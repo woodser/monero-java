@@ -8,6 +8,6 @@ public class MoneroResponse {
 	private String jsonrpc;
 	private String txKey;
 	private List<Integer> fees;
-	private List<String> txHashList;
-	private MoneroError error;
+	private List<String> txHashes;
+	private MoneroException error;
 }
