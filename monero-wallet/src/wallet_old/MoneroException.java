@@ -1,4 +1,4 @@
-package wallet;
+package wallet_old;
 
 public class MoneroException extends RuntimeException {
 

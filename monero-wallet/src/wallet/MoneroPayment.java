@@ -4,9 +4,9 @@ import org.jooq.types.UInteger;
 
 public class MoneroPayment {
 
-	private String paymentId;
-	private String hxHash;
+	private MoneroAddress address;
 	private UInteger amount;
-	private UInteger blockHeight;
-	private UInteger unlockTime;
+	private int blockHeight;
+	private MoneroTransaction transaction;
+	private boolean isAvailableToSpend;
 }

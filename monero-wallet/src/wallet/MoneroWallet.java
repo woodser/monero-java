@@ -1,39 +1,35 @@
 package wallet;
 
-import java.util.List;
+import java.net.URI;
+import java.util.Set;
 
 import org.jooq.types.UInteger;
 
-import common.Pair;
-
-/**
- * Defines a Monero wallet interface.
- * 
- * @author woodser
- */
 public interface MoneroWallet {
 
 	public UInteger getBalance();
 	
-	public UInteger getUnlockedBalance();
-	
 	public MoneroAddress getAddress();
 	
-	public UInteger getHeight();
+	public MoneroIntegratedAddress getIntegratedAddress(String paymentId);
 	
-	public MoneroTransaction send(MoneroAddress address, UInteger amount, UInteger fee, UInteger mixin, UInteger unlockTime, String paymentId);
+	public MoneroTransaction sendTransaction(MoneroAddress address, UInteger amount, UInteger fee, int mixin, int unlockTime);
 	
-	public List<MoneroTransaction> send(Pair<MoneroAddress, UInteger> addressAmountPairs, UInteger fee, UInteger mixin, UInteger unlockTime, String paymentId, Boolean newAlgorithm);
+	public MoneroTransaction sendTransaction(MoneroPayment payment);
 	
-	public MoneroTransaction send(MoneroTransfer transfer);
+	public MoneroTransaction sendTransaction(Set<MoneroPayment> payments, UInteger fee, int mixin, int unlockTime);
 	
-	public List<String> sweepDust();
+	public Set<MoneroTransaction> sweepDust();
 	
-	public void store();
+	public Set<MoneroTransaction> getTransactions(Set<MoneroTransactionType> includeTypes, Integer minHeight, Integer maxHeight);
 	
-	public List<MoneroPayment> getPayments(String paymentId);
+	public String getSpendKey();
 	
-	public List<MoneroPayment> getBulkPayments(List<String> paymentIds, UInteger minBlockHeight);
+	public String getViewKey();
 	
+	public void save();
 	
+	public URI getUri(MoneroUri uri);
+	
+	public MoneroUri parseUri(URI uri);
 }
