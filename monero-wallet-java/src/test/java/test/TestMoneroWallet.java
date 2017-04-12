@@ -1,10 +1,12 @@
 package test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import org.jooq.types.UInteger;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.primitives.UnsignedInteger;
 
 import wallet.MoneroWallet;
 import wallet.MoneroWalletRpc;
@@ -28,8 +30,14 @@ public class TestMoneroWallet {
 
   @Test
   public void testGetBalance() {
-    UInteger balance = wallet.getBalance();
+    UnsignedInteger balance = wallet.getBalance();
     assertTrue(balance.longValue() >= 0.0);
+  }
+  
+  @Test
+  public void getUnlockedBalance() {
+    UnsignedInteger unlocked = wallet.getUnlockedBalance();
+    assertTrue(unlocked.longValue() >= 0.0);
   }
 
   @Test
