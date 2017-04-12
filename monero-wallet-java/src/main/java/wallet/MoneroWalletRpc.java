@@ -2,7 +2,9 @@ package wallet;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,9 +15,14 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.jooq.types.UInteger;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.common.primitives.UnsignedInteger;
 
 import types.HttpException;
+import types.Pair;
 import utils.JsonUtils;
 import utils.StreamUtils;
 
@@ -26,6 +33,20 @@ import utils.StreamUtils;
  */
 public class MoneroWalletRpc implements MoneroWallet {
   
+  // set of field names that are unsigned integers
+  private static Set<String> UNSIGNED_INTEGERS = new HashSet<String>(Arrays.asList("balance", "unlocked_balance"));
+  
+  // customer mapper to deserialize unsigned integers
+  private static ObjectMapper MAPPER;
+  static {
+    MAPPER = new ObjectMapper();
+    MAPPER.setSerializationInclusion(Include.NON_NULL);
+    SimpleModule module = new SimpleModule();
+    module.addDeserializer(Map.class, new UnsignedIntegerDeserializer(UNSIGNED_INTEGERS));
+    MAPPER.registerModule(module);
+  }
+  
+  // instance variables
   private String host;
   private int port;
   private URI uri;
@@ -61,44 +82,12 @@ public class MoneroWalletRpc implements MoneroWallet {
     return uri;
   }
 
-  @SuppressWarnings("unchecked")
-  public UInteger getBalance() {
-
-    // get RPC response content
-    String respContent = null;
-    try {
-      
-      // build request body
-      Map<String, String> body = new HashMap<String, String>();
-      body.put("jsonrpc", "2.0");
-      body.put("id", "0");
-      body.put("method", "getbalance");
-      
-      // execute http request
-      HttpPost post = new HttpPost(uri);
-      HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
-      post.setEntity(entity);
-      HttpResponse resp = client.execute(post);
-      validateHttpResponse(resp);
-      
-      // get response
-      respContent = StreamUtils.streamToString(resp.getEntity().getContent());
-      EntityUtils.consume(resp.getEntity());
-    } catch (HttpException e1) {
-      throw e1;
-    } catch (Exception e2) {
-      throw new MoneroException(e2);
-    }
-      
-    // interpret response content
-    Map<String, Object> respMap = JsonUtils.toMap(respContent);
-    validateRpcResponse(respMap);
-    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    return UInteger.valueOf((Integer) resultMap.get("balance"));  // TODO: this will not handle unsigned ints
+  public UnsignedInteger getBalance() {
+    return getBalances().getFirst();
   }
   
-  public UInteger getUnlockedBalance() {
-    throw new RuntimeException("Not yet implemented.");
+  public UnsignedInteger getUnlockedBalance() {
+    return getBalances().getSecond();
   }
 
   public MoneroAddress getAddress() {
@@ -109,7 +98,7 @@ public class MoneroWalletRpc implements MoneroWallet {
     throw new RuntimeException("Not yet implemented.");
   }
 
-  public MoneroTransaction sendTransaction(MoneroAddress address, UInteger amount, UInteger fee, int mixin, int unlockTime) {
+  public MoneroTransaction sendTransaction(MoneroAddress address, UnsignedInteger amount, UnsignedInteger fee, int mixin, int unlockTime) {
     throw new RuntimeException("Not yet implemented.");
   }
 
@@ -117,7 +106,7 @@ public class MoneroWalletRpc implements MoneroWallet {
     throw new RuntimeException("Not yet implemented.");
   }
 
-  public MoneroTransaction sendTransaction(Set<MoneroPayment> payments, UInteger fee, int mixin, int unlockTime) {
+  public MoneroTransaction sendTransaction(Set<MoneroPayment> payments, UnsignedInteger fee, int mixin, int unlockTime) {
     throw new RuntimeException("Not yet implemented.");
   }
 
@@ -168,6 +157,42 @@ public class MoneroWalletRpc implements MoneroWallet {
       }
       throw new HttpException(code, resp.getStatusLine().getReasonPhrase() + (content != null ? (": " + content) : ""));
     }
+  }
+  
+  @SuppressWarnings("unchecked")
+  private Pair<UnsignedInteger, UnsignedInteger> getBalances() {
+    
+    // get RPC response content
+    String respContent = null;
+    try {
+      
+      // build request body
+      Map<String, String> body = new HashMap<String, String>();
+      body.put("jsonrpc", "2.0");
+      body.put("id", "0");
+      body.put("method", "getbalance");
+      
+      // execute http request
+      HttpPost post = new HttpPost(uri);
+      HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
+      post.setEntity(entity);
+      HttpResponse resp = client.execute(post);
+      validateHttpResponse(resp);
+      
+      // get response
+      respContent = StreamUtils.streamToString(resp.getEntity().getContent());
+      EntityUtils.consume(resp.getEntity());
+    } catch (HttpException e1) {
+      throw e1;
+    } catch (Exception e2) {
+      throw new MoneroException(e2);
+    }
+      
+    // interpret response content
+    Map<String, Object> respMap = JsonUtils.toMap(MAPPER, respContent);
+    validateRpcResponse(respMap);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return new Pair<UnsignedInteger, UnsignedInteger>((UnsignedInteger) resultMap.get("balance"), (UnsignedInteger) resultMap.get("unlocked_balance"));
   }
   
   @SuppressWarnings("unchecked")

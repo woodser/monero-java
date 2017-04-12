@@ -1,11 +1,11 @@
 package wallet;
 
-import org.jooq.types.UInteger;
+import com.google.common.primitives.UnsignedInteger;
 
 public class MoneroPayment {
 
 	private MoneroAddress address;
-	private UInteger amount;
+	private UnsignedInteger amount;
 	private int blockHeight;
 	private MoneroTransaction transaction;
 	private boolean isAvailableToSpend;

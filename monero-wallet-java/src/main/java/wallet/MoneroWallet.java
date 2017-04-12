@@ -3,7 +3,7 @@ package wallet;
 import java.net.URI;
 import java.util.Set;
 
-import org.jooq.types.UInteger;
+import com.google.common.primitives.UnsignedInteger;
 
 /**
  * Defines a Monero wallet interface.
@@ -12,19 +12,19 @@ import org.jooq.types.UInteger;
  */
 public interface MoneroWallet {
 
-	public UInteger getBalance();
+	public UnsignedInteger getBalance();
 	
-  public UInteger getUnlockedBalance();
+  public UnsignedInteger getUnlockedBalance();
 	
 	public MoneroAddress getAddress();
 	
 	public MoneroIntegratedAddress getIntegratedAddress(String paymentId);
 	
-	public MoneroTransaction sendTransaction(MoneroAddress address, UInteger amount, UInteger fee, int mixin, int unlockTime);
+	public MoneroTransaction sendTransaction(MoneroAddress address, UnsignedInteger amount, UnsignedInteger fee, int mixin, int unlockTime);
 	
 	public MoneroTransaction sendTransaction(MoneroPayment payment);
 	
-	public MoneroTransaction sendTransaction(Set<MoneroPayment> payments, UInteger fee, int mixin, int unlockTime);
+	public MoneroTransaction sendTransaction(Set<MoneroPayment> payments, UnsignedInteger fee, int mixin, int unlockTime);
 	
 	public Set<MoneroTransaction> sweepDust();
 	

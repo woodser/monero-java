@@ -5,11 +5,10 @@
   <version>0.0.1-SNAPSHOT</version>
   <dependencies>
   
-	<!-- https://mvnrepository.com/artifact/org.jooq/jooq -->
 	<dependency>
-		<groupId>org.jooq</groupId>
-		<artifactId>jooq</artifactId>
-		<version>3.9.0</version>
+	    <groupId>com.google.guava</groupId>
+	    <artifactId>guava</artifactId>
+	    <version>21.0</version>
 	</dependency>
 
 	<dependency>
