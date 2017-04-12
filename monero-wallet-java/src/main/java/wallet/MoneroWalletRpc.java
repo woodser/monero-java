@@ -6,6 +6,22 @@ import java.util.Set;
 import org.jooq.types.UInteger;
 
 public class MoneroWalletRpc implements MoneroWallet {
+  
+  private String domain;
+  private int port;
+  
+  public MoneroWalletRpc(String domain, int port) {
+    this.domain = domain;
+    this.port = port;
+  }
+
+  public String getDomain() {
+    return domain;
+  }
+
+  public int getPort() {
+    return port;
+  }
 
   public UInteger getBalance() {
     throw new RuntimeException("Not yet implemented.");
