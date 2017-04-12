@@ -5,6 +5,11 @@ import java.util.Set;
 
 import org.jooq.types.UInteger;
 
+/**
+ * Implements a MoneroWallet backed by a monero wallet RPC endpoint.
+ * 
+ * @author woodser
+ */
 public class MoneroWalletRpc implements MoneroWallet {
   
   private String domain;
