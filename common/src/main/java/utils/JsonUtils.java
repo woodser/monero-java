@@ -47,7 +47,7 @@ public class JsonUtils {
     try {
       return MAPPER.readValue(json, clazz);
     } catch (Exception e) {
-      throw new JsonException("Error deserializing json", e);
+      throw new JsonException("Error deserializing json to class", e);
     }
   }
   
