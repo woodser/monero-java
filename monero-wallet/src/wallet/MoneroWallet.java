@@ -21,9 +21,11 @@ public interface MoneroWallet {
 	
 	public UInteger getHeight();
 	
-	public MoneroTransaction transfer(MoneroAddress address, UInteger amount, UInteger fee, UInteger mixin, UInteger unlockTime, String paymentId);
+	public MoneroTransaction send(MoneroAddress address, UInteger amount, UInteger fee, UInteger mixin, UInteger unlockTime, String paymentId);
 	
-	public List<MoneroTransaction> transferSplit(Pair<MoneroAddress, UInteger> destinations, UInteger fee, UInteger mixin, UInteger unlockTime, String paymentId, Boolean newAlgorithm);
+	public List<MoneroTransaction> send(Pair<MoneroAddress, UInteger> addressAmountPairs, UInteger fee, UInteger mixin, UInteger unlockTime, String paymentId, Boolean newAlgorithm);
+	
+	public MoneroTransaction send(MoneroTransfer transfer);
 	
 	public List<String> sweepDust();
 	
