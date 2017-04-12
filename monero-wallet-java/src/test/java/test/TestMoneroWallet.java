@@ -1,7 +1,8 @@
 package test;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
+import org.jooq.types.UInteger;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,7 +28,8 @@ public class TestMoneroWallet {
 
   @Test
   public void testGetBalance() {
-    fail("Not yet implemented");
+    UInteger balance = wallet.getBalance();
+    assertTrue(balance.longValue() >= 0.0);
   }
 
   @Test

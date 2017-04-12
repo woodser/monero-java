@@ -14,6 +14,8 @@ public interface MoneroWallet {
 
 	public UInteger getBalance();
 	
+  public UInteger getUnlockedBalance();
+	
 	public MoneroAddress getAddress();
 	
 	public MoneroIntegratedAddress getIntegratedAddress(String paymentId);
