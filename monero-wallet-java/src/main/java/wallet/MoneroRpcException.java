@@ -5,18 +5,18 @@ package wallet;
  * 
  * @author woodser
  */
-public class MoneroExceptionRpc extends RuntimeException {
+public class MoneroRpcException extends RuntimeException {
 
   private static final long serialVersionUID = -6282368684634114151L;
   
   private Integer rpcCode;
   private String rpcMessage;
   
-  public MoneroExceptionRpc(Integer rpcCode, String rpcMessage) {
+  public MoneroRpcException(Integer rpcCode, String rpcMessage) {
     this(rpcCode, rpcMessage, null);
   }
   
-  public MoneroExceptionRpc(Integer rpcCode, String rpcMessage, Throwable e) {
+  public MoneroRpcException(Integer rpcCode, String rpcMessage, Throwable e) {
     super(rpcMessage, e);
     this.rpcCode = rpcCode;
     this.rpcMessage = rpcMessage;

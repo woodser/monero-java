@@ -1,5 +1,6 @@
 package utils;
 
+import types.Pair;
 import wallet.MoneroException;
 
 public class MoneroUtils {
@@ -17,5 +18,9 @@ public class MoneroUtils {
   
   public static void validatePaymentId(String paymentId) {
     throw new RuntimeException("Not yet implemented.");
+  }
+  
+  public static Pair<String, String> getIntegratedAddressComponents(String integratedAddress) {
+    throw new MoneroException("Not yet implemented.");
   }
 }

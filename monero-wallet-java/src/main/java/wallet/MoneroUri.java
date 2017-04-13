@@ -4,7 +4,7 @@ import com.google.common.primitives.UnsignedInteger;
 
 public class MoneroUri {
 
-	private MoneroAddress address;
+	private MoneroStandardAddress address;
 	private UnsignedInteger amount;
 	private String payementId;
 	private String recipientName;

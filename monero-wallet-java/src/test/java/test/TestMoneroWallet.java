@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import com.google.common.primitives.UnsignedInteger;
 
-import wallet.MoneroAddress;
+import wallet.MoneroStandardAddress;
 import wallet.MoneroWallet;
 import wallet.MoneroWalletRpc;
 
@@ -45,9 +45,9 @@ public class TestMoneroWallet {
 
   @Test
   public void testGetAddress() {
-    MoneroAddress address = wallet.getAddress();
-    assertNotNull(address.getAddress());
-    assertEquals(95, address.getAddress().length());
+    MoneroStandardAddress address = wallet.getAddress();
+    assertNotNull(address.getStandardAddress());
+    assertEquals(95, address.getStandardAddress().length());
   }
 
   @Test

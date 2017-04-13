@@ -91,19 +91,19 @@ public class MoneroWalletRpc implements MoneroWallet {
     return getBalances().getSecond();
   }
 
-  public MoneroAddress getAddress() {
+  public MoneroStandardAddress getAddress() {
     Map<String, Object> respMap = sendRpcRequest("getaddress", null);
     validateRpcResponse(respMap);
     @SuppressWarnings("unchecked")
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    return new MoneroAddress((String) resultMap.get("address"));
+    return new MoneroStandardAddress((String) resultMap.get("address"));
   }
 
-  public MoneroAddress getIntegratedAddress(String paymentId) {
+  public MoneroStandardAddress getIntegratedAddress(String paymentId) {
     throw new RuntimeException("Not yet implemented.");
   }
 
-  public MoneroTransaction sendTransaction(MoneroAddress address, UnsignedInteger amount, UnsignedInteger fee, int mixin, int unlockTime) {
+  public MoneroTransaction sendTransaction(MoneroStandardAddress address, UnsignedInteger amount, UnsignedInteger fee, int mixin, int unlockTime) {
     throw new RuntimeException("Not yet implemented.");
   }
 
@@ -214,6 +214,6 @@ public class MoneroWalletRpc implements MoneroWallet {
     if (error == null) return;
     int code = (Integer) error.get("code");
     String message = (String) error.get("message");
-    throw new MoneroExceptionRpc(code, message);
+    throw new MoneroRpcException(code, message);
   }
 }
