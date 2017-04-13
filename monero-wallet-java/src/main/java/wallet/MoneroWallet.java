@@ -18,7 +18,7 @@ public interface MoneroWallet {
 	
 	public MoneroAddress getAddress();
 	
-	public MoneroIntegratedAddress getIntegratedAddress(String paymentId);
+	public MoneroAddress getIntegratedAddress(String paymentId);
 	
 	public MoneroTransaction sendTransaction(MoneroAddress address, UnsignedInteger amount, UnsignedInteger fee, int mixin, int unlockTime);
 	
