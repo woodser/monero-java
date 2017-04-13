@@ -24,6 +24,7 @@ import com.google.common.primitives.UnsignedInteger;
 import types.HttpException;
 import types.Pair;
 import utils.JsonUtils;
+import utils.MoneroUtils;
 import utils.StreamUtils;
 import utils.UnsignedIntegerDeserializer;
 
@@ -91,19 +92,30 @@ public class MoneroWalletRpc implements MoneroWallet {
     return getBalances().getSecond();
   }
 
-  public MoneroStandardAddress getAddress() {
+  public MoneroAddress getAddress() {
     Map<String, Object> respMap = sendRpcRequest("getaddress", null);
     validateRpcResponse(respMap);
     @SuppressWarnings("unchecked")
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    return new MoneroStandardAddress((String) resultMap.get("address"));
+    return new MoneroAddress((String) resultMap.get("address"));
   }
 
-  public MoneroStandardAddress getIntegratedAddress(String paymentId) {
-    throw new RuntimeException("Not yet implemented.");
+  public MoneroIntegratedAddress getIntegratedAddress(String paymentId) {
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    if (paymentId != null) paramMap.put("payment_id", paymentId);
+    Map<String, Object> respMap = sendRpcRequest("make_integrated_address", paramMap);
+    validateRpcResponse(respMap);
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    String integratedAddress = (String) resultMap.get("integrated_address");
+    Pair<String, String> components = MoneroUtils.getIntegratedAddressComponents(integratedAddress);
+    MoneroAddress address = getAddress();
+    if (!address.getStandardAddress().equals(components.getFirst())) throw new MoneroException("Standard address " + address.getStandardAddress() + " does not equal derived standard address " + components.getFirst());
+    if (paymentId != null && !paymentId.equals(components.getSecond())) throw new MoneroException("Payment id " + paymentId + " does not match derived payment id " + components.getSecond());
+    return new MoneroIntegratedAddress(components.getFirst(), components.getSecond(), integratedAddress);
   }
 
-  public MoneroTransaction sendTransaction(MoneroStandardAddress address, UnsignedInteger amount, UnsignedInteger fee, int mixin, int unlockTime) {
+  public MoneroTransaction sendTransaction(MoneroAddress address, UnsignedInteger amount, UnsignedInteger fee, int mixin, int unlockTime) {
     throw new RuntimeException("Not yet implemented.");
   }
 
