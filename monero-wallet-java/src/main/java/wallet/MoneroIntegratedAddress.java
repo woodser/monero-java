@@ -9,28 +9,23 @@ import utils.MoneroUtils;
  * 
  * @author woodser
  */
-public class MoneroIntegratedAddress {
+public class MoneroIntegratedAddress extends MoneroAddress {
 
-  private String standardAddress;
   private String paymentId;
   private String integratedAddress;
   
   public MoneroIntegratedAddress(String standardAddress, String paymentId, String integratedAddress) {
-    MoneroUtils.validateStandardAddress(standardAddress);
-    MoneroUtils.validatePaymentId(paymentId);
-    MoneroUtils.validateIntegratedAddress(integratedAddress);
-    this.standardAddress = standardAddress;
+    super(standardAddress);
     this.paymentId = paymentId;
     this.integratedAddress = integratedAddress;
+    MoneroUtils.validateAddress(this);
   }
   
   public MoneroIntegratedAddress(String integratedAddress) {
-    MoneroUtils.validateIntegratedAddress(integratedAddress);
-    throw new MoneroException("Not yet implemented.");
-  }
-
-  public String getStandardAddress() {
-    return standardAddress;
+    super(MoneroUtils.getIntegratedAddressComponents(integratedAddress).getFirst());
+    this.paymentId = MoneroUtils.getIntegratedAddressComponents(integratedAddress).getSecond();
+    this.integratedAddress = integratedAddress;
+    MoneroUtils.validateAddress(this);
   }
 
   public String getPaymentId() {

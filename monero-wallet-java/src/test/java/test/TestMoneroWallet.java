@@ -1,7 +1,6 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -10,7 +9,10 @@ import org.junit.Test;
 
 import com.google.common.primitives.UnsignedInteger;
 
-import wallet.MoneroStandardAddress;
+import utils.MoneroUtils;
+import wallet.MoneroAddress;
+import wallet.MoneroException;
+import wallet.MoneroIntegratedAddress;
 import wallet.MoneroWallet;
 import wallet.MoneroWalletRpc;
 
@@ -45,14 +47,32 @@ public class TestMoneroWallet {
 
   @Test
   public void testGetAddress() {
-    MoneroStandardAddress address = wallet.getAddress();
-    assertNotNull(address.getStandardAddress());
-    assertEquals(95, address.getStandardAddress().length());
+    MoneroAddress address = wallet.getAddress();
+    MoneroUtils.validateAddress(address);
   }
 
   @Test
   public void testGetIntegratedAddress() {
-    fail("Not yet implemented");
+    
+    // test valid payment id
+    String paymentId = "f014b1fc8729374d";
+    MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(paymentId);
+    MoneroUtils.validateAddress(integratedAddress);
+    assertEquals(paymentId, integratedAddress.getPaymentId());
+    assertEquals(wallet.getAddress().getStandardAddress(), integratedAddress.getStandardAddress());
+    
+    // test invalid payment id
+    try {
+      String invalidPaymentId = "f014b1fc8729374z";
+      wallet.getIntegratedAddress(invalidPaymentId);
+    } catch (MoneroException e) {
+      fail("Success but need to validate exception");
+    }
+    
+    // test null payment id which generates a new one
+    integratedAddress = wallet.getIntegratedAddress(null);
+    MoneroUtils.validateAddress(integratedAddress);
+    assertEquals(wallet.getAddress().getStandardAddress(), integratedAddress.getStandardAddress());
   }
 
   @Test

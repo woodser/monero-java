@@ -3,15 +3,17 @@ package wallet;
 import utils.MoneroUtils;
 
 /**
- * Represents a Monero standard address.
+ * Represents a Monero address.
+ * 
+ * Every Monero address has a standard address, whether integrated or not.
  * 
  * @author woodser
  */
-public class MoneroStandardAddress {
+public class MoneroAddress {
   
   private String standardAddress;
   
-  public MoneroStandardAddress(String standardAddress) {
+  public MoneroAddress(String standardAddress) {
     MoneroUtils.validateStandardAddress(standardAddress);
     this.standardAddress = standardAddress;
   }
