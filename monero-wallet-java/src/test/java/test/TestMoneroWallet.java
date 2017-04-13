@@ -1,5 +1,7 @@
 package test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -8,6 +10,7 @@ import org.junit.Test;
 
 import com.google.common.primitives.UnsignedInteger;
 
+import wallet.MoneroAddress;
 import wallet.MoneroWallet;
 import wallet.MoneroWalletRpc;
 
@@ -42,7 +45,9 @@ public class TestMoneroWallet {
 
   @Test
   public void testGetAddress() {
-    fail("Not yet implemented");
+    MoneroAddress address = wallet.getAddress();
+    assertNotNull(address.getAddress());
+    assertEquals(95, address.getAddress().length());
   }
 
   @Test

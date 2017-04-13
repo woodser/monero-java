@@ -4,7 +4,7 @@ import com.google.common.primitives.UnsignedInteger;
 
 public class MoneroPayment {
 
-	private MoneroAddress address;
+	private String address;
 	private UnsignedInteger amount;
 	private int blockHeight;
 	private MoneroTransaction transaction;

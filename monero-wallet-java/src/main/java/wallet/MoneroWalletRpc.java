@@ -34,7 +34,7 @@ import utils.UnsignedIntegerDeserializer;
  */
 public class MoneroWalletRpc implements MoneroWallet {
   
-  // set of field names that are unsigned integers
+  // json field names that map to unsigned integers
   private static Set<String> UNSIGNED_INTEGERS = new HashSet<String>(Arrays.asList("balance", "unlocked_balance"));
   
   // customer mapper to deserialize unsigned integers
@@ -92,10 +92,14 @@ public class MoneroWalletRpc implements MoneroWallet {
   }
 
   public MoneroAddress getAddress() {
-    throw new RuntimeException("Not yet implemented.");
+    Map<String, Object> respMap = sendRpcRequest("getaddress", null);
+    validateRpcResponse(respMap);
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return new MoneroAddress((String) resultMap.get("address"));
   }
 
-  public MoneroIntegratedAddress getIntegratedAddress(String paymentId) {
+  public MoneroAddress getIntegratedAddress(String paymentId) {
     throw new RuntimeException("Not yet implemented.");
   }
 
@@ -162,38 +166,46 @@ public class MoneroWalletRpc implements MoneroWallet {
   
   @SuppressWarnings("unchecked")
   private Pair<UnsignedInteger, UnsignedInteger> getBalances() {
-    
-    // get RPC response content
-    String respContent = null;
+    Map<String, Object> respMap = sendRpcRequest("getbalance", null);
+    validateRpcResponse(respMap);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return new Pair<UnsignedInteger, UnsignedInteger>((UnsignedInteger) resultMap.get("balance"), (UnsignedInteger) resultMap.get("unlocked_balance"));
+  }
+  
+  
+  /**
+   * Sends a request to the RPC API.
+   * 
+   * @param method specifies the method to request
+   * @param params specifies input parameters
+   * @return Map<String, Object> is the RPC API response as a map
+   */
+  private Map<String, Object> sendRpcRequest(String method, Map<String, Object> params) {
     try {
       
       // build request body
       Map<String, String> body = new HashMap<String, String>();
       body.put("jsonrpc", "2.0");
       body.put("id", "0");
-      body.put("method", "getbalance");
+      body.put("method", method);
+      if (params != null) body.put("params", JsonUtils.serialize(params));
       
-      // execute http request
+      // send http request and validate response
       HttpPost post = new HttpPost(uri);
       HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
       post.setEntity(entity);
       HttpResponse resp = client.execute(post);
       validateHttpResponse(resp);
       
-      // get response
-      respContent = StreamUtils.streamToString(resp.getEntity().getContent());
+      // deserialize response
+      Map<String, Object> respMap = JsonUtils.toMap(MAPPER, StreamUtils.streamToString(resp.getEntity().getContent()));
       EntityUtils.consume(resp.getEntity());
+      return respMap;
     } catch (HttpException e1) {
       throw e1;
     } catch (Exception e2) {
       throw new MoneroException(e2);
     }
-      
-    // interpret response content
-    Map<String, Object> respMap = JsonUtils.toMap(MAPPER, respContent);
-    validateRpcResponse(respMap);
-    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    return new Pair<UnsignedInteger, UnsignedInteger>((UnsignedInteger) resultMap.get("balance"), (UnsignedInteger) resultMap.get("unlocked_balance"));
   }
   
   @SuppressWarnings("unchecked")
@@ -202,6 +214,6 @@ public class MoneroWalletRpc implements MoneroWallet {
     if (error == null) return;
     int code = (Integer) error.get("code");
     String message = (String) error.get("message");
-    throw new MoneroException(code, message);
+    throw new MoneroExceptionRpc(code, message);
   }
 }
