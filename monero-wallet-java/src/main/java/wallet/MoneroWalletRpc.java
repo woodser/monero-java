@@ -95,8 +95,7 @@ public class MoneroWalletRpc implements MoneroWallet {
   public MoneroAddress getStandardAddress() {
     Map<String, Object> respMap = sendRpcRequest("getaddress", null);
     validateRpcResponse(respMap);
-    @SuppressWarnings("unchecked")
-    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     String standardAddress = (String) resultMap.get("address");
     MoneroAddress address = new MoneroAddress(standardAddress);
     MoneroUtils.validateAddress(address);
@@ -108,8 +107,7 @@ public class MoneroWalletRpc implements MoneroWallet {
     if (paymentId != null) paramMap.put("payment_id", paymentId);
     Map<String, Object> respMap = sendRpcRequest("make_integrated_address", paramMap);
     validateRpcResponse(respMap);
-    @SuppressWarnings("unchecked")
-    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     paymentId = (String) resultMap.get("payment_id");
     String integratedAddress = (String) resultMap.get("integrated_address");
     MoneroIntegratedAddress address = new MoneroIntegratedAddress(getStandardAddress().getStandardAddress(), paymentId, integratedAddress);
@@ -137,15 +135,11 @@ public class MoneroWalletRpc implements MoneroWallet {
     throw new RuntimeException("Not yet implemented.");
   }
 
-  public String getSpendKey() {
+  public String getMnemonicSeed() {
     throw new RuntimeException("Not yet implemented.");
   }
 
   public String getViewKey() {
-    throw new RuntimeException("Not yet implemented.");
-  }
-
-  public void save() {
     throw new RuntimeException("Not yet implemented.");
   }
 
@@ -154,6 +148,14 @@ public class MoneroWalletRpc implements MoneroWallet {
   }
 
   public MoneroUri parseUri(URI uri) {
+    throw new RuntimeException("Not yet implemented.");
+  }
+
+  public void saveBlockchain() {
+    throw new RuntimeException("Not yet implemented.");
+  }
+
+  public void stopWallet() {
     throw new RuntimeException("Not yet implemented.");
   }
 	
@@ -229,5 +231,15 @@ public class MoneroWalletRpc implements MoneroWallet {
     int code = (Integer) error.get("code");
     String message = (String) error.get("message");
     throw new MoneroRpcException(code, message);
+  }
+
+  public MoneroIntegratedAddress splitIntegratedAddress(String integratedAddress) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public MoneroTransaction sendTransaction(MoneroPayment payment, UnsignedInteger fee, int mixin, int unlockTime) {
+    // TODO Auto-generated method stub
+    return null;
   }
 }
