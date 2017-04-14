@@ -28,4 +28,4 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ==== WOODSER ====
 
-You can do anything you want with this software.  There are no restrictions.  But I'm not liable for its use.
+You can do anything you want with this software.  There are no restrictions.  I am not liable for its use.
