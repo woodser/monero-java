@@ -60,5 +60,4 @@ public class FieldDeserializer extends JsonDeserializer<Map<String, Object>> {
     }
     return result;
   }
-
 }
