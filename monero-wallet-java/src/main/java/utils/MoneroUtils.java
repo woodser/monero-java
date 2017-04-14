@@ -1,6 +1,8 @@
 package utils;
 
+import wallet.MoneroAddress;
 import wallet.MoneroException;
+import wallet.MoneroIntegratedAddress;
 
 /**
  * Collection of utilities for working with Monero types.
@@ -36,6 +38,16 @@ public class MoneroUtils {
     validateStandardAddress(standardAddress);
     if (paymentId != null) validatePaymentId(paymentId);
     validateIntegratedAddress(integratedAddress);
+    // TODO: make sure standard address + payment id = integrated address
+  }
+  
+  public static void validateAddress(MoneroAddress address) {
+    if (address instanceof MoneroIntegratedAddress) {
+      MoneroIntegratedAddress integratedAddress = (MoneroIntegratedAddress) address;
+      validateIntegratedAddress(integratedAddress.getStandardAddress(), integratedAddress.getPaymentId(), integratedAddress.getIntegratedAddress());
+    } else {
+      validateStandardAddress(address.getStandardAddress());
+    }
   }
   
   private static void validateHex(String str) {
