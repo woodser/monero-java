@@ -167,12 +167,10 @@ public class TestMoneroWallet {
     mUri1.setAddress(wallet.getStandardAddress().getStandardAddress());
     URI uri = wallet.toUri(mUri1);
     MoneroUri mUri2 = wallet.fromUri(uri);
-    System.out.println(mUri1);
-    System.out.println(mUri2);
     assertTrue(mUri1.equals(mUri2));
     
     // test with all fields
-    //mUri1.setAmount(UnsignedInteger.valueOf(200));
+    mUri1.setAmount(UnsignedInteger.valueOf("4250000000"));
     mUri1.setPaymentId("03284e41c342f036");
     mUri1.setRecipientName("John Doe");
     mUri1.setTxDescription("OMZG XMR FTW");

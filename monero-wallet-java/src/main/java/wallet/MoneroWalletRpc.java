@@ -169,11 +169,10 @@ public class MoneroWalletRpc implements MoneroWallet {
     if (uri == null) throw new MoneroWalletException("Given Monero URI is null");
     Map<String, Object> paramMap = new HashMap<String, Object>();
     paramMap.put("address", uri.getAddress());
-    paramMap.put("amount", uri.getAmount() == null ? null : uri.getAmount().toString());
+    paramMap.put("amount", uri.getAmount() == null ? null : uri.getAmount());
     paramMap.put("payment_id", uri.getPaymentId());
     paramMap.put("recipient_name", uri.getRecipientName());
     paramMap.put("tx_description", uri.getTxDescription());
-    System.out.println(JsonUtils.serialize(paramMap));
     Map<String, Object> respMap = sendRpcRequest("make_uri", paramMap);
     @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return parseUri((String) resultMap.get("uri"));
@@ -182,11 +181,9 @@ public class MoneroWalletRpc implements MoneroWallet {
   public MoneroUri fromUri(URI uri) {
     if (uri == null) throw new MoneroWalletException("Given URI is null");
     Map<String, Object> paramMap = new HashMap<String, Object>();
-    System.out.println(uri.toString());
     paramMap.put("uri", uri.toString());
     Map<String, Object> respMap = sendRpcRequest("parse_uri", paramMap);
     @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) ((Map<String, Object>) respMap.get("result")).get("uri");
-    System.out.println(resultMap);
     MoneroUri mUri = new MoneroUri();
     mUri.setAddress((String) resultMap.get("address"));
     if ("".equals(mUri.getAddress())) mUri.setAddress(null);
