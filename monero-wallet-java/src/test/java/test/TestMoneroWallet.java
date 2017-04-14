@@ -115,7 +115,7 @@ public class TestMoneroWallet {
   }
 
   @Test
-  public void testSendTransactionMoneroPayment() {
+  public void testSendTransactionMoneroPaymentUnsignedIntegerIntInt() {
     fail("Not yet implemented");
   }
 
@@ -165,10 +165,4 @@ public class TestMoneroWallet {
   public void testStopWallet() {
     fail("Not yet implemented");
   }
-
-  @Test
-  public void testSendTransactionMoneroPaymentUnsignedIntegerIntInt() {
-    fail("Not yet implemented");
-  }
-
 }
