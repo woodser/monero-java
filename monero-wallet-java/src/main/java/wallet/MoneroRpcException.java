@@ -5,7 +5,7 @@ package wallet;
  * 
  * @author woodser
  */
-public class MoneroRpcException extends MoneroException {
+public class MoneroRpcException extends MoneroWalletException {
 
   private static final long serialVersionUID = -6282368684634114151L;
   
@@ -17,7 +17,7 @@ public class MoneroRpcException extends MoneroException {
   }
   
   public MoneroRpcException(Integer rpcCode, String rpcMessage, Throwable e) {
-    super(rpcMessage, e);
+    super(rpcCode + ": " + rpcMessage, e);
     this.rpcCode = rpcCode;
     this.rpcMessage = rpcMessage;
   }

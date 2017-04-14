@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.net.URI;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -15,6 +17,7 @@ import utils.MoneroUtils;
 import wallet.MoneroAddress;
 import wallet.MoneroIntegratedAddress;
 import wallet.MoneroRpcException;
+import wallet.MoneroUri;
 import wallet.MoneroWallet;
 import wallet.MoneroWalletRpc;
 
@@ -154,13 +157,40 @@ public class TestMoneroWallet {
   }
 
   @Test
-  public void testGetUriMoneroUri() {
-    fail("Not yet implemented");
-  }
+  public void testUriParsing() {
+    
+    // TODO: why are nulls getting serialized?
+    // TODO: how to translate unsigned integer into json
+    
+    // test with optional fields as null
+    MoneroUri mUri1 = new MoneroUri();
+    mUri1.setAddress(wallet.getStandardAddress().getStandardAddress());
+    URI uri = wallet.toUri(mUri1);
+    MoneroUri mUri2 = wallet.fromUri(uri);
+    System.out.println(mUri1);
+    System.out.println(mUri2);
+    assertTrue(mUri1.equals(mUri2));
+    
+    // test with all fields
+    //mUri1.setAmount(UnsignedInteger.valueOf(200));
+    mUri1.setPaymentId("03284e41c342f036");
+    mUri1.setRecipientName("John Doe");
+    mUri1.setTxDescription("OMZG XMR FTW");
+    uri = wallet.toUri(mUri1);
+    mUri2 = wallet.fromUri(uri);
 
-  @Test
-  public void testParseUri() {
-    fail("Not yet implemented");
+    assertTrue(mUri1.equals(mUri2));
+    
+    // test with address null
+    mUri1.setAddress(null);
+    mUri1.setPaymentId("bizzup");
+    try {
+      wallet.toUri(mUri1);
+      fail("Should have thrown RPC exception with invalid parameters");
+    } catch (MoneroRpcException e) {
+      assertEquals((int) -11, (int) e.getRpcCode());
+      assertTrue(e.getRpcMessage().contains("Cannot make URI from supplied parameters"));
+    }
   }
 
   @Test
