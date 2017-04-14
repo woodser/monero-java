@@ -92,30 +92,30 @@ public class MoneroWalletRpc implements MoneroWallet {
     return getBalances().getSecond();
   }
 
-  public MoneroAddress getAddress() {
+  public String getStandardAddress() {
     Map<String, Object> respMap = sendRpcRequest("getaddress", null);
     validateRpcResponse(respMap);
     @SuppressWarnings("unchecked")
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    return new MoneroAddress((String) resultMap.get("address"));
+    String standardAddress = (String) resultMap.get("address");
+    MoneroUtils.validateStandardAddress(standardAddress);
+    return standardAddress;
   }
 
-  public MoneroIntegratedAddress getIntegratedAddress(String paymentId) {
+  public String getIntegratedAddress(String paymentId) {
     Map<String, Object> paramMap = new HashMap<String, Object>();
     if (paymentId != null) paramMap.put("payment_id", paymentId);
     Map<String, Object> respMap = sendRpcRequest("make_integrated_address", paramMap);
+    System.out.println(respMap);
     validateRpcResponse(respMap);
     @SuppressWarnings("unchecked")
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     String integratedAddress = (String) resultMap.get("integrated_address");
-    Pair<String, String> components = MoneroUtils.getIntegratedAddressComponents(integratedAddress);
-    MoneroAddress address = getAddress();
-    if (!address.getStandardAddress().equals(components.getFirst())) throw new MoneroException("Standard address " + address.getStandardAddress() + " does not equal derived standard address " + components.getFirst());
-    if (paymentId != null && !paymentId.equals(components.getSecond())) throw new MoneroException("Payment id " + paymentId + " does not match derived payment id " + components.getSecond());
-    return new MoneroIntegratedAddress(components.getFirst(), components.getSecond(), integratedAddress);
+    MoneroUtils.validateIntegratedAddress(getStandardAddress(), paymentId, integratedAddress);
+    return integratedAddress;
   }
 
-  public MoneroTransaction sendTransaction(MoneroAddress address, UnsignedInteger amount, UnsignedInteger fee, int mixin, int unlockTime) {
+  public MoneroTransaction sendTransaction(String address, UnsignedInteger amount, UnsignedInteger fee, int mixin, int unlockTime) {
     throw new RuntimeException("Not yet implemented.");
   }
 
