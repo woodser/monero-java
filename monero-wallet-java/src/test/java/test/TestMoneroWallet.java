@@ -33,6 +33,12 @@ public class TestMoneroWallet {
   public void setup() throws Exception {
     wallet = new MoneroWalletRpc(DOMAIN, PORT);
   }
+  
+  @Test
+  public void testGetHeight() {
+    int height = wallet.getHeight();
+    assertTrue(height >= 0);
+  }
 
   @Test
   public void testGetBalance() {
