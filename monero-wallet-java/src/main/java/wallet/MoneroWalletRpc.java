@@ -92,27 +92,29 @@ public class MoneroWalletRpc implements MoneroWallet {
     return getBalances().getSecond();
   }
 
-  public String getStandardAddress() {
+  public MoneroAddress getStandardAddress() {
     Map<String, Object> respMap = sendRpcRequest("getaddress", null);
     validateRpcResponse(respMap);
     @SuppressWarnings("unchecked")
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     String standardAddress = (String) resultMap.get("address");
-    MoneroUtils.validateStandardAddress(standardAddress);
-    return standardAddress;
+    MoneroAddress address = new MoneroAddress(standardAddress);
+    MoneroUtils.validateAddress(address);
+    return address;
   }
 
-  public String getIntegratedAddress(String paymentId) {
+  public MoneroIntegratedAddress getIntegratedAddress(String paymentId) {
     Map<String, Object> paramMap = new HashMap<String, Object>();
     if (paymentId != null) paramMap.put("payment_id", paymentId);
     Map<String, Object> respMap = sendRpcRequest("make_integrated_address", paramMap);
-    System.out.println(respMap);
     validateRpcResponse(respMap);
     @SuppressWarnings("unchecked")
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    paymentId = (String) resultMap.get("payment_id");
     String integratedAddress = (String) resultMap.get("integrated_address");
-    MoneroUtils.validateIntegratedAddress(getStandardAddress(), paymentId, integratedAddress);
-    return integratedAddress;
+    MoneroIntegratedAddress address = new MoneroIntegratedAddress(getStandardAddress().getStandardAddress(), paymentId, integratedAddress);
+    MoneroUtils.validateAddress(address);
+    return address;
   }
 
   public MoneroTransaction sendTransaction(String address, UnsignedInteger amount, UnsignedInteger fee, int mixin, int unlockTime) {
@@ -196,11 +198,11 @@ public class MoneroWalletRpc implements MoneroWallet {
     try {
       
       // build request body
-      Map<String, String> body = new HashMap<String, String>();
+      Map<String, Object> body = new HashMap<String, Object>();
       body.put("jsonrpc", "2.0");
       body.put("id", "0");
       body.put("method", method);
-      if (params != null) body.put("params", JsonUtils.serialize(params));
+      if (params != null) body.put("params", params);
       
       // send http request and validate response
       HttpPost post = new HttpPost(uri);

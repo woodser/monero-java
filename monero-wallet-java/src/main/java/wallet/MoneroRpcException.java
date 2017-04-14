@@ -5,7 +5,7 @@ package wallet;
  * 
  * @author woodser
  */
-public class MoneroRpcException extends RuntimeException {
+public class MoneroRpcException extends MoneroException {
 
   private static final long serialVersionUID = -6282368684634114151L;
   

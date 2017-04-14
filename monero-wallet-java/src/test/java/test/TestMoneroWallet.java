@@ -1,6 +1,7 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -9,9 +10,10 @@ import org.junit.Test;
 
 import com.google.common.primitives.UnsignedInteger;
 
-import types.Pair;
 import utils.MoneroUtils;
-import wallet.MoneroException;
+import wallet.MoneroAddress;
+import wallet.MoneroIntegratedAddress;
+import wallet.MoneroRpcException;
 import wallet.MoneroWallet;
 import wallet.MoneroWalletRpc;
 
@@ -46,38 +48,38 @@ public class TestMoneroWallet {
 
   @Test
   public void testGetStandardAddress() {
-    String standardAddress = wallet.getStandardAddress();
-    MoneroUtils.validateStandardAddress(standardAddress);
+    MoneroAddress address = wallet.getStandardAddress();
+    MoneroUtils.validateAddress(address);
   }
 
   @Test
   public void testGetIntegratedAddress() {
     
+    // save address for later comparison
+    MoneroAddress address = wallet.getStandardAddress();
+    
     // test valid payment id
-    String paymentId = "f014b1fc8729374d";
-    String integratedAddress = wallet.getIntegratedAddress(paymentId);
-    MoneroUtils.validateIntegratedAddress(wallet.getStandardAddress(), paymentId, integratedAddress);
+    String paymentId = "03284e41c342f036";
+    MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(paymentId);
+    MoneroUtils.validateAddress(integratedAddress);
+    assertEquals(address.getStandardAddress(), integratedAddress.getStandardAddress());
+    assertEquals(paymentId, integratedAddress.getPaymentId());
     
     // test invalid payment id
     try {
-      String invalidPaymentId = "9d7610804e14b911";
+      String invalidPaymentId = "xxx51235xxxx512351xxx6234623462";
       integratedAddress = wallet.getIntegratedAddress(invalidPaymentId);
-      fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have failed");
-    } catch (MoneroException e) {
-      e.printStackTrace();
-      
-      
-      
-      
-      
-      
-      fail("Success but need to validate exception");
+      fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have thrown an RPC exception");
+    } catch (MoneroRpcException e) {
+      assertEquals((int) -5, (int) e.getRpcCode());
+      assertEquals("Invalid payment ID", e.getRpcMessage());
     }
     
     // test null payment id which generates a new one
-    paymentId = null;
-    integratedAddress = wallet.getIntegratedAddress(paymentId);
-    MoneroUtils.validateIntegratedAddress(wallet.getStandardAddress(), paymentId, integratedAddress);
+    integratedAddress = wallet.getIntegratedAddress(null);
+    MoneroUtils.validateAddress(integratedAddress);
+    assertEquals(address.getStandardAddress(), integratedAddress.getStandardAddress());
+    assertNotNull(integratedAddress.getPaymentId());
   }
 
   @Test
