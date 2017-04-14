@@ -69,7 +69,7 @@ public class TestMoneroWallet {
     try {
       String invalidPaymentId = "invalid_payment_id_123456";
       integratedAddress = wallet.getIntegratedAddress(invalidPaymentId);
-      fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have thrown an RPC exception");
+      fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have thrown a RPC exception");
     } catch (MoneroRpcException e) {
       assertEquals((int) -5, (int) e.getRpcCode());
       assertEquals("Invalid payment ID", e.getRpcMessage());
@@ -80,6 +80,33 @@ public class TestMoneroWallet {
     MoneroUtils.validateAddress(integratedAddress);
     assertEquals(address.getStandardAddress(), integratedAddress.getStandardAddress());
     assertNotNull(integratedAddress.getPaymentId());
+  }
+
+  @Test
+  public void testSplitIntegratedAddress() {
+    
+    // cache info to test against
+    MoneroAddress address = wallet.getStandardAddress();
+    String paymentId = "03284e41c342f036";
+    MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(paymentId);
+    MoneroUtils.validateAddress(integratedAddress);
+    assertEquals(address.getStandardAddress(), integratedAddress.getStandardAddress());
+    assertEquals(paymentId, integratedAddress.getPaymentId());
+    
+    // test split call
+    MoneroIntegratedAddress split = wallet.splitIntegratedAddress(integratedAddress.getIntegratedAddress());
+    assertEquals(address.getStandardAddress(), split.getStandardAddress());
+    assertEquals(paymentId, split.getPaymentId());
+    assertEquals(integratedAddress.getIntegratedAddress(), split.getIntegratedAddress());
+    
+    // test with invalid integrated address
+    try {
+      wallet.splitIntegratedAddress(integratedAddress.getIntegratedAddress() + " some invalid characters");
+      fail("Splitting invalid integrated address should throw a RPC exception");
+    } catch (MoneroRpcException e) {
+      assertEquals((int) -2, (int) e.getRpcCode());
+      assertEquals("Invalid address", e.getRpcMessage());
+    }
   }
 
   @Test
@@ -109,12 +136,14 @@ public class TestMoneroWallet {
 
   @Test
   public void testGetMnemonicSeed() {
-    fail("Not yet implemented");
+    String seed = wallet.getMnemonicSeed();
+    MoneroUtils.validateMnemonicSeed(seed);
   }
 
   @Test
   public void testGetViewKey() {
-    fail("Not yet implemented");
+    String viewKey = wallet.getViewKey();
+    MoneroUtils.validateViewKey(viewKey);
   }
 
   @Test
@@ -134,11 +163,6 @@ public class TestMoneroWallet {
 
   @Test
   public void testStopWallet() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testSplitIntegratedAddress() {
     fail("Not yet implemented");
   }
 
