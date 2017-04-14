@@ -51,39 +51,39 @@ public class MoneroWalletRpc implements MoneroWallet {
   }
   
   // instance variables
-  private String host;
-  private int port;
-  private URI uri;
+  private String rpcHost;
+  private int rpcPort;
+  private URI rpcUri;
   private HttpClient client;
   
   public MoneroWalletRpc(String endpoint) {
     this(parseUri(endpoint));
   }
   
-  public MoneroWalletRpc(URI uri) {
-    this.uri = uri;
-    this.host = uri.getHost();
-    this.port = uri.getPort();
+  public MoneroWalletRpc(URI rpcUri) {
+    this.rpcUri = rpcUri;
+    this.rpcHost = rpcUri.getHost();
+    this.rpcPort = rpcUri.getPort();
     this.client = HttpClients.createDefault();
   }
   
-  public MoneroWalletRpc(String host, int port) throws URISyntaxException {
-    this.host = host;
-    this.port = port;
-    this.uri = new URI("http", null, host, port, "/json_rpc", null, null);
+  public MoneroWalletRpc(String rpcHost, int rpcPort) throws URISyntaxException {
+    this.rpcHost = rpcHost;
+    this.rpcPort = rpcPort;
+    this.rpcUri = new URI("http", null, rpcHost, rpcPort, "/json_rpc", null, null);
     this.client = HttpClients.createDefault();
   }
 
   public String getRpcHost() {
-    return host;
+    return rpcHost;
   }
 
   public int getRpcPort() {
-    return port;
+    return rpcPort;
   }
   
   public URI getRpcUri() {
-    return uri;
+    return rpcUri;
   }
   
   public int getHeight() {
@@ -243,7 +243,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       if (params != null) body.put("params", params);
       
       // send http request and validate response
-      HttpPost post = new HttpPost(uri);
+      HttpPost post = new HttpPost(rpcUri);
       HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
       post.setEntity(entity);
       HttpResponse resp = client.execute(post);
