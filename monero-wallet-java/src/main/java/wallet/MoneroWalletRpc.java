@@ -190,7 +190,6 @@ public class MoneroWalletRpc implements MoneroWallet {
     mUri.setAddress((String) resultMap.get("address"));
     if ("".equals(mUri.getAddress())) mUri.setAddress(null);
     mUri.setAmount((UnsignedInteger) resultMap.get("amount"));
-    if (mUri.getAmount() != null && mUri.getAmount().longValue() == 0) mUri.setAmount(null);
     mUri.setPaymentId((String) resultMap.get("payment_id"));
     if ("".equals(mUri.getPaymentId())) mUri.setPaymentId(null);
     mUri.setRecipientName((String) resultMap.get("recipient_name"));
