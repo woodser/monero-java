@@ -94,7 +94,6 @@ public class MoneroWalletRpc implements MoneroWallet {
 
   public MoneroAddress getStandardAddress() {
     Map<String, Object> respMap = sendRpcRequest("getaddress", null);
-    validateRpcResponse(respMap);
     @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     String standardAddress = (String) resultMap.get("address");
     MoneroAddress address = new MoneroAddress(standardAddress);
@@ -106,11 +105,20 @@ public class MoneroWalletRpc implements MoneroWallet {
     Map<String, Object> paramMap = new HashMap<String, Object>();
     if (paymentId != null) paramMap.put("payment_id", paymentId);
     Map<String, Object> respMap = sendRpcRequest("make_integrated_address", paramMap);
-    validateRpcResponse(respMap);
     @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     paymentId = (String) resultMap.get("payment_id");
     String integratedAddress = (String) resultMap.get("integrated_address");
     MoneroIntegratedAddress address = new MoneroIntegratedAddress(getStandardAddress().getStandardAddress(), paymentId, integratedAddress);
+    MoneroUtils.validateAddress(address);
+    return address;
+  }  
+
+  public MoneroIntegratedAddress splitIntegratedAddress(String integratedAddress) {
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    paramMap.put("integrated_address", integratedAddress);
+    Map<String, Object> respMap = sendRpcRequest("split_integrated_address", paramMap);
+    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroIntegratedAddress address = new MoneroIntegratedAddress((String) resultMap.get("standard_address"), (String) resultMap.get("payment_id"), integratedAddress);
     MoneroUtils.validateAddress(address);
     return address;
   }
@@ -119,7 +127,7 @@ public class MoneroWalletRpc implements MoneroWallet {
     throw new RuntimeException("Not yet implemented.");
   }
 
-  public MoneroTransaction sendTransaction(MoneroPayment payment) {
+  public MoneroTransaction sendTransaction(MoneroPayment payment, UnsignedInteger fee, int mixin, int unlockTime) {
     throw new RuntimeException("Not yet implemented.");
   }
 
@@ -136,11 +144,19 @@ public class MoneroWalletRpc implements MoneroWallet {
   }
 
   public String getMnemonicSeed() {
-    throw new RuntimeException("Not yet implemented.");
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    paramMap.put("key_type", "mnemonic");
+    Map<String, Object> respMap = sendRpcRequest("query_key", paramMap);
+    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (String) resultMap.get("key");
   }
 
   public String getViewKey() {
-    throw new RuntimeException("Not yet implemented.");
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    paramMap.put("key_type", "view_key");
+    Map<String, Object> respMap = sendRpcRequest("query_key", paramMap);
+    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (String) resultMap.get("key");
   }
 
   public URI getUri(MoneroUri uri) {
@@ -167,23 +183,9 @@ public class MoneroWalletRpc implements MoneroWallet {
     }
   }
   
-  private static void validateHttpResponse(HttpResponse resp) {
-    int code = resp.getStatusLine().getStatusCode();
-    if (code < 200 || code > 299) {
-      String content = null;
-      try {
-        content = StreamUtils.streamToString(resp.getEntity().getContent());
-      } catch (Exception e) {
-        // could not get content
-      }
-      throw new HttpException(code, resp.getStatusLine().getReasonPhrase() + (content != null ? (": " + content) : ""));
-    }
-  }
-  
   @SuppressWarnings("unchecked")
   private Pair<UnsignedInteger, UnsignedInteger> getBalances() {
     Map<String, Object> respMap = sendRpcRequest("getbalance", null);
-    validateRpcResponse(respMap);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return new Pair<UnsignedInteger, UnsignedInteger>((UnsignedInteger) resultMap.get("balance"), (UnsignedInteger) resultMap.get("unlocked_balance"));
   }
@@ -197,6 +199,8 @@ public class MoneroWalletRpc implements MoneroWallet {
    * @return Map<String, Object> is the RPC API response as a map
    */
   private Map<String, Object> sendRpcRequest(String method, Map<String, Object> params) {
+    
+    // send http request
     try {
       
       // build request body
@@ -216,11 +220,29 @@ public class MoneroWalletRpc implements MoneroWallet {
       // deserialize response
       Map<String, Object> respMap = JsonUtils.toMap(MAPPER, StreamUtils.streamToString(resp.getEntity().getContent()));
       EntityUtils.consume(resp.getEntity());
+      
+      // check RPC response for errors
+      validateRpcResponse(respMap);
       return respMap;
     } catch (HttpException e1) {
       throw e1;
-    } catch (Exception e2) {
-      throw new MoneroException(e2);
+    } catch (MoneroRpcException e2) {
+      throw e2;
+    } catch (Exception e3) {
+      throw new MoneroException(e3);
+    }
+  }
+  
+  private static void validateHttpResponse(HttpResponse resp) {
+    int code = resp.getStatusLine().getStatusCode();
+    if (code < 200 || code > 299) {
+      String content = null;
+      try {
+        content = StreamUtils.streamToString(resp.getEntity().getContent());
+      } catch (Exception e) {
+        // could not get content
+      }
+      throw new HttpException(code, resp.getStatusLine().getReasonPhrase() + (content != null ? (": " + content) : ""));
     }
   }
   
@@ -231,15 +253,5 @@ public class MoneroWalletRpc implements MoneroWallet {
     int code = (Integer) error.get("code");
     String message = (String) error.get("message");
     throw new MoneroRpcException(code, message);
-  }
-
-  public MoneroIntegratedAddress splitIntegratedAddress(String integratedAddress) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public MoneroTransaction sendTransaction(MoneroPayment payment, UnsignedInteger fee, int mixin, int unlockTime) {
-    // TODO Auto-generated method stub
-    return null;
   }
 }
