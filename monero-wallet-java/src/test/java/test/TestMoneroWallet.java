@@ -9,10 +9,9 @@ import org.junit.Test;
 
 import com.google.common.primitives.UnsignedInteger;
 
+import types.Pair;
 import utils.MoneroUtils;
-import wallet.MoneroAddress;
 import wallet.MoneroException;
-import wallet.MoneroIntegratedAddress;
 import wallet.MoneroWallet;
 import wallet.MoneroWalletRpc;
 
@@ -46,9 +45,9 @@ public class TestMoneroWallet {
   }
 
   @Test
-  public void testGetAddress() {
-    MoneroAddress address = wallet.getAddress();
-    MoneroUtils.validateAddress(address);
+  public void testGetStandardAddress() {
+    String standardAddress = wallet.getStandardAddress();
+    MoneroUtils.validateStandardAddress(standardAddress);
   }
 
   @Test
@@ -56,23 +55,29 @@ public class TestMoneroWallet {
     
     // test valid payment id
     String paymentId = "f014b1fc8729374d";
-    MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(paymentId);
-    MoneroUtils.validateAddress(integratedAddress);
-    assertEquals(paymentId, integratedAddress.getPaymentId());
-    assertEquals(wallet.getAddress().getStandardAddress(), integratedAddress.getStandardAddress());
+    String integratedAddress = wallet.getIntegratedAddress(paymentId);
+    MoneroUtils.validateIntegratedAddress(wallet.getStandardAddress(), paymentId, integratedAddress);
     
     // test invalid payment id
     try {
-      String invalidPaymentId = "f014b1fc8729374z";
-      wallet.getIntegratedAddress(invalidPaymentId);
+      String invalidPaymentId = "9d7610804e14b911";
+      integratedAddress = wallet.getIntegratedAddress(invalidPaymentId);
+      fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have failed");
     } catch (MoneroException e) {
+      e.printStackTrace();
+      
+      
+      
+      
+      
+      
       fail("Success but need to validate exception");
     }
     
     // test null payment id which generates a new one
-    integratedAddress = wallet.getIntegratedAddress(null);
-    MoneroUtils.validateAddress(integratedAddress);
-    assertEquals(wallet.getAddress().getStandardAddress(), integratedAddress.getStandardAddress());
+    paymentId = null;
+    integratedAddress = wallet.getIntegratedAddress(paymentId);
+    MoneroUtils.validateIntegratedAddress(wallet.getStandardAddress(), paymentId, integratedAddress);
   }
 
   @Test
