@@ -24,6 +24,8 @@ import wallet.MoneroWalletRpc;
 /**
  * Tests a MoneroWallet implementation.
  * 
+ * TODO: why are nulls getting serialized?
+ * 
  * @author woodser
  */
 public class TestMoneroWallet {
@@ -158,9 +160,6 @@ public class TestMoneroWallet {
 
   @Test
   public void testUriParsing() {
-    
-    // TODO: why are nulls getting serialized?
-    // TODO: how to translate unsigned integer into json
     
     // test with optional fields as null
     MoneroUri mUri1 = new MoneroUri();

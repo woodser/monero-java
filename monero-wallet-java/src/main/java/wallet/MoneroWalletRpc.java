@@ -23,10 +23,10 @@ import com.google.common.primitives.UnsignedInteger;
 
 import types.HttpException;
 import types.Pair;
+import utils.FieldDeserializer;
 import utils.JsonUtils;
 import utils.MoneroUtils;
 import utils.StreamUtils;
-import utils.UnsignedIntegerDeserializer;
 
 /**
  * Implements a MoneroWallet backed by a monero wallet RPC endpoint.
@@ -44,7 +44,9 @@ public class MoneroWalletRpc implements MoneroWallet {
     MAPPER = new ObjectMapper();
     MAPPER.setSerializationInclusion(Include.NON_NULL);
     SimpleModule module = new SimpleModule();
-    module.addDeserializer(Map.class, new UnsignedIntegerDeserializer(UNSIGNED_INTEGERS));
+    Map<String, Class<?>> fieldClasses = new HashMap<String, Class<?>>();
+    for (String field : UNSIGNED_INTEGERS) fieldClasses.put(field, UnsignedInteger.class);
+    module.addDeserializer(Map.class, new FieldDeserializer(fieldClasses));
     MAPPER.registerModule(module);
   }
   
