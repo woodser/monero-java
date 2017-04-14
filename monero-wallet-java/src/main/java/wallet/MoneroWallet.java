@@ -38,9 +38,9 @@ public interface MoneroWallet {
 	
 	public String getViewKey();
 	
-	public URI getUri(MoneroUri uri);
+	public URI toUri(MoneroUri uri);
 	
-	public MoneroUri parseUri(URI uri);
+	public MoneroUri fromUri(URI uri);
 	 
   public void saveBlockchain();
   

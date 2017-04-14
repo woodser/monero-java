@@ -36,7 +36,7 @@ import utils.UnsignedIntegerDeserializer;
 public class MoneroWalletRpc implements MoneroWallet {
   
   // json field names that map to unsigned integers
-  private static Set<String> UNSIGNED_INTEGERS = new HashSet<String>(Arrays.asList("balance", "unlocked_balance"));
+  private static Set<String> UNSIGNED_INTEGERS = new HashSet<String>(Arrays.asList("balance", "unlocked_balance", "amount"));
   
   // customer mapper to deserialize unsigned integers
   private static ObjectMapper MAPPER;
@@ -165,12 +165,40 @@ public class MoneroWalletRpc implements MoneroWallet {
     return (String) resultMap.get("key");
   }
 
-  public URI getUri(MoneroUri uri) {
-    throw new RuntimeException("Not yet implemented.");
+  public URI toUri(MoneroUri uri) {
+    if (uri == null) throw new MoneroWalletException("Given Monero URI is null");
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    paramMap.put("address", uri.getAddress());
+    paramMap.put("amount", uri.getAmount() == null ? null : uri.getAmount().toString());
+    paramMap.put("payment_id", uri.getPaymentId());
+    paramMap.put("recipient_name", uri.getRecipientName());
+    paramMap.put("tx_description", uri.getTxDescription());
+    System.out.println(JsonUtils.serialize(paramMap));
+    Map<String, Object> respMap = sendRpcRequest("make_uri", paramMap);
+    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return parseUri((String) resultMap.get("uri"));
   }
 
-  public MoneroUri parseUri(URI uri) {
-    throw new RuntimeException("Not yet implemented.");
+  public MoneroUri fromUri(URI uri) {
+    if (uri == null) throw new MoneroWalletException("Given URI is null");
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    System.out.println(uri.toString());
+    paramMap.put("uri", uri.toString());
+    Map<String, Object> respMap = sendRpcRequest("parse_uri", paramMap);
+    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) ((Map<String, Object>) respMap.get("result")).get("uri");
+    System.out.println(resultMap);
+    MoneroUri mUri = new MoneroUri();
+    mUri.setAddress((String) resultMap.get("address"));
+    if ("".equals(mUri.getAddress())) mUri.setAddress(null);
+    mUri.setAmount((UnsignedInteger) resultMap.get("amount"));
+    if (mUri.getAmount() != null && mUri.getAmount().longValue() == 0) mUri.setAmount(null);
+    mUri.setPaymentId((String) resultMap.get("payment_id"));
+    if ("".equals(mUri.getPaymentId())) mUri.setPaymentId(null);
+    mUri.setRecipientName((String) resultMap.get("recipient_name"));
+    if ("".equals(mUri.getRecipientName())) mUri.setRecipientName(null);
+    mUri.setTxDescription((String) resultMap.get("tx_description"));
+    if ("".equals(mUri.getTxDescription())) mUri.setTxDescription(null);
+    return mUri;
   }
 
   public void saveBlockchain() {
@@ -185,7 +213,7 @@ public class MoneroWalletRpc implements MoneroWallet {
     try {
       return new URI(endpoint);
     } catch (Exception e) {
-      throw new MoneroException(e);
+      throw new MoneroWalletException(e);
     }
   }
   
@@ -235,7 +263,7 @@ public class MoneroWalletRpc implements MoneroWallet {
     } catch (MoneroRpcException e2) {
       throw e2;
     } catch (Exception e3) {
-      throw new MoneroException(e3);
+      throw new MoneroWalletException(e3);
     }
   }
   
