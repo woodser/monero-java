@@ -174,11 +174,11 @@ public class MoneroWalletRpc implements MoneroWallet {
   }
 
   public void saveBlockchain() {
-    throw new RuntimeException("Not yet implemented.");
+    sendRpcRequest("store", null);
   }
 
   public void stopWallet() {
-    throw new RuntimeException("Not yet implemented.");
+    sendRpcRequest("stop_wallet", null);
   }
 	
   private static URI parseUri(String endpoint) {

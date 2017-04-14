@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.primitives.UnsignedInteger;
@@ -164,11 +165,12 @@ public class TestMoneroWallet {
 
   @Test
   public void testSaveBlockchain() {
-    fail("Not yet implemented");
+    wallet.saveBlockchain();
   }
 
+  @Ignore
   @Test
   public void testStopWallet() {
-    fail("Not yet implemented");
+    wallet.stopWallet();
   }
 }
