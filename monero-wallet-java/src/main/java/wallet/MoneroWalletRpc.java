@@ -72,16 +72,22 @@ public class MoneroWalletRpc implements MoneroWallet {
     this.client = HttpClients.createDefault();
   }
 
-  public String getHost() {
+  public String getRpcHost() {
     return host;
   }
 
-  public int getPort() {
+  public int getRpcPort() {
     return port;
   }
   
-  public URI getUri() {
+  public URI getRpcUri() {
     return uri;
+  }
+  
+  public int getHeight() {
+    Map<String, Object> respMap = sendRpcRequest("getheight", null);
+    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (Integer) resultMap.get("height");
   }
 
   public UnsignedInteger getBalance() {

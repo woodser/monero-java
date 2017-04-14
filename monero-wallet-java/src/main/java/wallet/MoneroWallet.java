@@ -11,6 +11,8 @@ import com.google.common.primitives.UnsignedInteger;
  * @author woodser
  */
 public interface MoneroWallet {
+  
+  public int getHeight();
 
 	public UnsignedInteger getBalance();
 	
