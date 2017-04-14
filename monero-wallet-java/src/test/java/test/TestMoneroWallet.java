@@ -67,7 +67,7 @@ public class TestMoneroWallet {
     
     // test invalid payment id
     try {
-      String invalidPaymentId = "xxx51235xxxx512351xxx6234623462";
+      String invalidPaymentId = "invalid_payment_id_123456";
       integratedAddress = wallet.getIntegratedAddress(invalidPaymentId);
       fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have thrown an RPC exception");
     } catch (MoneroRpcException e) {
@@ -83,7 +83,7 @@ public class TestMoneroWallet {
   }
 
   @Test
-  public void testSendTransactionMoneroAddressUIntegerUIntegerIntInt() {
+  public void testSendTransactionStringUnsignedIntegerUnsignedIntegerIntInt() {
     fail("Not yet implemented");
   }
 
@@ -93,7 +93,7 @@ public class TestMoneroWallet {
   }
 
   @Test
-  public void testSendTransactionSetOfMoneroPaymentUIntegerIntInt() {
+  public void testSendTransactionSetOfMoneroPaymentUnsignedIntegerIntInt() {
     fail("Not yet implemented");
   }
 
@@ -108,7 +108,7 @@ public class TestMoneroWallet {
   }
 
   @Test
-  public void testGetSpendKey() {
+  public void testGetMnemonicSeed() {
     fail("Not yet implemented");
   }
 
@@ -118,12 +118,7 @@ public class TestMoneroWallet {
   }
 
   @Test
-  public void testSave() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testGetUri() {
+  public void testGetUriMoneroUri() {
     fail("Not yet implemented");
   }
 
@@ -131,4 +126,25 @@ public class TestMoneroWallet {
   public void testParseUri() {
     fail("Not yet implemented");
   }
+
+  @Test
+  public void testSaveBlockchain() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testStopWallet() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testSplitIntegratedAddress() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testSendTransactionMoneroPaymentUnsignedIntegerIntInt() {
+    fail("Not yet implemented");
+  }
+
 }
