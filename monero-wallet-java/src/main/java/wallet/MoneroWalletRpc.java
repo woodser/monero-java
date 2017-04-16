@@ -134,6 +134,10 @@ public class MoneroWalletRpc implements MoneroWallet {
   public MoneroTransaction sendTransaction(String address, BigInteger amount, BigInteger fee, int mixin, int unlockTime) {
     throw new RuntimeException("Not yet implemented.");
   }
+  
+  public MoneroTransaction sendTransaction(MoneroAddress address, BigInteger amount, BigInteger fee, int mixin, int unlockTime) {
+    throw new RuntimeException("Not yet implemented.");
+  }
 
   public MoneroTransaction sendTransaction(MoneroPayment payment, BigInteger fee, int mixin, int unlockTime) {
     throw new RuntimeException("Not yet implemented.");

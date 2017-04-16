@@ -25,6 +25,8 @@ public interface MoneroWallet {
 	
 	public MoneroTransaction sendTransaction(String address, BigInteger amount, BigInteger fee, int mixin, int unlockTime);
 	
+	public MoneroTransaction sendTransaction(MoneroAddress address, BigInteger amount, BigInteger fee, int mixin, int unlockTime);
+	
 	public MoneroTransaction sendTransaction(MoneroPayment payment, BigInteger fee, int mixin, int unlockTime);
 	
 	public MoneroTransaction sendTransaction(Set<MoneroPayment> payments, BigInteger fee, int mixin, int unlockTime);
