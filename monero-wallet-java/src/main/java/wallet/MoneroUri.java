@@ -1,11 +1,11 @@
 package wallet;
 
-import com.google.common.primitives.UnsignedInteger;
+import java.math.BigInteger;
 
 public class MoneroUri {
 
 	private String address;
-	private UnsignedInteger amount;
+	private BigInteger amount;
 	private String paymentId;
 	private String recipientName;
 	private String txDescription;
@@ -19,7 +19,7 @@ public class MoneroUri {
     setTxDescription(null);
 	}
 	
-  public MoneroUri(String address, UnsignedInteger amount, String paymentId, String recipientName, String txDescription) {
+  public MoneroUri(String address, BigInteger amount, String paymentId, String recipientName, String txDescription) {
     super();
     setAddress(address);
     setAmount(amount);
@@ -36,12 +36,12 @@ public class MoneroUri {
     this.address = address;
   }
 
-  public UnsignedInteger getAmount() {
+  public BigInteger getAmount() {
     return amount;
   }
 
-  public void setAmount(UnsignedInteger amount) {
-    this.amount = amount == null ? UnsignedInteger.valueOf(0) : amount;
+  public void setAmount(BigInteger amount) {
+    this.amount = amount == null ? BigInteger.valueOf(0) : amount;
   }
 
   public String getPaymentId() {

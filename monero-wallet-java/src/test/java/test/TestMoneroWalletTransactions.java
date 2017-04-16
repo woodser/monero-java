@@ -2,10 +2,10 @@ package test;
 
 import static org.junit.Assert.fail;
 
+import java.math.BigInteger;
+
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.common.primitives.UnsignedInteger;
 
 import wallet.MoneroWallet;
 import wallet.MoneroWalletRpc;
@@ -21,7 +21,7 @@ public class TestMoneroWalletTransactions {
   
   private static String DOMAIN = "localhost";
   private static int PORT = 18082;
-  private static final UnsignedInteger SEND_AMOUNT = UnsignedInteger.valueOf(100);
+  private static final BigInteger SEND_AMOUNT = BigInteger.valueOf(100);
   
   private MoneroWallet wallet;
 
@@ -31,17 +31,17 @@ public class TestMoneroWalletTransactions {
   }
 
   @Test
-  public void testSendTransactionStringUnsignedIntegerUnsignedIntegerIntInt() {
+  public void testSendTransactionStringBigIntegerBigIntegerIntInt() {
     System.out.println(wallet.getBalance());
   }
 
   @Test
-  public void testSendTransactionMoneroPaymentUnsignedIntegerIntInt() {
+  public void testSendTransactionMoneroPaymentBigIntegerIntInt() {
     fail("Not yet implemented");
   }
 
   @Test
-  public void testSendTransactionSetOfMoneroPaymentUnsignedIntegerIntInt() {
+  public void testSendTransactionSetOfMoneroPaymentBigIntegerIntInt() {
     fail("Not yet implemented");
   }
 
