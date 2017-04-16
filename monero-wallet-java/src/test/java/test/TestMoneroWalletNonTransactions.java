@@ -169,7 +169,7 @@ public class TestMoneroWalletNonTransactions {
     wallet.saveBlockchain();
   }
 
-  @Ignore
+  @Ignore // disabled so tests don't actually stop the wallet
   @Test
   public void testStopWallet() {
     wallet.stopWallet();
