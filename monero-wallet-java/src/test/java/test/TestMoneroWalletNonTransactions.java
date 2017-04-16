@@ -5,13 +5,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.math.BigInteger;
 import java.net.URI;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import com.google.common.primitives.UnsignedInteger;
 
 import utils.MoneroUtils;
 import wallet.MoneroAddress;
@@ -48,13 +47,13 @@ public class TestMoneroWalletNonTransactions {
 
   @Test
   public void testGetBalance() {
-    UnsignedInteger balance = wallet.getBalance();
+    BigInteger balance = wallet.getBalance();
     assertTrue(balance.longValue() >= 0.0);
   }
   
   @Test
   public void getUnlockedBalance() {
-    UnsignedInteger unlocked = wallet.getUnlockedBalance();
+    BigInteger unlocked = wallet.getUnlockedBalance();
     assertTrue(unlocked.longValue() >= 0.0);
   }
 
@@ -144,7 +143,7 @@ public class TestMoneroWalletNonTransactions {
     assertTrue(mUri1.equals(mUri2));
     
     // test with all fields
-    mUri1.setAmount(UnsignedInteger.valueOf("4250000000"));
+    mUri1.setAmount(BigInteger.valueOf((Long.parseLong("425000000000"))));
     mUri1.setPaymentId("03284e41c342f036");
     mUri1.setRecipientName("John Doe");
     mUri1.setTxDescription("OMZG XMR FTW");

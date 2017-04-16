@@ -1,5 +1,6 @@
 package wallet;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -19,7 +20,6 @@ import org.apache.http.util.EntityUtils;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.google.common.primitives.UnsignedInteger;
 
 import types.HttpException;
 import types.Pair;
@@ -45,7 +45,7 @@ public class MoneroWalletRpc implements MoneroWallet {
     MAPPER.setSerializationInclusion(Include.NON_NULL);
     SimpleModule module = new SimpleModule();
     Map<String, Class<?>> fieldClasses = new HashMap<String, Class<?>>();
-    for (String field : UNSIGNED_INTEGERS) fieldClasses.put(field, UnsignedInteger.class);
+    for (String field : UNSIGNED_INTEGERS) fieldClasses.put(field, BigInteger.class);
     module.addDeserializer(Map.class, new FieldDeserializer(fieldClasses));
     MAPPER.registerModule(module);
   }
@@ -92,11 +92,11 @@ public class MoneroWalletRpc implements MoneroWallet {
     return (Integer) resultMap.get("height");
   }
 
-  public UnsignedInteger getBalance() {
+  public BigInteger getBalance() {
     return getBalances().getFirst();
   }
   
-  public UnsignedInteger getUnlockedBalance() {
+  public BigInteger getUnlockedBalance() {
     return getBalances().getSecond();
   }
 
@@ -131,15 +131,15 @@ public class MoneroWalletRpc implements MoneroWallet {
     return address;
   }
 
-  public MoneroTransaction sendTransaction(String address, UnsignedInteger amount, UnsignedInteger fee, int mixin, int unlockTime) {
+  public MoneroTransaction sendTransaction(String address, BigInteger amount, BigInteger fee, int mixin, int unlockTime) {
     throw new RuntimeException("Not yet implemented.");
   }
 
-  public MoneroTransaction sendTransaction(MoneroPayment payment, UnsignedInteger fee, int mixin, int unlockTime) {
+  public MoneroTransaction sendTransaction(MoneroPayment payment, BigInteger fee, int mixin, int unlockTime) {
     throw new RuntimeException("Not yet implemented.");
   }
 
-  public MoneroTransaction sendTransaction(Set<MoneroPayment> payments, UnsignedInteger fee, int mixin, int unlockTime) {
+  public MoneroTransaction sendTransaction(Set<MoneroPayment> payments, BigInteger fee, int mixin, int unlockTime) {
     throw new RuntimeException("Not yet implemented.");
   }
 
@@ -189,7 +189,7 @@ public class MoneroWalletRpc implements MoneroWallet {
     MoneroUri mUri = new MoneroUri();
     mUri.setAddress((String) resultMap.get("address"));
     if ("".equals(mUri.getAddress())) mUri.setAddress(null);
-    mUri.setAmount((UnsignedInteger) resultMap.get("amount"));
+    mUri.setAmount((BigInteger) resultMap.get("amount"));
     mUri.setPaymentId((String) resultMap.get("payment_id"));
     if ("".equals(mUri.getPaymentId())) mUri.setPaymentId(null);
     mUri.setRecipientName((String) resultMap.get("recipient_name"));
@@ -216,10 +216,10 @@ public class MoneroWalletRpc implements MoneroWallet {
   }
   
   @SuppressWarnings("unchecked")
-  private Pair<UnsignedInteger, UnsignedInteger> getBalances() {
+  private Pair<BigInteger, BigInteger> getBalances() {
     Map<String, Object> respMap = sendRpcRequest("getbalance", null);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    return new Pair<UnsignedInteger, UnsignedInteger>((UnsignedInteger) resultMap.get("balance"), (UnsignedInteger) resultMap.get("unlocked_balance"));
+    return new Pair<BigInteger, BigInteger>((BigInteger) resultMap.get("balance"), (BigInteger) resultMap.get("unlocked_balance"));
   }
   
   

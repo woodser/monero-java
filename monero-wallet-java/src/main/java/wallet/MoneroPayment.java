@@ -1,11 +1,11 @@
 package wallet;
 
-import com.google.common.primitives.UnsignedInteger;
+import java.math.BigInteger;
 
 public class MoneroPayment {
 
 	private String address;
-	private UnsignedInteger amount;
+	private BigInteger amount;
 	private int blockHeight;
 	private MoneroTransaction transaction;
 	private boolean isAvailableToSpend;
