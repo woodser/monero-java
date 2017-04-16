@@ -18,4 +18,8 @@ public class MoneroIntegratedAddress extends MoneroAddress {
   public String getIntegratedAddress() {
     return integratedAddress;
   }
+  
+  public String toString() {
+    return integratedAddress;
+  }
 }
