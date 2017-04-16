@@ -22,13 +22,13 @@ import wallet.MoneroWallet;
 import wallet.MoneroWalletRpc;
 
 /**
- * Tests a MoneroWallet implementation.
+ * Tests a Monero wallet excluding sending transactions.
  * 
  * TODO: why are nulls getting serialized?
  * 
  * @author woodser
  */
-public class TestMoneroWallet {
+public class TestMoneroWalletNonTransactions {
   
   private static String DOMAIN = "localhost";
   private static int PORT = 18082;
@@ -119,31 +119,6 @@ public class TestMoneroWallet {
       assertEquals((int) -2, (int) e.getRpcCode());
       assertEquals("Invalid address", e.getRpcMessage());
     }
-  }
-
-  @Test
-  public void testSendTransactionStringUnsignedIntegerUnsignedIntegerIntInt() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testSendTransactionMoneroPaymentUnsignedIntegerIntInt() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testSendTransactionSetOfMoneroPaymentUnsignedIntegerIntInt() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testSweepDust() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testGetTransactions() {
-    fail("Not yet implemented");
   }
 
   @Test

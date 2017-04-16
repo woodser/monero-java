@@ -12,4 +12,8 @@ public class MoneroAddress {
   public String getStandardAddress() {
     return standardAddress;
   }
+  
+  public String toString() {
+    return standardAddress;
+  }
 }
