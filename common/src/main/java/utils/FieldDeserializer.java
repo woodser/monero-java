@@ -9,26 +9,31 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
+import types.JsonException;
+
 /**
- * Deserializes specific fields to specific classes.
+ * Deserializes specific fields to specified types.
+ * 
+ * TODO: this does not properly deserialize field with e.g. List<String> value
  * 
  * @author woodser
  */
 public class FieldDeserializer extends JsonDeserializer<Map<String, Object>> {
   
-  private Map<String, Class<?>> fieldClasses;
+  private Map<String, Object> fieldTypes;
   
   /**
    * Constructs the deserializer with the given field names.
    * 
-   * @param fieldNames specifies the names of fields to deserialize to specific classes
+   * @param fieldTypes specifies the names of fields to deserialize to specific types
    */
-  public FieldDeserializer(Map<String, Class<?>> fieldClasses) {
+  public FieldDeserializer(Map<String, Object> fieldTypes) {
     super();
-    this.fieldClasses = fieldClasses;
+    this.fieldTypes = fieldTypes;
   }
 
   @Override
@@ -36,14 +41,18 @@ public class FieldDeserializer extends JsonDeserializer<Map<String, Object>> {
     Map<String, Object> result = new HashMap<String, Object>();
     jp.nextToken();
     while (!JsonToken.END_OBJECT.equals(jp.getCurrentToken())) {
-      String key = jp.getText();
+      String tokenText = jp.getText();
       jp.nextToken();
-      Class<?> clazz = fieldClasses.get(key);
-      if (clazz != null) {
-        result.put(key, jp.readValueAs(clazz));
+      Object type = fieldTypes.get(tokenText);
+      if (type != null) {
+        if (type instanceof Class) result.put(tokenText, jp.readValueAs((Class<?>) type));
+        else if (type instanceof TypeReference) result.put(tokenText, jp.readValueAs((TypeReference<?>) type));
+        else throw new JsonException("Invalid deserialization type " + type.getClass() + " for field '" + tokenText + "'");
       } else {
+        
+        
         if (JsonToken.START_OBJECT.equals(jp.getCurrentToken())) {
-          result.put(key, deserialize(jp, ctxt));
+          result.put(tokenText, deserialize(jp, ctxt));
         } else if (JsonToken.START_ARRAY.equals(jp.getCurrentToken())) {
           jp.nextToken();
           List<Object> list = new ArrayList<Object>();
@@ -51,9 +60,9 @@ public class FieldDeserializer extends JsonDeserializer<Map<String, Object>> {
             list.add(deserialize(jp, ctxt));
             jp.nextToken();
           }
-          result.put(key, list);
+          result.put(tokenText, list);
         } else {
-          result.put(key, jp.readValueAs(Object.class));
+          result.put(tokenText, jp.readValueAs(Object.class));
         }
       }
       jp.nextToken();

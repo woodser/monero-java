@@ -3,9 +3,9 @@ package wallet;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,14 +18,13 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import types.HttpException;
 import types.Pair;
-import utils.FieldDeserializer;
 import utils.JsonUtils;
-import utils.MoneroUtils;
 import utils.StreamUtils;
 
 /**
@@ -35,19 +34,13 @@ import utils.StreamUtils;
  */
 public class MoneroWalletRpc implements MoneroWallet {
   
-  // json field names that map to unsigned integers
-  private static Set<String> UNSIGNED_INTEGERS = new HashSet<String>(Arrays.asList("balance", "unlocked_balance", "amount"));
-  
-  // customer mapper to deserialize unsigned integers
-  private static ObjectMapper MAPPER;
+  // customer mapper to deserialize integers to BigIntegers
+  public static ObjectMapper MAPPER;
   static {
     MAPPER = new ObjectMapper();
     MAPPER.setSerializationInclusion(Include.NON_NULL);
-    SimpleModule module = new SimpleModule();
-    Map<String, Class<?>> fieldClasses = new HashMap<String, Class<?>>();
-    for (String field : UNSIGNED_INTEGERS) fieldClasses.put(field, BigInteger.class);
-    module.addDeserializer(Map.class, new FieldDeserializer(fieldClasses));
-    MAPPER.registerModule(module);
+    MAPPER.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+    MAPPER.configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS, true);
   }
   
   // instance variables
@@ -89,7 +82,7 @@ public class MoneroWalletRpc implements MoneroWallet {
   public int getHeight() {
     Map<String, Object> respMap = sendRpcRequest("getheight", null);
     @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    return (Integer) resultMap.get("height");
+    return ((BigInteger) resultMap.get("height")).intValue();
   }
 
   public BigInteger getBalance() {
@@ -131,20 +124,56 @@ public class MoneroWalletRpc implements MoneroWallet {
     return address;
   }
 
-  public MoneroTransaction sendTransaction(String address, BigInteger amount, BigInteger fee, int mixin, int unlockTime) {
-    throw new RuntimeException("Not yet implemented.");
+  public MoneroTransaction sendTransaction(String address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime) {
+    return sendTransaction(new MoneroPayment(address, amount), paymentId, fee, mixin, unlockTime);
   }
   
-  public MoneroTransaction sendTransaction(MoneroAddress address, BigInteger amount, BigInteger fee, int mixin, int unlockTime) {
-    throw new RuntimeException("Not yet implemented.");
+  public MoneroTransaction sendTransaction(MoneroAddress address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime) {
+    return sendTransaction(address.toString(), amount, paymentId, fee, mixin, unlockTime);
   }
 
-  public MoneroTransaction sendTransaction(MoneroPayment payment, BigInteger fee, int mixin, int unlockTime) {
-    throw new RuntimeException("Not yet implemented.");
+  public MoneroTransaction sendTransaction(MoneroPayment payment, String paymentId, BigInteger fee, int mixin, int unlockTime) {
+    List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
+    payments.add(payment);
+    return sendTransactions(payments, paymentId, fee, mixin, unlockTime, null).get(0);
   }
 
-  public MoneroTransaction sendTransaction(Set<MoneroPayment> payments, BigInteger fee, int mixin, int unlockTime) {
-    throw new RuntimeException("Not yet implemented.");
+  @SuppressWarnings("unchecked")
+  public List<MoneroTransaction> sendTransactions(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime, Boolean newAlgorithm) {
+    
+    // build parameter map
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    List<Map<String, Object>> destinations = new ArrayList<Map<String, Object>>();
+    paramMap.put("destinations", destinations);
+    for (MoneroPayment payment : payments) {
+      Map<String, Object> destination = new HashMap<String, Object>();
+      destination.put("address", payment.getAddress().toString());
+      destination.put("amount", payment.getAmount());
+      destinations.add(destination);
+    }
+    paramMap.put("payment_id", paymentId);
+    paramMap.put("fee", fee);
+    paramMap.put("mixin", mixin);
+    paramMap.put("unlockTime", unlockTime);
+    paramMap.put("get_tx_key", true);
+    paramMap.put("new_algorithm", newAlgorithm);
+    
+    // send request
+    Map<String, Object> respMap = sendRpcRequest("transfer_split", paramMap);
+    
+    // interpret response
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<BigInteger> fees = (List<BigInteger>) resultMap.get("fee_list");
+    List<String> txHashes = (List<String>) resultMap.get("tx_hash_list");
+    List<String> txKeys = (List<String>) resultMap.get("tx_key_list");
+    List<MoneroTransaction> transactions = new ArrayList<MoneroTransaction>();
+    for (int i = 0; i < fees.size(); i++) {
+      MoneroTransaction transaction = new MoneroTransaction();
+      transaction.setFee(fees.get(i));
+      transaction.setTxHash(txHashes.get(0));
+      transaction.setTxKey(txKeys.get(0));
+    }
+    return transactions;
   }
 
   public Set<MoneroTransaction> sweepDust() {
@@ -172,7 +201,7 @@ public class MoneroWalletRpc implements MoneroWallet {
   }
 
   public URI toUri(MoneroUri uri) {
-    if (uri == null) throw new MoneroWalletException("Given Monero URI is null");
+    if (uri == null) throw new MoneroException("Given Monero URI is null");
     Map<String, Object> paramMap = new HashMap<String, Object>();
     paramMap.put("address", uri.getAddress());
     paramMap.put("amount", uri.getAmount() == null ? null : uri.getAmount());
@@ -185,7 +214,7 @@ public class MoneroWalletRpc implements MoneroWallet {
   }
 
   public MoneroUri fromUri(URI uri) {
-    if (uri == null) throw new MoneroWalletException("Given URI is null");
+    if (uri == null) throw new MoneroException("Given URI is null");
     Map<String, Object> paramMap = new HashMap<String, Object>();
     paramMap.put("uri", uri.toString());
     Map<String, Object> respMap = sendRpcRequest("parse_uri", paramMap);
@@ -215,7 +244,7 @@ public class MoneroWalletRpc implements MoneroWallet {
     try {
       return new URI(endpoint);
     } catch (Exception e) {
-      throw new MoneroWalletException(e);
+      throw new MoneroException(e);
     }
   }
   
@@ -258,14 +287,14 @@ public class MoneroWalletRpc implements MoneroWallet {
       EntityUtils.consume(resp.getEntity());
       
       // check RPC response for errors
-      validateRpcResponse(respMap);
+      validateRpcResponse(respMap, body);
       return respMap;
     } catch (HttpException e1) {
       throw e1;
     } catch (MoneroRpcException e2) {
       throw e2;
     } catch (Exception e3) {
-      throw new MoneroWalletException(e3);
+      throw new MoneroException(e3);
     }
   }
   
@@ -283,11 +312,11 @@ public class MoneroWalletRpc implements MoneroWallet {
   }
   
   @SuppressWarnings("unchecked")
-  private static void validateRpcResponse(Map<String, Object> respMap) {
+  private static void validateRpcResponse(Map<String, Object> respMap, Map<String, Object> requestBody) {
     Map<String, Object> error = (Map<String, Object>) respMap.get("error");
     if (error == null) return;
-    int code = (Integer) error.get("code");
+    int code = ((BigInteger) error.get("code")).intValue();
     String message = (String) error.get("message");
-    throw new MoneroRpcException(code, message);
+    throw new MoneroRpcException(code, message, requestBody);
   }
 }

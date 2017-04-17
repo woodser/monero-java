@@ -1,7 +1,6 @@
 package wallet;
 
 import java.math.BigInteger;
-import java.util.List;
 
 /**
  * Represents a transaction on the Monero network.
@@ -10,7 +9,7 @@ import java.util.List;
  */
 public class MoneroTransaction {
 
-	private List<MoneroPayment> payments;
+	private MoneroPayment payment;
 	private BigInteger fee;
 	private int mixin;
 	private String txKey;
@@ -18,9 +17,13 @@ public class MoneroTransaction {
 	private int size;
 	private MoneroTransactionType type;
 	
-  public MoneroTransaction(List<MoneroPayment> payments, BigInteger fee, int mixin, String txKey, String txHash, int size, MoneroTransactionType type) {
+	public MoneroTransaction() {
+	  super();
+	}
+	
+  public MoneroTransaction(MoneroPayment payment, BigInteger fee, int mixin, String txKey, String txHash, int size, MoneroTransactionType type) {
     super();
-    this.payments = payments;
+    setPayment(payment);
     this.fee = fee;
     this.mixin = mixin;
     this.txKey = txKey;
@@ -29,12 +32,13 @@ public class MoneroTransaction {
     this.type = type;
   }
 
-  public List<MoneroPayment> getPayments() {
-    return payments;
+  public MoneroPayment getPayment() {
+    return payment;
   }
 
-  public void setPayments(List<MoneroPayment> payments) {
-    this.payments = payments;
+  public void setPayment(MoneroPayment payment) {
+    this.payment = payment;
+    if (payment != null) payment.setTransaction(this);
   }
 
   public BigInteger getFee() {

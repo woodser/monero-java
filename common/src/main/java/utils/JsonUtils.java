@@ -5,6 +5,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import types.JsonException;
 
@@ -20,6 +21,7 @@ public class JsonUtils {
   static {
     DEFAULT_MAPPER = new ObjectMapper();
     DEFAULT_MAPPER.setSerializationInclusion(Include.NON_NULL);
+    DEFAULT_MAPPER.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
   }
   
   /**
@@ -41,7 +43,7 @@ public class JsonUtils {
    */
   public static String serialize(ObjectMapper mapper, Object obj) {
     try {
-      return DEFAULT_MAPPER.writeValueAsString(obj);
+      return mapper.writeValueAsString(obj);
     } catch (Exception e) {
       throw new JsonException("Error serializing object", e);
     }
@@ -98,7 +100,7 @@ public class JsonUtils {
     try {
       return (T) mapper.readValue(json, type);
     } catch (Exception e) {
-      throw new JsonException("Error deserializing json to parameterized type", e);
+      throw new JsonException("Error deserializing json to type " + type.getType(), e);
     }
   }
 
