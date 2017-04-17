@@ -1,4 +1,4 @@
-MONERO JAVA WALLET IMPLEMENTATION
+MONERO WALLET JAVA IMPLEMENTATION
 
 This is a Java interface and implementation of a Monero wallet.
 
