@@ -12,13 +12,13 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import utils.MoneroUtils;
+import utils.TestUtils;
 import wallet.MoneroAddress;
 import wallet.MoneroIntegratedAddress;
 import wallet.MoneroRpcException;
 import wallet.MoneroUri;
+import wallet.MoneroUtils;
 import wallet.MoneroWallet;
-import wallet.MoneroWalletRpc;
 
 /**
  * Tests a Monero wallet excluding sending transactions.
@@ -29,14 +29,11 @@ import wallet.MoneroWalletRpc;
  */
 public class TestMoneroWalletNonTransactions {
   
-  private static String DOMAIN = "localhost";
-  private static int PORT = 18082;
-  
   private MoneroWallet wallet;
 
   @Before
   public void setup() throws Exception {
-    wallet = new MoneroWalletRpc(DOMAIN, PORT);
+    wallet = TestUtils.getWallet();
   }
   
   @Test
