@@ -28,7 +28,6 @@ import wallet.MoneroWallet;
  */
 public class TestMoneroWalletTransactions {
   
-  private static final BigInteger SEND_AMOUNT = BigInteger.valueOf(Long.valueOf("50000000000000")); // 50 XMR
   private static final BigInteger FEE = null;
   private static final int MIXIN = 6;
   
@@ -48,7 +47,8 @@ public class TestMoneroWalletTransactions {
     
     // send to self
     MoneroAddress address = wallet.getStandardAddress();
-    MoneroTransaction tx = wallet.transfer(address.toString(), SEND_AMOUNT, null, FEE, MIXIN, 0);
+    BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(5));
+    MoneroTransaction tx = wallet.transfer(address.toString(), sendAmount, null, FEE, MIXIN, 0);
     
     // test transaction
     assertNotNull(tx.getPayments());
@@ -62,7 +62,7 @@ public class TestMoneroWalletTransactions {
     // test payments
     for (MoneroPayment payment : tx.getPayments()) {
       assertEquals(address.toString(), payment.getAddress());
-      assertEquals(SEND_AMOUNT, payment.getAmount());
+      assertEquals(sendAmount, payment.getAmount());
       assertTrue(tx == payment.getTransaction());
     }
     
@@ -81,7 +81,7 @@ public class TestMoneroWalletTransactions {
     
     // create payments to send
     int numPayments = 3;
-    BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(numPayments + 1));
+    BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(numPayments + 5));
     List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
     for (int i = 0; i < numPayments; i++) {
       payments.add(new MoneroPayment(address.toString(), sendAmount));
@@ -104,6 +104,41 @@ public class TestMoneroWalletTransactions {
       assertEquals(address.toString(), payment.getAddress());
       assertEquals(sendAmount, payment.getAmount());
       assertTrue(tx == payment.getTransaction());
+    }
+    
+    // test wallet balance
+    assertTrue(wallet.getBalance().longValue() < balanceBefore.longValue());
+    assertTrue(wallet.getUnlockedBalance().longValue() < unlockedBalanceBefore.longValue());
+  }
+  
+  @Test
+  public void testTransferSplit() {
+    
+    // get balance and address
+    BigInteger balanceBefore = wallet.getBalance();
+    BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance();
+    MoneroAddress address = wallet.getStandardAddress();
+    
+    // create payments to send
+    int numPayments = 3;
+    BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(numPayments + 5));
+    List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
+    for (int i = 0; i < numPayments; i++) {
+      payments.add(new MoneroPayment(address.toString(), sendAmount));
+    }
+    
+    // send payments
+    List<MoneroTransaction> txs = wallet.transferSplit(payments, null, FEE, MIXIN, 0, true);
+    
+    // test transactions
+    for (MoneroTransaction tx : txs) {
+      
+      assertNull(tx.getPayments());
+      assertTrue(tx.getFee().longValue() > 0);
+      assertEquals(MIXIN, tx.getMixin());
+      assertNull(tx.getTxKey());
+      assertNotNull(tx.getTxHash());
+      assertNull(tx.getBlockHeight());
     }
     
     // test wallet balance
