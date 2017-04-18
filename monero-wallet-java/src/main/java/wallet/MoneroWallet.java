@@ -24,13 +24,15 @@ public interface MoneroWallet {
 	
 	public MoneroIntegratedAddress splitIntegratedAddress(String integratedAddress);
 	
-	public MoneroTransaction sendTransaction(String address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime);
+	public MoneroTransaction transfer(String address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime);
 	
-	public MoneroTransaction sendTransaction(MoneroAddress address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime);
+	public MoneroTransaction transfer(MoneroAddress address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime);
 	
-	public MoneroTransaction sendTransaction(MoneroPayment payment, String paymentId, BigInteger fee, int mixin, int unlockTime);
+	public MoneroTransaction transfer(MoneroPayment payment, String paymentId, BigInteger fee, int mixin, int unlockTime);
 	
-	public List<MoneroTransaction> sendTransactions(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime, Boolean newAlgorithm);
+	public MoneroTransaction transfer(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime);
+	
+	public List<MoneroTransaction> transferSplit(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime, Boolean newAlgorithm);
 	
 	public Set<MoneroTransaction> sweepDust();
 	
