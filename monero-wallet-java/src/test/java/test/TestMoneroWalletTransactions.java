@@ -30,7 +30,7 @@ public class TestMoneroWalletTransactions {
   
   private static final BigInteger SEND_AMOUNT = BigInteger.valueOf(Long.valueOf("50000000000000")); // 50 XMR
   private static final BigInteger FEE = null;
-  private static final int MIXIN = 5;
+  private static final int MIXIN = 6;
   
   private MoneroWallet wallet;
 
