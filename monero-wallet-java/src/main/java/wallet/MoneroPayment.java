@@ -11,21 +11,19 @@ public class MoneroPayment {
 
 	private String address;
 	private BigInteger amount;
-	private Integer blockHeight;
+	private Boolean isSpent;
 	private MoneroTransaction transaction;
-	private Boolean isAvailableToSpend;
 	
 	public MoneroPayment(String address, BigInteger amount) {
-	  this(address, amount, null, null, null);
+	  this(address, amount, null, null);
 	}
 	
-  public MoneroPayment(String address, BigInteger amount, Integer blockHeight, MoneroTransaction transaction, Boolean isAvailableToSpend) {
+  public MoneroPayment(String address, BigInteger amount, Boolean isSpent, MoneroTransaction transaction) {
     super();
     this.address = address;
     this.amount = amount;
-    this.blockHeight = blockHeight;
+    this.isSpent = isSpent;
     this.transaction = transaction;
-    this.isAvailableToSpend = isAvailableToSpend;
   }
 
   public String getAddress() {
@@ -44,12 +42,12 @@ public class MoneroPayment {
     this.amount = amount;
   }
 
-  public Integer getBlockHeight() {
-    return blockHeight;
+  public Boolean isSpent() {
+    return isSpent;
   }
 
-  public void setBlockHeight(int blockHeight) {
-    this.blockHeight = blockHeight;
+  public void setSpent(boolean isSpent) {
+    this.isSpent = isSpent;
   }
 
   public MoneroTransaction getTransaction() {
@@ -58,13 +56,5 @@ public class MoneroPayment {
 
   public void setTransaction(MoneroTransaction transaction) {
     this.transaction = transaction;
-  }
-
-  public Boolean isAvailableToSpend() {
-    return isAvailableToSpend;
-  }
-
-  public void setAvailableToSpend(boolean isAvailableToSpend) {
-    this.isAvailableToSpend = isAvailableToSpend;
   }
 }

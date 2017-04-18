@@ -2,18 +2,21 @@ package test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import utils.TestUtils;
 import wallet.MoneroAddress;
+import wallet.MoneroPayment;
 import wallet.MoneroTransaction;
-import wallet.MoneroTransactionType;
 import wallet.MoneroWallet;
 
 /**
@@ -25,7 +28,7 @@ import wallet.MoneroWallet;
  */
 public class TestMoneroWalletTransactions {
   
-  private static final BigInteger SEND_AMOUNT = BigInteger.valueOf(Long.valueOf("1000000000000")); // 1 XMR
+  private static final BigInteger SEND_AMOUNT = BigInteger.valueOf(Long.valueOf("50000000000000")); // 50 XMR
   private static final BigInteger FEE = null;
   private static final int MIXIN = 5;
   
@@ -37,7 +40,7 @@ public class TestMoneroWalletTransactions {
   }
 
   @Test
-  public void testSendTransactionStringBigIntegerBigIntegerIntInt() {
+  public void testTransferPayment() {
     
     // get balance before
     BigInteger balanceBefore = wallet.getBalance();
@@ -45,31 +48,71 @@ public class TestMoneroWalletTransactions {
     
     // send to self
     MoneroAddress address = wallet.getStandardAddress();
-    MoneroTransaction tx = wallet.sendTransaction(address.toString(), SEND_AMOUNT, null, FEE, MIXIN, 0);
+    MoneroTransaction tx = wallet.transfer(address.toString(), SEND_AMOUNT, null, FEE, MIXIN, 0);
     
-    // test response
-    assertNotNull(tx.getPayment());
-    assertEquals(address, tx.getPayment().getAddress());
-    assertEquals(SEND_AMOUNT, tx.getPayment().getAmount());
-    assertTrue(tx.getPayment().getBlockHeight() > 0);
-    assertTrue(tx == tx.getPayment().getTransaction());
+    // test transaction
+    assertNotNull(tx.getPayments());
+    assertEquals(1, tx.getPayments().size());
     assertTrue(tx.getFee().longValue() > 0);
     assertEquals(MIXIN, tx.getMixin());
     assertNotNull(tx.getTxKey());
     assertNotNull(tx.getTxHash());
-    assertTrue(tx.getSize() > 0);
-    assertEquals(MoneroTransactionType.PENDING, tx.getType());
+    assertNull(tx.getBlockHeight());
+    
+    // test payments
+    for (MoneroPayment payment : tx.getPayments()) {
+      assertEquals(address.toString(), payment.getAddress());
+      assertEquals(SEND_AMOUNT, payment.getAmount());
+      assertTrue(tx == payment.getTransaction());
+    }
+    
+    // test wallet balance
+    assertTrue(wallet.getBalance().longValue() < balanceBefore.longValue());
+    assertTrue(wallet.getUnlockedBalance().longValue() < unlockedBalanceBefore.longValue());
+  }
+  
+  @Test
+  public void testTransferPayments() {
+    
+    // get balance and address
+    BigInteger balanceBefore = wallet.getBalance();
+    BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance();
+    MoneroAddress address = wallet.getStandardAddress();
+    
+    // create payments to send
+    int numPayments = 3;
+    BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(numPayments + 1));
+    List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
+    for (int i = 0; i < numPayments; i++) {
+      payments.add(new MoneroPayment(address.toString(), sendAmount));
+    }
+    
+    // send payments
+    MoneroTransaction tx = wallet.transfer(payments, null, FEE, MIXIN, 0);
+    
+    // test transaction
+    assertNotNull(tx.getPayments());
+    assertEquals(numPayments, tx.getPayments().size());
+    assertTrue(tx.getFee().longValue() > 0);
+    assertEquals(MIXIN, tx.getMixin());
+    assertNotNull(tx.getTxKey());
+    assertNotNull(tx.getTxHash());
+    assertNull(tx.getBlockHeight());
+    
+    // test payments
+    for (MoneroPayment payment : tx.getPayments()) {
+      assertEquals(address.toString(), payment.getAddress());
+      assertEquals(sendAmount, payment.getAmount());
+      assertTrue(tx == payment.getTransaction());
+    }
+    
+    // test wallet balance
     assertTrue(wallet.getBalance().longValue() < balanceBefore.longValue());
     assertTrue(wallet.getUnlockedBalance().longValue() < unlockedBalanceBefore.longValue());
   }
 
   @Test
-  public void testSendTransactionMoneroPaymentBigIntegerIntInt() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testSendTransactionSetOfMoneroPaymentBigIntegerIntInt() {
+  public void testSendTransactionsSplit() {
     fail("Not yet implemented");
   }
 

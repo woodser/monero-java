@@ -124,22 +124,22 @@ public class MoneroWalletRpc implements MoneroWallet {
     return address;
   }
 
-  public MoneroTransaction sendTransaction(String address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime) {
-    return sendTransaction(new MoneroPayment(address, amount), paymentId, fee, mixin, unlockTime);
+  public MoneroTransaction transfer(String address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime) {
+    return transfer(new MoneroPayment(address, amount), paymentId, fee, mixin, unlockTime);
   }
   
-  public MoneroTransaction sendTransaction(MoneroAddress address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime) {
-    return sendTransaction(address.toString(), amount, paymentId, fee, mixin, unlockTime);
+  public MoneroTransaction transfer(MoneroAddress address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime) {
+    return transfer(address.toString(), amount, paymentId, fee, mixin, unlockTime);
   }
 
-  public MoneroTransaction sendTransaction(MoneroPayment payment, String paymentId, BigInteger fee, int mixin, int unlockTime) {
+  public MoneroTransaction transfer(MoneroPayment payment, String paymentId, BigInteger fee, int mixin, int unlockTime) {
     List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
     payments.add(payment);
-    return sendTransactions(payments, paymentId, fee, mixin, unlockTime, null).get(0);
+    return transfer(payments, paymentId, fee, mixin, unlockTime);
   }
-
+  
   @SuppressWarnings("unchecked")
-  public List<MoneroTransaction> sendTransactions(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime, Boolean newAlgorithm) {
+  public MoneroTransaction transfer(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime) {
     
     // build parameter map
     Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -156,6 +156,39 @@ public class MoneroWalletRpc implements MoneroWallet {
     paramMap.put("mixin", mixin);
     paramMap.put("unlockTime", unlockTime);
     paramMap.put("get_tx_key", true);
+    
+    // send request
+    Map<String, Object> respMap = sendRpcRequest("transfer", paramMap);
+    
+    // interpret response
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroTransaction tx = new MoneroTransaction();
+    tx.setPayments(payments);
+    tx.setFee((BigInteger) resultMap.get("fee"));
+    tx.setMixin(mixin);
+    tx.setTxHash((String) resultMap.get("tx_hash"));
+    tx.setTxKey((String) resultMap.get("tx_key"));
+    
+    return tx;
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<MoneroTransaction> transferSplit(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime, Boolean newAlgorithm) {
+    
+    // build parameter map
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    List<Map<String, Object>> destinations = new ArrayList<Map<String, Object>>();
+    paramMap.put("destinations", destinations);
+    for (MoneroPayment payment : payments) {
+      Map<String, Object> destination = new HashMap<String, Object>();
+      destination.put("address", payment.getAddress().toString());
+      destination.put("amount", payment.getAmount());
+      destinations.add(destination);
+    }
+    paramMap.put("payment_id", paymentId);
+    paramMap.put("fee", fee);
+    paramMap.put("mixin", mixin);
+    paramMap.put("unlockTime", unlockTime);
     paramMap.put("new_algorithm", newAlgorithm);
     
     // send request
@@ -165,13 +198,13 @@ public class MoneroWalletRpc implements MoneroWallet {
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<BigInteger> fees = (List<BigInteger>) resultMap.get("fee_list");
     List<String> txHashes = (List<String>) resultMap.get("tx_hash_list");
-    List<String> txKeys = (List<String>) resultMap.get("tx_key_list");
     List<MoneroTransaction> transactions = new ArrayList<MoneroTransaction>();
     for (int i = 0; i < fees.size(); i++) {
-      MoneroTransaction transaction = new MoneroTransaction();
-      transaction.setFee(fees.get(i));
-      transaction.setTxHash(txHashes.get(0));
-      transaction.setTxKey(txKeys.get(0));
+      MoneroTransaction tx = new MoneroTransaction();
+      tx.setFee(fees.get(i));
+      tx.setMixin(mixin);
+      tx.setTxHash(txHashes.get(0));
+      transactions.add(tx);
     }
     return transactions;
   }

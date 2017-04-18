@@ -1,6 +1,7 @@
 package wallet;
 
 import java.math.BigInteger;
+import java.util.List;
 
 /**
  * Represents a transaction on the Monero network.
@@ -9,36 +10,42 @@ import java.math.BigInteger;
  */
 public class MoneroTransaction {
 
-	private MoneroPayment payment;
+	private List<MoneroPayment> payments;
 	private BigInteger fee;
 	private int mixin;
 	private String txKey;
 	private String txHash;
 	private int size;
 	private MoneroTransactionType type;
+  private Integer blockHeight;
 	
 	public MoneroTransaction() {
 	  super();
 	}
-	
-  public MoneroTransaction(MoneroPayment payment, BigInteger fee, int mixin, String txKey, String txHash, int size, MoneroTransactionType type) {
-    super();
-    setPayment(payment);
+
+  public MoneroTransaction(List<MoneroPayment> payments, BigInteger fee, int mixin, String txKey, String txHash, int size, MoneroTransactionType type, Integer blockHeight) {
+    this();
+    this.payments = payments;
     this.fee = fee;
     this.mixin = mixin;
     this.txKey = txKey;
     this.txHash = txHash;
     this.size = size;
     this.type = type;
+    this.blockHeight = blockHeight;
   }
 
-  public MoneroPayment getPayment() {
-    return payment;
+  public List<MoneroPayment> getPayments() {
+    return payments;
   }
 
-  public void setPayment(MoneroPayment payment) {
-    this.payment = payment;
-    if (payment != null) payment.setTransaction(this);
+  public void setPayments(List<MoneroPayment> payments) {
+    this.payments = payments;
+    if (payments != null) {
+      for (MoneroPayment payment : payments) {
+        payment.setTransaction(this);
+      }
+    }
   }
 
   public BigInteger getFee() {
@@ -87,5 +94,13 @@ public class MoneroTransaction {
 
   public void setType(MoneroTransactionType type) {
     this.type = type;
+  }
+  
+  public Integer getBlockHeight() {
+    return blockHeight;
+  }
+
+  public void setBlockHeight(Integer blockHeight) {
+    this.blockHeight = blockHeight;
   }
 }
