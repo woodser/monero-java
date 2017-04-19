@@ -30,6 +30,7 @@ public class TestMoneroWalletTransactions {
   
   private static final BigInteger FEE = null;
   private static final int MIXIN = 6;
+  private static final int UNLOCKED_DIVISOR = 20;
   
   private MoneroWallet wallet;
 
@@ -47,7 +48,7 @@ public class TestMoneroWalletTransactions {
     
     // send to self
     MoneroAddress address = wallet.getStandardAddress();
-    BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(5));
+    BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(UNLOCKED_DIVISOR));
     MoneroTransaction tx = wallet.transfer(address.toString(), sendAmount, null, FEE, MIXIN, 0);
     
     // test transaction
@@ -81,7 +82,7 @@ public class TestMoneroWalletTransactions {
     
     // create payments to send
     int numPayments = 3;
-    BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(numPayments + 5));
+    BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(numPayments + UNLOCKED_DIVISOR));
     List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
     for (int i = 0; i < numPayments; i++) {
       payments.add(new MoneroPayment(address.toString(), sendAmount));
@@ -121,7 +122,7 @@ public class TestMoneroWalletTransactions {
     
     // create payments to send
     int numPayments = 3;
-    BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(numPayments + 5));
+    BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(numPayments + UNLOCKED_DIVISOR));
     List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
     for (int i = 0; i < numPayments; i++) {
       payments.add(new MoneroPayment(address.toString(), sendAmount));
@@ -132,7 +133,6 @@ public class TestMoneroWalletTransactions {
     
     // test transactions
     for (MoneroTransaction tx : txs) {
-      
       assertNull(tx.getPayments());
       assertTrue(tx.getFee().longValue() > 0);
       assertEquals(MIXIN, tx.getMixin());
@@ -144,11 +144,6 @@ public class TestMoneroWalletTransactions {
     // test wallet balance
     assertTrue(wallet.getBalance().longValue() < balanceBefore.longValue());
     assertTrue(wallet.getUnlockedBalance().longValue() < unlockedBalanceBefore.longValue());
-  }
-
-  @Test
-  public void testSendTransactionsSplit() {
-    fail("Not yet implemented");
   }
 
   @Test
