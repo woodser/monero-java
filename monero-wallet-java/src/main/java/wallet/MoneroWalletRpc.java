@@ -26,6 +26,7 @@ import types.HttpException;
 import types.Pair;
 import utils.JsonUtils;
 import utils.StreamUtils;
+import wallet.MoneroTransaction.MoneroTransactionType;
 
 /**
  * Implements a Monero wallet backed by a Monero wallet RPC endpoint.
