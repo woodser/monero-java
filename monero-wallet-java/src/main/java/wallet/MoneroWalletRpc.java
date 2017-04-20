@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -26,7 +25,6 @@ import types.HttpException;
 import types.Pair;
 import utils.JsonUtils;
 import utils.StreamUtils;
-import wallet.MoneroTransaction.MoneroTransactionType;
 
 /**
  * Implements a Monero wallet backed by a Monero wallet RPC endpoint.
@@ -228,8 +226,12 @@ public class MoneroWalletRpc implements MoneroWallet {
     }
     return txs;
   }
-
-  public Set<MoneroTransaction> getTransactions(Set<MoneroTransactionType> includeTypes, Integer minHeight, Integer maxHeight) {
+  
+  public List<MoneroTransaction> getTransactions() {
+    return getTransactions(true, true, true, true, true, null, null);
+  }
+  
+  public List<MoneroTransaction> getTransactions(boolean getIn, boolean getOut, boolean getPending, boolean getFailed, boolean getMemPool, Integer minHeight, Integer maxHeight) {
     throw new RuntimeException("Not yet implemented.");
   }
 
