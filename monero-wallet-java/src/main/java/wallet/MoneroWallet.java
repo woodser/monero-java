@@ -5,6 +5,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
+import wallet.MoneroTransaction.MoneroTransactionType;
+
 /**
  * Defines a Monero wallet interface.
  * 
