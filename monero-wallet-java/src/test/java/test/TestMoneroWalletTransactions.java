@@ -1,10 +1,6 @@
 package test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -58,6 +54,8 @@ public class TestMoneroWalletTransactions {
     assertEquals(MIXIN, tx.getMixin());
     assertNotNull(tx.getTxKey());
     assertNotNull(tx.getTxHash());
+    assertNull(tx.getSize());
+    assertNull(tx.getType());
     assertNull(tx.getBlockHeight());
     
     // test payments
@@ -98,6 +96,8 @@ public class TestMoneroWalletTransactions {
     assertEquals(MIXIN, tx.getMixin());
     assertNotNull(tx.getTxKey());
     assertNotNull(tx.getTxHash());
+    assertNull(tx.getSize());
+    assertNull(tx.getType());
     assertNull(tx.getBlockHeight());
     
     // test payments
@@ -139,6 +139,9 @@ public class TestMoneroWalletTransactions {
       assertNull(tx.getTxKey());
       assertNotNull(tx.getTxHash());
       assertNull(tx.getBlockHeight());
+      assertNull(tx.getSize());
+      assertNull(tx.getType());
+      assertNull(tx.getBlockHeight());
     }
     
     // test wallet balance
@@ -163,6 +166,16 @@ public class TestMoneroWalletTransactions {
 
   @Test
   public void testGetTransactions() {
+    
+    // test all transactions
+    List<MoneroTransaction> txs = wallet.getTransactions();
+    assertTrue(txs != null);
+    assertFalse(txs.isEmpty()); // must test at least one transaction
+    for (MoneroTransaction tx : txs) {
+      assertNotNull(tx.getType());
+    }
+    
+    // TODO: test assertions on specific transactions like block height > 0 for incoming
     fail("Not yet implemented");
   }
 }

@@ -3,9 +3,6 @@ package wallet;
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.List;
-import java.util.Set;
-
-import wallet.MoneroTransaction.MoneroTransactionType;
 
 /**
  * Defines a Monero wallet interface.
@@ -38,7 +35,9 @@ public interface MoneroWallet {
 	
 	public List<MoneroTransaction> sweepDust();
 	
-	public Set<MoneroTransaction> getTransactions(Set<MoneroTransactionType> includeTypes, Integer minHeight, Integer maxHeight);
+	public List<MoneroTransaction> getTransactions();
+		
+	public List<MoneroTransaction> getTransactions(boolean getIn, boolean getOut, boolean getPending, boolean getFailed, boolean getMemPool, Integer minHeight, Integer maxHeight);
 	
 	public String getMnemonicSeed();
 	

@@ -22,10 +22,11 @@ public class MoneroTransaction {
     MEMPOOL
   }
 
-
 	private List<MoneroPayment> payments;
+	private String paymentId;
 	private BigInteger fee;
 	private Integer mixin;
+	private String txId;
 	private String txKey;
 	private String txHash;
 	private Integer size;
@@ -36,11 +37,13 @@ public class MoneroTransaction {
 	  super();
 	}
 
-  public MoneroTransaction(List<MoneroPayment> payments, BigInteger fee, Integer mixin, String txKey, String txHash, Integer size, MoneroTransactionType type, Integer blockHeight) {
+  public MoneroTransaction(List<MoneroPayment> payments, String paymentId, BigInteger fee, Integer mixin, String txId, String txKey, String txHash, Integer size, MoneroTransactionType type, Integer blockHeight) {
     this();
     this.payments = payments;
+    this.paymentId = paymentId;
     this.fee = fee;
     this.mixin = mixin;
+    this.txId = txId;
     this.txKey = txKey;
     this.txHash = txHash;
     this.size = size;
@@ -60,6 +63,14 @@ public class MoneroTransaction {
       }
     }
   }
+  
+  public String getPaymentId() {
+    return paymentId;
+  }
+
+  public void setPaymentId(String paymentId) {
+    this.paymentId = paymentId;
+  }
 
   public BigInteger getFee() {
     return fee;
@@ -75,6 +86,14 @@ public class MoneroTransaction {
 
   public void setMixin(Integer mixin) {
     this.mixin = mixin;
+  }
+  
+  public String getTxId() {
+    return txId;
+  }
+
+  public void setTxId(String txId) {
+    this.txId = txId;
   }
 
   public String getTxKey() {
