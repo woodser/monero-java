@@ -29,7 +29,7 @@ import wallet.MoneroWallet;
 public class TestMoneroWalletTransactions {
   
   private static final BigInteger FEE = null;
-  private static final int MIXIN = 6;
+  private static final Integer MIXIN = 6;
   private static final int UNLOCKED_DIVISOR = 20;
   
   private MoneroWallet wallet;
@@ -148,7 +148,17 @@ public class TestMoneroWalletTransactions {
 
   @Test
   public void testSweepDust() {
-    fail("Not yet implemented");
+    List<MoneroTransaction> txs = wallet.sweepDust();
+    for (MoneroTransaction tx : txs) {
+      assertNull(tx.getPayments());
+      assertNull(tx.getFee());
+      assertNull(tx.getMixin());
+      assertNull(tx.getTxKey());
+      assertNotNull(tx.getTxHash());
+      assertNull(tx.getSize());
+      assertNull(tx.getType());
+      assertNull(tx.getBlockHeight());
+    }
   }
 
   @Test

@@ -209,8 +209,23 @@ public class MoneroWalletRpc implements MoneroWallet {
     return transactions;
   }
 
-  public Set<MoneroTransaction> sweepDust() {
-    throw new RuntimeException("Not yet implemented.");
+  @SuppressWarnings("unchecked")
+  public List<MoneroTransaction> sweepDust() {
+
+    // send request
+    Map<String, Object> respMap = sendRpcRequest("sweep_dust", null);
+    
+    // interpret response
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<String> txHashes = (List<String>) resultMap.get("tx_hash_list");
+    List<MoneroTransaction> txs = new ArrayList<MoneroTransaction>();
+    if (txHashes == null) return txs;
+    for (String txHash : txHashes) {
+      MoneroTransaction tx = new MoneroTransaction();
+      tx.setTxHash(txHash);
+      txs.add(tx);
+    }
+    return txs;
   }
 
   public Set<MoneroTransaction> getTransactions(Set<MoneroTransactionType> includeTypes, Integer minHeight, Integer maxHeight) {
@@ -307,6 +322,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       body.put("id", "0");
       body.put("method", method);
       if (params != null) body.put("params", params);
+      System.out.println("Sending method '" + method + "' with body: " + body);
       
       // send http request and validate response
       HttpPost post = new HttpPost(rpcUri);
@@ -317,6 +333,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       
       // deserialize response
       Map<String, Object> respMap = JsonUtils.toMap(MAPPER, StreamUtils.streamToString(resp.getEntity().getContent()));
+      System.out.println("Received response to method '" + method + "': " + respMap);
       EntityUtils.consume(resp.getEntity());
       
       // check RPC response for errors

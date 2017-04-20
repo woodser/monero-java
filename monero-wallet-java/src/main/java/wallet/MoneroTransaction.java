@@ -1,3 +1,4 @@
+
 package wallet;
 
 import java.math.BigInteger;
@@ -12,10 +13,10 @@ public class MoneroTransaction {
 
 	private List<MoneroPayment> payments;
 	private BigInteger fee;
-	private int mixin;
+	private Integer mixin;
 	private String txKey;
 	private String txHash;
-	private int size;
+	private Integer size;
 	private MoneroTransactionType type;
   private Integer blockHeight;
 	
@@ -23,7 +24,7 @@ public class MoneroTransaction {
 	  super();
 	}
 
-  public MoneroTransaction(List<MoneroPayment> payments, BigInteger fee, int mixin, String txKey, String txHash, int size, MoneroTransactionType type, Integer blockHeight) {
+  public MoneroTransaction(List<MoneroPayment> payments, BigInteger fee, Integer mixin, String txKey, String txHash, Integer size, MoneroTransactionType type, Integer blockHeight) {
     this();
     this.payments = payments;
     this.fee = fee;
@@ -56,11 +57,11 @@ public class MoneroTransaction {
     this.fee = fee;
   }
 
-  public int getMixin() {
+  public Integer getMixin() {
     return mixin;
   }
 
-  public void setMixin(int mixin) {
+  public void setMixin(Integer mixin) {
     this.mixin = mixin;
   }
 
@@ -80,11 +81,11 @@ public class MoneroTransaction {
     this.txHash = txHash;
   }
 
-  public int getSize() {
+  public Integer getSize() {
     return size;
   }
 
-  public void setSize(int size) {
+  public void setSize(Integer size) {
     this.size = size;
   }
 
