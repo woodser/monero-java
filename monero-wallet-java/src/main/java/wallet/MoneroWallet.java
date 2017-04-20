@@ -34,7 +34,7 @@ public interface MoneroWallet {
 	
 	public List<MoneroTransaction> transferSplit(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime, Boolean newAlgorithm);
 	
-	public Set<MoneroTransaction> sweepDust();
+	public List<MoneroTransaction> sweepDust();
 	
 	public Set<MoneroTransaction> getTransactions(Set<MoneroTransactionType> includeTypes, Integer minHeight, Integer maxHeight);
 	
