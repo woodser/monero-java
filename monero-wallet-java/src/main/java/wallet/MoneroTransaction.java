@@ -10,6 +10,18 @@ import java.util.List;
  * @author woodser
  */
 public class MoneroTransaction {
+  
+  /**
+   * Enumerates possible transaction types.
+   */
+  public enum MoneroTransactionType {
+    INCOMING,
+    OUTGOING,
+    PENDING,
+    FAILED,
+    MEMPOOL
+  }
+
 
 	private List<MoneroPayment> payments;
 	private BigInteger fee;
