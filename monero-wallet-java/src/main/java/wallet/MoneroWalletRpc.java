@@ -28,7 +28,7 @@ import utils.JsonUtils;
 import utils.StreamUtils;
 
 /**
- * Implements a MoneroWallet backed by a monero wallet RPC endpoint.
+ * Implements a Monero wallet backed by a Monero wallet RPC endpoint.
  * 
  * @author woodser
  */
