@@ -22,33 +22,30 @@ public class MoneroTransaction {
     MEMPOOL
   }
 
+  private BigInteger amount;
 	private List<MoneroPayment> payments;
 	private String paymentId;
 	private BigInteger fee;
 	private Integer mixin;
-	private String txId;
-	private String txKey;
-	private String txHash;
+	private String id;
+	private String key;
+	private String hash;
 	private Integer size;
 	private MoneroTransactionType type;
-  private Integer blockHeight;
+  private Integer height;
+  private String note;
+  private Long timestamp;
 	
 	public MoneroTransaction() {
 	  super();
 	}
 
-  public MoneroTransaction(List<MoneroPayment> payments, String paymentId, BigInteger fee, Integer mixin, String txId, String txKey, String txHash, Integer size, MoneroTransactionType type, Integer blockHeight) {
-    this();
-    this.payments = payments;
-    this.paymentId = paymentId;
-    this.fee = fee;
-    this.mixin = mixin;
-    this.txId = txId;
-    this.txKey = txKey;
-    this.txHash = txHash;
-    this.size = size;
-    this.type = type;
-    this.blockHeight = blockHeight;
+  public BigInteger getAmount() {
+    return amount;
+  }
+
+  public void setAmount(BigInteger amount) {
+    this.amount = amount;
   }
 
   public List<MoneroPayment> getPayments() {
@@ -88,28 +85,28 @@ public class MoneroTransaction {
     this.mixin = mixin;
   }
   
-  public String getTxId() {
-    return txId;
+  public String getId() {
+    return id;
   }
 
-  public void setTxId(String txId) {
-    this.txId = txId;
+  public void setId(String id) {
+    this.id = id;
   }
 
-  public String getTxKey() {
-    return txKey;
+  public String getKey() {
+    return key;
   }
 
-  public void setTxKey(String txKey) {
-    this.txKey = txKey;
+  public void setKey(String key) {
+    this.key = key;
   }
 
-  public String getTxHash() {
-    return txHash;
+  public String getHash() {
+    return hash;
   }
 
-  public void setTxHash(String txHash) {
-    this.txHash = txHash;
+  public void setHash(String hash) {
+    this.hash = hash;
   }
 
   public Integer getSize() {
@@ -128,11 +125,27 @@ public class MoneroTransaction {
     this.type = type;
   }
   
-  public Integer getBlockHeight() {
-    return blockHeight;
+  public Integer getHeight() {
+    return height;
   }
 
-  public void setBlockHeight(Integer blockHeight) {
-    this.blockHeight = blockHeight;
+  public void setHeight(Integer height) {
+    this.height = height;
+  }
+
+  public String getNote() {
+    return note;
+  }
+
+  public void setNote(String note) {
+    this.note = note;
+  }
+
+  public Long getTimestamp() {
+    return timestamp;
+  }
+
+  public void setTimestamp(Long timestamp) {
+    this.timestamp = timestamp;
   }
 }

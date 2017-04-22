@@ -14,6 +14,10 @@ public class MoneroPayment {
 	private Boolean isSpent;
 	private MoneroTransaction transaction;
 	
+	public MoneroPayment() {
+	  super();
+	}
+	
 	public MoneroPayment(String address, BigInteger amount) {
 	  this(address, amount, null, null);
 	}

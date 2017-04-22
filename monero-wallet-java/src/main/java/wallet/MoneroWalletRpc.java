@@ -25,6 +25,7 @@ import types.HttpException;
 import types.Pair;
 import utils.JsonUtils;
 import utils.StreamUtils;
+import wallet.MoneroTransaction.MoneroTransactionType;
 
 /**
  * Implements a Monero wallet backed by a Monero wallet RPC endpoint.
@@ -160,14 +161,10 @@ public class MoneroWalletRpc implements MoneroWallet {
     Map<String, Object> respMap = sendRpcRequest("transfer", paramMap);
     
     // interpret response
-    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    MoneroTransaction tx = new MoneroTransaction();
+    Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
+    MoneroTransaction tx = getTransaction(txMap);
     tx.setPayments(payments);
-    tx.setFee((BigInteger) resultMap.get("fee"));
     tx.setMixin(mixin);
-    tx.setTxHash((String) resultMap.get("tx_hash"));
-    tx.setTxKey((String) resultMap.get("tx_key"));
-    
     return tx;
   }
 
@@ -202,7 +199,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       MoneroTransaction tx = new MoneroTransaction();
       tx.setFee(fees.get(i));
       tx.setMixin(mixin);
-      tx.setTxHash(txHashes.get(0));
+      tx.setHash(txHashes.get(0));
       transactions.add(tx);
     }
     return transactions;
@@ -221,18 +218,54 @@ public class MoneroWalletRpc implements MoneroWallet {
     if (txHashes == null) return txs;
     for (String txHash : txHashes) {
       MoneroTransaction tx = new MoneroTransaction();
-      tx.setTxHash(txHash);
+      tx.setHash(txHash);
       txs.add(tx);
     }
     return txs;
   }
   
   public List<MoneroTransaction> getTransactions() {
-    return getTransactions(true, true, true, true, true, null, null);
+    return getTransactions(null, null);
   }
   
+  public List<MoneroTransaction> getTransactions(Integer minHeight, Integer maxHeight) {
+    return getTransactions(true, true, true, true, true, minHeight, maxHeight);
+  }
+  
+  @SuppressWarnings("unchecked")
   public List<MoneroTransaction> getTransactions(boolean getIn, boolean getOut, boolean getPending, boolean getFailed, boolean getMemPool, Integer minHeight, Integer maxHeight) {
-    throw new RuntimeException("Not yet implemented.");
+    
+    // send request
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    paramMap.put("in", getIn);
+    paramMap.put("out", getOut);
+    paramMap.put("pending", getPending);
+    paramMap.put("failed", getFailed);
+    paramMap.put("pool", getMemPool);
+    boolean filterByHeight = minHeight != null || maxHeight != null;
+    paramMap.put("filter_by_height", filterByHeight);
+    if (filterByHeight) {
+      paramMap.put("min_height", minHeight == null ? 0 : minHeight);
+      paramMap.put("max_height", maxHeight == null ? getHeight() : maxHeight);
+    }
+    Map<String, Object> respMap = sendRpcRequest("get_transfers", paramMap);
+
+    // interpret response
+    List<MoneroTransaction> txs = new ArrayList<MoneroTransaction>();
+    Map<String, Object> result = (Map<String, Object>) respMap.get("result");
+    for (String key : result.keySet()) {
+      for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
+        
+        // convert to transaction
+        MoneroTransaction tx = getTransaction(txMap);
+        
+        // manual height filtering since rpc doesn't filter pending transactions
+        Integer height = tx.getHeight();
+        if (minHeight == null && maxHeight == null) txs.add(tx);  // no filtering
+        else if (height != null && (minHeight == null || minHeight <= height) && (maxHeight == null || maxHeight >= height)) txs.add(tx);
+      }
+    }
+    return txs;
   }
 
   public String getMnemonicSeed() {
@@ -306,6 +339,53 @@ public class MoneroWalletRpc implements MoneroWallet {
     return new Pair<BigInteger, BigInteger>((BigInteger) resultMap.get("balance"), (BigInteger) resultMap.get("unlocked_balance"));
   }
   
+  /**
+   * Initializes a MoneroTransaction from a transaction response map.
+   * 
+   * @param txMap is the map to initialize the transaction from
+   * @return MoneroTransaction is the initialized transaction
+   */
+  @SuppressWarnings("unchecked")
+  private static MoneroTransaction getTransaction(Map<String, Object> txMap) {
+    MoneroTransaction tx = new MoneroTransaction();
+    for (String key : txMap.keySet()) {
+      Object val = txMap.get(key);
+      if (key.equals("amount")) tx.setAmount((BigInteger) val);
+      else if (key.equalsIgnoreCase("fee")) tx.setFee((BigInteger) val);
+      else if (key.equalsIgnoreCase("height")) tx.setHeight(((BigInteger) val).intValue());
+      else if (key.equalsIgnoreCase("note")) tx.setNote((String) val);
+      else if (key.equalsIgnoreCase("payment_id")) tx.setPaymentId((String) val);
+      else if (key.equalsIgnoreCase("timestamp")) tx.setTimestamp(((BigInteger) val).longValue());
+      else if (key.equalsIgnoreCase("tx_hash")) tx.setHash((String) val);
+      else if (key.equalsIgnoreCase("tx_key")) tx.setKey((String) val);
+      else if (key.equalsIgnoreCase("txid")) tx.setId((String) val);
+      else if (key.equalsIgnoreCase("type")) tx.setType(getTransactionType((String) val));
+      else if (key.equalsIgnoreCase("destinations")) {
+        List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
+        tx.setPayments(payments);
+        for (Map<String, Object> paymentMap : (List<Map<String, Object>>) val) {
+          MoneroPayment payment = new MoneroPayment();
+          for (String paymentKey : paymentMap.keySet()) {
+            if (paymentKey.equals("address")) payment.setAddress((String) paymentMap.get(paymentKey));
+            else if (paymentKey.equals("amount")) payment.setAmount((BigInteger) paymentMap.get(paymentKey));
+            else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
+          }
+        }
+      }
+      else throw new MoneroException("Unrecognized transaction field: " + key);
+    }
+    return tx;
+  }
+  
+  private static MoneroTransactionType getTransactionType(String type) {
+    if (type == null) throw new MoneroException("Transaction type is null");
+    else if (type.equalsIgnoreCase("in")) return MoneroTransactionType.INCOMING;
+    else if (type.equalsIgnoreCase("out")) return MoneroTransactionType.OUTGOING;
+    else if (type.equalsIgnoreCase("pending")) return MoneroTransactionType.PENDING;
+    else if (type.equalsIgnoreCase("failed")) return MoneroTransactionType.FAILED;
+    else if (type.equalsIgnoreCase("pool")) return MoneroTransactionType.MEMPOOL;
+    throw new MoneroException("Unrecognized transaction type: " + type);
+  }
   
   /**
    * Sends a request to the RPC API.

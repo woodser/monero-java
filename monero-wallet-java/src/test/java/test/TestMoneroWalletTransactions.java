@@ -1,9 +1,15 @@
 package test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -52,11 +58,11 @@ public class TestMoneroWalletTransactions {
     assertEquals(1, tx.getPayments().size());
     assertTrue(tx.getFee().longValue() > 0);
     assertEquals(MIXIN, tx.getMixin());
-    assertNotNull(tx.getTxKey());
-    assertNotNull(tx.getTxHash());
+    assertNotNull(tx.getKey());
+    assertNotNull(tx.getHash());
     assertNull(tx.getSize());
     assertNull(tx.getType());
-    assertNull(tx.getBlockHeight());
+    assertNull(tx.getHeight());
     
     // test payments
     for (MoneroPayment payment : tx.getPayments()) {
@@ -94,11 +100,11 @@ public class TestMoneroWalletTransactions {
     assertEquals(numPayments, tx.getPayments().size());
     assertTrue(tx.getFee().longValue() > 0);
     assertEquals(MIXIN, tx.getMixin());
-    assertNotNull(tx.getTxKey());
-    assertNotNull(tx.getTxHash());
+    assertNotNull(tx.getKey());
+    assertNotNull(tx.getHash());
     assertNull(tx.getSize());
     assertNull(tx.getType());
-    assertNull(tx.getBlockHeight());
+    assertNull(tx.getHeight());
     
     // test payments
     for (MoneroPayment payment : tx.getPayments()) {
@@ -136,12 +142,12 @@ public class TestMoneroWalletTransactions {
       assertNull(tx.getPayments());
       assertTrue(tx.getFee().longValue() > 0);
       assertEquals(MIXIN, tx.getMixin());
-      assertNull(tx.getTxKey());
-      assertNotNull(tx.getTxHash());
-      assertNull(tx.getBlockHeight());
+      assertNull(tx.getKey());
+      assertNotNull(tx.getHash());
+      assertNull(tx.getHeight());
       assertNull(tx.getSize());
       assertNull(tx.getType());
-      assertNull(tx.getBlockHeight());
+      assertNull(tx.getHeight());
     }
     
     // test wallet balance
@@ -156,11 +162,11 @@ public class TestMoneroWalletTransactions {
       assertNull(tx.getPayments());
       assertNull(tx.getFee());
       assertNull(tx.getMixin());
-      assertNull(tx.getTxKey());
-      assertNotNull(tx.getTxHash());
+      assertNull(tx.getKey());
+      assertNotNull(tx.getHash());
       assertNull(tx.getSize());
       assertNull(tx.getType());
-      assertNull(tx.getBlockHeight());
+      assertNull(tx.getHeight());
     }
   }
 
@@ -172,10 +178,87 @@ public class TestMoneroWalletTransactions {
     assertTrue(txs != null);
     assertFalse(txs.isEmpty()); // must test at least one transaction
     for (MoneroTransaction tx : txs) {
-      assertNotNull(tx.getType());
+      testTransaction(tx);
     }
     
-    // TODO: test assertions on specific transactions like block height > 0 for incoming
-    fail("Not yet implemented");
+    // get and sort block heights in ascending order
+    List<Integer> heights = new ArrayList<Integer>();
+    for (MoneroTransaction tx : txs) {
+      if (tx.getHeight() != null) heights.add(tx.getHeight());
+    }
+    Collections.sort(heights);
+    
+    // pick minimum and maximum heights for filtering
+    int minHeight = -1;
+    int maxHeight = -1;
+    if (heights.size() == 1) {
+      minHeight = 0;
+      maxHeight = heights.get(0) - 1;
+    } else {
+      minHeight = heights.get(0) + 1;
+      maxHeight = heights.get(heights.size() - 1) - 1;
+    }
+    
+    // assert at least some transactions filtered
+    int unfilteredCount = txs.size();
+    txs = wallet.getTransactions(minHeight, maxHeight);
+    assertTrue(txs.size() < unfilteredCount);
+    for (MoneroTransaction tx : txs) {
+      assertTrue(tx.getHeight() >= minHeight && tx.getHeight() <= maxHeight);
+      testTransaction(tx);
+    }
+  }
+  
+  private static void testTransaction(MoneroTransaction tx) {
+    assertNotNull(tx.getType());
+    switch (tx.getType()) {
+      case INCOMING:
+        assertNotNull(tx.getAmount());
+        assertNotNull(tx.getFee());
+        assertNotNull(tx.getHeight());
+        assertNotNull(tx.getNote());
+        assertNotNull(tx.getPaymentId());
+        assertNotNull(tx.getTimestamp());
+        assertNotNull(tx.getId());
+        assertNotNull(tx.getType());
+        assertNull(tx.getPayments());
+        assertNull(tx.getKey());
+        assertNull(tx.getHash());
+        break;
+      case OUTGOING:
+        assertNotNull(tx.getAmount());
+        assertNotNull(tx.getFee());
+        assertNotNull(tx.getHeight());
+        assertNotNull(tx.getNote());
+        assertNotNull(tx.getPaymentId());
+        assertNotNull(tx.getTimestamp());
+        assertNotNull(tx.getId());
+        assertNotNull(tx.getType());
+        assertNotNull(tx.getPayments());
+        assertNull(tx.getKey());
+        assertNull(tx.getHash());
+        break;
+      case PENDING:
+        assertNotNull(tx.getAmount());
+        assertNotNull(tx.getFee());
+        assertNotNull(tx.getHeight());
+        assertNotNull(tx.getNote());
+        assertNotNull(tx.getPaymentId());
+        assertNotNull(tx.getTimestamp());
+        assertNotNull(tx.getId());
+        assertNotNull(tx.getType());
+        assertNull(tx.getPayments());
+        assertNull(tx.getKey());
+        assertNull(tx.getHash());
+        break;
+      case FAILED:
+        fail("No test data available to write test for transaction type " + tx.getType() + " even though it's probably working");
+        break;
+      case MEMPOOL:
+        fail("No test data available to write test for transaction type " + tx.getType() + " even though it's probably working");
+        break;
+      default:
+        fail("Unrecognized transaction type: " + tx.getType());
+    }
   }
 }

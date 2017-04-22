@@ -6,6 +6,7 @@ public class MoneroAddress {
 
   public MoneroAddress(String standardAddress) {
     super();
+    MoneroUtils.validateStandardAddress(standardAddress);
     this.standardAddress = standardAddress;
   }
 
