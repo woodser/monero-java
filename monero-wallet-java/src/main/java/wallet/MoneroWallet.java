@@ -5,7 +5,7 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * Defines a Monero wallet interface.
+ * Monero wallet interface.
  * 
  * @author woodser
  */
