@@ -1,5 +1,7 @@
 package utils;
 
+import org.apache.log4j.PropertyConfigurator;
+
 import wallet.MoneroWallet;
 import wallet.MoneroWalletRpc;
 
@@ -15,6 +17,11 @@ public class TestUtils {
   private static final String USERNAME = "rpc_user";
   private static final String PASSWORD = "abc123";
   private static MoneroWallet wallet;
+  
+  // initialize log4j configuration
+  static {
+    PropertyConfigurator.configure("src/main/resources/log4j.properties");
+  }
 
   public static MoneroWallet getWallet() {
     if (wallet == null) {

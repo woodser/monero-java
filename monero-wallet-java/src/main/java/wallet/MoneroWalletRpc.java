@@ -19,6 +19,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -37,6 +39,9 @@ import wallet.MoneroTransaction.MoneroTransactionType;
  * @author woodser
  */
 public class MoneroWalletRpc implements MoneroWallet {
+  
+  // logger
+  private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class);
   
   // customer mapper to deserialize integers to BigIntegers
   public static ObjectMapper MAPPER;
@@ -418,7 +423,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       body.put("id", "0");
       body.put("method", method);
       if (params != null) body.put("params", params);
-      System.out.println("Sending method '" + method + "' with body: " + JsonUtils.serialize(body));
+      LOGGER.debug("Sending method '" + method + "' with body: " + JsonUtils.serialize(body));
       
       // send http request and validate response
       HttpPost post = new HttpPost(rpcUri);
@@ -429,7 +434,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       
       // deserialize response
       Map<String, Object> respMap = JsonUtils.toMap(MAPPER, StreamUtils.streamToString(resp.getEntity().getContent()));
-      System.out.println("Received response to method '" + method + "': " + JsonUtils.serialize(respMap));
+      LOGGER.debug("Received response to method '" + method + "': " + JsonUtils.serialize(respMap));
       EntityUtils.consume(resp.getEntity());
       
       // check RPC response for errors
