@@ -11,7 +11,6 @@ public class MoneroPayment {
 
 	private String address;
 	private BigInteger amount;
-	private Boolean isSpent;
 	private MoneroTransaction transaction;
 	
 	public MoneroPayment() {
@@ -19,14 +18,13 @@ public class MoneroPayment {
 	}
 	
 	public MoneroPayment(String address, BigInteger amount) {
-	  this(address, amount, null, null);
+	  this(address, amount, null);
 	}
 	
-  public MoneroPayment(String address, BigInteger amount, Boolean isSpent, MoneroTransaction transaction) {
+  public MoneroPayment(String address, BigInteger amount, MoneroTransaction transaction) {
     super();
     this.address = address;
     this.amount = amount;
-    this.isSpent = isSpent;
     this.transaction = transaction;
   }
 
@@ -44,14 +42,6 @@ public class MoneroPayment {
 
   public void setAmount(BigInteger amount) {
     this.amount = amount;
-  }
-
-  public Boolean isSpent() {
-    return isSpent;
-  }
-
-  public void setSpent(boolean isSpent) {
-    this.isSpent = isSpent;
   }
 
   public MoneroTransaction getTransaction() {

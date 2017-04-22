@@ -25,7 +25,7 @@ import wallet.MoneroWallet;
  * 
  * @author woodser
  */
-public class TestMoneroWalletTransactions {
+public class TestMoneroWalletTransfers {
   
   private static final BigInteger FEE = null;
   private static final Integer MIXIN = 6;
