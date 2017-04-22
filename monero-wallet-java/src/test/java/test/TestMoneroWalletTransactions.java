@@ -234,9 +234,14 @@ public class TestMoneroWalletTransactions {
         assertNotNull(tx.getTimestamp());
         assertNotNull(tx.getId());
         assertNotNull(tx.getType());
-        assertNotNull(tx.getPayments());
         assertNull(tx.getKey());
         assertNull(tx.getHash());
+        if (tx.getPayments() != null) {
+          for (MoneroPayment payment : tx.getPayments()) {
+            assertNotNull(payment.getAddress());
+            assertNotNull(payment.getAmount());
+          }
+        }
         break;
       case PENDING:
         assertNotNull(tx.getAmount());

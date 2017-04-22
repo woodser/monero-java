@@ -10,9 +10,13 @@ import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
@@ -65,6 +69,15 @@ public class MoneroWalletRpc implements MoneroWallet {
     this.rpcPort = rpcPort;
     this.rpcUri = new URI("http", null, rpcHost, rpcPort, "/json_rpc", null, null);
     this.client = HttpClients.createDefault();
+  }
+  
+  public MoneroWalletRpc(String rpcHost, int rpcPort, String username, String password) throws URISyntaxException {
+    this.rpcHost = rpcHost;
+    this.rpcPort = rpcPort;
+    this.rpcUri = new URI("http", null, rpcHost, rpcPort, "/json_rpc", null, null);
+    CredentialsProvider creds = new BasicCredentialsProvider();
+    creds.setCredentials(new AuthScope(rpcUri.getHost(), rpcUri.getPort()), new UsernamePasswordCredentials(username, password));
+    this.client = HttpClients.custom().setDefaultCredentialsProvider(creds).build();
   }
 
   public String getRpcHost() {
@@ -405,7 +418,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       body.put("id", "0");
       body.put("method", method);
       if (params != null) body.put("params", params);
-      System.out.println("Sending method '" + method + "' with body: " + body);
+      System.out.println("Sending method '" + method + "' with body: " + JsonUtils.serialize(body));
       
       // send http request and validate response
       HttpPost post = new HttpPost(rpcUri);
@@ -416,7 +429,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       
       // deserialize response
       Map<String, Object> respMap = JsonUtils.toMap(MAPPER, StreamUtils.streamToString(resp.getEntity().getContent()));
-      System.out.println("Received response to method '" + method + "': " + respMap);
+      System.out.println("Received response to method '" + method + "': " + JsonUtils.serialize(respMap));
       EntityUtils.consume(resp.getEntity());
       
       // check RPC response for errors
