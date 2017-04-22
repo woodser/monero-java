@@ -36,6 +36,8 @@ public interface MoneroWallet {
 	public List<MoneroTransaction> sweepDust();
 	
 	public List<MoneroTransaction> getTransactions();
+	
+  public List<MoneroTransaction> getTransactions(Integer minHeight, Integer maxHeight);
 		
 	public List<MoneroTransaction> getTransactions(boolean getIn, boolean getOut, boolean getPending, boolean getFailed, boolean getMemPool, Integer minHeight, Integer maxHeight);
 	

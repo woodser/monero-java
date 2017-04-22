@@ -23,7 +23,8 @@ import wallet.MoneroWallet;
 /**
  * Tests a Monero wallet excluding sending transactions.
  * 
- * TODO: why are nulls getting serialized?
+ * TODO: digest authentication
+ * TODO: add logging
  * 
  * @author woodser
  */

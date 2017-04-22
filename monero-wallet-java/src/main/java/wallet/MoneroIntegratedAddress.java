@@ -7,6 +7,8 @@ public class MoneroIntegratedAddress extends MoneroAddress {
   
   public MoneroIntegratedAddress(String standardAddress, String paymentId, String integratedAddress) {
     super(standardAddress);
+    MoneroUtils.validatePaymentId(paymentId);
+    MoneroUtils.validateIntegratedAddress(integratedAddress);
     this.paymentId = paymentId;
     this.integratedAddress = integratedAddress;
   }
