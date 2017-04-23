@@ -36,7 +36,6 @@ public class MoneroTransaction {
   private Integer height;
   private String note;
   private Long timestamp;
-  private Boolean isSpent;
 	
 	public MoneroTransaction() {
 	  super();
@@ -162,13 +161,5 @@ public class MoneroTransaction {
 
   public void setTimestamp(Long timestamp) {
     this.timestamp = timestamp;
-  }
-
-  public Boolean getIsSpent() {
-    return isSpent;
-  }
-
-  public void setIsSpent(Boolean isSpent) {
-    this.isSpent = isSpent;
   }
 }
