@@ -309,7 +309,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       // build output
       MoneroOutput output = new MoneroOutput();
       output.setAmount((BigInteger) outputMap.get("amount"));
-      output.setIsAvailableToSpend(!(Boolean) outputMap.get("spent"));
+      output.setIsSpent((Boolean) outputMap.get("spent"));
       
       // build transaction if not already built
       String hash = (String) outputMap.get("tx_hash");

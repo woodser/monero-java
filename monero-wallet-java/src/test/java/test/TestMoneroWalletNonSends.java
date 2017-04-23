@@ -238,7 +238,7 @@ public class TestMoneroWalletNonSends {
     assertFalse(outputs.isEmpty());
     for (MoneroOutput output : outputs) {
       assertNotNull(output.getAmount());
-      assertNotNull(output.getIsAvailableToSpend());
+      assertNotNull(output.getIsSpent());
       assertNotNull(output.getTransaction());
       assertNotNull(output.getTransaction().getHash());
       assertNotNull(output.getTransaction().getSize());
@@ -258,13 +258,13 @@ public class TestMoneroWalletNonSends {
     // test filtering availables
     outputs = wallet.getIncomingOutputs(true);
     for (MoneroOutput output : outputs) {
-      assertTrue(output.getIsAvailableToSpend());
+      assertFalse(output.getIsSpent());
     }
     
     // test filtering unavailables
     outputs = wallet.getIncomingOutputs(false);
     for (MoneroOutput output : outputs) {
-      assertFalse(output.getIsAvailableToSpend());
+      assertTrue(output.getIsSpent());
     }
   }
   
