@@ -240,6 +240,8 @@ public class TestMoneroWalletNonSends {
       assertNotNull(output.getAmount());
       assertNotNull(output.getIsAvailableToSpend());
       assertNotNull(output.getTransaction());
+      assertNotNull(output.getTransaction().getHash());
+      assertNotNull(output.getTransaction().getSize());
     }
     
     // test that transactions with same hash are equal by reference
