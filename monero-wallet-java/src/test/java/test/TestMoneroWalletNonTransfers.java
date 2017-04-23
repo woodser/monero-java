@@ -281,7 +281,6 @@ public class TestMoneroWalletNonTransfers {
         assertNull(tx.getPayments());
         assertNull(tx.getKey());
         assertNull(tx.getHash());
-        assertNotNull(tx.getIsSpent());
         assertNotNull(tx.getSize());
         break;
       case OUTGOING:

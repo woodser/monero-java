@@ -426,7 +426,6 @@ public class MoneroWalletRpc implements MoneroWallet {
       else if (key.equalsIgnoreCase("txid")) tx.setId((String) val);
       else if (key.equalsIgnoreCase("type")) tx.setType(getTransactionType((String) val));
       else if (key.equalsIgnoreCase("tx_size")) tx.setSize(((BigInteger) val).intValue());
-      else if (key.equalsIgnoreCase("spent")) tx.setIsSpent((Boolean) val);
       else if (key.equalsIgnoreCase("global_index")) { }  // ignore
       else if (key.equalsIgnoreCase("destinations")) {
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
