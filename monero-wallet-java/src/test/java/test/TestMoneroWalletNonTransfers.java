@@ -276,12 +276,11 @@ public class TestMoneroWalletNonTransfers {
         assertNotNull(tx.getNote());
         assertNotNull(tx.getPaymentId());
         assertNotNull(tx.getTimestamp());
-        assertNotNull(tx.getId());
         assertNotNull(tx.getType());
         assertNull(tx.getPayments());
+        assertNotNull(tx.getHash());
         assertNull(tx.getKey());
-        assertNull(tx.getHash());
-        assertNotNull(tx.getSize());
+        assertNull(tx.getSize());
         break;
       case OUTGOING:
         assertNotNull(tx.getAmount());
@@ -290,10 +289,9 @@ public class TestMoneroWalletNonTransfers {
         assertNotNull(tx.getNote());
         assertNotNull(tx.getPaymentId());
         assertNotNull(tx.getTimestamp());
-        assertNotNull(tx.getId());
         assertNotNull(tx.getType());
+        assertNotNull(tx.getHash());
         assertNull(tx.getKey());
-        assertNull(tx.getHash());
         if (tx.getPayments() != null) {
           for (MoneroPayment payment : tx.getPayments()) {
             assertNotNull(payment.getAddress());
@@ -308,11 +306,10 @@ public class TestMoneroWalletNonTransfers {
         assertNotNull(tx.getNote());
         assertNotNull(tx.getPaymentId());
         assertNotNull(tx.getTimestamp());
-        assertNotNull(tx.getId());
         assertNotNull(tx.getType());
         assertNull(tx.getPayments());
+        assertNotNull(tx.getHash());
         assertNull(tx.getKey());
-        assertNull(tx.getHash());
         break;
       case FAILED:
         fail("No test data available to write test for transaction type " + tx.getType() + " even though it's probably working");
