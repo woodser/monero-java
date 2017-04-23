@@ -38,6 +38,8 @@ import wallet.MoneroWallet;
  * - standardize terminology destinations vs outputs vs payments (I like payment which is address + amount)
  * - consistently return all possible fields
  * - get_transfers returns all transactions whereas incoming_transfers returns incoming outputs; clarify terminology or both could return transactions for consistency
+ * - why doesn't tx_size get returned on get_transfers
+ * - standardize terminology payment vs output; one payment may be fulfilled with multiple outputs
  * 
  * @author woodser
  */

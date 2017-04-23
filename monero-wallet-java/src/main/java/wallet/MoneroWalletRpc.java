@@ -143,22 +143,22 @@ public class MoneroWalletRpc implements MoneroWallet {
     return address;
   }
 
-  public MoneroTransaction transfer(String address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime) {
-    return transfer(new MoneroPayment(address, amount), paymentId, fee, mixin, unlockTime);
+  public MoneroTransaction send(String address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime) {
+    return send(new MoneroPayment(null, address, amount), paymentId, fee, mixin, unlockTime);
   }
   
-  public MoneroTransaction transfer(MoneroAddress address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime) {
-    return transfer(address.toString(), amount, paymentId, fee, mixin, unlockTime);
+  public MoneroTransaction send(MoneroAddress address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime) {
+    return send(address.toString(), amount, paymentId, fee, mixin, unlockTime);
   }
 
-  public MoneroTransaction transfer(MoneroPayment payment, String paymentId, BigInteger fee, int mixin, int unlockTime) {
+  public MoneroTransaction send(MoneroPayment payment, String paymentId, BigInteger fee, int mixin, int unlockTime) {
     List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
     payments.add(payment);
-    return transfer(payments, paymentId, fee, mixin, unlockTime);
+    return send(payments, paymentId, fee, mixin, unlockTime);
   }
   
   @SuppressWarnings("unchecked")
-  public MoneroTransaction transfer(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime) {
+  public MoneroTransaction send(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime) {
     
     // build parameter map
     Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -188,7 +188,7 @@ public class MoneroWalletRpc implements MoneroWallet {
   }
 
   @SuppressWarnings("unchecked")
-  public List<MoneroTransaction> transferSplit(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime, Boolean newAlgorithm) {
+  public List<MoneroTransaction> sendSplit(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime, Boolean newAlgorithm) {
     
     // build parameter map
     Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -252,12 +252,12 @@ public class MoneroWalletRpc implements MoneroWallet {
   }
   
   @SuppressWarnings("unchecked")
-  public List<MoneroTransaction> getTransactions(boolean getIn, boolean getOut, boolean getPending, boolean getFailed, boolean getMemPool, Integer minHeight, Integer maxHeight) {
+  public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Integer minHeight, Integer maxHeight) {
     
     // send request
     Map<String, Object> paramMap = new HashMap<String, Object>();
-    paramMap.put("in", getIn);
-    paramMap.put("out", getOut);
+    paramMap.put("in", getIncoming);
+    paramMap.put("out", getOutgoing);
     paramMap.put("pending", getPending);
     paramMap.put("failed", getFailed);
     paramMap.put("pool", getMemPool);
@@ -286,7 +286,7 @@ public class MoneroWalletRpc implements MoneroWallet {
     }
     
     // return if did not retrieve incoming transactions
-    if (!getIn) return txs;
+    if (!getIncoming) return txs;
     
     // correlate tx ids to incoming tx hashes
     List<MoneroTransaction> incomingTxs = getIncomingTransactionsRpc();
