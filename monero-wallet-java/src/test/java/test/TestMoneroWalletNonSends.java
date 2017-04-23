@@ -45,7 +45,7 @@ import wallet.MoneroWallet;
  * 
  * @author woodser
  */
-public class TestMoneroWalletNonTransfers {
+public class TestMoneroWalletNonSends {
   
   private MoneroWallet wallet;
 
