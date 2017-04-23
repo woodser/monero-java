@@ -28,9 +28,8 @@ public class MoneroTransaction {
 	private String paymentId;
 	private BigInteger fee;
 	private Integer mixin;
-	private String id;
+	 private String hash;
 	private String key;
-	private String hash;
 	private Integer size;
 	private MoneroTransactionType type;
   private Integer height;
@@ -99,12 +98,12 @@ public class MoneroTransaction {
     this.mixin = mixin;
   }
   
-  public String getId() {
-    return id;
+  public String getHash() {
+    return hash;
   }
 
-  public void setId(String id) {
-    this.id = id;
+  public void setHash(String hash) {
+    this.hash = hash;
   }
 
   public String getKey() {
@@ -113,14 +112,6 @@ public class MoneroTransaction {
 
   public void setKey(String key) {
     this.key = key;
-  }
-
-  public String getHash() {
-    return hash;
-  }
-
-  public void setHash(String hash) {
-    this.hash = hash;
   }
 
   public Integer getSize() {

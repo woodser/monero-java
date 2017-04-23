@@ -423,7 +423,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       else if (key.equalsIgnoreCase("timestamp")) tx.setTimestamp(((BigInteger) val).longValue());
       else if (key.equalsIgnoreCase("tx_hash")) tx.setHash((String) val);
       else if (key.equalsIgnoreCase("tx_key")) tx.setKey((String) val);
-      else if (key.equalsIgnoreCase("txid")) tx.setId((String) val);
+      else if (key.equalsIgnoreCase("txid")) tx.setHash((String) val);
       else if (key.equalsIgnoreCase("type")) tx.setType(getTransactionType((String) val));
       else if (key.equalsIgnoreCase("tx_size")) tx.setSize(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("global_index")) { }  // ignore
