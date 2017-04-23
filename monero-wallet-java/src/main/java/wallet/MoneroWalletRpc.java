@@ -182,6 +182,7 @@ public class MoneroWalletRpc implements MoneroWallet {
     MoneroTransaction tx = getTransaction(txMap);
     tx.setPayments(payments);
     tx.setMixin(mixin);
+    tx.setUnlockTime(unlockTime);
     return tx;
   }
 
@@ -218,6 +219,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       tx.setMixin(mixin);
       tx.setHash(txHashes.get(0));
       transactions.add(tx);
+      tx.setUnlockTime(unlockTime);
     }
     return transactions;
   }
