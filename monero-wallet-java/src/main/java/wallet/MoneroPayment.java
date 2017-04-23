@@ -11,7 +11,11 @@ import java.math.BigInteger;
  * 
  * @author woodser
  */
-public class MoneroPayment extends MoneroAddressAmount {
+public class MoneroPayment {
+
+  private MoneroTransaction transaction;
+  private String address;
+  private BigInteger amount;
   
   public MoneroPayment() {
     super();
@@ -21,7 +25,34 @@ public class MoneroPayment extends MoneroAddressAmount {
     this(null, address, amount);
   }
   
-  public MoneroPayment(MoneroTransaction tx, String address, BigInteger amount) {
-    super(tx, address, amount);
+  public MoneroPayment(MoneroTransaction transaction, String address, BigInteger amount) {
+    super();
+    this.transaction = transaction;
+    this.address = address;
+    this.amount = amount;
+  }
+
+  public MoneroTransaction getTransaction() {
+    return transaction;
+  }
+
+  public void setTransaction(MoneroTransaction transaction) {
+    this.transaction = transaction;
+  }
+
+  public String getAddress() {
+    return address;
+  }
+
+  public void setAddress(String address) {
+    this.address = address;
+  }
+
+  public BigInteger getAmount() {
+    return amount;
+  }
+
+  public void setAmount(BigInteger amount) {
+    this.amount = amount;
   }
 }

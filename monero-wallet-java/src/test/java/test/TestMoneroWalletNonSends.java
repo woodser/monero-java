@@ -42,6 +42,7 @@ import wallet.MoneroWallet;
  * - get_transfers returns all transactions whereas incoming_transfers returns incoming outputs; clarify terminology or both could return transactions for consistency
  * - why doesn't tx_size get returned on get_transfers
  * - standardize terminology payment vs output; one payment may be fulfilled with multiple outputs
+ * - no way to get transaction keys after sending
  * 
  * @author woodser
  */
@@ -236,7 +237,6 @@ public class TestMoneroWalletNonSends {
     List<MoneroOutput> outputs = wallet.getIncomingOutputs();
     assertFalse(outputs.isEmpty());
     for (MoneroOutput output : outputs) {
-      assertNull(output.getAddress());
       assertNotNull(output.getAmount());
       assertNotNull(output.getIsAvailableToSpend());
       assertNotNull(output.getTransaction());
