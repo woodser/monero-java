@@ -41,6 +41,10 @@ public interface MoneroWallet {
 		
 	public List<MoneroTransaction> getTransactions(boolean getIn, boolean getOut, boolean getPending, boolean getFailed, boolean getMemPool, Integer minHeight, Integer maxHeight);
 	
+	public List<MoneroTransaction> getIncomingTransactions();
+	
+	public List<MoneroTransaction> getIncomingTransactions(Integer minHeight, Integer maxHeight);
+	
 	public String getMnemonicSeed();
 	
 	public String getViewKey();

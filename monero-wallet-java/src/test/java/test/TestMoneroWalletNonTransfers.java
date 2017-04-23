@@ -23,12 +23,21 @@ import wallet.MoneroIntegratedAddress;
 import wallet.MoneroPayment;
 import wallet.MoneroRpcException;
 import wallet.MoneroTransaction;
+import wallet.MoneroTransaction.MoneroTransactionType;
 import wallet.MoneroUri;
 import wallet.MoneroUtils;
 import wallet.MoneroWallet;
 
 /**
  * Tests a Monero wallet excluding sending transactions.
+ * 
+ * Monero-wallet-rpc suggested improvements:
+ * 
+ * - tx_hash in incoming_transfers vs txid in get_transfers; standardize on tx_hash or tx_id
+ * - standardize terminology transactions vs transfers
+ * - standardize terminology destinations vs outputs vs payments (I like payment which is address + amount)
+ * - consistently return all possible fields
+ * - get_transfers returns all transactions whereas incoming_transfers returns incoming outputs; clarify terminology or both could return transactions for consistency
  * 
  * @author woodser
  */
@@ -216,6 +225,17 @@ public class TestMoneroWalletNonTransfers {
     }
   }
   
+  @Test
+  public void testIncomingTransactions() {
+    List<MoneroTransaction> txs = wallet.getIncomingTransactions();
+    assertTrue(txs != null);
+    assertFalse(txs.isEmpty()); // must test at least one transaction
+    for (MoneroTransaction tx : txs) {
+      assertEquals(MoneroTransactionType.INCOMING, tx.getType());
+      testTransaction(tx);
+    }
+  }
+  
   private static void testTransaction(MoneroTransaction tx) {
     assertNotNull(tx.getType());
     switch (tx.getType()) {
@@ -231,6 +251,8 @@ public class TestMoneroWalletNonTransfers {
         assertNull(tx.getPayments());
         assertNull(tx.getKey());
         assertNull(tx.getHash());
+        assertNotNull(tx.getIsSpent());
+        assertNotNull(tx.getSize());
         break;
       case OUTGOING:
         assertNotNull(tx.getAmount());
