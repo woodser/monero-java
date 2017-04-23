@@ -11,17 +11,17 @@ public class MoneroOutput {
 
   private MoneroTransaction transaction;
   private BigInteger amount;
-  private Boolean isAvailableToSpend;
+  private Boolean isSpent;
   
   public MoneroOutput() {
     super();
   }
   
-  public MoneroOutput(MoneroTransaction transaction, BigInteger amount, Boolean isAvailableToSpend) {
+  public MoneroOutput(MoneroTransaction transaction, BigInteger amount, Boolean isSpent) {
     super();
     this.transaction = transaction;
     this.amount = amount;
-    this.isAvailableToSpend = isAvailableToSpend;
+    this.isSpent = isSpent;
   }
 
   public MoneroTransaction getTransaction() {
@@ -40,11 +40,11 @@ public class MoneroOutput {
     this.amount = amount;
   }
 
-  public Boolean getIsAvailableToSpend() {
-    return isAvailableToSpend;
+  public Boolean getIsSpent() {
+    return isSpent;
   }
 
-  public void setIsAvailableToSpend(Boolean isAvailableToSpend) {
-    this.isAvailableToSpend = isAvailableToSpend;
+  public void setIsSpent(Boolean isSpent) {
+    this.isSpent = isSpent;
   }
 }
