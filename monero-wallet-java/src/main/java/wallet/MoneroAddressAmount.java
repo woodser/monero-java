@@ -13,6 +13,10 @@ public class MoneroAddressAmount {
   private String address;
   private BigInteger amount;
   
+  public MoneroAddressAmount() {
+    super();
+  }
+  
   public MoneroAddressAmount(MoneroTransaction transaction, String address, BigInteger amount) {
     super();
     this.transaction = transaction;

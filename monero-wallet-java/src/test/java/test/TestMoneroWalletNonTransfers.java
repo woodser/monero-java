@@ -11,7 +11,9 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -20,10 +22,10 @@ import org.junit.Test;
 import utils.TestUtils;
 import wallet.MoneroAddress;
 import wallet.MoneroIntegratedAddress;
+import wallet.MoneroOutput;
 import wallet.MoneroPayment;
 import wallet.MoneroRpcException;
 import wallet.MoneroTransaction;
-import wallet.MoneroTransaction.MoneroTransactionType;
 import wallet.MoneroUri;
 import wallet.MoneroUtils;
 import wallet.MoneroWallet;
@@ -228,13 +230,38 @@ public class TestMoneroWalletNonTransfers {
   }
   
   @Test
-  public void testIncomingTransactions() {
-    List<MoneroTransaction> txs = wallet.getIncomingTransactions();
-    assertTrue(txs != null);
-    assertFalse(txs.isEmpty()); // must test at least one transaction
-    for (MoneroTransaction tx : txs) {
-      assertEquals(MoneroTransactionType.INCOMING, tx.getType());
-      testTransaction(tx);
+  public void testGetIncomingOutputs() {
+    
+    // test outputs
+    List<MoneroOutput> outputs = wallet.getIncomingOutputs();
+    assertFalse(outputs.isEmpty());
+    for (MoneroOutput output : outputs) {
+      assertNotNull(output.getAddress());
+      assertNotNull(output.getAmount());
+      assertNotNull(output.getIsAvailableToSpend());
+      assertNotNull(output.getTransaction());
+    }
+    
+    // test that transactions with same hash are equal by reference
+    Map<String, MoneroTransaction> txs = new HashMap<String, MoneroTransaction>();
+    for (MoneroOutput output : outputs) {
+      if (txs.containsKey(output.getTransaction().getHash())) {
+        assertTrue(txs.get(output.getTransaction().getHash()) == output.getTransaction());
+      } else {
+        txs.put(output.getTransaction().getHash(), output.getTransaction());
+      }
+    }
+    
+    // test filtering availables
+    outputs = wallet.getIncomingOutputs(true);
+    for (MoneroOutput output : outputs) {
+      assertTrue(output.getIsAvailableToSpend());
+    }
+    
+    // test filtering unavailables
+    outputs = wallet.getIncomingOutputs(false);
+    for (MoneroOutput output : outputs) {
+      assertFalse(output.getIsAvailableToSpend());
     }
   }
   

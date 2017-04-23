@@ -13,6 +13,14 @@ import java.math.BigInteger;
  */
 public class MoneroPayment extends MoneroAddressAmount {
   
+  public MoneroPayment() {
+    super();
+  }
+  
+  public MoneroPayment(String address, BigInteger amount) {
+    this(null, address, amount);
+  }
+  
   public MoneroPayment(MoneroTransaction tx, String address, BigInteger amount) {
     super(tx, address, amount);
   }
