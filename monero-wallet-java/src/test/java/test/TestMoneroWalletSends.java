@@ -60,6 +60,7 @@ public class TestMoneroWalletSends {
     assertNull(tx.getSize());
     assertNull(tx.getType());
     assertNull(tx.getHeight());
+    assertEquals((Integer) 0, tx.getUnlockTime());
     
     // test payments
     for (MoneroPayment payment : tx.getPayments()) {
@@ -102,6 +103,7 @@ public class TestMoneroWalletSends {
     assertNull(tx.getSize());
     assertNull(tx.getType());
     assertNull(tx.getHeight());
+    assertEquals((Integer) 0, tx.getUnlockTime());
     
     // test payments
     for (MoneroPayment payment : tx.getPayments()) {
@@ -145,6 +147,7 @@ public class TestMoneroWalletSends {
       assertNull(tx.getSize());
       assertNull(tx.getType());
       assertNull(tx.getHeight());
+      assertEquals((Integer) 0, tx.getUnlockTime());
     }
     
     // test wallet balance

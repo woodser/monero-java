@@ -35,6 +35,7 @@ public class MoneroTransaction {
   private Integer height;
   private String note;
   private Long timestamp;
+  private Integer unlockTime;
 	
 	public MoneroTransaction() {
 	  super();
@@ -152,5 +153,13 @@ public class MoneroTransaction {
 
   public void setTimestamp(Long timestamp) {
     this.timestamp = timestamp;
+  }
+
+  public Integer getUnlockTime() {
+    return unlockTime;
+  }
+
+  public void setUnlockTime(Integer unlockTime) {
+    this.unlockTime = unlockTime;
   }
 }
