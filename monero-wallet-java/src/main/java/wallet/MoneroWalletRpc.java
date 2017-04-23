@@ -5,8 +5,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -282,7 +284,55 @@ public class MoneroWalletRpc implements MoneroWallet {
         else if (height != null && (minHeight == null || minHeight <= height) && (maxHeight == null || maxHeight >= height)) txs.add(tx);
       }
     }
+    
+    // return if did not retrieve incoming transactions
+    if (!getIn) return txs;
+    
+    // correlate tx ids to incoming tx hashes
+    List<MoneroTransaction> incomingTxs = getIncomingTransactionsRpc();
+    System.out.println(incomingTxs.size());
+    Set<String> uncorrelatedTxIds = new HashSet<String>();
+    for (MoneroTransaction tx : txs) {
+      if (tx.getType() != MoneroTransactionType.INCOMING) continue;
+      boolean found = false;
+      for (MoneroTransaction incomingTx : incomingTxs) {
+        if (tx.getId().equals(incomingTx.getHash())) {
+          tx.setIsSpent(incomingTx.getIsSpent());
+          tx.setSize(incomingTx.getSize());
+          found = true;
+          break;
+        }
+      }
+      if (!found) uncorrelatedTxIds.add(tx.getId());
+    }
+    
+    // correlate incoming tx hashes to tx ids
+    Set<String> uncorrelatedTxHashes = new HashSet<String>();
+    for (MoneroTransaction incomingTx : incomingTxs) {
+      boolean found = false;
+      for (MoneroTransaction tx : txs) {
+        if (tx.getId().equals(incomingTx.getHash())) {
+          tx.setIsSpent(incomingTx.getIsSpent());
+          tx.setSize(incomingTx.getSize());
+          found = true;
+          break;
+        }
+      }
+      if (!found) uncorrelatedTxHashes.add(incomingTx.getHash());
+    }
+    
+    // verify correlations
+    if (!uncorrelatedTxIds.isEmpty() || !uncorrelatedTxHashes.isEmpty()) throw new MoneroException("Uncorrelated tx ids: " + uncorrelatedTxIds + "\nUncorrelated tx hashes: " + uncorrelatedTxHashes);
+    
     return txs;
+  }
+  
+  public List<MoneroTransaction> getIncomingTransactions() {
+    return getIncomingTransactions(null, null);
+  }
+  
+  public List<MoneroTransaction> getIncomingTransactions(Integer minHeight, Integer maxHeight) {
+    return getTransactions(true, false, false, false, false, minHeight, maxHeight);
   }
 
   public String getMnemonicSeed() {
@@ -377,6 +427,9 @@ public class MoneroWalletRpc implements MoneroWallet {
       else if (key.equalsIgnoreCase("tx_key")) tx.setKey((String) val);
       else if (key.equalsIgnoreCase("txid")) tx.setId((String) val);
       else if (key.equalsIgnoreCase("type")) tx.setType(getTransactionType((String) val));
+      else if (key.equalsIgnoreCase("tx_size")) tx.setSize(((BigInteger) val).intValue());
+      else if (key.equalsIgnoreCase("spent")) tx.setIsSpent((Boolean) val);
+      else if (key.equalsIgnoreCase("global_index")) { }  // ignore
       else if (key.equalsIgnoreCase("destinations")) {
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
         tx.setPayments(payments);
@@ -402,6 +455,25 @@ public class MoneroWalletRpc implements MoneroWallet {
     else if (type.equalsIgnoreCase("failed")) return MoneroTransactionType.FAILED;
     else if (type.equalsIgnoreCase("pool")) return MoneroTransactionType.MEMPOOL;
     throw new MoneroException("Unrecognized transaction type: " + type);
+  }
+  
+  @SuppressWarnings("unchecked")
+  private List<MoneroTransaction> getIncomingTransactionsRpc() {
+    
+    // send request
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    paramMap.put("transfer_type", "all");
+    Map<String, Object> respMap = sendRpcRequest("incoming_transfers", paramMap);
+
+    // interpret response
+    List<MoneroTransaction> txs = new ArrayList<MoneroTransaction>();
+    Map<String, Object> result = (Map<String, Object>) respMap.get("result");
+    for (String key : result.keySet()) {
+      for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
+        txs.add(getTransaction(txMap));
+      }
+    }
+    return txs;
   }
   
   /**
