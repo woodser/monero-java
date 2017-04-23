@@ -28,7 +28,7 @@ public class MoneroTransaction {
 	private String paymentId;
 	private BigInteger fee;
 	private Integer mixin;
-	 private String hash;
+	private String hash;
 	private String key;
 	private Integer size;
 	private MoneroTransactionType type;

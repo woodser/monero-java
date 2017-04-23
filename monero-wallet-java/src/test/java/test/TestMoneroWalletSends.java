@@ -25,7 +25,7 @@ import wallet.MoneroWallet;
  * 
  * @author woodser
  */
-public class TestMoneroWalletTransfers {
+public class TestMoneroWalletSends {
   
   private static final BigInteger FEE = null;
   private static final Integer MIXIN = 6;
@@ -39,7 +39,7 @@ public class TestMoneroWalletTransfers {
   }
 
   @Test
-  public void testTransferPayment() {
+  public void testSendPayment() {
     
     // get balance before
     BigInteger balanceBefore = wallet.getBalance();
@@ -74,7 +74,7 @@ public class TestMoneroWalletTransfers {
   }
   
   @Test
-  public void testTransferPayments() {
+  public void testSendPayments() {
     
     // get balance and address
     BigInteger balanceBefore = wallet.getBalance();
@@ -116,7 +116,7 @@ public class TestMoneroWalletTransfers {
   }
   
   @Test
-  public void testTransferSplit() {
+  public void testSendSplit() {
     
     // get balance and address
     BigInteger balanceBefore = wallet.getBalance();
