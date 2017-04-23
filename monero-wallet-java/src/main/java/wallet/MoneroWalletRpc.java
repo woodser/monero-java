@@ -463,7 +463,6 @@ public class MoneroWalletRpc implements MoneroWallet {
    * @return Map<String, Object> is the RPC API response as a map
    */
   private Map<String, Object> sendRpcRequest(String method, Map<String, Object> params) {
-    System.out.println("sendRpcRequest()");
     
     // send http request
     try {
