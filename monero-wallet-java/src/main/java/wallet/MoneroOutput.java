@@ -9,18 +9,22 @@ import java.math.BigInteger;
  */
 public class MoneroOutput extends MoneroAddressAmount {
 
-  private Boolean isSpent;
+  private Boolean isAvailableToSpend;
   
-  public MoneroOutput(MoneroTransaction tx, String address, BigInteger amount, Boolean isSpent) {
+  public MoneroOutput() {
+    super();
+  }
+  
+  public MoneroOutput(MoneroTransaction tx, String address, BigInteger amount, Boolean isAvailableToSpend) {
     super(tx, address, amount);
-    this.isSpent = isSpent;
+    this.isAvailableToSpend = isAvailableToSpend;
   }
 
-  public Boolean getIsSpent() {
-    return isSpent;
+  public Boolean getIsAvailableToSpend() {
+    return isAvailableToSpend;
   }
 
-  public void setIsSpent(Boolean isSpent) {
-    this.isSpent = isSpent;
+  public void setIsAvailableToSpend(Boolean isAvailableToSpend) {
+    this.isAvailableToSpend = isAvailableToSpend;
   }
 }
