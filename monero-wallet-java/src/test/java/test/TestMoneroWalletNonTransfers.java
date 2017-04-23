@@ -236,19 +236,20 @@ public class TestMoneroWalletNonTransfers {
     List<MoneroOutput> outputs = wallet.getIncomingOutputs();
     assertFalse(outputs.isEmpty());
     for (MoneroOutput output : outputs) {
-      assertNotNull(output.getAddress());
+      assertNull(output.getAddress());
       assertNotNull(output.getAmount());
       assertNotNull(output.getIsAvailableToSpend());
       assertNotNull(output.getTransaction());
     }
     
     // test that transactions with same hash are equal by reference
-    Map<String, MoneroTransaction> txs = new HashMap<String, MoneroTransaction>();
+    Map<String, MoneroTransaction> txMap = new HashMap<String, MoneroTransaction>();
     for (MoneroOutput output : outputs) {
-      if (txs.containsKey(output.getTransaction().getHash())) {
-        assertTrue(txs.get(output.getTransaction().getHash()) == output.getTransaction());
+      String hash = output.getTransaction().getHash();
+      if (txMap.containsKey(hash)) {
+        assertTrue(txMap.get(hash) == output.getTransaction());
       } else {
-        txs.put(output.getTransaction().getHash(), output.getTransaction());
+        txMap.put(hash, output.getTransaction());
       }
     }
     

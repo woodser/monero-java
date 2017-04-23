@@ -298,10 +298,39 @@ public class MoneroWalletRpc implements MoneroWallet {
     paramMap.put("transfer_type", isAvailableToSpend == null ? "all" : isAvailableToSpend ? "available" : "unavailable");
     Map<String, Object> respMap = sendRpcRequest("incoming_transfers", paramMap);
 
-    // interpret response
-    List<MoneroOutput> outputs = new ArrayList<MoneroOutput>();
+    // build map from tx hashes to transactions
     Map<String, Object> result = (Map<String, Object>) respMap.get("result");
-    throw new RuntimeException("Not yet implemented.");
+    List<Map<String, Object>> outputMaps = (List<Map<String, Object>>) result.get("transfers");
+    Map<String, MoneroTransaction> txMap = new HashMap<String, MoneroTransaction>();
+    for (Map<String, Object> outputMap : outputMaps) {
+      
+      // build output
+      MoneroOutput output = new MoneroOutput();
+      output.setAmount((BigInteger) outputMap.get("amount"));
+      output.setIsAvailableToSpend(!(Boolean) outputMap.get("spent"));
+      
+      // build transaction if not already built
+      String hash = (String) outputMap.get("tx_hash");
+      MoneroTransaction tx = txMap.get(hash);
+      if (tx == null) {
+        tx = new MoneroTransaction();
+        txMap.put(hash, tx);
+        tx.setOutputs(new ArrayList<MoneroOutput>());
+        tx.setHash(hash);
+        tx.setSize(((BigInteger) outputMap.get("tx_size")).intValue());
+      }
+      
+      // add output to transaction
+      output.setTransaction(tx);
+      tx.getOutputs().add(output);
+    }
+    
+    // collect outputs
+    List<MoneroOutput> outputs = new ArrayList<MoneroOutput>();
+    for (MoneroTransaction tx : txMap.values()) {
+      outputs.addAll(tx.getOutputs());
+    }
+    return outputs;
   }
 
   public String getMnemonicSeed() {
@@ -434,6 +463,7 @@ public class MoneroWalletRpc implements MoneroWallet {
    * @return Map<String, Object> is the RPC API response as a map
    */
   private Map<String, Object> sendRpcRequest(String method, Map<String, Object> params) {
+    System.out.println("sendRpcRequest()");
     
     // send http request
     try {
