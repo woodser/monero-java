@@ -23,15 +23,15 @@ public interface MoneroWallet {
 	
 	public MoneroIntegratedAddress splitIntegratedAddress(String integratedAddress);
 	
-	public MoneroTransaction transfer(String address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime);
+	public MoneroTransaction send(String address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime);
 	
-	public MoneroTransaction transfer(MoneroAddress address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime);
+	public MoneroTransaction send(MoneroAddress address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime);
 	
-	public MoneroTransaction transfer(MoneroPayment payment, String paymentId, BigInteger fee, int mixin, int unlockTime);
+	public MoneroTransaction send(MoneroPayment payment, String paymentId, BigInteger fee, int mixin, int unlockTime);
 	
-	public MoneroTransaction transfer(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime);
+	public MoneroTransaction send(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime);
 	
-	public List<MoneroTransaction> transferSplit(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime, Boolean newAlgorithm);
+	public List<MoneroTransaction> sendSplit(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime, Boolean newAlgorithm);
 	
 	public List<MoneroTransaction> sweepDust();
 	
@@ -39,11 +39,11 @@ public interface MoneroWallet {
 	
   public List<MoneroTransaction> getTransactions(Integer minHeight, Integer maxHeight);
 		
-	public List<MoneroTransaction> getTransactions(boolean getIn, boolean getOut, boolean getPending, boolean getFailed, boolean getMemPool, Integer minHeight, Integer maxHeight);
+	public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Integer minHeight, Integer maxHeight);
 	
-	public List<MoneroTransaction> getIncomingTransactions();
+	public List<MoneroOutput> getIncomingOutputs();
 	
-	public List<MoneroTransaction> getIncomingTransactions(Integer minHeight, Integer maxHeight);
+	public List<MoneroOutput> getIncomingOutputs(Boolean isAvailableToSpend);
 	
 	public String getMnemonicSeed();
 	

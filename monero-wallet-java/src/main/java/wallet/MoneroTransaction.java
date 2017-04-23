@@ -24,6 +24,7 @@ public class MoneroTransaction {
 
   private BigInteger amount;
 	private List<MoneroPayment> payments;
+	private List<MoneroOutput> outputs;
 	private String paymentId;
 	private BigInteger fee;
 	private Integer mixin;
@@ -58,6 +59,19 @@ public class MoneroTransaction {
     if (payments != null) {
       for (MoneroPayment payment : payments) {
         payment.setTransaction(this);
+      }
+    }
+  }
+  
+  public List<MoneroOutput> getOutputs() {
+    return outputs;
+  }
+
+  public void setOutputs(List<MoneroOutput> outputs) {
+    this.outputs = outputs;
+    if (outputs != null) {
+      for (MoneroOutput output : outputs) {
+        output.setTransaction(this);
       }
     }
   }
