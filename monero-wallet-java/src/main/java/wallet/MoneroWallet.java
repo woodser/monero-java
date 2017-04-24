@@ -2,7 +2,11 @@ package wallet;
 
 import java.math.BigInteger;
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import wallet.MoneroTransaction.MoneroTransactionType;
 
 /**
  * Monero wallet interface.
@@ -34,6 +38,10 @@ public interface MoneroWallet {
 	public List<MoneroTransaction> sendSplit(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime, Boolean newAlgorithm);
 	
 	public List<MoneroTransaction> sweepDust();
+	
+	public Map<MoneroTransactionType, List<MoneroTransaction>> getAllTransactions();
+	
+	public Map<MoneroTransactionType, List<MoneroTransaction>> getAllTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight);
 	
 	public List<MoneroTransaction> getTransactions();
 	
