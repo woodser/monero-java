@@ -26,6 +26,7 @@ import wallet.MoneroOutput;
 import wallet.MoneroPayment;
 import wallet.MoneroRpcException;
 import wallet.MoneroTransaction;
+import wallet.MoneroTransaction.MoneroTransactionType;
 import wallet.MoneroUri;
 import wallet.MoneroUtils;
 import wallet.MoneroWallet;
@@ -43,6 +44,8 @@ import wallet.MoneroWallet;
  * - why doesn't tx_size get returned on get_transfers
  * - standardize terminology payment vs output; one payment may be fulfilled with multiple outputs
  * - no way to get transaction keys after sending
+ * - height vs block_height inconsistent
+ * - key is never returned as part of get transactions and their variations
  * 
  * @author woodser
  */
@@ -272,7 +275,6 @@ public class TestMoneroWalletNonSends {
     assertNotNull(tx.getType());
     switch (tx.getType()) {
       case INCOMING:
-        assertNotNull(tx.getAmount());
         assertNotNull(tx.getFee());
         assertNotNull(tx.getHeight());
         assertNotNull(tx.getNote());
@@ -285,7 +287,6 @@ public class TestMoneroWalletNonSends {
         assertNull(tx.getSize());
         break;
       case OUTGOING:
-        assertNotNull(tx.getAmount());
         assertNotNull(tx.getFee());
         assertNotNull(tx.getHeight());
         assertNotNull(tx.getNote());
@@ -302,7 +303,6 @@ public class TestMoneroWalletNonSends {
         }
         break;
       case PENDING:
-        assertNotNull(tx.getAmount());
         assertNotNull(tx.getFee());
         assertNotNull(tx.getHeight());
         assertNotNull(tx.getNote());
@@ -321,6 +321,21 @@ public class TestMoneroWalletNonSends {
         break;
       default:
         fail("Unrecognized transaction type: " + tx.getType());
+    }
+  }
+  
+  @Test
+  public void testGetAllTransactions() {
+    List<String> paymentIds = new ArrayList<String>();
+    paymentIds.add("0000000000000000");
+    Map<MoneroTransactionType, List<MoneroTransaction>> txsMap = wallet.getAllTransactions(true, true, true, true, true, paymentIds, null, null);
+    //Map<MoneroTransactionType, List<MoneroTransaction>> txsMap = wallet.getAllTransactions();
+    for (MoneroTransactionType type : txsMap.keySet()) {
+      for (MoneroTransaction tx : txsMap.get(type)) {
+        assertEquals(type, tx.getType());
+        System.out.println(tx);
+        System.out.println("\n");
+      }
     }
   }
 }
