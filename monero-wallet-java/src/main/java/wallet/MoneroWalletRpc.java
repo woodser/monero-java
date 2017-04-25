@@ -99,18 +99,18 @@ public class MoneroWalletRpc implements MoneroWallet {
     return rpcUri;
   }
   
-  public int getHeight() {
-    Map<String, Object> respMap = sendRpcRequest("getheight", null);
-    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    return ((BigInteger) resultMap.get("height")).intValue();
-  }
-
   public BigInteger getBalance() {
     return getBalances().getFirst();
   }
   
   public BigInteger getUnlockedBalance() {
     return getBalances().getSecond();
+  }
+
+  public int getHeight() {
+    Map<String, Object> respMap = sendRpcRequest("getheight", null);
+    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return ((BigInteger) resultMap.get("height")).intValue();
   }
 
   public MoneroAddress getStandardAddress() {

@@ -11,13 +11,6 @@ import java.util.List;
  * @author woodser
  */
 public interface MoneroWallet {
-  
-  /**
-   * Gets the current height of the blockchain.
-   * 
-   * @return int is the height of the wallet's blockchain
-   */
-  public int getHeight();
 
   /**
    * Gets the wallet's balance.
@@ -32,6 +25,13 @@ public interface MoneroWallet {
 	 * @return BigInteger is the wallet's unlocked balance
 	 */
   public BigInteger getUnlockedBalance();
+  
+  /**
+   * Gets the current height of the blockchain.
+   * 
+   * @return int is the height of the wallet's blockchain
+   */
+  public int getHeight();
 	
   /**
    * Returns the wallet's standard address.
