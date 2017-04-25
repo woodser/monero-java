@@ -23,6 +23,18 @@ public interface MoneroWallet {
 	public MoneroIntegratedAddress getIntegratedAddress(String paymentId);
 	
 	public MoneroIntegratedAddress splitIntegratedAddress(String integratedAddress);
+	 
+  public String getMnemonicSeed();
+  
+  public String getViewKey();
+  
+  public URI toUri(MoneroUri uri);
+  
+  public MoneroUri fromUri(URI uri);
+   
+  public void saveBlockchain();
+  
+  public void stopWallet();
 	
 	public MoneroTransaction send(String address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime);
 	
@@ -39,16 +51,4 @@ public interface MoneroWallet {
 	public List<MoneroTransaction> getAllTransactions();
 	
 	public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight);
-	
-	public String getMnemonicSeed();
-	
-	public String getViewKey();
-	
-	public URI toUri(MoneroUri uri);
-	
-	public MoneroUri fromUri(URI uri);
-	 
-  public void saveBlockchain();
-  
-  public void stopWallet();
 }
