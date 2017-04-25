@@ -2,6 +2,7 @@ package wallet;
 
 import java.math.BigInteger;
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -22,6 +23,18 @@ public interface MoneroWallet {
 	public MoneroIntegratedAddress getIntegratedAddress(String paymentId);
 	
 	public MoneroIntegratedAddress splitIntegratedAddress(String integratedAddress);
+	 
+  public String getMnemonicSeed();
+  
+  public String getViewKey();
+  
+  public URI toUri(MoneroUri uri);
+  
+  public MoneroUri fromUri(URI uri);
+   
+  public void saveBlockchain();
+  
+  public void stopWallet();
 	
 	public MoneroTransaction send(String address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime);
 	
@@ -35,25 +48,7 @@ public interface MoneroWallet {
 	
 	public List<MoneroTransaction> sweepDust();
 	
-	public List<MoneroTransaction> getTransactions();
+	public List<MoneroTransaction> getAllTransactions();
 	
-  public List<MoneroTransaction> getTransactions(Integer minHeight, Integer maxHeight);
-		
-	public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Integer minHeight, Integer maxHeight);
-	
-	public List<MoneroOutput> getIncomingOutputs();
-	
-	public List<MoneroOutput> getIncomingOutputs(Boolean isAvailableToSpend);
-	
-	public String getMnemonicSeed();
-	
-	public String getViewKey();
-	
-	public URI toUri(MoneroUri uri);
-	
-	public MoneroUri fromUri(URI uri);
-	 
-  public void saveBlockchain();
-  
-  public void stopWallet();
+	public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight);
 }
