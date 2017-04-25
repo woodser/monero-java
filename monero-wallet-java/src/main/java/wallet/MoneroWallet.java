@@ -4,9 +4,6 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-
-import wallet.MoneroTransaction.MoneroTransactionType;
 
 /**
  * Monero wallet interface.
@@ -39,19 +36,9 @@ public interface MoneroWallet {
 	
 	public List<MoneroTransaction> sweepDust();
 	
-	public Map<MoneroTransactionType, List<MoneroTransaction>> getAllTransactions();
+	public List<MoneroTransaction> getAllTransactions();
 	
-	public Map<MoneroTransactionType, List<MoneroTransaction>> getAllTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight);
-	
-	public List<MoneroTransaction> getTransactions();
-	
-  public List<MoneroTransaction> getTransactions(Integer minHeight, Integer maxHeight);
-		
-	public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Integer minHeight, Integer maxHeight);
-	
-	public List<MoneroOutput> getIncomingOutputs();
-	
-	public List<MoneroOutput> getIncomingOutputs(Boolean isAvailableToSpend);
+	public List<MoneroTransaction> getAllTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight);
 	
 	public String getMnemonicSeed();
 	

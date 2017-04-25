@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -245,12 +246,12 @@ public class MoneroWalletRpc implements MoneroWallet {
     return txs;
   }
   
-  public Map<MoneroTransactionType, List<MoneroTransaction>> getAllTransactions() {
+  public List<MoneroTransaction> getAllTransactions() {
     return getAllTransactions(true, true, true, true, true, null, null, null);
   }
   
   @SuppressWarnings("unchecked")
-  public Map<MoneroTransactionType, List<MoneroTransaction>> getAllTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight) {
+  public List<MoneroTransaction> getAllTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight) {
     
     // collect transactions bucketed by type then hash
     Map<MoneroTransactionType, Map<String, MoneroTransaction>> txTypeMap = new HashMap<MoneroTransactionType, Map<String, MoneroTransaction>>();
@@ -326,17 +327,21 @@ public class MoneroWalletRpc implements MoneroWallet {
       }
     }
     
-    // filter results by block height
-    // TODO
-    
     // build return type
-    Map<MoneroTransactionType, List<MoneroTransaction>> txMap = new HashMap<MoneroTransactionType, List<MoneroTransaction>>();
+    List<MoneroTransaction> txs = new ArrayList<MoneroTransaction>();
     for (Entry<MoneroTransactionType, Map<String, MoneroTransaction>> entry : txTypeMap.entrySet()) {
-      List<MoneroTransaction> txs = new ArrayList<MoneroTransaction>();
       txs.addAll(entry.getValue().values());
-      txMap.put(entry.getKey(), txs);
     }
-    return txMap;
+    
+    // filter final results
+    Collection<MoneroTransaction> toRemoves = new HashSet<MoneroTransaction>();
+    for (MoneroTransaction tx : txs) {
+      if (paymentIds != null && !paymentIds.contains(tx.getPaymentId())) toRemoves.add(tx);
+      else if (minHeight != null && (tx.getHeight() == null || tx.getHeight() < minHeight)) toRemoves.add(tx);
+      else if (maxHeight != null && (tx.getHeight() == null || tx.getHeight() > maxHeight)) toRemoves.add(tx);
+    }
+    txs.removeAll(toRemoves);
+    return txs;
   }
   
   public List<MoneroTransaction> getTransactions() {

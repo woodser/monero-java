@@ -1,19 +1,12 @@
 package test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -22,8 +15,6 @@ import org.junit.Test;
 import utils.TestUtils;
 import wallet.MoneroAddress;
 import wallet.MoneroIntegratedAddress;
-import wallet.MoneroOutput;
-import wallet.MoneroPayment;
 import wallet.MoneroRpcException;
 import wallet.MoneroTransaction;
 import wallet.MoneroTransaction.MoneroTransactionType;
@@ -195,17 +186,45 @@ public class TestMoneroWalletNonSends {
   }
   
   @Test
-  public void testGetTransactions() {
-    
-    // test all transactions
-    List<MoneroTransaction> txs = wallet.getTransactions();
-    assertTrue(txs != null);
-    assertFalse(txs.isEmpty()); // must test at least one transaction
+  public void testGetAllTransactions() {
+    List<MoneroTransaction> txs = wallet.getAllTransactions();
+    assertFalse(txs.isEmpty());
     for (MoneroTransaction tx : txs) {
-      testTransaction(tx);
+      assertNotNull(tx.getHash());
+      assertNotNull(tx.getType());
+    }
+  }
+  
+  public void testGetAllTransactionsOptions() {
+    
+    // test getting transactions by payment id
+    String paymentId = "0000000000000000";
+    List<String> paymentIds = new ArrayList<String>();
+    paymentIds.add(paymentId);
+    List<MoneroTransaction> txs = wallet.getAllTransactions(true, true, true, true, true, paymentIds, null, null);
+    assertFalse(txs.isEmpty());
+    for (MoneroTransaction tx : txs) {
+      assertNotNull(tx.getType());
+      assertEquals(paymentId, tx.getPaymentId());
+    }
+    
+    // test getting incoming transactions
+    txs = wallet.getAllTransactions(true, false, false, false, false, null, null, null);
+    assertFalse(txs.isEmpty());
+    for (MoneroTransaction tx : txs) {
+      assertEquals(MoneroTransactionType.INCOMING, tx.getType());
+    }
+    
+    // test getting outgoing transactions
+    txs = wallet.getAllTransactions(false, true, false, false, false, null, null, null);
+    assertFalse(txs.isEmpty());
+    for (MoneroTransaction tx : txs) {
+      assertEquals(MoneroTransactionType.OUTGOING, tx.getType());
     }
     
     // get and sort block heights in ascending order
+    txs = wallet.getAllTransactions();
+    assertFalse(txs.isEmpty());
     List<Integer> heights = new ArrayList<Integer>();
     for (MoneroTransaction tx : txs) {
       if (tx.getHeight() != null) heights.add(tx.getHeight());
@@ -225,117 +244,11 @@ public class TestMoneroWalletNonSends {
     
     // assert at least some transactions filtered
     int unfilteredCount = txs.size();
-    txs = wallet.getTransactions(minHeight, maxHeight);
+    txs = wallet.getAllTransactions(true, true, true, true, true, null, minHeight, maxHeight);
+    assertFalse(txs.isEmpty());
     assertTrue(txs.size() < unfilteredCount);
     for (MoneroTransaction tx : txs) {
       assertTrue(tx.getHeight() >= minHeight && tx.getHeight() <= maxHeight);
-      testTransaction(tx);
-    }
-  }
-  
-  @Test
-  public void testGetIncomingOutputs() {
-    
-    // test outputs
-    List<MoneroOutput> outputs = wallet.getIncomingOutputs();
-    assertFalse(outputs.isEmpty());
-    for (MoneroOutput output : outputs) {
-      assertNotNull(output.getAmount());
-      assertNotNull(output.getIsSpent());
-      assertNotNull(output.getTransaction());
-      assertNotNull(output.getTransaction().getHash());
-      assertNotNull(output.getTransaction().getSize());
-    }
-    
-    // test that transactions with same hash are equal by reference
-    Map<String, MoneroTransaction> txMap = new HashMap<String, MoneroTransaction>();
-    for (MoneroOutput output : outputs) {
-      String hash = output.getTransaction().getHash();
-      if (txMap.containsKey(hash)) {
-        assertTrue(txMap.get(hash) == output.getTransaction());
-      } else {
-        txMap.put(hash, output.getTransaction());
-      }
-    }
-    
-    // test filtering availables
-    outputs = wallet.getIncomingOutputs(true);
-    for (MoneroOutput output : outputs) {
-      assertFalse(output.getIsSpent());
-    }
-    
-    // test filtering unavailables
-    outputs = wallet.getIncomingOutputs(false);
-    for (MoneroOutput output : outputs) {
-      assertTrue(output.getIsSpent());
-    }
-  }
-  
-  private static void testTransaction(MoneroTransaction tx) {
-    assertNotNull(tx.getType());
-    switch (tx.getType()) {
-      case INCOMING:
-        assertNotNull(tx.getFee());
-        assertNotNull(tx.getHeight());
-        assertNotNull(tx.getNote());
-        assertNotNull(tx.getPaymentId());
-        assertNotNull(tx.getTimestamp());
-        assertNotNull(tx.getType());
-        assertNull(tx.getPayments());
-        assertNotNull(tx.getHash());
-        assertNull(tx.getKey());
-        assertNull(tx.getSize());
-        break;
-      case OUTGOING:
-        assertNotNull(tx.getFee());
-        assertNotNull(tx.getHeight());
-        assertNotNull(tx.getNote());
-        assertNotNull(tx.getPaymentId());
-        assertNotNull(tx.getTimestamp());
-        assertNotNull(tx.getType());
-        assertNotNull(tx.getHash());
-        assertNull(tx.getKey());
-        if (tx.getPayments() != null) {
-          for (MoneroPayment payment : tx.getPayments()) {
-            assertNotNull(payment.getAddress());
-            assertNotNull(payment.getAmount());
-          }
-        }
-        break;
-      case PENDING:
-        assertNotNull(tx.getFee());
-        assertNotNull(tx.getHeight());
-        assertNotNull(tx.getNote());
-        assertNotNull(tx.getPaymentId());
-        assertNotNull(tx.getTimestamp());
-        assertNotNull(tx.getType());
-        assertNull(tx.getPayments());
-        assertNotNull(tx.getHash());
-        assertNull(tx.getKey());
-        break;
-      case FAILED:
-        fail("No test data available to write test for transaction type " + tx.getType() + " even though it's probably working");
-        break;
-      case MEMPOOL:
-        fail("No test data available to write test for transaction type " + tx.getType() + " even though it's probably working");
-        break;
-      default:
-        fail("Unrecognized transaction type: " + tx.getType());
-    }
-  }
-  
-  @Test
-  public void testGetAllTransactions() {
-    List<String> paymentIds = new ArrayList<String>();
-    paymentIds.add("0000000000000000");
-    Map<MoneroTransactionType, List<MoneroTransaction>> txsMap = wallet.getAllTransactions(true, true, true, true, true, paymentIds, null, null);
-    //Map<MoneroTransactionType, List<MoneroTransaction>> txsMap = wallet.getAllTransactions();
-    for (MoneroTransactionType type : txsMap.keySet()) {
-      for (MoneroTransaction tx : txsMap.get(type)) {
-        assertEquals(type, tx.getType());
-        System.out.println(tx);
-        System.out.println("\n");
-      }
     }
   }
 }
