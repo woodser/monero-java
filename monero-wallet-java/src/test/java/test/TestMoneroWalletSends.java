@@ -27,7 +27,6 @@ import wallet.MoneroWallet;
  */
 public class TestMoneroWalletSends {
   
-  private static final BigInteger FEE = null;
   private static final Integer MIXIN = 6;
   private static final int UNLOCKED_DIVISOR = 20;
   
@@ -48,7 +47,7 @@ public class TestMoneroWalletSends {
     // send to self
     MoneroAddress address = wallet.getStandardAddress();
     BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(UNLOCKED_DIVISOR));
-    MoneroTransaction tx = wallet.send(address.toString(), sendAmount, null, FEE, MIXIN, 0);
+    MoneroTransaction tx = wallet.send(address.toString(), sendAmount, null, MIXIN, 0);
     
     // test transaction
     assertNotNull(tx.getPayments());
@@ -91,7 +90,7 @@ public class TestMoneroWalletSends {
     }
     
     // send payments
-    MoneroTransaction tx = wallet.send(payments, null, FEE, MIXIN, 0);
+    MoneroTransaction tx = wallet.send(payments, null, MIXIN, 0);
     
     // test transaction
     assertNotNull(tx.getPayments());
@@ -134,7 +133,7 @@ public class TestMoneroWalletSends {
     }
     
     // send payments
-    List<MoneroTransaction> txs = wallet.sendSplit(payments, null, FEE, MIXIN, 0, true);
+    List<MoneroTransaction> txs = wallet.sendSplit(payments, null, MIXIN, 0, true);
     
     // test transactions
     for (MoneroTransaction tx : txs) {
