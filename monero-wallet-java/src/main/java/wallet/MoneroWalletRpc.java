@@ -160,20 +160,20 @@ public class MoneroWalletRpc implements MoneroWallet {
     return (String) resultMap.get("key");
   }
 
-  public URI toUri(MoneroUri uri) {
-    if (uri == null) throw new MoneroException("Given Monero URI is null");
+  public URI toUri(MoneroUri moneroUri) {
+    if (moneroUri == null) throw new MoneroException("Given Monero URI is null");
     Map<String, Object> paramMap = new HashMap<String, Object>();
-    paramMap.put("address", uri.getAddress());
-    paramMap.put("amount", uri.getAmount() == null ? null : uri.getAmount());
-    paramMap.put("payment_id", uri.getPaymentId());
-    paramMap.put("recipient_name", uri.getRecipientName());
-    paramMap.put("tx_description", uri.getTxDescription());
+    paramMap.put("address", moneroUri.getAddress());
+    paramMap.put("amount", moneroUri.getAmount() == null ? null : moneroUri.getAmount());
+    paramMap.put("payment_id", moneroUri.getPaymentId());
+    paramMap.put("recipient_name", moneroUri.getRecipientName());
+    paramMap.put("tx_description", moneroUri.getTxDescription());
     Map<String, Object> respMap = sendRpcRequest("make_uri", paramMap);
     @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return parseUri((String) resultMap.get("uri"));
   }
 
-  public MoneroUri fromUri(URI uri) {
+  public MoneroUri toMoneroUri(URI uri) {
     if (uri == null) throw new MoneroException("Given URI is null");
     Map<String, Object> paramMap = new HashMap<String, Object>();
     paramMap.put("uri", uri.toString());
@@ -200,22 +200,22 @@ public class MoneroWalletRpc implements MoneroWallet {
     sendRpcRequest("stop_wallet", null);
   }
 
-  public MoneroTransaction send(String address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime) {
-    return send(new MoneroPayment(null, address, amount), paymentId, fee, mixin, unlockTime);
+  public MoneroTransaction send(String address, BigInteger amount, String paymentId, int mixin, int unlockTime) {
+    return send(new MoneroPayment(null, address, amount), paymentId, mixin, unlockTime);
   }
   
-  public MoneroTransaction send(MoneroAddress address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime) {
-    return send(address.toString(), amount, paymentId, fee, mixin, unlockTime);
+  public MoneroTransaction send(MoneroAddress address, BigInteger amount, String paymentId, int mixin, int unlockTime) {
+    return send(address.toString(), amount, paymentId, mixin, unlockTime);
   }
 
-  public MoneroTransaction send(MoneroPayment payment, String paymentId, BigInteger fee, int mixin, int unlockTime) {
+  public MoneroTransaction send(MoneroPayment payment, String paymentId, int mixin, int unlockTime) {
     List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
     payments.add(payment);
-    return send(payments, paymentId, fee, mixin, unlockTime);
+    return send(payments, paymentId, mixin, unlockTime);
   }
   
   @SuppressWarnings("unchecked")
-  public MoneroTransaction send(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime) {
+  public MoneroTransaction send(List<MoneroPayment> payments, String paymentId, int mixin, int unlockTime) {
     
     // build parameter map
     Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -228,7 +228,6 @@ public class MoneroWalletRpc implements MoneroWallet {
       destinations.add(destination);
     }
     paramMap.put("payment_id", paymentId);
-    paramMap.put("fee", fee);
     paramMap.put("mixin", mixin);
     paramMap.put("unlockTime", unlockTime);
     paramMap.put("get_tx_key", true);
@@ -246,7 +245,7 @@ public class MoneroWalletRpc implements MoneroWallet {
   }
 
   @SuppressWarnings("unchecked")
-  public List<MoneroTransaction> sendSplit(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime, Boolean newAlgorithm) {
+  public List<MoneroTransaction> sendSplit(List<MoneroPayment> payments, String paymentId, int mixin, int unlockTime, Boolean newAlgorithm) {
     
     // build parameter map
     Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -259,7 +258,6 @@ public class MoneroWalletRpc implements MoneroWallet {
       destinations.add(destination);
     }
     paramMap.put("payment_id", paymentId);
-    paramMap.put("fee", fee);
     paramMap.put("mixin", mixin);
     paramMap.put("unlockTime", unlockTime);
     paramMap.put("new_algorithm", newAlgorithm);

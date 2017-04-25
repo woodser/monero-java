@@ -154,7 +154,7 @@ public class TestMoneroWalletNonSends {
     MoneroUri mUri1 = new MoneroUri();
     mUri1.setAddress(wallet.getStandardAddress().getStandardAddress());
     URI uri = wallet.toUri(mUri1);
-    MoneroUri mUri2 = wallet.fromUri(uri);
+    MoneroUri mUri2 = wallet.toMoneroUri(uri);
     assertTrue(mUri1.equals(mUri2));
     
     // test with all fields
@@ -163,7 +163,7 @@ public class TestMoneroWalletNonSends {
     mUri1.setRecipientName("John Doe");
     mUri1.setTxDescription("OMZG XMR FTW");
     uri = wallet.toUri(mUri1);
-    mUri2 = wallet.fromUri(uri);
+    mUri2 = wallet.toMoneroUri(uri);
 
     assertTrue(mUri1.equals(mUri2));
     
