@@ -1,6 +1,10 @@
 package test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
 import java.net.URI;
@@ -15,6 +19,7 @@ import org.junit.Test;
 import utils.TestUtils;
 import wallet.MoneroAddress;
 import wallet.MoneroIntegratedAddress;
+import wallet.MoneroOutput;
 import wallet.MoneroRpcException;
 import wallet.MoneroTransaction;
 import wallet.MoneroTransaction.MoneroTransactionType;
@@ -195,6 +200,7 @@ public class TestMoneroWalletNonSends {
     }
   }
   
+  @Test
   public void testGetAllTransactionsOptions() {
     
     // test getting transactions by payment id
@@ -222,9 +228,21 @@ public class TestMoneroWalletNonSends {
       assertEquals(MoneroTransactionType.OUTGOING, tx.getType());
     }
     
-    // get and sort block heights in ascending order
+    // test balance equals spendable outputs
     txs = wallet.getAllTransactions();
     assertFalse(txs.isEmpty());
+    BigInteger balance = BigInteger.valueOf(0);
+    for (MoneroTransaction tx : txs) {
+      if (tx.getOutputs() == null) continue;
+      for (MoneroOutput output : tx.getOutputs()) {
+        if (!output.getIsSpent()) {
+          balance = balance.add(output.getAmount());
+        }
+      }
+    }
+    assertEquals(wallet.getBalance(), balance);
+    
+    // get and sort block heights in ascending order
     List<Integer> heights = new ArrayList<Integer>();
     for (MoneroTransaction tx : txs) {
       if (tx.getHeight() != null) heights.add(tx.getHeight());
