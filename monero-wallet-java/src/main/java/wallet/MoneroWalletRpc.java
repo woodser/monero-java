@@ -247,11 +247,11 @@ public class MoneroWalletRpc implements MoneroWallet {
   }
   
   public List<MoneroTransaction> getAllTransactions() {
-    return getAllTransactions(true, true, true, true, true, null, null, null);
+    return getTransactions(true, true, true, true, true, null, null, null);
   }
   
   @SuppressWarnings("unchecked")
-  public List<MoneroTransaction> getAllTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight) {
+  public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight) {
     
     // collect transactions bucketed by type then hash
     Map<MoneroTransactionType, Map<String, MoneroTransaction>> txTypeMap = new HashMap<MoneroTransactionType, Map<String, MoneroTransaction>>();
