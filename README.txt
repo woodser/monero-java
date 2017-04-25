@@ -1,8 +1,10 @@
-MONERO WALLET JAVA IMPLEMENTATION
+MONERO WALLET JAVA INTERFACE
 
 This is a Java interface and implementation of a Monero wallet.
 
 The implementation uses a running instance of monero-wallet-rpc.
+
+This project is licensed under Apache 2.0 and MIT.
 
 The supported methods are:
 
@@ -45,5 +47,3 @@ The supported methods are:
 - public List<MoneroTransaction> getAllTransactions();
 	
 - public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight);
-
-This project is dual licensed under Apache 2.0 and MIT.
