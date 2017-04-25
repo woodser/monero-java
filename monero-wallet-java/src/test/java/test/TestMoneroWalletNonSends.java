@@ -201,7 +201,7 @@ public class TestMoneroWalletNonSends {
     String paymentId = "0000000000000000";
     List<String> paymentIds = new ArrayList<String>();
     paymentIds.add(paymentId);
-    List<MoneroTransaction> txs = wallet.getAllTransactions(true, true, true, true, true, paymentIds, null, null);
+    List<MoneroTransaction> txs = wallet.getTransactions(true, true, true, true, true, paymentIds, null, null);
     assertFalse(txs.isEmpty());
     for (MoneroTransaction tx : txs) {
       assertNotNull(tx.getType());
@@ -209,14 +209,14 @@ public class TestMoneroWalletNonSends {
     }
     
     // test getting incoming transactions
-    txs = wallet.getAllTransactions(true, false, false, false, false, null, null, null);
+    txs = wallet.getTransactions(true, false, false, false, false, null, null, null);
     assertFalse(txs.isEmpty());
     for (MoneroTransaction tx : txs) {
       assertEquals(MoneroTransactionType.INCOMING, tx.getType());
     }
     
     // test getting outgoing transactions
-    txs = wallet.getAllTransactions(false, true, false, false, false, null, null, null);
+    txs = wallet.getTransactions(false, true, false, false, false, null, null, null);
     assertFalse(txs.isEmpty());
     for (MoneroTransaction tx : txs) {
       assertEquals(MoneroTransactionType.OUTGOING, tx.getType());
@@ -244,7 +244,7 @@ public class TestMoneroWalletNonSends {
     
     // assert at least some transactions filtered
     int unfilteredCount = txs.size();
-    txs = wallet.getAllTransactions(true, true, true, true, true, null, minHeight, maxHeight);
+    txs = wallet.getTransactions(true, true, true, true, true, null, minHeight, maxHeight);
     assertFalse(txs.isEmpty());
     assertTrue(txs.size() < unfilteredCount);
     for (MoneroTransaction tx : txs) {
