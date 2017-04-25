@@ -12,38 +12,38 @@ The supported methods are:
 	
 - public BigInteger getUnlockedBalance();
 	
--	public MoneroAddress getStandardAddress();
+- public MoneroAddress getStandardAddress();
 	
--	public MoneroIntegratedAddress getIntegratedAddress(String paymentId);
+- public MoneroIntegratedAddress getIntegratedAddress(String paymentId);
 	
--	public MoneroIntegratedAddress splitIntegratedAddress(String integratedAddress);
+- public MoneroIntegratedAddress splitIntegratedAddress(String integratedAddress);
 	 
 - public String getMnemonicSeed();
   
--  public String getViewKey();
+- public String getViewKey();
   
--  public URI toUri(MoneroUri uri);
+- public URI toUri(MoneroUri uri);
   
--  public MoneroUri fromUri(URI uri);
+- public MoneroUri fromUri(URI uri);
    
--  public void saveBlockchain();
+- public void saveBlockchain();
   
--  public void stopWallet();
+- public void stopWallet();
 	
--	public MoneroTransaction send(String address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime);
+- public MoneroTransaction send(String address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime);
 	
--	public MoneroTransaction send(MoneroAddress address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime);
+- public MoneroTransaction send(MoneroAddress address, BigInteger amount, String paymentId, BigInteger fee, int mixin, int unlockTime);
 	
--	public MoneroTransaction send(MoneroPayment payment, String paymentId, BigInteger fee, int mixin, int unlockTime);
+- public MoneroTransaction send(MoneroPayment payment, String paymentId, BigInteger fee, int mixin, int unlockTime);
 	
 - public MoneroTransaction send(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime);
 	
--	public List<MoneroTransaction> sendSplit(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime, Boolean newAlgorithm);
+- public List<MoneroTransaction> sendSplit(List<MoneroPayment> payments, String paymentId, BigInteger fee, int mixin, int unlockTime, Boolean newAlgorithm);
 	
--	public List<MoneroTransaction> sweepDust();
+- public List<MoneroTransaction> sweepDust();
 	
--	public List<MoneroTransaction> getAllTransactions();
+- public List<MoneroTransaction> getAllTransactions();
 	
--	public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight);
+- public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight);
 
 This project is dual licensed under Apache 2.0 and MIT.
