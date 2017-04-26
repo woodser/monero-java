@@ -41,10 +41,10 @@ import wallet.MoneroTransaction.MoneroTransactionType;
  * @author woodser
  */
 public class MoneroWalletRpc implements MoneroWallet {
-  
+
   // logger
   private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class);
-  
+
   // customer mapper to deserialize integers to BigIntegers
   public static ObjectMapper MAPPER;
   static {
@@ -53,31 +53,31 @@ public class MoneroWalletRpc implements MoneroWallet {
     MAPPER.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
     MAPPER.configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS, true);
   }
-  
+
   // instance variables
   private String rpcHost;
   private int rpcPort;
   private URI rpcUri;
   private HttpClient client;
-  
+
   public MoneroWalletRpc(String endpoint) {
     this(parseUri(endpoint));
   }
-  
+
   public MoneroWalletRpc(URI rpcUri) {
     this.rpcUri = rpcUri;
     this.rpcHost = rpcUri.getHost();
     this.rpcPort = rpcUri.getPort();
     this.client = HttpClients.createDefault();
   }
-  
+
   public MoneroWalletRpc(String rpcHost, int rpcPort) throws URISyntaxException {
     this.rpcHost = rpcHost;
     this.rpcPort = rpcPort;
     this.rpcUri = new URI("http", null, rpcHost, rpcPort, "/json_rpc", null, null);
     this.client = HttpClients.createDefault();
   }
-  
+
   public MoneroWalletRpc(String rpcHost, int rpcPort, String username, String password) throws URISyntaxException {
     this.rpcHost = rpcHost;
     this.rpcPort = rpcPort;
@@ -94,28 +94,30 @@ public class MoneroWalletRpc implements MoneroWallet {
   public int getRpcPort() {
     return rpcPort;
   }
-  
+
   public URI getRpcUri() {
     return rpcUri;
   }
-  
+
   public BigInteger getBalance() {
     return getBalances().getFirst();
   }
-  
+
   public BigInteger getUnlockedBalance() {
     return getBalances().getSecond();
   }
 
   public int getHeight() {
     Map<String, Object> respMap = sendRpcRequest("getheight", null);
-    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return ((BigInteger) resultMap.get("height")).intValue();
   }
 
   public MoneroAddress getStandardAddress() {
     Map<String, Object> respMap = sendRpcRequest("getaddress", null);
-    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     String standardAddress = (String) resultMap.get("address");
     MoneroAddress address = new MoneroAddress(standardAddress);
     MoneroUtils.validateAddress(address);
@@ -126,19 +128,21 @@ public class MoneroWalletRpc implements MoneroWallet {
     Map<String, Object> paramMap = new HashMap<String, Object>();
     if (paymentId != null) paramMap.put("payment_id", paymentId);
     Map<String, Object> respMap = sendRpcRequest("make_integrated_address", paramMap);
-    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     paymentId = (String) resultMap.get("payment_id");
     String integratedAddress = (String) resultMap.get("integrated_address");
     MoneroIntegratedAddress address = new MoneroIntegratedAddress(getStandardAddress().getStandardAddress(), paymentId, integratedAddress);
     MoneroUtils.validateAddress(address);
     return address;
-  }  
+  }
 
   public MoneroIntegratedAddress splitIntegratedAddress(String integratedAddress) {
     Map<String, Object> paramMap = new HashMap<String, Object>();
     paramMap.put("integrated_address", integratedAddress);
     Map<String, Object> respMap = sendRpcRequest("split_integrated_address", paramMap);
-    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroIntegratedAddress address = new MoneroIntegratedAddress((String) resultMap.get("standard_address"), (String) resultMap.get("payment_id"), integratedAddress);
     MoneroUtils.validateAddress(address);
     return address;
@@ -148,7 +152,8 @@ public class MoneroWalletRpc implements MoneroWallet {
     Map<String, Object> paramMap = new HashMap<String, Object>();
     paramMap.put("key_type", "mnemonic");
     Map<String, Object> respMap = sendRpcRequest("query_key", paramMap);
-    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return (String) resultMap.get("key");
   }
 
@@ -156,7 +161,8 @@ public class MoneroWalletRpc implements MoneroWallet {
     Map<String, Object> paramMap = new HashMap<String, Object>();
     paramMap.put("key_type", "view_key");
     Map<String, Object> respMap = sendRpcRequest("query_key", paramMap);
-    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return (String) resultMap.get("key");
   }
 
@@ -169,7 +175,8 @@ public class MoneroWalletRpc implements MoneroWallet {
     paramMap.put("recipient_name", moneroUri.getRecipientName());
     paramMap.put("tx_description", moneroUri.getTxDescription());
     Map<String, Object> respMap = sendRpcRequest("make_uri", paramMap);
-    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return parseUri((String) resultMap.get("uri"));
   }
 
@@ -178,7 +185,8 @@ public class MoneroWalletRpc implements MoneroWallet {
     Map<String, Object> paramMap = new HashMap<String, Object>();
     paramMap.put("uri", uri.toString());
     Map<String, Object> respMap = sendRpcRequest("parse_uri", paramMap);
-    @SuppressWarnings("unchecked") Map<String, Object> resultMap = (Map<String, Object>) ((Map<String, Object>) respMap.get("result")).get("uri");
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) ((Map<String, Object>) respMap.get("result")).get("uri");
     MoneroUri mUri = new MoneroUri();
     mUri.setAddress((String) resultMap.get("address"));
     if ("".equals(mUri.getAddress())) mUri.setAddress(null);
@@ -203,7 +211,7 @@ public class MoneroWalletRpc implements MoneroWallet {
   public MoneroTransaction send(String address, BigInteger amount, String paymentId, int mixin, int unlockTime) {
     return send(new MoneroPayment(null, address, amount), paymentId, mixin, unlockTime);
   }
-  
+
   public MoneroTransaction send(MoneroAddress address, BigInteger amount, String paymentId, int mixin, int unlockTime) {
     return send(address.toString(), amount, paymentId, mixin, unlockTime);
   }
@@ -213,10 +221,10 @@ public class MoneroWalletRpc implements MoneroWallet {
     payments.add(payment);
     return send(payments, paymentId, mixin, unlockTime);
   }
-  
+
   @SuppressWarnings("unchecked")
   public MoneroTransaction send(List<MoneroPayment> payments, String paymentId, int mixin, int unlockTime) {
-    
+
     // build parameter map
     Map<String, Object> paramMap = new HashMap<String, Object>();
     List<Map<String, Object>> destinations = new ArrayList<Map<String, Object>>();
@@ -231,10 +239,10 @@ public class MoneroWalletRpc implements MoneroWallet {
     paramMap.put("mixin", mixin);
     paramMap.put("unlockTime", unlockTime);
     paramMap.put("get_tx_key", true);
-    
+
     // send request
     Map<String, Object> respMap = sendRpcRequest("transfer", paramMap);
-    
+
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
     MoneroTransaction tx = interpretTransaction(txMap);
@@ -246,7 +254,7 @@ public class MoneroWalletRpc implements MoneroWallet {
 
   @SuppressWarnings("unchecked")
   public List<MoneroTransaction> sendSplit(List<MoneroPayment> payments, String paymentId, int mixin, int unlockTime, Boolean newAlgorithm) {
-    
+
     // build parameter map
     Map<String, Object> paramMap = new HashMap<String, Object>();
     List<Map<String, Object>> destinations = new ArrayList<Map<String, Object>>();
@@ -261,10 +269,10 @@ public class MoneroWalletRpc implements MoneroWallet {
     paramMap.put("mixin", mixin);
     paramMap.put("unlockTime", unlockTime);
     paramMap.put("new_algorithm", newAlgorithm);
-    
+
     // send request
     Map<String, Object> respMap = sendRpcRequest("transfer_split", paramMap);
-    
+
     // interpret response
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<BigInteger> fees = (List<BigInteger>) resultMap.get("fee_list");
@@ -286,7 +294,7 @@ public class MoneroWalletRpc implements MoneroWallet {
 
     // send request
     Map<String, Object> respMap = sendRpcRequest("sweep_dust", null);
-    
+
     // interpret response
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<String> txHashes = (List<String>) resultMap.get("tx_hash_list");
@@ -299,17 +307,17 @@ public class MoneroWalletRpc implements MoneroWallet {
     }
     return txs;
   }
-  
+
   public List<MoneroTransaction> getAllTransactions() {
     return getTransactions(true, true, true, true, true, null, null, null);
   }
-  
+
   @SuppressWarnings("unchecked")
   public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight) {
-    
+
     // collect transactions bucketed by type then hash
     Map<MoneroTransactionType, Map<String, MoneroTransaction>> txTypeMap = new HashMap<MoneroTransactionType, Map<String, MoneroTransaction>>();
-    
+
     // get_transfers rpc call
     Map<String, Object> paramMap = new HashMap<String, Object>();
     paramMap.put("in", getIncoming);
@@ -319,12 +327,12 @@ public class MoneroWalletRpc implements MoneroWallet {
     paramMap.put("pool", getMemPool);
     paramMap.put("filter_by_height", false);
     Map<String, Object> respMap = sendRpcRequest("get_transfers", paramMap);
-    
+
     // interpret get_transfers response
     Map<String, Object> result = (Map<String, Object>) respMap.get("result");
     for (String key : result.keySet()) {
       for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
-        
+
         // build transaction
         MoneroTransaction tx = interpretTransaction(txMap);
         MoneroPayment payment = new MoneroPayment(tx, null, (BigInteger) txMap.get("amount"));
@@ -334,15 +342,15 @@ public class MoneroWalletRpc implements MoneroWallet {
         addTransaction(txTypeMap, tx);
       }
     }
- 
+
     if (getIncoming) {
-      
+
       // incoming_transfers rpc call to get incoming outputs
       paramMap = new HashMap<String, Object>();
       paramMap.put("transfer_type", "all");
       respMap = sendRpcRequest("incoming_transfers", paramMap);
       result = (Map<String, Object>) respMap.get("result");
-      
+
       // interpret incoming_transfers response
       List<Map<String, Object>> outputMaps = (List<Map<String, Object>>) result.get("transfers");
       for (Map<String, Object> outputMap : outputMaps) {
@@ -357,36 +365,36 @@ public class MoneroWalletRpc implements MoneroWallet {
         tx.setOutputs(outputs);
         addTransaction(txTypeMap, tx);
       }
-      
+
       // get_bulk_payments rpc call to get incoming payments by id
       if (paymentIds != null && !paymentIds.isEmpty()) {
         paramMap = new HashMap<String, Object>();
         paramMap.put("payment_ids", paymentIds);
         respMap = sendRpcRequest("get_bulk_payments", paramMap);
         result = (Map<String, Object>) respMap.get("result");
-        
+
         // interpret get_bulk_payments response
         List<Map<String, Object>> paymentMaps = (List<Map<String, Object>>) result.get("payments");
         for (Map<String, Object> paymentMap : paymentMaps) {
           MoneroTransaction tx = interpretTransaction(paymentMap);
           tx.setType(MoneroTransactionType.INCOMING);
           // payment data is redundant with get_transfers rpc call, so it's not added because merging would create duplicates
-//          MoneroPayment payment = new MoneroPayment();
-//          payment.setAmount((BigInteger) paymentMap.get("amount"));
-//          List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
-//          payments.add(payment);
-//          tx.setPayments(payments);
+          // MoneroPayment payment = new MoneroPayment();
+          // payment.setAmount((BigInteger) paymentMap.get("amount"));
+          // List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
+          // payments.add(payment);
+          // tx.setPayments(payments);
           addTransaction(txTypeMap, tx);
         }
       }
     }
-    
+
     // build return type
     List<MoneroTransaction> txs = new ArrayList<MoneroTransaction>();
     for (Entry<MoneroTransactionType, Map<String, MoneroTransaction>> entry : txTypeMap.entrySet()) {
       txs.addAll(entry.getValue().values());
     }
-    
+
     // filter final results
     Collection<MoneroTransaction> toRemoves = new HashSet<MoneroTransaction>();
     for (MoneroTransaction tx : txs) {
@@ -397,7 +405,7 @@ public class MoneroWalletRpc implements MoneroWallet {
     txs.removeAll(toRemoves);
     return txs;
   }
-  
+
   private static URI parseUri(String endpoint) {
     try {
       return new URI(endpoint);
@@ -405,14 +413,14 @@ public class MoneroWalletRpc implements MoneroWallet {
       throw new MoneroException(e);
     }
   }
-  
+
   @SuppressWarnings("unchecked")
   private Pair<BigInteger, BigInteger> getBalances() {
     Map<String, Object> respMap = sendRpcRequest("getbalance", null);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return new Pair<BigInteger, BigInteger>((BigInteger) resultMap.get("balance"), (BigInteger) resultMap.get("unlocked_balance"));
   }
-  
+
   /**
    * Initializes a MoneroTransaction from a transaction response map.
    * 
@@ -424,8 +432,10 @@ public class MoneroWalletRpc implements MoneroWallet {
     MoneroTransaction tx = new MoneroTransaction();
     for (String key : txMap.keySet()) {
       Object val = txMap.get(key);
-      if (key.equals("amount")) { }   // this method does not process amount since it could be output or payment depending on context
-      else if (key.equals("spent")) { }   // this method does not process spent which is specific to outputs
+      if (key.equals("amount")) {
+      } // this method does not process amount since it could be output or payment depending on context
+      else if (key.equals("spent")) {
+      } // this method does not process spent which is specific to outputs
       else if (key.equalsIgnoreCase("fee")) tx.setFee((BigInteger) val);
       else if (key.equalsIgnoreCase("height")) tx.setHeight(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("block_height")) tx.setHeight(((BigInteger) val).intValue());
@@ -438,7 +448,8 @@ public class MoneroWalletRpc implements MoneroWallet {
       else if (key.equalsIgnoreCase("type")) tx.setType(getTransactionType((String) val));
       else if (key.equalsIgnoreCase("tx_size")) tx.setSize(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("unlock_time")) tx.setUnlockTime(((BigInteger) val).intValue());
-      else if (key.equalsIgnoreCase("global_index")) { }  // ignore
+      else if (key.equalsIgnoreCase("global_index")) {
+      } // ignore
       else if (key.equalsIgnoreCase("destinations")) {
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
         tx.setPayments(payments);
@@ -450,12 +461,11 @@ public class MoneroWalletRpc implements MoneroWallet {
             else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
           }
         }
-      }
-      else throw new MoneroException("Unrecognized transaction field: " + key);
+      } else throw new MoneroException("Unrecognized transaction field: " + key);
     }
     return tx;
   }
-  
+
   private static void addTransaction(Map<MoneroTransactionType, Map<String, MoneroTransaction>> txTypeMap, MoneroTransaction tx) {
     if (tx.getType() == null) throw new MoneroException("Transaction type cannot be null: \n" + tx.toString());
     if (tx.getHash() == null) throw new MoneroException("Transaction hash cannot be null: \n" + tx.getHash());
@@ -471,7 +481,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       targetTx.merge(tx);
     }
   }
-  
+
   private static MoneroTransactionType getTransactionType(String type) {
     if (type == null) throw new MoneroException("Transaction type is null");
     else if (type.equalsIgnoreCase("in")) return MoneroTransactionType.INCOMING;
@@ -481,7 +491,7 @@ public class MoneroWalletRpc implements MoneroWallet {
     else if (type.equalsIgnoreCase("pool")) return MoneroTransactionType.MEMPOOL;
     throw new MoneroException("Unrecognized transaction type: " + type);
   }
-  
+
   /**
    * Sends a request to the RPC API.
    * 
@@ -490,10 +500,10 @@ public class MoneroWalletRpc implements MoneroWallet {
    * @return Map<String, Object> is the RPC API response as a map
    */
   private Map<String, Object> sendRpcRequest(String method, Map<String, Object> params) {
-    
+
     // send http request
     try {
-      
+
       // build request body
       Map<String, Object> body = new HashMap<String, Object>();
       body.put("jsonrpc", "2.0");
@@ -501,19 +511,19 @@ public class MoneroWalletRpc implements MoneroWallet {
       body.put("method", method);
       if (params != null) body.put("params", params);
       LOGGER.debug("Sending method '" + method + "' with body: " + JsonUtils.serialize(body));
-      
+
       // send http request and validate response
       HttpPost post = new HttpPost(rpcUri);
       HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
       post.setEntity(entity);
       HttpResponse resp = client.execute(post);
       validateHttpResponse(resp);
-      
+
       // deserialize response
       Map<String, Object> respMap = JsonUtils.toMap(MAPPER, StreamUtils.streamToString(resp.getEntity().getContent()));
       LOGGER.debug("Received response to method '" + method + "': " + JsonUtils.serialize(respMap));
       EntityUtils.consume(resp.getEntity());
-      
+
       // check RPC response for errors
       validateRpcResponse(respMap, body);
       return respMap;
@@ -525,7 +535,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       throw new MoneroException(e3);
     }
   }
-  
+
   private static void validateHttpResponse(HttpResponse resp) {
     int code = resp.getStatusLine().getStatusCode();
     if (code < 200 || code > 299) {
@@ -538,7 +548,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       throw new HttpException(code, resp.getStatusLine().getReasonPhrase() + (content != null ? (": " + content) : ""));
     }
   }
-  
+
   @SuppressWarnings("unchecked")
   private static void validateRpcResponse(Map<String, Object> respMap, Map<String, Object> requestBody) {
     Map<String, Object> error = (Map<String, Object>) respMap.get("error");
