@@ -7,6 +7,9 @@ The implementation uses a running instance of monero-wallet-rpc.
 This project is licensed under Apache 2.0 and MIT.
 
 ## Supported Methods
+
+```
+- public int getHeight();
 ```
 - public int getHeight();
 
