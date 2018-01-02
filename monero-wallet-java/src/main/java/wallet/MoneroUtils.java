@@ -78,12 +78,12 @@ public class MoneroUtils {
   public static void validateMnemonicSeed(String mnemonicSeed) {
     if (mnemonicSeed == null) throw new MoneroException("Mnemonic seed is null");
     String[] words = mnemonicSeed.split(" ");
-    if (words.length != MNEMONIC_SEED_NUM_WORDS) throw new MoneroException("Mnemonic seed must be " + MNEMONIC_SEED_NUM_WORDS + " words but was " + words.length + " words");
+    if (words.length != MNEMONIC_SEED_NUM_WORDS) throw new MoneroException("Mnemonic seed is " + words.length + " words but must be " + MNEMONIC_SEED_NUM_WORDS);
   }
   
   public static void validateViewKey(String viewKey) {
     if (viewKey == null) throw new MoneroException("View key is null");
-    if (viewKey.length() != VIEW_KEY_LENGTH) throw new MoneroException("View key must be " + VIEW_KEY_LENGTH + " characters but was " + viewKey.length() + " characters");
+    if (viewKey.length() != VIEW_KEY_LENGTH) throw new MoneroException("View key is " + viewKey.length() + " characters but must be " + VIEW_KEY_LENGTH);
   }
   
   /**
