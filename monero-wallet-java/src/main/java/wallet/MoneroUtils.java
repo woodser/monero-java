@@ -3,8 +3,6 @@ package wallet;
 /**
  * Collection of utilities for working with Monero types.
  * 
- * TODO: validate addresses are hexidecimal
- * 
  * @author woodser
  */
 public class MoneroUtils {
