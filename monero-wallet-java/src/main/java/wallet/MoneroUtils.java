@@ -101,8 +101,8 @@ public class MoneroUtils {
   
   private static void validateHex(String str) {
     try {
-    	Long.parseLong(str,16);
-    }catch(Exception e) {
+    	Long.parseLong(str, 16);
+    } catch(Exception e) {
     	throw new MoneroException(e);
     }
   }
