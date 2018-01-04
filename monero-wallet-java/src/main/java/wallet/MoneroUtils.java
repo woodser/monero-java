@@ -96,12 +96,12 @@ public class MoneroUtils {
     else if (isValidIntegratedAddress(address)) return wallet.splitIntegratedAddress(address);
     throw new MoneroException("Address is neither standard nor integrated: " + address);
   }
-  
+
   private static void validateHex(String str) {
     try {
-    	Long.parseLong(str, 16);
-    } catch(Exception e) {
-    	throw new MoneroException(e);
+      Long.parseLong(str, 16);
+    } catch (Exception e) {
+      throw new MoneroException(e);
     }
   }
 }
