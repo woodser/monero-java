@@ -1,5 +1,8 @@
 package wallet;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Collection of utilities for working with Monero types.
  * 
@@ -42,10 +45,11 @@ public class MoneroUtils {
 
   public static void validateStandardAddress(String standardAddress) {
     if (standardAddress == null) throw new MoneroException("Standard address is null");
-    validateHex(standardAddress);
+    if (!standardAddress.startsWith("4")) throw new MoneroException("Standard address does not start with 4");
+    validateBase58(standardAddress);
     if (standardAddress.length() != STANDARD_ADDRESS_LENGTH) throw new MoneroException("Standard address is " + standardAddress.length() + " characters but must be " + STANDARD_ADDRESS_LENGTH);
   }
-  
+
   public static void validatePaymentId(String paymentId) {
     if (paymentId == null) throw new MoneroException("Payment id is null");
     validateHex(paymentId);
@@ -103,5 +107,18 @@ public class MoneroUtils {
     } catch (Exception e) {
       throw new MoneroException(e);
     }
+  }
+  
+  public static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
+  public static final List<Character> CHARS = new ArrayList<Character>();
+  static {
+	  for(char c:ALPHABET) {
+		  CHARS.add(c);
+	  }
+  }
+  private static void validateBase58(String standardAddress) {
+	for(char c:standardAddress.toCharArray()) {
+		if(!CHARS.contains((Character)c)) throw new MoneroException("Invalid Base58 " + standardAddress);
+	}
   }
 }
