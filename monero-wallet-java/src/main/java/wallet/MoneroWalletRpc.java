@@ -353,6 +353,8 @@ public class MoneroWalletRpc implements MoneroWallet {
 
       // interpret incoming_transfers response
       List<Map<String, Object>> outputMaps = (List<Map<String, Object>>) result.get("transfers");
+      if(outputMaps == null)
+    	  return new ArrayList<MoneroTransaction>();
       for (Map<String, Object> outputMap : outputMaps) {
         MoneroOutput output = new MoneroOutput();
         output.setAmount((BigInteger) outputMap.get("amount"));
