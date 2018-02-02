@@ -15,6 +15,13 @@ public class MoneroUtils {
   private static final int INTEGRATED_ADDRESS_LENGTH = 106;
   private static final int MNEMONIC_SEED_NUM_WORDS = 25;
   private static final int VIEW_KEY_LENGTH = 64;
+  private static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
+  private static final List<Character> CHARS = new ArrayList<Character>();
+  static {
+    for (char c : ALPHABET) {
+      CHARS.add(c);
+    }
+  }
   
   public static boolean isValidStandardAddress(String standardAddress) {
     try {
@@ -108,17 +115,10 @@ public class MoneroUtils {
       throw new MoneroException(e);
     }
   }
-  
-  public static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
-  public static final List<Character> CHARS = new ArrayList<Character>();
-  static {
-	  for(char c:ALPHABET) {
-		  CHARS.add(c);
-	  }
-  }
+
   private static void validateBase58(String standardAddress) {
-	for(char c:standardAddress.toCharArray()) {
-		if(!CHARS.contains((Character)c)) throw new MoneroException("Invalid Base58 " + standardAddress);
-	}
+    for (char c : standardAddress.toCharArray()) {
+      if (!CHARS.contains((Character) c)) throw new MoneroException("Invalid Base58 " + standardAddress);
+    }
   }
 }
