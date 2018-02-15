@@ -45,7 +45,7 @@ public class MoneroWalletRpc implements MoneroWallet {
   // logger
   private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class);
 
-  // customer mapper to deserialize integers to BigIntegers
+  // custom mapper to deserialize integers to BigIntegers
   public static ObjectMapper MAPPER;
   static {
     MAPPER = new ObjectMapper();
