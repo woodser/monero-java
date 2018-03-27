@@ -6,8 +6,8 @@ The implementation uses a running instance of monero-wallet-rpc.
 
 This project is licensed under Apache 2.0 and MIT.
 
-## Supported Methods
-
+# Supported Methods
+```
 - public int getHeight();
 
 - public BigInteger getBalance();
@@ -47,3 +47,4 @@ This project is licensed under Apache 2.0 and MIT.
 - public List<MoneroTransaction> getAllTransactions();
 	
 - public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight);
+```
