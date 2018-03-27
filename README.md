@@ -2,7 +2,7 @@
 
 This project is a Java wrapper for [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html).
 
-Monero Wallet RPC manages a Monero wallet using remote procedure calls and it depends on a full node to consult the Monero blockchain.
+Monero Wallet RPC manages a Monero wallet using remote procedure calls and depends on a full node to interact with the Monero blockchain.
 
 # Getting started
 
