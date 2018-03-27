@@ -462,7 +462,7 @@ public class MoneroWalletRpc implements MoneroWallet {
             else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
           }
         }
-      } else throw new MoneroException("Unrecognized transaction field: " + key);
+      } else LOGGER.warn("Ignoring unexpected transaction field: '" + key + "'");
     }
     return tx;
   }
