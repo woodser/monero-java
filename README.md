@@ -16,7 +16,7 @@ Monero Wallet RPC manages a Monero wallet using remote procedure calls and it de
 5. Download the latest code from this GitHub repository:
 	1. Create directory to hold project assets: `mkdir monero_wallet_java && cd monero_wallet_java`
 	2. Check out the code: `git clone https://github.com/woodser/monero-wallet-java.git`
-	3. Optionally import the projects into an IDE like Eclipse
+	3. Optionally import the Java projects into an IDE like Eclipse
 6. If necessary, configure the default wallet for running JUnit tests within TestUtils.java.  The RPC domain, port, and authentication username and password can be configured.
 7. Run JUnits under src/test/java to verify setup.  Note `TestMoneroWalletSends.java` will require sufficient funds to be available in the wallet.
 
