@@ -1,10 +1,8 @@
-# Monero Wallet Java Interface
+# Introduction
 
 This project is a Java wrapper for [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html).
 
-Monero Wallet RPC manages a Monero wallet using remote procedure calls.  Monero Wallet RPC depends on a full node to consult the Monero blockchain.
-
-This project is licensed under Apache 2.0 and MIT.
+Monero Wallet RPC manages a Monero wallet using remote procedure calls and it depends on a full node to consult the Monero blockchain.
 
 # Getting started
 
@@ -14,7 +12,7 @@ This project is licensed under Apache 2.0 and MIT.
 	- New testnet wallet: `./monero-wallet-cli --testnet --daemon-address http://node.xmrbackb.one:28081`
 	- Restore testnet wallet: `./monero-wallet-cli --restore-deterministic-wallet --testnet --daemon-address http://node.xmrbackb.one:28081`
 4. Start monero-wallet-rpc:
-	- Wallet name 'TestWallet', user 'rpc_user', password 'abc123': `./monero-wallet-rpc --testnet --daemon-address http://node.xmrbackb.one:28081 --rpc-bind-port 18082 --wallet-file /Applications/monero-v0.11.1.0/TestWallet --rpc-login rpc_user:abc123`
+	- Wallet name `TestWallet`, user `rpc_user`, password `abc123`: `./monero-wallet-rpc --testnet --daemon-address http://node.xmrbackb.one:28081 --rpc-bind-port 18082 --wallet-file /Applications/monero-v0.11.1.0/TestWallet --rpc-login rpc_user:abc123`
 5. If necessary, configure the default wallet for running JUnit tests within TestUtils.java.  The RPC domain, port, and authentication username and password can be configured.
 6. Run JUnits under src/test/java to verify setup.  Note `TestMoneroWalletSends.java` will require sufficient funds to be available in the wallet.
 
@@ -42,3 +40,7 @@ public List<MoneroTransaction> sweepDust();
 public List<MoneroTransaction> getAllTransactions();
 public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight);
 ```
+
+# License
+
+This project is licensed under Apache 2.0 and MIT.
