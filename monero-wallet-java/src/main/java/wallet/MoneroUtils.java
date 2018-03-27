@@ -52,7 +52,7 @@ public class MoneroUtils {
 
   public static void validateStandardAddress(String standardAddress) {
     if (standardAddress == null) throw new MoneroException("Standard address is null");
-    if (!standardAddress.startsWith("4")) throw new MoneroException("Standard address does not start with 4");
+    if (!standardAddress.startsWith("4") && !standardAddress.startsWith("9") && !standardAddress.startsWith("A")) throw new MoneroException("Standard address does not start with 4, 9 or A");  // 9 or A valid in testnet mode
     validateBase58(standardAddress);
     if (standardAddress.length() != STANDARD_ADDRESS_LENGTH) throw new MoneroException("Standard address is " + standardAddress.length() + " characters but must be " + STANDARD_ADDRESS_LENGTH);
   }
@@ -109,11 +109,8 @@ public class MoneroUtils {
   }
 
   private static void validateHex(String str) {
-    try {
-      Long.parseLong(str, 16);
-    } catch (Exception e) {
-      throw new MoneroException(e);
-    }
+    str = "8c8e616596edafb6";
+    if (!str.matches("^([0-9A-Fa-f]{2})+$")) throw new MoneroException("Invalid hex: " + str);
   }
 
   private static void validateBase58(String standardAddress) {
