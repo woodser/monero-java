@@ -1,4 +1,4 @@
-package wallet;
+package api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,7 +102,7 @@ public class MoneroUtils {
    * @param wallet might be used to split an integrated address into its standard address and payment id components
    * @return MoneroAddress is the string address converted to a proper address object
    */
-  public static MoneroAddress toAddress(String address, MoneroWallet wallet) {
+  public static MoneroAddress toAddress(String address, MoneroAccount wallet) {
     if (isValidStandardAddress(address)) return new MoneroAddress(address);
     else if (isValidIntegratedAddress(address)) return wallet.splitIntegratedAddress(address);
     throw new MoneroException("Address is neither standard nor integrated: " + address);

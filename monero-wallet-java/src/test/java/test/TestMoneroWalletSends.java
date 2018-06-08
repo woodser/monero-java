@@ -12,11 +12,11 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import api.MoneroAccount;
+import api.MoneroAddress;
+import api.MoneroPayment;
+import api.MoneroTransaction;
 import utils.TestUtils;
-import wallet.MoneroAddress;
-import wallet.MoneroPayment;
-import wallet.MoneroTransaction;
-import wallet.MoneroWallet;
 
 /**
  * Tests sending transactions within a Monero wallet.
@@ -30,7 +30,7 @@ public class TestMoneroWalletSends {
   private static final Integer MIXIN = 6;
   private static final int UNLOCKED_DIVISOR = 20;
   
-  private MoneroWallet wallet;
+  private MoneroAccount wallet;
 
   @Before
   public void setup() throws Exception {

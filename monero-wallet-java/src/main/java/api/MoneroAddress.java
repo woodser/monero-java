@@ -1,4 +1,4 @@
-package wallet;
+package api;
 
 public class MoneroAddress {
 

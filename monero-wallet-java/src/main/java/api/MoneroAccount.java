@@ -1,101 +1,73 @@
-package wallet;
+package api;
 
 import java.math.BigInteger;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 /**
- * Monero wallet interface.
- * 
- * @author woodser
+ * Monero account interface.
  */
-public interface MoneroWallet {
-
+public abstract class MoneroAccount {
+  
   /**
-   * Gets the wallet's balance.
+   * Gets the account's index.
    * 
-   * @return BigInteger is the wallet's balance
+   * @return int is the account's index in the wallet
    */
-  public BigInteger getBalance();
+  public abstract int getIndex();
 
   /**
-   * Gets the wallet's unlocked balance.
+   * Gets the account's balance.
    * 
-   * @return BigInteger is the wallet's unlocked balance
+   * @return BigInteger is the account's balance
    */
-  public BigInteger getUnlockedBalance();
+  public abstract BigInteger getBalance();
 
   /**
-   * Gets the current height of the blockchain.
+   * Gets the account's unlocked balance.
    * 
-   * @return int is the height of the wallet's blockchain
+   * @return BigInteger is the account's unlocked balance
    */
-  public int getHeight();
-
+  public abstract BigInteger getUnlockedBalance();
+  
   /**
-   * Returns the wallet's standard address.
+   * Indicates if importing multisig data is needed for returning a correct balance.
    * 
-   * @return MoneroAddress is the wallet's standard address
+   * @return true if importing multisig data is needed for returning a correct balance, false otherwise
    */
-  public MoneroAddress getStandardAddress();
-
+  public abstract boolean isMultisigImportNeeded();
+  
   /**
-   * Returns an integrated address based on this wallet's standard address and the given payment id.
+   * Gets the account's sub-addresses.
    * 
-   * @param paymentId is the payment id to generate an integrated address from
-   * @return MoneroIntegratedAddress is the integrated address with standard address and payment id components
+   * @return List<MoneroSubAddress> are the account's sub-addresses
    */
-  public MoneroIntegratedAddress getIntegratedAddress(String paymentId);
-
+  public List<MoneroSubAddress> getSubAddresses() {
+    return getSubAddresses(null);
+  }
+  
   /**
-   * Splits an integrated address into its standard address and payment id components.
+   * Gets a sub-address.
    * 
-   * @param integratedAddress is a string representation of the integrated address
-   * @return MoneroIntegratedAddress contains the integrated address, standard address, and payment id
+   * @param index is the index of the sub-address to get
+   * @return MoneroSubAddress is the sub-address at the given index
    */
-  public MoneroIntegratedAddress splitIntegratedAddress(String integratedAddress);
-
+  public MoneroSubAddress getSubAddress(int index) {
+    List<MoneroSubAddress> subAddresses = getSubAddresses(Arrays.asList(index));
+    return subAddresses.isEmpty() ? null : subAddresses.get(0);
+  }
+  
   /**
-   * Gets the wallet's mnemonic seed.
+   * Gets the account's sub-addresses.
    * 
-   * @return String is the wallet's mnemonic seed
+   * @param indices are indices of sub-addresses to get
+   * @return List<MoneroSubAddress> are the account's sub-addresses at the given indices
    */
-  public String getMnemonicSeed();
-
-  /**
-   * Gets the wallet's view key.
-   * 
-   * @return String is the wallet's view key
-   */
-  public String getViewKey();
-
-  /**
-   * Converts a MoneroUri to a standard URI.
-   * 
-   * @param moneroUri is the MoneroUri to convert to a standard URI
-   * @return URI is the MoneroUri converted to a standard URI
-   */
-  public URI toUri(MoneroUri moneroUri);
-
-  /**
-   * Converts a standard URI to a Monero URI.
-   * 
-   * @param uri is the standard URI to convert
-   * @return MoneroUri is the URI converted to a Monero URI
-   */
-  public MoneroUri toMoneroUri(URI uri);
-
-  /**
-   * Saves the current state of the blockchain.
-   */
-  public void saveBlockchain();
-
-  /**
-   * Stops the wallet.
-   */
-  public void stopWallet();
-
+  public abstract List<MoneroSubAddress> getSubAddresses(Collection<Integer> indices);
+  
   /**
    * Sends a payment.
    * 
@@ -106,7 +78,9 @@ public interface MoneroWallet {
    * @param unlockTime is the number of blocks before the funds can be spent
    * @return MoneroTransaction is the resulting transaction from sending the payment
    */
-  public MoneroTransaction send(String address, BigInteger amount, String paymentId, int mixin, int unlockTime);
+  public MoneroTransaction send(String address, BigInteger amount, String paymentId, int mixin, int unlockTime) {
+    return send(new MoneroPayment(null, address, amount), paymentId, mixin, unlockTime);
+  }
 
   /**
    * Sends a payment.
@@ -118,7 +92,9 @@ public interface MoneroWallet {
    * @param unlockTime is the number of blocks before the funds can be spent
    * @return MoneroTransaction is the resulting transaction from sending the payment
    */
-  public MoneroTransaction send(MoneroAddress address, BigInteger amount, String paymentId, int mixin, int unlockTime);
+  public MoneroTransaction send(MoneroAddress address, BigInteger amount, String paymentId, int mixin, int unlockTime) {
+    return send(address.toString(), amount, paymentId, mixin, unlockTime);
+  }
 
   /**
    * Sends a payment.
@@ -129,7 +105,11 @@ public interface MoneroWallet {
    * @param unlockTime is the number of blocks before the funds can be spent
    * @return MoneroTransaction is the resulting transaction from sending the payment
    */
-  public MoneroTransaction send(MoneroPayment payment, String paymentId, int mixin, int unlockTime);
+  public MoneroTransaction send(MoneroPayment payment, String paymentId, int mixin, int unlockTime) {
+    List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
+    payments.add(payment);
+    return send(payments, paymentId, mixin, unlockTime);
+  }
 
   /**
    * Sends a list of payments in one transaction.
@@ -140,7 +120,7 @@ public interface MoneroWallet {
    * @param unlockTime is the number of blocks before the funds can be spent
    * @return MoneroTransaction is the resulting transaction from sending the payment
    */
-  public MoneroTransaction send(List<MoneroPayment> payments, String paymentId, int mixin, int unlockTime);
+  public MoneroTransaction send(List<MoneroPayment> payments, Collection<Integer> subAddressIndices, BigInteger fee, String paymentId, int mixin, int unlockTime);
 
   /**
    * Sends a list of payments which can be split into more than one transaction if necessary.
@@ -153,13 +133,6 @@ public interface MoneroWallet {
    * @return List<MoneroTransaction> are the resulting transaction from sending the payments
    */
   public List<MoneroTransaction> sendSplit(List<MoneroPayment> payments, String paymentId, int mixin, int unlockTime, Boolean newAlgorithm);
-
-  /**
-   * Send all dust outputs back to the wallet to make them easier to spend and mix.
-   * 
-   * @return List<MoneroTransaction> are the resulting transactions from sweeping dust
-   */
-  public List<MoneroTransaction> sweepDust();
 
   /**
    * Returns all wallet transactions, each containing payments, outputs, and other metadata depending on the transaction type.

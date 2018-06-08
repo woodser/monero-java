@@ -16,16 +16,16 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import api.MoneroAccount;
+import api.MoneroAddress;
+import api.MoneroIntegratedAddress;
+import api.MoneroOutput;
+import api.MoneroTransaction;
+import api.MoneroUri;
+import api.MoneroUtils;
+import api.MoneroTransaction.MoneroTransactionType;
 import utils.TestUtils;
-import wallet.MoneroAddress;
-import wallet.MoneroIntegratedAddress;
-import wallet.MoneroOutput;
 import wallet.MoneroRpcException;
-import wallet.MoneroTransaction;
-import wallet.MoneroTransaction.MoneroTransactionType;
-import wallet.MoneroUri;
-import wallet.MoneroUtils;
-import wallet.MoneroWallet;
 
 /**
  * Tests a Monero wallet excluding sending transactions.
@@ -47,7 +47,7 @@ import wallet.MoneroWallet;
  */
 public class TestMoneroWalletNonSends {
   
-  private MoneroWallet wallet;
+  private MoneroAccount wallet;
 
   @Before
   public void setup() throws Exception {

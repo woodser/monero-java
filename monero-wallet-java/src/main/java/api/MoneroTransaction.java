@@ -1,5 +1,5 @@
 
-package wallet;
+package api;
 
 import java.math.BigInteger;
 import java.util.List;
