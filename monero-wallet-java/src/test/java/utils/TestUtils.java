@@ -13,7 +13,7 @@ import wallet.MoneroWalletRpc;
 public class TestUtils {
   
   private static final String DOMAIN = "localhost";
-  private static final int PORT = 18082;
+  private static final int PORT = 38083;
   private static final String USERNAME = "rpc_user";
   private static final String PASSWORD = "abc123";
   private static MoneroWallet wallet;
