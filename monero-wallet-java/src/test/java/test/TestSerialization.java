@@ -12,8 +12,8 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import rpc.MoneroWalletRpc;
 import utils.JsonUtils;
-import wallet.MoneroWalletRpc;
 
 /**
  * Tests serialization and deserialization.

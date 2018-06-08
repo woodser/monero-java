@@ -1,4 +1,4 @@
-package wallet;
+package rpc;
 
 import java.math.BigInteger;
 import java.net.URI;

@@ -3,7 +3,7 @@ package utils;
 import org.apache.log4j.PropertyConfigurator;
 
 import api.MoneroAccount;
-import wallet.MoneroWalletRpc;
+import rpc.MoneroWalletRpc;
 
 /**
  * Collection of test utilities.
