@@ -15,6 +15,13 @@ public interface MoneroSubAddress {
   public int getIndex();
   
   /**
+   * Set the sub-address label.
+   * 
+   * @param label specifies the sub-address label
+   */
+  public void setLabel(String label);
+  
+  /**
    * Get the sub-address label.
    * 
    * @return String is the sub-address label

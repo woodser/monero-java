@@ -1,8 +1,6 @@
 package api;
 
 import java.math.BigInteger;
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -13,11 +11,25 @@ import java.util.List;
 public abstract class MoneroAccount {
   
   /**
-   * Gets the account's index.
+   * Get the account index in the wallet.
    * 
    * @return int is the account's index in the wallet
    */
   public abstract int getIndex();
+  
+  /**
+   * Get the account label.
+   * 
+   * @return String is the account label
+   */
+  public abstract String getLabel();
+  
+  /**
+   * Set the account label.
+   * 
+   * @param label specifies the account label to set
+   */
+  public abstract void setLabel(String label);
 
   /**
    * Gets the account's balance.
@@ -41,6 +53,14 @@ public abstract class MoneroAccount {
   public abstract boolean isMultisigImportNeeded();
   
   /**
+   * Create a new sub-address for an account.
+   * 
+   * @param label specifies the label for the sub-address
+   * @return MoneroSubAddress is the created sub-address
+   */
+  public abstract MoneroSubAddress createSubAddress(String label);
+  
+  /**
    * Gets the account's sub-addresses.
    * 
    * @return List<MoneroSubAddress> are the account's sub-addresses
@@ -57,7 +77,8 @@ public abstract class MoneroAccount {
    */
   public MoneroSubAddress getSubAddress(int index) {
     List<MoneroSubAddress> subAddresses = getSubAddresses(Arrays.asList(index));
-    return subAddresses.isEmpty() ? null : subAddresses.get(0);
+    if (subAddresses.size() != 1) throw new MoneroException("Sub-address at index " + index + " does not exist");
+    return subAddresses.get(0);
   }
   
   /**
@@ -69,77 +90,35 @@ public abstract class MoneroAccount {
   public abstract List<MoneroSubAddress> getSubAddresses(Collection<Integer> indices);
   
   /**
-   * Sends a payment.
+   * Send a payment.
    * 
-   * @param address is the recipient public address as a string
-   * @param amount is the amount to send in atomic units
-   * @param paymentId specifies the payment id (optional)
-   * @param mixin is the number of outputs from the blockchain to mix with
-   * @param unlockTime is the number of blocks before the funds can be spent
-   * @return MoneroTransaction is the resulting transaction from sending the payment
+   * @param config is the transaction configuration
+   * @return MoneroTransaction is the resulting transaction from sending payment
    */
-  public MoneroTransaction send(String address, BigInteger amount, String paymentId, int mixin, int unlockTime) {
-    return send(new MoneroPayment(null, address, amount), paymentId, mixin, unlockTime);
-  }
-
+  public abstract MoneroTransaction send(MoneroTransactionConfig config);
+  
   /**
-   * Sends a payment.
+   * Send a payment which may be split across multiple transactions.
    * 
-   * @param address is the recipient public address
-   * @param amount is the amount to send in atomic units
-   * @param paymentId specifies the payment id (optional)
-   * @param mixin is the number of outputs from the blockchain to mix with
-   * @param unlockTime is the number of blocks before the funds can be spent
-   * @return MoneroTransaction is the resulting transaction from sending the payment
+   * @param config is the transaction configuration
+   * @return List<MoneroTransaction> are the resulting transactions from sending payment
    */
-  public MoneroTransaction send(MoneroAddress address, BigInteger amount, String paymentId, int mixin, int unlockTime) {
-    return send(address.toString(), amount, paymentId, mixin, unlockTime);
-  }
-
+  public abstract List<MoneroTransaction> sendSplit(MoneroTransactionConfig config);
+  
   /**
-   * Sends a payment.
+   * Send all unlocked balance to an address.
    * 
-   * @param payment specifies the recipient public address and amount to send
-   * @param paymentId is the payment id (optional)
-   * @param mixin is the number of outputs from the blockchain to mix with
-   * @param unlockTime is the number of blocks before the funds can be spent
-   * @return MoneroTransaction is the resulting transaction from sending the payment
+   * @param config is the transcaction configuration
+   * @param List<MoneroTransaction> are the resulting transactions from sweeping
    */
-  public MoneroTransaction send(MoneroPayment payment, String paymentId, int mixin, int unlockTime) {
-    List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
-    payments.add(payment);
-    return send(payments, paymentId, mixin, unlockTime);
-  }
-
-  /**
-   * Sends a list of payments in one transaction.
-   * 
-   * @param payments are the payments to send, each specifying a recipient public address and amount to send
-   * @param paymentId specifies the payment id (optional)
-   * @param mixin is the number of outputs from the blockchain to mix with
-   * @param unlockTime is the number of blocks before the funds can be spent
-   * @return MoneroTransaction is the resulting transaction from sending the payment
-   */
-  public MoneroTransaction send(List<MoneroPayment> payments, Collection<Integer> subAddressIndices, BigInteger fee, String paymentId, int mixin, int unlockTime);
-
-  /**
-   * Sends a list of payments which can be split into more than one transaction if necessary.
-   * 
-   * @param payments are the payments to send, each specifying a recipient public address and amount to send
-   * @param paymentId specifies the payment id (optional)
-   * @param mixin is the number of outputs from the blockchain to mix with
-   * @param unlockTime is the number of blocks before the funds can be spent
-   * @param newAlgorithm specifies if the "new" construction algorithm should be used; defaults to false
-   * @return List<MoneroTransaction> are the resulting transaction from sending the payments
-   */
-  public List<MoneroTransaction> sendSplit(List<MoneroPayment> payments, String paymentId, int mixin, int unlockTime, Boolean newAlgorithm);
+  public abstract List<MoneroTransaction> sweepAll(MoneroTransactionConfig config);
 
   /**
    * Returns all wallet transactions, each containing payments, outputs, and other metadata depending on the transaction type.
    * 
    * @return List<MoneroTransaction> are all of the wallet's transactions
    */
-  public List<MoneroTransaction> getAllTransactions();
+  public abstract List<MoneroTransaction> getAllTransactions();
 
   /**
    * Returns all wallet transactions specified, each containing payments, outputs, and other metadata depending on the transaction type.

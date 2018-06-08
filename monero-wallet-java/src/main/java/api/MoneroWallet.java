@@ -30,6 +30,14 @@ public abstract class MoneroWallet {
   public abstract String getViewKey();
   
   /**
+   * Create a new account with an optional label.
+   * 
+   * @param label specifies the label for the account (optional)
+   * @return MoneroAccount is the created account
+   */
+  public abstract MoneroAccount createAccount(String label);
+  
+  /**
    * Get all accounts for a wallet.
    * 
    * @return List<MoneroAccount> are all accounts for the wallet
@@ -135,8 +143,9 @@ public abstract class MoneroWallet {
   public abstract void importKeyImages(List<MoneroKeyImage> keyImages);
   
   /**
+   * Get a list of available languages for your wallet's seed.
    * 
-   * @return
+   * @return List<String> is a list of available languages
    */
   public abstract List<String> getLanguages();
   
