@@ -1,6 +1,6 @@
 package utils;
 
-import wallet.MoneroWallet;
+import api.MoneroAccount;
 
 /**
  * Prints the balances of the wallet.
@@ -10,7 +10,7 @@ import wallet.MoneroWallet;
 public class PrintBalances {
 
   public static void main(String[] args) {
-    MoneroWallet wallet = TestUtils.getWallet();
+    MoneroAccount wallet = TestUtils.getWallet();
     System.out.println("Balance: " + wallet.getBalance());
     System.out.println("Unlocked: " + wallet.getUnlockedBalance());
   }

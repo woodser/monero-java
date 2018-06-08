@@ -29,18 +29,27 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import api.MoneroAccount;
+import api.MoneroAddress;
+import api.MoneroException;
+import api.MoneroIntegratedAddress;
+import api.MoneroOutput;
+import api.MoneroPayment;
+import api.MoneroTransaction;
+import api.MoneroUri;
+import api.MoneroUtils;
+import api.MoneroTransaction.MoneroTransactionType;
 import types.HttpException;
 import types.Pair;
 import utils.JsonUtils;
 import utils.StreamUtils;
-import wallet.MoneroTransaction.MoneroTransactionType;
 
 /**
  * Implements a Monero wallet backed by a Monero wallet RPC endpoint.
  * 
  * @author woodser
  */
-public class MoneroWalletRpc implements MoneroWallet {
+public class MoneroWalletRpc implements MoneroAccount {
 
   // logger
   private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class);
@@ -206,20 +215,6 @@ public class MoneroWalletRpc implements MoneroWallet {
 
   public void stopWallet() {
     sendRpcRequest("stop_wallet", null);
-  }
-
-  public MoneroTransaction send(String address, BigInteger amount, String paymentId, int mixin, int unlockTime) {
-    return send(new MoneroPayment(null, address, amount), paymentId, mixin, unlockTime);
-  }
-
-  public MoneroTransaction send(MoneroAddress address, BigInteger amount, String paymentId, int mixin, int unlockTime) {
-    return send(address.toString(), amount, paymentId, mixin, unlockTime);
-  }
-
-  public MoneroTransaction send(MoneroPayment payment, String paymentId, int mixin, int unlockTime) {
-    List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
-    payments.add(payment);
-    return send(payments, paymentId, mixin, unlockTime);
   }
 
   @SuppressWarnings("unchecked")

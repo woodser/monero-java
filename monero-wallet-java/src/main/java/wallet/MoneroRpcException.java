@@ -2,6 +2,8 @@ package wallet;
 
 import java.util.Map;
 
+import api.MoneroException;
+
 /**
  * Exception that is thrown when the RPC API returns an error.
  * 
