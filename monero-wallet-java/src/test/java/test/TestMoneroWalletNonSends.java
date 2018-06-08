@@ -24,8 +24,8 @@ import api.MoneroTransaction;
 import api.MoneroUri;
 import api.MoneroUtils;
 import api.MoneroTransaction.MoneroTransactionType;
+import rpc.MoneroRpcException;
 import utils.TestUtils;
-import wallet.MoneroRpcException;
 
 /**
  * Tests a Monero wallet excluding sending transactions.
