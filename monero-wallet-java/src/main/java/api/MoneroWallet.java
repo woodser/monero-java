@@ -9,9 +9,9 @@ import java.util.List;
 public abstract class MoneroWallet {
   
   /**
-   * Get the current height of the blockchain.
+   * Returns the wallet's current block height.
    * 
-   * @return int is the height of the wallet's blockchain
+   * @return int is the current block height of the wallet
    */
   public abstract int getHeight();
   
