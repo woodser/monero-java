@@ -35,6 +35,7 @@ public class MoneroTransaction {
   private String note;
   private Long timestamp;
   private Integer unlockTime;
+  private Boolean isDoubleSpend;
 	
 	public MoneroTransaction() {
 	  super();
@@ -154,6 +155,14 @@ public class MoneroTransaction {
     this.unlockTime = unlockTime;
   }
   
+  public Boolean getIsDoubleSpend() {
+    return isDoubleSpend;
+  }
+
+  public void setIsDoubleSpend(Boolean isDoubleSpend) {
+    this.isDoubleSpend = isDoubleSpend;
+  }
+
   /**
    * Merges the given transaction into this transaction.
    * 
@@ -223,6 +232,7 @@ public class MoneroTransaction {
     sb.append("Note: " + note + "\n");
     sb.append("Timestamp: " + timestamp + "\n");
     sb.append("Unlock time: " + unlockTime);
+    sb.append("Is double spend: " + isDoubleSpend);
     return sb.toString();
   }
 }

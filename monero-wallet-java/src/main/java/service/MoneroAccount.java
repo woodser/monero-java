@@ -93,26 +93,4 @@ public interface MoneroAccount {
    * @param List<MoneroTransaction> are the resulting transactions from sweeping
    */
   public List<MoneroTransaction> sweepAll(MoneroTransactionConfig config);
-
-  /**
-   * Returns all wallet transactions, each containing payments, outputs, and other metadata depending on the transaction type.
-   * 
-   * @return List<MoneroTransaction> are all of the wallet's transactions
-   */
-  public List<MoneroTransaction> getAllTransactions();
-
-  /**
-   * Returns all wallet transactions specified, each containing payments, outputs, and other metadata depending on the transaction type.
-   * 
-   * @param getIncoming specifies if incoming transactions should be retrieved
-   * @param getOutgoing specifies if outgoing transactions should be retrieved
-   * @param getPending specifies if pending transactions should be retrieved
-   * @param getFailed specifies if failed transactions should be retrieved
-   * @param getMemPool specifies if mempool transactions should be retrieved
-   * @param paymentIds allows transactions with specific transaction ids to be retrieved (optional)
-   * @param minHeight allows transactions with a mininum block height to be retrieved (optional)
-   * @param maxHeight allows transactions with a maximum block height to be retrieved (optional)
-   * @return List<MoneroTransaction> are the retrieved transactions
-   */
-  public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight);
 }
