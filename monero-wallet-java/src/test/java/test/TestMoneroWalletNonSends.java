@@ -42,8 +42,6 @@ import utils.TestUtils;
  * - no way to get transaction keys after sending
  * - height vs block_height inconsistent
  * - key is never returned as part of get transactions and their variations
- * 
- * @author woodser
  */
 public class TestMoneroWalletNonSends {
   

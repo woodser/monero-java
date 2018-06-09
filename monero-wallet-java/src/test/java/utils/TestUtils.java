@@ -7,8 +7,6 @@ import service.rpc.MoneroWalletRpc;
 
 /**
  * Collection of test utilities.
- * 
- * @author woodser
  */
 public class TestUtils {
   

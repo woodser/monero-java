@@ -17,8 +17,6 @@ import utils.JsonUtils;
 
 /**
  * Tests serialization and deserialization.
- * 
- * @author woodser
  */
 public class TestSerialization {
 
