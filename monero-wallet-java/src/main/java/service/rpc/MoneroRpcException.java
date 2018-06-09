@@ -6,8 +6,6 @@ import service.MoneroException;
 
 /**
  * Exception that is thrown when the RPC API returns an error.
- * 
- * @author woodser
  */
 public class MoneroRpcException extends MoneroException {
 

@@ -8,8 +8,6 @@ import service.MoneroException;
 
 /**
  * Represents a transaction on the Monero network.
- * 
- * @author woodser
  */
 public class MoneroTransaction {
   

@@ -1,5 +1,6 @@
 package model;
 
+import service.MoneroException;
 import utils.MoneroUtils;
 
 public class MoneroIntegratedAddress extends MoneroAddress {
@@ -9,8 +10,8 @@ public class MoneroIntegratedAddress extends MoneroAddress {
   
   public MoneroIntegratedAddress(String standardAddress, String paymentId, String integratedAddress) {
     super(standardAddress);
-    MoneroUtils.validatePaymentId(paymentId);
-    MoneroUtils.validateIntegratedAddress(integratedAddress);
+    validatePaymentId(paymentId);
+    validateIntegratedAddress(integratedAddress);
     this.paymentId = paymentId;
     this.integratedAddress = integratedAddress;
   }
@@ -49,5 +50,46 @@ public class MoneroIntegratedAddress extends MoneroAddress {
       if (other.paymentId != null) return false;
     } else if (!paymentId.equals(other.paymentId)) return false;
     return true;
+  }
+  
+  // ------------------------------ STATIC UTILITIES --------------------------
+  
+  private static final int PAYMENT_ID_LENGTH = 16;
+  private static final int INTEGRATED_ADDRESS_LENGTH = 106;
+  
+  public static boolean isValidIntegratedAddress(String integratedAddress) {
+    try {
+      validateIntegratedAddress(integratedAddress);
+      return true;
+    } catch (MoneroException e) {
+      return false;
+    }
+  }
+  
+  private static boolean isValidPaymentId(String paymentId) {
+    try {
+      validatePaymentId(paymentId);
+      return true;
+    } catch (MoneroException e) {
+      return false;
+    }
+  }
+  
+  private static void validatePaymentId(String paymentId) {
+    if (paymentId == null) throw new MoneroException("Payment id is null");
+    MoneroUtils.validateHex(paymentId);
+    if (paymentId.length() != PAYMENT_ID_LENGTH) throw new MoneroException("Payment id is " + paymentId.length() + " characters but must be " + PAYMENT_ID_LENGTH);
+  }
+  
+  private static void validateIntegratedAddress(String integratedAddress) {
+    if (integratedAddress == null) throw new MoneroException("Integrated address is null");
+    if (integratedAddress.length() != INTEGRATED_ADDRESS_LENGTH) throw new MoneroException("Integrated address is " + integratedAddress.length() + " characters but must be " + INTEGRATED_ADDRESS_LENGTH);
+  }
+  
+  private static void validateIntegratedAddress(String standardAddress, String paymentId, String integratedAddress) {
+    new MoneroAddress(standardAddress);
+    if (paymentId != null) validatePaymentId(paymentId);
+    validateIntegratedAddress(integratedAddress);
+    // TODO: make sure standard address + payment id = integrated address
   }
 }

@@ -46,8 +46,6 @@ import utils.StreamUtils;
 
 /**
  * Implements a Monero wallet backed by a Monero wallet RPC endpoint.
- * 
- * @author woodser
  */
 public class MoneroWalletRpc implements MoneroAccount {
 

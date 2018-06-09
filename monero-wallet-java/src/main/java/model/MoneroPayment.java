@@ -8,8 +8,6 @@ import java.math.BigInteger;
  * A transaction may have one or more payments.
  * 
  * Each payment may be fulfilled by multiple transaction outputs.
- * 
- * @author woodser
  */
 public class MoneroPayment {
 

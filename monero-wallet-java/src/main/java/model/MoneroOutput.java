@@ -4,8 +4,6 @@ import java.math.BigInteger;
 
 /**
  * Represents a Monero transaction output.
- * 
- * @author woodser
  */
 public class MoneroOutput {
 

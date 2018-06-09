@@ -4,8 +4,6 @@ import service.MoneroAccount;
 
 /**
  * Prints the balances of the wallet.
- * 
- * @author woodser
  */
 public class PrintBalances {
 

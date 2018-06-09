@@ -22,8 +22,6 @@ import utils.TestUtils;
  * Tests sending transactions within a Monero wallet.
  * 
  * These tests are separated since they rely on a balance and initiate transactions on the blockchain.
- * 
- * @author woodser
  */
 public class TestMoneroWalletSends {
   
