@@ -38,10 +38,10 @@ import model.MoneroUri;
 import model.MoneroTransaction.MoneroTransactionType;
 import service.MoneroAccount;
 import service.MoneroException;
-import service.MoneroUtils;
 import types.HttpException;
 import types.Pair;
 import utils.JsonUtils;
+import utils.MoneroUtils;
 import utils.StreamUtils;
 
 /**

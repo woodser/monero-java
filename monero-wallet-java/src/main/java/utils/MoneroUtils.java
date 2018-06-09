@@ -1,10 +1,12 @@
-package service;
+package utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import model.MoneroAddress;
 import model.MoneroIntegratedAddress;
+import service.MoneroAccount;
+import service.MoneroException;
 
 /**
  * Collection of utilities for working with Monero types.
