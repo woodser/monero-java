@@ -1,6 +1,6 @@
 package utils;
 
-import api.MoneroAccount;
+import service.MoneroAccount;
 
 /**
  * Prints the balances of the wallet.

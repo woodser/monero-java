@@ -16,15 +16,15 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import api.MoneroAccount;
-import api.MoneroAddress;
-import api.MoneroIntegratedAddress;
-import api.MoneroOutput;
-import api.MoneroTransaction;
-import api.MoneroUri;
-import api.MoneroUtils;
-import api.MoneroTransaction.MoneroTransactionType;
+import model.MoneroAddress;
+import model.MoneroIntegratedAddress;
+import model.MoneroOutput;
+import model.MoneroTransaction;
+import model.MoneroUri;
+import model.MoneroTransaction.MoneroTransactionType;
 import rpc.MoneroRpcException;
+import service.MoneroAccount;
+import service.MoneroUtils;
 import utils.TestUtils;
 
 /**

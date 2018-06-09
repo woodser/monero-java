@@ -1,4 +1,4 @@
-package api;
+package model;
 
 import java.math.BigInteger;
 

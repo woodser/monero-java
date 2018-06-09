@@ -1,4 +1,6 @@
-package api;
+package model;
+
+import service.MoneroUtils;
 
 public class MoneroAddress {
 
