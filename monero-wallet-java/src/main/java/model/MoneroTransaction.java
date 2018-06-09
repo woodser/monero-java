@@ -1,8 +1,10 @@
 
-package api;
+package model;
 
 import java.math.BigInteger;
 import java.util.List;
+
+import service.MoneroException;
 
 /**
  * Represents a transaction on the Monero network.

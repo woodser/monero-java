@@ -1,7 +1,9 @@
-package api;
+package model;
 
 import java.math.BigInteger;
 import java.util.Collection;
+
+import service.MoneroSubAddress;
 
 /**
  * Send transaction configuration.

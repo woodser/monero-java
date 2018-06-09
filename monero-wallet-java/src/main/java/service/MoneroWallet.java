@@ -3,11 +3,10 @@ package service;
 import java.net.URI;
 import java.util.List;
 
-import api.MoneroAccount;
-import api.MoneroIntegratedAddress;
-import api.MoneroKeyImage;
-import api.MoneroTransaction;
-import api.MoneroUri;
+import model.MoneroIntegratedAddress;
+import model.MoneroKeyImage;
+import model.MoneroTransaction;
+import model.MoneroUri;
 
 public interface MoneroWallet {
   

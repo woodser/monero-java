@@ -2,7 +2,7 @@ package rpc;
 
 import java.util.Map;
 
-import api.MoneroException;
+import service.MoneroException;
 
 /**
  * Exception that is thrown when the RPC API returns an error.

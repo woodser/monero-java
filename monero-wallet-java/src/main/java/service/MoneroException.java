@@ -1,4 +1,4 @@
-package api;
+package service;
 
 public class MoneroException extends RuntimeException {
 

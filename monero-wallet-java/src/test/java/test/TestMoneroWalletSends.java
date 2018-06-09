@@ -12,10 +12,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import api.MoneroAccount;
-import api.MoneroAddress;
-import api.MoneroPayment;
-import api.MoneroTransaction;
+import model.MoneroAddress;
+import model.MoneroPayment;
+import model.MoneroTransaction;
+import service.MoneroAccount;
 import utils.TestUtils;
 
 /**
