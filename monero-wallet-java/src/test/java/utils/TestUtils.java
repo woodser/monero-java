@@ -3,6 +3,7 @@ package utils;
 import org.apache.log4j.PropertyConfigurator;
 
 import service.MoneroAccount;
+import service.MoneroWallet;
 import service.rpc.MoneroWalletRpc;
 
 /**
@@ -21,7 +22,7 @@ public class TestUtils {
     PropertyConfigurator.configure("src/main/resources/log4j.properties");
   }
 
-  public static MoneroAccount getWallet() {
+  public static MoneroWallet getWallet() {
     if (wallet == null) {
       try {
         wallet = new MoneroWalletRpc(DOMAIN, PORT, USERNAME, PASSWORD);

@@ -34,10 +34,10 @@ import model.MoneroIntegratedAddress;
 import model.MoneroOutput;
 import model.MoneroPayment;
 import model.MoneroTransaction;
-import model.MoneroUri;
 import model.MoneroTransaction.MoneroTransactionType;
-import service.MoneroAccount;
+import model.MoneroUri;
 import service.MoneroException;
+import service.MoneroWallet;
 import types.HttpException;
 import types.Pair;
 import utils.JsonUtils;
@@ -47,7 +47,7 @@ import utils.StreamUtils;
 /**
  * Implements a Monero wallet backed by a Monero wallet RPC endpoint.
  */
-public class MoneroWalletRpc implements MoneroAccount {
+public class MoneroWalletRpc implements MoneroWallet {
 
   // logger
   private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class);
@@ -422,7 +422,7 @@ public class MoneroWalletRpc implements MoneroAccount {
    * @return MoneroTransaction is the initialized transaction
    */
   @SuppressWarnings("unchecked")
-  private static MoneroTransaction interpretTransaction(Map<String, Object> txMap) {
+  private MoneroTransaction interpretTransaction(Map<String, Object> txMap) {
     MoneroTransaction tx = new MoneroTransaction();
     for (String key : txMap.keySet()) {
       Object val = txMap.get(key);
@@ -450,7 +450,7 @@ public class MoneroWalletRpc implements MoneroAccount {
         for (Map<String, Object> paymentMap : (List<Map<String, Object>>) val) {
           MoneroPayment payment = new MoneroPayment();
           for (String paymentKey : paymentMap.keySet()) {
-            if (paymentKey.equals("address")) payment.setAddress((String) paymentMap.get(paymentKey));
+            if (paymentKey.equals("address")) payment.setAddress(MoneroUtils.toAddress((String) paymentMap.get(paymentKey), this));
             else if (paymentKey.equals("amount")) payment.setAmount((BigInteger) paymentMap.get(paymentKey));
             else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
           }
@@ -459,33 +459,7 @@ public class MoneroWalletRpc implements MoneroAccount {
     }
     return tx;
   }
-
-  private static void addTransaction(Map<MoneroTransactionType, Map<String, MoneroTransaction>> txTypeMap, MoneroTransaction tx) {
-    if (tx.getType() == null) throw new MoneroException("Transaction type cannot be null: \n" + tx.toString());
-    if (tx.getHash() == null) throw new MoneroException("Transaction hash cannot be null: \n" + tx.getHash());
-    Map<String, MoneroTransaction> txHashMap = txTypeMap.get(tx.getType());
-    if (txHashMap == null) {
-      txHashMap = new HashMap<String, MoneroTransaction>();
-      txTypeMap.put(tx.getType(), txHashMap);
-    }
-    MoneroTransaction targetTx = txHashMap.get(tx.getHash());
-    if (targetTx == null) {
-      txHashMap.put(tx.getHash(), tx);
-    } else {
-      targetTx.merge(tx);
-    }
-  }
-
-  private static MoneroTransactionType getTransactionType(String type) {
-    if (type == null) throw new MoneroException("Transaction type is null");
-    else if (type.equalsIgnoreCase("in")) return MoneroTransactionType.INCOMING;
-    else if (type.equalsIgnoreCase("out")) return MoneroTransactionType.OUTGOING;
-    else if (type.equalsIgnoreCase("pending")) return MoneroTransactionType.PENDING;
-    else if (type.equalsIgnoreCase("failed")) return MoneroTransactionType.FAILED;
-    else if (type.equalsIgnoreCase("pool")) return MoneroTransactionType.MEMPOOL;
-    throw new MoneroException("Unrecognized transaction type: " + type);
-  }
-
+  
   /**
    * Sends a request to the RPC API.
    * 
@@ -528,6 +502,34 @@ public class MoneroWalletRpc implements MoneroAccount {
     } catch (Exception e3) {
       throw new MoneroException(e3);
     }
+  }
+  
+  // ------------------------------ STATIC UTILITIES --------------------------
+
+  private static void addTransaction(Map<MoneroTransactionType, Map<String, MoneroTransaction>> txTypeMap, MoneroTransaction tx) {
+    if (tx.getType() == null) throw new MoneroException("Transaction type cannot be null: \n" + tx.toString());
+    if (tx.getHash() == null) throw new MoneroException("Transaction hash cannot be null: \n" + tx.getHash());
+    Map<String, MoneroTransaction> txHashMap = txTypeMap.get(tx.getType());
+    if (txHashMap == null) {
+      txHashMap = new HashMap<String, MoneroTransaction>();
+      txTypeMap.put(tx.getType(), txHashMap);
+    }
+    MoneroTransaction targetTx = txHashMap.get(tx.getHash());
+    if (targetTx == null) {
+      txHashMap.put(tx.getHash(), tx);
+    } else {
+      targetTx.merge(tx);
+    }
+  }
+
+  private static MoneroTransactionType getTransactionType(String type) {
+    if (type == null) throw new MoneroException("Transaction type is null");
+    else if (type.equalsIgnoreCase("in")) return MoneroTransactionType.INCOMING;
+    else if (type.equalsIgnoreCase("out")) return MoneroTransactionType.OUTGOING;
+    else if (type.equalsIgnoreCase("pending")) return MoneroTransactionType.PENDING;
+    else if (type.equalsIgnoreCase("failed")) return MoneroTransactionType.FAILED;
+    else if (type.equalsIgnoreCase("pool")) return MoneroTransactionType.MEMPOOL;
+    throw new MoneroException("Unrecognized transaction type: " + type);
   }
 
   private static void validateHttpResponse(HttpResponse resp) {

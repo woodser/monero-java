@@ -12,18 +12,18 @@ import java.math.BigInteger;
 public class MoneroPayment {
 
   private MoneroTransaction transaction;
-  private String address;
+  private MoneroAddress address;
   private BigInteger amount;
   
   public MoneroPayment() {
     super();
   }
   
-  public MoneroPayment(String address, BigInteger amount) {
+  public MoneroPayment(MoneroAddress address, BigInteger amount) {
     this(null, address, amount);
   }
   
-  public MoneroPayment(MoneroTransaction transaction, String address, BigInteger amount) {
+  public MoneroPayment(MoneroTransaction transaction, MoneroAddress address, BigInteger amount) {
     super();
     this.transaction = transaction;
     this.address = address;
@@ -38,11 +38,11 @@ public class MoneroPayment {
     this.transaction = transaction;
   }
 
-  public String getAddress() {
+  public MoneroAddress getAddress() {
     return address;
   }
 
-  public void setAddress(String address) {
+  public void setAddress(MoneroAddress address) {
     this.address = address;
   }
 
