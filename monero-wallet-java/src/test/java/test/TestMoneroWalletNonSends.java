@@ -29,19 +29,6 @@ import utils.TestUtils;
 
 /**
  * Tests a Monero wallet excluding sending transactions.
- * 
- * Monero-wallet-rpc suggested improvements:
- * 
- * - tx_hash in incoming_transfers vs txid in get_transfers; standardize on tx_hash or tx_id
- * - standardize terminology transactions vs transfers
- * - standardize terminology destinations vs outputs vs payments (I like payment which is address + amount)
- * - consistently return all possible fields
- * - get_transfers returns all transactions whereas incoming_transfers returns incoming outputs; clarify terminology or both could return transactions for consistency
- * - why doesn't tx_size get returned on get_transfers
- * - standardize terminology payment vs output; one payment may be fulfilled with multiple outputs
- * - no way to get transaction keys after sending
- * - height vs block_height inconsistent
- * - key is never returned as part of get transactions and their variations
  */
 public class TestMoneroWalletNonSends {
   
