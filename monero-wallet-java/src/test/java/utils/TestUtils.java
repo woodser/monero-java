@@ -2,8 +2,8 @@ package utils;
 
 import org.apache.log4j.PropertyConfigurator;
 
-import rpc.MoneroWalletRpc;
 import service.MoneroAccount;
+import service.rpc.MoneroWalletRpc;
 
 /**
  * Collection of test utilities.

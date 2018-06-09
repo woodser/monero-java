@@ -22,9 +22,9 @@ import model.MoneroOutput;
 import model.MoneroTransaction;
 import model.MoneroUri;
 import model.MoneroTransaction.MoneroTransactionType;
-import rpc.MoneroRpcException;
 import service.MoneroAccount;
 import service.MoneroUtils;
+import service.rpc.MoneroRpcException;
 import utils.TestUtils;
 
 /**

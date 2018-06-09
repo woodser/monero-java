@@ -1,4 +1,4 @@
-package rpc;
+package service.rpc;
 
 import java.util.Map;
 

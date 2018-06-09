@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import rpc.MoneroWalletRpc;
+import service.rpc.MoneroWalletRpc;
 import utils.JsonUtils;
 
 /**
