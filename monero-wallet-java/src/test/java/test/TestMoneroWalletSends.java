@@ -15,7 +15,7 @@ import org.junit.Test;
 import model.MoneroAddress;
 import model.MoneroPayment;
 import model.MoneroTransaction;
-import service.MoneroAccount;
+import service.MoneroWallet;
 import utils.TestUtils;
 
 /**
@@ -28,7 +28,7 @@ public class TestMoneroWalletSends {
   private static final Integer MIXIN = 6;
   private static final int UNLOCKED_DIVISOR = 20;
   
-  private MoneroAccount wallet;
+  private MoneroWallet wallet;
 
   @Before
   public void setup() throws Exception {
@@ -84,7 +84,7 @@ public class TestMoneroWalletSends {
     BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(numPayments + UNLOCKED_DIVISOR));
     List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
     for (int i = 0; i < numPayments; i++) {
-      payments.add(new MoneroPayment(address.toString(), sendAmount));
+      payments.add(new MoneroPayment(address, sendAmount));
     }
     
     // send payments
