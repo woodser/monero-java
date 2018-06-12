@@ -1,21 +1,27 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>woodser</groupId>
-  <artifactId>monero-wallet-java</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <dependencies>
-  
-	<dependency>
-	    <groupId>com.google.guava</groupId>
-	    <artifactId>guava</artifactId>
-	    <version>21.0</version>
-	</dependency>
-
-	<dependency>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>monero-wallet-java</artifactId>
+	<name>Monero Java RPC Wallet Bindings</name>
+	<description>Monero Java RPC Bindings for Wallet's Communication</description>
+	<parent>
 		<groupId>woodser</groupId>
-		<artifactId>common</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-	</dependency>
+		<artifactId>parent</artifactId>
+		<version>0.0.2-SNAPSHOT</version>
+	</parent>
+	<dependencies>
 
-  </dependencies>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>woodser</groupId>
+			<artifactId>common</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+
+	</dependencies>
 </project>
