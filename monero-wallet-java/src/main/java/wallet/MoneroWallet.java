@@ -182,4 +182,14 @@ public interface MoneroWallet {
    * @return List<MoneroTransaction> are the retrieved transactions
    */
   public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight);
+  
+  /**
+   * 
+   * 	If the Wallet RPC was started with server mode and the "--wallet-dir" option, there's the possibility om managing more than 
+   * one Wallet present on that directory, and create new ones in it
+   * 
+   * @param filename - Filename on the server
+   * @param password - Password for the wallet
+   */
+  public void changeRemoteWallet(String filename, String password);
 }

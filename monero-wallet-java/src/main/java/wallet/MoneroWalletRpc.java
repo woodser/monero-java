@@ -204,6 +204,13 @@ public class MoneroWalletRpc implements MoneroWallet {
     sendRpcRequest("store", null);
   }
 
+  public void changeRemoteWallet(String filename, String password) {
+	  Map<String, Object> paramMap = new HashMap<String, Object>();
+	  paramMap.put("filename", filename);
+	  paramMap.put("password", password);
+	  sendRpcRequest("open_wallet", paramMap);
+  }
+  
   public void stopWallet() {
     sendRpcRequest("stop_wallet", null);
   }
