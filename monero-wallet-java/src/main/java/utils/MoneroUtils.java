@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.MoneroAddress;
+import model.MoneroException;
 import model.MoneroIntegratedAddress;
-import service.MoneroException;
 import service.MoneroWallet;
 
 /**

@@ -23,7 +23,7 @@ import model.MoneroTransaction;
 import model.MoneroUri;
 import model.MoneroTransaction.MoneroTransactionType;
 import service.MoneroAccount;
-import service.rpc.MoneroRpcException;
+import service.rpc.MoneroExceptionRpc;
 import utils.MoneroUtils;
 import utils.TestUtils;
 
@@ -81,7 +81,7 @@ public class TestMoneroWalletNonSends {
       String invalidPaymentId = "invalid_payment_id_123456";
       integratedAddress = wallet.getIntegratedAddress(invalidPaymentId);
       fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have thrown a RPC exception");
-    } catch (MoneroRpcException e) {
+    } catch (MoneroExceptionRpc e) {
       assertEquals((int) -5, (int) e.getRpcCode());
       assertEquals("Invalid payment ID", e.getRpcMessage());
     }
@@ -114,7 +114,7 @@ public class TestMoneroWalletNonSends {
     try {
       wallet.splitIntegratedAddress(integratedAddress.getIntegratedAddress() + " some invalid characters");
       fail("Splitting invalid integrated address should throw a RPC exception");
-    } catch (MoneroRpcException e) {
+    } catch (MoneroExceptionRpc e) {
       assertEquals((int) -2, (int) e.getRpcCode());
       assertEquals("Invalid address", e.getRpcMessage());
     }
@@ -158,7 +158,7 @@ public class TestMoneroWalletNonSends {
     try {
       wallet.toUri(mUri1);
       fail("Should have thrown RPC exception with invalid parameters");
-    } catch (MoneroRpcException e) {
+    } catch (MoneroExceptionRpc e) {
       assertEquals((int) -11, (int) e.getRpcCode());
       assertTrue(e.getRpcMessage().contains("Cannot make URI from supplied parameters"));
     }

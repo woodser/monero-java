@@ -3,6 +3,8 @@ package service;
 import java.util.Arrays;
 import java.util.List;
 
+import model.MoneroException;
+
 public abstract class MoneroAccountDefault implements MoneroAccount {
 
   public List<MoneroSubAddress> getSubAddresses() {
