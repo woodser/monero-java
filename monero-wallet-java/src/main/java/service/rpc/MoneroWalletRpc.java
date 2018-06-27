@@ -30,13 +30,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import model.MoneroAddress;
+import model.MoneroException;
 import model.MoneroIntegratedAddress;
 import model.MoneroOutput;
 import model.MoneroPayment;
 import model.MoneroTransaction;
 import model.MoneroTransaction.MoneroTransactionType;
 import model.MoneroUri;
-import service.MoneroException;
 import service.MoneroWallet;
 import types.HttpException;
 import types.Pair;
@@ -497,7 +497,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       return respMap;
     } catch (HttpException e1) {
       throw e1;
-    } catch (MoneroRpcException e2) {
+    } catch (MoneroExceptionRpc e2) {
       throw e2;
     } catch (Exception e3) {
       throw new MoneroException(e3);
@@ -551,6 +551,6 @@ public class MoneroWalletRpc implements MoneroWallet {
     if (error == null) return;
     int code = ((BigInteger) error.get("code")).intValue();
     String message = (String) error.get("message");
-    throw new MoneroRpcException(code, message, requestBody);
+    throw new MoneroExceptionRpc(code, message, requestBody);
   }
 }

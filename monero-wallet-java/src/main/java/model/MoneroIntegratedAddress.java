@@ -1,6 +1,5 @@
 package model;
 
-import service.MoneroException;
 import utils.MoneroUtils;
 
 public class MoneroIntegratedAddress extends MoneroAddress {
