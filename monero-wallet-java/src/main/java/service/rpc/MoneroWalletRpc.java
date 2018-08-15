@@ -35,7 +35,7 @@ import model.MoneroIntegratedAddress;
 import model.MoneroOutput;
 import model.MoneroPayment;
 import model.MoneroTransaction;
-import model.MoneroTransaction.MoneroTransactionType;
+import model.MoneroTransactionType;
 import model.MoneroUri;
 import service.MoneroWallet;
 import types.HttpException;
@@ -340,7 +340,7 @@ public class MoneroWalletRpc implements MoneroWallet {
 
       // incoming_transfers rpc call to get incoming outputs
       paramMap = new HashMap<String, Object>();
-      paramMap.put("transfer_type", "all");
+      paramMap.put("transfer_type", "all"); // TODO: suppport all | available | unavailable 'types' which is different from MoneroTransactionType
       respMap = sendRpcRequest("incoming_transfers", paramMap);
       result = (Map<String, Object>) respMap.get("result");
 

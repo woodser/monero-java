@@ -61,6 +61,15 @@ public interface MoneroWallet {
    * @return List<MoneroTransaction> are all of the wallet's transactions
    */
   public List<MoneroTransaction> getAllTransactions();
+  
+  /**
+   * Gets a transaction by id.
+   * 
+   * @param txId identifies the transaction
+   * @param accountIdx specifies the index of the account to query (optional)
+   * @return MoneroTransaction is the retrieved transaction
+   */
+  public MoneroTransaction getTransaction(String txId, Integer accountIdx);
 
   /**
    * Returns all wallet transactions specified, each containing payments, outputs, and other metadata depending on the transaction type.
@@ -73,12 +82,12 @@ public interface MoneroWallet {
    * @param paymentIds allows transactions with specific transaction ids to be retrieved (optional)
    * @param minHeight allows transactions with a mininum block height to be retrieved (optional)
    * @param maxHeight allows transactions with a maximum block height to be retrieved (optional)
-   * @param accountIdx index of the account to query for transactions (optional)
-   * @param subAddressIndices subaddress indices to query for transactions (optional)
+   * @param account index of the account to query for transactions (optional)
+   * @param subaddresses subaddress indices to query for transactions (optional)
    * @param txIds are transaction ids to query (optional)
    * @return List<MoneroTransaction> are the retrieved transactions
    */
-  public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight, Integer accountIdx, Collection<Integer> subAddressIndices, Collection<Integer> txIds);
+  public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight, MoneroAccount account, Collection<MoneroSubAddress> subddresses, Collection<Integer> txIds);
   
   /**
    * Send all dust outputs back to the wallet to make them easier to spend and mix.
