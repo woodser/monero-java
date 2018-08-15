@@ -12,8 +12,8 @@ public abstract class MoneroAccountDefault implements MoneroAccount {
   }
   
   public MoneroSubAddress getSubAddress(int index) {
-    List<MoneroSubAddress> subAddresses = getSubAddresses(Arrays.asList(index));
-    if (subAddresses.size() != 1) throw new MoneroException("Subaddress at index " + index + " does not exist");
-    return subAddresses.get(0);
+    List<MoneroSubAddress> subaddresses = getSubAddresses(Arrays.asList(index));
+    if (subaddresses.size() != 1) throw new MoneroException("Subaddress at index " + index + " does not exist");
+    return subaddresses.get(0);
   }
 }

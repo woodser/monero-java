@@ -8,17 +8,6 @@ import java.util.List;
  * Represents a transaction on the Monero network.
  */
 public class MoneroTransaction {
-  
-  /**
-   * Enumerates possible transaction types.
-   */
-  public enum MoneroTransactionType {
-    INCOMING,
-    OUTGOING,
-    PENDING,
-    FAILED,
-    MEMPOOL
-  }
 
 	private List<MoneroPayment> payments;
 	private List<MoneroOutput> outputs;
@@ -34,6 +23,9 @@ public class MoneroTransaction {
   private Long timestamp;
   private Integer unlockTime;
   private Boolean isDoubleSpend;
+  private BigInteger amount;  // TODO: incorporate into model and test
+  private String blob;
+  private String metadata;
 	
 	public MoneroTransaction() {
 	  super();
