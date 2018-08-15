@@ -55,18 +55,33 @@ public interface MoneroAccount {
   public boolean isMultisigImportNeeded();
   
   /**
-   * Create a new sub-address for an account.
+   * Create a new subaddress for an account.
    * 
-   * @param label specifies the label for the sub-address
-   * @return MoneroSubAddress is the created sub-address
+   * @param label specifies the label for the subaddress
+   * @return MoneroSubAddress is the created subaddress
    */
   public MoneroSubAddress createSubAddress(String label);
   
   /**
-   * Gets the account's sub-addresses.
+   * Gets the account's subaddresses.
    * 
-   * @param indices are indices of sub-addresses to get
-   * @return List<MoneroSubAddress> are the account's sub-addresses at the given indices
+   * @return List<MoneroSubAddress> are the account's subaddresses
+   */
+  public List<MoneroSubAddress> getSubAddresses();
+  
+  /**
+   * Gets the account's subaddress at a given index.
+   * 
+   * @param index is the index of the subaddress to get
+   * @return MoneroSubAddress is the subaddress at the given index
+   */
+  public MoneroSubAddress getSubAddress(int index);
+  
+  /**
+   * Gets the account's subaddresses.
+   * 
+   * @param indices are indices of subaddresses to get (optional)
+   * @return List<MoneroSubAddress> are the account's subaddresses at the given indices
    */
   public List<MoneroSubAddress> getSubAddresses(Collection<Integer> indices);
   
