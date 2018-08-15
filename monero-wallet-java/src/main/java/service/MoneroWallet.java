@@ -74,7 +74,7 @@ public interface MoneroWallet {
    * @param minHeight allows transactions with a mininum block height to be retrieved (optional)
    * @param maxHeight allows transactions with a maximum block height to be retrieved (optional)
    * @param accountIdx index of the account to query for transactions (optional)
-   * @param subAddressIndices sub-address indices to query for transactions (optional)
+   * @param subAddressIndices subaddress indices to query for transactions (optional)
    * @param txIds are transaction ids to query (optional)
    * @return List<MoneroTransaction> are the retrieved transactions
    */
@@ -106,7 +106,7 @@ public interface MoneroWallet {
   
   public void importKeyImages(List<MoneroKeyImage> keyImages);
   
-  /** --------------------------- SERVICE UTILITIES --------------------------- */
+  // --------------------------- SERVICE UTILITIES ----------------------------
   
   /**
    * Get a list of available languages for wallet seeds.
