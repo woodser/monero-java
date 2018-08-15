@@ -106,9 +106,7 @@ public interface MoneroWallet {
   
   public void importKeyImages(List<MoneroKeyImage> keyImages);
   
-  /**
-   *  --------------------------- SERVICE UTILITIES ---------------------------
-   */
+  /** --------------------------- SERVICE UTILITIES --------------------------- */
   
   /**
    * Get a list of available languages for wallet seeds.
