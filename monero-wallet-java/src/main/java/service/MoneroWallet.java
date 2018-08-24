@@ -42,6 +42,16 @@ public interface MoneroWallet {
   public String getViewKey();
   
   /**
+   * Returns an integrated address based on this wallet's standard address and the given payment ID.
+   * 
+   * Generates a random payment ID if none is given.
+   * 
+   * @param paymentId is the payment id to generate an integrated address from (optional)
+   * @return MoneroIntegratedAddress is the integrated address
+   */
+  public MoneroIntegratedAddress getIntegratedAddress(String paymentId);
+  
+  /**
    * Get all accounts.
    * 
    * @return List<MoneroAccount> are all accounts within the wallet
@@ -85,7 +95,7 @@ public interface MoneroWallet {
    * 
    * @param accountIdx identifies the account
    * @param subaddressIndices identify the subaddresses within the account
-   * @return List<MoneroSubaddress> are the specified subaddresses
+   * @return List<MoneroSubaddress> are the specified subaddresses (optional)
    */
   public List<MoneroSubaddress> getSubaddresses(int accountIdx, Collection<Integer> subaddressIndices);
   
@@ -166,8 +176,6 @@ public interface MoneroWallet {
    * @param List<MoneroTransaction> are the resulting transactions from sweeping
    */
   public List<MoneroTransaction> sweepAll(MoneroTransactionConfig config);
-  
-  
   
   /**
    * Returns all wallet transactions, each containing payments, outputs, and other metadata depending on the transaction type.

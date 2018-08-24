@@ -2,13 +2,15 @@ package service;
 
 import java.util.List;
 
+import model.MoneroSubaddress;
+
 /**
  * Default implementation of a Monero Wallet.
  */
-public class MoneroWalletDefault implements MoneroWallet {
+public abstract class MoneroWalletDefault implements MoneroWallet {
 
   @Override
-  public List<MoneroSubaddress> getSubaddresses() {
+  public List<MoneroSubaddress> getSubaddresses(int accountIdx) {
     // TODO Auto-generated method stub
     return null;
   }
