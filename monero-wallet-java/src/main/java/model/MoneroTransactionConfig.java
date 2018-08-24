@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.Collection;
 
 import service.MoneroAccount;
-import service.MoneroSubAddress;
+import service.MoneroSubaddress;
 
 /**
  * Configuration for sending a transaction.
@@ -13,7 +13,7 @@ public class MoneroTransactionConfig {
 
   private Collection<MoneroPayment> destinations;
   private MoneroAccount account;
-  private Collection<MoneroSubAddress> subaddresses;
+  private Collection<MoneroSubaddress> subaddresses;
   private BigInteger fee;
   private int mixin;
   private int unlockTime;

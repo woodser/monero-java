@@ -6,13 +6,71 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import model.MoneroAccount;
 import model.MoneroAddressBookEntry;
 import model.MoneroIntegratedAddress;
 import model.MoneroKeyImage;
+import model.MoneroSubaddress;
 import model.MoneroTransaction;
+import model.MoneroTransactionConfig;
 import model.MoneroUri;
 
 public interface MoneroWallet {
+  
+  /**
+   * Create a new subaddress for an account.
+   * 
+   * @param label specifies the label for the subaddress (optional)
+   * @return MoneroSubaddress is the created subaddress
+   */
+  public MoneroSubaddress createSubaddress(String label);
+  
+  /**
+   * Gets the account's subaddresses.
+   * 
+   * @return List<MoneroSubaddress> are the account's subaddresses
+   */
+  public List<MoneroSubaddress> getSubaddresses();
+  
+  /**
+   * Gets the account's subaddress at a given index.
+   * 
+   * @param index is the index of the subaddress to get
+   * @return MoneroSubaddress is the subaddress at the given index
+   */
+  public MoneroSubaddress getSubaddress(int index);
+  
+  /**
+   * Gets the account's subaddresses.
+   * 
+   * @param indices are indices of subaddresses to get (optional)
+   * @return List<MoneroSubaddress> are the account's subaddresses at the given indices
+   */
+  public List<MoneroSubaddress> getSubaddresses(Collection<Integer> indices);
+  
+  /**
+   * Send a payment.
+   * 
+   * @param config is the transaction configuration
+   * @return MoneroTransaction is the resulting transaction from sending payment
+   */
+  public MoneroTransaction send(MoneroTransactionConfig config);
+  
+  /**
+   * Send a payment which may be split across multiple transactions.
+   * 
+   * @param config is the transaction configuration
+   * @return List<MoneroTransaction> are the resulting transactions from sending payment
+   */
+  public List<MoneroTransaction> sendSplit(MoneroTransactionConfig config);
+  
+  /**
+   * Send all unlocked balance to an address.
+   * 
+   * @param config is the transcaction configuration
+   * @param List<MoneroTransaction> are the resulting transactions from sweeping
+   */
+  public List<MoneroTransaction> sweepAll(MoneroTransactionConfig config);
   
   /**
    * Returns the wallet's current block height.
@@ -64,7 +122,6 @@ public interface MoneroWallet {
    * @return List<MoneroTransaction> are all of the wallet's transactions
    */
   public List<MoneroTransaction> getTransactions();
-  
 
   /**
    * Returns all wallet transactions specified, each containing payments, outputs, and other metadata depending on the transaction type.
