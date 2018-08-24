@@ -47,10 +47,10 @@ import utils.StreamUtils;
 /**
  * Implements a Monero wallet backed by a Monero wallet RPC endpoint.
  */
-public class MoneroWalletRpc implements MoneroWallet {
+public class MoneroWalletRpcOld implements MoneroWallet {
 
   // logger
-  private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class);
+  private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpcOld.class);
 
   // custom mapper to deserialize integers to BigIntegers
   public static ObjectMapper MAPPER;
@@ -67,25 +67,25 @@ public class MoneroWalletRpc implements MoneroWallet {
   private URI rpcUri;
   private HttpClient client;
 
-  public MoneroWalletRpc(String endpoint) {
+  public MoneroWalletRpcOld(String endpoint) {
     this(parseUri(endpoint));
   }
 
-  public MoneroWalletRpc(URI rpcUri) {
+  public MoneroWalletRpcOld(URI rpcUri) {
     this.rpcUri = rpcUri;
     this.rpcHost = rpcUri.getHost();
     this.rpcPort = rpcUri.getPort();
     this.client = HttpClients.createDefault();
   }
 
-  public MoneroWalletRpc(String rpcHost, int rpcPort) throws URISyntaxException {
+  public MoneroWalletRpcOld(String rpcHost, int rpcPort) throws URISyntaxException {
     this.rpcHost = rpcHost;
     this.rpcPort = rpcPort;
     this.rpcUri = new URI("http", null, rpcHost, rpcPort, "/json_rpc", null, null);
     this.client = HttpClients.createDefault();
   }
 
-  public MoneroWalletRpc(String rpcHost, int rpcPort, String username, String password) throws URISyntaxException {
+  public MoneroWalletRpcOld(String rpcHost, int rpcPort, String username, String password) throws URISyntaxException {
     this.rpcHost = rpcHost;
     this.rpcPort = rpcPort;
     this.rpcUri = new URI("http", null, rpcHost, rpcPort, "/json_rpc", null, null);
@@ -497,7 +497,7 @@ public class MoneroWalletRpc implements MoneroWallet {
       return respMap;
     } catch (HttpException e1) {
       throw e1;
-    } catch (MoneroExceptionRpc e2) {
+    } catch (MoneroRpcException e2) {
       throw e2;
     } catch (Exception e3) {
       throw new MoneroException(e3);
@@ -551,6 +551,6 @@ public class MoneroWalletRpc implements MoneroWallet {
     if (error == null) return;
     int code = ((BigInteger) error.get("code")).intValue();
     String message = (String) error.get("message");
-    throw new MoneroExceptionRpc(code, message, requestBody);
+    throw new MoneroRpcException(code, message, requestBody);
   }
 }

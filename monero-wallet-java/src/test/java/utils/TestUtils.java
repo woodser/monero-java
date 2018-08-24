@@ -4,7 +4,7 @@ import org.apache.log4j.PropertyConfigurator;
 
 import service.MoneroAccount;
 import service.MoneroWallet;
-import service.rpc.MoneroWalletRpc;
+import service.rpc.MoneroWalletRpcOld;
 
 /**
  * Collection of test utilities.
@@ -25,7 +25,7 @@ public class TestUtils {
   public static MoneroWallet getWallet() {
     if (wallet == null) {
       try {
-        wallet = new MoneroWalletRpc(DOMAIN, PORT, USERNAME, PASSWORD);
+        wallet = new MoneroWalletRpcOld(DOMAIN, PORT, USERNAME, PASSWORD);
       } catch (Exception e) {
         e.printStackTrace();
       }
