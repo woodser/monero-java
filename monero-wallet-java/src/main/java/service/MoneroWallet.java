@@ -21,11 +21,91 @@ import model.MoneroUri;
 public interface MoneroWallet {
   
   /**
-   * Returns the wallet's balance.
+   * Get the wallet's current block height.
    * 
-   * @return BigInteger is the wallet's balance
+   * @return int is the current block height of the wallet
    */
-  public BigInteger getBalance();
+  public int getHeight();
+  
+  /**
+   * Get the wallet's mnemonic seed.
+   * 
+   * @return String is the wallet's mnemonic seed
+   */
+  public String getMnemonicSeed();
+
+  /**
+   * Get the wallet's view key.
+   * 
+   * @return String is the wallet's view key
+   */
+  public String getViewKey();
+  
+  /**
+   * Get all accounts.
+   * 
+   * @return List<MoneroAccount> are all accounts within the wallet
+   */
+  public List<MoneroAccount> getAccounts();
+  
+  /**
+   * Get accounts with a given tag.
+   * 
+   * @param tag is the tag for filtering accounts
+   * @return List<MoneroAccount> are all accounts for the wallet with the given tag
+   */
+  public List<MoneroAccount> getAccounts(String tag);
+  
+  /**
+   * Get an account.
+   * 
+   * @param accountIdx identifies the account
+   * @return MoneroAccount is the account
+   */
+  public MoneroAccount getAccount(int accountIdx);
+  
+  /**
+   * Create a new account with an optional label.
+   * 
+   * @param label specifies the label for the account (optional)
+   * @return MoneroAccount is the created account
+   */
+  public MoneroAccount createAccount(String label);
+  
+  /**
+   * Gets an account's subaddresses.
+   * 
+   * @param accountIdx identifies the account
+   * @return List<MoneroSubaddress> are subaddresses within an account
+   */
+  public List<MoneroSubaddress> getSubaddresses(int accountIdx);
+  
+  /**
+   * Gets specific subaddresses within an account.
+   * 
+   * @param accountIdx identifies the account
+   * @param subaddressIndices identify the subaddresses within the account
+   * @return List<MoneroSubaddress> are the specified subaddresses
+   */
+  public List<MoneroSubaddress> getSubaddresses(int accountIdx, Collection<Integer> subaddressIndices);
+  
+  /**
+   * Gets a subaddress in an account.
+   * 
+   * @param accountIdx identifies the account
+   * @param subaddressIdx identifies the subaddress
+   * @return MoneroSubaddress is the subaddress in the account
+   */
+  public MoneroSubaddress getSubaddress(int accountIdx, int subaddressIdx);
+  
+  /**
+   * Create a subaddress within an account.
+   * 
+   * @param accountIdx identifies the account
+   * @param label specifies the label for the subaddress (optional)
+   * @return MoneroSubaddress is the created subaddress
+   */
+  public MoneroSubaddress createSubaddress(int accountIdx, String label);  
   
   /**
    * Returns the balance for a specific account.
@@ -45,41 +125,23 @@ public interface MoneroWallet {
   public BigInteger getBalance(int accountIdx, int subaddressIdx);
   
   /**
-   * Indicates if 
-   * @return
+   * Returns the unlocked balance for a specific account.
+   * 
+   * @param accountIdx identifies the account
+   * @return BigInteger is the account's unlocked balance
    */
-  public boolean isMultisigImportNeeded();
+  public BigInteger getUnlockedBalance(int accountIdx);
   
   /**
-   * Create a new subaddress for an account.
+   * Returns the unlocked balance for a specific subaddress.
    * 
-   * @param label specifies the label for the subaddress (optional)
-   * @return MoneroSubaddress is the created subaddress
+   * @param accountIdx identifies the account within the wallet
+   * @param subaddressIdx identifies the subbaddress within the account
+   * @return BigInteger is the subaddresse's unlocked balance
    */
-  public MoneroSubaddress createSubaddress(String label);
+  public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx);
   
-  /**
-   * Gets the account's subaddresses.
-   * 
-   * @return List<MoneroSubaddress> are the account's subaddresses
-   */
-  public List<MoneroSubaddress> getSubaddresses();
-  
-  /**
-   * Gets the account's subaddress at a given index.
-   * 
-   * @param index is the index of the subaddress to get
-   * @return MoneroSubaddress is the subaddress at the given index
-   */
-  public MoneroSubaddress getSubaddress(int index);
-  
-  /**
-   * Gets the account's subaddresses.
-   * 
-   * @param indices are indices of subaddresses to get (optional)
-   * @return List<MoneroSubaddress> are the account's subaddresses at the given indices
-   */
-  public List<MoneroSubaddress> getSubaddresses(Collection<Integer> indices);
+  // ------- NOW WHAT
   
   /**
    * Send a payment.
@@ -105,49 +167,7 @@ public interface MoneroWallet {
    */
   public List<MoneroTransaction> sweepAll(MoneroTransactionConfig config);
   
-  /**
-   * Returns the wallet's current block height.
-   * 
-   * @return int is the current block height of the wallet
-   */
-  public int getHeight();
   
-  /**
-   * Get the wallet's mnemonic seed.
-   * 
-   * @return String is the wallet's mnemonic seed
-   */
-  public String getMnemonicSeed();
-
-  /**
-   * Get the wallet's view key.
-   * 
-   * @return String is the wallet's view key
-   */
-  public String getViewKey();
-  
-  /**
-   * Create a new account with an optional label.
-   * 
-   * @param label specifies the label for the account (optional)
-   * @return MoneroAccount is the created account
-   */
-  public MoneroAccount createAccount(String label);
-  
-  /**
-   * Get all accounts for a wallet.
-   * 
-   * @return List<MoneroAccount> are all accounts for the wallet
-   */
-  public List<MoneroAccount> getAccounts();
-  
-  /**
-   * Get all accounts for a wallet filtered by a tag.
-   * 
-   * @param tag is the tag for filtering accounts (optional)
-   * @return List<MoneroAccount> are all accounts for the wallet with the given tag
-   */
-  public List<MoneroAccount> getAccounts(String tag);
   
   /**
    * Returns all wallet transactions, each containing payments, outputs, and other metadata depending on the transaction type.
