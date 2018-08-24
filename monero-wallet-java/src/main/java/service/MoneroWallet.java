@@ -1,9 +1,12 @@
 package service;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
+import model.MoneroAddressBookEntry;
 import model.MoneroIntegratedAddress;
 import model.MoneroKeyImage;
 import model.MoneroTransaction;
@@ -50,7 +53,7 @@ public interface MoneroWallet {
   /**
    * Get all accounts for a wallet filtered by a tag.
    * 
-   * @param tag is the tag for filtering accounts
+   * @param tag is the tag for filtering accounts (optional)
    * @return List<MoneroAccount> are all accounts for the wallet with the given tag
    */
   public List<MoneroAccount> getAccounts(String tag);
@@ -60,16 +63,8 @@ public interface MoneroWallet {
    * 
    * @return List<MoneroTransaction> are all of the wallet's transactions
    */
-  public List<MoneroTransaction> getAllTransactions();
+  public List<MoneroTransaction> getTransactions();
   
-  /**
-   * Gets a transaction by id.
-   * 
-   * @param txId identifies the transaction
-   * @param accountIdx specifies the index of the account to query (optional)
-   * @return MoneroTransaction is the retrieved transaction
-   */
-  public MoneroTransaction getTransaction(String txId, Integer accountIdx);
 
   /**
    * Returns all wallet transactions specified, each containing payments, outputs, and other metadata depending on the transaction type.
@@ -87,7 +82,16 @@ public interface MoneroWallet {
    * @param txIds are transaction ids to query (optional)
    * @return List<MoneroTransaction> are the retrieved transactions
    */
-  public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight, MoneroAccount account, Collection<MoneroSubAddress> subddresses, Collection<Integer> txIds);
+  public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight, Integer accountIdx, Collection<Integer> subaddressIndices, Collection<Integer> txIds);
+  
+  /**
+   * Gets a transaction by id.
+   * 
+   * @param txId identifies the transaction
+   * @param accountIdx specifies the index of the account to query (optional)
+   * @return MoneroTransaction is the retrieved transaction
+   */
+  public MoneroTransaction getTransaction(String txId, Integer accountIdx);
   
   /**
    * Send all dust outputs back to the wallet to make them easier to spend and mix.
@@ -108,14 +112,48 @@ public interface MoneroWallet {
    * Get arbitrary string notes for transactions.
    * 
    * @param txIds identify the transactions to get notes for
+   * @preturn List<String> are notes for the transactions
    */
-  public void getTxNotes(List<String> txIds);
+  public List<String> getTxNotes(List<String> txIds);
 
+  /**
+   * Returns a signed set of key images.
+   * 
+   * @return List<MoneroKeyImage> are exported key images
+   */
   public List<MoneroKeyImage> getKeyImages();
   
-  public void importKeyImages(List<MoneroKeyImage> keyImages);
+  /**
+   * Import signed key images list and verify their spent status.
+   * 
+   * @param keyImages are key images to import
+   * @return Map<String, BigInteger> contains "height", "spent", and "unspent"
+   */
+  public Map<String, BigInteger> importKeyImages(List<MoneroKeyImage> keyImages);
   
-  // --------------------------- SERVICE UTILITIES ----------------------------
+  /**
+   * Returns all address book entries.
+   * 
+   * @return List<MoneroAddressBookEntry> are the wallet's address book entries
+   */
+  public List<MoneroAddressBookEntry> getAddressBookEntries();
+  
+  /**
+   * Adds an address book entry.
+   * 
+   * @param address is the entry's Monero address
+   * @param paymentId is the entry's payment id (optional)
+   * @param description is the entry's description (optional)
+   * @return int is the index of the new address book entry
+   */
+  public int addAddressBookEntry(String address, String paymentId, String description);
+  
+  /**
+   * Deletes an address book entry.
+   * 
+   * @param entryIdx is the index of the address book entry to delete
+   */
+  public void deleteAddressBookEntry(int entryIdx);
   
   /**
    * Get a list of available languages for wallet seeds.
@@ -202,4 +240,18 @@ public interface MoneroWallet {
    * Stop the wallet.
    */
   public void stopWallet();
+  
+  /**
+   * Start mining in the Monero daemon.
+   * 
+   * @param numThreads is the number of threads created for mining
+   * @param backgroundMining specifies if mining should occur in the background
+   * @param ignoreBattery specifies if the battery should be ignored for mining
+   */
+  public void startMining(int numThreads, boolean backgroundMining, boolean ignoreBattery);
+  
+  /**
+   * Stop mining in the Monero daemon.
+   */
+  public void stopMining();
 }

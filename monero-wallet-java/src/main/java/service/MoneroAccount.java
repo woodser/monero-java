@@ -57,7 +57,7 @@ public interface MoneroAccount {
   /**
    * Create a new subaddress for an account.
    * 
-   * @param label specifies the label for the subaddress
+   * @param label specifies the label for the subaddress (optional)
    * @return MoneroSubAddress is the created subaddress
    */
   public MoneroSubAddress createSubAddress(String label);

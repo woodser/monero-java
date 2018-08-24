@@ -7,7 +7,7 @@ import model.MoneroException;
 /**
  * Exception that is thrown when the RPC API returns an error.
  */
-public class MoneroExceptionRpc extends MoneroException {
+public class MoneroRpcException extends MoneroException {
 
   private static final long serialVersionUID = -6282368684634114151L;
   
@@ -15,11 +15,11 @@ public class MoneroExceptionRpc extends MoneroException {
   private String rpcMessage;
   private Map<String, Object> requestBody;
   
-  public MoneroExceptionRpc(Integer rpcCode, String rpcMessage, Map<String, Object> requestBody) {
+  public MoneroRpcException(Integer rpcCode, String rpcMessage, Map<String, Object> requestBody) {
     this(rpcCode, rpcMessage, requestBody, null);
   }
   
-  public MoneroExceptionRpc(Integer rpcCode, String rpcMessage, Map<String, Object> requestBody, Throwable e) {
+  public MoneroRpcException(Integer rpcCode, String rpcMessage, Map<String, Object> requestBody, Throwable e) {
     super(rpcCode + ": " + rpcMessage, e);
     this.rpcCode = rpcCode;
     this.rpcMessage = rpcMessage;

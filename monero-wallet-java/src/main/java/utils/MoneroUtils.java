@@ -1,5 +1,6 @@
 package utils;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +55,14 @@ public class MoneroUtils {
   public static void validateBase58(String standardAddress) {
     for (char c : standardAddress.toCharArray()) {
       if (!CHARS.contains((Character) c)) throw new MoneroException("Invalid Base58 " + standardAddress);
+    }
+  }
+  
+  public static URI parseUri(String endpoint) {
+    try {
+      return new URI(endpoint);
+    } catch (Exception e) {
+      throw new MoneroException(e);
     }
   }
 }

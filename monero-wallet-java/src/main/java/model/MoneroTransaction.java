@@ -8,7 +8,8 @@ import java.util.List;
  * Represents a transaction on the Monero network.
  */
 public class MoneroTransaction {
-
+  
+  private String id; 
 	private List<MoneroPayment> payments;
 	private List<MoneroOutput> outputs;
 	private String paymentId;
