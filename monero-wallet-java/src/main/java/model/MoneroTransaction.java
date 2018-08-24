@@ -9,6 +9,27 @@ import java.util.List;
  */
 public class MoneroTransaction {
   
+  /**
+   * Enumerates Monero transaction priorities.
+   */
+  public enum MoneroTransactionPriority {
+    DEFAULT,
+    UNIMPORTANT,
+    NORMAL,
+    ELEVATED
+  }
+  
+  /**
+   * Enumerates Monero transaction types.
+   */
+  public enum MoneroTransactionType {
+    INCOMING,
+    OUTGOING,
+    PENDING,
+    FAILED,
+    MEMPOOL
+  }
+  
   private String id; 
 	private List<MoneroPayment> payments;
 	private List<MoneroOutput> outputs;

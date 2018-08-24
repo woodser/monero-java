@@ -3,8 +3,7 @@ package model;
 import java.math.BigInteger;
 import java.util.Collection;
 
-import service.MoneroAccount;
-import service.MoneroSubaddress;
+import model.MoneroTransaction.MoneroTransactionPriority;
 
 /**
  * Configuration for sending a transaction.
