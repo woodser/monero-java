@@ -16,16 +16,6 @@ public class MoneroAddress {
     return standardAddress;
   }
   
-  /**
-   * Returns an integrated address based on this subaddress's standard address and the given payment id.
-   * 
-   * @param paymentId is the payment id to generate an integrated address from
-   * @return MoneroIntegratedAddress is the integrated address with standard address and payment id components
-   */
-  public MoneroIntegratedAddress getIntegratedAddress(String paymentId) {
-    throw new RuntimeException("Not sure what to do with this?");
-  }
-  
   public String toString() {
     return standardAddress;
   }
