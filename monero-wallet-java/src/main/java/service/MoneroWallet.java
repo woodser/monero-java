@@ -15,7 +15,40 @@ import model.MoneroTransaction;
 import model.MoneroTransactionConfig;
 import model.MoneroUri;
 
+/**
+ * Top-level interface for a Monero Wallet.
+ */
 public interface MoneroWallet {
+  
+  /**
+   * Returns the wallet's balance.
+   * 
+   * @return BigInteger is the wallet's balance
+   */
+  public BigInteger getBalance();
+  
+  /**
+   * Returns the balance for a specific account.
+   * 
+   * @param accountIdx identifies the account
+   * @return BigInteger is the account's balance
+   */
+  public BigInteger getBalance(int accountIdx);
+  
+  /**
+   * Returns the balance for a specific subaddress.
+   * 
+   * @param accountIdx identifies the account within the wallet
+   * @param subaddressIdx identifies the subbaddress within the account
+   * @return BigInteger is the subaddresse's balance
+   */
+  public BigInteger getBalance(int accountIdx, int subaddressIdx);
+  
+  /**
+   * Indicates if 
+   * @return
+   */
+  public boolean isMultisigImportNeeded();
   
   /**
    * Create a new subaddress for an account.
