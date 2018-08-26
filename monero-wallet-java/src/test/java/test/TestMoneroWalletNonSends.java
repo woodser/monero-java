@@ -96,6 +96,16 @@ public class TestMoneroWalletNonSends {
   }
 
   @Test
+  public void testGetSubaddressesInt() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testGetSubaddress() {
+    fail("Not yet implemented");
+  }
+
+  @Test
   public void testGetSubaddressesIntCollectionOfInteger() {
     fail("Not yet implemented");
   }
@@ -264,15 +274,4 @@ public class TestMoneroWalletNonSends {
   public void testStopMining() {
     fail("Not yet implemented");
   }
-
-  @Test
-  public void testGetSubaddressesInt() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testGetSubaddress() {
-    fail("Not yet implemented");
-  }
-
 }
