@@ -1,12 +1,9 @@
 package test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -90,8 +87,15 @@ public class TestMoneroWalletNonSends {
   }
 
   @Test
-  public void testGetAccountsString() {
-    List<MoneroAccount> accounts = wallet.getAccounts("fake_tag");
+  public void testGetAccountsByTag() {
+    
+    // test that null tag returns all accounts
+    List<MoneroAccount> accounts1 = wallet.getAccounts();
+    List<MoneroAccount> accounts2 = wallet.getAccounts(null);
+    assertEquals(accounts1, accounts2);
+    
+    // test that non-existing tag returns no accounts
+    List<MoneroAccount> accounts = wallet.getAccounts("non_existing_tag");
     assertEquals(0, accounts.size());
   }
 
@@ -106,7 +110,33 @@ public class TestMoneroWalletNonSends {
 
   @Test
   public void testCreateAccount() {
-    fail("Not yet implemented");
+    
+    // test creation with null tag
+    List<MoneroAccount> accountsBefore = wallet.getAccounts();
+    MoneroAccount createdAccount = wallet.createAccount(null);
+    testAccount(createdAccount);
+    assertNull(createdAccount.getLabel());
+    assertTrue(accountsBefore.size() == wallet.getAccounts().size() - 1);
+    
+    // test creation with tag
+    accountsBefore = wallet.getAccounts();
+    String tag = UUID.randomUUID().toString();
+    createdAccount = wallet.createAccount(tag);
+    assertEquals(tag, createdAccount.getLabel());
+    testAccount(createdAccount);
+    assertTrue(accountsBefore.size() == wallet.getAccounts().size() - 1);
+    
+    // test querying by created tag
+    List<MoneroAccount> accountsByTag = wallet.getAccounts(tag);
+    assertEquals(1, accountsByTag.size());
+    assertEquals(createdAccount, accountsByTag.get(0));
+    
+    // create another account with the same tag
+    createdAccount = wallet.createAccount(tag);
+    assertEquals(tag, createdAccount.getLabel());
+    accountsByTag = wallet.getAccounts(tag);
+    assertEquals(2, accountsByTag.size());
+    assertEquals(createdAccount, accountsByTag.get(1));
   }
 
   @Test
