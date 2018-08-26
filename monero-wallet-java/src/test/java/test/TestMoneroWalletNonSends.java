@@ -19,9 +19,9 @@ import org.junit.Test;
 import model.MoneroAddress;
 import model.MoneroIntegratedAddress;
 import model.MoneroOutput;
-import model.MoneroTransaction;
+import model.MoneroTx;
 import model.MoneroUri;
-import model.MoneroTransaction.MoneroTransactionType;
+import model.MoneroTx.MoneroTxType;
 import service.MoneroAccount;
 import service.rpc.MoneroRpcException;
 import utils.MoneroUtils;
@@ -177,9 +177,9 @@ public class TestMoneroWalletNonSends {
   
   @Test
   public void testGetAllTransactions() {
-    List<MoneroTransaction> txs = wallet.getAllTransactions();
+    List<MoneroTx> txs = wallet.getAllTransactions();
     assertFalse(txs.isEmpty());
-    for (MoneroTransaction tx : txs) {
+    for (MoneroTx tx : txs) {
       assertNotNull(tx.getHash());
       assertNotNull(tx.getType());
     }
@@ -192,9 +192,9 @@ public class TestMoneroWalletNonSends {
     String paymentId = "0000000000000000";
     List<String> paymentIds = new ArrayList<String>();
     paymentIds.add(paymentId);
-    List<MoneroTransaction> txs = wallet.getTransactions(true, true, true, true, true, paymentIds, null, null);
+    List<MoneroTx> txs = wallet.getTransactions(true, true, true, true, true, paymentIds, null, null);
     assertFalse(txs.isEmpty());
-    for (MoneroTransaction tx : txs) {
+    for (MoneroTx tx : txs) {
       assertNotNull(tx.getType());
       assertEquals(paymentId, tx.getPaymentId());
     }
@@ -202,22 +202,22 @@ public class TestMoneroWalletNonSends {
     // test getting incoming transactions
     txs = wallet.getTransactions(true, false, false, false, false, null, null, null);
     assertFalse(txs.isEmpty());
-    for (MoneroTransaction tx : txs) {
-      assertEquals(MoneroTransactionType.INCOMING, tx.getType());
+    for (MoneroTx tx : txs) {
+      assertEquals(MoneroTxType.INCOMING, tx.getType());
     }
     
     // test getting outgoing transactions
     txs = wallet.getTransactions(false, true, false, false, false, null, null, null);
     assertFalse(txs.isEmpty());
-    for (MoneroTransaction tx : txs) {
-      assertEquals(MoneroTransactionType.OUTGOING, tx.getType());
+    for (MoneroTx tx : txs) {
+      assertEquals(MoneroTxType.OUTGOING, tx.getType());
     }
     
     // test balance equals spendable outputs
     txs = wallet.getAllTransactions();
     assertFalse(txs.isEmpty());
     BigInteger balance = BigInteger.valueOf(0);
-    for (MoneroTransaction tx : txs) {
+    for (MoneroTx tx : txs) {
       if (tx.getOutputs() == null) continue;
       for (MoneroOutput output : tx.getOutputs()) {
         if (!output.getIsSpent()) {
@@ -229,7 +229,7 @@ public class TestMoneroWalletNonSends {
     
     // get and sort block heights in ascending order
     List<Integer> heights = new ArrayList<Integer>();
-    for (MoneroTransaction tx : txs) {
+    for (MoneroTx tx : txs) {
       if (tx.getHeight() != null) heights.add(tx.getHeight());
     }
     Collections.sort(heights);
@@ -250,7 +250,7 @@ public class TestMoneroWalletNonSends {
     txs = wallet.getTransactions(true, true, true, true, true, null, minHeight, maxHeight);
     assertFalse(txs.isEmpty());
     assertTrue(txs.size() < unfilteredCount);
-    for (MoneroTransaction tx : txs) {
+    for (MoneroTx tx : txs) {
       assertTrue(tx.getHeight() >= minHeight && tx.getHeight() <= maxHeight);
     }
   }

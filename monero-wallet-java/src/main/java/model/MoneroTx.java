@@ -7,12 +7,12 @@ import java.util.List;
 /**
  * Represents a transaction on the Monero network.
  */
-public class MoneroTransaction {
+public class MoneroTx {
   
   /**
    * Enumerates Monero transaction priorities.
    */
-  public enum MoneroTransactionPriority {
+  public enum MoneroTxPriority {
     DEFAULT,
     UNIMPORTANT,
     NORMAL,
@@ -22,7 +22,7 @@ public class MoneroTransaction {
   /**
    * Enumerates Monero transaction types.
    */
-  public enum MoneroTransactionType {
+  public enum MoneroTxType {
     INCOMING,
     OUTGOING,
     PENDING,
@@ -39,7 +39,7 @@ public class MoneroTransaction {
 	private String hash;
 	private String key;
 	private Integer size;
-	private MoneroTransactionType type;
+	private MoneroTxType type;
   private Integer height;
   private String note;
   private Long timestamp;
@@ -49,7 +49,7 @@ public class MoneroTransaction {
   private String blob;
   private String metadata;
 	
-	public MoneroTransaction() {
+	public MoneroTx() {
 	  super();
 	}
 	
@@ -135,11 +135,11 @@ public class MoneroTransaction {
     this.size = size;
   }
 
-  public MoneroTransactionType getType() {
+  public MoneroTxType getType() {
     return type;
   }
 
-  public void setType(MoneroTransactionType type) {
+  public void setType(MoneroTxType type) {
     this.type = type;
   }
   
@@ -190,7 +190,7 @@ public class MoneroTransaction {
    * 
    * @param tx is the transaction to merge into this one
    */
-  public void merge(MoneroTransaction tx) {
+  public void merge(MoneroTx tx) {
     if (id == null) id = tx.getId();
     else if (tx.getId() != null) validateEquals("ID", id, tx.getId());
     if (payments == null) payments = tx.getPayments();

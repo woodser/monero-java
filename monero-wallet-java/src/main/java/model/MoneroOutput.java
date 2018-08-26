@@ -7,7 +7,7 @@ import java.math.BigInteger;
  */
 public class MoneroOutput {
 
-  private MoneroTransaction transaction;
+  private MoneroTx transaction;
   private BigInteger amount;
   private Boolean isSpent;
   
@@ -15,18 +15,18 @@ public class MoneroOutput {
     super();
   }
   
-  public MoneroOutput(MoneroTransaction transaction, BigInteger amount, Boolean isSpent) {
+  public MoneroOutput(MoneroTx transaction, BigInteger amount, Boolean isSpent) {
     super();
     this.transaction = transaction;
     this.amount = amount;
     this.isSpent = isSpent;
   }
 
-  public MoneroTransaction getTransaction() {
+  public MoneroTx getTransaction() {
     return transaction;
   }
 
-  public void setTransaction(MoneroTransaction transaction) {
+  public void setTransaction(MoneroTx transaction) {
     this.transaction = transaction;
   }
 
