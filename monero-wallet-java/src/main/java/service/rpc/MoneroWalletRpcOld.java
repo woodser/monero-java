@@ -35,7 +35,7 @@ import model.MoneroIntegratedAddress;
 import model.MoneroOutput;
 import model.MoneroPayment;
 import model.MoneroTransaction;
-import model.MoneroTransactionType;
+import model.MoneroTransaction.MoneroTransactionType;
 import model.MoneroUri;
 import service.MoneroWallet;
 import types.HttpException;

@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import model.MoneroException;
 import types.HttpException;
 import utils.JsonUtils;
-import utils.MoneroUtils;
 import utils.StreamUtils;
 
 /**
@@ -54,7 +53,7 @@ public class MoneroRpc {
   private HttpClient client;
 
   public MoneroRpc(String endpoint) {
-    this(MoneroUtils.parseUri(endpoint));
+    this(parseUri(endpoint));
   }
 
   public MoneroRpc(URI rpcUri) {
@@ -158,5 +157,13 @@ public class MoneroRpc {
     int code = ((BigInteger) error.get("code")).intValue();
     String message = (String) error.get("message");
     throw new MoneroRpcException(code, message, requestBody);
+  }
+  
+  private static URI parseUri(String endpoint) {
+    try {
+      return new URI(endpoint);
+    } catch (Exception e) {
+      throw new MoneroException(e);
+    }
   }
 }

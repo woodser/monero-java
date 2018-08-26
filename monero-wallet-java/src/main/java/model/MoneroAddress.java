@@ -2,13 +2,16 @@ package model;
 
 import utils.MoneroUtils;
 
+/**
+ * Represents a Monero standard address.
+ */
 public class MoneroAddress {
 
   private String standardAddress;
 
   public MoneroAddress(String standardAddress) {
     super();
-    validateStandardAddress(standardAddress);
+    MoneroUtils.validateStandardAddress(standardAddress);
     this.standardAddress = standardAddress;
   }
 
@@ -38,25 +41,5 @@ public class MoneroAddress {
       if (other.standardAddress != null) return false;
     } else if (!standardAddress.equals(other.standardAddress)) return false;
     return true;
-  }
-  
-  // ------------------------------ STATIC UTILITIES --------------------------
-  
-  private static final int STANDARD_ADDRESS_LENGTH = 95;
-  
-  private static void validateStandardAddress(String standardAddress) {
-    if (standardAddress == null) throw new MoneroException("Standard address is null");
-    if (!standardAddress.startsWith("5") && !standardAddress.startsWith("4") && !standardAddress.startsWith("9") && !standardAddress.startsWith("A")) throw new MoneroException("Standard address does not start with 4, 5, 9 or A");
-    MoneroUtils.validateBase58(standardAddress);
-    if (standardAddress.length() != STANDARD_ADDRESS_LENGTH) throw new MoneroException("Standard address is " + standardAddress.length() + " characters but must be " + STANDARD_ADDRESS_LENGTH);
-  }
-  
-  public static boolean isValidStandardAddress(String standardAddress) {
-    try {
-      validateStandardAddress(standardAddress);
-      return true;
-    } catch (MoneroException e) {
-      return false;
-    }
   }
 }

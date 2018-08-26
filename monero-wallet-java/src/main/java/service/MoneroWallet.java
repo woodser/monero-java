@@ -94,7 +94,7 @@ public interface MoneroWallet {
    * Gets specific subaddresses within an account.
    * 
    * @param accountIdx identifies the account
-   * @param subaddressIndices identify the subaddresses within the account
+   * @param subaddressIndices identifies the subaddresses within the account
    * @return List<MoneroSubaddress> are the specified subaddresses (optional)
    */
   public List<MoneroSubaddress> getSubaddresses(int accountIdx, Collection<Integer> subaddressIndices);
@@ -150,8 +150,6 @@ public interface MoneroWallet {
    * @return BigInteger is the subaddresse's unlocked balance
    */
   public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx);
-  
-  // ------- NOW WHAT
   
   /**
    * Send a payment.

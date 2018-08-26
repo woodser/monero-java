@@ -52,6 +52,14 @@ public class MoneroTransaction {
 	public MoneroTransaction() {
 	  super();
 	}
+	
+	public String getId() {
+	  return id;
+	}
+	
+	public void setId(String id) {
+	  this.id = id;
+	}
 
   public List<MoneroPayment> getPayments() {
     return payments;
@@ -183,6 +191,8 @@ public class MoneroTransaction {
    * @param tx is the transaction to merge into this one
    */
   public void merge(MoneroTransaction tx) {
+    if (id == null) id = tx.getId();
+    else if (tx.getId() != null) validateEquals("ID", id, tx.getId());
     if (payments == null) payments = tx.getPayments();
     else if (tx.getPayments() != null) payments.addAll(tx.getPayments());
     if (outputs == null) outputs = tx.getOutputs();
@@ -217,6 +227,7 @@ public class MoneroTransaction {
   
   public String toString() {
     StringBuilder sb = new StringBuilder();
+    sb.append("ID: " + id + "\n");
     sb.append("Hash: " + hash + "\n");
     sb.append("Key: " + key + "\n");
     if (payments != null) {
