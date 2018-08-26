@@ -15,11 +15,16 @@ public class MoneroAccount {
   private boolean isMultisigImportNeeded;
   private List<MoneroSubaddress> subaddresses;
   
-  /**
-   * Get the account index in the wallet.
-   * 
-   * @return int is the account's index in the wallet
-   */
+  public MoneroAccount(int index, String label, BigInteger balance, BigInteger unlockedBalance, boolean isMultisigImportNeeded, List<MoneroSubaddress> subaddresses) {
+    super();
+    this.index = index;
+    this.label = label;
+    this.balance = balance;
+    this.unlockedBalance = unlockedBalance;
+    this.isMultisigImportNeeded = isMultisigImportNeeded;
+    this.subaddresses = subaddresses;
+  }
+  
   public int getIndex() {
     return index;
   }
@@ -28,29 +33,14 @@ public class MoneroAccount {
     this.index = index;
   }
   
-  /**
-   * Get the account label.
-   * 
-   * @return String is the account label
-   */
   public String getLabel() {
     return label;
   }
   
-  /**
-   * Set the account label.
-   * 
-   * @param label specifies the account label to set
-   */
   public void setLabel(String label) {
     this.label = label;
   }
   
-  /**
-   * Gets the account's balance.
-   * 
-   * @return BigInteger is the account's balance
-   */
   public BigInteger getBalance() {
     return balance;
   }
@@ -59,11 +49,6 @@ public class MoneroAccount {
     this.balance = balance;
   }
   
-  /**
-   * Gets the account's unlocked balance.
-   * 
-   * @return BigInteger is the account's unlocked balance
-   */
   public BigInteger getUnlockedBalance() {
     return unlockedBalance;
   }
@@ -72,11 +57,6 @@ public class MoneroAccount {
     this.unlockedBalance = unlockedBalance;
   }
   
-  /**
-   * Indicates if importing multisig data is needed for returning a correct balance.
-   * 
-   * @return true if importing multisig data is needed for returning a correct balance, false otherwise
-   */
   public boolean isMultisigImportNeeded() {
     return isMultisigImportNeeded;
   }
