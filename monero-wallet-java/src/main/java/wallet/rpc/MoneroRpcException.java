@@ -1,4 +1,4 @@
-package service.rpc;
+package wallet.rpc;
 
 import java.util.Map;
 

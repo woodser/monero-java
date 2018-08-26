@@ -15,8 +15,8 @@ import org.junit.Test;
 import model.MoneroAddress;
 import model.MoneroPayment;
 import model.MoneroTx;
-import service.MoneroWallet;
 import utils.TestUtils;
+import wallet.MoneroWallet;
 
 /**
  * Tests sending transactions within a Monero wallet.

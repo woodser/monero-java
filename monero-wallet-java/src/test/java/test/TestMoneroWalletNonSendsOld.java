@@ -23,9 +23,9 @@ import model.MoneroTx;
 import model.MoneroUri;
 import model.MoneroTx.MoneroTxType;
 import service.MoneroAccount;
-import service.rpc.MoneroRpcException;
 import utils.MoneroUtils;
 import utils.TestUtils;
+import wallet.rpc.MoneroRpcException;
 
 /**
  * Tests a Monero wallet excluding sending transactions.
