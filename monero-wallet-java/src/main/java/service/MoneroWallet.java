@@ -11,8 +11,9 @@ import model.MoneroAddressBookEntry;
 import model.MoneroIntegratedAddress;
 import model.MoneroKeyImage;
 import model.MoneroSubaddress;
-import model.MoneroTransaction;
-import model.MoneroTransactionConfig;
+import model.MoneroTx;
+import model.MoneroTxConfig;
+import model.MoneroTxFilter;
 import model.MoneroUri;
 
 /**
@@ -155,66 +156,56 @@ public interface MoneroWallet {
    * Send a payment.
    * 
    * @param config is the transaction configuration
-   * @return MoneroTransaction is the resulting transaction from sending payment
+   * @return MoneroTx is the resulting transaction from sending payment
    */
-  public MoneroTransaction send(MoneroTransactionConfig config);
+  public MoneroTx send(MoneroTxConfig config);
   
   /**
    * Send a payment which may be split across multiple transactions.
    * 
    * @param config is the transaction configuration
-   * @return List<MoneroTransaction> are the resulting transactions from sending payment
+   * @return List<MoneroTx> are the resulting transactions from sending payment
    */
-  public List<MoneroTransaction> sendSplit(MoneroTransactionConfig config);
+  public List<MoneroTx> sendSplit(MoneroTxConfig config);
   
   /**
    * Send all unlocked balance to an address.
    * 
    * @param config is the transcaction configuration
-   * @param List<MoneroTransaction> are the resulting transactions from sweeping
+   * @param List<MoneroTx> are the resulting transactions from sweeping
    */
-  public List<MoneroTransaction> sweepAll(MoneroTransactionConfig config);
-  
-  /**
-   * Returns all wallet transactions, each containing payments, outputs, and other metadata depending on the transaction type.
-   * 
-   * @return List<MoneroTransaction> are all of the wallet's transactions
-   */
-  public List<MoneroTransaction> getTransactions();
-
-  /**
-   * Returns all wallet transactions specified, each containing payments, outputs, and other metadata depending on the transaction type.
-   * 
-   * @param getIncoming specifies if incoming transactions should be retrieved
-   * @param getOutgoing specifies if outgoing transactions should be retrieved
-   * @param getPending specifies if pending transactions should be retrieved
-   * @param getFailed specifies if failed transactions should be retrieved
-   * @param getMemPool specifies if mempool transactions should be retrieved
-   * @param paymentIds allows transactions with specific transaction ids to be retrieved (optional)
-   * @param minHeight allows transactions with a mininum block height to be retrieved (optional)
-   * @param maxHeight allows transactions with a maximum block height to be retrieved (optional)
-   * @param account index of the account to query for transactions (optional)
-   * @param subaddresses subaddress indices to query for transactions (optional)
-   * @param txIds are transaction ids to query (optional)
-   * @return List<MoneroTransaction> are the retrieved transactions
-   */
-  public List<MoneroTransaction> getTransactions(boolean getIncoming, boolean getOutgoing, boolean getPending, boolean getFailed, boolean getMemPool, Collection<String> paymentIds, Integer minHeight, Integer maxHeight, Integer accountIdx, Collection<Integer> subaddressIndices, Collection<Integer> txIds);
-  
-  /**
-   * Gets a transaction by id.
-   * 
-   * @param txId identifies the transaction
-   * @param accountIdx specifies the index of the account to query (optional)
-   * @return MoneroTransaction is the retrieved transaction
-   */
-  public MoneroTransaction getTransaction(String txId, Integer accountIdx);
+  public List<MoneroTx> sweepAll(MoneroTxConfig config);
   
   /**
    * Send all dust outputs back to the wallet to make them easier to spend and mix.
    * 
-   * @return List<MoneroTransaction> are the resulting transactions from sweeping dust
+   * @return List<MoneroTx> are the resulting transactions from sweeping dust
    */
-  public List<MoneroTransaction> sweepDust();
+  public List<MoneroTx> sweepDust();
+  
+  /**
+   * Get all wallet transactions, each containing payments, outputs, and other metadata depending on the transaction type.
+   * 
+   * @return List<MoneroTx> are all of the wallet's transactions
+   */
+  public List<MoneroTx> getTxs();
+  
+  /**
+   * Get wallet transactions that meet the criteria specified in a filter.
+   * 
+   * @param filter filters wallet transactions
+   * @return List<MoneroTx> are the transactions that meet the criteria specified in the filter
+   */
+  public List<MoneroTx> getTxs(MoneroTxFilter filter);
+  
+  /**
+   * Get a transaction by id.
+   * 
+   * @param txId identifies the transaction
+   * @param accountIdx specifies the index of the account to query (optional)
+   * @return MoneroTx is the retrieved transaction
+   */
+  public MoneroTx getTx(String txId, Integer accountIdx);
   
   /**
    * Set arbitrary string notes for transactions.

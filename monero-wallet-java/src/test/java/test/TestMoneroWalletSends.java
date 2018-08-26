@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import model.MoneroAddress;
 import model.MoneroPayment;
-import model.MoneroTransaction;
+import model.MoneroTx;
 import service.MoneroWallet;
 import utils.TestUtils;
 
@@ -45,7 +45,7 @@ public class TestMoneroWalletSends {
     // send to self
     MoneroAddress address = wallet.getStandardAddress();
     BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(UNLOCKED_DIVISOR));
-    MoneroTransaction tx = wallet.send(address.toString(), sendAmount, null, MIXIN, 0);
+    MoneroTx tx = wallet.send(address.toString(), sendAmount, null, MIXIN, 0);
     
     // test transaction
     assertNotNull(tx.getPayments());
@@ -88,7 +88,7 @@ public class TestMoneroWalletSends {
     }
     
     // send payments
-    MoneroTransaction tx = wallet.send(payments, null, MIXIN, 0);
+    MoneroTx tx = wallet.send(payments, null, MIXIN, 0);
     
     // test transaction
     assertNotNull(tx.getPayments());
@@ -131,10 +131,10 @@ public class TestMoneroWalletSends {
     }
     
     // send payments
-    List<MoneroTransaction> txs = wallet.sendSplit(payments, null, MIXIN, 0, true);
+    List<MoneroTx> txs = wallet.sendSplit(payments, null, MIXIN, 0, true);
     
     // test transactions
-    for (MoneroTransaction tx : txs) {
+    for (MoneroTx tx : txs) {
       assertNull(tx.getPayments());
       assertTrue(tx.getFee().longValue() > 0);
       assertEquals(MIXIN, tx.getMixin());
@@ -154,8 +154,8 @@ public class TestMoneroWalletSends {
 
   @Test
   public void testSweepDust() {
-    List<MoneroTransaction> txs = wallet.sweepDust();
-    for (MoneroTransaction tx : txs) {
+    List<MoneroTx> txs = wallet.sweepDust();
+    for (MoneroTx tx : txs) {
       assertNull(tx.getPayments());
       assertNull(tx.getFee());
       assertNull(tx.getMixin());

@@ -5,7 +5,7 @@ import java.util.Collection;
 /**
  * Specifies filter options when querying transactions.
  */
-public class MoneroTransactionFilter {
+public class MoneroTxFilter {
   
   private boolean incoming;
   private boolean outgoing;
@@ -19,7 +19,7 @@ public class MoneroTransactionFilter {
   private Collection<Integer> txIds;
   private Collection<String> paymentIds;
   
-  public MoneroTransactionFilter(boolean incoming, boolean outgoing, boolean pending, boolean failed, boolean memPool, Integer minHeight, Integer maxHeight, Integer accountIdx, Collection<Integer> subaddressIndices, Collection<Integer> txIds, Collection<String> paymentIds) {
+  public MoneroTxFilter(boolean incoming, boolean outgoing, boolean pending, boolean failed, boolean memPool, Integer minHeight, Integer maxHeight, Integer accountIdx, Collection<Integer> subaddressIndices, Collection<Integer> txIds, Collection<String> paymentIds) {
     super();
     this.incoming = incoming;
     this.outgoing = outgoing;
