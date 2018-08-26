@@ -3,7 +3,7 @@ package utils;
 import org.apache.log4j.PropertyConfigurator;
 
 import service.MoneroWallet;
-import service.rpc.MoneroWalletRpcOld;
+import service.MoneroWalletRpc;
 
 /**
  * Test utilities and constants.
@@ -26,7 +26,7 @@ public class TestUtils {
   public static MoneroWallet getWallet() {
     if (wallet == null) {
       try {
-        wallet = new MoneroWalletRpcOld(DOMAIN, PORT, USERNAME, PASSWORD);
+        wallet = new MoneroWalletRpc(DOMAIN, PORT, USERNAME, PASSWORD);
       } catch (Exception e) {
         e.printStackTrace();
       }

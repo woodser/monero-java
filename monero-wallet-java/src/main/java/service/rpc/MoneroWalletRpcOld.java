@@ -238,7 +238,7 @@ public class MoneroWalletRpcOld implements MoneroWallet {
 
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
-    MoneroTx tx = interpretTransaction(txMap);
+    MoneroTx tx = interpretTx(txMap);
     tx.setPayments(payments);
     tx.setMixin(mixin);
     tx.setUnlockTime(unlockTime);
@@ -327,7 +327,7 @@ public class MoneroWalletRpcOld implements MoneroWallet {
       for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
 
         // build transaction
-        MoneroTx tx = interpretTransaction(txMap);
+        MoneroTx tx = interpretTx(txMap);
         MoneroPayment payment = new MoneroPayment(tx, null, (BigInteger) txMap.get("amount"));
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
         payments.add(payment);
@@ -351,7 +351,7 @@ public class MoneroWalletRpcOld implements MoneroWallet {
         MoneroOutput output = new MoneroOutput();
         output.setAmount((BigInteger) outputMap.get("amount"));
         output.setIsSpent((Boolean) outputMap.get("spent"));
-        MoneroTx tx = interpretTransaction(outputMap);
+        MoneroTx tx = interpretTx(outputMap);
         tx.setType(MoneroTxType.INCOMING);
         output.setTransaction(tx);
         List<MoneroOutput> outputs = new ArrayList<MoneroOutput>();
@@ -370,7 +370,7 @@ public class MoneroWalletRpcOld implements MoneroWallet {
         // interpret get_bulk_payments response
         List<Map<String, Object>> paymentMaps = (List<Map<String, Object>>) result.get("payments");
         for (Map<String, Object> paymentMap : paymentMaps) {
-          MoneroTx tx = interpretTransaction(paymentMap);
+          MoneroTx tx = interpretTx(paymentMap);
           tx.setType(MoneroTxType.INCOMING);
           // payment data is redundant with get_transfers rpc call, so it's not added because merging would create duplicates
           // MoneroPayment payment = new MoneroPayment();
@@ -422,7 +422,7 @@ public class MoneroWalletRpcOld implements MoneroWallet {
    * @return MoneroTx is the initialized transaction
    */
   @SuppressWarnings("unchecked")
-  private MoneroTx interpretTransaction(Map<String, Object> txMap) {
+  private MoneroTx interpretTx(Map<String, Object> txMap) {
     MoneroTx tx = new MoneroTx();
     for (String key : txMap.keySet()) {
       Object val = txMap.get(key);
@@ -439,7 +439,7 @@ public class MoneroWalletRpcOld implements MoneroWallet {
       else if (key.equalsIgnoreCase("tx_hash")) tx.setHash((String) val);
       else if (key.equalsIgnoreCase("tx_key")) tx.setKey((String) val);
       else if (key.equalsIgnoreCase("txid")) tx.setHash((String) val);
-      else if (key.equalsIgnoreCase("type")) tx.setType(getTransactionType((String) val));
+      else if (key.equalsIgnoreCase("type")) tx.setType(getTxType((String) val));
       else if (key.equalsIgnoreCase("tx_size")) tx.setSize(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("unlock_time")) tx.setUnlockTime(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("global_index")) {
@@ -522,7 +522,7 @@ public class MoneroWalletRpcOld implements MoneroWallet {
     }
   }
 
-  private static MoneroTxType getTransactionType(String type) {
+  private static MoneroTxType getTxType(String type) {
     if (type == null) throw new MoneroException("Transaction type is null");
     else if (type.equalsIgnoreCase("in")) return MoneroTxType.INCOMING;
     else if (type.equalsIgnoreCase("out")) return MoneroTxType.OUTGOING;
