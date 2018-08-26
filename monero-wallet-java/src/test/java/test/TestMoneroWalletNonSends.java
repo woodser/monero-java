@@ -1,15 +1,20 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 
+import model.MoneroAccount;
 import model.MoneroAddress;
 import model.MoneroIntegratedAddress;
+import model.MoneroSubaddress;
 import utils.MoneroUtils;
 import utils.TestUtils;
 import wallet.MoneroWallet;
@@ -77,17 +82,26 @@ public class TestMoneroWalletNonSends {
 
   @Test
   public void testGetAccounts() {
-    fail("Not yet implemented");
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    assertTrue(accounts.size() > 0);
+    for (MoneroAccount account : accounts) {
+      testAccount(account);
+    }
   }
 
   @Test
   public void testGetAccountsString() {
-    fail("Not yet implemented");
+    List<MoneroAccount> accounts = wallet.getAccounts("fake_tag");
+    assertEquals(0, accounts.size());
   }
 
   @Test
   public void testGetAccount() {
-    fail("Not yet implemented");
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    assertTrue(accounts.size() > 0);
+    for (MoneroAccount account : accounts) {
+      testAccount(wallet.getAccount(account.getIndex()));
+    }
   }
 
   @Test
@@ -273,5 +287,28 @@ public class TestMoneroWalletNonSends {
   @Test
   public void testStopMining() {
     fail("Not yet implemented");
+  }
+  
+  // --------------------------------- PRIVATE --------------------------------
+  
+  private static void testAccount(MoneroAccount account) {
+    assertTrue(account.getIndex() >= 0);
+    assertTrue(account.getBalance().doubleValue() >= 0);
+    assertTrue(account.getUnlockedBalance().doubleValue() >= 0);
+    assertFalse(account.isMultisigImportNeeded());
+    if (account.getSubaddresses() != null) {
+      for (int i = 0; i < account.getSubaddresses().size(); i++) {
+        testSubaddress(account.getSubaddresses().get(i));
+      }
+    }
+  }
+  
+  private static void testSubaddress(MoneroSubaddress subaddress) {
+    assertTrue(subaddress.getIndex() >= 0);
+    assertTrue(subaddress.getBalance().doubleValue() >= 0);
+    assertTrue(subaddress.getUnlockedBalance().doubleValue() >= 0);
+    assertNotNull(subaddress.getAddress());
+    assertTrue(subaddress.getNumUnspentOutputs() >= 0);
+    if (subaddress.getBalance().doubleValue() >= 0) assertTrue(subaddress.isUsed());
   }
 }
