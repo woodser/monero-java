@@ -1,6 +1,6 @@
 package utils;
 
-import service.MoneroWallet;
+import wallet.MoneroWallet;
 
 /**
  * Prints the height of the wallet.

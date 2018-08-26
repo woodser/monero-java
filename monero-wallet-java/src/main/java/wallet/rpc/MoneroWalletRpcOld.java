@@ -1,4 +1,4 @@
-package service.rpc;
+package wallet.rpc;
 
 import java.math.BigInteger;
 import java.net.URI;
@@ -37,12 +37,12 @@ import model.MoneroPayment;
 import model.MoneroTx;
 import model.MoneroTx.MoneroTxType;
 import model.MoneroUri;
-import service.MoneroWallet;
 import types.HttpException;
 import types.Pair;
 import utils.JsonUtils;
 import utils.MoneroUtils;
 import utils.StreamUtils;
+import wallet.MoneroWallet;
 
 /**
  * Implements a Monero wallet backed by a Monero wallet RPC endpoint.

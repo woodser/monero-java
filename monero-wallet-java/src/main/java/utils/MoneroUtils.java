@@ -6,7 +6,7 @@ import java.util.List;
 import model.MoneroAddress;
 import model.MoneroException;
 import model.MoneroIntegratedAddress;
-import service.MoneroWallet;
+import wallet.MoneroWallet;
 
 /**
  * Collection of Monero utilities.

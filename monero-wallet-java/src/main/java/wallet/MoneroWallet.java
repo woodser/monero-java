@@ -1,4 +1,4 @@
-package service;
+package wallet;
 
 import java.math.BigInteger;
 import java.net.URI;

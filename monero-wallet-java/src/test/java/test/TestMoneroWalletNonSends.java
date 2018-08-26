@@ -10,10 +10,10 @@ import org.junit.Test;
 
 import model.MoneroAddress;
 import model.MoneroIntegratedAddress;
-import service.MoneroWallet;
-import service.rpc.MoneroRpcException;
 import utils.MoneroUtils;
 import utils.TestUtils;
+import wallet.MoneroWallet;
+import wallet.rpc.MoneroRpcException;
 
 /**
  * Tests a Monero wallet excluding sending transactions.
