@@ -111,7 +111,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public int getHeight() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = sendRpcRequest("getheight", null);
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return ((BigInteger) resultMap.get("height")).intValue();
   }
 
   @Override
