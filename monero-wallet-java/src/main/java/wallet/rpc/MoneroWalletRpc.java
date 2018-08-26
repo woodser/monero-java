@@ -98,7 +98,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public List<MoneroAccount> getAccounts() {
     throw new RuntimeException("Not implemented");
   }
-
+  
   @Override
   public List<MoneroAccount> getAccounts(String tag) {
     throw new RuntimeException("Not implemented");
