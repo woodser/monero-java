@@ -5,6 +5,7 @@ import java.util.List;
 
 import model.MoneroAddress;
 import model.MoneroException;
+import model.MoneroIntegratedAddress;
 import service.MoneroWallet;
 
 /**
@@ -140,6 +141,21 @@ public class MoneroUtils {
       return true;
     } catch (MoneroException e) {
       return false;
+    }
+  }
+  
+  /**
+   * Validates the given Monero address which may be an address or an integrated address.
+   * 
+   * @param address is the address to validate
+   * @throws MoneroException if if the address is invalid
+   */
+  public static void validateAddress(MoneroAddress address) {
+    if (address instanceof MoneroIntegratedAddress) {
+      MoneroIntegratedAddress integratedAddress = (MoneroIntegratedAddress) address;
+      validateIntegratedAddress(integratedAddress.getStandardAddress(), integratedAddress.getPaymentId(), integratedAddress.getIntegratedAddress());
+    } else {
+      validateStandardAddress(address.getStandardAddress());
     }
   }
   
