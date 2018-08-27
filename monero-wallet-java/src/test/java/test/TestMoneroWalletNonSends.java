@@ -286,26 +286,6 @@ public class TestMoneroWalletNonSends {
   }
 
   @Test
-  public void testSend() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testSendSplit() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testSweepAll() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testSweepDust() {
-    fail("Not yet implemented");
-  }
-
-  @Test
   public void testGetTxs() {
     fail("Not yet implemented");
   }
