@@ -1,7 +1,14 @@
 package test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -80,7 +87,7 @@ public class TestMoneroWalletNonSends {
   @Test
   public void testGetAccounts() {
     List<MoneroAccount> accounts = wallet.getAccounts();
-    assertTrue(accounts.size() > 0);
+    assertFalse(accounts.isEmpty());
     for (MoneroAccount account : accounts) {
       testAccount(account);
     }
@@ -102,7 +109,7 @@ public class TestMoneroWalletNonSends {
   @Test
   public void testGetAccount() {
     List<MoneroAccount> accounts = wallet.getAccounts();
-    assertTrue(accounts.size() > 0);
+    assertFalse(accounts.isEmpty());
     for (MoneroAccount account : accounts) {
       testAccount(wallet.getAccount(account.getIndex()));
     }
@@ -140,23 +147,68 @@ public class TestMoneroWalletNonSends {
   }
 
   @Test
-  public void testGetSubaddressesInt() {
-    fail("Not yet implemented");
+  public void testGetSubaddresses() {
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    assertFalse(accounts.isEmpty());
+    for (MoneroAccount account : accounts) {
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
+      assertFalse(subaddresses.isEmpty());
+      for (MoneroSubaddress subaddress : subaddresses) {
+        testSubaddress(subaddress);
+      }
+    }
   }
 
   @Test
-  public void testGetSubaddress() {
-    fail("Not yet implemented");
+  public void testGetSubaddressesByIndices() {
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    assertFalse(accounts.isEmpty());
+    for (MoneroAccount account : accounts) {
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
+      assertFalse(subaddresses.isEmpty());
+      Collection<Integer> subaddressIndices = new HashSet<Integer>();
+      for (MoneroSubaddress subaddress : subaddresses) {
+        subaddressIndices.add(subaddress.getIndex());
+      }
+      assertEquals(subaddresses, wallet.getSubaddresses(account.getIndex(), subaddressIndices));
+    }
   }
-
+  
   @Test
-  public void testGetSubaddressesIntCollectionOfInteger() {
-    fail("Not yet implemented");
+  public void testGetSubaddressByIndex() {
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    assertFalse(accounts.isEmpty());
+    for (MoneroAccount account : accounts) {
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
+      assertFalse(subaddresses.isEmpty());
+      for (int i = 0; i < subaddresses.size(); i++) {
+        MoneroSubaddress subaddress = wallet.getSubaddress(account.getIndex(), subaddresses.get(i).getIndex());
+        assertEquals(subaddresses.get(i), subaddress);
+      }
+    }
   }
 
   @Test
   public void testCreateSubaddress() {
-    fail("Not yet implemented");
+    
+    // create subaddress with no label
+    List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(0);
+    MoneroSubaddress subaddress = wallet.createSubaddress(0, null);
+    assertNull(subaddress.getLabel());
+    testSubaddress(subaddress);
+    List<MoneroSubaddress> subaddressesNew = wallet.getSubaddresses(0);
+    assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
+    assertEquals(subaddressesNew.get(subaddressesNew.size() - 1), subaddress);
+    
+    // create subaddress with label
+    subaddresses = wallet.getSubaddresses(0);
+    String uuid = UUID.randomUUID().toString();
+    subaddress = wallet.createSubaddress(0, uuid);
+    assertEquals(subaddress.getLabel(), uuid);
+    testSubaddress(subaddress);
+    subaddressesNew = wallet.getSubaddresses(0);
+    assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
+    assertEquals(subaddressesNew.get(subaddressesNew.size() - 1), subaddress);
   }
 
   @Test
