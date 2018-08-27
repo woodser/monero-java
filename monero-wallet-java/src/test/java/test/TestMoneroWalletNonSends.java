@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.junit.Test;
 
 import model.MoneroAccount;
 import model.MoneroAddress;
+import model.MoneroException;
 import model.MoneroIntegratedAddress;
 import model.MoneroSubaddress;
 import utils.MoneroUtils;
@@ -212,23 +214,75 @@ public class TestMoneroWalletNonSends {
   }
 
   @Test
-  public void testGetBalanceInt() {
-    fail("Not yet implemented");
+  public void testGetBalanceAccount() {
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    assertFalse(accounts.isEmpty());
+    for (MoneroAccount account : accounts) {
+      BigInteger balance = wallet.getBalance(account.getIndex());
+      assertTrue(balance.longValue() >= 0);
+    }
+    
+    // test getting balance of invalid account
+    try {
+      wallet.getBalance(-456);
+      fail("Should have thrown error on invalid account");
+    } catch (MoneroException exception) { }
   }
 
   @Test
-  public void testGetBalanceIntInt() {
-    fail("Not yet implemented");
+  public void getBalanceSubaddress() {
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    assertFalse(accounts.isEmpty());
+    for (MoneroAccount account : accounts) {
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
+      assertFalse(subaddresses.isEmpty());
+      for (MoneroSubaddress subaddress : subaddresses) {
+        BigInteger balance = wallet.getBalance(account.getIndex(), subaddress.getIndex());
+        assertTrue(balance.longValue() >= 0);
+      }
+    }
+    
+    // test getting balance of invalid account
+    try {
+      wallet.getBalance(-456);
+      fail("Should have thrown error on invalid account");
+    } catch (MoneroException exception) { }
   }
 
   @Test
-  public void testGetUnlockedBalanceInt() {
-    fail("Not yet implemented");
+  public void testGetUnlockedBalanceAccount() {
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    assertFalse(accounts.isEmpty());
+    for (MoneroAccount account : accounts) {
+      BigInteger unlockedBalance = wallet.getUnlockedBalance(account.getIndex());
+      assertTrue(unlockedBalance.longValue() >= 0);
+    }
+    
+    // test getting balance of invalid account
+    try {
+      wallet.getUnlockedBalance(-456);
+      fail("Should have thrown error on invalid account");
+    } catch (MoneroException exception) { }
   }
 
   @Test
-  public void testGetUnlockedBalanceIntInt() {
-    fail("Not yet implemented");
+  public void testGetUnlockedBalanceSubaddress() {
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    assertFalse(accounts.isEmpty());
+    for (MoneroAccount account : accounts) {
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
+      assertFalse(subaddresses.isEmpty());
+      for (MoneroSubaddress subaddress : subaddresses) {
+        BigInteger unlockedBalance = wallet.getUnlockedBalance(account.getIndex(), subaddress.getIndex());
+        assertTrue(unlockedBalance.longValue() >= 0);
+      }
+    }
+    
+    // test getting balance of invalid account
+    try {
+      wallet.getUnlockedBalance(-456);
+      fail("Should have thrown error on invalid account");
+    } catch (MoneroException exception) { }
   }
 
   @Test
