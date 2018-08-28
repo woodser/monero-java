@@ -401,13 +401,9 @@ public class TestMoneroWalletNonSends {
   }
 
   @Test
-  public void testStartMining() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testStopMining() {
-    fail("Not yet implemented");
+  public void testMining() {
+    wallet.startMining(2, false, true);
+    wallet.stopMining();
   }
   
   // --------------------------------- PRIVATE --------------------------------
