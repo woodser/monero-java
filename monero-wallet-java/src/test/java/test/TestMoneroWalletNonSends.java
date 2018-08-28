@@ -21,6 +21,7 @@ import model.MoneroAddress;
 import model.MoneroException;
 import model.MoneroIntegratedAddress;
 import model.MoneroSubaddress;
+import model.MoneroTx;
 import utils.MoneroUtils;
 import utils.TestUtils;
 import wallet.MoneroWallet;
@@ -287,7 +288,11 @@ public class TestMoneroWalletNonSends {
 
   @Test
   public void testGetTxs() {
-    fail("Not yet implemented");
+    List<MoneroTx> txs = wallet.getTxs();
+    assertFalse(txs.isEmpty());
+    for (MoneroTx tx : txs) {
+      testTransaction(tx);
+    }
   }
 
   @Test
@@ -426,5 +431,10 @@ public class TestMoneroWalletNonSends {
     assertNotNull(subaddress.getAddress());
     assertTrue(subaddress.getNumUnspentOutputs() >= 0);
     if (subaddress.getBalance().doubleValue() >= 0) assertTrue(subaddress.isUsed());
+  }
+  
+  private static void testTransaction(MoneroTx tx) {
+    assertNotNull(tx.getHash());
+    assertNotNull(tx.getType());
   }
 }
