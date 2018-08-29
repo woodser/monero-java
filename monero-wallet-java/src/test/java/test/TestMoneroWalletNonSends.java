@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import model.MoneroAccount;
@@ -28,6 +30,7 @@ import model.MoneroSubaddress;
 import model.MoneroTx;
 import model.MoneroTx.MoneroTxType;
 import model.MoneroTxFilter;
+import model.MoneroUri;
 import utils.MoneroUtils;
 import utils.TestUtils;
 import wallet.MoneroWallet;
@@ -499,13 +502,35 @@ public class TestMoneroWalletNonSends {
   }
 
   @Test
-  public void testToUri() {
-    fail("Not yet implemented");
-  }
+  public void testUri() {
+    
+    // test with optional fields as null
+    MoneroUri mUri1 = new MoneroUri();
+    mUri1.setAddress(wallet.getSubaddress(0, 0).getAddress().getStandardAddress());
+    URI uri = wallet.toUri(mUri1);
+    MoneroUri mUri2 = wallet.toMoneroUri(uri);
+    assertTrue(mUri1.equals(mUri2));
+    
+    // test with all fields
+    mUri1.setAmount(BigInteger.valueOf((Long.parseLong("425000000000"))));
+    mUri1.setPaymentId("03284e41c342f036");
+    mUri1.setRecipientName("John Doe");
+    mUri1.setTxDescription("OMZG XMR FTW");
+    uri = wallet.toUri(mUri1);
+    mUri2 = wallet.toMoneroUri(uri);
 
-  @Test
-  public void testToMoneroUri() {
-    fail("Not yet implemented");
+    assertTrue(mUri1.equals(mUri2));
+    
+    // test with address null
+    mUri1.setAddress(null);
+    mUri1.setPaymentId("bizzup");
+    try {
+      wallet.toUri(mUri1);
+      fail("Should have thrown RPC exception with invalid parameters");
+    } catch (MoneroRpcException e) {
+      assertEquals((int) -11, (int) e.getRpcCode());
+      assertTrue(e.getRpcMessage().contains("Cannot make URI from supplied parameters"));
+    }
   }
 
   @Test
@@ -515,7 +540,7 @@ public class TestMoneroWalletNonSends {
 
   @Test
   public void testSaveBlockchain() {
-    fail("Not yet implemented");
+    wallet.saveBlockchain();
   }
 
   @Test
@@ -528,9 +553,10 @@ public class TestMoneroWalletNonSends {
     fail("Not yet implemented");
   }
 
+  @Ignore // disabled so tests don't actually stop the wallet
   @Test
   public void testStopWallet() {
-    fail("Not yet implemented");
+    wallet.stopWallet();
   }
 
   @Test
