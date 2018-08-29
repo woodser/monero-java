@@ -8,7 +8,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -20,8 +22,11 @@ import model.MoneroAccount;
 import model.MoneroAddress;
 import model.MoneroException;
 import model.MoneroIntegratedAddress;
+import model.MoneroOutput;
 import model.MoneroSubaddress;
 import model.MoneroTx;
+import model.MoneroTx.MoneroTxType;
+import model.MoneroTxFilter;
 import utils.MoneroUtils;
 import utils.TestUtils;
 import wallet.MoneroWallet;
@@ -297,7 +302,94 @@ public class TestMoneroWalletNonSends {
 
   @Test
   public void testGetTxsMoneroTxFilter() {
-    fail("Not yet implemented");
+    
+    // get all transactions for reference
+    List<MoneroTx> allTxs = wallet.getTxs();
+    assertFalse(allTxs.isEmpty());
+    for (MoneroTx tx : allTxs) {
+      testTransaction(tx);
+    }
+    
+    // test getting transactions by payment ids
+    Collection<String> paymentIds = new HashSet<String>();
+    for (MoneroTx tx : allTxs) paymentIds.add(tx.getPaymentId());
+    assertFalse(paymentIds.isEmpty());
+    for (String paymentId : paymentIds) {
+      Collection<String> filterPaymentIds = new HashSet<String>();
+      filterPaymentIds.add(paymentId);
+      MoneroTxFilter filter = new MoneroTxFilter();
+      filter.setPaymentIds(paymentIds);
+      List<MoneroTx> txs = wallet.getTxs(filter);
+      assertFalse(txs.isEmpty());
+      for (MoneroTx tx : txs) {
+        testTransaction(tx);
+      }
+    }
+    
+    // test getting incoming transactions
+    List<MoneroTx> txs = wallet.getTxs(new MoneroTxFilter(true, false, false, false, false, null, null, null, null, null, null));
+    assertFalse(txs.isEmpty());
+    for (MoneroTx tx : txs) {
+      assertEquals(MoneroTxType.INCOMING, tx.getType());
+    }
+    
+    // test getting outgoing transactions
+    txs = wallet.getTxs(new MoneroTxFilter(false, true, false, false, false, null, null, null, null, null, null));
+    assertFalse(txs.isEmpty());
+    for (MoneroTx tx : txs) {
+      assertEquals(MoneroTxType.OUTGOING, tx.getType());
+    }
+    
+    // test balance equals spendable outputs for each account
+    for (MoneroAccount account : wallet.getAccounts()) {
+      MoneroTxFilter filter = new MoneroTxFilter();
+      filter.setAccountIdx(account.getIndex());
+      txs = wallet.getTxs(filter);
+      assertFalse(txs.isEmpty());
+      BigInteger balance = BigInteger.valueOf(0);
+      for (MoneroTx tx : txs) {
+        if (tx.getOutputs() == null) continue;
+        for (MoneroOutput output : tx.getOutputs()) {
+          if (!output.getIsSpent()) {
+            balance = balance.add(output.getAmount());
+          }
+        }
+      }
+      assertEquals(wallet.getBalance(account.getIndex()), balance);
+    }
+    
+    
+    // get and sort block heights in ascending order
+    List<Integer> heights = new ArrayList<Integer>();
+    for (MoneroTx tx : txs) {
+      if (tx.getHeight() != null) heights.add(tx.getHeight());
+    }
+    Collections.sort(heights);
+    
+    // pick minimum and maximum heights for filtering
+    int minHeight = -1;
+    int maxHeight = -1;
+    if (heights.size() == 1) {
+      minHeight = 0;
+      maxHeight = heights.get(0) - 1;
+    } else {
+      minHeight = heights.get(0) + 1;
+      maxHeight = heights.get(heights.size() - 1) - 1;
+    }
+    
+    // assert at least some transactions filtered
+    int unfilteredCount = txs.size();
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setMinHeight(minHeight);
+    filter.setMaxHeight(maxHeight);
+    txs = wallet.getTxs(filter);
+    assertFalse(txs.isEmpty());
+    assertTrue(txs.size() < unfilteredCount);
+    for (MoneroTx tx : txs) {
+      assertTrue(tx.getHeight() >= minHeight && tx.getHeight() <= maxHeight);
+    }
+    
+    // TODO: test filtering by accountIdx and subaddresses
   }
 
   @Test
