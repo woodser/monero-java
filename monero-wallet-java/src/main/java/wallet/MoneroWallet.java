@@ -199,15 +199,6 @@ public interface MoneroWallet {
   public List<MoneroTx> getTxs(MoneroTxFilter filter);
   
   /**
-   * Get a transaction by id.
-   * 
-   * @param txId identifies the transaction
-   * @param accountIdx specifies the index of the account to query (optional)
-   * @return MoneroTx is the retrieved transaction
-   */
-  public MoneroTx getTx(String txId, Integer accountIdx);
-  
-  /**
    * Set arbitrary string notes for transactions.
    * 
    * @param txIds identify the transactions to get notes for
