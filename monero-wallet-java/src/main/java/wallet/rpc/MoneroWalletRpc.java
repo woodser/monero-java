@@ -175,11 +175,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
-  public MoneroTx getTx(String txId, Integer accountIdx) {
-    throw new RuntimeException("Not implemented");
-  }
-
-  @Override
   public void setTxNotes(List<String> txIds, List<String> txNotes) {
     throw new RuntimeException("Not implemented");
   }

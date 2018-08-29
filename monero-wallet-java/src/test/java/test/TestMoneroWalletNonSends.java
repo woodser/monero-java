@@ -420,11 +420,22 @@ public class TestMoneroWalletNonSends {
     filter.setSubaddressIndices(subaddressIndices);
     txs = wallet.getTxs(filter);
     assertTrue(txs.isEmpty());
-  }
-
-  @Test
-  public void testGetTx() {
-    fail("Not yet implemented");
+    
+    // test getting transactions by transaction ids
+    Collection<String> txIds = new HashSet<String>();
+    for (MoneroTx tx : allTxs) txIds.add(tx.getId());
+    assertFalse(txIds.isEmpty());
+    filter = new MoneroTxFilter();
+    filter.setTxIds(txIds);    
+    txs = wallet.getTxs(filter);
+    assertEquals(allTxs.size(), txs.size());
+    for (String txId : txIds) {
+      filter = new MoneroTxFilter();
+      filter.setTxIds(Arrays.asList(txId));
+      txs = wallet.getTxs(filter);
+      assertEquals(1, txs.size());
+      assertEquals(txId, txs.get(0).getId());
+    }
   }
 
   @Test

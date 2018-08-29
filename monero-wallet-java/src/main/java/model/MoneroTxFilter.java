@@ -16,7 +16,7 @@ public class MoneroTxFilter {
   private Integer maxHeight;
   private Integer accountIdx;
   private Collection<Integer> subaddressIndices;
-  private Collection<Integer> txIds;
+  private Collection<String> txIds;
   private Collection<String> paymentIds;
   
   public MoneroTxFilter() {
@@ -33,7 +33,7 @@ public class MoneroTxFilter {
     paymentIds = null;
   }
   
-  public MoneroTxFilter(boolean incoming, boolean outgoing, boolean pending, boolean failed, boolean mempool, Integer minHeight, Integer maxHeight, Integer accountIdx, Collection<Integer> subaddressIndices, Collection<Integer> txIds, Collection<String> paymentIds) {
+  public MoneroTxFilter(boolean incoming, boolean outgoing, boolean pending, boolean failed, boolean mempool, Integer minHeight, Integer maxHeight, Integer accountIdx, Collection<Integer> subaddressIndices, Collection<String> txIds, Collection<String> paymentIds) {
     super();
     this.incoming = incoming;
     this.outgoing = outgoing;
@@ -120,11 +120,11 @@ public class MoneroTxFilter {
     this.subaddressIndices = subaddressIndices;
   }
 
-  public Collection<Integer> getTxIds() {
+  public Collection<String> getTxIds() {
     return txIds;
   }
 
-  public void setTxIds(Collection<Integer> txIds) {
+  public void setTxIds(Collection<String> txIds) {
     this.txIds = txIds;
   }
 
