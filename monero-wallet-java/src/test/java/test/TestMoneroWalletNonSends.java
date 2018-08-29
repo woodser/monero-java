@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -358,7 +359,6 @@ public class TestMoneroWalletNonSends {
       assertEquals(wallet.getBalance(account.getIndex()), balance);
     }
     
-    
     // get and sort block heights in ascending order
     List<Integer> heights = new ArrayList<Integer>();
     for (MoneroTx tx : txs) {
@@ -389,7 +389,37 @@ public class TestMoneroWalletNonSends {
       assertTrue(tx.getHeight() >= minHeight && tx.getHeight() <= maxHeight);
     }
     
-    // TODO: test filtering by accountIdx and subaddresses
+    // test filtering by subaddress
+    for (MoneroAccount account : wallet.getAccounts()) {
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
+      for (MoneroSubaddress subaddress : subaddresses) {
+        filter = new MoneroTxFilter();
+        filter.setAccountIdx(account.getIndex());
+        filter.setSubaddressIndices(Arrays.asList(subaddress.getIndex()));
+        txs = wallet.getTxs(filter);
+        
+        // test that tx amounts add up to subaddress balance
+        BigInteger balance = BigInteger.valueOf(0);
+        for (MoneroTx tx : txs) {
+          if (tx.getOutputs() == null) continue;
+          for (MoneroOutput output : tx.getOutputs()) {
+            if (!output.getIsSpent()) {
+              balance = balance.add(output.getAmount());
+            }
+          }
+        }
+        assertEquals(wallet.getBalance(account.getIndex(), subaddress.getIndex()), balance);
+      }
+    }
+    
+    // assert that ummet filter criteria has no results
+    filter = new MoneroTxFilter();
+    filter.setAccountIdx(0);
+    Collection<Integer> subaddressIndices = new HashSet<Integer>();
+    subaddressIndices.add(1234907);
+    filter.setSubaddressIndices(subaddressIndices);
+    txs = wallet.getTxs(filter);
+    assertTrue(txs.isEmpty());
   }
 
   @Test
