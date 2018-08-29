@@ -143,6 +143,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx) {
     throw new RuntimeException("Not implemented");
   }
+  
+  @Override
+  public MoneroTx send(String address, String paymentId, BigInteger amount, Integer mixin) {
+    throw new RuntimeException("Not implemented");
+  }
 
   @Override
   public MoneroTx send(MoneroTxConfig config) {
