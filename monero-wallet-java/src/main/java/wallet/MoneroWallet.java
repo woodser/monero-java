@@ -228,9 +228,9 @@ public interface MoneroWallet {
   /**
    * Returns a signed set of key images.
    * 
-   * @return List<MoneroKeyImage> are exported key images
+   * @return Collection<MoneroKeyImage> are exported key images
    */
-  public List<MoneroKeyImage> getKeyImages();
+  public Collection<MoneroKeyImage> getKeyImages();
   
   /**
    * Import signed key images list and verify their spent status.
@@ -238,7 +238,7 @@ public interface MoneroWallet {
    * @param keyImages are key images to import
    * @return Map<String, BigInteger> contains "height", "spent", and "unspent"
    */
-  public Map<String, BigInteger> importKeyImages(List<MoneroKeyImage> keyImages);
+  public Map<String, BigInteger> importKeyImages(Collection<MoneroKeyImage> keyImages);
   
   /**
    * Returns all address book entries.
