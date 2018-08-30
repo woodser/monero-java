@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -25,6 +26,7 @@ import model.MoneroAccount;
 import model.MoneroAddress;
 import model.MoneroException;
 import model.MoneroIntegratedAddress;
+import model.MoneroKeyImage;
 import model.MoneroOutput;
 import model.MoneroSubaddress;
 import model.MoneroTx;
@@ -475,12 +477,22 @@ public class TestMoneroWalletNonSends {
 
   @Test
   public void testGetKeyImages() {
-    fail("Not yet implemented");
+    Collection<MoneroKeyImage> images = wallet.getKeyImages();
+    assertFalse(images.isEmpty());
+    for (MoneroKeyImage image : images) {
+      assertNotNull(image.getKeyImage());
+      assertNotNull(image.getSignature());
+    }
   }
 
   @Test
   public void testImportKeyImages() {
-    fail("Not yet implemented");
+    Collection<MoneroKeyImage> images = wallet.getKeyImages();
+    assertFalse(images.isEmpty());
+    Map<String, BigInteger> results = wallet.importKeyImages(images);
+    assertNotNull(results.get("height"));
+    assertNotNull(results.get("spent"));
+    assertNotNull(results.get("unspent"));
   }
 
   @Test

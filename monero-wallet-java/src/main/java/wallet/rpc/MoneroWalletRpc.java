@@ -190,12 +190,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroKeyImage> getKeyImages() {
+  public Collection<MoneroKeyImage> getKeyImages() {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public Map<String, BigInteger> importKeyImages(List<MoneroKeyImage> keyImages) {
+  public Map<String, BigInteger> importKeyImages(Collection<MoneroKeyImage> keyImages) {
     throw new RuntimeException("Not implemented");
   }
 
