@@ -443,12 +443,34 @@ public class TestMoneroWalletNonSends {
 
   @Test
   public void testSetTxNotes() {
-    fail("Not yet implemented");
+    
+    // set tx notes
+    List<MoneroTx> txs = wallet.getTxs();
+    assertTrue(txs.size() >= 3);
+    List<String> txIds = new ArrayList<String>();
+    List<String> txNotes = new ArrayList<String>();
+    for (int i = 0; i < txIds.size(); i++) {
+      txIds.add(txs.get(i).getId());
+      txNotes.add("Hello " + i);
+    }
+    wallet.setTxNotes(txIds, txNotes);
+    
+    // get tx notes
+    txNotes = wallet.getTxNotes(txIds);
+    for (int i = 0; i < txIds.size(); i++) {
+      assertEquals("Hello " + i, txNotes.get(i));
+    }
   }
 
   @Test
   public void testGetTxNotes() {
-    fail("Not yet implemented");
+    List<MoneroTx> txs = wallet.getTxs();
+    assertFalse(txs.isEmpty());
+    List<String> txIds = new ArrayList<String>();
+    for (MoneroTx tx : txs) txIds.add(tx.getId());
+    List<String> txNotes = wallet.getTxNotes(txIds);
+    assertEquals(txs.size(), txNotes.size());
+    for (String txNote : txNotes) assertNotNull(txNote);
   }
 
   @Test
