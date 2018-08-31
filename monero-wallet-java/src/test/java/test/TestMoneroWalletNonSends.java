@@ -49,9 +49,19 @@ public class TestMoneroWalletNonSends {
 
   @Before
   public void setup() throws Exception {
+    
+    // initialize test wallet
     wallet = TestUtils.getWallet();
-    wallet.createWallet(TestUtils.TEST_WALLET_1, TestUtils.TEST_WALLET_PW, "english");
+    try {
+      wallet.createWallet(TestUtils.TEST_WALLET_1, TestUtils.TEST_WALLET_PW, "English");
+    } catch (MoneroRpcException e) {
+      assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
+    }
     wallet.openWallet(TestUtils.TEST_WALLET_1, TestUtils.TEST_WALLET_PW);
+    
+    // ensure wallet has history to test
+    List<MoneroTx> txs = wallet.getTxs();
+    assertTrue("Test wallet does not have transaction history; load '" + TestUtils.TEST_WALLET_1 + "' with stagenet XMR and run TestMoneroWalletSends a few times", txs.size() >= 3);
   }
 
   @Test
@@ -582,6 +592,7 @@ public class TestMoneroWalletNonSends {
   public void testGetLanguages() {
     List<String> languages = wallet.getLanguages();
     assertFalse(languages.isEmpty());
+    System.out.println(languages);
     for (String language : languages) assertFalse(language.isEmpty());
   }
 
@@ -589,7 +600,11 @@ public class TestMoneroWalletNonSends {
   public void testCreateOpenWallet() {
     
     // create / open new wallet
-    wallet.createWallet(TestUtils.TEST_WALLET_2, TestUtils.TEST_WALLET_PW, "english");
+    try {
+      wallet.createWallet(TestUtils.TEST_WALLET_2, TestUtils.TEST_WALLET_PW, "English");
+    } catch (MoneroRpcException e) {
+      assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
+    }    
     wallet.openWallet(TestUtils.TEST_WALLET_2, TestUtils.TEST_WALLET_PW);
     List<MoneroTx> txs = wallet.getTxs();
     assertTrue(txs.isEmpty());  // wallet is unused except tests

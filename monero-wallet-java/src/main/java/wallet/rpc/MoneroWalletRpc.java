@@ -215,19 +215,34 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<String> getLanguages() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_languages", null);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (List<String>) resultMap.get("languages");
   }
 
   @Override
   public void createWallet(String filename, String password, String language) {
-    throw new RuntimeException("Not implemented");
+    if (filename == null || filename.isEmpty()) throw new MoneroException("Filename is not initialized");
+    if (password == null || password.isEmpty()) throw new MoneroException("Password is not initialized");
+    if (language == null || language.isEmpty()) throw new MoneroException("Language is not initialized");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("filename", filename);
+    params.put("password", password);
+    params.put("language", language);
+    rpc.sendRpcRequest("create_wallet", params);
   }
 
   @Override
   public void openWallet(String filename, String password) {
-    throw new RuntimeException("Not implemented");
+    if (filename == null || filename.isEmpty()) throw new MoneroException("Filename is not initialized");
+    if (password == null || password.isEmpty()) throw new MoneroException("Password is not initialized");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("filename", filename);
+    params.put("password", password);
+    rpc.sendRpcRequest("open_wallet", params);
   }
 
   @Override
