@@ -48,6 +48,8 @@ public class TestMoneroWalletNonSends {
   @Before
   public void setup() throws Exception {
     wallet = TestUtils.getWallet();
+    wallet.createWallet(TestUtils.TEST_WALLET_1, TestUtils.TEST_WALLET_PW, "english");
+    wallet.openWallet(TestUtils.TEST_WALLET_1, TestUtils.TEST_WALLET_PW);
   }
 
   @Test
@@ -96,6 +98,13 @@ public class TestMoneroWalletNonSends {
     MoneroUtils.validateAddress(integratedAddress);
     assertEquals(address.getStandardAddress(), integratedAddress.getStandardAddress());
     assertNotNull(integratedAddress.getPaymentId());
+  }
+  
+  @Test
+  public void testDecodeIntegratedAddress() {
+    MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress("03284e41c342f036");
+    MoneroIntegratedAddress decodedAddress = wallet.decodeIntegratedAddress(integratedAddress.toString());
+    assertEquals(integratedAddress, decodedAddress);
   }
 
   @Test
@@ -512,27 +521,35 @@ public class TestMoneroWalletNonSends {
 
   @Test
   public void testGetLanguages() {
-    fail("Not yet implemented");
+    List<String> languages = wallet.getLanguages();
+    assertFalse(languages.isEmpty());
+    for (String language : languages) assertFalse(language.isEmpty());
   }
 
   @Test
-  public void testCreateWallet() {
-    fail("Not yet implemented");
+  public void testCreateOpenWallet() {
+    
+    // create / open new wallet
+    wallet.createWallet(TestUtils.TEST_WALLET_2, TestUtils.TEST_WALLET_PW, "english");
+    wallet.openWallet(TestUtils.TEST_WALLET_2, TestUtils.TEST_WALLET_PW);
+    List<MoneroTx> txs = wallet.getTxs();
+    assertTrue(txs.isEmpty());  // wallet is unused except tests
+    
+    // open previous wallet
+    wallet.openWallet(TestUtils.TEST_WALLET_1, TestUtils.TEST_WALLET_PW);
+    txs = wallet.getTxs();
+    assertFalse(txs.isEmpty());  // wallet is used
   }
 
   @Test
-  public void testOpenWallet() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testSign() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testVerify() {
-    fail("Not yet implemented");
+  public void testSignVerify() {
+    String msg = "This is a super important message which needs to be signed and verified.";
+    String signature = wallet.sign(msg);
+    boolean verified = wallet.verify(msg, wallet.getSubaddress(0, 0).getAddress().toString(), signature);
+    assertTrue(verified);
+    assertTrue(wallet.getSubaddresses(0).size() > 1);
+    verified = wallet.verify(msg, wallet.getSubaddress(0, 1).getAddress().toString(), signature);
+    assertFalse(verified);
   }
 
   @Test
@@ -568,23 +585,18 @@ public class TestMoneroWalletNonSends {
   }
 
   @Test
-  public void testDecodeIntegratedAddress() {
-    fail("Not yet implemented");
-  }
-
-  @Test
   public void testSaveBlockchain() {
     wallet.saveBlockchain();
   }
 
   @Test
   public void testRescanBlockchain() {
-    fail("Not yet implemented");
+    wallet.rescanBlockchain();
   }
 
   @Test
   public void testRescanSpent() {
-    fail("Not yet implemented");
+    wallet.rescanSpent();
   }
 
   @Ignore // disabled so tests don't actually stop the wallet

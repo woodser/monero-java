@@ -33,4 +33,9 @@ public class TestUtils {
     }
     return wallet;
   }
+  
+  // names of test wallets
+  public static final String TEST_WALLET_PW = "supersecretpassword123";
+  public static final String TEST_WALLET_1 = "test_wallet_1";
+  public static final String TEST_WALLET_2 = "test_wallet_2";
 }
