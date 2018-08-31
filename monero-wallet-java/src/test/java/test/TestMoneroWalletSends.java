@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -89,6 +90,16 @@ public class TestMoneroWalletSends {
 
   @Test
   public void testSweepDust() {
-    fail("Not yet implemented");
+    List<MoneroTx> txs = wallet.sweepDust();
+    for (MoneroTx tx : txs) {
+      assertNull(tx.getPayments());
+      assertNull(tx.getFee());
+      assertNull(tx.getMixin());
+      assertNull(tx.getKey());
+      assertNotNull(tx.getHash());
+      assertNull(tx.getSize());
+      assertNull(tx.getType());
+      assertNull(tx.getHeight());
+    }
   }
 }
