@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import model.MoneroAccount;
+import model.MoneroAddress;
 import model.MoneroAddressBookEntry;
 import model.MoneroException;
 import model.MoneroIntegratedAddress;
@@ -205,7 +206,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
-  public int addAddressBookEntry(String address, String paymentId, String description) {
+  public int addAddressBookEntry(MoneroAddress address, String description) {
     throw new RuntimeException("Not implemented");
   }
 

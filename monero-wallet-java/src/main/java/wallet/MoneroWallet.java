@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import model.MoneroAccount;
+import model.MoneroAddress;
 import model.MoneroAddressBookEntry;
 import model.MoneroIntegratedAddress;
 import model.MoneroKeyImage;
@@ -251,11 +252,10 @@ public interface MoneroWallet {
    * Adds an address book entry.
    * 
    * @param address is the entry's Monero address
-   * @param paymentId is the entry's payment id (optional)
    * @param description is the entry's description (optional)
    * @return int is the index of the new address book entry
    */
-  public int addAddressBookEntry(String address, String paymentId, String description);
+  public int addAddressBookEntry(MoneroAddress address, String description);
   
   /**
    * Deletes an address book entry.
