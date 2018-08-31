@@ -579,21 +579,6 @@ public class TestMoneroWalletNonSends {
   }
 
   @Test
-  public void testGetAddressBookEntries() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testAddAddressBookEntry() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testDeleteAddressBookEntry() {
-    fail("Not yet implemented");
-  }
-
-  @Test
   public void testGetLanguages() {
     List<String> languages = wallet.getLanguages();
     assertFalse(languages.isEmpty());
