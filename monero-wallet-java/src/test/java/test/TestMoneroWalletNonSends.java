@@ -50,18 +50,18 @@ public class TestMoneroWalletNonSends {
   @Before
   public void setup() throws Exception {
     
-    // initialize test wallet
+    // initialize and open test wallet
     wallet = TestUtils.getWallet();
     try {
-      wallet.createWallet(TestUtils.TEST_WALLET_1, TestUtils.TEST_WALLET_PW, "English");
+      wallet.createWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW, "English");
     } catch (MoneroRpcException e) {
       assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
     }
-    wallet.openWallet(TestUtils.TEST_WALLET_1, TestUtils.TEST_WALLET_PW);
+    wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
     
     // ensure wallet has history to test
     List<MoneroTx> txs = wallet.getTxs();
-    assertTrue("Test wallet does not have transaction history; load '" + TestUtils.TEST_WALLET_1 + "' with stagenet XMR and run TestMoneroWalletSends a few times", txs.size() >= 3);
+    assertTrue("Test wallet does not have transaction history; load '" + TestUtils.WALLET_NAME_1 + "' with stagenet XMR and run TestMoneroWalletSends a few times", txs.size() >= 3);
   }
 
   @Test
@@ -601,16 +601,16 @@ public class TestMoneroWalletNonSends {
     
     // create / open new wallet
     try {
-      wallet.createWallet(TestUtils.TEST_WALLET_2, TestUtils.TEST_WALLET_PW, "English");
+      wallet.createWallet(TestUtils.WALLET_NAME_2, TestUtils.WALLET_PW, "English");
     } catch (MoneroRpcException e) {
       assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
     }    
-    wallet.openWallet(TestUtils.TEST_WALLET_2, TestUtils.TEST_WALLET_PW);
+    wallet.openWallet(TestUtils.WALLET_NAME_2, TestUtils.WALLET_PW);
     List<MoneroTx> txs = wallet.getTxs();
     assertTrue(txs.isEmpty());  // wallet is unused except tests
     
     // open previous wallet
-    wallet.openWallet(TestUtils.TEST_WALLET_1, TestUtils.TEST_WALLET_PW);
+    wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
     txs = wallet.getTxs();
     assertFalse(txs.isEmpty());  // wallet is used
   }

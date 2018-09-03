@@ -33,8 +33,8 @@ public class TestMoneroWalletSends {
   @Before
   public void setup() throws Exception {
     wallet = TestUtils.getWallet();
-    wallet.createWallet(TestUtils.TEST_WALLET_1, TestUtils.TEST_WALLET_PW, "english");
-    wallet.openWallet(TestUtils.TEST_WALLET_1, TestUtils.TEST_WALLET_PW);
+    wallet.createWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW, "english");
+    wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
   }
   
   @Test
