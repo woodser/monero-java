@@ -44,7 +44,7 @@ import wallet.MoneroWalletDefault;
 public class MoneroWalletRpc extends MoneroWalletDefault {
   
   // logger
-  private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpcOld.class);
+  private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class);
 
   // custom mapper to deserialize integers to BigIntegers
   public static ObjectMapper MAPPER;
