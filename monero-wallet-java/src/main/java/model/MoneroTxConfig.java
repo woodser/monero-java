@@ -2,6 +2,7 @@ package model;
 
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.List;
 
 import model.MoneroTx.MoneroTxPriority;
 
@@ -10,7 +11,7 @@ import model.MoneroTx.MoneroTxPriority;
  */
 public class MoneroTxConfig {
 
-  private Collection<MoneroPayment> destinations;
+  private List<MoneroPayment> destinations;
   private Integer accountIdx;
   private Collection<Integer> subaddressIndices;
   private BigInteger fee;
@@ -33,7 +34,7 @@ public class MoneroTxConfig {
     doNotRelay = null;
   }
 
-  public MoneroTxConfig(Collection<MoneroPayment> destinations, Integer accountIdx, Collection<Integer> subaddressIndices, BigInteger fee, Integer mixin, Integer unlockTime, String paymentId, MoneroTxPriority priority, Boolean doNotRelay) {
+  public MoneroTxConfig(List<MoneroPayment> destinations, Integer accountIdx, Collection<Integer> subaddressIndices, BigInteger fee, Integer mixin, Integer unlockTime, String paymentId, MoneroTxPriority priority, Boolean doNotRelay) {
     super();
     this.destinations = destinations;
     this.accountIdx = accountIdx;
@@ -46,11 +47,11 @@ public class MoneroTxConfig {
     this.doNotRelay = doNotRelay;
   }
 
-  public Collection<MoneroPayment> getDestinations() {
+  public List<MoneroPayment> getDestinations() {
     return destinations;
   }
 
-  public void setDestinations(Collection<MoneroPayment> destinations) {
+  public void setDestinations(List<MoneroPayment> destinations) {
     this.destinations = destinations;
   }
 
