@@ -94,6 +94,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public String getViewKey() {
     throw new RuntimeException("Not implemented");
   }
+  
+  @Override
+  public MoneroAddress getPrimaryAddress() {
+    return getSubaddress(0, 0).getAddress();
+  }
 
   @Override
   public MoneroIntegratedAddress getIntegratedAddress(String paymentId) {
