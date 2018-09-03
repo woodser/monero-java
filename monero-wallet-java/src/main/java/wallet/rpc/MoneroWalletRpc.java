@@ -196,9 +196,35 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return send(MoneroUtils.newAddress(address, paymentId, this), amount, mixin);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroTx send(MoneroTxConfig config) {
-    throw new RuntimeException("Not implemented");
+    
+    // build parameter map
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    List<Map<String, Object>> destinationMaps = new ArrayList<Map<String, Object>>();
+    paramMap.put("destinations", destinationMaps);
+    for (MoneroPayment destination : config.getDestinations()) {
+      Map<String, Object> destinationMap = new HashMap<String, Object>();
+      destinationMap.put("address", destination.getAddress().toString());
+      destinationMap.put("amount", destination.getAmount());
+      destinationMaps.add(destinationMap);
+    }
+    paramMap.put("payment_id", config.getPaymentId());
+    paramMap.put("mixin", config.getMixin());
+    paramMap.put("unlockTime", config.getUnlockTime());
+    paramMap.put("get_tx_key", true);
+
+    // send request
+    Map<String, Object> respMap = rpc.sendRpcRequest("transfer", paramMap);
+
+    // interpret response
+    Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
+    MoneroTx tx = interpretTx(txMap, this);
+    tx.setPayments(config.getDestinations());
+    tx.setMixin(config.getMixin());
+    tx.setUnlockTime(config.getUnlockTime());
+    return tx;
   }
 
   @Override
