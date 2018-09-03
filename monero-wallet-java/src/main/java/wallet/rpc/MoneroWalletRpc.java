@@ -129,9 +129,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public BigInteger getBalance(int accountIdx) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendRpcRequest("getbalance", null);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (BigInteger) resultMap.get("balance");
   }
 
   @Override
@@ -139,9 +142,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public BigInteger getUnlockedBalance(int accountIdx) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendRpcRequest("getbalance", null);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (BigInteger) resultMap.get("unlocked_balance");
   }
 
   @Override

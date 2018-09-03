@@ -34,6 +34,7 @@ public class MoneroTx {
 	private List<MoneroPayment> payments;
 	private List<MoneroOutput> outputs;
 	private String paymentId;
+  private BigInteger amount;
 	private BigInteger fee;
 	private Integer mixin;
 	private String hash;
@@ -45,7 +46,6 @@ public class MoneroTx {
   private Long timestamp;
   private Integer unlockTime;
   private Boolean isDoubleSpend;
-  private BigInteger amount;  // TODO: incorporate into model and test
   private String blob;
   private String metadata;
 	
@@ -93,6 +93,14 @@ public class MoneroTx {
 
   public void setPaymentId(String paymentId) {
     this.paymentId = paymentId;
+  }
+  
+  public BigInteger getAmount() {
+    return amount;
+  }
+
+  public void setAmount(BigInteger amount) {
+    this.amount = amount;
   }
 
   public BigInteger getFee() {
@@ -183,6 +191,22 @@ public class MoneroTx {
     this.isDoubleSpend = isDoubleSpend;
   }
 
+  public String getBlob() {
+    return blob;
+  }
+
+  public void setBlob(String blob) {
+    this.blob = blob;
+  }
+
+  public String getMetadata() {
+    return metadata;
+  }
+
+  public void setMetadata(String metadata) {
+    this.metadata = metadata;
+  }
+
   /**
    * Merges the given transaction into this transaction.
    * 
@@ -199,6 +223,8 @@ public class MoneroTx {
     else if (tx.getOutputs() != null) outputs.addAll(tx.getOutputs());
     if (paymentId == null) paymentId = tx.getPaymentId();
     else if (tx.getPaymentId() != null) validateEquals("Payment ids", paymentId, tx.getPaymentId());
+    if (amount == null) amount = tx.getAmount();
+    else if (tx.getAmount() != null) validateEquals("Amount", amount, tx.getAmount());
     if (fee == null) fee = tx.getFee();
     else if (tx.getFee() != null) validateEquals("Fees", fee, tx.getFee());
     if (mixin == null) mixin = tx.getMixin();
@@ -219,6 +245,10 @@ public class MoneroTx {
     else if (tx.getTimestamp() != null) validateEquals("Timestamps", timestamp, tx.getTimestamp());
     if (unlockTime == null) unlockTime = tx.getUnlockTime();
     else if (tx.getUnlockTime() != null) validateEquals("Unlock times", unlockTime, tx.getUnlockTime());
+    if (blob == null) blob = tx.getBlob();
+    else if (tx.getBlob() != null) validateEquals("Blobs", blob, tx.getBlob());
+    if (metadata == null) metadata = tx.getMetadata();
+    else if (tx.getMetadata() != null) validateEquals("Metadatas", metadata, tx.getMetadata());
   }
   
   private void validateEquals(String fieldName, Object obj1, Object obj2) {
@@ -247,6 +277,7 @@ public class MoneroTx {
       }
     }
     sb.append("Payment ID: " + paymentId + "\n");
+    sb.append("Amount: " + amount + "\n");
     sb.append("Fee: " + fee + "\n");
     sb.append("Mixin: " + mixin + "\n");
     sb.append("Size: " + size + "\n");
@@ -256,6 +287,8 @@ public class MoneroTx {
     sb.append("Timestamp: " + timestamp + "\n");
     sb.append("Unlock time: " + unlockTime);
     sb.append("Is double spend: " + isDoubleSpend);
+    sb.append("Blob: " + blob);
+    sb.append("Metadata: " + metadata);
     return sb.toString();
   }
 }

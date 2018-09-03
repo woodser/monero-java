@@ -17,6 +17,7 @@ import model.MoneroPayment;
 import model.MoneroTx;
 import utils.TestUtils;
 import wallet.MoneroWallet;
+import wallet.rpc.MoneroRpcException;
 
 /**
  * Tests sending transactions using a Monero wallet.
@@ -33,14 +34,17 @@ public class TestMoneroWalletSends {
   @Before
   public void setup() throws Exception {
     wallet = TestUtils.getWallet();
-    wallet.createWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW, "english");
+    try {
+      wallet.createWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW, "English");
+    } catch (MoneroRpcException e) {
+      assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
+    }
     wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
   }
   
+  // TODO: test more than account 0
   @Test
-  public void testSend() {
-    
-    // TODO: test more than account 0
+  public void testSend0() {
     
     // get balance before
     BigInteger balanceBefore = wallet.getBalance(0);
@@ -93,6 +97,7 @@ public class TestMoneroWalletSends {
     List<MoneroTx> txs = wallet.sweepDust();
     for (MoneroTx tx : txs) {
       assertNull(tx.getPayments());
+      assertNull(tx.getAmount());
       assertNull(tx.getFee());
       assertNull(tx.getMixin());
       assertNull(tx.getKey());
@@ -100,6 +105,8 @@ public class TestMoneroWalletSends {
       assertNull(tx.getSize());
       assertNull(tx.getType());
       assertNull(tx.getHeight());
+      assertNull(tx.getBlob());
+      assertNull(tx.getMetadata());
     }
   }
 }
