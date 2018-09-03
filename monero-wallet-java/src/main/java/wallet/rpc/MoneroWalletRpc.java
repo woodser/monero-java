@@ -183,7 +183,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // set payment
     MoneroPayment payment = new MoneroPayment();
-    payment.setAddress(MoneroUtils.toAddress(address, this)); // TODO: how to handle addresses and payment ids
+    payment.setAddress(MoneroUtils.toAddress(address, this)); // TODO: how to handle addresses and payment ids; test for failure
     payment.setAmount(amount);
     txConfig.setDestinations(Arrays.asList(payment));
     
