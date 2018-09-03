@@ -1,5 +1,6 @@
 v0.12.3.0
 what is an amount key?
+test MoneroUtils.newAddress() used by wallet.send(str,str)
 
 Monero-wallet-rpc suggested improvements:
 tx_hash in incoming_transfers vs txid in get_transfers; standardize on tx_hash or tx_id

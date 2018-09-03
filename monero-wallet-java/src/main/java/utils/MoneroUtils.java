@@ -159,17 +159,40 @@ public class MoneroUtils {
     }
   }
   
+//  /**
+//   * Converts a given string address to a MoneroAddress which may be an integrated address.
+//   * 
+//   * @param address is the string to convert
+//   * @param wallet might be used to decode an integrated address into its standard address and payment id components
+//   * @return MoneroAddress is the string address converted to a proper address object
+//   */
+//  public static MoneroAddress toAddress(String address, MoneroWallet wallet) {
+//    if (isValidStandardAddress(address)) return new MoneroAddress(address);
+//    else if (isValidIntegratedAddress(address)) return wallet.decodeIntegratedAddress(address);
+//    throw new MoneroException("Address is neither standard nor integrated: " + address);
+//  }
+  
   /**
-   * Converts a given string address to a MoneroAddress which may be an integrated address.
+   * Initializes a new Monero address which may be an integrated address.
    * 
-   * @param address is the string to convert
-   * @param wallet might be used to decode an integrated address into its standard address and payment id components
-   * @return MoneroAddress is the string address converted to a proper address object
+   * @param address may be standard, integrated, or sub-address formats
+   * @param wallet is used as a utility to decode an integrated address
+   * @return MoneroAddress may be MoneroAddress or MoneroIntegratedAddress
    */
-  public static MoneroAddress toAddress(String address, MoneroWallet wallet) {
-    if (isValidStandardAddress(address)) return new MoneroAddress(address);
-    else if (isValidIntegratedAddress(address)) return wallet.decodeIntegratedAddress(address);
-    throw new MoneroException("Address is neither standard nor integrated: " + address);
+  public static MoneroAddress newAddress(String address, MoneroWallet wallet) {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  /**
+   * Initializes a new Monero address which may be an integrated address.
+   * 
+   * @param address may be standard, integrated, or sub-address formats
+   * @param paymentId is a payment id to create an integated address (optional)
+   * @param wallet is used as a utility to decode an integrated address
+   * @return MoneroAddress may be MoneroAddress or MoneroIntegratedAddress
+   */
+  public static MoneroAddress newAddress(String address, String paymentId, MoneroWallet wallet) {
+    throw new RuntimeException("Not implemented");
   }
 
   private static void validateHex(String str) {
