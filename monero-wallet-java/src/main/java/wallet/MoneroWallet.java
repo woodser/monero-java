@@ -96,8 +96,8 @@ public interface MoneroWallet {
    * Gets specific subaddresses within an account.
    * 
    * @param accountIdx identifies the account
-   * @param subaddressIndices identifies the subaddresses within the account
-   * @return List<MoneroSubaddress> are the specified subaddresses (optional)
+   * @param subaddressIndices identifies the subaddresses within the account (optional)
+   * @return List<MoneroSubaddress> are the specified subaddresses
    */
   public List<MoneroSubaddress> getSubaddresses(int accountIdx, Collection<Integer> subaddressIndices);
   
