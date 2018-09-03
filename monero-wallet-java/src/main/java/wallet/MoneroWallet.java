@@ -44,6 +44,13 @@ public interface MoneroWallet {
   public String getViewKey();
   
   /**
+   * Gets the wallet's primary address (account 0, subaddress 0).
+   * 
+   * @return MoneroAddress is the wallet's primary address
+   */
+  public MoneroAddress getPrimaryAddress();
+  
+  /**
    * Returns an integrated address based on this wallet's standard address and the given payment ID.
    * 
    * Generates a random payment ID if none is given.

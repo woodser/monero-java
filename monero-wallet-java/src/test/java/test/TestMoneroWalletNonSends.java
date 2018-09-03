@@ -113,6 +113,12 @@ public class TestMoneroWalletNonSends {
   }
   
   @Test
+  public void testGetPrimaryAddress() {
+    MoneroAddress primaryAddress = wallet.getPrimaryAddress();
+    assertEquals(wallet.getSubaddress(0, 0).getAddress(), primaryAddress);
+  }
+  
+  @Test
   public void testDecodeIntegratedAddress() {
     MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress("03284e41c342f036");
     MoneroIntegratedAddress decodedAddress = wallet.decodeIntegratedAddress(integratedAddress.toString());
