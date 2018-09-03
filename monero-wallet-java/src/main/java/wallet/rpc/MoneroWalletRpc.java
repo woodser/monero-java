@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -178,6 +179,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @Override
   public MoneroTx send(String address, String paymentId, BigInteger amount, Integer mixin) {
+    MoneroTxConfig txConfig = new MoneroTxConfig();
+    
+    // set payment
+    MoneroPayment payment = new MoneroPayment();
+    payment.setAddress(MoneroUtils.toAddress(address, this)); // TODO: how to handle addresses and payment ids
+    payment.setAmount(amount);
+    txConfig.setDestinations(Arrays.asList(payment));
+    
+    txConfig.
+    
+    
+    
     throw new RuntimeException("Not implemented");
   }
 
