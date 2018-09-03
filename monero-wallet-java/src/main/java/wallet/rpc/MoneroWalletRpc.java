@@ -119,9 +119,30 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroSubaddress> getSubaddresses(int accountIdx, Collection<Integer> subaddressIndices) {
-    throw new RuntimeException("Not implemented");
+    
+    // fetch subaddresses
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("account_index", accountIdx);
+    if (subaddressIndices != null) params.put("address_index", subaddressIndices);
+    Map<String, Object> respMap = rpc.sendRpcRequest("getaddress", params);
+    
+    // build subaddresses
+    List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<Map<String, Object>> addresses = (List<Map<String, Object>>) resultMap.get("addresses");
+    for (Map<String, Object> address : addresses) {
+      MoneroSubaddress subaddress = new MoneroSubaddress();
+      subaddresses.add(subaddress);
+      subaddress.setIndex(((BigInteger) address.get("address_index")).intValue());
+      subaddress.setLabel((String) address.get("label"));
+      subaddress.setAddress(MoneroUtils.toAddress((String) address.get("address"), this));
+      subaddress.setUsed((boolean) address.get("used"));
+    }
+    
+    return subaddresses;
   }
 
   @Override
