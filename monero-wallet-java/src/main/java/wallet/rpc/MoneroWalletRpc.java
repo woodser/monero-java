@@ -6,8 +6,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
@@ -22,6 +24,7 @@ import model.MoneroAddressBookEntry;
 import model.MoneroException;
 import model.MoneroIntegratedAddress;
 import model.MoneroKeyImage;
+import model.MoneroOutput;
 import model.MoneroPayment;
 import model.MoneroSubaddress;
 import model.MoneroTx;
@@ -31,6 +34,7 @@ import model.MoneroTxFilter;
 import model.MoneroUri;
 import types.Pair;
 import utils.MoneroUtils;
+import wallet.MoneroWallet;
 import wallet.MoneroWalletDefault;
 
 /**
@@ -172,12 +176,107 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public List<MoneroTx> getTxs() {
-    throw new RuntimeException("Not implemented");
+    return getTxs(null);
   }
 
+  // TODO: revisit this method to see if it can be optimized
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroTx> getTxs(MoneroTxFilter filter) {
-    throw new RuntimeException("Not implemented");
+    if (filter == null) filter = new MoneroTxFilter();
+    
+    // collect transactions bucketed by type then hash
+    Map<MoneroTxType, Map<String, MoneroTx>> txTypeMap = new HashMap<MoneroTxType, Map<String, MoneroTx>>();
+
+    // get_transfers rpc call
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    paramMap.put("in", filter.isIncoming());
+    paramMap.put("out", filter.isOutgoing());
+    paramMap.put("pending", filter.isPending());
+    paramMap.put("failed", filter.isFailed());
+    paramMap.put("pool", filter.isMempool());
+    paramMap.put("filter_by_height", filter.getMinHeight() != null || filter.getMaxHeight() != null);
+    if (filter.getMinHeight() != null) paramMap.put("min_height", filter.getMinHeight());
+    if (filter.getMaxHeight() != null) paramMap.put("max_height", filter.getMaxHeight());
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_transfers", paramMap);
+
+    // interpret get_transfers response
+    Map<String, Object> result = (Map<String, Object>) respMap.get("result");
+    for (String key : result.keySet()) {
+      for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
+
+        // build transaction
+        MoneroTx tx = interpretTx(txMap, this);
+        MoneroPayment payment = new MoneroPayment(tx, null, (BigInteger) txMap.get("amount"));
+        List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
+        payments.add(payment);
+        tx.setPayments(payments);
+        addTx(txTypeMap, tx);
+      }
+    }
+
+    if (filter.isIncoming()) {
+
+      // incoming_transfers rpc call to get incoming outputs
+      paramMap = new HashMap<String, Object>();
+      paramMap.put("transfer_type", "all"); // TODO: suppport all | available | unavailable 'types' which is different from MoneroTxType
+      respMap = rpc.sendRpcRequest("incoming_transfers", paramMap);
+      result = (Map<String, Object>) respMap.get("result");
+
+      // interpret incoming_transfers response
+      List<Map<String, Object>> outputMaps = (List<Map<String, Object>>) result.get("transfers");
+      if (outputMaps == null) return new ArrayList<MoneroTx>();
+      for (Map<String, Object> outputMap : outputMaps) {
+        MoneroOutput output = new MoneroOutput();
+        output.setAmount((BigInteger) outputMap.get("amount"));
+        output.setIsSpent((Boolean) outputMap.get("spent"));
+        MoneroTx tx = interpretTx(outputMap, this);
+        tx.setType(MoneroTxType.INCOMING);
+        output.setTransaction(tx);
+        List<MoneroOutput> outputs = new ArrayList<MoneroOutput>();
+        outputs.add(output);
+        tx.setOutputs(outputs);
+        addTx(txTypeMap, tx);
+      }
+
+      // get_bulk_payments rpc call to get incoming payments by id
+      if (filter.getPaymentIds() != null && !filter.getPaymentIds().isEmpty()) {
+        paramMap = new HashMap<String, Object>();
+        paramMap.put("payment_ids", filter.getPaymentIds());
+        respMap = rpc.sendRpcRequest("get_bulk_payments", paramMap);
+        result = (Map<String, Object>) respMap.get("result");
+
+        // interpret get_bulk_payments response
+        List<Map<String, Object>> paymentMaps = (List<Map<String, Object>>) result.get("payments");
+        for (Map<String, Object> paymentMap : paymentMaps) {
+          MoneroTx tx = interpretTx(paymentMap, this);
+          tx.setType(MoneroTxType.INCOMING);
+          // payment data is redundant with get_transfers rpc call, so it's not added because merging would create duplicates
+          // MoneroPayment payment = new MoneroPayment();
+          // payment.setAmount((BigInteger) paymentMap.get("amount"));
+          // List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
+          // payments.add(payment);
+          // tx.setPayments(payments);
+          addTx(txTypeMap, tx);
+        }
+      }
+    }
+
+    // build return type
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    for (Entry<MoneroTxType, Map<String, MoneroTx>> entry : txTypeMap.entrySet()) {
+      txs.addAll(entry.getValue().values());
+    }
+
+    // filter final results
+    Collection<MoneroTx> toRemoves = new HashSet<MoneroTx>();
+    for (MoneroTx tx : txs) {
+      if (filter.getPaymentIds() != null && !filter.getPaymentIds().contains(tx.getPaymentId())) toRemoves.add(tx);
+      else if (filter.getMinHeight() != null && (tx.getHeight() == null || tx.getHeight() < filter.getMinHeight())) toRemoves.add(tx);
+      else if (filter.getMaxHeight() != null && (tx.getHeight() == null || tx.getHeight() > filter.getMaxHeight())) toRemoves.add(tx);
+    }
+    txs.removeAll(toRemoves);
+    return txs;
   }
 
   @Override
@@ -308,22 +407,23 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return new Pair<BigInteger, BigInteger>((BigInteger) resultMap.get("balance"), (BigInteger) resultMap.get("unlocked_balance"));
   }
-
+  
+  // ------------------------------ STATIC UTILITIES --------------------------
+  
   /**
    * Initializes a MoneroTx from a transaction response map.
    * 
    * @param txMap is the map to initialize the transaction from
+   * @param wallet is necessary to initialize a MoneroAddress
    * @return MoneroTx is the initialized transaction
    */
   @SuppressWarnings("unchecked")
-  private MoneroTx interpretTx(Map<String, Object> txMap) {
+  private static MoneroTx interpretTx(Map<String, Object> txMap, MoneroWallet wallet) {
     MoneroTx tx = new MoneroTx();
     for (String key : txMap.keySet()) {
       Object val = txMap.get(key);
-      if (key.equals("amount")) {
-      } // this method does not process amount since it could be output or payment depending on context
-      else if (key.equals("spent")) {
-      } // this method does not process spent which is specific to outputs
+      if (key.equals("amount")) { } // this method does not process amount since it could be output or payment depending on context
+      else if (key.equals("spent")) { } // this method does not process spent which is specific to outputs
       else if (key.equalsIgnoreCase("fee")) tx.setFee((BigInteger) val);
       else if (key.equalsIgnoreCase("height")) tx.setHeight(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("block_height")) tx.setHeight(((BigInteger) val).intValue());
@@ -336,15 +436,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("type")) tx.setType(getTxType((String) val));
       else if (key.equalsIgnoreCase("tx_size")) tx.setSize(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("unlock_time")) tx.setUnlockTime(((BigInteger) val).intValue());
-      else if (key.equalsIgnoreCase("global_index")) {
-      } // ignore
+      else if (key.equalsIgnoreCase("global_index")) { } // ignore
       else if (key.equalsIgnoreCase("destinations")) {
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
         tx.setPayments(payments);
         for (Map<String, Object> paymentMap : (List<Map<String, Object>>) val) {
           MoneroPayment payment = new MoneroPayment();
           for (String paymentKey : paymentMap.keySet()) {
-            if (paymentKey.equals("address")) payment.setAddress(MoneroUtils.toAddress((String) paymentMap.get(paymentKey), this));
+            if (paymentKey.equals("address")) payment.setAddress(MoneroUtils.toAddress((String) paymentMap.get(paymentKey), wallet));
             else if (paymentKey.equals("amount")) payment.setAmount((BigInteger) paymentMap.get(paymentKey));
             else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
           }
@@ -353,8 +452,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     return tx;
   }
-  
-  // ------------------------------ STATIC UTILITIES --------------------------
 
   private static void addTx(Map<MoneroTxType, Map<String, MoneroTx>> txTypeMap, MoneroTx tx) {
     if (tx.getType() == null) throw new MoneroException("Transaction type cannot be null: \n" + tx.toString());
