@@ -180,7 +180,7 @@ public class MoneroUtils {
    * @return MoneroAddress may be MoneroAddress or MoneroIntegratedAddress
    */
   public static MoneroAddress newAddress(String address, MoneroWallet wallet) {
-    throw new RuntimeException("Not implemented");
+    return newAddress(address, null, wallet);
   }
   
   /**
@@ -192,7 +192,13 @@ public class MoneroUtils {
    * @return MoneroAddress may be MoneroAddress or MoneroIntegratedAddress
    */
   public static MoneroAddress newAddress(String address, String paymentId, MoneroWallet wallet) {
-    throw new RuntimeException("Not implemented");
+    if (paymentId != null) {
+      throw new RuntimeException("Not implemented");  // TODO: test
+    } else {
+      if (isValidStandardAddress(address)) return new MoneroAddress(address);
+      else if (isValidIntegratedAddress(address)) return wallet.decodeIntegratedAddress(address);
+      throw new MoneroException("Address is neither standard nor integrated: " + address);
+    }
   }
 
   private static void validateHex(String str) {
