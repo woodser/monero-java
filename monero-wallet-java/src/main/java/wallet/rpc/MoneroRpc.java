@@ -35,7 +35,7 @@ import utils.StreamUtils;
 public class MoneroRpc {
 
   // logger
-  private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpcOld.class);
+  private static final Logger LOGGER = Logger.getLogger(MoneroRpc.class);
 
   // custom mapper to deserialize integers to BigIntegers
   public static ObjectMapper MAPPER;

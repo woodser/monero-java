@@ -49,17 +49,7 @@ public class TestMoneroWalletNonSends {
 
   @Before
   public void setup() throws Exception {
-    
-    // initialize and open test wallet
     wallet = TestUtils.getWallet();
-    try {
-      wallet.createWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW, "English");
-    } catch (MoneroRpcException e) {
-      assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
-    }
-    wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
-    
-    // ensure wallet has history to test
     List<MoneroTx> txs = wallet.getTxs();
     assertTrue("Test wallet does not have transaction history; load '" + TestUtils.WALLET_NAME_1 + "' with stagenet XMR and run TestMoneroWalletSends a few times", txs.size() >= 3);
   }

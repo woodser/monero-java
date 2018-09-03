@@ -17,7 +17,6 @@ import model.MoneroPayment;
 import model.MoneroTx;
 import utils.TestUtils;
 import wallet.MoneroWallet;
-import wallet.rpc.MoneroRpcException;
 
 /**
  * Tests sending transactions using a Monero wallet.
@@ -34,12 +33,6 @@ public class TestMoneroWalletSends {
   @Before
   public void setup() throws Exception {
     wallet = TestUtils.getWallet();
-    try {
-      wallet.createWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW, "English");
-    } catch (MoneroRpcException e) {
-      assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
-    }
-    wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
   }
   
   // TODO: test more than account 0
@@ -48,8 +41,12 @@ public class TestMoneroWalletSends {
     
     // get balance before
     BigInteger balanceBefore = wallet.getBalance(0);
+    MoneroWallet wallet = TestUtils.getWallet();
+    System.out.println("Balance: " + wallet.getBalance(0));
+    System.out.println("Unlocked: " + wallet.getUnlockedBalance(0));
     BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance(0);
-    assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", unlockedBalanceBefore.longValue() > 0);
+    assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", balanceBefore.longValue() > 0);
+    assertTrue("Wallet is waiting on unlocked funds", unlockedBalanceBefore.longValue() > 0);
     
     // send to self
     MoneroAddress address = wallet.getSubaddress(0, 0).getAddress();
