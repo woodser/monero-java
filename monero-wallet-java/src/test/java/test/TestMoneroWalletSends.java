@@ -49,7 +49,7 @@ public class TestMoneroWalletSends {
     // get balance before
     BigInteger balanceBefore = wallet.getBalance(0);
     BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance(0);
-    assertTrue("Wallet is empty; load funds to send", unlockedBalanceBefore.longValue() > 0);
+    assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", unlockedBalanceBefore.longValue() > 0);
     
     // send to self
     MoneroAddress address = wallet.getSubaddress(0, 0).getAddress();
