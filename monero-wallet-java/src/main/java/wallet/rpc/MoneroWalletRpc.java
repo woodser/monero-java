@@ -139,7 +139,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       subaddresses.add(subaddress);
       subaddress.setIndex(((BigInteger) address.get("address_index")).intValue());
       subaddress.setLabel((String) address.get("label"));
-      subaddress.setAddress(MoneroUtils.toAddress((String) address.get("address"), this));
+      subaddress.setAddress(MoneroUtils.newAddress((String) address.get("address"), this));
       subaddress.setUsed((boolean) address.get("used"));
     }
     
@@ -178,20 +178,22 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   @Override
-  public MoneroTx send(String address, String paymentId, BigInteger amount, Integer mixin) {
-    MoneroTxConfig txConfig = new MoneroTxConfig();
+  public MoneroTx send(MoneroAddress address, BigInteger amount, Integer mixin) {
     
-    // set payment
+    // create payment
     MoneroPayment payment = new MoneroPayment();
-    payment.setAddress(MoneroUtils.toAddress(address, this)); // TODO: how to handle addresses and payment ids; test for failure
+    payment.setAddress(address);
     payment.setAmount(amount);
+    
+    // create and send tx config
+    MoneroTxConfig txConfig = new MoneroTxConfig();
     txConfig.setDestinations(Arrays.asList(payment));
-    
-    txConfig.
-    
-    
-    
-    throw new RuntimeException("Not implemented");
+    return send(txConfig);
+  }
+  
+  @Override
+  public MoneroTx send(String address, String paymentId, BigInteger amount, Integer mixin) {
+    return send(MoneroUtils.newAddress(address, paymentId, this), amount, mixin);
   }
 
   @Override
@@ -483,7 +485,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         for (Map<String, Object> paymentMap : (List<Map<String, Object>>) val) {
           MoneroPayment payment = new MoneroPayment();
           for (String paymentKey : paymentMap.keySet()) {
-            if (paymentKey.equals("address")) payment.setAddress(MoneroUtils.toAddress((String) paymentMap.get(paymentKey), wallet));
+            if (paymentKey.equals("address")) payment.setAddress(MoneroUtils.newAddress((String) paymentMap.get(paymentKey), wallet));
             else if (paymentKey.equals("amount")) payment.setAmount((BigInteger) paymentMap.get(paymentKey));
             else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
           }

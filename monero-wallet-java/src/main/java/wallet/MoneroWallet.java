@@ -157,10 +157,20 @@ public interface MoneroWallet {
    * Send a payment.
    * 
    * @param address is the address to send to
+   * @param amount is the amount to send
+   * @param mixin is the transaction mixin to use (optional)
+   * @return MoneroTx is the resulting transaction from sending a payment
+   */
+  public MoneroTx send(MoneroAddress address, BigInteger amount, Integer mixin);
+  
+  /**
+   * Send a payment.
+   * 
+   * @param address is the address to send to
    * @param paymentId is the payment id to send to (optional)
    * @param amount is the amount to send
-   * @param mixin is the transaction mixin to use
-   * @return MoneroTx is the resulting transaction from sending payment
+   * @param mixin is the transaction mixin to use (optional)
+   * @return MoneroTx is the resulting transaction from sending a payment
    */
   public MoneroTx send(String address, String paymentId, BigInteger amount, Integer mixin);
   
