@@ -258,13 +258,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // interpret response
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<BigInteger> fees = (List<BigInteger>) resultMap.get("fee_list");
-    List<String> txHashes = (List<String>) resultMap.get("tx_hash_list");
+    List<String> txIds = (List<String>) resultMap.get("tx_hash_list");
     List<MoneroTx> transactions = new ArrayList<MoneroTx>();
     for (int i = 0; i < fees.size(); i++) {
       MoneroTx tx = new MoneroTx();
       tx.setFee(fees.get(i));
       tx.setMixin(config.getMixin());
-      tx.setHash(txHashes.get(0));
+      tx.setId(txIds.get(0));
       transactions.add(tx);
       tx.setUnlockTime(config.getUnlockTime());
     }
@@ -285,12 +285,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
     // interpret response
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    List<String> txHashes = (List<String>) resultMap.get("tx_hash_list");
+    List<String> txIds = (List<String>) resultMap.get("tx_hash_list");
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    if (txHashes == null) return txs;
-    for (String txHash : txHashes) {
+    if (txIds == null) return txs;
+    for (String txId : txIds) {
       MoneroTx tx = new MoneroTx();
-      tx.setHash(txHash);
+      tx.setId(txId);
       txs.add(tx);
     }
     return txs;
@@ -307,7 +307,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public List<MoneroTx> getTxs(MoneroTxFilter filter) {
     if (filter == null) filter = new MoneroTxFilter();
     
-    // collect transactions bucketed by type then hash
+    // collect transactions bucketed by type then id
     Map<MoneroTxType, Map<String, MoneroTx>> txTypeMap = new HashMap<MoneroTxType, Map<String, MoneroTx>>();
 
     // get_transfers rpc call
@@ -329,10 +329,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
         // build transaction
         MoneroTx tx = interpretTx(txMap, this);
-        //MoneroPayment payment = new MoneroPayment(tx, null, (BigInteger) txMap.get("amount"));
-        //List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
-        //payments.add(payment);
-        //tx.setPayments(payments);
         if (txMap.containsKey("amount")) tx.setAmount((BigInteger) txMap.get("amount"));
         addTx(txTypeMap, tx);
       }
@@ -544,9 +540,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("note")) tx.setNote((String) val);
       else if (key.equalsIgnoreCase("payment_id")) tx.setPaymentId((String) val);
       else if (key.equalsIgnoreCase("timestamp")) tx.setTimestamp(((BigInteger) val).longValue());
-      else if (key.equalsIgnoreCase("tx_hash")) tx.setHash((String) val);
+      else if (key.equalsIgnoreCase("txid")) tx.setId((String) val);
+      else if (key.equalsIgnoreCase("tx_hash")) tx.setId((String) val);
       else if (key.equalsIgnoreCase("tx_key")) tx.setKey((String) val);
-      else if (key.equalsIgnoreCase("txid")) tx.setHash((String) val);
       else if (key.equalsIgnoreCase("type")) tx.setType(getTxType((String) val));
       else if (key.equalsIgnoreCase("tx_size")) tx.setSize(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("unlock_time")) tx.setUnlockTime(((BigInteger) val).intValue());
@@ -554,14 +550,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("tx_blob")) tx.setBlob((String) val);
       else if (key.equalsIgnoreCase("tx_metadata")) tx.setMetadata((String) val);
       else if (key.equalsIgnoreCase("destinations")) {
-        System.out.println("Yo setting destinations...");
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
         tx.setPayments(payments);
         for (Map<String, Object> paymentMap : (List<Map<String, Object>>) val) {
           MoneroPayment payment = new MoneroPayment();
           payments.add(payment);
           for (String paymentKey : paymentMap.keySet()) {
-            System.out.println("And we dint set address or amount");
             if (paymentKey.equals("address")) payment.setAddress(MoneroUtils.newAddress((String) paymentMap.get(paymentKey), wallet));
             else if (paymentKey.equals("amount")) payment.setAmount((BigInteger) paymentMap.get(paymentKey));
             else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
@@ -574,15 +568,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   private static void addTx(Map<MoneroTxType, Map<String, MoneroTx>> txTypeMap, MoneroTx tx) {
     if (tx.getType() == null) throw new MoneroException("Transaction type cannot be null: \n" + tx.toString());
-    if (tx.getHash() == null) throw new MoneroException("Transaction hash cannot be null: \n" + tx.getHash());
-    Map<String, MoneroTx> txHashMap = txTypeMap.get(tx.getType());
-    if (txHashMap == null) {
-      txHashMap = new HashMap<String, MoneroTx>();
-      txTypeMap.put(tx.getType(), txHashMap);
+    if (tx.getId() == null) throw new MoneroException("Transaction id cannot be null: \n" + tx.getId());
+    Map<String, MoneroTx> txIdMap = txTypeMap.get(tx.getType());
+    if (txIdMap == null) {
+      txIdMap = new HashMap<String, MoneroTx>();
+      txTypeMap.put(tx.getType(), txIdMap);
     }
-    MoneroTx targetTx = txHashMap.get(tx.getHash());
+    MoneroTx targetTx = txIdMap.get(tx.getId());
     if (targetTx == null) {
-      txHashMap.put(tx.getHash(), tx);
+      txIdMap.put(tx.getId(), tx);
     } else {
       targetTx.merge(tx);
     }
