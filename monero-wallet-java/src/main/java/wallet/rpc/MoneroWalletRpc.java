@@ -227,6 +227,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
     MoneroTx tx = interpretTx(txMap, this);
+    tx.setAmount((BigInteger) txMap.get("amount"));
     tx.setPayments(config.getDestinations());
     tx.setMixin(config.getMixin());
     tx.setUnlockTime(config.getUnlockTime());

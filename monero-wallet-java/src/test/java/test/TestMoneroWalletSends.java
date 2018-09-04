@@ -26,7 +26,7 @@ import wallet.MoneroWallet;
 public class TestMoneroWalletSends {
   
   private static final Integer MIXIN = 6;
-  private static final int UNLOCKED_DIVISOR = 20;
+  private static final int SEND_DIVISOR = 2;
   
   private MoneroWallet wallet;
 
@@ -55,7 +55,8 @@ public class TestMoneroWalletSends {
     
     // send to self
     MoneroAddress address = wallet.getSubaddress(0, 0).getAddress();
-    BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(UNLOCKED_DIVISOR));
+    BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(SEND_DIVISOR));
+    System.out.println("Send amount: " + sendAmount);
     MoneroTx tx = wallet.send(address.getStandardAddress(), null, sendAmount, MIXIN);
     
     // test transaction
