@@ -193,6 +193,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // create and send tx config
     MoneroTxConfig txConfig = new MoneroTxConfig();
     txConfig.setDestinations(Arrays.asList(payment));
+    txConfig.setMixin(mixin);
     return send(txConfig);
   }
   
@@ -217,7 +218,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     paramMap.put("payment_id", config.getPaymentId());
     paramMap.put("mixin", config.getMixin());
-    paramMap.put("unlockTime", config.getUnlockTime());
+    paramMap.put("unlock_time", config.getUnlockTime());
     paramMap.put("get_tx_key", true);
 
     // send request

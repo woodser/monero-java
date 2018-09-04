@@ -32,7 +32,12 @@ public class TestMoneroWalletSends {
 
   @Before
   public void setup() throws Exception {
-    wallet = TestUtils.getWallet();
+    try {
+      wallet = TestUtils.getWallet();
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw e;
+    }
   }
   
   // TODO: test more than account 0
