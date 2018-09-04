@@ -329,10 +329,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
         // build transaction
         MoneroTx tx = interpretTx(txMap, this);
-        MoneroPayment payment = new MoneroPayment(tx, null, (BigInteger) txMap.get("amount"));
-        List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
-        payments.add(payment);
-        tx.setPayments(payments);
+        //MoneroPayment payment = new MoneroPayment(tx, null, (BigInteger) txMap.get("amount"));
+        //List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
+        //payments.add(payment);
+        //tx.setPayments(payments);
+        if (txMap.containsKey("amount")) tx.setAmount((BigInteger) txMap.get("amount"));
         addTx(txTypeMap, tx);
       }
     }
@@ -553,11 +554,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("tx_blob")) tx.setBlob((String) val);
       else if (key.equalsIgnoreCase("tx_metadata")) tx.setMetadata((String) val);
       else if (key.equalsIgnoreCase("destinations")) {
+        System.out.println("Yo setting destinations...");
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
         tx.setPayments(payments);
         for (Map<String, Object> paymentMap : (List<Map<String, Object>>) val) {
           MoneroPayment payment = new MoneroPayment();
+          payments.add(payment);
           for (String paymentKey : paymentMap.keySet()) {
+            System.out.println("And we dint set address or amount");
             if (paymentKey.equals("address")) payment.setAddress(MoneroUtils.newAddress((String) paymentMap.get(paymentKey), wallet));
             else if (paymentKey.equals("amount")) payment.setAmount((BigInteger) paymentMap.get(paymentKey));
             else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
