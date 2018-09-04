@@ -16,7 +16,7 @@ public class MoneroTxConfig {
   private Collection<Integer> subaddressIndices;
   private BigInteger fee;
   private Integer mixin;
-  private Integer unlockTime;
+  private int unlockTime;
   private String paymentId;
   private MoneroTxPriority priority;
   private Boolean doNotRelay;
@@ -28,7 +28,7 @@ public class MoneroTxConfig {
     subaddressIndices = null;
     fee = null;
     mixin = null;
-    unlockTime = null;
+    unlockTime = 0;
     paymentId = null;
     priority = null;
     doNotRelay = null;

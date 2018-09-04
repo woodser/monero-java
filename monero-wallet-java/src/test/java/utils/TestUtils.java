@@ -1,13 +1,10 @@
 package utils;
 
-import static org.junit.Assert.assertEquals;
-
 import java.net.URISyntaxException;
 
 import org.apache.log4j.PropertyConfigurator;
 
 import wallet.MoneroWallet;
-import wallet.rpc.MoneroRpcException;
 import wallet.rpc.MoneroWalletRpc;
 
 /**
@@ -43,15 +40,15 @@ public class TestUtils {
         throw new RuntimeException(e1);
       }
       
-      // create test wallet if necessary
-      try {
-        wallet.createWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW, "English");
-      } catch (MoneroRpcException e) {
-        assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
-      }
-      
-      // open test wallet
-      wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
+//      // create test wallet if necessary
+//      try {
+//        wallet.createWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW, "English");
+//      } catch (MoneroRpcException e) {
+//        assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
+//      }
+//      
+//      // open test wallet
+//      wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
     }
     return wallet;
   }
