@@ -30,6 +30,7 @@ import model.MoneroException;
 import model.MoneroIntegratedAddress;
 import model.MoneroKeyImage;
 import model.MoneroOutput;
+import model.MoneroPayment;
 import model.MoneroSubaddress;
 import model.MoneroTx;
 import model.MoneroTx.MoneroTxType;
@@ -710,6 +711,13 @@ public class TestMoneroWalletNonSends {
     if (tx.getType() == MoneroTxType.OUTGOING) {
       assertNotNull(tx.getAmount());
       assertTrue(tx.getAmount().longValue() > 0);
+      assertNotNull(tx.getPayments());
+      assertFalse(tx.getPayments().isEmpty());
+      for (MoneroPayment payment : tx.getPayments()) {
+        assertNotNull(payment.getAddress());
+        assertNotNull(payment.getAmount());
+        assertTrue(payment.getAmount().longValue() > 0);
+      }
     }
   }
   
