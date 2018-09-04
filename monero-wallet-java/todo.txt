@@ -1,4 +1,6 @@
 v0.12.3.0
+why is transaction amount 0 when destinations present
+why don't some transactions have destinations
 what is an amount key?
 test MoneroUtils.newAddress() used by wallet.send(str,str)
 

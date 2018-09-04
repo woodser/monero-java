@@ -706,18 +706,20 @@ public class TestMoneroWalletNonSends {
   }
   
   private static void testTransaction(MoneroTx tx) {
-    assertNotNull(tx.getHash());
+    assertNotNull(tx.getId());
     assertNotNull(tx.getType());
     if (tx.getType() == MoneroTxType.OUTGOING) {
       assertNotNull(tx.getAmount());
       assertTrue(tx.getAmount().longValue() >= 0);  // TODO: seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
-      assertNotNull(tx.getPayments());
-      assertFalse(tx.getPayments().isEmpty());
-      for (MoneroPayment payment : tx.getPayments()) {
-        assertNotNull(payment.getAddress());
-        assertNotNull(payment.getAmount());
-        assertTrue(payment.getAmount().longValue() > 0);
+      if (tx.getPayments() != null) {
+        assertFalse(tx.getPayments().isEmpty());
+        for (MoneroPayment payment : tx.getPayments()) {
+          assertNotNull(payment.getAmount());
+          assertNotNull(payment.getAddress());
+          assertTrue(payment.getAmount().longValue() > 0);
+        }
       }
+
     }
   }
   

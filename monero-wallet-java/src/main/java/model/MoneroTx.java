@@ -37,7 +37,6 @@ public class MoneroTx {
   private BigInteger amount;
 	private BigInteger fee;
 	private Integer mixin;
-	private String hash;
 	private String key;
 	private Integer size;
 	private MoneroTxType type;
@@ -117,14 +116,6 @@ public class MoneroTx {
 
   public void setMixin(Integer mixin) {
     this.mixin = mixin;
-  }
-  
-  public String getHash() {
-    return hash;
-  }
-
-  public void setHash(String hash) {
-    this.hash = hash;
   }
 
   public String getKey() {
@@ -229,8 +220,6 @@ public class MoneroTx {
     else if (tx.getFee() != null) validateEquals("Fees", fee, tx.getFee());
     if (mixin == null) mixin = tx.getMixin();
     else if (tx.getMixin() != null) validateEquals("Mixins", mixin, tx.getMixin());
-    if (hash == null) hash = tx.getHash();
-    else if (tx.getHash() != null) validateEquals("Hashes", hash, tx.getHash());
     if (key == null) key = tx.getKey();
     else if (tx.getKey() != null) validateEquals("Keys", key, tx.getKey());
     if (size == null) size = tx.getSize();
@@ -258,7 +247,6 @@ public class MoneroTx {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("ID: " + id + "\n");
-    sb.append("Hash: " + hash + "\n");
     sb.append("Key: " + key + "\n");
     if (payments != null) {
       sb.append("Payments:\n");

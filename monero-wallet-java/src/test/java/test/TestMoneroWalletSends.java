@@ -63,17 +63,17 @@ public class TestMoneroWalletSends {
     MoneroTx tx = wallet.send(address.getStandardAddress(), null, sendAmount, MIXIN);
     
     // test transaction
+    assertEquals(sendAmount, tx.getAmount());
+    assertNotNull(tx.getId());
     assertNotNull(tx.getPayments());
     assertEquals(1, tx.getPayments().size());
     assertTrue(tx.getFee().longValue() > 0);
     assertEquals(MIXIN, tx.getMixin());
     assertNotNull(tx.getKey());
-    assertNotNull(tx.getHash());
     assertNull(tx.getSize());
     assertNull(tx.getType());
     assertNull(tx.getHeight());
     assertEquals((Integer) 0, tx.getUnlockTime());
-    assertEquals(sendAmount, tx.getAmount());
     assertNotNull(tx.getBlob());
     assertNotNull(tx.getMetadata());
     
@@ -115,11 +115,11 @@ public class TestMoneroWalletSends {
     
     // test transactions
     for (MoneroTx tx : txs) {
+      assertNotNull(tx.getId());
       assertNull(tx.getPayments());
       assertTrue(tx.getFee().longValue() > 0);
       assertEquals(MIXIN, tx.getMixin());
       assertNull(tx.getKey());
-      assertNotNull(tx.getHash());
       assertNull(tx.getHeight());
       assertNull(tx.getSize());
       assertNull(tx.getType());
@@ -141,12 +141,12 @@ public class TestMoneroWalletSends {
   public void testSweepDust() {
     List<MoneroTx> txs = wallet.sweepDust();
     for (MoneroTx tx : txs) {
+      assertNotNull(tx.getId());
       assertNull(tx.getPayments());
       assertNull(tx.getAmount());
       assertNull(tx.getFee());
       assertNull(tx.getMixin());
       assertNull(tx.getKey());
-      assertNotNull(tx.getHash());
       assertNull(tx.getSize());
       assertNull(tx.getType());
       assertNull(tx.getHeight());
