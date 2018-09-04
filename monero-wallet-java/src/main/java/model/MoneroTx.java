@@ -285,10 +285,10 @@ public class MoneroTx {
     sb.append("Height: " + height + "\n");
     sb.append("Note: " + note + "\n");
     sb.append("Timestamp: " + timestamp + "\n");
-    sb.append("Unlock time: " + unlockTime);
-    sb.append("Is double spend: " + isDoubleSpend);
-    sb.append("Blob: " + blob);
-    sb.append("Metadata: " + metadata);
+    sb.append("Unlock time: " + unlockTime + "\n");
+    sb.append("Is double spend: " + isDoubleSpend + "\n");
+    sb.append("Blob: " + blob + "\n");
+    sb.append("Metadata: " + metadata + "\n");
     return sb.toString();
   }
 }
