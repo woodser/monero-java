@@ -33,7 +33,6 @@ import model.MoneroTx.MoneroTxType;
 import model.MoneroTxConfig;
 import model.MoneroTxFilter;
 import model.MoneroUri;
-import types.Pair;
 import utils.MoneroUtils;
 import wallet.MoneroWallet;
 import wallet.MoneroWalletDefault;
@@ -234,9 +233,42 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return tx;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroTx> sendSplit(MoneroTxConfig config) {
-    throw new RuntimeException("Not implemented");
+    
+    // build parameter map
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    List<Map<String, Object>> destinationMaps = new ArrayList<Map<String, Object>>();
+    paramMap.put("destinations", destinationMaps);
+    for (MoneroPayment destination : config.getDestinations()) {
+      Map<String, Object> destinationMap = new HashMap<String, Object>();
+      destinationMap.put("address", destination.getAddress().toString());
+      destinationMap.put("amount", destination.getAmount());
+      destinationMaps.add(destinationMap);
+    }
+    paramMap.put("payment_id", config.getPaymentId());
+    paramMap.put("mixin", config.getMixin());
+    paramMap.put("unlockTime", config.getUnlockTime());
+    paramMap.put("new_algorithm", true);
+
+    // send request
+    Map<String, Object> respMap = rpc.sendRpcRequest("transfer_split", paramMap);
+
+    // interpret response
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<BigInteger> fees = (List<BigInteger>) resultMap.get("fee_list");
+    List<String> txHashes = (List<String>) resultMap.get("tx_hash_list");
+    List<MoneroTx> transactions = new ArrayList<MoneroTx>();
+    for (int i = 0; i < fees.size(); i++) {
+      MoneroTx tx = new MoneroTx();
+      tx.setFee(fees.get(i));
+      tx.setMixin(config.getMixin());
+      tx.setHash(txHashes.get(0));
+      transactions.add(tx);
+      tx.setUnlockTime(config.getUnlockTime());
+    }
+    return transactions;
   }
 
   @Override
@@ -244,9 +276,24 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroTx> sweepDust() {
-    throw new RuntimeException("Not implemented");
+    
+    // send request
+    Map<String, Object> respMap = rpc.sendRpcRequest("sweep_dust", null);
+
+    // interpret response
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<String> txHashes = (List<String>) resultMap.get("tx_hash_list");
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    if (txHashes == null) return txs;
+    for (String txHash : txHashes) {
+      MoneroTx tx = new MoneroTx();
+      tx.setHash(txHash);
+      txs.add(tx);
+    }
+    return txs;
   }
 
   @Override
@@ -472,15 +519,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public void stopMining() {
     throw new RuntimeException("Not implemented");
-  }
-  
-  // -------------------------------- PRIVATE ---------------------------------
-  
-  @SuppressWarnings("unchecked")
-  private Pair<BigInteger, BigInteger> getBalances() {
-    Map<String, Object> respMap = rpc.sendRpcRequest("getbalance", null);
-    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    return new Pair<BigInteger, BigInteger>((BigInteger) resultMap.get("balance"), (BigInteger) resultMap.get("unlocked_balance"));
   }
   
   // ------------------------------ STATIC UTILITIES --------------------------
