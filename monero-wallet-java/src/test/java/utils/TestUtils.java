@@ -2,6 +2,8 @@ package utils;
 
 import static org.junit.Assert.assertEquals;
 
+import java.net.URISyntaxException;
+
 import org.apache.log4j.PropertyConfigurator;
 
 import wallet.MoneroWallet;
@@ -19,6 +21,11 @@ public class TestUtils {
   private static final String USERNAME = "rpc_user";
   private static final String PASSWORD = "abc123";
   
+  // names of test wallets
+  public static final String WALLET_NAME_1 = "test_wallet_1";
+  public static final String WALLET_NAME_2 = "test_wallet_2";
+  public static final String WALLET_PW = "supersecretpassword123";
+  
   // log4j configuration
   static {
     PropertyConfigurator.configure("src/main/resources/log4j.properties");
@@ -28,29 +35,24 @@ public class TestUtils {
   private static MoneroWallet wallet;
   public static MoneroWallet getWallet() {
     if (wallet == null) {
+      
+      // connect to wallet
       try {
-        
-        // connect to wallet
         wallet = new MoneroWalletRpc(DOMAIN, PORT, USERNAME, PASSWORD);
-        
-        // create test wallet if necessary
-        try {
-          wallet.createWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW, "English");
-        } catch (MoneroRpcException e) {
-          assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
-        }
-        
-        // open test wallet
-        wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
-      } catch (Exception e) {
-        e.printStackTrace();
+      } catch (URISyntaxException e1) {
+        throw new RuntimeException(e1);
       }
+      
+      // create test wallet if necessary
+      try {
+        wallet.createWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW, "English");
+      } catch (MoneroRpcException e) {
+        assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
+      }
+      
+      // open test wallet
+      wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
     }
     return wallet;
   }
-  
-  // names of test wallets
-  public static final String WALLET_PW = "supersecretpassword123";
-  public static final String WALLET_NAME_1 = "test_wallet_1";
-  public static final String WALLET_NAME_2 = "test_wallet_2";
 }
