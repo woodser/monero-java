@@ -707,6 +707,10 @@ public class TestMoneroWalletNonSends {
   private static void testTransaction(MoneroTx tx) {
     assertNotNull(tx.getHash());
     assertNotNull(tx.getType());
+    if (tx.getType() == MoneroTxType.OUTGOING) {
+      assertNotNull(tx.getAmount());
+      assertTrue(tx.getAmount().longValue() > 0);
+    }
   }
   
   private static void testAddressBookEntry(MoneroAddressBookEntry entry) {
