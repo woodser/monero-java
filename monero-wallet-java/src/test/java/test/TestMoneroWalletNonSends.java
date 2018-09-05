@@ -252,12 +252,6 @@ public class TestMoneroWalletNonSends {
       BigInteger balance = wallet.getBalance(account.getIndex());
       assertTrue(balance.longValue() >= 0);
     }
-    
-    // test getting balance of invalid account
-    try {
-      wallet.getBalance(-456);
-      fail("Should have thrown error on invalid account");
-    } catch (MoneroException exception) { }
   }
 
   @Test
@@ -272,12 +266,6 @@ public class TestMoneroWalletNonSends {
         assertTrue(balance.longValue() >= 0);
       }
     }
-    
-    // test getting balance of invalid account
-    try {
-      wallet.getBalance(-456);
-      fail("Should have thrown error on invalid account");
-    } catch (MoneroException exception) { }
   }
 
   @Test
@@ -288,12 +276,6 @@ public class TestMoneroWalletNonSends {
       BigInteger unlockedBalance = wallet.getUnlockedBalance(account.getIndex());
       assertTrue(unlockedBalance.longValue() >= 0);
     }
-    
-    // test getting balance of invalid account
-    try {
-      wallet.getUnlockedBalance(-456);
-      fail("Should have thrown error on invalid account");
-    } catch (MoneroException exception) { }
   }
 
   @Test
