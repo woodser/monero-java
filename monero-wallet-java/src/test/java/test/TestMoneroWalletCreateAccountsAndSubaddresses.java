@@ -5,41 +5,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import java.math.BigInteger;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import model.MoneroAccount;
-import model.MoneroAddress;
-import model.MoneroAddressBookEntry;
-import model.MoneroException;
-import model.MoneroIntegratedAddress;
-import model.MoneroKeyImage;
-import model.MoneroOutput;
-import model.MoneroPayment;
 import model.MoneroSubaddress;
-import model.MoneroTx;
-import model.MoneroTx.MoneroTxType;
-import model.MoneroTxFilter;
-import model.MoneroUri;
-import utils.MoneroUtils;
 import utils.TestUtils;
 import wallet.MoneroWallet;
-import wallet.rpc.MoneroRpcException;
 
 /**
  * Tests a Monero wallet's account and subaddress creation function.
