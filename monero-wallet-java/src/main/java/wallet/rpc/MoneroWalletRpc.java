@@ -230,7 +230,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public BigInteger getBalance(int accountIdx, int subaddressIdx) {
-    throw new RuntimeException("Not implemented");
+    return getSubaddresses(accountIdx, Arrays.asList(subaddressIdx)).get(0).getBalance();
   }
 
   @SuppressWarnings("unchecked")
@@ -243,7 +243,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx) {
-    throw new RuntimeException("Not implemented");
+    return getSubaddresses(accountIdx, Arrays.asList(subaddressIdx)).get(0).getUnlockedBalance();
   }
   
   @SuppressWarnings("unchecked")
