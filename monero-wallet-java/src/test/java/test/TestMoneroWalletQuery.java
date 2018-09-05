@@ -3,7 +3,6 @@ package test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -17,7 +16,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -30,7 +28,6 @@ import model.MoneroException;
 import model.MoneroIntegratedAddress;
 import model.MoneroKeyImage;
 import model.MoneroOutput;
-import model.MoneroPayment;
 import model.MoneroSubaddress;
 import model.MoneroTx;
 import model.MoneroTx.MoneroTxType;
@@ -122,7 +119,7 @@ public class TestMoneroWalletQuery {
     List<MoneroAccount> accounts = wallet.getAccounts();
     assertFalse(accounts.isEmpty());
     for (MoneroAccount account : accounts) {
-      testAccount(account);
+      TestUtils.testAccount(account);
     }
   }
 
@@ -144,7 +141,7 @@ public class TestMoneroWalletQuery {
     List<MoneroAccount> accounts = wallet.getAccounts();
     assertFalse(accounts.isEmpty());
     for (MoneroAccount account : accounts) {
-      testAccount(wallet.getAccount(account.getIndex()));
+      TestUtils.testAccount(wallet.getAccount(account.getIndex()));
     }
   }
 
@@ -156,7 +153,7 @@ public class TestMoneroWalletQuery {
       List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
       assertFalse(subaddresses.isEmpty());
       for (MoneroSubaddress subaddress : subaddresses) {
-        testSubaddress(subaddress);
+        TestUtils.testSubaddress(subaddress);
       }
     }
   }
@@ -254,7 +251,7 @@ public class TestMoneroWalletQuery {
     List<MoneroTx> txs = wallet.getTxs();
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      testTransaction(tx);
+      TestUtils.testTransaction(tx);
     }
   }
 
@@ -265,7 +262,7 @@ public class TestMoneroWalletQuery {
     List<MoneroTx> allTxs = wallet.getTxs();
     assertFalse(allTxs.isEmpty());
     for (MoneroTx tx : allTxs) {
-      testTransaction(tx);
+      TestUtils.testTransaction(tx);
     }
     
     // test getting transactions by payment ids
@@ -280,7 +277,7 @@ public class TestMoneroWalletQuery {
       List<MoneroTx> txs = wallet.getTxs(filter);
       assertFalse(txs.isEmpty());
       for (MoneroTx tx : txs) {
-        testTransaction(tx);
+        TestUtils.testTransaction(tx);
       }
     }
     
@@ -453,7 +450,7 @@ public class TestMoneroWalletQuery {
     // initial state
     List<MoneroAddressBookEntry> entries = wallet.getAddressBookEntries();
     int numEntriesStart = entries.size();
-    for (MoneroAddressBookEntry entry : entries) testAddressBookEntry(entry);
+    for (MoneroAddressBookEntry entry : entries) TestUtils.testAddressBookEntry(entry);
     
     // test adding standard addresses
     final int NUM_ENTRIES = 5;
@@ -468,7 +465,7 @@ public class TestMoneroWalletQuery {
       boolean found = false;
       for (MoneroAddressBookEntry entry : entries) {
         if (idx == entry.getIndex()) {
-          testAddressBookEntry(entry);
+          TestUtils.testAddressBookEntry(entry);
           assertEquals(address, entry.getAddress());
           assertEquals("hi there!", entry.getDescription());
           found = true;
@@ -501,7 +498,7 @@ public class TestMoneroWalletQuery {
       boolean found = false;
       for (MoneroAddressBookEntry entry : entries) {
         if (idx == entry.getIndex()) {
-          testAddressBookEntry(entry);
+          TestUtils.testAddressBookEntry(entry);
           assertEquals(integratedAddresses.get(idx), entry.getAddress());
           assertEquals("", entry.getDescription());
           found = true;
@@ -613,54 +610,5 @@ public class TestMoneroWalletQuery {
   public void testMining() {
     wallet.startMining(2, false, true);
     wallet.stopMining();
-  }
-  
-  // --------------------------------- PRIVATE --------------------------------
-  
-  private static void testAccount(MoneroAccount account) {
-    assertTrue(account.getIndex() >= 0);
-    assertNotNull(account.getPrimaryAddress());
-    assertTrue(account.getBalance().doubleValue() >= 0);
-    assertTrue(account.getUnlockedBalance().doubleValue() >= 0);
-    assertFalse(account.isMultisigImportNeeded());
-    if (account.getSubaddresses() != null) {
-      for (int i = 0; i < account.getSubaddresses().size(); i++) {
-        testSubaddress(account.getSubaddresses().get(i));
-      }
-    }
-  }
-  
-  private static void testSubaddress(MoneroSubaddress subaddress) {
-    assertTrue(subaddress.getIndex() >= 0);
-    assertNotNull(subaddress.getAddress());
-    assertTrue(subaddress.getBalance().doubleValue() >= 0);
-    assertTrue(subaddress.getUnlockedBalance().doubleValue() >= 0);
-    assertTrue(subaddress.getNumUnspentOutputs() >= 0);
-    assertFalse(subaddress.isMultisigImportNeeded());
-    if (subaddress.getBalance().doubleValue() >= 0) assertTrue(subaddress.isUsed());
-  }
-  
-  private static void testTransaction(MoneroTx tx) {
-    assertNotNull(tx.getId());
-    assertNotNull(tx.getType());
-    if (tx.getType() == MoneroTxType.OUTGOING) {
-      assertNotNull(tx.getAmount());
-      assertTrue(tx.getAmount().longValue() >= 0);  // TODO: seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
-      if (tx.getPayments() != null) {
-        assertFalse(tx.getPayments().isEmpty());
-        for (MoneroPayment payment : tx.getPayments()) {
-          assertNotNull(payment.getAmount());
-          assertNotNull(payment.getAddress());
-          assertTrue(payment.getAmount().longValue() > 0);
-        }
-      }
-
-    }
-  }
-  
-  private static void testAddressBookEntry(MoneroAddressBookEntry entry) {
-    assertTrue(entry.getIndex() >= 0);
-    assertNotNull(entry.getAddress());
-    assertNotNull(entry.getDescription());
   }
 }

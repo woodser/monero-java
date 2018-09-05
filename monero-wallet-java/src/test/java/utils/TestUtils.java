@@ -1,9 +1,19 @@
 package utils;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.net.URISyntaxException;
 
 import org.apache.log4j.PropertyConfigurator;
 
+import model.MoneroAccount;
+import model.MoneroAddressBookEntry;
+import model.MoneroPayment;
+import model.MoneroSubaddress;
+import model.MoneroTx;
+import model.MoneroTx.MoneroTxType;
 import wallet.MoneroWallet;
 import wallet.rpc.MoneroWalletRpc;
 
@@ -51,5 +61,51 @@ public class TestUtils {
 //      wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
     }
     return wallet;
+  }
+  
+  public static void testAccount(MoneroAccount account) {
+    assertTrue(account.getIndex() >= 0);
+    assertNotNull(account.getPrimaryAddress());
+    assertTrue(account.getBalance().doubleValue() >= 0);
+    assertTrue(account.getUnlockedBalance().doubleValue() >= 0);
+    assertFalse(account.isMultisigImportNeeded());
+    if (account.getSubaddresses() != null) {
+      for (int i = 0; i < account.getSubaddresses().size(); i++) {
+        testSubaddress(account.getSubaddresses().get(i));
+      }
+    }
+  }
+  
+  public static void testSubaddress(MoneroSubaddress subaddress) {
+    assertTrue(subaddress.getIndex() >= 0);
+    assertNotNull(subaddress.getAddress());
+    assertTrue(subaddress.getBalance().doubleValue() >= 0);
+    assertTrue(subaddress.getUnlockedBalance().doubleValue() >= 0);
+    assertTrue(subaddress.getNumUnspentOutputs() >= 0);
+    assertFalse(subaddress.isMultisigImportNeeded());
+    if (subaddress.getBalance().doubleValue() >= 0) assertTrue(subaddress.isUsed());
+  }
+  
+  public static void testTransaction(MoneroTx tx) {
+    assertNotNull(tx.getId());
+    assertNotNull(tx.getType());
+    if (tx.getType() == MoneroTxType.OUTGOING) {
+      assertNotNull(tx.getAmount());
+      assertTrue(tx.getAmount().longValue() >= 0);  // TODO: seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
+      if (tx.getPayments() != null) {
+        assertFalse(tx.getPayments().isEmpty());
+        for (MoneroPayment payment : tx.getPayments()) {
+          assertNotNull(payment.getAmount());
+          assertNotNull(payment.getAddress());
+          assertTrue(payment.getAmount().longValue() > 0);
+        }
+      }
+    }
+  }
+  
+  public static void testAddressBookEntry(MoneroAddressBookEntry entry) {
+    assertTrue(entry.getIndex() >= 0);
+    assertNotNull(entry.getAddress());
+    assertNotNull(entry.getDescription());
   }
 }
