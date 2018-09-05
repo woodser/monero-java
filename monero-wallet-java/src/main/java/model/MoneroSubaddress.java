@@ -12,6 +12,7 @@ public class MoneroSubaddress {
   private MoneroAddress address;
   private BigInteger balance;
   private BigInteger unlockedBalance;
+  private boolean isMultisigImportNeeded;
   private int numUnspentOutputs;
   private boolean isUsed;
   
@@ -55,6 +56,14 @@ public class MoneroSubaddress {
     this.unlockedBalance = unlockedBalance;
   }
   
+  public boolean isMultisigImportNeeded() {
+    return isMultisigImportNeeded;
+  }
+
+  public void setMultisigImportNeeded(boolean isMultisigImportNeeded) {
+    this.isMultisigImportNeeded = isMultisigImportNeeded;
+  }
+
   public int getNumUnspentOutputs() {
     return numUnspentOutputs;
   }

@@ -1,5 +1,7 @@
 package wallet.rpc;
 
+import static org.junit.Assert.assertEquals;
+
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -181,7 +183,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (subaddressIndices != null) params.put("address_index", subaddressIndices);
     Map<String, Object> respMap = rpc.sendRpcRequest("getaddress", params);
     
-    // build subaddresses
+    // initialize subaddresses
     List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<Map<String, Object>> addresses = (List<Map<String, Object>>) resultMap.get("addresses");
@@ -192,6 +194,22 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       subaddress.setLabel((String) address.get("label"));
       subaddress.setAddress(MoneroUtils.newAddress((String) address.get("address"), this));
       subaddress.setUsed((boolean) address.get("used"));
+    }
+    
+    // fetch and initialize subaddress balances
+    respMap = rpc.sendRpcRequest("getbalance", params);
+    resultMap = (Map<String, Object>) respMap.get("result");
+    List<Map<String, Object>> subaddressMaps = (List<Map<String, Object>>) resultMap.get("per_subaddress");
+    for (Map<String, Object> subaddressMap : subaddressMaps) {
+      int subaddressIdx = ((BigInteger) subaddressMap.get("address_index")).intValue();
+      for (MoneroSubaddress subaddress : subaddresses) {
+        if (subaddressIdx != subaddress.getIndex()) continue; // find matching subaddress
+        assertEquals(subaddress.getAddress().toString(), (String) subaddressMap.get("address"));
+        subaddress.setBalance((BigInteger) subaddressMap.get("balance"));
+        subaddress.setUnlockedBalance((BigInteger) subaddressMap.get("unlocked_balance"));
+        subaddress.setNumUnspentOutputs(((BigInteger) subaddressMap.get("num_unspent_outputs")).intValue());
+        subaddress.setMultisigImportNeeded((boolean) resultMap.get("multisig_import_needed"));
+      }
     }
     
     return subaddresses;
