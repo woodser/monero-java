@@ -6,6 +6,8 @@ what is an amount key?
 test MoneroUtils.newAddress() used by wallet.send(str,str)
 
 Monero-wallet-rpc suggested improvements:
+getbalance subaddress should be array
+optional param documentation missing
 tx_hash in incoming_transfers vs txid in get_transfers; standardize on tx_hash or tx_id
 standardize terminology transactions vs transfers
 standardize terminology destinations vs outputs vs payments (I like payment which is address + amount)

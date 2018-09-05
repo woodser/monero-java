@@ -708,6 +708,7 @@ public class TestMoneroWalletNonSends {
     assertTrue(subaddress.getBalance().doubleValue() >= 0);
     assertTrue(subaddress.getUnlockedBalance().doubleValue() >= 0);
     assertTrue(subaddress.getNumUnspentOutputs() >= 0);
+    assertFalse(subaddress.isMultisigImportNeeded());
     if (subaddress.getBalance().doubleValue() >= 0) assertTrue(subaddress.isUsed());
   }
   
