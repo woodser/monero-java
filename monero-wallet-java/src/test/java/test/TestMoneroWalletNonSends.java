@@ -315,6 +315,11 @@ public class TestMoneroWalletNonSends {
       fail("Should have thrown error on invalid account");
     } catch (MoneroException exception) { }
   }
+  
+  @Test
+  public void testMultisigImportNeeded() {
+    assertFalse(wallet.isMultisigImportNeeded());
+  }
 
   @Test
   public void testGetTxs() {
@@ -686,6 +691,7 @@ public class TestMoneroWalletNonSends {
   
   private static void testAccount(MoneroAccount account) {
     assertTrue(account.getIndex() >= 0);
+    assertNotNull(account.getPrimaryAddress());
     assertTrue(account.getBalance().doubleValue() >= 0);
     assertTrue(account.getUnlockedBalance().doubleValue() >= 0);
     assertFalse(account.isMultisigImportNeeded());
@@ -698,9 +704,9 @@ public class TestMoneroWalletNonSends {
   
   private static void testSubaddress(MoneroSubaddress subaddress) {
     assertTrue(subaddress.getIndex() >= 0);
+    assertNotNull(subaddress.getAddress());
     assertTrue(subaddress.getBalance().doubleValue() >= 0);
     assertTrue(subaddress.getUnlockedBalance().doubleValue() >= 0);
-    assertNotNull(subaddress.getAddress());
     assertTrue(subaddress.getNumUnspentOutputs() >= 0);
     if (subaddress.getBalance().doubleValue() >= 0) assertTrue(subaddress.isUsed());
   }

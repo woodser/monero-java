@@ -1,4 +1,5 @@
 v0.12.3.0
+get rid of individual getBalance(), getUnlockedBalance(), isMultisigImportNeeded() and replace with getAccount() with all info?
 why is transaction amount 0 when destinations present
 why don't some transactions have destinations
 what is an amount key?

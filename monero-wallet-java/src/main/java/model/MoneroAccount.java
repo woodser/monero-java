@@ -9,15 +9,17 @@ import java.util.List;
 public class MoneroAccount {
 
   private int index;
+  private MoneroAddress primaryAddress;
   private String label;
   private BigInteger balance;
   private BigInteger unlockedBalance;
   private boolean isMultisigImportNeeded;
   private List<MoneroSubaddress> subaddresses;
   
-  public MoneroAccount(int index, String label, BigInteger balance, BigInteger unlockedBalance, boolean isMultisigImportNeeded, List<MoneroSubaddress> subaddresses) {
+  public MoneroAccount(int index, MoneroAddress primaryAddress, String label, BigInteger balance, BigInteger unlockedBalance, boolean isMultisigImportNeeded, List<MoneroSubaddress> subaddresses) {
     super();
     this.index = index;
+    this.primaryAddress = primaryAddress;
     this.label = label;
     this.balance = balance;
     this.unlockedBalance = unlockedBalance;
@@ -33,6 +35,14 @@ public class MoneroAccount {
     this.index = index;
   }
   
+  public MoneroAddress getPrimaryAddress() {
+    return primaryAddress;
+  }
+
+  public void setPrimaryAddress(MoneroAddress primaryAddress) {
+    this.primaryAddress = primaryAddress;
+  }
+
   public String getLabel() {
     return label;
   }

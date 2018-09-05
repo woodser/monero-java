@@ -161,6 +161,13 @@ public interface MoneroWallet {
   public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx);
   
   /**
+   * Indicates if importing multisig data is needed for returning a correct balance.
+   * 
+   * @return true if importing multisig data is needed for returning a correct balance, false otherwise
+   */
+  public boolean isMultisigImportNeeded();
+  
+  /**
    * Send a payment.
    * 
    * @param address is the address to send to
