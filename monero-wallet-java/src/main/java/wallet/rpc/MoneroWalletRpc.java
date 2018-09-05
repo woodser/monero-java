@@ -563,12 +563,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public void rescanBlockchain() {
-    throw new RuntimeException("Not implemented");
+    rpc.sendRpcRequest("rescan_blockchain", null);
   }
 
   @Override
   public void rescanSpent() {
-    throw new RuntimeException("Not implemented");
+    rpc.sendRpcRequest("rescan_spent", null);
   }
 
   @Override
@@ -578,12 +578,16 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public void startMining(int numThreads, boolean backgroundMining, boolean ignoreBattery) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("threads_count", numThreads);
+    params.put("do_background_mining", backgroundMining);
+    params.put("ignore_battery", ignoreBattery);
+    rpc.sendRpcRequest("start_mining", params);
   }
 
   @Override
   public void stopMining() {
-    throw new RuntimeException("Not implemented");
+    rpc.sendRpcRequest("stop_mining", null);
   }
   
   // ------------------------------ STATIC UTILITIES --------------------------
