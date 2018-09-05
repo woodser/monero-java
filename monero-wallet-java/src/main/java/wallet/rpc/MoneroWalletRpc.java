@@ -494,9 +494,25 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return keyImages;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Map<String, BigInteger> importKeyImages(Collection<MoneroKeyImage> keyImages) {
-    throw new RuntimeException("Not implemented");
+    
+    // convert key images to maps
+    List<Map<String, String>> keyImageMaps = new ArrayList<Map<String, String>>();
+    for (MoneroKeyImage keyImage : keyImages) {
+      Map<String, String> keyImageMap = new HashMap<String, String>();
+      keyImageMaps.add(keyImageMap);
+      keyImageMap.put("key_image", keyImage.getKeyImage());
+      keyImageMap.put("signature", keyImage.getSignature());
+    }
+    
+    // send and interpret rpc request
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("signed_key_images", keyImageMaps);
+    Map<String, Object> respMap = rpc.sendRpcRequest("import_key_images", params);
+    Map<String, BigInteger> resultMap = (Map<String, BigInteger>) respMap.get("result");
+    return resultMap;
   }
 
   @Override
