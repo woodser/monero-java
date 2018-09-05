@@ -13,10 +13,10 @@ public class MoneroAccount {
   private String label;
   private BigInteger balance;
   private BigInteger unlockedBalance;
-  private boolean isMultisigImportNeeded;
+  private Boolean isMultisigImportNeeded;
   private List<MoneroSubaddress> subaddresses;
   
-  public MoneroAccount(int index, MoneroAddress primaryAddress, String label, BigInteger balance, BigInteger unlockedBalance, boolean isMultisigImportNeeded, List<MoneroSubaddress> subaddresses) {
+  public MoneroAccount(int index, MoneroAddress primaryAddress, String label, BigInteger balance, BigInteger unlockedBalance, Boolean isMultisigImportNeeded, List<MoneroSubaddress> subaddresses) {
     super();
     this.index = index;
     this.primaryAddress = primaryAddress;
@@ -67,11 +67,11 @@ public class MoneroAccount {
     this.unlockedBalance = unlockedBalance;
   }
   
-  public boolean isMultisigImportNeeded() {
+  public Boolean isMultisigImportNeeded() {
     return isMultisigImportNeeded;
   }
   
-  public void setMultisigImportNeeded(boolean isMultisigImportNeeded) {
+  public void setMultisigImportNeeded(Boolean isMultisigImportNeeded) {
     this.isMultisigImportNeeded = isMultisigImportNeeded;
   }
   
