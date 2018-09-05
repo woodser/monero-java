@@ -47,6 +47,7 @@ import wallet.rpc.MoneroRpcException;
 public class TestMoneroWalletNonSends {
   
   private MoneroWallet wallet;
+  private static final String SAMPLE_ADDRESS = "58bf9MfrBNDXSqCzK6snxSXaJHehLTnvx3BdS6qMkYAsW8P5kvRVq8ePbGQ7mfAeYfC7QELPhpQBe2C9bqCrqeesUsifaWw";
 
   @Before
   public void setup() throws Exception {
@@ -618,8 +619,7 @@ public class TestMoneroWalletNonSends {
     String signature = wallet.sign(msg);
     boolean verified = wallet.verify(msg, wallet.getSubaddress(0, 0).getAddress().toString(), signature);
     assertTrue(verified);
-    assertTrue(wallet.getSubaddresses(0).size() > 1);
-    verified = wallet.verify(msg, wallet.getSubaddress(0, 1).getAddress().toString(), signature);
+    verified = wallet.verify(msg, SAMPLE_ADDRESS, signature);
     assertFalse(verified);
   }
 
