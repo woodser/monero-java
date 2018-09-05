@@ -86,12 +86,22 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public String getMnemonicSeed() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    paramMap.put("key_type", "mnemonic");
+    Map<String, Object> respMap = rpc.sendRpcRequest("query_key", paramMap);
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (String) resultMap.get("key");
   }
 
   @Override
   public String getViewKey() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    paramMap.put("key_type", "view_key");
+    Map<String, Object> respMap = rpc.sendRpcRequest("query_key", paramMap);
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (String) resultMap.get("key");
   }
   
   @Override
@@ -482,14 +492,24 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     rpc.sendRpcRequest("open_wallet", params);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String sign(String data) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("data", data);
+    Map<String, Object> result = (Map<String, Object>) rpc.sendRpcRequest("sign", params).get("result");
+    return (String) result.get("signature");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public boolean verify(String data, String address, String signature) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("data", data);
+    params.put("address", address);
+    params.put("signature", signature);
+    Map<String, Object> result = (Map<String, Object>) rpc.sendRpcRequest("verify", params).get("result");
+    return (boolean) result.get("good");
   }
 
   @Override
@@ -504,7 +524,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public void saveBlockchain() {
-    throw new RuntimeException("Not implemented");
+    rpc.sendRpcRequest("store", null);
   }
 
   @Override
@@ -519,7 +539,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public void stopWallet() {
-    throw new RuntimeException("Not implemented");
+    rpc.sendRpcRequest("stop_wallet", null);
   }
 
   @Override
