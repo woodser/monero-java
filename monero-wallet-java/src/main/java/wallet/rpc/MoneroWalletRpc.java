@@ -437,9 +437,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Collection<MoneroKeyImage> getKeyImages() {
-    throw new RuntimeException("Not implemented");
+    List<MoneroKeyImage> keyImages = new ArrayList<MoneroKeyImage>();
+    Map<String, Object> respMap = rpc.sendRpcRequest("export_key_images", null);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<Map<String, Object>> keyImageMaps = (List<Map<String, Object>>) resultMap.get("signed_key_images");
+    for (Map<String, Object> keyImageMap : keyImageMaps) {
+      keyImages.add(new MoneroKeyImage((String) keyImageMap.get("key_image"), (String) keyImageMap.get("signature")));
+    }
+    return keyImages;
   }
 
   @Override
@@ -514,12 +522,38 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public URI toUri(MoneroUri moneroUri) {
-    throw new RuntimeException("Not implemented");
+    if (moneroUri == null) throw new MoneroException("Given Monero URI is null");
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    paramMap.put("address", moneroUri.getAddress());
+    paramMap.put("amount", moneroUri.getAmount() == null ? null : moneroUri.getAmount());
+    paramMap.put("payment_id", moneroUri.getPaymentId());
+    paramMap.put("recipient_name", moneroUri.getRecipientName());
+    paramMap.put("tx_description", moneroUri.getTxDescription());
+    Map<String, Object> respMap = rpc.sendRpcRequest("make_uri", paramMap);
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return MoneroUtils.parseUri((String) resultMap.get("uri"));
   }
 
   @Override
   public MoneroUri toMoneroUri(URI uri) {
-    throw new RuntimeException("Not implemented");
+    if (uri == null) throw new MoneroException("Given URI is null");
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    paramMap.put("uri", uri.toString());
+    Map<String, Object> respMap = rpc.sendRpcRequest("parse_uri", paramMap);
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) ((Map<String, Object>) respMap.get("result")).get("uri");
+    MoneroUri mUri = new MoneroUri();
+    mUri.setAddress((String) resultMap.get("address"));
+    if ("".equals(mUri.getAddress())) mUri.setAddress(null);
+    mUri.setAmount((BigInteger) resultMap.get("amount"));
+    mUri.setPaymentId((String) resultMap.get("payment_id"));
+    if ("".equals(mUri.getPaymentId())) mUri.setPaymentId(null);
+    mUri.setRecipientName((String) resultMap.get("recipient_name"));
+    if ("".equals(mUri.getRecipientName())) mUri.setRecipientName(null);
+    mUri.setTxDescription((String) resultMap.get("tx_description"));
+    if ("".equals(mUri.getTxDescription())) mUri.setTxDescription(null);
+    return mUri;
   }
 
   @Override

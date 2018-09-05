@@ -1,5 +1,6 @@
 package utils;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -198,6 +199,20 @@ public class MoneroUtils {
       if (isValidStandardAddress(address)) return new MoneroAddress(address);
       else if (isValidIntegratedAddress(address)) return wallet.decodeIntegratedAddress(address);
       throw new MoneroException("Address is neither standard nor integrated: " + address);
+    }
+  }
+  
+  /**
+   * Converts the string to a URI.  Throws MoneroException if exception.
+   * 
+   * @param endpoint is the string to convert to a URI
+   * @return URI is the initialized object from the string endpoint
+   */
+  public static URI parseUri(String endpoint) {
+    try {
+      return new URI(endpoint);
+    } catch (Exception e) {
+      throw new MoneroException(e);
     }
   }
 
