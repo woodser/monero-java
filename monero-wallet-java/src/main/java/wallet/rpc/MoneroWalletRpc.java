@@ -135,17 +135,35 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public List<MoneroAccount> getAccounts() {
-    throw new RuntimeException("Not implemented");
+    return getAccounts(null);
   }
   
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroAccount> getAccounts(String tag) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    Map<String, Object> resultMap = (Map<String, Object>) rpc.sendRpcRequest("get_accounts", params).get("result");
+    List<Map<String, Object>> accountMaps = (List<Map<String, Object>>) resultMap.get("subaddress_accounts");
+    List<MoneroAccount> accounts = new ArrayList<MoneroAccount>();
+    for (Map<String, Object> accountMap : accountMaps) {
+      int accountIdx = ((BigInteger) accountMap.get("account_index")).intValue();
+      BigInteger balance = (BigInteger) accountMap.get("balance");
+      BigInteger unlockedBalance = (BigInteger) accountMap.get("unlocked_balance");
+      MoneroAddress primaryAddress = MoneroUtils.newAddress((String) accountMap.get("base_address"), null, this);
+      String label = (String) accountMap.get("label");
+      boolean isMultisigImportNeeded = false;  // TODO: get this value, may need to make another rpc call for balance info
+      MoneroAccount account = new MoneroAccount(accountIdx, primaryAddress, label, balance, unlockedBalance, isMultisigImportNeeded, null);
+      accounts.add(account);
+    }
+    return accounts;
   }
 
   @Override
   public MoneroAccount getAccount(int accountIdx) {
-    throw new RuntimeException("Not implemented");
+    for (MoneroAccount account : getAccounts()) {
+      if (account.getIndex() == accountIdx) return account;
+    }
+    throw new MoneroException("Account with index " + accountIdx + " does not exist");
   }
 
   @Override
@@ -208,6 +226,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx) {
     throw new RuntimeException("Not implemented");
+  }
+  
+  @SuppressWarnings("unchecked")
+  @Override
+  public boolean isMultisigImportNeeded() {
+    Map<String, Object> respMap = rpc.sendRpcRequest("getbalance", null);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (boolean) resultMap.get("multisig_import_needed");
   }
   
   @Override
@@ -440,10 +466,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @SuppressWarnings("unchecked")
   @Override
   public Collection<MoneroKeyImage> getKeyImages() {
-    List<MoneroKeyImage> keyImages = new ArrayList<MoneroKeyImage>();
     Map<String, Object> respMap = rpc.sendRpcRequest("export_key_images", null);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<Map<String, Object>> keyImageMaps = (List<Map<String, Object>>) resultMap.get("signed_key_images");
+    List<MoneroKeyImage> keyImages = new ArrayList<MoneroKeyImage>();
     for (Map<String, Object> keyImageMap : keyImageMaps) {
       keyImages.add(new MoneroKeyImage((String) keyImageMap.get("key_image"), (String) keyImageMap.get("signature")));
     }
