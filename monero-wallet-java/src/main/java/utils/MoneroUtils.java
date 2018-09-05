@@ -59,7 +59,7 @@ public class MoneroUtils {
    */
   public static void validateStandardAddress(String standardAddress) {
     if (standardAddress == null) throw new MoneroException("Standard address is null");
-    if (!standardAddress.startsWith("5") && !standardAddress.startsWith("4") && !standardAddress.startsWith("9") && !standardAddress.startsWith("A")) throw new MoneroException("Standard address does not start with 4, 5, 9 or A");
+    if (!standardAddress.startsWith("5") && !standardAddress.startsWith("4") && !standardAddress.startsWith("9") && !standardAddress.startsWith("A")) throw new MoneroException("Standard address does not start with 4, 5, 9 or A: " + standardAddress);
     MoneroUtils.validateBase58(standardAddress);
     if (standardAddress.length() != STANDARD_ADDRESS_LENGTH) throw new MoneroException("Standard address is " + standardAddress.length() + " characters but must be " + STANDARD_ADDRESS_LENGTH);
   }
@@ -87,9 +87,9 @@ public class MoneroUtils {
    */
   public static void validateSubaddress(String subaddress) {
     if (subaddress == null) throw new MoneroException("Subaddress is null");
-    if (!subaddress.startsWith("5") && !subaddress.startsWith("4") && !subaddress.startsWith("9") && !subaddress.startsWith("A")) throw new MoneroException("Subaddress does not start with 4, 5, 9 or A");
-    MoneroUtils.validateBase58(subaddress);
     if (subaddress.length() != SUBADDRESS_LENGTH) throw new MoneroException("Subaddress is " + subaddress.length() + " characters but must be " + SUBADDRESS_LENGTH);
+    if (!subaddress.startsWith("7") && !subaddress.startsWith("8")) throw new MoneroException("Subaddress does not start with 7 or 8: " + subaddress); // TODO: what about testnet?
+    MoneroUtils.validateBase58(subaddress);
   }
   
   /**
@@ -225,14 +225,8 @@ public class MoneroUtils {
     if (paymentId != null) {
       throw new RuntimeException("Not implemented");  // TODO: test
     } else {
-      try {
-        validateSubaddress(address);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-      
       if (isValidStandardAddress(address)) return new MoneroAddress(address);
-      else if (isValidSubaddress(address)) return new MoneroAddress(address);
+      else if (isValidSubaddress(address)) return new MoneroAddress(address); // TODO: have this store subaddress?
       else if (isValidIntegratedAddress(address)) return wallet.decodeIntegratedAddress(address);
       throw new MoneroException("Address format is not standard address, subaddress, or integrated address: " + address);
     }
