@@ -168,9 +168,16 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     throw new MoneroException("Account with index " + accountIdx + " does not exist");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroAccount createAccount(String label) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("label", label);
+    Map<String, Object> respMap = rpc.sendRpcRequest("create_account", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    int accountIdx = ((BigInteger) resultMap.get("account_index")).intValue();
+    MoneroAddress address = MoneroUtils.newAddress((String) resultMap.get("address"), this);
+    return new MoneroAccount(accountIdx, address, label, null, null, null, null);
   }
 
   @SuppressWarnings("unchecked")
