@@ -101,7 +101,26 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public MoneroIntegratedAddress getIntegratedAddress(String paymentId) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    if (paymentId != null) paramMap.put("payment_id", paymentId);
+    Map<String, Object> respMap = rpc.sendRpcRequest("make_integrated_address", paramMap);
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    paymentId = (String) resultMap.get("payment_id");
+    String integratedAddress = (String) resultMap.get("integrated_address");
+    return (MoneroIntegratedAddress) MoneroUtils.newAddress(integratedAddress, null, this);
+  }
+
+  @Override
+  public MoneroIntegratedAddress decodeIntegratedAddress(String integratedAddress) {
+    Map<String, Object> paramMap = new HashMap<String, Object>();
+    paramMap.put("integrated_address", integratedAddress);
+    Map<String, Object> respMap = rpc.sendRpcRequest("split_integrated_address", paramMap);
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroIntegratedAddress address = new MoneroIntegratedAddress((String) resultMap.get("standard_address"), (String) resultMap.get("payment_id"), integratedAddress);
+    MoneroUtils.validateAddress(address);
+    return address;
   }
 
   @Override
@@ -480,11 +499,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public MoneroUri toMoneroUri(URI uri) {
-    throw new RuntimeException("Not implemented");
-  }
-
-  @Override
-  public MoneroIntegratedAddress decodeIntegratedAddress(String integratedAddress) {
     throw new RuntimeException("Not implemented");
   }
 
