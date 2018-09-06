@@ -9,13 +9,19 @@ import static org.junit.Assert.fail;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import model.MoneroAccount;
+import model.MoneroAddressBookEntry;
+import model.MoneroIntegratedAddress;
 import model.MoneroPayment;
 import model.MoneroSubaddress;
 import model.MoneroTx;
@@ -238,5 +244,98 @@ public class TestMoneroWalletWrite {
       assertNull(tx.getBlob());
       assertNull(tx.getMetadata());
     }
+  }
+  
+  @Test
+  public void testSetTxNotes() {
+    
+    // set tx notes
+    List<MoneroTx> txs = wallet.getTxs();
+    assertTrue(txs.size() >= 3);
+    List<String> txIds = new ArrayList<String>();
+    List<String> txNotes = new ArrayList<String>();
+    for (int i = 0; i < txIds.size(); i++) {
+      txIds.add(txs.get(i).getId());
+      txNotes.add("Hello " + i);
+    }
+    wallet.setTxNotes(txIds, txNotes);
+    
+    // get tx notes
+    txNotes = wallet.getTxNotes(txIds);
+    for (int i = 0; i < txIds.size(); i++) {
+      assertEquals("Hello " + i, txNotes.get(i));
+    }
+  }
+  
+  @Test
+  public void testAddressBookEntries() {
+    
+    // initial state
+    List<MoneroAddressBookEntry> entries = wallet.getAddressBookEntries();
+    int numEntriesStart = entries.size();
+    for (MoneroAddressBookEntry entry : entries) TestUtils.testAddressBookEntry(entry);
+    
+    // test adding standard addresses
+    final int NUM_ENTRIES = 5;
+    String address = wallet.getSubaddress(0, 0).getAddress();
+    Collection<Integer> indices = new HashSet<Integer>();
+    for (int i = 0; i < NUM_ENTRIES; i++) {
+      indices.add(wallet.addAddressBookEntry(address, "hi there!"));
+    }
+    entries = wallet.getAddressBookEntries();
+    assertEquals(numEntriesStart + NUM_ENTRIES, entries.size());
+    for (Integer idx : indices) {
+      boolean found = false;
+      for (MoneroAddressBookEntry entry : entries) {
+        if (idx == entry.getIndex()) {
+          TestUtils.testAddressBookEntry(entry);
+          assertEquals(address, entry.getAddress());
+          assertEquals("hi there!", entry.getDescription());
+          found = true;
+          break;
+        }
+      }
+      assertTrue("Index " + idx + " not found in address book indices", found);
+    }
+    
+    // delete entries
+    for (Integer idx : indices) {
+      wallet.deleteAddressBookEntry(idx);
+    }
+    entries = wallet.getAddressBookEntries();
+    assertEquals(numEntriesStart, entries.size());
+    
+    // test adding integrated addresses
+    indices = new HashSet<Integer>();
+    String paymentId = "03284e41c342f03"; // payment id less one character
+    Map<Integer, MoneroIntegratedAddress> integratedAddresses = new HashMap<Integer, MoneroIntegratedAddress>();
+    for (int i = 0; i < NUM_ENTRIES; i++) {
+      MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(paymentId + i); // create unique integrated address
+      int idx = wallet.addAddressBookEntry(integratedAddress.getIntegratedAddress(), null);
+      indices.add(idx);
+      integratedAddresses.put(idx, integratedAddress);
+    }
+    entries = wallet.getAddressBookEntries();
+    assertEquals(numEntriesStart + NUM_ENTRIES, entries.size());
+    for (Integer idx : indices) {
+      boolean found = false;
+      for (MoneroAddressBookEntry entry : entries) {
+        if (idx == entry.getIndex()) {
+          TestUtils.testAddressBookEntry(entry);
+          assertEquals(integratedAddresses.get(idx), entry.getAddress());
+          assertEquals("", entry.getDescription());
+          found = true;
+          break;
+        }
+      }
+      assertTrue("Index " + idx + " not found in address book indices", found);
+    }
+    
+    // delete entries
+    for (Integer idx : indices) {
+      wallet.deleteAddressBookEntry(idx);
+    }
+    entries = wallet.getAddressBookEntries();
+    assertEquals(numEntriesStart, entries.size());
   }
 }
