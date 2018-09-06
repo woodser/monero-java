@@ -26,6 +26,7 @@ import wallet.MoneroWallet;
  * These tests are separated because they rely on a balance and initiate transactions on the blockchain.
  * 
  * TODO: support / test send, sendSplit, and sweepAll from specific accounts and subaddresses
+ * TODO: test sending with payment id
  */
 public class TestMoneroWalletSends {
   
