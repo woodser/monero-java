@@ -23,7 +23,6 @@ import org.junit.Test;
 
 import model.MoneroAccount;
 import model.MoneroAddressBookEntry;
-import model.MoneroException;
 import model.MoneroIntegratedAddress;
 import model.MoneroKeyImage;
 import model.MoneroOutput;
