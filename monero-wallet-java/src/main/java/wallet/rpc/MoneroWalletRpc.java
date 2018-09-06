@@ -173,7 +173,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     int accountIdx = ((BigInteger) resultMap.get("account_index")).intValue();
     String address = (String) resultMap.get("address");
-    return new MoneroAccount(accountIdx, address, label, null, null, null, null);
+    return new MoneroAccount(accountIdx, address, label, BigInteger.valueOf(0), BigInteger.valueOf(0), false, null);
   }
 
   @SuppressWarnings("unchecked")
