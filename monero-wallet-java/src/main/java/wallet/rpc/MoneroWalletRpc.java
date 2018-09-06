@@ -485,9 +485,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<String> getTxNotes(List<String> txIds) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txids", txIds);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_tx_notes", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (List<String>) resultMap.get("notes");
   }
 
   @SuppressWarnings("unchecked")
