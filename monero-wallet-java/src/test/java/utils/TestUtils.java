@@ -83,7 +83,7 @@ public class TestUtils {
     assertTrue(subaddress.getUnlockedBalance().doubleValue() >= 0);
     assertTrue(subaddress.getNumUnspentOutputs() >= 0);
     assertFalse(subaddress.isMultisigImportNeeded());
-    if (subaddress.getBalance().doubleValue() >= 0) assertTrue(subaddress.isUsed());
+    if (subaddress.getBalance().doubleValue() > 0) assertTrue(subaddress.isUsed());
   }
   
   public static void testTransaction(MoneroTx tx) {

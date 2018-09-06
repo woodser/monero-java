@@ -203,18 +203,28 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     respMap = rpc.sendRpcRequest("getbalance", params);
     resultMap = (Map<String, Object>) respMap.get("result");
     List<Map<String, Object>> subaddressMaps = (List<Map<String, Object>>) resultMap.get("per_subaddress");
-    for (Map<String, Object> subaddressMap : subaddressMaps) {
-      int subaddressIdx = ((BigInteger) subaddressMap.get("address_index")).intValue();
+    if (subaddressMaps != null) {
+      for (Map<String, Object> subaddressMap : subaddressMaps) {
+        int subaddressIdx = ((BigInteger) subaddressMap.get("address_index")).intValue();
+        for (MoneroSubaddress subaddress : subaddresses) {
+          if (subaddressIdx != subaddress.getIndex()) continue; // find matching subaddress
+          assertEquals(subaddress.getAddress().toString(), (String) subaddressMap.get("address"));
+          subaddress.setBalance((BigInteger) subaddressMap.get("balance"));
+          subaddress.setUnlockedBalance((BigInteger) subaddressMap.get("unlocked_balance"));
+          subaddress.setNumUnspentOutputs(((BigInteger) subaddressMap.get("num_unspent_outputs")).intValue());
+          subaddress.setMultisigImportNeeded((boolean) resultMap.get("multisig_import_needed"));
+        }
+      }
+    } else {
       for (MoneroSubaddress subaddress : subaddresses) {
-        if (subaddressIdx != subaddress.getIndex()) continue; // find matching subaddress
-        assertEquals(subaddress.getAddress().toString(), (String) subaddressMap.get("address"));
-        subaddress.setBalance((BigInteger) subaddressMap.get("balance"));
-        subaddress.setUnlockedBalance((BigInteger) subaddressMap.get("unlocked_balance"));
-        subaddress.setNumUnspentOutputs(((BigInteger) subaddressMap.get("num_unspent_outputs")).intValue());
-        subaddress.setMultisigImportNeeded((boolean) resultMap.get("multisig_import_needed"));
+        subaddress.setBalance(BigInteger.valueOf(0));
+        subaddress.setUnlockedBalance(BigInteger.valueOf(0));
+        subaddress.setMultisigImportNeeded(false);
+        subaddress.setNumUnspentOutputs(0);
       }
     }
     
+    // return results
     return subaddresses;
   }
 

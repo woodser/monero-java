@@ -230,12 +230,6 @@ public class TestMoneroWalletQuery {
         assertTrue(unlockedBalance.longValue() >= 0);
       }
     }
-    
-    // test getting balance of invalid account
-    try {
-      wallet.getUnlockedBalance(-456);
-      fail("Should have thrown error on invalid account");
-    } catch (MoneroException exception) { }
   }
   
   @Test
