@@ -213,6 +213,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       subaddress.setLabel((String) address.get("label"));
       subaddress.setAddress((String) address.get("address"));
       subaddress.setUsed((boolean) address.get("used"));
+      
+      // set defaults
+      subaddress.setBalance(BigInteger.valueOf(0));
+      subaddress.setUnlockedBalance(BigInteger.valueOf(0));
+      subaddress.setMultisigImportNeeded(false);
+      subaddress.setNumUnspentOutputs(0);
     }
     
     // fetch and initialize subaddress balances
@@ -225,18 +231,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         for (MoneroSubaddress subaddress : subaddresses) {
           if (subaddressIdx != subaddress.getIndex()) continue; // find matching subaddress
           assertEquals(subaddress.getAddress().toString(), (String) subaddressMap.get("address"));
-          subaddress.setBalance((BigInteger) subaddressMap.get("balance"));
-          subaddress.setUnlockedBalance((BigInteger) subaddressMap.get("unlocked_balance"));
+          if (subaddressMap.containsKey("balance")) subaddress.setBalance((BigInteger) subaddressMap.get("balance"));
+          if (subaddressMap.containsKey("unlocked_balance")) subaddress.setUnlockedBalance((BigInteger) subaddressMap.get("unlocked_balance"));
           subaddress.setNumUnspentOutputs(((BigInteger) subaddressMap.get("num_unspent_outputs")).intValue());
           subaddress.setMultisigImportNeeded((boolean) resultMap.get("multisig_import_needed"));
         }
-      }
-    } else {
-      for (MoneroSubaddress subaddress : subaddresses) {
-        subaddress.setBalance(BigInteger.valueOf(0));
-        subaddress.setUnlockedBalance(BigInteger.valueOf(0));
-        subaddress.setMultisigImportNeeded(false);
-        subaddress.setNumUnspentOutputs(0);
       }
     }
     
