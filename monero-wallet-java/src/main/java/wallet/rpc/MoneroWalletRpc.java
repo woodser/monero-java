@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
@@ -396,11 +397,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return txs;
   }
 
-  @Override
-  public List<MoneroTx> getTxs() {
-    return getTxs(null);
-  }
-
   // TODO: revisit this method to see if it can be optimized
   @SuppressWarnings("unchecked")
   @Override
@@ -460,8 +456,16 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
       // get_bulk_payments rpc call to get incoming payments by id
       if (filter.getPaymentIds() != null && !filter.getPaymentIds().isEmpty()) {
+        
+        // convert nulls to default payment id
+        Set<String> paymentIds = new HashSet<String>();
+        for (String paymentId : filter.getPaymentIds()) {
+          paymentIds.add(paymentId == null ? MoneroTx.DEFAULT_PAYMENT_ID : paymentId);
+        }
+        
+        // send request
         paramMap = new HashMap<String, Object>();
-        paramMap.put("payment_ids", filter.getPaymentIds());
+        paramMap.put("payment_ids", paymentIds);
         respMap = rpc.sendRpcRequest("get_bulk_payments", paramMap);
         result = (Map<String, Object>) respMap.get("result");
 

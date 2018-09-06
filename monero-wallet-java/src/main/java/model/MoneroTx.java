@@ -10,6 +10,11 @@ import java.util.List;
 public class MoneroTx {
   
   /**
+   * Default payment id.
+   */
+  public static final String DEFAULT_PAYMENT_ID = "0000000000000000";
+  
+  /**
    * Enumerates Monero transaction priorities.
    */
   public enum MoneroTxPriority {

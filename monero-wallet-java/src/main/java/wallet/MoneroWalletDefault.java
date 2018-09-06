@@ -26,6 +26,11 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
     if (subaddresses.size() != 1) throw new MoneroException("Subaddress at index " + subaddressIdx + " does not exist");
     return subaddresses.get(0);
   }
+
+  @Override
+  public List<MoneroTx> getTxs() {
+    return getTxs(null);
+  }
   
   @Override
   public MoneroTx send(String address, BigInteger amount, Integer mixin) {
