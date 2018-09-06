@@ -725,6 +725,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("global_index")) { } // ignore
       else if (key.equalsIgnoreCase("tx_blob")) tx.setBlob((String) val);
       else if (key.equalsIgnoreCase("tx_metadata")) tx.setMetadata((String) val);
+      else if (key.equalsIgnoreCase("double_spend_seen")) tx.setDoubleSpend((Boolean) val);
       else if (key.equalsIgnoreCase("destinations")) {
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
         tx.setPayments(payments);

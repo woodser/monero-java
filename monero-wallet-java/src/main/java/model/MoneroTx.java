@@ -36,6 +36,8 @@ public class MoneroTx {
   }
   
   private String id; 
+  private Integer accountIndex;
+  private Integer subaddressIndex;
 	private List<MoneroPayment> payments;
 	private List<MoneroOutput> outputs;
 	private String paymentId;
@@ -64,6 +66,22 @@ public class MoneroTx {
 	public void setId(String id) {
 	  this.id = id;
 	}
+
+  public Integer getAccountIndex() {
+    return accountIndex;
+  }
+
+  public void setAccountIndex(Integer accountIndex) {
+    this.accountIndex = accountIndex;
+  }
+
+  public Integer getSubaddressIndex() {
+    return subaddressIndex;
+  }
+
+  public void setSubaddressIndex(Integer subaddressIndex) {
+    this.subaddressIndex = subaddressIndex;
+  }
 
   public List<MoneroPayment> getPayments() {
     return payments;
@@ -179,11 +197,11 @@ public class MoneroTx {
     this.unlockTime = unlockTime;
   }
   
-  public Boolean getIsDoubleSpend() {
+  public Boolean isDoubleSpend() {
     return isDoubleSpend;
   }
 
-  public void setIsDoubleSpend(Boolean isDoubleSpend) {
+  public void setDoubleSpend(Boolean isDoubleSpend) {
     this.isDoubleSpend = isDoubleSpend;
   }
 
@@ -213,6 +231,10 @@ public class MoneroTx {
   public void merge(MoneroTx tx) {
     if (id == null) id = tx.getId();
     else if (tx.getId() != null) validateEquals("ID", id, tx.getId());
+    if (accountIndex == null) accountIndex = tx.getAccountIndex();
+    else if (tx.getAccountIndex() != null) validateEquals("Account index", accountIndex, tx.getAccountIndex());
+    if (subaddressIndex == null) subaddressIndex = tx.getSubaddressIndex();
+    else if (tx.getSubaddressIndex() != null) validateEquals("Subaddress index", subaddressIndex, tx.getSubaddressIndex());
     if (payments == null) payments = tx.getPayments();
     else if (tx.getPayments() != null) payments.addAll(tx.getPayments());
     if (outputs == null) outputs = tx.getOutputs();
@@ -245,13 +267,15 @@ public class MoneroTx {
     else if (tx.getMetadata() != null) validateEquals("Metadatas", metadata, tx.getMetadata());
   }
   
-  private void validateEquals(String fieldName, Object obj1, Object obj2) {
+  private static void validateEquals(String fieldName, Object obj1, Object obj2) {
     if (!obj1.equals(obj2)) throw new MoneroException(fieldName + " are not equal: " + obj1 + " vs " + obj2);
   }
   
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("ID: " + id + "\n");
+    sb.append("Account index: " + accountIndex + "\n");
+    sb.append("Subaddress index: " + subaddressIndex + "\n");
     sb.append("Key: " + key + "\n");
     if (payments != null) {
       sb.append("Payments:\n");

@@ -7,6 +7,7 @@ test MoneroUtils.newAddress() used by wallet.send(str,str)
 
 Monero-wallet-rpc suggested improvements:
 getbalance subaddress should be array
+get_transfers each group has double_spend_seen
 optional param documentation missing
 tx_hash in incoming_transfers vs txid in get_transfers; standardize on tx_hash or tx_id
 standardize terminology transactions vs transfers

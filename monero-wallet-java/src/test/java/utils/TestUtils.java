@@ -89,6 +89,9 @@ public class TestUtils {
   public static void testTransaction(MoneroTx tx) {
     assertNotNull(tx.getId());
     assertNotNull(tx.getType());
+    assertFalse(tx.isDoubleSpend());
+    assertNotNull(tx.getAccountIndex());
+    assertNotNull(tx.getSubaddressIndex());
     if (tx.getType() == MoneroTxType.OUTGOING) {
       assertNotNull(tx.getAmount());
       assertTrue(tx.getAmount().longValue() >= 0);  // TODO: seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
