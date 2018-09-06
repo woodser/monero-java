@@ -38,11 +38,11 @@ public class MoneroOutput {
     this.amount = amount;
   }
 
-  public Boolean getIsSpent() {
+  public Boolean isSpent() {
     return isSpent;
   }
 
-  public void setIsSpent(Boolean isSpent) {
+  public void setSpent(Boolean isSpent) {
     this.isSpent = isSpent;
   }
 

@@ -261,6 +261,8 @@ public class MoneroTx {
     else if (tx.getTimestamp() != null) validateEquals("Timestamps", timestamp, tx.getTimestamp());
     if (unlockTime == null) unlockTime = tx.getUnlockTime();
     else if (tx.getUnlockTime() != null) validateEquals("Unlock times", unlockTime, tx.getUnlockTime());
+    if (isDoubleSpend == null) isDoubleSpend = tx.isDoubleSpend();
+    else if (tx.isDoubleSpend() != null) validateEquals("Is double spend", isDoubleSpend, tx.isDoubleSpend());
     if (blob == null) blob = tx.getBlob();
     else if (tx.getBlob() != null) validateEquals("Blobs", blob, tx.getBlob());
     if (metadata == null) metadata = tx.getMetadata();
@@ -290,7 +292,7 @@ public class MoneroTx {
       for (int i = 0; i < outputs.size(); i++) {
         sb.append("\t" + (i + 1) + ":\n");
         sb.append("\t\tAmount: " + outputs.get(i).getAmount() + "\n");
-        sb.append("\t\tIs spent: " + outputs.get(i).getIsSpent() + "\n");
+        sb.append("\t\tIs spent: " + outputs.get(i).isSpent() + "\n");
       }
     }
     sb.append("Payment ID: " + paymentId + "\n");
