@@ -305,7 +305,7 @@ public class TestMoneroWalletRead {
       for (MoneroTx tx : txs) {
         if (tx.getOutputs() == null) continue;
         for (MoneroOutput output : tx.getOutputs()) {
-          if (!output.getIsSpent()) {
+          if (!output.isSpent()) {
             balance = balance.add(output.getAmount());
           }
         }
@@ -361,7 +361,7 @@ public class TestMoneroWalletRead {
         for (MoneroTx tx : txs) {
           if (tx.getOutputs() == null) continue;
           for (MoneroOutput output : tx.getOutputs()) {
-            if (!output.getIsSpent()) {
+            if (!output.isSpent()) {
               balance = balance.add(output.getAmount());
             }
           }

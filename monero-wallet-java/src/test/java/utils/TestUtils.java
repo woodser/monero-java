@@ -10,6 +10,7 @@ import org.apache.log4j.PropertyConfigurator;
 
 import model.MoneroAccount;
 import model.MoneroAddressBookEntry;
+import model.MoneroOutput;
 import model.MoneroPayment;
 import model.MoneroSubaddress;
 import model.MoneroTx;
@@ -89,11 +90,11 @@ public class TestUtils {
   public static void testTransaction(MoneroTx tx) {
     assertNotNull(tx.getId());
     assertNotNull(tx.getType());
-    assertFalse(tx.isDoubleSpend());
-    assertNotNull(tx.getAccountIndex());
-    assertNotNull(tx.getSubaddressIndex());
     if (tx.getType() == MoneroTxType.OUTGOING) {
       assertNotNull(tx.getAmount());
+      assertFalse(tx.isDoubleSpend());
+      assertNotNull(tx.getAccountIndex());
+      assertNotNull(tx.getSubaddressIndex());
       assertTrue(tx.getAmount().longValue() >= 0);  // TODO: seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
       if (tx.getPayments() != null) {
         assertFalse(tx.getPayments().isEmpty());
@@ -102,6 +103,13 @@ public class TestUtils {
           assertNotNull(payment.getAddress());
           assertTrue(payment.getAmount().longValue() > 0);
         }
+      }
+    } else if (tx.getType() == MoneroTxType.INCOMING) {
+      assertNotNull(tx.getOutputs());
+      assertFalse(tx.getOutputs().isEmpty());
+      for (MoneroOutput output : tx.getOutputs()) {
+        assertNotNull(output.getAmount());
+        assertNotNull(output.isSpent());
       }
     }
   }

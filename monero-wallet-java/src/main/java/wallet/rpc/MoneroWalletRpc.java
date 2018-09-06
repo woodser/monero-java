@@ -12,8 +12,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -452,7 +452,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       for (Map<String, Object> outputMap : outputMaps) {
         MoneroOutput output = new MoneroOutput();
         output.setAmount((BigInteger) outputMap.get("amount"));
-        output.setIsSpent((Boolean) outputMap.get("spent"));
+        output.setSpent((Boolean) outputMap.get("spent"));
         MoneroTx tx = interpretTx(outputMap);
         tx.setType(MoneroTxType.INCOMING);
         output.setTransaction(tx);
@@ -726,12 +726,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("tx_blob")) tx.setBlob((String) val);
       else if (key.equalsIgnoreCase("tx_metadata")) tx.setMetadata((String) val);
       else if (key.equalsIgnoreCase("double_spend_seen")) tx.setDoubleSpend((Boolean) val);
-      else if (key.equalsIgnoreCase("subaddr_index")) { // TODO: int on incoming transfers (insufficient?), map on transfers
+      else if (key.equalsIgnoreCase("subaddr_index") && val instanceof Map) { // TODO: int on incoming transfers (insufficient?), map on transfers
         Map<String, Object> subaddrMap = (Map<String, Object>) val;
         tx.setAccountIndex(((BigInteger) subaddrMap.get("major")).intValue());
         tx.setSubaddressIndex(((BigInteger) subaddrMap.get("minor")).intValue());
-      }
-      else if (key.equalsIgnoreCase("destinations")) {
+      } else if (key.equalsIgnoreCase("destinations")) {
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
         tx.setPayments(payments);
         for (Map<String, Object> paymentMap : (List<Map<String, Object>>) val) {
