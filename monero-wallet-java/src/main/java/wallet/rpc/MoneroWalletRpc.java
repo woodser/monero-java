@@ -286,7 +286,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @SuppressWarnings("unchecked")
   @Override
   public BigInteger getUnlockedBalance(int accountIdx) {
-    Map<String, Object> respMap = rpc.sendRpcRequest("getbalance", null);
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("account_index", accountIdx);
+    Map<String, Object> respMap = rpc.sendRpcRequest("getbalance", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return (BigInteger) resultMap.get("unlocked_balance");
   }
@@ -501,6 +503,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Collection<MoneroTx> toRemoves = new HashSet<MoneroTx>();
     for (MoneroTx tx : txs) {
       if (filter.getPaymentIds() != null && !filter.getPaymentIds().contains(tx.getPaymentId())) toRemoves.add(tx);
+      else if (filter.getTxIds() != null && !filter.getTxIds().contains(tx.getId())) toRemoves.add(tx);
       else if (filter.getMinHeight() != null && (tx.getHeight() == null || tx.getHeight() < filter.getMinHeight())) toRemoves.add(tx);
       else if (filter.getMaxHeight() != null && (tx.getHeight() == null || tx.getHeight() > filter.getMaxHeight())) toRemoves.add(tx);
     }

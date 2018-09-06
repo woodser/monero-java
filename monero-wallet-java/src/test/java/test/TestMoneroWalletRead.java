@@ -21,6 +21,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import model.MoneroAccount;
+import model.MoneroException;
 import model.MoneroIntegratedAddress;
 import model.MoneroKeyImage;
 import model.MoneroOutput;
@@ -176,6 +177,12 @@ public class TestMoneroWalletRead {
       BigInteger balance = wallet.getBalance(account.getIndex());
       assertTrue(balance.longValue() >= 0);
     }
+    
+    // test getting balance of invalid account
+    try {
+      wallet.getBalance(-456);
+      fail("Should have thrown error on invalid account");
+    } catch (MoneroException exception) { }
   }
 
   @Test
@@ -190,6 +197,12 @@ public class TestMoneroWalletRead {
         assertTrue(balance.longValue() >= 0);
       }
     }
+    
+    // test getting balance of invalid subaddress
+    try {
+      wallet.getBalance(0, -456);
+      fail("Should have thrown error on invalid subaddress");
+    } catch (MoneroException exception) { }
   }
 
   @Test
@@ -200,6 +213,12 @@ public class TestMoneroWalletRead {
       BigInteger unlockedBalance = wallet.getUnlockedBalance(account.getIndex());
       assertTrue(unlockedBalance.longValue() >= 0);
     }
+    
+    // test getting balance of invalid account
+    try {
+      wallet.getUnlockedBalance(-456);
+      fail("Should have thrown error on invalid account");
+    } catch (MoneroException exception) { }
   }
 
   @Test
@@ -214,6 +233,12 @@ public class TestMoneroWalletRead {
         assertTrue(unlockedBalance.longValue() >= 0);
       }
     }
+    
+    // test getting balance of invalid subaddress
+    try {
+      wallet.getUnlockedBalance(0, -456);
+      fail("Should have thrown error on invalid subaddress");
+    } catch (MoneroException exception) { }
   }
   
   @Test
@@ -285,47 +310,48 @@ public class TestMoneroWalletRead {
           }
         }
       }
-      //System.out.println(filter.getSubaddressIndices());
-      System.out.println(account.getIndex());
-      //System.out.println(subaddress.getIndex());
       assertEquals(wallet.getBalance(account.getIndex()), balance);
     }
     
-    // get and sort block heights in ascending order
-    List<Integer> heights = new ArrayList<Integer>();
-    for (MoneroTx tx : txs) {
-      if (tx.getHeight() != null) heights.add(tx.getHeight());
-    }
-    Collections.sort(heights);
-    
-    // pick minimum and maximum heights for filtering
-    int minHeight = -1;
-    int maxHeight = -1;
-    if (heights.size() == 1) {
-      minHeight = 0;
-      maxHeight = heights.get(0) - 1;
-    } else {
-      minHeight = heights.get(0) + 1;
-      maxHeight = heights.get(heights.size() - 1) - 1;
-    }
-    
-    // assert at least some transactions filtered
-    int unfilteredCount = txs.size();
-    MoneroTxFilter filter = new MoneroTxFilter();
-    filter.setMinHeight(minHeight);
-    filter.setMaxHeight(maxHeight);
-    txs = wallet.getTxs(filter);
-    assertFalse(txs.isEmpty());
-    assertTrue(txs.size() < unfilteredCount);
-    for (MoneroTx tx : txs) {
-      assertTrue(tx.getHeight() >= minHeight && tx.getHeight() <= maxHeight);
+    // test block height filtering if txs exist
+    if (!txs.isEmpty()) {
+      
+      // get and sort block heights in ascending order
+      List<Integer> heights = new ArrayList<Integer>();
+      for (MoneroTx tx : txs) {
+        if (tx.getHeight() != null) heights.add(tx.getHeight());
+      }
+      Collections.sort(heights);
+      
+      // pick minimum and maximum heights for filtering
+      int minHeight = -1;
+      int maxHeight = -1;
+      if (heights.size() == 1) {
+        minHeight = 0;
+        maxHeight = heights.get(0) - 1;
+      } else {
+        minHeight = heights.get(0) + 1;
+        maxHeight = heights.get(heights.size() - 1) - 1;
+      }
+      
+      // assert at least some transactions filtered
+      int unfilteredCount = txs.size();
+      MoneroTxFilter filter = new MoneroTxFilter();
+      filter.setMinHeight(minHeight);
+      filter.setMaxHeight(maxHeight);
+      txs = wallet.getTxs(filter);
+      assertFalse(txs.isEmpty());
+      assertTrue(txs.size() < unfilteredCount);
+      for (MoneroTx tx : txs) {
+        assertTrue(tx.getHeight() >= minHeight && tx.getHeight() <= maxHeight);
+      }
     }
     
     // test filtering by subaddress
     for (MoneroAccount account : wallet.getAccounts()) {
       List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
       for (MoneroSubaddress subaddress : subaddresses) {
-        filter = new MoneroTxFilter();
+        MoneroTxFilter filter = new MoneroTxFilter();
         filter.setAccountIdx(account.getIndex());
         filter.setSubaddressIndices(Arrays.asList(subaddress.getIndex()));
         txs = wallet.getTxs(filter);
@@ -345,7 +371,7 @@ public class TestMoneroWalletRead {
     }
     
     // assert that ummet filter criteria has no results
-    filter = new MoneroTxFilter();
+    MoneroTxFilter filter = new MoneroTxFilter();
     filter.setAccountIdx(0);
     Collection<Integer> subaddressIndices = new HashSet<Integer>();
     subaddressIndices.add(1234907);
@@ -365,8 +391,10 @@ public class TestMoneroWalletRead {
       filter = new MoneroTxFilter();
       filter.setTxIds(Arrays.asList(txId));
       txs = wallet.getTxs(filter);
-      assertEquals(1, txs.size());
-      assertEquals(txId, txs.get(0).getId());
+      assertFalse(txs.isEmpty());
+      for (MoneroTx tx : txs) {
+        assertEquals(txId, tx.getId());
+      }
     }
   }
 
