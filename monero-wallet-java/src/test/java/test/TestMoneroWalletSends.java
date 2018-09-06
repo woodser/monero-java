@@ -13,7 +13,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import model.MoneroAddress;
 import model.MoneroPayment;
 import model.MoneroTx;
 import model.MoneroTxConfig;
@@ -56,12 +55,12 @@ public class TestMoneroWalletSends {
     assertTrue("Wallet is waiting on unlocked funds", unlockedBalanceBefore.longValue() > 0);
     
     // send to self
-    MoneroAddress address = wallet.getSubaddress(0, 0).getAddress();
+    String address = wallet.getSubaddress(0, 0).getAddress();
     BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(SEND_DIVISOR));
     System.out.println("Balance: " + wallet.getBalance(0));
     System.out.println("Unlocked: " + wallet.getUnlockedBalance(0));
     System.out.println("Send amount: " + sendAmount);
-    MoneroTx tx = wallet.send(address.getStandardAddress(), null, sendAmount, MIXIN);
+    MoneroTx tx = wallet.send(address, null, sendAmount, MIXIN);
     
     // test transaction
     assertEquals(sendAmount, tx.getAmount());
@@ -80,7 +79,7 @@ public class TestMoneroWalletSends {
     
     // test payments
     for (MoneroPayment payment : tx.getPayments()) {
-      assertEquals(address.toString(), payment.getAddress().getStandardAddress());
+      assertEquals(address.toString(), payment.getAddress());
       assertEquals(sendAmount, payment.getAmount());
       assertTrue(tx == payment.getTransaction());
     }
@@ -96,7 +95,7 @@ public class TestMoneroWalletSends {
     // get balance and address
     BigInteger balanceBefore = wallet.getBalance(0);
     BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance(0);
-    MoneroAddress address = wallet.getPrimaryAddress();
+    String address = wallet.getPrimaryAddress();
     assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", balanceBefore.longValue() > 0);
     assertTrue("Wallet is waiting on unlocked funds", unlockedBalanceBefore.longValue() > 0);
     

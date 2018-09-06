@@ -22,7 +22,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import model.MoneroAccount;
-import model.MoneroAddress;
 import model.MoneroAddressBookEntry;
 import model.MoneroException;
 import model.MoneroIntegratedAddress;
@@ -75,13 +74,12 @@ public class TestMoneroWalletQuery {
   public void testGetIntegratedAddress() {
     
     // save address for later comparison
-    MoneroAddress address = wallet.getSubaddress(0, 0).getAddress();
+    String address = wallet.getSubaddress(0, 0).getAddress();
     
     // test valid payment id
     String paymentId = "03284e41c342f036";
     MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(paymentId);
-    MoneroUtils.validateAddress(integratedAddress);
-    assertEquals(address.getStandardAddress(), integratedAddress.getStandardAddress());
+    assertEquals(address, integratedAddress.getStandardAddress());
     assertEquals(paymentId, integratedAddress.getPaymentId());
     
     // test invalid payment id
@@ -96,14 +94,13 @@ public class TestMoneroWalletQuery {
     
     // test null payment id which generates a new one
     integratedAddress = wallet.getIntegratedAddress(null);
-    MoneroUtils.validateAddress(integratedAddress);
-    assertEquals(address.getStandardAddress(), integratedAddress.getStandardAddress());
+    assertEquals(address, integratedAddress.getStandardAddress());
     assertNotNull(integratedAddress.getPaymentId());
   }
   
   @Test
   public void testGetPrimaryAddress() {
-    MoneroAddress primaryAddress = wallet.getPrimaryAddress();
+    String primaryAddress = wallet.getPrimaryAddress();
     assertEquals(wallet.getSubaddress(0, 0).getAddress(), primaryAddress);
   }
   
@@ -454,7 +451,7 @@ public class TestMoneroWalletQuery {
     
     // test adding standard addresses
     final int NUM_ENTRIES = 5;
-    MoneroAddress address = wallet.getSubaddress(0, 0).getAddress();
+    String address = wallet.getSubaddress(0, 0).getAddress();
     Collection<Integer> indices = new HashSet<Integer>();
     for (int i = 0; i < NUM_ENTRIES; i++) {
       indices.add(wallet.addAddressBookEntry(address, "hi there!"));
@@ -488,7 +485,7 @@ public class TestMoneroWalletQuery {
     Map<Integer, MoneroIntegratedAddress> integratedAddresses = new HashMap<Integer, MoneroIntegratedAddress>();
     for (int i = 0; i < NUM_ENTRIES; i++) {
       MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(paymentId + i); // create unique integrated address
-      int idx = wallet.addAddressBookEntry(integratedAddress, null);
+      int idx = wallet.addAddressBookEntry(integratedAddress.getIntegratedAddress(), null);
       indices.add(idx);
       integratedAddresses.put(idx, integratedAddress);
     }
@@ -558,7 +555,7 @@ public class TestMoneroWalletQuery {
     
     // test with optional fields as null
     MoneroUri mUri1 = new MoneroUri();
-    mUri1.setAddress(wallet.getSubaddress(0, 0).getAddress().getStandardAddress());
+    mUri1.setAddress(wallet.getSubaddress(0, 0).getAddress());
     URI uri = wallet.toUri(mUri1);
     MoneroUri mUri2 = wallet.toMoneroUri(uri);
     assertTrue(mUri1.equals(mUri2));

@@ -4,10 +4,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.MoneroAddress;
 import model.MoneroException;
-import model.MoneroIntegratedAddress;
-import wallet.MoneroWallet;
 
 /**
  * Collection of Monero utilities.
@@ -16,10 +13,6 @@ public class MoneroUtils {
 
   private static final int MNEMONIC_SEED_NUM_WORDS = 25;
   private static final int VIEW_KEY_LENGTH = 64;
-  private static final int STANDARD_ADDRESS_LENGTH = 95;
-  private static final int SUBADDRESS_LENGTH = 95;
-  private static final int PAYMENT_ID_LENGTH = 16;
-  private static final int INTEGRATED_ADDRESS_LENGTH = 106;
   private static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
   private static final List<Character> CHARS = new ArrayList<Character>();
   static {
@@ -52,187 +45,6 @@ public class MoneroUtils {
   }
   
   /**
-   * Validates the given standard address.
-   * 
-   * @param standardAddress is the standard address to validate
-   * @throws MoneroException if the given standard address is invalid
-   */
-  public static void validateStandardAddress(String standardAddress) {
-    if (standardAddress == null) throw new MoneroException("Standard address is null");
-    if (!standardAddress.startsWith("5") && !standardAddress.startsWith("4") && !standardAddress.startsWith("9") && !standardAddress.startsWith("A")) throw new MoneroException("Standard address does not start with 4, 5, 9 or A: " + standardAddress);
-    MoneroUtils.validateBase58(standardAddress);
-    if (standardAddress.length() != STANDARD_ADDRESS_LENGTH) throw new MoneroException("Standard address is " + standardAddress.length() + " characters but must be " + STANDARD_ADDRESS_LENGTH);
-  }
-  
-  /**
-   * Determines if the given standard address is valid.
-   * 
-   * @param standardAddress is the standard address to determine the validity of
-   * @return true if the given string is a valid standard address, false otherwise
-   */
-  public static boolean isValidStandardAddress(String standardAddress) {
-    try {
-      validateStandardAddress(standardAddress);
-      return true;
-    } catch (MoneroException e) {
-      return false;
-    }
-  }
-  
-  /**
-   * Validates the given subaddress.
-   * 
-   * @param subaddress is the subaddress to validate
-   * @throws MoneroException if the given subaddress is invalid
-   */
-  public static void validateSubaddress(String subaddress) {
-    if (subaddress == null) throw new MoneroException("Subaddress is null");
-    if (subaddress.length() != SUBADDRESS_LENGTH) throw new MoneroException("Subaddress is " + subaddress.length() + " characters but must be " + SUBADDRESS_LENGTH);
-    if (!subaddress.startsWith("7") && !subaddress.startsWith("8")) throw new MoneroException("Subaddress does not start with 7 or 8: " + subaddress); // TODO: what about testnet?
-    MoneroUtils.validateBase58(subaddress);
-  }
-  
-  /**
-   * Determines if the given subaddress is valid.
-   * 
-   * @param subaddress is the subaddress to determine the validity of
-   * @return true if the given string is a valid subaddress, false otherwise
-   */
-  public static boolean isValidSubaddress(String subaddress) {
-    try {
-      validateSubaddress(subaddress);
-      return true;
-    } catch (MoneroException e) {
-      return false;
-    }
-  }
-  
-  /**
-   * Determines if the given payment id is valid
-   * 
-   * @param paymentId is the payment id to determine the validity of
-   * @return true if the payment id is valid, false otherwise
-   */
-  public static boolean isValidPaymentId(String paymentId) {
-    try {
-      validatePaymentId(paymentId);
-      return true;
-    } catch (MoneroException e) {
-      return false;
-    }
-  }
-  
-  /**
-   * Validates the given payment id.
-   * 
-   * @param paymentId is the payment id to validate
-   * @throws MoneroException if the given payment id is invalid
-   */
-  public static void validatePaymentId(String paymentId) {
-    if (paymentId == null) throw new MoneroException("Payment id is null");
-    MoneroUtils.validateHex(paymentId);
-    if (paymentId.length() != PAYMENT_ID_LENGTH) throw new MoneroException("Payment id is " + paymentId.length() + " characters but must be " + PAYMENT_ID_LENGTH);
-  }
-  
-  /**
-   * Validates the given integrated address.
-   * 
-   * @param integratedAddress is the integrated address to validate
-   * @throws MoneroException is if the given integrated address is invalid
-   */
-  public static void validateIntegratedAddress(String integratedAddress) {
-    if (integratedAddress == null) throw new MoneroException("Integrated address is null");
-    if (integratedAddress.length() != INTEGRATED_ADDRESS_LENGTH) throw new MoneroException("Integrated address is " + integratedAddress.length() + " characters but must be " + INTEGRATED_ADDRESS_LENGTH);
-  }
-  
-  /**
-   * Validates that the given address, payment id, and integrated address are consistent.
-   * 
-   * @param standardAddress is the standard address
-   * @param paymentId is the payment id
-   * @param integratedAddress is the integrated address
-   */
-  public static void validateIntegratedAddress(String standardAddress, String paymentId, String integratedAddress) {
-    new MoneroAddress(standardAddress);
-    if (paymentId != null) validatePaymentId(paymentId);
-    validateIntegratedAddress(integratedAddress);
-    // TODO: make sure standard address + payment id = integrated address
-  }
-  
-  /**
-   * Determines if the given integrated address is valid.
-   * 
-   * @param integratedAddress is the integrated address to determine the validity of
-   * @return true if the given string is a valid integrated address, false otherwise
-   */
-  public static boolean isValidIntegratedAddress(String integratedAddress) {
-    try {
-      validateIntegratedAddress(integratedAddress);
-      return true;
-    } catch (MoneroException e) {
-      return false;
-    }
-  }
-  
-  /**
-   * Validates the given Monero address which may be an address or an integrated address.
-   * 
-   * @param address is the address to validate
-   * @throws MoneroException if if the address is invalid
-   */
-  public static void validateAddress(MoneroAddress address) {
-    if (address instanceof MoneroIntegratedAddress) {
-      MoneroIntegratedAddress integratedAddress = (MoneroIntegratedAddress) address;
-      validateIntegratedAddress(integratedAddress.getStandardAddress(), integratedAddress.getPaymentId(), integratedAddress.getIntegratedAddress());
-    } else {
-      validateStandardAddress(address.getStandardAddress());
-    }
-  }
-  
-//  /**
-//   * Converts a given string address to a MoneroAddress which may be an integrated address.
-//   * 
-//   * @param address is the string to convert
-//   * @param wallet might be used to decode an integrated address into its standard address and payment id components
-//   * @return MoneroAddress is the string address converted to a proper address object
-//   */
-//  public static MoneroAddress toAddress(String address, MoneroWallet wallet) {
-//    if (isValidStandardAddress(address)) return new MoneroAddress(address);
-//    else if (isValidIntegratedAddress(address)) return wallet.decodeIntegratedAddress(address);
-//    throw new MoneroException("Address is neither standard nor integrated: " + address);
-//  }
-  
-  /**
-   * Initializes a new Monero address which may be an integrated address.
-   * 
-   * @param address may be standard, integrated, or sub-address formats
-   * @param wallet is used as a utility to decode an integrated address
-   * @return MoneroAddress may be MoneroAddress or MoneroIntegratedAddress
-   */
-  public static MoneroAddress newAddress(String address, MoneroWallet wallet) {
-    return newAddress(address, null, wallet);
-  }
-  
-  /**
-   * Initializes a new Monero address which may be an integrated address.
-   * 
-   * @param address may be standard, integrated, or sub-address formats
-   * @param paymentId is a payment id to create an integated address (optional)
-   * @param wallet is used as a utility to decode an integrated address
-   * @return MoneroAddress may be MoneroAddress or MoneroIntegratedAddress
-   */
-  public static MoneroAddress newAddress(String address, String paymentId, MoneroWallet wallet) {
-    if (paymentId != null) {
-      throw new RuntimeException("Not implemented");  // TODO: test
-    } else {
-      if (isValidStandardAddress(address)) return new MoneroAddress(address);
-      else if (isValidSubaddress(address)) return new MoneroAddress(address); // TODO: have this store subaddress?
-      else if (isValidIntegratedAddress(address)) return wallet.decodeIntegratedAddress(address);
-      throw new MoneroException("Address format is not standard address, subaddress, or integrated address: " + address);
-    }
-  }
-  
-  /**
    * Converts the string to a URI.  Throws MoneroException if exception.
    * 
    * @param endpoint is the string to convert to a URI
@@ -246,11 +58,11 @@ public class MoneroUtils {
     }
   }
 
-  private static void validateHex(String str) {
+  public static void validateHex(String str) {
     if (!str.matches("^([0-9A-Fa-f]{2})+$")) throw new MoneroException("Invalid hex: " + str);
   }
 
-  private static void validateBase58(String standardAddress) {
+  public static void validateBase58(String standardAddress) {
     for (char c : standardAddress.toCharArray()) {
       if (!CHARS.contains((Character) c)) throw new MoneroException("Invalid Base58 " + standardAddress);
     }
