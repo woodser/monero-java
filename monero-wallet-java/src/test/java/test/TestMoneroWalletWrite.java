@@ -118,11 +118,13 @@ public class TestMoneroWalletWrite {
     // create subaddress with no label
     List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(0);
     MoneroSubaddress subaddress = wallet.createSubaddress(0, null);
-    assertNull(subaddress.getLabel());
+    assertEquals("", subaddress.getLabel());
     TestUtils.testSubaddress(subaddress);
     List<MoneroSubaddress> subaddressesNew = wallet.getSubaddresses(0);
     assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
-    assertEquals(subaddressesNew.get(subaddressesNew.size() - 1), subaddress);
+    System.out.println(subaddress);
+    System.out.println(subaddressesNew.get(subaddressesNew.size() - 1));
+    assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
     
     // create subaddress with label
     subaddresses = wallet.getSubaddresses(0);
@@ -132,7 +134,7 @@ public class TestMoneroWalletWrite {
     TestUtils.testSubaddress(subaddress);
     subaddressesNew = wallet.getSubaddresses(0);
     assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
-    assertEquals(subaddressesNew.get(subaddressesNew.size() - 1), subaddress);
+    assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
   }
   
   @Test

@@ -79,6 +79,18 @@ public class MoneroSubaddress {
   public void setUsed(boolean isUsed) {
     this.isUsed = isUsed;
   }
+  
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("index: " + index + "\n");
+    sb.append("label: " + label + "\n");
+    sb.append("address: " + address + "\n");
+    sb.append("balance: " + balance + "\n");
+    sb.append("unlockedBalance: " + unlockedBalance + "\n");
+    sb.append("isMultisigImportNeeded: " + isMultisigImportNeeded + "\n");
+    sb.append("numUnspentOutputs: " + numUnspentOutputs + "\n");
+    return sb.toString();
+  }
 
   @Override
   public int hashCode() {

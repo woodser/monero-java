@@ -244,9 +244,28 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return subaddresses;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroSubaddress createSubaddress(int accountIdx, String label) {
-    throw new RuntimeException("Not implemented");
+    
+    // send request
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("account_idx", accountIdx);
+    params.put("label", label);
+    Map<String, Object> respMap = rpc.sendRpcRequest("create_address", params);
+    
+    // build subaddress from response
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroSubaddress subaddress = new MoneroSubaddress();
+    subaddress.setIndex(((BigInteger) resultMap.get("address_index")).intValue());
+    subaddress.setAddress((String) resultMap.get("address"));
+    subaddress.setLabel(label == null ? "" : label);
+    subaddress.setBalance(BigInteger.valueOf(0));
+    subaddress.setUnlockedBalance(BigInteger.valueOf(0));
+    subaddress.setMultisigImportNeeded(false);
+    subaddress.setNumUnspentOutputs(0);
+    subaddress.setUsed(false);
+    return subaddress;
   }
 
   @SuppressWarnings("unchecked")
