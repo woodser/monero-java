@@ -275,7 +275,7 @@ public class TestMoneroWalletRead {
       MoneroTxFilter filter = new MoneroTxFilter();
       filter.setAccountIdx(account.getIndex());
       txs = wallet.getTxs(filter);
-      assertFalse(txs.isEmpty());
+      if (account.getIndex() == 0) assertFalse(txs.isEmpty());
       BigInteger balance = BigInteger.valueOf(0);
       for (MoneroTx tx : txs) {
         if (tx.getOutputs() == null) continue;
@@ -285,6 +285,9 @@ public class TestMoneroWalletRead {
           }
         }
       }
+      //System.out.println(filter.getSubaddressIndices());
+      System.out.println(account.getIndex());
+      //System.out.println(subaddress.getIndex());
       assertEquals(wallet.getBalance(account.getIndex()), balance);
     }
     
@@ -402,7 +405,6 @@ public class TestMoneroWalletRead {
   public void testGetLanguages() {
     List<String> languages = wallet.getLanguages();
     assertFalse(languages.isEmpty());
-    System.out.println(languages);
     for (String language : languages) assertFalse(language.isEmpty());
   }
 

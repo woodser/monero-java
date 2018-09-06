@@ -271,7 +271,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @SuppressWarnings("unchecked")
   @Override
   public BigInteger getBalance(int accountIdx) {
-    Map<String, Object> respMap = rpc.sendRpcRequest("getbalance", null);
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("account_index", accountIdx);
+    Map<String, Object> respMap = rpc.sendRpcRequest("getbalance", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return (BigInteger) resultMap.get("balance");
   }
@@ -414,6 +416,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     paramMap.put("failed", filter.isFailed());
     paramMap.put("pool", filter.isMempool());
     paramMap.put("filter_by_height", filter.getMinHeight() != null || filter.getMaxHeight() != null);
+    paramMap.put("account_index", filter.getAccountIdx());
+    paramMap.put("subaddr_indices", filter.getSubaddressIndices());
     if (filter.getMinHeight() != null) paramMap.put("min_height", filter.getMinHeight());
     if (filter.getMaxHeight() != null) paramMap.put("max_height", filter.getMaxHeight());
     Map<String, Object> respMap = rpc.sendRpcRequest("get_transfers", paramMap);
@@ -435,6 +439,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       // incoming_transfers rpc call to get incoming outputs
       paramMap = new HashMap<String, Object>();
       paramMap.put("transfer_type", "all"); // TODO: suppport all | available | unavailable 'types' which is different from MoneroTxType
+      paramMap.put("account_index", filter.getAccountIdx());
+      paramMap.put("subaddr_indices", filter.getSubaddressIndices());
       respMap = rpc.sendRpcRequest("incoming_transfers", paramMap);
       result = (Map<String, Object>) respMap.get("result");
 
