@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import model.MoneroAccount;
-import model.MoneroAddress;
 import model.MoneroAddressBookEntry;
 import model.MoneroException;
 import model.MoneroIntegratedAddress;
@@ -36,7 +35,6 @@ import model.MoneroTxConfig;
 import model.MoneroTxFilter;
 import model.MoneroUri;
 import utils.MoneroUtils;
-import wallet.MoneroWallet;
 import wallet.MoneroWalletDefault;
 
 /**
@@ -107,7 +105,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   @Override
-  public MoneroAddress getPrimaryAddress() {
+  public String getPrimaryAddress() {
     return getSubaddress(0, 0).getAddress();
   }
 
@@ -118,9 +116,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> respMap = rpc.sendRpcRequest("make_integrated_address", paramMap);
     @SuppressWarnings("unchecked")
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    paymentId = (String) resultMap.get("payment_id");
     String integratedAddress = (String) resultMap.get("integrated_address");
-    return (MoneroIntegratedAddress) MoneroUtils.newAddress(integratedAddress, null, this);
+    return decodeIntegratedAddress(integratedAddress);
   }
 
   @Override
@@ -131,7 +128,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     @SuppressWarnings("unchecked")
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroIntegratedAddress address = new MoneroIntegratedAddress((String) resultMap.get("standard_address"), (String) resultMap.get("payment_id"), integratedAddress);
-    MoneroUtils.validateAddress(address);
     return address;
   }
 
@@ -151,7 +147,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       int accountIdx = ((BigInteger) accountMap.get("account_index")).intValue();
       BigInteger balance = (BigInteger) accountMap.get("balance");
       BigInteger unlockedBalance = (BigInteger) accountMap.get("unlocked_balance");
-      MoneroAddress primaryAddress = MoneroUtils.newAddress((String) accountMap.get("base_address"), null, this);
+      String primaryAddress = (String) accountMap.get("base_address");
       String label = (String) accountMap.get("label");
       boolean isMultisigImportNeeded = false;  // TODO: get this value, may need to make another rpc call for balance info
       MoneroAccount account = new MoneroAccount(accountIdx, primaryAddress, label, balance, unlockedBalance, isMultisigImportNeeded, null);
@@ -176,7 +172,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> respMap = rpc.sendRpcRequest("create_account", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     int accountIdx = ((BigInteger) resultMap.get("account_index")).intValue();
-    MoneroAddress address = MoneroUtils.newAddress((String) resultMap.get("address"), this);
+    String address = (String) resultMap.get("address");
     return new MoneroAccount(accountIdx, address, label, null, null, null, null);
   }
 
@@ -199,7 +195,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       subaddresses.add(subaddress);
       subaddress.setIndex(((BigInteger) address.get("address_index")).intValue());
       subaddress.setLabel((String) address.get("label"));
-      subaddress.setAddress(MoneroUtils.newAddress((String) address.get("address"), this));
+      subaddress.setAddress((String) address.get("address"));
       subaddress.setUsed((boolean) address.get("used"));
     }
     
@@ -260,26 +256,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return (boolean) resultMap.get("multisig_import_needed");
   }
-  
-  @Override
-  public MoneroTx send(MoneroAddress address, BigInteger amount, Integer mixin) {
-    
-    // create payment
-    MoneroPayment payment = new MoneroPayment();
-    payment.setAddress(address);
-    payment.setAmount(amount);
-    
-    // create and send tx config
-    MoneroTxConfig txConfig = new MoneroTxConfig();
-    txConfig.setDestinations(Arrays.asList(payment));
-    txConfig.setMixin(mixin);
-    return send(txConfig);
-  }
-  
-  @Override
-  public MoneroTx send(String address, String paymentId, BigInteger amount, Integer mixin) {
-    return send(MoneroUtils.newAddress(address, paymentId, this), amount, mixin);
-  }
 
   @SuppressWarnings("unchecked")
   @Override
@@ -305,7 +281,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
-    MoneroTx tx = interpretTx(txMap, this);
+    MoneroTx tx = interpretTx(txMap);
     tx.setAmount((BigInteger) txMap.get("amount"));
     tx.setPayments(config.getDestinations());
     tx.setMixin(config.getMixin());
@@ -408,7 +384,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
 
         // build transaction
-        MoneroTx tx = interpretTx(txMap, this);
+        MoneroTx tx = interpretTx(txMap);
         if (txMap.containsKey("amount")) tx.setAmount((BigInteger) txMap.get("amount"));
         addTx(txTypeMap, tx);
       }
@@ -429,7 +405,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         MoneroOutput output = new MoneroOutput();
         output.setAmount((BigInteger) outputMap.get("amount"));
         output.setIsSpent((Boolean) outputMap.get("spent"));
-        MoneroTx tx = interpretTx(outputMap, this);
+        MoneroTx tx = interpretTx(outputMap);
         tx.setType(MoneroTxType.INCOMING);
         output.setTransaction(tx);
         List<MoneroOutput> outputs = new ArrayList<MoneroOutput>();
@@ -448,7 +424,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         // interpret get_bulk_payments response
         List<Map<String, Object>> paymentMaps = (List<Map<String, Object>>) result.get("payments");
         for (Map<String, Object> paymentMap : paymentMaps) {
-          MoneroTx tx = interpretTx(paymentMap, this);
+          MoneroTx tx = interpretTx(paymentMap);
           tx.setType(MoneroTxType.INCOMING);
           // payment data is redundant with get_transfers rpc call, so it's not added because merging would create duplicates
           // MoneroPayment payment = new MoneroPayment();
@@ -528,7 +504,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
-  public int addAddressBookEntry(MoneroAddress address, String description) {
+  public int addAddressBookEntry(String address, String paymentId, String description) {
     throw new RuntimeException("Not implemented");
   }
 
@@ -663,11 +639,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * Initializes a MoneroTx from a transaction response map.
    * 
    * @param txMap is the map to initialize the transaction from
-   * @param wallet is necessary to initialize a MoneroAddress
    * @return MoneroTx is the initialized transaction
    */
   @SuppressWarnings("unchecked")
-  private static MoneroTx interpretTx(Map<String, Object> txMap, MoneroWallet wallet) {
+  private static MoneroTx interpretTx(Map<String, Object> txMap) {
     MoneroTx tx = new MoneroTx();
     for (String key : txMap.keySet()) {
       Object val = txMap.get(key);
@@ -695,7 +670,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           MoneroPayment payment = new MoneroPayment();
           payments.add(payment);
           for (String paymentKey : paymentMap.keySet()) {
-            if (paymentKey.equals("address")) payment.setAddress(MoneroUtils.newAddress((String) paymentMap.get(paymentKey), wallet));
+            if (paymentKey.equals("address")) payment.setAddress((String) paymentMap.get(paymentKey));
             else if (paymentKey.equals("amount")) payment.setAmount((BigInteger) paymentMap.get(paymentKey));
             else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
           }

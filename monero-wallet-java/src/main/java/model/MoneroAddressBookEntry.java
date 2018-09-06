@@ -6,13 +6,15 @@ package model;
 public class MoneroAddressBookEntry {
   
   private int index;
-  private MoneroAddress address;
+  private String address;
+  private String paymentId;
   private String description;
   
-  public MoneroAddressBookEntry(int index, MoneroAddress address, String description) {
+  public MoneroAddressBookEntry(int index, String address, String paymentId, String description) {
     super();
     this.index = index;
     this.address = address;
+    this.paymentId = paymentId;
     this.description = description;
   }
 
@@ -24,12 +26,20 @@ public class MoneroAddressBookEntry {
     this.index = index;
   }
 
-  public MoneroAddress getAddress() {
+  public String getAddress() {
     return address;
   }
 
-  public void setAddress(MoneroAddress address) {
+  public void setAddress(String address) {
     this.address = address;
+  }
+
+  public String getPaymentId() {
+    return paymentId;
+  }
+
+  public void setPaymentId(String paymentId) {
+    this.paymentId = paymentId;
   }
 
   public String getDescription() {

@@ -9,7 +9,7 @@ public class MoneroSubaddress {
 
   private int index;
   private String label;
-  private MoneroAddress address;
+  private String address;
   private BigInteger balance;
   private BigInteger unlockedBalance;
   private boolean isMultisigImportNeeded;
@@ -32,11 +32,11 @@ public class MoneroSubaddress {
     this.label = label;
   }
   
-  public MoneroAddress getAddress() {
+  public String getAddress() {
     return address;
   }
   
-  public void setAddress(MoneroAddress address) {
+  public void setAddress(String address) {
     this.address = address;
   }
   

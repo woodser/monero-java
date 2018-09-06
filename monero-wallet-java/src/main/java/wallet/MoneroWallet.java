@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import model.MoneroAccount;
-import model.MoneroAddress;
 import model.MoneroAddressBookEntry;
 import model.MoneroIntegratedAddress;
 import model.MoneroKeyImage;
@@ -46,9 +45,9 @@ public interface MoneroWallet {
   /**
    * Gets the wallet's primary address (account 0, subaddress 0).
    * 
-   * @return MoneroAddress is the wallet's primary address
+   * @return String is the wallet's primary address
    */
-  public MoneroAddress getPrimaryAddress();
+  public String getPrimaryAddress();
   
   /**
    * Returns an integrated address based on this wallet's standard address and the given payment ID.
@@ -175,7 +174,7 @@ public interface MoneroWallet {
    * @param mixin is the transaction mixin to use (optional)
    * @return MoneroTx is the resulting transaction from sending a payment
    */
-  public MoneroTx send(MoneroAddress address, BigInteger amount, Integer mixin);
+  public MoneroTx send(String address, BigInteger amount, Integer mixin);
   
   /**
    * Send a payment.
@@ -279,7 +278,17 @@ public interface MoneroWallet {
    * @param description is the entry's description (optional)
    * @return int is the index of the new address book entry
    */
-  public int addAddressBookEntry(MoneroAddress address, String description);
+  public int addAddressBookEntry(String address, String description);
+  
+  /**
+   * Adds an address book entry.
+   * 
+   * @param address is the entry's Monero address
+   * @param paymentId is the entry's payment id (optional)
+   * @param description is the entry's description (optional)
+   * @return int is the index of the new address book entry
+   */
+  public int addAddressBookEntry(String address, String paymentId, String description);
   
   /**
    * Deletes an address book entry.

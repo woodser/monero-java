@@ -12,21 +12,27 @@ import java.math.BigInteger;
 public class MoneroPayment {
 
   private MoneroTx transaction;
-  private MoneroAddress address;
+  private String address;
+  private String paymentId;
   private BigInteger amount;
   
   public MoneroPayment() {
     super();
   }
   
-  public MoneroPayment(MoneroAddress address, BigInteger amount) {
-    this(null, address, amount);
+  public MoneroPayment(String address, BigInteger amount) {
+    this(address, null, amount);
   }
   
-  public MoneroPayment(MoneroTx transaction, MoneroAddress address, BigInteger amount) {
+  public MoneroPayment(String address, String paymentId, BigInteger amount) {
+    this(null, address, paymentId, amount);
+  }
+  
+  public MoneroPayment(MoneroTx transaction, String address, String paymentId, BigInteger amount) {
     super();
     this.transaction = transaction;
     this.address = address;
+    this.paymentId = paymentId;
     this.amount = amount;
   }
 
@@ -38,12 +44,20 @@ public class MoneroPayment {
     this.transaction = transaction;
   }
 
-  public MoneroAddress getAddress() {
+  public String getAddress() {
     return address;
   }
 
-  public void setAddress(MoneroAddress address) {
+  public void setAddress(String address) {
     this.address = address;
+  }
+
+  public String getPaymentId() {
+    return paymentId;
+  }
+
+  public void setPaymentId(String paymentId) {
+    this.paymentId = paymentId;
   }
 
   public BigInteger getAmount() {
