@@ -23,7 +23,7 @@ import wallet.MoneroWallet;
  * 
  * These tests are separated since they rely on a balance and initiate transactions on the blockchain.
  */
-public class TestMoneroWalletSendsOld {
+public class TestMoneroWalletWriteOld {
   
   private static final Integer MIXIN = 6;
   private static final int UNLOCKED_DIVISOR = 20;
