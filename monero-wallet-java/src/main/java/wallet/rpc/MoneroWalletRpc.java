@@ -726,6 +726,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("tx_blob")) tx.setBlob((String) val);
       else if (key.equalsIgnoreCase("tx_metadata")) tx.setMetadata((String) val);
       else if (key.equalsIgnoreCase("double_spend_seen")) tx.setDoubleSpend((Boolean) val);
+      else if (key.equalsIgnoreCase("subaddr_index")) { // TODO: int on incoming transfers (insufficient?), map on transfers
+        Map<String, Object> subaddrMap = (Map<String, Object>) val;
+        tx.setAccountIndex(((BigInteger) subaddrMap.get("major")).intValue());
+        tx.setSubaddressIndex(((BigInteger) subaddrMap.get("minor")).intValue());
+      }
       else if (key.equalsIgnoreCase("destinations")) {
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
         tx.setPayments(payments);
