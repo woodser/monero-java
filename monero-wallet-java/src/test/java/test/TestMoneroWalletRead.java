@@ -39,7 +39,7 @@ import wallet.rpc.MoneroRpcException;
 /**
  * Tests a Monero wallet excluding sending transactions.
  */
-public class TestMoneroWalletQuery {
+public class TestMoneroWalletRead {
   
   private MoneroWallet wallet;
   private static final String SAMPLE_ADDRESS = "58bf9MfrBNDXSqCzK6snxSXaJHehLTnvx3BdS6qMkYAsW8P5kvRVq8ePbGQ7mfAeYfC7QELPhpQBe2C9bqCrqeesUsifaWw";
@@ -117,19 +117,6 @@ public class TestMoneroWalletQuery {
     for (MoneroAccount account : accounts) {
       TestUtils.testAccount(account);
     }
-  }
-
-  @Test
-  public void testGetAccountsByTag() {
-    
-    // test that null tag returns all accounts
-    List<MoneroAccount> accounts1 = wallet.getAccounts();
-    List<MoneroAccount> accounts2 = wallet.getAccounts(null);
-    assertEquals(accounts1, accounts2);
-    
-    // test that non-existing tag returns no accounts
-    List<MoneroAccount> accounts = wallet.getAccounts("non_existing_tag");
-    assertEquals(0, accounts.size());
   }
 
   @Test

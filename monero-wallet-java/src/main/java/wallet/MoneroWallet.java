@@ -69,7 +69,7 @@ public interface MoneroWallet {
   /**
    * Get accounts with a given tag.
    * 
-   * @param tag is the tag for filtering accounts
+   * @param tag is the tag for filtering accounts (optional)
    * @return List<MoneroAccount> are all accounts for the wallet with the given tag
    */
   public List<MoneroAccount> getAccounts(String tag);
@@ -89,6 +89,21 @@ public interface MoneroWallet {
    * @return MoneroAccount is the created account
    */
   public MoneroAccount createAccount(String label);
+  
+  /**
+   * Tags accounts.
+   * 
+   * @param tag is the tag to apply to the specified accounts
+   * @param accountIndices are the indices of the accounts to tag
+   */
+  public void tagAccounts(String tag, Collection<Integer> accountIndices);
+  
+  /**
+   * Untags acconts.
+   * 
+   * @param accountIndices are the indices of the accounts to untag
+   */
+  public void untagAccounts(Collection<Integer> accountIndices);
   
   /**
    * Gets an account's subaddresses.

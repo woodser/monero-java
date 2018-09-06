@@ -8,40 +8,125 @@ import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import model.MoneroAccount;
 import model.MoneroPayment;
+import model.MoneroSubaddress;
 import model.MoneroTx;
 import model.MoneroTxConfig;
 import utils.TestUtils;
 import wallet.MoneroWallet;
+import wallet.rpc.MoneroRpcException;
 
 /**
- * Tests sending transactions using a Monero wallet.
+ * Tests modifying a Monero wallet (sending, creating accounts, tagging accounts, creating subaddresses, setting tx notes, etc).
  * 
  * These tests are separated because they rely on a balance and initiate transactions on the blockchain.
  * 
  * TODO: support / test send, sendSplit, and sweepAll from specific accounts and subaddresses
  * TODO: test sending with payment id
  */
-public class TestMoneroWalletSends {
+public class TestMoneroWalletWrite {
   
   private static final Integer MIXIN = 6;
   private static final int SEND_DIVISOR = 2;
-  
   private MoneroWallet wallet;
 
   @Before
   public void setup() throws Exception {
+    wallet = TestUtils.getWallet();
+  }
+
+  @Test
+  public void testCreateAccount() {
+    
+    // create account with null label
+    List<MoneroAccount> accountsBefore = wallet.getAccounts();
+    MoneroAccount createdAccount = wallet.createAccount(null);
+    TestUtils.testAccount(createdAccount);
+    assertNull(createdAccount.getLabel());
+    assertTrue(accountsBefore.size() == wallet.getAccounts().size() - 1);
+    
+    List<MoneroAccount> newAccounts = new ArrayList<MoneroAccount>();
+    
+    // create account with label
+    accountsBefore = wallet.getAccounts();
+    String label = UUID.randomUUID().toString();
+    createdAccount = wallet.createAccount(label);
+    newAccounts.add(createdAccount);
+    assertEquals(label, createdAccount.getLabel());
+    TestUtils.testAccount(createdAccount);
+    assertTrue(accountsBefore.size() == wallet.getAccounts().size() - 1);
+    
+    // create account with same label
+    createdAccount = wallet.createAccount(label);
+    newAccounts.add(createdAccount);
+    assertEquals(label, createdAccount.getLabel());
+    TestUtils.testAccount(createdAccount);
+    assertTrue(accountsBefore.size() == wallet.getAccounts().size() - 2);
+  }
+  
+  @Test
+  public void testAccountTags() {
+    
+    // test that null tag returns all accounts
+    List<MoneroAccount> accounts1 = wallet.getAccounts();
+    List<MoneroAccount> accounts2 = wallet.getAccounts(null);
+    assertEquals(accounts1, accounts2);
+    
+    // test that non-existing tag returns no accounts
     try {
-      wallet = TestUtils.getWallet();
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw e;
+      wallet.getAccounts("non_existing_tag");
+      fail("Should have thrown exception with unregistered tag");
+    } catch (MoneroRpcException e) {
+      assertEquals((int) -1, (int) e.getRpcCode());
     }
+    
+    // tag and query accounts
+    assertTrue(accounts1.size() >= 3);
+    wallet.tagAccounts("my_tag", Arrays.asList(0, 1));
+    List<MoneroAccount> accounts = wallet.getAccounts("my_tag");
+    assertEquals(2, accounts.size());
+    assertEquals(accounts1.get(0), accounts.get(0));
+    assertEquals(accounts1.get(1), accounts.get(1));
+    
+    // untag and query accounts
+    wallet.untagAccounts(Arrays.asList(0, 1));
+    try {
+      wallet.getAccounts("my_tag");
+      fail("Should have thrown exception with unregistered tag");
+    } catch (MoneroRpcException e) {
+      assertEquals((int) -1, (int) e.getRpcCode());
+    }
+  }
+
+  @Test
+  public void testCreateSubaddress() {
+    
+    // create subaddress with no label
+    List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(0);
+    MoneroSubaddress subaddress = wallet.createSubaddress(0, null);
+    assertNull(subaddress.getLabel());
+    TestUtils.testSubaddress(subaddress);
+    List<MoneroSubaddress> subaddressesNew = wallet.getSubaddresses(0);
+    assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
+    assertEquals(subaddressesNew.get(subaddressesNew.size() - 1), subaddress);
+    
+    // create subaddress with label
+    subaddresses = wallet.getSubaddresses(0);
+    String uuid = UUID.randomUUID().toString();
+    subaddress = wallet.createSubaddress(0, uuid);
+    assertEquals(subaddress.getLabel(), uuid);
+    TestUtils.testSubaddress(subaddress);
+    subaddressesNew = wallet.getSubaddresses(0);
+    assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
+    assertEquals(subaddressesNew.get(subaddressesNew.size() - 1), subaddress);
   }
   
   @Test

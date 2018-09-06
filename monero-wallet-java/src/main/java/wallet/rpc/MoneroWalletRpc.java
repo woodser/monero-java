@@ -140,6 +140,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public List<MoneroAccount> getAccounts(String tag) {
     Map<String, Object> params = new HashMap<String, Object>();
+    params.put("tag", tag);
     Map<String, Object> resultMap = (Map<String, Object>) rpc.sendRpcRequest("get_accounts", params).get("result");
     List<Map<String, Object>> accountMaps = (List<Map<String, Object>>) resultMap.get("subaddress_accounts");
     List<MoneroAccount> accounts = new ArrayList<MoneroAccount>();
@@ -174,6 +175,21 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     int accountIdx = ((BigInteger) resultMap.get("account_index")).intValue();
     String address = (String) resultMap.get("address");
     return new MoneroAccount(accountIdx, address, label, BigInteger.valueOf(0), BigInteger.valueOf(0), false, null);
+  }
+  
+  @Override
+  public void tagAccounts(String tag, Collection<Integer> accountIndices) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("tag", tag);
+    params.put("accounts", accountIndices);
+    rpc.sendRpcRequest("tag_accounts", params);
+  }
+
+  @Override
+  public void untagAccounts(Collection<Integer> accountIndices) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("accounts", accountIndices);
+    rpc.sendRpcRequest("untag_accounts", params);
   }
 
   @SuppressWarnings("unchecked")

@@ -30,7 +30,7 @@ import wallet.rpc.MoneroRpcException;
 /**
  * Tests a Monero wallet excluding sending transactions.
  */
-public class TestMoneroWalletNonSendsOld {
+public class TestMoneroWalletReadOld {
   
   private MoneroAccount wallet;
 
