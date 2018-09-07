@@ -107,6 +107,7 @@ public class TestUtils {
       }
     } else if (tx.getType() == MoneroTxType.INCOMING) {
       assertNotNull(tx.getOutputs());
+      assertNotNull(tx.getKey());
       assertFalse(tx.getOutputs().isEmpty());
       for (MoneroOutput output : tx.getOutputs()) {
         assertNotNull(output.getAmount());
