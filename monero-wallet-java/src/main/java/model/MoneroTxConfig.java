@@ -24,15 +24,6 @@ public class MoneroTxConfig {
   
   public MoneroTxConfig() {
     super();
-    destinations = null;
-    accountIdx = null;
-    subaddressIndices = null;
-    fee = null;
-    mixin = null;
-    unlockTime = 0;
-    paymentId = null;
-    priority = null;
-    doNotRelay = null;
   }
   
   /**
