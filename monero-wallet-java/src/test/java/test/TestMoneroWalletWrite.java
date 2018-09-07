@@ -122,8 +122,6 @@ public class TestMoneroWalletWrite {
     TestUtils.testSubaddress(subaddress);
     List<MoneroSubaddress> subaddressesNew = wallet.getSubaddresses(0);
     assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
-    System.out.println(subaddress);
-    System.out.println(subaddressesNew.get(subaddressesNew.size() - 1));
     assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
     
     // create subaddress with label
@@ -150,9 +148,6 @@ public class TestMoneroWalletWrite {
     // send to self
     String address = wallet.getSubaddress(0, 0).getAddress();
     BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(SEND_DIVISOR));
-    System.out.println("Balance: " + wallet.getBalance(0));
-    System.out.println("Unlocked: " + wallet.getUnlockedBalance(0));
-    System.out.println("Send amount: " + sendAmount);
     MoneroTx tx = wallet.send(address, null, sendAmount, MIXIN);
     
     // test transaction
