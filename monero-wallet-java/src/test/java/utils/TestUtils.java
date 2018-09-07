@@ -87,7 +87,7 @@ public class TestUtils {
     if (subaddress.getBalance().doubleValue() > 0) assertTrue(subaddress.isUsed());
   }
   
-  public static void testTransaction(MoneroTx tx) {
+  public static void testTx(MoneroTx tx) {
     assertNotNull(tx.getId());
     assertNotNull(tx.getType());
     if (tx.getType() == MoneroTxType.OUTGOING) {
