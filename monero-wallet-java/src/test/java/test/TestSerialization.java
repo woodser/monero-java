@@ -13,7 +13,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import utils.JsonUtils;
-import wallet.rpc.MoneroWalletRpcOld;
+import wallet.rpc.MoneroWalletRpc;
 
 /**
  * Tests serialization and deserialization.
@@ -32,10 +32,10 @@ public class TestSerialization {
     map1.put("null", null);
     
     // serialize
-    String json = JsonUtils.serialize(MoneroWalletRpcOld.MAPPER, map1);
+    String json = JsonUtils.serialize(MoneroWalletRpc.MAPPER, map1);
     
     // deserialize
-    Map<String, Object> map2 = JsonUtils.deserialize(MoneroWalletRpcOld.MAPPER, json, new TypeReference<Map<String, Object>>(){});
+    Map<String, Object> map2 = JsonUtils.deserialize(MoneroWalletRpc.MAPPER, json, new TypeReference<Map<String, Object>>(){});
     Object amt = map2.get("amount");
     assertEquals(BigInteger.class, amt.getClass());
     map1.remove("null");  // nulls should be removed during serialization
@@ -49,7 +49,7 @@ public class TestSerialization {
     for (int i = 0; i < 5; i++) strs.add("hello");
     map.put("strings", strs);
     String json = JsonUtils.serialize(map);
-    Map<String, Object> deserialized = JsonUtils.deserialize(MoneroWalletRpcOld.MAPPER, json, new TypeReference<Map<String, Object>>(){});
+    Map<String, Object> deserialized = JsonUtils.deserialize(MoneroWalletRpc.MAPPER, json, new TypeReference<Map<String, Object>>(){});
     assertEquals(map, deserialized);
   }
   
@@ -75,7 +75,7 @@ public class TestSerialization {
     String json = JsonUtils.serialize(map1);
     
     // deserialize
-    Map<String, Object> map2 = JsonUtils.deserialize(MoneroWalletRpcOld.MAPPER, json, new TypeReference<Map<String, Object>>(){});
+    Map<String, Object> map2 = JsonUtils.deserialize(MoneroWalletRpc.MAPPER, json, new TypeReference<Map<String, Object>>(){});
     map1.remove("null");  // nulls should be removed during serialization
     assertEquals(map1, map2);
   }
