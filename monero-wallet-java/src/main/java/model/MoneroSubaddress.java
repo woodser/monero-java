@@ -7,20 +7,20 @@ import java.math.BigInteger;
  */
 public class MoneroSubaddress {
 
-  private int index;
+  private Integer index;
   private String label;
   private String address;
   private BigInteger balance;
   private BigInteger unlockedBalance;
-  private boolean isMultisigImportNeeded;
-  private int numUnspentOutputs;
-  private boolean isUsed;
+  private Boolean isMultisigImportNeeded;
+  private Integer numUnspentOutputs;
+  private Boolean isUsed;
   
-  public int getIndex() {
+  public Integer getIndex() {
     return index;
   }
   
-  public void setIndex(int index) {
+  public void setIndex(Integer index) {
     this.index = index;
   }
   
@@ -56,27 +56,27 @@ public class MoneroSubaddress {
     this.unlockedBalance = unlockedBalance;
   }
   
-  public boolean isMultisigImportNeeded() {
+  public Boolean isMultisigImportNeeded() {
     return isMultisigImportNeeded;
   }
 
-  public void setMultisigImportNeeded(boolean isMultisigImportNeeded) {
+  public void setMultisigImportNeeded(Boolean isMultisigImportNeeded) {
     this.isMultisigImportNeeded = isMultisigImportNeeded;
   }
 
-  public int getNumUnspentOutputs() {
+  public Integer getNumUnspentOutputs() {
     return numUnspentOutputs;
   }
   
-  public void setNumUnspentOutputs(int numUnspentOutputs) {
+  public void setNumUnspentOutputs(Integer numUnspentOutputs) {
     this.numUnspentOutputs = numUnspentOutputs;
   }
   
-  public boolean isUsed() {
+  public Boolean isUsed() {
     return isUsed;
   }
   
-  public void setUsed(boolean isUsed) {
+  public void setUsed(Boolean isUsed) {
     this.isUsed = isUsed;
   }
   

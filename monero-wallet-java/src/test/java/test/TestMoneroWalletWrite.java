@@ -222,7 +222,11 @@ public class TestMoneroWalletWrite {
 
   @Test
   public void testSweepAll() {
-    fail("Not yet implemented");
+    MoneroTxConfig config = new MoneroTxConfig();
+    List<MoneroTx> txs = wallet.sweepAll(config);
+    for (MoneroTx tx : txs) {
+      TestUtils.testTx(tx);
+    }
   }
 
   @Test

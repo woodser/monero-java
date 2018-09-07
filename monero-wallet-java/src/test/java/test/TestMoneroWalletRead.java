@@ -251,7 +251,7 @@ public class TestMoneroWalletRead {
     List<MoneroTx> txs = wallet.getTxs();
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      TestUtils.testTransaction(tx);
+      TestUtils.testTx(tx);
     }
   }
 
@@ -262,7 +262,7 @@ public class TestMoneroWalletRead {
     List<MoneroTx> allTxs = wallet.getTxs();
     assertFalse(allTxs.isEmpty());
     for (MoneroTx tx : allTxs) {
-      TestUtils.testTransaction(tx);
+      TestUtils.testTx(tx);
     }
     
     // test getting transactions by payment ids
@@ -277,7 +277,7 @@ public class TestMoneroWalletRead {
       List<MoneroTx> txs = wallet.getTxs(filter);
       assertFalse(txs.isEmpty());
       for (MoneroTx tx : txs) {
-        TestUtils.testTransaction(tx);
+        TestUtils.testTx(tx);
       }
     }
     
