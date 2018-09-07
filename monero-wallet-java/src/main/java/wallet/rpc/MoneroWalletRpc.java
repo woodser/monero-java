@@ -383,8 +383,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return transactions;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroTx> sweepAll(MoneroTxConfig config) {
+    
+    // send request
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("address", config.getDestinations().get(0).getAddress());
     params.put("account_index", config.getAccountIdx());
@@ -395,13 +398,41 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("payment_id", config.getPaymentId());
     params.put("do_not_relay", config.getDoNotRelay());
     params.put("below_amount", config.getBelowAmount());
-    params.put("get_tx_keys", true);
-    params.put("get_tx_hex", true);
-    params.put("get_tx_metadata", true);
-    
-    // send request
+    params.put("get_tx_keys", false); // false because transactions re-fetched
+    params.put("get_tx_hex", false);
+    params.put("get_tx_metadata", false);
     Map<String, Object> respMap = rpc.sendRpcRequest("sweep_all", params);
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+
+    // fetch resulting transactions by id
+    List<String> txIds = (List<String>) resultMap.get("tx_hash_list");
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setTxIds(txIds);
+    filter.setIncoming(false);
+    return getTxs(filter);
+    
+    // TODO: merge this info
+//    List<String> keys = (List<String>) resultMap.get("tx_key_list");
+//    List<String> blobs = (List<String>) resultMap.get("tx_blob_list");
+//    List<String> metadatas = (List<String>) resultMap.get("tx_metadata_list");
+//    //String multisigTxSet = (String) resultMap.get("multisig_txset");  // TODO: what to do with this?
+//    int numTxs = hashes.size();
+//    assertEquals(numTxs, keys.size());
+//    assertEquals(numTxs, blobs.size());
+//    assertEquals(numTxs, metadatas.size());
+//    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+//    for (int i = 0; i < numTxs; i++) {
+//      MoneroTx tx = new MoneroTx();
+//      txs.add(tx);
+//      tx.setId(hashes.get(i));
+//      tx.setKey(keys.get(i));
+//      tx.setBlob(blobs.get(i));
+//      tx.setMetadata(metadatas.get(i));
+//      tx.setType(MoneroTxType.OUTGOING);
+//    }
+//    
+//    // return transactions
+//    return txs;
   }
 
   @SuppressWarnings("unchecked")
