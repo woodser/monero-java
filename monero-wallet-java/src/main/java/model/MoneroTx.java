@@ -36,6 +36,7 @@ public class MoneroTx {
   }
   
   private String id; 
+  private String address;
   private Integer accountIndex;
   private Integer subaddressIndex;
 	private List<MoneroPayment> payments;
@@ -66,6 +67,14 @@ public class MoneroTx {
 	public void setId(String id) {
 	  this.id = id;
 	}
+
+  public String getAddress() {
+    return address;
+  }
+
+  public void setAddress(String address) {
+    this.address = address;
+  }
 
   public Integer getAccountIndex() {
     return accountIndex;
@@ -231,6 +240,8 @@ public class MoneroTx {
   public void merge(MoneroTx tx) {
     if (id == null) id = tx.getId();
     else if (tx.getId() != null) validateEquals("ID", id, tx.getId());
+    if (address == null) address = tx.getAddress();
+    else if (tx.getAddress() != null) validateEquals("Address", address, tx.getAddress());
     if (accountIndex == null) accountIndex = tx.getAccountIndex();
     else if (tx.getAccountIndex() != null) validateEquals("Account index", accountIndex, tx.getAccountIndex());
     if (subaddressIndex == null) subaddressIndex = tx.getSubaddressIndex();
@@ -276,6 +287,7 @@ public class MoneroTx {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("ID: " + id + "\n");
+    sb.append("Address: " + address + "\n");
     sb.append("Account index: " + accountIndex + "\n");
     sb.append("Subaddress index: " + subaddressIndex + "\n");
     sb.append("Key: " + key + "\n");
