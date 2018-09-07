@@ -222,7 +222,7 @@ public class TestMoneroWalletWrite {
 
   @Test
   public void testSweepAll() {
-    MoneroTxConfig config = new MoneroTxConfig();
+    MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), null, null);
     List<MoneroTx> txs = wallet.sweepAll(config);
     for (MoneroTx tx : txs) {
       TestUtils.testTx(tx);
