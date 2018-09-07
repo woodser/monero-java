@@ -409,11 +409,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<String> keys = (List<String>) resultMap.get("tx_key_list");
     List<String> blobs = (List<String>) resultMap.get("tx_blob_list");
     List<String> metadatas = (List<String>) resultMap.get("tx_metadata_list");
+    List<BigInteger> fees = (List<BigInteger>) resultMap.get("fee_list");
+    List<BigInteger> amounts = (List<BigInteger>) resultMap.get("amount_list");
     //String multisigTxSet = (String) resultMap.get("multisig_txset");  // TODO: what to do with this?
     int numTxs = ids.size();
     assertEquals(numTxs, keys.size());
     assertEquals(numTxs, blobs.size());
     assertEquals(numTxs, metadatas.size());
+    assertEquals(numTxs, fees.size());
+    assertEquals(numTxs, amounts.size());
     Map<String, MoneroTx> txMap = new HashMap<String, MoneroTx>();
     for (int i = 0; i < numTxs; i++) {
       MoneroTx tx = new MoneroTx();
@@ -421,8 +425,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setKey(keys.get(i));
       tx.setBlob(blobs.get(i));
       tx.setMetadata(metadatas.get(i));
+      tx.setFee(fees.get(i));
+      tx.setAmount(amounts.get(i));
       txMap.put(tx.getId(), tx);
-    }    
+    }
 
     // fetch transactions by id
     MoneroTxFilter filter = new MoneroTxFilter();
