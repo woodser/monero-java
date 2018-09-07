@@ -1,6 +1,7 @@
 package model;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class MoneroTxConfig {
   private Collection<Integer> subaddressIndices;
   private BigInteger fee;
   private Integer mixin;
-  private int unlockTime;
+  private Integer unlockTime;
   private String paymentId;
   private MoneroTxPriority priority;
   private Boolean doNotRelay;
@@ -32,6 +33,19 @@ public class MoneroTxConfig {
     paymentId = null;
     priority = null;
     doNotRelay = null;
+  }
+  
+  /**
+   * Convenience constructor to specify transaction destination and amount with defaults.
+   * 
+   * @param address is the destination address
+   * @param paymentId is the destination payment id
+   * @param amount is the amount to send
+   */
+  public MoneroTxConfig(String address, String paymentId, BigInteger amount) {
+    destinations = new ArrayList<MoneroPayment>();
+    destinations.add(new MoneroPayment(address, paymentId, amount));
+    
   }
 
   public MoneroTxConfig(List<MoneroPayment> destinations, Integer accountIdx, Collection<Integer> subaddressIndices, BigInteger fee, Integer mixin, Integer unlockTime, String paymentId, MoneroTxPriority priority, Boolean doNotRelay) {
