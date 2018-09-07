@@ -710,6 +710,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       Object val = txMap.get(key);
       if (key.equals("amount")) { } // this method does not process amount since it could be output or payment depending on context
       else if (key.equals("spent")) { } // this method does not process spent which is specific to outputs
+      else if (key.equals("address")) tx.setAddress((String) val);
       else if (key.equalsIgnoreCase("fee")) tx.setFee((BigInteger) val);
       else if (key.equalsIgnoreCase("height")) tx.setHeight(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("block_height")) tx.setHeight(((BigInteger) val).intValue());
@@ -726,10 +727,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("tx_blob")) tx.setBlob((String) val);
       else if (key.equalsIgnoreCase("tx_metadata")) tx.setMetadata((String) val);
       else if (key.equalsIgnoreCase("double_spend_seen")) tx.setDoubleSpend((Boolean) val);
-      else if (key.equalsIgnoreCase("subaddr_index") && val instanceof Map) { // TODO: int on incoming transfers (insufficient?), map on transfers
-        Map<String, Object> subaddrMap = (Map<String, Object>) val;
-        tx.setAccountIndex(((BigInteger) subaddrMap.get("major")).intValue());
-        tx.setSubaddressIndex(((BigInteger) subaddrMap.get("minor")).intValue());
+      else if (key.equalsIgnoreCase("subaddr_index")) {
+        if (val instanceof Map) {
+          Map<String, Object> subaddrMap = (Map<String, Object>) val;
+          tx.setAccountIndex(((BigInteger) subaddrMap.get("major")).intValue());
+          tx.setSubaddressIndex(((BigInteger) subaddrMap.get("minor")).intValue());
+        } else {
+          // ignore subaddr_index returned from 'incoming_transfers' (not map and not informative)
+        }
       } else if (key.equalsIgnoreCase("destinations")) {
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
         tx.setPayments(payments);
