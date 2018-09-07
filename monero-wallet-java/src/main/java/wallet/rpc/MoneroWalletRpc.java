@@ -323,7 +323,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     paramMap.put("payment_id", config.getPaymentId());
     paramMap.put("mixin", config.getMixin());
     paramMap.put("unlock_time", config.getUnlockTime());
+    paramMap.put("do_not_relay", config.getDoNotRelay());
     paramMap.put("get_tx_key", true);
+    paramMap.put("get_tx_hex", true);
+    paramMap.put("get_tx_metadata", true);
 
     // send request
     Map<String, Object> respMap = rpc.sendRpcRequest("transfer", paramMap);
@@ -354,7 +357,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     paramMap.put("payment_id", config.getPaymentId());
     paramMap.put("mixin", config.getMixin());
-    paramMap.put("unlockTime", config.getUnlockTime());
+    paramMap.put("unlock_time", config.getUnlockTime());
+    paramMap.put("do_not_relay", config.getDoNotRelay());
+    paramMap.put("get_tx_key", true);
+    paramMap.put("get_tx_hex", true);
+    paramMap.put("get_tx_metadata", true);
     paramMap.put("new_algorithm", true);
 
     // send request
@@ -378,6 +385,22 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public List<MoneroTx> sweepAll(MoneroTxConfig config) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("address", config.getDestinations().get(0).getAddress());
+    params.put("account_index", config.getAccountIdx());
+    params.put("subaddr_indices", config.getSubaddressIndices());
+    params.put("priority", config.getPriority());
+    params.put("mixin", config.getMixin());
+    params.put("unlock_time", config.getUnlockTime());
+    params.put("payment_id", config.getPaymentId());
+    params.put("do_not_relay", config.getDoNotRelay());
+    params.put("below_amount", config.getBelowAmount());
+    params.put("get_tx_keys", true);
+    params.put("get_tx_hex", true);
+    params.put("get_tx_metadata", true);
+    
+    // send request
+    Map<String, Object> respMap = rpc.sendRpcRequest("sweep_all", params);
     throw new RuntimeException("Not implemented");
   }
 
