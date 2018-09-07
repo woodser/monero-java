@@ -409,7 +409,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     MoneroTxFilter filter = new MoneroTxFilter();
     filter.setTxIds(txIds);
     filter.setIncoming(false);
-    return getTxs(filter);
+    throw new RuntimeException("Not implemented");
+    //return getTxs(filter);
     
     // TODO: merge this info
 //    List<String> keys = (List<String>) resultMap.get("tx_key_list");
