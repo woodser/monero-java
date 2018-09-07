@@ -13,7 +13,6 @@ public class MoneroPayment {
 
   private MoneroTx transaction;
   private String address;
-  private String paymentId;
   private BigInteger amount;
   
   public MoneroPayment() {
@@ -21,18 +20,13 @@ public class MoneroPayment {
   }
   
   public MoneroPayment(String address, BigInteger amount) {
-    this(address, null, amount);
+    this(null, address, amount);
   }
   
-  public MoneroPayment(String address, String paymentId, BigInteger amount) {
-    this(null, address, paymentId, amount);
-  }
-  
-  public MoneroPayment(MoneroTx transaction, String address, String paymentId, BigInteger amount) {
+  public MoneroPayment(MoneroTx transaction, String address, BigInteger amount) {
     super();
     this.transaction = transaction;
     this.address = address;
-    this.paymentId = paymentId;
     this.amount = amount;
   }
 
@@ -50,14 +44,6 @@ public class MoneroPayment {
 
   public void setAddress(String address) {
     this.address = address;
-  }
-
-  public String getPaymentId() {
-    return paymentId;
-  }
-
-  public void setPaymentId(String paymentId) {
-    this.paymentId = paymentId;
   }
 
   public BigInteger getAmount() {

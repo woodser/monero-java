@@ -21,6 +21,7 @@ public class MoneroTxConfig {
   private String paymentId;
   private MoneroTxPriority priority;
   private Boolean doNotRelay;
+  private BigInteger belowAmount;
   
   public MoneroTxConfig() {
     super();
@@ -35,11 +36,11 @@ public class MoneroTxConfig {
    */
   public MoneroTxConfig(String address, String paymentId, BigInteger amount) {
     destinations = new ArrayList<MoneroPayment>();
-    destinations.add(new MoneroPayment(address, paymentId, amount));
-    
+    destinations.add(new MoneroPayment(address, amount));
+    this.paymentId = paymentId;
   }
 
-  public MoneroTxConfig(List<MoneroPayment> destinations, Integer accountIdx, Collection<Integer> subaddressIndices, BigInteger fee, Integer mixin, Integer unlockTime, String paymentId, MoneroTxPriority priority, Boolean doNotRelay) {
+  public MoneroTxConfig(List<MoneroPayment> destinations, Integer accountIdx, Collection<Integer> subaddressIndices, BigInteger fee, Integer mixin, Integer unlockTime, String paymentId, MoneroTxPriority priority, Boolean doNotRelay, BigInteger belowAmount) {
     super();
     this.destinations = destinations;
     this.accountIdx = accountIdx;
@@ -50,6 +51,7 @@ public class MoneroTxConfig {
     this.paymentId = paymentId;
     this.priority = priority;
     this.doNotRelay = doNotRelay;
+    this.belowAmount = belowAmount;
   }
 
   public List<MoneroPayment> getDestinations() {
@@ -122,5 +124,13 @@ public class MoneroTxConfig {
 
   public void setDoNotRelay(Boolean doNotRelay) {
     this.doNotRelay = doNotRelay;
+  }
+
+  public BigInteger getBelowAmount() {
+    return belowAmount;
+  }
+
+  public void setBelowAmount(BigInteger belowAmount) {
+    this.belowAmount = belowAmount;
   }
 }
