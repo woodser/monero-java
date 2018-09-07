@@ -1,7 +1,6 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -219,19 +218,6 @@ public class TestMoneroWalletWrite {
     // test wallet balance
     assertTrue(wallet.getBalance(0).longValue() < balanceBefore.longValue());
     assertTrue(wallet.getUnlockedBalance(0).longValue() < unlockedBalanceBefore.longValue());
-  }
-
-  @Test
-  public void testSweepAll() {
-    MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), null, null);
-    List<MoneroTx> txs = wallet.sweepAll(config);
-    assertFalse(txs.isEmpty());
-    for (MoneroTx tx : txs) {
-      assertNotNull(tx.getKey());
-      assertNotNull(tx.getBlob());
-      assertNotNull(tx.getMetadata());
-      TestUtils.testTx(tx);
-    }
   }
 
   @Test
