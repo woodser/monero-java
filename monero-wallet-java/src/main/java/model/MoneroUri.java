@@ -4,7 +4,7 @@ import java.math.BigInteger;
 
 public class MoneroUri {
 
-	private String address;  // TODO: make this MoneroAddress
+	private String address;
 	private BigInteger amount;
 	private String paymentId;
 	private String recipientName;

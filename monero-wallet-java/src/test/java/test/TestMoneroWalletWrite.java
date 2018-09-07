@@ -31,9 +31,9 @@ import wallet.MoneroWallet;
 import wallet.rpc.MoneroRpcException;
 
 /**
- * Tests modifying a Monero wallet (sending, creating accounts, tagging accounts, creating subaddresses, setting tx notes, etc).
+ * Tests modifying a Monero wallet (churning funds, creating accounts, tagging accounts, creating subaddresses, setting tx notes, etc).
  * 
- * These tests are separated because they rely on a balance and initiate transactions on the blockchain.
+ * These tests are separated because they rely on a balance, initiate transactions on the blockchain, and modify a test wallet state (TODO).
  * 
  * TODO: support / test send, sendSplit, and sweepAll from specific accounts and subaddresses
  * TODO: test sending with payment id
