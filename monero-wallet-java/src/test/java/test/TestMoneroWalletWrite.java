@@ -225,6 +225,9 @@ public class TestMoneroWalletWrite {
     MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), null, null);
     List<MoneroTx> txs = wallet.sweepAll(config);
     for (MoneroTx tx : txs) {
+      assertNotNull(tx.getKey());
+      assertNotNull(tx.getBlob());
+      assertNotNull(tx.getMetadata());
       TestUtils.testTx(tx);
     }
   }
