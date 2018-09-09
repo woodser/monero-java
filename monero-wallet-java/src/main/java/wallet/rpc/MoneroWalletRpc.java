@@ -576,7 +576,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public void setTxNotes(List<String> txIds, List<String> txNotes) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txids", txIds);
+    params.put("notes", txNotes);
+    rpc.sendRpcRequest("set_tx_notes", params);
   }
 
   @SuppressWarnings("unchecked")
@@ -622,20 +625,45 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, BigInteger> resultMap = (Map<String, BigInteger>) respMap.get("result");
     return resultMap;
   }
-
+  
+  @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroAddressBookEntry> getAddressBookEntries() {
-    throw new RuntimeException("Not implemented");
+  public List<MoneroAddressBookEntry> getAddressBookEntries(List<Integer> entryIndices) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("entries", entryIndices);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_address_book", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<MoneroAddressBookEntry> entries = new ArrayList<MoneroAddressBookEntry>();
+    if (!resultMap.containsKey("entries")) return entries;
+    for (Map<String, Object> entryMap : (List<Map<String, Object>>) resultMap.get("entries")) {
+      MoneroAddressBookEntry entry = new MoneroAddressBookEntry(
+              ((BigInteger) entryMap.get("index")).intValue(),
+              (String) entryMap.get("address"),
+              (String) entryMap.get("payment_id"),
+              (String) entryMap.get("description")
+      );
+      entries.add(entry);
+    }
+    return entries;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public int addAddressBookEntry(String address, String paymentId, String description) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("address", address);
+    params.put("payment_id", paymentId);
+    params.put("description", description);
+    Map<String, Object> respMap = rpc.sendRpcRequest("add_address_book", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return ((BigInteger) resultMap.get("index")).intValue();
   }
 
   @Override
   public void deleteAddressBookEntry(int entryIdx) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("index", entryIdx);
+    rpc.sendRpcRequest("delete_address_book", params);
   }
 
   @SuppressWarnings("unchecked")

@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
+import model.MoneroAddressBookEntry;
 import model.MoneroException;
 import model.MoneroPayment;
 import model.MoneroSubaddress;
@@ -51,6 +52,11 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
     txConfig.setMixin(mixin);
     txConfig.setPaymentId(paymentId);
     return send(txConfig);
+  }
+  
+  @Override
+  public List<MoneroAddressBookEntry> getAddressBookEntries() {
+    return getAddressBookEntries(null);
   }
   
   @Override

@@ -67,4 +67,23 @@ public class MoneroUtils {
       if (!CHARS.contains((Character) c)) throw new MoneroException("Invalid Base58 " + standardAddress);
     }
   }
+  
+  /**
+   * Determines if two payment ids are functionally equal.
+   * 
+   * For example, 03284e41c342f032 and 03284e41c342f032000000000000000000000000000000000000000000000000 are considered equal.
+   * 
+   * @param paymentId1 is a payment id to compare
+   * @param paymentId2 is a payment id to compare
+   * @return true if the payment ids are equal, false otherwise
+   */
+  public static boolean paymentIdsEqual(String paymentId1, String paymentId2) {
+    int maxLength = Math.max(paymentId1.length(), paymentId2.length());
+    for (int i = 0; i < maxLength; i++) {
+      if (i < paymentId1.length() && i < paymentId2.length() && paymentId1.charAt(i) != paymentId2.charAt(i)) return false;
+      if (i >= paymentId1.length() && paymentId2.charAt(i) != '0') return false;
+      if (i >= paymentId2.length() && paymentId1.charAt(i) != '0') return false;
+    }
+    return true;
+  }
 }

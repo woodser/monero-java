@@ -7,6 +7,7 @@ what is an amount key?
 test MoneroUtils.newAddress() used by wallet.send(str,str)
 
 Monero-wallet-rpc suggested improvements:
+address book entries work by index instead of id which changes
 below_amount - unsigned int; (Optional) Include outputs below this amount. - shouldn't it be above?
 getbalance subaddress should be array
 get_transfers each group has double_spend_seen
