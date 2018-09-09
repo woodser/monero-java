@@ -38,4 +38,9 @@ public class TestMoneroWalletSweepAll {
       TestUtils.testTx(tx);
     }
   }
+  
+  @Test
+  public void testSweepAllFromSubaddresses() {
+    throw new RuntimeException("Not implemented");
+  }
 }
