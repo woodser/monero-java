@@ -378,7 +378,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setMixin(config.getMixin());
       tx.setId(txIds.get(0));
       transactions.add(tx);
-      tx.setUnlockTime(config.getUnlockTime());
+      tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
     }
     return transactions;
   }
