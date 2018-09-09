@@ -335,4 +335,9 @@ public class TestMoneroWalletWrite {
     entries = wallet.getAddressBookEntries();
     assertEquals(numEntriesStart, entries.size());
   }
+  
+  @Test
+  public void testSendFromSubaddresses() {
+    fail("Not implemented");
+  }
 }
