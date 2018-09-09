@@ -287,6 +287,14 @@ public interface MoneroWallet {
   public List<MoneroAddressBookEntry> getAddressBookEntries();
   
   /**
+   * Returns address book entries at the given indices.
+   * 
+   * @param entryIndices are entry indices to retrieve
+   * @return List<MoneroAddressBookEntry> are the wallet's address book entries
+   */
+  public List<MoneroAddressBookEntry> getAddressBookEntries(List<Integer> entryIndices);
+  
+  /**
    * Adds an address book entry.
    * 
    * @param address is the entry's Monero address

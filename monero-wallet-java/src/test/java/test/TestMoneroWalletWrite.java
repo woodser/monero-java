@@ -9,9 +9,7 @@ import static org.junit.Assert.fail;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -26,6 +24,7 @@ import model.MoneroPayment;
 import model.MoneroSubaddress;
 import model.MoneroTx;
 import model.MoneroTxConfig;
+import utils.MoneroUtils;
 import utils.TestUtils;
 import wallet.MoneroWallet;
 import wallet.rpc.MoneroRpcException;
@@ -270,7 +269,7 @@ public class TestMoneroWalletWrite {
     // test adding standard addresses
     final int NUM_ENTRIES = 5;
     String address = wallet.getSubaddress(0, 0).getAddress();
-    Collection<Integer> indices = new HashSet<Integer>();
+    List<Integer> indices = new ArrayList<Integer>();
     for (int i = 0; i < NUM_ENTRIES; i++) {
       indices.add(wallet.addAddressBookEntry(address, "hi there!"));
     }
@@ -290,22 +289,26 @@ public class TestMoneroWalletWrite {
       assertTrue("Index " + idx + " not found in address book indices", found);
     }
     
-    // delete entries
-    for (Integer idx : indices) {
-      wallet.deleteAddressBookEntry(idx);
+    // delete entries at starting index
+    int deleteIdx = indices.get(0);
+    for (int i = 0; i < indices.size(); i++) {
+      wallet.deleteAddressBookEntry(deleteIdx);
     }
     entries = wallet.getAddressBookEntries();
     assertEquals(numEntriesStart, entries.size());
     
     // test adding integrated addresses
-    indices = new HashSet<Integer>();
+    indices.clear();
     String paymentId = "03284e41c342f03"; // payment id less one character
     Map<Integer, MoneroIntegratedAddress> integratedAddresses = new HashMap<Integer, MoneroIntegratedAddress>();
+    Map<Integer, String> integratedDescriptions = new HashMap<Integer, String>();
     for (int i = 0; i < NUM_ENTRIES; i++) {
       MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(paymentId + i); // create unique integrated address
-      int idx = wallet.addAddressBookEntry(integratedAddress.getIntegratedAddress(), null);
+      String uuid = UUID.randomUUID().toString();
+      int idx = wallet.addAddressBookEntry(integratedAddress.toString(), uuid);
       indices.add(idx);
       integratedAddresses.put(idx, integratedAddress);
+      integratedDescriptions.put(idx, uuid);
     }
     entries = wallet.getAddressBookEntries();
     assertEquals(numEntriesStart + NUM_ENTRIES, entries.size());
@@ -314,8 +317,9 @@ public class TestMoneroWalletWrite {
       for (MoneroAddressBookEntry entry : entries) {
         if (idx == entry.getIndex()) {
           TestUtils.testAddressBookEntry(entry);
-          assertEquals(integratedAddresses.get(idx), entry.getAddress());
-          assertEquals("", entry.getDescription());
+          assertEquals(integratedDescriptions.get(idx), entry.getDescription());
+          assertEquals(integratedAddresses.get(idx).getStandardAddress(), entry.getAddress());
+          assertTrue(MoneroUtils.paymentIdsEqual(integratedAddresses.get(idx).getPaymentId(), entry.getPaymentId()));
           found = true;
           break;
         }
@@ -323,9 +327,10 @@ public class TestMoneroWalletWrite {
       assertTrue("Index " + idx + " not found in address book indices", found);
     }
     
-    // delete entries
-    for (Integer idx : indices) {
-      wallet.deleteAddressBookEntry(idx);
+    // delete entries at starting index
+    deleteIdx = indices.get(0);
+    for (int i = 0; i < indices.size(); i++) {
+      wallet.deleteAddressBookEntry(deleteIdx);
     }
     entries = wallet.getAddressBookEntries();
     assertEquals(numEntriesStart, entries.size());
