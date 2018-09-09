@@ -1,11 +1,11 @@
-package model;
+package wallet.model;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import model.MoneroTx.MoneroTxPriority;
+import wallet.model.MoneroTx.MoneroTxPriority;
 
 /**
  * Configuration for sending a transaction.

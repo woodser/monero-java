@@ -6,15 +6,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import model.MoneroAccount;
-import model.MoneroAddressBookEntry;
-import model.MoneroIntegratedAddress;
-import model.MoneroKeyImage;
-import model.MoneroSubaddress;
-import model.MoneroTx;
-import model.MoneroTxConfig;
-import model.MoneroTxFilter;
-import model.MoneroUri;
+import wallet.model.MoneroAccount;
+import wallet.model.MoneroAddressBookEntry;
+import wallet.model.MoneroIntegratedAddress;
+import wallet.model.MoneroKeyImage;
+import wallet.model.MoneroSubaddress;
+import wallet.model.MoneroTx;
+import wallet.model.MoneroTxConfig;
+import wallet.model.MoneroTxFilter;
+import wallet.model.MoneroUri;
 
 /**
  * Top-level interface for a Monero Wallet.

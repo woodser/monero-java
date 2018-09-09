@@ -1,4 +1,4 @@
-package model;
+package wallet.model;
 
 /**
  * Monero address book entry model.

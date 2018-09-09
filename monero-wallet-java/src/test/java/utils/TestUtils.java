@@ -8,15 +8,15 @@ import java.net.URISyntaxException;
 
 import org.apache.log4j.PropertyConfigurator;
 
-import model.MoneroAccount;
-import model.MoneroAddressBookEntry;
-import model.MoneroOutput;
-import model.MoneroPayment;
-import model.MoneroSubaddress;
-import model.MoneroTx;
-import model.MoneroTx.MoneroTxType;
 import wallet.MoneroWallet;
-import wallet.rpc.MoneroWalletRpc;
+import wallet.MoneroWalletRpc;
+import wallet.model.MoneroAccount;
+import wallet.model.MoneroAddressBookEntry;
+import wallet.model.MoneroOutput;
+import wallet.model.MoneroPayment;
+import wallet.model.MoneroSubaddress;
+import wallet.model.MoneroTx;
+import wallet.model.MoneroTx.MoneroTxType;
 
 /**
  * Test utilities and constants.

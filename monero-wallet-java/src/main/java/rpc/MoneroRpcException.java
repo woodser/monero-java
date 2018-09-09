@@ -1,8 +1,8 @@
-package wallet.rpc;
+package rpc;
 
 import java.util.Map;
 
-import model.MoneroException;
+import wallet.model.MoneroException;
 
 /**
  * Exception that is thrown when the RPC API returns an error.

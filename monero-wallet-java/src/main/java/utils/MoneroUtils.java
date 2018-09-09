@@ -4,7 +4,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.MoneroException;
+import wallet.model.MoneroException;
 
 /**
  * Collection of Monero utilities.

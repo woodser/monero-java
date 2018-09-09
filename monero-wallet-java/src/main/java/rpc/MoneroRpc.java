@@ -1,4 +1,4 @@
-package wallet.rpc;
+package rpc;
 
 import java.math.BigInteger;
 import java.net.URI;
@@ -24,11 +24,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import model.MoneroException;
 import types.HttpException;
 import utils.JsonUtils;
 import utils.MoneroUtils;
 import utils.StreamUtils;
+import wallet.model.MoneroException;
 
 /**
  * Sends requests to the Monero RPC API.
