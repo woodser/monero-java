@@ -79,7 +79,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public int getHeight() {
-    Map<String, Object> respMap = rpc.sendRpcRequest("getheight", null);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_height", null);
     @SuppressWarnings("unchecked")
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return ((BigInteger) resultMap.get("height")).intValue();
@@ -201,7 +201,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("account_index", accountIdx);
     if (subaddressIndices != null) params.put("address_index", subaddressIndices);
-    Map<String, Object> respMap = rpc.sendRpcRequest("getaddress", params);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_address", params);
     
     // initialize subaddresses
     List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
@@ -223,7 +223,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     // fetch and initialize subaddress balances
-    respMap = rpc.sendRpcRequest("getbalance", params);
+    respMap = rpc.sendRpcRequest("get_balance", params);
     resultMap = (Map<String, Object>) respMap.get("result");
     List<Map<String, Object>> subaddressMaps = (List<Map<String, Object>>) resultMap.get("per_subaddress");
     if (subaddressMaps != null) {
@@ -273,7 +273,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public BigInteger getBalance(int accountIdx) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("account_index", accountIdx);
-    Map<String, Object> respMap = rpc.sendRpcRequest("getbalance", params);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_balance", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return (BigInteger) resultMap.get("balance");
   }
@@ -288,7 +288,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public BigInteger getUnlockedBalance(int accountIdx) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("account_index", accountIdx);
-    Map<String, Object> respMap = rpc.sendRpcRequest("getbalance", params);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_balance", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return (BigInteger) resultMap.get("unlocked_balance");
   }
@@ -301,7 +301,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @SuppressWarnings("unchecked")
   @Override
   public boolean isMultisigImportNeeded() {
-    Map<String, Object> respMap = rpc.sendRpcRequest("getbalance", null);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_balance", null);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return (boolean) resultMap.get("multisig_import_needed");
   }
