@@ -17,17 +17,17 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import model.MoneroAccount;
-import model.MoneroAddressBookEntry;
-import model.MoneroIntegratedAddress;
-import model.MoneroPayment;
-import model.MoneroSubaddress;
-import model.MoneroTx;
-import model.MoneroTxConfig;
+import rpc.MoneroRpcException;
 import utils.MoneroUtils;
 import utils.TestUtils;
 import wallet.MoneroWallet;
-import wallet.rpc.MoneroRpcException;
+import wallet.model.MoneroAccount;
+import wallet.model.MoneroAddressBookEntry;
+import wallet.model.MoneroIntegratedAddress;
+import wallet.model.MoneroPayment;
+import wallet.model.MoneroSubaddress;
+import wallet.model.MoneroTx;
+import wallet.model.MoneroTxConfig;
 
 /**
  * Tests modifying a Monero wallet (churning funds, creating accounts, tagging accounts, creating subaddresses, setting tx notes, etc).

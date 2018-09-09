@@ -1,4 +1,4 @@
-package model;
+package wallet.model;
 
 public class MoneroException extends RuntimeException {
 

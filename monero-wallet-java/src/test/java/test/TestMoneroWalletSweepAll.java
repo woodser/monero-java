@@ -8,10 +8,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import model.MoneroTx;
-import model.MoneroTxConfig;
 import utils.TestUtils;
 import wallet.MoneroWallet;
+import wallet.model.MoneroTx;
+import wallet.model.MoneroTxConfig;
 
 /**
  * Tests sweeping all wallet funds.

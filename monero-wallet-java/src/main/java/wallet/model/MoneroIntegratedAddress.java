@@ -1,4 +1,4 @@
-package model;
+package wallet.model;
 
 /**
  * Monero integrated address model.

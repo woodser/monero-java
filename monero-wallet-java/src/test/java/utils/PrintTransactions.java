@@ -1,7 +1,7 @@
 package utils;
 
-import model.MoneroTx;
 import wallet.MoneroWallet;
+import wallet.model.MoneroTx;
 
 /**
  * Prints transactions in a wallet.

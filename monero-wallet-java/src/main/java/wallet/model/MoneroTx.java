@@ -1,5 +1,5 @@
 
-package model;
+package wallet.model;
 
 import java.math.BigInteger;
 import java.util.List;

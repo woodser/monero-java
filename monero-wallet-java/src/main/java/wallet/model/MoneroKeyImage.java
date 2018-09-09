@@ -1,4 +1,4 @@
-package model;
+package wallet.model;
 
 /**
  * Represents a Monero key image.

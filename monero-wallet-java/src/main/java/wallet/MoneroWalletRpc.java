@@ -1,4 +1,4 @@
-package wallet.rpc;
+package wallet;
 
 import static org.junit.Assert.assertEquals;
 
@@ -22,21 +22,21 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import model.MoneroAccount;
-import model.MoneroAddressBookEntry;
-import model.MoneroException;
-import model.MoneroIntegratedAddress;
-import model.MoneroKeyImage;
-import model.MoneroOutput;
-import model.MoneroPayment;
-import model.MoneroSubaddress;
-import model.MoneroTx;
-import model.MoneroTx.MoneroTxType;
-import model.MoneroTxConfig;
-import model.MoneroTxFilter;
-import model.MoneroUri;
+import rpc.MoneroRpc;
 import utils.MoneroUtils;
-import wallet.MoneroWalletDefault;
+import wallet.model.MoneroAccount;
+import wallet.model.MoneroAddressBookEntry;
+import wallet.model.MoneroException;
+import wallet.model.MoneroIntegratedAddress;
+import wallet.model.MoneroKeyImage;
+import wallet.model.MoneroOutput;
+import wallet.model.MoneroPayment;
+import wallet.model.MoneroSubaddress;
+import wallet.model.MoneroTx;
+import wallet.model.MoneroTxConfig;
+import wallet.model.MoneroTxFilter;
+import wallet.model.MoneroUri;
+import wallet.model.MoneroTx.MoneroTxType;
 
 /**
  * Implements a Monero Wallet using monero-wallet-rpc.

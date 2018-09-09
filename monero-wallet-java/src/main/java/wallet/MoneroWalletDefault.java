@@ -4,12 +4,12 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
-import model.MoneroAddressBookEntry;
-import model.MoneroException;
-import model.MoneroPayment;
-import model.MoneroSubaddress;
-import model.MoneroTx;
-import model.MoneroTxConfig;
+import wallet.model.MoneroAddressBookEntry;
+import wallet.model.MoneroException;
+import wallet.model.MoneroPayment;
+import wallet.model.MoneroSubaddress;
+import wallet.model.MoneroTx;
+import wallet.model.MoneroTxConfig;
 
 /**
  * Default implementation of a Monero Wallet.
