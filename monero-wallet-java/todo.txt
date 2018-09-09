@@ -8,9 +8,6 @@ test MoneroUtils.newAddress() used by wallet.send(str,str)
 
 Monero-wallet-rpc suggested improvements:
 address book entries work by index instead of id which changes
-below_amount - unsigned int; (Optional) Include outputs below this amount. - shouldn't it be above?
-getbalance subaddress should be array
-get_transfers each group has double_spend_seen
 optional param documentation missing
 tx_hash in incoming_transfers vs txid in get_transfers; standardize on tx_hash or tx_id
 standardize terminology transactions vs transfers
