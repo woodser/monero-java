@@ -17,7 +17,7 @@ import wallet.model.MoneroTxFilter;
 import wallet.model.MoneroUri;
 
 /**
- * Top-level interface for a Monero Wallet.
+ * Monero wallet interface.
  */
 public interface MoneroWallet {
   
