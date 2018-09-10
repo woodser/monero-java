@@ -45,4 +45,19 @@ public interface MoneroDaemon {
   public String setBan(MoneroBan ban );
   
   public String setBans(Collection<MoneroBan> bans);
+  
+  /**
+   * Flush all transactions from the transaction pool.
+   * 
+   * @return String is the resulting RPC error code. "OK" means everything looks good
+   */
+  public String flushTxPool();
+  
+  /**
+   * Flush specific transactions from the transaction pool or all if none specified.
+   * 
+   * @param txIds are transactions to flush from the pool, or all if none provided
+   * @return String is the resulting RPC error code. "OK" means everything looks good
+   */
+  public String flushTxPool(Collection<String> txIds);
 }
