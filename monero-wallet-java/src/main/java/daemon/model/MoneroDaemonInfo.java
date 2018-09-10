@@ -30,6 +30,7 @@ public class MoneroDaemonInfo {
   private Integer txCount;
   private Integer txPoolSize;
   private Boolean wasBootstrapEverUsed;
+  private Integer version;
   private String status;
   private Boolean isUntrusted;
 }
