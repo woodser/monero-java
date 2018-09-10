@@ -7,6 +7,7 @@ import daemon.model.MoneroBlockHeader;
 import daemon.model.MoneroBlockTemplate;
 import daemon.model.MoneroDaemonConnection;
 import daemon.model.MoneroDaemonInfo;
+import daemon.model.MoneroHardForkInfo;
 
 /**
  * Monero daemon interface.
@@ -36,4 +37,6 @@ public interface MoneroDaemon {
   public List<MoneroDaemonConnection> getConnections();
   
   public MoneroDaemonInfo getInfo();
+  
+  public MoneroHardForkInfo getHardForkInfo();
 }
