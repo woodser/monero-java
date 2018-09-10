@@ -12,7 +12,7 @@ import daemon.model.MoneroChain;
 import daemon.model.MoneroCoinbaseTxSum;
 import daemon.model.MoneroDaemonConnection;
 import daemon.model.MoneroDaemonInfo;
-import daemon.model.MoneroDaemonResponseInfo;
+import daemon.model.MoneroDaemonStatus;
 import daemon.model.MoneroHardForkInfo;
 import daemon.model.MoneroOutputDistributionEntry;
 import daemon.model.MoneroOutputHistogramEntry;
@@ -61,24 +61,24 @@ public interface MoneroDaemon {
   
   public MoneroHardForkInfo getHardForkInfo();
   
-  public String setBan(MoneroBan ban );
+  public MoneroDaemonStatus setBan(MoneroBan ban );
   
-  public String setBans(Collection<MoneroBan> bans);
+  public MoneroDaemonStatus setBans(Collection<MoneroBan> bans);
   
   /**
    * Flush all transactions from the transaction pool.
    * 
    * @return String is the resulting RPC error code. "OK" means everything looks good
    */
-  public String flushTxPool();
+  public MoneroDaemonStatus flushTxPool();
   
   /**
    * Flush specific transactions from the transaction pool or all if none specified.
    * 
    * @param txIds are transactions to flush from the pool, or all if none provided
-   * @return String is the resulting RPC error code. "OK" means everything looks good
+   * @return 
    */
-  public String flushTxPool(Collection<String> txIds);
+  public MoneroDaemonStatus flushTxPool(Collection<String> txIds);
   
   public List<MoneroOutputHistogramEntry> getOutputHistogram(List<BigInteger> amounts, Integer minCount, Integer maxCount, Boolean isUnlocked, Integer recentCutoff);
   
@@ -90,9 +90,9 @@ public interface MoneroDaemon {
   
   public List<MoneroChain> getAlternativeChains();
   
-  public MoneroDaemonResponseInfo relayTx(String txId);
+  public MoneroDaemonStatus relayTx(String txId);
   
-  public MoneroDaemonResponseInfo relayTxs(Collection<String> txIds);
+  public MoneroDaemonStatus relayTxs(Collection<String> txIds);
   
   public MoneroTxPoolBacklog getTxPoolBacklog();
 }

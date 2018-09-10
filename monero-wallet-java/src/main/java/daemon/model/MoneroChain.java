@@ -9,5 +9,5 @@ public class MoneroChain {
   private Integer difficulty;
   private Integer height;
   private Integer length;
-  private MoneroDaemonResponseInfo responseInfo;
+  private MoneroDaemonStatus responseInfo;
 }
