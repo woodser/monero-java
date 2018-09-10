@@ -14,8 +14,10 @@ import daemon.model.MoneroDaemonConnection;
 import daemon.model.MoneroDaemonInfo;
 import daemon.model.MoneroDaemonResponseInfo;
 import daemon.model.MoneroHardForkInfo;
+import daemon.model.MoneroOutputDistributionEntry;
 import daemon.model.MoneroOutputHistogramEntry;
 import daemon.model.MoneroSyncInfo;
+import daemon.model.MoneroTxPoolBacklog;
 
 /**
  * Monero daemon interface.
@@ -55,6 +57,8 @@ public interface MoneroDaemon {
    */
   public String getVersion();
   
+  public MoneroSyncInfo getSyncInfo();
+  
   public MoneroHardForkInfo getHardForkInfo();
   
   public String setBan(MoneroBan ban );
@@ -78,6 +82,8 @@ public interface MoneroDaemon {
   
   public List<MoneroOutputHistogramEntry> getOutputHistogram(List<BigInteger> amounts, Integer minCount, Integer maxCount, Boolean isUnlocked, Integer recentCutoff);
   
+  public List<MoneroOutputDistributionEntry> getOutputDistribution(List<BigInteger> amounts, Boolean cumulative, Integer startHeight, Integer endHeight);
+  
   public MoneroCoinbaseTxSum getCoinbaseTxSum(Integer height, Integer count);
   
   public BigInteger getFeeEstimate(Integer graceBlocks);
@@ -88,5 +94,5 @@ public interface MoneroDaemon {
   
   public MoneroDaemonResponseInfo relayTxs(Collection<String> txIds);
   
-  public MoneroSyncInfo getSyncInfo();
+  public MoneroTxPoolBacklog getTxPoolBacklog();
 }
