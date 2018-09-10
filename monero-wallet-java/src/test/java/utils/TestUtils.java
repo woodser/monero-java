@@ -47,6 +47,8 @@ public class TestUtils {
       // connect to wallet
       try {
         wallet = new MoneroWalletRpc(DOMAIN, PORT, USERNAME, PASSWORD);
+        wallet.rescanBlockchain();
+        wallet.rescanSpent();
       } catch (URISyntaxException e1) {
         throw new RuntimeException(e1);
       }
