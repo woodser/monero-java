@@ -9,5 +9,5 @@ public class MoneroCoinbaseTxSum {
 
   private BigInteger emissionSum;
   private BigInteger feeSum;
-  private MoneroDaemonResponseInfo responseInfo;
+  private MoneroDaemonStatus responseInfo;
 }
