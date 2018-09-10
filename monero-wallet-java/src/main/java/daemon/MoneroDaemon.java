@@ -13,6 +13,7 @@ import daemon.model.MoneroCoinbaseTxSum;
 import daemon.model.MoneroDaemonConnection;
 import daemon.model.MoneroDaemonInfo;
 import daemon.model.MoneroDaemonStatus;
+import daemon.model.MoneroFeeEstimate;
 import daemon.model.MoneroHardForkInfo;
 import daemon.model.MoneroOutputDistributionEntry;
 import daemon.model.MoneroOutputHistogramEntry;
@@ -48,15 +49,6 @@ public interface MoneroDaemon {
   
   public MoneroDaemonInfo getInfo();
   
-  /**
-   * Returns the daemon version.
-   * 
-   * TODO: incorporate into getInfo()?
-   * 
-   * @return String is the daemon version
-   */
-  public String getVersion();
-  
   public MoneroSyncInfo getSyncInfo();
   
   public MoneroHardForkInfo getHardForkInfo();
@@ -86,7 +78,7 @@ public interface MoneroDaemon {
   
   public MoneroCoinbaseTxSum getCoinbaseTxSum(Integer height, Integer count);
   
-  public BigInteger getFeeEstimate(Integer graceBlocks);
+  public MoneroFeeEstimate getFeeEstimate(Integer graceBlocks);
   
   public List<MoneroChain> getAlternativeChains();
   

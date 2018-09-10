@@ -1,6 +1,6 @@
 package daemon.model;
 
-public class MoneroTxPoolBacklog {
+public class MoneroTxPoolBacklog extends MoneroDaemonStatus {
 
   private String backlog;
 }

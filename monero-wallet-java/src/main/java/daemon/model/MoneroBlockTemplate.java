@@ -3,7 +3,7 @@ package daemon.model;
 /**
  * Monero block template to mine.
  */
-public class MoneroBlockTemplate {
+public class MoneroBlockTemplate extends MoneroDaemonStatus {
 
   private String templateBlob;
   private String hashBlob;
@@ -12,6 +12,4 @@ public class MoneroBlockTemplate {
   private Integer height;
   private String prevHash;
   private Integer reservedOffset;
-  private String status;
-  private Boolean isUntrusted;
 }

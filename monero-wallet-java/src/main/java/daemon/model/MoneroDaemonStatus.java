@@ -1,12 +1,12 @@
 package daemon.model;
 
 /**
- * Monero daemon status when request is sent and response received.
+ * Base daemon model including status.
  */
 public class MoneroDaemonStatus {
 
   private String status;
-  private Boolean isUntrusted;
+  private Boolean isTrusted;
   
   public String getStatus() {
     return status;
@@ -16,11 +16,11 @@ public class MoneroDaemonStatus {
     this.status = status;
   }
   
-  public Boolean getIsUntrusted() {
-    return isUntrusted;
+  public Boolean getIsTrusted() {
+    return isTrusted;
   }
   
-  public void setIsUntrusted(Boolean isUntrusted) {
-    this.isUntrusted = isUntrusted;
+  public void setIsTrusted(Boolean isTrusted) {
+    this.isTrusted = isTrusted;
   }
 }

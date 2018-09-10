@@ -5,9 +5,8 @@ import java.math.BigInteger;
 /**
  * Model for the summation of coinbase emissions and fees.
  */
-public class MoneroCoinbaseTxSum {
+public class MoneroCoinbaseTxSum extends MoneroDaemonStatus {
 
   private BigInteger emissionSum;
   private BigInteger feeSum;
-  private MoneroDaemonStatus responseInfo;
 }

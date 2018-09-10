@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Models daemon synchronization information.
  */
-public class MoneroSyncInfo {
+public class MoneroSyncInfo extends MoneroDaemonStatus {
 
   private Integer height;
   private List<MoneroDaemonConnection> peers;
