@@ -6,6 +6,7 @@ import java.util.List;
 
 import daemon.model.MoneroBan;
 import daemon.model.MoneroBlock;
+import daemon.model.MoneroBlockCount;
 import daemon.model.MoneroBlockHeader;
 import daemon.model.MoneroBlockTemplate;
 import daemon.model.MoneroChain;
@@ -25,13 +26,13 @@ import daemon.model.MoneroTxPoolBacklog;
  */
 public interface MoneroDaemon {
 
-  public void getBlockCount();
+  public MoneroBlockCount getBlockCount();
   
-  public void getBlockHash(int height);
+  public String getBlockHash(int height);
   
   public MoneroBlockTemplate getBlockTemplate(String walletAddress, int reserveSize);
   
-  public String submitBlock(String blockBlob);
+  public MoneroDaemonStatus submitBlock(String blockBlob);
   
   public MoneroBlockHeader getLastBlockHeader();  
   
