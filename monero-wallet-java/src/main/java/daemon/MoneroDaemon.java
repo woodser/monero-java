@@ -8,6 +8,7 @@ import daemon.model.MoneroBan;
 import daemon.model.MoneroBlock;
 import daemon.model.MoneroBlockHeader;
 import daemon.model.MoneroBlockTemplate;
+import daemon.model.MoneroCoinbaseTxSum;
 import daemon.model.MoneroDaemonConnection;
 import daemon.model.MoneroDaemonInfo;
 import daemon.model.MoneroHardForkInfo;
@@ -65,5 +66,5 @@ public interface MoneroDaemon {
   
   public List<MoneroOutputHistogramEntry> getOutputHistogram(List<BigInteger> amounts, Integer minCount, Integer maxCount, Boolean isUnlocked, Integer recentCutoff);
   
-  
+  public MoneroCoinbaseTxSum getCoinbaseTxSum(Integer height, Integer count);
 }
