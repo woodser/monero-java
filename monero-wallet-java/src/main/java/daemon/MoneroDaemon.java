@@ -8,11 +8,14 @@ import daemon.model.MoneroBan;
 import daemon.model.MoneroBlock;
 import daemon.model.MoneroBlockHeader;
 import daemon.model.MoneroBlockTemplate;
+import daemon.model.MoneroChain;
 import daemon.model.MoneroCoinbaseTxSum;
 import daemon.model.MoneroDaemonConnection;
 import daemon.model.MoneroDaemonInfo;
+import daemon.model.MoneroDaemonResponseInfo;
 import daemon.model.MoneroHardForkInfo;
 import daemon.model.MoneroOutputHistogramEntry;
+import daemon.model.MoneroSyncInfo;
 
 /**
  * Monero daemon interface.
@@ -43,6 +46,15 @@ public interface MoneroDaemon {
   
   public MoneroDaemonInfo getInfo();
   
+  /**
+   * Returns the daemon version.
+   * 
+   * TODO: incorporate into getInfo()?
+   * 
+   * @return String is the daemon version
+   */
+  public String getVersion();
+  
   public MoneroHardForkInfo getHardForkInfo();
   
   public String setBan(MoneroBan ban );
@@ -67,4 +79,14 @@ public interface MoneroDaemon {
   public List<MoneroOutputHistogramEntry> getOutputHistogram(List<BigInteger> amounts, Integer minCount, Integer maxCount, Boolean isUnlocked, Integer recentCutoff);
   
   public MoneroCoinbaseTxSum getCoinbaseTxSum(Integer height, Integer count);
+  
+  public BigInteger getFeeEstimate(Integer graceBlocks);
+  
+  public List<MoneroChain> getAlternativeChains();
+  
+  public MoneroDaemonResponseInfo relayTx(String txId);
+  
+  public MoneroDaemonResponseInfo relayTxs(Collection<String> txIds);
+  
+  public MoneroSyncInfo getSyncInfo();
 }
