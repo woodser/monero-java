@@ -1,5 +1,6 @@
 package daemon;
 
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import daemon.model.MoneroBlockTemplate;
 import daemon.model.MoneroDaemonConnection;
 import daemon.model.MoneroDaemonInfo;
 import daemon.model.MoneroHardForkInfo;
+import daemon.model.MoneroOutputHistogramEntry;
 
 /**
  * Monero daemon interface.
@@ -60,4 +62,8 @@ public interface MoneroDaemon {
    * @return String is the resulting RPC error code. "OK" means everything looks good
    */
   public String flushTxPool(Collection<String> txIds);
+  
+  public List<MoneroOutputHistogramEntry> getOutputHistogram(List<BigInteger> amounts, Integer minCount, Integer maxCount, Boolean isUnlocked, Integer recentCutoff);
+  
+  
 }
