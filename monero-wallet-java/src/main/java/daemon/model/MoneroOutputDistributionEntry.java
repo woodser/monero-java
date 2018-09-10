@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Monero output distribution entry.
  */
-public class MoneroOutputDistributionEntry {
+public class MoneroOutputDistributionEntry extends MoneroDaemonStatus {
 
   private BigInteger amount;
   private Integer base;

@@ -5,7 +5,7 @@ import java.math.BigInteger;
 /**
  * Monero block header information.
  */
-public class MoneroBlockHeader {
+public class MoneroBlockHeader extends MoneroDaemonStatus {
   
   private Integer size;
   private Integer depth;
@@ -20,6 +20,4 @@ public class MoneroBlockHeader {
   private String prevHash;
   private BigInteger reward;
   private Long timestamp;
-  private String status;
-  private Boolean isUntrusted;
 }

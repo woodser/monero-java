@@ -3,7 +3,7 @@ package daemon.model;
 /**
  * Monero hard fork info.
  */
-public class MoneroHardForkInfo {
+public class MoneroHardForkInfo extends MoneroDaemonStatus {
 
   private Integer earliestHeight;
   private Boolean isEnabled;

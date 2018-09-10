@@ -3,7 +3,7 @@ package daemon.model;
 /**
  * Monero daemon info.
  */
-public class MoneroDaemonInfo {
+public class MoneroDaemonInfo extends MoneroDaemonStatus {
   
   private Integer altBlocksCount;
   private Integer blockSizeLimit;
@@ -31,6 +31,4 @@ public class MoneroDaemonInfo {
   private Integer txPoolSize;
   private Boolean wasBootstrapEverUsed;
   private Integer version;
-  private String status;
-  private Boolean isUntrusted;
 }
