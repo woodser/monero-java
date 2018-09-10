@@ -1,7 +1,9 @@
 package daemon;
 
+import java.util.Collection;
 import java.util.List;
 
+import daemon.model.MoneroBan;
 import daemon.model.MoneroBlock;
 import daemon.model.MoneroBlockHeader;
 import daemon.model.MoneroBlockTemplate;
@@ -39,4 +41,8 @@ public interface MoneroDaemon {
   public MoneroDaemonInfo getInfo();
   
   public MoneroHardForkInfo getHardForkInfo();
+  
+  public String setBan(MoneroBan ban );
+  
+  public String setBans(Collection<MoneroBan> bans);
 }
