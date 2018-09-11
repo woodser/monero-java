@@ -31,14 +31,43 @@ import wallet.model.MoneroTx;
  */
 public interface MoneroDaemon {
 
+  /**
+   * Get how many blocks are in the longest chain known to the node.
+   * 
+   * @return MoneroBlockCount contains the block count and response status
+   */
   public MoneroBlockCount getBlockCount();
   
+  /**
+   * Get a block's hash by its height.
+   * 
+   * @param height is the height of the block hash to get
+   * @return String is the block hash at the given height
+   */
   public String getBlockHash(int height);
   
+  /**
+   * Get a block template for mining a new block.
+   * 
+   * @param walletAddress is the address of the wallet to receive coinbase transactions if block is successfully mined
+   * @param reserveSize is the reserve size
+   * @return MoneroBlockTemplate is a block template for mining a new block
+   */
   public MoneroBlockTemplate getBlockTemplate(String walletAddress, int reserveSize);
   
+  /**
+   * Submit a mined block to the network.
+   * 
+   * @param blockBlob is the mined block to submit
+   * @return MoneroDaemonModel contains response status
+   */
   public MoneroDaemonModel submitBlock(String blockBlob);
   
+  /**
+   * Get the last block's header.
+   * 
+   * @return MoneroBlockHeader is the last block's header
+   */
   public MoneroBlockHeader getLastBlockHeader();  
   
   public MoneroBlockHeader getBlockHeader(String hash);
