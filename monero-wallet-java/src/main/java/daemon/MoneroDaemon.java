@@ -68,7 +68,7 @@ public interface MoneroDaemon {
    * 
    * @return MoneroBlockHeader is the last block's header
    */
-  public MoneroBlockHeader getLastBlockHeader();  
+  public MoneroBlockHeader getLastBlockHeader();
   
   public MoneroBlockHeader getBlockHeader(String hash);
   
