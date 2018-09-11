@@ -6,4 +6,12 @@ package daemon.model;
 public class MoneroBlockCount extends MoneroDaemonModel {
 
   private Integer count;
+
+  public Integer getCount() {
+    return count;
+  }
+
+  public void setCount(Integer count) {
+    this.count = count;
+  }
 }
