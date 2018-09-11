@@ -12,16 +12,19 @@ import daemon.model.MoneroBlockHeader;
 import daemon.model.MoneroBlockTemplate;
 import daemon.model.MoneroChain;
 import daemon.model.MoneroCoinbaseTxSum;
+import daemon.model.MoneroDaemonBandwidth;
 import daemon.model.MoneroDaemonConnection;
 import daemon.model.MoneroDaemonInfo;
 import daemon.model.MoneroDaemonModel;
 import daemon.model.MoneroFeeEstimate;
 import daemon.model.MoneroHardForkInfo;
+import daemon.model.MoneroMiningStatus;
 import daemon.model.MoneroOutputDistributionEntry;
 import daemon.model.MoneroOutputHistogramEntry;
 import daemon.model.MoneroSyncInfo;
 import daemon.model.MoneroTxPoolBacklog;
 import wallet.model.MoneroKeyImage;
+import wallet.model.MoneroTx;
 
 /**
  * Monero daemon interface.
@@ -63,7 +66,7 @@ public interface MoneroDaemon {
   /**
    * Flush all transactions from the transaction pool.
    * 
-   * @return String is the resulting RPC error code. "OK" means everything looks good
+   * @return MoneroDaemonModel contains response information
    */
   public MoneroDaemonModel flushTxPool();
   
@@ -71,7 +74,7 @@ public interface MoneroDaemon {
    * Flush specific transactions from the transaction pool or all if none specified.
    * 
    * @param txIds are transactions to flush from the pool, or all if none provided
-   * @return 
+   * @return MoneroDaemonModel contains response information
    */
   public MoneroDaemonModel flushTxPool(Collection<String> txIds);
   
@@ -94,4 +97,20 @@ public interface MoneroDaemon {
   public MoneroBlockHashes getAltBlockHashes();
   
   public List<MoneroKeyImage> isKeyImageSpent(Collection<String> keyImageHexes);
+  
+  public List<MoneroTx> getTxs(Collection<String> hashes, Boolean prune);
+  
+  public MoneroDaemonModel startMining(String address, Integer numThreads, Boolean backgroundMining, Boolean ignoreBattery);
+  
+  public MoneroDaemonModel stopMining();
+  
+  public MoneroMiningStatus getMiningStatus();
+  
+  public MoneroDaemonModel setBandwidthLimit(Integer limitDown, Integer limitUp);
+  
+  public MoneroDaemonBandwidth getBandwidthLimit();
+  
+  public MoneroDaemonModel setNumOutgoingLimit(int limit);
+  
+  public MoneroDaemonModel setNumIncomingLimit(int limit);
 }
