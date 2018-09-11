@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import daemon.model.MoneroBan;
-import daemon.model.MoneroDaemonStatus;
+import daemon.model.MoneroDaemonModel;
 
 /**
  * Default Monero daemon implementation.
@@ -12,12 +12,12 @@ import daemon.model.MoneroDaemonStatus;
 public abstract class MoneroDaemonDefault implements MoneroDaemon {
 
   @Override
-  public MoneroDaemonStatus setBan(MoneroBan ban) {
+  public MoneroDaemonModel setBan(MoneroBan ban) {
     throw new RuntimeException("Not implemented");
   }
   
   @Override
-  public MoneroDaemonStatus relayTx(String txId) {
+  public MoneroDaemonModel relayTx(String txId) {
     Collection<String> txIds = new ArrayList<>();
     txIds.add(txId);
     return relayTxs(txIds);

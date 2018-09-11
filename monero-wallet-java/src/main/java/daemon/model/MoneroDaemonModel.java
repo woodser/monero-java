@@ -3,7 +3,7 @@ package daemon.model;
 /**
  * Base daemon model including status.
  */
-public class MoneroDaemonStatus {
+public class MoneroDaemonModel {
 
   private String status;
   private Boolean isTrusted;
