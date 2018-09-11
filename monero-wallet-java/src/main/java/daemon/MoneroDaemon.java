@@ -7,6 +7,7 @@ import java.util.List;
 import daemon.model.MoneroBan;
 import daemon.model.MoneroBlock;
 import daemon.model.MoneroBlockCount;
+import daemon.model.MoneroBlockHashes;
 import daemon.model.MoneroBlockHeader;
 import daemon.model.MoneroBlockTemplate;
 import daemon.model.MoneroChain;
@@ -89,6 +90,8 @@ public interface MoneroDaemon {
   public MoneroDaemonModel relayTxs(Collection<String> txIds);
   
   public MoneroTxPoolBacklog getTxPoolBacklog();
+  
+  public MoneroBlockHashes getAltBlockHashes();
   
   public List<MoneroKeyImage> isKeyImageSpent(Collection<String> keyImageHexes);
 }
