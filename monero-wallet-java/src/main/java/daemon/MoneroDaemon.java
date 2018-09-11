@@ -13,7 +13,7 @@ import daemon.model.MoneroChain;
 import daemon.model.MoneroCoinbaseTxSum;
 import daemon.model.MoneroDaemonConnection;
 import daemon.model.MoneroDaemonInfo;
-import daemon.model.MoneroDaemonStatus;
+import daemon.model.MoneroDaemonModel;
 import daemon.model.MoneroFeeEstimate;
 import daemon.model.MoneroHardForkInfo;
 import daemon.model.MoneroOutputDistributionEntry;
@@ -32,7 +32,7 @@ public interface MoneroDaemon {
   
   public MoneroBlockTemplate getBlockTemplate(String walletAddress, int reserveSize);
   
-  public MoneroDaemonStatus submitBlock(String blockBlob);
+  public MoneroDaemonModel submitBlock(String blockBlob);
   
   public MoneroBlockHeader getLastBlockHeader();  
   
@@ -54,16 +54,16 @@ public interface MoneroDaemon {
   
   public MoneroHardForkInfo getHardForkInfo();
   
-  public MoneroDaemonStatus setBan(MoneroBan ban );
+  public MoneroDaemonModel setBan(MoneroBan ban );
   
-  public MoneroDaemonStatus setBans(Collection<MoneroBan> bans);
+  public MoneroDaemonModel setBans(Collection<MoneroBan> bans);
   
   /**
    * Flush all transactions from the transaction pool.
    * 
    * @return String is the resulting RPC error code. "OK" means everything looks good
    */
-  public MoneroDaemonStatus flushTxPool();
+  public MoneroDaemonModel flushTxPool();
   
   /**
    * Flush specific transactions from the transaction pool or all if none specified.
@@ -71,7 +71,7 @@ public interface MoneroDaemon {
    * @param txIds are transactions to flush from the pool, or all if none provided
    * @return 
    */
-  public MoneroDaemonStatus flushTxPool(Collection<String> txIds);
+  public MoneroDaemonModel flushTxPool(Collection<String> txIds);
   
   public List<MoneroOutputHistogramEntry> getOutputHistogram(List<BigInteger> amounts, Integer minCount, Integer maxCount, Boolean isUnlocked, Integer recentCutoff);
   
@@ -83,9 +83,11 @@ public interface MoneroDaemon {
   
   public List<MoneroChain> getAlternativeChains();
   
-  public MoneroDaemonStatus relayTx(String txId);
+  public MoneroDaemonModel relayTx(String txId);
   
-  public MoneroDaemonStatus relayTxs(Collection<String> txIds);
+  public MoneroDaemonModel relayTxs(Collection<String> txIds);
   
   public MoneroTxPoolBacklog getTxPoolBacklog();
+  
+  public void isKeyImageSpent(Collection<String> keyImageHexes);
 }

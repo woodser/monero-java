@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Monero block.
  */
-public class MoneroBlock extends MoneroDaemonStatus {
+public class MoneroBlock extends MoneroDaemonModel {
 
   private String blob;
   private String header;
