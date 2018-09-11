@@ -8,6 +8,9 @@ import java.net.URISyntaxException;
 
 import org.apache.log4j.PropertyConfigurator;
 
+import daemon.MoneroDaemon;
+import daemon.MoneroDaemonRpc;
+import rpc.MoneroRpc;
 import wallet.MoneroWallet;
 import wallet.MoneroWalletRpc;
 import wallet.model.MoneroAccount;
@@ -23,11 +26,15 @@ import wallet.model.MoneroTx.MoneroTxType;
  */
 public class TestUtils {
   
+  // monero-daemon-rpc endpoint configuration (adjust per your configuration)
+  private static final String DAEMON_RPC_DOMAIN = "localhost";
+  private static final int DAEMON_RPC_PORT = 38081;
+  
   // monero-wallet-rpc endpoint configuration (adjust per your configuration)
-  private static final String DOMAIN = "localhost";
-  private static final int PORT = 38083;
-  private static final String USERNAME = "rpc_user";
-  private static final String PASSWORD = "abc123";
+  private static final String WALLET_RPC_DOMAIN = "localhost";
+  private static final int WALLET_RPC_PORT = 38083;
+  private static final String WALLET_RPC_USERNAME = "rpc_user";
+  private static final String WALLET_RPC_PASSWORD = "abc123";
   
   // names of test wallets
   public static final String WALLET_NAME_1 = "test_wallet_1";
@@ -39,14 +46,30 @@ public class TestUtils {
     PropertyConfigurator.configure("src/main/resources/log4j.properties");
   }
   
-  // singleton instance of the wallet to be tested
+  // singleton instance of a Daemon to test
+  private static MoneroDaemon daemon;
+  public static MoneroDaemon getDaemon() {
+    if (daemon == null) {
+      
+      // connect to daemon
+      try {
+        MoneroRpc rpc = new MoneroRpc(DAEMON_RPC_DOMAIN, DAEMON_RPC_PORT);
+        daemon = new MoneroDaemonRpc(rpc);
+      } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return daemon;
+  }
+  
+  // singleton instance of the wallet to test
   private static MoneroWallet wallet;
   public static MoneroWallet getWallet() {
     if (wallet == null) {
       
       // connect to wallet
       try {
-        wallet = new MoneroWalletRpc(DOMAIN, PORT, USERNAME, PASSWORD);
+        wallet = new MoneroWalletRpc(WALLET_RPC_DOMAIN, WALLET_RPC_PORT, WALLET_RPC_USERNAME, WALLET_RPC_PASSWORD);
         wallet.rescanBlockchain();
         wallet.rescanSpent();
       } catch (URISyntaxException e1) {
