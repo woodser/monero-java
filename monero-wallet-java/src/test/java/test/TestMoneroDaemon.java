@@ -29,7 +29,6 @@ public class TestMoneroDaemon {
   public void testGetBlockCount() {
     MoneroBlockCount blockCount = daemon.getBlockCount();
     testDaemonStatus(blockCount);
-    //testing
     assertNotNull(blockCount.getCount());
   }
 
