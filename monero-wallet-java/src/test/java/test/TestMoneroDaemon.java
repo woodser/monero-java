@@ -2,6 +2,7 @@ package test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -10,6 +11,7 @@ import org.junit.Test;
 
 import daemon.MoneroDaemon;
 import daemon.model.MoneroBlockCount;
+import daemon.model.MoneroBlockHeader;
 import daemon.model.MoneroDaemonModel;
 import utils.TestUtils;
 
@@ -28,13 +30,17 @@ public class TestMoneroDaemon {
   @Test
   public void testGetBlockCount() {
     MoneroBlockCount blockCount = daemon.getBlockCount();
-    testDaemonStatus(blockCount);
+    testDaemonStatus(blockCount, true, false);
     assertNotNull(blockCount.getCount());
+    assertTrue(blockCount.getCount().intValue() > 0);
   }
 
   @Test
   public void testGetBlockHash() {
-    fail("Not yet implemented");
+    MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
+    String hash = daemon.getBlockHash(lastHeader.getHeight());
+    assertNotNull(hash);
+    assertEquals(64, hash.length());
   }
 
   @Test
@@ -49,7 +55,9 @@ public class TestMoneroDaemon {
 
   @Test
   public void testGetLastBlockHeader() {
-    fail("Not yet implemented");
+    MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
+    testDaemonStatus(lastHeader, true, true);
+    testBlockHeader(lastHeader);
   }
 
   @Test
@@ -207,10 +215,34 @@ public class TestMoneroDaemon {
     fail("Not yet implemented");
   }
 
-  private static void testDaemonStatus(MoneroDaemonModel model) {
-    assertTrue(model.getStatus() != null || model.isTrusted() != null);
-    if (model.getStatus() != null) {
+  private static void testDaemonStatus(MoneroDaemonModel model, boolean initializedStatus, boolean initializedIsUntrusted) {
+    if (initializedStatus) {
       assertEquals("OK", model.getStatus());
+    } else {
+      assertNull(model.getStatus());
     }
+    if (initializedIsUntrusted) {
+      assertNotNull(model.isTrusted());
+    } else {
+      assertNull(model.isTrusted());
+    }
+  }
+  
+  private static void testBlockHeader(MoneroBlockHeader header) {
+    assertNotNull(header.getBlockSize());
+    assertNotNull(header.getDepth());
+    assertNotNull(header.getDepth());
+    assertNotNull(header.getDifficulty());
+    assertNotNull(header.getHash());
+    assertNotNull(header.getHeight());
+    assertNotNull(header.getMajorVersion());
+    assertNotNull(header.getMinorVersion());
+    assertNotNull(header.getNonce());
+    assertNotNull(header.getNumTxs());
+    assertNotNull(header.getOrphanStatus());
+    assertNotNull(header.getPrevHash());
+    assertNotNull(header.getReward());
+    assertNotNull(header.getTimestamp());
+    
   }
 }
