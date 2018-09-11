@@ -12,6 +12,7 @@ import org.junit.Test;
 import daemon.MoneroDaemon;
 import daemon.model.MoneroBlockCount;
 import daemon.model.MoneroBlockHeader;
+import daemon.model.MoneroBlockTemplate;
 import daemon.model.MoneroDaemonModel;
 import utils.TestUtils;
 
@@ -45,12 +46,9 @@ public class TestMoneroDaemon {
 
   @Test
   public void testGetBlockTemplate() {
-    fail("Not yet implemented");
-  }
-
-  @Test
-  public void testSubmitBlock() {
-    fail("Not yet implemented");
+    MoneroBlockTemplate template = daemon.getBlockTemplate("49hNury7mhADaH5r4buqRK9Mt5yFSPZdHanYcZzuNUV1fGRoVABHpnd81bUdTSZk5MaCb5ptsVSVAEusrmr61iX83FFTAuF", 2);
+    testDaemonStatus(template, true, true);
+    testBlockTemplate(template);
   }
 
   @Test
@@ -61,13 +59,39 @@ public class TestMoneroDaemon {
   }
 
   @Test
-  public void testGetBlockHeaderString() {
-    fail("Not yet implemented");
+  public void testGetBlockHeaderByHash() {
+    
+    // retrieve by hash of last block
+    MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
+    String hash = daemon.getBlockHash(lastHeader.getHeight());
+    MoneroBlockHeader header = daemon.getBlockHeader(hash);
+    testDaemonStatus(header, true, true);
+    testBlockHeader(header);
+    assertEquals(lastHeader, header);
+    
+    // retrieve by hash of previous to last block
+    hash = daemon.getBlockHash(lastHeader.getHeight() - 1);
+    header = daemon.getBlockHeader(hash);
+    testDaemonStatus(header, true, true);
+    testBlockHeader(header);
+    assertEquals((int) lastHeader.getHeight() - 1, (int) header.getHeight()); 
   }
 
   @Test
-  public void testGetBlockHeaderInt() {
-    fail("Not yet implemented");
+  public void testGetBlockHeaderByHeight() {
+    
+    // retrieve by height of last block
+    MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
+    MoneroBlockHeader header = daemon.getBlockHeader(lastHeader.getHeight());
+    testDaemonStatus(header, true, true);
+    testBlockHeader(header);
+    assertEquals(lastHeader, header);
+    
+    // retrieve by height of previous to last block
+    header = daemon.getBlockHeader(lastHeader.getHeight() - 1);
+    testDaemonStatus(header, true, true);
+    testBlockHeader(header);
+    assertEquals((int) lastHeader.getHeight() - 1, (int) header.getHeight()); 
   }
 
   @Test
@@ -214,6 +238,11 @@ public class TestMoneroDaemon {
   public void testSetNumIncomingLimit() {
     fail("Not yet implemented");
   }
+  
+  @Test
+  public void testSubmitBlock() {
+    fail("Not yet implemented");
+  }
 
   private static void testDaemonStatus(MoneroDaemonModel model, boolean initializedStatus, boolean initializedIsUntrusted) {
     if (initializedStatus) {
@@ -242,7 +271,17 @@ public class TestMoneroDaemon {
     assertNotNull(header.getOrphanStatus());
     assertNotNull(header.getPrevHash());
     assertNotNull(header.getReward());
-    assertNotNull(header.getTimestamp());
+    assertNotNull(header.getTimestamp()); 
+  }
+  
+  private static void testBlockTemplate(MoneroBlockTemplate template) {
+    assertNotNull(template.getTemplateBlob());
+    assertNotNull(template.getHashBlob());
+    assertNotNull(template.getDifficulty());
+    assertNotNull(template.getExpectedReward());
+    assertNotNull(template.getHeight());
+    assertNotNull(template.getPrevHash());
+    assertNotNull(template.getReservedOffset());
     
   }
 }
