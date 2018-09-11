@@ -16,11 +16,11 @@ public class MoneroDaemonStatus {
     this.status = status;
   }
   
-  public Boolean getIsTrusted() {
+  public Boolean isTrusted() {
     return isTrusted;
   }
   
-  public void setIsTrusted(Boolean isTrusted) {
+  public void setTrusted(Boolean isTrusted) {
     this.isTrusted = isTrusted;
   }
 }
