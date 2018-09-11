@@ -20,6 +20,7 @@ import daemon.model.MoneroOutputDistributionEntry;
 import daemon.model.MoneroOutputHistogramEntry;
 import daemon.model.MoneroSyncInfo;
 import daemon.model.MoneroTxPoolBacklog;
+import wallet.model.MoneroKeyImage;
 
 /**
  * Monero daemon interface.
@@ -89,5 +90,5 @@ public interface MoneroDaemon {
   
   public MoneroTxPoolBacklog getTxPoolBacklog();
   
-  public void isKeyImageSpent(Collection<String> keyImageHexes);
+  public List<MoneroKeyImage> isKeyImageSpent(Collection<String> keyImageHexes);
 }
