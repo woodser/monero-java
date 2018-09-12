@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.List;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -96,7 +98,23 @@ public class TestMoneroDaemon {
 
   @Test
   public void testGetBlockHeaders() {
-    fail("Not yet implemented");
+    
+    // retrieve X blocks Y blocks ago
+    int NUM_BLOCKS = 25;
+    int NUM_BLOCKS_AGO = 100;
+    int currentHeight = daemon.getInfo().getHeight();
+    int startHeight = currentHeight - NUM_BLOCKS_AGO;
+    int endHeight = currentHeight - (NUM_BLOCKS_AGO - NUM_BLOCKS);
+    List<MoneroBlockHeader> headers = daemon.getBlockHeaders(startHeight, endHeight);
+    
+    // test blocks
+    assertEquals(NUM_BLOCKS, headers.size());
+    for (int i = 0; i < NUM_BLOCKS; i++) {
+      MoneroBlockHeader header = headers.get(startHeight + i);
+      assertEquals((int) startHeight + i, (int) header.getHeight());
+      testDaemonStatus(header, true, true);
+      testBlockHeader(header);
+    }
   }
 
   @Test
