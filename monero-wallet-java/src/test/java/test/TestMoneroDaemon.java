@@ -26,6 +26,7 @@ import daemon.model.MoneroDaemonConnectionSpan;
 import daemon.model.MoneroDaemonInfo;
 import daemon.model.MoneroDaemonModel;
 import daemon.model.MoneroDaemonSyncInfo;
+import daemon.model.MoneroFeeEstimate;
 import daemon.model.MoneroHardForkInfo;
 import daemon.model.MoneroOutputDistributionEntry;
 import daemon.model.MoneroOutputHistogramEntry;
@@ -33,6 +34,8 @@ import utils.TestUtils;
 
 /**
  * Tests a Monero daemon.
+ * 
+ * TODO: test input variations more thoroughly
  */
 public class TestMoneroDaemon {
   
@@ -290,7 +293,9 @@ public class TestMoneroDaemon {
 
   @Test
   public void testGetFeeEstimate() {
-    fail("Not yet implemented");
+    MoneroFeeEstimate estimate = daemon.getFeeEstimate(null);
+    testDaemonResponseInfo(estimate, true, true);
+    assertNotNull(estimate.getFeeEstimate());
   }
 
   @Test
