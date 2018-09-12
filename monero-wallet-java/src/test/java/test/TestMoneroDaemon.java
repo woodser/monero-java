@@ -20,6 +20,7 @@ import daemon.model.MoneroBlock;
 import daemon.model.MoneroBlockCount;
 import daemon.model.MoneroBlockHeader;
 import daemon.model.MoneroBlockTemplate;
+import daemon.model.MoneroChain;
 import daemon.model.MoneroCoinbaseTxSum;
 import daemon.model.MoneroDaemonConnection;
 import daemon.model.MoneroDaemonConnectionSpan;
@@ -300,6 +301,13 @@ public class TestMoneroDaemon {
 
   @Test
   public void testGetAlternativeChains() {
+    Collection<MoneroChain> chains = daemon.getAlternativeChains();
+    assertFalse(chains.isEmpty());
+    for (MoneroChain chain : chains) {
+      testDaemonResponseInfo(chain, true, true);
+      testMoneroChain(chain);
+    }
+    
     fail("Not yet implemented");
   }
 
@@ -527,5 +535,12 @@ public class TestMoneroDaemon {
   private static void testCoinbaseTxSum(MoneroCoinbaseTxSum sum) {
     assertNotNull(sum.getEmissionSum());
     assertNotNull(sum.getFeeSum());
+  }
+  
+  private static void testMoneroChain(MoneroChain chain) {
+    assertNotNull(chain.getBlockHash());
+    assertNotNull(chain.getDifficulty());
+    assertNotNull(chain.getHeight());
+    assertNotNull(chain.getLength());
   }
 }
