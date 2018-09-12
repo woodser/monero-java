@@ -112,9 +112,16 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroBlock getBlock(String hash) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("hash", hash);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_block", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroBlock block = interpretBlock((Map<String, Object>) resultMap);
+    setResponseInfo(resultMap, block);
+    return block;
   }
 
   @Override
@@ -257,7 +264,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
   
   /**
-   * Initializes a MoneroBlockHeader from a header response map.
+   * Initializes a MoneroBlockHeader from a RPC header response map.
    * 
    * @param headerMap is the map to initialize the block header from
    * @return MoneroBlockHeader is the initialized block header
@@ -282,5 +289,19 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else LOGGER.warn("Ignoring unexpected block header field: '" + key + "'");
     }
     return header;
+  }
+  
+  /**
+   * Initializes a MoneroBlock from a RPC response map.
+   * 
+   * @param resultMap is the RPC response map for a block
+   * @return MoneroBlock is a block initialized from the map
+   */
+  @SuppressWarnings("unchecked")
+  private static MoneroBlock interpretBlock(Map<String, Object> resultMap) {
+    MoneroBlock block = new MoneroBlock();
+    block.setBlob((String) resultMap.get("blob"));
+    block.setHeader(interpretBlockHeader((Map<String, Object>) resultMap.get("block_header")));
+    return block;
   }
 }

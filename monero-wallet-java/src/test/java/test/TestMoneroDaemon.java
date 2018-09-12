@@ -396,6 +396,7 @@ public class TestMoneroDaemon {
   }
   
   private static void testBlockHeader(MoneroBlockHeader header) {
+    assertNotNull(header);
     assertNotNull(header.getBlockSize());
     assertNotNull(header.getDepth());
     assertNotNull(header.getDepth());
@@ -413,6 +414,7 @@ public class TestMoneroDaemon {
   }
   
   private static void testBlockTemplate(MoneroBlockTemplate template) {
+    assertNotNull(template);
     assertNotNull(template.getTemplateBlob());
     assertNotNull(template.getHashBlob());
     assertNotNull(template.getDifficulty());
@@ -423,11 +425,13 @@ public class TestMoneroDaemon {
   }
   
   private static void testBlock(MoneroBlock block) {
+    assertNotNull(block);
     testBlockHeader(block.getHeader());
     throw new RuntimeException("Not implemented");
   }
   
   private static void testDaemonConnection(MoneroDaemonConnection connection) {
+    assertNotNull(connection);
     assertNotNull(connection.getId());
     assertNotNull(connection.getAddress());
     assertNotNull(connection.getAvgDownload());
