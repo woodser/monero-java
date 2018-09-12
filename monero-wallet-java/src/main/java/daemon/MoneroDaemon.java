@@ -16,12 +16,12 @@ import daemon.model.MoneroDaemonBandwidth;
 import daemon.model.MoneroDaemonConnection;
 import daemon.model.MoneroDaemonInfo;
 import daemon.model.MoneroDaemonModel;
+import daemon.model.MoneroDaemonSyncInfo;
 import daemon.model.MoneroFeeEstimate;
 import daemon.model.MoneroHardForkInfo;
 import daemon.model.MoneroMiningStatus;
 import daemon.model.MoneroOutputDistributionEntry;
 import daemon.model.MoneroOutputHistogramEntry;
-import daemon.model.MoneroDaemonSyncInfo;
 import daemon.model.MoneroTxPoolBacklog;
 import wallet.model.MoneroKeyImage;
 import wallet.model.MoneroTx;
@@ -91,6 +91,8 @@ public interface MoneroDaemon {
   public MoneroDaemonModel setBan(MoneroBan ban );
   
   public MoneroDaemonModel setBans(Collection<MoneroBan> bans);
+  
+  public Collection<MoneroBan> getBans();
   
   /**
    * Flush all transactions from the transaction pool.

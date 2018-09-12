@@ -7,12 +7,15 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import daemon.MoneroDaemon;
+import daemon.model.MoneroBan;
 import daemon.model.MoneroBlock;
 import daemon.model.MoneroBlockCount;
 import daemon.model.MoneroBlockHeader;
@@ -167,8 +170,6 @@ public class TestMoneroDaemon {
       testDaemonResponseInfo(connection, true, false);
       testDaemonConnection(connection);
     }
-    
-    fail("Not yet implemented");
   }
 
   @Test
@@ -194,12 +195,56 @@ public class TestMoneroDaemon {
 
   @Test
   public void testSetBan() {
-    fail("Not yet implemented");
+    
+    // set ban
+    MoneroBan ban = new MoneroBan();
+    ban.setHost("192.168.1.51");
+    ban.setIsBanned(true);
+    ban.setSeconds(60);
+    MoneroDaemonModel model = daemon.setBan(ban);
+    testDaemonResponseInfo(model, true, false);
+    
+    // test ban
+    Collection<MoneroBan> bans = daemon.getBans();
+    boolean found = false;
+    for (MoneroBan aBan : bans) {
+      testDaemonResponseInfo(aBan, true, false);
+      testMoneroBan(aBan);
+      if (aBan.getHost().equals("192.168.1.51")) found = true;
+    }
+    assertTrue(found);
   }
 
   @Test
   public void testSetBans() {
-    fail("Not yet implemented");
+    
+    // set bans
+    MoneroBan ban1 = new MoneroBan();
+    ban1.setHost("192.168.1.52");
+    ban1.setIsBanned(true);
+    ban1.setSeconds(60);
+    MoneroBan ban2 = new MoneroBan();
+    ban2.setHost("192.168.1.53");
+    ban2.setIsBanned(true);
+    ban2.setSeconds(60);
+    Collection<MoneroBan> bans = new ArrayList<MoneroBan>();
+    bans.add(ban1);
+    bans.add(ban2);
+    MoneroDaemonModel model = daemon.setBans(bans);
+    testDaemonResponseInfo(model, true, false);
+    
+    // test bans
+    bans = daemon.getBans();
+    boolean found1 = false;
+    boolean found2 = false;
+    for (MoneroBan aBan : bans) {
+      testDaemonResponseInfo(aBan, true, false);
+      testMoneroBan(aBan);
+      if (aBan.getHost().equals("192.168.1.52")) found1 = true;
+      if (aBan.getHost().equals("192.168.1.53")) found2 = true;
+    }
+    assertTrue(found1);
+    assertTrue(found2);
   }
 
   @Test
@@ -436,5 +481,11 @@ public class TestMoneroDaemon {
     assertNotNull(hardForkInfo.getVotes());
     assertNotNull(hardForkInfo.getVoting());
     assertNotNull(hardForkInfo.getWindow());
+  }
+  
+  public static void testMoneroBan(MoneroBan ban) {
+    assertNotNull(ban.getHost());
+    assertNotNull(ban.getIp());
+    assertNotNull(ban.getSeconds());
   }
 }
