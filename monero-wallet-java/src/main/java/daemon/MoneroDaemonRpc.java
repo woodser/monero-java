@@ -3,6 +3,7 @@ package daemon;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -89,9 +90,16 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return header;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroBlockHeader getBlockHeader(String hash) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("hash", hash);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_block_header_by_hash", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroBlockHeader header = interpretBlockHeader((Map<String, Object>) resultMap.get("block_header"));
+    setResponseInfo(resultMap, header);
+    return header;
   }
 
   @Override
