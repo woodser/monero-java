@@ -1,9 +1,12 @@
 package daemon;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.log4j.Logger;
 
 import daemon.model.MoneroBan;
 import daemon.model.MoneroBlock;
@@ -18,14 +21,15 @@ import daemon.model.MoneroDaemonConnection;
 import daemon.model.MoneroDaemonInfo;
 import daemon.model.MoneroDaemonModel;
 import daemon.model.MoneroDaemonResponseInfo;
+import daemon.model.MoneroDaemonSyncInfo;
 import daemon.model.MoneroFeeEstimate;
 import daemon.model.MoneroHardForkInfo;
 import daemon.model.MoneroMiningStatus;
 import daemon.model.MoneroOutputDistributionEntry;
 import daemon.model.MoneroOutputHistogramEntry;
-import daemon.model.MoneroDaemonSyncInfo;
 import daemon.model.MoneroTxPoolBacklog;
 import rpc.MoneroRpc;
+import wallet.MoneroWalletRpc;
 import wallet.model.MoneroKeyImage;
 import wallet.model.MoneroTx;
 
@@ -33,6 +37,9 @@ import wallet.model.MoneroTx;
  * Implements a Monero daemon using monero-daemon-rpc.
  */
 public class MoneroDaemonRpc extends MoneroDaemonDefault {
+  
+  // logger
+  private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class);
   
   private MoneroRpc rpc;
   
@@ -58,7 +65,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public String getBlockHash(int height) {
-    throw new RuntimeException("Not implemented");
+     Map<String, Object> respMap = rpc.sendRpcRequest("on_get_block_hash", Arrays.asList(height));
+     return (String) respMap.get("result");
   }
 
   @Override
@@ -71,9 +79,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroBlockHeader getLastBlockHeader() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_last_block_header");
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroBlockHeader header = interpretBlockHeader((Map<String, Object>) resultMap.get("block_header"));
+    setResponseInfo(resultMap, header);
+    return header;
   }
 
   @Override
@@ -233,5 +246,33 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     if (trusted != null) trusted = !trusted;
     responseInfo.setIsTrusted(trusted);
     model.setResponseInfo(responseInfo);
+  }
+  
+  /**
+   * Initializes a MoneroBlockHeader from a header response map.
+   * 
+   * @param headerMap is the map to initialize the block header from
+   * @return MoneroBlockHeader is the initialized block header
+   */
+  private static MoneroBlockHeader interpretBlockHeader(Map<String, Object> headerMap) {
+    MoneroBlockHeader header = new MoneroBlockHeader();
+    for (String key : headerMap.keySet()) {
+      Object val = headerMap.get(key);
+      if (key.equals("block_size")) header.setBlockSize(((BigInteger) val).intValue());
+      else if (key.equals("depth")) header.setDepth(((BigInteger) val).intValue());
+      else if (key.equals("difficulty")) header.setDifficulty((BigInteger) val);
+      else if (key.equals("hash")) header.setHash((String) val);
+      else if (key.equals("height")) header.setHeight(((BigInteger) val).intValue());
+      else if (key.equals("major_version")) header.setMajorVersion(((BigInteger) val).intValue());
+      else if (key.equals("minor_version")) header.setMinorVersion(((BigInteger) val).intValue());
+      else if (key.equals("nonce")) header.setNonce((BigInteger) val);
+      else if (key.equals("num_txes")) header.setNumTxs(((BigInteger) val).intValue());
+      else if (key.equals("orphan_status")) header.setOrphanStatus((Boolean) val);
+      else if (key.equals("prev_hash")) header.setPrevHash((String) val);
+      else if (key.equals("reward")) header.setReward((BigInteger) val);
+      else if (key.equals("timestamp")) header.setTimestamp(((BigInteger) val).longValue());
+      else LOGGER.warn("Ignoring unexpected block header field: '" + key + "'");
+    }
+    return header;
   }
 }
