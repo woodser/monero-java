@@ -20,12 +20,15 @@ import daemon.model.MoneroBlock;
 import daemon.model.MoneroBlockCount;
 import daemon.model.MoneroBlockHeader;
 import daemon.model.MoneroBlockTemplate;
+import daemon.model.MoneroCoinbaseTxSum;
 import daemon.model.MoneroDaemonConnection;
 import daemon.model.MoneroDaemonConnectionSpan;
 import daemon.model.MoneroDaemonInfo;
 import daemon.model.MoneroDaemonModel;
 import daemon.model.MoneroDaemonSyncInfo;
 import daemon.model.MoneroHardForkInfo;
+import daemon.model.MoneroOutputDistributionEntry;
+import daemon.model.MoneroOutputHistogramEntry;
 import utils.TestUtils;
 
 /**
@@ -260,17 +263,29 @@ public class TestMoneroDaemon {
 
   @Test
   public void testGetOutputHistogram() {
-    fail("Not yet implemented");
+    List<MoneroOutputHistogramEntry> entries = daemon.getOutputHistogram(null, null, null, null, null);
+    assertFalse(entries.isEmpty());
+    for (MoneroOutputHistogramEntry entry : entries) {
+      testDaemonResponseInfo(entry, true, true);
+      testOutputHistogramEntry(entry);
+    }
   }
 
   @Test
   public void testGetOutputDistribution() {
-    fail("Not yet implemented");
+    List<MoneroOutputDistributionEntry> entries = daemon.getOutputDistribution(null, null, null, null);
+    assertFalse(entries.isEmpty());
+    for (MoneroOutputDistributionEntry entry : entries) {
+      testDaemonResponseInfo(entry, true, true);
+      testOutputDistributionEntry(entry);
+    }
   }
 
   @Test
   public void testGetCoinbaseTxSum() {
-    fail("Not yet implemented");
+    MoneroCoinbaseTxSum sum = daemon.getCoinbaseTxSum(null, null);
+    testDaemonResponseInfo(sum, true, true);
+    testCoinbaseTxSum(sum);
   }
 
   @Test
@@ -484,9 +499,28 @@ public class TestMoneroDaemon {
     assertNotNull(hardForkInfo.getWindow());
   }
   
-  public static void testMoneroBan(MoneroBan ban) {
+  private static void testMoneroBan(MoneroBan ban) {
     assertNotNull(ban.getHost());
     assertNotNull(ban.getIp());
     assertNotNull(ban.getSeconds());
+  }
+  
+  private static void testOutputHistogramEntry(MoneroOutputHistogramEntry entry) {
+    assertNotNull(entry.getAmount());
+    assertNotNull(entry.getNumTotalInstances());
+    assertNotNull(entry.getNumUnlockedInstances());
+    assertNotNull(entry.getNumRecentInstances());
+  }
+  
+  private static void testOutputDistributionEntry(MoneroOutputDistributionEntry entry) {
+    assertNotNull(entry.getAmount());
+    assertNotNull(entry.getBase());
+    assertNotNull(entry.getDistribution());
+    assertNotNull(entry.getStartHeight());
+  }
+  
+  private static void testCoinbaseTxSum(MoneroCoinbaseTxSum sum) {
+    assertNotNull(sum.getEmissionSum());
+    assertNotNull(sum.getFeeSum());
   }
 }
