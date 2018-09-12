@@ -1,26 +1,17 @@
 package daemon.model;
 
 /**
- * Base daemon model including status.
+ * Base daemon model including a reference to common daemon response information (status, isTrusted, etc).
  */
 public class MoneroDaemonModel {
+  
+  private MoneroDaemonResponseInfo responseInfo;
 
-  private String status;
-  private Boolean isTrusted;
-  
-  public String getStatus() {
-    return status;
+  public MoneroDaemonResponseInfo getResponseInfo() {
+    return responseInfo;
   }
-  
-  public void setStatus(String status) {
-    this.status = status;
-  }
-  
-  public Boolean isTrusted() {
-    return isTrusted;
-  }
-  
-  public void setTrusted(Boolean isTrusted) {
-    this.isTrusted = isTrusted;
+
+  public void setResponseInfo(MoneroDaemonResponseInfo responseInfo) {
+    this.responseInfo = responseInfo;
   }
 }
