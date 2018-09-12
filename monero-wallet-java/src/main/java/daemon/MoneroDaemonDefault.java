@@ -10,6 +10,15 @@ import daemon.model.MoneroDaemonModel;
  * Default Monero daemon implementation.
  */
 public abstract class MoneroDaemonDefault implements MoneroDaemon {
+  
+  /**
+   * Daemon networks.
+   */
+  public enum MoneroNetworkType {
+    MAINNET,
+    STAGENET,
+    TESTNET
+  }
 
   @Override
   public MoneroDaemonModel setBan(MoneroBan ban) {
