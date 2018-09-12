@@ -21,7 +21,7 @@ import daemon.model.MoneroHardForkInfo;
 import daemon.model.MoneroMiningStatus;
 import daemon.model.MoneroOutputDistributionEntry;
 import daemon.model.MoneroOutputHistogramEntry;
-import daemon.model.MoneroSyncInfo;
+import daemon.model.MoneroDaemonSyncInfo;
 import daemon.model.MoneroTxPoolBacklog;
 import wallet.model.MoneroKeyImage;
 import wallet.model.MoneroTx;
@@ -84,7 +84,7 @@ public interface MoneroDaemon {
   
   public MoneroDaemonInfo getInfo();
   
-  public MoneroSyncInfo getSyncInfo();
+  public MoneroDaemonSyncInfo getSyncInfo();
   
   public MoneroHardForkInfo getHardForkInfo();
   

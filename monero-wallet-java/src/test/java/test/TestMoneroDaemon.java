@@ -1,6 +1,7 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -17,8 +18,10 @@ import daemon.model.MoneroBlockCount;
 import daemon.model.MoneroBlockHeader;
 import daemon.model.MoneroBlockTemplate;
 import daemon.model.MoneroDaemonConnection;
+import daemon.model.MoneroDaemonConnectionSpan;
 import daemon.model.MoneroDaemonInfo;
 import daemon.model.MoneroDaemonModel;
+import daemon.model.MoneroDaemonSyncInfo;
 import utils.TestUtils;
 
 /**
@@ -176,7 +179,9 @@ public class TestMoneroDaemon {
 
   @Test
   public void testGetSyncInfo() {
-    fail("Not yet implemented");
+    MoneroDaemonSyncInfo syncInfo = daemon.getSyncInfo();
+    testDaemonResponseInfo(syncInfo, true, true);
+    testDaemonSyncInfo(syncInfo);
   }
 
   @Test
@@ -391,5 +396,31 @@ public class TestMoneroDaemon {
     assertNotNull(info.getTxCount());
     assertNotNull(info.getTxPoolSize());
     assertNotNull(info.getWasBootstrapEverUsed()); 
+  }
+  
+  private static void testDaemonSyncInfo(MoneroDaemonSyncInfo syncInfo) {
+    assertNotNull(syncInfo.getHeight());
+    assertNotNull(syncInfo.getPeers());
+    assertFalse(syncInfo.getPeers().isEmpty());
+    for (MoneroDaemonConnection peer : syncInfo.getPeers()) {
+      testDaemonResponseInfo(peer, true, true);
+      testDaemonConnection(peer);
+    }
+    assertNotNull(syncInfo.getSpans());
+    assertFalse(syncInfo.getSpans().isEmpty());
+    for (MoneroDaemonConnectionSpan span : syncInfo.getSpans()) {
+      testDaemonResponseInfo(span, true, true);
+      testDaemonConnectionSpan(span);
+    }
+  }
+  
+  private static void testDaemonConnectionSpan(MoneroDaemonConnectionSpan span) {
+    assertNotNull(span.getConnectionId());
+    assertNotNull(span.getNumBlocks());
+    assertNotNull(span.getConnectionRate());
+    assertNotNull(span.getRemoteAddress());
+    assertNotNull(span.getSize());
+    assertNotNull(span.getSpeed());
+    assertNotNull(span.getStartBlockHeight());
   }
 }

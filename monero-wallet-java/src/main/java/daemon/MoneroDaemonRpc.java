@@ -23,7 +23,7 @@ import daemon.model.MoneroHardForkInfo;
 import daemon.model.MoneroMiningStatus;
 import daemon.model.MoneroOutputDistributionEntry;
 import daemon.model.MoneroOutputHistogramEntry;
-import daemon.model.MoneroSyncInfo;
+import daemon.model.MoneroDaemonSyncInfo;
 import daemon.model.MoneroTxPoolBacklog;
 import rpc.MoneroRpc;
 import wallet.model.MoneroKeyImage;
@@ -112,7 +112,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public MoneroSyncInfo getSyncInfo() {
+  public MoneroDaemonSyncInfo getSyncInfo() {
     throw new RuntimeException("Not implemented");
   }
 
