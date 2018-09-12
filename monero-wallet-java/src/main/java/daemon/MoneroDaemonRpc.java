@@ -125,6 +125,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public MoneroDaemonModel setBans(Collection<MoneroBan> bans) {
     throw new RuntimeException("Not implemented");
   }
+  
+  @Override
+  public Collection<MoneroBan> getBans() {
+    throw new RuntimeException("Not implemented");
+  }
 
   @Override
   public MoneroDaemonModel flushTxPool() {
