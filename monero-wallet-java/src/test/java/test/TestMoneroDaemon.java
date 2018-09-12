@@ -12,6 +12,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import daemon.MoneroDaemon;
+import daemon.model.MoneroBlock;
 import daemon.model.MoneroBlockCount;
 import daemon.model.MoneroBlockHeader;
 import daemon.model.MoneroBlockTemplate;
@@ -33,7 +34,7 @@ public class TestMoneroDaemon {
   @Test
   public void testGetBlockCount() {
     MoneroBlockCount blockCount = daemon.getBlockCount();
-    testDaemonStatus(blockCount, true, false);
+    testDaemonResponseInfo(blockCount, true, false);
     assertNotNull(blockCount.getCount());
     assertTrue(blockCount.getCount().intValue() > 0);
   }
@@ -49,14 +50,14 @@ public class TestMoneroDaemon {
   @Test
   public void testGetBlockTemplate() {
     MoneroBlockTemplate template = daemon.getBlockTemplate("49hNury7mhADaH5r4buqRK9Mt5yFSPZdHanYcZzuNUV1fGRoVABHpnd81bUdTSZk5MaCb5ptsVSVAEusrmr61iX83FFTAuF", 2);
-    testDaemonStatus(template, true, true);
+    testDaemonResponseInfo(template, true, true);
     testBlockTemplate(template);
   }
 
   @Test
   public void testGetLastBlockHeader() {
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
-    testDaemonStatus(lastHeader, true, true);
+    testDaemonResponseInfo(lastHeader, true, true);
     testBlockHeader(lastHeader);
   }
 
@@ -67,14 +68,14 @@ public class TestMoneroDaemon {
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
     String hash = daemon.getBlockHash(lastHeader.getHeight());
     MoneroBlockHeader header = daemon.getBlockHeader(hash);
-    testDaemonStatus(header, true, true);
+    testDaemonResponseInfo(header, true, true);
     testBlockHeader(header);
     assertEquals(lastHeader, header);
     
     // retrieve by hash of previous to last block
     hash = daemon.getBlockHash(lastHeader.getHeight() - 1);
     header = daemon.getBlockHeader(hash);
-    testDaemonStatus(header, true, true);
+    testDaemonResponseInfo(header, true, true);
     testBlockHeader(header);
     assertEquals((int) lastHeader.getHeight() - 1, (int) header.getHeight()); 
   }
@@ -85,13 +86,13 @@ public class TestMoneroDaemon {
     // retrieve by height of last block
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
     MoneroBlockHeader header = daemon.getBlockHeader(lastHeader.getHeight());
-    testDaemonStatus(header, true, true);
+    testDaemonResponseInfo(header, true, true);
     testBlockHeader(header);
     assertEquals(lastHeader, header);
     
     // retrieve by height of previous to last block
     header = daemon.getBlockHeader(lastHeader.getHeight() - 1);
-    testDaemonStatus(header, true, true);
+    testDaemonResponseInfo(header, true, true);
     testBlockHeader(header);
     assertEquals((int) lastHeader.getHeight() - 1, (int) header.getHeight()); 
   }
@@ -112,18 +113,32 @@ public class TestMoneroDaemon {
     for (int i = 0; i < NUM_BLOCKS; i++) {
       MoneroBlockHeader header = headers.get(startHeight + i);
       assertEquals((int) startHeight + i, (int) header.getHeight());
-      testDaemonStatus(header, true, true);
+      testDaemonResponseInfo(header, true, true);
       testBlockHeader(header);
     }
   }
 
   @Test
-  public void testGetBlockString() {
-    fail("Not yet implemented");
+  public void testGetBlockByHash() {
+    
+    // retrieve by hash of last block
+    MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
+    String hash = daemon.getBlockHash(lastHeader.getHeight());
+    MoneroBlock block = daemon.getBlock(hash);
+    testDaemonResponseInfo(block, true, true);
+    testBlock(block);
+    assertEquals(daemon.getBlock(block.getHeader().getHeight()), block);
+    
+    // retrieve by hash of previous to last block
+    hash = daemon.getBlockHash(lastHeader.getHeight() - 1);
+    block = daemon.getBlock(hash);
+    testDaemonResponseInfo(block, true, true);
+    testBlock(block);
+    assertEquals(daemon.getBlock(block.getHeader().getHeight() - 1), block);
   }
 
   @Test
-  public void testGetBlockInt() {
+  public void testGetBlockByHeight() {
     fail("Not yet implemented");
   }
 
@@ -262,16 +277,17 @@ public class TestMoneroDaemon {
     fail("Not yet implemented");
   }
 
-  private static void testDaemonStatus(MoneroDaemonModel model, boolean initializedStatus, boolean initializedIsUntrusted) {
+  private static void testDaemonResponseInfo(MoneroDaemonModel model, boolean initializedStatus, boolean initializedIsUntrusted) {
+    assertNotNull(model.getResponseInfo());
     if (initializedStatus) {
-      assertEquals("OK", model.getStatus());
+      assertEquals("OK", model.getResponseInfo().getStatus());
     } else {
-      assertNull(model.getStatus());
+      assertNull(model.getResponseInfo().getStatus());
     }
     if (initializedIsUntrusted) {
-      assertNotNull(model.isTrusted());
+      assertNotNull(model.getResponseInfo().getIsTrusted());
     } else {
-      assertNull(model.isTrusted());
+      assertNull(model.getResponseInfo().getIsTrusted());
     }
   }
   
@@ -300,6 +316,9 @@ public class TestMoneroDaemon {
     assertNotNull(template.getHeight());
     assertNotNull(template.getPrevHash());
     assertNotNull(template.getReservedOffset());
-    
+  }
+  
+  private static void testBlock(MoneroBlock block) {
+    throw new RuntimeException("Not implemented");
   }
 }

@@ -17,6 +17,7 @@ import daemon.model.MoneroDaemonBandwidth;
 import daemon.model.MoneroDaemonConnection;
 import daemon.model.MoneroDaemonInfo;
 import daemon.model.MoneroDaemonModel;
+import daemon.model.MoneroDaemonResponseInfo;
 import daemon.model.MoneroFeeEstimate;
 import daemon.model.MoneroHardForkInfo;
 import daemon.model.MoneroMiningStatus;
@@ -50,7 +51,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     Map<String, Object> respMap = rpc.sendRpcRequest("get_block_count");
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroBlockCount blockCount = new MoneroBlockCount();
-    initializeResponseStatus(resultMap, blockCount);
+    setResponseInfo(resultMap, blockCount);
     blockCount.setCount(((BigInteger) resultMap.get("count")).intValue());
     return blockCount;
   }
@@ -220,10 +221,12 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
   
-  private static void initializeResponseStatus(Map<String, Object> resultMap, MoneroDaemonModel model) {
-    model.setStatus((String) resultMap.get("status"));
+  private static void setResponseInfo(Map<String, Object> resultMap, MoneroDaemonModel model) {
+    MoneroDaemonResponseInfo responseInfo = new MoneroDaemonResponseInfo();
+    responseInfo.setStatus((String) resultMap.get("status"));
     Boolean trusted = (Boolean) resultMap.get("untrusted");
     if (trusted != null) trusted = !trusted;
-    model.setTrusted(trusted);
+    responseInfo.setIsTrusted(trusted);
+    model.setResponseInfo(responseInfo);
   }
 }
