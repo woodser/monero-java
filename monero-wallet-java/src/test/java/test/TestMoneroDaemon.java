@@ -16,6 +16,8 @@ import daemon.model.MoneroBlock;
 import daemon.model.MoneroBlockCount;
 import daemon.model.MoneroBlockHeader;
 import daemon.model.MoneroBlockTemplate;
+import daemon.model.MoneroDaemonConnection;
+import daemon.model.MoneroDaemonInfo;
 import daemon.model.MoneroDaemonModel;
 import utils.TestUtils;
 
@@ -139,17 +141,37 @@ public class TestMoneroDaemon {
 
   @Test
   public void testGetBlockByHeight() {
-    fail("Not yet implemented");
+    
+    // retrieve by height of last block
+    MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
+    MoneroBlock block = daemon.getBlock(lastHeader.getHeight());
+    testDaemonResponseInfo(block, true, true);
+    testBlock(block);
+    assertEquals(daemon.getBlock(block.getHeader().getHeight()), block);
+    
+    // retrieve by height of previous to last block
+    block = daemon.getBlock(lastHeader.getHeight() - 1);
+    testDaemonResponseInfo(block, true, true);
+    testBlock(block);
+    assertEquals(daemon.getBlock(block.getHeader().getHeight() - 1), block);
   }
 
   @Test
   public void testGetConnections() {
+    List<MoneroDaemonConnection> connections = daemon.getConnections();
+    for (MoneroDaemonConnection connection : connections) {
+      testDaemonResponseInfo(connection, true, false);
+      testDaemonConnection(connection);
+    }
+    
     fail("Not yet implemented");
   }
 
   @Test
   public void testGetInfo() {
-    fail("Not yet implemented");
+    MoneroDaemonInfo info = daemon.getInfo();
+    testDaemonResponseInfo(info, true, true);
+    testDaemonInfo(info);
   }
 
   @Test
@@ -319,6 +341,55 @@ public class TestMoneroDaemon {
   }
   
   private static void testBlock(MoneroBlock block) {
+    testBlockHeader(block.getHeader());
     throw new RuntimeException("Not implemented");
+  }
+  
+  private static void testDaemonConnection(MoneroDaemonConnection connection) {
+    assertNotNull(connection.getId());
+    assertNotNull(connection.getAddress());
+    assertNotNull(connection.getAvgDownload());
+    assertNotNull(connection.getAvgUpload());
+    assertNotNull(connection.getCurrentDownload());
+    assertNotNull(connection.getCurrentUpload());
+    assertNotNull(connection.getHeight());
+    assertNotNull(connection.getHost());
+    assertNotNull(connection.getIp());
+    assertNotNull(connection.getLiveTime());
+    assertNotNull(connection.getIsLocalIp());
+    assertNotNull(connection.getIsLocalhost());
+    assertNotNull(connection.getPeerId());
+    assertNotNull(connection.getPort());
+    assertNotNull(connection.getReceiveCount());
+    assertNotNull(connection.getReceiveIdleTime());
+    assertNotNull(connection.getSendCount());
+    assertNotNull(connection.getSendIdleTime());
+    assertNotNull(connection.getState());
+    assertNotNull(connection.getSupportFlags()); 
+  }
+  
+  private static void testDaemonInfo(MoneroDaemonInfo info) {
+    assertNotNull(info.getAltBlocksCount());
+    assertNotNull(info.getBlockSizeLimit());
+    assertNotNull(info.getBlockSizeMedian());
+    assertNotNull(info.getBootstrapDaemonAddress());
+    assertNotNull(info.getCumulativeDifficulty());
+    assertNotNull(info.getFreeSpace());
+    assertNotNull(info.getGreyPeerlistSize());
+    assertNotNull(info.getWhitePeerlistSize());
+    assertNotNull(info.getHeight());
+    assertNotNull(info.getHeightWithoutBootstrap());
+    assertNotNull(info.getIncomingConnectionsCount());
+    assertNotNull(info.getNetworkType());
+    assertNotNull(info.getIsOffline());
+    assertNotNull(info.getOutgoingConnectionsCount());
+    assertNotNull(info.getRpcConnectionsCount());
+    assertNotNull(info.getStartTime());
+    assertNotNull(info.getTarget());
+    assertNotNull(info.getTargetHeight());
+    assertNotNull(info.getTopBlockHash());
+    assertNotNull(info.getTxCount());
+    assertNotNull(info.getTxPoolSize());
+    assertNotNull(info.getWasBootstrapEverUsed()); 
   }
 }

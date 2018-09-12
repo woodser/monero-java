@@ -1,5 +1,7 @@
 package daemon.model;
 
+import daemon.MoneroDaemonDefault.MoneroNetworkType;
+
 /**
  * Monero daemon info.
  */
@@ -16,9 +18,7 @@ public class MoneroDaemonInfo extends MoneroDaemonModel {
   private Integer whitePeerlistSize;
   private Integer height;
   private Integer heightWithoutBootstrap;
-  private Boolean isMainnet;
-  private Boolean isStagenet;
-  private Boolean isTestnet;
+  private MoneroNetworkType networkType;
   private Boolean isOffline;
   private Integer incomingConnectionsCount;
   private Integer outgoingConnectionsCount;
@@ -120,30 +120,14 @@ public class MoneroDaemonInfo extends MoneroDaemonModel {
     this.heightWithoutBootstrap = heightWithoutBootstrap;
   }
   
-  public Boolean getIsMainnet() {
-    return isMainnet;
+  public MoneroNetworkType getNetworkType() {
+    return networkType;
   }
-  
-  public void setIsMainnet(Boolean isMainnet) {
-    this.isMainnet = isMainnet;
+
+  public void setNetworkType(MoneroNetworkType networkType) {
+    this.networkType = networkType;
   }
-  
-  public Boolean getIsStagenet() {
-    return isStagenet;
-  }
-  
-  public void setIsStagenet(Boolean isStagenet) {
-    this.isStagenet = isStagenet;
-  }
-  
-  public Boolean getIsTestnet() {
-    return isTestnet;
-  }
-  
-  public void setIsTestnet(Boolean isTestnet) {
-    this.isTestnet = isTestnet;
-  }
-  
+
   public Boolean getIsOffline() {
     return isOffline;
   }
