@@ -22,6 +22,7 @@ import daemon.model.MoneroDaemonConnectionSpan;
 import daemon.model.MoneroDaemonInfo;
 import daemon.model.MoneroDaemonModel;
 import daemon.model.MoneroDaemonSyncInfo;
+import daemon.model.MoneroHardForkInfo;
 import utils.TestUtils;
 
 /**
@@ -186,7 +187,9 @@ public class TestMoneroDaemon {
 
   @Test
   public void testGetHardForkInfo() {
-    fail("Not yet implemented");
+    MoneroHardForkInfo hardForkInfo = daemon.getHardForkInfo();
+    testDaemonResponseInfo(hardForkInfo, true, true);
+    testHardForkInfo(hardForkInfo);
   }
 
   @Test
@@ -422,5 +425,16 @@ public class TestMoneroDaemon {
     assertNotNull(span.getSize());
     assertNotNull(span.getSpeed());
     assertNotNull(span.getStartBlockHeight());
+  }
+  
+  private static void testHardForkInfo(MoneroHardForkInfo hardForkInfo) {
+    assertNotNull(hardForkInfo.getEarliestHeight());
+    assertNotNull(hardForkInfo.getIsEnabled());
+    assertNotNull(hardForkInfo.getState());
+    assertNotNull(hardForkInfo.getThreshold());
+    assertNotNull(hardForkInfo.getVersion());
+    assertNotNull(hardForkInfo.getVotes());
+    assertNotNull(hardForkInfo.getVoting());
+    assertNotNull(hardForkInfo.getWindow());
   }
 }
