@@ -29,6 +29,7 @@ import daemon.model.MoneroDaemonModel;
 import daemon.model.MoneroDaemonSyncInfo;
 import daemon.model.MoneroFeeEstimate;
 import daemon.model.MoneroHardForkInfo;
+import daemon.model.MoneroMinerTx;
 import daemon.model.MoneroOutputDistributionEntry;
 import daemon.model.MoneroOutputHistogramEntry;
 import utils.TestUtils;
@@ -426,7 +427,15 @@ public class TestMoneroDaemon {
   
   private static void testBlock(MoneroBlock block) {
     assertNotNull(block);
+    assertNotNull(block.getBlob());
+    assertTrue(block.getBlob().length() > 1);
     testBlockHeader(block.getHeader());
+    testMinerTx(block.getMinerTx());
+    assertNotNull(block.getTxHashes());
+    throw new RuntimeException("Not implemented");
+  }
+  
+  private static void testMinerTx(MoneroMinerTx minerTx) {
     throw new RuntimeException("Not implemented");
   }
   
