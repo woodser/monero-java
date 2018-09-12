@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpEntity;
@@ -99,17 +100,17 @@ public class MoneroRpc {
    * @return Map<String, Object> is the RPC API response as a map
    */
   public Map<String, Object> sendRpcRequest(String method) {
-    return sendRpcRequest(method, null);
+    return sendRpcRequest(method, (Map<String, Object>) null);
   }
   
   /**
    * Sends a request to the RPC API.
    * 
    * @param method specifies the method to request
-   * @param params specifies input parameters
+   * @param params specifies input parameters (Map<String, Object>, List<Object>, etc)
    * @return Map<String, Object> is the RPC API response as a map
    */
-  public Map<String, Object> sendRpcRequest(String method, Map<String, Object> params) {
+  public Map<String, Object> sendRpcRequest(String method, Object params) {
 
     // send http request
     try {
