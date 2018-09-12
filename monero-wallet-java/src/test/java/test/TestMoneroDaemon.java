@@ -249,7 +249,8 @@ public class TestMoneroDaemon {
 
   @Test
   public void testFlushTxPool() {
-    fail("Not yet implemented");
+    MoneroDaemonModel model = daemon.flushTxPool();
+    testDaemonResponseInfo(model, true, false);
   }
 
   @Test
