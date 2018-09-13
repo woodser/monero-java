@@ -185,9 +185,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return syncInfo;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroHardForkInfo getHardForkInfo() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendRpcRequest("hard_fork_info");
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroHardForkInfo hardForkInfo = initializeHardForkInfo(resultMap);
+    setResponseInfo(resultMap, hardForkInfo);
+    return hardForkInfo;
   }
 
   @Override
@@ -367,14 +372,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("rpc_connections_count")) info.setRpcConnectionsCount(((BigInteger) val).intValue());
       else if (key.equals("stagenet")) { if ((Boolean) val) info.setNetworkType(MoneroNetworkType.STAGENET); }
       else if (key.equals("start_time")) info.setStartTime(((BigInteger) val).longValue());
-      else if (key.equals("status")) {}  // initialized elsewhere
+      else if (key.equals("status")) {}  // set elsewhere
       else if (key.equals("target")) info.setTarget(((BigInteger) val).intValue());
       else if (key.equals("target_height")) info.setTargetHeight(((BigInteger) val).intValue());
       else if (key.equals("testnet")) { if ((Boolean) val) info.setNetworkType(MoneroNetworkType.TESTNET); }
       else if (key.equals("top_block_hash")) info.setTopBlockHash((String) val);
       else if (key.equals("tx_count")) info.setTxCount(((BigInteger) val).intValue());
       else if (key.equals("tx_pool_size")) info.setTxPoolSize(((BigInteger) val).intValue());
-      else if (key.equals("untrusted")) {} // initialized elsewhere
+      else if (key.equals("untrusted")) {} // set elsewhere
       else if (key.equals("was_bootstrap_ever_used")) info.setWasBootstrapEverUsed((Boolean) val);
       else if (key.equals("white_peerlist_size")) info.setWhitePeerlistSize(((BigInteger) val).intValue());
       else LOGGER.warn("Ignoring unexpected info field: '" + key + "'");
@@ -456,7 +461,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         for (Map<String, Object> spanMap : spanMaps) {
           syncInfo.getSpans().add(initializeConnectionSpan(spanMap));
         }
-      } else if (key.equals("status")) {}   // initialized elsewhere
+      } else if (key.equals("status")) {}   // set elsewhere
       else if (key.equals("target_height")) syncInfo.setTargetHeight(((BigInteger) val).intValue());
       else LOGGER.warn("Ignoring unexpected sync info field: '" + key + "'");
     }
@@ -483,5 +488,23 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else LOGGER.warn("Ignoring unexpected connection span field: '" + key + "'");
     }
     return span;
+  }
+  
+  private static MoneroHardForkInfo initializeHardForkInfo(Map<String, Object> hardForkInfoMap) {
+    MoneroHardForkInfo info = new MoneroHardForkInfo();
+    for (String key : hardForkInfoMap.keySet()) {
+      Object val = hardForkInfoMap.get(key);
+      if (key.equals("earliest_height")) info.setEarliestHeight(((BigInteger) val).intValue());
+      else if (key.equals("enabled")) info.setIsEnabled((Boolean) val);
+      else if (key.equals("state")) info.setState(((BigInteger) val).intValue());
+      else if (key.equals("status")) {} // set elsewhere
+      else if (key.equals("threshold")) info.setThreshold(((BigInteger) val).intValue());
+      else if (key.equals("version")) info.setVersion(((BigInteger) val).intValue());
+      else if (key.equals("votes")) info.setVotes(((BigInteger) val).intValue());
+      else if (key.equals("voting")) info.setVoting(((BigInteger) val).intValue());
+      else if (key.equals("window")) info.setWindow(((BigInteger) val).intValue());
+      else LOGGER.warn("Ignoring unexpected connection span field: '" + key + "'");
+    }
+    return info;
   }
 }
