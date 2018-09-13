@@ -225,9 +225,17 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroFeeEstimate getFeeEstimate(Integer graceBlocks) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("grace_blocks", graceBlocks);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_fee_estimate", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroFeeEstimate feeEstimate = new MoneroFeeEstimate();
+    feeEstimate.setFeeEstimate((BigInteger) resultMap.get("fee"));
+    setResponseInfo(resultMap, feeEstimate);
+    return feeEstimate;
   }
 
   @Override
