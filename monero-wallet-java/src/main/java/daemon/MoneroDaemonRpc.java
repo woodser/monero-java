@@ -1,6 +1,7 @@
 package daemon;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -136,9 +137,19 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroDaemonConnection> getConnections() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_connections");
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<Map<String, Object>> connectionMaps = (List<Map<String, Object>>) resultMap.get("connections");
+    List<MoneroDaemonConnection> connections = new ArrayList<MoneroDaemonConnection>();
+    for (Map<String, Object> connectionMap : connectionMaps) {
+      MoneroDaemonConnection connection = interpretConnection(connectionMap);
+      setResponseInfo(resultMap, connection);
+      connections.add(connection);
+    }
+    return connections;
   }
 
   @SuppressWarnings("unchecked")
@@ -357,5 +368,41 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     block.setBlob((String) resultMap.get("blob"));
     block.setHeader(interpretBlockHeader((Map<String, Object>) resultMap.get("block_header")));
     return block;
+  }
+  
+  /**
+   * Initializes a connection from a RPC connection map.
+   * 
+   * @param connectionMap is the connection map to initialize the connection object from
+   * @return MoneroDaemonConnection connection is the connection initialized from the map
+   */
+  private static MoneroDaemonConnection interpretConnection(Map<String, Object> connectionMap) {
+    MoneroDaemonConnection connection = new MoneroDaemonConnection();
+    for (String key : connectionMap.keySet()) {
+      Object val = connectionMap.get(key);
+      if (key.equals("address")) connection.setAddress((String) val);
+      else if (key.equals("avg_download")) connection.setAvgDownload(((BigInteger) val).intValue());
+      else if (key.equals("avg_upload")) connection.setAvgUpload(((BigInteger) val).intValue());
+      else if (key.equals("connection_id")) connection.setId((String) val);
+      else if (key.equals("current_download")) connection.setCurrentDownload(((BigInteger) val).intValue());
+      else if (key.equals("current_upload")) connection.setCurrentUpload(((BigInteger) val).intValue());
+      else if (key.equals("height")) connection.setHeight(((BigInteger) val).intValue());
+      else if (key.equals("host")) connection.setHost((String) val);
+      else if (key.equals("incoming")) connection.setIsIncoming((Boolean) val);
+      else if (key.equals("ip")) connection.setIp((String) val);
+      else if (key.equals("live_time")) connection.setLiveTime(((BigInteger) val).intValue());
+      else if (key.equals("local_ip")) connection.setIsLocalIp((Boolean) val);
+      else if (key.equals("localhost")) connection.setIsLocalHost((Boolean) val);
+      else if (key.equals("peer_id")) connection.setPeerId((String) val);
+      else if (key.equals("port")) connection.setPort((String) val);
+      else if (key.equals("recv_count")) connection.setReceiveCount(((BigInteger) val).intValue());
+      else if (key.equals("recv_idle_time")) connection.setReceiveIdleTime(((BigInteger) val).longValue());
+      else if (key.equals("send_count")) connection.setSendCount(((BigInteger) val).intValue());
+      else if (key.equals("send_idle_time")) connection.setSendIdleTime(((BigInteger) val).longValue());
+      else if (key.equals("state")) connection.setState((String) val);
+      else if (key.equals("support_flags")) connection.setNumSupportFlags(((BigInteger) val).intValue());
+      else LOGGER.warn("Ignoring unexpected connection field: '" + key + "'");
+    }
+    return connection;
   }
 }

@@ -17,13 +17,13 @@ public class MoneroDaemonConnection extends MoneroDaemonModel {
   private String ip;
   private Integer liveTime;
   private Boolean isLocalIp;
-  private Boolean isLocalhost;
+  private Boolean isLocalHost;
   private String peerId;
   private String port;
   private Integer receiveCount;
-  private Integer receiveIdleTime;
+  private Long receiveIdleTime;
   private Integer sendCount;
-  private Integer sendIdleTime;
+  private Long sendIdleTime;
   private String state;
   private Integer supportFlags;
 
@@ -123,12 +123,12 @@ public class MoneroDaemonConnection extends MoneroDaemonModel {
     this.isLocalIp = isLocalIp;
   }
 
-  public Boolean getIsLocalhost() {
-    return isLocalhost;
+  public Boolean getIsLocalHost() {
+    return isLocalHost;
   }
 
-  public void setIsLocalhost(Boolean isLocalhost) {
-    this.isLocalhost = isLocalhost;
+  public void setIsLocalHost(Boolean isLocalHost) {
+    this.isLocalHost = isLocalHost;
   }
 
   public String getPeerId() {
@@ -155,11 +155,11 @@ public class MoneroDaemonConnection extends MoneroDaemonModel {
     this.receiveCount = receiveCount;
   }
 
-  public Integer getReceiveIdleTime() {
+  public Long getReceiveIdleTime() {
     return receiveIdleTime;
   }
 
-  public void setReceiveIdleTime(Integer receiveIdleTime) {
+  public void setReceiveIdleTime(Long receiveIdleTime) {
     this.receiveIdleTime = receiveIdleTime;
   }
 
@@ -171,11 +171,11 @@ public class MoneroDaemonConnection extends MoneroDaemonModel {
     this.sendCount = sendCount;
   }
 
-  public Integer getSendIdleTime() {
+  public Long getSendIdleTime() {
     return sendIdleTime;
   }
 
-  public void setSendIdleTime(Integer sendIdleTime) {
+  public void setSendIdleTime(Long sendIdleTime) {
     this.sendIdleTime = sendIdleTime;
   }
 
