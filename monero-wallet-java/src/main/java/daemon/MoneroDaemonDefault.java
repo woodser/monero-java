@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import daemon.model.MoneroBan;
+import daemon.model.MoneroCoinbaseTxSum;
 import daemon.model.MoneroDaemonModel;
 
 /**
@@ -35,5 +36,10 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   @Override
   public MoneroDaemonModel flushTxPool() {
     return flushTxPool(null);
+  }
+  
+  @Override
+  public MoneroCoinbaseTxSum getCoinbaseTxSum() {
+    return getCoinbaseTxSum(0, getInfo().getHeight());
   }
 }

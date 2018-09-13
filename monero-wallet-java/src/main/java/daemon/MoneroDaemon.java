@@ -113,7 +113,14 @@ public interface MoneroDaemon {
   
   public List<MoneroOutputDistributionEntry> getOutputDistribution(List<BigInteger> amounts, Boolean cumulative, Integer startHeight, Integer endHeight);
   
-  public MoneroCoinbaseTxSum getCoinbaseTxSum(Integer height, Integer count);
+  /**
+   * Gets the total emissions and fees from the genesis block to the current height.
+   * 
+   * @return MoneroCoinbaseTxSum encapsulates the total emissions and fees since the genesis block
+   */
+  public MoneroCoinbaseTxSum getCoinbaseTxSum();
+  
+  public MoneroCoinbaseTxSum getCoinbaseTxSum(int height, int count);
   
   public MoneroFeeEstimate getFeeEstimate(Integer graceBlocks);
   

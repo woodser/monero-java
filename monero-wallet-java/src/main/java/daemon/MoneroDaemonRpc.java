@@ -237,7 +237,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroCoinbaseTxSum getCoinbaseTxSum(Integer height, Integer count) {
+  public MoneroCoinbaseTxSum getCoinbaseTxSum(int height, int count) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("height", height);
     params.put("count", count);
