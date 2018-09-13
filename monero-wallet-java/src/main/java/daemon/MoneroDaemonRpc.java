@@ -165,7 +165,6 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public MoneroDaemonSyncInfo getSyncInfo() {
-    // test
     Map<String, Object> respMap = rpc.sendRpcRequest("sync_info");
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroDaemonSyncInfo syncInfo = initializeSyncInfo(resultMap);
