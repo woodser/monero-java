@@ -174,6 +174,8 @@ public class TestMoneroDaemon {
   @Test
   public void testGetConnections() {
     List<MoneroDaemonConnection> connections = daemon.getConnections();
+    assertNotNull(connections);
+    assertFalse(connections.isEmpty());
     for (MoneroDaemonConnection connection : connections) {
       testDaemonResponseInfo(connection, true, false);
       testDaemonConnection(connection);
@@ -452,7 +454,7 @@ public class TestMoneroDaemon {
     assertNotNull(connection.getIp());
     assertNotNull(connection.getLiveTime());
     assertNotNull(connection.getIsLocalIp());
-    assertNotNull(connection.getIsLocalhost());
+    assertNotNull(connection.getIsLocalHost());
     assertNotNull(connection.getPeerId());
     assertNotNull(connection.getPort());
     assertNotNull(connection.getReceiveCount());
