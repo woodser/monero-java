@@ -456,7 +456,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
   
   /**
-   * Initializes a connection span from a RPC result map.
+   * Initializes a connection span from a RPC span map.
    * 
    * @param spanMap is the RPC result map to initialize the connection span from
    * @return MoneroDaemonConnectionSpan is the initialized span from the RPC result map
