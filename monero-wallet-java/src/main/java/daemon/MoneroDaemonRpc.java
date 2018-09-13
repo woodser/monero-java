@@ -227,9 +227,19 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroCoinbaseTxSum getCoinbaseTxSum(Integer height, Integer count) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("height", height);
+    params.put("count", count);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_coinbase_tx_sum", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroCoinbaseTxSum txSum = new MoneroCoinbaseTxSum();
+    txSum.setTotalEmission((BigInteger) resultMap.get("emission_amount"));
+    txSum.setTotalFees((BigInteger) resultMap.get("fee_amount"));
+    setResponseInfo(resultMap, txSum);
+    return txSum;
   }
 
   @SuppressWarnings("unchecked")
