@@ -290,7 +290,9 @@ public class TestMoneroDaemon {
 
   @Test
   public void testGetCoinbaseTxSum() {
-    MoneroCoinbaseTxSum sum = daemon.getCoinbaseTxSum(null, null);
+    MoneroCoinbaseTxSum sum = daemon.getCoinbaseTxSum();
+    System.out.println(sum.getTotalEmission());
+    System.out.println(sum.getTotalFees());
     testDaemonResponseInfo(sum, true, false);
     testCoinbaseTxSum(sum);
   }
@@ -553,7 +555,9 @@ public class TestMoneroDaemon {
   
   private static void testCoinbaseTxSum(MoneroCoinbaseTxSum sum) {
     assertNotNull(sum.getTotalEmission());
+    assertTrue(sum.getTotalEmission().longValue() > 0);
     assertNotNull(sum.getTotalFees());
+    assertTrue(sum.getTotalFees().longValue() > 0);
   }
   
   private static void testMoneroChain(MoneroChain chain) {
