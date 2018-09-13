@@ -20,6 +20,7 @@ import daemon.model.MoneroChain;
 import daemon.model.MoneroCoinbaseTxSum;
 import daemon.model.MoneroDaemonBandwidth;
 import daemon.model.MoneroDaemonConnection;
+import daemon.model.MoneroDaemonConnectionSpan;
 import daemon.model.MoneroDaemonInfo;
 import daemon.model.MoneroDaemonModel;
 import daemon.model.MoneroDaemonResponseInfo;
@@ -31,7 +32,6 @@ import daemon.model.MoneroOutputDistributionEntry;
 import daemon.model.MoneroOutputHistogramEntry;
 import daemon.model.MoneroTxPoolBacklog;
 import rpc.MoneroRpc;
-import wallet.MoneroWalletRpc;
 import wallet.model.MoneroKeyImage;
 import wallet.model.MoneroTx;
 
@@ -41,7 +41,7 @@ import wallet.model.MoneroTx;
 public class MoneroDaemonRpc extends MoneroDaemonDefault {
   
   // logger
-  private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class);
+  private static final Logger LOGGER = Logger.getLogger(MoneroDaemonRpc.class);
   
   private MoneroRpc rpc;
   
@@ -86,7 +86,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public MoneroBlockHeader getLastBlockHeader() {
     Map<String, Object> respMap = rpc.sendRpcRequest("get_last_block_header");
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    MoneroBlockHeader header = interpretBlockHeader((Map<String, Object>) resultMap.get("block_header"));
+    MoneroBlockHeader header = initializeBlockHeader((Map<String, Object>) resultMap.get("block_header"));
     setResponseInfo(resultMap, header);
     return header;
   }
@@ -98,7 +98,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     params.put("hash", hash);
     Map<String, Object> respMap = rpc.sendRpcRequest("get_block_header_by_hash", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    MoneroBlockHeader header = interpretBlockHeader((Map<String, Object>) resultMap.get("block_header"));
+    MoneroBlockHeader header = initializeBlockHeader((Map<String, Object>) resultMap.get("block_header"));
     setResponseInfo(resultMap, header);
     return header;
   }
@@ -110,7 +110,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     params.put("height", height);
     Map<String, Object> respMap = rpc.sendRpcRequest("get_block_header_by_height", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    MoneroBlockHeader header = interpretBlockHeader((Map<String, Object>) resultMap.get("block_header"));
+    MoneroBlockHeader header = initializeBlockHeader((Map<String, Object>) resultMap.get("block_header"));
     setResponseInfo(resultMap, header);
     return header;
   }
@@ -127,7 +127,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     params.put("hash", hash);
     Map<String, Object> respMap = rpc.sendRpcRequest("get_block", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    MoneroBlock block = interpretBlock((Map<String, Object>) resultMap);
+    MoneroBlock block = initializeBlock((Map<String, Object>) resultMap);
     setResponseInfo(resultMap, block);
     return block;
   }
@@ -145,7 +145,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     List<Map<String, Object>> connectionMaps = (List<Map<String, Object>>) resultMap.get("connections");
     List<MoneroDaemonConnection> connections = new ArrayList<MoneroDaemonConnection>();
     for (Map<String, Object> connectionMap : connectionMaps) {
-      MoneroDaemonConnection connection = interpretConnection(connectionMap);
+      MoneroDaemonConnection connection = initializeConnection(connectionMap);
       setResponseInfo(resultMap, connection);
       connections.add(connection);
     }
@@ -157,14 +157,19 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public MoneroDaemonInfo getInfo() {
     Map<String, Object> respMap = rpc.sendRpcRequest("get_info");
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    MoneroDaemonInfo info = interpretInfo(resultMap);
+    MoneroDaemonInfo info = initializeInfo(resultMap);
     setResponseInfo(resultMap, info);
     return info;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroDaemonSyncInfo getSyncInfo() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendRpcRequest("sync_info");
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroDaemonSyncInfo syncInfo = initializeSyncInfo(resultMap);
+    setResponseInfo(resultMap, syncInfo);
+    return syncInfo;
   }
 
   @Override
@@ -292,7 +297,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * @param headerMap is the map to initialize the block header from
    * @return MoneroBlockHeader is the initialized block header
    */
-  private static MoneroBlockHeader interpretBlockHeader(Map<String, Object> headerMap) {
+  private static MoneroBlockHeader initializeBlockHeader(Map<String, Object> headerMap) {
     MoneroBlockHeader header = new MoneroBlockHeader();
     for (String key : headerMap.keySet()) {
       Object val = headerMap.get(key);
@@ -320,7 +325,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * @param resultMap is the RPC info result map to initialize from
    * @return MoneroDaemonInfo is an object initialized from the RPC result map
    */
-  private static MoneroDaemonInfo interpretInfo(Map<String, Object> resultMap) {
+  private static MoneroDaemonInfo initializeInfo(Map<String, Object> resultMap) {
     MoneroDaemonInfo info = new MoneroDaemonInfo();
     for (String key : resultMap.keySet()) {
       Object val = resultMap.get(key);
@@ -341,14 +346,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("rpc_connections_count")) info.setRpcConnectionsCount(((BigInteger) val).intValue());
       else if (key.equals("stagenet")) { if ((Boolean) val) info.setNetworkType(MoneroNetworkType.STAGENET); }
       else if (key.equals("start_time")) info.setStartTime(((BigInteger) val).longValue());
-      else if (key.equals("status")) { }  // initialized elsewhere
+      else if (key.equals("status")) {}  // initialized elsewhere
       else if (key.equals("target")) info.setTarget(((BigInteger) val).intValue());
       else if (key.equals("target_height")) info.setTargetHeight(((BigInteger) val).intValue());
       else if (key.equals("testnet")) { if ((Boolean) val) info.setNetworkType(MoneroNetworkType.TESTNET); }
       else if (key.equals("top_block_hash")) info.setTopBlockHash((String) val);
       else if (key.equals("tx_count")) info.setTxCount(((BigInteger) val).intValue());
       else if (key.equals("tx_pool_size")) info.setTxPoolSize(((BigInteger) val).intValue());
-      else if (key.equals("untrusted")) { } // initialized elsewhere
+      else if (key.equals("untrusted")) {} // initialized elsewhere
       else if (key.equals("was_bootstrap_ever_used")) info.setWasBootstrapEverUsed((Boolean) val);
       else if (key.equals("white_peerlist_size")) info.setWhitePeerlistSize(((BigInteger) val).intValue());
       else LOGGER.warn("Ignoring unexpected info field: '" + key + "'");
@@ -363,10 +368,10 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * @return MoneroBlock is a block initialized from the map
    */
   @SuppressWarnings("unchecked")
-  private static MoneroBlock interpretBlock(Map<String, Object> resultMap) {
+  private static MoneroBlock initializeBlock(Map<String, Object> resultMap) {
     MoneroBlock block = new MoneroBlock();
     block.setBlob((String) resultMap.get("blob"));
-    block.setHeader(interpretBlockHeader((Map<String, Object>) resultMap.get("block_header")));
+    block.setHeader(initializeBlockHeader((Map<String, Object>) resultMap.get("block_header")));
     return block;
   }
   
@@ -376,7 +381,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * @param connectionMap is the connection map to initialize the connection object from
    * @return MoneroDaemonConnection connection is the connection initialized from the map
    */
-  private static MoneroDaemonConnection interpretConnection(Map<String, Object> connectionMap) {
+  private static MoneroDaemonConnection initializeConnection(Map<String, Object> connectionMap) {
     MoneroDaemonConnection connection = new MoneroDaemonConnection();
     for (String key : connectionMap.keySet()) {
       Object val = connectionMap.get(key);
@@ -404,5 +409,58 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else LOGGER.warn("Ignoring unexpected connection field: '" + key + "'");
     }
     return connection;
+  }
+  
+  /**
+   * Initializes sync info from a RPC sync info map.
+   * 
+   * @param syncInfoMap is the sync info map to initialize the sync info object from
+   * @return MoneroDaemonSyncInfo is sync info initialized from the map
+   */
+  @SuppressWarnings("unchecked")
+  private static MoneroDaemonSyncInfo initializeSyncInfo(Map<String, Object> syncInfoMap) {
+    MoneroDaemonSyncInfo syncInfo = new MoneroDaemonSyncInfo();
+    for (String key : syncInfoMap.keySet()) {
+      Object val = syncInfoMap.get(key);
+      if (key.equals("height")) syncInfo.setHeight(((BigInteger) val).intValue());
+      else if (key.equals("peers")) {
+        syncInfo.setPeers(new ArrayList<MoneroDaemonConnection>());
+        List<Map<String, Object>> peerMaps = (List<Map<String, Object>>) val;
+        for (Map<String, Object> peerMap : peerMaps) {
+          syncInfo.getPeers().add(initializeConnection(peerMap));
+        }
+      } else if (key.equals("spans")) {
+        syncInfo.setSpans(new ArrayList<MoneroDaemonConnectionSpan>());
+        List<Map<String, Object>> spanMaps = (List<Map<String, Object>>) val;
+        for (Map<String, Object> spanMap : spanMaps) {
+          syncInfo.getSpans().add(initializeConnectionSpan(spanMap));
+        }
+      } else if (key.equals("status")) {}   // initialized elsewhere
+      else if (key.equals("target_height")) syncInfo.setTargetHeight(((BigInteger) val).intValue());
+      else LOGGER.warn("Ignoring unexpected sync info field: '" + key + "'");
+    }
+    return syncInfo;
+  }
+  
+  /**
+   * Initializes a connection span from a RPC result map.
+   * 
+   * @param spanMap is the RPC result map to initialize the connection span from
+   * @return MoneroDaemonConnectionSpan is the initialized span from the RPC result map
+   */
+  private static MoneroDaemonConnectionSpan initializeConnectionSpan(Map<String, Object> spanMap) {
+    MoneroDaemonConnectionSpan span = new MoneroDaemonConnectionSpan();
+    for (String key : spanMap.keySet()) {
+      Object val = spanMap.get(key);
+      if (key.equals("connection_id")) span.setConnectionId((String) val);
+      else if (key.equals("nblocks")) span.setNumBlocks(((BigInteger) val).intValue());
+      else if (key.equals("remote_address")) span.setRemoteAddress((String) val);
+      else if (key.equals("rate")) span.setRate((BigInteger) val);
+      else if (key.equals("speed")) span.setSpeed((BigInteger) val);
+      else if (key.equals("size")) span.setSize((BigInteger) val);
+      else if (key.equals("start_block_height")) span.setStartBlockHeight(((BigInteger) val).intValue());
+      else LOGGER.warn("Ignoring unexpected connection span field: '" + key + "'");
+    }
+    return span;
   }
 }
