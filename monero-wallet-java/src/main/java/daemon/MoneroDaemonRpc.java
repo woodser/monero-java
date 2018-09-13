@@ -141,9 +141,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroDaemonInfo getInfo() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_info");
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroDaemonInfo info = interpretInfo(resultMap);
+    setResponseInfo(resultMap, info);
+    return info;
   }
 
   @Override
@@ -296,6 +301,48 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else LOGGER.warn("Ignoring unexpected block header field: '" + key + "'");
     }
     return header;
+  }
+  
+  /**
+   * Initializes daemon info from a RPC info result map.
+   * 
+   * @param resultMap is the RPC info result map to initialize from
+   * @return MoneroDaemonInfo is an object initialized from the RPC result map
+   */
+  private static MoneroDaemonInfo interpretInfo(Map<String, Object> resultMap) {
+    MoneroDaemonInfo info = new MoneroDaemonInfo();
+    for (String key : resultMap.keySet()) {
+      Object val = resultMap.get(key);
+      if (key.equals("alt_blocks_count")) info.setAltBlocksCount(((BigInteger) val).intValue());
+      else if (key.equals("block_size_limit")) info.setBlockSizeLimit(((BigInteger) val).intValue());
+      else if (key.equals("block_size_median")) info.setBlockSizeMedian(((BigInteger) val).intValue());
+      else if (key.equals("bootstrap_daemon_address")) info.setBootstrapDaemonAddress((String) val);
+      else if (key.equals("cumulative_difficulty")) info.setCumulativeDifficulty((BigInteger) val);
+      else if (key.equals("difficulty")) info.setDifficulty((BigInteger) val);
+      else if (key.equals("free_space")) info.setFreeSpace((BigInteger) val);
+      else if (key.equals("grey_peerlist_size")) info.setGreyPeerlistSize(((BigInteger) val).intValue());
+      else if (key.equals("height")) info.setHeight(((BigInteger) val).intValue());
+      else if (key.equals("height_without_bootstrap")) info.setHeightWithoutBootstrap(((BigInteger) val).intValue());
+      else if (key.equals("incoming_connections_count")) info.setIncomingConnectionsCount(((BigInteger) val).intValue());
+      else if (key.equals("mainnet")) { if ((Boolean) val) info.setNetworkType(MoneroNetworkType.MAINNET); }
+      else if (key.equals("offline")) info.setIsOffline((Boolean) val);
+      else if (key.equals("outgoing_connections_count")) info.setOutgoingConnectionsCount(((BigInteger) val).intValue());
+      else if (key.equals("rpc_connections_count")) info.setRpcConnectionsCount(((BigInteger) val).intValue());
+      else if (key.equals("stagenet")) { if ((Boolean) val) info.setNetworkType(MoneroNetworkType.STAGENET); }
+      else if (key.equals("start_time")) info.setStartTime(((BigInteger) val).longValue());
+      else if (key.equals("status")) { }  // initialized elsewhere
+      else if (key.equals("target")) info.setTarget(((BigInteger) val).intValue());
+      else if (key.equals("target_height")) info.setTargetHeight(((BigInteger) val).intValue());
+      else if (key.equals("testnet")) { if ((Boolean) val) info.setNetworkType(MoneroNetworkType.TESTNET); }
+      else if (key.equals("top_block_hash")) info.setTopBlockHash((String) val);
+      else if (key.equals("tx_count")) info.setTxCount(((BigInteger) val).intValue());
+      else if (key.equals("tx_pool_size")) info.setTxPoolSize(((BigInteger) val).intValue());
+      else if (key.equals("untrusted")) { } // initialized elsewhere
+      else if (key.equals("was_bootstrap_ever_used")) info.setWasBootstrapEverUsed((Boolean) val);
+      else if (key.equals("white_peerlist_size")) info.setWhitePeerlistSize(((BigInteger) val).intValue());
+      else LOGGER.warn("Ignoring unexpected info field: '" + key + "'");
+    }
+    return info;
   }
   
   /**
