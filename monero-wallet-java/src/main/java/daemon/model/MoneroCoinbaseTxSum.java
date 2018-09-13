@@ -7,22 +7,22 @@ import java.math.BigInteger;
  */
 public class MoneroCoinbaseTxSum extends MoneroDaemonModel {
 
-  private BigInteger emissionSum;
-  private BigInteger feeSum;
+  private BigInteger totalEmission;
+  private BigInteger totalFees;
   
-  public BigInteger getEmissionSum() {
-    return emissionSum;
+  public BigInteger getTotalEmission() {
+    return totalEmission;
   }
   
-  public void setEmissionSum(BigInteger emissionSum) {
-    this.emissionSum = emissionSum;
+  public void setTotalEmission(BigInteger totalEmission) {
+    this.totalEmission = totalEmission;
   }
   
-  public BigInteger getFeeSum() {
-    return feeSum;
+  public BigInteger getTotalFees() {
+    return totalFees;
   }
   
-  public void setFeeSum(BigInteger feeSum) {
-    this.feeSum = feeSum;
-  }
+  public void setTotalFees(BigInteger totalFees) {
+    this.totalFees = totalFees;
+  }  
 }
