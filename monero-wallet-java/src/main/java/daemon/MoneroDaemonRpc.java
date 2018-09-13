@@ -205,14 +205,16 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
-  @Override
-  public MoneroDaemonModel flushTxPool() {
-    throw new RuntimeException("Not implemented");
-  }
-
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroDaemonModel flushTxPool(Collection<String> txIds) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txids", txIds);
+    Map<String, Object> respMap = rpc.sendRpcRequest("flush_txpool", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroDaemonModel model = new MoneroDaemonModel();
+    setResponseInfo(resultMap, model);
+    return model;
   }
 
   @Override

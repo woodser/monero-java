@@ -31,4 +31,9 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
     txIds.add(txId);
     return relayTxs(txIds);
   }
+  
+  @Override
+  public MoneroDaemonModel flushTxPool() {
+    return flushTxPool(null);
+  }
 }
