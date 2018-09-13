@@ -1,5 +1,7 @@
 package daemon.model;
 
+import java.math.BigInteger;
+
 /**
  * Monero block template to mine.
  */
@@ -8,7 +10,7 @@ public class MoneroBlockTemplate extends MoneroDaemonModel {
   private String templateBlob;
   private String hashBlob;
   private Integer difficulty;
-  private Integer expectedReward;
+  private BigInteger expectedReward;
   private Integer height;
   private String prevHash;
   private Integer reservedOffset;
@@ -37,11 +39,11 @@ public class MoneroBlockTemplate extends MoneroDaemonModel {
     this.difficulty = difficulty;
   }
   
-  public Integer getExpectedReward() {
+  public BigInteger getExpectedReward() {
     return expectedReward;
   }
   
-  public void setExpectedReward(Integer expectedReward) {
+  public void setExpectedReward(BigInteger expectedReward) {
     this.expectedReward = expectedReward;
   }
   

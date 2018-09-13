@@ -66,7 +66,7 @@ public class TestMoneroDaemon {
 
   @Test
   public void testGetBlockTemplate() {
-    MoneroBlockTemplate template = daemon.getBlockTemplate("49hNury7mhADaH5r4buqRK9Mt5yFSPZdHanYcZzuNUV1fGRoVABHpnd81bUdTSZk5MaCb5ptsVSVAEusrmr61iX83FFTAuF", 2);
+    MoneroBlockTemplate template = daemon.getBlockTemplate("55AepZuUKYV7Wrf9BMiczAELg2gcZuWQsYmg4kXHGAiW8uhVC1VVhqA5HzFcePKhuNgS2d9ag5imvC1jxsJbbnHm5kF753Z", 2);
     testDaemonResponseInfo(template, true, true);
     testBlockTemplate(template);
   }

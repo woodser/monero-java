@@ -71,9 +71,17 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
      return (String) respMap.get("result");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroBlockTemplate getBlockTemplate(String walletAddress, int reserveSize) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("wallet_address", walletAddress);
+    params.put("reserve_size", reserveSize);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_block_template", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroBlockTemplate temmplate = initializeBlockTemplate(resultMap);
+    setResponseInfo(resultMap, temmplate);
+    return temmplate;
   }
 
   @Override
@@ -518,5 +526,23 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else LOGGER.warn("Ignoring unexpected connection span field: '" + key + "'");
     }
     return info;
+  }
+  
+  private static MoneroBlockTemplate initializeBlockTemplate(Map<String, Object> templateMap) {
+    MoneroBlockTemplate template = new MoneroBlockTemplate();
+    for (String key : templateMap.keySet()) {
+      Object val = templateMap.get(key);
+      if (key.equals("blocktemplate_blob")) template.setTemplateBlob((String) val);
+      else if (key.equals("blockhashing_blob")) template.setHashBlob((String) val);
+      else if (key.equals("difficulty")) template.setDifficulty(((BigInteger) val).intValue());
+      else if (key.equals("expected_reward")) template.setExpectedReward((BigInteger) val);
+      else if (key.equals("height")) template.setHeight(((BigInteger) val).intValue());
+      else if (key.equals("prev_hash")) template.setPrevHash((String) val);
+      else if (key.equals("reserved_offset")) template.setReservedOffset(((BigInteger) val).intValue());
+      else if (key.equals("status")) {}  // set elsewhere
+      else if (key.equals("untrusted")) {}  // set elsewhere
+      else LOGGER.warn("Ignoring unexpected connection span field: '" + key + "'");
+    }
+    return template;
   }
 }
