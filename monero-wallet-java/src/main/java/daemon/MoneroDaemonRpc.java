@@ -169,6 +169,19 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroDaemonSyncInfo syncInfo = initializeSyncInfo(resultMap);
     setResponseInfo(resultMap, syncInfo);
+    
+    // initialize response info
+    if (syncInfo.getPeers() != null) {
+      for (MoneroDaemonConnection peer : syncInfo.getPeers()) {
+        peer.setResponseInfo(syncInfo.getResponseInfo());
+      }
+    }
+    if (syncInfo.getSpans() != null) {
+      for (MoneroDaemonConnectionSpan span : syncInfo.getSpans()) {
+        span.setResponseInfo(syncInfo.getResponseInfo());
+      }
+    }
+    
     return syncInfo;
   }
 
@@ -427,7 +440,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         syncInfo.setPeers(new ArrayList<MoneroDaemonConnection>());
         List<Map<String, Object>> peerMaps = (List<Map<String, Object>>) val;
         for (Map<String, Object> peerMap : peerMaps) {
-          syncInfo.getPeers().add(initializeConnection(peerMap));
+          syncInfo.getPeers().add(initializeConnection((Map<String, Object>) peerMap.get("info")));
         }
       } else if (key.equals("spans")) {
         syncInfo.setSpans(new ArrayList<MoneroDaemonConnectionSpan>());

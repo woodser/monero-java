@@ -492,20 +492,19 @@ public class TestMoneroDaemon {
   
   private static void testDaemonSyncInfo(MoneroDaemonSyncInfo syncInfo) {
     assertNotNull(syncInfo.getHeight());
-    //assertNotNull(syncInfo.getPeers());
-    //assertFalse(syncInfo.getPeers().isEmpty());
+    assertNotNull(syncInfo.getPeers());
+    assertFalse(syncInfo.getPeers().isEmpty());
     if (syncInfo.getPeers() != null) {
       for (MoneroDaemonConnection peer : syncInfo.getPeers()) {
-        testDaemonResponseInfo(peer, true, true);
+        testDaemonResponseInfo(peer, true, false);
         testDaemonConnection(peer);
       }
     }
-
     //assertNotNull(syncInfo.getSpans());
     //assertFalse(syncInfo.getSpans().isEmpty());
     if (syncInfo.getSpans() != null) {
       for (MoneroDaemonConnectionSpan span : syncInfo.getSpans()) {
-        testDaemonResponseInfo(span, true, true);
+        testDaemonResponseInfo(span, true, false);
         testDaemonConnectionSpan(span);
       }
     }
