@@ -1,5 +1,7 @@
 package daemon.model;
 
+import java.math.BigInteger;
+
 import daemon.MoneroDaemonDefault.MoneroNetworkType;
 
 /**
@@ -11,9 +13,9 @@ public class MoneroDaemonInfo extends MoneroDaemonModel {
   private Integer blockSizeLimit;
   private Integer blockSizeMedian;
   private String bootstrapDaemonAddress;
-  private Integer cumulativeDifficulty;
-  private Integer difficulty;
-  private Integer freeSpace;
+  private BigInteger cumulativeDifficulty;
+  private BigInteger difficulty;
+  private BigInteger freeSpace;
   private Integer greyPeerlistSize;
   private Integer whitePeerlistSize;
   private Integer height;
@@ -64,27 +66,27 @@ public class MoneroDaemonInfo extends MoneroDaemonModel {
     this.bootstrapDaemonAddress = bootstrapDaemonAddress;
   }
   
-  public Integer getCumulativeDifficulty() {
+  public BigInteger getCumulativeDifficulty() {
     return cumulativeDifficulty;
   }
   
-  public void setCumulativeDifficulty(Integer cumulativeDifficulty) {
+  public void setCumulativeDifficulty(BigInteger cumulativeDifficulty) {
     this.cumulativeDifficulty = cumulativeDifficulty;
   }
   
-  public Integer getDifficulty() {
+  public BigInteger getDifficulty() {
     return difficulty;
   }
   
-  public void setDifficulty(Integer difficulty) {
+  public void setDifficulty(BigInteger difficulty) {
     this.difficulty = difficulty;
   }
   
-  public Integer getFreeSpace() {
+  public BigInteger getFreeSpace() {
     return freeSpace;
   }
   
-  public void setFreeSpace(Integer freeSpace) {
+  public void setFreeSpace(BigInteger freeSpace) {
     this.freeSpace = freeSpace;
   }
   
