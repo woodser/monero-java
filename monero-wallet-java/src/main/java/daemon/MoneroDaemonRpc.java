@@ -27,11 +27,13 @@ import daemon.model.MoneroDaemonResponseInfo;
 import daemon.model.MoneroDaemonSyncInfo;
 import daemon.model.MoneroFeeEstimate;
 import daemon.model.MoneroHardForkInfo;
+import daemon.model.MoneroMinerTx;
 import daemon.model.MoneroMiningStatus;
 import daemon.model.MoneroOutputDistributionEntry;
 import daemon.model.MoneroOutputHistogramEntry;
 import daemon.model.MoneroTxPoolBacklog;
 import rpc.MoneroRpc;
+import utils.JsonUtils;
 import wallet.model.MoneroKeyImage;
 import wallet.model.MoneroTx;
 
@@ -140,9 +142,16 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return block;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroBlock getBlock(int height) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("height", height);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_block", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroBlock block = initializeBlock((Map<String, Object>) resultMap);
+    setResponseInfo(resultMap, block);
+    return block;
   }
 
   @SuppressWarnings("unchecked")
@@ -418,6 +427,26 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     MoneroBlock block = new MoneroBlock();
     block.setBlob((String) resultMap.get("blob"));
     block.setHeader(initializeBlockHeader((Map<String, Object>) resultMap.get("block_header")));
+    
+    // convert json string field to map
+    String jsonStr = (String) resultMap.get("json");
+    Map<String, Object> json = JsonUtils.toMap(MoneroRpc.MAPPER, jsonStr);
+    
+    // initialize tx hashes from json
+    block.setTxHashes((List<String>) json.get("tx_hashes"));
+    
+    // initialize miner tx from json
+    Map<String, Object> minerTxMap = (Map<String, Object>) json.get("miner_tx");
+    MoneroMinerTx minerTx = new MoneroMinerTx();
+    block.setMinerTx(minerTx);
+    minerTx.setVersion(((BigInteger) minerTxMap.get("version")).intValue());
+    minerTx.setUnlockTime(((BigInteger) minerTxMap.get("unlock_time")).intValue());
+    List<BigInteger> extraNums = (List<BigInteger>) minerTxMap.get("extra");
+    int[] extra = new int[extraNums.size()];
+    for (int i = 0; i < extraNums.size(); i++) {
+      extra[i] = extraNums.get(i).intValue();
+    }
+    minerTx.setExtra(extra);
     return block;
   }
   

@@ -151,7 +151,7 @@ public class TestMoneroDaemon {
     block = daemon.getBlock(hash);
     testDaemonResponseInfo(block, true, true);
     testBlock(block);
-    assertEquals(daemon.getBlock(block.getHeader().getHeight() - 1), block);
+    assertEquals(daemon.getBlock(lastHeader.getHeight() - 1), block);
   }
 
   @Test
@@ -168,7 +168,7 @@ public class TestMoneroDaemon {
     block = daemon.getBlock(lastHeader.getHeight() - 1);
     testDaemonResponseInfo(block, true, true);
     testBlock(block);
-    assertEquals(daemon.getBlock(block.getHeader().getHeight() - 1), block);
+    assertEquals((int) lastHeader.getHeight() - 1, (int) block.getHeader().getHeight());
   }
 
   @Test
@@ -434,13 +434,16 @@ public class TestMoneroDaemon {
     assertNotNull(block.getBlob());
     assertTrue(block.getBlob().length() > 1);
     testBlockHeader(block.getHeader());
-    testMinerTx(block.getMinerTx());
     assertNotNull(block.getTxHashes());
-    throw new RuntimeException("Not implemented");
+    testMinerTx(block.getMinerTx());
   }
   
   private static void testMinerTx(MoneroMinerTx minerTx) {
-    throw new RuntimeException("Not implemented");
+    assertNotNull(minerTx);
+    assertNotNull(minerTx.getVersion());
+    assertNotNull(minerTx.getExtra());
+    assertTrue(minerTx.getExtra().length > 0);
+    assertNotNull(minerTx.getUnlockTime());
   }
   
   private static void testDaemonConnection(MoneroDaemonConnection connection) {
