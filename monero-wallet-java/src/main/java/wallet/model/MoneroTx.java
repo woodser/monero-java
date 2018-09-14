@@ -322,4 +322,98 @@ public class MoneroTx {
     sb.append("Metadata: " + metadata + "\n");
     return sb.toString();
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((accountIndex == null) ? 0 : accountIndex.hashCode());
+    result = prime * result + ((address == null) ? 0 : address.hashCode());
+    result = prime * result + ((amount == null) ? 0 : amount.hashCode());
+    result = prime * result + ((blob == null) ? 0 : blob.hashCode());
+    result = prime * result + ((fee == null) ? 0 : fee.hashCode());
+    result = prime * result + ((height == null) ? 0 : height.hashCode());
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    result = prime * result + ((isDoubleSpend == null) ? 0 : isDoubleSpend.hashCode());
+    result = prime * result + ((key == null) ? 0 : key.hashCode());
+    result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
+    result = prime * result + ((mixin == null) ? 0 : mixin.hashCode());
+    result = prime * result + ((note == null) ? 0 : note.hashCode());
+    result = prime * result + ((outputs == null) ? 0 : outputs.hashCode());
+    result = prime * result + ((paymentId == null) ? 0 : paymentId.hashCode());
+    result = prime * result + ((payments == null) ? 0 : payments.hashCode());
+    result = prime * result + ((size == null) ? 0 : size.hashCode());
+    result = prime * result + ((subaddressIndex == null) ? 0 : subaddressIndex.hashCode());
+    result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
+    result = prime * result + ((type == null) ? 0 : type.hashCode());
+    result = prime * result + ((unlockTime == null) ? 0 : unlockTime.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    MoneroTx other = (MoneroTx) obj;
+    if (accountIndex == null) {
+      if (other.accountIndex != null) return false;
+    } else if (!accountIndex.equals(other.accountIndex)) return false;
+    if (address == null) {
+      if (other.address != null) return false;
+    } else if (!address.equals(other.address)) return false;
+    if (amount == null) {
+      if (other.amount != null) return false;
+    } else if (!amount.equals(other.amount)) return false;
+    if (blob == null) {
+      if (other.blob != null) return false;
+    } else if (!blob.equals(other.blob)) return false;
+    if (fee == null) {
+      if (other.fee != null) return false;
+    } else if (!fee.equals(other.fee)) return false;
+    if (height == null) {
+      if (other.height != null) return false;
+    } else if (!height.equals(other.height)) return false;
+    if (id == null) {
+      if (other.id != null) return false;
+    } else if (!id.equals(other.id)) return false;
+    if (isDoubleSpend == null) {
+      if (other.isDoubleSpend != null) return false;
+    } else if (!isDoubleSpend.equals(other.isDoubleSpend)) return false;
+    if (key == null) {
+      if (other.key != null) return false;
+    } else if (!key.equals(other.key)) return false;
+    if (metadata == null) {
+      if (other.metadata != null) return false;
+    } else if (!metadata.equals(other.metadata)) return false;
+    if (mixin == null) {
+      if (other.mixin != null) return false;
+    } else if (!mixin.equals(other.mixin)) return false;
+    if (note == null) {
+      if (other.note != null) return false;
+    } else if (!note.equals(other.note)) return false;
+    if (outputs == null) {
+      if (other.outputs != null) return false;
+    } else if (!outputs.equals(other.outputs)) return false;
+    if (paymentId == null) {
+      if (other.paymentId != null) return false;
+    } else if (!paymentId.equals(other.paymentId)) return false;
+    if (payments == null) {
+      if (other.payments != null) return false;
+    } else if (!payments.equals(other.payments)) return false;
+    if (size == null) {
+      if (other.size != null) return false;
+    } else if (!size.equals(other.size)) return false;
+    if (subaddressIndex == null) {
+      if (other.subaddressIndex != null) return false;
+    } else if (!subaddressIndex.equals(other.subaddressIndex)) return false;
+    if (timestamp == null) {
+      if (other.timestamp != null) return false;
+    } else if (!timestamp.equals(other.timestamp)) return false;
+    if (type != other.type) return false;
+    if (unlockTime == null) {
+      if (other.unlockTime != null) return false;
+    } else if (!unlockTime.equals(other.unlockTime)) return false;
+    return true;
+  }
 }
