@@ -307,9 +307,19 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return feeEstimate;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroChain> getAlternativeChains() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_alternate_chains");
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<Map<String, Object>> chainMaps = (List<Map<String, Object>>) resultMap.get("chains");
+    List<MoneroChain> chains = new ArrayList<MoneroChain>();
+    for (Map<String, Object> chainMap : chainMaps) {
+      MoneroChain chain = initializeMoneroChain(chainMap);
+      chains.add(chain);
+      setResponseInfo(resultMap, chain);
+    }
+    return chains;
   }
 
   @Override
@@ -516,7 +526,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("send_idle_time")) connection.setSendIdleTime(((BigInteger) val).longValue());
       else if (key.equals("state")) connection.setState((String) val);
       else if (key.equals("support_flags")) connection.setNumSupportFlags(((BigInteger) val).intValue());
-      else LOGGER.warn("Ignoring unexpected connection field: '" + key + "'");
+      else LOGGER.warn("Ignoring unexpected field in connection: '" + key + "'");
     }
     return connection;
   }
@@ -547,7 +557,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         }
       } else if (key.equals("status")) {}   // set elsewhere
       else if (key.equals("target_height")) syncInfo.setTargetHeight(((BigInteger) val).intValue());
-      else LOGGER.warn("Ignoring unexpected sync info field: '" + key + "'");
+      else LOGGER.warn("Ignoring unexpected field in sync info: '" + key + "'");
     }
     return syncInfo;
   }
@@ -569,7 +579,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("speed")) span.setSpeed((BigInteger) val);
       else if (key.equals("size")) span.setSize((BigInteger) val);
       else if (key.equals("start_block_height")) span.setStartBlockHeight(((BigInteger) val).intValue());
-      else LOGGER.warn("Ignoring unexpected connection span field: '" + key + "'");
+      else LOGGER.warn("Ignoring unexpected field in connection span: '" + key + "'");
     }
     return span;
   }
@@ -587,7 +597,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("votes")) info.setVotes(((BigInteger) val).intValue());
       else if (key.equals("voting")) info.setVoting(((BigInteger) val).intValue());
       else if (key.equals("window")) info.setWindow(((BigInteger) val).intValue());
-      else LOGGER.warn("Ignoring unexpected connection span field: '" + key + "'");
+      else LOGGER.warn("Ignoring unexpected field in hard fork info: '" + key + "'");
     }
     return info;
   }
@@ -605,7 +615,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("reserved_offset")) template.setReservedOffset(((BigInteger) val).intValue());
       else if (key.equals("status")) {}  // set elsewhere
       else if (key.equals("untrusted")) {}  // set elsewhere
-      else LOGGER.warn("Ignoring unexpected connection span field: '" + key + "'");
+      else LOGGER.warn("Ignoring unexpected field in block template: '" + key + "'");
     }
     return template;
   }
@@ -617,5 +627,18 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     banMap.put("ban", ban.getIsBanned());
     banMap.put("seconds", ban.getSeconds());
     return banMap;
+  }
+  
+  private static MoneroChain initializeMoneroChain(Map<String, Object> chainMap) {
+    MoneroChain chain = new MoneroChain();
+    for (String key : chainMap.keySet()) {
+      Object val = chainMap.get(key);
+      if (key.equals("block_hash")) chain.setBlockHash((String) val);
+      else if (key.equals("difficulty")) chain.setDifficulty(((BigInteger) val).intValue());
+      else if (key.equals("height")) chain.setHeight(((BigInteger) val).intValue());
+      else if (key.equals("length")) chain.setLength(((BigInteger) val).intValue());
+      else LOGGER.warn("Ignoring unexpected field in alternative chain: '" + key + "'");
+    }
+    return chain;
   }
 }
