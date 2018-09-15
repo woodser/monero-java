@@ -212,14 +212,36 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return hardForkInfo;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroDaemonModel setBans(Collection<MoneroBan> bans) {
-    throw new RuntimeException("Not implemented");
+    List<Map<String, Object>> banMaps = new ArrayList<Map<String, Object>>();
+    for (MoneroBan ban : bans)  banMaps.add(banToMap(ban));
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("bans", banMaps);
+    Map<String, Object> respMap = rpc.sendRpcRequest("set_bans", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroDaemonModel model = new MoneroDaemonModel();
+    setResponseInfo(resultMap, model);
+    return model;
   }
   
+  @SuppressWarnings("unchecked")
   @Override
   public Collection<MoneroBan> getBans() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_bans");
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<Map<String, Object>> banMaps = (List<Map<String, Object>>) resultMap.get("bans");
+    List<MoneroBan> bans = new ArrayList<MoneroBan>();
+    for (Map<String, Object> banMap : banMaps) {
+      MoneroBan ban = new MoneroBan();
+      bans.add(ban);
+      ban.setHost((String) banMap.get("host"));
+      ban.setIp(((BigInteger) banMap.get("ip")).intValue());
+      ban.setSeconds(((BigInteger) banMap.get("seconds")).longValue());
+      setResponseInfo(resultMap, ban);
+    }
+    return bans;
   }
 
   @SuppressWarnings("unchecked")
@@ -573,5 +595,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else LOGGER.warn("Ignoring unexpected connection span field: '" + key + "'");
     }
     return template;
+  }
+  
+  private static Map<String, Object> banToMap(MoneroBan ban) {
+    Map<String, Object> banMap = new HashMap<String, Object>();
+    banMap.put("host", ban.getHost());
+    banMap.put("ip", ban.getIp());
+    banMap.put("ban", ban.getIsBanned());
+    banMap.put("seconds", ban.getSeconds());
+    return banMap;
   }
 }

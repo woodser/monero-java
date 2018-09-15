@@ -1,6 +1,7 @@
 package daemon;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import daemon.model.MoneroBan;
@@ -23,7 +24,7 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
 
   @Override
   public MoneroDaemonModel setBan(MoneroBan ban) {
-    throw new RuntimeException("Not implemented");
+    return setBans(Arrays.asList(ban));
   }
   
   @Override
