@@ -274,9 +274,27 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroOutputDistributionEntry> getOutputDistribution(List<BigInteger> amounts, Boolean cumulative, Integer startHeight, Integer endHeight) {
-    throw new RuntimeException("Not implemented");
+    if (startHeight == null) startHeight = 0;
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("amounts", amounts);
+    params.put("cumulative", cumulative);
+    params.put("from_height", startHeight);
+    params.put("to_height", endHeight);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_output_distribution", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<Map<String, Object>> entryMaps = (List<Map<String, Object>>) resultMap.get("distributions");
+    List<MoneroOutputDistributionEntry> entries = new ArrayList<MoneroOutputDistributionEntry>();
+    if (entryMaps != null) {
+      for (Map<String, Object> entryMap : entryMaps) {
+        MoneroOutputDistributionEntry entry = initializeOutputDistributionEntry(entryMap);
+        entries.add(entry);
+        setResponseInfo(resultMap, entry);
+      }
+    }
+    return entries;
   }
 
   @SuppressWarnings("unchecked")
@@ -640,5 +658,28 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else LOGGER.warn("Ignoring unexpected field in alternative chain: '" + key + "'");
     }
     return chain;
+  }
+  
+  @SuppressWarnings("unchecked")
+  private static MoneroOutputDistributionEntry initializeOutputDistributionEntry(Map<String, Object> entryMap) {
+    MoneroOutputDistributionEntry entry = new MoneroOutputDistributionEntry();
+    for (String key : entryMap.keySet()) {
+      Object val = entryMap.get(key);
+      if (key.equals("amount")) entry.setAmount((BigInteger) val);
+      else if (key.equals("base")) entry.setBase(((BigInteger) val).intValue());
+      else if (key.equals("start_height")) entry.setStartHeight(((BigInteger) val).intValue());
+      else if (key.equals("distribution")) {
+        if (val instanceof List) {
+          List<BigInteger> distributionRaw = (List<BigInteger>) val;
+          List<Integer> distribution = new ArrayList<Integer>();
+          entry.setDistribution(distribution);
+          for (BigInteger distributionRawElem : distributionRaw) {
+            distribution.add(distributionRawElem.intValue());
+          }
+        }
+      }
+      else LOGGER.warn("Ignoring unexpected field in alternative chain: '" + key + "'");
+    }
+    return entry;
   }
 }
