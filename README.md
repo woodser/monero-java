@@ -2,7 +2,7 @@
 
 This project provides a Java interface for managing a Monero wallet.
 
-The interface relies on a running instance of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) to manage the wallet. Monero Wallet RPC is an application that manages a Monero wallet via remote procedure calls and relies on a full node to interact with the Monero blockchain.
+The interface relies on a running instance of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) to manage the wallet. Monero Wallet RPC is an application that manages a Monero wallet by making remote procedure calls to a full node.
 
 # Getting started
 
