@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import daemon.MoneroDaemon;
@@ -279,6 +280,7 @@ public class TestMoneroDaemon {
     }
   }
 
+  @Ignore
   @Test
   public void testGetOutputDistribution() {
     List<BigInteger> amounts = new ArrayList<BigInteger>();
