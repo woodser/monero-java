@@ -309,11 +309,9 @@ public class TestMoneroDaemon {
     Collection<MoneroChain> chains = daemon.getAlternativeChains();
     assertFalse(chains.isEmpty());
     for (MoneroChain chain : chains) {
-      testDaemonResponseInfo(chain, true, true);
+      testDaemonResponseInfo(chain, true, false);
       testMoneroChain(chain);
     }
-    
-    fail("Not yet implemented");
   }
 
   @Test
