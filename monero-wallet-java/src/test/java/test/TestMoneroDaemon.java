@@ -34,6 +34,7 @@ import daemon.model.MoneroHardForkInfo;
 import daemon.model.MoneroMinerTx;
 import daemon.model.MoneroOutputDistributionEntry;
 import daemon.model.MoneroOutputHistogramEntry;
+import rpc.MoneroRpcException;
 import utils.TestUtils;
 
 /**
@@ -303,8 +304,6 @@ public class TestMoneroDaemon {
   @Test
   public void testGetCoinbaseTxSum() {
     MoneroCoinbaseTxSum sum = daemon.getCoinbaseTxSum();
-    System.out.println(sum.getTotalEmission());
-    System.out.println(sum.getTotalFees());
     testDaemonResponseInfo(sum, true, false);
     testCoinbaseTxSum(sum);
   }
@@ -393,7 +392,12 @@ public class TestMoneroDaemon {
   
   @Test
   public void testSubmitBlock() {
-    fail("Not yet implemented");
+    try {
+      daemon.submitBlock("Hello there!"); // TODO: way to test actual block?
+      fail("Should have thrown error submitting invalid block");
+    } catch (MoneroRpcException e) {
+      assertEquals(-2, (int) e.getRpcCode()); // TODO: verify input format
+    }
   }
 
   private static void testDaemonResponseInfo(MoneroDaemonModel model, boolean initializedStatus, boolean initializedIsUntrusted) {

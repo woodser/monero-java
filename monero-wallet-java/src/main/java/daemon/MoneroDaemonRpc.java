@@ -82,14 +82,19 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     params.put("reserve_size", reserveSize);
     Map<String, Object> respMap = rpc.sendRpcRequest("get_block_template", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    MoneroBlockTemplate temmplate = initializeBlockTemplate(resultMap);
-    setResponseInfo(resultMap, temmplate);
-    return temmplate;
+    MoneroBlockTemplate template = initializeBlockTemplate(resultMap);
+    setResponseInfo(resultMap, template);
+    return template;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroDaemonModel submitBlock(String blockBlob) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendRpcRequest("submit_block", blockBlob);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroDaemonModel model = new MoneroDaemonModel();
+    setResponseInfo(resultMap, model);
+    return model;
   }
 
   @SuppressWarnings("unchecked")
