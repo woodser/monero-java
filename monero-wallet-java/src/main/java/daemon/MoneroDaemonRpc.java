@@ -125,9 +125,22 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return header;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroBlockHeader> getBlockHeaders(int startHeight, int endHeight) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("start_height", startHeight);
+    params.put("end_height", endHeight);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_block_headers_range", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<Map<String, Object>> headerMaps = (List<Map<String, Object>>) resultMap.get("headers");
+    List<MoneroBlockHeader> headers = new ArrayList<MoneroBlockHeader>();
+    for (Map<String, Object> headerMap : headerMaps) {
+      MoneroBlockHeader header = initializeBlockHeader(headerMap);
+      headers.add(header);
+      setResponseInfo(resultMap, header);
+    }
+    return headers;
   }
 
   @SuppressWarnings("unchecked")

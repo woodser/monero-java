@@ -122,13 +122,13 @@ public class TestMoneroDaemon {
     int NUM_BLOCKS_AGO = 100;
     int currentHeight = daemon.getInfo().getHeight();
     int startHeight = currentHeight - NUM_BLOCKS_AGO;
-    int endHeight = currentHeight - (NUM_BLOCKS_AGO - NUM_BLOCKS);
+    int endHeight = currentHeight - (NUM_BLOCKS_AGO - NUM_BLOCKS) - 1;
     List<MoneroBlockHeader> headers = daemon.getBlockHeaders(startHeight, endHeight);
     
     // test blocks
     assertEquals(NUM_BLOCKS, headers.size());
     for (int i = 0; i < NUM_BLOCKS; i++) {
-      MoneroBlockHeader header = headers.get(startHeight + i);
+      MoneroBlockHeader header = headers.get(i);
       assertEquals((int) startHeight + i, (int) header.getHeight());
       testDaemonResponseInfo(header, true, true);
       testBlockHeader(header);
