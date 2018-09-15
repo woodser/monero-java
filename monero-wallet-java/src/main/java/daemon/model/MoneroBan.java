@@ -8,7 +8,7 @@ public class MoneroBan extends MoneroDaemonModel {
   private String host;  // e.g. 192.168.1.100
   private Integer ip;   // integer formatted IP
   private Boolean isBanned;
-  private Integer seconds;
+  private Long seconds;
   
   public String getHost() {
     return host;
@@ -34,11 +34,11 @@ public class MoneroBan extends MoneroDaemonModel {
     this.isBanned = isBanned;
   }
   
-  public Integer getSeconds() {
+  public Long getSeconds() {
     return seconds;
   }
   
-  public void setSeconds(Integer seconds) {
+  public void setSeconds(Long seconds) {
     this.seconds = seconds;
   }
 }

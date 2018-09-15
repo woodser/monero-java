@@ -210,7 +210,7 @@ public class TestMoneroDaemon {
     MoneroBan ban = new MoneroBan();
     ban.setHost("192.168.1.51");
     ban.setIsBanned(true);
-    ban.setSeconds(60);
+    ban.setSeconds((long) 60);
     MoneroDaemonModel model = daemon.setBan(ban);
     testDaemonResponseInfo(model, true, false);
     
@@ -232,11 +232,11 @@ public class TestMoneroDaemon {
     MoneroBan ban1 = new MoneroBan();
     ban1.setHost("192.168.1.52");
     ban1.setIsBanned(true);
-    ban1.setSeconds(60);
+    ban1.setSeconds((long) 60);
     MoneroBan ban2 = new MoneroBan();
     ban2.setHost("192.168.1.53");
     ban2.setIsBanned(true);
-    ban2.setSeconds(60);
+    ban2.setSeconds((long) 60);
     Collection<MoneroBan> bans = new ArrayList<MoneroBan>();
     bans.add(ban1);
     bans.add(ban2);

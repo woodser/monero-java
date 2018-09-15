@@ -338,6 +338,6 @@ public class TestMoneroWalletWrite {
   
   @Test
   public void testSendFromSubaddresses() {
-    fail("Not implemented");
+    throw new RuntimeException("Not implemented");
   }
 }
