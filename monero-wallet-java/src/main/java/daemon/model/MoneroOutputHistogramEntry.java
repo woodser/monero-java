@@ -8,9 +8,9 @@ import java.math.BigInteger;
 public class MoneroOutputHistogramEntry extends MoneroDaemonModel {
 
   private BigInteger amount;
-  private Integer numTotalInstances;
-  private Integer numUnlockedInstances;
-  private Integer numRecentInstances;
+  private Integer totalInstances;
+  private Integer unlockedInstances;
+  private Integer recentInstances;
   
   public BigInteger getAmount() {
     return amount;
@@ -19,28 +19,28 @@ public class MoneroOutputHistogramEntry extends MoneroDaemonModel {
   public void setAmount(BigInteger amount) {
     this.amount = amount;
   }
-  
-  public Integer getNumTotalInstances() {
-    return numTotalInstances;
+
+  public Integer getTotalInstances() {
+    return totalInstances;
   }
-  
-  public void setNumTotalInstances(Integer numTotalInstances) {
-    this.numTotalInstances = numTotalInstances;
+
+  public void setTotalInstances(Integer totalInstances) {
+    this.totalInstances = totalInstances;
   }
-  
-  public Integer getNumUnlockedInstances() {
-    return numUnlockedInstances;
+
+  public Integer getUnlockedInstances() {
+    return unlockedInstances;
   }
-  
-  public void setNumUnlockedInstances(Integer numUnlockedInstances) {
-    this.numUnlockedInstances = numUnlockedInstances;
+
+  public void setUnlockedInstances(Integer unlockedInstances) {
+    this.unlockedInstances = unlockedInstances;
   }
-  
-  public Integer getNumRecentInstances() {
-    return numRecentInstances;
+
+  public Integer getRecentInstances() {
+    return recentInstances;
   }
-  
-  public void setNumRecentInstances(Integer numRecentInstances) {
-    this.numRecentInstances = numRecentInstances;
+
+  public void setRecentInstances(Integer recentInstances) {
+    this.recentInstances = recentInstances;
   }
 }

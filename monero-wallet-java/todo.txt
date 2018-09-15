@@ -1,4 +1,5 @@
 v0.12.3.0
+get_output_distribution distribution field cannot be deserialized to array of integer
 investigate do not relay, way of doing pending transaction?  would need to relay
 get rid of individual getBalance(), getUnlockedBalance(), isMultisigImportNeeded() and replace with getAccount() with all info?
 why is transaction amount 0 when destinations present

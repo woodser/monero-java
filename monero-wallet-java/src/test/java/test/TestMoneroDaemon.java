@@ -554,9 +554,9 @@ public class TestMoneroDaemon {
   
   private static void testOutputHistogramEntry(MoneroOutputHistogramEntry entry) {
     assertNotNull(entry.getAmount());
-    assertNotNull(entry.getNumTotalInstances());
-    assertNotNull(entry.getNumUnlockedInstances());
-    assertNotNull(entry.getNumRecentInstances());
+    assertNotNull(entry.getTotalInstances());
+    assertNotNull(entry.getUnlockedInstances());
+    assertNotNull(entry.getRecentInstances());
   }
   
   private static void testOutputDistributionEntry(MoneroOutputDistributionEntry entry) {

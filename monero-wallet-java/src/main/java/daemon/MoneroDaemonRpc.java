@@ -34,6 +34,7 @@ import daemon.model.MoneroOutputHistogramEntry;
 import daemon.model.MoneroTxPoolBacklog;
 import rpc.MoneroRpc;
 import utils.JsonUtils;
+import wallet.model.MoneroException;
 import wallet.model.MoneroKeyImage;
 import wallet.model.MoneroTx;
 
@@ -269,14 +270,32 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return model;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroOutputHistogramEntry> getOutputHistogram(List<BigInteger> amounts, Integer minCount, Integer maxCount, Boolean isUnlocked, Integer recentCutoff) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("amounts", amounts);
+    params.put("min_count", minCount);
+    params.put("max_count", maxCount);
+    params.put("unlocked", isUnlocked);
+    params.put("recent_cutoff", recentCutoff);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_output_histogram", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<Map<String, Object>> entryMaps = (List<Map<String, Object>>) resultMap.get("histogram");
+    List<MoneroOutputHistogramEntry> entries = new ArrayList<MoneroOutputHistogramEntry>();
+    if (entryMaps != null) {
+      for (Map<String, Object> entryMap : entryMaps) {
+        MoneroOutputHistogramEntry entry = initializeOutputHistogramEntry(entryMap);
+        entries.add(entry);
+        setResponseInfo(resultMap, entry);
+      }
+    }
+    return entries;
   }
 
   @Override
   public List<MoneroOutputDistributionEntry> getOutputDistribution(List<BigInteger> amounts, Boolean cumulative, Integer startHeight, Integer endHeight) {
-    throw new Error("getOutputDistribution() not implemented because response 'distribution' field cannot be deserialized to array of integers as documented");
+    throw new MoneroException("getOutputDistribution() not implemented because response 'distribution' field cannot be deserialized to array of integers as documented");
 //    if (startHeight == null) startHeight = 0;
 //    Map<String, Object> params = new HashMap<String, Object>();
 //    params.put("amounts", amounts);
@@ -660,7 +679,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return chain;
   }
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "unused" })
   private static MoneroOutputDistributionEntry initializeOutputDistributionEntry(Map<String, Object> entryMap) {
     MoneroOutputDistributionEntry entry = new MoneroOutputDistributionEntry();
     for (String key : entryMap.keySet()) {
@@ -678,7 +697,20 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
           }
         }
       }
-      else LOGGER.warn("Ignoring unexpected field in alternative chain: '" + key + "'");
+      else LOGGER.warn("Ignoring unexpected field in output distribution: '" + key + "'");
+    }
+    return entry;
+  }
+  
+  private static MoneroOutputHistogramEntry initializeOutputHistogramEntry(Map<String, Object> entryMap) {
+    MoneroOutputHistogramEntry entry = new MoneroOutputHistogramEntry();
+    for (String key : entryMap.keySet()) {
+      Object val = entryMap.get(key);
+      if (key.equals("amount")) entry.setAmount((BigInteger) val);
+      else if (key.equals("total_instances")) entry.setTotalInstances(((BigInteger) val).intValue());
+      else if (key.equals("unlocked_instances")) entry.setUnlockedInstances(((BigInteger) val).intValue());
+      else if (key.equals("recent_instances")) entry.setRecentInstances(((BigInteger) val).intValue());
+      else LOGGER.warn("Ignoring unexpected field in output histogram: '" + key + "'");
     }
     return entry;
   }
