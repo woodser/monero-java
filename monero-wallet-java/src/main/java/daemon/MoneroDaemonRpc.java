@@ -274,27 +274,27 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroOutputDistributionEntry> getOutputDistribution(List<BigInteger> amounts, Boolean cumulative, Integer startHeight, Integer endHeight) {
-    if (startHeight == null) startHeight = 0;
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("amounts", amounts);
-    params.put("cumulative", cumulative);
-    params.put("from_height", startHeight);
-    params.put("to_height", endHeight);
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_output_distribution", params);
-    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    List<Map<String, Object>> entryMaps = (List<Map<String, Object>>) resultMap.get("distributions");
-    List<MoneroOutputDistributionEntry> entries = new ArrayList<MoneroOutputDistributionEntry>();
-    if (entryMaps != null) {
-      for (Map<String, Object> entryMap : entryMaps) {
-        MoneroOutputDistributionEntry entry = initializeOutputDistributionEntry(entryMap);
-        entries.add(entry);
-        setResponseInfo(resultMap, entry);
-      }
-    }
-    return entries;
+    throw new Error("getOutputDistribution() not implemented because response 'distribution' field cannot be deserialized to array of integers as documented");
+//    if (startHeight == null) startHeight = 0;
+//    Map<String, Object> params = new HashMap<String, Object>();
+//    params.put("amounts", amounts);
+//    params.put("cumulative", cumulative);
+//    params.put("from_height", startHeight);
+//    params.put("to_height", endHeight);
+//    Map<String, Object> respMap = rpc.sendRpcRequest("get_output_distribution", params);
+//    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+//    List<Map<String, Object>> entryMaps = (List<Map<String, Object>>) resultMap.get("distributions");
+//    List<MoneroOutputDistributionEntry> entries = new ArrayList<MoneroOutputDistributionEntry>();
+//    if (entryMaps != null) {
+//      for (Map<String, Object> entryMap : entryMaps) {
+//        MoneroOutputDistributionEntry entry = initializeOutputDistributionEntry(entryMap);
+//        entries.add(entry);
+//        setResponseInfo(resultMap, entry);
+//      }
+//    }
+//    return entries;
   }
 
   @SuppressWarnings("unchecked")
