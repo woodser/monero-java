@@ -280,7 +280,7 @@ public class TestMoneroDaemon {
     }
   }
 
-  @Ignore
+  @Ignore // disabled because response 'distribution' field cannot be deserialized to array of integers as documented
   @Test
   public void testGetOutputDistribution() {
     List<BigInteger> amounts = new ArrayList<BigInteger>();
