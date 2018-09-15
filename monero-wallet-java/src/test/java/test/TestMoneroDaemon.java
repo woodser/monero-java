@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -280,10 +281,19 @@ public class TestMoneroDaemon {
 
   @Test
   public void testGetOutputDistribution() {
-    List<MoneroOutputDistributionEntry> entries = daemon.getOutputDistribution(null, null, null, null);
+    List<BigInteger> amounts = new ArrayList<BigInteger>();
+    amounts.add(BigInteger.valueOf(0));
+    amounts.add(BigInteger.valueOf(1));
+    amounts.add(BigInteger.valueOf(10));
+    amounts.add(BigInteger.valueOf(100));
+    amounts.add(BigInteger.valueOf(1000));
+    amounts.add(BigInteger.valueOf(10000));
+    amounts.add(BigInteger.valueOf(100000));
+    amounts.add(BigInteger.valueOf(1000000));
+    List<MoneroOutputDistributionEntry> entries = daemon.getOutputDistribution(amounts, null, null, null);
     assertFalse(entries.isEmpty());
     for (MoneroOutputDistributionEntry entry : entries) {
-      testDaemonResponseInfo(entry, true, true);
+      testDaemonResponseInfo(entry, true, false);
       testOutputDistributionEntry(entry);
     }
   }
