@@ -45,6 +45,7 @@ import utils.TestUtils;
 public class TestMoneroDaemon {
   
   private static MoneroDaemon daemon;
+  private static String TEST_ADDRESS = "55AepZuUKYV7Wrf9BMiczAELg2gcZuWQsYmg4kXHGAiW8uhVC1VVhqA5HzFcePKhuNgS2d9ag5imvC1jxsJbbnHm5kF753Z";
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -69,7 +70,7 @@ public class TestMoneroDaemon {
 
   @Test
   public void testGetBlockTemplate() {
-    MoneroBlockTemplate template = daemon.getBlockTemplate("55AepZuUKYV7Wrf9BMiczAELg2gcZuWQsYmg4kXHGAiW8uhVC1VVhqA5HzFcePKhuNgS2d9ag5imvC1jxsJbbnHm5kF753Z", 2);
+    MoneroBlockTemplate template = daemon.getBlockTemplate(TEST_ADDRESS, 2);
     testDaemonResponseInfo(template, true, true);
     testBlockTemplate(template);
   }
@@ -393,11 +394,12 @@ public class TestMoneroDaemon {
   @Test
   public void testSubmitBlock() {
     try {
-      daemon.submitBlock("Hello there!"); // TODO: way to test actual block?
+      MoneroBlockTemplate template = daemon.getBlockTemplate(TEST_ADDRESS, 2);
+      daemon.submitBlock(template.getTemplateBlob());
       fail("Should have thrown error submitting invalid block");
     } catch (MoneroRpcException e) {
-      assertEquals(-6, (int) e.getRpcCode());
-      assertEquals("Wrong block blob", e.getRpcMessage());
+      assertEquals(-7, (int) e.getRpcCode());
+      assertEquals("Block not accepted", e.getRpcMessage());
     }
   }
 
