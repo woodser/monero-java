@@ -90,7 +90,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public MoneroDaemonModel submitBlock(String blockBlob) {
-    Map<String, Object> respMap = rpc.sendRpcRequest("submit_block", blockBlob);
+    Map<String, Object> respMap = rpc.sendRpcRequest("submit_block", Arrays.asList(blockBlob));
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroDaemonModel model = new MoneroDaemonModel();
     setResponseInfo(resultMap, model);
