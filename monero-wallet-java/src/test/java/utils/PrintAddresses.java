@@ -18,7 +18,7 @@ public class PrintAddresses {
     for (MoneroAccount account : accounts) {
       List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
       for (MoneroSubaddress subaddress : subaddresses) {
-        System.out.println("[" + account.getIndex() + ", " + subaddress.getIndex() + "] " + subaddress.getAddress());
+        System.out.println("[" + account.getIndex() + ", " + subaddress.getIndex() + "] " + subaddress.getAddress() + " " + subaddress.getBalance() + " balance " + subaddress.getUnlockedBalance() + " unlocked");
       }
     }
   }
