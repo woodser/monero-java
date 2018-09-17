@@ -396,7 +396,8 @@ public class TestMoneroDaemon {
       daemon.submitBlock("Hello there!"); // TODO: way to test actual block?
       fail("Should have thrown error submitting invalid block");
     } catch (MoneroRpcException e) {
-      assertEquals(-2, (int) e.getRpcCode()); // TODO: verify input format
+      assertEquals(-6, (int) e.getRpcCode());
+      assertEquals("Wrong block blob", e.getRpcMessage());
     }
   }
 
