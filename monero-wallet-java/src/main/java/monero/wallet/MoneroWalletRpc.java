@@ -320,6 +320,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       destinationMap.put("amount", destination.getAmount());
       destinationMaps.add(destinationMap);
     }
+    paramMap.put("account_index", config.getAccountIndex());
+    paramMap.put("subaddr_indices", config.getSubaddressIndices());
     paramMap.put("payment_id", config.getPaymentId());
     paramMap.put("mixin", config.getMixin());
     paramMap.put("unlock_time", config.getUnlockTime());

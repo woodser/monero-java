@@ -14,6 +14,10 @@ import monero.wallet.model.MoneroSubaddress;
 public class PrintAddresses {
 
   public static void main(String[] args) {
+    printAddresses();
+  }
+  
+  public static void printAddresses() {
     
     // collect info about subaddresses
     List<Pair<String, List<Object>>> pairs = new ArrayList<Pair<String, List<Object>>>();
@@ -23,7 +27,7 @@ public class PrintAddresses {
       add(pairs, "ACCOUNT", account.getIndex());
       add(pairs, "SUBADDRESS", 0);
       add(pairs, "LABEL", account.getLabel());
-      add(pairs, "ADDRESS", account.getPrimaryAddress());
+      add(pairs, "ADDRESS", "******** ACCOUNT ********");
       add(pairs, "BALANCE", account.getBalance());
       add(pairs, "UNLOCKED", account.getUnlockedBalance());
       List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
