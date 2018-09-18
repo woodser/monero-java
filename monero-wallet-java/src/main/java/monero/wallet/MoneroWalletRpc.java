@@ -340,8 +340,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
     tx.setType(MoneroTxType.OUTGOING);
     tx.setIsDoubleSpend(false);
-    tx.setAccountIndex(config.getAccountIdx());
-    if (config.getSubaddressIndices() != null) tx.setSubaddressIndices(new ArrayList<Integer>(config.getSubaddressIndices()));
+    tx.setAccountIndex(config.getAccountIdx() == null ? 0 : config.getAccountIdx());
+    tx.setSubaddressIndices(config.getSubaddressIndices() == null ? null : new ArrayList<Integer>(config.getSubaddressIndices()));
     return tx;
   }
 
