@@ -228,7 +228,7 @@ public class TestMoneroWalletWrite {
     }
     MoneroTxConfig config = new MoneroTxConfig();
     config.setMixin(MIXIN);
-    config.setAccountIdx(0);
+    config.setAccountIndex(0);
     config.setDestinations(payments);
     MoneroTx tx = wallet.send(config);
     

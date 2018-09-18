@@ -13,7 +13,7 @@ import monero.wallet.model.MoneroTx.MoneroTxPriority;
 public class MoneroTxConfig {
 
   private List<MoneroPayment> destinations;
-  private Integer accountIdx;
+  private Integer accountIndex;
   private Collection<Integer> subaddressIndices;
   private BigInteger fee;
   private Integer mixin;
@@ -43,7 +43,7 @@ public class MoneroTxConfig {
   public MoneroTxConfig(List<MoneroPayment> destinations, Integer accountIdx, Collection<Integer> subaddressIndices, BigInteger fee, Integer mixin, Integer unlockTime, String paymentId, MoneroTxPriority priority, Boolean doNotRelay, BigInteger belowAmount) {
     super();
     this.destinations = destinations;
-    this.accountIdx = accountIdx;
+    this.accountIndex = accountIdx;
     this.subaddressIndices = subaddressIndices;
     this.fee = fee;
     this.mixin = mixin;
@@ -62,12 +62,12 @@ public class MoneroTxConfig {
     this.destinations = destinations;
   }
 
-  public Integer getAccountIdx() {
-    return accountIdx;
+  public Integer getAccountIndex() {
+    return accountIndex;
   }
 
-  public void setAccountIdx(Integer accountIdx) {
-    this.accountIdx = accountIdx;
+  public void setAccountIndex(Integer accountIdx) {
+    this.accountIndex = accountIdx;
   }
 
   public Collection<Integer> getSubaddressIndices() {
