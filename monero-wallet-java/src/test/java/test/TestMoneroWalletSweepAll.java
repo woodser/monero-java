@@ -14,12 +14,12 @@ import java.util.Map.Entry;
 import org.junit.Before;
 import org.junit.Test;
 
+import monero.wallet.MoneroWallet;
+import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroSubaddress;
+import monero.wallet.model.MoneroTx;
+import monero.wallet.model.MoneroTxConfig;
 import utils.TestUtils;
-import wallet.MoneroWallet;
-import wallet.model.MoneroAccount;
-import wallet.model.MoneroSubaddress;
-import wallet.model.MoneroTx;
-import wallet.model.MoneroTxConfig;
 
 /**
  * Tests sweeping all wallet funds.

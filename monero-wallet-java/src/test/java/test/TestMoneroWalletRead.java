@@ -20,20 +20,20 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import rpc.MoneroRpcException;
-import utils.MoneroUtils;
+import monero.rpc.MoneroRpcException;
+import monero.utils.MoneroUtils;
+import monero.wallet.MoneroWallet;
+import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroException;
+import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroKeyImage;
+import monero.wallet.model.MoneroOutput;
+import monero.wallet.model.MoneroSubaddress;
+import monero.wallet.model.MoneroTx;
+import monero.wallet.model.MoneroTxFilter;
+import monero.wallet.model.MoneroUri;
+import monero.wallet.model.MoneroTx.MoneroTxType;
 import utils.TestUtils;
-import wallet.MoneroWallet;
-import wallet.model.MoneroAccount;
-import wallet.model.MoneroException;
-import wallet.model.MoneroIntegratedAddress;
-import wallet.model.MoneroKeyImage;
-import wallet.model.MoneroOutput;
-import wallet.model.MoneroSubaddress;
-import wallet.model.MoneroTx;
-import wallet.model.MoneroTxFilter;
-import wallet.model.MoneroUri;
-import wallet.model.MoneroTx.MoneroTxType;
 
 /**
  * Tests a Monero wallet excluding sending transactions.
