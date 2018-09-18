@@ -144,7 +144,7 @@ public class TestMoneroWalletWrite {
   }
   
   @Test
-  public void testSend() {
+  public void testSendSingle() {
     
     // get balance before
     BigInteger balanceBefore = wallet.getBalance(0);
@@ -160,6 +160,7 @@ public class TestMoneroWalletWrite {
     
     // test transaction
     TestUtils.testTx(tx);
+    assertNull(tx.getSubaddressIndices());
     assertEquals(sendAmount, tx.getAmount());
     assertNotNull(tx.getPayments());
     assertEquals(1, tx.getPayments().size());
@@ -183,6 +184,81 @@ public class TestMoneroWalletWrite {
     // test wallet balance
     assertTrue(wallet.getBalance(0).longValue() < balanceBefore.longValue());
     assertTrue(wallet.getUnlockedBalance(0).longValue() < unlockedBalanceBefore.longValue());
+  }
+
+  @Test
+  public void testSendMultiple() {
+    
+    // test constants
+    int NUM_ACCOUNTS = 3;
+    int NUM_ADDRESSES_PER_ACCOUNT = 3;
+    int TOTAL_ADDRESSES = NUM_ACCOUNTS * NUM_ADDRESSES_PER_ACCOUNT;
+    
+    // get amount to send per subaddress
+    BigInteger balance = wallet.getBalance(0);
+    BigInteger unlockedBalance = wallet.getUnlockedBalance(0);
+    assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", balance.longValue() > 0);
+    assertTrue("Wallet is waiting on unlocked funds", unlockedBalance.longValue() > 0);
+    BigInteger sendAmount = unlockedBalance.divide(BigInteger.valueOf(SEND_DIVISOR));
+    BigInteger sendAmountPerSubaddress = sendAmount.divide(BigInteger.valueOf(TOTAL_ADDRESSES));
+    
+    // create minimum number of accounts
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    for (int i = 0; i < NUM_ACCOUNTS - accounts.size(); i++) {
+      wallet.createAccount();
+    }
+    
+    // create minimum number of subaddresses per account and collect destination addresses
+    List<String> destinationAddresses = new ArrayList<String>();
+    for (int i = 0; i < NUM_ACCOUNTS; i++) {
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(i);
+      for (int j = 0; j < NUM_ADDRESSES_PER_ACCOUNT - subaddresses.size(); j++) wallet.createSubaddress(i);
+      subaddresses = wallet.getSubaddresses(i);
+      assertTrue(subaddresses.size() >= NUM_ADDRESSES_PER_ACCOUNT);
+      for (int j = 0; j < NUM_ADDRESSES_PER_ACCOUNT; j++) destinationAddresses.add(subaddresses.get(j).getAddress());
+    }
+        
+    // send to subaddresses
+    List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
+    for (int i = 0; i < destinationAddresses.size(); i++) {
+      MoneroPayment payment = new MoneroPayment();
+      payments.add(payment);
+      payment.setAddress(destinationAddresses.get(i));
+      payment.setAmount(sendAmountPerSubaddress);
+    }
+    MoneroTxConfig config = new MoneroTxConfig();
+    config.setMixin(MIXIN);
+    config.setAccountIdx(0);
+    config.setDestinations(payments);
+    MoneroTx tx = wallet.send(config);
+    
+    // test transaction
+    TestUtils.testTx(tx);
+    assertNull(tx.getSubaddressIndices());
+    assertTrue(Math.abs(sendAmount.subtract(tx.getAmount()).longValue()) < 10);  // send amount may not be exact but should be very close
+    assertNotNull(tx.getPayments());
+    assertEquals(TOTAL_ADDRESSES, tx.getPayments().size());
+    assertTrue(tx.getFee().longValue() > 0);
+    assertEquals(MIXIN, tx.getMixin());
+    assertNotNull(tx.getKey());
+    assertNull(tx.getSize());
+    assertEquals(MoneroTxType.OUTGOING, tx.getType());
+    assertNull(tx.getHeight());
+    assertEquals((Integer) 0, tx.getUnlockTime());
+    assertNotNull(tx.getBlob());
+    assertNotNull(tx.getMetadata());
+    
+    // test payments
+    assertEquals(payments.size(), tx.getPayments().size());
+    for (int i = 0; i < payments.size(); i++) {
+      assertEquals(payments.get(i).getAddress(), tx.getPayments().get(i).getAddress());
+      assertEquals(payments.get(i).getAmount(), tx.getPayments().get(i).getAmount());
+      assertTrue(tx == tx.getPayments().get(i).getTransaction());
+    }
+    
+    // test wallet balance
+    assertTrue(wallet.getBalance(0).longValue() < balance.longValue());
+    assertTrue(wallet.getUnlockedBalance(0).longValue() < unlockedBalance.longValue());
   }
 
   @Test
@@ -226,6 +302,11 @@ public class TestMoneroWalletWrite {
     // test wallet balance
     assertTrue(wallet.getBalance(0).longValue() < balanceBefore.longValue());
     assertTrue(wallet.getUnlockedBalance(0).longValue() < unlockedBalanceBefore.longValue());
+  }
+  
+  @Test
+  public void testSendFromSubaddresses() {
+    throw new RuntimeException("Not implemented");
   }
 
   @Test
@@ -343,65 +424,5 @@ public class TestMoneroWalletWrite {
     }
     entries = wallet.getAddressBookEntries();
     assertEquals(numEntriesStart, entries.size());
-  }
-  
-  @Test
-  public void testSendFan() {
-    
-    // test constants
-    int NUM_ACCOUNTS = 3;
-    int NUM_ADDRESSES_PER_ACCOUNT = 3;
-    int TOTAL_ADDRESSES = NUM_ACCOUNTS * NUM_ADDRESSES_PER_ACCOUNT;
-    
-    // get amount to send per subaddress
-    BigInteger balance = wallet.getBalance(0, 0);
-    BigInteger unlockedBalance = wallet.getUnlockedBalance(0, 0);
-    assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", balance.longValue() > 0);
-    assertTrue("Wallet is waiting on unlocked funds", unlockedBalance.longValue() > 0);
-    BigInteger sendAmount = unlockedBalance.divide(BigInteger.valueOf(SEND_DIVISOR));
-    BigInteger sendAmountPerSubaddress = sendAmount.divide(BigInteger.valueOf(TOTAL_ADDRESSES));
-    
-    // create minimum number of accounts
-    List<MoneroAccount> accounts = wallet.getAccounts();
-    for (int i = 0; i < NUM_ACCOUNTS - accounts.size(); i++) {
-      wallet.createAccount();
-    }
-    
-    // create minimum number of subaddresses per account and collect destination addresses
-    List<String> destinationAddresses = new ArrayList<String>();
-    for (int i = 0; i < NUM_ACCOUNTS; i++) {
-      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(i);
-      for (int j = 0; j < NUM_ADDRESSES_PER_ACCOUNT - subaddresses.size(); j++) wallet.createSubaddress(i);
-      subaddresses = wallet.getSubaddresses(i);
-      assertTrue(subaddresses.size() >= NUM_ADDRESSES_PER_ACCOUNT);
-      for (int j = 0; j < NUM_ADDRESSES_PER_ACCOUNT; j++) destinationAddresses.add(subaddresses.get(j).getAddress());
-    }
-        
-    // send to subaddresses
-    List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
-    for (int i = 0; i < destinationAddresses.size(); i++) {
-      MoneroPayment payment = new MoneroPayment();
-      payments.add(payment);
-      payment.setAddress(destinationAddresses.get(i));
-      payment.setAmount(sendAmountPerSubaddress);
-    }
-    MoneroTxConfig config = new MoneroTxConfig();
-    config.setAccountIdx(0);
-    config.setSubaddressIndices(Arrays.asList(0));
-    config.setDestinations(payments);
-    MoneroTx tx = wallet.send(config);
-    TestUtils.testTx(tx);
-  }
-  
-  @Test
-  public void testSendFromSubaddresses() {
-    
-    
-    
-    
-    
-    
-    
-    throw new RuntimeException("Not implemented");
   }
 }
