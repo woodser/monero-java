@@ -69,7 +69,7 @@ public class TestMoneroWalletSweepAll {
     }
     
     // assert unlocked balance across accounts
-    assertTrue("Test requires multiple accounts with unlocked balance; run testSendFan()", subaddressIndexMap.size() > 1);
+    assertTrue("Test requires multiple accounts with unlocked balance; run testSendFan() and wait for funds to unlock", subaddressIndexMap.size() > 1);
     
     // sweep from each account
     for (Entry<Integer, List<Integer>> entry : subaddressIndexMap.entrySet()) {
