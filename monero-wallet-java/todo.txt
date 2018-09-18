@@ -1,4 +1,5 @@
 v0.12.3.0
+should MoneroTx subaddressIndex be list?
 logs getting printed twice
 check for unrecognized fields
 send / sendAll from specific subaddresses
