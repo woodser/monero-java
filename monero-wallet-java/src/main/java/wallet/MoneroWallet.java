@@ -83,6 +83,13 @@ public interface MoneroWallet {
   public MoneroAccount getAccount(int accountIdx);
   
   /**
+   * Create a new account without a label.
+   * 
+   * @return MoneroAccount is the created account
+   */
+  public MoneroAccount createAccount();
+  
+  /**
    * Create a new account with an optional label.
    * 
    * @param label specifies the label for the account (optional)
@@ -130,6 +137,14 @@ public interface MoneroWallet {
    * @return MoneroSubaddress is the subaddress in the account
    */
   public MoneroSubaddress getSubaddress(int accountIdx, int subaddressIdx);
+  
+  /**
+   * Create a subaddress within an account without a label.
+   * 
+   * @param accountIdx identifies the account
+   * @return MoneroSubaddress is the created subaddress
+   */
+  public MoneroSubaddress createSubaddress(int accountIdx);  
   
   /**
    * Create a subaddress within an account.

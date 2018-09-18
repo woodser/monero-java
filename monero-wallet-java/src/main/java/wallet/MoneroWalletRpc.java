@@ -250,7 +250,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // send request
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("account_idx", accountIdx);
+    params.put("account_index", accountIdx);
     params.put("label", label);
     Map<String, Object> respMap = rpc.sendRpcRequest("create_address", params);
     
@@ -339,7 +339,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setMixin(config.getMixin());
     tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
     tx.setType(MoneroTxType.OUTGOING);
-    tx.setDoubleSpend(false);
+    tx.setIsDoubleSpend(false);
+    tx.setAccountIndex(config.getAccountIdx());
+    tx.setSubaddressIndices(new ArrayList<Integer>(config.getSubaddressIndices()));
     return tx;
   }
 
@@ -820,12 +822,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("global_index")) { } // ignore
       else if (key.equalsIgnoreCase("tx_blob")) tx.setBlob((String) val);
       else if (key.equalsIgnoreCase("tx_metadata")) tx.setMetadata((String) val);
-      else if (key.equalsIgnoreCase("double_spend_seen")) tx.setDoubleSpend((Boolean) val);
+      else if (key.equalsIgnoreCase("double_spend_seen")) tx.setIsDoubleSpend((Boolean) val);
       else if (key.equalsIgnoreCase("subaddr_index")) {
         if (val instanceof Map) {
           Map<String, Object> subaddrMap = (Map<String, Object>) val;
           tx.setAccountIndex(((BigInteger) subaddrMap.get("major")).intValue());
-          tx.setSubaddressIndex(((BigInteger) subaddrMap.get("minor")).intValue());
+          tx.setSubaddressIndices(Arrays.asList(((BigInteger) subaddrMap.get("minor")).intValue()));
         } else {
           // ignore subaddr_index returned from 'incoming_transfers' (not map and not informative)
         }

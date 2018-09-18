@@ -115,24 +115,32 @@ public class TestMoneroWalletWrite {
   @Test
   public void testCreateSubaddress() {
     
-    // create subaddress with no label
-    List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(0);
-    MoneroSubaddress subaddress = wallet.createSubaddress(0, null);
-    assertEquals("", subaddress.getLabel());
-    TestUtils.testSubaddress(subaddress);
-    List<MoneroSubaddress> subaddressesNew = wallet.getSubaddresses(0);
-    assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
-    assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
-    
-    // create subaddress with label
-    subaddresses = wallet.getSubaddresses(0);
-    String uuid = UUID.randomUUID().toString();
-    subaddress = wallet.createSubaddress(0, uuid);
-    assertEquals(subaddress.getLabel(), uuid);
-    TestUtils.testSubaddress(subaddress);
-    subaddressesNew = wallet.getSubaddresses(0);
-    assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
-    assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
+    // create subaddresses across accounts
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    if (accounts.size() < 2) wallet.createAccount();
+    accounts = wallet.getAccounts();
+    assertTrue(accounts.size() > 1);
+    for (int accountIdx = 0; accountIdx < 2; accountIdx++) {
+      
+      // create subaddress with no label
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(accountIdx);
+      MoneroSubaddress subaddress = wallet.createSubaddress(accountIdx, null);
+      assertEquals("", subaddress.getLabel());
+      TestUtils.testSubaddress(subaddress);
+      List<MoneroSubaddress> subaddressesNew = wallet.getSubaddresses(accountIdx);
+      assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
+      assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
+      
+      // create subaddress with label
+      subaddresses = wallet.getSubaddresses(accountIdx);
+      String uuid = UUID.randomUUID().toString();
+      subaddress = wallet.createSubaddress(accountIdx, uuid);
+      assertEquals(subaddress.getLabel(), uuid);
+      TestUtils.testSubaddress(subaddress);
+      subaddressesNew = wallet.getSubaddresses(accountIdx);
+      assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
+      assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
+    }
   }
   
   @Test
@@ -340,7 +348,9 @@ public class TestMoneroWalletWrite {
   public void testSendFan() {
     
     // test constants
-    int NUM_ADDRESSES = 10;
+    int NUM_ACCOUNTS = 3;
+    int NUM_ADDRESSES_PER_ACCOUNT = 3;
+    int TOTAL_ADDRESSES = NUM_ACCOUNTS * NUM_ADDRESSES_PER_ACCOUNT;
     
     // get amount to send per subaddress
     BigInteger balance = wallet.getBalance(0, 0);
@@ -348,20 +358,30 @@ public class TestMoneroWalletWrite {
     assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", balance.longValue() > 0);
     assertTrue("Wallet is waiting on unlocked funds", unlockedBalance.longValue() > 0);
     BigInteger sendAmount = unlockedBalance.divide(BigInteger.valueOf(SEND_DIVISOR));
-    BigInteger sendAmountPerSubaddress = sendAmount.divide(BigInteger.valueOf(NUM_ADDRESSES));
+    BigInteger sendAmountPerSubaddress = sendAmount.divide(BigInteger.valueOf(TOTAL_ADDRESSES));
     
-    // create minimum number of subaddresses for destinations
-    List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(0);
-    for (int i = 0; i < NUM_ADDRESSES - subaddresses.size(); i++) wallet.createSubaddress(0, null);
-    subaddresses = wallet.getSubaddresses(0);
-    assertTrue(subaddresses.size() >= NUM_ADDRESSES);
+    // create minimum number of accounts
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    for (int i = 0; i < NUM_ACCOUNTS - accounts.size(); i++) {
+      wallet.createAccount();
+    }
     
+    // create minimum number of subaddresses per account and collect destination addresses
+    List<String> destinationAddresses = new ArrayList<String>();
+    for (int i = 0; i < NUM_ACCOUNTS; i++) {
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(i);
+      for (int j = 0; j < NUM_ADDRESSES_PER_ACCOUNT - subaddresses.size(); j++) wallet.createSubaddress(i);
+      subaddresses = wallet.getSubaddresses(i);
+      assertTrue(subaddresses.size() >= NUM_ADDRESSES_PER_ACCOUNT);
+      for (int j = 0; j < NUM_ADDRESSES_PER_ACCOUNT; j++) destinationAddresses.add(subaddresses.get(j).getAddress());
+    }
+        
     // send to subaddresses
     List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
-    for (int i = 0; i < NUM_ADDRESSES; i++) {
+    for (int i = 0; i < destinationAddresses.size(); i++) {
       MoneroPayment payment = new MoneroPayment();
       payments.add(payment);
-      payment.setAddress(subaddresses.get(i).getAddress());
+      payment.setAddress(destinationAddresses.get(i));
       payment.setAmount(sendAmountPerSubaddress);
     }
     MoneroTxConfig config = new MoneroTxConfig();
@@ -370,7 +390,6 @@ public class TestMoneroWalletWrite {
     config.setDestinations(payments);
     MoneroTx tx = wallet.send(config);
     TestUtils.testTx(tx);
-    fail("Not implemented");  // TODO: now what?
   }
   
   @Test
