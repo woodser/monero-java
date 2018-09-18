@@ -340,7 +340,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
     tx.setType(MoneroTxType.OUTGOING);
     tx.setIsDoubleSpend(false);
-    tx.setAccountIndex(config.getAccountIdx() == null ? 0 : config.getAccountIdx());
+    tx.setAccountIndex(config.getAccountIndex() == null ? 0 : config.getAccountIndex());
     tx.setSubaddressIndices(config.getSubaddressIndices() == null ? null : new ArrayList<Integer>(config.getSubaddressIndices()));
     return tx;
   }
@@ -394,7 +394,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // send request
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("address", config.getDestinations().get(0).getAddress());
-    params.put("account_index", config.getAccountIdx());
+    params.put("account_index", config.getAccountIndex());
     params.put("subaddr_indices", config.getSubaddressIndices());
     params.put("priority", config.getPriority());
     params.put("mixin", config.getMixin());
