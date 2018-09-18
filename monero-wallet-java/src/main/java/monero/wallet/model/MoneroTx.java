@@ -239,11 +239,11 @@ public class MoneroTx {
    */
   public void merge(MoneroTx tx) {
     if (id == null) id = tx.getId();
-    else if (tx.getId() != null) validateEquals("ID", id, tx.getId());
+    else if (tx.getId() != null) validateEquals("IDs", id, tx.getId());
     if (address == null) address = tx.getAddress();
-    else if (tx.getAddress() != null) validateEquals("Address", address, tx.getAddress());
+    else if (tx.getAddress() != null) validateEquals("Addresses", address, tx.getAddress());
     if (accountIndex == null) accountIndex = tx.getAccountIndex();
-    else if (tx.getAccountIndex() != null) validateEquals("Account index", accountIndex, tx.getAccountIndex());
+    else if (tx.getAccountIndex() != null) validateEquals("Account indices", accountIndex, tx.getAccountIndex());
     if (subaddressIndices == null) subaddressIndices = tx.getSubaddressIndices();
     else if (tx.getSubaddressIndices() != null) validateEquals("Subaddress indices", subaddressIndices, tx.getSubaddressIndices());
     if (payments == null) payments = tx.getPayments();
@@ -253,7 +253,7 @@ public class MoneroTx {
     if (paymentId == null) paymentId = tx.getPaymentId();
     else if (tx.getPaymentId() != null) validateEquals("Payment ids", paymentId, tx.getPaymentId());
     if (amount == null) amount = tx.getAmount();
-    else if (tx.getAmount() != null) validateEquals("Amount", amount, tx.getAmount());
+    else if (tx.getAmount() != null) validateEquals("Amounts", amount, tx.getAmount());
     if (fee == null) fee = tx.getFee();
     else if (tx.getFee() != null) validateEquals("Fees", fee, tx.getFee());
     if (mixin == null) mixin = tx.getMixin();
