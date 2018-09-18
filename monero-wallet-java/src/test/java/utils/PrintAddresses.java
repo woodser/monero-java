@@ -25,9 +25,9 @@ public class PrintAddresses {
     List<MoneroAccount> accounts = wallet.getAccounts();
     for (MoneroAccount account : accounts) {
       add(pairs, "ACCOUNT", account.getIndex());
-      add(pairs, "SUBADDRESS", 0);
+      add(pairs, "SUBADDRESS", "");
       add(pairs, "LABEL", account.getLabel());
-      add(pairs, "ADDRESS", "******** ACCOUNT ********");
+      add(pairs, "ADDRESS", "");
       add(pairs, "BALANCE", account.getBalance());
       add(pairs, "UNLOCKED", account.getUnlockedBalance());
       List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
