@@ -159,6 +159,7 @@ public class TestMoneroWalletWrite {
     MoneroTx tx = wallet.send(address, null, sendAmount, MIXIN);
     
     // test transaction
+    TestUtils.testTx(tx);
     assertEquals(sendAmount, tx.getAmount());
     assertNotNull(tx.getPayments());
     assertEquals(1, tx.getPayments().size());
@@ -394,6 +395,13 @@ public class TestMoneroWalletWrite {
   
   @Test
   public void testSendFromSubaddresses() {
+    
+    
+    
+    
+    
+    
+    
     throw new RuntimeException("Not implemented");
   }
 }
