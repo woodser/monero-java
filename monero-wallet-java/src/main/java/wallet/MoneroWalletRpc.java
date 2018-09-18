@@ -33,10 +33,10 @@ import wallet.model.MoneroOutput;
 import wallet.model.MoneroPayment;
 import wallet.model.MoneroSubaddress;
 import wallet.model.MoneroTx;
+import wallet.model.MoneroTx.MoneroTxType;
 import wallet.model.MoneroTxConfig;
 import wallet.model.MoneroTxFilter;
 import wallet.model.MoneroUri;
-import wallet.model.MoneroTx.MoneroTxType;
 
 /**
  * Implements a Monero Wallet using monero-wallet-rpc.
@@ -338,6 +338,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setPayments(config.getDestinations());
     tx.setMixin(config.getMixin());
     tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
+    tx.setType(MoneroTxType.OUTGOING);
+    tx.setDoubleSpend(false);
     return tx;
   }
 
@@ -464,7 +466,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return txs;
   }
 
-  // TODO: revisit this method to see if it can be optimized
+  // TODO: revisit this method to see if it can be optimized, one way is lookup txs by id if only one id
   @SuppressWarnings("unchecked")
   @Override
   public List<MoneroTx> getTxs(MoneroTxFilter filter) {

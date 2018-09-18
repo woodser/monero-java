@@ -221,7 +221,7 @@ public interface MoneroWallet {
   /**
    * Send all unlocked balance to an address.
    * 
-   * @param config is the transcaction configuration
+   * @param config is the transaction configuration (account index defaults to 0 and subaddress indices defaults to [0] if not provided)
    * @param List<MoneroTx> are the resulting transactions from sweeping
    */
   public List<MoneroTx> sweepAll(MoneroTxConfig config);
