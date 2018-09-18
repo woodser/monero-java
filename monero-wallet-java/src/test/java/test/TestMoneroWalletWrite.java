@@ -27,6 +27,7 @@ import wallet.model.MoneroIntegratedAddress;
 import wallet.model.MoneroPayment;
 import wallet.model.MoneroSubaddress;
 import wallet.model.MoneroTx;
+import wallet.model.MoneroTx.MoneroTxType;
 import wallet.model.MoneroTxConfig;
 
 /**
@@ -151,14 +152,13 @@ public class TestMoneroWalletWrite {
     
     // test transaction
     assertEquals(sendAmount, tx.getAmount());
-    assertNotNull(tx.getId());
     assertNotNull(tx.getPayments());
     assertEquals(1, tx.getPayments().size());
     assertTrue(tx.getFee().longValue() > 0);
     assertEquals(MIXIN, tx.getMixin());
     assertNotNull(tx.getKey());
     assertNull(tx.getSize());
-    assertNull(tx.getType());
+    assertEquals(MoneroTxType.OUTGOING, tx.getType());
     assertNull(tx.getHeight());
     assertEquals((Integer) 0, tx.getUnlockTime());
     assertNotNull(tx.getBlob());

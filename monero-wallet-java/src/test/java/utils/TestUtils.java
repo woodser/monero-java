@@ -116,7 +116,13 @@ public class TestUtils {
     assertNotNull(tx.getId());
     assertNotNull(tx.getType());
     if (tx.getType() == MoneroTxType.OUTGOING) {
-      assertNotNull(tx.getAddress());
+      if (tx.getAddress() == null) {
+        assertNotNull(tx.getPayments());
+        assertFalse(tx.getPayments().isEmpty());
+      }
+      if (tx.getPayments() == null || tx.getPayments().isEmpty()) {
+        assertNotNull(tx.getAddress());
+      }
       assertNotNull(tx.getAmount());
       assertFalse(tx.isDoubleSpend());
       assertNotNull(tx.getAccountIndex());
