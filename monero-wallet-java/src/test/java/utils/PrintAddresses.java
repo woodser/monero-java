@@ -2,9 +2,9 @@ package utils;
 
 import java.util.List;
 
-import wallet.MoneroWallet;
-import wallet.model.MoneroAccount;
-import wallet.model.MoneroSubaddress;
+import monero.wallet.MoneroWallet;
+import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroSubaddress;
 
 /**
  * Prints the balances of the wallet.
