@@ -262,6 +262,11 @@ public class TestMoneroWalletWrite {
   }
 
   @Test
+  public void testSendFromSubaddresses() {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Test
   public void testSendSplit() {
     
     // get balance and address
@@ -304,11 +309,6 @@ public class TestMoneroWalletWrite {
     assertTrue(wallet.getUnlockedBalance(0).longValue() < unlockedBalanceBefore.longValue());
   }
   
-  @Test
-  public void testSendFromSubaddresses() {
-    throw new RuntimeException("Not implemented");
-  }
-
   @Test
   public void testSweepDust() {
     List<MoneroTx> txs = wallet.sweepDust();
