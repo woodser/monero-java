@@ -1,8 +1,6 @@
 v0.12.3.0
-should MoneroTx subaddressIndex be list?
+sendFromAddresses() then replicate in sendSplit
 check for unrecognized fields
-send / sendAll from specific subaddresses
-test accounts
 
 get_output_distribution distribution field cannot be deserialized to array of integer
 investigate do not relay, way of doing pending transaction?  would need to relay 
