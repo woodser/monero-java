@@ -341,7 +341,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setType(MoneroTxType.OUTGOING);
     tx.setIsDoubleSpend(false);
     tx.setAccountIndex(config.getAccountIdx());
-    tx.setSubaddressIndices(new ArrayList<Integer>(config.getSubaddressIndices()));
+    if (config.getSubaddressIndices() != null) tx.setSubaddressIndices(new ArrayList<Integer>(config.getSubaddressIndices()));
     return tx;
   }
 
