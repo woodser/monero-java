@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
+import wallet.model.MoneroAccount;
 import wallet.model.MoneroAddressBookEntry;
 import wallet.model.MoneroException;
 import wallet.model.MoneroPayment;
@@ -31,6 +32,16 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   @Override
   public List<MoneroTx> getTxs() {
     return getTxs(null);
+  }
+  
+  @Override
+  public MoneroAccount createAccount() {
+    return createAccount(null);
+  }
+  
+  @Override
+  public MoneroSubaddress createSubaddress(int accountIdx) {
+    return createSubaddress(accountIdx,  null);
   }
   
   @Override

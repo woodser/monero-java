@@ -38,7 +38,7 @@ public class MoneroTx {
   private String id; 
   private String address;
   private Integer accountIndex;
-  private Integer subaddressIndex;
+  private List<Integer> subaddressIndices;
 	private List<MoneroPayment> payments;
 	private List<MoneroOutput> outputs;
 	private String paymentId;
@@ -84,12 +84,12 @@ public class MoneroTx {
     this.accountIndex = accountIndex;
   }
 
-  public Integer getSubaddressIndex() {
-    return subaddressIndex;
+  public List<Integer> getSubaddressIndices() {
+    return subaddressIndices;
   }
 
-  public void setSubaddressIndex(Integer subaddressIndex) {
-    this.subaddressIndex = subaddressIndex;
+  public void setSubaddressIndices(List<Integer> subaddressIndices) {
+    this.subaddressIndices = subaddressIndices;
   }
 
   public List<MoneroPayment> getPayments() {
@@ -205,12 +205,12 @@ public class MoneroTx {
   public void setUnlockTime(Integer unlockTime) {
     this.unlockTime = unlockTime;
   }
-  
-  public Boolean isDoubleSpend() {
+
+  public Boolean getIsDoubleSpend() {
     return isDoubleSpend;
   }
 
-  public void setDoubleSpend(Boolean isDoubleSpend) {
+  public void setIsDoubleSpend(Boolean isDoubleSpend) {
     this.isDoubleSpend = isDoubleSpend;
   }
 
@@ -244,8 +244,8 @@ public class MoneroTx {
     else if (tx.getAddress() != null) validateEquals("Address", address, tx.getAddress());
     if (accountIndex == null) accountIndex = tx.getAccountIndex();
     else if (tx.getAccountIndex() != null) validateEquals("Account index", accountIndex, tx.getAccountIndex());
-    if (subaddressIndex == null) subaddressIndex = tx.getSubaddressIndex();
-    else if (tx.getSubaddressIndex() != null) validateEquals("Subaddress index", subaddressIndex, tx.getSubaddressIndex());
+    if (subaddressIndices == null) subaddressIndices = tx.getSubaddressIndices();
+    else if (tx.getSubaddressIndices() != null) validateEquals("Subaddress indices", subaddressIndices, tx.getSubaddressIndices());
     if (payments == null) payments = tx.getPayments();
     else if (tx.getPayments() != null) payments.addAll(tx.getPayments());
     if (outputs == null) outputs = tx.getOutputs();
@@ -272,8 +272,8 @@ public class MoneroTx {
     else if (tx.getTimestamp() != null) validateEquals("Timestamps", timestamp, tx.getTimestamp());
     if (unlockTime == null) unlockTime = tx.getUnlockTime();
     else if (tx.getUnlockTime() != null) validateEquals("Unlock times", unlockTime, tx.getUnlockTime());
-    if (isDoubleSpend == null) isDoubleSpend = tx.isDoubleSpend();
-    else if (tx.isDoubleSpend() != null) validateEquals("Is double spend", isDoubleSpend, tx.isDoubleSpend());
+    if (isDoubleSpend == null) isDoubleSpend = tx.getIsDoubleSpend();
+    else if (tx.getIsDoubleSpend() != null) validateEquals("Is double spend", isDoubleSpend, tx.getIsDoubleSpend());
     if (blob == null) blob = tx.getBlob();
     else if (tx.getBlob() != null) validateEquals("Blobs", blob, tx.getBlob());
     if (metadata == null) metadata = tx.getMetadata();
@@ -289,7 +289,7 @@ public class MoneroTx {
     sb.append("ID: " + id + "\n");
     sb.append("Address: " + address + "\n");
     sb.append("Account index: " + accountIndex + "\n");
-    sb.append("Subaddress index: " + subaddressIndex + "\n");
+    sb.append("Subaddress indices: " + subaddressIndices + "\n");
     sb.append("Key: " + key + "\n");
     if (payments != null) {
       sb.append("Payments:\n");
@@ -343,7 +343,7 @@ public class MoneroTx {
     result = prime * result + ((paymentId == null) ? 0 : paymentId.hashCode());
     result = prime * result + ((payments == null) ? 0 : payments.hashCode());
     result = prime * result + ((size == null) ? 0 : size.hashCode());
-    result = prime * result + ((subaddressIndex == null) ? 0 : subaddressIndex.hashCode());
+    result = prime * result + ((subaddressIndices == null) ? 0 : subaddressIndices.hashCode());
     result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
     result = prime * result + ((type == null) ? 0 : type.hashCode());
     result = prime * result + ((unlockTime == null) ? 0 : unlockTime.hashCode());
@@ -404,9 +404,9 @@ public class MoneroTx {
     if (size == null) {
       if (other.size != null) return false;
     } else if (!size.equals(other.size)) return false;
-    if (subaddressIndex == null) {
-      if (other.subaddressIndex != null) return false;
-    } else if (!subaddressIndex.equals(other.subaddressIndex)) return false;
+    if (subaddressIndices == null) {
+      if (other.subaddressIndices != null) return false;
+    } else if (!subaddressIndices.equals(other.subaddressIndices)) return false;
     if (timestamp == null) {
       if (other.timestamp != null) return false;
     } else if (!timestamp.equals(other.timestamp)) return false;

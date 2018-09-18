@@ -3,15 +3,20 @@ package test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import utils.TestUtils;
 import wallet.MoneroWallet;
+import wallet.model.MoneroAccount;
 import wallet.model.MoneroSubaddress;
 import wallet.model.MoneroTx;
 import wallet.model.MoneroTxConfig;
@@ -43,36 +48,52 @@ public class TestMoneroWalletSweepAll {
   }
   
   @Test
-  public void testSweepAllSubaddresses() {
+  public void testSweepAllFromAddresses() {
     
-    // collect subaddress indices which contain unlocked balance
-    List<Integer> subaddressIndices = new ArrayList<Integer>();
-    List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(0);
-    for (MoneroSubaddress subaddress : subaddresses) {
-      if (subaddress.getUnlockedBalance().longValue() > 0) {
-        subaddressIndices.add(subaddress.getIndex());
+    // collect coordinates of all subaddresses that have unlocked balance
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    assertTrue("testSweepAllFromAddresses() requires multiple accounts; run testSendFan()", accounts.size() > 1);
+    Map<Integer, List<Integer>> subaddressIndexMap = new HashMap<Integer, List<Integer>>();
+    for (MoneroAccount account : accounts) {
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
+      for (MoneroSubaddress subaddress : subaddresses) {
+        if (subaddress.getUnlockedBalance().longValue() > 0) {
+          List<Integer> subaddressIndices = subaddressIndexMap.get(account.getIndex());
+          if (subaddressIndices == null) {
+            subaddressIndices = new ArrayList<Integer>();
+            subaddressIndexMap.put(account.getIndex(), subaddressIndices);
+          }
+          subaddressIndices.add(subaddress.getIndex());
+        }
       }
     }
     
-    // build sweep configuration
-    MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), null, null);
-    config.setAccountIdx(0);
-    config.setSubaddressIndices(subaddressIndices);
+    // assert unlocked balance across accounts
+    assertTrue("Test requires multiple accounts with unlocked balance; run testSendFan()", subaddressIndexMap.size() > 1);
     
-    // sweep all
-    List<MoneroTx> txs = wallet.sweepAll(config);
-    assertFalse(txs.isEmpty());
-    for (MoneroTx tx : txs) {
-      assertNotNull(tx.getKey());
-      assertNotNull(tx.getBlob());
-      assertNotNull(tx.getMetadata());
-      TestUtils.testTx(tx);
-    }
-    
-    // verify all balances no subaddresses contain unlocked balance
-    subaddresses = wallet.getSubaddresses(0);
-    for (MoneroSubaddress subaddress : subaddresses) {
-      assertEquals(0, subaddress.getUnlockedBalance().longValue());
+    // sweep from each account
+    for (Entry<Integer, List<Integer>> entry : subaddressIndexMap.entrySet()) {
+      
+      // build sweep configuration
+      MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), null, null);
+      config.setAccountIdx(entry.getKey());
+      config.setSubaddressIndices(entry.getValue());
+      
+      // sweep all
+      List<MoneroTx> txs = wallet.sweepAll(config);
+      assertFalse(txs.isEmpty());
+      for (MoneroTx tx : txs) {
+        assertNotNull(tx.getKey());
+        assertNotNull(tx.getBlob());
+        assertNotNull(tx.getMetadata());
+        TestUtils.testTx(tx);
+      }
+      
+      // verify no unlocked balances
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(entry.getKey());
+      for (MoneroSubaddress subaddress : subaddresses) {
+        assertEquals(0, subaddress.getUnlockedBalance().longValue());
+      }
     }
   }
 }
