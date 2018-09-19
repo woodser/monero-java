@@ -216,7 +216,7 @@ public class TestMoneroWalletWrite {
   private void testSendToMultiple(boolean canSplit) {
     
     // test constants
-    int NUM_ACCOUNTS = 3;
+    int NUM_ACCOUNTS = 5;
     int NUM_ADDRESSES_PER_ACCOUNT = 5;
     int TOTAL_ADDRESSES = NUM_ACCOUNTS * NUM_ADDRESSES_PER_ACCOUNT;
     
