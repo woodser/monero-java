@@ -201,10 +201,9 @@ public interface MoneroWallet {
    * 
    * @param address is the address to send to
    * @param amount is the amount to send
-   * @param mixin is the transaction mixin to use (optional)
    * @return MoneroTx is the resulting transaction from sending a payment
    */
-  public MoneroTx send(String address, BigInteger amount, Integer mixin);
+  public MoneroTx send(String address, BigInteger amount);
   
   /**
    * Send a payment.
@@ -212,24 +211,42 @@ public interface MoneroWallet {
    * @param address is the address to send to
    * @param paymentId is the payment id to send to (optional)
    * @param amount is the amount to send
-   * @param mixin is the transaction mixin to use (optional)
    * @return MoneroTx is the resulting transaction from sending a payment
    */
-  public MoneroTx send(String address, String paymentId, BigInteger amount, Integer mixin);
+  public MoneroTx send(String address, String paymentId, BigInteger amount);
   
   /**
-   * Send a payment.
+   * Send payments.
    * 
    * @param config is the transaction configuration
-   * @return MoneroTx is the resulting transaction from sending payment
+   * @return MoneroTx is the resulting transaction from sending payments
    */
   public MoneroTx send(MoneroTxConfig config);
   
   /**
    * Send a payment which may be split across multiple transactions.
    * 
+   * @param address is the address to send to
+   * @param amount is the amount to send
+   * @return List<MoneroTx> are the resulting transactions from sending a payment
+   */
+  public List<MoneroTx> sendSplit(String address, BigInteger amount);
+  
+  /**
+   * Send a payment which may be split across multiple transactions.
+   * 
+   * @param address is the address to send to
+   * @param paymentId is the payment id to send to (optional)
+   * @param amount is the amount to send
+   * @return List<MoneroTx> are the resulting transactions from sending a payment
+   */
+  public List<MoneroTx> sendSplit(String address, String paymentId, BigInteger amount);
+  
+  /**
+   * Send payments which may be split across multiple transactions.
+   * 
    * @param config is the transaction configuration
-   * @return List<MoneroTx> are the resulting transactions from sending payment
+   * @return List<MoneroTx> are the resulting transactions from sending payments
    */
   public List<MoneroTx> sendSplit(MoneroTxConfig config);
   
