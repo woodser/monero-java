@@ -376,11 +376,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
     // interpret response
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<BigInteger> amounts = (List<BigInteger>) resultMap.get("amount_list");
     List<BigInteger> fees = (List<BigInteger>) resultMap.get("fee_list");
     List<String> txIds = (List<String>) resultMap.get("tx_hash_list");
     List<String> keys = (List<String>) resultMap.get("tx_key_list");
-    List<BigInteger> amounts = (List<BigInteger>) resultMap.get("amount_list");
-    List<String> blobs = (List<String>) resultMap.get("blob_list");
+    List<String> blobs = (List<String>) resultMap.get("tx_blob_list");
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     for (int i = 0; i < fees.size(); i++) {
       MoneroTx tx = new MoneroTx();
