@@ -319,7 +319,6 @@ public class TestMoneroDaemon {
   @Test
   public void testGetAlternativeChains() {
     Collection<MoneroChain> chains = daemon.getAlternativeChains();
-    assertFalse(chains.isEmpty());
     for (MoneroChain chain : chains) {
       testDaemonResponseInfo(chain, true, false);
       testMoneroChain(chain);

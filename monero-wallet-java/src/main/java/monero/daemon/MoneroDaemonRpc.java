@@ -356,6 +356,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<Map<String, Object>> chainMaps = (List<Map<String, Object>>) resultMap.get("chains");
     List<MoneroChain> chains = new ArrayList<MoneroChain>();
+    if (chainMaps == null) return chains;
     for (Map<String, Object> chainMap : chainMaps) {
       MoneroChain chain = initializeMoneroChain(chainMap);
       chains.add(chain);
