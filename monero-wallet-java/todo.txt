@@ -1,5 +1,6 @@
 v0.12.3.0
 sendFromAddresses() then replicate in sendSplit
+test getTxs() with txIds filter
 test reads with specific accounts / subaddresses
 check for unrecognized fields
 sendToMultiple fans out across more accounts, then send tests search for account which meets requirements
