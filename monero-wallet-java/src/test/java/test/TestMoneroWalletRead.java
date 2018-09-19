@@ -273,11 +273,12 @@ public class TestMoneroWalletRead {
       Collection<String> filterPaymentIds = new HashSet<String>();
       filterPaymentIds.add(paymentId);
       MoneroTxFilter filter = new MoneroTxFilter();
-      filter.setPaymentIds(paymentIds);
+      filter.setPaymentIds(filterPaymentIds);
       List<MoneroTx> txs = wallet.getTxs(filter);
       assertFalse(txs.isEmpty());
       for (MoneroTx tx : txs) {
         TestUtils.testTx(tx);
+        assertTrue(filter.getPaymentIds().contains(tx.getPaymentId()));
       }
     }
     
