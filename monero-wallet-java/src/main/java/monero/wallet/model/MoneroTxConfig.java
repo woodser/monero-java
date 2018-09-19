@@ -35,9 +35,22 @@ public class MoneroTxConfig {
    * @param amount is the amount to send
    */
   public MoneroTxConfig(String address, String paymentId, BigInteger amount) {
+    this(address, paymentId, amount, null);
+  }
+  
+  /**
+   * Convenience constructor to specify transaction destination and amount with defaults.
+   * 
+   * @param address is the destination address
+   * @param paymentId is the destination payment id
+   * @param amount is the amount to send
+   * @param mixin is the transaction mixin to use
+   */
+  public MoneroTxConfig(String address, String paymentId, BigInteger amount, Integer mixin) {
     destinations = new ArrayList<MoneroPayment>();
     destinations.add(new MoneroPayment(address, amount));
     this.paymentId = paymentId;
+    this.mixin = mixin;
   }
 
   public MoneroTxConfig(List<MoneroPayment> destinations, Integer accountIdx, Collection<Integer> subaddressIndices, BigInteger fee, Integer mixin, Integer unlockTime, String paymentId, MoneroTxPriority priority, Boolean doNotRelay, BigInteger belowAmount) {

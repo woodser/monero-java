@@ -7,7 +7,6 @@ import java.util.List;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroException;
-import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTxConfig;
@@ -45,24 +44,23 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public MoneroTx send(String address, BigInteger amount, Integer mixin) {
-    return send(address, null, amount, mixin);
+  public MoneroTx send(String address, BigInteger amount) {
+    return send(new MoneroTxConfig(address, null, amount));
   }
   
   @Override
-  public MoneroTx send(String address, String paymentId, BigInteger amount, Integer mixin) {
-    
-    // create payment
-    MoneroPayment payment = new MoneroPayment();
-    payment.setAddress(address);
-    payment.setAmount(amount);
-    
-    // create and send tx config
-    MoneroTxConfig txConfig = new MoneroTxConfig();
-    txConfig.setDestinations(Arrays.asList(payment));
-    txConfig.setMixin(mixin);
-    txConfig.setPaymentId(paymentId);
-    return send(txConfig);
+  public MoneroTx send(String address, String paymentId, BigInteger amount) {
+    return send(new MoneroTxConfig(address, paymentId, amount));
+  }
+  
+  @Override
+  public List<MoneroTx> sendSplit(String address, BigInteger amount) {
+    return sendSplit(new MoneroTxConfig(address, null, amount));
+  }
+  
+  @Override
+  public List<MoneroTx> sendSplit(String address, String paymentId, BigInteger amount) {
+    return sendSplit(new MoneroTxConfig(address, paymentId, amount));
   }
   
   @Override
