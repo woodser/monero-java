@@ -11,13 +11,13 @@ import monero.wallet.model.MoneroSubaddress;
 /**
  * Prints the balances of the wallet.
  */
-public class PrintAddresses {
+public class PrintBalances {
 
   public static void main(String[] args) {
-    printAddresses();
+    printBalances();
   }
   
-  public static void printAddresses() {
+  public static void printBalances() {
     
     // collect info about subaddresses
     List<Pair<String, List<Object>>> pairs = new ArrayList<Pair<String, List<Object>>>();

@@ -30,7 +30,7 @@ import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTx.MoneroTxType;
 import monero.wallet.model.MoneroTxConfig;
-import utils.PrintAddresses;
+import utils.PrintBalances;
 import utils.TestUtils;
 
 /**
@@ -55,7 +55,7 @@ public class TestMoneroWalletWrite {
   
   @After
   public void teardown() {
-    PrintAddresses.printAddresses();
+    PrintBalances.printBalances();
   }
 
   @Test
