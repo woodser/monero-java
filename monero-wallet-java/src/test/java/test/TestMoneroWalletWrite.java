@@ -45,7 +45,7 @@ public class TestMoneroWalletWrite {
   
   private static final Integer MIXIN = 6;
   private static final int SEND_DIVISOR = 2;
-  private static final BigInteger CONSERVATIVE_FEE = BigInteger.valueOf(10000000).multiply(BigInteger.valueOf(10000));
+  private static final BigInteger CONSERVATIVE_FEE = BigInteger.valueOf(5000000).multiply(BigInteger.valueOf(10000));
   private MoneroWallet wallet;
 
   @Before
@@ -189,7 +189,7 @@ public class TestMoneroWalletWrite {
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       TestUtils.testTx(tx);
-      testSendTx(tx);
+      testSendTx(tx, canSplit);
       assertNull(tx.getSubaddressIndices());
       assertEquals(sendAmount, tx.getAmount());
       
@@ -271,7 +271,7 @@ public class TestMoneroWalletWrite {
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       TestUtils.testTx(tx);
-      testSendTx(tx);
+      testSendTx(tx, canSplit);
       assertNull(tx.getSubaddressIndices());
       if (Math.abs(sendAmount.subtract(tx.getAmount()).longValue()) >= TOTAL_ADDRESSES) { // send amounts may be slightly different
         fail("Tx amounts are too different: " + sendAmount + " - " + tx.getAmount() + " = " + sendAmount.subtract(tx.getAmount()));
@@ -360,7 +360,7 @@ public class TestMoneroWalletWrite {
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       TestUtils.testTx(tx);
-      testSendTx(tx);
+      testSendTx(tx, canSplit);
       assertEquals(fromSubaddressIndices, tx.getSubaddressIndices());
       if (Math.abs(sendAmount.subtract(tx.getAmount()).longValue()) >= 10) { // send amounts may be slightly different
         fail("Tx amounts are too different: " + sendAmount + " - " + tx.getAmount() + " = " + sendAmount.subtract(tx.getAmount()));
@@ -534,10 +534,10 @@ public class TestMoneroWalletWrite {
     assertEquals(numEntriesStart, entries.size());
   }
   
-  private static void testSendTx(MoneroTx tx) {
+  private static void testSendTx(MoneroTx tx, boolean canSplit) {
     assertTrue(tx.getFee().longValue() > 0);
     assertEquals(MIXIN, tx.getMixin());
-    assertNotNull(tx.getKey());
+    if (!canSplit) assertNotNull(tx.getKey());
     assertNull(tx.getSize());
     assertNotNull(tx.getPayments());
     assertFalse(tx.getPayments().isEmpty());
