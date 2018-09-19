@@ -1,6 +1,7 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -162,36 +163,27 @@ public class TestMoneroWalletWrite {
     assertTrue("Wallet is waiting on unlocked funds", unlockedBalanceBefore.longValue() > 0);
     
     // send to self
-    String address = wallet.getSubaddress(0, 0).getAddress();
     BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(SEND_DIVISOR));
+    String address = wallet.getPrimaryAddress();
     MoneroTx tx = wallet.send(address, null, sendAmount, MIXIN);
+    
+    // test wallet balance
+    assertTrue(wallet.getBalance(0).longValue() < balanceBefore.longValue());
+    assertTrue(wallet.getUnlockedBalance(0).longValue() < unlockedBalanceBefore.longValue());
     
     // test transaction
     TestUtils.testTx(tx);
+    testSendTx(tx);
     assertNull(tx.getSubaddressIndices());
     assertEquals(sendAmount, tx.getAmount());
-    assertNotNull(tx.getPayments());
-    assertEquals(1, tx.getPayments().size());
-    assertTrue(tx.getFee().longValue() > 0);
-    assertEquals(MIXIN, tx.getMixin());
-    assertNotNull(tx.getKey());
-    assertNull(tx.getSize());
-    assertEquals(MoneroTxType.OUTGOING, tx.getType());
-    assertNull(tx.getHeight());
-    assertEquals((Integer) 0, tx.getUnlockTime());
-    assertNotNull(tx.getBlob());
-    assertNotNull(tx.getMetadata());
     
-    // test payments
+    // test tx payments
+    assertEquals(1, tx.getPayments().size());
     for (MoneroPayment payment : tx.getPayments()) {
       assertEquals(address.toString(), payment.getAddress());
       assertEquals(sendAmount, payment.getAmount());
       assertTrue(tx == payment.getTransaction());
     }
-    
-    // test wallet balance
-    assertTrue(wallet.getBalance(0).longValue() < balanceBefore.longValue());
-    assertTrue(wallet.getUnlockedBalance(0).longValue() < unlockedBalanceBefore.longValue());
   }
 
   @Test
@@ -240,35 +232,26 @@ public class TestMoneroWalletWrite {
     config.setDestinations(payments);
     MoneroTx tx = wallet.send(config);
     
+    // test wallet balance
+    assertTrue(wallet.getBalance(0).longValue() < balance.longValue());
+    assertTrue(wallet.getUnlockedBalance(0).longValue() < unlockedBalance.longValue());
+    
     // test transaction
     TestUtils.testTx(tx);
+    testSendTx(tx);
     assertNull(tx.getSubaddressIndices());
     if (Math.abs(sendAmount.subtract(tx.getAmount()).longValue()) >= TOTAL_ADDRESSES) { // send amounts may be slightly different
       fail("Tx amounts are too different: " + sendAmount + " - " + tx.getAmount() + " = " + sendAmount.subtract(tx.getAmount()));
     }
-    assertNotNull(tx.getPayments());
-    assertEquals(TOTAL_ADDRESSES, tx.getPayments().size());
-    assertTrue(tx.getFee().longValue() > 0);
-    assertEquals(MIXIN, tx.getMixin());
-    assertNotNull(tx.getKey());
-    assertNull(tx.getSize());
-    assertEquals(MoneroTxType.OUTGOING, tx.getType());
-    assertNull(tx.getHeight());
-    assertEquals((Integer) 0, tx.getUnlockTime());
-    assertNotNull(tx.getBlob());
-    assertNotNull(tx.getMetadata());
     
-    // test payments
+    // test tx payments
+    assertEquals(TOTAL_ADDRESSES, tx.getPayments().size());
     assertEquals(payments.size(), tx.getPayments().size());
     for (int i = 0; i < payments.size(); i++) {
       assertEquals(payments.get(i).getAddress(), tx.getPayments().get(i).getAddress());
       assertEquals(payments.get(i).getAmount(), tx.getPayments().get(i).getAmount());
       assertTrue(tx == tx.getPayments().get(i).getTransaction());
     }
-    
-    // test wallet balance
-    assertTrue(wallet.getBalance(0).longValue() < balance.longValue());
-    assertTrue(wallet.getUnlockedBalance(0).longValue() < unlockedBalance.longValue());
   }
 
   @Test
@@ -301,29 +284,12 @@ public class TestMoneroWalletWrite {
     sendAmount = sendAmount.subtract(CONSERVATIVE_FEE);
     
     // send from the first subaddresses with unlocked balances
-    MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), null, sendAmount);
+    String address = wallet.getPrimaryAddress();
+    MoneroTxConfig config = new MoneroTxConfig(address, null, sendAmount);
     config.setAccountIndex(ACCOUNT_IDX);
     config.setSubaddressIndices(fromSubaddressIndices);
+    config.setMixin(MIXIN);
     MoneroTx tx = wallet.send(config);
-    System.out.println(tx.getFee());
-    
-    // test the resulting transaction
-    // TODO: factor out common parts with other sends to common method
-    TestUtils.testTx(tx);
-    assertEquals(fromSubaddressIndices, tx.getSubaddressIndices());
-    if (Math.abs(sendAmount.subtract(tx.getAmount()).longValue()) >= 10) { // send amounts may be slightly different
-      fail("Tx amounts are too different: " + sendAmount + " - " + tx.getAmount() + " = " + sendAmount.subtract(tx.getAmount()));
-    }
-    assertNotNull(tx.getPayments());
-    assertEquals(1, tx.getPayments().size());
-    assertTrue(tx.getFee().longValue() > 0);
-    assertNotNull(tx.getKey());
-    assertNull(tx.getSize());
-    assertEquals(MoneroTxType.OUTGOING, tx.getType());
-    assertNull(tx.getHeight());
-    assertEquals((Integer) 0, tx.getUnlockTime());
-    assertNotNull(tx.getBlob());
-    assertNotNull(tx.getMetadata());
     
     // test that balances from intended subaddresses decreased
     List<MoneroSubaddress> subaddressesAfter = wallet.getSubaddresses(ACCOUNT_IDX);
@@ -338,6 +304,20 @@ public class TestMoneroWalletWrite {
           fail("Tx amounts from unrelated subaddresses should not have changed: " + subaddresses.get(i).getUnlockedBalance() + " vs " + subaddressesAfter.get(i).getUnlockedBalance());
         }
       }
+    }
+    
+    // test the resulting transaction
+    TestUtils.testTx(tx);
+    testSendTx(tx);
+    assertEquals(fromSubaddressIndices, tx.getSubaddressIndices());
+    if (Math.abs(sendAmount.subtract(tx.getAmount()).longValue()) >= 10) { // send amounts may be slightly different
+      fail("Tx amounts are too different: " + sendAmount + " - " + tx.getAmount() + " = " + sendAmount.subtract(tx.getAmount()));
+    }
+    assertEquals(1, tx.getPayments().size());
+    for (MoneroPayment payment : tx.getPayments()) {
+      assertEquals(address, payment.getAddress());
+      assertEquals(sendAmount, payment.getAmount());
+      assertTrue(tx == payment.getTransaction());
     }
   }
 
@@ -499,5 +479,19 @@ public class TestMoneroWalletWrite {
     }
     entries = wallet.getAddressBookEntries();
     assertEquals(numEntriesStart, entries.size());
+  }
+  
+  private static void testSendTx(MoneroTx tx) {
+    assertTrue(tx.getFee().longValue() > 0);
+    assertEquals(MIXIN, tx.getMixin());
+    assertNotNull(tx.getKey());
+    assertNull(tx.getSize());
+    assertNotNull(tx.getPayments());
+    assertFalse(tx.getPayments().isEmpty());
+    assertEquals(MoneroTxType.OUTGOING, tx.getType());
+    assertNull(tx.getHeight());
+    assertEquals((Integer) 0, tx.getUnlockTime());
+    assertNotNull(tx.getBlob());
+    assertNotNull(tx.getMetadata());
   }
 }
