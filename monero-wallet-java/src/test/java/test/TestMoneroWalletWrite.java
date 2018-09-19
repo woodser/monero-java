@@ -494,7 +494,6 @@ public class TestMoneroWalletWrite {
   private static void testSendTx(MoneroTx tx, boolean canSplit) {
     assertTrue(tx.getFee().longValue() > 0);
     assertEquals(MIXIN, tx.getMixin());
-    if (!canSplit) assertNotNull(tx.getKey());
     assertNull(tx.getSize());
     assertNotNull(tx.getPayments());
     assertFalse(tx.getPayments().isEmpty());
@@ -503,5 +502,10 @@ public class TestMoneroWalletWrite {
     assertEquals((Integer) 0, tx.getUnlockTime());
     assertNotNull(tx.getBlob());
     assertNotNull(tx.getMetadata());
+    if (canSplit) {
+      assertNull(tx.getKey());
+    } else {
+      assertNotNull(tx.getKey());
+    }
   }
 }

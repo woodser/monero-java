@@ -88,7 +88,7 @@ public class TestMoneroWalletSweepAll {
         assertNotNull(tx.getBlob());
         assertNotNull(tx.getMetadata());
         assertEquals(config.getAccountIndex(), tx.getAccountIndex());
-        assertEquals(config.getSubaddressIndices(), tx.getSubaddressIndices());
+        assertEquals(config.getSubaddressIndices(), tx.getSubaddressIndices()); // TODO: expected [4] but was [0]?
       }
       
       // verify no unlocked balances
