@@ -1,7 +1,8 @@
 v0.12.3.0
-test reads with specific accounts / subaddresses
 sendFromAddresses() then replicate in sendSplit
+test reads with specific accounts / subaddresses
 check for unrecognized fields
+sendToMultiple fans out across more accounts, then send tests search for account which meets requirements
 
 get_output_distribution distribution field cannot be deserialized to array of integer
 investigate do not relay, way of doing pending transaction?  would need to relay 
