@@ -378,8 +378,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<BigInteger> fees = (List<BigInteger>) resultMap.get("fee_list");
     List<String> txIds = (List<String>) resultMap.get("tx_hash_list");
-    List<BigInteger> amounts = (List<BigInteger>) resultMap.get("amount_list");
     List<String> keys = (List<String>) resultMap.get("tx_key_list");
+    List<BigInteger> amounts = (List<BigInteger>) resultMap.get("amount_list");
+    List<String> blobs = (List<String>) resultMap.get("blob_list");
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     for (int i = 0; i < fees.size(); i++) {
       MoneroTx tx = new MoneroTx();
@@ -388,6 +389,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setMixin(config.getMixin());
       tx.setId(txIds.get(i));      
       if (keys != null) tx.setKey(keys.get(i));
+      tx.setBlob(blobs.get(i));
       tx.setPayments(config.getDestinations());
       tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
       tx.setType(MoneroTxType.OUTGOING);

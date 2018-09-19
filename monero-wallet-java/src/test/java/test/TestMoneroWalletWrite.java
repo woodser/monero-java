@@ -373,49 +373,6 @@ public class TestMoneroWalletWrite {
       }
     }
   }
-
-  @Test
-  public void testSendSplit() {
-    
-    // get balance and address
-    BigInteger balanceBefore = wallet.getBalance(0);
-    BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance(0);
-    String address = wallet.getPrimaryAddress();
-    assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", balanceBefore.longValue() > 0);
-    assertTrue("Wallet is waiting on unlocked funds", unlockedBalanceBefore.longValue() > 0);
-    
-    // create payments to send
-    int numPayments = 3;
-    BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(numPayments + SEND_DIVISOR));
-    List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
-    for (int i = 0; i < numPayments; i++) {
-      payments.add(new MoneroPayment(address, sendAmount));
-    }
-    
-    // send payments
-    MoneroTxConfig config = new MoneroTxConfig();
-    config.setDestinations(payments);
-    config.setMixin(MIXIN);
-    List<MoneroTx> txs = wallet.sendSplit(config);
-    
-    // test transactions
-    for (MoneroTx tx : txs) {
-      assertNotNull(tx.getId());
-      assertNull(tx.getPayments());
-      assertTrue(tx.getFee().longValue() > 0);
-      assertEquals(MIXIN, tx.getMixin());
-      assertNull(tx.getKey());
-      assertNull(tx.getHeight());
-      assertNull(tx.getSize());
-      assertNull(tx.getType());
-      assertNull(tx.getHeight());
-      assertEquals((Integer) 0, tx.getUnlockTime());
-    }
-    
-    // test wallet balance
-    assertTrue(wallet.getBalance(0).longValue() < balanceBefore.longValue());
-    assertTrue(wallet.getUnlockedBalance(0).longValue() < unlockedBalanceBefore.longValue());
-  }
   
   @Test
   public void testSweepDust() {
