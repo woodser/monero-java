@@ -361,6 +361,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       destinationMap.put("amount", destination.getAmount());
       destinationMaps.add(destinationMap);
     }
+    paramMap.put("account_index", config.getAccountIndex());
+    paramMap.put("subaddr_indices", config.getSubaddressIndices());
     paramMap.put("payment_id", config.getPaymentId());
     paramMap.put("mixin", config.getMixin());
     paramMap.put("unlock_time", config.getUnlockTime());
@@ -368,7 +370,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     paramMap.put("get_tx_key", true);
     paramMap.put("get_tx_hex", true);
     paramMap.put("get_tx_metadata", true);
-    paramMap.put("new_algorithm", true);
 
     // send request
     Map<String, Object> respMap = rpc.sendRpcRequest("transfer_split", paramMap);
@@ -377,16 +378,25 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<BigInteger> fees = (List<BigInteger>) resultMap.get("fee_list");
     List<String> txIds = (List<String>) resultMap.get("tx_hash_list");
-    List<MoneroTx> transactions = new ArrayList<MoneroTx>();
+    List<BigInteger> amounts = (List<BigInteger>) resultMap.get("amount_list");
+    List<String> keys = (List<String>) resultMap.get("tx_key_list");
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
     for (int i = 0; i < fees.size(); i++) {
       MoneroTx tx = new MoneroTx();
+      tx.setAmount(amounts.get(i));
       tx.setFee(fees.get(i));
       tx.setMixin(config.getMixin());
-      tx.setId(txIds.get(i));
-      transactions.add(tx);
+      tx.setId(txIds.get(i));      
+      if (keys != null) tx.setKey(keys.get(i));
+      tx.setPayments(config.getDestinations());
       tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
+      tx.setType(MoneroTxType.OUTGOING);
+      tx.setIsDoubleSpend(false);
+      tx.setAccountIndex(config.getAccountIndex() == null ? 0 : config.getAccountIndex());
+      tx.setSubaddressIndices(config.getSubaddressIndices() == null ? null : new ArrayList<Integer>(config.getSubaddressIndices()));
+      txs.add(tx);
     }
-    return transactions;
+    return txs;
   }
 
   @SuppressWarnings("unchecked")
