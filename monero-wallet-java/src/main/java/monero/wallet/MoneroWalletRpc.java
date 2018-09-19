@@ -381,6 +381,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<String> txIds = (List<String>) resultMap.get("tx_hash_list");
     List<String> keys = (List<String>) resultMap.get("tx_key_list");
     List<String> blobs = (List<String>) resultMap.get("tx_blob_list");
+    List<String> metadatas = (List<String>) resultMap.get("tx_metadata_list");
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     for (int i = 0; i < fees.size(); i++) {
       MoneroTx tx = new MoneroTx();
@@ -396,6 +397,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setIsDoubleSpend(false);
       tx.setAccountIndex(config.getAccountIndex() == null ? 0 : config.getAccountIndex());
       tx.setSubaddressIndices(config.getSubaddressIndices() == null ? null : new ArrayList<Integer>(config.getSubaddressIndices()));
+      tx.setMetadata(metadatas.get(i));
       txs.add(tx);
     }
     return txs;
