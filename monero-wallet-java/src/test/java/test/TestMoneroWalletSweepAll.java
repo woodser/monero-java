@@ -88,7 +88,8 @@ public class TestMoneroWalletSweepAll {
         assertNotNull(tx.getBlob());
         assertNotNull(tx.getMetadata());
         assertEquals(config.getAccountIndex(), tx.getAccountIndex());
-        assertEquals(config.getSubaddressIndices(), tx.getSubaddressIndices()); // TODO: expected [4] but was [0]?
+        assertNotNull(tx.getSubaddressIndex());
+        assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: outbound transactions do not relable record minor, e.g. send from [2,3] but tx minor will be 0
       }
       
       // verify no unlocked balances

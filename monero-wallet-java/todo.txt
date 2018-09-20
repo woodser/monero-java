@@ -1,7 +1,10 @@
 v0.12.3.0
 outbound transactions do not relable record minor, e.g. send from [2,3] but tx minor will be 0
+monerotx should only have one id
+merge based on subaddress location
+sendFromMultiple() searches for account
+
 test pool
-sendFromAddresses() then replicate in sendSplit
 test getTxs() by account
 test getTxs() with txIds filter
 test reads with specific accounts / subaddresses
@@ -15,6 +18,7 @@ why is transaction amount 0 when destinations present
 why don't some transactions have destinations
 
 Monero-wallet-rpc suggested improvements:
+monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
 address book entries work by index instead of id which changes
 optional param documentation missing
 tx_hash in incoming_transfers vs txid in get_transfers; standardize on tx_hash or tx_id

@@ -95,19 +95,25 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return (String) resultMap.get("key");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getViewKey() {
     Map<String, Object> paramMap = new HashMap<String, Object>();
     paramMap.put("key_type", "view_key");
     Map<String, Object> respMap = rpc.sendRpcRequest("query_key", paramMap);
-    @SuppressWarnings("unchecked")
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return (String) resultMap.get("key");
   }
   
+  @SuppressWarnings("unchecked")
   @Override
   public String getPrimaryAddress() {
-    return getSubaddress(0, 0).getAddress();
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("account_index", 0);
+    params.put("address_index", 0);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_address", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (String) resultMap.get("address");
   }
 
   @Override
@@ -343,7 +349,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setType(MoneroTxType.OUTGOING);
     tx.setIsDoubleSpend(false);
     tx.setAccountIndex(config.getAccountIndex() == null ? 0 : config.getAccountIndex());
-    tx.setSubaddressIndices(config.getSubaddressIndices() == null ? null : new ArrayList<Integer>(config.getSubaddressIndices()));
+    tx.setSubaddressIndex(0); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
     return tx;
   }
 
@@ -396,7 +402,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setType(MoneroTxType.OUTGOING);
       tx.setIsDoubleSpend(false);
       tx.setAccountIndex(config.getAccountIndex() == null ? 0 : config.getAccountIndex());
-      tx.setSubaddressIndices(config.getSubaddressIndices() == null ? null : new ArrayList<Integer>(config.getSubaddressIndices()));
+      tx.setSubaddressIndex(0); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
       tx.setMetadata(metadatas.get(i));
       txs.add(tx);
     }
@@ -448,8 +454,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setMetadata(metadatas.get(i));
       tx.setFee(fees.get(i));
       tx.setAmount(amounts.get(i));
-      //tx.setAccountIndex(config.getAccountIndex() == null ? 0 : config.getAccountIndex());
-      tx.setSubaddressIndices(config.getSubaddressIndices() == null ? null : new ArrayList<Integer>(config.getSubaddressIndices()));
+      //tx.setAccountIndex(config.getAccountIndex() == null ? 0 : config.getAccountIndex()); // TODO: test failure because commented out
+      tx.setSubaddressIndex(0); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
       txMap.put(tx.getId(), tx);
     }
 
@@ -846,7 +852,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (val instanceof Map) {
           Map<String, Object> subaddrMap = (Map<String, Object>) val;
           tx.setAccountIndex(((BigInteger) subaddrMap.get("major")).intValue());
-          tx.setSubaddressIndices(Arrays.asList(((BigInteger) subaddrMap.get("minor")).intValue()));
+          tx.setSubaddressIndex(((BigInteger) subaddrMap.get("minor")).intValue());
         } else {
           // ignore subaddr_index returned from 'incoming_transfers' (not map and not informative)
         }
