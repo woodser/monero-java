@@ -2,6 +2,7 @@ package utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -86,9 +87,9 @@ public class TestUtils {
       // open test wallet
       wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
       
-//      // refresh wallet
-//      wallet.rescanBlockchain();
-//      wallet.rescanSpent();
+      // refresh wallet
+      wallet.rescanBlockchain();
+      wallet.rescanSpent();
     }
     return wallet;
   }
@@ -119,6 +120,7 @@ public class TestUtils {
   public static void testTx(MoneroTx tx) {
     assertNotNull(tx.getId());
     assertNotNull(tx.getType());
+    assertNotEquals(MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());  // default payment should be converted to null
     if (tx.getType() == MoneroTxType.OUTGOING) {
       if (tx.getAddress() == null) {
         assertNotNull(tx.getPayments());
