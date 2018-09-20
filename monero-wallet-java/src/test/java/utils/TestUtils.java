@@ -86,9 +86,9 @@ public class TestUtils {
       // open test wallet
       wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
       
-      // refresh wallet
-      wallet.rescanBlockchain();
-      wallet.rescanSpent();
+//      // refresh wallet
+//      wallet.rescanBlockchain();
+//      wallet.rescanSpent();
     }
     return wallet;
   }

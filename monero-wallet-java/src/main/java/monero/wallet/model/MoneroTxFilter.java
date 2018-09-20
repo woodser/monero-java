@@ -14,7 +14,7 @@ public class MoneroTxFilter {
   private boolean mempool;
   private Integer minHeight;
   private Integer maxHeight;
-  private Integer accountIdx;
+  private Integer accountIndex;
   private Collection<Integer> subaddressIndices;
   private Collection<String> txIds;
   private Collection<String> paymentIds;
@@ -27,7 +27,7 @@ public class MoneroTxFilter {
     mempool = true;
     minHeight = null;
     maxHeight = null;
-    accountIdx = null;
+    accountIndex = null;
     subaddressIndices = null;
     txIds = null;
     paymentIds = null;
@@ -42,7 +42,7 @@ public class MoneroTxFilter {
     this.mempool = mempool;
     this.minHeight = minHeight;
     this.maxHeight = maxHeight;
-    this.accountIdx = accountIdx;
+    this.accountIndex = accountIdx;
     this.subaddressIndices = subaddressIndices;
     this.txIds = txIds;
     this.paymentIds = paymentIds;
@@ -104,12 +104,12 @@ public class MoneroTxFilter {
     this.maxHeight = maxHeight;
   }
 
-  public Integer getAccountIdx() {
-    return accountIdx;
+  public Integer getAccountIndex() {
+    return accountIndex;
   }
 
-  public void setAccountIdx(Integer accountIdx) {
-    this.accountIdx = accountIdx;
+  public void setAccountIndex(Integer accountIndex) {
+    this.accountIndex = accountIndex;
   }
 
   public Collection<Integer> getSubaddressIndices() {
