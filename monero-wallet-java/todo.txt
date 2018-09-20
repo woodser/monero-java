@@ -1,5 +1,7 @@
 v0.12.3.0
+test pool
 sendFromAddresses() then replicate in sendSplit
+test getTxs() by account
 test getTxs() with txIds filter
 test reads with specific accounts / subaddresses
 check for unrecognized fields
