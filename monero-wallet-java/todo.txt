@@ -1,4 +1,5 @@
 v0.12.3.0
+outbound transactions do not relable record minor, e.g. send from [2,3] but tx minor will be 0
 test pool
 sendFromAddresses() then replicate in sendSplit
 test getTxs() by account

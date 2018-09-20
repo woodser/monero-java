@@ -438,6 +438,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     assertEquals(numTxs, metadatas.size());
     assertEquals(numTxs, fees.size());
     assertEquals(numTxs, amounts.size());
+    assertEquals(numTxs, metadatas);
     Map<String, MoneroTx> txMap = new HashMap<String, MoneroTx>();
     for (int i = 0; i < numTxs; i++) {
       MoneroTx tx = new MoneroTx();
@@ -447,6 +448,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setMetadata(metadatas.get(i));
       tx.setFee(fees.get(i));
       tx.setAmount(amounts.get(i));
+      //tx.setAccountIndex(config.getAccountIndex() == null ? 0 : config.getAccountIndex());
+      tx.setSubaddressIndices(config.getSubaddressIndices() == null ? null : new ArrayList<Integer>(config.getSubaddressIndices()));
       txMap.put(tx.getId(), tx);
     }
 
