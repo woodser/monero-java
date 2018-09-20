@@ -18,6 +18,7 @@ why is transaction amount 0 when destinations present
 why don't some transactions have destinations
 
 Monero-wallet-rpc suggested improvements:
+get_transfers with specific subaddresses will return txs at [0, 0] because outgoing txs do not indicate originating subaddresses reliably
 monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
 address book entries work by index instead of id which changes
 optional param documentation missing
