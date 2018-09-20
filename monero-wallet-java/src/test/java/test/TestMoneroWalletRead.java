@@ -267,7 +267,7 @@ public class TestMoneroWalletRead {
         nonDefaultSubaddressFound = true;
       }
     }
-    assertTrue("Test requires transactions in non-default account and subaddress; run testSendMultiple() first", nonDefaultSubaddressFound);
+    assertTrue("No transactions found in non-default account and subaddress; run testSendMultiple() first", nonDefaultSubaddressFound);
   }
   
   @Test
@@ -281,7 +281,7 @@ public class TestMoneroWalletRead {
         if (account.getIndex() != 0 && tx.getSubaddressIndex() != 0) nonDefaultSubaddressFound = true;
       }
     }
-    assertTrue("Test requires transactions in non-default account and subaddress; run testSendMultiple() first", nonDefaultSubaddressFound);
+    assertTrue("No transactions found in non-default account and subaddress; run testSendMultiple() first", nonDefaultSubaddressFound);
   }
   
   @Test
@@ -297,7 +297,7 @@ public class TestMoneroWalletRead {
         }
       }
     }
-    assertTrue("Test requires transactions in non-default account and subaddress; run testSendMultiple() first", nonDefaultSubaddressFound);
+    assertTrue("No transactions found in non-default account and subaddress; run testSendMultiple() first", nonDefaultSubaddressFound);
   }
 
   @Test
