@@ -45,7 +45,7 @@ public class TestMoneroWalletWrite {
   
   private static final Integer MIXIN = 6;
   private static final int SEND_DIVISOR = 2;
-  private static final BigInteger CONSERVATIVE_FEE = BigInteger.valueOf(5000000).multiply(BigInteger.valueOf(10000));
+  private static final BigInteger MAX_FEE = BigInteger.valueOf(5000000).multiply(BigInteger.valueOf(10000));
   private MoneroWallet wallet;
 
   @Before
@@ -164,39 +164,61 @@ public class TestMoneroWalletWrite {
   
   private void testSendToSingle(boolean canSplit) {
     
-    // get balance before
-    BigInteger balanceBefore = wallet.getBalance(0);
-    MoneroWallet wallet = TestUtils.getWallet();
-    BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance(0);
-    assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", balanceBefore.longValue() > 0);
-    assertTrue("Wallet is waiting on unlocked funds", unlockedBalanceBefore.longValue() > 0);
+    // find a non-primary subaddress to send from
+    boolean sufficientBalance = false;
+    MoneroAccount fromAccount = null;
+    MoneroSubaddress fromSubaddress = null;
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    for (MoneroAccount account : accounts) {
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
+      for (int i = 1; i < subaddresses.size(); i++) {
+        if (subaddresses.get(i).getBalance().compareTo(MAX_FEE) > 0) sufficientBalance = true;
+        if (subaddresses.get(i).getUnlockedBalance().compareTo(MAX_FEE) > 0) {
+          fromAccount = account;
+          fromSubaddress = subaddresses.get(i);
+          break;
+        }
+      }
+      if (fromAccount != null) break;
+    }
+    assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", sufficientBalance);
+    assertTrue("Wallet is waiting on unlocked funds", fromSubaddress != null);
     
+    // get balance before send
+    BigInteger balanceBefore = fromSubaddress.getBalance();
+    BigInteger unlockedBalanceBefore  = fromSubaddress.getBalance();
+        
     // send to self
     BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(SEND_DIVISOR));
     String address = wallet.getPrimaryAddress();
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    MoneroTxConfig config = new MoneroTxConfig(address, null, sendAmount, MIXIN);
+    config.setAccountIndex(fromAccount.getIndex());
+    config.setSubaddressIndices(Arrays.asList(fromSubaddress.getIndex()));
     if (canSplit) {
-      txs.addAll(wallet.sendSplit(new MoneroTxConfig(address, null, sendAmount, MIXIN)));
+      txs.addAll(wallet.sendSplit(config));
     } else {
-      txs.add(wallet.send(new MoneroTxConfig(address, null, sendAmount, MIXIN)));
+      txs.add(wallet.send(config));
     }
     
-    // test wallet balance
-    assertTrue(wallet.getBalance(0).longValue() < balanceBefore.longValue());
-    assertTrue(wallet.getUnlockedBalance(0).longValue() < unlockedBalanceBefore.longValue());
+    // test that balance and unlocked balance decreased
+    assertTrue(wallet.getBalance(fromAccount.getIndex(), fromSubaddress.getIndex()).compareTo(balanceBefore) < 0);
+    assertTrue(wallet.getUnlockedBalance(fromAccount.getIndex(), fromSubaddress.getIndex()).compareTo(unlockedBalanceBefore) < 0);
     
     // test transactions
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       TestUtils.testTx(tx);
       testSendTx(tx, canSplit);
-      assertNull(tx.getSubaddressIndices());
+      assertEquals(fromAccount.getIndex(), tx.getAccountIndex());
+      assertNotNull(tx.getSubaddressIndex());
+      assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
       assertEquals(sendAmount, tx.getAmount());
       
       // test tx payments
       assertEquals(1, tx.getPayments().size());
       for (MoneroPayment payment : tx.getPayments()) {
-        assertEquals(address.toString(), payment.getAddress());
+        assertEquals(address, payment.getAddress());
         assertEquals(sendAmount, payment.getAmount());
         assertTrue(tx == payment.getTransaction());
       }
@@ -272,7 +294,8 @@ public class TestMoneroWalletWrite {
     for (MoneroTx tx : txs) {
       TestUtils.testTx(tx);
       testSendTx(tx, canSplit);
-      assertNull(tx.getSubaddressIndices());
+      assertNotNull(tx.getSubaddressIndex());
+      assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
       if (Math.abs(sendAmount.subtract(tx.getAmount()).longValue()) >= TOTAL_ADDRESSES) { // send amounts may be slightly different
         fail("Tx amounts are too different: " + sendAmount + " - " + tx.getAmount() + " = " + sendAmount.subtract(tx.getAmount()));
       }
@@ -288,7 +311,7 @@ public class TestMoneroWalletWrite {
   
   @Test
   public void testSendFromMultiple() {
-    testSendFromMultiple(1, false);
+    testSendFromMultiple(4, false);
   }
   
   @Test
@@ -326,7 +349,7 @@ public class TestMoneroWalletWrite {
     for (Integer fromSubaddressIdx : fromSubaddressIndices) {
       sendAmount = sendAmount.add(subaddresses.get(fromSubaddressIdx).getUnlockedBalance());
     }
-    sendAmount = sendAmount.subtract(CONSERVATIVE_FEE);
+    sendAmount = sendAmount.subtract(MAX_FEE);
     
     // send from the first subaddresses with unlocked balances
     String address = wallet.getPrimaryAddress();
@@ -361,7 +384,8 @@ public class TestMoneroWalletWrite {
     for (MoneroTx tx : txs) {
       TestUtils.testTx(tx);
       testSendTx(tx, canSplit);
-      assertEquals(fromSubaddressIndices, tx.getSubaddressIndices());
+      assertNotNull(tx.getSubaddressIndex());
+      assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
       if (Math.abs(sendAmount.subtract(tx.getAmount()).longValue()) >= 10) { // send amounts may be slightly different
         fail("Tx amounts are too different: " + sendAmount + " - " + tx.getAmount() + " = " + sendAmount.subtract(tx.getAmount()));
       }
