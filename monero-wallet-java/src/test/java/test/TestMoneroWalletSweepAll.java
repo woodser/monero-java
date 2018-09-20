@@ -89,7 +89,7 @@ public class TestMoneroWalletSweepAll {
         assertNotNull(tx.getMetadata());
         assertEquals(config.getAccountIndex(), tx.getAccountIndex());
         assertNotNull(tx.getSubaddressIndex());
-        assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: outbound transactions do not relable record minor, e.g. send from [2,3] but tx minor will be 0
+        assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
       }
       
       // verify no unlocked balances
