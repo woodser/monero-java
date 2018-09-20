@@ -87,9 +87,9 @@ public class TestUtils {
       // open test wallet
       wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
       
-      // refresh wallet
-      wallet.rescanBlockchain();
-      wallet.rescanSpent();
+//      // refresh wallet
+//      wallet.rescanBlockchain();
+//      wallet.rescanSpent();
     }
     return wallet;
   }
@@ -118,9 +118,19 @@ public class TestUtils {
   }
   
   public static void testTx(MoneroTx tx) {
+    
+    // test all transactions
     assertNotNull(tx.getId());
     assertNotNull(tx.getType());
     assertNotEquals(MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());  // default payment should be converted to null
+    
+    // test incoming or outgoing
+    if (tx.getType() == MoneroTxType.OUTGOING || tx.getType() == MoneroTxType.INCOMING) {
+      assertNotNull(tx.getAccountIndex());
+      assertNotNull(tx.getSubaddressIndex());
+    }
+    
+    // test outgoing
     if (tx.getType() == MoneroTxType.OUTGOING) {
       if (tx.getAddress() == null) {
         assertNotNull(tx.getPayments());
@@ -141,7 +151,10 @@ public class TestUtils {
           assertTrue(payment.getAmount().longValue() > 0);
         }
       }
-    } else if (tx.getType() == MoneroTxType.INCOMING) {
+    }
+    
+    // test incoming
+    if (tx.getType() == MoneroTxType.INCOMING) {
       assertNotNull(tx.getOutputs());
       assertNotNull(tx.getKey());
       assertFalse(tx.getOutputs().isEmpty());

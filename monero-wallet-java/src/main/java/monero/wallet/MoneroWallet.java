@@ -153,10 +153,17 @@ public interface MoneroWallet {
    * @param label specifies the label for the subaddress (optional)
    * @return MoneroSubaddress is the created subaddress
    */
-  public MoneroSubaddress createSubaddress(int accountIdx, String label);  
+  public MoneroSubaddress createSubaddress(int accountIdx, String label);
   
   /**
-   * Returns the balance for a specific account.
+   * Get the balance across all accounts.
+   * 
+   * @return BigInteger is the balance across all accounts
+   */
+  public BigInteger getBalance();
+  
+  /**
+   * Get the balance for a specific account.
    * 
    * @param accountIdx identifies the account
    * @return BigInteger is the account's balance
@@ -164,7 +171,7 @@ public interface MoneroWallet {
   public BigInteger getBalance(int accountIdx);
   
   /**
-   * Returns the balance for a specific subaddress.
+   * Get the balance for a specific subaddress.
    * 
    * @param accountIdx identifies the account within the wallet
    * @param subaddressIdx identifies the subbaddress within the account
@@ -173,7 +180,14 @@ public interface MoneroWallet {
   public BigInteger getBalance(int accountIdx, int subaddressIdx);
   
   /**
-   * Returns the unlocked balance for a specific account.
+   * Get the unlocked balance across all accounts.
+   * 
+   * @return BigInteger is the unlocked balance across all accounts
+   */
+  public BigInteger getUnlockedBalance();
+  
+  /**
+   * Get the unlocked balance for a specific account.
    * 
    * @param accountIdx identifies the account
    * @return BigInteger is the account's unlocked balance
@@ -181,7 +195,7 @@ public interface MoneroWallet {
   public BigInteger getUnlockedBalance(int accountIdx);
   
   /**
-   * Returns the unlocked balance for a specific subaddress.
+   * Get the unlocked balance for a specific subaddress.
    * 
    * @param accountIdx identifies the account within the wallet
    * @param subaddressIdx identifies the subbaddress within the account
@@ -271,6 +285,20 @@ public interface MoneroWallet {
    * @return List<MoneroTx> are all of the wallet's transactions
    */
   public List<MoneroTx> getTxs();
+  
+  /**
+   * Get all account transactions, each containing payments, outputs, and other metadata depending on the transaction type.
+   * 
+   * @return List<MoneroTx> are all of the account's transactions
+   */
+  public List<MoneroTx> getTxs(int accountIdx);
+  
+  /**
+   * Get all subaddress transactions, each containing payments, outputs, and other metadata depending on the transaction type.
+   * 
+   * @return List<MoneroTx> are all of the subaddress's transactions
+   */
+  public List<MoneroTx> getTxs(int accountIdx, int subaddressIdx);
   
   /**
    * Get wallet transactions that meet the criteria specified in a filter.

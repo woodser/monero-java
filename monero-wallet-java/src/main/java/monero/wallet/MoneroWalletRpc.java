@@ -272,6 +272,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     subaddress.setUsed(false);
     return subaddress;
   }
+  
+  @Override
+  public BigInteger getBalance() {
+    throw new RuntimeException("Not implemented");
+  }
 
   @SuppressWarnings("unchecked")
   @Override
@@ -286,6 +291,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public BigInteger getBalance(int accountIdx, int subaddressIdx) {
     return getSubaddresses(accountIdx, Arrays.asList(subaddressIdx)).get(0).getBalance();
+  }
+  
+  @Override
+  public BigInteger getUnlockedBalance() {
+    throw new RuntimeException("Not implemented");
   }
 
   @SuppressWarnings("unchecked")
