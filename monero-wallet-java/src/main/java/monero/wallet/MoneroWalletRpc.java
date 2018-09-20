@@ -350,7 +350,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
-    MoneroTx tx = interpretTx(txMap);
+    MoneroTx tx = mapToTx(txMap);
     tx.setAmount((BigInteger) txMap.get("amount"));
     tx.setPayments(config.getDestinations());
     tx.setMixin(config.getMixin());
@@ -539,7 +539,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       Map<String, Object> result = (Map<String, Object>) respMap.get("result");
       for (String key : result.keySet()) {
         for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
-          MoneroTx tx = interpretTx(txMap);
+          MoneroTx tx = mapToTx(txMap);
           if (txMap.containsKey("amount")) tx.setAmount((BigInteger) txMap.get("amount"));
           addTx(txTypeMap, tx);
         }
@@ -565,7 +565,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           MoneroOutput output = new MoneroOutput();
           output.setAmount((BigInteger) outputMap.get("amount"));
           output.setSpent((Boolean) outputMap.get("spent"));
-          MoneroTx tx = interpretTx(outputMap);
+          MoneroTx tx = mapToTx(outputMap);
           tx.setType(MoneroTxType.INCOMING);
           tx.setAccountIndex(accountIdx);
           output.setTransaction(tx);
@@ -594,7 +594,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         // interpret get_bulk_payments response
         List<Map<String, Object>> paymentMaps = (List<Map<String, Object>>) result.get("payments");
         for (Map<String, Object> paymentMap : paymentMaps) {
-          MoneroTx tx = interpretTx(paymentMap);
+          MoneroTx tx = mapToTx(paymentMap);
           tx.setType(MoneroTxType.INCOMING);
           // payment data is redundant with get_transfers rpc call, so it's not added because merging would create duplicates
           // MoneroPayment payment = new MoneroPayment();
@@ -850,7 +850,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @return MoneroTx is the initialized transaction
    */
   @SuppressWarnings("unchecked")
-  private static MoneroTx interpretTx(Map<String, Object> txMap) {
+  private static MoneroTx mapToTx(Map<String, Object> txMap) {
     MoneroTx tx = new MoneroTx();
     for (String key : txMap.keySet()) {
       Object val = txMap.get(key);
