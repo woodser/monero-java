@@ -299,7 +299,7 @@ public class TestMoneroWalletRead {
     // test balance equals spendable outputs for each account
     for (MoneroAccount account : wallet.getAccounts()) {
       MoneroTxFilter filter = new MoneroTxFilter();
-      filter.setAccountIdx(account.getIndex());
+      filter.setAccountIndex(account.getIndex());
       txs = wallet.getTxs(filter);
       if (account.getIndex() == 0) assertFalse(txs.isEmpty());
       BigInteger balance = BigInteger.valueOf(0);
@@ -353,7 +353,7 @@ public class TestMoneroWalletRead {
       List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
       for (MoneroSubaddress subaddress : subaddresses) {
         MoneroTxFilter filter = new MoneroTxFilter();
-        filter.setAccountIdx(account.getIndex());
+        filter.setAccountIndex(account.getIndex());
         filter.setSubaddressIndices(Arrays.asList(subaddress.getIndex()));
         txs = wallet.getTxs(filter);
         
@@ -373,7 +373,7 @@ public class TestMoneroWalletRead {
     
     // assert that ummet filter criteria has no results
     MoneroTxFilter filter = new MoneroTxFilter();
-    filter.setAccountIdx(0);
+    filter.setAccountIndex(0);
     Collection<Integer> subaddressIndices = new HashSet<Integer>();
     subaddressIndices.add(1234907);
     filter.setSubaddressIndices(subaddressIndices);

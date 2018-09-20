@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -33,10 +32,10 @@ import monero.wallet.model.MoneroOutput;
 import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
+import monero.wallet.model.MoneroTx.MoneroTxType;
 import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxFilter;
 import monero.wallet.model.MoneroUri;
-import monero.wallet.model.MoneroTx.MoneroTxType;
 
 /**
  * Implements a Monero Wallet using monero-wallet-rpc.
@@ -499,8 +498,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public List<MoneroTx> getTxs(MoneroTxFilter filter) {
     if (filter == null) filter = new MoneroTxFilter();
     
-    // collect transactions bucketed by type then id
-    Map<MoneroTxType, Map<String, MoneroTx>> txTypeMap = new HashMap<MoneroTxType, Map<String, MoneroTx>>();
+    // collection of unique transactions segmented by type, id, account idx, then subaddress idx
+    Map<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>> txTypeMap = new HashMap<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>>();
 
     // get_transfers rpc call
     Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -510,7 +509,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     paramMap.put("failed", filter.isFailed());
     paramMap.put("pool", filter.isMempool());
     paramMap.put("filter_by_height", filter.getMinHeight() != null || filter.getMaxHeight() != null);
-    paramMap.put("account_index", filter.getAccountIdx());
+    paramMap.put("account_index", filter.getAccountIndex());
     paramMap.put("subaddr_indices", filter.getSubaddressIndices());
     if (filter.getMinHeight() != null) paramMap.put("min_height", filter.getMinHeight());
     if (filter.getMaxHeight() != null) paramMap.put("max_height", filter.getMaxHeight());
@@ -533,7 +532,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       // incoming_transfers rpc call to get incoming outputs
       paramMap = new HashMap<String, Object>();
       paramMap.put("transfer_type", "all"); // TODO: suppport all | available | unavailable 'types' which is different from MoneroTxType
-      paramMap.put("account_index", filter.getAccountIdx());
+      paramMap.put("account_index", filter.getAccountIndex());
       paramMap.put("subaddr_indices", filter.getSubaddressIndices());
       respMap = rpc.sendRpcRequest("incoming_transfers", paramMap);
       result = (Map<String, Object>) respMap.get("result");
@@ -547,6 +546,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         output.setSpent((Boolean) outputMap.get("spent"));
         MoneroTx tx = interpretTx(outputMap);
         tx.setType(MoneroTxType.INCOMING);
+        tx.setAccountIndex(filter.getAccountIndex() == null ? 0 : filter.getAccountIndex());
         output.setTransaction(tx);
         List<MoneroOutput> outputs = new ArrayList<MoneroOutput>();
         outputs.add(output);
@@ -584,14 +584,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
       }
     }
-
-    // build return type
+    
+    // collect all transactions as list
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    for (Entry<MoneroTxType, Map<String, MoneroTx>> entry : txTypeMap.entrySet()) {
-      txs.addAll(entry.getValue().values());
+    for (Map<String, Map<Integer, Map<Integer, MoneroTx>>> idMap : txTypeMap.values()) {
+      for (Map<Integer, Map<Integer, MoneroTx>> accountMap : idMap.values()) {
+        for (Map<Integer, MoneroTx> subaddressMap : accountMap.values()) {
+          txs.addAll(subaddressMap.values());
+        }
+      }
     }
 
-    // filter final results
+    // filter final result
     Collection<MoneroTx> toRemoves = new HashSet<MoneroTx>();
     for (MoneroTx tx : txs) {
       if (filter.getPaymentIds() != null && !filter.getPaymentIds().contains(tx.getPaymentId())) toRemoves.add(tx);
@@ -854,7 +858,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           tx.setAccountIndex(((BigInteger) subaddrMap.get("major")).intValue());
           tx.setSubaddressIndex(((BigInteger) subaddrMap.get("minor")).intValue());
         } else {
-          // ignore subaddr_index returned from 'incoming_transfers' (not map and not informative)
+          tx.setSubaddressIndex(((BigInteger) val).intValue());
         }
       } else if (key.equalsIgnoreCase("destinations")) {
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
@@ -872,20 +876,42 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     return tx;
   }
-
-  private static void addTx(Map<MoneroTxType, Map<String, MoneroTx>> txTypeMap, MoneroTx tx) {
-    if (tx.getType() == null) throw new MoneroException("Transaction type cannot be null: \n" + tx.toString());
-    if (tx.getId() == null) throw new MoneroException("Transaction id cannot be null: \n" + tx.getId());
-    Map<String, MoneroTx> txIdMap = txTypeMap.get(tx.getType());
-    if (txIdMap == null) {
-      txIdMap = new HashMap<String, MoneroTx>();
-      txTypeMap.put(tx.getType(), txIdMap);
+  
+  /**
+   * Merges a transaction into a collection of unique transactions.
+   * 
+   * @param txTypeMap is the collection of unique transactions (Map<type, Map<id, Map<accountIdx, Map<subaddressIdx, MoneroTx>>>>)
+   * @param tx is the transaction to merge into the collection
+   */
+  private static void addTx(Map<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>> txTypeMap, MoneroTx tx) {
+    
+    // test the transaction
+    if (tx.getType() == null) throw new MoneroException("Transaction type is null: \n" + tx);
+    if (tx.getId() == null) throw new MoneroException("Transaction id is null: \n" + tx);
+    if (tx.getAccountIndex() == null) throw new MoneroException("Transaction account index cannot be null: \n" + tx);
+    if (tx.getSubaddressIndex() == null) throw new MoneroException("Transaction subaddress index cannot be null: \n" + tx);
+    
+    // merge transaction into map
+    Map<String, Map<Integer, Map<Integer, MoneroTx>>> idMap = txTypeMap.get(tx.getType());
+    if (idMap == null) {
+      idMap = new HashMap<String, Map<Integer, Map<Integer, MoneroTx>>>();
+      txTypeMap.put(tx.getType(), idMap);
     }
-    MoneroTx targetTx = txIdMap.get(tx.getId());
-    if (targetTx == null) {
-      txIdMap.put(tx.getId(), tx);
+    Map<Integer, Map<Integer, MoneroTx>> accountMap = idMap.get(tx.getId());
+    if (accountMap == null) {
+      accountMap = new HashMap<Integer, Map<Integer, MoneroTx>>();
+      idMap.put(tx.getId(), accountMap);
+    }
+    Map<Integer, MoneroTx> subaddressMap = accountMap.get(tx.getAccountIndex());
+    if (subaddressMap == null) {
+      subaddressMap = new HashMap<Integer, MoneroTx>();
+      accountMap.put(tx.getAccountIndex(), subaddressMap);
+    }
+    MoneroTx mergedTx = subaddressMap.get(tx.getSubaddressIndex());
+    if (mergedTx == null) {
+      subaddressMap.put(tx.getSubaddressIndex(), tx);
     } else {
-      targetTx.merge(tx);
+      mergedTx.merge(tx);
     }
   }
 
