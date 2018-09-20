@@ -443,7 +443,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     assertEquals(numTxs, metadatas.size());
     assertEquals(numTxs, fees.size());
     assertEquals(numTxs, amounts.size());
-    assertEquals(numTxs, metadatas);
+    assertEquals(numTxs, metadatas.size());
     Map<String, MoneroTx> txMap = new HashMap<String, MoneroTx>();
     for (int i = 0; i < numTxs; i++) {
       MoneroTx tx = new MoneroTx();
@@ -839,7 +839,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("height")) tx.setHeight(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("block_height")) tx.setHeight(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("note")) tx.setNote((String) val);
-      else if (key.equalsIgnoreCase("payment_id")) tx.setPaymentId((String) val);
+      else if (key.equalsIgnoreCase("payment_id")) {
+        if (!MoneroTx.DEFAULT_PAYMENT_ID.equals((String) val)) tx.setPaymentId((String) val); // convert default to null
+      }
       else if (key.equalsIgnoreCase("timestamp")) tx.setTimestamp(((BigInteger) val).longValue());
       else if (key.equalsIgnoreCase("txid")) tx.setId((String) val);
       else if (key.equalsIgnoreCase("tx_hash")) tx.setId((String) val);
