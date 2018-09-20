@@ -10,6 +10,7 @@ import monero.wallet.model.MoneroException;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTxConfig;
+import monero.wallet.model.MoneroTxFilter;
 
 /**
  * Default implementation of a Monero Wallet.
@@ -35,12 +36,17 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   
   @Override
   public List<MoneroTx> getTxs(int accountIdx) {
-    throw new RuntimeException("Not implemented");
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setAccountIndex(accountIdx);
+    return getTxs(filter);
   }
   
   @Override
   public List<MoneroTx> getTxs(int accountIdx, int subaddressIdx) {
-    throw new RuntimeException("Not implemented");
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setAccountIndex(accountIdx);
+    filter.setSubaddressIndices(Arrays.asList(subaddressIdx));
+    return getTxs(filter);
   }
   
   @Override
