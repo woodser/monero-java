@@ -34,6 +34,16 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
+  public List<MoneroTx> getTxs(int accountIdx) {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  @Override
+  public List<MoneroTx> getTxs(int accountIdx, int subaddressIdx) {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  @Override
   public MoneroAccount createAccount() {
     return createAccount(null);
   }

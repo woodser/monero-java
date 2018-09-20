@@ -30,9 +30,9 @@ import monero.wallet.model.MoneroKeyImage;
 import monero.wallet.model.MoneroOutput;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
+import monero.wallet.model.MoneroTx.MoneroTxType;
 import monero.wallet.model.MoneroTxFilter;
 import monero.wallet.model.MoneroUri;
-import monero.wallet.model.MoneroTx.MoneroTxType;
 import utils.TestUtils;
 
 /**
@@ -168,6 +168,11 @@ public class TestMoneroWalletRead {
       }
     }
   }
+  
+  @Test
+  public void testGetBalance() {
+    fail("Not implemented");
+  }
 
   @Test
   public void testGetBalanceAccount() {
@@ -203,6 +208,11 @@ public class TestMoneroWalletRead {
       wallet.getBalance(0, -456);
       fail("Should have thrown error on invalid subaddress");
     } catch (MoneroException exception) { }
+  }
+  
+  @Test
+  public void testGetUnlockedBalance() {
+    fail("Not implemented");
   }
 
   @Test
@@ -245,14 +255,49 @@ public class TestMoneroWalletRead {
   public void testMultisigImportNeeded() {
     assertFalse(wallet.isMultisigImportNeeded());
   }
-
+  
   @Test
-  public void testGetTxs() {
+  public void testGetTxsWallet() {
+    boolean nonDefaultSubaddressFound = false;
     List<MoneroTx> txs = wallet.getTxs();
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       TestUtils.testTx(tx);
+      if (tx.getAccountIndex() != null && tx.getAccountIndex() != 0 && tx.getSubaddressIndex() != null && tx.getSubaddressIndex() != 0) {
+        nonDefaultSubaddressFound = true;
+      }
     }
+    assertTrue("Test requires transactions in non-default account and subaddress; run testSendMultiple() first", nonDefaultSubaddressFound);
+  }
+  
+  @Test
+  public void testGetTxsAccount() {
+    boolean nonDefaultSubaddressFound = false;
+    for (MoneroAccount account : wallet.getAccounts()) {
+      List<MoneroTx> txs = wallet.getTxs(account.getIndex());
+      for (MoneroTx tx : txs) {
+        TestUtils.testTx(tx);
+        assertEquals(account.getIndex(), tx.getAccountIndex());
+        if (account.getIndex() != 0 && tx.getSubaddressIndex() != 0) nonDefaultSubaddressFound = true;
+      }
+    }
+    assertTrue("Test requires transactions in non-default account and subaddress; run testSendMultiple() first", nonDefaultSubaddressFound);
+  }
+  
+  @Test
+  public void testGetTxsSubaddress() {
+    boolean nonDefaultSubaddressFound = false;
+    for (MoneroAccount account : wallet.getAccounts()) {
+      for (MoneroSubaddress subaddress : wallet.getSubaddresses(account.getIndex())) {
+        for (MoneroTx tx : wallet.getTxs(account.getIndex(), subaddress.getIndex())) {
+          TestUtils.testTx(tx);
+          assertEquals(account.getIndex(), tx.getAccountIndex());
+          assertEquals(subaddress.getIndex(), tx.getSubaddressIndex());
+          if (account.getIndex() != 0 && tx.getSubaddressIndex() != 0) nonDefaultSubaddressFound = true;
+        }
+      }
+    }
+    assertTrue("Test requires transactions in non-default account and subaddress; run testSendMultiple() first", nonDefaultSubaddressFound);
   }
 
   @Test
