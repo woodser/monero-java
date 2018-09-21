@@ -67,12 +67,29 @@ public interface MoneroWallet {
   public List<MoneroAccount> getAccounts();
   
   /**
+   * Get all accounts.
+   * 
+   * @param includeSubaddresses specifies if subaddresses should be included
+   * @return List<MoneroAccount> are all accounts
+   */
+  public List<MoneroAccount> getAccounts(boolean includeSubaddresses);
+  
+  /**
    * Get accounts with a given tag.
    * 
-   * @param tag is the tag for filtering accounts (optional)
+   * @param tag is the tag for filtering accounts, all accounts if null
    * @return List<MoneroAccount> are all accounts for the wallet with the given tag
    */
   public List<MoneroAccount> getAccounts(String tag);
+  
+  /**
+   * Get accounts with a given tag.
+   * 
+   * @param tag is the tag for filtering accounts, all accounts if null
+   * @param includeSubaddresses specifies if subaddresses should be included
+   * @return List<MoneroAccount> are all accounts for the wallet with the given tag
+   */
+  public List<MoneroAccount> getAccounts(String tag, boolean includeSubaddresses);
   
   /**
    * Get an account.
@@ -81,6 +98,15 @@ public interface MoneroWallet {
    * @return MoneroAccount is the account
    */
   public MoneroAccount getAccount(int accountIdx);
+  
+  /**
+   * Get an account.
+   * 
+   * @param accountIdx identifies the account
+   * @param includeSubaddresses specifies if subaddresses should be included
+   * @return MoneroAccount is the account
+   */
+  public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses);
   
   /**
    * Create a new account without a label.

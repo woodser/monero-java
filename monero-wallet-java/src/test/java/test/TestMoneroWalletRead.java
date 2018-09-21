@@ -3,6 +3,7 @@ package test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -48,8 +49,6 @@ public class TestMoneroWalletRead {
   @Before
   public void setup() throws Exception {
     wallet = TestUtils.getWallet();
-    List<MoneroTx> txs = wallet.getTxs();
-    assertTrue("Test wallet does not have transaction history; load '" + TestUtils.WALLET_NAME_1 + "' with stagenet XMR and run TestMoneroWalletSends a few times", txs.size() >= 3);
   }
 
   @Test
@@ -116,6 +115,18 @@ public class TestMoneroWalletRead {
     List<MoneroAccount> accounts = wallet.getAccounts();
     assertFalse(accounts.isEmpty());
     for (MoneroAccount account : accounts) {
+      assertNull(account.getSubaddresses());
+      TestUtils.testAccount(account);
+    }
+  }
+  
+  @Test
+  public void testGetAccountsWithSubaddresses() {
+    List<MoneroAccount> accounts = wallet.getAccounts(true);
+    assertFalse(accounts.isEmpty());
+    for (MoneroAccount account : accounts) {
+      assertNotNull(account.getSubaddresses());
+      assertFalse(account.getSubaddresses().isEmpty());
       TestUtils.testAccount(account);
     }
   }
@@ -125,7 +136,21 @@ public class TestMoneroWalletRead {
     List<MoneroAccount> accounts = wallet.getAccounts();
     assertFalse(accounts.isEmpty());
     for (MoneroAccount account : accounts) {
-      TestUtils.testAccount(wallet.getAccount(account.getIndex()));
+      MoneroAccount retrieved = wallet.getAccount(account.getIndex(), true);
+      assertNull(retrieved.getSubaddresses());
+      TestUtils.testAccount(retrieved);
+    }
+  }
+  
+  @Test
+  public void testGetAccountWithSubaddresses() {
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    assertFalse(accounts.isEmpty());
+    for (MoneroAccount account : accounts) {
+      MoneroAccount retrieved = wallet.getAccount(account.getIndex(), true);
+      assertNotNull(retrieved.getSubaddresses());
+      assertFalse(retrieved.getSubaddresses().isEmpty());
+      TestUtils.testAccount(retrieved);
     }
   }
 
@@ -174,6 +199,8 @@ public class TestMoneroWalletRead {
   @Test
   public void testGetBalance() {
     fail("Not implemented");
+//    List<MoneroTx> txs = wallet.getTxs();
+//    assertTrue("Test wallet does not have transaction history; load '" + TestUtils.WALLET_NAME_1 + "' with stagenet XMR and run TestMoneroWalletSends a few times", txs.size() >= 3);
   }
 
   @Test

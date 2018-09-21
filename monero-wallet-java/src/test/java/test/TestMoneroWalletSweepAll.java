@@ -36,30 +36,71 @@ public class TestMoneroWalletSweepAll {
   }
   
   @Test
-  public void testSweepWallet() {
+  public void testSweepAccounts() {
+    int NUM_ACCOUNTS_TO_SWEEP = 2;
     
-    // verify 2 accounts with unlocked balance
-    Pair<Map<Integer, List<Integer>>, Map<Integer, List<Integer>>> balances = getBalances();
-    assertTrue("Test requires multiple accounts with a balance; run testSendMultiple() first", balances.getFirst().size() >= 2);
-    assertTrue("Wallet is waiting on unlocked funds", balances.getSecond().size() >= 2);
-    
-    // sweep
-    List<MoneroTx> txs = wallet.sweepWallet(wallet.getPrimaryAddress());
-    assertFalse(txs.isEmpty());
-    for (MoneroTx tx : txs) {
-      TestUtils.testTx(tx);
-      assertNotNull(tx.getKey());
-      assertNotNull(tx.getBlob());
-      assertNotNull(tx.getMetadata());
-      assertNotNull(tx.getAccountIndex());
-      assertNotNull(tx.getSubaddressIndex());
-      assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
-      TestUtils.testSendTx(tx, true);
+    // collect accounts with balance and unlocked balance
+    List<MoneroAccount> accounts = wallet.getAccounts(true);
+    List<MoneroAccount> balanceAccounts = new ArrayList<MoneroAccount>();
+    List<MoneroAccount> unlockedAccounts = new ArrayList<MoneroAccount>();
+    for (MoneroAccount account : accounts) {
+      if (account.getBalance().longValue() != 0) balanceAccounts.add(account);
+      if (account.getUnlockedBalance().longValue() != 0) unlockedAccounts.add(account);
     }
     
-    // assert no unlocked funds across subaddresses
-    balances = getBalances();
-    assertTrue("Wallet should have no unlocked funds after sweeping all", balances.getSecond().isEmpty());
+    // test requires at least one more account than the number being swept to verify it does not change
+    assertTrue("Test requires balance in at least " + (NUM_ACCOUNTS_TO_SWEEP + 1) + " accounts; run testSendMultiple() first", balanceAccounts.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
+    assertTrue("Test is waiting on unlocked funds", unlockedAccounts.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
+    
+    // sweep from first unlocked accounts
+    for (int i = 0; i < NUM_ACCOUNTS_TO_SWEEP; i++) {
+      
+      // sweep unlocked account
+      MoneroAccount unlockedAccount = unlockedAccounts.get(i);
+      List<MoneroTx> txs = wallet.sweepAccount(wallet.getPrimaryAddress(), unlockedAccount.getIndex());
+      
+      // test transactions
+      assertFalse(txs.isEmpty());
+      for (MoneroTx tx : txs) {
+        TestUtils.testTx(tx);
+        assertNotNull(tx.getKey());
+        assertNotNull(tx.getBlob());
+        assertNotNull(tx.getMetadata());
+        assertNotNull(tx.getAccountIndex());
+        assertEquals((int) unlockedAccount.getIndex(), (int) tx.getAccountIndex());
+        assertNotNull(tx.getSubaddressIndex());
+        assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
+        TestUtils.testSendTx(tx, true);
+      }
+      
+      // assert no unlocked funds in account
+      MoneroAccount account = wallet.getAccount(unlockedAccount.getIndex());
+      assertEquals(0, account.getUnlockedBalance().longValue());
+    }
+    
+    // test accounts after sweeping
+    List<MoneroAccount> accountsAfter = wallet.getAccounts(true);
+    assertEquals(accounts.size(), accountsAfter.size());
+    for (int i = 0; i < accounts.size(); i++) {
+      MoneroAccount accountBefore = accounts.get(i);
+      MoneroAccount accountAfter = accountsAfter.get(i);
+      
+      // determine if account was swept
+      boolean swept = false;
+      for (int j = 0; j < NUM_ACCOUNTS_TO_SWEEP; j++) {
+        if (unlockedAccounts.get(j).getIndex() == accountBefore.getIndex()) {
+          swept = true;
+          break;
+        }
+      }
+      
+      // test that unlocked balance is 0 if swept, unchanged otherwise
+      if (swept) {
+        assertEquals(0, accountAfter.getUnlockedBalance().longValue());
+      } else {
+        assertEquals(accountBefore, accountAfter);
+      }
+    }
   }
   
   @Test
@@ -105,10 +146,38 @@ public class TestMoneroWalletSweepAll {
     
     // ensure no other accounts or subaddresses changed
     Map<Integer, List<Integer>> unlockedAccountsAfter = getBalances().getSecond();
+    assertFalse(unlockedAccountsAfter.isEmpty());
     for (Integer accountIdx : balances.getSecond().keySet()) {
-      if (unlockedAccountsSweep.contains(accountIdx)) assertFalse(unlockedAccountsAfter.keySet().contains(accountIdx));
-      else assertEquals(balances.getSecond().get(accountIdx), unlockedAccountsAfter.get(accountIdx));
+      if (unlockedAccountsSweep.contains(accountIdx)) assertFalse(unlockedAccountsAfter.keySet().contains(accountIdx)); // if account was swept from, assert it does not contain unlocked funds
+      else assertEquals(balances.getSecond().get(accountIdx), unlockedAccountsAfter.get(accountIdx)); //otherwise, ensure same subaddresses are unlocked
     }
+  }
+  
+  @Test
+  public void testSweepWallet() {
+    
+    // verify 2 accounts with unlocked balance
+    Pair<Map<Integer, List<Integer>>, Map<Integer, List<Integer>>> balances = getBalances();
+    assertTrue("Test requires multiple accounts with a balance; run testSendMultiple() first", balances.getFirst().size() >= 2);
+    assertTrue("Wallet is waiting on unlocked funds", balances.getSecond().size() >= 2);
+    
+    // sweep
+    List<MoneroTx> txs = wallet.sweepWallet(wallet.getPrimaryAddress());
+    assertFalse(txs.isEmpty());
+    for (MoneroTx tx : txs) {
+      TestUtils.testTx(tx);
+      assertNotNull(tx.getKey());
+      assertNotNull(tx.getBlob());
+      assertNotNull(tx.getMetadata());
+      assertNotNull(tx.getAccountIndex());
+      assertNotNull(tx.getSubaddressIndex());
+      assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
+      TestUtils.testSendTx(tx, true);
+    }
+    
+    // assert no unlocked funds across subaddresses
+    balances = getBalances();
+    assertTrue("Wallet should have no unlocked funds after sweeping all", balances.getSecond().isEmpty());
   }
   
   @Test

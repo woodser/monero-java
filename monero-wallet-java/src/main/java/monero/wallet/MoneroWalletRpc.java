@@ -39,6 +39,8 @@ import monero.wallet.model.MoneroUri;
 
 /**
  * Implements a Monero Wallet using monero-wallet-rpc.
+ * 
+ * TODO: cache static data like primary address
  */
 public class MoneroWalletRpc extends MoneroWalletDefault {
   
@@ -136,15 +138,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     MoneroIntegratedAddress address = new MoneroIntegratedAddress((String) resultMap.get("standard_address"), (String) resultMap.get("payment_id"), integratedAddress);
     return address;
   }
-
-  @Override
-  public List<MoneroAccount> getAccounts() {
-    return getAccounts(null);
-  }
   
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroAccount> getAccounts(String tag) {
+  public List<MoneroAccount> getAccounts(String tag, boolean includeSubaddresses) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("tag", tag);
     Map<String, Object> resultMap = (Map<String, Object>) rpc.sendRpcRequest("get_accounts", params).get("result");
@@ -159,14 +156,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       boolean isMultisigImportNeeded = false;  // TODO: get this value, may need to make another rpc call for balance info
       MoneroAccount account = new MoneroAccount(accountIdx, primaryAddress, label, balance, unlockedBalance, isMultisigImportNeeded, null);
       accounts.add(account);
+      if (includeSubaddresses) account.setSubaddresses(getSubaddresses(account.getIndex()));
     }
     return accounts;
   }
-
+  
   @Override
-  public MoneroAccount getAccount(int accountIdx) {
+  public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses) {
     for (MoneroAccount account : getAccounts()) {
-      if (account.getIndex() == accountIdx) return account;
+      if (account.getIndex() == accountIdx) {
+        account.setSubaddresses(getSubaddresses(accountIdx));
+        return account;
+      }
     }
     throw new MoneroException("Account with index " + accountIdx + " does not exist");
   }
