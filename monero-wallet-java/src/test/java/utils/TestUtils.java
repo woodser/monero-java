@@ -8,6 +8,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URISyntaxException;
+import java.util.Collection;
 
 import org.apache.log4j.PropertyConfigurator;
 
@@ -190,5 +191,19 @@ public class TestUtils {
     assertTrue(entry.getIndex() >= 0);
     assertNotNull(entry.getAddress());
     assertNotNull(entry.getDescription());
+  }
+  
+  /**
+   * Get an account by index.
+   * 
+   * @param accounts is a collection of accounts to search
+   * @param accountIdx is the index of the account to return
+   * @return MoneroAccount is the account with the given index, null if not found
+   */
+  public static MoneroAccount getAccountById(Collection<MoneroAccount> accounts, int accountIdx) {
+    for (MoneroAccount account : accounts) {
+      if (account.getIndex() == accountIdx) return account;
+    }
+    return null;
   }
 }
