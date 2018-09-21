@@ -364,9 +364,11 @@ public class TestMoneroWalletRead {
       assertEquals(wallet.getBalance(account.getIndex()), balance);
     }
     
-    // test block height filtering if txs exist
-    if (!txs.isEmpty()) {
-      
+    // test block height filtering
+    {
+      txs = wallet.getTxs(0);
+      assertFalse("No transactions; run testSendMultiple()", txs.isEmpty());
+        
       // get and sort block heights in ascending order
       List<Integer> heights = new ArrayList<Integer>();
       for (MoneroTx tx : txs) {
@@ -388,6 +390,7 @@ public class TestMoneroWalletRead {
       // assert at least some transactions filtered
       int unfilteredCount = txs.size();
       MoneroTxFilter filter = new MoneroTxFilter();
+      filter.setAccountIndex(0);
       filter.setMinHeight(minHeight);
       filter.setMaxHeight(maxHeight);
       txs = wallet.getTxs(filter);
@@ -438,15 +441,16 @@ public class TestMoneroWalletRead {
     filter.setTxIds(txIds);    
     txs = wallet.getTxs(filter);
     assertEquals(allTxs.size(), txs.size());
-    for (String txId : txIds) {
-      filter = new MoneroTxFilter();
-      filter.setTxIds(Arrays.asList(txId));
-      txs = wallet.getTxs(filter);
-      assertFalse(txs.isEmpty());
-      for (MoneroTx tx : txs) {
-        assertEquals(txId, tx.getId());
-      }
-    }
+    // TODO: this queries every transaction, too much
+//    for (String txId : txIds) {
+//      filter = new MoneroTxFilter();
+//      filter.setTxIds(Arrays.asList(txId));
+//      txs = wallet.getTxs(filter);
+//      assertFalse(txs.isEmpty());
+//      for (MoneroTx tx : txs) {
+//        assertEquals(txId, tx.getId());
+//      }
+//    }
   }
 
   @Test
