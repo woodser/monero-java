@@ -8,7 +8,7 @@ import java.util.List;
 import monero.wallet.model.MoneroTx.MoneroTxPriority;
 
 /**
- * Configuration for sending a transaction.
+ * Configuration for sending transactions.
  */
 public class MoneroTxConfig {
 

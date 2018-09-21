@@ -265,10 +265,37 @@ public interface MoneroWallet {
   public List<MoneroTx> sendSplit(MoneroTxConfig config);
   
   /**
-   * Send all unlocked balance to an address.
+   * Sweep the wallet's unlocked funds to an address.
    * 
-   * @param config is the transaction configuration (account index defaults to 0 and subaddress indices defaults to [0] if not provided)
-   * @param List<MoneroTx> are the resulting transactions from sweeping
+   * @param address is the address to sweep the wallet's funds to
+   * @return List<MoneroTx> are the resulting transactions
+   */
+  public List<MoneroTx> sweepWallet(String address);
+  
+  /**
+   * Sweep an acount's unlocked funds to an address.
+   * 
+   * @param address is the address to sweep the account's funds to
+   * @param accountIdx is the index of the account
+   * @return List<MoneroTx> are the resulting transactions
+   */
+  public List<MoneroTx> sweepAccount(String address, int accountIdx);
+  
+  /**
+   * Sweep a subaddress's unlocked funds to an address.
+   * 
+   * @param address is the address to sweep the subaddress's funds to
+   * @param accountIdx is the index of the account
+   * @param subaddressIdx is the index of the subaddress
+   * @return List<MoneroTx> are the resulting transactions
+   */
+  public List<MoneroTx> sweepSubaddress(String address, int accountIdx, int subaddressIdx);
+  
+  /**
+   * Sweep unlocked funds.
+   * 
+   * @param config specifies the sweep configuration
+   * @param List<MoneroTx> are the resulting transactions
    */
   public List<MoneroTx> sweepAll(MoneroTxConfig config);
   

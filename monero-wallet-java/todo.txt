@@ -1,4 +1,5 @@
 v0.12.3.0
+belowAmount only supported in sweep?  assert not used when not usable
 outbound transactions do not relable record minor, e.g. send from [2,3] but tx minor will be 0
 monerotx should only have one id
 merge based on subaddress location
