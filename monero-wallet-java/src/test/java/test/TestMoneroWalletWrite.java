@@ -28,7 +28,6 @@ import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
-import monero.wallet.model.MoneroTx.MoneroTxType;
 import monero.wallet.model.MoneroTxConfig;
 import utils.PrintBalances;
 import utils.TestUtils;
@@ -43,7 +42,6 @@ import utils.TestUtils;
  */
 public class TestMoneroWalletWrite {
   
-  private static final Integer MIXIN = 6;
   private static final int SEND_DIVISOR = 2;
   private static final BigInteger MAX_FEE = BigInteger.valueOf(5000000).multiply(BigInteger.valueOf(10000));
   private MoneroWallet wallet;
@@ -192,7 +190,7 @@ public class TestMoneroWalletWrite {
     BigInteger sendAmount = unlockedBalanceBefore.divide(BigInteger.valueOf(SEND_DIVISOR));
     String address = wallet.getPrimaryAddress();
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    MoneroTxConfig config = new MoneroTxConfig(address, null, sendAmount, MIXIN);
+    MoneroTxConfig config = new MoneroTxConfig(address, null, sendAmount, TestUtils.MIXIN);
     config.setAccountIndex(fromAccount.getIndex());
     config.setSubaddressIndices(Arrays.asList(fromSubaddress.getIndex()));
     if (canSplit) {
@@ -209,7 +207,7 @@ public class TestMoneroWalletWrite {
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       TestUtils.testTx(tx);
-      testSendTx(tx, canSplit);
+      TestUtils.testSendTx(tx, canSplit);
       assertEquals(fromAccount.getIndex(), tx.getAccountIndex());
       assertNotNull(tx.getSubaddressIndex());
       assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
@@ -275,7 +273,7 @@ public class TestMoneroWalletWrite {
       payment.setAmount(sendAmountPerSubaddress);
     }
     MoneroTxConfig config = new MoneroTxConfig();
-    config.setMixin(MIXIN);
+    config.setMixin(TestUtils.MIXIN);
     config.setAccountIndex(0);
     config.setDestinations(payments);
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
@@ -293,7 +291,7 @@ public class TestMoneroWalletWrite {
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       TestUtils.testTx(tx);
-      testSendTx(tx, canSplit);
+      TestUtils.testSendTx(tx, canSplit);
       assertNotNull(tx.getSubaddressIndex());
       assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
       if (Math.abs(sendAmount.subtract(tx.getAmount()).longValue()) >= TOTAL_ADDRESSES) { // send amounts may be slightly different
@@ -356,7 +354,7 @@ public class TestMoneroWalletWrite {
     MoneroTxConfig config = new MoneroTxConfig(address, null, sendAmount);
     config.setAccountIndex(accountIdx);
     config.setSubaddressIndices(fromSubaddressIndices);
-    config.setMixin(MIXIN);
+    config.setMixin(TestUtils.MIXIN);
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     if (canSplit) {
       txs.addAll(wallet.sendSplit(config));
@@ -383,7 +381,7 @@ public class TestMoneroWalletWrite {
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       TestUtils.testTx(tx);
-      testSendTx(tx, canSplit);
+      TestUtils.testSendTx(tx, canSplit);
       assertNotNull(tx.getSubaddressIndex());
       assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
       if (Math.abs(sendAmount.subtract(tx.getAmount()).longValue()) >= 10) { // send amounts may be slightly different
@@ -513,23 +511,5 @@ public class TestMoneroWalletWrite {
     }
     entries = wallet.getAddressBookEntries();
     assertEquals(numEntriesStart, entries.size());
-  }
-  
-  private static void testSendTx(MoneroTx tx, boolean canSplit) {
-    assertTrue(tx.getFee().longValue() > 0);
-    assertEquals(MIXIN, tx.getMixin());
-    assertNull(tx.getSize());
-    assertNotNull(tx.getPayments());
-    assertFalse(tx.getPayments().isEmpty());
-    assertEquals(MoneroTxType.OUTGOING, tx.getType());
-    assertNull(tx.getHeight());
-    assertEquals((Integer) 0, tx.getUnlockTime());
-    assertNotNull(tx.getBlob());
-    assertNotNull(tx.getMetadata());
-    if (canSplit) {
-      assertNull(tx.getKey());
-    } else {
-      assertNotNull(tx.getKey());
-    }
   }
 }

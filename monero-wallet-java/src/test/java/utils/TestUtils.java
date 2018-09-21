@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URISyntaxException;
@@ -13,7 +14,6 @@ import org.apache.log4j.PropertyConfigurator;
 import monero.daemon.MoneroDaemon;
 import monero.daemon.MoneroDaemonRpc;
 import monero.rpc.MoneroRpc;
-import monero.rpc.MoneroRpcException;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
@@ -43,6 +43,9 @@ public class TestUtils {
   public static final String WALLET_NAME_1 = "test_wallet_1";
   public static final String WALLET_NAME_2 = "test_wallet_2";
   public static final String WALLET_PW = "supersecretpassword123";
+  
+  // test constants
+  public static final Integer MIXIN = 6;
   
   // log4j configuration
   static {
@@ -77,19 +80,19 @@ public class TestUtils {
         throw new RuntimeException(e1);
       }
       
-      // create test wallet if necessary
-      try {
-        wallet.createWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW, "English");
-      } catch (MoneroRpcException e) {
-        assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
-      }
+//      // create test wallet if necessary
+//      try {
+//        wallet.createWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW, "English");
+//      } catch (MoneroRpcException e) {
+//        assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
+//      }
+//      
+//      // open test wallet
+//      wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
       
-      // open test wallet
-      wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
-      
-//      // refresh wallet
-//      wallet.rescanBlockchain();
+      // refresh wallet
 //      wallet.rescanSpent();
+//      wallet.rescanBlockchain();
     }
     return wallet;
   }
@@ -162,6 +165,24 @@ public class TestUtils {
         assertNotNull(output.getAmount());
         assertNotNull(output.isSpent());
       }
+    }
+  }
+  
+  public static void testSendTx(MoneroTx tx, boolean canSplit) {
+    assertTrue(tx.getFee().longValue() > 0);
+    assertEquals(MIXIN, tx.getMixin());
+    assertNull(tx.getSize());
+    assertNotNull(tx.getPayments());
+    assertFalse(tx.getPayments().isEmpty());
+    assertEquals(MoneroTxType.OUTGOING, tx.getType());
+    assertNull(tx.getHeight());
+    assertEquals((Integer) 0, tx.getUnlockTime());
+    assertNotNull(tx.getBlob());
+    assertNotNull(tx.getMetadata());
+    if (canSplit) {
+      assertNull(tx.getKey());
+    } else {
+      assertNotNull(tx.getKey());
     }
   }
   
