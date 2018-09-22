@@ -143,7 +143,7 @@ public class TestUtils {
         assertTrue(payment.getAmount().longValue() >= 0);  // TODO: seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
         assertNull(payment.getAccountIdx());
         assertNull(payment.getSubaddressIdx());
-        assertEquals(tx, payment.getTransaction());
+        assertEquals(tx, payment.getTx());
       }
     }
     
@@ -161,7 +161,7 @@ public class TestUtils {
         assertTrue(payment.getAmount().longValue() >= 0);  // TODO: seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
         assertNotNull(payment.getAccountIdx());
         assertNotNull(payment.getSubaddressIdx());
-        assertEquals(tx, payment.getTransaction());
+        assertEquals(tx, payment.getTx());
       }
       assertNotNull(tx.getOutputs());
       assertFalse(tx.getOutputs().isEmpty());

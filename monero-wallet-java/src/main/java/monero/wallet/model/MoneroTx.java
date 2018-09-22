@@ -99,7 +99,7 @@ public class MoneroTx {
     this.payments = payments;
     if (payments != null) {
       for (MoneroPayment payment : payments) {
-        payment.setTransaction(this);
+        payment.setTx(this);
       }
     }
   }

@@ -353,7 +353,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
-    MoneroTx tx = mapToTx(txMap);
+    MoneroTx tx = txMapToTx(txMap);
     tx.setAmount((BigInteger) txMap.get("amount"));
     tx.setPayments(config.getDestinations());
     tx.setMixin(config.getMixin());
@@ -584,7 +584,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       Map<String, Object> result = (Map<String, Object>) respMap.get("result");
       for (String key : result.keySet()) {
         for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
-          MoneroTx tx = mapToTx(txMap);
+          MoneroTx tx = txMapToTx(txMap);
           if (txMap.containsKey("amount")) tx.setAmount((BigInteger) txMap.get("amount"));
           addTx(txTypeMap, tx);
         }
@@ -610,7 +610,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           MoneroOutput output = new MoneroOutput();
           output.setAmount((BigInteger) outputMap.get("amount"));
           output.setSpent((Boolean) outputMap.get("spent"));
-          MoneroTx tx = mapToTx(outputMap);
+          MoneroTx tx = txMapToTx(outputMap);
           tx.setType(MoneroTxType.INCOMING);
           tx.setAccountIndex(accountIdx);
           output.setTransaction(tx);
@@ -639,7 +639,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         // interpret get_bulk_payments response
         List<Map<String, Object>> paymentMaps = (List<Map<String, Object>>) result.get("payments");
         for (Map<String, Object> paymentMap : paymentMaps) {
-          MoneroTx tx = mapToTx(paymentMap);
+          MoneroTx tx = txMapToTx(paymentMap);
           tx.setType(MoneroTxType.INCOMING);
           // payment data is redundant with get_transfers rpc call, so it's not added because merging would create duplicates
           // MoneroPayment payment = new MoneroPayment();
@@ -889,13 +889,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   // ------------------------------ STATIC UTILITIES --------------------------
   
   /**
-   * Initializes a MoneroTx from a transaction response map.
+   * Converts a transaction map to a MoneroTx.
    * 
-   * @param txMap is the map to initialize the transaction from
-   * @return MoneroTx is the initialized transaction
+   * @param txMap is the map to create a MoneroTx from
+   * @return MoneroTx is the transaction created from the map
    */
   @SuppressWarnings("unchecked")
-  private static MoneroTx mapToTx(Map<String, Object> txMap) {
+  private static MoneroTx txMapToTx(Map<String, Object> txMap) {
     MoneroTx tx = new MoneroTx();
     for (String key : txMap.keySet()) {
       Object val = txMap.get(key);
@@ -944,6 +944,44 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       } else LOGGER.warn("Ignoring unexpected transaction field: '" + key + "'");
     }
     return tx;
+  }
+  
+  /**
+   * Converts a map of transaction lists to a list of MoneroTx.
+   * 
+   * @param txListMap is the map listing transactions
+   * @return List<MoneroTx> are the transactions created from the list map
+   */
+  @SuppressWarnings("unchecked")
+  private static List<MoneroTx> txListMapToTxs(Map<String, Object> txListMap, int accountIdx, MoneroTxType type) {
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    List<String> ids = (List<String>) txListMap.get("tx_hash_list");
+    List<String> keys = (List<String>) txListMap.get("tx_key_list");
+    List<String> blobs = (List<String>) txListMap.get("tx_blob_list");
+    List<String> metadatas = (List<String>) txListMap.get("tx_metadata_list");
+    List<BigInteger> fees = (List<BigInteger>) txListMap.get("fee_list");
+    List<BigInteger> amounts = (List<BigInteger>) txListMap.get("amount_list");
+    //String multisigTxSet = (String) resultMap.get("multisig_txset");  // TODO: what to do with this?
+    int numTxs = ids.size();
+    assertEquals(numTxs, keys.size());
+    assertEquals(numTxs, blobs.size());
+    assertEquals(numTxs, metadatas.size());
+    assertEquals(numTxs, fees.size());
+    assertEquals(numTxs, amounts.size());
+    assertEquals(numTxs, metadatas.size());
+    for (int i = 0; i < numTxs; i++) {
+      MoneroTx tx = new MoneroTx();
+      txs.add(tx);
+      MoneroPayment payment = new MoneroPayment(tx, null, amounts.get(i), accountIdx, 0); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
+      tx.setPayments(Arrays.asList(payment));
+      tx.setId(ids.get(i));
+      tx.setKey(keys.get(i));
+      tx.setBlob(blobs.get(i));
+      tx.setMetadata(metadatas.get(i));
+      tx.setFee(fees.get(i));
+      tx.setType(type);
+    }
+    return txs;
   }
   
   /**
@@ -1014,38 +1052,5 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       subaddressIndices.add(((BigInteger) address.get("address_index")).intValue());
     }
     return subaddressIndices;
-  }
-  
-  @SuppressWarnings("unchecked")
-  private static List<MoneroTx> txListMapToTxs(Map<String, Object> txListMap, int accountIdx, MoneroTxType type) {
-    List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    List<String> ids = (List<String>) txListMap.get("tx_hash_list");
-    List<String> keys = (List<String>) txListMap.get("tx_key_list");
-    List<String> blobs = (List<String>) txListMap.get("tx_blob_list");
-    List<String> metadatas = (List<String>) txListMap.get("tx_metadata_list");
-    List<BigInteger> fees = (List<BigInteger>) txListMap.get("fee_list");
-    List<BigInteger> amounts = (List<BigInteger>) txListMap.get("amount_list");
-    //String multisigTxSet = (String) resultMap.get("multisig_txset");  // TODO: what to do with this?
-    int numTxs = ids.size();
-    assertEquals(numTxs, keys.size());
-    assertEquals(numTxs, blobs.size());
-    assertEquals(numTxs, metadatas.size());
-    assertEquals(numTxs, fees.size());
-    assertEquals(numTxs, amounts.size());
-    assertEquals(numTxs, metadatas.size());
-    for (int i = 0; i < numTxs; i++) {
-      MoneroTx tx = new MoneroTx();
-      txs.add(tx);
-      tx.setAccountIndex(accountIdx);
-      tx.setSubaddressIndex(0); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
-      tx.setId(ids.get(i));
-      tx.setKey(keys.get(i));
-      tx.setBlob(blobs.get(i));
-      tx.setMetadata(metadatas.get(i));
-      tx.setFee(fees.get(i));
-      tx.setAmount(amounts.get(i));
-      tx.setType(type);
-    }
-    return txs;
   }
 }

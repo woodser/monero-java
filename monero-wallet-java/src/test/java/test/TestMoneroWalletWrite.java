@@ -218,7 +218,7 @@ public class TestMoneroWalletWrite {
       for (MoneroPayment payment : tx.getPayments()) {
         assertEquals(address, payment.getAddress());
         assertEquals(sendAmount, payment.getAmount());
-        assertTrue(tx == payment.getTransaction());
+        assertTrue(tx == payment.getTx());
       }
     }
   }
@@ -302,7 +302,7 @@ public class TestMoneroWalletWrite {
       for (int i = 0; i < payments.size(); i++) {
         assertEquals(payments.get(i).getAddress(), tx.getPayments().get(i).getAddress());
         assertEquals(payments.get(i).getAmount(), tx.getPayments().get(i).getAmount());
-        assertTrue(tx == tx.getPayments().get(i).getTransaction());
+        assertTrue(tx == tx.getPayments().get(i).getTx());
       }
     }
   }
@@ -391,7 +391,7 @@ public class TestMoneroWalletWrite {
       for (MoneroPayment payment : tx.getPayments()) {
         assertEquals(address, payment.getAddress());
         assertEquals(sendAmount, payment.getAmount());
-        assertTrue(tx == payment.getTransaction());
+        assertTrue(tx == payment.getTx());
       }
     }
   }

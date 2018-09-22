@@ -11,7 +11,7 @@ import java.math.BigInteger;
  */
 public class MoneroPayment {
 
-  private MoneroTx transaction;
+  private MoneroTx tx;
   private String address;
   private BigInteger amount;
   private Integer accountIdx;
@@ -21,15 +21,20 @@ public class MoneroPayment {
     super();
   }
   
-  public MoneroPayment(String address, BigInteger amount) {
-    this(null, address, amount);
-  }
-  
   public MoneroPayment(MoneroTx transaction, String address, BigInteger amount) {
     super();
-    this.transaction = transaction;
+    this.tx = transaction;
     this.address = address;
     this.amount = amount;
+  }
+
+  public MoneroPayment(MoneroTx tx, String address, BigInteger amount, Integer accountIdx, Integer subaddressIdx) {
+    super();
+    this.tx = tx;
+    this.address = address;
+    this.amount = amount;
+    this.accountIdx = accountIdx;
+    this.subaddressIdx = subaddressIdx;
   }
 
   public Integer getAccountIdx() {
@@ -48,12 +53,12 @@ public class MoneroPayment {
     this.subaddressIdx = subaddressIdx;
   }
 
-  public MoneroTx getTransaction() {
-    return transaction;
+  public MoneroTx getTx() {
+    return tx;
   }
 
-  public void setTransaction(MoneroTx transaction) {
-    this.transaction = transaction;
+  public void setTx(MoneroTx transaction) {
+    this.tx = transaction;
   }
 
   public String getAddress() {
@@ -80,7 +85,7 @@ public class MoneroPayment {
     result = prime * result + ((address == null) ? 0 : address.hashCode());
     result = prime * result + ((amount == null) ? 0 : amount.hashCode());
     result = prime * result + ((subaddressIdx == null) ? 0 : subaddressIdx.hashCode());
-    result = prime * result + ((transaction == null) ? 0 : transaction.hashCode());
+    result = prime * result + ((tx == null) ? 0 : tx.hashCode());
     return result;
   }
 
@@ -102,9 +107,9 @@ public class MoneroPayment {
     if (subaddressIdx == null) {
       if (other.subaddressIdx != null) return false;
     } else if (!subaddressIdx.equals(other.subaddressIdx)) return false;
-    if (transaction == null) {
-      if (other.transaction != null) return false;
-    } else if (!transaction.equals(other.transaction)) return false;
+    if (tx == null) {
+      if (other.tx != null) return false;
+    } else if (!tx.equals(other.tx)) return false;
     return true;
   }
 }
