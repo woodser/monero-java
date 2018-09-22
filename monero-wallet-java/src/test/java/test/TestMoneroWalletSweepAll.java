@@ -62,6 +62,10 @@ public class TestMoneroWalletSweepAll {
       // test transactions
       assertFalse(txs.isEmpty());
       for (MoneroTx tx : txs) {
+        if (tx.getPayments() == null) {
+          System.out.println("boom");
+          System.out.println(tx);
+        }
         TestUtils.testTx(tx);
         assertNotNull(tx.getKey());
         assertNotNull(tx.getBlob());

@@ -1,6 +1,7 @@
 package monero.wallet;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.math.BigInteger;
 import java.net.URI;
@@ -423,11 +424,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public List<MoneroTx> sweepAll(MoneroTxConfig config) {
     
-    // send request
+    // common request params
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("address", config.getDestinations().get(0).getAddress());
-    params.put("account_index", config.getAccountIndex());
-    params.put("subaddr_indices", config.getSubaddressIndices());
     params.put("priority", config.getPriority());
     params.put("mixin", config.getMixin());
     params.put("unlock_time", config.getUnlockTime());
@@ -437,49 +436,76 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("get_tx_keys", true);
     params.put("get_tx_hex", true);
     params.put("get_tx_metadata", true);
-    Map<String, Object> respMap = rpc.sendRpcRequest("sweep_all", params);
-    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     
-    // build transactions from response
-    List<String> ids = (List<String>) resultMap.get("tx_hash_list");
-    List<String> keys = (List<String>) resultMap.get("tx_key_list");
-    List<String> blobs = (List<String>) resultMap.get("tx_blob_list");
-    List<String> metadatas = (List<String>) resultMap.get("tx_metadata_list");
-    List<BigInteger> fees = (List<BigInteger>) resultMap.get("fee_list");
-    List<BigInteger> amounts = (List<BigInteger>) resultMap.get("amount_list");
-    //String multisigTxSet = (String) resultMap.get("multisig_txset");  // TODO: what to do with this?
-    int numTxs = ids.size();
-    assertEquals(numTxs, keys.size());
-    assertEquals(numTxs, blobs.size());
-    assertEquals(numTxs, metadatas.size());
-    assertEquals(numTxs, fees.size());
-    assertEquals(numTxs, amounts.size());
-    assertEquals(numTxs, metadatas.size());
-    Map<String, MoneroTx> txMap = new HashMap<String, MoneroTx>();
-    for (int i = 0; i < numTxs; i++) {
-      MoneroTx tx = new MoneroTx();
-      tx.setId(ids.get(i));
-      tx.setKey(keys.get(i));
-      tx.setBlob(blobs.get(i));
-      tx.setMetadata(metadatas.get(i));
-      tx.setFee(fees.get(i));
-      tx.setAmount(amounts.get(i));
-      //tx.setAccountIndex(config.getAccountIndex() == null ? 0 : config.getAccountIndex()); // TODO: test failure because commented out
-      tx.setSubaddressIndex(0); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
-      txMap.put(tx.getId(), tx);
+    // determine accounts to sweep from; default to all with unlocked balance if not specified
+    List<Integer> accountIndices = new ArrayList<Integer>();
+    if (config.getAccountIndex() != null) {
+      accountIndices.add(config.getAccountIndex());
+    } else {
+      for (MoneroAccount account : getAccounts()) {
+        if (account.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) {
+          accountIndices.add(account.getIndex());
+        }
+      }
     }
-
-    // fetch transactions by id
-    MoneroTxFilter filter = new MoneroTxFilter();
-    filter.setTxIds(ids);
-    filter.setIncoming(false);
-    List<MoneroTx> txs = getTxs(filter);
     
-    // merge transactions for complete data
-    assertEquals(txs.size(), txMap.size());
+    // sweep from each account
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    for (Integer accountIdx : accountIndices) {
+      params.put("account_index", accountIdx);
+      
+      // determine subaddresses to sweep from; default to all with unlocked balance if not specified
+      List<Integer> subaddressIndices = new ArrayList<Integer>();
+      if (config.getSubaddressIndices() != null) {
+        subaddressIndices.addAll(config.getSubaddressIndices());
+      } else {
+        for (MoneroSubaddress subaddress : getSubaddresses(accountIdx)) {
+          if (subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) {
+            subaddressIndices.add(subaddress.getIndex());
+          }
+        }
+      }
+      if (subaddressIndices.isEmpty()) throw new MoneroException("No subaddresses to sweep from");
+      
+      // sweep each subaddress individually
+      if (config.getSweepEachSubaddress() == null || config.getSweepEachSubaddress()) {
+        for (Integer subaddressIdx : subaddressIndices) {
+          params.put("subaddr_indices", Arrays.asList(subaddressIdx));
+          Map<String, Object> respMap = rpc.sendRpcRequest("sweep_all", params);
+          Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+          txs.addAll(txListMapToTxs(resultMap, accountIdx, MoneroTxType.OUTGOING));
+        }
+      }
+      
+      // sweep all subaddresses together
+      else {
+        params.put("subaddr_indices", Arrays.asList(subaddressIndices));
+        Map<String, Object> respMap = rpc.sendRpcRequest("sweep_all", params);
+        Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+        txs.addAll(txListMapToTxs(resultMap, accountIdx, MoneroTxType.OUTGOING));
+      }
+    }
+    
+    // collect ids
+    assertFalse(txs.isEmpty());
+    List<String> ids = new ArrayList<String>();
     for (MoneroTx tx : txs) {
-      tx.merge(txMap.get(tx.getId()));
+      if (tx.getId() != null) ids.add(tx.getId());
     }
+    if (!ids.isEmpty()) assertEquals(txs.size(), ids.size());
+    
+    // fetch transaction by id for complete data
+    if (!ids.isEmpty()) {
+      Map<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>> txTypeMap = new HashMap<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>>();
+      for (MoneroTx tx : txs) addTx(txTypeMap, tx);
+      MoneroTxFilter filter = new MoneroTxFilter();
+      filter.setTxIds(ids);
+      filter.setIncoming(false);
+      for (MoneroTx tx : getTxs(filter)) {  // TODO: this will fetch all transfers across all accounts; should fetch per account swept from
+        addTx(txTypeMap, tx);
+      }
+    }
+    
     return txs;
   }
 
@@ -970,5 +996,39 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       subaddressIndices.add(((BigInteger) address.get("address_index")).intValue());
     }
     return subaddressIndices;
+  }
+  
+  @SuppressWarnings("unchecked")
+  private static List<MoneroTx> txListMapToTxs(Map<String, Object> txListMap, int accountIdx, MoneroTxType type) {
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    List<String> ids = (List<String>) txListMap.get("tx_hash_list");
+    List<String> keys = (List<String>) txListMap.get("tx_key_list");
+    List<String> blobs = (List<String>) txListMap.get("tx_blob_list");
+    List<String> metadatas = (List<String>) txListMap.get("tx_metadata_list");
+    List<BigInteger> fees = (List<BigInteger>) txListMap.get("fee_list");
+    List<BigInteger> amounts = (List<BigInteger>) txListMap.get("amount_list");
+    //String multisigTxSet = (String) resultMap.get("multisig_txset");  // TODO: what to do with this?
+    int numTxs = ids.size();
+    assertEquals(numTxs, keys.size());
+    assertEquals(numTxs, blobs.size());
+    assertEquals(numTxs, metadatas.size());
+    assertEquals(numTxs, fees.size());
+    assertEquals(numTxs, amounts.size());
+    assertEquals(numTxs, metadatas.size());
+    for (int i = 0; i < numTxs; i++) {
+      MoneroTx tx = new MoneroTx();
+      txs.add(tx);
+      tx.setId(ids.get(i));
+      tx.setKey(keys.get(i));
+      tx.setBlob(blobs.get(i));
+      tx.setMetadata(metadatas.get(i));
+      tx.setFee(fees.get(i));
+      tx.setAmount(amounts.get(i));
+      tx.setAccountIndex(accountIdx);
+      tx.setType(type);
+      //tx.setAccountIndex(config.getAccountIndex() == null ? 0 : config.getAccountIndex()); // TODO: test failure because commented out
+      tx.setSubaddressIndex(0); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
+    }
+    return txs;
   }
 }

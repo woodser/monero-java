@@ -101,17 +101,22 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   
   @Override
   public List<MoneroTx> sweepWallet(String address) {
-    throw new RuntimeException("Not implemented");
+    return sweepAll(new MoneroTxConfig(address, null, null));
   }
   
   @Override
   public List<MoneroTx> sweepAccount(String address, int accountIdx) {
-    throw new RuntimeException("Not implemented");
+    MoneroTxConfig config = new MoneroTxConfig(address, null, null);
+    config.setAccountIndex(accountIdx);
+    return sweepAll(config);
   }
   
   @Override
   public List<MoneroTx> sweepSubaddress(String address, int accountIdx, int subaddressIdx) {
-    throw new RuntimeException("Not implemented");
+    MoneroTxConfig config = new MoneroTxConfig(address, null, null);
+    config.setAccountIndex(accountIdx);
+    config.setSubaddressIndices(Arrays.asList(subaddressIdx));
+    return sweepAll(config);
   }
   
   @Override
