@@ -14,6 +14,8 @@ public class MoneroPayment {
   private MoneroTx transaction;
   private String address;
   private BigInteger amount;
+  private Integer accountIdx;
+  private Integer subaddressIdx;
   
   public MoneroPayment() {
     super();
@@ -28,6 +30,22 @@ public class MoneroPayment {
     this.transaction = transaction;
     this.address = address;
     this.amount = amount;
+  }
+
+  public Integer getAccountIdx() {
+    return accountIdx;
+  }
+
+  public void setAccountIdx(Integer accountIdx) {
+    this.accountIdx = accountIdx;
+  }
+
+  public Integer getSubaddressIdx() {
+    return subaddressIdx;
+  }
+
+  public void setSubaddressIdx(Integer subaddressIdx) {
+    this.subaddressIdx = subaddressIdx;
   }
 
   public MoneroTx getTransaction() {
@@ -58,8 +76,11 @@ public class MoneroPayment {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
+    result = prime * result + ((accountIdx == null) ? 0 : accountIdx.hashCode());
     result = prime * result + ((address == null) ? 0 : address.hashCode());
     result = prime * result + ((amount == null) ? 0 : amount.hashCode());
+    result = prime * result + ((subaddressIdx == null) ? 0 : subaddressIdx.hashCode());
+    result = prime * result + ((transaction == null) ? 0 : transaction.hashCode());
     return result;
   }
 
@@ -69,12 +90,21 @@ public class MoneroPayment {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroPayment other = (MoneroPayment) obj;
+    if (accountIdx == null) {
+      if (other.accountIdx != null) return false;
+    } else if (!accountIdx.equals(other.accountIdx)) return false;
     if (address == null) {
       if (other.address != null) return false;
     } else if (!address.equals(other.address)) return false;
     if (amount == null) {
       if (other.amount != null) return false;
     } else if (!amount.equals(other.amount)) return false;
+    if (subaddressIdx == null) {
+      if (other.subaddressIdx != null) return false;
+    } else if (!subaddressIdx.equals(other.subaddressIdx)) return false;
+    if (transaction == null) {
+      if (other.transaction != null) return false;
+    } else if (!transaction.equals(other.transaction)) return false;
     return true;
   }
 }
