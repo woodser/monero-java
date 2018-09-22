@@ -1,5 +1,9 @@
 package utils;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTxFilter;
@@ -12,11 +16,17 @@ public class PrintTransactions {
   public static void main(String[] args) {
     MoneroWallet wallet = TestUtils.getWallet();
     MoneroTxFilter filter = new MoneroTxFilter();
-    //filter.setTxIds(Arrays.asList("c5ae93ceb9751734dc361bbeb0aba8a7a18b7d383e6c4f26713319d312a7f34c"));
-    //filter.setAccountIdx(1);
-    //filter.setAccountIdx(1);
-    for (MoneroTx tx : wallet.getTxs(filter)) {
+    //filter.setTxIds(Arrays.asList("0b93b598552f843e6ada0e2dc0dd9f8ed47d1228f0092d8728c8b8c30c1bf5d5"));
+    filter.setIncoming(false);
+    //filter.setAccountIndex(1);
+    Set<String> ids = new HashSet<String>();
+    List<MoneroTx> txs = wallet.getTxs(filter);
+    for (MoneroTx tx : txs) {
+      ids.add(tx.getId());
       System.out.println(tx);
     }
+    
+    System.out.println(ids.size());
+    System.out.println(txs.size());
   }
 }

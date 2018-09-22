@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -35,6 +36,7 @@ import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTx.MoneroTxType;
 import monero.wallet.model.MoneroTxFilter;
 import monero.wallet.model.MoneroUri;
+import utils.PrintBalances;
 import utils.TestUtils;
 
 /**
@@ -49,6 +51,11 @@ public class TestMoneroWalletRead {
   @Before
   public void setup() throws Exception {
     wallet = TestUtils.getWallet();
+  }
+  
+  @After
+  public void teardown() {
+    PrintBalances.printBalances();
   }
 
   @Test

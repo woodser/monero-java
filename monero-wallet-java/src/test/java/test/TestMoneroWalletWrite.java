@@ -295,7 +295,7 @@ public class TestMoneroWalletWrite {
       assertNotNull(tx.getSubaddressIndex());
       assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
       if (Math.abs(sendAmount.subtract(tx.getAmount()).longValue()) >= TOTAL_ADDRESSES) { // send amounts may be slightly different
-        fail("Tx amounts are too different: " + sendAmount + " - " + tx.getAmount() + " = " + sendAmount.subtract(tx.getAmount()));
+        fail("Tx amounts are too different: " + sendAmount + " - " + tx.getAmount() + " = " + sendAmount.subtract(tx.getAmount())); // TODO: this assumes entire balance happened in one transaction
       }
       assertEquals(TOTAL_ADDRESSES, tx.getPayments().size());
       assertEquals(payments.size(), tx.getPayments().size());

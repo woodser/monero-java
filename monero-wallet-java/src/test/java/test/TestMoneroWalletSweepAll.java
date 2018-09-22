@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,6 +21,7 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
+import utils.PrintBalances;
 import utils.TestUtils;
 
 /**
@@ -33,6 +35,11 @@ public class TestMoneroWalletSweepAll {
   @Before
   public void setup() throws Exception {
     wallet = TestUtils.getWallet();
+  }
+  
+  @After
+  public void teardown() {
+    PrintBalances.printBalances();
   }
   
   @Test
@@ -59,11 +66,20 @@ public class TestMoneroWalletSweepAll {
       MoneroAccount unlockedAccount = unlockedAccounts.get(i);
       List<MoneroTx> txs = wallet.sweepAccount(wallet.getPrimaryAddress(), unlockedAccount.getIndex());
       
+      System.out.println("BEFORE");
+      for (MoneroTx tx : txs) {
+        System.out.println(tx);
+      }
+      
       // test transactions
       assertFalse(txs.isEmpty());
       for (MoneroTx tx : txs) {
+        if (tx.getKey() == null) {
+          System.out.println("key is null");
+          System.out.println(tx);
+        }
         if (tx.getPayments() == null) {
-          System.out.println("boom");
+          System.out.println("payments is null");
           System.out.println(tx);
         }
         TestUtils.testTx(tx);
