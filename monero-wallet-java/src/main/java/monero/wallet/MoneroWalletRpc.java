@@ -496,12 +496,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // fetch transaction by id for complete data
     if (!ids.isEmpty()) {
+      System.out.println("Fetching by id...");
+      System.out.println(ids);
       Map<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>> txTypeMap = new HashMap<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>>();
       for (MoneroTx tx : txs) addTx(txTypeMap, tx);
       MoneroTxFilter filter = new MoneroTxFilter();
       filter.setTxIds(ids);
       filter.setIncoming(false);
       for (MoneroTx tx : getTxs(filter)) {  // TODO: this will fetch all transfers across all accounts; should fetch per account swept from
+        if (tx.getId().equals("20e297b0c4fce3643ff9b29637679f6a5ed88246803f3d9ddca2d8191188bbf7")) {
+          System.out.println("Merging...");
+          System.out.println(tx);
+        }
         addTx(txTypeMap, tx);
       }
     }
