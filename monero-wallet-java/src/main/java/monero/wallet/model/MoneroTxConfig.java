@@ -49,7 +49,7 @@ public class MoneroTxConfig {
    */
   public MoneroTxConfig(String address, String paymentId, BigInteger amount, Integer mixin) {
     destinations = new ArrayList<MoneroPayment>();
-    destinations.add(new MoneroPayment(address, amount));
+    destinations.add(new MoneroPayment(null, address, amount));
     this.paymentId = paymentId;
     this.mixin = mixin;
   }
