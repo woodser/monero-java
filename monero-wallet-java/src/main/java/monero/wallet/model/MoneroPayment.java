@@ -6,8 +6,6 @@ import java.math.BigInteger;
  * Represents a payment on the Monero network to an address.
  * 
  * A transaction may have one or more payments.
- * 
- * Each payment may be fulfilled by multiple transaction outputs.
  */
 public class MoneroPayment {
 
@@ -16,6 +14,7 @@ public class MoneroPayment {
   private BigInteger amount;
   private Integer accountIdx;
   private Integer subaddressIdx;
+  private Boolean isSpent;
   
   public MoneroPayment() {
     super();
@@ -77,6 +76,14 @@ public class MoneroPayment {
     this.amount = amount;
   }
 
+  public Boolean getIsSpent() {
+    return isSpent;
+  }
+
+  public void setIsSpent(Boolean isSpent) {
+    this.isSpent = isSpent;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -84,6 +91,7 @@ public class MoneroPayment {
     result = prime * result + ((accountIdx == null) ? 0 : accountIdx.hashCode());
     result = prime * result + ((address == null) ? 0 : address.hashCode());
     result = prime * result + ((amount == null) ? 0 : amount.hashCode());
+    result = prime * result + ((isSpent == null) ? 0 : isSpent.hashCode());
     result = prime * result + ((subaddressIdx == null) ? 0 : subaddressIdx.hashCode());
     result = prime * result + ((tx == null) ? 0 : tx.hashCode());
     return result;
@@ -104,6 +112,9 @@ public class MoneroPayment {
     if (amount == null) {
       if (other.amount != null) return false;
     } else if (!amount.equals(other.amount)) return false;
+    if (isSpent == null) {
+      if (other.isSpent != null) return false;
+    } else if (!isSpent.equals(other.isSpent)) return false;
     if (subaddressIdx == null) {
       if (other.subaddressIdx != null) return false;
     } else if (!subaddressIdx.equals(other.subaddressIdx)) return false;
