@@ -39,6 +39,7 @@ public class MoneroTx {
   private String srcAddress;
   private Integer srcAccountIdx;
   private Integer srcSubaddressIdx; // TODO (monero-wallet-rpc): transactions may originate from multiple subaddresses but querying only provides subaddress 0
+  private Integer totalAmount;
 	private List<MoneroPayment> payments;
 	private String paymentId;
 	private BigInteger fee;
@@ -88,6 +89,14 @@ public class MoneroTx {
 
   public void setSrcSubaddressIdx(Integer srcSubaddressIdx) {
     this.srcSubaddressIdx = srcSubaddressIdx;
+  }
+
+  public Integer getTotalAmount() {
+    return totalAmount;
+  }
+
+  public void setTotalAmount(Integer totalAmount) {
+    this.totalAmount = totalAmount;
   }
 
   public List<MoneroPayment> getPayments() {
@@ -214,6 +223,7 @@ public class MoneroTx {
    * 
    * @param tx is the transaction to merge into this one
    */
+  @SuppressWarnings("unused")
   public void merge(MoneroTx tx) {
     if (id == null) id = tx.getId();
     else if (tx.getId() != null) validateEquals("IDs", id, tx.getId());
@@ -223,6 +233,9 @@ public class MoneroTx {
     else if (tx.getSrcAccountIdx() != null) validateEquals("Account indices", srcAccountIdx, tx.getSrcAccountIdx());
     if (srcSubaddressIdx == null) srcSubaddressIdx = tx.getSrcSubaddressIdx();
     else if (tx.getSrcSubaddressIdx() != null) validateEquals("Subaddress indices", srcSubaddressIdx, tx.getSrcSubaddressIdx());
+    if (totalAmount == null) totalAmount = tx.getSrcSubaddressIdx();
+    else if (tx.getTotalAmount() != null) validateEquals("Total amounts", totalAmount, tx.getTotalAmount());  // TODO: total amount must be cumulative
+    if (true) throw new RuntimeException("... cool ... total amount must be cumulative");
     if (payments == null) payments = tx.getPayments();
     else if (tx.getPayments() != null) payments.addAll(tx.getPayments());
     if (paymentId == null) paymentId = tx.getPaymentId();
@@ -263,7 +276,7 @@ public class MoneroTx {
     sb.append("Source address: " + srcAddress + "\n");
     sb.append("Source account index: " + srcAccountIdx + "\n");
     sb.append("Source subaddress index: " + srcSubaddressIdx + "\n");
-    sb.append("Key: " + key + "\n");
+    sb.append("Total amount: " + totalAmount + "\n");
     if (payments != null) {
       sb.append("Payments:\n");
       for (int i = 0; i < payments.size(); i++) {
@@ -272,6 +285,7 @@ public class MoneroTx {
         sb.append("\t\tAmount: " + payments.get(i).getAmount() + "\n");
         sb.append("\t\tAccount idx: " + payments.get(i).getAccountIdx() + "\n");
         sb.append("\t\tSubaddress idx: " + payments.get(i).getSubaddressIdx() + "\n");
+        sb.append("\t\tIs spent idx: " + payments.get(i).getIsSpent() + "\n");
       }
     } else {
       sb.append("Payments: null\n");
@@ -286,6 +300,7 @@ public class MoneroTx {
     sb.append("Timestamp: " + timestamp + "\n");
     sb.append("Unlock time: " + unlockTime + "\n");
     sb.append("Is double spend: " + isDoubleSpend + "\n");
+    sb.append("Key: " + key + "\n");
     sb.append("Blob: " + blob + "\n");
     sb.append("Metadata: " + metadata + "\n");
     return sb.toString();
@@ -311,6 +326,7 @@ public class MoneroTx {
     result = prime * result + ((srcAddress == null) ? 0 : srcAddress.hashCode());
     result = prime * result + ((srcSubaddressIdx == null) ? 0 : srcSubaddressIdx.hashCode());
     result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
+    result = prime * result + ((totalAmount == null) ? 0 : totalAmount.hashCode());
     result = prime * result + ((type == null) ? 0 : type.hashCode());
     result = prime * result + ((unlockTime == null) ? 0 : unlockTime.hashCode());
     return result;
@@ -370,6 +386,9 @@ public class MoneroTx {
     if (timestamp == null) {
       if (other.timestamp != null) return false;
     } else if (!timestamp.equals(other.timestamp)) return false;
+    if (totalAmount == null) {
+      if (other.totalAmount != null) return false;
+    } else if (!totalAmount.equals(other.totalAmount)) return false;
     if (type != other.type) return false;
     if (unlockTime == null) {
       if (other.unlockTime != null) return false;
