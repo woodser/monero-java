@@ -30,7 +30,6 @@ import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroException;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImage;
-import monero.wallet.model.MoneroOutput;
 import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
@@ -354,14 +353,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
     MoneroTx tx = txMapToTx(txMap);
-    tx.setAmount((BigInteger) txMap.get("amount"));
-    tx.setPayments(config.getDestinations());
+    tx.setSrcAccountIdx(config.getAccountIndex() == null ? 0 : config.getAccountIndex());
+    tx.setSrcSubaddressIdx(0); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
+    tx.setPayments(config.getDestinations()); // TODO: test that txMap.get("amount") == sum of payments
     tx.setMixin(config.getMixin());
     tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
     tx.setType(MoneroTxType.OUTGOING);
     tx.setIsDoubleSpend(false);
-    tx.setAccountIndex(config.getAccountIndex() == null ? 0 : config.getAccountIndex());
-    tx.setSubaddressIndex(0); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
     return tx;
   }
 

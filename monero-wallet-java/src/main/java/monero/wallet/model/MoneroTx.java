@@ -40,7 +40,6 @@ public class MoneroTx {
   private Integer srcAccountIdx;
   private Integer srcSubaddressIdx; // TODO (monero-wallet-rpc): transactions may originate from multiple subaddresses but querying only provides subaddress 0
 	private List<MoneroPayment> payments;
-	private List<MoneroOutput> outputs;
 	private String paymentId;
 	private BigInteger fee;
 	private Integer mixin;
@@ -100,19 +99,6 @@ public class MoneroTx {
     if (payments != null) {
       for (MoneroPayment payment : payments) {
         payment.setTx(this);
-      }
-    }
-  }
-  
-  public List<MoneroOutput> getOutputs() {
-    return outputs;
-  }
-
-  public void setOutputs(List<MoneroOutput> outputs) {
-    this.outputs = outputs;
-    if (outputs != null) {
-      for (MoneroOutput output : outputs) {
-        output.setTransaction(this);
       }
     }
   }
@@ -239,8 +225,6 @@ public class MoneroTx {
     else if (tx.getSrcSubaddressIdx() != null) validateEquals("Subaddress indices", srcSubaddressIdx, tx.getSrcSubaddressIdx());
     if (payments == null) payments = tx.getPayments();
     else if (tx.getPayments() != null) payments.addAll(tx.getPayments());
-    if (outputs == null) outputs = tx.getOutputs();
-    else if (tx.getOutputs() != null) outputs.addAll(tx.getOutputs());
     if (paymentId == null) paymentId = tx.getPaymentId();
     else if (tx.getPaymentId() != null) validateEquals("Payment ids", paymentId, tx.getPaymentId());
     if (fee == null) fee = tx.getFee();
@@ -289,14 +273,8 @@ public class MoneroTx {
         sb.append("\t\tAccount idx: " + payments.get(i).getAccountIdx() + "\n");
         sb.append("\t\tSubaddress idx: " + payments.get(i).getSubaddressIdx() + "\n");
       }
-    }
-    if (outputs != null) {
-      sb.append("Outputs:\n");
-      for (int i = 0; i < outputs.size(); i++) {
-        sb.append("\t" + (i + 1) + ":\n");
-        sb.append("\t\tAmount: " + outputs.get(i).getAmount() + "\n");
-        sb.append("\t\tIs spent: " + outputs.get(i).isSpent() + "\n");
-      }
+    } else {
+      sb.append("Payments: null\n");
     }
     sb.append("Payment ID: " + paymentId + "\n");
     sb.append("Fee: " + fee + "\n");
@@ -326,7 +304,6 @@ public class MoneroTx {
     result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
     result = prime * result + ((mixin == null) ? 0 : mixin.hashCode());
     result = prime * result + ((note == null) ? 0 : note.hashCode());
-    result = prime * result + ((outputs == null) ? 0 : outputs.hashCode());
     result = prime * result + ((paymentId == null) ? 0 : paymentId.hashCode());
     result = prime * result + ((payments == null) ? 0 : payments.hashCode());
     result = prime * result + ((size == null) ? 0 : size.hashCode());
@@ -372,9 +349,6 @@ public class MoneroTx {
     if (note == null) {
       if (other.note != null) return false;
     } else if (!note.equals(other.note)) return false;
-    if (outputs == null) {
-      if (other.outputs != null) return false;
-    } else if (!outputs.equals(other.outputs)) return false;
     if (paymentId == null) {
       if (other.paymentId != null) return false;
     } else if (!paymentId.equals(other.paymentId)) return false;
