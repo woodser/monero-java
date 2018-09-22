@@ -31,6 +31,7 @@ import monero.wallet.model.MoneroException;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImage;
 import monero.wallet.model.MoneroOutput;
+import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTx.MoneroTxType;
@@ -299,7 +300,7 @@ public class TestMoneroWalletRead {
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       TestUtils.testTx(tx);
-      if (tx.getAccountIndex() != null && tx.getAccountIndex() != 0 && tx.getSubaddressIndex() != null && tx.getSubaddressIndex() != 0) {
+      if (tx.getSrcAccountIdx() != null && tx.getSrcAccountIdx() != 0 && tx.getSrcSubaddressIdx() != null && tx.getSrcSubaddressIdx() != 0) {
         nonDefaultSubaddressFound = true;
       }
     }
@@ -313,8 +314,15 @@ public class TestMoneroWalletRead {
       List<MoneroTx> txs = wallet.getTxs(account.getIndex());
       for (MoneroTx tx : txs) {
         TestUtils.testTx(tx);
-        assertEquals(account.getIndex(), tx.getAccountIndex());
-        if (account.getIndex() != 0 && tx.getSubaddressIndex() != 0) nonDefaultSubaddressFound = true;
+        if (tx.getType() == MoneroTxType.OUTGOING) {
+          assertEquals(account.getIndex(), tx.getSrcAccountIdx());
+          if (tx.getSrcAccountIdx() != 0 && tx.getSrcSubaddressIdx() != 0 && tx.getSrcSubaddressIdx() != null && tx.getSrcSubaddressIdx() != 0) nonDefaultSubaddressFound = true;
+        } else if (tx.getType() == MoneroTxType.INCOMING) {
+          for (MoneroPayment payment : tx.getPayments()) {
+            assertEquals(account.getIndex(), payment.getAccountIdx());
+            if (payment.getAccountIdx() != 0 && payment.getAccountIdx() != 0 && payment.getSubaddressIdx() != null && payment.getSubaddressIdx() != 0) nonDefaultSubaddressFound = true;
+          }
+        }
       }
     }
     assertTrue("No transactions found in non-default account and subaddress; run testSendMultiple() first", nonDefaultSubaddressFound);
@@ -323,16 +331,24 @@ public class TestMoneroWalletRead {
   @Test
   public void testGetTxsSubaddress() {
     boolean nonDefaultSubaddressFound = false;
-    for (MoneroAccount account : wallet.getAccounts()) {
-      for (MoneroSubaddress subaddress : wallet.getSubaddresses(account.getIndex())) {
+    for (MoneroAccount account : wallet.getAccounts(true)) {
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         for (MoneroTx tx : wallet.getTxs(account.getIndex(), subaddress.getIndex())) {
           TestUtils.testTx(tx);
-          assertEquals(account.getIndex(), tx.getAccountIndex());
-          //assertEquals(subaddress.getIndex(), tx.getSubaddressIndex());
-          if (subaddress.getIndex() != tx.getSubaddressIndex()) {
-            LOGGER.warn("Tx subaddress index does not match queried subaddress index because monero-wallet-rpc outgoing transactions do not indicate originating subaddresses");
+          if (tx.getType() == MoneroTxType.OUTGOING) {
+            assertEquals(account.getIndex(), tx.getSrcAccountIdx());
+            assertEquals(subaddress.getIndex(), tx.getSrcSubaddressIdx());  // TODO: this should fail so use warning below
+//            if (subaddress.getIndex() != tx.getSrcSubaddressIdx())  {
+//              LOGGER.warn("Tx subaddress index does not match queried subaddress index because monero-wallet-rpc outgoing transactions do not indicate originating subaddresses");
+//            }
+            if (tx.getSrcAccountIdx() != 0 && tx.getSrcSubaddressIdx() != 0 && tx.getSrcSubaddressIdx() != null && tx.getSrcSubaddressIdx() != 0) nonDefaultSubaddressFound = true;
+          } else if (tx.getType() == MoneroTxType.INCOMING) {
+            for (MoneroPayment payment : tx.getPayments()) {
+              assertEquals(account.getIndex(), payment.getAccountIdx());
+              assertEquals(subaddress.getIndex(), payment.getSubaddressIdx());
+              if (payment.getAccountIdx() != 0 && payment.getAccountIdx() != 0 && payment.getSubaddressIdx() != null && payment.getSubaddressIdx() != 0) nonDefaultSubaddressFound = true;
+            }
           }
-          if (account.getIndex() != 0 && tx.getSubaddressIndex() != 0) nonDefaultSubaddressFound = true;
         }
       }
     }
