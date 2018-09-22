@@ -15,6 +15,7 @@ import org.apache.log4j.PropertyConfigurator;
 import monero.daemon.MoneroDaemon;
 import monero.daemon.MoneroDaemonRpc;
 import monero.rpc.MoneroRpc;
+import monero.rpc.MoneroRpcException;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
@@ -81,19 +82,19 @@ public class TestUtils {
         throw new RuntimeException(e1);
       }
       
-//      // create test wallet if necessary
-//      try {
-//        wallet.createWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW, "English");
-//      } catch (MoneroRpcException e) {
-//        assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
-//      }
-//      
-//      // open test wallet
-//      wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
+      // create test wallet if necessary
+      try {
+        wallet.createWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW, "English");
+      } catch (MoneroRpcException e) {
+        assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
+      }
+      
+      // open test wallet
+      wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
       
       // refresh wallet
-//      wallet.rescanSpent();
-//      wallet.rescanBlockchain();
+      wallet.rescanSpent();
+      wallet.rescanBlockchain();
     }
     return wallet;
   }

@@ -22,6 +22,7 @@ public class MoneroTxConfig {
   private MoneroTxPriority priority;
   private Boolean doNotRelay;
   private BigInteger belowAmount;
+  private Boolean sweepEachSubaddress;
   
   public MoneroTxConfig() {
     super();
@@ -145,5 +146,23 @@ public class MoneroTxConfig {
 
   public void setBelowAmount(BigInteger belowAmount) {
     this.belowAmount = belowAmount;
+  }
+
+  /**
+   * Indicates if each subaddress will be swept individually (if applicable).
+   * 
+   * @return true if each subaddress will be swept individually, false if all subaddresses swept together, null if not defined
+   */
+  public Boolean getSweepEachSubaddress() {
+    return sweepEachSubaddress;
+  }
+  
+  /**
+   * Specifies if each subaddress in an account should be swept individually or together (if applicable).
+   * 
+   * @param sweepEachSubaddress specifies if each subaddress should be swept individually or together
+   */
+  public void setSweepEachSubaddress(Boolean sweepEachSubaddress) {
+    this.sweepEachSubaddress = sweepEachSubaddress;
   }
 }
