@@ -285,7 +285,7 @@ public class MoneroTx {
         sb.append("\t\tAmount: " + payments.get(i).getAmount() + "\n");
         sb.append("\t\tAccount idx: " + payments.get(i).getAccountIdx() + "\n");
         sb.append("\t\tSubaddress idx: " + payments.get(i).getSubaddressIdx() + "\n");
-        sb.append("\t\tIs spent idx: " + payments.get(i).getIsSpent() + "\n");
+        sb.append("\t\tIs spent: " + payments.get(i).getIsSpent() + "\n");
       }
     } else {
       sb.append("Payments: null\n");
