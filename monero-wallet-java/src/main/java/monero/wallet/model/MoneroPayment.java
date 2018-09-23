@@ -2,6 +2,7 @@ package monero.wallet.model;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 
@@ -103,7 +104,16 @@ public class MoneroPayment {
     if (address == null) address = payment.getAddress();
     else if (payment.getAddress() != null) assertEquals("Address", address, payment.getAddress());
     if (amount == null) amount = payment.getAmount();
-    else if (payment.getAmount() != null) assertEquals("Amounts", amount, payment.getAmount());
+    else if (payment.getAmount() != null) {
+      if (amount.compareTo(payment.getAmount()) != 0) {
+        System.out.println("boom");
+        System.out.println(amount);
+        System.out.println(payment.getAmount());
+        System.out.println(tx);
+        System.out.println(payment.getTx());
+      }
+      assertTrue("Amounts", amount.compareTo(payment.getAmount()) == 0);
+    }
     if (accountIdx == null) accountIdx = payment.getAccountIdx();
     else if (payment.getAccountIdx() != null) assertEquals("Account indices", accountIdx, payment.getAccountIdx());
     if (subaddressIdx == null) subaddressIdx = payment.getSubaddressIdx();
