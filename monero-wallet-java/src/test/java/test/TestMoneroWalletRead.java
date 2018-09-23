@@ -30,7 +30,6 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroException;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImage;
-import monero.wallet.model.MoneroOutput;
 import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
@@ -396,7 +395,7 @@ public class TestMoneroWalletRead {
       assertEquals(MoneroTxType.OUTGOING, tx.getType());
     }
     
-    // test balance equals spendable outputs for each account
+    // test balance equals spendable payments for each account
     for (MoneroAccount account : wallet.getAccounts()) {
       MoneroTxFilter filter = new MoneroTxFilter();
       filter.setAccountIndex(account.getIndex());
@@ -404,10 +403,11 @@ public class TestMoneroWalletRead {
       if (account.getIndex() == 0) assertFalse(txs.isEmpty());
       BigInteger balance = BigInteger.valueOf(0);
       for (MoneroTx tx : txs) {
-        if (tx.getOutputs() == null) continue;
-        for (MoneroOutput output : tx.getOutputs()) {
-          if (!output.isSpent()) {
-            balance = balance.add(output.getAmount());
+        if (tx.getType() == MoneroTxType.INCOMING) {
+          for (MoneroPayment payment : tx.getPayments()) {
+            if (!payment.getIsSpent()) {
+              balance = balance.add(payment.getAmount());
+            }
           }
         }
       }
@@ -463,10 +463,11 @@ public class TestMoneroWalletRead {
         // test that tx amounts add up to subaddress balance
         BigInteger balance = BigInteger.valueOf(0);
         for (MoneroTx tx : txs) {
-          if (tx.getOutputs() == null) continue;
-          for (MoneroOutput output : tx.getOutputs()) {
-            if (!output.isSpent()) {
-              balance = balance.add(output.getAmount());
+          if (tx.getType() == MoneroTxType.INCOMING) {
+            for (MoneroPayment payment : tx.getPayments()) {
+              if (!payment.getIsSpent()) {
+                balance = balance.add(payment.getAmount());
+              }
             }
           }
         }
