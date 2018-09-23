@@ -1027,7 +1027,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     assertNotNull(tx.getType());
     MoneroTx mergedTx = null;
     for (MoneroTx aTx : txs) {
-      if (aTx.getId() == tx.getId() && aTx.getType() == tx.getType()) {
+      if (aTx.getId().equals(tx.getId()) && aTx.getType() == tx.getType()) {
         assertFalse("Should not have outgoing txs with duplicate ids", MoneroUtils.isOutgoing(tx.getType()));
         aTx.merge(tx);
         mergedTx = aTx;
