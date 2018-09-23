@@ -385,6 +385,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (txMaps == null) return new ArrayList<MoneroTx>();
         for (Map<String, Object> txMap : txMaps) {
           MoneroTx tx = txMapToTx(txMap, MoneroTxType.INCOMING);
+          tx.getPayments().get(0).setAccountIdx(accountIdx);
           addTx(txs, tx);
         }
       }

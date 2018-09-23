@@ -1,8 +1,13 @@
 
 package monero.wallet.model;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
 import java.math.BigInteger;
 import java.util.List;
+
+import monero.utils.MoneroUtils;
 
 /**
  * Represents a transaction on the Monero network.
@@ -224,51 +229,53 @@ public class MoneroTx {
    * @param tx is the transaction to merge into this one
    */
   public void merge(MoneroTx tx) {
+    assertFalse("Only incoming transactions can be merged", MoneroUtils.isOutgoing(tx.getType()));
     if (id == null) id = tx.getId();
-    else if (tx.getId() != null) validateEquals("IDs", id, tx.getId());
+    else if (tx.getId() != null) assertEquals("IDs", id, tx.getId());
     if (srcAddress == null) srcAddress = tx.getSrcAddress();
-    else if (tx.getSrcAddress() != null) validateEquals("Addresses", srcAddress, tx.getSrcAddress());
+    else if (tx.getSrcAddress() != null) assertEquals("Addresses", srcAddress, tx.getSrcAddress());
     if (srcAccountIdx == null) srcAccountIdx = tx.getSrcAccountIdx();
-    else if (tx.getSrcAccountIdx() != null) validateEquals("Account indices", srcAccountIdx, tx.getSrcAccountIdx());
+    else if (tx.getSrcAccountIdx() != null) assertEquals("Account indices", srcAccountIdx, tx.getSrcAccountIdx());
     if (srcSubaddressIdx == null) srcSubaddressIdx = tx.getSrcSubaddressIdx();
-    else if (tx.getSrcSubaddressIdx() != null) validateEquals("Subaddress indices", srcSubaddressIdx, tx.getSrcSubaddressIdx());
+    else if (tx.getSrcSubaddressIdx() != null) assertEquals("Subaddress indices", srcSubaddressIdx, tx.getSrcSubaddressIdx());
     if (totalAmount == null) totalAmount = tx.getTotalAmount();
     else if (tx.getTotalAmount() != null) totalAmount = totalAmount.add(tx.getTotalAmount());
     if (payments == null) payments = tx.getPayments();
     else if (tx.getPayments() != null) {
-      throw new RuntimeException("Payments need to be merged like a biotch");
-//      payments.addAll(tx.getPayments());
+      for (MoneroPayment paymentA : payments) {
+        for (MoneroPayment paymentB : tx.getPayments()) {
+          if (paymentA.getAccountIdx() == paymentB.getAccountIdx() && paymentA.getSubaddressIdx() == paymentB.getSubaddressIdx()) {
+            paymentA.merge(paymentB);
+          }
+        }
+      }
     }
     if (paymentId == null) paymentId = tx.getPaymentId();
-    else if (tx.getPaymentId() != null) validateEquals("Payment ids", paymentId, tx.getPaymentId());
+    else if (tx.getPaymentId() != null) assertEquals("Payment ids", paymentId, tx.getPaymentId());
     if (fee == null) fee = tx.getFee();
-    else if (tx.getFee() != null) validateEquals("Fees", fee, tx.getFee());
+    else if (tx.getFee() != null) assertEquals("Fees", fee, tx.getFee());
     if (mixin == null) mixin = tx.getMixin();
-    else if (tx.getMixin() != null) validateEquals("Mixins", mixin, tx.getMixin());
+    else if (tx.getMixin() != null) assertEquals("Mixins", mixin, tx.getMixin());
     if (key == null) key = tx.getKey();
-    else if (tx.getKey() != null) validateEquals("Keys", key, tx.getKey());
+    else if (tx.getKey() != null) assertEquals("Keys", key, tx.getKey());
     if (size == null) size = tx.getSize();
-    else if (tx.getSize() != null) validateEquals("Sizes", size, tx.getSize());
+    else if (tx.getSize() != null) assertEquals("Sizes", size, tx.getSize());
     if (type == null) type = tx.getType();
-    else if (tx.getType() != null) validateEquals("Types", type, tx.getType());
+    else if (tx.getType() != null) assertEquals("Types", type, tx.getType());
     if (height == null) height = tx.getHeight();
-    else if (tx.getHeight() != null) validateEquals("Heights", height, tx.getHeight());
+    else if (tx.getHeight() != null) assertEquals("Heights", height, tx.getHeight());
     if (note == null) note = tx.getNote();
-    else if (tx.getNote() != null) validateEquals("Notes", note, tx.getNote());
+    else if (tx.getNote() != null) assertEquals("Notes", note, tx.getNote());
     if (timestamp == null) timestamp = tx.getTimestamp();
-    else if (tx.getTimestamp() != null) validateEquals("Timestamps", timestamp, tx.getTimestamp());
+    else if (tx.getTimestamp() != null) assertEquals("Timestamps", timestamp, tx.getTimestamp());
     if (unlockTime == null) unlockTime = tx.getUnlockTime();
-    else if (tx.getUnlockTime() != null) validateEquals("Unlock times", unlockTime, tx.getUnlockTime());
+    else if (tx.getUnlockTime() != null) assertEquals(unlockTime, tx.getUnlockTime());
     if (isDoubleSpend == null) isDoubleSpend = tx.getIsDoubleSpend();
-    else if (tx.getIsDoubleSpend() != null) validateEquals("Is double spend", isDoubleSpend, tx.getIsDoubleSpend());
+    else if (tx.getIsDoubleSpend() != null) assertEquals(isDoubleSpend, tx.getIsDoubleSpend());
     if (blob == null) blob = tx.getBlob();
-    else if (tx.getBlob() != null) validateEquals("Blobs", blob, tx.getBlob());
+    else if (tx.getBlob() != null) assertEquals(blob, tx.getBlob());
     if (metadata == null) metadata = tx.getMetadata();
-    else if (tx.getMetadata() != null) validateEquals("Metadatas", metadata, tx.getMetadata());
-  }
-  
-  private static void validateEquals(String fieldName, Object obj1, Object obj2) {
-    if (!obj1.equals(obj2)) throw new MoneroException(fieldName + " are not equal: " + obj1 + " vs " + obj2);
+    else if (tx.getMetadata() != null) assertEquals(metadata, tx.getMetadata());
   }
   
   public String toString() {
