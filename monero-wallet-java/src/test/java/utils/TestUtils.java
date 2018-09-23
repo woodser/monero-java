@@ -191,7 +191,7 @@ public class TestUtils {
       assertEquals((Integer) 0, tx.getUnlockTime());
       assertNotNull(tx.getIsDoubleSpend());
       assertFalse(tx.getIsDoubleSpend());
-      assertNull(tx.getKey());
+      assertNotNull(tx.getKey());
       assertNull(tx.getBlob());
       assertNull(tx.getMetadata());
       if (tx.getType() == MoneroTxType.INCOMING) {

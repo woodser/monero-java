@@ -331,9 +331,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public List<MoneroTx> getTxs(MoneroTxFilter filter) {
     if (filter == null) filter = new MoneroTxFilter();
     
-    // collect transactions segmented by type, id, account idx, then subaddress idx
-    Map<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>> txTypeMap = new HashMap<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>>();
-    
     // build common params for get_transfers
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("in", filter.isIncoming());
@@ -354,6 +351,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       indices = getAllAccountAndSubaddressIndices();
     }
     
+    // collect unique transactions
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    
     // get transactions using get_transfers
     for (Integer accountIdx : indices.keySet()) {
       params.put("account_index", accountIdx);
@@ -363,7 +363,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       for (String key : result.keySet()) {
         for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
           MoneroTx tx = txMapToTx(txMap);
-          addTx(txTypeMap, tx);
+          addTx(txs, tx);
         }
       }
     }
@@ -381,20 +381,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         Map<String, Object> result = (Map<String, Object>) respMap.get("result");
 
         // interpret incoming_transfers response
-        List<Map<String, Object>> outputMaps = (List<Map<String, Object>>) result.get("transfers");
-        if (outputMaps == null) return new ArrayList<MoneroTx>();
-        for (Map<String, Object> outputMap : outputMaps) {
-          MoneroOutput output = new MoneroOutput();
-          output.setAmount((BigInteger) outputMap.get("amount"));
-          output.setSpent((Boolean) outputMap.get("spent"));
-          MoneroTx tx = txMapToTx(outputMap);
-          tx.setType(MoneroTxType.INCOMING);
-          tx.setAccountIndex(accountIdx);
-          output.setTransaction(tx);
-          List<MoneroOutput> outputs = new ArrayList<MoneroOutput>();
-          outputs.add(output);
-          tx.setOutputs(outputs);
-          addTx(txTypeMap, tx);
+        List<Map<String, Object>> txMaps = (List<Map<String, Object>>) result.get("transfers");
+        if (txMaps == null) return new ArrayList<MoneroTx>();
+        for (Map<String, Object> txMap : txMaps) {
+          MoneroTx tx = txMapToTx(txMap, MoneroTxType.INCOMING);
+          addTx(txs, tx);
         }
       }
       
@@ -424,17 +415,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           // List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
           // payments.add(payment);
           // tx.setPayments(payments);
-          addTx(txTypeMap, tx);
-        }
-      }
-    }
-    
-    // collect all transactions as list
-    List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    for (Map<String, Map<Integer, Map<Integer, MoneroTx>>> idMap : txTypeMap.values()) {
-      for (Map<Integer, Map<Integer, MoneroTx>> accountMap : idMap.values()) {
-        for (Map<Integer, MoneroTx> subaddressMap : accountMap.values()) {
-          txs.addAll(subaddressMap.values());
+          addTx(txs, tx);
         }
       }
     }
@@ -480,6 +461,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
+    asdfasdf
     MoneroTx tx = txMapToTx(txMap, true);
     tx.setSrcAccountIdx(config.getAccountIndex() == null ? 0 : config.getAccountIndex());
     tx.setSrcSubaddressIdx(0); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
@@ -891,28 +873,34 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * Converts a transaction map to a MoneroTx.
    * 
    * @param txMap is the map to create a MoneroTx from
+   * @return MoneroTx is the transaction created from the map
+   */
+  private static MoneroTx txMapToTx(Map<String, Object> txMap) {
+    return txMapToTx(txMap, null);
+  }
+  
+  /**
+   * Converts a transaction map to a MoneroTx.
+   * 
+   * @param txMap is the map to create a MoneroTx from
    * @param isOutgoing specifies if the transaction is outgoing xor incoming (only necessary if type information not available)
    * @return MoneroTx is the transaction created from the map
    */
   @SuppressWarnings("unchecked")
-  private static MoneroTx txMapToTx(Map<String, Object> txMap, Boolean isOutgoing) {
+  private static MoneroTx txMapToTx(Map<String, Object> txMap, MoneroTxType type) {
     
-    // determine if transaction is incoming or outgoing
-    if (isOutgoing == null) {
-      Object type = txMap.get("type");
-      if (type == null) throw new MoneroException("Transaction type is unknown so isOutgoing must be specified:\n" + txMap);
-      MoneroTxType txType = getTxType((String) type);
-      if (txType == MoneroTxType.OUTGOING || txType == MoneroTxType.PENDING || txType == MoneroTxType.FAILED) {
-        isOutgoing = true;
-      } else if (txType == MoneroTxType.INCOMING || txType == MoneroTxType.MEMPOOL) {
-        isOutgoing = false;
-      } else {
-        throw new MoneroException("Unknown transaction type: " + txType);
-      }
+    // determine the type upfront
+    if (type == null) {
+      assertTrue("Transaction type is unknown so type must be specified:\n" + txMap, txMap.containsKey("type"));
+      type = getTxType((String) txMap.get("type"));
     }
+    
+    // determine if the type is outgoing
+    boolean isOutgoing = MoneroUtils.isOutgoing(type);
     
     // build transaction
     MoneroTx tx = new MoneroTx();
+    tx.setType(type);
     MoneroPayment payment = null;
     Integer accountIdx = null;
     Integer subaddressIdx = null;
@@ -927,19 +915,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("tx_hash")) tx.setId((String) val);
       else if (key.equalsIgnoreCase("tx_key")) tx.setKey((String) val);
       else if (key.equalsIgnoreCase("key_image")) tx.setKey((String) val);
-      else if (key.equalsIgnoreCase("type")) tx.setType(getTxType((String) val));
+      else if (key.equalsIgnoreCase("type")) assertEquals(type, getTxType((String) val)); // type already set
       else if (key.equalsIgnoreCase("tx_size")) tx.setSize(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("unlock_time")) tx.setUnlockTime(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("global_index")) { } // ignore
       else if (key.equalsIgnoreCase("tx_blob")) tx.setBlob((String) val);
       else if (key.equalsIgnoreCase("tx_metadata")) tx.setMetadata((String) val);
       else if (key.equalsIgnoreCase("double_spend_seen")) tx.setIsDoubleSpend((Boolean) val);
-      if (key.equals("amount")) {
-        if (isOutgoing) tx.setTotalAmount((BigInteger) val);
-        else {
-          if (payment == null) payment = new MoneroPayment();
-          payment.setAmount((BigInteger) val);
-        }
+      else if (key.equals("amount")) {
+        tx.setTotalAmount((BigInteger) val);
+        if (payment == null) payment = new MoneroPayment();
+        payment.setAmount((BigInteger) val);
       }
       else if (key.equals("address")) {
         if (isOutgoing) tx.setSrcAddress((String) val);
@@ -1034,6 +1020,20 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setType(type);
     }
     return txs;
+  }
+  
+  private static void addTx(Collection<MoneroTx> txs, MoneroTx tx) {
+    assertNotNull(tx.getId());
+    assertNotNull(tx.getType());
+    MoneroTx mergedTx = null;
+    for (MoneroTx aTx : txs) {
+      if (aTx.getId() == tx.getId() && aTx.getType() == tx.getType()) {
+        assertFalse("Should not have outgoing txs with duplicate ids", MoneroUtils.isOutgoing(tx.getType()));
+        aTx.merge(tx);
+        mergedTx = aTx;
+      }
+    }
+    if (mergedTx == null) txs.add(tx);  // add tx if it wasn't merged
   }
   
   /**
