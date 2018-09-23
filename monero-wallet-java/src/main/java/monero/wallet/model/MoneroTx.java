@@ -242,6 +242,7 @@ public class MoneroTx {
     else if (tx.getTotalAmount() != null) totalAmount = totalAmount.add(tx.getTotalAmount());
     if (payments == null) payments = tx.getPayments();
     else if (tx.getPayments() != null) {
+//      payments.addAll(tx.getPayments());
       for (MoneroPayment paymentA : payments) {
         for (MoneroPayment paymentB : tx.getPayments()) {
           if (paymentA.getAccountIdx() == paymentB.getAccountIdx() && paymentA.getSubaddressIdx() == paymentB.getSubaddressIdx()) {
