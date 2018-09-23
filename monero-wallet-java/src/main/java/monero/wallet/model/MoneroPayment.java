@@ -93,7 +93,6 @@ public class MoneroPayment {
     result = prime * result + ((amount == null) ? 0 : amount.hashCode());
     result = prime * result + ((isSpent == null) ? 0 : isSpent.hashCode());
     result = prime * result + ((subaddressIdx == null) ? 0 : subaddressIdx.hashCode());
-    result = prime * result + ((tx == null) ? 0 : tx.hashCode());
     return result;
   }
 
