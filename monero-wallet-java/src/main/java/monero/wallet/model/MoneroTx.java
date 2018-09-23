@@ -223,7 +223,6 @@ public class MoneroTx {
    * 
    * @param tx is the transaction to merge into this one
    */
-  @SuppressWarnings("unused")
   public void merge(MoneroTx tx) {
     if (id == null) id = tx.getId();
     else if (tx.getId() != null) validateEquals("IDs", id, tx.getId());
@@ -234,10 +233,12 @@ public class MoneroTx {
     if (srcSubaddressIdx == null) srcSubaddressIdx = tx.getSrcSubaddressIdx();
     else if (tx.getSrcSubaddressIdx() != null) validateEquals("Subaddress indices", srcSubaddressIdx, tx.getSrcSubaddressIdx());
     if (totalAmount == null) totalAmount = tx.getTotalAmount();
-    else if (tx.getTotalAmount() != null) validateEquals("Total amounts", totalAmount, tx.getTotalAmount());  // TODO: total amount must be cumulative
-    if (true) throw new RuntimeException("... cool ... total amount must be cumulative");
+    else if (tx.getTotalAmount() != null) totalAmount = totalAmount.add(tx.getTotalAmount());
     if (payments == null) payments = tx.getPayments();
-    else if (tx.getPayments() != null) payments.addAll(tx.getPayments());
+    else if (tx.getPayments() != null) {
+      throw new RuntimeException("Payments need to be merged like a biotch");
+//      payments.addAll(tx.getPayments());
+    }
     if (paymentId == null) paymentId = tx.getPaymentId();
     else if (tx.getPaymentId() != null) validateEquals("Payment ids", paymentId, tx.getPaymentId());
     if (fee == null) fee = tx.getFee();

@@ -970,7 +970,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // initialize final fields
     if (tx.getPayments() != null) assertNull(payment);
-    else if (payment != null) tx.setPayments(Arrays.asList(payment));
+    else if (payment != null) tx.setPayments(new ArrayList<MoneroPayment>(Arrays.asList(payment)));
     if (isOutgoing) {
       tx.setSrcAccountIdx(accountIdx);
       tx.setSrcSubaddressIdx(subaddressIdx);
@@ -1011,7 +1011,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       MoneroTx tx = new MoneroTx();
       txs.add(tx);
       MoneroPayment payment = new MoneroPayment(tx, null, amounts.get(i), accountIdx, 0); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
-      tx.setPayments(Arrays.asList(payment));
+      tx.setPayments(new ArrayList<MoneroPayment>(Arrays.asList(payment)));
       tx.setId(ids.get(i));
       tx.setKey(keys.get(i));
       tx.setBlob(blobs.get(i));
