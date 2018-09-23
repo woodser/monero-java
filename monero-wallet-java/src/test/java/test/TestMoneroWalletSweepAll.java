@@ -56,7 +56,7 @@ public class TestMoneroWalletSweepAll {
     }
     
     // test requires at least one more account than the number being swept to verify it does not change
-    assertTrue("Test requires balance in at least " + (NUM_ACCOUNTS_TO_SWEEP + 1) + " accounts; run testSendMultiple() first", balanceAccounts.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
+    assertTrue("Test requires balance in at least " + (NUM_ACCOUNTS_TO_SWEEP + 1) + " accounts; run testSendToMultiple() first", balanceAccounts.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
     assertTrue("Test is waiting on unlocked funds", unlockedAccounts.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
     
     // sweep from first unlocked accounts
@@ -131,7 +131,7 @@ public class TestMoneroWalletSweepAll {
     
     // verify min accounts with unlocked balance
     Pair<Map<Integer, List<Integer>>, Map<Integer, List<Integer>>> balances = getBalances();
-    assertTrue("Test requires multiple accounts with a balance; run testSendMultiple() first", balances.getFirst().size() >= MIN_UNLOCKED_ACCOUNTS);
+    assertTrue("Test requires multiple accounts with a balance; run testSendToMultiple() first", balances.getFirst().size() >= MIN_UNLOCKED_ACCOUNTS);
     assertTrue("Wallet is waiting on unlocked funds", balances.getSecond().size() >= MIN_UNLOCKED_ACCOUNTS);
     
     // sweep from first unlocked accounts
@@ -178,7 +178,7 @@ public class TestMoneroWalletSweepAll {
     
     // verify 2 accounts with unlocked balance
     Pair<Map<Integer, List<Integer>>, Map<Integer, List<Integer>>> balances = getBalances();
-    assertTrue("Test requires multiple accounts with a balance; run testSendMultiple() first", balances.getFirst().size() >= 2);
+    assertTrue("Test requires multiple accounts with a balance; run testSendToMultiple() first", balances.getFirst().size() >= 2);
     assertTrue("Wallet is waiting on unlocked funds", balances.getSecond().size() >= 2);
     
     // sweep
@@ -228,7 +228,7 @@ public class TestMoneroWalletSweepAll {
 //    
 //    // collect coordinates of all subaddresses that have unlocked balance
 //    List<MoneroAccount> accounts = wallet.getAccounts();
-//    assertTrue("testSweepWallet() requires multiple accounts; run testSendMultiple()", accounts.size() > 1);
+//    assertTrue("testSweepWallet() requires multiple accounts; run testSendToMultiple()", accounts.size() > 1);
 //    Map<Integer, List<Integer>> unlockedBalanceMap = new HashMap<Integer, List<Integer>>();
 //    for (MoneroAccount account : accounts) {
 //      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());

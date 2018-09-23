@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.util.Collection;
 
@@ -20,11 +21,11 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
-import monero.wallet.model.MoneroOutput;
 import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTx.MoneroTxType;
+import monero.wallet.model.MoneroTxConfig;
 
 /**
  * Test utilities and constants.
@@ -94,7 +95,7 @@ public class TestUtils {
       
       // refresh wallet
       wallet.rescanSpent();
-      wallet.rescanBlockchain();
+      //wallet.rescanBlockchain();
     }
     return wallet;
   }
@@ -122,72 +123,140 @@ public class TestUtils {
     if (subaddress.getBalance().doubleValue() > 0) assertTrue(subaddress.isUsed());
   }
   
-  public static void testTx(MoneroTx tx) {
-    
-    // test all transactions
+  public static void testCommonTx(MoneroTx tx) {
     assertNotNull(tx.getId());
     assertNotNull(tx.getType());
     assertNotEquals(MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());  // default payment should be converted to null
+  }
+  
+  public static void testGetTx(MoneroTx tx, Boolean hasOutgoingPayments) {
+    testCommonTx(tx);
     
     // test outgoing
-    if (tx.getType() == MoneroTxType.OUTGOING) {
+    if (tx.getType() == MoneroTxType.OUTGOING || tx.getType() == MoneroTxType.PENDING || tx.getType() == MoneroTxType.FAILED) {
+      assertNotNull("hasOutgoingPayments must be specified", hasOutgoingPayments);
+      assertNotNull(tx.getId());
       assertNotNull(tx.getSrcAddress());
       assertNotNull(tx.getSrcAccountIdx());
       assertNotNull(tx.getSrcSubaddressIdx());
+      assertNotNull(tx.getTotalAmount());
+      assertNotEquals(MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());
+      assertNotNull(tx.getFee());
+      assertNull(tx.getMixin());
+      assertNotNull(tx.getSize());
+      assertNotNull(tx.getNote());
+      assertNotNull(tx.getTimestamp());
+      assertEquals((Integer) 0, tx.getUnlockTime());
+      assertNotNull(tx.getIsDoubleSpend());
       assertFalse(tx.getIsDoubleSpend());
-      assertNotNull(tx.getPayments());
-      assertFalse(tx.getPayments().isEmpty());
-      for (MoneroPayment payment : tx.getPayments()) {
-        assertNotNull(payment.getAddress());
-        assertNotNull(payment.getAmount());
-        assertTrue(payment.getAmount().longValue() >= 0);  // TODO: seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
-        assertNull(payment.getAccountIdx());
-        assertNull(payment.getSubaddressIdx());
-        assertEquals(tx, payment.getTx());
+      assertNull(tx.getKey());
+      assertNull(tx.getBlob());
+      assertNull(tx.getMetadata());
+      if (tx.getType() == MoneroTxType.OUTGOING) {
+        assertNotNull(tx.getHeight());
+      } else if (tx.getType() == MoneroTxType.PENDING || tx.getType() == MoneroTxType.FAILED) {
+        assertNull(tx.getHeight());
+      }
+      if (hasOutgoingPayments) {
+        assertNotNull(tx.getPayments());
+        assertFalse(tx.getPayments().isEmpty());
+        BigInteger totalAmount = BigInteger.valueOf(0);
+        for (MoneroPayment payment : tx.getPayments()) {
+          assertNotNull(payment.getAddress());
+          assertNotNull(payment.getAmount());
+          assertTrue(payment.getAmount().longValue() > 0);  // TODO: seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
+          assertNull(payment.getAccountIdx());
+          assertNull(payment.getSubaddressIdx());
+          assertNull(payment.getIsSpent());
+          assertTrue(tx == payment.getTx());
+          totalAmount = totalAmount.add(payment.getAmount());
+        }
+        assertTrue(totalAmount.compareTo(tx.getTotalAmount()) == 0);
       }
     }
     
     // test incoming
-    if (tx.getType() == MoneroTxType.INCOMING) {
+    if (tx.getType() == MoneroTxType.INCOMING || tx.getType() == MoneroTxType.MEMPOOL) {
+      assertNotNull(tx.getId());
       assertNull(tx.getSrcAddress());
       assertNull(tx.getSrcAccountIdx());
       assertNull(tx.getSrcSubaddressIdx());
-      assertNotNull(tx.getKey());
+      assertNotNull(tx.getTotalAmount());
+      assertNotEquals(MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());
+      assertNotNull(tx.getFee());
+      assertNull(tx.getMixin());
+      assertNotNull(tx.getSize());
+      assertNotNull(tx.getNote());
+      assertNotNull(tx.getTimestamp());
+      assertEquals((Integer) 0, tx.getUnlockTime());
+      assertNotNull(tx.getIsDoubleSpend());
+      assertFalse(tx.getIsDoubleSpend());
+      assertNull(tx.getKey());
+      assertNull(tx.getBlob());
+      assertNull(tx.getMetadata());
+      if (tx.getType() == MoneroTxType.INCOMING) {
+        assertNotNull(tx.getHeight());
+      } else if (tx.getType() == MoneroTxType.MEMPOOL) {
+        assertNull(tx.getHeight());
+      }
       assertNotNull(tx.getPayments());
       assertFalse(tx.getPayments().isEmpty());
+      BigInteger totalAmount = BigInteger.valueOf(0);
       for (MoneroPayment payment : tx.getPayments()) {
         assertNotNull(payment.getAddress());
         assertNotNull(payment.getAmount());
-        assertTrue(payment.getAmount().longValue() >= 0);  // TODO: seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
+        assertTrue(payment.getAmount().longValue() > 0);  // TODO: seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
         assertNotNull(payment.getAccountIdx());
         assertNotNull(payment.getSubaddressIdx());
-        assertEquals(tx, payment.getTx());
+        assertNotNull(payment.getIsSpent());
+        assertTrue(tx == payment.getTx());
+        totalAmount = totalAmount.add(payment.getAmount());
       }
-      assertNotNull(tx.getOutputs());
-      assertFalse(tx.getOutputs().isEmpty());
-      for (MoneroOutput output : tx.getOutputs()) {
-        assertNotNull(output.getAmount());
-        assertNotNull(output.isSpent());
-      }
+      assertTrue(totalAmount.compareTo(tx.getTotalAmount()) == 0);
     }
   }
   
-  public static void testSendTx(MoneroTx tx, boolean canSplit) {
-    assertTrue(tx.getFee().longValue() > 0);
+  public static void testSendTx(MoneroTx tx, MoneroTxConfig config) {
+    testCommonTx(tx);
+    assertEquals(MoneroTxType.PENDING, tx.getType());
+    assertNotNull(tx.getId());
+    assertNotNull(tx.getSrcAddress());
+    assertEquals(config.getAccountIndex(), tx.getSrcAccountIdx());
+    assertEquals((Integer) 0, tx.getSrcSubaddressIdx());
+    assertNotNull(tx.getTotalAmount());
+    if (config.getPaymentId().equals(MoneroTx.DEFAULT_PAYMENT_ID)) assertNull(tx.getPaymentId());
+    else assertEquals(config.getPaymentId(), tx.getPaymentId());
+    assertNotNull(tx.getFee());
     assertEquals(MIXIN, tx.getMixin());
-    assertNull(tx.getSize());
-    assertNotNull(tx.getPayments());
-    assertFalse(tx.getPayments().isEmpty());
-    assertEquals(MoneroTxType.OUTGOING, tx.getType());
-    assertNull(tx.getHeight());
+    assertNotNull(tx.getSize());
+    assertNotNull(tx.getNote());
+    assertNotNull(tx.getTimestamp());
     assertEquals((Integer) 0, tx.getUnlockTime());
+    assertNotNull(tx.getIsDoubleSpend());
+    assertFalse(tx.getIsDoubleSpend());
+//    if (canSplit) {
+//      assertNull(tx.getKey());
+//    } else {
+      assertNotNull(tx.getKey());
+//    }
     assertNotNull(tx.getBlob());
     assertNotNull(tx.getMetadata());
-    if (canSplit) {
-      assertNull(tx.getKey());
-    } else {
-      assertNotNull(tx.getKey());
+    assertNull(tx.getHeight());
+    assertNotNull(tx.getPayments());
+    assertFalse(tx.getPayments().isEmpty());
+    BigInteger totalAmount = BigInteger.valueOf(0);
+    assertEquals(config.getDestinations(), tx.getPayments());
+    for (MoneroPayment payment : tx.getPayments()) {
+      assertNotNull(payment.getAddress());
+      assertNotNull(payment.getAmount());
+      assertTrue(payment.getAmount().longValue() > 0);  // TODO: seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
+      assertNull(payment.getAccountIdx());
+      assertNull(payment.getSubaddressIdx());
+      assertNull(payment.getIsSpent());
+      assertTrue(tx == payment.getTx());
+      totalAmount = totalAmount.add(payment.getAmount());
     }
+    assertTrue(totalAmount.compareTo(tx.getTotalAmount()) == 0);
   }
   
   public static void testAddressBookEntry(MoneroAddressBookEntry entry) {

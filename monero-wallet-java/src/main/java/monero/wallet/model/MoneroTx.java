@@ -39,12 +39,11 @@ public class MoneroTx {
   private String srcAddress;
   private Integer srcAccountIdx;
   private Integer srcSubaddressIdx; // TODO (monero-wallet-rpc): transactions may originate from multiple subaddresses but querying only provides subaddress 0
-  private Integer totalAmount;
+  private BigInteger totalAmount;
 	private List<MoneroPayment> payments;
 	private String paymentId;
 	private BigInteger fee;
 	private Integer mixin;
-	private String key;
 	private Integer size;
 	private MoneroTxType type;
   private Integer height;
@@ -52,6 +51,7 @@ public class MoneroTx {
   private Long timestamp;
   private Integer unlockTime;
   private Boolean isDoubleSpend;
+  private String key;
   private String blob;
   private String metadata;
 	
@@ -91,11 +91,11 @@ public class MoneroTx {
     this.srcSubaddressIdx = srcSubaddressIdx;
   }
 
-  public Integer getTotalAmount() {
+  public BigInteger getTotalAmount() {
     return totalAmount;
   }
 
-  public void setTotalAmount(Integer totalAmount) {
+  public void setTotalAmount(BigInteger totalAmount) {
     this.totalAmount = totalAmount;
   }
 
@@ -134,14 +134,6 @@ public class MoneroTx {
 
   public void setMixin(Integer mixin) {
     this.mixin = mixin;
-  }
-
-  public String getKey() {
-    return key;
-  }
-
-  public void setKey(String key) {
-    this.key = key;
   }
 
   public Integer getSize() {
@@ -200,6 +192,14 @@ public class MoneroTx {
     this.isDoubleSpend = isDoubleSpend;
   }
 
+  public String getKey() {
+    return key;
+  }
+
+  public void setKey(String key) {
+    this.key = key;
+  }
+
   public String getBlob() {
     return blob;
   }
@@ -233,7 +233,7 @@ public class MoneroTx {
     else if (tx.getSrcAccountIdx() != null) validateEquals("Account indices", srcAccountIdx, tx.getSrcAccountIdx());
     if (srcSubaddressIdx == null) srcSubaddressIdx = tx.getSrcSubaddressIdx();
     else if (tx.getSrcSubaddressIdx() != null) validateEquals("Subaddress indices", srcSubaddressIdx, tx.getSrcSubaddressIdx());
-    if (totalAmount == null) totalAmount = tx.getSrcSubaddressIdx();
+    if (totalAmount == null) totalAmount = tx.getTotalAmount();
     else if (tx.getTotalAmount() != null) validateEquals("Total amounts", totalAmount, tx.getTotalAmount());  // TODO: total amount must be cumulative
     if (true) throw new RuntimeException("... cool ... total amount must be cumulative");
     if (payments == null) payments = tx.getPayments();
