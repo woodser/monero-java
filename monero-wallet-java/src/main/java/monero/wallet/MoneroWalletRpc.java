@@ -2,6 +2,8 @@ package monero.wallet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
@@ -352,13 +354,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
-    MoneroTx tx = txMapToTx(txMap);
+    MoneroTx tx = txMapToTx(txMap, true);
     tx.setSrcAccountIdx(config.getAccountIndex() == null ? 0 : config.getAccountIndex());
     tx.setSrcSubaddressIdx(0); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
     tx.setPayments(config.getDestinations()); // TODO: test that txMap.get("amount") == sum of payments
     tx.setMixin(config.getMixin());
     tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
-    tx.setType(MoneroTxType.OUTGOING);
+    tx.setType(MoneroTxType.PENDING);
     tx.setIsDoubleSpend(false);
     return tx;
   }
@@ -890,23 +892,37 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * Converts a transaction map to a MoneroTx.
    * 
    * @param txMap is the map to create a MoneroTx from
+   * @param isOutgoing specifies if the transaction is outgoing xor incoming (only necessary if type information not available)
    * @return MoneroTx is the transaction created from the map
    */
   @SuppressWarnings("unchecked")
-  private static MoneroTx txMapToTx(Map<String, Object> txMap) {
+  private static MoneroTx txMapToTx(Map<String, Object> txMap, Boolean isOutgoing) {
+    
+    // determine if transaction is incoming or outgoing
+    if (isOutgoing == null) {
+      Object type = txMap.get("type");
+      if (type == null) throw new MoneroException("Transaction type is unknown:\n" + txMap);
+      MoneroTxType txType = getTxType((String) type);
+      if (txType == MoneroTxType.OUTGOING || txType == MoneroTxType.PENDING || txType == MoneroTxType.FAILED) {
+        isOutgoing = true;
+      } else if (txType == MoneroTxType.INCOMING || txType == MoneroTxType.MEMPOOL) {
+        isOutgoing = false;
+      } else {
+        throw new MoneroException("Unknown transaction type: " + txType);
+      }
+    }
+    
+    // build transaction
     MoneroTx tx = new MoneroTx();
+    MoneroPayment payment = null;
+    Integer accountIdx = null;
+    Integer subaddressIdx = null;
     for (String key : txMap.keySet()) {
       Object val = txMap.get(key);
-      if (key.equals("amount")) { } // this method does not process amount since it could be output or payment depending on context
-      else if (key.equals("spent")) { } // this method does not process spent which is specific to outputs
-      else if (key.equals("address")) tx.setAddress((String) val);
-      else if (key.equalsIgnoreCase("fee")) tx.setFee((BigInteger) val);
+      if (key.equalsIgnoreCase("fee")) tx.setFee((BigInteger) val);
       else if (key.equalsIgnoreCase("height")) tx.setHeight(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("block_height")) tx.setHeight(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("note")) tx.setNote((String) val);
-      else if (key.equalsIgnoreCase("payment_id")) {
-        if (!MoneroTx.DEFAULT_PAYMENT_ID.equals((String) val)) tx.setPaymentId((String) val); // convert default to null
-      }
       else if (key.equalsIgnoreCase("timestamp")) tx.setTimestamp(((BigInteger) val).longValue());
       else if (key.equalsIgnoreCase("txid")) tx.setId((String) val);
       else if (key.equalsIgnoreCase("tx_hash")) tx.setId((String) val);
@@ -919,28 +935,67 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("tx_blob")) tx.setBlob((String) val);
       else if (key.equalsIgnoreCase("tx_metadata")) tx.setMetadata((String) val);
       else if (key.equalsIgnoreCase("double_spend_seen")) tx.setIsDoubleSpend((Boolean) val);
+      if (key.equals("amount")) {
+        if (isOutgoing) tx.setTotalAmount((BigInteger) val);
+        else {
+          if (payment == null) payment = new MoneroPayment();
+          payment.setAmount((BigInteger) val);
+        }
+      }
+      else if (key.equals("address")) {
+        if (isOutgoing) tx.setSrcAddress((String) val);
+        else {
+          if (payment == null) payment = new MoneroPayment();
+          payment.setAddress((String) val);
+        }
+      }
+      else if (key.equals("spent")) {
+        assertFalse(isOutgoing);
+        if (payment == null) payment = new MoneroPayment();
+        payment.setIsSpent((boolean) val);
+      }
+      else if (key.equalsIgnoreCase("payment_id")) {
+        if (!MoneroTx.DEFAULT_PAYMENT_ID.equals((String) val)) tx.setPaymentId((String) val); // convert default to null
+      }
       else if (key.equalsIgnoreCase("subaddr_index")) {
         if (val instanceof Map) {
           Map<String, Object> subaddrMap = (Map<String, Object>) val;
-          tx.setAccountIndex(((BigInteger) subaddrMap.get("major")).intValue());
-          tx.setSubaddressIndex(((BigInteger) subaddrMap.get("minor")).intValue());
+          accountIdx = ((BigInteger) subaddrMap.get("major")).intValue();
+          subaddressIdx = ((BigInteger) subaddrMap.get("minor")).intValue();
         } else {
-          tx.setSubaddressIndex(((BigInteger) val).intValue());
+          subaddressIdx = ((BigInteger) val).intValue();
         }
-      } else if (key.equalsIgnoreCase("destinations")) {
+      }
+      else if (key.equalsIgnoreCase("destinations")) {
+        assertTrue(isOutgoing);
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
         tx.setPayments(payments);
         for (Map<String, Object> paymentMap : (List<Map<String, Object>>) val) {
-          MoneroPayment payment = new MoneroPayment();
-          payments.add(payment);
+          MoneroPayment destination = new MoneroPayment();
+          payments.add(destination);
           for (String paymentKey : paymentMap.keySet()) {
-            if (paymentKey.equals("address")) payment.setAddress((String) paymentMap.get(paymentKey));
-            else if (paymentKey.equals("amount")) payment.setAmount((BigInteger) paymentMap.get(paymentKey));
+            if (paymentKey.equals("address")) destination.setAddress((String) paymentMap.get(paymentKey));
+            else if (paymentKey.equals("amount")) destination.setAmount((BigInteger) paymentMap.get(paymentKey));
             else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
           }
         }
-      } else LOGGER.warn("Ignoring unexpected transaction field: '" + key + "'");
+      }
+      else LOGGER.warn("Ignoring unexpected transaction field: '" + key + "'");
     }
+    
+    // initialize final fields
+    if (tx.getPayments() != null) assertNull(payment);
+    else if (payment != null) tx.setPayments(Arrays.asList(payment));
+    if (isOutgoing) {
+      tx.setSrcAccountIdx(accountIdx);
+      tx.setSrcSubaddressIdx(subaddressIdx);
+    } else {
+      assertNotNull(payment);
+      assertEquals(1, tx.getPayments().size());
+      payment.setAccountIdx(accountIdx);
+      payment.setSubaddressIdx(subaddressIdx);
+    }
+    
     return tx;
   }
   

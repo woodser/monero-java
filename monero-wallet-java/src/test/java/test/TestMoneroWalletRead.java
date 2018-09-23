@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -46,7 +45,7 @@ public class TestMoneroWalletRead {
   
   private MoneroWallet wallet;
   private static final String SAMPLE_ADDRESS = "58bf9MfrBNDXSqCzK6snxSXaJHehLTnvx3BdS6qMkYAsW8P5kvRVq8ePbGQ7mfAeYfC7QELPhpQBe2C9bqCrqeesUsifaWw";
-  private static final Logger LOGGER = Logger.getLogger(TestMoneroWalletRead.class);
+  //private static final Logger LOGGER = Logger.getLogger(TestMoneroWalletRead.class);
 
   @Before
   public void setup() throws Exception {
@@ -294,64 +293,58 @@ public class TestMoneroWalletRead {
   
   @Test
   public void testGetTxsWallet() {
-    boolean nonDefaultSubaddressFound = false;
+    boolean nonDefaultIncoming = false;
     List<MoneroTx> txs = wallet.getTxs();
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      TestUtils.testTx(tx);
-      if (tx.getSrcAccountIdx() != null && tx.getSrcAccountIdx() != 0 && tx.getSrcSubaddressIdx() != null && tx.getSrcSubaddressIdx() != 0) {
-        nonDefaultSubaddressFound = true;
+      TestUtils.testGetTx(tx, false);
+      if (!MoneroUtils.isOutgoing(tx.getType()) && tx.getSrcAccountIdx() != 0 && tx.getSrcSubaddressIdx() != 0) {
+        nonDefaultIncoming = true;
       }
     }
-    assertTrue("No transactions found in non-default account and subaddress; run testSendMultiple() first", nonDefaultSubaddressFound);
+    assertTrue("No incoming transactions found in non-default account and subaddress; run testSendToMultiple() first", nonDefaultIncoming);
   }
   
   @Test
   public void testGetTxsAccount() {
-    boolean nonDefaultSubaddressFound = false;
+    boolean nonDefaultIncoming = false;
     for (MoneroAccount account : wallet.getAccounts()) {
       List<MoneroTx> txs = wallet.getTxs(account.getIndex());
       for (MoneroTx tx : txs) {
-        TestUtils.testTx(tx);
-        if (tx.getType() == MoneroTxType.OUTGOING) {
+        TestUtils.testGetTx(tx, false);
+        if (MoneroUtils.isOutgoing(tx.getType())) {
           assertEquals(account.getIndex(), tx.getSrcAccountIdx());
-          if (tx.getSrcAccountIdx() != 0 && tx.getSrcSubaddressIdx() != 0 && tx.getSrcSubaddressIdx() != null && tx.getSrcSubaddressIdx() != 0) nonDefaultSubaddressFound = true;
-        } else if (tx.getType() == MoneroTxType.INCOMING) {
+        } else {
           for (MoneroPayment payment : tx.getPayments()) {
             assertEquals(account.getIndex(), payment.getAccountIdx());
-            if (payment.getAccountIdx() != 0 && payment.getAccountIdx() != 0 && payment.getSubaddressIdx() != null && payment.getSubaddressIdx() != 0) nonDefaultSubaddressFound = true;
+            if (payment.getAccountIdx() != 0 && payment.getSubaddressIdx() != 0) nonDefaultIncoming = true;
           }
         }
       }
     }
-    assertTrue("No transactions found in non-default account and subaddress; run testSendMultiple() first", nonDefaultSubaddressFound);
+    assertTrue("No incoming transactions found in non-default account and subaddress; run testSendToMultiple() first", nonDefaultIncoming);
   }
   
   @Test
   public void testGetTxsSubaddress() {
-    boolean nonDefaultSubaddressFound = false;
+    boolean nonDefaultIncoming = false;
     for (MoneroAccount account : wallet.getAccounts(true)) {
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         for (MoneroTx tx : wallet.getTxs(account.getIndex(), subaddress.getIndex())) {
-          TestUtils.testTx(tx);
-          if (tx.getType() == MoneroTxType.OUTGOING) {
+          TestUtils.testGetTx(tx, false);
+          if (MoneroUtils.isOutgoing(tx.getType()))  {
             assertEquals(account.getIndex(), tx.getSrcAccountIdx());
-            assertEquals(subaddress.getIndex(), tx.getSrcSubaddressIdx());  // TODO: this should fail so use warning below
-//            if (subaddress.getIndex() != tx.getSrcSubaddressIdx())  {
-//              LOGGER.warn("Tx subaddress index does not match queried subaddress index because monero-wallet-rpc outgoing transactions do not indicate originating subaddresses");
-//            }
-            if (tx.getSrcAccountIdx() != 0 && tx.getSrcSubaddressIdx() != 0 && tx.getSrcSubaddressIdx() != null && tx.getSrcSubaddressIdx() != 0) nonDefaultSubaddressFound = true;
-          } else if (tx.getType() == MoneroTxType.INCOMING) {
+          } else {
             for (MoneroPayment payment : tx.getPayments()) {
               assertEquals(account.getIndex(), payment.getAccountIdx());
               assertEquals(subaddress.getIndex(), payment.getSubaddressIdx());
-              if (payment.getAccountIdx() != 0 && payment.getAccountIdx() != 0 && payment.getSubaddressIdx() != null && payment.getSubaddressIdx() != 0) nonDefaultSubaddressFound = true;
+              if (payment.getAccountIdx() != 0 && payment.getSubaddressIdx() != 0) nonDefaultIncoming = true;
             }
           }
         }
       }
     }
-    assertTrue("No transactions found in non-default account and subaddress; run testSendMultiple() first", nonDefaultSubaddressFound);
+    assertTrue("No incoming transactions found in non-default account and subaddress; run testSendToMultiple() first", nonDefaultIncoming);
   }
 
   @Test
@@ -361,7 +354,7 @@ public class TestMoneroWalletRead {
     List<MoneroTx> allTxs = wallet.getTxs();
     assertFalse(allTxs.isEmpty());
     for (MoneroTx tx : allTxs) {
-      TestUtils.testTx(tx);
+      TestUtils.testGetTx(tx, false);
     }
     
     // test getting transactions by payment ids
@@ -376,7 +369,7 @@ public class TestMoneroWalletRead {
       List<MoneroTx> txs = wallet.getTxs(filter);
       assertFalse(txs.isEmpty());
       for (MoneroTx tx : txs) {
-        TestUtils.testTx(tx);
+        TestUtils.testGetTx(tx, false);
         assertTrue(filter.getPaymentIds().contains(tx.getPaymentId()));
       }
     }
@@ -417,7 +410,7 @@ public class TestMoneroWalletRead {
     // test block height filtering
     {
       txs = wallet.getTxs(0);
-      assertFalse("No transactions; run testSendMultiple()", txs.isEmpty());
+      assertFalse("No transactions; run testSendToMultiple()", txs.isEmpty());
         
       // get and sort block heights in ascending order
       List<Integer> heights = new ArrayList<Integer>();

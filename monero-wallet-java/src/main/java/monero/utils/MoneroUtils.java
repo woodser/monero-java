@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import monero.wallet.model.MoneroException;
+import monero.wallet.model.MoneroTx.MoneroTxType;
 
 /**
  * Collection of Monero utilities.
@@ -85,5 +86,10 @@ public class MoneroUtils {
       if (i >= paymentId2.length() && paymentId1.charAt(i) != '0') return false;
     }
     return true;
+  }
+  
+  public static boolean isOutgoing(MoneroTxType type) {
+    if (type == MoneroTxType.OUTGOING || type == MoneroTxType.PENDING || type == MoneroTxType.FAILED) return true;
+    return false;
   }
 }
