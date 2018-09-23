@@ -325,6 +325,132 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return (boolean) resultMap.get("multisig_import_needed");
   }
 
+  // TODO: use get_transfers_by_id if ids given
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<MoneroTx> getTxs(MoneroTxFilter filter) {
+    if (filter == null) filter = new MoneroTxFilter();
+    
+    // collect transactions segmented by type, id, account idx, then subaddress idx
+    Map<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>> txTypeMap = new HashMap<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>>();
+    
+    // build common params for get_transfers
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("in", filter.isIncoming());
+    params.put("out", filter.isOutgoing());
+    params.put("pending", filter.isPending());
+    params.put("failed", filter.isFailed());
+    params.put("pool", filter.isMempool());
+    params.put("filter_by_height", filter.getMinHeight() != null || filter.getMaxHeight() != null);
+    if (filter.getMinHeight() != null) params.put("min_height", filter.getMinHeight());
+    if (filter.getMaxHeight() != null) params.put("max_height", filter.getMaxHeight());
+    
+    // determine account and subaddress indices to be queried
+    Map<Integer, List<Integer>> indices = new HashMap<Integer, List<Integer>>();
+    if (filter.getAccountIndex() != null) {
+      indices.put(filter.getAccountIndex(), filter.getSubaddressIndices() == null || filter.getSubaddressIndices().isEmpty() ? getSubaddressIndices(filter.getAccountIndex()) : new ArrayList<Integer>(filter.getSubaddressIndices()));
+    } else {
+      if (filter.getSubaddressIndices() != null) throw new RuntimeException("Filter specifies subaddress indices but not an account index");
+      indices = getAllAccountAndSubaddressIndices();
+    }
+    
+    // get transactions using get_transfers
+    for (Integer accountIdx : indices.keySet()) {
+      params.put("account_index", accountIdx);
+      params.put("subaddr_indices", indices.get(accountIdx));
+      Map<String, Object> respMap = rpc.sendRpcRequest("get_transfers", params);
+      Map<String, Object> result = (Map<String, Object>) respMap.get("result");
+      for (String key : result.keySet()) {
+        for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
+          MoneroTx tx = txMapToTx(txMap);
+          addTx(txTypeMap, tx);
+        }
+      }
+    }
+    
+    // get incoming transactions
+    if (filter.isIncoming()) {
+      
+      // get transactions using incoming_transfers
+      params.clear();
+      params.put("transfer_type", "all"); // TODO: suppport all | available | unavailable 'types' which is different from MoneroTxType
+      for (Integer accountIdx : indices.keySet()) {
+        params.put("account_index", accountIdx);
+        params.put("subaddr_indices", filter.getSubaddressIndices()); // null subaddr_indices will fetch all incoming_transfers
+        Map<String, Object> respMap = rpc.sendRpcRequest("incoming_transfers", params);
+        Map<String, Object> result = (Map<String, Object>) respMap.get("result");
+
+        // interpret incoming_transfers response
+        List<Map<String, Object>> outputMaps = (List<Map<String, Object>>) result.get("transfers");
+        if (outputMaps == null) return new ArrayList<MoneroTx>();
+        for (Map<String, Object> outputMap : outputMaps) {
+          MoneroOutput output = new MoneroOutput();
+          output.setAmount((BigInteger) outputMap.get("amount"));
+          output.setSpent((Boolean) outputMap.get("spent"));
+          MoneroTx tx = txMapToTx(outputMap);
+          tx.setType(MoneroTxType.INCOMING);
+          tx.setAccountIndex(accountIdx);
+          output.setTransaction(tx);
+          List<MoneroOutput> outputs = new ArrayList<MoneroOutput>();
+          outputs.add(output);
+          tx.setOutputs(outputs);
+          addTx(txTypeMap, tx);
+        }
+      }
+      
+      // get_bulk_payments rpc call to get incoming payments by id
+      if (filter.getPaymentIds() != null && !filter.getPaymentIds().isEmpty()) {
+        
+        // convert nulls to default payment id
+        Set<String> paymentIds = new HashSet<String>();
+        for (String paymentId : filter.getPaymentIds()) {
+          paymentIds.add(paymentId == null ? MoneroTx.DEFAULT_PAYMENT_ID : paymentId);
+        }
+        
+        // send request
+        params.clear();
+        params.put("payment_ids", paymentIds);
+        Map<String, Object> respMap = rpc.sendRpcRequest("get_bulk_payments", params);
+        Map<String, Object> result = (Map<String, Object>) respMap.get("result");
+
+        // interpret get_bulk_payments response
+        List<Map<String, Object>> paymentMaps = (List<Map<String, Object>>) result.get("payments");
+        for (Map<String, Object> paymentMap : paymentMaps) {
+          MoneroTx tx = txMapToTx(paymentMap);
+          tx.setType(MoneroTxType.INCOMING);
+          // payment data is redundant with get_transfers rpc call, so it's not added because merging would create duplicates
+          // MoneroPayment payment = new MoneroPayment();
+          // payment.setAmount((BigInteger) paymentMap.get("amount"));
+          // List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
+          // payments.add(payment);
+          // tx.setPayments(payments);
+          addTx(txTypeMap, tx);
+        }
+      }
+    }
+    
+    // collect all transactions as list
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    for (Map<String, Map<Integer, Map<Integer, MoneroTx>>> idMap : txTypeMap.values()) {
+      for (Map<Integer, Map<Integer, MoneroTx>> accountMap : idMap.values()) {
+        for (Map<Integer, MoneroTx> subaddressMap : accountMap.values()) {
+          txs.addAll(subaddressMap.values());
+        }
+      }
+    }
+
+    // filter final result
+    Collection<MoneroTx> toRemoves = new HashSet<MoneroTx>();
+    for (MoneroTx tx : txs) {
+      if (filter.getPaymentIds() != null && !filter.getPaymentIds().contains(tx.getPaymentId())) toRemoves.add(tx);
+      else if (filter.getTxIds() != null && !filter.getTxIds().contains(tx.getId())) toRemoves.add(tx);
+      else if (filter.getMinHeight() != null && (tx.getHeight() == null || tx.getHeight() < filter.getMinHeight())) toRemoves.add(tx);
+      else if (filter.getMaxHeight() != null && (tx.getHeight() == null || tx.getHeight() > filter.getMaxHeight())) toRemoves.add(tx);
+    }
+    txs.removeAll(toRemoves);
+    return txs;
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public MoneroTx send(MoneroTxConfig config) {
@@ -348,10 +474,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     paramMap.put("get_tx_key", true);
     paramMap.put("get_tx_hex", true);
     paramMap.put("get_tx_metadata", true);
-
+  
     // send request
     Map<String, Object> respMap = rpc.sendRpcRequest("transfer", paramMap);
-
+  
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
     MoneroTx tx = txMapToTx(txMap, true);
@@ -388,10 +514,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     paramMap.put("get_tx_key", true);
     paramMap.put("get_tx_hex", true);
     paramMap.put("get_tx_metadata", true);
-
+  
     // send request
     Map<String, Object> respMap = rpc.sendRpcRequest("transfer_split", paramMap);
-
+  
     // interpret response
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<BigInteger> amounts = (List<BigInteger>) resultMap.get("amount_list");
@@ -533,7 +659,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // send request
     Map<String, Object> respMap = rpc.sendRpcRequest("sweep_dust", null);
-
+  
     // interpret response
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<String> txIds = (List<String>) resultMap.get("tx_hash_list");
@@ -544,133 +670,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setId(txId);
       txs.add(tx);
     }
-    return txs;
-  }
-  
-  // TODO: use get_transfers_by_id if ids given
-  @SuppressWarnings("unchecked")
-  @Override
-  public List<MoneroTx> getTxs(MoneroTxFilter filter) {
-    if (filter == null) filter = new MoneroTxFilter();
-    
-    // collect transactions segmented by type, id, account idx, then subaddress idx
-    Map<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>> txTypeMap = new HashMap<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>>();
-    
-    // build common params for get_transfers
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("in", filter.isIncoming());
-    params.put("out", filter.isOutgoing());
-    params.put("pending", filter.isPending());
-    params.put("failed", filter.isFailed());
-    params.put("pool", filter.isMempool());
-    params.put("filter_by_height", filter.getMinHeight() != null || filter.getMaxHeight() != null);
-    if (filter.getMinHeight() != null) params.put("min_height", filter.getMinHeight());
-    if (filter.getMaxHeight() != null) params.put("max_height", filter.getMaxHeight());
-    
-    // determine account and subaddress indices to be queried
-    Map<Integer, List<Integer>> indices = new HashMap<Integer, List<Integer>>();
-    if (filter.getAccountIndex() != null) {
-      indices.put(filter.getAccountIndex(), filter.getSubaddressIndices() == null || filter.getSubaddressIndices().isEmpty() ? getSubaddressIndices(filter.getAccountIndex()) : new ArrayList<Integer>(filter.getSubaddressIndices()));
-    } else {
-      if (filter.getSubaddressIndices() != null) throw new RuntimeException("Filter specifies subaddress indices but not an account index");
-      indices = getAllAccountAndSubaddressIndices();
-    }
-    
-    // get transactions using get_transfers
-    for (Integer accountIdx : indices.keySet()) {
-      params.put("account_index", accountIdx);
-      params.put("subaddr_indices", indices.get(accountIdx));
-      Map<String, Object> respMap = rpc.sendRpcRequest("get_transfers", params);
-      Map<String, Object> result = (Map<String, Object>) respMap.get("result");
-      for (String key : result.keySet()) {
-        for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
-          MoneroTx tx = txMapToTx(txMap);
-          if (txMap.containsKey("amount")) tx.setAmount((BigInteger) txMap.get("amount"));
-          addTx(txTypeMap, tx);
-        }
-      }
-    }
-    
-    // get incoming transactions
-    if (filter.isIncoming()) {
-      
-      // get transactions using incoming_transfers
-      params.clear();
-      params.put("transfer_type", "all"); // TODO: suppport all | available | unavailable 'types' which is different from MoneroTxType
-      for (Integer accountIdx : indices.keySet()) {
-        params.put("account_index", accountIdx);
-        params.put("subaddr_indices", filter.getSubaddressIndices()); // null subaddr_indices will fetch all incoming_transfers
-        Map<String, Object> respMap = rpc.sendRpcRequest("incoming_transfers", params);
-        Map<String, Object> result = (Map<String, Object>) respMap.get("result");
-
-        // interpret incoming_transfers response
-        List<Map<String, Object>> outputMaps = (List<Map<String, Object>>) result.get("transfers");
-        if (outputMaps == null) return new ArrayList<MoneroTx>();
-        for (Map<String, Object> outputMap : outputMaps) {
-          MoneroOutput output = new MoneroOutput();
-          output.setAmount((BigInteger) outputMap.get("amount"));
-          output.setSpent((Boolean) outputMap.get("spent"));
-          MoneroTx tx = txMapToTx(outputMap);
-          tx.setType(MoneroTxType.INCOMING);
-          tx.setAccountIndex(accountIdx);
-          output.setTransaction(tx);
-          List<MoneroOutput> outputs = new ArrayList<MoneroOutput>();
-          outputs.add(output);
-          tx.setOutputs(outputs);
-          addTx(txTypeMap, tx);
-        }
-      }
-      
-      // get_bulk_payments rpc call to get incoming payments by id
-      if (filter.getPaymentIds() != null && !filter.getPaymentIds().isEmpty()) {
-        
-        // convert nulls to default payment id
-        Set<String> paymentIds = new HashSet<String>();
-        for (String paymentId : filter.getPaymentIds()) {
-          paymentIds.add(paymentId == null ? MoneroTx.DEFAULT_PAYMENT_ID : paymentId);
-        }
-        
-        // send request
-        params.clear();
-        params.put("payment_ids", paymentIds);
-        Map<String, Object> respMap = rpc.sendRpcRequest("get_bulk_payments", params);
-        Map<String, Object> result = (Map<String, Object>) respMap.get("result");
-
-        // interpret get_bulk_payments response
-        List<Map<String, Object>> paymentMaps = (List<Map<String, Object>>) result.get("payments");
-        for (Map<String, Object> paymentMap : paymentMaps) {
-          MoneroTx tx = txMapToTx(paymentMap);
-          tx.setType(MoneroTxType.INCOMING);
-          // payment data is redundant with get_transfers rpc call, so it's not added because merging would create duplicates
-          // MoneroPayment payment = new MoneroPayment();
-          // payment.setAmount((BigInteger) paymentMap.get("amount"));
-          // List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
-          // payments.add(payment);
-          // tx.setPayments(payments);
-          addTx(txTypeMap, tx);
-        }
-      }
-    }
-    
-    // collect all transactions as list
-    List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    for (Map<String, Map<Integer, Map<Integer, MoneroTx>>> idMap : txTypeMap.values()) {
-      for (Map<Integer, Map<Integer, MoneroTx>> accountMap : idMap.values()) {
-        for (Map<Integer, MoneroTx> subaddressMap : accountMap.values()) {
-          txs.addAll(subaddressMap.values());
-        }
-      }
-    }
-
-    // filter final result
-    Collection<MoneroTx> toRemoves = new HashSet<MoneroTx>();
-    for (MoneroTx tx : txs) {
-      if (filter.getPaymentIds() != null && !filter.getPaymentIds().contains(tx.getPaymentId())) toRemoves.add(tx);
-      else if (filter.getTxIds() != null && !filter.getTxIds().contains(tx.getId())) toRemoves.add(tx);
-      else if (filter.getMinHeight() != null && (tx.getHeight() == null || tx.getHeight() < filter.getMinHeight())) toRemoves.add(tx);
-      else if (filter.getMaxHeight() != null && (tx.getHeight() == null || tx.getHeight() > filter.getMaxHeight())) toRemoves.add(tx);
-    }
-    txs.removeAll(toRemoves);
     return txs;
   }
 
@@ -901,7 +900,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // determine if transaction is incoming or outgoing
     if (isOutgoing == null) {
       Object type = txMap.get("type");
-      if (type == null) throw new MoneroException("Transaction type is unknown:\n" + txMap);
+      if (type == null) throw new MoneroException("Transaction type is unknown so isOutgoing must be specified:\n" + txMap);
       MoneroTxType txType = getTxType((String) type);
       if (txType == MoneroTxType.OUTGOING || txType == MoneroTxType.PENDING || txType == MoneroTxType.FAILED) {
         isOutgoing = true;

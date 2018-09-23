@@ -237,102 +237,6 @@ public interface MoneroWallet {
   public boolean isMultisigImportNeeded();
   
   /**
-   * Send a payment.
-   * 
-   * @param address is the address to send to
-   * @param amount is the amount to send
-   * @return MoneroTx is the resulting transaction from sending a payment
-   */
-  public MoneroTx send(String address, BigInteger amount);
-  
-  /**
-   * Send a payment.
-   * 
-   * @param address is the address to send to
-   * @param paymentId is the payment id to send to (optional)
-   * @param amount is the amount to send
-   * @return MoneroTx is the resulting transaction from sending a payment
-   */
-  public MoneroTx send(String address, String paymentId, BigInteger amount);
-  
-  /**
-   * Send payments.
-   * 
-   * @param config is the transaction configuration
-   * @return MoneroTx is the resulting transaction from sending payments
-   */
-  public MoneroTx send(MoneroTxConfig config);
-  
-  /**
-   * Send a payment which may be split across multiple transactions.
-   * 
-   * @param address is the address to send to
-   * @param amount is the amount to send
-   * @return List<MoneroTx> are the resulting transactions from sending a payment
-   */
-  public List<MoneroTx> sendSplit(String address, BigInteger amount);
-  
-  /**
-   * Send a payment which may be split across multiple transactions.
-   * 
-   * @param address is the address to send to
-   * @param paymentId is the payment id to send to (optional)
-   * @param amount is the amount to send
-   * @return List<MoneroTx> are the resulting transactions from sending a payment
-   */
-  public List<MoneroTx> sendSplit(String address, String paymentId, BigInteger amount);
-  
-  /**
-   * Send payments which may be split across multiple transactions.
-   * 
-   * @param config is the transaction configuration
-   * @return List<MoneroTx> are the resulting transactions from sending payments
-   */
-  public List<MoneroTx> sendSplit(MoneroTxConfig config);
-  
-  /**
-   * Sweep the wallet's unlocked funds to an address.
-   * 
-   * @param address is the address to sweep the wallet's funds to
-   * @return List<MoneroTx> are the resulting transactions
-   */
-  public List<MoneroTx> sweepWallet(String address);
-  
-  /**
-   * Sweep an acount's unlocked funds to an address.
-   * 
-   * @param address is the address to sweep the account's funds to
-   * @param accountIdx is the index of the account
-   * @return List<MoneroTx> are the resulting transactions
-   */
-  public List<MoneroTx> sweepAccount(String address, int accountIdx);
-  
-  /**
-   * Sweep a subaddress's unlocked funds to an address.
-   * 
-   * @param address is the address to sweep the subaddress's funds to
-   * @param accountIdx is the index of the account
-   * @param subaddressIdx is the index of the subaddress
-   * @return List<MoneroTx> are the resulting transactions
-   */
-  public List<MoneroTx> sweepSubaddress(String address, int accountIdx, int subaddressIdx);
-  
-  /**
-   * Sweep unlocked funds.
-   * 
-   * @param config specifies the sweep configuration
-   * @param List<MoneroTx> are the resulting transactions
-   */
-  public List<MoneroTx> sweepAll(MoneroTxConfig config);
-  
-  /**
-   * Send all dust outputs back to the wallet to make them easier to spend and mix.
-   * 
-   * @return List<MoneroTx> are the resulting transactions from sweeping dust
-   */
-  public List<MoneroTx> sweepDust();
-  
-  /**
    * Get all wallet transactions, each containing payments, outputs, and other metadata depending on the transaction type.
    * 
    * @return List<MoneroTx> are all of the wallet's transactions
@@ -361,6 +265,102 @@ public interface MoneroWallet {
    */
   public List<MoneroTx> getTxs(MoneroTxFilter filter);
   
+  /**
+   * Send a payment.
+   * 
+   * @param address is the address to send to
+   * @param amount is the amount to send
+   * @return MoneroTx is the resulting transaction from sending a payment
+   */
+  public MoneroTx send(String address, BigInteger amount);
+
+  /**
+   * Send a payment.
+   * 
+   * @param address is the address to send to
+   * @param paymentId is the payment id to send to (optional)
+   * @param amount is the amount to send
+   * @return MoneroTx is the resulting transaction from sending a payment
+   */
+  public MoneroTx send(String address, String paymentId, BigInteger amount);
+
+  /**
+   * Send payments.
+   * 
+   * @param config is the transaction configuration
+   * @return MoneroTx is the resulting transaction from sending payments
+   */
+  public MoneroTx send(MoneroTxConfig config);
+
+  /**
+   * Send a payment which may be split across multiple transactions.
+   * 
+   * @param address is the address to send to
+   * @param amount is the amount to send
+   * @return List<MoneroTx> are the resulting transactions from sending a payment
+   */
+  public List<MoneroTx> sendSplit(String address, BigInteger amount);
+
+  /**
+   * Send a payment which may be split across multiple transactions.
+   * 
+   * @param address is the address to send to
+   * @param paymentId is the payment id to send to (optional)
+   * @param amount is the amount to send
+   * @return List<MoneroTx> are the resulting transactions from sending a payment
+   */
+  public List<MoneroTx> sendSplit(String address, String paymentId, BigInteger amount);
+
+  /**
+   * Send payments which may be split across multiple transactions.
+   * 
+   * @param config is the transaction configuration
+   * @return List<MoneroTx> are the resulting transactions from sending payments
+   */
+  public List<MoneroTx> sendSplit(MoneroTxConfig config);
+
+  /**
+   * Sweep the wallet's unlocked funds to an address.
+   * 
+   * @param address is the address to sweep the wallet's funds to
+   * @return List<MoneroTx> are the resulting transactions
+   */
+  public List<MoneroTx> sweepWallet(String address);
+
+  /**
+   * Sweep an acount's unlocked funds to an address.
+   * 
+   * @param address is the address to sweep the account's funds to
+   * @param accountIdx is the index of the account
+   * @return List<MoneroTx> are the resulting transactions
+   */
+  public List<MoneroTx> sweepAccount(String address, int accountIdx);
+
+  /**
+   * Sweep a subaddress's unlocked funds to an address.
+   * 
+   * @param address is the address to sweep the subaddress's funds to
+   * @param accountIdx is the index of the account
+   * @param subaddressIdx is the index of the subaddress
+   * @return List<MoneroTx> are the resulting transactions
+   */
+  public List<MoneroTx> sweepSubaddress(String address, int accountIdx, int subaddressIdx);
+
+  /**
+   * Sweep unlocked funds.
+   * 
+   * @param config specifies the sweep configuration
+   * @param List<MoneroTx> are the resulting transactions
+   */
+  public List<MoneroTx> sweepAll(MoneroTxConfig config);
+
+  /**
+   * Send all dust outputs back to the wallet to make them easier to spend and mix.
+   * 
+   * @return List<MoneroTx> are the resulting transactions from sweeping dust
+   */
+  public List<MoneroTx> sweepDust();
+
   /**
    * Set arbitrary string notes for transactions.
    * 
