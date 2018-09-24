@@ -353,9 +353,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // collect unique transactions across calls
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
-//    List<MoneroTx> getTransfersTxs = new ArrayList<MoneroTx>();
-//    List<MoneroTx> incomingTransfersTxs = new ArrayList<MoneroTx>();
-//    List<MoneroTx> bulkPaymentsTxs = new ArrayList<MoneroTx>();
     
     // get transactions using get_transfers
     for (Integer accountIdx : indices.keySet()) {
@@ -366,7 +363,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       for (String key : result.keySet()) {
         for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
           MoneroTx tx = txMapToTx(txMap);
-          if (tx.getType() == MoneroTxType.INCOMING) {  // prevent duplicates when populated by incoming_transfers
+          if (tx.getType() == MoneroTxType.INCOMING) {  // prevent duplicates when populated by incoming_transfers  // TODO: merge payments when incoming txs work (https://github.com/monero-project/monero/issues/4428)
             tx.setTotalAmount(BigInteger.valueOf(0));
             tx.setPayments(null);
           }
@@ -397,58 +394,34 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
       }
       
-      // get_bulk_payments rpc call to get incoming payments by id
-      if (filter.getPaymentIds() != null && !filter.getPaymentIds().isEmpty()) {
-        
-        // convert nulls to default payment id
-        Set<String> paymentIds = new HashSet<String>();
-        for (String paymentId : filter.getPaymentIds()) {
-          paymentIds.add(paymentId == null ? MoneroTx.DEFAULT_PAYMENT_ID : paymentId);
-        }
-        
-        // send request
-        params.clear();
-        params.put("payment_ids", paymentIds);
-        Map<String, Object> respMap = rpc.sendRpcRequest("get_bulk_payments", params);
-        Map<String, Object> result = (Map<String, Object>) respMap.get("result");
-
-        // interpret get_bulk_payments response
-        List<Map<String, Object>> paymentMaps = (List<Map<String, Object>>) result.get("payments");
-        for (Map<String, Object> paymentMap : paymentMaps) {
-          MoneroTx tx = txMapToTx(paymentMap, MoneroTxType.INCOMING);
-          // payment data is redundant with get_transfers rpc call, so it's not added because merging would create duplicates
-          // MoneroPayment payment = new MoneroPayment();
-          // payment.setAmount((BigInteger) paymentMap.get("amount"));
-          // List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
-          // payments.add(payment);
-          // tx.setPayments(payments);
-          addTx(txs, tx, false);
-        }
-      }
+//      // get_bulk_payments rpc call to get incoming payments by id
+//      if (filter.getPaymentIds() != null && !filter.getPaymentIds().isEmpty()) {
+//        
+//        // convert nulls to default payment id
+//        Set<String> paymentIds = new HashSet<String>();
+//        for (String paymentId : filter.getPaymentIds()) {
+//          paymentIds.add(paymentId == null ? MoneroTx.DEFAULT_PAYMENT_ID : paymentId);
+//        }
+//        
+//        // send request
+//        params.clear();
+//        params.put("payment_ids", paymentIds);
+//        Map<String, Object> respMap = rpc.sendRpcRequest("get_bulk_payments", params);
+//        Map<String, Object> result = (Map<String, Object>) respMap.get("result");
+//
+//        // interpret get_bulk_payments response
+//        List<Map<String, Object>> paymentMaps = (List<Map<String, Object>>) result.get("payments");
+//        for (Map<String, Object> paymentMap : paymentMaps) {
+//          MoneroTx tx = txMapToTx(paymentMap, MoneroTxType.INCOMING);
+//          
+//          // prevent duplicates when populated by incoming_transfers  // TODO: merge payments when incoming txs work (https://github.com/monero-project/monero/issues/4428)
+//          tx.setTotalAmount(BigInteger.valueOf(0)); 
+//          tx.setPayments(null);
+//          
+//          addTx(txs, tx, true);
+//        }
+//      }
     }
-    
-//    // merge all txs
-//    for (MoneroTx tx : getTransfersTxs) {
-//      if (tx.getId().equals("31eb308ce88446b37a12c99270813d993ef5769ddac047403e438945d2d508cb")) {
-//        System.out.println("getTransfersTxs");
-//        System.out.println(tx);
-//      }
-//      addTx(txs, tx, true);
-//    }
-//    for (MoneroTx tx : incomingTransfersTxs) {
-//      if (tx.getId().equals("31eb308ce88446b37a12c99270813d993ef5769ddac047403e438945d2d508cb")) {
-//        System.out.println("incomingTransfersTxs");
-//        System.out.println(tx);
-//      }
-//      addTx(txs, tx, true);
-//    }
-//    for (MoneroTx tx : bulkPaymentsTxs) {
-//      if (tx.getId().equals("31eb308ce88446b37a12c99270813d993ef5769ddac047403e438945d2d508cb")) {
-//        System.out.println("bulkPaymentsTxs");
-//        System.out.println(tx);
-//      }
-//      addTx(txs, tx, false);
-//    }
 
     // filter final result
     Collection<MoneroTx> toRemoves = new HashSet<MoneroTx>();
