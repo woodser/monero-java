@@ -141,7 +141,7 @@ public class TestMoneroWalletRead {
     List<MoneroAccount> accounts = wallet.getAccounts();
     assertFalse(accounts.isEmpty());
     for (MoneroAccount account : accounts) {
-      MoneroAccount retrieved = wallet.getAccount(account.getIndex(), true);
+      MoneroAccount retrieved = wallet.getAccount(account.getIndex(), false);
       assertNull(retrieved.getSubaddresses());
       TestUtils.testAccount(retrieved);
     }
