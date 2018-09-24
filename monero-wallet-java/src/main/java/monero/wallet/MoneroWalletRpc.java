@@ -474,6 +474,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
     MoneroTx tx = txMapToTx(txMap, MoneroTxType.PENDING);
+    tx.setMixin(config.getMixin());
+    tx.setPayments(config.getDestinations());
+    
+    // merge tx for complete data
     MoneroTxFilter filter = new MoneroTxFilter();
     filter.setAccountIndex(accountIdx);
     filter.setSubaddressIndices(subaddressIndices);
@@ -482,16 +486,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     filter.setTxIds(Arrays.asList(tx.getId()));
     List<MoneroTx> filtered = getTxs(filter);
     assertEquals(1, filtered.size());
+    
+    System.out.println("MERGING");
+    System.out.println(tx);
+    System.out.println(filtered.get(0));
     tx.merge(getTxs(filter).get(0), false); // TODO: need to make retrieval by id much more efficient
     return tx;
-    
-//    tx.setSrcAccountIdx(accountIdx);
-//    tx.setSrcSubaddressIdx(0); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
-//    tx.setPayments(config.getDestinations()); // TODO: test that txMap.get("amount") == sum of payments
-//    tx.setMixin(config.getMixin());
-//    tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
-//    tx.setIsDoubleSpend(false);
-//    return tx;
   }
 
   @SuppressWarnings("unchecked")
@@ -928,7 +928,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     for (String key : txMap.keySet()) {
       Object val = txMap.get(key);
       if (key.equalsIgnoreCase("fee")) tx.setFee((BigInteger) val);
-      else if (key.equalsIgnoreCase("height")) tx.setHeight(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("block_height")) tx.setHeight(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("note")) if (isOutgoing) tx.setNote((String) val); else tx.setNote(null);
       else if (key.equalsIgnoreCase("timestamp")) tx.setTimestamp(((BigInteger) val).longValue());
@@ -942,6 +941,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("global_index")) { } // ignore
       else if (key.equalsIgnoreCase("tx_blob")) tx.setBlob((String) val);
       else if (key.equalsIgnoreCase("tx_metadata")) tx.setMetadata((String) val);
+      else if (key.equalsIgnoreCase("height")) {
+        int height = ((BigInteger) val).intValue();
+        tx.setHeight(height == 0 ? null : height);
+      }
       else if (key.equalsIgnoreCase("double_spend_seen")) tx.setIsDoubleSpend((Boolean) val);
       else if (key.equals("amount")) {
         tx.setTotalAmount((BigInteger) val);

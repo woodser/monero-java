@@ -227,7 +227,7 @@ public class TestUtils {
     else assertEquals(tx.getId(), config.getPaymentId(), tx.getPaymentId());
     assertNotNull(tx.getId(), tx.getFee());
     assertEquals(tx.getId(), MIXIN, tx.getMixin());
-    assertNotNull(tx.getId(), tx.getSize());
+    assertNull(tx.getId(), tx.getSize());
     assertNotNull(tx.getId(), tx.getNote());
     assertNotNull(tx.getId(), tx.getTimestamp());
     assertEquals(tx.getId(), (Integer) 0, tx.getUnlockTime());
@@ -255,7 +255,7 @@ public class TestUtils {
       assertNull(tx.getId(), payment.getIsSpent());
       totalAmount = totalAmount.add(payment.getAmount());
     }
-    assertTrue(tx.getId(), totalAmount.compareTo(tx.getTotalAmount()) == 0);
+    assertTrue("Total amount is not sum of payments: " + tx.getTotalAmount() + " vs " + totalAmount + " for TX " + tx.getId(), totalAmount.compareTo(tx.getTotalAmount()) == 0);
   }
   
   public static void testAddressBookEntry(MoneroAddressBookEntry entry) {
