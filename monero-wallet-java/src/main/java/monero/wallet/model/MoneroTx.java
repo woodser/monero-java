@@ -249,7 +249,7 @@ public class MoneroTx {
           payments.add(payment);
         }
       } else {
-        assertEquals(payments.size(), tx.getPayments().size());
+        assertEquals("Tx " + tx.getId() + " cannot be merged because payments are different sizes", payments.size(), tx.getPayments().size());
         for (int i = 0; i < payments.size(); i++) {
           payments.get(i).merge(tx.getPayments().get(i));
         }
