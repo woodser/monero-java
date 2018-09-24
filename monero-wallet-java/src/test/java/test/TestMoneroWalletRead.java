@@ -203,9 +203,12 @@ public class TestMoneroWalletRead {
   
   @Test
   public void testGetBalance() {
-    fail("Not implemented");
-//    List<MoneroTx> txs = wallet.getTxs();
-//    assertTrue("Test wallet does not have transaction history; load '" + TestUtils.WALLET_NAME_1 + "' with stagenet XMR and run TestMoneroWalletSends a few times", txs.size() >= 3);
+    BigInteger balanceWallet = wallet.getUnlockedBalance();
+    BigInteger balanceAccounts = BigInteger.valueOf(0);
+    for (MoneroAccount account : wallet.getAccounts()) {
+      balanceAccounts = balanceAccounts.add(account.getUnlockedBalance());
+    }
+    assertTrue(balanceWallet.compareTo(balanceAccounts) == 0);
   }
 
   @Test
@@ -246,7 +249,12 @@ public class TestMoneroWalletRead {
   
   @Test
   public void testGetUnlockedBalance() {
-    fail("Not implemented");
+    BigInteger unlockedBalanceWallet = wallet.getUnlockedBalance();
+    BigInteger unlockedBalanceAccounts = BigInteger.valueOf(0);
+    for (MoneroAccount account : wallet.getAccounts()) {
+      unlockedBalanceAccounts = unlockedBalanceAccounts.add(account.getUnlockedBalance());
+    }
+    assertTrue(unlockedBalanceWallet.compareTo(unlockedBalanceAccounts) == 0);
   }
 
   @Test
@@ -296,7 +304,7 @@ public class TestMoneroWalletRead {
     List<MoneroTx> txs = wallet.getTxs();
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      TestUtils.testGetTx(tx, false);
+      TestUtils.testGetTx(tx, null);
       if (!MoneroUtils.isOutgoing(tx.getType())) {
         for (MoneroPayment payment : tx.getPayments()) {
          if (payment.getAccountIdx() != 0 && payment.getSubaddressIdx() != 0) nonDefaultIncoming = true;
@@ -312,7 +320,7 @@ public class TestMoneroWalletRead {
     for (MoneroAccount account : wallet.getAccounts()) {
       List<MoneroTx> txs = wallet.getTxs(account.getIndex());
       for (MoneroTx tx : txs) {
-        TestUtils.testGetTx(tx, false);
+        TestUtils.testGetTx(tx, null);
         if (MoneroUtils.isOutgoing(tx.getType())) {
           assertEquals(account.getIndex(), tx.getSrcAccountIdx());
         } else {
@@ -332,7 +340,7 @@ public class TestMoneroWalletRead {
     for (MoneroAccount account : wallet.getAccounts(true)) {
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         for (MoneroTx tx : wallet.getTxs(account.getIndex(), subaddress.getIndex())) {
-          TestUtils.testGetTx(tx, false);
+          TestUtils.testGetTx(tx, null);
           if (MoneroUtils.isOutgoing(tx.getType()))  {
             assertEquals(account.getIndex(), tx.getSrcAccountIdx());
           } else {
@@ -355,7 +363,7 @@ public class TestMoneroWalletRead {
     List<MoneroTx> allTxs = wallet.getTxs();
     assertFalse(allTxs.isEmpty());
     for (MoneroTx tx : allTxs) {
-      TestUtils.testGetTx(tx, false);
+      TestUtils.testGetTx(tx, null);
     }
     
     // test getting transactions by payment ids
@@ -370,7 +378,7 @@ public class TestMoneroWalletRead {
       List<MoneroTx> txs = wallet.getTxs(filter);
       assertFalse(txs.isEmpty());
       for (MoneroTx tx : txs) {
-        TestUtils.testGetTx(tx, false);
+        TestUtils.testGetTx(tx, null);
         assertTrue(filter.getPaymentIds().contains(tx.getPaymentId()));
       }
     }
@@ -601,10 +609,14 @@ public class TestMoneroWalletRead {
   public void testSaveBlockchain() {
     wallet.saveBlockchain();
   }
-
+  
+  @Ignore // disabled so tests don't delete local cache
   @Test
   public void testRescanBlockchain() {
     wallet.rescanBlockchain();
+    for (MoneroTx tx : wallet.getTxs()) {
+      TestUtils.testGetTx(tx, false);
+    }
   }
 
   @Test

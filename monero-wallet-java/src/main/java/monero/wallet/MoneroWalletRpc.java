@@ -298,7 +298,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @Override
   public BigInteger getUnlockedBalance() {
-    throw new RuntimeException("Not implemented");
+    BigInteger unlockedBalance = BigInteger.valueOf(0);
+    for (MoneroAccount account : getAccounts()) {
+      unlockedBalance = unlockedBalance.add(account.getUnlockedBalance());
+    }
+    return unlockedBalance;
   }
 
   @SuppressWarnings("unchecked")
@@ -330,16 +334,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public List<MoneroTx> getTxs(MoneroTxFilter filter) {
     if (filter == null) filter = new MoneroTxFilter();
     
-    // build common params for get_transfers
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("in", filter.isIncoming());
-    params.put("out", filter.isOutgoing());
-    params.put("pending", filter.isPending());
-    params.put("failed", filter.isFailed());
-    params.put("pool", filter.isMempool());
-    params.put("filter_by_height", filter.getMinHeight() != null || filter.getMaxHeight() != null);
-    if (filter.getMinHeight() != null) params.put("min_height", filter.getMinHeight());
-    if (filter.getMaxHeight() != null) params.put("max_height", filter.getMaxHeight());
+    // stores merged txs across calls
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();    
     
     // determine account and subaddress indices to be queried
     Map<Integer, List<Integer>> indices = new HashMap<Integer, List<Integer>>();
@@ -350,8 +346,16 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       indices = getAllAccountAndSubaddressIndices();
     }
     
-    // collect unique transactions across calls
-    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    // build common params for get_transfers
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("in", filter.isIncoming());
+    params.put("out", filter.isOutgoing());
+    params.put("pending", filter.isPending());
+    params.put("failed", filter.isFailed());
+    params.put("pool", filter.isMempool());
+    params.put("filter_by_height", filter.getMinHeight() != null || filter.getMaxHeight() != null);
+    if (filter.getMinHeight() != null) params.put("min_height", filter.getMinHeight());
+    if (filter.getMaxHeight() != null) params.put("max_height", filter.getMaxHeight());
     
     // get transactions using get_transfers
     for (Integer accountIdx : indices.keySet()) {
@@ -471,15 +475,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
     MoneroTx tx = txMapToTx(txMap, MoneroTxType.PENDING);
     MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setAccountIndex(accountIdx);
+    filter.setSubaddressIndices(subaddressIndices);
     filter.setIncoming(false);
     filter.setMempool(false);
     filter.setTxIds(Arrays.asList(tx.getId()));
     List<MoneroTx> filtered = getTxs(filter);
     assertEquals(1, filtered.size());
-    System.out.println(tx);
-    System.out.println(filtered.get(0));
     tx.merge(getTxs(filter).get(0), false); // TODO: need to make retrieval by id much more efficient
-    System.out.println(tx);
     return tx;
     
 //    tx.setSrcAccountIdx(accountIdx);
@@ -942,12 +945,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("double_spend_seen")) tx.setIsDoubleSpend((Boolean) val);
       else if (key.equals("amount")) {
         tx.setTotalAmount((BigInteger) val);
-        if (payment == null) payment = new MoneroPayment();
-        payment.setAmount((BigInteger) val);
+        if (!isOutgoing) {
+          if (payment == null) payment = new MoneroPayment();
+          payment.setAmount((BigInteger) val);
+        }
       }
       else if (key.equals("address")) {
-        if (payment == null) payment = new MoneroPayment();
-        payment.setAddress((String) val);
+        if (isOutgoing) tx.setSrcAddress((String) val);
+        else {
+          if (payment == null) payment = new MoneroPayment();
+          payment.setAddress((String) val);
+        }
       }
       else if (key.equals("spent")) {
         assertFalse(isOutgoing);

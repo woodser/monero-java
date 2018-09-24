@@ -6,10 +6,15 @@ import static org.junit.Assert.assertEquals;
 import java.math.BigInteger;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 /**
  * Represents a transaction on the Monero network.
  */
 public class MoneroTx {
+  
+  //logger
+ private static final Logger LOGGER = Logger.getLogger(MoneroTx.class);
   
   /**
    * Default payment id.
@@ -268,7 +273,11 @@ public class MoneroTx {
     if (note == null) note = tx.getNote();
     else if (tx.getNote() != null) assertEquals("Notes", note, tx.getNote());
     if (timestamp == null) timestamp = tx.getTimestamp();
-    else if (tx.getTimestamp() != null) assertEquals("Timestamps", timestamp, tx.getTimestamp());
+    else if (tx.getTimestamp() != null) {
+      //assertEquals("Timestamps", timestamp, tx.getTimestamp()); // TODO (monero-wallet-rpc): timestamps for id can vary (e.g. faa8a4aecb4de18c91dcedb00be76f4f9d3d79839b5bf9cab87f2e3632fc574c)
+      if (timestamp.equals(tx.getTimestamp())) LOGGER.warn("Timestamps for tx " + tx.getId() + " are different, using first one");
+      timestamp = Math.min(timestamp, tx.getTimestamp());
+    }
     if (unlockTime == null) unlockTime = tx.getUnlockTime();
     else if (tx.getUnlockTime() != null) assertEquals(unlockTime, tx.getUnlockTime());
     if (isDoubleSpend == null) isDoubleSpend = tx.getIsDoubleSpend();
