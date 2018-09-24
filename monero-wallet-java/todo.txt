@@ -1,4 +1,5 @@
 v0.12.3.0
+test right after sending that get_transfers with sent id returns destinations
 test getTxs() with outgoing payments because fetched by id
 test that subaddress numUnspentOutputs == incoming transfers unspent payments
 belowAmount only supported in sweep?  assert not used when not usable
@@ -21,6 +22,11 @@ why is transaction amount 0 when destinations present
 why don't some transactions have destinations
 
 Monero-wallet-rpc suggested improvements:
+timestamps can vary across txs (see txid faa8a4aecb4de18c91dcedb00be76f4f9d3d79839b5bf9cab87f2e3632fc574c)
+get_transfer_by_txid only returns incoming, not outgoing counterpart
+add address to incoming_transfers
+add tx_size to get_transfer_by_txid
+add destinations to get_transfers for outgoing transactions
 fee is included on incoming transactions from get_transfers but it is not in incoming_transfers; with incoming account 0 bug cannot reliably get fee
 get_transfers of account 0 all subaddresses does not return incoming transfers!
 monero-wallet-rpc outgoing transactions do not indicate originating subaddresses

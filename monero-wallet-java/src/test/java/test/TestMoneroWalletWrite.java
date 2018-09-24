@@ -237,13 +237,14 @@ public class TestMoneroWalletWrite {
   private void testSendToMultiple(boolean canSplit) {
     
     // test constants
-    int NUM_ACCOUNTS = 20;
-    int NUM_ADDRESSES_PER_ACCOUNT = 5;
+    int SRC_ACCOUNT = 2;
+    int NUM_ACCOUNTS = 5;
+    int NUM_ADDRESSES_PER_ACCOUNT = 3;
     int TOTAL_ADDRESSES = NUM_ACCOUNTS * NUM_ADDRESSES_PER_ACCOUNT;
     
     // get amount to send per subaddress
-    BigInteger balance = wallet.getBalance(0);
-    BigInteger unlockedBalance = wallet.getUnlockedBalance(0);
+    BigInteger balance = wallet.getBalance(SRC_ACCOUNT);
+    BigInteger unlockedBalance = wallet.getUnlockedBalance(SRC_ACCOUNT);
     assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", balance.longValue() > 0);
     assertTrue("Wallet is waiting on unlocked funds", unlockedBalance.longValue() > 0);
     BigInteger sendAmount = unlockedBalance.divide(BigInteger.valueOf(SEND_DIVISOR));
@@ -275,28 +276,28 @@ public class TestMoneroWalletWrite {
     }
     MoneroTxConfig config = new MoneroTxConfig();
     config.setMixin(TestUtils.MIXIN);
-    config.setAccountIndex(0);
+    config.setAccountIndex(SRC_ACCOUNT);
     config.setDestinations(payments);
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     if (canSplit) {
       txs.addAll(wallet.sendSplit(config));
     } else {
+      System.out.println("SENDING...");
       txs.add(wallet.send(config));
+      System.out.println("JUST SENT");
+      System.out.println(txs.get(txs.size() - 1));
     }
     
     // test wallet balance
-    assertTrue(wallet.getBalance(0).longValue() < balance.longValue());
-    assertTrue(wallet.getUnlockedBalance(0).longValue() < unlockedBalance.longValue());
+    assertTrue(wallet.getBalance(SRC_ACCOUNT).longValue() < balance.longValue());
+    assertTrue(wallet.getUnlockedBalance(SRC_ACCOUNT).longValue() < unlockedBalance.longValue());
     
     // test transactions
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      TestUtils.testTx(tx);
-      TestUtils.testSendTx(tx, canSplit);
-      assertNotNull(tx.getSubaddressIndex());
-      assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
-      if (Math.abs(sendAmount.subtract(tx.getAmount()).longValue()) >= TOTAL_ADDRESSES) { // send amounts may be slightly different
-        fail("Tx amounts are too different: " + sendAmount + " - " + tx.getAmount() + " = " + sendAmount.subtract(tx.getAmount())); // TODO: this assumes entire balance happened in one transaction
+      TestUtils.testSendTx(tx, config);
+      if (Math.abs(sendAmount.subtract(tx.getTotalAmount()).longValue()) >= TOTAL_ADDRESSES) { // send amounts may be slightly different
+        fail("Tx amounts are too different: " + sendAmount + " - " + tx.getTotalAmount() + " = " + sendAmount.subtract(tx.getTotalAmount())); // TODO: this assumes entire balance happened in one transaction
       }
       assertEquals(TOTAL_ADDRESSES, tx.getPayments().size());
       assertEquals(payments.size(), tx.getPayments().size());
