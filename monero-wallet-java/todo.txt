@@ -21,10 +21,10 @@ why is transaction amount 0 when destinations present
 why don't some transactions have destinations
 
 Monero-wallet-rpc suggested improvements:
+fee is included on incoming transactions from get_transfers but it is not in incoming_transfers; with incoming account 0 bug cannot reliably get fee
 get_transfers of account 0 all subaddresses does not return incoming transfers!
-must call get_transfer_by_txid in order to get outgoing destinations
-get_transfers with specific subaddresses will return txs at [0, 0] because outgoing txs do not indicate originating subaddresses reliably
 monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
+must call get_transfer_by_txid in order to get outgoing destinations
 address book entries work by index instead of id which changes
 optional param documentation missing
 tx_hash in incoming_transfers vs txid in get_transfers; standardize on tx_hash or tx_id
