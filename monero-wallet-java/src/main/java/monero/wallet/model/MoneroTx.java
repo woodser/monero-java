@@ -2,6 +2,7 @@
 package monero.wallet.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -229,9 +230,9 @@ public class MoneroTx {
    * Appends payments and outputs. Sets uninitialized fields to the given transaction. Validates initialized fields are equal.
    * 
    * @param tx is the transaction to merge into this one
-   * @param appendPayments specifies if payments should be appended or merged with existing payments
+   * @param addPayments specifies if payments should be appended or merged with existing payments
    */
-  public void merge(MoneroTx tx, boolean appendPayments) {
+  public void merge(MoneroTx tx, boolean addPayments) {
     if (id == null) id = tx.getId();
     else if (tx.getId() != null) assertEquals("IDs", id, tx.getId());
     if (srcAddress == null) srcAddress = tx.getSrcAddress();
@@ -241,10 +242,13 @@ public class MoneroTx {
     if (srcSubaddressIdx == null) srcSubaddressIdx = tx.getSrcSubaddressIdx();
     else if (tx.getSrcSubaddressIdx() != null) assertEquals("Subaddress indices", srcSubaddressIdx, tx.getSrcSubaddressIdx());
     if (totalAmount == null) totalAmount = tx.getTotalAmount();
-    else if (tx.getTotalAmount() != null) totalAmount = totalAmount.add(tx.getTotalAmount());
+    else if (tx.getTotalAmount() != null) {
+      if (addPayments) totalAmount = totalAmount.add(tx.getTotalAmount());
+      else assertTrue(totalAmount.compareTo(tx.getTotalAmount()) == 0);
+    }
     if (payments == null) setPayments(tx.getPayments());
     else if (tx.getPayments() != null) {
-      if (appendPayments) {
+      if (addPayments) {
         for (MoneroPayment payment : tx.getPayments()) {
           payment.setTx(this);
           payments.add(payment);
