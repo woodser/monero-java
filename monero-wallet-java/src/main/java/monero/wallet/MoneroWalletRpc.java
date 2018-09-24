@@ -168,7 +168,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses) {
     for (MoneroAccount account : getAccounts()) {
       if (account.getIndex() == accountIdx) {
-        account.setSubaddresses(getSubaddresses(accountIdx));
+        if (includeSubaddresses) account.setSubaddresses(getSubaddresses(accountIdx));
         return account;
       }
     }
