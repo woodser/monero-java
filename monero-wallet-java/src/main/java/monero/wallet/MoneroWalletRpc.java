@@ -351,8 +351,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       indices = getAllAccountAndSubaddressIndices();
     }
     
-    // collect unique transactions
+    // collect unique transactions across calls
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
+//    List<MoneroTx> getTransfersTxs = new ArrayList<MoneroTx>();
+//    List<MoneroTx> incomingTransfersTxs = new ArrayList<MoneroTx>();
+//    List<MoneroTx> bulkPaymentsTxs = new ArrayList<MoneroTx>();
     
     // get transactions using get_transfers
     for (Integer accountIdx : indices.keySet()) {
@@ -363,7 +366,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       for (String key : result.keySet()) {
         for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
           MoneroTx tx = txMapToTx(txMap);
-          addTx(txs, tx);
+          if (tx.getType() == MoneroTxType.INCOMING) {  // prevent duplicates when populated by incoming_transfers
+            tx.setTotalAmount(BigInteger.valueOf(0));
+            tx.setPayments(null);
+          }
+          addTx(txs, tx, true);
         }
       }
     }
@@ -386,7 +393,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         for (Map<String, Object> txMap : txMaps) {
           MoneroTx tx = txMapToTx(txMap, MoneroTxType.INCOMING);
           tx.getPayments().get(0).setAccountIdx(accountIdx);
-          addTx(txs, tx);
+          addTx(txs, tx, true);
         }
       }
       
@@ -416,10 +423,33 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           // List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
           // payments.add(payment);
           // tx.setPayments(payments);
-          addTx(txs, tx);
+          addTx(txs, tx, false);
         }
       }
     }
+    
+//    // merge all txs
+//    for (MoneroTx tx : getTransfersTxs) {
+//      if (tx.getId().equals("31eb308ce88446b37a12c99270813d993ef5769ddac047403e438945d2d508cb")) {
+//        System.out.println("getTransfersTxs");
+//        System.out.println(tx);
+//      }
+//      addTx(txs, tx, true);
+//    }
+//    for (MoneroTx tx : incomingTransfersTxs) {
+//      if (tx.getId().equals("31eb308ce88446b37a12c99270813d993ef5769ddac047403e438945d2d508cb")) {
+//        System.out.println("incomingTransfersTxs");
+//        System.out.println(tx);
+//      }
+//      addTx(txs, tx, true);
+//    }
+//    for (MoneroTx tx : bulkPaymentsTxs) {
+//      if (tx.getId().equals("31eb308ce88446b37a12c99270813d993ef5769ddac047403e438945d2d508cb")) {
+//        System.out.println("bulkPaymentsTxs");
+//        System.out.println(tx);
+//      }
+//      addTx(txs, tx, false);
+//    }
 
     // filter final result
     Collection<MoneroTx> toRemoves = new HashSet<MoneroTx>();
@@ -955,7 +985,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("destinations")) {
         assertTrue(isOutgoing);
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
-        tx.setPayments(payments);
         for (Map<String, Object> paymentMap : (List<Map<String, Object>>) val) {
           MoneroPayment destination = new MoneroPayment();
           payments.add(destination);
@@ -965,6 +994,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
             else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
           }
         }
+        tx.setPayments(payments);
       }
       else LOGGER.warn("Ignoring unexpected transaction field: '" + key + "'");
     }
@@ -1023,14 +1053,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return txs;
   }
   
-  private static void addTx(Collection<MoneroTx> txs, MoneroTx tx) {
+  private static void addTx(Collection<MoneroTx> txs, MoneroTx tx, boolean appendPayments) {
     assertNotNull(tx.getId());
     assertNotNull(tx.getType());
     MoneroTx mergedTx = null;
     for (MoneroTx aTx : txs) {
       if (aTx.getId().equals(tx.getId()) && aTx.getType() == tx.getType()) {
         assertFalse("Should not have outgoing txs with duplicate ids", MoneroUtils.isOutgoing(tx.getType()));
-        aTx.merge(tx);
+        aTx.merge(tx, appendPayments);
         mergedTx = aTx;
       }
     }

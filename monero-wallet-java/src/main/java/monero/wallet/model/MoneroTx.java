@@ -227,8 +227,9 @@ public class MoneroTx {
    * Appends payments and outputs. Sets uninitialized fields to the given transaction. Validates initialized fields are equal.
    * 
    * @param tx is the transaction to merge into this one
+   * @param appendPayments specifies if payments should be appended or merged with existing payments
    */
-  public void merge(MoneroTx tx) {
+  public void merge(MoneroTx tx, boolean appendPayments) {
     assertFalse("Only incoming transactions can be merged", MoneroUtils.isOutgoing(tx.getType()));
     if (id == null) id = tx.getId();
     else if (tx.getId() != null) assertEquals("IDs", id, tx.getId());
@@ -240,14 +241,17 @@ public class MoneroTx {
     else if (tx.getSrcSubaddressIdx() != null) assertEquals("Subaddress indices", srcSubaddressIdx, tx.getSrcSubaddressIdx());
     if (totalAmount == null) totalAmount = tx.getTotalAmount();
     else if (tx.getTotalAmount() != null) totalAmount = totalAmount.add(tx.getTotalAmount());
-    if (payments == null) payments = tx.getPayments();
+    if (payments == null) setPayments(tx.getPayments());
     else if (tx.getPayments() != null) {
-//      payments.addAll(tx.getPayments());
-      for (MoneroPayment paymentA : payments) {
-        for (MoneroPayment paymentB : tx.getPayments()) {
-          if (paymentA.getAccountIdx() == paymentB.getAccountIdx() && paymentA.getSubaddressIdx() == paymentB.getSubaddressIdx()) {
-            paymentA.merge(paymentB);
-          }
+      if (appendPayments) {
+        for (MoneroPayment payment : tx.getPayments()) {
+          payment.setTx(this);
+          payments.add(payment);
+        }
+      } else {
+        assertEquals(payments.size(), tx.getPayments().size());
+        for (int i = 0; i < payments.size(); i++) {
+          payments.get(i).merge(tx.getPayments().get(i));
         }
       }
     }

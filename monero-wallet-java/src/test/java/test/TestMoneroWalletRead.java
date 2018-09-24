@@ -298,8 +298,10 @@ public class TestMoneroWalletRead {
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       TestUtils.testGetTx(tx, false);
-      if (!MoneroUtils.isOutgoing(tx.getType()) && tx.getSrcAccountIdx() != 0 && tx.getSrcSubaddressIdx() != 0) {
-        nonDefaultIncoming = true;
+      if (!MoneroUtils.isOutgoing(tx.getType())) {
+        for (MoneroPayment payment : tx.getPayments()) {
+         if (payment.getAccountIdx() != 0 && payment.getSubaddressIdx() != 0) nonDefaultIncoming = true;
+        }
       }
     }
     assertTrue("No incoming transactions found in non-default account and subaddress; run testSendToMultiple() first", nonDefaultIncoming);
