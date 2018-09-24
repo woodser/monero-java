@@ -486,10 +486,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     filter.setTxIds(Arrays.asList(tx.getId()));
     List<MoneroTx> filtered = getTxs(filter);
     assertEquals(1, filtered.size());
-    
-    System.out.println("MERGING");
-    System.out.println(tx);
-    System.out.println(filtered.get(0));
     tx.merge(getTxs(filter).get(0), false); // TODO: need to make retrieval by id much more efficient
     return tx;
   }
