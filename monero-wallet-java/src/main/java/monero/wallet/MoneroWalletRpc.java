@@ -940,7 +940,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (key.equalsIgnoreCase("fee")) tx.setFee((BigInteger) val);
       else if (key.equalsIgnoreCase("height")) tx.setHeight(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("block_height")) tx.setHeight(((BigInteger) val).intValue());
-      else if (key.equalsIgnoreCase("note")) tx.setNote((String) val);
+      else if (key.equalsIgnoreCase("note")) if (isOutgoing) tx.setNote((String) val); else tx.setNote(null);
       else if (key.equalsIgnoreCase("timestamp")) tx.setTimestamp(((BigInteger) val).longValue());
       else if (key.equalsIgnoreCase("txid")) tx.setId((String) val);
       else if (key.equalsIgnoreCase("tx_hash")) tx.setId((String) val);
@@ -959,11 +959,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         payment.setAmount((BigInteger) val);
       }
       else if (key.equals("address")) {
-        if (isOutgoing) tx.setSrcAddress((String) val);
-        else {
-          if (payment == null) payment = new MoneroPayment();
-          payment.setAddress((String) val);
-        }
+        if (payment == null) payment = new MoneroPayment();
+        payment.setAddress((String) val);
       }
       else if (key.equals("spent")) {
         assertFalse(isOutgoing);
