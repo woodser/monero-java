@@ -45,7 +45,6 @@ public class TestMoneroWalletRead {
   
   private MoneroWallet wallet;
   private static final String SAMPLE_ADDRESS = "58bf9MfrBNDXSqCzK6snxSXaJHehLTnvx3BdS6qMkYAsW8P5kvRVq8ePbGQ7mfAeYfC7QELPhpQBe2C9bqCrqeesUsifaWw";
-  //private static final Logger LOGGER = Logger.getLogger(TestMoneroWalletRead.class);
 
   @Before
   public void setup() throws Exception {
