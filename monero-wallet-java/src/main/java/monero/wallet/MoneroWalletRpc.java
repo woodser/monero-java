@@ -415,8 +415,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         // interpret get_bulk_payments response
         List<Map<String, Object>> paymentMaps = (List<Map<String, Object>>) result.get("payments");
         for (Map<String, Object> paymentMap : paymentMaps) {
-          MoneroTx tx = txMapToTx(paymentMap);
-          tx.setType(MoneroTxType.INCOMING);
+          MoneroTx tx = txMapToTx(paymentMap, MoneroTxType.INCOMING);
           // payment data is redundant with get_transfers rpc call, so it's not added because merging would create duplicates
           // MoneroPayment payment = new MoneroPayment();
           // payment.setAmount((BigInteger) paymentMap.get("amount"));
