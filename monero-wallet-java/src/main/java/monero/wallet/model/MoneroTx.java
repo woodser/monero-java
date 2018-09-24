@@ -2,12 +2,9 @@
 package monero.wallet.model;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 import java.math.BigInteger;
 import java.util.List;
-
-import monero.utils.MoneroUtils;
 
 /**
  * Represents a transaction on the Monero network.
@@ -230,7 +227,6 @@ public class MoneroTx {
    * @param appendPayments specifies if payments should be appended or merged with existing payments
    */
   public void merge(MoneroTx tx, boolean appendPayments) {
-    assertFalse("Only incoming transactions can be merged", MoneroUtils.isOutgoing(tx.getType()));
     if (id == null) id = tx.getId();
     else if (tx.getId() != null) assertEquals("IDs", id, tx.getId());
     if (srcAddress == null) srcAddress = tx.getSrcAddress();

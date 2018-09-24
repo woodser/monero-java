@@ -1,7 +1,6 @@
 package monero.wallet.model;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
@@ -96,24 +95,15 @@ public class MoneroPayment {
    * @param tx is the transaction to merge into this one
    */
   public void merge(MoneroPayment payment) {
-    assertNotNull(accountIdx);
-    assertEquals(accountIdx, payment.getAccountIdx());
-    assertNotNull(subaddressIdx);
-    assertEquals(subaddressIdx, payment.getSubaddressIdx());
     assertEquals(tx.getId(), payment.getTx().getId());
+    if (accountIdx == null) accountIdx = payment.getAccountIdx();
+    else if (payment.getAccountIdx() != null) assertEquals("Account indices", accountIdx, payment.getAccountIdx());
+    if (subaddressIdx == null) subaddressIdx = payment.getSubaddressIdx();
+    else if (payment.getSubaddressIdx() != null) assertEquals("Subaddress indices", subaddressIdx, payment.getSubaddressIdx());
     if (address == null) address = payment.getAddress();
     else if (payment.getAddress() != null) assertEquals("Address", address, payment.getAddress());
     if (amount == null) amount = payment.getAmount();
-    else if (payment.getAmount() != null) {
-      if (amount.compareTo(payment.getAmount()) != 0) {
-        System.out.println("boom");
-        System.out.println(amount);
-        System.out.println(payment.getAmount());
-        System.out.println(tx);
-        System.out.println(payment.getTx());
-      }
-      assertTrue("Amounts", amount.compareTo(payment.getAmount()) == 0);
-    }
+    else if (payment.getAmount() != null) assertTrue("Amounts", amount.compareTo(payment.getAmount()) == 0);
     if (isSpent == null) isSpent = payment.getIsSpent();
     else if (payment.getIsSpent() != null) assertEquals("Is spents", isSpent, payment.getIsSpent());
   }

@@ -166,9 +166,9 @@ public class TestMoneroWalletWrite {
     boolean sufficientBalance = false;
     MoneroAccount fromAccount = null;
     MoneroSubaddress fromSubaddress = null;
-    List<MoneroAccount> accounts = wallet.getAccounts();
+    List<MoneroAccount> accounts = wallet.getAccounts(true);
     for (MoneroAccount account : accounts) {
-      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
+      List<MoneroSubaddress> subaddresses = account.getSubaddresses();
       for (int i = 1; i < subaddresses.size(); i++) {
         if (subaddresses.get(i).getBalance().compareTo(MAX_FEE) > 0) sufficientBalance = true;
         if (subaddresses.get(i).getUnlockedBalance().compareTo(MAX_FEE) > 0) {
@@ -206,19 +206,20 @@ public class TestMoneroWalletWrite {
     // test transactions
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      TestUtils.testTx(tx);
-      TestUtils.testSendTx(tx, canSplit);
-      assertEquals(fromAccount.getIndex(), tx.getAccountIndex());
-      assertNotNull(tx.getSubaddressIndex());
-      assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
-      assertEquals(sendAmount, tx.getAmount());
+      TestUtils.testSendTx(tx, config);
+      assertEquals(fromAccount.getIndex(), tx.getSrcAccountIdx());
+      assertEquals((Integer) 0, tx.getSrcSubaddressIdx()); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
+      assertEquals(sendAmount, tx.getTotalAmount());
       
       // test tx payments
       assertEquals(1, tx.getPayments().size());
       for (MoneroPayment payment : tx.getPayments()) {
+        assertTrue(tx == payment.getTx());
         assertEquals(address, payment.getAddress());
         assertEquals(sendAmount, payment.getAmount());
-        assertTrue(tx == payment.getTx());
+        assertNull(payment.getAccountIdx());
+        assertNull(payment.getSubaddressIdx());
+        assertNull(payment.getIsSpent());
       }
     }
   }

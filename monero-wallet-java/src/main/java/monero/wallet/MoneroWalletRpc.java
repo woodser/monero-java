@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -439,6 +438,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public MoneroTx send(MoneroTxConfig config) {
     
+    // determine account and subaddresses to send from
+    Integer accountIdx = config.getAccountIndex();
+    if (accountIdx == null) throw new MoneroException("Must specify account index to send from");
+    Collection<Integer> subaddressIndices = config.getSubaddressIndices();
+    if (subaddressIndices == null) subaddressIndices = getSubaddressIndices(accountIdx);    
+    
     // build parameter map
     Map<String, Object> paramMap = new HashMap<String, Object>();
     List<Map<String, Object>> destinationMaps = new ArrayList<Map<String, Object>>();
@@ -449,8 +454,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       destinationMap.put("amount", destination.getAmount());
       destinationMaps.add(destinationMap);
     }
-    paramMap.put("account_index", config.getAccountIndex());
-    paramMap.put("subaddr_indices", config.getSubaddressIndices());
+    paramMap.put("account_index", accountIdx);
+    paramMap.put("subaddr_indices", subaddressIndices);
     paramMap.put("payment_id", config.getPaymentId());
     paramMap.put("mixin", config.getMixin());
     paramMap.put("unlock_time", config.getUnlockTime());
@@ -464,16 +469,26 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
-    asdfasdf
-    MoneroTx tx = txMapToTx(txMap, true);
-    tx.setSrcAccountIdx(config.getAccountIndex() == null ? 0 : config.getAccountIndex());
-    tx.setSrcSubaddressIdx(0); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
-    tx.setPayments(config.getDestinations()); // TODO: test that txMap.get("amount") == sum of payments
-    tx.setMixin(config.getMixin());
-    tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
-    tx.setType(MoneroTxType.PENDING);
-    tx.setIsDoubleSpend(false);
+    MoneroTx tx = txMapToTx(txMap, MoneroTxType.PENDING);
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setIncoming(false);
+    filter.setMempool(false);
+    filter.setTxIds(Arrays.asList(tx.getId()));
+    List<MoneroTx> filtered = getTxs(filter);
+    assertEquals(1, filtered.size());
+    System.out.println(tx);
+    System.out.println(filtered.get(0));
+    tx.merge(getTxs(filter).get(0), false); // TODO: need to make retrieval by id much more efficient
+    System.out.println(tx);
     return tx;
+    
+//    tx.setSrcAccountIdx(accountIdx);
+//    tx.setSrcSubaddressIdx(0); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
+//    tx.setPayments(config.getDestinations()); // TODO: test that txMap.get("amount") == sum of payments
+//    tx.setMixin(config.getMixin());
+//    tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
+//    tx.setIsDoubleSpend(false);
+//    return tx;
   }
 
   @SuppressWarnings("unchecked")
