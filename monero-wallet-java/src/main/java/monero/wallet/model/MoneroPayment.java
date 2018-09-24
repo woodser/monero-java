@@ -60,8 +60,8 @@ public class MoneroPayment {
     return tx;
   }
 
-  public void setTx(MoneroTx transaction) {
-    this.tx = transaction;
+  public void setTx(MoneroTx tx) {
+    this.tx = tx;
   }
 
   public String getAddress() {
@@ -114,10 +114,6 @@ public class MoneroPayment {
       }
       assertTrue("Amounts", amount.compareTo(payment.getAmount()) == 0);
     }
-    if (accountIdx == null) accountIdx = payment.getAccountIdx();
-    else if (payment.getAccountIdx() != null) assertEquals("Account indices", accountIdx, payment.getAccountIdx());
-    if (subaddressIdx == null) subaddressIdx = payment.getSubaddressIdx();
-    else if (payment.getSubaddressIdx() != null) assertEquals("Subaddress indices", subaddressIdx, payment.getSubaddressIdx());
     if (isSpent == null) isSpent = payment.getIsSpent();
     else if (payment.getIsSpent() != null) assertEquals("Is spents", isSpent, payment.getIsSpent());
   }
