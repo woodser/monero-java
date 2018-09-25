@@ -51,7 +51,7 @@ public class TestUtils {
   public static final Integer MIXIN = 6;
   
   // logger configuration
-  private static final Logger LOGGER = Logger.getLogger(TestUtils.class);
+  public static final Logger LOGGER = Logger.getLogger(TestUtils.class);
   static {
     PropertyConfigurator.configure("src/main/resources/log4j.properties");
   }
