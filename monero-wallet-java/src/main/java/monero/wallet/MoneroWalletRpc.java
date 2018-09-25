@@ -390,11 +390,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
         // interpret incoming_transfers response
         List<Map<String, Object>> txMaps = (List<Map<String, Object>>) result.get("transfers");
-        if (txMaps == null) return new ArrayList<MoneroTx>();
-        for (Map<String, Object> txMap : txMaps) {
-          MoneroTx tx = txMapToTx(txMap, MoneroTxType.INCOMING);
-          tx.getPayments().get(0).setAccountIdx(accountIdx);
-          addTx(txs, tx, true);
+        if (txMaps != null) {
+          for (Map<String, Object> txMap : txMaps) {
+            MoneroTx tx = txMapToTx(txMap, MoneroTxType.INCOMING);
+            tx.getPayments().get(0).setAccountIdx(accountIdx);
+            addTx(txs, tx, true);
+          }
         }
       }
       

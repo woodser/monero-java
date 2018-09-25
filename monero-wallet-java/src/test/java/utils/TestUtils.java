@@ -49,6 +49,7 @@ public class TestUtils {
   
   // test constants
   public static final Integer MIXIN = 6;
+  public static final BigInteger MAX_FEE = BigInteger.valueOf(5000000).multiply(BigInteger.valueOf(20000));
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class);
@@ -108,9 +109,16 @@ public class TestUtils {
     assertTrue(account.getUnlockedBalance().doubleValue() >= 0);
     assertFalse(account.isMultisigImportNeeded());
     if (account.getSubaddresses() != null) {
+      BigInteger balance = BigInteger.valueOf(0);
+      BigInteger unlockedBalance = BigInteger.valueOf(0);
       for (int i = 0; i < account.getSubaddresses().size(); i++) {
         testSubaddress(account.getSubaddresses().get(i));
+        assertEquals((Integer) i, account.getSubaddresses().get(i).getIndex());
+        balance = balance.add(account.getSubaddresses().get(i).getBalance());
+        unlockedBalance = unlockedBalance.add(account.getSubaddresses().get(i).getUnlockedBalance());
       }
+      assertEquals(account.getBalance(), balance);
+      assertEquals(account.getUnlockedBalance(), unlockedBalance);
     }
   }
   
