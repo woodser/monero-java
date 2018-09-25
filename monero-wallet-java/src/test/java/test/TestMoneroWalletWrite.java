@@ -237,16 +237,27 @@ public class TestMoneroWalletWrite {
   private void testSendToMultiple(boolean canSplit) {
     
     // test constants
-    int SRC_ACCOUNT = 2;
     int NUM_ACCOUNTS = 5;
     int NUM_ADDRESSES_PER_ACCOUNT = 3;
     int TOTAL_ADDRESSES = NUM_ACCOUNTS * NUM_ADDRESSES_PER_ACCOUNT;
     
-    // get amount to send per subaddress
-    BigInteger balance = wallet.getBalance(SRC_ACCOUNT);
-    BigInteger unlockedBalance = wallet.getUnlockedBalance(SRC_ACCOUNT);
-    assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", balance.longValue() > 0);
-    assertTrue("Wallet is waiting on unlocked funds", unlockedBalance.longValue() > 0);
+    // send funds from first account with unlocked funds
+    MoneroAccount srcAccount = null;
+    boolean hasBalance = true;
+    for (MoneroAccount account : wallet.getAccounts()) {
+      if (account.getBalance().compareTo(BigInteger.valueOf(0)) > 0) hasBalance = true;
+      if (account.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) {
+        srcAccount = account;
+        break;
+      }
+    }
+    assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", hasBalance);
+    assertNotNull("Wallet is waiting on unlocked funds", srcAccount);
+    
+    // get amount to send per address
+    TestUtils.LOGGER.info("testSendToMultiple() from account " + srcAccount.getIndex());  // TODO: downgrade to debug
+    BigInteger balance = srcAccount.getBalance();
+    BigInteger unlockedBalance = srcAccount.getUnlockedBalance();
     BigInteger sendAmount = unlockedBalance.divide(BigInteger.valueOf(SEND_DIVISOR));
     BigInteger sendAmountPerSubaddress = sendAmount.divide(BigInteger.valueOf(TOTAL_ADDRESSES));
     
@@ -276,21 +287,18 @@ public class TestMoneroWalletWrite {
     }
     MoneroTxConfig config = new MoneroTxConfig();
     config.setMixin(TestUtils.MIXIN);
-    config.setAccountIndex(SRC_ACCOUNT);
+    config.setAccountIndex(srcAccount.getIndex());
     config.setDestinations(payments);
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     if (canSplit) {
       txs.addAll(wallet.sendSplit(config));
     } else {
-      System.out.println("SENDING...");
       txs.add(wallet.send(config));
-      System.out.println("JUST SENT");
-      System.out.println(txs.get(txs.size() - 1));
     }
     
-    // test wallet balance
-    assertTrue(wallet.getBalance(SRC_ACCOUNT).longValue() < balance.longValue());
-    assertTrue(wallet.getUnlockedBalance(SRC_ACCOUNT).longValue() < unlockedBalance.longValue());
+    // test that wallet balance decreased
+    assertTrue(wallet.getBalance(srcAccount.getIndex()).longValue() < balance.longValue());
+    assertTrue(wallet.getUnlockedBalance(srcAccount.getIndex()).longValue() < unlockedBalance.longValue());
     
     // test transactions
     assertFalse(txs.isEmpty());

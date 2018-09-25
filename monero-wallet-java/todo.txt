@@ -22,6 +22,7 @@ why is transaction amount 0 when destinations present
 why don't some transactions have destinations
 
 Monero-wallet-rpc suggested improvements:
+sending from account 1 says has unlocked balance but get -16 tx not possible.  Fixes itself after confirmations
 it needs to be documented that rescan_bc destroys wallet cache (destination addresses, etc)
 incoming_transfers d59fe775249465621d7736b53c0cb488e03e4da8dae647a13492ea51d7685c62 totalAmount is 0?
 outgoing destinations only known after first confirmation
