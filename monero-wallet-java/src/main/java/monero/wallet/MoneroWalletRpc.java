@@ -1055,6 +1055,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return txs;
   }
   
+  /**
+   * Merges a transaction into a unique set of transactions.
+   * 
+   * @param txs are the collection of transactions to merge into
+   * @param tx is the transaction to merge into the collection
+   * @param addPayments specifies if payments in the tx should be appended or merged into the merged transaction
+   */
   private static void addTx(Collection<MoneroTx> txs, MoneroTx tx, boolean addPayments) {
     assertNotNull(tx.getId());
     assertNotNull(tx.getType());
@@ -1067,44 +1074,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
     }
     if (mergedTx == null) txs.add(tx);  // add tx if it wasn't merged
-  }
-  
-  /**
-   * Merges a transaction into a collection of unique transactions.
-   * 
-   * @param txTypeMap is the collection of unique transactions (Map<type, Map<id, Map<accountIdx, Map<subaddressIdx, MoneroTx>>>>)
-   * @param tx is the transaction to merge into the collection
-   */
-  private static void addTx(Map<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>> txTypeMap, MoneroTx tx) {
-    
-    // test the transaction
-    if (tx.getType() == null) throw new MoneroException("Transaction type is null: \n" + tx);
-    if (tx.getId() == null) throw new MoneroException("Transaction id is null: \n" + tx);
-    if (tx.getAccountIndex() == null) throw new MoneroException("Transaction account index cannot be null: \n" + tx);
-    if (tx.getSubaddressIndex() == null) throw new MoneroException("Transaction subaddress index cannot be null: \n" + tx);
-    
-    // merge transaction into map
-    Map<String, Map<Integer, Map<Integer, MoneroTx>>> idMap = txTypeMap.get(tx.getType());
-    if (idMap == null) {
-      idMap = new HashMap<String, Map<Integer, Map<Integer, MoneroTx>>>();
-      txTypeMap.put(tx.getType(), idMap);
-    }
-    Map<Integer, Map<Integer, MoneroTx>> accountMap = idMap.get(tx.getId());
-    if (accountMap == null) {
-      accountMap = new HashMap<Integer, Map<Integer, MoneroTx>>();
-      idMap.put(tx.getId(), accountMap);
-    }
-    Map<Integer, MoneroTx> subaddressMap = accountMap.get(tx.getAccountIndex());
-    if (subaddressMap == null) {
-      subaddressMap = new HashMap<Integer, MoneroTx>();
-      accountMap.put(tx.getAccountIndex(), subaddressMap);
-    }
-    MoneroTx mergedTx = subaddressMap.get(tx.getSubaddressIndex());
-    if (mergedTx == null) {
-      subaddressMap.put(tx.getSubaddressIndex(), tx);
-    } else {
-      mergedTx.merge(tx);
-    }
   }
 
   private static MoneroTxType getTxType(String type) {
