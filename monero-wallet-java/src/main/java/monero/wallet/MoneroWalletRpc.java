@@ -528,7 +528,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<MoneroTx> txs = txListMapToTxs(resultMap, accountIdx, MoneroTxType.PENDING);
     for (MoneroTx tx : txs) {
-      //tx.setMixin(config.getMixin());
+      tx.setMixin(config.getMixin());
     }
     
     // merge txs for complete data
@@ -1031,20 +1031,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<BigInteger> amounts = (List<BigInteger>) txListMap.get("amount_list");
     //String multisigTxSet = (String) resultMap.get("multisig_txset");  // TODO: what to do with this?
     
-    if (keys == null) {
-      System.out.println(txListMap);
-    }
-    
-    System.out.println(ids);
-    System.out.println(keys);
-    System.out.println(blobs);
-    System.out.println(metadatas);
-    System.out.println(fees);
-    System.out.println(amounts);
-    
     // ensure lists are same size
     Set<Integer> sizes = new HashSet<Integer>();
-    sizes.addAll(Arrays.asList(ids.size(), keys.size(), blobs.size(), metadatas.size(), fees.size(), amounts.size()));
+    sizes.addAll(Arrays.asList(ids.size(), blobs.size(), metadatas.size(), fees.size(), amounts.size()));
+    if (keys != null) sizes.add(keys.size());
     assertEquals("Response lists are different sizes", 1, sizes.size());
     
     // build transactions
@@ -1057,7 +1047,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setTotalAmount(amounts.get(i));
       tx.setFee(fees.get(i));
       tx.setId(ids.get(i));
-      tx.setKey(keys.get(i));
+      if (keys != null) tx.setKey(keys.get(i));
       tx.setBlob(blobs.get(i));
       tx.setMetadata(metadatas.get(i));
       tx.setType(type);
