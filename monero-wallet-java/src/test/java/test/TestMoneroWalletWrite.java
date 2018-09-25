@@ -206,7 +206,7 @@ public class TestMoneroWalletWrite {
     // test transactions
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      TestUtils.testSendTx(tx, config);
+      TestUtils.testSendTx(tx, config, canSplit);
       assertEquals(fromAccount.getIndex(), tx.getSrcAccountIdx());
       assertEquals((Integer) 0, tx.getSrcSubaddressIdx()); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
       assertEquals(sendAmount, tx.getTotalAmount());
@@ -303,7 +303,7 @@ public class TestMoneroWalletWrite {
     // test transactions
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      TestUtils.testSendTx(tx, config);
+      TestUtils.testSendTx(tx, config, canSplit);
       if (Math.abs(sendAmount.subtract(tx.getTotalAmount()).longValue()) >= TOTAL_ADDRESSES) { // send amounts may be slightly different
         fail("Tx amounts are too different: " + sendAmount + " - " + tx.getTotalAmount() + " = " + sendAmount.subtract(tx.getTotalAmount())); // TODO: this assumes entire balance happened in one transaction
       }
@@ -359,7 +359,7 @@ public class TestMoneroWalletWrite {
       fromSubaddressIndices.add(unlockedSubaddresses.get(i).getIndex());
     }
     
-    System.out.println("Sending from [" + srcAccount.getIndex() + "," + fromSubaddressIndices);
+    System.out.println("Sending from [" + srcAccount.getIndex() + "," + fromSubaddressIndices + "]");
     
     // determine the amount to send (slightly less than the sum to send from)
     BigInteger sendAmount = BigInteger.valueOf(0);
@@ -400,15 +400,17 @@ public class TestMoneroWalletWrite {
     // test the resulting transactions
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      TestUtils.testSendTx(tx, config);
+      TestUtils.testSendTx(tx, config, canSplit);
       if (Math.abs(sendAmount.subtract(tx.getTotalAmount()).longValue()) >= 10) { // send amounts may be slightly different
         fail("Tx amounts are too different: " + sendAmount + " - " + tx.getTotalAmount() + " = " + sendAmount.subtract(tx.getTotalAmount())); // TODO: this assumes amount is in one transaction
       }
-      assertEquals(1, tx.getPayments().size());
-      for (MoneroPayment payment : tx.getPayments()) {
-        assertEquals(address, payment.getAddress());
-        assertEquals(sendAmount, payment.getAmount());
-        assertTrue(tx == payment.getTx());
+      if (tx.getPayments() != null) {
+        assertEquals(1, tx.getPayments().size());
+        for (MoneroPayment payment : tx.getPayments()) {
+          assertEquals(address, payment.getAddress());
+          assertEquals(sendAmount, payment.getAmount());
+          assertTrue(tx == payment.getTx());
+        }
       }
     }
   }
