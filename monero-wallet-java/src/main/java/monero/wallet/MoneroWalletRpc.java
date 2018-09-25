@@ -1044,14 +1044,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return txs;
   }
   
-  private static void addTx(Collection<MoneroTx> txs, MoneroTx tx, boolean appendPayments) {
+  private static void addTx(Collection<MoneroTx> txs, MoneroTx tx, boolean addPayments) {
     assertNotNull(tx.getId());
     assertNotNull(tx.getType());
     MoneroTx mergedTx = null;
     for (MoneroTx aTx : txs) {
       if (aTx.getId().equals(tx.getId()) && aTx.getType() == tx.getType()) {
         assertFalse("Should not have outgoing txs with duplicate ids", MoneroUtils.isOutgoing(tx.getType()));
-        aTx.merge(tx, appendPayments);
+        aTx.merge(tx, addPayments);
         mergedTx = aTx;
       }
     }
