@@ -656,6 +656,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return txs;
   }
 
+  // TODO: v0.13.0 has input params
+  // TODO: unable to properly test because no dust to sweep
   @SuppressWarnings("unchecked")
   @Override
   public List<MoneroTx> sweepDust() {
@@ -665,15 +667,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
     // interpret response
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    List<String> txIds = (List<String>) resultMap.get("tx_hash_list");
-    List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    if (txIds == null) return txs;
-    for (String txId : txIds) {
-      MoneroTx tx = new MoneroTx();
-      tx.setId(txId);
-      txs.add(tx);
+    List<String> ids = (List<String>) resultMap.get("tx_hash_list");
+    if (ids == null) return new ArrayList<MoneroTx>();
+    else {
+      MoneroTxFilter filter = new MoneroTxFilter();
+      filter.setTxIds(ids);
+      filter.setIncoming(false);
+      filter.setMempool(false);
+      List<MoneroTx> txs = getTxs(filter);
+      assertEquals("Sweep dust transactions not fetched: " + ids, ids.size(), txs.size());
+      return txs;
     }
-    return txs;
   }
 
   @Override
