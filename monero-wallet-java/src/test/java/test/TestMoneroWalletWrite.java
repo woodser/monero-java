@@ -319,7 +319,7 @@ public class TestMoneroWalletWrite {
   
   @Test
   public void testSendFromMultiple() {
-    testSendFromMultiple(4, false);
+    testSendFromMultiple(4, false); // TODO: auto send from
   }
   
   @Test
