@@ -582,9 +582,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // sweep from each account and collect unique transactions
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    Map<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>> txTypeMap = new HashMap<MoneroTxType, Map<String, Map<Integer, Map<Integer, MoneroTx>>>>();
     for (Integer accountIdx : accountIndices) {
       params.put("account_index", accountIdx);
+      
+      // collect transactions for account
+      List<MoneroTx> accountTxs = new ArrayList<MoneroTx>();
       
       // determine subaddresses to sweep from; default to all with unlocked balance if not specified
       List<Integer> subaddressIndices = new ArrayList<Integer>();
@@ -600,13 +602,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (subaddressIndices.isEmpty()) throw new MoneroException("No subaddresses to sweep from");
       
       // sweep each subaddress individually
-      List<MoneroTx> accountTxs = new ArrayList<MoneroTx>();
       if (config.getSweepEachSubaddress() == null || config.getSweepEachSubaddress()) {
         for (Integer subaddressIdx : subaddressIndices) {
           params.put("subaddr_indices", Arrays.asList(subaddressIdx));
           Map<String, Object> respMap = rpc.sendRpcRequest("sweep_all", params);
           Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-          accountTxs.addAll(txListMapToTxs(resultMap, accountIdx, MoneroTxType.OUTGOING));
+          accountTxs.addAll(txListMapToTxs(resultMap, accountIdx, MoneroTxType.PENDING));
         }
       }
       
@@ -615,45 +616,30 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         params.put("subaddr_indices", Arrays.asList(subaddressIndices));
         Map<String, Object> respMap = rpc.sendRpcRequest("sweep_all", params);
         Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-        accountTxs.addAll(txListMapToTxs(resultMap, accountIdx, MoneroTxType.OUTGOING));
+        accountTxs.addAll(txListMapToTxs(resultMap, accountIdx, MoneroTxType.PENDING));
       }
       
-      // collect ids
+      // customize and merge transactions from account
+      for (MoneroTx tx : accountTxs) {
+        tx.setMixin(config.getMixin());
+        addTx(txs, tx, false);
+      }
+      
+      // fetch transactions by id and merge complete data
       assertFalse(accountTxs.isEmpty());
       List<String> ids = new ArrayList<String>();
-      for (MoneroTx tx : accountTxs) {
-        if (tx.getId() != null) ids.add(tx.getId());
-      }
+      for (MoneroTx tx : accountTxs) if (tx.getId() != null) ids.add(tx.getId());
       if (!ids.isEmpty()) assertEquals(accountTxs.size(), ids.size());
-      
-      // fetch transaction by id for complete data
       if (!ids.isEmpty()) {
-        for (MoneroTx tx : accountTxs) addTx(txTypeMap, tx);
         MoneroTxFilter filter = new MoneroTxFilter();
         filter.setAccountIndex(accountIdx);
         filter.setTxIds(ids);
         filter.setIncoming(false);
-        for (MoneroTx tx : getTxs(filter)) addTx(txTypeMap, tx);
-      } else {
-        txs.addAll(accountTxs);
+        for (MoneroTx tx : getTxs(filter)) addTx(txs, tx, false);
       }
     }
     
-    // return tx list if ids not returned (e.g. do not relay) // TODO: correct?
-    if (txTypeMap.isEmpty()) {
-      assertFalse(txs.isEmpty());
-      return txs;
-    }
-    
-    // collect all transactions as list
-    assertTrue(txs.isEmpty());
-    for (Map<String, Map<Integer, Map<Integer, MoneroTx>>> idMap : txTypeMap.values()) {
-      for (Map<Integer, Map<Integer, MoneroTx>> accountMap : idMap.values()) {
-        for (Map<Integer, MoneroTx> subaddressMap : accountMap.values()) {
-          txs.addAll(subaddressMap.values());
-        }
-      }
-    }
+    // return transactions from all accounts
     return txs;
   }
 
@@ -1073,7 +1059,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     MoneroTx mergedTx = null;
     for (MoneroTx aTx : txs) {
       if (aTx.getId().equals(tx.getId()) && aTx.getType() == tx.getType()) {
-        assertFalse("Should not have outgoing txs with duplicate ids", MoneroUtils.isOutgoing(tx.getType()));
         aTx.merge(tx, addPayments);
         mergedTx = aTx;
       }

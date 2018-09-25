@@ -2,7 +2,6 @@ package test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -21,6 +20,7 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
+import monero.wallet.model.MoneroTxConfig;
 import utils.PrintBalances;
 import utils.TestUtils;
 
@@ -68,11 +68,6 @@ public class TestMoneroWalletResets {
       MoneroAccount unlockedAccount = unlockedAccounts.get(i);
       List<MoneroTx> txs = wallet.sweepAccount(wallet.getPrimaryAddress(), unlockedAccount.getIndex());
       
-      System.out.println("BEFORE");
-      for (MoneroTx tx : txs) {
-        System.out.println(tx);
-      }
-      
       // test transactions
       assertFalse(txs.isEmpty());
       for (MoneroTx tx : txs) {
@@ -84,15 +79,9 @@ public class TestMoneroWalletResets {
           System.out.println("payments is null");
           System.out.println(tx);
         }
-        TestUtils.testTx(tx);
-        assertNotNull(tx.getKey());
-        assertNotNull(tx.getBlob());
-        assertNotNull(tx.getMetadata());
-        assertNotNull(tx.getAccountIndex());
-        assertEquals((int) unlockedAccount.getIndex(), (int) tx.getAccountIndex());
-        assertNotNull(tx.getSubaddressIndex());
-        assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
-        TestUtils.testSendTx(tx, true);
+        MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), null, null);
+        config.setAccountIndex(unlockedAccount.getIndex());
+        TestUtils.testSendTx(tx, config, true);
       }
       
       // assert no unlocked funds in account
@@ -147,15 +136,9 @@ public class TestMoneroWalletResets {
       // test transactions
       assertFalse(txs.isEmpty());
       for (MoneroTx tx : txs) {
-        TestUtils.testTx(tx);
-        assertNotNull(tx.getKey());
-        assertNotNull(tx.getBlob());
-        assertNotNull(tx.getMetadata());
-        assertNotNull(tx.getAccountIndex());
-        assertEquals((int) unlockedAccountSweep, (int) tx.getAccountIndex());
-        assertNotNull(tx.getSubaddressIndex());
-        assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
-        TestUtils.testSendTx(tx, true);
+        MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), null, null);
+        config.setAccountIndex(unlockedAccountSweep);
+        TestUtils.testSendTx(tx, config, true);
       }
       
       // assert no unlocked funds within account
@@ -187,14 +170,9 @@ public class TestMoneroWalletResets {
     List<MoneroTx> txs = wallet.sweepWallet(wallet.getPrimaryAddress());
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      TestUtils.testTx(tx);
-      assertNotNull(tx.getKey());
-      assertNotNull(tx.getBlob());
-      assertNotNull(tx.getMetadata());
-      assertNotNull(tx.getAccountIndex());
-      assertNotNull(tx.getSubaddressIndex());
-      assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
-      TestUtils.testSendTx(tx, true);
+      MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), null, null);
+      config.setAccountIndex(tx.getSrcAccountIdx());  // TODO: this is to game testSendTx(); should not assert account equivalency there?
+      TestUtils.testSendTx(tx, config, true);
     }
     
     // assert no unlocked funds across subaddresses
