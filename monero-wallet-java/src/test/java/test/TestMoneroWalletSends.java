@@ -33,14 +33,14 @@ import utils.PrintBalances;
 import utils.TestUtils;
 
 /**
- * Tests modifying a Monero wallet (churning funds, creating accounts, tagging accounts, creating subaddresses, setting tx notes, etc).
+ * Tests sending funds from a Monero wallet.
  * 
- * These tests are separated because they rely on a balance, initiate transactions on the blockchain, and modify a test wallet state (TODO).
+ * These tests are separated because they rely on a balance and initiate transactions on the blockchain.
  * 
  * TODO: support / test send, sendSplit, and sweepAll from specific accounts and subaddresses
  * TODO: test sending with payment id
  */
-public class TestMoneroWalletWrite {
+public class TestMoneroWalletSends {
   
   private static final int SEND_DIVISOR = 2;
   private static final BigInteger MAX_FEE = BigInteger.valueOf(5000000).multiply(BigInteger.valueOf(10000));
@@ -54,100 +54,6 @@ public class TestMoneroWalletWrite {
   @After
   public void teardown() {
     PrintBalances.printBalances();
-  }
-
-  @Test
-  public void testCreateAccount() {
-    
-    // create account with null label
-    List<MoneroAccount> accountsBefore = wallet.getAccounts();
-    MoneroAccount createdAccount = wallet.createAccount(null);
-    TestUtils.testAccount(createdAccount);
-    assertNull(createdAccount.getLabel());
-    assertTrue(accountsBefore.size() == wallet.getAccounts().size() - 1);
-    
-    List<MoneroAccount> newAccounts = new ArrayList<MoneroAccount>();
-    
-    // create account with label
-    accountsBefore = wallet.getAccounts();
-    String label = UUID.randomUUID().toString();
-    createdAccount = wallet.createAccount(label);
-    newAccounts.add(createdAccount);
-    assertEquals(label, createdAccount.getLabel());
-    TestUtils.testAccount(createdAccount);
-    assertTrue(accountsBefore.size() == wallet.getAccounts().size() - 1);
-    
-    // create account with same label
-    createdAccount = wallet.createAccount(label);
-    newAccounts.add(createdAccount);
-    assertEquals(label, createdAccount.getLabel());
-    TestUtils.testAccount(createdAccount);
-    assertTrue(accountsBefore.size() == wallet.getAccounts().size() - 2);
-  }
-  
-  @Test
-  public void testAccountTags() {
-    
-    // test that null tag returns all accounts
-    List<MoneroAccount> accounts1 = wallet.getAccounts();
-    List<MoneroAccount> accounts2 = wallet.getAccounts(null);
-    assertEquals(accounts1, accounts2);
-    
-    // test that non-existing tag returns no accounts
-    try {
-      wallet.getAccounts("non_existing_tag");
-      fail("Should have thrown exception with unregistered tag");
-    } catch (MoneroRpcException e) {
-      assertEquals((int) -1, (int) e.getRpcCode());
-    }
-    
-    // tag and query accounts
-    assertTrue(accounts1.size() >= 3);
-    wallet.tagAccounts("my_tag", Arrays.asList(0, 1));
-    List<MoneroAccount> accounts = wallet.getAccounts("my_tag");
-    assertEquals(2, accounts.size());
-    assertEquals(accounts1.get(0), accounts.get(0));
-    assertEquals(accounts1.get(1), accounts.get(1));
-    
-    // untag and query accounts
-    wallet.untagAccounts(Arrays.asList(0, 1));
-    try {
-      wallet.getAccounts("my_tag");
-      fail("Should have thrown exception with unregistered tag");
-    } catch (MoneroRpcException e) {
-      assertEquals((int) -1, (int) e.getRpcCode());
-    }
-  }
-
-  @Test
-  public void testCreateSubaddress() {
-    
-    // create subaddresses across accounts
-    List<MoneroAccount> accounts = wallet.getAccounts();
-    if (accounts.size() < 2) wallet.createAccount();
-    accounts = wallet.getAccounts();
-    assertTrue(accounts.size() > 1);
-    for (int accountIdx = 0; accountIdx < 2; accountIdx++) {
-      
-      // create subaddress with no label
-      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(accountIdx);
-      MoneroSubaddress subaddress = wallet.createSubaddress(accountIdx, null);
-      assertEquals("", subaddress.getLabel());
-      TestUtils.testSubaddress(subaddress);
-      List<MoneroSubaddress> subaddressesNew = wallet.getSubaddresses(accountIdx);
-      assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
-      assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
-      
-      // create subaddress with label
-      subaddresses = wallet.getSubaddresses(accountIdx);
-      String uuid = UUID.randomUUID().toString();
-      subaddress = wallet.createSubaddress(accountIdx, uuid);
-      assertEquals(subaddress.getLabel(), uuid);
-      TestUtils.testSubaddress(subaddress);
-      subaddressesNew = wallet.getSubaddresses(accountIdx);
-      assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
-      assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
-    }
   }
   
   @Test
@@ -223,23 +129,28 @@ public class TestMoneroWalletWrite {
       }
     }
   }
-
+  
   @Test
   public void testSendToMultiple() {
-    testSendToMultiple(false);
+    testSendToMultiple(5, 3, false);
   }
   
   @Test
   public void testSendSplitToMultiple() {
-    testSendToMultiple(true);
+    testSendToMultiple(5, 3, true);
   }
   
-  private void testSendToMultiple(boolean canSplit) {
+  /**
+   * Fans funds from the first unlocked account across numerous accounts and subaddresses.
+   * 
+   * @param numAccounts is the number of accounts to receive funds
+   * @param numSubaddressesPerAccount is the number of subaddresses per account to receive funds
+   * @param canSplit specifies if the operation can be split into multiple transactions
+   */
+  private void testSendToMultiple(int numAccounts, int numSubaddressesPerAccount, boolean canSplit) {
     
     // test constants
-    int NUM_ACCOUNTS = 5;
-    int NUM_ADDRESSES_PER_ACCOUNT = 3;
-    int TOTAL_ADDRESSES = NUM_ACCOUNTS * NUM_ADDRESSES_PER_ACCOUNT;
+    int totalSubaddresses = numAccounts * numSubaddressesPerAccount;
     
     // send funds from first account with unlocked funds
     MoneroAccount srcAccount = null;
@@ -259,22 +170,22 @@ public class TestMoneroWalletWrite {
     BigInteger balance = srcAccount.getBalance();
     BigInteger unlockedBalance = srcAccount.getUnlockedBalance();
     BigInteger sendAmount = unlockedBalance.divide(BigInteger.valueOf(SEND_DIVISOR));
-    BigInteger sendAmountPerSubaddress = sendAmount.divide(BigInteger.valueOf(TOTAL_ADDRESSES));
+    BigInteger sendAmountPerSubaddress = sendAmount.divide(BigInteger.valueOf(totalSubaddresses));
     
     // create minimum number of accounts
     List<MoneroAccount> accounts = wallet.getAccounts();
-    for (int i = 0; i < NUM_ACCOUNTS - accounts.size(); i++) {
+    for (int i = 0; i < numAccounts - accounts.size(); i++) {
       wallet.createAccount();
     }
     
     // create minimum number of subaddresses per account and collect destination addresses
     List<String> destinationAddresses = new ArrayList<String>();
-    for (int i = 0; i < NUM_ACCOUNTS; i++) {
+    for (int i = 0; i < numAccounts; i++) {
       List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(i);
-      for (int j = 0; j < NUM_ADDRESSES_PER_ACCOUNT - subaddresses.size(); j++) wallet.createSubaddress(i);
+      for (int j = 0; j < numSubaddressesPerAccount - subaddresses.size(); j++) wallet.createSubaddress(i);
       subaddresses = wallet.getSubaddresses(i);
-      assertTrue(subaddresses.size() >= NUM_ADDRESSES_PER_ACCOUNT);
-      for (int j = 0; j < NUM_ADDRESSES_PER_ACCOUNT; j++) destinationAddresses.add(subaddresses.get(j).getAddress());
+      assertTrue(subaddresses.size() >= numSubaddressesPerAccount);
+      for (int j = 0; j < numSubaddressesPerAccount; j++) destinationAddresses.add(subaddresses.get(j).getAddress());
     }
         
     // send to subaddresses
@@ -304,10 +215,10 @@ public class TestMoneroWalletWrite {
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       TestUtils.testSendTx(tx, config, canSplit);
-      if (Math.abs(sendAmount.subtract(tx.getTotalAmount()).longValue()) >= TOTAL_ADDRESSES) { // send amounts may be slightly different
+      if (Math.abs(sendAmount.subtract(tx.getTotalAmount()).longValue()) >= totalSubaddresses) { // send amounts may be slightly different
         fail("Tx amounts are too different: " + sendAmount + " - " + tx.getTotalAmount() + " = " + sendAmount.subtract(tx.getTotalAmount())); // TODO: this assumes entire balance happened in one transaction
       }
-      assertEquals(TOTAL_ADDRESSES, tx.getPayments().size());
+      assertEquals(totalSubaddresses, tx.getPayments().size());
       assertEquals(payments.size(), tx.getPayments().size());
       for (int i = 0; i < payments.size(); i++) {
         assertEquals(payments.get(i).getAddress(), tx.getPayments().get(i).getAddress());
@@ -431,104 +342,5 @@ public class TestMoneroWalletWrite {
       assertNull(tx.getBlob());
       assertNull(tx.getMetadata());
     }
-  }
-  
-  @Test
-  public void testSetTxNotes() {
-    
-    // set tx notes
-    List<MoneroTx> txs = wallet.getTxs();
-    assertTrue(txs.size() >= 3);
-    List<String> txIds = new ArrayList<String>();
-    List<String> txNotes = new ArrayList<String>();
-    for (int i = 0; i < txIds.size(); i++) {
-      txIds.add(txs.get(i).getId());
-      txNotes.add("Hello " + i);
-    }
-    wallet.setTxNotes(txIds, txNotes);
-    
-    // get tx notes
-    txNotes = wallet.getTxNotes(txIds);
-    for (int i = 0; i < txIds.size(); i++) {
-      assertEquals("Hello " + i, txNotes.get(i));
-    }
-  }
-  
-  @Test
-  public void testAddressBookEntries() {
-    
-    // initial state
-    List<MoneroAddressBookEntry> entries = wallet.getAddressBookEntries();
-    int numEntriesStart = entries.size();
-    for (MoneroAddressBookEntry entry : entries) TestUtils.testAddressBookEntry(entry);
-    
-    // test adding standard addresses
-    final int NUM_ENTRIES = 5;
-    String address = wallet.getSubaddress(0, 0).getAddress();
-    List<Integer> indices = new ArrayList<Integer>();
-    for (int i = 0; i < NUM_ENTRIES; i++) {
-      indices.add(wallet.addAddressBookEntry(address, "hi there!"));
-    }
-    entries = wallet.getAddressBookEntries();
-    assertEquals(numEntriesStart + NUM_ENTRIES, entries.size());
-    for (Integer idx : indices) {
-      boolean found = false;
-      for (MoneroAddressBookEntry entry : entries) {
-        if (idx == entry.getIndex()) {
-          TestUtils.testAddressBookEntry(entry);
-          assertEquals(address, entry.getAddress());
-          assertEquals("hi there!", entry.getDescription());
-          found = true;
-          break;
-        }
-      }
-      assertTrue("Index " + idx + " not found in address book indices", found);
-    }
-    
-    // delete entries at starting index
-    int deleteIdx = indices.get(0);
-    for (int i = 0; i < indices.size(); i++) {
-      wallet.deleteAddressBookEntry(deleteIdx);
-    }
-    entries = wallet.getAddressBookEntries();
-    assertEquals(numEntriesStart, entries.size());
-    
-    // test adding integrated addresses
-    indices.clear();
-    String paymentId = "03284e41c342f03"; // payment id less one character
-    Map<Integer, MoneroIntegratedAddress> integratedAddresses = new HashMap<Integer, MoneroIntegratedAddress>();
-    Map<Integer, String> integratedDescriptions = new HashMap<Integer, String>();
-    for (int i = 0; i < NUM_ENTRIES; i++) {
-      MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(paymentId + i); // create unique integrated address
-      String uuid = UUID.randomUUID().toString();
-      int idx = wallet.addAddressBookEntry(integratedAddress.toString(), uuid);
-      indices.add(idx);
-      integratedAddresses.put(idx, integratedAddress);
-      integratedDescriptions.put(idx, uuid);
-    }
-    entries = wallet.getAddressBookEntries();
-    assertEquals(numEntriesStart + NUM_ENTRIES, entries.size());
-    for (Integer idx : indices) {
-      boolean found = false;
-      for (MoneroAddressBookEntry entry : entries) {
-        if (idx == entry.getIndex()) {
-          TestUtils.testAddressBookEntry(entry);
-          assertEquals(integratedDescriptions.get(idx), entry.getDescription());
-          assertEquals(integratedAddresses.get(idx).getStandardAddress(), entry.getAddress());
-          assertTrue(MoneroUtils.paymentIdsEqual(integratedAddresses.get(idx).getPaymentId(), entry.getPaymentId()));
-          found = true;
-          break;
-        }
-      }
-      assertTrue("Index " + idx + " not found in address book indices", found);
-    }
-    
-    // delete entries at starting index
-    deleteIdx = indices.get(0);
-    for (int i = 0; i < indices.size(); i++) {
-      wallet.deleteAddressBookEntry(deleteIdx);
-    }
-    entries = wallet.getAddressBookEntries();
-    assertEquals(numEntriesStart, entries.size());
   }
 }

@@ -22,6 +22,7 @@ why is transaction amount 0 when destinations present
 why don't some transactions have destinations
 
 Monero-wallet-rpc suggested improvements:
+get_transfers defaults [0, 0], incoming_transfers defaults [0, all], get_bulk_payments defaults [all, all]
 sending from account 1 says has unlocked balance but get -16 tx not possible.  Fixes itself after confirmations
 it needs to be documented that rescan_bc destroys wallet cache (destination addresses, etc)
 incoming_transfers d59fe775249465621d7736b53c0cb488e03e4da8dae647a13492ea51d7685c62 totalAmount is 0?
@@ -31,7 +32,6 @@ timestamps can vary across txs (see txid faa8a4aecb4de18c91dcedb00be76f4f9d3d798
 get_transfer_by_txid only returns incoming, not outgoing counterpart
 add address to incoming_transfers
 add tx_size to get_transfer_by_txid
-add destinations to get_transfers for outgoing transactions
 fee is included on incoming transactions from get_transfers but it is not in incoming_transfers; with incoming account 0 bug cannot reliably get fee
 get_transfers of account 0 all subaddresses does not return incoming transfers!
 monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
