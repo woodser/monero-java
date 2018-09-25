@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -494,6 +495,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public List<MoneroTx> sendSplit(MoneroTxConfig config) {
     
+    // determine account and subaddresses to send from
+    Integer accountIdx = config.getAccountIndex();
+    if (accountIdx == null) throw new MoneroException("Must specify account index to send from");
+    Collection<Integer> subaddressIndices = config.getSubaddressIndices();
+    if (subaddressIndices == null) subaddressIndices = getSubaddressIndices(accountIdx);    
+    
     // build parameter map
     Map<String, Object> paramMap = new HashMap<String, Object>();
     List<Map<String, Object>> destinationMaps = new ArrayList<Map<String, Object>>();
@@ -504,8 +511,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       destinationMap.put("amount", destination.getAmount());
       destinationMaps.add(destinationMap);
     }
-    paramMap.put("account_index", config.getAccountIndex());
-    paramMap.put("subaddr_indices", config.getSubaddressIndices());
+    paramMap.put("account_index", accountIdx);
+    paramMap.put("subaddr_indices", subaddressIndices);
     paramMap.put("payment_id", config.getPaymentId());
     paramMap.put("mixin", config.getMixin());
     paramMap.put("unlock_time", config.getUnlockTime());
@@ -516,33 +523,30 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
     // send request
     Map<String, Object> respMap = rpc.sendRpcRequest("transfer_split", paramMap);
-  
+    
     // interpret response
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    List<BigInteger> amounts = (List<BigInteger>) resultMap.get("amount_list");
-    List<BigInteger> fees = (List<BigInteger>) resultMap.get("fee_list");
-    List<String> txIds = (List<String>) resultMap.get("tx_hash_list");
-    List<String> keys = (List<String>) resultMap.get("tx_key_list");
-    List<String> blobs = (List<String>) resultMap.get("tx_blob_list");
-    List<String> metadatas = (List<String>) resultMap.get("tx_metadata_list");
-    List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    for (int i = 0; i < fees.size(); i++) {
-      MoneroTx tx = new MoneroTx();
-      tx.setAmount(amounts.get(i));
-      tx.setFee(fees.get(i));
-      tx.setMixin(config.getMixin());
-      tx.setId(txIds.get(i));      
-      if (keys != null) tx.setKey(keys.get(i));
-      tx.setBlob(blobs.get(i));
-      tx.setPayments(config.getDestinations());
-      tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
-      tx.setType(MoneroTxType.OUTGOING);
-      tx.setIsDoubleSpend(false);
-      tx.setAccountIndex(config.getAccountIndex() == null ? 0 : config.getAccountIndex());
-      tx.setSubaddressIndex(0); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
-      tx.setMetadata(metadatas.get(i));
-      txs.add(tx);
+    List<MoneroTx> txs = txListMapToTxs(resultMap, accountIdx, MoneroTxType.PENDING);
+    for (MoneroTx tx : txs) {
+      //tx.setMixin(config.getMixin());
     }
+    
+    // merge txs for complete data
+    Collection<String> ids = new ArrayList<String>();
+    for (MoneroTx tx : txs) ids.add(tx.getId());
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setAccountIndex(accountIdx);
+    filter.setSubaddressIndices(subaddressIndices);
+    filter.setIncoming(false);
+    filter.setMempool(false);
+    filter.setTxIds(ids);
+    List<MoneroTx> filtereds = getTxs(filter);
+    assertEquals(txs.size(), filtereds.size());
+    for (MoneroTx tx : txs) {
+      for (MoneroTx filtered : filtereds) {
+        if (tx.getId().equals(filtered.getId())) tx.merge(filtered, false);
+      }
+    }    
     return txs;
   }
 
@@ -1010,11 +1014,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * Converts a map of transaction lists to a list of MoneroTx.
    * 
    * @param txListMap is the map listing transactions
+   * @param accountIdx specifies the tx account index
+   * @param type specifies the tx type
    * @return List<MoneroTx> are the transactions created from the list map
    */
   @SuppressWarnings("unchecked")
   private static List<MoneroTx> txListMapToTxs(Map<String, Object> txListMap, int accountIdx, MoneroTxType type) {
-    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    assertTrue("Only outgoing tx conversion supported", MoneroUtils.isOutgoing(type));
+    
+    // get lists
     List<String> ids = (List<String>) txListMap.get("tx_hash_list");
     List<String> keys = (List<String>) txListMap.get("tx_key_list");
     List<String> blobs = (List<String>) txListMap.get("tx_blob_list");
@@ -1022,23 +1030,36 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<BigInteger> fees = (List<BigInteger>) txListMap.get("fee_list");
     List<BigInteger> amounts = (List<BigInteger>) txListMap.get("amount_list");
     //String multisigTxSet = (String) resultMap.get("multisig_txset");  // TODO: what to do with this?
-    int numTxs = ids.size();
-    assertEquals(numTxs, keys.size());
-    assertEquals(numTxs, blobs.size());
-    assertEquals(numTxs, metadatas.size());
-    assertEquals(numTxs, fees.size());
-    assertEquals(numTxs, amounts.size());
-    assertEquals(numTxs, metadatas.size());
-    for (int i = 0; i < numTxs; i++) {
+    
+    if (keys == null) {
+      System.out.println(txListMap);
+    }
+    
+    System.out.println(ids);
+    System.out.println(keys);
+    System.out.println(blobs);
+    System.out.println(metadatas);
+    System.out.println(fees);
+    System.out.println(amounts);
+    
+    // ensure lists are same size
+    Set<Integer> sizes = new HashSet<Integer>();
+    sizes.addAll(Arrays.asList(ids.size(), keys.size(), blobs.size(), metadatas.size(), fees.size(), amounts.size()));
+    assertEquals("Response lists are different sizes", 1, sizes.size());
+    
+    // build transactions
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    for (int i = 0; i < ids.size(); i++) {
       MoneroTx tx = new MoneroTx();
       txs.add(tx);
-      MoneroPayment payment = new MoneroPayment(tx, null, amounts.get(i), accountIdx, 0); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
-      tx.setPayments(new ArrayList<MoneroPayment>(Arrays.asList(payment)));
+      tx.setSrcAccountIdx(accountIdx);
+      tx.setSrcSubaddressIdx(0);  // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
+      tx.setTotalAmount(amounts.get(i));
+      tx.setFee(fees.get(i));
       tx.setId(ids.get(i));
       tx.setKey(keys.get(i));
       tx.setBlob(blobs.get(i));
       tx.setMetadata(metadatas.get(i));
-      tx.setFee(fees.get(i));
       tx.setType(type);
     }
     return txs;

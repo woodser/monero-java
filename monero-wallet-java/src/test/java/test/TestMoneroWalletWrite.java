@@ -319,50 +319,59 @@ public class TestMoneroWalletWrite {
   
   @Test
   public void testSendFromMultiple() {
-    testSendFromMultiple(4, false); // TODO: auto send from
+    testSendFromMultiple(false);
   }
   
   @Test
   public void testSendSplitFromMultiple() {
-    testSendFromMultiple(2, true);
+    testSendFromMultiple(true);
   }
 
-  private void testSendFromMultiple(int accountIdx, boolean canSplit) {
+  private void testSendFromMultiple(boolean canSplit) {
     
     int NUM_SUBADDRESSES = 2; // number of subaddresses to send from
     
-    // ensure at least 2 accounts exist and the second account has at least 3 subaddresses with unlocked balances
-    List<MoneroAccount> accounts = wallet.getAccounts();
-    assertTrue("This test requires at least 2 accounts.  Run testSendToMultiple() first", accounts.size() > accountIdx);
-    List<Integer> unlockedBalanceIndices = new ArrayList<Integer>();
-    List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(accountIdx);
-    int numBalances = 0;
-    for (MoneroSubaddress subaddress : subaddresses) {
-      if (subaddress.getBalance().longValue() > 0) numBalances++;
-      if (subaddress.getUnlockedBalance().longValue() > 0) unlockedBalanceIndices.add(subaddress.getIndex());
+    // get first account with (NUM_SUBADDRESSES + 1) subaddresses with unlocked balances
+    List<MoneroAccount> accounts = wallet.getAccounts(true);
+    assertTrue("This test requires at least 2 accounts.  Run testSendToMultiple() first", accounts.size() >= 2);
+    MoneroAccount srcAccount = null;
+    List<MoneroSubaddress> unlockedSubaddresses = new ArrayList<MoneroSubaddress>();
+    boolean hasBalance = false;
+    for (MoneroAccount account : accounts) {
+      unlockedSubaddresses.clear();
+      int numSubaddressBalances = 0;
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
+        if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0) numSubaddressBalances++;
+        if (subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) unlockedSubaddresses.add(subaddress);
+      }
+      if (numSubaddressBalances >= NUM_SUBADDRESSES + 1) hasBalance = true;
+      if (unlockedSubaddresses.size() >= NUM_SUBADDRESSES + 1) {
+        srcAccount = account;
+        break;
+      }
     }
-    if (unlockedBalanceIndices.size() <= NUM_SUBADDRESSES) {
-      if (numBalances >= 2) fail("Wallet is waiting on unlocked funds");
-      else fail("This test requires at least " + (NUM_SUBADDRESSES + 1) + " subaddresses with unlocked balances in accounts[" + accountIdx + "].  Run testSendToMultiple() first");
-    }
+    assertTrue("Wallet does not have account with " + (NUM_SUBADDRESSES + 1) + " subaddresses with balances.  Run testSendToMultiple() first", hasBalance);
+    assertTrue("Wallet is waiting on unlocked funds", unlockedSubaddresses.size() >= NUM_SUBADDRESSES + 1);
     
     // determine the indices of the first two subaddresses with unlocked balances
     List<Integer> fromSubaddressIndices = new ArrayList<Integer>();
     for (int i = 0; i < NUM_SUBADDRESSES; i++) {
-      fromSubaddressIndices.add(unlockedBalanceIndices.get(i));
+      fromSubaddressIndices.add(unlockedSubaddresses.get(i).getIndex());
     }
+    
+    System.out.println("Sending from [" + srcAccount.getIndex() + "," + fromSubaddressIndices);
     
     // determine the amount to send (slightly less than the sum to send from)
     BigInteger sendAmount = BigInteger.valueOf(0);
     for (Integer fromSubaddressIdx : fromSubaddressIndices) {
-      sendAmount = sendAmount.add(subaddresses.get(fromSubaddressIdx).getUnlockedBalance());
+      sendAmount = sendAmount.add(srcAccount.getSubaddresses().get(fromSubaddressIdx).getUnlockedBalance());
     }
     sendAmount = sendAmount.subtract(MAX_FEE);
     
     // send from the first subaddresses with unlocked balances
     String address = wallet.getPrimaryAddress();
     MoneroTxConfig config = new MoneroTxConfig(address, null, sendAmount);
-    config.setAccountIndex(accountIdx);
+    config.setAccountIndex(srcAccount.getIndex());
     config.setSubaddressIndices(fromSubaddressIndices);
     config.setMixin(TestUtils.MIXIN);
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
@@ -372,17 +381,18 @@ public class TestMoneroWalletWrite {
       txs.add(wallet.send(config));
     }
     
-    // test that balances from intended subaddresses decreased
-    List<MoneroSubaddress> subaddressesAfter = wallet.getSubaddresses(accountIdx);
-    assertEquals(subaddresses.size(), subaddressesAfter.size());
-    for (int i = 0; i < subaddresses.size(); i++) {
-      if (fromSubaddressIndices.contains(i)) {
-        if (subaddressesAfter.get(i).getUnlockedBalance().compareTo(subaddresses.get(i).getUnlockedBalance()) >= 0) {
-          fail("Tx amounts should have decreased: " + subaddresses.get(i).getUnlockedBalance() + " vs " + subaddressesAfter.get(i).getUnlockedBalance());
-        }
-      } else {
-        if (subaddressesAfter.get(i).getUnlockedBalance().compareTo(subaddresses.get(i).getUnlockedBalance()) != 0) {
-          fail("Tx amounts from unrelated subaddresses should not have changed: " + subaddresses.get(i).getUnlockedBalance() + " vs " + subaddressesAfter.get(i).getUnlockedBalance());
+    // test that balances of intended subaddresses decreased
+    List<MoneroAccount> accountsAfter = wallet.getAccounts(true);
+    assertEquals(accounts.size(), accountsAfter.size());
+    for (int i = 0; i < accounts.size(); i++) {
+      assertEquals(accounts.get(i).getSubaddresses().size(), accountsAfter.get(i).getSubaddresses().size());
+      for (int j = 0; j < accounts.get(i).getSubaddresses().size(); j++) {
+        MoneroSubaddress subaddressBefore = accounts.get(i).getSubaddresses().get(j);
+        MoneroSubaddress subaddressAfter = accountsAfter.get(i).getSubaddresses().get(j);
+        if (i == srcAccount.getIndex() && fromSubaddressIndices.contains(j)) {
+          assertTrue("Subaddress [" + i + "," + j + "] unlocked balance should have decreased", subaddressAfter.getUnlockedBalance().compareTo(subaddressBefore.getUnlockedBalance()) < 0);          
+        } else {
+          assertTrue("Subaddress [" + i + "," + j + "] unlocked balance should not have changed", subaddressAfter.getUnlockedBalance().compareTo(subaddressBefore.getUnlockedBalance()) == 0);          
         }
       }
     }
@@ -390,12 +400,9 @@ public class TestMoneroWalletWrite {
     // test the resulting transactions
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      TestUtils.testTx(tx);
-      TestUtils.testSendTx(tx, canSplit);
-      assertNotNull(tx.getSubaddressIndex());
-      assertEquals((int) 0, (int) tx.getSubaddressIndex()); // TODO: monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
-      if (Math.abs(sendAmount.subtract(tx.getAmount()).longValue()) >= 10) { // send amounts may be slightly different
-        fail("Tx amounts are too different: " + sendAmount + " - " + tx.getAmount() + " = " + sendAmount.subtract(tx.getAmount()));
+      TestUtils.testSendTx(tx, config);
+      if (Math.abs(sendAmount.subtract(tx.getTotalAmount()).longValue()) >= 10) { // send amounts may be slightly different
+        fail("Tx amounts are too different: " + sendAmount + " - " + tx.getTotalAmount() + " = " + sendAmount.subtract(tx.getTotalAmount())); // TODO: this assumes amount is in one transaction
       }
       assertEquals(1, tx.getPayments().size());
       for (MoneroPayment payment : tx.getPayments()) {
