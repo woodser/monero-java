@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,8 +44,13 @@ public class TestMoneroWalletResets {
   }
   
   @Test
-  public void testSweepAccounts() {
-    int NUM_ACCOUNTS_TO_SWEEP = 2;
+  public void testSweepSubaddress() {
+    fail("No implemented");
+  }
+
+  @Test
+  public void testSweepAccount() {
+    int NUM_ACCOUNTS_TO_SWEEP = 1;
     
     // collect accounts with balance and unlocked balance
     List<MoneroAccount> accounts = wallet.getAccounts(true);
@@ -71,17 +75,9 @@ public class TestMoneroWalletResets {
       // test transactions
       assertFalse(txs.isEmpty());
       for (MoneroTx tx : txs) {
-        if (tx.getKey() == null) {
-          System.out.println("key is null");
-          System.out.println(tx);
-        }
-        if (tx.getPayments() == null) {
-          System.out.println("payments is null");
-          System.out.println(tx);
-        }
         MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), null, null);
         config.setAccountIndex(unlockedAccount.getIndex());
-        TestUtils.testSendTx(tx, config, true);
+        TestUtils.testSendTx(tx, config, true, false);
       }
       
       // assert no unlocked funds in account
@@ -115,50 +111,6 @@ public class TestMoneroWalletResets {
   }
   
   @Test
-  public void testSweepAccount() {
-    
-    int MIN_UNLOCKED_ACCOUNTS = 3;
-    int NUM_SWEEP = 2;
-    
-    // verify min accounts with unlocked balance
-    Pair<Map<Integer, List<Integer>>, Map<Integer, List<Integer>>> balances = getBalances();
-    assertTrue("Test requires multiple accounts with a balance; run testSendToMultiple() first", balances.getFirst().size() >= MIN_UNLOCKED_ACCOUNTS);
-    assertTrue("Wallet is waiting on unlocked funds", balances.getSecond().size() >= MIN_UNLOCKED_ACCOUNTS);
-    
-    // sweep from first unlocked accounts
-    List<Integer> unlockedAccounts = new ArrayList<Integer>(balances.getSecond().keySet());
-    Collections.sort(unlockedAccounts);
-    List<Integer> unlockedAccountsSweep = new ArrayList<Integer>();
-    for (int i = 0; i < NUM_SWEEP; i++) unlockedAccountsSweep.add(unlockedAccounts.get(i));
-    for (Integer unlockedAccountSweep : unlockedAccountsSweep) {
-      List<MoneroTx> txs = wallet.sweepAccount(wallet.getPrimaryAddress(), unlockedAccountSweep);
-      
-      // test transactions
-      assertFalse(txs.isEmpty());
-      for (MoneroTx tx : txs) {
-        MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), null, null);
-        config.setAccountIndex(unlockedAccountSweep);
-        TestUtils.testSendTx(tx, config, true);
-      }
-      
-      // assert no unlocked funds within account
-      MoneroAccount account = wallet.getAccount(unlockedAccountSweep);
-      assertEquals(0, account.getUnlockedBalance());
-      for (MoneroSubaddress subaddress : wallet.getSubaddresses(unlockedAccountSweep)) {
-        assertEquals(0, subaddress.getUnlockedBalance());
-      }
-    }
-    
-    // ensure no other accounts or subaddresses changed
-    Map<Integer, List<Integer>> unlockedAccountsAfter = getBalances().getSecond();
-    assertFalse(unlockedAccountsAfter.isEmpty());
-    for (Integer accountIdx : balances.getSecond().keySet()) {
-      if (unlockedAccountsSweep.contains(accountIdx)) assertFalse(unlockedAccountsAfter.keySet().contains(accountIdx)); // if account was swept from, assert it does not contain unlocked funds
-      else assertEquals(balances.getSecond().get(accountIdx), unlockedAccountsAfter.get(accountIdx)); //otherwise, ensure same subaddresses are unlocked
-    }
-  }
-  
-  @Test
   public void testSweepWallet() {
     
     // verify 2 accounts with unlocked balance
@@ -172,17 +124,12 @@ public class TestMoneroWalletResets {
     for (MoneroTx tx : txs) {
       MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), null, null);
       config.setAccountIndex(tx.getSrcAccountIdx());  // TODO: this is to game testSendTx(); should not assert account equivalency there?
-      TestUtils.testSendTx(tx, config, true);
+      TestUtils.testSendTx(tx, config, true, false);
     }
     
     // assert no unlocked funds across subaddresses
     balances = getBalances();
     assertTrue("Wallet should have no unlocked funds after sweeping all", balances.getSecond().isEmpty());
-  }
-  
-  @Test
-  public void testSweepSubaddress() {
-    fail("No implemented");
   }
   
   @Test

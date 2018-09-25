@@ -228,7 +228,7 @@ public class TestUtils {
     }
   }
   
-  public static void testSendTx(MoneroTx tx, MoneroTxConfig config, boolean canSplit) {
+  public static void testSendTx(MoneroTx tx, MoneroTxConfig config, boolean hasKey, boolean hasPayments) {
     testCommonTx(tx);
     assertNotNull(tx.getId());
     assertEquals(tx.getId(), MoneroTxType.PENDING, tx.getType());
@@ -246,14 +246,12 @@ public class TestUtils {
     assertEquals(tx.getId(), (Integer) 0, tx.getUnlockTime());
     assertNotNull(tx.getId(), tx.getIsDoubleSpend());
     assertFalse(tx.getId(), tx.getIsDoubleSpend());
-    if (canSplit) {
-      assertNull(tx.getKey());
-      assertNull(tx.getPayments());
-    } else {
-      assertNotNull(tx.getId(), tx.getPayments());
-      assertFalse(tx.getId(), tx.getPayments().isEmpty());
+    if (hasKey) assertNotNull(tx.getKey());
+    else assertNull(tx.getKey());
+    if (hasPayments) {
+      assertNotNull(tx.getPayments());
+      assertFalse(tx.getPayments().isEmpty());
       assertEquals(tx.getId(), config.getDestinations(), tx.getPayments());
-      assertNotNull(tx.getId(), tx.getKey());
     }
     assertNotNull(tx.getId(), tx.getBlob());
     assertNotNull(tx.getId(), tx.getMetadata());
