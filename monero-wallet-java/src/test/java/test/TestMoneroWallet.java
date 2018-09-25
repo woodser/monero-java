@@ -409,7 +409,7 @@ public class TestMoneroWallet {
       if (account.getIndex() == 0) assertFalse(txs.isEmpty());
       BigInteger balance = BigInteger.valueOf(0);
       for (MoneroTx tx : txs) {
-        if (tx.getType() == MoneroTxType.INCOMING) {
+        if (!MoneroUtils.isOutgoing(tx.getType())) {
           for (MoneroPayment payment : tx.getPayments()) {
             if (!payment.getIsSpent()) {
               balance = balance.add(payment.getAmount());
@@ -616,15 +616,6 @@ public class TestMoneroWallet {
   @Test
   public void testSaveBlockchain() {
     wallet.saveBlockchain();
-  }
-  
-  @Ignore // disabled so tests don't delete local cache
-  @Test
-  public void testRescanBlockchain() {
-    wallet.rescanBlockchain();
-    for (MoneroTx tx : wallet.getTxs()) {
-      TestUtils.testGetTx(tx, false);
-    }
   }
 
   @Test

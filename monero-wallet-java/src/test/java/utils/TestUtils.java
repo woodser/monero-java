@@ -169,13 +169,13 @@ public class TestUtils {
         BigInteger totalAmount = BigInteger.valueOf(0);
         for (MoneroPayment payment : tx.getPayments()) {
           assertTrue(tx == payment.getTx());
+          totalAmount = totalAmount.add(payment.getAmount());
           assertNotNull(tx.getId(), payment.getAddress());
           assertNotNull(tx.getId(), payment.getAmount());
           assertTrue(tx.getId(), payment.getAmount().longValue() >= 0);  // TODO (monero-wallet-rpc): seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
           assertNull(tx.getId(), payment.getAccountIdx());
           assertNull(tx.getId(), payment.getSubaddressIdx());
           assertNull(tx.getId(), payment.getIsSpent());
-          totalAmount = totalAmount.add(payment.getAmount());
         }
         // TODO (monero-wallet-rpc): incoming_transfers d59fe775249465621d7736b53c0cb488e03e4da8dae647a13492ea51d7685c62 totalAmount is 0?
         if (totalAmount.compareTo(tx.getTotalAmount()) != 0 && tx.getTotalAmount().compareTo(BigInteger.valueOf(0)) == 0) {
@@ -202,27 +202,28 @@ public class TestUtils {
       if (tx.getUnlockTime() == null) LOGGER.warn("Incoming transaction is missing unlock_time: " + tx.getId());
       if (tx.getIsDoubleSpend() == null) LOGGER.warn("Incoming transaction is missing is_double_spend: " + tx.getId());
       if (tx.getIsDoubleSpend() != null) assertFalse(tx.getId(), tx.getIsDoubleSpend());
-      assertNotNull(tx.getId(), tx.getKey());
+      if (tx.getType() == MoneroTxType.MEMPOOL) {
+        assertNull(tx.getId(), tx.getKey());
+        assertNull(tx.getId(), tx.getHeight());
+      } else {
+        assertNotNull(tx.getId(), tx.getKey());
+        //assertNotNull(tx.getId(), tx.getHeight());
+        if (tx.getHeight() == null) LOGGER.warn("Incoming transaction is missing height: " + tx.getId());
+      }
       assertNull(tx.getId(), tx.getBlob());
       assertNull(tx.getId(), tx.getMetadata());
-      if (tx.getType() == MoneroTxType.INCOMING) {
-        if (tx.getHeight() == null) LOGGER.warn("Incoming transaction is missing height: " + tx.getId());
-        //assertNotNull(tx.getId(), tx.getHeight());
-      } else if (tx.getType() == MoneroTxType.MEMPOOL) {
-        assertNull(tx.getId(), tx.getHeight());
-      }
       assertNotNull(tx.getId(), tx.getPayments());
       assertFalse(tx.getId(), tx.getPayments().isEmpty());
       BigInteger totalAmount = BigInteger.valueOf(0);
       for (MoneroPayment payment : tx.getPayments()) {
         assertTrue(tx == payment.getTx());
+        totalAmount = totalAmount.add(payment.getAmount());
         //assertNotNull(payment.getAddress());  // TODO: re-enable but need to fetch
         assertNotNull(tx.getId(), payment.getAmount());
         assertTrue(tx.getId(), payment.getAmount().longValue() > 0);  // TODO: seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
         assertNotNull(tx.getId(), payment.getAccountIdx());
         assertNotNull(tx.getId(), payment.getSubaddressIdx());
         assertNotNull(tx.getId(), payment.getIsSpent());
-        totalAmount = totalAmount.add(payment.getAmount());
       }
       assertTrue(totalAmount.compareTo(tx.getTotalAmount()) == 0);
     }
@@ -260,13 +261,13 @@ public class TestUtils {
       BigInteger totalAmount = BigInteger.valueOf(0);
       for (MoneroPayment payment : tx.getPayments()) {
         assertTrue(tx.getId(), tx == payment.getTx());
+        totalAmount = totalAmount.add(payment.getAmount());
         assertNotNull(tx.getId(), payment.getAddress());
         assertNotNull(tx.getId(), payment.getAmount());
         assertTrue(tx.getId(), payment.getAmount().longValue() > 0);  // TODO: seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
         assertNull(tx.getId(), payment.getAccountIdx());
         assertNull(tx.getId(), payment.getSubaddressIdx());
         assertNull(tx.getId(), payment.getIsSpent());
-        totalAmount = totalAmount.add(payment.getAmount());
       }
       assertTrue("Total amount is not sum of payments: " + tx.getTotalAmount() + " vs " + totalAmount + " for TX " + tx.getId(), totalAmount.compareTo(tx.getTotalAmount()) == 0);
     }
