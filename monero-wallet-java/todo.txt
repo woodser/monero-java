@@ -22,6 +22,8 @@ why is transaction amount 0 when destinations present
 why don't some transactions have destinations
 
 Monero-wallet-rpc suggested improvements:
+it needs to be documented that rescan_bc destroys wallet cache (destination addresses, etc)
+incoming_transfers d59fe775249465621d7736b53c0cb488e03e4da8dae647a13492ea51d7685c62 totalAmount is 0?
 outgoing destinations only known after first confirmation
 tx_size only known in incoming_transfers
 timestamps can vary across txs (see txid faa8a4aecb4de18c91dcedb00be76f4f9d3d79839b5bf9cab87f2e3632fc574c)
