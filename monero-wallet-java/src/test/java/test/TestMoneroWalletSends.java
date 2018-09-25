@@ -10,21 +10,14 @@ import static org.junit.Assert.fail;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import monero.rpc.MoneroRpcException;
-import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroAccount;
-import monero.wallet.model.MoneroAddressBookEntry;
-import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
@@ -329,18 +322,10 @@ public class TestMoneroWalletSends {
   @Test
   public void testSweepDust() {
     List<MoneroTx> txs = wallet.sweepDust();
+    assertFalse("No dust to sweep", txs.isEmpty());
     for (MoneroTx tx : txs) {
-      assertNotNull(tx.getId());
-      assertNull(tx.getPayments());
-      assertNull(tx.getAmount());
-      assertNull(tx.getFee());
-      assertNull(tx.getMixin());
-      assertNull(tx.getKey());
-      assertNull(tx.getSize());
-      assertNull(tx.getType());
-      assertNull(tx.getHeight());
-      assertNull(tx.getBlob());
-      assertNull(tx.getMetadata());
+      System.out.println("SWEEP TRANSACTION:\n" + tx);
+      TestUtils.testSendTx(tx, null, true);
     }
   }
 }
