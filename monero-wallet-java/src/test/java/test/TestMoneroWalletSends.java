@@ -77,7 +77,7 @@ public class TestMoneroWalletSends {
       }
       if (fromAccount != null) break;
     }
-    assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", sufficientBalance);
+    assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", sufficientBalance);   // TODO: wrong message when everything is in 0,0
     assertTrue("Wallet is waiting on unlocked funds", fromSubaddress != null);
     
     // get balance before send
@@ -127,12 +127,12 @@ public class TestMoneroWalletSends {
   
   @Test
   public void testSendToMultiple() {
-    testSendToMultiple(5, 3, false);
+    testSendToMultiple(10, 3, false);
   }
   
   @Test
   public void testSendSplitToMultiple() {
-    testSendToMultiple(5, 3, true);
+    testSendToMultiple(20, 3, true);
   }
   
   /**

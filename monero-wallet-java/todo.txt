@@ -1,4 +1,5 @@
 v0.12.3.0
+optimize (cache subaddresses, check if used, etc)
 test right after sending that get_transfers with sent id returns destinations
 test getTxs() with outgoing payments because fetched by id
 test that subaddress numUnspentOutputs == incoming transfers unspent payments

@@ -997,6 +997,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       payment.setAccountIdx(accountIdx);
       payment.setSubaddressIdx(subaddressIdx);
     }
+    if (type == MoneroTxType.MEMPOOL && tx.getPayments() != null) {
+      for (MoneroPayment aPayment : tx.getPayments()) aPayment.setIsSpent(false); // mempool payments are not spent
+    }
     
     return tx;
   }

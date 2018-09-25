@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import common.types.Pair;
@@ -41,6 +42,15 @@ public class TestMoneroWalletResets {
   @After
   public void teardown() {
     PrintBalances.printBalances();
+  }
+  
+  @Ignore // disabled so tests don't delete local cache
+  @Test
+  public void testRescanBlockchain() {
+    wallet.rescanBlockchain();
+    for (MoneroTx tx : wallet.getTxs()) {
+      TestUtils.testGetTx(tx, false);
+    }
   }
   
   @Test
