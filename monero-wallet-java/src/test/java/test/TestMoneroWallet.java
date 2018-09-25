@@ -13,9 +13,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,6 +28,7 @@ import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroException;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImage;
@@ -41,7 +44,7 @@ import utils.TestUtils;
 /**
  * Tests a Monero wallet excluding sending transactions.
  */
-public class TestMoneroWalletRead {
+public class TestMoneroWallet {
   
   private MoneroWallet wallet;
   private static final String SAMPLE_ADDRESS = "58bf9MfrBNDXSqCzK6snxSXaJHehLTnvx3BdS6qMkYAsW8P5kvRVq8ePbGQ7mfAeYfC7QELPhpQBe2C9bqCrqeesUsifaWw";
@@ -509,7 +512,11 @@ public class TestMoneroWalletRead {
 
   @Test
   public void testGetTxNotes() {
+    System.out.println("And begin...");
     List<MoneroTx> txs = wallet.getTxs();
+    if (txs.isEmpty()) {
+      System.out.println("OH NOES");
+    }
     assertFalse(txs.isEmpty());
     List<String> txIds = new ArrayList<String>();
     for (MoneroTx tx : txs) txIds.add(tx.getId());
@@ -635,5 +642,198 @@ public class TestMoneroWalletRead {
   public void testMining() {
     wallet.startMining(2, false, true);
     wallet.stopMining();
+  }
+  
+  @Test
+  public void testCreateAccount() {
+    
+    // create account with null label
+    List<MoneroAccount> accountsBefore = wallet.getAccounts();
+    MoneroAccount createdAccount = wallet.createAccount(null);
+    TestUtils.testAccount(createdAccount);
+    assertNull(createdAccount.getLabel());
+    assertTrue(accountsBefore.size() == wallet.getAccounts().size() - 1);
+    
+    List<MoneroAccount> newAccounts = new ArrayList<MoneroAccount>();
+    
+    // create account with label
+    accountsBefore = wallet.getAccounts();
+    String label = UUID.randomUUID().toString();
+    createdAccount = wallet.createAccount(label);
+    newAccounts.add(createdAccount);
+    assertEquals(label, createdAccount.getLabel());
+    TestUtils.testAccount(createdAccount);
+    assertTrue(accountsBefore.size() == wallet.getAccounts().size() - 1);
+    
+    // create account with same label
+    createdAccount = wallet.createAccount(label);
+    newAccounts.add(createdAccount);
+    assertEquals(label, createdAccount.getLabel());
+    TestUtils.testAccount(createdAccount);
+    assertTrue(accountsBefore.size() == wallet.getAccounts().size() - 2);
+  }
+  
+  @Test
+  public void testAccountTags() {
+    
+    // test that null tag returns all accounts
+    List<MoneroAccount> accounts1 = wallet.getAccounts();
+    List<MoneroAccount> accounts2 = wallet.getAccounts(null);
+    assertEquals(accounts1, accounts2);
+    
+    // test that non-existing tag returns no accounts
+    try {
+      wallet.getAccounts("non_existing_tag");
+      fail("Should have thrown exception with unregistered tag");
+    } catch (MoneroRpcException e) {
+      assertEquals((int) -1, (int) e.getRpcCode());
+    }
+    
+    // tag and query accounts
+    assertTrue(accounts1.size() >= 3);
+    wallet.tagAccounts("my_tag", Arrays.asList(0, 1));
+    List<MoneroAccount> accounts = wallet.getAccounts("my_tag");
+    assertEquals(2, accounts.size());
+    assertEquals(accounts1.get(0), accounts.get(0));
+    assertEquals(accounts1.get(1), accounts.get(1));
+    
+    // untag and query accounts
+    wallet.untagAccounts(Arrays.asList(0, 1));
+    try {
+      wallet.getAccounts("my_tag");
+      fail("Should have thrown exception with unregistered tag");
+    } catch (MoneroRpcException e) {
+      assertEquals((int) -1, (int) e.getRpcCode());
+    }
+  }
+
+  @Test
+  public void testCreateSubaddress() {
+    
+    // create subaddresses across accounts
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    if (accounts.size() < 2) wallet.createAccount();
+    accounts = wallet.getAccounts();
+    assertTrue(accounts.size() > 1);
+    for (int accountIdx = 0; accountIdx < 2; accountIdx++) {
+      
+      // create subaddress with no label
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(accountIdx);
+      MoneroSubaddress subaddress = wallet.createSubaddress(accountIdx, null);
+      assertEquals("", subaddress.getLabel());
+      TestUtils.testSubaddress(subaddress);
+      List<MoneroSubaddress> subaddressesNew = wallet.getSubaddresses(accountIdx);
+      assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
+      assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
+      
+      // create subaddress with label
+      subaddresses = wallet.getSubaddresses(accountIdx);
+      String uuid = UUID.randomUUID().toString();
+      subaddress = wallet.createSubaddress(accountIdx, uuid);
+      assertEquals(subaddress.getLabel(), uuid);
+      TestUtils.testSubaddress(subaddress);
+      subaddressesNew = wallet.getSubaddresses(accountIdx);
+      assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
+      assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
+    }
+  }
+  
+  @Test
+  public void testSetTxNotes() {
+    
+    // set tx notes
+    List<MoneroTx> txs = wallet.getTxs();
+    assertTrue(txs.size() >= 3);
+    List<String> txIds = new ArrayList<String>();
+    List<String> txNotes = new ArrayList<String>();
+    for (int i = 0; i < txIds.size(); i++) {
+      txIds.add(txs.get(i).getId());
+      txNotes.add("Hello " + i);
+    }
+    wallet.setTxNotes(txIds, txNotes);
+    
+    // get tx notes
+    txNotes = wallet.getTxNotes(txIds);
+    for (int i = 0; i < txIds.size(); i++) {
+      assertEquals("Hello " + i, txNotes.get(i));
+    }
+  }
+  
+  @Test
+  public void testAddressBookEntries() {
+    
+    // initial state
+    List<MoneroAddressBookEntry> entries = wallet.getAddressBookEntries();
+    int numEntriesStart = entries.size();
+    for (MoneroAddressBookEntry entry : entries) TestUtils.testAddressBookEntry(entry);
+    
+    // test adding standard addresses
+    final int NUM_ENTRIES = 5;
+    String address = wallet.getSubaddress(0, 0).getAddress();
+    List<Integer> indices = new ArrayList<Integer>();
+    for (int i = 0; i < NUM_ENTRIES; i++) {
+      indices.add(wallet.addAddressBookEntry(address, "hi there!"));
+    }
+    entries = wallet.getAddressBookEntries();
+    assertEquals(numEntriesStart + NUM_ENTRIES, entries.size());
+    for (Integer idx : indices) {
+      boolean found = false;
+      for (MoneroAddressBookEntry entry : entries) {
+        if (idx == entry.getIndex()) {
+          TestUtils.testAddressBookEntry(entry);
+          assertEquals(address, entry.getAddress());
+          assertEquals("hi there!", entry.getDescription());
+          found = true;
+          break;
+        }
+      }
+      assertTrue("Index " + idx + " not found in address book indices", found);
+    }
+    
+    // delete entries at starting index
+    int deleteIdx = indices.get(0);
+    for (int i = 0; i < indices.size(); i++) {
+      wallet.deleteAddressBookEntry(deleteIdx);
+    }
+    entries = wallet.getAddressBookEntries();
+    assertEquals(numEntriesStart, entries.size());
+    
+    // test adding integrated addresses
+    indices.clear();
+    String paymentId = "03284e41c342f03"; // payment id less one character
+    Map<Integer, MoneroIntegratedAddress> integratedAddresses = new HashMap<Integer, MoneroIntegratedAddress>();
+    Map<Integer, String> integratedDescriptions = new HashMap<Integer, String>();
+    for (int i = 0; i < NUM_ENTRIES; i++) {
+      MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(paymentId + i); // create unique integrated address
+      String uuid = UUID.randomUUID().toString();
+      int idx = wallet.addAddressBookEntry(integratedAddress.toString(), uuid);
+      indices.add(idx);
+      integratedAddresses.put(idx, integratedAddress);
+      integratedDescriptions.put(idx, uuid);
+    }
+    entries = wallet.getAddressBookEntries();
+    assertEquals(numEntriesStart + NUM_ENTRIES, entries.size());
+    for (Integer idx : indices) {
+      boolean found = false;
+      for (MoneroAddressBookEntry entry : entries) {
+        if (idx == entry.getIndex()) {
+          TestUtils.testAddressBookEntry(entry);
+          assertEquals(integratedDescriptions.get(idx), entry.getDescription());
+          assertEquals(integratedAddresses.get(idx).getStandardAddress(), entry.getAddress());
+          assertTrue(MoneroUtils.paymentIdsEqual(integratedAddresses.get(idx).getPaymentId(), entry.getPaymentId()));
+          found = true;
+          break;
+        }
+      }
+      assertTrue("Index " + idx + " not found in address book indices", found);
+    }
+    
+    // delete entries at starting index
+    deleteIdx = indices.get(0);
+    for (int i = 0; i < indices.size(); i++) {
+      wallet.deleteAddressBookEntry(deleteIdx);
+    }
+    entries = wallet.getAddressBookEntries();
+    assertEquals(numEntriesStart, entries.size());
   }
 }

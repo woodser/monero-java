@@ -25,11 +25,13 @@ import utils.PrintBalances;
 import utils.TestUtils;
 
 /**
- * Tests sweeping all wallet funds.
+ * Runs tests that reset the wallet state including sweeping all funds to the primary account and
+ * rescanning the blockchain which resets the local wallet cache (e.g. send destinations).
  * 
- * These tests are separated because they use all unlocked funds which invalidates other write tests.
+ * These tests are separated because they use all unlocked funds which invalidates other tests until
+ * testSendToMultiple() is run.
  */
-public class TestMoneroWalletSweepAll {
+public class TestMoneroWalletResets {
   private MoneroWallet wallet;
 
   @Before
