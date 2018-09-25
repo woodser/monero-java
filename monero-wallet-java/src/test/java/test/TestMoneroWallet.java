@@ -404,20 +404,23 @@ public class TestMoneroWallet {
     // test balance equals spendable payments for each account
     for (MoneroAccount account : wallet.getAccounts()) {
       MoneroTxFilter filter = new MoneroTxFilter();
+      filter.setOutgoing(false);
+      filter.setPending(false);
+      filter.setFailed(false);
       filter.setAccountIndex(account.getIndex());
       txs = wallet.getTxs(filter);
       if (account.getIndex() == 0) assertFalse(txs.isEmpty());
       BigInteger balance = BigInteger.valueOf(0);
       for (MoneroTx tx : txs) {
-        if (!MoneroUtils.isOutgoing(tx.getType())) {
-          for (MoneroPayment payment : tx.getPayments()) {
-            if (!payment.getIsSpent()) {
-              balance = balance.add(payment.getAmount());
-            }
+        assertFalse(MoneroUtils.isOutgoing(tx.getType()));
+        assertFalse(tx.getPayments().isEmpty());
+        for (MoneroPayment payment : tx.getPayments()) {
+          if (!payment.getIsSpent()) {
+            balance = balance.add(payment.getAmount());
           }
         }
       }
-      assertEquals(wallet.getBalance(account.getIndex()), balance);
+      assertEquals("Account " + account.getIndex() + " balance does not add up", wallet.getBalance(account.getIndex()), balance);
     }
     
     // test block height filtering
