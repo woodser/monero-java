@@ -49,7 +49,7 @@ public class TestUtils {
   
   // test constants
   public static final Integer MIXIN = 6;
-  public static final BigInteger MAX_FEE = BigInteger.valueOf(5000000).multiply(BigInteger.valueOf(20000));
+  public static final BigInteger MAX_FEE = BigInteger.valueOf(5000000).multiply(BigInteger.valueOf(10000));
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class);
@@ -239,7 +239,7 @@ public class TestUtils {
     if (MoneroTx.DEFAULT_PAYMENT_ID.equals(config.getPaymentId())) assertNull(tx.getId(), tx.getPaymentId());
     else assertEquals(tx.getId(), config.getPaymentId(), tx.getPaymentId());
     assertNotNull(tx.getId(), tx.getFee());
-    assertEquals(tx.getId(), MIXIN, tx.getMixin());
+    assertEquals(tx.getId(), config.getMixin(), tx.getMixin());
     assertNull(tx.getId(), tx.getSize());
     assertNotNull(tx.getId(), tx.getNote());
     assertNotNull(tx.getId(), tx.getTimestamp());

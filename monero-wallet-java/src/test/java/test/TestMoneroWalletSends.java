@@ -151,8 +151,8 @@ public class TestMoneroWalletSends {
     MoneroAccount srcAccount = null;
     boolean hasBalance = true;
     for (MoneroAccount account : wallet.getAccounts()) {
-      if (account.getBalance().compareTo(BigInteger.valueOf(0)) > 0) hasBalance = true;
-      if (account.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) {
+      if (account.getBalance().subtract(TestUtils.MAX_FEE).compareTo(BigInteger.valueOf(0)) > 0) hasBalance = true;
+      if (account.getUnlockedBalance().subtract(TestUtils.MAX_FEE).compareTo(BigInteger.valueOf(0)) > 0) {
         srcAccount = account;
         break;
       }
@@ -288,6 +288,8 @@ public class TestMoneroWalletSends {
     } else {
       txs.add(wallet.send(config));
     }
+    
+    for (MoneroTx tx : txs) System.out.println("FEE: " + tx.getFee());
     
     // test that balances of intended subaddresses decreased
     List<MoneroAccount> accountsAfter = wallet.getAccounts(true);
