@@ -125,6 +125,7 @@ public class TestMoneroWalletRead {
     }
   }
   
+  // TODO: assert that subaddress balances add to account balances
   @Test
   public void testGetAccountsWithSubaddresses() {
     List<MoneroAccount> accounts = wallet.getAccounts(true);
