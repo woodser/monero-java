@@ -77,7 +77,7 @@ public class TestMoneroWalletSends {
       }
       if (fromAccount != null) break;
     }
-    assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", sufficientBalance);   // TODO: wrong message when everything is in 0,0
+    assertTrue("No non-primary subaddress found with sufficient balance", sufficientBalance);
     assertTrue("Wallet is waiting on unlocked funds", fromSubaddress != null);
     
     // get balance before send

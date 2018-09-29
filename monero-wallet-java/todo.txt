@@ -1,6 +1,5 @@
 v0.12.3.0
 some standard tests fail after send transactions (e.g. testGetTxsMoneroTxFilter)
-optimize (cache subaddresses, check if used, etc)
 test right after sending that get_transfers with sent id returns destinations
 test getTxs() with outgoing payments because fetched by id
 test that subaddress numUnspentOutputs == incoming transfers unspent payments
@@ -9,6 +8,7 @@ outbound transactions do not relable record minor, e.g. send from [2,3] but tx m
 monerotx should only have one id
 merge based on subaddress location
 sendFromMultiple() searches for account
+optimize (cache subaddresses, check if used, etc)
 
 test pool
 test getTxs() by account
