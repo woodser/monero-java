@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import monero.wallet.MoneroWallet;
@@ -36,14 +36,14 @@ import utils.TestUtils;
 public class TestMoneroWalletSends {
   
   private static final int SEND_DIVISOR = 2;
-  private MoneroWallet wallet;
+  private static MoneroWallet wallet;
 
-  @Before
+  @BeforeClass
   public void setup() throws Exception {
     wallet = TestUtils.getWallet();
   }
   
-  @After
+  @AfterClass
   public void teardown() {
     PrintBalances.printBalances();
   }

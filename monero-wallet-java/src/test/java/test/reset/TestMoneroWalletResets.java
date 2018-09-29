@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -32,14 +32,15 @@ import utils.TestUtils;
  * testSendToMultiple() is run.
  */
 public class TestMoneroWalletResets {
-  private MoneroWallet wallet;
+  
+  private static MoneroWallet wallet;
 
-  @Before
+  @BeforeClass
   public void setup() throws Exception {
     wallet = TestUtils.getWallet();
   }
   
-  @After
+  @AfterClass
   public void teardown() {
     PrintBalances.printBalances();
   }
