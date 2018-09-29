@@ -1,5 +1,7 @@
 package monero.wallet;
 
+import static org.junit.Assert.assertEquals;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
@@ -45,7 +47,8 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   @Override
   public MoneroSubaddress getSubaddress(int accountIdx, int subaddressIdx) {
     List<MoneroSubaddress> subaddresses = getSubaddresses(accountIdx, Arrays.asList(subaddressIdx));
-    if (subaddresses.size() != 1) throw new MoneroException("Subaddress at index " + subaddressIdx + " does not exist");
+    if (subaddresses.isEmpty()) throw new MoneroException("Subaddress at index " + subaddressIdx + " is not initialized");
+    assertEquals("Only 1 subaddress should be returned", 1, subaddresses.size());
     return subaddresses.get(0);
   }
 
