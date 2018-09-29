@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -46,16 +46,16 @@ import utils.TestUtils;
  */
 public class TestMoneroWallet {
   
-  private MoneroWallet wallet;
+  private static MoneroWallet wallet;
   private static final String SAMPLE_ADDRESS = "58bf9MfrBNDXSqCzK6snxSXaJHehLTnvx3BdS6qMkYAsW8P5kvRVq8ePbGQ7mfAeYfC7QELPhpQBe2C9bqCrqeesUsifaWw";
 
-  @Before
-  public void setup() throws Exception {
+  @BeforeClass
+  public static void setup() throws Exception {
     wallet = TestUtils.getWallet();
   }
   
-  @After
-  public void teardown() {
+  @AfterClass
+  public static void teardown() {
     PrintBalances.printBalances();
   }
 
