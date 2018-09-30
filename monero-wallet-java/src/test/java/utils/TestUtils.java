@@ -107,7 +107,7 @@ public class TestUtils {
     assertNotNull(account.getPrimaryAddress());
     assertTrue(account.getBalance().doubleValue() >= 0);
     assertTrue(account.getUnlockedBalance().doubleValue() >= 0);
-    assertFalse(account.isMultisigImportNeeded());
+    assertFalse(account.getIsMultisigImportNeeded());
     if (account.getSubaddresses() != null) {
       BigInteger balance = BigInteger.valueOf(0);
       BigInteger unlockedBalance = BigInteger.valueOf(0);
@@ -128,7 +128,6 @@ public class TestUtils {
     assertTrue(subaddress.getBalance().doubleValue() >= 0);
     assertTrue(subaddress.getUnlockedBalance().doubleValue() >= 0);
     assertTrue(subaddress.getNumUnspentOutputs() >= 0);
-    assertFalse(subaddress.isMultisigImportNeeded());
     if (subaddress.getBalance().doubleValue() > 0) assertTrue(subaddress.isUsed());
   }
   

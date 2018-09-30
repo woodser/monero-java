@@ -161,7 +161,6 @@ public class TestMoneroWalletSends {
     assertNotNull("Wallet is waiting on unlocked funds", srcAccount);
     
     // get amount to send per address
-    TestUtils.LOGGER.info("testSendToMultiple() from account " + srcAccount.getIndex());  // TODO: downgrade to debug
     BigInteger balance = srcAccount.getBalance();
     BigInteger unlockedBalance = srcAccount.getUnlockedBalance();
     BigInteger sendAmount = unlockedBalance.subtract(TestUtils.MAX_FEE).divide(BigInteger.valueOf(SEND_DIVISOR));
