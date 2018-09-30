@@ -67,11 +67,11 @@ public class MoneroAccount {
     this.unlockedBalance = unlockedBalance;
   }
   
-  public Boolean isMultisigImportNeeded() {
+  public Boolean getIsMultisigImportNeeded() {
     return isMultisigImportNeeded;
   }
   
-  public void setMultisigImportNeeded(Boolean isMultisigImportNeeded) {
+  public void setIsMultisigImportNeeded(Boolean isMultisigImportNeeded) {
     this.isMultisigImportNeeded = isMultisigImportNeeded;
   }
   
