@@ -364,7 +364,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       for (String key : result.keySet()) {
         for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
           MoneroTx tx = txMapToTx(txMap);
-          if (tx.getType() == MoneroTxType.INCOMING) {  // prevent duplicates when populated by incoming_transfers  // TODO: merge payments when incoming txs work (https://github.com/monero-project/monero/issues/4428)
+          if (tx.getType() == MoneroTxType.INCOMING) {  // prevent duplicates when populated by incoming_transfers  // TODO (monero-wallet-rpc): merge payments when incoming txs work (https://github.com/monero-project/monero/issues/4428)
             tx.setTotalAmount(BigInteger.valueOf(0));
             tx.setPayments(null);
           }
@@ -395,34 +395,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           }
         }
       }
-      
-//      // get_bulk_payments rpc call to get incoming payments by id
-//      if (filter.getPaymentIds() != null && !filter.getPaymentIds().isEmpty()) {
-//        
-//        // convert nulls to default payment id
-//        Set<String> paymentIds = new HashSet<String>();
-//        for (String paymentId : filter.getPaymentIds()) {
-//          paymentIds.add(paymentId == null ? MoneroTx.DEFAULT_PAYMENT_ID : paymentId);
-//        }
-//        
-//        // send request
-//        params.clear();
-//        params.put("payment_ids", paymentIds);
-//        Map<String, Object> respMap = rpc.sendRpcRequest("get_bulk_payments", params);
-//        Map<String, Object> result = (Map<String, Object>) respMap.get("result");
-//
-//        // interpret get_bulk_payments response
-//        List<Map<String, Object>> paymentMaps = (List<Map<String, Object>>) result.get("payments");
-//        for (Map<String, Object> paymentMap : paymentMaps) {
-//          MoneroTx tx = txMapToTx(paymentMap, MoneroTxType.INCOMING);
-//          
-//          // prevent duplicates when populated by incoming_transfers  // TODO: merge payments when incoming txs work (https://github.com/monero-project/monero/issues/4428)
-//          tx.setTotalAmount(BigInteger.valueOf(0)); 
-//          tx.setPayments(null);
-//          
-//          addTx(txs, tx, true);
-//        }
-//      }
     }
 
     // filter final result
