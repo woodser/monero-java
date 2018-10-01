@@ -97,7 +97,6 @@ public class TestUtils {
 //      
 //      // refresh wallet
 //      wallet.rescanSpent();
-//      wallet.rescanBlockchain();
     }
     return wallet;
   }
