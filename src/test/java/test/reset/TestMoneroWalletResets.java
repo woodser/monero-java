@@ -36,12 +36,12 @@ public class TestMoneroWalletResets {
   private static MoneroWallet wallet;
 
   @BeforeClass
-  public void setup() throws Exception {
+  public static void setup() throws Exception {
     wallet = TestUtils.getWallet();
   }
   
   @AfterClass
-  public void teardown() {
+  public static void teardown() {
     PrintBalances.printBalances();
   }
   
