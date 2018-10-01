@@ -124,16 +124,19 @@ public class TestMoneroWalletResets {
   @Test
   public void testSweepWallet() {
     
+    // sweep destination
+    String destionation = wallet.getPrimaryAddress();
+    
     // verify 2 accounts with unlocked balance
     Pair<Map<Integer, List<Integer>>, Map<Integer, List<Integer>>> balances = getBalances();
     assertTrue("Test requires multiple accounts with a balance; run testSendToMultiple() first", balances.getFirst().size() >= 2);
     assertTrue("Wallet is waiting on unlocked funds", balances.getSecond().size() >= 2);
     
     // sweep
-    List<MoneroTx> txs = wallet.sweepWallet(wallet.getPrimaryAddress());
+    List<MoneroTx> txs = wallet.sweepWallet(destionation);
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), null, null);
+      MoneroTxConfig config = new MoneroTxConfig(destionation, null, null);
       config.setAccountIndex(tx.getSrcAccountIdx());  // TODO: this is to game testSendTx(); should not assert account equivalency there?
       TestUtils.testSendTx(tx, config, true, false);
     }
