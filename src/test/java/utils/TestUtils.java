@@ -222,7 +222,7 @@ public class TestUtils {
         totalAmount = totalAmount.add(payment.getAmount());
         //assertNotNull(payment.getAddress());  // TODO: re-enable but need to fetch
         assertNotNull(tx.getId(), payment.getAmount());
-        assertTrue(tx.getId(), payment.getAmount().longValue() > 0);  // TODO (monero-wallet-rpc): seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
+        assertTrue(tx.getId(), payment.getAmount().longValue() > 0);
         assertNotNull(tx.getId(), payment.getAccountIdx());
         assertNotNull(tx.getId(), payment.getSubaddressIdx());
         assertNotNull(tx.getId(), payment.getIsSpent());
@@ -266,7 +266,7 @@ public class TestUtils {
         totalAmount = totalAmount.add(payment.getAmount());
         assertNotNull(tx.getId(), payment.getAddress());
         assertNotNull(tx.getId(), payment.getAmount());
-        assertTrue(tx.getId(), payment.getAmount().longValue() > 0);  // TODO (monero-wallet-rpc): seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
+        assertTrue(tx.getId(), payment.getAmount().longValue() > 0);
         assertNull(tx.getId(), payment.getAccountIdx());
         assertNull(tx.getId(), payment.getSubaddressIdx());
         assertNull(tx.getId(), payment.getIsSpent());
