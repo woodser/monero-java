@@ -111,7 +111,6 @@ public class TestUtils {
     assertNotNull(account.getPrimaryAddress());
     assertTrue(account.getBalance().doubleValue() >= 0);
     assertTrue(account.getUnlockedBalance().doubleValue() >= 0);
-    assertFalse(account.getIsMultisigImportNeeded());
     if (account.getSubaddresses() != null) {
       BigInteger balance = BigInteger.valueOf(0);
       BigInteger unlockedBalance = BigInteger.valueOf(0);

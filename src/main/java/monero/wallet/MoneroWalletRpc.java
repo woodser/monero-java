@@ -156,8 +156,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       BigInteger unlockedBalance = (BigInteger) accountMap.get("unlocked_balance");
       String primaryAddress = (String) accountMap.get("base_address");
       String label = (String) accountMap.get("label");
-      boolean isMultisigImportNeeded = false;  // TODO: get this value, may need to make another rpc call for balance info
-      MoneroAccount account = new MoneroAccount(accountIdx, primaryAddress, label, balance, unlockedBalance, isMultisigImportNeeded, null);
+      MoneroAccount account = new MoneroAccount(accountIdx, primaryAddress, label, balance, unlockedBalance, null);
       accounts.add(account);
       if (includeSubaddresses) account.setSubaddresses(getSubaddresses(account.getIndex()));
     }
@@ -184,7 +183,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     int accountIdx = ((BigInteger) resultMap.get("account_index")).intValue();
     String address = (String) resultMap.get("address");
-    return new MoneroAccount(accountIdx, address, label, BigInteger.valueOf(0), BigInteger.valueOf(0), false, null);
+    return new MoneroAccount(accountIdx, address, label, BigInteger.valueOf(0), BigInteger.valueOf(0), null);
   }
   
   @Override
@@ -612,7 +611,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return txs;
   }
 
-  // TODO: v0.13.0 has input params
+  // TODO (v0.13.0): rpc call has input params in new version
   // TODO: unable to properly test because no dust to sweep
   @SuppressWarnings("unchecked")
   @Override
@@ -992,7 +991,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<String> metadatas = (List<String>) txListMap.get("tx_metadata_list");
     List<BigInteger> fees = (List<BigInteger>) txListMap.get("fee_list");
     List<BigInteger> amounts = (List<BigInteger>) txListMap.get("amount_list");
-    //String multisigTxSet = (String) resultMap.get("multisig_txset");  // TODO: what to do with this?
+    //String multisigTxSet = (String) resultMap.get("multisig_txset");  // TODO (v0.13.0): what to do with this?
     
     // ensure lists are same size
     Set<Integer> sizes = new HashSet<Integer>();

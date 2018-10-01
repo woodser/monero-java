@@ -13,17 +13,15 @@ public class MoneroAccount {
   private String label;
   private BigInteger balance;
   private BigInteger unlockedBalance;
-  private Boolean isMultisigImportNeeded;
   private List<MoneroSubaddress> subaddresses;
   
-  public MoneroAccount(int index, String primaryAddress, String label, BigInteger balance, BigInteger unlockedBalance, Boolean isMultisigImportNeeded, List<MoneroSubaddress> subaddresses) {
+  public MoneroAccount(int index, String primaryAddress, String label, BigInteger balance, BigInteger unlockedBalance, List<MoneroSubaddress> subaddresses) {
     super();
     this.index = index;
     this.primaryAddress = primaryAddress;
     this.label = label;
     this.balance = balance;
     this.unlockedBalance = unlockedBalance;
-    this.isMultisigImportNeeded = isMultisigImportNeeded;
     this.subaddresses = subaddresses;
   }
   
@@ -67,14 +65,6 @@ public class MoneroAccount {
     this.unlockedBalance = unlockedBalance;
   }
   
-  public Boolean getIsMultisigImportNeeded() {
-    return isMultisigImportNeeded;
-  }
-  
-  public void setIsMultisigImportNeeded(Boolean isMultisigImportNeeded) {
-    this.isMultisigImportNeeded = isMultisigImportNeeded;
-  }
-  
   public List<MoneroSubaddress> getSubaddresses() {
     return subaddresses;
   }
@@ -88,8 +78,7 @@ public class MoneroAccount {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((balance == null) ? 0 : balance.hashCode());
-    result = prime * result + index;
-    result = prime * result + ((isMultisigImportNeeded == null) ? 0 : isMultisigImportNeeded.hashCode());
+    result = prime * result + ((index == null) ? 0 : index.hashCode());
     result = prime * result + ((label == null) ? 0 : label.hashCode());
     result = prime * result + ((primaryAddress == null) ? 0 : primaryAddress.hashCode());
     result = prime * result + ((subaddresses == null) ? 0 : subaddresses.hashCode());
@@ -106,10 +95,9 @@ public class MoneroAccount {
     if (balance == null) {
       if (other.balance != null) return false;
     } else if (!balance.equals(other.balance)) return false;
-    if (index != other.index) return false;
-    if (isMultisigImportNeeded == null) {
-      if (other.isMultisigImportNeeded != null) return false;
-    } else if (!isMultisigImportNeeded.equals(other.isMultisigImportNeeded)) return false;
+    if (index == null) {
+      if (other.index != null) return false;
+    } else if (!index.equals(other.index)) return false;
     if (label == null) {
       if (other.label != null) return false;
     } else if (!label.equals(other.label)) return false;
