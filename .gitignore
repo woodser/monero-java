@@ -1,5 +1,6 @@
-/.settings
+/target/
 /.classpath
+/.settings
 /.project
 .project
 .settings
@@ -7,4 +8,3 @@
 /build/
 **/pom.xml.versionsBackup
 **/logs
-
