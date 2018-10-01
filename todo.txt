@@ -10,6 +10,9 @@ merge based on subaddress location
 sendFromMultiple() searches for account
 optimize (cache subaddresses, check if used, etc)
 
+v0.13.0
+multisig support
+
 test pool
 test getTxs() by account
 test getTxs() with txIds filter
