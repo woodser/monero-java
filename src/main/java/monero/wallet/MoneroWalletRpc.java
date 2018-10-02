@@ -60,14 +60,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   private MoneroRpc rpc;  // handles rpc interactions
+  private Map<Integer, Map<Integer, String>> addressCache;  // cache static addresses to reduce requests
 
   public MoneroWalletRpc(String endpoint) {
-     rpc = new MoneroRpc(endpoint);
+    super();
+    rpc = new MoneroRpc(endpoint);
+    addressCache = new HashMap<Integer, Map<Integer, String>>();
   }
 
   public MoneroWalletRpc(URI rpcUri) {
     super();
     rpc = new MoneroRpc(rpcUri);
+    addressCache = new HashMap<Integer, Map<Integer, String>>();
   }
 
   public MoneroWalletRpc(String rpcHost, int rpcPort) throws URISyntaxException {
@@ -77,6 +81,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public MoneroWalletRpc(String rpcHost, int rpcPort, String username, String password) throws URISyntaxException {
     super();
     rpc = new MoneroRpc(rpcHost, rpcPort, username, password);
+    addressCache = new HashMap<Integer, Map<Integer, String>>();
   }
   
   public MoneroRpc getRpc() {
@@ -248,6 +253,16 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
     }
     
+    // cache addresses
+    Map<Integer, String> subaddressMap = addressCache.get(accountIdx);
+    if (subaddressMap == null) {
+      subaddressMap = new HashMap<Integer, String>();
+      addressCache.put(accountIdx, subaddressMap);
+    }
+    for (MoneroSubaddress subaddress : subaddresses) {
+      subaddressMap.put(subaddress.getIndex(), subaddress.getAddress());
+    }
+    
     // return results
     return subaddresses;
   }
@@ -273,6 +288,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     subaddress.setNumUnspentOutputs(0);
     subaddress.setUsed(false);
     return subaddress;
+  }
+  
+  @Override
+  public String getAddress(int accountIdx, int subaddressIdx) {
+    Map<Integer, String> subaddressMap = addressCache.get(accountIdx);
+    if (subaddressMap == null) return getSubaddress(accountIdx, subaddressIdx).getAddress();
+    String address = subaddressMap.get(subaddressIdx);
+    if (address == null) return getSubaddress(accountIdx, subaddressIdx).getAddress();
+    return address;
   }
   
   @Override
@@ -737,28 +761,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return (List<String>) resultMap.get("languages");
   }
 
-  @Override
-  public void createWallet(String filename, String password, String language) {
-    if (filename == null || filename.isEmpty()) throw new MoneroException("Filename is not initialized");
-    if (password == null || password.isEmpty()) throw new MoneroException("Password is not initialized");
-    if (language == null || language.isEmpty()) throw new MoneroException("Language is not initialized");
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("filename", filename);
-    params.put("password", password);
-    params.put("language", language);
-    rpc.sendRpcRequest("create_wallet", params);
-  }
-
-  @Override
-  public void openWallet(String filename, String password) {
-    if (filename == null || filename.isEmpty()) throw new MoneroException("Filename is not initialized");
-    if (password == null || password.isEmpty()) throw new MoneroException("Password is not initialized");
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("filename", filename);
-    params.put("password", password);
-    rpc.sendRpcRequest("open_wallet", params);
-  }
-
   @SuppressWarnings("unchecked")
   @Override
   public String sign(String data) {
@@ -816,6 +818,35 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
+  public void createWallet(String filename, String password, String language) {
+    if (filename == null || filename.isEmpty()) throw new MoneroException("Filename is not initialized");
+    if (password == null || password.isEmpty()) throw new MoneroException("Password is not initialized");
+    if (language == null || language.isEmpty()) throw new MoneroException("Language is not initialized");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("filename", filename);
+    params.put("password", password);
+    params.put("language", language);
+    rpc.sendRpcRequest("create_wallet", params);
+  }
+
+  @Override
+  public void openWallet(String filename, String password) {
+    if (filename == null || filename.isEmpty()) throw new MoneroException("Filename is not initialized");
+    if (password == null || password.isEmpty()) throw new MoneroException("Password is not initialized");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("filename", filename);
+    params.put("password", password);
+    rpc.sendRpcRequest("open_wallet", params);
+    addressCache.clear();
+  }
+
+  @Override
+  public void stopWallet() {
+    rpc.sendRpcRequest("stop_wallet", null);
+    addressCache.clear();
+  }
+
+  @Override
   public void saveBlockchain() {
     rpc.sendRpcRequest("store", null);
   }
@@ -828,11 +859,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public void rescanSpent() {
     rpc.sendRpcRequest("rescan_spent", null);
-  }
-
-  @Override
-  public void stopWallet() {
-    rpc.sendRpcRequest("stop_wallet", null);
   }
 
   @Override
