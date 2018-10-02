@@ -293,9 +293,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public String getAddress(int accountIdx, int subaddressIdx) {
     Map<Integer, String> subaddressMap = addressCache.get(accountIdx);
-    if (subaddressMap == null) return getSubaddress(accountIdx, subaddressIdx).getAddress();
+    if (subaddressMap == null) {
+      getSubaddresses(accountIdx, null);            // cache's all addresses at this account
+      return getAddress(accountIdx, subaddressIdx); // uses cache
+    }
     String address = subaddressMap.get(subaddressIdx);
-    if (address == null) return getSubaddress(accountIdx, subaddressIdx).getAddress();
+    if (address == null) {
+      getSubaddresses(accountIdx, null);            // cache's all addresses at this account
+      return getAddress(accountIdx, subaddressIdx); // uses cache
+    }
     return address;
   }
   
