@@ -50,7 +50,7 @@ public class TestMoneroWalletResets {
   public void testRescanBlockchain() {
     wallet.rescanBlockchain();
     for (MoneroTx tx : wallet.getTxs()) {
-      TestUtils.testGetTx(tx, false);
+      TestUtils.testGetTx(tx, false, wallet);
     }
   }
   
@@ -88,7 +88,7 @@ public class TestMoneroWalletResets {
       for (MoneroTx tx : txs) {
         MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), null, null);
         config.setAccountIndex(unlockedAccount.getIndex());
-        TestUtils.testSendTx(tx, config, true, false);
+        TestUtils.testSendTx(tx, config, true, false, wallet);
       }
       
       // assert no unlocked funds in account
@@ -138,7 +138,7 @@ public class TestMoneroWalletResets {
     for (MoneroTx tx : txs) {
       MoneroTxConfig config = new MoneroTxConfig(destionation, null, null);
       config.setAccountIndex(tx.getSrcAccountIdx());  // TODO: this is to game testSendTx(); should not assert account equivalency there?
-      TestUtils.testSendTx(tx, config, true, false);
+      TestUtils.testSendTx(tx, config, true, false, wallet);
     }
     
     // assert no unlocked funds across subaddresses
