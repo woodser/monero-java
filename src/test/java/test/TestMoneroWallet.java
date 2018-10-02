@@ -205,6 +205,16 @@ public class TestMoneroWallet {
   }
   
   @Test
+  public void testGetAddress() {
+    assertEquals(wallet.getPrimaryAddress(), wallet.getSubaddress(0, 0).getAddress());
+    for (MoneroAccount account : wallet.getAccounts(true)) {
+      for (MoneroSubaddress subaddress : wallet.getSubaddresses(account.getIndex())) {
+        assertEquals(subaddress.getAddress(), wallet.getAddress(account.getIndex(), subaddress.getIndex()));
+      }
+    }
+  }
+  
+  @Test
   public void testGetBalance() {
     BigInteger balanceWallet = wallet.getUnlockedBalance();
     BigInteger balanceAccounts = BigInteger.valueOf(0);
