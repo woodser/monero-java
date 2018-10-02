@@ -450,23 +450,6 @@ public interface MoneroWallet {
   public List<String> getLanguages();
   
   /**
-   * Create a new wallet.
-   * 
-   * @param filename is the name of the wallet file to create
-   * @param password is the wallet password
-   * @param language is the wallet language
-   */
-  public void createWallet(String filename, String password, String language);
-  
-  /**
-   * Open a wallet.
-   * 
-   * @param filename is the name of the wallet file to open
-   * @param password is the wallet password
-   */
-  public void openWallet(String filename, String password);
-  
-  /**
    * Sign a string.
    * 
    * @param data is the string to sign
@@ -509,6 +492,28 @@ public interface MoneroWallet {
   public MoneroIntegratedAddress decodeIntegratedAddress(String integratedAddress);
   
   /**
+   * Create a new wallet.
+   * 
+   * @param filename is the name of the wallet file to create
+   * @param password is the wallet password
+   * @param language is the wallet language
+   */
+  public void createWallet(String filename, String password, String language);
+
+  /**
+   * Open a wallet.
+   * 
+   * @param filename is the name of the wallet file to open
+   * @param password is the wallet password
+   */
+  public void openWallet(String filename, String password);
+
+  /**
+   * Stop the wallet.
+   */
+  public void stopWallet();
+
+  /**
    * Save the current state of the blockchain.
    */
   public void saveBlockchain();
@@ -523,11 +528,6 @@ public interface MoneroWallet {
    */
   public void rescanSpent();
 
-  /**
-   * Stop the wallet.
-   */
-  public void stopWallet();
-  
   /**
    * Start mining in the Monero daemon.
    * 
