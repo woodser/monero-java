@@ -429,7 +429,7 @@ public class TestMoneroWallet {
           }
         }
       }
-      assertEquals("Account " + account.getIndex() + " balance does not add up", wallet.getBalance(account.getIndex()), balance);
+      assertEquals("Account " + account.getIndex() + " balance does not add up", wallet.getBalance(account.getIndex()), balance); // TODO: account balance does not add up after sending TX
     }
     
     // test block height filtering
