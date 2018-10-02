@@ -62,18 +62,20 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   private MoneroRpc rpc;  // handles rpc interactions
 
   public MoneroWalletRpc(String endpoint) {
-    rpc = new MoneroRpc(endpoint);
+     rpc = new MoneroRpc(endpoint);
   }
 
   public MoneroWalletRpc(URI rpcUri) {
+    super();
     rpc = new MoneroRpc(rpcUri);
   }
 
   public MoneroWalletRpc(String rpcHost, int rpcPort) throws URISyntaxException {
-    rpc = new MoneroRpc(rpcHost, rpcPort);
+    this(rpcHost, rpcPort, null, null);
   }
 
   public MoneroWalletRpc(String rpcHost, int rpcPort, String username, String password) throws URISyntaxException {
+    super();
     rpc = new MoneroRpc(rpcHost, rpcPort, username, password);
   }
   
@@ -248,17 +250,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // return results
     return subaddresses;
-  }
-  
-  @Override
-  public String getAddress(int accountIdx, int subaddressIdx) {
-    
-    
-    
-    
-    
-    
-    throw new RuntimeException("Not implemented");
   }
 
   @SuppressWarnings("unchecked")

@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -18,6 +20,12 @@ import monero.wallet.model.MoneroTxFilter;
  * Default implementation of a Monero Wallet.
  */
 public abstract class MoneroWalletDefault implements MoneroWallet {
+  
+  private Map<Integer, Map<Integer, String>> addressCache;
+  
+  public MoneroWalletDefault() {
+    addressCache = new HashMap<Integer, Map<Integer, String>>();
+  }
   
   @Override
   public List<MoneroAccount> getAccounts() {
@@ -50,6 +58,18 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
     if (subaddresses.isEmpty()) throw new MoneroException("Subaddress at index " + subaddressIdx + " is not initialized");
     assertEquals("Only 1 subaddress should be returned", 1, subaddresses.size());
     return subaddresses.get(0);
+  }
+  
+  @Override
+  public String getAddress(int accountIdx, int subaddressIdx) {
+    Map<Integer, String> subaddressMap = addressCache.get(accountIdx);
+    if (subaddressMap == null) {
+      subaddressMap = new HashMap<Integer, String>();
+      addressCache.put(accountIdx, subaddressMap);
+    } else {
+      
+    }
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
