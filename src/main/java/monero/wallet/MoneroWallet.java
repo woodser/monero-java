@@ -182,6 +182,15 @@ public interface MoneroWallet {
   public MoneroSubaddress createSubaddress(int accountIdx, String label);
   
   /**
+   * Returns the receive address of the given subaddress.
+   * 
+   * @param accountIdx identifies the subaddress's account index
+   * @param subaddressIdx identifies the subaddress's index within the account
+   * @return String is the receive address of the given subaddress
+   */
+  public String getAddress(int accountIdx, int subaddressIdx);
+  
+  /**
    * Get the balance across all accounts.
    * 
    * @return BigInteger is the balance across all accounts

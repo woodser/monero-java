@@ -249,6 +249,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // return results
     return subaddresses;
   }
+  
+  @Override
+  public String getAddress(int accountIdx, int subaddressIdx) {
+    
+    
+    
+    
+    
+    
+    throw new RuntimeException("Not implemented");
+  }
 
   @SuppressWarnings("unchecked")
   @Override
