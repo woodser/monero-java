@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.AfterClass;
@@ -503,23 +504,22 @@ public class TestMoneroWallet {
     assertTrue(txs.isEmpty());
     
     // test getting transactions by transaction ids
-    Collection<String> txIds = new HashSet<String>();
+    Set<String> txIds = new HashSet<String>();
     for (MoneroTx tx : allTxs) txIds.add(tx.getId());
     assertFalse(txIds.isEmpty());
     filter = new MoneroTxFilter();
     filter.setTxIds(txIds);    
     txs = wallet.getTxs(filter);
     assertEquals(allTxs.size(), txs.size());
-    // TODO: this queries every transaction, too much
-//    for (String txId : txIds) {
-//      filter = new MoneroTxFilter();
-//      filter.setTxIds(Arrays.asList(txId));
-//      txs = wallet.getTxs(filter);
-//      assertFalse(txs.isEmpty());
-//      for (MoneroTx tx : txs) {
-//        assertEquals(txId, tx.getId());
-//      }
-//    }
+    for (String txId : txIds) {
+      filter = new MoneroTxFilter();
+      filter.setTxIds(Arrays.asList(txId));
+      txs = wallet.getTxs(filter);
+      assertFalse(txs.isEmpty());
+      for (MoneroTx tx : txs) {
+        assertEquals(txId, tx.getId());
+      }
+    }
   }
 
   @Test
