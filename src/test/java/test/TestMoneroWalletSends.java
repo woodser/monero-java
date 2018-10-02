@@ -35,6 +35,7 @@ import utils.TestUtils;
 public class TestMoneroWalletSends {
   
   private static final int SEND_DIVISOR = 2;
+  private static final int SEND_MAX_DIFF = 25;
   private static MoneroWallet wallet;
 
   @BeforeClass
@@ -204,22 +205,26 @@ public class TestMoneroWalletSends {
     assertTrue(wallet.getBalance(srcAccount.getIndex()).longValue() < balance.longValue());
     assertTrue(wallet.getUnlockedBalance(srcAccount.getIndex()).longValue() < unlockedBalance.longValue());
     
-    // test transactions
+    // test each transaction
     assertFalse(txs.isEmpty());
+    BigInteger txSum = BigInteger.valueOf(0);
     for (MoneroTx tx : txs) {
       TestUtils.testSendTx(tx, config, !canSplit, !canSplit, wallet);
-      if (Math.abs(sendAmount.subtract(tx.getTotalAmount()).longValue()) >= totalSubaddresses) { // send amounts may be slightly different
-        fail("Tx amounts are too different: " + sendAmount + " - " + tx.getTotalAmount() + " = " + sendAmount.subtract(tx.getTotalAmount())); // TODO: this assumes entire balance happened in one transaction
-      }
+      txSum = txSum.add(tx.getTotalAmount());
       if (tx.getPayments() != null) {
-        assertEquals(totalSubaddresses, tx.getPayments().size());
-        assertEquals(payments.size(), tx.getPayments().size());
-        for (int i = 0; i < payments.size(); i++) {
-          assertEquals(payments.get(i).getAddress(), tx.getPayments().get(i).getAddress());
-          assertEquals(payments.get(i).getAmount(), tx.getPayments().get(i).getAmount());
-          assertTrue(tx == tx.getPayments().get(i).getTx());
+        BigInteger paymentSum = BigInteger.valueOf(0);
+        for (MoneroPayment payment : tx.getPayments()) {
+          assertTrue(tx == payment.getTx());
+          assertTrue(destinationAddresses.contains(payment.getAddress()));
+          paymentSum = paymentSum.add(payment.getAmount());
         }
+        assertEquals(tx.getId(), tx.getTotalAmount(), paymentSum);  // assert that payments sum up to tx amount
       }
+    }
+    
+    // assert that tx amounts sum up the amount sent within a small margin
+    if (Math.abs(sendAmount.subtract(txSum).longValue()) > SEND_MAX_DIFF) { // send amounts may be slightly different
+      fail("Tx amounts are too different: " + sendAmount + " - " + txSum + " = " + sendAmount.subtract(txSum));
     }
   }
   
@@ -312,19 +317,19 @@ public class TestMoneroWalletSends {
       TestUtils.testSendTx(tx, config, !canSplit, !canSplit, wallet);
       txSum = txSum.add(tx.getTotalAmount());
       if (tx.getPayments() != null) {
-        assertEquals(1, tx.getPayments().size());
+        assertEquals(tx.getId(), 1, tx.getPayments().size());
         BigInteger paymentSum = BigInteger.valueOf(0);
         for (MoneroPayment payment : tx.getPayments()) {
-          assertEquals(address, payment.getAddress());
-          assertTrue(tx == payment.getTx());
+          assertEquals(tx.getId(), address, payment.getAddress());
+          assertTrue(tx.getId(), tx == payment.getTx());
           paymentSum = paymentSum.add(payment.getAmount());
         }
-        assertEquals(tx.getTotalAmount(), paymentSum);  // assert that payment amounts sum up to tx amount
+        assertEquals(tx.getId(), tx.getTotalAmount(), paymentSum);  // assert that payment amounts sum up to tx amount
       }
     }
     
-    // assert that tx amounts sum up the amount sent, within a small margin
-    if (Math.abs(sendAmount.subtract(txSum).longValue()) >= 10) { // send amounts may be slightly different
+    // assert that tx amounts sum up the amount sent within a small margin
+    if (Math.abs(sendAmount.subtract(txSum).longValue()) > SEND_MAX_DIFF) { // send amounts may be slightly different
       fail("Tx amounts are too different: " + sendAmount + " - " + txSum + " = " + sendAmount.subtract(txSum));
     }
   }
