@@ -140,13 +140,14 @@ public class TestUtils {
     assertNotEquals(tx.getId(), MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());  // default payment should be converted to null
   }
   
-  public static void testGetTx(MoneroTx tx, Boolean hasOutgoingPayments) {
+  public static void testGetTx(MoneroTx tx, Boolean hasOutgoingPayments, MoneroWallet wallet) {
     testCommonTx(tx);
     
     // test outgoing
     if (tx.getType() == MoneroTxType.OUTGOING || tx.getType() == MoneroTxType.PENDING || tx.getType() == MoneroTxType.FAILED) {
       assertNotNull(tx.getId());
-      //assertNotNull(tx.getId(), tx.getSrcAddress());   // TODO: need to fetch
+      assertNotNull(tx.getId(), tx.getSrcAddress());
+      assertEquals(tx.getId(), wallet.getAddress(tx.getSrcAccountIdx(), tx.getSrcSubaddressIdx()), tx.getSrcAddress());
       assertNotNull(tx.getId(), tx.getSrcAccountIdx());
       assertNotNull(tx.getId(), tx.getSrcSubaddressIdx());
       assertNotNull(tx.getId(), tx.getTotalAmount());
@@ -193,7 +194,7 @@ public class TestUtils {
       assertNotNull(tx.getId(), tx.getId());
       assertNull(tx.getId(), tx.getSrcAddress());
       assertNull(tx.getId(), tx.getSrcAccountIdx());
-      assertNull(tx.getSrcSubaddressIdx());
+      assertNull(tx.getId(), tx.getSrcSubaddressIdx());
       assertNotNull(tx.getId(), tx.getTotalAmount());
       assertNotEquals(tx.getId(), MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());
       if (tx.getFee() == null) LOGGER.warn("Incoming transaction is missing fee: " + tx.getId()); // TODO (monero-wallet-rpc): show on incoming_transfers or fix bug where incoming txs don't return on account 0
@@ -220,7 +221,8 @@ public class TestUtils {
       for (MoneroPayment payment : tx.getPayments()) {
         assertTrue(tx == payment.getTx());
         totalAmount = totalAmount.add(payment.getAmount());
-        //assertNotNull(payment.getAddress());  // TODO: re-enable but need to fetch
+        assertNotNull(tx.getId(), payment.getAddress());
+        assertEquals(tx.getId(), wallet.getAddress(payment.getAccountIdx(), payment.getSubaddressIdx()), payment.getAddress());
         assertNotNull(tx.getId(), payment.getAmount());
         assertTrue(tx.getId(), payment.getAmount().longValue() > 0);
         assertNotNull(tx.getId(), payment.getAccountIdx());
@@ -231,11 +233,12 @@ public class TestUtils {
     }
   }
   
-  public static void testSendTx(MoneroTx tx, MoneroTxConfig config, boolean hasKey, boolean hasPayments) {
+  public static void testSendTx(MoneroTx tx, MoneroTxConfig config, boolean hasKey, boolean hasPayments, MoneroWallet wallet) {
     testCommonTx(tx);
     assertNotNull(tx.getId());
     assertEquals(tx.getId(), MoneroTxType.PENDING, tx.getType());
     assertNotNull(tx.getId(), tx.getSrcAddress());
+    assertEquals(tx.getId(), wallet.getAddress(tx.getSrcAccountIdx(), tx.getSrcSubaddressIdx()), tx.getSrcAddress());
     assertEquals(tx.getId(), config.getAccountIndex(), tx.getSrcAccountIdx());
     assertEquals(tx.getId(), (Integer) 0, tx.getSrcSubaddressIdx());
     assertNotNull(tx.getId(), tx.getTotalAmount());

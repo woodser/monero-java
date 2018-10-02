@@ -317,7 +317,7 @@ public class TestMoneroWallet {
     List<MoneroTx> txs = wallet.getTxs();
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      TestUtils.testGetTx(tx, null);
+      TestUtils.testGetTx(tx, null, wallet);
       if (!MoneroUtils.isOutgoing(tx.getType())) {
         for (MoneroPayment payment : tx.getPayments()) {
          if (payment.getAccountIdx() != 0 && payment.getSubaddressIdx() != 0) nonDefaultIncoming = true;
@@ -333,7 +333,7 @@ public class TestMoneroWallet {
     for (MoneroAccount account : wallet.getAccounts()) {
       List<MoneroTx> txs = wallet.getTxs(account.getIndex());
       for (MoneroTx tx : txs) {
-        TestUtils.testGetTx(tx, null);
+        TestUtils.testGetTx(tx, null, wallet);
         if (MoneroUtils.isOutgoing(tx.getType())) {
           assertEquals(account.getIndex(), tx.getSrcAccountIdx());
         } else {
@@ -353,7 +353,7 @@ public class TestMoneroWallet {
     for (MoneroAccount account : wallet.getAccounts(true)) {
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         for (MoneroTx tx : wallet.getTxs(account.getIndex(), subaddress.getIndex())) {
-          TestUtils.testGetTx(tx, null);
+          TestUtils.testGetTx(tx, null, wallet);
           if (MoneroUtils.isOutgoing(tx.getType()))  {
             assertEquals(account.getIndex(), tx.getSrcAccountIdx());
           } else {
@@ -376,7 +376,7 @@ public class TestMoneroWallet {
     List<MoneroTx> allTxs = wallet.getTxs();
     assertFalse(allTxs.isEmpty());
     for (MoneroTx tx : allTxs) {
-      TestUtils.testGetTx(tx, null);
+      TestUtils.testGetTx(tx, null, wallet);
     }
     
     // test getting transactions by payment ids
@@ -391,7 +391,7 @@ public class TestMoneroWallet {
       List<MoneroTx> txs = wallet.getTxs(filter);
       assertFalse(txs.isEmpty());
       for (MoneroTx tx : txs) {
-        TestUtils.testGetTx(tx, null);
+        TestUtils.testGetTx(tx, null, wallet);
         assertTrue(filter.getPaymentIds().contains(tx.getPaymentId()));
       }
     }

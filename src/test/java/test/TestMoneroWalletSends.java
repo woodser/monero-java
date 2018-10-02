@@ -104,7 +104,7 @@ public class TestMoneroWalletSends {
     // test transactions
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      TestUtils.testSendTx(tx, config, !canSplit, !canSplit);
+      TestUtils.testSendTx(tx, config, !canSplit, !canSplit, wallet);
       assertEquals(fromAccount.getIndex(), tx.getSrcAccountIdx());
       assertEquals((Integer) 0, tx.getSrcSubaddressIdx()); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
       assertEquals(sendAmount, tx.getTotalAmount());
@@ -207,7 +207,7 @@ public class TestMoneroWalletSends {
     // test transactions
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      TestUtils.testSendTx(tx, config, !canSplit, !canSplit);
+      TestUtils.testSendTx(tx, config, !canSplit, !canSplit, wallet);
       if (Math.abs(sendAmount.subtract(tx.getTotalAmount()).longValue()) >= totalSubaddresses) { // send amounts may be slightly different
         fail("Tx amounts are too different: " + sendAmount + " - " + tx.getTotalAmount() + " = " + sendAmount.subtract(tx.getTotalAmount())); // TODO: this assumes entire balance happened in one transaction
       }
@@ -308,7 +308,7 @@ public class TestMoneroWalletSends {
     // test the resulting transactions
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      TestUtils.testSendTx(tx, config, !canSplit, !canSplit);
+      TestUtils.testSendTx(tx, config, !canSplit, !canSplit, wallet);
       if (Math.abs(sendAmount.subtract(tx.getTotalAmount()).longValue()) >= 10) { // send amounts may be slightly different
         fail("Tx amounts are too different: " + sendAmount + " - " + tx.getTotalAmount() + " = " + sendAmount.subtract(tx.getTotalAmount())); // TODO: this assumes amount is in one transaction
       }
@@ -329,7 +329,7 @@ public class TestMoneroWalletSends {
     assertFalse("No dust to sweep", txs.isEmpty());
     for (MoneroTx tx : txs) {
       System.out.println("SWEEP TRANSACTION\n" + tx);
-      TestUtils.testSendTx(tx, null, true, true);
+      TestUtils.testSendTx(tx, null, true, true, wallet);
     }
   }
 }
