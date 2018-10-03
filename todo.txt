@@ -13,14 +13,6 @@ optimize (cache subaddresses, check if used, etc)
 
 v0.13.0
 multisig support
-
-test pool
-test getTxs() by account
-test getTxs() with txIds filter
-test reads with specific accounts / subaddresses
-check for unrecognized fields
-sendToMultiple fans out across more accounts, then send tests search for account which meets requirements
-
 get_output_distribution distribution field cannot be deserialized to array of integer
 investigate do not relay, way of doing pending transaction?  would need to relay 
 get rid of individual getBalance(), getUnlockedBalance(), isMultisigImportNeeded() and replace with getAccount() with all info?
@@ -28,6 +20,7 @@ why is transaction amount 0 when destinations present
 why don't some transactions have destinations
 
 Monero-wallet-rpc suggested improvements:
+timestamps for incoming pool txs are non deterministic
 wallet which was previously synced should be up-to-date at the completion of open_wallet
 get_transfers defaults [0, 0], incoming_transfers defaults [0, all], get_bulk_payments defaults [all, all]
 sending from account 1 says has unlocked balance but get -16 tx not possible.  Fixes itself after confirmations
