@@ -355,7 +355,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return (boolean) resultMap.get("multisig_import_needed");
   }
 
-  // TODO: use get_transfers_by_id if ids given
   @SuppressWarnings("unchecked")
   @Override
   public List<MoneroTx> getTxs(MoneroTxFilter filter) {
