@@ -320,7 +320,7 @@ public class TestMoneroWallet {
     assertEquals(txs1.size(), txs2.size());
     for (int i = 0; i < txs1.size(); i++) {
       if (!txs1.get(i).equals(txs2.get(i))) {
-        System.out.println("DIFFERENCE"); // TODO: see difference after sends
+        System.out.println("DIFFERENCE"); // TODO (monero-wallet-rpc): timestamps for incoming pool transactions not deterministic
         System.out.println(txs1.get(i));
         System.out.println(txs2.get(i));
       }
