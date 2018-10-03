@@ -161,7 +161,7 @@ public class TestUtils {
       assertEquals(tx.getId(), (Integer) 0, tx.getUnlockTime());
       assertNotNull(tx.getId(), tx.getIsDoubleSpend());
       assertFalse(tx.getId(), tx.getIsDoubleSpend());
-      assertNull(tx.getId(), tx.getKey());
+      assertNull(tx.getId(), tx.getKey());   // TODO (monero-wallet-rpc): cannot get tx keys after sending
       assertNull(tx.getId(), tx.getBlob());
       assertNull(tx.getId(), tx.getMetadata());
       if (tx.getType() == MoneroTxType.OUTGOING) assertNotNull(tx.getId(), tx.getHeight());
@@ -199,10 +199,10 @@ public class TestUtils {
       assertNull(tx.getId(), tx.getSrcSubaddressIdx());
       assertNotNull(tx.getId(), tx.getTotalAmount());
       assertNotEquals(tx.getId(), MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());
-      if (tx.getFee() == null) LOGGER.warn("Incoming transaction is missing fee: " + tx.getId()); // TODO (monero-wallet-rpc): show on incoming_transfers or fix bug where incoming txs don't return on account 0
       assertNull(tx.getId(), tx.getMixin());
-      //assertNotNull(tx.getId(), tx.getSize());
+      //assertNotNull(tx.getId(), tx.getSize());  TODO: size can be null or not null?
       assertNull(tx.getId(), tx.getNote());
+      if (tx.getFee() == null) LOGGER.warn("Incoming transaction is missing fee: " + tx.getId());    // TODO (monero-wallet-rpc): add fee, timestamp, unlock_time, is_double_spend, height to incoming_transfers or fix bug where incoming txs don't return when sent from same account
       if (tx.getTimestamp() == null) LOGGER.warn("Incoming transaction is missing timestamp: " + tx.getId());
       if (tx.getUnlockTime() == null) LOGGER.warn("Incoming transaction is missing unlock_time: " + tx.getId());
       if (tx.getIsDoubleSpend() == null) LOGGER.warn("Incoming transaction is missing is_double_spend: " + tx.getId());
