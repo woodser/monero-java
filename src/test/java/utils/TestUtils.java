@@ -95,6 +95,7 @@ public class TestUtils {
       
       // open test wallet
       try {
+        // TODO (monero-wallet-rpc): wallet which was previously synced should be up-to-date at the completion of open_wallet
         wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
       } catch (MoneroRpcException e) {
         assertEquals((int) -1, (int) e.getRpcCode()); // TODO (v0.13.0): -1: Failed to open wallet if wallet is already open; better code and message
@@ -154,7 +155,7 @@ public class TestUtils {
       assertNotEquals(tx.getId(), MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());
       assertNotNull(tx.getId(), tx.getFee());
       assertNull(tx.getId(), tx.getMixin());
-      assertNull(tx.getId(), tx.getSize());
+      assertNull(tx.getId(), tx.getSize()); // TODO (monero-wallet-rpc): tx_size only known in incoming_transfers
       assertNotNull(tx.getId(), tx.getNote());
       assertNotNull(tx.getId(), tx.getTimestamp());
       assertEquals(tx.getId(), (Integer) 0, tx.getUnlockTime());
@@ -166,7 +167,7 @@ public class TestUtils {
       if (tx.getType() == MoneroTxType.OUTGOING) assertNotNull(tx.getId(), tx.getHeight());
       else if (tx.getType() == MoneroTxType.PENDING || tx.getType() == MoneroTxType.FAILED) assertNull(tx.getId(), tx.getHeight());
       if (Boolean.TRUE.equals(hasOutgoingPayments)) assertNotNull(tx.getId(), tx.getPayments());
-      else if (Boolean.FALSE.equals(hasOutgoingPayments)) assertNull(tx.getId(), tx.getPayments());
+      else if (Boolean.FALSE.equals(hasOutgoingPayments)) assertNull(tx.getId(), tx.getPayments()); // TODO (monero-wallet-rpc): outgoing destinations only known after first confirmation
       if (tx.getPayments() != null) {
         assertFalse(tx.getId(), tx.getPayments().isEmpty());
         BigInteger totalAmount = BigInteger.valueOf(0);

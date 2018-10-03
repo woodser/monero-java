@@ -31,6 +31,8 @@ import utils.TestUtils;
  * Tests sending funds from a Monero wallet.
  * 
  * These tests are separated because they rely on a balance and initiate transactions on the blockchain.
+ * 
+ * TODO: anyway to get around tx not possible?  need to refresh spend?
  */
 public class TestMoneroWalletSends {
   
@@ -308,7 +310,7 @@ public class TestMoneroWalletSends {
         MoneroSubaddress subaddressBefore = accounts.get(i).getSubaddresses().get(j);
         MoneroSubaddress subaddressAfter = accountsAfter.get(i).getSubaddresses().get(j);
         if (i == srcAccount.getIndex() && fromSubaddressIndices.contains(j)) {
-          assertTrue("Subaddress [" + i + "," + j + "] unlocked balance should have decreased", subaddressAfter.getUnlockedBalance().compareTo(subaddressBefore.getUnlockedBalance()) < 0);          
+          assertTrue("Subaddress [" + i + "," + j + "] unlocked balance should have decreased", subaddressAfter.getUnlockedBalance().compareTo(subaddressBefore.getUnlockedBalance()) < 0); // TODO: Subaddress [0,1] unlocked balance should have decreased          
         } else {
           assertTrue("Subaddress [" + i + "," + j + "] unlocked balance should not have changed", subaddressAfter.getUnlockedBalance().compareTo(subaddressBefore.getUnlockedBalance()) == 0);          
         }

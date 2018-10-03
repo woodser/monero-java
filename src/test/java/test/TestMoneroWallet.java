@@ -44,6 +44,8 @@ import utils.TestUtils;
 
 /**
  * Tests a Monero wallet excluding sending transactions.
+ * 
+ * TODO: incoming_transfers d59fe775249465621d7736b53c0cb488e03e4da8dae647a13492ea51d7685c62 totalAmount is 0?
  */
 public class TestMoneroWallet {
   
