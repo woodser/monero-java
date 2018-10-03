@@ -512,7 +512,7 @@ public class TestMoneroWallet {
     assertTrue(txs.isEmpty());
     
     // test getting transactions by transaction ids
-    int maxTxs = Math.min(30, allTxs.size());
+    int maxTxs = Math.min(5, allTxs.size());
     Set<String> txIds = new HashSet<String>();
     for (int i = 0; i < maxTxs; i++) txIds.add(allTxs.get(i).getId());
     assertFalse(txIds.isEmpty());
