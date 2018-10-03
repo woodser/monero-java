@@ -1,4 +1,11 @@
-v0.12.3.0
+v0.13.0
+payments are comprised of outputs
+multisig support
+get_output_distribution distribution field cannot be deserialized to array of integer
+investigate do not relay, way of doing pending transaction?  would need to relay 
+get rid of individual getBalance(), getUnlockedBalance(), isMultisigImportNeeded() and replace with getAccount() with all info?
+why is transaction amount 0 when destinations present
+why don't some transactions have destinations
 some standard tests fail after send transactions (e.g. testGetTxsMoneroTxFilter)
 test right after sending that get_transfers with sent id returns destinations
 test getTxs() with outgoing payments because fetched by id
@@ -9,34 +16,18 @@ optimize (cache subaddresses, check if used, etc)
 generate javadoc
 update readme
 
-v0.13.0
-multisig support
-get_output_distribution distribution field cannot be deserialized to array of integer
-investigate do not relay, way of doing pending transaction?  would need to relay 
-get rid of individual getBalance(), getUnlockedBalance(), isMultisigImportNeeded() and replace with getAccount() with all info?
-why is transaction amount 0 when destinations present
-why don't some transactions have destinations
-
-
 MONERO-RPC SUGGESTED IMPROVEMENTS
-get_transfer_by_txid only returns incoming, not outgoing counterpart
-fee is included on incoming transactions from get_transfers but it is not in incoming_transfers; with incoming account 0 bug cannot reliably get fee
-get_transfers of account 0 all subaddresses does not return incoming transfers!
+get_transfers, get_transfer_by_txid does not return incoming transfers with outgoing counterpart from same account
+
+incoming_transfers add address
+get_transfers add tx_size
+get_transfers returns all transactions whereas incoming_transfers returns incoming outputs; clarify terminology or both could return transactions for consistency
+get_transfer_by_tx_id add tx_size
+get_transfers defaults [0, 0], incoming_transfers defaults [0, all], get_bulk_payments defaults [all, all]
+document that rescan_bc destroys wallet cache (destination addresses, etc)
 must call get_transfer_by_txid in order to get outgoing destinations
+height vs block_height inconsistent
 address book entries work by index instead of id which changes
-optional param documentation missing
 tx_hash in incoming_transfers vs txid in get_transfers; standardize on tx_hash or tx_id
 standardize terminology transactions vs transfers
-standardize terminology destinations vs outputs vs payments (I like payment which is address + amount)
-consistently return all possible fields
-get_transfers returns all transactions whereas incoming_transfers returns incoming outputs; clarify terminology or both could return transactions for consistency
-why doesn't tx_size get returned on get_transfers
 standardize terminology payment vs output; one payment may be fulfilled with multiple outputs
-no way to get transaction keys after sending
-
-add address to incoming_transfers
-add tx_size to get_transfer_by_txid
-get_transfers defaults [0, 0], incoming_transfers defaults [0, all], get_bulk_payments defaults [all, all]
-it needs to be documented that rescan_bc destroys wallet cache (destination addresses, etc)
-
-height vs block_height inconsistent
