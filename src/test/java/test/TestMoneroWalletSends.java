@@ -35,7 +35,7 @@ import utils.TestUtils;
 public class TestMoneroWalletSends {
   
   private static final int SEND_DIVISOR = 2;
-  private static final int SEND_MAX_DIFF = 25;
+  private static final int SEND_MAX_DIFF = 60;
   private static MoneroWallet wallet;
 
   @BeforeClass
