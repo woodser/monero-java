@@ -512,8 +512,9 @@ public class TestMoneroWallet {
     assertTrue(txs.isEmpty());
     
     // test getting transactions by transaction ids
+    int maxTxs = Math.min(30, txs.size());
     Set<String> txIds = new HashSet<String>();
-    for (MoneroTx tx : allTxs) txIds.add(tx.getId());
+    for (int i = 0; i < maxTxs; i++) txIds.add(txs.get(i).getId());
     assertFalse(txIds.isEmpty());
     filter = new MoneroTxFilter();
     filter.setTxIds(txIds);    
