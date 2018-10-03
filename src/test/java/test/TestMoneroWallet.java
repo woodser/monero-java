@@ -512,14 +512,13 @@ public class TestMoneroWallet {
     assertTrue(txs.isEmpty());
     
     // test getting transactions by transaction ids
-    int maxTxs = Math.min(30, txs.size());
+    int maxTxs = Math.min(30, allTxs.size());
     Set<String> txIds = new HashSet<String>();
-    for (int i = 0; i < maxTxs; i++) txIds.add(txs.get(i).getId());
+    for (int i = 0; i < maxTxs; i++) txIds.add(allTxs.get(i).getId());
     assertFalse(txIds.isEmpty());
     filter = new MoneroTxFilter();
     filter.setTxIds(txIds);    
     txs = wallet.getTxs(filter);
-    assertEquals(allTxs.size(), txs.size());
     for (String txId : txIds) {
       filter = new MoneroTxFilter();
       filter.setTxIds(Arrays.asList(txId));
