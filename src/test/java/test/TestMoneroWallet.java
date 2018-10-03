@@ -319,7 +319,7 @@ public class TestMoneroWallet {
     List<MoneroTx> txs2 = wallet.getTxs();  // fetch transactions twice to ensure results are the same
     assertEquals(txs1.size(), txs2.size());
     for (int i = 0; i < txs1.size(); i++) {
-      if (txs1.get(i).equals(txs2.get(i))) {
+      if (!txs1.get(i).equals(txs2.get(i))) {
         System.out.println("DIFFERENCE"); // TODO: see difference after sends
         System.out.println(txs1.get(i));
         System.out.println(txs2.get(i));
