@@ -62,6 +62,8 @@ public class MoneroTx {
   private String key;
   private String blob;
   private String metadata;
+  private Integer numConfirmations;
+  private Integer numEstimatedBlocksUntilConfirmed;
 	
 	public MoneroTx() {
 	  super();
@@ -224,6 +226,22 @@ public class MoneroTx {
     this.metadata = metadata;
   }
 
+  public Integer getNumConfirmations() {
+    return numConfirmations;
+  }
+
+  public void setNumConfirmations(Integer numConfirmations) {
+    this.numConfirmations = numConfirmations;
+  }
+
+  public Integer getNumEstimatedBlocksUntilConfirmed() {
+    return numEstimatedBlocksUntilConfirmed;
+  }
+
+  public void setNumEstimatedBlocksUntilConfirmed(Integer numEstimatedBlocksUntilConfirmed) {
+    this.numEstimatedBlocksUntilConfirmed = numEstimatedBlocksUntilConfirmed;
+  }
+
   /**
    * Merges the given transaction into this transaction.
    * 
@@ -290,6 +308,10 @@ public class MoneroTx {
     else if (tx.getBlob() != null) assertEquals(blob, tx.getBlob());
     if (metadata == null) metadata = tx.getMetadata();
     else if (tx.getMetadata() != null) assertEquals(metadata, tx.getMetadata());
+    if (numConfirmations == null) numConfirmations = tx.getNumConfirmations();
+    else if (tx.getNumConfirmations() != null) assertEquals(numConfirmations, tx.getNumConfirmations());
+    if (numEstimatedBlocksUntilConfirmed == null) numEstimatedBlocksUntilConfirmed = tx.getNumEstimatedBlocksUntilConfirmed();
+    else if (tx.getNumEstimatedBlocksUntilConfirmed() != null) assertEquals(numEstimatedBlocksUntilConfirmed, tx.getNumEstimatedBlocksUntilConfirmed());
   }
   
   public String toString() {
@@ -325,6 +347,8 @@ public class MoneroTx {
     sb.append("Key: " + key + "\n");
     sb.append("Blob: " + blob + "\n");
     sb.append("Metadata: " + metadata + "\n");
+    sb.append("Num confirmations: " + numConfirmations + "\n");
+    sb.append("Num estimated blocks until confirmed: " + numEstimatedBlocksUntilConfirmed + "\n");
     return sb.toString();
   }
 
@@ -341,6 +365,8 @@ public class MoneroTx {
     result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
     result = prime * result + ((mixin == null) ? 0 : mixin.hashCode());
     result = prime * result + ((note == null) ? 0 : note.hashCode());
+    result = prime * result + ((numConfirmations == null) ? 0 : numConfirmations.hashCode());
+    result = prime * result + ((numEstimatedBlocksUntilConfirmed == null) ? 0 : numEstimatedBlocksUntilConfirmed.hashCode());
     result = prime * result + ((paymentId == null) ? 0 : paymentId.hashCode());
     result = prime * result + ((payments == null) ? 0 : payments.hashCode());
     result = prime * result + ((size == null) ? 0 : size.hashCode());
@@ -387,6 +413,12 @@ public class MoneroTx {
     if (note == null) {
       if (other.note != null) return false;
     } else if (!note.equals(other.note)) return false;
+    if (numConfirmations == null) {
+      if (other.numConfirmations != null) return false;
+    } else if (!numConfirmations.equals(other.numConfirmations)) return false;
+    if (numEstimatedBlocksUntilConfirmed == null) {
+      if (other.numEstimatedBlocksUntilConfirmed != null) return false;
+    } else if (!numEstimatedBlocksUntilConfirmed.equals(other.numEstimatedBlocksUntilConfirmed)) return false;
     if (paymentId == null) {
       if (other.paymentId != null) return false;
     } else if (!paymentId.equals(other.paymentId)) return false;
