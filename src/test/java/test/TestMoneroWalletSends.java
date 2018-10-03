@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.wallet.MoneroWallet;
@@ -334,6 +335,7 @@ public class TestMoneroWalletSends {
     }
   }
   
+  @Ignore // TODO: no dust to sweep to test always fails
   @Test
   public void testSweepDust() {
     List<MoneroTx> txs = wallet.sweepDust();
