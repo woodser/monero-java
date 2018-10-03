@@ -315,12 +315,15 @@ public class TestMoneroWallet {
   @Test
   public void testGetTxsWallet() {
     boolean nonDefaultIncoming = false;
-    List<MoneroTx> txs = wallet.getTxs();
-    assertFalse(txs.isEmpty());
-    for (MoneroTx tx : txs) {
-      TestUtils.testGetTx(tx, null, wallet);
-      if (!MoneroUtils.isOutgoing(tx.getType())) {
-        for (MoneroPayment payment : tx.getPayments()) {
+    List<MoneroTx> txs1 = wallet.getTxs();
+    List<MoneroTx> txs2 = wallet.getTxs();  // fetch transactions twice to ensure results are the same
+    assertEquals(txs1.size(), txs2.size());
+    for (int i = 0; i < txs1.size(); i++) {
+      assertEquals(txs1.get(i), txs2.get(i));
+      TestUtils.testGetTx(txs1.get(i), null, wallet);
+      TestUtils.testGetTx(txs2.get(i), null, wallet);
+      if (!MoneroUtils.isOutgoing(txs1.get(i).getType())) {
+        for (MoneroPayment payment : txs1.get(i).getPayments()) {
          if (payment.getAccountIdx() != 0 && payment.getSubaddressIdx() != 0) nonDefaultIncoming = true;
         }
       }
