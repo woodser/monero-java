@@ -97,7 +97,7 @@ public class TestUtils {
       try {
         wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
       } catch (MoneroRpcException e) {
-        assertEquals((int) -1, (int) e.getRpcCode()); // TODO (monero-wallet-rpc): -1: Failed to open wallet if wallet is already open
+        assertEquals((int) -1, (int) e.getRpcCode()); // TODO (v0.13.0): -1: Failed to open wallet if wallet is already open
       }
       
       // refresh wallet
