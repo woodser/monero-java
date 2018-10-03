@@ -1,15 +1,13 @@
 v0.12.3.0
-anyway to get around tx not possible?  need to refresh spend?
 some standard tests fail after send transactions (e.g. testGetTxsMoneroTxFilter)
 test right after sending that get_transfers with sent id returns destinations
 test getTxs() with outgoing payments because fetched by id
 test that subaddress numUnspentOutputs == incoming transfers unspent payments
 belowAmount only supported in sweep?  assert not used when not usable
 outbound transactions do not relable record minor, e.g. send from [2,3] but tx minor will be 0
-monerotx should only have one id
-merge based on subaddress location
-sendFromMultiple() searches for account
 optimize (cache subaddresses, check if used, etc)
+generate javadoc
+update readme
 
 v0.13.0
 multisig support
@@ -19,23 +17,11 @@ get rid of individual getBalance(), getUnlockedBalance(), isMultisigImportNeeded
 why is transaction amount 0 when destinations present
 why don't some transactions have destinations
 
-Monero-wallet-rpc suggested improvements:
-Subaddress [0,1] unlocked balance should have decreased
-timestamps for incoming pool txs are non deterministic
-wallet which was previously synced should be up-to-date at the completion of open_wallet
-get_transfers defaults [0, 0], incoming_transfers defaults [0, all], get_bulk_payments defaults [all, all]
-sending from account 1 says has unlocked balance but get -16 tx not possible.  Fixes itself after confirmations
-it needs to be documented that rescan_bc destroys wallet cache (destination addresses, etc)
-incoming_transfers d59fe775249465621d7736b53c0cb488e03e4da8dae647a13492ea51d7685c62 totalAmount is 0?
-outgoing destinations only known after first confirmation
-tx_size only known in incoming_transfers
-timestamps can vary across txs (see txid faa8a4aecb4de18c91dcedb00be76f4f9d3d79839b5bf9cab87f2e3632fc574c)
+
+MONERO-RPC SUGGESTED IMPROVEMENTS
 get_transfer_by_txid only returns incoming, not outgoing counterpart
-add address to incoming_transfers
-add tx_size to get_transfer_by_txid
 fee is included on incoming transactions from get_transfers but it is not in incoming_transfers; with incoming account 0 bug cannot reliably get fee
 get_transfers of account 0 all subaddresses does not return incoming transfers!
-monero-wallet-rpc outgoing transactions do not indicate originating subaddresses
 must call get_transfer_by_txid in order to get outgoing destinations
 address book entries work by index instead of id which changes
 optional param documentation missing
@@ -47,5 +33,10 @@ get_transfers returns all transactions whereas incoming_transfers returns incomi
 why doesn't tx_size get returned on get_transfers
 standardize terminology payment vs output; one payment may be fulfilled with multiple outputs
 no way to get transaction keys after sending
+
+add address to incoming_transfers
+add tx_size to get_transfer_by_txid
+get_transfers defaults [0, 0], incoming_transfers defaults [0, all], get_bulk_payments defaults [all, all]
+it needs to be documented that rescan_bc destroys wallet cache (destination addresses, etc)
+
 height vs block_height inconsistent
-key is never returned as part of get transactions and their variations
