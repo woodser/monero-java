@@ -377,6 +377,41 @@ public class TestMoneroWallet {
     }
     assertTrue("No incoming transactions found in non-default account and subaddress; run testSendToMultiple() first", nonDefaultIncoming);
   }
+  
+  @Test
+  public void testGetTxsIncomingSumToBalance() {
+    
+    // only get incoming or mempool transactions
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setOutgoing(false);
+    filter.setPending(false);
+    filter.setFailed(false);
+    
+    // test that spendable payments of incoming txs sum to account balances
+    for (MoneroAccount account : wallet.getAccounts()) {
+      
+      // get transactions
+      filter.setAccountIndex(account.getIndex());
+      List<MoneroTx> txs = wallet.getTxs(filter);
+      if (account.getIndex() == 0) assertFalse(txs.isEmpty());
+      
+      // sum balance of spendable payments
+      BigInteger balance = BigInteger.valueOf(0);
+      for (MoneroTx tx : txs) {
+        assertFalse(MoneroUtils.isOutgoing(tx.getType()));
+        assertFalse(tx.getPayments().isEmpty());
+        for (MoneroPayment payment : tx.getPayments()) {
+          if (!payment.getIsSpent()) {
+            balance = balance.add(payment.getAmount());
+          }
+        }
+      }
+      
+      // wallet balane must equal spendable payments
+      BigInteger walletBalance = wallet.getBalance(account.getIndex());
+      assertEquals("Account " + account.getIndex() + " balance does not add up", walletBalance, balance); // TODO (monero-wallet-rpc): get_account and get_balance report wrong balance when incoming txs are in the mempool so this doesn't add up after send tests
+    }
+  }
 
   @Test
   public void testGetTxsMoneroTxFilter() {
@@ -417,28 +452,6 @@ public class TestMoneroWallet {
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       assertEquals(MoneroTxType.OUTGOING, tx.getType());
-    }
-    
-    // test balance equals spendable payments for each account
-    for (MoneroAccount account : wallet.getAccounts()) {
-      MoneroTxFilter filter = new MoneroTxFilter();
-      filter.setOutgoing(false);
-      filter.setPending(false);
-      filter.setFailed(false);
-      filter.setAccountIndex(account.getIndex());
-      txs = wallet.getTxs(filter);
-      if (account.getIndex() == 0) assertFalse(txs.isEmpty());
-      BigInteger balance = BigInteger.valueOf(0);
-      for (MoneroTx tx : txs) {
-        assertFalse(MoneroUtils.isOutgoing(tx.getType()));
-        assertFalse(tx.getPayments().isEmpty());
-        for (MoneroPayment payment : tx.getPayments()) {
-          if (!payment.getIsSpent()) {
-            balance = balance.add(payment.getAmount());
-          }
-        }
-      }
-      assertEquals("Account " + account.getIndex() + " balance does not add up", wallet.getBalance(account.getIndex()), balance); // TODO: account balance does not add up after sending TX
     }
     
     // test block height filtering
