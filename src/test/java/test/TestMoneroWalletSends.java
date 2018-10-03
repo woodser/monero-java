@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
@@ -30,8 +31,6 @@ import utils.TestUtils;
  * Tests sending funds from a Monero wallet.
  * 
  * These tests are separated because they rely on a balance and initiate transactions on the blockchain.
- * 
- * TODO: test sending with payment id
  */
 public class TestMoneroWalletSends {
   
@@ -51,15 +50,21 @@ public class TestMoneroWalletSends {
   
   @Test
   public void testSendToSingle() {
-    testSendToSingle(false);
+    testSendToSingle(false, null);
+  }
+  
+  @Test
+  public void testSendToSinglePaymentId() {
+    MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(null);
+    testSendToSingle(false, integratedAddress.getPaymentId());
   }
   
   @Test
   public void testSendSplitToSingle() {
-    testSendToSingle(true);
+    testSendToSingle(true, null);
   }
   
-  private void testSendToSingle(boolean canSplit) {
+  private void testSendToSingle(boolean canSplit, String paymentId) {
     
     // find a non-primary subaddress to send from
     boolean sufficientBalance = false;
@@ -89,13 +94,12 @@ public class TestMoneroWalletSends {
     BigInteger sendAmount = unlockedBalanceBefore.subtract(TestUtils.MAX_FEE).divide(BigInteger.valueOf(SEND_DIVISOR));
     String address = wallet.getPrimaryAddress();
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    MoneroTxConfig config = new MoneroTxConfig(address, null, sendAmount, TestUtils.MIXIN);
+    MoneroTxConfig config = new MoneroTxConfig(address, paymentId, sendAmount, TestUtils.MIXIN);
     config.setAccountIndex(fromAccount.getIndex());
     config.setSubaddressIndices(Arrays.asList(fromSubaddress.getIndex()));
     if (canSplit) {
       txs.addAll(wallet.sendSplit(config));
     } else {
-      System.out.println("Sending from [" + config.getAccountIndex() + ", " + config.getSubaddressIndices() + "]");
       txs.add(wallet.send(config));
     }
     
