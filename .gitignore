@@ -8,3 +8,4 @@
 /build/
 **/pom.xml.versionsBackup
 **/logs
+/bin/
