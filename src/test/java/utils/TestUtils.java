@@ -179,6 +179,7 @@ public class TestUtils {
           assertNull(tx.getId(), payment.getAccountIdx());
           assertNull(tx.getId(), payment.getSubaddressIdx());
           assertNull(tx.getId(), payment.getIsSpent());
+          assertNull(tx.getId(), payment.getKeyImage());
         }
         // TODO (monero-wallet-rpc): incoming_transfers d59fe775249465621d7736b53c0cb488e03e4da8dae647a13492ea51d7685c62 totalAmount is 0?
         if (totalAmount.compareTo(tx.getTotalAmount()) != 0 && tx.getTotalAmount().compareTo(BigInteger.valueOf(0)) == 0) {
@@ -209,7 +210,7 @@ public class TestUtils {
         assertNull(tx.getId(), tx.getKey());
         assertNull(tx.getId(), tx.getHeight());
       } else {
-        assertNotNull(tx.getId(), tx.getKey());
+        assertNull(tx.getId(), tx.getKey());
         //assertNotNull(tx.getId(), tx.getHeight());
         if (tx.getHeight() == null) LOGGER.warn("Incoming transaction is missing height: " + tx.getId());
       }
@@ -228,6 +229,7 @@ public class TestUtils {
         assertNotNull(tx.getId(), payment.getAccountIdx());
         assertNotNull(tx.getId(), payment.getSubaddressIdx());
         assertNotNull(tx.getId(), payment.getIsSpent());
+        assertNotNull(tx.getId(), payment.getKeyImage());
       }
       assertTrue(totalAmount.compareTo(tx.getTotalAmount()) == 0);
     }
@@ -273,6 +275,7 @@ public class TestUtils {
         assertNull(tx.getId(), payment.getAccountIdx());
         assertNull(tx.getId(), payment.getSubaddressIdx());
         assertNull(tx.getId(), payment.getIsSpent());
+        assertNull(tx.getId(), payment.getKeyImage());
       }
       assertTrue("Total amount is not sum of payments: " + tx.getTotalAmount() + " vs " + totalAmount + " for TX " + tx.getId(), totalAmount.compareTo(tx.getTotalAmount()) == 0);
     }
