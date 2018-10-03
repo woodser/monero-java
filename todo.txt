@@ -20,6 +20,7 @@ why is transaction amount 0 when destinations present
 why don't some transactions have destinations
 
 Monero-wallet-rpc suggested improvements:
+Subaddress [0,1] unlocked balance should have decreased
 timestamps for incoming pool txs are non deterministic
 wallet which was previously synced should be up-to-date at the completion of open_wallet
 get_transfers defaults [0, 0], incoming_transfers defaults [0, all], get_bulk_payments defaults [all, all]
