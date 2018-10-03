@@ -924,7 +924,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("txid")) tx.setId((String) val);
       else if (key.equalsIgnoreCase("tx_hash")) tx.setId((String) val);
       else if (key.equalsIgnoreCase("tx_key")) tx.setKey((String) val);
-      else if (key.equalsIgnoreCase("key_image")) tx.setKey((String) val);
       else if (key.equalsIgnoreCase("type")) assertEquals(type, getTxType((String) val)); // type already set
       else if (key.equalsIgnoreCase("tx_size")) tx.setSize(((BigInteger) val).intValue());
       else if (key.equalsIgnoreCase("unlock_time")) tx.setUnlockTime(((BigInteger) val).intValue());
@@ -949,6 +948,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           if (payment == null) payment = new MoneroPayment();
           payment.setAddress((String) val);
         }
+      }
+      else if (key.equalsIgnoreCase("key_image")) {
+        assertFalse(isOutgoing);
+        if (payment == null) payment = new MoneroPayment();
+        payment.setKeyImage((String) val);
       }
       else if (key.equals("spent")) {
         assertFalse(isOutgoing);

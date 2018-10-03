@@ -18,6 +18,7 @@ public class MoneroPayment {
   private Integer accountIdx;
   private Integer subaddressIdx;
   private Boolean isSpent;
+  private String keyImage;
   
   public MoneroPayment() {
     super();
@@ -87,6 +88,14 @@ public class MoneroPayment {
     this.isSpent = isSpent;
   }
   
+  public String getKeyImage() {
+    return keyImage;
+  }
+
+  public void setKeyImage(String keyImage) {
+    this.keyImage = keyImage;
+  }
+
   /**
    * Merges the given payment into this payment.
    * 
@@ -106,6 +115,8 @@ public class MoneroPayment {
     else if (payment.getAmount() != null) assertTrue("Amounts", amount.compareTo(payment.getAmount()) == 0);
     if (isSpent == null) isSpent = payment.getIsSpent();
     else if (payment.getIsSpent() != null) assertEquals("Is spents", isSpent, payment.getIsSpent());
+    if (keyImage == null) keyImage = payment.getKeyImage();
+    else if (payment.getKeyImage() != null) assertEquals("Key images", keyImage, payment.getKeyImage());
   }
 
   @Override
@@ -116,6 +127,7 @@ public class MoneroPayment {
     result = prime * result + ((address == null) ? 0 : address.hashCode());
     result = prime * result + ((amount == null) ? 0 : amount.hashCode());
     result = prime * result + ((isSpent == null) ? 0 : isSpent.hashCode());
+    result = prime * result + ((keyImage == null) ? 0 : keyImage.hashCode());
     result = prime * result + ((subaddressIdx == null) ? 0 : subaddressIdx.hashCode());
     return result;
   }
@@ -138,6 +150,9 @@ public class MoneroPayment {
     if (isSpent == null) {
       if (other.isSpent != null) return false;
     } else if (!isSpent.equals(other.isSpent)) return false;
+    if (keyImage == null) {
+      if (other.keyImage != null) return false;
+    } else if (!keyImage.equals(other.keyImage)) return false;
     if (subaddressIdx == null) {
       if (other.subaddressIdx != null) return false;
     } else if (!subaddressIdx.equals(other.subaddressIdx)) return false;
