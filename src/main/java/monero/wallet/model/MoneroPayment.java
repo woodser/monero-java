@@ -141,9 +141,6 @@ public class MoneroPayment {
     if (subaddressIdx == null) {
       if (other.subaddressIdx != null) return false;
     } else if (!subaddressIdx.equals(other.subaddressIdx)) return false;
-    if (tx == null) {
-      if (other.tx != null) return false;
-    } else if (!tx.equals(other.tx)) return false;
     return true;
   }
 }
