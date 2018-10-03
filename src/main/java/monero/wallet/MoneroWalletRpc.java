@@ -642,7 +642,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   // TODO (v0.13.0): rpc call has input params in new version
-  // TODO: unable to properly test because no dust to sweep
   @SuppressWarnings("unchecked")
   @Override
   public List<MoneroTx> sweepDust() {
