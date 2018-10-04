@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImage;
@@ -122,21 +123,6 @@ public interface MoneroWallet {
    * @return MoneroAccount is the created account
    */
   public MoneroAccount createAccount(String label);
-  
-  /**
-   * Tags accounts.
-   * 
-   * @param tag is the tag to apply to the specified accounts
-   * @param accountIndices are the indices of the accounts to tag
-   */
-  public void tagAccounts(String tag, Collection<Integer> accountIndices);
-  
-  /**
-   * Untags acconts.
-   * 
-   * @param accountIndices are the indices of the accounts to untag
-   */
-  public void untagAccounts(Collection<Integer> accountIndices);
   
   /**
    * Gets an account's subaddresses.
@@ -335,6 +321,36 @@ public interface MoneroWallet {
    * @return List<MoneroTx> are the resulting transactions from sweeping dust
    */
   public List<MoneroTx> sweepDust();
+
+  /**
+   * Tags accounts.
+   * 
+   * @param tag is the tag to apply to the specified accounts
+   * @param accountIndices are the indices of the accounts to tag
+   */
+  public void tagAccounts(String tag, Collection<Integer> accountIndices);
+
+  /**
+   * Untags acconts.
+   * 
+   * @param accountIndices are the indices of the accounts to untag
+   */
+  public void untagAccounts(Collection<Integer> accountIndices);
+
+  /**
+   * Returns all account tags.
+   * 
+   * @return List<MoneroAccountTag> are the wallet's account tags
+   */
+  public List<MoneroAccountTag> getAccountTags();
+
+  /**
+   * Sets a human-readable description for a tag.
+   * 
+   * @param tag is the tag to set a description for
+   * @param label is the label to set for the tag
+   */
+  public void setAccountTagLabel(String tag, String label);
 
   /**
    * Set arbitrary string notes for transactions.
