@@ -13,8 +13,11 @@ optimize (cache subaddresses, check if used, etc)
 generate javadoc
 update readme
 
-MONERO-RPC SUGGESTED IMPROVEMENTS
-seeing invalid params on testSEndSplitFromMultiple() when unlocked is too low; pull from accounts with min balance and better error code when unlocked is too low
+MONERO-RPC
+balances are wrong after sends (monero-wallet-rpc)
+incoming transactions are missing when outgoing counterpart from same account (monero-wallet-rpc)
+send errors (tx not possible, not enough money, invalid params) with sufficient unlocked balance
+
 don't return incorrect balance information if multisig, instead return error
 incoming_transfers add address, fee, timestamp, unlock_time, is_double_spend, height
 get_transfers returns all transactions whereas incoming_transfers returns incoming outputs; clarify terminology or both could return transactions for consistency
