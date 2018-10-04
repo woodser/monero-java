@@ -15,8 +15,8 @@ update readme
 
 MONERO-RPC
 HIGH
-balances are wrong after sends (https://github.com/monero-project/monero/issues/4428)
-incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4428)
+balances are wrong after sends (https://github.com/monero-project/monero/issues/4500)
+incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
 
 MEDIUM
 different timestamps for same txs.  mempool timestamp changes from call to call
