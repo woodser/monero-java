@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import monero.rpc.MoneroRpc;
 import monero.utils.MoneroUtils;
 import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroException;
 import monero.wallet.model.MoneroIntegratedAddress;
@@ -191,19 +192,34 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return new MoneroAccount(accountIdx, address, label, BigInteger.valueOf(0), BigInteger.valueOf(0), null);
   }
   
+  @SuppressWarnings("unchecked")
   @Override
-  public void tagAccounts(String tag, Collection<Integer> accountIndices) {
+  public List<MoneroAccountTag> getAccountTags() {
+    List<MoneroAccountTag> tags = new ArrayList<MoneroAccountTag>();
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_account_tags");
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<Map<String, Object>> accountTagMaps = (List<Map<String, Object>>) resultMap.get("account_tags");
+    if (accountTagMaps != null) {
+      for (Map<String, Object> accountTagMap : accountTagMaps) {
+        MoneroAccountTag tag = new MoneroAccountTag();
+        tags.add(tag);
+        tag.setTag((String) accountTagMap.get("tag"));
+        tag.setLabel((String) accountTagMap.get("label"));
+        List<BigInteger> accountIndicesBI = (List<BigInteger>) accountTagMap.get("accounts");
+        List<Integer> accountIndices = new ArrayList<Integer>();
+        for (BigInteger idx : accountIndicesBI) accountIndices.add(idx.intValue());
+        tag.setAccountIndices(accountIndices);
+      }
+    }
+    return tags;
+  }
+  
+  @Override
+  public void setAccountTagLabel(String tag, String label) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("tag", tag);
-    params.put("accounts", accountIndices);
-    rpc.sendRpcRequest("tag_accounts", params);
-  }
-
-  @Override
-  public void untagAccounts(Collection<Integer> accountIndices) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("accounts", accountIndices);
-    rpc.sendRpcRequest("untag_accounts", params);
+    params.put("description", label);
+    rpc.sendRpcRequest("set_account_tag_description", params);
   }
 
   @SuppressWarnings("unchecked")
@@ -636,6 +652,21 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       assertEquals("Sweep dust transactions not fetched: " + ids, ids.size(), txs.size());
       return txs;
     }
+  }
+
+  @Override
+  public void tagAccounts(String tag, Collection<Integer> accountIndices) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("tag", tag);
+    params.put("accounts", accountIndices);
+    rpc.sendRpcRequest("tag_accounts", params);
+  }
+
+  @Override
+  public void untagAccounts(Collection<Integer> accountIndices) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("accounts", accountIndices);
+    rpc.sendRpcRequest("untag_accounts", params);
   }
 
   @Override

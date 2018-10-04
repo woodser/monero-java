@@ -29,6 +29,7 @@ import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImage;
@@ -638,18 +639,29 @@ public class TestMoneroWallet {
       assertEquals((int) -1, (int) e.getRpcCode());
     }
     
+    // create expected tag for test
+    MoneroAccountTag expectedTag = new MoneroAccountTag("my_tag_" + UUID.randomUUID().toString(), "my tag label", Arrays.asList(0, 1));
+    
     // tag and query accounts
     assertTrue(accounts1.size() >= 3);
-    wallet.tagAccounts("my_tag", Arrays.asList(0, 1));
-    List<MoneroAccount> accounts = wallet.getAccounts("my_tag");
+    wallet.tagAccounts(expectedTag.getTag(), Arrays.asList(0, 1));
+    List<MoneroAccount> accounts = wallet.getAccounts(expectedTag.getTag());
     assertEquals(2, accounts.size());
     assertEquals(accounts1.get(0), accounts.get(0));
     assertEquals(accounts1.get(1), accounts.get(1));
     
+    // set tag label
+    wallet.setAccountTagLabel(expectedTag.getTag(), expectedTag.getLabel());
+    
+    // retrieve and find new tag
+    List<MoneroAccountTag> tags = wallet.getAccountTags();
+    assertTrue(tags.contains(expectedTag));
+    
     // untag and query accounts
     wallet.untagAccounts(Arrays.asList(0, 1));
+    assertFalse(wallet.getAccountTags().contains(expectedTag));
     try {
-      wallet.getAccounts("my_tag");
+      wallet.getAccounts(expectedTag.getTag());
       fail("Should have thrown exception with unregistered tag");
     } catch (MoneroRpcException e) {
       assertEquals((int) -1, (int) e.getRpcCode());
