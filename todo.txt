@@ -1,7 +1,7 @@
 v0.13.0
 new api calls
 payments are comprised of outputs
-only wallet.getBalance() and wallet.getUnlockedBalance(), else use accounts and subaddresses
+don't call accounts / subaddresses that are unused
 test getTxs() with outgoing payments because fetched by id
 test that subaddress numUnspentOutputs == incoming transfers unspent payments
 test right after sending that get_transfers with sent id returns destinations
