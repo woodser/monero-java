@@ -461,24 +461,20 @@ public class TestMoneroWallet {
     filter = new MoneroTxFilter();
     filter.setTxIds(txIds);    
     txs = wallet.getTxs(filter);
+    assertFalse(txs.isEmpty());
     for (String txId : txIds) {
-      filter = new MoneroTxFilter();
-      filter.setTxIds(Arrays.asList(txId));
-      txs = wallet.getTxs(filter);
-      assertFalse(txs.isEmpty());
-      for (MoneroTx tx : txs) {
-        assertEquals(txId, tx.getId());
-      }
+      boolean found = false;
+      for (MoneroTx tx : txs) if (tx.getId().equals(txId)) found = true;
+      assertTrue("No transaction with id " + txId + " fetched", found);
+    }
+    for (MoneroTx tx : txs) {
+      assertTrue(txIds.contains(tx.getId()));
     }
   }
 
   @Test
   public void testGetTxNotes() {
-    System.out.println("And begin...");
     List<MoneroTx> txs = wallet.getTxs();
-    if (txs.isEmpty()) {
-      System.out.println("OH NOES");
-    }
     assertFalse(txs.isEmpty());
     List<String> txIds = new ArrayList<String>();
     for (MoneroTx tx : txs) txIds.add(tx.getId());
