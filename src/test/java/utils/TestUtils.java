@@ -156,7 +156,7 @@ public class TestUtils {
       assertNotEquals(tx.getId(), MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());
       assertNotNull(tx.getId(), tx.getFee());
       assertNull(tx.getId(), tx.getMixin());
-      assertNull(tx.getId(), tx.getSize()); // TODO (monero-wallet-rpc): tx_size only known in incoming_transfers
+      assertNull(tx.getId(), tx.getSize()); // TODO (monero-wallet-rpc): add tx_size to get_transfers and get_transfer_by_txid
       assertNotNull(tx.getId(), tx.getNote());
       assertNotNull(tx.getId(), tx.getTimestamp());
       assertEquals(tx.getId(), (Integer) 0, tx.getUnlockTime());
@@ -211,7 +211,7 @@ public class TestUtils {
       assertNull(tx.getId(), tx.getMixin());
       //assertNotNull(tx.getId(), tx.getSize());  TODO: size can be null or not null?
       assertNull(tx.getId(), tx.getNote());
-      if (tx.getFee() == null) LOGGER.warn("Incoming transaction is missing fee: " + tx.getId());    // TODO (monero-wallet-rpc): add fee, timestamp, unlock_time, is_double_spend, height to incoming_transfers or fix bug where incoming txs don't return when sent from same account
+      if (tx.getFee() == null) LOGGER.warn("Incoming transaction is missing fee: " + tx.getId());    // TODO (monero-wallet-rpc): incoming txs are occluded by outgoing counterparts from same account and then incoming_transfers need address, fee, timestamp, unlock_time, is_double_spend, height 
       if (tx.getTimestamp() == null) LOGGER.warn("Incoming transaction is missing timestamp: " + tx.getId());
       if (tx.getUnlockTime() == null) LOGGER.warn("Incoming transaction is missing unlock_time: " + tx.getId());
       if (tx.getIsDoubleSpend() == null) LOGGER.warn("Incoming transaction is missing is_double_spend: " + tx.getId());
