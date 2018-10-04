@@ -50,7 +50,7 @@ public class TestUtils {
   
   // test constants
   public static final Integer MIXIN = 6;
-  public static final BigInteger MAX_FEE = BigInteger.valueOf(8500000).multiply(BigInteger.valueOf(10000));
+  public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class);
