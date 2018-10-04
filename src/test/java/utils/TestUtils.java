@@ -95,7 +95,6 @@ public class TestUtils {
       
       // open test wallet
       try {
-        // TODO (monero-wallet-rpc): wallet which was previously synced should be up-to-date at the completion of open_wallet
         wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
       } catch (MoneroRpcException e) {
         assertEquals((int) -1, (int) e.getRpcCode()); // TODO (v0.13.0): -1: Failed to open wallet if wallet is already open; better code and message
@@ -191,7 +190,7 @@ public class TestUtils {
           assertNull(tx.getId(), payment.getIsSpent());
           assertNull(tx.getId(), payment.getKeyImage());
         }
-        // TODO (monero-wallet-rpc): incoming_transfers d59fe775249465621d7736b53c0cb488e03e4da8dae647a13492ea51d7685c62 totalAmount is 0?
+        // TODO: incoming_transfers d59fe775249465621d7736b53c0cb488e03e4da8dae647a13492ea51d7685c62 totalAmount is 0?
         if (totalAmount.compareTo(tx.getTotalAmount()) != 0 && tx.getTotalAmount().compareTo(BigInteger.valueOf(0)) == 0) {
           LOGGER.warn("Total amount is not sum of payments: " + tx.getTotalAmount() + " vs " + totalAmount + " for TX " + tx.getId());
         } else {
@@ -209,9 +208,9 @@ public class TestUtils {
       assertNotNull(tx.getId(), tx.getTotalAmount());
       assertNotEquals(tx.getId(), MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());
       assertNull(tx.getId(), tx.getMixin());
-      //assertNotNull(tx.getId(), tx.getSize());  TODO: size can be null or not null?
+      assertNull(tx.getId(), tx.getSize());  // TODO: (monero-wallet-rpc) add tx_size to "in" get_transfers and incoming_transfers
       assertNull(tx.getId(), tx.getNote());
-      if (tx.getFee() == null) LOGGER.warn("Incoming transaction is missing fee: " + tx.getId());    // TODO (monero-wallet-rpc): incoming txs are occluded by outgoing counterparts from same account and then incoming_transfers need address, fee, timestamp, unlock_time, is_double_spend, height 
+      if (tx.getFee() == null) LOGGER.warn("Incoming transaction is missing fee: " + tx.getId());    // TODO (monero-wallet-rpc): incoming txs are occluded by outgoing counterparts from same account ()https://github.com/monero-project/monero/issues/4500) and then incoming_transfers need address, fee, timestamp, unlock_time, is_double_spend, height, tx_size 
       if (tx.getTimestamp() == null) LOGGER.warn("Incoming transaction is missing timestamp: " + tx.getId());
       if (tx.getUnlockTime() == null) LOGGER.warn("Incoming transaction is missing unlock_time: " + tx.getId());
       if (tx.getIsDoubleSpend() == null) LOGGER.warn("Incoming transaction is missing is_double_spend: " + tx.getId());

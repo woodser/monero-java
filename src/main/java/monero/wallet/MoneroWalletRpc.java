@@ -382,7 +382,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       for (String key : result.keySet()) {
         for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
           MoneroTx tx = txMapToTx(txMap, this);
-          if (tx.getType() == MoneroTxType.INCOMING) {  // prevent duplicates when populated by incoming_transfers  // TODO (monero-wallet-rpc): merge payments when incoming txs work (https://github.com/monero-project/monero/issues/4428)
+          if (tx.getType() == MoneroTxType.INCOMING) {  // prevent duplicates when populated by incoming_transfers  // TODO (monero-wallet-rpc): merge payments when incoming txs work (https://github.com/monero-project/monero/issues/4500)
             tx.setTotalAmount(BigInteger.valueOf(0));
             tx.setPayments(null);
           }
