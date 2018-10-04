@@ -50,7 +50,7 @@ public class TestUtils {
   
   // test constants
   public static final Integer MIXIN = 6;
-  public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
+  public static final BigInteger MAX_FEE = BigInteger.valueOf(8500000).multiply(BigInteger.valueOf(10000));
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class);
@@ -185,7 +185,7 @@ public class TestUtils {
           totalAmount = totalAmount.add(payment.getAmount());
           assertNotNull(tx.getId(), payment.getAddress());
           assertNotNull(tx.getId(), payment.getAmount());
-          assertTrue(tx.getId(), payment.getAmount().longValue() >= 0);  // TODO (monero-wallet-rpc): seems amount = 0 is a bug in monero-wallet-rpc since destination amounts are > 0
+          assertTrue(tx.getId(), payment.getAmount().longValue() > 0);
           assertNull(tx.getId(), payment.getAccountIdx());
           assertNull(tx.getId(), payment.getSubaddressIdx());
           assertNull(tx.getId(), payment.getIsSpent());
