@@ -340,7 +340,7 @@ public class TestMoneroWallet {
       
       // wallet balance must equal spendable payments
       BigInteger walletBalance = wallet.getAccount(account.getIndex()).getBalance();
-      assertEquals("Account " + account.getIndex() + " balance does not add up", walletBalance, balance); // TODO (monero-wallet-rpc): get_account and get_balance report wrong balance when incoming txs are in the mempool so this doesn't add up after send tests
+      assertEquals("Account " + account.getIndex() + " balance does not add up", walletBalance, balance); // TODO (monero-wallet-rpc): balance may not add up because of https://github.com/monero-project/monero/issues/4500
     }
   }
 
