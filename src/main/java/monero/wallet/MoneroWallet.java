@@ -198,45 +198,11 @@ public interface MoneroWallet {
   public BigInteger getBalance();
   
   /**
-   * Get the balance for a specific account.
-   * 
-   * @param accountIdx identifies the account
-   * @return BigInteger is the account's balance
-   */
-  public BigInteger getBalance(int accountIdx);
-  
-  /**
-   * Get the balance for a specific subaddress.
-   * 
-   * @param accountIdx identifies the account within the wallet
-   * @param subaddressIdx identifies the subbaddress within the account
-   * @return BigInteger is the subaddresse's balance
-   */
-  public BigInteger getBalance(int accountIdx, int subaddressIdx);
-  
-  /**
    * Get the unlocked balance across all accounts.
    * 
    * @return BigInteger is the unlocked balance across all accounts
    */
   public BigInteger getUnlockedBalance();
-  
-  /**
-   * Get the unlocked balance for a specific account.
-   * 
-   * @param accountIdx identifies the account
-   * @return BigInteger is the account's unlocked balance
-   */
-  public BigInteger getUnlockedBalance(int accountIdx);
-  
-  /**
-   * Get the unlocked balance for a specific subaddress.
-   * 
-   * @param accountIdx identifies the account within the wallet
-   * @param subaddressIdx identifies the subbaddress within the account
-   * @return BigInteger is the subaddresse's unlocked balance
-   */
-  public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx);
   
   /**
    * Indicates if importing multisig data is needed for returning a correct balance.

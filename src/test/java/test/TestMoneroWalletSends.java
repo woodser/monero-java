@@ -106,8 +106,9 @@ public class TestMoneroWalletSends {
     }
     
     // test that balance and unlocked balance decreased
-    assertTrue(wallet.getBalance(fromAccount.getIndex(), fromSubaddress.getIndex()).compareTo(balanceBefore) < 0);
-    assertTrue(wallet.getUnlockedBalance(fromAccount.getIndex(), fromSubaddress.getIndex()).compareTo(unlockedBalanceBefore) < 0);
+    MoneroSubaddress subaddress = wallet.getSubaddress(fromAccount.getIndex(), fromSubaddress.getIndex());
+    assertTrue(subaddress.getBalance().compareTo(balanceBefore) < 0);
+    assertTrue(subaddress.getUnlockedBalance().compareTo(unlockedBalanceBefore) < 0);
     
     // test transactions
     assertFalse(txs.isEmpty());
@@ -209,8 +210,9 @@ public class TestMoneroWalletSends {
     }
     
     // test that wallet balance decreased
-    assertTrue(wallet.getBalance(srcAccount.getIndex()).longValue() < balance.longValue());
-    assertTrue(wallet.getUnlockedBalance(srcAccount.getIndex()).longValue() < unlockedBalance.longValue());
+    MoneroAccount account = wallet.getAccount(srcAccount.getIndex());
+    assertTrue(account.getBalance().compareTo(balance) < 0);
+    assertTrue(account.getUnlockedBalance().compareTo(unlockedBalance) < 0);
     
     // test each transaction
     assertFalse(txs.isEmpty());

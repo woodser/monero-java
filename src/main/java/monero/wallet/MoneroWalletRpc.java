@@ -305,22 +305,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @Override
   public BigInteger getBalance() {
-    throw new RuntimeException("Not implemented");
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public BigInteger getBalance(int accountIdx) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("account_index", accountIdx);
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_balance", params);
-    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    return (BigInteger) resultMap.get("balance");
-  }
-
-  @Override
-  public BigInteger getBalance(int accountIdx, int subaddressIdx) {
-    return getSubaddresses(accountIdx, Arrays.asList(subaddressIdx)).get(0).getBalance();
+    BigInteger balance = BigInteger.valueOf(0);
+    for (MoneroAccount account : getAccounts()) {
+      balance = balance.add(account.getBalance());
+    }
+    return balance;
   }
   
   @Override
@@ -330,21 +319,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       unlockedBalance = unlockedBalance.add(account.getUnlockedBalance());
     }
     return unlockedBalance;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public BigInteger getUnlockedBalance(int accountIdx) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("account_index", accountIdx);
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_balance", params);
-    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    return (BigInteger) resultMap.get("unlocked_balance");
-  }
-
-  @Override
-  public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx) {
-    return getSubaddresses(accountIdx, Arrays.asList(subaddressIdx)).get(0).getUnlockedBalance();
   }
   
   @SuppressWarnings("unchecked")
