@@ -308,10 +308,18 @@ public class MoneroTx {
     else if (tx.getBlob() != null) assertEquals(blob, tx.getBlob());
     if (metadata == null) metadata = tx.getMetadata();
     else if (tx.getMetadata() != null) assertEquals(metadata, tx.getMetadata());
-    if (numConfirmations == null) numConfirmations = tx.getNumConfirmations();  // TODO: confirmations can change
-    else if (tx.getNumConfirmations() != null) assertEquals(numConfirmations, tx.getNumConfirmations());
-    if (numEstimatedBlocksUntilConfirmed == null) numEstimatedBlocksUntilConfirmed = tx.getNumEstimatedBlocksUntilConfirmed();
-    else if (tx.getNumEstimatedBlocksUntilConfirmed() != null) assertEquals(numEstimatedBlocksUntilConfirmed, tx.getNumEstimatedBlocksUntilConfirmed());
+    if (numConfirmations == null) numConfirmations = tx.getNumConfirmations();
+    else if (tx.getNumConfirmations() != null) {
+      assertTrue(Math.abs(numConfirmations - tx.getNumConfirmations()) <= 1); // num confirmations can change, take the latest (max)
+      numConfirmations = Math.max(numConfirmations, tx.getNumConfirmations());
+    }
+    if (numEstimatedBlocksUntilConfirmed != null) {
+      if (tx.getNumEstimatedBlocksUntilConfirmed() == null) numEstimatedBlocksUntilConfirmed = null;  // becomes null when confirmed
+      else {
+        assertTrue(Math.abs(numEstimatedBlocksUntilConfirmed - tx.getNumEstimatedBlocksUntilConfirmed()) <= 1); // num estimated blocks can change, take the latest (min)
+        numEstimatedBlocksUntilConfirmed = Math.min(numEstimatedBlocksUntilConfirmed, tx.getNumEstimatedBlocksUntilConfirmed());
+      }
+    }
   }
   
   public String toString() {
