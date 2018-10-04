@@ -308,7 +308,7 @@ public class MoneroTx {
     else if (tx.getBlob() != null) assertEquals(blob, tx.getBlob());
     if (metadata == null) metadata = tx.getMetadata();
     else if (tx.getMetadata() != null) assertEquals(metadata, tx.getMetadata());
-    if (numConfirmations == null) numConfirmations = tx.getNumConfirmations();
+    if (numConfirmations == null) numConfirmations = tx.getNumConfirmations();  // TODO: confirmations can change
     else if (tx.getNumConfirmations() != null) assertEquals(numConfirmations, tx.getNumConfirmations());
     if (numEstimatedBlocksUntilConfirmed == null) numEstimatedBlocksUntilConfirmed = tx.getNumEstimatedBlocksUntilConfirmed();
     else if (tx.getNumEstimatedBlocksUntilConfirmed() != null) assertEquals(numEstimatedBlocksUntilConfirmed, tx.getNumEstimatedBlocksUntilConfirmed());
