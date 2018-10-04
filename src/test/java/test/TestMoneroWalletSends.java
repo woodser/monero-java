@@ -74,6 +74,7 @@ public class TestMoneroWalletSends {
     MoneroSubaddress fromSubaddress = null;
     List<MoneroAccount> accounts = wallet.getAccounts(true);
     for (MoneroAccount account : accounts) {
+      if (account.getIndex() == 0) continue;
       List<MoneroSubaddress> subaddresses = account.getSubaddresses();
       for (int i = 1; i < subaddresses.size(); i++) {
         if (subaddresses.get(i).getBalance().compareTo(TestUtils.MAX_FEE) > 0) sufficientBalance = true;
