@@ -297,14 +297,11 @@ public class TestMoneroWalletSends {
       fromSubaddressIndices.add(unlockedSubaddresses.get(i).getIndex());
     }
     
-    System.out.println("Sending from [" + srcAccount.getIndex() + "," + fromSubaddressIndices + "]");
-    
     // determine the amount to send (slightly less than the sum to send from)
     BigInteger sendAmount = BigInteger.valueOf(0);
     for (Integer fromSubaddressIdx : fromSubaddressIndices) {
-      sendAmount = sendAmount.add(srcAccount.getSubaddresses().get(fromSubaddressIdx).getUnlockedBalance());
+      sendAmount = sendAmount.add(srcAccount.getSubaddresses().get(fromSubaddressIdx).getUnlockedBalance()).subtract(TestUtils.MAX_FEE);
     }
-    sendAmount = sendAmount.subtract(TestUtils.MAX_FEE);
     
     BigInteger fromBalance = BigInteger.valueOf(0);
     BigInteger fromUnlockedBalance = BigInteger.valueOf(0);
@@ -313,6 +310,7 @@ public class TestMoneroWalletSends {
       fromBalance = fromBalance.add(subaddress.getBalance());
       fromUnlockedBalance = fromUnlockedBalance.add(subaddress.getUnlockedBalance());
     }
+    System.out.println("Source               : [" + srcAccount.getIndex() + "," + fromSubaddressIndices + "]");
     System.out.println("Send amount          : " + sendAmount);
     System.out.println("Total amount         : " + sendAmount.add(TestUtils.MAX_FEE));
     System.out.println("From balance         : " + fromBalance);
