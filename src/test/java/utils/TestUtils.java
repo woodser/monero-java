@@ -97,7 +97,7 @@ public class TestUtils {
       try {
         wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
       } catch (MoneroRpcException e) {
-        assertEquals((int) -1, (int) e.getRpcCode()); // TODO (v0.13.0): -1: Failed to open wallet if wallet is already open; better code and message
+        assertEquals((int) -1, (int) e.getRpcCode()); // TODO (monero-wallet-rpc): -1: Failed to open wallet if wallet is already open; better code and message
       }
       
       // refresh wallet
@@ -208,7 +208,7 @@ public class TestUtils {
       assertNotNull(tx.getId(), tx.getTotalAmount());
       assertNotEquals(tx.getId(), MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());
       assertNull(tx.getId(), tx.getMixin());
-      assertNull(tx.getId(), tx.getSize());  // TODO: (monero-wallet-rpc) add tx_size to "in" get_transfers and incoming_transfers
+      assertNull(tx.getId(), tx.getSize());  // TODO (monero-wallet-rpc): add tx_size to "in" get_transfers and incoming_transfers
       assertNull(tx.getId(), tx.getNote());
       if (tx.getFee() == null) LOGGER.warn("Incoming transaction is missing fee: " + tx.getId());    // TODO (monero-wallet-rpc): incoming txs are occluded by outgoing counterparts from same account ()https://github.com/monero-project/monero/issues/4500) and then incoming_transfers need address, fee, timestamp, unlock_time, is_double_spend, height, tx_size 
       if (tx.getTimestamp() == null) LOGGER.warn("Incoming transaction is missing timestamp: " + tx.getId());
