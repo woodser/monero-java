@@ -262,8 +262,8 @@ public class TestMoneroWalletSends {
       unlockedSubaddresses.clear();
       int numSubaddressBalances = 0;
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
-        if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0) numSubaddressBalances++;
-        if (subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) unlockedSubaddresses.add(subaddress);
+        if (subaddress.getBalance().compareTo(TestUtils.MAX_FEE) > 0) numSubaddressBalances++;
+        if (subaddress.getUnlockedBalance().compareTo(TestUtils.MAX_FEE) > 0) unlockedSubaddresses.add(subaddress);
       }
       if (numSubaddressBalances >= NUM_SUBADDRESSES + 1) hasBalance = true;
       if (unlockedSubaddresses.size() >= NUM_SUBADDRESSES + 1) {
