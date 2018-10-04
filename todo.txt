@@ -17,15 +17,10 @@ generate javadoc
 update readme
 
 MONERO-RPC SUGGESTED IMPROVEMENTS
-get_transfers, get_transfer_by_txid does not return incoming transfers with outgoing counterpart from same account
-
-incoming_transfers add address
-get_transfers add tx_size
+incoming_transfers add address, fee, timestamp, unlock_time, is_double_spend, height
 get_transfers returns all transactions whereas incoming_transfers returns incoming outputs; clarify terminology or both could return transactions for consistency
-get_transfer_by_tx_id add tx_size
 get_transfers defaults [0, 0], incoming_transfers defaults [0, all], get_bulk_payments defaults [all, all]
 document that rescan_bc destroys wallet cache (destination addresses, etc)
-must call get_transfer_by_txid in order to get outgoing destinations
 height vs block_height inconsistent
 address book entries work by index instead of id which changes
 tx_hash in incoming_transfers vs txid in get_transfers; standardize on tx_hash or tx_id
