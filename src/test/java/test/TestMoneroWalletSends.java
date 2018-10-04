@@ -256,6 +256,9 @@ public class TestMoneroWalletSends {
     testSendFromMultiple(false);
   }
   
+  /**
+   * TODO: still seeing -16: tx not possible
+   */
   @Test
   public void testSendSplitFromMultiple() {
     testSendFromMultiple(true);
