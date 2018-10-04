@@ -14,6 +14,7 @@ generate javadoc
 update readme
 
 MONERO-RPC SUGGESTED IMPROVEMENTS
+seeing invalid params on testSEndSplitFromMultiple() when unlocked is too low; pull from accounts with min balance and better error code when unlocked is too low
 don't return incorrect balance information if multisig, instead return error
 incoming_transfers add address, fee, timestamp, unlock_time, is_double_spend, height
 get_transfers returns all transactions whereas incoming_transfers returns incoming outputs; clarify terminology or both could return transactions for consistency
