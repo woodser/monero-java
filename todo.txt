@@ -14,8 +14,8 @@ generate javadoc
 update readme
 
 MONERO-RPC
-balances are wrong after sends (monero-wallet-rpc)
-incoming transactions are missing when outgoing counterpart from same account (monero-wallet-rpc)
+balances are wrong after sends (https://github.com/monero-project/monero/issues/4428)
+incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4428)
 
 don't return incorrect balance information if multisig, instead return error
 incoming_transfers add address, fee, timestamp, unlock_time, is_double_spend, height
