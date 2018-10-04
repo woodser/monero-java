@@ -408,7 +408,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (txMaps != null) {
           for (Map<String, Object> txMap : txMaps) {
             MoneroTx tx = txMapToTx(txMap, MoneroTxType.INCOMING, this);
-            tx.getPayments().get(0).setAccountIdx(accountIdx);  // TODO (monero-wallet-rpc): incoming only returns subaddress idx so account idx and address must be set after
             tx.getPayments().get(0).setAddress(getAddress(accountIdx, tx.getPayments().get(0).getSubaddressIdx()));
             addTx(txs, tx, true);
           }
