@@ -33,7 +33,6 @@ import utils.TestUtils;
  * These tests are separated because they rely on a balance and initiate transactions on the blockchain.
  * 
  * TODO: test do not relay
- * TODO: anyway to get around tx not possible?  need to refresh spend?
  */
 public class TestMoneroWalletSends {
   
