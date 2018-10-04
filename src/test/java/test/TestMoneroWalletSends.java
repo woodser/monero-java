@@ -141,7 +141,7 @@ public class TestMoneroWalletSends {
   
   @Test
   public void testSendToMultiple() {
-    testSendToMultiple(10, 3, false);
+    testSendToMultiple(5, 3, false);
   }
   
   @Test
@@ -311,6 +311,7 @@ public class TestMoneroWalletSends {
       fromUnlockedBalance = fromUnlockedBalance.add(subaddress.getUnlockedBalance());
     }
     System.out.println("Send amount          : " + sendAmount);
+    System.out.println("Total amount         : " + sendAmount.add(TestUtils.MAX_FEE));
     System.out.println("From balance         : " + fromBalance);
     System.out.println("From unlocked balance: " + fromUnlockedBalance);
     
