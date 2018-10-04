@@ -16,7 +16,6 @@ update readme
 MONERO-RPC
 balances are wrong after sends (monero-wallet-rpc)
 incoming transactions are missing when outgoing counterpart from same account (monero-wallet-rpc)
-send errors (tx not possible, not enough money, invalid params) with sufficient unlocked balance
 
 don't return incorrect balance information if multisig, instead return error
 incoming_transfers add address, fee, timestamp, unlock_time, is_double_spend, height
