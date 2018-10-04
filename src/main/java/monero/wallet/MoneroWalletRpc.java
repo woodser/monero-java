@@ -930,11 +930,19 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("global_index")) { } // ignore
       else if (key.equalsIgnoreCase("tx_blob")) tx.setBlob((String) val);
       else if (key.equalsIgnoreCase("tx_metadata")) tx.setMetadata((String) val);
+      else if (key.equalsIgnoreCase("double_spend_seen")) tx.setIsDoubleSpend((Boolean) val);
+      else if (key.equalsIgnoreCase("confirmations")) {
+        if (tx.getType() == MoneroTxType.PENDING || tx.getType() == MoneroTxType.MEMPOOL) tx.setNumConfirmations(0);
+        else tx.setNumConfirmations(((BigInteger) val).intValue());
+      }
+      else if (key.equalsIgnoreCase("suggested_confirmations_threshold")) {
+        if (tx.getType() == MoneroTxType.PENDING || tx.getType() == MoneroTxType.MEMPOOL) tx.setNumEstimatedBlocksUntilConfirmed(((BigInteger) val).intValue());
+        else tx.setNumEstimatedBlocksUntilConfirmed(null);
+      }
       else if (key.equalsIgnoreCase("height")) {
         int height = ((BigInteger) val).intValue();
         tx.setHeight(height == 0 ? null : height);
       }
-      else if (key.equalsIgnoreCase("double_spend_seen")) tx.setIsDoubleSpend((Boolean) val);
       else if (key.equals("amount")) {
         tx.setTotalAmount((BigInteger) val);
         if (!isOutgoing) {
