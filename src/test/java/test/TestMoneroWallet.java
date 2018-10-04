@@ -30,7 +30,6 @@ import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
-import monero.wallet.model.MoneroException;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImage;
 import monero.wallet.model.MoneroPayment;
@@ -219,48 +218,12 @@ public class TestMoneroWallet {
   
   @Test
   public void testGetBalance() {
-    BigInteger balanceWallet = wallet.getUnlockedBalance();
+    BigInteger balanceWallet = wallet.getBalance();
     BigInteger balanceAccounts = BigInteger.valueOf(0);
     for (MoneroAccount account : wallet.getAccounts()) {
-      balanceAccounts = balanceAccounts.add(account.getUnlockedBalance());
+      balanceAccounts = balanceAccounts.add(account.getBalance());
     }
     assertTrue(balanceWallet.compareTo(balanceAccounts) == 0);
-  }
-
-  @Test
-  public void testGetBalanceAccount() {
-    List<MoneroAccount> accounts = wallet.getAccounts();
-    assertFalse(accounts.isEmpty());
-    for (MoneroAccount account : accounts) {
-      BigInteger balance = wallet.getBalance(account.getIndex());
-      assertTrue(balance.longValue() >= 0);
-    }
-    
-    // test getting balance of invalid account
-    try {
-      wallet.getBalance(-456);
-      fail("Should have thrown error on invalid account");
-    } catch (MoneroException exception) { }
-  }
-
-  @Test
-  public void getBalanceSubaddress() {
-    List<MoneroAccount> accounts = wallet.getAccounts();
-    assertFalse(accounts.isEmpty());
-    for (MoneroAccount account : accounts) {
-      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
-      assertFalse(subaddresses.isEmpty());
-      for (MoneroSubaddress subaddress : subaddresses) {
-        BigInteger balance = wallet.getBalance(account.getIndex(), subaddress.getIndex());
-        assertTrue(balance.longValue() >= 0);
-      }
-    }
-    
-    // test getting balance of invalid subaddress
-    try {
-      wallet.getBalance(0, -456);
-      fail("Should have thrown error on invalid subaddress");
-    } catch (MoneroException exception) { }
   }
   
   @Test
@@ -271,42 +234,6 @@ public class TestMoneroWallet {
       unlockedBalanceAccounts = unlockedBalanceAccounts.add(account.getUnlockedBalance());
     }
     assertTrue(unlockedBalanceWallet.compareTo(unlockedBalanceAccounts) == 0);
-  }
-
-  @Test
-  public void testGetUnlockedBalanceAccount() {
-    List<MoneroAccount> accounts = wallet.getAccounts();
-    assertFalse(accounts.isEmpty());
-    for (MoneroAccount account : accounts) {
-      BigInteger unlockedBalance = wallet.getUnlockedBalance(account.getIndex());
-      assertTrue(unlockedBalance.longValue() >= 0);
-    }
-    
-    // test getting balance of invalid account
-    try {
-      wallet.getUnlockedBalance(-456);
-      fail("Should have thrown error on invalid account");
-    } catch (MoneroException exception) { }
-  }
-
-  @Test
-  public void testGetUnlockedBalanceSubaddress() {
-    List<MoneroAccount> accounts = wallet.getAccounts();
-    assertFalse(accounts.isEmpty());
-    for (MoneroAccount account : accounts) {
-      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
-      assertFalse(subaddresses.isEmpty());
-      for (MoneroSubaddress subaddress : subaddresses) {
-        BigInteger unlockedBalance = wallet.getUnlockedBalance(account.getIndex(), subaddress.getIndex());
-        assertTrue(unlockedBalance.longValue() >= 0);
-      }
-    }
-    
-    // test getting balance of invalid subaddress
-    try {
-      wallet.getUnlockedBalance(0, -456);
-      fail("Should have thrown error on invalid subaddress");
-    } catch (MoneroException exception) { }
   }
   
   @Test
@@ -410,7 +337,7 @@ public class TestMoneroWallet {
       }
       
       // wallet balane must equal spendable payments
-      BigInteger walletBalance = wallet.getBalance(account.getIndex());
+      BigInteger walletBalance = wallet.getAccount(account.getIndex()).getBalance();
       assertEquals("Account " + account.getIndex() + " balance does not add up", walletBalance, balance); // TODO (monero-wallet-rpc): get_account and get_balance report wrong balance when incoming txs are in the mempool so this doesn't add up after send tests
     }
   }
@@ -513,7 +440,7 @@ public class TestMoneroWallet {
             }
           }
         }
-        assertEquals(wallet.getBalance(account.getIndex(), subaddress.getIndex()), balance);
+        assertEquals(wallet.getSubaddress(account.getIndex(), subaddress.getIndex()).getBalance(), balance);
       }
     }
     
