@@ -143,9 +143,10 @@ public class TestUtils {
   
   public static void testGetTx(MoneroTx tx, Boolean hasOutgoingPayments, MoneroWallet wallet) {
     testCommonTx(tx);
+    assertNotEquals(MoneroTxType.FAILED, tx.getType());
     
     // test outgoing
-    if (tx.getType() == MoneroTxType.OUTGOING || tx.getType() == MoneroTxType.PENDING || tx.getType() == MoneroTxType.FAILED) {
+    if (tx.getType() == MoneroTxType.OUTGOING || tx.getType() == MoneroTxType.PENDING) {
       assertNotNull(tx.getId());
       assertNotNull(tx.getId(), tx.getSrcAddress());
       assertEquals(tx.getId(), wallet.getAddress(tx.getSrcAccountIdx(), tx.getSrcSubaddressIdx()), tx.getSrcAddress());
@@ -164,8 +165,16 @@ public class TestUtils {
       assertNull(tx.getId(), tx.getKey());   // TODO (monero-wallet-rpc): cannot get tx keys after sending
       assertNull(tx.getId(), tx.getBlob());
       assertNull(tx.getId(), tx.getMetadata());
-      if (tx.getType() == MoneroTxType.OUTGOING) assertNotNull(tx.getId(), tx.getHeight());
-      else if (tx.getType() == MoneroTxType.PENDING || tx.getType() == MoneroTxType.FAILED) assertNull(tx.getId(), tx.getHeight());
+      if (tx.getType() == MoneroTxType.OUTGOING) {
+        assertNotNull(tx.getId(), tx.getHeight());
+        assertNotNull(tx.getId(), tx.getNumConfirmations());
+        assertTrue(tx.getId(), tx.getNumConfirmations() > 0);
+        assertNull(tx.getId(), tx.getNumEstimatedBlocksUntilConfirmed());
+      } else if (tx.getType() == MoneroTxType.PENDING) {
+        assertNull(tx.getId(), tx.getHeight());
+        assertEquals(tx.getId(), 0, (int) tx.getNumConfirmations());
+        assertTrue(tx.getId(), tx.getNumEstimatedBlocksUntilConfirmed() > 0);
+      }
       if (Boolean.TRUE.equals(hasOutgoingPayments)) assertNotNull(tx.getId(), tx.getPayments());
       else if (Boolean.FALSE.equals(hasOutgoingPayments)) assertNull(tx.getId(), tx.getPayments()); // TODO (monero-wallet-rpc): outgoing destinations only known after first confirmation
       if (tx.getPayments() != null) {
@@ -207,13 +216,17 @@ public class TestUtils {
       if (tx.getUnlockTime() == null) LOGGER.warn("Incoming transaction is missing unlock_time: " + tx.getId());
       if (tx.getIsDoubleSpend() == null) LOGGER.warn("Incoming transaction is missing is_double_spend: " + tx.getId());
       if (tx.getIsDoubleSpend() != null) assertFalse(tx.getId(), tx.getIsDoubleSpend());
-      if (tx.getType() == MoneroTxType.MEMPOOL) {
+      if (tx.getType() == MoneroTxType.INCOMING) {
         assertNull(tx.getId(), tx.getKey());
-        assertNull(tx.getId(), tx.getHeight());
+        if (tx.getHeight() == null) LOGGER.warn("Incoming transaction is missing height: " + tx.getId());
+        if (tx.getNumConfirmations() == null) LOGGER.warn("Incoming transaction is missing confirmations: " + tx.getNumConfirmations());
+        else assertTrue(tx.getId(), tx.getNumConfirmations() > 0);
+        assertNull(tx.getId(), tx.getNumEstimatedBlocksUntilConfirmed());
       } else {
         assertNull(tx.getId(), tx.getKey());
-        //assertNotNull(tx.getId(), tx.getHeight());
-        if (tx.getHeight() == null) LOGGER.warn("Incoming transaction is missing height: " + tx.getId());
+        assertNull(tx.getId(), tx.getHeight());
+        assertEquals(tx.getId(), 0, (int) tx.getNumConfirmations());
+        assertTrue(tx.getId(), tx.getNumEstimatedBlocksUntilConfirmed() > 0);
       }
       assertNull(tx.getId(), tx.getBlob());
       assertNull(tx.getId(), tx.getMetadata());
