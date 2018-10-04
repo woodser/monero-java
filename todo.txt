@@ -17,6 +17,7 @@ MONERO-RPC
 HIGH
 balances are wrong after sends (https://github.com/monero-project/monero/issues/4500)
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
+still seeing -16 tx not possible
 
 MEDIUM
 different timestamps for same txs.  mempool timestamp changes from call to call
