@@ -160,8 +160,8 @@ public class TestMoneroWalletSends {
     MoneroAccount srcAccount = null;
     boolean hasBalance = true;
     for (MoneroAccount account : wallet.getAccounts()) {
-      if (account.getBalance().subtract(TestUtils.MAX_FEE).compareTo(BigInteger.valueOf(0)) > 0) hasBalance = true;
-      if (account.getUnlockedBalance().subtract(TestUtils.MAX_FEE).compareTo(BigInteger.valueOf(0)) > 0) {
+      if (account.getBalance().compareTo(TestUtils.MAX_FEE) > 0) hasBalance = true;
+      if (account.getUnlockedBalance().compareTo(TestUtils.MAX_FEE)> 0) {
         srcAccount = account;
         break;
       }
