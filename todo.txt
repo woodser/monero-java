@@ -1,15 +1,12 @@
 v0.13.0
+new api calls
 payments are comprised of outputs
-multisig support
-get_output_distribution distribution field cannot be deserialized to array of integer
-investigate do not relay, way of doing pending transaction?  would need to relay 
-get rid of individual getBalance(), getUnlockedBalance(), isMultisigImportNeeded() and replace with getAccount() with all info?
-why is transaction amount 0 when destinations present
-why don't some transactions have destinations
-some standard tests fail after send transactions (e.g. testGetTxsMoneroTxFilter)
-test right after sending that get_transfers with sent id returns destinations
+only wallet.getBalance() and wallet.getUnlockedBalance(), else use accounts and subaddresses
 test getTxs() with outgoing payments because fetched by id
 test that subaddress numUnspentOutputs == incoming transfers unspent payments
+test right after sending that get_transfers with sent id returns destinations
+multisig support and tests
+get_output_distribution distribution field cannot be deserialized to array of integer
 belowAmount only supported in sweep?  assert not used when not usable
 outbound transactions do not relable record minor, e.g. send from [2,3] but tx minor will be 0
 optimize (cache subaddresses, check if used, etc)
