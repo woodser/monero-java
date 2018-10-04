@@ -21,7 +21,7 @@ send errors (tx not possible, not enough money, invalid params) with sufficient 
 don't return incorrect balance information if multisig, instead return error
 incoming_transfers add address, fee, timestamp, unlock_time, is_double_spend, height
 get_transfers returns all transactions whereas incoming_transfers returns incoming outputs; clarify terminology or both could return transactions for consistency
-get_transfers defaults [0, 0], incoming_transfers defaults [0, all], get_bulk_payments defaults [all, all]
+get_transfers defaults [0, 0], incoming_transfers defaults [0, all], get_bulk_payments defaults [all, all] (especially get_transfers should default to all else call to get_address is required first)
 document that rescan_bc destroys wallet cache (destination addresses, etc)
 height vs block_height inconsistent
 address book entries work by index instead of id which changes
