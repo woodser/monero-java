@@ -7,15 +7,10 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigInteger;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 /**
  * Represents a transaction on the Monero network.
  */
 public class MoneroTx {
-  
-  //logger
- private static final Logger LOGGER = Logger.getLogger(MoneroTx.class);
   
   /**
    * Default payment id.
@@ -279,26 +274,28 @@ public class MoneroTx {
       }
     }
     if (paymentId == null) paymentId = tx.getPaymentId();
-    else if (tx.getPaymentId() != null) assertEquals("Payment ids", paymentId, tx.getPaymentId());
+    else if (tx.getPaymentId() != null) assertEquals(tx.getId(), paymentId, tx.getPaymentId());
     if (fee == null) fee = tx.getFee();
-    else if (tx.getFee() != null) assertEquals("Fees", fee, tx.getFee());
+    else if (tx.getFee() != null) assertEquals(tx.getId(), fee, tx.getFee());
     if (mixin == null) mixin = tx.getMixin();
-    else if (tx.getMixin() != null) assertEquals("Mixins", mixin, tx.getMixin());
+    else if (tx.getMixin() != null) assertEquals(tx.getId(), mixin, tx.getMixin());
     if (key == null) key = tx.getKey();
-    else if (tx.getKey() != null) assertEquals("Keys", key, tx.getKey());
+    else if (tx.getKey() != null) assertEquals(tx.getId(), key, tx.getKey());
     if (size == null) size = tx.getSize();
-    else if (tx.getSize() != null) assertEquals("Sizes", size, tx.getSize());
+    else if (tx.getSize() != null) assertEquals(tx.getId(), size, tx.getSize());
     if (type == null) type = tx.getType();
-    else if (tx.getType() != null) assertEquals("Types", type, tx.getType());
+    else if (tx.getType() != null) assertEquals(tx.getId(), type, tx.getType());
     if (height == null) height = tx.getHeight();
-    else if (tx.getHeight() != null) assertEquals("Heights", height, tx.getHeight());
+    else if (tx.getHeight() != null) assertEquals(tx.getId(), height, tx.getHeight());
     if (note == null) note = tx.getNote();
-    else if (tx.getNote() != null) assertEquals("Notes", note, tx.getNote());
+    else if (tx.getNote() != null) assertEquals(tx.getId(), note, tx.getNote());
     if (timestamp == null) timestamp = tx.getTimestamp();
     else if (tx.getTimestamp() != null) {
-      //assertEquals("Timestamps", timestamp, tx.getTimestamp()); // TODO (monero-wallet-rpc): timestamps for id can vary (e.g. faa8a4aecb4de18c91dcedb00be76f4f9d3d79839b5bf9cab87f2e3632fc574c)
-      if (timestamp.equals(tx.getTimestamp())) LOGGER.warn("Timestamps for tx " + tx.getId() + " are different, using first one");
-      timestamp = Math.min(timestamp, tx.getTimestamp());
+      if (tx.getType() == MoneroTxType.PENDING || tx.getType() == MoneroTxType.MEMPOOL) {
+        timestamp = Math.min(timestamp, tx.getTimestamp()); // use first timestamp
+      } else {
+        assertEquals(tx.getId(), timestamp, tx.getTimestamp());
+      }
     }
     if (unlockTime == null) unlockTime = tx.getUnlockTime();
     else if (tx.getUnlockTime() != null) assertEquals(unlockTime, tx.getUnlockTime());
@@ -381,7 +378,7 @@ public class MoneroTx {
     result = prime * result + ((srcAccountIdx == null) ? 0 : srcAccountIdx.hashCode());
     result = prime * result + ((srcAddress == null) ? 0 : srcAddress.hashCode());
     result = prime * result + ((srcSubaddressIdx == null) ? 0 : srcSubaddressIdx.hashCode());
-    result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
+    result = prime * result + ((timestamp == null || type == MoneroTxType.PENDING || type == MoneroTxType.MEMPOOL || type == MoneroTxType.FAILED) ? 0 : timestamp.hashCode()); // ignore timestamps if not confirmed
     result = prime * result + ((totalAmount == null) ? 0 : totalAmount.hashCode());
     result = prime * result + ((type == null) ? 0 : type.hashCode());
     result = prime * result + ((unlockTime == null) ? 0 : unlockTime.hashCode());
@@ -447,7 +444,7 @@ public class MoneroTx {
     } else if (!srcSubaddressIdx.equals(other.srcSubaddressIdx)) return false;
     if (timestamp == null) {
       if (other.timestamp != null) return false;
-    } else if (!timestamp.equals(other.timestamp)) return false;
+    } else if ((type == MoneroTxType.OUTGOING || type == MoneroTxType.INCOMING) && !timestamp.equals(other.timestamp)) return false;  // only must be the same if confirmed
     if (totalAmount == null) {
       if (other.totalAmount != null) return false;
     } else if (!totalAmount.equals(other.totalAmount)) return false;
