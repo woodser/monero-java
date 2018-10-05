@@ -25,6 +25,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import common.utils.MathUtils;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
@@ -338,6 +339,56 @@ public class TestMoneroWallet {
       assertEquals("Account " + account.getIndex() + " balance does not add up", walletBalance, balance); // TODO (monero-wallet-rpc): balance may not add up because of https://github.com/monero-project/monero/issues/4500
     }
   }
+  
+  @Test
+  public void testGetTxsByIds() {
+    int numTestTxs = 5;  // number of txs to test
+    
+    // get all transactions for reference
+    List<MoneroTx> allTxs = wallet.getTxs();
+    assertFalse(allTxs.isEmpty());
+    for (MoneroTx tx : allTxs) {
+      TestUtils.testGetTx(tx, null, wallet);
+    }
+    
+    // collect all ids
+    Set<String> uniqueIds = new HashSet<String>();
+    for (MoneroTx tx : allTxs) uniqueIds.add(tx.getId());
+    assertTrue(uniqueIds.size() > numTestTxs);
+    List<String> uniqueIdsList = new ArrayList<String>(uniqueIds);
+    
+    // get random transaction ids
+    Set<String> txIds = new HashSet<String>();
+    while (txIds.size() < numTestTxs) {
+      txIds.add(uniqueIdsList.get(MathUtils.random(0, uniqueIdsList.size() - 1)));
+    }
+    assertEquals(numTestTxs, txIds.size());
+    
+    // fetch transactions by id
+    for (String txId : txIds) {
+      MoneroTxFilter filter = new MoneroTxFilter();
+      filter.setTxIds(Arrays.asList(txId));
+      List<MoneroTx> txs = wallet.getTxs(filter);
+      assertFalse(txs.isEmpty());
+      for (MoneroTx tx : txs) {
+        assertEquals(txId, tx.getId());
+      }
+    }
+    
+    // fetch transactions by ids
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setTxIds(txIds);
+    List<MoneroTx> txs = wallet.getTxs(filter);
+    assertFalse(txs.isEmpty());
+    for (MoneroTx tx : txs) {
+      assertTrue(txIds.contains(tx.getId()));
+    }
+    for (String txId : txIds) {
+      boolean found = false;
+      for (MoneroTx tx : txs) if (tx.getId().equals(txId)) found = true;
+      assertTrue("No transaction with id " + txId + " fetched", found);
+    }
+  }
 
   // TODO: break this test up
   @Test
@@ -450,24 +501,6 @@ public class TestMoneroWallet {
     filter.setSubaddressIndices(subaddressIndices);
     txs = wallet.getTxs(filter);
     assertTrue(txs.isEmpty());
-    
-    // test getting transactions by transaction ids
-    int maxTxs = Math.min(5, allTxs.size());
-    Set<String> txIds = new HashSet<String>();
-    for (int i = 0; i < maxTxs; i++) txIds.add(allTxs.get(i).getId());
-    assertFalse(txIds.isEmpty());
-    filter = new MoneroTxFilter();
-    filter.setTxIds(txIds);    
-    txs = wallet.getTxs(filter);
-    assertFalse(txs.isEmpty());
-    for (String txId : txIds) {
-      boolean found = false;
-      for (MoneroTx tx : txs) if (tx.getId().equals(txId)) found = true;
-      assertTrue("No transaction with id " + txId + " fetched", found);
-    }
-    for (MoneroTx tx : txs) {
-      assertTrue(txIds.contains(tx.getId()));
-    }
   }
 
   @Test
