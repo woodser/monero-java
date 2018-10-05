@@ -251,11 +251,6 @@ public class TestMoneroWallet {
     for (int i = 0; i < txs1.size(); i++) {
       TestUtils.testGetTx(txs1.get(i), null, wallet);
       TestUtils.testGetTx(txs2.get(i), null, wallet);
-      if (!txs1.get(i).equals(txs2.get(i))) {
-        System.out.println("DIFFERENCE"); // TODO (monero-wallet-rpc): timestamps for incoming pool transactions not deterministic
-        System.out.println(txs1.get(i));
-        System.out.println(txs2.get(i));
-      }
       assertEquals(txs1.get(i), txs2.get(i));
       if (!MoneroUtils.isOutgoing(txs1.get(i).getType())) {
         for (MoneroPayment payment : txs1.get(i).getPayments()) {
