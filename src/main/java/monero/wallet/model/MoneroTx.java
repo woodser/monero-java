@@ -292,7 +292,7 @@ public class MoneroTx {
     if (timestamp == null) timestamp = tx.getTimestamp();
     else if (tx.getTimestamp() != null) {
       if (tx.getType() == MoneroTxType.PENDING || tx.getType() == MoneroTxType.MEMPOOL) {
-        timestamp = Math.min(timestamp, tx.getTimestamp()); // use first timestamp
+        timestamp = Math.min(timestamp, tx.getTimestamp()); // mempool timestamps can vary so use first timestamp
       } else {
         assertEquals(tx.getId(), timestamp, tx.getTimestamp());
       }
