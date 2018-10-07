@@ -336,7 +336,7 @@ public class TestMoneroWallet {
         }
       }
       
-      // wallet balance must equal confirmed in minus pending out
+      // wallet balance must equal sum of unspent incoming txs
       BigInteger walletBalance = wallet.getAccount(account.getIndex()).getBalance();
       BigInteger expectedBalance = incomingBalance;  // TODO (monero-wallet-rpc): unconfirmed balance may not add up because of https://github.com/monero-project/monero/issues/4500
 //      System.out.println("Wallet    : " + walletBalance);
