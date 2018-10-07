@@ -308,35 +308,43 @@ public class TestMoneroWallet {
   @Test
   public void testGetTxsIncomingSumToBalance() {
     
-    // only get incoming or mempool transactions
-    MoneroTxFilter filter = new MoneroTxFilter();
-    filter.setOutgoing(false);
-    filter.setPending(false);
-    filter.setFailed(false);
-    
-    // test that spendable payments of incoming txs sum to account balances
+    // test each account balance
     for (MoneroAccount account : wallet.getAccounts()) {
       
       // get transactions
+      MoneroTxFilter filter = new MoneroTxFilter();
       filter.setAccountIndex(account.getIndex());
       List<MoneroTx> txs = wallet.getTxs(filter);
       if (account.getIndex() == 0) assertFalse(txs.isEmpty());
       
-      // sum balance of spendable payments
-      BigInteger balance = BigInteger.valueOf(0);
+      // sum balances of incoming payments and pending deductions
+      BigInteger incomingBalance = BigInteger.valueOf(0);
+      BigInteger pendingBalance = BigInteger.valueOf(0);
+      BigInteger mempoolBalance = BigInteger.valueOf(0);
       for (MoneroTx tx : txs) {
-        assertFalse(MoneroUtils.isOutgoing(tx.getType()));
-        assertFalse(tx.getPayments().isEmpty());
-        for (MoneroPayment payment : tx.getPayments()) {
-          if (!payment.getIsSpent()) {
-            balance = balance.add(payment.getAmount());
+        if (tx.getType() == MoneroTxType.PENDING) {
+          pendingBalance = pendingBalance.add(tx.getTotalAmount());
+        }
+        if (!MoneroUtils.isOutgoing(tx.getType())) {
+          assertFalse(tx.getPayments().isEmpty());
+          for (MoneroPayment payment : tx.getPayments()) {
+            if (!payment.getIsSpent()) {
+              if (tx.getType() == MoneroTxType.INCOMING) incomingBalance = incomingBalance.add(payment.getAmount());
+              if (tx.getType() == MoneroTxType.MEMPOOL) mempoolBalance = mempoolBalance.add(payment.getAmount());
+            }
           }
         }
       }
       
-      // wallet balance must equal spendable payments
+      // wallet balance must equal confirmed in minus pending out
       BigInteger walletBalance = wallet.getAccount(account.getIndex()).getBalance();
-      assertEquals("Account " + account.getIndex() + " balance does not add up", walletBalance, balance); // TODO (monero-wallet-rpc): balance may not add up because of https://github.com/monero-project/monero/issues/4500
+      BigInteger expectedBalance = incomingBalance;  // TODO (monero-wallet-rpc): unconfirmed balance may not add up because of https://github.com/monero-project/monero/issues/4500
+//      System.out.println("Wallet    : " + walletBalance);
+//      System.out.println("Incoming  : " + incomingBalance);
+//      System.out.println("Pending   : " + pendingBalance);
+//      System.out.println("Mempool   : " + mempoolBalance);
+//      System.out.println("Expected  : " + expectedBalance);
+      assertEquals("Account " + account.getIndex() + " balance does not add up", walletBalance, expectedBalance);
     }
   }
   
