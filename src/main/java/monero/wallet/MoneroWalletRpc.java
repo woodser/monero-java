@@ -454,7 +454,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setSrcSubaddressIdx(0);  // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
     tx.setSrcAddress(getAddress(tx.getSrcAccountIdx(), tx.getSrcSubaddressIdx()));
     if (tx.getType() != MoneroTxType.NOT_RELAYED) {
-      if (tx.getTimestamp() == null) tx.setTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary anyway
+      if (tx.getTimestamp() == null) tx.setTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
       if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
       if (tx.getIsDoubleSpend() == null) tx.setIsDoubleSpend(false);
     }
@@ -533,7 +533,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       for (MoneroTx filtered : filtereds) {
         if (tx.getId().equals(filtered.getId())) tx.merge(filtered, false);
       }
-    }    
+    }
     return txs;
   }
 
