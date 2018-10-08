@@ -321,6 +321,22 @@ public interface MoneroWallet {
    * @return List<MoneroTx> are the resulting transactions from sweeping dust
    */
   public List<MoneroTx> sweepDust();
+  
+  /**
+   * Relays a transaction previously created without relaying.
+   * 
+   * @param tx is the transaction to relay
+   * @return MoneroTx is the relayed transaction
+   */
+  public MoneroTx relayTx(MoneroTx tx);
+  
+  /**
+   * Relays tranactions previously created without relaying.
+   * 
+   * @param txs are the transactions to relay
+   * @return List<MoneroTx> are the relayed txs
+   */
+  public List<MoneroTx> relayTxs(List<MoneroTx> txs);
 
   /**
    * Tags accounts.

@@ -125,7 +125,7 @@ public class TestMoneroWalletSends {
       }
       
       // relay transactions
-      throw new RuntimeException("Not implemented");
+      txs = wallet.relayTxs(txs);
     }
     
     // test that balance and unlocked balance decreased
