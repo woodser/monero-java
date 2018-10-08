@@ -445,26 +445,37 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
     MoneroTx tx = txMapToTx(txMap, Boolean.TRUE.equals(config.getDoNotRelay()) ? MoneroTxType.NOT_RELAYED : MoneroTxType.PENDING, this);
+    
+    // set final fields
     tx.setMixin(config.getMixin());
     tx.setPayments(config.getDestinations());
+    tx.setPaymentId(config.getPaymentId());
     tx.setSrcAccountIdx(accountIdx);
     tx.setSrcSubaddressIdx(0);  // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
     tx.setSrcAddress(getAddress(tx.getSrcAccountIdx(), tx.getSrcSubaddressIdx()));
+    if (tx.getType() != MoneroTxType.NOT_RELAYED) {
+      if (tx.getTimestamp() == null) tx.setTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary anyway
+      if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
+      if (tx.getIsDoubleSpend() == null) tx.setIsDoubleSpend(false);
+    }
 
-    // done if not relayed
-    if (Boolean.TRUE.equals(config.getDoNotRelay())) return tx;
-    
-    // merge tx for complete data
-    MoneroTxFilter filter = new MoneroTxFilter();
-    filter.setAccountIndex(accountIdx);
-    filter.setSubaddressIndices(subaddressIndices);
-    filter.setIncoming(false);
-    filter.setMempool(false);
-    filter.setTxIds(Arrays.asList(tx.getId()));
-    List<MoneroTx> filtered = getTxs(filter);
-    assertEquals(1, filtered.size());
-    tx.merge(getTxs(filter).get(0), false); // TODO: need to make retrieval by id much more efficient
     return tx;
+
+    // TODO: can we get away with this?
+//    // done if not relayed
+//    if (Boolean.TRUE.equals(config.getDoNotRelay())) return tx;
+//    
+//    // merge tx for complete data
+//    MoneroTxFilter filter = new MoneroTxFilter();
+//    filter.setAccountIndex(accountIdx);
+//    filter.setSubaddressIndices(subaddressIndices);
+//    filter.setIncoming(false);
+//    filter.setMempool(false);
+//    filter.setTxIds(Arrays.asList(tx.getId()));
+//    List<MoneroTx> filtered = getTxs(filter);
+//    assertEquals(1, filtered.size());
+//    tx.merge(getTxs(filter).get(0), false); // TODO: need to make retrieval by id much more efficient
+//    return tx;
   }
 
   @SuppressWarnings("unchecked")

@@ -71,6 +71,11 @@ public class TestMoneroWalletSends {
     testSendToSingle(true, null, false);
   }
   
+  @Test
+  public void testSendSplitToSingleDoNotRelay() {
+    testSendToSingle(true, null, true);
+  }
+  
   private void testSendToSingle(boolean canSplit, String paymentId, boolean doNotRelay) {
     
     // find a non-primary subaddress to send from
