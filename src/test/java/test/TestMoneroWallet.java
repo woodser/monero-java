@@ -25,12 +25,13 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import common.utils.MathUtils;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
-import monero.wallet.model.MoneroException;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImage;
 import monero.wallet.model.MoneroPayment;
@@ -219,48 +220,12 @@ public class TestMoneroWallet {
   
   @Test
   public void testGetBalance() {
-    BigInteger balanceWallet = wallet.getUnlockedBalance();
+    BigInteger balanceWallet = wallet.getBalance();
     BigInteger balanceAccounts = BigInteger.valueOf(0);
     for (MoneroAccount account : wallet.getAccounts()) {
-      balanceAccounts = balanceAccounts.add(account.getUnlockedBalance());
+      balanceAccounts = balanceAccounts.add(account.getBalance());
     }
     assertTrue(balanceWallet.compareTo(balanceAccounts) == 0);
-  }
-
-  @Test
-  public void testGetBalanceAccount() {
-    List<MoneroAccount> accounts = wallet.getAccounts();
-    assertFalse(accounts.isEmpty());
-    for (MoneroAccount account : accounts) {
-      BigInteger balance = wallet.getBalance(account.getIndex());
-      assertTrue(balance.longValue() >= 0);
-    }
-    
-    // test getting balance of invalid account
-    try {
-      wallet.getBalance(-456);
-      fail("Should have thrown error on invalid account");
-    } catch (MoneroException exception) { }
-  }
-
-  @Test
-  public void getBalanceSubaddress() {
-    List<MoneroAccount> accounts = wallet.getAccounts();
-    assertFalse(accounts.isEmpty());
-    for (MoneroAccount account : accounts) {
-      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
-      assertFalse(subaddresses.isEmpty());
-      for (MoneroSubaddress subaddress : subaddresses) {
-        BigInteger balance = wallet.getBalance(account.getIndex(), subaddress.getIndex());
-        assertTrue(balance.longValue() >= 0);
-      }
-    }
-    
-    // test getting balance of invalid subaddress
-    try {
-      wallet.getBalance(0, -456);
-      fail("Should have thrown error on invalid subaddress");
-    } catch (MoneroException exception) { }
   }
   
   @Test
@@ -271,42 +236,6 @@ public class TestMoneroWallet {
       unlockedBalanceAccounts = unlockedBalanceAccounts.add(account.getUnlockedBalance());
     }
     assertTrue(unlockedBalanceWallet.compareTo(unlockedBalanceAccounts) == 0);
-  }
-
-  @Test
-  public void testGetUnlockedBalanceAccount() {
-    List<MoneroAccount> accounts = wallet.getAccounts();
-    assertFalse(accounts.isEmpty());
-    for (MoneroAccount account : accounts) {
-      BigInteger unlockedBalance = wallet.getUnlockedBalance(account.getIndex());
-      assertTrue(unlockedBalance.longValue() >= 0);
-    }
-    
-    // test getting balance of invalid account
-    try {
-      wallet.getUnlockedBalance(-456);
-      fail("Should have thrown error on invalid account");
-    } catch (MoneroException exception) { }
-  }
-
-  @Test
-  public void testGetUnlockedBalanceSubaddress() {
-    List<MoneroAccount> accounts = wallet.getAccounts();
-    assertFalse(accounts.isEmpty());
-    for (MoneroAccount account : accounts) {
-      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
-      assertFalse(subaddresses.isEmpty());
-      for (MoneroSubaddress subaddress : subaddresses) {
-        BigInteger unlockedBalance = wallet.getUnlockedBalance(account.getIndex(), subaddress.getIndex());
-        assertTrue(unlockedBalance.longValue() >= 0);
-      }
-    }
-    
-    // test getting balance of invalid subaddress
-    try {
-      wallet.getUnlockedBalance(0, -456);
-      fail("Should have thrown error on invalid subaddress");
-    } catch (MoneroException exception) { }
   }
   
   @Test
@@ -323,13 +252,8 @@ public class TestMoneroWallet {
     for (int i = 0; i < txs1.size(); i++) {
       TestUtils.testGetTx(txs1.get(i), null, wallet);
       TestUtils.testGetTx(txs2.get(i), null, wallet);
-      if (!txs1.get(i).equals(txs2.get(i))) {
-        System.out.println("DIFFERENCE"); // TODO (monero-wallet-rpc): timestamps for incoming pool transactions not deterministic
-        System.out.println(txs1.get(i));
-        System.out.println(txs2.get(i));
-      }
       assertEquals(txs1.get(i), txs2.get(i));
-      if (!MoneroUtils.isOutgoing(txs1.get(i).getType())) {
+      if (!MoneroUtils.isSendTx(txs1.get(i).getType())) {
         for (MoneroPayment payment : txs1.get(i).getPayments()) {
          if (payment.getAccountIdx() != 0 && payment.getSubaddressIdx() != 0) nonDefaultIncoming = true;
         }
@@ -345,7 +269,7 @@ public class TestMoneroWallet {
       List<MoneroTx> txs = wallet.getTxs(account.getIndex());
       for (MoneroTx tx : txs) {
         TestUtils.testGetTx(tx, null, wallet);
-        if (MoneroUtils.isOutgoing(tx.getType())) {
+        if (MoneroUtils.isSendTx(tx.getType())) {
           assertEquals(account.getIndex(), tx.getSrcAccountIdx());
         } else {
           for (MoneroPayment payment : tx.getPayments()) {
@@ -361,16 +285,17 @@ public class TestMoneroWallet {
   @Test
   public void testGetTxsSubaddress() {
     boolean nonDefaultIncoming = false;
-    for (MoneroAccount account : wallet.getAccounts(true)) {
-      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
-        for (MoneroTx tx : wallet.getTxs(account.getIndex(), subaddress.getIndex())) {
+    List<MoneroAccount> accounts = wallet.getAccounts(true);
+    for (int accountIdx = 0; accountIdx < Math.min(accounts.size(), 3); accountIdx++) {
+      for (int subaddressIdx = 0; subaddressIdx < Math.min(accounts.get(accountIdx).getSubaddresses().size(), 5); subaddressIdx++) {
+        for (MoneroTx tx : wallet.getTxs(accountIdx, subaddressIdx)) {
           TestUtils.testGetTx(tx, null, wallet);
-          if (MoneroUtils.isOutgoing(tx.getType()))  {
-            assertEquals(account.getIndex(), tx.getSrcAccountIdx());
+          if (MoneroUtils.isSendTx(tx.getType()))  {
+            assertEquals(accountIdx, (int) tx.getSrcAccountIdx());
           } else {
             for (MoneroPayment payment : tx.getPayments()) {
-              assertEquals(account.getIndex(), payment.getAccountIdx());
-              assertEquals(subaddress.getIndex(), payment.getSubaddressIdx());
+              assertEquals(accountIdx, (int) payment.getAccountIdx());
+              assertEquals(subaddressIdx, (int) payment.getSubaddressIdx());
               if (payment.getAccountIdx() != 0 && payment.getSubaddressIdx() != 0) nonDefaultIncoming = true;
             }
           }
@@ -383,38 +308,97 @@ public class TestMoneroWallet {
   @Test
   public void testGetTxsIncomingSumToBalance() {
     
-    // only get incoming or mempool transactions
-    MoneroTxFilter filter = new MoneroTxFilter();
-    filter.setOutgoing(false);
-    filter.setPending(false);
-    filter.setFailed(false);
-    
-    // test that spendable payments of incoming txs sum to account balances
+    // test each account balance
     for (MoneroAccount account : wallet.getAccounts()) {
       
       // get transactions
+      MoneroTxFilter filter = new MoneroTxFilter();
       filter.setAccountIndex(account.getIndex());
       List<MoneroTx> txs = wallet.getTxs(filter);
       if (account.getIndex() == 0) assertFalse(txs.isEmpty());
       
-      // sum balance of spendable payments
-      BigInteger balance = BigInteger.valueOf(0);
+      // sum balances of incoming payments and pending deductions
+      BigInteger incomingBalance = BigInteger.valueOf(0);
+      BigInteger pendingBalance = BigInteger.valueOf(0);
+      BigInteger mempoolBalance = BigInteger.valueOf(0);
       for (MoneroTx tx : txs) {
-        assertFalse(MoneroUtils.isOutgoing(tx.getType()));
-        assertFalse(tx.getPayments().isEmpty());
-        for (MoneroPayment payment : tx.getPayments()) {
-          if (!payment.getIsSpent()) {
-            balance = balance.add(payment.getAmount());
+        if (tx.getType() == MoneroTxType.PENDING) {
+          pendingBalance = pendingBalance.add(tx.getTotalAmount());
+        }
+        if (!MoneroUtils.isSendTx(tx.getType())) {
+          assertFalse(tx.getPayments().isEmpty());
+          for (MoneroPayment payment : tx.getPayments()) {
+            if (!payment.getIsSpent()) {
+              if (tx.getType() == MoneroTxType.INCOMING) incomingBalance = incomingBalance.add(payment.getAmount());
+              if (tx.getType() == MoneroTxType.MEMPOOL) mempoolBalance = mempoolBalance.add(payment.getAmount());
+            }
           }
         }
       }
       
-      // wallet balane must equal spendable payments
-      BigInteger walletBalance = wallet.getBalance(account.getIndex());
-      assertEquals("Account " + account.getIndex() + " balance does not add up", walletBalance, balance); // TODO (monero-wallet-rpc): get_account and get_balance report wrong balance when incoming txs are in the mempool so this doesn't add up after send tests
+      // wallet balance must equal sum of unspent incoming txs
+      BigInteger walletBalance = wallet.getAccount(account.getIndex()).getBalance();
+      BigInteger expectedBalance = incomingBalance;  // TODO (monero-wallet-rpc): unconfirmed balance may not add up because of https://github.com/monero-project/monero/issues/4500
+//      System.out.println("Wallet    : " + walletBalance);
+//      System.out.println("Incoming  : " + incomingBalance);
+//      System.out.println("Pending   : " + pendingBalance);
+//      System.out.println("Mempool   : " + mempoolBalance);
+//      System.out.println("Expected  : " + expectedBalance);
+      assertEquals("Account " + account.getIndex() + " balance does not add up", walletBalance, expectedBalance);
+    }
+  }
+  
+  @Test
+  public void testGetTxsByIds() {
+    int numTestTxs = 5;  // number of txs to test
+    
+    // get all transactions for reference
+    List<MoneroTx> allTxs = wallet.getTxs();
+    assertFalse(allTxs.isEmpty());
+    for (MoneroTx tx : allTxs) {
+      TestUtils.testGetTx(tx, null, wallet);
+    }
+    
+    // collect all ids
+    Set<String> uniqueIds = new HashSet<String>();
+    for (MoneroTx tx : allTxs) uniqueIds.add(tx.getId());
+    assertTrue(uniqueIds.size() > numTestTxs);
+    List<String> uniqueIdsList = new ArrayList<String>(uniqueIds);
+    
+    // get random transaction ids
+    Set<String> txIds = new HashSet<String>();
+    while (txIds.size() < numTestTxs) {
+      txIds.add(uniqueIdsList.get(MathUtils.random(0, uniqueIdsList.size() - 1)));
+    }
+    assertEquals(numTestTxs, txIds.size());
+    
+    // fetch transactions by id
+    for (String txId : txIds) {
+      MoneroTxFilter filter = new MoneroTxFilter();
+      filter.setTxIds(Arrays.asList(txId));
+      List<MoneroTx> txs = wallet.getTxs(filter);
+      assertFalse(txs.isEmpty());
+      for (MoneroTx tx : txs) {
+        assertEquals(txId, tx.getId());
+      }
+    }
+    
+    // fetch transactions by ids
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setTxIds(txIds);
+    List<MoneroTx> txs = wallet.getTxs(filter);
+    assertFalse(txs.isEmpty());
+    for (MoneroTx tx : txs) {
+      assertTrue(txIds.contains(tx.getId()));
+    }
+    for (String txId : txIds) {
+      boolean found = false;
+      for (MoneroTx tx : txs) if (tx.getId().equals(txId)) found = true;
+      assertTrue("No transaction with id " + txId + " fetched", found);
     }
   }
 
+  // TODO: break this test up
   @Test
   public void testGetTxsMoneroTxFilter() {
     
@@ -513,7 +497,7 @@ public class TestMoneroWallet {
             }
           }
         }
-        assertEquals(wallet.getBalance(account.getIndex(), subaddress.getIndex()), balance);
+        assertEquals(wallet.getSubaddress(account.getIndex(), subaddress.getIndex()).getBalance(), balance);
       }
     }
     
@@ -525,33 +509,11 @@ public class TestMoneroWallet {
     filter.setSubaddressIndices(subaddressIndices);
     txs = wallet.getTxs(filter);
     assertTrue(txs.isEmpty());
-    
-    // test getting transactions by transaction ids
-    int maxTxs = Math.min(5, allTxs.size());
-    Set<String> txIds = new HashSet<String>();
-    for (int i = 0; i < maxTxs; i++) txIds.add(allTxs.get(i).getId());
-    assertFalse(txIds.isEmpty());
-    filter = new MoneroTxFilter();
-    filter.setTxIds(txIds);    
-    txs = wallet.getTxs(filter);
-    for (String txId : txIds) {
-      filter = new MoneroTxFilter();
-      filter.setTxIds(Arrays.asList(txId));
-      txs = wallet.getTxs(filter);
-      assertFalse(txs.isEmpty());
-      for (MoneroTx tx : txs) {
-        assertEquals(txId, tx.getId());
-      }
-    }
   }
 
   @Test
   public void testGetTxNotes() {
-    System.out.println("And begin...");
     List<MoneroTx> txs = wallet.getTxs();
-    if (txs.isEmpty()) {
-      System.out.println("OH NOES");
-    }
     assertFalse(txs.isEmpty());
     List<String> txIds = new ArrayList<String>();
     for (MoneroTx tx : txs) txIds.add(tx.getId());
@@ -715,18 +677,29 @@ public class TestMoneroWallet {
       assertEquals((int) -1, (int) e.getRpcCode());
     }
     
+    // create expected tag for test
+    MoneroAccountTag expectedTag = new MoneroAccountTag("my_tag_" + UUID.randomUUID().toString(), "my tag label", Arrays.asList(0, 1));
+    
     // tag and query accounts
     assertTrue(accounts1.size() >= 3);
-    wallet.tagAccounts("my_tag", Arrays.asList(0, 1));
-    List<MoneroAccount> accounts = wallet.getAccounts("my_tag");
+    wallet.tagAccounts(expectedTag.getTag(), Arrays.asList(0, 1));
+    List<MoneroAccount> accounts = wallet.getAccounts(expectedTag.getTag());
     assertEquals(2, accounts.size());
     assertEquals(accounts1.get(0), accounts.get(0));
     assertEquals(accounts1.get(1), accounts.get(1));
     
+    // set tag label
+    wallet.setAccountTagLabel(expectedTag.getTag(), expectedTag.getLabel());
+    
+    // retrieve and find new tag
+    List<MoneroAccountTag> tags = wallet.getAccountTags();
+    assertTrue(tags.contains(expectedTag));
+    
     // untag and query accounts
     wallet.untagAccounts(Arrays.asList(0, 1));
+    assertFalse(wallet.getAccountTags().contains(expectedTag));
     try {
-      wallet.getAccounts("my_tag");
+      wallet.getAccounts(expectedTag.getTag());
       fail("Should have thrown exception with unregistered tag");
     } catch (MoneroRpcException e) {
       assertEquals((int) -1, (int) e.getRpcCode());
@@ -861,5 +834,23 @@ public class TestMoneroWallet {
     }
     entries = wallet.getAddressBookEntries();
     assertEquals(numEntriesStart, entries.size());
+  }
+  
+  @Test
+  public void testAttributes() {
+    
+    // set attributes
+    Map<String, String> attrs = new HashMap<String, String>();
+    for (int i = 0; i < 5; i++) {
+      String key = "attr" + i;
+      String val = UUID.randomUUID().toString();
+      attrs.put(key, val);
+      wallet.setAttribute(key, val);
+    }
+    
+    // test attributes
+    for (String key : attrs.keySet()) {
+      assertEquals(attrs.get(key), wallet.getAttribute(key));
+    }
   }
 }

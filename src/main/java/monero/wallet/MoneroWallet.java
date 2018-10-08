@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImage;
@@ -124,21 +125,6 @@ public interface MoneroWallet {
   public MoneroAccount createAccount(String label);
   
   /**
-   * Tags accounts.
-   * 
-   * @param tag is the tag to apply to the specified accounts
-   * @param accountIndices are the indices of the accounts to tag
-   */
-  public void tagAccounts(String tag, Collection<Integer> accountIndices);
-  
-  /**
-   * Untags acconts.
-   * 
-   * @param accountIndices are the indices of the accounts to untag
-   */
-  public void untagAccounts(Collection<Integer> accountIndices);
-  
-  /**
    * Gets an account's subaddresses.
    * 
    * @param accountIdx identifies the account
@@ -198,45 +184,11 @@ public interface MoneroWallet {
   public BigInteger getBalance();
   
   /**
-   * Get the balance for a specific account.
-   * 
-   * @param accountIdx identifies the account
-   * @return BigInteger is the account's balance
-   */
-  public BigInteger getBalance(int accountIdx);
-  
-  /**
-   * Get the balance for a specific subaddress.
-   * 
-   * @param accountIdx identifies the account within the wallet
-   * @param subaddressIdx identifies the subbaddress within the account
-   * @return BigInteger is the subaddresse's balance
-   */
-  public BigInteger getBalance(int accountIdx, int subaddressIdx);
-  
-  /**
    * Get the unlocked balance across all accounts.
    * 
    * @return BigInteger is the unlocked balance across all accounts
    */
   public BigInteger getUnlockedBalance();
-  
-  /**
-   * Get the unlocked balance for a specific account.
-   * 
-   * @param accountIdx identifies the account
-   * @return BigInteger is the account's unlocked balance
-   */
-  public BigInteger getUnlockedBalance(int accountIdx);
-  
-  /**
-   * Get the unlocked balance for a specific subaddress.
-   * 
-   * @param accountIdx identifies the account within the wallet
-   * @param subaddressIdx identifies the subbaddress within the account
-   * @return BigInteger is the subaddresse's unlocked balance
-   */
-  public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx);
   
   /**
    * Indicates if importing multisig data is needed for returning a correct balance.
@@ -369,6 +321,52 @@ public interface MoneroWallet {
    * @return List<MoneroTx> are the resulting transactions from sweeping dust
    */
   public List<MoneroTx> sweepDust();
+  
+  /**
+   * Relays a transaction previously created without relaying.
+   * 
+   * @param tx is the transaction to relay
+   * @return MoneroTx is the relayed transaction
+   */
+  public MoneroTx relayTx(MoneroTx tx);
+  
+  /**
+   * Relays tranactions previously created without relaying.
+   * 
+   * @param txs are the transactions to relay
+   * @return List<MoneroTx> are the relayed txs
+   */
+  public List<MoneroTx> relayTxs(List<MoneroTx> txs);
+
+  /**
+   * Tags accounts.
+   * 
+   * @param tag is the tag to apply to the specified accounts
+   * @param accountIndices are the indices of the accounts to tag
+   */
+  public void tagAccounts(String tag, Collection<Integer> accountIndices);
+
+  /**
+   * Untags acconts.
+   * 
+   * @param accountIndices are the indices of the accounts to untag
+   */
+  public void untagAccounts(Collection<Integer> accountIndices);
+
+  /**
+   * Returns all account tags.
+   * 
+   * @return List<MoneroAccountTag> are the wallet's account tags
+   */
+  public List<MoneroAccountTag> getAccountTags();
+
+  /**
+   * Sets a human-readable description for a tag.
+   * 
+   * @param tag is the tag to set a description for
+   * @param label is the label to set for the tag
+   */
+  public void setAccountTagLabel(String tag, String label);
 
   /**
    * Set arbitrary string notes for transactions.
@@ -541,4 +539,20 @@ public interface MoneroWallet {
    * Stop mining in the Monero daemon.
    */
   public void stopMining();
+  
+  /**
+   * Set an arbitrary attribute.
+   * 
+   * @param key is the attribute key
+   * @param value is the attribute value
+   */
+  public void setAttribute(String key, String value);
+  
+  /**
+   * Get an attribute.
+   * 
+   * @param key is the attribute to get the value of
+   * @return String is the attribute's value
+   */
+  public String getAttribute(String key);
 }
