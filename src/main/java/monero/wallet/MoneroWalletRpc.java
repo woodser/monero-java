@@ -319,24 +319,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return address;
   }
   
-  @Override
-  public BigInteger getBalance() {
-    BigInteger balance = BigInteger.valueOf(0);
-    for (MoneroAccount account : getAccounts()) {
-      balance = balance.add(account.getBalance());
-    }
-    return balance;
-  }
-  
-  @Override
-  public BigInteger getUnlockedBalance() {
-    BigInteger unlockedBalance = BigInteger.valueOf(0);
-    for (MoneroAccount account : getAccounts()) {
-      unlockedBalance = unlockedBalance.add(account.getUnlockedBalance());
-    }
-    return unlockedBalance;
-  }
-  
   @SuppressWarnings("unchecked")
   @Override
   public boolean isMultisigImportNeeded() {
@@ -657,6 +639,41 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       assertEquals("Sweep dust transactions not fetched: " + ids, ids.size(), txs.size());
       return txs;
     }
+  }
+  
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<MoneroTx> relayTxs(List<MoneroTx> txs) {
+    
+    // relay transactions and collect resulting ids
+    List<String> txIds = new ArrayList<String>();
+    for (MoneroTx tx : txs)  {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("hex", tx.getMetadata());
+      Map<String, Object> respMap = rpc.sendRpcRequest("relay_tx", params);
+      Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+      txIds.add((String) resultMap.get("tx_hash"));
+    }
+    
+    // fetch transactions by id
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setIncoming(false);
+    filter.setMempool(false);
+    filter.setTxIds(txIds);
+    List<MoneroTx> relayedTxs = getTxs(filter);
+    
+    // transfer tx data
+    assertEquals(txs.size(), relayedTxs.size());
+    for (int i = 0; i < txs.size(); i++) {
+      assertEquals(txs.get(i).getId(), relayedTxs.get(i).getId());
+      relayedTxs.get(i).setMixin(txs.get(i).getMixin());
+      relayedTxs.get(i).setKey(txs.get(i).getKey());
+      relayedTxs.get(i).setPayments(txs.get(i).getPayments());
+      relayedTxs.get(i).setBlob(txs.get(i).getBlob());
+      relayedTxs.get(i).setMetadata(txs.get(i).getMetadata());
+    }
+    
+    return relayedTxs;
   }
 
   @Override

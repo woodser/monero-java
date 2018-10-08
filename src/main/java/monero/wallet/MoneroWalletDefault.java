@@ -20,6 +20,24 @@ import monero.wallet.model.MoneroTxFilter;
 public abstract class MoneroWalletDefault implements MoneroWallet {
   
   @Override
+  public BigInteger getBalance() {
+    BigInteger balance = BigInteger.valueOf(0);
+    for (MoneroAccount account : getAccounts()) {
+      balance = balance.add(account.getBalance());
+    }
+    return balance;
+  }
+  
+  @Override
+  public BigInteger getUnlockedBalance() {
+    BigInteger unlockedBalance = BigInteger.valueOf(0);
+    for (MoneroAccount account : getAccounts()) {
+      unlockedBalance = unlockedBalance.add(account.getUnlockedBalance());
+    }
+    return unlockedBalance;
+  }
+  
+  @Override
   public List<MoneroAccount> getAccounts() {
     return getAccounts(null, false);
   }
@@ -120,6 +138,11 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
     config.setAccountIndex(accountIdx);
     config.setSubaddressIndices(Arrays.asList(subaddressIdx));
     return sweepAll(config);
+  }
+  
+  @Override
+  public MoneroTx relayTx(MoneroTx tx) {
+    return relayTxs(Arrays.asList(tx)).get(0);
   }
   
   @Override
