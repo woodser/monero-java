@@ -134,6 +134,7 @@ public class TestMoneroWalletSends {
     }
     
     // test that balance and unlocked balance decreased
+    // TODO: test that other balances did not decrease
     MoneroSubaddress subaddress = wallet.getSubaddress(fromAccount.getIndex(), fromSubaddress.getIndex());
     assertTrue(subaddress.getBalance().compareTo(balanceBefore) < 0);
     assertTrue(subaddress.getUnlockedBalance().compareTo(unlockedBalanceBefore) < 0);
