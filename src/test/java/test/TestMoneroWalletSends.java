@@ -52,21 +52,26 @@ public class TestMoneroWalletSends {
   
   @Test
   public void testSendToSingle() {
-    testSendToSingle(false, null);
+    testSendToSingle(false, null, false);
   }
   
   @Test
   public void testSendToSinglePaymentId() {
     MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(null);
-    testSendToSingle(false, integratedAddress.getPaymentId());
+    testSendToSingle(false, integratedAddress.getPaymentId(), false);
+  }
+  
+  @Test
+  public void testSendToSingleDoNotRelay() {
+    testSendToSingle(false, null, true);
   }
   
   @Test
   public void testSendSplitToSingle() {
-    testSendToSingle(true, null);
+    testSendToSingle(true, null, false);
   }
   
-  private void testSendToSingle(boolean canSplit, String paymentId) {
+  private void testSendToSingle(boolean canSplit, String paymentId, boolean doNotRelay) {
     
     // find a non-primary subaddress to send from
     boolean sufficientBalance = false;
@@ -99,6 +104,7 @@ public class TestMoneroWalletSends {
     MoneroTxConfig config = new MoneroTxConfig(address, paymentId, sendAmount, TestUtils.MIXIN);
     config.setAccountIndex(fromAccount.getIndex());
     config.setSubaddressIndices(Arrays.asList(fromSubaddress.getIndex()));
+    config.setDoNotRelay(doNotRelay);
     System.out.println("Subaddress           : [" + fromAccount.getIndex() + ", " + fromSubaddress.getIndex() + "]");
     System.out.println("Max fee              : " + TestUtils.MAX_FEE);
     System.out.println("Send amount          : " + sendAmount);
@@ -108,6 +114,18 @@ public class TestMoneroWalletSends {
       txs.addAll(wallet.sendSplit(config));
     } else {
       txs.add(wallet.send(config));
+    }
+    
+    // handle non-relayed transaction
+    if (doNotRelay) {
+      
+      // test transactions
+      for (MoneroTx tx : txs) {
+        TestUtils.testSendTxDoNotRelay(tx, config, !canSplit, !canSplit, wallet);
+      }
+      
+      // relay transactions
+      throw new RuntimeException("Not implemented");
     }
     
     // test that balance and unlocked balance decreased

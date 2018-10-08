@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigInteger;
 import java.util.List;
 
+import monero.utils.MoneroUtils;
+
 /**
  * Represents a transaction on the Monero network.
  */
@@ -35,7 +37,8 @@ public class MoneroTx {
     OUTGOING,
     PENDING,
     FAILED,
-    MEMPOOL
+    MEMPOOL,
+    NOT_RELAYED
   }
   
   private String id;
@@ -378,7 +381,7 @@ public class MoneroTx {
     result = prime * result + ((srcAccountIdx == null) ? 0 : srcAccountIdx.hashCode());
     result = prime * result + ((srcAddress == null) ? 0 : srcAddress.hashCode());
     result = prime * result + ((srcSubaddressIdx == null) ? 0 : srcSubaddressIdx.hashCode());
-    result = prime * result + ((timestamp == null || type == MoneroTxType.PENDING || type == MoneroTxType.MEMPOOL || type == MoneroTxType.FAILED) ? 0 : timestamp.hashCode()); // ignore timestamps if not confirmed
+    result = prime * result + ((timestamp == null || !MoneroUtils.isConfirmed(type)) ? 0 : timestamp.hashCode()); // ignore timestamps if not confirmed
     result = prime * result + ((totalAmount == null) ? 0 : totalAmount.hashCode());
     result = prime * result + ((type == null) ? 0 : type.hashCode());
     result = prime * result + ((unlockTime == null) ? 0 : unlockTime.hashCode());
@@ -444,7 +447,7 @@ public class MoneroTx {
     } else if (!srcSubaddressIdx.equals(other.srcSubaddressIdx)) return false;
     if (timestamp == null) {
       if (other.timestamp != null) return false;
-    } else if ((type == MoneroTxType.OUTGOING || type == MoneroTxType.INCOMING) && !timestamp.equals(other.timestamp)) return false;  // only must be the same if confirmed
+    } else if (MoneroUtils.isConfirmed(type) && !timestamp.equals(other.timestamp)) return false;  // only must be the same if confirmed
     if (totalAmount == null) {
       if (other.totalAmount != null) return false;
     } else if (!totalAmount.equals(other.totalAmount)) return false;

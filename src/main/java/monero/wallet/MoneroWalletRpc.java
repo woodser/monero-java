@@ -462,9 +462,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
-    MoneroTx tx = txMapToTx(txMap, MoneroTxType.PENDING, this);
+    MoneroTx tx = txMapToTx(txMap, Boolean.TRUE.equals(config.getDoNotRelay()) ? MoneroTxType.NOT_RELAYED : MoneroTxType.PENDING, this);
     tx.setMixin(config.getMixin());
     tx.setPayments(config.getDestinations());
+    tx.setSrcAccountIdx(accountIdx);
+    tx.setSrcSubaddressIdx(0);  // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
+    tx.setSrcAddress(getAddress(tx.getSrcAccountIdx(), tx.getSrcSubaddressIdx()));
+
+    // done if not relayed
+    if (Boolean.TRUE.equals(config.getDoNotRelay())) return tx;
     
     // merge tx for complete data
     MoneroTxFilter filter = new MoneroTxFilter();
@@ -941,7 +947,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       Object val = txMap.get(key);
       if (key.equalsIgnoreCase("fee")) tx.setFee((BigInteger) val);
       else if (key.equalsIgnoreCase("block_height")) tx.setHeight(((BigInteger) val).intValue());
-      else if (key.equalsIgnoreCase("note")) if (isOutgoing) tx.setNote((String) val); else tx.setNote(null);
+      else if (key.equalsIgnoreCase("note")) tx.setNote("".equals(val) ? null : (String) val);
       else if (key.equalsIgnoreCase("timestamp")) tx.setTimestamp(((BigInteger) val).longValue());
       else if (key.equalsIgnoreCase("txid")) tx.setId((String) val);
       else if (key.equalsIgnoreCase("tx_hash")) tx.setId((String) val);
@@ -954,7 +960,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equalsIgnoreCase("tx_metadata")) tx.setMetadata((String) val);
       else if (key.equalsIgnoreCase("double_spend_seen")) tx.setIsDoubleSpend((Boolean) val);
       else if (key.equalsIgnoreCase("confirmations")) {
-        if (tx.getType() == MoneroTxType.PENDING || tx.getType() == MoneroTxType.MEMPOOL) tx.setNumConfirmations(0);
+        if (!MoneroUtils.isConfirmed(tx.getType())) tx.setNumConfirmations(0);
         else tx.setNumConfirmations(((BigInteger) val).intValue());
       }
       else if (key.equalsIgnoreCase("suggested_confirmations_threshold")) {
