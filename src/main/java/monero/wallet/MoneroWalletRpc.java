@@ -882,6 +882,16 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     rpc.sendRpcRequest("stop_mining", null);
   }
   
+  @Override
+  public void setAttribute(String key, String value) {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  @Override
+  public String getAttribute(String key) {
+    throw new RuntimeException("Not implemented");
+  }
+  
   // ------------------------------ STATIC UTILITIES --------------------------
   
   /**
