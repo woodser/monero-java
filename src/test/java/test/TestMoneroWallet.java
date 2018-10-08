@@ -835,4 +835,22 @@ public class TestMoneroWallet {
     entries = wallet.getAddressBookEntries();
     assertEquals(numEntriesStart, entries.size());
   }
+  
+  @Test
+  public void testAttributes() {
+    
+    // set attributes
+    Map<String, String> attrs = new HashMap<String, String>();
+    for (int i = 0; i < 5; i++) {
+      String key = "attr" + i;
+      String val = UUID.randomUUID().toString();
+      attrs.put(key, val);
+      wallet.setAttribute(key, val);
+    }
+    
+    // test attributes
+    for (String key : attrs.keySet()) {
+      assertEquals(attrs.get(key), wallet.getAttribute(key));
+    }
+  }
 }

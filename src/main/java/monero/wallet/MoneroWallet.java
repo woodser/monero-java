@@ -523,4 +523,20 @@ public interface MoneroWallet {
    * Stop mining in the Monero daemon.
    */
   public void stopMining();
+  
+  /**
+   * Set an arbitrary attribute.
+   * 
+   * @param key is the attribute key
+   * @param value is the attribute value
+   */
+  public void setAttribute(String key, String value);
+  
+  /**
+   * Get an attribute.
+   * 
+   * @param key identifies the attribute to get the value of
+   * @return String is the attribute's value
+   */
+  public String getAttribute(String key);
 }
