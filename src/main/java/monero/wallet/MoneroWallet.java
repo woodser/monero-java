@@ -535,7 +535,7 @@ public interface MoneroWallet {
   /**
    * Get an attribute.
    * 
-   * @param key identifies the attribute to get the value of
+   * @param key is the attribute to get the value of
    * @return String is the attribute's value
    */
   public String getAttribute(String key);
