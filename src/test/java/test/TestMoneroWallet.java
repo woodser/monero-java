@@ -739,6 +739,11 @@ public class TestMoneroWallet {
   }
   
   @Test
+  public void testSetTxNote() {
+    fail("Not implemented");
+  }
+  
+  @Test
   public void testSetTxNotes() {
     
     // set tx notes
@@ -757,6 +762,8 @@ public class TestMoneroWallet {
     for (int i = 0; i < txIds.size(); i++) {
       assertEquals("Hello " + i, txNotes.get(i));
     }
+    
+    // TODO: test that get transaction has note
   }
   
   @Test
