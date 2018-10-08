@@ -142,7 +142,6 @@ public class TestUtils {
   
   public static void testGetTx(MoneroTx tx, Boolean hasOutgoingPayments, MoneroWallet wallet) {
     testCommonTx(tx);
-    assertNotEquals(MoneroTxType.FAILED, tx.getType());
     
     // test outgoing
     if (tx.getType() == MoneroTxType.OUTGOING || tx.getType() == MoneroTxType.PENDING) {
@@ -156,7 +155,7 @@ public class TestUtils {
       assertNotNull(tx.getId(), tx.getFee());
       assertNull(tx.getId(), tx.getMixin());
       assertNull(tx.getId(), tx.getSize()); // TODO (monero-wallet-rpc): add tx_size to get_transfers and get_transfer_by_txid
-      assertNotNull(tx.getId(), tx.getNote());
+      assertTrue(tx.getNote() == null || !tx.getNote().isEmpty());
       assertNotNull(tx.getId(), tx.getTimestamp());
       assertEquals(tx.getId(), (Integer) 0, tx.getUnlockTime());
       assertNotNull(tx.getId(), tx.getIsDoubleSpend());
@@ -246,6 +245,33 @@ public class TestUtils {
         else assertNull(tx.getId(), payment.getKeyImage()); // TODO (monero-wallet-rpc): mempool transactions do not have key_images
       }
       assertTrue(totalAmount.compareTo(tx.getTotalAmount()) == 0);
+    }
+    
+    // test failed
+    if (tx.getType() == MoneroTxType.FAILED) {
+      assertNotNull(tx.getId());
+      assertNotNull(tx.getId(), tx.getSrcAddress());
+      assertEquals(tx.getId(), wallet.getAddress(tx.getSrcAccountIdx(), tx.getSrcSubaddressIdx()), tx.getSrcAddress());
+      assertNotNull(tx.getId(), tx.getSrcAccountIdx());
+      assertNotNull(tx.getId(), tx.getSrcSubaddressIdx());
+      assertNotNull(tx.getId(), tx.getTotalAmount());
+      assertNotEquals(tx.getId(), MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());
+      assertNotNull(tx.getId(), tx.getFee());
+      assertNull(tx.getId(), tx.getMixin());
+      assertNull(tx.getId(), tx.getSize()); // TODO (monero-wallet-rpc): add tx_size to get_transfers and get_transfer_by_txid
+      assertNull(tx.getId(), tx.getNote());
+      assertNotNull(tx.getId(), tx.getTimestamp());
+      assertEquals(tx.getId(), (Integer) 0, tx.getUnlockTime());
+      assertNotNull(tx.getId(), tx.getIsDoubleSpend());
+      assertFalse(tx.getId(), tx.getIsDoubleSpend());
+      assertNull(tx.getId(), tx.getKey());
+      assertNull(tx.getId(), tx.getBlob());
+      assertNull(tx.getId(), tx.getMetadata());
+      assertNull(tx.getId(), tx.getHeight());
+      assertNotNull(tx.getId(), tx.getNumConfirmations());
+      assertEquals(tx.getId(), 0, (int) tx.getNumConfirmations());
+      assertNull(tx.getId(), tx.getNumEstimatedBlocksUntilConfirmed());
+      assertNull(tx.getId(), tx.getPayments());
     }
   }
   
