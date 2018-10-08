@@ -884,12 +884,20 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @Override
   public void setAttribute(String key, String value) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key", key);
+    params.put("value", value);
+    rpc.sendRpcRequest("set_attribute", params);
   }
   
+  @SuppressWarnings("unchecked")
   @Override
   public String getAttribute(String key) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key", key);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_attribute", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (String) resultMap.get("value");
   }
   
   // ------------------------------ STATIC UTILITIES --------------------------
