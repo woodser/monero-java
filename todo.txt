@@ -20,6 +20,7 @@ incoming transactions are missing when outgoing counterpart from same account (h
 still seeing -16 tx not possible
 
 MEDIUM
+typos on monero-wallet-rpc tx proofs, wrong output on check_reserve_proof
 get_transfer add tx_size, tx_key (out or pending), destinations (pending), key_image (in or mempool)
 get_transfers should default to all subaddresses, else all subaddresses must be pre-fetched to get all txs in account
 get_transfer_by_txid add tx_size
