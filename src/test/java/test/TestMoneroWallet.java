@@ -478,6 +478,7 @@ public class TestMoneroWallet {
     }
     
     // test filtering by subaddress
+    // TODO: this tests every subaddress which takes too long
     for (MoneroAccount account : wallet.getAccounts()) {
       List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
       for (MoneroSubaddress subaddress : subaddresses) {
