@@ -1,7 +1,7 @@
 v0.13.0
 new api calls
 payments are comprised of outputs
-only wallet.getBalance() and wallet.getUnlockedBalance(), else use accounts and subaddresses
+don't call accounts / subaddresses that are unused
 test getTxs() with outgoing payments because fetched by id
 test that subaddress numUnspentOutputs == incoming transfers unspent payments
 test right after sending that get_transfers with sent id returns destinations
@@ -13,10 +13,25 @@ optimize (cache subaddresses, check if used, etc)
 generate javadoc
 update readme
 
-MONERO-RPC SUGGESTED IMPROVEMENTS
-incoming_transfers add address, fee, timestamp, unlock_time, is_double_spend, height
+MONERO-RPC
+HIGH
+balances are wrong after sends (https://github.com/monero-project/monero/issues/4500)
+incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
+still seeing -16 tx not possible
+
+MEDIUM
+get_transfer add tx_size, tx_key (out or pending), destinations (pending), key_image (in or mempool)
+get_transfers should default to all subaddresses, else all subaddresses must be pre-fetched to get all txs in account
+get_transfer_by_txid add tx_size
+incoming_transfers add address (low priority), fee, timestamp, unlock_time, is_double_spend, height, tx_size (misdocumented)
+
+LOW
+outgoing transactions src subaddress always 0, not actual src subaddresses
+-1: Failed to open wallet if wallet is already open; better code and message
+don't return incorrect balance information if multisig, instead return error
+get_transfers defaults [0, 0], incoming_transfers defaults [0, all], get_bulk_payments defaults [all, all] (especially get_transfers should default to all else call to get_address is required first)
 get_transfers returns all transactions whereas incoming_transfers returns incoming outputs; clarify terminology or both could return transactions for consistency
-get_transfers defaults [0, 0], incoming_transfers defaults [0, all], get_bulk_payments defaults [all, all]
+document get_transfers account_index and subaddr_indices defaults
 document that rescan_bc destroys wallet cache (destination addresses, etc)
 height vs block_height inconsistent
 address book entries work by index instead of id which changes

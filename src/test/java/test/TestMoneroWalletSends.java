@@ -32,7 +32,7 @@ import utils.TestUtils;
  * 
  * These tests are separated because they rely on a balance and initiate transactions on the blockchain.
  * 
- * TODO: anyway to get around tx not possible?  need to refresh spend?
+ * TODO: test do not relay
  */
 public class TestMoneroWalletSends {
   
@@ -52,21 +52,31 @@ public class TestMoneroWalletSends {
   
   @Test
   public void testSendToSingle() {
-    testSendToSingle(false, null);
+    testSendToSingle(false, null, false);
   }
   
   @Test
   public void testSendToSinglePaymentId() {
     MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(null);
-    testSendToSingle(false, integratedAddress.getPaymentId());
+    testSendToSingle(false, integratedAddress.getPaymentId(), false);
+  }
+  
+  @Test
+  public void testSendToSingleDoNotRelay() {
+    testSendToSingle(false, null, true);
   }
   
   @Test
   public void testSendSplitToSingle() {
-    testSendToSingle(true, null);
+    testSendToSingle(true, null, false);
   }
   
-  private void testSendToSingle(boolean canSplit, String paymentId) {
+  @Test
+  public void testSendSplitToSingleDoNotRelay() {
+    testSendToSingle(true, null, true);
+  }
+  
+  private void testSendToSingle(boolean canSplit, String paymentId, boolean doNotRelay) {
     
     // find a non-primary subaddress to send from
     boolean sufficientBalance = false;
@@ -90,7 +100,7 @@ public class TestMoneroWalletSends {
     
     // get balance before send
     BigInteger balanceBefore = fromSubaddress.getBalance();
-    BigInteger unlockedBalanceBefore  = fromSubaddress.getBalance();
+    BigInteger unlockedBalanceBefore  = fromSubaddress.getUnlockedBalance();
         
     // send to self
     BigInteger sendAmount = unlockedBalanceBefore.subtract(TestUtils.MAX_FEE).divide(BigInteger.valueOf(SEND_DIVISOR));
@@ -99,15 +109,35 @@ public class TestMoneroWalletSends {
     MoneroTxConfig config = new MoneroTxConfig(address, paymentId, sendAmount, TestUtils.MIXIN);
     config.setAccountIndex(fromAccount.getIndex());
     config.setSubaddressIndices(Arrays.asList(fromSubaddress.getIndex()));
+    config.setDoNotRelay(doNotRelay);
+    System.out.println("Subaddress           : [" + fromAccount.getIndex() + ", " + fromSubaddress.getIndex() + "]");
+    System.out.println("Max fee              : " + TestUtils.MAX_FEE);
+    System.out.println("Send amount          : " + sendAmount);
+    System.out.println("From balance         : " + balanceBefore);
+    System.out.println("From unlocked balance: " + unlockedBalanceBefore);
     if (canSplit) {
       txs.addAll(wallet.sendSplit(config));
     } else {
       txs.add(wallet.send(config));
     }
     
+    // handle non-relayed transaction
+    if (doNotRelay) {
+      
+      // test transactions
+      for (MoneroTx tx : txs) {
+        TestUtils.testSendTxDoNotRelay(tx, config, !canSplit, !canSplit, wallet);
+      }
+      
+      // relay transactions
+      txs = wallet.relayTxs(txs);
+    }
+    
     // test that balance and unlocked balance decreased
-    assertTrue(wallet.getBalance(fromAccount.getIndex(), fromSubaddress.getIndex()).compareTo(balanceBefore) < 0);
-    assertTrue(wallet.getUnlockedBalance(fromAccount.getIndex(), fromSubaddress.getIndex()).compareTo(unlockedBalanceBefore) < 0);
+    // TODO: test that other balances did not decrease
+    MoneroSubaddress subaddress = wallet.getSubaddress(fromAccount.getIndex(), fromSubaddress.getIndex());
+    assertTrue(subaddress.getBalance().compareTo(balanceBefore) < 0);
+    assertTrue(subaddress.getUnlockedBalance().compareTo(unlockedBalanceBefore) < 0);
     
     // test transactions
     assertFalse(txs.isEmpty());
@@ -134,7 +164,7 @@ public class TestMoneroWalletSends {
   
   @Test
   public void testSendToMultiple() {
-    testSendToMultiple(10, 3, false);
+    testSendToMultiple(5, 3, false);
   }
   
   @Test
@@ -153,18 +183,19 @@ public class TestMoneroWalletSends {
     
     // test constants
     int totalSubaddresses = numAccounts * numSubaddressesPerAccount;
+    BigInteger minAccountAmount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(totalSubaddresses)).multiply(BigInteger.valueOf(SEND_DIVISOR)).add(TestUtils.MAX_FEE); // account balance must be more than divisor * fee * numAddresses + fee so each destination amount is at least a fee's worth 
     
-    // send funds from first account with unlocked funds
+    // send funds from first account with sufficient unlocked funds
     MoneroAccount srcAccount = null;
     boolean hasBalance = true;
     for (MoneroAccount account : wallet.getAccounts()) {
-      if (account.getBalance().subtract(TestUtils.MAX_FEE).compareTo(BigInteger.valueOf(0)) > 0) hasBalance = true;
-      if (account.getUnlockedBalance().subtract(TestUtils.MAX_FEE).compareTo(BigInteger.valueOf(0)) > 0) {
+      if (account.getBalance().compareTo(minAccountAmount) > 0) hasBalance = true;
+      if (account.getUnlockedBalance().compareTo(minAccountAmount) > 0) {
         srcAccount = account;
         break;
       }
     }
-    assertTrue("Wallet is empty; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", hasBalance);
+    assertTrue("Wallet does not have enough balance; load '" + TestUtils.WALLET_NAME_1 + "' with XMR in order to test sending", hasBalance);
     assertNotNull("Wallet is waiting on unlocked funds", srcAccount);
     
     // get amount to send per address
@@ -201,6 +232,14 @@ public class TestMoneroWalletSends {
     config.setMixin(TestUtils.MIXIN);
     config.setAccountIndex(srcAccount.getIndex());
     config.setDestinations(payments);
+    
+    System.out.println("Account              : " + config.getAccountIndex());
+    System.out.println("Max fee              : " + TestUtils.MAX_FEE);
+    System.out.println("Send amount          : " + sendAmount);
+    System.out.println("Send amount per addr : " + sendAmountPerSubaddress);
+    System.out.println("From balance         : " + srcAccount.getBalance());
+    System.out.println("From unlocked balance: " + srcAccount.getUnlockedBalance());
+    
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     if (canSplit) {
       txs.addAll(wallet.sendSplit(config));
@@ -209,8 +248,9 @@ public class TestMoneroWalletSends {
     }
     
     // test that wallet balance decreased
-    assertTrue(wallet.getBalance(srcAccount.getIndex()).longValue() < balance.longValue());
-    assertTrue(wallet.getUnlockedBalance(srcAccount.getIndex()).longValue() < unlockedBalance.longValue());
+    MoneroAccount account = wallet.getAccount(srcAccount.getIndex());
+    assertTrue(account.getBalance().compareTo(balance) < 0);
+    assertTrue(account.getUnlockedBalance().compareTo(unlockedBalance) < 0);
     
     // test each transaction
     assertFalse(txs.isEmpty());
@@ -240,6 +280,9 @@ public class TestMoneroWalletSends {
     testSendFromMultiple(false);
   }
   
+  /**
+   * TODO: still seeing -16: tx not possible
+   */
   @Test
   public void testSendSplitFromMultiple() {
     testSendFromMultiple(true);
@@ -259,8 +302,8 @@ public class TestMoneroWalletSends {
       unlockedSubaddresses.clear();
       int numSubaddressBalances = 0;
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
-        if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0) numSubaddressBalances++;
-        if (subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) unlockedSubaddresses.add(subaddress);
+        if (subaddress.getBalance().compareTo(TestUtils.MAX_FEE) > 0) numSubaddressBalances++;
+        if (subaddress.getUnlockedBalance().compareTo(TestUtils.MAX_FEE) > 0) unlockedSubaddresses.add(subaddress);
       }
       if (numSubaddressBalances >= NUM_SUBADDRESSES + 1) hasBalance = true;
       if (unlockedSubaddresses.size() >= NUM_SUBADDRESSES + 1) {
@@ -277,14 +320,24 @@ public class TestMoneroWalletSends {
       fromSubaddressIndices.add(unlockedSubaddresses.get(i).getIndex());
     }
     
-    System.out.println("Sending from [" + srcAccount.getIndex() + "," + fromSubaddressIndices + "]");
-    
     // determine the amount to send (slightly less than the sum to send from)
     BigInteger sendAmount = BigInteger.valueOf(0);
     for (Integer fromSubaddressIdx : fromSubaddressIndices) {
-      sendAmount = sendAmount.add(srcAccount.getSubaddresses().get(fromSubaddressIdx).getUnlockedBalance());
+      sendAmount = sendAmount.add(srcAccount.getSubaddresses().get(fromSubaddressIdx).getUnlockedBalance()).subtract(TestUtils.MAX_FEE);
     }
-    sendAmount = sendAmount.subtract(TestUtils.MAX_FEE);
+    
+    BigInteger fromBalance = BigInteger.valueOf(0);
+    BigInteger fromUnlockedBalance = BigInteger.valueOf(0);
+    for (Integer subaddressIdx : fromSubaddressIndices) {
+      MoneroSubaddress subaddress = wallet.getSubaddress(srcAccount.getIndex(), subaddressIdx);
+      fromBalance = fromBalance.add(subaddress.getBalance());
+      fromUnlockedBalance = fromUnlockedBalance.add(subaddress.getUnlockedBalance());
+    }
+    System.out.println("Source               : [" + srcAccount.getIndex() + "," + fromSubaddressIndices + "]");
+    System.out.println("Send amount          : " + sendAmount);
+    System.out.println("Total amount         : " + sendAmount.add(TestUtils.MAX_FEE));
+    System.out.println("From balance         : " + fromBalance);
+    System.out.println("From unlocked balance: " + fromUnlockedBalance);
     
     // send from the first subaddresses with unlocked balances
     String address = wallet.getPrimaryAddress();
@@ -299,7 +352,7 @@ public class TestMoneroWalletSends {
       txs.add(wallet.send(config));
     }
     
-    for (MoneroTx tx : txs) System.out.println("FEE: " + tx.getFee());
+    for (MoneroTx tx : txs) System.out.println("Fee                  : " + tx.getFee());
     
     // test that balances of intended subaddresses decreased
     List<MoneroAccount> accountsAfter = wallet.getAccounts(true);
