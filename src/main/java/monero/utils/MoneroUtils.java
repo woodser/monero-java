@@ -92,4 +92,8 @@ public class MoneroUtils {
     if (type == MoneroTxType.OUTGOING || type == MoneroTxType.PENDING || type == MoneroTxType.FAILED) return true;
     return false;
   }
+  
+  public static boolean isConfirmed(MoneroTxType type) {
+    return type == MoneroTxType.OUTGOING || type == MoneroTxType.INCOMING;
+  }
 }
