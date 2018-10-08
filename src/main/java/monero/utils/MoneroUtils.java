@@ -88,8 +88,8 @@ public class MoneroUtils {
     return true;
   }
   
-  public static boolean isOutgoing(MoneroTxType type) {
-    if (type == MoneroTxType.OUTGOING || type == MoneroTxType.PENDING || type == MoneroTxType.FAILED) return true;
+  public static boolean isSendTx(MoneroTxType type) {
+    if (type == MoneroTxType.OUTGOING || type == MoneroTxType.PENDING || type == MoneroTxType.FAILED || type == MoneroTxType.NOT_RELAYED) return true;
     return false;
   }
   

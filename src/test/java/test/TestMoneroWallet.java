@@ -253,7 +253,7 @@ public class TestMoneroWallet {
       TestUtils.testGetTx(txs1.get(i), null, wallet);
       TestUtils.testGetTx(txs2.get(i), null, wallet);
       assertEquals(txs1.get(i), txs2.get(i));
-      if (!MoneroUtils.isOutgoing(txs1.get(i).getType())) {
+      if (!MoneroUtils.isSendTx(txs1.get(i).getType())) {
         for (MoneroPayment payment : txs1.get(i).getPayments()) {
          if (payment.getAccountIdx() != 0 && payment.getSubaddressIdx() != 0) nonDefaultIncoming = true;
         }
@@ -269,7 +269,7 @@ public class TestMoneroWallet {
       List<MoneroTx> txs = wallet.getTxs(account.getIndex());
       for (MoneroTx tx : txs) {
         TestUtils.testGetTx(tx, null, wallet);
-        if (MoneroUtils.isOutgoing(tx.getType())) {
+        if (MoneroUtils.isSendTx(tx.getType())) {
           assertEquals(account.getIndex(), tx.getSrcAccountIdx());
         } else {
           for (MoneroPayment payment : tx.getPayments()) {
@@ -290,7 +290,7 @@ public class TestMoneroWallet {
       for (int subaddressIdx = 0; subaddressIdx < Math.min(accounts.get(accountIdx).getSubaddresses().size(), 5); subaddressIdx++) {
         for (MoneroTx tx : wallet.getTxs(accountIdx, subaddressIdx)) {
           TestUtils.testGetTx(tx, null, wallet);
-          if (MoneroUtils.isOutgoing(tx.getType()))  {
+          if (MoneroUtils.isSendTx(tx.getType()))  {
             assertEquals(accountIdx, (int) tx.getSrcAccountIdx());
           } else {
             for (MoneroPayment payment : tx.getPayments()) {
@@ -325,7 +325,7 @@ public class TestMoneroWallet {
         if (tx.getType() == MoneroTxType.PENDING) {
           pendingBalance = pendingBalance.add(tx.getTotalAmount());
         }
-        if (!MoneroUtils.isOutgoing(tx.getType())) {
+        if (!MoneroUtils.isSendTx(tx.getType())) {
           assertFalse(tx.getPayments().isEmpty());
           for (MoneroPayment payment : tx.getPayments()) {
             if (!payment.getIsSpent()) {
