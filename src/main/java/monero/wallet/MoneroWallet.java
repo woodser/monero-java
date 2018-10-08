@@ -13,6 +13,7 @@ import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImage;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
+import monero.wallet.model.MoneroTxCheck;
 import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxFilter;
 import monero.wallet.model.MoneroUri;
@@ -408,7 +409,84 @@ public interface MoneroWallet {
    */
   public String getTxKey(String txId);
   
-  public void checkTxKey(String id, String key, String address);  // TODO: this.
+  /**
+   * Check a transaction in the blockchain with its secret key.
+   * 
+   * @param id specifies the transaction to check
+   * @param key is the transaction's secret key
+   * @param address is the destination public address of the transaction
+   * @return MoneroTxCheck is the result of the check
+   */
+  public MoneroTxCheck checkTxKey(String id, String key, String address);
+  
+  /**
+   * Get a transaction signature to prove it.
+   * 
+   * @param txId specifies the transaction to prove
+   * @param address is the destination public address of the transaction
+   * @param message is a message to include with the signature to further authenticate the proof (optional)
+   * @return String is the transaction signature
+   */
+  public String getTxProof(String txId, String address, String message);
+  
+  /**
+   * Prove a transaction by checking its signature.
+   * 
+   * @param txId specifies the transaction to prove
+   * @param address is the destination public address of the transaction
+   * @param message is a message included with the signature to further authenticate the proof (optional)
+   * @param signature is the transaction signature to confirm
+   * @return MoneroTxCheck is the result of the check
+   */
+  public MoneroTxCheck checkTxProof(String txId, String address, String message, String signature);
+  
+  /**
+   * Generate a signature to prove a spend. Unlike proving a transaction, it does not require the destination public address.
+   * 
+   * @param txId specifies the transaction to prove
+   * @param message is a message to include with the signature to further authenticate the proof (optional)
+   * @return String is the transaction signature
+   */
+  public String getSpendProof(String txId, String message);
+  
+  /**
+   * Prove a spend using a signature. Unlike proving a transaction, it does not require the destination public address.
+   * 
+   * @param txId specifies the transaction to prove
+   * @param message is a message included with the signature to further authenticate the proof (optional)
+   * @param signature is the transaction signature to confirm
+   * @return true if the signature is good, false otherwise
+   */
+  public boolean checkSpendProof(String txId, String message, String signature);
+  
+  /**
+   * Generate a signature to prove the available balance of a wallet.
+   * 
+   * @param message is a message included with the signature to further authenticate the proof (optional)
+   * @return String is the reserve proof signature
+   */
+  public String getReserveProof(String message);
+  
+  /**
+   * Generate a signature to prove an available balance.
+   * 
+   * @param accountIdx specifies an account to prove the balance of
+   * @param amount is the amount to prove the account has for reserve
+   * @param message is a message to include with the signature to further authenticate the proof (optional)
+   * @return String is the reserve proof signature
+   */
+  public String getReserveProof(int accountIdx, BigInteger amount, String message);
+
+  /**
+   * Proves a wallet has a disposable reserve using a signature.
+   * 
+   * @param address is the public address of the wallet
+   * @param message is a message included with the signature to further authenticate the proof (optional)
+   * @param signature is the reserve proof signature to check
+   * 
+   * @return MoneroTxCheck is the result of checking the signature proof
+   */
+  public MoneroTxCheck checkReserveProof(String address, String message, String signature);
 
   /**
    * Returns a signed set of key images.
