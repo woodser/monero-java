@@ -367,14 +367,30 @@ public interface MoneroWallet {
    * @param label is the label to set for the tag
    */
   public void setAccountTagLabel(String tag, String label);
+  
+  /**
+   * Set a note for a specific transaction.
+   * 
+   * @param txId specifies the transaction
+   * @param txNote specifies the note
+   */
+  public void setTxNote(String txId, String txNote);
 
   /**
-   * Set arbitrary string notes for transactions.
+   * Set notes for multiple transactions.
    * 
-   * @param txIds identify the transactions to get notes for
-   * @param txNotes are the notes to set for transactions
+   * @param txIds specifies the transactions to set notes for
+   * @param txNotes are the notes to set for the transactions
    */
   public void setTxNotes(List<String> txIds, List<String> txNotes);
+  
+  /**
+   * Get a transaction note.
+   * 
+   * @param txId specifies the transaction to get the note of
+   * @return String is the transaction note
+   */
+  public String getTxNote(String txId);
   
   /**
    * Get arbitrary string notes for transactions.
@@ -383,6 +399,16 @@ public interface MoneroWallet {
    * @preturn List<String> are notes for the transactions
    */
   public List<String> getTxNotes(List<String> txIds);
+  
+  /**
+   * Get a transaction's secret key from its id.
+   * 
+   * @param txId is the transaction's id
+   * @return String is the transaction's secret key
+   */
+  public String getTxKey(String txId);
+  
+  public void checkTxKey(String id, String key, String address);  // TODO: this.
 
   /**
    * Returns a signed set of key images.
