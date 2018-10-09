@@ -13,7 +13,7 @@ import java.math.BigInteger;
 public class MoneroPayment {
 
   private MoneroTx tx;
-  private MoneroSubaddress destinations;
+  private MoneroSubaddress destination;
   private BigInteger amount;
   private Boolean isSpent;
   private String keyImage;
@@ -31,11 +31,11 @@ public class MoneroPayment {
   }
 
   public MoneroSubaddress getDestination() {
-    return destinations;
+    return destination;
   }
 
   public void setDestination(MoneroSubaddress subaddress) {
-    this.destinations = subaddress;
+    this.destination = subaddress;
   }
 
   public BigInteger getAmount() {
@@ -72,8 +72,8 @@ public class MoneroPayment {
   public void merge(MoneroPayment payment) {
     if (tx == null) tx = payment.getTx();
     else if (payment.getTx() != null) tx.merge(payment.getTx());
-    if (destinations == null) destinations = payment.getDestination();
-    else if (payment.getDestination() != null) destinations.merge(payment.getDestination());
+    if (destination == null) destination = payment.getDestination();
+    else if (payment.getDestination() != null) destination.merge(payment.getDestination());
     if (amount == null) amount = payment.getAmount();
     else if (payment.getAmount() != null) assertTrue("Amounts", amount.compareTo(payment.getAmount()) == 0);
     if (isSpent == null) isSpent = payment.getIsSpent();
@@ -89,7 +89,7 @@ public class MoneroPayment {
     result = prime * result + ((amount == null) ? 0 : amount.hashCode());
     result = prime * result + ((isSpent == null) ? 0 : isSpent.hashCode());
     result = prime * result + ((keyImage == null) ? 0 : keyImage.hashCode());
-    result = prime * result + ((destinations == null) ? 0 : destinations.hashCode());
+    result = prime * result + ((destination == null) ? 0 : destination.hashCode());
     return result;
   }
 
@@ -108,9 +108,9 @@ public class MoneroPayment {
     if (keyImage == null) {
       if (other.keyImage != null) return false;
     } else if (!keyImage.equals(other.keyImage)) return false;
-    if (destinations == null) {
-      if (other.destinations != null) return false;
-    } else if (!destinations.equals(other.destinations)) return false;
+    if (destination == null) {
+      if (other.destination != null) return false;
+    } else if (!destination.equals(other.destination)) return false;
     return true;
   }
 }
