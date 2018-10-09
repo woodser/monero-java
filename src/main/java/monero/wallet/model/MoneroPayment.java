@@ -13,47 +13,13 @@ import java.math.BigInteger;
 public class MoneroPayment {
 
   private MoneroTx tx;
-  private String address;
+  private MoneroSubaddress subaddress;
   private BigInteger amount;
-  private Integer accountIdx;
-  private Integer subaddressIdx;
   private Boolean isSpent;
   private String keyImage;
   
   public MoneroPayment() {
     super();
-  }
-  
-  public MoneroPayment(MoneroTx transaction, String address, BigInteger amount) {
-    super();
-    this.tx = transaction;
-    this.address = address;
-    this.amount = amount;
-  }
-
-  public MoneroPayment(MoneroTx tx, String address, BigInteger amount, Integer accountIdx, Integer subaddressIdx) {
-    super();
-    this.tx = tx;
-    this.address = address;
-    this.amount = amount;
-    this.accountIdx = accountIdx;
-    this.subaddressIdx = subaddressIdx;
-  }
-
-  public Integer getAccountIdx() {
-    return accountIdx;
-  }
-
-  public void setAccountIdx(Integer accountIdx) {
-    this.accountIdx = accountIdx;
-  }
-
-  public Integer getSubaddressIdx() {
-    return subaddressIdx;
-  }
-
-  public void setSubaddressIdx(Integer subaddressIdx) {
-    this.subaddressIdx = subaddressIdx;
   }
 
   public MoneroTx getTx() {
@@ -64,12 +30,12 @@ public class MoneroPayment {
     this.tx = tx;
   }
 
-  public String getAddress() {
-    return address;
+  public MoneroSubaddress getSubaddress() {
+    return subaddress;
   }
 
-  public void setAddress(String address) {
-    this.address = address;
+  public void setSubaddress(MoneroSubaddress subaddress) {
+    this.subaddress = subaddress;
   }
 
   public BigInteger getAmount() {
@@ -87,7 +53,7 @@ public class MoneroPayment {
   public void setIsSpent(Boolean isSpent) {
     this.isSpent = isSpent;
   }
-  
+
   public String getKeyImage() {
     return keyImage;
   }
@@ -104,13 +70,10 @@ public class MoneroPayment {
    * @param tx is the transaction to merge into this one
    */
   public void merge(MoneroPayment payment) {
-    assertEquals(tx.getId(), payment.getTx().getId());
-    if (accountIdx == null) accountIdx = payment.getAccountIdx();
-    else if (payment.getAccountIdx() != null) assertEquals("Account indices", accountIdx, payment.getAccountIdx());
-    if (subaddressIdx == null) subaddressIdx = payment.getSubaddressIdx();
-    else if (payment.getSubaddressIdx() != null) assertEquals("Subaddress indices", subaddressIdx, payment.getSubaddressIdx());
-    if (address == null) address = payment.getAddress();
-    else if (payment.getAddress() != null) assertEquals("Address", address, payment.getAddress());
+    if (tx == null) tx = payment.getTx();
+    else if (payment.getTx() != null) tx.merge(payment.getTx());
+    if (subaddress == null) subaddress = payment.getSubaddress();
+    else if (payment.getSubaddress() != null) subaddress.merge(payment.getSubaddress());
     if (amount == null) amount = payment.getAmount();
     else if (payment.getAmount() != null) assertTrue("Amounts", amount.compareTo(payment.getAmount()) == 0);
     if (isSpent == null) isSpent = payment.getIsSpent();
@@ -123,12 +86,11 @@ public class MoneroPayment {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((accountIdx == null) ? 0 : accountIdx.hashCode());
-    result = prime * result + ((address == null) ? 0 : address.hashCode());
     result = prime * result + ((amount == null) ? 0 : amount.hashCode());
     result = prime * result + ((isSpent == null) ? 0 : isSpent.hashCode());
     result = prime * result + ((keyImage == null) ? 0 : keyImage.hashCode());
-    result = prime * result + ((subaddressIdx == null) ? 0 : subaddressIdx.hashCode());
+    result = prime * result + ((subaddress == null) ? 0 : subaddress.hashCode());
+    result = prime * result + ((tx == null) ? 0 : tx.hashCode());
     return result;
   }
 
@@ -138,12 +100,6 @@ public class MoneroPayment {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroPayment other = (MoneroPayment) obj;
-    if (accountIdx == null) {
-      if (other.accountIdx != null) return false;
-    } else if (!accountIdx.equals(other.accountIdx)) return false;
-    if (address == null) {
-      if (other.address != null) return false;
-    } else if (!address.equals(other.address)) return false;
     if (amount == null) {
       if (other.amount != null) return false;
     } else if (!amount.equals(other.amount)) return false;
@@ -153,9 +109,12 @@ public class MoneroPayment {
     if (keyImage == null) {
       if (other.keyImage != null) return false;
     } else if (!keyImage.equals(other.keyImage)) return false;
-    if (subaddressIdx == null) {
-      if (other.subaddressIdx != null) return false;
-    } else if (!subaddressIdx.equals(other.subaddressIdx)) return false;
+    if (subaddress == null) {
+      if (other.subaddress != null) return false;
+    } else if (!subaddress.equals(other.subaddress)) return false;
+    if (tx == null) {
+      if (other.tx != null) return false;
+    } else if (!tx.equals(other.tx)) return false;
     return true;
   }
 }

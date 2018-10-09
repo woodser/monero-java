@@ -48,8 +48,13 @@ public class MoneroTxConfig {
    * @param mixin is the transaction mixin to use
    */
   public MoneroTxConfig(String address, String paymentId, BigInteger amount, Integer mixin) {
-    destinations = new ArrayList<MoneroPayment>();
-    destinations.add(new MoneroPayment(null, address, amount));
+    MoneroSubaddress subaddress = new MoneroSubaddress();
+    subaddress.setAddress(address);
+    MoneroPayment destination = new MoneroPayment();
+    destination.setSubaddress(subaddress);
+    destination.setAmount(amount);
+    this.destinations = new ArrayList<MoneroPayment>();
+    this.destinations.add(destination);
     this.paymentId = paymentId;
     this.mixin = mixin;
   }
