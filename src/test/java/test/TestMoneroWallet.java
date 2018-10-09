@@ -511,6 +511,11 @@ public class TestMoneroWallet {
     txs = wallet.getTxs(filter);
     assertTrue(txs.isEmpty());
   }
+  
+  @Test
+  public void testGetTxNote() {
+    fail("Not implemented");
+  }
 
   @Test
   public void testGetTxNotes() {
@@ -521,6 +526,32 @@ public class TestMoneroWallet {
     List<String> txNotes = wallet.getTxNotes(txIds);
     assertEquals(txs.size(), txNotes.size());
     for (String txNote : txNotes) assertNotNull(txNote);
+  }
+  
+  
+  @Test
+  public void testGetTxKey() {
+    fail("Not implemented");
+  }
+  
+  @Test
+  public void testGetTxProof() {
+    fail("Not implemented");
+  }
+  
+  @Test
+  public void testGetSpendProof() {
+    fail("Not implemented");
+  }
+  
+  @Test
+  public void testGetReserveProofWallet() {
+    fail("Not implemented");
+  }
+  
+  @Test
+  public void testGetReserveProofAccount() {
+    fail("Not implemented");
   }
 
   @Test
