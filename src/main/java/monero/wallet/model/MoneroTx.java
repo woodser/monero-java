@@ -42,9 +42,7 @@ public class MoneroTx {
   }
   
   private String id;
-  private String srcAddress;
-  private Integer srcAccountIdx;
-  private Integer srcSubaddressIdx; // TODO (monero-wallet-rpc): transactions may originate from multiple subaddresses but querying only provides subaddress 0
+  private MoneroSubaddress srcSubaddress; // TODO (monero-wallet-rpc): transactions may originate from multiple subaddresses but querying only provides subaddress 0
   private BigInteger totalAmount;
 	private List<MoneroPayment> payments;
 	private String paymentId;
@@ -75,28 +73,12 @@ public class MoneroTx {
 	  this.id = id;
 	}
 
-  public String getSrcAddress() {
-    return srcAddress;
+  public MoneroSubaddress getSrcSubaddress() {
+    return srcSubaddress;
   }
 
-  public void setSrcAddress(String srcAddress) {
-    this.srcAddress = srcAddress;
-  }
-
-  public Integer getSrcAccountIdx() {
-    return srcAccountIdx;
-  }
-
-  public void setSrcAccountIdx(Integer srcAccountIdx) {
-    this.srcAccountIdx = srcAccountIdx;
-  }
-
-  public Integer getSrcSubaddressIdx() {
-    return srcSubaddressIdx;
-  }
-
-  public void setSrcSubaddressIdx(Integer srcSubaddressIdx) {
-    this.srcSubaddressIdx = srcSubaddressIdx;
+  public void setSrcSubaddress(MoneroSubaddress srcSubaddress) {
+    this.srcSubaddress = srcSubaddress;
   }
 
   public BigInteger getTotalAmount() {
@@ -239,43 +221,17 @@ public class MoneroTx {
   public void setNumEstimatedBlocksUntilConfirmed(Integer numEstimatedBlocksUntilConfirmed) {
     this.numEstimatedBlocksUntilConfirmed = numEstimatedBlocksUntilConfirmed;
   }
-
+  
   /**
-   * Merges the given transaction into this transaction.
+   * Merges the given transaction into this transaction.  Does not merge payments or total amount.
    * 
-   * Appends payments and outputs. Sets uninitialized fields to the given transaction. Validates initialized fields are equal.
-   * 
-   * @param tx is the transaction to merge into this one
-   * @param addPayments specifies if payments should be appended or merged with existing payments
+   * @param tx is the transaction to merge into this transaction
    */
-  public void merge(MoneroTx tx, boolean addPayments) {
+  public void merge(MoneroTx tx) {
     if (id == null) id = tx.getId();
     else if (tx.getId() != null) assertEquals("IDs", id, tx.getId());
-    if (srcAddress == null) srcAddress = tx.getSrcAddress();
-    else if (tx.getSrcAddress() != null) assertEquals("Addresses", srcAddress, tx.getSrcAddress());
-    if (srcAccountIdx == null) srcAccountIdx = tx.getSrcAccountIdx();
-    else if (tx.getSrcAccountIdx() != null) assertEquals("Account indices", srcAccountIdx, tx.getSrcAccountIdx());
-    if (srcSubaddressIdx == null) srcSubaddressIdx = tx.getSrcSubaddressIdx();
-    else if (tx.getSrcSubaddressIdx() != null) assertEquals("Subaddress indices", srcSubaddressIdx, tx.getSrcSubaddressIdx());
-    if (totalAmount == null) totalAmount = tx.getTotalAmount();
-    else if (tx.getTotalAmount() != null) {
-      if (addPayments) totalAmount = totalAmount.add(tx.getTotalAmount());
-      else assertTrue(totalAmount.compareTo(tx.getTotalAmount()) == 0);
-    }
-    if (payments == null) setPayments(tx.getPayments());
-    else if (tx.getPayments() != null) {
-      if (addPayments) {
-        for (MoneroPayment payment : tx.getPayments()) {
-          payment.setTx(this);
-          payments.add(payment);
-        }
-      } else {
-        assertEquals("Tx " + tx.getId() + " cannot be merged because payments are different sizes", payments.size(), tx.getPayments().size());
-        for (int i = 0; i < payments.size(); i++) {
-          payments.get(i).merge(tx.getPayments().get(i));
-        }
-      }
-    }
+    if (srcSubaddress == null) srcSubaddress = tx.getSrcSubaddress();
+    else if (tx.getSrcSubaddress() != null) srcSubaddress.merge(tx.getSrcSubaddress());
     if (paymentId == null) paymentId = tx.getPaymentId();
     else if (tx.getPaymentId() != null) assertEquals(tx.getId(), paymentId, tx.getPaymentId());
     if (fee == null) fee = tx.getFee();
@@ -321,22 +277,47 @@ public class MoneroTx {
       }
     }
   }
+
+  /**
+   * Merges the given transaction into this transaction.
+   * 
+   * @param tx is the transaction to merge into this one
+   * @param mergePayments specifies if payments should be merged with xor appended to existing payments
+   */
+  public void merge(MoneroTx tx, boolean mergePayments) {
+    merge(tx);
+    if (totalAmount == null) totalAmount = tx.getTotalAmount();
+    else if (tx.getTotalAmount() != null) {
+      if (mergePayments) assertTrue(totalAmount.compareTo(tx.getTotalAmount()) == 0);
+      else totalAmount = totalAmount.add(tx.getTotalAmount());
+    }
+    if (payments == null) setPayments(tx.getPayments());
+    else if (tx.getPayments() != null) {
+      if (mergePayments) {
+        assertEquals("Tx " + tx.getId() + " cannot be merged because payments are different sizes", payments.size(), tx.getPayments().size());
+        for (int i = 0; i < payments.size(); i++) {
+          payments.get(i).merge(tx.getPayments().get(i));
+        }
+      } else {
+        for (MoneroPayment payment : tx.getPayments()) {
+          payment.setTx(this);
+          payments.add(payment);
+        }
+      }
+    }
+  }
   
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("ID: " + id + "\n");
-    sb.append("Source address: " + srcAddress + "\n");
-    sb.append("Source account index: " + srcAccountIdx + "\n");
-    sb.append("Source subaddress index: " + srcSubaddressIdx + "\n");
+    sb.append("Source subaddress: " + srcSubaddress + "\n");
     sb.append("Total amount: " + totalAmount + "\n");
     if (payments != null) {
       sb.append("Payments:\n");
       for (int i = 0; i < payments.size(); i++) {
         sb.append("\t" + (i + 1) + ":\n");
-        sb.append("\t\tAddress: " + payments.get(i).getAddress() + "\n");
+        sb.append("\t\tSubaddress: " + payments.get(i).getSubaddress());
         sb.append("\t\tAmount: " + payments.get(i).getAmount() + "\n");
-        sb.append("\t\tAccount idx: " + payments.get(i).getAccountIdx() + "\n");
-        sb.append("\t\tSubaddress idx: " + payments.get(i).getSubaddressIdx() + "\n");
         sb.append("\t\tIs spent: " + payments.get(i).getIsSpent() + "\n");
       }
     } else {
@@ -378,9 +359,7 @@ public class MoneroTx {
     result = prime * result + ((paymentId == null) ? 0 : paymentId.hashCode());
     result = prime * result + ((payments == null) ? 0 : payments.hashCode());
     result = prime * result + ((size == null) ? 0 : size.hashCode());
-    result = prime * result + ((srcAccountIdx == null) ? 0 : srcAccountIdx.hashCode());
-    result = prime * result + ((srcAddress == null) ? 0 : srcAddress.hashCode());
-    result = prime * result + ((srcSubaddressIdx == null) ? 0 : srcSubaddressIdx.hashCode());
+    result = prime * result + ((srcSubaddress == null) ? 0 : srcSubaddress.hashCode());
     result = prime * result + ((timestamp == null || !MoneroUtils.isConfirmed(type)) ? 0 : timestamp.hashCode()); // ignore timestamps if not confirmed
     result = prime * result + ((totalAmount == null) ? 0 : totalAmount.hashCode());
     result = prime * result + ((type == null) ? 0 : type.hashCode());
@@ -436,15 +415,9 @@ public class MoneroTx {
     if (size == null) {
       if (other.size != null) return false;
     } else if (!size.equals(other.size)) return false;
-    if (srcAccountIdx == null) {
-      if (other.srcAccountIdx != null) return false;
-    } else if (!srcAccountIdx.equals(other.srcAccountIdx)) return false;
-    if (srcAddress == null) {
-      if (other.srcAddress != null) return false;
-    } else if (!srcAddress.equals(other.srcAddress)) return false;
-    if (srcSubaddressIdx == null) {
-      if (other.srcSubaddressIdx != null) return false;
-    } else if (!srcSubaddressIdx.equals(other.srcSubaddressIdx)) return false;
+    if (srcSubaddress == null) {
+      if (other.srcSubaddress != null) return false;
+    } else if (!srcSubaddress.equals(other.srcSubaddress)) return false;
     if (timestamp == null) {
       if (other.timestamp != null) return false;
     } else if (MoneroUtils.isConfirmed(type) && !timestamp.equals(other.timestamp)) return false;  // only must be the same if confirmed

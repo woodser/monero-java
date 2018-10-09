@@ -72,6 +72,10 @@ public class MoneroAccount {
   public void setSubaddresses(List<MoneroSubaddress> subaddresses) {
     this.subaddresses = subaddresses;
   }
+  
+  public void merge(MoneroAccount account) {
+    throw new RuntimeException("Not implemented");
+  }
 
   @Override
   public int hashCode() {
