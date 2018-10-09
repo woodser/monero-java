@@ -52,10 +52,14 @@ public class TestMoneroWallet {
   
   private static MoneroWallet wallet;
   private static final String SAMPLE_ADDRESS = "58bf9MfrBNDXSqCzK6snxSXaJHehLTnvx3BdS6qMkYAsW8P5kvRVq8ePbGQ7mfAeYfC7QELPhpQBe2C9bqCrqeesUsifaWw";
+  private static List<MoneroTx> txCache;
+  private static List<MoneroAccount> accountCache;
 
   @BeforeClass
   public static void setup() throws Exception {
     wallet = TestUtils.getWallet();
+    txCache = null;
+    accountCache = null;
   }
   
   @AfterClass
@@ -246,7 +250,7 @@ public class TestMoneroWallet {
   @Test
   public void testGetTxsWallet() {
     boolean nonDefaultIncoming = false;
-    List<MoneroTx> txs1 = wallet.getTxs();
+    List<MoneroTx> txs1 = getCachedTxs();
     List<MoneroTx> txs2 = wallet.getTxs();  // fetch transactions twice to ensure results are the same
     assertEquals(txs1.size(), txs2.size());
     for (int i = 0; i < txs1.size(); i++) {
@@ -387,7 +391,7 @@ public class TestMoneroWallet {
   public void testGetTxsMoneroTxFilter() {
     
     // get all transactions for reference
-    List<MoneroTx> allTxs = wallet.getTxs();
+    List<MoneroTx> allTxs = getCachedTxs();
     assertFalse(allTxs.isEmpty());
     for (MoneroTx tx : allTxs) {
       TestUtils.testGetTx(tx, null, wallet);
@@ -498,12 +502,22 @@ public class TestMoneroWallet {
   
   @Test
   public void testGetTxNote() {
-    fail("Not implemented");
+    List<MoneroTx> txs = getRandomTransactions(5);
+    
+    // set notes
+    for (int i = 0; i < txs.size(); i++) {
+      wallet.setTxNote(txs.get(i).getId(), "Hello " + i);
+    }
+    
+    // get notes
+    for (int i = 0; i < txs.size(); i++) {
+      assertEquals("Hello " + i, wallet.getTxNote(txs.get(i).getId()));
+    }
   }
 
   @Test
   public void testGetTxNotes() {
-    List<MoneroTx> txs = wallet.getTxs();
+    List<MoneroTx> txs = getCachedTxs();
     assertFalse(txs.isEmpty());
     List<String> txIds = new ArrayList<String>();
     for (MoneroTx tx : txs) {
@@ -765,7 +779,7 @@ public class TestMoneroWallet {
   public void testSetTxNotes() {
     
     // set tx notes
-    List<MoneroTx> txs = wallet.getTxs();
+    List<MoneroTx> txs = getCachedTxs();
     assertTrue(txs.size() >= 3);
     List<String> txIds = new ArrayList<String>();
     List<String> txNotes = new ArrayList<String>();
@@ -886,13 +900,25 @@ public class TestMoneroWallet {
    * @param numTxs is the number of transactions to retrieve
    * @return List<MoneroTx> are the randomly retrieved transactions
    */
-  private List<MoneroTx> getRandomTransactions(int numTxs) {
-    List<MoneroTx> allTxs = wallet.getTxs();
+  private static List<MoneroTx> getRandomTransactions(int numTxs) {
+    List<MoneroTx> allTxs = getCachedTxs();
     assertTrue(allTxs.size() > numTxs);
     Set<MoneroTx> randomTxs = new HashSet<MoneroTx>();
     while (randomTxs.size() < numTxs) {
       randomTxs.add(allTxs.get(MathUtils.random(0, allTxs.size())));
     }
     return new ArrayList<MoneroTx>(randomTxs);
+  }
+  
+  private static List<MoneroTx> getCachedTxs() {
+    if (txCache != null) return txCache;
+    txCache = wallet.getTxs();
+    return txCache;
+  }
+  
+  private static List<MoneroAccount> getCachedAccounts() {
+    if (accountCache != null) return accountCache;
+    accountCache = wallet.getAccounts(true);
+    return accountCache;
   }
 }
