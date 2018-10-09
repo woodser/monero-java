@@ -37,6 +37,7 @@ import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTx.MoneroTxType;
+import monero.wallet.model.MoneroTxCheck;
 import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxFilter;
 import monero.wallet.model.MoneroUri;
@@ -1183,5 +1184,50 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       subaddressIndices.add(((BigInteger) address.get("address_index")).intValue());
     }
     return subaddressIndices;
+  }
+
+  @Override
+  public String getTxKey(String txId) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public MoneroTxCheck checkTxKey(String id, String key, String address) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public String getTxProof(String txId, String address, String message) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public MoneroTxCheck checkTxProof(String txId, String address, String message, String signature) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public String getSpendProof(String txId, String message) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public boolean checkSpendProof(String txId, String message, String signature) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public String getReserveProof(String message) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public String getReserveProof(int accountIdx, BigInteger amount, String message) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public MoneroTxCheck checkReserveProof(String address, String message, String signature) {
+    throw new RuntimeException("Not implemented");
   }
 }

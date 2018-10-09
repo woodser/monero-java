@@ -154,4 +154,14 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   public int addAddressBookEntry(String address, String description) {
     return addAddressBookEntry(address, null, description);
   }
+  
+  @Override
+  public String getTxNote(String txId) {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  @Override
+  public void setTxNote(String txId, String note) {
+    throw new RuntimeException("Not implemented");
+  }
 }
