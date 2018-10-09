@@ -463,7 +463,7 @@ public class TestMoneroWallet {
         maxHeight = heights.get(heights.size() - 1) - 1;
       }
       
-      // assert at least some transactions filtered
+      // assert some transactions filtered
       int unfilteredCount = txs.size();
       MoneroTxFilter filter = new MoneroTxFilter();
       filter.setAccountIndex(0);
