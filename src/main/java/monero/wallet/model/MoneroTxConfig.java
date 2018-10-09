@@ -12,7 +12,7 @@ import monero.wallet.model.MoneroTx.MoneroTxPriority;
  */
 public class MoneroTxConfig {
 
-  private List<MoneroPayment> destinations;
+  private List<MoneroPayment> payments;
   private Integer accountIndex;
   private Collection<Integer> subaddressIndices;
   private BigInteger fee;
@@ -48,20 +48,19 @@ public class MoneroTxConfig {
    * @param mixin is the transaction mixin to use
    */
   public MoneroTxConfig(String address, String paymentId, BigInteger amount, Integer mixin) {
-    MoneroSubaddress subaddress = new MoneroSubaddress();
-    subaddress.setAddress(address);
-    MoneroPayment destination = new MoneroPayment();
-    destination.setDestination(subaddress);
-    destination.setAmount(amount);
-    this.destinations = new ArrayList<MoneroPayment>();
-    this.destinations.add(destination);
+    MoneroSubaddress destination = new MoneroSubaddress(address);
+    MoneroPayment payment = new MoneroPayment();
+    payment.setDestination(destination);
+    payment.setAmount(amount);
+    this.payments = new ArrayList<MoneroPayment>();
+    this.payments.add(payment);
     this.paymentId = paymentId;
     this.mixin = mixin;
   }
 
-  public MoneroTxConfig(List<MoneroPayment> destinations, Integer accountIdx, Collection<Integer> subaddressIndices, BigInteger fee, Integer mixin, Integer unlockTime, String paymentId, MoneroTxPriority priority, Boolean doNotRelay, BigInteger belowAmount) {
+  public MoneroTxConfig(List<MoneroPayment> payments, Integer accountIdx, Collection<Integer> subaddressIndices, BigInteger fee, Integer mixin, Integer unlockTime, String paymentId, MoneroTxPriority priority, Boolean doNotRelay, BigInteger belowAmount) {
     super();
-    this.destinations = destinations;
+    this.payments = payments;
     this.accountIndex = accountIdx;
     this.subaddressIndices = subaddressIndices;
     this.fee = fee;
@@ -74,11 +73,11 @@ public class MoneroTxConfig {
   }
 
   public List<MoneroPayment> getDestinations() {
-    return destinations;
+    return payments;
   }
 
   public void setDestinations(List<MoneroPayment> destinations) {
-    this.destinations = destinations;
+    this.payments = destinations;
   }
 
   public Integer getAccountIndex() {

@@ -1041,12 +1041,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
         else {
           if (payment == null) payment = new MoneroPayment();
-          MoneroSubaddress subaddress = payment.getDestination();
-          if (subaddress == null) {
-            subaddress = new MoneroSubaddress();
-            payment.setDestination(subaddress);
+          MoneroSubaddress destination = payment.getDestination();
+          if (destination == null) {
+            destination = new MoneroSubaddress();
+            payment.setDestination(destination);
           }
-          subaddress.setAddress((String) val);
+          destination.setAddress((String) val);
         }
       }
       else if (key.equalsIgnoreCase("key_image")) {
@@ -1108,13 +1108,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     } else {
       assertNotNull(payment);
       assertEquals(1, tx.getPayments().size());
-      MoneroSubaddress subaddress = payment.getDestination();
-      if (subaddress == null) {
-        subaddress = new MoneroSubaddress();
-        payment.setDestination(subaddress);
+      MoneroSubaddress destination = payment.getDestination();
+      if (destination == null) {
+        destination = new MoneroSubaddress();
+        payment.setDestination(destination);
       }
-      subaddress.setAccount(account);
-      subaddress.setIndex(subaddressIdx);
+      destination.setAccount(account);
+      destination.setIndex(subaddressIdx);
     }
     if (type == MoneroTxType.MEMPOOL && tx.getPayments() != null) {
       for (MoneroPayment aPayment : tx.getPayments()) aPayment.setIsSpent(false); // mempool payments are not spent

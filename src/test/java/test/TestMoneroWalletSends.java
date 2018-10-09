@@ -226,8 +226,7 @@ public class TestMoneroWalletSends {
     for (int i = 0; i < destinationAddresses.size(); i++) {
       MoneroPayment payment = new MoneroPayment();
       payments.add(payment);
-      MoneroSubaddress destination = new MoneroSubaddress();
-      destination.setAddress(destinationAddresses.get(i));
+      MoneroSubaddress destination = new MoneroSubaddress(destinationAddresses.get(i));
       payment.setDestination(destination);
       payment.setAmount(sendAmountPerSubaddress);
     }

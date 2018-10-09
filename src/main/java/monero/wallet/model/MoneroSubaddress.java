@@ -18,6 +18,15 @@ public class MoneroSubaddress {
   private Integer numUnspentOutputs;
   private Boolean isUsed;
   
+  public MoneroSubaddress() {
+    super();
+  }
+  
+  public MoneroSubaddress(String address) {
+    super();
+    this.address = address;
+  }
+  
   public MoneroAccount getAccount() {
     return account;
   }
