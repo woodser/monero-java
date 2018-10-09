@@ -1089,15 +1089,24 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     else if (payment != null) tx.setPayments(new ArrayList<MoneroPayment>(Arrays.asList(payment)));
     MoneroAccount account = new MoneroAccount();
     account.setIndex(accountIdx);
-    MoneroSubaddress subaddress = new MoneroSubaddress();
-    subaddress.setAccount(account);
-    subaddress.setIndex(subaddressIdx);
     if (isSend) {
-      tx.setSrcSubaddress(subaddress);
+      MoneroSubaddress subaddress = tx.getSrcSubaddress();
+      if (subaddress == null) {
+        subaddress = new MoneroSubaddress();
+        tx.setSrcSubaddress(subaddress);
+      }
+      subaddress.setAccount(account);
+      subaddress.setIndex(subaddressIdx);
     } else {
       assertNotNull(payment);
       assertEquals(1, tx.getPayments().size());
-      payment.setSubaddress(subaddress);
+      MoneroSubaddress subaddress = payment.getSubaddress();
+      if (subaddress == null) {
+        subaddress = new MoneroSubaddress();
+        payment.setSubaddress(subaddress);
+      }
+      subaddress.setAccount(account);
+      subaddress.setIndex(subaddressIdx);
     }
     if (type == MoneroTxType.MEMPOOL && tx.getPayments() != null) {
       for (MoneroPayment aPayment : tx.getPayments()) aPayment.setIsSpent(false); // mempool payments are not spent
