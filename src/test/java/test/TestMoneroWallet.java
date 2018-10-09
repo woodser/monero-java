@@ -259,7 +259,7 @@ public class TestMoneroWallet {
       assertEquals(txs1.get(i), txs2.get(i));
       if (!MoneroUtils.isSendTx(txs1.get(i).getType())) {
         for (MoneroPayment payment : txs1.get(i).getPayments()) {
-         if (payment.getAccountIdx() != 0 && payment.getSubaddressIdx() != 0) nonDefaultIncoming = true;
+         if (payment.getSubaddress().getAccount().getIndex() != 0 && payment.getSubaddress().getIndex() != 0) nonDefaultIncoming = true;
         }
       }
     }
