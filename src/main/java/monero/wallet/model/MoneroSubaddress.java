@@ -14,7 +14,7 @@ public class MoneroSubaddress {
   private BigInteger unlockedBalance;
   private Integer numUnspentOutputs;
   private Boolean isUsed;
-  
+
   public Integer getIndex() {
     return index;
   }
@@ -63,11 +63,11 @@ public class MoneroSubaddress {
     this.numUnspentOutputs = numUnspentOutputs;
   }
   
-  public Boolean isUsed() {
+  public Boolean getIsUsed() {
     return isUsed;
   }
   
-  public void setUsed(Boolean isUsed) {
+  public void setIsUsed(Boolean isUsed) {
     this.isUsed = isUsed;
   }
   

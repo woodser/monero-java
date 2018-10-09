@@ -131,7 +131,7 @@ public class TestUtils {
     assertTrue(subaddress.getBalance().doubleValue() >= 0);
     assertTrue(subaddress.getUnlockedBalance().doubleValue() >= 0);
     assertTrue(subaddress.getNumUnspentOutputs() >= 0);
-    if (subaddress.getBalance().doubleValue() > 0) assertTrue(subaddress.isUsed());
+    if (subaddress.getBalance().doubleValue() > 0) assertTrue(subaddress.getIsUsed());
   }
   
   public static void testCommonTx(MoneroTx tx) {

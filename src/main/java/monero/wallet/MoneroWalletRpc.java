@@ -243,7 +243,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       subaddress.setIndex(((BigInteger) address.get("address_index")).intValue());
       subaddress.setLabel((String) address.get("label"));
       subaddress.setAddress((String) address.get("address"));
-      subaddress.setUsed((boolean) address.get("used"));
+      subaddress.setIsUsed((boolean) address.get("used"));
       
       // set defaults
       subaddress.setBalance(BigInteger.valueOf(0));
@@ -301,7 +301,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     subaddress.setBalance(BigInteger.valueOf(0));
     subaddress.setUnlockedBalance(BigInteger.valueOf(0));
     subaddress.setNumUnspentOutputs(0);
-    subaddress.setUsed(false);
+    subaddress.setIsUsed(false);
     return subaddress;
   }
   
