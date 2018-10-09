@@ -369,7 +369,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
             tx.setTotalAmount(BigInteger.valueOf(0));
             tx.setPayments(null);
           }
-          addTx(txs, tx, true);
+          addTx(txs, tx, false);
         }
       }
     }
@@ -391,8 +391,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (txMaps != null) {
           for (Map<String, Object> txMap : txMaps) {
             MoneroTx tx = txMapToTx(txMap, MoneroTxType.INCOMING, this);
-            tx.getPayments().get(0).setAddress(getAddress(accountIdx, tx.getPayments().get(0).getSubaddressIdx()));
-            addTx(txs, tx, true);
+            String address = getAddress(accountIdx, tx.getPayments().get(0).getSubaddress().getIndex());
+            tx.getPayments().get(0).getSubaddress().setAddress(address);
+            addTx(txs, tx, false);
           }
         }
       }
@@ -623,7 +624,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       // customize and merge transactions from account
       for (MoneroTx tx : accountTxs) {
         tx.setMixin(config.getMixin());
-        addTx(txs, tx, false);
+        addTx(txs, tx, true);
       }
       
       // fetch transactions by id and merge complete data
@@ -636,7 +637,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         filter.setAccountIndex(accountIdx);
         filter.setTxIds(ids);
         filter.setIncoming(false);
-        for (MoneroTx tx : getTxs(filter)) addTx(txs, tx, false);
+        for (MoneroTx tx : getTxs(filter)) addTx(txs, tx, true);
       }
     }
     
@@ -1022,10 +1023,22 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
       }
       else if (key.equals("address")) {
-        if (isSend) tx.setSrcAddress((String) val);
+        if (isSend) {
+          MoneroSubaddress subaddress = tx.getSrcSubaddress();
+          if (subaddress == null) {
+            subaddress = new MoneroSubaddress();
+            tx.setSrcSubaddress(subaddress);
+          }
+          subaddress.setAddress((String) val);
+        }
         else {
           if (payment == null) payment = new MoneroPayment();
-          payment.setAddress((String) val);
+          MoneroSubaddress subaddress = payment.getSubaddress();
+          if (subaddress == null) {
+            subaddress = new MoneroSubaddress();
+            payment.setSubaddress(subaddress);
+          }
+          subaddress.setAddress((String) val);
         }
       }
       else if (key.equalsIgnoreCase("key_image")) {
@@ -1057,7 +1070,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           MoneroPayment destination = new MoneroPayment();
           payments.add(destination);
           for (String paymentKey : paymentMap.keySet()) {
-            if (paymentKey.equals("address")) destination.setAddress((String) paymentMap.get(paymentKey));
+            if (paymentKey.equals("address")) {
+              MoneroSubaddress subaddress = new MoneroSubaddress();
+              subaddress.setAddress((String) paymentMap.get(paymentKey));
+              destination.setSubaddress(subaddress);
+            }
             else if (paymentKey.equals("amount")) destination.setAmount((BigInteger) paymentMap.get(paymentKey));
             else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
           }
@@ -1070,14 +1087,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // initialize final fields
     if (tx.getPayments() != null) assertNull(payment);
     else if (payment != null) tx.setPayments(new ArrayList<MoneroPayment>(Arrays.asList(payment)));
+    MoneroAccount account = new MoneroAccount();
+    account.setIndex(accountIdx);
+    MoneroSubaddress subaddress = new MoneroSubaddress();
+    subaddress.setAccount(account);
+    subaddress.setIndex(subaddressIdx);
     if (isSend) {
-      tx.setSrcAccountIdx(accountIdx);
-      tx.setSrcSubaddressIdx(subaddressIdx);
+      tx.setSrcSubaddress(subaddress);
     } else {
       assertNotNull(payment);
       assertEquals(1, tx.getPayments().size());
-      payment.setAccountIdx(accountIdx);
-      payment.setSubaddressIdx(subaddressIdx);
+      payment.setSubaddress(subaddress);
     }
     if (type == MoneroTxType.MEMPOOL && tx.getPayments() != null) {
       for (MoneroPayment aPayment : tx.getPayments()) aPayment.setIsSpent(false); // mempool payments are not spent
@@ -1139,15 +1159,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * 
    * @param txs are the collection of transactions to merge into
    * @param tx is the transaction to merge into the collection
-   * @param addPayments specifies if payments in the tx should be appended or merged into the merged transaction
+   * @param mergePayments specifies if payments should be merged with xor appended to existing payments
    */
-  private static void addTx(Collection<MoneroTx> txs, MoneroTx tx, boolean addPayments) {
+  private static void addTx(Collection<MoneroTx> txs, MoneroTx tx, boolean mergePayments) {
     assertNotNull(tx.getId());
     assertNotNull(tx.getType());
     MoneroTx mergedTx = null;
     for (MoneroTx aTx : txs) {
       if (aTx.getId().equals(tx.getId()) && aTx.getType() == tx.getType()) {
-        aTx.merge(tx, addPayments);
+        aTx.merge(tx, mergePayments);
         mergedTx = aTx;
       }
     }

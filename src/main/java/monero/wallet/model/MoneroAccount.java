@@ -15,6 +15,10 @@ public class MoneroAccount {
   private BigInteger unlockedBalance;
   private List<MoneroSubaddress> subaddresses;
   
+  public MoneroAccount() {
+    super();
+  }
+  
   public MoneroAccount(int index, String primaryAddress, String label, BigInteger balance, BigInteger unlockedBalance, List<MoneroSubaddress> subaddresses) {
     super();
     this.index = index;

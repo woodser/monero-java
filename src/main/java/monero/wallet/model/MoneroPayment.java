@@ -90,7 +90,6 @@ public class MoneroPayment {
     result = prime * result + ((isSpent == null) ? 0 : isSpent.hashCode());
     result = prime * result + ((keyImage == null) ? 0 : keyImage.hashCode());
     result = prime * result + ((subaddress == null) ? 0 : subaddress.hashCode());
-    result = prime * result + ((tx == null) ? 0 : tx.hashCode());
     return result;
   }
 
@@ -112,9 +111,6 @@ public class MoneroPayment {
     if (subaddress == null) {
       if (other.subaddress != null) return false;
     } else if (!subaddress.equals(other.subaddress)) return false;
-    if (tx == null) {
-      if (other.tx != null) return false;
-    } else if (!tx.equals(other.tx)) return false;
     return true;
   }
 }
