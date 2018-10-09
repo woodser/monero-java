@@ -350,50 +350,34 @@ public class TestMoneroWallet {
   
   @Test
   public void testGetTxsByIds() {
-    int numTestTxs = 5;  // number of txs to test
     
-    // get all transactions for reference
-    List<MoneroTx> allTxs = wallet.getTxs();
-    assertFalse(allTxs.isEmpty());
-    for (MoneroTx tx : allTxs) {
-      TestUtils.testGetTx(tx, null, wallet);
-    }
-    
-    // collect all ids
-    Set<String> uniqueIds = new HashSet<String>();
-    for (MoneroTx tx : allTxs) uniqueIds.add(tx.getId());
-    assertTrue(uniqueIds.size() > numTestTxs);
-    List<String> uniqueIdsList = new ArrayList<String>(uniqueIds);
-    
-    // get random transaction ids
-    Set<String> txIds = new HashSet<String>();
-    while (txIds.size() < numTestTxs) {
-      txIds.add(uniqueIdsList.get(MathUtils.random(0, uniqueIdsList.size() - 1)));
-    }
-    assertEquals(numTestTxs, txIds.size());
+    // get random transactions
+    List<MoneroTx> txs = getRandomTransactions(5);
     
     // fetch transactions by id
-    for (String txId : txIds) {
+    List<String> txIds = new ArrayList<String>();
+    for (MoneroTx tx : txs) {
+      txIds.add(tx.getId());
       MoneroTxFilter filter = new MoneroTxFilter();
-      filter.setTxIds(Arrays.asList(txId));
-      List<MoneroTx> txs = wallet.getTxs(filter);
-      assertFalse(txs.isEmpty());
-      for (MoneroTx tx : txs) {
-        assertEquals(txId, tx.getId());
+      filter.setTxIds(Arrays.asList(tx.getId()));
+      List<MoneroTx> filteredTxs = wallet.getTxs(filter);
+      assertFalse(filteredTxs.isEmpty());
+      for (MoneroTx filteredTx : filteredTxs) {
+        assertEquals(tx.getId(), filteredTx.getId());
       }
     }
     
     // fetch transactions by ids
     MoneroTxFilter filter = new MoneroTxFilter();
     filter.setTxIds(txIds);
-    List<MoneroTx> txs = wallet.getTxs(filter);
-    assertFalse(txs.isEmpty());
-    for (MoneroTx tx : txs) {
-      assertTrue(txIds.contains(tx.getId()));
+    List<MoneroTx> filteredTxs = wallet.getTxs(filter);
+    assertFalse(filteredTxs.isEmpty());
+    for (MoneroTx filteredTx : filteredTxs) {
+      assertTrue(txIds.contains(filteredTx.getId()));
     }
     for (String txId : txIds) {
       boolean found = false;
-      for (MoneroTx tx : txs) if (tx.getId().equals(txId)) found = true;
+      for (MoneroTx filteredTx : filteredTxs) if (filteredTx.getId().equals(txId)) found = true;
       assertTrue("No transaction with id " + txId + " fetched", found);
     }
   }
@@ -522,7 +506,10 @@ public class TestMoneroWallet {
     List<MoneroTx> txs = wallet.getTxs();
     assertFalse(txs.isEmpty());
     List<String> txIds = new ArrayList<String>();
-    for (MoneroTx tx : txs) txIds.add(tx.getId());
+    for (MoneroTx tx : txs) {
+      TestUtils.testGetTx(tx, null, wallet);
+      txIds.add(tx.getId());
+    }
     List<String> txNotes = wallet.getTxNotes(txIds);
     assertEquals(txs.size(), txNotes.size());
     for (String txNote : txNotes) assertNotNull(txNote);
@@ -891,5 +878,21 @@ public class TestMoneroWallet {
     for (String key : attrs.keySet()) {
       assertEquals(attrs.get(key), wallet.getAttribute(key));
     }
+  }
+  
+  /**
+   * Returns random transactions.
+   * 
+   * @param numTxs is the number of transactions to retrieve
+   * @return List<MoneroTx> are the randomly retrieved transactions
+   */
+  private List<MoneroTx> getRandomTransactions(int numTxs) {
+    List<MoneroTx> allTxs = wallet.getTxs();
+    assertTrue(allTxs.size() > numTxs);
+    Set<MoneroTx> randomTxs = new HashSet<MoneroTx>();
+    while (randomTxs.size() < numTxs) {
+      randomTxs.add(allTxs.get(MathUtils.random(0, allTxs.size())));
+    }
+    return new ArrayList<MoneroTx>(randomTxs);
   }
 }

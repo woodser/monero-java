@@ -140,6 +140,13 @@ public class TestUtils {
     assertNotEquals(tx.getId(), MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());  // default payment should be converted to null
   }
   
+  /**
+   * Test a single transasction.
+   * 
+   * @param tx is the transaction to test
+   * @param hasOutgoingPayments specifies if the tx has outgoing payents, null if doesn't matter
+   * @param wallet is a wallet reference to test the tx
+   */
   public static void testGetTx(MoneroTx tx, Boolean hasOutgoingPayments, MoneroWallet wallet) {
     testCommonTx(tx);
     
