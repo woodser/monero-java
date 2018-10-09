@@ -278,6 +278,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       subaddressMap.put(subaddress.getIndex(), subaddress.getAddress());
     }
     
+    // assign account
+    MoneroAccount account = new MoneroAccount();
+    account.setIndex(accountIdx);
+    account.setSubaddresses(subaddresses);
+    
     // return results
     return subaddresses;
   }
