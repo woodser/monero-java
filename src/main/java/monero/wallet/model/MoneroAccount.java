@@ -75,6 +75,11 @@ public class MoneroAccount {
   
   public void setSubaddresses(List<MoneroSubaddress> subaddresses) {
     this.subaddresses = subaddresses;
+    if (subaddresses != null) {
+      for (MoneroSubaddress subaddress : subaddresses) {
+        subaddress.setAccount(this);
+      }
+    }
   }
   
   public void merge(MoneroAccount account) {
@@ -89,7 +94,6 @@ public class MoneroAccount {
     result = prime * result + ((index == null) ? 0 : index.hashCode());
     result = prime * result + ((label == null) ? 0 : label.hashCode());
     result = prime * result + ((primaryAddress == null) ? 0 : primaryAddress.hashCode());
-    result = prime * result + ((subaddresses == null) ? 0 : subaddresses.hashCode());
     result = prime * result + ((unlockedBalance == null) ? 0 : unlockedBalance.hashCode());
     return result;
   }
@@ -112,9 +116,6 @@ public class MoneroAccount {
     if (primaryAddress == null) {
       if (other.primaryAddress != null) return false;
     } else if (!primaryAddress.equals(other.primaryAddress)) return false;
-    if (subaddresses == null) {
-      if (other.subaddresses != null) return false;
-    } else if (!subaddresses.equals(other.subaddresses)) return false;
     if (unlockedBalance == null) {
       if (other.unlockedBalance != null) return false;
     } else if (!unlockedBalance.equals(other.unlockedBalance)) return false;
