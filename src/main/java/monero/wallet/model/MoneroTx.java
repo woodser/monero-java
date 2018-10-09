@@ -316,7 +316,7 @@ public class MoneroTx {
       sb.append("Payments:\n");
       for (int i = 0; i < payments.size(); i++) {
         sb.append("\t" + (i + 1) + ":\n");
-        sb.append("\t\tSubaddress: " + payments.get(i).getSubaddress());
+        sb.append("\t\tSubaddress: " + payments.get(i).getDestination());
         sb.append("\t\tAmount: " + payments.get(i).getAmount() + "\n");
         sb.append("\t\tIs spent: " + payments.get(i).getIsSpent() + "\n");
       }

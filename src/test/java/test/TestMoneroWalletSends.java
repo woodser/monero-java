@@ -143,8 +143,8 @@ public class TestMoneroWalletSends {
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       TestUtils.testSendTx(tx, config, !canSplit, !canSplit, wallet);
-      assertEquals(fromAccount.getIndex(), tx.getSrcAccountIdx());
-      assertEquals((Integer) 0, tx.getSrcSubaddressIdx()); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
+      assertEquals(fromAccount.getIndex(), tx.getSrcSubaddress().getAccount().getIndex());
+      assertEquals(0, (int) tx.getSrcSubaddress().getIndex()); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
       assertEquals(sendAmount, tx.getTotalAmount());
       
       // test tx payments
@@ -152,10 +152,11 @@ public class TestMoneroWalletSends {
         assertEquals(1, tx.getPayments().size());
         for (MoneroPayment payment : tx.getPayments()) {
           assertTrue(tx == payment.getTx());
-          assertEquals(address, payment.getAddress());
+          assertNotNull(payment.getDestination());
+          assertEquals(address, payment.getDestination().getAddress());
+          assertNull(payment.getDestination().getAccount());
+          assertNull(payment.getDestination().getIndex());
           assertEquals(sendAmount, payment.getAmount());
-          assertNull(payment.getAccountIdx());
-          assertNull(payment.getSubaddressIdx());
           assertNull(payment.getIsSpent());
         }
       }
@@ -225,7 +226,9 @@ public class TestMoneroWalletSends {
     for (int i = 0; i < destinationAddresses.size(); i++) {
       MoneroPayment payment = new MoneroPayment();
       payments.add(payment);
-      payment.setAddress(destinationAddresses.get(i));
+      MoneroSubaddress destination = new MoneroSubaddress();
+      destination.setAddress(destinationAddresses.get(i));
+      payment.setDestination(destination);
       payment.setAmount(sendAmountPerSubaddress);
     }
     MoneroTxConfig config = new MoneroTxConfig();
@@ -262,7 +265,7 @@ public class TestMoneroWalletSends {
         BigInteger paymentSum = BigInteger.valueOf(0);
         for (MoneroPayment payment : tx.getPayments()) {
           assertTrue(tx == payment.getTx());
-          assertTrue(destinationAddresses.contains(payment.getAddress()));
+          assertTrue(destinationAddresses.contains(payment.getDestination().getAddress()));
           paymentSum = paymentSum.add(payment.getAmount());
         }
         assertEquals(tx.getId(), tx.getTotalAmount(), paymentSum);  // assert that payments sum up to tx amount
@@ -380,7 +383,7 @@ public class TestMoneroWalletSends {
         assertEquals(tx.getId(), 1, tx.getPayments().size());
         BigInteger paymentSum = BigInteger.valueOf(0);
         for (MoneroPayment payment : tx.getPayments()) {
-          assertEquals(tx.getId(), address, payment.getAddress());
+          assertEquals(tx.getId(), address, payment.getDestination().getAddress());
           assertTrue(tx.getId(), tx == payment.getTx());
           paymentSum = paymentSum.add(payment.getAmount());
         }
