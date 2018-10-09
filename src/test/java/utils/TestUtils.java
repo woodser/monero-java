@@ -126,6 +126,7 @@ public class TestUtils {
   }
   
   public static void testSubaddress(MoneroSubaddress subaddress) {
+    assertNotNull(subaddress.getAccount());
     assertTrue(subaddress.getIndex() >= 0);
     assertNotNull(subaddress.getAddress());
     assertTrue(subaddress.getBalance().doubleValue() >= 0);
