@@ -391,8 +391,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (txMaps != null) {
           for (Map<String, Object> txMap : txMaps) {
             MoneroTx tx = txMapToTx(txMap, MoneroTxType.INCOMING, this);
-            String address = getAddress(accountIdx, tx.getPayments().get(0).getSubaddress().getIndex());
-            tx.getPayments().get(0).getSubaddress().setAddress(address);
+            String address = getAddress(accountIdx, tx.getPayments().get(0).getDestination().getIndex());
+            tx.getPayments().get(0).getDestination().setAddress(address);
             addTx(txs, tx, false);
           }
         }
@@ -427,7 +427,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     paramMap.put("destinations", destinationMaps);
     for (MoneroPayment destination : config.getDestinations()) {
       Map<String, Object> destinationMap = new HashMap<String, Object>();
-      destinationMap.put("address", destination.getAddress().toString());
+      destinationMap.put("address", destination.getDestination().getAddress());
       destinationMap.put("amount", destination.getAmount());
       destinationMaps.add(destinationMap);
     }
@@ -453,9 +453,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setMixin(config.getMixin());
     tx.setPayments(config.getDestinations());
     tx.setPaymentId(config.getPaymentId());
-    tx.setSrcAccountIdx(accountIdx);
-    tx.setSrcSubaddressIdx(0);  // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
-    tx.setSrcAddress(getAddress(tx.getSrcAccountIdx(), tx.getSrcSubaddressIdx()));
+    MoneroAccount account = new MoneroAccount();
+    account.setIndex(accountIdx);
+    MoneroSubaddress srcSubaddress = new MoneroSubaddress();
+    srcSubaddress.setAccount(account);
+    srcSubaddress.setIndex(0);    // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
+    srcSubaddress.setAddress(getAddress(accountIdx, 0));
+    tx.setSrcSubaddress(srcSubaddress);
     if (tx.getType() != MoneroTxType.NOT_RELAYED) {
       if (tx.getTimestamp() == null) tx.setTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
       if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
@@ -497,7 +501,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     paramMap.put("destinations", destinationMaps);
     for (MoneroPayment destination : config.getDestinations()) {
       Map<String, Object> destinationMap = new HashMap<String, Object>();
-      destinationMap.put("address", destination.getAddress().toString());
+      destinationMap.put("address", destination.getDestination().getAddress());
       destinationMap.put("amount", destination.getAmount());
       destinationMaps.add(destinationMap);
     }
@@ -520,13 +524,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<MoneroTx> txs = txListMapToTxs(resultMap, accountIdx, type, this);
     
     // set final fields
+    MoneroAccount account = new MoneroAccount();
+    account.setIndex(accountIdx);
     for (MoneroTx tx : txs) {
       tx.setMixin(config.getMixin());
       tx.setPayments(config.getDestinations());
       tx.setPaymentId(config.getPaymentId());
-      tx.setSrcAccountIdx(accountIdx);
-      tx.setSrcSubaddressIdx(0);  // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
-      tx.setSrcAddress(getAddress(tx.getSrcAccountIdx(), tx.getSrcSubaddressIdx()));
+      MoneroSubaddress srcSubaddress = new MoneroSubaddress();
+      srcSubaddress.setAccount(account);
+      srcSubaddress.setIndex(0);    // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
+      srcSubaddress.setAddress(getAddress(accountIdx, 0));
+      tx.setSrcSubaddress(srcSubaddress);
       if (tx.getType() != MoneroTxType.NOT_RELAYED) {
         if (tx.getTimestamp() == null) tx.setTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
         if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
@@ -559,7 +567,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // common request params
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("address", config.getDestinations().get(0).getAddress());
+    params.put("address", config.getDestinations().get(0).getDestination().getAddress());
     params.put("priority", config.getPriority());
     params.put("mixin", config.getMixin());
     params.put("unlock_time", config.getUnlockTime());
@@ -1033,10 +1041,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
         else {
           if (payment == null) payment = new MoneroPayment();
-          MoneroSubaddress subaddress = payment.getSubaddress();
+          MoneroSubaddress subaddress = payment.getDestination();
           if (subaddress == null) {
             subaddress = new MoneroSubaddress();
-            payment.setSubaddress(subaddress);
+            payment.setDestination(subaddress);
           }
           subaddress.setAddress((String) val);
         }
@@ -1073,7 +1081,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
             if (paymentKey.equals("address")) {
               MoneroSubaddress subaddress = new MoneroSubaddress();
               subaddress.setAddress((String) paymentMap.get(paymentKey));
-              destination.setSubaddress(subaddress);
+              destination.setDestination(subaddress);
             }
             else if (paymentKey.equals("amount")) destination.setAmount((BigInteger) paymentMap.get(paymentKey));
             else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
@@ -1100,10 +1108,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     } else {
       assertNotNull(payment);
       assertEquals(1, tx.getPayments().size());
-      MoneroSubaddress subaddress = payment.getSubaddress();
+      MoneroSubaddress subaddress = payment.getDestination();
       if (subaddress == null) {
         subaddress = new MoneroSubaddress();
-        payment.setSubaddress(subaddress);
+        payment.setDestination(subaddress);
       }
       subaddress.setAccount(account);
       subaddress.setIndex(subaddressIdx);
@@ -1145,13 +1153,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // build transactions
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    MoneroAccount account = new MoneroAccount();
+    account.setIndex(accountIdx);
     for (int i = 0; i < ids.size(); i++) {
       MoneroTx tx = new MoneroTx();
       txs.add(tx);
       int subaddressIdx = 0;  // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
-      tx.setSrcAddress(wallet.getAddress(accountIdx, subaddressIdx));
-      tx.setSrcAccountIdx(accountIdx);
-      tx.setSrcSubaddressIdx(subaddressIdx);
+      MoneroSubaddress srcSubaddress = new MoneroSubaddress();
+      srcSubaddress.setAccount(account);
+      srcSubaddress.setIndex(subaddressIdx);
+      srcSubaddress.setAddress(wallet.getAddress(accountIdx, subaddressIdx));
+      tx.setSrcSubaddress(srcSubaddress);
       tx.setTotalAmount(amounts.get(i));
       tx.setFee(fees.get(i));
       tx.setId(ids.get(i));

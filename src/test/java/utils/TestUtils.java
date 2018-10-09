@@ -190,11 +190,11 @@ public class TestUtils {
         for (MoneroPayment payment : tx.getPayments()) {
           assertTrue(tx == payment.getTx());
           totalAmount = totalAmount.add(payment.getAmount());
-          assertNotNull(tx.getId(), payment.getSubaddress().getAddress());
+          assertNotNull(tx.getId(), payment.getDestination().getAddress());
           assertNotNull(tx.getId(), payment.getAmount());
           assertTrue(tx.getId(), payment.getAmount().longValue() > 0);
-          assertNull(tx.getId(), payment.getSubaddress().getAccount());
-          assertNull(tx.getId(), payment.getSubaddress().getIndex());
+          assertNull(tx.getId(), payment.getDestination().getAccount());
+          assertNull(tx.getId(), payment.getDestination().getIndex());
           assertNull(tx.getId(), payment.getIsSpent());
           assertNull(tx.getId(), payment.getKeyImage());
         }
@@ -241,7 +241,7 @@ public class TestUtils {
       for (MoneroPayment payment : tx.getPayments()) {
         assertTrue(tx == payment.getTx());
         totalAmount = totalAmount.add(payment.getAmount());
-        MoneroSubaddress subaddress = payment.getSubaddress();
+        MoneroSubaddress subaddress = payment.getDestination();
         assertNotNull(tx.getId(), subaddress);
         assertNotNull(tx.getId(), subaddress.getAccount());
         assertNotNull(tx.getId(), subaddress.getAccount().getIndex());
@@ -326,7 +326,7 @@ public class TestUtils {
       for (MoneroPayment payment : tx.getPayments()) {
         assertTrue(tx.getId(), tx == payment.getTx());
         totalAmount = totalAmount.add(payment.getAmount());
-        MoneroSubaddress subaddress = payment.getSubaddress();
+        MoneroSubaddress subaddress = payment.getDestination();
         assertNotNull(tx.getId(), subaddress);
         assertNotNull(tx.getId(), subaddress.getAddress());
         assertNull(tx.getId(), subaddress.getAccount());
@@ -378,7 +378,7 @@ public class TestUtils {
       for (MoneroPayment payment : tx.getPayments()) {
         assertTrue(tx.getId(), tx == payment.getTx());
         totalAmount = totalAmount.add(payment.getAmount());
-        MoneroSubaddress subaddress = payment.getSubaddress();
+        MoneroSubaddress subaddress = payment.getDestination();
         assertNotNull(tx.getId(), subaddress);
         assertNotNull(tx.getId(), subaddress.getAddress());
         assertNull(tx.getId(), subaddress.getAccount());

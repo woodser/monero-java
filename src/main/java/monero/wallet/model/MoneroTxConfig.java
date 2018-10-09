@@ -51,7 +51,7 @@ public class MoneroTxConfig {
     MoneroSubaddress subaddress = new MoneroSubaddress();
     subaddress.setAddress(address);
     MoneroPayment destination = new MoneroPayment();
-    destination.setSubaddress(subaddress);
+    destination.setDestination(subaddress);
     destination.setAmount(amount);
     this.destinations = new ArrayList<MoneroPayment>();
     this.destinations.add(destination);
