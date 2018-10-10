@@ -541,7 +541,7 @@ public class TestMoneroWallet {
   
   
   @Test
-  public void testTxKey() {
+  public void testTxKeyProof() {
     Integer maxTxs = 100;  // maximum number of transactions to test or test all if null    
     
     // get random txs with outgoing payments
