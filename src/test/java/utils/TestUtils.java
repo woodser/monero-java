@@ -318,7 +318,7 @@ public class TestUtils {
     if (hasPayments) {
       assertNotNull(tx.getPayments());
       assertFalse(tx.getPayments().isEmpty());
-      assertEquals(tx.getId(), config.getDestinations(), tx.getPayments());
+      assertEquals(tx.getId(), config.getPayments(), tx.getPayments());
     }
     assertNotNull(tx.getId(), tx.getBlob());
     assertNotNull(tx.getId(), tx.getMetadata());
@@ -370,7 +370,7 @@ public class TestUtils {
     if (hasPayments) {
       assertNotNull(tx.getPayments());
       assertFalse(tx.getPayments().isEmpty());
-      assertEquals(tx.getId(), config.getDestinations(), tx.getPayments());
+      assertEquals(tx.getId(), config.getPayments(), tx.getPayments());
     }
     assertNotNull(tx.getId(), tx.getBlob());
     assertNotNull(tx.getId(), tx.getMetadata());

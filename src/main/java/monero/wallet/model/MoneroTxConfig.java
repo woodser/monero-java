@@ -72,12 +72,12 @@ public class MoneroTxConfig {
     this.belowAmount = belowAmount;
   }
 
-  public List<MoneroPayment> getDestinations() {
+  public List<MoneroPayment> getPayments() {
     return payments;
   }
 
-  public void setDestinations(List<MoneroPayment> destinations) {
-    this.payments = destinations;
+  public void setDestinations(List<MoneroPayment> payments) {
+    this.payments = payments;
   }
 
   public Integer getAccountIndex() {

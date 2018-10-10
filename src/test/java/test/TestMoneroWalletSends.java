@@ -155,6 +155,7 @@ public class TestMoneroWalletSends {
           assertNotNull(payment.getDestination());
           assertEquals(address, payment.getDestination().getAddress());
           assertNull(payment.getDestination().getAccount());
+          assertNull(payment.getDestination().getAccount().getIndex());
           assertNull(payment.getDestination().getIndex());
           assertEquals(sendAmount, payment.getAmount());
           assertNull(payment.getIsSpent());

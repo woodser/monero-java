@@ -430,10 +430,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> paramMap = new HashMap<String, Object>();
     List<Map<String, Object>> destinationMaps = new ArrayList<Map<String, Object>>();
     paramMap.put("destinations", destinationMaps);
-    for (MoneroPayment destination : config.getDestinations()) {
+    for (MoneroPayment payment : config.getPayments()) {
       Map<String, Object> destinationMap = new HashMap<String, Object>();
-      destinationMap.put("address", destination.getDestination().getAddress());
-      destinationMap.put("amount", destination.getAmount());
+      destinationMap.put("address", payment.getDestination().getAddress());
+      destinationMap.put("amount", payment.getAmount());
       destinationMaps.add(destinationMap);
     }
     paramMap.put("account_index", accountIdx);
@@ -456,7 +456,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // set final fields
     tx.setMixin(config.getMixin());
-    tx.setPayments(config.getDestinations());
+    tx.setPayments(config.getPayments());
     tx.setPaymentId(config.getPaymentId());
     MoneroAccount account = new MoneroAccount();
     account.setIndex(accountIdx);
@@ -504,10 +504,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> paramMap = new HashMap<String, Object>();
     List<Map<String, Object>> destinationMaps = new ArrayList<Map<String, Object>>();
     paramMap.put("destinations", destinationMaps);
-    for (MoneroPayment destination : config.getDestinations()) {
+    for (MoneroPayment payment : config.getPayments()) {
       Map<String, Object> destinationMap = new HashMap<String, Object>();
-      destinationMap.put("address", destination.getDestination().getAddress());
-      destinationMap.put("amount", destination.getAmount());
+      destinationMap.put("address", payment.getDestination().getAddress());
+      destinationMap.put("amount", payment.getAmount());
       destinationMaps.add(destinationMap);
     }
     paramMap.put("account_index", accountIdx);
@@ -533,7 +533,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     account.setIndex(accountIdx);
     for (MoneroTx tx : txs) {
       tx.setMixin(config.getMixin());
-      tx.setPayments(config.getDestinations());
+      tx.setPayments(config.getPayments());
       tx.setPaymentId(config.getPaymentId());
       MoneroSubaddress srcSubaddress = new MoneroSubaddress();
       srcSubaddress.setAccount(account);
@@ -572,7 +572,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // common request params
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("address", config.getDestinations().get(0).getDestination().getAddress());
+    params.put("address", config.getPayments().get(0).getDestination().getAddress());
     params.put("priority", config.getPriority());
     params.put("mixin", config.getMixin());
     params.put("unlock_time", config.getUnlockTime());
@@ -1080,15 +1080,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         assertTrue(isSend);
         List<MoneroPayment> payments = new ArrayList<MoneroPayment>();
         for (Map<String, Object> paymentMap : (List<Map<String, Object>>) val) {
-          MoneroPayment destination = new MoneroPayment();
-          payments.add(destination);
+          MoneroPayment aPayment = new MoneroPayment();
+          payments.add(aPayment);
           for (String paymentKey : paymentMap.keySet()) {
             if (paymentKey.equals("address")) {
               MoneroSubaddress subaddress = new MoneroSubaddress();
               subaddress.setAddress((String) paymentMap.get(paymentKey));
-              destination.setDestination(subaddress);
+              aPayment.setDestination(subaddress);
             }
-            else if (paymentKey.equals("amount")) destination.setAmount((BigInteger) paymentMap.get(paymentKey));
+            else if (paymentKey.equals("amount")) aPayment.setAmount((BigInteger) paymentMap.get(paymentKey));
             else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
           }
         }
