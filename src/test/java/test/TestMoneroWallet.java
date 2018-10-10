@@ -542,17 +542,10 @@ public class TestMoneroWallet {
   
   @Test
   public void testCheckTxKey() {
+    Integer maxTxs = 100;  // maximum number of transactions to test or test all if null    
     
     // get random txs with outgoing payments
-    MoneroTxFilter filter = new MoneroTxFilter();
-    filter.setFailed(false);
-    filter.setIncoming(false);
-    filter.setMempool(false);
-    List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    for (MoneroTx tx : wallet.getTxs(filter)) if (tx.getPayments() != null) txs.add(tx);
-    assertFalse("Wallet does not have outgoing transactions with payment data; run testSendToMultiple()", txs.isEmpty());
-    Collections.shuffle(txs);
-    txs = txs.subList(0, txs.size());
+    List<MoneroTx> txs = getRandomTransactionsOutboundWithPayments(maxTxs);
     
     // test good checks
     for (MoneroTx tx : txs) {
@@ -600,18 +593,10 @@ public class TestMoneroWallet {
   
   @Test
   public void testCheckTxProof() {
-    int numTxs = 10;
+    Integer maxTxs = 100;  // maximum number of transactions to test or test all if null
     
     // get random txs with outgoing payments
-    MoneroTxFilter filter = new MoneroTxFilter();
-    filter.setFailed(false);
-    filter.setIncoming(false);
-    filter.setMempool(false);
-    List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    for (MoneroTx tx : wallet.getTxs(filter)) if (tx.getPayments() != null) txs.add(tx);
-    assertTrue("Wallet does not have enough outgoing transactions with payment data; run testSendToMultiple()", txs.size() >= numTxs);
-    Collections.shuffle(txs);
-    txs = txs.subList(0, numTxs);
+    List<MoneroTx> txs = getRandomTransactionsOutboundWithPayments(maxTxs);
     
     // test good checks with messages
     for (MoneroTx tx : txs) {
@@ -1028,6 +1013,8 @@ public class TestMoneroWallet {
   /**
    * Returns random transactions.
    * 
+   * TODO: switch this over to maxTxs like getRandomTransactionsOutboundWithPayments
+   * 
    * @param numTxs is the number of transactions to retrieve
    * @return List<MoneroTx> are the randomly retrieved transactions
    */
@@ -1039,6 +1026,20 @@ public class TestMoneroWallet {
       randomTxs.add(allTxs.get(MathUtils.random(0, allTxs.size())));
     }
     return new ArrayList<MoneroTx>(randomTxs);
+  }
+  
+  // TODO: add hasPayments to MoneroTxFilter and make this general purpose (and possibly with minTxs)
+  private static List<MoneroTx> getRandomTransactionsOutboundWithPayments(Integer maxTxs) {
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setFailed(false);
+    filter.setIncoming(false);
+    filter.setMempool(false);
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    for (MoneroTx tx : wallet.getTxs(filter)) if (tx.getPayments() != null) txs.add(tx);
+    assertFalse("Wallet does not have outgoing transactions with payment data; run testSendToMultiple()", txs.isEmpty());
+    Collections.shuffle(txs);
+    txs = txs.subList(0, maxTxs == null ? txs.size() : Math.min(maxTxs, txs.size()));
+    return txs;
   }
   
   private static List<MoneroTx> getCachedTxs() {
