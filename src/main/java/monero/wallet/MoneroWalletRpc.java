@@ -736,14 +736,35 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return (List<String>) resultMap.get("notes");
   }
   
+  @SuppressWarnings("unchecked")
   @Override
   public String getTxKey(String txId) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txid", txId);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_tx_key", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (String) resultMap.get("tx_key");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public MoneroTxCheck checkTxKey(String id, String key, String address) {
-    throw new RuntimeException("Not implemented");
+  public MoneroTxCheck checkTxKey(String txId, String txKey, String address) {
+    
+    // send request
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txid", txId);
+    params.put("tx_key", txKey);
+    params.put("address", address);
+    Map<String, Object> respMap = rpc.sendRpcRequest("check_tx_key", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    
+    // interpret result
+    MoneroTxCheck check = new MoneroTxCheck();
+    check.setIsGood(true);
+    check.setNumConfirmations(((BigInteger) resultMap.get("confirmations")).intValue());
+    check.setIsInPool((Boolean) resultMap.get("in_pool"));
+    check.setAmountReceived((BigInteger) resultMap.get("received"));
+    return check;
   }
 
   @Override

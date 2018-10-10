@@ -26,6 +26,7 @@ import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTx.MoneroTxType;
+import monero.wallet.model.MoneroTxCheck;
 import monero.wallet.model.MoneroTxConfig;
 
 /**
@@ -407,5 +408,22 @@ public class TestUtils {
       if (account.getIndex() == accountIdx) return account;
     }
     return null;
+  }
+  
+  public static void testTxCheck(MoneroTxCheck check) {
+    assertNotNull(check.getIsGood());
+    if (check.getIsGood()) {
+      assertNotNull(check.getNumConfirmations());
+      assertNotNull(check.getIsInPool());
+      assertNotNull(check.getAmountReceived());
+      assertTrue(check.getAmountReceived().compareTo(BigInteger.valueOf(0)) > 0);
+      if (check.getIsInPool()) assertEquals(0, (int) check.getNumConfirmations());
+      else assertTrue(check.getNumConfirmations() > 0);
+    } else {
+      assertFalse(check.getIsGood());
+      assertNull(check.getNumConfirmations());
+      assertNull(check.getIsInPool());
+      assertNull(check.getAmountReceived());
+    }
   }
 }

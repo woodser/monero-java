@@ -412,12 +412,12 @@ public interface MoneroWallet {
   /**
    * Check a transaction in the blockchain with its secret key.
    * 
-   * @param id specifies the transaction to check
-   * @param key is the transaction's secret key
+   * @param txId specifies the transaction to check
+   * @param txKey is the transaction's secret key
    * @param address is the destination public address of the transaction
    * @return MoneroTxCheck is the result of the check
    */
-  public MoneroTxCheck checkTxKey(String id, String key, String address);
+  public MoneroTxCheck checkTxKey(String txId, String txKey, String address);
   
   /**
    * Get a transaction signature to prove it.

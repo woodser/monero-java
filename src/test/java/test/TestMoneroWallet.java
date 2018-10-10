@@ -38,6 +38,7 @@ import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTx.MoneroTxType;
+import monero.wallet.model.MoneroTxCheck;
 import monero.wallet.model.MoneroTxFilter;
 import monero.wallet.model.MoneroUri;
 import utils.PrintBalances;
@@ -542,31 +543,49 @@ public class TestMoneroWallet {
   public void testCheckTxKey() {
     int numTxs = 10;
     
-    // get outgoing txs
+    // get random txs with outgoing payments
     MoneroTxFilter filter = new MoneroTxFilter();
     filter.setFailed(false);
-    filter.setPending(false);
     filter.setIncoming(false);
     filter.setMempool(false);
-    List<MoneroTx> txs = wallet.getTxs(filter);
-    assertTrue("Wallet does not have enough outgoing transactions; run testSendToMultiple()", txs.size() >= numTxs);
-    
-    // get random txs to test
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    for (MoneroTx tx : wallet.getTxs(filter)) if (tx.getPayments() != null) txs.add(tx);
+    assertTrue("Wallet does not have enough outgoing transactions with payment data; run testSendToMultiple()", txs.size() >= numTxs);
     Collections.shuffle(txs);
     txs = txs.subList(0, numTxs);
     
-    // test key
+    // test good checks
     for (MoneroTx tx : txs) {
-      assertEquals(1, tx.getPayments().size());
       String key = wallet.getTxKey(tx.getId());
-      wallet.checkTxKey(tx.getId(), key, tx.getPayments().get(0).getDestination().getAddress());
+      for (MoneroPayment payment : tx.getPayments()) {
+        MoneroTxCheck check = wallet.checkTxKey(tx.getId(), key, payment.getDestination().getAddress());
+        assertTrue(check.getIsGood());
+        TestUtils.testTxCheck(check);
+      }
     }
     
-    // test invalid tx id
+    // test get tx key with invalid id
     try {
       wallet.getTxKey("invalid_tx_id");
       fail("Should throw exception for invalid key");
     } catch (MoneroRpcException e) { }
+    
+    // test check with invalid tx id
+    MoneroTx tx = txs.get(0);
+    String key = wallet.getTxKey(tx.getId());
+    MoneroTxCheck check = wallet.checkTxKey("invalid_tx_id", key, tx.getPayments().get(0).getDestination().getAddress());
+    assertFalse(check.getIsGood());
+    TestUtils.testTxCheck(check);
+    
+    // test check with invalid key
+    check = wallet.checkTxKey(tx.getId(), "invalid_tx_key", tx.getPayments().get(0).getDestination().getAddress());
+    assertFalse(check.getIsGood());
+    TestUtils.testTxCheck(check);
+    
+    // test check with invalid address
+    check = wallet.checkTxKey(tx.getId(), key, "invalid_tx_address");
+    assertFalse(check.getIsGood());
+    TestUtils.testTxCheck(check);
   }
   
   @Test
