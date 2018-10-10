@@ -539,7 +539,7 @@ public class TestMoneroWallet {
   
   
   @Test
-  public void testGetTxKey() {
+  public void testCheckTxKey() {
     int numTxs = 10;
     
     // get outgoing txs
@@ -570,22 +570,22 @@ public class TestMoneroWallet {
   }
   
   @Test
-  public void testGetTxProof() {
+  public void testCheckTxProof() {
     fail("Not implemented");
   }
   
   @Test
-  public void testGetSpendProof() {
+  public void testCheckSpendProof() {
     fail("Not implemented");
   }
   
   @Test
-  public void testGetReserveProofWallet() {
+  public void testCheckReserveProofWallet() {
     fail("Not implemented");
   }
   
   @Test
-  public void testGetReserveProofAccount() {
+  public void testCheckReserveProofAccount() {
     fail("Not implemented");
   }
 
