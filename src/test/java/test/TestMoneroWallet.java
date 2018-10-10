@@ -697,7 +697,7 @@ public class TestMoneroWallet {
       fail("Should have thrown exception");
     } catch (MoneroException e) {
       if (e instanceof MoneroRpcException) assertEquals(-1, (int) ((MoneroRpcException) e).getRpcCode());
-      else assertEquals("Signature is not good", e.getMessage()); // TODO (monero-wallet-rpc): should throw exception with error code if signature is not good?
+      else assertEquals("Signature is not good", e.getMessage()); // TODO (monero-wallet-rpc): should throw exception with error code if signature is not good?  why would error codes be different for different wrong but valid signatures?
     }
   }
   
