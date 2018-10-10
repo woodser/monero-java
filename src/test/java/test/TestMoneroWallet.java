@@ -540,7 +540,33 @@ public class TestMoneroWallet {
   
   @Test
   public void testGetTxKey() {
-    fail("Not implemented");
+    int numTxs = 10;
+    
+    // get outgoing txs
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setFailed(false);
+    filter.setPending(false);
+    filter.setIncoming(false);
+    filter.setMempool(false);
+    List<MoneroTx> txs = wallet.getTxs(filter);
+    assertTrue("Wallet does not have enough outgoing transactions; run testSendToMultiple()", txs.size() >= numTxs);
+    
+    // get random txs to test
+    Collections.shuffle(txs);
+    txs = txs.subList(0, numTxs);
+    
+    // test key
+    for (MoneroTx tx : txs) {
+      assertEquals(1, tx.getPayments().size());
+      String key = wallet.getTxKey(tx.getId());
+      wallet.checkTxKey(tx.getId(), key, tx.getPayments().get(0).getDestination().getAddress());
+    }
+    
+    // test invalid tx id
+    try {
+      wallet.getTxKey("invalid_tx_id");
+      fail("Should throw exception for invalid key");
+    } catch (MoneroRpcException e) { }
   }
   
   @Test
