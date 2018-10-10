@@ -4,6 +4,8 @@ import java.util.Collection;
 
 /**
  * Specifies filter options when querying transactions.
+ * 
+ * TODO: filter on NOT_RELAYED
  */
 public class MoneroTxFilter {
   
