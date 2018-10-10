@@ -766,14 +766,39 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return check;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getTxProof(String txId, String address, String message) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txid", txId);
+    params.put("address", address);
+    params.put("message", message);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_tx_proof", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (String) resultMap.get("signature");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroTxCheck checkTxProof(String txId, String address, String message, String signature) {
-    throw new RuntimeException("Not implemented");
+
+    // send request
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txid", txId);
+    params.put("address", address);
+    params.put("message", message);
+    params.put("signature", signature);
+    Map<String, Object> respMap = rpc.sendRpcRequest("check_tx_proof", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    
+    // interpret result
+    boolean isGood = (boolean) resultMap.get("good");
+    if (!isGood) throw new MoneroException("Signature is not good");  // TODO (monero-wallet-rpc): check_tx_key throws exception so this is made to be consistent
+    MoneroTxCheck check = new MoneroTxCheck();
+    check.setNumConfirmations(((BigInteger) resultMap.get("confirmations")).intValue());
+    check.setIsInPool((Boolean) resultMap.get("in_pool"));
+    check.setAmountReceived((BigInteger) resultMap.get("received"));
+    return check;
   }
 
   @Override
