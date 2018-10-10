@@ -9,8 +9,8 @@ import java.math.BigInteger;
  */
 public class MoneroSubaddress {
 
-  private MoneroAccount account;
-  private Integer index;
+  private Integer accountIndex;
+  private Integer subaddrIndex;
   private String label;
   private String address;
   private BigInteger balance;
@@ -23,24 +23,30 @@ public class MoneroSubaddress {
   }
   
   public MoneroSubaddress(String address) {
-    super();
-    this.address = address;
+    this(null, null, address);
   }
   
-  public MoneroAccount getAccount() {
-    return account;
+  public MoneroSubaddress(Integer accountIndex, Integer subaddrIndex, String address) {
+    super();
+    this.accountIndex = accountIndex;
+    this.subaddrIndex = subaddrIndex;
+    this.address = address;
   }
 
-  public void setAccount(MoneroAccount account) {
-    this.account = account;
+  public Integer getAccountIndex() {
+    return accountIndex;
   }
 
-  public Integer getIndex() {
-    return index;
+  public void setAccountIndex(Integer accountIndex) {
+    this.accountIndex = accountIndex;
   }
 
-  public void setIndex(Integer index) {
-    this.index = index;
+  public Integer getSubaddrIndex() {
+    return subaddrIndex;
+  }
+
+  public void setSubaddrIndex(Integer subaddrIndex) {
+    this.subaddrIndex = subaddrIndex;
   }
 
   public String getLabel() {
@@ -92,10 +98,10 @@ public class MoneroSubaddress {
   }
   
   public void merge(MoneroSubaddress subaddress) {
-    if (account == null) account = subaddress.getAccount();
-    else if (subaddress.getAccount() != null) account.merge(subaddress.getAccount());
-    if (index == null) index = subaddress.getIndex();
-    else if (subaddress.getIndex() != null) assertEquals(index, subaddress.getIndex());
+    if (accountIndex == null) accountIndex = subaddress.getAccountIndex();
+    else if (subaddress.getAccountIndex() != null) assertEquals(accountIndex, subaddress.getAccountIndex());
+    if (subaddrIndex == null) subaddrIndex = subaddress.getSubaddrIndex();
+    else if (subaddress.getSubaddrIndex() != null) assertEquals(subaddrIndex, subaddress.getSubaddrIndex());
     if (label == null) label = subaddress.getLabel();
     else if (subaddress.getLabel() != null) assertEquals(label, subaddress.getLabel());
     if (address == null) address = subaddress.getAddress();
@@ -110,7 +116,7 @@ public class MoneroSubaddress {
 
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("index: [" + account.getIndex() + ", " + index + "]\n");
+    sb.append("index: [" + accountIndex + ", " + subaddrIndex + "]\n");
     sb.append("label: " + label + "\n");
     sb.append("address: " + address + "\n");
     sb.append("balance: " + balance + "\n");
@@ -123,13 +129,13 @@ public class MoneroSubaddress {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((account == null) ? 0 : account.hashCode());
+    result = prime * result + ((accountIndex == null) ? 0 : accountIndex.hashCode());
     result = prime * result + ((address == null) ? 0 : address.hashCode());
     result = prime * result + ((balance == null) ? 0 : balance.hashCode());
-    result = prime * result + ((index == null) ? 0 : index.hashCode());
     result = prime * result + ((isUsed == null) ? 0 : isUsed.hashCode());
     result = prime * result + ((label == null) ? 0 : label.hashCode());
     result = prime * result + ((numUnspentOutputs == null) ? 0 : numUnspentOutputs.hashCode());
+    result = prime * result + ((subaddrIndex == null) ? 0 : subaddrIndex.hashCode());
     result = prime * result + ((unlockedBalance == null) ? 0 : unlockedBalance.hashCode());
     return result;
   }
@@ -140,18 +146,15 @@ public class MoneroSubaddress {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroSubaddress other = (MoneroSubaddress) obj;
-    if (account == null) {
-      if (other.account != null) return false;
-    } else if (!account.equals(other.account)) return false;
+    if (accountIndex == null) {
+      if (other.accountIndex != null) return false;
+    } else if (!accountIndex.equals(other.accountIndex)) return false;
     if (address == null) {
       if (other.address != null) return false;
     } else if (!address.equals(other.address)) return false;
     if (balance == null) {
       if (other.balance != null) return false;
     } else if (!balance.equals(other.balance)) return false;
-    if (index == null) {
-      if (other.index != null) return false;
-    } else if (!index.equals(other.index)) return false;
     if (isUsed == null) {
       if (other.isUsed != null) return false;
     } else if (!isUsed.equals(other.isUsed)) return false;
@@ -161,6 +164,9 @@ public class MoneroSubaddress {
     if (numUnspentOutputs == null) {
       if (other.numUnspentOutputs != null) return false;
     } else if (!numUnspentOutputs.equals(other.numUnspentOutputs)) return false;
+    if (subaddrIndex == null) {
+      if (other.subaddrIndex != null) return false;
+    } else if (!subaddrIndex.equals(other.subaddrIndex)) return false;
     if (unlockedBalance == null) {
       if (other.unlockedBalance != null) return false;
     } else if (!unlockedBalance.equals(other.unlockedBalance)) return false;

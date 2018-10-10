@@ -240,7 +240,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     for (Map<String, Object> address : addresses) {
       MoneroSubaddress subaddress = new MoneroSubaddress();
       subaddresses.add(subaddress);
-      subaddress.setIndex(((BigInteger) address.get("address_index")).intValue());
+      subaddress.setSubaddrIndex(((BigInteger) address.get("address_index")).intValue());
       subaddress.setLabel((String) address.get("label"));
       subaddress.setAddress((String) address.get("address"));
       subaddress.setIsUsed((boolean) address.get("used"));
@@ -259,7 +259,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       for (Map<String, Object> subaddressMap : subaddressMaps) {
         int subaddressIdx = ((BigInteger) subaddressMap.get("address_index")).intValue();
         for (MoneroSubaddress subaddress : subaddresses) {
-          if (subaddressIdx != subaddress.getIndex()) continue; // find matching subaddress
+          if (subaddressIdx != subaddress.getSubaddrIndex()) continue; // find matching subaddress
           assertEquals(subaddress.getAddress().toString(), (String) subaddressMap.get("address"));
           if (subaddressMap.containsKey("balance")) subaddress.setBalance((BigInteger) subaddressMap.get("balance"));
           if (subaddressMap.containsKey("unlocked_balance")) subaddress.setUnlockedBalance((BigInteger) subaddressMap.get("unlocked_balance"));
@@ -275,7 +275,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       addressCache.put(accountIdx, subaddressMap);
     }
     for (MoneroSubaddress subaddress : subaddresses) {
-      subaddressMap.put(subaddress.getIndex(), subaddress.getAddress());
+      subaddressMap.put(subaddress.getSubaddrIndex(), subaddress.getAddress());
     }
     
     // assign account
@@ -300,7 +300,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // build subaddress from response
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroSubaddress subaddress = new MoneroSubaddress();
-    subaddress.setIndex(((BigInteger) resultMap.get("address_index")).intValue());
+    subaddress.setSubaddrIndex(((BigInteger) resultMap.get("address_index")).intValue());
     subaddress.setAddress((String) resultMap.get("address"));
     subaddress.setLabel(label == null ? "" : label);
     subaddress.setBalance(BigInteger.valueOf(0));
@@ -396,7 +396,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (txMaps != null) {
           for (Map<String, Object> txMap : txMaps) {
             MoneroTx tx = txMapToTx(txMap, MoneroTxType.INCOMING, this);
-            String address = getAddress(accountIdx, tx.getPayments().get(0).getDestination().getIndex());
+            String address = getAddress(accountIdx, tx.getPayments().get(0).getDestination().getSubaddrIndex());
             tx.getPayments().get(0).getDestination().setAddress(address);
             addTx(txs, tx, false);
           }
@@ -458,12 +458,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setMixin(config.getMixin());
     tx.setPayments(config.getPayments());
     tx.setPaymentId(config.getPaymentId());
-    MoneroAccount account = new MoneroAccount();
-    account.setIndex(accountIdx);
-    MoneroSubaddress srcSubaddress = new MoneroSubaddress();
-    srcSubaddress.setAccount(account);
-    srcSubaddress.setIndex(0);    // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
-    srcSubaddress.setAddress(getAddress(accountIdx, 0));
+    MoneroSubaddress srcSubaddress = new MoneroSubaddress(accountIdx, 0, getAddress(accountIdx, 0));  // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
     tx.setSrcSubaddress(srcSubaddress);
     if (tx.getType() != MoneroTxType.NOT_RELAYED) {
       if (tx.getTimestamp() == null) tx.setTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
@@ -529,16 +524,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<MoneroTx> txs = txListMapToTxs(resultMap, accountIdx, type, this);
     
     // set final fields
-    MoneroAccount account = new MoneroAccount();
-    account.setIndex(accountIdx);
     for (MoneroTx tx : txs) {
       tx.setMixin(config.getMixin());
       tx.setPayments(config.getPayments());
       tx.setPaymentId(config.getPaymentId());
-      MoneroSubaddress srcSubaddress = new MoneroSubaddress();
-      srcSubaddress.setAccount(account);
-      srcSubaddress.setIndex(0);    // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
-      srcSubaddress.setAddress(getAddress(accountIdx, 0));
+      MoneroSubaddress srcSubaddress = new MoneroSubaddress(accountIdx, 0, getAddress(accountIdx, 0));  // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
       tx.setSrcSubaddress(srcSubaddress);
       if (tx.getType() != MoneroTxType.NOT_RELAYED) {
         if (tx.getTimestamp() == null) tx.setTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
@@ -610,7 +600,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       } else {
         for (MoneroSubaddress subaddress : getSubaddresses(accountIdx)) {
           if (subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) {
-            subaddressIndices.add(subaddress.getIndex());
+            subaddressIndices.add(subaddress.getSubaddrIndex());
           }
         }
       }
@@ -1100,16 +1090,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // initialize final fields
     if (tx.getPayments() != null) assertNull(payment);
     else if (payment != null) tx.setPayments(new ArrayList<MoneroPayment>(Arrays.asList(payment)));
-    MoneroAccount account = new MoneroAccount();
-    account.setIndex(accountIdx);
     if (isSend) {
       MoneroSubaddress subaddress = tx.getSrcSubaddress();
       if (subaddress == null) {
         subaddress = new MoneroSubaddress();
         tx.setSrcSubaddress(subaddress);
       }
-      subaddress.setAccount(account);
-      subaddress.setIndex(subaddressIdx);
+      subaddress.setAccountIndex(accountIdx);
+      subaddress.setSubaddrIndex(subaddressIdx);
     } else {
       assertNotNull(payment);
       assertEquals(1, tx.getPayments().size());
@@ -1118,8 +1106,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         destination = new MoneroSubaddress();
         payment.setDestination(destination);
       }
-      destination.setAccount(account);
-      destination.setIndex(subaddressIdx);
+      destination.setAccountIndex(accountIdx);
+      destination.setSubaddrIndex(subaddressIdx);
     }
     if (type == MoneroTxType.MEMPOOL && tx.getPayments() != null) {
       for (MoneroPayment aPayment : tx.getPayments()) aPayment.setIsSpent(false); // mempool payments are not spent
@@ -1158,16 +1146,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // build transactions
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    MoneroAccount account = new MoneroAccount();
-    account.setIndex(accountIdx);
     for (int i = 0; i < ids.size(); i++) {
       MoneroTx tx = new MoneroTx();
       txs.add(tx);
       int subaddressIdx = 0;  // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
-      MoneroSubaddress srcSubaddress = new MoneroSubaddress();
-      srcSubaddress.setAccount(account);
-      srcSubaddress.setIndex(subaddressIdx);
-      srcSubaddress.setAddress(wallet.getAddress(accountIdx, subaddressIdx));
+      MoneroSubaddress srcSubaddress = new MoneroSubaddress(accountIdx, subaddressIdx, wallet.getAddress(accountIdx, subaddressIdx)); // TODO: batch fetch addresses outside of this
       tx.setSrcSubaddress(srcSubaddress);
       tx.setTotalAmount(amounts.get(i));
       tx.setFee(fees.get(i));

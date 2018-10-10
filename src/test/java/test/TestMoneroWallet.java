@@ -192,7 +192,7 @@ public class TestMoneroWallet {
       assertFalse(subaddresses.isEmpty());
       Collection<Integer> subaddressIndices = new HashSet<Integer>();
       for (MoneroSubaddress subaddress : subaddresses) {
-        subaddressIndices.add(subaddress.getIndex());
+        subaddressIndices.add(subaddress.getSubaddrIndex());
       }
       assertEquals(subaddresses, wallet.getSubaddresses(account.getIndex(), subaddressIndices));
     }
@@ -206,7 +206,7 @@ public class TestMoneroWallet {
       List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
       assertFalse(subaddresses.isEmpty());
       for (int i = 0; i < subaddresses.size(); i++) {
-        MoneroSubaddress subaddress = wallet.getSubaddress(account.getIndex(), subaddresses.get(i).getIndex());
+        MoneroSubaddress subaddress = wallet.getSubaddress(account.getIndex(), subaddresses.get(i).getSubaddrIndex());
         assertEquals(subaddresses.get(i), subaddress);
       }
     }
@@ -217,7 +217,7 @@ public class TestMoneroWallet {
     assertEquals(wallet.getPrimaryAddress(), wallet.getSubaddress(0, 0).getAddress());
     for (MoneroAccount account : wallet.getAccounts(true)) {
       for (MoneroSubaddress subaddress : wallet.getSubaddresses(account.getIndex())) {
-        assertEquals(subaddress.getAddress(), wallet.getAddress(account.getIndex(), subaddress.getIndex()));
+        assertEquals(subaddress.getAddress(), wallet.getAddress(account.getIndex(), subaddress.getSubaddrIndex()));
       }
     }
   }
@@ -259,7 +259,7 @@ public class TestMoneroWallet {
       assertEquals(txs1.get(i), txs2.get(i));
       if (!MoneroUtils.isSendTx(txs1.get(i).getType())) {
         for (MoneroPayment payment : txs1.get(i).getPayments()) {
-         if (payment.getDestination().getAccount().getIndex() != 0 && payment.getDestination().getIndex() != 0) nonDefaultIncoming = true;
+         if (payment.getDestination().getAccountIndex() != 0 && payment.getDestination().getSubaddrIndex() != 0) nonDefaultIncoming = true;
         }
       }
     }
@@ -274,12 +274,12 @@ public class TestMoneroWallet {
       for (MoneroTx tx : txs) {
         TestUtils.testGetTx(tx, null, wallet);
         if (MoneroUtils.isSendTx(tx.getType())) {
-          assertEquals(account.getIndex(), tx.getSrcSubaddress().getAccount().getIndex());
+          assertEquals(account.getIndex(), tx.getSrcSubaddress().getAccountIndex());
         } else {
           for (MoneroPayment payment : tx.getPayments()) {
             MoneroSubaddress subaddress = payment.getDestination();
-            assertEquals(account.getIndex(), subaddress.getAccount().getIndex());
-            if (subaddress.getAccount().getIndex() != 0 && subaddress.getIndex() != 0) nonDefaultIncoming = true;
+            assertEquals(account.getIndex(), subaddress.getAccountIndex());
+            if (subaddress.getAccountIndex() != 0 && subaddress.getSubaddrIndex() != 0) nonDefaultIncoming = true;
           }
         }
       }
@@ -296,14 +296,14 @@ public class TestMoneroWallet {
         for (MoneroTx tx : wallet.getTxs(accountIdx, subaddressIdx)) {
           TestUtils.testGetTx(tx, null, wallet);
           if (MoneroUtils.isSendTx(tx.getType()))  {
-            assertEquals(accountIdx, (int) tx.getSrcSubaddress().getAccount().getIndex());
+            assertEquals(accountIdx, (int) tx.getSrcSubaddress().getAccountIndex());
           } else {
             for (MoneroPayment payment : tx.getPayments()) {
               MoneroSubaddress subaddress = payment.getDestination();
               
-              assertEquals(accountIdx, (int) subaddress.getAccount().getIndex());
-              assertEquals(subaddressIdx, (int) subaddress.getIndex());
-              if (subaddress.getAccount().getIndex() != 0 && subaddress.getIndex() != 0) nonDefaultIncoming = true;
+              assertEquals(accountIdx, (int) subaddress.getAccountIndex());
+              assertEquals(subaddressIdx, (int) subaddress.getSubaddrIndex());
+              if (subaddress.getAccountIndex() != 0 && subaddress.getSubaddrIndex() != 0) nonDefaultIncoming = true;
             }
           }
         }
@@ -475,7 +475,7 @@ public class TestMoneroWallet {
       for (MoneroSubaddress subaddress : subaddresses) {
         MoneroTxFilter filter = new MoneroTxFilter();
         filter.setAccountIndex(account.getIndex());
-        filter.setSubaddressIndices(Arrays.asList(subaddress.getIndex()));
+        filter.setSubaddressIndices(Arrays.asList(subaddress.getSubaddrIndex()));
         txs = wallet.getTxs(filter);
         
         // test that tx amounts add up to subaddress balance
@@ -489,7 +489,7 @@ public class TestMoneroWallet {
             }
           }
         }
-        assertEquals(wallet.getSubaddress(account.getIndex(), subaddress.getIndex()).getBalance(), balance);
+        assertEquals(wallet.getSubaddress(account.getIndex(), subaddress.getSubaddrIndex()).getBalance(), balance);
       }
     }
     
