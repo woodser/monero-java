@@ -7,18 +7,9 @@ import java.math.BigInteger;
  */
 public class MoneroTxCheck {
 
-  public Boolean isGood;
   public Boolean isInPool;
   public Integer numConfirmations;
   public BigInteger amountReceived;
-  
-  public Boolean getIsGood() {
-    return isGood;
-  }
-  
-  public void setIsGood(Boolean isGood) {
-    this.isGood = isGood;
-  }
   
   public Boolean getIsInPool() {
     return isInPool;
