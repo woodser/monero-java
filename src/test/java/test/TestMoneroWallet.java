@@ -541,7 +541,7 @@ public class TestMoneroWallet {
   
   
   @Test
-  public void testCheckTxKey() {
+  public void testTxKeyProof() {
     Integer maxTxs = 100;  // maximum number of transactions to test or test all if null    
     
     // get random txs with outgoing payments
@@ -592,7 +592,7 @@ public class TestMoneroWallet {
   }
   
   @Test
-  public void testCheckTxProof() {
+  public void testTxProof() {
     Integer maxTxs = 100;  // maximum number of transactions to test or test all if null
     
     // get random txs with outgoing payments
@@ -657,17 +657,17 @@ public class TestMoneroWallet {
   }
   
   @Test
-  public void testCheckSpendProof() {
+  public void testSpendProof() {
     fail("Not implemented");
   }
   
   @Test
-  public void testCheckReserveProofWallet() {
+  public void testReserveProofWallet() {
     fail("Not implemented");
   }
   
   @Test
-  public void testCheckReserveProofAccount() {
+  public void testReserveProofAccount() {
     fail("Not implemented");
   }
 
