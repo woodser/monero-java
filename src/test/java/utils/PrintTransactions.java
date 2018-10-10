@@ -17,9 +17,9 @@ public class PrintTransactions {
     MoneroWallet wallet = TestUtils.getWallet();
     MoneroTxFilter filter = new MoneroTxFilter();
 //    filter.setOutgoing(false);
-//    filter.setIncoming(false);
+    filter.setIncoming(false);
     Set<String> ids = new HashSet<String>();
-    ids.add("727de264a4a3278b3bab5cf6c4ccfab2f595543d70da907e924025c3082882ee");
+    ids.add("e9699640fb3253f21c6a3b247b13d713b3dd5f89f3c2ab8b771748c4d562e406");
     filter.setTxIds(ids);
     List<MoneroTx> txs = wallet.getTxs(filter);
     for (MoneroTx tx : txs) {

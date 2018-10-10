@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 
+import common.utils.StringUtils;
+
 /**
  * Represents a payment on the Monero network to an address.
  * 
@@ -80,6 +82,20 @@ public class MoneroPayment {
     else if (payment.getIsSpent() != null) assertEquals("Is spents", isSpent, payment.getIsSpent());
     if (keyImage == null) keyImage = payment.getKeyImage();
     else if (payment.getKeyImage() != null) assertEquals("Key images", keyImage, payment.getKeyImage());
+  }
+  
+  public String toString() {
+    return toString(0);
+  }
+  
+  public String toString(int offset) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(StringUtils.getTabs(offset) + "Destination:\n");
+    sb.append(getDestination().toString(offset + 1) + "\n");
+    sb.append(StringUtils.getTabs(offset) + "Amount: " + getAmount() + "\n");
+    sb.append(StringUtils.getTabs(offset) + "Is spent: " + getIsSpent() + "\n");
+    sb.append(StringUtils.getTabs(offset) + "Key image: " + getKeyImage());
+    return sb.toString();
   }
 
   @Override
