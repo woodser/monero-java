@@ -18,6 +18,7 @@ public class MoneroTxFilter {
   private Collection<Integer> subaddressIndices;
   private Collection<String> txIds;
   private Collection<String> paymentIds;
+  private Boolean hasPayments;  // null means tx will not be filtered regardless of having payments
   
   public MoneroTxFilter() {
     incoming = true;
@@ -31,9 +32,10 @@ public class MoneroTxFilter {
     subaddressIndices = null;
     txIds = null;
     paymentIds = null;
+    hasPayments = null;
   }
   
-  public MoneroTxFilter(boolean incoming, boolean outgoing, boolean pending, boolean failed, boolean mempool, Integer minHeight, Integer maxHeight, Integer accountIdx, Collection<Integer> subaddressIndices, Collection<String> txIds, Collection<String> paymentIds) {
+  public MoneroTxFilter(boolean incoming, boolean outgoing, boolean pending, boolean failed, boolean mempool, Integer minHeight, Integer maxHeight, Integer accountIdx, Collection<Integer> subaddressIndices, Collection<String> txIds, Collection<String> paymentIds, Boolean hasPayments) {
     super();
     this.incoming = incoming;
     this.outgoing = outgoing;
@@ -46,6 +48,7 @@ public class MoneroTxFilter {
     this.subaddressIndices = subaddressIndices;
     this.txIds = txIds;
     this.paymentIds = paymentIds;
+    this.hasPayments = hasPayments;
   }
 
   public boolean isIncoming() {
@@ -134,5 +137,13 @@ public class MoneroTxFilter {
 
   public void setPaymentIds(Collection<String> paymentIds) {
     this.paymentIds = paymentIds;
+  }
+
+  public Boolean getHasPayments() {
+    return hasPayments;
+  }
+
+  public void setHasPayments(Boolean hasPayments) {
+    this.hasPayments = hasPayments;
   }
 }
