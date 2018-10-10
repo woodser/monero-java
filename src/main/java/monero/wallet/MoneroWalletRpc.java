@@ -762,6 +762,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // interpret result
     MoneroTxCheck check = new MoneroTxCheck();
+    check.setIsGood(true);
     check.setNumConfirmations(((BigInteger) resultMap.get("confirmations")).intValue());
     check.setIsInPool((Boolean) resultMap.get("in_pool"));
     check.setAmountReceived((BigInteger) resultMap.get("received"));
@@ -795,22 +796,37 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // interpret result
     boolean isGood = (boolean) resultMap.get("good");
-    if (!isGood) throw new MoneroException("Signature is not good");  // TODO (monero-wallet-rpc): check_tx_key throws exception so this throws exception to be made consistent
     MoneroTxCheck check = new MoneroTxCheck();
-    check.setNumConfirmations(((BigInteger) resultMap.get("confirmations")).intValue());
-    check.setIsInPool((Boolean) resultMap.get("in_pool"));
-    check.setAmountReceived((BigInteger) resultMap.get("received"));
+    check.setIsGood(isGood);
+    if (isGood) {
+      check.setNumConfirmations(((BigInteger) resultMap.get("confirmations")).intValue());
+      check.setIsInPool((Boolean) resultMap.get("in_pool"));
+      check.setAmountReceived((BigInteger) resultMap.get("received"));
+    }
     return check;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getSpendProof(String txId, String message) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txid", txId);
+    params.put("message", message);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_spend_proof", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (String) resultMap.get("signature");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public boolean checkSpendProof(String txId, String message, String signature) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txid", txId);
+    params.put("message", message);
+    params.put("signature", signature);
+    Map<String, Object> respMap = rpc.sendRpcRequest("check_spend_proof", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (boolean) resultMap.get("good");
   }
 
   @Override

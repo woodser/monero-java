@@ -1,4 +1,5 @@
 v0.13.0
+embed payment destination info directly in payment?
 new api calls
 payments are comprised of outputs
 don't call accounts / subaddresses that are unused
