@@ -416,6 +416,6 @@ public class TestUtils {
     assertNotNull(tx.getId(), check.getAmountReceived());
     assertTrue(tx.getId(), check.getAmountReceived().compareTo(BigInteger.valueOf(0)) >= 0);
     if (check.getIsInPool()) assertEquals(tx.getId(), 0, (int) check.getNumConfirmations());
-    else assertTrue(tx.getId(), check.getNumConfirmations() > 0);
+    else assertTrue(tx.getId(), check.getNumConfirmations() > 0); // TODO (monero-wall-rpc) this fails (confirmations is 0) for (at least one) transaction that has 1 confirmation on testCheckTxKey()
   }
 }
