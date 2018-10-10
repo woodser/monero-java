@@ -795,7 +795,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // interpret result
     boolean isGood = (boolean) resultMap.get("good");
-    if (!isGood) throw new MoneroException("Signature is not good");  // TODO (monero-wallet-rpc): check_tx_key throws exception so this is made to be consistent
+    if (!isGood) throw new MoneroException("Signature is not good");  // TODO (monero-wallet-rpc): check_tx_key throws exception so this throws exception to be made consistent
     MoneroTxCheck check = new MoneroTxCheck();
     check.setNumConfirmations(((BigInteger) resultMap.get("confirmations")).intValue());
     check.setIsInPool((Boolean) resultMap.get("in_pool"));
