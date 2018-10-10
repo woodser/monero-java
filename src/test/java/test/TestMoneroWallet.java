@@ -696,7 +696,8 @@ public class TestMoneroWallet {
       wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the right message", signature);
       fail("Should have thrown exception");
     } catch (MoneroException e) {
-      assertEquals("Signature is not good", e.getMessage());
+      if (e instanceof MoneroRpcException) assertEquals(-1, (int) ((MoneroRpcException) e).getRpcCode());
+      else assertEquals("Signature is not good", e.getMessage()); // TODO (monero-wallet-rpc): should throw exception with error code if signature is not good?
     }
   }
   
