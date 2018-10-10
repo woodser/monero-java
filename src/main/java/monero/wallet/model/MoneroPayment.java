@@ -34,8 +34,8 @@ public class MoneroPayment {
     return destination;
   }
 
-  public void setDestination(MoneroSubaddress subaddress) {
-    this.destination = subaddress;
+  public void setDestination(MoneroSubaddress destination) {
+    this.destination = destination;
   }
 
   public BigInteger getAmount() {
