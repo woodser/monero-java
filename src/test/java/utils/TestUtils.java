@@ -225,7 +225,7 @@ public class TestUtils {
       if (tx.getType() == MoneroTxType.INCOMING) {
         assertNull(tx.getId(), tx.getKey());
         if (tx.getHeight() == null) LOGGER.warn("Incoming transaction is missing height: " + tx.getId());
-        if (tx.getNumConfirmations() == null) LOGGER.warn("Incoming transaction is missing confirmations: " + tx.getNumConfirmations());
+        if (tx.getNumConfirmations() == null) LOGGER.warn("Incoming transaction is missing confirmations: " + tx.getId());
         else assertTrue(tx.getId(), tx.getNumConfirmations() > 0);
         assertNull(tx.getId(), tx.getNumEstimatedBlocksUntilConfirmed());
       } else {

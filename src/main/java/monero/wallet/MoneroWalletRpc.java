@@ -240,6 +240,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     for (Map<String, Object> address : addresses) {
       MoneroSubaddress subaddress = new MoneroSubaddress();
       subaddresses.add(subaddress);
+      subaddress.setAccountIndex(accountIdx);
       subaddress.setSubaddrIndex(((BigInteger) address.get("address_index")).intValue());
       subaddress.setLabel((String) address.get("label"));
       subaddress.setAddress((String) address.get("address"));
@@ -278,11 +279,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       subaddressMap.put(subaddress.getSubaddrIndex(), subaddress.getAddress());
     }
     
-    // assign account
-    MoneroAccount account = new MoneroAccount();
-    account.setIndex(accountIdx);
-    account.setSubaddresses(subaddresses);
-    
     // return results
     return subaddresses;
   }
@@ -300,6 +296,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // build subaddress from response
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroSubaddress subaddress = new MoneroSubaddress();
+    subaddress.setAccountIndex(accountIdx);
     subaddress.setSubaddrIndex(((BigInteger) resultMap.get("address_index")).intValue());
     subaddress.setAddress((String) resultMap.get("address"));
     subaddress.setLabel(label == null ? "" : label);
