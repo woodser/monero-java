@@ -310,15 +310,13 @@ public class MoneroTx {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("ID: " + id + "\n");
-    sb.append("Source subaddress: " + srcSubaddress + "\n");
+    sb.append("Source subaddress: " + (srcSubaddress == null ? "null" : "\n" + srcSubaddress.toString(1) + "\n"));
     sb.append("Total amount: " + totalAmount + "\n");
     if (payments != null) {
       sb.append("Payments:\n");
       for (int i = 0; i < payments.size(); i++) {
         sb.append("\t" + (i + 1) + ":\n");
-        sb.append("\t\tDestination: " + payments.get(i).getDestination());
-        sb.append("\t\tAmount: " + payments.get(i).getAmount() + "\n");
-        sb.append("\t\tIs spent: " + payments.get(i).getIsSpent() + "\n");
+        sb.append(payments.get(i).toString(2) + "\n");
       }
     } else {
       sb.append("Payments: null\n");
@@ -337,7 +335,7 @@ public class MoneroTx {
     sb.append("Blob: " + blob + "\n");
     sb.append("Metadata: " + metadata + "\n");
     sb.append("Num confirmations: " + numConfirmations + "\n");
-    sb.append("Num estimated blocks until confirmed: " + numEstimatedBlocksUntilConfirmed + "\n");
+    sb.append("Num estimated blocks until confirmed: " + numEstimatedBlocksUntilConfirmed);
     return sb.toString();
   }
 

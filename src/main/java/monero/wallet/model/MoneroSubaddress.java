@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
 
+import common.utils.StringUtils;
+
 /**
  * Monero subaddress model.
  */
@@ -115,13 +117,17 @@ public class MoneroSubaddress {
   }
 
   public String toString() {
+    return toString(0);
+  }
+  
+  public String toString(int offset) {
     StringBuilder sb = new StringBuilder();
-    sb.append("index: [" + accountIndex + ", " + subaddrIndex + "]\n");
-    sb.append("label: " + label + "\n");
-    sb.append("address: " + address + "\n");
-    sb.append("balance: " + balance + "\n");
-    sb.append("unlockedBalance: " + unlockedBalance + "\n");
-    sb.append("numUnspentOutputs: " + numUnspentOutputs + "\n");
+    sb.append(StringUtils.getTabs(offset) + "address: " + address + "\n");
+    sb.append(StringUtils.getTabs(offset) + "index: [" + accountIndex + ", " + subaddrIndex + "]\n");
+    sb.append(StringUtils.getTabs(offset) + "label: " + label + "\n");
+    sb.append(StringUtils.getTabs(offset) + "balance: " + balance + "\n");
+    sb.append(StringUtils.getTabs(offset) + "unlockedBalance: " + unlockedBalance + "\n");
+    sb.append(StringUtils.getTabs(offset) + "numUnspentOutputs: " + numUnspentOutputs);
     return sb.toString();
   }
 

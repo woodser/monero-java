@@ -542,7 +542,6 @@ public class TestMoneroWallet {
   
   @Test
   public void testCheckTxKey() {
-    int numTxs = 10;
     
     // get random txs with outgoing payments
     MoneroTxFilter filter = new MoneroTxFilter();
@@ -551,16 +550,16 @@ public class TestMoneroWallet {
     filter.setMempool(false);
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     for (MoneroTx tx : wallet.getTxs(filter)) if (tx.getPayments() != null) txs.add(tx);
-    assertTrue("Wallet does not have enough outgoing transactions with payment data; run testSendToMultiple()", txs.size() >= numTxs);
+    assertFalse("Wallet does not have outgoing transactions with payment data; run testSendToMultiple()", txs.isEmpty());
     Collections.shuffle(txs);
-    txs = txs.subList(0, numTxs);
+    txs = txs.subList(0, txs.size());
     
     // test good checks
     for (MoneroTx tx : txs) {
       String key = wallet.getTxKey(tx.getId());
       for (MoneroPayment payment : tx.getPayments()) {
         MoneroTxCheck check = wallet.checkTxKey(tx.getId(), key, payment.getDestination().getAddress());
-        TestUtils.testTxCheck(check);
+        TestUtils.testTxCheck(tx, check);
       }
     }
     
@@ -619,7 +618,7 @@ public class TestMoneroWallet {
       for (MoneroPayment payment : tx.getPayments()) {
         String signature = wallet.getTxProof(tx.getId(), payment.getDestination().getAddress(), "This transaction definitely happened.");
         MoneroTxCheck check = wallet.checkTxProof(tx.getId(), payment.getDestination().getAddress(), "This transaction definitely happened.", signature);
-        TestUtils.testTxCheck(check);
+        TestUtils.testTxCheck(tx, check);
       }
     }
     
@@ -627,7 +626,7 @@ public class TestMoneroWallet {
     MoneroTx tx = txs.get(0);
     String signature = wallet.getTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), null);
     MoneroTxCheck check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), null, signature);
-    TestUtils.testTxCheck(check);
+    TestUtils.testTxCheck(tx, check);
     
     // test get tx key with invalid id
     try {

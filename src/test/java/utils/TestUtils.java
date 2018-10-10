@@ -410,12 +410,12 @@ public class TestUtils {
     return null;
   }
   
-  public static void testTxCheck(MoneroTxCheck check) {
-    assertNotNull(check.getNumConfirmations());
-    assertNotNull(check.getIsInPool());
-    assertNotNull(check.getAmountReceived());
-    assertTrue(check.getAmountReceived().compareTo(BigInteger.valueOf(0)) > 0);
-    if (check.getIsInPool()) assertEquals(0, (int) check.getNumConfirmations());
-    else assertTrue(check.getNumConfirmations() > 0);
+  public static void testTxCheck(MoneroTx tx, MoneroTxCheck check) {
+    assertNotNull(tx.getId(), check.getNumConfirmations());
+    assertNotNull(tx.getId(), check.getIsInPool());
+    assertNotNull(tx.getId(), check.getAmountReceived());
+    assertTrue(tx.getId(), check.getAmountReceived().compareTo(BigInteger.valueOf(0)) >= 0);
+    if (check.getIsInPool()) assertEquals(tx.getId(), 0, (int) check.getNumConfirmations());
+    else assertTrue(tx.getId(), check.getNumConfirmations() > 0);
   }
 }
