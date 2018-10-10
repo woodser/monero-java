@@ -32,7 +32,7 @@ public class PrintBalances {
       add(pairs, "UNLOCKED", account.getUnlockedBalance());
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         add(pairs, "ACCOUNT", account.getIndex());
-        add(pairs, "SUBADDRESS", subaddress.getIndex());
+        add(pairs, "SUBADDRESS", subaddress.getSubaddrIndex());
         add(pairs, "LABEL", subaddress.getLabel());
         add(pairs, "ADDRESS", subaddress.getAddress());
         add(pairs, "BALANCE", subaddress.getBalance());

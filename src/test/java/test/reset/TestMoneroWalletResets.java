@@ -137,7 +137,7 @@ public class TestMoneroWalletResets {
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       MoneroTxConfig config = new MoneroTxConfig(destionation, null, null);
-      config.setAccountIndex(tx.getSrcSubaddress().getAccount().getIndex());  // TODO: this is to game testSendTx(); should not assert account equivalency there?
+      config.setAccountIndex(tx.getSrcSubaddress().getAccountIndex());  // TODO: this is to game testSendTx(); should not assert account equivalency there?
       TestUtils.testSendTx(tx, config, true, false, wallet);
     }
     
@@ -167,7 +167,7 @@ public class TestMoneroWalletResets {
             subaddressIndices = new ArrayList<Integer>();
             balances.put(account.getIndex(), subaddressIndices);
           }
-          subaddressIndices.add(subaddress.getIndex());
+          subaddressIndices.add(subaddress.getSubaddrIndex());
         }
         if (subaddress.getUnlockedBalance().longValue() > 0) {
           List<Integer> subaddressIndices = unlockedBalances.get(account.getIndex());
@@ -175,7 +175,7 @@ public class TestMoneroWalletResets {
             subaddressIndices = new ArrayList<Integer>();
             unlockedBalances.put(account.getIndex(), subaddressIndices);
           }
-          subaddressIndices.add(subaddress.getIndex());
+          subaddressIndices.add(subaddress.getSubaddrIndex());
         }
       }
     }

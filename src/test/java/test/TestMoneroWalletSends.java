@@ -108,9 +108,9 @@ public class TestMoneroWalletSends {
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     MoneroTxConfig config = new MoneroTxConfig(address, paymentId, sendAmount, TestUtils.MIXIN);
     config.setAccountIndex(fromAccount.getIndex());
-    config.setSubaddressIndices(Arrays.asList(fromSubaddress.getIndex()));
+    config.setSubaddressIndices(Arrays.asList(fromSubaddress.getSubaddrIndex()));
     config.setDoNotRelay(doNotRelay);
-    System.out.println("Subaddress           : [" + fromAccount.getIndex() + ", " + fromSubaddress.getIndex() + "]");
+    System.out.println("Subaddress           : [" + fromAccount.getIndex() + ", " + fromSubaddress.getSubaddrIndex() + "]");
     System.out.println("Max fee              : " + TestUtils.MAX_FEE);
     System.out.println("Send amount          : " + sendAmount);
     System.out.println("From balance         : " + balanceBefore);
@@ -135,7 +135,7 @@ public class TestMoneroWalletSends {
     
     // test that balance and unlocked balance decreased
     // TODO: test that other balances did not decrease
-    MoneroSubaddress subaddress = wallet.getSubaddress(fromAccount.getIndex(), fromSubaddress.getIndex());
+    MoneroSubaddress subaddress = wallet.getSubaddress(fromAccount.getIndex(), fromSubaddress.getSubaddrIndex());
     assertTrue(subaddress.getBalance().compareTo(balanceBefore) < 0);
     assertTrue(subaddress.getUnlockedBalance().compareTo(unlockedBalanceBefore) < 0);
     
@@ -143,8 +143,8 @@ public class TestMoneroWalletSends {
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       TestUtils.testSendTx(tx, config, !canSplit, !canSplit, wallet);
-      assertEquals(fromAccount.getIndex(), tx.getSrcSubaddress().getAccount().getIndex());
-      assertEquals(0, (int) tx.getSrcSubaddress().getIndex()); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
+      assertEquals(fromAccount.getIndex(), tx.getSrcSubaddress().getAccountIndex());
+      assertEquals(0, (int) tx.getSrcSubaddress().getSubaddrIndex()); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
       assertEquals(sendAmount, tx.getTotalAmount());
       
       // test tx payments
@@ -154,9 +154,8 @@ public class TestMoneroWalletSends {
           assertTrue(tx == payment.getTx());
           assertNotNull(payment.getDestination());
           assertEquals(address, payment.getDestination().getAddress());
-          assertNull(payment.getDestination().getAccount());
-          assertNull(payment.getDestination().getAccount().getIndex());
-          assertNull(payment.getDestination().getIndex());
+          assertNull(payment.getDestination().getAccountIndex());
+          assertNull(payment.getDestination().getSubaddrIndex());
           assertEquals(sendAmount, payment.getAmount());
           assertNull(payment.getIsSpent());
         }
@@ -320,7 +319,7 @@ public class TestMoneroWalletSends {
     // determine the indices of the first two subaddresses with unlocked balances
     List<Integer> fromSubaddressIndices = new ArrayList<Integer>();
     for (int i = 0; i < NUM_SUBADDRESSES; i++) {
-      fromSubaddressIndices.add(unlockedSubaddresses.get(i).getIndex());
+      fromSubaddressIndices.add(unlockedSubaddresses.get(i).getSubaddrIndex());
     }
     
     // determine the amount to send (slightly less than the sum to send from)
