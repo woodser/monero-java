@@ -313,6 +313,41 @@ public class TestMoneroWallet {
   }
   
   @Test
+  public void testGetTxsHasPayments() {
+    
+    // filter on having payments
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setAccountIndex(0);
+    filter.setHasPayments(true);
+    List<MoneroTx> txs = wallet.getTxs(filter);
+    assertFalse(txs.isEmpty());
+    for (MoneroTx tx : wallet.getTxs(filter)) {
+      assertNotNull(tx.getPayments());
+      assertFalse(tx.getPayments().isEmpty());
+    }
+    
+    // filter on not having payments
+    filter.setHasPayments(false);
+    txs = wallet.getTxs(filter);
+    assertFalse(txs.isEmpty());
+    for (MoneroTx tx : wallet.getTxs(filter)) {
+      assertNull(tx.getPayments());
+    }
+    
+    // filter on no preference
+    filter.setHasPayments(null);
+    txs = wallet.getTxs(filter);
+    boolean foundPayments = false;
+    boolean foundNoPayments = false;
+    for (MoneroTx tx : wallet.getTxs(filter)) {
+      if (tx.getPayments() != null && !tx.getPayments().isEmpty()) foundPayments = true;
+      if (tx.getPayments() == null) foundNoPayments = true;
+    }
+    assertTrue(foundPayments);
+    assertTrue(foundNoPayments);
+  }
+  
+  @Test
   public void testGetTxsIncomingSumToBalance() {
     
     // test each account balance
@@ -419,14 +454,14 @@ public class TestMoneroWallet {
     }
     
     // test getting incoming transactions
-    List<MoneroTx> txs = wallet.getTxs(new MoneroTxFilter(true, false, false, false, false, null, null, null, null, null, null));
+    List<MoneroTx> txs = wallet.getTxs(new MoneroTxFilter(true, false, false, false, false, null, null, null, null, null, null, null));
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       assertEquals(MoneroTxType.INCOMING, tx.getType());
     }
     
     // test getting outgoing transactions
-    txs = wallet.getTxs(new MoneroTxFilter(false, true, false, false, false, null, null, null, null, null, null));
+    txs = wallet.getTxs(new MoneroTxFilter(false, true, false, false, false, null, null, null, null, null, null, null));
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       assertEquals(MoneroTxType.OUTGOING, tx.getType());

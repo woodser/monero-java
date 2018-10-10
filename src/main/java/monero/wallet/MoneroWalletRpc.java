@@ -408,6 +408,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (filter.getTxIds() != null && !filter.getTxIds().contains(tx.getId())) toRemoves.add(tx);
       else if (filter.getMinHeight() != null && (tx.getHeight() == null || tx.getHeight() < filter.getMinHeight())) toRemoves.add(tx);
       else if (filter.getMaxHeight() != null && (tx.getHeight() == null || tx.getHeight() > filter.getMaxHeight())) toRemoves.add(tx);
+      else if (Boolean.TRUE.equals(filter.getHasPayments()) && (tx.getPayments() == null || tx.getPayments().isEmpty())) toRemoves.add(tx);
+      else if (Boolean.FALSE.equals(filter.getHasPayments()) && tx.getPayments() != null && !tx.getPayments().isEmpty()) toRemoves.add(tx);
     }
     txs.removeAll(toRemoves);
     return txs;
