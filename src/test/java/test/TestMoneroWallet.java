@@ -55,6 +55,7 @@ public class TestMoneroWallet {
   private static MoneroWallet wallet;
   private static final String SAMPLE_ADDRESS = "58bf9MfrBNDXSqCzK6snxSXaJHehLTnvx3BdS6qMkYAsW8P5kvRVq8ePbGQ7mfAeYfC7QELPhpQBe2C9bqCrqeesUsifaWw";
   private static List<MoneroTx> txCache;
+  private static Integer MAX_TX_PROOFS = 50;   // maximum number of transactions to check for each proof, null to check all
 
   @BeforeClass
   public static void setup() throws Exception {
@@ -394,7 +395,7 @@ public class TestMoneroWallet {
   public void testGetTxsByIds() {
     
     // get random transactions
-    List<MoneroTx> txs = getRandomTransactions(5);
+    List<MoneroTx> txs = getRandomTransactions(null, 1, 5);
     
     // fetch transactions by id
     List<String> txIds = new ArrayList<String>();
@@ -547,7 +548,7 @@ public class TestMoneroWallet {
   
   @Test
   public void testGetTxNote() {
-    List<MoneroTx> txs = getRandomTransactions(5);
+    List<MoneroTx> txs = getRandomTransactions(null, 1, 5);
     
     // set notes
     for (int i = 0; i < txs.size(); i++) {
@@ -579,8 +580,12 @@ public class TestMoneroWallet {
   public void testTxKeyProof() {
     
     // get random txs with outgoing payments
-    Integer maxTxs = 100;  // maximum number of transactions to test or test all if null
-    List<MoneroTx> txs = getRandomTransactionsOutboundWithPayments(maxTxs);
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setIncoming(false);
+    filter.setMempool(false);
+    filter.setFailed(false);
+    filter.setHasPayments(true);
+    List<MoneroTx> txs = getRandomTransactions(filter, 1, MAX_TX_PROOFS);
     
     // test good checks
     for (MoneroTx tx : txs) {
@@ -630,8 +635,12 @@ public class TestMoneroWallet {
   public void testTxProof() {
     
     // get random txs with outgoing payments
-    Integer maxTxs = 100;  // maximum number of transactions to test or test all if null
-    List<MoneroTx> txs = getRandomTransactionsOutboundWithPayments(maxTxs);
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setIncoming(false);
+    filter.setMempool(false);
+    filter.setFailed(false);
+    filter.setHasPayments(true);
+    List<MoneroTx> txs = getRandomTransactions(filter, 1, MAX_TX_PROOFS);
     
     // test good checks with messages
     for (MoneroTx tx : txs) {
@@ -686,8 +695,8 @@ public class TestMoneroWallet {
     try {
       wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the right message", signature);
       fail("Should have thrown exception");
-    } catch (MoneroRpcException e) {
-      assertEquals(-1, (int) e.getRpcCode());
+    } catch (MoneroException e) {
+      assertEquals("Signature is not good", e.getMessage());
     }
   }
   
@@ -695,65 +704,14 @@ public class TestMoneroWallet {
   public void testSpendProof() {
     
     // get random txs with outgoing payments
-    Integer maxTxs = 100;  // maximum number of transactions to test or test all if null
-    List<MoneroTx> txs = getRandomTransactionsOutbound(maxTxs);
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setIncoming(false);
+    filter.setMempool(false);
+    filter.setFailed(false);
+    filter.setHasPayments(true);
+    List<MoneroTx> txs = getRandomTransactions(filter, 1, MAX_TX_PROOFS);
     
-    // test good checks with messages
-    for (MoneroTx tx : txs) {
-      for (MoneroPayment payment : tx.getPayments()) {
-        String signature = wallet.getTxProof(tx.getId(), payment.getDestination().getAddress(), "This transaction definitely happened.");
-        MoneroTxCheck check = wallet.checkTxProof(tx.getId(), payment.getDestination().getAddress(), "This transaction definitely happened.", signature);
-        TestUtils.testTxCheck(tx, check);
-      }
-    }
-    
-    // test good check without message
-    MoneroTx tx = txs.get(0);
-    String signature = wallet.getTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), null);
-    MoneroTxCheck check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), null, signature);
-    TestUtils.testTxCheck(tx, check);
-    
-    // test get tx key with invalid id
-    try {
-      wallet.getTxProof("invalid_tx_id", tx.getPayments().get(0).getDestination().getAddress(), null);
-      fail("Should throw exception for invalid key");
-    } catch (MoneroRpcException e) {
-      assertEquals(-8, (int) e.getRpcCode());
-    }
-    
-    // test check with invalid tx id
-    try {
-      wallet.checkTxProof("invalid_tx_id", tx.getPayments().get(0).getDestination().getAddress(), null, signature);
-      fail("Should have thrown exception");
-    } catch (MoneroRpcException e) {
-      assertEquals(-8, (int) e.getRpcCode());
-    }
-    
-    // test check with invalid address
-    try {
-      wallet.checkTxProof(tx.getId(), "invalid_tx_address", null, signature);
-      fail("Should have thrown exception");
-    } catch (MoneroRpcException e) {
-      assertEquals(-2, (int) e.getRpcCode());
-    }
-    
-    // test check with invalid message
-    signature = wallet.getTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the right message");
-    try {
-      wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the wrong message", signature);
-      fail("Should have thrown exception");
-    } catch (MoneroException e) {
-      assertEquals("Signature is not good", e.getMessage());
-    }
-    
-    // test check with wrong signature
-    tx = txs.get(1);  // change tx
-    try {
-      wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the right message", signature);
-      fail("Should have thrown exception");
-    } catch (MoneroRpcException e) {
-      assertEquals(-1, (int) e.getRpcCode());
-    }
+    fail("Not implemented");
   }
   
   @Test
@@ -1106,35 +1064,19 @@ public class TestMoneroWallet {
   }
   
   /**
-   * Returns random transactions.
+   * Gets random transactions.
    * 
-   * TODO: switch this over to maxTxs like getRandomTransactionsOutboundWithPayments
-   * 
-   * @param numTxs is the number of transactions to retrieve
-   * @return List<MoneroTx> are the randomly retrieved transactions
+   * @param filter specifies a filter for the transactions.
+   * @param minTxs specifies the minimum number of transactions (null for no minimum)
+   * @param maxTxs specifies the maximum number of transactions (null for all filtered transactions)
+   * @return List<MoneroTx> are the random transactions
    */
-  private static List<MoneroTx> getRandomTransactions(int numTxs) {
-    List<MoneroTx> allTxs = getCachedTxs();
-    assertTrue(allTxs.size() > numTxs);
-    Set<MoneroTx> randomTxs = new HashSet<MoneroTx>();
-    while (randomTxs.size() < numTxs) {
-      randomTxs.add(allTxs.get(MathUtils.random(0, allTxs.size())));
-    }
-    return new ArrayList<MoneroTx>(randomTxs);
-  }
-  
-  // TODO: add hasPayments to MoneroTxFilter and make this general purpose (and possibly with minTxs)
-  private static List<MoneroTx> getRandomTransactionsOutboundWithPayments(Integer maxTxs) {
-    MoneroTxFilter filter = new MoneroTxFilter();
-    filter.setFailed(false);
-    filter.setIncoming(false);
-    filter.setMempool(false);
-    List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    for (MoneroTx tx : wallet.getTxs(filter)) if (tx.getPayments() != null) txs.add(tx);
-    assertFalse("Wallet does not have outgoing transactions with payment data; run testSendToMultiple()", txs.isEmpty());
+  private static List<MoneroTx> getRandomTransactions(MoneroTxFilter filter, Integer minTxs, Integer maxTxs) {
+    List<MoneroTx> txs = wallet.getTxs(filter);
+    if (minTxs != null) assertTrue(txs.size() >= minTxs);
     Collections.shuffle(txs);
-    txs = txs.subList(0, maxTxs == null ? txs.size() : Math.min(maxTxs, txs.size()));
-    return txs;
+    if (maxTxs == null) return txs;
+    else return txs.subList(0, Math.min(maxTxs, txs.size()));
   }
   
   private static List<MoneroTx> getCachedTxs() {
