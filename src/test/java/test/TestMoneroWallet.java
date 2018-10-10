@@ -559,7 +559,6 @@ public class TestMoneroWallet {
       String key = wallet.getTxKey(tx.getId());
       for (MoneroPayment payment : tx.getPayments()) {
         MoneroTxCheck check = wallet.checkTxKey(tx.getId(), key, payment.getDestination().getAddress());
-        assertTrue(check.getIsGood());
         TestUtils.testTxCheck(check);
       }
     }
@@ -568,24 +567,33 @@ public class TestMoneroWallet {
     try {
       wallet.getTxKey("invalid_tx_id");
       fail("Should throw exception for invalid key");
-    } catch (MoneroRpcException e) { }
+    } catch (MoneroRpcException e) {
+      assertEquals(-8, (int) e.getRpcCode());
+    }
     
     // test check with invalid tx id
     MoneroTx tx = txs.get(0);
     String key = wallet.getTxKey(tx.getId());
-    MoneroTxCheck check = wallet.checkTxKey("invalid_tx_id", key, tx.getPayments().get(0).getDestination().getAddress());
-    assertFalse(check.getIsGood());
-    TestUtils.testTxCheck(check);
+    try {
+      wallet.checkTxKey("invalid_tx_id", key, tx.getPayments().get(0).getDestination().getAddress());
+      fail("Should have thrown exception");
+    } catch (MoneroRpcException e) {
+      assertEquals(-8, (int) e.getRpcCode());
+    }
     
     // test check with invalid key
-    check = wallet.checkTxKey(tx.getId(), "invalid_tx_key", tx.getPayments().get(0).getDestination().getAddress());
-    assertFalse(check.getIsGood());
-    TestUtils.testTxCheck(check);
+    try {
+      wallet.checkTxKey(tx.getId(), "invalid_tx_key", tx.getPayments().get(0).getDestination().getAddress());
+    } catch (MoneroRpcException e) {
+      assertEquals(-25, (int) e.getRpcCode());
+    }
     
     // test check with invalid address
-    check = wallet.checkTxKey(tx.getId(), key, "invalid_tx_address");
-    assertFalse(check.getIsGood());
-    TestUtils.testTxCheck(check);
+    try {
+      wallet.checkTxKey(tx.getId(), key, "invalid_tx_address");
+    } catch (MoneroRpcException e) {
+      assertEquals(-2, (int) e.getRpcCode());
+    }
   }
   
   @Test
