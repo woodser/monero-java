@@ -32,6 +32,7 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
+import monero.wallet.model.MoneroException;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImage;
 import monero.wallet.model.MoneroPayment;
@@ -584,6 +585,7 @@ public class TestMoneroWallet {
     // test check with invalid key
     try {
       wallet.checkTxKey(tx.getId(), "invalid_tx_key", tx.getPayments().get(0).getDestination().getAddress());
+      fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
       assertEquals(-25, (int) e.getRpcCode());
     }
@@ -591,6 +593,7 @@ public class TestMoneroWallet {
     // test check with invalid address
     try {
       wallet.checkTxKey(tx.getId(), key, "invalid_tx_address");
+      fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
       assertEquals(-2, (int) e.getRpcCode());
     }
@@ -598,7 +601,75 @@ public class TestMoneroWallet {
   
   @Test
   public void testCheckTxProof() {
-    fail("Not implemented");
+    int numTxs = 10;
+    
+    // get random txs with outgoing payments
+    MoneroTxFilter filter = new MoneroTxFilter();
+    filter.setFailed(false);
+    filter.setIncoming(false);
+    filter.setMempool(false);
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    for (MoneroTx tx : wallet.getTxs(filter)) if (tx.getPayments() != null) txs.add(tx);
+    assertTrue("Wallet does not have enough outgoing transactions with payment data; run testSendToMultiple()", txs.size() >= numTxs);
+    Collections.shuffle(txs);
+    txs = txs.subList(0, numTxs);
+    
+    // test good checks with messages
+    for (MoneroTx tx : txs) {
+      for (MoneroPayment payment : tx.getPayments()) {
+        String signature = wallet.getTxProof(tx.getId(), payment.getDestination().getAddress(), "This transaction definitely happened.");
+        MoneroTxCheck check = wallet.checkTxProof(tx.getId(), payment.getDestination().getAddress(), "This transaction definitely happened.", signature);
+        TestUtils.testTxCheck(check);
+      }
+    }
+    
+    // test good check without message
+    MoneroTx tx = txs.get(0);
+    String signature = wallet.getTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), null);
+    MoneroTxCheck check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), null, signature);
+    TestUtils.testTxCheck(check);
+    
+    // test get tx key with invalid id
+    try {
+      wallet.getTxProof("invalid_tx_id", tx.getPayments().get(0).getDestination().getAddress(), null);
+      fail("Should throw exception for invalid key");
+    } catch (MoneroRpcException e) {
+      assertEquals(-8, (int) e.getRpcCode());
+    }
+    
+    // test check with invalid tx id
+    try {
+      wallet.checkTxProof("invalid_tx_id", tx.getPayments().get(0).getDestination().getAddress(), null, signature);
+      fail("Should have thrown exception");
+    } catch (MoneroRpcException e) {
+      assertEquals(-8, (int) e.getRpcCode());
+    }
+    
+    // test check with invalid address
+    try {
+      wallet.checkTxProof(tx.getId(), "invalid_tx_address", null, signature);
+      fail("Should have thrown exception");
+    } catch (MoneroRpcException e) {
+      assertEquals(-2, (int) e.getRpcCode());
+    }
+    
+    // test check with invalid message
+    signature = wallet.getTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the right message");
+    try {
+      wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the wrong message", signature);
+      fail("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals("Signature is not good", e.getMessage());
+    }
+    
+    // test check with wrong signature
+    tx = txs.get(1);  // change tx
+    try {
+      wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the right message", signature);
+      fail("Should have thrown exception");
+    } catch (MoneroRpcException e) {
+      assertEquals(-1, (int) e.getRpcCode());
+    }
   }
   
   @Test
