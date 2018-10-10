@@ -53,13 +53,11 @@ public class TestMoneroWallet {
   private static MoneroWallet wallet;
   private static final String SAMPLE_ADDRESS = "58bf9MfrBNDXSqCzK6snxSXaJHehLTnvx3BdS6qMkYAsW8P5kvRVq8ePbGQ7mfAeYfC7QELPhpQBe2C9bqCrqeesUsifaWw";
   private static List<MoneroTx> txCache;
-  private static List<MoneroAccount> accountCache;
 
   @BeforeClass
   public static void setup() throws Exception {
     wallet = TestUtils.getWallet();
     txCache = null;
-    accountCache = null;
   }
   
   @AfterClass
@@ -401,6 +399,7 @@ public class TestMoneroWallet {
     }
     
     // test getting transactions by payment ids
+    // TODO: this test is very slow, optimize
     Collection<String> paymentIds = new HashSet<String>();
     for (MoneroTx tx : allTxs) paymentIds.add(tx.getPaymentId());
     assertFalse(paymentIds.isEmpty());
@@ -468,29 +467,35 @@ public class TestMoneroWallet {
       }
     }
     
-    // test filtering by subaddress
-    // TODO: this tests every subaddress which takes too long
-    for (MoneroAccount account : wallet.getAccounts()) {
-      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
-      for (MoneroSubaddress subaddress : subaddresses) {
-        MoneroTxFilter filter = new MoneroTxFilter();
-        filter.setAccountIndex(account.getIndex());
-        filter.setSubaddressIndices(Arrays.asList(subaddress.getSubaddrIndex()));
-        txs = wallet.getTxs(filter);
-        
-        // test that tx amounts add up to subaddress balance
-        BigInteger balance = BigInteger.valueOf(0);
-        for (MoneroTx tx : txs) {
-          if (tx.getType() == MoneroTxType.INCOMING) {
-            for (MoneroPayment payment : tx.getPayments()) {
-              if (!payment.getIsSpent()) {
-                balance = balance.add(payment.getAmount());
-              }
+    // get all subaddresses with balances
+    List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
+    for (MoneroAccount account : wallet.getAccounts(true)) {
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
+        if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0 || subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) {
+          subaddresses.add(subaddress);
+        }
+      }
+    }
+    
+    // test that unspent tx payments add up to balance
+    for (MoneroSubaddress subaddress : subaddresses) {
+      MoneroTxFilter filter = new MoneroTxFilter();
+      filter.setAccountIndex(subaddress.getAccountIndex());
+      filter.setSubaddressIndices(Arrays.asList(subaddress.getSubaddrIndex()));
+      txs = wallet.getTxs(filter);
+      
+      // test that unspent tx payments add up to subaddress balance
+      BigInteger balance = BigInteger.valueOf(0);
+      for (MoneroTx tx : txs) {
+        if (tx.getType() == MoneroTxType.INCOMING) {
+          for (MoneroPayment payment : tx.getPayments()) {
+            if (!payment.getIsSpent()) {
+              balance = balance.add(payment.getAmount());
             }
           }
         }
-        assertEquals(wallet.getSubaddress(account.getIndex(), subaddress.getSubaddrIndex()).getBalance(), balance);
       }
+      assertEquals(wallet.getSubaddress(subaddress.getAccountIndex(), subaddress.getSubaddrIndex()).getBalance(), balance);
     }
     
     // assert that ummet filter criteria has no results
@@ -917,11 +922,5 @@ public class TestMoneroWallet {
     if (txCache != null) return txCache;
     txCache = wallet.getTxs();
     return txCache;
-  }
-  
-  private static List<MoneroAccount> getCachedAccounts() {
-    if (accountCache != null) return accountCache;
-    accountCache = wallet.getAccounts(true);
-    return accountCache;
   }
 }
