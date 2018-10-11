@@ -765,7 +765,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     check.setIsGood(true);
     check.setNumConfirmations(((BigInteger) resultMap.get("confirmations")).intValue());
     check.setIsInPool((Boolean) resultMap.get("in_pool"));
-    check.setAmountReceived((BigInteger) resultMap.get("received"));
+    check.setReceivedAmount((BigInteger) resultMap.get("received"));
     return check;
   }
 
@@ -801,7 +801,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (isGood) {
       check.setNumConfirmations(((BigInteger) resultMap.get("confirmations")).intValue());
       check.setIsInPool((Boolean) resultMap.get("in_pool"));
-      check.setAmountReceived((BigInteger) resultMap.get("received"));
+      check.setReceivedAmount((BigInteger) resultMap.get("received"));
     }
     return check;
   }

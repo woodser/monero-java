@@ -591,11 +591,11 @@ public class TestMoneroWallet {
         assertTrue(check.getIsGood());
         if (payment.getAmount().compareTo(BigInteger.valueOf(0)) > 0) {
 //        assertTrue(check.getAmountReceived().compareTo(BigInteger.valueOf(0)) > 0); // TODO (monero-wallet-rpc): indicates amount received amount is 0 despite transaction with payment to this address
-          if (check.getAmountReceived().compareTo(BigInteger.valueOf(0)) == 0) {
+          if (check.getReceivedAmount().compareTo(BigInteger.valueOf(0)) == 0) {
             TestUtils.LOGGER.warn("Key proof indicates no funds received despite payment (txid=" + tx.getId() + ", key=" + key + ", address=" + payment.getDestination().getAddress() + ", amount=" + payment.getAmount() + ")");
           }
         }
-        else assertTrue(check.getAmountReceived().compareTo(BigInteger.valueOf(0)) == 0);
+        else assertTrue(check.getReceivedAmount().compareTo(BigInteger.valueOf(0)) == 0);
         TestUtils.testTxCheck(tx, check);
       }
     }
@@ -648,7 +648,7 @@ public class TestMoneroWallet {
     assertNotNull("Could not get a different address to test", differentAddress);
     MoneroTxCheck check = wallet.checkTxKey(tx.getId(), key, differentAddress);
     assertTrue(check.getIsGood());
-    assertTrue(check.getAmountReceived().compareTo(BigInteger.valueOf(0)) == 0);
+    assertTrue(check.getReceivedAmount().compareTo(BigInteger.valueOf(0)) == 0);
     TestUtils.testTxCheck(tx, check);
   }
   
@@ -762,6 +762,19 @@ public class TestMoneroWallet {
   
   @Test
   public void testReserveProofWallet() {
+    
+    // check good proof
+    String signature = wallet.getReserveProof("Test message");
+    MoneroTxCheck check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", signature);  // TODO: primary address?
+    assertTrue(check.getIsGood());
+    assertNotNull(check.getSpentAmount());
+    assertTrue(check.getSpentAmount().compareTo(BigInteger.valueOf(0)) > 0);
+    assertNotNull(check.getTotalAmount());
+    assertTrue(check.getTotalAmount().compareTo(BigInteger.valueOf(0)) > 0);
+    assertNull(check.getReceivedAmount());
+    assertNull(check.getIsInPool());
+    
+    // check wrong message
     fail("Not implemented");
   }
   
