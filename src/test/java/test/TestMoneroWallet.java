@@ -777,16 +777,28 @@ public class TestMoneroWallet {
     assertNotNull(check.getAmountSpent());
     assertEquals(0, check.getAmountSpent().compareTo(BigInteger.valueOf(0))); // TODO (monero-wallet-rpc): ever return non-zero spent?
     assertNotNull(check.getAmountTotal());
-    assertTrue(check.getAmountTotal().compareTo(BigInteger.valueOf(0)) > 0);
+    assertEquals(wallet.getBalance(), check.getAmountTotal());
     assertNull(check.getAmountReceived());
     assertNull(check.getIsInPool());
     
-    // check proof with wrong address
+    System.out.println("Here");
+    //wallet.checkReserveProof(wallet.getSubaddress(1, 0).getAddress(), "Test message", signature);
+    
+    // check proof with wrong primary address
     wallet.openWallet(TestUtils.WALLET_NAME_2, TestUtils.WALLET_PW);
     String wrongAddress = wallet.getPrimaryAddress();
     wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
     try {
       wallet.checkReserveProof(wrongAddress, "Test message", signature);
+      fail("Should have thrown exception");
+    } catch (MoneroRpcException e) {
+      assertEquals(-1, (int) e.getRpcCode());
+    }
+    
+    // check proof with subaddress
+    try {
+      wallet.checkReserveProof(wallet.getSubaddress(0, 1).getAddress(), "Test message", signature);
+      fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
       assertEquals(-1, (int) e.getRpcCode());
     }
@@ -794,6 +806,7 @@ public class TestMoneroWallet {
     // check proof with wrong message
     try {
       wallet.checkReserveProof(wallet.getPrimaryAddress(), "Wrong message", signature);
+      fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
       assertEquals(-1, (int) e.getRpcCode());
     }
@@ -804,6 +817,46 @@ public class TestMoneroWallet {
   
   @Test
   public void testReserveProofAccount() {
+    
+    // test proofs of accounts
+    int numNonZeroTests = 0;
+    String msg = "Test message";
+    for (MoneroAccount account : wallet.getAccounts()) {
+      if (account.getBalance().compareTo(BigInteger.valueOf(0)) > 0) {
+        String signature = wallet.getReserveProof(account.getIndex(), account.getBalance(), msg);
+        MoneroTxCheck check = wallet.checkReserveProof(wallet.getPrimaryAddress(), msg, signature);
+        assertTrue(check.getIsGood());
+        assertNotNull(check.getAmountSpent());
+        assertEquals(0, check.getAmountSpent().compareTo(BigInteger.valueOf(0))); // TODO (monero-wallet-rpc): ever return non-zero spent?
+        assertNotNull(check.getAmountTotal());
+        assertEquals(account.getBalance(), check.getAmountTotal());
+        assertNull(check.getAmountReceived());
+        assertNull(check.getIsInPool());
+        numNonZeroTests++;
+      } else {
+        try {
+          wallet.getReserveProof(account.getIndex(), account.getBalance(), msg);
+          fail("Should have thrown exception");
+        } catch (MoneroRpcException e) {
+          assertEquals(-1, (int) e.getRpcCode());
+          try {
+            wallet.getReserveProof(account.getIndex(), TestUtils.MAX_FEE, msg);
+            fail("Should have thrown exception");
+          } catch (MoneroRpcException e2) {
+            assertEquals(-1, (int) e2.getRpcCode());
+          }
+        }
+      }
+    }
+    assertTrue("Must have more than one account with non-zero balance; run testSendToMultiple() first", numNonZeroTests > 1);
+    
+    // test wrong address
+    
+    // test error when not enough balance for requested minimum reserve amount
+    
+    // test wrong message
+    
+    // test wrong signature
     fail("Not implemented");
   }
 
@@ -1166,5 +1219,13 @@ public class TestMoneroWallet {
     if (txCache != null) return txCache;
     txCache = wallet.getTxs();
     return txCache;
+  }
+  
+  private static List<MoneroSubaddress> getRandomSubaddresses(int numSubaddresses) {
+    List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
+    for (MoneroAccount account : wallet.getAccounts(true)) subaddresses.addAll(account.getSubaddresses());
+    assertTrue("Not enough subaddresses; run testSendToMultiple()", subaddresses.size() > numSubaddresses);
+    Collections.shuffle(subaddresses);
+    return subaddresses.subList(0,  numSubaddresses);
   }
 }
