@@ -468,7 +468,7 @@ public interface MoneroWallet {
   public String getReserveProof(String message);
   
   /**
-   * Generate a signature to prove an available balance.
+   * Generate a signature to prove an available balance from an account.
    * 
    * @param accountIdx specifies an account to prove the balance of
    * @param amount is the amount to prove the account has for reserve
@@ -480,10 +480,9 @@ public interface MoneroWallet {
   /**
    * Proves a wallet has a disposable reserve using a signature.
    * 
-   * @param address is the public address of the wallet
+   * @param address is the public wallet address
    * @param message is a message included with the signature to further authenticate the proof (optional)
    * @param signature is the reserve proof signature to check
-   * 
    * @return MoneroTxCheck is the result of checking the signature proof
    */
   public MoneroTxCheck checkReserveProof(String address, String message, String signature);
