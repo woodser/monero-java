@@ -767,18 +767,38 @@ public class TestMoneroWallet {
   @Test
   public void testReserveProofWallet() {
     
-    // check good proof
+    // get proof of entire wallet
     String signature = wallet.getReserveProof("Test message");
+    
+    // check proof of entire wallet
+    // TODO: get random subaddresses and test those
     MoneroTxCheck check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", signature);  // TODO: primary address?
     assertTrue(check.getIsGood());
     assertNotNull(check.getAmountSpent());
-    assertTrue(check.getAmountSpent().compareTo(BigInteger.valueOf(0)) > 0);
+    assertEquals(0, check.getAmountSpent().compareTo(BigInteger.valueOf(0))); // TODO (monero-wallet-rpc): ever return non-zero spent?
     assertNotNull(check.getAmountTotal());
     assertTrue(check.getAmountTotal().compareTo(BigInteger.valueOf(0)) > 0);
     assertNull(check.getAmountReceived());
     assertNull(check.getIsInPool());
     
-    // check wrong message
+    // check proof with wrong address
+    wallet.openWallet(TestUtils.WALLET_NAME_2, TestUtils.WALLET_PW);
+    String wrongAddress = wallet.getPrimaryAddress();
+    wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
+    try {
+      wallet.checkReserveProof(wrongAddress, "Test message", signature);
+    } catch (MoneroRpcException e) {
+      assertEquals(-1, (int) e.getRpcCode());
+    }
+    
+    // check proof with wrong message
+    try {
+      wallet.checkReserveProof(wallet.getPrimaryAddress(), "Wrong message", signature);
+    } catch (MoneroRpcException e) {
+      assertEquals(-1, (int) e.getRpcCode());
+    }
+    
+    // check proof with wrong signature
     fail("Not implemented");
   }
   
