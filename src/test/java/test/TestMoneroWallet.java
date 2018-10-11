@@ -714,7 +714,7 @@ public class TestMoneroWallet {
       check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the right message", wrongSignature);  
       assertFalse(check.getIsGood());
     } catch (MoneroRpcException e) {
-      assertEquals(-1, (int) e.getRpcCode()); // TODO (monero-wallet-rpc): sometimes comes back bad, sometimes throws exception
+      assertEquals(-1, (int) e.getRpcCode()); // TODO: sometimes comes back bad, sometimes throws exception.  ensure txs come from different addresses?
     }
   }
   
