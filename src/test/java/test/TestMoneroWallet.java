@@ -818,9 +818,11 @@ public class TestMoneroWallet {
     // test proofs of accounts
     int numNonZeroTests = 0;
     String msg = "Test message";
-    for (MoneroAccount account : wallet.getAccounts()) {
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    String signature = null;
+    for (MoneroAccount account : accounts) {
       if (account.getBalance().compareTo(BigInteger.valueOf(0)) > 0) {
-        String signature = wallet.getReserveProof(account.getIndex(), account.getBalance(), msg);
+        signature = wallet.getReserveProof(account.getIndex(), account.getBalance(), msg);
         MoneroTxCheck check = wallet.checkReserveProof(wallet.getPrimaryAddress(), msg, signature);
         assertTrue(check.getIsGood());
         assertNotNull(check.getAmountSpent());
@@ -848,15 +850,43 @@ public class TestMoneroWallet {
     assertTrue("Must have more than one account with non-zero balance; run testSendToMultiple() first", numNonZeroTests > 1);
     
     // test error when not enough balance for requested minimum reserve amount
+    try {
+      wallet.getReserveProof(0, accounts.get(0).getBalance().add(TestUtils.MAX_FEE), "Test message");
+      fail("Should have thrown exception");
+    } catch (MoneroRpcException e) {
+      assertEquals(-1, (int) e.getRpcCode());
+    }
     
     // test different wallet address
+    wallet.openWallet(TestUtils.WALLET_NAME_2, TestUtils.WALLET_PW);
+    String differentAddress = wallet.getPrimaryAddress();
+    wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
+    try {
+      wallet.checkReserveProof(differentAddress, "Test message", signature);
+      fail("Should have thrown exception");
+    } catch (MoneroRpcException e) {
+      assertEquals(-1, (int) e.getRpcCode());
+    }
     
     // test subaddress
+    try {
+      wallet.checkReserveProof(wallet.getSubaddress(0, 1).getAddress(), "Test message", signature);
+      fail("Should have thrown exception");
+    } catch (MoneroRpcException e) {
+      assertEquals(-1, (int) e.getRpcCode());
+    }
     
     // test wrong message
+    MoneroTxCheck check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Wrong message", signature);
+    assertFalse(check.getIsGood()); // TODO: specifically test reserve checks, probably separate objects
     
     // test wrong signature
-    fail("Not implemented");
+    try {
+      wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", "wrong signature");
+      fail("Should have thrown exception");
+    } catch (MoneroRpcException e) {
+      assertEquals(-1, (int) e.getRpcCode());
+    }
   }
 
   @Test
