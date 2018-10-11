@@ -782,10 +782,10 @@ public class TestMoneroWallet {
     
     // test different wallet address
     wallet.openWallet(TestUtils.WALLET_NAME_2, TestUtils.WALLET_PW);
-    String wrongAddress = wallet.getPrimaryAddress();
+    String differentAddress = wallet.getPrimaryAddress();
     wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
     try {
-      wallet.checkReserveProof(wrongAddress, "Test message", signature);
+      wallet.checkReserveProof(differentAddress, "Test message", signature);
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
       assertEquals(-1, (int) e.getRpcCode());
@@ -804,7 +804,12 @@ public class TestMoneroWallet {
     assertFalse(check.getIsGood());  // TODO: specifically test reserve checks, probably separate objects
     
     // test wrong signature
-    fail("Not implemented");
+    try {
+      wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", "wrong signature");
+      fail("Should have thrown exception");
+    } catch (MoneroRpcException e) {
+      assertEquals(-1, (int) e.getRpcCode());
+    }
   }
   
   @Test
