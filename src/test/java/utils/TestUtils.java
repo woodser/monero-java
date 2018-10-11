@@ -50,7 +50,7 @@ public class TestUtils {
   public static final String WALLET_PW = "supersecretpassword123";
   
   // test constants
-  public static final Integer MIXIN = 6;
+  public static final Integer MIXIN = 10;
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
   
   // logger configuration
