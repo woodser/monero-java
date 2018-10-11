@@ -460,7 +460,7 @@ public interface MoneroWallet {
   public boolean checkSpendProof(String txId, String message, String signature);
   
   /**
-   * Generate a signature to prove the available balance of a wallet.
+   * Generate a signature to prove the entire balance of the wallet.
    * 
    * @param message is a message included with the signature to further authenticate the proof (optional)
    * @return String is the reserve proof signature
@@ -468,10 +468,10 @@ public interface MoneroWallet {
   public String getReserveProof(String message);
   
   /**
-   * Generate a signature to prove an available balance from an account.
+   * Generate a signature to prove an available amount in an account.
    * 
-   * @param accountIdx specifies an account to prove the balance of
-   * @param amount is the amount to prove the account has for reserve
+   * @param accountIdx specifies the account to prove contains an available amount
+   * @param amount is the minimum amount to prove as available in the account
    * @param message is a message to include with the signature to further authenticate the proof (optional)
    * @return String is the reserve proof signature
    */
