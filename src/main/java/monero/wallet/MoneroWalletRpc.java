@@ -840,9 +840,16 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return (String) resultMap.get("signature");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getReserveProof(int accountIdx, BigInteger amount, String message) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("account_index", accountIdx);
+    params.put("amount", amount);
+    params.put("message", message);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_reserve_proof", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (String) resultMap.get("signature");
   }
 
   @SuppressWarnings("unchecked")
