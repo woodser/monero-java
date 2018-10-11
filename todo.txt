@@ -28,6 +28,7 @@ get_transfer_by_txid add tx_size
 incoming_transfers add address (low priority), fee, timestamp, unlock_time, is_double_spend, height, tx_size (misdocumented)
 
 LOW
+get_reserve_proof document default account 0
 check_reserve_proof documentation spent and total not documented as outputs
 outgoing transactions src subaddress always 0, not actual src subaddresses
 -1: Failed to open wallet if wallet is already open; better code and message
