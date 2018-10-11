@@ -51,7 +51,7 @@ public class TestMoneroWallet {
   private static MoneroWallet wallet;
   private static final String SAMPLE_ADDRESS = "58bf9MfrBNDXSqCzK6snxSXaJHehLTnvx3BdS6qMkYAsW8P5kvRVq8ePbGQ7mfAeYfC7QELPhpQBe2C9bqCrqeesUsifaWw";
   private static List<MoneroTx> txCache;
-  private static Integer MAX_TX_PROOFS = 50;   // maximum number of transactions to check for each proof, null to check all
+  private static Integer MAX_TX_PROOFS = 25;   // maximum number of transactions to check for each proof, null to check all
 
   @BeforeClass
   public static void setup() throws Exception {
@@ -591,11 +591,11 @@ public class TestMoneroWallet {
         assertTrue(check.getIsGood());
         if (payment.getAmount().compareTo(BigInteger.valueOf(0)) > 0) {
 //        assertTrue(check.getAmountReceived().compareTo(BigInteger.valueOf(0)) > 0); // TODO (monero-wallet-rpc): indicates amount received amount is 0 despite transaction with payment to this address
-          if (check.getReceivedAmount().compareTo(BigInteger.valueOf(0)) == 0) {
+          if (check.getAmountReceived().compareTo(BigInteger.valueOf(0)) == 0) {
             TestUtils.LOGGER.warn("Key proof indicates no funds received despite payment (txid=" + tx.getId() + ", key=" + key + ", address=" + payment.getDestination().getAddress() + ", amount=" + payment.getAmount() + ")");
           }
         }
-        else assertTrue(check.getReceivedAmount().compareTo(BigInteger.valueOf(0)) == 0);
+        else assertTrue(check.getAmountReceived().compareTo(BigInteger.valueOf(0)) == 0);
         TestUtils.testTxCheck(tx, check);
       }
     }
@@ -648,7 +648,7 @@ public class TestMoneroWallet {
     assertNotNull("Could not get a different address to test", differentAddress);
     MoneroTxCheck check = wallet.checkTxKey(tx.getId(), key, differentAddress);
     assertTrue(check.getIsGood());
-    assertTrue(check.getReceivedAmount().compareTo(BigInteger.valueOf(0)) == 0);
+    assertTrue(check.getAmountReceived().compareTo(BigInteger.valueOf(0)) == 0);
     TestUtils.testTxCheck(tx, check);
   }
   
@@ -710,8 +710,12 @@ public class TestMoneroWallet {
     
     // test check with wrong signature
     String wrongSignature = wallet.getTxProof(txs.get(1).getId(), txs.get(1).getPayments().get(0).getDestination().getAddress(), "This is the right message");
-    check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the right message", wrongSignature);  // TODO: sometimes comes back bad, sometimes throws exception
-    assertFalse(check.getIsGood());
+    try {
+      check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the right message", wrongSignature);  
+      assertFalse(check.getIsGood());
+    } catch (MoneroRpcException e) {
+      assertEquals(-1, (int) e.getRpcCode()); // TODO (monero-wallet-rpc): sometimes comes back bad, sometimes throws exception
+    }
   }
   
   @Test
@@ -767,11 +771,11 @@ public class TestMoneroWallet {
     String signature = wallet.getReserveProof("Test message");
     MoneroTxCheck check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", signature);  // TODO: primary address?
     assertTrue(check.getIsGood());
-    assertNotNull(check.getSpentAmount());
-    assertTrue(check.getSpentAmount().compareTo(BigInteger.valueOf(0)) > 0);
-    assertNotNull(check.getTotalAmount());
-    assertTrue(check.getTotalAmount().compareTo(BigInteger.valueOf(0)) > 0);
-    assertNull(check.getReceivedAmount());
+    assertNotNull(check.getAmountSpent());
+    assertTrue(check.getAmountSpent().compareTo(BigInteger.valueOf(0)) > 0);
+    assertNotNull(check.getAmountTotal());
+    assertTrue(check.getAmountTotal().compareTo(BigInteger.valueOf(0)) > 0);
+    assertNull(check.getAmountReceived());
     assertNull(check.getIsInPool());
     
     // check wrong message
