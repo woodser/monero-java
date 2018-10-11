@@ -10,9 +10,9 @@ public class MoneroTxCheck {
   public Boolean isGood;
   public Boolean isInPool;
   public Integer numConfirmations;
-  public BigInteger receivedAmount;
-  public BigInteger spentAmount;
-  public BigInteger totalAmount;  // TODO: separate into different check objects?
+  public BigInteger amountReceived;
+  public BigInteger amountSpent;
+  public BigInteger amountTotal;  // TODO: separate into different check objects?
   
   public Boolean getIsGood() {
     return isGood;
@@ -38,27 +38,27 @@ public class MoneroTxCheck {
     this.numConfirmations = numConfirmations;
   }
   
-  public BigInteger getReceivedAmount() {
-    return receivedAmount;
+  public BigInteger getAmountReceived() {
+    return amountReceived;
   }
   
-  public void setReceivedAmount(BigInteger amountReceived) {
-    this.receivedAmount = amountReceived;
+  public void setAmountReceived(BigInteger amountReceived) {
+    this.amountReceived = amountReceived;
   }
 
-  public BigInteger getSpentAmount() {
-    return spentAmount;
+  public BigInteger getAmountSpent() {
+    return amountSpent;
   }
 
-  public void setSpentAmount(BigInteger spentAmount) {
-    this.spentAmount = spentAmount;
+  public void setAmountSpent(BigInteger amountSpent) {
+    this.amountSpent = amountSpent;
   }
 
-  public BigInteger getTotalAmount() {
-    return totalAmount;
+  public BigInteger getAmountTotal() {
+    return amountTotal;
   }
 
-  public void setTotalAmount(BigInteger totalAmount) {
-    this.totalAmount = totalAmount;
+  public void setAmountTotal(BigInteger amountTotal) {
+    this.amountTotal = amountTotal;
   }
 }

@@ -765,7 +765,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     check.setIsGood(true);
     check.setNumConfirmations(((BigInteger) resultMap.get("confirmations")).intValue());
     check.setIsInPool((Boolean) resultMap.get("in_pool"));
-    check.setReceivedAmount((BigInteger) resultMap.get("received"));
+    check.setAmountReceived((BigInteger) resultMap.get("received"));
     return check;
   }
 
@@ -801,7 +801,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (isGood) {
       check.setNumConfirmations(((BigInteger) resultMap.get("confirmations")).intValue());
       check.setIsInPool((Boolean) resultMap.get("in_pool"));
-      check.setReceivedAmount((BigInteger) resultMap.get("received"));
+      check.setAmountReceived((BigInteger) resultMap.get("received"));
     }
     return check;
   }
@@ -829,9 +829,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return (boolean) resultMap.get("good");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getReserveProof(String message) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("all", true);
+    params.put("message", message);
+    Map<String, Object> respMap = rpc.sendRpcRequest("get_reserve_proof", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return (String) resultMap.get("signature");
   }
 
   @Override
@@ -839,9 +845,27 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroTxCheck checkReserveProof(String address, String message, String signature) {
-    throw new RuntimeException("Not implemented");
+    
+    // send request
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("address", address);
+    params.put("message", message);
+    params.put("signature", signature);
+    Map<String, Object> respMap = rpc.sendRpcRequest("check_reserve_proof", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    
+    // interpret results
+    boolean isGood = (boolean) resultMap.get("good");
+    MoneroTxCheck check = new MoneroTxCheck();
+    check.setIsGood(isGood);
+    if (isGood) {
+      check.setAmountSpent((BigInteger) resultMap.get("spent"));
+      check.setAmountTotal((BigInteger) resultMap.get("total"));
+    }
+    return check;
   }
 
   @SuppressWarnings("unchecked")

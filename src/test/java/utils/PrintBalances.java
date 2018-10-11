@@ -1,5 +1,6 @@
 package utils;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,11 @@ public class PrintBalances {
     // collect info about subaddresses
     List<Pair<String, List<Object>>> pairs = new ArrayList<Pair<String, List<Object>>>();
     MoneroWallet wallet = TestUtils.getWallet();
+    BigInteger balance = wallet.getBalance();
+    BigInteger unlockedBalance = wallet.getUnlockedBalance();
     List<MoneroAccount> accounts = wallet.getAccounts(true);
+    System.out.println("Wallet balance: " + balance);
+    System.out.println("Wallet unlocked balance: " + unlockedBalance);
     for (MoneroAccount account : accounts) {
       add(pairs, "ACCOUNT", account.getIndex());
       add(pairs, "SUBADDRESS", "");
