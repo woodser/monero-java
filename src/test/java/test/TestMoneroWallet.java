@@ -710,7 +710,7 @@ public class TestMoneroWallet {
     
     // test check with wrong signature
     String wrongSignature = wallet.getTxProof(txs.get(1).getId(), txs.get(1).getPayments().get(0).getDestination().getAddress(), "This is the right message");
-    check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the right message", wrongSignature);
+    check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the right message", wrongSignature);  // TODO: sometimes comes back bad, sometimes throws exception
     assertFalse(check.getIsGood());
   }
   
