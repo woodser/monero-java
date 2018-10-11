@@ -822,13 +822,14 @@ public class TestMoneroWallet {
     String signature = null;
     for (MoneroAccount account : accounts) {
       if (account.getBalance().compareTo(BigInteger.valueOf(0)) > 0) {
-        signature = wallet.getReserveProof(account.getIndex(), account.getBalance(), msg);
+        BigInteger checkAmount = account.getBalance().divide(BigInteger.valueOf(2));
+        signature = wallet.getReserveProof(account.getIndex(), checkAmount, msg);
         MoneroTxCheck check = wallet.checkReserveProof(wallet.getPrimaryAddress(), msg, signature);
         assertTrue(check.getIsGood());
         assertNotNull(check.getAmountSpent());
         assertEquals(0, check.getAmountSpent().compareTo(BigInteger.valueOf(0))); // TODO (monero-wallet-rpc): ever return non-zero spent?
         assertNotNull(check.getAmountTotal());
-        assertEquals(account.getBalance(), check.getAmountTotal());
+        assertTrue(check.getAmountTotal().compareTo(checkAmount) >= 0);
         assertNull(check.getAmountReceived());
         assertNull(check.getIsInPool());
         numNonZeroTests++;
