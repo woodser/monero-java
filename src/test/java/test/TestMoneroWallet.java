@@ -771,7 +771,6 @@ public class TestMoneroWallet {
     String signature = wallet.getReserveProof("Test message");
     
     // check proof of entire wallet
-    // TODO: get random subaddresses and test those
     MoneroTxCheck check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", signature);  // TODO: primary address?
     assertTrue(check.getIsGood());
     assertNotNull(check.getAmountSpent());
@@ -781,10 +780,7 @@ public class TestMoneroWallet {
     assertNull(check.getAmountReceived());
     assertNull(check.getIsInPool());
     
-    System.out.println("Here");
-    //wallet.checkReserveProof(wallet.getSubaddress(1, 0).getAddress(), "Test message", signature);
-    
-    // check proof with wrong primary address
+    // check proof with different wallet address
     wallet.openWallet(TestUtils.WALLET_NAME_2, TestUtils.WALLET_PW);
     String wrongAddress = wallet.getPrimaryAddress();
     wallet.openWallet(TestUtils.WALLET_NAME_1, TestUtils.WALLET_PW);
@@ -850,9 +846,11 @@ public class TestMoneroWallet {
     }
     assertTrue("Must have more than one account with non-zero balance; run testSendToMultiple() first", numNonZeroTests > 1);
     
-    // test wrong address
-    
     // test error when not enough balance for requested minimum reserve amount
+    
+    // test with different wallet address
+    
+    // test with subaddress
     
     // test wrong message
     
