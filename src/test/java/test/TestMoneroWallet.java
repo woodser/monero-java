@@ -257,7 +257,7 @@ public class TestMoneroWallet {
       assertEquals(txs1.get(i), txs2.get(i));
       if (!MoneroUtils.isSendTx(txs1.get(i).getType())) {
         for (MoneroPayment payment : txs1.get(i).getPayments()) {
-         if (payment.getDestination().getAccountIndex() != 0 && payment.getDestination().getSubaddrIndex() != 0) nonDefaultIncoming = true;
+         if (payment.getAccountIndex() != 0 && payment.getSubaddrIndex() != 0) nonDefaultIncoming = true;
         }
       }
     }
@@ -275,9 +275,8 @@ public class TestMoneroWallet {
           assertEquals(account.getIndex(), tx.getSrcSubaddress().getAccountIndex());
         } else {
           for (MoneroPayment payment : tx.getPayments()) {
-            MoneroSubaddress subaddress = payment.getDestination();
-            assertEquals(account.getIndex(), subaddress.getAccountIndex());
-            if (subaddress.getAccountIndex() != 0 && subaddress.getSubaddrIndex() != 0) nonDefaultIncoming = true;
+            assertEquals(account.getIndex(), payment.getAccountIndex());
+            if (payment.getAccountIndex() != 0 && payment.getSubaddrIndex() != 0) nonDefaultIncoming = true;
           }
         }
       }
@@ -297,11 +296,9 @@ public class TestMoneroWallet {
             assertEquals(accountIdx, (int) tx.getSrcSubaddress().getAccountIndex());
           } else {
             for (MoneroPayment payment : tx.getPayments()) {
-              MoneroSubaddress subaddress = payment.getDestination();
-              
-              assertEquals(accountIdx, (int) subaddress.getAccountIndex());
-              assertEquals(subaddressIdx, (int) subaddress.getSubaddrIndex());
-              if (subaddress.getAccountIndex() != 0 && subaddress.getSubaddrIndex() != 0) nonDefaultIncoming = true;
+              assertEquals(accountIdx, (int) payment.getAccountIndex());
+              assertEquals(subaddressIdx, (int) payment.getSubaddrIndex());
+              if (payment.getAccountIndex() != 0 && payment.getSubaddrIndex() != 0) nonDefaultIncoming = true;
             }
           }
         }
@@ -588,12 +585,12 @@ public class TestMoneroWallet {
     for (MoneroTx tx : txs) {
       String key = wallet.getTxKey(tx.getId());
       for (MoneroPayment payment : tx.getPayments()) {
-        MoneroCheckTx check = wallet.checkTxKey(tx.getId(), key, payment.getDestination().getAddress());
+        MoneroCheckTx check = wallet.checkTxKey(tx.getId(), key, payment.getAddress());
         assertTrue(check.getIsGood());
         if (payment.getAmount().compareTo(BigInteger.valueOf(0)) > 0) {
 //        assertTrue(check.getAmountReceived().compareTo(BigInteger.valueOf(0)) > 0); // TODO (monero-wallet-rpc): indicates amount received amount is 0 despite transaction with payment to this address
           if (check.getAmountReceived().compareTo(BigInteger.valueOf(0)) == 0) {
-            TestUtils.LOGGER.warn("Key proof indicates no funds received despite payment (txid=" + tx.getId() + ", key=" + key + ", address=" + payment.getDestination().getAddress() + ", amount=" + payment.getAmount() + ")");
+            TestUtils.LOGGER.warn("Key proof indicates no funds received despite payment (txid=" + tx.getId() + ", key=" + key + ", address=" + payment.getAddress() + ", amount=" + payment.getAmount() + ")");
           }
         }
         else assertTrue(check.getAmountReceived().compareTo(BigInteger.valueOf(0)) == 0);
@@ -613,7 +610,7 @@ public class TestMoneroWallet {
     MoneroTx tx = txs.get(0);
     String key = wallet.getTxKey(tx.getId());
     try {
-      wallet.checkTxKey("invalid_tx_id", key, tx.getPayments().get(0).getDestination().getAddress());
+      wallet.checkTxKey("invalid_tx_id", key, tx.getPayments().get(0).getAddress());
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
       assertEquals(-8, (int) e.getRpcCode());
@@ -621,7 +618,7 @@ public class TestMoneroWallet {
     
     // test check with invalid key
     try {
-      wallet.checkTxKey(tx.getId(), "invalid_tx_key", tx.getPayments().get(0).getDestination().getAddress());
+      wallet.checkTxKey(tx.getId(), "invalid_tx_key", tx.getPayments().get(0).getAddress());
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
       assertEquals(-25, (int) e.getRpcCode());
@@ -640,8 +637,8 @@ public class TestMoneroWallet {
     for (MoneroTx aTx : getCachedTxs()) {
       if (aTx.getPayments() == null) continue;
       for (MoneroPayment aPayment : aTx.getPayments()) {
-        if (!aPayment.getDestination().getAddress().equals(tx.getPayments().get(0).getDestination().getAddress())) {
-          differentAddress = aPayment.getDestination().getAddress();
+        if (!aPayment.getAddress().equals(tx.getPayments().get(0).getAddress())) {
+          differentAddress = aPayment.getAddress();
           break;
         }
       }
@@ -667,21 +664,21 @@ public class TestMoneroWallet {
     // test good checks with messages
     for (MoneroTx tx : txs) {
       for (MoneroPayment payment : tx.getPayments()) {
-        String signature = wallet.getTxProof(tx.getId(), payment.getDestination().getAddress(), "This transaction definitely happened.");
-        MoneroCheckTx check = wallet.checkTxProof(tx.getId(), payment.getDestination().getAddress(), "This transaction definitely happened.", signature);
+        String signature = wallet.getTxProof(tx.getId(), payment.getAddress(), "This transaction definitely happened.");
+        MoneroCheckTx check = wallet.checkTxProof(tx.getId(), payment.getAddress(), "This transaction definitely happened.", signature);
         TestUtils.testCheckTx(tx, check);
       }
     }
     
     // test good check without message
     MoneroTx tx = txs.get(0);
-    String signature = wallet.getTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), null);
-    MoneroCheckTx check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), null, signature);
+    String signature = wallet.getTxProof(tx.getId(), tx.getPayments().get(0).getAddress(), null);
+    MoneroCheckTx check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getAddress(), null, signature);
     TestUtils.testCheckTx(tx, check);
     
     // test get proof with invalid id
     try {
-      wallet.getTxProof("invalid_tx_id", tx.getPayments().get(0).getDestination().getAddress(), null);
+      wallet.getTxProof("invalid_tx_id", tx.getPayments().get(0).getAddress(), null);
       fail("Should throw exception for invalid key");
     } catch (MoneroRpcException e) {
       assertEquals(-8, (int) e.getRpcCode());
@@ -689,7 +686,7 @@ public class TestMoneroWallet {
     
     // test check with invalid tx id
     try {
-      wallet.checkTxProof("invalid_tx_id", tx.getPayments().get(0).getDestination().getAddress(), null, signature);
+      wallet.checkTxProof("invalid_tx_id", tx.getPayments().get(0).getAddress(), null, signature);
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
       assertEquals(-8, (int) e.getRpcCode());
@@ -704,15 +701,15 @@ public class TestMoneroWallet {
     }
     
     // test check with wrong message
-    signature = wallet.getTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the right message");
-    check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the wrong message", signature);
+    signature = wallet.getTxProof(tx.getId(), tx.getPayments().get(0).getAddress(), "This is the right message");
+    check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getAddress(), "This is the wrong message", signature);
     assertFalse(check.getIsGood());
     TestUtils.testCheckTx(tx, check);
     
     // test check with wrong signature
-    String wrongSignature = wallet.getTxProof(txs.get(1).getId(), txs.get(1).getPayments().get(0).getDestination().getAddress(), "This is the right message");
+    String wrongSignature = wallet.getTxProof(txs.get(1).getId(), txs.get(1).getPayments().get(0).getAddress(), "This is the right message");
     try {
-      check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the right message", wrongSignature);  
+      check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getAddress(), "This is the right message", wrongSignature);  
       assertFalse(check.getIsGood());
     } catch (MoneroRpcException e) {
       assertEquals(-1, (int) e.getRpcCode()); // TODO: sometimes comes back bad, sometimes throws exception.  ensure txs come from different addresses?

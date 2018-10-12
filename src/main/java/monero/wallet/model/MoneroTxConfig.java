@@ -48,9 +48,8 @@ public class MoneroTxConfig {
    * @param mixin is the transaction mixin to use
    */
   public MoneroTxConfig(String address, String paymentId, BigInteger amount, Integer mixin) {
-    MoneroSubaddress destination = new MoneroSubaddress(address);
     MoneroPayment payment = new MoneroPayment();
-    payment.setDestination(destination);
+    payment.setAddress(address);
     payment.setAmount(amount);
     this.payments = new ArrayList<MoneroPayment>();
     this.payments.add(payment);

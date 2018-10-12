@@ -394,8 +394,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (txMaps != null) {
           for (Map<String, Object> txMap : txMaps) {
             MoneroTx tx = txMapToTx(txMap, MoneroTxType.INCOMING, this);
-            String address = getAddress(accountIdx, tx.getPayments().get(0).getDestination().getSubaddrIndex());
-            tx.getPayments().get(0).getDestination().setAddress(address);
+            String address = getAddress(accountIdx, tx.getPayments().get(0).getSubaddrIndex());
+            tx.getPayments().get(0).setAddress(address);
             addTx(txs, tx, false);
           }
         }
@@ -432,7 +432,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     paramMap.put("destinations", destinationMaps);
     for (MoneroPayment payment : config.getPayments()) {
       Map<String, Object> destinationMap = new HashMap<String, Object>();
-      destinationMap.put("address", payment.getDestination().getAddress());
+      destinationMap.put("address", payment.getAddress());
       destinationMap.put("amount", payment.getAmount());
       destinationMaps.add(destinationMap);
     }
@@ -501,7 +501,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     paramMap.put("destinations", destinationMaps);
     for (MoneroPayment payment : config.getPayments()) {
       Map<String, Object> destinationMap = new HashMap<String, Object>();
-      destinationMap.put("address", payment.getDestination().getAddress());
+      destinationMap.put("address", payment.getAddress());
       destinationMap.put("amount", payment.getAmount());
       destinationMaps.add(destinationMap);
     }
@@ -562,7 +562,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // common request params
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("address", config.getPayments().get(0).getDestination().getAddress());
+    params.put("address", config.getPayments().get(0).getAddress());
     params.put("priority", config.getPriority());
     params.put("mixin", config.getMixin());
     params.put("unlock_time", config.getUnlockTime());
@@ -1173,12 +1173,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
         else {
           if (payment == null) payment = new MoneroPayment();
-          MoneroSubaddress destination = payment.getDestination();
-          if (destination == null) {
-            destination = new MoneroSubaddress();
-            payment.setDestination(destination);
-          }
-          destination.setAddress((String) val);
+          payment.setAddress((String) val);
         }
       }
       else if (key.equalsIgnoreCase("key_image")) {
@@ -1210,11 +1205,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           MoneroPayment aPayment = new MoneroPayment();
           payments.add(aPayment);
           for (String paymentKey : paymentMap.keySet()) {
-            if (paymentKey.equals("address")) {
-              MoneroSubaddress subaddress = new MoneroSubaddress();
-              subaddress.setAddress((String) paymentMap.get(paymentKey));
-              aPayment.setDestination(subaddress);
-            }
+            if (paymentKey.equals("address")) aPayment.setAddress((String) paymentMap.get(paymentKey));
             else if (paymentKey.equals("amount")) aPayment.setAmount((BigInteger) paymentMap.get(paymentKey));
             else throw new MoneroException("Unrecognized transaction destination field: " + paymentKey);
           }
@@ -1238,13 +1229,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     } else {
       assertNotNull(payment);
       assertEquals(1, tx.getPayments().size());
-      MoneroSubaddress destination = payment.getDestination();
-      if (destination == null) {
-        destination = new MoneroSubaddress();
-        payment.setDestination(destination);
-      }
-      destination.setAccountIndex(accountIdx);
-      destination.setSubaddrIndex(subaddressIdx);
+      payment.setAccountIndex(accountIdx);
+      payment.setSubaddrIndex(subaddressIdx);
     }
     if (type == MoneroTxType.MEMPOOL && tx.getPayments() != null) {
       for (MoneroPayment aPayment : tx.getPayments()) aPayment.setIsSpent(false); // mempool payments are not spent

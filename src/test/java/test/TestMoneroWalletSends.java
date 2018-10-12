@@ -152,10 +152,9 @@ public class TestMoneroWalletSends {
         assertEquals(1, tx.getPayments().size());
         for (MoneroPayment payment : tx.getPayments()) {
           assertTrue(tx == payment.getTx());
-          assertNotNull(payment.getDestination());
-          assertEquals(address, payment.getDestination().getAddress());
-          assertNull(payment.getDestination().getAccountIndex());
-          assertNull(payment.getDestination().getSubaddrIndex());
+          assertEquals(address, payment.getAddress());
+          assertNull(payment.getAccountIndex());
+          assertNull(payment.getSubaddrIndex());
           assertEquals(sendAmount, payment.getAmount());
           assertNull(payment.getIsSpent());
         }
@@ -226,8 +225,7 @@ public class TestMoneroWalletSends {
     for (int i = 0; i < destinationAddresses.size(); i++) {
       MoneroPayment payment = new MoneroPayment();
       payments.add(payment);
-      MoneroSubaddress destination = new MoneroSubaddress(destinationAddresses.get(i));
-      payment.setDestination(destination);
+      payment.setAddress(destinationAddresses.get(i));
       payment.setAmount(sendAmountPerSubaddress);
     }
     MoneroTxConfig config = new MoneroTxConfig();
@@ -264,7 +262,7 @@ public class TestMoneroWalletSends {
         BigInteger paymentSum = BigInteger.valueOf(0);
         for (MoneroPayment payment : tx.getPayments()) {
           assertTrue(tx == payment.getTx());
-          assertTrue(destinationAddresses.contains(payment.getDestination().getAddress()));
+          assertTrue(destinationAddresses.contains(payment.getAddress()));
           paymentSum = paymentSum.add(payment.getAmount());
         }
         assertEquals(tx.getId(), tx.getTotalAmount(), paymentSum);  // assert that payments sum up to tx amount
@@ -382,7 +380,7 @@ public class TestMoneroWalletSends {
         assertEquals(tx.getId(), 1, tx.getPayments().size());
         BigInteger paymentSum = BigInteger.valueOf(0);
         for (MoneroPayment payment : tx.getPayments()) {
-          assertEquals(tx.getId(), address, payment.getDestination().getAddress());
+          assertEquals(tx.getId(), address, payment.getAddress());
           assertTrue(tx.getId(), tx == payment.getTx());
           paymentSum = paymentSum.add(payment.getAmount());
         }

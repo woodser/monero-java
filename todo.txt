@@ -1,5 +1,6 @@
 v0.13.0
-embed payment destination info directly in payment?
+embed src fields subaddress into tx
+ignoring multisig_txset and unsigned_txset on send tests
 new api calls
 payments are comprised of outputs
 don't call accounts / subaddresses that are unused
