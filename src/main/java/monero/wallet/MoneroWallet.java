@@ -9,11 +9,12 @@ import java.util.Map;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
+import monero.wallet.model.MoneroCheckReserve;
+import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImage;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
-import monero.wallet.model.MoneroTxCheck;
 import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxFilter;
 import monero.wallet.model.MoneroUri;
@@ -415,9 +416,9 @@ public interface MoneroWallet {
    * @param txId specifies the transaction to check
    * @param txKey is the transaction's secret key
    * @param address is the destination public address of the transaction
-   * @return MoneroTxCheck is the result of the check
+   * @return MoneroCheckTx is the result of the check
    */
-  public MoneroTxCheck checkTxKey(String txId, String txKey, String address);
+  public MoneroCheckTx checkTxKey(String txId, String txKey, String address);
   
   /**
    * Get a transaction signature to prove it.
@@ -436,9 +437,9 @@ public interface MoneroWallet {
    * @param address is the destination public address of the transaction
    * @param message is a message included with the signature to further authenticate the proof (optional)
    * @param signature is the transaction signature to confirm
-   * @return MoneroTxCheck is the result of the check
+   * @return MoneroCheckTx is the result of the check
    */
-  public MoneroTxCheck checkTxProof(String txId, String address, String message, String signature);
+  public MoneroCheckTx checkTxProof(String txId, String address, String message, String signature);
   
   /**
    * Generate a signature to prove a spend. Unlike proving a transaction, it does not require the destination public address.
@@ -483,9 +484,9 @@ public interface MoneroWallet {
    * @param address is the public wallet address
    * @param message is a message included with the signature to further authenticate the proof (optional)
    * @param signature is the reserve proof signature to check
-   * @return MoneroTxCheck is the result of checking the signature proof
+   * @return MoneroCheckReserve is the result of checking the signature proof
    */
-  public MoneroTxCheck checkReserveProof(String address, String message, String signature);
+  public MoneroCheckReserve checkReserveProof(String address, String message, String signature);
 
   /**
    * Returns a signed set of key images.
