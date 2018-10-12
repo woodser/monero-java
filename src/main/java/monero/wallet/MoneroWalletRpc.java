@@ -458,8 +458,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setMixin(config.getMixin());
     tx.setPayments(config.getPayments());
     tx.setPaymentId(config.getPaymentId());
-    MoneroSubaddress srcSubaddress = new MoneroSubaddress(accountIdx, 0, getAddress(accountIdx, 0));  // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
-    tx.setSrcSubaddress(srcSubaddress);
+    tx.setSrcAddress(getAddress(accountIdx, 0));
+    tx.setSrcAccountIndex(accountIdx);
+    tx.setSrcSubaddrIndex(0); // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
     if (tx.getType() != MoneroTxType.NOT_RELAYED) {
       if (tx.getTimestamp() == null) tx.setTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
       if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
@@ -528,8 +529,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setMixin(config.getMixin());
       tx.setPayments(config.getPayments());
       tx.setPaymentId(config.getPaymentId());
-      MoneroSubaddress srcSubaddress = new MoneroSubaddress(accountIdx, 0, getAddress(accountIdx, 0));  // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
-      tx.setSrcSubaddress(srcSubaddress);
+      tx.setSrcAddress(getAddress(accountIdx, 0));
+      tx.setSrcAccountIndex(accountIdx);
+      tx.setSrcSubaddrIndex(0); // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
       if (tx.getType() != MoneroTxType.NOT_RELAYED) {
         if (tx.getTimestamp() == null) tx.setTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
         if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
@@ -1163,14 +1165,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
       }
       else if (key.equals("address")) {
-        if (isSend) {
-          MoneroSubaddress subaddress = tx.getSrcSubaddress();
-          if (subaddress == null) {
-            subaddress = new MoneroSubaddress();
-            tx.setSrcSubaddress(subaddress);
-          }
-          subaddress.setAddress((String) val);
-        }
+        if (isSend) tx.setSrcAddress((String) val);
         else {
           if (payment == null) payment = new MoneroPayment();
           payment.setAddress((String) val);
@@ -1219,13 +1214,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (tx.getPayments() != null) assertNull(payment);
     else if (payment != null) tx.setPayments(new ArrayList<MoneroPayment>(Arrays.asList(payment)));
     if (isSend) {
-      MoneroSubaddress subaddress = tx.getSrcSubaddress();
-      if (subaddress == null) {
-        subaddress = new MoneroSubaddress();
-        tx.setSrcSubaddress(subaddress);
-      }
-      subaddress.setAccountIndex(accountIdx);
-      subaddress.setSubaddrIndex(subaddressIdx);
+      tx.setSrcAccountIndex(accountIdx);
+      tx.setSrcSubaddrIndex(subaddressIdx);
     } else {
       assertNotNull(payment);
       assertEquals(1, tx.getPayments().size());
@@ -1272,9 +1262,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     for (int i = 0; i < ids.size(); i++) {
       MoneroTx tx = new MoneroTx();
       txs.add(tx);
-      int subaddressIdx = 0;  // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
-      MoneroSubaddress srcSubaddress = new MoneroSubaddress(accountIdx, subaddressIdx, wallet.getAddress(accountIdx, subaddressIdx)); // TODO: batch fetch addresses outside of this
-      tx.setSrcSubaddress(srcSubaddress);
+      int subaddrIdx = 0;    // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
+      tx.setSrcAddress(wallet.getAddress(accountIdx, subaddrIdx));
+      tx.setSrcAccountIndex(accountIdx);
+      tx.setSrcSubaddrIndex(subaddrIdx);
       tx.setTotalAmount(amounts.get(i));
       tx.setFee(fees.get(i));
       tx.setId(ids.get(i));

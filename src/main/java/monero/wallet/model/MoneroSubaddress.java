@@ -1,7 +1,5 @@
 package monero.wallet.model;
 
-import static org.junit.Assert.assertEquals;
-
 import java.math.BigInteger;
 
 import common.utils.StringUtils;
@@ -97,23 +95,6 @@ public class MoneroSubaddress {
 
   public void setIsUsed(Boolean isUsed) {
     this.isUsed = isUsed;
-  }
-  
-  public void merge(MoneroSubaddress subaddress) {
-    if (accountIndex == null) accountIndex = subaddress.getAccountIndex();
-    else if (subaddress.getAccountIndex() != null) assertEquals(accountIndex, subaddress.getAccountIndex());
-    if (subaddrIndex == null) subaddrIndex = subaddress.getSubaddrIndex();
-    else if (subaddress.getSubaddrIndex() != null) assertEquals(subaddrIndex, subaddress.getSubaddrIndex());
-    if (label == null) label = subaddress.getLabel();
-    else if (subaddress.getLabel() != null) assertEquals(label, subaddress.getLabel());
-    if (address == null) address = subaddress.getAddress();
-    else if (subaddress.getAddress() != null) assertEquals(address, subaddress.getAddress());
-    if (balance == null) balance = subaddress.getBalance();
-    else if (subaddress.getBalance() != null) assertEquals(balance, subaddress.getBalance());
-    if (unlockedBalance == null) unlockedBalance = subaddress.getUnlockedBalance();
-    else if (subaddress.getUnlockedBalance() != null) assertEquals(unlockedBalance, subaddress.getUnlockedBalance());
-    if (numUnspentOutputs == null) numUnspentOutputs = subaddress.getNumUnspentOutputs();
-    else if (subaddress.getNumUnspentOutputs() != null) assertEquals(numUnspentOutputs, subaddress.getNumUnspentOutputs());
   }
 
   public String toString() {
