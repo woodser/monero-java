@@ -157,11 +157,10 @@ public class TestUtils {
     // test outgoing
     if (tx.getType() == MoneroTxType.OUTGOING || tx.getType() == MoneroTxType.PENDING) {
       assertNotNull(tx.getId());
-      assertNotNull(tx.getId(), tx.getSrcSubaddress());
-      assertNotNull(tx.getId(), tx.getSrcSubaddress().getAccountIndex());
-      assertNotNull(tx.getId(), tx.getSrcSubaddress().getSubaddrIndex());
-      assertNotNull(tx.getId(), tx.getSrcSubaddress().getAddress());
-      assertEquals(wallet.getAddress(tx.getSrcSubaddress().getAccountIndex(), tx.getSrcSubaddress().getSubaddrIndex()), tx.getSrcSubaddress().getAddress());
+      assertNotNull(tx.getId(), tx.getSrcAccountIndex());
+      assertNotNull(tx.getId(), tx.getSrcSubaddrIndex());
+      assertNotNull(tx.getId(), tx.getSrcAddress());
+      assertEquals(wallet.getAddress(tx.getSrcAccountIndex(), tx.getSrcSubaddrIndex()), tx.getSrcAddress());
       assertNotNull(tx.getId(), tx.getTotalAmount());
       assertNotEquals(tx.getId(), MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());
       assertNotNull(tx.getId(), tx.getFee());
@@ -213,7 +212,9 @@ public class TestUtils {
     // test incoming
     if (tx.getType() == MoneroTxType.INCOMING || tx.getType() == MoneroTxType.MEMPOOL) {
       assertNotNull(tx.getId(), tx.getId());
-      assertNull(tx.getId(), tx.getSrcSubaddress());
+      assertNull(tx.getSrcAddress());
+      assertNull(tx.getSrcAccountIndex());
+      assertNull(tx.getSrcSubaddrIndex());
       assertNotNull(tx.getId(), tx.getTotalAmount());
       assertNotEquals(tx.getId(), MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());
       assertNull(tx.getId(), tx.getMixin());
@@ -247,8 +248,6 @@ public class TestUtils {
         assertNotNull(tx.getId(), payment.getAddress());
         assertNotNull(tx.getId(), payment.getAccountIndex());
         assertNotNull(tx.getId(), payment.getSubaddrIndex());
-        
-        
         assertEquals(tx.getId(), wallet.getAddress(payment.getAccountIndex(), payment.getSubaddrIndex()), payment.getAddress());
         assertNotNull(tx.getId(), payment.getAmount());
         assertTrue(tx.getId(), payment.getAmount().longValue() > 0);
@@ -262,12 +261,11 @@ public class TestUtils {
     // test failed
     if (tx.getType() == MoneroTxType.FAILED) {
       assertNotNull(tx.getId());
-      MoneroSubaddress srcSubaddress = tx.getSrcSubaddress();
-      assertNotNull(tx.getId(), srcSubaddress);
-      assertNotNull(tx.getId(), srcSubaddress.getAccountIndex());
-      assertNotNull(tx.getId(), srcSubaddress.getSubaddrIndex());
-      assertNotNull(tx.getId(), srcSubaddress.getAddress());
-      assertEquals(tx.getId(), wallet.getAddress(srcSubaddress.getAccountIndex(), srcSubaddress.getSubaddrIndex()), srcSubaddress.getAddress());
+      assertNotNull(tx.getId(), tx.getSrcAddress());
+      assertNotNull(tx.getId(), tx.getSrcAccountIndex());
+      assertNotNull(tx.getId(), tx.getSrcSubaddrIndex());
+      assertEquals(tx.getId(), wallet.getAddress(tx.getSrcAccountIndex(), tx.getSrcSubaddrIndex()), tx.getSrcAddress());
+      assertEquals(tx.getId(), 0, (int) tx.getSrcSubaddrIndex());
       assertNotNull(tx.getId(), tx.getTotalAmount());
       assertNotEquals(tx.getId(), MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId());
       assertNotNull(tx.getId(), tx.getFee());
@@ -293,13 +291,11 @@ public class TestUtils {
     testCommonTx(tx);
     assertNotNull(tx.getId());
     assertEquals(tx.getId(), MoneroTxType.PENDING, tx.getType());
-    MoneroSubaddress srcSubaddress = tx.getSrcSubaddress();
-    assertNotNull(tx.getId(), srcSubaddress);
-    assertNotNull(tx.getId(), srcSubaddress.getAccountIndex());
-    assertNotNull(tx.getId(), srcSubaddress.getSubaddrIndex());
-    assertEquals(tx.getId(), 0, (int) srcSubaddress.getSubaddrIndex());
-    assertNotNull(tx.getId(), srcSubaddress.getAddress());
-    assertEquals(tx.getId(), wallet.getAddress(srcSubaddress.getAccountIndex(), srcSubaddress.getSubaddrIndex()), srcSubaddress.getAddress());
+    assertNotNull(tx.getId(), tx.getSrcAddress());
+    assertNotNull(tx.getId(), tx.getSrcAccountIndex());
+    assertNotNull(tx.getId(), tx.getSrcSubaddrIndex());
+    assertEquals(tx.getId(), wallet.getAddress(tx.getSrcAccountIndex(), tx.getSrcSubaddrIndex()), tx.getSrcAddress());
+    assertEquals(tx.getId(), 0, (int) tx.getSrcSubaddrIndex());
     assertNotNull(tx.getId(), tx.getTotalAmount());
     if (MoneroTx.DEFAULT_PAYMENT_ID.equals(config.getPaymentId())) assertNull(tx.getId(), tx.getPaymentId());
     else assertEquals(tx.getId(), config.getPaymentId(), tx.getPaymentId());
@@ -342,14 +338,12 @@ public class TestUtils {
     testCommonTx(tx);
     assertNotNull(tx.getId());
     assertEquals(tx.getId(), MoneroTxType.NOT_RELAYED, tx.getType());
-    MoneroSubaddress srcSubaddress = tx.getSrcSubaddress();
-    assertNotNull(tx.getId(), srcSubaddress);
-    assertNotNull(tx.getId(), srcSubaddress.getAccountIndex());
-    assertNotNull(tx.getId(), srcSubaddress.getSubaddrIndex());
-    assertEquals(tx.getId(), 0, (int) srcSubaddress.getSubaddrIndex());
-    assertNotNull(tx.getId(), srcSubaddress.getAddress());
-    assertEquals(tx.getId(), wallet.getAddress(srcSubaddress.getAccountIndex(), srcSubaddress.getSubaddrIndex()), srcSubaddress.getAddress());
-    assertEquals(tx.getId(), config.getAccountIndex(), tx.getSrcSubaddress().getAccountIndex());
+    assertNotNull(tx.getId(), tx.getSrcAddress());
+    assertNotNull(tx.getId(), tx.getSrcAccountIndex());
+    assertNotNull(tx.getId(), tx.getSrcSubaddrIndex());
+    assertEquals(tx.getId(), wallet.getAddress(tx.getSrcAccountIndex(), tx.getSrcSubaddrIndex()), tx.getSrcAddress());
+    assertEquals(tx.getId(), 0, (int) tx.getSrcSubaddrIndex());
+    assertEquals(tx.getId(), config.getAccountIndex(), tx.getSrcAccountIndex());
     assertNotNull(tx.getId(), tx.getTotalAmount());
     if (MoneroTx.DEFAULT_PAYMENT_ID.equals(config.getPaymentId())) assertNull(tx.getId(), tx.getPaymentId());
     else assertEquals(tx.getId(), config.getPaymentId(), tx.getPaymentId());

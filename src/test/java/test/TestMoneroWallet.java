@@ -272,7 +272,7 @@ public class TestMoneroWallet {
       for (MoneroTx tx : txs) {
         TestUtils.testGetTx(tx, null, wallet);
         if (MoneroUtils.isSendTx(tx.getType())) {
-          assertEquals(account.getIndex(), tx.getSrcSubaddress().getAccountIndex());
+          assertEquals(account.getIndex(), tx.getSrcAccountIndex());
         } else {
           for (MoneroPayment payment : tx.getPayments()) {
             assertEquals(account.getIndex(), payment.getAccountIndex());
@@ -293,7 +293,7 @@ public class TestMoneroWallet {
         for (MoneroTx tx : wallet.getTxs(accountIdx, subaddressIdx)) {
           TestUtils.testGetTx(tx, null, wallet);
           if (MoneroUtils.isSendTx(tx.getType()))  {
-            assertEquals(accountIdx, (int) tx.getSrcSubaddress().getAccountIndex());
+            assertEquals(accountIdx, (int) tx.getSrcAccountIndex());
           } else {
             for (MoneroPayment payment : tx.getPayments()) {
               assertEquals(accountIdx, (int) payment.getAccountIndex());
@@ -772,7 +772,7 @@ public class TestMoneroWallet {
     MoneroCheckReserve check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", signature);
     assertTrue(check.getIsGood());
     TestUtils.testCheckReserve(check);
-    assertEquals(wallet.getBalance(), check.getAmountTotal());
+    assertEquals(wallet.getBalance(), check.getAmountTotal());  // TODO: fails after send tests
     
     // test different wallet address
     wallet.openWallet(TestUtils.WALLET_NAME_2, TestUtils.WALLET_PW);

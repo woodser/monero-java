@@ -143,8 +143,8 @@ public class TestMoneroWalletSends {
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       TestUtils.testSendTx(tx, config, !canSplit, !canSplit, wallet);
-      assertEquals(fromAccount.getIndex(), tx.getSrcSubaddress().getAccountIndex());
-      assertEquals(0, (int) tx.getSrcSubaddress().getSubaddrIndex()); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
+      assertEquals(fromAccount.getIndex(), tx.getSrcAccountIndex());
+      assertEquals(0, (int) tx.getSrcSubaddrIndex()); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
       assertEquals(sendAmount, tx.getTotalAmount());
       
       // test tx payments

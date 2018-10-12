@@ -42,7 +42,9 @@ public class MoneroTx {
   }
   
   private String id;
-  private MoneroSubaddress srcSubaddress; // TODO (monero-wallet-rpc): transactions may originate from multiple subaddresses but querying only provides subaddress 0
+  private String srcAddress;
+  private Integer srcAccountIndex;
+  private Integer srcSubaddrIndex; // TODO (monero-wallet-rpc): transactions may originate from multiple subaddresses but querying only provides subaddress 0
   private BigInteger totalAmount;
 	private List<MoneroPayment> payments;
 	private String paymentId;
@@ -73,12 +75,28 @@ public class MoneroTx {
 	  this.id = id;
 	}
 
-  public MoneroSubaddress getSrcSubaddress() {
-    return srcSubaddress;
+  public String getSrcAddress() {
+    return srcAddress;
   }
 
-  public void setSrcSubaddress(MoneroSubaddress srcSubaddress) {
-    this.srcSubaddress = srcSubaddress;
+  public void setSrcAddress(String srcAddress) {
+    this.srcAddress = srcAddress;
+  }
+
+  public Integer getSrcAccountIndex() {
+    return srcAccountIndex;
+  }
+
+  public void setSrcAccountIndex(Integer srcAccountIndex) {
+    this.srcAccountIndex = srcAccountIndex;
+  }
+
+  public Integer getSrcSubaddrIndex() {
+    return srcSubaddrIndex;
+  }
+
+  public void setSrcSubaddrIndex(Integer srcSubaddrIndex) {
+    this.srcSubaddrIndex = srcSubaddrIndex;
   }
 
   public BigInteger getTotalAmount() {
@@ -230,8 +248,12 @@ public class MoneroTx {
   public void merge(MoneroTx tx) {
     if (id == null) id = tx.getId();
     else if (tx.getId() != null) assertEquals("IDs", id, tx.getId());
-    if (srcSubaddress == null) srcSubaddress = tx.getSrcSubaddress();
-    else if (tx.getSrcSubaddress() != null) srcSubaddress.merge(tx.getSrcSubaddress());
+    if (srcAddress == null) srcAddress = tx.getSrcAddress();
+    else if (tx.getSrcAddress() != null) assertEquals(srcAddress, tx.getSrcAddress());
+    if (srcAccountIndex == null) srcAccountIndex = tx.getSrcAccountIndex();
+    else if (tx.getSrcAccountIndex() != null) assertEquals(srcAccountIndex, tx.getSrcAccountIndex());
+    if (srcSubaddrIndex == null) srcSubaddrIndex = tx.getSrcSubaddrIndex();
+    else if (tx.getSrcSubaddrIndex() != null) assertEquals(srcSubaddrIndex, tx.getSrcSubaddrIndex());
     if (paymentId == null) paymentId = tx.getPaymentId();
     else if (tx.getPaymentId() != null) assertEquals(tx.getId(), paymentId, tx.getPaymentId());
     if (fee == null) fee = tx.getFee();
@@ -310,7 +332,9 @@ public class MoneroTx {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("ID: " + id + "\n");
-    sb.append("Source subaddress: " + (srcSubaddress == null ? "null" : "\n" + srcSubaddress.toString(1) + "\n"));
+    sb.append("Src address: " + srcAddress + "\n");
+    sb.append("Src account index: " + srcAccountIndex + "\n");
+    sb.append("Src Subaddr index: " + srcSubaddrIndex + "\n");
     sb.append("Total amount: " + totalAmount + "\n");
     if (payments != null) {
       sb.append("Payments:\n");
@@ -357,7 +381,9 @@ public class MoneroTx {
     result = prime * result + ((paymentId == null) ? 0 : paymentId.hashCode());
     result = prime * result + ((payments == null) ? 0 : payments.hashCode());
     result = prime * result + ((size == null) ? 0 : size.hashCode());
-    result = prime * result + ((srcSubaddress == null) ? 0 : srcSubaddress.hashCode());
+    result = prime * result + ((srcAccountIndex == null) ? 0 : srcAccountIndex.hashCode());
+    result = prime * result + ((srcAddress == null) ? 0 : srcAddress.hashCode());
+    result = prime * result + ((srcSubaddrIndex == null) ? 0 : srcSubaddrIndex.hashCode());
     result = prime * result + ((timestamp == null || !MoneroUtils.isConfirmed(type)) ? 0 : timestamp.hashCode()); // ignore timestamps if not confirmed
     result = prime * result + ((totalAmount == null) ? 0 : totalAmount.hashCode());
     result = prime * result + ((type == null) ? 0 : type.hashCode());
@@ -413,9 +439,15 @@ public class MoneroTx {
     if (size == null) {
       if (other.size != null) return false;
     } else if (!size.equals(other.size)) return false;
-    if (srcSubaddress == null) {
-      if (other.srcSubaddress != null) return false;
-    } else if (!srcSubaddress.equals(other.srcSubaddress)) return false;
+    if (srcAccountIndex == null) {
+      if (other.srcAccountIndex != null) return false;
+    } else if (!srcAccountIndex.equals(other.srcAccountIndex)) return false;
+    if (srcAddress == null) {
+      if (other.srcAddress != null) return false;
+    } else if (!srcAddress.equals(other.srcAddress)) return false;
+    if (srcSubaddrIndex == null) {
+      if (other.srcSubaddrIndex != null) return false;
+    } else if (!srcSubaddrIndex.equals(other.srcSubaddrIndex)) return false;
     if (timestamp == null) {
       if (other.timestamp != null) return false;
     } else if (MoneroUtils.isConfirmed(type) && !timestamp.equals(other.timestamp)) return false;  // only must be the same if confirmed
@@ -427,5 +459,5 @@ public class MoneroTx {
       if (other.unlockTime != null) return false;
     } else if (!unlockTime.equals(other.unlockTime)) return false;
     return true;
-  }
+  }  
 }
