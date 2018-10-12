@@ -30,6 +30,8 @@ import monero.utils.MoneroUtils;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
+import monero.wallet.model.MoneroCheckReserve;
+import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroException;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImage;
@@ -37,7 +39,6 @@ import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTx.MoneroTxType;
-import monero.wallet.model.MoneroTxCheck;
 import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxFilter;
 import monero.wallet.model.MoneroUri;
@@ -750,7 +751,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroTxCheck checkTxKey(String txId, String txKey, String address) {
+  public MoneroCheckTx checkTxKey(String txId, String txKey, String address) {
     
     // send request
     Map<String, Object> params = new HashMap<String, Object>();
@@ -761,7 +762,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     
     // interpret result
-    MoneroTxCheck check = new MoneroTxCheck();
+    MoneroCheckTx check = new MoneroCheckTx();
     check.setIsGood(true);
     check.setNumConfirmations(((BigInteger) resultMap.get("confirmations")).intValue());
     check.setIsInPool((Boolean) resultMap.get("in_pool"));
@@ -783,7 +784,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroTxCheck checkTxProof(String txId, String address, String message, String signature) {
+  public MoneroCheckTx checkTxProof(String txId, String address, String message, String signature) {
 
     // send request
     Map<String, Object> params = new HashMap<String, Object>();
@@ -796,7 +797,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // interpret result
     boolean isGood = (boolean) resultMap.get("good");
-    MoneroTxCheck check = new MoneroTxCheck();
+    MoneroCheckTx check = new MoneroCheckTx();
     check.setIsGood(isGood);
     if (isGood) {
       check.setNumConfirmations(((BigInteger) resultMap.get("confirmations")).intValue());
@@ -854,7 +855,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroTxCheck checkReserveProof(String address, String message, String signature) {
+  public MoneroCheckReserve checkReserveProof(String address, String message, String signature) {
     
     // send request
     Map<String, Object> params = new HashMap<String, Object>();
@@ -866,7 +867,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // interpret results
     boolean isGood = (boolean) resultMap.get("good");
-    MoneroTxCheck check = new MoneroTxCheck();
+    MoneroCheckReserve check = new MoneroCheckReserve();
     check.setIsGood(isGood);
     if (isGood) {
       check.setAmountSpent((BigInteger) resultMap.get("spent"));

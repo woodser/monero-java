@@ -22,11 +22,12 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
+import monero.wallet.model.MoneroCheckReserve;
+import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTx.MoneroTxType;
-import monero.wallet.model.MoneroTxCheck;
 import monero.wallet.model.MoneroTxConfig;
 
 /**
@@ -410,7 +411,7 @@ public class TestUtils {
     return null;
   }
   
-  public static void testTxCheck(MoneroTx tx, MoneroTxCheck check) {
+  public static void testCheckTx(MoneroTx tx, MoneroCheckTx check) {
     assertNotNull(check.getIsGood());
     if (check.getIsGood()) {
       assertNotNull(tx.getId(), check.getNumConfirmations());
@@ -423,6 +424,19 @@ public class TestUtils {
       assertNull(tx.getId(), check.getNumConfirmations());
       assertNull(tx.getId(), check.getIsInPool());
       assertNull(tx.getId(), check.getAmountReceived());
+    }
+  }
+  
+  public static void testCheckReserve(MoneroCheckReserve check) {
+    assertNotNull(check.getIsGood());
+    if (check.getIsGood()) {
+      assertNotNull(check.getAmountSpent());
+      assertEquals(0, check.getAmountSpent().compareTo(BigInteger.valueOf(0))); // TODO (monero-wallet-rpc): ever return non-zero spent?
+      assertNotNull(check.getAmountTotal());
+      assertTrue(check.getAmountTotal().compareTo(BigInteger.valueOf(0)) >= 0);
+    } else {
+      assertNull(check.getAmountSpent());
+      assertNull(check.getAmountTotal());
     }
   }
 }

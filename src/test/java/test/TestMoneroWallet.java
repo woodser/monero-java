@@ -30,13 +30,14 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
+import monero.wallet.model.MoneroCheckReserve;
+import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImage;
 import monero.wallet.model.MoneroPayment;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTx.MoneroTxType;
-import monero.wallet.model.MoneroTxCheck;
 import monero.wallet.model.MoneroTxFilter;
 import monero.wallet.model.MoneroUri;
 import utils.TestUtils;
@@ -587,7 +588,7 @@ public class TestMoneroWallet {
     for (MoneroTx tx : txs) {
       String key = wallet.getTxKey(tx.getId());
       for (MoneroPayment payment : tx.getPayments()) {
-        MoneroTxCheck check = wallet.checkTxKey(tx.getId(), key, payment.getDestination().getAddress());
+        MoneroCheckTx check = wallet.checkTxKey(tx.getId(), key, payment.getDestination().getAddress());
         assertTrue(check.getIsGood());
         if (payment.getAmount().compareTo(BigInteger.valueOf(0)) > 0) {
 //        assertTrue(check.getAmountReceived().compareTo(BigInteger.valueOf(0)) > 0); // TODO (monero-wallet-rpc): indicates amount received amount is 0 despite transaction with payment to this address
@@ -596,7 +597,7 @@ public class TestMoneroWallet {
           }
         }
         else assertTrue(check.getAmountReceived().compareTo(BigInteger.valueOf(0)) == 0);
-        TestUtils.testTxCheck(tx, check);
+        TestUtils.testCheckTx(tx, check);
       }
     }
     
@@ -646,10 +647,10 @@ public class TestMoneroWallet {
       }
     }
     assertNotNull("Could not get a different address to test", differentAddress);
-    MoneroTxCheck check = wallet.checkTxKey(tx.getId(), key, differentAddress);
+    MoneroCheckTx check = wallet.checkTxKey(tx.getId(), key, differentAddress);
     assertTrue(check.getIsGood());
     assertTrue(check.getAmountReceived().compareTo(BigInteger.valueOf(0)) == 0);
-    TestUtils.testTxCheck(tx, check);
+    TestUtils.testCheckTx(tx, check);
   }
   
   @Test
@@ -667,16 +668,16 @@ public class TestMoneroWallet {
     for (MoneroTx tx : txs) {
       for (MoneroPayment payment : tx.getPayments()) {
         String signature = wallet.getTxProof(tx.getId(), payment.getDestination().getAddress(), "This transaction definitely happened.");
-        MoneroTxCheck check = wallet.checkTxProof(tx.getId(), payment.getDestination().getAddress(), "This transaction definitely happened.", signature);
-        TestUtils.testTxCheck(tx, check);
+        MoneroCheckTx check = wallet.checkTxProof(tx.getId(), payment.getDestination().getAddress(), "This transaction definitely happened.", signature);
+        TestUtils.testCheckTx(tx, check);
       }
     }
     
     // test good check without message
     MoneroTx tx = txs.get(0);
     String signature = wallet.getTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), null);
-    MoneroTxCheck check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), null, signature);
-    TestUtils.testTxCheck(tx, check);
+    MoneroCheckTx check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), null, signature);
+    TestUtils.testCheckTx(tx, check);
     
     // test get proof with invalid id
     try {
@@ -706,7 +707,7 @@ public class TestMoneroWallet {
     signature = wallet.getTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the right message");
     check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getDestination().getAddress(), "This is the wrong message", signature);
     assertFalse(check.getIsGood());
-    TestUtils.testTxCheck(tx, check);
+    TestUtils.testCheckTx(tx, check);
     
     // test check with wrong signature
     String wrongSignature = wallet.getTxProof(txs.get(1).getId(), txs.get(1).getPayments().get(0).getDestination().getAddress(), "This is the right message");
@@ -771,14 +772,10 @@ public class TestMoneroWallet {
     String signature = wallet.getReserveProof("Test message");
     
     // check proof of entire wallet
-    MoneroTxCheck check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", signature);  // TODO: primary address?
+    MoneroCheckReserve check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", signature);
     assertTrue(check.getIsGood());
-    assertNotNull(check.getAmountSpent());
-    assertEquals(0, check.getAmountSpent().compareTo(BigInteger.valueOf(0))); // TODO (monero-wallet-rpc): ever return non-zero spent?
-    assertNotNull(check.getAmountTotal());
+    TestUtils.testCheckReserve(check);
     assertEquals(wallet.getBalance(), check.getAmountTotal());
-    assertNull(check.getAmountReceived());
-    assertNull(check.getIsInPool());
     
     // test different wallet address
     wallet.openWallet(TestUtils.WALLET_NAME_2, TestUtils.WALLET_PW);
@@ -802,6 +799,7 @@ public class TestMoneroWallet {
     // test wrong message
     check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Wrong message", signature);
     assertFalse(check.getIsGood());  // TODO: specifically test reserve checks, probably separate objects
+    TestUtils.testCheckReserve(check);
     
     // test wrong signature
     try {
@@ -824,14 +822,10 @@ public class TestMoneroWallet {
       if (account.getBalance().compareTo(BigInteger.valueOf(0)) > 0) {
         BigInteger checkAmount = account.getBalance().divide(BigInteger.valueOf(2));
         signature = wallet.getReserveProof(account.getIndex(), checkAmount, msg);
-        MoneroTxCheck check = wallet.checkReserveProof(wallet.getPrimaryAddress(), msg, signature);
+        MoneroCheckReserve check = wallet.checkReserveProof(wallet.getPrimaryAddress(), msg, signature);
         assertTrue(check.getIsGood());
-        assertNotNull(check.getAmountSpent());
-        assertEquals(0, check.getAmountSpent().compareTo(BigInteger.valueOf(0))); // TODO (monero-wallet-rpc): ever return non-zero spent?
-        assertNotNull(check.getAmountTotal());
+        TestUtils.testCheckReserve(check);
         assertTrue(check.getAmountTotal().compareTo(checkAmount) >= 0);
-        assertNull(check.getAmountReceived());
-        assertNull(check.getIsInPool());
         numNonZeroTests++;
       } else {
         try {
@@ -878,8 +872,9 @@ public class TestMoneroWallet {
     }
     
     // test wrong message
-    MoneroTxCheck check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Wrong message", signature);
+    MoneroCheckReserve check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Wrong message", signature);
     assertFalse(check.getIsGood()); // TODO: specifically test reserve checks, probably separate objects
+    TestUtils.testCheckReserve(check);
     
     // test wrong signature
     try {
@@ -1251,11 +1246,11 @@ public class TestMoneroWallet {
     return txCache;
   }
   
-  private static List<MoneroSubaddress> getRandomSubaddresses(int numSubaddresses) {
-    List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
-    for (MoneroAccount account : wallet.getAccounts(true)) subaddresses.addAll(account.getSubaddresses());
-    assertTrue("Not enough subaddresses; run testSendToMultiple()", subaddresses.size() > numSubaddresses);
-    Collections.shuffle(subaddresses);
-    return subaddresses.subList(0,  numSubaddresses);
-  }
+//  private static List<MoneroSubaddress> getRandomSubaddresses(int numSubaddresses) {
+//    List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
+//    for (MoneroAccount account : wallet.getAccounts(true)) subaddresses.addAll(account.getSubaddresses());
+//    assertTrue("Not enough subaddresses; run testSendToMultiple()", subaddresses.size() > numSubaddresses);
+//    Collections.shuffle(subaddresses);
+//    return subaddresses.subList(0,  numSubaddresses);
+//  }
 }
