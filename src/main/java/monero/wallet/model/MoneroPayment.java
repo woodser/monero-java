@@ -15,7 +15,9 @@ import common.utils.StringUtils;
 public class MoneroPayment {
 
   private MoneroTx tx;
-  private MoneroSubaddress destination;
+  private String address;
+  private Integer accountIndex;
+  private Integer subaddrIndex;
   private BigInteger amount;
   private Boolean isSpent;
   private String keyImage;
@@ -31,13 +33,29 @@ public class MoneroPayment {
   public void setTx(MoneroTx tx) {
     this.tx = tx;
   }
-
-  public MoneroSubaddress getDestination() {
-    return destination;
+  
+  public String getAddress() {
+    return address;
   }
 
-  public void setDestination(MoneroSubaddress destination) {
-    this.destination = destination;
+  public void setAddress(String address) {
+    this.address = address;
+  }
+
+  public Integer getAccountIndex() {
+    return accountIndex;
+  }
+
+  public void setAccountIndex(Integer accountIndex) {
+    this.accountIndex = accountIndex;
+  }
+
+  public Integer getSubaddrIndex() {
+    return subaddrIndex;
+  }
+
+  public void setSubaddrIndex(Integer subaddrIndex) {
+    this.subaddrIndex = subaddrIndex;
   }
 
   public BigInteger getAmount() {
@@ -74,8 +92,12 @@ public class MoneroPayment {
   public void merge(MoneroPayment payment) {
     if (tx == null) tx = payment.getTx();
     else if (payment.getTx() != null) tx.merge(payment.getTx());
-    if (destination == null) destination = payment.getDestination();
-    else if (payment.getDestination() != null) destination.merge(payment.getDestination());
+    if (address == null) address = payment.getAddress();
+    else if (payment.getAddress() != null) assertEquals(address, payment.getAddress());
+    if (accountIndex == null) accountIndex = payment.getAccountIndex();
+    else if (payment.getAccountIndex() != null) assertEquals(accountIndex, payment.getAccountIndex());
+    if (subaddrIndex == null) subaddrIndex = payment.getSubaddrIndex();
+    else if (payment.getSubaddrIndex() != null) assertEquals(subaddrIndex, payment.getSubaddrIndex());
     if (amount == null) amount = payment.getAmount();
     else if (payment.getAmount() != null) assertTrue("Amounts", amount.compareTo(payment.getAmount()) == 0);
     if (isSpent == null) isSpent = payment.getIsSpent();
@@ -90,8 +112,9 @@ public class MoneroPayment {
   
   public String toString(int offset) {
     StringBuilder sb = new StringBuilder();
-    sb.append(StringUtils.getTabs(offset) + "Destination:\n");
-    sb.append(getDestination().toString(offset + 1) + "\n");
+    sb.append(StringUtils.getTabs(offset) + "Address: " + getAmount() + "\n");
+    sb.append(StringUtils.getTabs(offset) + "Account idx: " + getAccountIndex() + "\n");
+    sb.append(StringUtils.getTabs(offset) + "Subaddr idx: " + getSubaddrIndex() + "\n");
     sb.append(StringUtils.getTabs(offset) + "Amount: " + getAmount() + "\n");
     sb.append(StringUtils.getTabs(offset) + "Is spent: " + getIsSpent() + "\n");
     sb.append(StringUtils.getTabs(offset) + "Key image: " + getKeyImage());
@@ -102,10 +125,12 @@ public class MoneroPayment {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
+    result = prime * result + ((accountIndex == null) ? 0 : accountIndex.hashCode());
+    result = prime * result + ((address == null) ? 0 : address.hashCode());
     result = prime * result + ((amount == null) ? 0 : amount.hashCode());
     result = prime * result + ((isSpent == null) ? 0 : isSpent.hashCode());
     result = prime * result + ((keyImage == null) ? 0 : keyImage.hashCode());
-    result = prime * result + ((destination == null) ? 0 : destination.hashCode());
+    result = prime * result + ((subaddrIndex == null) ? 0 : subaddrIndex.hashCode());
     return result;
   }
 
@@ -115,6 +140,12 @@ public class MoneroPayment {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroPayment other = (MoneroPayment) obj;
+    if (accountIndex == null) {
+      if (other.accountIndex != null) return false;
+    } else if (!accountIndex.equals(other.accountIndex)) return false;
+    if (address == null) {
+      if (other.address != null) return false;
+    } else if (!address.equals(other.address)) return false;
     if (amount == null) {
       if (other.amount != null) return false;
     } else if (!amount.equals(other.amount)) return false;
@@ -124,9 +155,9 @@ public class MoneroPayment {
     if (keyImage == null) {
       if (other.keyImage != null) return false;
     } else if (!keyImage.equals(other.keyImage)) return false;
-    if (destination == null) {
-      if (other.destination != null) return false;
-    } else if (!destination.equals(other.destination)) return false;
+    if (subaddrIndex == null) {
+      if (other.subaddrIndex != null) return false;
+    } else if (!subaddrIndex.equals(other.subaddrIndex)) return false;
     return true;
   }
 }
