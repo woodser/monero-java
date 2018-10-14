@@ -1207,7 +1207,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
         tx.setPayments(payments);
       }
-      else LOGGER.warn("Ignoring unexpected transaction field: '" + key + "'");
+      else LOGGER.warn("Ignoring unexpected transaction field: '" + key + "': " + val);
     }
     
     // initialize final fields
