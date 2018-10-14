@@ -1250,6 +1250,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<BigInteger> fees = (List<BigInteger>) txListMap.get("fee_list");
     List<BigInteger> amounts = (List<BigInteger>) txListMap.get("amount_list");
     //String multisigTxSet = (String) resultMap.get("multisig_txset");  // TODO (v0.13.0): what to do with this?
+    //String unsignedTxSet = (String) resultMap.get("unsigned_txset");  // TODO (v0.13.0): what to do with this?
     
     // ensure lists are same size
     Set<Integer> sizes = new HashSet<Integer>();
