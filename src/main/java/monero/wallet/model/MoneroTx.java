@@ -62,6 +62,7 @@ public class MoneroTx {
   private String metadata;
   private Integer numConfirmations;
   private Integer numEstimatedBlocksUntilConfirmed;
+  private MoneroTxSets commonTxSets;
 	
 	public MoneroTx() {
 	  super();
@@ -240,6 +241,14 @@ public class MoneroTx {
     this.numEstimatedBlocksUntilConfirmed = numEstimatedBlocksUntilConfirmed;
   }
   
+  public MoneroTxSets getCommonTxSets() {
+    return commonTxSets;
+  }
+
+  public void setCommonTxSets(MoneroTxSets commonTxSets) {
+    this.commonTxSets = commonTxSets;
+  }
+
   /**
    * Merges the given transaction into this transaction.  Does not merge payments or total amount.
    * 
@@ -298,6 +307,8 @@ public class MoneroTx {
         numEstimatedBlocksUntilConfirmed = Math.min(numEstimatedBlocksUntilConfirmed, tx.getNumEstimatedBlocksUntilConfirmed());
       }
     }
+    if (commonTxSets == null) commonTxSets = tx.getCommonTxSets();
+    else if (tx.getCommonTxSets() != null) assertEquals(commonTxSets, tx.getCommonTxSets());
   }
 
   /**
@@ -360,6 +371,9 @@ public class MoneroTx {
     sb.append("Metadata: " + metadata + "\n");
     sb.append("Num confirmations: " + numConfirmations + "\n");
     sb.append("Num estimated blocks until confirmed: " + numEstimatedBlocksUntilConfirmed);
+    sb.append("Signed tx set: " + commonTxSets == null ? "null" : commonTxSets.getSignedTxSet());
+    sb.append("Unsigned tx set: " + commonTxSets == null ? "null" : commonTxSets.getUnsignedTxSet());
+    sb.append("Multisig tx set: " + commonTxSets == null ? "null" : commonTxSets.getMultisigTxSet());
     return sb.toString();
   }
 
@@ -368,6 +382,7 @@ public class MoneroTx {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((blob == null) ? 0 : blob.hashCode());
+    result = prime * result + ((commonTxSets == null) ? 0 : commonTxSets.hashCode());
     result = prime * result + ((fee == null) ? 0 : fee.hashCode());
     result = prime * result + ((height == null) ? 0 : height.hashCode());
     result = prime * result + ((id == null) ? 0 : id.hashCode());
@@ -400,6 +415,9 @@ public class MoneroTx {
     if (blob == null) {
       if (other.blob != null) return false;
     } else if (!blob.equals(other.blob)) return false;
+    if (commonTxSets == null) {
+      if (other.commonTxSets != null) return false;
+    } else if (!commonTxSets.equals(other.commonTxSets)) return false;
     if (fee == null) {
       if (other.fee != null) return false;
     } else if (!fee.equals(other.fee)) return false;
@@ -459,5 +477,5 @@ public class MoneroTx {
       if (other.unlockTime != null) return false;
     } else if (!unlockTime.equals(other.unlockTime)) return false;
     return true;
-  }  
+  }
 }

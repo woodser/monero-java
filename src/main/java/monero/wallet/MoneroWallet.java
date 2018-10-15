@@ -339,6 +339,22 @@ public interface MoneroWallet {
    * @return List<MoneroTx> are the relayed txs
    */
   public List<MoneroTx> relayTxs(List<MoneroTx> txs);
+  
+  /**
+   * Sign transactions created on a read-only wallet (in cold-signing process).
+   * 
+   * @param unsignedTxSet are the unsigned transactions to sign
+   * @return List<MoneroTx> is data for each transaction after signing
+   */
+  public List<MoneroTx> signTxs(String unsignedTxSet);
+  
+  /**
+   * Submit previously signed transactions on a read-only wallet (in cold-signing process).
+   * 
+   * @param signedTxSet are the signed transactions to submit
+   * @return List<MoneroTx> is data for each transaction after submitting
+   */
+  public List<MoneroTx> submitTxs(String signedTxSet);
 
   /**
    * Tags accounts.

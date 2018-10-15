@@ -125,6 +125,7 @@ public class TestMoneroWalletSends {
     if (doNotRelay) {
       
       // test transactions
+      TestUtils.testCommonTxSets(txs, false, false, false);
       for (MoneroTx tx : txs) {
         TestUtils.testSendTxDoNotRelay(tx, config, !canSplit, !canSplit, wallet);
       }
@@ -141,6 +142,7 @@ public class TestMoneroWalletSends {
     
     // test transactions
     assertFalse(txs.isEmpty());
+    TestUtils.testCommonTxSets(txs, false, false, false);
     for (MoneroTx tx : txs) {
       TestUtils.testSendTx(tx, config, !canSplit, !canSplit, wallet);
       assertEquals(fromAccount.getIndex(), tx.getSrcAccountIndex());
