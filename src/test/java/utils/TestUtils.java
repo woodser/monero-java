@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -29,6 +30,7 @@ import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTx.MoneroTxType;
 import monero.wallet.model.MoneroTxConfig;
+import monero.wallet.model.MoneroTxSets;
 
 /**
  * Test utilities and constants.
@@ -427,6 +429,35 @@ public class TestUtils {
     } else {
       assertNull(check.getAmountSpent());
       assertNull(check.getAmountTotal());
+    }
+  }
+  
+  public static void testCommonTxSets(List<MoneroTx> txs, boolean hasSigned, boolean hasUnsigned, boolean hasMultisig) {
+    assertFalse(txs.isEmpty());
+    
+    // assert that all sets are equal
+    MoneroTxSets sets = null;
+    for (int i = 0; i < txs.size(); i++) {
+      if (i == 0) sets = txs.get(i).getCommonTxSets();
+      else assertTrue(txs.get(i).getCommonTxSets() == sets);
+    }
+    
+    // test expected set
+    if (!hasSigned && !hasUnsigned && !hasMultisig) assertNull(sets);
+    else {
+      assertNotNull(sets);
+      if (hasSigned) {
+        assertNotNull(sets.getSignedTxSet());
+        assertFalse(sets.getSignedTxSet().isEmpty());
+      }
+      if (hasUnsigned) {
+        assertNotNull(sets.getUnsignedTxSet());
+        assertFalse(sets.getUnsignedTxSet().isEmpty());
+      }
+      if (hasMultisig) {
+        assertNotNull(sets.getMultisigTxSet());
+        assertFalse(sets.getMultisigTxSet().isEmpty());
+      }
     }
   }
 }
