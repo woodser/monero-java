@@ -707,6 +707,16 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     return relayedTxs;
   }
+  
+  @Override
+  public List<MoneroTx> signTxs(String unsignedTxSet) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public List<MoneroTx> submitTxs(String signedTxSet) {
+    throw new RuntimeException("Not implemented");
+  }
 
   @Override
   public void tagAccounts(String tag, Collection<Integer> accountIndices) {
