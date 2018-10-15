@@ -1,6 +1,6 @@
 v0.13.0
-do_not_relay with sweep
 offline sign/submit
+do_not_relay with sweep
 multisig
 
 test wallet gets should send test transaction so unconfirmed tx can be tested with the others
