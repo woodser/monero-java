@@ -2,7 +2,7 @@
 
 This project provides Java interfaces for a Monero wallet and daemon.
 
-The interfaces rely on running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html).
+The interfaces rely on running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon](https://getmonero.org/resources/developer-guides/daemon-rpc.html).
 
 # Getting started
 
@@ -12,6 +12,7 @@ The interfaces rely on running instances of [Monero Wallet RPC](https://getmoner
 	- Create new / open existing: `./monero-wallet-cli --daemon-address http://localhost:38081 --stagenet`
 	- Restore from mnemonic seed: `./monero-wallet-cli --daemon-address http://localhost:38081 --stagenet --restore-deterministic-wallet`
 4. Start monero-wallet-rpc (requires --wallet-dir to run tests):
+	
 	e.g. For wallet name `test_wallet_1`, user `rpc_user`, password `abc123`, stagenet: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir /Applications/monero-v0.13.0.2 --log-level 4`
 5. Download the latest Java code from this GitHub repository:
 	1. Create a directory to hold project assets: `mkdir monero_wallet_java && cd monero_wallet_java`
