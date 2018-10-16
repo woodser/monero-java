@@ -23,9 +23,9 @@ The interfaces rely on running instances of [Monero Wallet RPC](https://getmoner
 
 # Documentation
 
-The main interfaces are MoneroWallet.java and MoneroDaemon.java.
+The main interfaces are [MoneroWallet.java](src/main/java/monero/wallet/MoneroWallet.java) and [MoneroDaemon.java](src/main/java/monero/daemon/MoneroDaemon.java).
 
-Javadoc is provided in the [doc](doc) folder (see [doc/index.html](doc/index.html)).
+Javadoc is provided in the [doc](doc) folder (best viewed opening [doc/index.html](doc/index.html) in a browser).
 
 # License
 
