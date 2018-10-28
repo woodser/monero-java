@@ -65,19 +65,20 @@ public class MoneroRpc {
   }
 
   public MoneroRpc(String rpcHost, int rpcPort) throws URISyntaxException {
-    this.rpcHost = rpcHost;
-    this.rpcPort = rpcPort;
-    this.rpcUri = new URI("http", null, rpcHost, rpcPort, "/json_rpc", null, null);
-    this.client = HttpClients.createDefault();
+    this(rpcHost, rpcPort, null, null);
   }
 
   public MoneroRpc(String rpcHost, int rpcPort, String username, String password) throws URISyntaxException {
     this.rpcHost = rpcHost;
     this.rpcPort = rpcPort;
     this.rpcUri = new URI("http", null, rpcHost, rpcPort, "/json_rpc", null, null);
-    CredentialsProvider creds = new BasicCredentialsProvider();
-    creds.setCredentials(new AuthScope(rpcUri.getHost(), rpcUri.getPort()), new UsernamePasswordCredentials(username, password));
-    this.client = HttpClients.custom().setDefaultCredentialsProvider(creds).build();
+    if (username != null || password != null) {
+      CredentialsProvider creds = new BasicCredentialsProvider();
+      creds.setCredentials(new AuthScope(rpcUri.getHost(), rpcUri.getPort()), new UsernamePasswordCredentials(username, password));
+      this.client = HttpClients.custom().setDefaultCredentialsProvider(creds).build();
+    } else {
+      this.client = HttpClients.createDefault();
+    }
   }
 
   public String getRpcHost() {

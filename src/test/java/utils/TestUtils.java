@@ -40,6 +40,8 @@ public class TestUtils {
   // monero-daemon-rpc endpoint configuration (adjust per your configuration)
   private static final String DAEMON_RPC_DOMAIN = "localhost";
   private static final int DAEMON_RPC_PORT = 38081;
+  private static final String DAEMON_USERNAME = null;
+  private static final String DAEMON_PASSWORD = null;
   
   // monero-wallet-rpc endpoint configuration (adjust per your configuration)
   private static final String WALLET_RPC_DOMAIN = "localhost";
@@ -69,7 +71,7 @@ public class TestUtils {
       
       // connect to daemon
       try {
-        MoneroRpc rpc = new MoneroRpc(DAEMON_RPC_DOMAIN, DAEMON_RPC_PORT);
+        MoneroRpc rpc = new MoneroRpc(DAEMON_RPC_DOMAIN, DAEMON_RPC_PORT, DAEMON_USERNAME, DAEMON_PASSWORD);
         daemon = new MoneroDaemonRpc(rpc);
       } catch (URISyntaxException e) {
         throw new RuntimeException(e);
