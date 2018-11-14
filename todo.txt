@@ -1,4 +1,5 @@
 v0.13.0
+upgrade com.fasterxml.jackson.core:jackson-databind to version 2.8.11.1 or later.
 offline sign/submit
 do_not_relay with sweep
 multisig
