@@ -571,6 +571,35 @@ public class TestMoneroWallet {
   
   
   @Test
+  public void testSetTxNote() {
+    fail("Not implemented");
+  }
+  
+  @Test
+  public void testSetTxNotes() {
+    
+    // set tx notes
+    List<MoneroTx> txs = getCachedTxs();
+    assertTrue(txs.size() >= 3);
+    List<String> txIds = new ArrayList<String>();
+    List<String> txNotes = new ArrayList<String>();
+    for (int i = 0; i < txIds.size(); i++) {
+      txIds.add(txs.get(i).getId());
+      txNotes.add("Hello " + i);
+    }
+    wallet.setTxNotes(txIds, txNotes);
+    
+    // get tx notes
+    txNotes = wallet.getTxNotes(txIds);
+    for (int i = 0; i < txIds.size(); i++) {
+      assertEquals("Hello " + i, txNotes.get(i));
+    }
+    
+    // TODO: test that get transaction has note
+  }
+  
+  
+  @Test
   public void testTxKeyProof() {
     
     // get random txs with outgoing payments
@@ -1095,34 +1124,6 @@ public class TestMoneroWallet {
       assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
       assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
     }
-  }
-  
-  @Test
-  public void testSetTxNote() {
-    fail("Not implemented");
-  }
-  
-  @Test
-  public void testSetTxNotes() {
-    
-    // set tx notes
-    List<MoneroTx> txs = getCachedTxs();
-    assertTrue(txs.size() >= 3);
-    List<String> txIds = new ArrayList<String>();
-    List<String> txNotes = new ArrayList<String>();
-    for (int i = 0; i < txIds.size(); i++) {
-      txIds.add(txs.get(i).getId());
-      txNotes.add("Hello " + i);
-    }
-    wallet.setTxNotes(txIds, txNotes);
-    
-    // get tx notes
-    txNotes = wallet.getTxNotes(txIds);
-    for (int i = 0; i < txIds.size(); i++) {
-      assertEquals("Hello " + i, txNotes.get(i));
-    }
-    
-    // TODO: test that get transaction has note
   }
   
   @Test
