@@ -223,6 +223,7 @@ public class TestMoneroWallet {
   @Test
   public void testGetBalance() {
     BigInteger balanceWallet = wallet.getBalance();
+    assertTrue(balanceWallet.compareTo(BigInteger.valueOf(0)) > 0); // wallet must have balance
     BigInteger balanceAccounts = BigInteger.valueOf(0);
     for (MoneroAccount account : wallet.getAccounts()) {
       balanceAccounts = balanceAccounts.add(account.getBalance());
