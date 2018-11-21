@@ -257,7 +257,7 @@ public class TestUtils {
         assertNotNull(tx.getId(), payment.getAmount());
         assertTrue(tx.getId(), payment.getAmount().longValue() > 0);
         assertNotNull(tx.getId(), payment.getIsSpent());
-        if (MoneroUtils.isIncoming(tx.getType())) assertNotNull(tx.getId(), payment.getKeyImage());
+        if (MoneroUtils.isConfirmed(tx.getType())) assertNotNull(tx.getId(), payment.getKeyImage());
         else assertNull(tx.getId(), payment.getKeyImage()); // TODO (monero-wallet-rpc): mempool transactions do not have key_images
       }
       assertTrue(totalAmount.compareTo(tx.getTotalAmount()) == 0);
