@@ -88,12 +88,15 @@ public class MoneroUtils {
     return true;
   }
   
-  public static boolean isSendTx(MoneroTxType type) {
-    if (type == MoneroTxType.OUTGOING || type == MoneroTxType.PENDING || type == MoneroTxType.FAILED || type == MoneroTxType.NOT_RELAYED) return true;
-    return false;
+  public static boolean isIncoming(MoneroTxType type) {
+    return type == MoneroTxType.INCOMING || type == MoneroTxType.BLOCK || type == MoneroTxType.MEMPOOL;
+  }
+  
+  public static boolean isOutgoing(MoneroTxType type) {
+    return type == MoneroTxType.OUTGOING || type == MoneroTxType.PENDING || type == MoneroTxType.FAILED || type == MoneroTxType.NOT_RELAYED;
   }
   
   public static boolean isConfirmed(MoneroTxType type) {
-    return type == MoneroTxType.OUTGOING || type == MoneroTxType.INCOMING;
+    return type == MoneroTxType.OUTGOING || type == MoneroTxType.INCOMING || type == MoneroTxType.BLOCK;
   }
 }

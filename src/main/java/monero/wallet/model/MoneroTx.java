@@ -33,12 +33,13 @@ public class MoneroTx {
    * Enumerates Monero transaction types.
    */
   public enum MoneroTxType {
-    INCOMING,
-    OUTGOING,
-    PENDING,
-    FAILED,
-    MEMPOOL,
-    NOT_RELAYED
+    INCOMING,   // incoming
+    BLOCK,      // incoming from mining
+    MEMPOOL,    // incoming in mempool
+    OUTGOING,   // outgoing
+    PENDING,    // outgoing mempool
+    FAILED,     // outgoing failed
+    NOT_RELAYED // outgoing tx not relayed
   }
   
   private String id;
@@ -371,9 +372,9 @@ public class MoneroTx {
     sb.append("Metadata: " + metadata + "\n");
     sb.append("Num confirmations: " + numConfirmations + "\n");
     sb.append("Num estimated blocks until confirmed: " + numEstimatedBlocksUntilConfirmed);
-    sb.append("Signed tx set: " + commonTxSets == null ? "null" : commonTxSets.getSignedTxSet());
-    sb.append("Unsigned tx set: " + commonTxSets == null ? "null" : commonTxSets.getUnsignedTxSet());
-    sb.append("Multisig tx set: " + commonTxSets == null ? "null" : commonTxSets.getMultisigTxSet());
+    sb.append("Signed tx set: " + (commonTxSets == null ? "null" : commonTxSets.getSignedTxSet()));
+    sb.append("Unsigned tx set: " + (commonTxSets == null ? "null" : commonTxSets.getUnsignedTxSet()));
+    sb.append("Multisig tx set: " + (commonTxSets == null ? "null" : commonTxSets.getMultisigTxSet()));
     return sb.toString();
   }
 

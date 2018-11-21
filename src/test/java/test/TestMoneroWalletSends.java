@@ -110,11 +110,6 @@ public class TestMoneroWalletSends {
     config.setAccountIndex(fromAccount.getIndex());
     config.setSubaddressIndices(Arrays.asList(fromSubaddress.getSubaddrIndex()));
     config.setDoNotRelay(doNotRelay);
-    System.out.println("Subaddress           : [" + fromAccount.getIndex() + ", " + fromSubaddress.getSubaddrIndex() + "]");
-    System.out.println("Max fee              : " + TestUtils.MAX_FEE);
-    System.out.println("Send amount          : " + sendAmount);
-    System.out.println("From balance         : " + balanceBefore);
-    System.out.println("From unlocked balance: " + unlockedBalanceBefore);
     if (canSplit) {
       txs.addAll(wallet.sendSplit(config));
     } else {
@@ -235,13 +230,6 @@ public class TestMoneroWalletSends {
     config.setAccountIndex(srcAccount.getIndex());
     config.setDestinations(payments);
     
-    System.out.println("Account              : " + config.getAccountIndex());
-    System.out.println("Max fee              : " + TestUtils.MAX_FEE);
-    System.out.println("Send amount          : " + sendAmount);
-    System.out.println("Send amount per addr : " + sendAmountPerSubaddress);
-    System.out.println("From balance         : " + srcAccount.getBalance());
-    System.out.println("From unlocked balance: " + srcAccount.getUnlockedBalance());
-    
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     if (canSplit) {
       txs.addAll(wallet.sendSplit(config));
@@ -335,11 +323,6 @@ public class TestMoneroWalletSends {
       fromBalance = fromBalance.add(subaddress.getBalance());
       fromUnlockedBalance = fromUnlockedBalance.add(subaddress.getUnlockedBalance());
     }
-    System.out.println("Source               : [" + srcAccount.getIndex() + "," + fromSubaddressIndices + "]");
-    System.out.println("Send amount          : " + sendAmount);
-    System.out.println("Total amount         : " + sendAmount.add(TestUtils.MAX_FEE));
-    System.out.println("From balance         : " + fromBalance);
-    System.out.println("From unlocked balance: " + fromUnlockedBalance);
     
     // send from the first subaddresses with unlocked balances
     String address = wallet.getPrimaryAddress();

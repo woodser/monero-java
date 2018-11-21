@@ -256,7 +256,7 @@ public class TestMoneroWallet {
       TestUtils.testGetTx(txs1.get(i), null, wallet);
       TestUtils.testGetTx(txs2.get(i), null, wallet);
       assertEquals(txs1.get(i), txs2.get(i));
-      if (!MoneroUtils.isSendTx(txs1.get(i).getType())) {
+      if (!MoneroUtils.isOutgoing(txs1.get(i).getType())) {
         for (MoneroPayment payment : txs1.get(i).getPayments()) {
          if (payment.getAccountIndex() != 0 && payment.getSubaddrIndex() != 0) nonDefaultIncoming = true;
         }
@@ -272,7 +272,7 @@ public class TestMoneroWallet {
       List<MoneroTx> txs = wallet.getTxs(account.getIndex());
       for (MoneroTx tx : txs) {
         TestUtils.testGetTx(tx, null, wallet);
-        if (MoneroUtils.isSendTx(tx.getType())) {
+        if (MoneroUtils.isOutgoing(tx.getType())) {
           assertEquals(account.getIndex(), tx.getSrcAccountIndex());
         } else {
           for (MoneroPayment payment : tx.getPayments()) {
@@ -293,7 +293,7 @@ public class TestMoneroWallet {
       for (int subaddressIdx = 0; subaddressIdx < Math.min(accounts.get(accountIdx).getSubaddresses().size(), 5); subaddressIdx++) {
         for (MoneroTx tx : wallet.getTxs(accountIdx, subaddressIdx)) {
           TestUtils.testGetTx(tx, null, wallet);
-          if (MoneroUtils.isSendTx(tx.getType()))  {
+          if (MoneroUtils.isOutgoing(tx.getType()))  {
             assertEquals(accountIdx, (int) tx.getSrcAccountIndex());
           } else {
             for (MoneroPayment payment : tx.getPayments()) {
@@ -361,14 +361,14 @@ public class TestMoneroWallet {
       BigInteger mempoolBalance = BigInteger.valueOf(0);
       for (MoneroTx tx : txs) {
         if (tx.getType() == MoneroTxType.PENDING) {
-          pendingBalance = pendingBalance.add(tx.getTotalAmount());
+          pendingBalance = pendingBalance.add(tx.getTotalAmount()); // TODO: test pending balance
         }
-        if (!MoneroUtils.isSendTx(tx.getType())) {
+        if (!MoneroUtils.isOutgoing(tx.getType())) {
           assertFalse(tx.getPayments().isEmpty());
           for (MoneroPayment payment : tx.getPayments()) {
             if (!payment.getIsSpent()) {
-              if (tx.getType() == MoneroTxType.INCOMING) incomingBalance = incomingBalance.add(payment.getAmount());
-              if (tx.getType() == MoneroTxType.MEMPOOL) mempoolBalance = mempoolBalance.add(payment.getAmount());
+              if (MoneroUtils.isConfirmed(tx.getType())) incomingBalance = incomingBalance.add(payment.getAmount());
+              else mempoolBalance = mempoolBalance.add(payment.getAmount());
             }
           }
         }
@@ -450,14 +450,21 @@ public class TestMoneroWallet {
     }
     
     // test getting incoming transactions
-    List<MoneroTx> txs = wallet.getTxs(new MoneroTxFilter(true, false, false, false, false, null, null, null, null, null, null, null));
+    List<MoneroTx> txs = wallet.getTxs(new MoneroTxFilter(true, false, false, false, false, false, null, null, null, null, null, null, null));
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       assertEquals(MoneroTxType.INCOMING, tx.getType());
     }
     
+    // test getting incoming block transactions from mining
+    txs = wallet.getTxs(new MoneroTxFilter(false, true, false, false, false, false, null, null, null, null, null, null, null));
+    assertFalse(txs.isEmpty()); // TODO: disable because may be false if no miner txs
+    for (MoneroTx tx : txs) {
+      assertEquals(MoneroTxType.BLOCK, tx.getType());
+    }
+    
     // test getting outgoing transactions
-    txs = wallet.getTxs(new MoneroTxFilter(false, true, false, false, false, null, null, null, null, null, null, null));
+    txs = wallet.getTxs(new MoneroTxFilter(false, false, false, true, false, false, null, null, null, null, null, null, null));
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       assertEquals(MoneroTxType.OUTGOING, tx.getType());
@@ -520,7 +527,7 @@ public class TestMoneroWallet {
       // test that unspent tx payments add up to subaddress balance
       BigInteger balance = BigInteger.valueOf(0);
       for (MoneroTx tx : txs) {
-        if (tx.getType() == MoneroTxType.INCOMING) {
+        if (MoneroUtils.isIncoming(tx.getType()) && MoneroUtils.isConfirmed(tx.getType())) {
           for (MoneroPayment payment : tx.getPayments()) {
             if (!payment.getIsSpent()) {
               balance = balance.add(payment.getAmount());
