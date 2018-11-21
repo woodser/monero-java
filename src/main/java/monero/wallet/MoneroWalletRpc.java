@@ -368,7 +368,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       for (String key : result.keySet()) {
         for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
           MoneroTx tx = txMapToTx(txMap, this);
-          if (tx.getType() == MoneroTxType.INCOMING) {  // prevent duplicates when populated by incoming_transfers  // TODO (monero-wallet-rpc): merge payments when incoming txs work (https://github.com/monero-project/monero/issues/4500)
+          if (MoneroUtils.isIncoming(tx.getType()) && MoneroUtils.isConfirmed(tx.getType())) {  // prevent duplicates when populated by incoming_transfers  // TODO (monero-wallet-rpc): merge payments when incoming txs work (https://github.com/monero-project/monero/issues/4500)
             tx.setTotalAmount(BigInteger.valueOf(0));
             tx.setPayments(null);
           }
@@ -378,7 +378,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     // get incoming transactions
-    if (filter.isIncoming()) {
+    if (filter.isIncoming() || filter.isBlock()) {
       
       // get transactions using incoming_transfers
       params.clear();
@@ -396,6 +396,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
             MoneroTx tx = txMapToTx(txMap, MoneroTxType.INCOMING, this);
             String address = getAddress(accountIdx, tx.getPayments().get(0).getSubaddrIndex());
             tx.getPayments().get(0).setAddress(address);
+            for (MoneroTx prevTx : txs) if (prevTx.getType() == MoneroTxType.BLOCK && prevTx.getId().equals(tx.getId())) tx.setType(prevTx.getType());  // differentiate between 'block' and 'incoming' txs which 'incoming_transfers' does not provide
             addTx(txs, tx, false);
           }
         }
@@ -1131,7 +1132,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     // determine if the type is outgoing
-    boolean isSend = MoneroUtils.isSendTx(type);
+    boolean isSend = MoneroUtils.isOutgoing(type);
     
     // build transaction
     MoneroTx tx = new MoneroTx();
@@ -1250,7 +1251,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    */
   @SuppressWarnings("unchecked")
   private static List<MoneroTx> txListMapToTxs(Map<String, Object> txListMap, int accountIdx, MoneroTxType type, MoneroWallet wallet) {
-    assertTrue("Only send tx conversion supported", MoneroUtils.isSendTx(type));
+    assertTrue("Only send tx conversion supported", MoneroUtils.isOutgoing(type));
     
     // get lists
     List<String> ids = (List<String>) txListMap.get("tx_hash_list");
@@ -1315,6 +1316,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     else if (type.equalsIgnoreCase("pending")) return MoneroTxType.PENDING;
     else if (type.equalsIgnoreCase("failed")) return MoneroTxType.FAILED;
     else if (type.equalsIgnoreCase("pool")) return MoneroTxType.MEMPOOL;
+    else if (type.equalsIgnoreCase("block")) return MoneroTxType.BLOCK;
     throw new MoneroException("Unrecognized transaction type: " + type);
   }
   

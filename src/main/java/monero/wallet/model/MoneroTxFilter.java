@@ -10,10 +10,11 @@ import java.util.Collection;
 public class MoneroTxFilter {
   
   private boolean incoming;
+  private boolean block;
+  private boolean mempool;
   private boolean outgoing;
   private boolean pending;
   private boolean failed;
-  private boolean mempool;
   private Integer minHeight;
   private Integer maxHeight;
   private Integer accountIndex;
@@ -24,10 +25,11 @@ public class MoneroTxFilter {
   
   public MoneroTxFilter() {
     incoming = true;
+    block = true;
+    mempool = true;
     outgoing = true;
     pending = true;
     failed = true;
-    mempool = true;
     minHeight = null;
     maxHeight = null;
     accountIndex = null;
@@ -36,17 +38,18 @@ public class MoneroTxFilter {
     paymentIds = null;
     hasPayments = null;
   }
-  
-  public MoneroTxFilter(boolean incoming, boolean outgoing, boolean pending, boolean failed, boolean mempool, Integer minHeight, Integer maxHeight, Integer accountIdx, Collection<Integer> subaddressIndices, Collection<String> txIds, Collection<String> paymentIds, Boolean hasPayments) {
+
+  public MoneroTxFilter(boolean incoming, boolean block, boolean mempool, boolean outgoing, boolean pending, boolean failed, Integer minHeight, Integer maxHeight, Integer accountIndex, Collection<Integer> subaddressIndices, Collection<String> txIds, Collection<String> paymentIds, Boolean hasPayments) {
     super();
     this.incoming = incoming;
+    this.block = block;
+    this.mempool = mempool;
     this.outgoing = outgoing;
     this.pending = pending;
     this.failed = failed;
-    this.mempool = mempool;
     this.minHeight = minHeight;
     this.maxHeight = maxHeight;
-    this.accountIndex = accountIdx;
+    this.accountIndex = accountIndex;
     this.subaddressIndices = subaddressIndices;
     this.txIds = txIds;
     this.paymentIds = paymentIds;
@@ -59,6 +62,22 @@ public class MoneroTxFilter {
 
   public void setIncoming(boolean incoming) {
     this.incoming = incoming;
+  }
+
+  public boolean isBlock() {
+    return block;
+  }
+
+  public void setBlock(boolean block) {
+    this.block = block;
+  }
+
+  public boolean isMempool() {
+    return mempool;
+  }
+
+  public void setMempool(boolean mempool) {
+    this.mempool = mempool;
   }
 
   public boolean isOutgoing() {
@@ -83,14 +102,6 @@ public class MoneroTxFilter {
 
   public void setFailed(boolean failed) {
     this.failed = failed;
-  }
-
-  public boolean isMempool() {
-    return mempool;
-  }
-
-  public void setMempool(boolean mempool) {
-    this.mempool = mempool;
   }
 
   public Integer getMinHeight() {

@@ -112,7 +112,7 @@ public class MoneroPayment {
   
   public String toString(int offset) {
     StringBuilder sb = new StringBuilder();
-    sb.append(StringUtils.getTabs(offset) + "Address: " + getAmount() + "\n");
+    sb.append(StringUtils.getTabs(offset) + "Address: " + getAddress() + "\n");
     sb.append(StringUtils.getTabs(offset) + "Account idx: " + getAccountIndex() + "\n");
     sb.append(StringUtils.getTabs(offset) + "Subaddr idx: " + getSubaddrIndex() + "\n");
     sb.append(StringUtils.getTabs(offset) + "Amount: " + getAmount() + "\n");

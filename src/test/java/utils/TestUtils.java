@@ -19,6 +19,7 @@ import monero.daemon.MoneroDaemon;
 import monero.daemon.MoneroDaemonRpc;
 import monero.rpc.MoneroRpc;
 import monero.rpc.MoneroRpcException;
+import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
@@ -214,7 +215,7 @@ public class TestUtils {
     }
     
     // test incoming
-    if (tx.getType() == MoneroTxType.INCOMING || tx.getType() == MoneroTxType.MEMPOOL) {
+    if (MoneroUtils.isIncoming(tx.getType())) {
       assertNotNull(tx.getId(), tx.getId());
       assertNull(tx.getSrcAddress());
       assertNull(tx.getSrcAccountIndex());
@@ -229,7 +230,7 @@ public class TestUtils {
       if (tx.getUnlockTime() == null) LOGGER.warn("Incoming transaction is missing unlock_time: " + tx.getId());
       if (tx.getIsDoubleSpend() == null) LOGGER.warn("Incoming transaction is missing is_double_spend: " + tx.getId());
       if (tx.getIsDoubleSpend() != null) assertFalse(tx.getId(), tx.getIsDoubleSpend());
-      if (tx.getType() == MoneroTxType.INCOMING) {
+      if (MoneroUtils.isConfirmed(tx.getType())) {
         assertNull(tx.getId(), tx.getKey());
         if (tx.getHeight() == null) LOGGER.warn("Incoming transaction is missing height: " + tx.getId());
         if (tx.getNumConfirmations() == null) LOGGER.warn("Incoming transaction is missing confirmations: " + tx.getId());
@@ -256,7 +257,7 @@ public class TestUtils {
         assertNotNull(tx.getId(), payment.getAmount());
         assertTrue(tx.getId(), payment.getAmount().longValue() > 0);
         assertNotNull(tx.getId(), payment.getIsSpent());
-        if (tx.getType() == MoneroTxType.INCOMING) assertNotNull(tx.getId(), payment.getKeyImage());
+        if (MoneroUtils.isIncoming(tx.getType())) assertNotNull(tx.getId(), payment.getKeyImage());
         else assertNull(tx.getId(), payment.getKeyImage()); // TODO (monero-wallet-rpc): mempool transactions do not have key_images
       }
       assertTrue(totalAmount.compareTo(tx.getTotalAmount()) == 0);
