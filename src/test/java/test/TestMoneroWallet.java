@@ -613,6 +613,7 @@ public class TestMoneroWallet {
     // get random txs with outgoing payments
     MoneroTxFilter filter = new MoneroTxFilter();
     filter.setIncoming(false);
+    filter.setBlock(false);
     filter.setMempool(false);
     filter.setFailed(false);
     filter.setHasPayments(true);
@@ -759,6 +760,7 @@ public class TestMoneroWallet {
     // get random outgoing txs
     MoneroTxFilter filter = new MoneroTxFilter();
     filter.setIncoming(false);
+    filter.setBlock(false);
     filter.setMempool(false);
     filter.setFailed(false);
     List<MoneroTx> txs = getRandomTransactions(filter, 2, MAX_TX_PROOFS);
