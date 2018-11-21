@@ -1,5 +1,10 @@
-v0.13.0
-upgrade com.fasterxml.jackson.core:jackson-databind to version 2.8.11.1 or later.
+v0.13.0.4
+github maven pr
+support incoming "block" transactions
+segmentation fault 11 on testReserveProofAccount() with balance but no unlocked balance
+slow daemon / wallet rpc since upgrade and change of wallets
+upgrade com.fasterxml.jackson.core:jackson-databind to version 2.8.11.1 or later
+
 offline sign/submit
 do_not_relay with sweep
 multisig
