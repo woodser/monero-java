@@ -372,9 +372,9 @@ public class MoneroTx {
     sb.append("Metadata: " + metadata + "\n");
     sb.append("Num confirmations: " + numConfirmations + "\n");
     sb.append("Num estimated blocks until confirmed: " + numEstimatedBlocksUntilConfirmed);
-    sb.append("Signed tx set: " + (commonTxSets == null ? "null" : commonTxSets.getSignedTxSet()));
-    sb.append("Unsigned tx set: " + (commonTxSets == null ? "null" : commonTxSets.getUnsignedTxSet()));
-    sb.append("Multisig tx set: " + (commonTxSets == null ? "null" : commonTxSets.getMultisigTxSet()));
+    sb.append("Signed tx set: " + (commonTxSets == null ? "null" : commonTxSets.getSignedTxSet()) + "\n");
+    sb.append("Unsigned tx set: " + (commonTxSets == null ? "null" : commonTxSets.getUnsignedTxSet()) + "\n");
+    sb.append("Multisig tx set: " + (commonTxSets == null ? "null" : commonTxSets.getMultisigTxSet()) + "\n");
     return sb.toString();
   }
 
