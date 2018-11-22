@@ -1,5 +1,5 @@
 v0.13.0.4
-support incoming "block" transactions
+testGetTxsWallet() failing when run with other tests
 upgrade com.fasterxml.jackson.core:jackson-databind to version 2.8.11.1 or later
 
 offline sign/submit
