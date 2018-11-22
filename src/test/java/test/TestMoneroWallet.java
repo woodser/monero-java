@@ -325,7 +325,7 @@ public class TestMoneroWallet {
     // filter on not having payments
     filter.setHasPayments(false);
     txs = wallet.getTxs(filter);
-    assertFalse(txs.isEmpty());
+    assertFalse(txs.isEmpty()); // requires running rescan blockchain so tx payments get wiped
     for (MoneroTx tx : wallet.getTxs(filter)) {
       assertNull(tx.getPayments());
     }
@@ -608,7 +608,7 @@ public class TestMoneroWallet {
     filter.setIncoming(false);
     filter.setMempool(false);
     filter.setFailed(false);
-    filter.setHasPayments(true);
+    filter.setHasPayments(true);  // requires outgoing payments which rescan_bc can destroy
     List<MoneroTx> txs = getRandomTransactions(filter, 1, MAX_TX_PROOFS);
     
     // test good checks
