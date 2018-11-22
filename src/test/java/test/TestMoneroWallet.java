@@ -689,7 +689,7 @@ public class TestMoneroWallet {
     filter.setMempool(false);
     filter.setFailed(false);
     filter.setHasPayments(true);
-    List<MoneroTx> txs = getRandomTransactions(filter, 1, MAX_TX_PROOFS);
+    List<MoneroTx> txs = getRandomTransactions(filter, 2, MAX_TX_PROOFS);
     
     // test good checks with messages
     for (MoneroTx tx : txs) {
