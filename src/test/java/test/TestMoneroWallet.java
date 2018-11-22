@@ -450,21 +450,14 @@ public class TestMoneroWallet {
     }
     
     // test getting incoming transactions
-    List<MoneroTx> txs = wallet.getTxs(new MoneroTxFilter(true, false, false, false, false, false, null, null, null, null, null, null, null));
+    List<MoneroTx> txs = wallet.getTxs(new MoneroTxFilter(true, false, false, false, false, null, null, null, null, null, null, null));
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
-      assertEquals(MoneroTxType.INCOMING, tx.getType());
-    }
-    
-    // test getting incoming block transactions from mining
-    txs = wallet.getTxs(new MoneroTxFilter(false, true, false, false, false, false, null, null, null, null, null, null, null));
-    assertFalse(txs.isEmpty()); // TODO: disable because may be false if no miner txs
-    for (MoneroTx tx : txs) {
-      assertEquals(MoneroTxType.BLOCK, tx.getType());
+      assertTrue(tx.getType() == MoneroTxType.INCOMING || tx.getType() == MoneroTxType.BLOCK);
     }
     
     // test getting outgoing transactions
-    txs = wallet.getTxs(new MoneroTxFilter(false, false, false, true, false, false, null, null, null, null, null, null, null));
+    txs = wallet.getTxs(new MoneroTxFilter(false, false, true, false, false, null, null, null, null, null, null, null));
     assertFalse(txs.isEmpty());
     for (MoneroTx tx : txs) {
       assertEquals(MoneroTxType.OUTGOING, tx.getType());
@@ -535,7 +528,7 @@ public class TestMoneroWallet {
           }
         }
       }
-      assertEquals(wallet.getSubaddress(subaddress.getAccountIndex(), subaddress.getSubaddrIndex()).getBalance(), balance);
+      assertEquals(wallet.getSubaddress(subaddress.getAccountIndex(), subaddress.getSubaddrIndex()).getBalance(), balance); // TODO: (monero-wallet-rpc): fails after send tests
     }
     
     // assert that ummet filter criteria has no results
@@ -613,7 +606,6 @@ public class TestMoneroWallet {
     // get random txs with outgoing payments
     MoneroTxFilter filter = new MoneroTxFilter();
     filter.setIncoming(false);
-    filter.setBlock(false);
     filter.setMempool(false);
     filter.setFailed(false);
     filter.setHasPayments(true);
@@ -760,7 +752,6 @@ public class TestMoneroWallet {
     // get random outgoing txs
     MoneroTxFilter filter = new MoneroTxFilter();
     filter.setIncoming(false);
-    filter.setBlock(false);
     filter.setMempool(false);
     filter.setFailed(false);
     List<MoneroTx> txs = getRandomTransactions(filter, 2, MAX_TX_PROOFS);
