@@ -10,7 +10,6 @@ import java.util.Collection;
 public class MoneroTxFilter {
   
   private boolean incoming;
-  private boolean block;
   private boolean mempool;
   private boolean outgoing;
   private boolean pending;
@@ -25,7 +24,6 @@ public class MoneroTxFilter {
   
   public MoneroTxFilter() {
     incoming = true;
-    block = true;
     mempool = true;
     outgoing = true;
     pending = true;
@@ -39,10 +37,9 @@ public class MoneroTxFilter {
     hasPayments = null;
   }
 
-  public MoneroTxFilter(boolean incoming, boolean block, boolean mempool, boolean outgoing, boolean pending, boolean failed, Integer minHeight, Integer maxHeight, Integer accountIndex, Collection<Integer> subaddressIndices, Collection<String> txIds, Collection<String> paymentIds, Boolean hasPayments) {
+  public MoneroTxFilter(boolean incoming, boolean mempool, boolean outgoing, boolean pending, boolean failed, Integer minHeight, Integer maxHeight, Integer accountIndex, Collection<Integer> subaddressIndices, Collection<String> txIds, Collection<String> paymentIds, Boolean hasPayments) {
     super();
     this.incoming = incoming;
-    this.block = block;
     this.mempool = mempool;
     this.outgoing = outgoing;
     this.pending = pending;
@@ -62,14 +59,6 @@ public class MoneroTxFilter {
 
   public void setIncoming(boolean incoming) {
     this.incoming = incoming;
-  }
-
-  public boolean isBlock() {
-    return block;
-  }
-
-  public void setBlock(boolean block) {
-    this.block = block;
   }
 
   public boolean isMempool() {

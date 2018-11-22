@@ -378,7 +378,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     // get incoming transactions
-    if (filter.isIncoming() || filter.isBlock()) {
+    if (filter.isIncoming()) {
       
       // get transactions using incoming_transfers
       params.clear();
@@ -393,10 +393,20 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         List<Map<String, Object>> txMaps = (List<Map<String, Object>>) result.get("transfers");
         if (txMaps != null) {
           for (Map<String, Object> txMap : txMaps) {
+            
+            // convert map to tx and assign address
             MoneroTx tx = txMapToTx(txMap, MoneroTxType.INCOMING, this);
             String address = getAddress(accountIdx, tx.getPayments().get(0).getSubaddrIndex());
             tx.getPayments().get(0).setAddress(address);
-            for (MoneroTx prevTx : txs) if (prevTx.getType() == MoneroTxType.BLOCK && prevTx.getId().equals(tx.getId())) tx.setType(prevTx.getType());  // differentiate between 'block' and 'incoming' txs which 'incoming_transfers' does not provide
+            
+            // assign block type if applicable, which 'incoming_transfers' does not provide
+            for (MoneroTx allTx : txs) {
+              if (allTx.getType() == MoneroTxType.BLOCK && allTx.getId().equals(tx.getId())) {
+                tx.setType(allTx.getType());
+              }
+            }
+            
+            // add tx to existing txs
             addTx(txs, tx, false);
           }
         }
