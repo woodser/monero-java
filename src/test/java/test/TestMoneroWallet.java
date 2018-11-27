@@ -255,7 +255,7 @@ public class TestMoneroWallet {
     for (int i = 0; i < txs1.size(); i++) {
       TestUtils.testGetTx(txs1.get(i), null, wallet);
       TestUtils.testGetTx(txs2.get(i), null, wallet);
-      assertEquals(txs1.get(i), txs2.get(i));
+      assertEquals(txs1.get(i), txs2.get(i));   // TODO: this fails when run with other tests
       if (!MoneroUtils.isOutgoing(txs1.get(i).getType())) {
         for (MoneroPayment payment : txs1.get(i).getPayments()) {
          if (payment.getAccountIndex() != 0 && payment.getSubaddrIndex() != 0) nonDefaultIncoming = true;
