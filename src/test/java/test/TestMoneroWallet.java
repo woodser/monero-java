@@ -1031,21 +1031,17 @@ public class TestMoneroWallet {
     TestUtils.testAccount(createdAccount);
     assertNull(createdAccount.getLabel());
     assertTrue(accountsBefore.size() == wallet.getAccounts().size() - 1);
-    
-    List<MoneroAccount> newAccounts = new ArrayList<MoneroAccount>();
-    
+        
     // create account with label
     accountsBefore = wallet.getAccounts();
     String label = UUID.randomUUID().toString();
     createdAccount = wallet.createAccount(label);
-    newAccounts.add(createdAccount);
     assertEquals(label, createdAccount.getLabel());
     TestUtils.testAccount(createdAccount);
     assertTrue(accountsBefore.size() == wallet.getAccounts().size() - 1);
     
     // create account with same label
     createdAccount = wallet.createAccount(label);
-    newAccounts.add(createdAccount);
     assertEquals(label, createdAccount.getLabel());
     TestUtils.testAccount(createdAccount);
     assertTrue(accountsBefore.size() == wallet.getAccounts().size() - 2);
