@@ -152,7 +152,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroAccount> getAccounts(String tag, boolean includeSubaddresses) {
+  public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("tag", tag);
     Map<String, Object> resultMap = (Map<String, Object>) rpc.sendRpcRequest("get_accounts", params).get("result");
