@@ -88,11 +88,11 @@ public interface MoneroWallet {
   /**
    * Get accounts with a given tag.
    * 
-   * @param tag is the tag for filtering accounts, all accounts if null
    * @param includeSubaddresses specifies if subaddresses should be included
+   * @param tag is the tag for filtering accounts, all accounts if null
    * @return List<MoneroAccount> are all accounts for the wallet with the given tag
    */
-  public List<MoneroAccount> getAccounts(String tag, boolean includeSubaddresses);
+  public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag);
   
   /**
    * Get an account.
