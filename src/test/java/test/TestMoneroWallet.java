@@ -211,6 +211,37 @@ public class TestMoneroWallet {
   }
   
   @Test
+  public void testCreateSubaddress() {
+    
+    // create subaddresses across accounts
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    if (accounts.size() < 2) wallet.createAccount();
+    accounts = wallet.getAccounts();
+    assertTrue(accounts.size() > 1);
+    for (int accountIdx = 0; accountIdx < 2; accountIdx++) {
+      
+      // create subaddress with no label
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(accountIdx);
+      MoneroSubaddress subaddress = wallet.createSubaddress(accountIdx, null);
+      assertEquals("", subaddress.getLabel());
+      TestUtils.testSubaddress(subaddress);
+      List<MoneroSubaddress> subaddressesNew = wallet.getSubaddresses(accountIdx);
+      assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
+      assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
+      
+      // create subaddress with label
+      subaddresses = wallet.getSubaddresses(accountIdx);
+      String uuid = UUID.randomUUID().toString();
+      subaddress = wallet.createSubaddress(accountIdx, uuid);
+      assertEquals(subaddress.getLabel(), uuid);
+      TestUtils.testSubaddress(subaddress);
+      subaddressesNew = wallet.getSubaddresses(accountIdx);
+      assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
+      assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
+    }
+  }
+
+  @Test
   public void testGetAddress() {
     assertEquals(wallet.getPrimaryAddress(), wallet.getSubaddress(0, 0).getAddress());
     for (MoneroAccount account : wallet.getAccounts(true)) {
@@ -1092,37 +1123,6 @@ public class TestMoneroWallet {
     }
   }
 
-  @Test
-  public void testCreateSubaddress() {
-    
-    // create subaddresses across accounts
-    List<MoneroAccount> accounts = wallet.getAccounts();
-    if (accounts.size() < 2) wallet.createAccount();
-    accounts = wallet.getAccounts();
-    assertTrue(accounts.size() > 1);
-    for (int accountIdx = 0; accountIdx < 2; accountIdx++) {
-      
-      // create subaddress with no label
-      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(accountIdx);
-      MoneroSubaddress subaddress = wallet.createSubaddress(accountIdx, null);
-      assertEquals("", subaddress.getLabel());
-      TestUtils.testSubaddress(subaddress);
-      List<MoneroSubaddress> subaddressesNew = wallet.getSubaddresses(accountIdx);
-      assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
-      assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
-      
-      // create subaddress with label
-      subaddresses = wallet.getSubaddresses(accountIdx);
-      String uuid = UUID.randomUUID().toString();
-      subaddress = wallet.createSubaddress(accountIdx, uuid);
-      assertEquals(subaddress.getLabel(), uuid);
-      TestUtils.testSubaddress(subaddress);
-      subaddressesNew = wallet.getSubaddresses(accountIdx);
-      assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
-      assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
-    }
-  }
-  
   @Test
   public void testAddressBookEntries() {
     
