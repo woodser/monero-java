@@ -367,7 +367,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       Map<String, Object> result = (Map<String, Object>) respMap.get("result");
       for (String key : result.keySet()) {
         for (Map<String, Object> txMap : (List<Map<String, Object>>) result.get(key)) {
-          MoneroTx tx = txMapToTx(txMap, this);
+          MoneroTx tx = txMapToTx(txMap);
           if (MoneroUtils.isIncoming(tx.getType()) && MoneroUtils.isConfirmed(tx.getType())) {  // prevent duplicates when populated by incoming_transfers  // TODO (monero-wallet-rpc): merge payments when incoming txs work (https://github.com/monero-project/monero/issues/4500)
             tx.setTotalAmount(BigInteger.valueOf(0));
             tx.setPayments(null);
@@ -395,7 +395,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           for (Map<String, Object> txMap : txMaps) {
             
             // convert map to tx and assign address
-            MoneroTx tx = txMapToTx(txMap, MoneroTxType.INCOMING, this);
+            MoneroTx tx = txMapToTx(txMap, MoneroTxType.INCOMING);
             String address = getAddress(accountIdx, tx.getPayments().get(0).getSubaddrIndex());
             tx.getPayments().get(0).setAddress(address);
             
@@ -463,7 +463,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // interpret response
     Map<String, Object> txMap = (Map<String, Object>) respMap.get("result");
     MoneroTxType type = Boolean.TRUE.equals(config.getDoNotRelay()) ? MoneroTxType.NOT_RELAYED : MoneroTxType.PENDING;
-    MoneroTx tx = txMapToTx(txMap, type, this);
+    MoneroTx tx = txMapToTx(txMap, type);
     
     // set final fields
     tx.setMixin(config.getMixin());
@@ -1121,8 +1121,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @param txMap is the map to create a MoneroTx from
    * @return MoneroTx is the transaction created from the map
    */
-  private static MoneroTx txMapToTx(Map<String, Object> txMap, MoneroWallet wallet) {
-    return txMapToTx(txMap, null, wallet);
+  private static MoneroTx txMapToTx(Map<String, Object> txMap) {
+    return txMapToTx(txMap, null);
   }
   
   /**
@@ -1133,7 +1133,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @return MoneroTx is the transaction created from the map
    */
   @SuppressWarnings("unchecked")
-  private static MoneroTx txMapToTx(Map<String, Object> txMap, MoneroTxType type, MoneroWallet wallet) {
+  private static MoneroTx txMapToTx(Map<String, Object> txMap, MoneroTxType type) {
     
     // determine the type upfront
     if (type == null) {
