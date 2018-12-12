@@ -513,7 +513,7 @@ public class TestMoneroDaemon {
   
   private static void testDaemonSyncInfo(MoneroDaemonSyncInfo syncInfo) {
     assertNotNull(syncInfo.getHeight());
-    assertNotNull(syncInfo.getPeers());
+    assertNotNull(syncInfo.getPeers()); // TODO: this will fail if not connected
     assertFalse(syncInfo.getPeers().isEmpty());
     if (syncInfo.getPeers() != null) {
       for (MoneroDaemonConnection peer : syncInfo.getPeers()) {
