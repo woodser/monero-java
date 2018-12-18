@@ -379,7 +379,7 @@ public class TestMoneroWalletSends {
     }
   }
   
-  @Ignore // TODO: no dust to sweep to test always fails
+  @Ignore // TODO: no dust to sweep so test always fails
   @Test
   public void testSweepDust() {
     List<MoneroTx> txs = wallet.sweepDust();
