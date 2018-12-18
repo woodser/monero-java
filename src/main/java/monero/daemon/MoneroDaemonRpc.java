@@ -300,7 +300,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public List<MoneroOutputDistributionEntry> getOutputDistribution(List<BigInteger> amounts, Boolean cumulative, Integer startHeight, Integer endHeight) {
-    throw new MoneroException("getOutputDistribution() not implemented because response 'distribution' field cannot be deserialized to array of integers as documented");
+    throw new MoneroException("getOutputDistribution() not implemented because response 'distribution' field cannot be deserialized to array of integers as documented"); // TODO: related to `distribution` being in binary format
 //    if (startHeight == null) startHeight = 0;
 //    Map<String, Object> params = new HashMap<String, Object>();
 //    params.put("amounts", amounts);
