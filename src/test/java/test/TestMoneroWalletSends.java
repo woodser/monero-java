@@ -164,7 +164,7 @@ public class TestMoneroWalletSends {
   
   @Test
   public void testSendSplitToMultiple() {
-    testSendToMultiple(20, 3, true);
+    testSendToMultiple(15, 3, true);
   }
   
   /**
