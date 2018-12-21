@@ -75,7 +75,7 @@ public class MoneroTxConfig {
     return payments;
   }
 
-  public void setDestinations(List<MoneroPayment> payments) {
+  public void setPayments(List<MoneroPayment> payments) {
     this.payments = payments;
   }
 
