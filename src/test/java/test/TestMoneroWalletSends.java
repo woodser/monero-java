@@ -168,7 +168,7 @@ public class TestMoneroWalletSends {
   }
   
   /**
-   * Fans funds from the first unlocked account across numerous accounts and subaddresses.
+   * Sends funds from the first unlocked account across multiple accounts and subaddresses.
    * 
    * @param numAccounts is the number of accounts to receive funds
    * @param numSubaddressesPerAccount is the number of subaddresses per account to receive funds
@@ -226,7 +226,7 @@ public class TestMoneroWalletSends {
     MoneroTxConfig config = new MoneroTxConfig();
     config.setMixin(TestUtils.MIXIN);
     config.setAccountIndex(srcAccount.getIndex());
-    config.setDestinations(payments);
+    config.setPayments(payments);
     
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     if (canSplit) {
