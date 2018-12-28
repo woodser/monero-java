@@ -21,7 +21,7 @@ The interfaces rely on running instances of [Monero Wallet RPC](https://getmoner
 6. To run tests, configure the default wallet for running JUnit tests within TestUtils.java.  The RPC domains, ports, and authentication credentials can be configured.
 7. Run JUnits under src/test/java to verify the setup.  Note that `TestMoneroWalletSends.java` requires sufficient funds to be available in the wallet to test sending payments (hence why stagenet mode is recommended, so it's not real XMR).
 
-# Documentation
+# API Documentation
 
 The main interfaces are [MoneroWallet.java](src/main/java/monero/wallet/MoneroWallet.java) and [MoneroDaemon.java](src/main/java/monero/daemon/MoneroDaemon.java).
 
