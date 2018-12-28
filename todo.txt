@@ -1,6 +1,6 @@
 v0.13.0.4
 testGetTxsWallet() failing when run with other tests
-upgrade com.fasterxml.jackson.core:jackson-databind to version 2.8.11.1 or later
+support sweep_single (output)
 
 offline sign/submit
 do_not_relay with sweep
