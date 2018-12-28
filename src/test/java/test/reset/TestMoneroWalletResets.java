@@ -81,7 +81,7 @@ public class TestMoneroWalletResets {
       
       // sweep unlocked account
       MoneroAccount unlockedAccount = unlockedAccounts.get(i);
-      List<MoneroTx> txs = wallet.sweepAccount(wallet.getPrimaryAddress(), unlockedAccount.getIndex());
+      List<MoneroTx> txs = wallet.sweepAccount(unlockedAccount.getIndex(), wallet.getPrimaryAddress());
       
       // test transactions
       assertFalse(txs.isEmpty());
