@@ -571,7 +571,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroTx> sweepAll(MoneroTxConfig config) {
+  public List<MoneroTx> sweep(MoneroTxConfig config) {
     
     // common request params
     Map<String, Object> params = new HashMap<String, Object>();

@@ -315,7 +315,7 @@ public interface MoneroWallet {
    * @param config specifies the sweep configuration
    * @param List<MoneroTx> are the resulting transactions
    */
-  public List<MoneroTx> sweepAll(MoneroTxConfig config);
+  public List<MoneroTx> sweep(MoneroTxConfig config);
 
   /**
    * Send all dust outputs back to the wallet to make them easier to spend and mix.
