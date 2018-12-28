@@ -2,7 +2,7 @@
 
 This project provides Java interfaces for a Monero wallet and daemon.
 
-The interfaces rely on running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon](https://getmonero.org/resources/developer-guides/daemon-rpc.html).
+The interfaces rely on running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html).
 
 # Getting started
 
