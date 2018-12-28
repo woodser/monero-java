@@ -126,14 +126,14 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public List<MoneroTx> sweepAccount(String address, int accountIdx) {
+  public List<MoneroTx> sweepAccount(int accountIdx, String address) {
     MoneroTxConfig config = new MoneroTxConfig(address, null, null);
     config.setAccountIndex(accountIdx);
     return sweepAll(config);
   }
   
   @Override
-  public List<MoneroTx> sweepSubaddress(String address, int accountIdx, int subaddressIdx) {
+  public List<MoneroTx> sweepSubaddress(int accountIdx, int subaddressIdx, String address) {
     MoneroTxConfig config = new MoneroTxConfig(address, null, null);
     config.setAccountIndex(accountIdx);
     config.setSubaddressIndices(Arrays.asList(subaddressIdx));

@@ -293,21 +293,21 @@ public interface MoneroWallet {
   /**
    * Sweep an acount's unlocked funds to an address.
    * 
-   * @param address is the address to sweep the account's funds to
    * @param accountIdx is the index of the account
+   * @param address is the address to sweep the account's funds to
    * @return List<MoneroTx> are the resulting transactions
    */
-  public List<MoneroTx> sweepAccount(String address, int accountIdx);
+  public List<MoneroTx> sweepAccount(int accountIdx, String address);
 
   /**
    * Sweep a subaddress's unlocked funds to an address.
    * 
-   * @param address is the address to sweep the subaddress's funds to
    * @param accountIdx is the index of the account
    * @param subaddressIdx is the index of the subaddress
+   * @param address is the address to sweep the subaddress's funds to
    * @return List<MoneroTx> are the resulting transactions
    */
-  public List<MoneroTx> sweepSubaddress(String address, int accountIdx, int subaddressIdx);
+  public List<MoneroTx> sweepSubaddress(int accountIdx, int subaddressIdx, String address);
 
   /**
    * Sweep unlocked funds.
