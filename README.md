@@ -39,4 +39,4 @@ This project is licensed under Apache 2.0 and MIT.
 
 `46FR1GKVqFNQnDiFkH7AuzbUBrGQwz2VdaXTDD4jcjRE8YkkoTYTmZ2Vohsz9gLSqkj5EM6ai9Q7sBoX4FPPYJdGKQQXPVz`
 
-Thank you for your support.
+Thank you for supporting this project.
