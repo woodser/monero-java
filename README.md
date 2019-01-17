@@ -27,7 +27,7 @@ The main interfaces are [MoneroWallet.java](src/main/java/monero/wallet/MoneroWa
 
 Javadoc is provided in the [doc](doc) folder (best viewed opening [doc/index.html](doc/index.html) in a browser).
 
-# License
+## License
 
 This project is licensed under Apache 2.0 and MIT.
 
