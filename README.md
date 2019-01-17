@@ -4,7 +4,7 @@ This project provides Java interfaces for a Monero wallet and daemon.
 
 The interfaces rely on running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html).
 
-# Getting started
+## Getting started
 
 1. Download and extract the latest [Monero CLI](https://getmonero.org/downloads/) for your platform.
 2. Start Monero daemon locally: `./monerod --stagenet` (or use a remote daemon).
@@ -21,7 +21,7 @@ The interfaces rely on running instances of [Monero Wallet RPC](https://getmoner
 6. To run tests, configure the default wallet for running JUnit tests within TestUtils.java.  The RPC domains, ports, and authentication credentials can be configured.
 7. Run JUnits under src/test/java to verify the setup.  Note that `TestMoneroWalletSends.java` requires sufficient funds to be available in the wallet to test sending payments (hence why stagenet mode is recommended, so it's not real XMR).
 
-# API Documentation
+## API Documentation
 
 The main interfaces are [MoneroWallet.java](src/main/java/monero/wallet/MoneroWallet.java) and [MoneroDaemon.java](src/main/java/monero/daemon/MoneroDaemon.java).
 
@@ -30,3 +30,13 @@ Javadoc is provided in the [doc](doc) folder (best viewed opening [doc/index.htm
 # License
 
 This project is licensed under Apache 2.0 and MIT.
+
+## Donate
+
+<p align="center">
+	<img src="donate.png" width="175" height="175"/>
+</p>
+
+`46FR1GKVqFNQnDiFkH7AuzbUBrGQwz2VdaXTDD4jcjRE8YkkoTYTmZ2Vohsz9gLSqkj5EM6ai9Q7sBoX4FPPYJdGKQQXPVz`
+
+Thank you for your support.
