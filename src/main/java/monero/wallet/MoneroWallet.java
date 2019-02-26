@@ -27,6 +27,9 @@ import java.util.List;
 
 import monero.daemon.model.MoneroKeyImage;
 import monero.wallet.config.MoneroSendConfig;
+import monero.wallet.config.MoneroTransferFilter;
+import monero.wallet.config.MoneroTxFilter;
+import monero.wallet.config.MoneroVoutFilter;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -138,19 +141,36 @@ public interface MoneroWallet {
   public boolean isMultisigImportNeeded();
   
   /**
-   * Get accounts without subaddress information.
+   * Get all accounts.
    * 
-   * @return the retrieved accounts
+   * @return List<MoneroAccount> are all accounts within the wallet
    */
   public List<MoneroAccount> getAccounts();
   
   /**
-   * Get accounts.
+   * Get all accounts.
    * 
    * @param includeSubaddresses specifies if subaddresses should be included
-   * @return the retrieved accounts
+   * @return List<MoneroAccount> are all accounts
    */
   public List<MoneroAccount> getAccounts(boolean includeSubaddresses);
+  
+  /**
+   * Get accounts with a given tag.
+   * 
+   * @param tag is the tag for filtering accounts, all accounts if null
+   * @return List<MoneroAccount> are all accounts for the wallet with the given tag
+   */
+  public List<MoneroAccount> getAccounts(String tag);
+  
+  /**
+   * Get accounts with a given tag.
+   * 
+   * @param includeSubaddresses specifies if subaddresses should be included
+   * @param tag is the tag for filtering accounts, all accounts if null
+   * @return List<MoneroAccount> are all accounts for the wallet with the given tag
+   */
+  public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag);
   
   /**
    * Get an account without subaddress information.
@@ -168,6 +188,13 @@ public interface MoneroWallet {
    * @return the retrieved account
    */
   public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses);
+  
+  /**
+   * Create a new account without a label.
+   * 
+   * @return the created account
+   */
+  public MoneroAccount createAccount();
 
   /**
    * Create a new account.
@@ -321,6 +348,33 @@ public interface MoneroWallet {
   public List<MoneroTransfer> getTransfers();
   
   /**
+   * Get incoming and outgoing transfers to and from an account.  An outgoing
+   * transfer represents a total amount sent from one or more subaddresses
+   * within an account to individual destination addresses, each with their
+   * own amount.  An incoming transfer represents a total amount received into
+   * a subaddress within an account.  Transfers belong to transactions which
+   * are stored on the blockchain.
+   * 
+   * @param accountIdx is the index of the account to get transfers from
+   * @return transfers to/from the account
+   */
+  public List<MoneroTransfer> getTransfers(int accountIdx);
+  
+  /**
+   * Get incoming and outgoing transfers to and from a subaddress.  An outgoing
+   * transfer represents a total amount sent from one or more subaddresses
+   * within an account to individual destination addresses, each with their
+   * own amount.  An incoming transfer represents a total amount received into
+   * a subaddress within an account.  Transfers belong to transactions which
+   * are stored on the blockchain.
+   * 
+   * @param accountIdx is the index of the account to get transfers from
+   * @param subaddressIdx is the index of the subaddress to get transfers from
+   * @return transfers to/from the subaddress
+   */
+  public List<MoneroTransfer> getTransfers(int accountIdx, int subaddressIdx);
+  
+  /**
    * Get incoming and outgoing transfers to and from this wallet.  An outgoing
    * transfer represents a total amount sent from one or more subaddresses
    * within an account to individual destination addresses, each with their
@@ -397,10 +451,9 @@ public interface MoneroWallet {
    * 
    * @param address is the destination address to send funds to
    * @param sendAmount is the amount being sent
-   * @param priority is the transaction priority (optional)
    * @return the resulting transaction
    */
-  public MoneroWalletTx send(String address, BigInteger sendAmount, MoneroSendPriority priority);
+  public MoneroWalletTx send(String address, BigInteger sendAmount);
   
   /**
    * Create and relay (depending on configuration) one or more transactions
@@ -417,10 +470,9 @@ public interface MoneroWallet {
    * 
    * @param address is the destination address to send funds to
    * @param sendAmount is the amount being sent
-   * @param priority is the transaction priority (optional)
    * @return the resulting transactions
    */
-  public List<MoneroWalletTx> sendSplit(String address, BigInteger sendAount, MoneroSendPriority priority);
+  public List<MoneroWalletTx> sendSplit(String address, BigInteger sendAount);
   
   /**
    * Sweep the wallet's unlocked funds to an address.
@@ -643,12 +695,28 @@ public interface MoneroWallet {
   public MoneroCheckReserve checkReserveProof(String address, String message, String signature);
   
   /**
+   * Get all address book entries.
+   * 
+   * @return the address book entries
+   */
+  public List<MoneroAddressBookEntry> getAddressBookEntries();
+  
+  /**
    * Get address book entries.
    * 
    * @param entryIndices are indices of the entries to get
    * @return the address book entries
    */
   public List<MoneroAddressBookEntry> getAddressBookEntries(List<Integer> entryIndices);
+  
+  /**
+   * Add an address book entry.
+   * 
+   * @param address is the entry address
+   * @param description is the entry description (optional)
+   * @return the index of the added entry
+   */
+  public int addAddressBookEntry(String address, String description);
   
   /**
    * Add an address book entry.

@@ -21,63 +21,71 @@ public class MoneroTransfer {
     return tx;
   }
   
-  public void setTx(MoneroWalletTx tx) {
+  public MoneroTransfer setTx(MoneroWalletTx tx) {
     this.tx = tx;
+    return this;
   }
   
   public Boolean getIsOutgoing() {
     return isOutgoing;
   }
   
-  public void setIsOutgoing(Boolean isOutgoing) {
+  public MoneroTransfer setIsOutgoing(Boolean isOutgoing) {
     this.isOutgoing = isOutgoing;
+    return this;
   }
   
   public Boolean getIsIncoming() {
     return isIncoming;
   }
   
-  public void setIsIncoming(Boolean isIncoming) {
+  public MoneroTransfer setIsIncoming(Boolean isIncoming) {
     this.isIncoming = isIncoming;
+    return this;
   }
   
   public String getAddress() {
     return address;
   }
   
-  public void setAddress(String address) {
+  public MoneroTransfer setAddress(String address) {
     this.address = address;
+    return this;
   }
   
   public Integer getAccountIndex() {
     return accountIndex;
   }
   
-  public void setAccountIndex(Integer accountIndex) {
+  public MoneroTransfer setAccountIndex(Integer accountIndex) {
     this.accountIndex = accountIndex;
+    return this;
   }
   
   public Integer getSubaddressIndex() {
     return subaddressIndex;
   }
   
-  public void setSubaddressIndex(Integer subaddressIndex) {
+  public MoneroTransfer setSubaddressIndex(Integer subaddressIndex) {
     this.subaddressIndex = subaddressIndex;
+    return this;
   }
   
   public BigInteger getAmount() {
     return amount;
   }
   
-  public void setAmount(BigInteger amount) {
+  public MoneroTransfer setAmount(BigInteger amount) {
     this.amount = amount;
+    return this;
   }
   
   public List<MoneroDestination> getDestinations() {
     return destinations;
   }
   
-  public void setDestinations(List<MoneroDestination> destinations) {
+  public MoneroTransfer setDestinations(List<MoneroDestination> destinations) {
     this.destinations = destinations;
+    return this;
   }
 }

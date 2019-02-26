@@ -6,36 +6,22 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
+import monero.daemon.model.MoneroTx;
+import monero.wallet.config.MoneroSendConfig;
+import monero.wallet.config.MoneroTransferFilter;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroException;
+import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSubaddress;
-import monero.wallet.model.MoneroTx;
-import monero.wallet.model.MoneroTxConfig;
-import monero.wallet.model.MoneroTxFilter;
+import monero.wallet.model.MoneroTransfer;
+import monero.wallet.model.MoneroWalletOutput;
+import monero.wallet.model.MoneroWalletTx;
 
 /**
  * Default implementation of a Monero Wallet.
  */
 public abstract class MoneroWalletDefault implements MoneroWallet {
-  
-  @Override
-  public BigInteger getBalance() {
-    BigInteger balance = BigInteger.valueOf(0);
-    for (MoneroAccount account : getAccounts()) {
-      balance = balance.add(account.getBalance());
-    }
-    return balance;
-  }
-  
-  @Override
-  public BigInteger getUnlockedBalance() {
-    BigInteger unlockedBalance = BigInteger.valueOf(0);
-    for (MoneroAccount account : getAccounts()) {
-      unlockedBalance = unlockedBalance.add(account.getUnlockedBalance());
-    }
-    return unlockedBalance;
-  }
   
   @Override
   public List<MoneroAccount> getAccounts() {
@@ -56,7 +42,12 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   public MoneroAccount getAccount(int accountIdx) {
     return getAccount(accountIdx, false);
   }
-
+  
+  @Override
+  public MoneroAccount createAccount() {
+    return createAccount(null);
+  }
+  
   @Override
   public List<MoneroSubaddress> getSubaddresses(int accountIdx) {
     return getSubaddresses(accountIdx, null);
@@ -69,31 +60,6 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
     assertEquals("Only 1 subaddress should be returned", 1, subaddresses.size());
     return subaddresses.get(0);
   }
-
-  @Override
-  public List<MoneroTx> getTxs() {
-    return getTxs(null);
-  }
-  
-  @Override
-  public List<MoneroTx> getTxs(int accountIdx) {
-    MoneroTxFilter filter = new MoneroTxFilter();
-    filter.setAccountIndex(accountIdx);
-    return getTxs(filter);
-  }
-  
-  @Override
-  public List<MoneroTx> getTxs(int accountIdx, int subaddressIdx) {
-    MoneroTxFilter filter = new MoneroTxFilter();
-    filter.setAccountIndex(accountIdx);
-    filter.setSubaddressIndices(Arrays.asList(subaddressIdx));
-    return getTxs(filter);
-  }
-  
-  @Override
-  public MoneroAccount createAccount() {
-    return createAccount(null);
-  }
   
   @Override
   public MoneroSubaddress createSubaddress(int accountIdx) {
@@ -101,48 +67,88 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public MoneroTx send(String address, BigInteger amount) {
-    return send(new MoneroTxConfig(address, null, amount));
+  public List<MoneroWalletTx> getTxs() {
+    return getTxs(null);
   }
   
   @Override
-  public MoneroTx send(String address, String paymentId, BigInteger amount) {
-    return send(new MoneroTxConfig(address, paymentId, amount));
+  public List<MoneroTransfer> getTransfers() {
+    return getTransfers(null);
   }
   
   @Override
-  public List<MoneroTx> sendSplit(String address, BigInteger amount) {
-    return sendSplit(new MoneroTxConfig(address, null, amount));
+  public List<MoneroTransfer> getTransfers(int accountIdx) {
+    MoneroTransferFilter filter = new MoneroTransferFilter();
+    filter.setTransfer(new MoneroTransfer().setAccountIndex(accountIdx));
+    return getTransfers(filter);
   }
   
   @Override
-  public List<MoneroTx> sendSplit(String address, String paymentId, BigInteger amount) {
-    return sendSplit(new MoneroTxConfig(address, paymentId, amount));
+  public List<MoneroTransfer> getTransfers(int accountIdx, int subaddressIdx) {
+    MoneroTransferFilter filter = new MoneroTransferFilter();
+    filter.setTransfer(new MoneroTransfer().setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx));
+    return getTransfers(filter);
   }
   
   @Override
-  public List<MoneroTx> sweepWallet(String address) {
-    return sweep(new MoneroTxConfig(address, null, null));
+  public List<MoneroWalletOutput> getVouts() {
+    return getVouts(null);
   }
   
   @Override
-  public List<MoneroTx> sweepAccount(int accountIdx, String address) {
-    MoneroTxConfig config = new MoneroTxConfig(address, null, null);
+  public MoneroWalletTx send(String address, BigInteger sendAmount) {
+    return send(new MoneroSendConfig(address, sendAmount));
+  }
+  
+  @Override
+  public List<MoneroWalletTx> sendSplit(String address, BigInteger sendAmount) {
+    return sendSplit(new MoneroSendConfig(address, sendAmount));
+  }
+  
+  @Override
+  public List<MoneroWalletTx> sweepWallet(String address) {
+    return sweepUnlocked(new MoneroSendConfig(address));
+  }
+  
+  @Override
+  public List<MoneroWalletTx> sweepAccount(int accountIdx, String address) {
+    MoneroSendConfig config = new MoneroSendConfig(address);
     config.setAccountIndex(accountIdx);
-    return sweep(config);
+    return sweepUnlocked(config);
   }
   
   @Override
-  public List<MoneroTx> sweepSubaddress(int accountIdx, int subaddressIdx, String address) {
-    MoneroTxConfig config = new MoneroTxConfig(address, null, null);
+  public List<MoneroWalletTx> sweepSubaddress(int accountIdx, int subaddressIdx, String address) {
+    MoneroSendConfig config = new MoneroSendConfig(address);
     config.setAccountIndex(accountIdx);
     config.setSubaddressIndices(Arrays.asList(subaddressIdx));
-    return sweep(config);
+    return sweepUnlocked(config);
   }
   
   @Override
-  public MoneroTx relayTx(MoneroTx tx) {
-    return relayTxs(Arrays.asList(tx)).get(0);
+  public List<MoneroWalletTx> sweepDust() {
+    return sweepDust(false);
+  }
+  
+  @Override
+  public MoneroWalletTx sweepOutput(String address, String keyImage, MoneroSendPriority priority) {
+    MoneroSendConfig config = new MoneroSendConfig(address, null, priority);
+    config.setKeyImage(keyImage);
+    return sweepOutput(config);
+  }
+  
+  public MoneroWalletTx relayTx(String txMetadata) {
+    return relayTxs(Arrays.asList(txMetadata)).get(0);
+  }
+  
+  @Override
+  public String getTxNote(String txId) {
+    return getTxNotes(Arrays.asList(txId)).get(0);
+  }
+  
+  @Override
+  public void setTxNote(String txId, String note) {
+    setTxNotes(Arrays.asList(txId), Arrays.asList(note));
   }
   
   @Override
@@ -153,15 +159,5 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   @Override
   public int addAddressBookEntry(String address, String description) {
     return addAddressBookEntry(address, null, description);
-  }
-  
-  @Override
-  public String getTxNote(String txId) {
-    throw new RuntimeException("Not implemented");
-  }
-  
-  @Override
-  public void setTxNote(String txId, String note) {
-    throw new RuntimeException("Not implemented");
   }
 }
