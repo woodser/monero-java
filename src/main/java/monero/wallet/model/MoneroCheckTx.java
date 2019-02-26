@@ -7,16 +7,16 @@ import java.math.BigInteger;
  */
 public class MoneroCheckTx extends MoneroCheck {
 
-  public Boolean isInPool;
+  public Boolean inTxPool;
   public Integer numConfirmations;
-  public BigInteger amountReceived;
-
-  public Boolean getIsInPool() {
-    return isInPool;
+  public BigInteger receivedAmount;
+  
+  public Boolean getInTxPool() {
+    return inTxPool;
   }
   
-  public void setIsInPool(Boolean isInPool) {
-    this.isInPool = isInPool;
+  public void setInTxPool(Boolean inTxPool) {
+    this.inTxPool = inTxPool;
   }
   
   public Integer getNumConfirmations() {
@@ -27,11 +27,11 @@ public class MoneroCheckTx extends MoneroCheck {
     this.numConfirmations = numConfirmations;
   }
   
-  public BigInteger getAmountReceived() {
-    return amountReceived;
+  public BigInteger getReceivedAmount() {
+    return receivedAmount;
   }
   
-  public void setAmountReceived(BigInteger amountReceived) {
-    this.amountReceived = amountReceived;
+  public void setReceivedAmount(BigInteger receivedAmount) {
+    this.receivedAmount = receivedAmount;
   }
 }
