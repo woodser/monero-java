@@ -5,7 +5,7 @@ import java.math.BigInteger;
 /**
  * Monero block header information.
  */
-public class MoneroBlockHeader extends MoneroDaemonModel {
+public class MoneroBlockHeader {
   
   private String id;
   private Integer height;

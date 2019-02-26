@@ -7,7 +7,7 @@ import monero.daemon.MoneroDaemonDefault.MoneroNetworkType;
 /**
  * Monero daemon info.
  */
-public class MoneroDaemonInfo extends MoneroDaemonModel {
+public class MoneroDaemonInfo {
   
   private String version;
   private Integer numAltBlocks;
