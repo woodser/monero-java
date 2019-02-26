@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import monero.daemon.MoneroDaemon;
-import monero.daemon.MoneroDaemonRpc;
+import monero.daemon.MoneroDaemonRpcOld;
 import monero.rpc.MoneroRpc;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroUtils;
@@ -73,7 +73,7 @@ public class TestUtils {
       // connect to daemon
       try {
         MoneroRpc rpc = new MoneroRpc(DAEMON_RPC_DOMAIN, DAEMON_RPC_PORT, DAEMON_USERNAME, DAEMON_PASSWORD);
-        daemon = new MoneroDaemonRpc(rpc);
+        daemon = new MoneroDaemonRpcOld(rpc);
       } catch (URISyntaxException e) {
         throw new RuntimeException(e);
       }
