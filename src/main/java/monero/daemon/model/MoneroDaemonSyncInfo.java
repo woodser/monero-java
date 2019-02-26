@@ -5,12 +5,14 @@ import java.util.List;
 /**
  * Models daemon synchronization information.
  */
-public class MoneroDaemonSyncInfo extends MoneroDaemonModel {
+public class MoneroDaemonSyncInfo {
 
   private Integer height;
-  private List<MoneroDaemonConnection> peers;
-  private List<MoneroDaemonConnectionSpan> spans; // TODO: incorporate span info into daemon connection?
+  private List<MoneroDaemonConnection> connections;
+  private List<MoneroDaemonConnectionSpan> spans;
   private Integer targetHeight;
+  private Integer nextNeededPruningSeed;
+  private String overview;
   
   public Integer getHeight() {
     return height;
@@ -20,12 +22,12 @@ public class MoneroDaemonSyncInfo extends MoneroDaemonModel {
     this.height = height;
   }
   
-  public List<MoneroDaemonConnection> getPeers() {
-    return peers;
+  public List<MoneroDaemonConnection> getConnections() {
+    return connections;
   }
   
-  public void setPeers(List<MoneroDaemonConnection> peers) {
-    this.peers = peers;
+  public void setConnections(List<MoneroDaemonConnection> connections) {
+    this.connections = connections;
   }
   
   public List<MoneroDaemonConnectionSpan> getSpans() {
@@ -42,5 +44,21 @@ public class MoneroDaemonSyncInfo extends MoneroDaemonModel {
   
   public void setTargetHeight(Integer targetHeight) {
     this.targetHeight = targetHeight;
+  }
+  
+  public Integer getNextNeededPruningSeed() {
+    return nextNeededPruningSeed;
+  }
+  
+  public void setNextNeededPruningSeed(Integer nextNeededPruningSeed) {
+    this.nextNeededPruningSeed = nextNeededPruningSeed;
+  }
+  
+  public String getOverview() {
+    return overview;
+  }
+  
+  public void setOverview(String overview) {
+    this.overview = overview;
   }
 }

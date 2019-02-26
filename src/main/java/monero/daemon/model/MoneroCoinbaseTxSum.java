@@ -5,24 +5,24 @@ import java.math.BigInteger;
 /**
  * Model for the summation of coinbase emissions and fees.
  */
-public class MoneroCoinbaseTxSum extends MoneroDaemonModel {
+public class MoneroCoinbaseTxSum {
 
-  private BigInteger totalEmission;
-  private BigInteger totalFees;
+  private BigInteger emissionSum;
+  private BigInteger feeSum;
   
-  public BigInteger getTotalEmission() {
-    return totalEmission;
+  public BigInteger getEmissionSum() {
+    return emissionSum;
   }
   
-  public void setTotalEmission(BigInteger totalEmission) {
-    this.totalEmission = totalEmission;
+  public void setEmissionSum(BigInteger emissionSum) {
+    this.emissionSum = emissionSum;
   }
   
-  public BigInteger getTotalFees() {
-    return totalFees;
+  public BigInteger getFeeSum() {
+    return feeSum;
   }
   
-  public void setTotalFees(BigInteger totalFees) {
-    this.totalFees = totalFees;
-  }  
+  public void setFeeSum(BigInteger feeSum) {
+    this.feeSum = feeSum;
+  }
 }

@@ -7,7 +7,7 @@ import monero.daemon.model.MoneroTx;
 /**
  * Monero block.
  */
-public class MoneroBlock extends MoneroDaemonModel {
+public class MoneroBlock {
 
   private MoneroBlockHeader header;
   private String hex;

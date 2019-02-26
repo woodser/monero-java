@@ -5,37 +5,37 @@ import java.math.BigInteger;
 /**
  * Monero block template to mine.
  */
-public class MoneroBlockTemplate extends MoneroDaemonModel {
-
-  private String templateBlob;
-  private String hashBlob;
-  private Integer difficulty;
+public class MoneroBlockTemplate {
+  
+  private String blockTemplateBlob;
+  private String blockHashingBlob;
+  private Long difficulty;
   private BigInteger expectedReward;
   private Integer height;
-  private String prevHash;
+  private String prevId;
   private Integer reservedOffset;
   
-  public String getTemplateBlob() {
-    return templateBlob;
+  public String getBlockTemplateBlob() {
+    return blockTemplateBlob;
   }
   
-  public void setTemplateBlob(String templateBlob) {
-    this.templateBlob = templateBlob;
+  public void setBlockTemplateBlob(String blockTemplateBlob) {
+    this.blockTemplateBlob = blockTemplateBlob;
   }
   
-  public String getHashBlob() {
-    return hashBlob;
+  public String getBlockHashingBlob() {
+    return blockHashingBlob;
   }
   
-  public void setHashBlob(String hashBlob) {
-    this.hashBlob = hashBlob;
+  public void setBlockHashingBlob(String blockHashingBlob) {
+    this.blockHashingBlob = blockHashingBlob;
   }
   
-  public Integer getDifficulty() {
+  public Long getDifficulty() {
     return difficulty;
   }
   
-  public void setDifficulty(Integer difficulty) {
+  public void setDifficulty(Long difficulty) {
     this.difficulty = difficulty;
   }
   
@@ -55,12 +55,12 @@ public class MoneroBlockTemplate extends MoneroDaemonModel {
     this.height = height;
   }
   
-  public String getPrevHash() {
-    return prevHash;
+  public String getPrevId() {
+    return prevId;
   }
   
-  public void setPrevHash(String prevHash) {
-    this.prevHash = prevHash;
+  public void setPrevId(String prevId) {
+    this.prevId = prevId;
   }
   
   public Integer getReservedOffset() {

@@ -5,7 +5,7 @@ import java.math.BigInteger;
 /**
  * Monero daemon connection span.
  */
-public class MoneroDaemonConnectionSpan extends MoneroDaemonModel {
+public class MoneroDaemonConnectionSpan {
 
   private String connectionId;
   private Integer numBlocks;
