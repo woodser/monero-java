@@ -1,46 +1,48 @@
 package monero.daemon;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 
 import monero.daemon.model.MoneroBan;
-import monero.daemon.model.MoneroCoinbaseTxSum;
-import monero.daemon.model.MoneroDaemonModel;
+import monero.daemon.model.MoneroKeyImageSpentStatus;
+import monero.daemon.model.MoneroTx;
 
 /**
  * Default Monero daemon implementation.
  */
 public abstract class MoneroDaemonDefault implements MoneroDaemon {
   
-  /**
-   * Daemon networks.
-   */
-  public enum MoneroNetworkType {
-    MAINNET,
-    STAGENET,
-    TESTNET
-  }
-
   @Override
-  public MoneroDaemonModel setBan(MoneroBan ban) {
-    return setBans(Arrays.asList(ban));
+  public MoneroTx getTx(String txId) {
+    return getTx(txId, null);
   }
   
   @Override
-  public MoneroDaemonModel relayTx(String txId) {
-    Collection<String> txIds = new ArrayList<>();
-    txIds.add(txId);
-    return relayTxs(txIds);
+  public List<MoneroTx> getTxs(List<String> txIds) {
+    return getTxs(txIds, null);
+  }
+  
+  public List<String> getTxHexes(String txIds) {
+    return getTxHexes(txIds, null);
   }
   
   @Override
-  public MoneroDaemonModel flushTxPool() {
-    return flushTxPool(null);
+  public void relayTxById(String txId) {
+    relayTxsById(Arrays.asList(txId));
   }
   
   @Override
-  public MoneroCoinbaseTxSum getCoinbaseTxSum() {
-    return getCoinbaseTxSum(0, getInfo().getHeight());
+  public MoneroKeyImageSpentStatus getSpentStatus(String keyImage) {
+    return getSpentStatuses(Arrays.asList(keyImage)).get(0);
+  }
+  
+  @Override
+  public void setPeerBan(MoneroBan ban) {
+    setPeerBans(Arrays.asList(ban));
+  }
+  
+  @Override
+  public void submitBlock(String blockBlob) {
+    submitBlocks(Arrays.asList(blockBlob));
   }
 }
