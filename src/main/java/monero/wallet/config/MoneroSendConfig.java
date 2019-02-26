@@ -26,6 +26,22 @@ public class MoneroSendConfig {
   private Boolean sweepEachSubaddress;
   private String keyImage;
   
+  public MoneroSendConfig() {
+    this(null, null);
+  }
+  
+  public MoneroSendConfig(String address) {
+    this(address, null);
+  }
+  
+  public MoneroSendConfig(String address, BigInteger amount) {
+    this(address, amount, null);
+  }
+  
+  public MoneroSendConfig(String address, BigInteger amount, MoneroSendPriority priority) {
+    throw new Error("Not implemented");
+  }
+  
   public List<MoneroDestination> getDestinations() {
     return destinations;
   }
