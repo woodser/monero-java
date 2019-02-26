@@ -1,23 +1,46 @@
+/**
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package monero.wallet;
 
 import java.math.BigInteger;
-import java.net.URI;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
+import monero.daemon.model.MoneroKeyImage;
+import monero.wallet.config.MoneroSendConfig;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIntegratedAddress;
-import monero.wallet.model.MoneroKeyImage;
+import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSubaddress;
-import monero.wallet.model.MoneroTx;
-import monero.wallet.model.MoneroTxConfig;
-import monero.wallet.model.MoneroTxFilter;
-import monero.wallet.model.MoneroUri;
+import monero.wallet.model.MoneroSyncProgressListener;
+import monero.wallet.model.MoneroSyncResult;
+import monero.wallet.model.MoneroTransfer;
+import monero.wallet.model.MoneroWalletOutput;
+import monero.wallet.model.MoneroWalletTx;
 
 /**
  * Monero wallet interface.
@@ -25,172 +48,87 @@ import monero.wallet.model.MoneroUri;
 public interface MoneroWallet {
   
   /**
-   * Get the wallet's current block height.
+   * Get the wallet's seed.
    * 
-   * @return int is the current block height of the wallet
+   * @return the wallet's seed
+   */
+  public String getSeed();
+  
+  /**
+   * Get the wallet's mnemonic phrase derived from the seed.
+   * 
+   * @return the wallet's mnemonic phrase
+   */
+  public String getMnemonic();
+  
+  /**
+   * Get the wallet's public view key.
+   * 
+   * @return the wallet's public view key
+   */
+  public String getPublicViewKey();
+  
+  /**
+   * Get the wallet's private view key.
+   * 
+   * @return the wallet's private view key
+   */
+  public String getPrivateViewKey();
+  
+  /**
+   * Get a list of available languages for the wallet's seed.
+   * 
+   * @return the available languages for the wallet's seed
+   */
+  public List<String> getLanguages();
+  
+  /**
+   * Get the height of the last block processed by the wallet (its index + 1).
+   * 
+   * @return the height of the last block processed by the wallet
    */
   public int getHeight();
   
   /**
-   * Get the wallet's mnemonic seed.
+   * Get the blockchain's height.
    * 
-   * @return String is the wallet's mnemonic seed
+   * @return the block chain's height
    */
-  public String getMnemonicSeed();
-
-  /**
-   * Get the wallet's view key.
-   * 
-   * @return String is the wallet's view key
-   */
-  public String getViewKey();
+  public int getChainHeight();
   
   /**
-   * Gets the wallet's primary address (account 0, subaddress 0).
+   * Get the wallet's primary address.
    * 
-   * @return String is the wallet's primary address
+   * @return the wallet's primary address
    */
   public String getPrimaryAddress();
   
   /**
-   * Returns an integrated address based on this wallet's standard address and the given payment ID.
+   * Get an integrated address based on this wallet's primary address and the
+   * given payment ID.  Generates a random payment ID if none is given.
    * 
-   * Generates a random payment ID if none is given.
-   * 
-   * @param paymentId is the payment id to generate an integrated address from (optional)
-   * @return MoneroIntegratedAddress is the integrated address
+   * @param paymentId is the payment ID to generate an integrated address from (randomly generated if null)
+   * @return the integrated address
    */
   public MoneroIntegratedAddress getIntegratedAddress(String paymentId);
   
   /**
-   * Get all accounts.
+   * Decode an integrated address to get its standard address and payment id.
    * 
-   * @return List<MoneroAccount> are all accounts within the wallet
+   * @param integratedAddress is an integrated address to decode
+   * @return the decoded integrated address including standard address and payment id
    */
-  public List<MoneroAccount> getAccounts();
+  public MoneroIntegratedAddress decodeIntegratedAddress(String integratedAddress);
   
   /**
-   * Get all accounts.
+   * Synchronizes the wallet with the block chain.
    * 
-   * @param includeSubaddresses specifies if subaddresses should be included
-   * @return List<MoneroAccount> are all accounts
+   * @param startHeight is the start height to sync from, syncs from the last synced block by default
+   * @param endHeight is the end height to sync to, syncs to the current chain height by default
+   * @param progressListener is invoked as sync progress is made
+   * @return the sync result
    */
-  public List<MoneroAccount> getAccounts(boolean includeSubaddresses);
-  
-  /**
-   * Get accounts with a given tag.
-   * 
-   * @param tag is the tag for filtering accounts, all accounts if null
-   * @return List<MoneroAccount> are all accounts for the wallet with the given tag
-   */
-  public List<MoneroAccount> getAccounts(String tag);
-  
-  /**
-   * Get accounts with a given tag.
-   * 
-   * @param includeSubaddresses specifies if subaddresses should be included
-   * @param tag is the tag for filtering accounts, all accounts if null
-   * @return List<MoneroAccount> are all accounts for the wallet with the given tag
-   */
-  public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag);
-  
-  /**
-   * Get an account.
-   * 
-   * @param accountIdx identifies the account
-   * @return MoneroAccount is the account
-   */
-  public MoneroAccount getAccount(int accountIdx);
-  
-  /**
-   * Get an account.
-   * 
-   * @param accountIdx identifies the account
-   * @param includeSubaddresses specifies if subaddresses should be included
-   * @return MoneroAccount is the account
-   */
-  public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses);
-  
-  /**
-   * Create a new account without a label.
-   * 
-   * @return MoneroAccount is the created account
-   */
-  public MoneroAccount createAccount();
-  
-  /**
-   * Create a new account with an optional label.
-   * 
-   * @param label specifies the label for the account (optional)
-   * @return MoneroAccount is the created account
-   */
-  public MoneroAccount createAccount(String label);
-  
-  /**
-   * Gets an account's subaddresses.
-   * 
-   * @param accountIdx identifies the account
-   * @return List<MoneroSubaddress> are subaddresses within an account
-   */
-  public List<MoneroSubaddress> getSubaddresses(int accountIdx);
-  
-  /**
-   * Gets specific subaddresses within an account.
-   * 
-   * @param accountIdx identifies the account
-   * @param subaddressIndices identifies the subaddresses within the account (optional)
-   * @return List<MoneroSubaddress> are the specified subaddresses
-   */
-  public List<MoneroSubaddress> getSubaddresses(int accountIdx, Collection<Integer> subaddressIndices);
-  
-  /**
-   * Gets a subaddress in an account.
-   * 
-   * @param accountIdx identifies the account
-   * @param subaddressIdx identifies the subaddress
-   * @return MoneroSubaddress is the subaddress in the account
-   */
-  public MoneroSubaddress getSubaddress(int accountIdx, int subaddressIdx);
-  
-  /**
-   * Create a subaddress within an account without a label.
-   * 
-   * @param accountIdx identifies the account
-   * @return MoneroSubaddress is the created subaddress
-   */
-  public MoneroSubaddress createSubaddress(int accountIdx);  
-  
-  /**
-   * Create a subaddress within an account.
-   * 
-   * @param accountIdx identifies the account
-   * @param label specifies the label for the subaddress (optional)
-   * @return MoneroSubaddress is the created subaddress
-   */
-  public MoneroSubaddress createSubaddress(int accountIdx, String label);
-  
-  /**
-   * Returns the receive address of the given subaddress.
-   * 
-   * @param accountIdx identifies the subaddress's account index
-   * @param subaddressIdx identifies the subaddress's index within the account
-   * @return String is the receive address of the given subaddress
-   */
-  public String getAddress(int accountIdx, int subaddressIdx);
-  
-  /**
-   * Get the balance across all accounts.
-   * 
-   * @return BigInteger is the balance across all accounts
-   */
-  public BigInteger getBalance();
-  
-  /**
-   * Get the unlocked balance across all accounts.
-   * 
-   * @return BigInteger is the unlocked balance across all accounts
-   */
-  public BigInteger getUnlockedBalance();
+  public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncProgressListener progressListener);
   
   /**
    * Indicates if importing multisig data is needed for returning a correct balance.
@@ -200,104 +138,306 @@ public interface MoneroWallet {
   public boolean isMultisigImportNeeded();
   
   /**
-   * Get all wallet transactions, each containing payments, outputs, and other metadata depending on the transaction type.
+   * Get accounts without subaddress information.
    * 
-   * @return List<MoneroTx> are all of the wallet's transactions
+   * @return the retrieved accounts
    */
-  public List<MoneroTx> getTxs();
+  public List<MoneroAccount> getAccounts();
   
   /**
-   * Get all account transactions, each containing payments, outputs, and other metadata depending on the transaction type.
+   * Get accounts.
    * 
-   * @return List<MoneroTx> are all of the account's transactions
+   * @param includeSubaddresses specifies if subaddresses should be included
+   * @return the retrieved accounts
    */
-  public List<MoneroTx> getTxs(int accountIdx);
+  public List<MoneroAccount> getAccounts(boolean includeSubaddresses);
   
   /**
-   * Get all subaddress transactions, each containing payments, outputs, and other metadata depending on the transaction type.
+   * Get an account without subaddress information.
    * 
-   * @return List<MoneroTx> are all of the subaddress's transactions
+   * @param accountIdx specifies the account to get
+   * @return the retrieved account
    */
-  public List<MoneroTx> getTxs(int accountIdx, int subaddressIdx);
+  public MoneroAccount getAccount(int accountIdx);
   
   /**
-   * Get wallet transactions that meet the criteria specified in a filter.
+   * Get an account.
    * 
-   * @param filter filters wallet transactions
-   * @return List<MoneroTx> are the transactions that meet the criteria specified in the filter
+   * @param accountIdx specifies the account to get
+   * @param includeSubaddresses specifies if subaddresses should be included
+   * @return the retrieved account
    */
-  public List<MoneroTx> getTxs(MoneroTxFilter filter);
+  public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses);
+
+  /**
+   * Create a new account.
+   * 
+   * @param label specifies the label for the account (optional)
+   * @return the created account
+   */
+  public MoneroAccount createAccount(String label);
   
   /**
-   * Send a payment.
+   * Get all subaddresses in an account.
    * 
-   * @param address is the address to send to
-   * @param amount is the amount to send
-   * @return MoneroTx is the resulting transaction from sending a payment
+   * @param accountIdx specifies the account to get subaddresses within
+   * @return List<MoneroSubaddress> are the retrieved subaddresses
    */
-  public MoneroTx send(String address, BigInteger amount);
-
+  public List<MoneroSubaddress> getSubaddresses(int accountIdx);
+  
   /**
-   * Send a payment.
+   * Get subaddresses in an account.
    * 
-   * @param address is the address to send to
-   * @param paymentId is the payment id to send to (optional)
-   * @param amount is the amount to send
-   * @return MoneroTx is the resulting transaction from sending a payment
+   * @param accountIdx specifies the account to get subaddresses within
+   * @param subaddressIndices are specific subaddresses to get (optional)
+   * @return the retrieved subaddresses
    */
-  public MoneroTx send(String address, String paymentId, BigInteger amount);
-
+  public List<MoneroSubaddress> getSubaddresses(int accountIdx, List<Integer> subaddressIndices);
+  
   /**
-   * Send payments.
+   * Get a subaddress.
    * 
-   * @param config is the transaction configuration
-   * @return MoneroTx is the resulting transaction from sending payments
+   * @param accountIdx specifies the index of the subaddress's account
+   * @param subaddressIdx specifies index of the subaddress within the account
+   * @return the retrieved subaddress
    */
-  public MoneroTx send(MoneroTxConfig config);
-
+  public MoneroSubaddress getSubaddress(int accountIdx, int subaddressIdx);
+  
   /**
-   * Send a payment which may be split across multiple transactions.
+   * Create a subaddress within an account and without a label.
    * 
-   * @param address is the address to send to
-   * @param amount is the amount to send
-   * @return List<MoneroTx> are the resulting transactions from sending a payment
+   * @param accountIdx specifies the index of the account to create the subaddress within
+   * @return the created subaddress
    */
-  public List<MoneroTx> sendSplit(String address, BigInteger amount);
-
+  public MoneroSubaddress createSubaddress(int accountIdx);
+  
   /**
-   * Send a payment which may be split across multiple transactions.
+   * Create a subaddress within an account.
    * 
-   * @param address is the address to send to
-   * @param paymentId is the payment id to send to (optional)
-   * @param amount is the amount to send
-   * @return List<MoneroTx> are the resulting transactions from sending a payment
+   * @param accountIdx specifies the index of the account to create the subaddress within
+   * @param label specifies the the label for the subaddress (optional)
+   * @return the created subaddress
    */
-  public List<MoneroTx> sendSplit(String address, String paymentId, BigInteger amount);
-
+  public MoneroSubaddress createSubaddress(int accountIdx, String label);
+  
   /**
-   * Send payments which may be split across multiple transactions.
+   * Get the address of a specific subaddress.
    * 
-   * @param config is the transaction configuration
-   * @return List<MoneroTx> are the resulting transactions from sending payments
+   * @param accountIdx specifies the account index of the address's subaddress
+   * @param subaddressIdx specifies the subaddress index within the account
+   * @return the receive address of the specified subaddress
    */
-  public List<MoneroTx> sendSplit(MoneroTxConfig config);
+  public String getAddress(int accountIdx, int subaddressIdx);
+  
+  /**
+   * Get the account and subaddress index of the given address.
+   * 
+   * @param address is the address to get the account and subaddress index from
+   * @return the account and subaddress indices
+   * @throws exception if address is not a wallet address
+   */
+  public MoneroSubaddress getAddressIndex(String address);
+  
+  /**
+   * Get the wallet's balance.
+   * 
+   * @return the wallet's balance
+   */
+  public BigInteger getBalance();
+  
+  /**
+   * Get an account's balance.
+   * 
+   * @param accountIdx is the index of the account to get the balance of
+   * @return the account's balance
+   */
+  public BigInteger getBalance(int accountIdx);
+  
+  /**
+   * Get a subaddress's balance.
+   * 
+   * @param accountIdx is the index of the subaddress's account to get the balance of
+   * @param subaddressIdx is the index of the subaddress to get the balance of
+   * @return the subaddress's balance
+   */
+  public BigInteger getBalance(int accountIdx, int subaddressIdx);
+  
+  /**
+   * Get the wallet's unlocked balance.
+   * 
+   * @return the wallet's unlocked balance
+   */
+  public BigInteger getUnlockedBalance();
+  
+  /**
+   * Get an account's unlocked balance.
+   * 
+   * @param accountIdx is the index of the account to get the unlocked balance of
+   * @return the account's unlocked balance
+   */
+  public BigInteger getUnlockedBalance(int accountIdx);
+  
+  /**
+   * Get a subaddress's unlocked balance.
+   * 
+   * @param accountIdx is the index of the subaddress's account to get the unlocked balance of
+   * @param subaddressIdx is the index of the subaddress to get the unlocked balance of
+   * @return the subaddress's balance
+   */
+  public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx);
+  
+  /**
+   * Get all wallet transactions.  Wallet transactions contain one or more
+   * transfers that are either incoming or outgoing to the wallet.
 
+   * @return all wallet transactions
+   */
+  public List<MoneroWalletTx> getTxs();
+  
+  /**
+   * Get wallet transactions.  Wallet transactions contain one or more
+   * transfers that are either incoming or outgoing to the wallet.
+   * 
+   * Query results can be filtered by passing in a transaction filter.
+   * Transactions must meet every criteria defined in the filter in order to be
+   * returned.  All filtering is optional and no filtering is applied when not
+   * defined.
+   * 
+   * @param filter filters query results (optional)
+   * @return wallet transactions per the filter
+   */
+  public List<MoneroWalletTx> getTxs(MoneroTxFilter filter);
+  
+  /**
+   * Get all incoming and outgoing transfers to and from this wallet.  An
+   * outgoing transfer represents a total amount sent from one or more
+   * subaddresses within an account to individual destination addresses, each
+   * with their own amount.  An incoming transfer represents a total amount
+   * received into a subaddress within an account.  Transfers belong to
+   * transactions which are stored on the blockchain.
+   * 
+   * @return all wallet transfers
+   */
+  public List<MoneroTransfer> getTransfers();
+  
+  /**
+   * Get incoming and outgoing transfers to and from this wallet.  An outgoing
+   * transfer represents a total amount sent from one or more subaddresses
+   * within an account to individual destination addresses, each with their
+   * own amount.  An incoming transfer represents a total amount received into
+   * a subaddress within an account.  Transfers belong to transactions which
+   * are stored on the blockchain.
+   * 
+   * Query results can be filtered by passing in a transfer filter.  Transfers
+   * must meet every criteria defined in the filter in order to be returned.
+   * All filtering is optional and no filtering is applied when not defined.
+   * 
+   * @param filter filters query results (optional)
+   * @return wallet transfers per the filter
+   */
+  public List<MoneroTransfer> getTransfers(MoneroTransferFilter filter);
+  
+  /**
+   * Get all wallet vouts.  A wallet vout is an output created from a previous
+   * transaction that the wallet can spend one time.  Vouts belong to
+   * transactions which are stored on the blockchain.
+   * 
+   * @return all wallet vouts
+   */
+  public List<MoneroWalletOutput> getVouts();
+  
+  /**
+   * Get wallet vouts.  A wallet vout is an output created from a previous
+   * transaction that the wallet can spend one time.  Vouts belong to
+   * transactions which are stored on the blockchain.
+   * 
+   * Query results can be filtered by passing in a vout filter.  Vouts must
+   * meet every criteria defined in the filter in order to be returned.  All
+   * filtering is optional and no filtering is applied when not defined.
+   * 
+   * @param filter filters query results (optional)
+   * @return wallet vouts per the filter
+   */
+  public List<MoneroWalletOutput> getVouts(MoneroVoutFilter filter);
+  
+  /**
+   * Get all signed key images.
+   * 
+   * @return the wallet's signed key images
+   */
+  public List<MoneroKeyImage> getKeyImages();
+  
+  /**
+   * Import signed key images and verify their spent status.
+   * 
+   * @param keyImages are key images to import and verify (requires hex and signature)
+   * @return results of the import
+   */
+  public MoneroKeyImageImportResult importKeyImages(List<MoneroKeyImage> keyImages);
+  
+  /**
+   * Get new key images from the last imported outputs.
+   * 
+   * @return the key images from the last imported outputs
+   */
+  public List<MoneroKeyImage> getNewKeyImagesFromLastImport();
+  
+  /**
+   * Create and relay (depending on configuration) a transaction which
+   * transfers funds from this wallet to one or more destination addresses.
+   * 
+   * @param config configures the transaction
+   * @return the resulting transaction
+   */
+  public MoneroWalletTx send(MoneroSendConfig config);
+  
+  /**
+   * Create and relay a transaction which transfers funds from this wallet to
+   * a destination address.
+   * 
+   * @param address is the destination address to send funds to
+   * @param sendAmount is the amount being sent
+   * @param priority is the transaction priority (optional)
+   * @return the resulting transaction
+   */
+  public MoneroWalletTx send(String address, BigInteger sendAmount, MoneroSendPriority priority);
+  
+  /**
+   * Create and relay (depending on configuration) one or more transactions
+   * which transfer funds from this wallet to one or more destination.
+   * 
+   * @param config configures the transactions
+   * @return the resulting transactions
+   */
+  public List<MoneroWalletTx> sendSplit(MoneroSendConfig config);
+  
+  /**
+   * Create and relay one or more transactions which transfer funds from this
+   * wallet to one or more destination.
+   * 
+   * @param address is the destination address to send funds to
+   * @param sendAmount is the amount being sent
+   * @param priority is the transaction priority (optional)
+   * @return the resulting transactions
+   */
+  public List<MoneroWalletTx> sendSplit(String address, BigInteger sendAount, MoneroSendPriority priority);
+  
   /**
    * Sweep the wallet's unlocked funds to an address.
    * 
    * @param address is the address to sweep the wallet's funds to
-   * @return List<MoneroTx> are the resulting transactions
+   * @return the resulting transactions
    */
-  public List<MoneroTx> sweepWallet(String address);
+  public List<MoneroWalletTx> sweepWallet(String address);
 
   /**
    * Sweep an acount's unlocked funds to an address.
    * 
    * @param accountIdx is the index of the account
    * @param address is the address to sweep the account's funds to
-   * @return List<MoneroTx> are the resulting transactions
+   * @return the resulting transactions
    */
-  public List<MoneroTx> sweepAccount(int accountIdx, String address);
+  public List<MoneroWalletTx> sweepAccount(int accountIdx, String address);
 
   /**
    * Sweep a subaddress's unlocked funds to an address.
@@ -305,124 +445,122 @@ public interface MoneroWallet {
    * @param accountIdx is the index of the account
    * @param subaddressIdx is the index of the subaddress
    * @param address is the address to sweep the subaddress's funds to
-   * @return List<MoneroTx> are the resulting transactions
+   * @return the resulting transactions
    */
-  public List<MoneroTx> sweepSubaddress(int accountIdx, int subaddressIdx, String address);
+  public List<MoneroWalletTx> sweepSubaddress(int accountIdx, int subaddressIdx, String address);
 
   /**
    * Sweep unlocked funds.
    * 
-   * @param config specifies the sweep configuration
-   * @param List<MoneroTx> are the resulting transactions
+   * @param config is the sweep configuration
+   * @return the resulting transactions
    */
-  public List<MoneroTx> sweep(MoneroTxConfig config);
-
-  /**
-   * Send all dust outputs back to the wallet to make them easier to spend and mix.
-   * 
-   * @return List<MoneroTx> are the resulting transactions from sweeping dust
-   */
-  public List<MoneroTx> sweepDust();
+  public List<MoneroWalletTx> sweepUnlocked(MoneroSendConfig config);
   
   /**
-   * Relays a transaction previously created without relaying.
+   * Sweep all unmixable dust outputs back to the wallet to make them easier to spend and mix.
    * 
-   * @param tx is the transaction to relay
-   * @return MoneroTx is the relayed transaction
+   * @return the resulting transactions from sweeping dust
    */
-  public MoneroTx relayTx(MoneroTx tx);
+  public List<MoneroWalletTx> sweepDust();
   
   /**
-   * Relays tranactions previously created without relaying.
+   * Sweep all unmixable dust outputs back to the wallet to make them easier to spend and mix.
    * 
-   * @param txs are the transactions to relay
-   * @return List<MoneroTx> are the relayed txs
+   * @param doNotRelay specifies if the resulting transaction should not be relayed (defaults to false i.e. relayed)
+   * @return the resulting transactions from sweeping dust
    */
-  public List<MoneroTx> relayTxs(List<MoneroTx> txs);
+  public List<MoneroWalletTx> sweepDust(boolean doNotRelay);
   
   /**
-   * Sign transactions created on a read-only wallet (in cold-signing process).
+   * Sweep an output with a given key image.
    * 
-   * @param unsignedTxSet are the unsigned transactions to sign
-   * @return List<MoneroTx> is data for each transaction after signing
+   * @param config configures the sweep transaction
+   * @return the resulting transaction from sweeping an output 
    */
-  public List<MoneroTx> signTxs(String unsignedTxSet);
+  public MoneroWalletTx sweepOutput(MoneroSendConfig config);
   
   /**
-   * Submit previously signed transactions on a read-only wallet (in cold-signing process).
+   * Sweep an output with a given key image.
    * 
-   * @param signedTxSet are the signed transactions to submit
-   * @return List<MoneroTx> is data for each transaction after submitting
+   * @param address is the destination address to send to
+   * @param keyImage is the key image hex of the output to sweep
+   * @param priority is the transaction priority (optional)
+   * @return the resulting transaction from sweeping an output 
    */
-  public List<MoneroTx> submitTxs(String signedTxSet);
-
-  /**
-   * Tags accounts.
-   * 
-   * @param tag is the tag to apply to the specified accounts
-   * @param accountIndices are the indices of the accounts to tag
-   */
-  public void tagAccounts(String tag, Collection<Integer> accountIndices);
-
-  /**
-   * Untags acconts.
-   * 
-   * @param accountIndices are the indices of the accounts to untag
-   */
-  public void untagAccounts(Collection<Integer> accountIndices);
-
-  /**
-   * Returns all account tags.
-   * 
-   * @return List<MoneroAccountTag> are the wallet's account tags
-   */
-  public List<MoneroAccountTag> getAccountTags();
-
-  /**
-   * Sets a human-readable description for a tag.
-   * 
-   * @param tag is the tag to set a description for
-   * @param label is the label to set for the tag
-   */
-  public void setAccountTagLabel(String tag, String label);
+  public MoneroWalletTx sweepOutput(String address, String keyImage, MoneroSendPriority priority);
   
   /**
-   * Set a note for a specific transaction.
+   * Relay a transaction previously created without relaying.
    * 
-   * @param txId specifies the transaction
-   * @param txNote specifies the note
+   * @param txMetadata is transaction metadata previously created without relaying
+   * @return the relayed tx
    */
-  public void setTxNote(String txId, String txNote);
-
+  public MoneroWalletTx relayTx(String txMetadata);
+  
   /**
-   * Set notes for multiple transactions.
+   * Relay transactions previously created without relaying.
    * 
-   * @param txIds specifies the transactions to set notes for
-   * @param txNotes are the notes to set for the transactions
+   * @param txMetadatas are transaction metadata previously created without relaying
+   * @return the relayed txs
    */
-  public void setTxNotes(List<String> txIds, List<String> txNotes);
+  public List<MoneroWalletTx> relayTxs(List<String> txMetadatas);
   
   /**
    * Get a transaction note.
    * 
    * @param txId specifies the transaction to get the note of
-   * @return String is the transaction note
+   * @return the tx note
    */
   public String getTxNote(String txId);
   
   /**
-   * Get arbitrary string notes for transactions.
+   * Set a note for a specific transaction.
+   * 
+   * @param txId specifies the transaction
+   * @param note specifies the note
+   */
+  public void setTxNote(String txId, String note);
+  
+  /**
+   * Get notes for multiple transactions.
    * 
    * @param txIds identify the transactions to get notes for
-   * @preturn List<String> are notes for the transactions
+   * @preturns notes for the transactions
    */
   public List<String> getTxNotes(List<String> txIds);
+  
+  /**
+   * Set notes for multiple transactions.
+   * 
+   * @param txIds specify the transactions to set notes for
+   * @param notes are the notes to set for the transactions
+   */
+  public void setTxNotes(List<String> txIds, List<String> notes);
+  
+  /**
+   * Sign a message.
+   * 
+   * @param msg is the message to sign
+   * @return the signature
+   */
+  public String sign(String msg);
+  
+  /**
+   * Verify a signature on a message.
+   * 
+   * @param msg is the signed message
+   * @param address is the signing address
+   * @param signature is the signature
+   * @return true if the signature is good, false otherwise
+   */
+  public boolean verify(String msg, String address, String signature);
   
   /**
    * Get a transaction's secret key from its id.
    * 
    * @param txId is the transaction's id
-   * @return String is the transaction's secret key
+   * @return is the transaction's secret key
    */
   public String getTxKey(String txId);
   
@@ -432,7 +570,7 @@ public interface MoneroWallet {
    * @param txId specifies the transaction to check
    * @param txKey is the transaction's secret key
    * @param address is the destination public address of the transaction
-   * @return MoneroCheckTx is the result of the check
+   * @return the result of the check
    */
   public MoneroCheckTx checkTxKey(String txId, String txKey, String address);
   
@@ -442,7 +580,7 @@ public interface MoneroWallet {
    * @param txId specifies the transaction to prove
    * @param address is the destination public address of the transaction
    * @param message is a message to include with the signature to further authenticate the proof (optional)
-   * @return String is the transaction signature
+   * @return the transaction signature
    */
   public String getTxProof(String txId, String address, String message);
   
@@ -453,7 +591,7 @@ public interface MoneroWallet {
    * @param address is the destination public address of the transaction
    * @param message is a message included with the signature to further authenticate the proof (optional)
    * @param signature is the transaction signature to confirm
-   * @return MoneroCheckTx is the result of the check
+   * @return the result of the check
    */
   public MoneroCheckTx checkTxProof(String txId, String address, String message, String signature);
   
@@ -462,7 +600,7 @@ public interface MoneroWallet {
    * 
    * @param txId specifies the transaction to prove
    * @param message is a message to include with the signature to further authenticate the proof (optional)
-   * @return String is the transaction signature
+   * @return the transaction signature
    */
   public String getSpendProof(String txId, String message);
   
@@ -480,9 +618,9 @@ public interface MoneroWallet {
    * Generate a signature to prove the entire balance of the wallet.
    * 
    * @param message is a message included with the signature to further authenticate the proof (optional)
-   * @return String is the reserve proof signature
+   * @return the reserve proof signature
    */
-  public String getReserveProof(String message);
+  public String getReserveProofWallet(String message);
   
   /**
    * Generate a signature to prove an available amount in an account.
@@ -490,9 +628,9 @@ public interface MoneroWallet {
    * @param accountIdx specifies the account to prove contains an available amount
    * @param amount is the minimum amount to prove as available in the account
    * @param message is a message to include with the signature to further authenticate the proof (optional)
-   * @return String is the reserve proof signature
+   * @return the reserve proof signature
    */
-  public String getReserveProof(int accountIdx, BigInteger amount, String message);
+  public String getReserveProofAccount(int accountIdx, BigInteger amount, String message);
 
   /**
    * Proves a wallet has a disposable reserve using a signature.
@@ -500,179 +638,123 @@ public interface MoneroWallet {
    * @param address is the public wallet address
    * @param message is a message included with the signature to further authenticate the proof (optional)
    * @param signature is the reserve proof signature to check
-   * @return MoneroCheckReserve is the result of checking the signature proof
+   * @return the result of checking the signature proof
    */
   public MoneroCheckReserve checkReserveProof(String address, String message, String signature);
-
-  /**
-   * Returns a signed set of key images.
-   * 
-   * @return Collection<MoneroKeyImage> are exported key images
-   */
-  public Collection<MoneroKeyImage> getKeyImages();
   
   /**
-   * Import signed key images list and verify their spent status.
+   * Get address book entries.
    * 
-   * @param keyImages are key images to import
-   * @return Map<String, BigInteger> contains "height", "spent", and "unspent"
-   */
-  public Map<String, BigInteger> importKeyImages(Collection<MoneroKeyImage> keyImages);
-  
-  /**
-   * Returns all address book entries.
-   * 
-   * @return List<MoneroAddressBookEntry> are the wallet's address book entries
-   */
-  public List<MoneroAddressBookEntry> getAddressBookEntries();
-  
-  /**
-   * Returns address book entries at the given indices.
-   * 
-   * @param entryIndices are entry indices to retrieve
-   * @return List<MoneroAddressBookEntry> are the wallet's address book entries
+   * @param entryIndices are indices of the entries to get
+   * @return the address book entries
    */
   public List<MoneroAddressBookEntry> getAddressBookEntries(List<Integer> entryIndices);
   
   /**
-   * Adds an address book entry.
+   * Add an address book entry.
    * 
-   * @param address is the entry's Monero address
-   * @param description is the entry's description (optional)
-   * @return int is the index of the new address book entry
+   * @param address is the entry address
+   * @param description is the entry description (optional)
+   * @param paymentId is the entry paymet id (optional)
+   * @return the index of the added entry
    */
-  public int addAddressBookEntry(String address, String description);
+  public int addAddressBookEntry(String address, String description, String paymentId);
   
   /**
-   * Adds an address book entry.
+   * Delete an address book entry.
    * 
-   * @param address is the entry's Monero address
-   * @param paymentId is the entry's payment id (optional)
-   * @param description is the entry's description (optional)
-   * @return int is the index of the new address book entry
-   */
-  public int addAddressBookEntry(String address, String paymentId, String description);
-  
-  /**
-   * Deletes an address book entry.
-   * 
-   * @param entryIdx is the index of the address book entry to delete
+   * @param entryIdx is the index of the entry to delete
    */
   public void deleteAddressBookEntry(int entryIdx);
   
   /**
-   * Get a list of available languages for wallet seeds.
+   * Tag accounts.
    * 
-   * @return List<String> is a list of available languages
+   * @param tag is the tag to apply to the specified accounts
+   * @param accountIndices are the indices of the accounts to tag
    */
-  public List<String> getLanguages();
-  
-  /**
-   * Sign a string.
-   * 
-   * @param data is the string to sign
-   * @return String is the signature
-   */
-  public String sign(String data);
-  
-  /**
-   * Verify a signature on a string.
-   * 
-   * @param data is the signed string
-   * @param address is the signing address
-   * @param signature is the signature
-   * @return true if the signature is good, false otherwise
-   */
-  public boolean verify(String data, String address, String signature);
-  
-  /**
-   * Convert a MoneroUri to a standard URI.
-   * 
-   * @param moneroUri is the MoneroUri to convert to a standard URI
-   * @return URI is the MoneroUri converted to a standard URI
-   */
-  public URI toUri(MoneroUri moneroUri);
+  public List<Integer> tagAccounts(String tag, List<Integer> accountIndices);
 
   /**
-   * Convert a standard URI to a Monero URI.
+   * Untag acconts.
    * 
-   * @param uri is the standard URI to convert
-   * @return MoneroUri is the URI converted to a Monero URI
+   * @param accountIndices are the indices of the accounts to untag
    */
-  public MoneroUri toMoneroUri(URI uri);
-  
-  /**
-   * Decodes an integrated address into its standard address and payment id components.
-   * 
-   * @param integratedAddress is a string representation of the integrated address
-   * @return MoneroIntegratedAddress contains the integrated address, standard address, and payment id
-   */
-  public MoneroIntegratedAddress decodeIntegratedAddress(String integratedAddress);
-  
-  /**
-   * Create a new wallet.
-   * 
-   * @param filename is the name of the wallet file to create
-   * @param password is the wallet password
-   * @param language is the wallet language
-   */
-  public void createWallet(String filename, String password, String language);
+  public void untagAccounts(List<Integer> accountIndices);
 
   /**
-   * Open a wallet.
+   * Return all account tags.
    * 
-   * @param filename is the name of the wallet file to open
-   * @param password is the wallet password
+   * @return the wallet's account tags
    */
-  public void openWallet(String filename, String password);
+  public List<MoneroAccountTag> getAccountTags();
 
   /**
-   * Stop the wallet.
-   */
-  public void stopWallet();
-
-  /**
-   * Save the current state of the blockchain.
-   */
-  public void saveBlockchain();
-  
-  /**
-   * Rescan the blockchain.
-   */
-  public void rescanBlockchain();
-  
-  /**
-   * Rescan the blockchain for spent outputs.
-   */
-  public void rescanSpent();
-
-  /**
-   * Start mining in the Monero daemon.
+   * Sets a human-readable description for a tag.
    * 
-   * @param numThreads is the number of threads created for mining
-   * @param backgroundMining specifies if mining should occur in the background
-   * @param ignoreBattery specifies if the battery should be ignored for mining
+   * @param tag is the tag to set a description for
+   * @param label is the label to set for the tag
    */
-  public void startMining(int numThreads, boolean backgroundMining, boolean ignoreBattery);
+  public void setAccountTagLabel(String tag, String label);
   
   /**
-   * Stop mining in the Monero daemon.
+   * Creates a payment URI from a send configuration.
+   * 
+   * @param sendConfig specifies configuration for a potential tx
+   * @return is the payment uri
    */
-  public void stopMining();
+  public String createPaymentUri(MoneroSendConfig sendConfig);
+  
+  /**
+   * Parses a payment URI to a send configuration.
+   * 
+   * @param uri is the payment uri to parse
+   * @return the send configuration parsed from the uri
+   */
+  public MoneroSendConfig parsePaymentUri(String uri);
+  
+  /**
+   * Export all outputs in hex format.
+   * 
+   * @return all outputs in hex format, null if no outputs
+   */
+  public String getOutputsHex();
+  
+  /**
+   * Import outputs in hex format.
+   * 
+   * @param outputsHex are outputs in hex format
+   * @return the number of outputs imported
+   */
+  public int importOutputsHex(String outputsHex);
   
   /**
    * Set an arbitrary attribute.
    * 
    * @param key is the attribute key
-   * @param value is the attribute value
+   * @param val is the attribute value
    */
-  public void setAttribute(String key, String value);
+  public void setAttribute(String key, String val);
   
   /**
    * Get an attribute.
    * 
    * @param key is the attribute to get the value of
-   * @return String is the attribute's value
+   * @return the attribute's value
    */
   public String getAttribute(String key);
+  
+  /**
+   * Start mining.
+   * 
+   * @param numThreads is the number of threads created for mining (optional)
+   * @param backgroundMining specifies if mining should occur in the background (optional)
+   * @param ignoreBattery specifies if the battery should be ignored for mining (optional)
+   */
+  public void startMining(Integer numThreads, Boolean backgroundMining, Boolean ignoreBattery);
+  
+  /**
+   * Stop mining.
+   */
+  public void stopMining();
 }
