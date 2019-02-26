@@ -9,37 +9,48 @@ import monero.daemon.MoneroDaemonDefault.MoneroNetworkType;
  */
 public class MoneroDaemonInfo extends MoneroDaemonModel {
   
-  private Integer altBlocksCount;
+  private String version;
+  private Integer numAltBlocks;
   private Integer blockSizeLimit;
   private Integer blockSizeMedian;
+  private Integer blockWeightMedian;
   private String bootstrapDaemonAddress;
-  private BigInteger cumulativeDifficulty;
   private BigInteger difficulty;
+  private BigInteger cumulativeDifficulty;
   private BigInteger freeSpace;
-  private Integer greyPeerlistSize;
-  private Integer whitePeerlistSize;
+  private Integer numOfflinePeers;
+  private Integer numOnlinePeers;
   private Integer height;
   private Integer heightWithoutBootstrap;
   private MoneroNetworkType networkType;
   private Boolean isOffline;
-  private Integer incomingConnectionsCount;
-  private Integer outgoingConnectionsCount;
-  private Integer rpcConnectionsCount;
-  private Long startTime;
+  private Integer numIncomingConnections;
+  private Integer numOutgoingConnections;
+  private Integer numRpcConnections;
+  private Long startTimestamp;
   private Integer target;
   private Integer targetHeight;
-  private String topBlockHash;
-  private Integer txCount;
-  private Integer txPoolSize;
+  private String topBlockId;
+  private Integer numTxs;
+  private Integer numTxsPool;
   private Boolean wasBootstrapEverUsed;
-  private Integer version;
+  private Integer databaseSize;
+  private Boolean updateAvailable;
   
-  public Integer getAltBlocksCount() {
-    return altBlocksCount;
+  public String getVersion() {
+    return version;
   }
   
-  public void setAltBlocksCount(Integer altBlocksCount) {
-    this.altBlocksCount = altBlocksCount;
+  public void setVersion(String version) {
+    this.version = version;
+  }
+  
+  public Integer getNumAltBlocks() {
+    return numAltBlocks;
+  }
+  
+  public void setNumAltBlocks(Integer numAltBlocks) {
+    this.numAltBlocks = numAltBlocks;
   }
   
   public Integer getBlockSizeLimit() {
@@ -58,20 +69,20 @@ public class MoneroDaemonInfo extends MoneroDaemonModel {
     this.blockSizeMedian = blockSizeMedian;
   }
   
+  public Integer getBlockWeightMedian() {
+    return blockWeightMedian;
+  }
+  
+  public void setBlockWeightMedian(Integer blockWeightMedian) {
+    this.blockWeightMedian = blockWeightMedian;
+  }
+  
   public String getBootstrapDaemonAddress() {
     return bootstrapDaemonAddress;
   }
   
   public void setBootstrapDaemonAddress(String bootstrapDaemonAddress) {
     this.bootstrapDaemonAddress = bootstrapDaemonAddress;
-  }
-  
-  public BigInteger getCumulativeDifficulty() {
-    return cumulativeDifficulty;
-  }
-  
-  public void setCumulativeDifficulty(BigInteger cumulativeDifficulty) {
-    this.cumulativeDifficulty = cumulativeDifficulty;
   }
   
   public BigInteger getDifficulty() {
@@ -82,6 +93,14 @@ public class MoneroDaemonInfo extends MoneroDaemonModel {
     this.difficulty = difficulty;
   }
   
+  public BigInteger getCumulativeDifficulty() {
+    return cumulativeDifficulty;
+  }
+  
+  public void setCumulativeDifficulty(BigInteger cumulativeDifficulty) {
+    this.cumulativeDifficulty = cumulativeDifficulty;
+  }
+  
   public BigInteger getFreeSpace() {
     return freeSpace;
   }
@@ -90,20 +109,20 @@ public class MoneroDaemonInfo extends MoneroDaemonModel {
     this.freeSpace = freeSpace;
   }
   
-  public Integer getGreyPeerlistSize() {
-    return greyPeerlistSize;
+  public Integer getNumOfflinePeers() {
+    return numOfflinePeers;
   }
   
-  public void setGreyPeerlistSize(Integer greyPeerlistSize) {
-    this.greyPeerlistSize = greyPeerlistSize;
+  public void setNumOfflinePeers(Integer numOfflinePeers) {
+    this.numOfflinePeers = numOfflinePeers;
   }
   
-  public Integer getWhitePeerlistSize() {
-    return whitePeerlistSize;
+  public Integer getNumOnlinePeers() {
+    return numOnlinePeers;
   }
   
-  public void setWhitePeerlistSize(Integer whitePeerlistSize) {
-    this.whitePeerlistSize = whitePeerlistSize;
+  public void setNumOnlinePeers(Integer numOnlinePeers) {
+    this.numOnlinePeers = numOnlinePeers;
   }
   
   public Integer getHeight() {
@@ -125,11 +144,11 @@ public class MoneroDaemonInfo extends MoneroDaemonModel {
   public MoneroNetworkType getNetworkType() {
     return networkType;
   }
-
+  
   public void setNetworkType(MoneroNetworkType networkType) {
     this.networkType = networkType;
   }
-
+  
   public Boolean getIsOffline() {
     return isOffline;
   }
@@ -138,36 +157,36 @@ public class MoneroDaemonInfo extends MoneroDaemonModel {
     this.isOffline = isOffline;
   }
   
-  public Integer getIncomingConnectionsCount() {
-    return incomingConnectionsCount;
+  public Integer getNumIncomingConnections() {
+    return numIncomingConnections;
   }
   
-  public void setIncomingConnectionsCount(Integer incomingConnectionsCount) {
-    this.incomingConnectionsCount = incomingConnectionsCount;
+  public void setNumIncomingConnections(Integer numIncomingConnections) {
+    this.numIncomingConnections = numIncomingConnections;
   }
   
-  public Integer getOutgoingConnectionsCount() {
-    return outgoingConnectionsCount;
+  public Integer getNumOutgoingConnections() {
+    return numOutgoingConnections;
   }
   
-  public void setOutgoingConnectionsCount(Integer outgoingConnectionsCount) {
-    this.outgoingConnectionsCount = outgoingConnectionsCount;
+  public void setNumOutgoingConnections(Integer numOutgoingConnections) {
+    this.numOutgoingConnections = numOutgoingConnections;
   }
   
-  public Integer getRpcConnectionsCount() {
-    return rpcConnectionsCount;
+  public Integer getNumRpcConnections() {
+    return numRpcConnections;
   }
   
-  public void setRpcConnectionsCount(Integer rpcConnectionsCount) {
-    this.rpcConnectionsCount = rpcConnectionsCount;
+  public void setNumRpcConnections(Integer numRpcConnections) {
+    this.numRpcConnections = numRpcConnections;
   }
   
-  public Long getStartTime() {
-    return startTime;
+  public Long getStartTimestamp() {
+    return startTimestamp;
   }
   
-  public void setStartTime(Long startTime) {
-    this.startTime = startTime;
+  public void setStartTimestamp(Long startTimestamp) {
+    this.startTimestamp = startTimestamp;
   }
   
   public Integer getTarget() {
@@ -177,6 +196,7 @@ public class MoneroDaemonInfo extends MoneroDaemonModel {
   public void setTarget(Integer target) {
     this.target = target;
   }
+  
   public Integer getTargetHeight() {
     return targetHeight;
   }
@@ -185,28 +205,28 @@ public class MoneroDaemonInfo extends MoneroDaemonModel {
     this.targetHeight = targetHeight;
   }
   
-  public String getTopBlockHash() {
-    return topBlockHash;
+  public String getTopBlockId() {
+    return topBlockId;
   }
   
-  public void setTopBlockHash(String topBlockHash) {
-    this.topBlockHash = topBlockHash;
+  public void setTopBlockId(String topBlockId) {
+    this.topBlockId = topBlockId;
   }
   
-  public Integer getTxCount() {
-    return txCount;
+  public Integer getNumTxs() {
+    return numTxs;
   }
   
-  public void setTxCount(Integer txCount) {
-    this.txCount = txCount;
+  public void setNumTxs(Integer numTxs) {
+    this.numTxs = numTxs;
   }
   
-  public Integer getTxPoolSize() {
-    return txPoolSize;
+  public Integer getNumTxsPool() {
+    return numTxsPool;
   }
   
-  public void setTxPoolSize(Integer txPoolSize) {
-    this.txPoolSize = txPoolSize;
+  public void setNumTxsPool(Integer numTxsPool) {
+    this.numTxsPool = numTxsPool;
   }
   
   public Boolean getWasBootstrapEverUsed() {
@@ -217,11 +237,19 @@ public class MoneroDaemonInfo extends MoneroDaemonModel {
     this.wasBootstrapEverUsed = wasBootstrapEverUsed;
   }
   
-  public Integer getVersion() {
-    return version;
+  public Integer getDatabaseSize() {
+    return databaseSize;
   }
   
-  public void setVersion(Integer version) {
-    this.version = version;
+  public void setDatabaseSize(Integer databaseSize) {
+    this.databaseSize = databaseSize;
+  }
+  
+  public Boolean getUpdateAvailable() {
+    return updateAvailable;
+  }
+  
+  public void setUpdateAvailable(Boolean updateAvailable) {
+    this.updateAvailable = updateAvailable;
   }
 }
