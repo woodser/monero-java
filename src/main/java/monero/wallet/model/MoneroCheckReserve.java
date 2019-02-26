@@ -6,23 +6,23 @@ import java.math.BigInteger;
  * Results from checking a reserve proof.
  */
 public class MoneroCheckReserve extends MoneroCheck {
-
-  public BigInteger amountSpent;
-  public BigInteger amountTotal;
   
-  public BigInteger getAmountSpent() {
-    return amountSpent;
+  private BigInteger spentAmount;
+  private BigInteger totalAmount;
+  
+  public BigInteger getSpentAmount() {
+    return spentAmount;
   }
-
-  public void setAmountSpent(BigInteger amountSpent) {
-    this.amountSpent = amountSpent;
+  
+  public void setSpentAmount(BigInteger spentAmount) {
+    this.spentAmount = spentAmount;
   }
-
-  public BigInteger getAmountTotal() {
-    return amountTotal;
+  
+  public BigInteger getTotalAmount() {
+    return totalAmount;
   }
-
-  public void setAmountTotal(BigInteger amountTotal) {
-    this.amountTotal = amountTotal;
+  
+  public void setTotalAmount(BigInteger totalAmount) {
+    this.totalAmount = totalAmount;
   }
 }
