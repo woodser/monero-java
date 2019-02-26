@@ -21,7 +21,7 @@ import monero.rpc.MoneroRpc;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
-import monero.wallet.MoneroWalletRpc;
+import monero.wallet.MoneroWalletRpcOld;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroCheckReserve;
@@ -88,7 +88,7 @@ public class TestUtils {
       
       // connect to wallet
       try {
-        wallet = new MoneroWalletRpc(WALLET_RPC_DOMAIN, WALLET_RPC_PORT, WALLET_RPC_USERNAME, WALLET_RPC_PASSWORD);
+        wallet = new MoneroWalletRpcOld(WALLET_RPC_DOMAIN, WALLET_RPC_PORT, WALLET_RPC_USERNAME, WALLET_RPC_PASSWORD);
       } catch (URISyntaxException e1) {
         throw new RuntimeException(e1);
       }
