@@ -178,10 +178,26 @@ public interface MoneroDaemon {
    * Get a transaction by id.
    * 
    * @param txId is the id of the transaction to get
+   * @return the transaction with the given id
+   */
+  public MoneroTx getTx(String txId);
+  
+  /**
+   * Get a transaction by id.
+   * 
+   * @param txId is the id of the transaction to get
    * @param prune specifies if the returned tx should be pruned (defaults to false)
    * @return the transaction with the given id
    */
   public MoneroTx getTx(String txId, Boolean prune);
+  
+  /**
+   * Get transactions by ids.
+   * 
+   * @param txIds are ids of transactions to get
+   * @return the transactions with the given ids
+   */
+  public List<MoneroTx> getTxs(List<String> txIds);
   
   /**
    * Get transactions by ids.
@@ -200,6 +216,14 @@ public interface MoneroDaemon {
    * @return the tx hex with the given id
    */
   public String getTxHex(String txId, Boolean prune);
+  
+  /**
+   * Get transaction hexes by ids.
+   * 
+   * @param txIds are ids of transactions to get hexes from
+   * @return are the tx hexes
+   */
+  public List<String> getTxHexes(String txIds);
   
   /**
    * Get transaction hexes by ids.
