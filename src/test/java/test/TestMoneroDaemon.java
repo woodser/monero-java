@@ -162,11 +162,11 @@ public class TestMoneroDaemon {
   
   // ------------------------------- PRIVATE ---------------------------------
   
-  private class MoneroBlockTestConfig {
-    public boolean hasTxs;
-    public boolean hasHex;
-    public boolean headerIsFull;
-    public MoneroTxTestConfig txConfig;
+  class MoneroBlockTestConfig {
+    boolean hasTxs;
+    boolean hasHex;
+    boolean headerIsFull;
+    MoneroTxTestConfig txConfig;
     public MoneroBlockTestConfig(boolean hasTxs, boolean hasHex, boolean headerIsFull, MoneroTxTestConfig txConfig) {
       super();
       this.hasTxs = hasTxs;
@@ -176,8 +176,13 @@ public class TestMoneroDaemon {
     }
   }
   
-  private class MoneroTxTestConfig {
-    
+  class MoneroTxTestConfig {
+    boolean hasJson;
+    boolean isPruned;
+    boolean isFull;
+    boolean isConfirmed;
+    boolean isCoinbase;
+    boolean fromGetTxPool;
   }
   
   private static void testBlockTemplate(MoneroBlockTemplate template) {
@@ -249,5 +254,24 @@ public class TestMoneroDaemon {
       assertNull(config.txConfig);
       assertNull(block.getTxs());
     }
+  }
+  
+  private static void testCoinbaseTx(MoneroTx coinbaseTx) {
+    assertNotNull(coinbaseTx);
+    assertNotNull(coinbaseTx.getIsCoinbase());
+    assertTrue(coinbaseTx.getVersion() >= 0);
+    assertNotNull(coinbaseTx.getExtra());
+    assertTrue(coinbaseTx.getExtra().length > 0);
+    assertTrue(coinbaseTx.getUnlockTime() >= 0);
+
+    // TODO: coinbase tx does not have ids in binary requests so this will fail, need to derive using prunable data
+    MoneroTxTestConfig config = new MoneroTxTestConfig();
+    config.hasJson = false;
+    config.isPruned = true;
+    config.isFull = false;
+    config.isConfirmed = true;
+    config.isCoinbase = true;
+    config.fromGetTxPool = true;
+    testTx(coinbaseTx, config);
   }
 }
