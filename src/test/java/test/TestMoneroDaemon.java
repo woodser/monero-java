@@ -1,6 +1,7 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -12,8 +13,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import monero.daemon.MoneroDaemon;
+import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroBlockTemplate;
+import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWallet;
 import utils.TestUtils;
 
@@ -135,7 +138,47 @@ public class TestMoneroDaemon {
     }
   }
   
+  @Test
+  public void testGetBlockById() {
+    
+    // test config
+    MoneroBlockTestConfig config = new MoneroBlockTestConfig(false, true, true, null);
+    
+    // retrieve by id of last block
+    MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
+    String id = daemon.getBlockId(lastHeader.getHeight());
+    MoneroBlock block = daemon.getBlockById(id);
+    testBlock(block, config);
+    assertEquals(daemon.getBlockByHeight(block.getHeader().getHeight()), block);
+    assertEquals(null, block.getTxs());
+    
+    // retrieve by id of previous to last block
+    id = daemon.getBlockId(lastHeader.getHeight() - 1);
+    block = daemon.getBlockById(id);
+    testBlock(block, config);
+    assertEquals(daemon.getBlockByHeight(lastHeader.getHeight() - 1), block);
+    assertEquals(null, block.getTxs());
+  }
+  
   // ------------------------------- PRIVATE ---------------------------------
+  
+  private class MoneroBlockTestConfig {
+    public boolean hasTxs;
+    public boolean hasHex;
+    public boolean headerIsFull;
+    public MoneroTxTestConfig txConfig;
+    public MoneroBlockTestConfig(boolean hasTxs, boolean hasHex, boolean headerIsFull, MoneroTxTestConfig txConfig) {
+      super();
+      this.hasTxs = hasTxs;
+      this.hasHex = hasHex;
+      this.headerIsFull = headerIsFull;
+      this.txConfig = txConfig;
+    }
+  }
+  
+  private class MoneroTxTestConfig {
+    
+  }
   
   private static void testBlockTemplate(MoneroBlockTemplate template) {
     assertNotNull(template);
@@ -177,6 +220,34 @@ public class TestMoneroDaemon {
       assertNull(header.getOrphanStatus());
       assertNull(header.getReward());
       assertNull(header.getWeight());
+    }
+  }
+  
+  // TODO: test block deep copy
+  private static void testBlock(MoneroBlock block, MoneroBlockTestConfig config) {
+    
+    // test required fields
+    assertNotNull(block);
+    assertFalse(block.getTxIds().isEmpty());
+    testCoinbaseTx(block.getCoinbaseTx());  // TODO: coinbase tx doesn't have as much stuff, can't call testTx?
+    testBlockHeader(block.getHeader(), config.headerIsFull);
+    
+    if (config.hasHex) {
+      assertNotNull(block.getHex());
+      assert(block.getHex().length() > 1);
+    } else {
+      assertNull(block.getHex());
+    }
+    
+    if (config.hasTxs) {
+      assertNotNull(config.txConfig);
+      for (MoneroTx tx : block.getTxs()) {
+        assertTrue(block == tx.getBlock());
+        testTx(tx, config.txConfig);
+      }
+    } else {
+      assertNull(config.txConfig);
+      assertNull(block.getTxs());
     }
   }
 }
