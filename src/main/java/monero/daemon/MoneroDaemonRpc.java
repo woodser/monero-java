@@ -47,7 +47,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public boolean isTrusted() {
+  public boolean getIsTrusted() {
     throw new RuntimeException("Not implemented");
   }
 
