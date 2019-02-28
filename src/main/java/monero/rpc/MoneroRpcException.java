@@ -2,7 +2,7 @@ package monero.rpc;
 
 import java.util.Map;
 
-import monero.wallet.model.MoneroException;
+import monero.utils.MoneroException;
 
 /**
  * Exception that is thrown when the RPC API returns an error.
@@ -11,7 +11,7 @@ public class MoneroRpcException extends MoneroException {
 
   private static final long serialVersionUID = -6282368684634114151L;
   
-  private Integer rpcCode;
+  private int rpcCode;
   private String rpcMessage;
   private Map<String, Object> requestBody;
   
@@ -19,13 +19,13 @@ public class MoneroRpcException extends MoneroException {
     this(rpcCode, rpcMessage, requestBody, null);
   }
   
-  public MoneroRpcException(Integer rpcCode, String rpcMessage, Map<String, Object> requestBody, Throwable e) {
+  public MoneroRpcException(int rpcCode, String rpcMessage, Map<String, Object> requestBody, Throwable e) {
     super(rpcCode + ": " + rpcMessage, e);
     this.rpcCode = rpcCode;
     this.rpcMessage = rpcMessage;
   }
 
-  public Integer getRpcCode() {
+  public int getRpcCode() {
     return rpcCode;
   }
 
