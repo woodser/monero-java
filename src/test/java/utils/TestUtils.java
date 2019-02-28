@@ -47,7 +47,7 @@ public class TestUtils {
    * Get a daemon RPC singleton instance shared among tests.
    */
   private static MoneroDaemonRpc daemonRpc;
-  static MoneroDaemonRpc getDaemonRpc() {
+  public static MoneroDaemonRpc getDaemonRpc() {
     if (daemonRpc == null) {
       MoneroRpc rpc = new MoneroRpc(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
       daemonRpc = new MoneroDaemonRpc(rpc);
@@ -59,7 +59,7 @@ public class TestUtils {
    * Get a wallet RPC singleton instance shared among tests.
    */
   private static MoneroWalletRpc walletRpc;
-  static MoneroWalletRpc getWalletRpc() {
+  public static MoneroWalletRpc getWalletRpc() {
     if (walletRpc == null) {
       
       // construct wallet

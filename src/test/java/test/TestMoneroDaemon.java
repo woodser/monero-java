@@ -12,8 +12,8 @@ import utils.TestUtils;
  */
 public class TestMoneroDaemon {
   
-  private MoneroDaemon daemon;
-  private MoneroWallet wallet;
+  private static MoneroDaemon daemon;
+  private static MoneroWallet wallet;
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -25,6 +25,4 @@ public class TestMoneroDaemon {
   public static void before() {
     
   }
-  
-  
 }

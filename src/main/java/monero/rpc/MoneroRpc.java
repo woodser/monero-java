@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import common.types.HttpException;
 import common.utils.JsonUtils;
 import common.utils.StreamUtils;
+import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 
 /**
