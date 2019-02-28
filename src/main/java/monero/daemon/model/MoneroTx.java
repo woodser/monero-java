@@ -11,7 +11,7 @@ public class MoneroTx {
   private MoneroBlock block;
   private Integer height;
   private String id;
-  private String version;
+  private Integer version;
   private Boolean isCoinbase;
   private String paymentId;
   private BigInteger fee;
@@ -38,7 +38,7 @@ public class MoneroTx {
   private List<Integer> outputIndices;
   private String metadata;
   private String commonTxSets;
-  private List<Integer> extra;
+  private int[] extra;
   private List<String> rctSignatures;
   private Object rctSigPrunable;
   private Boolean isKeptByBlock;
@@ -73,11 +73,11 @@ public class MoneroTx {
     this.id = id;
   }
   
-  public String getVersion() {
+  public Integer getVersion() {
     return version;
   }
   
-  public void setVersion(String version) {
+  public void setVersion(Integer version) {
     this.version = version;
   }
   
@@ -289,11 +289,11 @@ public class MoneroTx {
     this.commonTxSets = commonTxSets;
   }
   
-  public List<Integer> getExtra() {
+  public int[] getExtra() {
     return extra;
   }
   
-  public void setExtra(List<Integer> extra) {
+  public void setExtra(int[] extra) {
     this.extra = extra;
   }
   
