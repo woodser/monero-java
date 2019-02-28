@@ -17,10 +17,10 @@ import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroBlockTemplate;
+import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWallet;
-import monero.wallet.model.MoneroTransfer;
 import utils.TestUtils;
 
 /**
@@ -145,41 +145,33 @@ public class TestMoneroDaemon {
   public void testGetBlockById() {
     
     // test config
-    MoneroBlockTestConfig config = new MoneroBlockTestConfig(false, true, true, null);
+    TestContext ctx = new TestContext();
+    ctx.hasHex = false;
+    ctx.hasJson = true;
+    ctx.headerIsFull = true;
     
     // retrieve by id of last block
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
     String id = daemon.getBlockId(lastHeader.getHeight());
     MoneroBlock block = daemon.getBlockById(id);
-    testBlock(block, config);
+    testBlock(block, ctx);
     assertEquals(daemon.getBlockByHeight(block.getHeader().getHeight()), block);
     assertEquals(null, block.getTxs());
     
     // retrieve by id of previous to last block
     id = daemon.getBlockId(lastHeader.getHeight() - 1);
     block = daemon.getBlockById(id);
-    testBlock(block, config);
+    testBlock(block, ctx);
     assertEquals(daemon.getBlockByHeight(lastHeader.getHeight() - 1), block);
     assertEquals(null, block.getTxs());
   }
   
   // ------------------------------- PRIVATE ---------------------------------
   
-  public static class MoneroBlockTestConfig {
-    boolean hasTxs;
-    boolean hasHex;
-    boolean headerIsFull;
-    MoneroTxCtx txConfig;
-    public MoneroBlockTestConfig(boolean hasTxs, boolean hasHex, boolean headerIsFull, MoneroTxCtx txConfig) {
-      super();
-      this.hasTxs = hasTxs;
-      this.hasHex = hasHex;
-      this.headerIsFull = headerIsFull;
-      this.txConfig = txConfig;
-    }
-  }
-  
-  public static class MoneroTxCtx {
+  /**
+   * Provides context or configuration for test methods to test a type.
+   */
+  public static class TestContext {
     boolean hasJson;
     boolean isPruned;
     boolean isFull;
@@ -189,7 +181,49 @@ public class TestMoneroDaemon {
     boolean fromGetBlocksByHeight;
     boolean hasOutputIndices;
     boolean doNotTestCopy;
+    boolean hasTxs;
+    boolean hasHex;
+    boolean headerIsFull;
+    TestContext txContext;
   }
+  
+//  public static class MoneroBlockTestConfig {
+//    boolean hasTxs;
+//    boolean hasHex;
+//    boolean headerIsFull;
+//    MoneroTxCtx txConfig;
+//    public MoneroBlockTestConfig(boolean hasTxs, boolean hasHex, boolean headerIsFull, MoneroTxCtx txConfig) {
+//      super();
+//      this.hasTxs = hasTxs;
+//      this.hasHex = hasHex;
+//      this.headerIsFull = headerIsFull;
+//      this.txConfig = txConfig;
+//    }
+//  }
+//  
+//  public static class MoneroTxCtx {
+//    boolean hasJson;
+//    boolean isPruned;
+//    boolean isFull;
+//    boolean isConfirmed;
+//    boolean isCoinbase;
+//    boolean fromGetTxPool;
+//    boolean fromGetBlocksByHeight;
+//    boolean hasOutputIndices;
+//    boolean doNotTestCopy;
+//  }
+//  
+//  public static class MoneroOuptutCtx {
+//    boolean hasJson;
+//    boolean isPruned;
+//    boolean isFull;
+//    boolean isConfirmed;
+//    boolean isCoinbase;
+//    boolean fromGetTxPool;
+//    boolean fromGetBlocksByHeight;
+//    boolean hasOutputIndices;
+//    boolean doNotTestCopy;
+//  }
   
   private static void testBlockTemplate(MoneroBlockTemplate template) {
     assertNotNull(template);
@@ -235,29 +269,29 @@ public class TestMoneroDaemon {
   }
   
   // TODO: test block deep copy
-  private static void testBlock(MoneroBlock block, MoneroBlockTestConfig config) {
+  private static void testBlock(MoneroBlock block, TestContext ctx) {
     
     // test required fields
     assertNotNull(block);
     assertFalse(block.getTxIds().isEmpty());
     testCoinbaseTx(block.getCoinbaseTx());  // TODO: coinbase tx doesn't have as much stuff, can't call testTx?
-    testBlockHeader(block.getHeader(), config.headerIsFull);
+    testBlockHeader(block.getHeader(), ctx.headerIsFull);
     
-    if (config.hasHex) {
+    if (ctx.hasHex) {
       assertNotNull(block.getHex());
       assertTrue(block.getHex().length() > 1);
     } else {
       assertNull(block.getHex());
     }
     
-    if (config.hasTxs) {
-      assertNotNull(config.txConfig);
+    if (ctx.hasTxs) {
+      assertNotNull(ctx.txContext);
       for (MoneroTx tx : block.getTxs()) {
         assertTrue(block == tx.getBlock());
-        testTx(tx, config.txConfig);
+        testTx(tx, ctx.txContext);
       }
     } else {
-      assertNull(config.txConfig);
+      assertNull(ctx.txContext);
       assertNull(block.getTxs());
     }
   }
@@ -271,17 +305,17 @@ public class TestMoneroDaemon {
     assertTrue(coinbaseTx.getUnlockTime() >= 0);
 
     // TODO: coinbase tx does not have ids in binary requests so this will fail, need to derive using prunable data
-    MoneroTxCtx config = new MoneroTxCtx();
-    config.hasJson = false;
-    config.isPruned = true;
-    config.isFull = false;
-    config.isConfirmed = true;
-    config.isCoinbase = true;
-    config.fromGetTxPool = true;
-    testTx(coinbaseTx, config);
+    TestContext ctx = new TestContext();
+    ctx.hasJson = false;
+    ctx.isPruned = true;
+    ctx.isFull = false;
+    ctx.isConfirmed = true;
+    ctx.isCoinbase = true;
+    ctx.fromGetTxPool = true;
+    testTx(coinbaseTx, ctx);
   }
   
-  private static void testTx(MoneroTx tx, MoneroTxCtx ctx) {
+  private static void testTx(MoneroTx tx, TestContext ctx) {
     
     // check inputs
     assertNotNull(tx);
@@ -447,5 +481,30 @@ public class TestMoneroDaemon {
     
     // test deep copy
     if (!ctx.doNotTestCopy) testTxCopy(tx, ctx);
+  }
+  
+  private static void testVin(MoneroOutput vin, TestContext ctx) {
+    testOutput(vin);
+    testKeyImage(vin.getKeyImage(), ctx);
+    assertFalse(vin.getRingOutputIndices().isEmpty());
+  }
+
+  private static void testKeyImage(MoneroKeyImage image, TestContext ctx) {
+    assertFalse(image.getHex().isEmpty());
+    if (image.getSignature() != null) {
+      assertNotNull(image.getSignature());
+      assertFalse(image.getSignature().isEmpty());
+    }
+  }
+
+  private static void testVout(MoneroOutput vout, TestContext ctx) {
+    testOutput(vout);
+    if (vout.getTx().getInTxPool() || ctx.hasOutputIndices == false) assertEquals(null, vout.getIndex());
+    else assertTrue(vout.getIndex() >= 0);
+    assertEquals(64, vout.getStealthPublicKey().length());
+  }
+
+  private static void testOutput(MoneroOutput output) {
+    TestUtils.testUnsignedBigInteger(output.getAmount());
   }
 }
