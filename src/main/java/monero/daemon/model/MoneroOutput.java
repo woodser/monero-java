@@ -3,9 +3,6 @@ package monero.daemon.model;
 import java.math.BigInteger;
 import java.util.List;
 
-import monero.wallet.model.MoneroKeyImage;
-import monero.wallet.model.MoneroTx;
-
 /**
  * Represents a transaction output.
  */
