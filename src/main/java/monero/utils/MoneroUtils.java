@@ -4,9 +4,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import monero.wallet.model.MoneroException;
-import monero.wallet.model.MoneroTx.MoneroTxType;
-
 /**
  * Collection of Monero utilities.
  */
@@ -86,17 +83,5 @@ public class MoneroUtils {
       if (i >= paymentId2.length() && paymentId1.charAt(i) != '0') return false;
     }
     return true;
-  }
-  
-  public static boolean isIncoming(MoneroTxType type) {
-    return type == MoneroTxType.INCOMING || type == MoneroTxType.BLOCK || type == MoneroTxType.MEMPOOL;
-  }
-  
-  public static boolean isOutgoing(MoneroTxType type) {
-    return type == MoneroTxType.OUTGOING || type == MoneroTxType.PENDING || type == MoneroTxType.FAILED || type == MoneroTxType.NOT_RELAYED;
-  }
-  
-  public static boolean isConfirmed(MoneroTxType type) {
-    return type == MoneroTxType.OUTGOING || type == MoneroTxType.INCOMING || type == MoneroTxType.BLOCK;
   }
 }
