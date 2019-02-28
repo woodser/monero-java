@@ -6,12 +6,11 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
-import monero.daemon.model.MoneroTx;
+import monero.utils.MoneroException;
 import monero.wallet.config.MoneroSendConfig;
 import monero.wallet.config.MoneroTransferFilter;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
-import monero.wallet.model.MoneroException;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTransfer;

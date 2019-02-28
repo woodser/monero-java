@@ -1,7 +1,10 @@
 package test;
 
+import static org.junit.Assert.fail;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Test;
 
 import monero.daemon.MoneroDaemon;
 import monero.wallet.MoneroWallet;
@@ -28,7 +31,12 @@ public class TestMoneroDaemon {
   }
   
   @Before
-  public static void before() {
+  public void before() {
     
+  }
+  
+  @Test
+  public void testIsTrusted() {
+    fail("Not implemented");
   }
 }
