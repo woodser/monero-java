@@ -12,9 +12,15 @@ import utils.TestUtils;
  */
 public class TestMoneroDaemon {
   
+  // classes to test
   private static MoneroDaemon daemon;
   private static MoneroWallet wallet;
-
+  
+  // test configuration
+  private static boolean testNonRelays = true;
+  private static boolean testRelays = true; // creates and relays outgoing txs
+  private static boolean testNotifications = true;
+  
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     daemon = TestUtils.getDaemonRpc();
