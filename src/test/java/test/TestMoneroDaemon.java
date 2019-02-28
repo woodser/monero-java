@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,9 +27,9 @@ public class TestMoneroDaemon {
   private static MoneroWallet wallet;
   
   // test configuration
-  private static boolean testNonRelays = true;
-  private static boolean testRelays = true; // creates and relays outgoing txs
-  private static boolean testNotifications = true;
+  private static boolean TEST_NON_RELAYS = true;
+  private static boolean TEST_RELAYS = true; // creates and relays outgoing txs
+  private static boolean TEST_NOTIFICATIONS = true;
   
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -44,17 +46,20 @@ public class TestMoneroDaemon {
   
   @Test
   public void testIsTrusted() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     daemon.getIsTrusted();
   }
   
   @Test
   public void testGetBlockchainHeight() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     int height = daemon.getHeight();
     assertTrue("Height must be greater than 0", height > 0);
   }
   
   @Test
   public void testGetBlockIdByHeight() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
     String id = daemon.getBlockId(lastHeader.getHeight());
     assertNotNull(id);
@@ -63,14 +68,71 @@ public class TestMoneroDaemon {
   
   @Test
   public void testGetBlockTemplate() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     MoneroBlockTemplate template = daemon.getBlockTemplate(TestUtils.TEST_ADDRESS, 2);
     testBlockTemplate(template);
   }
   
   @Test
   public void testGetLastBlockHeader() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
     testBlockHeader(lastHeader, true);
+  }
+  
+  @Test
+  public void testGetBlockHeaderById() {
+    
+    // retrieve by id of last block
+    MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
+    String id = daemon.getBlockId(lastHeader.getHeight());
+    MoneroBlockHeader header = daemon.getBlockHeaderById(id);
+    testBlockHeader(header, true);
+    assertEquals(lastHeader, header);
+    
+    // retrieve by id of previous to last block
+    id = daemon.getBlockId(lastHeader.getHeight() - 1);
+    header = daemon.getBlockHeaderById(id);
+    testBlockHeader(header, true);
+    assertEquals(lastHeader.getHeight() - 1, (int) header.getHeight());
+  }
+  
+  @Test
+  public void testGetBlockHeaderByHeight() {
+    
+    // retrieve by height of last block
+    MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
+    MoneroBlockHeader header = daemon.getBlockHeaderByHeight(lastHeader.getHeight());
+    testBlockHeader(header, true);
+   assertEquals(lastHeader, header);
+    
+    // retrieve by height of previous to last block
+    header = daemon.getBlockHeaderByHeight(lastHeader.getHeight() - 1);
+    testBlockHeader(header, true);
+    assertEquals(lastHeader.getHeight() - 1, (int) header.getHeight());
+  }
+  
+  // TODO: test start with no end, vice versa, inclusivity
+  @Test
+  public void testGetBlockHeadersByRange() {
+    
+    // determine start and end height based on number of blocks and how many blocks ago
+    int numBlocks = 100;
+    int numBlocksAgo = 100;
+    int currentHeight = daemon.getHeight();
+    int startHeight = currentHeight - numBlocksAgo;
+    int endHeight = currentHeight - (numBlocksAgo - numBlocks) - 1;
+    
+    // fetch headers
+    List<MoneroBlockHeader> headers = daemon.getBlockHeadersByRange(startHeight, endHeight);
+    
+    // test headers
+    assertEquals(numBlocks, headers.size());
+    for (int i = 0; i < numBlocks; i++) {
+      MoneroBlockHeader header = headers.get(i);
+      assertEquals(startHeight + i, (int) header.getHeight());
+      testBlockHeader(header, true);
+    }
   }
   
   // ------------------------------- PRIVATE ---------------------------------
