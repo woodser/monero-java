@@ -2,7 +2,6 @@ package monero.rpc;
 
 import java.math.BigInteger;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +27,6 @@ import common.types.HttpException;
 import common.utils.JsonUtils;
 import common.utils.StreamUtils;
 import monero.utils.MoneroUtils;
-import monero.wallet.model.MoneroException;
 
 /**
  * Sends requests to the Monero RPC API.
@@ -48,50 +46,33 @@ public class MoneroRpc {
   }
 
   // instance variables
-  private String rpcHost;
-  private int rpcPort;
-  private URI rpcUri;
+  private URI uri;
   private HttpClient client;
-
-  public MoneroRpc(String endpoint) {
-    this(MoneroUtils.parseUri(endpoint));
-  }
-
-  public MoneroRpc(URI rpcUri) {
-    this.rpcUri = rpcUri;
-    this.rpcHost = rpcUri.getHost();
-    this.rpcPort = rpcUri.getPort();
+  
+  public MoneroRpc(URI uri) {
+    this.uri = uri;
     this.client = HttpClients.createDefault();
   }
-
-  public MoneroRpc(String rpcHost, int rpcPort) throws URISyntaxException {
-    this(rpcHost, rpcPort, null, null);
+  
+  public MoneroRpc(String uri) {
+    this(MoneroUtils.parseUri(uri));
   }
-
-  public MoneroRpc(String rpcHost, int rpcPort, String username, String password) throws URISyntaxException {
-    this.rpcHost = rpcHost;
-    this.rpcPort = rpcPort;
-    this.rpcUri = new URI("http", null, rpcHost, rpcPort, "/json_rpc", null, null);
+  
+  public MoneroRpc(String uri, String username, String password) {
+    this(MoneroUtils.parseUri(uri), username, password);
+  }
+  
+  public MoneroRpc(URI uri, String username, String password) {
     if (username != null || password != null) {
       CredentialsProvider creds = new BasicCredentialsProvider();
-      creds.setCredentials(new AuthScope(rpcUri.getHost(), rpcUri.getPort()), new UsernamePasswordCredentials(username, password));
+      creds.setCredentials(new AuthScope(uri.getHost(), uri.getPort()), new UsernamePasswordCredentials(username, password));
       this.client = HttpClients.custom().setDefaultCredentialsProvider(creds).build();
     } else {
       this.client = HttpClients.createDefault();
     }
   }
-
-  public String getRpcHost() {
-    return rpcHost;
-  }
-
-  public int getRpcPort() {
-    return rpcPort;
-  }
-
-  public URI getRpcUri() {
-    return rpcUri;
-  }
+  
+  // TODO: What happened to MoneroException?
   
   /**
    * Sends a request to the RPC API.
@@ -99,8 +80,8 @@ public class MoneroRpc {
    * @param method specifies the method to request
    * @return Map<String, Object> is the RPC API response as a map
    */
-  public Map<String, Object> sendRpcRequest(String method) {
-    return sendRpcRequest(method, (Map<String, Object>) null);
+  public Map<String, Object> sendJsonRequest(String method) {
+    return sendJsonRequest(method, (Map<String, Object>) null);
   }
   
   /**
@@ -110,7 +91,7 @@ public class MoneroRpc {
    * @param params specifies input parameters (Map<String, Object>, List<Object>, String, etc)
    * @return Map<String, Object> is the RPC API response as a map
    */
-  public Map<String, Object> sendRpcRequest(String method, Object params) {
+  public Map<String, Object> sendJsonRequest(String method, Object params) {
 
     // send http request
     try {
@@ -124,7 +105,7 @@ public class MoneroRpc {
       LOGGER.debug("Sending method '" + method + "' with body: " + JsonUtils.serialize(body));
 
       // send http request and validate response
-      HttpPost post = new HttpPost(rpcUri);
+      HttpPost post = new HttpPost(uri);
       HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
       post.setEntity(entity);
       HttpResponse resp = client.execute(post);

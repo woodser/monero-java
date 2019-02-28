@@ -60,7 +60,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public MoneroBlockCount getBlockCount() {
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_block_count");
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_block_count");
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroBlockCount blockCount = new MoneroBlockCount();
     setResponseInfo(resultMap, blockCount);
@@ -70,7 +70,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
 
   @Override
   public String getBlockHash(int height) {
-     Map<String, Object> respMap = rpc.sendRpcRequest("on_get_block_hash", Arrays.asList(height));
+     Map<String, Object> respMap = rpc.sendJsonRequest("on_get_block_hash", Arrays.asList(height));
      return (String) respMap.get("result");
   }
 
@@ -80,7 +80,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("wallet_address", walletAddress);
     params.put("reserve_size", reserveSize);
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_block_template", params);
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_block_template", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroBlockTemplate template = initializeBlockTemplate(resultMap);
     setResponseInfo(resultMap, template);
@@ -90,7 +90,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public MoneroDaemonModel submitBlock(String blockBlob) {
-    Map<String, Object> respMap = rpc.sendRpcRequest("submit_block", Arrays.asList(blockBlob));
+    Map<String, Object> respMap = rpc.sendJsonRequest("submit_block", Arrays.asList(blockBlob));
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroDaemonModel model = new MoneroDaemonModel();
     setResponseInfo(resultMap, model);
@@ -100,7 +100,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public MoneroBlockHeader getLastBlockHeader() {
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_last_block_header");
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_last_block_header");
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroBlockHeader header = initializeBlockHeader((Map<String, Object>) resultMap.get("block_header"));
     setResponseInfo(resultMap, header);
@@ -112,7 +112,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   public MoneroBlockHeader getBlockHeader(String hash) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("hash", hash);
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_block_header_by_hash", params);
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_block_header_by_hash", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroBlockHeader header = initializeBlockHeader((Map<String, Object>) resultMap.get("block_header"));
     setResponseInfo(resultMap, header);
@@ -124,7 +124,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   public MoneroBlockHeader getBlockHeader(int height) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("height", height);
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_block_header_by_height", params);
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_block_header_by_height", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroBlockHeader header = initializeBlockHeader((Map<String, Object>) resultMap.get("block_header"));
     setResponseInfo(resultMap, header);
@@ -137,7 +137,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("start_height", startHeight);
     params.put("end_height", endHeight);
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_block_headers_range", params);
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_block_headers_range", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<Map<String, Object>> headerMaps = (List<Map<String, Object>>) resultMap.get("headers");
     List<MoneroBlockHeader> headers = new ArrayList<MoneroBlockHeader>();
@@ -154,7 +154,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   public MoneroBlock getBlock(String hash) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("hash", hash);
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_block", params);
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_block", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroBlock block = initializeBlock((Map<String, Object>) resultMap);
     setResponseInfo(resultMap, block);
@@ -166,7 +166,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   public MoneroBlock getBlock(int height) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("height", height);
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_block", params);
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_block", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroBlock block = initializeBlock((Map<String, Object>) resultMap);
     setResponseInfo(resultMap, block);
@@ -176,7 +176,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public List<MoneroDaemonConnection> getConnections() {
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_connections");
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_connections");
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<Map<String, Object>> connectionMaps = (List<Map<String, Object>>) resultMap.get("connections");
     List<MoneroDaemonConnection> connections = new ArrayList<MoneroDaemonConnection>();
@@ -191,7 +191,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public MoneroDaemonInfo getInfo() {
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_info");
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_info");
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroDaemonInfo info = initializeInfo(resultMap);
     setResponseInfo(resultMap, info);
@@ -201,7 +201,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public MoneroDaemonSyncInfo getSyncInfo() {
-    Map<String, Object> respMap = rpc.sendRpcRequest("sync_info");
+    Map<String, Object> respMap = rpc.sendJsonRequest("sync_info");
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroDaemonSyncInfo syncInfo = initializeSyncInfo(resultMap);
     setResponseInfo(resultMap, syncInfo);
@@ -224,7 +224,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public MoneroHardForkInfo getHardForkInfo() {
-    Map<String, Object> respMap = rpc.sendRpcRequest("hard_fork_info");
+    Map<String, Object> respMap = rpc.sendJsonRequest("hard_fork_info");
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroHardForkInfo hardForkInfo = initializeHardForkInfo(resultMap);
     setResponseInfo(resultMap, hardForkInfo);
@@ -238,7 +238,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
     for (MoneroBan ban : bans)  banMaps.add(banToMap(ban));
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("bans", banMaps);
-    Map<String, Object> respMap = rpc.sendRpcRequest("set_bans", params);
+    Map<String, Object> respMap = rpc.sendJsonRequest("set_bans", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroDaemonModel model = new MoneroDaemonModel();
     setResponseInfo(resultMap, model);
@@ -248,7 +248,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public Collection<MoneroBan> getBans() {
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_bans");
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_bans");
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<Map<String, Object>> banMaps = (List<Map<String, Object>>) resultMap.get("bans");
     List<MoneroBan> bans = new ArrayList<MoneroBan>();
@@ -268,7 +268,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   public MoneroDaemonModel flushTxPool(Collection<String> txIds) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("txids", txIds);
-    Map<String, Object> respMap = rpc.sendRpcRequest("flush_txpool", params);
+    Map<String, Object> respMap = rpc.sendJsonRequest("flush_txpool", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroDaemonModel model = new MoneroDaemonModel();
     setResponseInfo(resultMap, model);
@@ -284,7 +284,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
     params.put("max_count", maxCount);
     params.put("unlocked", isUnlocked);
     params.put("recent_cutoff", recentCutoff);
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_output_histogram", params);
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_output_histogram", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<Map<String, Object>> entryMaps = (List<Map<String, Object>>) resultMap.get("histogram");
     List<MoneroOutputHistogramEntry> entries = new ArrayList<MoneroOutputHistogramEntry>();
@@ -327,7 +327,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("height", height);
     params.put("count", count);
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_coinbase_tx_sum", params);
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_coinbase_tx_sum", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroCoinbaseTxSum txSum = new MoneroCoinbaseTxSum();
     txSum.setTotalEmission((BigInteger) resultMap.get("emission_amount"));
@@ -341,7 +341,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   public MoneroFeeEstimate getFeeEstimate(Integer graceBlocks) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("grace_blocks", graceBlocks);
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_fee_estimate", params);
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_fee_estimate", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroFeeEstimate feeEstimate = new MoneroFeeEstimate();
     feeEstimate.setFeeEstimate((BigInteger) resultMap.get("fee"));
@@ -352,7 +352,7 @@ public class MoneroDaemonRpcOld extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public List<MoneroChain> getAlternativeChains() {
-    Map<String, Object> respMap = rpc.sendRpcRequest("get_alternate_chains");
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_alternate_chains");
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     List<Map<String, Object>> chainMaps = (List<Map<String, Object>>) resultMap.get("chains");
     List<MoneroChain> chains = new ArrayList<MoneroChain>();
