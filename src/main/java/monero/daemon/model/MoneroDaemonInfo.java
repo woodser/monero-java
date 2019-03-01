@@ -2,8 +2,6 @@ package monero.daemon.model;
 
 import java.math.BigInteger;
 
-import monero.daemon.MoneroDaemonDefault.MoneroNetworkType;
-
 /**
  * Monero daemon info.
  */
