@@ -136,7 +136,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public List<String> getTxHexes(String txIds, Boolean prune) {
+  public List<String> getTxHexes(List<String> txIds, Boolean prune) {
     throw new RuntimeException("Not implemented");
   }
 
@@ -146,7 +146,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public BigInteger getFeeEstimate(int graceBlocks) {
+  public BigInteger getFeeEstimate(Integer graceBlocks) {
     throw new RuntimeException("Not implemented");
   }
 
