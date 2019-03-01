@@ -58,7 +58,7 @@ public class TestMoneroDaemon {
   }
   
   @Test
-  public void testGetBlockchainHeight() {
+  public void testGetHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     int height = daemon.getHeight();
     assertTrue("Height must be greater than 0", height > 0);
@@ -529,7 +529,6 @@ public class TestMoneroDaemon {
         if (tx.getVins().get(i).getAmount().equals(copy.getVins().get(i).getAmount())) assertTrue(tx.getVins().get(i).getAmount().equals(BigInteger.valueOf(0)));
       }
     }
-    
     
     // test different vout references
     if (copy.getVouts() == null) assertEquals(null, tx.getVouts());

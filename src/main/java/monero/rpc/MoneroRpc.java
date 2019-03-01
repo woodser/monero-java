@@ -51,8 +51,7 @@ public class MoneroRpc {
   private HttpClient client;
   
   public MoneroRpc(URI uri) {
-    this.uri = uri;
-    this.client = HttpClients.createDefault();
+    this(uri, null, null);
   }
   
   public MoneroRpc(String uri) {
@@ -64,6 +63,7 @@ public class MoneroRpc {
   }
   
   public MoneroRpc(URI uri, String username, String password) {
+    this.uri = uri;
     if (username != null || password != null) {
       CredentialsProvider creds = new BasicCredentialsProvider();
       creds.setCredentials(new AuthScope(uri.getHost(), uri.getPort()), new UsernamePasswordCredentials(username, password));
@@ -106,9 +106,12 @@ public class MoneroRpc {
       LOGGER.debug("Sending method '" + method + "' with body: " + JsonUtils.serialize(body));
 
       // send http request and validate response
-      HttpPost post = new HttpPost(uri);
+      HttpPost post = new HttpPost(uri.toString() + "/json_rpc");
       HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
       post.setEntity(entity);
+      
+      System.out.println(post);
+      
       HttpResponse resp = client.execute(post);
       validateHttpResponse(resp);
 
@@ -141,7 +144,7 @@ public class MoneroRpc {
       } catch (Exception e) {
         // could not get content
       }
-      throw new HttpException(code, resp.getStatusLine().getReasonPhrase() + (content != null ? (": " + content) : ""));
+      throw new HttpException(code, code + " " + resp.getStatusLine().getReasonPhrase() + (content == null || content.isEmpty() ? "" : (": " + content)));
     }
   }
 

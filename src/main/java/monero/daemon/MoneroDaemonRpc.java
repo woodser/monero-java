@@ -2,6 +2,7 @@ package monero.daemon;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -51,9 +52,12 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public int getHeight() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_block_count");
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return ((BigInteger) resultMap.get("count")).intValue();
   }
 
   @Override
