@@ -368,4 +368,12 @@ public class MoneroTx {
   public void setSignatures(List<String> signatures) {
     this.signatures = signatures;
   }
+  
+  public MoneroTx copy() {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  public MoneroTx merge(MoneroTx tx) {
+    return this;
+  }
 }

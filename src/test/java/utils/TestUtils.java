@@ -1,6 +1,8 @@
 package utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 
@@ -91,5 +93,16 @@ public class TestUtils {
     
     // return cached wallet rpc
     return walletRpc;
+  }
+  
+  public static void testUnsignedBigInteger(BigInteger num) {
+    testUnsignedBigInteger(num, null);
+  }
+  
+  public static void testUnsignedBigInteger(BigInteger num, Boolean nonZero) {
+    assertNotNull(num);
+    assertTrue(num.intValue() >= 0);
+    if (nonZero == true) assertTrue(num.intValue() > 0);
+    if (nonZero == false) assertTrue(num.intValue() == 0);
   }
 }

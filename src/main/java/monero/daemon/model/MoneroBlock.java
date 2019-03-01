@@ -2,8 +2,6 @@ package monero.daemon.model;
 
 import java.util.List;
 
-import monero.daemon.model.MoneroTx;
-
 /**
  * Monero block.
  */
@@ -19,39 +17,48 @@ public class MoneroBlock {
     return header;
   }
   
-  public void setHeader(MoneroBlockHeader header) {
+  public MoneroBlock setHeader(MoneroBlockHeader header) {
     this.header = header;
+    return this;
   }
   
   public String getHex() {
     return hex;
   }
   
-  public void setHex(String hex) {
+  public MoneroBlock setHex(String hex) {
     this.hex = hex;
+    return this;
   }
   
   public MoneroTx getCoinbaseTx() {
     return coinbaseTx;
   }
   
-  public void setCoinbaseTx(MoneroTx coinbaseTx) {
+  public MoneroBlock setCoinbaseTx(MoneroTx coinbaseTx) {
     this.coinbaseTx = coinbaseTx;
+    return this;
   }
   
   public List<MoneroTx> getTxs() {
     return txs;
   }
   
-  public void setTxs(List<MoneroTx> txs) {
+  public MoneroBlock setTxs(List<MoneroTx> txs) {
     this.txs = txs;
+    return this;
   }
   
   public List<String> getTxIds() {
     return txIds;
   }
   
-  public void setTxIds(List<String> txIds) {
+  public MoneroBlock setTxIds(List<String> txIds) {
     this.txIds = txIds;
+    return this;
+  }
+  
+  public MoneroBlock copy() {
+    throw new RuntimeException("Not implemented");
   }
 }
