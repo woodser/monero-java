@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -185,6 +186,10 @@ public class TestMoneroDaemon {
     boolean hasHex;
     boolean headerIsFull;
     TestContext txContext;
+    public TestContext() { }
+    public TestContext(TestContext ctx) {
+      throw new RuntimeException("Not implemented");
+    }
   }
   
 //  public static class MoneroBlockTestConfig {
@@ -506,5 +511,43 @@ public class TestMoneroDaemon {
 
   private static void testOutput(MoneroOutput output) {
     TestUtils.testUnsignedBigInteger(output.getAmount());
+  }
+  
+  private static void testTxCopy(MoneroTx tx, TestContext ctx) {
+    
+    // copy tx and assert deep equality
+    MoneroTx copy = tx.copy();
+    assert(copy instanceof MoneroTx);
+    assertEquals(tx, copy);
+    assertTrue(copy != tx);
+    
+    // test different vin references
+    if (copy.getVins() == null) assertEquals(tx.getVins(), null);
+    else {
+      assertFalse(copy.getVins() == tx.getVins());
+      for (int i = 0; i < copy.getVins().size(); i++) {
+        if (tx.getVins().get(i).getAmount().equals(copy.getVins().get(i).getAmount())) assertTrue(tx.getVins().get(i).getAmount().equals(BigInteger.valueOf(0)));
+      }
+    }
+    
+    
+    // test different vout references
+    if (copy.getVouts() == null) assertEquals(null, tx.getVouts());
+    else {
+      assertTrue(copy.getVouts() != tx.getVouts());
+      for (int i = 0; i < copy.getVouts().size(); i++) {
+        if (tx.getVouts().get(i).getAmount() == copy.getVouts().get(i).getAmount()) assertTrue(tx.getVouts().get(i).getAmount().equals(BigInteger.valueOf(0)));
+      }
+    }
+    
+    // test copied tx
+    ctx = new TestContext(ctx);
+    ctx.doNotTestCopy = true; // to prevent infinite recursion
+    if (tx.getBlock() != null) copy.setBlock(tx.getBlock().copy().setTxs(Arrays.asList(copy))); // copy block for testing
+    testTx(copy, ctx);
+    
+    // test merging with copy
+    MoneroTx merged = copy.merge(copy.copy());
+    assertEquals(tx.toString(), merged.toString());
   }
 }
