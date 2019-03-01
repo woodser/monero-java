@@ -27,7 +27,7 @@ import utils.TestUtils;
 /**
  * Tests a Monero daemon.
  */
-public class TestMoneroDaemon {
+public class TestMoneroDaemonRpc {
   
   // classes to test
   private static MoneroDaemon daemon;
