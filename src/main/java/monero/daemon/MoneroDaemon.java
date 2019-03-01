@@ -212,6 +212,14 @@ public interface MoneroDaemon {
    * Get a transaction hex by id.
    * 
    * @param txId is the id of the transaction to get hex from
+   * @return the tx hex with the given id
+   */
+  public String getTxHex(String txId);
+  
+  /**
+   * Get a transaction hex by id.
+   * 
+   * @param txId is the id of the transaction to get hex from
    * @param prune specifies if the returned tx hex should be pruned (defaults to false)
    * @return the tx hex with the given id
    */
@@ -223,7 +231,7 @@ public interface MoneroDaemon {
    * @param txIds are ids of transactions to get hexes from
    * @return are the tx hexes
    */
-  public List<String> getTxHexes(String txIds);
+  public List<String> getTxHexes(List<String> txIds);
   
   /**
    * Get transaction hexes by ids.
@@ -232,7 +240,7 @@ public interface MoneroDaemon {
    * @param prune specifies if the returned tx hexes should be pruned (defaults to false)
    * @return are the tx hexes
    */
-  public List<String> getTxHexes(String txIds, Boolean prune);
+  public List<String> getTxHexes(List<String> txIds, Boolean prune);
   
   /**
    * Gets the total emissions and fees from the genesis block to the current height.
@@ -246,10 +254,17 @@ public interface MoneroDaemon {
   /**
    * Get the fee estimate per kB.
    * 
+   * @return is the fee estimate per kB.
+   */
+  public BigInteger getFeeEstimate();
+  
+  /**
+   * Get the fee estimate per kB.
+   * 
    * @param graceBlocks TODO
    * @return is the fee estimate per kB.
    */
-  public BigInteger getFeeEstimate(int graceBlocks);
+  public BigInteger getFeeEstimate(Integer graceBlocks);
   
   /**
    * Submits a transaction to the daemon's pool.

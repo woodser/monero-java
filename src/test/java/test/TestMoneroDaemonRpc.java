@@ -20,6 +20,7 @@ import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroBlockTemplate;
+import monero.daemon.model.MoneroCoinbaseTxSum;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
@@ -324,7 +325,7 @@ public class TestMoneroDaemonRpc {
     
     // fetch txs by id without pruning
     List<MoneroTx> txs = daemon.getTxs(txIds);
-    assertEquals(txs.size(), txIds.size());
+    assertEquals(txIds.size(), txs.size());
     for (MoneroTx tx : txs) {
       testTx(tx, ctx);
     }
@@ -332,7 +333,7 @@ public class TestMoneroDaemonRpc {
     // fetch txs by id with pruning
     txs = daemon.getTxs(txIds, true);
     ctx.isPruned = true;
-    assertEquals(txs.size(), txIds.size());
+    assertEquals(txIds.size(), txs.size());
     for (MoneroTx tx : txs) {
       testTx(tx, ctx);
     }
@@ -367,10 +368,111 @@ public class TestMoneroDaemonRpc {
     ctx.fromGetTxPool = false;
     
     // test fetched txs
-    assertEquals(txs.size(), txIds.size());
+    assertEquals(txIds.size(), txs.size());
     for (MoneroTx tx : txs) {
       testTx(tx, ctx);
     }
+  }
+  
+  @Test
+  public void testGetTransactionHexById() {
+    
+    // fetch transaction ids to test
+    List<String> txIds = getConfirmedTxIds(daemon);
+    
+    // fetch each tx hex by id with and without pruning
+    List<String> hexes = new ArrayList<String>();
+    List<String> hexesPruned = new ArrayList<String>();
+    for (String txId : txIds) {
+      hexes.add(daemon.getTxHex(txId));
+      hexesPruned.add(daemon.getTxHex(txId, true));
+    }
+    
+    // test results
+    assertEquals(hexes.size(), txIds.size());
+    assertEquals(hexesPruned.size(), txIds.size());
+    for (int i = 0; i < hexes.size(); i++) {
+      assertNotNull(hexes.get(i));
+      assertNotNull(hexesPruned.get(i));
+      assertFalse(hexesPruned.isEmpty());
+      assertTrue(hexes.get(i).length() > hexesPruned.get(i).length()); // pruned hex is shorter
+    }
+    
+    // fetch invalid id
+    try {
+      daemon.getTxHex("invalid tx id");
+      throw new Error("fail");
+    } catch (MoneroException e) {
+      assertEquals("Invalid transaction id", e.getMessage());
+    }
+  }
+  
+  @Test
+  public void testGetTransactionHexesByIds() {
+    
+    // fetch transaction ids to test
+    List<String> txIds = getConfirmedTxIds(daemon);
+    
+    // fetch tx hexes by id with and without pruning
+    List<String> hexes = daemon.getTxHexes(txIds);
+    List<String> hexesPruned = daemon.getTxHexes(txIds, true);
+    
+    // test results
+    assertEquals(hexes.size(), txIds.size());
+    assertEquals(hexesPruned.size(), txIds.size());
+    for (int i = 0; i < hexes.size(); i++) {
+      assertNotNull(hexes.get(i));
+      assertNotNull(hexesPruned.get(i));
+      assertFalse(hexesPruned.isEmpty());
+      assertTrue(hexes.get(i).length() > hexesPruned.get(i).length()); // pruned hex is shorter
+    }
+    
+    // fetch invalid id
+    txIds.add("invalid tx id");
+    try {
+      daemon.getTxHexes(txIds);
+      throw new Error("fail");
+    } catch (MoneroException e) {
+      assertEquals("Invalid transaction id", e.getMessage());
+    }
+  }
+  
+  @Test
+  public void testGetCoinbaseTxSum() {
+    MoneroCoinbaseTxSum sum = daemon.getCoinbaseTxSum(0, 50000);
+    testCoinbaseTxSum(sum);
+  }
+  
+  @Test
+  public void testGetFeeEstimate() {
+    BigInteger fee = daemon.getFeeEstimate();
+    TestUtils.testUnsignedBigInteger(fee, true);
+  }
+  
+  @Test
+  public void testGetTransactionsInPool() {
+    
+    // submit tx to pool but don't relay
+    MoneroTx tx = getUnrelayedTx(wallet, null);
+    daemon.submitTxHex(tx.getHex(), true);
+    
+    // fetch txs in pool
+    List<MoneroTx> txs = daemon.getTxPool();
+    
+    // context for testing tx
+    TestContext ctx = new TestContext();
+    ctx.isPruned = false;
+    ctx.isConfirmed = false;
+    ctx.fromGetTxPool = true;
+    
+    // test txs
+    assertFalse("Test requires an unconfirmed tx in the tx pool", txs.isEmpty());
+    for (MoneroTx aTx : txs) {
+      testTx(aTx, ctx);
+    }
+    
+    // flush the tx from the pool, gg
+    daemon.flushTxPool(tx.getId());
   }
   
   // ------------------------------- PRIVATE ---------------------------------
@@ -788,7 +890,7 @@ public class TestMoneroDaemonRpc {
     return txIds;
   }
   
-  private static MoneroTx getUnrelayedTx(MoneroWallet wallet, int accountIdx) {
+  private static MoneroTx getUnrelayedTx(MoneroWallet wallet, Integer accountIdx) {
     MoneroSendConfig sendConfig = new MoneroSendConfig(wallet.getPrimaryAddress(), TestUtils.MAX_FEE); 
     sendConfig.setDoNotRelay(true);
     sendConfig.setAccountIndex(accountIdx);
@@ -796,5 +898,10 @@ public class TestMoneroDaemonRpc {
     assertFalse(tx.getHex().isEmpty());
     assertEquals(tx.getDoNotRelay(), true);
     return tx;
+  }
+  
+  private static void testCoinbaseTxSum(MoneroCoinbaseTxSum txSum) {
+    TestUtils.testUnsignedBigInteger(txSum.getEmissionSum(), true);
+    TestUtils.testUnsignedBigInteger(txSum.getFeeSum(), true);
   }
 }
