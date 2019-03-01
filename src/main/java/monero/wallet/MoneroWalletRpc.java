@@ -54,7 +54,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   public MoneroWalletRpc(MoneroRpc rpc) {
-    throw new RuntimeException("Not implemented");
+    this.rpc = rpc;
+    addressCache = new HashMap<Integer, Map<Integer, String>>();
   }
   
   // TODO: overloaded constructors
@@ -161,7 +162,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public int getHeight() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_height");
+    @SuppressWarnings("unchecked")
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return ((BigInteger) resultMap.get("height")).intValue();
   }
 
   @Override

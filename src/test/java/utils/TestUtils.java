@@ -20,12 +20,12 @@ import monero.wallet.MoneroWalletRpc;
 public class TestUtils {
   
   // monero-daemon-rpc endpoint configuration (adjust per your configuration)
-  private static final String DAEMON_RPC_URI = "http://localhost:38081";
+  private static final String DAEMON_RPC_URI = "http://localhost:28081";
   private static final String DAEMON_RPC_USERNAME = null;
   private static final String DAEMON_RPC_PASSWORD = null;  
   
   // monero-wallet-rpc endpoint configuration (adjust per your configuration)
-  private static final String WALLET_RPC_URI = "http://localhost:38083";
+  private static final String WALLET_RPC_URI = "http://localhost:28083";
   private static final String WALLET_RPC_USERNAME = "rpc_user";
   private static final String WALLET_RPC_PASSWORD = "abc123";
   
