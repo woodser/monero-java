@@ -5,8 +5,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,7 +23,9 @@ import monero.daemon.model.MoneroBlockTemplate;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
+import monero.utils.MoneroException;
 import monero.wallet.MoneroWallet;
+import monero.wallet.config.MoneroSendConfig;
 import utils.TestUtils;
 
 /**
@@ -165,6 +169,208 @@ public class TestMoneroDaemonRpc {
     testBlock(block, ctx);
     assertEquals(daemon.getBlockByHeight(lastHeader.getHeight() - 1), block);
     assertEquals(null, block.getTxs());
+  }
+  
+  @Test
+  public void testGetBlockByHeight() {
+    
+    // config for testing blocks
+    TestContext ctx = new TestContext();
+    ctx.hasHex = true;
+    ctx.headerIsFull = true;
+    ctx.hasTxs = false;
+    
+    // retrieve by height of last block
+    MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
+    MoneroBlock block = daemon.getBlockByHeight(lastHeader.getHeight());
+    testBlock(block, ctx);
+    assertEquals(daemon.getBlockByHeight(block.getHeader().getHeight()), block);
+    
+    // retrieve by height of previous to last block
+    block = daemon.getBlockByHeight(lastHeader.getHeight() - 1);
+    testBlock(block, ctx);
+    assertEquals(lastHeader.getHeight() - 1, (int) block.getHeader().getHeight());
+  }
+  
+  @Test
+  public void testGetBlocksByHeightBinary() {
+    
+    // set number of blocks to test
+    int numBlocks = 200;
+    
+    // select random heights  // TODO: this is horribly inefficient way of computing last 100 blocks if not shuffling
+    int currentHeight = daemon.getHeight();
+    List<Integer> allHeights = new ArrayList<Integer>();
+    for (int i = 0; i < currentHeight - 1; i++) allHeights.add(i);
+    //GenUtils.shuffle(allHeights);
+    List<Integer> heights = new ArrayList<Integer>();
+    for (int i = allHeights.size() - numBlocks; i < allHeights.size(); i++) heights.add(allHeights.get(i));
+    
+    // fetch blocks
+    List<MoneroBlock> blocks = daemon.getBlocksByHeight(heights);
+    
+    // config for testing blocks
+    // TODO: getBlocksByHeight() has inconsistent client-side pruning
+    // TODO: get_blocks_by_height.bin does not return output indices (#5127)
+    TestContext ctx  = new TestContext();
+    ctx.hasHex = false;
+    ctx.headerIsFull = false;
+    ctx.hasTxs = true;
+    ctx.txContext = new TestContext();
+    ctx.txContext.isPruned = false;
+    ctx.txContext.isConfirmed = true;
+    ctx.txContext.fromGetTxPool = false;
+    ctx.txContext.hasOutputIndices = false;
+    ctx.txContext.fromGetBlocksByHeight = false;
+    
+    // test blocks
+    boolean txFound = false;
+    assertEquals(numBlocks, blocks.size());
+    for (int i = 0; i < heights.size(); i++) {
+      MoneroBlock block = blocks.get(i);
+      if (!block.getTxs().isEmpty()) txFound = true;
+      testBlock(block, ctx);
+      assertEquals(block.getHeader().getHeight(), heights.get(i));      
+    }
+    assertTrue("No transactions found to test", txFound);
+  }
+  
+  @Test
+  public void testGetBlocksByIdBinary() {
+    fail("Not implemented");
+  }
+  
+  @Test
+  public void testGetBlocksByRange() {
+    
+    // get current height
+    int height = daemon.getHeight();
+    
+    // get valid height range
+    int numBlocks = 1; // TODO: RequestError: Error: read ECONNRESET or  RequestError: Error: socket hang up if > 64 or (or > 1 if test getBlocksByHeight() runs first)
+    int numBlocksAgo = 190;
+    assertTrue(numBlocks > 0);
+    assertTrue(numBlocksAgo >= numBlocks);
+    assertTrue(height - numBlocksAgo + numBlocks - 1 < height);
+    int startHeight = height - numBlocksAgo;
+    int endHeight = height - numBlocksAgo + numBlocks - 1;
+    
+    // test known start and end heights
+    //console.log("Height: " + height);
+    //console.log("Fecthing " + (endHeight - startHeight + 1) + " blocks [" + startHeight + ", " + endHeight + "]");
+    testRange(startHeight, endHeight, height);
+    
+    // test unspecified start
+    testRange(null, numBlocks - 1, height);
+    
+    // test unspecified end
+    testRange(height - numBlocks - 1, null, height);
+    
+    // test unspecified start and end 
+    //testRange(null, null, height);  // TODO: RequestError: Error: socket hang up
+  };
+  
+  @Test
+  public void testGetBlockIdsBinary() {
+    //get_hashes.bin
+    fail("Not implemented");
+  }
+  
+  @Test
+  public void testGetTransactionById() {
+    
+    // fetch transaction ids to test
+    List<String> txIds = getConfirmedTxIds(daemon);
+    
+    // context for testing txs
+    TestContext ctx = new TestContext();
+    ctx.isPruned = false;
+    ctx.isConfirmed = true;
+    ctx.fromGetTxPool = false;
+    
+    // fetch each tx by id without pruning
+    for (String txId : txIds) {
+      MoneroTx tx = daemon.getTx(txId);
+      testTx(tx, ctx);
+    }
+    
+    // fetch each tx by id with pruning
+    for (String txId : txIds) {
+      MoneroTx tx = daemon.getTx(txId, true);
+      ctx.isPruned = true;
+      testTx(tx, ctx);
+    }
+    
+    // fetch invalid id
+    try {
+      daemon.getTx("invalid tx id");
+      throw new Error("fail");
+    } catch (MoneroException e) {
+      assertEquals("Invalid transaction id", e.getMessage());
+    }
+  }
+  
+  @Test
+  public void testGetTransactionsByIds() {
+    
+    // fetch transaction ids to test
+    List<String> txIds = getConfirmedTxIds(daemon);
+    
+    // context for testing txs
+    TestContext ctx = new TestContext();
+    ctx.isPruned = false;
+    ctx.isConfirmed = true;
+    ctx.fromGetTxPool = false;
+    
+    // fetch txs by id without pruning
+    List<MoneroTx> txs = daemon.getTxs(txIds);
+    assertEquals(txs.size(), txIds.size());
+    for (MoneroTx tx : txs) {
+      testTx(tx, ctx);
+    }
+    
+    // fetch txs by id with pruning
+    txs = daemon.getTxs(txIds, true);
+    ctx.isPruned = true;
+    assertEquals(txs.size(), txIds.size());
+    for (MoneroTx tx : txs) {
+      testTx(tx, ctx);
+    }
+    
+    // fetch invalid id
+    txIds.add("invalid tx id");
+    try {
+      daemon.getTxs(txIds);
+      throw new Error("fail");
+    } catch (MoneroException e) {
+      assertEquals("Invalid transaction id", e.getMessage());
+    }
+  }
+  
+  public void testGetTransactionsByIdsInPool() {
+    
+    // submit txs to the pool but don't relay
+    List<String> txIds = new ArrayList<String>();
+    for (int i = 0; i < 3; i++) {
+      MoneroTx tx = getUnrelayedTx(wallet, i);
+      daemon.submitTxHex(tx.getHex(), true);
+      txIds.add(tx.getId());
+    }
+    
+    // fetch txs by id
+    List<MoneroTx> txs = daemon.getTxs(txIds);
+    
+    // context for testing tx
+    TestContext ctx = new TestContext();
+    ctx.isPruned = false;
+    ctx.isConfirmed = false;
+    ctx.fromGetTxPool = false;
+    
+    // test fetched txs
+    assertEquals(txs.size(), txIds.size());
+    for (MoneroTx tx : txs) {
+      testTx(tx, ctx);
+    }
   }
   
   // ------------------------------- PRIVATE ---------------------------------
@@ -548,5 +754,47 @@ public class TestMoneroDaemonRpc {
     // test merging with copy
     MoneroTx merged = copy.merge(copy.copy());
     assertEquals(tx.toString(), merged.toString());
+  }
+  
+  private static void testRange(Integer startHeight, Integer endHeight, Integer chainHeight) {
+    int realStartHeight = startHeight == null ? 0 : startHeight;
+    int realEndHeight = endHeight == null ? chainHeight - 1 : endHeight;
+    List<MoneroBlock> blocks = daemon.getBlocksByRange(startHeight, endHeight);
+    assertEquals(realEndHeight - realStartHeight + 1, blocks.size());
+    for (int i = 0; i < blocks.size(); i++) {
+      assertEquals(realStartHeight + i, (int) blocks.get(i).getHeader().getHeight());
+    }
+  }
+  
+  private static List<String> getConfirmedTxIds(MoneroDaemon daemon) {
+    
+    // get valid height range
+    int height = daemon.getHeight();
+    int numBlocks = 200;
+    int numBlocksAgo = 200;
+    assertTrue(numBlocks > 0);
+    assertTrue(numBlocksAgo >= numBlocks);
+    assertTrue(height - numBlocksAgo + numBlocks - 1 < height);
+    int startHeight = height - numBlocksAgo;
+    int endHeight = height - numBlocksAgo + numBlocks - 1;
+    
+    // get blocks
+    List<MoneroBlock> blocks = daemon.getBlocksByRange(startHeight, endHeight);
+    
+    // collect tx ids
+    List<String> txIds = new ArrayList<String>();
+    for (MoneroBlock block : blocks) txIds.addAll(block.getTxIds());
+    assertFalse("No transactions found in the range [" + startHeight + ", " + endHeight + "]", txIds.isEmpty());  // TODO: this fails if no txs in last 100 blocks
+    return txIds;
+  }
+  
+  private static MoneroTx getUnrelayedTx(MoneroWallet wallet, int accountIdx) {
+    MoneroSendConfig sendConfig = new MoneroSendConfig(wallet.getPrimaryAddress(), TestUtils.MAX_FEE); 
+    sendConfig.setDoNotRelay(true);
+    sendConfig.setAccountIndex(accountIdx);
+    MoneroTx tx = wallet.send(sendConfig);
+    assertFalse(tx.getHex().isEmpty());
+    assertEquals(tx.getDoNotRelay(), true);
+    return tx;
   }
 }
