@@ -24,6 +24,7 @@ import monero.daemon.model.MoneroAltChain;
 import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
+import monero.daemon.model.MoneroBlockListener;
 import monero.daemon.model.MoneroBlockTemplate;
 import monero.daemon.model.MoneroCoinbaseTxSum;
 import monero.daemon.model.MoneroDaemonConnection;
@@ -1095,6 +1096,43 @@ public class TestMoneroDaemonRpc {
         }
       }
       assertTrue("Tx was not found after being submitted to the daemon's tx pool", found);
+    }
+  }
+  
+  // -------------------------- NOTIFICATION TESTS ---------------------------
+  
+  @Test
+  public void testBlockListener() {
+    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
+    
+    try {
+      
+      // start mining if possible to help push the network along
+      MoneroWallet wallet = new MoneroWalletLocal(daemon);
+      String address = wallet.getPrimaryAddress();
+      try { daemon.startMining(address, 8, false, true); }
+      catch (MoneroException e) { }
+      
+      // register a listener
+      MoneroBlockListener listener = new MoneroBlockListener();
+      daemon.addBlockListener(listener);
+      
+      // wait for next block notification
+      MoneroBlockHeader header = daemon.getNextBlockHeader();
+      testBlockHeader(header, true);
+      
+      // test that listener was called with equivalent header
+      assertEquals(header, listener.getLastBlockHeader());
+      
+      // unregister listener so daemon does not keep polling
+      daemon.removeBlockListener(listener);
+    } catch (MoneroException e) {
+      throw e;
+    } finally {
+      
+      // stop mining
+      try { daemon.stopMining(); }
+      catch (MoneroException e) { }
     }
   }
   
