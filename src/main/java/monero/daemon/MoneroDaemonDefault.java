@@ -10,6 +10,7 @@ import monero.daemon.model.MoneroDaemonUpdateCheckResult;
 import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
 import monero.daemon.model.MoneroKeyImageSpentStatus;
 import monero.daemon.model.MoneroOutputDistributionEntry;
+import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 
 /**
@@ -42,6 +43,10 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   
   public BigInteger getFeeEstimate() {
     return getFeeEstimate(null);
+  }
+  
+  public MoneroSubmitTxResult submitTxHex(String txHex) {
+    return submitTxHex(txHex, false);
   }
   
   @Override

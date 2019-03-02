@@ -39,6 +39,7 @@ import monero.daemon.model.MoneroKeyImageSpentStatus;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroOutputDistributionEntry;
+import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxPoolStats;
 import monero.rpc.MoneroRpcException;
@@ -990,6 +991,113 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // ----------------------------- RELAY TESTS -------------------------------
+  
+  @Test
+  public void testSubmitAndRelayTxHex() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
+    
+    // create 2 txs, the second will double spend outputs of first
+    MoneroTx tx1 = getUnrelayedTx(wallet, 0);
+    MoneroTx tx2 = getUnrelayedTx(wallet, 0);
+    
+    // submit and relay tx1
+    MoneroSubmitTxResult result = daemon.submitTxHex(tx1.getHex());
+    assertEquals(result.getIsRelayed(), true);
+    testSubmitTxResultGood(result);
+    
+    // tx1 is in the pool
+    List<MoneroTx> txs = daemon.getTxPool();
+    boolean found = false;
+    for (MoneroTx aTx : txs) {
+      if (aTx.getId().equals(tx1.getId())) {
+        assertEquals(aTx.getIsRelayed(), true);
+        found = true;
+        break;
+      }
+    }
+    assertTrue("Tx1 was not found after being submitted to the daemon's tx pool", found);
+    
+    // submit and relay tx2 hex which double spends tx1
+    result = daemon.submitTxHex(tx2.getHex());
+    assertEquals(result.getIsRelayed(), true);
+    testSubmitTxResultDoubleSpend(result);
+    
+    // tx2 is in not the pool
+    txs = daemon.getTxPool();
+    found = false;
+    for (MoneroTx aTx : txs) {
+      if (aTx.getId().equals(tx2.getId())) {
+        found = true;
+        break;
+      }
+    }
+    assertTrue("Tx2 should not be in the pool because it double spends tx1 which is in the pool", !found);
+  }
+  
+  @Test
+  public void testSubmitThenRelayTxHex() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
+    MoneroTx tx = getUnrelayedTx(wallet, 1);
+    testSubmitThenRelay(Arrays.asList(tx));
+  }
+  
+  @Test
+  public void testSubmitThenRelayTxHexes() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    txs.add(getUnrelayedTx(wallet, 2));
+    txs.add(getUnrelayedTx(wallet, 3));  // TODO: accounts cannot be re-used across send tests else isRelayed is true; wallet needs to update?
+    testSubmitThenRelay(txs);
+  }
+  
+  private static void testSubmitThenRelay(List<MoneroTx> txs) {
+    
+    // submit txs hex but don't relay
+    List<String> txIds = new ArrayList<String>();
+    for (MoneroTx tx : txs) {
+      txIds.add(tx.getId());
+      MoneroSubmitTxResult result = daemon.submitTxHex(tx.getHex(), true);
+      assertEquals(result.getIsRelayed(), false);
+      testSubmitTxResultGood(result);
+      
+      // ensure tx is in pool
+      List<MoneroTx> poolTxs = daemon.getTxPool();
+      boolean found = false;
+      for (MoneroTx aTx : poolTxs) {
+        if (aTx.getId().equals(tx.getId())) {
+          assertEquals(aTx.getIsRelayed(), false);
+          found = true;
+          break;
+        }
+      }
+      assertTrue("Tx was not found after being submitted to the daemon's tx pool", found);
+      
+      // fetch tx by id and ensure not relayed
+      MoneroTx fetchedTx = daemon.getTx(tx.getId());
+      assertNull(fetchedTx.getIsRelayed()); // TODO monero-daemon-rpc: add relayed to get_transactions
+    }
+    
+    // relay the txs
+    if (txIds.size() == 1) daemon.relayTxById(txIds.get(0));
+    else daemon.relayTxsById(txIds);
+
+    
+    // ensure txs are relayed
+    for (MoneroTx tx : txs) {
+      List<MoneroTx> poolTxs = daemon.getTxPool();
+      boolean found = false;
+      for (MoneroTx aTx : poolTxs) {
+        if (aTx.getId().equals(tx.getId())) {
+          assertEquals(aTx.getIsRelayed(), true);
+          found = true;
+          break;
+        }
+      }
+      assertTrue("Tx was not found after being submitted to the daemon's tx pool", found);
+    }
+  }
+  
   // ------------------------------- PRIVATE ---------------------------------
   
   /**
@@ -1624,5 +1732,44 @@ public class TestMoneroDaemonRpc {
   
   private static void testDaemonConnectionSpan(MoneroDaemonConnectionSpan span) {
     throw new RuntimeException("Not implemented");
+  }
+  
+  private static void testSubmitTxResultGood(MoneroSubmitTxResult result) {
+    testSubmitTxResultCommon(result);
+    assertEquals(true, result.getIsGood());
+    assertEquals(false, result.getIsDoubleSpend());
+    assertEquals(false, result.getIsFeeTooLow());
+    assertEquals(false, result.getIsMixinTooLow());
+    assertEquals(false, result.getHasInvalidInput());
+    assertEquals(false, result.getHasInvalidOutput());
+    assertEquals(true, result.getIsRct());
+    assertEquals(false, result.getIsOverspend());
+    assertEquals(false, result.getIsTooBig());
+  }
+  
+  private static void testSubmitTxResultDoubleSpend(MoneroSubmitTxResult result) {
+    testSubmitTxResultCommon(result);
+    assertEquals(false, result.getIsGood());
+    assertEquals(true, result.getIsDoubleSpend());
+    assertEquals(false, result.getIsFeeTooLow());
+    assertEquals(false, result.getIsMixinTooLow());
+    assertEquals(false, result.getHasInvalidInput());
+    assertEquals(false, result.getHasInvalidOutput());
+    assertEquals(true, result.getIsRct());
+    assertEquals(false, result.getIsOverspend());
+    assertEquals(false, result.getIsTooBig());
+  }
+
+  private static void testSubmitTxResultCommon(MoneroSubmitTxResult result) {
+    assertNull(result.getIsGood());
+    assertNull(result.getIsRelayed());
+    assertNull(result.getIsDoubleSpend());
+    assertNull(result.getIsFeeTooLow());
+    assertNull(result.getIsMixinTooLow());
+    assertNull(result.getHasInvalidInput());
+    assertNull(result.getHasInvalidOutput());
+    assertNull(result.getIsRct());
+    assertNull(result.getIsOverspend());
+    assertNull(result.getIsTooBig());
   }
 }

@@ -278,6 +278,14 @@ public interface MoneroDaemon {
    * Submits a transaction to the daemon's pool.
    * 
    * @param txHex is the raw transaction hex to submit
+   * @return the submission results
+   */
+  public MoneroSubmitTxResult submitTxHex(String txHex);
+  
+  /**
+   * Submits a transaction to the daemon's pool.
+   * 
+   * @param txHex is the raw transaction hex to submit
    * @param doNotRelay specifies if the tx should be relayed (optional)
    * @return the submission results
    */
