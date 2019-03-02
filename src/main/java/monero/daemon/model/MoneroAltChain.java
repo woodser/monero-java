@@ -1,5 +1,6 @@
 package monero.daemon.model;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -8,7 +9,7 @@ import java.util.List;
 public class MoneroAltChain {
   
   private List<String> blockIds;
-  private Long difficulty;
+  private BigInteger difficulty;
   private Integer height;
   private Integer length;
   private String mainChainParentBlockId;
@@ -21,11 +22,11 @@ public class MoneroAltChain {
     this.blockIds = blockIds;
   }
   
-  public Long getDifficulty() {
+  public BigInteger getDifficulty() {
     return difficulty;
   }
   
-  public void setDifficulty(Long difficulty) {
+  public void setDifficulty(BigInteger difficulty) {
     this.difficulty = difficulty;
   }
   

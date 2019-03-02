@@ -11,6 +11,7 @@ public class MoneroDaemonInfo {
   private Integer numAltBlocks;
   private Integer blockSizeLimit;
   private Integer blockSizeMedian;
+  private Integer blockWeightLimit;
   private Integer blockWeightMedian;
   private String bootstrapDaemonAddress;
   private BigInteger difficulty;
@@ -65,6 +66,15 @@ public class MoneroDaemonInfo {
   
   public void setBlockSizeMedian(Integer blockSizeMedian) {
     this.blockSizeMedian = blockSizeMedian;
+  }
+  
+  public Integer getBlockWeightLimit() {
+    return blockWeightLimit;
+  }
+  
+  public MoneroDaemonInfo setBlockWeightLimit(Integer blockWeightLimit) {
+    this.blockWeightLimit = blockWeightLimit;
+    return this;
   }
   
   public Integer getBlockWeightMedian() {

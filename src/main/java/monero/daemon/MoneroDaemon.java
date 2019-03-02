@@ -81,10 +81,18 @@ public interface MoneroDaemon {
    * Get a block template for mining a new block.
    * 
    * @param walletAddress is the address of the wallet to receive coinbase transactions if block is successfully mined
-   * @param reserveSize is the reserve size
    * @return a block template for mining a new block
    */
-  public MoneroBlockTemplate getBlockTemplate(String walletAddress, int reserveSize);
+  public MoneroBlockTemplate getBlockTemplate(String walletAddress);
+  
+  /**
+   * Get a block template for mining a new block.
+   * 
+   * @param walletAddress is the address of the wallet to receive coinbase transactions if block is successfully mined
+   * @param reserveSize is the reserve size (optional)
+   * @return a block template for mining a new block
+   */
+  public MoneroBlockTemplate getBlockTemplate(String walletAddress, Integer reserveSize);
   
   /**
    * Get the last block's header.
@@ -380,6 +388,14 @@ public interface MoneroDaemon {
    * Creates an output distribution.
    * 
    * @param amounts are amounts of outputs to make the distribution with
+   * @return output distribution entries meeting the parameters
+   */
+  public List<MoneroOutputDistributionEntry> getOutputDistribution(List<BigInteger> amounts);
+  
+  /**
+   * Creates an output distribution.
+   * 
+   * @param amounts are amounts of outputs to make the distribution with
    * @param cumulative specifies if the results should be cumulative (defaults to TODO)
    * @param startHeight is the start height lower bound inclusive (optional)
    * @param endHeight is the end height upper bound inclusive (optional)
@@ -552,10 +568,24 @@ public interface MoneroDaemon {
   /**
    * Check for update.
    * 
+   * @return the result of the update check
+   */
+  public MoneroDaemonUpdateCheckResult checkForUpdate();
+  
+  /**
+   * Check for update.
+   * 
    * @param path is the path to check for an update (optional)
    * @return the result of the update check
    */
   public MoneroDaemonUpdateCheckResult checkForUpdate(String path);
+  
+  /**
+   * Download an update.
+   * 
+   * @return the result of the update download
+   */
+  public MoneroDaemonUpdateDownloadResult downloadUpdate();
   
   /**
    * Download an update.

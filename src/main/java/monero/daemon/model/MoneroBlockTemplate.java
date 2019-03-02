@@ -9,7 +9,7 @@ public class MoneroBlockTemplate {
   
   private String blockTemplateBlob;
   private String blockHashingBlob;
-  private Long difficulty;
+  private BigInteger difficulty;
   private BigInteger expectedReward;
   private Integer height;
   private String prevId;
@@ -31,11 +31,11 @@ public class MoneroBlockTemplate {
     this.blockHashingBlob = blockHashingBlob;
   }
   
-  public Long getDifficulty() {
+  public BigInteger getDifficulty() {
     return difficulty;
   }
   
-  public void setDifficulty(Long difficulty) {
+  public void setDifficulty(BigInteger difficulty) {
     this.difficulty = difficulty;
   }
   
