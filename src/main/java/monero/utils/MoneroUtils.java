@@ -1,5 +1,9 @@
 package monero.utils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +13,7 @@ import java.util.List;
  */
 public class MoneroUtils {
 
-  private static final int MNEMONIC_SEED_NUM_WORDS = 25;
+  private static final int NUM_MNEMONIC_WORDS = 25;
   private static final int VIEW_KEY_LENGTH = 64;
   private static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
   private static final List<Character> CHARS = new ArrayList<Character>();
@@ -22,13 +26,25 @@ public class MoneroUtils {
   /**
    * Validates the given mnemonic seed.
    * 
-   * @param mnemonicSeed is the seed to validate
+   * @param mnemonic is the mnemonic to validate
    * @throws MoneroException if the given seed is invalid
    */
-  public static void validateMnemonicSeed(String mnemonicSeed) {
-    if (mnemonicSeed == null) throw new MoneroException("Mnemonic seed is null");
-    String[] words = mnemonicSeed.split(" ");
-    if (words.length != MNEMONIC_SEED_NUM_WORDS) throw new MoneroException("Mnemonic seed is " + words.length + " words but must be " + MNEMONIC_SEED_NUM_WORDS);
+  public static void validateMnemonic(String mnemonic) {
+    assertNotNull("Mnemonic phrase is not initialized", mnemonic);
+    assertFalse("Mnemonic phrase is empty", mnemonic.isEmpty());
+    String[] words = mnemonic.split(" ");
+    if (words.length != MoneroUtils.NUM_MNEMONIC_WORDS) throw new Error("Mnemonic phrase is " + words.length + " words but must be " + MoneroUtils.NUM_MNEMONIC_WORDS);
+  }
+  
+  // TODO: beef this up
+  public static void validatePrivateViewKey(String privateViewKey) {
+    assertNotNull(privateViewKey);
+    assertEquals(64, privateViewKey.length());
+  }
+  
+  // TODO: beef this up
+  public static void validateAddress(String address) {
+    
   }
   
   /**

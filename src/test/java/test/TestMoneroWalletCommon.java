@@ -1,11 +1,17 @@
 package test;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
+import utils.TestUtils;
 
 /**
  * Runs common tests that every Monero wallet implementation should support.
@@ -14,7 +20,7 @@ import monero.wallet.MoneroWallet;
  */
 public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
-  // wallet to test
+  // wallet instance to test
   private MoneroWallet wallet;
   
   /**
@@ -26,9 +32,37 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   public static void setUpBeforeClass() throws Exception {
     
   }
-
+  
   @Test
-  public void test() {
-    fail("Not yet implemented");
+  public void testGetHeight() {
+    int height = wallet.getHeight();
+    assertTrue(height >= 0);
+  }
+  
+  @Test
+  public void testGetMnemonic() {
+    String mnemonic = wallet.getMnemonic();
+    MoneroUtils.validateMnemonic(mnemonic);
+    assertEquals(TestUtils.TEST_MNEMONIC, mnemonic);
+  }
+  
+  @Test
+  public void testGetSupportedLanguages() {
+    List<String> languages = wallet.getLanguages();
+    assertFalse(languages.isEmpty());
+    for (String language : languages) assertFalse(language.isEmpty());
+  }
+  
+  @Test
+  public void testGetPrivateViewKey() {
+    String privateViewKey = wallet.getPrivateViewKey();
+    MoneroUtils.validatePrivateViewKey(privateViewKey);
+  }
+  
+  @Test
+  public void getPrimaryAddress() {
+    String primaryAddress = wallet.getPrimaryAddress();
+    MoneroUtils.validateAddress(primaryAddress);
+    assertEquals((wallet.getSubaddress(0, 0)).getAddress(), primaryAddress);
   }
 }
