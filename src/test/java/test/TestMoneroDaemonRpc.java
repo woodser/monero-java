@@ -113,6 +113,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetBlockHeaderById() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // retrieve by id of last block
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
@@ -130,6 +131,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetBlockHeaderByHeight() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // retrieve by height of last block
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
@@ -146,6 +148,7 @@ public class TestMoneroDaemonRpc {
   // TODO: test start with no end, vice versa, inclusivity
   @Test
   public void testGetBlockHeadersByRange() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // determine start and end height based on number of blocks and how many blocks ago
     int numBlocks = 100;
@@ -168,6 +171,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetBlockById() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // test config
     TestContext ctx = new TestContext();
@@ -193,6 +197,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetBlockByHeight() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // config for testing blocks
     TestContext ctx = new TestContext();
@@ -214,6 +219,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetBlocksByHeightBinary() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // set number of blocks to test
     int numBlocks = 200;
@@ -257,11 +263,13 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetBlocksByIdBinary() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     fail("Not implemented");
   }
   
   @Test
   public void testGetBlocksByRange() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get current height
     int height = daemon.getHeight();
@@ -292,12 +300,14 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetBlockIdsBinary() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     //get_hashes.bin
     fail("Not implemented");
   }
   
   @Test
   public void testGetTransactionById() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction ids to test
     List<String> txIds = getConfirmedTxIds(daemon);
@@ -332,6 +342,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetTransactionsByIds() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction ids to test
     List<String> txIds = getConfirmedTxIds(daemon);
@@ -367,7 +378,9 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  @Test
   public void testGetTransactionsByIdsInPool() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // submit txs to the pool but don't relay
     List<String> txIds = new ArrayList<String>();
@@ -395,6 +408,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetTransactionHexById() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction ids to test
     List<String> txIds = getConfirmedTxIds(daemon);
@@ -428,6 +442,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetTransactionHexesByIds() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction ids to test
     List<String> txIds = getConfirmedTxIds(daemon);
@@ -458,18 +473,21 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetCoinbaseTxSum() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     MoneroCoinbaseTxSum sum = daemon.getCoinbaseTxSum(0, 50000);
     testCoinbaseTxSum(sum);
   }
   
   @Test
   public void testGetFeeEstimate() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     BigInteger fee = daemon.getFeeEstimate();
     TestUtils.testUnsignedBigInteger(fee, true);
   }
   
   @Test
   public void testGetTransactionsInPool() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // submit tx to pool but don't relay
     MoneroTx tx = getUnrelayedTx(wallet, null);
@@ -495,24 +513,22 @@ public class TestMoneroDaemonRpc {
   }
   
   @Test
-  public void testTodo() {
-    
-  }
-  
-  @Test
   public void testGetIdsOfTransactionsInPoolBin() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     // TODO: get_transaction_pool_hashes.bin
     throw new Error("Not implemented");
   }
   
   @Test
   public void testGetTxPoolBacklogBin() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     // TODO: get_txpool_backlog
     throw new Error("Not implemented");
   }
   
   @Test
   public void testGetTxPoolStatisticsBin() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // submit txs to the pool but don't relay (multiple txs result in binary `histo` field)
     for (int i = 0; i < 2; i++) {
@@ -530,6 +546,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testFlushTxsFromPool() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // pool starts flushed for each test
     List<MoneroTx> txs = daemon.getTxPool();
@@ -553,6 +570,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testFlushTxFromPoolById() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // submit txs to the pool but don't relay
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
@@ -576,6 +594,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testFlushTxsFromPoolByIds() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // submit txs to the pool but don't relay
     List<String> txIds = new ArrayList<String>();
@@ -595,6 +614,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetSpentStatusOfKeyImages() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // submit txs to the pool to collect key images then flush
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
@@ -633,16 +653,19 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetOutputIndicesFromTxIdsBinary() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     throw new Error("Not implemented"); // get_o_indexes.bin
   }
   
   @Test
   public void testGetOutputsFromAmountsAndIndicesBinary() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     throw new Error("Not implemented"); // get_outs.bin
   }
   
   @Test
   public void testGetOutputHistogramBinary() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     fail("Not implemented");
 //    List<MoneroOutputHistogramEntry> entries = daemon.getOutputHistogram();
 //    assertFalse(entries.isEmpty());
@@ -653,6 +676,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetOutputDistributionBinary() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<BigInteger> amounts = new ArrayList<BigInteger>();
     amounts.add(BigInteger.valueOf(0));
     amounts.add(BigInteger.valueOf(1));
@@ -670,24 +694,28 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetGeneralInformation() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     MoneroDaemonInfo info = daemon.getInfo();
     testInfo(info);
   }
   
   @Test
   public void testGetSyncInformation() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     MoneroDaemonSyncInfo syncInfo = daemon.getSyncInfo();
     testSyncInfo(syncInfo);
   }
   
   @Test
   public void testGetHardForkInformation() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     MoneroHardForkInfo hardForkInfo = daemon.getHardForkInfo();
     testHardForkInfo(hardForkInfo);
   }
   
   @Test
   public void testGetAlternativeChains() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroAltChain> altChains = daemon.getAltChains();
     for (MoneroAltChain altChain : altChains) {
       testAltChain(altChain);
@@ -696,6 +724,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetAlternativeBlockIds() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<String> altBlockIds = daemon.getAltBlockIds();
     for (String altBlockId : altBlockIds) {
       assertNotNull(altBlockId);
@@ -705,6 +734,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testSetDownloadBandwidth() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     int initVal = daemon.getDownloadLimit();
     assertTrue(initVal > 0);
     int setVal = initVal * 2;
@@ -725,6 +755,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testSetUploadBandwidth() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     int initVal = daemon.getUploadLimit();
     assertTrue(initVal > 0);
     int setVal = initVal * 2;
@@ -745,6 +776,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetKnownPeers() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroDaemonPeer> peers = daemon.getKnownPeers();
     assertFalse("Daemon has no known peers to test", peers.isEmpty());
     for (MoneroDaemonPeer peer : peers) {
@@ -754,6 +786,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetPeerConnections() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroDaemonConnection> connections = daemon.getConnections();
     assertFalse("Daemon has no incoming or outgoing connections to test", connections.isEmpty());
     for (MoneroDaemonConnection connection : connections) {
@@ -763,6 +796,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testSetOutgoingPeerLimit() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     daemon.setOutgoingPeerLimit(0);
     daemon.setOutgoingPeerLimit(8);
     daemon.setOutgoingPeerLimit(10);
@@ -770,6 +804,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testSetIncomingPeerLimit() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     daemon.setIncomingPeerLimit(0);
     daemon.setIncomingPeerLimit(8);
     daemon.setIncomingPeerLimit(10);
@@ -777,6 +812,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testBanPeer() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // set ban
     MoneroBan ban = new MoneroBan();
@@ -797,6 +833,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testBanPeers() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // set bans
     MoneroBan ban1 = new MoneroBan();
@@ -827,6 +864,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testMining() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // stop mining at beginning of test
     try { daemon.stopMining(); }
@@ -845,6 +883,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testGetMiningStatus() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     try {
       
@@ -884,6 +923,7 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testSubmitMinedBlock() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get template to mine on
     MoneroBlockTemplate template = daemon.getBlockTemplate(TestUtils.TEST_ADDRESS);
@@ -902,12 +942,14 @@ public class TestMoneroDaemonRpc {
   
   @Test
   public void testCheckForUpdate() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     MoneroDaemonUpdateCheckResult result = daemon.checkForUpdate();
     testUpdateCheckResult(result);
   }
   
   @Test
   public void testDownloadUpdate() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // download to default path
     MoneroDaemonUpdateDownloadResult result = daemon.downloadUpdate();
@@ -931,6 +973,7 @@ public class TestMoneroDaemonRpc {
   // test is disabled to not interfere with other tests
   @Test
   public void testStop() throws InterruptedException {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // stop the daemon
     daemon.stop();
