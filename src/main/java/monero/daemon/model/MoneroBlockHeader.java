@@ -14,8 +14,8 @@ public class MoneroBlockHeader {
   private Long weight;
   private Long longTermWeight;
   private Long depth;
-  private Long difficulty;
-  private Long cumulativeDifficulty;
+  private BigInteger difficulty;
+  private BigInteger cumulativeDifficulty;
   private Integer majorVersion;
   private Integer minorVersion;
   private Long nonce;
@@ -81,19 +81,19 @@ public class MoneroBlockHeader {
     this.depth = depth;
   }
   
-  public Long getDifficulty() {
+  public BigInteger getDifficulty() {
     return difficulty;
   }
   
-  public void setDifficulty(Long difficulty) {
+  public void setDifficulty(BigInteger difficulty) {
     this.difficulty = difficulty;
   }
   
-  public Long getCumulativeDifficulty() {
+  public BigInteger getCumulativeDifficulty() {
     return cumulativeDifficulty;
   }
   
-  public void setCumulativeDifficulty(Long cumulativeDifficulty) {
+  public void setCumulativeDifficulty(BigInteger cumulativeDifficulty) {
     this.cumulativeDifficulty = cumulativeDifficulty;
   }
   

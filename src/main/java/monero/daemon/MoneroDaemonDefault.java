@@ -5,13 +5,22 @@ import java.util.Arrays;
 import java.util.List;
 
 import monero.daemon.model.MoneroBan;
+import monero.daemon.model.MoneroBlockTemplate;
+import monero.daemon.model.MoneroDaemonUpdateCheckResult;
+import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
 import monero.daemon.model.MoneroKeyImageSpentStatus;
+import monero.daemon.model.MoneroOutputDistributionEntry;
 import monero.daemon.model.MoneroTx;
 
 /**
  * Default Monero daemon implementation.
  */
 public abstract class MoneroDaemonDefault implements MoneroDaemon {
+  
+  @Override
+  public MoneroBlockTemplate getBlockTemplate(String walletAddress) {
+    return getBlockTemplate(null);
+  }
   
   @Override
   public MoneroTx getTx(String txId) {
@@ -46,6 +55,11 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   }
   
   @Override
+  public List<MoneroOutputDistributionEntry> getOutputDistribution(List<BigInteger> amounts) {
+    return getOutputDistribution(amounts, null, null, null);
+  }
+  
+  @Override
   public void setPeerBan(MoneroBan ban) {
     setPeerBans(Arrays.asList(ban));
   }
@@ -53,5 +67,15 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   @Override
   public void submitBlock(String blockBlob) {
     submitBlocks(Arrays.asList(blockBlob));
+  }
+  
+  @Override
+  public MoneroDaemonUpdateCheckResult checkForUpdate() {
+    return checkForUpdate(null);
+  }
+  
+  @Override
+  public MoneroDaemonUpdateDownloadResult downloadUpdate() {
+    return downloadUpdate(null);
   }
 }

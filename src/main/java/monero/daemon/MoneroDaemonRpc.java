@@ -66,7 +66,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public MoneroBlockTemplate getBlockTemplate(String walletAddress, int reserveSize) {
+  public MoneroBlockTemplate getBlockTemplate(String walletAddress, Integer reserveSize) {
     throw new RuntimeException("Not implemented");
   }
 
