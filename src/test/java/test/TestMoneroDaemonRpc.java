@@ -937,8 +937,8 @@ public class TestMoneroDaemonRpc {
       daemon.submitBlock(template.getBlockHashingBlob());
       fail("Should have thrown error");
     } catch (MoneroRpcException e) {
-      assertEquals(-7, e.getRpcCode());
-      assertEquals("Block not accepted", e.getRpcMessage());
+      assertEquals(-7, (int) e.getCode());
+      assertEquals("Block not accepted", e.getMessage());
     }
   }
   

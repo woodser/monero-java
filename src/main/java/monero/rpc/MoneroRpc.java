@@ -152,8 +152,8 @@ public class MoneroRpc {
   private static void validateRpcResponse(Map<String, Object> respMap, Map<String, Object> requestBody) {
     Map<String, Object> error = (Map<String, Object>) respMap.get("error");
     if (error == null) return;
+    String msg = (String) error.get("message");
     int code = ((BigInteger) error.get("code")).intValue();
-    String message = (String) error.get("message");
-    throw new MoneroRpcException(code, message, requestBody);
+    throw new MoneroRpcException(msg, code, requestBody);
   }
 }
