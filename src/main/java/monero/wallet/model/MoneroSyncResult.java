@@ -6,7 +6,7 @@ package monero.wallet.model;
 public class MoneroSyncResult {
 
   private Integer numBlocksFetched;
-  private Boolean receivedAmount;
+  private Boolean receivedMoney;
   
   public Integer getNumBlocksFetched() {
     return numBlocksFetched;
@@ -16,11 +16,11 @@ public class MoneroSyncResult {
     this.numBlocksFetched = numBlocksFetched;
   }
   
-  public Boolean getReceivedAmount() {
-    return receivedAmount;
+  public Boolean getReceivedMoney() {
+    return receivedMoney;
   }
   
-  public void setReceivedAmount(Boolean receivedAmount) {
-    this.receivedAmount = receivedAmount;
+  public void setReceivedMoney(Boolean receivedMoney) {
+    this.receivedMoney = receivedMoney;
   }
 }

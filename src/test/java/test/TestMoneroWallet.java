@@ -101,7 +101,7 @@ public class TestMoneroWallet {
       integratedAddress = wallet.getIntegratedAddress(invalidPaymentId);
       fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have thrown a RPC exception");
     } catch (MoneroRpcException e) {
-      assertEquals((int) -5, (int) e.getRpcCode());
+      assertEquals((int) -5, (int) e.getErrorCode());
       assertEquals("Invalid payment ID", e.getRpcMessage());
     }
     
@@ -664,7 +664,7 @@ public class TestMoneroWallet {
       wallet.getTxKey("invalid_tx_id");
       fail("Should throw exception for invalid key");
     } catch (MoneroRpcException e) {
-      assertEquals(-8, (int) e.getRpcCode());
+      assertEquals(-8, (int) e.getErrorCode());
     }
     
     // test check with invalid tx id
@@ -674,7 +674,7 @@ public class TestMoneroWallet {
       wallet.checkTxKey("invalid_tx_id", key, tx.getPayments().get(0).getAddress());
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
-      assertEquals(-8, (int) e.getRpcCode());
+      assertEquals(-8, (int) e.getErrorCode());
     }
     
     // test check with invalid key
@@ -682,7 +682,7 @@ public class TestMoneroWallet {
       wallet.checkTxKey(tx.getId(), "invalid_tx_key", tx.getPayments().get(0).getAddress());
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
-      assertEquals(-25, (int) e.getRpcCode());
+      assertEquals(-25, (int) e.getErrorCode());
     }
     
     // test check with invalid address
@@ -690,7 +690,7 @@ public class TestMoneroWallet {
       wallet.checkTxKey(tx.getId(), key, "invalid_tx_address");
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
-      assertEquals(-2, (int) e.getRpcCode());
+      assertEquals(-2, (int) e.getErrorCode());
     }
     
     // test check with different address
@@ -742,7 +742,7 @@ public class TestMoneroWallet {
       wallet.getTxProof("invalid_tx_id", tx.getPayments().get(0).getAddress(), null);
       fail("Should throw exception for invalid key");
     } catch (MoneroRpcException e) {
-      assertEquals(-8, (int) e.getRpcCode());
+      assertEquals(-8, (int) e.getErrorCode());
     }
     
     // test check with invalid tx id
@@ -750,7 +750,7 @@ public class TestMoneroWallet {
       wallet.checkTxProof("invalid_tx_id", tx.getPayments().get(0).getAddress(), null, signature);
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
-      assertEquals(-8, (int) e.getRpcCode());
+      assertEquals(-8, (int) e.getErrorCode());
     }
     
     // test check with invalid address
@@ -758,7 +758,7 @@ public class TestMoneroWallet {
       wallet.checkTxProof(tx.getId(), "invalid_tx_address", null, signature);
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
-      assertEquals(-2, (int) e.getRpcCode());
+      assertEquals(-2, (int) e.getErrorCode());
     }
     
     // test check with wrong message
@@ -773,7 +773,7 @@ public class TestMoneroWallet {
       check = wallet.checkTxProof(tx.getId(), tx.getPayments().get(0).getAddress(), "This is the right message", wrongSignature);  
       assertFalse(check.getIsGood());
     } catch (MoneroRpcException e) {
-      assertEquals(-1, (int) e.getRpcCode()); // TODO: sometimes comes back bad, sometimes throws exception.  ensure txs come from different addresses?
+      assertEquals(-1, (int) e.getErrorCode()); // TODO: sometimes comes back bad, sometimes throws exception.  ensure txs come from different addresses?
     }
   }
   
@@ -803,7 +803,7 @@ public class TestMoneroWallet {
       wallet.getSpendProof("invalid_tx_id", null);
       fail("Should throw exception for invalid key");
     } catch (MoneroRpcException e) {
-      assertEquals(-8, (int) e.getRpcCode());
+      assertEquals(-8, (int) e.getErrorCode());
     }
     
     // test check with invalid tx id
@@ -811,7 +811,7 @@ public class TestMoneroWallet {
       wallet.checkSpendProof("invalid_tx_id", null, signature);
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
-      assertEquals(-8, (int) e.getRpcCode());
+      assertEquals(-8, (int) e.getErrorCode());
     }
     
     // test check with invalid message
@@ -843,7 +843,7 @@ public class TestMoneroWallet {
       wallet.checkReserveProof(differentAddress, "Test message", signature);
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
-      assertEquals(-1, (int) e.getRpcCode());
+      assertEquals(-1, (int) e.getErrorCode());
     }
     
     // test subaddress
@@ -851,7 +851,7 @@ public class TestMoneroWallet {
       wallet.checkReserveProof(wallet.getSubaddress(0, 1).getAddress(), "Test message", signature);
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
-      assertEquals(-1, (int) e.getRpcCode());
+      assertEquals(-1, (int) e.getErrorCode());
     }
     
     // test wrong message
@@ -864,7 +864,7 @@ public class TestMoneroWallet {
       wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", "wrong signature");
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
-      assertEquals(-1, (int) e.getRpcCode());
+      assertEquals(-1, (int) e.getErrorCode());
     }
   }
   
@@ -890,12 +890,12 @@ public class TestMoneroWallet {
           wallet.getReserveProof(account.getIndex(), account.getBalance(), msg);
           fail("Should have thrown exception");
         } catch (MoneroRpcException e) {
-          assertEquals(-1, (int) e.getRpcCode());
+          assertEquals(-1, (int) e.getErrorCode());
           try {
             wallet.getReserveProof(account.getIndex(), TestUtils.MAX_FEE, msg);
             fail("Should have thrown exception");
           } catch (MoneroRpcException e2) {
-            assertEquals(-1, (int) e2.getRpcCode());
+            assertEquals(-1, (int) e2.getErrorCode());
           }
         }
       }
@@ -907,7 +907,7 @@ public class TestMoneroWallet {
       wallet.getReserveProof(0, accounts.get(0).getBalance().add(TestUtils.MAX_FEE), "Test message");
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
-      assertEquals(-1, (int) e.getRpcCode());
+      assertEquals(-1, (int) e.getErrorCode());
     }
     
     // test different wallet address
@@ -918,7 +918,7 @@ public class TestMoneroWallet {
       wallet.checkReserveProof(differentAddress, "Test message", signature);
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
-      assertEquals(-1, (int) e.getRpcCode());
+      assertEquals(-1, (int) e.getErrorCode());
     }
     
     // test subaddress
@@ -926,7 +926,7 @@ public class TestMoneroWallet {
       wallet.checkReserveProof(wallet.getSubaddress(0, 1).getAddress(), "Test message", signature);
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
-      assertEquals(-1, (int) e.getRpcCode());
+      assertEquals(-1, (int) e.getErrorCode());
     }
     
     // test wrong message
@@ -939,7 +939,7 @@ public class TestMoneroWallet {
       wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", "wrong signature");
       fail("Should have thrown exception");
     } catch (MoneroRpcException e) {
-      assertEquals(-1, (int) e.getRpcCode());
+      assertEquals(-1, (int) e.getErrorCode());
     }
   }
 
@@ -977,7 +977,7 @@ public class TestMoneroWallet {
     try {
       wallet.createWallet(TestUtils.WALLET_NAME_2, TestUtils.WALLET_PW, "English");
     } catch (MoneroRpcException e) {
-      assertEquals((int) -21, (int) e.getRpcCode());  // exception is ok if wallet already created
+      assertEquals((int) -21, (int) e.getErrorCode());  // exception is ok if wallet already created
     }    
     wallet.openWallet(TestUtils.WALLET_NAME_2, TestUtils.WALLET_PW);
     List<MoneroTx> txs = wallet.getTxs();
@@ -1026,7 +1026,7 @@ public class TestMoneroWallet {
       wallet.toUri(mUri1);
       fail("Should have thrown RPC exception with invalid parameters");
     } catch (MoneroRpcException e) {
-      assertEquals((int) -11, (int) e.getRpcCode());
+      assertEquals((int) -11, (int) e.getErrorCode());
       assertTrue(e.getRpcMessage().contains("Cannot make URI from supplied parameters"));
     }
   }
@@ -1091,7 +1091,7 @@ public class TestMoneroWallet {
       wallet.getAccounts("non_existing_tag");
       fail("Should have thrown exception with unregistered tag");
     } catch (MoneroRpcException e) {
-      assertEquals((int) -1, (int) e.getRpcCode());
+      assertEquals((int) -1, (int) e.getErrorCode());
     }
     
     // create expected tag for test
@@ -1119,7 +1119,7 @@ public class TestMoneroWallet {
       wallet.getAccounts(expectedTag.getTag());
       fail("Should have thrown exception with unregistered tag");
     } catch (MoneroRpcException e) {
-      assertEquals((int) -1, (int) e.getRpcCode());
+      assertEquals((int) -1, (int) e.getErrorCode());
     }
   }
 

@@ -12,6 +12,8 @@ import org.apache.log4j.PropertyConfigurator;
 import monero.daemon.MoneroDaemonRpc;
 import monero.rpc.MoneroRpc;
 import monero.rpc.MoneroRpcException;
+import monero.wallet.MoneroWallet;
+import monero.wallet.MoneroWalletLocal;
 import monero.wallet.MoneroWalletRpc;
 
 /**
@@ -72,21 +74,21 @@ public class TestUtils {
       try {
         walletRpc.createWallet(WALLET_RPC_NAME_1, WALLET_RPC_PW, "English");
       } catch (MoneroRpcException e) {
-        assertEquals(-21, e.getRpcCode());  // exception is ok if wallet already created
+        assertEquals(-21, (int) e.getCode());  // exception is ok if wallet already created
       }
       
       // open rpc wallet file
       try {
         walletRpc.openWallet(WALLET_RPC_NAME_1, WALLET_RPC_PW);
       } catch (MoneroRpcException e) {
-        assertEquals(-1, e.getRpcCode()); // TODO (monero-wallet-rpc): -1: Failed to open wallet if wallet is already open; better code and message
+        assertEquals(-1, (int) e.getCode()); // TODO (monero-wallet-rpc): -1: Failed to open wallet if wallet is already open; better code and message
       }
       
       // refresh wallet
       try {
         walletRpc.rescanSpent();
       } catch (MoneroRpcException e) {
-        assertEquals((int) -38, (int) e.getRpcCode());  // TODO: (monero-wallet-rpc) sometimes getting -38: no connection to daemon on rescan call (after above calls) which causes mocha "before all" hook problem
+        assertEquals((int) -38, (int) e.getCode());  // TODO: (monero-wallet-rpc) sometimes getting -38: no connection to daemon on rescan call (after above calls) which causes mocha "before all" hook problem
         System.out.println("WARNING: received -38: no connection to daemon on rescan call after create/open, ignoring...");
       }
     }
@@ -104,5 +106,10 @@ public class TestUtils {
     assertTrue(num.intValue() >= 0);
     if (nonZero == true) assertTrue(num.intValue() > 0);
     if (nonZero == false) assertTrue(num.intValue() == 0);
+  }
+  
+  public static String getRandomWalletAddress() {
+    MoneroWallet wallet = new MoneroWalletLocal(getDaemonRpc());
+    return wallet.getPrimaryAddress();
   }
 }
