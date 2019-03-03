@@ -334,7 +334,9 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     }
   }
   
-  it("Can get the locked and unlocked balances of the wallet, accounts, and subaddresses", async function() {
+  // Can get the locked and unlocked balances of the wallet, accounts, and subaddresses
+  @Test
+  public void getAllBalances() {
     
     // fetch accounts with all info as reference
     let accounts = await wallet.getAccounts(true);
@@ -372,9 +374,11 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     } catch(e) {
       assert.notEqual("Should have failed", e.message);
     }
-  });
+  }
   
-  it("Can get transactions in the wallet", async function() {
+  // Can get transactions in the wallet
+  @Test
+  public void testGetTransactionsWallet() {
     let nonDefaultIncoming = false;
     let txs1 = await getCachedTxs();
     let txs2 = await testGetTxs(wallet, undefined, true);
@@ -411,10 +415,12 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     
     // ensure non-default account and subaddress tested
     assert(nonDefaultIncoming, "No incoming transfers found to non-default account and subaddress; run send-to-multiple tests first");
-  });
+  }
   
-  if (!liteMode)
-  it("Can get transactions with additional configuration", async function() {
+  // Can get transactions with additional configuration
+  @Test
+  public void testGetTransactionsWithConfiguration() {
+    // TODO: litemode
     
     // get random transactions with payment ids for testing
     let randomTxs = await getRandomTransactions(wallet, {hasPaymentId: true}, 3, 5);
@@ -566,9 +572,11 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
       }
     }
     assert(found, "No vouts found in txs");
-  });
+  }
   
-  it("Returns all known fields of txs regardless of filtering", async function() {
+  // Returns all known fields of txs regardless of filtering
+  @Test
+  public void testGetTransactionFieldsWithFiltering() {
     
     // fetch wallet txs
     let txs = await wallet.getTxs({isConfirmed: true});
@@ -595,10 +603,12 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     
     // test did not fully execute
     throw new Error("Test requires tx sent from/to different accounts of same wallet but none found; run send tests");
-  });
+  }
   
-  if (!liteMode)
-  it("Validates inputs when getting transactions", async function() {
+  // Validates inputs when getting transactions
+  @Test
+  public void testGetTransactionsValidateInputs() {
+    // TODO: liteMode
     
     // test with invalid id
     let txs = await wallet.getTxs({txId: "invalid_id"});
@@ -611,9 +621,11 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     assert.equal(txs[0].getId(), randomTxs[0].getId());
     
     // TODO: test other input validation here
-  });
+  }
 
-  it("Can get transfers in the wallet, accounts, and subaddresses", async function() {
+  // Can get transfers in the wallet, accounts, and subaddresses
+  @Test
+  public void testGetTransfers() {
     
     // get all transfers
     await testGetTransfers(wallet, undefined, true);
@@ -659,10 +671,12 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     
     // ensure transfer found with non-zero account and subaddress indices
     assert(nonDefaultIncoming, "No transfers found in non-default account and subaddress; run send-to-multiple tests");
-  });
+  }
   
-  if (!liteMode)
-  it("Can get transfers with additional configuration", async function() {
+  // Can get transfers with additional configuration
+  @Test
+  public void testGetTransfersWithConfiguration() {
+    // TODO: liteMode
     
     // get incoming transfers
     let transfers = await testGetTransfers(wallet, {isIncoming: true}, true);
@@ -723,10 +737,12 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
       assert(transfer.getDestinations().length > 0);
       assert.equal(transfer.getTx().getIsConfirmed(), true);
     }
-  });
+  }
   
-  if (!liteMode)
-  it("Validates inputs when getting transfers", async function() {
+  // Validates inputs when getting transfers
+  @Test
+  public void testGetTransfersValidateInputs() {
+    // TODO: liteMode
     
     // test with invalid id
     let transfers = await wallet.getTransfers({txId: "invalid_id"});
@@ -750,9 +766,11 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     } catch (e) {
       assert.notEqual(e.message, "Should have failed");
     }
-  });
+  }
   
-  it("Can get vouts in the wallet, accounts, and subaddresses", async function() {
+  // Can get vouts in the wallet, accounts, and subaddresses
+  @Test
+  public void testGetVouts() {
 
     // get all vouts
     await testGetVouts(wallet, undefined, true);
@@ -795,10 +813,12 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     
     // ensure vout found with non-zero account and subaddress indices
     assert(nonDefaultIncoming, "No vouts found in non-default account and subaddress; run send-to-multiple tests");
-  });
+  }
   
-  if (!liteMode)
-  it("Can get vouts with additional configuration", async function() {
+  // TODO: Can get vouts with additional configuration
+  @Test
+  public void testGetVoutsWithConfiguration() {
+    // TODO: liteMode
     
     // get unspent vouts to account 0
     let vouts = await testGetVouts(wallet, {accountIndex: 0, isSpent: false});
@@ -841,10 +861,12 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
       assert.equal(vout.getSubaddressIndex(), subaddressIdx);
       assert.equal(vout.getTx().getIsConfirmed(), true);
     }
-  });
+  }
   
-  if (!liteMode)
-  it("Validates inputs when getting vouts", async function() {
+  // Validates inputs when getting vouts
+  @Test
+  public void testGetVoutsValidateInputes() {
+    // TODO: liteMode
     
     // test with invalid id
     let vouts = await wallet.getVouts({txId: "invalid_id"});
@@ -856,9 +878,11 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     assert.equal(randomTxs[0].getVouts().length, vouts.length);
     let tx = vouts[0].getTx();
     for (let vout of vouts) assert(tx === vout.getTx());
-  });
+  }
   
-  it("Has correct accounting across accounts, subaddresses, txs, transfers, and vouts", async function() {
+  // Has correct accounting across accounts, subaddresses, txs, transfers, and vouts
+  @Test
+  public void testAccounting() {
     
     // pre-fetch wallet balances, accounts, subaddresses, and txs
     let walletBalance = await wallet.getBalance();
@@ -944,9 +968,11 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
         if (subaddress.getBalance().toString() !== subaddressSum.toString()) assert(hasUnconfirmedTx, "Subaddress balance must equal sum of its unspent vouts if no unconfirmed txs");
       }
     }
-  });
+  }
   
-  it("Can get and set a transaction note", async function() {
+  // Can get and set a transaction note
+  @Test
+  public void testSetTransactionNote() {
     let txs = await getRandomTransactions(wallet, undefined, 1, 5);
     
     // set notes
@@ -959,10 +985,12 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     for (let i = 0; i < txs.length; i++) {
       assert.equal(await wallet.getTxNote(txs[i].getId()), uuid + i);
     }
-  });
+  }
   
+  // Can get and set multiple transaction notes
   // TODO: why does getting cached txs take 2 seconds when should already be cached?
-  it("Can get and set multiple transaction notes", async function() {
+  @Test
+  public void testSetTransactionNotes() {
     
     // set tx notes
     let uuid = GenUtils.uuidv4();
@@ -983,9 +1011,11 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     }
     
     // TODO: test that get transaction has note
-  });
+  }
   
-  it("Can check a transfer using the transaction's secret key and the destination", async function() {
+  // Can check a transfer using the transaction's secret key and the destination
+  @Test
+  public void testCheckTxKey() {
     
     // get random txs that are confirmed and have outgoing destinations
     let txs;
@@ -1065,9 +1095,12 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     assert(check.getIsGood());
     assert(check.getReceivedAmount().compare(new BigInteger(0)) >= 0);
     testCheckTx(tx, check);
-  });
+  }
   
-  it("Can prove a transaction by getting its signature", async function() {
+  
+  // Can prove a transaction by getting its signature
+  @Test
+  public void testCheckTxProof() {
     
     // get random txs that are confirmed and have outgoing destinations
     let txs;
@@ -1131,9 +1164,11 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     } catch (e) {
       assert.equal(e.getRpcCode(), -1); // TODO: sometimes comes back bad, sometimes throws exception.  ensure txs come from different addresses?
     }
-  });
+  }
   
-  it("Can prove a spend using a generated signature and no destination public address", async function() {
+  // Can prove a spend using a generated signature and no destination public address
+  @Test
+  public void testCheckSpendProof() {
     
     // get random confirmed outgoing txs
     let filter = new MoneroTxFilter();
@@ -1178,9 +1213,11 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     // test check with wrong signature
     signature = await wallet.getSpendProof(txs[1].getId(), "This is the right message");
     assert.equal(await wallet.checkSpendProof(tx.getId(), "This is the right message", signature), false);
-  });
+  }
   
-  it("Can prove reserves in the wallet", async function() {
+  // Can prove reserves in the wallet
+  @Test
+  public void testGetReserveProofWallet() {
     
     // get proof of entire wallet
     let signature = await wallet.getReserveProofWallet("Test message");
@@ -1228,91 +1265,97 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     } catch (e) {
       assert.equal(e.getRpcCode(), -1);
     }
-  });
+  }
   
+  // Can prove reserves in an account
   // TODO: re-enable this after 14.x point release which fixes this
-//  it("Can prove reserves in an account", async function() {
-//    
-//    // test proofs of accounts
-//    let numNonZeroTests = 0;
-//    let msg = "Test message";
-//    let accounts = await wallet.getAccounts();
-//    let signature;
-//    for (let account of accounts) {
-//      if (account.getBalance().compare(new BigInteger(0)) > 0) {
-//        let checkAmount = (await account.getBalance()).divide(new BigInteger(2));
-//        signature = await wallet.getReserveProofAccount(account.getIndex(), checkAmount, msg);
-//        let check = await wallet.checkReserveProof(await wallet.getPrimaryAddress(), msg, signature);
-//        assert(check.getIsGood());
-//        testCheckReserve(check);
-//        assert(check.getTotalAmount().compare(checkAmount) >= 0);
-//        numNonZeroTests++;
-//      } else {
-//        try {
-//          await wallet.getReserveProofAccount(account.getIndex(), account.getBalance(), msg);
-//          throw new Error("Should have thrown exception");
-//        } catch (e) {
-//          assert.equal(e.getRpcCode(), -1);
-//          try {
-//            await wallet.getReserveProofAccount(account.getIndex(), TestUtils.MAX_FEE, msg);
-//            throw new Error("Should have thrown exception");
-//          } catch (e2) {
-//            assert.equal(e2.getRpcCode(), -1);
-//          }
-//        }
-//      }
-//    }
-//    assert(numNonZeroTests > 1, "Must have more than one account with non-zero balance; run send-to-multiple tests");
-//    
-//    // test error when not enough balance for requested minimum reserve amount
-//    try {
-//      await wallet.getReserveProofAccount(0, accounts[0].getBalance().add(TestUtils.MAX_FEE), "Test message");
-//      throw new Error("Should have thrown exception");
-//    } catch (e) {
-//      assert.equal(e.getRpcCode(), -1);
-//    }
-//    
-//    // test different wallet address
-//    // TODO: openWallet is not common so this won't work for other wallet impls
-//    await wallet.openWallet(TestUtils.WALLET_RPC_NAME_2, TestUtils.WALLET_RPC_PW_2);
-//    let differentAddress = await wallet.getPrimaryAddress();
-//    await wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_RPC_PW_1);
-//    try {
-//      await wallet.checkReserveProof(differentAddress, "Test message", signature);
-//      throw new Error("Should have thrown exception");
-//    } catch (e) {
-//      assert.equal(e.getRpcCode(), -1);
-//    }
-//    
-//    // test subaddress
-//    try {
-//      await wallet.checkReserveProof((await wallet.getSubaddress(0, 1)).getAddress(), "Test message", signature);
-//      throw new Error("Should have thrown exception");
-//    } catch (e) {
-//      assert.equal(e.getRpcCode(), -1);
-//    }
-//    
-//    // test wrong message
-//    let check = await wallet.checkReserveProof(await wallet.getPrimaryAddress(), "Wrong message", signature);
-//    assert.equal(check.getIsGood(), false); // TODO: specifically test reserve checks, probably separate objects
-//    testCheckReserve(check);
-//    
-//    // test wrong signature
-//    try {
-//      await wallet.checkReserveProof(await wallet.getPrimaryAddress(), "Test message", "wrong signature");
-//      throw new Error("Should have thrown exception");
-//    } catch (e) {
-//      assert.equal(e.getRpcCode(), -1);
-//    }
-//  });
+  @Test
+  public void getReserveProofAccount() {
+    
+    // test proofs of accounts
+    let numNonZeroTests = 0;
+    let msg = "Test message";
+    let accounts = await wallet.getAccounts();
+    let signature;
+    for (let account of accounts) {
+      if (account.getBalance().compare(new BigInteger(0)) > 0) {
+        let checkAmount = (await account.getBalance()).divide(new BigInteger(2));
+        signature = await wallet.getReserveProofAccount(account.getIndex(), checkAmount, msg);
+        let check = await wallet.checkReserveProof(await wallet.getPrimaryAddress(), msg, signature);
+        assert(check.getIsGood());
+        testCheckReserve(check);
+        assert(check.getTotalAmount().compare(checkAmount) >= 0);
+        numNonZeroTests++;
+      } else {
+        try {
+          await wallet.getReserveProofAccount(account.getIndex(), account.getBalance(), msg);
+          throw new Error("Should have thrown exception");
+        } catch (e) {
+          assert.equal(e.getRpcCode(), -1);
+          try {
+            await wallet.getReserveProofAccount(account.getIndex(), TestUtils.MAX_FEE, msg);
+            throw new Error("Should have thrown exception");
+          } catch (e2) {
+            assert.equal(e2.getRpcCode(), -1);
+          }
+        }
+      }
+    }
+    assert(numNonZeroTests > 1, "Must have more than one account with non-zero balance; run send-to-multiple tests");
+    
+    // test error when not enough balance for requested minimum reserve amount
+    try {
+      await wallet.getReserveProofAccount(0, accounts[0].getBalance().add(TestUtils.MAX_FEE), "Test message");
+      throw new Error("Should have thrown exception");
+    } catch (e) {
+      assert.equal(e.getRpcCode(), -1);
+    }
+    
+    // test different wallet address
+    // TODO: openWallet is not common so this won't work for other wallet impls
+    await wallet.openWallet(TestUtils.WALLET_RPC_NAME_2, TestUtils.WALLET_RPC_PW_2);
+    let differentAddress = await wallet.getPrimaryAddress();
+    await wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_RPC_PW_1);
+    try {
+      await wallet.checkReserveProof(differentAddress, "Test message", signature);
+      throw new Error("Should have thrown exception");
+    } catch (e) {
+      assert.equal(e.getRpcCode(), -1);
+    }
+    
+    // test subaddress
+    try {
+      await wallet.checkReserveProof((await wallet.getSubaddress(0, 1)).getAddress(), "Test message", signature);
+      throw new Error("Should have thrown exception");
+    } catch (e) {
+      assert.equal(e.getRpcCode(), -1);
+    }
+    
+    // test wrong message
+    let check = await wallet.checkReserveProof(await wallet.getPrimaryAddress(), "Wrong message", signature);
+    assert.equal(check.getIsGood(), false); // TODO: specifically test reserve checks, probably separate objects
+    testCheckReserve(check);
+    
+    // test wrong signature
+    try {
+      await wallet.checkReserveProof(await wallet.getPrimaryAddress(), "Test message", "wrong signature");
+      throw new Error("Should have thrown exception");
+    } catch (e) {
+      assert.equal(e.getRpcCode(), -1);
+    }
+  }
   
-  it("Can get outputs in hex format", async function() {
+  // Can get outputs in hex format
+  @Test
+  public void testGetOutputsHex() {
     let outputsHex = await wallet.getOutputsHex();
     assert.equal(typeof outputsHex, "string");  // TODO: this will fail if wallet has no outputs; run these tests on new wallet
     assert(outputsHex.length > 0);
-  });
+  }
   
-  it("Can import outputs in hex format", async function() {
+  // Can import outputs in hex format
+  @Test
+  public void testImportOutputsHex() {
     
     // get outputs hex
     let outputsHex = await wallet.getOutputsHex();
@@ -1322,9 +1365,11 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
       let numImported = await wallet.importOutputsHex(outputsHex);
       assert(numImported > 0);
     }
-  });
+  }
   
-  it("Can get signed key images", async function() {
+  // Can get signed key images
+  @Test
+  public void testGetSignedKeyImages() {
     let images = await wallet.getKeyImages();
     assert(Array.isArray(images));
     assert(images.length > 0, "No signed key images in wallet");
@@ -1333,9 +1378,11 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
       assert(image.getHex());
       assert(image.getSignature());
     }
-  });
+  }
   
-  it("Can get new key images from the last import", async function() {
+  // Can get new key images from the last import
+  @Test
+  public void testGetNewKeyImagesFromLastImport() {
     
     // get outputs hex
     let outputsHex = await wallet.getOutputsHex();
@@ -1354,9 +1401,11 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
       assert(image.getHex());
       assert(image.getSignature());
     }
-  });
+  }
   
-  it("Can import key images", async function() {
+  // Can import key images
+  @Test
+  public void testImportKeyImages() {
     let images = await wallet.getKeyImages();
     assert(Array.isArray(images));
     assert(images.length > 0, "Wallet does not have any key images; run send tests");
@@ -1372,18 +1421,22 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     // test amounts
     TestUtils.testUnsignedBigInteger(result.getSpentAmount(), hasSpent);
     TestUtils.testUnsignedBigInteger(result.getUnspentAmount(), hasUnspent);
-  });
+  }
   
-  it("Can sign and verify messages", async function() {
+  // Can sign and verify messages
+  @Test
+  public void testSignAndVerifyMessages() {
     let msg = "This is a super important message which needs to be signed and verified.";
     let signature = await wallet.sign(msg);
     let verified = await wallet.verify(msg, await wallet.getAddress(0, 0), signature);
     assert.equal(verified, true);
     verified = await wallet.verify(msg, TestMoneroWalletCommon.SAMPLE_ADDRESS, signature);
     assert.equal(verified, false);
-  });
+  }
   
-  it("Can get and set arbitrary key/value attributes", async function() {
+  // Can get and set arbitrary key/value attributes
+  @Test
+  public void testSetKeyValues() {
     
     // set attributes
     let attrs = {};
@@ -1398,9 +1451,11 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     for (let key of Object.keys(attrs)) {
       assert.equal(attrs[key], await wallet.getAttribute(key));
     }
-  });
+  }
   
-  it("Can convert between a tx send config and payment URI", async function() {
+  // Can convert between a tx send config and payment URI
+  @Test
+  public void testCreatePaymentUri() {
     
     // test with address and amount
     let config1 = new MoneroSendConfig(await wallet.getAddress(0, 0), new BigInteger(0));
@@ -1442,12 +1497,13 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
       assert.equal(e.getRpcCode(), -11);
       assert(e.getRpcMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
     }
-  });
+  }
   
-  it("Can start and stop mining", async function() {
+  @Test
+  public void testMining() {
     await wallet.startMining(2, false, true);
     await wallet.stopMining();
-  });
+  }
   
   // --------------------------------- PRIVATE --------------------------------
   
