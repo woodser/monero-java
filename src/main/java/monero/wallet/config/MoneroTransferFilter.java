@@ -1,5 +1,6 @@
 package monero.wallet.config;
 
+import java.util.Arrays;
 import java.util.List;
 
 import common.types.Filter;
@@ -52,6 +53,11 @@ public class MoneroTransferFilter extends Filter<MoneroTransfer> {
   public MoneroTransferFilter setAccountIndex(Integer accountIndex) {
     this.accountIndex = accountIndex;
     return this;
+  }
+  
+  // TODO: this will be inherited from MoneroTxWallet
+  public MoneroTransferFilter setSubaddressIndex(Integer subaddressIndex) {
+    return setSubaddressIndices(Arrays.asList(subaddressIndex));
   }
 
   public List<Integer> getSubaddressIndices() {
