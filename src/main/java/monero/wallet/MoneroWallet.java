@@ -677,6 +677,14 @@ public interface MoneroWallet {
    * Generate a signature to prove a spend. Unlike proving a transaction, it does not require the destination public address.
    * 
    * @param txId specifies the transaction to prove
+   * @return the transaction signature
+   */
+  public String getSpendProof(String txId);
+  
+  /**
+   * Generate a signature to prove a spend. Unlike proving a transaction, it does not require the destination public address.
+   * 
+   * @param txId specifies the transaction to prove
    * @param message is a message to include with the signature to further authenticate the proof (optional)
    * @return the transaction signature
    */

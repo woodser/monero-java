@@ -132,7 +132,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     try {
       String invalidPaymentId = "invalid_payment_id_123456";
       integratedAddress = wallet.getIntegratedAddress(invalidPaymentId);
-      throw new Error("Getting integrated address with invalid payment id " + invalidPaymentId + " should have thrown a RPC exception");
+      fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have thrown a RPC exception");
     } catch (MoneroException e) {
       assertEquals(-5, (int) e.getCode());
       assertEquals("Invalid payment ID", e.getMessage());
@@ -344,7 +344,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     String nonWalletAddress = TestUtils.getRandomWalletAddress();
     try {
       subaddress = wallet.getAddressIndex(nonWalletAddress);
-      throw new Error("fail");
+      fail("Should have thrown exception");
     } catch (MoneroException e) {
       assertEquals("Address does not belong to the wallet", e.getMessage());
     }
@@ -352,7 +352,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     // test invalid address
     try {
       subaddress = wallet.getAddressIndex("this is definitely not an address");
-      throw new Error("fail");
+      fail("Should have thrown exception");
     } catch (MoneroException e) {
       assertEquals("Address does not belong to the wallet", e.getMessage());
     }
@@ -1214,108 +1214,103 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
       assertEquals(-1, (int) e.getCode()); // TODO: sometimes comes back bad, sometimes throws exception.  ensure txs come from different addresses?
     }
   }
-//  
-//  // Can prove a spend using a generated signature and no destination public address
-//  @Test
-//  public void testCheckSpendProof() {
-//    
-//    // get random confirmed outgoing txs
-//    let filter = new MoneroTxFilter();
-//    let txs = getRandomTransactions(wallet, {hasIncomingTransfers: false, inTxPool: false, isFailed: false}, 2, MAX_TX_PROOFS);
-//    for (let tx of txs) {
-//      assertEquals(tx.getIsConfirmed(), true);
-//      assertEquals(tx.getIncomingTransfers(), undefined);
-//      assertTrue(tx.getOutgoingTransfer());
-//    }
-//    
-//    // test good checks with messages
-//    for (let tx of txs) {
-//      let signature = wallet.getSpendProof(tx.getId(), "I am a message.");
-//      assertTrue(wallet.checkSpendProof(tx.getId(), "I am a message.", signature));
-//    }
-//    
-//    // test good check without message
-//    let tx = txs[0];
-//    let signature = wallet.getSpendProof(tx.getId());
-//    assertTrue(wallet.checkSpendProof(tx.getId(), undefined, signature));
-//    
-//    // test get proof with invalid id
-//    try {
-//      wallet.getSpendProof("invalid_tx_id");
-//      throw new Error("Should throw exception for invalid key");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -8);
-//    }
-//    
-//    // test check with invalid tx id
-//    try {
-//      wallet.checkSpendProof("invalid_tx_id", undefined, signature);
-//      throw new Error("Should have thrown exception");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -8);
-//    }
-//    
-//    // test check with invalid message
-//    signature = wallet.getSpendProof(tx.getId(), "This is the right message");
-//    assertEquals(wallet.checkSpendProof(tx.getId(), "This is the wrong message", signature), false);
-//    
-//    // test check with wrong signature
-//    signature = wallet.getSpendProof(txs[1].getId(), "This is the right message");
-//    assertEquals(wallet.checkSpendProof(tx.getId(), "This is the right message", signature), false);
-//  }
-//  
-//  // Can prove reserves in the wallet
-//  @Test
-//  public void testGetReserveProofWallet() {
-//    
-//    // get proof of entire wallet
-//    let signature = wallet.getReserveProofWallet("Test message");
-//    
-//    // check proof of entire wallet
-//    let check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", signature);
-//    assertTrue(check.getIsGood());
-//    testCheckReserve(check);
-//    let balance = wallet.getBalance();
-//    if (balance.compare(check.getTotalAmount()) !== 0) {  // TODO monero-wallet-rpc: this check fails with unconfirmed txs
-//      let unconfirmedTxs = wallet.getTxs({inTxPool: true});
-//      assertTrue(unconfirmedTxs.size() > 0, "Reserve amount must equal balance unless wallet has unconfirmed txs");
-//    }
-//    
-//    // test different wallet address
-//    // TODO: openWallet is not common so this won't work for other wallet impls
-//    wallet.openWallet(TestUtils.WALLET_RPC_NAME_2, TestUtils.WALLET_RPC_PW_2);
-//    let differentAddress = wallet.getPrimaryAddress();
-//    wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_RPC_PW_1);
-//    try {
-//      wallet.checkReserveProof(differentAddress, "Test message", signature);
-//      throw new Error("Should have thrown exception");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -1);
-//    }
-//    
-//    // test subaddress
-//    try {
-//      
-//      wallet.checkReserveProof((wallet.getSubaddress(0, 1)).getAddress(), "Test message", signature);
-//      throw new Error("Should have thrown exception");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -1);
-//    }
-//    
-//    // test wrong message
-//    check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Wrong message", signature);
-//    assertEquals(check.getIsGood(), false);  // TODO: specifically test reserve checks, probably separate objects
-//    testCheckReserve(check);
-//    
-//    // test wrong signature
-//    try {
-//      wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", "wrong signature");
-//      throw new Error("Should have thrown exception");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -1);
-//    }
-//  }
-//  
+  
+  // Can prove a spend using a generated signature and no destination public address
+  @Test
+  public void testCheckSpendProof() {
+    
+    // get random confirmed outgoing txs
+    List<MoneroWalletTx> txs = getRandomTransactions(wallet, new MoneroTxFilter().setIsIncoming(false).setTx(new MoneroWalletTx().setInTxPool(false).setIsFailed(false)), 2, MAX_TX_PROOFS);
+    for (MoneroWalletTx tx : txs) {
+      assertEquals(true, tx.getIsConfirmed());
+      assertNull(tx.getIncomingTransfers());
+      assertNotNull(tx.getOutgoingTransfer());
+    }
+    
+    // test good checks with messages
+    for (MoneroWalletTx tx : txs) {
+      String signature = wallet.getSpendProof(tx.getId(), "I am a message.");
+      assertTrue(wallet.checkSpendProof(tx.getId(), "I am a message.", signature));
+    }
+    
+    // test good check without message
+    MoneroWalletTx tx = txs.get(0);
+    String signature = wallet.getSpendProof(tx.getId());
+    assertTrue(wallet.checkSpendProof(tx.getId(), null, signature));
+    
+    // test get proof with invalid id
+    try {
+      wallet.getSpendProof("invalid_tx_id");
+      throw new Error("Should throw exception for invalid key");
+    } catch (MoneroException e) {
+      assertEquals(-8, (int) e.getCode());
+    }
+    
+    // test check with invalid tx id
+    try {
+      wallet.checkSpendProof("invalid_tx_id", null, signature);
+      throw new Error("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals(-8, (int) e.getCode());
+    }
+    
+    // test check with invalid message
+    signature = wallet.getSpendProof(tx.getId(), "This is the right message");
+    assertEquals(false, wallet.checkSpendProof(tx.getId(), "This is the wrong message", signature));
+    
+    // test check with wrong signature
+    signature = wallet.getSpendProof(txs.get(1).getId(), "This is the right message");
+    assertEquals(false, wallet.checkSpendProof(tx.getId(), "This is the right message", signature));
+  }
+  
+  // Can prove reserves in the wallet
+  @Test
+  public void testGetReserveProofWallet() {
+    
+    // get proof of entire wallet
+    String signature = wallet.getReserveProofWallet("Test message");
+    
+    // check proof of entire wallet
+    MoneroCheckReserve check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", signature);
+    assertTrue(check.getIsGood());
+    testCheckReserve(check);
+    BigInteger balance = wallet.getBalance();
+    if (!balance.equals(check.getTotalAmount())) {  // TODO monero-wallet-rpc: this check fails with unconfirmed txs
+      List<MoneroWalletTx> unconfirmedTxs = wallet.getTxs(new MoneroTxFilter().setTx(new MoneroWalletTx().setInTxPool(true)));
+      assertTrue("Reserve amount must equal balance unless wallet has unconfirmed txs", unconfirmedTxs.size() > 0);
+    }
+    
+    // test different wallet address
+    String differentAddress = TestUtils.getRandomWalletAddress();
+    try {
+      wallet.checkReserveProof(differentAddress, "Test message", signature);
+      fail("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals(-1, (int) e.getCode());
+    }
+    
+    // test subaddress
+    try {
+      wallet.checkReserveProof((wallet.getSubaddress(0, 1)).getAddress(), "Test message", signature);
+      fail("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals(-1, (int) e.getCode());
+    }
+    
+    // test wrong message
+    check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Wrong message", signature);
+    assertEquals(false, check.getIsGood());  // TODO: specifically test reserve checks, probably separate objects
+    testCheckReserve(check);
+    
+    // test wrong signature
+    try {
+      wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", "wrong signature");
+      fail("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals(-1, (int) e.getCode());
+    }
+  }
+  
 //  // Can prove reserves in an account
 //  // TODO: re-enable this after 14.x point release which fixes this
 //  @Test

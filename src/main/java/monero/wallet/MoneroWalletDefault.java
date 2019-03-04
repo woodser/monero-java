@@ -148,6 +148,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
     return sweepOutput(config);
   }
   
+  @Override
   public MoneroWalletTx relayTx(String txMetadata) {
     return relayTxs(Arrays.asList(txMetadata)).get(0);
   }
@@ -162,8 +163,14 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
     setTxNotes(Arrays.asList(txId), Arrays.asList(note));
   }
   
+  @Override
   public String getTxProof(String txId, String address) {
     return getTxProof(txId, address, null);
+  }
+  
+  @Override
+  public String getSpendProof(String txId) {
+    return getSpendProof(txId, null);
   }
   
   @Override
