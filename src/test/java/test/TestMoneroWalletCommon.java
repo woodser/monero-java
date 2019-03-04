@@ -703,73 +703,73 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     // ensure transfer found with non-zero account and subaddress indices
     assertTrue("No transfers found in non-default account and subaddress; run send-to-multiple tests", nonDefaultIncoming);
   }
-//  
-//  // Can get transfers with additional configuration
-//  @Test
-//  public void testGetTransfersWithConfiguration() {
-//    // TODO: liteMode
-//    
-//    // get incoming transfers
-//    let transfers = getAndTestTransfers(wallet, {isIncoming: true}, true);
-//    for (let transfer of transfers) assertTrue(transfer.getIsIncoming());
-//    
-//    // get outgoing transfers
-//    transfers = getAndTestTransfers(wallet, {isOutgoing: true}, true);
-//    for (let transfer of transfers) assertTrue(transfer.getIsOutgoing());
-//    
-//    // get confirmed transfers to account 0
-//    transfers = getAndTestTransfers(wallet, {accountIndex: 0, isConfirmed: true}, true);
-//    for (let transfer of transfers) {
-//      assertEquals(transfer.getAccountIndex(), 0);
-//      assertTrue(transfer.getTx().getIsConfirmed());
-//    }
-//    
-//    // get confirmed transfers to [1, 2]
-//    transfers = getAndTestTransfers(wallet, {accountIndex: 1, subaddressIndex: 2, isConfirmed: true}, true);
-//    for (let transfer of transfers) {
-//      assertEquals(transfer.getAccountIndex(), 1);
-//      assertEquals(transfer.getSubaddressIndex(), transfer.getIsOutgoing() ? 0 : 2);
-//      assertTrue(transfer.getTx().getIsConfirmed());
-//    }
-//    
-//    // get transfers in the tx pool
-//    transfers = getAndTestTransfers(wallet, {inTxPool: true});
-//    for (let transfer of transfers) {
-//      assertEquals(transfer.getTx().getInTxPool(), true);
-//    }
-//    
-//    // get random transactions
-//    let txs = getRandomTransactions(wallet, undefined, 3, 5);
-//    
-//    // get transfers with a tx id
-//    let txIds = [];
-//    for (let tx of txs) {
-//      txIds.push(tx.getId());
-//      transfers = getAndTestTransfers(wallet, {txId: tx.getId()}, true);
-//      for (let transfer of transfers) assertEquals(transfer.getTx().getId(), tx.getId());
-//    }
-//    
-//    // get transfers with tx ids
-//    transfers = getAndTestTransfers(wallet, {txIds: txIds}, true);
-//    for (let transfer of transfers) assertTrue(txIds.includes(transfer.getTx().getId()));
-//    
-//    // TODO: test that transfers with the same txId have the same tx reference
-//    
-//    // TODO: test transfers destinations
-//    
-//    // get transfers with pre-built filter that are confirmed and have outgoing destinations
-//    let transferFilter = new MoneroTransferFilter();
-//    transferFilter.setIsOutgoing(true);
-//    transferFilter.setHasDestinations(true);
-//    transferFilter.setTxFilter(new MoneroTxFilter().setTx(new MoneroTx().setIsConfirmed(true)));
-//    transfers = getAndTestTransfers(wallet, transferFilter);
-//    for (let transfer of transfers) {
-//      assertEquals(transfer.getIsOutgoing(), true);
-//      assertTrue(transfer.getDestinations().size() > 0);
-//      assertEquals(transfer.getTx().getIsConfirmed(), true);
-//    }
-//  }
-//  
+  
+  // Can get transfers with additional configuration
+  @Test
+  public void testGetTransfersWithConfiguration() {
+    // TODO: liteMode
+    
+    // get incoming transfers
+    List<MoneroTransfer> transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setIsIncoming(true), null, true);
+    for (MoneroTransfer transfer : transfers) assertTrue(transfer.getIsIncoming());
+    
+    // get outgoing transfers
+    transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setIsOutgoing(true), null, true);
+    for (MoneroTransfer transfer : transfers) assertTrue(transfer.getIsOutgoing());
+    
+    // get confirmed transfers to account 0
+    transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setAccountIndex(0).setTxFilter(new MoneroTxFilter().setTx(new MoneroWalletTx().setIsConfirmed(true))), null, true);
+    for (MoneroTransfer transfer : transfers) {
+      assertEquals(0, (int) transfer.getAccountIndex());
+      assertTrue(transfer.getTx().getIsConfirmed());
+    }
+    
+    // get confirmed transfers to [1, 2]
+    transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setAccountIndex(1).setSubaddressIndex(2).setTxFilter(new MoneroTxFilter().setTx(new MoneroWalletTx().setIsConfirmed(true))), null, true);
+    for (MoneroTransfer transfer : transfers) {
+      assertEquals(1, (int) transfer.getAccountIndex());
+      assertEquals(transfer.getIsOutgoing() ? 0 : 2, (int) transfer.getSubaddressIndex());
+      assertTrue(transfer.getTx().getIsConfirmed());
+    }
+    
+    // get transfers in the tx pool
+    transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setTx(new MoneroWalletTx().setInTxPool(true))), null, true);
+    for (MoneroTransfer transfer : transfers) {
+      assertEquals(true, transfer.getTx().getInTxPool());
+    }
+    
+    // get random transactions
+    List<MoneroWalletTx> txs = getRandomTransactions(wallet, null, 3, 5);
+    
+    // get transfers with a tx id
+    List<String> txIds = new ArrayList<String>();
+    for (MoneroWalletTx tx : txs) {
+      txIds.add(tx.getId());
+      transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setTx(new MoneroWalletTx().setId(tx.getId()))), null, true);
+      for (MoneroTransfer transfer : transfers) assertEquals(transfer.getTx().getId(), tx.getId());
+    }
+    
+    // get transfers with tx ids
+    transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setTxIds(txIds)), null, true);
+    for (MoneroTransfer transfer : transfers) assertTrue(txIds.contains(transfer.getTx().getId()));
+    
+    // TODO: test that transfers with the same txId have the same tx reference
+    
+    // TODO: test transfers destinations
+    
+    // get transfers with pre-built filter that are confirmed and have outgoing destinations
+    MoneroTransferFilter transferFilter = new MoneroTransferFilter();
+    transferFilter.setIsOutgoing(true);
+    transferFilter.setHasDestinations(true);
+    transferFilter.setTxFilter(new MoneroTxFilter().setTx(new MoneroWalletTx().setIsConfirmed(true)));
+    transfers = getAndTestTransfers(wallet, transferFilter, null, null);
+    for (MoneroTransfer transfer : transfers) {
+      assertEquals(transfer.getIsOutgoing(), true);
+      assertTrue(transfer.getDestinations().size() > 0);
+      assertEquals(transfer.getTx().getIsConfirmed(), true);
+    }
+  }
+  
 //  // Validates inputs when getting transfers
 //  @Test
 //  public void testGetTransfersValidateInputs() {
