@@ -1774,7 +1774,6 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
       ctx.sendConfig = config;
       
       // test transactions
-      testCommonTxSets(txs, false, false, false);
       for (MoneroWalletTx tx : txs) {
         testWalletTx(tx, ctx);
       }
@@ -1821,7 +1820,6 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
         }
       }
     }
-    testCommonTxSets(txs, false, false, false);
   }
   
   // Can send to multiple addresses in a single transaction
@@ -1847,98 +1845,91 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   private void testSendToMultiple(int numAccounts, int numSubaddressesPerAccount, boolean canSplit) {
     
     // test constants
-    let totalSubaddresses = numAccounts * numSubaddressesPerAccount;
-    let minAccountAmount = TestUtils.MAX_FEE.multiply(new BigInteger(totalSubaddresses)).multiply(new BigInteger(SEND_DIVISOR)).add(TestUtils.MAX_FEE); // account balance must be more than divisor * fee * numAddresses + fee so each destination amount is at least a fee's worth 
+    int totalSubaddresses = numAccounts * numSubaddressesPerAccount;
+    BigInteger minAccountAmount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(totalSubaddresses)).multiply(BigInteger.valueOf(SEND_DIVISOR)).add(TestUtils.MAX_FEE); // account balance must be more than divisor * fee * numAddresses + fee so each destination amount is at least a fee's worth 
     
     // send funds from first account with sufficient unlocked funds
-    let srcAccount;
-    let hasBalance = true;
-    for (let account of wallet.getAccounts()) {
-      if (account.getBalance().compare(minAccountAmount) > 0) hasBalance = true;
-      if (account.getUnlockedBalance().compare(minAccountAmount) > 0) {
+    MoneroAccount srcAccount = null;
+    boolean hasBalance = true;
+    for (MoneroAccount account : wallet.getAccounts()) {
+      if (account.getBalance().compareTo(minAccountAmount) > 0) hasBalance = true;
+      if (account.getUnlockedBalance().compareTo(minAccountAmount) > 0) {
         srcAccount = account;
         break;
       }
     }
-    assertTrue(hasBalance, "Wallet does not have enough balance; load '" + TestUtils.WALLET_RPC_NAME_1 + "' with XMR in order to test sending");
-    assertTrue(srcAccount, "Wallet is waiting on unlocked funds");
+    assertTrue("Wallet does not have enough balance; load '" + TestUtils.WALLET_RPC_NAME_1 + "' with XMR in order to test sending", hasBalance);
+    assertNotNull("Wallet is waiting on unlocked funds", srcAccount);
     
     // get amount to send per address
-    let balance = srcAccount.getBalance();
-    let unlockedBalance = srcAccount.getUnlockedBalance();
-    let sendAmount = unlockedBalance.subtract(TestUtils.MAX_FEE).divide(new BigInteger(SEND_DIVISOR));
-    let sendAmountPerSubaddress = sendAmount.divide(new BigInteger(totalSubaddresses));
+    BigInteger balance = srcAccount.getBalance();
+    BigInteger unlockedBalance = srcAccount.getUnlockedBalance();
+    BigInteger sendAmount = unlockedBalance.subtract(TestUtils.MAX_FEE).divide(BigInteger.valueOf(SEND_DIVISOR));
+    BigInteger sendAmountPerSubaddress = sendAmount.divide(BigInteger.valueOf(totalSubaddresses));
     
     // create minimum number of accounts
-    let accounts = wallet.getAccounts();
-    for (let i = 0; i < numAccounts - accounts.size(); i++) {
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    for (int i = 0; i < numAccounts - accounts.size(); i++) {
       wallet.createAccount();
     }
     
     // create minimum number of subaddresses per account and collect destination addresses
-    let destinationAddresses = [];
-    for (let i = 0; i < numAccounts; i++) {
-      let subaddresses = wallet.getSubaddresses(i);
-      for (let j = 0; j < numSubaddressesPerAccount - subaddresses.size(); j++) wallet.createSubaddress(i);
+    List<String> destinationAddresses = new ArrayList<String>();
+    for (int i = 0; i < numAccounts; i++) {
+      List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(i);
+      for (int j = 0; j < numSubaddressesPerAccount - subaddresses.size(); j++) wallet.createSubaddress(i);
       subaddresses = wallet.getSubaddresses(i);
       assertTrue(subaddresses.size() >= numSubaddressesPerAccount);
-      for (let j = 0; j < numSubaddressesPerAccount; j++) destinationAddresses.push(subaddresses[j].getAddress());
+      for (int j = 0; j < numSubaddressesPerAccount; j++) destinationAddresses.add(subaddresses.get(j).getAddress());
     }
     
     // build send config using MoneroSendConfig
-    let config = new MoneroSendConfig();
+    MoneroSendConfig config = new MoneroSendConfig();
     config.setCanSplit(canSplit);
     config.setMixin(TestUtils.MIXIN);
     config.setAccountIndex(srcAccount.getIndex());
-    config.setDestinations([]);
-    for (let i = 0; i < destinationAddresses.size(); i++) {
-      config.getDestinations().push(new MoneroDestination(destinationAddresses.get(i), sendAmountPerSubaddress));
-    }
-    
-    // build send config with JS object
-    let jsConfig;
-    if (useJsConfig) {
-      jsConfig = {};
-      jsConfig.mixin = TestUtils.MIXIN;
-      jsConfig.accountIdx = srcAccount.getIndex();
-      jsConfig.destinations = [];
-      for (let i = 0; i < destinationAddresses.size(); i++) {
-        jsConfig.destinations.push({address: destinationAddresses.get(i), amount: sendAmountPerSubaddress}
-      }
+    config.setDestinations(new ArrayList<MoneroDestination>());
+    for (int i = 0; i < destinationAddresses.size(); i++) {
+      config.getDestinations().add(new MoneroDestination(destinationAddresses.get(i), sendAmountPerSubaddress));
     }
     
     // send tx(s) with config
-    let txs = [];
+    List<MoneroWalletTx> txs = new ArrayList<MoneroWalletTx>();
     if (canSplit) {
-      let sendTxs = wallet.sendSplit(useJsConfig ? jsConfig : config);
-      for (let tx of sendTxs) txs.push(tx);
+      List<MoneroWalletTx> sendTxs = wallet.sendSplit(config);
+      for (MoneroWalletTx tx : sendTxs) txs.add(tx);
     } else {
-      txs.push(wallet.send(useJsConfig ? jsConfig : config));
+      txs.add(wallet.send(config));
     }
     
     // test that wallet balance decreased
-    let account = wallet.getAccount(srcAccount.getIndex());
-    assertTrue(account.getBalance().compare(balance) < 0);
-    assertTrue(account.getUnlockedBalance().compare(unlockedBalance) < 0);
+    MoneroAccount account = wallet.getAccount(srcAccount.getIndex());
+    assertTrue(account.getBalance().compareTo(balance) < 0);
+    assertTrue(account.getUnlockedBalance().compareTo(unlockedBalance) < 0);
+    
+    // build test context
+    TestContext ctx = new TestContext();
+    ctx.wallet = wallet;
+    ctx.sendConfig = config;
     
     // test each transaction
     assertTrue(txs.size() > 0);
-    let outgoingSum = new BigInteger(0);
-    for (let tx of txs) {
-      testWalletTx(tx, {wallet: wallet, sendConfig: config}
+    BigInteger outgoingSum = BigInteger.valueOf(0);
+    for (MoneroWalletTx tx : txs) {
+      testWalletTx(tx, ctx);
       outgoingSum = outgoingSum.add(tx.getOutgoingAmount());
-      if (tx.getOutgoingTransfer() !== undefined && tx.getOutgoingTransfer().getDestinations()) {
-        let destinationSum = new BigInteger(0);
-        for (let destination of tx.getOutgoingTransfer().getDestinations()) {
-          assertTrue(destinationAddresses.includes(destination.getAddress()));
+      if (tx.getOutgoingTransfer() != null && tx.getOutgoingTransfer().getDestinations() != null) {
+        BigInteger destinationSum = BigInteger.valueOf(0);
+        for (MoneroDestination destination : tx.getOutgoingTransfer().getDestinations()) {
+          assertTrue(destinationAddresses.contains(destination.getAddress()));
           destinationSum = destinationSum.add(destination.getAmount());
         }
-        assertTrue(tx.getOutgoingAmount().compare(destinationSum) === 0);  // assert that transfers sum up to tx amount
+        assertTrue(tx.getOutgoingAmount().equals(destinationSum));  // assert that transfers sum up to tx amount
       }
     }
     
     // assert that outgoing amounts sum up to the amount sent within a small margin
-    if (Math.abs(sendAmount.subtract(outgoingSum).toJSValue()) > SEND_MAX_DIFF) { // send amounts may be slightly different
+    if (Math.abs(sendAmount.subtract(outgoingSum).longValue()) > SEND_MAX_DIFF) { // send amounts may be slightly different
       throw new Error("Actual send amount is too different from requested send amount: " + sendAmount + " - " + outgoingSum + " = " + sendAmount.subtract(outgoingSum));
     }
   }
@@ -1948,33 +1939,41 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   public void testSweepOutputs() {
     
     // test config
-    let numVouts = 3;
+    int numVouts = 3;
     
     // get unspent vouts to sweep
-    let vouts = wallet.getVouts({isSpent: false}
-    assertTrue(vouts.size() >= numVouts, "Wallet has no unspent vouts; run send tests");
-    vouts = vouts.slice(0, numVouts);
+    List<MoneroWalletOutput> vouts = wallet.getVouts(new MoneroVoutFilter().setVout(new MoneroWalletOutput().setIsSpent(false)));
+    assertTrue("Wallet has no unspent vouts; run send tests", vouts.size() >= numVouts);
+    vouts = vouts.subList(0, numVouts);
     
     // sweep each vout by key image
-    let useParams = true;
-    for (let vout of vouts) {
-      let address = wallet.getAddress(vout.getAccountIndex(), vout.getSubaddressIndex());
-      let tx;
-      if (useParams) tx = wallet.sweepOutput(address, vout.getKeyImage().getHex(), undefined, 11); // test params
-      else tx = wallet.sweepOutput({address: address, keyImage: vout.getKeyImage().getHex(), mixin: 11}  // test config
-      let sendConfig = new MoneroSendConfig({address: address, keyImage: vout.getKeyImage().getHex(), mixin: 11}
-      testWalletTx(tx, {wallet: wallet, sendConfig: sendConfig, isSweep: true}
+    boolean useParams = true;
+    for (MoneroWalletOutput vout : vouts) {
+      
+      // sweep output to address
+      String address = wallet.getAddress(vout.getAccountIndex(), vout.getSubaddressIndex());
+      MoneroSendConfig sendConfig = new MoneroSendConfig(address).setKeyImage(vout.getKeyImage().getHex());
+      MoneroWalletTx tx;
+      if (useParams) tx = wallet.sweepOutput(address, vout.getKeyImage().getHex(), null); // test params
+      else tx = wallet.sweepOutput(sendConfig);  // test config
+      
+      // test resulting tx
+      TestContext ctx = new TestContext();
+      ctx.wallet = wallet;
+      ctx.sendConfig = sendConfig;
+      ctx.isSweep = true;
+      testWalletTx(tx, ctx);
       useParams = !useParams;
     }
     
     // get vouts after sweeping
-    let afterVouts = wallet.getVouts();
+    List<MoneroWalletOutput> afterVouts = wallet.getVouts();
     
     // swept vouts are now spent
-    for (let afterVout of afterVouts) {
-      for (let vout of vouts) {
-        if (vout.getKeyImage().getHex() === afterVout.getKeyImage().getHex()) {
-          assertTrue(afterVout.getIsSpent(), "Output should be spent");
+    for (MoneroWalletOutput afterVout : afterVouts) {
+      for (MoneroWalletOutput vout : vouts) {
+        if (vout.getKeyImage().getHex().equals(afterVout.getKeyImage().getHex())) {
+          assertTrue("Output should be spent", afterVout.getIsSpent());
         }
       }
     }
@@ -1985,39 +1984,44 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   public void testSweepDustNoRelay() {
     
     // generate non-relayed transactions to sweep dust
-    let txs = wallet.sweepDust(true);
-    assertTrue(Array.isArray(txs));
-    assertTrue(txs.size() > 0, "No dust to sweep");
+    List<MoneroWalletTx> txs = wallet.sweepDust(true);
+    assertTrue("No dust to sweep", txs.size() > 0);
     
-    // test txs
-    let config = new MoneroSendConfig();
-    config.setDoNotRelay(true);
-    for (let tx of txs) {
-      testWalletTxSend(tx, config, !canSplit, !canSplit, wallet); // TODO: this code is outdated
-    }
+    // TODO: this code is outdated
+    throw new RuntimeException("Not implemented");
     
-    // relay txs
-    let txIds = wallet.relayTxs(txs.map(tx => tx.getMetadata()));
-    assertEquals(txIds.size(), txs.size());
-    for (let txId of txIds) assertTrue(typeof txId === "string" && txId.size() === 64);
-    
-    // fetch and test txs
-    txs = wallet.getTxs({txIds: txIds}
-    config.setDoNotRelay(false);
-    for (let tx of txs) {
-      testWalletTxSend(tx, config, !canSplit, !canSplit, wallet);
-    }
+//    // test txs
+//    MoneroSendConfig config = new MoneroSendConfig();
+//    config.setDoNotRelay(true);
+//    for (MoneroWalletTx tx : txs) {
+//      testWalletTxSend(tx, config, !canSplit, !canSplit, wallet); // TODO: this code is outdated
+//    }
+//    
+//    // relay txs
+//    let txIds = wallet.relayTxs(txs.map(tx => tx.getMetadata()));
+//    assertEquals(txIds.size(), txs.size());
+//    for (let txId of txIds) assertTrue(typeof txId === "string" && txId.size() === 64);
+//    
+//    // fetch and test txs
+//    txs = wallet.getTxs({txIds: txIds}
+//    config.setDoNotRelay(false);
+//    for (let tx of txs) {
+//      testWalletTxSend(tx, config, !canSplit, !canSplit, wallet);
+//    }
   }
   
   // Can sweep dust
   @Test
   public void testSweepDust() {
-    let txs = wallet.sweepDust();
-    assertTrue(Array.isArray(txs));
-    assertTrue(txs.size() > 0, "No dust to sweep");
-    for (let tx of txs) {
-      testWalletTxSend(tx, undefined, !canSplit, !canSplit, wallet);
-    }
+    List<MoneroWalletTx> txs = wallet.sweepDust();
+    assertTrue("No dust to sweep", txs.size() > 0);
+    
+    // TODO: this code is outdated
+    throw new RuntimeException("Not implemented");
+    
+//    for (MoneroWalletTx tx : txs) {
+//      testWalletTxSend(tx, undefined, !canSplit, !canSplit, wallet);
+//    }
   }
   
   // --------------------------------- PRIVATE --------------------------------
@@ -2506,34 +2510,4 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
       assertNull(check.getTotalAmount());
     }
   }
-  
-//  private static void testCommonTxSets(List<MoneroTx> txs, boolean hasSigned, boolean hasUnsigned, boolean hasMultisig) {
-//    assert(txs.size() > 0);
-//    
-//    // assert that all sets are same reference
-//    let sets;
-//    for (let i = 0; i < txs.length; i++) {
-//      assert(txs[i] instanceof MoneroTx);
-//      if (i === 0) sets = txs[i].getCommonTxSets();
-//      else assert(txs[i].getCommonTxSets() === sets);
-//    }
-//    
-//    // test expected set
-//    if (!hasSigned && !hasUnsigned && !hasMultisig) assert.equal(sets, undefined);
-//    else {
-//      assert(sets);
-//      if (hasSigned) {
-//        assert(sets.getSignedTxSet());
-//        assert(sets.getSignedTxSet().length > 0);
-//      }
-//      if (hasUnsigned) {
-//        assert(sets.getUnsignedTxSet());
-//        assert(sets.getUnsignedTxSet().length > 0);
-//      }
-//      if (hasMultisig) {
-//        assert(sets.getMultisigTxSet());
-//        assert(sets.getMultisigTxSet().length > 0);
-//      }
-//    }
-//  }
 }
