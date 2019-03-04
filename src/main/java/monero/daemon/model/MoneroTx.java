@@ -7,6 +7,8 @@ import java.util.List;
  * Represents a transaction on the Monero network.
  */
 public class MoneroTx {
+  
+  public static final String DEFAULT_PAYMENT_ID = "0000000000000000";
 
   private MoneroBlock block;
   private Integer height;
@@ -34,7 +36,7 @@ public class MoneroTx {
   private Integer size;
   private Integer weight;
   private List<MoneroOutput> vins;
-  private List<MoneroOutput> vouts;
+  private List<? extends MoneroOutput> vouts;
   private List<Integer> outputIndices;
   private String metadata;
   private String commonTxSets;
@@ -257,11 +259,11 @@ public class MoneroTx {
     this.vins = vins;
   }
   
-  public List<MoneroOutput> getVouts() {
+  public List<? extends MoneroOutput> getVouts() {
     return vouts;
   }
   
-  public void setVouts(List<MoneroOutput> vouts) {
+  public void setVouts(List<? extends MoneroOutput> vouts) {
     this.vouts = vouts;
   }
   

@@ -1142,18 +1142,18 @@ public class TestMoneroDaemonRpc {
    * Provides context or configuration for test methods to test a type.
    */
   public static class TestContext {
-    boolean hasJson;
-    boolean isPruned;
-    boolean isFull;
-    boolean isConfirmed;
-    boolean isCoinbase;
-    boolean fromGetTxPool;
-    boolean fromGetBlocksByHeight;
-    boolean hasOutputIndices;
-    boolean doNotTestCopy;
-    boolean hasTxs;
-    boolean hasHex;
-    boolean headerIsFull;
+    Boolean hasJson;
+    Boolean isPruned;
+    Boolean isFull;
+    Boolean isConfirmed;
+    Boolean isCoinbase;
+    Boolean fromGetTxPool;
+    Boolean fromGetBlocksByHeight;
+    Boolean hasOutputIndices;
+    Boolean doNotTestCopy;
+    Boolean hasTxs;
+    Boolean hasHex;
+    Boolean headerIsFull;
     TestContext txContext;
     public TestContext() { }
     public TestContext(TestContext ctx) {
