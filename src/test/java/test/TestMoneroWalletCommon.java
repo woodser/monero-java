@@ -895,22 +895,22 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     }
   }
   
-//  // Validates inputs when getting vouts
-//  @Test
-//  public void testGetVoutsValidateInputes() {
-//    // TODO: liteMode
-//    
-//    // test with invalid id
-//    let vouts = wallet.getVouts({txId: "invalid_id"});
-//    assertEquals(vouts.size(), 0);
-//    
-//    // test invalid id in collection
-//    let randomTxs = getRandomTransactions(wallet, {isConfirmed: true, getVouts: true}, 3, 5);
-//    vouts = wallet.getVouts({txIds: [randomTxs[0].getId(), "invalid_id"]});
-//    assertEquals(randomTxs[0].getVouts().size(), vouts.size());
-//    let tx = vouts[0].getTx();
-//    for (let vout of vouts) assertTrue(tx === vout.getTx());
-//  }
+  // Validates inputs when getting vouts
+  @Test
+  public void testGetVoutsValidateInputes() {
+    // TODO: liteMode
+    
+    // test with invalid id
+    List<MoneroWalletOutput> vouts = wallet.getVouts(new MoneroVoutFilter().setTxFilter(new MoneroTxFilter().setTx(new MoneroWalletTx().setId("invalid_id"))));
+    assertEquals(0, vouts.size());
+    
+    // test invalid id in collection
+    List<MoneroWalletTx> randomTxs = getRandomTransactions(wallet, new MoneroTxFilter().setTx(new MoneroWalletTx().setIsConfirmed(true)).setIncludeVouts(true), 3, 5);
+    vouts = wallet.getVouts(new MoneroVoutFilter().setTxFilter(new MoneroTxFilter().setTxIds(Arrays.asList(randomTxs.get(0).getId(), "invalid_id"))));
+    assertEquals(vouts.size(), randomTxs.get(0).getVouts().size());
+    MoneroWalletTx tx = vouts.get(0).getTx();
+    for (MoneroWalletOutput vout : vouts) assertTrue(tx == vout.getTx());
+  }
 //  
 //  // Has correct accounting across accounts, subaddresses, txs, transfers, and vouts
 //  @Test
