@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -33,6 +34,8 @@ import monero.wallet.config.MoneroTransferFilter;
 import monero.wallet.config.MoneroTxFilter;
 import monero.wallet.config.MoneroVoutFilter;
 import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroCheckReserve;
+import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroSubaddress;
@@ -49,6 +52,10 @@ import utils.TestUtils;
  */
 public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
+  // constants
+  private static final int MAX_TX_PROOFS = 25;   // maximum number of transactions to check for each proof, undefined to check all
+  
+  // instance variables
   private MoneroWallet wallet;    // wallet instance to test
   private MoneroDaemon daemon;    // daemon instance to test
   private List<MoneroWalletTx> txCache; // local tx cache
@@ -1055,91 +1062,92 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     // TODO: test that get transaction has note
   }
   
-//  // Can check a transfer using the transaction's secret key and the destination
-//  @Test
-//  public void testCheckTxKey() {
-//    
-//    // get random txs that are confirmed and have outgoing destinations
-//    List<MoneroWalletTx> txs;
-//    try {
-//      txs = getRandomTransactions(wallet, {isConfirmed: true, hasOutgoingTransfer: true, transferFilter: {hasDestinations: true}}, 1, MAX_TX_PROOFS);
-//    } catch (MoneroException e) {
-//      throw new Error("No txs with outgoing destinations found; run send tests")
-//    }
-//    
-//    // test good checks
-//    assertTrue(txs.size() > 0, "No transactions found with outgoing destinations");
-//    for (let tx of txs) {
-//      let key = wallet.getTxKey(tx.getId());
-//      for (let destination of tx.getOutgoingTransfer().getDestinations()) {
-//        let check = wallet.checkTxKey(tx.getId(), key, destination.getAddress());
-//        if (destination.getAmount().compare(new BigInteger()) > 0) {
-//          // TODO monero-wallet-rpc: indicates amount received amount is 0 despite transaction with transfer to this address
-//          // TODO monero-wallet-rpc: returns 0-4 errors, not consistent
-////        assertTrue(check.getReceivedAmount().compare(BigInteger.valueOf(0)) > 0);
-//          if (check.getReceivedAmount().compare(BigInteger.valueOf(0)) === 0) {
-//            console.log("WARNING: key proof indicates no funds received despite transfer (txid=" + tx.getId() + ", key=" + key + ", address=" + destination.getAddress() + ", amount=" + destination.getAmount() + ")");
-//          }
-//        }
-//        else assertTrue(check.getReceivedAmount().compare(BigInteger.valueOf(0)) === 0);
-//        testCheckTx(tx, check);
-//      }
-//    }
+  // Can check a transfer using the transaction's secret key and the destination
+  @Test
+  public void testCheckTxKey() {
     
-//    // test get tx key with invalid id
-//    try {
-//      wallet.getTxKey("invalid_tx_id");
-//      throw new Error("Should throw exception for invalid key");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -8);
-//    }
-//    
-//    // test check with invalid tx id
-//    let tx = txs[0];
-//    let key = wallet.getTxKey(tx.getId());
-//    let destination = tx.getOutgoingTransfer().getDestinations()[0];
-//    try {
-//      wallet.checkTxKey("invalid_tx_id", key, destination.getAddress());
-//      throw new Error("Should have thrown exception");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -8);
-//    }
-//    
-//    // test check with invalid key
-//    try {
-//      wallet.checkTxKey(tx.getId(), "invalid_tx_key", destination.getAddress());
-//      throw new Error("Should have thrown exception");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -25);
-//    }
-//    
-//    // test check with invalid address
-//    try {
-//      wallet.checkTxKey(tx.getId(), key, "invalid_tx_address");
-//      throw new Error("Should have thrown exception");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -2);
-//    }
-//    
-//    // test check with different address
-//    let differentAddress;
-//    for (let aTx of getCachedTxs()) {
-//      if (!aTx.getOutgoingTransfer() || !aTx.getOutgoingTransfer().getDestinations()) continue;
-//      for (let aDestination of aTx.getOutgoingTransfer().getDestinations()) {
-//        if (aDestination.getAddress() !== destination.getAddress()) {
-//          differentAddress = aDestination.getAddress();
-//          break;
-//        }
-//      }
-//    }
-//    assertTrue(differentAddress, "Could not get a different address to test");
-//    let check = wallet.checkTxKey(tx.getId(), key, differentAddress);
-//    assertTrue(check.getIsGood());
-//    assertTrue(check.getReceivedAmount().compare(BigInteger.valueOf(0)) >= 0);
-//    testCheckTx(tx, check);
-//  }
-//  
-//  
+    // get random txs that are confirmed and have outgoing destinations
+    List<MoneroWalletTx> txs;
+    try {
+      txs = getRandomTransactions(wallet, new MoneroTxFilter().setTx(new MoneroWalletTx().setIsConfirmed(true)).setTransferFilter(new MoneroTransferFilter().setHasDestinations(true)), 1, MAX_TX_PROOFS);
+    } catch (MoneroException e) {
+      throw new Error("No txs with outgoing destinations found; run send tests");
+    }
+    
+    // test good checks
+    assertTrue("No transactions found with outgoing destinations", txs.size() > 0);
+    for (MoneroWalletTx tx : txs) {
+      String key = wallet.getTxKey(tx.getId());
+      assertFalse(tx.getOutgoingTransfer().getDestinations().isEmpty());
+      for (MoneroDestination destination : tx.getOutgoingTransfer().getDestinations()) {
+        MoneroCheckTx check = wallet.checkTxKey(tx.getId(), key, destination.getAddress());
+        if (destination.getAmount().compareTo(BigInteger.valueOf(0)) > 0) {
+          // TODO monero-wallet-rpc: indicates amount received amount is 0 despite transaction with transfer to this address
+          // TODO monero-wallet-rpc: returns 0-4 errors, not consistent
+//        assertTrue(check.getReceivedAmount().compareTo(BigInteger.valueOf(0)) > 0);
+          if (check.getReceivedAmount().equals(BigInteger.valueOf(0))) {
+            System.out.println("WARNING: key proof indicates no funds received despite transfer (txid=" + tx.getId() + ", key=" + key + ", address=" + destination.getAddress() + ", amount=" + destination.getAmount() + ")");
+          }
+        }
+        else assertTrue(check.getReceivedAmount().equals(BigInteger.valueOf(0)));
+        testCheckTx(tx, check);
+      }
+    }
+    
+    // test get tx key with invalid id
+    try {
+      wallet.getTxKey("invalid_tx_id");
+      fail("Should throw exception for invalid key");
+    } catch (MoneroException e) {
+      assertEquals(-8, (int) e.getCode());
+    }
+    
+    // test check with invalid tx id
+    MoneroWalletTx tx = txs.get(0);
+    String key = wallet.getTxKey(tx.getId());
+    MoneroDestination destination = tx.getOutgoingTransfer().getDestinations().get(0);
+    try {
+      wallet.checkTxKey("invalid_tx_id", key, destination.getAddress());
+      fail("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals(-8, (int) e.getCode());
+    }
+    
+    // test check with invalid key
+    try {
+      wallet.checkTxKey(tx.getId(), "invalid_tx_key", destination.getAddress());
+      fail("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals(-25, (int) e.getCode());
+    }
+    
+    // test check with invalid address
+    try {
+      wallet.checkTxKey(tx.getId(), key, "invalid_tx_address");
+      throw new Error("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals(-2, (int) e.getCode());
+    }
+    
+    // test check with different address
+    String differentAddress = null;
+    for (MoneroWalletTx aTx : getCachedTxs()) {
+      if (aTx.getOutgoingTransfer() == null || aTx.getOutgoingTransfer().getDestinations() == null) continue;
+      for (MoneroDestination aDestination : aTx.getOutgoingTransfer().getDestinations()) {
+        if (!aDestination.getAddress().equals(destination.getAddress())) {
+          differentAddress = aDestination.getAddress();
+          break;
+        }
+      }
+    }
+    assertNotNull("Could not get a different address to test", differentAddress);
+    MoneroCheckTx check = wallet.checkTxKey(tx.getId(), key, differentAddress);
+    assertTrue(check.getIsGood());
+    assertTrue(check.getReceivedAmount().compareTo(BigInteger.valueOf(0)) >= 0);
+    testCheckTx(tx, check);
+  }
+  
+  
 //  // Can prove a transaction by getting its signature
 //  @Test
 //  public void testCheckTxProof() {
@@ -1992,5 +2000,33 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     Collections.shuffle(txs);
     if (maxTxs == null) return txs;
     else return txs.subList(0, Math.min(maxTxs, txs.size()));
+  }
+  
+  private static void testCheckTx(MoneroWalletTx tx, MoneroCheckTx check) {
+    assertNotNull(check.getIsGood());
+    if (check.getIsGood()) {
+      assert(check.getNumConfirmations() >= 0);
+      assertNotNull(check.getInTxPool());
+      TestUtils.testUnsignedBigInteger(check.getReceivedAmount());
+      if (check.getInTxPool()) assertEquals(0, (int) check.getNumConfirmations());
+      else assert(check.getNumConfirmations() > 0); // TODO (monero-wall-rpc) this fails (confirmations is 0) for (at least one) transaction that has 1 confirmation on testCheckTxKey()
+    } else {
+      assertNull(check.getNumConfirmations());
+      assertNull(check.getInTxPool());
+      assertNull(check.getNumConfirmations());
+    }
+  }
+
+  private static void testCheckReserve(MoneroCheckReserve check) {
+    assertNotNull(check.getIsGood());
+    if (check.getIsGood()) {
+      TestUtils.testUnsignedBigInteger(check.getSpentAmount());
+      assertEquals(BigInteger.valueOf(0), check.getSpentAmount());  // TODO sometimes see non-zero, seg fault after sweep and send tests
+      TestUtils.testUnsignedBigInteger(check.getTotalAmount());
+      assert(check.getTotalAmount().compareTo(BigInteger.valueOf(0)) >= 0);
+    } else {
+      assertNull(check.getSpentAmount());
+      assertNull(check.getTotalAmount());
+    }
   }
 }
