@@ -798,54 +798,55 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
       assertNotEquals("Should have failed", e.getMessage());
     }
   }
-//  
-//  // Can get vouts in the wallet, accounts, and subaddresses
-//  @Test
-//  public void testGetVouts() {
+  
+  // Can get vouts in the wallet, accounts, and subaddresses
+  @Test
+  public void testGetVouts() {
+
+    // get all vouts
+    getAndTestVouts(wallet, null, true);
+    
+    // get vouts for each account
+    boolean nonDefaultIncoming = false;
+    List<MoneroAccount> accounts = wallet.getAccounts(true);
+    for (MoneroAccount account : accounts) {
+      
+      // determine if account is used
+      boolean isUsed = false;
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) if (subaddress.getIsUsed()) isUsed = true;
+      
+      // get vouts by account index
+      List<MoneroWalletOutput> accountVouts = getAndTestVouts(wallet, new MoneroVoutFilter().setVout(new MoneroWalletOutput().setAccountIndex(account.getIndex())), isUsed);
+      for (MoneroWalletOutput vout : accountVouts) assertEquals(vout.getAccountIndex(), account.getIndex());
+      
+      // get vouts by subaddress index
+      List<MoneroWalletOutput> subaddressVouts = new ArrayList<MoneroWalletOutput>();
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
+        List<MoneroWalletOutput> vouts = getAndTestVouts(wallet, new MoneroVoutFilter().setVout(new MoneroWalletOutput().setAccountIndex(account.getIndex()).setSubaddressIndex(subaddress.getIndex())), subaddress.getIsUsed());
+        for (MoneroWalletOutput vout : vouts) {
+          assertEquals(vout.getAccountIndex(), subaddress.getAccountIndex());
+          assertEquals(vout.getSubaddressIndex(), subaddress.getIndex());
+          if (vout.getAccountIndex() != 0 && vout.getSubaddressIndex() != 0) nonDefaultIncoming = true;
+          subaddressVouts.add(vout);
+        }
+      }
+      assertEquals(subaddressVouts.size(), accountVouts.size());
+      
+      // get vouts by subaddress indices
+      Set<Integer> subaddressIndices = new HashSet<Integer>();
+      for (MoneroWalletOutput vout : subaddressVouts) subaddressIndices.add(vout.getSubaddressIndex());
+      List<MoneroWalletOutput> vouts = getAndTestVouts(wallet, new MoneroVoutFilter().setVout(new MoneroWalletOutput().setAccountIndex(account.getIndex())).setSubaddressIndices(new ArrayList<Integer>(subaddressIndices)), isUsed);
+      assertEquals(vouts.size(), subaddressVouts.size());
+      for (MoneroWalletOutput vout : vouts) {
+        assertEquals(account.getIndex(), vout.getAccountIndex());
+        assertTrue(subaddressIndices.contains(vout.getSubaddressIndex()));
+      }
+    }
+    
+    // ensure vout found with non-zero account and subaddress indices
+    assertTrue("No vouts found in non-default account and subaddress; run send-to-multiple tests", nonDefaultIncoming);
+  }
 //
-//    // get all vouts
-//    getAndTestVouts(wallet, undefined, true);
-//    
-//    // get vouts for each account
-//    let nonDefaultIncoming = false;
-//    let accounts = wallet.getAccounts(true);
-//    for (let account of accounts) {
-//      
-//      // determine if account is used
-//      let isUsed = false;
-//      for (let subaddress of account.getSubaddresses()) if (subaddress.getIsUsed()) isUsed = true;
-//      
-//      // get vouts by account index
-//      let accountVouts = getAndTestVouts(wallet, {accountIndex: account.getIndex()}, isUsed);
-//      for (let vout of accountVouts) assertEquals(vout.getAccountIndex(), account.getIndex());
-//      
-//      // get vouts by subaddress index
-//      let subaddressVouts = [];
-//      for (let subaddress of account.getSubaddresses()) {
-//        let vouts = getAndTestVouts(wallet, {accountIndex: account.getIndex(), subaddressIndex: subaddress.getIndex()}, subaddress.getIsUsed());
-//        for (let vout of vouts) {
-//          assertEquals(vout.getAccountIndex(), subaddress.getAccountIndex());
-//          assertEquals(vout.getSubaddressIndex(), subaddress.getIndex());
-//          if (vout.getAccountIndex() !== 0 && vout.getSubaddressIndex() !== 0) nonDefaultIncoming = true;
-//          subaddressVouts.push(vout);
-//        }
-//      }
-//      assertEquals(subaddressVouts.size(), accountVouts.size());
-//      
-//      // get vouts by subaddress indices
-//      let subaddressIndices = Array.from(new Set(subaddressVouts.map(vout => vout.getSubaddressIndex())));
-//      let vouts = getAndTestVouts(wallet, {accountIndex: account.getIndex(), subaddressIndices: subaddressIndices}, isUsed);
-//      assertEquals(vouts.size(), subaddressVouts.size());
-//      for (let vout of vouts) {
-//        assertEquals(vout.getAccountIndex(), account.getIndex());
-//        assertTrue(subaddressIndices.includes(vout.getSubaddressIndex()));
-//      }
-//    }
-//    
-//    // ensure vout found with non-zero account and subaddress indices
-//    assertTrue(nonDefaultIncoming, "No vouts found in non-default account and subaddress; run send-to-multiple tests");
-//  }
-//  
 //  // TODO: Can get vouts with additional configuration
 //  @Test
 //  public void testGetVoutsWithConfiguration() {
