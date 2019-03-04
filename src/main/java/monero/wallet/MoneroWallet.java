@@ -107,6 +107,15 @@ public interface MoneroWallet {
   public String getPrimaryAddress();
   
   /**
+   * Get an integrated address based on this wallet's primary address and a
+   * randomly generated payment ID.  Generates a random payment ID if none is
+   * given.
+   * 
+   * @return the integrated address
+   */
+  public MoneroIntegratedAddress getIntegratedAddress();
+  
+  /**
    * Get an integrated address based on this wallet's primary address and the
    * given payment ID.  Generates a random payment ID if none is given.
    * 

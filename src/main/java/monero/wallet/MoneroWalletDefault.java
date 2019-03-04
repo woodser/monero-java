@@ -11,6 +11,7 @@ import monero.wallet.config.MoneroSendConfig;
 import monero.wallet.config.MoneroTransferFilter;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
+import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncProgressListener;
@@ -23,6 +24,11 @@ import monero.wallet.model.MoneroWalletTx;
  * Default implementation of a Monero Wallet.
  */
 public abstract class MoneroWalletDefault implements MoneroWallet {
+  
+  @Override
+  public MoneroIntegratedAddress getIntegratedAddress() {
+    return getIntegratedAddress(null);
+  }
   
   @Override
   public MoneroSyncResult sync(Integer startHeight, MoneroSyncProgressListener listener) {
