@@ -162,6 +162,10 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
     setTxNotes(Arrays.asList(txId), Arrays.asList(note));
   }
   
+  public String getTxProof(String txId, String address) {
+    return getTxProof(txId, address, null);
+  }
+  
   @Override
   public List<MoneroAddressBookEntry> getAddressBookEntries() {
     return getAddressBookEntries(null);
