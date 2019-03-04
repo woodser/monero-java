@@ -14,11 +14,11 @@ public class MoneroWalletOutput extends MoneroOutput {
   private Boolean isSpent;
   
   public MoneroWalletTx getTx() {
-    return (MoneroWalletTx) getTx();
+    return (MoneroWalletTx) super.getTx();
   }
   
   public void setTx(MoneroTx tx) {
-    if (!(tx instanceof MoneroWalletTx)) throw new MoneroException("Wallet output's transaction must be of type MoneroWalletTx");
+    if (tx != null && !(tx instanceof MoneroWalletTx)) throw new MoneroException("Wallet output's transaction must be of type MoneroWalletTx");
     super.setTx(tx);
   }
   
@@ -48,5 +48,9 @@ public class MoneroWalletOutput extends MoneroOutput {
   
   public void setIsSpent(Boolean isSpent) {
     this.isSpent = isSpent;
+  }
+  
+  public MoneroWalletOutput copy() {
+    throw new RuntimeException("Not implemented");
   }
 }

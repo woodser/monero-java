@@ -73,4 +73,17 @@ public class MoneroWalletTx extends MoneroTx {
   public void setNote(String note) {
     this.note = note;
   }
+  
+  public MoneroWalletTx copy() {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  public MoneroWalletTx merge(MoneroTx tx) {
+    if (tx != null && !(tx instanceof MoneroWalletTx)) throw new MoneroException("Wallet transaction must be merged with type MoneroWalletTx");
+    return merge((MoneroWalletTx) tx);
+  }
+  
+  public MoneroWalletTx merge(MoneroWalletTx tx) {
+    throw new RuntimeException("Not implemented");
+  }
 }
