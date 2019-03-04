@@ -1311,84 +1311,81 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     }
   }
   
-//  // Can prove reserves in an account
-//  // TODO: re-enable this after 14.x point release which fixes this
-//  @Test
-//  public void getReserveProofAccount() {
-//    
-//    // test proofs of accounts
-//    let numNonZeroTests = 0;
-//    let msg = "Test message";
-//    let accounts = wallet.getAccounts();
-//    let signature;
-//    for (let account of accounts) {
-//      if (account.getBalance().compare(BigInteger.valueOf(0)) > 0) {
-//        let checkAmount = (account.getBalance()).divide(new BigInteger(2));
-//        signature = wallet.getReserveProofAccount(account.getIndex(), checkAmount, msg);
-//        let check = wallet.checkReserveProof(wallet.getPrimaryAddress(), msg, signature);
-//        assertTrue(check.getIsGood());
-//        testCheckReserve(check);
-//        assertTrue(check.getTotalAmount().compare(checkAmount) >= 0);
-//        numNonZeroTests++;
-//      } else {
-//        try {
-//          wallet.getReserveProofAccount(account.getIndex(), account.getBalance(), msg);
-//          throw new Error("Should have thrown exception");
-//        } catch (MoneroException e) {
-//          assertEquals(e.getRpcCode(), -1);
-//          try {
-//            wallet.getReserveProofAccount(account.getIndex(), TestUtils.MAX_FEE, msg);
-//            throw new Error("Should have thrown exception");
-//          } catch (e2) {
-//            assertEquals(e2.getRpcCode(), -1);
-//          }
-//        }
-//      }
-//    }
-//    assertTrue(numNonZeroTests > 1, "Must have more than one account with non-zero balance; run send-to-multiple tests");
-//    
-//    // test error when not enough balance for requested minimum reserve amount
-//    try {
-//      wallet.getReserveProofAccount(0, accounts[0].getBalance().add(TestUtils.MAX_FEE), "Test message");
-//      throw new Error("Should have thrown exception");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -1);
-//    }
-//    
-//    // test different wallet address
-//    // TODO: openWallet is not common so this won't work for other wallet impls
-//    wallet.openWallet(TestUtils.WALLET_RPC_NAME_2, TestUtils.WALLET_RPC_PW_2);
-//    let differentAddress = wallet.getPrimaryAddress();
-//    wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_RPC_PW_1);
-//    try {
-//      wallet.checkReserveProof(differentAddress, "Test message", signature);
-//      throw new Error("Should have thrown exception");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -1);
-//    }
-//    
-//    // test subaddress
-//    try {
-//      wallet.checkReserveProof((wallet.getSubaddress(0, 1)).getAddress(), "Test message", signature);
-//      throw new Error("Should have thrown exception");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -1);
-//    }
-//    
-//    // test wrong message
-//    let check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Wrong message", signature);
-//    assertEquals(check.getIsGood(), false); // TODO: specifically test reserve checks, probably separate objects
-//    testCheckReserve(check);
-//    
-//    // test wrong signature
-//    try {
-//      wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", "wrong signature");
-//      throw new Error("Should have thrown exception");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -1);
-//    }
-//  }
-//  
+  // Can prove reserves in an account
+  // TODO: re-enable this after 14.x point release which fixes this
+  @Test
+  public void getReserveProofAccount() {
+    
+    // test proofs of accounts
+    int numNonZeroTests = 0;
+    String msg = "Test message";
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    String signature = null;
+    for (MoneroAccount account : accounts) {
+      if (account.getBalance().compareTo(BigInteger.valueOf(0)) > 0) {
+        BigInteger checkAmount = (account.getBalance()).divide(BigInteger.valueOf(2));
+        signature = wallet.getReserveProofAccount(account.getIndex(), checkAmount, msg);
+        MoneroCheckReserve check = wallet.checkReserveProof(wallet.getPrimaryAddress(), msg, signature);
+        assertTrue(check.getIsGood());
+        testCheckReserve(check);
+        assertTrue(check.getTotalAmount().compareTo(checkAmount) >= 0);
+        numNonZeroTests++;
+      } else {
+        try {
+          wallet.getReserveProofAccount(account.getIndex(), account.getBalance(), msg);
+          throw new Error("Should have thrown exception");
+        } catch (MoneroException e) {
+          assertEquals(-1, (int) e.getCode());
+          try {
+            wallet.getReserveProofAccount(account.getIndex(), TestUtils.MAX_FEE, msg);
+            throw new Error("Should have thrown exception");
+          } catch (MoneroException e2) {
+            assertEquals(-1, (int) e2.getCode());
+          }
+        }
+      }
+    }
+    assertTrue("Must have more than one account with non-zero balance; run send-to-multiple tests", numNonZeroTests > 1);
+    
+    // test error when not enough balance for requested minimum reserve amount
+    try {
+      wallet.getReserveProofAccount(0, accounts.get(0).getBalance().add(TestUtils.MAX_FEE), "Test message");
+      fail("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals(-1, (int) e.getCode());
+    }
+    
+    // test different wallet address
+    String differentAddress = TestUtils.getRandomWalletAddress();
+    try {
+      wallet.checkReserveProof(differentAddress, "Test message", signature);
+      fail("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals(-1, (int) e.getCode());
+    }
+    
+    // test subaddress
+    try {
+      wallet.checkReserveProof((wallet.getSubaddress(0, 1)).getAddress(), "Test message", signature);
+      fail("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals(-1, (int) e.getCode());
+    }
+    
+    // test wrong message
+    MoneroCheckReserve check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Wrong message", signature);
+    assertEquals(check.getIsGood(), false); // TODO: specifically test reserve checks, probably separate objects
+    testCheckReserve(check);
+    
+    // test wrong signature
+    try {
+      wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", "wrong signature");
+      fail("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals(-1, (int) e.getCode());
+    }
+  }
+  
 //  // Can get outputs in hex format
 //  @Test
 //  public void testGetOutputsHex() {
