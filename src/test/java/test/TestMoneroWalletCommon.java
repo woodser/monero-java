@@ -746,7 +746,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     for (MoneroWalletTx tx : txs) {
       txIds.add(tx.getId());
       transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setTx(new MoneroWalletTx().setId(tx.getId()))), null, true);
-      for (MoneroTransfer transfer : transfers) assertEquals(transfer.getTx().getId(), tx.getId());
+      for (MoneroTransfer transfer : transfers) assertEquals(tx.getId(), transfer.getTx().getId());
     }
     
     // get transfers with tx ids
@@ -764,9 +764,9 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     transferFilter.setTxFilter(new MoneroTxFilter().setTx(new MoneroWalletTx().setIsConfirmed(true)));
     transfers = getAndTestTransfers(wallet, transferFilter, null, null);
     for (MoneroTransfer transfer : transfers) {
-      assertEquals(transfer.getIsOutgoing(), true);
+      assertEquals(true, transfer.getIsOutgoing());
       assertTrue(transfer.getDestinations().size() > 0);
-      assertEquals(transfer.getTx().getIsConfirmed(), true);
+      assertEquals(true, transfer.getTx().getIsConfirmed());
     }
   }
   
@@ -777,7 +777,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     
     // test with invalid id
     List<MoneroTransfer> transfers = wallet.getTransfers(new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setTx(new MoneroWalletTx().setId("invalid_id"))));
-    assertEquals(transfers.size(), 0);
+    assertEquals(0, transfers.size());
     
     // test invalid id in collection
     List<MoneroWalletTx> randomTxs = getRandomTransactions(wallet, null, 3, 5);
@@ -817,15 +817,15 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
       
       // get vouts by account index
       List<MoneroWalletOutput> accountVouts = getAndTestVouts(wallet, new MoneroVoutFilter().setVout(new MoneroWalletOutput().setAccountIndex(account.getIndex())), isUsed);
-      for (MoneroWalletOutput vout : accountVouts) assertEquals(vout.getAccountIndex(), account.getIndex());
+      for (MoneroWalletOutput vout : accountVouts) assertEquals(account.getIndex(), vout.getAccountIndex());
       
       // get vouts by subaddress index
       List<MoneroWalletOutput> subaddressVouts = new ArrayList<MoneroWalletOutput>();
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         List<MoneroWalletOutput> vouts = getAndTestVouts(wallet, new MoneroVoutFilter().setVout(new MoneroWalletOutput().setAccountIndex(account.getIndex()).setSubaddressIndex(subaddress.getIndex())), subaddress.getIsUsed());
         for (MoneroWalletOutput vout : vouts) {
-          assertEquals(vout.getAccountIndex(), subaddress.getAccountIndex());
-          assertEquals(vout.getSubaddressIndex(), subaddress.getIndex());
+          assertEquals(subaddress.getAccountIndex(), vout.getAccountIndex());
+          assertEquals(subaddress.getIndex(), vout.getSubaddressIndex());
           if (vout.getAccountIndex() != 0 && vout.getSubaddressIndex() != 0) nonDefaultIncoming = true;
           subaddressVouts.add(vout);
         }
@@ -846,55 +846,55 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     // ensure vout found with non-zero account and subaddress indices
     assertTrue("No vouts found in non-default account and subaddress; run send-to-multiple tests", nonDefaultIncoming);
   }
-//
-//  // TODO: Can get vouts with additional configuration
-//  @Test
-//  public void testGetVoutsWithConfiguration() {
-//    // TODO: liteMode
-//    
-//    // get unspent vouts to account 0
-//    let vouts = getAndTestVouts(wallet, {accountIndex: 0, isSpent: false});
-//    for (let vout of vouts) {
-//      assertEquals(vout.getAccountIndex(), 0);
-//      assertEquals(vout.getIsSpent(), false);
-//    }
-//    
-//    // get spent vouts to account 1
-//    vouts = getAndTestVouts(wallet, {accountIndex: 1, isSpent: true}, true);
-//    for (let vout of vouts) {
-//      assertEquals(vout.getAccountIndex(), 1);
-//      assertEquals(vout.getIsSpent(), true);
-//    }
-//    
-//    // get random transactions
-//    let txs = getRandomTransactions(wallet, {isConfirmed: true}, 3, 5);
-//    
-//    // get vouts with a tx id
-//    let txIds = [];
-//    for (let tx of txs) {
-//      txIds.push(tx.getId());
-//      vouts = getAndTestVouts(wallet, {txId: tx.getId()}, true);
-//      for (let vout of vouts) assertEquals(vout.getTx().getId(), tx.getId());
-//    }
-//    
-//    // get vouts with tx ids
-//    vouts = getAndTestVouts(wallet, {txIds: txIds}, true);
-//    for (let vout of vouts) assertTrue(txIds.includes(vout.getTx().getId()));
-//    
-//    // get confirmed vouts to specific subaddress with pre-built filter
-//    let accountIdx = 0;
-//    let subaddressIdx = 1;
-//    let voutFilter = new MoneroVoutFilter();
-//    voutFilter.setVout(new MoneroWalletOutput().setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx));
-//    voutFilter.setTxFilter(new MoneroTxFilter().setTx(new MoneroTx().setIsConfirmed(true)));
-//    vouts = getAndTestVouts(wallet, voutFilter, true);
-//    for (let vout of vouts) {
-//      assertEquals(vout.getAccountIndex(), accountIdx);
-//      assertEquals(vout.getSubaddressIndex(), subaddressIdx);
-//      assertEquals(vout.getTx().getIsConfirmed(), true);
-//    }
-//  }
-//  
+
+  // TODO: Can get vouts with additional configuration
+  @Test
+  public void testGetVoutsWithConfiguration() {
+    // TODO: liteMode
+    
+    // get unspent vouts to account 0
+    List<MoneroWalletOutput> vouts = getAndTestVouts(wallet, new MoneroVoutFilter().setVout(new MoneroWalletOutput().setAccountIndex(0).setIsSpent(false)), null);
+    for (MoneroWalletOutput vout : vouts) {
+      assertEquals(0, vout.getAccountIndex(), 0);
+      assertEquals(false, vout.getIsSpent());
+    }
+    
+    // get spent vouts to account 1
+    vouts = getAndTestVouts(wallet, new MoneroVoutFilter().setVout(new MoneroWalletOutput().setAccountIndex(1).setIsSpent(true)), true);
+    for (MoneroWalletOutput vout : vouts) {
+      assertEquals(1, (int) vout.getAccountIndex());
+      assertEquals(true, vout.getIsSpent());
+    }
+    
+    // get random transactions
+    List<MoneroWalletTx> txs = getRandomTransactions(wallet, new MoneroTxFilter().setTx(new MoneroWalletTx().setIsConfirmed(true)), 3, 5);
+    
+    // get vouts with a tx id
+    List<String> txIds = new ArrayList<String>();
+    for (MoneroWalletTx tx : txs) {
+      txIds.add(tx.getId());
+      vouts = getAndTestVouts(wallet, new MoneroVoutFilter().setTxFilter(new MoneroTxFilter().setTx(new MoneroWalletTx().setId(tx.getId()))), true);
+      for (MoneroWalletOutput vout : vouts) assertEquals(vout.getTx().getId(), tx.getId());
+    }
+    
+    // get vouts with tx ids
+    vouts = getAndTestVouts(wallet, new MoneroVoutFilter().setTxFilter(new MoneroTxFilter().setTxIds(txIds)), true);
+    for (MoneroWalletOutput vout : vouts) assertTrue(txIds.contains(vout.getTx().getId()));
+    
+    // get confirmed vouts to specific subaddress with pre-built filter
+    int accountIdx = 0;
+    int subaddressIdx = 1;
+    MoneroVoutFilter voutFilter = new MoneroVoutFilter();
+    voutFilter.setVout(new MoneroWalletOutput().setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx));
+    voutFilter.setTxFilter(new MoneroTxFilter().setTx(new MoneroWalletTx().setIsConfirmed(true)));
+    vouts = getAndTestVouts(wallet, voutFilter, true);
+    for (MoneroWalletOutput vout : vouts) {
+      assertEquals(accountIdx, (int) vout.getAccountIndex());
+      assertEquals(subaddressIdx, (int) vout.getSubaddressIndex());
+      assertEquals(true, vout.getTx().getIsConfirmed());
+    }
+  }
+  
 //  // Validates inputs when getting vouts
 //  @Test
 //  public void testGetVoutsValidateInputes() {
