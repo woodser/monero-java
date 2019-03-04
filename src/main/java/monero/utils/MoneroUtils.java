@@ -36,14 +36,19 @@ public class MoneroUtils {
     if (words.length != MoneroUtils.NUM_MNEMONIC_WORDS) throw new Error("Mnemonic phrase is " + words.length + " words but must be " + MoneroUtils.NUM_MNEMONIC_WORDS);
   }
   
-  // TODO: beef this up
+  // TODO: implement this
   public static void validatePrivateViewKey(String privateViewKey) {
     assertNotNull(privateViewKey);
     assertEquals(64, privateViewKey.length());
   }
   
-  // TODO: beef this up
+  // TODO: implement this
   public static void validateAddress(String address) {
+    
+  }
+  
+  // TODO: implement this
+  public static void validatePaymentId(String paymentId) {
     
   }
   
