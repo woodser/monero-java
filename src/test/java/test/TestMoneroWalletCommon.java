@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import java.util.UUID;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import common.utils.JsonUtils;
 import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroKeyImage;
@@ -433,79 +435,95 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     // TODO: litemode
     
     // get random transactions with payment ids for testing
-    let randomTxs = getRandomTransactions(wallet, {hasPaymentId: true}, 3, 5);
-    for (let randomTx of randomTxs) {
-      assertTrue(randomTx.getPaymentId());
+    List<MoneroWalletTx> randomTxs = getRandomTransactions(wallet, new MoneroTxFilter().setHasPaymentId(true), 3, 5);
+    for (MoneroWalletTx randomTx : randomTxs) {
+      assertNotNull(randomTx.getPaymentId());
     }
     
     // get transactions by id
-    let txIds = [];
-    for (let randomTx of randomTxs) {
-      txIds.push(randomTx.getId());
-      let txs = testGetTxs(wallet, {txId: randomTx.getId()}, true);
+    List<String> txIds = new ArrayList<String>();
+    for (MoneroWalletTx randomTx : randomTxs) {
+      txIds.add(randomTx.getId());
+      List<MoneroWalletTx> txs = testGetTxs(wallet, new MoneroTxFilter().setTxId(randomTx.getId()), null, true);
       assertEquals(txs.size(), 1);
-      let merged = txs[0].merge(randomTx.copy()); // txs change with chain so check mergeability
-      testWalletTx(merged);
+      MoneroWalletTx merged = txs.get(0).merge(randomTx.copy()); // txs change with chain so check mergeability
+      testWalletTx(merged, null);
     }
     
     // get transactions by ids
-    let txs = testGetTxs(wallet, {txIds: txIds});
+    List<MoneroWalletTx> txs = testGetTxs(wallet, new MoneroTxFilter().setTxIds(txIds), null, null);
     assertEquals(txs.size(), randomTxs.size());
-    for (let tx of txs) assertTrue(txIds.includes(tx.getId()));
+    for (MoneroWalletTx tx : txs) assertTrue(txIds.contains(tx.getId()));
     
     // get transactions with an outgoing transfer
-    txs = testGetTxs(wallet, {hasOutgoingTransfer: true}, true);
-    for (let tx of txs) assertTrue(tx.getOutgoingTransfer() instanceof MoneroTransfer);
+    TestContext ctx = new TestContext();
+    ctx.hasOutgoingTransfer = true;
+    txs = testGetTxs(wallet, new MoneroTxFilter().setIsOutgoing(true), ctx, true);
+    for (MoneroWalletTx tx : txs) {
+      assertTrue(tx.getIsOutgoing());
+      assertNotNull(tx.getOutgoingTransfer());
+      testTransfer(tx.getOutgoingTransfer());
+    }
     
     // get transactions without an outgoing transfer
-    txs = testGetTxs(wallet, {hasOutgoingTransfer: false}, true);
-    for (let tx of txs) assertEquals(tx.getOutgoingTransfer(), undefined);
+    ctx.hasOutgoingTransfer = false;
+    txs = testGetTxs(wallet, new MoneroTxFilter().setIsOutgoing(false), ctx, true);
+    for (MoneroWalletTx tx : txs) assertNull(tx.getOutgoingTransfer());
     
     // get transactions with incoming transfers
-    txs = testGetTxs(wallet, {hasIncomingTransfers: true}, true);
-    for (let tx of txs) {
+    ctx.hasIncomingTransfers = true;
+    txs = testGetTxs(wallet, new MoneroTxFilter().setIsIncoming(true), ctx, true);
+    for (MoneroWalletTx tx : txs) {
+      assertTrue(tx.getIsIncoming());
       assertTrue(tx.getIncomingTransfers().size() > 0);
-      for (let transfer of tx.getIncomingTransfers()) assertTrue(transfer instanceof MoneroTransfer);
+      for (MoneroTransfer transfer : tx.getIncomingTransfers()) {
+        assertTrue(transfer instanceof MoneroTransfer);
+        testTransfer(transfer);
+      }
     }
     
     // get transactions without incoming transfers
-    txs = testGetTxs(wallet, {hasIncomingTransfers: false}, true);
-    for (let tx of txs) assertEquals(tx.getIncomingTransfers(), undefined);
+    ctx.hasIncomingTransfers = false;
+    txs = testGetTxs(wallet, new MoneroTxFilter().setIsIncoming(false), ctx, true);
+    for (MoneroWalletTx tx : txs)  {
+      assertFalse(tx.getIsIncoming());
+      assertNull(tx.getIncomingTransfers());
+    }
     
     // get transactions associated with an account
-    let accountIdx = 1;
-    txs = wallet.getTxs({transferFilter: {accountIndex: accountIdx}});
-    for (let tx of txs) {
-      let found = false;
-      if (tx.getOutgoingTransfer() && tx.getOutgoingTransfer().getAccountIndex() === accountIdx) found = true;
-      else if (tx.getIncomingTransfers()) {
-        for (let transfer of tx.getIncomingTransfers()) {
-          if (transfer.getAccountIndex() === accountIdx) {
+    int accountIdx = 1;
+    txs = wallet.getTxs(new MoneroTxFilter().setTransferFilter(new MoneroTransferFilter().setAccountIndex(accountIdx)));
+    for (MoneroWalletTx tx : txs) {
+      boolean found = false;
+      if (tx.getIsOutgoing() && tx.getOutgoingTransfer().getAccountIndex() == accountIdx) found = true;
+      else if (tx.getIncomingTransfers() != null) {
+        for (MoneroTransfer transfer : tx.getIncomingTransfers()) {
+          if (transfer.getAccountIndex() == accountIdx) {
             found = true;
             break;
           }
         }
       }
-      assertTrue(found, ("Transaction is not associated with account " + accountIdx + ":\n" + tx.toString()));
+      assertTrue(("Transaction is not associated with account " + accountIdx + ":\n" + tx.toString()), found);
     }
     
     // get transactions with incoming transfers to an account
-    txs = wallet.getTxs({transferFilter: {isIncoming: true, accountIndex: accountIdx}});
-    for (let tx of txs) {
+    txs = wallet.getTxs(new MoneroTxFilter().setTransferFilter(new MoneroTransferFilter().setIsIncoming(true).setAccountIndex(accountIdx)));
+    for (MoneroWalletTx tx : txs) {
       assertTrue(tx.getIncomingTransfers().size() > 0);
-      let found = false;
-      for (let transfer of tx.getIncomingTransfers()) {
-        if (transfer.getAccountIndex() === accountIdx) {
+      boolean found = false;
+      for (MoneroTransfer transfer : tx.getIncomingTransfers()) {
+        if (transfer.getAccountIndex() == accountIdx) {
           found = true;
           break;
         }
       }
-      assertTrue(found, "No incoming transfers to account " + accountIdx + " found:\n" + tx.toString());
+      assertTrue("No incoming transfers to account " + accountIdx + " found:\n" + tx.toString(), found);
     }
     
     // get txs with manually built filter that are confirmed have an outgoing transfer from account 0
-    let txFilter = new MoneroTxFilter();
-    txFilter.setTx(new MoneroTx().setIsConfirmed(true));
+    MoneroTxFilter txFilter = new MoneroTxFilter();
+    txFilter.setTx(new MoneroWalletTx().setIsConfirmed(true));
     txFilter.setTransferFilter(new MoneroTransferFilter().setTransfer(new MoneroTransfer().setAccountIndex(0)).setIsOutgoing(true));
     txs = testGetTxs(wallet, txFilter, true);
     for (let tx of txs) {
@@ -1545,6 +1563,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     MoneroWallet wallet;
     MoneroSendConfig sendConfig;
     Boolean hasOutgoingTransfer;
+    Boolean hasIncomingTransfers;
     Boolean hasDestinations;
     Boolean isSweep;
     Boolean doNotTestCopy;
@@ -1918,5 +1937,22 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     assertTrue(copy != vout);
     assertEquals(vout.toString(), copy.toString());
     assertNull(copy.getTx());  // TODO: should vout copy do deep copy of tx so models are graph instead of tree?  Would need to work out circular references
+  }
+  
+  /**
+   * Gets random transactions.
+   * 
+   * @param wallet is the wallet to query for transactions
+   * @param filter filters the transactions to retrieve
+   * @param minTxs specifies the minimum number of transactions (null for no minimum)
+   * @param maxTxs specifies the maximum number of transactions (null for all filtered transactions)
+   * @return List<MoneroWalletTx> are the random transactions
+   */
+  private static List<MoneroWalletTx> getRandomTransactions(MoneroWallet wallet, MoneroTxFilter filter, Integer minTxs, Integer maxTxs) {
+    List<MoneroWalletTx> txs = wallet.getTxs(filter);
+    if (minTxs != null) assertTrue(txs.size() + "/" + minTxs + " transactions found with filter: " + filter, txs.size() >= minTxs);
+    Collections.shuffle(txs);
+    if (maxTxs == null) return txs;
+    else return txs.subList(0, Math.min(maxTxs, txs.size()));
   }
 }
