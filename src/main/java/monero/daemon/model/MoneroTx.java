@@ -51,6 +51,19 @@ public class MoneroTx {
   private Integer maxUsedBlockId;
   private List<String> signatures;
   
+  public MoneroTx() {
+    
+  }
+  
+  /**
+   * Construct this transaction as a deep copy of the given transaction.
+   * 
+   * @param tx is the transaction to make a deep copy of
+   */
+  public MoneroTx(MoneroTx tx) {
+    throw new RuntimeException("Not implemented");
+  }
+  
   public MoneroBlock getBlock() {
     return block;
   }
@@ -371,11 +384,11 @@ public class MoneroTx {
     this.signatures = signatures;
   }
   
-  public MoneroTx copy() {
+  public MoneroTx merge(MoneroTx tx) {
     throw new RuntimeException("Not implemented");
   }
   
-  public MoneroTx merge(MoneroTx tx) {
-    return this;
+  public MoneroTx copy() {
+    return new MoneroTx(this);
   }
 }

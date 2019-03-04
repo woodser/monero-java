@@ -10,13 +10,16 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import monero.daemon.MoneroDaemon;
+import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroException;
@@ -384,40 +387,44 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   public void testGetTransactionsWallet() {
     boolean nonDefaultIncoming = false;
     List<MoneroWalletTx> txs1 = getCachedTxs();
-    List<MoneroWalletTx> txs2 = testGetTxs(wallet, null, true);
+    List<MoneroWalletTx> txs2 = testGetTxs(wallet, null, null, true);
     assertEquals(txs2.size(), txs1.size());
     
+    // build test context
+    TestContext ctx = new TestContext();
+    ctx.wallet = wallet;
+    
     // test each tranasction
-    let blocksPerHeight = {};
+    Map<Integer, MoneroBlock> blockPerHeight = new HashMap<Integer, MoneroBlock>();
     for (int i = 0; i < txs1.size(); i++) {
-      testWalletTx(txs1[i], {wallet: wallet});
-      testWalletTx(txs2[i], {wallet: wallet});
+      testWalletTx(txs1.get(i), ctx);
+      testWalletTx(txs2.get(i), ctx);
       
       // test merging equivalent txs
-      let copy1 = txs1[i].copy();
-      let copy2 = txs2[i].copy();
-      if (copy1.getIsConfirmed()) copy1.setBlock(txs1[i].getBlock().copy().setTxs([copy1]));
-      if (copy2.getIsConfirmed()) copy2.setBlock(txs2[i].getBlock().copy().setTxs([copy2]));
-      let merged = copy1.merge(copy2);
-      testWalletTx(merged, {wallet: wallet});
+      MoneroWalletTx copy1 = txs1.get(i).copy();
+      MoneroWalletTx copy2 = txs2.get(i).copy();
+      if (copy1.getIsConfirmed()) copy1.setBlock(txs1.get(i).getBlock().copy().setTxs(Arrays.asList(copy1)));
+      if (copy2.getIsConfirmed()) copy2.setBlock(txs2.get(i).getBlock().copy().setTxs(Arrays.asList(copy2)));
+      MoneroWalletTx merged = copy1.merge(copy2);
+      testWalletTx(merged, ctx);
       
       // find non-default incoming
-      if (txs1[i].getIncomingTransfers()) {
-        for (let transfer of txs1[i].getIncomingTransfers()) {
-          if (transfer.getAccountIndex() !== 0 && transfer.getSubaddressIndex() !== 0) nonDefaultIncoming = true;
+      if (txs1.get(i).getIncomingTransfers() != null) { // TODO: txs1.get(i).isIncoming()
+        for (MoneroTransfer transfer : txs1.get(i).getIncomingTransfers()) {
+          if (transfer.getAccountIndex() != 0 && transfer.getSubaddressIndex() != 0) nonDefaultIncoming = true;
         }
       }
       
       // ensure unique block reference per height
-      if (txs2[i].getIsConfirmed()) {
-        let block = blocksPerHeight[txs2[i].getHeight()];
-        if (block === undefined) blocksPerHeight[txs2[i].getHeight()] = txs2[i].getBlock();
-        else assertTrue(block === txs2[i].getBlock(), "Block references for same height must be same");
+      if (txs2.get(i).getIsConfirmed()) {
+        MoneroBlock block = blockPerHeight.get(txs2.get(i).getHeight());
+        if (block == null) blockPerHeight.put(txs2.get(i).getHeight(), txs2.get(i).getBlock());
+        else assertTrue("Block references for same height must be same", block == txs2.get(i).getBlock());
       }
     }
     
     // ensure non-default account and subaddress tested
-    assertTrue(nonDefaultIncoming, "No incoming transfers found to non-default account and subaddress; run send-to-multiple tests first");
+    assertTrue("No incoming transfers found to non-default account and subaddress; run send-to-multiple tests first", nonDefaultIncoming);
   }
   
   // Can get transactions with additional configuration
@@ -1522,12 +1529,12 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
    * 
    * TODO: convert config to filter and ensure each tx passes filter, same with testGetTransfer and testGetVouts
    */
-  private List<MoneroWalletTx> testGetTxs(MoneroWallet wallet, MoneroTxFilter filter, TestContext testCtx, Boolean isExpected) {
+  private List<MoneroWalletTx> testGetTxs(MoneroWallet wallet, MoneroTxFilter filter, TestContext ctx, Boolean isExpected) {
     List<MoneroWalletTx> txs = wallet.getTxs(filter);
     assertNotNull(txs);
     if (Boolean.FALSE.equals(isExpected)) assertTrue(txs.isEmpty());
     if (Boolean.TRUE.equals(isExpected)) assertFalse(txs.isEmpty());
-    for (MoneroWalletTx tx : txs) testWalletTx(tx, testCtx);
+    for (MoneroWalletTx tx : txs) testWalletTx(tx, ctx);
     return txs;
   }
   
@@ -1819,10 +1826,10 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
       //assertTrue(tx.getOutgoingTransfer().getAmount() != copy.getOutgoingTransfer().getAmount());  // TODO: BI 0 == BI 0?, testing this instead:
       if (tx.getOutgoingTransfer().getAmount() == copy.getOutgoingTransfer().getAmount()) assertTrue(tx.getOutgoingTransfer().getAmount().equals(BigInteger.valueOf(0)));
       if (tx.getOutgoingTransfer().getDestinations() != null) {
-        assertTrue(tx.getOutgoingTransfer().getDestinations() !== copy.getOutgoingTransfer().getDestinations());
+        assertTrue(tx.getOutgoingTransfer().getDestinations() != copy.getOutgoingTransfer().getDestinations());
         for (int i = 0; i < tx.getOutgoingTransfer().getDestinations().size(); i++) {
           assertEquals(copy.getOutgoingTransfer().getDestinations().get(i), tx.getOutgoingTransfer().getDestinations().get(i));
-          assertTrue(tx.getOutgoingTransfer().getDestinations().get(i) !== copy.getOutgoingTransfer().getDestinations().get(i));
+          assertTrue(tx.getOutgoingTransfer().getDestinations().get(i) != copy.getOutgoingTransfer().getDestinations().get(i));
           if (tx.getOutgoingTransfer().getDestinations().get(i).getAmount() == copy.getOutgoingTransfer().getDestinations().get(i).getAmount()) assertTrue(tx.getOutgoingTransfer().getDestinations().get(i).getAmount().equals(BigInteger.valueOf(0)));
         }
       }
@@ -1830,14 +1837,14 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     if (tx.getIncomingTransfers() != null) {
       for (int i = 0; i < tx.getIncomingTransfers().size(); i++) {
         assertEquals(copy.getIncomingTransfers().get(i), tx.getIncomingTransfers().get(i));
-        assertTrue(tx.getIncomingTransfers().get(i) !== copy.getIncomingTransfers().get(i));
+        assertTrue(tx.getIncomingTransfers().get(i) != copy.getIncomingTransfers().get(i));
         if (tx.getIncomingTransfers().get(i).getAmount() == copy.getIncomingTransfers().get(i).getAmount()) assertTrue(tx.getIncomingTransfers().get(i).getAmount().equals(BigInteger.valueOf(0)));
       }
     }
     if (tx.getVouts() != null) {
       for (int i = 0; i < tx.getVouts().size(); i++) {
         assertEquals(copy.getVouts().get(i), tx.getVouts().get(i));
-        assertTrue(tx.getVouts().get(i) !== copy.getVouts().get(i));
+        assertTrue(tx.getVouts().get(i) != copy.getVouts().get(i));
         if (tx.getVouts().get(i).getAmount() == copy.getVouts().get(i).getAmount()) assertTrue(tx.getVouts().get(i).getAmount().equals(BigInteger.valueOf(0)));
       }
     }
@@ -1845,11 +1852,11 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     // test copied tx
     ctx = new TestContext(ctx);
     ctx.doNotTestCopy = true;
-    if (tx.getBlock()) copy.setBlock(tx.getBlock().copy().setTxs([copy])); // copy block for testing
-    await testWalletTx(copy, testConfig);
+    if (tx.getBlock() != null) copy.setBlock(tx.getBlock().copy().setTxs(Arrays.asList(copy))); // copy block for testing
+    testWalletTx(copy, ctx);
     
     // test merging with copy
-    let merged = copy.merge(copy.copy());
+    MoneroWalletTx merged = copy.merge(copy.copy());
     assertEquals(merged.toString(), tx.toString());
   }
   
