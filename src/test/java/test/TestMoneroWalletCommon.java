@@ -54,7 +54,11 @@ import utils.TestUtils;
  */
 public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
-  // constants
+  // test constants
+  private static final boolean TEST_LITE_MODE = false;
+  private static final boolean TEST_NON_RELAYS = true;
+  private static final boolean TEST_RELAYS = false;
+  private static final boolean TEST_NOTIFICATIONS = false;
   private static final int MAX_TX_PROOFS = 25;   // maximum number of transactions to check for each proof, undefined to check all
   
   // instance variables
@@ -82,12 +86,14 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testGetHeight() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     int height = wallet.getHeight();
     assertTrue(height >= 0);
   }
   
   @Test
   public void testGetMnemonic() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     String mnemonic = wallet.getMnemonic();
     MoneroUtils.validateMnemonic(mnemonic);
     assertEquals(TestUtils.TEST_MNEMONIC, mnemonic);
@@ -95,6 +101,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testGetSupportedLanguages() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<String> languages = wallet.getLanguages();
     assertFalse(languages.isEmpty());
     for (String language : languages) assertFalse(language.isEmpty());
@@ -102,12 +109,14 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testGetPrivateViewKey() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     String privateViewKey = wallet.getPrivateViewKey();
     MoneroUtils.validatePrivateViewKey(privateViewKey);
   }
   
   @Test
   public void testGetPrimaryAddress() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     String primaryAddress = wallet.getPrimaryAddress();
     MoneroUtils.validateAddress(primaryAddress);
     assertEquals((wallet.getSubaddress(0, 0)).getAddress(), primaryAddress);
@@ -115,6 +124,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testGetIntegratedAddressFromPaymentId() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // save address for later comparison
     String address = wallet.getSubaddress(0, 0).getAddress();
@@ -143,6 +153,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testDecodeIntegratedAddress() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress("03284e41c342f036");
     MoneroIntegratedAddress decodedAddress = wallet.decodeIntegratedAddress(integratedAddress.toString());
     assertEquals(integratedAddress, decodedAddress);
@@ -151,6 +162,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // TODO: test syncing from start height
   @Test
   public void testSyncWithoutProgress() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     int numBlocks = 100;
     int chainHeight = daemon.getHeight();
     assertTrue(chainHeight >= numBlocks);
@@ -161,6 +173,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testGetAccountsWithoutSubaddresses() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroAccount> accounts = wallet.getAccounts();
     assertFalse(accounts.isEmpty());
     for (MoneroAccount account : accounts) {
@@ -171,6 +184,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testGetAccountsWithSubaddresses() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroAccount> accounts = wallet.getAccounts(true);
     assertFalse(accounts.isEmpty());
     for (MoneroAccount account : accounts) {
@@ -181,6 +195,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testGetAccount() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroAccount> accounts = wallet.getAccounts();
     assertFalse(accounts.isEmpty());
     for (MoneroAccount account : accounts) {
@@ -198,6 +213,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testCreateAccountWithLabel() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroAccount> accountsBefore = wallet.getAccounts();
     MoneroAccount createdAccount = wallet.createAccount();
     testAccount(createdAccount);
@@ -207,6 +223,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testCreateAccountWithoutLabel() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // create account with label
     List<MoneroAccount> accountsBefore = wallet.getAccounts();
@@ -225,6 +242,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testGetSubaddresses() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroAccount> accounts = wallet.getAccounts();
     assertFalse(accounts.isEmpty());
     for (MoneroAccount account : accounts) {
@@ -239,6 +257,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testGetSubaddressesByIndices() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroAccount> accounts = wallet.getAccounts();
     assertFalse(accounts.isEmpty());
     for (MoneroAccount account : accounts) {
@@ -267,6 +286,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testGetSubaddressByIndex() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroAccount> accounts = wallet.getAccounts();
     assertTrue(accounts.size() > 0);
     for (MoneroAccount account : accounts) {
@@ -281,6 +301,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testCreateSubaddress() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // create subaddresses across accounts
     List<MoneroAccount> accounts = wallet.getAccounts();
@@ -312,6 +333,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testGetSubaddressAddress() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     assertEquals(wallet.getPrimaryAddress(), (wallet.getSubaddress(0, 0)).getAddress());
     for (MoneroAccount account : wallet.getAccounts(true)) {
       for (MoneroSubaddress subaddress : wallet.getSubaddresses(account.getIndex())) {
@@ -329,6 +351,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testGetAddressIndices() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get last subaddress to test
     List<MoneroAccount> accounts = wallet.getAccounts(true);
@@ -363,6 +386,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can get the locked and unlocked balances of the wallet, accounts, and subaddresses
   @Test
   public void getAllBalances() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch accounts with all info as reference
     List<MoneroAccount> accounts = wallet.getAccounts(true);
@@ -397,6 +421,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can get transactions in the wallet
   @Test
   public void testGetTransactionsWallet() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     boolean nonDefaultIncoming = false;
     List<MoneroWalletTx> txs1 = getCachedTxs();
     List<MoneroWalletTx> txs2 = getAndTestTxs(wallet, null, null, true);
@@ -442,7 +467,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can get transactions with additional configuration
   @Test
   public void testGetTransactionsWithConfiguration() {
-    // TODO: litemode
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !TEST_LITE_MODE);
     
     // get random transactions with payment ids for testing
     List<MoneroWalletTx> randomTxs = getRandomTransactions(wallet, new MoneroTxFilter().setHasPaymentId(true), 3, 5);
@@ -621,6 +646,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Returns all known fields of txs regardless of filtering
   @Test
   public void testTransactionFieldsWithFiltering() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch wallet txs
     List<MoneroWalletTx> txs = wallet.getTxs(new MoneroTxFilter().setTx(new MoneroWalletTx().setIsConfirmed(true)));
@@ -648,7 +674,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Validates inputs when getting transactions
   @Test
   public void testGetTransactionsValidateInputs() {
-    // TODO: liteMode
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !TEST_LITE_MODE);
     
     // test with invalid id
     List<MoneroWalletTx> txs = wallet.getTxs(new MoneroTxFilter().setTxId("invalid_id"));
@@ -666,6 +692,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can get transfers in the wallet, accounts, and subaddresses
   @Test
   public void testGetTransfers() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get all transfers
     getAndTestTransfers(wallet, null, null, true);
@@ -717,7 +744,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can get transfers with additional configuration
   @Test
   public void testGetTransfersWithConfiguration() {
-    // TODO: liteMode
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !TEST_LITE_MODE);
     
     // get incoming transfers
     List<MoneroTransfer> transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setIsIncoming(true), null, true);
@@ -783,7 +810,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Validates inputs when getting transfers
   @Test
   public void testGetTransfersValidateInputs() {
-    // TODO: liteMode
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !TEST_LITE_MODE);
     
     // test with invalid id
     List<MoneroTransfer> transfers = wallet.getTransfers(new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setTx(new MoneroWalletTx().setId("invalid_id"))));
@@ -812,6 +839,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can get vouts in the wallet, accounts, and subaddresses
   @Test
   public void testGetVouts() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
 
     // get all vouts
     getAndTestVouts(wallet, null, true);
@@ -860,7 +888,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // TODO: Can get vouts with additional configuration
   @Test
   public void testGetVoutsWithConfiguration() {
-    // TODO: liteMode
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !TEST_LITE_MODE);
     
     // get unspent vouts to account 0
     List<MoneroWalletOutput> vouts = getAndTestVouts(wallet, new MoneroVoutFilter().setVout(new MoneroWalletOutput().setAccountIndex(0).setIsSpent(false)), null);
@@ -907,8 +935,8 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   // Validates inputs when getting vouts
   @Test
-  public void testGetVoutsValidateInputes() {
-    // TODO: liteMode
+  public void testGetVoutsValidateInputs() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !TEST_LITE_MODE);
     
     // test with invalid id
     List<MoneroWalletOutput> vouts = wallet.getVouts(new MoneroVoutFilter().setTxFilter(new MoneroTxFilter().setTx(new MoneroWalletTx().setId("invalid_id"))));
@@ -922,23 +950,10 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     for (MoneroWalletOutput vout : vouts) assertTrue(tx == vout.getTx());
   }
   
-  /**
-   * Compares two MoneroTxs by their timestamp.
-   */
-  public class MoneroTxComparator implements Comparator<MoneroTx> {
-    @Override
-    public int compare(MoneroTx tx1, MoneroTx tx2) {
-      long timestampA = tx1.getIsConfirmed() ? tx1.getBlock().getHeader().getTimestamp() : tx1.getReceivedTimestamp();
-      long timestampB = tx2.getIsConfirmed() ? tx2.getBlock().getHeader().getTimestamp() : tx2.getReceivedTimestamp();
-      if (timestampA < timestampB) return -1;
-      if (timestampA > timestampB) return 1;
-      return 0;
-    }
-  }
-  
   // Has correct accounting across accounts, subaddresses, txs, transfers, and vouts
   @Test
   public void testAccounting() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // pre-fetch wallet balances, accounts, subaddresses, and txs
     BigInteger walletBalance = wallet.getBalance();
@@ -1024,6 +1039,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can get and set a transaction note
   @Test
   public void testSetTransactionNote() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroWalletTx> txs = getRandomTransactions(wallet, null, 1, 5);
     
     // set notes
@@ -1042,6 +1058,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // TODO: why does getting cached txs take 2 seconds when should already be cached?
   @Test
   public void testSetTransactionNotes() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // set tx notes
     String uuid = UUID.randomUUID().toString();
@@ -1067,6 +1084,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can check a transfer using the transaction's secret key and the destination
   @Test
   public void testCheckTxKey() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get random txs that are confirmed and have outgoing destinations
     List<MoneroWalletTx> txs;
@@ -1152,6 +1170,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can prove a transaction by getting its signature
   @Test
   public void testCheckTxProof() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get random txs that are confirmed and have outgoing destinations
     List<MoneroWalletTx> txs;
@@ -1220,6 +1239,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can prove a spend using a generated signature and no destination public address
   @Test
   public void testCheckSpendProof() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get random confirmed outgoing txs
     List<MoneroWalletTx> txs = getRandomTransactions(wallet, new MoneroTxFilter().setIsIncoming(false).setTx(new MoneroWalletTx().setInTxPool(false).setIsFailed(false)), 2, MAX_TX_PROOFS);
@@ -1268,6 +1288,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can prove reserves in the wallet
   @Test
   public void testGetReserveProofWallet() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get proof of entire wallet
     String signature = wallet.getReserveProofWallet("Test message");
@@ -1317,6 +1338,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // TODO: re-enable this after 14.x point release which fixes this
   @Test
   public void getReserveProofAccount() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // test proofs of accounts
     int numNonZeroTests = 0;
@@ -1391,6 +1413,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can get outputs in hex format
   @Test
   public void testGetOutputsHex() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     String outputsHex = wallet.getOutputsHex();
     assertNotNull(outputsHex);  // TODO: this will fail if wallet has no outputs; run these tests on new wallet
     assertTrue(outputsHex.length() > 0);
@@ -1399,6 +1422,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can import outputs in hex format
   @Test
   public void testImportOutputsHex() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get outputs hex
     String outputsHex = wallet.getOutputsHex();
@@ -1413,6 +1437,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can get signed key images
   @Test
   public void testGetSignedKeyImages() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroKeyImage> images = wallet.getKeyImages();
     assertTrue("No signed key images in wallet", images.size() > 0);
     for (MoneroKeyImage image : images) {
@@ -1425,6 +1450,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can get new key images from the last import
   @Test
   public void testGetNewKeyImagesFromLastImport() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get outputs hex
     String outputsHex = wallet.getOutputsHex();
@@ -1447,6 +1473,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can import key images
   @Test
   public void testImportKeyImages() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroKeyImage> images = wallet.getKeyImages();
     assertTrue("Wallet does not have any key images; run send tests", images.size() > 0);
     MoneroKeyImageImportResult result = wallet.importKeyImages(images);
@@ -1466,6 +1493,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can sign and verify messages
   @Test
   public void testSignAndVerifyMessages() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     String msg = "This is a super important message which needs to be signed and verified.";
     String signature = wallet.sign(msg);
     boolean verified = wallet.verify(msg, wallet.getAddress(0, 0), signature);
@@ -1477,6 +1505,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can get and set arbitrary key/value attributes
   @Test
   public void testSetKeyValues() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // set attributes
     Map<String, String> attrs = new HashMap<String, String>();
@@ -1496,6 +1525,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can convert between a tx send config and payment URI
   @Test
   public void testCreatePaymentUri() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // test with address and amount
     MoneroSendConfig config1 = new MoneroSendConfig(wallet.getAddress(0, 0), BigInteger.valueOf(0));
@@ -1537,6 +1567,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   @Test
   public void testMining() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     wallet.startMining(2, false, true);
     wallet.stopMining();
   }
@@ -1550,11 +1581,25 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   }
   
   /**
+   * Compares two MoneroTxs by their timestamp.
+   */
+  private class MoneroTxComparator implements Comparator<MoneroTx> {
+    @Override
+    public int compare(MoneroTx tx1, MoneroTx tx2) {
+      long timestampA = tx1.getIsConfirmed() ? tx1.getBlock().getHeader().getTimestamp() : tx1.getReceivedTimestamp();
+      long timestampB = tx2.getIsConfirmed() ? tx2.getBlock().getHeader().getTimestamp() : tx2.getReceivedTimestamp();
+      if (timestampA < timestampB) return -1;
+      if (timestampA > timestampB) return 1;
+      return 0;
+    }
+  }
+  
+  /**
    * Fetchs and tests transactions according to the given config.
    * 
    * TODO: convert config to filter and ensure each tx passes filter, same with testGetTransfer and getAndTestVouts
    */
-  private List<MoneroWalletTx> getAndTestTxs(MoneroWallet wallet, MoneroTxFilter filter, TestContext ctx, Boolean isExpected) {
+  private static List<MoneroWalletTx> getAndTestTxs(MoneroWallet wallet, MoneroTxFilter filter, TestContext ctx, Boolean isExpected) {
     List<MoneroWalletTx> txs = wallet.getTxs(filter);
     assertNotNull(txs);
     if (Boolean.FALSE.equals(isExpected)) assertTrue(txs.isEmpty());
