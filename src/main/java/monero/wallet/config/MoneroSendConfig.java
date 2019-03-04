@@ -18,8 +18,9 @@ public class MoneroSendConfig {
   private BigInteger fee;
   private Integer accountIndex;
   private List<Integer> subaddressIndices;
-  private Boolean doNotRelay;
+  private Integer unlockTime;
   private Boolean canSplit;
+  private Boolean doNotRelay;
   private String note;
   private String recipientName;
   private BigInteger belowAmount;
@@ -98,20 +99,28 @@ public class MoneroSendConfig {
     this.subaddressIndices = subaddressIndices;
   }
   
-  public Boolean getDoNotRelay() {
-    return doNotRelay;
+  public Integer getUnlockTime() {
+    return unlockTime;
   }
-  
-  public void setDoNotRelay(Boolean doNotRelay) {
-    this.doNotRelay = doNotRelay;
+
+  public void setUnlockTime(Integer unlockTime) {
+    this.unlockTime = unlockTime;
   }
-  
+
   public Boolean getCanSplit() {
     return canSplit;
   }
   
   public void setCanSplit(Boolean canSplit) {
     this.canSplit = canSplit;
+  }
+  
+  public Boolean getDoNotRelay() {
+    return doNotRelay;
+  }
+  
+  public void setDoNotRelay(Boolean doNotRelay) {
+    this.doNotRelay = doNotRelay;
   }
   
   public String getNote() {
