@@ -770,34 +770,34 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     }
   }
   
-//  // Validates inputs when getting transfers
-//  @Test
-//  public void testGetTransfersValidateInputs() {
-//    // TODO: liteMode
-//    
-//    // test with invalid id
-//    let transfers = wallet.getTransfers({txId: "invalid_id"});
-//    assertEquals(transfers.size(), 0);
-//    
-//    // test invalid id in collection
-//    let randomTxs = getRandomTransactions(wallet, undefined, 3, 5);
-//    transfers = wallet.getTransfers({txIds: [randomTxs[0].getId(), "invalid_id"]});
-//    assertTrue(transfers.size() > 0);
-//    let tx = transfers[0].getTx();
-//    for (let transfer of transfers) assertTrue(tx === transfer.getTx());
-//    
-//    // test unused subaddress indices
-//    transfers = wallet.getTransfers({accountIndex: 0, subaddressIndices: [1234907]});
-//    assertTrue(transfers.size() === 0);
-//    
-//    // test invalid subaddress index
-//    try {
-//      let transfers = wallet.getTransfers({accountIndex: 0, subaddressIndex: -10});
-//      throw new Error("Should have failed");
-//    } catch (MoneroException e) {
-//      assertNotEquals(e.message, "Should have failed");
-//    }
-//  }
+  // Validates inputs when getting transfers
+  @Test
+  public void testGetTransfersValidateInputs() {
+    // TODO: liteMode
+    
+    // test with invalid id
+    List<MoneroTransfer> transfers = wallet.getTransfers(new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setTx(new MoneroWalletTx().setId("invalid_id"))));
+    assertEquals(transfers.size(), 0);
+    
+    // test invalid id in collection
+    List<MoneroWalletTx> randomTxs = getRandomTransactions(wallet, null, 3, 5);
+    transfers = wallet.getTransfers(new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setTxIds(Arrays.asList(randomTxs.get(0).getId(), "invalid_id"))));
+    assertTrue(transfers.size() > 0);
+    MoneroWalletTx tx = transfers.get(0).getTx();
+    for (MoneroTransfer transfer : transfers) assertTrue(tx == transfer.getTx());
+    
+    // test unused subaddress indices
+    transfers = wallet.getTransfers(new MoneroTransferFilter().setAccountIndex(0).setSubaddressIndices(Arrays.asList(1234907)));
+    assertTrue(transfers.size() == 0);
+    
+    // test invalid subaddress index
+    try {
+      transfers = wallet.getTransfers(new MoneroTransferFilter().setAccountIndex(0).setSubaddressIndex(-1));
+      throw new Error("Should have failed");
+    } catch (MoneroException e) {
+      assertNotEquals("Should have failed", e.getMessage());
+    }
+  }
 //  
 //  // Can get vouts in the wallet, accounts, and subaddresses
 //  @Test
