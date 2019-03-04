@@ -1147,74 +1147,73 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     testCheckTx(tx, check);
   }
   
-  
-//  // Can prove a transaction by getting its signature
-//  @Test
-//  public void testCheckTxProof() {
-//    
-//    // get random txs that are confirmed and have outgoing destinations
-//    let txs;
-//    try {
-//      txs = getRandomTransactions(wallet, {isConfirmed: true, hasOutgoingTransfer: true, transferFilter: {hasDestinations: true}}, 1, MAX_TX_PROOFS);
-//    } catch (MoneroException e) {
-//      throw new Error("No txs with outgoing destinations found; run send tests")
-//    }
-//    
-//    // test good checks with messages
-//    for (let tx of txs) {
-//      for (let destination of tx.getOutgoingTransfer().getDestinations()) {
-//        let signature = wallet.getTxProof(tx.getId(), destination.getAddress(), "This transaction definitely happened.");
-//        let check = wallet.checkTxProof(tx.getId(), destination.getAddress(), "This transaction definitely happened.", signature);
-//        testCheckTx(tx, check);
-//      }
-//    }
-//    
-//    // test good check without message
-//    let tx = txs[0];
-//    let destination = tx.getOutgoingTransfer().getDestinations()[0];
-//    let signature = wallet.getTxProof(tx.getId(), destination.getAddress());
-//    let check = wallet.checkTxProof(tx.getId(), destination.getAddress(), undefined, signature);
-//    testCheckTx(tx, check);
-//    
-//    // test get proof with invalid id
-//    try {
-//      wallet.getTxProof("invalid_tx_id", destination.getAddress());
-//      throw new Error("Should throw exception for invalid key");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -8);
-//    }
-//    
-//    // test check with invalid tx id
-//    try {
-//      wallet.checkTxProof("invalid_tx_id", destination.getAddress(), undefined, signature);
-//      throw new Error("Should have thrown exception");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -8);
-//    }
-//    
-//    // test check with invalid address
-//    try {
-//      wallet.checkTxProof(tx.getId(), "invalid_tx_address", undefined, signature);
-//      throw new Error("Should have thrown exception");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -2);
-//    }
-//    
-//    // test check with wrong message
-//    signature = wallet.getTxProof(tx.getId(), destination.getAddress(), "This is the right message");
-//    check = wallet.checkTxProof(tx.getId(), destination.getAddress(), "This is the wrong message", signature);
-//    assertEquals(check.getIsGood(), false);
-//    testCheckTx(tx, check);
-//    
-//    // test check with wrong signature
-//    let wrongSignature = wallet.getTxProof(txs[1].getId(), txs[1].getOutgoingTransfer().getDestinations()[0].getAddress(), "This is the right message");
-//    try {
-//      check = wallet.checkTxProof(tx.getId(), destination.getAddress(), "This is the right message", wrongSignature);  
-//      assertEquals(check.getIsGood(), false);
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -1); // TODO: sometimes comes back bad, sometimes throws exception.  ensure txs come from different addresses?
-//    }
-//  }
+  // Can prove a transaction by getting its signature
+  @Test
+  public void testCheckTxProof() {
+    
+    // get random txs that are confirmed and have outgoing destinations
+    List<MoneroWalletTx> txs;
+    try {
+      txs = getRandomTransactions(wallet, new MoneroTxFilter().setTx(new MoneroWalletTx().setIsConfirmed(true)).setTransferFilter(new MoneroTransferFilter().setHasDestinations(true)), 1, MAX_TX_PROOFS);
+    } catch (MoneroException e) {
+      throw new Error("No txs with outgoing destinations found; run send tests");
+    }
+    
+    // test good checks with messages
+    for (MoneroWalletTx tx : txs) {
+      for (MoneroDestination destination : tx.getOutgoingTransfer().getDestinations()) {
+        String signature = wallet.getTxProof(tx.getId(), destination.getAddress(), "This transaction definitely happened.");
+        MoneroCheckTx check = wallet.checkTxProof(tx.getId(), destination.getAddress(), "This transaction definitely happened.", signature);
+        testCheckTx(tx, check);
+      }
+    }
+    
+    // test good check without message
+    MoneroWalletTx tx = txs.get(0);
+    MoneroDestination destination = tx.getOutgoingTransfer().getDestinations().get(0);
+    String signature = wallet.getTxProof(tx.getId(), destination.getAddress());
+    MoneroCheckTx check = wallet.checkTxProof(tx.getId(), destination.getAddress(), null, signature);
+    testCheckTx(tx, check);
+    
+    // test get proof with invalid id
+    try {
+      wallet.getTxProof("invalid_tx_id", destination.getAddress());
+      throw new Error("Should throw exception for invalid key");
+    } catch (MoneroException e) {
+      assertEquals(-8, (int) e.getCode());
+    }
+    
+    // test check with invalid tx id
+    try {
+      wallet.checkTxProof("invalid_tx_id", destination.getAddress(), null, signature);
+      fail("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals(-8, (int) e.getCode());
+    }
+    
+    // test check with invalid address
+    try {
+      wallet.checkTxProof(tx.getId(), "invalid_tx_address", null, signature);
+      fail("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals(-2, (int) e.getCode());
+    }
+    
+    // test check with wrong message
+    signature = wallet.getTxProof(tx.getId(), destination.getAddress(), "This is the right message");
+    check = wallet.checkTxProof(tx.getId(), destination.getAddress(), "This is the wrong message", signature);
+    assertEquals(check.getIsGood(), false);
+    testCheckTx(tx, check);
+    
+    // test check with wrong signature
+    String wrongSignature = wallet.getTxProof(txs.get(1).getId(), txs.get(1).getOutgoingTransfer().getDestinations().get(0).getAddress(), "This is the right message");
+    try {
+      check = wallet.checkTxProof(tx.getId(), destination.getAddress(), "This is the right message", wrongSignature);  
+      assertEquals(check.getIsGood(), false);
+    } catch (MoneroException e) {
+      assertEquals(-1, (int) e.getCode()); // TODO: sometimes comes back bad, sometimes throws exception.  ensure txs come from different addresses?
+    }
+  }
 //  
 //  // Can prove a spend using a generated signature and no destination public address
 //  @Test

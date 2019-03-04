@@ -648,6 +648,15 @@ public interface MoneroWallet {
    * 
    * @param txId specifies the transaction to prove
    * @param address is the destination public address of the transaction
+   * @return the transaction signature
+   */
+  public String getTxProof(String txId, String address);
+  
+  /**
+   * Get a transaction signature to prove it.
+   * 
+   * @param txId specifies the transaction to prove
+   * @param address is the destination public address of the transaction
    * @param message is a message to include with the signature to further authenticate the proof (optional)
    * @return the transaction signature
    */
