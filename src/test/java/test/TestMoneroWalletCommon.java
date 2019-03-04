@@ -1012,55 +1012,55 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     }
   }
   
-//  // Can get and set a transaction note
-//  @Test
-//  public void testSetTransactionNote() {
-//    let txs = getRandomTransactions(wallet, undefined, 1, 5);
-//    
-//    // set notes
-//    let uuid = GenUtils.uuidv4();
-//    for (int i = 0; i < txs.size(); i++) {
-//      wallet.setTxNote(txs[i].getId(), uuid + i); // TODO: can we not iterate over awaits?
-//    }
-//    
-//    // get notes
-//    for (int i = 0; i < txs.size(); i++) {
-//      assertEquals(wallet.getTxNote(txs[i].getId()), uuid + i);
-//    }
-//  }
-//  
-//  // Can get and set multiple transaction notes
-//  // TODO: why does getting cached txs take 2 seconds when should already be cached?
-//  @Test
-//  public void testSetTransactionNotes() {
-//    
-//    // set tx notes
-//    let uuid = GenUtils.uuidv4();
-//    let txs = getCachedTxs();
-//    assertTrue(txs.size() >= 3, "Test requires 3 or more wallet transactions; run send tests");
-//    let txIds = [];
-//    let txNotes = [];
-//    for (int i = 0; i < txIds.size(); i++) {
-//      txIds.push(txs[i].getId());
-//      txNotes.push(uuid + i);
-//    }
-//    wallet.setTxNotes(txIds, txNotes);
-//    
-//    // get tx notes
-//    txNotes = wallet.getTxNotes(txIds);
-//    for (int i = 0; i < txIds.size(); i++) {
-//      assertEquals(uuid + i, txNotes[i]);
-//    }
-//    
-//    // TODO: test that get transaction has note
-//  }
-//  
+  // Can get and set a transaction note
+  @Test
+  public void testSetTransactionNote() {
+    List<MoneroWalletTx> txs = getRandomTransactions(wallet, null, 1, 5);
+    
+    // set notes
+    String uuid = UUID.randomUUID().toString();
+    for (int i = 0; i < txs.size(); i++) {
+      wallet.setTxNote(txs.get(i).getId(), uuid + i);
+    }
+    
+    // get notes
+    for (int i = 0; i < txs.size(); i++) {
+      assertEquals(wallet.getTxNote(txs.get(i).getId()), uuid + i);
+    }
+  }
+  
+  // Can get and set multiple transaction notes
+  // TODO: why does getting cached txs take 2 seconds when should already be cached?
+  @Test
+  public void testSetTransactionNotes() {
+    
+    // set tx notes
+    String uuid = UUID.randomUUID().toString();
+    List<MoneroWalletTx> txs = getCachedTxs();
+    assertTrue("Test requires 3 or more wallet transactions; run send tests", txs.size() >= 3);
+    List<String> txIds = new ArrayList<String>();
+    List<String> txNotes = new ArrayList<String>();
+    for (int i = 0; i < txIds.size(); i++) {
+      txIds.add(txs.get(i).getId());
+      txNotes.add(uuid + i);
+    }
+    wallet.setTxNotes(txIds, txNotes);
+    
+    // get tx notes
+    txNotes = wallet.getTxNotes(txIds);
+    for (int i = 0; i < txIds.size(); i++) {
+      assertEquals(uuid + i, txNotes.get(i));
+    }
+    
+    // TODO: test that get transaction has note
+  }
+  
 //  // Can check a transfer using the transaction's secret key and the destination
 //  @Test
 //  public void testCheckTxKey() {
 //    
 //    // get random txs that are confirmed and have outgoing destinations
-//    let txs;
+//    List<MoneroWalletTx> txs;
 //    try {
 //      txs = getRandomTransactions(wallet, {isConfirmed: true, hasOutgoingTransfer: true, transferFilter: {hasDestinations: true}}, 1, MAX_TX_PROOFS);
 //    } catch (MoneroException e) {
@@ -1085,7 +1085,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
 //        testCheckTx(tx, check);
 //      }
 //    }
-//    
+    
 //    // test get tx key with invalid id
 //    try {
 //      wallet.getTxKey("invalid_tx_id");
