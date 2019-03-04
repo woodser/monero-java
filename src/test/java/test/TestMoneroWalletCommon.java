@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -911,97 +912,106 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     MoneroWalletTx tx = vouts.get(0).getTx();
     for (MoneroWalletOutput vout : vouts) assertTrue(tx == vout.getTx());
   }
-//  
-//  // Has correct accounting across accounts, subaddresses, txs, transfers, and vouts
-//  @Test
-//  public void testAccounting() {
-//    
-//    // pre-fetch wallet balances, accounts, subaddresses, and txs
-//    let walletBalance = wallet.getBalance();
-//    let walletUnlockedBalance = wallet.getUnlockedBalance();
-//    let accounts = wallet.getAccounts(true);  // includes subaddresses
-//    let txs = wallet.getTxs();
-//    
-//    // sort txs
-//    txs.sort((a, b) => {
-//      let timestampA = a.getIsConfirmed() ? a.getBlock().getHeader().getTimestamp() : a.getReceivedTimestamp();
-//      let timestampB = b.getIsConfirmed() ? b.getBlock().getHeader().getTimestamp() : b.getReceivedTimestamp();
-//      if (timestampA < timestampB) return -1;
-//      if (timestampA > timestampB) return 1;
-//      return 0;
-//    })
-//    
-//    // test wallet balance
-//    TestUtils.testUnsignedBigInteger(walletBalance);
-//    TestUtils.testUnsignedBigInteger(walletUnlockedBalance);
-//    assertTrue(walletBalance >= walletUnlockedBalance);
-//    
-//    // test that wallet balance equals sum of account balances
-//    let accountsBalance = BigInteger.valueOf(0);
-//    let accountsUnlockedBalance = BigInteger.valueOf(0);
-//    for (let account of accounts) {
-//      testAccount(account); // test that account balance equals sum of subaddress balances
-//      accountsBalance = accountsBalance.add(account.getBalance());
-//      accountsUnlockedBalance = accountsUnlockedBalance.add(account.getUnlockedBalance());
+  
+  /**
+   * Compares two MoneroTxs by their timestamp.
+   */
+  public class MoneroTxComparator implements Comparator<MoneroTx> {
+    @Override
+    public int compare(MoneroTx tx1, MoneroTx tx2) {
+      long timestampA = tx1.getIsConfirmed() ? tx1.getBlock().getHeader().getTimestamp() : tx1.getReceivedTimestamp();
+      long timestampB = tx2.getIsConfirmed() ? tx2.getBlock().getHeader().getTimestamp() : tx2.getReceivedTimestamp();
+      if (timestampA < timestampB) return -1;
+      if (timestampA > timestampB) return 1;
+      return 0;
+    }
+  }
+  
+  // Has correct accounting across accounts, subaddresses, txs, transfers, and vouts
+  @Test
+  public void testAccounting() {
+    
+    // pre-fetch wallet balances, accounts, subaddresses, and txs
+    BigInteger walletBalance = wallet.getBalance();
+    BigInteger walletUnlockedBalance = wallet.getUnlockedBalance();
+    List<MoneroAccount> accounts = wallet.getAccounts(true);  // includes subaddresses
+    List<MoneroWalletTx> txs = wallet.getTxs();
+    
+    // sort txs
+    Collections.sort(txs, new MoneroTxComparator());
+    
+    // test wallet balance
+    TestUtils.testUnsignedBigInteger(walletBalance);
+    TestUtils.testUnsignedBigInteger(walletUnlockedBalance);
+    assertTrue(walletBalance.compareTo(walletUnlockedBalance) > 0);
+    
+    // test that wallet balance equals sum of account balances
+    BigInteger accountsBalance = BigInteger.valueOf(0);
+    BigInteger accountsUnlockedBalance = BigInteger.valueOf(0);
+    for (MoneroAccount account : accounts) {
+      testAccount(account); // test that account balance equals sum of subaddress balances
+      accountsBalance = accountsBalance.add(account.getBalance());
+      accountsUnlockedBalance = accountsUnlockedBalance.add(account.getUnlockedBalance());
+    }
+    assertEquals(0, walletBalance.compareTo(accountsBalance));
+    assertEquals(0, walletUnlockedBalance.compareTo(accountsUnlockedBalance));
+    
+//    // test that wallet balance equals net of wallet's incoming and outgoing tx amounts
+//    // TODO monero-wallet-rpc: these tests are disabled because incoming transfers are not returned when sent from the same account, so doesn't balance #4500
+//    // TODO: test unlocked balance based on txs, requires e.g. tx.isLocked()
+//    // TODO: update this test with new api
+//    BigInteger outgoingSum = BigInteger.valueOf(0);
+//    BigInteger incomingSum = BigInteger.valueOf(0);
+//    for (MoneroWalletTx tx : txs) {
+//      if (tx.getOutgoingAmount() != null) outgoingSum = outgoingSum.add(tx.getOutgoingAmount());
+//      if (tx.getIncomingAmount() != null) incomingSum = incomingSum.add(tx.getIncomingAmount());
 //    }
-//    assertEquals(walletBalance.compare(accountsBalance), 0);
-//    assertEquals(walletUnlockedBalance.compare(accountsUnlockedBalance), 0);
+//    assertEquals(walletBalance, incomingSum.subtract(outgoingSum));
 //    
-////    // test that wallet balance equals net of wallet's incoming and outgoing tx amounts
-////    // TODO monero-wallet-rpc: these tests are disabled because incoming transfers are not returned when sent from the same account, so doesn't balance #4500
-////    // TODO: test unlocked balance based on txs, requires e.g. tx.isLocked()
-////    let outgoingSum = BigInteger.valueOf(0);
-////    let incomingSum = BigInteger.valueOf(0);
-////    for (let tx of txs) {
-////      if (tx.getOutgoingAmount()) outgoingSum = outgoingSum.add(tx.getOutgoingAmount());
-////      if (tx.getIncomingAmount()) incomingSum = incomingSum.add(tx.getIncomingAmount());
-////    }
-////    assertEquals(incomingSum.subtract(outgoingSum).toString(), walletBalance.toString());
-////    
-////    // test that each account's balance equals net of account's incoming and outgoing tx amounts
-////    for (let account of accounts) {
-////      if (account.getIndex() !== 1) continue; // find 1
-////      outgoingSum = BigInteger.valueOf(0);
-////      incomingSum = BigInteger.valueOf(0);
-////      let filter = new MoneroTxFilter();
-////      filter.setAccountIndex(account.getIndex());
-////      for (let tx of txs.filter(tx => filter.meetsCriteria(tx))) { // normally we'd call wallet.getTxs(filter) but we're using pre-fetched txs
-////        if (tx.getId() === "8d3919d98dd5a734da8c52eddc558db3fbf059ad55d432f0052ecd59ef122ecb") console.log(tx.toString(0));
-////        
-////        //console.log((tx.getOutgoingAmount() ? tx.getOutgoingAmount().toString() : "") + ", " + (tx.getIncomingAmount() ? tx.getIncomingAmount().toString() : ""));
-////        if (tx.getOutgoingAmount()) outgoingSum = outgoingSum.add(tx.getOutgoingAmount());
-////        if (tx.getIncomingAmount()) incomingSum = incomingSum.add(tx.getIncomingAmount());
-////      }
-////      assertEquals(incomingSum.subtract(outgoingSum).toString(), account.getBalance().toString());
-////    }
-//    
-//    // balance may not equal sum of unspent vouts if if unconfirmed txs
-//    // TODO monero-wallet-rpc: reason not to return unspent vouts on unconfirmed txs? then this isn't necessary
-//    let hasUnconfirmedTx = false;
-//    for (let tx of txs) if (tx.getInTxPool()) hasUnconfirmedTx = true;
-//    
-//    // wallet balance is sum of all unspent vouts
-//    let walletSum = BigInteger.valueOf(0);
-//    for (let vout of wallet.getVouts({isSpent: false})) walletSum = walletSum.add(vout.getAmount());
-//    if (walletBalance.toString() !== walletSum.toString()) assertTrue(hasUnconfirmedTx, "Wallet balance must equal sum of unspent vouts if no unconfirmed txs");
-//    
-//    // account balances are sum of their unspent vouts
-//    for (let account of accounts) {
-//      let accountSum = BigInteger.valueOf(0);
-//      let accountVouts = wallet.getVouts({accountIndex: account.getIndex(), isSpent: false});
-//      for (let vout of accountVouts) accountSum = accountSum.add(vout.getAmount());
-//      if (account.getBalance().toString() !== accountSum.toString()) assertTrue(hasUnconfirmedTx, "Account balance must equal sum of its unspent vouts if no unconfirmed txs");
-//      
-//      // subaddress balances are sum of their unspent vouts
-//      for (let subaddress of account.getSubaddresses()) {
-//        let subaddressSum = BigInteger.valueOf(0);
-//        let subaddressVouts = wallet.getVouts({accountIndex: account.getIndex(), subaddressIndex: subaddress.getIndex(), isSpent: false});
-//        for (let vout of subaddressVouts) subaddressSum = subaddressSum.add(vout.getAmount());
-//        if (subaddress.getBalance().toString() !== subaddressSum.toString()) assertTrue(hasUnconfirmedTx, "Subaddress balance must equal sum of its unspent vouts if no unconfirmed txs");
+//    // test that each account's balance equals net of account's incoming and outgoing tx amounts
+//    for (MoneroAccount account : accounts) {
+//      if (account.getIndex() != 1) continue; // find 1
+//      outgoingSum = BigInteger.valueOf(0);
+//      incomingSum = BigInteger.valueOf(0);
+//      let filter = new MoneroTxFilter();
+//      filter.setAccountIndex(account.getIndex());
+//      for (let tx of txs.filter(tx => filter.meetsCriteria(tx))) { // normally we'd call wallet.getTxs(filter) but we're using pre-fetched txs
+//        if (tx.getId() === "8d3919d98dd5a734da8c52eddc558db3fbf059ad55d432f0052ecd59ef122ecb") console.log(tx.toString(0));
+//        
+//        //console.log((tx.getOutgoingAmount() ? tx.getOutgoingAmount().toString() : "") + ", " + (tx.getIncomingAmount() ? tx.getIncomingAmount().toString() : ""));
+//        if (tx.getOutgoingAmount()) outgoingSum = outgoingSum.add(tx.getOutgoingAmount());
+//        if (tx.getIncomingAmount()) incomingSum = incomingSum.add(tx.getIncomingAmount());
 //      }
+//      assertEquals(incomingSum.subtract(outgoingSum).toString(), account.getBalance().toString());
 //    }
-//  }
-//  
+    
+    // balance may not equal sum of unspent vouts if if unconfirmed txs
+    // TODO monero-wallet-rpc: reason not to return unspent vouts on unconfirmed txs? then this isn't necessary
+    boolean hasUnconfirmedTx = false;
+    for (MoneroWalletTx tx : txs) if (tx.getInTxPool()) hasUnconfirmedTx = true;
+    
+    // wallet balance is sum of all unspent vouts
+    BigInteger walletSum = BigInteger.valueOf(0);
+    for (MoneroWalletOutput vout : wallet.getVouts(new MoneroVoutFilter().setVout(new MoneroWalletOutput().setIsSpent(false)))) walletSum = walletSum.add(vout.getAmount());
+    if (!walletBalance.equals(walletSum)) assertTrue("Wallet balance must equal sum of unspent vouts if no unconfirmed txs", hasUnconfirmedTx);
+    
+    // account balances are sum of their unspent vouts
+    for (MoneroAccount account : accounts) {
+      BigInteger accountSum = BigInteger.valueOf(0);
+      List<MoneroWalletOutput> accountVouts = wallet.getVouts(new MoneroVoutFilter().setVout(new MoneroWalletOutput().setAccountIndex(account.getIndex()).setIsSpent(false)));
+      for (MoneroWalletOutput vout : accountVouts) accountSum = accountSum.add(vout.getAmount());
+      if (!account.getBalance().equals(accountSum)) assertTrue("Account balance must equal sum of its unspent vouts if no unconfirmed txs", hasUnconfirmedTx);
+      
+      // subaddress balances are sum of their unspent vouts
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
+        BigInteger subaddressSum = BigInteger.valueOf(0);
+        List<MoneroWalletOutput> subaddressVouts = wallet.getVouts(new MoneroVoutFilter().setVout(new MoneroWalletOutput().setAccountIndex(account.getIndex()).setSubaddressIndex(subaddress.getIndex()).setIsSpent(false)));
+        for (MoneroWalletOutput vout : subaddressVouts) subaddressSum = subaddressSum.add(vout.getAmount());
+        if (!subaddress.getBalance().equals(subaddressSum)) assertTrue("Subaddress balance must equal sum of its unspent vouts if no unconfirmed txs", hasUnconfirmedTx);
+      }
+    }
+  }
+  
 //  // Can get and set a transaction note
 //  @Test
 //  public void testSetTransactionNote() {
