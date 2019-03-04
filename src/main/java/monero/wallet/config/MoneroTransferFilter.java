@@ -13,6 +13,7 @@ public class MoneroTransferFilter extends Filter<MoneroTransfer> {
   private Boolean isOutgoing;
   private Boolean isIncoming;
   private Boolean hasDestinations;
+  private Integer accountIndex;
   private List<Integer> subaddressIndices;
   private MoneroTxFilter txFilter;
   private MoneroTransfer transfer;
@@ -21,48 +22,63 @@ public class MoneroTransferFilter extends Filter<MoneroTransfer> {
     return isOutgoing;
   }
   
-  public void setIsOutgoing(Boolean isOutgoing) {
+  public MoneroTransferFilter setIsOutgoing(Boolean isOutgoing) {
     this.isOutgoing = isOutgoing;
+    return this;
   }
   
   public Boolean getIsIncoming() {
     return isIncoming;
   }
   
-  public void setIsIncoming(Boolean isIncoming) {
+  public MoneroTransferFilter setIsIncoming(Boolean isIncoming) {
     this.isIncoming = isIncoming;
+    return this;
   }
   
   public Boolean getHasDestinations() {
     return hasDestinations;
   }
   
-  public void setHasDestinations(Boolean hasDestinations) {
+  public MoneroTransferFilter setHasDestinations(Boolean hasDestinations) {
     this.hasDestinations = hasDestinations;
+    return this;
   }
   
+  public Integer getAccountIndex() {
+    return accountIndex;
+  }
+
+  public MoneroTransferFilter setAccountIndex(Integer accountIndex) {
+    this.accountIndex = accountIndex;
+    return this;
+  }
+
   public List<Integer> getSubaddressIndices() {
     return subaddressIndices;
   }
   
-  public void setSubaddressIndices(List<Integer> subaddressIndices) {
+  public MoneroTransferFilter setSubaddressIndices(List<Integer> subaddressIndices) {
     this.subaddressIndices = subaddressIndices;
+    return this;
   }
   
   public MoneroTxFilter getTxFilter() {
     return txFilter;
   }
   
-  public void setTxFilter(MoneroTxFilter txFilter) {
+  public MoneroTransferFilter setTxFilter(MoneroTxFilter txFilter) {
     this.txFilter = txFilter;
+    return this;
   }
   
   public MoneroTransfer getTransfer() {
     return transfer;
   }
   
-  public void setTransfer(MoneroTransfer transfer) {
+  public MoneroTransferFilter setTransfer(MoneroTransfer transfer) {
     this.transfer = transfer;
+    return this;
   }
 
   @Override

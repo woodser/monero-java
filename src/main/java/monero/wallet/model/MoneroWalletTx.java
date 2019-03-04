@@ -18,6 +18,14 @@ public class MoneroWalletTx extends MoneroTx {
   private MoneroTransfer outgoingTransfer;
   private String note;
   
+  public boolean getIsOutgoing() {
+    return getOutgoingTransfer() != null;
+  }
+  
+  public boolean getIsIncoming() {
+    return getIncomingTransfers() != null;
+  }
+  
   public BigInteger getIncomingAmount() {
     return incomingAmount;
   }
