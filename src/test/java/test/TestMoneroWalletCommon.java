@@ -608,7 +608,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   // Returns all known fields of txs regardless of filtering
   @Test
-  public void testGetTransactionFieldsWithFiltering() {
+  public void testTransactionFieldsWithFiltering() {
     
     // fetch wallet txs
     List<MoneroWalletTx> txs = wallet.getTxs(new MoneroTxFilter().setTx(new MoneroWalletTx().setIsConfirmed(true)));
