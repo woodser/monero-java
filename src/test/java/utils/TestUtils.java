@@ -47,6 +47,9 @@ public class TestUtils {
     PropertyConfigurator.configure("src/main/resources/log4j.properties");
   }
   
+  // test constants
+  public static final int MIXIN = 11;
+  
   /**
    * Get a daemon RPC singleton instance shared among tests.
    */

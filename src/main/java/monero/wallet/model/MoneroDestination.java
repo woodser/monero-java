@@ -10,6 +10,12 @@ public class MoneroDestination {
   private String address;
   private BigInteger amount;
   
+  public MoneroDestination(String address, BigInteger amount) {
+    super();
+    this.address = address;
+    this.amount = amount;
+  }
+
   public String getAddress() {
     return address;
   }
