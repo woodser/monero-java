@@ -17,37 +17,42 @@ public class MoneroWalletOutput extends MoneroOutput {
     return (MoneroWalletTx) super.getTx();
   }
   
-  public void setTx(MoneroTx tx) {
+  public MoneroWalletOutput setTx(MoneroTx tx) {
     if (tx != null && !(tx instanceof MoneroWalletTx)) throw new MoneroException("Wallet output's transaction must be of type MoneroWalletTx");
     super.setTx(tx);
+    return this;
   }
   
-  public void setTx(MoneroWalletTx tx) {
+  public MoneroWalletOutput setTx(MoneroWalletTx tx) {
     super.setTx(tx);
+    return this;
   }
   
   public Integer getAccountIndex() {
     return accountIndex;
   }
   
-  public void setAccountIndex(Integer accountIndex) {
+  public MoneroWalletOutput setAccountIndex(Integer accountIndex) {
     this.accountIndex = accountIndex;
+    return this;
   }
   
   public Integer getSubaddressIndex() {
     return subaddressIndex;
   }
   
-  public void setSubaddressIndex(Integer subaddressIndex) {
+  public MoneroWalletOutput setSubaddressIndex(Integer subaddressIndex) {
     this.subaddressIndex = subaddressIndex;
+    return this;
   }
   
   public Boolean getIsSpent() {
     return isSpent;
   }
   
-  public void setIsSpent(Boolean isSpent) {
+  public MoneroWalletOutput setIsSpent(Boolean isSpent) {
     this.isSpent = isSpent;
+    return this;
   }
   
   public MoneroWalletOutput copy() {

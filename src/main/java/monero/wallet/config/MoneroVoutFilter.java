@@ -18,24 +18,27 @@ public class MoneroVoutFilter extends Filter<MoneroWalletOutput> {
     return subaddressIndices;
   }
 
-  public void setSubaddressIndices(List<Integer> subaddressIndices) {
+  public MoneroVoutFilter setSubaddressIndices(List<Integer> subaddressIndices) {
     this.subaddressIndices = subaddressIndices;
+    return this;
   }
 
   public MoneroTxFilter getTxFilter() {
     return txFilter;
   }
 
-  public void setTxFilter(MoneroTxFilter txFilter) {
+  public MoneroVoutFilter setTxFilter(MoneroTxFilter txFilter) {
     this.txFilter = txFilter;
+    return this;
   }
 
   public MoneroWalletOutput getVout() {
     return vout;
   }
 
-  public void setVout(MoneroWalletOutput vout) {
+  public MoneroVoutFilter setVout(MoneroWalletOutput vout) {
     this.vout = vout;
+    return this;
   }
 
   @Override

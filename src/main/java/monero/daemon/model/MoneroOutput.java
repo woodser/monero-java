@@ -19,47 +19,53 @@ public class MoneroOutput {
     return tx;
   }
   
-  public void setTx(MoneroTx tx) {
+  public MoneroOutput setTx(MoneroTx tx) {
     this.tx = tx;
+    return this;
   }
   
   public MoneroKeyImage getKeyImage() {
     return keyImage;
   }
   
-  public void setKeyImage(MoneroKeyImage keyImage) {
+  public MoneroOutput setKeyImage(MoneroKeyImage keyImage) {
     this.keyImage = keyImage;
+    return this;
   }
   
   public BigInteger getAmount() {
     return amount;
   }
   
-  public void setAmount(BigInteger amount) {
+  public MoneroOutput setAmount(BigInteger amount) {
     this.amount = amount;
+    return this;
   }
   
   public Integer getIndex() {
     return index;
   }
   
-  public void setIndex(Integer index) {
+  public MoneroOutput setIndex(Integer index) {
     this.index = index;
+    return this;
   }
   
   public List<Integer> getRingOutputIndices() {
     return ringOutputIndices;
   }
   
-  public void setRingOutputIndices(List<Integer> ringOutputIndices) {
+  public MoneroOutput setRingOutputIndices(List<Integer> ringOutputIndices) {
     this.ringOutputIndices = ringOutputIndices;
+    return this;
   }
   
   public String getStealthPublicKey() {
     return stealthPublicKey;
   }
   
-  public void setStealthPublicKey(String stealthPublicKey) {
+  public MoneroOutput setStealthPublicKey(String stealthPublicKey) {
     this.stealthPublicKey = stealthPublicKey;
+    return this;
   }
 }
