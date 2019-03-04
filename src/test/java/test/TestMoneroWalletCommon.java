@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroBlock;
+import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
@@ -38,6 +39,7 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
@@ -1386,166 +1388,158 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     }
   }
   
-//  // Can get outputs in hex format
-//  @Test
-//  public void testGetOutputsHex() {
-//    let outputsHex = wallet.getOutputsHex();
-//    assertEquals(typeof outputsHex, "string");  // TODO: this will fail if wallet has no outputs; run these tests on new wallet
-//    assertTrue(outputsHex.size() > 0);
-//  }
-//  
-//  // Can import outputs in hex format
-//  @Test
-//  public void testImportOutputsHex() {
-//    
-//    // get outputs hex
-//    let outputsHex = wallet.getOutputsHex();
-//    
-//    // import outputs hex
-//    if (outputsHex !== undefined) {
-//      let numImported = wallet.importOutputsHex(outputsHex);
-//      assertTrue(numImported > 0);
-//    }
-//  }
-//  
-//  // Can get signed key images
-//  @Test
-//  public void testGetSignedKeyImages() {
-//    let images = wallet.getKeyImages();
-//    assertTrue(Array.isArray(images));
-//    assertTrue(images.size() > 0, "No signed key images in wallet");
-//    for (let image of images) {
-//      assertTrue(image instanceof MoneroKeyImage);
-//      assertTrue(image.getHex());
-//      assertTrue(image.getSignature());
-//    }
-//  }
-//  
-//  // Can get new key images from the last import
-//  @Test
-//  public void testGetNewKeyImagesFromLastImport() {
-//    
-//    // get outputs hex
-//    let outputsHex = wallet.getOutputsHex();
-//    
-//    // import outputs hex
-//    if (outputsHex !== undefined) {
-//      let numImported = wallet.importOutputsHex(outputsHex);
-//      assertTrue(numImported > 0);
-//    }
-//    
-//    // get and test new key images from last import
-//    let images = wallet.getNewKeyImagesFromLastImport();
-//    assertTrue(Array.isArray(images));
-//    assertTrue(images.size() > 0, "No new key images in last import");  // TODO: these are already known to the wallet, so no new key images will be imported
-//    for (let image of images) {
-//      assertTrue(image.getHex());
-//      assertTrue(image.getSignature());
-//    }
-//  }
-//  
-//  // Can import key images
-//  @Test
-//  public void testImportKeyImages() {
-//    let images = wallet.getKeyImages();
-//    assertTrue(Array.isArray(images));
-//    assertTrue(images.size() > 0, "Wallet does not have any key images; run send tests");
-//    let result = wallet.importKeyImages(images);
-//    assertTrue(result.getHeight() > 0);
-//    
-//    // determine if non-zero spent and unspent amounts are expected
-//    let txs = wallet.getTxs({isConfirmed: true, transferFilter: {isOutgoing: true}});
-//    let balance = wallet.getBalance();
-//    let hasSpent = txs.size() > 0;
-//    let hasUnspent = balance.toJSValue() > 0;
-//    
-//    // test amounts
-//    TestUtils.testUnsignedBigInteger(result.getSpentAmount(), hasSpent);
-//    TestUtils.testUnsignedBigInteger(result.getUnspentAmount(), hasUnspent);
-//  }
-//  
-//  // Can sign and verify messages
-//  @Test
-//  public void testSignAndVerifyMessages() {
-//    let msg = "This is a super important message which needs to be signed and verified.";
-//    let signature = wallet.sign(msg);
-//    let verified = wallet.verify(msg, wallet.getAddress(0, 0), signature);
-//    assertEquals(verified, true);
-//    verified = wallet.verify(msg, TestMoneroWalletCommon.SAMPLE_ADDRESS, signature);
-//    assertEquals(verified, false);
-//  }
-//  
-//  // Can get and set arbitrary key/value attributes
-//  @Test
-//  public void testSetKeyValues() {
-//    
-//    // set attributes
-//    let attrs = {};
-//    for (int i = 0; i < 5; i++) {
-//      let key = "attr" + i;
-//      let val = GenUtils.uuidv4();
-//      attrs[key] = val;
-//      wallet.setAttribute(key, val);
-//    }
-//    
-//    // test attributes
-//    for (let key of Object.keys(attrs)) {
-//      assertEquals(attrs[key], wallet.getAttribute(key));
-//    }
-//  }
-//  
-//  // Can convert between a tx send config and payment URI
-//  @Test
-//  public void testCreatePaymentUri() {
-//    
-//    // test with address and amount
-//    let config1 = new MoneroSendConfig(wallet.getAddress(0, 0), BigInteger.valueOf(0));
-//    let uri = wallet.createPaymentUri(config1);
-//    let config2 = wallet.parsePaymentUri(uri);
-//    GenUtils.deleteUndefinedKeys(config1);
-//    GenUtils.deleteUndefinedKeys(config2);
-//    assertEquals(JSON.parse(JSON.stringify(config2)), JSON.parse(JSON.stringify(config1)));
-//    
-//    // test with all fields3
-//    config1.getDestinations()[0].setAmount(new BigInteger("425000000000"));
-//    config1.setPaymentId("03284e41c342f036");
-//    config1.setRecipientName("John Doe");
-//    config1.setNote("OMZG XMR FTW");
-//    uri = wallet.createPaymentUri(config1);
-//    config2 = wallet.parsePaymentUri(uri);
-//    GenUtils.deleteUndefinedKeys(config1);
-//    GenUtils.deleteUndefinedKeys(config2);
-//    assertEquals(config2, config1);
-//    
-//    // test with undefined address
-//    let address = config1.getDestinations()[0].getAddress();
-//    config1.getDestinations()[0].setAddress(undefined);
-//    try {
-//      wallet.createPaymentUri(config1);
-//      fail("Should have thrown RPC exception with invalid parameters");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -11);
-//      assertTrue(e.getRpcMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
-//    }
-//    config1.getDestinations()[0].setAddress(address);
-//    
-//    // test with invalid payment id
-//    config1.setPaymentId("bizzup");
-//    try {
-//      wallet.createPaymentUri(config1);
-//      fail("Should have thrown RPC exception with invalid parameters");
-//    } catch (MoneroException e) {
-//      assertEquals(e.getRpcCode(), -11);
-//      assertTrue(e.getRpcMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
-//    }
-//  }
-//  
-//  @Test
-//  public void testMining() {
-//    wallet.startMining(2, false, true);
-//    wallet.stopMining();
-//  }
+  // Can get outputs in hex format
+  @Test
+  public void testGetOutputsHex() {
+    String outputsHex = wallet.getOutputsHex();
+    assertNotNull(outputsHex);  // TODO: this will fail if wallet has no outputs; run these tests on new wallet
+    assertTrue(outputsHex.length() > 0);
+  }
   
+  // Can import outputs in hex format
+  @Test
+  public void testImportOutputsHex() {
+    
+    // get outputs hex
+    String outputsHex = wallet.getOutputsHex();
+    
+    // import outputs hex
+    if (outputsHex != null) {
+      int numImported = wallet.importOutputsHex(outputsHex);
+      assertTrue(numImported > 0);
+    }
+  }
+  
+  // Can get signed key images
+  @Test
+  public void testGetSignedKeyImages() {
+    List<MoneroKeyImage> images = wallet.getKeyImages();
+    assertTrue("No signed key images in wallet", images.size() > 0);
+    for (MoneroKeyImage image : images) {
+      assertTrue(image instanceof MoneroKeyImage);
+      assertTrue(image.getHex().length() > 0);
+      assertTrue(image.getSignature().length() > 0);
+    }
+  }
+  
+  // Can get new key images from the last import
+  @Test
+  public void testGetNewKeyImagesFromLastImport() {
+    
+    // get outputs hex
+    String outputsHex = wallet.getOutputsHex();
+    
+    // import outputs hex
+    if (outputsHex != null) {
+      int numImported = wallet.importOutputsHex(outputsHex);
+      assertTrue(numImported > 0);
+    }
+    
+    // get and test new key images from last import
+    List<MoneroKeyImage> images = wallet.getNewKeyImagesFromLastImport();
+    assertTrue("No new key images in last import", images.size() > 0);  // TODO: these are already known to the wallet, so no new key images will be imported
+    for (MoneroKeyImage image : images) {
+      assertTrue(image.getHex().length() > 0);
+      assertTrue(image.getSignature().length() > 0);
+    }
+  }
+  
+  // Can import key images
+  @Test
+  public void testImportKeyImages() {
+    List<MoneroKeyImage> images = wallet.getKeyImages();
+    assertTrue("Wallet does not have any key images; run send tests", images.size() > 0);
+    MoneroKeyImageImportResult result = wallet.importKeyImages(images);
+    assertTrue(result.getHeight() > 0);
+    
+    // determine if non-zero spent and unspent amounts are expected
+    List<MoneroWalletTx> txs = wallet.getTxs(new MoneroTxFilter().setIsOutgoing(true).setTx(new MoneroWalletTx().setIsConfirmed(true)));
+    BigInteger balance = wallet.getBalance();
+    boolean hasSpent = txs.size() > 0;
+    boolean hasUnspent = balance.compareTo(BigInteger.valueOf(0)) > 0;
+    
+    // test amounts
+    TestUtils.testUnsignedBigInteger(result.getSpentAmount(), hasSpent);
+    TestUtils.testUnsignedBigInteger(result.getUnspentAmount(), hasUnspent);
+  }
+  
+  // Can sign and verify messages
+  @Test
+  public void testSignAndVerifyMessages() {
+    String msg = "This is a super important message which needs to be signed and verified.";
+    String signature = wallet.sign(msg);
+    boolean verified = wallet.verify(msg, wallet.getAddress(0, 0), signature);
+    assertEquals(true, verified);
+    verified = wallet.verify(msg, TestUtils.getRandomWalletAddress(), signature);
+    assertEquals(false, verified);
+  }
+  
+  // Can get and set arbitrary key/value attributes
+  @Test
+  public void testSetKeyValues() {
+    
+    // set attributes
+    Map<String, String> attrs = new HashMap<String, String>();
+    for (int i = 0; i < 5; i++) {
+      String key = "attr" + i;
+      String val = UUID.randomUUID().toString();
+      attrs.put(key, val);
+      wallet.setAttribute(key, val);
+    }
+    
+    // test attributes
+    for (String key : attrs.keySet()) {
+      assertEquals(wallet.getAttribute(key), attrs.get(key));
+    }
+  }
+  
+  // Can convert between a tx send config and payment URI
+  @Test
+  public void testCreatePaymentUri() {
+    
+    // test with address and amount
+    MoneroSendConfig config1 = new MoneroSendConfig(wallet.getAddress(0, 0), BigInteger.valueOf(0));
+    String uri = wallet.createPaymentUri(config1);
+    MoneroSendConfig config2 = wallet.parsePaymentUri(uri);
+    assertEquals(config1, config2);
+    
+    // test with all fields3
+    config1.getDestinations().get(0).setAmount(new BigInteger("425000000000"));
+    config1.setPaymentId("03284e41c342f036");
+    config1.setRecipientName("John Doe");
+    config1.setNote("OMZG XMR FTW");
+    uri = wallet.createPaymentUri(config1);
+    config2 = wallet.parsePaymentUri(uri);
+    assertEquals(config1, config2);
+    
+    // test with undefined address
+    String address = config1.getDestinations().get(0).getAddress();
+    config1.getDestinations().get(0).setAddress(null);
+    try {
+      wallet.createPaymentUri(config1);
+      fail("Should have thrown RPC exception with invalid parameters");
+    } catch (MoneroException e) {
+      assertEquals(-1, (int) e.getCode());
+      assertTrue(e.getMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
+    }
+    config1.getDestinations().get(0).setAddress(address);
+    
+    // test with invalid payment id
+    config1.setPaymentId("bizzup");
+    try {
+      wallet.createPaymentUri(config1);
+      fail("Should have thrown RPC exception with invalid parameters");
+    } catch (MoneroException e) {
+      assertEquals(-11, (int) e.getCode());
+      assertTrue(e.getMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
+    }
+  }
+  
+  @Test
+  public void testMining() {
+    wallet.startMining(2, false, true);
+    wallet.stopMining();
+  }
   
   // --------------------------------- PRIVATE --------------------------------
   
@@ -1613,7 +1607,6 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   
   // ------------------------------ PRIVATE STATIC ----------------------------
 
-  
    private static void testAccount(MoneroAccount account) {
     
     // test account
