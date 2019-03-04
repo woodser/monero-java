@@ -471,6 +471,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     for (MoneroWalletTx tx : txs) assertNull(tx.getOutgoingTransfer());
     
     // get transactions with incoming transfers
+    ctx = new TestContext();
     ctx.hasIncomingTransfers = true;
     txs = testGetTxs(wallet, new MoneroTxFilter().setIsIncoming(true), ctx, true);
     for (MoneroWalletTx tx : txs) {
@@ -522,84 +523,87 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
     }
     
     // get txs with manually built filter that are confirmed have an outgoing transfer from account 0
+    ctx = new TestContext();
+    ctx.hasOutgoingTransfer = true;
     MoneroTxFilter txFilter = new MoneroTxFilter();
     txFilter.setTx(new MoneroWalletTx().setIsConfirmed(true));
     txFilter.setTransferFilter(new MoneroTransferFilter().setTransfer(new MoneroTransfer().setAccountIndex(0)).setIsOutgoing(true));
-    txs = testGetTxs(wallet, txFilter, true);
-    for (let tx of txs) {
-      if (!tx.getIsConfirmed()) console.log(tx.toString());
-      assertEquals(tx.getIsConfirmed(), true);
-      assertTrue(tx.getOutgoingTransfer());
-      assertEquals(tx.getOutgoingTransfer().getAccountIndex(), 0);
+    txs = testGetTxs(wallet, txFilter, ctx, true);
+    for (MoneroWalletTx tx : txs) {
+      if (!tx.getIsConfirmed()) System.out.println(tx);
+      assertEquals(true, tx.getIsConfirmed());
+      assertTrue(tx.getIsOutgoing());
+      assertEquals(0, (int) tx.getOutgoingTransfer().getAccountIndex());
     }
     
     // get txs with outgoing transfers that have destinations to account 1
-    txs = testGetTxs(wallet, {transferFilter: {hasDestinations: true, accountIndex: 0}});
-    for (let tx of txs) {
-      assertTrue(tx.getOutgoingTransfer());
+    txs = testGetTxs(wallet, new MoneroTxFilter().setTransferFilter(new MoneroTransferFilter().setHasDestinations(true).setAccountIndex(0)), null, null);
+    for (MoneroWalletTx tx : txs) {
+      assertTrue(tx.getIsOutgoing());
       assertTrue(tx.getOutgoingTransfer().getDestinations().size() > 0);
     }
     
     // get transactions by payment id
-    let paymentIds = randomTxs.map(tx => tx.getPaymentId());
+    List<String> paymentIds = new ArrayList<String>();
+    for (MoneroWalletTx tx : txs) paymentIds.add(tx.getPaymentId());
     assertTrue(paymentIds.size() > 1);
-    for (let paymentId of paymentIds) {
-      txs = testGetTxs(wallet, {paymentId: paymentId});
+    for (String paymentId : paymentIds) {
+      txs = testGetTxs(wallet, new MoneroTxFilter().setPaymentId(paymentId), null, null);
       assertEquals(txs.size(), 1);
-      assertTrue(txs[0].getPaymentId());
-      MoneroUtils.validatePaymentId(txs[0].getPaymentId());
+      assertNotNull(txs.get(0).getPaymentId());
+      MoneroUtils.validatePaymentId(txs.get(0).getPaymentId());
     }
     
     // get transactions by payment ids
-    txs = testGetTxs(wallet, {paymentIds: paymentIds});
-    for (let tx of txs) {
-      assertTrue(paymentIds.includes(tx.getPaymentId()));
+    txs = testGetTxs(wallet, new MoneroTxFilter().setPaymentIds(paymentIds), null, null);
+    for (MoneroWalletTx tx : txs) {
+      assertTrue(paymentIds.contains(tx.getPaymentId()));
     }
     
     // test block height filtering
     {
-      txs = wallet.getTxs({accountIndex: 0, isConfirmed: true});
-      assertTrue(txs.size() > 0, "No transactions; run send to multiple test");
+      txs = wallet.getTxs(new MoneroTxFilter().setTx(new MoneroWalletTx().setIsConfirmed(true)));
+      assertTrue("No transactions; run send to multiple test", txs.size() > 0);
         
       // get and sort block heights in ascending order
-      let heights = [];
-      for (let tx of txs) {
-        heights.push(tx.getBlock().getHeader().getHeight());
+      List<Integer> heights = new ArrayList<Integer>();
+      for (MoneroWalletTx tx : txs) {
+        heights.add(tx.getBlock().getHeader().getHeight());
       }
-      GenUtils.sort(heights);
+      Collections.sort(heights);
       
       // pick minimum and maximum heights for filtering
-      let minHeight = -1;
-      let maxHeight = -1;
+      int minHeight = -1;
+      int maxHeight = -1;
       if (heights.size() == 1) {
         minHeight = 0;
-        maxHeight = heights[0] - 1;
+        maxHeight = heights.get(0) - 1;
       } else {
-        minHeight = heights[0] + 1;
-        maxHeight = heights[heights.size() - 1] - 1;
+        minHeight = heights.get(0) + 1;
+        maxHeight = heights.get(heights.size() - 1) - 1;
       }
       
       // assert some transactions filtered
-      let unfilteredCount = txs.size();
-      txs = testGetTxs(wallet, {accountIndex: 0, minHeight: minHeight, maxHeight: maxHeight}, true);
+      int unfilteredCount = txs.size();
+      txs = testGetTxs(wallet, new MoneroTxFilter().setMinHeight(minHeight).setMaxHeight(maxHeight), null, true);
       assertTrue(txs.size() < unfilteredCount);
-      for (let tx of txs) {
-        let height = tx.getBlock().getHeader().getHeight();
+      for (MoneroTx tx : txs) {
+        int height = tx.getBlock().getHeader().getHeight();
         assertTrue(height >= minHeight && height <= maxHeight);
       }
     }
     
     // include vouts with transactions
-    txs = testGetTxs(wallet, {getVouts: true}, true);
-    let found = false;
-    for (let tx of txs) {
-      if (tx.getVouts()) {
+    txs = testGetTxs(wallet, new MoneroTxFilter().setIncludeVouts(true), null, true);
+    boolean found = false;
+    for (MoneroWalletTx tx : txs) {
+      if (tx.getVouts() != null) {
         assertTrue(tx.getVouts().size() > 0);
         found = true;
         break;
       }
     }
-    assertTrue(found, "No vouts found in txs");
+    assertTrue("No vouts found in txs", found);
   }
   
   // Returns all known fields of txs regardless of filtering

@@ -22,6 +22,7 @@ public class MoneroTxFilter extends Filter<MoneroWalletTx> {
   private Boolean isIncoming;
   private MoneroTransferFilter transferFilter;
   private MoneroWalletTx tx;
+  private Boolean includeVouts;
 
   public List<String> getTxIds() {
     return txIds;
@@ -52,6 +53,10 @@ public class MoneroTxFilter extends Filter<MoneroWalletTx> {
   public MoneroTxFilter setPaymentIds(List<String> paymentIds) {
     this.paymentIds = paymentIds;
     return this;
+  }
+  
+  public MoneroTxFilter setPaymentId(String paymentId) {
+    return setPaymentIds(Arrays.asList(paymentId));
   }
 
   public Integer getHeight() {
@@ -114,6 +119,15 @@ public class MoneroTxFilter extends Filter<MoneroWalletTx> {
 
   public MoneroTxFilter setTx(MoneroWalletTx tx) {
     this.tx = tx;
+    return this;
+  }
+
+  public Boolean getIncludeVouts() {
+    return includeVouts;
+  }
+
+  public MoneroTxFilter setIncludeVouts(Boolean includeVouts) {
+    this.includeVouts = includeVouts;
     return this;
   }
 
