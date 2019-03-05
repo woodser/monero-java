@@ -2,12 +2,12 @@ package test;
 
 import org.junit.BeforeClass;
 
-import monero.wallet.MoneroWalletRpc;
+import monero.wallet.MoneroWallet;
 
 /**
- * Tests the Monero Wallet RPC client and server.
+ * Tests monero-wallet-rpc non-relaying calls.
  */
-public class TestMoneroWalletRpc extends TestMoneroWalletCommon<MoneroWalletRpc> {
+public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -15,7 +15,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon<MoneroWalletRpc>
   }
 
   @Override
-  protected MoneroWalletRpc initWallet() {
+  protected MoneroWallet getTestWallet() {
     throw new RuntimeException("Not implemented");
   }
 }

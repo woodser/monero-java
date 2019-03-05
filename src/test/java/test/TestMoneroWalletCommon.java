@@ -53,7 +53,7 @@ import utils.TestUtils;
  * 
  * TODO: test filtering with not relayed
  */
-public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
+public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // test constants
   private static final boolean TEST_LITE_MODE = false;
@@ -69,17 +69,9 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   private MoneroDaemon daemon;    // daemon instance to test
   private List<MoneroWalletTx> txCache; // local tx cache
   
-  /**
-   * Subclasseses return wallet instance to test and may override default RPC daemon.
-   */
-  protected abstract MoneroWallet initWallet();
-  protected MoneroDaemon initDaemon() {
-    return TestUtils.getDaemonRpc();
-  }
-  
   public TestMoneroWalletCommon() {
-    wallet = initWallet();
-    daemon = initDaemon();
+    wallet = getTestWallet();
+    daemon = getTestDaemon();
   }
 
   @BeforeClass
