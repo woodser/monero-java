@@ -1,6 +1,7 @@
 package common.types;
 
-import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Base filter.
@@ -16,13 +17,24 @@ public interface Filter<T> {
   public boolean meetsCriteria(T item);
   
   /**
-   * Returns a new collection comprised of elements from the given collection
-   * that meet this filter's criteria.
+   * Returns a new list comprised of elements from the given list that meet the
+   * filter's criteria.
    * 
    * @param items are the items to filter
    * @return the items that meet this filter's criteria
    */
-  public static Collection<Filter<?>> apply(Filter<?> filter, Collection<Filter<?>> items) {
+  public static <T> List<T> apply(Filter<? extends T> filter, List<T> items) {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  /**
+   * Returns a new set comprised of elements from the given set that meet the
+   * filter's criteria.
+   * 
+   * @param items are the items to filter
+   * @return the items that meet this filter's criteria
+   */
+  public static <T> Set<T> apply(Filter<? extends T> filter, Set<T> items) {
     throw new RuntimeException("Not implemented");
   }
 }
