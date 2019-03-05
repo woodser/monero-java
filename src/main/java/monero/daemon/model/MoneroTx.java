@@ -36,7 +36,7 @@ public class MoneroTx {
   private Integer size;
   private Integer weight;
   private List<MoneroOutput> vins;
-  private List<? extends MoneroOutput> vouts;
+  private List<MoneroOutput> vouts;
   private List<Integer> outputIndices;
   private String metadata;
   private String commonTxSets;
@@ -298,11 +298,11 @@ public class MoneroTx {
     return this;
   }
   
-  public List<? extends MoneroOutput> getVouts() {
+  public List<MoneroOutput> getVouts() {
     return vouts;
   }
   
-  public MoneroTx setVouts(List<? extends MoneroOutput> vouts) {
+  public MoneroTx setVouts(List<MoneroOutput> vouts) {
     this.vouts = vouts;
     return this;
   }

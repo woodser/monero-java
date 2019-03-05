@@ -2522,7 +2522,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // test vouts
     if (tx.getIncomingTransfers() != null && Boolean.TRUE.equals(tx.getIsConfirmed()) && ctx.getVouts) assertTrue(tx.getVouts().size() > 0);
-    if (tx.getVouts() != null) for (MoneroOutputWallet vout : tx.getVouts()) testVout(vout);
+    if (tx.getVouts() != null) for (MoneroOutputWallet vout : tx.getVoutsWallet()) testVout(vout);
     
     // test deep copy
     if (!Boolean.TRUE.equals(ctx.doNotTestCopy)) testWalletTxCopy(tx, ctx);
