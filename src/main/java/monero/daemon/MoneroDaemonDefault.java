@@ -29,6 +29,11 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   }
   
   @Override
+  public MoneroTx getTx(String txId, Boolean prune) {
+    return getTxs(Arrays.asList(txId), prune).get(0);
+  }
+  
+  @Override
   public List<MoneroTx> getTxs(List<String> txIds) {
     return getTxs(txIds, null);
   }

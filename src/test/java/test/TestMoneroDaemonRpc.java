@@ -266,7 +266,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetBlocksByIdBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    fail("Not implemented");
+    throw new RuntimeException("Not implemented");
   }
   
   @Test
@@ -304,7 +304,7 @@ public class TestMoneroDaemonRpc {
   public void testGetBlockIdsBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     //get_hashes.bin
-    fail("Not implemented");
+    throw new RuntimeException("Not implemented");
   }
   
   @Test
@@ -668,7 +668,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetOutputHistogramBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    fail("Not implemented");
+    throw new RuntimeException("Not implemented");
 //    List<MoneroOutputHistogramEntry> entries = daemon.getOutputHistogram();
 //    assertFalse(entries.isEmpty());
 //    for (MoneroOutputHistogramEntry entry : entries) {

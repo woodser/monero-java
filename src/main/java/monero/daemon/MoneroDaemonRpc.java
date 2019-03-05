@@ -154,28 +154,78 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroBlock getBlockByHeight(int height) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("height", height);
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_block", params);
+    Map<String, Object> rpcBlock = (Map<String, Object>) respMap.get("result");
+    MoneroBlock block = convertRpcBlock((Map<String, Object>) rpcBlock);
+    return block;
   }
 
   @Override
   public List<MoneroBlock> getBlocksByHeight(List<Integer> heights) {
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("Binary requests not implemented");
+//    await this._initOneTime();
+//    
+//    // fetch blocks in binary
+//    let respBin = await this.config.rpc.sendBinaryRequest("get_blocks_by_height.bin", { heights: heights });
+//    
+//    // convert binary blocks to json
+//    let rpcBlocks = this.coreUtils.binary_blocks_to_json(respBin);
+//    MoneroDaemonRpc._checkResponseStatus(rpcBlocks);
+//    //console.log(JSON.stringify(rpcBlocks));
+//    
+//    // build blocks with transactions
+//    assert.equal(rpcBlocks.txs.length, rpcBlocks.blocks.length);    
+//    let blocks = [];
+//    for (let blockIdx = 0; blockIdx < rpcBlocks.blocks.length; blockIdx++) {
+//      
+//      // build block
+//      let block = MoneroDaemonRpc._buildBlock(rpcBlocks.blocks[blockIdx]);
+//      block.getHeader().setHeight(heights[blockIdx]);
+//      blocks.push(block);
+//      
+//      // build transactions
+//      let txs = [];
+//      for (let txIdx = 0; txIdx < rpcBlocks.txs[blockIdx].length; txIdx++) {
+//        let tx = new MoneroTx();
+//        txs.push(tx);
+//        tx.setId(rpcBlocks.blocks[blockIdx].tx_hashes[txIdx]);
+//        tx.setIsConfirmed(true);
+//        tx.setInTxPool(false);
+//        tx.setIsCoinbase(false);
+//        tx.setDoNotRelay(false);
+//        tx.setIsRelayed(true);
+//        tx.setIsFailed(false);
+//        tx.setIsDoubleSpend(false);
+//        MoneroDaemonRpc._buildTx(rpcBlocks.txs[blockIdx][txIdx], tx);
+//      }
+//      
+//      // merge into one block
+//      block.setTxs([]);
+//      for (let tx of txs) {
+//        if (tx.getBlock()) block.merge(tx.getBlock());
+//        else block.getTxs().push(tx.setBlock(block));
+//      }
+//    }
+//    
+//    return blocks;
   }
 
   @Override
   public List<MoneroBlock> getBlocksByRange(Integer startHeight, Integer endHeight) {
-    throw new RuntimeException("Not implemented");
+    if (startHeight == null) startHeight = 0;
+    if (endHeight == null) endHeight = getHeight() - 1;
+    List<Integer> heights = new ArrayList<Integer>();
+    for (int height = startHeight; height <= endHeight; height++) heights.add(height);
+    return getBlocksByHeight(heights);
   }
 
   @Override
   public List<String> getBlockIds(List<String> blockIds, Integer startHeight) {
-    throw new RuntimeException("Not implemented");
-  }
-
-  @Override
-  public MoneroTx getTx(String txId, Boolean prune) {
     throw new RuntimeException("Not implemented");
   }
 
