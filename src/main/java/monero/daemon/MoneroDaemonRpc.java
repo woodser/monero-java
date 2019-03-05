@@ -46,6 +46,8 @@ import monero.utils.MoneroUtils;
 
 /**
  * Implements a Monero daemon using monero-daemon-rpc.
+ * 
+ * TODO: every call needs to checkResponseStatus
  */
 public class MoneroDaemonRpc extends MoneroDaemonDefault {
   
