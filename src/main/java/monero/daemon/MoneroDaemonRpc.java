@@ -512,8 +512,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("vin")) {
         List<Map<String, Object>> rpcVins = (List<Map<String, Object>>) val;
         if (rpcVins.size() != 1 || !rpcVins.get(0).containsKey("gen")) {  // ignore coinbase vin TODO: why? probably needs re-enabled
-          tx.setVins(new ArrayList<MoneroOutput>());
-          for (Map<String, Object> rpcVin : rpcVins) tx.getVins().add(convertRpcOutput(rpcVin, null));
+          List<MoneroOutput> vouts = new ArrayList<MoneroOutput>();
+          for (Map<String, Object> rpcVin : rpcVins) vouts.add(convertRpcOutput(rpcVin, null));
+          tx.setVouts(vouts);
         }
       }
       else if (key.equals("vout")) {
