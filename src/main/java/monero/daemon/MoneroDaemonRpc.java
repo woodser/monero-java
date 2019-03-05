@@ -1,6 +1,7 @@
 package monero.daemon;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxBacklogEntry;
 import monero.daemon.model.MoneroTxPoolStats;
 import monero.rpc.MoneroRpc;
+import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 
 /**
@@ -229,9 +231,41 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroTx> getTxs(List<String> txIds, Boolean prune) {
-    throw new RuntimeException("Not implemented");
+    
+    // validate input
+    assertTrue("Must provide an array of transaction ids", txIds.size() > 0);
+    
+    // fetch transactions
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txs_hashes", txIds);
+    params.put("decode_as_json", true);
+    params.put("prune", prune);
+    Map<String, Object> resultMap = null;
+    try {
+      Map<String, Object> respMap = rpc.sendPathRequest("get_transactions", params);
+      resultMap = (Map<String, Object>) respMap.get("result");
+      _checkResponseStatus(resultMap);
+    } catch (MoneroException e) {
+      if (e.getMessage().indexOf("Failed to parse hex representation of transaction hash") >= 0) throw new MoneroException("Invalid transaction id", e.getCode());
+      throw e;
+    }
+    
+    //  interpret response
+    List<Map<String, Object>> rpcTxs = (List<Map<String, Object>>) resultMap.get("txs");
+    
+    // build transaction models
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    if (rpcTxs != null) {
+      for (int i = 0; i < rpcTxs.size(); i++) {
+        MoneroTx tx = new MoneroTx();
+        tx.setIsCoinbase(false);
+        txs.add(convertRpcTx(rpcTxs.get(i), tx));
+      }
+    }
+    return txs;
   }
 
   @Override
@@ -457,6 +491,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
   
   //---------------------------------- PRIVATE -------------------------------
+  
+  private static void _checkResponseStatus(Map<String, Object> resp) {
+    String status = (String) resp.get("status");
+    if ("OK".equals(status)) throw new MoneroException(status);
+  }
   
   private static MoneroBlockTemplate convertRpcBlockTemplate(Map<String, Object> rpcTemplate) {
     MoneroBlockTemplate template = new MoneroBlockTemplate();

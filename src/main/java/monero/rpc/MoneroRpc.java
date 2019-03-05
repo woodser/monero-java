@@ -108,10 +108,7 @@ public class MoneroRpc {
       // send http request and validate response
       HttpPost post = new HttpPost(uri.toString() + "/json_rpc");
       HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
-      post.setEntity(entity);
-      
-      System.out.println(post);
-      
+      post.setEntity(entity);      
       HttpResponse resp = client.execute(post);
       validateHttpResponse(resp);
 
