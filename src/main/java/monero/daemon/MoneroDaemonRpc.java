@@ -1,6 +1,8 @@
 package monero.daemon;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +32,7 @@ import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxBacklogEntry;
 import monero.daemon.model.MoneroTxPoolStats;
 import monero.rpc.MoneroRpc;
+import monero.utils.MoneroUtils;
 
 /**
  * Implements a Monero daemon using monero-daemon-rpc.
@@ -62,17 +65,29 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public String getBlockId(int height) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendJsonRequest("on_get_block_hash", Arrays.asList(height));
+    return (String) respMap.get("result");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroBlockTemplate getBlockTemplate(String walletAddress, Integer reserveSize) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("wallet_address", walletAddress);
+    params.put("reserve_size", reserveSize);
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_block_template", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroBlockTemplate template = convertBlockTemplate(resultMap);
+    return template;
   }
-
+  
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroBlockHeader getLastBlockHeader() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_last_block_header");
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    MoneroBlockHeader header = convertBlockHeader((Map<String, Object>) resultMap.get("block_header"));
+    return header;
   }
 
   @Override
@@ -351,4 +366,87 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public void removeBlockListener(MoneroBlockListener listener) {
     throw new RuntimeException("Not implemented");
   }
+  
+  //---------------------------------- PRIVATE -------------------------------
+  
+  private static MoneroBlockTemplate convertBlockTemplate(Map<String, Object> rpcTemplate) {
+    MoneroBlockTemplate template = new MoneroBlockTemplate();
+    for (String key : rpcTemplate.keySet()) {
+      Object val = rpcTemplate.get(key);
+      if (key.equals("blockhashing_blob")) template.setBlockTemplateBlob((String) val);
+      else if (key.equals("blocktemplate_blob")) template.setBlockHashingBlob((String) val);
+      else if (key.equals("difficulty")) template.setDifficulty((BigInteger) val);
+      else if (key.equals("expected_reward")) template.setExpectedReward((BigInteger) val);
+      else if (key.equals("height")) template.setHeight(((BigInteger) val).intValue());
+      else if (key.equals("prev_hash")) template.setPrevId((String) val);
+      else if (key.equals("reserved_offset")) template.setReservedOffset(((BigInteger) val).intValue());
+      else if (key.equals("status")) {}  // handled elsewhere
+      else if (key.equals("untrusted")) {}  // handled elsewhere
+      else LOGGER.warn("WARNING: ignoring unexpected field in block template: " + key + ": " + val);
+    }
+    return template;
+  }
+  
+  /**
+   * Converts a block header map from rpc to a MoneroBlockHeader.
+   * 
+   * @param rpcHeader is the block header map to convert
+   * @return MoneroBlockHeader is the converted block header
+   */
+  private static MoneroBlockHeader convertBlockHeader(Map<String, Object> rpcHeader) {
+    MoneroBlockHeader header = new MoneroBlockHeader();
+    for (String key : rpcHeader.keySet()) {
+      Object val = rpcHeader.get(key);
+      if (key.equals("block_size")) header.setSize(MoneroUtils.reconcile(header.getSize(), ((BigInteger) val).longValue()));
+      else if (key.equals("depth")) header.setDepth(MoneroUtils.reconcile(header.getDepth(), ((BigInteger) val).longValue()));
+      else if (key.equals("difficulty")) header.setDifficulty(MoneroUtils.reconcile(header.getDifficulty(), (BigInteger) val));
+      else if (key.equals("cumulative_difficulty")) header.setCumulativeDifficulty(MoneroUtils.reconcile(header.getCumulativeDifficulty(), (BigInteger) val));
+      else if (key.equals("hash")) header.setId(MoneroUtils.reconcile(header.getId(), (String) val));
+      else if (key.equals("height")) header.setHeight(MoneroUtils.reconcile(header.getHeight(), ((BigInteger) val).intValue()));
+      else if (key.equals("major_version")) header.setMajorVersion(MoneroUtils.reconcile(header.getMajorVersion(), ((BigInteger) val).intValue()));
+      else if (key.equals("minor_version")) header.setMinorVersion(MoneroUtils.reconcile(header.getMinorVersion(), ((BigInteger) val).intValue()));
+      else if (key.equals("nonce")) header.setNonce(MoneroUtils.reconcile(header.getNonce(), ((BigInteger) val).longValue()));
+      else if (key.equals("num_txes")) header.setNumTxs(MoneroUtils.reconcile(header.getNumTxs(), ((BigInteger) val).intValue()));
+      else if (key.equals("orphan_status")) header.setOrphanStatus(MoneroUtils.reconcile(header.getOrphanStatus(), (Boolean) val));
+      else if (key.equals("prev_hash") || key.equals("prev_id")) header.setPrevId(MoneroUtils.reconcile(header.getPrevId(), (String) val));
+      else if (key.equals("reward")) header.setReward(MoneroUtils.reconcile(header.getReward(), (BigInteger) val));
+      else if (key.equals("timestamp")) header.setTimestamp(MoneroUtils.reconcile(header.getTimestamp(), ((BigInteger) val).longValue()));
+      else if (key.equals("block_weight")) header.setWeight(MoneroUtils.reconcile(header.getWeight(), ((BigInteger) val).longValue()));
+      else if (key.equals("long_term_weight")) header.setLongTermWeight(MoneroUtils.reconcile(header.getLongTermWeight(), ((BigInteger) val).longValue()));
+      else if (key.equals("pow_hash")) header.setPowHash(MoneroUtils.reconcile(header.getPowHash(), "".equals(val) ? null : (String) val));
+      else if (key.equals("tx_hashes")) {}  // used in block model, not header model
+      else if (key.equals("miner_tx")) {}   // used in block model, not header model
+      else LOGGER.warn("WARNING: ignoring unexpected block header field: '" + key + "': " + val);
+    }
+    return header;
+  }
+  
+//  static _buildBlockHeader(rpcHeader) {
+//    if (!rpcHeader) return undefined;
+//    let header = new MoneroBlockHeader();
+//    for (let key of Object.keys(rpcHeader)) {
+//      let val = rpcHeader[key];
+//      if (key === "block_size") MoneroUtils.safeSet(header, header.getSize, header.setSize, val);
+//      else if (key === "depth") MoneroUtils.safeSet(header, header.getDepth, header.setDepth, val);
+//      else if (key === "difficulty") MoneroUtils.safeSet(header, header.getDifficulty, header.setDifficulty, new BigInteger(val));
+//      else if (key === "cumulative_difficulty") MoneroUtils.safeSet(header, header.getCumulativeDifficulty, header.setCumulativeDifficulty, new BigInteger(val));
+//      else if (key === "hash") MoneroUtils.safeSet(header, header.getId, header.setId, val);
+//      else if (key === "height") MoneroUtils.safeSet(header, header.getHeight, header.setHeight, val);
+//      else if (key === "major_version") MoneroUtils.safeSet(header, header.getMajorVersion, header.setMajorVersion, val);
+//      else if (key === "minor_version") MoneroUtils.safeSet(header, header.getMinorVersion, header.setMinorVersion, val);
+//      else if (key === "nonce") MoneroUtils.safeSet(header, header.getNonce, header.setNonce, val);
+//      else if (key === "num_txes") MoneroUtils.safeSet(header, header.getNumTxs, header.setNumTxs, val);
+//      else if (key === "orphan_status") MoneroUtils.safeSet(header, header.getOrphanStatus, header.setOrphanStatus, val);
+//      else if (key === "prev_hash" || key === "prev_id") MoneroUtils.safeSet(header, header.getPrevId, header.setPrevId, val);
+//      else if (key === "reward") MoneroUtils.safeSet(header, header.getReward, header.setReward, new BigInteger(val));
+//      else if (key === "timestamp") MoneroUtils.safeSet(header, header.getTimestamp, header.setTimestamp, val);
+//      else if (key === "block_weight") MoneroUtils.safeSet(header, header.getWeight, header.setWeight, val);
+//      else if (key === "long_term_weight") MoneroUtils.safeSet(header, header.getLongTermWeight, header.setLongTermWeight, val);
+//      else if (key === "pow_hash") MoneroUtils.safeSet(header, header.getPowHash, header.setPowHash, val === "" ? undefined : val);
+//      else if (key === "tx_hashes") {}  // used in block model, not header model
+//      else if (key === "miner_tx") {}   // used in block model, not header model
+//      else console.log("WARNING: ignoring unexpected block header field: '" + key + "': " + val);
+//    }
+//    return header;
+//  }
 }
