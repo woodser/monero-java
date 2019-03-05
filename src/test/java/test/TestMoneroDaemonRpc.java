@@ -139,7 +139,7 @@ public class TestMoneroDaemonRpc {
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
     MoneroBlockHeader header = daemon.getBlockHeaderByHeight(lastHeader.getHeight());
     testBlockHeader(header, true);
-   assertEquals(lastHeader, header);
+    assertEquals(lastHeader, header);
     
     // retrieve by height of previous to last block
     header = daemon.getBlockHeaderByHeight(lastHeader.getHeight() - 1);
