@@ -8,6 +8,15 @@ public class MoneroKeyImage {
   private String hex;
   private String signature;
   
+  public MoneroKeyImage(String hex) {
+    this(hex, null);
+  }
+  
+  public MoneroKeyImage(String hex, String signature) {
+    this.hex = hex;
+    this.signature = signature;
+  }
+  
   public String getHex() {
     return hex;
   }
