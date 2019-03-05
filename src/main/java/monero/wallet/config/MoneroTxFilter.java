@@ -5,24 +5,40 @@ import java.util.List;
 
 import common.types.Filter;
 import common.utils.JsonUtils;
-import monero.wallet.model.MoneroWalletTx;
+import monero.wallet.model.MoneroTxWallet;
 
 /**
- * Filters transactions that don't match initialized filter criteria.
+ * Filters transactions that don't meet initialized filter criteria.
  */
-public class MoneroTxFilter extends Filter<MoneroWalletTx> {
+public class MoneroTxFilter extends MoneroTxWallet implements Filter<MoneroTxWallet> {
   
+  private Boolean isOutgoing;
+  private Boolean isIncoming;
   private List<String> txIds;
   private Boolean hasPaymentId;
   private List<String> paymentIds;
-  private Integer height;
   private Integer minHeight;
   private Integer maxHeight;
-  private Boolean isOutgoing;
-  private Boolean isIncoming;
-  private MoneroTransferFilter transferFilter;
-  private MoneroWalletTx tx;
   private Boolean includeVouts;
+  private MoneroTransferFilter transferFilter;
+  
+  public Boolean getIsOutgoing() {
+    return isOutgoing;
+  }
+
+  public MoneroTxFilter setIsOutgoing(Boolean isOutgoing) {
+    this.isOutgoing = isOutgoing;
+    return this;
+  }
+
+  public Boolean getIsIncoming() {
+    return isIncoming;
+  }
+
+  public MoneroTxFilter setIsIncoming(Boolean isIncoming) {
+    this.isIncoming = isIncoming;
+    return this;
+  }
 
   public List<String> getTxIds() {
     return txIds;
@@ -59,15 +75,6 @@ public class MoneroTxFilter extends Filter<MoneroWalletTx> {
     return setPaymentIds(Arrays.asList(paymentId));
   }
 
-  public Integer getHeight() {
-    return height;
-  }
-
-  public MoneroTxFilter setHeight(Integer height) {
-    this.height = height;
-    return this;
-  }
-
   public Integer getMinHeight() {
     return minHeight;
   }
@@ -86,21 +93,12 @@ public class MoneroTxFilter extends Filter<MoneroWalletTx> {
     return this;
   }
 
-  public Boolean getIsOutgoing() {
-    return isOutgoing;
+  public Boolean getIncludeVouts() {
+    return includeVouts;
   }
 
-  public MoneroTxFilter setIsOutgoing(Boolean isOutgoing) {
-    this.isOutgoing = isOutgoing;
-    return this;
-  }
-
-  public Boolean getIsIncoming() {
-    return isIncoming;
-  }
-
-  public MoneroTxFilter setIsIncoming(Boolean isIncoming) {
-    this.isIncoming = isIncoming;
+  public MoneroTxFilter setIncludeVouts(Boolean includeVouts) {
+    this.includeVouts = includeVouts;
     return this;
   }
 
@@ -112,27 +110,9 @@ public class MoneroTxFilter extends Filter<MoneroWalletTx> {
     this.transferFilter = transferFilter;
     return this;
   }
-
-  public MoneroWalletTx getTx() {
-    return tx;
-  }
-
-  public MoneroTxFilter setTx(MoneroWalletTx tx) {
-    this.tx = tx;
-    return this;
-  }
-
-  public Boolean getIncludeVouts() {
-    return includeVouts;
-  }
-
-  public MoneroTxFilter setIncludeVouts(Boolean includeVouts) {
-    this.includeVouts = includeVouts;
-    return this;
-  }
-
+  
   @Override
-  public boolean meetsCriteria(MoneroWalletTx item) {
+  public boolean meetsCriteria(MoneroTxWallet item) {
     throw new RuntimeException("Not implemented");
   }
   

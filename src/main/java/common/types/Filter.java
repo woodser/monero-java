@@ -5,8 +5,16 @@ import java.util.Collection;
 /**
  * Base filter.
  */
-public abstract class Filter<T> {
+public interface Filter<T> {
 
+  /**
+   * Indicates if the given item meets the criteria of this filter.
+   * 
+   * @param item is the item to test
+   * @return true if the item meets the criteria of this filter, false otherwise
+   */
+  public boolean meetsCriteria(T item);
+  
   /**
    * Returns a new collection comprised of elements from the given collection
    * that meet this filter's criteria.
@@ -14,15 +22,7 @@ public abstract class Filter<T> {
    * @param items are the items to filter
    * @return the items that meet this filter's criteria
    */
-  public Collection<T> apply(Collection<T> items) {
+  public static Collection<Filter<?>> apply(Filter<?> filter, Collection<Filter<?>> items) {
     throw new RuntimeException("Not implemented");
   }
-  
-  /**
-   * Indicates if the given item meets the criteria of this filter.
-   * 
-   * @param item is the item to test
-   * @return true if the item meets the criteria of this filter, false otherwise
-   */
-  public abstract boolean meetsCriteria(T item);
 }

@@ -7,23 +7,23 @@ import monero.utils.MoneroException;
 /**
  * Models a Monero output with wallet extensions.
  */
-public class MoneroWalletOutput extends MoneroOutput {
+public class MoneroOutputWallet extends MoneroOutput {
 
   private Integer accountIndex;
   private Integer subaddressIndex;
   private Boolean isSpent;
   
-  public MoneroWalletTx getTx() {
-    return (MoneroWalletTx) super.getTx();
+  public MoneroTxWallet getTx() {
+    return (MoneroTxWallet) super.getTx();
   }
   
-  public MoneroWalletOutput setTx(MoneroTx tx) {
-    if (tx != null && !(tx instanceof MoneroWalletTx)) throw new MoneroException("Wallet output's transaction must be of type MoneroWalletTx");
+  public MoneroOutputWallet setTx(MoneroTx tx) {
+    if (tx != null && !(tx instanceof MoneroTxWallet)) throw new MoneroException("Wallet output's transaction must be of type MoneroTxWallet");
     super.setTx(tx);
     return this;
   }
   
-  public MoneroWalletOutput setTx(MoneroWalletTx tx) {
+  public MoneroOutputWallet setTx(MoneroTxWallet tx) {
     super.setTx(tx);
     return this;
   }
@@ -32,7 +32,7 @@ public class MoneroWalletOutput extends MoneroOutput {
     return accountIndex;
   }
   
-  public MoneroWalletOutput setAccountIndex(Integer accountIndex) {
+  public MoneroOutputWallet setAccountIndex(Integer accountIndex) {
     this.accountIndex = accountIndex;
     return this;
   }
@@ -41,7 +41,7 @@ public class MoneroWalletOutput extends MoneroOutput {
     return subaddressIndex;
   }
   
-  public MoneroWalletOutput setSubaddressIndex(Integer subaddressIndex) {
+  public MoneroOutputWallet setSubaddressIndex(Integer subaddressIndex) {
     this.subaddressIndex = subaddressIndex;
     return this;
   }
@@ -50,12 +50,12 @@ public class MoneroWalletOutput extends MoneroOutput {
     return isSpent;
   }
   
-  public MoneroWalletOutput setIsSpent(Boolean isSpent) {
+  public MoneroOutputWallet setIsSpent(Boolean isSpent) {
     this.isSpent = isSpent;
     return this;
   }
   
-  public MoneroWalletOutput copy() {
+  public MoneroOutputWallet copy() {
     throw new RuntimeException("Not implemented");
   }
 }

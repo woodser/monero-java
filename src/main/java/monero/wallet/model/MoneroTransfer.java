@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class MoneroTransfer {
 
-  private MoneroWalletTx tx;
+  private MoneroTxWallet tx;
   private Boolean isOutgoing;
   private Boolean isIncoming;
   private String address;
@@ -17,11 +17,11 @@ public class MoneroTransfer {
   private BigInteger amount;
   private List<MoneroDestination> destinations;
   
-  public MoneroWalletTx getTx() {
+  public MoneroTxWallet getTx() {
     return tx;
   }
   
-  public MoneroTransfer setTx(MoneroWalletTx tx) {
+  public MoneroTransfer setTx(MoneroTxWallet tx) {
     this.tx = tx;
     return this;
   }
