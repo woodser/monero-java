@@ -1,9 +1,12 @@
 package monero.wallet.config;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import common.types.Filter;
+import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroTransfer;
+import monero.wallet.model.MoneroTxWallet;
 
 /**
  * Filters transfers that don't meet initialized filter criteria.
@@ -44,5 +47,55 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
   @Override
   public boolean meetsCriteria(MoneroTransfer item) {
     throw new RuntimeException("Not implemented");
+  }
+  
+  // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
+
+  @Override
+  public MoneroTransferFilter setTx(MoneroTxWallet tx) {
+    super.setTx(tx);
+    return this;
+  }
+
+  @Override
+  public MoneroTransferFilter setIsOutgoing(Boolean isOutgoing) {
+    super.setIsOutgoing(isOutgoing);
+    return this;
+  }
+
+  @Override
+  public MoneroTransferFilter setIsIncoming(Boolean isIncoming) {
+    super.setIsIncoming(isIncoming);
+    return this;
+  }
+
+  @Override
+  public MoneroTransferFilter setAddress(String address) {
+    super.setAddress(address);
+    return this;
+  }
+
+  @Override
+  public MoneroTransferFilter setAccountIndex(Integer accountIndex) {
+    super.setAccountIndex(accountIndex);
+    return this;
+  }
+
+  @Override
+  public MoneroTransferFilter setSubaddressIndex(Integer subaddressIndex) {
+    super.setSubaddressIndex(subaddressIndex);
+    return this;
+  }
+
+  @Override
+  public MoneroTransferFilter setAmount(BigInteger amount) {
+    super.setAmount(amount);
+    return this;
+  }
+
+  @Override
+  public MoneroTransferFilter setDestinations(List<MoneroDestination> destinations) {
+    super.setDestinations(destinations);
+    return this;
   }
 }
