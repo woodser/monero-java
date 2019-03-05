@@ -3,16 +3,15 @@ package monero.wallet.config;
 import java.util.List;
 
 import common.types.Filter;
-import monero.wallet.model.MoneroWalletOutput;
+import monero.wallet.model.MoneroOutputWallet;
 
 /**
  * Filters transfers that don't match initialized filter criteria.
  */
-public class MoneroVoutFilter extends Filter<MoneroWalletOutput> {
+public class MoneroVoutFilter extends MoneroOutputWallet implements Filter<MoneroOutputWallet> {
 
   private List<Integer> subaddressIndices;
   private MoneroTxFilter txFilter;
-  private MoneroWalletOutput vout;
   
   public List<Integer> getSubaddressIndices() {
     return subaddressIndices;
@@ -32,17 +31,8 @@ public class MoneroVoutFilter extends Filter<MoneroWalletOutput> {
     return this;
   }
 
-  public MoneroWalletOutput getVout() {
-    return vout;
-  }
-
-  public MoneroVoutFilter setVout(MoneroWalletOutput vout) {
-    this.vout = vout;
-    return this;
-  }
-
   @Override
-  public boolean meetsCriteria(MoneroWalletOutput item) {
+  public boolean meetsCriteria(MoneroOutputWallet item) {
     throw new RuntimeException("Not implemented");
   }
 }

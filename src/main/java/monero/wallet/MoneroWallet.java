@@ -42,8 +42,8 @@ import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncProgressListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
-import monero.wallet.model.MoneroWalletOutput;
-import monero.wallet.model.MoneroWalletTx;
+import monero.wallet.model.MoneroOutputWallet;
+import monero.wallet.model.MoneroTxWallet;
 
 /**
  * Monero wallet interface.
@@ -345,7 +345,7 @@ public interface MoneroWallet {
 
    * @return all wallet transactions
    */
-  public List<MoneroWalletTx> getTxs();
+  public List<MoneroTxWallet> getTxs();
   
   /**
    * Get wallet transactions.  Wallet transactions contain one or more
@@ -359,7 +359,7 @@ public interface MoneroWallet {
    * @param filter filters query results (optional)
    * @return wallet transactions per the filter
    */
-  public List<MoneroWalletTx> getTxs(MoneroTxFilter filter);
+  public List<MoneroTxWallet> getTxs(MoneroTxFilter filter);
   
   /**
    * Get all incoming and outgoing transfers to and from this wallet.  An
@@ -424,7 +424,7 @@ public interface MoneroWallet {
    * 
    * @return all wallet vouts
    */
-  public List<MoneroWalletOutput> getVouts();
+  public List<MoneroOutputWallet> getVouts();
   
   /**
    * Get wallet vouts.  A wallet vout is an output created from a previous
@@ -438,7 +438,7 @@ public interface MoneroWallet {
    * @param filter filters query results (optional)
    * @return wallet vouts per the filter
    */
-  public List<MoneroWalletOutput> getVouts(MoneroVoutFilter filter);
+  public List<MoneroOutputWallet> getVouts(MoneroVoutFilter filter);
   
   /**
    * Get all signed key images.
@@ -469,7 +469,7 @@ public interface MoneroWallet {
    * @param config configures the transaction
    * @return the resulting transaction
    */
-  public MoneroWalletTx send(MoneroSendConfig config);
+  public MoneroTxWallet send(MoneroSendConfig config);
   
   /**
    * Create and relay a transaction which transfers funds from this wallet to
@@ -479,7 +479,7 @@ public interface MoneroWallet {
    * @param sendAmount is the amount being sent
    * @return the resulting transaction
    */
-  public MoneroWalletTx send(String address, BigInteger sendAmount);
+  public MoneroTxWallet send(String address, BigInteger sendAmount);
   
   /**
    * Create and relay (depending on configuration) one or more transactions
@@ -488,7 +488,7 @@ public interface MoneroWallet {
    * @param config configures the transactions
    * @return the resulting transactions
    */
-  public List<MoneroWalletTx> sendSplit(MoneroSendConfig config);
+  public List<MoneroTxWallet> sendSplit(MoneroSendConfig config);
   
   /**
    * Create and relay one or more transactions which transfer funds from this
@@ -498,7 +498,7 @@ public interface MoneroWallet {
    * @param sendAmount is the amount being sent
    * @return the resulting transactions
    */
-  public List<MoneroWalletTx> sendSplit(String address, BigInteger sendAount);
+  public List<MoneroTxWallet> sendSplit(String address, BigInteger sendAount);
   
   /**
    * Sweep the wallet's unlocked funds to an address.
@@ -506,7 +506,7 @@ public interface MoneroWallet {
    * @param address is the address to sweep the wallet's funds to
    * @return the resulting transactions
    */
-  public List<MoneroWalletTx> sweepWallet(String address);
+  public List<MoneroTxWallet> sweepWallet(String address);
 
   /**
    * Sweep an acount's unlocked funds to an address.
@@ -515,7 +515,7 @@ public interface MoneroWallet {
    * @param address is the address to sweep the account's funds to
    * @return the resulting transactions
    */
-  public List<MoneroWalletTx> sweepAccount(int accountIdx, String address);
+  public List<MoneroTxWallet> sweepAccount(int accountIdx, String address);
 
   /**
    * Sweep a subaddress's unlocked funds to an address.
@@ -525,7 +525,7 @@ public interface MoneroWallet {
    * @param address is the address to sweep the subaddress's funds to
    * @return the resulting transactions
    */
-  public List<MoneroWalletTx> sweepSubaddress(int accountIdx, int subaddressIdx, String address);
+  public List<MoneroTxWallet> sweepSubaddress(int accountIdx, int subaddressIdx, String address);
 
   /**
    * Sweep unlocked funds.
@@ -533,14 +533,14 @@ public interface MoneroWallet {
    * @param config is the sweep configuration
    * @return the resulting transactions
    */
-  public List<MoneroWalletTx> sweepUnlocked(MoneroSendConfig config);
+  public List<MoneroTxWallet> sweepUnlocked(MoneroSendConfig config);
   
   /**
    * Sweep all unmixable dust outputs back to the wallet to make them easier to spend and mix.
    * 
    * @return the resulting transactions from sweeping dust
    */
-  public List<MoneroWalletTx> sweepDust();
+  public List<MoneroTxWallet> sweepDust();
   
   /**
    * Sweep all unmixable dust outputs back to the wallet to make them easier to spend and mix.
@@ -548,7 +548,7 @@ public interface MoneroWallet {
    * @param doNotRelay specifies if the resulting transaction should not be relayed (defaults to false i.e. relayed)
    * @return the resulting transactions from sweeping dust
    */
-  public List<MoneroWalletTx> sweepDust(boolean doNotRelay);
+  public List<MoneroTxWallet> sweepDust(boolean doNotRelay);
   
   /**
    * Sweep an output with a given key image.
@@ -556,7 +556,7 @@ public interface MoneroWallet {
    * @param config configures the sweep transaction
    * @return the resulting transaction from sweeping an output 
    */
-  public MoneroWalletTx sweepOutput(MoneroSendConfig config);
+  public MoneroTxWallet sweepOutput(MoneroSendConfig config);
   
   /**
    * Sweep an output with a given key image.
@@ -566,7 +566,7 @@ public interface MoneroWallet {
    * @param priority is the transaction priority (optional)
    * @return the resulting transaction from sweeping an output 
    */
-  public MoneroWalletTx sweepOutput(String address, String keyImage, MoneroSendPriority priority);
+  public MoneroTxWallet sweepOutput(String address, String keyImage, MoneroSendPriority priority);
   
   /**
    * Relay a transaction previously created without relaying.
@@ -574,7 +574,7 @@ public interface MoneroWallet {
    * @param txMetadata is transaction metadata previously created without relaying
    * @return the relayed tx
    */
-  public MoneroWalletTx relayTx(String txMetadata);
+  public MoneroTxWallet relayTx(String txMetadata);
   
   /**
    * Relay transactions previously created without relaying.
@@ -582,7 +582,7 @@ public interface MoneroWallet {
    * @param txMetadatas are transaction metadata previously created without relaying
    * @return the relayed txs
    */
-  public List<MoneroWalletTx> relayTxs(List<String> txMetadatas);
+  public List<MoneroTxWallet> relayTxs(List<String> txMetadatas);
   
   /**
    * Get a transaction note.

@@ -20,8 +20,8 @@ import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncProgressListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
-import monero.wallet.model.MoneroWalletOutput;
-import monero.wallet.model.MoneroWalletTx;
+import monero.wallet.model.MoneroOutputWallet;
+import monero.wallet.model.MoneroTxWallet;
 
 /**
  * Implements a Monero wallet using client-side crypto and a given daemon.
@@ -160,7 +160,7 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroWalletTx> getTxs(MoneroTxFilter filter) {
+  public List<MoneroTxWallet> getTxs(MoneroTxFilter filter) {
     throw new RuntimeException("Not implemented");
   }
 
@@ -170,7 +170,7 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroWalletOutput> getVouts(MoneroVoutFilter filter) {
+  public List<MoneroOutputWallet> getVouts(MoneroVoutFilter filter) {
     throw new RuntimeException("Not implemented");
   }
 
@@ -190,32 +190,32 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   }
 
   @Override
-  public MoneroWalletTx send(MoneroSendConfig config) {
+  public MoneroTxWallet send(MoneroSendConfig config) {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public List<MoneroWalletTx> sendSplit(MoneroSendConfig config) {
+  public List<MoneroTxWallet> sendSplit(MoneroSendConfig config) {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public List<MoneroWalletTx> sweepUnlocked(MoneroSendConfig config) {
+  public List<MoneroTxWallet> sweepUnlocked(MoneroSendConfig config) {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public List<MoneroWalletTx> sweepDust(boolean doNotRelay) {
+  public List<MoneroTxWallet> sweepDust(boolean doNotRelay) {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public MoneroWalletTx sweepOutput(MoneroSendConfig config) {
+  public MoneroTxWallet sweepOutput(MoneroSendConfig config) {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public List<MoneroWalletTx> relayTxs(List<String> txMetadatas) {
+  public List<MoneroTxWallet> relayTxs(List<String> txMetadatas) {
     throw new RuntimeException("Not implemented");
   }
 

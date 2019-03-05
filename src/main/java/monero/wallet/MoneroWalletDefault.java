@@ -17,8 +17,8 @@ import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncProgressListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
-import monero.wallet.model.MoneroWalletOutput;
-import monero.wallet.model.MoneroWalletTx;
+import monero.wallet.model.MoneroOutputWallet;
+import monero.wallet.model.MoneroTxWallet;
 
 /**
  * Default implementation of a Monero Wallet.
@@ -84,7 +84,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public List<MoneroWalletTx> getTxs() {
+  public List<MoneroTxWallet> getTxs() {
     return getTxs(null);
   }
   
@@ -95,47 +95,45 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   
   @Override
   public List<MoneroTransfer> getTransfers(int accountIdx) {
-    MoneroTransferFilter filter = new MoneroTransferFilter();
-    filter.setTransfer(new MoneroTransfer().setAccountIndex(accountIdx));
+    MoneroTransferFilter filter = new MoneroTransferFilter().setAccountIndex(accountIdx);
     return getTransfers(filter);
   }
   
   @Override
   public List<MoneroTransfer> getTransfers(int accountIdx, int subaddressIdx) {
-    MoneroTransferFilter filter = new MoneroTransferFilter();
-    filter.setTransfer(new MoneroTransfer().setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx));
+    MoneroTransferFilter filter = new MoneroTransferFilter().setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx);
     return getTransfers(filter);
   }
   
   @Override
-  public List<MoneroWalletOutput> getVouts() {
+  public List<MoneroOutputWallet> getVouts() {
     return getVouts(null);
   }
   
   @Override
-  public MoneroWalletTx send(String address, BigInteger sendAmount) {
+  public MoneroTxWallet send(String address, BigInteger sendAmount) {
     return send(new MoneroSendConfig(address, sendAmount));
   }
   
   @Override
-  public List<MoneroWalletTx> sendSplit(String address, BigInteger sendAmount) {
+  public List<MoneroTxWallet> sendSplit(String address, BigInteger sendAmount) {
     return sendSplit(new MoneroSendConfig(address, sendAmount));
   }
   
   @Override
-  public List<MoneroWalletTx> sweepWallet(String address) {
+  public List<MoneroTxWallet> sweepWallet(String address) {
     return sweepUnlocked(new MoneroSendConfig(address));
   }
   
   @Override
-  public List<MoneroWalletTx> sweepAccount(int accountIdx, String address) {
+  public List<MoneroTxWallet> sweepAccount(int accountIdx, String address) {
     MoneroSendConfig config = new MoneroSendConfig(address);
     config.setAccountIndex(accountIdx);
     return sweepUnlocked(config);
   }
   
   @Override
-  public List<MoneroWalletTx> sweepSubaddress(int accountIdx, int subaddressIdx, String address) {
+  public List<MoneroTxWallet> sweepSubaddress(int accountIdx, int subaddressIdx, String address) {
     MoneroSendConfig config = new MoneroSendConfig(address);
     config.setAccountIndex(accountIdx);
     config.setSubaddressIndices(Arrays.asList(subaddressIdx));
@@ -143,19 +141,19 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public List<MoneroWalletTx> sweepDust() {
+  public List<MoneroTxWallet> sweepDust() {
     return sweepDust(false);
   }
   
   @Override
-  public MoneroWalletTx sweepOutput(String address, String keyImage, MoneroSendPriority priority) {
+  public MoneroTxWallet sweepOutput(String address, String keyImage, MoneroSendPriority priority) {
     MoneroSendConfig config = new MoneroSendConfig(address, null, priority);
     config.setKeyImage(keyImage);
     return sweepOutput(config);
   }
   
   @Override
-  public MoneroWalletTx relayTx(String txMetadata) {
+  public MoneroTxWallet relayTx(String txMetadata) {
     return relayTxs(Arrays.asList(txMetadata)).get(0);
   }
   

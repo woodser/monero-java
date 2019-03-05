@@ -23,7 +23,7 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIntegratedAddress;
-import monero.wallet.model.MoneroWalletTx;
+import monero.wallet.model.MoneroTxWallet;
 import utils.TestUtils;
 
 /**
@@ -69,7 +69,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       wallet.openWallet(TestUtils.WALLET_RPC_NAME_2, TestUtils.WALLET_RPC_PW);
       
       // assert wallet 2 is empty
-      List<MoneroWalletTx> txs = wallet.getTxs();
+      List<MoneroTxWallet> txs = wallet.getTxs();
       assertTrue(txs.size() == 0);
       
       // open test wallet 1
