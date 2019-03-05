@@ -8,10 +8,6 @@ import utils.TestUtils;
  * Test base for subclasses to supply the wallet or daemon to test.
  */
 public abstract class TestMoneroBase {
-
-  /**
-   * Subclasseses return wallet instance to test and may override default RPC daemon.
-   */
   
   /**
    * Get the daemon to test.
