@@ -48,7 +48,7 @@ public class MoneroTx {
   private Integer lastFailedHeight;
   private String lastFailedId;
   private Integer maxUsedBlockHeight;
-  private Integer maxUsedBlockId;
+  private String maxUsedBlockId;
   private List<String> signatures;
   
   public MoneroTx() {
@@ -406,11 +406,11 @@ public class MoneroTx {
     return this;
   }
   
-  public Integer getMaxUsedBlockId() {
+  public String getMaxUsedBlockId() {
     return maxUsedBlockId;
   }
   
-  public MoneroTx setMaxUsedBlockId(Integer maxUsedBlockId) {
+  public MoneroTx setMaxUsedBlockId(String maxUsedBlockId) {
     this.maxUsedBlockId = maxUsedBlockId;
     return this;
   }

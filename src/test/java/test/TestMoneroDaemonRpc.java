@@ -1438,7 +1438,7 @@ public class TestMoneroDaemonRpc {
       assertEquals(null, tx.getLastFailedHeight());
       assertEquals(null, tx.getLastFailedId());
       assertTrue(tx.getMaxUsedBlockHeight() >= 0);
-      assertTrue(tx.getMaxUsedBlockId() > 0);
+      assertNotNull(tx.getMaxUsedBlockId());
     } else {
       assertEquals(null, tx.getWeight());
       assertEquals(null, tx.getIsKeptByBlock());
