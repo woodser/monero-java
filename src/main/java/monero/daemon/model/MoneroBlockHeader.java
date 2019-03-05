@@ -159,5 +159,89 @@ public class MoneroBlockHeader {
   
   public void setPowHash(String powHash) {
     this.powHash = powHash;
-  }  
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((cumulativeDifficulty == null) ? 0 : cumulativeDifficulty.hashCode());
+    result = prime * result + ((depth == null) ? 0 : depth.hashCode());
+    result = prime * result + ((difficulty == null) ? 0 : difficulty.hashCode());
+    result = prime * result + ((height == null) ? 0 : height.hashCode());
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    result = prime * result + ((longTermWeight == null) ? 0 : longTermWeight.hashCode());
+    result = prime * result + ((majorVersion == null) ? 0 : majorVersion.hashCode());
+    result = prime * result + ((minorVersion == null) ? 0 : minorVersion.hashCode());
+    result = prime * result + ((nonce == null) ? 0 : nonce.hashCode());
+    result = prime * result + ((numTxs == null) ? 0 : numTxs.hashCode());
+    result = prime * result + ((orphanStatus == null) ? 0 : orphanStatus.hashCode());
+    result = prime * result + ((powHash == null) ? 0 : powHash.hashCode());
+    result = prime * result + ((prevId == null) ? 0 : prevId.hashCode());
+    result = prime * result + ((reward == null) ? 0 : reward.hashCode());
+    result = prime * result + ((size == null) ? 0 : size.hashCode());
+    result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
+    result = prime * result + ((weight == null) ? 0 : weight.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    MoneroBlockHeader other = (MoneroBlockHeader) obj;
+    if (cumulativeDifficulty == null) {
+      if (other.cumulativeDifficulty != null) return false;
+    } else if (!cumulativeDifficulty.equals(other.cumulativeDifficulty)) return false;
+    if (depth == null) {
+      if (other.depth != null) return false;
+    } else if (!depth.equals(other.depth)) return false;
+    if (difficulty == null) {
+      if (other.difficulty != null) return false;
+    } else if (!difficulty.equals(other.difficulty)) return false;
+    if (height == null) {
+      if (other.height != null) return false;
+    } else if (!height.equals(other.height)) return false;
+    if (id == null) {
+      if (other.id != null) return false;
+    } else if (!id.equals(other.id)) return false;
+    if (longTermWeight == null) {
+      if (other.longTermWeight != null) return false;
+    } else if (!longTermWeight.equals(other.longTermWeight)) return false;
+    if (majorVersion == null) {
+      if (other.majorVersion != null) return false;
+    } else if (!majorVersion.equals(other.majorVersion)) return false;
+    if (minorVersion == null) {
+      if (other.minorVersion != null) return false;
+    } else if (!minorVersion.equals(other.minorVersion)) return false;
+    if (nonce == null) {
+      if (other.nonce != null) return false;
+    } else if (!nonce.equals(other.nonce)) return false;
+    if (numTxs == null) {
+      if (other.numTxs != null) return false;
+    } else if (!numTxs.equals(other.numTxs)) return false;
+    if (orphanStatus == null) {
+      if (other.orphanStatus != null) return false;
+    } else if (!orphanStatus.equals(other.orphanStatus)) return false;
+    if (powHash == null) {
+      if (other.powHash != null) return false;
+    } else if (!powHash.equals(other.powHash)) return false;
+    if (prevId == null) {
+      if (other.prevId != null) return false;
+    } else if (!prevId.equals(other.prevId)) return false;
+    if (reward == null) {
+      if (other.reward != null) return false;
+    } else if (!reward.equals(other.reward)) return false;
+    if (size == null) {
+      if (other.size != null) return false;
+    } else if (!size.equals(other.size)) return false;
+    if (timestamp == null) {
+      if (other.timestamp != null) return false;
+    } else if (!timestamp.equals(other.timestamp)) return false;
+    if (weight == null) {
+      if (other.weight != null) return false;
+    } else if (!weight.equals(other.weight)) return false;
+    return true;
+  }
 }
