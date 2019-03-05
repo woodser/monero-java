@@ -1580,12 +1580,14 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can send from multiple subaddresses in a single transaction
   @Test
   public void testSendFromSubaddresses() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
     testSendFromMultiple(false);
   }
   
   // Can send from multiple subaddresses in split transactions
   @Test
   public void testSendFromSubaddressesSplit() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
     testSendFromMultiple(true);
   }
   
@@ -1694,12 +1696,14 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can send to an address in a single transaction
   @Test
   public void testSend() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
     testSendToSingle(false, null, false);
   }
   
   // Can send to an address in a single transaction with a payment id
   @Test
   public void testSendWithPaymentId() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
     MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress();
     testSendToSingle(false, integratedAddress.getPaymentId(), false);
   }
@@ -1707,18 +1711,21 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can create then relay a transaction to send to a single address
   @Test
   public void testCreateThenRelay() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
     testSendToSingle(false, null, true);
   }
   
   // Can send to an address with split transactions
   @Test
   public void testSendSplit() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
     testSendToSingle(true, null, false);
   }
   
   // Can create then relay split transactions to send to a single address
   @Test
   public void testCreateThenRelaySplit() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
     testSendToSingle(true, null, true);
   }
   
@@ -1825,12 +1832,14 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can send to multiple addresses in a single transaction
   @Test
   public void testSendToMultiple() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
     testSendToMultiple(5, 3, false);
   }
   
   // Can send to multiple addresses in split transactions
   @Test
   public void testSendToMultipleSplit() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
     testSendToMultiple(5, 3, true);
   }
   
@@ -1937,6 +1946,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can sweep individual outputs identified by their key images
   @Test
   public void testSweepOutputs() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
     
     // test config
     int numVouts = 3;
@@ -1982,6 +1992,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can sweep dust without relaying
   @Test
   public void testSweepDustNoRelay() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
     
     // generate non-relayed transactions to sweep dust
     List<MoneroWalletTx> txs = wallet.sweepDust(true);
@@ -2013,6 +2024,7 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
   // Can sweep dust
   @Test
   public void testSweepDust() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
     List<MoneroWalletTx> txs = wallet.sweepDust();
     assertTrue("No dust to sweep", txs.size() > 0);
     
@@ -2023,6 +2035,9 @@ public abstract class TestMoneroWalletCommon<T extends MoneroWallet> {
 //      testWalletTxSend(tx, undefined, !canSplit, !canSplit, wallet);
 //    }
   }
+  
+  // --------------------------- NOTIFICATION TESTS ---------------------------
+
   
   // --------------------------------- PRIVATE --------------------------------
   
