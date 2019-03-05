@@ -152,7 +152,7 @@ public class MoneroTxFilter extends MoneroTxWallet implements Filter<MoneroTxWal
   }
 
   @Override
-  public MoneroTxFilter setVouts(List<? extends MoneroOutput> vouts) {
+  public MoneroTxFilter setVouts(List<MoneroOutput> vouts) {
     super.setVouts(vouts);
     return this;
   }

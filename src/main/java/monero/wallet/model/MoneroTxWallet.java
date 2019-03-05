@@ -1,6 +1,7 @@
 package monero.wallet.model;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import monero.daemon.model.MoneroBlock;
@@ -65,12 +66,18 @@ public class MoneroTxWallet extends MoneroTx {
     return this;
   }
   
-  @SuppressWarnings("unchecked")
-  public List<MoneroOutputWallet> getVouts() {
-    return (List<MoneroOutputWallet>) super.getVouts();
+  /**
+   * Returns vouts as List<MoneroOutputWallet>.
+   * 
+   * @return vouts of type MoneroOutputWallet
+   */
+  public List<MoneroOutputWallet> getVoutsWallet() {
+    List<MoneroOutputWallet> voutsWallet = new ArrayList<MoneroOutputWallet>();
+    for (MoneroOutput vout : getVouts()) voutsWallet.add((MoneroOutputWallet) vout);
+    return voutsWallet;
   }
   
-  public MoneroTxWallet setVouts(List<? extends MoneroOutput> vouts) {
+  public MoneroTxWallet setVouts(List<MoneroOutput> vouts) {
     
     // validate that all vouts are wallet outputs
     if (vouts != null) {
