@@ -308,7 +308,7 @@ public class TestMoneroDaemonRpc {
   }
   
   @Test
-  public void testGetTransactionById() {
+  public void testGetTxById() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction ids to test
@@ -343,7 +343,7 @@ public class TestMoneroDaemonRpc {
   }
   
   @Test
-  public void testGetTransactionsByIds() {
+  public void testGetTxsByIds() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction ids to test
@@ -381,7 +381,7 @@ public class TestMoneroDaemonRpc {
   }
   
   @Test
-  public void testGetTransactionsByIdsInPool() {
+  public void testGetTxsByIdsInPool() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // submit txs to the pool but don't relay
@@ -409,7 +409,7 @@ public class TestMoneroDaemonRpc {
   }
   
   @Test
-  public void testGetTransactionHexById() {
+  public void testGetTxHexById() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction ids to test
@@ -443,7 +443,7 @@ public class TestMoneroDaemonRpc {
   }
   
   @Test
-  public void testGetTransactionHexesByIds() {
+  public void testGetTxHexesByIds() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction ids to test
@@ -488,7 +488,7 @@ public class TestMoneroDaemonRpc {
   }
   
   @Test
-  public void testGetTransactionsInPool() {
+  public void testGetTxsInPool() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // submit tx to pool but don't relay
