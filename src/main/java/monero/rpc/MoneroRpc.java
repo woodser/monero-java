@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -93,8 +94,6 @@ public class MoneroRpc {
    * @return Map<String, Object> is the RPC API response as a map
    */
   public Map<String, Object> sendJsonRequest(String method, Object params) {
-
-    // send http request
     try {
 
       // build request body
@@ -129,6 +128,107 @@ public class MoneroRpc {
       throw new MoneroException(e3);
     }
   }
+  
+  /**
+   * Sends a RPC request to the given path and with the given paramters.
+   * 
+   * E.g. "/get_transactions" with params
+   * 
+   * @param path is the url path of the request to invoke
+   * @param params are request parameters sent in the body
+   * @return the request's deserialized response
+   */
+  public Map<String, Object> sendPathRequest(String path, Map<String, Object> params) {
+    System.out.println("sendPathRequest(" + path + ", " + JsonUtils.serialize(params) + ")");
+    
+    try {
+      
+      // build request
+      HttpPost post = new HttpPost(uri.toString() + "/" + path);
+      HttpEntity entity = new StringEntity(JsonUtils.serialize(params));
+      
+      // send request and validate response
+      HttpResponse resp = client.execute(post);
+      validateHttpResponse(resp);
+      post.setEntity(entity);
+      
+      // deserialize response
+      Header contentType = resp.getEntity().getContentType();
+      System.out.println("Content type: " + contentType);
+      throw new RuntimeException("Not implemented");
+    } catch (HttpException e1) {
+      throw e1;
+    } catch (MoneroRpcException e2) {
+      throw e2;
+    } catch (Exception e3) {
+      e3.printStackTrace();
+      throw new MoneroException(e3);
+    }
+    
+//    Map<String, Object> respMap = JsonUtils.toMap(MAPPER, StreamUtils.streamToString(resp.getEntity().getContent()));
+//    LOGGER.debug("Received response to method '" + method + "': " + JsonUtils.serialize(respMap));
+//    EntityUtils.consume(resp.getEntity());
+//    
+//    // build request
+//    let opts = {
+//      method: "POST",
+//      uri: this.config.uri + "/" + path,
+//      agent: this.agent,
+//      json: params
+//    };
+//    if (this.config.user) {
+//      opts.forever = true;
+//      opts.auth = {
+//        user: this.config.user,
+//        pass: this.config.pass,
+//        sendImmediately: false
+//      }
+//    }
+//    
+//    // send request and await response
+//    let resp = await this._throttledRequest(opts);
+//    if (typeof resp === "string") resp = JSON.parse(resp);  // TODO: some responses returned as strings?
+//    if (resp.error) throw new MoneroRpcError(resp.error.code, resp.error.message, opts);
+//    return resp;
+  }
+  
+//  /**
+//   * Sends a binary RPC request.
+//   * 
+//   * @param path is the path of the binary RPC method to invoke
+//   * @params are the request parameters
+//   * @returns a Uint8Array with the binary response
+//   */
+//  public int[] sendBinaryRequest(String path, Map<String, Object> params) {
+//    
+//    // get core utils to serialize and deserialize binary requests
+//    let coreUtils = await MoneroUtils.getCoreUtils();
+//    
+//    // serialize params
+//    let paramsBin = coreUtils.json_to_binary(params);
+//    
+//    // build request
+//    let opts = {
+//      method: "POST",
+//      uri: this.config.uri + "/" + path,
+//      agent: this.agent,
+//      encoding: null,
+//      body: paramsBin
+//    };
+//    if (this.config.user) {
+//      opts.forever = true;
+//      opts.auth = {
+//        user: this.config.user,
+//        pass: this.config.pass,
+//        sendImmediately: false
+//      }
+//    }
+//    
+//    // send request and store binary response as Uint8Array
+//    let resp = await this._throttledRequest(opts);
+//    if (resp.error) throw new MoneroRpcError(resp.error.code, resp.error.message, opts);
+//    return new Uint8Array(resp, 0, resp.length);
+//  }
   
   // ------------------------------ STATIC UTILITIES --------------------------
 
