@@ -602,7 +602,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       }
       else if (key.equals("double_spend_seen")) tx.setIsDoubleSpend(MoneroUtils.reconcile(tx.getIsDoubleSpend(), (Boolean) val));
       else if (key.equals("version")) tx.setVersion(MoneroUtils.reconcile(tx.getVersion(), ((BigInteger) val).intValue()));
-      else if (key.equals("extra")) tx.setExtra(MoneroUtils.reconcile(tx.getExtra(), GenUtils.listToIntArray((List<Integer>) val)));
+      else if (key.equals("extra")) {
+        List<Integer> ints = new ArrayList<Integer>();
+        for (BigInteger bi : (List<BigInteger>) val) ints.add(bi.intValue());
+        tx.setExtra(MoneroUtils.reconcile(tx.getExtra(), GenUtils.listToIntArray(ints)));
+      }
       else if (key.equals("vin")) {
         List<Map<String, Object>> rpcVins = (List<Map<String, Object>>) val;
         if (rpcVins.size() != 1 || !rpcVins.get(0).containsKey("gen")) {  // ignore coinbase vin TODO: why? probably needs re-enabled

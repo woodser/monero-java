@@ -20,7 +20,7 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   
   @Override
   public MoneroBlockTemplate getBlockTemplate(String walletAddress) {
-    return getBlockTemplate(null);
+    return getBlockTemplate(walletAddress, null);
   }
   
   @Override
