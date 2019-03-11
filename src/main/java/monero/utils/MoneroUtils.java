@@ -9,6 +9,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import common.utils.GenUtils;
+
 /**
  * Collection of Monero utilities.
  */
@@ -173,5 +175,32 @@ public class MoneroUtils {
     // assert deep equality
     assertEquals("Cannot reconcile values " + val1 + " and " + val2 + " with config: [" + resolveDefined + ", " + resolveTrue + ", " + resolveMax + "]", val1, val2);
     return val1;
+  }
+  
+  /**
+   * Returns a human-friendly key value line.
+   * 
+   * @param key is the key
+   * @param value is the value
+   * @param indent indents the line
+   * @returns {string} is the human-friendly key value line
+   */
+  public static String kvLine(Object key, Object value, int indent) {
+    return kvLine(key, value, indent, true, true);
+  }
+  
+  /**
+   * Returns a human-friendly key value line.
+   * 
+   * @param key is the key
+   * @param value is the value
+   * @param indent indents the line
+   * @param newline specifies if the string should be terminated with a newline or not
+   * @param ignoreUndefined specifies if undefined values should return an empty string
+   * @returns {string} is the human-friendly key value line
+   */
+  public static String kvLine(Object key, Object value, int indent, boolean newline, boolean ignoreUndefined) {
+    if (value == null && ignoreUndefined) return "";
+    return GenUtils.getIndent(indent) + key + ": " + value + (newline ? '\n' : "");
   }
 }

@@ -2,6 +2,8 @@ package monero.daemon.model;
 
 import java.math.BigInteger;
 
+import monero.utils.MoneroUtils;
+
 /**
  * Monero block header information.
  */
@@ -159,6 +161,32 @@ public class MoneroBlockHeader {
   
   public void setPowHash(String powHash) {
     this.powHash = powHash;
+  }
+  
+  public String toString() {
+    return toString(0);
+  }
+  
+  public String toString(int indent) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(MoneroUtils.kvLine("Id", getId(), indent));
+    sb.append(MoneroUtils.kvLine("Height", getHeight(), indent));
+    sb.append(MoneroUtils.kvLine("Timestamp", getNumTxs(), indent));
+    sb.append(MoneroUtils.kvLine("Size", getSize(), indent));
+    sb.append(MoneroUtils.kvLine("Weight", getWeight(), indent));
+    sb.append(MoneroUtils.kvLine("Depth", getDepth(), indent));
+    sb.append(MoneroUtils.kvLine("Difficulty", getDifficulty(), indent));
+    sb.append(MoneroUtils.kvLine("Cumulative difficulty", getCumulativeDifficulty(), indent));
+    sb.append(MoneroUtils.kvLine("Major version", getMajorVersion(), indent));
+    sb.append(MoneroUtils.kvLine("Minor version", getMinorVersion(), indent));
+    sb.append(MoneroUtils.kvLine("Nonce", getNonce(), indent));
+    sb.append(MoneroUtils.kvLine("Num txs", getNumTxs(), indent));
+    sb.append(MoneroUtils.kvLine("Orphan status", getOrphanStatus(), indent));
+    sb.append(MoneroUtils.kvLine("Prev id", getPrevId(), indent));
+    sb.append(MoneroUtils.kvLine("Reward", getReward(), indent));
+    sb.append(MoneroUtils.kvLine("Pow hash", getPowHash(), indent));
+    String str = sb.toString();
+    return str.charAt(str.length() - 1) == '\n' ? str.substring(0, str.length() - 1) : str; // strip newline
   }
 
   @Override
