@@ -41,8 +41,8 @@ public class MoneroTx {
   private String metadata;
   private String commonTxSets;
   private int[] extra;
-  private List<String> rctSignatures;
-  private Object rctSigPrunable;
+  private Object rctSignatures; // TODO: implement
+  private Object rctSigPrunable;  // TODO: implement
   private Boolean isKeptByBlock;
   private Boolean isFailed;
   private Integer lastFailedHeight;
@@ -343,11 +343,11 @@ public class MoneroTx {
     return this;
   }
   
-  public List<String> getRctSignatures() {
+  public Object getRctSignatures() {
     return rctSignatures;
   }
   
-  public MoneroTx setRctSignatures(List<String> rctSignatures) {
+  public MoneroTx setRctSignatures(Object rctSignatures) {
     this.rctSignatures = rctSignatures;
     return this;
   }
