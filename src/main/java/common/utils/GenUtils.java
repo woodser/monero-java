@@ -18,4 +18,16 @@ public class GenUtils {
     for (int i = 0; i < list.size(); i++) ints[i] = list.get(i);
     return ints;
   }
+  
+  /**
+   * Returns a string indentation of the given length;
+   * 
+   * @param length is the length of the indentation
+   * @returns {string} is an indentation string of the given length
+   */
+  public static String getIndent(int length) {
+    String str = "";
+    for (int i = 0; i < length; i++) str += "  "; // two spaces
+    return str;
+  }
 }

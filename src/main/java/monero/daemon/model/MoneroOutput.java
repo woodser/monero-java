@@ -3,6 +3,8 @@ package monero.daemon.model;
 import java.math.BigInteger;
 import java.util.List;
 
+import monero.utils.MoneroUtils;
+
 /**
  * Represents a transaction output.
  */
@@ -67,5 +69,22 @@ public class MoneroOutput {
   public MoneroOutput setStealthPublicKey(String stealthPublicKey) {
     this.stealthPublicKey = stealthPublicKey;
     return this;
+  }
+  
+  public String toString() {
+    return toString(0);
+  }
+  
+  public String toString(int indent) {
+    StringBuilder sb = new StringBuilder();
+    if (getKeyImage() != null) {
+      sb.append(MoneroUtils.kvLine("Key image", "", indent));
+      sb.append(getKeyImage().toString(indent + 1) + "\n");
+    }
+    sb.append(MoneroUtils.kvLine("Amount", getAmount(), indent));
+    sb.append(MoneroUtils.kvLine("Index", getIndex(), indent));
+    sb.append(MoneroUtils.kvLine("Ring output indices", getRingOutputIndices(), indent));
+    String str = sb.toString();
+    return str.substring(0, str.length() - 1);  // strip newline
   }
 }
