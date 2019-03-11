@@ -186,17 +186,6 @@ public class TestMoneroDaemonRpc {
     String id = daemon.getBlockId(lastHeader.getHeight());
     MoneroBlock block = daemon.getBlockById(id);
     testBlock(block, ctx);
-    
-    // TODO: *** here ***
-    System.out.println(daemon.getBlockByHeight(block.getHeader().getHeight()));
-    //int[] extra1 = daemon.getBlockByHeight(block.getHeader().getHeight()).getCoinbaseTx().getExtra();
-    //for (int i = 0; i < extra1.length; i++) System.out.println(extra1[i]);
-    System.out.println("VS");
-    System.out.println(block);
-    //int[] extra2 = block.getCoinbaseTx().getExtra();
-    //for (int i = 0; i < extra2.length; i++) System.out.println(extra2[i]);
-
-    
     assertEquals(daemon.getBlockByHeight(block.getHeader().getHeight()), block);
     assertEquals(null, block.getTxs());
     

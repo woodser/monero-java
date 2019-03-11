@@ -87,4 +87,44 @@ public class MoneroOutput {
     String str = sb.toString();
     return str.substring(0, str.length() - 1);  // strip newline
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((amount == null) ? 0 : amount.hashCode());
+    result = prime * result + ((index == null) ? 0 : index.hashCode());
+    result = prime * result + ((keyImage == null) ? 0 : keyImage.hashCode());
+    result = prime * result + ((ringOutputIndices == null) ? 0 : ringOutputIndices.hashCode());
+    result = prime * result + ((stealthPublicKey == null) ? 0 : stealthPublicKey.hashCode());
+    result = prime * result + ((tx == null) ? 0 : tx.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    MoneroOutput other = (MoneroOutput) obj;
+    if (amount == null) {
+      if (other.amount != null) return false;
+    } else if (!amount.equals(other.amount)) return false;
+    if (index == null) {
+      if (other.index != null) return false;
+    } else if (!index.equals(other.index)) return false;
+    if (keyImage == null) {
+      if (other.keyImage != null) return false;
+    } else if (!keyImage.equals(other.keyImage)) return false;
+    if (ringOutputIndices == null) {
+      if (other.ringOutputIndices != null) return false;
+    } else if (!ringOutputIndices.equals(other.ringOutputIndices)) return false;
+    if (stealthPublicKey == null) {
+      if (other.stealthPublicKey != null) return false;
+    } else if (!stealthPublicKey.equals(other.stealthPublicKey)) return false;
+    if (tx == null) {
+      if (other.tx != null) return false;
+    } else if (!tx.equals(other.tx)) return false;
+    return true;
+  }
 }
