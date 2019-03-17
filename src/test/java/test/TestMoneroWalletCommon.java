@@ -601,7 +601,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       // get and sort block heights in ascending order
       List<Integer> heights = new ArrayList<Integer>();
       for (MoneroTxWallet tx : txs) {
-        heights.add(tx.getBlock().getHeader().getHeight());
+        heights.add(tx.getBlock().getHeight());
       }
       Collections.sort(heights);
       
@@ -621,7 +621,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       txs = getAndTestTxs(wallet, new MoneroTxFilter().setMinHeight(minHeight).setMaxHeight(maxHeight), null, true);
       assertTrue(txs.size() < unfilteredCount);
       for (MoneroTx tx : txs) {
-        int height = tx.getBlock().getHeader().getHeight();
+        int height = tx.getBlock().getHeight();
         assertTrue(height >= minHeight && height <= maxHeight);
       }
     }
@@ -2229,8 +2229,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   private class MoneroTxComparator implements Comparator<MoneroTx> {
     @Override
     public int compare(MoneroTx tx1, MoneroTx tx2) {
-      long timestampA = tx1.getIsConfirmed() ? tx1.getBlock().getHeader().getTimestamp() : tx1.getReceivedTimestamp();
-      long timestampB = tx2.getIsConfirmed() ? tx2.getBlock().getHeader().getTimestamp() : tx2.getReceivedTimestamp();
+      long timestampA = tx1.getIsConfirmed() ? tx1.getBlock().getTimestamp() : tx1.getReceivedTimestamp();
+      long timestampB = tx2.getIsConfirmed() ? tx2.getBlock().getTimestamp() : tx2.getReceivedTimestamp();
       if (timestampA < timestampB) return -1;
       if (timestampA > timestampB) return 1;
       return 0;
@@ -2356,8 +2356,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     if (tx.getIsConfirmed()) {
       assertNotNull(tx.getBlock());
       assertTrue(tx.getBlock().getTxs().contains(tx));
-      assertTrue(tx.getBlock().getHeader().getHeight() > 0);
-      assertTrue(tx.getBlock().getHeader().getTimestamp() > 0);
+      assertTrue(tx.getBlock().getHeight() > 0);
+      assertTrue(tx.getBlock().getTimestamp() > 0);
       assertEquals(true, tx.getIsRelayed());
       assertEquals(false, tx.getIsFailed());
       assertEquals(false, tx.getInTxPool());

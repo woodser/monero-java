@@ -186,7 +186,7 @@ public class TestMoneroDaemonRpc {
     String id = daemon.getBlockId(lastHeader.getHeight());
     MoneroBlock block = daemon.getBlockById(id);
     testBlock(block, ctx);
-    assertEquals(daemon.getBlockByHeight(block.getHeader().getHeight()), block);
+    assertEquals(daemon.getBlockByHeight(block.getHeight()), block);
     assertEquals(null, block.getTxs());
     
     // retrieve by id of previous to last block
@@ -211,12 +211,12 @@ public class TestMoneroDaemonRpc {
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
     MoneroBlock block = daemon.getBlockByHeight(lastHeader.getHeight());
     testBlock(block, ctx);
-    assertEquals(daemon.getBlockByHeight(block.getHeader().getHeight()), block);
+    assertEquals(daemon.getBlockByHeight(block.getHeight()), block);
     
     // retrieve by height of previous to last block
     block = daemon.getBlockByHeight(lastHeader.getHeight() - 1);
     testBlock(block, ctx);
-    assertEquals(lastHeader.getHeight() - 1, (int) block.getHeader().getHeight());
+    assertEquals(lastHeader.getHeight() - 1, (int) block.getHeight());
   }
   
   @Test
@@ -258,7 +258,7 @@ public class TestMoneroDaemonRpc {
       MoneroBlock block = blocks.get(i);
       if (!block.getTxs().isEmpty()) txFound = true;
       testBlock(block, ctx);
-      assertEquals(block.getHeader().getHeight(), heights.get(i));      
+      assertEquals(block.getHeight(), heights.get(i));      
     }
     assertTrue("No transactions found to test", txFound);
   }
@@ -1248,7 +1248,7 @@ public class TestMoneroDaemonRpc {
     // test required fields
     assertNotNull(block);
     testCoinbaseTx(block.getCoinbaseTx());  // TODO: coinbase tx doesn't have as much stuff, can't call testTx?
-    testBlockHeader(block.getHeader(), ctx.headerIsFull);
+    testBlockHeader(block, ctx.headerIsFull);
     
     if (ctx.hasHex) {
       assertNotNull(block.getHex());
@@ -1332,10 +1332,10 @@ public class TestMoneroDaemonRpc {
     if (tx.getIsConfirmed()) {
       assertNotNull(tx.getBlock());
       assertTrue(tx.getBlock().getTxs().contains(tx));
-      assertTrue(tx.getBlock().getHeader().getHeight() > 0);
+      assertTrue(tx.getBlock().getHeight() > 0);
       assertTrue(tx.getBlock().getTxs().contains(tx));
-      assertTrue(tx.getBlock().getHeader().getHeight() > 0);
-      assertTrue(tx.getBlock().getHeader().getTimestamp() > 0);
+      assertTrue(tx.getBlock().getHeight() > 0);
+      assertTrue(tx.getBlock().getTimestamp() > 0);
       assertEquals(true, tx.getIsRelayed());
       assertEquals(false, tx.getIsFailed());
       assertEquals(false, tx.getInTxPool());
@@ -1524,7 +1524,7 @@ public class TestMoneroDaemonRpc {
     List<MoneroBlock> blocks = daemon.getBlocksByRange(startHeight, endHeight);
     assertEquals(realEndHeight - realStartHeight + 1, blocks.size());
     for (int i = 0; i < blocks.size(); i++) {
-      assertEquals(realStartHeight + i, (int) blocks.get(i).getHeader().getHeight());
+      assertEquals(realStartHeight + i, (int) blocks.get(i).getHeight());
     }
   }
   
