@@ -518,7 +518,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
   
   private static MoneroBlockHeader convertRpcBlockHeader(Map<String, Object> rpcHeader) {
-    MoneroBlockHeader header = new MoneroBlockHeader();
+    return convertRpcBlockHeader(rpcHeader, null);
+  }
+  
+  private static MoneroBlockHeader convertRpcBlockHeader(Map<String, Object> rpcHeader, MoneroBlockHeader header) {
+    if (header == null) header = new MoneroBlockHeader();
     for (String key : rpcHeader.keySet()) {
       Object val = rpcHeader.get(key);
       if (key.equals("block_size")) header.setSize(MoneroUtils.reconcile(header.getSize(), ((BigInteger) val).longValue()));
@@ -550,8 +554,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     
     // build block
     MoneroBlock block = new MoneroBlock();
+    convertRpcBlockHeader(rpcBlock.containsKey("block_header") ? (Map<String, Object>) rpcBlock.get("block_header") : rpcBlock, block);
     block.setHex((String) rpcBlock.get("blob"));
-    block.setHeader(convertRpcBlockHeader(rpcBlock.containsKey("block_header") ? (Map<String, Object>) rpcBlock.get("block_header") : rpcBlock));
     block.setTxIds(rpcBlock.containsKey("tx_hashes") ? (List<String>) rpcBlock.get("tx_hashes") : new ArrayList<String>());
     
     // build coinbase tx
@@ -582,17 +586,17 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 //    System.out.println(tx.toString());
     
     // initialize from rpc map
-    MoneroBlockHeader header = null;
+    MoneroBlock block = null;
     for (String key : rpcTx.keySet()) {
       Object val = rpcTx.get(key);
       if (key.equals("tx_hash") || key.equals("id_hash")) tx.setId(MoneroUtils.reconcile(tx.getId(), (String) val));
       else if (key.equals("block_timestamp")) {
-        if (header == null) header = new MoneroBlockHeader();
-        header.setTimestamp(MoneroUtils.reconcile(header.getTimestamp(), ((BigInteger) val).longValue()));
+        if (block == null) block = new MoneroBlock();
+        block.setTimestamp(MoneroUtils.reconcile(block.getTimestamp(), ((BigInteger) val).longValue()));
       }
       else if (key.equals("block_height")) {
-        if (header == null) header = new MoneroBlockHeader();
-        header.setHeight(MoneroUtils.reconcile(header.getHeight(), ((BigInteger) val).intValue()));
+        if (block == null) block = new MoneroBlock();
+        block.setHeight(MoneroUtils.reconcile(block.getHeight(), ((BigInteger) val).intValue()));
       }
       else if (key.equals("last_relayed_time")) tx.setLastRelayedTimestamp(MoneroUtils.reconcile(tx.getLastRelayedTimestamp(), ((BigInteger) val).longValue()));
       else if (key.equals("receive_time")) tx.setReceivedTimestamp(MoneroUtils.reconcile(tx.getReceivedTimestamp(), ((BigInteger) val).longValue()));
@@ -657,11 +661,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     }
     
     // link block and tx
-    if (header != null) tx.setBlock(new MoneroBlock().setHeader(header).setTxs(Arrays.asList(tx)));
+    if (block != null) tx.setBlock(block.setTxs(Arrays.asList(tx)));
     
     // TODO monero-daemon-rpc: unconfirmed txs block height and timestamp are actually received timestamp; overloading data model variables is bad juju
-    if (tx.getBlock() != null && tx.getBlock().getHeader().getHeight() != null && (long) tx.getBlock().getHeader().getHeight() == tx.getBlock().getHeader().getTimestamp()) {
-      tx.setReceivedTimestamp((long) tx.getBlock().getHeader().getHeight());
+    if (tx.getBlock() != null && tx.getBlock().getHeight() != null && (long) tx.getBlock().getHeight() == tx.getBlock().getTimestamp()) {
+      tx.setReceivedTimestamp((long) tx.getBlock().getHeight());
       tx.setBlock(null);
       tx.setIsConfirmed(false);
     }

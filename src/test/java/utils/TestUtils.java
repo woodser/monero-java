@@ -22,12 +22,12 @@ import monero.wallet.MoneroWalletRpc;
 public class TestUtils {
   
   // monero-daemon-rpc endpoint configuration (adjust per your configuration)
-  private static final String DAEMON_RPC_URI = "http://localhost:28081";
+  private static final String DAEMON_RPC_URI = "http://localhost:38081";
   private static final String DAEMON_RPC_USERNAME = null;
   private static final String DAEMON_RPC_PASSWORD = null;  
   
   // monero-wallet-rpc endpoint configuration (adjust per your configuration)
-  private static final String WALLET_RPC_URI = "http://localhost:28083";
+  private static final String WALLET_RPC_URI = "http://localhost:38083";
   private static final String WALLET_RPC_USERNAME = "rpc_user";
   private static final String WALLET_RPC_PASSWORD = "abc123";
   
@@ -38,8 +38,8 @@ public class TestUtils {
   
   // test constants
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
-  public static final String TEST_MNEMONIC = "cage moon giant fall library framed adrenalin yawning ledge voice tell jingle gusts kangaroo paddles boldly hydrogen ripped dangerous gleeful jeers cell sequence spud giant";
-  public static final String TEST_ADDRESS = "9ygBCoxDMKBW9Tasxcsk29cLB54QsKkYb2m3Sne9c74ziUwepWQiXfKBoF42K9Xd38VBQWswF5nuf2QcRdJd2Dn69tyiTi2";
+  public static final String TEST_MNEMONIC = "nagged giddy virtual bias spying arsenic fowls hexagon oars frying lava dialect copy gasp utensils muffin tattoo ritual exotic inmate kisses either sprig sunken sprig";
+  public static final String TEST_ADDRESS = "59aZULsUF3YNSKGiHz4JPMfjGYkm1S4TB3sPsTr3j85HhXb9crZqGa7jJ8cA87U48kT5wzi2VzGZnN2PKojEwoyaHqtpeZh";
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class);
@@ -91,7 +91,8 @@ public class TestUtils {
       try {
         walletRpc.rescanSpent();
       } catch (MoneroRpcException e) {
-        assertEquals((int) -38, (int) e.getCode());  // TODO: (monero-wallet-rpc) sometimes getting -38: no connection to daemon on rescan call (after above calls) which causes mocha "before all" hook problem
+        e.printStackTrace();
+        assertEquals((int) -38, (int) e.getCode());  // TODO: (monero-wallet-rpc) sometimes getting -38: no connection to daemon on rescan call (after above calls)
         System.out.println("WARNING: received -38: no connection to daemon on rescan call after create/open, ignoring...");
       }
     }

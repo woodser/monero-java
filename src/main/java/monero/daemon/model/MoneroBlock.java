@@ -7,22 +7,12 @@ import monero.utils.MoneroUtils;
 /**
  * Monero block.
  */
-public class MoneroBlock {
+public class MoneroBlock extends MoneroBlockHeader {
 
-  private MoneroBlockHeader header;
   private String hex;
   private MoneroTx coinbaseTx;
   private List<MoneroTx> txs;
   private List<String> txIds;
-  
-  public MoneroBlockHeader getHeader() {
-    return header;
-  }
-  
-  public MoneroBlock setHeader(MoneroBlockHeader header) {
-    this.header = header;
-    return this;
-  }
   
   public String getHex() {
     return hex;
@@ -70,22 +60,19 @@ public class MoneroBlock {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
-    if (getHeader() != null) {
-      sb.append(MoneroUtils.kvLine("Header", "", indent));
-      sb.append(getHeader().toString(indent + 1) + "\n");
-    }
+    sb.append(super.toString(indent) + "\n");
+    sb.append(MoneroUtils.kvLine("Hex", getHex(), indent));
+    sb.append(MoneroUtils.kvLine("Txs ids", getTxIds(), indent));
     if (getCoinbaseTx() != null) {
       sb.append(MoneroUtils.kvLine("Coinbase tx", "", indent));
       sb.append(getCoinbaseTx().toString(indent + 1) + "\n");
     }
-    sb.append(MoneroUtils.kvLine("Hex", getHex(), indent));
     if (getTxs() != null) {
       sb.append(MoneroUtils.kvLine("Txs", "", indent));
       for (MoneroTx tx : getTxs()) {
         sb.append(tx.toString(indent + 1) + "\n");
       }
     }
-    sb.append(MoneroUtils.kvLine("Txs ids", getTxIds(), indent));
     String str = sb.toString();
     return str.charAt(str.length() - 1) == '\n' ? str.substring(0, str.length() - 1) : str; // strip newline
   }
@@ -93,9 +80,8 @@ public class MoneroBlock {
   @Override
   public int hashCode() {
     final int prime = 31;
-    int result = 1;
+    int result = super.hashCode();
     result = prime * result + ((coinbaseTx == null) ? 0 : coinbaseTx.hashCode());
-    result = prime * result + ((header == null) ? 0 : header.hashCode());
     result = prime * result + ((hex == null) ? 0 : hex.hashCode());
     result = prime * result + ((txIds == null) ? 0 : txIds.hashCode());
     result = prime * result + ((txs == null) ? 0 : txs.hashCode());
@@ -105,15 +91,12 @@ public class MoneroBlock {
   @Override
   public boolean equals(Object obj) {
     if (this == obj) return true;
-    if (obj == null) return false;
+    if (!super.equals(obj)) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroBlock other = (MoneroBlock) obj;
     if (coinbaseTx == null) {
       if (other.coinbaseTx != null) return false;
     } else if (!coinbaseTx.equals(other.coinbaseTx)) return false;
-    if (header == null) {
-      if (other.header != null) return false;
-    } else if (!header.equals(other.header)) return false;
     if (hex == null) {
       if (other.hex != null) return false;
     } else if (!hex.equals(other.hex)) return false;
