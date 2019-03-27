@@ -1,7 +1,5 @@
 package monero.rpc;
 
-import java.util.Map;
-
 import monero.utils.MoneroException;
 
 /**
@@ -11,18 +9,31 @@ public class MoneroRpcException extends MoneroException {
 
   private static final long serialVersionUID = -6282368684634114151L;
   
-  private Map<String, Object> requestBody;
+  private String rpcMethod;
+  private Object rpcParams;
   
-  public MoneroRpcException(String msg, int code, Map<String, Object> requestBody) {
-    this(msg, code, requestBody, null);
-  }
-  
-  public MoneroRpcException(String msg, int code, Map<String, Object> requestBody, Throwable e) {
-    super(msg, code, e);
-    this.requestBody = requestBody;
+  public MoneroRpcException(String rpcDescription, Integer rpcCode, String rpcMethod, Object rpcParams) {
+    super(rpcDescription, rpcCode);
+    this.rpcMethod = rpcMethod;
+    this.rpcParams = rpcParams;
   }
 
-  public Map<String, Object> getRequestBody() {
-    return requestBody;
+  public String getRpcMethod() {
+    return rpcMethod;
+  }
+
+  public Object getRpcParams() {
+    return rpcParams;
+  }
+  
+  public String getMessage() {
+    return toString();
+  }
+  
+  public String toString() {
+    String str = super.toString();
+    str += "\nRPC method: " + rpcMethod;
+    str += "\nRPC params: " + rpcParams;
+    return str;
   }
 }

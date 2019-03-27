@@ -581,14 +581,6 @@ public interface MoneroDaemon {
   public MoneroDaemonUpdateCheckResult checkForUpdate();
   
   /**
-   * Check for update.
-   * 
-   * @param path is the path to check for an update (optional)
-   * @return the result of the update check
-   */
-  public MoneroDaemonUpdateCheckResult checkForUpdate(String path);
-  
-  /**
    * Download an update.
    * 
    * @return the result of the update download

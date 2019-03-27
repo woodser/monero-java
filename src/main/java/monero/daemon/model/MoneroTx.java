@@ -33,7 +33,7 @@ public class MoneroTx {
   private Long receivedTimestamp;
   private Boolean isDoubleSpend;
   private String key;
-  private String hex;
+  private String fullHex;
   private String prunedHex;
   private String prunableHex;
   private String prunableHash;
@@ -239,12 +239,12 @@ public class MoneroTx {
     return this;
   }
   
-  public String getHex() {
-    return hex;
+  public String getFullHex() {
+    return fullHex;
   }
   
-  public MoneroTx setHex(String hex) {
-    this.hex = hex;
+  public MoneroTx setFullHex(String fullHex) {
+    this.fullHex = fullHex;
     return this;
   }
   
@@ -460,7 +460,7 @@ public class MoneroTx {
     sb.append(MoneroUtils.kvLine("Received time", getReceivedTimestamp(), indent));
     sb.append(MoneroUtils.kvLine("Is double spend", getIsDoubleSpend(), indent));
     sb.append(MoneroUtils.kvLine("Key", getKey(), indent));
-    sb.append(MoneroUtils.kvLine("Hex", getHex(), indent));
+    sb.append(MoneroUtils.kvLine("Full Hex", getFullHex(), indent));
     sb.append(MoneroUtils.kvLine("Pruned hex", getPrunedHex(), indent));
     sb.append(MoneroUtils.kvLine("Prunable hex", getPrunableHex(), indent));
     sb.append(MoneroUtils.kvLine("Prunable hash", getPrunableHash(), indent));
@@ -509,7 +509,7 @@ public class MoneroTx {
     result = prime * result + Arrays.hashCode(extra);
     result = prime * result + ((fee == null) ? 0 : fee.hashCode());
     result = prime * result + ((height == null) ? 0 : height.hashCode());
-    result = prime * result + ((hex == null) ? 0 : hex.hashCode());
+    result = prime * result + ((fullHex == null) ? 0 : fullHex.hashCode());
     result = prime * result + ((id == null) ? 0 : id.hashCode());
     result = prime * result + ((inTxPool == null) ? 0 : inTxPool.hashCode());
     result = prime * result + ((isCoinbase == null) ? 0 : isCoinbase.hashCode());
@@ -568,9 +568,9 @@ public class MoneroTx {
     if (height == null) {
       if (other.height != null) return false;
     } else if (!height.equals(other.height)) return false;
-    if (hex == null) {
-      if (other.hex != null) return false;
-    } else if (!hex.equals(other.hex)) return false;
+    if (fullHex == null) {
+      if (other.fullHex != null) return false;
+    } else if (!fullHex.equals(other.fullHex)) return false;
     if (id == null) {
       if (other.id != null) return false;
     } else if (!id.equals(other.id)) return false;

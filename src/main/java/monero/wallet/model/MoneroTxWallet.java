@@ -27,7 +27,7 @@ public class MoneroTxWallet extends MoneroTx {
   }
   
   public Boolean getIsIncoming() {
-    return getIncomingTransfers() != null;
+    return getIncomingTransfers() != null && !getIncomingTransfers().isEmpty();
   }
   
   public BigInteger getIncomingAmount() {
@@ -228,8 +228,8 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setHex(String hex) {
-    super.setHex(hex);
+  public MoneroTxWallet setFullHex(String hex) {
+    super.setFullHex(hex);
     return this;
   }
 
@@ -294,7 +294,7 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setRctSignatures(List<String> rctSignatures) {
+  public MoneroTxWallet setRctSignatures(Object rctSignatures) {
     super.setRctSignatures(rctSignatures);
     return this;
   }
@@ -336,7 +336,7 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setMaxUsedBlockId(Integer maxUsedBlockId) {
+  public MoneroTxWallet setMaxUsedBlockId(String maxUsedBlockId) {
     super.setMaxUsedBlockId(maxUsedBlockId);
     return this;
   }

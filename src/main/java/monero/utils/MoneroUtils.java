@@ -3,6 +3,7 @@ package monero.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 import java.net.URI;
@@ -52,7 +53,7 @@ public class MoneroUtils {
   
   // TODO: implement this
   public static void validatePaymentId(String paymentId) {
-    
+    assertTrue(paymentId.length() == 16 || paymentId.length() == 64);
   }
   
   /**
