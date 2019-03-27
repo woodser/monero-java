@@ -2436,6 +2436,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // test outgoing transfer
     if (tx.getOutgoingTransfer() != null) {
+      assertTrue(tx.getIsOutgoing());
       testTransfer(tx.getOutgoingTransfer());
       if (ctx.isSweep) assertEquals(tx.getOutgoingTransfer().getDestinations().size(), 1);
       
@@ -2452,6 +2453,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // test incoming transfers
     if (tx.getIncomingTransfers() != null) {
+      assertTrue(tx.getIsIncoming());
       assertTrue(tx.getIncomingTransfers().size() > 0);
       TestUtils.testUnsignedBigInteger(tx.getIncomingAmount());      
       assertEquals(tx.getIsFailed(), false);

@@ -12,7 +12,7 @@ import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
 
 /**
- * Filters transactions that don't meet initialized filter criteria.
+ * Filters transactions that don't match initialized filter criteria.
  */
 public class MoneroTxFilter extends MoneroTxWallet implements Filter<MoneroTxWallet> {
   
@@ -116,7 +116,7 @@ public class MoneroTxFilter extends MoneroTxWallet implements Filter<MoneroTxWal
   }
   
   @Override
-  public boolean meetsCriteria(MoneroTxWallet item) {
+  public boolean meetsCriteria(MoneroTxWallet tx) {
     throw new RuntimeException("Not implemented");
   }
   
