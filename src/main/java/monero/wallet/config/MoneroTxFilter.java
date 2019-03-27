@@ -272,8 +272,8 @@ public class MoneroTxFilter extends MoneroTxWallet implements Filter<MoneroTxWal
   }
 
   @Override
-  public MoneroTxFilter setHex(String hex) {
-    super.setHex(hex);
+  public MoneroTxFilter setFullHex(String hex) {
+    super.setFullHex(hex);
     return this;
   }
 
@@ -338,7 +338,7 @@ public class MoneroTxFilter extends MoneroTxWallet implements Filter<MoneroTxWal
   }
 
   @Override
-  public MoneroTxFilter setRctSignatures(List<String> rctSignatures) {
+  public MoneroTxFilter setRctSignatures(Object rctSignatures) {
     super.setRctSignatures(rctSignatures);
     return this;
   }
@@ -380,7 +380,7 @@ public class MoneroTxFilter extends MoneroTxWallet implements Filter<MoneroTxWal
   }
 
   @Override
-  public MoneroTxFilter setMaxUsedBlockId(Integer maxUsedBlockId) {
+  public MoneroTxFilter setMaxUsedBlockId(String maxUsedBlockId) {
     super.setMaxUsedBlockId(maxUsedBlockId);
     return this;
   }

@@ -6,6 +6,10 @@ package monero.daemon.model;
 public class MoneroDaemonUpdateDownloadResult extends MoneroDaemonUpdateCheckResult {
 
   private String downloadPath;
+  
+  public MoneroDaemonUpdateDownloadResult(MoneroDaemonUpdateCheckResult checkResult) {
+    throw new RuntimeException("Not implemented");
+  }
 
   public String getDownloadPath() {
     return downloadPath;

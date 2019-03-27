@@ -6,7 +6,6 @@ import java.util.List;
 
 import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlockTemplate;
-import monero.daemon.model.MoneroDaemonUpdateCheckResult;
 import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
 import monero.daemon.model.MoneroKeyImageSpentStatus;
 import monero.daemon.model.MoneroOutputDistributionEntry;
@@ -77,11 +76,6 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   @Override
   public void submitBlock(String blockBlob) {
     submitBlocks(Arrays.asList(blockBlob));
-  }
-  
-  @Override
-  public MoneroDaemonUpdateCheckResult checkForUpdate() {
-    return checkForUpdate(null);
   }
   
   @Override

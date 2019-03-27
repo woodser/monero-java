@@ -9,6 +9,7 @@ public class MoneroDaemonPeer {
   private String address;
   private String host;
   private Integer port;
+  private Integer rpcPort;
   private Boolean isOnline;
   private Long lastSeenTimestamp;
   private Integer pruningSeed;
@@ -43,6 +44,14 @@ public class MoneroDaemonPeer {
   
   public void setPort(Integer port) {
     this.port = port;
+  }
+  
+  public Integer getRpcPort() {
+    return rpcPort;
+  }
+  
+  public void setRpcPort(Integer rpcPort) {
+    this.rpcPort = rpcPort;
   }
   
   public Boolean getIsOnline() {

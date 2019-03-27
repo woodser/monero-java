@@ -5,7 +5,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -117,7 +116,7 @@ public class MoneroRpc {
       EntityUtils.consume(resp.getEntity());
 
       // check RPC response for errors
-      validateRpcResponse(respMap, body);
+      validateRpcResponse(respMap, method, params);
       return respMap;
     } catch (HttpException e1) {
       throw e1;
@@ -139,23 +138,27 @@ public class MoneroRpc {
    * @return the request's deserialized response
    */
   public Map<String, Object> sendPathRequest(String path, Map<String, Object> params) {
-    System.out.println("sendPathRequest(" + path + ", " + JsonUtils.serialize(params) + ")");
+    //System.out.println("sendPathRequest(" + path + ", " + JsonUtils.serialize(params) + ")");
     
     try {
       
       // build request
       HttpPost post = new HttpPost(uri.toString() + "/" + path);
       HttpEntity entity = new StringEntity(JsonUtils.serialize(params));
+      post.setEntity(entity);
       
       // send request and validate response
       HttpResponse resp = client.execute(post);
       validateHttpResponse(resp);
-      post.setEntity(entity);
       
       // deserialize response
-      Header contentType = resp.getEntity().getContentType();
-      System.out.println("Content type: " + contentType);
-      throw new RuntimeException("Not implemented");
+      Map<String, Object> respMap = JsonUtils.toMap(MAPPER, StreamUtils.streamToString(resp.getEntity().getContent()));
+      LOGGER.debug("Received response to path '" + path + "': " + JsonUtils.serialize(respMap));
+      EntityUtils.consume(resp.getEntity());
+
+      // check RPC response for errors
+      validateRpcResponse(respMap, path, params);
+      return respMap;
     } catch (HttpException e1) {
       throw e1;
     } catch (MoneroRpcException e2) {
@@ -164,32 +167,6 @@ public class MoneroRpc {
       e3.printStackTrace();
       throw new MoneroException(e3);
     }
-    
-//    Map<String, Object> respMap = JsonUtils.toMap(MAPPER, StreamUtils.streamToString(resp.getEntity().getContent()));
-//    LOGGER.debug("Received response to method '" + method + "': " + JsonUtils.serialize(respMap));
-//    EntityUtils.consume(resp.getEntity());
-//    
-//    // build request
-//    let opts = {
-//      method: "POST",
-//      uri: this.config.uri + "/" + path,
-//      agent: this.agent,
-//      json: params
-//    };
-//    if (this.config.user) {
-//      opts.forever = true;
-//      opts.auth = {
-//        user: this.config.user,
-//        pass: this.config.pass,
-//        sendImmediately: false
-//      }
-//    }
-//    
-//    // send request and await response
-//    let resp = await this._throttledRequest(opts);
-//    if (typeof resp === "string") resp = JSON.parse(resp);  // TODO: some responses returned as strings?
-//    if (resp.error) throw new MoneroRpcError(resp.error.code, resp.error.message, opts);
-//    return resp;
   }
   
 //  /**
@@ -246,11 +223,11 @@ public class MoneroRpc {
   }
 
   @SuppressWarnings("unchecked")
-  private static void validateRpcResponse(Map<String, Object> respMap, Map<String, Object> requestBody) {
+  private static void validateRpcResponse(Map<String, Object> respMap, String method, Object params) {
     Map<String, Object> error = (Map<String, Object>) respMap.get("error");
     if (error == null) return;
     String msg = (String) error.get("message");
     int code = ((BigInteger) error.get("code")).intValue();
-    throw new MoneroRpcException(msg, code, requestBody);
+    throw new MoneroRpcException(msg, code, method, params);
   }
 }

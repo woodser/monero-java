@@ -41,6 +41,7 @@ import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxBacklogEntry;
 import monero.daemon.model.MoneroTxPoolStats;
 import monero.rpc.MoneroRpc;
+import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 
@@ -249,7 +250,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     try {
       Map<String, Object> respMap = rpc.sendPathRequest("get_transactions", params);
       resultMap = (Map<String, Object>) respMap.get("result");
-      _checkResponseStatus(resultMap);
+      checkResponseStatus(resultMap);
     } catch (MoneroException e) {
       if (e.getMessage().indexOf("Failed to parse hex representation of transaction hash") >= 0) throw new MoneroException("Invalid transaction id", e.getCode());
       throw e;
@@ -463,8 +464,12 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public MoneroDaemonUpdateCheckResult checkForUpdate(String path) {
-    throw new RuntimeException("Not implemented");
+  public MoneroDaemonUpdateCheckResult checkForUpdate() {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("command", "check");
+    Map<String, Object> respMap = rpc.sendPathRequest("update", params);
+    checkResponseStatus(respMap);
+    return convertRpcUpdateCheckResult(respMap);
   }
 
   @Override
@@ -494,9 +499,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   
   //---------------------------------- PRIVATE -------------------------------
   
-  private static void _checkResponseStatus(Map<String, Object> resp) {
+  private static void checkResponseStatus(Map<String, Object> resp) {
     String status = (String) resp.get("status");
-    if ("OK".equals(status)) throw new MoneroException(status);
+    if (!"OK".equals(status)) throw new MoneroRpcException(status, null, null, null);
   }
   
   private static MoneroBlockTemplate convertRpcBlockTemplate(Map<String, Object> rpcTemplate) {
@@ -629,7 +634,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("rctsig_prunable")) tx.setRctSigPrunable(MoneroUtils.reconcile(tx.getRctSigPrunable(), val));
       else if (key.equals("unlock_time")) tx.setUnlockTime(MoneroUtils.reconcile(tx.getUnlockTime(), ((BigInteger) val).intValue()));
       else if (key.equals("as_json") || key.equals("tx_json")) { }  // handled last so tx is as initialized as possible
-      else if (key.equals("as_hex") || key.equals("tx_blob")) tx.setHex(MoneroUtils.reconcile(tx.getHex(), (String) val));
+      else if (key.equals("as_hex") || key.equals("tx_blob")) tx.setFullHex(MoneroUtils.reconcile(tx.getFullHex(), (String) val));
       else if (key.equals("blob_size")) tx.setSize(MoneroUtils.reconcile(tx.getSize(), ((BigInteger) val).intValue()));
       else if (key.equals("weight")) tx.setWeight(MoneroUtils.reconcile(tx.getWeight(), ((BigInteger) val).intValue()));
       else if (key.equals("fee")) tx.setFee(MoneroUtils.reconcile(tx.getFee(), (BigInteger) val));
@@ -711,5 +716,32 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else LOGGER.warn("WARNING: ignoring unexpected field output: " + key + ": " + val);
     }
     return output;
+  }
+  
+  private static MoneroDaemonUpdateCheckResult convertRpcUpdateCheckResult(Map<String, Object> rpcResult) {
+    MoneroDaemonUpdateCheckResult result = new MoneroDaemonUpdateCheckResult();
+    for (String key : rpcResult.keySet()) {
+      Object val = rpcResult.get(key);
+      if (key.equals("auto_uri")) result.setAutoUri((String) val);
+      else if (key.equals("hash")) result.setHash((String) val);
+      else if (key.equals("path")) {} // handled elsewhere
+      else if (key.equals("status")) {} // handled elsewhere
+      else if (key.equals("update")) result.setIsUpdateAvailable((Boolean) val);
+      else if (key.equals("user_uri")) result.setUserUri((String) val);
+      else if (key.equals("version")) result.setVersion((String) val);
+      else LOGGER.warn("WARNING: ignoring unexpected field in rpc check update result: " + key + ": " + val);
+    }
+    if ("".equals(result.getAutoUri())) result.setAutoUri(null);
+    if ("".equals(result.getUserUri())) result.setUserUri(null);
+    if ("".equals(result.getVersion())) result.setVersion(null);
+    if ("".equals(result.getHash())) result.setHash(null);
+    return result;
+  }
+  
+  private static MoneroDaemonUpdateDownloadResult convertRpcUpdateDownloadResult(Map<String, Object> rpcResult) {
+    MoneroDaemonUpdateDownloadResult result = new MoneroDaemonUpdateDownloadResult(convertRpcUpdateCheckResult(rpcResult));
+    result.setDownloadPath((String) rpcResult.get("path"));
+    if ("".equals(result.getDownloadPath())) result.setDownloadPath(null);
+    return result;
   }
 }
