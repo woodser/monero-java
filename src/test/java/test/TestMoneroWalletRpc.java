@@ -93,38 +93,56 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Test
   public void testAccountTags() {
     
-    // test that non-existing tag returns no accounts
+    // get accounts
+    List<MoneroAccount> accounts = wallet.getAccounts();
+    assertTrue("Not enough accounts to test; run create account test", accounts.size() >= 3);
+    
+    // tag some of the accounts
+    MoneroAccountTag tag = new MoneroAccountTag("my_tag_" + UUID.randomUUID(), "my tag label", Arrays.asList(0, 1));
+    wallet.tagAccounts(tag.getTag(), tag.getAccountIndices());
+    
+    // query accounts by tag
+    List<MoneroAccount> taggedAccounts = wallet.getAccounts(false, tag.getTag());
+    assertEquals(2, taggedAccounts.size());
+    assertEquals(0, (int) taggedAccounts.get(0).getIndex());
+    assertEquals(tag.getTag(), taggedAccounts.get(0).getTag());
+    assertEquals(1, (int) taggedAccounts.get(1).getIndex());
+    assertEquals(tag.getTag(), taggedAccounts.get(1).getTag());
+
+    // set tag label
+    wallet.setAccountTagLabel(tag.getTag(), tag.getLabel());
+    
+    // fetch tags and ensure new tag is contained
+    List<MoneroAccountTag> tags = wallet.getAccountTags();
+    assertTrue(tags.contains(tag));
+    
+    // re-tag an account
+    MoneroAccountTag tag2 = new MoneroAccountTag("my_tag_" + UUID.randomUUID(), "my tag label 2", Arrays.asList(1));
+    wallet.tagAccounts(tag2.getTag(), tag2.getAccountIndices());
+    List<MoneroAccount> taggedAccounts2 = wallet.getAccounts(false, tag2.getTag());
+    assertEquals(1, taggedAccounts2.size(), 1);
+    assertEquals(1, taggedAccounts2.get(0).getIndex(), 1);
+    assertEquals(tag2.getTag(), taggedAccounts2.get(0).getTag());
+    
+    // re-query original tag which only applies to one account now
+    taggedAccounts = wallet.getAccounts(false, tag.getTag());
+    assertEquals(1, taggedAccounts.size());
+    assertEquals(0, (int) taggedAccounts.get(0).getIndex());
+    assertEquals(tag.getTag(), taggedAccounts.get(0).getTag());
+    
+    // untag and query accounts
+    wallet.untagAccounts(Arrays.asList(0, 1));
+    assertEquals(0, wallet.getAccountTags().size());
     try {
-      wallet.getAccounts(false, "non_existing_tag");
+      wallet.getAccounts(false, tag.getTag());
       fail("Should have thrown exception with unregistered tag");
     } catch (MoneroException e) {
       assertEquals(-1, (int) e.getCode());
     }
     
-    // create expected tag for test
-    MoneroAccountTag expectedTag = new MoneroAccountTag("my_tag_" + UUID.randomUUID().toString(), "my tag label", Arrays.asList(0, 1));
-    
-    // tag and query accounts
-    List<MoneroAccount> accounts1 = wallet.getAccounts();
-    assertTrue("Not enough accounts to test; run create account test", accounts1.size() >= 3);
-    wallet.tagAccounts(expectedTag.getTag(), Arrays.asList(0, 1));
-    List<MoneroAccount> accounts2 = wallet.getAccounts(false, expectedTag.getTag());
-    assertEquals(2, accounts2.size());
-    assertEquals(accounts2.get(0), accounts1.get(0));
-    assertEquals(accounts2.get(1), accounts1.get(1));
-    
-    // set tag label
-    wallet.setAccountTagLabel(expectedTag.getTag(), expectedTag.getLabel());
-    
-    // retrieve and find new tag
-    List<MoneroAccountTag> tags = wallet.getAccountTags();
-    assertTrue(tags.contains(expectedTag));
-    
-    // untag and query accounts
-    wallet.untagAccounts(Arrays.asList(0, 1));
-    assertEquals(false, (wallet.getAccountTags()).contains(expectedTag));
+    // test that non-existing tag returns no accounts
     try {
-      wallet.getAccounts(false, expectedTag.getTag());
+      wallet.getAccounts(false, "non_existing_tag");
       fail("Should have thrown exception with unregistered tag");
     } catch (MoneroException e) {
       assertEquals(-1, (int) e.getCode());
