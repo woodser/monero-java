@@ -14,6 +14,7 @@ public class MoneroAccount {
   private BigInteger balance;
   private BigInteger unlockedBalance;
   private List<MoneroSubaddress> subaddresses;
+  private String tag;
   
   public MoneroAccount() {
     super();
@@ -82,6 +83,14 @@ public class MoneroAccount {
     }
   }
 
+  public String getTag() {
+    return tag;
+  }
+
+  public void setTag(String tag) {
+    this.tag = tag;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -91,6 +100,7 @@ public class MoneroAccount {
     result = prime * result + ((label == null) ? 0 : label.hashCode());
     result = prime * result + ((primaryAddress == null) ? 0 : primaryAddress.hashCode());
     result = prime * result + ((subaddresses == null) ? 0 : subaddresses.hashCode());
+    result = prime * result + ((tag == null) ? 0 : tag.hashCode());
     result = prime * result + ((unlockedBalance == null) ? 0 : unlockedBalance.hashCode());
     return result;
   }
@@ -116,6 +126,9 @@ public class MoneroAccount {
     if (subaddresses == null) {
       if (other.subaddresses != null) return false;
     } else if (!subaddresses.equals(other.subaddresses)) return false;
+    if (tag == null) {
+      if (other.tag != null) return false;
+    } else if (!tag.equals(other.tag)) return false;
     if (unlockedBalance == null) {
       if (other.unlockedBalance != null) return false;
     } else if (!unlockedBalance.equals(other.unlockedBalance)) return false;
