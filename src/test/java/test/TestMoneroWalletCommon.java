@@ -44,7 +44,6 @@ import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
@@ -1586,17 +1585,18 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   @Test
   public void testSendFromSubaddresses() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
-    testSendFromMultiple(false);
+    testSendFromMultiple(null);
   }
   
   // Can send from multiple subaddresses in split transactions
   @Test
   public void testSendFromSubaddressesSplit() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
-    testSendFromMultiple(true);
+    testSendFromMultiple(new MoneroSendConfig().setCanSplit(true));
   }
   
-  private void testSendFromMultiple(boolean canSplit) {
+  private void testSendFromMultiple(MoneroSendConfig sendConfig) {
+    if (sendConfig == null) sendConfig = new MoneroSendConfig();
     
     int NUM_SUBADDRESSES = 2; // number of subaddresses to send from
     
@@ -1607,6 +1607,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     List<MoneroSubaddress> unlockedSubaddresses = new ArrayList<MoneroSubaddress>();
     boolean hasBalance = false;
     for (MoneroAccount account : accounts) {
+      unlockedSubaddresses.clear();
       int numSubaddressBalances = 0;
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         if (subaddress.getBalance().compareTo(TestUtils.MAX_FEE) > 0) numSubaddressBalances++;
@@ -1643,16 +1644,15 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // send from the first subaddresses with unlocked balances
     String address = wallet.getPrimaryAddress();
-    MoneroSendConfig config = new MoneroSendConfig(address, sendAmount);
-    config.setAccountIndex(srcAccount.getIndex());
-    config.setSubaddressIndices(fromSubaddressIndices);
-    config.setCanSplit(canSplit); // so test knows txs could be split
+    sendConfig.setDestinations(Arrays.asList(new MoneroDestination(address, sendAmount)));
+    sendConfig.setAccountIndex(srcAccount.getIndex());
+    sendConfig.setSubaddressIndices(fromSubaddressIndices);
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-    if (canSplit) {
-      List<MoneroTxWallet> sendTxs = wallet.sendSplit(config);
+    if (Boolean.TRUE.equals(sendConfig.getCanSplit())) {
+      List<MoneroTxWallet> sendTxs = wallet.sendSplit(sendConfig);
       for (MoneroTxWallet tx : sendTxs) txs.add(tx);
     } else {
-      txs.add(wallet.send(config));
+      txs.add(wallet.send(sendConfig));
     }
     
     // test that balances of intended subaddresses decreased
@@ -1673,7 +1673,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // test context
     TestContext ctx = new TestContext();
-    ctx.sendConfig = config;
+    ctx.sendConfig = sendConfig;
     ctx.wallet = wallet;
     
     // test each transaction
@@ -1702,40 +1702,49 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   @Test
   public void testSend() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
-    testSendToSingle(false, null, false);
+    testSendToSingle(null);
   }
   
   // Can send to an address in a single transaction with a payment id
+  // NOTE: this test will be invalid when payment ids are fully removed
   @Test
   public void testSendWithPaymentId() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
     MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress();
     String paymentId = integratedAddress.getPaymentId();
-    testSendToSingle(false, paymentId + paymentId + paymentId + paymentId, false);  // 64 character payment id
+    testSendToSingle(new MoneroSendConfig(paymentId + paymentId + paymentId + paymentId));  // 64 character payment id
   }
   
-  // Can create then relay a transaction to send to a single address
+  // Can send to an address in a single transaction with a ring size
   @Test
-  public void testCreateThenRelay() {
+  public void testSendWithRingSize() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
-    testSendToSingle(false, null, true);
+    testSendToSingle(new MoneroSendConfig().setRingSize(8));
   }
   
   // Can send to an address with split transactions
   @Test
   public void testSendSplit() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
-    testSendToSingle(true, null, false);
+    testSendToSingle(new MoneroSendConfig().setCanSplit(true));
+  }
+  
+  // Can create then relay a transaction to send to a single address
+  @Test
+  public void testCreateThenRelay() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
+    testSendToSingle(new MoneroSendConfig().setDoNotRelay(true));
   }
   
   // Can create then relay split transactions to send to a single address
   @Test
   public void testCreateThenRelaySplit() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
-    testSendToSingle(true, null, true);
+    testSendToSingle(new MoneroSendConfig().setCanSplit(true).setDoNotRelay(true));
   }
   
-  private void testSendToSingle(boolean canSplit, String paymentId, boolean doNotRelay) {
+  private void testSendToSingle(MoneroSendConfig sendConfig) {
+    if (sendConfig == null) sendConfig = new MoneroSendConfig();
     
     // find a non-primary subaddress to send from
     boolean sufficientBalance = false;
@@ -1761,30 +1770,29 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     BigInteger balanceBefore = fromSubaddress.getBalance();
     BigInteger unlockedBalanceBefore  = fromSubaddress.getUnlockedBalance();
     
-    // send to self
+    // init send config
     BigInteger sendAmount = unlockedBalanceBefore.subtract(TestUtils.MAX_FEE).divide(BigInteger.valueOf(SEND_DIVISOR));
     String address = wallet.getPrimaryAddress();
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-    MoneroSendConfig config = new MoneroSendConfig(address, sendAmount, MoneroSendPriority.ELEVATED);
-    config.setPaymentId(paymentId);
-    config.setAccountIndex(fromAccount.getIndex());
-    config.setSubaddressIndices(Arrays.asList(fromSubaddress.getIndex()));
-    config.setDoNotRelay(doNotRelay);
-    config.setCanSplit(canSplit); // so test knows txs could be split
-    if (canSplit) {
-      List<MoneroTxWallet> sendTxs = wallet.sendSplit(config);
+    sendConfig.setDestinations(Arrays.asList(new MoneroDestination(address, sendAmount)));
+    sendConfig.setAccountIndex(fromAccount.getIndex());
+    sendConfig.setSubaddressIndices(Arrays.asList(fromSubaddress.getIndex()));
+    
+    // send to self
+    if (Boolean.TRUE.equals(sendConfig.getCanSplit())) {
+      List<MoneroTxWallet> sendTxs = wallet.sendSplit(sendConfig);
       for (MoneroTxWallet tx : sendTxs) txs.add(tx);
     } else {
-      txs.add(wallet.send(config));
+      txs.add(wallet.send(sendConfig));
     }
     
     // handle non-relayed transaction
-    if (doNotRelay) {
+    if (sendConfig.getDoNotRelay()) {
       
       // build test context
       TestContext ctx = new TestContext();
       ctx.wallet = wallet;
-      ctx.sendConfig = config;
+      ctx.sendConfig = sendConfig;
       
       // test transactions
       for (MoneroTxWallet tx : txs) {
@@ -1814,7 +1822,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // build test context
     TestContext ctx = new TestContext();
     ctx.wallet = wallet;
-    ctx.sendConfig = doNotRelay ? null : config;
+    ctx.sendConfig = sendConfig.getDoNotRelay() ? null : sendConfig;
     
     // test transactions
     assertTrue(txs.size() > 0);
@@ -1823,7 +1831,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertEquals(fromAccount.getIndex(), tx.getOutgoingTransfer().getAccountIndex());
       assertEquals(0, (int) tx.getOutgoingTransfer().getSubaddressIndex()); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
       assertTrue(sendAmount.equals(tx.getOutgoingAmount()));
-      if (paymentId != null) assertEquals(paymentId, tx.getPaymentId());
+      if (sendConfig.getPaymentId() != null) assertEquals(sendConfig.getPaymentId(), tx.getPaymentId());
       
       // test outgoing destinations
       if (tx.getOutgoingTransfer() != null && tx.getOutgoingTransfer().getDestinations() != null) {
@@ -1901,10 +1909,10 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // build send config using MoneroSendConfig
     MoneroSendConfig config = new MoneroSendConfig();
-    config.setCanSplit(canSplit);
     config.setMixin(TestUtils.MIXIN);
     config.setAccountIndex(srcAccount.getIndex());
     config.setDestinations(new ArrayList<MoneroDestination>());
+    config.setCanSplit(canSplit);
     for (int i = 0; i < destinationAddresses.size(); i++) {
       config.getDestinations().add(new MoneroDestination(destinationAddresses.get(i), sendAmountPerSubaddress));
     }
