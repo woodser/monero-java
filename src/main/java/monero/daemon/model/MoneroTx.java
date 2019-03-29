@@ -460,7 +460,7 @@ public class MoneroTx {
     sb.append(MoneroUtils.kvLine("Received time", getReceivedTimestamp(), indent));
     sb.append(MoneroUtils.kvLine("Is double spend", getIsDoubleSpend(), indent));
     sb.append(MoneroUtils.kvLine("Key", getKey(), indent));
-    sb.append(MoneroUtils.kvLine("Full Hex", getFullHex(), indent));
+    sb.append(MoneroUtils.kvLine("Full hex", getFullHex(), indent));
     sb.append(MoneroUtils.kvLine("Pruned hex", getPrunedHex(), indent));
     sb.append(MoneroUtils.kvLine("Prunable hex", getPrunableHex(), indent));
     sb.append(MoneroUtils.kvLine("Prunable hash", getPrunableHash(), indent));
