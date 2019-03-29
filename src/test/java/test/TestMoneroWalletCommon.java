@@ -1855,7 +1855,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   @Test
   public void testSendToMultipleSplit() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
-    testSendToMultiple(5, 3, true);
+    testSendToMultiple(1, 15, true);
   }
   
   /**
@@ -1874,7 +1874,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // send funds from first account with sufficient unlocked funds
     MoneroAccount srcAccount = null;
-    boolean hasBalance = true;
+    boolean hasBalance = false;
     for (MoneroAccount account : wallet.getAccounts()) {
       if (account.getBalance().compareTo(minAccountAmount) > 0) hasBalance = true;
       if (account.getUnlockedBalance().compareTo(minAccountAmount) > 0) {
