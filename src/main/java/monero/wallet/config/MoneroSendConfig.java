@@ -17,6 +17,7 @@ public class MoneroSendConfig {
   private String paymentId;
   private MoneroSendPriority priority;
   private Integer mixin;
+  private Integer ringSize;
   private BigInteger fee;
   private Integer accountIndex;
   private List<Integer> subaddressIndices;
@@ -78,6 +79,15 @@ public class MoneroSendConfig {
   
   public MoneroSendConfig setMixin(Integer mixin) {
     this.mixin = mixin;
+    return this;
+  }
+  
+  public Integer getRingSize() {
+    return ringSize;
+  }
+  
+  public MoneroSendConfig setRingSize(Integer ringSize) {
+    this.ringSize = ringSize;
     return this;
   }
   
