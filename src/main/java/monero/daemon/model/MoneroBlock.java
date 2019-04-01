@@ -60,7 +60,8 @@ public class MoneroBlock extends MoneroBlockHeader {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
-    sb.append(super.toString(indent) + "\n");
+    sb.append(super.toString(indent));
+    sb.append("\n");
     sb.append(MoneroUtils.kvLine("Hex", getHex(), indent));
     sb.append(MoneroUtils.kvLine("Txs ids", getTxIds(), indent));
     if (getCoinbaseTx() != null) {

@@ -444,6 +444,7 @@ public class MoneroTx {
     StringBuilder sb = new StringBuilder();
     sb.append(GenUtils.getIndent(indent) + "=== TX ===\n");
     sb.append(MoneroUtils.kvLine("Tx ID: ", getId(), indent));
+    sb.append(MoneroUtils.kvLine("Height", getHeight(), indent));
     sb.append(MoneroUtils.kvLine("Version", getVersion(), indent));
     sb.append(MoneroUtils.kvLine("Is coinbase", getIsCoinbase(), indent));
     sb.append(MoneroUtils.kvLine("Payment ID", getPaymentId(), indent));
