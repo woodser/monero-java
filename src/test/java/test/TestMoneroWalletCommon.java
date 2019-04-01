@@ -1675,6 +1675,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     TestContext ctx = new TestContext();
     ctx.sendConfig = sendConfig;
     ctx.wallet = wallet;
+    ctx.isSendResponse = true;
     
     // test each transaction
     assertTrue(txs.size() > 0);
@@ -1937,6 +1938,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     TestContext ctx = new TestContext();
     ctx.wallet = wallet;
     ctx.sendConfig = config;
+    ctx.isSendResponse = true;
     
     // test each transaction
     assertTrue(txs.size() > 0);
