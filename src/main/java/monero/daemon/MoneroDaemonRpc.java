@@ -172,7 +172,19 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public List<MoneroBlock> getBlocksByHeight(List<Integer> heights) {
-    throw new RuntimeException("Binary requests not implemented");
+    
+    // fetch blocks in binary
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("heights", heights);
+    int[] respBin = rpc.sendBinaryRequest("get_blocks_by_height.bin", params);
+    System.out.println(respBin);
+    throw new RuntimeException("Not implemented");
+    
+//    // convert binary blocks to map
+//    Map<String, Object> rpcBlocks = MoneroCppUtils.binaryBlocksToMap(respBin);
+//    System.out.println("We have blocks as maps!!!");
+//    System.out.println(rpcBlocks);
+
 //    await this._initOneTime();
 //    
 //    // fetch blocks in binary

@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import common.types.HttpException;
 import common.utils.JsonUtils;
 import common.utils.StreamUtils;
+import monero.cpp_bridge.MoneroCppUtils;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 
@@ -73,8 +74,6 @@ public class MoneroRpc {
     }
   }
   
-  // TODO: What happened to MoneroException?
-  
   /**
    * Sends a request to the RPC API.
    * 
@@ -101,12 +100,12 @@ public class MoneroRpc {
       body.put("id", "0");
       body.put("method", method);
       if (params != null) body.put("params", params);
-      LOGGER.debug("Sending method '" + method + "' with body: " + JsonUtils.serialize(body));
+      LOGGER.debug("Sending json request with method '" + method + "' and body: " + JsonUtils.serialize(body));
 
       // send http request and validate response
       HttpPost post = new HttpPost(uri.toString() + "/json_rpc");
       HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
-      post.setEntity(entity);      
+      post.setEntity(entity);
       HttpResponse resp = client.execute(post);
       validateHttpResponse(resp);
 
@@ -146,6 +145,7 @@ public class MoneroRpc {
       HttpPost post = new HttpPost(uri.toString() + "/" + path);
       HttpEntity entity = new StringEntity(JsonUtils.serialize(params));
       post.setEntity(entity);
+      LOGGER.debug("Sending path request with path '" + path + "' and params: " + JsonUtils.serialize(params));
       
       // send request and validate response
       HttpResponse resp = client.execute(post);
@@ -169,21 +169,22 @@ public class MoneroRpc {
     }
   }
   
-//  /**
-//   * Sends a binary RPC request.
-//   * 
-//   * @param path is the path of the binary RPC method to invoke
-//   * @params are the request parameters
-//   * @returns a Uint8Array with the binary response
-//   */
-//  public int[] sendBinaryRequest(String path, Map<String, Object> params) {
-//    
-//    // get core utils to serialize and deserialize binary requests
-//    let coreUtils = await MoneroUtils.getCoreUtils();
-//    
-//    // serialize params
-//    let paramsBin = coreUtils.json_to_binary(params);
-//    
+  /**
+   * Sends a binary RPC request.
+   * 
+   * @param path is the path of the binary RPC method to invoke
+   * @param params are the request parameters
+   * @return int[] is the binary response
+   */
+  public int[] sendBinaryRequest(String path, Map<String, Object> params) {
+    
+    // serialize params
+    int[] paramsBin = MoneroCppUtils.mapToBinary(params);
+    
+    System.out.println("Converted params to binary!!!");
+    System.out.println(paramsBin);
+    throw new RuntimeException("Not implemented");
+    
 //    // build request
 //    let opts = {
 //      method: "POST",
@@ -205,7 +206,7 @@ public class MoneroRpc {
 //    let resp = await this._throttledRequest(opts);
 //    if (resp.error) throw new MoneroRpcError(resp.error.code, resp.error.message, opts);
 //    return new Uint8Array(resp, 0, resp.length);
-//  }
+  }
   
   // ------------------------------ STATIC UTILITIES --------------------------
 
