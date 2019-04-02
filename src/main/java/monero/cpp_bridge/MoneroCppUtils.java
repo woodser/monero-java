@@ -7,11 +7,15 @@ import java.util.Map;
  */
 public class MoneroCppUtils {
 
-  public static Map<String, Object> binaryBlocksToMap(int[] binBlocks) {
+  public static String binaryBlocksToJson(int[] binBlocks) {
     throw new RuntimeException("Not implemented");
   }
   
   public static int[] mapToBinary(Map<String, Object> map) {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  public static Map<String, Object> binaryToMap(int[] bin) {
     throw new RuntimeException("Not implemented");
   }
 }
