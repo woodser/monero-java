@@ -1,7 +1,10 @@
 package monero.cpp_bridge;
 
-import java.util.HashMap;
 import java.util.Map;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import common.utils.JsonUtils;
 
 /**
  * Collection of utilties bridged from Monero Core C++ to Java.
@@ -16,20 +19,21 @@ public class MoneroCppUtils {
   
   public native static void sayHello();
 
-  public native static int[] mapToBinary(Map<String, Object> map);
+  public static int[] mapToBinary(Map<String, Object> map) {
+    return jsonToBinary(JsonUtils.serialize(map));
+  }
   
   public static Map<String, Object> binaryToMap(int[] bin) {
-    Map<String, Object> map = new HashMap<String, Object>();
-    binaryToMap(bin, map);
-    return map;
+    return JsonUtils.deserialize(binaryToJson(bin), new TypeReference<Map<String, Object>>(){});
   }
   
-  public static String binaryBlocksToJson(int[] binBlocks) {
-    throw new RuntimeException("Not implemented");
+  public static Map<String, Object> binaryBlocksToMap(int[] binBlocks) {
+    return JsonUtils.deserialize(binaryBlocksToJson(binBlocks), new TypeReference<Map<String, Object>>(){});
   }
   
-  private native static void binaryToMap(int[] bin, Map<String, Object> map);
+  private native static int[] jsonToBinary(String json);
   
-//private native static int[] jsonToBinary(String json);
-
+  private native static String binaryToJson(int[] bin);
+  
+  private native static String binaryBlocksToJson(int[] binBlocks);
 }
