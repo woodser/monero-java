@@ -12,7 +12,7 @@ import monero.wallet.model.MoneroSubaddress;
 /**
  * Prints the balances of the wallet.
  */
-public class PrintBalances {
+public class PrintBalancesOld {
 
   public static void main(String[] args) {
     printBalances();
