@@ -15,15 +15,15 @@ public class MoneroCppUtils {
     MoneroCppUtilsJni.sayHello();
   }
 
-  public static int[] mapToBinary(Map<String, Object> map) {
+  public static byte[] mapToBinary(Map<String, Object> map) {
     return MoneroCppUtilsJni.jsonToBinary(JsonUtils.serialize(map));
   }
   
-  public static Map<String, Object> binaryToMap(int[] bin) {
+  public static Map<String, Object> binaryToMap(byte[] bin) {
     return JsonUtils.deserialize(MoneroCppUtilsJni.binaryToJson(bin), new TypeReference<Map<String, Object>>(){});
   }
   
-  public static Map<String, Object> binaryBlocksToMap(int[] binBlocks) {
+  public static Map<String, Object> binaryBlocksToMap(byte[] binBlocks) {
     return JsonUtils.deserialize(MoneroCppUtilsJni.binaryBlocksToJson(binBlocks), new TypeReference<Map<String, Object>>(){});
   }
 }

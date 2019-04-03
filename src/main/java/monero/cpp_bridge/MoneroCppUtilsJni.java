@@ -16,9 +16,9 @@ public class MoneroCppUtilsJni {
   
   public native static void sayHello();
 
-  public native static int[] jsonToBinary(String json);
+  public native static byte[] jsonToBinary(String json);
   
-  public native static String binaryToJson(int[] bin);
+  public native static String binaryToJson(byte[] bin);
   
-  public native static String binaryBlocksToJson(int[] binBlocks);
+  public native static String binaryBlocksToJson(byte[] binBlocks);
 }
