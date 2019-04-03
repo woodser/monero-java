@@ -15,6 +15,13 @@ import monero.cpp_bridge.MoneroCppUtils;
  * Test Monero Core C++ utilities.
  */
 public class TestMoneroCppUtils {
+  
+  // Can say hello
+  @Test
+  public void testSayHello() {
+    System.out.println(System.getProperty("java.library.path"));
+    MoneroCppUtils.sayHello();
+  }
 
   // Can serialize heights with small numbers
   @Test
