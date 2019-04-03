@@ -21,7 +21,7 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTx;
 import monero.wallet.model.MoneroTxConfig;
-import utils.PrintBalances;
+import utils.PrintBalancesOld;
 import utils.TestUtils;
 
 /**
@@ -31,7 +31,7 @@ import utils.TestUtils;
  * These tests are separated because they use all unlocked funds which invalidates other tests until
  * testSendToMultiple() is run.
  */
-public class TestMoneroWalletResets {
+public class TestMoneroWalletResetsOld {
   
   private static MoneroWallet wallet;
 
@@ -42,7 +42,7 @@ public class TestMoneroWalletResets {
   
   @AfterClass
   public static void teardown() {
-    PrintBalances.printBalances();
+    PrintBalancesOld.printBalances();
   }
   
   @Ignore // disabled so tests don't delete local cache

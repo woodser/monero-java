@@ -11,7 +11,7 @@ import monero.wallet.model.MoneroTxFilter;
 /**
  * Prints transactions in a wallet.
  */
-public class PrintTransactions {
+public class PrintTransactionsOld {
 
   public static void main(String[] args) {
     MoneroWallet wallet = TestUtils.getWallet();

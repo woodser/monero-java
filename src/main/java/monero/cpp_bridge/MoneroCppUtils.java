@@ -11,29 +11,19 @@ import common.utils.JsonUtils;
  */
 public class MoneroCppUtils {
   
-  static {
-    //System.out.println(System.getProperty("java.library.path"));
-    //System.load("/Users/Eric/git/monero-java-rpc/lib/monero-java.dylib");
-    System.loadLibrary("monero");
+  public static void sayHello() {
+    MoneroCppUtilsJni.sayHello();
   }
-  
-  public native static void sayHello();
 
   public static int[] mapToBinary(Map<String, Object> map) {
-    return jsonToBinary(JsonUtils.serialize(map));
+    return MoneroCppUtilsJni.jsonToBinary(JsonUtils.serialize(map));
   }
   
   public static Map<String, Object> binaryToMap(int[] bin) {
-    return JsonUtils.deserialize(binaryToJson(bin), new TypeReference<Map<String, Object>>(){});
+    return JsonUtils.deserialize(MoneroCppUtilsJni.binaryToJson(bin), new TypeReference<Map<String, Object>>(){});
   }
   
   public static Map<String, Object> binaryBlocksToMap(int[] binBlocks) {
-    return JsonUtils.deserialize(binaryBlocksToJson(binBlocks), new TypeReference<Map<String, Object>>(){});
+    return JsonUtils.deserialize(MoneroCppUtilsJni.binaryBlocksToJson(binBlocks), new TypeReference<Map<String, Object>>(){});
   }
-  
-  private native static int[] jsonToBinary(String json);
-  
-  private native static String binaryToJson(int[] bin);
-  
-  private native static String binaryBlocksToJson(int[] binBlocks);
 }

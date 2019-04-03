@@ -9,6 +9,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import common.utils.JsonUtils;
 import monero.cpp_bridge.MoneroCppUtils;
 
 /**
