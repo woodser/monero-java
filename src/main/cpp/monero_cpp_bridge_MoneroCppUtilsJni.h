@@ -20,7 +20,7 @@ JNIEXPORT void JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_sayHello
  * Method:    jsonToBinary
  * Signature: (Ljava/lang/String;)[I
  */
-JNIEXPORT jintArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_jsonToBinary
+JNIEXPORT jbyteArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_jsonToBinary
   (JNIEnv *, jclass, jstring);
 
 /*
@@ -29,7 +29,7 @@ JNIEXPORT jintArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_jsonToBina
  * Signature: ([I)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryToJson
-  (JNIEnv *, jclass, jintArray);
+  (JNIEnv *, jclass, jbyteArray);
 
 /*
  * Class:     monero_cpp_bridge_MoneroCppUtilsJni
@@ -37,7 +37,7 @@ JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryToJson
  * Signature: ([I)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryBlocksToJson
-  (JNIEnv *, jclass, jintArray);
+  (JNIEnv *, jclass, jbyteArray);
 
 #ifdef __cplusplus
 }
