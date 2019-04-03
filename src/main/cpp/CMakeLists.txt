@@ -8,10 +8,9 @@ include_directories("build/boost/include") # must exist already - run bin/build-
 #
 include_directories("src")
 #
-set(JAVA_HOME "/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/")
-include_directories("${JAVA_HOME}")
-include_directories("${JAVA_HOME}/include}")
-include_directories("${JAVA_HOME}/include/darwin}")
+include_directories("$ENV{JAVA_HOME}")
+include_directories("$ENV{JAVA_HOME}/include")
+include_directories("$ENV{JAVA_HOME}/include/darwin")
 #
 set(MYMONERO_CORE_CPP "submodules/mymonero-core-cpp")
 set(MYMONERO_CORE_CPP_SRC "${MYMONERO_CORE_CPP}/src")
