@@ -7,15 +7,6 @@ JNIEXPORT void JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_sayHello(JNIEnv
   cout << "Hello World from C++!" << endl;
 }
 
-//JNIEXPORT jintArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_mapToBinary(JNIEnv *env, jclass utilClass, jobject jmap) {
-//  cout << "cpp_bridge.mapToBinary()" << endl;
-////  jintArray intArray = env->NewIntArray(5);
-////  jint values[5] = {69, 69, 69, 69, 69};
-////  env->SetIntArrayRegion(intArray, 0, 5, values);
-////  env->ReleaseIntArrayElements(intArray, values, 0);
-////  return intArray;
-//}
-
 JNIEXPORT jintArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_jsonToBinary(JNIEnv *env, jclass utilsClass, jstring json) {
   int size = 5;
   jintArray result;
@@ -38,7 +29,3 @@ JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryToJson
   string str = "{\"heights\":[123456,1234567,870987]}";
   return env->NewStringUTF(str.c_str());
 }
-
-//JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryBlocksToJson(JNIEnv *env, jclass utilsClass, jintArray bin) {
-//
-//}
