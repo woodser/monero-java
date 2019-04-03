@@ -1,7 +1,7 @@
 #include <jni.h>
 #include <iostream>
 #include "monero_cpp_bridge_MoneroCppUtilsJni.h"
-//#include "submodules/mymonero-core-cpp/src/monero_binary_utils.hpp"
+#include "monero_binary_utils.hpp"
 //#include "./submodules/mymonero-core-cpp/src/monero_binary_utils.hpp"
 using namespace std;
 

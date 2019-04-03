@@ -2,13 +2,18 @@ cmake_minimum_required(VERSION 3.4.1)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-project(MyMoneroCoreCpp)
+project(JavaCppBridge)
 #
 include_directories("build/boost/include") # must exist already - run bin/build-boost-emscripten.sh
 #
 include_directories("src")
 #
-set(MYMONERO_CORE_CPP "src/submodules/mymonero-core-cpp")
+set(JAVA_HOME "/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/")
+include_directories("${JAVA_HOME}")
+include_directories("${JAVA_HOME}/include}")
+include_directories("${JAVA_HOME}/include/darwin}")
+#
+set(MYMONERO_CORE_CPP "submodules/mymonero-core-cpp")
 set(MYMONERO_CORE_CPP_SRC "${MYMONERO_CORE_CPP}/src")
 include_directories("${MYMONERO_CORE_CPP}/src")
 #
@@ -34,9 +39,8 @@ include_directories("${MONERO_SRC}/contrib/libsodium/include/sodium")
 set(
     SRC_FILES
     #
-    src/index.cpp
-    src/emscr_async_send_bridge.hpp
-    src/emscr_async_send_bridge.cpp
+    monero_cpp_bridge_MoneroCppUtilsJni.h
+    monero_cpp_bridge_MoneroCppUtilsJni.cpp
     #
     ${MYMONERO_CORE_CPP_SRC}/monero_address_utils.hpp
     ${MYMONERO_CORE_CPP_SRC}/monero_address_utils.cpp
