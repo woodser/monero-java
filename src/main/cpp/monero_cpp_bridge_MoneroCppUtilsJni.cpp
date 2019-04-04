@@ -86,6 +86,7 @@ JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryToJson
   //string str = "{\"heights\":[123456,1234567,870987]}";
 }
 
+// credit: https://stackoverflow.com/questions/41820039/jstringjni-to-stdstringc-with-utf8-characters
 std::string jstring2string(JNIEnv *env, jstring jStr) {
     if (!jStr)
         return "";
