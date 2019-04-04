@@ -7,6 +7,7 @@ using namespace std;
 
 JNIEXPORT void JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_sayHello(JNIEnv *env, jclass utilClass) {
   cout << "Hello World from C++!" << endl;
+  binary_utils::say_hello_binary_utils();
 }
 
 JNIEXPORT jbyteArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_jsonToBinary(JNIEnv *env, jclass utilsClass, jstring json) {

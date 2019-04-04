@@ -2,23 +2,31 @@ cmake_minimum_required(VERSION 3.4.1)
 
 #SET(CMAKE_C_COMPILER /path/to/c/compiler)
 #SET(CMAKE_CXX_COMPILER /path/to/cpp/compiler)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -shared -fPIC -std=c++11 -pthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -pthread")
 
 project(JavaCppBridge)
-#
-include_directories("build/boost/include") # must exist already - run bin/build-boost-emscripten.sh
-#
-include_directories("src")
-#
+
+############################# COMPILER INCLUDES ##################################
+
 include_directories("$ENV{JAVA_HOME}")
 include_directories("$ENV{JAVA_HOME}/include")
 include_directories("$ENV{JAVA_HOME}/include/darwin")
-#
+
+#include_directories("build/boost/include") # must exist already - run bin/build-boost-emscripten.sh
+
+
+SET(boost_SRC /Users/Eric/git/build_stuff/boost_1_69_0/boost)
+SET(boost_LIB /Users/Eric/git/build_stuff/boost_1_69_0/stage/lib)
+#include_directories(/Users/Eric/git/build_stuff/boost_1_69_0)
+#include_directories("${boost_SRC}")
+link_directories("${boost_LIB}")
+
 set(MYMONERO_CORE_CPP "submodules/mymonero-core-cpp")
 set(MYMONERO_CORE_CPP_SRC "${MYMONERO_CORE_CPP}/src")
-include_directories("${MYMONERO_CORE_CPP}/src")
-#
 set(MONERO_SRC "${MYMONERO_CORE_CPP}/contrib/monero-core-custom")
+
+include_directories("${MYMONERO_CORE_CPP_SRC}")
+
 include_directories(${MONERO_SRC})
 include_directories("${MONERO_SRC}/epee/include")
 include_directories("${MONERO_SRC}/common")
@@ -33,13 +41,45 @@ include_directories("${MONERO_SRC}/rpc")
 include_directories("${MONERO_SRC}/mnemonics")
 include_directories("${MONERO_SRC}/contrib/libsodium/include") # support sodium/… paths
 include_directories("${MONERO_SRC}/contrib/libsodium/include/sodium")
+
+############################# BOOST SETTINGS ##################################
+
+#set(Boost_NO_SYSTEM_PATH ON)
+#set(Boost_USE_STATIC_LIBS ON)
+#set(Boost_USE_MULTITHREADED ON)
+#set(Boost_USE_STATIC_RUNTIME ON)
+
+set(boost_DIR ${CMAKE_SOURCE_DIR}/build/boost)
+#include_directories(${boost_DIR})
+#link_directories(${boost_DIR})
+#set(boost_SRC ${boost_DIR}/include/boost)
+#include_directories(${boost_SRC})
+#link_directories(${boost_SRC})
+find_package(Boost 1.69.0 REQUIRED COMPONENTS thread chrono system)
+
+set(boost_DIR ${CMAKE_SOURCE_DIR}/build/boost)
+
+add_library(boost_chrono SHARED IMPORTED)
+set_target_properties(
+    boost_chrono PROPERTIES IMPORTED_LOCATION
+    ${boost_DIR}/lib/libboost_chrono.dylib
+)
+add_library(boost_system SHARED IMPORTED)
+set_target_properties(
+    boost_system PROPERTIES IMPORTED_LOCATION
+    ${boost_DIR}/lib/libboost_system.dylib
+)
+add_library(boost_thread SHARED IMPORTED)
+set_target_properties(
+    boost_thread PROPERTIES IMPORTED_LOCATION
+    ${boost_DIR}/lib/libboost_thread.dylib
+)
 #
 # keeping test files in a separate source directory 
 # file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/test_*.cpp)
 #
 set(
     SRC_FILES
-    #
     monero_cpp_bridge_MoneroCppUtilsJni.h
     monero_cpp_bridge_MoneroCppUtilsJni.cpp
     #
@@ -111,32 +151,17 @@ set(
     ${MONERO_SRC}/mnemonics/electrum-words.cpp
     ${MONERO_SRC}/vtlogger/logger.cpp
     ${MONERO_SRC}/contrib/libsodium/src/crypto_verify/verify.c
+    #
+    #${boost_SRC}/thread/thread.hpp
 )
 
-set(boost_DIR ${CMAKE_SOURCE_DIR}/build/boost)
+########################## BUILD MONERO LIBRARY ###############################
 
-add_library(boost_chrono STATIC IMPORTED)
-set_target_properties(
-    boost_chrono PROPERTIES IMPORTED_LOCATION
-    ${boost_DIR}/lib/libboost_chrono.a
-)
-add_library(boost_system STATIC IMPORTED)
-set_target_properties(
-    boost_system PROPERTIES IMPORTED_LOCATION
-    ${boost_DIR}/lib/libboost_system.a
-)
-add_library(boost_thread STATIC IMPORTED)
-set_target_properties(
-    boost_thread PROPERTIES IMPORTED_LOCATION
-    ${boost_DIR}/lib/libboost_thread.a
-)
-add_library(boost_atomic STATIC IMPORTED)
-set_target_properties(
-    boost_atomic PROPERTIES IMPORTED_LOCATION
-    ${boost_DIR}/lib/libboost_atomic.a
-)
-##
 add_library(monero SHARED ${SRC_FILES})
+#target_link_libraries(monero)
+target_link_libraries(monero boost_chrono boost_system boost_thread)
+
+#set_target_properties(monero PROPERTIES POSITION_INDEPENDENT_CODE ON)
 #set_target_properties(monero PROPERTIES dynamiclib "")
 #set_target_properties(monero PROPERTIES o libmonero.dylib)
 #
@@ -151,13 +176,3 @@ add_library(monero SHARED ${SRC_FILES})
 # boost_signals
 # boost_timer
 # boost_wserialization
-#
-target_link_libraries(
-    monero
-    #
-    #boost_chrono
-    #boost_system
-    #boost_thread
-    #
-    #${log-lib}
-)
