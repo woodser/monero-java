@@ -12,39 +12,95 @@ JNIEXPORT void JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_sayHello(JNIEnv
 
 JNIEXPORT jbyteArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_jsonToBinary(JNIEnv *env, jclass utilsClass, jstring json) {
 
-//  // lets test json to binary call
-//  string str = "{\"heights\":[123456,1234567,870987]}";
-//  string result;
-//  binary_utils::json_to_binary(str, result);
-//  cout << result << endl;
+  // convert json jstring to string
+  string jsonStr = jstring2string(env, json);
+  cout << "Converted: " << jsonStr << endl;
+  //string jsonStr = "{\"heights\":[123456,1234567,870987]}";
 
-  // convert jstring to string
-  const char *str = env->GetStringUTFChars(json, 0);
-  //printf(“%s”, str);
+  // convert json to monero's portable storage binary format
+  string binStr;
+  binary_utils::json_to_binary(jsonStr, binStr);
+  cout << "Binary: " << binStr << endl;
+  cout << "Binary length " << binStr.length() << endl;
 
-  cout << str << endl;
-
-  // release string
-  env->ReleaseStringUTFChars(json, str);
-
-  int size = 5;
-  jbyteArray result;
-  result = (env)->NewByteArray(size);
+  // convert binary string to jbyteArray
+  jbyteArray result = env->NewByteArray(binStr.length());
   if (result == NULL) {
-     return NULL; /* out of memory error thrown */
+     return NULL; // out of memory error thrown
   }
-  int i;
-  // fill a temp structure to use to populate the java int array
-  jbyte fill[size];
-  for (i = 0; i < size; i++) {
-     fill[i] = 2; // put whatever logic you want to populate the values here.
+
+  // fill a temp structure to use to populate the java byte array
+  jbyte fill[binStr.length()];
+  for (int i = 0; i < binStr.length(); i++) {
+     fill[i] = binStr[i];
   }
-  // move from the temp structure to the java structure
-  (env)->SetByteArrayRegion(result, 0, size, fill);
+  env->SetByteArrayRegion(result, 0, binStr.length(), fill);
   return result;
+
+
+
+
+//
+
+//  int size = 5;
+//  jbyteArray result;
+//  result = (env)->NewByteArray(size);
+//  if (result == NULL) {
+//     return NULL; /* out of memory error thrown */
+//  }
+//  int i;
+//  // fill a temp structure to use to populate the java int array
+//  jbyte fill[size];
+//  for (i = 0; i < size; i++) {
+//     fill[i] = 2; // put whatever logic you want to populate the values here.
+//  }
+//  // move from the temp structure to the java structure
+//  (env)->SetByteArrayRegion(result, 0, size, fill);
+//  return result;
+
+//  // convert jstring to string
+//  const char *str = env->GetStringUTFChars(json, 0);
+//  cout << str << endl;
+//  env->ReleaseStringUTFChars(json, str);
 }
 
 JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryToJson(JNIEnv *env, jclass utilsClass, jbyteArray bin) {
-  string str = "{\"heights\":[123456,1234567,870987]}";
-  return env->NewStringUTF(str.c_str());
+
+  // convert the jbyteArray to a string
+  cout << "Binary: " << bin << endl;
+  int binLength = env->GetArrayLength(bin);
+  cout << "Binary length: " << binLength << endl;
+  jboolean isCopy;
+  jbyte* jbytes = env->GetByteArrayElements(bin, &isCopy);
+  string binStr = string((char*) jbytes, binLength);
+
+  //string binStr = "temp";
+
+  // convert monero's portable storage binary format to json
+  string jsonStr;
+  binary_utils::binary_to_json(binStr, jsonStr);
+
+  // convert string to jstring
+  return env->NewStringUTF(jsonStr.c_str());
+
+  //string str = "{\"heights\":[123456,1234567,870987]}";
+}
+
+std::string jstring2string(JNIEnv *env, jstring jStr) {
+    if (!jStr)
+        return "";
+
+    const jclass stringClass = env->GetObjectClass(jStr);
+    const jmethodID getBytes = env->GetMethodID(stringClass, "getBytes", "(Ljava/lang/String;)[B");
+    const jbyteArray stringJbytes = (jbyteArray) env->CallObjectMethod(jStr, getBytes, env->NewStringUTF("UTF-8"));
+
+    size_t length = (size_t) env->GetArrayLength(stringJbytes);
+    jbyte* pBytes = env->GetByteArrayElements(stringJbytes, NULL);
+
+    std::string ret = std::string((char *)pBytes, length);
+    env->ReleaseByteArrayElements(stringJbytes, pBytes, JNI_ABORT);
+
+    env->DeleteLocalRef(stringJbytes);
+    env->DeleteLocalRef(stringClass);
+    return ret;
 }
