@@ -59,20 +59,20 @@ find_package(Boost 1.69.0 REQUIRED COMPONENTS thread chrono system)
 
 set(boost_DIR ${CMAKE_SOURCE_DIR}/build/boost)
 
-add_library(boost_chrono SHARED IMPORTED)
+add_library(boost_chrono STATIC IMPORTED)
 set_target_properties(
     boost_chrono PROPERTIES IMPORTED_LOCATION
-    ${boost_DIR}/lib/libboost_chrono.dylib
+    ${boost_DIR}/lib/libboost_chrono.a
 )
-add_library(boost_system SHARED IMPORTED)
+add_library(boost_system STATIC IMPORTED)
 set_target_properties(
     boost_system PROPERTIES IMPORTED_LOCATION
-    ${boost_DIR}/lib/libboost_system.dylib
+    ${boost_DIR}/lib/libboost_system.a
 )
-add_library(boost_thread SHARED IMPORTED)
+add_library(boost_thread STATIC IMPORTED)
 set_target_properties(
     boost_thread PROPERTIES IMPORTED_LOCATION
-    ${boost_DIR}/lib/libboost_thread.dylib
+    ${boost_DIR}/lib/libboost_thread.a
 )
 #
 # keeping test files in a separate source directory 
@@ -82,7 +82,7 @@ set(
     SRC_FILES
     monero_cpp_bridge_MoneroCppUtilsJni.h
     monero_cpp_bridge_MoneroCppUtilsJni.cpp
-    #
+	#
     ${MYMONERO_CORE_CPP_SRC}/monero_address_utils.hpp
     ${MYMONERO_CORE_CPP_SRC}/monero_address_utils.cpp
     ${MYMONERO_CORE_CPP_SRC}/monero_paymentID_utils.hpp
