@@ -39,6 +39,9 @@ JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryToJson
 JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryBlocksToJson
   (JNIEnv *, jclass, jbyteArray);
 
+// TODO: this causes warning
+std::string jstring2string(JNIEnv *env, jstring jStr);
+
 #ifdef __cplusplus
 }
 #endif
