@@ -12,6 +12,12 @@ JNIEXPORT void JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_sayHello(JNIEnv
 
 JNIEXPORT jbyteArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_jsonToBinary(JNIEnv *env, jclass utilsClass, jstring json) {
 
+//  // lets test json to binary call
+//  string str = "{\"heights\":[123456,1234567,870987]}";
+//  string result;
+//  binary_utils::json_to_binary(str, result);
+//  cout << result << endl;
+
   // convert jstring to string
   const char *str = env->GetStringUTFChars(json, 0);
   //printf(“%s”, str);
