@@ -387,8 +387,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public int getDownloadLimit() {
-    // TODO Auto-generated method stub
-    return 0;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
