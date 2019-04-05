@@ -134,6 +134,18 @@ public class MoneroRpc {
    * E.g. "/get_transactions" with params
    * 
    * @param path is the url path of the request to invoke
+   * @return the request's deserialized response
+   */
+  public Map<String, Object>sendPathRequest(String path) {
+    return sendPathRequest(path, null);
+  }
+  
+  /**
+   * Sends a RPC request to the given path and with the given paramters.
+   * 
+   * E.g. "/get_transactions" with params
+   * 
+   * @param path is the url path of the request to invoke
    * @param params are request parameters sent in the body
    * @return the request's deserialized response
    */
@@ -144,8 +156,10 @@ public class MoneroRpc {
       
       // build request
       HttpPost post = new HttpPost(uri.toString() + "/" + path);
-      HttpEntity entity = new StringEntity(JsonUtils.serialize(params));
-      post.setEntity(entity);
+      if (params != null) {
+        HttpEntity entity = new StringEntity(JsonUtils.serialize(params));
+        post.setEntity(entity);
+      }
       LOGGER.debug("Sending path request with path '" + path + "' and params: " + JsonUtils.serialize(params));
       
       // send request and validate response
@@ -186,8 +200,10 @@ public class MoneroRpc {
       
       // build request
       HttpPost post = new HttpPost(uri.toString() + "/" + path);
-      HttpEntity entity = new ByteArrayEntity(paramsBin);
-      post.setEntity(entity);
+      if (paramsBin != null) {
+        HttpEntity entity = new ByteArrayEntity(paramsBin);
+        post.setEntity(entity);
+      }
       LOGGER.debug("Sending binary request with path '" + path + "' and params: " + JsonUtils.serialize(params));
       
       // send request and validate response
