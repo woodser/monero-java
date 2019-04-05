@@ -1,6 +1,7 @@
 package monero.daemon;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
@@ -415,9 +416,31 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroDaemonPeer> getKnownPeers() {
-    throw new RuntimeException("Not implemented");
+    
+    // send request
+    Map<String, Object> respMap = rpc.sendPathRequest("get_peer_list");
+    checkResponseStatus(respMap);
+    
+    // build peers
+    List<MoneroDaemonPeer> peers = new ArrayList<MoneroDaemonPeer>();
+    if (respMap.containsKey("gray_list")) {
+      for (Map<String, Object> rpcPeer : (List<Map<String, Object>>) respMap.get("gray_list")) {
+        MoneroDaemonPeer peer = convertRpcPeer(rpcPeer);
+        peer.setIsOnline(false); // gray list means offline last checked
+        peers.add(peer);
+      }
+    }
+    if (respMap.containsKey("white_list")) {
+      for (Map<String, Object> rpcPeer :  (List<Map<String, Object>>) respMap.get("white_list")) {
+        MoneroDaemonPeer peer = convertRpcPeer(rpcPeer);
+        peer.setIsOnline(true); // white list means online last checked
+        peers.add(peer);
+      }
+    }
+    return peers;
   }
 
   @Override
@@ -752,5 +775,22 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     result.setDownloadPath((String) rpcResult.get("path"));
     if ("".equals(result.getDownloadPath())) result.setDownloadPath(null);
     return result;
+  }
+  
+  private static MoneroDaemonPeer convertRpcPeer(Map<String, Object> rpcPeer) {
+    assertNotNull(rpcPeer);
+    MoneroDaemonPeer peer = new MoneroDaemonPeer();
+    for (String key : rpcPeer.keySet()) {
+      Object val = rpcPeer.get(key);
+      if (key.equals("host")) peer.setHost((String) val);
+      else if (key.equals("id")) peer.setId("" + val);  // TODO monero-wallet-rpc: peer id is big integer but string in `get_connections`
+      else if (key.equals("ip")) {} // host used instead which is consistently a string
+      else if (key.equals("last_seen")) peer.setLastSeenTimestamp(((BigInteger) val).longValue());
+      else if (key.equals("port")) peer.setPort(((BigInteger) val).intValue());
+      else if (key.equals("rpc_port")) peer.setRpcPort(((BigInteger) val).intValue());
+      else if (key.equals("pruning_seed")) peer.setPruningSeed(((BigInteger) val).intValue());
+      else LOGGER.warn("WARNING: ignoring unexpected field in rpc peer: " + key + ": " + val);
+    }
+    return peer;
   }
 }
