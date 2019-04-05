@@ -14,8 +14,6 @@ public class MoneroCppUtilsJni {
     //System.loadLibrary("boost_thread");
     System.loadLibrary("monero");
   }
-  
-  public native static void sayHello();
 
   public native static byte[] jsonToBinary(String json);
   
