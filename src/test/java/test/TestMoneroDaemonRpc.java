@@ -1235,8 +1235,8 @@ public class TestMoneroDaemonRpc {
     if (isFull) {
       assertTrue(header.getSize() > 0);
       assertTrue(header.getDepth() >= 0);
-      assertTrue(header.getDifficulty().intValue() > 0);
-      assertTrue(header.getCumulativeDifficulty().intValue() > 0);
+      assertTrue(header.getDifficulty().compareTo(BigInteger.valueOf(0)) > 0);
+      assertTrue(header.getCumulativeDifficulty().compareTo(BigInteger.valueOf(0)) > 0);
       assertEquals(64, header.getId().length());
       assertTrue(header.getNumTxs() >= 0);
       assertNotNull(header.getOrphanStatus());
