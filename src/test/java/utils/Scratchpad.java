@@ -1,7 +1,5 @@
 package utils;
 
-import java.util.Arrays;
-
 import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroTx;
 
@@ -31,7 +29,7 @@ public class Scratchpad {
     
     // -------------------------------- SCRATCHPAD ----------------------------
     
-    MoneroTx tx = daemon.getTxs(Arrays.asList("de832e12e213c07af54bece4d070b0ec31c59bb35da0c1460db24a0018ab3396")).get(0);
+    MoneroTx tx = daemon.getTx("de832e12e213c07af54bece4d070b0ec31c59bb35da0c1460db24a0018ab3396");
     System.out.println(tx.toString());
     
 //    List<MoneroAccount> accounts = wallet.getAccounts(true);
