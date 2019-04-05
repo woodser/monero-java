@@ -222,13 +222,6 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       }
     }
     
-    System.out.println("LETS LOOK AT THIS THESE TXS");
-    for (MoneroBlock block : blocks) {
-      for (MoneroTx tx : block.getTxs()) {
-        System.out.println(tx);
-      }
-    }
-    
     return blocks;
   }
 

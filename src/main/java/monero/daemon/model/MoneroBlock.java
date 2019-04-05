@@ -1,5 +1,6 @@
 package monero.daemon.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import monero.utils.MoneroUtils;
@@ -13,6 +14,21 @@ public class MoneroBlock extends MoneroBlockHeader {
   private MoneroTx coinbaseTx;
   private List<MoneroTx> txs;
   private List<String> txIds;
+  
+  public MoneroBlock() {
+    super();
+  }
+  
+  public MoneroBlock(MoneroBlock block) {
+    super(block);
+    this.hex = block.getHex();
+    this.coinbaseTx = block.coinbaseTx.copy().setBlock(this);
+    if (block.txs != null) {
+      this.txs = new ArrayList<MoneroTx>();
+      for (MoneroTx tx : block.txs) txs.add(tx.copy().setBlock(this));
+    }
+    if (block.getTxIds() != null) this.txIds = new ArrayList<String>(block.getTxIds());
+  }
   
   public String getHex() {
     return hex;
@@ -51,7 +67,7 @@ public class MoneroBlock extends MoneroBlockHeader {
   }
   
   public MoneroBlock copy() {
-    throw new RuntimeException("Not implemented");
+    return new MoneroBlock(this);
   }
   
   public MoneroBlock merge(MoneroBlock block) {

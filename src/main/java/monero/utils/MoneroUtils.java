@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import common.utils.GenUtils;
@@ -137,7 +138,7 @@ public class MoneroUtils {
   @SuppressWarnings("unchecked")
   public static <T> T reconcile(T val1, T val2, Boolean resolveDefined, Boolean resolveTrue, Boolean resolveMax) {
     
-    // check for direct equality
+    // check for same reference
     if (val1 == val2) return val1;
     
     // check for BigInteger equality
@@ -177,6 +178,30 @@ public class MoneroUtils {
     assertEquals("Cannot reconcile values " + val1 + " and " + val2 + " with config: [" + resolveDefined + ", " + resolveTrue + ", " + resolveMax + "]", val1, val2);
     return val1;
   }
+  
+  /**
+   * Reconciles two int arrays.  The arrays must be identical or an
+   * exception is thrown.
+   * 
+   * @param val1
+   * @param val2
+   * @return
+   */
+  public static int[] reconcileIntArrays(int[] arr1, int[] arr2) {
+    
+    // check for same reference or null
+    if (arr1 == arr2) return arr1;
+    
+    // resolve one value defined
+    if (arr1 == null || arr2 == null) {
+      return arr1 == null ? arr2 : arr1;
+    }
+    
+    // assert deep equality
+    assertTrue("Cannot reconcile arrays", Arrays.equals(arr1, arr2));
+    return arr1;
+  }
+
   
   /**
    * Returns a human-friendly key value line.
