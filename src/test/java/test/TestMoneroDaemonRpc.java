@@ -515,7 +515,7 @@ public class TestMoneroDaemonRpc {
   }
   
   @Test
-  public void testGetIdsOfTransactionsInPoolBin() {
+  public void testGetIdsOfTxsInPoolBin() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     // TODO: get_transaction_pool_hashes.bin
     throw new Error("Not implemented");
