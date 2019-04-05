@@ -1,6 +1,10 @@
 package monero.daemon.model;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -56,7 +60,7 @@ public class MoneroTx {
   private List<String> signatures;
   
   public MoneroTx() {
-    
+    // nothing to build
   }
   
   /**
@@ -65,7 +69,51 @@ public class MoneroTx {
    * @param tx is the transaction to make a deep copy of
    */
   public MoneroTx(MoneroTx tx) {
-    throw new RuntimeException("Not implemented");
+    this.height = tx.height;
+    this.id = tx.id;
+    this.version = tx.version;
+    this.isCoinbase = tx.isCoinbase;
+    this.paymentId = tx.paymentId;
+    this.fee = tx.fee;
+    this.mixin = tx.mixin;
+    this.doNotRelay = tx.doNotRelay;
+    this.isRelayed = tx.isRelayed;
+    this.isConfirmed = tx.isConfirmed;
+    this.inTxPool = tx.inTxPool;
+    this.numConfirmations = tx.numConfirmations;
+    this.numEstimatedBlocksUntilConfirmed = tx.numEstimatedBlocksUntilConfirmed;
+    this.unlockTime = tx.unlockTime;
+    this.lastRelayedTimestamp = tx.lastRelayedTimestamp;
+    this.receivedTimestamp = tx.receivedTimestamp;
+    this.isDoubleSpend = tx.isDoubleSpend;
+    this.key = tx.key;
+    this.fullHex = tx.fullHex;
+    this.prunedHex = tx.prunedHex;
+    this.prunableHex = tx.prunableHex;
+    this.prunableHash = tx.prunableHash;
+    this.size = tx.size;
+    this.weight = tx.weight;
+    if (tx.vins != null) {
+      this.vins = new ArrayList<MoneroOutput>();
+      for (MoneroOutput vin : tx.vins) vins.add(vin.copy().setTx(this));
+    }
+    if (tx.vouts != null) {
+      this.vouts = new ArrayList<MoneroOutput>();
+      for (MoneroOutput vout : tx.vouts) vouts.add(vout.copy().setTx(this));
+    }
+    if (tx.outputIndices != null) this.outputIndices = new ArrayList<Integer>(tx.outputIndices);
+    this.metadata = tx.metadata;
+    this.commonTxSets = tx.commonTxSets;
+    if (tx.extra != null) this.extra = tx.extra.clone();
+    this.rctSignatures = tx.rctSignatures;
+    this.rctSigPrunable = tx.rctSigPrunable;
+    this.isKeptByBlock = tx.isKeptByBlock;
+    this.isFailed = tx.isFailed;
+    this.lastFailedHeight = tx.lastFailedHeight;
+    this.lastFailedId = tx.lastFailedId;
+    this.maxUsedBlockHeight = tx.maxUsedBlockHeight;
+    this.maxUsedBlockId = tx.maxUsedBlockId;
+    if (tx.signatures != null) this.signatures = new ArrayList<String>(tx.signatures);
   }
   
   public MoneroBlock getBlock() {
@@ -429,7 +477,110 @@ public class MoneroTx {
   }
   
   public MoneroTx merge(MoneroTx tx) {
-    throw new RuntimeException("Not implemented");
+    assertTrue(tx instanceof MoneroTx);
+    if (this == tx) return this;
+    this.setId(MoneroUtils.reconcile(this.getId(), tx.getId()));
+    this.setVersion(MoneroUtils.reconcile(this.getVersion(), tx.getVersion()));
+    this.setPaymentId(MoneroUtils.reconcile(this.getPaymentId(), tx.getPaymentId()));
+    this.setFee(MoneroUtils.reconcile(this.getFee(), tx.getFee()));
+    this.setMixin(MoneroUtils.reconcile(this.getMixin(), tx.getMixin()));
+    this.setIsConfirmed(MoneroUtils.reconcile(this.getIsConfirmed(), tx.getIsConfirmed(), null, true, null));
+    this.setDoNotRelay(MoneroUtils.reconcile(this.getDoNotRelay(), tx.getDoNotRelay(), null, false, null));  // tx can become relayed
+    this.setIsRelayed(MoneroUtils.reconcile(this.getIsRelayed(), tx.getIsRelayed(), null, true, null));      // tx can become relayed
+    this.setIsDoubleSpend(MoneroUtils.reconcile(this.getIsDoubleSpend(), tx.getIsDoubleSpend()));
+    this.setKey(MoneroUtils.reconcile(this.getKey(), tx.getKey()));
+    this.setFullHex(MoneroUtils.reconcile(this.getFullHex(), tx.getFullHex()));
+    this.setPrunedHex(MoneroUtils.reconcile(this.getPrunedHex(), tx.getPrunedHex()));
+    this.setPrunableHex(MoneroUtils.reconcile(this.getPrunableHex(), tx.getPrunableHex()));
+    this.setPrunableHash(MoneroUtils.reconcile(this.getPrunableHash(), tx.getPrunableHash()));
+    this.setSize(MoneroUtils.reconcile(this.getSize(), tx.getSize()));
+    this.setWeight(MoneroUtils.reconcile(this.getWeight(), tx.getWeight()));
+    this.setOutputIndices(MoneroUtils.reconcile(this.getOutputIndices(), tx.getOutputIndices()));
+    this.setMetadata(MoneroUtils.reconcile(this.getMetadata(), tx.getMetadata()));
+    this.setCommonTxSets(MoneroUtils.reconcile(this.getCommonTxSets(), tx.getCommonTxSets()));
+    this.setExtra(MoneroUtils.reconcileIntArrays(this.getExtra(), tx.getExtra()));
+    this.setRctSignatures(MoneroUtils.reconcile(this.getRctSignatures(), tx.getRctSignatures()));
+    this.setRctSigPrunable(MoneroUtils.reconcile(this.getRctSigPrunable(), tx.getRctSigPrunable()));
+    this.setIsKeptByBlock(MoneroUtils.reconcile(this.getIsKeptByBlock(), tx.getIsKeptByBlock()));
+    this.setIsFailed(MoneroUtils.reconcile(this.getIsFailed(), tx.getIsFailed()));
+    this.setLastFailedHeight(MoneroUtils.reconcile(this.getLastFailedHeight(), tx.getLastFailedHeight()));
+    this.setLastFailedId(MoneroUtils.reconcile(this.getLastFailedId(), tx.getLastFailedId()));
+    this.setMaxUsedBlockHeight(MoneroUtils.reconcile(this.getMaxUsedBlockHeight(), tx.getMaxUsedBlockHeight()));
+    this.setMaxUsedBlockId(MoneroUtils.reconcile(this.getMaxUsedBlockId(), tx.getMaxUsedBlockId()));
+    this.setSignatures(MoneroUtils.reconcile(this.getSignatures(), tx.getSignatures()));
+    this.setUnlockTime(MoneroUtils.reconcile(this.getUnlockTime(), tx.getUnlockTime()));
+    this.setNumConfirmations(MoneroUtils.reconcile(this.getNumConfirmations(), tx.getNumConfirmations(), null, null, true)); // num confirmations can increase
+    
+    // merge vins
+    if (tx.getVins() != null) {
+      for (MoneroOutput merger : tx.getVins()) {
+        boolean merged = false;
+        merger.setTx(this);
+        if (this.getVins() == null) this.setVins(new ArrayList<MoneroOutput>());
+        for (MoneroOutput mergee : this.getVins()) {
+          if (mergee.getKeyImage().getHex().equals(merger.getKeyImage().getHex())) {
+            mergee.merge(merger);
+            merged = true;
+            break;
+          }
+        }
+        if (!merged) this.getVins().add(merger);
+      }
+    }
+    
+    // merge vouts
+    if (tx.getVouts() != null) {
+      for (MoneroOutput vout : tx.getVouts()) vout.setTx(this);
+      if (this.getVouts() == null) this.setVouts(tx.getVouts());
+      else {
+        
+        // determine if output indices present
+        int numOutputIndices = 0;
+        for (MoneroOutput vout : this.getVouts()) if (vout.getIndex() != null) numOutputIndices++;
+        for (MoneroOutput vout : tx.getVouts()) if (vout.getIndex() != null) numOutputIndices++;
+        assertTrue("Some vouts have an index and some do not", numOutputIndices == 0 || this.getVouts().size() + tx.getVouts().size() == numOutputIndices);
+        
+        // merge by indices
+        if (numOutputIndices > 0) {
+          for (MoneroOutput merger : tx.getVouts()) {
+            boolean merged = false;
+            if (this.getVouts() == null) this.setVouts(new ArrayList<MoneroOutput>());
+            for (MoneroOutput mergee : this.getVouts()) {
+              assertTrue(mergee.getIndex() >= 0 && merger.getIndex() >= 0);
+              if (mergee.getIndex() == merger.getIndex()) {
+                mergee.merge(merger);
+                merged = true;
+                break;
+              }
+            }
+            if (!merged) this.getVouts().add(merger);
+          }
+        }
+        
+        // merge by position
+        else {
+          assertEquals(this.getVouts().size(), tx.getVouts().size());
+          for (int i = 0; i < tx.getVouts().size(); i++) {
+            this.getVouts().get(i).merge(tx.getVouts().get(i));
+          }
+        }
+      }
+    }
+    
+    // handle unrelayed -> relayed -> confirmed
+    if (this.getIsConfirmed()) {
+      this.setInTxPool(false);
+      this.setReceivedTimestamp(null);
+      this.setLastRelayedTimestamp(null);
+      this.setNumEstimatedBlocksUntilConfirmed(null);
+    } else {
+      this.setInTxPool(MoneroUtils.reconcile(this.getInTxPool(), tx.getInTxPool(), null, true, null)); // unrelayed -> tx pool
+      this.setReceivedTimestamp(MoneroUtils.reconcile(this.getReceivedTimestamp(), tx.getReceivedTimestamp(), null, null, false)); // take earliest receive time
+      this.setLastRelayedTimestamp(MoneroUtils.reconcile(this.getLastRelayedTimestamp(), tx.getLastRelayedTimestamp(), null, null, true));  // take latest relay time
+      this.setNumEstimatedBlocksUntilConfirmed(MoneroUtils.reconcile(this.getNumEstimatedBlocksUntilConfirmed(), tx.getNumEstimatedBlocksUntilConfirmed(), null, null, false)); // take min
+    }
+    
+    return this;  // for chaining
   }
   
   public MoneroTx copy() {

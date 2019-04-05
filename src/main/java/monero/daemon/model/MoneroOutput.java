@@ -1,6 +1,9 @@
 package monero.daemon.model;
 
+import static org.junit.Assert.assertTrue;
+
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import monero.utils.MoneroUtils;
@@ -16,6 +19,18 @@ public class MoneroOutput {
   private Integer index;
   private List<Integer> ringOutputIndices;
   private String stealthPublicKey;
+  
+  public MoneroOutput() {
+    // nothing to build
+  }
+  
+  public MoneroOutput(MoneroOutput output) {
+    if (output.keyImage != null) this.keyImage = output.keyImage.copy();
+    this.amount = output.amount;
+    this.index = output.index;
+    if (output.ringOutputIndices != null) this.ringOutputIndices = new ArrayList<Integer>(output.ringOutputIndices);
+    this.stealthPublicKey = output.stealthPublicKey;
+  }
   
   public MoneroTx getTx() {
     return tx;
@@ -71,8 +86,22 @@ public class MoneroOutput {
     return this;
   }
   
+  public MoneroOutput copy() {
+    return new MoneroOutput(this);
+  }
+  
   public String toString() {
     return toString(0);
+  }
+  
+  public MoneroOutput merge(MoneroOutput output) {
+    assertTrue(output instanceof MoneroOutput);
+    if (this == output) return this;
+    if (this.getKeyImage() == null) this.setKeyImage(output.getKeyImage());
+    else if (output.getKeyImage() != null) this.getKeyImage().merge(output.getKeyImage());
+    this.setAmount(MoneroUtils.reconcile(this.getAmount(), output.getAmount()));
+    this.setIndex(MoneroUtils.reconcile(this.getIndex(), output.getIndex()));
+    return this;
   }
   
   public String toString(int indent) {

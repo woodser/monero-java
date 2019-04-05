@@ -1159,7 +1159,18 @@ public class TestMoneroDaemonRpc {
     TestContext txContext;
     public TestContext() { }
     public TestContext(TestContext ctx) {
-      throw new RuntimeException("Not implemented");
+      this.hasJson = ctx.hasJson;
+      this.isPruned = ctx.isPruned;
+      this.isFull = ctx.isFull;
+      this.isConfirmed = ctx.isConfirmed;
+      this.isCoinbase = ctx.isCoinbase;
+      this.fromGetTxPool = ctx.fromGetTxPool;
+      this.fromGetBlocksByHeight = ctx.fromGetBlocksByHeight;
+      this.hasOutputIndices = ctx.hasOutputIndices;
+      this.doNotTestCopy = ctx.doNotTestCopy;
+      this.hasTxs = ctx.hasTxs;
+      this.hasHex = ctx.hasHex;
+      this.headerIsFull = ctx.headerIsFull;
     }
   }
   
@@ -1458,7 +1469,7 @@ public class TestMoneroDaemonRpc {
     }
     
     // test deep copy
-    if (!Boolean.FALSE.equals(ctx.doNotTestCopy)) testTxCopy(tx, ctx);
+    if (!Boolean.TRUE.equals(ctx.doNotTestCopy)) testTxCopy(tx, ctx);
   }
   
   private static void testVin(MoneroOutput vin, TestContext ctx) {
@@ -1491,7 +1502,9 @@ public class TestMoneroDaemonRpc {
     // copy tx and assert deep equality
     MoneroTx copy = tx.copy();
     assertTrue(copy instanceof MoneroTx);
-    assertEquals(tx, copy);
+    assertNull(copy.getBlock());
+    copy.setBlock(tx.getBlock().copy().setTxs(Arrays.asList(copy)));
+    assertEquals(tx.toString(), copy.toString());
     assertTrue(copy != tx);
     
     // test different vin references

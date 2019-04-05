@@ -27,6 +27,30 @@ public class MoneroBlockHeader {
   private BigInteger reward;
   private String powHash;
   
+  public MoneroBlockHeader() {
+    super();
+  }
+  
+  public MoneroBlockHeader(MoneroBlockHeader header) {
+    this.id = header.id;
+    this.height = header.height;
+    this.timestamp = header.timestamp;
+    this.size = header.size;
+    this.weight = header.weight;
+    this.longTermWeight = header.longTermWeight;
+    this.depth = header.depth;
+    this.difficulty = header.difficulty;
+    this.cumulativeDifficulty = header.cumulativeDifficulty;
+    this.majorVersion = header.majorVersion;
+    this.minorVersion = header.minorVersion;
+    this.nonce = header.nonce;
+    this.numTxs = header.numTxs;
+    this.orphanStatus = header.orphanStatus;
+    this.prevId = header.prevId;
+    this.reward = header.reward;
+    this.powHash = header.powHash;
+  }
+  
   public String getId() {
     return id;
   }

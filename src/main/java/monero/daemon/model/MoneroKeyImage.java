@@ -1,5 +1,7 @@
 package monero.daemon.model;
 
+import static org.junit.Assert.assertTrue;
+
 import monero.utils.MoneroUtils;
 
 /**
@@ -19,6 +21,11 @@ public class MoneroKeyImage {
     this.signature = signature;
   }
   
+  public MoneroKeyImage(MoneroKeyImage keyImage) {
+    this.hex = keyImage.hex;
+    this.signature = keyImage.signature;
+  }
+  
   public String getHex() {
     return hex;
   }
@@ -33,6 +40,18 @@ public class MoneroKeyImage {
   
   public void setSignature(String signature) {
     this.signature = signature;
+  }
+  
+  public MoneroKeyImage copy() {
+    return new MoneroKeyImage(this);
+  }
+  
+  public MoneroKeyImage merge(MoneroKeyImage keyImage) {
+    assertTrue(keyImage instanceof MoneroKeyImage);
+    if (keyImage == this) return this;
+    this.setHex(MoneroUtils.reconcile(this.getHex(), keyImage.getHex()));
+    this.setSignature(MoneroUtils.reconcile(this.getSignature(), keyImage.getSignature()));
+    return this;
   }
   
   public String toString() {

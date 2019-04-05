@@ -181,9 +181,7 @@ public class MoneroRpc {
     
     // serialize params to monero's portable binary storage format
     byte[] paramsBin = MoneroCppUtils.mapToBinary(params);
-    System.out.println("Converted params to binary!!!");
-    System.out.println(paramsBin);
-    
+
     try {
       
       // build request
