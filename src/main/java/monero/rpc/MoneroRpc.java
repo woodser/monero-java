@@ -12,6 +12,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
@@ -174,16 +175,41 @@ public class MoneroRpc {
    * 
    * @param path is the path of the binary RPC method to invoke
    * @param params are the request parameters
-   * @return int[] is the binary response
+   * @return byte[] is the binary response
    */
-  public int[] sendBinaryRequest(String path, Map<String, Object> params) {
+  public byte[] sendBinaryRequest(String path, Map<String, Object> params) {
     
-    // serialize params
-    int[] paramsBin = MoneroCppUtils.mapToBinary(params);
-    
+    // serialize params to monero's portable binary storage format
+    byte[] paramsBin = MoneroCppUtils.mapToBinary(params);
     System.out.println("Converted params to binary!!!");
     System.out.println(paramsBin);
-    throw new RuntimeException("Not implemented");
+    
+    try {
+      
+      // build request
+      HttpPost post = new HttpPost(uri.toString() + "/" + path);
+      HttpEntity entity = new ByteArrayEntity(paramsBin);
+      post.setEntity(entity);
+      LOGGER.debug("Sending binary request with path '" + path + "' and params: " + JsonUtils.serialize(params));
+      
+      // send request and validate response
+      HttpResponse resp = client.execute(post);
+      validateHttpResponse(resp);
+      
+      // deserialize response
+      return EntityUtils.toByteArray(resp.getEntity());
+      
+//      Map<String, Object> respMap = JsonUtils.toMap(MAPPER, StreamUtils.streamToString(resp.getEntity().getContent()));
+//      LOGGER.debug("Received response to path '" + path + "': " + JsonUtils.serialize(respMap));
+//      EntityUtils.consume(resp.getEntity());
+    } catch (HttpException e1) {
+      throw e1;
+    } catch (MoneroRpcException e2) {
+      throw e2;
+    } catch (Exception e3) {
+      e3.printStackTrace();
+      throw new MoneroException(e3.getMessage());
+    }
     
 //    // build request
 //    let opts = {

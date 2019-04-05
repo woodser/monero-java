@@ -108,8 +108,8 @@ public class TestUtils {
   public static void testUnsignedBigInteger(BigInteger num, Boolean nonZero) {
     assertNotNull(num);
     assertTrue(num.intValue() >= 0);
-    if (nonZero == true) assertTrue(num.intValue() > 0);
-    if (nonZero == false) assertTrue(num.intValue() == 0);
+    if (Boolean.TRUE.equals(nonZero)) assertTrue(num.intValue() > 0);
+    if (Boolean.FALSE.equals(nonZero)) assertTrue(num.intValue() == 0);
   }
   
   public static String getRandomWalletAddress() {
