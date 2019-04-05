@@ -197,9 +197,11 @@ public class MoneroRpc {
       // deserialize response
       return EntityUtils.toByteArray(resp.getEntity());
       
-//      Map<String, Object> respMap = JsonUtils.toMap(MAPPER, StreamUtils.streamToString(resp.getEntity().getContent()));
-//      LOGGER.debug("Received response to path '" + path + "': " + JsonUtils.serialize(respMap));
-//      EntityUtils.consume(resp.getEntity());
+      // TODO: js code checks for map containing "error"; necessary?
+//    // send request and store binary response as Uint8Array
+//    let resp = await this._throttledRequest(opts);
+//    if (resp.error) throw new MoneroRpcError(resp.error.code, resp.error.message, opts);
+//    return new Uint8Array(resp, 0, resp.length);
     } catch (HttpException e1) {
       throw e1;
     } catch (MoneroRpcException e2) {
@@ -208,28 +210,6 @@ public class MoneroRpc {
       e3.printStackTrace();
       throw new MoneroException(e3.getMessage());
     }
-    
-//    // build request
-//    let opts = {
-//      method: "POST",
-//      uri: this.config.uri + "/" + path,
-//      agent: this.agent,
-//      encoding: null,
-//      body: paramsBin
-//    };
-//    if (this.config.user) {
-//      opts.forever = true;
-//      opts.auth = {
-//        user: this.config.user,
-//        pass: this.config.pass,
-//        sendImmediately: false
-//      }
-//    }
-//    
-//    // send request and store binary response as Uint8Array
-//    let resp = await this._throttledRequest(opts);
-//    if (resp.error) throw new MoneroRpcError(resp.error.code, resp.error.message, opts);
-//    return new Uint8Array(resp, 0, resp.length);
   }
   
   // ------------------------------ STATIC UTILITIES --------------------------
