@@ -55,7 +55,7 @@ public class MoneroException extends RuntimeException {
   public String toString() {
     String str = "";
     if (code != null) str += code + ": ";
-    str += getMessage();
+    str += getDescription();
     return str;
   }
 }

@@ -54,6 +54,41 @@ public class MoneroBlock extends MoneroBlockHeader {
     throw new RuntimeException("Not implemented");
   }
   
+  public MoneroBlock merge(MoneroBlock block) {
+    throw new RuntimeException("Not implemented");
+//    assert(block instanceof MoneroBlock);
+//    if (this === block) return;
+//    
+//    // merge header fields
+//    super.merge(block);
+//    
+//    // merge coinbase tx
+//    if (!this.getCoinbaseTx()) this.setCoinbaseTx(block.getCoinbaseTx());
+//    else if (block.getCoinbaseTx()) this.getCoinbaseTx().merge(block.getCoinbaseTx());
+//    
+//    // merge non-coinbase txs
+//    if (!this.getTxs()) this.setTxs(block.getTxs());
+//    else if (block.getTxs()) {
+//      for (let thatTx of block.getTxs()) {
+//        let found = false;
+//        for (let thisTx of this.getTxs()) {
+//          if (thatTx.getId() === thisTx.getId()) {
+//            thisTx.merge(thatTx);
+//            found = true;
+//            break;
+//          }
+//        }
+//        if (!found) this.getTxs().push(thatTx);
+//      }
+//    }
+//    if (this.getTxs()) for (let tx of this.getTxs()) tx.setBlock(this);
+//    
+//    // merge other fields
+//    this.setHex(MoneroUtils.reconcile(this.getHex(), block.getHex()));
+//    this.setTxIds(MoneroUtils.reconcile(this.getTxIds(), block.getTxIds()));
+//    return this;
+  }
+
   public String toString() {
     return toString(0);
   }

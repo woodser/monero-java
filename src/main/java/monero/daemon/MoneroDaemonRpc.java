@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import common.utils.GenUtils;
 import common.utils.JsonUtils;
+import monero.cpp_bridge.MoneroCppUtils;
 import monero.daemon.model.MoneroAltChain;
 import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
@@ -170,66 +171,65 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return block;
   }
 
+  @SuppressWarnings({ "unchecked" })
   @Override
   public List<MoneroBlock> getBlocksByHeight(List<Integer> heights) {
     
     // fetch blocks in binary
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("heights", heights);
-    int[] respBin = rpc.sendBinaryRequest("get_blocks_by_height.bin", params);
-    System.out.println(respBin);
-    throw new RuntimeException("Not implemented");
+    byte[] respBin = rpc.sendBinaryRequest("get_blocks_by_height.bin", params);
     
-//    // convert binary blocks to map
-//    Map<String, Object> rpcBlocks = MoneroCppUtils.binaryBlocksToMap(respBin);
-//    System.out.println("We have blocks as maps!!!");
-//    System.out.println(rpcBlocks);
+    // convert binary blocks to map
+    Map<String, Object> rpcResp = MoneroCppUtils.binaryBlocksToMap(respBin);
+    checkResponseStatus(rpcResp);
+    
+    // build blocks with transactions
+    List<MoneroBlock> blocks = new ArrayList<MoneroBlock>();
+    List<Map<String, Object>> rpcBlocks = (List<Map<String, Object>>) rpcResp.get("blocks");
+    List<List<Map<String, Object>>> rpcTxs = (List<List<Map<String, Object>>>) rpcResp.get("txs");
+    assertEquals(rpcBlocks.size(), rpcTxs.size());
+    for (int blockIdx = 0; blockIdx < rpcBlocks.size(); blockIdx++) {
+      
+      // build block
+      MoneroBlock block = convertRpcBlock(rpcBlocks.get(blockIdx));
+      block.setHeight(heights.get(blockIdx));
+      blocks.add(block);
 
-//    await this._initOneTime();
-//    
-//    // fetch blocks in binary
-//    let respBin = await this.config.rpc.sendBinaryRequest("get_blocks_by_height.bin", { heights: heights });
-//    
-//    // convert binary blocks to json
-//    let rpcBlocks = this.coreUtils.binary_blocks_to_json(respBin);
-//    MoneroDaemonRpc._checkResponseStatus(rpcBlocks);
-//    //console.log(JSON.stringify(rpcBlocks));
-//    
-//    // build blocks with transactions
-//    assert.equal(rpcBlocks.txs.length, rpcBlocks.blocks.length);    
-//    let blocks = [];
-//    for (let blockIdx = 0; blockIdx < rpcBlocks.blocks.length; blockIdx++) {
-//      
-//      // build block
-//      let block = MoneroDaemonRpc._buildBlock(rpcBlocks.blocks[blockIdx]);
-//      block.getHeader().setHeight(heights[blockIdx]);
-//      blocks.push(block);
-//      
-//      // build transactions
-//      let txs = [];
-//      for (let txIdx = 0; txIdx < rpcBlocks.txs[blockIdx].length; txIdx++) {
-//        let tx = new MoneroTx();
-//        txs.push(tx);
-//        tx.setId(rpcBlocks.blocks[blockIdx].tx_hashes[txIdx]);
-//        tx.setIsConfirmed(true);
-//        tx.setInTxPool(false);
-//        tx.setIsCoinbase(false);
-//        tx.setDoNotRelay(false);
-//        tx.setIsRelayed(true);
-//        tx.setIsFailed(false);
-//        tx.setIsDoubleSpend(false);
-//        MoneroDaemonRpc._buildTx(rpcBlocks.txs[blockIdx][txIdx], tx);
-//      }
-//      
-//      // merge into one block
-//      block.setTxs([]);
-//      for (let tx of txs) {
-//        if (tx.getBlock()) block.merge(tx.getBlock());
-//        else block.getTxs().push(tx.setBlock(block));
-//      }
-//    }
-//    
-//    return blocks;
+      // build transactions
+      List<MoneroTx> txs = new ArrayList<MoneroTx>();
+      for (int txIdx = 0; txIdx < rpcTxs.get(blockIdx).size(); txIdx++) {
+        MoneroTx tx = new MoneroTx();
+        txs.add(tx);
+        List<String> txIds = (List<String>) rpcBlocks.get(blockIdx).get("tx_hashes");
+        tx.setId(txIds.get(txIdx));
+        tx.setIsConfirmed(true);
+        tx.setInTxPool(false);
+        tx.setIsCoinbase(false);
+        tx.setDoNotRelay(false);
+        tx.setIsRelayed(true);
+        tx.setIsFailed(false);
+        tx.setIsDoubleSpend(false);
+        List<Map<String, Object>> blockTxs = (List<Map<String, Object>>) rpcTxs.get(blockIdx);
+        convertRpcTx(blockTxs.get(txIdx), tx);
+      }
+      
+      // merge into one block
+      block.setTxs(new ArrayList<MoneroTx>());
+      for (MoneroTx tx : txs) {
+        if (tx.getBlock() != null) block.merge(tx.getBlock());
+        else block.getTxs().add(tx.setBlock(block));
+      }
+    }
+    
+    System.out.println("LETS LOOK AT THIS THESE TXS");
+    for (MoneroBlock block : blocks) {
+      for (MoneroTx tx : block.getTxs()) {
+        System.out.println(tx);
+      }
+    }
+    
+    return blocks;
   }
 
   @Override
@@ -631,15 +631,15 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("vin")) {
         List<Map<String, Object>> rpcVins = (List<Map<String, Object>>) val;
         if (rpcVins.size() != 1 || !rpcVins.get(0).containsKey("gen")) {  // ignore coinbase vin TODO: why? probably needs re-enabled
-          List<MoneroOutput> vouts = new ArrayList<MoneroOutput>();
-          for (Map<String, Object> rpcVin : rpcVins) vouts.add(convertRpcOutput(rpcVin, null));
-          tx.setVouts(vouts);
+          List<MoneroOutput> vins = new ArrayList<MoneroOutput>();
+          for (Map<String, Object> rpcVin : rpcVins) vins.add(convertRpcOutput(rpcVin, tx));
+          tx.setVins(vins);
         }
       }
       else if (key.equals("vout")) {
         List<Map<String, Object>> rpcVouts = (List<Map<String, Object>>) val;
         List<MoneroOutput> vouts = new ArrayList<MoneroOutput>();
-        for (Map<String, Object> rpcVout : rpcVouts) vouts.add(convertRpcOutput(rpcVout, null));
+        for (Map<String, Object> rpcVout : rpcVouts) vouts.add(convertRpcOutput(rpcVout, tx));
         tx.setVouts(vouts);
       }
       else if (key.equals("rct_signatures")) tx.setRctSignatures(MoneroUtils.reconcile(tx.getRctSignatures(), (Map<String, Object>) val));

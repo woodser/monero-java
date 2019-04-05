@@ -249,7 +249,7 @@ public class TestMoneroDaemonRpc {
     ctx.txContext.isConfirmed = true;
     ctx.txContext.fromGetTxPool = false;
     ctx.txContext.hasOutputIndices = false;
-    ctx.txContext.fromGetBlocksByHeight = false;
+    ctx.txContext.fromGetBlocksByHeight = true;
     
     // test blocks
     boolean txFound = false;
@@ -1408,7 +1408,7 @@ public class TestMoneroDaemonRpc {
       if (ctx.fromGetBlocksByHeight) assertNull(tx.getFullHex());         // TODO: getBlocksByHeight() has inconsistent client-side pruning
       else assertFalse(tx.getFullHex().isEmpty());
       if (ctx.fromGetBlocksByHeight) assertNull(tx.getRctSigPrunable());  // TODO: getBlocksByHeight() has inconsistent client-side pruning
-      assertNotNull(tx.getRctSigPrunable());  // TODO: test this more thoroughly
+      else assertNotNull(tx.getRctSigPrunable()); // TODO: define and test this
       assertFalse(tx.getIsDoubleSpend());
       if (tx.getIsConfirmed()) {
         assertNull(tx.getLastRelayedTimestamp());
@@ -1446,7 +1446,7 @@ public class TestMoneroDaemonRpc {
     } else {
       assertNull(tx.getWeight());
       assertNull(tx.getIsKeptByBlock());
-      assertNull(tx.getIsFailed());
+      assertFalse(tx.getIsFailed());
       assertNull(tx.getLastFailedHeight());
       assertNull(tx.getLastFailedId());
       assertNull(tx.getMaxUsedBlockHeight());
@@ -1458,7 +1458,7 @@ public class TestMoneroDaemonRpc {
     }
     
     // test deep copy
-    if (!ctx.doNotTestCopy) testTxCopy(tx, ctx);
+    if (!Boolean.FALSE.equals(ctx.doNotTestCopy)) testTxCopy(tx, ctx);
   }
   
   private static void testVin(MoneroOutput vin, TestContext ctx) {

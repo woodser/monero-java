@@ -14,14 +14,11 @@ JNIEXPORT jbyteArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_jsonToBin
 
   // convert json jstring to string
   string jsonStr = jstring2string(env, json);
-  cout << "Converted: " << jsonStr << endl;
   //string jsonStr = "{\"heights\":[123456,1234567,870987]}";
 
   // convert json to monero's portable storage binary format
   string binStr;
   binary_utils::json_to_binary(jsonStr, binStr);
-  cout << "Binary: " << binStr << endl;
-  cout << "Binary length " << binStr.length() << endl;
 
   // convert binary string to jbyteArray
   jbyteArray result = env->NewByteArray(binStr.length());
@@ -36,32 +33,6 @@ JNIEXPORT jbyteArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_jsonToBin
   }
   env->SetByteArrayRegion(result, 0, binStr.length(), fill);
   return result;
-
-
-
-
-//
-
-//  int size = 5;
-//  jbyteArray result;
-//  result = (env)->NewByteArray(size);
-//  if (result == NULL) {
-//     return NULL; /* out of memory error thrown */
-//  }
-//  int i;
-//  // fill a temp structure to use to populate the java int array
-//  jbyte fill[size];
-//  for (i = 0; i < size; i++) {
-//     fill[i] = 2; // put whatever logic you want to populate the values here.
-//  }
-//  // move from the temp structure to the java structure
-//  (env)->SetByteArrayRegion(result, 0, size, fill);
-//  return result;
-
-//  // convert jstring to string
-//  const char *str = env->GetStringUTFChars(json, 0);
-//  cout << str << endl;
-//  env->ReleaseStringUTFChars(json, str);
 }
 
 JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryToJson(JNIEnv *env, jclass utilsClass, jbyteArray bin) {
@@ -74,16 +45,28 @@ JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryToJson
   jbyte* jbytes = env->GetByteArrayElements(bin, &isCopy);
   string binStr = string((char*) jbytes, binLength);
 
-  //string binStr = "temp";
-
   // convert monero's portable storage binary format to json
   string jsonStr;
   binary_utils::binary_to_json(binStr, jsonStr);
 
   // convert string to jstring
   return env->NewStringUTF(jsonStr.c_str());
+}
 
-  //string str = "{\"heights\":[123456,1234567,870987]}";
+JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryBlocksToJson(JNIEnv *env, jclass utilsClass, jbyteArray blocksBin) {
+
+  // convert the jbyteArray to a string
+  int binLength = env->GetArrayLength(blocksBin);
+  jboolean isCopy;
+  jbyte* jbytes = env->GetByteArrayElements(blocksBin, &isCopy);
+  string binStr = string((char*) jbytes, binLength);
+
+  // convert monero's portable storage binary format to json
+  string jsonStr;
+  binary_utils::binary_blocks_to_json(binStr, jsonStr);
+
+  // convert string to jstring
+  return env->NewStringUTF(jsonStr.c_str());
 }
 
 // credit: https://stackoverflow.com/questions/41820039/jstringjni-to-stdstringc-with-utf8-characters
