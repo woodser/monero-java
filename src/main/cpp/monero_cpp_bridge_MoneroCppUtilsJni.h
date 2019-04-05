@@ -7,13 +7,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/*
- * Class:     monero_cpp_bridge_MoneroCppUtilsJni
- * Method:    sayHello
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_sayHello
-  (JNIEnv *, jclass);
 
 /*
  * Class:     monero_cpp_bridge_MoneroCppUtilsJni

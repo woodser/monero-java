@@ -13,10 +13,6 @@ import monero.rpc.MoneroRpc;
  * Collection of utilties bridged from Monero Core C++ to Java.
  */
 public class MoneroCppUtils {
-  
-  public static void sayHello() {
-    MoneroCppUtilsJni.sayHello();
-  }
 
   public static byte[] mapToBinary(Map<String, Object> map) {
     return MoneroCppUtilsJni.jsonToBinary(JsonUtils.serialize(map));
