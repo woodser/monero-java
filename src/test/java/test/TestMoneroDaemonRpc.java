@@ -1323,7 +1323,7 @@ public class TestMoneroDaemonRpc {
     // test presence of output indices
     // TODO: change this over to vouts only
     if (tx.getIsCoinbase()) assertEquals(tx.getOutputIndices(), null); // TODO: how to get output indices for coinbase transactions?
-    if (tx.getInTxPool() || ctx.fromGetTxPool || ctx.hasOutputIndices == false) assertEquals(null, tx.getOutputIndices());
+    if (tx.getInTxPool() || ctx.fromGetTxPool || Boolean.FALSE.equals(ctx.hasOutputIndices)) assertEquals(null, tx.getOutputIndices());
     else assertFalse(tx.getOutputIndices().isEmpty());
     
     // test confirmed ctx
@@ -1397,7 +1397,7 @@ public class TestMoneroDaemonRpc {
     }
     
     // test pruned vs not pruned
-    if (ctx.fromGetTxPool || ctx.fromGetBlocksByHeight) assertNull(tx.getPrunableHash());   // TODO monero-daemon-rpc: tx pool txs do not have prunable hash, TODO: getBlocksByHeight() has inconsistent client-side pruning
+    if (ctx.fromGetTxPool || Boolean.TRUE.equals(ctx.fromGetBlocksByHeight)) assertNull(tx.getPrunableHash());   // TODO monero-daemon-rpc: tx pool txs do not have prunable hash, TODO: getBlocksByHeight() has inconsistent client-side pruning
     else assertNotNull(tx.getPrunableHash());
     if (ctx.isPruned) {
       assertNull(tx.getRctSigPrunable());
@@ -1416,9 +1416,9 @@ public class TestMoneroDaemonRpc {
       assertTrue(tx.getVersion() >= 0);
       assertTrue(tx.getUnlockTime() >= 0);
       assertTrue(tx.getExtra().length > 0);
-      if (ctx.fromGetBlocksByHeight) assertNull(tx.getFullHex());         // TODO: getBlocksByHeight() has inconsistent client-side pruning
+      if (Boolean.TRUE.equals(ctx.fromGetBlocksByHeight)) assertNull(tx.getFullHex());         // TODO: getBlocksByHeight() has inconsistent client-side pruning
       else assertFalse(tx.getFullHex().isEmpty());
-      if (ctx.fromGetBlocksByHeight) assertNull(tx.getRctSigPrunable());  // TODO: getBlocksByHeight() has inconsistent client-side pruning
+      if (Boolean.TRUE.equals(ctx.fromGetBlocksByHeight)) assertNull(tx.getRctSigPrunable());  // TODO: getBlocksByHeight() has inconsistent client-side pruning
       else assertNotNull(tx.getRctSigPrunable()); // TODO: define and test this
       assertFalse(tx.getIsDoubleSpend());
       if (tx.getIsConfirmed()) {
@@ -1488,7 +1488,7 @@ public class TestMoneroDaemonRpc {
 
   private static void testVout(MoneroOutput vout, TestContext ctx) {
     testOutput(vout);
-    if (vout.getTx().getInTxPool() || ctx.hasOutputIndices == false) assertEquals(null, vout.getIndex());
+    if (vout.getTx().getInTxPool() || Boolean.FALSE.equals(ctx.hasOutputIndices)) assertEquals(null, vout.getIndex());
     else assertTrue(vout.getIndex() >= 0);
     assertEquals(64, vout.getStealthPublicKey().length());
   }

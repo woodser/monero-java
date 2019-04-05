@@ -251,18 +251,16 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     params.put("txs_hashes", txIds);
     params.put("decode_as_json", true);
     params.put("prune", prune);
-    Map<String, Object> resultMap = null;
+    Map<String, Object> respMap = rpc.sendPathRequest("get_transactions", params);
     try {
-      Map<String, Object> respMap = rpc.sendPathRequest("get_transactions", params);
-      resultMap = (Map<String, Object>) respMap.get("result");
-      checkResponseStatus(resultMap);
+      checkResponseStatus(respMap);
     } catch (MoneroException e) {
       if (e.getMessage().indexOf("Failed to parse hex representation of transaction hash") >= 0) throw new MoneroException("Invalid transaction id", e.getCode());
       throw e;
     }
     
     //  interpret response
-    List<Map<String, Object>> rpcTxs = (List<Map<String, Object>>) resultMap.get("txs");
+    List<Map<String, Object>> rpcTxs = (List<Map<String, Object>>) respMap.get("txs");
     
     // build transaction models
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
@@ -611,7 +609,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("last_relayed_time")) tx.setLastRelayedTimestamp(MoneroUtils.reconcile(tx.getLastRelayedTimestamp(), ((BigInteger) val).longValue()));
       else if (key.equals("receive_time")) tx.setReceivedTimestamp(MoneroUtils.reconcile(tx.getReceivedTimestamp(), ((BigInteger) val).longValue()));
       else if (key.equals("in_pool")) {
-        tx.setIsConfirmed(MoneroUtils.reconcile(tx.getIsConfirmed(), (Boolean) val));
+        tx.setIsConfirmed(MoneroUtils.reconcile(tx.getIsConfirmed(), !(Boolean) val));
         tx.setInTxPool(MoneroUtils.reconcile(tx.getInTxPool(), (Boolean) val));
       }
       else if (key.equals("double_spend_seen")) tx.setIsDoubleSpend(MoneroUtils.reconcile(tx.getIsDoubleSpend(), (Boolean) val));
@@ -639,12 +637,16 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("rctsig_prunable")) tx.setRctSigPrunable(MoneroUtils.reconcile(tx.getRctSigPrunable(), val));
       else if (key.equals("unlock_time")) tx.setUnlockTime(MoneroUtils.reconcile(tx.getUnlockTime(), ((BigInteger) val).intValue()));
       else if (key.equals("as_json") || key.equals("tx_json")) { }  // handled last so tx is as initialized as possible
-      else if (key.equals("as_hex") || key.equals("tx_blob")) tx.setFullHex(MoneroUtils.reconcile(tx.getFullHex(), (String) val));
+      else if (key.equals("as_hex") || key.equals("tx_blob")) tx.setFullHex(MoneroUtils.reconcile(tx.getFullHex(), "".equals((String) val) ? null : (String) val));
       else if (key.equals("blob_size")) tx.setSize(MoneroUtils.reconcile(tx.getSize(), ((BigInteger) val).intValue()));
       else if (key.equals("weight")) tx.setWeight(MoneroUtils.reconcile(tx.getWeight(), ((BigInteger) val).intValue()));
       else if (key.equals("fee")) tx.setFee(MoneroUtils.reconcile(tx.getFee(), (BigInteger) val));
       else if (key.equals("relayed")) tx.setIsRelayed(MoneroUtils.reconcile(tx.getIsRelayed(), (Boolean) val));
-      else if (key.equals("output_indices")) tx.setOutputIndices(MoneroUtils.reconcile(tx.getOutputIndices(), (List<Integer>) val));
+      else if (key.equals("output_indices")) {
+        List<Integer> indices = new ArrayList<Integer>();
+        for (BigInteger bi : (List<BigInteger>) val) indices.add(bi.intValue());
+        tx.setOutputIndices(MoneroUtils.reconcile(tx.getOutputIndices(), indices));
+      }
       else if (key.equals("do_not_relay")) tx.setDoNotRelay(MoneroUtils.reconcile(tx.getDoNotRelay(), (Boolean) val));
       else if (key.equals("kept_by_block")) tx.setIsKeptByBlock(MoneroUtils.reconcile(tx.getIsKeptByBlock(), (Boolean) val));
       else if (key.equals("signatures")) tx.setSignatures(MoneroUtils.reconcile(tx.getSignatures(), (List<String>) val));
@@ -665,8 +667,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       }
       else if (key.equals("max_used_block_height")) tx.setMaxUsedBlockHeight(MoneroUtils.reconcile(tx.getMaxUsedBlockHeight(), ((BigInteger) val).intValue()));
       else if (key.equals("max_used_block_id_hash")) tx.setMaxUsedBlockId(MoneroUtils.reconcile(tx.getMaxUsedBlockId(), (String) val));
-      else if (key.equals("prunable_hash")) tx.setPrunableHash(MoneroUtils.reconcile(tx.getPrunableHash(), (String) val));
-      else if (key.equals("prunable_as_hex")) tx.setPrunableHex(MoneroUtils.reconcile(tx.getPrunableHex(), (String) val));
+      else if (key.equals("prunable_hash")) tx.setPrunableHash(MoneroUtils.reconcile(tx.getPrunableHash(), "".equals((String) val) ? null : (String) val));
+      else if (key.equals("prunable_as_hex")) tx.setPrunableHex(MoneroUtils.reconcile(tx.getPrunableHex(), "".equals((String) val) ? null : (String) val));
+      else if (key.equals("pruned_as_hex")) tx.setPrunedHex(MoneroUtils.reconcile(tx.getPrunedHex(), "".equals((String) val) ? null : (String) val));
       else LOGGER.warn("WARNING: ignoring unexpected field in rpc tx: " + key + ": " + val);
     }
     
@@ -695,9 +698,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         tx.getVouts().get(i).setIndex(tx.getOutputIndices().get(i));  // transfer output indices to vouts
       }
     }
-    if (rpcTx.containsKey("as_json")) convertRpcTx(JsonUtils.deserialize(MoneroRpc.MAPPER, (String) rpcTx.get("as_json"), new TypeReference<Map<String, Object>>(){}), tx);
-    if (rpcTx.containsKey("tx_json")) convertRpcTx(JsonUtils.deserialize(MoneroRpc.MAPPER, (String) rpcTx.get("tx_json"), new TypeReference<Map<String, Object>>(){}), tx);
-    if (!tx.getIsRelayed()) tx.setLastRelayedTimestamp(null);  // TODO monero-daemon-rpc: returns last_relayed_timestamp despite relayed: false, self inconsistent
+    if (rpcTx.containsKey("as_json") && !"".equals(rpcTx.get("as_json"))) convertRpcTx(JsonUtils.deserialize(MoneroRpc.MAPPER, (String) rpcTx.get("as_json"), new TypeReference<Map<String, Object>>(){}), tx);
+    if (rpcTx.containsKey("tx_json") && !"".equals(rpcTx.get("tx_json"))) convertRpcTx(JsonUtils.deserialize(MoneroRpc.MAPPER, (String) rpcTx.get("tx_json"), new TypeReference<Map<String, Object>>(){}), tx);
+    if (!Boolean.TRUE.equals(tx.getIsRelayed())) tx.setLastRelayedTimestamp(null);  // TODO monero-daemon-rpc: returns last_relayed_timestamp despite relayed: false, self inconsistent
     
     // return built transaction
     return tx;
@@ -714,7 +717,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         Map<String, Object> rpcKey = (Map<String, Object>) val;
         output.setAmount(MoneroUtils.reconcile(output.getAmount(), (BigInteger) rpcKey.get("amount")));
         output.setKeyImage(MoneroUtils.reconcile(output.getKeyImage(), new MoneroKeyImage((String) rpcKey.get("k_image"))));
-        output.setRingOutputIndices(MoneroUtils.reconcile(output.getRingOutputIndices(), (List<Integer>) rpcKey.get("key_offsets")));
+        List<Integer> ringOutputIndices = new ArrayList<Integer>();
+        for (BigInteger bi : (List<BigInteger>) rpcKey.get("key_offsets")) ringOutputIndices.add(bi.intValue());
+        output.setRingOutputIndices(MoneroUtils.reconcile(output.getRingOutputIndices(), ringOutputIndices));
       }
       else if (key.equals("amount")) output.setAmount(MoneroUtils.reconcile(output.getAmount(), (BigInteger) val));
       else if (key.equals("target")) output.setStealthPublicKey(MoneroUtils.reconcile(output.getStealthPublicKey(), (String) ((Map<String, Object>) val).get("key")));

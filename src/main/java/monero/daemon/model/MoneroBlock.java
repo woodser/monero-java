@@ -22,7 +22,7 @@ public class MoneroBlock extends MoneroBlockHeader {
   public MoneroBlock(MoneroBlock block) {
     super(block);
     this.hex = block.getHex();
-    this.coinbaseTx = block.coinbaseTx.copy().setBlock(this);
+    if (block.coinbaseTx != null) this.coinbaseTx = block.coinbaseTx.copy().setBlock(this);
     if (block.txs != null) {
       this.txs = new ArrayList<MoneroTx>();
       for (MoneroTx tx : block.txs) txs.add(tx.copy().setBlock(this));
