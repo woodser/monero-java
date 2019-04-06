@@ -391,9 +391,13 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<String> getAltBlockIds() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendPathRequest("get_alt_blocks_hashes");
+    checkResponseStatus(resp);
+    if (!resp.containsKey("blks_hashes")) return new ArrayList<String>();
+    return (List<String>) resp.get("blks_hashes");
   }
 
   @Override
