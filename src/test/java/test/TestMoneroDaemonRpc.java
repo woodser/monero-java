@@ -78,7 +78,7 @@ public class TestMoneroDaemonRpc {
   // -------------------------------- NON RELAYS ------------------------------
   
   @Test
-  public void testIsTrusted() {
+  public void testGetIsTrusted() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     daemon.getIsTrusted();
   }

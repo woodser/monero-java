@@ -68,7 +68,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public boolean getIsTrusted() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendPathRequest("get_height");
+    checkResponseStatus(resp);
+    return !(boolean) resp.get("untrusted");
   }
 
   @SuppressWarnings("unchecked")
@@ -300,9 +302,13 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return txSum;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public BigInteger getFeeEstimate(Integer graceBlocks) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendJsonRequest("get_fee_estimate");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    checkResponseStatus(result);
+    return (BigInteger) result.get("fee");
   }
 
   @Override
