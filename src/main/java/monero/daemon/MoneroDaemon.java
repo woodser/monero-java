@@ -344,14 +344,14 @@ public interface MoneroDaemon {
    * 
    * @param id is the id of the transaction to flush
    */
-  public void flushTxPool(String id);
+  public void flushTxPoolById(String id);
   
   /**
    * Flush transactions from the tx pool.
    * 
    * @paramids are ids of transactions to flush
    */
-  public void flushTxPool(List<String> ids);
+  public void flushTxPoolByIds(List<String> ids);
   
   /**
    * Get the spent status of the given key image.
