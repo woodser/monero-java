@@ -19,6 +19,10 @@ public class MoneroBlock extends MoneroBlockHeader {
     super();
   }
   
+  public MoneroBlock(MoneroBlockHeader header) {
+    super(header);
+  }
+  
   public MoneroBlock(MoneroBlock block) {
     super(block);
     this.hex = block.getHex();

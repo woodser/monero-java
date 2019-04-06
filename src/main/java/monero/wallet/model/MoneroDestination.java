@@ -2,6 +2,8 @@ package monero.wallet.model;
 
 import java.math.BigInteger;
 
+import monero.utils.MoneroUtils;
+
 /**
  * Models an outgoing transfer destination.
  */
@@ -9,6 +11,10 @@ public class MoneroDestination {
 
   private String address;
   private BigInteger amount;
+  
+  public MoneroDestination() {
+    // nothing to construct
+  }
   
   public MoneroDestination(String address, BigInteger amount) {
     super();
@@ -30,5 +36,17 @@ public class MoneroDestination {
   
   public void setAmount(BigInteger amount) {
     this.amount = amount;
+  }
+  
+  public String toString() {
+    return toString(0);
+  }
+  
+  public String toString(int indent) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(MoneroUtils.kvLine("Address", this.getAddress(), indent));
+    sb.append(MoneroUtils.kvLine("Amount", this.getAmount() != null ? this.getAmount().toString() : null, indent));
+    String str = sb.toString();
+    return str.substring(0, str.length() - 1);
   }
 }
