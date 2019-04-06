@@ -41,6 +41,11 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
     return getTxHex(txId, false);
   }
   
+  @Override
+  public String getTxHex(String txId, Boolean prune) {
+    return getTxHexes(Arrays.asList(txId), prune).get(0);
+  }
+  
   public List<String> getTxHexes(List<String> txIds) {
     return getTxHexes(txIds, null);
   }

@@ -276,13 +276,10 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public String getTxHex(String txId, Boolean prune) {
-    throw new RuntimeException("Not implemented");
-  }
-
-  @Override
   public List<String> getTxHexes(List<String> txIds, Boolean prune) {
-    throw new RuntimeException("Not implemented");
+    List<String> hexes = new ArrayList<String>();
+    for (MoneroTx tx : getTxs(txIds, prune)) hexes.add(Boolean.TRUE.equals(prune) ? tx.getPrunedHex() : tx.getFullHex());
+    return hexes;
   }
 
   @SuppressWarnings("unchecked")
