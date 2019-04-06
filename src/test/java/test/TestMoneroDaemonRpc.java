@@ -1078,7 +1078,7 @@ public class TestMoneroDaemonRpc {
       
       // fetch tx by id and ensure not relayed
       MoneroTx fetchedTx = daemon.getTx(tx.getId());
-      assertNull(fetchedTx.getIsRelayed()); // TODO monero-daemon-rpc: add relayed to get_transactions
+      assertFalse(fetchedTx.getIsRelayed());
     }
     
     // relay the txs
