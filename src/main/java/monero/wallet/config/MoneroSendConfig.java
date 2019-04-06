@@ -1,6 +1,8 @@
 package monero.wallet.config;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import monero.wallet.model.MoneroDestination;
@@ -43,7 +45,11 @@ public class MoneroSendConfig {
   }
   
   public MoneroSendConfig(String address, BigInteger amount, MoneroSendPriority priority) {
-    throw new Error("Not implemented");
+    // map address and amount to single destination
+    if (address != null || amount != null) {
+      this.destinations = Arrays.asList(new MoneroDestination(address, amount));
+    }
+    this.priority = priority;
   }
   
   public List<MoneroDestination> getDestinations() {

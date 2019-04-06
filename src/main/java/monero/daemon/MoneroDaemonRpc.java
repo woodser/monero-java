@@ -46,6 +46,7 @@ import monero.rpc.MoneroRpc;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
+import monero.wallet.model.MoneroTxWallet;
 
 /**
  * Implements a Monero daemon using monero-daemon-rpc.
@@ -313,7 +314,20 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public MoneroSubmitTxResult submitTxHex(String txHex, Boolean doNotRelay) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("tx_as_hex", txHex);
+    params.put("do_not_relay", doNotRelay);
+    Map<String, Object> resp = rpc.sendPathRequest("send_raw_transaction", params);
+    MoneroSubmitTxResult submitResult = convertRpcSubmitTxResult(resp);
+    
+    // set isGood based on status
+    try {
+      checkResponseStatus(resp);
+      submitResult.setIsGood(true);
+    } catch (MoneroException e) {
+      submitResult.setIsGood(false);
+    }
+    return submitResult;
   }
 
   @Override
@@ -321,9 +335,30 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroTx> getTxPool() {
-    throw new RuntimeException("Not implemented");
+    
+    
+    // send rpc request
+    Map<String, Object> resp = rpc.sendPathRequest("get_transaction_pool");
+    checkResponseStatus(resp);
+    
+    // build txs
+    List<MoneroTx> txs = new ArrayList<MoneroTx>();
+    if (resp.containsKey("transactions")) {
+      for (Map<String, Object> rpcTx : (List<Map<String, Object>>) resp.get("transactions")) {
+        MoneroTx tx = new MoneroTx();
+        txs.add(tx);
+        tx.setIsConfirmed(false);
+        tx.setIsCoinbase(false);
+        tx.setInTxPool(true);
+        tx.setNumConfirmations(0);
+        convertRpcTx(rpcTx, tx);
+      }
+    }
+    
+    return txs;
   }
 
   @Override
@@ -812,5 +847,26 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else LOGGER.warn("WARNING: ignoring unexpected field in rpc peer: " + key + ": " + val);
     }
     return peer;
+  }
+  
+  private static MoneroSubmitTxResult convertRpcSubmitTxResult(Map<String, Object> rpcResult) {
+    assertNotNull(rpcResult);
+    MoneroSubmitTxResult result = new MoneroSubmitTxResult();
+    for (String key : rpcResult.keySet()) {
+      Object val = rpcResult.get(key);
+      if (key.equals("double_spend")) result.setIsDoubleSpend((Boolean) val);
+      else if (key.equals("fee_too_low")) result.setIsFeeTooLow((Boolean) val);
+      else if (key.equals("invalid_input")) result.setHasInvalidInput((Boolean) val);
+      else if (key.equals("invalid_output")) result.setHasInvalidOutput((Boolean) val);
+      else if (key.equals("low_mixin")) result.setIsMixinTooLow((Boolean) val);
+      else if (key.equals("not_rct")) result.setIsRct(!Boolean.TRUE.equals(val));
+      else if (key.equals("not_relayed")) result.setIsRelayed(!Boolean.TRUE.equals(val));
+      else if (key.equals("overspend")) result.setIsOverspend((Boolean) val);
+      else if (key.equals("reason")) result.setReason((String) val);
+      else if (key.equals("too_big")) result.setIsTooBig((Boolean) val);
+      else if (key.equals("status") || key.equals("untrusted")) {}  // handled elsewhere
+      else LOGGER.warn("WARNING: ignoring unexpected field in submit tx hex result: " + key + ": " + val);
+    }
+    return result;
   }
 }
