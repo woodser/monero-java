@@ -257,7 +257,7 @@ public interface MoneroDaemon {
    * @param numBlocks are the number of blocks to include in the sum
    * @return the sum emission and fees since the geneis block
    */
-  public MoneroCoinbaseTxSum getCoinbaseTxSum(int height, int numBlocks);
+  public MoneroCoinbaseTxSum getCoinbaseTxSum(int height, Integer numBlocks);
   
   /**
    * Get the fee estimate per kB.
