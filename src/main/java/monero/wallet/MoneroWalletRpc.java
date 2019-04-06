@@ -173,9 +173,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getPrimaryAddress() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("account_index", 0);
+    params.put("address_index", 0);
+    Map<String, Object> resp = rpc.sendJsonRequest("get_address", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("address");
   }
 
   @Override
