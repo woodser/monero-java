@@ -72,7 +72,7 @@ public class TestMoneroDaemonRpc {
   
   @Before
   public void before() {
-    
+    daemon.flushTxPool();
   }
   
   // -------------------------------- NON RELAYS ------------------------------
@@ -511,7 +511,7 @@ public class TestMoneroDaemonRpc {
     }
     
     // flush the tx from the pool, gg
-    daemon.flushTxPool(tx.getId());
+    daemon.flushTxPoolById(tx.getId());
   }
   
   @Test
@@ -586,7 +586,7 @@ public class TestMoneroDaemonRpc {
     for (int i = 0; i < txs.size(); i++) {
       
       // flush tx from pool
-      daemon.flushTxPool(txs.get(i).getId());
+      daemon.flushTxPoolById(txs.get(i).getId());
       
       // test tx pool
       List<MoneroTx> poolTxs = daemon.getTxPool();
@@ -607,7 +607,7 @@ public class TestMoneroDaemonRpc {
     }
     
     // remove all txs by ids
-    daemon.flushTxPool(txIds);
+    daemon.flushTxPoolByIds(txIds);
     
     // test tx pool
     List<MoneroTx> txs = daemon.getTxPool();
@@ -631,7 +631,7 @@ public class TestMoneroDaemonRpc {
     for (MoneroTx tx : daemon.getTxs(txIds)) {
       for (MoneroOutput vin : tx.getVins()) keyImages.add(vin.getKeyImage().getHex());
     }
-    daemon.flushTxPool(txIds);
+    daemon.flushTxPoolByIds(txIds);
     
     // key images are not spent
     testSpentStatuses(keyImages, MoneroKeyImageSpentStatus.NOT_SPENT);
@@ -1061,7 +1061,7 @@ public class TestMoneroDaemonRpc {
     for (MoneroTx tx : txs) {
       txIds.add(tx.getId());
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-      assertEquals(result.getIsRelayed(), false);
+      assertEquals(false, result.getIsRelayed());
       testSubmitTxResultGood(result);
       
       // ensure tx is in pool
@@ -1069,7 +1069,7 @@ public class TestMoneroDaemonRpc {
       boolean found = false;
       for (MoneroTx aTx : poolTxs) {
         if (aTx.getId().equals(tx.getId())) {
-          assertEquals(aTx.getIsRelayed(), false);
+          assertEquals(false, aTx.getIsRelayed());
           found = true;
           break;
         }
@@ -1084,7 +1084,6 @@ public class TestMoneroDaemonRpc {
     // relay the txs
     if (txIds.size() == 1) daemon.relayTxById(txIds.get(0));
     else daemon.relayTxsById(txIds);
-
     
     // ensure txs are relayed
     for (MoneroTx tx : txs) {
@@ -1092,7 +1091,7 @@ public class TestMoneroDaemonRpc {
       boolean found = false;
       for (MoneroTx aTx : poolTxs) {
         if (aTx.getId().equals(tx.getId())) {
-          assertEquals(aTx.getIsRelayed(), true);
+          assertEquals(true, aTx.getIsRelayed());
           found = true;
           break;
         }
@@ -1356,6 +1355,13 @@ public class TestMoneroDaemonRpc {
       assertEquals(tx.getLastFailedHeight(), null);
       assertEquals(tx.getLastFailedId(), null);
       assertTrue(tx.getReceivedTimestamp() > 0);
+      assertTrue(tx.getSize() > 0);
+      assertTrue(tx.getWeight() > 0);
+      assertNotNull(tx.getIsKeptByBlock());
+      assertEquals(null, tx.getLastFailedHeight());
+      assertEquals(null, tx.getLastFailedId());
+      assertTrue(tx.getMaxUsedBlockHeight() >= 0);
+      assertNotNull(tx.getMaxUsedBlockId());
       if (tx.getIsRelayed()) assertTrue(tx.getNumEstimatedBlocksUntilConfirmed() > 0);
       else assertNull(tx.getNumEstimatedBlocksUntilConfirmed());
     } else {
@@ -1445,25 +1451,6 @@ public class TestMoneroDaemonRpc {
       }
     }
     
-    // test fields from tx pool
-    if (ctx.fromGetTxPool) {
-      assertTrue(tx.getSize() > 0);
-      assertTrue(tx.getWeight() > 0);
-      assertNotNull(tx.getIsKeptByBlock());
-      assertEquals(null, tx.getLastFailedHeight());
-      assertEquals(null, tx.getLastFailedId());
-      assertTrue(tx.getMaxUsedBlockHeight() >= 0);
-      assertNotNull(tx.getMaxUsedBlockId());
-    } else {
-      assertNull(tx.getWeight());
-      assertNull(tx.getIsKeptByBlock());
-      assertFalse(tx.getIsFailed());
-      assertNull(tx.getLastFailedHeight());
-      assertNull(tx.getLastFailedId());
-      assertNull(tx.getMaxUsedBlockHeight());
-      assertNull(tx.getMaxUsedBlockId());
-    }
-    
     if (tx.getIsFailed()) {
       // TODO: implement this
     }
@@ -1503,7 +1490,7 @@ public class TestMoneroDaemonRpc {
     MoneroTx copy = tx.copy();
     assertTrue(copy instanceof MoneroTx);
     assertNull(copy.getBlock());
-    copy.setBlock(tx.getBlock().copy().setTxs(Arrays.asList(copy)));
+    if (tx.getBlock() != null) copy.setBlock(tx.getBlock().copy().setTxs(Arrays.asList(copy)));
     assertEquals(tx.toString(), copy.toString());
     assertTrue(copy != tx);
     

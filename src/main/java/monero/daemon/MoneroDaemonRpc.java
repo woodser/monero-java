@@ -46,7 +46,6 @@ import monero.rpc.MoneroRpc;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
-import monero.wallet.model.MoneroTxWallet;
 
 /**
  * Implements a Monero daemon using monero-daemon-rpc.
@@ -275,6 +274,15 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         txs.add(convertRpcTx(rpcTxs.get(i), tx));
       }
     }
+    
+    // fetch unconfirmed txs from pool and merge additional fields  // TODO monero-daemon-rpc: merge rpc calls so this isn't necessary?
+    List<MoneroTx> poolTxs = getTxPool();
+    for (MoneroTx tx : txs) {
+      for (MoneroTx poolTx : poolTxs) {
+        if (tx.getId().equals(poolTx.getId())) tx.merge(poolTx);
+      }
+    }
+    
     return txs;
   }
 
@@ -378,17 +386,21 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public void flushTxPool() {
-    throw new RuntimeException("Not implemented");
+    flushTxPoolByIds(null);
   }
 
   @Override
-  public void flushTxPool(String id) {
-    throw new RuntimeException("Not implemented");
+  public void flushTxPoolById(String id) {
+    flushTxPoolByIds(Arrays.asList(id));
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public void flushTxPool(List<String> ids) {
-    throw new RuntimeException("Not implemented");
+  public void flushTxPoolByIds(List<String> ids) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txids", ids);
+    Map<String, Object> resp = rpc.sendJsonRequest("flush_txpool", params);
+    checkResponseStatus((Map<String, Object>) resp.get("result"));
   }
 
   @Override
@@ -753,9 +765,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     // link block and tx
     if (block != null) tx.setBlock(block.setTxs(Arrays.asList(tx)));
     
-    // TODO monero-daemon-rpc: unconfirmed txs block height and timestamp are actually received timestamp; overloading data model variables is bad juju
+    // TODO monero-daemon-rpc: unconfirmed txs misreport block height and timestamp
     if (tx.getBlock() != null && tx.getBlock().getHeight() != null && (long) tx.getBlock().getHeight() == tx.getBlock().getTimestamp()) {
-      tx.setReceivedTimestamp((long) tx.getBlock().getHeight());
       tx.setBlock(null);
       tx.setIsConfirmed(false);
     }
