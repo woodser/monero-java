@@ -40,6 +40,7 @@ import monero.daemon.model.MoneroKeyImageSpentStatus;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroOutputDistributionEntry;
+import monero.daemon.model.MoneroOutputHistogramEntry;
 import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxPoolStats;
@@ -668,12 +669,11 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetOutputHistogramBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    throw new RuntimeException("Not implemented");
-//    List<MoneroOutputHistogramEntry> entries = daemon.getOutputHistogram();
-//    assertFalse(entries.isEmpty());
-//    for (MoneroOutputHistogramEntry entry : entries) {
-//      testOutputHistogramEntry(entry);
-//    }
+    List<MoneroOutputHistogramEntry> entries = daemon.getOutputHistogram(null, null, null, null, null);
+    assertFalse(entries.isEmpty());
+    for (MoneroOutputHistogramEntry entry : entries) {
+      testOutputHistogramEntry(entry);
+    }
   }
   
   @Test
@@ -1816,5 +1816,12 @@ public class TestMoneroDaemonRpc {
     assertNotNull(result.getIsRct());
     assertNotNull(result.getIsOverspend());
     assertNotNull(result.getIsTooBig());
+  }
+  
+  private static void testOutputHistogramEntry(MoneroOutputHistogramEntry entry) {
+    TestUtils.testUnsignedBigInteger(entry.getAmount());
+    assertTrue(entry.getNumInstances() >= 0);
+    assertTrue(entry.getNumUnlockedInstances() >= 0);
+    assertTrue(entry.getNumRecentInstances() >= 0);
   }
 }

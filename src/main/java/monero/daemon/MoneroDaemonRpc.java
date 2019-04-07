@@ -26,6 +26,7 @@ import monero.daemon.model.MoneroBlockListener;
 import monero.daemon.model.MoneroBlockTemplate;
 import monero.daemon.model.MoneroCoinbaseTxSum;
 import monero.daemon.model.MoneroDaemonConnection;
+import monero.daemon.model.MoneroDaemonConnectionSpan;
 import monero.daemon.model.MoneroDaemonInfo;
 import monero.daemon.model.MoneroDaemonPeer;
 import monero.daemon.model.MoneroDaemonSyncInfo;
@@ -35,6 +36,7 @@ import monero.daemon.model.MoneroHardForkInfo;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroKeyImageSpentStatus;
 import monero.daemon.model.MoneroMiningStatus;
+import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroOutputDistributionEntry;
 import monero.daemon.model.MoneroOutputHistogramEntry;
@@ -403,10 +405,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     checkResponseStatus((Map<String, Object>) resp.get("result"));
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroKeyImageSpentStatus> getSpentStatuses(List<String> keyImages) {
-    // TODO Auto-generated method stub
-    return null;
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key_images", keyImages);
+    Map<String, Object> resp = rpc.sendPathRequest("is_key_image_spent", params);
+    checkResponseStatus(resp);
+    return (List<MoneroKeyImageSpentStatus>) resp.get("spent_status");
   }
 
   @Override
@@ -414,29 +420,90 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroOutputHistogramEntry> getOutputHistogram(List<BigInteger> amounts, Integer minCount, Integer maxCount, Boolean isUnlocked, Integer recentCutoff) {
-    throw new RuntimeException("Not implemented");
+    
+    // build request params
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("amounts", amounts);
+    params.put("min_count", minCount);
+    params.put("max_count", maxCount);
+    params.put("unlocked", isUnlocked);
+    params.put("recent_cutoff", recentCutoff);
+    
+    // send rpc request
+    Map<String, Object> resp = rpc.sendJsonRequest("get_output_histogram", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    checkResponseStatus(result);
+    
+    // build histogram entries from response
+    List<MoneroOutputHistogramEntry> entries = new ArrayList<MoneroOutputHistogramEntry>();
+    if (!result.containsKey("histogram")) return entries;
+    for (Map<String, Object> rpcEntry : (List<Map<String, Object>>) result.get("histogram")) {
+      entries.add(convertRpcOutputHistogramEntry(rpcEntry));
+    }
+    return entries;
   }
 
   @Override
   public List<MoneroOutputDistributionEntry> getOutputDistribution(List<BigInteger> amounts, Boolean isCumulative, Integer startHeight, Integer endHeight) {
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("Not implemented (response 'distribution' field is binary)");
+//  let amountStrs = [];
+//  for (let amount of amounts) amountStrs.push(amount.toJSValue());
+//  console.log(amountStrs);
+//  console.log(cumulative);
+//  console.log(startHeight);
+//  console.log(endHeight);
+//  
+//  // send rpc request
+//  console.log("*********** SENDING REQUEST *************");
+//  if (startHeight === undefined) startHeight = 0;
+//  let resp = await this.config.rpc.sendJsonRequest("get_output_distribution", {
+//    amounts: amountStrs,
+//    cumulative: cumulative,
+//    from_height: startHeight,
+//    to_height: endHeight
+//  });
+//  
+//  console.log("RESPONSE");
+//  console.log(resp);
+//  
+//  // build distribution entries from response
+//  let entries = [];
+//  if (!resp.result.distributions) return entries; 
+//  for (let rpcEntry of resp.result.distributions) {
+//    let entry = MoneroDaemonRpc._convertRpcOutputDistributionEntry(rpcEntry);
+//    entries.push(entry);
+//  }
+//  return entries;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroDaemonInfo getInfo() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendJsonRequest("get_info");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    checkResponseStatus(result);
+    return convertRpcInfo(result);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroDaemonSyncInfo getSyncInfo() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendJsonRequest("sync_info");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    checkResponseStatus(result);
+    return convertRpcSyncInfo(result);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroHardForkInfo getHardForkInfo() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendJsonRequest("hard_fork_info");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    checkResponseStatus(result);
+    return convertRpcHardForkInfo(result);
   }
 
   @Override
@@ -482,6 +549,19 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public int resetUploadLimit() {
     throw new RuntimeException("Not implemented");
   }
+  
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<MoneroDaemonConnection> getConnections() {
+    Map<String, Object> resp = rpc.sendJsonRequest("get_connections");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    checkResponseStatus(result);
+    List<MoneroDaemonConnection> connections = new ArrayList<MoneroDaemonConnection>();
+    for (Map<String, Object> rpcConnection : (List<Map<String, Object>>) result.get("connections")) {
+      connections.add(convertRpcConnection(rpcConnection));
+    }
+    return connections;
+  }
 
   @SuppressWarnings("unchecked")
   @Override
@@ -511,11 +591,6 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public List<MoneroDaemonConnection> getConnections() {
-    throw new RuntimeException("Not implemented");
-  }
-
-  @Override
   public void setOutgoingPeerLimit(int limit) {
     throw new RuntimeException("Not implemented");
   }
@@ -534,6 +609,43 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public void setPeerBans(List<MoneroBan> bans) {
     throw new RuntimeException("Not implemented");
   }
+  
+//  async setOutgoingPeerLimit(limit) {
+//    assert(GenUtils.isInt(limit) && limit >= 0, "Outgoing peer limit must be >= 0");
+//    let resp = this.config.rpc.sendPathRequest("out_peers", {out_peers: limit});
+//    MoneroDaemonRpc._checkResponseStatus(resp);
+//  }
+//  
+//  async setIncomingPeerLimit(limit) {
+//    assert(GenUtils.isInt(limit) && limit >= 0, "Incoming peer limit must be >= 0");
+//    let resp = this.config.rpc.sendPathRequest("in_peers", {in_peers: limit});
+//    MoneroDaemonRpc._checkResponseStatus(resp);
+//  }
+//  
+//  async getPeerBans() {
+//    Map<String> resp = rpc.sendJsonRequest("get_bans");
+//    MoneroDaemonRpc._checkResponseStatus(resp.result);
+//    let bans = [];
+//    for (let rpcBan of resp.result.bans) {
+//      let ban = new MoneroBan();
+//      ban.setHost(rpcBan.host);
+//      ban.setIp(rpcBan.ip);
+//      ban.setSeconds(rpcBan.seconds);
+//      bans.push(ban);
+//    }
+//    return bans;
+//  }
+//  
+//  async setPeerBan(ban) {
+//    return this.setPeerBans([ban]);
+//  }
+//  
+//  async setPeerBans(bans) {
+//    let rpcBans = [];
+//    for (let ban of bans) rpcBans.push(MoneroDaemonRpc._convertRpcBan(ban));
+//    List<Map<String> resp = rpc.sendJsonRequest("set_bans", {bans: rpcBans});
+//    MoneroDaemonRpc._checkResponseStatus(resp.result);
+//  }
 
   @Override
   public void startMining(String address, Integer numThreads, Boolean isBackground, Boolean ignoreBattery) {
@@ -879,5 +991,161 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else LOGGER.warn("WARNING: ignoring unexpected field in submit tx hex result: " + key + ": " + val);
     }
     return result;
+  }
+  
+  private static MoneroDaemonConnection convertRpcConnection(Map<String, Object> rpcConnection) {
+    MoneroDaemonConnection connection = new MoneroDaemonConnection();
+    MoneroDaemonPeer peer = new MoneroDaemonPeer();
+    connection.setPeer(peer);
+    peer.setIsOnline(true);
+    for (String key : rpcConnection.keySet()) {
+      Object val = rpcConnection.get(key);
+      if (key.equals("address")) peer.setAddress((String) val);
+      else if (key.equals("avg_download")) connection.setAvgDownload(((BigInteger) val).intValue());
+      else if (key.equals("avg_upload")) connection.setAvgUpload(((BigInteger) val).intValue());
+      else if (key.equals("connection_id")) connection.setId((String) val);
+      else if (key.equals("current_download")) connection.setCurrentDownload(((BigInteger) val).intValue());
+      else if (key.equals("current_upload")) connection.setCurrentUpload(((BigInteger) val).intValue());
+      else if (key.equals("height")) connection.setHeight(((BigInteger) val).intValue());
+      else if (key.equals("host")) peer.setHost((String) val);
+      else if (key.equals("ip")) {} // host used instead which is consistently a string
+      else if (key.equals("incoming")) connection.setIsIncoming((Boolean) val);
+      else if (key.equals("live_time")) connection.setLiveTime(((BigInteger) val).longValue());
+      else if (key.equals("local_ip")) connection.setIsLocalIp((Boolean) val);
+      else if (key.equals("localhost")) connection.setIsLocalHost((Boolean) val);
+      else if (key.equals("peer_id")) peer.setId((String) val);
+      else if (key.equals("port")) peer.setPort(Integer.parseInt((String) val));
+      else if (key.equals("rpc_port")) peer.setRpcPort(((BigInteger) val).intValue());
+      else if (key.equals("recv_count")) connection.setNumReceives(((BigInteger) val).intValue());
+      else if (key.equals("recv_idle_time")) connection.setReceiveIdleTime(((BigInteger) val).longValue());
+      else if (key.equals("send_count")) connection.setNumSends(((BigInteger) val).intValue());
+      else if (key.equals("send_idle_time")) connection.setSendIdleTime(((BigInteger) val).longValue());
+      else if (key.equals("state")) connection.setState((String) val);
+      else if (key.equals("support_flags")) connection.setNumSupportFlags(((BigInteger) val).intValue());
+      else if (key.equals("pruning_seed")) peer.setPruningSeed(((BigInteger) val).intValue());
+      else LOGGER.warn("WARNING: ignoring unexpected field in connection: " + key + ": " + val);
+    }
+    return connection;
+  }
+  
+  private static MoneroOutputHistogramEntry convertRpcOutputHistogramEntry(Map<String, Object> rpcEntry) {
+    MoneroOutputHistogramEntry entry = new MoneroOutputHistogramEntry();
+    for (String key : rpcEntry.keySet()) {
+      Object val = rpcEntry.get(key);
+      if (key.equals("amount")) entry.setAmount((BigInteger) val);
+      else if (key.equals("total_instances")) entry.setNumInstances(((BigInteger) val).intValue());
+      else if (key.equals("unlocked_instances")) entry.setNumUnlockedInstances(((BigInteger) val).intValue());
+      else if (key.equals("recent_instances")) entry.setNumRecentInstances(((BigInteger) val).intValue());
+      else LOGGER.warn("WARNING: ignoring unexpected field in output histogram: " + key + ": " + val);
+    }
+    return entry;
+  }
+  
+  public static MoneroDaemonInfo convertRpcInfo(Map<String, Object> rpcInfo) {
+    if (rpcInfo == null) return null;
+    MoneroDaemonInfo info = new MoneroDaemonInfo();
+    for (String key : rpcInfo.keySet()) {
+      Object val = rpcInfo.get(key);
+      if (key.equals("version")) info.setVersion((String) val);
+      else if (key.equals("alt_blocks_count")) info.setNumAltBlocks(((BigInteger) val).intValue());
+      else if (key.equals("block_size_limit")) info.setBlockSizeLimit(((BigInteger) val).intValue());
+      else if (key.equals("block_size_median")) info.setBlockSizeMedian(((BigInteger) val).intValue());
+      else if (key.equals("block_weight_limit")) info.setBlockWeightLimit(((BigInteger) val).intValue());
+      else if (key.equals("block_weight_median")) info.setBlockWeightMedian(((BigInteger) val).intValue());
+      else if (key.equals("bootstrap_daemon_address")) info.setBootstrapDaemonAddress((String) val);
+      else if (key.equals("cumulative_difficulty")) info.setCumulativeDifficulty((BigInteger) val);
+      else if (key.equals("difficulty")) info.setDifficulty((BigInteger) val);
+      else if (key.equals("free_space")) info.setFreeSpace((BigInteger) val);
+      else if (key.equals("database_size")) info.setDatabaseSize(((BigInteger) val).intValue());
+      else if (key.equals("grey_peerlist_size")) info.setNumOfflinePeers(((BigInteger) val).intValue());
+      else if (key.equals("height")) info.setHeight(((BigInteger) val).intValue());
+      else if (key.equals("height_without_bootstrap")) info.setHeightWithoutBootstrap(((BigInteger) val).intValue());
+      else if (key.equals("incoming_connections_count")) info.setNumIncomingConnections(((BigInteger) val).intValue());
+      else if (key.equals("offline")) info.setIsOffline((Boolean) val);
+      else if (key.equals("outgoing_connections_count")) info.setNumOutgoingConnections(((BigInteger) val).intValue());
+      else if (key.equals("rpc_connections_count")) info.setNumRpcConnections(((BigInteger) val).intValue());
+      else if (key.equals("start_time")) info.setStartTimestamp(((BigInteger) val).longValue());
+      else if (key.equals("status")) {}  // handled elsewhere
+      else if (key.equals("target")) info.setTarget(((BigInteger) val).intValue());
+      else if (key.equals("target_height")) info.setTargetHeight(((BigInteger) val).intValue());
+      else if (key.equals("top_block_hash")) info.setTopBlockId((String) val);
+      else if (key.equals("tx_count")) info.setNumTxs(((BigInteger) val).intValue());
+      else if (key.equals("tx_pool_size")) info.setNumTxsPool(((BigInteger) val).intValue());
+      else if (key.equals("untrusted")) {} // handled elsewhere
+      else if (key.equals("was_bootstrap_ever_used")) info.setWasBootstrapEverUsed((Boolean) val);
+      else if (key.equals("white_peerlist_size")) info.setNumOnlinePeers(((BigInteger) val).intValue());
+      else if (key.equals("update_available")) info.setUpdateAvailable((Boolean) val);
+      else if (key.equals("nettype")) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroDaemon.parseNetworkType((String) val)));
+      else if (key.equals("mainnet")) { if (!((String) val).isEmpty()) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroNetworkType.MAINNET)); }
+      else if (key.equals("testnet")) { if (!((String) val).isEmpty()) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroNetworkType.TESTNET)); }
+      else if (key.equals("stagenet")) { if (!((String) val).isEmpty()) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroNetworkType.STAGENET)); }
+      else LOGGER.warn("WARNING: Ignoring unexpected info field: " + key + ": " + val);
+    }
+    return info;
+  }
+  
+  /**
+   * Initializes sync info from RPC sync info.
+   * 
+   * @param rpcSyncInfo is the rpc map to initialize the sync info from
+   * @return {MoneroDaemonSyncInfo} is sync info initialized from the map
+   */
+  @SuppressWarnings("unchecked")
+  public static MoneroDaemonSyncInfo convertRpcSyncInfo(Map<String, Object> rpcSyncInfo) {
+    MoneroDaemonSyncInfo syncInfo = new MoneroDaemonSyncInfo();
+    for (String key : rpcSyncInfo.keySet()) {
+      Object val = rpcSyncInfo.get(key);
+      if (key.equals("height")) syncInfo.setHeight(((BigInteger) val).intValue());
+      else if (key.equals("peers")) {
+        syncInfo.setConnections(new ArrayList<MoneroDaemonConnection>());
+        List<Map<String, Object>> rpcConnections = (List<Map<String, Object>>) val;
+        for (Map<String, Object> rpcConnection : rpcConnections) {
+          syncInfo.getConnections().add(convertRpcConnection((Map<String, Object>) rpcConnection.get("info")));
+        }
+      } else if (key.equals("spans")) {
+        syncInfo.setSpans(new ArrayList<MoneroDaemonConnectionSpan>());
+        List<Map<String, Object>> rpcSpans = (List<Map<String, Object>>) val;
+        for (Map<String, Object> rpcSpan : rpcSpans) {
+          syncInfo.getSpans().add(convertRpcConnectionSpan(rpcSpan));
+        }
+      }
+      else if (key.equals("status")) {}   // handled elsewhere
+      else if (key.equals("target_height")) syncInfo.setTargetHeight(((BigInteger) val).intValue());
+      else if (key.equals("next_needed_pruning_seed")) syncInfo.setNextNeededPruningSeed(((BigInteger) val).intValue());
+      else if (key.equals("overview")) {  // this returns [] without pruning
+        try {
+          List<Object> overview = JsonUtils.deserialize((String) val, new TypeReference<List<Object>>(){});
+          if (!overview.isEmpty()) LOGGER.warn("WARNING: ignoring non-empty 'overview' field (not implemented): " + overview); // TODO
+        } catch (Exception e) {
+          e.printStackTrace();
+          LOGGER.warn("WARNING: failed to parse 'overview' field: " + val);
+        }
+      }
+      else LOGGER.warn("WARNING: ignoring unexpected field in sync info: " + key + ": " + val);
+    }
+    return syncInfo;
+  }
+  
+  public static MoneroHardForkInfo convertRpcHardForkInfo(Map<String, Object> rpcHardForkInfo) {
+    MoneroHardForkInfo info = new MoneroHardForkInfo();
+    for (String key : rpcHardForkInfo.keySet()) {
+      Object val = rpcHardForkInfo.get(key);
+      if (key.equals("earliest_height")) info.setEarliestHeight(((BigInteger) val).intValue());
+      else if (key.equals("enabled")) info.setIsEnabled((Boolean) val);
+      else if (key.equals("state")) info.setState(((BigInteger) val).intValue());
+      else if (key.equals("status")) {}     // handled elsewhere
+      else if (key.equals("untrusted")) {}  // handled elsewhere
+      else if (key.equals("threshold")) info.setThreshold(((BigInteger) val).intValue());
+      else if (key.equals("version")) info.setVersion(((BigInteger) val).intValue());
+      else if (key.equals("votes")) info.setNumVotes(((BigInteger) val).intValue());
+      else if (key.equals("voting")) info.setVoting(((BigInteger) val).intValue());
+      else if (key.equals("window")) info.setWindow(((BigInteger) val).intValue());
+      else LOGGER.warn("WARNING: ignoring unexpected field in hard fork info: " + key + ": " + val);
+    }
+    return info;
+  }
+  
+  public static MoneroDaemonConnectionSpan convertRpcConnectionSpan(Map<String, Object> rpcConnectionSpan) {
+    throw new RuntimeException("Not implemented");
   }
 }
