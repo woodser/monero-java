@@ -1535,7 +1535,7 @@ public class TestMoneroDaemonRpc {
     else {
       assertFalse(copy.getVins() == tx.getVins());
       for (int i = 0; i < copy.getVins().size(); i++) {
-        if (tx.getVins().get(i).getAmount().equals(copy.getVins().get(i).getAmount())) assertTrue(tx.getVins().get(i).getAmount().equals(BigInteger.valueOf(0)));
+        assertEquals(0, tx.getVins().get(i).getAmount().compareTo(copy.getVins().get(i).getAmount()));
       }
     }
     
@@ -1544,7 +1544,7 @@ public class TestMoneroDaemonRpc {
     else {
       assertTrue(copy.getVouts() != tx.getVouts());
       for (int i = 0; i < copy.getVouts().size(); i++) {
-        if (tx.getVouts().get(i).getAmount() == copy.getVouts().get(i).getAmount()) assertTrue(tx.getVouts().get(i).getAmount().equals(BigInteger.valueOf(0)));
+        assertEquals(0, tx.getVouts().get(i).getAmount().compareTo(copy.getVouts().get(i).getAmount()));
       }
     }
     
@@ -1587,7 +1587,7 @@ public class TestMoneroDaemonRpc {
     // collect tx ids
     List<String> txIds = new ArrayList<String>();
     for (MoneroBlock block : blocks) txIds.addAll(block.getTxIds());
-    assertFalse("No transactions found in the range [" + startHeight + ", " + endHeight + "]", txIds.isEmpty());  // TODO: this fails if no txs in last 100 blocks
+    assertFalse("No transactions found in the range [" + startHeight + ", " + endHeight + "]", txIds.isEmpty());  // TODO: this fails if no txs in last 200 blocks
     return txIds;
   }
   
