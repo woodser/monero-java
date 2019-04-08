@@ -522,32 +522,36 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public int getDownloadLimit() {
-    throw new RuntimeException("Not implemented");
+    return getBandwidthLimits()[0];
   }
 
   @Override
-  public void setDownloadLimit(int limit) {
-    throw new RuntimeException("Not implemented");
+  public int setDownloadLimit(int limit) {
+    if (limit == -1) return resetDownloadLimit();
+    if (limit <= 0) throw new MoneroException("Download limit must be an integer greater than 0");
+    return setBandwidthLimits(limit, 0)[0];
   }
 
   @Override
   public int resetDownloadLimit() {
-    throw new RuntimeException("Not implemented");
+    return setBandwidthLimits(-1, 0)[0];
   }
 
   @Override
   public int getUploadLimit() {
-    throw new RuntimeException("Not implemented");
+    return getBandwidthLimits()[1];
   }
 
   @Override
-  public void setUploadLimit(int limit) {
-    throw new RuntimeException("Not implemented");
+  public int setUploadLimit(int limit) {
+    if (limit == -1) return resetUploadLimit();
+    if (limit <= 0) throw new MoneroException("Upload limit must be an integer greater than 0");
+    return setBandwidthLimits(0, limit)[1];
   }
 
   @Override
   public int resetUploadLimit() {
-    throw new RuntimeException("Not implemented");
+    return setBandwidthLimits(0, -1)[1];
   }
   
   @SuppressWarnings("unchecked")
@@ -701,7 +705,26 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("Not implemented");
   }
   
-  //---------------------------------- PRIVATE -------------------------------
+  // --------------------------------- PRIVATE INSTANCE  --------------------------
+  
+  private int[] getBandwidthLimits() {
+    Map<String, Object> resp = rpc.sendPathRequest("get_limit");
+    checkResponseStatus(resp);
+    return new int[] { ((BigInteger) resp.get("limit_down")).intValue(), ((BigInteger) resp.get("limit_up")).intValue() };
+  }
+  
+  private int[] setBandwidthLimits(Integer downLimit, Integer upLimit) {
+    if (downLimit == null) downLimit = 0;
+    if (upLimit == null) upLimit = 0;
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("limit_down", downLimit);
+    params.put("limit_up", upLimit);
+    Map<String, Object> resp = rpc.sendPathRequest("set_limit", params);
+    checkResponseStatus(resp);
+    return new int[] { ((BigInteger) resp.get("limit_down")).intValue(), ((BigInteger) resp.get("limit_up")).intValue() };
+  }
+  
+  //---------------------------------- PRIVATE STATIC -------------------------------
   
   private static void checkResponseStatus(Map<String, Object> resp) {
     String status = (String) resp.get("status");
