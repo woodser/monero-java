@@ -734,6 +734,42 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+//  @Test
+//  public void testSetBandwidthLimits() {
+//    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+//    
+//    // get initial limits
+//    MoneroDaemonBandwidthLimits initLimits = daemon.getBandwidthLimits();
+//    assertTrue(initLimits.getDownloadLimit() > 0);
+//    assertTrue(initLimits.getUploadLimit() > 0);
+//    
+//    // reset limits to default
+//    MoneroDaemonBandwidthLimits defaultLimits = daemon.setBandwidthLimits(-1, -1);
+//    assertTrue(defaultLimits.getDownloadLimit() > 0);
+//    assertTrue(defaultLimits.getUploadLimit() > 0);
+//    
+//    // increase both limits
+//    MoneroDaemonBandwidthLimits increasedLimits = daemon.setBandwidthLimits(initLimits.getDownloadLimit() * 2, initLimits.getUploadLimit() * 3);
+//    assertEquals(initLimits.getDownloadLimit() * 2, (int) increasedLimits.getDownloadLimit());
+//    assertEquals(initLimits.getUploadLimit() * 3, (int) increasedLimits.getUploadLimit());
+//    
+//    // reset limits one at a time
+//    MoneroDaemonBandwidthLimits resetLimits = daemon.setBandwidthLimits(-1, 0);
+//    assertEquals(defaultLimits.getDownloadLimit(), resetLimits.getDownloadLimit());
+//    assertEquals(increasedLimits.getUploadLimit(), resetLimits.getUploadLimit());
+//    resetLimits = daemon.setBandwidthLimits(0, -1);
+//    assertEquals(defaultLimits.getDownloadLimit(), resetLimits.getDownloadLimit());
+//    assertEquals(defaultLimits.getUploadLimit(), resetLimits.getUploadLimit());
+//    
+//    // test invalid limits
+//    try {
+//      daemon.setBandwidthLimits(-2, 0);
+//      fail("Should have thrown err");
+//    } catch (MoneroException e) {
+//      throw new RuntimeException("Not handled yet");
+//    }
+//  }
+  
   @Test
   public void testSetDownloadBandwidth() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
