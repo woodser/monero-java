@@ -596,12 +596,20 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public void setOutgoingPeerLimit(int limit) {
-    throw new RuntimeException("Not implemented");
+    if (limit < 0) throw new MoneroException("Outgoing peer limit must be >= 0");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("out_peers", limit);
+    Map<String, Object> resp = rpc.sendPathRequest("out_peers", params);
+    checkResponseStatus(resp);
   }
 
   @Override
   public void setIncomingPeerLimit(int limit) {
-    throw new RuntimeException("Not implemented");
+    if (limit < 0) throw new MoneroException("Incoming peer limit must be >= 0");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("in_peers", limit);
+    Map<String, Object> resp = rpc.sendPathRequest("in_peers", params);
+    checkResponseStatus(resp);
   }
 
   @Override
