@@ -1349,7 +1349,6 @@ public class TestMoneroDaemonRpc {
     assertEquals(64, tx.getId().length());
     if (tx.getIsRelayed() == null) assertTrue(tx.getInTxPool());  // TODO monero-daemon-rpc: add relayed to get_transactions
     else assertNotNull(tx.getIsRelayed());
-    assertNull(tx.getSignatures());
     assertNotNull(tx.getIsConfirmed());
     assertNotNull(tx.getInTxPool());
     assertNotNull(tx.getIsCoinbase());
@@ -1409,6 +1408,9 @@ public class TestMoneroDaemonRpc {
     if (tx.getIsCoinbase()) {
       assertEquals(0, tx.getFee().equals(BigInteger.valueOf(0)));
       assertEquals(null, tx.getVins());
+      assertNull(tx.getSignatures());
+    } else {
+      if (tx.getSignatures() != null) assertFalse(tx.getSignatures().isEmpty());
     }
     
     // test failed  // TODO: what else to test associated with failed
@@ -1461,7 +1463,7 @@ public class TestMoneroDaemonRpc {
       if (Boolean.TRUE.equals(ctx.fromGetBlocksByHeight)) assertNull(tx.getFullHex());         // TODO: getBlocksByHeight() has inconsistent client-side pruning
       else assertFalse(tx.getFullHex().isEmpty());
       if (Boolean.TRUE.equals(ctx.fromGetBlocksByHeight)) assertNull(tx.getRctSigPrunable());  // TODO: getBlocksByHeight() has inconsistent client-side pruning
-      else assertNotNull(tx.getRctSigPrunable()); // TODO: define and test this
+      //else assertNotNull(tx.getRctSigPrunable()); // TODO: define and test this
       assertFalse(tx.getIsDoubleSpend());
       if (tx.getIsConfirmed()) {
         assertNull(tx.getLastRelayedTimestamp());
