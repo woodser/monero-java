@@ -127,7 +127,6 @@ public class MoneroOutput {
     result = prime * result + ((keyImage == null) ? 0 : keyImage.hashCode());
     result = prime * result + ((ringOutputIndices == null) ? 0 : ringOutputIndices.hashCode());
     result = prime * result + ((stealthPublicKey == null) ? 0 : stealthPublicKey.hashCode());
-    result = prime * result + ((tx == null) ? 0 : tx.hashCode());
     return result;
   }
 
@@ -152,9 +151,6 @@ public class MoneroOutput {
     if (stealthPublicKey == null) {
       if (other.stealthPublicKey != null) return false;
     } else if (!stealthPublicKey.equals(other.stealthPublicKey)) return false;
-    if (tx == null) {
-      if (other.tx != null) return false;
-    } else if (!tx.equals(other.tx)) return false;
     return true;
   }
 }
