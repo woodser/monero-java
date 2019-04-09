@@ -534,35 +534,10 @@ public class MoneroTx {
       if (this.getVouts() == null) this.setVouts(tx.getVouts());
       else {
         
-        // determine if output indices present
-        int numOutputIndices = 0;
-        for (MoneroOutput vout : this.getVouts()) if (vout.getIndex() != null) numOutputIndices++;
-        for (MoneroOutput vout : tx.getVouts()) if (vout.getIndex() != null) numOutputIndices++;
-        assertTrue("Some vouts have an index and some do not", numOutputIndices == 0 || this.getVouts().size() + tx.getVouts().size() == numOutputIndices);
-        
-        // merge by indices
-        if (numOutputIndices > 0) {
-          for (MoneroOutput merger : tx.getVouts()) {
-            boolean merged = false;
-            if (this.getVouts() == null) this.setVouts(new ArrayList<MoneroOutput>());
-            for (MoneroOutput mergee : this.getVouts()) {
-              assertTrue(mergee.getIndex() >= 0 && merger.getIndex() >= 0);
-              if (mergee.getIndex() == merger.getIndex()) {
-                mergee.merge(merger);
-                merged = true;
-                break;
-              }
-            }
-            if (!merged) this.getVouts().add(merger);
-          }
-        }
-        
         // merge by position
-        else {
-          assertEquals(this.getVouts().size(), tx.getVouts().size());
-          for (int i = 0; i < tx.getVouts().size(); i++) {
-            this.getVouts().get(i).merge(tx.getVouts().get(i));
-          }
+        assertEquals(this.getVouts().size(), tx.getVouts().size());
+        for (int i = 0; i < tx.getVouts().size(); i++) {
+          this.getVouts().get(i).merge(tx.getVouts().get(i));
         }
       }
     }
