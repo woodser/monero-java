@@ -340,9 +340,13 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return submitResult;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void relayTxsById(List<String> txIds) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txids", txIds);
+    Map<String, Object> resp = rpc.sendJsonRequest("relay_tx", params);
+    checkResponseStatus((Map<String, Object>) resp.get("result"));
   }
 
   @SuppressWarnings("unchecked")
