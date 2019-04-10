@@ -848,6 +848,7 @@ public class TestMoneroDaemonRpc {
     daemon.setIncomingPeerLimit(10);
   }
   
+  // Can ban a peer
   @Test
   public void testBanPeer() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -869,6 +870,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(found);
   }
   
+  // Can ban a peers
   @Test
   public void testBanPeers() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);

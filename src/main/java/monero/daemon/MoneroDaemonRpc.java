@@ -383,7 +383,22 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public MoneroTxPoolStats getTxPoolStats() {
-    throw new RuntimeException("Not implemented");
+    throw new MoneroException("Response contains field 'histo' which is binary'");
+//    let resp = await this.config.rpc.sendPathRequest("get_transaction_pool_stats");
+//    MoneroDaemonRpc._checkResponseStatus(resp);
+//    let stats = MoneroDaemonRpc._convertRpcTxPoolStats(resp.pool_stats);
+//    
+//    // uninitialize some stats if not applicable
+//    if (stats.getHisto98pc() === 0) stats.setHisto98pc(undefined);
+//    if (stats.getNumTxs() === 0) {
+//      stats.setBytesMin(undefined);
+//      stats.setBytesMed(undefined);
+//      stats.setBytesMax(undefined);
+//      stats.setHisto98pc(undefined);
+//      stats.setOldestTimestamp(undefined);
+//    }
+//    
+//    return stats;
   }
 
   @Override
@@ -616,14 +631,33 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     checkResponseStatus(resp);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroBan> getPeerBans() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = (Map<String, Object>) rpc.sendJsonRequest("get_bans");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    checkResponseStatus(result);
+    System.out.println(result);
+    List<MoneroBan> bans = new ArrayList<MoneroBan>();
+    for (Map<String, Object> rpcBan : (List<Map<String, Object>>) result.get("bans")) {
+      MoneroBan ban = new MoneroBan();
+      ban.setHost((String) rpcBan.get("host"));
+      ban.setIp(((BigInteger) rpcBan.get("ip")).intValue());
+      ban.setSeconds(((BigInteger) rpcBan.get("seconds")).longValue());
+      bans.add(ban);
+    }
+    return bans;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void setPeerBans(List<MoneroBan> bans) {
-    throw new RuntimeException("Not implemented");
+    List<Map<String, Object>> rpcBans = new ArrayList<Map<String,  Object>>();
+    for (MoneroBan ban : bans) rpcBans.add(convertToRpcBan(ban));
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("bans", rpcBans);
+    Map<String, Object> resp = rpc.sendJsonRequest("set_bans", params);
+    checkResponseStatus((Map<String, Object>) resp.get("result"));
   }
   
 //  async setOutgoingPeerLimit(limit) {
@@ -1076,7 +1110,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return entry;
   }
   
-  public static MoneroDaemonInfo convertRpcInfo(Map<String, Object> rpcInfo) {
+  private static MoneroDaemonInfo convertRpcInfo(Map<String, Object> rpcInfo) {
     if (rpcInfo == null) return null;
     MoneroDaemonInfo info = new MoneroDaemonInfo();
     for (String key : rpcInfo.keySet()) {
@@ -1126,7 +1160,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * @return {MoneroDaemonSyncInfo} is sync info initialized from the map
    */
   @SuppressWarnings("unchecked")
-  public static MoneroDaemonSyncInfo convertRpcSyncInfo(Map<String, Object> rpcSyncInfo) {
+  private static MoneroDaemonSyncInfo convertRpcSyncInfo(Map<String, Object> rpcSyncInfo) {
     MoneroDaemonSyncInfo syncInfo = new MoneroDaemonSyncInfo();
     for (String key : rpcSyncInfo.keySet()) {
       Object val = rpcSyncInfo.get(key);
@@ -1161,7 +1195,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return syncInfo;
   }
   
-  public static MoneroHardForkInfo convertRpcHardForkInfo(Map<String, Object> rpcHardForkInfo) {
+  private static MoneroHardForkInfo convertRpcHardForkInfo(Map<String, Object> rpcHardForkInfo) {
     MoneroHardForkInfo info = new MoneroHardForkInfo();
     for (String key : rpcHardForkInfo.keySet()) {
       Object val = rpcHardForkInfo.get(key);
@@ -1180,7 +1214,16 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return info;
   }
   
-  public static MoneroDaemonConnectionSpan convertRpcConnectionSpan(Map<String, Object> rpcConnectionSpan) {
+  private static MoneroDaemonConnectionSpan convertRpcConnectionSpan(Map<String, Object> rpcConnectionSpan) {
     throw new RuntimeException("Not implemented");
+  }
+  
+  private static Map<String, Object> convertToRpcBan(MoneroBan ban) {
+    Map<String, Object> rpcBan = new HashMap<String, Object>();
+    rpcBan.put("host", ban.getHost());
+    rpcBan.put("ip", ban.getIp());
+    rpcBan.put("ban", ban.getIsBanned());
+    rpcBan.put("seconds", ban.getSeconds());
+    return rpcBan;
   }
 }
