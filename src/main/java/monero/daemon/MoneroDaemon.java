@@ -29,7 +29,7 @@ import monero.daemon.model.MoneroAltChain;
 import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
-import monero.daemon.model.MoneroBlockListener;
+import monero.daemon.model.MoneroDaemonListener;
 import monero.daemon.model.MoneroBlockTemplate;
 import monero.daemon.model.MoneroCoinbaseTxSum;
 import monero.daemon.model.MoneroDaemonConnection;
@@ -630,14 +630,14 @@ public interface MoneroDaemon {
    * 
    * @param listener is invoked when blocks are added to the chain
    */
-  public void addBlockListener(MoneroBlockListener listener);
+  public void addListener(MoneroDaemonListener listener);
   
   /**
    * Unregister a listener to be notified when blocks are added to the chain.
    * 
    * @param listener is a previously registered listener to be unregistered
    */
-  public void removeBlockListener(MoneroBlockListener listener);
+  public void removeListener(MoneroDaemonListener listener);
   
   // ----------------------------- STATIC UTILITIES ---------------------------
   

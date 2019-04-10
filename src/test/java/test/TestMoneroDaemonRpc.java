@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -24,12 +23,12 @@ import monero.daemon.model.MoneroAltChain;
 import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
-import monero.daemon.model.MoneroBlockListener;
 import monero.daemon.model.MoneroBlockTemplate;
 import monero.daemon.model.MoneroCoinbaseTxSum;
 import monero.daemon.model.MoneroDaemonConnection;
 import monero.daemon.model.MoneroDaemonConnectionSpan;
 import monero.daemon.model.MoneroDaemonInfo;
+import monero.daemon.model.MoneroDaemonListener;
 import monero.daemon.model.MoneroDaemonPeer;
 import monero.daemon.model.MoneroDaemonSyncInfo;
 import monero.daemon.model.MoneroDaemonUpdateCheckResult;
@@ -47,7 +46,6 @@ import monero.daemon.model.MoneroTxPoolStats;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroException;
 import monero.wallet.MoneroWallet;
-import monero.wallet.MoneroWalletLocal;
 import monero.wallet.config.MoneroSendConfig;
 import utils.TestUtils;
 
@@ -1143,15 +1141,15 @@ public class TestMoneroDaemonRpc {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
     
     try {
-      
+            
       // start mining if possible to help push the network along
       String address = wallet.getPrimaryAddress();
       try { daemon.startMining(address, 8, false, true); }
       catch (MoneroException e) { }
       
       // register a listener
-      MoneroBlockListener listener = new MoneroBlockListener();
-      daemon.addBlockListener(listener);
+      MoneroDaemonListener listener = new MoneroDaemonListener();
+      daemon.addListener(listener);
       
       // wait for next block notification
       MoneroBlockHeader header = daemon.getNextBlockHeader();
@@ -1161,7 +1159,7 @@ public class TestMoneroDaemonRpc {
       assertEquals(header, listener.getLastBlockHeader());
       
       // unregister listener so daemon does not keep polling
-      daemon.removeBlockListener(listener);
+      daemon.removeListener(listener);
     } catch (MoneroException e) {
       throw e;
     } finally {

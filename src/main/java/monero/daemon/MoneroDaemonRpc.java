@@ -22,12 +22,12 @@ import monero.daemon.model.MoneroAltChain;
 import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
-import monero.daemon.model.MoneroBlockListener;
 import monero.daemon.model.MoneroBlockTemplate;
 import monero.daemon.model.MoneroCoinbaseTxSum;
 import monero.daemon.model.MoneroDaemonConnection;
 import monero.daemon.model.MoneroDaemonConnectionSpan;
 import monero.daemon.model.MoneroDaemonInfo;
+import monero.daemon.model.MoneroDaemonListener;
 import monero.daemon.model.MoneroDaemonPeer;
 import monero.daemon.model.MoneroDaemonSyncInfo;
 import monero.daemon.model.MoneroDaemonUpdateCheckResult;
@@ -57,11 +57,14 @@ import monero.utils.MoneroUtils;
 public class MoneroDaemonRpc extends MoneroDaemonDefault {
   
   private MoneroRpc rpc;
+  private MoneroDaemonPoller daemonPoller;
   private static final String DEFAULT_ID = "0000000000000000000000000000000000000000000000000000000000000000";
   private static final Logger LOGGER = Logger.getLogger(MoneroDaemonRpc.class);
+  
 
   public MoneroDaemonRpc(MoneroRpc rpc) {
     this.rpc = rpc;
+    this.daemonPoller = new MoneroDaemonPoller(this);
   }
   
   public MoneroRpc getRpc() {
@@ -648,7 +651,6 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     Map<String, Object> resp = (Map<String, Object>) rpc.sendJsonRequest("get_bans");
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     checkResponseStatus(result);
-    System.out.println(result);
     List<MoneroBan> bans = new ArrayList<MoneroBan>();
     for (Map<String, Object> rpcBan : (List<Map<String, Object>>) result.get("bans")) {
       MoneroBan ban = new MoneroBan();
@@ -769,17 +771,36 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public MoneroBlockHeader getNextBlockHeader() {
-    throw new RuntimeException("Not implemented");
+    Object syncObject  = new Object();
+    synchronized(syncObject) {
+      try {
+        MoneroDaemonListener customListener = new MoneroDaemonListener() {
+          @Override
+          public void onBlockHeader(MoneroBlockHeader header) {
+            super.onBlockHeader(header);
+            synchronized(syncObject) {
+              syncObject.notifyAll();
+            }
+          }
+        };
+        addListener(customListener);
+        syncObject.wait();
+        removeListener(customListener);
+        return customListener.getLastBlockHeader();
+      } catch (InterruptedException e) {
+        throw new MoneroException(e);
+      }
+    }
   }
 
   @Override
-  public void addBlockListener(MoneroBlockListener listener) {
-    throw new RuntimeException("Not implemented");
+  public void addListener(MoneroDaemonListener listener) {
+    daemonPoller.addListener(listener);
   }
 
   @Override
-  public void removeBlockListener(MoneroBlockListener listener) {
-    throw new RuntimeException("Not implemented");
+  public void removeListener(MoneroDaemonListener listener) {
+    daemonPoller.removeListener(listener);
   }
   
   // --------------------------------- PRIVATE INSTANCE  --------------------------

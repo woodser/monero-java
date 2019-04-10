@@ -18,7 +18,7 @@ public class Scratchpad {
 //    try { wallet.startMining(8, false, true); }
 //    catch (MoneroException e) { }
 //    wallet.stopMining();
-//    daemon.stopMining();
+    daemon.stopMining();
 //    daemon.flushTxPool();
     
 //    // common variables
