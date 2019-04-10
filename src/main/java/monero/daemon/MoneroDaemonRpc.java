@@ -412,7 +412,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     params.put("key_images", keyImages);
     Map<String, Object> resp = rpc.sendPathRequest("is_key_image_spent", params);
     checkResponseStatus(resp);
-    return (List<MoneroKeyImageSpentStatus>) resp.get("spent_status");
+    List<MoneroKeyImageSpentStatus> statuses = new ArrayList<MoneroKeyImageSpentStatus>();
+    for (BigInteger bi : (List<BigInteger>) resp.get("spent_status")) {
+      statuses.add(MoneroKeyImageSpentStatus.valueOf(bi.intValue()));
+    }
+    return statuses;
   }
 
   @Override
