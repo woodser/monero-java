@@ -976,7 +976,7 @@ public class TestMoneroDaemonRpc {
       fail("Should have thrown error");
     } catch (MoneroRpcException e) {
       assertEquals(-7, (int) e.getCode());
-      assertEquals("Block not accepted", e.getMessage());
+      assertEquals("Block not accepted", e.getDescription());
     }
   }
   
@@ -1013,24 +1013,24 @@ public class TestMoneroDaemonRpc {
   }
   
   // test is disabled to not interfere with other tests
-  @Test
-  public void testStop() throws InterruptedException {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    
-    // stop the daemon
-    daemon.stop();
-    
-    // give the daemon 10 seconds to shut down
-    TimeUnit.SECONDS.sleep(10);
-    
-    // try to interact with the daemon
-    try {
-      daemon.getHeight();
-      throw new Error("Should have thrown error");
-    } catch (MoneroException e) {
-      assertNotEquals("Should have thrown error", e.getMessage());
-    }
-  }
+//  @Test
+//  public void testStop() throws InterruptedException {
+//    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+//    
+//    // stop the daemon
+//    daemon.stop();
+//    
+//    // give the daemon 10 seconds to shut down
+//    TimeUnit.SECONDS.sleep(10);
+//    
+//    // try to interact with the daemon
+//    try {
+//      daemon.getHeight();
+//      throw new Error("Should have thrown error");
+//    } catch (MoneroException e) {
+//      assertNotEquals("Should have thrown error", e.getMessage());
+//    }
+//  }
   
   // ----------------------------- RELAY TESTS -------------------------------
   

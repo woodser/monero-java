@@ -699,22 +699,36 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public void startMining(String address, Integer numThreads, Boolean isBackground, Boolean ignoreBattery) {
-    throw new RuntimeException("Not implemented");
+    if (address == null || address.isEmpty()) throw new MoneroException("Must provide address to mine to");
+    if (numThreads == null || numThreads <= 0) throw new MoneroException("Number of threads must be an integer greater than 0");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("miner_address", address);
+    params.put("threads_count", numThreads);
+    params.put("do_background_mining", isBackground);
+    params.put("ignore_battery", ignoreBattery);
+    Map<String, Object> resp = rpc.sendPathRequest("start_mining", params);
+    checkResponseStatus(resp);
   }
 
   @Override
   public void stopMining() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendPathRequest("stop_mining");
+    checkResponseStatus(resp);
   }
 
   @Override
   public MoneroMiningStatus getMiningStatus() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendPathRequest("mining_status");
+    checkResponseStatus(resp);
+    return convertRpcMiningStatus(resp);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void submitBlocks(List<String> blockBlobs) {
-    throw new RuntimeException("Not implemented");
+    if (blockBlobs.isEmpty()) throw new MoneroException("Must provide an array of mined block blobs to submit");
+    Map<String, Object> resp = rpc.sendJsonRequest("submit_block", blockBlobs);
+    checkResponseStatus((Map<String, Object>) resp.get("result"));
   }
 
   @Override
@@ -728,12 +742,18 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public MoneroDaemonUpdateDownloadResult downloadUpdate(String path) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("command", "download");
+    params.put("path", path);
+    Map<String, Object> resp = rpc.sendPathRequest("update", params);
+    checkResponseStatus(resp);
+    return convertRpcUpdateDownloadResult(resp);
   }
 
   @Override
   public void stop() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendPathRequest("stop_daemon");
+    checkResponseStatus(resp);
   }
 
   @Override
@@ -1225,5 +1245,17 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     rpcBan.put("ban", ban.getIsBanned());
     rpcBan.put("seconds", ban.getSeconds());
     return rpcBan;
+  }
+  
+  private static MoneroMiningStatus convertRpcMiningStatus(Map<String, Object> rpcStatus) {
+    MoneroMiningStatus status = new MoneroMiningStatus();
+    status.setIsActive((Boolean) rpcStatus.get("active"));
+    status.setSpeed(((BigInteger) rpcStatus.get("speed")).intValue());
+    status.setNumThreads(((BigInteger) rpcStatus.get("threads_count")).intValue());
+    if (status.getIsActive()) {
+      status.setAddress((String) rpcStatus.get("address"));
+      status.setIsBackground((Boolean) rpcStatus.get("is_background_mining_enabled"));
+    }
+    return status;
   }
 }
