@@ -940,7 +940,6 @@ public class TestMoneroDaemonRpc {
       assertNull(status.getIsBackground());
       
       // test status with mining
-      MoneroWallet wallet = new MoneroWalletLocal(daemon);
       String address = wallet.getPrimaryAddress();
       int threadCount = 3;
       boolean isBackground = false;
