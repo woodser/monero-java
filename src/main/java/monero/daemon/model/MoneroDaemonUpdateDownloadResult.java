@@ -8,7 +8,7 @@ public class MoneroDaemonUpdateDownloadResult extends MoneroDaemonUpdateCheckRes
   private String downloadPath;
   
   public MoneroDaemonUpdateDownloadResult(MoneroDaemonUpdateCheckResult checkResult) {
-    throw new RuntimeException("Not implemented");
+    super(checkResult);
   }
 
   public String getDownloadPath() {

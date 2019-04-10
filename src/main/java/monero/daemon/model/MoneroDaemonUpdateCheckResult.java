@@ -11,6 +11,18 @@ public class MoneroDaemonUpdateCheckResult {
   private String autoUri;
   private String userUri;
   
+  public MoneroDaemonUpdateCheckResult() {
+    // nothing to construct
+  }
+  
+  MoneroDaemonUpdateCheckResult(MoneroDaemonUpdateCheckResult checkResult) {
+    this.isUpdateAvailable = checkResult.isUpdateAvailable;
+    this.version = checkResult.version;
+    this.hash = checkResult.hash;
+    this.autoUri = checkResult.autoUri;
+    this.userUri = checkResult.userUri;
+  }
+  
   public Boolean getIsUpdateAvailable() {
     return isUpdateAvailable;
   }
