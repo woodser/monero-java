@@ -392,7 +392,7 @@ public class TestMoneroDaemonRpc {
       daemon.submitTxHex(tx.getFullHex(), true);
       txIds.add(tx.getId());
     }
-    
+
     // fetch txs by id
     List<MoneroTx> txs = daemon.getTxs(txIds);
     
@@ -911,7 +911,6 @@ public class TestMoneroDaemonRpc {
     catch (MoneroException e) { }
     
     // generate address to mine to
-    MoneroWallet wallet = new MoneroWalletLocal(daemon);
     String address = wallet.getPrimaryAddress();
     
     // start mining
