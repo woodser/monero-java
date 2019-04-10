@@ -1684,7 +1684,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(info.getNumAltBlocks() >= 0);
     assertTrue(info.getBlockSizeLimit() > 0);
     assertTrue(info.getBlockSizeMedian() > 0);
-    assertFalse(info.getBootstrapDaemonAddress().isEmpty());
+    assertTrue(info.getBootstrapDaemonAddress() == null || !info.getBootstrapDaemonAddress().isEmpty());
     TestUtils.testUnsignedBigInteger(info.getCumulativeDifficulty());
     TestUtils.testUnsignedBigInteger(info.getFreeSpace());
     assertTrue(info.getNumOfflinePeers() >= 0);

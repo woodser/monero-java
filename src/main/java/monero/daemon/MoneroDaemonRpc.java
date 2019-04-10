@@ -1083,7 +1083,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("block_size_median")) info.setBlockSizeMedian(((BigInteger) val).intValue());
       else if (key.equals("block_weight_limit")) info.setBlockWeightLimit(((BigInteger) val).intValue());
       else if (key.equals("block_weight_median")) info.setBlockWeightMedian(((BigInteger) val).intValue());
-      else if (key.equals("bootstrap_daemon_address")) info.setBootstrapDaemonAddress((String) val);
+      else if (key.equals("bootstrap_daemon_address")) { if (!((String) val).isEmpty()) info.setBootstrapDaemonAddress((String) val); }
       else if (key.equals("cumulative_difficulty")) info.setCumulativeDifficulty((BigInteger) val);
       else if (key.equals("difficulty")) info.setDifficulty((BigInteger) val);
       else if (key.equals("free_space")) info.setFreeSpace((BigInteger) val);
@@ -1107,9 +1107,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("white_peerlist_size")) info.setNumOnlinePeers(((BigInteger) val).intValue());
       else if (key.equals("update_available")) info.setUpdateAvailable((Boolean) val);
       else if (key.equals("nettype")) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroDaemon.parseNetworkType((String) val)));
-      else if (key.equals("mainnet")) { if (!((String) val).isEmpty()) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroNetworkType.MAINNET)); }
-      else if (key.equals("testnet")) { if (!((String) val).isEmpty()) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroNetworkType.TESTNET)); }
-      else if (key.equals("stagenet")) { if (!((String) val).isEmpty()) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroNetworkType.STAGENET)); }
+      else if (key.equals("mainnet")) { if ((Boolean) val) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroNetworkType.MAINNET)); }
+      else if (key.equals("testnet")) { if ((Boolean) val) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroNetworkType.TESTNET)); }
+      else if (key.equals("stagenet")) { if ((Boolean) val) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroNetworkType.STAGENET)); }
       else LOGGER.warn("WARNING: Ignoring unexpected info field: " + key + ": " + val);
     }
     return info;
