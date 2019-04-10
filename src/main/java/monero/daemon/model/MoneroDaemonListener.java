@@ -1,9 +1,9 @@
 package monero.daemon.model;
 
 /**
- * Receives notifications as blocks are added to the chain.
+ * Receives notifications as a daemon is updated.
  */
-public class MoneroBlockListener {
+public class MoneroDaemonListener {
   
   private MoneroBlockHeader lastHeader;
 
