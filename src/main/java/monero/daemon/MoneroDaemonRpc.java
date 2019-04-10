@@ -249,7 +249,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public List<MoneroTx> getTxs(List<String> txIds, Boolean prune) {
     
     // validate input
-    assertTrue("Must provide an array of transaction ids", txIds.size() > 0);
+    if (txIds.isEmpty()) throw new MoneroException("Must provide an array of transaction ids");
     
     // fetch transactions
     Map<String, Object> params = new HashMap<String, Object>();
@@ -529,9 +529,16 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return convertRpcHardForkInfo(result);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroAltChain> getAltChains() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendJsonRequest("get_alternate_chains");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    checkResponseStatus(result);
+    List<MoneroAltChain> chains = new ArrayList<MoneroAltChain>();
+    if (!result.containsKey("chains")) return chains;
+    for (Map<String, Object> rpcChain : (List<Map<String, Object>>) result.get("chains")) chains.add(convertRpcAltChain(rpcChain));
+    return chains;
   }
 
   @SuppressWarnings("unchecked")
@@ -1261,5 +1268,21 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       status.setIsBackground((Boolean) rpcStatus.get("is_background_mining_enabled"));
     }
     return status;
+  }
+  
+  @SuppressWarnings("unchecked")
+  private static MoneroAltChain convertRpcAltChain(Map<String, Object> rpcChain) {
+    MoneroAltChain chain = new MoneroAltChain();
+    for (String key : rpcChain.keySet()) {
+      Object val = rpcChain.get(key);
+      if (key.equals("block_hash")) {}  // using block_hashes instead
+      else if (key.equals("difficulty")) chain.setDifficulty((BigInteger) val);
+      else if (key.equals("height")) chain.setHeight(((BigInteger) val).intValue());
+      else if (key.equals("length")) chain.setLength(((BigInteger) val).intValue());
+      else if (key.equals("block_hashes")) chain.setBlockIds((List<String>) val);
+      else if (key.equals("main_chain_parent_block")) chain.setMainChainParentBlockId((String) val);
+      else LOGGER.warn("WARNING: ignoring unexpected field in alternative chain: " + key + ": " + val);
+    }
+    return chain;
   }
 }
