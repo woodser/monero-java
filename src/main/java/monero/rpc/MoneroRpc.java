@@ -123,7 +123,7 @@ public class MoneroRpc {
     } catch (MoneroRpcException e2) {
       throw e2;
     } catch (Exception e3) {
-      e3.printStackTrace();
+      //e3.printStackTrace();
       throw new MoneroException(e3);
     }
   }

@@ -40,6 +40,11 @@ public class MoneroException extends RuntimeException {
     this.code = code;
   }
   
+  /**
+   * Get a human-readable description of the error without error code, etc.
+   * 
+   * @return String is a human-readable description of the error
+   */
   public String getDescription() {
     return description;
   }
