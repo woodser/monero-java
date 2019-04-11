@@ -162,6 +162,17 @@ public class MoneroTxWallet extends MoneroTx {
     return this;  // for chaining
   }
   
+  // helper function to merge transfers
+  private static void mergeTransfer(List<MoneroTransfer> transfers, MoneroTransfer transfer) {
+    for (MoneroTransfer aTransfer : transfers) {
+      if (aTransfer.getAccountIndex() == transfer.getAccountIndex() && aTransfer.getSubaddressIndex() == transfer.getSubaddressIndex()) {
+        aTransfer.merge(transfer);
+        return;
+      }
+    }
+    transfers.add(transfer);
+  }
+  
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
 
   @Override
@@ -396,16 +407,5 @@ public class MoneroTxWallet extends MoneroTx {
   public MoneroTxWallet setSignatures(List<String> signatures) {
     super.setSignatures(signatures);
     return this;
-  }
-  
-  // helper function to merge transfers
-  private static void mergeTransfer(List<MoneroTransfer> transfers, MoneroTransfer transfer) {
-    for (MoneroTransfer aTransfer : transfers) {
-      if (aTransfer.getAccountIndex() == transfer.getAccountIndex() && aTransfer.getSubaddressIndex() == transfer.getSubaddressIndex()) {
-        aTransfer.merge(transfer);
-        return;
-      }
-    }
-    transfers.add(transfer);
   }
 }

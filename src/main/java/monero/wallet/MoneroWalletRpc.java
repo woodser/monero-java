@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import common.types.Filter;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
@@ -454,7 +455,42 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public List<MoneroTxWallet> getTxs(MoneroTxFilter filter) {
-    throw new RuntimeException("Not implemented");
+    
+    // normalize tx filter
+    if (filter == null) new MoneroTxFilter();
+    if (filter.getTransferFilter() == null) filter.setTransferFilter(new MoneroTransferFilter());
+    MoneroTransferFilter transferFilter = filter.getTransferFilter();
+    
+    // temporarily disable transfer filter
+    filter.setTransferFilter(null);
+    
+    // fetch all transfers that meet tx filter
+    List<MoneroTransfer> transfers = getTransfers(new MoneroTransferFilter().setTxFilter(filter));
+    
+    // collect unique txs from transfers as ordered list
+    Set<MoneroTxWallet> txSet = new HashSet<MoneroTxWallet>();
+    for (MoneroTransfer transfer : transfers) txSet.add(transfer.getTx());
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>(txSet);
+    
+    // fetch and merge vouts if configured
+    if (Boolean.TRUE.equals(filter.getIncludeVouts())) {
+      List<MoneroOutputWallet> vouts = getVouts(new MoneroVoutFilter().setTxFilter(filter));
+      Set<MoneroTxWallet> voutTxs = new HashSet<MoneroTxWallet>();
+      for (MoneroOutputWallet vout : vouts) voutTxs.add(vout.getTx());
+      for (MoneroTxWallet tx : voutTxs) mergeTx(txs, tx, true);
+    }
+    
+    // filter and return txs that meet transfer filter
+    filter.setTransferFilter(transferFilter);
+    txs = Filter.apply(filter, txs);
+    
+    // special case: re-fetch txs if inconsistency caused by needing to make multiple rpc calls
+    for (MoneroTxWallet tx : txs) {
+      if (tx.getIsConfirmed() && tx.getBlock() == null) return getTxs(filter);
+    }
+    
+    // otherwise return txs
+    return txs;
   }
 
   @Override
@@ -1044,5 +1080,50 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       throw new MoneroException("Unrecognized transfer type: " + rpcType);
     }
     return isOutgoing;
+  }
+  
+  /**
+   * Merges a transaction into a unique set of transactions.
+   * 
+   * TODO monero-wallet-rpc: skipIfAbsent only necessary because incoming payments not returned
+   * when sent from/to same account
+   * 
+   * @param txs are existing transactions to merge into
+   * @param tx is the transaction to merge into the existing txs
+   * @param skipIfAbsent specifies if the tx should not be added
+   *        if it doesn't already exist.  Only necessasry to handle
+   *        missing incoming payments from #4500. // TODO
+   * @returns the merged tx
+   */
+  private static void mergeTx(List<MoneroTxWallet> txs, MoneroTxWallet tx, boolean skipIfAbsent) {
+    assertNotNull(tx.getId());
+    for (MoneroTxWallet aTx : txs) {
+      
+      // merge tx
+      if (aTx.getId().equals(tx.getId())) {
+        
+        // merge blocks which only exist when confirmed
+        if (aTx.getBlock() != null || tx.getBlock() != null) {
+          if (aTx.getBlock() == null) aTx.setBlock(new MoneroBlock().setTxs(Arrays.asList(aTx)).setHeight(tx.getHeight()));
+          if (tx.getBlock() == null) tx.setBlock(new MoneroBlock().setTxs(Arrays.asList(tx)).setHeight(aTx.getHeight()));
+          aTx.getBlock().merge(tx.getBlock());
+        } else {
+          aTx.merge(tx);
+        }
+        break;
+      }
+      
+      // merge common block of different txs
+      if (tx.getHeight() != null && aTx.getHeight() == tx.getHeight()) {
+        aTx.getBlock().merge(tx.getBlock());
+      }
+    }
+    
+    // add tx if it doesn't already exist unless skipped
+    if (!skipIfAbsent) {
+      txs.add(tx);
+    } else {
+      LOGGER.warn("WARNING: tx does not already exist"); 
+    }
   }
 }
