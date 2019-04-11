@@ -149,40 +149,58 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public String getSeed() {
-    throw new RuntimeException("Not implemented");
+    throw new MoneroException("monero-wallet-rpc does not support getting the wallet seed");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getMnemonic() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key_type", "mnemonic");
+    Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("key");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getPublicViewKey() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key_type", "view_key");
+    Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("key");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getPrivateViewKey() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key_type", "view_key");
+    Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("key");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<String> getLanguages() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendJsonRequest("get_languages");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (List<String>) result.get("languages");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public int getHeight() {
-    Map<String, Object> respMap = rpc.sendJsonRequest("get_height");
-    @SuppressWarnings("unchecked")
-    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
-    return ((BigInteger) resultMap.get("height")).intValue();
+    Map<String, Object> resp = rpc.sendJsonRequest("get_height");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return ((BigInteger) result.get("height")).intValue();
   }
 
   @Override
   public int getChainHeight() {
-    throw new RuntimeException("Not implemented");
+    throw new MoneroException("monero-wallet-rpc does not support getting the chain height");
   }
 
   @SuppressWarnings("unchecked")
@@ -196,44 +214,197 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return (String) result.get("address");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroIntegratedAddress getIntegratedAddress(String paymentId) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("payment_id", paymentId);
+    Map<String, Object> resp = rpc.sendJsonRequest("make_integrated_address", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    String integratedAddressStr = (String) result.get("integrated_address");
+    return decodeIntegratedAddress(integratedAddressStr);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroIntegratedAddress decodeIntegratedAddress(String integratedAddress) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("integrated_address", integratedAddress);
+    Map<String, Object> resp = rpc.sendJsonRequest("split_integrated_address", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return new MoneroIntegratedAddress((String) result.get("standard_address"), (String) result.get("payment_id"), integratedAddress);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncProgressListener progressListener) {
-    throw new RuntimeException("Not implemented");
+    if (endHeight != null) throw new MoneroException("Monero Wallet RPC does not support syncing to an end height");
+    if (progressListener != null) throw new MoneroException("Monero Wallet RPC does not support reporting sync progress");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("start_height", startHeight);
+    Map<String, Object> resp = rpc.sendJsonRequest("refresh", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return new MoneroSyncResult(((BigInteger) result.get("blocks_fetched")).intValue(), (Boolean) result.get("received_money"));
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public boolean isMultisigImportNeeded() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendJsonRequest("get_balance");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return Boolean.TRUE.equals((Boolean) result.get("multisig_import_needed"));
   }
-
+  
   @Override
   public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag) {
-    throw new RuntimeException("Not implemented");
+    return getAccounts(includeSubaddresses, tag, false);
   }
 
+  @SuppressWarnings("unchecked")
+  public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag, boolean skipBalances) {
+    
+    // fetch accounts from rpc
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("tag", tag);
+    Map<String, Object> resp = rpc.sendJsonRequest("get_accounts", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    
+    // build account objects and fetch subaddresses per account using get_address
+    // TODO monero-wallet-rpc: get_address should support all_accounts so not called once per account
+    List<MoneroAccount> accounts = new ArrayList<MoneroAccount>();
+    for (Map<String, Object> rpcAccount : (List<Map<String, Object>>) result.get("subaddress_accounts")) {
+      MoneroAccount account = convertRpcAccount(rpcAccount);
+      if (includeSubaddresses) account.setSubaddresses(getSubaddresses(account.getIndex(), null, true));
+      accounts.add(account);
+    }
+    
+    // fetch and merge fields from get_balance across all accounts
+    if (includeSubaddresses && !skipBalances) {
+      
+      // these fields are not returned from rpc if 0 so pre-initialize them
+      for (MoneroAccount account : accounts) {
+        for (MoneroSubaddress subaddress : account.getSubaddresses()) {
+          subaddress.setBalance(BigInteger.valueOf(0));
+          subaddress.setUnlockedBalance(BigInteger.valueOf(0));
+          subaddress.setNumUnspentOutputs(0);
+        }
+      }
+      
+      // fetch and merge info from get_balance
+      params.clear();
+      params.put("all_accounts", true);
+      resp = rpc.sendJsonRequest("get_balance", params);
+      if (result.containsKey("per_subaddress")) {
+        for (Map<String, Object> rpcSubaddress : (List<Map<String, Object>>) result.get("per_subaddress")) {
+          MoneroSubaddress subaddress = convertRpcSubaddress(rpcSubaddress);
+          
+          // merge info
+          MoneroAccount account = accounts.get(subaddress.getAccountIndex());
+          assertEquals("RPC accounts are out of order", account.getIndex(), subaddress.getAccountIndex());  // would need to switch lookup to loop
+          MoneroSubaddress tgtSubaddress = account.getSubaddresses().get(subaddress.getIndex());
+          assertEquals("RPC subaddresses are out of order", tgtSubaddress.getIndex(), subaddress.getIndex());
+          if (subaddress.getBalance() != null) tgtSubaddress.setBalance(subaddress.getBalance());
+          if (subaddress.getUnlockedBalance() != null) tgtSubaddress.setUnlockedBalance(subaddress.getUnlockedBalance());
+          if (subaddress.getNumUnspentOutputs() != null) tgtSubaddress.setNumUnspentOutputs(subaddress.getNumUnspentOutputs());
+        }
+      }
+    }
+    
+    // return accounts
+    return accounts;
+  }
+
+  // TODO: getAccountByIndex(), getAccountByTag()
   @Override
   public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses) {
-    throw new RuntimeException("Not implemented");
+    return getAccount(accountIdx, includeSubaddresses, false);
+  }
+  
+  public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses, boolean skipBalances) {
+    if (accountIdx < 0) throw new MoneroException("Account index must be greater than or equal to 0");
+    for (MoneroAccount account : getAccounts()) {
+      if (account.getIndex() == accountIdx) {
+        if (includeSubaddresses) account.setSubaddresses(getSubaddresses(accountIdx, null, skipBalances));
+        return account;
+      }
+    }
+    throw new MoneroException("Account with index " + accountIdx + " does not exist");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroAccount createAccount(String label) {
-    throw new RuntimeException("Not implemented");
+    label = label == null || label.isEmpty() ? null : label;
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("label", label);
+    Map<String, Object> resp = rpc.sendJsonRequest("create_account", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return new MoneroAccount(((BigInteger) result.get("account_index")).intValue(), (String) result.get("address"), label, BigInteger.valueOf(0), BigInteger.valueOf(0), null);
   }
-
+  
   @Override
   public List<MoneroSubaddress> getSubaddresses(int accountIdx, List<Integer> subaddressIndices) {
-    throw new RuntimeException("Not implemented");
+    return getSubaddresses(accountIdx, subaddressIndices, false);
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<MoneroSubaddress> getSubaddresses(int accountIdx, List<Integer> subaddressIndices, boolean skipBalances) {
+    
+    // fetch subaddresses
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("account_index", accountIdx);
+    if (subaddressIndices != null && !subaddressIndices.isEmpty()) params.put("address_index", subaddressIndices);
+    Map<String, Object> resp = rpc.sendJsonRequest("get_address", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    
+    // initialize subaddresses
+    List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
+    for (Map<String, Object> rpcSubaddress : (List<Map<String, Object>>) result.get("addresses")) {
+      MoneroSubaddress subaddress = convertRpcSubaddress(rpcSubaddress);
+      subaddress.setAccountIndex(accountIdx);
+      subaddresses.add(subaddress);
+    }
+    
+    // fetch and initialize subaddress balances
+    if (!skipBalances) {
+      
+      // these fields are not returned from rpc if 0 so pre-initialize them
+      for (MoneroSubaddress subaddress : subaddresses) {
+        subaddress.setBalance(BigInteger.valueOf(0));
+        subaddress.setUnlockedBalance(BigInteger.valueOf(0));
+        subaddress.setNumUnspentOutputs(0);
+      }
+
+      // fetch and initialize balances
+      resp = rpc.sendJsonRequest("get_balance", params);
+      result = (Map<String, Object>) resp.get("result");
+      if (result.containsKey("per_subaddress")) {
+        for (Map<String, Object> rpcSubaddress : (List<Map<String, Object>>) result.get("per_subaddress")) {
+          MoneroSubaddress subaddress = convertRpcSubaddress(rpcSubaddress);
+          
+          // transfer info to existing subaddress object
+          for (MoneroSubaddress tgtSubaddress : subaddresses) {
+            if (tgtSubaddress.getIndex() != subaddress.getIndex()) continue; // skip to subaddress with same index
+            if (subaddress.getBalance() != null) tgtSubaddress.setBalance(subaddress.getBalance());
+            if (subaddress.getUnlockedBalance() != null) tgtSubaddress.setUnlockedBalance(subaddress.getUnlockedBalance());
+            if (subaddress.getNumUnspentOutputs() != null) tgtSubaddress.setNumUnspentOutputs(subaddress.getNumUnspentOutputs());
+          }
+        }
+      }
+    }
+    
+    // cache addresses
+    Map<Integer, String> subaddressMap = addressCache.get(accountIdx);
+    if (subaddressMap == null) {
+      subaddressMap = new HashMap<Integer, String>();
+      addressCache.put(accountIdx, subaddressMap);
+    }
+    for (MoneroSubaddress subaddress : subaddresses) {
+      subaddressMap.put(subaddress.getIndex(), subaddress.getAddress());
+    }
+    
+    // return results
+    return subaddresses;
   }
 
   @Override
@@ -317,7 +488,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // normalize configuration
     assertNotNull("Send config must not be null", config);
     if (config.getCanSplit() == null) config.setCanSplit(false);
-    else assertEquals(true, config.getCanSplit());
+    else assertEquals(false, config.getCanSplit());
     
     // send with common method
     return sendCommon(config).get(0);
@@ -560,6 +731,38 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   // ------------------------------ PRIVATE -----------------------------------
   
+  private static MoneroAccount convertRpcAccount(Map<String, Object> rpcAccount) {
+    MoneroAccount account = new MoneroAccount();
+    for (String key : rpcAccount.keySet()) {
+      Object val = rpcAccount.get(key);
+      if (key.equals("account_index")) account.setIndex(((BigInteger) val).intValue());
+      else if (key.equals("balance")) account.setBalance((BigInteger) val);
+      else if (key.equals("unlocked_balance")) account.setUnlockedBalance((BigInteger) val);
+      else if (key.equals("base_address")) account.setPrimaryAddress((String) val);
+      else if (key.equals("label")) { if (!"".equals(val)) account.setLabel((String) val); }
+      else if (key.equals("tag")) account.setTag((String) val);
+      else LOGGER.warn("WARNING: ignoring unexpected account field: " + key + ": " + val);
+    }
+    return account;
+  }
+  
+  private static MoneroSubaddress convertRpcSubaddress(Map<String, Object> rpcSubaddress) {
+    MoneroSubaddress subaddress = new MoneroSubaddress();
+    for (String key : rpcSubaddress.keySet()) {
+      Object val = rpcSubaddress.get(key);
+      if (key.equals("account_index")) subaddress.setAccountIndex(((BigInteger) val).intValue());
+      else if (key.equals("address_index")) subaddress.setIndex(((BigInteger) val).intValue());
+      else if (key.equals("address")) subaddress.setAddress((String) val);
+      else if (key.equals("balance")) subaddress.setBalance((BigInteger) val);
+      else if (key.equals("unlocked_balance")) subaddress.setUnlockedBalance((BigInteger) val);
+      else if (key.equals("num_unspent_outputs")) subaddress.setNumUnspentOutputs(((BigInteger) val).intValue());
+      else if (key.equals("label")) { if (!"".equals(val)) subaddress.setLabel((String) val); }
+      else if (key.equals("used")) subaddress.setIsUsed((Boolean) val);
+      else LOGGER.warn("WARNING: ignoring unexpected subaddress field: " + key + ": " + val);
+    }
+    return subaddress;
+  }
+  
   private Map<Integer, List<Integer>> getAccountIndices(boolean getSubaddressIndices) {
     Map<Integer, List<Integer>> indices = new HashMap<Integer, List<Integer>>();
     for (MoneroAccount account : getAccounts()) {
@@ -592,9 +795,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (tx == null) tx = new MoneroTxWallet();
     tx.setIsConfirmed(false);
     tx.setNumConfirmations(0);
-    tx.setInTxPool(config.getDoNotRelay() ? false : true);
-    tx.setDoNotRelay(config.getDoNotRelay() ? true : false);
-    tx.setIsRelayed(!tx.getDoNotRelay());
+    tx.setInTxPool(Boolean.TRUE.equals(config.getDoNotRelay()) ? false : true);
+    tx.setDoNotRelay(Boolean.TRUE.equals(config.getDoNotRelay()) ? true : false);
+    tx.setIsRelayed(!Boolean.TRUE.equals(tx.getDoNotRelay()));
     tx.setIsCoinbase(false);
     tx.setIsFailed(false);
     tx.setMixin(config.getMixin());
@@ -604,7 +807,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setOutgoingTransfer(transfer);
     tx.setPaymentId(config.getPaymentId());
     if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
-    if (!tx.getDoNotRelay()) {
+    if (!Boolean.TRUE.equals(tx.getDoNotRelay())) {
       if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
       if (tx.getIsDoubleSpend() == null) tx.setIsDoubleSpend(false);
     }

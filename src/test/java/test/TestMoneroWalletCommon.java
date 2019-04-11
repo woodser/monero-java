@@ -144,7 +144,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have thrown a RPC exception");
     } catch (MoneroException e) {
       assertEquals(-5, (int) e.getCode());
-      assertEquals("Invalid payment ID", e.getMessage());
+      assertEquals("Invalid payment ID", e.getDescription());
     }
   }
   
@@ -247,7 +247,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertFalse(subaddresses.isEmpty());
       for (MoneroSubaddress subaddress : subaddresses) {
         testSubaddress(subaddress);
-        assertEquals(account.getIndex(), subaddress.getIndex());
+        assertEquals(account.getIndex(), subaddress.getAccountIndex());
       }
     }
   }
@@ -267,8 +267,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       if (subaddresses.size() > 1) subaddresses.remove(0);
       
       // get subaddress indices
-      
-      
       List<Integer> subaddressIndices = new ArrayList<Integer>();
       for (MoneroSubaddress subaddress : subaddresses) subaddressIndices.add(subaddress.getIndex());
       assertTrue(subaddressIndices.size() > 0);
@@ -2319,7 +2317,15 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     Boolean isSendResponse;
     public TestContext() { }
     public TestContext(TestContext ctx) {
-      throw new RuntimeException("Not implemented");
+      this.wallet = ctx.wallet;
+      this.sendConfig = ctx.sendConfig;
+      this.hasOutgoingTransfer = ctx.hasOutgoingTransfer;
+      this.hasIncomingTransfers = ctx.hasIncomingTransfers;
+      this.hasDestinations = ctx.hasDestinations;
+      this.isSweep = ctx.isSweep;
+      this.doNotTestCopy = ctx.doNotTestCopy;
+      this.getVouts = ctx.getVouts;
+      this.isSendResponse = ctx.isSendResponse;
     }
   }
   
@@ -2359,7 +2365,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     TestUtils.testUnsignedBigInteger(subaddress.getBalance());
     TestUtils.testUnsignedBigInteger(subaddress.getUnlockedBalance());
     assertTrue(subaddress.getNumUnspentOutputs() >= 0);
-    if (subaddress.getBalance().equals(BigInteger.valueOf(0))) assertTrue(subaddress.getIsUsed());
+    if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0) assertTrue(subaddress.getIsUsed());
   }
   
   /**
@@ -2410,8 +2416,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertEquals(false, tx.getDoNotRelay());
       assertEquals(true, tx.getIsRelayed());
       assertEquals(false, tx.getIsDoubleSpend()); // TODO: test double spend attempt
-      assertNotNull(tx.getLastFailedHeight());
-      assertNotNull(tx.getLastFailedId());
       
       // these should be initialized unless a response from sending
       if (!Boolean.TRUE.equals(ctx.isSendResponse)) {
@@ -2461,7 +2465,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     if (tx.getOutgoingTransfer() != null) {
       assertTrue(tx.getIsOutgoing());
       testTransfer(tx.getOutgoingTransfer());
-      if (ctx.isSweep) assertEquals(tx.getOutgoingTransfer().getDestinations().size(), 1);
+      if (Boolean.TRUE.equals(ctx.isSweep)) assertEquals(tx.getOutgoingTransfer().getDestinations().size(), 1);
       
       // TODO: handle special cases
     } else {
@@ -2523,7 +2527,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertEquals(sendConfig.getDestinations().size(), tx.getOutgoingTransfer().getDestinations().size());
       for (int i = 0; i < sendConfig.getDestinations().size(); i++) {
         assertEquals(sendConfig.getDestinations().get(i).getAddress(), tx.getOutgoingTransfer().getDestinations().get(i).getAddress());
-        if (ctx.isSweep) {
+        if (Boolean.TRUE.equals(ctx.isSweep)) {
           assertEquals(1, sendConfig.getDestinations().size());
           assertNull(sendConfig.getDestinations().get(i).getAmount());
           assertEquals(tx.getOutgoingTransfer().getAmount().toString(), tx.getOutgoingTransfer().getDestinations().get(i).getAmount().toString());
@@ -2533,7 +2537,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       }
       
       // test relayed txs
-      if (!sendConfig.getDoNotRelay()) {
+      if (!Boolean.TRUE.equals(sendConfig.getDoNotRelay())) {
         assertEquals(true, tx.getInTxPool());
         assertEquals(false, tx.getDoNotRelay());
         assertEquals(true, tx.getIsRelayed());
@@ -2561,7 +2565,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // test vouts
-    if (tx.getIncomingTransfers() != null && Boolean.TRUE.equals(tx.getIsConfirmed()) && ctx.getVouts) assertTrue(tx.getVouts().size() > 0);
+    if (tx.getIncomingTransfers() != null && Boolean.TRUE.equals(tx.getIsConfirmed()) && Boolean.TRUE.equals(ctx.getVouts)) assertTrue(tx.getVouts().size() > 0);
     if (tx.getVouts() != null) for (MoneroOutputWallet vout : tx.getVoutsWallet()) testVout(vout);
     
     // test deep copy
