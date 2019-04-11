@@ -58,4 +58,28 @@ public class MoneroDestination {
     String str = sb.toString();
     return str.substring(0, str.length() - 1);
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((address == null) ? 0 : address.hashCode());
+    result = prime * result + ((amount == null) ? 0 : amount.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    MoneroDestination other = (MoneroDestination) obj;
+    if (address == null) {
+      if (other.address != null) return false;
+    } else if (!address.equals(other.address)) return false;
+    if (amount == null) {
+      if (other.amount != null) return false;
+    } else if (!amount.equals(other.amount)) return false;
+    return true;
+  }
 }
