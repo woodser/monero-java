@@ -8,6 +8,7 @@ import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroException;
+import monero.utils.MoneroUtils;
 
 /**
  * Models a Monero transaction with wallet extensions.
@@ -125,8 +126,40 @@ public class MoneroTxWallet extends MoneroTx {
     return merge((MoneroTxWallet) tx);
   }
   
+  /**
+   * Updates this transaction by merging the latest information from the given
+   * transaction.
+   * 
+   * Merging can modify or build references to the transaction given so it
+   * should not be re-used or it should be copied before calling this method.
+   * 
+   * @param tx is the transaction to merge into this transaction
+   */
   public MoneroTxWallet merge(MoneroTxWallet tx) {
-    throw new RuntimeException("Not implemented");
+    if (!(tx instanceof MoneroTxWallet)) throw new MoneroException("Wallet transaction must be merged with type MoneroTxWallet");
+    if (this == tx) return this;
+    super.merge(tx);
+    
+    // merge wallet extensions
+    this.setNote(MoneroUtils.reconcile(this.getNote(), tx.getNote()));
+    
+    // merge incoming transfers
+    if (tx.getIncomingTransfers() != null) {
+      if (this.getIncomingTransfers() == null) this.setIncomingTransfers(new ArrayList<MoneroTransfer>());
+      for (MoneroTransfer transfer : tx.getIncomingTransfers()) {
+        transfer.setTx(this);
+        mergeTransfer(this.getIncomingTransfers(), transfer);
+      }
+    }
+    
+    // merge outgoing transfer
+    if (tx.getOutgoingTransfer() != null) {
+      tx.getOutgoingTransfer().setTx(this);
+      if (this.getOutgoingTransfer() == null) this.setOutgoingTransfer(tx.getOutgoingTransfer());
+      else this.getOutgoingTransfer().merge(tx.getOutgoingTransfer());
+    }
+    
+    return this;  // for chaining
   }
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
@@ -363,5 +396,16 @@ public class MoneroTxWallet extends MoneroTx {
   public MoneroTxWallet setSignatures(List<String> signatures) {
     super.setSignatures(signatures);
     return this;
+  }
+  
+  // helper function to merge transfers
+  private static void mergeTransfer(List<MoneroTransfer> transfers, MoneroTransfer transfer) {
+    for (MoneroTransfer aTransfer : transfers) {
+      if (aTransfer.getAccountIndex() == transfer.getAccountIndex() && aTransfer.getSubaddressIndex() == transfer.getSubaddressIndex()) {
+        aTransfer.merge(transfer);
+        return;
+      }
+    }
+    transfers.add(transfer);
   }
 }
