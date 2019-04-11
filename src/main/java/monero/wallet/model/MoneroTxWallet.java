@@ -20,6 +20,24 @@ public class MoneroTxWallet extends MoneroTx {
   private MoneroTransfer outgoingTransfer;
   private String note;
   
+  public MoneroTxWallet() {
+    // nothing to initialize
+  }
+  
+  public MoneroTxWallet(MoneroTxWallet tx) {
+    super(tx);
+    this.incomingAmount = tx.incomingAmount;
+    this.outgoingAmount = tx.outgoingAmount;
+    if (tx.incomingTransfers != null) {
+      this.incomingTransfers = new ArrayList<MoneroTransfer>();
+      for (MoneroTransfer transfer : tx.incomingTransfers) {
+        this.incomingTransfers.add(transfer.copy());
+      }
+    }
+    if (tx.outgoingTransfer != null) this.outgoingTransfer = tx.outgoingTransfer.copy();
+    this.note = tx.note;
+  }
+  
   // ----------------------------- WALLET-SPECIFIC ----------------------------
   
   public Boolean getIsOutgoing() {
@@ -99,7 +117,7 @@ public class MoneroTxWallet extends MoneroTx {
   }
   
   public MoneroTxWallet copy() {
-    throw new RuntimeException("Not implemented");
+    return new MoneroTxWallet(this);
   }
   
   public MoneroTxWallet merge(MoneroTx tx) {

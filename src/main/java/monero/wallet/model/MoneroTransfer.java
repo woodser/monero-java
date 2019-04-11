@@ -3,6 +3,7 @@ package monero.wallet.model;
 import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import monero.utils.MoneroUtils;
@@ -13,13 +14,28 @@ import monero.utils.MoneroUtils;
 public class MoneroTransfer {
 
   private MoneroTxWallet tx;
-  private Boolean isOutgoing;
-  private Boolean isIncoming;
   private String address;
   private Integer accountIndex;
   private Integer subaddressIndex;
   private BigInteger amount;
   private List<MoneroDestination> destinations;
+  
+  public MoneroTransfer() {
+    // nothing to initialize
+  }
+  
+  public MoneroTransfer(MoneroTransfer transfer) {
+    this.address = transfer.address;
+    this.accountIndex = transfer.accountIndex;
+    this.subaddressIndex = transfer.subaddressIndex;
+    this.amount = transfer.amount;
+    if (transfer.destinations != null) {
+      this.destinations = new ArrayList<MoneroDestination>();
+      for (MoneroDestination destination : transfer.getDestinations()) {
+        this.destinations.add(destination.copy()); 
+      }
+    }
+  }
   
   public MoneroTxWallet getTx() {
     return tx;
@@ -31,21 +47,12 @@ public class MoneroTransfer {
   }
   
   public Boolean getIsOutgoing() {
-    return isOutgoing;
-  }
-  
-  public MoneroTransfer setIsOutgoing(Boolean isOutgoing) {
-    this.isOutgoing = isOutgoing;
-    return this;
+    return this == tx.getOutgoingTransfer();
   }
   
   public Boolean getIsIncoming() {
-    return isIncoming;
-  }
-  
-  public MoneroTransfer setIsIncoming(Boolean isIncoming) {
-    this.isIncoming = isIncoming;
-    return this;
+    if (tx.getIncomingTransfers() == null) return false;
+    return tx.getIncomingTransfers().contains(this);
   }
   
   public String getAddress() {
@@ -91,6 +98,10 @@ public class MoneroTransfer {
   public MoneroTransfer setDestinations(List<MoneroDestination> destinations) {
     this.destinations = destinations;
     return this;
+  }
+  
+  public MoneroTransfer copy() {
+    return new MoneroTransfer(this);
   }
   
   /**

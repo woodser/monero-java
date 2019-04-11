@@ -21,6 +21,11 @@ public class MoneroDestination {
     this.address = address;
     this.amount = amount;
   }
+  
+  public MoneroDestination(MoneroDestination destination) {
+    this.address = destination.address;
+    this.amount = destination.amount;
+  }
 
   public String getAddress() {
     return address;
@@ -36,6 +41,10 @@ public class MoneroDestination {
   
   public void setAmount(BigInteger amount) {
     this.amount = amount;
+  }
+  
+  public MoneroDestination copy() {
+    return new MoneroDestination(this);
   }
   
   public String toString() {
