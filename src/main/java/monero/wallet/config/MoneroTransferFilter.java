@@ -13,9 +13,29 @@ import monero.wallet.model.MoneroTxWallet;
  */
 public class MoneroTransferFilter extends MoneroTransfer implements Filter<MoneroTransfer> {
 
+  private boolean isOutgoing;
+  private boolean isIncoming;
   private List<Integer> subaddressIndices;
   private Boolean hasDestinations;
   private MoneroTxFilter txFilter;
+  
+  public Boolean getIsOutgoing() {
+    return isOutgoing;
+  }
+  
+  public MoneroTransferFilter setIsOutgoing(Boolean isOutgoing) {
+    this.isOutgoing = isOutgoing;
+    return this;
+  }
+  
+  public Boolean getIsIncoming() {
+    return isIncoming;
+  }
+
+  public MoneroTransferFilter setIsIncoming(Boolean isIncoming) {
+    this.isIncoming = isIncoming;
+    return this;
+  }
   
   public Boolean getHasDestinations() {
     return hasDestinations;
@@ -54,18 +74,6 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
   @Override
   public MoneroTransferFilter setTx(MoneroTxWallet tx) {
     super.setTx(tx);
-    return this;
-  }
-
-  @Override
-  public MoneroTransferFilter setIsOutgoing(Boolean isOutgoing) {
-    super.setIsOutgoing(isOutgoing);
-    return this;
-  }
-
-  @Override
-  public MoneroTransferFilter setIsIncoming(Boolean isIncoming) {
-    super.setIsIncoming(isIncoming);
     return this;
   }
 

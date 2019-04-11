@@ -55,136 +55,153 @@ public class MoneroBlockHeader {
     return id;
   }
   
-  public void setId(String id) {
+  public MoneroBlockHeader setId(String id) {
     this.id = id;
+    return this;
   }
   
   public Integer getHeight() {
     return height;
   }
   
-  public void setHeight(Integer height) {
+  public MoneroBlockHeader setHeight(Integer height) {
     this.height = height;
+    return this;
   }
   
   public Long getTimestamp() {
     return timestamp;
   }
   
-  public void setTimestamp(Long timestamp) {
+  public MoneroBlockHeader setTimestamp(Long timestamp) {
     this.timestamp = timestamp;
+    return this;
   }
   
   public Long getSize() {
     return size;
   }
   
-  public void setSize(Long size) {
+  public MoneroBlockHeader setSize(Long size) {
     this.size = size;
+    return this;
   }
   
   public Long getWeight() {
     return weight;
   }
   
-  public void setWeight(Long weight) {
+  public MoneroBlockHeader setWeight(Long weight) {
     this.weight = weight;
+    return this;
   }
   
   public Long getLongTermWeight() {
     return longTermWeight;
   }
   
-  public void setLongTermWeight(Long longTermWeight) {
+  public MoneroBlockHeader setLongTermWeight(Long longTermWeight) {
     this.longTermWeight = longTermWeight;
+    return this;
   }
   
   public Long getDepth() {
     return depth;
   }
   
-  public void setDepth(Long depth) {
+  public MoneroBlockHeader setDepth(Long depth) {
     this.depth = depth;
+    return this;
   }
   
   public BigInteger getDifficulty() {
     return difficulty;
   }
   
-  public void setDifficulty(BigInteger difficulty) {
+  public MoneroBlockHeader setDifficulty(BigInteger difficulty) {
     this.difficulty = difficulty;
+    return this;
   }
   
   public BigInteger getCumulativeDifficulty() {
     return cumulativeDifficulty;
   }
   
-  public void setCumulativeDifficulty(BigInteger cumulativeDifficulty) {
+  public MoneroBlockHeader setCumulativeDifficulty(BigInteger cumulativeDifficulty) {
     this.cumulativeDifficulty = cumulativeDifficulty;
+    return this;
   }
   
   public Integer getMajorVersion() {
     return majorVersion;
   }
   
-  public void setMajorVersion(Integer majorVersion) {
+  public MoneroBlockHeader setMajorVersion(Integer majorVersion) {
     this.majorVersion = majorVersion;
+    return this;
   }
   
   public Integer getMinorVersion() {
     return minorVersion;
   }
   
-  public void setMinorVersion(Integer minorVersion) {
+  public MoneroBlockHeader setMinorVersion(Integer minorVersion) {
     this.minorVersion = minorVersion;
+    return this;
   }
   
   public Long getNonce() {
     return nonce;
   }
   
-  public void setNonce(Long nonce) {
+  public MoneroBlockHeader setNonce(Long nonce) {
     this.nonce = nonce;
+    return this;
   }
   
   public Integer getNumTxs() {
     return numTxs;
   }
   
-  public void setNumTxs(Integer numTxs) {
+  public MoneroBlockHeader setNumTxs(Integer numTxs) {
     this.numTxs = numTxs;
+    return this;
   }
   
   public Boolean getOrphanStatus() {
     return orphanStatus;
   }
   
-  public void setOrphanStatus(Boolean orphanStatus) {
+  public MoneroBlockHeader setOrphanStatus(Boolean orphanStatus) {
     this.orphanStatus = orphanStatus;
+    return this;
   }
   
   public String getPrevId() {
     return prevId;
   }
   
-  public void setPrevId(String prevId) {
+  public MoneroBlockHeader setPrevId(String prevId) {
     this.prevId = prevId;
+    return this;
   }
   
   public BigInteger getReward() {
     return reward;
   }
   
-  public void setReward(BigInteger reward) {
+  public MoneroBlockHeader setReward(BigInteger reward) {
     this.reward = reward;
+    return this;
   }
   
   public String getPowHash() {
     return powHash;
   }
   
-  public void setPowHash(String powHash) {
+  public MoneroBlockHeader setPowHash(String powHash) {
     this.powHash = powHash;
+    return this;
   }
   
   public String toString() {

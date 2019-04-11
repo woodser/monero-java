@@ -1,5 +1,6 @@
 package monero.daemon.model;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -163,5 +164,108 @@ public class MoneroBlock extends MoneroBlockHeader {
       if (other.txs != null) return false;
     } else if (!txs.equals(other.txs)) return false;
     return true;
+  }
+  
+  // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
+  
+  public MoneroBlock setId(String id) {
+    super.setId(id);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setHeight(Integer height) {
+    super.setHeight(height);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setTimestamp(Long timestamp) {
+    super.setTimestamp(timestamp);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setSize(Long size) {
+    super.setSize(size);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setWeight(Long weight) {
+    super.setWeight(weight);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setLongTermWeight(Long longTermWeight) {
+    super.setLongTermWeight(longTermWeight);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setDepth(Long depth) {
+    super.setDepth(depth);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setDifficulty(BigInteger difficulty) {
+    super.setDifficulty(difficulty);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setCumulativeDifficulty(BigInteger cumulativeDifficulty) {
+    super.setCumulativeDifficulty(cumulativeDifficulty);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setMajorVersion(Integer majorVersion) {
+    super.setMajorVersion(majorVersion);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setMinorVersion(Integer minorVersion) {
+    super.setMinorVersion(minorVersion);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setNonce(Long nonce) {
+    super.setNonce(nonce);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setNumTxs(Integer numTxs) {
+    super.setNumTxs(numTxs);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setOrphanStatus(Boolean orphanStatus) {
+    super.setOrphanStatus(orphanStatus);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setPrevId(String prevId) {
+    super.setPrevId(prevId);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setReward(BigInteger reward) {
+    super.setReward(reward);
+    return this;
+  }
+  
+  @Override
+  public MoneroBlock setPowHash(String powHash) {
+    super.setPowHash(powHash);
+    return this;
   }
 }
