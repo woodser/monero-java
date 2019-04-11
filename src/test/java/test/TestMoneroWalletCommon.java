@@ -81,6 +81,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
   }
   
+  // Can get the current height that the wallet is synchronized to
   @Test
   public void testGetHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -88,6 +89,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertTrue(height >= 0);
   }
   
+  // Can get the mnemonic phrase derived from the seed
   @Test
   public void testGetMnemonic() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -96,6 +98,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertEquals(TestUtils.TEST_MNEMONIC, mnemonic);
   }
   
+  // Can get a list of supported languages for the mnemonic phrase
   @Test
   public void testGetSupportedLanguages() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -104,6 +107,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     for (String language : languages) assertFalse(language.isEmpty());
   }
   
+  // Can get the private view key
   @Test
   public void testGetPrivateViewKey() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -111,6 +115,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     MoneroUtils.validatePrivateViewKey(privateViewKey);
   }
   
+  // Can get the primary address
   @Test
   public void testGetPrimaryAddress() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -119,6 +124,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertEquals((wallet.getSubaddress(0, 0)).getAddress(), primaryAddress);
   }
   
+  // Can get an integrated address given a payment id
   @Test
   public void testGetIntegratedAddressFromPaymentId() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -148,6 +154,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  // Can decode an integrated address
   @Test
   public void testDecodeIntegratedAddress() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -156,6 +163,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertEquals(integratedAddress, decodedAddress);
   }
   
+  // Can sync (without progress)
   // TODO: test syncing from start height
   @Test
   public void testSyncWithoutProgress() {
@@ -168,6 +176,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertNotNull(result.getReceivedMoney());
   }
   
+  // Can get all accounts in the wallet without subaddresses
   @Test
   public void testGetAccountsWithoutSubaddresses() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -179,6 +188,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  // Can get all accounts in the wallet with subaddresses
   @Test
   public void testGetAccountsWithSubaddresses() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -190,6 +200,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  // Can get an account at a specified index
   @Test
   public void testGetAccount() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -208,8 +219,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  // Can create a new account without a label
   @Test
-  public void testCreateAccountWithLabel() {
+  public void testCreateAccountWithoutLabel() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroAccount> accountsBefore = wallet.getAccounts();
     MoneroAccount createdAccount = wallet.createAccount();
@@ -218,8 +230,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertTrue(accountsBefore.size() == (wallet.getAccounts()).size() - 1);
   }
   
+  // Can create a new account with a label
   @Test
-  public void testCreateAccountWithoutLabel() {
+  public void testCreateAccountWithLabel() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // create account with label
@@ -237,6 +250,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertTrue(accountsBefore.size() == (wallet.getAccounts()).size() - 2);
   }
   
+  // Can get subaddresses at a specified account index
   @Test
   public void testGetSubaddresses() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -252,6 +266,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  // Can get subaddresses at specified account and subaddress indices
   @Test
   public void testGetSubaddressesByIndices() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -279,6 +294,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  // Can get a subaddress at a specified account and subaddress index
   @Test
   public void testGetSubaddressByIndex() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -294,6 +310,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  // Can create a subaddress with and without a label
   @Test
   public void testCreateSubaddress() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -326,6 +343,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  // Can get the address of a subaddress at a specified account and subaddress index
   @Test
   public void testGetSubaddressAddress() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -344,6 +362,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertNull(address);
   }
   
+  // Can get the account and subaddress indices of an address
   @Test
   public void testGetAddressIndices() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -2071,7 +2090,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   // Can update split locked txs sent from/to the same account as blocks are added to the chain
   @Test
   public void testUpdateLockedSameAccountSplit() {
-    org.junit.Assume.assumeTrue(TEST_RELAYS && !LITE_MODE);
+    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS && !LITE_MODE);
     MoneroSendConfig sendConfig = new MoneroSendConfig(wallet.getPrimaryAddress(), TestUtils.MAX_FEE);
     sendConfig.setAccountIndex(0);
     sendConfig.setUnlockTime(3);
@@ -2082,7 +2101,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   // Can update a locked tx sent from/to different accounts as blocks are added to the chain
   @Test
   public void testUpdateLockedDifferentAccounts() {
-    org.junit.Assume.assumeTrue(TEST_RELAYS && !LITE_MODE);
+    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS && !LITE_MODE);
     MoneroSendConfig sendConfig = new MoneroSendConfig((wallet.getSubaddress(1, 0)).getAddress(), TestUtils.MAX_FEE);
     sendConfig.setAccountIndex(0);
     sendConfig.setUnlockTime(3);
@@ -2093,7 +2112,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   // Can update a locked tx sent from/to different accounts as blocks are added to the chain
   @Test
   public void testUpdateLockedDifferentAccountsSplit() {
-    org.junit.Assume.assumeTrue(TEST_RELAYS && !LITE_MODE);
+    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS && !LITE_MODE);
     MoneroSendConfig sendConfig = new MoneroSendConfig((wallet.getSubaddress(1, 0)).getAddress(), TestUtils.MAX_FEE);
     sendConfig.setAccountIndex(0);
     sendConfig.setUnlockTime(3);

@@ -295,6 +295,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       params.clear();
       params.put("all_accounts", true);
       resp = rpc.sendJsonRequest("get_balance", params);
+      result = (Map<String, Object>) resp.get("result");
       if (result.containsKey("per_subaddress")) {
         for (Map<String, Object> rpcSubaddress : (List<Map<String, Object>>) result.get("per_subaddress")) {
           MoneroSubaddress subaddress = convertRpcSubaddress(rpcSubaddress);
@@ -457,7 +458,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public List<MoneroTxWallet> getTxs(MoneroTxFilter filter) {
     
     // normalize tx filter
-    if (filter == null) new MoneroTxFilter();
+    if (filter == null) filter = new MoneroTxFilter();
     if (filter.getTransferFilter() == null) filter.setTransferFilter(new MoneroTransferFilter());
     MoneroTransferFilter transferFilter = filter.getTransferFilter();
     
@@ -495,6 +496,81 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public List<MoneroTransfer> getTransfers(MoneroTransferFilter filter) {
+    
+    // normalize transfer filter
+    if (filter == null) filter = new MoneroTransferFilter();
+//    
+//    
+//    // initialize filters from config
+//    let transferFilter;
+//    if (config instanceof MoneroTransferFilter) transferFilter = config;
+//    else {
+//      config = Object.assign({}, config);
+//      if (!config.id) config.id = config.txId;  // support txId TODO: move into MoneroTransaction?
+//      transferFilter = new MoneroTransferFilter(config);
+//      transferFilter.setTxFilter(new MoneroTxFilter(config));
+//    }
+//    if (!transferFilter.getTxFilter()) transferFilter.setTxFilter(new MoneroTxFilter());
+//    let txFilter = transferFilter.getTxFilter();
+//    
+//    // build params for get_transfers rpc call
+//    let params = {};
+//    let canBeConfirmed = txFilter.getIsConfirmed() !== false && txFilter.getInTxPool() !== true && txFilter.getIsFailed() !== true && txFilter.getIsRelayed() !== false;
+//    let canBeInTxPool = txFilter.getIsConfirmed() !== true && txFilter.getInTxPool() !== false && txFilter.getIsFailed() !== true & txFilter.getIsRelayed() !== false && txFilter.getHeight() === undefined && txFilter.getMinHeight() === undefined;
+//    let canBeIncoming = transferFilter.getIsIncoming() !== false && transferFilter.getIsOutgoing() !== true && transferFilter.getHasDestinations() !== true;
+//    let canBeOutgoing = transferFilter.getIsOutgoing() !== false && transferFilter.getIsIncoming() !== true;
+//    params.in = canBeIncoming && canBeConfirmed;
+//    params.out = canBeOutgoing && canBeConfirmed;
+//    params.pool = canBeIncoming && canBeInTxPool;
+//    params.pending = canBeOutgoing && canBeInTxPool;
+//    params.failed = txFilter.getIsFailed() !== false && txFilter.getIsConfirmed() !== true && txFilter.getInTxPool() != true;
+//    if (txFilter.getMinHeight() !== undefined) params.min_height = txFilter.getMinHeight(); 
+//    if (txFilter.getMaxHeight() !== undefined) params.max_height = txFilter.getMaxHeight();
+//    params.filter_by_height = txFilter.getMinHeight() !== undefined || txFilter.getMaxHeight() !== undefined;
+//    if (transferFilter.getAccountIndex() === undefined) {
+//      assert(transferFilter.getSubaddressIndex() === undefined && transferFilter.getSubaddressIndices() === undefined, "Filter specifies a subaddress index but not an account index");
+//      params.all_accounts = true;
+//    } else {
+//      params.account_index = transferFilter.getAccountIndex();
+//      
+//      // set subaddress indices param
+//      let subaddressIndices = new Set();
+//      if (transferFilter.getSubaddressIndex() !== undefined) subaddressIndices.add(transferFilter.getSubaddressIndex());
+//      if (transferFilter.getSubaddressIndices() !== undefined) transferFilter.getSubaddressIndices().map(subaddressIdx => subaddressIndices.add(subaddressIdx));
+//      if (subaddressIndices.size) params.subaddr_indices = Array.from(subaddressIndices);
+//    }
+//    
+//    // build txs using `get_transfers`
+//    let txs = [];
+//    let resp = await this.config.rpc.sendJsonRequest("get_transfers", params);
+//    for (let key of Object.keys(resp.result)) {
+//      for (let rpcTx of resp.result[key]) {
+//        if (rpcTx.txid === config.debugTxId) console.log(rpcTx);
+//        let tx = MoneroWalletRpc._convertRpcTxWallet(rpcTx);
+//        
+//        // replace transfer amount with destination sum
+//        // TODO monero-wallet-rpc: confirmed tx from/to same account has amount 0 but cached transfers
+//        if (tx.getOutgoingTransfer() !== undefined && tx.getIsRelayed() && !tx.getIsFailed() &&
+//            tx.getOutgoingTransfer().getDestinations() && tx.getOutgoingAmount().compare(new BigInteger(0)) === 0) {
+//          let outgoingTransfer = tx.getOutgoingTransfer();
+//          let transferTotal = new BigInteger(0);
+//          for (let destination of outgoingTransfer.getDestinations()) transferTotal = transferTotal.add(destination.getAmount());
+//          tx.getOutgoingTransfer().setAmount(transferTotal);
+//        }
+//        
+//        // merge tx
+//        MoneroWalletRpc._mergeTx(txs, tx);
+//      }
+//    }
+//    
+//    // filter and return transfers
+//    let transfers = [];
+//    for (let tx of txs) {
+//      if (transferFilter.meetsCriteria(tx.getOutgoingTransfer())) transfers.push(tx.getOutgoingTransfer());
+//      if (tx.getIncomingTransfers()) Filter.apply(transferFilter, tx.getIncomingTransfers()).map(transfer => transfers.push(transfer));
+//    }
+//    return transfers;
+    
     throw new RuntimeException("Not implemented");
   }
 
