@@ -2604,14 +2604,11 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     if (tx.getOutgoingTransfer() != null) {
       assertTrue(tx.getOutgoingTransfer() != copy.getOutgoingTransfer());
       assertTrue(tx.getOutgoingTransfer().getTx() != copy.getOutgoingTransfer().getTx());
-      //assertTrue(tx.getOutgoingTransfer().getAmount() != copy.getOutgoingTransfer().getAmount());  // TODO: BI 0 == BI 0?, testing this instead:
-      if (tx.getOutgoingTransfer().getAmount() == copy.getOutgoingTransfer().getAmount()) assertTrue(tx.getOutgoingTransfer().getAmount().equals(BigInteger.valueOf(0)));
       if (tx.getOutgoingTransfer().getDestinations() != null) {
         assertTrue(tx.getOutgoingTransfer().getDestinations() != copy.getOutgoingTransfer().getDestinations());
         for (int i = 0; i < tx.getOutgoingTransfer().getDestinations().size(); i++) {
           assertEquals(copy.getOutgoingTransfer().getDestinations().get(i), tx.getOutgoingTransfer().getDestinations().get(i));
           assertTrue(tx.getOutgoingTransfer().getDestinations().get(i) != copy.getOutgoingTransfer().getDestinations().get(i));
-          if (tx.getOutgoingTransfer().getDestinations().get(i).getAmount() == copy.getOutgoingTransfer().getDestinations().get(i).getAmount()) assertTrue(tx.getOutgoingTransfer().getDestinations().get(i).getAmount().equals(BigInteger.valueOf(0)));
         }
       }
     }
@@ -2619,14 +2616,12 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       for (int i = 0; i < tx.getIncomingTransfers().size(); i++) {
         assertEquals(copy.getIncomingTransfers().get(i), tx.getIncomingTransfers().get(i));
         assertTrue(tx.getIncomingTransfers().get(i) != copy.getIncomingTransfers().get(i));
-        if (tx.getIncomingTransfers().get(i).getAmount() == copy.getIncomingTransfers().get(i).getAmount()) assertTrue(tx.getIncomingTransfers().get(i).getAmount().equals(BigInteger.valueOf(0)));
       }
     }
     if (tx.getVouts() != null) {
       for (int i = 0; i < tx.getVouts().size(); i++) {
         assertEquals(copy.getVouts().get(i), tx.getVouts().get(i));
         assertTrue(tx.getVouts().get(i) != copy.getVouts().get(i));
-        if (tx.getVouts().get(i).getAmount() == copy.getVouts().get(i).getAmount()) assertTrue(tx.getVouts().get(i).getAmount().equals(BigInteger.valueOf(0)));
       }
     }
     

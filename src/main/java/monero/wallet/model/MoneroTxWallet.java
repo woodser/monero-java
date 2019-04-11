@@ -31,10 +31,10 @@ public class MoneroTxWallet extends MoneroTx {
     if (tx.incomingTransfers != null) {
       this.incomingTransfers = new ArrayList<MoneroTransfer>();
       for (MoneroTransfer transfer : tx.incomingTransfers) {
-        this.incomingTransfers.add(transfer.copy());
+        this.incomingTransfers.add(transfer.copy().setTx(this));
       }
     }
-    if (tx.outgoingTransfer != null) this.outgoingTransfer = tx.outgoingTransfer.copy();
+    if (tx.outgoingTransfer != null) this.outgoingTransfer = tx.outgoingTransfer.copy().setTx(this);
     this.note = tx.note;
   }
   
