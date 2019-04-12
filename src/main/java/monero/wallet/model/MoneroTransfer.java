@@ -158,4 +158,40 @@ public class MoneroTransfer {
     String str = sb.toString();
     return str.substring(0, str.length() - 1);
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((accountIndex == null) ? 0 : accountIndex.hashCode());
+    result = prime * result + ((address == null) ? 0 : address.hashCode());
+    result = prime * result + ((amount == null) ? 0 : amount.hashCode());
+    result = prime * result + ((destinations == null) ? 0 : destinations.hashCode());
+    result = prime * result + ((subaddressIndex == null) ? 0 : subaddressIndex.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    MoneroTransfer other = (MoneroTransfer) obj;
+    if (accountIndex == null) {
+      if (other.accountIndex != null) return false;
+    } else if (!accountIndex.equals(other.accountIndex)) return false;
+    if (address == null) {
+      if (other.address != null) return false;
+    } else if (!address.equals(other.address)) return false;
+    if (amount == null) {
+      if (other.amount != null) return false;
+    } else if (!amount.equals(other.amount)) return false;
+    if (destinations == null) {
+      if (other.destinations != null) return false;
+    } else if (!destinations.equals(other.destinations)) return false;
+    if (subaddressIndex == null) {
+      if (other.subaddressIndex != null) return false;
+    } else if (!subaddressIndex.equals(other.subaddressIndex)) return false;
+    return true;
+  }
 }

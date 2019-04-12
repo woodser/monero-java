@@ -117,7 +117,61 @@ public class MoneroTxFilter extends MoneroTxWallet implements Filter<MoneroTxWal
   
   @Override
   public boolean meetsCriteria(MoneroTxWallet tx) {
-    throw new RuntimeException("Not implemented");
+    if (tx == null) return false;
+    
+    // filter on tx
+    if (this.getId() != null && !this.getId().equals(tx.getId())) return false;
+    if (this.getPaymentId() != null && !this.getPaymentId().equals(tx.getPaymentId())) return false;
+    if (this.getIsConfirmed() != null && this.getIsConfirmed() != tx.getIsConfirmed()) return false;
+    if (this.getInTxPool() != null && this.getInTxPool() != tx.getInTxPool()) return false;
+    if (this.getDoNotRelay() != null && this.getDoNotRelay() != tx.getDoNotRelay()) return false;
+    if (this.getIsRelayed() != null && this.getIsRelayed() != tx.getIsRelayed()) return false;
+    if (this.getIsFailed() != null && this.getIsFailed() != tx.getIsFailed()) return false;
+    if (this.getIsCoinbase() != null && this.getIsCoinbase() != tx.getIsCoinbase()) return false;
+    
+    // at least one transfer must meet transfer filter if defined
+    if (this.getTransferFilter() != null) {
+      boolean matchFound = false;
+      if (tx.getOutgoingTransfer() != null && this.getTransferFilter().meetsCriteria(tx.getOutgoingTransfer())) matchFound = true;
+      else if (tx.getIncomingTransfers() != null) {
+        for (MoneroTransfer incomingTransfer : tx.getIncomingTransfers()) {
+          if (this.getTransferFilter().meetsCriteria(incomingTransfer)) {
+            matchFound = true;
+            break;
+          }
+        }
+      }
+      if (!matchFound) return false;
+    }
+    
+    // filter on having a payment id
+    if (this.getHasPaymentId() != null) {
+      if (this.getHasPaymentId() && tx.getPaymentId() == null) return false;
+      if (!this.getHasPaymentId() && tx.getPaymentId() != null) return false;
+    }
+    
+    // filter on incoming
+    if (this.getIsIncoming() != null) {
+      if (this.getIsIncoming() && !tx.getIsIncoming()) return false;
+      if (!this.getIsIncoming() && tx.getIsIncoming()) return false;
+    }
+    
+    // filter on outgoing
+    if (this.getIsOutgoing() != null) {
+      if (this.getIsOutgoing() && !tx.getIsOutgoing()) return false;
+      if (!this.getIsOutgoing() && tx.getIsOutgoing()) return false;
+    }
+    
+    // filter on remaining fields
+    Integer height = tx.getBlock() == null ? null : tx.getBlock().getHeight();
+    if (this.getTxIds() != null && !this.getTxIds().contains(tx.getId())) return false;
+    if (this.getPaymentIds() != null && !this.getPaymentIds().contains(tx.getPaymentId())) return false;
+    if (this.getHeight() != null && height != this.getHeight()) return false;
+    if (this.getMinHeight() != null && (height == null || height < this.getMinHeight())) return false;
+    if (this.getMaxHeight() != null && (height == null || height > this.getMaxHeight())) return false;
+    
+    // transaction meets filter criteria
+    return true;
   }
   
   @Override
@@ -126,18 +180,6 @@ public class MoneroTxFilter extends MoneroTxWallet implements Filter<MoneroTxWal
   }
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
-
-  @Override
-  public MoneroTxFilter setIncomingAmount(BigInteger incomingAmount) {
-    super.setIncomingAmount(incomingAmount);
-    return this;
-  }
-
-  @Override
-  public MoneroTxFilter setOutgoingAmount(BigInteger outgoingAmount) {
-    super.setOutgoingAmount(outgoingAmount);
-    return this;
-  }
 
   @Override
   public MoneroTxFilter setIncomingTransfers(List<MoneroTransfer> incomingTransfers) {
@@ -166,12 +208,6 @@ public class MoneroTxFilter extends MoneroTxWallet implements Filter<MoneroTxWal
   @Override
   public MoneroTxFilter setBlock(MoneroBlock block) {
     super.setBlock(block);
-    return this;
-  }
-
-  @Override
-  public MoneroTxFilter setHeight(Integer height) {
-    super.setHeight(height);
     return this;
   }
 

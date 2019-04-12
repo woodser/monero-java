@@ -25,6 +25,7 @@ import common.types.Filter;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
+import monero.daemon.model.MoneroTx;
 import monero.rpc.MoneroRpc;
 import monero.utils.MoneroException;
 import monero.wallet.config.MoneroSendConfig;
@@ -494,84 +495,81 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return txs;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroTransfer> getTransfers(MoneroTransferFilter filter) {
     
     // normalize transfer filter
     if (filter == null) filter = new MoneroTransferFilter();
-//    
-//    
-//    // initialize filters from config
-//    let transferFilter;
-//    if (config instanceof MoneroTransferFilter) transferFilter = config;
-//    else {
-//      config = Object.assign({}, config);
-//      if (!config.id) config.id = config.txId;  // support txId TODO: move into MoneroTransaction?
-//      transferFilter = new MoneroTransferFilter(config);
-//      transferFilter.setTxFilter(new MoneroTxFilter(config));
-//    }
-//    if (!transferFilter.getTxFilter()) transferFilter.setTxFilter(new MoneroTxFilter());
-//    let txFilter = transferFilter.getTxFilter();
-//    
-//    // build params for get_transfers rpc call
-//    let params = {};
-//    let canBeConfirmed = txFilter.getIsConfirmed() !== false && txFilter.getInTxPool() !== true && txFilter.getIsFailed() !== true && txFilter.getIsRelayed() !== false;
-//    let canBeInTxPool = txFilter.getIsConfirmed() !== true && txFilter.getInTxPool() !== false && txFilter.getIsFailed() !== true & txFilter.getIsRelayed() !== false && txFilter.getHeight() === undefined && txFilter.getMinHeight() === undefined;
-//    let canBeIncoming = transferFilter.getIsIncoming() !== false && transferFilter.getIsOutgoing() !== true && transferFilter.getHasDestinations() !== true;
-//    let canBeOutgoing = transferFilter.getIsOutgoing() !== false && transferFilter.getIsIncoming() !== true;
-//    params.in = canBeIncoming && canBeConfirmed;
-//    params.out = canBeOutgoing && canBeConfirmed;
-//    params.pool = canBeIncoming && canBeInTxPool;
-//    params.pending = canBeOutgoing && canBeInTxPool;
-//    params.failed = txFilter.getIsFailed() !== false && txFilter.getIsConfirmed() !== true && txFilter.getInTxPool() != true;
-//    if (txFilter.getMinHeight() !== undefined) params.min_height = txFilter.getMinHeight(); 
-//    if (txFilter.getMaxHeight() !== undefined) params.max_height = txFilter.getMaxHeight();
-//    params.filter_by_height = txFilter.getMinHeight() !== undefined || txFilter.getMaxHeight() !== undefined;
-//    if (transferFilter.getAccountIndex() === undefined) {
-//      assert(transferFilter.getSubaddressIndex() === undefined && transferFilter.getSubaddressIndices() === undefined, "Filter specifies a subaddress index but not an account index");
-//      params.all_accounts = true;
-//    } else {
-//      params.account_index = transferFilter.getAccountIndex();
-//      
-//      // set subaddress indices param
-//      let subaddressIndices = new Set();
-//      if (transferFilter.getSubaddressIndex() !== undefined) subaddressIndices.add(transferFilter.getSubaddressIndex());
-//      if (transferFilter.getSubaddressIndices() !== undefined) transferFilter.getSubaddressIndices().map(subaddressIdx => subaddressIndices.add(subaddressIdx));
-//      if (subaddressIndices.size) params.subaddr_indices = Array.from(subaddressIndices);
-//    }
-//    
-//    // build txs using `get_transfers`
-//    let txs = [];
-//    let resp = await this.config.rpc.sendJsonRequest("get_transfers", params);
-//    for (let key of Object.keys(resp.result)) {
-//      for (let rpcTx of resp.result[key]) {
-//        if (rpcTx.txid === config.debugTxId) console.log(rpcTx);
-//        let tx = MoneroWalletRpc._convertRpcTxWallet(rpcTx);
-//        
-//        // replace transfer amount with destination sum
-//        // TODO monero-wallet-rpc: confirmed tx from/to same account has amount 0 but cached transfers
-//        if (tx.getOutgoingTransfer() !== undefined && tx.getIsRelayed() && !tx.getIsFailed() &&
-//            tx.getOutgoingTransfer().getDestinations() && tx.getOutgoingAmount().compare(new BigInteger(0)) === 0) {
-//          let outgoingTransfer = tx.getOutgoingTransfer();
-//          let transferTotal = new BigInteger(0);
-//          for (let destination of outgoingTransfer.getDestinations()) transferTotal = transferTotal.add(destination.getAmount());
-//          tx.getOutgoingTransfer().setAmount(transferTotal);
-//        }
-//        
-//        // merge tx
-//        MoneroWalletRpc._mergeTx(txs, tx);
-//      }
-//    }
-//    
-//    // filter and return transfers
-//    let transfers = [];
-//    for (let tx of txs) {
-//      if (transferFilter.meetsCriteria(tx.getOutgoingTransfer())) transfers.push(tx.getOutgoingTransfer());
-//      if (tx.getIncomingTransfers()) Filter.apply(transferFilter, tx.getIncomingTransfers()).map(transfer => transfers.push(transfer));
-//    }
-//    return transfers;
+    if (filter.getTxFilter() == null) filter.setTxFilter(new MoneroTxFilter());
+    MoneroTxFilter txFilter = filter.getTxFilter();
     
-    throw new RuntimeException("Not implemented");
+    // build params for get_transfers rpc call
+    Map<String, Object> params = new HashMap<String, Object>();
+    boolean canBeConfirmed = !Boolean.FALSE.equals(txFilter.getIsConfirmed()) && !Boolean.TRUE.equals(txFilter.getInTxPool()) && !Boolean.TRUE.equals(txFilter.getIsFailed()) && !Boolean.FALSE.equals(txFilter.getIsRelayed());
+    boolean canBeInTxPool = !Boolean.TRUE.equals(txFilter.getIsConfirmed()) && !Boolean.FALSE.equals(txFilter.getInTxPool()) && !Boolean.TRUE.equals(txFilter.getIsFailed()) & !Boolean.FALSE.equals(txFilter.getIsRelayed()) && txFilter.getHeight() == null && txFilter.getMinHeight() == null;
+    boolean canBeIncoming = !Boolean.FALSE.equals(filter.getIsIncoming()) && !Boolean.TRUE.equals(filter.getIsOutgoing()) && !Boolean.TRUE.equals(filter.getHasDestinations());
+    boolean canBeOutgoing = !Boolean.FALSE.equals(filter.getIsOutgoing()) && !Boolean.TRUE.equals(filter.getIsIncoming());
+    params.put("in", canBeIncoming && canBeConfirmed);
+    params.put("out", canBeOutgoing && canBeConfirmed);
+    params.put("pool", canBeIncoming && canBeInTxPool);
+    params.put("pending", canBeOutgoing && canBeInTxPool);
+    params.put("failed", !Boolean.FALSE.equals(txFilter.getIsFailed()) && !Boolean.TRUE.equals(txFilter.getIsConfirmed()) && !Boolean.TRUE.equals(txFilter.getInTxPool()));
+    if (txFilter.getMinHeight() != null) params.put("min_height", txFilter.getMinHeight()); 
+    if (txFilter.getMaxHeight() != null) params.put("max_height", txFilter.getMaxHeight());
+    params.put("filter_by_height", txFilter.getMinHeight() != null || txFilter.getMaxHeight() != null);
+    if (filter.getAccountIndex() == null) {
+      assertTrue("Filter specifies a subaddress index but not an account index", filter.getSubaddressIndex() == null && filter.getSubaddressIndices() == null);
+      params.put("all_accounts", true);
+    } else {
+      params.put("account_index", filter.getAccountIndex());
+      
+      // set subaddress indices param
+      Set<Integer> subaddressIndices = new HashSet<Integer>();
+      if (filter.getSubaddressIndex() != null) subaddressIndices.add(filter.getSubaddressIndex());
+      if (filter.getSubaddressIndices() != null) {
+        for (int subaddressIdx : filter.getSubaddressIndices()) subaddressIndices.add(subaddressIdx);
+      }
+      if (!subaddressIndices.isEmpty()) params.put("subaddr_indices", new ArrayList<Integer>(subaddressIndices));
+    }
+    
+    // build txs using `get_transfers`
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    Map<String, Object> resp = rpc.sendJsonRequest("get_transfers", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    for (String key : result.keySet()) {
+      for (Map<String, Object> rpcTx :((List<Map<String, Object>>) result.get(key))) {
+        MoneroTxWallet tx = convertRpcTxWallet(rpcTx, null, null);
+        if (tx.getIsConfirmed()) assertTrue(tx.getBlock().getTxs().contains(tx));
+//        if (tx.getId().equals("38436c710dfbebfb24a14cddfd430d422e7282bbe94da5e080643a1bd2880b44")) {
+//          System.out.println(rpcTx);
+//          System.out.println(tx.getOutgoingAmount().compareTo(BigInteger.valueOf(0)) == 0);
+//        }
+        
+        // replace transfer amount with destination sum
+        // TODO monero-wallet-rpc: confirmed tx from/to same account has amount 0 but cached transfers
+        if (tx.getOutgoingTransfer() != null && Boolean.TRUE.equals(tx.getIsRelayed()) && !Boolean.TRUE.equals(tx.getIsFailed()) &&
+            tx.getOutgoingTransfer().getDestinations() != null && tx.getOutgoingAmount().compareTo(BigInteger.valueOf(0)) == 0) {
+          MoneroTransfer outgoingTransfer = tx.getOutgoingTransfer();
+          BigInteger transferTotal = BigInteger.valueOf(0);
+          for (MoneroDestination destination : outgoingTransfer.getDestinations()) transferTotal = transferTotal.add(destination.getAmount());
+          tx.getOutgoingTransfer().setAmount(transferTotal);
+        }
+        
+        // merge tx
+        mergeTx(txs, tx, false);
+      }
+    }
+    
+    // filter and return transfers
+    List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
+    for (MoneroTxWallet tx : txs) {
+      if (filter.meetsCriteria(tx.getOutgoingTransfer())) transfers.add(tx.getOutgoingTransfer());
+      if (tx.getIncomingTransfers() != null) {
+        transfers.addAll(Filter.apply(filter, tx.getIncomingTransfers()));
+      }
+    }
+    return transfers;
   }
 
   @Override
@@ -1042,7 +1040,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         transfer.setAddress((String) val);
       }
       else if (key.equals("payment_id")) {
-        if (MoneroTxWallet.DEFAULT_PAYMENT_ID != val) tx.setPaymentId((String) val);  // default is undefined
+        if (!MoneroTxWallet.DEFAULT_PAYMENT_ID.equals(val)) tx.setPaymentId((String) val);  // default is undefined
       }
       else if (key.equals("subaddr_index")) {
         if (val instanceof Map) { // returned structure can be a subaddress index or a map containing major and minor
@@ -1074,7 +1072,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     // link block and tx
-    if (header != null) tx.setBlock(new MoneroBlock(header).setTxs(Arrays.asList(tx)));
+    if (header != null) tx.setBlock(new MoneroBlock(header).setTxs(new ArrayList<MoneroTx>(Arrays.asList(tx))));
     
     // initialize final fields
     if (transfer != null) {
@@ -1084,7 +1082,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (tx.getOutgoingTransfer() != null) tx.getOutgoingTransfer().merge(transfer);
         else tx.setOutgoingTransfer(transfer);
       } else {
-        tx.setIncomingTransfers(Arrays.asList(transfer));
+        tx.setIncomingTransfers(new ArrayList<MoneroTransfer>(Arrays.asList(transfer)));
       }
     }
     
@@ -1180,18 +1178,19 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         
         // merge blocks which only exist when confirmed
         if (aTx.getBlock() != null || tx.getBlock() != null) {
-          if (aTx.getBlock() == null) aTx.setBlock(new MoneroBlock().setTxs(Arrays.asList(aTx)).setHeight(tx.getHeight()));
-          if (tx.getBlock() == null) tx.setBlock(new MoneroBlock().setTxs(Arrays.asList(tx)).setHeight(aTx.getHeight()));
+          if (aTx.getBlock() == null) aTx.setBlock(new MoneroBlock().setTxs(new ArrayList<MoneroTx>(Arrays.asList(aTx))).setHeight(tx.getHeight()));
+          if (tx.getBlock() == null) tx.setBlock(new MoneroBlock().setTxs(new ArrayList<MoneroTx>(Arrays.asList(aTx))).setHeight(aTx.getHeight()));
           aTx.getBlock().merge(tx.getBlock());
         } else {
           aTx.merge(tx);
         }
-        break;
+        return;
       }
       
       // merge common block of different txs
-      if (tx.getHeight() != null && aTx.getHeight() == tx.getHeight()) {
+      if (tx.getHeight() != null && tx.getHeight().equals(aTx.getHeight())) {
         aTx.getBlock().merge(tx.getBlock());
+        if (aTx.getIsConfirmed()) assertTrue(aTx.getBlock().getTxs().contains(aTx));
       }
     }
     

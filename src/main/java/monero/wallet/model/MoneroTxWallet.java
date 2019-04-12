@@ -15,8 +15,6 @@ import monero.utils.MoneroUtils;
  */
 public class MoneroTxWallet extends MoneroTx {
 
-  private BigInteger incomingAmount;
-  private BigInteger outgoingAmount;
   private List<MoneroTransfer> incomingTransfers;
   private MoneroTransfer outgoingTransfer;
   private String note;
@@ -27,8 +25,6 @@ public class MoneroTxWallet extends MoneroTx {
   
   public MoneroTxWallet(MoneroTxWallet tx) {
     super(tx);
-    this.incomingAmount = tx.incomingAmount;
-    this.outgoingAmount = tx.outgoingAmount;
     if (tx.incomingTransfers != null) {
       this.incomingTransfers = new ArrayList<MoneroTransfer>();
       for (MoneroTransfer transfer : tx.incomingTransfers) {
@@ -50,21 +46,14 @@ public class MoneroTxWallet extends MoneroTx {
   }
   
   public BigInteger getIncomingAmount() {
-    return incomingAmount;
-  }
-  
-  public MoneroTxWallet setIncomingAmount(BigInteger incomingAmount) {
-    this.incomingAmount = incomingAmount;
-    return this;
+    if (getIncomingTransfers() == null) return null;
+    BigInteger incomingAmt = BigInteger.valueOf(0);
+    for (MoneroTransfer transfer : this.getIncomingTransfers()) incomingAmt = incomingAmt.add(transfer.getAmount());
+    return incomingAmt;
   }
   
   public BigInteger getOutgoingAmount() {
-    return outgoingAmount;
-  }
-  
-  public MoneroTxWallet setOutgoingAmount(BigInteger outgoingAmount) {
-    this.outgoingAmount = outgoingAmount;
-    return this;
+    return getOutgoingTransfer() != null ? getOutgoingTransfer().getAmount() : null;
   }
   
   public List<MoneroTransfer> getIncomingTransfers() {
@@ -162,6 +151,44 @@ public class MoneroTxWallet extends MoneroTx {
     return this;  // for chaining
   }
   
+  public String toString() {
+    return toString(0, false);
+  }
+  
+  public String toString(int indent, boolean oneLine) {
+    StringBuilder sb = new StringBuilder();
+    
+    // represent tx with one line string
+    // TODO: proper csv export
+    if (oneLine) {
+      sb.append(this.getId() + ", ");
+      sb.append((this.getIsConfirmed() ? this.getBlock().getTimestamp() : this.getReceivedTimestamp()) + ", ");
+      sb.append(this.getIsConfirmed() + ", ");
+      sb.append((this.getOutgoingAmount() != null? this.getOutgoingAmount().toString() : "") + ", ");
+      sb.append(this.getIncomingAmount() != null ? this.getIncomingAmount().toString() : "");
+      return sb.toString();
+    }
+    
+    // otherwise stringify all fields
+    sb.append(super.toString(indent) + "\n");
+    sb.append(MoneroUtils.kvLine("Incoming amount", this.getIncomingAmount(), indent));
+    if (this.getIncomingTransfers() != null) {
+      sb.append(MoneroUtils.kvLine("Incoming transfers", "", indent));
+      for (int i = 0; i < this.getIncomingTransfers().size(); i++) {
+        sb.append(MoneroUtils.kvLine(i + 1, "", indent + 1));
+        sb.append(this.getIncomingTransfers().get(i).toString(indent + 2) + "\n");
+      }
+    }
+    sb.append(MoneroUtils.kvLine("Outgoing amount", this.getOutgoingAmount(), indent));
+    if (this.getOutgoingTransfer() != null) {
+      sb.append(MoneroUtils.kvLine("Outgoing transfer", "", indent));
+      sb.append(this.getOutgoingTransfer().toString(indent + 1) + "\n");
+    }
+    sb.append(MoneroUtils.kvLine("Note: ", this.getNote(), indent));
+    String str = sb.toString();
+    return str.substring(0, str.length() - 1);  // strip last newline
+  }
+  
   // helper function to merge transfers
   private static void mergeTransfer(List<MoneroTransfer> transfers, MoneroTransfer transfer) {
     for (MoneroTransfer aTransfer : transfers) {
@@ -178,12 +205,6 @@ public class MoneroTxWallet extends MoneroTx {
   @Override
   public MoneroTxWallet setBlock(MoneroBlock block) {
     super.setBlock(block);
-    return this;
-  }
-
-  @Override
-  public MoneroTxWallet setHeight(Integer height) {
-    super.setHeight(height);
     return this;
   }
 

@@ -1,5 +1,7 @@
 package monero.daemon.model;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.math.BigInteger;
 
 import monero.utils.MoneroUtils;
@@ -201,6 +203,28 @@ public class MoneroBlockHeader {
   
   public MoneroBlockHeader setPowHash(String powHash) {
     this.powHash = powHash;
+    return this;
+  }
+  
+  public MoneroBlockHeader merge(MoneroBlockHeader header) {
+    assertNotNull(header);
+    if (this == header) return this;
+    this.setId(MoneroUtils.reconcile(this.getId(), header.getId()));
+    this.setHeight(MoneroUtils.reconcile(this.getHeight(), header.getHeight(), false, false, true));  // height can increase
+    this.setTimestamp(MoneroUtils.reconcile(this.getTimestamp(), header.getTimestamp(), false, false, true));  // block timestamp can increase
+    this.setSize(MoneroUtils.reconcile(this.getSize(), header.getSize()));
+    this.setWeight(MoneroUtils.reconcile(this.getWeight(), header.getWeight()));
+    this.setDepth(MoneroUtils.reconcile(this.getDepth(), header.getDepth()));
+    this.setDifficulty(MoneroUtils.reconcile(this.getDifficulty(), header.getDifficulty()));
+    this.setCumulativeDifficulty(MoneroUtils.reconcile(this.getCumulativeDifficulty(), header.getCumulativeDifficulty()));
+    this.setMajorVersion(MoneroUtils.reconcile(this.getMajorVersion(), header.getMajorVersion()));
+    this.setMinorVersion(MoneroUtils.reconcile(this.getMinorVersion(), header.getMinorVersion()));
+    this.setNonce(MoneroUtils.reconcile(this.getNonce(), header.getNonce()));
+    this.setNumTxs(MoneroUtils.reconcile(this.getNumTxs(), header.getNumTxs()));
+    this.setOrphanStatus(MoneroUtils.reconcile(this.getOrphanStatus(), header.getOrphanStatus()));
+    this.setPrevId(MoneroUtils.reconcile(this.getPrevId(), header.getPrevId()));
+    this.setReward(MoneroUtils.reconcile(this.getReward(), header.getReward()));
+    this.setPowHash(MoneroUtils.reconcile(this.getPowHash(), header.getPowHash()));
     return this;
   }
   
