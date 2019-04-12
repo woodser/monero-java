@@ -679,6 +679,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // fetch wallet txs
     List<MoneroTxWallet> txs = wallet.getTxs(new MoneroTxFilter().setIsConfirmed(true));
     for (MoneroTxWallet tx : txs) {
+      
+      // find tx sent to same wallet with incoming transfer in different account than src account
+      if (tx.getOutgoingTransfer() == null || tx.getIncomingTransfers() == null) continue;
       for (MoneroTransfer transfer : tx.getIncomingTransfers()) {
         if (transfer.getAccountIndex() == tx.getOutgoingTransfer().getAccountIndex()) continue;
         
