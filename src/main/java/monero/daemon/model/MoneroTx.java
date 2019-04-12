@@ -19,7 +19,6 @@ public class MoneroTx {
   public static final String DEFAULT_PAYMENT_ID = "0000000000000000";
 
   private MoneroBlock block;
-  private Integer height;
   private String id;
   private Integer version;
   private Boolean isCoinbase;
@@ -69,7 +68,6 @@ public class MoneroTx {
    * @param tx is the transaction to make a deep copy of
    */
   public MoneroTx(MoneroTx tx) {
-    this.height = tx.height;
     this.id = tx.id;
     this.version = tx.version;
     this.isCoinbase = tx.isCoinbase;
@@ -126,12 +124,7 @@ public class MoneroTx {
   }
   
   public Integer getHeight() {
-    return height;
-  }
-  
-  public MoneroTx setHeight(Integer height) {
-    this.height = height;
-    return this;
+    return this.getBlock() == null ? null : this.getBlock().getHeight();
   }
   
   public String getId() {
@@ -661,12 +654,10 @@ public class MoneroTx {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((block == null) ? 0 : block.hashCode());
     result = prime * result + ((commonTxSets == null) ? 0 : commonTxSets.hashCode());
     result = prime * result + ((doNotRelay == null) ? 0 : doNotRelay.hashCode());
     result = prime * result + Arrays.hashCode(extra);
     result = prime * result + ((fee == null) ? 0 : fee.hashCode());
-    result = prime * result + ((height == null) ? 0 : height.hashCode());
     result = prime * result + ((fullHex == null) ? 0 : fullHex.hashCode());
     result = prime * result + ((id == null) ? 0 : id.hashCode());
     result = prime * result + ((inTxPool == null) ? 0 : inTxPool.hashCode());
@@ -710,9 +701,6 @@ public class MoneroTx {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroTx other = (MoneroTx) obj;
-    if (block == null) {
-      if (other.block != null) return false;
-    } else if (!block.equals(other.block)) return false;
     if (commonTxSets == null) {
       if (other.commonTxSets != null) return false;
     } else if (!commonTxSets.equals(other.commonTxSets)) return false;
@@ -723,9 +711,6 @@ public class MoneroTx {
     if (fee == null) {
       if (other.fee != null) return false;
     } else if (!fee.equals(other.fee)) return false;
-    if (height == null) {
-      if (other.height != null) return false;
-    } else if (!height.equals(other.height)) return false;
     if (fullHex == null) {
       if (other.fullHex != null) return false;
     } else if (!fullHex.equals(other.fullHex)) return false;

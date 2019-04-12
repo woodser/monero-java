@@ -13,8 +13,8 @@ import monero.wallet.model.MoneroTxWallet;
  */
 public class MoneroTransferFilter extends MoneroTransfer implements Filter<MoneroTransfer> {
 
-  private boolean isOutgoing;
-  private boolean isIncoming;
+  private Boolean isOutgoing;
+  private Boolean isIncoming;
   private List<Integer> subaddressIndices;
   private Boolean hasDestinations;
   private MoneroTxFilter txFilter;
@@ -65,8 +65,32 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
   }
 
   @Override
-  public boolean meetsCriteria(MoneroTransfer item) {
-    throw new RuntimeException("Not implemented");
+  public boolean meetsCriteria(MoneroTransfer transfer) {
+    if (transfer == null) return false;
+    
+    // filter on transfer fields
+    if (this.getAddress() != null && !this.getAddress().equals(transfer.getAddress())) return false;
+    if (this.getAccountIndex() != null && !this.getAccountIndex().equals(transfer.getAccountIndex())) return false;
+    if (this.getSubaddressIndex() != null && !transfer.getIsOutgoing() && this.getSubaddressIndex() != transfer.getSubaddressIndex()) return false; // outgoing subaddresses are always 0 TODO monero-wallet-rpc: possible to return correct subaddress?
+    if (this.getAmount() != null && this.getAmount().compareTo(transfer.getAmount()) != 0) return false;
+    
+    // filter extensions
+    if (this.getIsIncoming() != null && this.getIsIncoming() != transfer.getIsIncoming()) return false;
+    if (this.getIsOutgoing() != null && this.getIsOutgoing() != transfer.getIsOutgoing()) return false;
+    if (this.getSubaddressIndices() != null && !this.getSubaddressIndices().contains(transfer.getSubaddressIndex())) return false;
+    if (this.getHasDestinations() != null) {
+      if (this.getHasDestinations() && transfer.getDestinations() == null) return false;
+      if (!this.getHasDestinations() && transfer.getDestinations() != null) return false;
+    }
+    
+    // filter with transaction filter
+    if (this.getTxFilter() != null && !this.getTxFilter().meetsCriteria(transfer.getTx())) return false;
+    
+    // filter on destinations TODO: start with test for this
+//  if (this.getDestionations() != null && this.getDestionations() != transfer.getDestionations()) return false;
+    
+    // transfer meets filter criteria
+    return true;
   }
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------

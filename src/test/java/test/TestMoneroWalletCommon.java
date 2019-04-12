@@ -434,7 +434,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can get transactions in the wallet
   @Test
-  public void testGetTransactionsWallet() {
+  public void testGetTxsWallet() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     boolean nonDefaultIncoming = false;
     List<MoneroTxWallet> txs1 = getCachedTxs();
@@ -445,11 +445,12 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     TestContext ctx = new TestContext();
     ctx.wallet = wallet;
     
-    // test each tranasction
+    // test each transaction
     Map<Integer, MoneroBlock> blockPerHeight = new HashMap<Integer, MoneroBlock>();
     for (int i = 0; i < txs1.size(); i++) {
       testTxWallet(txs1.get(i), ctx);
       testTxWallet(txs2.get(i), ctx);
+      assertEquals(txs1.get(i), txs2.get(i));
       
       // test merging equivalent txs
       MoneroTxWallet copy1 = txs1.get(i).copy();
@@ -470,7 +471,10 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       if (txs2.get(i).getIsConfirmed()) {
         MoneroBlock block = blockPerHeight.get(txs2.get(i).getHeight());
         if (block == null) blockPerHeight.put(txs2.get(i).getHeight(), txs2.get(i).getBlock());
-        else assertTrue("Block references for same height must be same", block == txs2.get(i).getBlock());
+        else {
+          assertEquals(block, txs2.get(i).getBlock());
+          assertTrue("Block references for same height must be same", block == txs2.get(i).getBlock());
+        }
       }
     }
     
@@ -480,7 +484,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can get transactions with additional configuration
   @Test
-  public void testGetTransactionsWithConfiguration() {
+  public void testGetTxsWithConfiguration() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // get random transactions for testing
@@ -569,12 +573,12 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertTrue("No incoming transfers to account " + accountIdx + " found:\n" + tx.toString(), found);
     }
     
-    // get txs with manually built filter that are confirmed have an outgoing transfer from account 0
+    // get txs with manually built filter that are confirmed and have an outgoing transfer from account 0
     ctx = new TestContext();
     ctx.hasOutgoingTransfer = true;
     MoneroTxFilter txFilter = new MoneroTxFilter();
     txFilter.setIsConfirmed(true);
-    txFilter.setTransferFilter(new MoneroTransferFilter().setAccountIndex(0)).setIsOutgoing(true);
+    txFilter.setTransferFilter(new MoneroTransferFilter().setAccountIndex(0).setIsOutgoing(true));
     txs = getAndTestTxs(wallet, txFilter, ctx, true);
     for (MoneroTxWallet tx : txs) {
       if (!tx.getIsConfirmed()) System.out.println(tx);
@@ -640,7 +644,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // NOTE: payment ids are deprecated so this test will require an old wallet to pass
   @Test
-  public void testGetTransactionsWithPaymentIds() {
+  public void testGetTxsWithPaymentIds() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // get random transactions with payment ids for testing
@@ -669,7 +673,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Returns all known fields of txs regardless of filtering
   @Test
-  public void testTransactionFieldsWithFiltering() {
+  public void testGetTxsFieldsWithFiltering() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch wallet txs
@@ -697,7 +701,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Validates inputs when getting transactions
   @Test
-  public void testGetTransactionsValidateInputs() {
+  public void testGetTxsValidateInputs() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // test with invalid id
@@ -2336,15 +2340,17 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     Boolean isSendResponse;
     public TestContext() { }
     public TestContext(TestContext ctx) {
-      this.wallet = ctx.wallet;
-      this.sendConfig = ctx.sendConfig;
-      this.hasOutgoingTransfer = ctx.hasOutgoingTransfer;
-      this.hasIncomingTransfers = ctx.hasIncomingTransfers;
-      this.hasDestinations = ctx.hasDestinations;
-      this.isSweep = ctx.isSweep;
-      this.doNotTestCopy = ctx.doNotTestCopy;
-      this.getVouts = ctx.getVouts;
-      this.isSendResponse = ctx.isSendResponse;
+      if (ctx != null) {
+        this.wallet = ctx.wallet;
+        this.sendConfig = ctx.sendConfig;
+        this.hasOutgoingTransfer = ctx.hasOutgoingTransfer;
+        this.hasIncomingTransfers = ctx.hasIncomingTransfers;
+        this.hasDestinations = ctx.hasDestinations;
+        this.isSweep = ctx.isSweep;
+        this.doNotTestCopy = ctx.doNotTestCopy;
+        this.getVouts = ctx.getVouts;
+        this.isSendResponse = ctx.isSendResponse;
+      }
     }
   }
   
@@ -2676,12 +2682,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         TestUtils.testUnsignedBigInteger(destination.getAmount(), true);
         sum = sum.add(destination.getAmount());
       }
-      try {
-        assertEquals(transfer.getAmount().toString(), sum.toString());
-      } catch (MoneroException e) {
-        System.out.println(transfer.getTx().toString());
-        throw e;
-      }
+      if (!transfer.getAmount().equals(sum)) System.out.println(transfer.getTx().toString());
+      assertEquals(transfer.getAmount(), sum);
     }
     
     // transfer is outgoing xor incoming

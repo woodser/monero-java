@@ -166,6 +166,16 @@ public class MoneroUtils {
       if (val1 instanceof BigInteger && val2 instanceof BigInteger) {
         return resolveMax ? (comparison < 0 ? val2 : val1) : (comparison < 0 ? val1 : val2);
       }
+      
+      // resolve integers
+      if (Integer.class.isInstance(val1) && Integer.class.isInstance(val2)) {
+        return (T) (Integer) (resolveMax ? Math.max((int) val1, (int) val2) : Math.min((int) val1, (int) val2));
+      }
+      
+      // resolve longs
+      if (Long.class.isInstance(val1) && Long.class.isInstance(val2)) {
+        return (T) (Long) (resolveMax ? Math.max((long) val1, (long) val2) : Math.min((long) val1, (long) val2));
+      }
 
       throw new RuntimeException("Need to resolve primitives and object versions");
 //      // resolve js numbers

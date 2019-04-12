@@ -1,5 +1,6 @@
 package common.types;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -23,8 +24,10 @@ public interface Filter<T> {
    * @param items are the items to filter
    * @return the items that meet this filter's criteria
    */
-  public static <T> List<T> apply(Filter<? extends T> filter, List<T> items) {
-    throw new RuntimeException("Not implemented");
+  public static <T> List<T> apply(Filter<T> filter, List<T> items) {
+    List<T> filtered = new ArrayList<T>();
+    for (T item : items) if (filter.meetsCriteria(item)) filtered.add(item);
+    return filtered;
   }
   
   /**
