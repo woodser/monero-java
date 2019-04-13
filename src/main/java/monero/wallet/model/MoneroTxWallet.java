@@ -85,6 +85,16 @@ public class MoneroTxWallet extends MoneroTx {
     return voutsWallet;
   }
   
+  /**
+   * Set the tx's vouts (MoneroOutputWallet) which contain information relative
+   * to a wallet.
+   * 
+   * Callers must cast to extended type (MoneroOutput) because Java
+   * paramaterized types do not recognize inheritance.
+   * 
+   * @param vouts are MoneroOutputWallets to set for the wallet tx
+   * @return MoneroTxWallet is a reference to this tx for chaining
+   */
   public MoneroTxWallet setVouts(List<MoneroOutput> vouts) {
     
     // validate that all vouts are wallet outputs

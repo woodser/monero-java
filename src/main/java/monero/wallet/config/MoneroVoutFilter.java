@@ -18,6 +18,10 @@ public class MoneroVoutFilter extends MoneroOutputWallet implements Filter<Moner
   private List<Integer> subaddressIndices;
   private MoneroTxFilter txFilter;
   
+  public MoneroVoutFilter() {
+    super();
+  }
+  
   public List<Integer> getSubaddressIndices() {
     return subaddressIndices;
   }
@@ -37,8 +41,24 @@ public class MoneroVoutFilter extends MoneroOutputWallet implements Filter<Moner
   }
 
   @Override
-  public boolean meetsCriteria(MoneroOutputWallet item) {
-    throw new RuntimeException("Not implemented");
+  public boolean meetsCriteria(MoneroOutputWallet vout) {
+    if (!(vout instanceof MoneroOutputWallet)) return false;
+    
+    // filter on vout
+    if (this.getAccountIndex() != null && this.getAccountIndex() != vout.getAccountIndex()) return false;
+    if (this.getSubaddressIndex() != null && this.getSubaddressIndex() != vout.getSubaddressIndex()) return false;
+    if (this.getAmount() != null && this.getAmount().compareTo(vout.getAmount()) != 0) return false;
+    if (this.getIsSpent() != null && this.getIsSpent() != vout.getIsSpent()) return false;
+    if (this.getKeyImage() != null && this.getKeyImage() != vout.getKeyImage()) return false;  // TODO: bug: shouldn't compare by refererence, add test to catch 
+    
+    // filter extensions
+    if (this.getSubaddressIndices() != null && !this.getSubaddressIndices().contains(vout.getSubaddressIndex())) return false;
+    
+    // filter with transaction filter
+    if (this.getTxFilter() != null && !this.getTxFilter().meetsCriteria(vout.getTx())) return false;
+    
+    // vout meets filter criteria
+    return true;
   }
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
