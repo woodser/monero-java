@@ -65,4 +65,28 @@ public class MoneroKeyImage {
     String str = sb.toString();
     return str.substring(0, str.length() - 1);  // strip newline
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((hex == null) ? 0 : hex.hashCode());
+    result = prime * result + ((signature == null) ? 0 : signature.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    MoneroKeyImage other = (MoneroKeyImage) obj;
+    if (hex == null) {
+      if (other.hex != null) return false;
+    } else if (!hex.equals(other.hex)) return false;
+    if (signature == null) {
+      if (other.signature != null) return false;
+    } else if (!signature.equals(other.signature)) return false;
+    return true;
+  }
 }

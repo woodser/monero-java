@@ -29,6 +29,7 @@ import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
+import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
@@ -636,7 +637,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       if (tx.getVouts() != null) {
         assertTrue(tx.getVouts().size() > 0);
         found = true;
-        break;
+      } else {
+        assertTrue(tx.getIsOutgoing() || (tx.getIsIncoming() && !tx.getIsConfirmed())); // TODO: monero-wallet-rpc: return vouts for unconfirmed txs
       }
     }
     assertTrue("No vouts found in txs", found);
@@ -975,7 +977,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // test invalid id in collection
     List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, new MoneroTxFilter().setIsConfirmed(true).setIncludeVouts(true), 3, 5);
+    for (MoneroTxWallet randomTx : randomTxs) assertFalse(randomTx.getVouts().isEmpty());
     vouts = wallet.getVouts(new MoneroVoutFilter().setTxFilter(new MoneroTxFilter().setTxIds(Arrays.asList(randomTxs.get(0).getId(), "invalid_id"))));
+    assertFalse(vouts.isEmpty());
     assertEquals(vouts.size(), randomTxs.get(0).getVouts().size());
     MoneroTxWallet tx = vouts.get(0).getTx();
     for (MoneroOutputWallet vout : vouts) assertTrue(tx == vout.getTx());
@@ -1812,7 +1816,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // handle non-relayed transaction
-    if (sendConfig.getDoNotRelay()) {
+    if (Boolean.TRUE.equals(sendConfig.getDoNotRelay())) {
       
       // build test context
       TestContext ctx = new TestContext();
@@ -1849,7 +1853,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     TestContext ctx = new TestContext();
     ctx.wallet = wallet;
     ctx.sendConfig = sendConfig;
-    ctx.isSendResponse = sendConfig.getDoNotRelay() ? false : true;
+    ctx.isSendResponse = Boolean.TRUE.equals(sendConfig.getDoNotRelay()) ? false : true;
     
     // test transactions
     assertTrue(txs.size() > 0);
@@ -2593,7 +2597,14 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // test vouts
-    if (tx.getIncomingTransfers() != null && Boolean.TRUE.equals(tx.getIsConfirmed()) && Boolean.TRUE.equals(ctx.getVouts)) assertTrue(tx.getVouts().size() > 0);
+    if (tx.getIsIncoming() && Boolean.TRUE.equals(ctx.getVouts)) {
+      if (tx.getIsConfirmed()) {
+        assertNotNull(tx.getVouts());
+        assertTrue(tx.getVouts().size() > 0);
+      } else {
+        assertNull(tx.getVouts());
+      }
+    }
     if (tx.getVouts() != null) for (MoneroOutputWallet vout : tx.getVoutsWallet()) testVout(vout);
     
     // test deep copy
@@ -2730,7 +2741,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
    */
   private static List<MoneroTxWallet> getRandomTransactions(MoneroWallet wallet, MoneroTxFilter filter, Integer minTxs, Integer maxTxs) {
     List<MoneroTxWallet> txs = wallet.getTxs(filter);
-    if (minTxs != null) assertTrue(txs.size() + "/" + minTxs + " transactions found with filter: " + filter, txs.size() >= minTxs);
+    if (minTxs != null) assertTrue(txs.size() + "/" + minTxs + " transactions found with filter", txs.size() >= minTxs);
     Collections.shuffle(txs);
     if (maxTxs == null) return txs;
     else return txs.subList(0, Math.min(maxTxs, txs.size()));

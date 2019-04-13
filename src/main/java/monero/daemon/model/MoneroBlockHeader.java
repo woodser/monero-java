@@ -210,8 +210,8 @@ public class MoneroBlockHeader {
     assertNotNull(header);
     if (this == header) return this;
     this.setId(MoneroUtils.reconcile(this.getId(), header.getId()));
-    this.setHeight(MoneroUtils.reconcile(this.getHeight(), header.getHeight(), false, false, true));  // height can increase
-    this.setTimestamp(MoneroUtils.reconcile(this.getTimestamp(), header.getTimestamp(), false, false, true));  // block timestamp can increase
+    this.setHeight(MoneroUtils.reconcile(this.getHeight(), header.getHeight(), null, null, true));  // height can increase
+    this.setTimestamp(MoneroUtils.reconcile(this.getTimestamp(), header.getTimestamp(), null, null, true));  // block timestamp can increase
     this.setSize(MoneroUtils.reconcile(this.getSize(), header.getSize()));
     this.setWeight(MoneroUtils.reconcile(this.getWeight(), header.getWeight()));
     this.setDepth(MoneroUtils.reconcile(this.getDepth(), header.getDepth()));
