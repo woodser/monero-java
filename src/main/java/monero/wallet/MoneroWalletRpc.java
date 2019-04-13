@@ -610,7 +610,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       // convert response to txs with vouts and merge
       if (!result.containsKey("transfers")) continue;
       for (Map<String, Object> rpcVout : ((List<Map<String, Object>>) result.get("transfers"))) {
-        MoneroTxWallet tx = convertRpcTxWalletVout(rpcVout);
+        MoneroTxWallet tx = convertRpcTxWalletWithVout(rpcVout);
         mergeTx(txs, tx);
       }
     }
@@ -1229,7 +1229,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         // merge blocks which only exist when confirmed
         if (aTx.getBlock() != null || tx.getBlock() != null) {
           if (aTx.getBlock() == null) aTx.setBlock(new MoneroBlock().setTxs(new ArrayList<MoneroTx>(Arrays.asList(aTx))).setHeight(tx.getHeight()));
-          if (tx.getBlock() == null) tx.setBlock(new MoneroBlock().setTxs(new ArrayList<MoneroTx>(Arrays.asList(aTx))).setHeight(aTx.getHeight()));
+          if (tx.getBlock() == null) tx.setBlock(new MoneroBlock().setTxs(new ArrayList<MoneroTx>(Arrays.asList(tx))).setHeight(aTx.getHeight()));
           aTx.getBlock().merge(tx.getBlock());
         } else {
           aTx.merge(tx);
@@ -1253,7 +1253,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   @SuppressWarnings("unchecked")
-  private static MoneroTxWallet convertRpcTxWalletVout(Map<String, Object> rpcVout) {
+  private static MoneroTxWallet convertRpcTxWalletWithVout(Map<String, Object> rpcVout) {
     
     // initialize tx
     MoneroTxWallet tx = new MoneroTxWallet();

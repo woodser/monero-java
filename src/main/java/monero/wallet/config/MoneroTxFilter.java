@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import common.types.Filter;
-import common.utils.JsonUtils;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroOutput;
 import monero.wallet.model.MoneroTransfer;
@@ -176,7 +175,7 @@ public class MoneroTxFilter extends MoneroTxWallet implements Filter<MoneroTxWal
   
   @Override
   public String toString() {
-    return JsonUtils.serialize(this);
+    throw new RuntimeException("Not implemented");
   }
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------

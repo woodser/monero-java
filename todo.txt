@@ -1,3 +1,6 @@
+remove typing on e.g. MoneroOutput.getVouts()?
+clean up these todos for new version
+
 v0.13.0.4
 testGetTxsWallet() failing when run with other tests
 support sweep_single (output)

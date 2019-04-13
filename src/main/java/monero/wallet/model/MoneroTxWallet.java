@@ -181,6 +181,7 @@ public class MoneroTxWallet extends MoneroTx {
     
     // otherwise stringify all fields
     sb.append(super.toString(indent) + "\n");
+    sb.append(MoneroUtils.kvLine("Is incoming", this.getIsIncoming(), indent));
     sb.append(MoneroUtils.kvLine("Incoming amount", this.getIncomingAmount(), indent));
     if (this.getIncomingTransfers() != null) {
       sb.append(MoneroUtils.kvLine("Incoming transfers", "", indent));
@@ -189,6 +190,7 @@ public class MoneroTxWallet extends MoneroTx {
         sb.append(this.getIncomingTransfers().get(i).toString(indent + 2) + "\n");
       }
     }
+    sb.append(MoneroUtils.kvLine("Is outgoing", this.getIsOutgoing(), indent));
     sb.append(MoneroUtils.kvLine("Outgoing amount", this.getOutgoingAmount(), indent));
     if (this.getOutgoingTransfer() != null) {
       sb.append(MoneroUtils.kvLine("Outgoing transfer", "", indent));
@@ -208,6 +210,34 @@ public class MoneroTxWallet extends MoneroTx {
       }
     }
     transfers.add(transfer);
+  }
+  
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + ((incomingTransfers == null) ? 0 : incomingTransfers.hashCode());
+    result = prime * result + ((note == null) ? 0 : note.hashCode());
+    result = prime * result + ((outgoingTransfer == null) ? 0 : outgoingTransfer.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (!super.equals(obj)) return false;
+    if (getClass() != obj.getClass()) return false;
+    MoneroTxWallet other = (MoneroTxWallet) obj;
+    if (incomingTransfers == null) {
+      if (other.incomingTransfers != null) return false;
+    } else if (!incomingTransfers.equals(other.incomingTransfers)) return false;
+    if (note == null) {
+      if (other.note != null) return false;
+    } else if (!note.equals(other.note)) return false;
+    if (outgoingTransfer == null) {
+      if (other.outgoingTransfer != null) return false;
+    } else if (!outgoingTransfer.equals(other.outgoingTransfer)) return false;
+    return true;
   }
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------

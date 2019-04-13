@@ -74,4 +74,32 @@ public class MoneroOutputWallet extends MoneroOutput {
   public MoneroOutputWallet copy() {
     return new MoneroOutputWallet(this);
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + ((accountIndex == null) ? 0 : accountIndex.hashCode());
+    result = prime * result + ((isSpent == null) ? 0 : isSpent.hashCode());
+    result = prime * result + ((subaddressIndex == null) ? 0 : subaddressIndex.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (!super.equals(obj)) return false;
+    if (getClass() != obj.getClass()) return false;
+    MoneroOutputWallet other = (MoneroOutputWallet) obj;
+    if (accountIndex == null) {
+      if (other.accountIndex != null) return false;
+    } else if (!accountIndex.equals(other.accountIndex)) return false;
+    if (isSpent == null) {
+      if (other.isSpent != null) return false;
+    } else if (!isSpent.equals(other.isSpent)) return false;
+    if (subaddressIndex == null) {
+      if (other.subaddressIndex != null) return false;
+    } else if (!subaddressIndex.equals(other.subaddressIndex)) return false;
+    return true;
+  }
 }
