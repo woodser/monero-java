@@ -13,6 +13,22 @@ public class MoneroOutputWallet extends MoneroOutput {
   private Integer subaddressIndex;
   private Boolean isSpent;
   
+  public MoneroOutputWallet() {
+    // nothing to construct
+  }
+  
+  /**
+   * Deep copy constructor.
+   * 
+   * @param output is the output to initialize from
+   */
+  public MoneroOutputWallet(MoneroOutputWallet output) {
+    super(output);
+    accountIndex = output.accountIndex;
+    subaddressIndex = output.subaddressIndex;
+    isSpent = output.isSpent;
+  }
+  
   public MoneroTxWallet getTx() {
     return (MoneroTxWallet) super.getTx();
   }
@@ -56,6 +72,6 @@ public class MoneroOutputWallet extends MoneroOutput {
   }
   
   public MoneroOutputWallet copy() {
-    throw new RuntimeException("Not implemented");
+    return new MoneroOutputWallet(this);
   }
 }

@@ -25,6 +25,7 @@ import common.types.Filter;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
+import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.rpc.MoneroRpc;
 import monero.utils.MoneroException;
@@ -557,7 +558,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
         
         // merge tx
-        mergeTx(txs, tx, false);
+        mergeTx(txs, tx);
       }
     }
     
@@ -572,9 +573,54 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return transfers;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroOutputWallet> getVouts(MoneroVoutFilter filter) {
-    throw new RuntimeException("Not implemented");
+    
+    // normalize vout filter
+    if (filter == null) filter = new MoneroVoutFilter();
+    if (filter.getTxFilter() == null) filter.setTxFilter(new MoneroTxFilter());
+    
+    // determine account and subaddress indices to be queried
+    Map<Integer, List<Integer>> indices = new HashMap<Integer, List<Integer>>();
+    if (filter.getAccountIndex() != null) {
+      Set<Integer> subaddressIndices = new HashSet<Integer>();
+      if (filter.getSubaddressIndex() != null) subaddressIndices.add(filter.getSubaddressIndex());
+      if (filter.getSubaddressIndices() != null) for (int subaddressIdx : filter.getSubaddressIndices()) subaddressIndices.add(subaddressIdx);
+      indices.put(filter.getAccountIndex(), subaddressIndices.isEmpty() ? null : new ArrayList<Integer>(subaddressIndices));  // null will fetch from all subaddresses
+    } else {
+      assertEquals("Filter specifies a subaddress index but not an account index", null, filter.getSubaddressIndex());
+      assertTrue("Filter specifies subaddress indices but not an account index", filter.getSubaddressIndices() == null || filter.getSubaddressIndices().size() == 0);
+      indices = getAccountIndices(false);  // fetch all account indices without subaddresses
+    }
+    
+    // collect txs with vouts for each indicated account using `incoming_transfers` rpc call
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("transfer_type", filter.getIsSpent() == null ? "all" : filter.getIsSpent() ? "unavailable" : "available");
+    params.put("verbose", true);
+    for (int accountIdx : indices.keySet()) {
+    
+      // send request
+      params.put("account_index", accountIdx);
+      params.put("subaddr_indices", indices.get(accountIdx));
+      Map<String, Object> resp = rpc.sendJsonRequest("incoming_transfers", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      
+      // convert response to txs with vouts and merge
+      if (!result.containsKey("transfers")) continue;
+      for (Map<String, Object> rpcVout : ((List<Map<String, Object>>) result.get("transfers"))) {
+        MoneroTxWallet tx = convertRpcTxWalletVout(rpcVout);
+        mergeTx(txs, tx);
+      }
+    }
+    
+    // filter and return vouts
+    List<MoneroOutputWallet> vouts = new ArrayList<MoneroOutputWallet>();
+    for (MoneroTxWallet tx : txs) {
+      vouts.addAll(Filter.apply(filter, tx.getVoutsWallet()));
+    }
+    return vouts;
   }
 
   @Override
@@ -1156,6 +1202,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return isOutgoing;
   }
   
+  private static void mergeTx(List<MoneroTxWallet> txs, MoneroTxWallet tx) {
+    mergeTx(txs, tx, false);
+  }
+  
   /**
    * Merges a transaction into a unique set of transactions.
    * 
@@ -1200,5 +1250,38 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     } else {
       LOGGER.warn("WARNING: tx does not already exist"); 
     }
+  }
+  
+  @SuppressWarnings("unchecked")
+  private static MoneroTxWallet convertRpcTxWalletVout(Map<String, Object> rpcVout) {
+    
+    // initialize tx
+    MoneroTxWallet tx = new MoneroTxWallet();
+    tx.setIsConfirmed(true);
+    tx.setIsRelayed(true);
+    tx.setIsFailed(false);
+    
+    // initialize vout
+    MoneroOutputWallet vout = new MoneroOutputWallet().setTx(tx);
+    for (String key : rpcVout.keySet()) {
+      Object val = rpcVout.get(key);
+      if (key.equals("amount")) vout.setAmount((BigInteger) val);
+      else if (key.equals("spent")) vout.setIsSpent((Boolean) val);
+      else if (key.equals("key_image")) vout.setKeyImage(new MoneroKeyImage((String) val));
+      else if (key.equals("global_index")) vout.setIndex(((BigInteger) val).intValue());
+      else if (key.equals("tx_hash")) tx.setId((String) val);
+      else if (key.equals("subaddr_index")) {
+        Map<String, BigInteger> rpcIndices = (HashMap<String, BigInteger>) val;
+        vout.setAccountIndex(rpcIndices.get("major").intValue());
+        vout.setSubaddressIndex(rpcIndices.get("minor").intValue());
+      }
+      else LOGGER.warn("WARNING: ignoring unexpected transaction field: " + key + ": " + val);
+    }
+    
+    // initialize tx with vout
+    List<MoneroOutput> vouts = new ArrayList<MoneroOutput>();
+    vouts.add((MoneroOutput) vout); // have to cast to extended type because Java paramaterized types do not recognize inheritance
+    tx.setVouts(vouts);
+    return tx;
   }
 }
