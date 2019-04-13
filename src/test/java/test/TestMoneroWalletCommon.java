@@ -2309,8 +2309,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
    */
   private static List<MoneroTransfer> getAndTestTransfers(MoneroWallet wallet, MoneroTransferFilter filter, TestContext ctx, Boolean isExpected) {
     List<MoneroTransfer> transfers = wallet.getTransfers(filter);
-    if (isExpected == false) assertEquals(0, transfers.size());
-    if (isExpected == true) assertTrue("Transactions were expected but not found; run send tests?", transfers.size() > 0);
+    if (Boolean.FALSE.equals(isExpected)) assertEquals(0, transfers.size());
+    if (Boolean.TRUE.equals(isExpected)) assertTrue("Transactions were expected but not found; run send tests?", transfers.size() > 0);
     if (ctx == null) ctx = new TestContext();
     ctx.wallet = wallet;
     for (MoneroTransfer transfer : transfers) testTxWallet(transfer.getTx(), ctx);
