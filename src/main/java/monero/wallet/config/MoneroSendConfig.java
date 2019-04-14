@@ -195,4 +195,82 @@ public class MoneroSendConfig {
     this.keyImage = keyImage;
     return this;
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((accountIndex == null) ? 0 : accountIndex.hashCode());
+    result = prime * result + ((belowAmount == null) ? 0 : belowAmount.hashCode());
+    result = prime * result + ((canSplit == null) ? 0 : canSplit.hashCode());
+    result = prime * result + ((destinations == null) ? 0 : destinations.hashCode());
+    result = prime * result + ((doNotRelay == null) ? 0 : doNotRelay.hashCode());
+    result = prime * result + ((fee == null) ? 0 : fee.hashCode());
+    result = prime * result + ((keyImage == null) ? 0 : keyImage.hashCode());
+    result = prime * result + ((mixin == null) ? 0 : mixin.hashCode());
+    result = prime * result + ((note == null) ? 0 : note.hashCode());
+    result = prime * result + ((paymentId == null) ? 0 : paymentId.hashCode());
+    result = prime * result + ((priority == null) ? 0 : priority.hashCode());
+    result = prime * result + ((recipientName == null) ? 0 : recipientName.hashCode());
+    result = prime * result + ((ringSize == null) ? 0 : ringSize.hashCode());
+    result = prime * result + ((subaddressIndices == null) ? 0 : subaddressIndices.hashCode());
+    result = prime * result + ((sweepEachSubaddress == null) ? 0 : sweepEachSubaddress.hashCode());
+    result = prime * result + ((unlockTime == null) ? 0 : unlockTime.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    MoneroSendConfig other = (MoneroSendConfig) obj;
+    if (accountIndex == null) {
+      if (other.accountIndex != null) return false;
+    } else if (!accountIndex.equals(other.accountIndex)) return false;
+    if (belowAmount == null) {
+      if (other.belowAmount != null) return false;
+    } else if (!belowAmount.equals(other.belowAmount)) return false;
+    if (canSplit == null) {
+      if (other.canSplit != null) return false;
+    } else if (!canSplit.equals(other.canSplit)) return false;
+    if (destinations == null) {
+      if (other.destinations != null) return false;
+    } else if (!destinations.equals(other.destinations)) return false;
+    if (doNotRelay == null) {
+      if (other.doNotRelay != null) return false;
+    } else if (!doNotRelay.equals(other.doNotRelay)) return false;
+    if (fee == null) {
+      if (other.fee != null) return false;
+    } else if (!fee.equals(other.fee)) return false;
+    if (keyImage == null) {
+      if (other.keyImage != null) return false;
+    } else if (!keyImage.equals(other.keyImage)) return false;
+    if (mixin == null) {
+      if (other.mixin != null) return false;
+    } else if (!mixin.equals(other.mixin)) return false;
+    if (note == null) {
+      if (other.note != null) return false;
+    } else if (!note.equals(other.note)) return false;
+    if (paymentId == null) {
+      if (other.paymentId != null) return false;
+    } else if (!paymentId.equals(other.paymentId)) return false;
+    if (priority != other.priority) return false;
+    if (recipientName == null) {
+      if (other.recipientName != null) return false;
+    } else if (!recipientName.equals(other.recipientName)) return false;
+    if (ringSize == null) {
+      if (other.ringSize != null) return false;
+    } else if (!ringSize.equals(other.ringSize)) return false;
+    if (subaddressIndices == null) {
+      if (other.subaddressIndices != null) return false;
+    } else if (!subaddressIndices.equals(other.subaddressIndices)) return false;
+    if (sweepEachSubaddress == null) {
+      if (other.sweepEachSubaddress != null) return false;
+    } else if (!sweepEachSubaddress.equals(other.sweepEachSubaddress)) return false;
+    if (unlockTime == null) {
+      if (other.unlockTime != null) return false;
+    } else if (!unlockTime.equals(other.unlockTime)) return false;
+    return true;
+  }
 }
