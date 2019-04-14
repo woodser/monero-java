@@ -349,7 +349,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     assertEquals(wallet.getPrimaryAddress(), (wallet.getSubaddress(0, 0)).getAddress());
     for (MoneroAccount account : wallet.getAccounts(true)) {
-      for (MoneroSubaddress subaddress : wallet.getSubaddresses(account.getIndex())) {
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         assertEquals(subaddress.getAddress(), wallet.getAddress(account.getIndex(), subaddress.getIndex()));
       }
     }

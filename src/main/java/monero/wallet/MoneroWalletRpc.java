@@ -28,6 +28,7 @@ import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.rpc.MoneroRpc;
+import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroException;
 import monero.wallet.config.MoneroSendConfig;
 import monero.wallet.config.MoneroTransferFilter;
@@ -388,7 +389,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           
           // transfer info to existing subaddress object
           for (MoneroSubaddress tgtSubaddress : subaddresses) {
-            if (tgtSubaddress.getIndex() != subaddress.getIndex()) continue; // skip to subaddress with same index
+            if (!tgtSubaddress.getIndex().equals(subaddress.getIndex())) continue; // skip to subaddress with same index
             if (subaddress.getBalance() != null) tgtSubaddress.setBalance(subaddress.getBalance());
             if (subaddress.getUnlockedBalance() != null) tgtSubaddress.setUnlockedBalance(subaddress.getUnlockedBalance());
             if (subaddress.getNumUnspentOutputs() != null) tgtSubaddress.setNumUnspentOutputs(subaddress.getNumUnspentOutputs());
@@ -411,30 +412,70 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return subaddresses;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroSubaddress createSubaddress(int accountIdx, String label) {
-    throw new RuntimeException("Not implemented");
+    
+    // send request
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("account_index", accountIdx);
+    params.put("label", label);
+    Map<String, Object> resp = rpc.sendJsonRequest("create_address", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    
+    // build subaddress object
+    MoneroSubaddress subaddress = new MoneroSubaddress();
+    subaddress.setAccountIndex(accountIdx);
+    subaddress.setIndex(((BigInteger) result.get("address_index")).intValue());
+    subaddress.setAddress((String) result.get("address"));
+    subaddress.setLabel(label);
+    subaddress.setBalance(BigInteger.valueOf(0));
+    subaddress.setUnlockedBalance(BigInteger.valueOf(0));
+    subaddress.setNumUnspentOutputs(0);
+    subaddress.setIsUsed(false);
+    return subaddress;
   }
 
   @Override
   public String getAddress(int accountIdx, int subaddressIdx) {
     Map<Integer, String> subaddressMap = addressCache.get(accountIdx);
     if (subaddressMap == null) {
-      getSubaddresses(accountIdx, null);            // cache's all addresses at this account
+      getSubaddresses(accountIdx, null, true);      // cache's all addresses at this account
       return getAddress(accountIdx, subaddressIdx); // uses cache
     }
     String address = subaddressMap.get(subaddressIdx);
     if (address == null) {
-      getSubaddresses(accountIdx, null);            // cache's all addresses at this account
-      return getAddress(accountIdx, subaddressIdx); // uses cache
+      getSubaddresses(accountIdx, null, true);      // cache's all addresses at this account
+      return addressCache.get(accountIdx).get(subaddressIdx);
     }
     return address;
   }
 
+  // TODO: use cache
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroSubaddress getAddressIndex(String address) {
-    throw new RuntimeException("Not implemented");
+    
+    // fetch result and normalize error if address does not belong to the wallet
+    Map<String, Object> result;
+    try {
+      Map<String, Object> params =  new HashMap<String, Object>();
+      params.put("address", address);
+      Map<String, Object> resp = rpc.sendJsonRequest("get_address_index", params);
+      result = (Map<String, Object>) resp.get("result");
+    } catch (MoneroRpcException e) {
+      if (e.getCode() == -2) throw new MoneroException("Address does not belong to the wallet");
+      throw e;
+    }
+    
+    // convert rpc response
+    Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) result.get("index");
+    MoneroSubaddress subaddress = new MoneroSubaddress(address);
+    subaddress.setAccountIndex(rpcIndices.get("major").intValue());
+    subaddress.setIndex(rpcIndices.get("minor").intValue());
+    return subaddress;
   }
+
 
   @Override
   public BigInteger getBalance() {
@@ -940,34 +981,54 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return sendConfig;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getOutputsHex() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendJsonRequest("export_outputs");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("outputs_data_hex");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public int importOutputsHex(String outputsHex) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("outputs_data_hex", outputsHex);
+    Map<String, Object> resp = rpc.sendJsonRequest("import_outputs", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return ((BigInteger) result.get("num_imported")).intValue();
   }
 
   @Override
   public void setAttribute(String key, String val) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key", key);
+    params.put("value", val);
+    rpc.sendJsonRequest("set_attribute", params);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getAttribute(String key) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key", key);
+    Map<String, Object> resp = rpc.sendJsonRequest("get_attribute", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("value");
   }
 
   @Override
   public void startMining(Integer numThreads, Boolean backgroundMining, Boolean ignoreBattery) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("threads_count", numThreads);
+    params.put("backgroundMining", backgroundMining);
+    params.put("ignoreBattery", ignoreBattery);
+    rpc.sendJsonRequest("start_mining", params);
   }
 
   @Override
   public void stopMining() {
-    throw new RuntimeException("Not implemented");
+    rpc.sendJsonRequest("stop_mining");
   }
   
   // ------------------------------ PRIVATE -----------------------------------
