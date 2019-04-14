@@ -784,7 +784,7 @@ public interface MoneroWallet {
    * @param tag is the tag to apply to the specified accounts
    * @param accountIndices are the indices of the accounts to tag
    */
-  public List<Integer> tagAccounts(String tag, List<Integer> accountIndices);
+  public void tagAccounts(String tag, List<Integer> accountIndices);
 
   /**
    * Untag acconts.

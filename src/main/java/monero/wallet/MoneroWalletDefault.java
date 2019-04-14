@@ -184,6 +184,6 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   
   @Override
   public int addAddressBookEntry(String address, String description) {
-    return addAddressBookEntry(address, null, description);
+    return addAddressBookEntry(address, description, null);
   }
 }

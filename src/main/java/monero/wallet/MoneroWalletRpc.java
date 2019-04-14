@@ -418,7 +418,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public String getAddress(int accountIdx, int subaddressIdx) {
-    throw new RuntimeException("Not implemented");
+    Map<Integer, String> subaddressMap = addressCache.get(accountIdx);
+    if (subaddressMap == null) {
+      getSubaddresses(accountIdx, null);            // cache's all addresses at this account
+      return getAddress(accountIdx, subaddressIdx); // uses cache
+    }
+    String address = subaddressMap.get(subaddressIdx);
+    if (address == null) {
+      getSubaddresses(accountIdx, null);            // cache's all addresses at this account
+      return getAddress(accountIdx, subaddressIdx); // uses cache
+    }
+    return address;
   }
 
   @Override
@@ -810,49 +820,124 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroAddressBookEntry> getAddressBookEntries(List<Integer> entryIndices) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("entries", entryIndices);
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_address_book", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<MoneroAddressBookEntry> entries = new ArrayList<MoneroAddressBookEntry>();
+    if (!resultMap.containsKey("entries")) return entries;
+    for (Map<String, Object> entryMap : (List<Map<String, Object>>) resultMap.get("entries")) {
+      MoneroAddressBookEntry entry = new MoneroAddressBookEntry(
+              ((BigInteger) entryMap.get("index")).intValue(),
+              (String) entryMap.get("address"),
+              (String) entryMap.get("payment_id"),
+              (String) entryMap.get("description")
+      );
+      entries.add(entry);
+    }
+    return entries;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public int addAddressBookEntry(String address, String description, String paymentId) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("address", address);
+    params.put("payment_id", paymentId);
+    params.put("description", description);
+    Map<String, Object> respMap = rpc.sendJsonRequest("add_address_book", params);
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    return ((BigInteger) resultMap.get("index")).intValue();
   }
 
   @Override
   public void deleteAddressBookEntry(int entryIdx) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("index", entryIdx);
+    rpc.sendJsonRequest("delete_address_book", params);
   }
-
+  
   @Override
-  public List<Integer> tagAccounts(String tag, List<Integer> accountIndices) {
-    throw new RuntimeException("Not implemented");
+  public void tagAccounts(String tag, List<Integer> accountIndices) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("tag", tag);
+    params.put("accounts", accountIndices);
+    rpc.sendJsonRequest("tag_accounts", params);
   }
 
   @Override
   public void untagAccounts(List<Integer> accountIndices) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("accounts", accountIndices);
+    rpc.sendJsonRequest("untag_accounts", params);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroAccountTag> getAccountTags() {
-    throw new RuntimeException("Not implemented");
+    List<MoneroAccountTag> tags = new ArrayList<MoneroAccountTag>();
+    Map<String, Object> respMap = rpc.sendJsonRequest("get_account_tags");
+    Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    List<Map<String, Object>> accountTagMaps = (List<Map<String, Object>>) resultMap.get("account_tags");
+    if (accountTagMaps != null) {
+      for (Map<String, Object> accountTagMap : accountTagMaps) {
+        MoneroAccountTag tag = new MoneroAccountTag();
+        tags.add(tag);
+        tag.setTag((String) accountTagMap.get("tag"));
+        tag.setLabel((String) accountTagMap.get("label"));
+        List<BigInteger> accountIndicesBI = (List<BigInteger>) accountTagMap.get("accounts");
+        List<Integer> accountIndices = new ArrayList<Integer>();
+        for (BigInteger idx : accountIndicesBI) accountIndices.add(idx.intValue());
+        tag.setAccountIndices(accountIndices);
+      }
+    }
+    return tags;
   }
 
   @Override
   public void setAccountTagLabel(String tag, String label) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("tag", tag);
+    params.put("description", label);
+    rpc.sendJsonRequest("set_account_tag_description", params);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String createPaymentUri(MoneroSendConfig sendConfig) {
-    throw new RuntimeException("Not implemented");
+    assertNotNull("Must provide send configuration to create a payment URI", sendConfig);
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("address", sendConfig.getDestinations().get(0).getAddress());
+    params.put("amount", sendConfig.getDestinations().get(0).getAmount() != null ? sendConfig.getDestinations().get(0).getAmount().toString() : null);
+    params.put("payment_id", sendConfig.getPaymentId());
+    params.put("recipient_name", sendConfig.getRecipientName());
+    params.put("tx_description", sendConfig.getNote());
+    Map<String, Object> resp = rpc.sendJsonRequest("make_uri", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("uri");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroSendConfig parsePaymentUri(String uri) {
-    throw new RuntimeException("Not implemented");
+    assertNotNull("Must provide URI to parse", uri);
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("uri", uri);
+    Map<String, Object> resp = rpc.sendJsonRequest("parse_uri", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    Map<String, Object> rpcUri = (Map<String, Object>) result.get("uri");
+    MoneroSendConfig sendConfig = new MoneroSendConfig((String) rpcUri.get("address"), (BigInteger) rpcUri.get("amount"));
+    sendConfig.setPaymentId((String) rpcUri.get("payment_id"));
+    sendConfig.setRecipientName((String) rpcUri.get("recipient_name"));
+    sendConfig.setNote((String) rpcUri.get("tx_description"));
+    if ("".equals(sendConfig.getDestinations().get(0).getAddress())) sendConfig.getDestinations().get(0).setAddress(null);
+    if ("".equals(sendConfig.getPaymentId())) sendConfig.setPaymentId(null);
+    if ("".equals(sendConfig.getRecipientName())) sendConfig.setRecipientName(null);
+    if ("".equals(sendConfig.getNote())) sendConfig.setNote(null);
+    return sendConfig;
   }
 
   @Override

@@ -29,7 +29,6 @@ import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
-import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
@@ -1584,7 +1583,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.createPaymentUri(config1);
       fail("Should have thrown RPC exception with invalid parameters");
     } catch (MoneroException e) {
-      assertEquals(-1, (int) e.getCode());
+      assertEquals(-11, (int) e.getCode());
       assertTrue(e.getMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
     }
     config1.getDestinations().get(0).setAddress(address);
