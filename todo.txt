@@ -1,4 +1,5 @@
 reset tests
+confirm tx ordering since internal impl uses sets
 update to new master
 re-enable getReserveProofAccount
 update readme
