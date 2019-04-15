@@ -1,3 +1,4 @@
+balances: getBalanceWallet(), getBalanceAccount(), getBalancesSubaddress() : return MoneroBalances .getUnlockedBalance(), .getLockedBalance()
 more convenient filtering, e.g. one filter class with getTxId(), getInTxPool(), getIsOutgoing(), which is used in getTransfers(), etc
 remove typing on e.g. MoneroOutput.getVouts()?
 clean up these todos for new version

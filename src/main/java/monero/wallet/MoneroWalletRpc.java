@@ -479,32 +479,32 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public BigInteger getBalance() {
-    throw new RuntimeException("Not implemented");
+    return getBalances(null, null)[0];
   }
 
   @Override
   public BigInteger getBalance(int accountIdx) {
-    throw new RuntimeException("Not implemented");
+    return getBalances(accountIdx, null)[0];
   }
 
   @Override
   public BigInteger getBalance(int accountIdx, int subaddressIdx) {
-    throw new RuntimeException("Not implemented");
+    return getBalances(accountIdx, subaddressIdx)[0];
   }
 
   @Override
   public BigInteger getUnlockedBalance() {
-    throw new RuntimeException("Not implemented");
+    return getBalances(null, null)[1];
   }
 
   @Override
   public BigInteger getUnlockedBalance(int accountIdx) {
-    throw new RuntimeException("Not implemented");
+    return getBalances(accountIdx, null)[1];
   }
 
   @Override
   public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx) {
-    throw new RuntimeException("Not implemented");
+    return getBalances(accountIdx, subaddressIdx)[1];
   }
 
   @Override
@@ -809,9 +809,40 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroTxWallet sweepOutput(MoneroSendConfig config) {
-    throw new RuntimeException("Not implemented");
+    
+    // validate config
+    assertNull(config.getSweepEachSubaddress());
+    assertNull(config.getBelowAmount());
+    assertNull("Splitting is not applicable when sweeping output", config.getCanSplit());
+    
+    // build request parameters
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("address", config.getDestinations().get(0).getAddress());
+    params.put("account_index", config.getAccountIndex());
+    params.put("subaddr_indices", config.getSubaddressIndices());
+    params.put("key_image", config.getKeyImage());
+    params.put("mixin", config.getMixin());
+    params.put("ring_size", config.getRingSize());
+    params.put("unlock_time", config.getUnlockTime());
+    params.put("do_not_relay", config.getDoNotRelay());
+    params.put("priority", config.getPriority());
+    params.put("payment_id", config.getPaymentId());
+    params.put("get_tx_key", true);
+    params.put("get_tx_hex", true);
+    params.put("get_tx_metadata", true);
+    
+    // send request
+    Map<String, Object> resp = (Map<String, Object>) rpc.sendJsonRequest("sweep_single", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+
+    // build and return tx response
+    MoneroTxWallet tx = initSentTxWallet(config, null);
+    convertRpcTxWallet(result, tx, true);
+    tx.getOutgoingTransfer().getDestinations().get(0).setAmount(tx.getOutgoingTransfer().getAmount());  // initialize destination amount
+    return tx;
   }
 
   @SuppressWarnings("unchecked")
@@ -1249,6 +1280,31 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       images.add(new MoneroKeyImage((String) rpcImage.get("key_image"), (String) rpcImage.get("signature")));
     }
     return images;
+  }
+  
+  @SuppressWarnings("unchecked")
+  private BigInteger[] getBalances(Integer accountIdx, Integer subaddressIdx) {
+    if (accountIdx == null) {
+      assertNull("Must provide account index with subaddress index", subaddressIdx);
+      BigInteger balance = BigInteger.valueOf(0);
+      BigInteger unlockedBalance = BigInteger.valueOf(0);
+      for (MoneroAccount account : getAccounts()) {
+        balance = balance.add(account.getBalance());
+        unlockedBalance = unlockedBalance.add(account.getUnlockedBalance());
+      }
+      return new BigInteger[] { balance, unlockedBalance };
+    } else {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("account_index", accountIdx);
+      params.put("address_indices", subaddressIdx == null ? null : new Integer[] { subaddressIdx });
+      Map<String, Object> resp = rpc.sendJsonRequest("get_balance", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      if (subaddressIdx == null) return new BigInteger[] { (BigInteger) result.get("balance"), (BigInteger) result.get("unlocked_balance") };
+      else {
+        List<Map<String, Object>> rpcBalancesPerSubaddress = (List<Map<String, Object>>) result.get("per_subaddress");
+        return new BigInteger[] { (BigInteger) rpcBalancesPerSubaddress.get(0).get("balance"), (BigInteger) rpcBalancesPerSubaddress.get(0).get("unlocked_balance") };
+      }
+    }
   }
   
   // ---------------------------- PRIVATE STATIC ------------------------------
