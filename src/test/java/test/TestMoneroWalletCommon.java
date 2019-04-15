@@ -802,7 +802,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // get transfers in the tx pool
-    transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setInTxPool(true)), null, true);
+    transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setInTxPool(true)), null, null);
     for (MoneroTransfer transfer : transfers) {
       assertEquals(true, transfer.getTx().getInTxPool());
     }
@@ -1369,10 +1369,11 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   }
   
   // Can prove reserves in an account
-  // TODO: re-enable this after 14.x point release which fixes this
   @Test
   public void getReserveProofAccount() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    
+    fail("This causes seg fault; update to 14.x point release");  // TODO: re-enable this after 14.x point release which fixes this
     
     // test proofs of accounts
     int numNonZeroTests = 0;
@@ -1831,12 +1832,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       // relay txs
       List<String> txMetadatas = new ArrayList<String>();
       for (MoneroTxWallet tx : txs) txMetadatas.add(tx.getMetadata());
-      List<MoneroTxWallet> relayedTxs = wallet.relayTxs(txMetadatas);
-      List<String> txIds = new ArrayList<String>();
-      for (MoneroTxWallet relayedTx : relayedTxs) {
-        testTxWallet(relayedTx, null);
-        txIds.add(relayedTx.getId());
-      }
+      List<String> txIds = wallet.relayTxs(txMetadatas);
+      for (String txId : txIds) assertEquals(64, txId.length());
       
       // fetch txs for testing
       txs = wallet.getTxs(new MoneroTxFilter().setTxIds(txIds));

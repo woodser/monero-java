@@ -16,11 +16,11 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncProgressListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
-import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroTxWallet;
 
 /**
@@ -215,7 +215,7 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroTxWallet> relayTxs(List<String> txMetadatas) {
+  public List<String> relayTxs(List<String> txMetadatas) {
     throw new RuntimeException("Not implemented");
   }
 
@@ -300,7 +300,7 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   }
 
   @Override
-  public List<Integer> tagAccounts(String tag, List<Integer> accountIndices) {
+  public void tagAccounts(String tag, List<Integer> accountIndices) {
     throw new RuntimeException("Not implemented");
   }
 

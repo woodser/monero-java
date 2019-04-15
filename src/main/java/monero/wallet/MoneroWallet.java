@@ -572,17 +572,17 @@ public interface MoneroWallet {
    * Relay a transaction previously created without relaying.
    * 
    * @param txMetadata is transaction metadata previously created without relaying
-   * @return the relayed tx
+   * @return String is the id of the relayed tx
    */
-  public MoneroTxWallet relayTx(String txMetadata);
+  public String relayTx(String txMetadata);
   
   /**
    * Relay transactions previously created without relaying.
    * 
    * @param txMetadatas are transaction metadata previously created without relaying
-   * @return the relayed txs
+   * @return List<String> are ids of the relayed txs
    */
-  public List<MoneroTxWallet> relayTxs(List<String> txMetadatas);
+  public List<String> relayTxs(List<String> txMetadatas);
   
   /**
    * Get a transaction note.

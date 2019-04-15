@@ -676,17 +676,40 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public List<MoneroKeyImage> getKeyImages() {
-    throw new RuntimeException("Not implemented");
+    return rpcExportKeyImages(true);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroKeyImageImportResult importKeyImages(List<MoneroKeyImage> keyImages) {
-    throw new RuntimeException("Not implemented");
+    
+    // convert key images to rpc parameter
+    List<Map<String, Object>> rpcKeyImages = new ArrayList<Map<String, Object>>();
+    for (MoneroKeyImage keyImage : keyImages) {
+      Map<String, Object> rpcKeyImage = new HashMap<String, Object>();
+      rpcKeyImage.put("key_image", keyImage.getHex());
+      rpcKeyImage.put("signature", keyImage.getSignature());
+      rpcKeyImages.add(rpcKeyImage);
+    }
+    
+    // send rpc request
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("signed_key_images", rpcKeyImages);
+    Map<String, Object> resp = rpc.sendJsonRequest("import_key_images", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    
+    // build and return result
+    System.out.println(result);
+    MoneroKeyImageImportResult importResult = new MoneroKeyImageImportResult();
+    importResult.setHeight(((BigInteger) result.get("height")).intValue());
+    importResult.setSpentAmount((BigInteger) result.get("spent"));
+    importResult.setUnspentAmount((BigInteger) result.get("unspent"));
+    return importResult;
   }
 
   @Override
   public List<MoneroKeyImage> getNewKeyImagesFromLastImport() {
-    throw new RuntimeException("Not implemented");
+    return rpcExportKeyImages(false);
   }
 
   @Override
@@ -791,74 +814,196 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroTxWallet> relayTxs(List<String> txMetadatas) {
-    throw new RuntimeException("Not implemented");
+  public List<String> relayTxs(List<String> txMetadatas) {
+    if (txMetadatas == null || txMetadatas.isEmpty()) throw new MoneroException("Must provide an array of tx metadata to relay");
+    List<String> txIds = new ArrayList<String>();
+    for (String txMetadata : txMetadatas) {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("hex", txMetadata);
+      Map<String, Object> resp = rpc.sendJsonRequest("relay_tx", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      txIds.add((String) result.get("tx_hash"));
+    }
+    return txIds;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<String> getTxNotes(List<String> txIds) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txids", txIds);
+    Map<String, Object> resp = rpc.sendJsonRequest("get_tx_notes", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (List<String>) result.get("notes");
   }
 
   @Override
   public void setTxNotes(List<String> txIds, List<String> notes) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txids", txIds);
+    params.put("notes", notes);
+    rpc.sendJsonRequest("set_tx_notes", params);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String sign(String msg) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("data", msg);
+    Map<String, Object> resp = rpc.sendJsonRequest("sign", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("signature");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public boolean verify(String msg, String address, String signature) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("data", msg);
+    params.put("address", address);
+    params.put("signature", signature);
+    Map<String, Object> resp = rpc.sendJsonRequest("verify", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (boolean) result.get("good");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getTxKey(String txId) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txid", txId);
+    Map<String, Object> resp = rpc.sendJsonRequest("get_tx_key", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("tx_key");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroCheckTx checkTxKey(String txId, String txKey, String address) {
-    throw new RuntimeException("Not implemented");
+    
+    // send request
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txid", txId);
+    params.put("tx_key", txKey);
+    params.put("address", address);
+    Map<String, Object> resp = rpc.sendJsonRequest("check_tx_key", params);
+    
+    // interpret result
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    MoneroCheckTx check = new MoneroCheckTx();
+    check.setIsGood(true);
+    check.setNumConfirmations(((BigInteger) result.get("confirmations")).intValue());
+    check.setInTxPool((Boolean) result.get("in_pool"));
+    check.setReceivedAmount((BigInteger) result.get("received"));
+    return check;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getTxProof(String txId, String address, String message) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txid", txId);
+    params.put("address", address);
+    params.put("message", message);
+    Map<String, Object> resp = rpc.sendJsonRequest("get_tx_proof", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("signature");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroCheckTx checkTxProof(String txId, String address, String message, String signature) {
-    throw new RuntimeException("Not implemented");
+    
+    // send request
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txid", txId);
+    params.put("address", address);
+    params.put("message", message);
+    params.put("signature", signature);
+    Map<String, Object> resp = rpc.sendJsonRequest("check_tx_proof", params);
+    
+    // interpret response
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    boolean isGood = (boolean) result.get("good");
+    MoneroCheckTx check = new MoneroCheckTx();
+    check.setIsGood(isGood);
+    if (isGood) {
+      check.setNumConfirmations(((BigInteger) result.get("confirmations")).intValue());
+      check.setInTxPool((boolean) result.get("in_pool"));
+      check.setReceivedAmount((BigInteger) result.get("received"));
+    }
+    return check;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getSpendProof(String txId, String message) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txid", txId);
+    params.put("message", message);
+    Map<String, Object> resp = rpc.sendJsonRequest("get_spend_proof", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("signature");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public boolean checkSpendProof(String txId, String message, String signature) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txid", txId);
+    params.put("message", message);
+    params.put("signature", signature);
+    Map<String, Object> resp = rpc.sendJsonRequest("check_spend_proof", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (boolean) result.get("good");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getReserveProofWallet(String message) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("all", true);
+    params.put("message", message);
+    Map<String, Object> resp = rpc.sendJsonRequest("get_reserve_proof", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("signature");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getReserveProofAccount(int accountIdx, BigInteger amount, String message) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("account_index", accountIdx);
+    params.put("amount", amount.toString());
+    params.put("message", message);
+    Map<String, Object> resp = rpc.sendJsonRequest("get_reserve_proof", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("signature");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroCheckReserve checkReserveProof(String address, String message, String signature) {
-    throw new RuntimeException("Not implemented");
+    
+    // send request
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("address", address);
+    params.put("message", message);
+    params.put("signature", signature);
+    Map<String, Object> resp = rpc.sendJsonRequest("check_reserve_proof", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    
+    // interpret results
+    boolean isGood = (boolean) result.get("good");
+    MoneroCheckReserve check = new MoneroCheckReserve();
+    check.setIsGood(isGood);
+    if (isGood) {
+      check.setSpentAmount((BigInteger) result.get("spent"));
+      check.setTotalAmount((BigInteger) result.get("total"));
+    }
+    return check;
   }
 
   @SuppressWarnings("unchecked")
@@ -1085,6 +1230,28 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     return subaddressIndices;
   }
+  
+  /**
+   * Common method to get key images.
+   * 
+   * @param all specifies to get all xor only new images from last import
+   * @return {MoneroKeyImage[]} are the key images
+   */
+  @SuppressWarnings("unchecked")
+  private List<MoneroKeyImage> rpcExportKeyImages(boolean all) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("all", all);
+    Map<String, Object> resp = rpc.sendJsonRequest("export_key_images", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    List<MoneroKeyImage> images = new ArrayList<MoneroKeyImage>();
+    if (!result.containsKey("signed_key_images")) return images;
+    for (Map<String, Object> rpcImage : (List<Map<String, Object>>) result.get("signed_key_images")) {
+      images.add(new MoneroKeyImage((String) rpcImage.get("key_image"), (String) rpcImage.get("signature")));
+    }
+    return images;
+  }
+  
+  // ---------------------------- PRIVATE STATIC ------------------------------
   
   /**
    * Initializes a sent transaction.
