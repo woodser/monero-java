@@ -1,13 +1,23 @@
-implement/test other sweep tests
+reset tests
+update to new master
+re-enable getReserveProofAccount
+update readme
+api updates? getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
+release
 
 balances: getBalanceWallet(), getBalanceAccount(), getBalancesSubaddress() : return MoneroBalances .getUnlockedBalance(), .getLockedBalance()
 more convenient filtering, e.g. one filter class with getTxId(), getInTxPool(), getIsOutgoing(), which is used in getTransfers(), etc
 remove typing on e.g. MoneroOutput.getVouts()?
-clean up these todos for new version
-js todos
+daemon.getTx(id), wallet needs equivalent convenience function
+testGetTransactionsWallet() how are txs in same order since internal implementation uses set?
+wallet.getTxs() returns txs in no particular order
 
-update to new master
-update readme
+NEXT
+clean up these todos below
+jni binding
+model rct_signatures and rct_prunable
+mms
+pruning
 
 v0.13.0.4
 testGetTxsWallet() failing when run with other tests

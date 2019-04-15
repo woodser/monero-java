@@ -62,6 +62,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   private static final boolean TEST_NON_RELAYS = true;
   private static final boolean TEST_RELAYS = true;
   private static final boolean TEST_NOTIFICATIONS = false;
+  private static final boolean TEST_RESETS = false;
   private static final int MAX_TX_PROOFS = 25;   // maximum number of transactions to check for each proof, undefined to check all
   private static final int SEND_MAX_DIFF = 60;
   private static final int SEND_DIVISOR = 2;
@@ -2266,7 +2267,14 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     assertEquals(tx.getUnlockTime(), sendConfig.getUnlockTime()); // TODO: send config as part of test, then this fn not necessary
   }
-
+  
+  // --------------------------------- RESET TESTS --------------------------------
+  
+  // 
+  @Test
+  public void testResetTODO() {
+    org.junit.Assume.assumeTrue(TEST_RESETS);
+  }
   
   // --------------------------------- PRIVATE --------------------------------
   
