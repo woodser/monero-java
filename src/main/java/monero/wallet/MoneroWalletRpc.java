@@ -699,7 +699,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     
     // build and return result
-    System.out.println(result);
     MoneroKeyImageImportResult importResult = new MoneroKeyImageImportResult();
     importResult.setHeight(((BigInteger) result.get("height")).intValue());
     importResult.setSpentAmount((BigInteger) result.get("spent"));
