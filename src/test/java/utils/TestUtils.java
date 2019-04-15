@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import monero.daemon.MoneroDaemonRpc;
+import monero.daemon.model.MoneroNetworkType;
 import monero.rpc.MoneroRpc;
 import monero.rpc.MoneroRpcException;
 import monero.wallet.MoneroWallet;
@@ -112,8 +113,21 @@ public class TestUtils {
     if (Boolean.FALSE.equals(nonZero)) assertTrue(num.compareTo(BigInteger.valueOf(0)) == 0);
   }
   
+  // TODO: switch to local wallet (like js version) if/when it can generate addresses
   public static String getRandomWalletAddress() {
-    MoneroWallet wallet = new MoneroWalletLocal(getDaemonRpc());
-    return wallet.getPrimaryAddress();
+    MoneroNetworkType networkType = getDaemonRpc().getInfo().getNetworkType();
+    switch (networkType) {
+      case STAGENET:
+        //return "59bc81VNoucPsbJSH648GLLssjSMT9K1vLwNv63edf3fLUHBMt7FHtQdVA2XhDSRwi5uBwXWUkUBg29pouuBbvw98XDXjFy"; // primary
+        return "78Zq71rS1qK4CnGt8utvMdWhVNMJexGVEDM2XsSkBaGV9bDSnRFFhWrQTbmCACqzevE8vth9qhWfQ9SUENXXbLnmMVnBwgW"; // subaddress
+      case TESTNET:
+        //return "9ufu7oz6G1d7bfJgRfwtEh3iYYqxNABraPLaYXhAK1TiPjuH8tWfomALhTfeWUCnDwjFqmgrtqccKGcwYqyCgdzY1dA5Tda"; // primary
+        return "BhsbVvqW4Wajf4a76QW3hA2B3easR5QdNE5L8NwkY7RWXCrfSuaUwj1DDUsk3XiRGHBqqsK3NPvsATwcmNNPUQQ4SRR2b3V"; // subaddress
+      case MAINNET:
+        //return "47Pf4v4sG6H5CDcAY1sY6qQjYYe2w7UxrBR7j54DYTQBXxFjTtuQtjBdDZV3q8n4hTC8PKjXVGnFTTZJWB7wBipYNc47XwP"; // primary
+        return "87a1Yf47UqyQFCrMqqtxfvhJN9se3PgbmU7KUFWqhSu5aih6YsZYoxfjgyxAM1DztNNSdoYTZYn9xa3vHeJjoZqdAybnLzN"; // subaddress
+      default:
+        throw new RuntimeException("Invalid network type: " + networkType);
+    }
   }
 }
