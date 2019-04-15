@@ -153,7 +153,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public MoneroTxWallet relayTx(String txMetadata) {
+  public String relayTx(String txMetadata) {
     return relayTxs(Arrays.asList(txMetadata)).get(0);
   }
   
