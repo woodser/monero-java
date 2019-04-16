@@ -89,13 +89,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     rpc.sendJsonRequest("rescan_spent");
   }
   
-  /**
-   * Rescan the blockchain from scratch, losing any information which can not
-   * be recovered from the blockchain itself.
-   * 
-   * WARNING: This method discards local wallet data like destination
-   * addresses, tx secret keys, tx notes, etc.
-   */
   public void rescanBlockchain() {
     rpc.sendJsonRequest("rescan_blockchain");
   }

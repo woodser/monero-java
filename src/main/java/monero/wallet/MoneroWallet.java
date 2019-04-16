@@ -150,7 +150,7 @@ public interface MoneroWallet {
   public MoneroSyncResult sync(Integer startHeight, MoneroSyncProgressListener progressListener);
   
   /**
-   * Synchronizes the wallet with the block chain.
+   * Synchronizes the wallet with the blockchain.
    * 
    * @param startHeight is the start height to sync from, syncs from the last synced block by default
    * @param endHeight is the end height to sync to, syncs to the current chain height by default
@@ -158,6 +158,15 @@ public interface MoneroWallet {
    * @return the sync result
    */
   public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncProgressListener progressListener);
+  
+  /**
+   * Rescan the blockchain from scratch, losing any information which can not
+   * be recovered from the blockchain itself.
+   * 
+   * WARNING: This method discards local wallet data like destination
+   * addresses, tx secret keys, tx notes, etc.
+   */
+  public void rescanBlockchain();
   
   /**
    * Indicates if importing multisig data is needed for returning a correct balance.

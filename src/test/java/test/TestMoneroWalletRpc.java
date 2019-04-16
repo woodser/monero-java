@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.utils.MoneroException;
@@ -50,12 +51,14 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   // Can indicate if multisig import is needed for correct balance information
   @Test
   public void testIsMultisigNeeded() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     assertEquals(false, wallet.isMultisigImportNeeded()); // TODO: test with multisig wallet
   }
   
   // Can create and open a wallet
   @Test
   public void testCreateAndOpenWallet() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // create test wallet 2 which throws rpc code -21 if it already exists
     try {
@@ -92,6 +95,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   // Can tag accounts and query accounts by tag
   @Test
   public void testAccountTags() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get accounts
     List<MoneroAccount> accounts = wallet.getAccounts();
@@ -152,6 +156,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   // Has an address book
   @Test
   public void testAddressBook() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // initial state
     List<MoneroAddressBookEntry> entries = wallet.getAddressBookEntries();
@@ -231,32 +236,23 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   // Can rescan spent
   @Test
   public void testRescanSpent() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     wallet.rescanSpent();
   }
-  
-  // Can rescan the blockchain
-  // disabled so tests don't delete local cache
-//  @Test
-//  public void testRescanBlockchain() {
-//    org.junit.Assume.assumeTrue(TEST_RESETS);
-//    wallet.rescanBlockchain();
-//    for (MoneroTxWallet tx : wallet.getTxs()) {
-//      super.testTxWallet(tx, null);
-//    }
-//  }
   
   // Can save the wallet file
   @Test
   public void testSave() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     wallet.save();
   }
   
-//  // Can close the currently open wallet
-//  // disabled so wallet is not actually closed
-//  @Test
-//  public void testClose() {
-//    wallet.close();
-//  }
+  // Can close the currently open wallet
+  @Test
+  @Ignore   // disabled so wallet is not actually closed
+  public void testClose() {
+    wallet.close();
+  }
   
   // ---------------------------------- PRIVATE -------------------------------
   
