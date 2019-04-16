@@ -4,7 +4,7 @@ update to new master
 re-enable getReserveProofAccount
 communicate errors (-4 change address is not ours, etc, if applicable)
 update readme
-api updates? getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
+api updates: getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
 update print test utilities
 release
 
