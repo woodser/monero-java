@@ -88,6 +88,11 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncProgressListener progressListener) {
     throw new RuntimeException("Not implemented");
   }
+  
+  @Override
+  public void rescanBlockchain() {
+    throw new RuntimeException("Not implemented");
+  }
 
   @Override
   public boolean isMultisigImportNeeded() {
