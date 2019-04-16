@@ -234,6 +234,17 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     wallet.rescanSpent();
   }
   
+  // Can rescan the blockchain
+  // disabled so tests don't delete local cache
+//  @Test
+//  public void testRescanBlockchain() {
+//    org.junit.Assume.assumeTrue(TEST_RESETS);
+//    wallet.rescanBlockchain();
+//    for (MoneroTxWallet tx : wallet.getTxs()) {
+//      super.testTxWallet(tx, null);
+//    }
+//  }
+  
   // Can save the wallet file
   @Test
   public void testSave() {

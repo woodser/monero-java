@@ -798,9 +798,132 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return txs;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroTxWallet> sweepUnlocked(MoneroSendConfig config) {
-    throw new RuntimeException("Not implemented");
+    
+    // validate config
+    assertNotNull("Must specify sweep configuration", config);
+    assertTrue("Must specify exactly one destination address to sweep to", config.getDestinations() != null && config.getDestinations().size() == 1);
+    assertNotNull(config.getDestinations().get(0).getAddress());
+    assertNull(config.getDestinations().get(0).getAmount());
+    assertNull("Key image defined; use sweepOutput() to sweep an output by its key image", config.getKeyImage());
+    
+    // determine accounts to sweep from; default to all with unlocked balance if not specified
+    List<Integer> accountIndices = new ArrayList<Integer>();
+    if (config.getAccountIndex() != null) accountIndices.add(config.getAccountIndex());
+    else {
+      for (MoneroAccount account : this.getAccounts()) {
+        if (account.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) {
+          accountIndices.add(account.getIndex());
+        }
+      }
+    }
+    
+    // common request params
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("address", config.getDestinations().get(0).getAddress());
+    params.put("priority", config.getPriority());
+    params.put("mixin", config.getMixin());
+    params.put("ring_size", config.getRingSize());
+    params.put("unlock_time", config.getUnlockTime());
+    params.put("payment_id", config.getPaymentId());
+    params.put("do_not_relay", config.getDoNotRelay());
+    params.put("below_amount", config.getBelowAmount());
+    params.put("get_tx_keys", true);
+    params.put("get_tx_hex", true);
+    params.put("get_tx_metadata", true);
+    
+    // sweep from each account and collect unique transactions
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    for (int accountIdx : accountIndices) {
+      params.put("account_index", accountIdx);
+      
+      // collect transactions for account
+      List<MoneroTxWallet> accountTxs = new ArrayList<MoneroTxWallet>();
+      
+      // determine subaddresses to sweep from; default to all with unlocked balance if not specified
+      List<Integer> subaddressIndices = new ArrayList<Integer>();
+      if (config.getSubaddressIndices() != null) {
+        for (int subaddressIdx : config.getSubaddressIndices()) {
+          subaddressIndices.add(subaddressIdx);
+        }
+      } else {
+        for (MoneroSubaddress subaddress : getSubaddresses(accountIdx)) {
+          if (subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) {
+            subaddressIndices.add(subaddress.getIndex());
+          }
+        }
+      }
+      if (subaddressIndices.size() == 0) throw new MoneroException("No subaddresses to sweep from");
+      
+      // sweep each subaddress individually
+      if (config.getSweepEachSubaddress() == null || Boolean.TRUE.equals(config.getSweepEachSubaddress())) {
+        for (int subaddressIdx : subaddressIndices) {
+          params.put("subaddr_indices", new int[] { subaddressIdx });
+          Map<String, Object> resp = rpc.sendJsonRequest("sweep_all", params);
+          Map<String, Object> result = (Map<String, Object>) resp.get("result");
+          
+          // initialize tx per subaddress
+          List<String> txIds = (List<String>) result.get("tx_hash_list");
+          List<MoneroTxWallet> respTxs = new ArrayList<MoneroTxWallet>();
+          for (int i = 0; i < txIds.size(); i++) {
+            respTxs.add(new MoneroTxWallet());
+          }
+          
+          // initialize fields from response
+          convertRpcSentTxWallets(result, respTxs);
+          for (MoneroTxWallet tx : respTxs) accountTxs.add(tx);
+        }
+      }
+      
+      // sweep all subaddresses together  // TODO monero-wallet-rpc: doesn't this reveal outputs belong to same wallet?
+      else {
+        params.put("subaddr_indices", subaddressIndices);
+        Map<String, Object> resp = rpc.sendJsonRequest("sweep_all", params);  // TODO: test this
+        Map<String, Object> result = (Map<String, Object>) resp.get("result");
+        
+        // initialize tx per subaddress
+        List<String> txIds = (List<String>) result.get("tx_hash_list");
+        List<MoneroTxWallet> respTxs = new ArrayList<MoneroTxWallet>();
+        for (int i = 0; i < txIds.size(); i++) {
+          respTxs.add(new MoneroTxWallet());
+        }
+        
+        // initialize fields from response
+        convertRpcSentTxWallets(result, respTxs);
+        for (MoneroTxWallet tx : respTxs) accountTxs.add(tx);
+      }
+      
+      // initialize known fields of tx and merge transactions from account
+      for (MoneroTxWallet tx : accountTxs) {
+        tx.setIsConfirmed(false);
+        tx.setNumConfirmations(0);
+        tx.setInTxPool(config.getDoNotRelay() ? false : true);
+        tx.setDoNotRelay(config.getDoNotRelay() ? true : false);
+        tx.setIsRelayed(!tx.getDoNotRelay());
+        tx.setIsCoinbase(false);
+        tx.setIsFailed(false);
+        tx.setMixin(config.getMixin());
+        MoneroTransfer transfer = tx.getOutgoingTransfer();
+        transfer.setAddress(getAddress(accountIdx, 0));
+        transfer.setAccountIndex(accountIdx);
+        transfer.setSubaddressIndex(0); // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
+        MoneroDestination destination = new MoneroDestination(config.getDestinations().get(0).getAddress(), transfer.getAmount());
+        transfer.setDestinations(Arrays.asList(destination));
+        tx.setOutgoingTransfer(transfer);
+        tx.setPaymentId(config.getPaymentId());
+        if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
+        if (!tx.getDoNotRelay()) {
+          if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
+          if (tx.getIsDoubleSpend() == null) tx.setIsDoubleSpend(false);
+        }
+        mergeTx(txs, tx);
+      }
+    }
+    
+    // return transactions from all accounts
+    return txs;
   }
 
   @Override

@@ -58,11 +58,11 @@ import utils.TestUtils;
 public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // test constants
-  private static final boolean LITE_MODE = false;
-  private static final boolean TEST_NON_RELAYS = true;
-  private static final boolean TEST_RELAYS = true;
-  private static final boolean TEST_NOTIFICATIONS = false;
-  private static final boolean TEST_RESETS = false;
+  protected static final boolean LITE_MODE = false;
+  protected static final boolean TEST_NON_RELAYS = false;
+  protected static final boolean TEST_RELAYS = false;
+  protected static final boolean TEST_NOTIFICATIONS = false;
+  protected static final boolean TEST_RESETS = true;
   private static final int MAX_TX_PROOFS = 25;   // maximum number of transactions to check for each proof, undefined to check all
   private static final int SEND_MAX_DIFF = 60;
   private static final int SEND_DIVISOR = 2;
@@ -2270,10 +2270,112 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // --------------------------------- RESET TESTS --------------------------------
   
-  // 
+  // Can sweep subaddresses
   @Test
-  public void testResetTODO() {
+  public void testSweepSubaddresses() {
     org.junit.Assume.assumeTrue(TEST_RESETS);
+    throw new Error("Not implemented");
+  }
+  
+  // Can sweep accounts
+  @Test
+  public void testSweepAccounts() {
+    org.junit.Assume.assumeTrue(TEST_RESETS);
+    final int NUM_ACCOUNTS_TO_SWEEP = 1;
+    
+    // collect accounts with balance and unlocked balance
+    List<MoneroAccount> accounts = wallet.getAccounts(true);
+    List<MoneroAccount> balanceAccounts = new ArrayList<MoneroAccount>();
+    List<MoneroAccount> unlockedAccounts = new ArrayList<MoneroAccount>();
+    for (MoneroAccount account : accounts) {
+      if (account.getBalance().compareTo(BigInteger.valueOf(0)) > 0) balanceAccounts.add(account);
+      if (account.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) unlockedAccounts.add(account);
+    }
+    
+    // test requires at least one more account than the number being swept to verify it does not change
+    assertTrue("Test requires balance in at least " + (NUM_ACCOUNTS_TO_SWEEP + 1) + " accounts; run send-to-multiple tests", balanceAccounts.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
+    assertTrue("Wallet is waiting on unlocked funds", unlockedAccounts.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
+    
+    // sweep from first unlocked accounts
+    for (int i = 0; i < NUM_ACCOUNTS_TO_SWEEP; i++) {
+      
+      // sweep unlocked account
+      MoneroAccount unlockedAccount = unlockedAccounts.get(i);
+      List<MoneroTxWallet> txs = wallet.sweepAccount(unlockedAccount.getIndex(), wallet.getPrimaryAddress());
+      
+      // test transactions
+      assertTrue(txs.size() > 0);
+      for (MoneroTxWallet tx : txs) {
+        MoneroSendConfig config = new MoneroSendConfig(wallet.getPrimaryAddress());
+        config.setAccountIndex(unlockedAccount.getIndex());
+        TestContext ctx = new TestContext();
+        ctx.wallet = wallet;
+        ctx.sendConfig = config;
+        ctx.isSweep = true;
+        testTxWallet(tx, ctx);
+      }
+      
+      // assert no unlocked funds in account
+      MoneroAccount account = wallet.getAccount(unlockedAccount.getIndex());
+      assertTrue(account.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) == 0);
+    }
+    
+    // test accounts after sweeping
+    List<MoneroAccount> accountsAfter = wallet.getAccounts(true);
+    assertEquals(accounts.size(), accountsAfter.size());
+    for (int i = 0; i < accounts.size(); i++) {
+      MoneroAccount accountBefore = accounts.get(i);
+      MoneroAccount accountAfter = accountsAfter.get(i);
+      
+      // determine if account was swept
+      boolean swept = false;
+      for (int j = 0; j < NUM_ACCOUNTS_TO_SWEEP; j++) {
+        if (unlockedAccounts.get(j).getIndex().equals(accountBefore.getIndex())) {
+          swept = true;
+          break;
+        }
+      }
+      
+      // test that unlocked balance is 0 if swept, unchanged otherwise
+      if (swept) {
+        assertTrue(accountAfter.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) == 0);
+      } else {
+        assertTrue(accountBefore.getUnlockedBalance().compareTo(accountAfter.getUnlockedBalance()) == 0);
+      }
+    }
+  }
+  
+  // Can sweep the whole wallet
+  @Test
+  public void testSweepWallet() {
+    org.junit.Assume.assumeTrue(TEST_RESETS);
+    
+    // sweep destination
+    String destination = wallet.getPrimaryAddress();
+    
+    // verify 2 accounts with unlocked balance
+    List<MoneroSubaddress> subaddressesBalance = getSubaddressesWithBalance();
+    List<MoneroSubaddress> subaddressesUnlockedBalance = getSubaddressesWithUnlockedBalance();
+    assertTrue("Test requires multiple accounts with a balance; run send to multiple first", subaddressesBalance.size() >= 2);
+    assertTrue("Wallet is waiting on unlocked funds", subaddressesUnlockedBalance.size() >= 2);
+    
+    // sweep
+    List<MoneroTxWallet> txs = wallet.sweepWallet(destination);
+    assertTrue(txs.size() > 0);
+    for (MoneroTxWallet tx : txs) {
+      MoneroSendConfig config = new MoneroSendConfig(destination);
+      config.setAccountIndex(tx.getOutgoingTransfer().getAccountIndex());
+      TestContext ctx = new TestContext();
+      ctx.wallet = wallet;
+      ctx.sendConfig = config;
+      ctx.isSweep = true;
+      testTxWallet(tx, ctx);
+    }
+    
+    // assert no unlocked funds across subaddresses
+    subaddressesUnlockedBalance = getSubaddressesWithUnlockedBalance();
+    System.out.println(subaddressesUnlockedBalance);
+    assertTrue("Wallet should have no unlocked funds after sweeping all", subaddressesUnlockedBalance.isEmpty());
   }
   
   // --------------------------------- PRIVATE --------------------------------
@@ -2365,6 +2467,27 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  
+  private List<MoneroSubaddress> getSubaddressesWithBalance() {
+    List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
+    for (MoneroAccount account : wallet.getAccounts(true)) {
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
+        if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0) subaddresses.add(subaddress);
+      }
+    }
+    return subaddresses;
+  }
+
+  private List<MoneroSubaddress> getSubaddressesWithUnlockedBalance() {
+    List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
+    for (MoneroAccount account : wallet.getAccounts(true)) {
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
+        if (subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) subaddresses.add(subaddress);
+      }
+    }
+    return subaddresses;
+  }
+  
   // ------------------------------ PRIVATE STATIC ----------------------------
 
    private static void testAccount(MoneroAccount account) {
@@ -2415,7 +2538,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
    *        ctx.hasDestinations specifies if the tx has an outgoing transfer with destinations, undefined if doesn't matter
    *        ctx.getVouts specifies if vouts were fetched and should therefore be expected with incoming transfers
    */
-  private static void testTxWallet(MoneroTxWallet tx, TestContext ctx) {
+  protected static void testTxWallet(MoneroTxWallet tx, TestContext ctx) {
     
     // validate / sanitize inputs
     ctx = new TestContext(ctx);
