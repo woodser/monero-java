@@ -2910,7 +2910,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertNotNull(check.getInTxPool());
       TestUtils.testUnsignedBigInteger(check.getReceivedAmount());
       if (check.getInTxPool()) assertEquals(0, (int) check.getNumConfirmations());
-      else assert(check.getNumConfirmations() > 0); // TODO (monero-wall-rpc) this fails (confirmations is 0) for (at least one) transaction that has 1 confirmation on testCheckTxKey()
+      else assertTrue(check.getNumConfirmations() > 0); // TODO (monero-wall-rpc) this fails (confirmations is 0) for (at least one) transaction that has 1 confirmation on testCheckTxKey()
     } else {
       assertNull(check.getNumConfirmations());
       assertNull(check.getInTxPool());
