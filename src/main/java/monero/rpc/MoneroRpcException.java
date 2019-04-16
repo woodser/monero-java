@@ -1,5 +1,6 @@
 package monero.rpc;
 
+import common.utils.JsonUtils;
 import monero.utils.MoneroException;
 
 /**
@@ -32,8 +33,7 @@ public class MoneroRpcException extends MoneroException {
   
   public String toString() {
     String str = super.toString();
-    str += "\nRPC method: " + rpcMethod;
-    str += "\nRPC params: " + rpcParams;
+    str += "\nRPC request: '" + rpcMethod + "' with params: " + JsonUtils.serialize(rpcParams);
     return str;
   }
 }
