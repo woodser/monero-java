@@ -63,7 +63,7 @@ public class TestSerialization {
     List<BigInteger> amounts = new ArrayList<BigInteger>();
     for (int i = 0; i < 5; i++) {
       txHashes.add("c5c389846e701c27aaf1f7ab8b9dc457b471fcea5bc9710e8020d51275afbc54");
-      amounts.add(BigInteger.valueOf(Long.valueOf("140000000000")));
+      amounts.add(new BigInteger("140000000000"));
     }
     map1.put("fee_list", amounts);
     map1.put("tx_hash_list", txHashes);
