@@ -912,7 +912,6 @@ public class TestMoneroDaemonRpc {
   
   // Can start and stop mining
   @Test
-  @Ignore // TODO monero-daemon-rpc: start_mining / stop_mining are hanging for some reason
   public void testMining() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
@@ -932,7 +931,6 @@ public class TestMoneroDaemonRpc {
   
   // Can get mining status
   @Test
-  @Ignore // TODO monero-daemon-rpc: start_mining / stop_mining are hanging for some reason
   public void testGetMiningStatus() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
@@ -1372,7 +1370,6 @@ public class TestMoneroDaemonRpc {
     assertNotNull(tx.getInTxPool());
     assertNotNull(tx.getIsCoinbase());
     assertNotNull(tx.getIsDoubleSpend());
-    assertTrue(tx.getVersion() >= 0);
     
     // test presence of output indices
     // TODO: change this over to vouts only
@@ -1468,6 +1465,7 @@ public class TestMoneroDaemonRpc {
       assertNull(tx.getSize());
       assertNull(tx.getLastRelayedTimestamp());
       assertNull(tx.getReceivedTimestamp());
+      assertNull(tx.getVersion());
       assertNull(tx.getUnlockTime());
       assertNull(tx.getVins());
       assertNull(tx.getVouts());
@@ -1476,6 +1474,7 @@ public class TestMoneroDaemonRpc {
       assertNotNull(tx.getPrunedHex());
     } else {
       assertNull(tx.getPrunedHex());
+      assertTrue(tx.getVersion() >= 0);
       assertTrue(tx.getUnlockTime() >= 0);
       assertTrue(tx.getExtra().length > 0);
       if (Boolean.TRUE.equals(ctx.fromGetBlocksByHeight)) assertNull(tx.getFullHex());         // TODO: getBlocksByHeight() has inconsistent client-side pruning
