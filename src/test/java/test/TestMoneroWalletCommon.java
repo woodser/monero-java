@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import common.types.Filter;
@@ -2345,8 +2346,20 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  // Can rescan the blockchain
+  @Test
+  @Ignore // disabled so tests don't delete local cache
+  public void testRescanBlockchain() {
+    org.junit.Assume.assumeTrue(TEST_RESETS);
+    wallet.rescanBlockchain();
+    for (MoneroTxWallet tx : wallet.getTxs()) {
+      testTxWallet(tx, null);
+    }
+  }
+  
   // Can sweep the whole wallet
   @Test
+  @Ignore // disabled so tests don't sweep the whole wallet
   public void testSweepWallet() {
     org.junit.Assume.assumeTrue(TEST_RESETS);
     
