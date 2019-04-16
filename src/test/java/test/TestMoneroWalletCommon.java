@@ -30,6 +30,7 @@ import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
+import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
@@ -2145,6 +2146,18 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
    */
   private void testSendAndUpdateTxs(MoneroSendConfig sendConfig) {
     
+    // attempt to start mining to push the network along
+    boolean startedMining = false;
+    MoneroMiningStatus miningStatus = daemon.getMiningStatus();
+    if (!miningStatus.getIsActive()) {
+      try {
+        wallet.startMining(8, false, true);
+        startedMining = true;
+      } catch (MoneroException e) {
+        // no problem
+      }
+    }
+    
     // send transactions
     List<MoneroTxWallet> sentTxs;
     if (sendConfig.getCanSplit()) sentTxs = wallet.sendSplit(sendConfig);
@@ -2221,6 +2234,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       // update confirmations in order to exit loop
       numConfirmations = fetchedTxs.get(0).getNumConfirmations();
     }
+    
+    // stop mining if it was started by this test
+    if (startedMining) wallet.stopMining();
   }
   
   private void testOutInPairs(MoneroWallet wallet, List<MoneroTxWallet> txs, MoneroSendConfig sendConfig, boolean isSendResponse) {
