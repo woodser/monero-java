@@ -3,6 +3,7 @@ implement and port sweepDust()
 re-enable getReserveProofAccount
 communicate errors (-4 change address is not ours, etc, if applicable)
 confirm tx ordering since internal impl uses sets
+need to crawl blocks in test to test/handle duplicate output indices and merging
 api updates: getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
 update print test utilities
 update readme
