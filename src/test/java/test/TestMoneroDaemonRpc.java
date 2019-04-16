@@ -13,9 +13,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.daemon.MoneroDaemon;
@@ -76,12 +78,14 @@ public class TestMoneroDaemonRpc {
   
   // -------------------------------- NON RELAYS ------------------------------
   
+  // Can indicate if it's trusted
   @Test
   public void testGetIsTrusted() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     daemon.getIsTrusted();
   }
   
+  // Can get the blockchain height
   @Test
   public void testGetHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -89,6 +93,7 @@ public class TestMoneroDaemonRpc {
     assertTrue("Height must be greater than 0", height > 0);
   }
   
+  // Can get a block id by height
   @Test
   public void testGetBlockIdByHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -98,6 +103,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(64, id.length());
   }
   
+  // Can get a block template
   @Test
   public void testGetBlockTemplate() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -105,6 +111,7 @@ public class TestMoneroDaemonRpc {
     testBlockTemplate(template);
   }
   
+  // Can get the last block's header
   @Test
   public void testGetLastBlockHeader() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -112,6 +119,7 @@ public class TestMoneroDaemonRpc {
     testBlockHeader(lastHeader, true);
   }
   
+  // Can get a block header by id
   @Test
   public void testGetBlockHeaderById() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -130,6 +138,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(lastHeader.getHeight() - 1, (int) header.getHeight());
   }
   
+  // Can get a block header by height
   @Test
   public void testGetBlockHeaderByHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -146,6 +155,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(lastHeader.getHeight() - 1, (int) header.getHeight());
   }
   
+  // Can get block headers by range
   // TODO: test start with no end, vice versa, inclusivity
   @Test
   public void testGetBlockHeadersByRange() {
@@ -170,6 +180,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can get a block by id
   @Test
   public void testGetBlockById() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -196,6 +207,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(null, block.getTxs());
   }
   
+  // Can get a block by height
   @Test
   public void testGetBlockByHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -218,6 +230,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(lastHeader.getHeight() - 1, (int) block.getHeight());
   }
   
+  // Can get blocks by height which includes transactions (binary)
   @Test
   public void testGetBlocksByHeightBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -262,12 +275,14 @@ public class TestMoneroDaemonRpc {
     assertTrue("No transactions found to test", txFound);
   }
   
+  // Can get blocks by id which includes transactions (binary)
   @Test
   public void testGetBlocksByIdBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     throw new RuntimeException("Not implemented");
   }
   
+  // Can get blocks by range
   @Test
   public void testGetBlocksByRange() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -299,6 +314,7 @@ public class TestMoneroDaemonRpc {
     //testRange(null, null, height);  // TODO: RequestError: Error: socket hang up
   };
   
+  // Can get block ids (binary)
   @Test
   public void testGetBlockIdsBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -306,6 +322,7 @@ public class TestMoneroDaemonRpc {
     throw new RuntimeException("Not implemented");
   }
   
+  // Can get a transaction by id with and without pruning
   @Test
   public void testGetTxById() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -341,6 +358,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can get transactions by ids with and without pruning
   @Test
   public void testGetTxsByIds() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -379,6 +397,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can get transactions by ids that are in the transaction pool
   @Test
   public void testGetTxsByIdsInPool() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -407,6 +426,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can get a transaction hex by id with and without pruning
   @Test
   public void testGetTxHexById() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -441,6 +461,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can get transaction hexes by ids with and without pruning
   @Test
   public void testGetTxHexesByIds() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -472,6 +493,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can get the coinbase transaction sum
   @Test
   public void testGetCoinbaseTxSum() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -479,6 +501,7 @@ public class TestMoneroDaemonRpc {
     testCoinbaseTxSum(sum);
   }
   
+  // Can get a fee estimate
   @Test
   public void testGetFeeEstimate() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -486,6 +509,7 @@ public class TestMoneroDaemonRpc {
     TestUtils.testUnsignedBigInteger(fee, true);
   }
   
+  // Can get all transactions in the transaction pool
   @Test
   public void testGetTxsInPool() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -513,6 +537,7 @@ public class TestMoneroDaemonRpc {
     daemon.flushTxPoolById(tx.getId());
   }
   
+  // Can get ids of transactions in the transaction pool (binary)
   @Test
   public void testGetIdsOfTxsInPoolBin() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -520,6 +545,7 @@ public class TestMoneroDaemonRpc {
     throw new Error("Not implemented");
   }
   
+  // Can get the transaction pool backlog (binary)
   @Test
   public void testGetTxPoolBacklogBin() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -527,6 +553,7 @@ public class TestMoneroDaemonRpc {
     throw new Error("Not implemented");
   }
   
+  // Can get transaction pool statistics (binary)
   @Test
   public void testGetTxPoolStatisticsBin() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -545,6 +572,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can flush all transactions from the pool
   @Test
   public void testFlushTxsFromPool() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -569,6 +597,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(txs.isEmpty());
   }
   
+  // Can flush a transaction from the pool by id
   @Test
   public void testFlushTxFromPoolById() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -593,6 +622,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can flush transactions from the pool by ids
   @Test
   public void testFlushTxsFromPoolByIds() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -613,6 +643,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(0, txs.size());
   }
   
+  // Can get the spent status of key images
   @Test
   public void testGetSpentStatusOfKeyImages() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -652,18 +683,21 @@ public class TestMoneroDaemonRpc {
     testSpentStatuses(keyImages, MoneroKeyImageSpentStatus.CONFIRMED);
   }
   
+  // Can get output indices given a list of transaction ids (binary)
   @Test
   public void testGetOutputIndicesFromTxIdsBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     throw new Error("Not implemented"); // get_o_indexes.bin
   }
   
+  // Can get outputs given a list of output amounts and indices (binary)
   @Test
   public void testGetOutputsFromAmountsAndIndicesBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     throw new Error("Not implemented"); // get_outs.bin
   }
   
+  // Can get an output histogram (binary)
   @Test
   public void testGetOutputHistogramBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -674,6 +708,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can get an output distribution (binary)
   @Test
   public void testGetOutputDistributionBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -692,6 +727,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can get general information
   @Test
   public void testGetGeneralInformation() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -699,6 +735,7 @@ public class TestMoneroDaemonRpc {
     testInfo(info);
   }
   
+  // Can get sync information
   @Test
   public void testGetSyncInformation() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -706,6 +743,7 @@ public class TestMoneroDaemonRpc {
     testSyncInfo(syncInfo);
   }
   
+  // Can get hard fork information
   @Test
   public void testGetHardForkInformation() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -713,6 +751,7 @@ public class TestMoneroDaemonRpc {
     testHardForkInfo(hardForkInfo);
   }
   
+  // Can get alternative chains
   @Test
   public void testGetAlternativeChains() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -722,6 +761,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can get alternative block ids
   @Test
   public void testGetAlternativeBlockIds() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -732,42 +772,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
-//  @Test
-//  public void testSetBandwidthLimits() {
-//    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-//    
-//    // get initial limits
-//    MoneroDaemonBandwidthLimits initLimits = daemon.getBandwidthLimits();
-//    assertTrue(initLimits.getDownloadLimit() > 0);
-//    assertTrue(initLimits.getUploadLimit() > 0);
-//    
-//    // reset limits to default
-//    MoneroDaemonBandwidthLimits defaultLimits = daemon.setBandwidthLimits(-1, -1);
-//    assertTrue(defaultLimits.getDownloadLimit() > 0);
-//    assertTrue(defaultLimits.getUploadLimit() > 0);
-//    
-//    // increase both limits
-//    MoneroDaemonBandwidthLimits increasedLimits = daemon.setBandwidthLimits(initLimits.getDownloadLimit() * 2, initLimits.getUploadLimit() * 3);
-//    assertEquals(initLimits.getDownloadLimit() * 2, (int) increasedLimits.getDownloadLimit());
-//    assertEquals(initLimits.getUploadLimit() * 3, (int) increasedLimits.getUploadLimit());
-//    
-//    // reset limits one at a time
-//    MoneroDaemonBandwidthLimits resetLimits = daemon.setBandwidthLimits(-1, 0);
-//    assertEquals(defaultLimits.getDownloadLimit(), resetLimits.getDownloadLimit());
-//    assertEquals(increasedLimits.getUploadLimit(), resetLimits.getUploadLimit());
-//    resetLimits = daemon.setBandwidthLimits(0, -1);
-//    assertEquals(defaultLimits.getDownloadLimit(), resetLimits.getDownloadLimit());
-//    assertEquals(defaultLimits.getUploadLimit(), resetLimits.getUploadLimit());
-//    
-//    // test invalid limits
-//    try {
-//      daemon.setBandwidthLimits(-2, 0);
-//      fail("Should have thrown err");
-//    } catch (MoneroException e) {
-//      throw new RuntimeException("Not handled yet");
-//    }
-//  }
-  
+  // Can get, set, and reset a download bandwidth limit
   @Test
   public void testSetDownloadBandwidth() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -789,6 +794,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(daemon.getDownloadLimit(), initVal);
   }
   
+  // Can get, set, and reset an upload bandwidth limit
   @Test
   public void testSetUploadBandwidth() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -810,6 +816,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(initVal, daemon.getUploadLimit());
   }
   
+  // Can get known peers which may be online or offline
   @Test
   public void testGetKnownPeers() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -820,6 +827,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can get incoming and outgoing peer connections
   @Test
   public void testGetPeerConnections() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -830,6 +838,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can limit the number of outgoing peers
   @Test
   public void testSetOutgoingPeerLimit() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -838,6 +847,7 @@ public class TestMoneroDaemonRpc {
     daemon.setOutgoingPeerLimit(10);
   }
   
+  // Can limit the number of incoming peers
   @Test
   public void testSetIncomingPeerLimit() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -868,7 +878,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(found);
   }
   
-  // Can ban a peers
+  // Can ban peers
   @Test
   public void testBanPeers() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -900,7 +910,9 @@ public class TestMoneroDaemonRpc {
     assertTrue(found2);
   }
   
+  // Can start and stop mining
   @Test
+  @Ignore // TODO monero-daemon-rpc: start_mining / stop_mining are hanging for some reason
   public void testMining() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
@@ -918,7 +930,9 @@ public class TestMoneroDaemonRpc {
     daemon.stopMining();
   }
   
+  // Can get mining status
   @Test
+  @Ignore // TODO monero-daemon-rpc: start_mining / stop_mining are hanging for some reason
   public void testGetMiningStatus() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
@@ -957,6 +971,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can submit a mined block to the network
   @Test
   public void testSubmitMinedBlock() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -976,6 +991,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
+  // Can check for an update
   @Test
   public void testCheckForUpdate() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -983,6 +999,7 @@ public class TestMoneroDaemonRpc {
     testUpdateCheckResult(result);
   }
   
+  // Can download an update
   @Test
   public void testDownloadUpdate() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -1008,28 +1025,30 @@ public class TestMoneroDaemonRpc {
     }
   }
   
-  // test is disabled to not interfere with other tests
-//  @Test
-//  public void testStop() throws InterruptedException {
-//    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-//    
-//    // stop the daemon
-//    daemon.stop();
-//    
-//    // give the daemon 10 seconds to shut down
-//    TimeUnit.SECONDS.sleep(10);
-//    
-//    // try to interact with the daemon
-//    try {
-//      daemon.getHeight();
-//      throw new Error("Should have thrown error");
-//    } catch (MoneroException e) {
-//      assertNotEquals("Should have thrown error", e.getMessage());
-//    }
-//  }
+  // Can be stopped
+  @Test
+  @Ignore // test is disabled to not interfere with other tests
+  public void testStop() throws InterruptedException {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    
+    // stop the daemon
+    daemon.stop();
+    
+    // give the daemon 10 seconds to shut down
+    TimeUnit.SECONDS.sleep(10);
+    
+    // try to interact with the daemon
+    try {
+      daemon.getHeight();
+      throw new Error("Should have thrown error");
+    } catch (MoneroException e) {
+      assertNotEquals("Should have thrown error", e.getMessage());
+    }
+  }
   
   // ----------------------------- RELAY TESTS -------------------------------
   
+  // Can submit a tx in hex format to the pool and relay in one call
   @Test
   public void testSubmitAndRelayTxHex() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
@@ -1072,6 +1091,7 @@ public class TestMoneroDaemonRpc {
     assertTrue("Tx2 should not be in the pool because it double spends tx1 which is in the pool", !found);
   }
   
+  // Can submit a tx in hex format to the pool then relay
   @Test
   public void testSubmitThenRelayTxHex() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
@@ -1079,6 +1099,7 @@ public class TestMoneroDaemonRpc {
     testSubmitThenRelay(Arrays.asList(tx));
   }
   
+  // Can submit txs in hex format to the pool then relay
   @Test
   public void testSubmitThenRelayTxHexes() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
@@ -1136,6 +1157,7 @@ public class TestMoneroDaemonRpc {
   
   // -------------------------- NOTIFICATION TESTS ---------------------------
   
+  // Can notify listeners when a new block is added to the chain
   @Test
   public void testBlockListener() {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
@@ -1350,6 +1372,7 @@ public class TestMoneroDaemonRpc {
     assertNotNull(tx.getInTxPool());
     assertNotNull(tx.getIsCoinbase());
     assertNotNull(tx.getIsDoubleSpend());
+    assertTrue(tx.getVersion() >= 0);
     
     // test presence of output indices
     // TODO: change this over to vouts only
@@ -1445,7 +1468,6 @@ public class TestMoneroDaemonRpc {
       assertNull(tx.getSize());
       assertNull(tx.getLastRelayedTimestamp());
       assertNull(tx.getReceivedTimestamp());
-      assertNull(tx.getVersion());
       assertNull(tx.getUnlockTime());
       assertNull(tx.getVins());
       assertNull(tx.getVouts());
@@ -1454,7 +1476,6 @@ public class TestMoneroDaemonRpc {
       assertNotNull(tx.getPrunedHex());
     } else {
       assertNull(tx.getPrunedHex());
-      assertTrue(tx.getVersion() >= 0);
       assertTrue(tx.getUnlockTime() >= 0);
       assertTrue(tx.getExtra().length > 0);
       if (Boolean.TRUE.equals(ctx.fromGetBlocksByHeight)) assertNull(tx.getFullHex());         // TODO: getBlocksByHeight() has inconsistent client-side pruning
