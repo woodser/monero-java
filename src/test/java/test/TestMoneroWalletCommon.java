@@ -2003,22 +2003,24 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     vouts = vouts.subList(0, numVouts);
     
     // sweep each vout by key image
-    boolean useParams = true;
+    boolean useParams = true; // for loop flips in order to alternate test
     for (MoneroOutputWallet vout : vouts) {
       
       // sweep output to address
       String address = wallet.getAddress(vout.getAccountIndex(), vout.getSubaddressIndex());
       MoneroSendConfig sendConfig = new MoneroSendConfig(address).setKeyImage(vout.getKeyImage().getHex());
+      assertNull(sendConfig.getDestinations().get(0).getAmount());
       MoneroTxWallet tx;
       if (useParams) tx = wallet.sweepOutput(address, vout.getKeyImage().getHex(), null); // test params
       else tx = wallet.sweepOutput(sendConfig);  // test config
+      assertNull(sendConfig.getDestinations().get(0).getAmount());
       
       // test resulting tx
       TestContext ctx = new TestContext();
       ctx.wallet = wallet;
       ctx.sendConfig = sendConfig;
       ctx.isSendResponse = true;
-      ctx.isSweep = true;
+      ctx.isSweepResponse = true;
       testTxWallet(tx, ctx);
       useParams = !useParams;
     }
@@ -2341,7 +2343,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         TestContext ctx = new TestContext();
         ctx.wallet = wallet;
         ctx.sendConfig = config;
-        ctx.isSweep = true;
+        ctx.isSweepResponse = true;
         testTxWallet(tx, ctx);
       }
       
@@ -2410,7 +2412,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       TestContext ctx = new TestContext();
       ctx.wallet = wallet;
       ctx.sendConfig = config;
-      ctx.isSweep = true;
+      ctx.isSweepResponse = true;
       testTxWallet(tx, ctx);
     }
     
@@ -2489,7 +2491,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     Boolean hasOutgoingTransfer;
     Boolean hasIncomingTransfers;
     Boolean hasDestinations;
-    Boolean isSweep;
+    Boolean isSweepResponse;
     Boolean doNotTestCopy;
     Boolean getVouts;
     Boolean isSendResponse;
@@ -2501,7 +2503,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         this.hasOutgoingTransfer = ctx.hasOutgoingTransfer;
         this.hasIncomingTransfers = ctx.hasIncomingTransfers;
         this.hasDestinations = ctx.hasDestinations;
-        this.isSweep = ctx.isSweep;
+        this.isSweepResponse = ctx.isSweepResponse;
         this.doNotTestCopy = ctx.doNotTestCopy;
         this.getVouts = ctx.getVouts;
         this.isSendResponse = ctx.isSendResponse;
@@ -2666,7 +2668,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     if (tx.getOutgoingTransfer() != null) {
       assertTrue(tx.getIsOutgoing());
       testTransfer(tx.getOutgoingTransfer());
-      if (Boolean.TRUE.equals(ctx.isSweep)) assertEquals(tx.getOutgoingTransfer().getDestinations().size(), 1);
+      if (Boolean.TRUE.equals(ctx.isSweepResponse)) assertEquals(tx.getOutgoingTransfer().getDestinations().size(), 1);
       
       // TODO: handle special cases
     } else {
@@ -2717,7 +2719,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertEquals(sendConfig.getMixin(), tx.getMixin());
       assertEquals(sendConfig.getUnlockTime() != null ? sendConfig.getUnlockTime() : 0, (int) tx.getUnlockTime());
       assertNull(tx.getBlock());
-      if (sendConfig.getCanSplit()) assertNull(tx.getKey());  // tx key unknown if from split response
+      if (Boolean.TRUE.equals(sendConfig.getCanSplit())) assertNull(tx.getKey());  // tx key unknown if from split response
       else assertTrue(tx.getKey().length() > 0);
       assertNotNull(tx.getFullHex());
       assertTrue(tx.getFullHex().length() > 0);
@@ -2728,7 +2730,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertEquals(sendConfig.getDestinations().size(), tx.getOutgoingTransfer().getDestinations().size());
       for (int i = 0; i < sendConfig.getDestinations().size(); i++) {
         assertEquals(sendConfig.getDestinations().get(i).getAddress(), tx.getOutgoingTransfer().getDestinations().get(i).getAddress());
-        if (Boolean.TRUE.equals(ctx.isSweep)) {
+        if (Boolean.TRUE.equals(ctx.isSweepResponse)) {
           assertEquals(1, sendConfig.getDestinations().size());
           assertNull(sendConfig.getDestinations().get(i).getAmount());
           assertEquals(tx.getOutgoingTransfer().getAmount().toString(), tx.getOutgoingTransfer().getDestinations().get(i).getAmount().toString());

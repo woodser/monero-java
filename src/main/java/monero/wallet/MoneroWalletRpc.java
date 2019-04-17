@@ -1443,7 +1443,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setMixin(config.getMixin());
     MoneroTransfer transfer = new MoneroTransfer().setTx(tx);
     transfer.setSubaddressIndex(0); // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
-    transfer.setDestinations(config.getDestinations());
+    List<MoneroDestination> destCopies = new ArrayList<MoneroDestination>();
+    for (MoneroDestination dest : config.getDestinations()) destCopies.add(dest.copy());
+    transfer.setDestinations(destCopies);
     tx.setOutgoingTransfer(transfer);
     tx.setPaymentId(config.getPaymentId());
     if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? 0 : config.getUnlockTime());
