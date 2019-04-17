@@ -429,7 +429,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroKeyImageSpentStatus> getSpentStatuses(List<String> keyImages) {
+  public List<MoneroKeyImageSpentStatus> getKeyImageSpentStatuses(List<String> keyImages) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("key_images", keyImages);
     Map<String, Object> resp = rpc.sendPathRequest("is_key_image_spent", params);
