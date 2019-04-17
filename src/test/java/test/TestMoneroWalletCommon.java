@@ -1373,11 +1373,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can prove reserves in an account
   @Test
-  public void getReserveProofAccount() {
+  public void testGetReserveProofAccount() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    
-    fail("This causes seg fault; update to 14.x point release");  // TODO: re-enable this after 14.x point release which fixes this
-    
+        
     // test proofs of accounts
     int numNonZeroTests = 0;
     String msg = "Test message";
@@ -2017,6 +2015,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       TestContext ctx = new TestContext();
       ctx.wallet = wallet;
       ctx.sendConfig = sendConfig;
+      ctx.isSendResponse = true;
       ctx.isSweep = true;
       testTxWallet(tx, ctx);
       useParams = !useParams;
@@ -2146,97 +2145,109 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
    */
   private void testSendAndUpdateTxs(MoneroSendConfig sendConfig) {
     
-    // attempt to start mining to push the network along
-    boolean startedMining = false;
-    MoneroMiningStatus miningStatus = daemon.getMiningStatus();
-    if (!miningStatus.getIsActive()) {
-      try {
-        wallet.startMining(8, false, true);
-        startedMining = true;
-      } catch (MoneroException e) {
-        // no problem
-      }
-    }
-    
-    // send transactions
-    List<MoneroTxWallet> sentTxs;
-    if (sendConfig.getCanSplit()) sentTxs = wallet.sendSplit(sendConfig);
-    else sentTxs = Arrays.asList(wallet.send(sendConfig));
-    
-    // build test context
-    TestContext ctx = new TestContext();
-    ctx.wallet = wallet;
-    ctx.sendConfig = sendConfig;
-    ctx.isSendResponse = true;
-    
-    // test sent transactions
-    for (MoneroTxWallet tx : sentTxs) {
-      testTxWallet(tx, ctx);
-      assertEquals(false, tx.getIsConfirmed());
-      assertEquals(true, tx.getInTxPool());
-    }
-    
-    // track resulting outgoing and incoming txs as blocks are added to the chain
-    List<MoneroTxWallet> updatedTxs = null;
-    
-    // loop to update txs through confirmations
-    int numConfirmations = 0;
-    int numConfirmationsTotal = 2; // number of confirmations to test
-    while (numConfirmations < numConfirmationsTotal) {
+    // unlike js version, this test starts and stops its own mining, so it's wrapped in order to stop mining if anything fails
+    try {
       
-      // wait for a block
-      MoneroBlockHeader header = daemon.getNextBlockHeader();
-      System.out.println("*** Block " + header.getHeight() + " added to chain ***");
-      
-      // give wallet time to catch up, otherwise incoming tx may not appear
-      // TODO: this lets new block slip, okay?
-      try {
-        TimeUnit.SECONDS.sleep(5);
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
+      // attempt to start mining to push the network along
+      boolean startedMining = false;
+      MoneroMiningStatus miningStatus = daemon.getMiningStatus();
+      if (!miningStatus.getIsActive()) {
+        try {
+          wallet.startMining(8, false, true);
+          startedMining = true;
+        } catch (MoneroException e) {
+          // no problem
+        }
       }
       
-      // get incoming/outgoing txs with sent ids
-      List<String> txIds = new ArrayList<String>();
-      for (MoneroTxWallet sentTx : sentTxs) txIds.add(sentTx.getId());  // TODO: convenience methods wallet.getTxById(), getTxsById()?
-      MoneroTxFilter filter = new MoneroTxFilter().setTxIds(txIds);
-      List<MoneroTxWallet> fetchedTxs = getAndTestTxs(wallet, filter, null, true);
-      assertFalse(fetchedTxs.isEmpty());
+      // send transactions
+      List<MoneroTxWallet> sentTxs;
+      if (sendConfig.getCanSplit()) sentTxs = wallet.sendSplit(sendConfig);
+      else sentTxs = Arrays.asList(wallet.send(sendConfig));
       
-      // test fetched txs
-      testOutInPairs(wallet, fetchedTxs, sendConfig, false);
-
-      // merge fetched txs into updated txs and original sent txs
-      for (MoneroTxWallet fetchedTx : fetchedTxs) {
+      // build test context
+      TestContext ctx = new TestContext();
+      ctx.wallet = wallet;
+      ctx.sendConfig = sendConfig;
+      ctx.isSendResponse = true;
+      
+      // test sent transactions
+      for (MoneroTxWallet tx : sentTxs) {
+        testTxWallet(tx, ctx);
+        assertEquals(false, tx.getIsConfirmed());
+        assertEquals(true, tx.getInTxPool());
+      }
+      
+      // track resulting outgoing and incoming txs as blocks are added to the chain
+      List<MoneroTxWallet> updatedTxs = null;
+      
+      // loop to update txs through confirmations
+      int numConfirmations = 0;
+      int numConfirmationsTotal = 2; // number of confirmations to test
+      while (numConfirmations < numConfirmationsTotal) {
         
-        // merge with updated txs
-        if (updatedTxs == null) updatedTxs = fetchedTxs;
-        else {
-          for (MoneroTxWallet updatedTx : updatedTxs) {
-            if (!fetchedTx.getId().equals(updatedTx.getId())) continue;
-            if (fetchedTx.getIsOutgoing() != updatedTx.getIsOutgoing()) continue; // skip if directions are different
-            updatedTx.merge(fetchedTx.copy());
-            if (updatedTx.getBlock() == null && fetchedTx.getBlock() != null) updatedTx.setBlock(fetchedTx.getBlock().copy().setTxs(Arrays.asList(updatedTx)));  // copy block for testing
+        // wait for a block
+        MoneroBlockHeader header = daemon.getNextBlockHeader();
+        System.out.println("*** Block " + header.getHeight() + " added to chain ***");
+        
+        // give wallet time to catch up, otherwise incoming tx may not appear
+        // TODO: this lets new block slip, okay?
+        try {
+          TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+        
+        // get incoming/outgoing txs with sent ids
+        List<String> txIds = new ArrayList<String>();
+        for (MoneroTxWallet sentTx : sentTxs) txIds.add(sentTx.getId());  // TODO: convenience methods wallet.getTxById(), getTxsById()?
+        MoneroTxFilter filter = new MoneroTxFilter().setTxIds(txIds);
+        List<MoneroTxWallet> fetchedTxs = getAndTestTxs(wallet, filter, null, true);
+        assertFalse(fetchedTxs.isEmpty());
+        
+        // test fetched txs
+        testOutInPairs(wallet, fetchedTxs, sendConfig, false);
+
+        // merge fetched txs into updated txs and original sent txs
+        for (MoneroTxWallet fetchedTx : fetchedTxs) {
+          
+          // merge with updated txs
+          if (updatedTxs == null) updatedTxs = fetchedTxs;
+          else {
+            for (MoneroTxWallet updatedTx : updatedTxs) {
+              if (!fetchedTx.getId().equals(updatedTx.getId())) continue;
+              if (fetchedTx.getIsOutgoing() != updatedTx.getIsOutgoing()) continue; // skip if directions are different
+              updatedTx.merge(fetchedTx.copy());
+              if (updatedTx.getBlock() == null && fetchedTx.getBlock() != null) updatedTx.setBlock(fetchedTx.getBlock().copy().setTxs(Arrays.asList(updatedTx)));  // copy block for testing
+            }
+          }
+          
+          // merge with original sent txs
+          for (MoneroTxWallet sentTx : sentTxs) {
+            if (!fetchedTx.getId().equals(sentTx.getId())) continue;
+            if (fetchedTx.getIsOutgoing() != sentTx.getIsOutgoing()) continue; // skip if directions are different
+            sentTx.merge(fetchedTx.copy());  // TODO: it's mergeable but tests don't account for extra info from send (e.g. hex) so not tested; could specify in test config
           }
         }
         
-        // merge with original sent txs
-        for (MoneroTxWallet sentTx : sentTxs) {
-          if (!fetchedTx.getId().equals(sentTx.getId())) continue;
-          if (fetchedTx.getIsOutgoing() != sentTx.getIsOutgoing()) continue; // skip if directions are different
-          sentTx.merge(fetchedTx.copy());  // TODO: it's mergeable but tests don't account for extra info from send (e.g. hex) so not tested; could specify in test config
-        }
+        // test updated txs
+        testOutInPairs(wallet, updatedTxs, sendConfig, false);
+        
+        // update confirmations in order to exit loop
+        numConfirmations = fetchedTxs.get(0).getNumConfirmations();
       }
       
-      // test updated txs
-      testOutInPairs(wallet, updatedTxs, sendConfig, false);
+      // stop mining if it was started by this test
+      if (startedMining) wallet.stopMining();
       
-      // update confirmations in order to exit loop
-      numConfirmations = fetchedTxs.get(0).getNumConfirmations();
+    } catch (MoneroException e) {
+      throw e;
+    } finally {
+      
+      // stop mining at end of test
+      try { daemon.stopMining(); }
+      catch (MoneroException e) { }
     }
-    
-    // stop mining if it was started by this test
-    if (startedMining) wallet.stopMining();
   }
   
   private void testOutInPairs(MoneroWallet wallet, List<MoneroTxWallet> txs, MoneroSendConfig sendConfig, boolean isSendResponse) {

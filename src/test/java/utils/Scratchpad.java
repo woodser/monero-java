@@ -1,11 +1,8 @@
 package utils;
 
-import static org.junit.Assert.assertTrue;
-
 import monero.daemon.MoneroDaemon;
+import monero.utils.MoneroException;
 import monero.wallet.MoneroWallet;
-import monero.wallet.config.MoneroTxFilter;
-import monero.wallet.model.MoneroTxWallet;
 
 /**
  * Scratchpad for quick scripting.
@@ -19,10 +16,16 @@ public class Scratchpad {
     MoneroWallet wallet = TestUtils.getWalletRpc();
     //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
     
+    
+//    for (int i = 0; i < 10; i++) {
+//      wallet.startMining(8, false, true);
+//      daemon.stopMining();
+//    }
+    
 //    try { wallet.startMining(8, false, true); }
 //    catch (MoneroException e) { }
 //    wallet.stopMining();
-//    daemon.stopMining();
+    daemon.stopMining();
 //    daemon.flushTxPool();
     
 //    // common variables
@@ -33,9 +36,9 @@ public class Scratchpad {
     
     // -------------------------------- SCRATCHPAD ----------------------------
     
-    MoneroTxWallet tx = wallet.getTxs(new MoneroTxFilter().setTxId("80abdb2be7fdf07249967a581150da77069a41cd28385701ce1027606fceb677")).get(0);
-    System.out.println(tx.toString());
-    assertTrue(tx.getBlock().getTxs().contains(tx));
+//    MoneroTxWallet tx = wallet.getTxs(new MoneroTxFilter().setTxId("80abdb2be7fdf07249967a581150da77069a41cd28385701ce1027606fceb677")).get(0);
+//    System.out.println(tx.toString());
+//    assertTrue(tx.getBlock().getTxs().contains(tx));
     
 //    List<MoneroAccount> accounts = wallet.getAccounts(true);
 //    for (MoneroAccount account : accounts) {
