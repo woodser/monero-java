@@ -1604,6 +1604,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   @Test
   public void testMining() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    MoneroMiningStatus status = daemon.getMiningStatus();
+    if (status.getIsActive()) wallet.stopMining();
     wallet.startMining(2, false, true);
     wallet.stopMining();
   }
