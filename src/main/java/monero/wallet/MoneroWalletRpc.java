@@ -1576,12 +1576,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
       else if (key.equals("subaddr_index")) {
         if (val instanceof Map) { // returned structure can be a subaddress index or a map containing major and minor
-          Map<String, Object> indices = (Map<String, Object>) val;
-          accountIdx = ((BigInteger) indices.get("major")).intValue();
-          subaddressIdx = ((BigInteger) indices.get("minor")).intValue();
+          Map<String, Object> rpcIndices = (Map<String, Object>) val;
+          accountIdx = ((BigInteger) rpcIndices.get("major")).intValue();
+          subaddressIdx = ((BigInteger) rpcIndices.get("minor")).intValue();
         } else {
           subaddressIdx = ((BigInteger) val).intValue();
         }
+      }
+      else if (key.equals("subaddr_indices")) {
+        Map<String, Object> rpcIndices = ((List<Map<String, Object>>) val).get(0);
+        accountIdx = ((BigInteger) rpcIndices.get("major")).intValue();
+        subaddressIdx = ((BigInteger) rpcIndices.get("minor")).intValue();
       }
       else if (key.equals("destinations")) {
         assertTrue(isOutgoing);

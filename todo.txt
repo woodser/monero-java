@@ -1,11 +1,18 @@
+- incorporate new tx fields
+- testSweepDust
+- TestAccounting
+- testCheckTxKey
+- testGetAddressIndices
+- testGetNewKeyImagesFromLastImport
+daemon.getKeyImageSpentStatus()
 fix tests
 testSendFromSubaddressesSplit unlocked balance should not have changed at [0, 8]
-testSweepOutputs NPE
+
 test double spend transaction in pool specifically
 implement and port sweepDust()
-communicate issues (-4 change address is not ours, do we want all excess fields, etc)
 confirm tx ordering since internal impl uses sets
 need to crawl blocks in test to test/handle duplicate output indices and merging
+communicate issues (-4 change address is not ours, do we want all excess fields, etc)
 api updates: getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
 update print test utilities
 update readme
@@ -18,22 +25,13 @@ remove typing on e.g. MoneroOutput.getVouts()?
 daemon.getTx(id), wallet needs equivalent convenience function
 testGetTransactionsWallet() how are txs in same order since internal implementation uses set?
 wallet.getTxs() returns txs in no particular order
+fetched vout's tx is incoming and outgoing are false
 
 
 ISSUES TO REPORT
 
-I’m seeing new rpc fields: cumulative_difficulty_top64, difficulty_top64, wide_cumulative_difficulty, wide_difficulty, and sanity_check_failed.  Are these intended for use by a rpc client, i.e. should they be surfaced over rpc?  If so may I get brief descriptions of each?
-
-
-testGetSpentKeyImageStatus hanging? re-test
-
-TODO
-- incorporate new tx fields
-- testSweepDust
-- TestAccounting
-- testCheckTxKey
-- testGetAddressIndices
-- testGetNewKeyImagesFromLastImport
+I usually get -1: No outputs found with rpc `sweep_single` and a `key_image` which is reported as unspent and confirmed by daemon and wallet rpc
+I’m seeing new rpc fields: cumulative_difficulty_top64, difficulty_top64, wide_cumulative_difficulty, wide_difficulty, and sanity_check_failed.  Are these intended for use by a rpc client, i.e. should they be surfaced over rpc?  If so what do they mean?
 
 
 NEXT
