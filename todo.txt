@@ -1,9 +1,8 @@
-testSendFromSubaddressesSplit unlocked balance should not have changed at [0, 8]
-testGetTxsByIdsInPool fails because a double spend is in the tx pool
-
 fix tests
+testSendFromSubaddressesSplit unlocked balance should not have changed at [0, 8]
+testSweepOutputs NPE
+test double spend transaction in pool specifically
 implement and port sweepDust()
-re-enable getReserveProofAccount
 communicate issues (-4 change address is not ours, do we want all excess fields, etc)
 confirm tx ordering since internal impl uses sets
 need to crawl blocks in test to test/handle duplicate output indices and merging
@@ -11,6 +10,7 @@ api updates: getTxsById, getBalancesWallet, more convenient filtering, remove ty
 update print test utilities
 update readme
 release
+update javascript with master updates
 
 balances: getBalanceWallet(), getBalanceAccount(), getBalancesSubaddress() : return MoneroBalances .getUnlockedBalance(), .getLockedBalance()
 more convenient filtering, e.g. one filter class with getTxId(), getInTxPool(), getIsOutgoing(), which is used in getTransfers(), etc
