@@ -1,7 +1,10 @@
-update to new master
+testSendFromSubaddressesSplit unlocked balance should not have changed at [0, 8]
+testGetTxsByIdsInPool fails because a double spend is in the tx pool
+
+fix tests
 implement and port sweepDust()
 re-enable getReserveProofAccount
-communicate errors (-4 change address is not ours, etc, if applicable)
+communicate issues (-4 change address is not ours, do we want all excess fields, etc)
 confirm tx ordering since internal impl uses sets
 need to crawl blocks in test to test/handle duplicate output indices and merging
 api updates: getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
@@ -15,6 +18,23 @@ remove typing on e.g. MoneroOutput.getVouts()?
 daemon.getTx(id), wallet needs equivalent convenience function
 testGetTransactionsWallet() how are txs in same order since internal implementation uses set?
 wallet.getTxs() returns txs in no particular order
+
+
+ISSUES TO REPORT
+
+I’m seeing new rpc fields: cumulative_difficulty_top64, difficulty_top64, wide_cumulative_difficulty, wide_difficulty, and sanity_check_failed.  Are these intended for use by a rpc client, i.e. should they be surfaced over rpc?  If so may I get brief descriptions of each?
+
+
+testGetSpentKeyImageStatus hanging? re-test
+
+TODO
+- incorporate new tx fields
+- testSweepDust
+- TestAccounting
+- testCheckTxKey
+- testGetAddressIndices
+- testGetNewKeyImagesFromLastImport
+
 
 NEXT
 clean up these todos below
@@ -50,10 +70,15 @@ update readme
 
 MONERO-RPC
 HIGH
+toggling mining causes monerod to hang
 segmentation fault 11 on testReserveProofAccount() with balance but no unlocked balance
 balances are wrong after sends (https://github.com/monero-project/monero/issues/4500)
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
 still seeing -16 tx not possible
+
+update suggested_confirmations_threshold documentation
+It's "how much confirmations till it's not worth rewriting the chain". But it's got lots of assumptions, so is maybe not too useful.
+in other words, the number of confirmations before it’s “highly unlikely” to be double spent or overwritten, and could therefore be considered “settled”, say, for a merchant?
 
 MEDIUM
 typos on monero-wallet-rpc tx proofs, wrong output on check_reserve_proof

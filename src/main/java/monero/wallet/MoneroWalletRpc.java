@@ -1505,7 +1505,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    */
   @SuppressWarnings("unchecked")
   private static MoneroTxWallet convertRpcTxWallet(Map<String, Object> rpcTx, MoneroTxWallet tx, Boolean isOutgoing) {  // TODO: change everything to safe set
-        
+    
     // initialize tx to return
     if (tx == null) tx = new MoneroTxWallet();
     

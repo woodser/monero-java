@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -64,6 +65,9 @@ public class TestMoneroDaemonRpc {
   private static boolean TEST_NON_RELAYS = true;
   private static boolean TEST_RELAYS = true; // creates and relays outgoing txs
   private static boolean TEST_NOTIFICATIONS = true;
+  
+  // logger
+  private static final Logger LOGGER = Logger.getLogger(TestMoneroDaemonRpc.class);
   
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -1370,6 +1374,11 @@ public class TestMoneroDaemonRpc {
     assertNotNull(tx.getInTxPool());
     assertNotNull(tx.getIsCoinbase());
     assertNotNull(tx.getIsDoubleSpend());
+    assertTrue(tx.getVersion() >= 0);
+    assertTrue(tx.getUnlockTime() >= 0);
+    assertNotNull(tx.getVins());
+    assertNotNull(tx.getVouts());
+    assertTrue(tx.getExtra().length > 0);
     
     // test presence of output indices
     // TODO: change this over to vouts only
@@ -1457,6 +1466,18 @@ public class TestMoneroDaemonRpc {
       assertTrue(!tx.getIsConfirmed());
     }
     
+    // test vins and vouts
+    if (!tx.getIsCoinbase()) assertFalse(tx.getVins().isEmpty());
+    for (MoneroOutput vin : tx.getVins()) {
+      assertTrue(tx == vin.getTx());
+      testVin(vin, ctx);
+    }
+    assertFalse(tx.getVouts().isEmpty());
+    for (MoneroOutput vout : tx.getVouts()) {
+      assert(tx == vout.getTx());
+      testVout(vout, ctx);
+    }
+    
     // test pruned vs not pruned
     if (ctx.fromGetTxPool || Boolean.TRUE.equals(ctx.fromGetBlocksByHeight)) assertNull(tx.getPrunableHash());   // TODO monero-daemon-rpc: tx pool txs do not have prunable hash, TODO: getBlocksByHeight() has inconsistent client-side pruning
     else assertNotNull(tx.getPrunableHash());
@@ -1465,18 +1486,10 @@ public class TestMoneroDaemonRpc {
       assertNull(tx.getSize());
       assertNull(tx.getLastRelayedTimestamp());
       assertNull(tx.getReceivedTimestamp());
-      assertNull(tx.getVersion());
-      assertNull(tx.getUnlockTime());
-      assertNull(tx.getVins());
-      assertNull(tx.getVouts());
-      assertNull(tx.getExtra());
       assertNull(tx.getFullHex());
       assertNotNull(tx.getPrunedHex());
     } else {
       assertNull(tx.getPrunedHex());
-      assertTrue(tx.getVersion() >= 0);
-      assertTrue(tx.getUnlockTime() >= 0);
-      assertTrue(tx.getExtra().length > 0);
       if (Boolean.TRUE.equals(ctx.fromGetBlocksByHeight)) assertNull(tx.getFullHex());         // TODO: getBlocksByHeight() has inconsistent client-side pruning
       else assertFalse(tx.getFullHex().isEmpty());
       if (Boolean.TRUE.equals(ctx.fromGetBlocksByHeight)) assertNull(tx.getRctSigPrunable());  // TODO: getBlocksByHeight() has inconsistent client-side pruning
@@ -1489,20 +1502,6 @@ public class TestMoneroDaemonRpc {
         if (tx.getIsRelayed()) assert(tx.getLastRelayedTimestamp() > 0);
         else assertNull(tx.getLastRelayedTimestamp());
         assert(tx.getReceivedTimestamp() > 0);
-      }
-      
-      // test vins and vouts
-      assertNotNull(tx.getVins());
-      assertNotNull(tx.getVouts());
-      if (!tx.getIsCoinbase()) assertFalse(tx.getVins().isEmpty());
-      for (MoneroOutput vin : tx.getVins()) {
-        assertTrue(tx == vin.getTx());
-        testVin(vin, ctx);
-      }
-      assertFalse(tx.getVouts().isEmpty());
-      for (MoneroOutput vout : tx.getVouts()) {
-        assert(tx == vout.getTx());
-        testVout(vout, ctx);
       }
     }
     
