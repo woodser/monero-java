@@ -1663,11 +1663,11 @@ public class TestMoneroDaemonRpc {
     
     // test image
     for (String keyImage : keyImages) {
-      assertEquals(expectedStatus, daemon.getSpentStatus(keyImage));
+      assertEquals(expectedStatus, daemon.getKeyImageSpentStatus(keyImage));
     }
     
     // test array of images
-    List<MoneroKeyImageSpentStatus> statuses = daemon.getSpentStatuses(keyImages);
+    List<MoneroKeyImageSpentStatus> statuses = daemon.getKeyImageSpentStatuses(keyImages);
     assertEquals(keyImages.size(), statuses.size());
     for (MoneroKeyImageSpentStatus status : statuses) assertEquals(expectedStatus, status);
   }

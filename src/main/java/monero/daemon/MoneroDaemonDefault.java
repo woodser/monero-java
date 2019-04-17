@@ -64,8 +64,8 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   }
   
   @Override
-  public MoneroKeyImageSpentStatus getSpentStatus(String keyImage) {
-    return getSpentStatuses(Arrays.asList(keyImage)).get(0);
+  public MoneroKeyImageSpentStatus getKeyImageSpentStatus(String keyImage) {
+    return getKeyImageSpentStatuses(Arrays.asList(keyImage)).get(0);
   }
   
   @Override
