@@ -3,6 +3,7 @@ package monero.wallet.model;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroException;
+import monero.utils.MoneroUtils;
 
 /**
  * Models a Monero output with wallet extensions.
@@ -12,6 +13,7 @@ public class MoneroOutputWallet extends MoneroOutput {
   private Integer accountIndex;
   private Integer subaddressIndex;
   private Boolean isSpent;
+  private Boolean isUnlocked;
   
   public MoneroOutputWallet() {
     // nothing to construct
@@ -27,6 +29,7 @@ public class MoneroOutputWallet extends MoneroOutput {
     accountIndex = output.accountIndex;
     subaddressIndex = output.subaddressIndex;
     isSpent = output.isSpent;
+    isUnlocked = output.isUnlocked;
   }
   
   public MoneroTxWallet getTx() {
@@ -71,8 +74,28 @@ public class MoneroOutputWallet extends MoneroOutput {
     return this;
   }
   
+  public Boolean getIsUnlocked() {
+    return isUnlocked;
+  }
+  
+  public MoneroOutputWallet setIsUnlocked(Boolean isUnlocked) {
+    this.isUnlocked = isUnlocked;
+    return this;
+  }
+  
   public MoneroOutputWallet copy() {
     return new MoneroOutputWallet(this);
+  }
+  
+  public String toString(int indent) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(super.toString(indent) + "\n");
+    sb.append(MoneroUtils.kvLine("Account index", this.getAccountIndex(), indent));
+    sb.append(MoneroUtils.kvLine("Subaddress index", this.getSubaddressIndex(), indent));
+    sb.append(MoneroUtils.kvLine("Is spent", this.getIsSpent(), indent));
+    sb.append(MoneroUtils.kvLine("Is unlocked", this.getIsUnlocked(), indent));
+    String str = sb.toString();
+    return str.substring(0, str.length() - 1);  // strip last newline
   }
 
   @Override
@@ -81,6 +104,7 @@ public class MoneroOutputWallet extends MoneroOutput {
     int result = super.hashCode();
     result = prime * result + ((accountIndex == null) ? 0 : accountIndex.hashCode());
     result = prime * result + ((isSpent == null) ? 0 : isSpent.hashCode());
+    result = prime * result + ((isUnlocked == null) ? 0 : isUnlocked.hashCode());
     result = prime * result + ((subaddressIndex == null) ? 0 : subaddressIndex.hashCode());
     return result;
   }
@@ -97,6 +121,9 @@ public class MoneroOutputWallet extends MoneroOutput {
     if (isSpent == null) {
       if (other.isSpent != null) return false;
     } else if (!isSpent.equals(other.isSpent)) return false;
+    if (isUnlocked == null) {
+      if (other.isUnlocked != null) return false;
+    } else if (!isUnlocked.equals(other.isUnlocked)) return false;
     if (subaddressIndex == null) {
       if (other.subaddressIndex != null) return false;
     } else if (!subaddressIndex.equals(other.subaddressIndex)) return false;

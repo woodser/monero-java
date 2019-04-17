@@ -48,6 +48,7 @@ public class MoneroVoutFilter extends MoneroOutputWallet implements Filter<Moner
     if (this.getSubaddressIndex() != null && !this.getSubaddressIndex().equals(vout.getSubaddressIndex())) return false;
     if (this.getAmount() != null && this.getAmount().compareTo(vout.getAmount()) != 0) return false;
     if (this.getIsSpent() != null && !this.getIsSpent().equals(vout.getIsSpent())) return false;
+    if (this.getIsUnlocked() != null && !this.getIsUnlocked().equals(vout.getIsUnlocked())) return false;
     
     // filter on vout's key image
     if (this.getKeyImage() != null) {
@@ -97,6 +98,13 @@ public class MoneroVoutFilter extends MoneroOutputWallet implements Filter<Moner
     super.setIsSpent(isSpent);
     return this;
   }
+  
+  @Override
+  public MoneroVoutFilter setIsUnlocked(Boolean isUnlocked) {
+    super.setIsUnlocked(isUnlocked);
+    return this;
+  }
+
 
   @Override
   public MoneroVoutFilter setKeyImage(MoneroKeyImage keyImage) {

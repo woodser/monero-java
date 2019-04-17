@@ -783,6 +783,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     for (MoneroTxWallet tx : txs) {
       initSentTxWallet(config, tx);
       tx.getOutgoingTransfer().setAccountIndex(accountIdx);
+      if (subaddressIndices.size() == 1) tx.getOutgoingTransfer().setSubaddressIndex(subaddressIndices.get(0));
     }
     
     // initialize txs from rpc response
@@ -901,7 +902,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         MoneroTransfer transfer = tx.getOutgoingTransfer();
         transfer.setAddress(getAddress(accountIdx, 0));
         transfer.setAccountIndex(accountIdx);
-        transfer.setSubaddressIndex(0); // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
+        //transfer.setSubaddressIndex(0); // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
         MoneroDestination destination = new MoneroDestination(config.getDestinations().get(0).getAddress(), transfer.getAmount());
         transfer.setDestinations(Arrays.asList(destination));
         tx.setOutgoingTransfer(transfer);
@@ -1442,7 +1443,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setIsFailed(false);
     tx.setMixin(config.getMixin());
     MoneroTransfer transfer = new MoneroTransfer().setTx(tx);
-    transfer.setSubaddressIndex(0); // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
+    //transfer.setSubaddressIndex(0); // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
     List<MoneroDestination> destCopies = new ArrayList<MoneroDestination>();
     for (MoneroDestination dest : config.getDestinations()) destCopies.add(dest.copy());
     transfer.setDestinations(destCopies);
@@ -1761,6 +1762,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("key_image")) vout.setKeyImage(new MoneroKeyImage((String) val));
       else if (key.equals("global_index")) vout.setIndex(((BigInteger) val).intValue());
       else if (key.equals("tx_hash")) tx.setId((String) val);
+      else if (key.equals("unlocked")) vout.setIsUnlocked((Boolean) val);
       else if (key.equals("subaddr_index")) {
         Map<String, BigInteger> rpcIndices = (HashMap<String, BigInteger>) val;
         vout.setAccountIndex(rpcIndices.get("major").intValue());
