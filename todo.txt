@@ -9,7 +9,6 @@ rename daemon.getKeyImageSpentStatus()
 testSendFromSubaddressesSplit unlocked balance should not have changed at [0, 8]
 test double spend transaction in pool specifically
 confirm tx ordering since internal impl uses sets
-communicate issues (-4 change address is not ours, do we want all excess fields, etc)
 api updates: getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
 update print test utilities
 update readme
