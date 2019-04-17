@@ -966,6 +966,12 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertEquals(subaddressIdx, (int) vout.getSubaddressIndex());
       assertEquals(true, vout.getTx().getIsConfirmed());
     }
+    
+    // get vout by key image
+    String keyImage = vouts.get(0).getKeyImage().getHex();
+    vouts = wallet.getVouts(new MoneroVoutFilter().setKeyImage(new MoneroKeyImage(keyImage)));
+    assertEquals(1, vouts.size());
+    assertEquals(keyImage, vouts.get(0).getKeyImage().getHex());
   }
   
   // Validates inputs when getting vouts
@@ -2009,11 +2015,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       // sweep output to address
       String address = wallet.getAddress(vout.getAccountIndex(), vout.getSubaddressIndex());
       MoneroSendConfig sendConfig = new MoneroSendConfig(address).setKeyImage(vout.getKeyImage().getHex());
-      assertNull(sendConfig.getDestinations().get(0).getAmount());
       MoneroTxWallet tx;
       if (useParams) tx = wallet.sweepOutput(address, vout.getKeyImage().getHex(), null); // test params
       else tx = wallet.sweepOutput(sendConfig);  // test config
-      assertNull(sendConfig.getDestinations().get(0).getAmount());
       
       // test resulting tx
       TestContext ctx = new TestContext();

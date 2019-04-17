@@ -5,13 +5,12 @@ import java.util.List;
 
 import common.types.Filter;
 import monero.daemon.model.MoneroKeyImage;
-import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroTxWallet;
 
 /**
- * Filters transfers that don't match initialized filter criteria.
+ * Filters outputs that don't match initialized filter criteria.
  */
 public class MoneroVoutFilter extends MoneroOutputWallet implements Filter<MoneroOutputWallet> {
 
@@ -45,11 +44,17 @@ public class MoneroVoutFilter extends MoneroOutputWallet implements Filter<Moner
     if (!(vout instanceof MoneroOutputWallet)) return false;
     
     // filter on vout
-    if (this.getAccountIndex() != null && this.getAccountIndex() != vout.getAccountIndex()) return false;
-    if (this.getSubaddressIndex() != null && this.getSubaddressIndex() != vout.getSubaddressIndex()) return false;
+    if (this.getAccountIndex() != null && !this.getAccountIndex().equals(vout.getAccountIndex())) return false;
+    if (this.getSubaddressIndex() != null && !this.getSubaddressIndex().equals(vout.getSubaddressIndex())) return false;
     if (this.getAmount() != null && this.getAmount().compareTo(vout.getAmount()) != 0) return false;
-    if (this.getIsSpent() != null && this.getIsSpent() != vout.getIsSpent()) return false;
-    if (this.getKeyImage() != null && this.getKeyImage() != vout.getKeyImage()) return false;  // TODO: bug: shouldn't compare by refererence, add test to catch 
+    if (this.getIsSpent() != null && !this.getIsSpent().equals(vout.getIsSpent())) return false;
+    
+    // filter on vout's key image
+    if (this.getKeyImage() != null) {
+      if (vout.getKeyImage() == null) return false;
+      if (this.getKeyImage().getHex() != null && !this.getKeyImage().getHex().equals(vout.getKeyImage().getHex())) return false;
+      if (this.getKeyImage().getSignature() != null && !this.getKeyImage().getSignature().equals(vout.getKeyImage().getSignature())) return false;
+    }
     
     // filter extensions
     if (this.getSubaddressIndices() != null && !this.getSubaddressIndices().contains(vout.getSubaddressIndex())) return false;
@@ -94,31 +99,31 @@ public class MoneroVoutFilter extends MoneroOutputWallet implements Filter<Moner
   }
 
   @Override
-  public MoneroOutput setKeyImage(MoneroKeyImage keyImage) {
+  public MoneroVoutFilter setKeyImage(MoneroKeyImage keyImage) {
     super.setKeyImage(keyImage);
     return this;
   }
 
   @Override
-  public MoneroOutput setAmount(BigInteger amount) {
+  public MoneroVoutFilter setAmount(BigInteger amount) {
     super.setAmount(amount);
     return this;
   }
 
   @Override
-  public MoneroOutput setIndex(Integer index) {
+  public MoneroVoutFilter setIndex(Integer index) {
     super.setIndex(index);
     return this;
   }
 
   @Override
-  public MoneroOutput setRingOutputIndices(List<Integer> ringOutputIndices) {
+  public MoneroVoutFilter setRingOutputIndices(List<Integer> ringOutputIndices) {
     super.setRingOutputIndices(ringOutputIndices);
     return this;
   }
 
   @Override
-  public MoneroOutput setStealthPublicKey(String stealthPublicKey) {
+  public MoneroVoutFilter setStealthPublicKey(String stealthPublicKey) {
     super.setStealthPublicKey(stealthPublicKey);
     return this;
   }
