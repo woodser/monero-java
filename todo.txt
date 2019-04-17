@@ -1,11 +1,12 @@
-- incorporate new tx fields
-- testSweepDust
-- TestAccounting
-- testCheckTxKey
-- testGetAddressIndices
-- testGetNewKeyImagesFromLastImport
-daemon.getKeyImageSpentStatus()
-fix tests
+add isUnlocked to MoneroOutputWallet, test, update model
+update sweepOutput() test and impl to honor isUnlocked and !isSpent
+incorporate new tx fields
+testSweepDust
+TestAccounting
+testCheckTxKey
+testGetAddressIndices
+testGetNewKeyImagesFromLastImport
+rename daemon.getKeyImageSpentStatus()
 testSendFromSubaddressesSplit unlocked balance should not have changed at [0, 8]
 
 test double spend transaction in pool specifically
