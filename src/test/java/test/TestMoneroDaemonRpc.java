@@ -64,7 +64,7 @@ public class TestMoneroDaemonRpc {
   // test configuration
   private static boolean TEST_NON_RELAYS = true;
   private static boolean TEST_RELAYS = true; // creates and relays outgoing txs
-  private static boolean TEST_NOTIFICATIONS = true;
+  private static boolean TEST_NOTIFICATIONS = false;
   
   // logger
   private static final Logger LOGGER = Logger.getLogger(TestMoneroDaemonRpc.class);

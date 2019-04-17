@@ -1,18 +1,14 @@
-add isUnlocked to MoneroOutputWallet, test, update model
-update sweepOutput() test and impl to honor isUnlocked and !isSpent
-incorporate new tx fields
+need to crawl blocks in test to test/handle duplicate output indices and merging
 testSweepDust
-TestAccounting
+testAccounting
 testCheckTxKey
+incorporate new tx fields
 testGetAddressIndices
 testGetNewKeyImagesFromLastImport
 rename daemon.getKeyImageSpentStatus()
 testSendFromSubaddressesSplit unlocked balance should not have changed at [0, 8]
-
 test double spend transaction in pool specifically
-implement and port sweepDust()
 confirm tx ordering since internal impl uses sets
-need to crawl blocks in test to test/handle duplicate output indices and merging
 communicate issues (-4 change address is not ours, do we want all excess fields, etc)
 api updates: getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
 update print test utilities

@@ -63,7 +63,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   protected static final boolean LITE_MODE = false;
   protected static final boolean TEST_NON_RELAYS = true;
   protected static final boolean TEST_RELAYS = true;
-  protected static final boolean TEST_NOTIFICATIONS = true;
+  protected static final boolean TEST_NOTIFICATIONS = false;
   protected static final boolean TEST_RESETS = false;
   private static final int MAX_TX_PROOFS = 25;   // maximum number of transactions to check for each proof, undefined to check all
   private static final int SEND_MAX_DIFF = 60;
@@ -744,7 +744,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         List<MoneroTransfer> transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setAccountIndex(subaddress.getAccountIndex()).setSubaddressIndex(subaddress.getIndex()), null, null);
         for (MoneroTransfer transfer : transfers) {
           assertEquals(subaddress.getAccountIndex(), transfer.getAccountIndex());
-          assertEquals(transfer.getIsOutgoing() ? 0 : subaddress.getIndex(), (int) transfer.getSubaddressIndex());
+          assertEquals(subaddress.getIndex(), transfer.getSubaddressIndex());
           if (transfer.getAccountIndex() != 0 && transfer.getSubaddressIndex() != 0) nonDefaultIncoming = true;
           
           // don't add duplicates TODO monero-wallet-rpc: duplicate outgoing transfers returned for different subaddress indices, way to return outgoing subaddress indices?
@@ -800,7 +800,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setAccountIndex(1).setSubaddressIndex(2).setTxFilter(new MoneroTxFilter().setIsConfirmed(true)), null, true);
     for (MoneroTransfer transfer : transfers) {
       assertEquals(1, (int) transfer.getAccountIndex());
-      assertEquals(transfer.getIsOutgoing() ? 0 : 2, (int) transfer.getSubaddressIndex());
+      assertEquals(2, (int) transfer.getSubaddressIndex());
       assertTrue(transfer.getTx().getIsConfirmed());
     }
     
@@ -1865,7 +1865,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     for (MoneroTxWallet tx : txs) {
       testTxWallet(tx, ctx);
       assertEquals(fromAccount.getIndex(), tx.getOutgoingTransfer().getAccountIndex());
-      assertEquals(0, (int) tx.getOutgoingTransfer().getSubaddressIndex()); // TODO (monero-wallet-rpc): outgoing transactions do not indicate originating subaddresses
+      assertEquals(fromSubaddress.getIndex(), tx.getOutgoingTransfer().getSubaddressIndex());
       assertTrue(sendAmount.equals(tx.getOutgoingAmount()));
       if (sendConfig.getPaymentId() != null) assertEquals(sendConfig.getPaymentId(), tx.getPaymentId());
       
@@ -2003,14 +2003,15 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // test config
     int numVouts = 3;
     
-    // get unspent vouts to sweep
-    List<MoneroOutputWallet> vouts = wallet.getVouts(new MoneroVoutFilter().setIsSpent(false));
+    // get unspent and unlocked vouts to sweep
+    List<MoneroOutputWallet> vouts = wallet.getVouts(new MoneroVoutFilter().setIsSpent(false).setIsUnlocked(true));
     assertTrue("Wallet has no unspent vouts; run send tests", vouts.size() >= numVouts);
     vouts = vouts.subList(0, numVouts);
     
     // sweep each vout by key image
     boolean useParams = true; // for loop flips in order to alternate test
     for (MoneroOutputWallet vout : vouts) {
+      testVout(vout);
       
       // sweep output to address
       String address = wallet.getAddress(vout.getAccountIndex(), vout.getSubaddressIndex());
@@ -2885,6 +2886,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertTrue(vout.getSubaddressIndex() >= 0);
     assertTrue(vout.getIndex() >= 0);
     assertNotNull(vout.getIsSpent());
+    assertNotNull(vout.getIsUnlocked());
     assertNotNull(vout.getKeyImage());
     assertTrue(vout.getKeyImage().getHex().length() > 0);
     TestUtils.testUnsignedBigInteger(vout.getAmount(), true);

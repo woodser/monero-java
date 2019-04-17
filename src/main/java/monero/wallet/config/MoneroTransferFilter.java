@@ -71,7 +71,7 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
     // filter on transfer fields
     if (this.getAddress() != null && !this.getAddress().equals(transfer.getAddress())) return false;
     if (this.getAccountIndex() != null && !this.getAccountIndex().equals(transfer.getAccountIndex())) return false;
-    if (this.getSubaddressIndex() != null && !transfer.getIsOutgoing() && this.getSubaddressIndex() != transfer.getSubaddressIndex()) return false; // outgoing subaddresses are always 0 TODO monero-wallet-rpc: possible to return correct subaddress?
+    if (this.getSubaddressIndex() != null && !this.getSubaddressIndex().equals(transfer.getSubaddressIndex())) return false;
     if (this.getAmount() != null && this.getAmount().compareTo(transfer.getAmount()) != 0) return false;
     
     // filter extensions
