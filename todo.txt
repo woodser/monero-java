@@ -1,4 +1,5 @@
 monero-wallet-rpc utilizing high cpu after tests run
+testGetReserveProofAccount() seg fault 11
 what does `blocks_to_unlock` mean in the response of `get_balance`, which returns the balances of accounts and subaddresses	// how many blocks until entire balance is unlocked
 incorporate new tx fields
 need to crawl blocks in test to test/handle duplicate output indices and merging
