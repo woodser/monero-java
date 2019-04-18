@@ -851,14 +851,21 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return convertRpcBlockHeader(rpcHeader, null);
   }
   
+  //else if (key.equals("difficulty")) header.setDifficulty(MoneroUtils.reconcile(header.getDifficulty(), (BigInteger) val));
+  //else if (key.equals("cumulative_difficulty")) header.setCumulativeDifficulty(MoneroUtils.reconcile(header.getCumulativeDifficulty(), (BigInteger) val));
+  
   private static MoneroBlockHeader convertRpcBlockHeader(Map<String, Object> rpcHeader, MoneroBlockHeader header) {
     if (header == null) header = new MoneroBlockHeader();
     for (String key : rpcHeader.keySet()) {
       Object val = rpcHeader.get(key);
       if (key.equals("block_size")) header.setSize(MoneroUtils.reconcile(header.getSize(), ((BigInteger) val).longValue()));
       else if (key.equals("depth")) header.setDepth(MoneroUtils.reconcile(header.getDepth(), ((BigInteger) val).longValue()));
-      else if (key.equals("difficulty")) header.setDifficulty(MoneroUtils.reconcile(header.getDifficulty(), (BigInteger) val));
-      else if (key.equals("cumulative_difficulty")) header.setCumulativeDifficulty(MoneroUtils.reconcile(header.getCumulativeDifficulty(), (BigInteger) val));
+      else if (key.equals("difficulty")) { }  // handled by wide_difficulty
+      else if (key.equals("cumulative_difficulty")) { } // handled by wide_cumulative_difficulty
+      else if (key.equals("difficulty_top64")) { }  // handled by wide_difficulty
+      else if (key.equals("cumulative_difficulty_top64")) { } // handled by wide_cumulative_difficulty
+      else if (key.equals("wide_difficulty")) header.setDifficulty(MoneroUtils.reconcile(header.getDifficulty(), new BigInteger(((String) val).substring(2), 16)));
+      else if (key.equals("wide_cumulative_difficulty")) header.setCumulativeDifficulty(MoneroUtils.reconcile(header.getCumulativeDifficulty(), new BigInteger(((String) val).substring(2), 16)));
       else if (key.equals("hash")) header.setId(MoneroUtils.reconcile(header.getId(), (String) val));
       else if (key.equals("height")) header.setHeight(MoneroUtils.reconcile(header.getHeight(), ((BigInteger) val).intValue()));
       else if (key.equals("major_version")) header.setMajorVersion(MoneroUtils.reconcile(header.getMajorVersion(), ((BigInteger) val).intValue()));
@@ -874,6 +881,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("pow_hash")) header.setPowHash(MoneroUtils.reconcile(header.getPowHash(), "".equals(val) ? null : (String) val));
       else if (key.equals("tx_hashes")) {}  // used in block model, not header model
       else if (key.equals("miner_tx")) {}   // used in block model, not header model
+      else if (key.equals("miner_tx_hash")) header.setCoinbaseTxId((String) val);
       else LOGGER.warn("WARNING: ignoring unexpected block header field: '" + key + "': " + val);
     }
     return header;

@@ -1294,6 +1294,7 @@ public class TestMoneroDaemonRpc {
       assertTrue(header.getDifficulty().compareTo(BigInteger.valueOf(0)) > 0);
       assertTrue(header.getCumulativeDifficulty().compareTo(BigInteger.valueOf(0)) > 0);
       assertEquals(64, header.getId().length());
+      assertEquals(64, header.getCoinbaseTxId().length());
       assertTrue(header.getNumTxs() >= 0);
       assertNotNull(header.getOrphanStatus());
       assertNotNull(header.getReward());
@@ -1304,6 +1305,7 @@ public class TestMoneroDaemonRpc {
       assertNull(header.getDifficulty());
       assertNull(header.getCumulativeDifficulty());
       assertNull(header.getId());
+      assertNull(header.getCoinbaseTxId());
       assertNull(header.getNumTxs());
       assertNull(header.getOrphanStatus());
       assertNull(header.getReward());
@@ -1844,6 +1846,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(true, result.getIsRct());
     assertEquals(false, result.getIsOverspend());
     assertEquals(false, result.getIsTooBig());
+    //assertEquals(false, result.getSanityCheckFailed());
   }
   
   private static void testSubmitTxResultDoubleSpend(MoneroSubmitTxResult result) {
@@ -1870,6 +1873,8 @@ public class TestMoneroDaemonRpc {
     assertNotNull(result.getIsRct());
     assertNotNull(result.getIsOverspend());
     assertNotNull(result.getIsTooBig());
+    //assertNotNull(result.getSanityCheckFailed());
+    assertTrue(result.getReason() == null || !result.getReason().isEmpty());
   }
   
   private static void testOutputHistogramEntry(MoneroOutputHistogramEntry entry) {
