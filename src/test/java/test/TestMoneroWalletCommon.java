@@ -179,7 +179,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertNotNull(result.getReceivedMoney());
   }
   
-  // Can get all accounts in the wallet without subaddresses
+  // Can get accounts without subaddresses
   @Test
   public void testGetAccountsWithoutSubaddresses() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -191,7 +191,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
-  // Can get all accounts in the wallet with subaddresses
+  // Can get accounts with subaddresses
   @Test
   public void testGetAccountsWithSubaddresses() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
