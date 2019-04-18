@@ -15,6 +15,7 @@ public class MoneroSubmitTxResult {
   private Boolean isRct;
   private Boolean isOverspend;
   private Boolean isTooBig;
+  private Boolean sanityCheckFailed;
   private String reason;
   
   public Boolean getIsGood() {
@@ -95,6 +96,14 @@ public class MoneroSubmitTxResult {
   
   public void setIsTooBig(Boolean isTooBig) {
     this.isTooBig = isTooBig;
+  }
+  
+  public Boolean getSanityCheckFailed() {
+    return sanityCheckFailed;
+  }
+  
+  public void setSanityCheckFailed(Boolean sanityCheckFailed) {
+    this.sanityCheckFailed = sanityCheckFailed;
   }
   
   public String getReason() {

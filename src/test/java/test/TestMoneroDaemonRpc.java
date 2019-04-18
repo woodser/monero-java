@@ -1846,7 +1846,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(true, result.getIsRct());
     assertEquals(false, result.getIsOverspend());
     assertEquals(false, result.getIsTooBig());
-    //assertEquals(false, result.getSanityCheckFailed());
+    assertEquals(false, result.getSanityCheckFailed());
   }
   
   private static void testSubmitTxResultDoubleSpend(MoneroSubmitTxResult result) {
@@ -1873,7 +1873,7 @@ public class TestMoneroDaemonRpc {
     assertNotNull(result.getIsRct());
     assertNotNull(result.getIsOverspend());
     assertNotNull(result.getIsTooBig());
-    //assertNotNull(result.getSanityCheckFailed());
+    assertNotNull(result.getSanityCheckFailed());
     assertTrue(result.getReason() == null || !result.getReason().isEmpty());
   }
   
