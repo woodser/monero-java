@@ -1,3 +1,4 @@
+testGetTxsByIdsInPool hanging when run with all tests
 can 0x safely be stripped to convert wide difficulty to big integer?
 what does `blocks_to_unlock` mean in the response of `get_balance`, which returns the balances of accounts and subaddresses
 incorporate new tx fields
