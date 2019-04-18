@@ -14,6 +14,15 @@ update readme
 release
 update javascript with master updates
 
+2019-04-17 22:09:56 WARN  MoneroDaemonRpc:845 - WARNING: ignoring unexpected field in block template: difficulty_top64: 0
+2019-04-17 22:09:56 WARN  MoneroDaemonRpc:845 - WARNING: ignoring unexpected field in block template: wide_difficulty: 0x24e5
+2019-04-17 22:10:18 WARN  MoneroDaemonRpc:845 - WARNING: ignoring unexpected field in block template: difficulty_top64: 0
+2019-04-17 22:10:18 WARN  MoneroDaemonRpc:845 - WARNING: ignoring unexpected field in block template: wide_difficulty: 0x24e5
+2019-04-17 22:10:34 WARN  MoneroDaemonRpc:1212 - WARNING: Ignoring unexpected info field: cumulative_difficulty_top64: 0
+2019-04-17 22:10:34 WARN  MoneroDaemonRpc:1212 - WARNING: Ignoring unexpected info field: difficulty_top64: 0
+2019-04-17 22:10:34 WARN  MoneroDaemonRpc:1212 - WARNING: Ignoring unexpected info field: wide_cumulative_difficulty: 0x29fa72fcc
+2019-04-17 22:10:34 WARN  MoneroDaemonRpc:1212 - WARNING: Ignoring unexpected info field: wide_difficulty: 0x24e5
+
 balances: getBalanceWallet(), getBalanceAccount(), getBalancesSubaddress() : return MoneroBalances .getUnlockedBalance(), .getLockedBalance()
 more convenient filtering, e.g. one filter class with getTxId(), getInTxPool(), getIsOutgoing(), which is used in getTransfers(), etc
 remove typing on e.g. MoneroOutput.getVouts()?
