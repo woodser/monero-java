@@ -1,6 +1,6 @@
 testGetTxsByIdsInPool hanging when run with all tests
-can 0x safely be stripped to convert wide difficulty to big integer?
-what does `blocks_to_unlock` mean in the response of `get_balance`, which returns the balances of accounts and subaddresses
+able to make waller rpc process run away
+what does `blocks_to_unlock` mean in the response of `get_balance`, which returns the balances of accounts and subaddresses	// how many blocks until entire balance is unlocked
 incorporate new tx fields
 need to crawl blocks in test to test/handle duplicate output indices and merging
 testSweepDust
@@ -13,16 +13,7 @@ api updates: getTxsById, getBalancesWallet, more convenient filtering, remove ty
 update print test utilities
 update readme
 release
-update javascript with master updates
-
-2019-04-17 22:09:56 WARN  MoneroDaemonRpc:845 - WARNING: ignoring unexpected field in block template: difficulty_top64: 0
-2019-04-17 22:09:56 WARN  MoneroDaemonRpc:845 - WARNING: ignoring unexpected field in block template: wide_difficulty: 0x24e5
-2019-04-17 22:10:18 WARN  MoneroDaemonRpc:845 - WARNING: ignoring unexpected field in block template: difficulty_top64: 0
-2019-04-17 22:10:18 WARN  MoneroDaemonRpc:845 - WARNING: ignoring unexpected field in block template: wide_difficulty: 0x24e5
-2019-04-17 22:10:34 WARN  MoneroDaemonRpc:1212 - WARNING: Ignoring unexpected info field: cumulative_difficulty_top64: 0
-2019-04-17 22:10:34 WARN  MoneroDaemonRpc:1212 - WARNING: Ignoring unexpected info field: difficulty_top64: 0
-2019-04-17 22:10:34 WARN  MoneroDaemonRpc:1212 - WARNING: Ignoring unexpected info field: wide_cumulative_difficulty: 0x29fa72fcc
-2019-04-17 22:10:34 WARN  MoneroDaemonRpc:1212 - WARNING: Ignoring unexpected info field: wide_difficulty: 0x24e5
+update javascript with master updates;
 
 balances: getBalanceWallet(), getBalanceAccount(), getBalancesSubaddress() : return MoneroBalances .getUnlockedBalance(), .getLockedBalance()
 more convenient filtering, e.g. one filter class with getTxId(), getInTxPool(), getIsOutgoing(), which is used in getTransfers(), etc
