@@ -1,3 +1,4 @@
+can 0x safely be stripped to convert wide difficulty to big integer?
 what does `blocks_to_unlock` mean in the response of `get_balance`, which returns the balances of accounts and subaddresses
 incorporate new tx fields
 need to crawl blocks in test to test/handle duplicate output indices and merging
@@ -5,6 +6,7 @@ testSweepDust
 testGetNewKeyImagesFromLastImport
 testSendFromSubaddressesSplit unlocked balance should not have changed at [0, 8]
 test double spend transaction in pool specifically
+remote cout from binary utils
 confirm tx ordering since internal impl uses sets
 api updates: getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
 update print test utilities

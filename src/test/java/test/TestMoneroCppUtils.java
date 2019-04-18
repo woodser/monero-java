@@ -23,7 +23,6 @@ public class TestMoneroCppUtils {
     map.put("heights", Arrays.asList(111, 222, 333));
     byte[] binary = MoneroCppUtils.mapToBinary(map);
     assertTrue(binary.length > 0);
-    System.out.println(binary);
     //for (int i = 0; i < binary.length; i++) System.out.println(binary[i]);
     Map<String, Object> map2 = MoneroCppUtils.binaryToMap(binary);
     assertEquals(map, map2);
