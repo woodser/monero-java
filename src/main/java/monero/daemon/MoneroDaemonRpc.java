@@ -837,6 +837,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("blocktemplate_blob")) template.setBlockHashingBlob((String) val);
       else if (key.equals("difficulty")) template.setDifficulty((BigInteger) val);
       else if (key.equals("expected_reward")) template.setExpectedReward((BigInteger) val);
+      else if (key.equals("difficulty")) { }  // handled by wide_difficulty
+      else if (key.equals("difficulty_top64")) { }  // handled by wide_difficulty
+      else if (key.equals("wide_difficulty")) template.setDifficulty(MoneroUtils.reconcile(template.getDifficulty(), prefixedHexToBI((String) val)));
       else if (key.equals("height")) template.setHeight(((BigInteger) val).intValue());
       else if (key.equals("prev_hash")) template.setPrevId((String) val);
       else if (key.equals("reserved_offset")) template.setReservedOffset(((BigInteger) val).intValue());
@@ -851,9 +854,6 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return convertRpcBlockHeader(rpcHeader, null);
   }
   
-  //else if (key.equals("difficulty")) header.setDifficulty(MoneroUtils.reconcile(header.getDifficulty(), (BigInteger) val));
-  //else if (key.equals("cumulative_difficulty")) header.setCumulativeDifficulty(MoneroUtils.reconcile(header.getCumulativeDifficulty(), (BigInteger) val));
-  
   private static MoneroBlockHeader convertRpcBlockHeader(Map<String, Object> rpcHeader, MoneroBlockHeader header) {
     if (header == null) header = new MoneroBlockHeader();
     for (String key : rpcHeader.keySet()) {
@@ -864,8 +864,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("cumulative_difficulty")) { } // handled by wide_cumulative_difficulty
       else if (key.equals("difficulty_top64")) { }  // handled by wide_difficulty
       else if (key.equals("cumulative_difficulty_top64")) { } // handled by wide_cumulative_difficulty
-      else if (key.equals("wide_difficulty")) header.setDifficulty(MoneroUtils.reconcile(header.getDifficulty(), new BigInteger(((String) val).substring(2), 16)));
-      else if (key.equals("wide_cumulative_difficulty")) header.setCumulativeDifficulty(MoneroUtils.reconcile(header.getCumulativeDifficulty(), new BigInteger(((String) val).substring(2), 16)));
+      else if (key.equals("wide_difficulty")) header.setDifficulty(MoneroUtils.reconcile(header.getDifficulty(), prefixedHexToBI((String) val)));
+      else if (key.equals("wide_cumulative_difficulty")) header.setCumulativeDifficulty(MoneroUtils.reconcile(header.getCumulativeDifficulty(), prefixedHexToBI((String) val)));
       else if (key.equals("hash")) header.setId(MoneroUtils.reconcile(header.getId(), (String) val));
       else if (key.equals("height")) header.setHeight(MoneroUtils.reconcile(header.getHeight(), ((BigInteger) val).intValue()));
       else if (key.equals("major_version")) header.setMajorVersion(MoneroUtils.reconcile(header.getMajorVersion(), ((BigInteger) val).intValue()));
@@ -1183,8 +1183,12 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("block_weight_limit")) info.setBlockWeightLimit(((BigInteger) val).intValue());
       else if (key.equals("block_weight_median")) info.setBlockWeightMedian(((BigInteger) val).intValue());
       else if (key.equals("bootstrap_daemon_address")) { if (!((String) val).isEmpty()) info.setBootstrapDaemonAddress((String) val); }
-      else if (key.equals("cumulative_difficulty")) info.setCumulativeDifficulty((BigInteger) val);
-      else if (key.equals("difficulty")) info.setDifficulty((BigInteger) val);
+      else if (key.equals("difficulty")) { }  // handled by wide_difficulty
+      else if (key.equals("cumulative_difficulty")) { } // handled by wide_cumulative_difficulty
+      else if (key.equals("difficulty_top64")) { }  // handled by wide_difficulty
+      else if (key.equals("cumulative_difficulty_top64")) { } // handled by wide_cumulative_difficulty
+      else if (key.equals("wide_difficulty")) info.setDifficulty(MoneroUtils.reconcile(info.getDifficulty(), prefixedHexToBI((String) val)));
+      else if (key.equals("wide_cumulative_difficulty")) info.setCumulativeDifficulty(MoneroUtils.reconcile(info.getCumulativeDifficulty(), prefixedHexToBI((String) val)));
       else if (key.equals("free_space")) info.setFreeSpace((BigInteger) val);
       else if (key.equals("database_size")) info.setDatabaseSize(((BigInteger) val).intValue());
       else if (key.equals("grey_peerlist_size")) info.setNumOfflinePeers(((BigInteger) val).intValue());
@@ -1314,5 +1318,16 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else LOGGER.warn("WARNING: ignoring unexpected field in alternative chain: " + key + ": " + val);
     }
     return chain;
+  }
+  
+  /**
+   * Converts a '0x' prefixed hexidecimal string to a BigInteger.
+   * 
+   * @param hex is the '0x' prefixed hexidecimal string to convert
+   * @return BigInteger is the hexicedimal converted to decimal
+   */
+  private static BigInteger prefixedHexToBI(String hex) {
+    assertTrue(hex.startsWith("0x"));
+    return new BigInteger(hex.substring(2), 16);
   }
 }
