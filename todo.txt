@@ -16,6 +16,7 @@ release
 update javascript with master updates;
 
 refactor getAccounts(Boolean includeSubaddresses, Boolean isUsed, String tag, Boolean includeBalanceDetails)? that's filtering with most known options (in internal wallet rpc)
+handle blocks_to_unlock at top level of get_balance call which reflects account, but is it based only on queried subaddresses?
 balances: getBalanceWallet(), getBalanceAccount(), getBalancesSubaddress() : return MoneroBalances .getUnlockedBalance(), .getLockedBalance()
 more convenient filtering, e.g. one filter class with getTxId(), getInTxPool(), getIsOutgoing(), which is used in getTransfers(), etc
 remove typing on e.g. MoneroOutput.getVouts()?
