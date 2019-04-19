@@ -15,6 +15,7 @@ update readme
 release
 update javascript with master updates;
 
+refactor getAccounts(Boolean includeSubaddresses, Boolean isUsed, String tag, Boolean includeBalanceDetails)? that's filtering with most known options (in internal wallet rpc)
 balances: getBalanceWallet(), getBalanceAccount(), getBalancesSubaddress() : return MoneroBalances .getUnlockedBalance(), .getLockedBalance()
 more convenient filtering, e.g. one filter class with getTxId(), getInTxPool(), getIsOutgoing(), which is used in getTransfers(), etc
 remove typing on e.g. MoneroOutput.getVouts()?
