@@ -293,7 +293,7 @@ public class TestMoneroDaemonRpc {
     int height = daemon.getHeight();
     
     // test entire chain
-    testGetRange(null, null, height);
+    testGetRange(height - 250, null, height);
   };
   
   // Can get a block by id
