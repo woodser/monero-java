@@ -22,6 +22,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.daemon.MoneroDaemon;
+import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroAltChain;
 import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
@@ -58,7 +59,7 @@ import utils.TestUtils;
 public class TestMoneroDaemonRpc {
   
   // classes to test
-  private static MoneroDaemon daemon;
+  private static MoneroDaemonRpc daemon;  // could test base interface if multiple daemon implementations come along
   private static MoneroWallet wallet;
   
   // test configuration
@@ -284,16 +285,24 @@ public class TestMoneroDaemonRpc {
     testGetRange(height - numBlocks - 1, null, height);
   };
   
-  // Can get blocks over a long range
+  // Can return every block in a long range with chunked requests
   @Test
-  public void testGetBlocksByRangeLong() {
+  public void testBlocksInLongRange() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
-    
-    // get current height
-    int height = daemon.getHeight();
-    
-    // test entire chain
-    testGetRange(height - 250, null, height);
+    int numBlocks = 2160; // test last ~3 days worth of blocks
+    int endHeight = daemon.getHeight() - 1;
+    int startHeight = Math.max(0, endHeight - numBlocks);
+    int lastHeight = startHeight - 1;
+    while (lastHeight < endHeight) {
+      List<MoneroBlock> blocks = daemon.getAsManyBlocksAsPossible(lastHeight + 1, endHeight, null);
+      for (MoneroBlock block : blocks) testBlock(block, BINARY_BLOCK_CTX);
+      lastHeight = blocks.get(blocks.size() - 1).getHeight();
+      
+      // print out
+      int numTxs = 0;
+      for (MoneroBlock block : blocks) numTxs += block.getTxs().size();
+      System.out.println(lastHeight + "/" + endHeight + ", fetched " + blocks.size() + " blocks with " + numTxs + " txs");
+    }
   };
   
   // Can get a block by id
