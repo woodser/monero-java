@@ -12,7 +12,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
@@ -285,7 +287,7 @@ public class TestMoneroDaemonRpc {
     testGetRange(height - numBlocks - 1, null, height);
   };
   
-  // Can return every block in a long range with chunked requests
+  // Can return every block in a long range using chunked requests
   @Test
   public void testBlocksInLongRange() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
@@ -1407,7 +1409,15 @@ public class TestMoneroDaemonRpc {
     // TODO: change this over to vouts only
     if (tx.getIsCoinbase()) assertEquals(tx.getOutputIndices(), null); // TODO: how to get output indices for coinbase transactions?
     if (tx.getInTxPool() || ctx.fromGetTxPool || Boolean.FALSE.equals(ctx.hasOutputIndices)) assertEquals(null, tx.getOutputIndices());
-    else assertFalse(tx.getOutputIndices().isEmpty());
+    else assertNotNull(tx.getOutputIndices());
+    if (tx.getOutputIndices() != null) {
+      assertFalse(tx.getOutputIndices().isEmpty());
+      Set<Integer> indices = new HashSet<Integer>();
+      for (Integer index : tx.getOutputIndices()) {
+        assertFalse("Tx contains duplicate output indices", indices.contains(index));
+        indices.add(index);
+      }
+    }
     
     // test confirmed ctx
     if (ctx.isConfirmed == true) assertEquals(true, tx.getIsConfirmed());
