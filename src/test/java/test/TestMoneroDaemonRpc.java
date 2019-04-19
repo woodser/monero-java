@@ -253,27 +253,13 @@ public class TestMoneroDaemonRpc {
     // fetch blocks
     List<MoneroBlock> blocks = daemon.getBlocksByHeight(heights);
     
-    // config for testing blocks
-    // TODO: getBlocksByHeight() has inconsistent client-side pruning
-    // TODO: get_blocks_by_height.bin does not return output indices (#5127)
-    TestContext ctx  = new TestContext();
-    ctx.hasHex = false;
-    ctx.headerIsFull = false;
-    ctx.hasTxs = true;
-    ctx.txContext = new TestContext();
-    ctx.txContext.isPruned = false;
-    ctx.txContext.isConfirmed = true;
-    ctx.txContext.fromGetTxPool = false;
-    ctx.txContext.hasOutputIndices = false;
-    ctx.txContext.fromGetBlocksByHeight = true;
-    
     // test blocks
     boolean txFound = false;
     assertEquals(numBlocks, blocks.size());
     for (int i = 0; i < heights.size(); i++) {
       MoneroBlock block = blocks.get(i);
       if (!block.getTxs().isEmpty()) txFound = true;
-      testBlock(block, ctx);
+      testBinaryBlock(block);
       assertEquals(block.getHeight(), heights.get(i));      
     }
     assertTrue("No transactions found to test", txFound);
@@ -1206,7 +1192,7 @@ public class TestMoneroDaemonRpc {
     Boolean isConfirmed;
     Boolean isCoinbase;
     Boolean fromGetTxPool;
-    Boolean fromGetBlocksByHeight;
+    Boolean fromBinaryBlock;
     Boolean hasOutputIndices;
     Boolean doNotTestCopy;
     Boolean hasTxs;
@@ -1221,7 +1207,7 @@ public class TestMoneroDaemonRpc {
       this.isConfirmed = ctx.isConfirmed;
       this.isCoinbase = ctx.isCoinbase;
       this.fromGetTxPool = ctx.fromGetTxPool;
-      this.fromGetBlocksByHeight = ctx.fromGetBlocksByHeight;
+      this.fromBinaryBlock = ctx.fromBinaryBlock;
       this.hasOutputIndices = ctx.hasOutputIndices;
       this.doNotTestCopy = ctx.doNotTestCopy;
       this.hasTxs = ctx.hasTxs;
@@ -1311,6 +1297,26 @@ public class TestMoneroDaemonRpc {
       assertNull(header.getReward());
       assertNull(header.getWeight());
     }
+  }
+  
+  private static void testBinaryBlock(MoneroBlock block) {
+    
+    // config for testing binary blocks
+    // TODO: binary blocks have inconsistent client-side pruning
+    // TODO: get_blocks_by_height.bin does not return output indices (#5127)
+    TestContext ctx  = new TestContext();
+    ctx.hasHex = false;
+    ctx.headerIsFull = false;
+    ctx.hasTxs = true;
+    ctx.txContext = new TestContext();
+    ctx.txContext.isPruned = false;
+    ctx.txContext.isConfirmed = true;
+    ctx.txContext.fromGetTxPool = false;
+    ctx.txContext.hasOutputIndices = false;
+    ctx.txContext.fromBinaryBlock = true;
+    
+    // test block
+    testBlock(block, ctx);
   }
   
   // TODO: test block deep copy
@@ -1481,7 +1487,7 @@ public class TestMoneroDaemonRpc {
     }
     
     // test pruned vs not pruned
-    if (ctx.fromGetTxPool || Boolean.TRUE.equals(ctx.fromGetBlocksByHeight)) assertNull(tx.getPrunableHash());   // TODO monero-daemon-rpc: tx pool txs do not have prunable hash, TODO: getBlocksByHeight() has inconsistent client-side pruning
+    if (ctx.fromGetTxPool || Boolean.TRUE.equals(ctx.fromBinaryBlock)) assertNull(tx.getPrunableHash());   // TODO monero-daemon-rpc: tx pool txs do not have prunable hash, TODO: getBlocksByHeight() has inconsistent client-side pruning
     else assertNotNull(tx.getPrunableHash());
     if (ctx.isPruned) {
       assertNull(tx.getRctSigPrunable());
@@ -1492,9 +1498,9 @@ public class TestMoneroDaemonRpc {
       assertNotNull(tx.getPrunedHex());
     } else {
       assertNull(tx.getPrunedHex());
-      if (Boolean.TRUE.equals(ctx.fromGetBlocksByHeight)) assertNull(tx.getFullHex());         // TODO: getBlocksByHeight() has inconsistent client-side pruning
+      if (Boolean.TRUE.equals(ctx.fromBinaryBlock)) assertNull(tx.getFullHex());         // TODO: getBlocksByHeight() has inconsistent client-side pruning
       else assertFalse(tx.getFullHex().isEmpty());
-      if (Boolean.TRUE.equals(ctx.fromGetBlocksByHeight)) assertNull(tx.getRctSigPrunable());  // TODO: getBlocksByHeight() has inconsistent client-side pruning
+      if (Boolean.TRUE.equals(ctx.fromBinaryBlock)) assertNull(tx.getRctSigPrunable());  // TODO: getBlocksByHeight() has inconsistent client-side pruning
       //else assertNotNull(tx.getRctSigPrunable()); // TODO: define and test this
       assertFalse(tx.getIsDoubleSpend());
       if (tx.getIsConfirmed()) {
@@ -1580,12 +1586,17 @@ public class TestMoneroDaemonRpc {
   }
   
   private static void testRange(Integer startHeight, Integer endHeight, Integer chainHeight) {
+    
+    // fetch blocks by range
     int realStartHeight = startHeight == null ? 0 : startHeight;
     int realEndHeight = endHeight == null ? chainHeight - 1 : endHeight;
     List<MoneroBlock> blocks = daemon.getBlocksByRange(startHeight, endHeight);
     assertEquals(realEndHeight - realStartHeight + 1, blocks.size());
+    
+    // test each block
     for (int i = 0; i < blocks.size(); i++) {
       assertEquals(realStartHeight + i, (int) blocks.get(i).getHeight());
+      testBinaryBlock(blocks.get(i));
     }
   }
   
