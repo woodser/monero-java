@@ -289,7 +289,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testBlocksInLongRange() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
-    int numBlocks = 2160; // test last ~3 days worth of blocks
+    int numBlocks = 2160; // test ~ last 3 days of blocks
     int endHeight = daemon.getHeight() - 1;
     int startHeight = Math.max(0, endHeight - numBlocks);
     int lastHeight = startHeight - 1;
