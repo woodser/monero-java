@@ -62,6 +62,7 @@ public class TestMoneroDaemonRpc {
   private static MoneroWallet wallet;
   
   // test configuration
+  private static final boolean LITE_MODE = false;
   private static boolean TEST_NON_RELAYS = true;
   private static boolean TEST_RELAYS = true; // creates and relays outgoing txs
   private static boolean TEST_NOTIFICATIONS = false;
@@ -263,7 +264,7 @@ public class TestMoneroDaemonRpc {
     int height = daemon.getHeight();
     
     // get valid height range
-    int numBlocks = 1; // TODO: RequestError: Error: read ECONNRESET or  RequestError: Error: socket hang up if > 64 or (or > 1 if test getBlocksByHeight() runs first)
+    int numBlocks = 100;
     int numBlocksAgo = 190;
     assertTrue(numBlocks > 0);
     assertTrue(numBlocksAgo >= numBlocks);
@@ -281,16 +282,19 @@ public class TestMoneroDaemonRpc {
     
     // test unspecified end
     testGetRange(height - numBlocks - 1, null, height);
-    
-    // test unspecified start and end 
-    //testRange(null, null, height);  // TODO: RequestError: Error: socket hang up
   };
   
-  // Returns correct blocks over a long range
+  // Can get blocks over a long range
   @Test
-  public void testRangeOfBlocks() {
-    throw new RuntimeException("Not implemented");
-  }
+  public void testGetBlocksByRangeLong() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
+    
+    // get current height
+    int height = daemon.getHeight();
+    
+    // test entire chain
+    testGetRange(null, null, height);
+  };
   
   // Can get a block by id
   @Test

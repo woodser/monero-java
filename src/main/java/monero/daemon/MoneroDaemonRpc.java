@@ -60,7 +60,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   private MoneroDaemonPoller daemonPoller;
   private static final String DEFAULT_ID = "0000000000000000000000000000000000000000000000000000000000000000";
   private static final Logger LOGGER = Logger.getLogger(MoneroDaemonRpc.class);
-  
+  private static long MAX_REQ_SIZE = 3000000;  // max request size when fetching blocks from daemon
 
   public MoneroDaemonRpc(MoneroRpc rpc) {
     this.rpc = rpc;
