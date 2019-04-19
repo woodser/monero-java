@@ -66,6 +66,22 @@ public class TestMoneroDaemonRpc {
   private static boolean TEST_RELAYS = true; // creates and relays outgoing txs
   private static boolean TEST_NOTIFICATIONS = false;
   
+  // config for testing binary blocks
+  // TODO: binary blocks have inconsistent client-side pruning
+  // TODO: get_blocks_by_height.bin does not return output indices (#5127)
+  private static TestContext BINARY_BLOCK_CTX = new TestContext();
+  {
+    BINARY_BLOCK_CTX.hasHex = false;
+    BINARY_BLOCK_CTX.headerIsFull = false;
+    BINARY_BLOCK_CTX.hasTxs = true;
+    BINARY_BLOCK_CTX.txContext = new TestContext();
+    BINARY_BLOCK_CTX.txContext.isPruned = false;
+    BINARY_BLOCK_CTX.txContext.isConfirmed = true;
+    BINARY_BLOCK_CTX.txContext.fromGetTxPool = false;
+    BINARY_BLOCK_CTX.txContext.hasOutputIndices = false;
+    BINARY_BLOCK_CTX.txContext.fromBinaryBlock = true;
+  }
+  
   // logger
   private static final Logger LOGGER = Logger.getLogger(TestMoneroDaemonRpc.class);
   
@@ -259,7 +275,7 @@ public class TestMoneroDaemonRpc {
     for (int i = 0; i < heights.size(); i++) {
       MoneroBlock block = blocks.get(i);
       if (!block.getTxs().isEmpty()) txFound = true;
-      testBinaryBlock(block);
+      testBlock(block, BINARY_BLOCK_CTX);
       assertEquals(block.getHeight(), heights.get(i));      
     }
     assertTrue("No transactions found to test", txFound);
@@ -1299,26 +1315,6 @@ public class TestMoneroDaemonRpc {
     }
   }
   
-  private static void testBinaryBlock(MoneroBlock block) {
-    
-    // config for testing binary blocks
-    // TODO: binary blocks have inconsistent client-side pruning
-    // TODO: get_blocks_by_height.bin does not return output indices (#5127)
-    TestContext ctx  = new TestContext();
-    ctx.hasHex = false;
-    ctx.headerIsFull = false;
-    ctx.hasTxs = true;
-    ctx.txContext = new TestContext();
-    ctx.txContext.isPruned = false;
-    ctx.txContext.isConfirmed = true;
-    ctx.txContext.fromGetTxPool = false;
-    ctx.txContext.hasOutputIndices = false;
-    ctx.txContext.fromBinaryBlock = true;
-    
-    // test block
-    testBlock(block, ctx);
-  }
-  
   // TODO: test block deep copy
   private static void testBlock(MoneroBlock block, TestContext ctx) {
     
@@ -1596,7 +1592,7 @@ public class TestMoneroDaemonRpc {
     // test each block
     for (int i = 0; i < blocks.size(); i++) {
       assertEquals(realStartHeight + i, (int) blocks.get(i).getHeight());
-      testBinaryBlock(blocks.get(i));
+      testBlock(blocks.get(i), BINARY_BLOCK_CTX);
     }
   }
   
