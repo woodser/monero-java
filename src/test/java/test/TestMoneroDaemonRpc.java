@@ -274,17 +274,23 @@ public class TestMoneroDaemonRpc {
     // test known start and end heights
     //console.log("Height: " + height);
     //console.log("Fecthing " + (endHeight - startHeight + 1) + " blocks [" + startHeight + ", " + endHeight + "]");
-    testRange(startHeight, endHeight, height);
+    testGetRange(startHeight, endHeight, height);
     
     // test unspecified start
-    testRange(null, numBlocks - 1, height);
+    testGetRange(null, numBlocks - 1, height);
     
     // test unspecified end
-    testRange(height - numBlocks - 1, null, height);
+    testGetRange(height - numBlocks - 1, null, height);
     
     // test unspecified start and end 
     //testRange(null, null, height);  // TODO: RequestError: Error: socket hang up
   };
+  
+  // Returns correct blocks over a long range
+  @Test
+  public void testRangeOfBlocks() {
+    throw new RuntimeException("Not implemented");
+  }
   
   // Can get a block by id
   @Test
@@ -1581,7 +1587,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(tx.toString(), merged.toString());
   }
   
-  private static void testRange(Integer startHeight, Integer endHeight, Integer chainHeight) {
+  private static void testGetRange(Integer startHeight, Integer endHeight, Integer chainHeight) {
     
     // fetch blocks by range
     int realStartHeight = startHeight == null ? 0 : startHeight;
@@ -1594,10 +1600,6 @@ public class TestMoneroDaemonRpc {
       assertEquals(realStartHeight + i, (int) blocks.get(i).getHeight());
       testBlock(blocks.get(i), BINARY_BLOCK_CTX);
     }
-  }
-  
-  private static void testRangeInChunks(Integer startHeight, Integer endHeight, Integer chainHeight) {
-    throw new RuntimeException("Not implemented");
   }
   
   private static List<String> getConfirmedTxIds(MoneroDaemon daemon) {
