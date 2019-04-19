@@ -200,33 +200,6 @@ public class TestMoneroDaemonRpc {
     }
   }
   
-  // Can get a block by id
-  @Test
-  public void testGetBlockById() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    
-    // test config
-    TestContext ctx = new TestContext();
-    ctx.hasHex = true;
-    ctx.hasTxs = false;
-    ctx.headerIsFull = true;
-    
-    // retrieve by id of last block
-    MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
-    String id = daemon.getBlockId(lastHeader.getHeight());
-    MoneroBlock block = daemon.getBlockById(id);
-    testBlock(block, ctx);
-    assertEquals(daemon.getBlockByHeight(block.getHeight()), block);
-    assertEquals(null, block.getTxs());
-    
-    // retrieve by id of previous to last block
-    id = daemon.getBlockId(lastHeader.getHeight() - 1);
-    block = daemon.getBlockById(id);
-    testBlock(block, ctx);
-    assertEquals(daemon.getBlockByHeight(lastHeader.getHeight() - 1), block);
-    assertEquals(null, block.getTxs());
-  }
-  
   // Can get a block by height
   @Test
   public void testGetBlockByHeight() {
@@ -281,13 +254,6 @@ public class TestMoneroDaemonRpc {
     assertTrue("No transactions found to test", txFound);
   }
   
-  // Can get blocks by id which includes transactions (binary)
-  @Test
-  public void testGetBlocksByIdBinary() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    throw new RuntimeException("Not implemented");
-  }
-  
   // Can get blocks by range
   @Test
   public void testGetBlocksByRange() {
@@ -320,6 +286,40 @@ public class TestMoneroDaemonRpc {
     //testRange(null, null, height);  // TODO: RequestError: Error: socket hang up
   };
   
+  // Can get a block by id
+  @Test
+  public void testGetBlockById() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    
+    // test config
+    TestContext ctx = new TestContext();
+    ctx.hasHex = true;
+    ctx.hasTxs = false;
+    ctx.headerIsFull = true;
+    
+    // retrieve by id of last block
+    MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
+    String id = daemon.getBlockId(lastHeader.getHeight());
+    MoneroBlock block = daemon.getBlockById(id);
+    testBlock(block, ctx);
+    assertEquals(daemon.getBlockByHeight(block.getHeight()), block);
+    assertEquals(null, block.getTxs());
+    
+    // retrieve by id of previous to last block
+    id = daemon.getBlockId(lastHeader.getHeight() - 1);
+    block = daemon.getBlockById(id);
+    testBlock(block, ctx);
+    assertEquals(daemon.getBlockByHeight(lastHeader.getHeight() - 1), block);
+    assertEquals(null, block.getTxs());
+  }
+
+  // Can get blocks by id which includes transactions (binary)
+  @Test
+  public void testGetBlocksByIdBinary() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    throw new RuntimeException("Not implemented");
+  }
+
   // Can get block ids (binary)
   @Test
   public void testGetBlockIdsBinary() {
@@ -1594,6 +1594,10 @@ public class TestMoneroDaemonRpc {
       assertEquals(realStartHeight + i, (int) blocks.get(i).getHeight());
       testBlock(blocks.get(i), BINARY_BLOCK_CTX);
     }
+  }
+  
+  private static void testRangeInChunks(Integer startHeight, Integer endHeight, Integer chainHeight) {
+    throw new RuntimeException("Not implemented");
   }
   
   private static List<String> getConfirmedTxIds(MoneroDaemon daemon) {
