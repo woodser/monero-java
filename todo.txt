@@ -1,3 +1,5 @@
+daemon.getBlocksByRange should handle block crawling
+
 monero-wallet-rpc utilizing high cpu after tests run
 testGetReserveProofAccount() seg fault 11
 need to crawl blocks in test to test/handle duplicate output indices and merging
