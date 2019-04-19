@@ -278,12 +278,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // fetch and merge fields from get_balance across all accounts
     if (includeSubaddresses && !skipBalances) {
       
-      // these fields are not returned from rpc if 0 so pre-initialize them
+      // these fields are not initialized if subaddress is unused and therefore not returned from `get_balance`
       for (MoneroAccount account : accounts) {
         for (MoneroSubaddress subaddress : account.getSubaddresses()) {
           subaddress.setBalance(BigInteger.valueOf(0));
           subaddress.setUnlockedBalance(BigInteger.valueOf(0));
           subaddress.setNumUnspentOutputs(0);
+          subaddress.setNumBlocksToUnlock(0);
         }
       }
       
@@ -366,11 +367,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // fetch and initialize subaddress balances
     if (!skipBalances) {
       
-      // these fields are not returned from rpc if 0 so pre-initialize them
+      // these fields are not initialized if subaddress is unused and therefore not returned from `get_balance`
       for (MoneroSubaddress subaddress : subaddresses) {
         subaddress.setBalance(BigInteger.valueOf(0));
         subaddress.setUnlockedBalance(BigInteger.valueOf(0));
         subaddress.setNumUnspentOutputs(0);
+        subaddress.setNumBlocksToUnlock(0);
       }
 
       // fetch and initialize balances
@@ -386,6 +388,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
             if (subaddress.getBalance() != null) tgtSubaddress.setBalance(subaddress.getBalance());
             if (subaddress.getUnlockedBalance() != null) tgtSubaddress.setUnlockedBalance(subaddress.getUnlockedBalance());
             if (subaddress.getNumUnspentOutputs() != null) tgtSubaddress.setNumUnspentOutputs(subaddress.getNumUnspentOutputs());
+            if (subaddress.getNumBlocksToUnlock() != null) tgtSubaddress.setNumBlocksToUnlock(subaddress.getNumBlocksToUnlock());
           }
         }
       }
@@ -426,6 +429,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     subaddress.setUnlockedBalance(BigInteger.valueOf(0));
     subaddress.setNumUnspentOutputs(0);
     subaddress.setIsUsed(false);
+    subaddress.setNumBlocksToUnlock(0);
     return subaddress;
   }
 
@@ -1352,6 +1356,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("num_unspent_outputs")) subaddress.setNumUnspentOutputs(((BigInteger) val).intValue());
       else if (key.equals("label")) { if (!"".equals(val)) subaddress.setLabel((String) val); }
       else if (key.equals("used")) subaddress.setIsUsed((Boolean) val);
+      else if (key.equals("blocks_to_unlock")) subaddress.setNumBlocksToUnlock(((BigInteger) val).intValue());
       else LOGGER.warn("WARNING: ignoring unexpected subaddress field: " + key + ": " + val);
     }
     return subaddress;

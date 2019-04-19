@@ -31,13 +31,15 @@ public class Scratchpad {
     
     // -------------------------------- SCRATCHPAD ----------------------------
     
-    MoneroKeyImageSpentStatus status = daemon.getKeyImageSpentStatus("e0a0e86f63ef489ce6163298a531c584add551698e7381a789a4e506023027f6");
-    System.out.println("Spent: " + status);
+    wallet.getAccounts(true);
     
-    MoneroOutputWallet vout = wallet.getVouts(new MoneroVoutFilter().setKeyImage(new MoneroKeyImage("e0a0e86f63ef489ce6163298a531c584add551698e7381a789a4e506023027f6"))).get(0);
-    MoneroTxWallet tx = wallet.getTxs(new MoneroTxFilter().setTxIds(Arrays.asList(vout.getTx().getId())).setIncludeVouts(true)).get(0);
-    System.out.println(tx);
-    System.out.println(tx.getHeight() + " | " + (wallet.getHeight() - tx.getHeight()));
+//    MoneroKeyImageSpentStatus status = daemon.getKeyImageSpentStatus("e0a0e86f63ef489ce6163298a531c584add551698e7381a789a4e506023027f6");
+//    System.out.println("Spent: " + status);
+//    
+//    MoneroOutputWallet vout = wallet.getVouts(new MoneroVoutFilter().setKeyImage(new MoneroKeyImage("e0a0e86f63ef489ce6163298a531c584add551698e7381a789a4e506023027f6"))).get(0);
+//    MoneroTxWallet tx = wallet.getTxs(new MoneroTxFilter().setTxIds(Arrays.asList(vout.getTx().getId())).setIncludeVouts(true)).get(0);
+//    System.out.println(tx);
+//    System.out.println(tx.getHeight() + " | " + (wallet.getHeight() - tx.getHeight()));
     
 //    List<MoneroKeyImage> keyImages = wallet.getKeyImages();
 //    for (MoneroKeyImage keyImage : keyImages) {

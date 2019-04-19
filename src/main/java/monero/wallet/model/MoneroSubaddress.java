@@ -15,6 +15,7 @@ public class MoneroSubaddress {
   private BigInteger unlockedBalance;
   private Integer numUnspentOutputs;
   private Boolean isUsed;
+  private Integer numBlocksToUnlock;
   
   public MoneroSubaddress() {
     // nothing to construct
@@ -88,6 +89,14 @@ public class MoneroSubaddress {
     this.isUsed = isUsed;
   }
 
+  public Integer getNumBlocksToUnlock() {
+    return numBlocksToUnlock;
+  }
+
+  public void setNumBlocksToUnlock(Integer numBlocksToUnlock) {
+    this.numBlocksToUnlock = numBlocksToUnlock;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -98,6 +107,7 @@ public class MoneroSubaddress {
     result = prime * result + ((index == null) ? 0 : index.hashCode());
     result = prime * result + ((isUsed == null) ? 0 : isUsed.hashCode());
     result = prime * result + ((label == null) ? 0 : label.hashCode());
+    result = prime * result + ((numBlocksToUnlock == null) ? 0 : numBlocksToUnlock.hashCode());
     result = prime * result + ((numUnspentOutputs == null) ? 0 : numUnspentOutputs.hashCode());
     result = prime * result + ((unlockedBalance == null) ? 0 : unlockedBalance.hashCode());
     return result;
@@ -127,6 +137,9 @@ public class MoneroSubaddress {
     if (label == null) {
       if (other.label != null) return false;
     } else if (!label.equals(other.label)) return false;
+    if (numBlocksToUnlock == null) {
+      if (other.numBlocksToUnlock != null) return false;
+    } else if (!numBlocksToUnlock.equals(other.numBlocksToUnlock)) return false;
     if (numUnspentOutputs == null) {
       if (other.numUnspentOutputs != null) return false;
     } else if (!numUnspentOutputs.equals(other.numUnspentOutputs)) return false;

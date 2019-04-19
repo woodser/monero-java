@@ -2573,7 +2573,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     TestUtils.testUnsignedBigInteger(subaddress.getBalance());
     TestUtils.testUnsignedBigInteger(subaddress.getUnlockedBalance());
     assertTrue(subaddress.getNumUnspentOutputs() >= 0);
+    assertNotNull(subaddress.getIsUsed());
     if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0) assertTrue(subaddress.getIsUsed());
+    assertTrue(subaddress.getNumBlocksToUnlock() >= 0);
   }
   
   /**
