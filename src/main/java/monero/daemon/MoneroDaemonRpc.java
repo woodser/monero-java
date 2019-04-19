@@ -56,15 +56,21 @@ import monero.utils.MoneroUtils;
  */
 public class MoneroDaemonRpc extends MoneroDaemonDefault {
   
-  private MoneroRpc rpc;
-  private MoneroDaemonPoller daemonPoller;
+  // static variables
   private static final String DEFAULT_ID = "0000000000000000000000000000000000000000000000000000000000000000";
   private static final Logger LOGGER = Logger.getLogger(MoneroDaemonRpc.class);
   private static long MAX_REQ_SIZE = 3000000;  // max request size when fetching blocks from daemon
+  private static int NUM_HEADERS_PER_REQUEST = 750;
+  
+  // instance variables
+  private MoneroRpc rpc;
+  private MoneroDaemonPoller daemonPoller;
+  private Map<Integer, MoneroBlockHeader> cachedHeaders;
 
   public MoneroDaemonRpc(MoneroRpc rpc) {
     this.rpc = rpc;
     this.daemonPoller = new MoneroDaemonPoller(this);
+    this.cachedHeaders = new HashMap<Integer, MoneroBlockHeader>();
   }
   
   public MoneroRpc getRpc() {
@@ -237,11 +243,50 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public List<MoneroBlock> getBlocksByRange(Integer startHeight, Integer endHeight) {
     if (startHeight == null) startHeight = 0;
     if (endHeight == null) endHeight = getHeight() - 1;
-    List<Integer> heights = new ArrayList<Integer>();
-    for (int height = startHeight; height <= endHeight; height++) heights.add(height);
-    return getBlocksByHeight(heights);
+    int lastHeight = startHeight - 1;
+    List<MoneroBlock> blocks = new ArrayList<MoneroBlock>();
+    while (lastHeight < endHeight) {
+      blocks.addAll(getAsManyBlocksAsPossible(lastHeight + 1, endHeight, null));
+      lastHeight = blocks.get(blocks.size() - 1).getHeight();
+    }
+    return blocks;
   }
-
+  
+  /**
+   * Get a contiguous chunk of blocks starting from a given height up to a maximum
+   * height or amount of block data fetched from the blockchain, whichever comes first.
+   * 
+   * @param startHeight is the start height to retrieve blocks (default 0)
+   * @param maxHeight is the maximum end height to retrieve blocks (default blockchain height)
+   * @param maxReqSize is the maximum amount of block data to fetch from the blockchain in bytes (default 1,000,000 bytes)
+   * @return List<MoneroBlock> are the resulting chunk of blocks
+   */
+  public List<MoneroBlock> getAsManyBlocksAsPossible(Integer startHeight, Integer maxHeight, Long maxReqSize) {
+    if (startHeight == null) startHeight = 0;
+    if (maxHeight == null) maxHeight = getHeight() - 1;
+    if (maxReqSize == null) maxReqSize = MAX_REQ_SIZE;
+    
+    // determine end height to fetch
+    int reqSize = 0;
+    int endHeight = startHeight - 1;
+    while (reqSize < maxReqSize && endHeight < maxHeight) {
+      
+      // get header of next block
+      MoneroBlockHeader header = getBlockHeaderByHeightCached(endHeight + 1, maxHeight);
+      
+      // block cannot be bigger than max request size
+      assertTrue("Block exceeds maximum request size: " + header.getSize(), header.getSize() <= maxReqSize);
+      
+      // done iterating if fetching block would exceed max request size
+      if (reqSize + header.getSize() > maxReqSize) break;
+      
+      // otherwise block is included
+      reqSize += header.getSize();
+      endHeight++;
+    }
+    return endHeight >= startHeight ? getBlocksByRangeSingle(startHeight, endHeight) : new ArrayList<MoneroBlock>();
+  }
+  
   @Override
   public List<String> getBlockIds(List<String> blockIds, Integer startHeight) {
     throw new RuntimeException("Not implemented");
@@ -822,6 +867,38 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     Map<String, Object> resp = rpc.sendPathRequest("set_limit", params);
     checkResponseStatus(resp);
     return new int[] { ((BigInteger) resp.get("limit_down")).intValue(), ((BigInteger) resp.get("limit_up")).intValue() };
+  }
+  
+  private List<MoneroBlock> getBlocksByRangeSingle(Integer startHeight, Integer endHeight) {
+    if (startHeight == null) startHeight = 0;
+    if (endHeight == null) endHeight = getHeight() - 1;
+    List<Integer> heights = new ArrayList<Integer>();
+    for (int height = startHeight; height <= endHeight; height++) heights.add(height);
+    return getBlocksByHeight(heights);
+  }
+  
+  /**
+   * Retrieves a header by height from the cache or fetches and caches a header
+   * range if not already in the cache.
+   * 
+   * @param height is the height of the header to retrieve from the cache
+   * @param maxHeight is the maximum height of headers to cache
+   */
+  private MoneroBlockHeader getBlockHeaderByHeightCached(int height, int maxHeight) {
+    
+    // get header from cache
+    MoneroBlockHeader cachedHeader = cachedHeaders.get(height);
+    if (cachedHeader != null) return cachedHeader;
+    
+    // fetch and cache headers if not in cache
+    int endHeight = Math.min(maxHeight, height + NUM_HEADERS_PER_REQUEST - 1);  // TODO: could specify end height to cache to optimize small requests (would like to have time profiling in place though)
+    List<MoneroBlockHeader> headers = getBlockHeadersByRange(height, endHeight);
+    for (MoneroBlockHeader header : headers) {
+      cachedHeaders.put(header.getHeight(), header);
+    }
+    
+    // return the cached header
+    return cachedHeaders.get(height);
   }
   
   //---------------------------------- PRIVATE STATIC -------------------------------
