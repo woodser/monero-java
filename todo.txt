@@ -3,9 +3,8 @@ testGetReserveProofAccount() seg fault 11
 need to crawl blocks in test to test/handle duplicate output indices and merging
 testSweepDust
 testGetNewKeyImagesFromLastImport
-testSendFromSubaddressesSplit unlocked balance should not have changed at [0, 8]
 test double spend transaction in pool specifically
-remote cout from binary utils
+remove cout from binary utils
 confirm tx ordering since internal impl uses sets
 api updates: getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
 update print test utilities
