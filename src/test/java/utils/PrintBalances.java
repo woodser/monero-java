@@ -12,7 +12,7 @@ import monero.wallet.model.MoneroSubaddress;
 /**
  * Prints the balances of the wallet.
  */
-public class PrintBalancesOld {
+public class PrintBalances {
 
   public static void main(String[] args) {
     printBalances();
@@ -22,7 +22,7 @@ public class PrintBalancesOld {
     
     // collect info about subaddresses
     List<Pair<String, List<Object>>> pairs = new ArrayList<Pair<String, List<Object>>>();
-    MoneroWallet wallet = TestUtils.getWallet();
+    MoneroWallet wallet = TestUtils.getWalletRpc();
     BigInteger balance = wallet.getBalance();
     BigInteger unlockedBalance = wallet.getUnlockedBalance();
     List<MoneroAccount> accounts = wallet.getAccounts(true);
@@ -37,7 +37,7 @@ public class PrintBalancesOld {
       add(pairs, "UNLOCKED", account.getUnlockedBalance());
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         add(pairs, "ACCOUNT", account.getIndex());
-        add(pairs, "SUBADDRESS", subaddress.getSubaddrIndex());
+        add(pairs, "SUBADDRESS", subaddress.getIndex());
         add(pairs, "LABEL", subaddress.getLabel());
         add(pairs, "ADDRESS", subaddress.getAddress());
         add(pairs, "BALANCE", subaddress.getBalance());
