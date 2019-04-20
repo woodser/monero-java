@@ -5,10 +5,10 @@ import monero.wallet.MoneroWallet;
 /**
  * Prints the height of the wallet.
  */
-public class PrintHeightOld {
+public class PrintHeight {
 
   public static void main(String[] args) {
-    MoneroWallet wallet = TestUtils.getWallet();
+    MoneroWallet wallet = TestUtils.getWalletRpc();
     System.out.println("Height: " + wallet.getHeight());
   }
 }
