@@ -1159,8 +1159,8 @@ public class TestMoneroDaemonRpc {
     for (MoneroTx tx : txs) {
       txIds.add(tx.getId());
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-      assertEquals(false, result.getIsRelayed());
       testSubmitTxResultGood(result);
+      assertEquals(false, result.getIsRelayed());
       
       // ensure tx is in pool
       List<MoneroTx> poolTxs = daemon.getTxPool();

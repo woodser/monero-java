@@ -44,8 +44,8 @@ public class Scratchpad {
     
     wallet.getVouts();
     
-//    MoneroTx tx = daemon.getTx("d16e603efed00a3d2e14085d0ebe96734145d9eba851f6afd02ab76f9d5b62c0");
-//    System.out.println(tx);
+    MoneroTx tx = daemon.getTx("d16e603efed00a3d2e14085d0ebe96734145d9eba851f6afd02ab76f9d5b62c0");
+    System.out.println(tx);
 //    tx.merge(tx.copy());
     
 //    MoneroTxWallet tx = wallet.getTxs(new MoneroTxFilter().setTxId("d16e603efed00a3d2e14085d0ebe96734145d9eba851f6afd02ab76f9d5b62c0")).get(0);
