@@ -12,9 +12,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
@@ -1467,10 +1465,7 @@ public class TestMoneroDaemonRpc {
       assertEquals(null, tx.getLastFailedId());
       assertTrue(tx.getMaxUsedBlockHeight() >= 0);
       assertNotNull(tx.getMaxUsedBlockId());
-      if (tx.getIsRelayed()) assertTrue(tx.getNumEstimatedBlocksUntilConfirmed() > 0);
-      else assertNull(tx.getNumEstimatedBlocksUntilConfirmed());
     } else {
-      assertEquals(tx.getNumEstimatedBlocksUntilConfirmed(), null);
       assertEquals(tx.getLastRelayedTimestamp(), null);
     }
     

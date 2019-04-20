@@ -1566,8 +1566,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         else tx.setNumConfirmations(((BigInteger) val).intValue());
       }
       else if (key.equals("suggested_confirmations_threshold")) {
-        if (tx.getInTxPool()) tx.setNumEstimatedBlocksUntilConfirmed(((BigInteger) val).intValue());
-        else tx.setNumEstimatedBlocksUntilConfirmed(null);
+        if (tx.getInTxPool()) tx.setNumSuggestedConfirmations(((BigInteger) val).intValue());
+        else tx.setNumSuggestedConfirmations(null);
       }
       else if (key.equals("amount")) {
         if (transfer == null) transfer = new MoneroTransfer().setTx(tx);
