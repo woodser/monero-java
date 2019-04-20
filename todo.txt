@@ -11,8 +11,8 @@ test double spend transaction in pool specifically
 remove cout from binary utils
 confirm tx ordering since internal impl uses sets
 api updates: getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
-update print test utilities
 update readme
+generate javadoc
 release
 update javascript with master updates
 
@@ -25,42 +25,20 @@ daemon.getTx(id), wallet needs equivalent convenience function
 testGetTransactionsWallet() how are txs in same order since internal implementation uses set?
 wallet.getTxs() returns txs in no particular order
 fetched vout's tx is incoming and outgoing are false
+multisig_txset and unsigned_txset on send tests
+test wallet gets should send test transaction so unconfirmed tx can be tested with the others
+
 
 NEXT
-clean up these todos below
+clean up todos
 jni binding
 model rct_signatures and rct_prunable
-mms
+multisig
 pruning
 
-v0.13.0.4
-testGetTxsWallet() failing when run with other tests
-support sweep_single (output)
-
-offline sign/submit
-do_not_relay with sweep
-multisig
-
-test wallet gets should send test transaction so unconfirmed tx can be tested with the others
-consistent naming schemes, probably longest, like getSubaddressIndex()
-ignoring multisig_txset and unsigned_txset on send tests
-new api calls
-payments are comprised of outputs
-don't call accounts / subaddresses that are unused
-test getTxs() with outgoing payments because fetched by id
-test that subaddress numUnspentOutputs == incoming transfers unspent payments
-test right after sending that get_transfers with sent id returns destinations
-multisig support and tests
-get_output_distribution distribution field cannot be deserialized to array of integer
-belowAmount only supported in sweep?  assert not used when not usable
-outbound transactions do not relable record minor, e.g. send from [2,3] but tx minor will be 0
-optimize (cache subaddresses, check if used, etc)
-generate javadoc
-update readme
 
 MONERO-RPC
 HIGH
-toggling mining causes monerod to hang
 segmentation fault 11 on testReserveProofAccount() with balance but no unlocked balance
 balances are wrong after sends (https://github.com/monero-project/monero/issues/4500)
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
