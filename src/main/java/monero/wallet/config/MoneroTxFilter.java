@@ -272,8 +272,8 @@ public class MoneroTxFilter extends MoneroTxWallet implements Filter<MoneroTxWal
   }
 
   @Override
-  public MoneroTxFilter setNumEstimatedBlocksUntilConfirmed(Integer numEstimatedBlocksUntilConfirmed) {
-    super.setNumEstimatedBlocksUntilConfirmed(numEstimatedBlocksUntilConfirmed);
+  public MoneroTxFilter setNumSuggestedConfirmations(Integer numSuggestedConfirmations) {
+    super.setNumSuggestedConfirmations(numSuggestedConfirmations);
     return this;
   }
 

@@ -31,7 +31,6 @@ public class MoneroTx {
   private Boolean isConfirmed;
   private Boolean inTxPool;
   private Integer numConfirmations;
-  private Integer numEstimatedBlocksUntilConfirmed;
   private Integer unlockTime;
   private Long lastRelayedTimestamp;
   private Long receivedTimestamp;
@@ -80,7 +79,6 @@ public class MoneroTx {
     this.isConfirmed = tx.isConfirmed;
     this.inTxPool = tx.inTxPool;
     this.numConfirmations = tx.numConfirmations;
-    this.numEstimatedBlocksUntilConfirmed = tx.numEstimatedBlocksUntilConfirmed;
     this.unlockTime = tx.unlockTime;
     this.lastRelayedTimestamp = tx.lastRelayedTimestamp;
     this.receivedTimestamp = tx.receivedTimestamp;
@@ -224,15 +222,6 @@ public class MoneroTx {
   
   public MoneroTx setNumConfirmations(Integer numConfirmations) {
     this.numConfirmations = numConfirmations;
-    return this;
-  }
-  
-  public Integer getNumEstimatedBlocksUntilConfirmed() {
-    return numEstimatedBlocksUntilConfirmed;
-  }
-  
-  public MoneroTx setNumEstimatedBlocksUntilConfirmed(Integer numEstimatedBlocksUntilConfirmed) {
-    this.numEstimatedBlocksUntilConfirmed = numEstimatedBlocksUntilConfirmed;
     return this;
   }
   
@@ -581,12 +570,10 @@ public class MoneroTx {
       this.setInTxPool(false);
       this.setReceivedTimestamp(null);
       this.setLastRelayedTimestamp(null);
-      this.setNumEstimatedBlocksUntilConfirmed(null);
     } else {
       this.setInTxPool(MoneroUtils.reconcile(this.getInTxPool(), tx.getInTxPool(), null, true, null)); // unrelayed -> tx pool
       this.setReceivedTimestamp(MoneroUtils.reconcile(this.getReceivedTimestamp(), tx.getReceivedTimestamp(), null, null, false)); // take earliest receive time
       this.setLastRelayedTimestamp(MoneroUtils.reconcile(this.getLastRelayedTimestamp(), tx.getLastRelayedTimestamp(), null, null, true));  // take latest relay time
-      this.setNumEstimatedBlocksUntilConfirmed(MoneroUtils.reconcile(this.getNumEstimatedBlocksUntilConfirmed(), tx.getNumEstimatedBlocksUntilConfirmed(), null, null, false)); // take min
     }
     
     return this;  // for chaining
@@ -615,7 +602,6 @@ public class MoneroTx {
     sb.append(MoneroUtils.kvLine("Is confirmed", getIsConfirmed(), indent));
     sb.append(MoneroUtils.kvLine("In tx pool", getInTxPool(), indent));
     sb.append(MoneroUtils.kvLine("Num confirmations", getNumConfirmations(), indent));
-    sb.append(MoneroUtils.kvLine("Num estimated blocks until confirmed", getNumEstimatedBlocksUntilConfirmed(), indent));
     sb.append(MoneroUtils.kvLine("Unlock time", getUnlockTime(), indent));
     sb.append(MoneroUtils.kvLine("Last relayed time", getLastRelayedTimestamp(), indent));
     sb.append(MoneroUtils.kvLine("Received time", getReceivedTimestamp(), indent));
@@ -686,7 +672,6 @@ public class MoneroTx {
     result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
     result = prime * result + ((mixin == null) ? 0 : mixin.hashCode());
     result = prime * result + ((numConfirmations == null) ? 0 : numConfirmations.hashCode());
-    result = prime * result + ((numEstimatedBlocksUntilConfirmed == null) ? 0 : numEstimatedBlocksUntilConfirmed.hashCode());
     result = prime * result + ((outputIndices == null) ? 0 : outputIndices.hashCode());
     result = prime * result + ((paymentId == null) ? 0 : paymentId.hashCode());
     result = prime * result + ((prunableHash == null) ? 0 : prunableHash.hashCode());
@@ -775,9 +760,6 @@ public class MoneroTx {
     if (numConfirmations == null) {
       if (other.numConfirmations != null) return false;
     } else if (!numConfirmations.equals(other.numConfirmations)) return false;
-    if (numEstimatedBlocksUntilConfirmed == null) {
-      if (other.numEstimatedBlocksUntilConfirmed != null) return false;
-    } else if (!numEstimatedBlocksUntilConfirmed.equals(other.numEstimatedBlocksUntilConfirmed)) return false;
     if (outputIndices == null) {
       if (other.outputIndices != null) return false;
     } else if (!outputIndices.equals(other.outputIndices)) return false;

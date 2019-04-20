@@ -3,10 +3,6 @@ occasionally hangs in getTxsByIdsInPool()
 ocasional seg fault 11 in testGetReserveProofAccount(), wallet rpc get_reserve_proof
 
 14.0.3 RELEASE
-update suggested_confirmations_threshold documentation
-It's "how much confirmations till it's not worth rewriting the chain". But it's got lots of assumptions, so is maybe not too useful.
-in other words, the number of confirmations before it’s “highly unlikely” to be double spent or overwritten, and could therefore be considered “settled”, say, for a merchant?
-
 handle new top64/wide difficulty in alternative chains
 testSweepDust
 testGetNewKeyImagesFromLastImport

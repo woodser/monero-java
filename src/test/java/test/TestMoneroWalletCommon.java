@@ -2630,10 +2630,10 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       // these should be initialized unless a response from sending
       if (!Boolean.TRUE.equals(ctx.isSendResponse)) {
         assertTrue(tx.getReceivedTimestamp() > 0);
-        assertTrue(tx.getNumEstimatedBlocksUntilConfirmed() > 0);
+        assertTrue(tx.getNumSuggestedConfirmations() > 0);
       }
     } else {
-      assertNull(tx.getNumEstimatedBlocksUntilConfirmed());
+      assertNull(tx.getNumSuggestedConfirmations());
       assertNull(tx.getLastRelayedTimestamp());
     }
     

@@ -17,6 +17,7 @@ public class MoneroTxWallet extends MoneroTx {
 
   private List<MoneroTransfer> incomingTransfers;
   private MoneroTransfer outgoingTransfer;
+  private Integer numSuggestedConfirmations;
   private String note;
   
   public MoneroTxWallet() {
@@ -32,6 +33,7 @@ public class MoneroTxWallet extends MoneroTx {
       }
     }
     if (tx.outgoingTransfer != null) this.outgoingTransfer = tx.outgoingTransfer.copy().setTx(this);
+    this.numSuggestedConfirmations = tx.numSuggestedConfirmations;
     this.note = tx.note;
   }
   
@@ -107,6 +109,23 @@ public class MoneroTxWallet extends MoneroTx {
     return this;
   }
   
+  /**
+   * Return how many confirmations till it's not economically worth re-writing the chain.
+   * That is, the number of confirmations before the transaction is highly unlikely to be
+   * double spent or overwritten and may be considered settled, e.g. for a merchant to trust
+   * as finalized.
+   * 
+   * @return Integer is the number of confirmations before it's not worth rewriting the chain
+   */
+  public Integer getNumSuggestedConfirmations() {
+    return numSuggestedConfirmations;
+  }
+  
+  public MoneroTxWallet setNumSuggestedConfirmations(Integer numSuggestedConfirmations) {
+    this.numSuggestedConfirmations = numSuggestedConfirmations;
+    return this;
+  }
+  
   public String getNote() {
     return note;
   }
@@ -158,6 +177,13 @@ public class MoneroTxWallet extends MoneroTx {
       else this.getOutgoingTransfer().merge(tx.getOutgoingTransfer());
     }
     
+    // handle unrelayed -> relayed -> confirmed
+    if (this.getIsConfirmed()) {
+      this.setNumSuggestedConfirmations(null);
+    } else {
+      this.setNumSuggestedConfirmations(MoneroUtils.reconcile(this.getNumSuggestedConfirmations(), tx.getNumSuggestedConfirmations(), null, null, false)); // take min
+    }
+    
     return this;  // for chaining
   }
   
@@ -196,6 +222,7 @@ public class MoneroTxWallet extends MoneroTx {
       sb.append(MoneroUtils.kvLine("Outgoing transfer", "", indent));
       sb.append(this.getOutgoingTransfer().toString(indent + 1) + "\n");
     }
+    sb.append(MoneroUtils.kvLine("Num suggested confirmations", getNumSuggestedConfirmations(), indent));
     sb.append(MoneroUtils.kvLine("Note: ", this.getNote(), indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);  // strip last newline
@@ -212,12 +239,17 @@ public class MoneroTxWallet extends MoneroTx {
     transfers.add(transfer);
   }
   
+  
+  
+  // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
+
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
     result = prime * result + ((incomingTransfers == null) ? 0 : incomingTransfers.hashCode());
     result = prime * result + ((note == null) ? 0 : note.hashCode());
+    result = prime * result + ((numSuggestedConfirmations == null) ? 0 : numSuggestedConfirmations.hashCode());
     result = prime * result + ((outgoingTransfer == null) ? 0 : outgoingTransfer.hashCode());
     return result;
   }
@@ -234,13 +266,14 @@ public class MoneroTxWallet extends MoneroTx {
     if (note == null) {
       if (other.note != null) return false;
     } else if (!note.equals(other.note)) return false;
+    if (numSuggestedConfirmations == null) {
+      if (other.numSuggestedConfirmations != null) return false;
+    } else if (!numSuggestedConfirmations.equals(other.numSuggestedConfirmations)) return false;
     if (outgoingTransfer == null) {
       if (other.outgoingTransfer != null) return false;
     } else if (!outgoingTransfer.equals(other.outgoingTransfer)) return false;
     return true;
   }
-  
-  // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
 
   @Override
   public MoneroTxWallet setBlock(MoneroBlock block) {
@@ -311,12 +344,6 @@ public class MoneroTxWallet extends MoneroTx {
   @Override
   public MoneroTxWallet setNumConfirmations(Integer numConfirmations) {
     super.setNumConfirmations(numConfirmations);
-    return this;
-  }
-
-  @Override
-  public MoneroTxWallet setNumEstimatedBlocksUntilConfirmed(Integer numEstimatedBlocksUntilConfirmed) {
-    super.setNumEstimatedBlocksUntilConfirmed(numEstimatedBlocksUntilConfirmed);
     return this;
   }
 
