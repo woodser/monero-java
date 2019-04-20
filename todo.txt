@@ -1,5 +1,10 @@
-monero-wallet-rpc utilizing high cpu after tests run
-testGetReserveProofAccount() seg fault 11
+WALLET RPC ISSUES
+occasionally hangs in getTxsByIdsInPool()
+ocasional seg fault 11 in testGetReserveProofAccount(), wallet rpc get_reserve_proof
+
+14.0.3 RELEASE
+duplicate output indices: "Those are pre-rct outputs. The output indices are indices within a particular amount. Did you check they're non distinct within that amount ?"
+handle new top64/wide difficulty in alternative chains
 testSweepDust
 testGetNewKeyImagesFromLastImport
 test double spend transaction in pool specifically
@@ -9,7 +14,7 @@ api updates: getTxsById, getBalancesWallet, more convenient filtering, remove ty
 update print test utilities
 update readme
 release
-update javascript with master updates;
+update javascript with master updates
 
 refactor getAccounts(Boolean includeSubaddresses, Boolean isUsed, String tag, Boolean includeBalanceDetails)? that's filtering with most known options (in internal wallet rpc)
 handle blocks_to_unlock at top level of get_balance call which reflects account, but is it based only on queried subaddresses?
