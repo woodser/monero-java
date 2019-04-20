@@ -291,13 +291,31 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testBlocksInLongRange() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
-    int numBlocks = 2160; // test ~ last 3 days of blocks
+    int numBlocks = 2160; // test ~last 3 days of blocks
     int endHeight = daemon.getHeight() - 1;
-    int startHeight = Math.max(0, endHeight - numBlocks);
+    int startHeight = Math.max(0, endHeight - numBlocks + 1);
+    //int startHeight = 250000;
     int lastHeight = startHeight - 1;
     while (lastHeight < endHeight) {
       List<MoneroBlock> blocks = daemon.getAsManyBlocksAsPossible(lastHeight + 1, endHeight, null);
-      for (MoneroBlock block : blocks) testBlock(block, BINARY_BLOCK_CTX);
+      for (MoneroBlock block : blocks) {
+        testBlock(block, BINARY_BLOCK_CTX);
+        
+//        // test full txs
+//        if (block.getTxs().isEmpty()) continue;
+//        TestContext ctx = new TestContext();
+//        ctx.isPruned = false;
+//        ctx.isConfirmed = true;
+//        ctx.fromGetTxPool = false;
+//        ctx.hasOutputIndices = true;
+//        List<String> txIds = new ArrayList<String>();
+//        for (MoneroTx tx : block.getTxs()) txIds.add(tx.getId());
+//        List<MoneroTx> txs = daemon.getTxs(txIds);
+//        for (MoneroTx tx : txs) {
+//          assertFalse(tx.getOutputIndices().isEmpty());
+//          testTx(tx, ctx);
+//        }
+      }
       lastHeight = blocks.get(blocks.size() - 1).getHeight();
       
       // print out
@@ -1410,14 +1428,7 @@ public class TestMoneroDaemonRpc {
     if (tx.getIsCoinbase()) assertEquals(tx.getOutputIndices(), null); // TODO: how to get output indices for coinbase transactions?
     if (tx.getInTxPool() || ctx.fromGetTxPool || Boolean.FALSE.equals(ctx.hasOutputIndices)) assertEquals(null, tx.getOutputIndices());
     else assertNotNull(tx.getOutputIndices());
-    if (tx.getOutputIndices() != null) {
-      assertFalse(tx.getOutputIndices().isEmpty());
-      Set<Integer> indices = new HashSet<Integer>();
-      for (Integer index : tx.getOutputIndices()) {
-        assertFalse("Tx contains duplicate output indices", indices.contains(index));
-        indices.add(index);
-      }
-    }
+    if (tx.getOutputIndices() != null) assertFalse(tx.getOutputIndices().isEmpty());
     
     // test confirmed ctx
     if (ctx.isConfirmed == true) assertEquals(true, tx.getIsConfirmed());

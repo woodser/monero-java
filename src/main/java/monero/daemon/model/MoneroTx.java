@@ -1,6 +1,7 @@
 package monero.daemon.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
@@ -527,20 +528,29 @@ public class MoneroTx {
       if (this.getVouts() == null) this.setVouts(tx.getVouts());
       else {
         
-        // determine if output indices present
-        int numOutputIndices = 0;
-        for (MoneroOutput vout : this.getVouts()) if (vout.getIndex() != null) numOutputIndices++;
-        for (MoneroOutput vout : tx.getVouts()) if (vout.getIndex() != null) numOutputIndices++;
-        assertTrue("Some vouts have an index and some do not", numOutputIndices == 0 || this.getVouts().size() + tx.getVouts().size() == numOutputIndices);
+        // determine if key images present
+        int numKeyImages = 0;
+        for (MoneroOutput vout : this.getVouts()) {
+          if (vout.getKeyImage() != null) {
+            assertNotNull(vout.getKeyImage().getHex());
+            numKeyImages++;
+          }
+        }
+        for (MoneroOutput vout : tx.getVouts()) {
+          if (vout.getKeyImage() != null) {
+            assertNotNull(vout.getKeyImage().getHex());
+            numKeyImages++;
+          }
+        }
+        assertTrue("Some vouts have a key image and some do not", numKeyImages == 0 || this.getVouts().size() + tx.getVouts().size() == numKeyImages);
         
-        // merge by indices
-        if (numOutputIndices > 0) {
+        // merge by key images
+        if (numKeyImages > 0) {
           for (MoneroOutput merger : tx.getVouts()) {
             boolean merged = false;
             if (this.getVouts() == null) this.setVouts(new ArrayList<MoneroOutput>());
             for (MoneroOutput mergee : this.getVouts()) {
-              assertTrue(mergee.getIndex() >= 0 && merger.getIndex() >= 0);
-              if (mergee.getIndex() == merger.getIndex()) {
+              if (mergee.getKeyImage().getHex().equals(merger.getKeyImage().getHex())) {
                 mergee.merge(merger);
                 merged = true;
                 break;
@@ -549,7 +559,7 @@ public class MoneroTx {
             if (!merged) this.getVouts().add(merger);
           }
         }
-        
+
         // merge by position
         else {
           assertEquals(this.getVouts().size(), tx.getVouts().size());
