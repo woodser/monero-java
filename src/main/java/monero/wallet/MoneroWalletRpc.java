@@ -1591,15 +1591,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("payment_id")) {
         if (!MoneroTxWallet.DEFAULT_PAYMENT_ID.equals(val)) tx.setPaymentId((String) val);  // default is undefined
       }
-      else if (key.equals("subaddr_index")) {
-        if (val instanceof Map) { // returned structure can be a subaddress index or a map containing major and minor
-          Map<String, Object> rpcIndices = (Map<String, Object>) val;
-          accountIdx = ((BigInteger) rpcIndices.get("major")).intValue();
-          subaddressIdx = ((BigInteger) rpcIndices.get("minor")).intValue();
-        } else {
-          subaddressIdx = ((BigInteger) val).intValue();
-        }
-      }
+      else if (key.equals("subaddr_index")) assertTrue(rpcTx.containsKey("subaddr_indices")); // handled by subaddr_indices
       else if (key.equals("subaddr_indices")) {
         Map<String, Object> rpcIndices = ((List<Map<String, Object>>) val).get(0);
         accountIdx = ((BigInteger) rpcIndices.get("major")).intValue();
