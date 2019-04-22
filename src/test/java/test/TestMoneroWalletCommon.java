@@ -465,7 +465,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       
       // find non-default incoming
       if (txs1.get(i).getIncomingTransfers() != null) { // TODO: txs1.get(i).isIncoming()
-        for (MoneroTransfer transfer : txs1.get(i).getIncomingTransfers()) {
+        for (MoneroIncomingTransfer transfer : txs1.get(i).getIncomingTransfers()) {
           if (transfer.getAccountIndex() != 0 && transfer.getSubaddressIndex() != 0) nonDefaultIncoming = true;
         }
       }

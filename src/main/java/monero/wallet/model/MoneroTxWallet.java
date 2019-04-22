@@ -15,8 +15,8 @@ import monero.utils.MoneroUtils;
  */
 public class MoneroTxWallet extends MoneroTx {
 
-  private List<MoneroTransfer> incomingTransfers;
-  private MoneroTransfer outgoingTransfer;
+  private List<MoneroIncomingTransfer> incomingTransfers;
+  private MoneroOutgoingTransfer outgoingTransfer;
   private Integer numSuggestedConfirmations;
   private String note;
   
@@ -27,7 +27,7 @@ public class MoneroTxWallet extends MoneroTx {
   public MoneroTxWallet(MoneroTxWallet tx) {
     super(tx);
     if (tx.incomingTransfers != null) {
-      this.incomingTransfers = new ArrayList<MoneroTransfer>();
+      this.incomingTransfers = new ArrayList<MoneroIncomingTransfer>();
       for (MoneroTransfer transfer : tx.incomingTransfers) {
         this.incomingTransfers.add(transfer.copy().setTx(this));
       }
