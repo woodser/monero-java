@@ -3,7 +3,6 @@ occasionally hangs in getTxsByIdsInPool()
 ocasional seg fault 11 in testGetReserveProofAccount(), wallet rpc get_reserve_proof
 
 14.0.3 RELEASE
-handle new top64/wide difficulty in alternative chains
 testGetNewKeyImagesFromLastImport
 test double spend transaction in pool specifically
 remove cout from binary utils
