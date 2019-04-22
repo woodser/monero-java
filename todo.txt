@@ -4,7 +4,6 @@ ocasional seg fault 11 in testGetReserveProofAccount(), wallet rpc get_reserve_p
 
 14.0.3 RELEASE
 handle new top64/wide difficulty in alternative chains
-testSweepDust
 testGetNewKeyImagesFromLastImport
 test double spend transaction in pool specifically
 remove cout from binary utils
