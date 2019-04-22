@@ -1389,7 +1389,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     for (String key : rpcChain.keySet()) {
       Object val = rpcChain.get(key);
       if (key.equals("block_hash")) {}  // using block_hashes instead
-      else if (key.equals("difficulty")) chain.setDifficulty((BigInteger) val);
+      else if (key.equals("difficulty")) { } // handled by wide_difficulty
+      else if (key.equals("difficulty_top64")) { }  // handled by wide_difficulty
+      else if (key.equals("wide_difficulty")) chain.setDifficulty(MoneroUtils.reconcile(chain.getDifficulty(), prefixedHexToBI((String) val)));
       else if (key.equals("height")) chain.setHeight(((BigInteger) val).intValue());
       else if (key.equals("length")) chain.setLength(((BigInteger) val).intValue());
       else if (key.equals("block_hashes")) chain.setBlockIds((List<String>) val);
