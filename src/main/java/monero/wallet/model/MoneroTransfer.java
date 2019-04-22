@@ -1,24 +1,18 @@
 package monero.wallet.model;
 
-import static org.junit.Assert.assertEquals;
-
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 import monero.utils.MoneroUtils;
 
 /**
- * Models a directional transfer of funds from or to a wallet.
+ * Base model for a transfer of funds to or from the wallet.
  */
 public class MoneroTransfer {
 
   private MoneroTxWallet tx;
   private String address;
-  private Integer accountIndex;
-  private Integer subaddressIndex;
   private BigInteger amount;
-  private List<MoneroDestination> destinations;
+  private Integer accountIndex;
   
   public MoneroTransfer() {
     // nothing to initialize
@@ -26,15 +20,8 @@ public class MoneroTransfer {
   
   public MoneroTransfer(MoneroTransfer transfer) {
     this.address = transfer.address;
-    this.accountIndex = transfer.accountIndex;
-    this.subaddressIndex = transfer.subaddressIndex;
     this.amount = transfer.amount;
-    if (transfer.destinations != null) {
-      this.destinations = new ArrayList<MoneroDestination>();
-      for (MoneroDestination destination : transfer.getDestinations()) {
-        this.destinations.add(destination.copy()); 
-      }
-    }
+    this.accountIndex = transfer.accountIndex;
   }
   
   public MoneroTxWallet getTx() {
@@ -46,39 +33,12 @@ public class MoneroTransfer {
     return this;
   }
   
-  public Boolean getIsOutgoing() {
-    return this == tx.getOutgoingTransfer();
-  }
-  
-  public Boolean getIsIncoming() {
-    if (tx.getIncomingTransfers() == null) return false;
-    return tx.getIncomingTransfers().contains(this);
-  }
-  
   public String getAddress() {
     return address;
   }
   
   public MoneroTransfer setAddress(String address) {
     this.address = address;
-    return this;
-  }
-  
-  public Integer getAccountIndex() {
-    return accountIndex;
-  }
-  
-  public MoneroTransfer setAccountIndex(Integer accountIndex) {
-    this.accountIndex = accountIndex;
-    return this;
-  }
-  
-  public Integer getSubaddressIndex() {
-    return subaddressIndex;
-  }
-  
-  public MoneroTransfer setSubaddressIndex(Integer subaddressIndex) {
-    this.subaddressIndex = subaddressIndex;
     return this;
   }
   
@@ -91,12 +51,12 @@ public class MoneroTransfer {
     return this;
   }
   
-  public List<MoneroDestination> getDestinations() {
-    return destinations;
+  public Integer getAccountIndex() {
+    return accountIndex;
   }
   
-  public MoneroTransfer setDestinations(List<MoneroDestination> destinations) {
-    this.destinations = destinations;
+  public MoneroTransfer setAccountIndex(Integer accountIndex) {
+    this.accountIndex = accountIndex;
     return this;
   }
   
@@ -123,15 +83,8 @@ public class MoneroTransfer {
     // otherwise merge transfer fields
     else {
       this.setAddress(MoneroUtils.reconcile(this.getAddress(), transfer.getAddress()));
-      this.setAccountIndex(MoneroUtils.reconcile(this.getAccountIndex(), transfer.getAccountIndex()));
-      this.setSubaddressIndex(MoneroUtils.reconcile(this.getSubaddressIndex(), transfer.getSubaddressIndex()));
       this.setAmount(MoneroUtils.reconcile(this.getAmount(), transfer.getAmount()));
-      
-      // merge destinations
-      if (this.getDestinations() == null) this.setDestinations(transfer.getDestinations());
-      else if (transfer.getDestinations() != null) {
-        assertEquals("Cannot merge transfer because destinations are different", this.getDestinations(), transfer.getDestinations());
-      }
+      this.setAccountIndex(MoneroUtils.reconcile(this.getAccountIndex(), transfer.getAccountIndex()));
     }
     
     return this;
@@ -143,18 +96,9 @@ public class MoneroTransfer {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
-    sb.append(MoneroUtils.kvLine("Is outgoing", this.getIsOutgoing(), indent));
     sb.append(MoneroUtils.kvLine("Address", this.getAddress(), indent));
-    sb.append(MoneroUtils.kvLine("Account index", this.getAccountIndex(), indent));
-    sb.append(MoneroUtils.kvLine("Subaddress index", this.getSubaddressIndex(), indent));
     sb.append(MoneroUtils.kvLine("Amount", this.getAmount() != null ? this.getAmount().toString() : null, indent));
-    if (this.getDestinations() != null) {
-      sb.append(MoneroUtils.kvLine("Destinations", "", indent));
-      for (int i = 0; i < this.getDestinations().size(); i++) {
-        sb.append(MoneroUtils.kvLine(i + 1, "", indent + 1));
-        sb.append(getDestinations().get(i).toString(indent + 2) + "\n");
-      }
-    }
+    sb.append(MoneroUtils.kvLine("Account index", this.getAccountIndex(), indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);
   }
@@ -166,8 +110,6 @@ public class MoneroTransfer {
     result = prime * result + ((accountIndex == null) ? 0 : accountIndex.hashCode());
     result = prime * result + ((address == null) ? 0 : address.hashCode());
     result = prime * result + ((amount == null) ? 0 : amount.hashCode());
-    result = prime * result + ((destinations == null) ? 0 : destinations.hashCode());
-    result = prime * result + ((subaddressIndex == null) ? 0 : subaddressIndex.hashCode());
     return result;
   }
 
@@ -186,12 +128,6 @@ public class MoneroTransfer {
     if (amount == null) {
       if (other.amount != null) return false;
     } else if (!amount.equals(other.amount)) return false;
-    if (destinations == null) {
-      if (other.destinations != null) return false;
-    } else if (!destinations.equals(other.destinations)) return false;
-    if (subaddressIndex == null) {
-      if (other.subaddressIndex != null) return false;
-    } else if (!subaddressIndex.equals(other.subaddressIndex)) return false;
     return true;
   }
 }
