@@ -33,9 +33,7 @@ JNIEXPORT jbyteArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_jsonToBin
 JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryToJson(JNIEnv *env, jclass utilsClass, jbyteArray bin) {
 
   // convert the jbyteArray to a string
-  cout << "Binary: " << bin << endl;
   int binLength = env->GetArrayLength(bin);
-  cout << "Binary length: " << binLength << endl;
   jboolean isCopy;
   jbyte* jbytes = env->GetByteArrayElements(bin, &isCopy);
   string binStr = string((char*) jbytes, binLength);
