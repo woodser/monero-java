@@ -28,7 +28,9 @@ import monero.wallet.config.MoneroTxFilter;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
+import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
 import utils.TestUtils;
@@ -651,23 +653,27 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       MoneroTransfer transfer = (MoneroTransfer) transfers.get(i);
       Map<String, Object> rpcTransfer = rpcTransfers.get(i);
       assertEquals((String) rpcTransfer.get("txid"), transfer.getTx().getId());
+      
+      // collect account and subaddress indices from rpc response
       List<Map<String, BigInteger>> rpcSubaddrIndices = (List<Map<String, BigInteger>>) rpcTransfer.get("subaddr_indices");
+      Integer accountIdx = null;
+      List<Integer> subaddressIndices = new ArrayList<Integer>();
+      for (Map<String, BigInteger> rpcSubaddrIdx : rpcSubaddrIndices) {
+        if (accountIdx == null) accountIdx = rpcSubaddrIdx.get("major").intValue();
+        else assertEquals((int) accountIdx, (int) rpcSubaddrIdx.get("major").intValue());
+        subaddressIndices.add(rpcSubaddrIdx.get("minor").intValue());
+      }
       
-      
-      // TODO: account for multiple here
-      
-      
-      
-      
-      
-      if (rpcSubaddrIndices.size() > 1) System.out.println(rpcTransfer);
-      assertEquals(1, rpcSubaddrIndices.size());
-      Map<String, BigInteger> rpcSubaddrIndex = rpcSubaddrIndices.get(0);
-      int rpcAccountIdx = rpcSubaddrIndex.get("major").intValue();
-      assertEquals(rpcAccountIdx, (int) transfer.getAccountIndex());
-      int rpcSubaddressIdx = rpcSubaddrIndex.get("minor").intValue();
-      if (rpcSubaddressIdx != transfer.getSubaddressIndex()) System.out.println(rpcTransfer);
-      assertEquals(rpcSubaddressIdx, (int) transfer.getSubaddressIndex());
+      // test transfer
+      assertEquals(accountIdx, transfer.getAccountIndex());
+      if (transfer instanceof MoneroIncomingTransfer) {
+        assertEquals(1, rpcSubaddrIndices.size());
+        assertEquals(subaddressIndices.get(0), ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
+      } else if (transfer instanceof MoneroOutgoingTransfer) {
+        assertEquals(subaddressIndices, ((MoneroOutgoingTransfer) transfer).getSubaddressIndices());
+      } else {
+        fail("Unrecognized transfer instance");
+      }
     }
   }
 }
