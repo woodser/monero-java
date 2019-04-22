@@ -645,13 +645,21 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   @SuppressWarnings("unchecked")
-  private static void compareTransferOrder(List<Map<String, Object>> rpcTransfers, List<MoneroTransfer> transfers) {
+  private static void compareTransferOrder(List<Map<String, Object>> rpcTransfers, List<?> transfers) {
     assertEquals(transfers.size(), rpcTransfers.size());
     for (int i = 0; i < transfers.size(); i++) {
-      MoneroTransfer transfer = transfers.get(i);
+      MoneroTransfer transfer = (MoneroTransfer) transfers.get(i);
       Map<String, Object> rpcTransfer = rpcTransfers.get(i);
       assertEquals((String) rpcTransfer.get("txid"), transfer.getTx().getId());
       List<Map<String, BigInteger>> rpcSubaddrIndices = (List<Map<String, BigInteger>>) rpcTransfer.get("subaddr_indices");
+      
+      
+      // TODO: account for multiple here
+      
+      
+      
+      
+      
       if (rpcSubaddrIndices.size() > 1) System.out.println(rpcTransfer);
       assertEquals(1, rpcSubaddrIndices.size());
       Map<String, BigInteger> rpcSubaddrIndex = rpcSubaddrIndices.get(0);
