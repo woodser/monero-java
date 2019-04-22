@@ -258,7 +258,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * 
    * @param startHeight is the start height to retrieve blocks (default 0)
    * @param maxHeight is the maximum end height to retrieve blocks (default blockchain height)
-   * @param maxReqSize is the maximum amount of block data to fetch from the blockchain in bytes (default 1,000,000 bytes)
+   * @param maxReqSize is the maximum amount of block data to fetch from the blockchain in bytes (default 3,000,000 bytes)
    * @return List<MoneroBlock> are the resulting chunk of blocks
    */
   public List<MoneroBlock> getAsManyBlocksAsPossible(Integer startHeight, Integer maxHeight, Long maxReqSize) {
