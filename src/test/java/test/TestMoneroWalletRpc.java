@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,14 +18,18 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.daemon.MoneroDaemon;
+import monero.rpc.MoneroRpc;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc;
+import monero.wallet.config.MoneroTransferFilter;
+import monero.wallet.config.MoneroTxFilter;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
 import utils.TestUtils;
 
@@ -91,6 +96,30 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
         assertEquals(-1, (int) e.getCode()); // ok if wallet is already open
       }
     }
+  }
+  
+  // Preserves order from rpc
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testRpcOrder() {
+    
+    // fetch transfers directly from rpc for comparison to library
+    MoneroRpc rpc = wallet.getRpc();
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("all_accounts", true);
+    params.put("in", true);
+    params.put("out", true);
+//    params.put("pool", true);
+//    params.put("pending", true);
+//    params.put("failed", true);
+    Map<String, Object> resp = rpc.sendJsonRequest("get_transfers", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    
+    // compare incoming confirmed transfers
+    compareTransferOrder((List<Map<String, Object>>) result.get("in"), wallet.getTransfers(new MoneroTransferFilter().setIsIncoming(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(true))));
+    
+    // compare outgoing confirmed transfers
+    compareTransferOrder((List<Map<String, Object>>) result.get("out"), wallet.getTransfers(new MoneroTransferFilter().setIsOutgoing(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(true))));
   }
 
   // Can tag accounts and query accounts by tag
@@ -613,5 +642,24 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Override
   protected MoneroDaemon getTestDaemon() {
     return super.getTestDaemon();
+  }
+  
+  @SuppressWarnings("unchecked")
+  private static void compareTransferOrder(List<Map<String, Object>> rpcTransfers, List<MoneroTransfer> transfers) {
+    assertEquals(transfers.size(), rpcTransfers.size());
+    for (int i = 0; i < transfers.size(); i++) {
+      MoneroTransfer transfer = transfers.get(i);
+      Map<String, Object> rpcTransfer = rpcTransfers.get(i);
+      assertEquals((String) rpcTransfer.get("txid"), transfer.getTx().getId());
+      List<Map<String, BigInteger>> rpcSubaddrIndices = (List<Map<String, BigInteger>>) rpcTransfer.get("subaddr_indices");
+      if (rpcSubaddrIndices.size() > 1) System.out.println(rpcTransfer);
+      assertEquals(1, rpcSubaddrIndices.size());
+      Map<String, BigInteger> rpcSubaddrIndex = rpcSubaddrIndices.get(0);
+      int rpcAccountIdx = rpcSubaddrIndex.get("major").intValue();
+      assertEquals(rpcAccountIdx, (int) transfer.getAccountIndex());
+      int rpcSubaddressIdx = rpcSubaddrIndex.get("minor").intValue();
+      if (rpcSubaddressIdx != transfer.getSubaddressIndex()) System.out.println(rpcTransfer);
+      assertEquals(rpcSubaddressIdx, (int) transfer.getSubaddressIndex());
+    }
   }
 }
