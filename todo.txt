@@ -3,14 +3,14 @@ occasionally hangs in getTxsByIdsInPool()
 ocasional seg fault 11 in testGetReserveProofAccount(), wallet rpc get_reserve_proof
 
 14.0.3 RELEASE
-testGetNewKeyImagesFromLastImport
 confirm tx ordering since internal impl uses sets
 api updates: getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
 update readme
 generate javadoc
+port changes to js
 release
-update javascript with master updates
 
+testGetNewKeyImagesFromLastImport
 refactor getAccounts(Boolean includeSubaddresses, Boolean isUsed, String tag, Boolean includeBalanceDetails)? that's filtering with most known options (in internal wallet rpc)
 handle blocks_to_unlock at top level of get_balance call which reflects account, but is it based only on queried subaddresses?
 balances: getBalanceWallet(), getBalanceAccount(), getBalancesSubaddress() : return MoneroBalances .getUnlockedBalance(), .getLockedBalance()
