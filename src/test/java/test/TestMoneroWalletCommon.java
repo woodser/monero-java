@@ -2050,29 +2050,30 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // generate non-relayed transactions to sweep dust
     List<MoneroTxWallet> txs = wallet.sweepDust(true);
-    assertTrue("No dust to sweep", txs.size() > 0);
+    if (txs.isEmpty()) return;  // dust does not exist after rct
     
-    // TODO: this code is outdated
-    throw new RuntimeException("Not implemented");
+    // test txs
+    TestContext ctx = new TestContext();
+    ctx.isSendResponse = true;
+    ctx.sendConfig = new MoneroSendConfig().setDoNotRelay(true);
+    ctx.isSweepResponse = true;
+    for (MoneroTxWallet tx : txs) {
+      testTxWallet(tx, ctx);
+    }
     
-//    // test txs
-//    MoneroSendConfig config = new MoneroSendConfig();
-//    config.setDoNotRelay(true);
-//    for (MoneroTxWallet tx : txs) {
-//      testTxWalletSend(tx, config, !canSplit, !canSplit, wallet); // TODO: this code is outdated
-//    }
-//    
-//    // relay txs
-//    let txIds = wallet.relayTxs(txs.map(tx => tx.getMetadata()));
-//    assertEquals(txIds.size(), txs.size());
-//    for (let txId of txIds) assertTrue(typeof txId === "string" && txId.size() === 64);
-//    
-//    // fetch and test txs
-//    txs = wallet.getTxs({txIds: txIds}
-//    config.setDoNotRelay(false);
-//    for (let tx of txs) {
-//      testTxWalletSend(tx, config, !canSplit, !canSplit, wallet);
-//    }
+    // relay txs
+    List<String> metadatas = new ArrayList<String>();
+    for (MoneroTxWallet tx : txs) metadatas.add(tx.getMetadata());
+    List<String> txIds = wallet.relayTxs(metadatas);
+    assertEquals(txIds.size(), txs.size());
+    for (String txId : txIds) assertEquals(64, txId.length());
+    
+    // fetch and test txs
+    txs = wallet.getTxs(new MoneroTxFilter().setTxIds(txIds));
+    ctx.sendConfig.setDoNotRelay(false);
+    for (MoneroTxWallet tx : txs) {
+      testTxWallet(tx, ctx);
+    }
   }
   
   // Can sweep dust
@@ -2080,14 +2081,15 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   public void testSweepDust() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
     List<MoneroTxWallet> txs = wallet.sweepDust();
-    assertTrue("No dust to sweep", txs.size() > 0);
-    
-    // TODO: this code is outdated
-    throw new RuntimeException("Not implemented");
-    
-//    for (MoneroTxWallet tx : txs) {
-//      testTxWalletSend(tx, undefined, !canSplit, !canSplit, wallet);
-//    }
+    if (txs.isEmpty()) return;  // dust does not exist after rct
+    TestContext ctx = new TestContext();
+    ctx.wallet = wallet;
+    ctx.sendConfig = null;
+    ctx.isSendResponse = true;
+    ctx.isSweepResponse = true;
+    for (MoneroTxWallet tx : txs) {
+      testTxWallet(tx, ctx);
+    }
   }
   
   // --------------------------- NOTIFICATION TESTS ---------------------------

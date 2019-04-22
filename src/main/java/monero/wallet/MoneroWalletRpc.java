@@ -924,9 +924,20 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return txs;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<MoneroTxWallet> sweepDust(boolean doNotRelay) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("do_not_relay", doNotRelay);
+    Map<String, Object> resp = rpc.sendJsonRequest("sweep_dust", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    if (!result.containsKey("tx_hash_list")) return new ArrayList<MoneroTxWallet>();  // no dust to sweep
+    List<MoneroTxWallet> txs = convertRpcSentTxWallets(result, null);
+    for (MoneroTxWallet tx : txs) {
+      tx.setIsRelayed(!doNotRelay);
+      tx.setInTxPool(tx.getIsRelayed());
+    }
+    return txs;
   }
 
   @SuppressWarnings("unchecked")
