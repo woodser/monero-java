@@ -239,8 +239,6 @@ public class MoneroTxWallet extends MoneroTx {
     transfers.add(transfer);
   }
   
-  
-  
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
 
   @Override
