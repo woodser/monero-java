@@ -118,6 +118,7 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
     
     // filter on incoming fields
     if (transfer instanceof MoneroIncomingTransfer) {
+      if (Boolean.TRUE.equals(this.getHasDestinations())) return false;
       MoneroIncomingTransfer inTransfer = (MoneroIncomingTransfer) transfer;
       if (this.getAddress() != null && !this.getAddress().equals(inTransfer.getAddress())) return false;
       if (this.getAddresses() != null && !this.getAddresses().contains(inTransfer.getAddress())) return false;
@@ -153,12 +154,13 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
       
       // filter on destinations TODO: start with test for this
 //    if (this.getDestionations() != null && this.getDestionations() != transfer.getDestionations()) return false;
-    } else throw new RuntimeException("Transfer must be MoneroIncomingTransfer or MoneroOutgoingTransfer");
+    }
+    
+    // otherwise invalid type
+    else throw new RuntimeException("Transfer must be MoneroIncomingTransfer or MoneroOutgoingTransfer");
     
     // filter with tx filter
-    if (this.getTxFilter() != null && !this.getTxFilter().meetsCriteria(transfer.getTx())) return false;
-    
-    // transfer meets filter criteria
+    if (this.getTxFilter() != null && !this.getTxFilter().meetsCriteria(transfer.getTx())) return false;    
     return true;
   }
   
