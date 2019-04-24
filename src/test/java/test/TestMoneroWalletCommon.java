@@ -46,6 +46,7 @@ import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncResult;
@@ -744,9 +745,25 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         List<MoneroTransfer> transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setAccountIndex(subaddress.getAccountIndex()).setSubaddressIndex(subaddress.getIndex()), null, null);
         for (MoneroTransfer transfer : transfers) {
+          
+          // test account and subaddress indices
           assertEquals(subaddress.getAccountIndex(), transfer.getAccountIndex());
-          assertEquals(subaddress.getIndex(), transfer.getSubaddressIndex());
-          if (transfer.getAccountIndex() != 0 && transfer.getSubaddressIndex() != 0) nonDefaultIncoming = true;
+          if (transfer.getIsIncoming()) {
+            MoneroIncomingTransfer inTransfer = (MoneroIncomingTransfer) transfer;
+            assertEquals(subaddress.getIndex(), inTransfer.getSubaddressIndex());
+            if (transfer.getAccountIndex() != 0 && inTransfer.getSubaddressIndex() != 0) nonDefaultIncoming = true;
+          } else {
+            MoneroOutgoingTransfer outTransfer = (MoneroOutgoingTransfer) transfer;
+            assertTrue(outTransfer.getSubaddressIndices().contains(subaddress.getIndex()));
+            if (transfer.getAccountIndex() != 0) {
+              for (int subaddrIdx : outTransfer.getSubaddressIndices()) {
+                if (subaddrIdx > 0) {
+                  nonDefaultIncoming = true;
+                  break;
+                }
+              }
+            }
+          }
           
           // don't add duplicates TODO monero-wallet-rpc: duplicate outgoing transfers returned for different subaddress indices, way to return outgoing subaddress indices?
           boolean found = false;
@@ -763,13 +780,21 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       
       // get transfers by subaddress indices
       Set<Integer> subaddressIndices = new HashSet<Integer>();
-      for (MoneroTransfer transfer : subaddressTransfers) subaddressIndices.add(transfer.getSubaddressIndex());
+      for (MoneroTransfer transfer : subaddressTransfers) {
+        if (transfer.getIsIncoming()) subaddressIndices.add(((MoneroIncomingTransfer) transfer).getSubaddressIndex());
+        else subaddressIndices.addAll(((MoneroOutgoingTransfer) transfer).getSubaddressIndices());
+      }
       List<MoneroTransfer> transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setAccountIndex(account.getIndex()).setSubaddressIndices(new ArrayList<Integer>(subaddressIndices)), null, null);
-      if (transfers.size() != subaddressTransfers.size()) System.out.println("WARNING: outgoing transfers always from subaddress 0 (monero-wallet-rpc #5171)");
-      //assertEquals(subaddressTransfers.size(), transfers.size()); // TODO monero-wallet-rpc: these may not be equal because outgoing transfers are always from subaddress 0 (#5171) and/or incoming transfers from/to same account are occluded (#4500)
+      //if (transfers.size() != subaddressTransfers.size()) System.out.println("WARNING: outgoing transfers always from subaddress 0 (monero-wallet-rpc #5171)");
+      assertEquals(subaddressTransfers.size(), transfers.size()); // TODO monero-wallet-rpc: these may not be equal because outgoing transfers are always from subaddress 0 (#5171) and/or incoming transfers from/to same account are occluded (#4500)
       for (MoneroTransfer transfer : transfers) {
         assertEquals(transfer.getAccountIndex(), account.getIndex());
-        assertTrue(subaddressIndices.contains(transfer.getSubaddressIndex()));
+        if (transfer.getIsIncoming()) assertTrue(subaddressIndices.contains(((MoneroIncomingTransfer) transfer).getSubaddressIndex()));
+        else {
+          Set<Integer> intersections = new HashSet<Integer>(subaddressIndices);
+          intersections.retainAll(((MoneroOutgoingTransfer) transfer).getSubaddressIndices());
+          assertTrue(intersections.size() > 0);  // subaddresses must have overlap
+        }
       }
     }
     
@@ -801,7 +826,11 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setAccountIndex(1).setSubaddressIndex(2).setTxFilter(new MoneroTxFilter().setIsConfirmed(true)), null, true);
     for (MoneroTransfer transfer : transfers) {
       assertEquals(1, (int) transfer.getAccountIndex());
-      assertEquals(2, (int) transfer.getSubaddressIndex());
+      if (transfer.getIsIncoming()) assertEquals(2, (int) ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
+      else {
+        assertEquals(1, ((MoneroOutgoingTransfer) transfer).getSubaddressIndices().size());
+        assertEquals(2, (int) ((MoneroOutgoingTransfer) transfer).getSubaddressIndices().get(0));
+      }
       assertTrue(transfer.getTx().getIsConfirmed());
     }
     
@@ -838,7 +867,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     transfers = getAndTestTransfers(wallet, transferFilter, null, null);
     for (MoneroTransfer transfer : transfers) {
       assertEquals(true, transfer.getIsOutgoing());
-      assertTrue(transfer.getDestinations().size() > 0);
+      assertTrue(((MoneroOutgoingTransfer) transfer).getDestinations().size() > 0);
       assertEquals(true, transfer.getTx().getIsConfirmed());
     }
   }
@@ -1866,7 +1895,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     for (MoneroTxWallet tx : txs) {
       testTxWallet(tx, ctx);
       assertEquals(fromAccount.getIndex(), tx.getOutgoingTransfer().getAccountIndex());
-      assertEquals(fromSubaddress.getIndex(), tx.getOutgoingTransfer().getSubaddressIndex());
+      assertEquals(1, tx.getOutgoingTransfer().getSubaddressIndices().size());
+      assertEquals(fromSubaddress.getIndex(), tx.getOutgoingTransfer().getSubaddressIndices().get(0));
       assertTrue(sendAmount.equals(tx.getOutgoingAmount()));
       if (sendConfig.getPaymentId() != null) assertEquals(sendConfig.getPaymentId(), tx.getPaymentId());
       
@@ -2700,7 +2730,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       
       // test each transfer and collect transfer sum
       BigInteger transferSum = BigInteger.valueOf(0);
-      for (MoneroTransfer transfer : tx.getIncomingTransfers()) {
+      for (MoneroIncomingTransfer transfer : tx.getIncomingTransfers()) {
         testTransfer(transfer);
         assertNotNull(transfer.getAddress());
         assertTrue(transfer.getAccountIndex() >= 0);
@@ -2868,11 +2898,11 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // test destinations sum to outgoing amount
-    if (transfer.getDestinations() != null) {
-      assertTrue(transfer.getDestinations().size() > 0);
-      assertEquals(true, transfer.getIsOutgoing());
+    if (transfer.getIsOutgoing() && ((MoneroOutgoingTransfer) transfer).getDestinations() != null) {
+      List<MoneroDestination> destinations = ((MoneroOutgoingTransfer) transfer).getDestinations();
+      assertTrue(destinations.size() > 0);
       BigInteger sum = BigInteger.valueOf(0);
-      for (MoneroDestination destination : transfer.getDestinations()) {
+      for (MoneroDestination destination : destinations) {
         assertNotNull(destination.getAddress());
         TestUtils.testUnsignedBigInteger(destination.getAmount(), true);
         sum = sum.add(destination.getAmount());
