@@ -52,11 +52,11 @@ public class MoneroTransfer {
     return new MoneroTransfer(this);
   }
   
-  public boolean getIsIncoming() {
+  public Boolean getIsIncoming() {
     throw new RuntimeException("Subclass must implement");
   }
   
-  public boolean getIsOutgoing() {
+  public Boolean getIsOutgoing() {
     throw new RuntimeException("Subclass must implement");
   }
 
