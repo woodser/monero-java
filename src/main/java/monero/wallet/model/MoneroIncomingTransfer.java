@@ -8,6 +8,7 @@ import monero.utils.MoneroUtils;
 public class MoneroIncomingTransfer extends MoneroTransfer {
 
   private Integer subaddressIndex;
+  private String address;
   
   public MoneroIncomingTransfer() {
     // nothing to initialize
@@ -16,6 +17,7 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
   public MoneroIncomingTransfer(MoneroIncomingTransfer transfer) {
     super(transfer);
     this.subaddressIndex = transfer.subaddressIndex;
+    this.address = transfer.address;
   }
   
   public Integer getSubaddressIndex() {
@@ -27,6 +29,15 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     return this;
   }
   
+  public String getAddress() {
+    return address;
+  }
+
+  public MoneroIncomingTransfer setAddress(String address) {
+    this.address = address;
+    return this;
+  }
+
   public MoneroIncomingTransfer copy() {
     return new MoneroIncomingTransfer(this);
   }
@@ -45,6 +56,7 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     assert(transfer instanceof MoneroIncomingTransfer);
     if (this == transfer) return this;
     this.setSubaddressIndex(MoneroUtils.reconcile(this.getSubaddressIndex(), transfer.getSubaddressIndex()));
+    this.setAddress(MoneroUtils.reconcile(this.getAddress(), transfer.getAddress()));
     return this;
   }
   
@@ -55,6 +67,7 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
     sb.append(MoneroUtils.kvLine("Subaddress index", this.getSubaddressIndex(), indent));
+    sb.append(MoneroUtils.kvLine("Address", this.getAddress(), indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);
   }
@@ -63,6 +76,7 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
+    result = prime * result + ((address == null) ? 0 : address.hashCode());
     result = prime * result + ((subaddressIndex == null) ? 0 : subaddressIndex.hashCode());
     return result;
   }
@@ -73,6 +87,9 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     if (!super.equals(obj)) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroIncomingTransfer other = (MoneroIncomingTransfer) obj;
+    if (address == null) {
+      if (other.address != null) return false;
+    } else if (!address.equals(other.address)) return false;
     if (subaddressIndex == null) {
       if (other.subaddressIndex != null) return false;
     } else if (!subaddressIndex.equals(other.subaddressIndex)) return false;

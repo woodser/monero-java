@@ -10,7 +10,6 @@ import monero.utils.MoneroUtils;
 public class MoneroTransfer {
 
   private MoneroTxWallet tx;
-  private String address;
   private BigInteger amount;
   private Integer accountIndex;
   
@@ -19,7 +18,6 @@ public class MoneroTransfer {
   }
   
   public MoneroTransfer(MoneroTransfer transfer) {
-    this.address = transfer.address;
     this.amount = transfer.amount;
     this.accountIndex = transfer.accountIndex;
   }
@@ -30,15 +28,6 @@ public class MoneroTransfer {
   
   public MoneroTransfer setTx(MoneroTxWallet tx) {
     this.tx = tx;
-    return this;
-  }
-  
-  public String getAddress() {
-    return address;
-  }
-  
-  public MoneroTransfer setAddress(String address) {
-    this.address = address;
     return this;
   }
   
@@ -54,16 +43,23 @@ public class MoneroTransfer {
   public Integer getAccountIndex() {
     return accountIndex;
   }
-  
-  public MoneroTransfer setAccountIndex(Integer accountIndex) {
+
+  public void setAccountIndex(Integer accountIndex) {
     this.accountIndex = accountIndex;
-    return this;
   }
   
   public MoneroTransfer copy() {
     return new MoneroTransfer(this);
   }
   
+  public boolean getIsIncoming() {
+    throw new RuntimeException("Subclass must implement");
+  }
+  
+  public boolean getIsOutgoing() {
+    throw new RuntimeException("Subclass must implement");
+  }
+
   /**
    * Updates this transaction by merging the latest information from the given
    * transaction.
@@ -77,12 +73,11 @@ public class MoneroTransfer {
     assert(transfer instanceof MoneroTransfer);
     if (this == transfer) return this;
     
-    // merge transactions if they're different which comes back to merging transfers
+    // merge txs if they're different which comes back to merging transfers
     if (this.getTx() != transfer.getTx()) this.getTx().merge(transfer.getTx());
     
     // otherwise merge transfer fields
     else {
-      this.setAddress(MoneroUtils.reconcile(this.getAddress(), transfer.getAddress()));
       this.setAmount(MoneroUtils.reconcile(this.getAmount(), transfer.getAmount()));
       this.setAccountIndex(MoneroUtils.reconcile(this.getAccountIndex(), transfer.getAccountIndex()));
     }
@@ -96,7 +91,6 @@ public class MoneroTransfer {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
-    sb.append(MoneroUtils.kvLine("Address", this.getAddress(), indent));
     sb.append(MoneroUtils.kvLine("Amount", this.getAmount() != null ? this.getAmount().toString() : null, indent));
     sb.append(MoneroUtils.kvLine("Account index", this.getAccountIndex(), indent));
     String str = sb.toString();
@@ -108,7 +102,6 @@ public class MoneroTransfer {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((accountIndex == null) ? 0 : accountIndex.hashCode());
-    result = prime * result + ((address == null) ? 0 : address.hashCode());
     result = prime * result + ((amount == null) ? 0 : amount.hashCode());
     return result;
   }
@@ -122,9 +115,6 @@ public class MoneroTransfer {
     if (accountIndex == null) {
       if (other.accountIndex != null) return false;
     } else if (!accountIndex.equals(other.accountIndex)) return false;
-    if (address == null) {
-      if (other.address != null) return false;
-    } else if (!address.equals(other.address)) return false;
     if (amount == null) {
       if (other.amount != null) return false;
     } else if (!amount.equals(other.amount)) return false;
