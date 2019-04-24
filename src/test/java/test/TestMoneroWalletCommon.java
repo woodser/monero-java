@@ -533,8 +533,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     for (MoneroTxWallet tx : txs) {
       assertTrue(tx.getIsIncoming());
       assertTrue(tx.getIncomingTransfers().size() > 0);
-      for (MoneroTransfer transfer : tx.getIncomingTransfers()) {
-        assertTrue(transfer instanceof MoneroTransfer);
+      for (MoneroIncomingTransfer transfer : tx.getIncomingTransfers()) {
         testTransfer(transfer);
       }
     }
@@ -2732,9 +2731,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       BigInteger transferSum = BigInteger.valueOf(0);
       for (MoneroIncomingTransfer transfer : tx.getIncomingTransfers()) {
         testTransfer(transfer);
-        assertNotNull(transfer.getAddress());
-        assertTrue(transfer.getAccountIndex() >= 0);
-        assertTrue(transfer.getSubaddressIndex() >= 0);
         transferSum = transferSum.add(transfer.getAmount());
         if (ctx.wallet != null) assertEquals(ctx.wallet.getAddress(transfer.getAccountIndex(), transfer.getSubaddressIndex()), transfer.getAddress());
         
@@ -2889,6 +2885,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   private static void testTransfer(MoneroTransfer transfer) {
     assertNotNull(transfer);
     TestUtils.testUnsignedBigInteger(transfer.getAmount());
+    assertTrue(transfer.getAccountIndex() >= 0);
+    if (transfer.getIsIncoming()) testIncomingTransfer((MoneroIncomingTransfer) transfer);
+    else testOutgoingTransfer((MoneroOutgoingTransfer) transfer);
     
     // transfer and tx reference each other
     assertNotNull(transfer.getTx());
@@ -2896,13 +2895,28 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertNotNull(transfer.getTx().getIncomingTransfers());
       assertTrue("Transaction does not reference given transfer", transfer.getTx().getIncomingTransfers().contains(transfer));
     }
+  }
+  
+  private static void testIncomingTransfer(MoneroIncomingTransfer transfer) {
+    assertTrue(transfer.getIsIncoming());
+    assertFalse(transfer.getIsOutgoing());
+    assertNotNull(transfer.getAddress());
+    assertTrue(transfer.getSubaddressIndex() >= 0);
+  }
+  
+  private static void testOutgoingTransfer(MoneroOutgoingTransfer transfer) {
+    assertFalse(transfer.getIsIncoming());
+    assertTrue(transfer.getIsOutgoing());
+    assertTrue(transfer.getSubaddressIndices().size() >= 1);
+    for (int subaddressIdx : transfer.getSubaddressIndices()) assertTrue(subaddressIdx >= 0);
+    assertEquals(transfer.getSubaddressIndices().size(), transfer.getAddresses().size());
+    for (String address : transfer.getAddresses()) assertNotNull(address);
     
     // test destinations sum to outgoing amount
-    if (transfer.getIsOutgoing() && ((MoneroOutgoingTransfer) transfer).getDestinations() != null) {
-      List<MoneroDestination> destinations = ((MoneroOutgoingTransfer) transfer).getDestinations();
-      assertTrue(destinations.size() > 0);
+    if (transfer.getDestinations() != null) {
+      assertTrue(transfer.getDestinations().size() > 0);
       BigInteger sum = BigInteger.valueOf(0);
-      for (MoneroDestination destination : destinations) {
+      for (MoneroDestination destination : transfer.getDestinations()) {
         assertNotNull(destination.getAddress());
         TestUtils.testUnsignedBigInteger(destination.getAmount(), true);
         sum = sum.add(destination.getAmount());
@@ -2910,9 +2924,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       if (!transfer.getAmount().equals(sum)) System.out.println(transfer.getTx().toString());
       assertEquals(transfer.getAmount(), sum);
     }
-    
-    // transfer is outgoing xor incoming
-    assertTrue((transfer.getIsOutgoing() == true && transfer.getIsIncoming() == false) || (transfer.getIsOutgoing() == false && transfer.getIsIncoming() == true));
   }
   
   private static void testVout(MoneroOutputWallet vout) {
