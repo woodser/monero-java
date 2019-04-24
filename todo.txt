@@ -1,6 +1,6 @@
 WALLET RPC ISSUES
 sweepOutput("f4c6123ea4daa831d850785fd5f72d8f34fcd3606ef94431ea2cae7a3dbd03be") -37: not enough unlocked money, despite spent: false, unlocked: true
-occasionally hangs in getTxsByIdsInPool()
+occasionally hangs in testGetTxsByIdsInPool()
 ocasional seg fault 11 in testGetReserveProofAccount(), wallet rpc get_reserve_proof
 one time: testCheckTxKey() -24: No tx secret key is stored for this tx, RPC request: 'get_tx_key' with params: {"txid":"e779dbb7fbff77544ea39de062b12c1d722901ed937a833307c1b5b3cea41069"}
 rarely: testGetTxsByIdsInPool() tx fails testTx() as double spend
