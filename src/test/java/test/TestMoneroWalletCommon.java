@@ -2909,8 +2909,10 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertTrue(transfer.getIsOutgoing());
     assertTrue(transfer.getSubaddressIndices().size() >= 1);
     for (int subaddressIdx : transfer.getSubaddressIndices()) assertTrue(subaddressIdx >= 0);
-    assertEquals(transfer.getSubaddressIndices().size(), transfer.getAddresses().size());
-    for (String address : transfer.getAddresses()) assertNotNull(address);
+    if (transfer.getAddresses() != null) {
+      assertEquals(transfer.getSubaddressIndices().size(), transfer.getAddresses().size());
+      for (String address : transfer.getAddresses()) assertNotNull(address);
+    }
     
     // test destinations sum to outgoing amount
     if (transfer.getDestinations() != null) {
