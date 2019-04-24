@@ -8,6 +8,8 @@ import java.util.List;
 import common.types.Filter;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroOutput;
+import monero.wallet.model.MoneroIncomingTransfer;
+import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
 
@@ -182,13 +184,13 @@ public class MoneroTxFilter extends MoneroTxWallet implements Filter<MoneroTxWal
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
 
   @Override
-  public MoneroTxFilter setIncomingTransfers(List<MoneroTransfer> incomingTransfers) {
+  public MoneroTxFilter setIncomingTransfers(List<MoneroIncomingTransfer> incomingTransfers) {
     super.setIncomingTransfers(incomingTransfers);
     return this;
   }
 
   @Override
-  public MoneroTxFilter setOutgoingTransfer(MoneroTransfer outgoingTransfer) {
+  public MoneroTxFilter setOutgoingTransfer(MoneroOutgoingTransfer outgoingTransfer) {
     super.setOutgoingTransfer(outgoingTransfer);
     return this;
   }

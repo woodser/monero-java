@@ -43,6 +43,7 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroDestination;
+import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroOutputWallet;
