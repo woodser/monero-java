@@ -111,17 +111,18 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     params.put("all_accounts", true);
     params.put("in", true);
     params.put("out", true);
-//    params.put("pool", true);
-//    params.put("pending", true);
-//    params.put("failed", true);
+    params.put("pool", true);
+    params.put("pending", true);
+    params.put("failed", true);
     Map<String, Object> resp = rpc.sendJsonRequest("get_transfers", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     
-    // compare incoming confirmed transfers
+    // compare transfers to rpc
     compareTransferOrder((List<Map<String, Object>>) result.get("in"), wallet.getTransfers(new MoneroTransferFilter().setIsIncoming(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(true))));
-    
-    // compare outgoing confirmed transfers
     compareTransferOrder((List<Map<String, Object>>) result.get("out"), wallet.getTransfers(new MoneroTransferFilter().setIsOutgoing(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(true))));
+    compareTransferOrder((List<Map<String, Object>>) result.get("pool"), wallet.getTransfers(new MoneroTransferFilter().setIsIncoming(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(false))));
+    compareTransferOrder((List<Map<String, Object>>) result.get("pending"), wallet.getTransfers(new MoneroTransferFilter().setIsOutgoing(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(false).setIsFailed(false))));
+    compareTransferOrder((List<Map<String, Object>>) result.get("failed"), wallet.getTransfers(new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setIsFailed(true))));
   }
 
   // Can tag accounts and query accounts by tag
@@ -648,7 +649,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @SuppressWarnings("unchecked")
   private static void compareTransferOrder(List<Map<String, Object>> rpcTransfers, List<?> transfers) {
-    assertEquals(transfers.size(), rpcTransfers.size());
+    assertEquals(rpcTransfers.size(), transfers.size());
     for (int i = 0; i < transfers.size(); i++) {
       MoneroTransfer transfer = (MoneroTransfer) transfers.get(i);
       Map<String, Object> rpcTransfer = rpcTransfers.get(i);
