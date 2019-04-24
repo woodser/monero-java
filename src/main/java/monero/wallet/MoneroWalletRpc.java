@@ -42,6 +42,7 @@ import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncProgressListener;
@@ -599,7 +600,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         // TODO monero-wallet-rpc: confirmed tx from/to same account has amount 0 but cached transfers
         if (tx.getOutgoingTransfer() != null && Boolean.TRUE.equals(tx.getIsRelayed()) && !Boolean.TRUE.equals(tx.getIsFailed()) &&
             tx.getOutgoingTransfer().getDestinations() != null && tx.getOutgoingAmount().compareTo(BigInteger.valueOf(0)) == 0) {
-          MoneroTransfer outgoingTransfer = tx.getOutgoingTransfer();
+          MoneroOutgoingTransfer outgoingTransfer = tx.getOutgoingTransfer();
           BigInteger transferTotal = BigInteger.valueOf(0);
           for (MoneroDestination destination : outgoingTransfer.getDestinations()) transferTotal = transferTotal.add(destination.getAmount());
           tx.getOutgoingTransfer().setAmount(transferTotal);
@@ -744,8 +745,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // determine account and subaddresses to send from
     Integer accountIdx = config.getAccountIndex();
     if (accountIdx == null) accountIdx = 0; // default to account 0
-    List<Integer> subaddressIndices = config.getSubaddressIndices();
-    if (subaddressIndices == null) subaddressIndices = getSubaddressIndices(accountIdx);   
+    List<Integer> subaddressIndices = config.getSubaddressIndices() == null ? getSubaddressIndices(accountIdx) : new ArrayList<Integer>(config.getSubaddressIndices());
     
     // build request parameters
     Map<String, Object> params = new HashMap<String, Object>();
@@ -787,7 +787,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     for (MoneroTxWallet tx : txs) {
       initSentTxWallet(config, tx);
       tx.getOutgoingTransfer().setAccountIndex(accountIdx);
-      if (subaddressIndices.size() == 1) tx.getOutgoingTransfer().setSubaddressIndex(subaddressIndices.get(0));
+      if (subaddressIndices.size() == 1) tx.getOutgoingTransfer().setSubaddressIndices(subaddressIndices);
     }
     
     // initialize txs from rpc response
@@ -903,10 +903,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         tx.setIsCoinbase(false);
         tx.setIsFailed(false);
         tx.setMixin(config.getMixin());
-        MoneroTransfer transfer = tx.getOutgoingTransfer();
-        transfer.setAddress(getAddress(accountIdx, 0));
+        MoneroOutgoingTransfer transfer = tx.getOutgoingTransfer();
         transfer.setAccountIndex(accountIdx);
-        //transfer.setSubaddressIndex(0); // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
+        if (subaddressIndices.size() == 1) transfer.setSubaddressIndices(subaddressIndices);
         MoneroDestination destination = new MoneroDestination(config.getDestinations().get(0).getAddress(), transfer.getAmount());
         transfer.setDestinations(Arrays.asList(destination));
         tx.setOutgoingTransfer(transfer);
@@ -1458,8 +1457,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setIsCoinbase(false);
     tx.setIsFailed(false);
     tx.setMixin(config.getMixin());
-    MoneroTransfer transfer = new MoneroTransfer().setTx(tx);
-    //transfer.setSubaddressIndex(0); // TODO (monero-wallet-rpc): outgoing subaddress idx is always 0
+    MoneroOutgoingTransfer transfer = new MoneroOutgoingTransfer().setTx(tx);
+    if (config.getSubaddressIndices().size() == 1) transfer.setSubaddressIndices(new ArrayList<Integer>(config.getSubaddressIndices()));
     List<MoneroDestination> destCopies = new ArrayList<MoneroDestination>();
     for (MoneroDestination dest : config.getDestinations()) destCopies.add(dest.copy());
     transfer.setDestinations(destCopies);
@@ -1509,7 +1508,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setMetadata(metadatas.get(i));
       tx.setFee((BigInteger) fees.get(i));
       if (tx.getOutgoingTransfer() != null) tx.getOutgoingTransfer().setAmount((BigInteger) amounts.get(i));
-      else tx.setOutgoingTransfer(new MoneroTransfer().setTx(tx).setAmount((BigInteger) amounts.get(i)));
+      else tx.setOutgoingTransfer(new MoneroOutgoingTransfer().setTx(tx).setAmount((BigInteger) amounts.get(i)));
     }
     return txs;
   }
