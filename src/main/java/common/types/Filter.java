@@ -24,7 +24,7 @@ public interface Filter<T> {
    * @param items are the items to filter
    * @return the items that meet this filter's criteria
    */
-  public static <T> List<T> apply(Filter<T> filter, List<T> items) {
+  public static <T> List<T> apply(Filter<T> filter, List<? extends T> items) {
     List<T> filtered = new ArrayList<T>();
     for (T item : items) if (filter.meetsCriteria(item)) filtered.add(item);
     return filtered;
@@ -37,7 +37,7 @@ public interface Filter<T> {
    * @param items are the items to filter
    * @return the items that meet this filter's criteria
    */
-  public static <T> Set<T> apply(Filter<? extends T> filter, Set<T> items) {
+  public static <T> Set<T> apply(Filter<? extends T> filter, Set<? extends T> items) {
     throw new RuntimeException("Not implemented");
   }
 }
