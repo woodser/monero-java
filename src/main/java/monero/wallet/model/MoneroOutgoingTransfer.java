@@ -1,5 +1,6 @@
 package monero.wallet.model;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -126,5 +127,25 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
       if (other.subaddressIndices != null) return false;
     } else if (!subaddressIndices.equals(other.subaddressIndices)) return false;
     return true;
+  }
+  
+  // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
+
+  @Override
+  public MoneroOutgoingTransfer setTx(MoneroTxWallet tx) {
+    super.setTx(tx);
+    return this;
+  }
+
+  @Override
+  public MoneroOutgoingTransfer setAmount(BigInteger amount) {
+    super.setAmount(amount);
+    return this;
+  }
+
+  @Override
+  public MoneroOutgoingTransfer setAccountIndex(Integer accountIndex) {
+    super.setAccountIndex(accountIndex);
+    return this;
   }
 }

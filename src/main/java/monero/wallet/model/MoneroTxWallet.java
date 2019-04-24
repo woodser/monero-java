@@ -28,7 +28,7 @@ public class MoneroTxWallet extends MoneroTx {
     super(tx);
     if (tx.incomingTransfers != null) {
       this.incomingTransfers = new ArrayList<MoneroIncomingTransfer>();
-      for (MoneroTransfer transfer : tx.incomingTransfers) {
+      for (MoneroIncomingTransfer transfer : tx.incomingTransfers) {
         this.incomingTransfers.add(transfer.copy().setTx(this));
       }
     }
@@ -58,20 +58,20 @@ public class MoneroTxWallet extends MoneroTx {
     return getOutgoingTransfer() != null ? getOutgoingTransfer().getAmount() : null;
   }
   
-  public List<MoneroTransfer> getIncomingTransfers() {
+  public List<MoneroIncomingTransfer> getIncomingTransfers() {
     return incomingTransfers;
   }
   
-  public MoneroTxWallet setIncomingTransfers(List<MoneroTransfer> incomingTransfers) {
+  public MoneroTxWallet setIncomingTransfers(List<MoneroIncomingTransfer> incomingTransfers) {
     this.incomingTransfers = incomingTransfers;
     return this;
   }
   
-  public MoneroTransfer getOutgoingTransfer() {
+  public MoneroOutgoingTransfer getOutgoingTransfer() {
     return outgoingTransfer;
   }
   
-  public MoneroTxWallet setOutgoingTransfer(MoneroTransfer outgoingTransfer) {
+  public MoneroTxWallet setOutgoingTransfer(MoneroOutgoingTransfer outgoingTransfer) {
     this.outgoingTransfer = outgoingTransfer;
     return this;
   }
@@ -163,10 +163,10 @@ public class MoneroTxWallet extends MoneroTx {
     
     // merge incoming transfers
     if (tx.getIncomingTransfers() != null) {
-      if (this.getIncomingTransfers() == null) this.setIncomingTransfers(new ArrayList<MoneroTransfer>());
-      for (MoneroTransfer transfer : tx.getIncomingTransfers()) {
+      if (this.getIncomingTransfers() == null) this.setIncomingTransfers(new ArrayList<MoneroIncomingTransfer>());
+      for (MoneroIncomingTransfer transfer : tx.getIncomingTransfers()) {
         transfer.setTx(this);
-        mergeTransfer(this.getIncomingTransfers(), transfer);
+        mergeIncomingTransfer(this.getIncomingTransfers(), transfer);
       }
     }
     
@@ -229,8 +229,8 @@ public class MoneroTxWallet extends MoneroTx {
   }
   
   // helper function to merge transfers
-  private static void mergeTransfer(List<MoneroTransfer> transfers, MoneroTransfer transfer) {
-    for (MoneroTransfer aTransfer : transfers) {
+  private static void mergeIncomingTransfer(List<MoneroIncomingTransfer> transfers, MoneroIncomingTransfer transfer) {
+    for (MoneroIncomingTransfer aTransfer : transfers) {
       if (aTransfer.getAccountIndex() == transfer.getAccountIndex() && aTransfer.getSubaddressIndex() == transfer.getSubaddressIndex()) {
         aTransfer.merge(transfer);
         return;

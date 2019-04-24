@@ -44,8 +44,9 @@ public class MoneroTransfer {
     return accountIndex;
   }
 
-  public void setAccountIndex(Integer accountIndex) {
+  public MoneroTransfer setAccountIndex(Integer accountIndex) {
     this.accountIndex = accountIndex;
+    return this;
   }
   
   public MoneroTransfer copy() {
