@@ -1,8 +1,11 @@
 package utils;
 
 import monero.daemon.MoneroDaemon;
-import monero.daemon.model.MoneroTx;
+import monero.daemon.model.MoneroKeyImage;
+import monero.daemon.model.MoneroKeyImageSpentStatus;
 import monero.wallet.MoneroWallet;
+import monero.wallet.config.MoneroVoutFilter;
+import monero.wallet.model.MoneroOutputWallet;
 
 /**
  * Scratchpad for quick scripting.
@@ -26,8 +29,14 @@ public class Scratchpad {
     
 //    wallet.getAccounts(true);
     
-//    MoneroKeyImageSpentStatus status = daemon.getKeyImageSpentStatus("e0a0e86f63ef489ce6163298a531c584add551698e7381a789a4e506023027f6");
-//    System.out.println("Spent: " + status);
+    String keyImage = "f4c6123ea4daa831d850785fd5f72d8f34fcd3606ef94431ea2cae7a3dbd03be";
+    MoneroKeyImageSpentStatus status = daemon.getKeyImageSpentStatus(keyImage);
+    System.out.println("Spent: " + status);
+    
+    for (MoneroOutputWallet vout : wallet.getVouts(new MoneroVoutFilter().setKeyImage(new MoneroKeyImage().setHex(keyImage)))) {
+      System.out.println(vout);
+      wallet.sweepOutput(wallet.getPrimaryAddress(), keyImage, null);
+    }
 //    
 //    MoneroOutputWallet vout = wallet.getVouts(new MoneroVoutFilter().setKeyImage(new MoneroKeyImage("e0a0e86f63ef489ce6163298a531c584add551698e7381a789a4e506023027f6"))).get(0);
 //    MoneroTxWallet tx = wallet.getTxs(new MoneroTxFilter().setTxIds(Arrays.asList(vout.getTx().getId())).setIncludeVouts(true)).get(0);
@@ -42,10 +51,10 @@ public class Scratchpad {
 //      break;
 //    }
     
-    wallet.getVouts();
-    
-    MoneroTx tx = daemon.getTx("d16e603efed00a3d2e14085d0ebe96734145d9eba851f6afd02ab76f9d5b62c0");
-    System.out.println(tx);
+//    wallet.getVouts();
+//    
+//    MoneroTx tx = daemon.getTx("d16e603efed00a3d2e14085d0ebe96734145d9eba851f6afd02ab76f9d5b62c0");
+//    System.out.println(tx);
 //    tx.merge(tx.copy());
     
 //    MoneroTxWallet tx = wallet.getTxs(new MoneroTxFilter().setTxId("d16e603efed00a3d2e14085d0ebe96734145d9eba851f6afd02ab76f9d5b62c0")).get(0);

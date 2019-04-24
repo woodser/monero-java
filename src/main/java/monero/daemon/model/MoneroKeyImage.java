@@ -12,6 +12,10 @@ public class MoneroKeyImage {
   private String hex;
   private String signature;
   
+  public MoneroKeyImage() {
+    // nothing to construct
+  }
+  
   public MoneroKeyImage(String hex) {
     this(hex, null);
   }
@@ -30,16 +34,18 @@ public class MoneroKeyImage {
     return hex;
   }
   
-  public void setHex(String hex) {
+  public MoneroKeyImage setHex(String hex) {
     this.hex = hex;
+    return this;
   }
   
   public String getSignature() {
     return signature;
   }
   
-  public void setSignature(String signature) {
+  public MoneroKeyImage setSignature(String signature) {
     this.signature = signature;
+    return this;
   }
   
   public MoneroKeyImage copy() {
