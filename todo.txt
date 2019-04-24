@@ -1,4 +1,5 @@
 WALLET RPC ISSUES
+sweepOutput("f4c6123ea4daa831d850785fd5f72d8f34fcd3606ef94431ea2cae7a3dbd03be") -37: not enough unlocked money, despite spent: false, unlocked: true
 occasionally hangs in getTxsByIdsInPool()
 ocasional seg fault 11 in testGetReserveProofAccount(), wallet rpc get_reserve_proof
 
@@ -23,6 +24,7 @@ wallet.getTxs() returns txs in no particular order
 fetched vout's tx is incoming and outgoing are false
 multisig_txset and unsigned_txset on send tests
 test wallet gets should send test transaction so unconfirmed tx can be tested with the others
+incoming_transfers "available" could optimize request if !spent && unlocked?
 
 NEXT
 clean up todos

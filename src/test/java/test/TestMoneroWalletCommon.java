@@ -518,7 +518,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     for (MoneroTxWallet tx : txs) {
       assertTrue(tx.getIsOutgoing());
       assertNotNull(tx.getOutgoingTransfer());
-      testTransfer(tx.getOutgoingTransfer());
+      testTransfer(tx.getOutgoingTransfer(), null);
     }
     
     // get transactions without an outgoing transfer
@@ -534,7 +534,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertTrue(tx.getIsIncoming());
       assertTrue(tx.getIncomingTransfers().size() > 0);
       for (MoneroIncomingTransfer transfer : tx.getIncomingTransfers()) {
-        testTransfer(transfer);
+        testTransfer(transfer, null);
       }
     }
     
@@ -2041,6 +2041,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     boolean useParams = true; // for loop flips in order to alternate test
     for (MoneroOutputWallet vout : vouts) {
       testVout(vout);
+      assertFalse(vout.getIsSpent());
+      assertTrue(vout.getIsUnlocked());
       
       // sweep output to address
       String address = wallet.getAddress(vout.getAccountIndex(), vout.getSubaddressIndex());
@@ -2705,7 +2707,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // test outgoing transfer
     if (tx.getOutgoingTransfer() != null) {
       assertTrue(tx.getIsOutgoing());
-      testTransfer(tx.getOutgoingTransfer());
+      testTransfer(tx.getOutgoingTransfer(), ctx);
       if (Boolean.TRUE.equals(ctx.isSweepResponse)) assertEquals(tx.getOutgoingTransfer().getDestinations().size(), 1);
       
       // TODO: handle special cases
@@ -2729,7 +2731,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       // test each transfer and collect transfer sum
       BigInteger transferSum = BigInteger.valueOf(0);
       for (MoneroIncomingTransfer transfer : tx.getIncomingTransfers()) {
-        testTransfer(transfer);
+        testTransfer(transfer, ctx);
         transferSum = transferSum.add(transfer.getAmount());
         if (ctx.wallet != null) assertEquals(ctx.wallet.getAddress(transfer.getAccountIndex(), transfer.getSubaddressIndex()), transfer.getAddress());
         
@@ -2750,7 +2752,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       // test common attributes
       MoneroSendConfig sendConfig = ctx.sendConfig;
       assertEquals(false, tx.getIsConfirmed());
-      testTransfer(tx.getOutgoingTransfer());
+      testTransfer(tx.getOutgoingTransfer(), ctx);
       assertEquals(sendConfig.getMixin(), tx.getMixin());
       assertEquals(sendConfig.getUnlockTime() != null ? sendConfig.getUnlockTime() : 0, (int) tx.getUnlockTime());
       assertNull(tx.getBlock());
@@ -2881,12 +2883,12 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertEquals(merged.toString(), tx.toString());
   }
   
-  private static void testTransfer(MoneroTransfer transfer) {
+  private static void testTransfer(MoneroTransfer transfer, TestContext ctx) {
     assertNotNull(transfer);
     TestUtils.testUnsignedBigInteger(transfer.getAmount());
     assertTrue(transfer.getAccountIndex() >= 0);
     if (transfer.getIsIncoming()) testIncomingTransfer((MoneroIncomingTransfer) transfer);
-    else testOutgoingTransfer((MoneroOutgoingTransfer) transfer);
+    else testOutgoingTransfer((MoneroOutgoingTransfer) transfer, ctx);
     
     // transfer and tx reference each other
     assertNotNull(transfer.getTx());
@@ -2903,11 +2905,15 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertTrue(transfer.getSubaddressIndex() >= 0);
   }
   
-  private static void testOutgoingTransfer(MoneroOutgoingTransfer transfer) {
+  private static void testOutgoingTransfer(MoneroOutgoingTransfer transfer, TestContext ctx) {
+    if (ctx == null) ctx = new TestContext();
     assertFalse(transfer.getIsIncoming());
     assertTrue(transfer.getIsOutgoing());
-    assertTrue(transfer.getSubaddressIndices().size() >= 1);
-    for (int subaddressIdx : transfer.getSubaddressIndices()) assertTrue(subaddressIdx >= 0);
+    if (!Boolean.TRUE.equals(ctx.isSendResponse)) assertNotNull(transfer.getSubaddressIndices());
+    if (transfer.getSubaddressIndices() != null) {
+      assertTrue(transfer.getSubaddressIndices().size() >= 1);
+      for (int subaddressIdx : transfer.getSubaddressIndices()) assertTrue(subaddressIdx >= 0);
+    }
     if (transfer.getAddresses() != null) {
       assertEquals(transfer.getSubaddressIndices().size(), transfer.getAddresses().size());
       for (String address : transfer.getAddresses()) assertNotNull(address);
