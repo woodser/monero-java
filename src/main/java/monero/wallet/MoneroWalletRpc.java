@@ -1459,7 +1459,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setIsFailed(false);
     tx.setMixin(config.getMixin());
     MoneroOutgoingTransfer transfer = new MoneroOutgoingTransfer().setTx(tx);
-    if (config.getSubaddressIndices().size() == 1) transfer.setSubaddressIndices(new ArrayList<Integer>(config.getSubaddressIndices()));
+    if (config.getSubaddressIndices() != null && config.getSubaddressIndices().size() == 1) transfer.setSubaddressIndices(new ArrayList<Integer>(config.getSubaddressIndices())); // we know src subaddress indices iff config specifies 1
     List<MoneroDestination> destCopies = new ArrayList<MoneroDestination>();
     for (MoneroDestination dest : config.getDestinations()) destCopies.add(dest.copy());
     transfer.setDestinations(destCopies);

@@ -827,8 +827,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertEquals(1, (int) transfer.getAccountIndex());
       if (transfer.getIsIncoming()) assertEquals(2, (int) ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
       else {
-        assertEquals(1, ((MoneroOutgoingTransfer) transfer).getSubaddressIndices().size());
-        assertEquals(2, (int) ((MoneroOutgoingTransfer) transfer).getSubaddressIndices().get(0));
+        assertTrue(((MoneroOutgoingTransfer) transfer).getSubaddressIndices().contains(2));
       }
       assertTrue(transfer.getTx().getIsConfirmed());
     }
