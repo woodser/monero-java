@@ -22,6 +22,14 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     this.address = transfer.address;
   }
   
+  public Boolean getIsIncoming() {
+    return true;
+  }
+  
+  public Boolean getIsOutgoing() {
+    return false;
+  }
+  
   public Integer getSubaddressIndex() {
     return subaddressIndex;
   }
