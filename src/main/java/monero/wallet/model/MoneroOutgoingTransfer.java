@@ -1,7 +1,5 @@
 package monero.wallet.model;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +11,7 @@ import monero.utils.MoneroUtils;
 public class MoneroOutgoingTransfer extends MoneroTransfer {
 
   private List<Integer> subaddressIndices;
+  private List<String> addresses;
   private List<MoneroDestination> destinations;
   
   public MoneroOutgoingTransfer() {
@@ -21,7 +20,8 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
   
   public MoneroOutgoingTransfer(MoneroOutgoingTransfer transfer) {
     super(transfer);
-    this.subaddressIndices = new ArrayList<Integer>(transfer.subaddressIndices);
+    if (transfer.subaddressIndices != null) this.subaddressIndices = new ArrayList<Integer>(transfer.subaddressIndices);
+    if (transfer.addresses != null) this.addresses = new ArrayList<String>(transfer.addresses);
     if (transfer.destinations != null) {
       this.destinations = new ArrayList<MoneroDestination>();
       for (MoneroDestination destination : transfer.getDestinations()) {
@@ -39,6 +39,15 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
     return this;
   }
   
+  public List<String> getAddresses() {
+    return addresses;
+  }
+
+  public MoneroOutgoingTransfer setAddresses(List<String> addresses) {
+    this.addresses = addresses;
+    return this;
+  }
+
   public List<MoneroDestination> getDestinations() {
     return destinations;
   }
@@ -65,16 +74,9 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
     super.merge(transfer);
     assert(transfer instanceof MoneroOutgoingTransfer);
     if (this == transfer) return this;
-    
-    // merge subaddress indices
     this.setSubaddressIndices(MoneroUtils.reconcile(this.getSubaddressIndices(), transfer.getSubaddressIndices()));
-    
-    // merge destinations
-    if (this.getDestinations() == null) this.setDestinations(transfer.getDestinations());
-    else if (transfer.getDestinations() != null) {
-      assertEquals("Cannot merge transfer because destinations are different", this.getDestinations(), transfer.getDestinations());
-    }
-    
+    this.setAddresses(MoneroUtils.reconcile(this.getAddresses(), transfer.getAddresses()));
+    this.setDestinations(MoneroUtils.reconcile(this.getDestinations(), transfer.getDestinations()));
     return this;
   }
   
@@ -86,6 +88,7 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
     StringBuilder sb = new StringBuilder();
     sb.append(super.toString(indent));
     sb.append(MoneroUtils.kvLine("Subaddress indices", this.getSubaddressIndices(), indent));
+    sb.append(MoneroUtils.kvLine("Addresses", this.getAddresses(), indent));
     if (this.getDestinations() != null) {
       sb.append(MoneroUtils.kvLine("Destinations", "", indent));
       for (int i = 0; i < this.getDestinations().size(); i++) {
@@ -101,6 +104,7 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
+    result = prime * result + ((addresses == null) ? 0 : addresses.hashCode());
     result = prime * result + ((destinations == null) ? 0 : destinations.hashCode());
     result = prime * result + ((subaddressIndices == null) ? 0 : subaddressIndices.hashCode());
     return result;
@@ -112,6 +116,9 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
     if (!super.equals(obj)) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroOutgoingTransfer other = (MoneroOutgoingTransfer) obj;
+    if (addresses == null) {
+      if (other.addresses != null) return false;
+    } else if (!addresses.equals(other.addresses)) return false;
     if (destinations == null) {
       if (other.destinations != null) return false;
     } else if (!destinations.equals(other.destinations)) return false;
