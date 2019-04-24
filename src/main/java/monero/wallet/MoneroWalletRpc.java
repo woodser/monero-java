@@ -40,6 +40,7 @@ import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroDestination;
+import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroOutgoingTransfer;
@@ -1542,8 +1543,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // initialize remaining fields  TODO: seems this should be part of common function with DaemonRpc._convertRpcTx
     MoneroBlockHeader header = null;
     MoneroTransfer transfer = null;
-    Integer accountIdx = null;
-    Integer subaddressIdx = null;
     for (String key : rpcTx.keySet()) {
       Object val = rpcTx.get(key);
       if (key.equals("txid")) tx.setId((String) val);
@@ -1580,21 +1579,32 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         else tx.setNumSuggestedConfirmations(null);
       }
       else if (key.equals("amount")) {
-        if (transfer == null) transfer = new MoneroTransfer().setTx(tx);
+        if (transfer == null) transfer = (isOutgoing ? new MoneroOutgoingTransfer() : new MoneroIncomingTransfer()).setTx(tx);
         transfer.setAmount((BigInteger) val);
       }
       else if (key.equals("address")) {
-        if (transfer == null) transfer = new MoneroTransfer().setTx(tx);
-        transfer.setAddress((String) val);
+        if (!isOutgoing) {
+          if (transfer == null) transfer = new MoneroIncomingTransfer().setTx(tx);
+          ((MoneroIncomingTransfer) transfer).setAddress((String) val);
+        }
+        // TODO: set addresses here?
       }
       else if (key.equals("payment_id")) {
         if (!MoneroTxWallet.DEFAULT_PAYMENT_ID.equals(val)) tx.setPaymentId((String) val);  // default is undefined
       }
       else if (key.equals("subaddr_index")) assertTrue(rpcTx.containsKey("subaddr_indices")); // handled by subaddr_indices
       else if (key.equals("subaddr_indices")) {
-        Map<String, Object> rpcIndices = ((List<Map<String, Object>>) val).get(0);
-        accountIdx = ((BigInteger) rpcIndices.get("major")).intValue();
-        subaddressIdx = ((BigInteger) rpcIndices.get("minor")).intValue();
+        if (transfer == null) transfer = (isOutgoing ? new MoneroOutgoingTransfer() : new MoneroIncomingTransfer()).setTx(tx);
+        List<Map<String, BigInteger>> rpcIndices = (List<Map<String, BigInteger>>) val;
+        transfer.setAccountIndex(rpcIndices.get(0).get("major").intValue());
+        if (isOutgoing) {
+          List<Integer> subaddressIndices = new ArrayList<Integer>();
+          for (Map<String, BigInteger> rpcIndex : rpcIndices) subaddressIndices.add(rpcIndex.get("minor").intValue());
+          ((MoneroOutgoingTransfer) transfer).setSubaddressIndices(subaddressIndices);
+        } else {
+          assertEquals(1, rpcIndices.size());
+          ((MoneroIncomingTransfer) transfer).setSubaddressIndex(rpcIndices.get(0).get("minor").intValue());
+        }
       }
       else if (key.equals("destinations")) {
         assertTrue(isOutgoing);
@@ -1608,8 +1618,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
             else throw new MoneroException("Unrecognized transaction destination field: " + destinationKey);
           }
         }
-        if (transfer == null) transfer = new MoneroTransfer().setTx(tx);
-        transfer.setDestinations(destinations);
+        if (transfer == null) transfer = new MoneroOutgoingTransfer().setTx(tx);
+        ((MoneroOutgoingTransfer) transfer).setDestinations(destinations);
       }
       else if (key.equals("multisig_txset") && val != null) {} // TODO: handle this with value
       else if (key.equals("unsigned_txset") && val != null) {} // TODO: handle this with value
@@ -1621,13 +1631,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // initialize final fields
     if (transfer != null) {
-      transfer.setAccountIndex(accountIdx);
-      transfer.setSubaddressIndex(subaddressIdx);
+//      transfer.setAccountIndex(accountIdx);
+//      transfer.setSubaddressIndex(subaddressIdx);
       if (isOutgoing) {
         if (tx.getOutgoingTransfer() != null) tx.getOutgoingTransfer().merge(transfer);
-        else tx.setOutgoingTransfer(transfer);
+        else tx.setOutgoingTransfer((MoneroOutgoingTransfer) transfer);
       } else {
-        tx.setIncomingTransfers(new ArrayList<MoneroTransfer>(Arrays.asList(transfer)));
+        tx.setIncomingTransfers(new ArrayList<MoneroIncomingTransfer>(Arrays.asList((MoneroIncomingTransfer) transfer)));
       }
     }
     
