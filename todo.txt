@@ -8,11 +8,11 @@ WARNING: key proof indicates no funds received despite transfer (txid=76983ebf1d
 add all_accounts to incoming_transfers
 
 14.0.3 RELEASE
-MoneroSendConfig -> MoneroSendRequest
-api updates: setSubaddressIndices(...) and others, getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
 update readme
-generate javadoc
 port changes to js
+wallet rpc getTxById(String txId), getTxsByIds(String... txIds)
+MoneroSendConfig -> MoneroSendRequest
+generate javadoc
 release
 
 testGetNewKeyImagesFromLastImport
@@ -29,6 +29,7 @@ multisig_txset and unsigned_txset on send tests
 test wallet gets should send test transaction so unconfirmed tx can be tested with the others
 deterministic ordering of txs, vouts?
 test priority in common tests (only in sample code currently)
+api updates: setSubaddressIndices(...) and others, , getBalancesWallet, more convenient filtering, remove typing on vouts, etc
 
 NEXT
 clean up todos
