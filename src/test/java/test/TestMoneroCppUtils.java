@@ -12,7 +12,7 @@ import org.junit.Test;
 import monero.cpp_bridge.MoneroCppUtils;
 
 /**
- * Test Monero Core C++ utilities.
+ * Test bridged C++ utilities.
  */
 public class TestMoneroCppUtils {
 
