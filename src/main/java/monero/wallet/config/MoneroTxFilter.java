@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import common.types.Filter;
+import common.utils.GenUtils;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroOutput;
 import monero.wallet.model.MoneroIncomingTransfer;
@@ -52,6 +53,11 @@ public class MoneroTxFilter extends MoneroTxWallet implements Filter<MoneroTxWal
 
   public MoneroTxFilter setTxIds(Collection<String> txIds) {
     this.txIds = txIds;
+    return this;
+  }
+  
+  public MoneroTxFilter setTxIds(String... txIds) {
+    this.txIds = GenUtils.arrayToList(txIds);
     return this;
   }
   
