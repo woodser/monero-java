@@ -26,7 +26,7 @@ import utils.TestUtils;
 /**
  * Test the sample code in README.md.
  */
-public class TestReadmeSample {
+public class TestSampleCode {
   
   @Test
   public void testWalletSample() {
