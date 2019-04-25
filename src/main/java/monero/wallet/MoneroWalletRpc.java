@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -71,12 +72,26 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     MAPPER.configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS, true);
   }
   
+  public MoneroWalletRpc(URI uri) {
+    this(new MoneroRpc(uri));
+  }
+  
+  public MoneroWalletRpc(String uri) {
+    this(new MoneroRpc(uri));
+  }
+  
+  public MoneroWalletRpc(String uri, String username, String password) {
+    this(new MoneroRpc(uri, username, password));
+  }
+  
+  public MoneroWalletRpc(URI uri, String username, String password) {
+    this(new MoneroRpc(uri, username, password));
+  }
+  
   public MoneroWalletRpc(MoneroRpc rpc) {
     this.rpc = rpc;
     addressCache = new HashMap<Integer, Map<Integer, String>>();
   }
-  
-  // TODO: overloaded constructors
   
   // --------------------------- RPC WALLET METHODS ---------------------------
   
@@ -782,7 +797,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("ring_size", config.getRingSize());
     params.put("unlock_time", config.getUnlockTime());
     params.put("do_not_relay", config.getDoNotRelay());
-    params.put("priority", config.getPriority());
+    params.put("priority", config.getPriority() == null ? null : config.getPriority().ordinal());
     params.put("get_tx_key", true);
     params.put("get_tx_hex", true);
     params.put("get_tx_metadata", true);
@@ -837,7 +852,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // common request params
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("address", config.getDestinations().get(0).getAddress());
-    params.put("priority", config.getPriority());
+    params.put("priority", config.getPriority() == null ? null : config.getPriority().ordinal());
     params.put("mixin", config.getMixin());
     params.put("ring_size", config.getRingSize());
     params.put("unlock_time", config.getUnlockTime());
@@ -974,7 +989,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("ring_size", config.getRingSize());
     params.put("unlock_time", config.getUnlockTime());
     params.put("do_not_relay", config.getDoNotRelay());
-    params.put("priority", config.getPriority());
+    params.put("priority", config.getPriority() == null ? null : config.getPriority().ordinal());
     params.put("payment_id", config.getPaymentId());
     params.put("get_tx_key", true);
     params.put("get_tx_hex", true);

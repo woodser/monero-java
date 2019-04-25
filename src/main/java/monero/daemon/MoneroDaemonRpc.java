@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -66,6 +67,22 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   private MoneroRpc rpc;
   private MoneroDaemonPoller daemonPoller;
   private Map<Integer, MoneroBlockHeader> cachedHeaders;
+  
+  public MoneroDaemonRpc(URI uri) {
+    this(new MoneroRpc(uri));
+  }
+  
+  public MoneroDaemonRpc(String uri) {
+    this(new MoneroRpc(uri));
+  }
+  
+  public MoneroDaemonRpc(String uri, String username, String password) {
+    this(new MoneroRpc(uri, username, password));
+  }
+  
+  public MoneroDaemonRpc(URI uri, String username, String password) {
+    this(new MoneroRpc(uri, username, password));
+  }
 
   public MoneroDaemonRpc(MoneroRpc rpc) {
     this.rpc = rpc;
