@@ -25,12 +25,14 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.config.MoneroTransferFilter;
 import monero.wallet.config.MoneroTxFilter;
+import monero.wallet.config.MoneroVoutFilter;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroOutgoingTransfer;
+import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
 import utils.TestUtils;
@@ -123,6 +125,31 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     compareTransferOrder((List<Map<String, Object>>) result.get("pool"), wallet.getTransfers(new MoneroTransferFilter().setIsIncoming(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(false))));
     compareTransferOrder((List<Map<String, Object>>) result.get("pending"), wallet.getTransfers(new MoneroTransferFilter().setIsOutgoing(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(false).setIsFailed(false))));
     compareTransferOrder((List<Map<String, Object>>) result.get("failed"), wallet.getTransfers(new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setIsFailed(true))));
+    
+    // compare tx order to rpc
+//    compareTxOrder((List<Map<String, Object>>) result.get("in"), wallet.getTxs(new MoneroTxFilter().setIsConfirmed(true).setTransferFilter(new MoneroTransferFilter().setIsIncoming(true))));
+//    compareTxOrder((List<Map<String, Object>>) result.get("pool"), wallet.getTxs(new MoneroTxFilter().setIsConfirmed(false).setTransferFilter(new MoneroTransferFilter().setIsIncoming(true))));
+//    compareTxOrder((List<Map<String, Object>>) result.get("pending"), wallet.getTxs(new MoneroTxFilter().setIsConfirmed(false).setIsFailed(false).setTransferFilter(new MoneroTransferFilter().setIsOutgoing(true))));
+//    compareTxOrder((List<Map<String, Object>>) result.get("failed"), wallet.getTxs(new MoneroTxFilter().setIsFailed(true)));
+    
+    // fetch vouts directly from rpc for comparison to library
+    params.clear();
+    params.put("transfer_type", "all");
+    params.put("verbose", true);
+    params.put("account_index", 0);
+    resp = rpc.sendJsonRequest("incoming_transfers", params);
+    result = (Map<String, Object>) resp.get("result");
+    List<Map<String, Object>> rpcVouts = (List<Map<String, Object>>) result.get("transfers");
+    
+    // compare vout order to rpc
+    List<MoneroOutputWallet> vouts = wallet.getVouts(new MoneroVoutFilter().setAccountIndex(0));
+    assertEquals(rpcVouts.size(), vouts.size());
+    for (int i = 0; i < vouts.size(); i++) {
+      assertEquals(rpcVouts.get(i).get("key_image"), vouts.get(i).getKeyImage().getHex());
+      Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) rpcVouts.get(i).get("subaddr_index");
+      assertEquals(rpcIndices.get("major").intValue(), (int) vouts.get(i).getAccountIndex());
+      assertEquals(rpcIndices.get("minor").intValue(), (int) vouts.get(i).getSubaddressIndex());
+    }
   }
 
   // Can tag accounts and query accounts by tag
@@ -683,11 +710,9 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
 //  private static void compareTxOrder(List<Map<String, Object>> rpcTransfers, List<MoneroTxWallet> txs) {
-//    System.out.println(rpcTransfers);
 //    List<String> txIds = new ArrayList<String>();
 //    for (Map<String, Object> rpcTransfer : rpcTransfers) {
 //      String txId = (String) rpcTransfer.get("txid");
-//      System.out.println("RPC transfer: " + txId);
 //      if (!txIds.contains(txId)) txIds.add(txId);
 //    }
 //    assertEquals(txIds.size(), txs.size());

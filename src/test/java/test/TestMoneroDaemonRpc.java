@@ -448,13 +448,17 @@ public class TestMoneroDaemonRpc {
     // submit txs to the pool but don't relay
     List<String> txIds = new ArrayList<String>();
     for (int i = 0; i < 3; i++) {
+      System.out.print("Fetching unrelayed tx...");
       MoneroTx tx = getUnrelayedTx(wallet, i);
+      System.out.println("done");
       daemon.submitTxHex(tx.getFullHex(), true);
       txIds.add(tx.getId());
     }
     
     // fetch txs by id
+    System.out.print("Fetching txs...");
     List<MoneroTx> txs = daemon.getTxs(txIds);
+    System.out.println("done");
     
     // context for testing tx
     TestContext ctx = new TestContext();
