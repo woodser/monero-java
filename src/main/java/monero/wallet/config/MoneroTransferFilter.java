@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import common.types.Filter;
+import common.utils.GenUtils;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroOutgoingTransfer;
@@ -60,6 +61,11 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
     this.addresses = addresses;
     return this;
   }
+  
+  public MoneroTransferFilter setAddresses(String... addresses) {
+    this.addresses = GenUtils.arrayToList(addresses);
+    return this;
+  }
 
   public Integer getSubaddressIndex() {
     return subaddressIndex;
@@ -76,6 +82,11 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
 
   public MoneroTransferFilter setSubaddressIndices(List<Integer> subaddressIndices) {
     this.subaddressIndices = subaddressIndices;
+    return this;
+  }
+  
+  public MoneroTransferFilter setSubaddressIndices(Integer... subaddressIndices) {
+    this.subaddressIndices = GenUtils.arrayToList(subaddressIndices);
     return this;
   }
 

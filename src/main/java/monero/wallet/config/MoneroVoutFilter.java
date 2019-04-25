@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import common.types.Filter;
+import common.utils.GenUtils;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroTx;
 import monero.wallet.model.MoneroOutputWallet;
@@ -27,6 +28,11 @@ public class MoneroVoutFilter extends MoneroOutputWallet implements Filter<Moner
 
   public MoneroVoutFilter setSubaddressIndices(List<Integer> subaddressIndices) {
     this.subaddressIndices = subaddressIndices;
+    return this;
+  }
+  
+  public MoneroVoutFilter setSubaddressIndices(Integer... subaddressIndices) {
+    this.subaddressIndices = GenUtils.arrayToList(subaddressIndices);
     return this;
   }
 

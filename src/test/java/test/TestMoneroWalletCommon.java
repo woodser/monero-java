@@ -692,7 +692,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         
         // fetch tx with filtering
         List<MoneroTxWallet> filteredTxs = wallet.getTxs(new MoneroTxFilter().setTransferFilter(new MoneroTransferFilter().setIsIncoming(true).setAccountIndex(transfer.getAccountIndex())));
-        MoneroTxWallet filteredTx = Filter.apply(new MoneroTxFilter().setTxIds(Arrays.asList(tx.getId())), filteredTxs).get(0);
+        MoneroTxWallet filteredTx = Filter.apply(new MoneroTxFilter().setTxIds(tx.getId()), filteredTxs).get(0);
         
         // txs should be the same (mergeable)
         assertEquals(tx.getId(), filteredTx.getId());
@@ -718,7 +718,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // test invalid id in collection
     List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, null, 3, 5);
-    txs = wallet.getTxs(new MoneroTxFilter().setTxIds(Arrays.asList(randomTxs.get(0).getId(), "invalid_id")));
+    txs = wallet.getTxs(new MoneroTxFilter().setTxIds(randomTxs.get(0).getId(), "invalid_id"));
     assertEquals(1, txs.size());
     assertEquals(randomTxs.get(0).getId(), txs.get(0).getId());
     
@@ -881,13 +881,13 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // test invalid id in collection
     List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, null, 3, 5);
-    transfers = wallet.getTransfers(new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setTxIds(Arrays.asList(randomTxs.get(0).getId(), "invalid_id"))));
+    transfers = wallet.getTransfers(new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setTxIds(randomTxs.get(0).getId(), "invalid_id")));
     assertTrue(transfers.size() > 0);
     MoneroTxWallet tx = transfers.get(0).getTx();
     for (MoneroTransfer transfer : transfers) assertTrue(tx == transfer.getTx());
     
     // test unused subaddress indices
-    transfers = wallet.getTransfers(new MoneroTransferFilter().setAccountIndex(0).setSubaddressIndices(Arrays.asList(1234907)));
+    transfers = wallet.getTransfers(new MoneroTransferFilter().setAccountIndex(0).setSubaddressIndices(1234907));
     assertTrue(transfers.size() == 0);
     
     // test invalid subaddress index
@@ -1014,7 +1014,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // test invalid id in collection
     List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, new MoneroTxFilter().setIsConfirmed(true).setIncludeVouts(true), 3, 5);
     for (MoneroTxWallet randomTx : randomTxs) assertFalse(randomTx.getVouts().isEmpty());
-    vouts = wallet.getVouts(new MoneroVoutFilter().setTxFilter(new MoneroTxFilter().setTxIds(Arrays.asList(randomTxs.get(0).getId(), "invalid_id"))));
+    vouts = wallet.getVouts(new MoneroVoutFilter().setTxFilter(new MoneroTxFilter().setTxIds(randomTxs.get(0).getId(), "invalid_id")));
     assertFalse(vouts.isEmpty());
     assertEquals(vouts.size(), randomTxs.get(0).getVouts().size());
     MoneroTxWallet tx = vouts.get(0).getTx();
@@ -1709,7 +1709,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // send from the first subaddresses with unlocked balances
     String address = wallet.getPrimaryAddress();
-    sendConfig.setDestinations(Arrays.asList(new MoneroDestination(address, sendAmount)));
+    sendConfig.setDestinations(new MoneroDestination(address, sendAmount));
     sendConfig.setAccountIndex(srcAccount.getIndex());
     sendConfig.setSubaddressIndices(fromSubaddressIndices);
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
@@ -1840,9 +1840,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     BigInteger sendAmount = unlockedBalanceBefore.subtract(TestUtils.MAX_FEE).divide(BigInteger.valueOf(SEND_DIVISOR));
     String address = wallet.getPrimaryAddress();
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-    sendConfig.setDestinations(Arrays.asList(new MoneroDestination(address, sendAmount)));
+    sendConfig.setDestinations(new MoneroDestination(address, sendAmount));
     sendConfig.setAccountIndex(fromAccount.getIndex());
-    sendConfig.setSubaddressIndices(Arrays.asList(fromSubaddress.getIndex()));
+    sendConfig.setSubaddressIndices(fromSubaddress.getIndex());
     
     // send to self
     if (Boolean.TRUE.equals(sendConfig.getCanSplit())) {
