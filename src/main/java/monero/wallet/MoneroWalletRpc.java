@@ -670,7 +670,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       
       // convert response to txs with vouts and merge
       if (!result.containsKey("transfers")) continue;
-      for (Map<String, Object> rpcVout : ((List<Map<String, Object>>) result.get("transfers"))) {
+      for (Map<String, Object> rpcVout : (List<Map<String, Object>>) result.get("transfers")) {
         MoneroTxWallet tx = convertRpcTxWalletWithVout(rpcVout);
         mergeTx(txs, tx);
       }
@@ -1792,7 +1792,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("tx_hash")) tx.setId((String) val);
       else if (key.equals("unlocked")) vout.setIsUnlocked((Boolean) val);
       else if (key.equals("subaddr_index")) {
-        Map<String, BigInteger> rpcIndices = (HashMap<String, BigInteger>) val;
+        Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) val;
         vout.setAccountIndex(rpcIndices.get("major").intValue());
         vout.setSubaddressIndex(rpcIndices.get("minor").intValue());
       }
