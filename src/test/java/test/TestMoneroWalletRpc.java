@@ -117,7 +117,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     Map<String, Object> resp = rpc.sendJsonRequest("get_transfers", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     
-    // compare transfers to rpc
+    // compare transfer order to rpc
     compareTransferOrder((List<Map<String, Object>>) result.get("in"), wallet.getTransfers(new MoneroTransferFilter().setIsIncoming(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(true))));
     compareTransferOrder((List<Map<String, Object>>) result.get("out"), wallet.getTransfers(new MoneroTransferFilter().setIsOutgoing(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(true))));
     compareTransferOrder((List<Map<String, Object>>) result.get("pool"), wallet.getTransfers(new MoneroTransferFilter().setIsIncoming(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(false))));
@@ -649,6 +649,10 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @SuppressWarnings("unchecked")
   private static void compareTransferOrder(List<Map<String, Object>> rpcTransfers, List<?> transfers) {
+    if (rpcTransfers == null) {
+      assertTrue(transfers.isEmpty());
+      return;
+    }
     assertEquals(rpcTransfers.size(), transfers.size());
     for (int i = 0; i < transfers.size(); i++) {
       MoneroTransfer transfer = (MoneroTransfer) transfers.get(i);
@@ -677,4 +681,18 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       }
     }
   }
+  
+//  private static void compareTxOrder(List<Map<String, Object>> rpcTransfers, List<MoneroTxWallet> txs) {
+//    System.out.println(rpcTransfers);
+//    List<String> txIds = new ArrayList<String>();
+//    for (Map<String, Object> rpcTransfer : rpcTransfers) {
+//      String txId = (String) rpcTransfer.get("txid");
+//      System.out.println("RPC transfer: " + txId);
+//      if (!txIds.contains(txId)) txIds.add(txId);
+//    }
+//    assertEquals(txIds.size(), txs.size());
+//    for (int i = 0; i < txIds.size(); i++) {
+//      assertEquals(txIds.get(i), txs.get(i).getId());
+//    }
+//  }
 }
