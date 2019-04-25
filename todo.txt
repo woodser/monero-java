@@ -27,7 +27,6 @@ wallet.getTxs() returns txs in no particular order
 fetched vout's tx is incoming and outgoing are false
 multisig_txset and unsigned_txset on send tests
 test wallet gets should send test transaction so unconfirmed tx can be tested with the others
-incoming_transfers "available" could optimize request if !spent && unlocked?
 
 NEXT
 clean up todos

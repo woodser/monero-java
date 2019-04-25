@@ -658,7 +658,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // collect txs with vouts for each indicated account using `incoming_transfers` rpc call
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("transfer_type", filter.getIsSpent() == null ? "all" : filter.getIsSpent() ? "unavailable" : "available");
+    String transferType;
+    if (Boolean.TRUE.equals(filter.getIsSpent()) || Boolean.FALSE.equals(filter.getIsUnlocked())) transferType = "unavailable";
+    else if (Boolean.FALSE.equals(filter.getIsSpent()) && Boolean.TRUE.equals(filter.getIsUnlocked())) transferType = "available";
+    else transferType = "all";
+    params.put("transfer_type", transferType);
     params.put("verbose", true);
     for (int accountIdx : indices.keySet()) {
     
