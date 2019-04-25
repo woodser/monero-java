@@ -136,7 +136,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   public List<MoneroTxWallet> sweepSubaddress(int accountIdx, int subaddressIdx, String address) {
     MoneroSendConfig config = new MoneroSendConfig(address);
     config.setAccountIndex(accountIdx);
-    config.setSubaddressIndices(Arrays.asList(subaddressIdx));
+    config.setSubaddressIndices(subaddressIdx);
     return sweepUnlocked(config);
   }
   

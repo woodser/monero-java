@@ -1,11 +1,24 @@
 package common.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Collection of general purpose utilities.
  */
 public class GenUtils {
+  
+  /**
+   * Converts a templated array to a list.
+   * 
+   * @param arr is an array of type T to convert to a list
+   * @return List<T> is the array converted to a list
+   */
+  public static <T> List<T> arrayToList(T[] arr) {
+    List<T> list = new ArrayList<T>(arr.length);
+    for (T elem : arr) list.add(elem);
+    return list;
+  }
   
   /**
    * Converts a list of integers to an int array.

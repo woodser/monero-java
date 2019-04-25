@@ -1,10 +1,10 @@
 package monero.wallet.config;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import common.utils.GenUtils;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroSendPriority;
 
@@ -58,6 +58,11 @@ public class MoneroSendConfig {
   
   public MoneroSendConfig setDestinations(List<MoneroDestination> destinations) {
     this.destinations = destinations;
+    return this;
+  }
+  
+  public MoneroSendConfig setDestinations(MoneroDestination... destinations) {
+    this.destinations = GenUtils.arrayToList(destinations);
     return this;
   }
   
@@ -121,6 +126,11 @@ public class MoneroSendConfig {
   
   public MoneroSendConfig setSubaddressIndices(List<Integer> subaddressIndices) {
     this.subaddressIndices = subaddressIndices;
+    return this;
+  }
+  
+  public MoneroSendConfig setSubaddressIndices(Integer... subaddressIndices) {
+    this.subaddressIndices = GenUtils.arrayToList(subaddressIndices);
     return this;
   }
   

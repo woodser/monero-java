@@ -1,7 +1,6 @@
 package test;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
@@ -53,11 +52,11 @@ public class TestReadmeSample {
     // see MoneroSendConfig.js for all config options or to build a config object
     List<MoneroTxWallet> sentTxs = wallet.sendSplit(new MoneroSendConfig()
             .setAccountIndex(1)
-            .setSubaddressIndices(Arrays.asList(0)) // TODO: use ...
+            .setSubaddressIndices(0, 1)
             .setPriority(MoneroSendPriority.UNIMPORTANT)  // no rush
-            .setDestinations(Arrays.asList(
+            .setDestinations(
                     new MoneroDestination("7BV7iyk9T6kfs7cPfmn7vPZPyWRid7WEwecBkkVr8fpw9MmUgXTPtvMKXuuzqKyr2BegWMhEcGGEt5vNkmJEtgnRFUAvf29", new BigInteger("50000")),
-                    new MoneroDestination("78NWrWGgyZeYgckJhuxmtDMqo8Kzq5r9j1kV8BQXGq5CDnECz2KjQeBDc3KKvdMQmR6TWtfbRaedgbSGmmwr1g8N1rBMdvW", new BigInteger("50000")))));
+                    new MoneroDestination("78NWrWGgyZeYgckJhuxmtDMqo8Kzq5r9j1kV8BQXGq5CDnECz2KjQeBDc3KKvdMQmR6TWtfbRaedgbSGmmwr1g8N1rBMdvW", new BigInteger("50000"))));
     
     // get confirmed transactions
     for (MoneroTxWallet tx : wallet.getTxs(new MoneroTxFilter().setIsConfirmed(true))) {
@@ -89,7 +88,6 @@ public class TestReadmeSample {
     // get last block's header
     MoneroBlockHeader lastBlockHeader = daemon.getLastBlockHeader();
     long lastBlockSize = lastBlockHeader.getSize();
-    
     
     // get first 100 blocks as a binary request
     List<MoneroBlock> blocks = daemon.getBlocksByRange(0, 100);
