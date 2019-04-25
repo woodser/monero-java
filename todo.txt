@@ -7,6 +7,7 @@ rarely: testGetTxsByIdsInPool() tx fails testTx() as double spend
 
 14.0.3 RELEASE
 MoneroSendConfig -> MoneroSendRequest
+wallet sample code
 api updates: getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
 update readme
 generate javadoc
