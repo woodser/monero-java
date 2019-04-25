@@ -6,8 +6,9 @@ one time: testCheckTxKey() -24: No tx secret key is stored for this tx, RPC requ
 rarely: testGetTxsByIdsInPool() tx fails testTx() as double spend
 
 14.0.3 RELEASE
-MoneroSendConfig -> MoneroSendRequest
 confirm tx ordering since internal impl uses sets
+getVouts() getIsSpent() should be npe and test ordering
+MoneroSendConfig -> MoneroSendRequest
 api updates: getTxsById, getBalancesWallet, more convenient filtering, remove typing on vouts, etc
 update readme
 generate javadoc

@@ -520,17 +520,28 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // fetch all transfers that meet tx filter
     List<MoneroTransfer> transfers = getTransfers(new MoneroTransferFilter().setTxFilter(filter));
     
-    // collect unique txs from transfers as ordered list
-    Set<MoneroTxWallet> txSet = new HashSet<MoneroTxWallet>();
-    for (MoneroTransfer transfer : transfers) txSet.add(transfer.getTx());
-    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>(txSet);
+    // collect unique txs from transfers while retaining order
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    Set<MoneroTxWallet> txsSet = new HashSet<MoneroTxWallet>();
+    for (MoneroTransfer transfer : transfers) {
+      if (!txsSet.contains(transfer.getTx())) {
+        txs.add(transfer.getTx());
+        txsSet.add(transfer.getTx());
+      }
+    }
     
     // fetch and merge vouts if configured
     if (Boolean.TRUE.equals(filter.getIncludeVouts())) {
       List<MoneroOutputWallet> vouts = getVouts(new MoneroVoutFilter().setTxFilter(filter));
+      
+      // merge vout txs one time while retaining order
       Set<MoneroTxWallet> voutTxs = new HashSet<MoneroTxWallet>();
-      for (MoneroOutputWallet vout : vouts) voutTxs.add(vout.getTx());
-      for (MoneroTxWallet tx : voutTxs) mergeTx(txs, tx, true);
+      for (MoneroOutputWallet vout : vouts) {
+        if (!voutTxs.contains(vout.getTx())){
+          mergeTx(txs, vout.getTx(), true);
+          voutTxs.add(vout.getTx());
+        }
+      }
     }
     
     // filter and return txs that meet transfer filter
