@@ -617,7 +617,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     for (String key : result.keySet()) {
       for (Map<String, Object> rpcTx :((List<Map<String, Object>>) result.get(key))) {
-        MoneroTxWallet tx = convertRpcTxWallet(rpcTx, null, null);
+        MoneroTxWallet tx = convertRpcTxWalletWithTransfer(rpcTx, null, null);
         if (tx.getIsConfirmed()) assertTrue(tx.getBlock().getTxs().contains(tx));
 //        if (tx.getId().equals("38436c710dfbebfb24a14cddfd430d422e7282bbe94da5e080643a1bd2880b44")) {
 //          System.out.println(rpcTx);
@@ -824,7 +824,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // initialize txs from rpc response
     if (config.getCanSplit()) convertRpcSentTxWallets(result, txs);
-    else convertRpcTxWallet(result, txs.get(0), true);
+    else convertRpcTxWalletWithTransfer(result, txs.get(0), true);
     return txs;
   }
 
@@ -1002,7 +1002,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
     // build and return tx response
     MoneroTxWallet tx = initSentTxWallet(config, null);
-    convertRpcTxWallet(result, tx, true);
+    convertRpcTxWalletWithTransfer(result, tx, true);
     tx.getOutgoingTransfer().getDestinations().get(0).setAmount(tx.getOutgoingTransfer().getAmount());  // initialize destination amount
     return tx;
   }
@@ -1554,7 +1554,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @returns {MoneroTxWallet} is the initialized tx
    */
   @SuppressWarnings("unchecked")
-  private static MoneroTxWallet convertRpcTxWallet(Map<String, Object> rpcTx, MoneroTxWallet tx, Boolean isOutgoing) {  // TODO: change everything to safe set
+  private static MoneroTxWallet convertRpcTxWalletWithTransfer(Map<String, Object> rpcTx, MoneroTxWallet tx, Boolean isOutgoing) {  // TODO: change everything to safe set
     
     // initialize tx to return
     if (tx == null) tx = new MoneroTxWallet();
@@ -1811,12 +1811,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("global_index")) vout.setIndex(((BigInteger) val).intValue());
       else if (key.equals("tx_hash")) tx.setId((String) val);
       else if (key.equals("unlocked")) vout.setIsUnlocked((Boolean) val);
+      else if (key.equals("frozen")) vout.setIsFrozen((Boolean) val);
       else if (key.equals("subaddr_index")) {
         Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) val;
         vout.setAccountIndex(rpcIndices.get("major").intValue());
         vout.setSubaddressIndex(rpcIndices.get("minor").intValue());
       }
-      else LOGGER.warn("WARNING: ignoring unexpected transaction field: " + key + ": " + val);
+      else if (key.equals("block_height")) {
+        int height = ((BigInteger) val).intValue();
+        tx.setBlock(new MoneroBlock().setHeight(height).setTxs(tx));
+      }
+      else LOGGER.warn("WARNING: ignoring unexpected transaction field with vout: " + key + ": " + val);
     }
     
     // initialize tx with vout

@@ -9,12 +9,11 @@ add all_accounts to incoming_transfers
 14.0.3 RELEASE
 confirm definition of "unavailable" v "available" by looking at code
 first open then create wallet in TestUtils
-wallet.getOutputs(), wallet.getIncomingOutputs(), wallet.getVouts()
 test sweeps, implement sweepSubaddresses() finally?
-handle block_height, frozen in convertRpcTxWalletWithVout()
 update readme
 wallet rpc getTxById(String txId), getTxsByIds(String... txIds)
 port changes to js
+wallet.getVouts() -> wallet.getOutputs()
 MoneroSendConfig -> MoneroSendRequest
 generate javadoc
 release

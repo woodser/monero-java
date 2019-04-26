@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import common.utils.GenUtils;
 import monero.utils.MoneroUtils;
 
 /**
@@ -61,6 +62,11 @@ public class MoneroBlock extends MoneroBlockHeader {
   
   public MoneroBlock setTxs(List<MoneroTx> txs) {
     this.txs = txs;
+    return this;
+  }
+  
+  public MoneroBlock setTxs(MoneroTx... txs) {
+    this.txs = GenUtils.arrayToList(txs);
     return this;
   }
   

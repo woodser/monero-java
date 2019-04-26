@@ -14,6 +14,7 @@ public class MoneroOutputWallet extends MoneroOutput {
   private Integer subaddressIndex;
   private Boolean isSpent;
   private Boolean isUnlocked;
+  private Boolean isFrozen;
   
   public MoneroOutputWallet() {
     // nothing to construct
@@ -30,6 +31,7 @@ public class MoneroOutputWallet extends MoneroOutput {
     subaddressIndex = output.subaddressIndex;
     isSpent = output.isSpent;
     isUnlocked = output.isUnlocked;
+    isFrozen = output.isFrozen;
   }
   
   public MoneroTxWallet getTx() {
@@ -83,6 +85,21 @@ public class MoneroOutputWallet extends MoneroOutput {
     return this;
   }
   
+  /**
+   * Indicates if this output has been deemed 'malicious' and will therefore
+   * not be spent by the wallet.
+   * 
+   * @return Boolean is whether or not this output is frozen
+   */
+  public Boolean getIsFrozen() {
+    return isFrozen;
+  }
+  
+  public MoneroOutputWallet setIsFrozen(Boolean isFrozen) {
+    this.isFrozen = isFrozen;
+    return this;
+  }
+  
   public MoneroOutputWallet copy() {
     return new MoneroOutputWallet(this);
   }
@@ -94,6 +111,7 @@ public class MoneroOutputWallet extends MoneroOutput {
     sb.append(MoneroUtils.kvLine("Subaddress index", this.getSubaddressIndex(), indent));
     sb.append(MoneroUtils.kvLine("Is spent", this.getIsSpent(), indent));
     sb.append(MoneroUtils.kvLine("Is unlocked", this.getIsUnlocked(), indent));
+    sb.append(MoneroUtils.kvLine("Is frozen", this.getIsFrozen(), indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);  // strip last newline
   }
@@ -103,6 +121,7 @@ public class MoneroOutputWallet extends MoneroOutput {
     final int prime = 31;
     int result = super.hashCode();
     result = prime * result + ((accountIndex == null) ? 0 : accountIndex.hashCode());
+    result = prime * result + ((isFrozen == null) ? 0 : isFrozen.hashCode());
     result = prime * result + ((isSpent == null) ? 0 : isSpent.hashCode());
     result = prime * result + ((isUnlocked == null) ? 0 : isUnlocked.hashCode());
     result = prime * result + ((subaddressIndex == null) ? 0 : subaddressIndex.hashCode());
@@ -118,6 +137,9 @@ public class MoneroOutputWallet extends MoneroOutput {
     if (accountIndex == null) {
       if (other.accountIndex != null) return false;
     } else if (!accountIndex.equals(other.accountIndex)) return false;
+    if (isFrozen == null) {
+      if (other.isFrozen != null) return false;
+    } else if (!isFrozen.equals(other.isFrozen)) return false;
     if (isSpent == null) {
       if (other.isSpent != null) return false;
     } else if (!isSpent.equals(other.isSpent)) return false;
