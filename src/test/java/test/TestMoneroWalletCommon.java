@@ -748,7 +748,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // test with invalid id
     List<MoneroTxWallet> txs = wallet.getTxs(new MoneroTxFilter().setTxId("invalid_id"));
-    assertEquals(txs.size(), 0);
+    assertEquals(0, txs.size());
     
     // test invalid id in collection
     List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, null, 3, 5);
