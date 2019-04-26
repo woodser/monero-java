@@ -560,7 +560,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
     }
     
-    // filter and return txs that meet transfer filter
+    // filter txs that meet transfer filter
     filter.setTransferFilter(transferFilter);
     txs = Filter.apply(filter, txs);
     
@@ -569,7 +569,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (tx.getIsConfirmed() && tx.getBlock() == null) return getTxs(filter);
     }
     
-    // otherwise return txs
+    // otherwise order txs if tx ids given then return
+    if (filter.getTxIds() != null && !filter.getTxIds().isEmpty()) {
+      Map<String, MoneroTxWallet> txsById = new HashMap<String, MoneroTxWallet>();  // store txs in temporary map for sorting
+      for (MoneroTxWallet tx : txs) txsById.put(tx.getId(), tx);
+      List<MoneroTxWallet> orderedTxs = new ArrayList<MoneroTxWallet>();
+      for (String txId : filter.getTxIds()) orderedTxs.add(txsById.get(txId));
+      txs = orderedTxs;
+    }
     return txs;
   }
 
