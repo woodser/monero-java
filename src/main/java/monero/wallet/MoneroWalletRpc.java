@@ -9,6 +9,7 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1008,7 +1009,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<String> relayTxs(List<String> txMetadatas) {
+  public List<String> relayTxs(Collection<String> txMetadatas) {
     if (txMetadatas == null || txMetadatas.isEmpty()) throw new MoneroException("Must provide an array of tx metadata to relay");
     List<String> txIds = new ArrayList<String>();
     for (String txMetadata : txMetadatas) {
@@ -1023,7 +1024,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<String> getTxNotes(List<String> txIds) {
+  public List<String> getTxNotes(Collection<String> txIds) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("txids", txIds);
     Map<String, Object> resp = rpc.sendJsonRequest("get_tx_notes", params);
@@ -1032,7 +1033,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
-  public void setTxNotes(List<String> txIds, List<String> notes) {
+  public void setTxNotes(Collection<String> txIds, Collection<String> notes) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("txids", txIds);
     params.put("notes", notes);
@@ -1200,7 +1201,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroAddressBookEntry> getAddressBookEntries(List<Integer> entryIndices) {
+  public List<MoneroAddressBookEntry> getAddressBookEntries(Collection<Integer> entryIndices) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("entries", entryIndices);
     Map<String, Object> respMap = rpc.sendJsonRequest("get_address_book", params);
@@ -1239,7 +1240,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   @Override
-  public void tagAccounts(String tag, List<Integer> accountIndices) {
+  public void tagAccounts(String tag, Collection<Integer> accountIndices) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("tag", tag);
     params.put("accounts", accountIndices);
@@ -1247,7 +1248,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
-  public void untagAccounts(List<Integer> accountIndices) {
+  public void untagAccounts(Collection<Integer> accountIndices) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("accounts", accountIndices);
     rpc.sendJsonRequest("untag_accounts", params);

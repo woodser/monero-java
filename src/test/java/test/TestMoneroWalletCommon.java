@@ -487,6 +487,39 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertTrue("No incoming transfers found to non-default account and subaddress; run send-to-multiple tests first", nonDefaultIncoming);
   }
   
+  // Can get transactions by id
+  @Test
+  public void testGetTxsById() {
+    
+    // fetch all txs for testing
+    List<MoneroTxWallet> txs = wallet.getTxs();
+    assertTrue("Test requires at least 2 txs to fetch by id", txs.size() > 1);
+    
+    // randomly pick a few for fetching by id
+    Collections.shuffle(txs);
+    txs = txs.subList(0, Math.max(txs.size(), 10));
+    
+    // test fetching by id
+    MoneroTxWallet fetchedTx = wallet.getTx(txs.get(0).getId());
+    assertEquals(txs.get(0).getId(), fetchedTx.getId());
+    testTxWallet(fetchedTx);
+    
+    // test fetching by ids
+    String txId1 = txs.get(0).getId();
+    String txId2 = txs.get(1).getId();
+    List<MoneroTxWallet> fetchedTxs = wallet.getTxs(txId1, txId2);
+    
+    // test fetching by ids as collection
+    List<String> txIds = new ArrayList<String>();
+    for (MoneroTxWallet tx : txs) txIds.add(tx.getId());
+    fetchedTxs = wallet.getTxs(txIds);
+    assertEquals(txs.size(), fetchedTxs.size());
+    for (int i = 0; i < txs.size(); i++) {
+      assertEquals(txs.get(i).getId(), fetchedTxs.get(i).getId());
+      testTxWallet(fetchedTxs.get(i));
+    }
+  }
+  
   // Can get transactions with additional configuration
   @Test
   public void testGetTxsWithConfiguration() {
@@ -704,7 +737,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // test did not fully execute
-    throw new Error("Test requires tx sent from/to different accounts of same wallet but none found; run send tests");
+    throw new RuntimeException("Test requires tx sent from/to different accounts of same wallet but none found; run send tests");
   }
   
   // Validates inputs when getting transactions
@@ -893,7 +926,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // test invalid subaddress index
     try {
       transfers = wallet.getTransfers(new MoneroTransferFilter().setAccountIndex(0).setSubaddressIndex(-1));
-      throw new Error("Should have failed");
+      throw new RuntimeException("Should have failed");
     } catch (MoneroException e) {
       assertNotEquals("Should have failed", e.getMessage());
     }
@@ -1162,7 +1195,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     try {
       txs = getRandomTransactions(wallet, new MoneroTxFilter().setIsConfirmed(true).setTransferFilter(new MoneroTransferFilter().setHasDestinations(true)), 1, MAX_TX_PROOFS);
     } catch (MoneroException e) {
-      throw new Error("No txs with outgoing destinations found; run send tests");
+      throw new RuntimeException("No txs with outgoing destinations found; run send tests");
     }
     
     // test good checks
@@ -1215,7 +1248,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // test check with invalid address
     try {
       wallet.checkTxKey(tx.getId(), key, "invalid_tx_address");
-      throw new Error("Should have thrown exception");
+      throw new RuntimeException("Should have thrown exception");
     } catch (MoneroException e) {
       assertEquals(-2, (int) e.getCode());
     }
@@ -1248,7 +1281,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     try {
       txs = getRandomTransactions(wallet, new MoneroTxFilter().setIsConfirmed(true).setTransferFilter(new MoneroTransferFilter().setHasDestinations(true)), 1, MAX_TX_PROOFS);
     } catch (MoneroException e) {
-      throw new Error("No txs with outgoing destinations found; run send tests");
+      throw new RuntimeException("No txs with outgoing destinations found; run send tests");
     }
     
     // test good checks with messages
@@ -1270,7 +1303,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // test get proof with invalid id
     try {
       wallet.getTxProof("invalid_tx_id", destination.getAddress());
-      throw new Error("Should throw exception for invalid key");
+      throw new RuntimeException("Should throw exception for invalid key");
     } catch (MoneroException e) {
       assertEquals(-8, (int) e.getCode());
     }
@@ -1334,7 +1367,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // test get proof with invalid id
     try {
       wallet.getSpendProof("invalid_tx_id");
-      throw new Error("Should throw exception for invalid key");
+      throw new RuntimeException("Should throw exception for invalid key");
     } catch (MoneroException e) {
       assertEquals(-8, (int) e.getCode());
     }
@@ -1342,7 +1375,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // test check with invalid tx id
     try {
       wallet.checkSpendProof("invalid_tx_id", null, signature);
-      throw new Error("Should have thrown exception");
+      throw new RuntimeException("Should have thrown exception");
     } catch (MoneroException e) {
       assertEquals(-8, (int) e.getCode());
     }
@@ -1427,12 +1460,12 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       } else {
         try {
           wallet.getReserveProofAccount(account.getIndex(), account.getBalance(), msg);
-          throw new Error("Should have thrown exception");
+          throw new RuntimeException("Should have thrown exception");
         } catch (MoneroException e) {
           assertEquals(-1, (int) e.getCode());
           try {
             wallet.getReserveProofAccount(account.getIndex(), TestUtils.MAX_FEE, msg);
-            throw new Error("Should have thrown exception");
+            throw new RuntimeException("Should have thrown exception");
           } catch (MoneroException e2) {
             assertEquals(-1, (int) e2.getCode());
           }
@@ -1760,7 +1793,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // assert that tx amounts sum up the amount sent within a small margin
     if (Math.abs(sendAmount.subtract(outgoingSum).longValue()) > SEND_MAX_DIFF) { // send amounts may be slightly different
-      throw new Error("Tx amounts are too different: " + sendAmount + " - " + outgoingSum + " = " + sendAmount.subtract(outgoingSum));
+      throw new RuntimeException("Tx amounts are too different: " + sendAmount + " - " + outgoingSum + " = " + sendAmount.subtract(outgoingSum));
     }
   }
   
@@ -2020,7 +2053,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // assert that outgoing amounts sum up to the amount sent within a small margin
     if (Math.abs(sendAmount.subtract(outgoingSum).longValue()) > SEND_MAX_DIFF) { // send amounts may be slightly different
-      throw new Error("Actual send amount is too different from requested send amount: " + sendAmount + " - " + outgoingSum + " = " + sendAmount.subtract(outgoingSum));
+      throw new RuntimeException("Actual send amount is too different from requested send amount: " + sendAmount + " - " + outgoingSum + " = " + sendAmount.subtract(outgoingSum));
     }
   }
   
@@ -2344,7 +2377,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   @Test
   public void testSweepSubaddresses() {
     org.junit.Assume.assumeTrue(TEST_RESETS);
-    throw new Error("Not implemented");
+    throw new RuntimeException("Not implemented");
   }
   
   // Can sweep accounts
@@ -2622,6 +2655,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
    *        ctx.hasDestinations specifies if the tx has an outgoing transfer with destinations, undefined if doesn't matter
    *        ctx.getVouts specifies if vouts were fetched and should therefore be expected with incoming transfers
    */
+  protected static void testTxWallet(MoneroTxWallet tx) { testTxWallet(tx, null); }
   protected static void testTxWallet(MoneroTxWallet tx, TestContext ctx) {
     
     // validate / sanitize inputs

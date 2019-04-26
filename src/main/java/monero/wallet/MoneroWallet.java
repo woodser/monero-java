@@ -23,6 +23,7 @@
 package monero.wallet;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 
 import monero.daemon.model.MoneroKeyImage;
@@ -37,12 +38,12 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncProgressListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
-import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroTxWallet;
 
 /**
@@ -349,12 +350,36 @@ public interface MoneroWallet {
   public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx);
   
   /**
+   * Get a wallet transaction by id.
+   * 
+   * @param txId is an id of a transaction to get
+   * @return MoneroTxWallet is the identified transactions
+   */
+  public MoneroTxWallet getTx(String txId);
+  
+  /**
    * Get all wallet transactions.  Wallet transactions contain one or more
    * transfers that are either incoming or outgoing to the wallet.
-
+   * 
    * @return all wallet transactions
    */
   public List<MoneroTxWallet> getTxs();
+  
+  /**
+   * Get wallet transactions by id.
+   * 
+   * @param txIds are ids of transactions to get
+   * @return List<MoneroTxWallet> are the identified transactions
+   */
+  public List<MoneroTxWallet> getTxs(String... txIds);
+  
+  /**
+   * Get wallet transactions by id.
+   * 
+   * @param txIds are ids of transactions to get
+   * @return List<MoneroTxWallet> are the identified transactions
+   */
+  public List<MoneroTxWallet> getTxs(Collection<String> txIds);
   
   /**
    * Get wallet transactions.  Wallet transactions contain one or more
@@ -591,7 +616,7 @@ public interface MoneroWallet {
    * @param txMetadatas are transaction metadata previously created without relaying
    * @return List<String> are ids of the relayed txs
    */
-  public List<String> relayTxs(List<String> txMetadatas);
+  public List<String> relayTxs(Collection<String> txMetadatas);
   
   /**
    * Get a transaction note.
@@ -615,7 +640,7 @@ public interface MoneroWallet {
    * @param txIds identify the transactions to get notes for
    * @preturns notes for the transactions
    */
-  public List<String> getTxNotes(List<String> txIds);
+  public List<String> getTxNotes(Collection<String> txIds);
   
   /**
    * Set notes for multiple transactions.
@@ -623,7 +648,7 @@ public interface MoneroWallet {
    * @param txIds specify the transactions to set notes for
    * @param notes are the notes to set for the transactions
    */
-  public void setTxNotes(List<String> txIds, List<String> notes);
+  public void setTxNotes(Collection<String> txIds, Collection<String> notes);
   
   /**
    * Sign a message.
@@ -759,7 +784,7 @@ public interface MoneroWallet {
    * @param entryIndices are indices of the entries to get
    * @return the address book entries
    */
-  public List<MoneroAddressBookEntry> getAddressBookEntries(List<Integer> entryIndices);
+  public List<MoneroAddressBookEntry> getAddressBookEntries(Collection<Integer> entryIndices);
   
   /**
    * Add an address book entry.
@@ -793,14 +818,14 @@ public interface MoneroWallet {
    * @param tag is the tag to apply to the specified accounts
    * @param accountIndices are the indices of the accounts to tag
    */
-  public void tagAccounts(String tag, List<Integer> accountIndices);
+  public void tagAccounts(String tag, Collection<Integer> accountIndices);
 
   /**
    * Untag acconts.
    * 
    * @param accountIndices are the indices of the accounts to untag
    */
-  public void untagAccounts(List<Integer> accountIndices);
+  public void untagAccounts(Collection<Integer> accountIndices);
 
   /**
    * Return all account tags.

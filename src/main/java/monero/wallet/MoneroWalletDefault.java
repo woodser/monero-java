@@ -4,20 +4,22 @@ import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import monero.utils.MoneroException;
 import monero.wallet.config.MoneroSendConfig;
 import monero.wallet.config.MoneroTransferFilter;
+import monero.wallet.config.MoneroTxFilter;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncProgressListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
-import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroTxWallet;
 
 /**
@@ -84,8 +86,21 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
+  public MoneroTxWallet getTx(String txId) {
+    return getTxs(txId).get(0);
+  }
+  
+  @Override
   public List<MoneroTxWallet> getTxs() {
-    return getTxs(null);
+    return getTxs(new MoneroTxFilter());
+  }
+  
+  public List<MoneroTxWallet> getTxs(String... txIds) {
+    return getTxs(new MoneroTxFilter().setTxIds(txIds));
+  }
+  
+  public List<MoneroTxWallet> getTxs(Collection<String> txIds) {
+    return getTxs(new MoneroTxFilter().setTxIds(txIds));
   }
   
   @Override
