@@ -1,8 +1,9 @@
 package utils;
 
+import java.util.List;
+
 import monero.daemon.MoneroDaemon;
-import monero.daemon.model.MoneroKeyImage;
-import monero.daemon.model.MoneroKeyImageSpentStatus;
+import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWallet;
 import monero.wallet.config.MoneroVoutFilter;
 import monero.wallet.model.MoneroOutputWallet;
@@ -30,12 +31,37 @@ public class Scratchpad {
         
 //    wallet.getAccounts(true);
     
-    String keyImage = "f4c6123ea4daa831d850785fd5f72d8f34fcd3606ef94431ea2cae7a3dbd03be";
-    MoneroKeyImageSpentStatus status = daemon.getKeyImageSpentStatus(keyImage);
-    System.out.println("Spent: " + status);
+//    String keyImage = "f4c6123ea4daa831d850785fd5f72d8f34fcd3606ef94431ea2cae7a3dbd03be";
+//    MoneroKeyImageSpentStatus status = daemon.getKeyImageSpentStatus(keyImage);
+//    System.out.println("Spent: " + status);
     
-    MoneroTxWallet tx = wallet.sweepOutput(wallet.getPrimaryAddress(), keyImage, null);
-    System.out.println(tx);
+//    MoneroTxWallet tx = wallet.sweepOutput(wallet.getPrimaryAddress(), keyImage, null);
+//    System.out.println(tx);
+    
+    String address = wallet.getPrimaryAddress();
+    List<MoneroOutputWallet> outputs = wallet.getVouts(new MoneroVoutFilter().setIsSpent(false).setIsUnlocked(true));
+    System.out.println("Found " + outputs.size() + " sweepable outputs");
+    for (MoneroOutputWallet output : outputs) {
+      try {
+        MoneroTxWallet tx = wallet.sweepOutput(address, output.getKeyImage().getHex(), null);
+        System.out.println("Success!");
+        System.out.println(output.getAmount());
+        System.out.println(output.getKeyImage().getHex());
+        System.out.println(tx);
+        break;
+      } catch (Exception e) {
+        
+        
+        MoneroTx daemonTx = daemon.getTx(output.getTx().getId());
+        System.out.println(daemonTx);
+        
+        //MoneroTxWallet test = wallet.getTxs(new MoneroTxFilter().setTxIds(output.getTx().getId()).setIncludeVouts(true)).get(0);
+        //System.out.println(test);
+        System.out.println("The search continues...");
+        System.out.println(output);
+        throw new RuntimeException("stop");
+      }
+    }
 
     
 //    for (MoneroOutputWallet vout : wallet.getVouts(new MoneroVoutFilter().setKeyImage(new MoneroKeyImage().setHex(keyImage)))) {
