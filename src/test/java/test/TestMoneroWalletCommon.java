@@ -2926,6 +2926,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   }
   
   private static void testTransfer(MoneroTransfer transfer, TestContext ctx) {
+    if (ctx == null) ctx = new TestContext();
     assertNotNull(transfer);
     TestUtils.testUnsignedBigInteger(transfer.getAmount());
     if (!Boolean.TRUE.equals(ctx.isSweepOutputResponse)) assertTrue(transfer.getAccountIndex() >= 0);
@@ -2948,7 +2949,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   }
   
   private static void testOutgoingTransfer(MoneroOutgoingTransfer transfer, TestContext ctx) {
-    if (ctx == null) ctx = new TestContext();
     assertFalse(transfer.getIsIncoming());
     assertTrue(transfer.getIsOutgoing());
     if (!Boolean.TRUE.equals(ctx.isSendResponse)) assertNotNull(transfer.getSubaddressIndices());
