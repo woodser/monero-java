@@ -7,8 +7,6 @@ WARNING: key proof indicates no funds received despite transfer (txid=76983ebf1d
 add all_accounts to incoming_transfers, would be huge time saver
 
 14.0.3 RELEASE
-confirm definition of "unavailable" v "available" by looking at code
-first open then create wallet in TestUtils
 test sweeps, implement sweepSubaddresses() finally?
 update readme
 port changes to js
@@ -32,6 +30,7 @@ test wallet gets should send test transaction so unconfirmed tx can be tested wi
 deterministic ordering of txs, vouts?
 test priority in common tests (only in sample code currently)
 api updates: setSubaddressIndices(...) and others, , getBalancesWallet, more convenient filtering, remove typing on vouts, etc
+first open then create wallet in TestUtils
 
 NEXT
 clean up todos
