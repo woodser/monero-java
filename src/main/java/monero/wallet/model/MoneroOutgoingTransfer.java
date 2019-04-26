@@ -95,7 +95,7 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
-    sb.append(super.toString(indent));
+    sb.append(super.toString(indent) + "\n");
     sb.append(MoneroUtils.kvLine("Subaddress indices", this.getSubaddressIndices(), indent));
     sb.append(MoneroUtils.kvLine("Addresses", this.getAddresses(), indent));
     if (this.getDestinations() != null) {
