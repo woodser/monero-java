@@ -2549,7 +2549,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   }
 
   /**
-   * Fetchs and tests vouts according to the given config.
+   * Fetches and tests vouts according to the given config.
    */
   private static List<MoneroOutputWallet> getAndTestVouts(MoneroWallet wallet, MoneroVoutFilter filter, Boolean isExpected) {
     List<MoneroOutputWallet> vouts = wallet.getVouts(filter);
@@ -2981,6 +2981,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertTrue(vout.getIndex() >= 0);
     assertNotNull(vout.getIsSpent());
     assertNotNull(vout.getIsUnlocked());
+    assertNotNull(vout.getIsFrozen());
     assertNotNull(vout.getKeyImage());
     assertTrue(vout.getKeyImage().getHex().length() > 0);
     TestUtils.testUnsignedBigInteger(vout.getAmount(), true);
@@ -2993,6 +2994,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertEquals(true, tx.getIsConfirmed());  // TODO monero-wallet-rpc: possible to get unconfirmed vouts?
     assertEquals(true, tx.getIsRelayed());
     assertEquals(false, tx.getIsFailed());
+    assertTrue(tx.getHeight() > 0);
     
     // test copying
     MoneroOutputWallet copy = vout.copy();
