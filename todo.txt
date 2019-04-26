@@ -11,8 +11,8 @@ add all_accounts to incoming_transfers
 report sweepOuput
 handle block_height, frozen in convertRpcTxWalletWithVout()
 update readme
-port changes to js
 wallet rpc getTxById(String txId), getTxsByIds(String... txIds)
+port changes to js
 MoneroSendConfig -> MoneroSendRequest
 generate javadoc
 release
