@@ -498,7 +498,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // randomly pick a few for fetching by id
     Collections.shuffle(txs);
-    txs = txs.subList(0, Math.max(txs.size(), 10));
+    txs = txs.subList(0, Math.min(txs.size(), 10));
     
     // test fetching by id
     MoneroTxWallet fetchedTx = wallet.getTx(txs.get(0).getId());
