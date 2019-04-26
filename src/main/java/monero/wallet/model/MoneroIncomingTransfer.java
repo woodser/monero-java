@@ -76,6 +76,7 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
+    sb.append(super.toString() + "\n");
     sb.append(MoneroUtils.kvLine("Subaddress index", this.getSubaddressIndex(), indent));
     sb.append(MoneroUtils.kvLine("Address", this.getAddress(), indent));
     String str = sb.toString();
