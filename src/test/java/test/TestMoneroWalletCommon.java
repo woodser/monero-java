@@ -490,6 +490,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   // Can get transactions by id
   @Test
   public void testGetTxsById() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch all txs for testing
     List<MoneroTxWallet> txs = wallet.getTxs();
@@ -2065,17 +2066,21 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // test config
     int numVouts = 3;
     
-    // get unspent and unlocked vouts to sweep
-    List<MoneroOutputWallet> vouts = wallet.getVouts(new MoneroVoutFilter().setIsSpent(false).setIsUnlocked(true));
-    assertTrue("Wallet has no unspent vouts; run send tests", vouts.size() >= numVouts);
-    vouts = vouts.subList(0, numVouts);
+    // get outputs to sweep (not spent, unlocked, and amount >= fee)
+    List<MoneroOutputWallet> spendableUnlockedVouts = wallet.getVouts(new MoneroVoutFilter().setIsSpent(false).setIsUnlocked(true));
+    List<MoneroOutputWallet> voutsToSweep = new ArrayList<MoneroOutputWallet>();
+    for (int i = 0; i < spendableUnlockedVouts.size() && voutsToSweep.size() < numVouts; i++) {
+      if (spendableUnlockedVouts.get(i).getAmount().compareTo(TestUtils.MAX_FEE) > 0) voutsToSweep.add(spendableUnlockedVouts.get(i));  // output cannot be swept if amount does not cover fee
+    }
+    assertTrue("Wallet does not have enough sweepable outputs; run send tests", voutsToSweep.size() >= numVouts);
     
     // sweep each vout by key image
     boolean useParams = true; // for loop flips in order to alternate test
-    for (MoneroOutputWallet vout : vouts) {
+    for (MoneroOutputWallet vout : voutsToSweep) {
       testVout(vout);
       assertFalse(vout.getIsSpent());
       assertTrue(vout.getIsUnlocked());
+      if (vout.getAmount().compareTo(TestUtils.MAX_FEE) <= 0) continue;  
       
       // sweep output to address
       String address = wallet.getAddress(vout.getAccountIndex(), vout.getSubaddressIndex());
@@ -2090,6 +2095,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       ctx.sendConfig = sendConfig;
       ctx.isSendResponse = true;
       ctx.isSweepResponse = true;
+      ctx.isSweepOutputResponse = true;
       testTxWallet(tx, ctx);
       useParams = !useParams;
     }
@@ -2099,7 +2105,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // swept vouts are now spent
     for (MoneroOutputWallet afterVout : afterVouts) {
-      for (MoneroOutputWallet vout : vouts) {
+      for (MoneroOutputWallet vout : voutsToSweep) {
         if (vout.getKeyImage().getHex().equals(afterVout.getKeyImage().getHex())) {
           assertTrue("Output should be spent", afterVout.getIsSpent());
         }
@@ -2395,7 +2401,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       if (account.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) unlockedAccounts.add(account);
     }
     
-    // test requires at least one more account than the number being swept to verify it does not change
+    // test requires at least one more accounts than the number being swept to verify it does not change
     assertTrue("Test requires balance in at least " + (NUM_ACCOUNTS_TO_SWEEP + 1) + " accounts; run send-to-multiple tests", balanceAccounts.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
     assertTrue("Wallet is waiting on unlocked funds", unlockedAccounts.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
     
@@ -2562,10 +2568,11 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     Boolean hasOutgoingTransfer;
     Boolean hasIncomingTransfers;
     Boolean hasDestinations;
-    Boolean isSweepResponse;
     Boolean doNotTestCopy;
     Boolean getVouts;
     Boolean isSendResponse;
+    Boolean isSweepResponse;
+    Boolean isSweepOutputResponse;  // TODO monero-wallet-rpc: this only necessary because sweep_output does not return account index
     public TestContext() { }
     public TestContext(TestContext ctx) {
       if (ctx != null) {
@@ -2574,14 +2581,14 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         this.hasOutgoingTransfer = ctx.hasOutgoingTransfer;
         this.hasIncomingTransfers = ctx.hasIncomingTransfers;
         this.hasDestinations = ctx.hasDestinations;
-        this.isSweepResponse = ctx.isSweepResponse;
         this.doNotTestCopy = ctx.doNotTestCopy;
         this.getVouts = ctx.getVouts;
         this.isSendResponse = ctx.isSendResponse;
+        this.isSweepResponse = ctx.isSweepResponse;
+        this.isSweepOutputResponse = ctx.isSweepOutputResponse;
       }
     }
   }
-  
   
   private List<MoneroSubaddress> getSubaddressesWithBalance() {
     List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
@@ -2920,7 +2927,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   private static void testTransfer(MoneroTransfer transfer, TestContext ctx) {
     assertNotNull(transfer);
     TestUtils.testUnsignedBigInteger(transfer.getAmount());
-    assertTrue(transfer.getAccountIndex() >= 0);
+    if (!Boolean.TRUE.equals(ctx.isSweepOutputResponse)) assertTrue(transfer.getAccountIndex() >= 0);
     if (transfer.getIsIncoming()) testIncomingTransfer((MoneroIncomingTransfer) transfer);
     else testOutgoingTransfer((MoneroOutgoingTransfer) transfer, ctx);
     

@@ -929,8 +929,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       for (MoneroTxWallet tx : accountTxs) {
         tx.setIsConfirmed(false);
         tx.setNumConfirmations(0);
-        tx.setInTxPool(config.getDoNotRelay() ? false : true);
-        tx.setDoNotRelay(config.getDoNotRelay() ? true : false);
+        tx.setInTxPool(Boolean.TRUE.equals(config.getDoNotRelay()) ? false : true);
+        tx.setDoNotRelay(Boolean.TRUE.equals(config.getDoNotRelay()) ? true : false);
         tx.setIsRelayed(!tx.getDoNotRelay());
         tx.setIsCoinbase(false);
         tx.setIsFailed(false);
