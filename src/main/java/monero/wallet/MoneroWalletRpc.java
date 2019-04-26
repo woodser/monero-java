@@ -682,8 +682,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     Map<String, Object> params = new HashMap<String, Object>();
     String transferType;
-    if (Boolean.TRUE.equals(filter.getIsSpent()) || Boolean.FALSE.equals(filter.getIsUnlocked())) transferType = "unavailable";
-    else if (Boolean.FALSE.equals(filter.getIsSpent()) && Boolean.TRUE.equals(filter.getIsUnlocked())) transferType = "available";
+    if (Boolean.TRUE.equals(filter.getIsSpent())) transferType = "unavailable";
+    else if (Boolean.FALSE.equals(filter.getIsSpent())) transferType = "available";
     else transferType = "all";
     params.put("transfer_type", transferType);
     params.put("verbose", true);

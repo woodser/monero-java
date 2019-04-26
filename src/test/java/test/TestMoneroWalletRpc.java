@@ -520,6 +520,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     super.testGetReserveProofWallet();
   }
 
+  @Ignore // this sometimes causes seg fault 11, capture with sanitize=on
   @Override
   public void testGetReserveProofAccount() {
     super.testGetReserveProofAccount();
