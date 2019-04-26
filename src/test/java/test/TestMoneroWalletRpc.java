@@ -106,6 +106,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @SuppressWarnings("unchecked")
   @Test
   public void testRpcOrder() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transfers directly from rpc for comparison to library
     MoneroRpc rpc = wallet.getRpc();

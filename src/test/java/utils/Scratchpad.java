@@ -39,29 +39,39 @@ public class Scratchpad {
 //    System.out.println(tx);
     
     String address = wallet.getPrimaryAddress();
-    List<MoneroOutputWallet> outputs = wallet.getVouts(new MoneroVoutFilter().setIsSpent(false).setIsUnlocked(true));
-    System.out.println("Found " + outputs.size() + " sweepable outputs");
-    for (MoneroOutputWallet output : outputs) {
-      try {
-        MoneroTxWallet tx = wallet.sweepOutput(address, output.getKeyImage().getHex(), null);
-        System.out.println("Success!");
-        System.out.println(output.getAmount());
-        System.out.println(output.getKeyImage().getHex());
-        System.out.println(tx);
-        break;
-      } catch (Exception e) {
-        
-        
-        MoneroTx daemonTx = daemon.getTx(output.getTx().getId());
-        System.out.println(daemonTx);
-        
-        //MoneroTxWallet test = wallet.getTxs(new MoneroTxFilter().setTxIds(output.getTx().getId()).setIncludeVouts(true)).get(0);
-        //System.out.println(test);
-        System.out.println("The search continues...");
-        System.out.println(output);
-        throw new RuntimeException("stop");
-      }
-    }
+
+    System.out.println(wallet.getUnlockedBalance(0, 0));
+
+    wallet.sweepOutput(address, "639481ce36eeea15857e171dcc28aa278c1ee30ec28b6bab44db124a346faeb1", null);
+    
+    
+//    List<MoneroOutputWallet> outputs = wallet.getVouts(new MoneroVoutFilter().setIsSpent(false).setIsUnlocked(true).setAccountIndex(0).setSubaddressIndex(0));
+//    System.out.println("Found " + outputs.size() + " sweepable outputs");
+//    for (MoneroOutputWallet output : outputs) {
+//      if (output.getAccountIndex() != 0 || output.getSubaddressIndex() != 0) continue;
+//      
+//      try {
+//        MoneroTxWallet tx = wallet.sweepOutput(address, output.getKeyImage().getHex(), null);
+//        System.out.println("Success!");
+//        System.out.println(output.getAmount());
+//        System.out.println(output.getKeyImage().getHex());
+//        System.out.println(tx);
+//        break;
+//      } catch (Exception e) {
+//        
+//        System.out.println("The search continues...");
+//
+//        
+//        
+//        MoneroTx daemonTx = daemon.getTx(output.getTx().getId());
+//        System.out.println(daemonTx);
+//        
+//        //MoneroTxWallet test = wallet.getTxs(new MoneroTxFilter().setTxIds(output.getTx().getId()).setIncludeVouts(true)).get(0);
+//        //System.out.println(test);
+//        System.out.println(output);
+//        //throw new RuntimeException("stop");
+//      }
+//    }
 
     
 //    for (MoneroOutputWallet vout : wallet.getVouts(new MoneroVoutFilter().setKeyImage(new MoneroKeyImage().setHex(keyImage)))) {
