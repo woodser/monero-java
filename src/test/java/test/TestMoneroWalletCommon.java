@@ -1441,6 +1441,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can prove reserves in an account
   @Test
+  @Ignore // this sometimes causes seg fault 11, capture with sanitize=on
   public void testGetReserveProofAccount() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
         
