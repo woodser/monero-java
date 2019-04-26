@@ -1,6 +1,7 @@
 package monero.wallet;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 
 import monero.daemon.MoneroDaemon;
@@ -220,17 +221,17 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   }
 
   @Override
-  public List<String> relayTxs(List<String> txMetadatas) {
+  public List<String> relayTxs(Collection<String> txMetadatas) {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public List<String> getTxNotes(List<String> txIds) {
+  public List<String> getTxNotes(Collection<String> txIds) {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public void setTxNotes(List<String> txIds, List<String> notes) {
+  public void setTxNotes(Collection<String> txIds, Collection<String> notes) {
     throw new RuntimeException("Not implemented");
   }
 
@@ -290,7 +291,7 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroAddressBookEntry> getAddressBookEntries(List<Integer> entryIndices) {
+  public List<MoneroAddressBookEntry> getAddressBookEntries(Collection<Integer> entryIndices) {
     throw new RuntimeException("Not implemented");
   }
 
@@ -305,12 +306,12 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   }
 
   @Override
-  public void tagAccounts(String tag, List<Integer> accountIndices) {
+  public void tagAccounts(String tag, Collection<Integer> accountIndices) {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public void untagAccounts(List<Integer> accountIndices) {
+  public void untagAccounts(Collection<Integer> accountIndices) {
     throw new RuntimeException("Not implemented");
   }
 

@@ -395,7 +395,7 @@ public class TestMoneroDaemonRpc {
     // fetch invalid id
     try {
       daemon.getTx("invalid tx id");
-      throw new Error("fail");
+      throw new RuntimeException("fail");
     } catch (MoneroException e) {
       assertEquals("Invalid transaction id", e.getMessage());
     }
@@ -434,7 +434,7 @@ public class TestMoneroDaemonRpc {
     txIds.add("invalid tx id");
     try {
       daemon.getTxs(txIds);
-      throw new Error("fail");
+      throw new RuntimeException("fail");
     } catch (MoneroException e) {
       assertEquals("Invalid transaction id", e.getMessage());
     }
@@ -502,7 +502,7 @@ public class TestMoneroDaemonRpc {
     // fetch invalid id
     try {
       daemon.getTxHex("invalid tx id");
-      throw new Error("fail");
+      throw new RuntimeException("fail");
     } catch (MoneroException e) {
       assertEquals("Invalid transaction id", e.getMessage());
     }
@@ -534,7 +534,7 @@ public class TestMoneroDaemonRpc {
     txIds.add("invalid tx id");
     try {
       daemon.getTxHexes(txIds);
-      throw new Error("fail");
+      throw new RuntimeException("fail");
     } catch (MoneroException e) {
       assertEquals("Invalid transaction id", e.getMessage());
     }
@@ -589,7 +589,7 @@ public class TestMoneroDaemonRpc {
   public void testGetIdsOfTxsInPoolBin() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     // TODO: get_transaction_pool_hashes.bin
-    throw new Error("Not implemented");
+    throw new RuntimeException("Not implemented");
   }
   
   // Can get the transaction pool backlog (binary)
@@ -597,7 +597,7 @@ public class TestMoneroDaemonRpc {
   public void testGetTxPoolBacklogBin() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     // TODO: get_txpool_backlog
-    throw new Error("Not implemented");
+    throw new RuntimeException("Not implemented");
   }
   
   // Can get transaction pool statistics (binary)
@@ -734,14 +734,14 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetOutputIndicesFromTxIdsBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    throw new Error("Not implemented"); // get_o_indexes.bin
+    throw new RuntimeException("Not implemented"); // get_o_indexes.bin
   }
   
   // Can get outputs given a list of output amounts and indices (binary)
   @Test
   public void testGetOutputsFromAmountsAndIndicesBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    throw new Error("Not implemented"); // get_outs.bin
+    throw new RuntimeException("Not implemented"); // get_outs.bin
   }
   
   // Can get an output histogram (binary)
@@ -1085,7 +1085,7 @@ public class TestMoneroDaemonRpc {
     // try to interact with the daemon
     try {
       daemon.getHeight();
-      throw new Error("Should have thrown error");
+      throw new RuntimeException("Should have thrown error");
     } catch (MoneroException e) {
       assertNotEquals("Should have thrown error", e.getMessage());
     }

@@ -428,6 +428,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testGetTxsWallet() {
     super.testGetTxsWallet();
   }
+  
+  @Override
+  public void testGetTxsById() {
+    super.testGetTxsById();
+  }
 
   @Override
   public void testGetTxsWithConfiguration() {

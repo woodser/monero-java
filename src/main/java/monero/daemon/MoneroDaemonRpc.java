@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -311,7 +312,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroTx> getTxs(List<String> txIds, Boolean prune) {
+  public List<MoneroTx> getTxs(Collection<String> txIds, Boolean prune) {
     
     // validate input
     if (txIds.isEmpty()) throw new MoneroException("Must provide an array of transaction ids");
@@ -354,7 +355,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public List<String> getTxHexes(List<String> txIds, Boolean prune) {
+  public List<String> getTxHexes(Collection<String> txIds, Boolean prune) {
     List<String> hexes = new ArrayList<String>();
     for (MoneroTx tx : getTxs(txIds, prune)) hexes.add(Boolean.TRUE.equals(prune) ? tx.getPrunedHex() : tx.getFullHex());
     return hexes;
@@ -407,7 +408,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void relayTxsById(List<String> txIds) {
+  public void relayTxsById(Collection<String> txIds) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("txids", txIds);
     Map<String, Object> resp = rpc.sendJsonRequest("relay_tx", params);
@@ -491,7 +492,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroKeyImageSpentStatus> getKeyImageSpentStatuses(List<String> keyImages) {
+  public List<MoneroKeyImageSpentStatus> getKeyImageSpentStatuses(Collection<String> keyImages) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("key_images", keyImages);
     Map<String, Object> resp = rpc.sendPathRequest("is_key_image_spent", params);
@@ -504,13 +505,13 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public List<MoneroOutput> getOutputs(List<MoneroOutput> outputs) {
+  public List<MoneroOutput> getOutputs(Collection<MoneroOutput> outputs) {
     throw new RuntimeException("Not implemented");
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroOutputHistogramEntry> getOutputHistogram(List<BigInteger> amounts, Integer minCount, Integer maxCount, Boolean isUnlocked, Integer recentCutoff) {
+  public List<MoneroOutputHistogramEntry> getOutputHistogram(Collection<BigInteger> amounts, Integer minCount, Integer maxCount, Boolean isUnlocked, Integer recentCutoff) {
     
     // build request params
     Map<String, Object> params = new HashMap<String, Object>();
@@ -535,7 +536,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public List<MoneroOutputDistributionEntry> getOutputDistribution(List<BigInteger> amounts, Boolean isCumulative, Integer startHeight, Integer endHeight) {
+  public List<MoneroOutputDistributionEntry> getOutputDistribution(Collection<BigInteger> amounts, Boolean isCumulative, Integer startHeight, Integer endHeight) {
     throw new RuntimeException("Not implemented (response 'distribution' field is binary)");
 //  let amountStrs = [];
 //  for (let amount of amounts) amountStrs.push(amount.toJSValue());
@@ -802,7 +803,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void submitBlocks(List<String> blockBlobs) {
+  public void submitBlocks(Collection<String> blockBlobs) {
     if (blockBlobs.isEmpty()) throw new MoneroException("Must provide an array of mined block blobs to submit");
     Map<String, Object> resp = rpc.sendJsonRequest("submit_block", blockBlobs);
     checkResponseStatus((Map<String, Object>) resp.get("result"));

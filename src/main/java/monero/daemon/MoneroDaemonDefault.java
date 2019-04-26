@@ -2,6 +2,7 @@ package monero.daemon;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import monero.daemon.model.MoneroBan;
@@ -33,10 +34,11 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   }
   
   @Override
-  public List<MoneroTx> getTxs(List<String> txIds) {
+  public List<MoneroTx> getTxs(Collection<String> txIds) {
     return getTxs(txIds, null);
   }
   
+  @Override
   public String getTxHex(String txId) {
     return getTxHex(txId, false);
   }
@@ -46,14 +48,17 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
     return getTxHexes(Arrays.asList(txId), prune).get(0);
   }
   
-  public List<String> getTxHexes(List<String> txIds) {
+  @Override
+  public List<String> getTxHexes(Collection<String> txIds) {
     return getTxHexes(txIds, null);
   }
   
+  @Override
   public BigInteger getFeeEstimate() {
     return getFeeEstimate(null);
   }
   
+  @Override
   public MoneroSubmitTxResult submitTxHex(String txHex) {
     return submitTxHex(txHex, false);
   }
@@ -69,7 +74,7 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   }
   
   @Override
-  public List<MoneroOutputDistributionEntry> getOutputDistribution(List<BigInteger> amounts) {
+  public List<MoneroOutputDistributionEntry> getOutputDistribution(Collection<BigInteger> amounts) {
     return getOutputDistribution(amounts, null, null, null);
   }
   

@@ -23,17 +23,18 @@
 package monero.daemon;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 
 import monero.daemon.model.MoneroAltChain;
 import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
-import monero.daemon.model.MoneroDaemonListener;
 import monero.daemon.model.MoneroBlockTemplate;
 import monero.daemon.model.MoneroCoinbaseTxSum;
 import monero.daemon.model.MoneroDaemonConnection;
 import monero.daemon.model.MoneroDaemonInfo;
+import monero.daemon.model.MoneroDaemonListener;
 import monero.daemon.model.MoneroDaemonPeer;
 import monero.daemon.model.MoneroDaemonSyncInfo;
 import monero.daemon.model.MoneroDaemonUpdateCheckResult;
@@ -205,7 +206,7 @@ public interface MoneroDaemon {
    * @param txIds are ids of transactions to get
    * @return the transactions with the given ids
    */
-  public List<MoneroTx> getTxs(List<String> txIds);
+  public List<MoneroTx> getTxs(Collection<String> txIds);
   
   /**
    * Get transactions by ids.
@@ -214,7 +215,7 @@ public interface MoneroDaemon {
    * @param prune specifies if the returned txs should be pruned (defaults to false)
    * @return the transactions with the given ids
    */
-  public List<MoneroTx> getTxs(List<String> txIds, Boolean prune);
+  public List<MoneroTx> getTxs(Collection<String> txIds, Boolean prune);
   
   /**
    * Get a transaction hex by id.
@@ -239,7 +240,7 @@ public interface MoneroDaemon {
    * @param txIds are ids of transactions to get hexes from
    * @return are the tx hexes
    */
-  public List<String> getTxHexes(List<String> txIds);
+  public List<String> getTxHexes(Collection<String> txIds);
   
   /**
    * Get transaction hexes by ids.
@@ -248,7 +249,7 @@ public interface MoneroDaemon {
    * @param prune specifies if the returned tx hexes should be pruned (defaults to false)
    * @return are the tx hexes
    */
-  public List<String> getTxHexes(List<String> txIds, Boolean prune);
+  public List<String> getTxHexes(Collection<String> txIds, Boolean prune);
   
   /**
    * Gets the total emissions and fees from the genesis block to the current height.
@@ -303,7 +304,7 @@ public interface MoneroDaemon {
    * 
    * @param txIds identify the transactions to relay
    */
-  public void relayTxsById(List<String> txIds);
+  public void relayTxsById(Collection<String> txIds);
   
   /**
    * Get valid transactions seen by the node but not yet mined into a block, as well
@@ -367,7 +368,7 @@ public interface MoneroDaemon {
    * @param keyImages are hex key images to get the statuses of
    * @return the spent status for each key image
    */
-  public List<MoneroKeyImageSpentStatus> getKeyImageSpentStatuses(List<String> keyImages);
+  public List<MoneroKeyImageSpentStatus> getKeyImageSpentStatuses(Collection<String> keyImages);
   
   /**
    * Get outputs identified by a list of output amounts and indices as a binary
@@ -376,7 +377,7 @@ public interface MoneroDaemon {
    * @param identify each output by amount and index
    * @return the identified outputs
    */
-  public List<MoneroOutput> getOutputs(List<MoneroOutput> outputs);
+  public List<MoneroOutput> getOutputs(Collection<MoneroOutput> outputs);
   
   /**
    * Get a histogram of output amounts. For all amounts (possibly filtered by
@@ -390,7 +391,7 @@ public interface MoneroDaemon {
    * @param recentCutoff TODO
    * @return output histogram entries meeting the parameters
    */
-  public List<MoneroOutputHistogramEntry> getOutputHistogram(List<BigInteger> amounts, Integer minCount, Integer maxCount, Boolean isUnlocked, Integer recentCutoff);
+  public List<MoneroOutputHistogramEntry> getOutputHistogram(Collection<BigInteger> amounts, Integer minCount, Integer maxCount, Boolean isUnlocked, Integer recentCutoff);
   
   /**
    * Creates an output distribution.
@@ -398,7 +399,7 @@ public interface MoneroDaemon {
    * @param amounts are amounts of outputs to make the distribution with
    * @return output distribution entries meeting the parameters
    */
-  public List<MoneroOutputDistributionEntry> getOutputDistribution(List<BigInteger> amounts);
+  public List<MoneroOutputDistributionEntry> getOutputDistribution(Collection<BigInteger> amounts);
   
   /**
    * Creates an output distribution.
@@ -409,7 +410,7 @@ public interface MoneroDaemon {
    * @param endHeight is the end height upper bound inclusive (optional)
    * @return output distribution entries meeting the parameters
    */
-  public List<MoneroOutputDistributionEntry> getOutputDistribution(List<BigInteger> amounts, Boolean isCumulative, Integer startHeight, Integer endHeight);
+  public List<MoneroOutputDistributionEntry> getOutputDistribution(Collection<BigInteger> amounts, Boolean isCumulative, Integer startHeight, Integer endHeight);
   
   /**
    * Get general information about the state of the node and the network.
@@ -589,7 +590,7 @@ public interface MoneroDaemon {
    * 
    * @param blockBlobs are the mined blocks to submit
    */
-  public void submitBlocks(List<String> blockBlobs);
+  public void submitBlocks(Collection<String> blockBlobs);
   
   /**
    * Check for update.
