@@ -40,6 +40,15 @@ public class TestSampleCode {
     // get wallet primary address
     String primaryAddress = wallet.getPrimaryAddress();  // e.g. 59aZULsUF3YNSKGiHz4J...
     
+    // get incoming and outgoing transfers
+    List<MoneroTransfer> transfers = wallet.getTransfers();
+    for (MoneroTransfer transfer : transfers) {
+      boolean isIncoming = transfer.getIsIncoming();
+      BigInteger amount = transfer.getAmount();
+      int accountIdx = transfer.getAccountIndex();
+      Integer height = transfer.getTx().getHeight();  // can be null if unconfirmed
+    }
+    
     // get address and balance of subaddress [1, 0]
     MoneroSubaddress subaddress = wallet.getSubaddress(1, 0);
     BigInteger subaddressBalance = subaddress.getBalance();
@@ -49,7 +58,7 @@ public class TestSampleCode {
     MoneroTxWallet sentTx = wallet.send("74oAtjgE2dfD1bJBo4DWW3E6qXCAwUDMgNqUurnX9b2xUvDTwMwExiXDkZskg7Vct37tRGjzHRqL4gH4H3oag3YyMYJzrNp", new BigInteger("50000"));
 
     // send to multiple destinations from subaddress 1, 0 which can be split into multiple transactions
-    // see MoneroSendConfig.js for all config options or to build a config object
+    // see MoneroSendConfig.java for all config options or to build a config object
     List<MoneroTxWallet> sentTxs = wallet.sendSplit(new MoneroSendConfig()
             .setAccountIndex(1)
             .setSubaddressIndices(0, 1)
@@ -58,20 +67,18 @@ public class TestSampleCode {
                     new MoneroDestination("7BV7iyk9T6kfs7cPfmn7vPZPyWRid7WEwecBkkVr8fpw9MmUgXTPtvMKXuuzqKyr2BegWMhEcGGEt5vNkmJEtgnRFUAvf29", new BigInteger("50000")),
                     new MoneroDestination("78NWrWGgyZeYgckJhuxmtDMqo8Kzq5r9j1kV8BQXGq5CDnECz2KjQeBDc3KKvdMQmR6TWtfbRaedgbSGmmwr1g8N1rBMdvW", new BigInteger("50000"))));
     
-    // get confirmed transactions
+    // get all confirmed wallet transactions
     for (MoneroTxWallet tx : wallet.getTxs(new MoneroTxFilter().setIsConfirmed(true))) {
       String txId = tx.getId();                   // e.g. f8b2f0baa80bf6b...
       BigInteger txFee = tx.getFee();             // e.g. 750000
       boolean isConfirmed = tx.getIsConfirmed();  // e.g. true
     }
     
-    // get incoming transfers to account 0
-    List<MoneroTransfer> transfers = wallet.getTransfers(new MoneroTransferFilter().setIsIncoming(true).setAccountIndex(0));
-    for (MoneroTransfer transfer : transfers) {
-      BigInteger amount = transfer.getAmount();   // e.g. 752343011023
-      int height = transfer.getTx().getHeight();
-      int subaddressIdx = ((MoneroIncomingTransfer) transfer).getSubaddressIndex();
-    }
+    // get a wallet transaction by id
+    MoneroTxWallet tx = wallet.getTx("c936b213b236a8ff60da84067c39409db6934faf6c0acffce752ac5a0d53f6b6");
+    String txId = tx.getId();                   // e.g. c936b213b236a8ff6...
+    BigInteger txFee = tx.getFee();             // e.g. 750000
+    boolean isConfirmed = tx.getIsConfirmed();  // e.g. true
   }
   
   @Test

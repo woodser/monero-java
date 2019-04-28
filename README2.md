@@ -22,72 +22,100 @@ A quick reference of the wallet and daemon data models can be found [here](moner
 
 See the [tests](tests) for the most complete examples of using this library.
 
-```js
-// create a wallet that uses a monero-wallet-rpc endpoint
-let wallet = new MoneroWalletRpc({
-  uri: "http://localhost:38083",
-  user: "rpc_user",
-  pass: "abc123"
-});
+```java
+// create a wallet that uses a monero-wallet-rpc endpoint with authentication
+MoneroWallet wallet = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
 
 // get wallet balance as BigInteger
-let balance = await wallet.getBalance();  // e.g. 533648366742
-   
+BigInteger balance = wallet.getBalance();  // e.g. 533648366742
+
 // get wallet primary address
-let primaryAddress = await wallet.getPrimaryAddress();  // e.g. 59aZULsUF3YNSKGiHz4J...
-    
+String primaryAddress = wallet.getPrimaryAddress();  // e.g. 59aZULsUF3YNSKGiHz4J...
+
+// get incoming and outgoing transfers
+List<MoneroTransfer> transfers = wallet.getTransfers();
+for (MoneroTransfer transfer : transfers) {
+  boolean isIncoming = transfer.getIsIncoming();
+  BigInteger amount = transfer.getAmount();
+  int accountIdx = transfer.getAccountIndex();
+  Integer height = transfer.getTx().getHeight();  // can be null if unconfirmed
+}
+
 // get address and balance of subaddress [1, 0]
-let subaddress = await wallet.getSubaddress(1, 0);
-let subaddressBalance = subaddress.getBalance();
-let subaddressAddress = subaddress.getAddress();
+MoneroSubaddress subaddress = wallet.getSubaddress(1, 0);
+BigInteger subaddressBalance = subaddress.getBalance();
+String subaddressAddress = subaddress.getAddress();
 
 // send to an address
-let sentTx = await wallet.send("74oAtjgE2dfD1bJBo4DW...", new BigInteger(50000));
+MoneroTxWallet sentTx = wallet.send("74oAtjgE2dfD1bJBo4DWW3E6qXCAwUDMgNqUurnX9b2xUvDTwMwExiXDkZskg7Vct37tRGjzHRqL4gH4H3oag3YyMYJzrNp", new BigInteger("50000"));
 
 // send to multiple destinations from subaddress 1, 0 which can be split into multiple transactions
-// see MoneroSendConfig.js for all config options or to build a config object
-let sentTxs = await wallet.sendSplit({
-  destinations: [
-    { address: "7BV7iyk9T6kfs7cPfmn7...", amount: new BigInteger(50000) },
-    { address: "78NWrWGgyZeYgckJhuxm...", amount: new BigInteger(50000) }
-  ],
-  accountIndex: 1,
-  subaddressIndices: [0]
-});
-
-// get confirmed transactions
-for (let tx of await wallet.getTxs({isConfirmed: true})) {
-  let txId = tx.getId();                 // e.g. f8b2f0baa80bf6b...
-  let txFee = tx.getFee();               // e.g. 750000
-  let isConfirmed = tx.getIsConfirmed(); // e.g. true
+// see MoneroSendConfig.java for all config options or to build a config object
+List<MoneroTxWallet> sentTxs = wallet.sendSplit(new MoneroSendConfig()
+    .setAccountIndex(1)
+    .setSubaddressIndices(0, 1)
+    .setPriority(MoneroSendPriority.UNIMPORTANT)  // no rush
+        .setDestinations(
+                new MoneroDestination("7BV7iyk9T6kfs7cPfmn7vPZPyWRid7WEwecBkkVr8fpw9MmUgXTPtvMKXuuzqKyr2BegWMhEcGGEt5vNkmJEtgnRFUAvf29", new BigInteger("50000")),
+                new MoneroDestination("78NWrWGgyZeYgckJhuxmtDMqo8Kzq5r9j1kV8BQXGq5CDnECz2KjQeBDc3KKvdMQmR6TWtfbRaedgbSGmmwr1g8N1rBMdvW", new BigInteger("50000"))));
+                
+// get all confirmed wallet transactions
+for (MoneroTxWallet tx : wallet.getTxs(new MoneroTxFilter().setIsConfirmed(true))) {
+  String txId = tx.getId();                   // e.g. f8b2f0baa80bf6b...
+  BigInteger txFee = tx.getFee();             // e.g. 750000
+  boolean isConfirmed = tx.getIsConfirmed();  // e.g. true
 }
 
-// get incoming transfers to account 0
-for (let transfer of await wallet.getTransfers({isIncoming: true, accountIndex: 0})) {
-  let amount = transfer.getAmount();     // e.g. 752343011023
-}
+// get a wallet transaction by id
+MoneroTxWallet tx = wallet.getTx("c936b213b236a8ff60da84067c39409db6934faf6c0acffce752ac5a0d53f6b6");
+String txId = tx.getId();                   // e.g. c936b213b236a8ff6...
+BigInteger txFee = tx.getFee();             // e.g. 750000
+boolean isConfirmed = tx.getIsConfirmed();  // e.g. true
 ```
 
 ## Daemon Sample Code
 
-```js
+```java
 // create a daemon that uses a monero-daemon-rpc endpoint
-let daemon = new MoneroDaemonRpc({uri: "http://localhost:38081"});
+MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:38081", "admin", "password");
 
 // get daemon info
-let height = await daemon.getHeight();           // e.g. 1523651
-let feeEstimate = await daemon.getFeeEstimate(); // e.g. 750000
+int height = daemon.getHeight();                  // e.g. 1523651
+BigInteger feeEstimate = daemon.getFeeEstimate(); // e.g. 750000
+
+// get last block's header
+MoneroBlockHeader lastBlockHeader = daemon.getLastBlockHeader();
+long lastBlockSize = lastBlockHeader.getSize();
 
 // get first 100 blocks as a binary request
-let blocks = await daemon.getBlocksByRange(0, 100);
+List<MoneroBlock> blocks = daemon.getBlocksByRange(0, 100);
 
 // get block info
-for (let block of blocks) {
-  let blockHeight = block.getHeader().getHeight();
-  let blockId = block.getHeader().getId();
-  let blockSize = block.getHeader().getSize();
-  let txCount = block.getTxs().length;
+for (MoneroBlock block : blocks) {
+  int blockHeight = block.getHeight();
+  String blockId = block.getId();
+  List<MoneroTx> txs = block.getTxs();
+  
+  // get tx ids and keys
+  for (MoneroTx tx : txs) {
+    String txId = tx.getId();
+    String txKey = tx.getKey();
+  }
 }
+
+// start mining to an address with 4 threads, not in the background, and ignoring the battery
+String address = "59aZULsUF3YNSKGiHz4JPMfjGYk...";
+int numThreads = 4;
+boolean isBackground = false;
+boolean ignoreBattery = false;
+daemon.startMining(address, numThreads, isBackground, ignoreBattery);
+
+// wait for the header of the next block added to the chain
+MoneroBlockHeader nextBlockHeader = daemon.getNextBlockHeader();
+long nextNumTxs = nextBlockHeader.getNumTxs();
+
+// stop mining
+daemon.stopMining();
 ```
 
 ## Running Tests
