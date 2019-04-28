@@ -66,7 +66,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   protected static final boolean TEST_NON_RELAYS = true;
   protected static final boolean TEST_RELAYS = true;
   protected static final boolean TEST_NOTIFICATIONS = false;
-  protected static final boolean TEST_RESETS = false;
+  protected static final boolean TEST_RESETS = true;
   private static final int MAX_TX_PROOFS = 25;   // maximum number of transactions to check for each proof, undefined to check all
   private static final int SEND_MAX_DIFF = 60;
   private static final int SEND_DIVISOR = 2;
@@ -2383,13 +2383,85 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   @Test
   public void testSweepSubaddresses() {
     org.junit.Assume.assumeTrue(TEST_RESETS);
-    throw new RuntimeException("Not implemented");
+    
+    final int NUM_SUBADDRESSES_TO_SWEEP = 2;
+    
+    // collect subaddresses with balance and unlocked balance
+    List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
+    List<MoneroSubaddress> balanceSubaddresses = new ArrayList<MoneroSubaddress>();
+    List<MoneroSubaddress> unlockedSubaddresses = new ArrayList<MoneroSubaddress>();
+    for (MoneroAccount account : wallet.getAccounts(true)) {
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
+        subaddresses.add(subaddress);
+        if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0) balanceSubaddresses.add(subaddress);
+        if (subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) unlockedSubaddresses.add(subaddress);
+      }
+    }
+    
+    // test requires at least one more subaddresses than the number being swept to verify it does not change
+    assertTrue("Test requires balance in at least " + (NUM_SUBADDRESSES_TO_SWEEP + 1) + " subaddresses; run send-to-multiple tests", balanceSubaddresses.size() >= NUM_SUBADDRESSES_TO_SWEEP + 1);
+    assertTrue("Wallet is waiting on unlocked funds", unlockedSubaddresses.size() >= NUM_SUBADDRESSES_TO_SWEEP + 1);
+    
+    // sweep from first unlocked subaddresses
+    for (int i = 0; i < NUM_SUBADDRESSES_TO_SWEEP; i++) {
+      
+      // sweep unlocked account
+      MoneroSubaddress unlockedSubaddress = unlockedSubaddresses.get(i);
+      List<MoneroTxWallet> txs = wallet.sweepSubaddress(unlockedSubaddress.getAccountIndex(), unlockedSubaddress.getIndex(), wallet.getPrimaryAddress());
+      
+      // test transactions
+      assertTrue(txs.size() > 0);
+      for (MoneroTxWallet tx : txs) {
+        MoneroSendConfig config = new MoneroSendConfig(wallet.getPrimaryAddress());
+        config.setAccountIndex(unlockedSubaddress.getAccountIndex());
+        config.setSubaddressIndices(unlockedSubaddress.getIndex());
+        TestContext ctx = new TestContext();
+        ctx.wallet = wallet;
+        ctx.sendConfig = config;
+        ctx.isSweepResponse = true;
+        testTxWallet(tx, ctx);
+      }
+      
+      // assert no unlocked funds in subaddress
+      MoneroSubaddress subaddress = wallet.getSubaddress(unlockedSubaddress.getAccountIndex(), unlockedSubaddress.getIndex());
+      assertTrue(subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) == 0);
+    }
+    
+    // test subaddresses after sweeping
+    List<MoneroSubaddress> subaddressesAfter = new ArrayList<MoneroSubaddress>();
+    for (MoneroAccount account : wallet.getAccounts(true)) {
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
+        subaddressesAfter.add(subaddress);
+      }
+    }
+    assertEquals(subaddresses.size(), subaddressesAfter.size());
+    for (int i = 0; i < subaddresses.size(); i++) {
+      MoneroSubaddress subaddressBefore = subaddresses.get(i);
+      MoneroSubaddress subaddressAfter = subaddressesAfter.get(i);
+      
+      // determine if subaddress was swept
+      boolean swept = false;
+      for (int j = 0; j < NUM_SUBADDRESSES_TO_SWEEP; j++) {
+        if (unlockedSubaddresses.get(j).getAccountIndex().equals(subaddressBefore.getAccountIndex()) && unlockedSubaddresses.get(j).getIndex().equals(subaddressBefore.getIndex())) {
+          swept = true;
+          break;
+        }
+      }
+      
+      // test that unlocked balance is 0 if swept, unchanged otherwise
+      if (swept) {
+        assertTrue(subaddressAfter.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) == 0);
+      } else {
+        assertTrue(subaddressBefore.getUnlockedBalance().compareTo(subaddressAfter.getUnlockedBalance()) == 0);
+      }
+    }
   }
   
   // Can sweep accounts
   @Test
   public void testSweepAccounts() {
     org.junit.Assume.assumeTrue(TEST_RESETS);
+    
     final int NUM_ACCOUNTS_TO_SWEEP = 1;
     
     // collect accounts with balance and unlocked balance
