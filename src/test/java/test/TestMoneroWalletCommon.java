@@ -2454,17 +2454,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
-  // Can rescan the blockchain
-  @Test
-  @Ignore // disabled so tests don't delete local cache
-  public void testRescanBlockchain() {
-    org.junit.Assume.assumeTrue(TEST_RESETS);
-    wallet.rescanBlockchain();
-    for (MoneroTxWallet tx : wallet.getTxs()) {
-      testTxWallet(tx, null);
-    }
-  }
-  
   // Can sweep the whole wallet
   @Test
   @Ignore // disabled so tests don't sweep the whole wallet
@@ -2497,6 +2486,17 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     subaddressesUnlockedBalance = getSubaddressesWithUnlockedBalance();
     System.out.println(subaddressesUnlockedBalance);
     assertTrue("Wallet should have no unlocked funds after sweeping all", subaddressesUnlockedBalance.isEmpty());
+  }
+  
+  // Can rescan the blockchain
+  @Test
+  @Ignore // disabled so tests don't delete local cache
+  public void testRescanBlockchain() {
+    org.junit.Assume.assumeTrue(TEST_RESETS);
+    wallet.rescanBlockchain();
+    for (MoneroTxWallet tx : wallet.getTxs()) {
+      testTxWallet(tx, null);
+    }
   }
   
   // --------------------------------- PRIVATE --------------------------------
