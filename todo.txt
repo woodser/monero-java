@@ -9,10 +9,9 @@ add all_accounts to incoming_transfers, would be huge time saver
 Marking output 18666(<9cd46fd977f2d8f6112cc87592677cbd76801b318c6e607dd31b9a25dd7d9530>) as unspent, it was marked as spent
 
 14.0.3 RELEASE
+update sample with getTx(ids) and readme
 investigate seg fault 11 in testGetReserveProofAccount()
 test sweeps
-implement sweepSubaddresses() finally?
-update sample with getTx(ids) and readme
 port changes to js
 wallet.getVouts() -> wallet.getOutputs()
 MoneroSendConfig -> MoneroSendRequest
