@@ -157,17 +157,19 @@ Note: some tests are failing as not all functionality is implemented.
 
 ## Building platform-specific Monero binaries
 
-In order to fetch and process binary data from the daemon, Monero Core C++ must be built as a dynamic library for Java JNI.  The dynamic library must be built for the specific platform it is running on (e.g. MacOS, Windows, Linux, etc).
+In order to fetch and process binary data from the daemon, functionality written in C++ is built as a dynamic library for Java to access using JNI.  The C++ code being built is in src/main/cpp/submodules.  A fork of MyMonero is used with added utilities to convert binary data between JSON and Monero's portable storage format.
+
+The dynamic library is platform-specific so it must be built from source for the specific platform it is running on (e.g. Linux, Mac, Windows, etc).
 
 ### Build Steps
 
 1. Build boost for your system
 2. Copy boost_system.a, boost_thread.a, and boost_chrono.a into src/main/cpp/build/boost/lib
 3. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/` (change as appropriate)
-4. cd src/main/cpp && ./bin/build-libmonero.sh
-5. Run TestMoneroCppUtils.java to verify dynamic library is working
+4. Build libmonero dynamic library in src/main/cpp/build/: `cd src/main/cpp && ./bin/build-libmonero.sh`
+5. Run TestMoneroCppUtils.java JUnit tests verify the dynamic library is working
 
-Note: for convenience, a dynamic library built for MacOSX is included with the project's source code.  **This executable is suitable for development and testing only, and should be re-built from source to verify its integrity and trusthworthiness for any other purpose.** (TODO: remove pre-built library?)
+Note: for convenience, a dynamic library built for MacOSX is included with the project's source code.  **This executable is suitable for development and testing only and should be re-built from source to verify its integrity and trusthworthiness for any other purpose.** (TODO: remove pre-built library?)
 
 ## Project Goals
 

@@ -18,6 +18,7 @@ generate javadoc
 release
 rename monero-java-rpc -> monero-java
 
+clearer dynamic library readme instructions, verify other platforms
 testGetNewKeyImagesFromLastImport
 refactor getAccounts(Boolean includeSubaddresses, Boolean isUsed, String tag, Boolean, Integer accountIdx, List<Integer> subaddressIndices, [includeBalaneDetails?]) that's filtering with most known options (in internal wallet rpc)
 handle blocks_to_unlock at top level of get_balance call which reflects account, but is it based only on queried subaddresses?
