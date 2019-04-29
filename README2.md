@@ -10,17 +10,17 @@ A primary goal of this project make the Monero Core C++ wallet accessible throug
 
 Main Features
 
-- General-purpose library with focus on ease-of-use
+- General-purpose library to access a Monero wallet and daemon with focus on ease-of-use
 - Clear object-oriented models to formalize Monero types and their relationships to each other
 - Powerful API to query transactions, transfers, and vouts by their attributes
+- Fetch and process binary data from the daemon (e.g. raw blocks) in Java using JNI to bridge C++ utilities
 - Extensive test suite (130+ passing tests)
-- Fetch and process binary data from the daemon in Java using JNI to bridge C++ utilities
 
-A quick reference of the wallet and daemon data models can be found [here](monero-model.pdf).
+A quick reference of the wallet and daemon data models can be found [here](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf).
 
 ## Wallet Sample Code
 
-See the [tests](tests) for the most complete examples of using this library.
+See the [src/test/java/](src/test/java) for the most complete examples of using this library.
 
 ```java
 // create a wallet that uses a monero-wallet-rpc endpoint with authentication
@@ -118,15 +118,20 @@ long nextNumTxs = nextBlockHeader.getNumTxs();
 daemon.stopMining();
 ```
 
-## Running Tests
+## Interfaces and Types
 
-1. Set up running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html).  See [Monero RPC Setup](#monero-rpc-setup).
-2. `git clone --recurse-submodules https://github.com/woodser/monero-javascript.git`
-3. `npm install`
-4. Configure the appropriate RPC endpoints and authentication by modifying `WALLET_RPC_CONFIG` and `DAEMON_RPC_CONFIG` in [TestUtils.js](tests/TestUtils.js).
-5. `npm test`
+- [Monero daemon (MoneroDaemon.java)](src/main/java/monero/daemon/MoneroDaemon.java)
+- [Monero daemon rpc implementation (MoneroDaemonRpc.java)](src/main/java/monero/daemon/MoneroDaemon.java)
+- [Monero daemon model (src/main/java/monero/daemon/model)](src/main/java/monero/daemon/model)
+- [Monero wallet (src/main/java/monero/wallet/MoneroWallet.java)](src/main/java/monero/wallet/MoneroWallet.java)
+- [Monero wallet rpc implementation (src/main/java/model/wallet/MoneroWalletRpc.java)](src/main/java/model/wallet/MoneroWalletRpc.java)
+- [Monero wallet model (src/main/java/wallet/model)](src/main/java/wallet/model)
 
-Note: some tests are failing as not all functionality is implemented.
+## API Documentation
+
+The main interfaces are [MoneroWallet.java](src/main/java/monero/wallet/MoneroWallet.java) and [MoneroDaemon.java](src/main/java/monero/daemon/MoneroDaemon.java).
+
+Javadoc is provided in the [doc](doc) folder (best viewed opening [doc/index.html](doc/index.html) in a browser).
 
 ## Monero RPC Setup
 
@@ -137,22 +142,39 @@ Note: some tests are failing as not all functionality is implemented.
 	- Restore from mnemonic seed: `./monero-wallet-cli --daemon-address http://localhost:38081 --stagenet --restore-deterministic-wallet`
 4. Start monero-wallet-rpc (requires --wallet-dir to run tests):
 	
-	e.g. For wallet name `test_wallet_1`, user `rpc_user`, password `abc123`, stagenet: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir /Applications/monero-v0.13.0.2`
+	e.g. For wallet name `test_wallet_1`, user `rpc_user`, password `abc123`, stagenet: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir /Applications/monero-v0.14.0.3`
 
-## Interfaces and Types
+## Running Tests
 
-- [Monero daemon (MoneroDaemon.js)](src/daemon/MoneroDaemon.js)
-- [Monero daemon rpc implementation (MoneroDaemonRpc.js)](src/daemon/MoneroDaemonRpc.js)
-- [Monero daemon model (src/daemon/model)](src/daemon/model)
-- [Monero wallet (src/wallet/MoneroWallet.js)](src/wallet/MoneroWallet.js)
-- [Monero wallet rpc implementation (src/wallet/MoneroWalletRpc.js)](src/wallet/MoneroWalletRpc.js)
-- [Monero wallet model (src/wallet/model)](src/wallet/model)
+1. Set up running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html).  See [Monero RPC Setup](#monero-rpc-setup).
+2. Clone the Java repository: `git clone --recurse-submodules https://github.com/monero-ecosystem/monero-java-rpc.git`
+3. Install project dependencies: `maven install`
+4. Configure the appropriate RPC endpoints and authentication by modifying `WALLET_RPC_CONFIG` and `DAEMON_RPC_CONFIG` in [src/test/main/test/TestUtils.java](src/test/main/TestUtils.java).
+5  [Build a dynamic library from Monero C++ for your platform](#building-platform-specific-monero-binaries)
+5. Run all *.java files in src/main/test as JUnits.
+
+Note: some tests are failing as not all functionality is implemented.
+
+## Building platform-specific Monero binaries
+
+In order to fetch and process binary data from the daemon, Monero Core C++ must be built as a dynamic library for Java JNI.  The dynamic library must be built for the specific platform it is running on (e.g. MacOS, Windows, Linux, etc).
+
+### Build Steps
+
+1. Build boost for your system
+2. Copy boost_system.a, boost_thread.a, and boost_chrono.a into src/main/cpp/build/boost/lib
+3. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/` (change as appropriate)
+4. cd src/main/cpp && ./bin/build-libmonero.sh
+5. Run TestMoneroCppUtils.java to verify dynamic library is working
+
+Note: for convenience, a dynamic library built for MacOSX is included with the project's source code.  **This executable is suitable for development and testing only, and should be re-built from source to verify its integrity and trusthworthiness for any other purpose.** (TODO: remove pre-built library?)
 
 ## Project Goals
 
+- Expose a Monero daemon and wallet in Java using Monero Core RPC.
+- Expose a Monero wallet in Java by JNI binding to Monero Core's wallet in C++.
+- Expose a Monero wallet in Java backed by a MyMonero-compatible endpoint which shares the view key with a 3rd party to scan the blockchain.
 - Offer consistent terminology and APIs for Monero's developer ecosystem
-- Build a wallet adapter for a local wallet which uses client-side crypto and a daemon
-- Build a wallet adapter for a MyMonero wallet which shares the view key with a 3rd party to scan the blockchain
 
 ## License
 
