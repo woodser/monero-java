@@ -492,13 +492,15 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   public void testGetTxsById() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
+    int maxNumTxs = 10;  // max number of txs to test
+    
     // fetch all txs for testing
     List<MoneroTxWallet> txs = wallet.getTxs();
     assertTrue("Test requires at least 2 txs to fetch by id", txs.size() > 1);
     
     // randomly pick a few for fetching by id
     Collections.shuffle(txs);
-    txs = txs.subList(0, Math.min(txs.size(), 10));
+    txs = txs.subList(0, Math.min(txs.size(), maxNumTxs));
     
     // test fetching by id
     MoneroTxWallet fetchedTx = wallet.getTx(txs.get(0).getId());
@@ -810,13 +812,16 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         }
       }
       assertEquals(accountTransfers.size(), subaddressTransfers.size());
+
       
-      // get transfers by subaddress indices
+      // collect unique subaddress indices
       Set<Integer> subaddressIndices = new HashSet<Integer>();
       for (MoneroTransfer transfer : subaddressTransfers) {
         if (transfer.getIsIncoming()) subaddressIndices.add(((MoneroIncomingTransfer) transfer).getSubaddressIndex());
         else subaddressIndices.addAll(((MoneroOutgoingTransfer) transfer).getSubaddressIndices());
       }
+      
+      // get and test transfers by subaddress indices
       List<MoneroTransfer> transfers = getAndTestTransfers(wallet, new MoneroTransferFilter().setAccountIndex(account.getIndex()).setSubaddressIndices(new ArrayList<Integer>(subaddressIndices)), null, null);
       //if (transfers.size() != subaddressTransfers.size()) System.out.println("WARNING: outgoing transfers always from subaddress 0 (monero-wallet-rpc #5171)");
       assertEquals(subaddressTransfers.size(), transfers.size()); // TODO monero-wallet-rpc: these may not be equal because outgoing transfers are always from subaddress 0 (#5171) and/or incoming transfers from/to same account are occluded (#4500)
@@ -826,7 +831,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         else {
           Set<Integer> intersections = new HashSet<Integer>(subaddressIndices);
           intersections.retainAll(((MoneroOutgoingTransfer) transfer).getSubaddressIndices());
-          assertTrue(intersections.size() > 0);  // subaddresses must have overlap
+          assertTrue("Subaddresses must have overlap", intersections.size() > 0);
         }
       }
     }
@@ -860,9 +865,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     for (MoneroTransfer transfer : transfers) {
       assertEquals(1, (int) transfer.getAccountIndex());
       if (transfer.getIsIncoming()) assertEquals(2, (int) ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
-      else {
-        assertTrue(((MoneroOutgoingTransfer) transfer).getSubaddressIndices().contains(2));
-      }
+      else assertTrue(((MoneroOutgoingTransfer) transfer).getSubaddressIndices().contains(2));
       assertTrue(transfer.getTx().getIsConfirmed());
     }
     
@@ -1669,6 +1672,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  // Can start and stop mining
   @Test
   public void testMining() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -2080,7 +2084,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       testVout(vout);
       assertFalse(vout.getIsSpent());
       assertTrue(vout.getIsUnlocked());
-      if (vout.getAmount().compareTo(TestUtils.MAX_FEE) <= 0) continue;  
+      if (vout.getAmount().compareTo(TestUtils.MAX_FEE) <= 0) continue;
       
       // sweep output to address
       String address = wallet.getAddress(vout.getAccountIndex(), vout.getSubaddressIndex());
@@ -2821,7 +2825,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     if (tx.getOutgoingTransfer() != null) {
       assertTrue(tx.getIsOutgoing());
       testTransfer(tx.getOutgoingTransfer(), ctx);
-      if (Boolean.TRUE.equals(ctx.isSweepResponse)) assertEquals(tx.getOutgoingTransfer().getDestinations().size(), 1);
+      if (Boolean.TRUE.equals(ctx.isSweepResponse)) assertEquals(1, tx.getOutgoingTransfer().getDestinations().size());
       
       // TODO: handle special cases
     } else {

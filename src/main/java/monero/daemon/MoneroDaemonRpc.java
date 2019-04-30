@@ -657,10 +657,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     checkResponseStatus(result);
     List<MoneroDaemonConnection> connections = new ArrayList<MoneroDaemonConnection>();
-    if (result.containsKey("connections")) {
-      for (Map<String, Object> rpcConnection : (List<Map<String, Object>>) result.get("connections")) {
-        connections.add(convertRpcConnection(rpcConnection));
-      }
+    if (!result.containsKey("connections")) return connections;
+    for (Map<String, Object> rpcConnection : (List<Map<String, Object>>) result.get("connections")) {
+      connections.add(convertRpcConnection(rpcConnection));
     }
     return connections;
   }

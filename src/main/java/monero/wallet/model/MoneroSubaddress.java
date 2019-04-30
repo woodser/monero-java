@@ -2,6 +2,8 @@ package monero.wallet.model;
 
 import java.math.BigInteger;
 
+import monero.utils.MoneroUtils;
+
 /**
  * Monero subaddress model.
  */
@@ -95,6 +97,25 @@ public class MoneroSubaddress {
 
   public void setNumBlocksToUnlock(Integer numBlocksToUnlock) {
     this.numBlocksToUnlock = numBlocksToUnlock;
+  }
+  
+  public String toString() {
+    return toString(0);
+  }
+  
+  public String toString(int indent) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(MoneroUtils.kvLine("Account index", this.getAccountIndex(), indent));
+    sb.append(MoneroUtils.kvLine("Subaddress index", this.getIndex(), indent));
+    sb.append(MoneroUtils.kvLine("Address", this.getAddress(), indent));
+    sb.append(MoneroUtils.kvLine("Label", this.getLabel(), indent));
+    sb.append(MoneroUtils.kvLine("Balance", this.getBalance(), indent));
+    sb.append(MoneroUtils.kvLine("Unlocked balance", this.getUnlockedBalance(), indent));
+    sb.append(MoneroUtils.kvLine("Num unspent outputs", this.getNumUnspentOutputs(), indent));
+    sb.append(MoneroUtils.kvLine("Is used", this.getIsUsed(), indent));
+    sb.append(MoneroUtils.kvLine("Num blocks to unlock", this.getIsUsed(), indent));
+    String str = sb.toString();
+    return str.substring(0, str.length() - 1);  // strip last newline
   }
 
   @Override

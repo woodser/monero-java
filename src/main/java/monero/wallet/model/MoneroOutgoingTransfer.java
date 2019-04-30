@@ -1,5 +1,7 @@
 package monero.wallet.model;
 
+import static org.junit.Assert.assertTrue;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +83,7 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
    */
   public MoneroOutgoingTransfer merge(MoneroOutgoingTransfer transfer) {
     super.merge(transfer);
-    assert(transfer instanceof MoneroOutgoingTransfer);
+    assertTrue(transfer instanceof MoneroOutgoingTransfer);
     if (this == transfer) return this;
     this.setSubaddressIndices(MoneroUtils.reconcile(this.getSubaddressIndices(), transfer.getSubaddressIndices()));
     this.setAddresses(MoneroUtils.reconcile(this.getAddresses(), transfer.getAddresses()));

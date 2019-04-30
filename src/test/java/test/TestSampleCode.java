@@ -1,5 +1,8 @@
 package test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.math.BigInteger;
 import java.util.List;
 
@@ -16,7 +19,6 @@ import monero.wallet.config.MoneroSendConfig;
 import monero.wallet.config.MoneroTransferFilter;
 import monero.wallet.config.MoneroTxFilter;
 import monero.wallet.model.MoneroDestination;
-import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTransfer;
@@ -40,19 +42,28 @@ public class TestSampleCode {
     // get wallet primary address
     String primaryAddress = wallet.getPrimaryAddress();  // e.g. 59aZULsUF3YNSKGiHz4J...
     
+    // get address and balance of subaddress [1, 0]
+    MoneroSubaddress subaddress = wallet.getSubaddress(1, 0);
+    BigInteger subaddressBalance = subaddress.getBalance();
+    String subaddressAddress = subaddress.getAddress();
+    
     // get incoming and outgoing transfers
     List<MoneroTransfer> transfers = wallet.getTransfers();
     for (MoneroTransfer transfer : transfers) {
       boolean isIncoming = transfer.getIsIncoming();
       BigInteger amount = transfer.getAmount();
       int accountIdx = transfer.getAccountIndex();
-      Integer height = transfer.getTx().getHeight();  // can be null if unconfirmed
+      Integer height = transfer.getTx().getHeight();  // will be null if unconfirmed
     }
     
-    // get address and balance of subaddress [1, 0]
-    MoneroSubaddress subaddress = wallet.getSubaddress(1, 0);
-    BigInteger subaddressBalance = subaddress.getBalance();
-    String subaddressAddress = subaddress.getAddress();
+    // get incoming transfers to account 0
+    transfers = wallet.getTransfers(new MoneroTransferFilter().setAccountIndex(0).setIsIncoming(true));
+    for (MoneroTransfer transfer : transfers) {
+      assertTrue(transfer.getIsIncoming());
+      assertEquals(0, (int) transfer.getAccountIndex());
+      BigInteger amount = transfer.getAmount();
+      Integer height = transfer.getTx().getHeight();  // will be null if unconfirmed
+    }
 
     // send to an address
     MoneroTxWallet sentTx = wallet.send("74oAtjgE2dfD1bJBo4DWW3E6qXCAwUDMgNqUurnX9b2xUvDTwMwExiXDkZskg7Vct37tRGjzHRqL4gH4H3oag3YyMYJzrNp", new BigInteger("50000"));
