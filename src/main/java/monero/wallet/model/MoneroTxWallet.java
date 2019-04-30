@@ -228,7 +228,7 @@ public class MoneroTxWallet extends MoneroTx {
     return str.substring(0, str.length() - 1);  // strip last newline
   }
   
-  // helper function to merge transfers
+  // private helper to merge transfers
   private static void mergeIncomingTransfer(List<MoneroIncomingTransfer> transfers, MoneroIncomingTransfer transfer) {
     for (MoneroIncomingTransfer aTransfer : transfers) {
       if (aTransfer.getAccountIndex() == transfer.getAccountIndex() && aTransfer.getSubaddressIndex() == transfer.getSubaddressIndex()) {

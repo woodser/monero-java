@@ -556,12 +556,6 @@ public class MoneroTx {
             this.getVouts().get(i).merge(tx.getVouts().get(i));
           }
         }
-        
-//        // merge by position
-//        assertEquals(this.getVouts().size(), tx.getVouts().size());
-//        for (int i = 0; i < tx.getVouts().size(); i++) {
-//          this.getVouts().get(i).merge(tx.getVouts().get(i));
-//        }
       }
     }
     

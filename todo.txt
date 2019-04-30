@@ -9,11 +9,12 @@ add all_accounts to incoming_transfers, would be huge time saver
 Marking output 18666(<9cd46fd977f2d8f6112cc87592677cbd76801b318c6e607dd31b9a25dd7d9530>) as unspent, it was marked as spent
 
 14.0.3 RELEASE
-investigate seg fault 11 in testGetReserveProofAccount()
-test sweeps
 port changes to js
+cannot send: -4: Known ring does not include the spent output: 1255232
 wallet.getVouts() -> wallet.getOutputs()
 MoneroSendConfig -> MoneroSendRequest
+test sweeps
+investigate seg fault 11 in testGetReserveProofAccount()
 generate javadoc
 release
 rename monero-java-rpc -> monero-java

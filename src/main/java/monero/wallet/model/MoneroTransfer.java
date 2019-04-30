@@ -31,6 +31,14 @@ public class MoneroTransfer {
     return this;
   }
   
+  public Boolean getIsIncoming() {
+    throw new RuntimeException("Subclass must implement");
+  }
+  
+  public Boolean getIsOutgoing() {
+    throw new RuntimeException("Subclass must implement");
+  }
+  
   public BigInteger getAmount() {
     return amount;
   }
@@ -53,14 +61,6 @@ public class MoneroTransfer {
     return new MoneroTransfer(this);
   }
   
-  public Boolean getIsIncoming() {
-    throw new RuntimeException("Subclass must implement");
-  }
-  
-  public Boolean getIsOutgoing() {
-    throw new RuntimeException("Subclass must implement");
-  }
-
   /**
    * Updates this transaction by merging the latest information from the given
    * transaction.

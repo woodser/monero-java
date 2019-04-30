@@ -784,7 +784,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // determine account and subaddresses to send from
     Integer accountIdx = config.getAccountIndex();
     if (accountIdx == null) accountIdx = 0; // default to account 0
-    List<Integer> subaddressIndices = config.getSubaddressIndices() == null ? getSubaddressIndices(accountIdx) : new ArrayList<Integer>(config.getSubaddressIndices());
+    List<Integer> subaddressIndices = config.getSubaddressIndices() == null ? getSubaddressIndices(accountIdx) : new ArrayList<Integer>(config.getSubaddressIndices()); // copy given indices or fetch all
     
     // build request parameters
     Map<String, Object> params = new HashMap<String, Object>();
@@ -826,7 +826,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     for (MoneroTxWallet tx : txs) {
       initSentTxWallet(config, tx);
       tx.getOutgoingTransfer().setAccountIndex(accountIdx);
-      if (subaddressIndices.size() == 1) tx.getOutgoingTransfer().setSubaddressIndices(subaddressIndices);
+        if (subaddressIndices.size() == 1) tx.getOutgoingTransfer().setSubaddressIndices(subaddressIndices);
     }
     
     // initialize txs from rpc response
@@ -1625,7 +1625,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           if (transfer == null) transfer = new MoneroIncomingTransfer().setTx(tx);
           ((MoneroIncomingTransfer) transfer).setAddress((String) val);
         }
-        // TODO: set addresses here?
       }
       else if (key.equals("payment_id")) {
         if (!MoneroTxWallet.DEFAULT_PAYMENT_ID.equals(val)) tx.setPaymentId((String) val);  // default is undefined
@@ -1669,8 +1668,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // initialize final fields
     if (transfer != null) {
-//      transfer.setAccountIndex(accountIdx);
-//      transfer.setSubaddressIndex(subaddressIdx);
       if (isOutgoing) {
         if (tx.getOutgoingTransfer() != null) tx.getOutgoingTransfer().merge(transfer);
         else tx.setOutgoingTransfer((MoneroOutgoingTransfer) transfer);

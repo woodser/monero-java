@@ -127,12 +127,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     compareTransferOrder((List<Map<String, Object>>) result.get("pending"), wallet.getTransfers(new MoneroTransferFilter().setIsOutgoing(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(false).setIsFailed(false))));
     compareTransferOrder((List<Map<String, Object>>) result.get("failed"), wallet.getTransfers(new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setIsFailed(true))));
     
-    // compare tx order to rpc
-//    compareTxOrder((List<Map<String, Object>>) result.get("in"), wallet.getTxs(new MoneroTxFilter().setIsConfirmed(true).setTransferFilter(new MoneroTransferFilter().setIsIncoming(true))));
-//    compareTxOrder((List<Map<String, Object>>) result.get("pool"), wallet.getTxs(new MoneroTxFilter().setIsConfirmed(false).setTransferFilter(new MoneroTransferFilter().setIsIncoming(true))));
-//    compareTxOrder((List<Map<String, Object>>) result.get("pending"), wallet.getTxs(new MoneroTxFilter().setIsConfirmed(false).setIsFailed(false).setTransferFilter(new MoneroTransferFilter().setIsOutgoing(true))));
-//    compareTxOrder((List<Map<String, Object>>) result.get("failed"), wallet.getTxs(new MoneroTxFilter().setIsFailed(true)));
-    
     // fetch vouts directly from rpc for comparison to library
     params.clear();
     params.put("transfer_type", "all");
