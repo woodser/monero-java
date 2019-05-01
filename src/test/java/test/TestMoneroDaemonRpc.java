@@ -1273,44 +1273,6 @@ public class TestMoneroDaemonRpc {
     }
   }
   
-//  public static class MoneroBlockTestConfig {
-//    boolean hasTxs;
-//    boolean hasHex;
-//    boolean headerIsFull;
-//    MoneroTxCtx txConfig;
-//    public MoneroBlockTestConfig(boolean hasTxs, boolean hasHex, boolean headerIsFull, MoneroTxCtx txConfig) {
-//      super();
-//      this.hasTxs = hasTxs;
-//      this.hasHex = hasHex;
-//      this.headerIsFull = headerIsFull;
-//      this.txConfig = txConfig;
-//    }
-//  }
-//  
-//  public static class MoneroTxCtx {
-//    boolean hasJson;
-//    boolean isPruned;
-//    boolean isFull;
-//    boolean isConfirmed;
-//    boolean isCoinbase;
-//    boolean fromGetTxPool;
-//    boolean fromGetBlocksByHeight;
-//    boolean hasOutputIndices;
-//    boolean doNotTestCopy;
-//  }
-//  
-//  public static class MoneroOuptutCtx {
-//    boolean hasJson;
-//    boolean isPruned;
-//    boolean isFull;
-//    boolean isConfirmed;
-//    boolean isCoinbase;
-//    boolean fromGetTxPool;
-//    boolean fromGetBlocksByHeight;
-//    boolean hasOutputIndices;
-//    boolean doNotTestCopy;
-//  }
-  
   private static void testBlockTemplate(MoneroBlockTemplate template) {
     assertNotNull(template);
     assertNotNull(template.getBlockTemplateBlob());

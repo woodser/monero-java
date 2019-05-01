@@ -831,7 +831,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         else {
           Set<Integer> intersections = new HashSet<Integer>(subaddressIndices);
           intersections.retainAll(((MoneroOutgoingTransfer) transfer).getSubaddressIndices());
-          assertTrue("Subaddresses must have overlap", intersections.size() > 0);
+          assertTrue("Subaddresses must overlap", intersections.size() > 0);
         }
       }
     }
