@@ -26,10 +26,6 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     return true;
   }
   
-  public Boolean getIsOutgoing() {
-    return false;
-  }
-  
   public Integer getSubaddressIndex() {
     return subaddressIndex;
   }
