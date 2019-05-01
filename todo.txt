@@ -1,4 +1,5 @@
 WALLET RPC ISSUES
+daemon tx gets stuck in pool, get_transfers `timestamp` varies from call to call for tx stuck in pool; resolved by daemon.flushTxPool()
 ocasional: testGetTxsByIdsInPool() hangs
 ocasional: testGetTxsByIdsInPool() tx fails testTx() as double spend
 ocasional: seg fault 11 in testGetReserveProofAccount() (with no unlocked balance???), wallet rpc get_reserve_proof
@@ -6,7 +7,6 @@ one time: testCheckTxKey() -24: No tx secret key is stored for this tx, RPC requ
 WARNING: key proof indicates no funds received despite transfer (txid=76983ebf1d2e62141c19e190355e146145cb03988c5bfaf857b65dc0e15d378f, key=5246bf34d97dd379843ea31cb2bddfe41a89db73be4bd72fdc1ffe1b4d8ac70d, address=76gP3JEGAhnS5sgnB7LHRP2tbidL8ChvkJATJADQF4SpBcbN8bUgSZyQmTpdMQqyW129dh3zV5XscaBhkU6WTUKQVdDykFV, amount=44933)
 add all_accounts to incoming_transfers, would be huge time saver
 Marking output 18666(<9cd46fd977f2d8f6112cc87592677cbd76801b318c6e607dd31b9a25dd7d9530>) as unspent, it was marked as spent
-low: daemon tx gets stuck in pool, get_transfers `timestamp` varies from call to call for tx stuck in pool; resolved by daemon.flushTxPool()
 cannot send: -4: Known ring does not include the spent output: 1255232 (this fixed itself, not sure how)
 
 14.0.3 RELEASE
