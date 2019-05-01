@@ -564,6 +564,20 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     filter.setTransferFilter(transferFilter);
     txs = Filter.apply(filter, txs);
     
+    // verify all specified tx ids found
+    if (filter.getTxIds() != null) {
+      for (String txId : filter.getTxIds()) {
+        boolean found = false;
+        for (MoneroTxWallet tx : txs) {
+          if (txId.equals(tx.getId())) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) throw new MoneroException("Tx not found in wallet: " + txId);
+      }
+    }
+    
     // special case: re-fetch txs if inconsistency caused by needing to make multiple rpc calls
     for (MoneroTxWallet tx : txs) {
       if (tx.getIsConfirmed() && tx.getBlock() == null) return getTxs(filter);

@@ -66,7 +66,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   protected static final boolean TEST_NON_RELAYS = true;
   protected static final boolean TEST_RELAYS = true;
   protected static final boolean TEST_NOTIFICATIONS = false;
-  protected static final boolean TEST_RESETS = true;
+  protected static final boolean TEST_RESETS = false;
   private static final int MAX_TX_PROOFS = 25;   // maximum number of transactions to check for each proof, undefined to check all
   private static final int SEND_MAX_DIFF = 60;
   private static final int SEND_DIVISOR = 2;
@@ -748,17 +748,70 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   public void testGetTxsValidateInputs() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
-    // test with invalid id
-    List<MoneroTxWallet> txs = wallet.getTxs(new MoneroTxFilter().setTxId("invalid_id"));
-    assertEquals(0, txs.size());
-    
-    // test invalid id in collection
+    // fetch random txs for testing
     List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, null, 3, 5);
-    txs = wallet.getTxs(new MoneroTxFilter().setTxIds(randomTxs.get(0).getId(), "invalid_id"));
-    assertEquals(1, txs.size());
-    assertEquals(randomTxs.get(0).getId(), txs.get(0).getId());
     
-    // TODO: test other input validation here
+    // valid, invalid, and unknown tx ids for tests
+    String txId = randomTxs.get(0).getId();
+    String invalidId = "invalid_id";
+    String unknownId1 = "6c4982f2499ece80e10b627083c4f9b992a00155e98bcba72a9588ccb91d0a61";
+    String unknownId2 = "ff397104dd875882f5e7c66e4f852ee134f8cf45e21f0c40777c9188bc92e943";
+    
+    // fetch unknown tx id
+    try {
+      wallet.getTx(unknownId1);
+      fail("Should have thrown error getting tx id unknown to wallet");
+    } catch (MoneroException e) {
+      assertEquals("Tx not found in wallet: " + unknownId1, e.getDescription());
+    }
+    
+    // fetch unknown tx id using filter
+    try {
+      wallet.getTxs(new MoneroTxFilter().setTxId(unknownId1));
+      throw new Error("Should have thrown error getting tx id unknown to wallet");
+    } catch (MoneroException e) {
+      assertEquals("Tx not found in wallet: " + unknownId1, e.getDescription());
+    }
+    
+    // fetch unknown tx id in collection
+    try {
+      wallet.getTxs(txId, unknownId1);
+      fail("Should have thrown error getting tx id unknown to wallet");
+    } catch (MoneroException e) {
+      assertEquals("Tx not found in wallet: " + unknownId1, e.getDescription());
+    }
+    
+    // fetch unknown tx ids in collection
+    try {
+      wallet.getTxs(txId, unknownId1, unknownId2);
+      fail("Should have thrown error getting tx id unknown to wallet");
+    } catch (MoneroException e) {
+      assertEquals("Tx not found in wallet: " + unknownId1, e.getDescription()); // TODO: list all invalid ids in error description?
+    }
+    
+    // fetch invalid id
+    try {
+      wallet.getTx(invalidId);
+      fail("Should have thrown error getting tx id unknown to wallet");
+    } catch (MoneroException e) {
+      assertEquals("Tx not found in wallet: " + invalidId, e.getDescription());
+    }
+    
+    // fetch invalid id collection
+    try {
+      wallet.getTxs(txId, invalidId);
+      fail("Should have thrown error getting tx id unknown to wallet");
+    } catch (MoneroException e) {
+      assertEquals("Tx not found in wallet: " + invalidId, e.getDescription());
+    }
+    
+    // fetch invalid ids in collection
+    try {
+      wallet.getTxs(txId, invalidId, "invalid_id_2");
+      fail("Should have thrown error getting tx id unknown to wallet");
+    } catch (MoneroException e) {
+      assertEquals("Tx not found in wallet: " + invalidId, e.getDescription());
+    }
   }
 
   // Can get transfers in the wallet, accounts, and subaddresses
@@ -2422,6 +2475,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         TestContext ctx = new TestContext();
         ctx.wallet = wallet;
         ctx.sendConfig = config;
+        ctx.isSendResponse = true;
         ctx.isSweepResponse = true;
         testTxWallet(tx, ctx);
       }
@@ -2496,6 +2550,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         TestContext ctx = new TestContext();
         ctx.wallet = wallet;
         ctx.sendConfig = config;
+        ctx.isSendResponse = true;
         ctx.isSweepResponse = true;
         testTxWallet(tx, ctx);
       }
