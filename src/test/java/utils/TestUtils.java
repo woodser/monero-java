@@ -108,9 +108,10 @@ public class TestUtils {
   
   public static void testUnsignedBigInteger(BigInteger num, Boolean nonZero) {
     assertNotNull(num);
-    assertTrue(num.compareTo(BigInteger.valueOf(0)) >= 0);
-    if (Boolean.TRUE.equals(nonZero)) assertTrue(num.compareTo(BigInteger.valueOf(0)) > 0);
-    if (Boolean.FALSE.equals(nonZero)) assertTrue(num.compareTo(BigInteger.valueOf(0)) == 0);
+    int comparison = num.compareTo(BigInteger.valueOf(0));
+    assertTrue(comparison >= 0);
+    if (Boolean.TRUE.equals(nonZero)) assertTrue(comparison > 0);
+    if (Boolean.FALSE.equals(nonZero)) assertTrue(comparison == 0);
   }
   
   // TODO: switch to local wallet (like js version) if/when it can generate addresses
