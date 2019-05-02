@@ -1498,7 +1498,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can prove reserves in an account
   @Test
-  @Ignore
+  @Ignore // TODO: investigate and re-enable
   public void testGetReserveProofAccount() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
         
@@ -2766,8 +2766,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         balance = balance.add(account.getSubaddresses().get(i).getBalance());
         unlockedBalance = unlockedBalance.add(account.getSubaddresses().get(i).getUnlockedBalance());
       }
-      assertTrue("Subaddress balances " + balance + " does not equal account balance " + account.getBalance(), account.getBalance().equals(balance));
-      assertTrue("Subaddress unlocked balances " + unlockedBalance + " does not equal account unlocked balance " + account.getUnlockedBalance(), account.getUnlockedBalance().equals(unlockedBalance));
+      assertTrue("Subaddress balances " + balance + " does not equal account " + account.getIndex() + " balance " + account.getBalance(), account.getBalance().equals(balance));
+      assertTrue("Subaddress unlocked balances " + unlockedBalance + " does not equal account " + account.getIndex() + " unlocked balance " + account.getUnlockedBalance(), account.getUnlockedBalance().equals(unlockedBalance));
     }
   }
 
