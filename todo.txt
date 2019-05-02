@@ -18,6 +18,7 @@ wallet.getVouts() -> wallet.getOutputs()
 MoneroSendConfig -> MoneroSendRequest
 test sweeps
 promote daemon.getAsManyBlocksAsPossible to daemon interface?
+update readme: document creation of wallet files for running tests
 generate javadoc
 release
 
