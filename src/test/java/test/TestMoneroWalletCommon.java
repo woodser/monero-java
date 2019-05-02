@@ -865,7 +865,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         }
       }
       assertEquals(accountTransfers.size(), subaddressTransfers.size());
-
       
       // collect unique subaddress indices
       Set<Integer> subaddressIndices = new HashSet<Integer>();
