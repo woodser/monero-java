@@ -11,10 +11,8 @@ cannot send: -4: Known ring does not include the spent output: 1255232 (this fix
 
 14.0.3 RELEASE
 verify consistency with java breaks
-investigate differences in balances
 report difference in timestamps for txs in pool
 investigate seg fault 11 in testGetReserveProofAccount() (with no unlocked balance??? happened on fresh wallet, but send had run), wallet rpc get_reserve_proof
-test fetch tx by id with unknown/invalid id
 getTxsByIds, getTxById, vs getBlockById()
 port changes to js
 wallet.getVouts() -> wallet.getOutputs()
