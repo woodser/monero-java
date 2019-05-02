@@ -19,6 +19,7 @@ investigate seg fault 11 in testGetReserveProofAccount()
 generate javadoc
 release
 rename monero-java-rpc -> monero-java
+promote daemon.getAsManyBlocksAsPossible to daemon interface
 
 clearer dynamic library readme instructions, verify other platforms
 testGetNewKeyImagesFromLastImport
