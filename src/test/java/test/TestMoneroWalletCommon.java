@@ -1250,8 +1250,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     List<MoneroTxWallet> txs;
     try {
       txs = getRandomTransactions(wallet, new MoneroTxFilter().setIsConfirmed(true).setTransferFilter(new MoneroTransferFilter().setHasDestinations(true)), 1, MAX_TX_PROOFS);
-    } catch (MoneroException e) {
-      throw new RuntimeException("No txs with outgoing destinations found; run send tests");
+    } catch (AssertionError e) {
+      if (e.getMessage().contains("found with")) fail("No txs with outgoing destinations found; run send tests");
+      throw e;
     }
     
     // test good checks
@@ -1336,8 +1337,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     List<MoneroTxWallet> txs;
     try {
       txs = getRandomTransactions(wallet, new MoneroTxFilter().setIsConfirmed(true).setTransferFilter(new MoneroTransferFilter().setHasDestinations(true)), 1, MAX_TX_PROOFS);
-    } catch (MoneroException e) {
-      throw new RuntimeException("No txs with outgoing destinations found; run send tests");
+    } catch (AssertionError e) {
+      if (e.getMessage().contains("found with")) fail("No txs with outgoing destinations found; run send tests");
+      throw e;
     }
     
     // test good checks with messages
@@ -1496,6 +1498,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can prove reserves in an account
   @Test
+  @Ignore
   public void testGetReserveProofAccount() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
         
