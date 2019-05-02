@@ -118,7 +118,15 @@ long nextNumTxs = nextBlockHeader.getNumTxs();
 daemon.stopMining();
 ```
 
-## Interfaces and Types
+## API Documentation
+
+This library follows the wallet and daemon interfaces and models defined here: https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf).
+
+Javadoc is provided in the [doc](doc) folder (best viewed opening [doc/index.html](doc/index.html) in a browser).
+
+The main interfaces are [MoneroWallet.java](src/main/java/monero/wallet/MoneroWallet.java) and [MoneroDaemon.java](src/main/java/monero/daemon/MoneroDaemon.java).
+
+Here is the source code to the main interfaces, implementations, and models:
 
 - [Monero daemon (MoneroDaemon.java)](src/main/java/monero/daemon/MoneroDaemon.java)
 - [Monero daemon rpc implementation (MoneroDaemonRpc.java)](src/main/java/monero/daemon/MoneroDaemon.java)
@@ -126,12 +134,6 @@ daemon.stopMining();
 - [Monero wallet (src/main/java/monero/wallet/MoneroWallet.java)](src/main/java/monero/wallet/MoneroWallet.java)
 - [Monero wallet rpc implementation (src/main/java/model/wallet/MoneroWalletRpc.java)](src/main/java/model/wallet/MoneroWalletRpc.java)
 - [Monero wallet model (src/main/java/wallet/model)](src/main/java/wallet/model)
-
-## API Documentation
-
-The main interfaces are [MoneroWallet.java](src/main/java/monero/wallet/MoneroWallet.java) and [MoneroDaemon.java](src/main/java/monero/daemon/MoneroDaemon.java).
-
-Javadoc is provided in the [doc](doc) folder (best viewed opening [doc/index.html](doc/index.html) in a browser).
 
 ## Monero RPC Setup
 
@@ -157,7 +159,7 @@ Note: some tests are failing as not all functionality is implemented.
 
 ## Building platform-specific Monero binaries
 
-In order to fetch and process binary data from the daemon, functionality written in C++ is built as a dynamic library for Java to access using JNI.  The C++ code being built is in src/main/cpp/submodules.  A fork of MyMonero is used with added utilities to convert binary data between JSON and Monero's portable storage format.
+In order to fetch and process binary data from the daemon, functionality written in C++ is built as a dynamic library for Java to access using JNI.  The C++ code being built is contained in src/main/cpp/submodules.  A fork of MyMonero is currently used with added utilities to convert binary data between JSON and Monero's portable storage format.
 
 The dynamic library is platform-specific so it must be built from source for the specific platform it is running on (e.g. Linux, Mac, Windows, etc).
 
@@ -166,17 +168,17 @@ The dynamic library is platform-specific so it must be built from source for the
 1. Build boost for your system
 2. Copy boost_system.a, boost_thread.a, and boost_chrono.a into src/main/cpp/build/boost/lib
 3. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/` (change as appropriate)
-4. Build libmonero dynamic library in src/main/cpp/build/: `cd src/main/cpp && ./bin/build-libmonero.sh`
-5. Run TestMoneroCppUtils.java JUnit tests verify the dynamic library is working
+4. Build libmonero.dylib to src/main/cpp/build/: `cd src/main/cpp && ./bin/build-libmonero.sh`
+5. Run TestMoneroCppUtils.java JUnit tests verify the dynamic library is working with Java JNI
 
-Note: for convenience, a dynamic library built for MacOSX is included with the project's source code.  **This executable is suitable for development and testing only and should be re-built from source to verify its integrity and trusthworthiness for any other purpose.** (TODO: remove pre-built library?)
+Note: for convenience, a pre-built library for MacOSX is included with the project's source code.  **This executable is suitable for development and testing only and should be re-built from source to verify its integrity for any other purpose.** (TODO: remove pre-built library?)
 
 ## Project Goals
 
 - Expose a Monero daemon and wallet in Java using Monero Core RPC.
-- Expose a Monero wallet in Java by JNI binding to Monero Core's wallet in C++.
+- Expose a Monero wallet in Java by binding to Monero Core's wallet in C++.
 - Expose a Monero wallet in Java backed by a MyMonero-compatible endpoint which shares the view key with a 3rd party to scan the blockchain.
-- Offer consistent terminology and APIs for Monero's developer ecosystem
+- Offer consistent terminology and APIs for Monero's developer ecosystem with a working reference implementation.
 
 ## License
 

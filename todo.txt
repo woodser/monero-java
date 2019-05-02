@@ -15,12 +15,12 @@ port changes to js
 wallet.getVouts() -> wallet.getOutputs()
 MoneroSendConfig -> MoneroSendRequest
 test sweeps
-investigate seg fault 11 in testGetReserveProofAccount()
 generate javadoc
+getTxsByIds, getTxById, vs getBlockById()
 release
-rename monero-java-rpc -> monero-java
 promote daemon.getAsManyBlocksAsPossible to daemon interface
 
+investigate seg fault 11 in testGetReserveProofAccount()
 clearer dynamic library readme instructions, verify other platforms
 testGetNewKeyImagesFromLastImport
 refactor getAccounts(Boolean includeSubaddresses, Boolean isUsed, String tag, Boolean, Integer accountIdx, List<Integer> subaddressIndices, [includeBalaneDetails?]) that's filtering with most known options (in internal wallet rpc)
@@ -38,6 +38,7 @@ deterministic ordering of txs, vouts?
 test priority in common tests (only in sample code currently)
 api updates: setSubaddressIndices(...) and others, , getBalancesWallet, more convenient filtering, remove typing on vouts, etc
 first open then create wallet in TestUtils
+rename monero-java-rpc -> monero-java
 
 NEXT
 clean up todos
