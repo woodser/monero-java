@@ -59,10 +59,10 @@ import monero.utils.MoneroUtils;
 public class MoneroDaemonRpc extends MoneroDaemonDefault {
   
   // static variables
-  private static final String DEFAULT_ID = "0000000000000000000000000000000000000000000000000000000000000000";
   private static final Logger LOGGER = Logger.getLogger(MoneroDaemonRpc.class);
+  private static final String DEFAULT_ID = "0000000000000000000000000000000000000000000000000000000000000000";
   private static long MAX_REQ_SIZE = 3000000;  // max request size when fetching blocks from daemon
-  private static int NUM_HEADERS_PER_REQUEST = 750;
+  private static int NUM_HEADERS_PER_REQ = 750;
   
   // instance variables
   private MoneroRpc rpc;
@@ -908,7 +908,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     if (cachedHeader != null) return cachedHeader;
     
     // fetch and cache headers if not in cache
-    int endHeight = Math.min(maxHeight, height + NUM_HEADERS_PER_REQUEST - 1);  // TODO: could specify end height to cache to optimize small requests (would like to have time profiling in place though)
+    int endHeight = Math.min(maxHeight, height + NUM_HEADERS_PER_REQ - 1);  // TODO: could specify end height to cache to optimize small requests (would like to have time profiling in place though)
     List<MoneroBlockHeader> headers = getBlockHeadersByRange(height, endHeight);
     for (MoneroBlockHeader header : headers) {
       cachedHeaders.put(header.getHeight(), header);

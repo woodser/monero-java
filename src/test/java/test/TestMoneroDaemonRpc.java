@@ -332,21 +332,6 @@ public class TestMoneroDaemonRpc {
       List<MoneroBlock> blocks = daemon.getAsManyBlocksAsPossible(lastHeight + 1, endHeight, null);
       for (MoneroBlock block : blocks) {
         testBlock(block, BINARY_BLOCK_CTX);
-        
-//        // test full txs
-//        if (block.getTxs().isEmpty()) continue;
-//        TestContext ctx = new TestContext();
-//        ctx.isPruned = false;
-//        ctx.isConfirmed = true;
-//        ctx.fromGetTxPool = false;
-//        ctx.hasOutputIndices = true;
-//        List<String> txIds = new ArrayList<String>();
-//        for (MoneroTx tx : block.getTxs()) txIds.add(tx.getId());
-//        List<MoneroTx> txs = daemon.getTxs(txIds);
-//        for (MoneroTx tx : txs) {
-//          assertFalse(tx.getOutputIndices().isEmpty());
-//          testTx(tx, ctx);
-//        }
       }
       lastHeight = blocks.get(blocks.size() - 1).getHeight();
       
