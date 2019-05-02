@@ -152,8 +152,8 @@ Here is the source code to the main interfaces, implementations, and models:
 2. Clone the Java repository: `git clone --recurse-submodules https://github.com/monero-ecosystem/monero-java-rpc.git`
 3. Install project dependencies: `maven install`
 4. Configure the appropriate RPC endpoints and authentication by modifying `WALLET_RPC_CONFIG` and `DAEMON_RPC_CONFIG` in [src/test/main/test/TestUtils.java](src/test/main/TestUtils.java).
-5  [Build a dynamic library from Monero C++ for your platform](#building-platform-specific-monero-binaries)
-5. Run all *.java files in src/main/test as JUnits.
+5.  [Build a dynamic library from Monero C++ for your platform](#building-platform-specific-monero-binaries)
+6. Run all *.java files in src/main/test as JUnits.
 
 Note: some tests are failing as not all functionality is implemented.
 
