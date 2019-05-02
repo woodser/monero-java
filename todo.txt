@@ -10,15 +10,16 @@ Marking output 18666(<9cd46fd977f2d8f6112cc87592677cbd76801b318c6e607dd31b9a25dd
 cannot send: -4: Known ring does not include the spent output: 1255232 (this fixed itself, not sure how)
 
 14.0.3 RELEASE
+test master
 test fetch tx by id with unknown/invalid id
+getTxsByIds, getTxById, vs getBlockById()
 port changes to js
 wallet.getVouts() -> wallet.getOutputs()
 MoneroSendConfig -> MoneroSendRequest
 test sweeps
+promote daemon.getAsManyBlocksAsPossible to daemon interface?
 generate javadoc
-getTxsByIds, getTxById, vs getBlockById()
 release
-promote daemon.getAsManyBlocksAsPossible to daemon interface
 
 investigate seg fault 11 in testGetReserveProofAccount()
 clearer dynamic library readme instructions, verify other platforms
