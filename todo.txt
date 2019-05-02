@@ -10,13 +10,11 @@ Marking output 18666(<9cd46fd977f2d8f6112cc87592677cbd76801b318c6e607dd31b9a25dd
 cannot send: -4: Known ring does not include the spent output: 1255232 (this fixed itself, not sure how)
 
 14.0.3 RELEASE
-verify consistency with java breaks
-report difference in timestamps for txs in pool
+report difference in timestamps for txs in pool - It's the timestamp of the block hte tx is in. No block = now.  It can be made into a received timestamp.  File bug if wanted.
 investigate seg fault 11 in testGetReserveProofAccount() (with no unlocked balance??? happened on fresh wallet, but send had run), wallet rpc get_reserve_proof
-getTxsByIds, getTxById, vs getBlockById()
-port changes to js
 wallet.getVouts() -> wallet.getOutputs()
 MoneroSendConfig -> MoneroSendRequest
+getTxsByIds, getTxById, vs getBlockById()
 test sweeps
 promote daemon.getAsManyBlocksAsPossible to daemon interface?
 update readme: document creation of wallet files for running tests
