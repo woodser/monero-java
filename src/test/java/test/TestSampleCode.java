@@ -15,14 +15,14 @@ import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc;
-import monero.wallet.config.MoneroSendConfig;
-import monero.wallet.config.MoneroTransferFilter;
-import monero.wallet.config.MoneroTxFilter;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.request.MoneroSendRequest;
+import monero.wallet.request.MoneroTransferRequest;
+import monero.wallet.request.MoneroTxRequest;
 import utils.TestUtils;
 
 /**
@@ -57,7 +57,7 @@ public class TestSampleCode {
     }
     
     // get incoming transfers to account 0
-    transfers = wallet.getTransfers(new MoneroTransferFilter().setAccountIndex(0).setIsIncoming(true));
+    transfers = wallet.getTransfers(new MoneroTransferRequest().setAccountIndex(0).setIsIncoming(true));
     for (MoneroTransfer transfer : transfers) {
       assertTrue(transfer.getIsIncoming());
       assertEquals(0, (int) transfer.getAccountIndex());
@@ -69,8 +69,8 @@ public class TestSampleCode {
     MoneroTxWallet sentTx = wallet.send("74oAtjgE2dfD1bJBo4DWW3E6qXCAwUDMgNqUurnX9b2xUvDTwMwExiXDkZskg7Vct37tRGjzHRqL4gH4H3oag3YyMYJzrNp", new BigInteger("50000"));
 
     // send to multiple destinations from subaddress 1, 0 which can be split into multiple transactions
-    // see MoneroSendConfig.java for all config options or to build a config object
-    List<MoneroTxWallet> sentTxs = wallet.sendSplit(new MoneroSendConfig()
+    // see MoneroSendRequest.java for all request options
+    List<MoneroTxWallet> sentTxs = wallet.sendSplit(new MoneroSendRequest()
             .setAccountIndex(1)
             .setSubaddressIndices(0, 1)
             .setPriority(MoneroSendPriority.UNIMPORTANT)  // no rush
@@ -79,7 +79,7 @@ public class TestSampleCode {
                     new MoneroDestination("78NWrWGgyZeYgckJhuxmtDMqo8Kzq5r9j1kV8BQXGq5CDnECz2KjQeBDc3KKvdMQmR6TWtfbRaedgbSGmmwr1g8N1rBMdvW", new BigInteger("50000"))));
     
     // get all confirmed wallet transactions
-    for (MoneroTxWallet tx : wallet.getTxs(new MoneroTxFilter().setIsConfirmed(true))) {
+    for (MoneroTxWallet tx : wallet.getTxs(new MoneroTxRequest().setIsConfirmed(true))) {
       String txId = tx.getId();                   // e.g. f8b2f0baa80bf6b...
       BigInteger txFee = tx.getFee();             // e.g. 750000
       boolean isConfirmed = tx.getIsConfirmed();  // e.g. true

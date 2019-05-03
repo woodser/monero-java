@@ -344,6 +344,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     }
     
     // fetch unconfirmed txs from pool and merge additional fields  // TODO monero-daemon-rpc: merge rpc calls so this isn't necessary?
+    System.out.println("Fetching from pool...");
     List<MoneroTx> poolTxs = getTxPool();
     for (MoneroTx tx : txs) {
       for (MoneroTx poolTx : poolTxs) {

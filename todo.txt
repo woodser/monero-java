@@ -1,6 +1,5 @@
 WALLET RPC ISSUES
-daemon tx gets stuck in pool, get_transfers `timestamp` varies from call to call for tx stuck in pool; resolved by daemon.flushTxPool()
-ocasional: testGetTxsByIdsInPool() hangs
+ocasional: testGetTxsByIdsInPool() hangs (have no peer connections?)
 ocasional: testGetTxsByIdsInPool() tx fails testTx() as double spend
 ocasional: seg fault 11 in testGetReserveProofAccount() (with no unlocked balance???), wallet rpc get_reserve_proof
 one time: testCheckTxKey() -24: No tx secret key is stored for this tx, RPC request: 'get_tx_key' with params: {"txid":"e779dbb7fbff77544ea39de062b12c1d722901ed937a833307c1b5b3cea41069"}
@@ -12,9 +11,8 @@ file issue to get received timestamp for unconfirmed wallet txs if wanted
 
 14.0.3 RELEASE
 investigate seg fault 11 in testGetReserveProofAccount() (with no unlocked balance??? happened on fresh wallet, but send had run), wallet rpc get_reserve_proof
-wallet.getVouts() -> wallet.getOutputs()
-MoneroSendConfig -> MoneroSendRequest
 getTxsByIds, getTxById, vs getBlockById()
+update readme sample code
 test sweeps
 promote daemon.getAsManyBlocksAsPossible to daemon interface?
 update readme: document creation of wallet files for running tests

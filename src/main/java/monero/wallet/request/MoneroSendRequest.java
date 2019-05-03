@@ -1,4 +1,4 @@
-package monero.wallet.config;
+package monero.wallet.request;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -13,7 +13,7 @@ import monero.wallet.model.MoneroSendPriority;
  * 
  * TODO: allow setAddress(), setAmount() for default destination?
  */
-public class MoneroSendConfig {
+public class MoneroSendRequest {
 
   private List<MoneroDestination> destinations;
   private String paymentId;
@@ -32,19 +32,19 @@ public class MoneroSendConfig {
   private Boolean sweepEachSubaddress;
   private String keyImage;
   
-  public MoneroSendConfig() {
+  public MoneroSendRequest() {
     this(null, null);
   }
   
-  public MoneroSendConfig(String address) {
+  public MoneroSendRequest(String address) {
     this(address, null);
   }
   
-  public MoneroSendConfig(String address, BigInteger amount) {
+  public MoneroSendRequest(String address, BigInteger amount) {
     this(address, amount, null);
   }
   
-  public MoneroSendConfig(String address, BigInteger amount, MoneroSendPriority priority) {
+  public MoneroSendRequest(String address, BigInteger amount, MoneroSendPriority priority) {
     // map address and amount to single destination
     if (address != null || amount != null) {
       this.destinations = Arrays.asList(new MoneroDestination(address, amount));
@@ -56,12 +56,12 @@ public class MoneroSendConfig {
     return destinations;
   }
   
-  public MoneroSendConfig setDestinations(List<MoneroDestination> destinations) {
+  public MoneroSendRequest setDestinations(List<MoneroDestination> destinations) {
     this.destinations = destinations;
     return this;
   }
   
-  public MoneroSendConfig setDestinations(MoneroDestination... destinations) {
+  public MoneroSendRequest setDestinations(MoneroDestination... destinations) {
     this.destinations = GenUtils.arrayToList(destinations);
     return this;
   }
@@ -70,7 +70,7 @@ public class MoneroSendConfig {
     return paymentId;
   }
   
-  public MoneroSendConfig setPaymentId(String paymentId) {
+  public MoneroSendRequest setPaymentId(String paymentId) {
     this.paymentId = paymentId;
     return this;
   }
@@ -79,7 +79,7 @@ public class MoneroSendConfig {
     return priority;
   }
   
-  public MoneroSendConfig setPriority(MoneroSendPriority priority) {
+  public MoneroSendRequest setPriority(MoneroSendPriority priority) {
     this.priority = priority;
     return this;
   }
@@ -88,7 +88,7 @@ public class MoneroSendConfig {
     return mixin;
   }
   
-  public MoneroSendConfig setMixin(Integer mixin) {
+  public MoneroSendRequest setMixin(Integer mixin) {
     this.mixin = mixin;
     return this;
   }
@@ -97,7 +97,7 @@ public class MoneroSendConfig {
     return ringSize;
   }
   
-  public MoneroSendConfig setRingSize(Integer ringSize) {
+  public MoneroSendRequest setRingSize(Integer ringSize) {
     this.ringSize = ringSize;
     return this;
   }
@@ -106,7 +106,7 @@ public class MoneroSendConfig {
     return fee;
   }
   
-  public MoneroSendConfig setFee(BigInteger fee) {
+  public MoneroSendRequest setFee(BigInteger fee) {
     this.fee = fee;
     return this;
   }
@@ -115,7 +115,7 @@ public class MoneroSendConfig {
     return accountIndex;
   }
   
-  public MoneroSendConfig setAccountIndex(Integer accountIndex) {
+  public MoneroSendRequest setAccountIndex(Integer accountIndex) {
     this.accountIndex = accountIndex;
     return this;
   }
@@ -124,12 +124,12 @@ public class MoneroSendConfig {
     return subaddressIndices;
   }
   
-  public MoneroSendConfig setSubaddressIndices(List<Integer> subaddressIndices) {
+  public MoneroSendRequest setSubaddressIndices(List<Integer> subaddressIndices) {
     this.subaddressIndices = subaddressIndices;
     return this;
   }
   
-  public MoneroSendConfig setSubaddressIndices(Integer... subaddressIndices) {
+  public MoneroSendRequest setSubaddressIndices(Integer... subaddressIndices) {
     this.subaddressIndices = GenUtils.arrayToList(subaddressIndices);
     return this;
   }
@@ -138,7 +138,7 @@ public class MoneroSendConfig {
     return unlockTime;
   }
 
-  public MoneroSendConfig setUnlockTime(Integer unlockTime) {
+  public MoneroSendRequest setUnlockTime(Integer unlockTime) {
     this.unlockTime = unlockTime;
     return this;
   }
@@ -147,7 +147,7 @@ public class MoneroSendConfig {
     return canSplit;
   }
   
-  public MoneroSendConfig setCanSplit(Boolean canSplit) {
+  public MoneroSendRequest setCanSplit(Boolean canSplit) {
     this.canSplit = canSplit;
     return this;
   }
@@ -156,7 +156,7 @@ public class MoneroSendConfig {
     return doNotRelay;
   }
   
-  public MoneroSendConfig setDoNotRelay(Boolean doNotRelay) {
+  public MoneroSendRequest setDoNotRelay(Boolean doNotRelay) {
     this.doNotRelay = doNotRelay;
     return this;
   }
@@ -165,7 +165,7 @@ public class MoneroSendConfig {
     return note;
   }
   
-  public MoneroSendConfig setNote(String note) {
+  public MoneroSendRequest setNote(String note) {
     this.note = note;
     return this;
   }
@@ -174,7 +174,7 @@ public class MoneroSendConfig {
     return recipientName;
   }
   
-  public MoneroSendConfig setRecipientName(String recipientName) {
+  public MoneroSendRequest setRecipientName(String recipientName) {
     this.recipientName = recipientName;
     return this;
   }
@@ -183,7 +183,7 @@ public class MoneroSendConfig {
     return belowAmount;
   }
   
-  public MoneroSendConfig setBelowAmount(BigInteger belowAmount) {
+  public MoneroSendRequest setBelowAmount(BigInteger belowAmount) {
     this.belowAmount = belowAmount;
     return this;
   }
@@ -192,7 +192,7 @@ public class MoneroSendConfig {
     return sweepEachSubaddress;
   }
   
-  public MoneroSendConfig setSweepEachSubaddress(Boolean sweepEachSubaddress) {
+  public MoneroSendRequest setSweepEachSubaddress(Boolean sweepEachSubaddress) {
     this.sweepEachSubaddress = sweepEachSubaddress;
     return this;
   }
@@ -201,7 +201,7 @@ public class MoneroSendConfig {
     return keyImage;
   }
   
-  public MoneroSendConfig setKeyImage(String keyImage) {
+  public MoneroSendRequest setKeyImage(String keyImage) {
     this.keyImage = keyImage;
     return this;
   }
@@ -234,7 +234,7 @@ public class MoneroSendConfig {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    MoneroSendConfig other = (MoneroSendConfig) obj;
+    MoneroSendRequest other = (MoneroSendRequest) obj;
     if (accountIndex == null) {
       if (other.accountIndex != null) return false;
     } else if (!accountIndex.equals(other.accountIndex)) return false;

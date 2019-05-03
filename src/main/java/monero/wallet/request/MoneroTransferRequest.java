@@ -1,4 +1,4 @@
-package monero.wallet.config;
+package monero.wallet.request;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import monero.wallet.model.MoneroTxWallet;
 /**
  * Filters transfers that don't meet initialized filter criteria.
  */
-public class MoneroTransferFilter extends MoneroTransfer implements Filter<MoneroTransfer> {
+public class MoneroTransferRequest extends MoneroTransfer implements Filter<MoneroTransfer> {
 
   private Boolean isIncoming;
   private String address;
@@ -24,13 +24,13 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
   private List<Integer> subaddressIndices;
   private List<MoneroDestination> destinations;
   private Boolean hasDestinations;
-  private MoneroTxFilter txFilter;
+  private MoneroTxRequest txRequest;
 
   public Boolean getIsIncoming() {
     return isIncoming;
   }
 
-  public MoneroTransferFilter setIsIncoming(Boolean isIncoming) {
+  public MoneroTransferRequest setIsIncoming(Boolean isIncoming) {
     this.isIncoming = isIncoming;
     return this;
   }
@@ -39,7 +39,7 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
     return isIncoming == null ? null : !isIncoming;
   }
   
-  public MoneroTransferFilter setIsOutgoing(Boolean isOutgoing) {
+  public MoneroTransferRequest setIsOutgoing(Boolean isOutgoing) {
     isIncoming = isOutgoing == null ? null : !isOutgoing;
     return this;
   }
@@ -48,7 +48,7 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
     return address;
   }
 
-  public MoneroTransferFilter setAddress(String address) {
+  public MoneroTransferRequest setAddress(String address) {
     this.address = address;
     return this;
   }
@@ -57,12 +57,12 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
     return addresses;
   }
 
-  public MoneroTransferFilter setAddresses(List<String> addresses) {
+  public MoneroTransferRequest setAddresses(List<String> addresses) {
     this.addresses = addresses;
     return this;
   }
   
-  public MoneroTransferFilter setAddresses(String... addresses) {
+  public MoneroTransferRequest setAddresses(String... addresses) {
     this.addresses = GenUtils.arrayToList(addresses);
     return this;
   }
@@ -71,7 +71,7 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
     return subaddressIndex;
   }
 
-  public MoneroTransferFilter setSubaddressIndex(Integer subaddressIndex) {
+  public MoneroTransferRequest setSubaddressIndex(Integer subaddressIndex) {
     this.subaddressIndex = subaddressIndex;
     return this;
   }
@@ -80,12 +80,12 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
     return subaddressIndices;
   }
 
-  public MoneroTransferFilter setSubaddressIndices(List<Integer> subaddressIndices) {
+  public MoneroTransferRequest setSubaddressIndices(List<Integer> subaddressIndices) {
     this.subaddressIndices = subaddressIndices;
     return this;
   }
   
-  public MoneroTransferFilter setSubaddressIndices(Integer... subaddressIndices) {
+  public MoneroTransferRequest setSubaddressIndices(Integer... subaddressIndices) {
     this.subaddressIndices = GenUtils.arrayToList(subaddressIndices);
     return this;
   }
@@ -94,7 +94,7 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
     return destinations;
   }
 
-  public MoneroTransferFilter setDestinations(List<MoneroDestination> destinations) {
+  public MoneroTransferRequest setDestinations(List<MoneroDestination> destinations) {
     this.destinations = destinations;
     return this;
   }
@@ -103,17 +103,17 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
     return hasDestinations;
   }
 
-  public MoneroTransferFilter setHasDestinations(Boolean hasDestinations) {
+  public MoneroTransferRequest setHasDestinations(Boolean hasDestinations) {
     this.hasDestinations = hasDestinations;
     return this;
   }
 
-  public MoneroTxFilter getTxFilter() {
-    return txFilter;
+  public MoneroTxRequest getTxRequest() {
+    return txRequest;
   }
 
-  public MoneroTransferFilter setTxFilter(MoneroTxFilter txFilter) {
-    this.txFilter = txFilter;
+  public MoneroTransferRequest setTxRequest(MoneroTxRequest txRequest) {
+    this.txRequest = txRequest;
     return this;
   }
 
@@ -171,26 +171,26 @@ public class MoneroTransferFilter extends MoneroTransfer implements Filter<Moner
     else throw new RuntimeException("Transfer must be MoneroIncomingTransfer or MoneroOutgoingTransfer");
     
     // filter with tx filter
-    if (this.getTxFilter() != null && !this.getTxFilter().meetsCriteria(transfer.getTx())) return false;    
+    if (this.getTxRequest() != null && !this.getTxRequest().meetsCriteria(transfer.getTx())) return false;    
     return true;
   }
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
 
   @Override
-  public MoneroTransferFilter setTx(MoneroTxWallet tx) {
+  public MoneroTransferRequest setTx(MoneroTxWallet tx) {
     super.setTx(tx);
     return this;
   }
 
   @Override
-  public MoneroTransferFilter setAmount(BigInteger amount) {
+  public MoneroTransferRequest setAmount(BigInteger amount) {
     super.setAmount(amount);
     return this;
   }
 
   @Override
-  public MoneroTransferFilter setAccountIndex(Integer accountIndex) {
+  public MoneroTransferRequest setAccountIndex(Integer accountIndex) {
     super.setAccountIndex(accountIndex);
     return this;
   }
