@@ -1619,7 +1619,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           if (header == null) header = new MoneroBlockHeader();
           header.setTimestamp(((BigInteger) val).longValue());
         } else {
-          tx.setReceivedTimestamp(((BigInteger) val).longValue());
+          // timestamp of unconfirmed tx is current request time
         }
       }
       else if (key.equals("confirmations")) {
@@ -1678,7 +1678,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     // link block and tx
-    if (header != null) tx.setBlock(new MoneroBlock(header).setTxs(new ArrayList<MoneroTx>(Arrays.asList(tx))));
+    if (header != null) tx.setBlock(new MoneroBlock(header).setTxs(tx));
     
     // initialize final fields
     if (transfer != null) {

@@ -247,7 +247,7 @@ public class MoneroBlockHeader {
     StringBuilder sb = new StringBuilder();
     sb.append(MoneroUtils.kvLine("Id", getId(), indent));
     sb.append(MoneroUtils.kvLine("Height", getHeight(), indent));
-    sb.append(MoneroUtils.kvLine("Timestamp", getNumTxs(), indent));
+    sb.append(MoneroUtils.kvLine("Timestamp", getTimestamp(), indent));
     sb.append(MoneroUtils.kvLine("Size", getSize(), indent));
     sb.append(MoneroUtils.kvLine("Weight", getWeight(), indent));
     sb.append(MoneroUtils.kvLine("Depth", getDepth(), indent));
