@@ -12,7 +12,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1120,9 +1119,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     BigInteger walletUnlockedBalance = wallet.getUnlockedBalance();
     List<MoneroAccount> accounts = wallet.getAccounts(true);  // includes subaddresses
     List<MoneroTxWallet> txs = wallet.getTxs();
-    
-    // sort txs
-    Collections.sort(txs, new MoneroTxComparator());
     
     // test wallet balance
     TestUtils.testUnsignedBigInteger(walletBalance);
@@ -2258,7 +2254,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     testSendAndUpdateTxs(sendConfig);
   }
   
-  // Can update a locked tx sent from/to different accounts as blocks are added to the chain
+  // Can update locked, split txs sent from/to different accounts as blocks are added to the chain
   @Test
   public void testUpdateLockedDifferentAccountsSplit() {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS && !LITE_MODE);
@@ -2641,20 +2637,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   }
   
   /**
-   * Compares two MoneroTxs by their timestamp.
-   */
-  private class MoneroTxComparator implements Comparator<MoneroTx> {
-    @Override
-    public int compare(MoneroTx tx1, MoneroTx tx2) {
-      long timestampA = tx1.getIsConfirmed() ? tx1.getBlock().getTimestamp() : tx1.getReceivedTimestamp();
-      long timestampB = tx2.getIsConfirmed() ? tx2.getBlock().getTimestamp() : tx2.getReceivedTimestamp();
-      if (timestampA < timestampB) return -1;
-      if (timestampA > timestampB) return 1;
-      return 0;
-    }
-  }
-  
-  /**
    * Fetchs and tests transactions according to the given config.
    * 
    * TODO: convert config to filter and ensure each tx passes filter, same with testGetTransfer and getAndTestVouts
@@ -2836,7 +2818,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       
       // these should be initialized unless a response from sending
       if (!Boolean.TRUE.equals(ctx.isSendResponse)) {
-        assertTrue(tx.getReceivedTimestamp() > 0);
+        //assertTrue(tx.getReceivedTimestamp() > 0);  // TODO: re-enable when received timestamp returned in wallet rpc
         assertTrue(tx.getNumSuggestedConfirmations() > 0);
       }
     } else {
@@ -2853,7 +2835,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // test failed  // TODO: what else to test associated with failed
     if (tx.getIsFailed()) {
       assertTrue(tx.getOutgoingTransfer() instanceof MoneroTransfer);
-      assertTrue(tx.getReceivedTimestamp() > 0);
+      //assertTrue(tx.getReceivedTimestamp() > 0);  // TODO: re-enable when received timestamp returned in wallet rpc
     } else {
       if (tx.getIsRelayed()) assertEquals(tx.getIsDoubleSpend(), false);
       else {
@@ -3010,8 +2992,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     if (tx.getPaymentId() != null) assertNotEquals(MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId()); // default payment id converted to null
     if (tx.getNote() != null) assertTrue(tx.getNote().length() > 0);  // empty notes converted to undefined
     assertTrue(tx.getUnlockTime() >= 0);
-    assertNull(tx.getSize());   // TODO (monero-wallet-rpc): add tx_size to get_transfers and get_transfer_by_txid
+    assertNull(tx.getSize());   // TODO monero-wallet-rpc: add tx_size to get_transfers and get_transfer_by_txid
     assertNull(tx.getWeight());
+    assertNull(tx.getReceivedTimestamp());  // TODO monero-wallet-rpc: return received timestamp (asked to file issue if wanted)
   }
 
   private static void testTxWalletCopy(MoneroTxWallet tx, TestContext ctx) {

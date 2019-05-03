@@ -8,9 +8,9 @@ WARNING: key proof indicates no funds received despite transfer (txid=76983ebf1d
 add all_accounts to incoming_transfers, would be huge time saver
 Marking output 18666(<9cd46fd977f2d8f6112cc87592677cbd76801b318c6e607dd31b9a25dd7d9530>) as unspent, it was marked as spent
 cannot send: -4: Known ring does not include the spent output: 1255232 (this fixed itself, not sure how)
+file issue to get received timestamp for unconfirmed wallet txs if wanted
 
 14.0.3 RELEASE
-report difference in timestamps for txs in pool - It's the timestamp of the block hte tx is in. No block = now.  It can be made into a received timestamp.  File bug if wanted.
 investigate seg fault 11 in testGetReserveProofAccount() (with no unlocked balance??? happened on fresh wallet, but send had run), wallet rpc get_reserve_proof
 wallet.getVouts() -> wallet.getOutputs()
 MoneroSendConfig -> MoneroSendRequest
@@ -21,7 +21,7 @@ update readme: document creation of wallet files for running tests
 generate javadoc
 release
 
-investigate seg fault 11 in testGetReserveProofAccount()
+expose getBlocksByRangeSingle() to avoid header fetch overhead?
 clearer dynamic library readme instructions, verify other platforms
 testGetNewKeyImagesFromLastImport
 refactor getAccounts(Boolean includeSubaddresses, Boolean isUsed, String tag, Boolean, Integer accountIdx, List<Integer> subaddressIndices, [includeBalaneDetails?]) that's filtering with most known options (in internal wallet rpc)
