@@ -8,6 +8,7 @@ add all_accounts to incoming_transfers, would be huge time saver
 Marking output 18666(<9cd46fd977f2d8f6112cc87592677cbd76801b318c6e607dd31b9a25dd7d9530>) as unspent, it was marked as spent
 cannot send: -4: Known ring does not include the spent output: 1255232 (this fixed itself, not sure how)
 file issue to get received timestamp for unconfirmed wallet txs if wanted
+incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
 
 14.0.3 RELEASE
 investigate seg fault 11 in testGetReserveProofAccount() (with no unlocked balance??? happened on fresh wallet, but send had run), wallet rpc get_reserve_proof
@@ -19,6 +20,7 @@ update readme: document creation of wallet files for running tests
 generate javadoc
 release
 
+untangle and re-file: incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
 expose getBlocksByRangeSingle() to avoid header fetch overhead?
 clearer dynamic library readme instructions, verify other platforms
 testGetNewKeyImagesFromLastImport
@@ -49,7 +51,6 @@ pruning
 MONERO-RPC
 HIGH
 balances are wrong after sends (https://github.com/monero-project/monero/issues/4500)
-incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
 
 MEDIUM
 typos on monero-wallet-rpc tx proofs, wrong output on check_reserve_proof
@@ -62,7 +63,6 @@ get transactions per block
 LOW
 get_reserve_proof document default account 0
 check_reserve_proof documentation spent and total not documented as outputs
-outgoing transactions src subaddress always 0, not actual src subaddresses
 -1: Failed to open wallet if wallet is already open; better code and message
 don't return incorrect balance information if multisig, instead return error
 get_transfers defaults [0, 0], incoming_transfers defaults [0, all], get_bulk_payments defaults [all, all] (especially get_transfers should default to all else call to get_address is required first)
