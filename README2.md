@@ -1,5 +1,7 @@
 # Monero Java
 
+** Compatible with Monero Core version 14.0.3 **
+
 ## Introduction
 
 This project provides Java interfaces for a Monero wallet and daemon.

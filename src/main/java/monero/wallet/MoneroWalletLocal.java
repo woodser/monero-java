@@ -6,10 +6,6 @@ import java.util.List;
 
 import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroKeyImage;
-import monero.wallet.config.MoneroSendConfig;
-import monero.wallet.config.MoneroTransferFilter;
-import monero.wallet.config.MoneroTxFilter;
-import monero.wallet.config.MoneroVoutFilter;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -23,6 +19,10 @@ import monero.wallet.model.MoneroSyncProgressListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.request.MoneroSendRequest;
+import monero.wallet.request.MoneroTransferRequest;
+import monero.wallet.request.MoneroTxRequest;
+import monero.wallet.request.MoneroOutputRequest;
 
 /**
  * Implements a Monero wallet using client-side crypto and a given daemon.
@@ -166,17 +166,17 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroTxWallet> getTxs(MoneroTxFilter filter) {
+  public List<MoneroTxWallet> getTxs(MoneroTxRequest request) {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public List<MoneroTransfer> getTransfers(MoneroTransferFilter filter) {
+  public List<MoneroTransfer> getTransfers(MoneroTransferRequest request) {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public List<MoneroOutputWallet> getVouts(MoneroVoutFilter filter) {
+  public List<MoneroOutputWallet> getOutputs(MoneroOutputRequest request) {
     throw new RuntimeException("Not implemented");
   }
 
@@ -196,17 +196,17 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   }
 
   @Override
-  public MoneroTxWallet send(MoneroSendConfig config) {
+  public MoneroTxWallet send(MoneroSendRequest request) {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public List<MoneroTxWallet> sendSplit(MoneroSendConfig config) {
+  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public List<MoneroTxWallet> sweepUnlocked(MoneroSendConfig config) {
+  public List<MoneroTxWallet> sweepUnlocked(MoneroSendRequest request) {
     throw new RuntimeException("Not implemented");
   }
 
@@ -216,7 +216,7 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   }
 
   @Override
-  public MoneroTxWallet sweepOutput(MoneroSendConfig config) {
+  public MoneroTxWallet sweepOutput(MoneroSendRequest request) {
     throw new RuntimeException("Not implemented");
   }
 
@@ -326,12 +326,12 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   }
 
   @Override
-  public String createPaymentUri(MoneroSendConfig sendConfig) {
+  public String createPaymentUri(MoneroSendRequest request) {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public MoneroSendConfig parsePaymentUri(String uri) {
+  public MoneroSendRequest parsePaymentUri(String uri) {
     throw new RuntimeException("Not implemented");
   }
 

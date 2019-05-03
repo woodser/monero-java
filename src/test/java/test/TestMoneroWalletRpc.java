@@ -23,9 +23,6 @@ import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc;
-import monero.wallet.config.MoneroTransferFilter;
-import monero.wallet.config.MoneroTxFilter;
-import monero.wallet.config.MoneroVoutFilter;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -35,6 +32,9 @@ import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.request.MoneroTransferRequest;
+import monero.wallet.request.MoneroTxRequest;
+import monero.wallet.request.MoneroOutputRequest;
 import utils.TestUtils;
 
 /**
@@ -121,29 +121,29 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     
     // compare transfer order to rpc
-    compareTransferOrder((List<Map<String, Object>>) result.get("in"), wallet.getTransfers(new MoneroTransferFilter().setIsIncoming(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(true))));
-    compareTransferOrder((List<Map<String, Object>>) result.get("out"), wallet.getTransfers(new MoneroTransferFilter().setIsOutgoing(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(true))));
-    compareTransferOrder((List<Map<String, Object>>) result.get("pool"), wallet.getTransfers(new MoneroTransferFilter().setIsIncoming(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(false))));
-    compareTransferOrder((List<Map<String, Object>>) result.get("pending"), wallet.getTransfers(new MoneroTransferFilter().setIsOutgoing(true).setTxFilter(new MoneroTxFilter().setIsConfirmed(false).setIsFailed(false))));
-    compareTransferOrder((List<Map<String, Object>>) result.get("failed"), wallet.getTransfers(new MoneroTransferFilter().setTxFilter(new MoneroTxFilter().setIsFailed(true))));
+    compareTransferOrder((List<Map<String, Object>>) result.get("in"), wallet.getTransfers(new MoneroTransferRequest().setIsIncoming(true).setTxRequest(new MoneroTxRequest().setIsConfirmed(true))));
+    compareTransferOrder((List<Map<String, Object>>) result.get("out"), wallet.getTransfers(new MoneroTransferRequest().setIsOutgoing(true).setTxRequest(new MoneroTxRequest().setIsConfirmed(true))));
+    compareTransferOrder((List<Map<String, Object>>) result.get("pool"), wallet.getTransfers(new MoneroTransferRequest().setIsIncoming(true).setTxRequest(new MoneroTxRequest().setIsConfirmed(false))));
+    compareTransferOrder((List<Map<String, Object>>) result.get("pending"), wallet.getTransfers(new MoneroTransferRequest().setIsOutgoing(true).setTxRequest(new MoneroTxRequest().setIsConfirmed(false).setIsFailed(false))));
+    compareTransferOrder((List<Map<String, Object>>) result.get("failed"), wallet.getTransfers(new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setIsFailed(true))));
     
-    // fetch vouts directly from rpc for comparison to library
+    // fetch outputs directly from rpc for comparison to library
     params.clear();
     params.put("transfer_type", "all");
     params.put("verbose", true);
     params.put("account_index", 0);
     resp = rpc.sendJsonRequest("incoming_transfers", params);
     result = (Map<String, Object>) resp.get("result");
-    List<Map<String, Object>> rpcVouts = (List<Map<String, Object>>) result.get("transfers");
+    List<Map<String, Object>> rpcOutputs = (List<Map<String, Object>>) result.get("transfers");
     
-    // compare vout order to rpc
-    List<MoneroOutputWallet> vouts = wallet.getVouts(new MoneroVoutFilter().setAccountIndex(0));
-    assertEquals(rpcVouts.size(), vouts.size());
-    for (int i = 0; i < vouts.size(); i++) {
-      assertEquals(rpcVouts.get(i).get("key_image"), vouts.get(i).getKeyImage().getHex());
-      Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) rpcVouts.get(i).get("subaddr_index");
-      assertEquals(rpcIndices.get("major").intValue(), (int) vouts.get(i).getAccountIndex());
-      assertEquals(rpcIndices.get("minor").intValue(), (int) vouts.get(i).getSubaddressIndex());
+    // compare output order to rpc
+    List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputRequest().setAccountIndex(0));
+    assertEquals(rpcOutputs.size(), outputs.size());
+    for (int i = 0; i < outputs.size(); i++) {
+      assertEquals(rpcOutputs.get(i).get("key_image"), outputs.get(i).getKeyImage().getHex());
+      Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) rpcOutputs.get(i).get("subaddr_index");
+      assertEquals(rpcIndices.get("major").intValue(), (int) outputs.get(i).getAccountIndex());
+      assertEquals(rpcIndices.get("minor").intValue(), (int) outputs.get(i).getSubaddressIndex());
     }
   }
 
@@ -465,18 +465,18 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testGetVouts() {
-    super.testGetVouts();
+  public void testGetOutputs() {
+    super.testGetOutputs();
   }
 
   @Override
-  public void testGetVoutsWithConfiguration() {
-    super.testGetVoutsWithConfiguration();
+  public void testGetOutputsWithConfiguration() {
+    super.testGetOutputsWithConfiguration();
   }
 
   @Override
-  public void testGetVoutsValidateInputs() {
-    super.testGetVoutsValidateInputs();
+  public void testGetOutputsValidateInputs() {
+    super.testGetOutputsValidateInputs();
   }
 
   @Override

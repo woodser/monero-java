@@ -27,10 +27,6 @@ import java.util.Collection;
 import java.util.List;
 
 import monero.daemon.model.MoneroKeyImage;
-import monero.wallet.config.MoneroSendConfig;
-import monero.wallet.config.MoneroTransferFilter;
-import monero.wallet.config.MoneroTxFilter;
-import monero.wallet.config.MoneroVoutFilter;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -45,6 +41,10 @@ import monero.wallet.model.MoneroSyncProgressListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.request.MoneroSendRequest;
+import monero.wallet.request.MoneroTransferRequest;
+import monero.wallet.request.MoneroTxRequest;
+import monero.wallet.request.MoneroOutputRequest;
 
 /**
  * Monero wallet interface.
@@ -385,15 +385,15 @@ public interface MoneroWallet {
    * Get wallet transactions.  Wallet transactions contain one or more
    * transfers that are either incoming or outgoing to the wallet.
    * 
-   * Query results can be filtered by passing in a transaction filter.
-   * Transactions must meet every criteria defined in the filter in order to be
-   * returned.  All filtering is optional and no filtering is applied when not
-   * defined.
+   * Query results can be filtered by passing in a transaction request.
+   * Transactions must meet every criteria defined in the request in order to
+   * be returned.  All filtering is optional and no filtering is applied when
+   * not defined.
    * 
-   * @param filter filters query results (optional)
-   * @return wallet transactions per the filter
+   * @param request filters query results (optional)
+   * @return wallet transactions per the request
    */
-  public List<MoneroTxWallet> getTxs(MoneroTxFilter filter);
+  public List<MoneroTxWallet> getTxs(MoneroTxRequest request);
   
   /**
    * Get all incoming and outgoing transfers to and from this wallet.  An
@@ -442,37 +442,38 @@ public interface MoneroWallet {
    * a subaddress within an account.  Transfers belong to transactions which
    * are stored on the blockchain.
    * 
-   * Query results can be filtered by passing in a transfer filter.  Transfers
-   * must meet every criteria defined in the filter in order to be returned.
-   * All filtering is optional and no filtering is applied when not defined.
+   * Query results can be filtered by passing in a MoneroTransferRequest.
+   * Transfers must meet every criteria defined in the request in order to be
+   * returned.  All filtering is optional and no filtering is applied when not
+   * defined.
    * 
-   * @param filter filters query results (optional)
-   * @return wallet transfers per the filter
+   * @param request filters query results (optional)
+   * @return wallet transfers per the request
    */
-  public List<MoneroTransfer> getTransfers(MoneroTransferFilter filter);
+  public List<MoneroTransfer> getTransfers(MoneroTransferRequest request);
   
   /**
-   * Get all wallet vouts.  A wallet vout is an output created from a previous
-   * transaction that the wallet can spend one time.  Vouts belong to
-   * transactions which are stored on the blockchain.
+   * Get outputs created from previous transactions that belong to the wallet
+   * (i.e. that the wallet can spend one time).  Outputs are part of
+   * transactions which are stored in blocks on the blockchain.
    * 
-   * @return all wallet vouts
+   * @return List<MoneroOutputWallet> are all wallet outputs
    */
-  public List<MoneroOutputWallet> getVouts();
+  public List<MoneroOutputWallet> getOutputs();
   
   /**
-   * Get wallet vouts.  A wallet vout is an output created from a previous
-   * transaction that the wallet can spend one time.  Vouts belong to
-   * transactions which are stored on the blockchain.
+   * Get outputs created from previous transactions that belong to the wallet
+   * (i.e. that the wallet can spend one time).  Outputs are part of
+   * transactions which are stored in blocks on the blockchain.
    * 
-   * Query results can be filtered by passing in a vout filter.  Vouts must
-   * meet every criteria defined in the filter in order to be returned.  All
+   * Results can be configured by passing a MoneroOutputRequest.  Outputs must
+   * meet every criteria defined in the request in order to be returned.  All
    * filtering is optional and no filtering is applied when not defined.
    * 
-   * @param filter filters query results (optional)
-   * @return wallet vouts per the filter
+   * @param request specifies request options (optional)
+   * @return List<MoneroOutputWallet> are wallet outputs per the request
    */
-  public List<MoneroOutputWallet> getVouts(MoneroVoutFilter filter);
+  public List<MoneroOutputWallet> getOutputs(MoneroOutputRequest request);
   
   /**
    * Get all signed key images.
@@ -500,10 +501,10 @@ public interface MoneroWallet {
    * Create and relay (depending on configuration) a transaction which
    * transfers funds from this wallet to one or more destination addresses.
    * 
-   * @param config configures the transaction
+   * @param request configures the transaction
    * @return the resulting transaction
    */
-  public MoneroTxWallet send(MoneroSendConfig config);
+  public MoneroTxWallet send(MoneroSendRequest request);
   
   /**
    * Create and relay a transaction which transfers funds from this wallet to
@@ -519,10 +520,10 @@ public interface MoneroWallet {
    * Create and relay (depending on configuration) one or more transactions
    * which transfer funds from this wallet to one or more destination.
    * 
-   * @param config configures the transactions
+   * @param request configures the transactions
    * @return the resulting transactions
    */
-  public List<MoneroTxWallet> sendSplit(MoneroSendConfig config);
+  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request);
   
   /**
    * Create and relay one or more transactions which transfer funds from this
@@ -564,10 +565,10 @@ public interface MoneroWallet {
   /**
    * Sweep unlocked funds.
    * 
-   * @param config is the sweep configuration
+   * @param request is the sweep configuration
    * @return the resulting transactions
    */
-  public List<MoneroTxWallet> sweepUnlocked(MoneroSendConfig config);
+  public List<MoneroTxWallet> sweepUnlocked(MoneroSendRequest request);
   
   /**
    * Sweep all unmixable dust outputs back to the wallet to make them easier to spend and mix.
@@ -587,10 +588,10 @@ public interface MoneroWallet {
   /**
    * Sweep an output with a given key image.
    * 
-   * @param config configures the sweep transaction
+   * @param request configures the sweep transaction
    * @return the resulting transaction from sweeping an output 
    */
-  public MoneroTxWallet sweepOutput(MoneroSendConfig config);
+  public MoneroTxWallet sweepOutput(MoneroSendRequest request);
   
   /**
    * Sweep an output with a given key image.
@@ -845,10 +846,10 @@ public interface MoneroWallet {
   /**
    * Creates a payment URI from a send configuration.
    * 
-   * @param sendConfig specifies configuration for a potential tx
+   * @param request specifies configuration for a potential tx
    * @return is the payment uri
    */
-  public String createPaymentUri(MoneroSendConfig sendConfig);
+  public String createPaymentUri(MoneroSendRequest request);
   
   /**
    * Parses a payment URI to a send configuration.
@@ -856,7 +857,7 @@ public interface MoneroWallet {
    * @param uri is the payment uri to parse
    * @return the send configuration parsed from the uri
    */
-  public MoneroSendConfig parsePaymentUri(String uri);
+  public MoneroSendRequest parsePaymentUri(String uri);
   
   /**
    * Export all outputs in hex format.

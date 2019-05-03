@@ -50,7 +50,7 @@ import monero.daemon.model.MoneroTxPoolStats;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroException;
 import monero.wallet.MoneroWallet;
-import monero.wallet.config.MoneroSendConfig;
+import monero.wallet.request.MoneroSendRequest;
 import utils.TestUtils;
 
 /**
@@ -1605,10 +1605,10 @@ public class TestMoneroDaemonRpc {
   }
   
   private static MoneroTx getUnrelayedTx(MoneroWallet wallet, Integer accountIdx) {
-    MoneroSendConfig sendConfig = new MoneroSendConfig(wallet.getPrimaryAddress(), TestUtils.MAX_FEE); 
-    sendConfig.setDoNotRelay(true);
-    sendConfig.setAccountIndex(accountIdx);
-    MoneroTx tx = wallet.send(sendConfig);
+    MoneroSendRequest req = new MoneroSendRequest(wallet.getPrimaryAddress(), TestUtils.MAX_FEE); 
+    req.setDoNotRelay(true);
+    req.setAccountIndex(accountIdx);
+    MoneroTx tx = wallet.send(req);
     assertFalse(tx.getFullHex().isEmpty());
     assertEquals(tx.getDoNotRelay(), true);
     return tx;
