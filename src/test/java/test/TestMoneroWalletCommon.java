@@ -47,10 +47,10 @@ import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.request.MoneroOutputRequest;
 import monero.wallet.request.MoneroSendRequest;
 import monero.wallet.request.MoneroTransferRequest;
 import monero.wallet.request.MoneroTxRequest;
-import monero.wallet.request.MoneroOutputRequest;
 import utils.TestUtils;
 
 /**
@@ -65,7 +65,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   protected static final boolean TEST_NON_RELAYS = true;
   protected static final boolean TEST_RELAYS = true;
   protected static final boolean TEST_NOTIFICATIONS = false;
-  protected static final boolean TEST_RESETS = false;
+  protected static final boolean TEST_RESETS = true;
   private static final int MAX_TX_PROOFS = 25;   // maximum number of transactions to check for each proof, undefined to check all
   private static final int SEND_MAX_DIFF = 60;
   private static final int SEND_DIVISOR = 2;
@@ -2441,25 +2441,25 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // collect subaddresses with balance and unlocked balance
     List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
-    List<MoneroSubaddress> balanceSubaddresses = new ArrayList<MoneroSubaddress>();
-    List<MoneroSubaddress> unlockedSubaddresses = new ArrayList<MoneroSubaddress>();
+    List<MoneroSubaddress> subaddressesBalance = new ArrayList<MoneroSubaddress>();
+    List<MoneroSubaddress> subaddressesUnlocked = new ArrayList<MoneroSubaddress>();
     for (MoneroAccount account : wallet.getAccounts(true)) {
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         subaddresses.add(subaddress);
-        if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0) balanceSubaddresses.add(subaddress);
-        if (subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) unlockedSubaddresses.add(subaddress);
+        if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0) subaddressesBalance.add(subaddress);
+        if (subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) subaddressesUnlocked.add(subaddress);
       }
     }
     
     // test requires at least one more subaddresses than the number being swept to verify it does not change
-    assertTrue("Test requires balance in at least " + (NUM_SUBADDRESSES_TO_SWEEP + 1) + " subaddresses; run send-to-multiple tests", balanceSubaddresses.size() >= NUM_SUBADDRESSES_TO_SWEEP + 1);
-    assertTrue("Wallet is waiting on unlocked funds", unlockedSubaddresses.size() >= NUM_SUBADDRESSES_TO_SWEEP + 1);
+    assertTrue("Test requires balance in at least " + (NUM_SUBADDRESSES_TO_SWEEP + 1) + " subaddresses; run send-to-multiple tests", subaddressesBalance.size() >= NUM_SUBADDRESSES_TO_SWEEP + 1);
+    assertTrue("Wallet is waiting on unlocked funds", subaddressesUnlocked.size() >= NUM_SUBADDRESSES_TO_SWEEP + 1);
     
     // sweep from first unlocked subaddresses
     for (int i = 0; i < NUM_SUBADDRESSES_TO_SWEEP; i++) {
       
       // sweep unlocked account
-      MoneroSubaddress unlockedSubaddress = unlockedSubaddresses.get(i);
+      MoneroSubaddress unlockedSubaddress = subaddressesUnlocked.get(i);
       List<MoneroTxWallet> txs = wallet.sweepSubaddress(unlockedSubaddress.getAccountIndex(), unlockedSubaddress.getIndex(), wallet.getPrimaryAddress());
       
       // test transactions
@@ -2496,7 +2496,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       // determine if subaddress was swept
       boolean swept = false;
       for (int j = 0; j < NUM_SUBADDRESSES_TO_SWEEP; j++) {
-        if (unlockedSubaddresses.get(j).getAccountIndex().equals(subaddressBefore.getAccountIndex()) && unlockedSubaddresses.get(j).getIndex().equals(subaddressBefore.getIndex())) {
+        if (subaddressesUnlocked.get(j).getAccountIndex().equals(subaddressBefore.getAccountIndex()) && subaddressesUnlocked.get(j).getIndex().equals(subaddressBefore.getIndex())) {
           swept = true;
           break;
         }
@@ -2520,22 +2520,22 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // collect accounts with sufficient balance and unlocked balance to cover the fee
     List<MoneroAccount> accounts = wallet.getAccounts(true);
-    List<MoneroAccount> balanceAccounts = new ArrayList<MoneroAccount>();
-    List<MoneroAccount> unlockedAccounts = new ArrayList<MoneroAccount>();
+    List<MoneroAccount> accountsBalance = new ArrayList<MoneroAccount>();
+    List<MoneroAccount> accountsUnlocked = new ArrayList<MoneroAccount>();
     for (MoneroAccount account : accounts) {
-      if (account.getBalance().compareTo(TestUtils.MAX_FEE) > 0) balanceAccounts.add(account);
-      if (account.getUnlockedBalance().compareTo(TestUtils.MAX_FEE) > 0) unlockedAccounts.add(account);
+      if (account.getBalance().compareTo(TestUtils.MAX_FEE) > 0) accountsBalance.add(account);
+      if (account.getUnlockedBalance().compareTo(TestUtils.MAX_FEE) > 0) accountsUnlocked.add(account);
     }
     
     // test requires at least one more accounts than the number being swept to verify it does not change
-    assertTrue("Test requires balance greater than the fee in at least " + (NUM_ACCOUNTS_TO_SWEEP + 1) + " accounts; run send-to-multiple tests", balanceAccounts.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
-    assertTrue("Wallet is waiting on unlocked funds", unlockedAccounts.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
+    assertTrue("Test requires balance greater than the fee in at least " + (NUM_ACCOUNTS_TO_SWEEP + 1) + " accounts; run send-to-multiple tests", accountsBalance.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
+    assertTrue("Wallet is waiting on unlocked funds", accountsUnlocked.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
     
     // sweep from first unlocked accounts
     for (int i = 0; i < NUM_ACCOUNTS_TO_SWEEP; i++) {
       
       // sweep unlocked account
-      MoneroAccount unlockedAccount = unlockedAccounts.get(i);
+      MoneroAccount unlockedAccount = accountsUnlocked.get(i);
       List<MoneroTxWallet> txs = wallet.sweepAccount(unlockedAccount.getIndex(), wallet.getPrimaryAddress());
       
       // test transactions
@@ -2566,7 +2566,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       // determine if account was swept
       boolean swept = false;
       for (int j = 0; j < NUM_ACCOUNTS_TO_SWEEP; j++) {
-        if (unlockedAccounts.get(j).getIndex().equals(accountBefore.getIndex())) {
+        if (accountsUnlocked.get(j).getIndex().equals(accountBefore.getIndex())) {
           swept = true;
           break;
         }
@@ -2583,18 +2583,24 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can sweep the whole wallet
   @Test
-  @Ignore // disabled so tests don't sweep the whole wallet
+  //@Ignore // disabled so tests don't sweep the whole wallet
   public void testSweepWallet() {
     org.junit.Assume.assumeTrue(TEST_RESETS);
     
     // sweep destination
     String destination = wallet.getPrimaryAddress();
     
-    // verify 2 accounts with unlocked balance
-    List<MoneroSubaddress> subaddressesBalance = getSubaddressesWithBalance();
-    List<MoneroSubaddress> subaddressesUnlockedBalance = getSubaddressesWithUnlockedBalance();
-    assertTrue("Test requires multiple accounts with a balance; run send to multiple first", subaddressesBalance.size() >= 2);
-    assertTrue("Wallet is waiting on unlocked funds", subaddressesUnlockedBalance.size() >= 2);
+    // verify 2 subaddresses with enough unlocked balance to cover the fee
+    List<MoneroSubaddress> subaddressesBalance = new ArrayList<MoneroSubaddress>();
+    List<MoneroSubaddress> subaddressesUnlocked = new ArrayList<MoneroSubaddress>();
+    for (MoneroAccount account : wallet.getAccounts(true)) {
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
+        if (subaddress.getBalance().compareTo(TestUtils.MAX_FEE) > 0) subaddressesBalance.add(subaddress);
+        if (subaddress.getUnlockedBalance().compareTo(TestUtils.MAX_FEE) > 0) subaddressesUnlocked.add(subaddress);
+      }
+    }
+    assertTrue("Test requires multiple accounts with a balance greater than the fee; run send to multiple first", subaddressesBalance.size() >= 2);
+    assertTrue("Wallet is waiting on unlocked funds", subaddressesUnlocked.size() >= 2);
     
     // sweep
     List<MoneroTxWallet> txs = wallet.sweepWallet(destination);
@@ -2609,10 +2615,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       testTxWallet(tx, ctx);
     }
     
-    // assert no unlocked funds across subaddresses
-    subaddressesUnlockedBalance = getSubaddressesWithUnlockedBalance();
-    System.out.println(subaddressesUnlockedBalance);
-    assertTrue("Wallet should have no unlocked funds after sweeping all", subaddressesUnlockedBalance.isEmpty());
+    // assert no unlocked funds
+    assertTrue("Wallet should have no unlocked funds after sweeping all", wallet.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) == 0);
   }
   
   // Can rescan the blockchain
@@ -2701,26 +2705,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         this.isSweepOutputResponse = ctx.isSweepOutputResponse;
       }
     }
-  }
-  
-  private List<MoneroSubaddress> getSubaddressesWithBalance() {
-    List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
-    for (MoneroAccount account : wallet.getAccounts(true)) {
-      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
-        if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0) subaddresses.add(subaddress);
-      }
-    }
-    return subaddresses;
-  }
-
-  private List<MoneroSubaddress> getSubaddressesWithUnlockedBalance() {
-    List<MoneroSubaddress> subaddresses = new ArrayList<MoneroSubaddress>();
-    for (MoneroAccount account : wallet.getAccounts(true)) {
-      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
-        if (subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) subaddresses.add(subaddress);
-      }
-    }
-    return subaddresses;
   }
   
   // ------------------------------ PRIVATE STATIC ----------------------------
