@@ -851,7 +851,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroTxWallet> sweepUnlocked(MoneroSendRequest request) {
+  public List<MoneroTxWallet> sweepAllUnlocked(MoneroSendRequest request) {
     
     // validate request
     assertNotNull("Must specify sweep request", request);

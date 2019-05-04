@@ -206,7 +206,7 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroTxWallet> sweepUnlocked(MoneroSendRequest request) {
+  public List<MoneroTxWallet> sweepAllUnlocked(MoneroSendRequest request) {
     throw new RuntimeException("Not implemented");
   }
 

@@ -536,23 +536,6 @@ public interface MoneroWallet {
   public List<MoneroTxWallet> sendSplit(String address, BigInteger sendAount);
   
   /**
-   * Sweep the wallet's unlocked funds to an address.
-   * 
-   * @param address is the address to sweep the wallet's funds to
-   * @return the resulting transactions
-   */
-  public List<MoneroTxWallet> sweepWallet(String address);
-
-  /**
-   * Sweep an acount's unlocked funds to an address.
-   * 
-   * @param accountIdx is the index of the account
-   * @param address is the address to sweep the account's funds to
-   * @return the resulting transactions
-   */
-  public List<MoneroTxWallet> sweepAccount(int accountIdx, String address);
-
-  /**
    * Sweep a subaddress's unlocked funds to an address.
    * 
    * @param accountIdx is the index of the account
@@ -561,17 +544,36 @@ public interface MoneroWallet {
    * @return the resulting transactions
    */
   public List<MoneroTxWallet> sweepSubaddress(int accountIdx, int subaddressIdx, String address);
+  
+  /**
+   * Sweep an acount's unlocked funds to an address.
+   * 
+   * @param accountIdx is the index of the account
+   * @param address is the address to sweep the account's funds to
+   * @return the resulting transactions
+   */
+  public List<MoneroTxWallet> sweepAccount(int accountIdx, String address);
+  
+  /**
+   * Sweep the wallet's unlocked funds to an address.
+   * 
+   * @param address is the address to sweep the wallet's funds to
+   * @return the resulting transactions
+   */
+  public List<MoneroTxWallet> sweepWallet(String address);
 
   /**
-   * Sweep unlocked funds.
+   * Sweep all unlocked funds according to the given request.
    * 
    * @param request is the sweep configuration
    * @return the resulting transactions
    */
-  public List<MoneroTxWallet> sweepUnlocked(MoneroSendRequest request);
+  public List<MoneroTxWallet> sweepAllUnlocked(MoneroSendRequest request);
   
   /**
    * Sweep all unmixable dust outputs back to the wallet to make them easier to spend and mix.
+   * 
+   * NOTE: Dust only exists pre RCT, so this method will return "no dust to sweep" on new wallets.
    * 
    * @return the resulting transactions from sweeping dust
    */

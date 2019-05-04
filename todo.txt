@@ -13,6 +13,7 @@ incoming transactions are missing when outgoing counterpart from same account (h
 14.0.3 RELEASE
 investigate seg fault 11 in testGetReserveProofAccount() (with no unlocked balance??? happened on fresh wallet, but send had run), wallet rpc get_reserve_proof
 getTxsByIds, getTxById, vs getBlockById()
+send tests should look for first account gretaer than fee
 update readme sample code
 test sweeps
 promote daemon.getAsManyBlocksAsPossible to daemon interface?
