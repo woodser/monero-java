@@ -2518,17 +2518,17 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     final int NUM_ACCOUNTS_TO_SWEEP = 1;
     
-    // collect accounts with balance and unlocked balance
+    // collect accounts with sufficient balance and unlocked balance to cover the fee
     List<MoneroAccount> accounts = wallet.getAccounts(true);
     List<MoneroAccount> balanceAccounts = new ArrayList<MoneroAccount>();
     List<MoneroAccount> unlockedAccounts = new ArrayList<MoneroAccount>();
     for (MoneroAccount account : accounts) {
-      if (account.getBalance().compareTo(BigInteger.valueOf(0)) > 0) balanceAccounts.add(account);
-      if (account.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) unlockedAccounts.add(account);
+      if (account.getBalance().compareTo(TestUtils.MAX_FEE) > 0) balanceAccounts.add(account);
+      if (account.getUnlockedBalance().compareTo(TestUtils.MAX_FEE) > 0) unlockedAccounts.add(account);
     }
     
     // test requires at least one more accounts than the number being swept to verify it does not change
-    assertTrue("Test requires balance in at least " + (NUM_ACCOUNTS_TO_SWEEP + 1) + " accounts; run send-to-multiple tests", balanceAccounts.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
+    assertTrue("Test requires balance greater than the fee in at least " + (NUM_ACCOUNTS_TO_SWEEP + 1) + " accounts; run send-to-multiple tests", balanceAccounts.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
     assertTrue("Wallet is waiting on unlocked funds", unlockedAccounts.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
     
     // sweep from first unlocked accounts
