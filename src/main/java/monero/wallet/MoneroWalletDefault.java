@@ -136,23 +136,23 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public List<MoneroTxWallet> sweepWallet(String address) {
-    return sweepUnlocked(new MoneroSendRequest(address));
+  public List<MoneroTxWallet> sweepSubaddress(int accountIdx, int subaddressIdx, String address) {
+    MoneroSendRequest request = new MoneroSendRequest(address);
+    request.setAccountIndex(accountIdx);
+    request.setSubaddressIndices(subaddressIdx);
+    return sweepAllUnlocked(request);
   }
   
   @Override
   public List<MoneroTxWallet> sweepAccount(int accountIdx, String address) {
     MoneroSendRequest request = new MoneroSendRequest(address);
     request.setAccountIndex(accountIdx);
-    return sweepUnlocked(request);
+    return sweepAllUnlocked(request);
   }
   
   @Override
-  public List<MoneroTxWallet> sweepSubaddress(int accountIdx, int subaddressIdx, String address) {
-    MoneroSendRequest request = new MoneroSendRequest(address);
-    request.setAccountIndex(accountIdx);
-    request.setSubaddressIndices(subaddressIdx);
-    return sweepUnlocked(request);
+  public List<MoneroTxWallet> sweepWallet(String address) {
+    return sweepAllUnlocked(new MoneroSendRequest(address));
   }
   
   @Override
