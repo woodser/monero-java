@@ -12,7 +12,6 @@ incoming transactions are missing when outgoing counterpart from same account (h
 
 14.0.3 RELEASE
 investigate seg fault 11 in testGetReserveProofAccount() (with no unlocked balance??? happened on fresh wallet, but send had run), wallet rpc get_reserve_proof
-getTxsByIds, getTxById, vs getBlockById()
 send tests should look for first account gretaer than fee
 update readme sample code
 promote daemon.getAsManyBlocksAsPossible to daemon interface?
@@ -42,6 +41,13 @@ test priority in common tests (only in sample code currently)
 api updates: setSubaddressIndices(...) and others, , getBalancesWallet, more convenient filtering, remove typing on vouts, etc
 first open then create wallet in TestUtils
 rename monero-java-rpc -> monero-java
+
+API IDEAS
+getTxsByIds, getTxById, vs getBlockById()
+getTxs(req, str, str[]) | getTx(str)
+getTxs(req), getTxsById(str|strs[]), getTxById(str)
+port getTxs(req, string[], getTxs(String)
+wallet.getTx(), getTxs() support many types (str, str[], req, obj) but they all get turned into req
 
 NEXT
 clean up todos
