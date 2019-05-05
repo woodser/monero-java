@@ -122,7 +122,7 @@ daemon.stopMining();
 
 ## API Documentation
 
-This library follows the wallet and daemon interfaces and models defined here: https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf.
+This library follows the wallet and daemon interfaces and models defined [here](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf).
 
 Javadoc is provided in the [doc](doc) folder (best viewed opening [doc/index.html](doc/index.html) in a browser).
 
@@ -132,10 +132,10 @@ Here is the source code to the main interfaces, implementations, and models:
 
 - [Monero daemon (MoneroDaemon.java)](src/main/java/monero/daemon/MoneroDaemon.java)
 - [Monero daemon rpc implementation (MoneroDaemonRpc.java)](src/main/java/monero/daemon/MoneroDaemon.java)
-- [Monero daemon model (src/main/java/monero/daemon/model)](src/main/java/monero/daemon/model)
-- [Monero wallet (src/main/java/monero/wallet/MoneroWallet.java)](src/main/java/monero/wallet/MoneroWallet.java)
-- [Monero wallet rpc implementation (src/main/java/model/wallet/MoneroWalletRpc.java)](src/main/java/model/wallet/MoneroWalletRpc.java)
-- [Monero wallet model (src/main/java/wallet/model)](src/main/java/wallet/model)
+- [Monero daemon models](src/main/java/monero/daemon/model)
+- [Monero wallet](src/main/java/monero/wallet/MoneroWallet.java)
+- [Monero wallet rpc implementation](src/main/java/monero/wallet/MoneroWalletRpc.java)
+- [Monero wallet models](src/main/java/monero/wallet/model)
 
 ## Monero RPC Setup
 
