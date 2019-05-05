@@ -15,6 +15,7 @@ investigate seg fault 11 in testGetReserveProofAccount() (with no unlocked balan
 send tests should look for first account gretaer than fee
 update readme sample code
 promote daemon.getAsManyBlocksAsPossible to daemon interface?
+better descriptions for request classes
 send tests send dust
 update readme: document creation of wallet files for running tests
 generate javadoc
