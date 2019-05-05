@@ -1,6 +1,6 @@
 # Monero Java
 
-** Compatible with Monero Core version 14.0.3 **
+**Compatible with Monero Core version 14.0.3**
 
 ## Introduction
 
@@ -122,7 +122,7 @@ daemon.stopMining();
 
 ## API Documentation
 
-This library follows the wallet and daemon interfaces and models defined here: https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf).
+This library follows the wallet and daemon interfaces and models defined here: https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf.
 
 Javadoc is provided in the [doc](doc) folder (best viewed opening [doc/index.html](doc/index.html) in a browser).
 
