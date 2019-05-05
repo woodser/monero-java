@@ -131,7 +131,7 @@ The main interfaces are [MoneroWallet.java](src/main/java/monero/wallet/MoneroWa
 Here is the source code to the main interfaces, implementations, and models:
 
 - [Monero daemon (MoneroDaemon.java)](src/main/java/monero/daemon/MoneroDaemon.java)
-- [Monero daemon rpc implementation](src/main/java/monero/daemon/MoneroDaemon.java)
+- [Monero daemon rpc implementation](src/main/java/monero/daemon/MoneroDaemonRpc.java)
 - [Monero daemon models](src/main/java/monero/daemon/model)
 - [Monero wallet (MoneroWallet.java)](src/main/java/monero/wallet/MoneroWallet.java)
 - [Monero wallet rpc implementation](src/main/java/monero/wallet/MoneroWalletRpc.java)
