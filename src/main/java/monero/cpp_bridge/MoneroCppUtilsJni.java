@@ -9,9 +9,6 @@ package monero.cpp_bridge;
 public class MoneroCppUtilsJni {
   
   static {
-    //System.out.println(System.getProperty("java.library.path"));
-    //System.load("/Users/Eric/git/monero-java-rpc/lib/monero-java.dylib");
-    //System.loadLibrary("boost_thread");
     System.loadLibrary("monero");
   }
 
