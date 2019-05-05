@@ -615,21 +615,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testSweepOutputs() {
-    super.testSweepOutputs();
-  }
-
-  @Override
-  public void testSweepDustNoRelay() {
-    super.testSweepDustNoRelay();
-  }
-
-  @Override
-  public void testSweepDust() {
-    super.testSweepDust();
-  }
-
-  @Override
   public void testUpdateLockedSameAccount() {
     super.testUpdateLockedSameAccount();
   }
@@ -648,6 +633,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testUpdateLockedDifferentAccountsSplit() {
     super.testUpdateLockedDifferentAccountsSplit();
   }
+  
+  @Override
+  public void testSweepOutputs() {
+    super.testSweepOutputs();
+  }
 
   @Override
   public void testSweepSubaddresses() {
@@ -660,13 +650,28 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testRescanBlockchain() {
-    super.testRescanBlockchain();
+  public void testSweepWalletByAccounts() {
+    super.testSweepWalletByAccounts();
+  }
+  
+  @Override
+  public void testSweepWalletBySubaddresses() {
+    super.testSweepWalletBySubaddresses();
   }
 
   @Override
-  public void testSweepWallet() {
-    super.testSweepWallet();
+  public void testSweepDustNoRelay() {
+    super.testSweepDustNoRelay();
+  }
+
+  @Override
+  public void testSweepDust() {
+    super.testSweepDust();
+  }
+  
+  @Override
+  public void testRescanBlockchain() {
+    super.testRescanBlockchain();
   }
 
   @Override
