@@ -136,6 +136,13 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
+  public MoneroTxWallet sweepOutput(String address, String keyImage, MoneroSendPriority priority) {
+    MoneroSendRequest request = new MoneroSendRequest(address, null, priority);
+    request.setKeyImage(keyImage);
+    return sweepOutput(request);
+  }
+  
+  @Override
   public List<MoneroTxWallet> sweepSubaddress(int accountIdx, int subaddressIdx, String address) {
     MoneroSendRequest request = new MoneroSendRequest(address);
     request.setAccountIndex(accountIdx);
@@ -158,13 +165,6 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   @Override
   public List<MoneroTxWallet> sweepDust() {
     return sweepDust(false);
-  }
-  
-  @Override
-  public MoneroTxWallet sweepOutput(String address, String keyImage, MoneroSendPriority priority) {
-    MoneroSendRequest request = new MoneroSendRequest(address, null, priority);
-    request.setKeyImage(keyImage);
-    return sweepOutput(request);
   }
   
   @Override

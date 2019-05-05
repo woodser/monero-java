@@ -65,7 +65,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   protected static final boolean TEST_NON_RELAYS = true;
   protected static final boolean TEST_RELAYS = true;
   protected static final boolean TEST_NOTIFICATIONS = false;
-  protected static final boolean TEST_RESETS = true;
+  protected static final boolean TEST_RESETS = false;
   private static final int MAX_TX_PROOFS = 25;   // maximum number of transactions to check for each proof, undefined to check all
   private static final int SEND_MAX_DIFF = 60;
   private static final int SEND_DIVISOR = 2;
@@ -2581,14 +2581,23 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
-  // Can sweep the whole wallet
+  // Can sweep the whole wallet by accounts
   @Test
-  //@Ignore // disabled so tests don't sweep the whole wallet
-  public void testSweepWallet() {
+  @Ignore // disabled so tests don't sweep the whole wallet
+  public void testSweepWalletByAccounts() {
     org.junit.Assume.assumeTrue(TEST_RESETS);
-    
-    // sweep destination
-    String destination = wallet.getPrimaryAddress();
+    testSweepWallet(null);
+  }
+  
+  // Can sweep the whole wallet by subaddresses
+  @Test
+  @Ignore // disabled so tests don't sweep the whole wallet
+  public void testSweepWalletBySubaddresses() {
+    org.junit.Assume.assumeTrue(TEST_RESETS);
+    testSweepWallet(true);
+  }
+  
+  private void testSweepWallet(Boolean sweepEachSubaddress) {
     
     // verify 2 subaddresses with enough unlocked balance to cover the fee
     List<MoneroSubaddress> subaddressesBalance = new ArrayList<MoneroSubaddress>();
@@ -2603,20 +2612,36 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertTrue("Wallet is waiting on unlocked funds", subaddressesUnlocked.size() >= 2);
     
     // sweep
-    List<MoneroTxWallet> txs = wallet.sweepWallet(destination);
+    String destination = wallet.getPrimaryAddress();
+    MoneroSendRequest req = new MoneroSendRequest(destination).setSweepEachSubaddress(sweepEachSubaddress);
+    List<MoneroTxWallet> txs = wallet.sweepAllUnlocked(req);
     assertTrue(txs.size() > 0);
     for (MoneroTxWallet tx : txs) {
       MoneroSendRequest request = new MoneroSendRequest(destination);
       request.setAccountIndex(tx.getOutgoingTransfer().getAccountIndex());
+      request.setSweepEachSubaddress(sweepEachSubaddress);
       TestContext ctx = new TestContext();
       ctx.wallet = wallet;
       ctx.sendRequest = request;
+      ctx.isSendResponse = true;
       ctx.isSweepResponse = true;
       testTxWallet(tx, ctx);
     }
     
-    // assert no unlocked funds
-    assertTrue("Wallet should have no unlocked funds after sweeping all", wallet.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) == 0);
+    // all unspent, unlocked outputs must be less than fee
+    List<MoneroOutputWallet> spendableOutputs = wallet.getOutputs(new MoneroOutputRequest().setIsSpent(false).setIsUnlocked(true));
+    for (MoneroOutputWallet spendableOutput : spendableOutputs) {
+      assertTrue("Unspent output should have been swept\n" + spendableOutput.toString(), spendableOutput.getAmount().compareTo(TestUtils.MAX_FEE) < 0);
+    }
+    
+    // all subaddress unlocked balances must be less than fee
+    subaddressesBalance.clear();
+    subaddressesUnlocked.clear();
+    for (MoneroAccount account : wallet.getAccounts(true)) {
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
+        assertTrue("No subaddress should have more unlocked than the fee", subaddress.getUnlockedBalance().compareTo(TestUtils.MAX_FEE) < 0);
+      }
+    }
   }
   
   // Can rescan the blockchain

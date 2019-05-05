@@ -536,6 +536,24 @@ public interface MoneroWallet {
   public List<MoneroTxWallet> sendSplit(String address, BigInteger sendAount);
   
   /**
+   * Sweep an output with a given key image.
+   * 
+   * @param request configures the sweep transaction
+   * @return the resulting transaction from sweeping an output 
+   */
+  public MoneroTxWallet sweepOutput(MoneroSendRequest request);
+  
+  /**
+   * Sweep an output with a given key image.
+   * 
+   * @param address is the destination address to send to
+   * @param keyImage is the key image hex of the output to sweep
+   * @param priority is the transaction priority (optional)
+   * @return the resulting transaction from sweeping an output 
+   */
+  public MoneroTxWallet sweepOutput(String address, String keyImage, MoneroSendPriority priority);
+  
+  /**
    * Sweep a subaddress's unlocked funds to an address.
    * 
    * @param accountIdx is the index of the account
@@ -586,24 +604,6 @@ public interface MoneroWallet {
    * @return the resulting transactions from sweeping dust
    */
   public List<MoneroTxWallet> sweepDust(boolean doNotRelay);
-  
-  /**
-   * Sweep an output with a given key image.
-   * 
-   * @param request configures the sweep transaction
-   * @return the resulting transaction from sweeping an output 
-   */
-  public MoneroTxWallet sweepOutput(MoneroSendRequest request);
-  
-  /**
-   * Sweep an output with a given key image.
-   * 
-   * @param address is the destination address to send to
-   * @param keyImage is the key image hex of the output to sweep
-   * @param priority is the transaction priority (optional)
-   * @return the resulting transaction from sweeping an output 
-   */
-  public MoneroTxWallet sweepOutput(String address, String keyImage, MoneroSendPriority priority);
   
   /**
    * Relay a transaction previously created without relaying.
