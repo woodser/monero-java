@@ -62,7 +62,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // test constants
   protected static final boolean LITE_MODE = false;
-  protected static final boolean TEST_NON_RELAYS = true;
+  protected static final boolean TEST_NON_RELAYS = false;
   protected static final boolean TEST_RELAYS = true;
   protected static final boolean TEST_NOTIFICATIONS = false;
   protected static final boolean TEST_RESETS = false;
@@ -1956,9 +1956,13 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       }
       
       // relay txs
-      List<String> txMetadatas = new ArrayList<String>();
-      for (MoneroTxWallet tx : txs) txMetadatas.add(tx.getMetadata());
-      List<String> txIds = wallet.relayTxs(txMetadatas);
+      List<String> txIds = null;
+      if (!Boolean.TRUE.equals(request.getCanSplit())) txIds = Arrays.asList(wallet.relayTx(txs.get(0).getMetadata())); // test relayTx() with single transaction
+      else {
+        List<String> txMetadatas = new ArrayList<String>();
+        for (MoneroTxWallet tx : txs) txMetadatas.add(tx.getMetadata());
+        txIds = wallet.relayTxs(txMetadatas); // test relayTxs() with potentially multiple transactions
+      }
       for (String txId : txIds) assertEquals(64, txId.length());
       
       // fetch txs for testing
