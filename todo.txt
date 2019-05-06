@@ -9,6 +9,7 @@ Marking output 18666(<9cd46fd977f2d8f6112cc87592677cbd76801b318c6e607dd31b9a25dd
 cannot send: -4: Known ring does not include the spent output: 1255232 (this fixed itself, not sure how)
 file issue to get received timestamp for unconfirmed wallet txs if wanted
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
+wallet rpc `open_wallet` spends a lot of time generating ssl certificates and Trying to decrypt cache data when wallet is already open, can't just skip check?
 
 14.0.3 RELEASE
 investigate seg fault 11 in testGetReserveProofAccount() (with no unlocked balance??? happened on fresh wallet, but send had run), wallet rpc get_reserve_proof
