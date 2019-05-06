@@ -14,13 +14,13 @@ No message store file found: /Applications/190322-monero-master//test_wallet_1.m
 
 14.0.3 RELEASE
 investigate seg fault 11 in testGetReserveProofAccount() (with no unlocked balance??? happened on fresh wallet, but send had run), wallet rpc get_reserve_proof
-send tests should look for first account gretaer than fee
 promote daemon.getAsManyBlocksAsPossible to daemon interface?
 send tests send dust
 update readme: document creation of wallet files for running tests
 generate javadoc
 release
 
+send tests should look for first account greater than fee
 getUnrelayedTx() auto finds account idx if not given, would lessen -37s
 add warning in PrintBalances.java if balance don't add up for any reason
 untangle and re-file: incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
