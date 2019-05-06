@@ -9,7 +9,7 @@ import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroSendPriority;
 
 /**
- * Common configuration for sending, sweeping, and creation of payment URIs.
+ * Configures a request to send/sweep funds or create a payment URI.
  * 
  * TODO: allow setAddress(), setAmount() for default destination?
  */

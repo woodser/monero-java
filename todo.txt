@@ -10,12 +10,12 @@ cannot send: -4: Known ring does not include the spent output: 1255232 (this fix
 file issue to get received timestamp for unconfirmed wallet txs if wanted
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
 wallet rpc `open_wallet` spends a lot of time generating ssl certificates and Trying to decrypt cache data when wallet is already open, can't just skip check?
+No message store file found: /Applications/190322-monero-master//test_wallet_1.mms
 
 14.0.3 RELEASE
 investigate seg fault 11 in testGetReserveProofAccount() (with no unlocked balance??? happened on fresh wallet, but send had run), wallet rpc get_reserve_proof
 send tests should look for first account gretaer than fee
 promote daemon.getAsManyBlocksAsPossible to daemon interface?
-better descriptions for request classes
 send tests send dust
 update readme: document creation of wallet files for running tests
 generate javadoc

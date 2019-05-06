@@ -13,7 +13,9 @@ import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
 
 /**
- * Filters transfers that don't meet initialized filter criteria.
+ * Configures a request to retrieve transfers.
+ * 
+ * All transfers are returned except those that do not meet the criteria defined in this request.
  */
 public class MoneroTransferRequest extends MoneroTransfer implements Filter<MoneroTransfer> {
 

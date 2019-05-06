@@ -11,7 +11,10 @@ import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroTxWallet;
 
 /**
- * Filters outputs that don't match initialized filter criteria.
+ * Configures a request to retrieve wallet outputs (i.e. outputs that the wallet has or had the
+ * ability to spend).
+ * 
+ * All outputs are returned except those that do not meet the criteria defined in this request.
  */
 public class MoneroOutputRequest extends MoneroOutputWallet implements Filter<MoneroOutputWallet> {
 
