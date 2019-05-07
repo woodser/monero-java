@@ -13,7 +13,7 @@ wallet rpc `open_wallet` spends a lot of time generating ssl certificates and Tr
 No message store file found: /Applications/190322-monero-master//test_wallet_1.mms
 sometimes see non-zero spent amount in testCheckReserve()
 
-14.0.3 RELEASE
+14.1.0 RELEASE
 release
 
 "transfer" pulls from all subaddreses by default? no need to fetch subaddress indices then
