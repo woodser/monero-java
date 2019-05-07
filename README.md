@@ -159,7 +159,7 @@ Here is the source code to the main interfaces, implementations, and models:
 
 ## Running Tests
 
-1. Set up running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html).  See [Monero RPC Setup](#monero-rpc-setup).
+1. Set up running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html) with two test wallets named `test_wallet_1` and `test_wallet_2`.  The mnemonic phrase and public address of `test_wallet_1` must match TestUtils.TEST_MNEMONIC and TestUtils.TEST_ADDRESS, respectively.  Both wallets must be encrypted with a password which matches TestUtils.WALLET_RPC_PW ("supersecretpassword123").  See [Monero RPC Setup](#monero-rpc-setup).
 2. Clone the Java repository: `git clone --recurse-submodules https://github.com/monero-ecosystem/monero-java-rpc.git`
 3. Install project dependencies: `maven install`
 4. Configure the appropriate RPC endpoints and authentication by modifying `WALLET_RPC_CONFIG` and `DAEMON_RPC_CONFIG` in [src/test/main/test/TestUtils.java](src/test/main/TestUtils.java).
