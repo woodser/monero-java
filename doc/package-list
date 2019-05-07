@@ -1,8 +1,10 @@
 common.types
 common.utils
+monero.cpp_bridge
 monero.daemon
 monero.daemon.model
 monero.rpc
 monero.utils
 monero.wallet
 monero.wallet.model
+monero.wallet.request

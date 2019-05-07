@@ -117,7 +117,7 @@ public class MoneroUtils {
    * 
    * @param val1 is a value to reconcile
    * @param val2 is a value to reconcile
-   * @returns the reconciled value if reconcilable
+   * @return the reconciled value if reconcilable
    * @throws Exceptionif the values cannot be reconciled
    */
   public static <T> T reconcile(T val1, T val2) {
