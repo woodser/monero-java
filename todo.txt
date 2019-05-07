@@ -14,7 +14,6 @@ No message store file found: /Applications/190322-monero-master//test_wallet_1.m
 
 14.0.3 RELEASE
 update readme: document creation of wallet files for running tests
-generate javadoc
 release
 
 send tests should look for first account greater than fee

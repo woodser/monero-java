@@ -426,7 +426,7 @@ public interface MoneroDaemon {
    * Creates an output distribution.
    * 
    * @param amounts are amounts of outputs to make the distribution with
-   * @param cumulative specifies if the results should be cumulative (defaults to TODO)
+   * @param isCumulative specifies if the results should be cumulative (defaults to TODO)
    * @param startHeight is the start height lower bound inclusive (optional)
    * @param endHeight is the end height upper bound inclusive (optional)
    * @return output distribution entries meeting the parameters
