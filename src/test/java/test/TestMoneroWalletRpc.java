@@ -81,9 +81,9 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       // open test wallet 2
       wallet.openWallet(TestUtils.WALLET_RPC_NAME_2, TestUtils.WALLET_RPC_PW);
       
-      // assert wallet 2 is empty
+      // test fetching transactions
       List<MoneroTxWallet> txs = wallet.getTxs();
-      assertTrue(txs.size() == 0);
+      assertTrue(txs.size() >= 0);
       
       // open test wallet 1
       wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_RPC_PW);
@@ -612,6 +612,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Override
   public void testSendToMultipleSplit() {
     super.testSendToMultipleSplit();
+  }
+  
+  @Override
+  public void testSendDustToMultipleSplit() {
+    super.testSendDustToMultipleSplit();
   }
 
   @Override

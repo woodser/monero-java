@@ -62,7 +62,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // test constants
   protected static final boolean LITE_MODE = false;
-  protected static final boolean TEST_NON_RELAYS = false;
+  protected static final boolean TEST_NON_RELAYS = true;
   protected static final boolean TEST_RELAYS = true;
   protected static final boolean TEST_NOTIFICATIONS = false;
   protected static final boolean TEST_RESETS = false;
@@ -2016,18 +2016,30 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     testSendToMultiple(1, 15, true);
   }
   
+  // Can send dust to multiple addresses in split transactions
+  @Test
+  public void testSendDustToMultipleSplit() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
+    BigInteger dustAmt = daemon.getFeeEstimate().divide(BigInteger.valueOf(2));
+    testSendToMultiple(5, 3, true, dustAmt);
+  }
+  
   /**
    * Sends funds from the first unlocked account to multiple accounts and subaddresses.
    * 
    * @param numAccounts is the number of accounts to receive funds
    * @param numSubaddressesPerAccount is the number of subaddresses per account to receive funds
    * @param canSplit specifies if the operation can be split into multiple transactions
+   * @param sendAmountPerSubaddress is the amount to send to each subaddress (optional, computed if not given)
    */
-  private void testSendToMultiple(int numAccounts, int numSubaddressesPerAccount, boolean canSplit) {
+  private void testSendToMultiple(int numAccounts, int numSubaddressesPerAccount, boolean canSplit) { testSendToMultiple(numAccounts, numSubaddressesPerAccount, canSplit, null); }
+  private void testSendToMultiple(int numAccounts, int numSubaddressesPerAccount, boolean canSplit, BigInteger sendAmountPerSubaddress) {
     
-    // test constants
+    // compute the minimum account unlocked balance needed in order to fulfill the request
+    BigInteger minAccountAmount = null;
     int totalSubaddresses = numAccounts * numSubaddressesPerAccount;
-    BigInteger minAccountAmount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(totalSubaddresses)).multiply(BigInteger.valueOf(SEND_DIVISOR)).add(TestUtils.MAX_FEE); // account balance must be more than divisor * fee * numAddresses + fee so each destination amount is at least a fee's worth 
+    if (sendAmountPerSubaddress != null) minAccountAmount = BigInteger.valueOf(totalSubaddresses).multiply(sendAmountPerSubaddress.add(TestUtils.MAX_FEE)); // min account amount must cover the total amount being sent plus the tx fee = numAddresses * (amtPerSubaddress + fee)
+    else minAccountAmount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(totalSubaddresses)).multiply(BigInteger.valueOf(SEND_DIVISOR)).add(TestUtils.MAX_FEE); // account balance must be more than fee * numAddresses * divisor + fee so each destination amount is at least a fee's worth (so dust is not sent)
     
     // send funds from first account with sufficient unlocked funds
     MoneroAccount srcAccount = null;
@@ -2041,12 +2053,17 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     assertTrue("Wallet does not have enough balance; load '" + TestUtils.WALLET_RPC_NAME_1 + "' with XMR in order to test sending", hasBalance);
     assertNotNull("Wallet is waiting on unlocked funds", srcAccount);
-    
-    // get amount to send per address
     BigInteger balance = srcAccount.getBalance();
     BigInteger unlockedBalance = srcAccount.getUnlockedBalance();
-    BigInteger sendAmount = unlockedBalance.subtract(TestUtils.MAX_FEE).divide(BigInteger.valueOf(SEND_DIVISOR));
-    BigInteger sendAmountPerSubaddress = sendAmount.divide(BigInteger.valueOf(totalSubaddresses));
+    
+    // get amount to send total and per subaddress
+    BigInteger sendAmount = null;
+    if (sendAmountPerSubaddress == null) {
+      sendAmount = unlockedBalance.subtract(TestUtils.MAX_FEE).divide(BigInteger.valueOf(SEND_DIVISOR));
+      sendAmountPerSubaddress = sendAmount.divide(BigInteger.valueOf(totalSubaddresses));
+    } else {
+      sendAmount = sendAmountPerSubaddress.multiply(BigInteger.valueOf(totalSubaddresses));
+    }
     
     // create minimum number of accounts
     List<MoneroAccount> accounts = wallet.getAccounts();
@@ -2112,7 +2129,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // assert that outgoing amounts sum up to the amount sent within a small margin
     if (Math.abs(sendAmount.subtract(outgoingSum).longValue()) > SEND_MAX_DIFF) { // send amounts may be slightly different
-      throw new RuntimeException("Actual send amount is too different from requested send amount: " + sendAmount + " - " + outgoingSum + " = " + sendAmount.subtract(outgoingSum));
+      fail("Actual send amount is too different from requested send amount: " + sendAmount + " - " + outgoingSum + " = " + sendAmount.subtract(outgoingSum));
     }
   }
   
