@@ -20,7 +20,6 @@ send tests should look for first account greater than fee
 getUnrelayedTx() auto finds account idx if not given, would lessen -37s
 add warning in PrintBalances.java if balance don't add up for any reason
 untangle and re-file: incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
-expose getBlocksByRangeSingle() to avoid header fetch overhead?
 clearer dynamic library readme instructions, verify other platforms
 testGetNewKeyImagesFromLastImport
 refactor getAccounts(Boolean includeSubaddresses, Boolean isUsed, String tag, Boolean, Integer accountIdx, List<Integer> subaddressIndices, [includeBalaneDetails?]) that's filtering with most known options (in internal wallet rpc)
