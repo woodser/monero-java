@@ -290,56 +290,52 @@ public class TestMoneroDaemonRpc {
     assertTrue("No transactions found to test", txFound);
   }
   
-  // Can get blocks by range
+  // Can get blocks by range in a single request
   @Test
   public void testGetBlocksByRange() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
-    // get current height
-    int height = daemon.getHeight();
-    
-    // get valid height range
+    // get height range
     int numBlocks = 100;
     int numBlocksAgo = 190;
     assertTrue(numBlocks > 0);
     assertTrue(numBlocksAgo >= numBlocks);
+    int height = daemon.getHeight();
     assertTrue(height - numBlocksAgo + numBlocks - 1 < height);
     int startHeight = height - numBlocksAgo;
     int endHeight = height - numBlocksAgo + numBlocks - 1;
     
     // test known start and end heights
-    //console.log("Height: " + height);
-    //console.log("Fecthing " + (endHeight - startHeight + 1) + " blocks [" + startHeight + ", " + endHeight + "]");
-    testGetRange(startHeight, endHeight, height);
+    testGetBlocksRange(startHeight, endHeight, height, false);
     
     // test unspecified start
-    testGetRange(null, numBlocks - 1, height);
+    testGetBlocksRange(null, numBlocks - 1, height, false);
     
     // test unspecified end
-    testGetRange(height - numBlocks - 1, null, height);
+    testGetBlocksRange(height - numBlocks - 1, null, height, false);
   };
   
-  // Can return every block in a long range using chunked requests
+  // Can get blocks by range using chunked requests
   @Test
-  public void testBlocksInLongRange() {
+  public void testGetBlocksByRangeChunked() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
-    int numBlocks = 2160; // test ~last 3 days of blocks
-    int endHeight = daemon.getHeight() - 1;
-    int startHeight = Math.max(0, endHeight - numBlocks + 1);
-    //int startHeight = 250000;
-    int lastHeight = startHeight - 1;
-    while (lastHeight < endHeight) {
-      List<MoneroBlock> blocks = daemon.getAsManyBlocksAsPossible(lastHeight + 1, endHeight, null);
-      for (MoneroBlock block : blocks) {
-        testBlock(block, BINARY_BLOCK_CTX);
-      }
-      lastHeight = blocks.get(blocks.size() - 1).getHeight();
-      
-      // print out
-      int numTxs = 0;
-      for (MoneroBlock block : blocks) numTxs += block.getTxs().size();
-      System.out.println(lastHeight + "/" + endHeight + ", fetched " + blocks.size() + " blocks with " + numTxs + " txs");
-    }
+    
+    // get long height range
+    int numBlocks = 2160; // test ~3 days of blocks
+    assertTrue(numBlocks > 0);
+    int height = daemon.getHeight();
+    assertTrue(height - numBlocks - 1 < height);
+    int startHeight = height - numBlocks;
+    int endHeight = height - 1;
+    
+    // test known start and end heights
+    testGetBlocksRange(startHeight, endHeight, height, true);
+    
+    // test unspecified start
+    testGetBlocksRange(null, numBlocks - 1, height, true);
+    
+    // test unspecified end
+    testGetBlocksRange(endHeight - numBlocks - 1, null, height, true);
   };
   
   // Can get block ids (binary)
@@ -1567,12 +1563,12 @@ public class TestMoneroDaemonRpc {
     assertEquals(tx.toString(), merged.toString());
   }
   
-  private static void testGetRange(Integer startHeight, Integer endHeight, Integer chainHeight) {
+  private static void testGetBlocksRange(Integer startHeight, Integer endHeight, Integer chainHeight, boolean chunked) {
     
     // fetch blocks by range
     int realStartHeight = startHeight == null ? 0 : startHeight;
     int realEndHeight = endHeight == null ? chainHeight - 1 : endHeight;
-    List<MoneroBlock> blocks = daemon.getBlocksByRange(startHeight, endHeight);
+    List<MoneroBlock> blocks = chunked ? daemon.getBlocksByRangeChunked(startHeight, endHeight) : daemon.getBlocksByRange(startHeight, endHeight);
     assertEquals(realEndHeight - realStartHeight + 1, blocks.size());
     
     // test each block
