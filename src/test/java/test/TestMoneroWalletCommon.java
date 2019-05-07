@@ -1317,7 +1317,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         }
       }
     }
-    assertNotNull("Could not get a different address to test", differentAddress);
+    assertNotNull("Could not get a different outgoing address to test; run send tests", differentAddress);
     MoneroCheckTx check = wallet.checkTxKey(tx.getId(), key, differentAddress);
     assertTrue(check.getIsGood());
     assertTrue(check.getReceivedAmount().compareTo(BigInteger.valueOf(0)) >= 0);
