@@ -173,6 +173,27 @@ public interface MoneroDaemon {
   public List<MoneroBlock> getBlocksByRange(Integer startHeight, Integer endHeight);
   
   /**
+   * Get blocks in the given height range as chunked requests so that each request is
+   * not too big.
+   * 
+   * @param startHeight is the start height lower bound inclusive (optional)
+   * @param endHeight is the end height upper bound inclusive (optional)
+   * @return blocks in the given height range
+   */
+  public List<MoneroBlock> getBlocksByRangeChunked(Integer startHeight, Integer endHeight);
+  
+  /**
+   * Get blocks in the given height range as chunked requests so that each request is
+   * not too big.
+   * 
+   * @param startHeight is the start height lower bound inclusive (optional)
+   * @param endHeight is the end height upper bound inclusive (optional)
+   * @param maxChunkSize is the maximum chunk size in any one request (default 3,000,000 bytes)
+   * @return blocks in the given height range
+   */
+  public List<MoneroBlock> getBlocksByRangeChunked(Integer startHeight, Integer endHeight, Long maxChunkSize);
+  
+  /**
    * Get block ids as a binary request to the daemon.
    * 
    * @param blockIds specify block ids to fetch; first 10 blocks id goes

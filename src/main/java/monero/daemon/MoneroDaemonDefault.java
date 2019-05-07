@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import monero.daemon.model.MoneroBan;
+import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockTemplate;
 import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
 import monero.daemon.model.MoneroKeyImageSpentStatus;
@@ -21,6 +22,11 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   @Override
   public MoneroBlockTemplate getBlockTemplate(String walletAddress) {
     return getBlockTemplate(walletAddress, null);
+  }
+  
+  @Override
+  public List<MoneroBlock> getBlocksByRangeChunked(Integer startHeight, Integer endHeight) {
+    return getBlocksByRangeChunked(startHeight, endHeight, null);
   }
   
   @Override

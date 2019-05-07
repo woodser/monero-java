@@ -256,53 +256,27 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     
     return blocks;
   }
-
+  
   @Override
   public List<MoneroBlock> getBlocksByRange(Integer startHeight, Integer endHeight) {
+    if (startHeight == null) startHeight = 0;
+    if (endHeight == null) endHeight = getHeight() - 1;
+    List<Integer> heights = new ArrayList<Integer>();
+    for (int height = startHeight; height <= endHeight; height++) heights.add(height);
+    return getBlocksByHeight(heights);
+  }
+
+  @Override
+  public List<MoneroBlock> getBlocksByRangeChunked(Integer startHeight, Integer endHeight, Long maxChunkSize) {
     if (startHeight == null) startHeight = 0;
     if (endHeight == null) endHeight = getHeight() - 1;
     int lastHeight = startHeight - 1;
     List<MoneroBlock> blocks = new ArrayList<MoneroBlock>();
     while (lastHeight < endHeight) {
-      blocks.addAll(getAsManyBlocksAsPossible(lastHeight + 1, endHeight, null));
+      blocks.addAll(getMaxBlocks(lastHeight + 1, endHeight, maxChunkSize));
       lastHeight = blocks.get(blocks.size() - 1).getHeight();
     }
     return blocks;
-  }
-  
-  /**
-   * Get a contiguous chunk of blocks starting from a given height up to a maximum
-   * height or amount of block data fetched from the blockchain, whichever comes first.
-   * 
-   * @param startHeight is the start height to retrieve blocks (default 0)
-   * @param maxHeight is the maximum end height to retrieve blocks (default blockchain height)
-   * @param maxReqSize is the maximum amount of block data to fetch from the blockchain in bytes (default 3,000,000 bytes)
-   * @return List<MoneroBlock> are the resulting chunk of blocks
-   */
-  public List<MoneroBlock> getAsManyBlocksAsPossible(Integer startHeight, Integer maxHeight, Long maxReqSize) {
-    if (startHeight == null) startHeight = 0;
-    if (maxHeight == null) maxHeight = getHeight() - 1;
-    if (maxReqSize == null) maxReqSize = MAX_REQ_SIZE;
-    
-    // determine end height to fetch
-    int reqSize = 0;
-    int endHeight = startHeight - 1;
-    while (reqSize < maxReqSize && endHeight < maxHeight) {
-      
-      // get header of next block
-      MoneroBlockHeader header = getBlockHeaderByHeightCached(endHeight + 1, maxHeight);
-      
-      // block cannot be bigger than max request size
-      assertTrue("Block exceeds maximum request size: " + header.getSize(), header.getSize() <= maxReqSize);
-      
-      // done iterating if fetching block would exceed max request size
-      if (reqSize + header.getSize() > maxReqSize) break;
-      
-      // otherwise block is included
-      reqSize += header.getSize();
-      endHeight++;
-    }
-    return endHeight >= startHeight ? getBlocksByRangeSingle(startHeight, endHeight) : new ArrayList<MoneroBlock>();
   }
   
   @Override
@@ -887,12 +861,39 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return new int[] { ((BigInteger) resp.get("limit_down")).intValue(), ((BigInteger) resp.get("limit_up")).intValue() };
   }
   
-  private List<MoneroBlock> getBlocksByRangeSingle(Integer startHeight, Integer endHeight) {
+  /**
+   * Get a contiguous chunk of blocks starting from a given height up to a maximum
+   * height or maximum amount of block data fetched from the blockchain, whichever comes first.
+   * 
+   * @param startHeight is the start height to retrieve blocks (default 0)
+   * @param maxHeight is the maximum end height to retrieve blocks (default blockchain height)
+   * @param chunkSize is the maximum chunk size in any one request (default 3,000,000 bytes)
+   * @return List<MoneroBlock> are the resulting chunk of blocks
+   */
+  private List<MoneroBlock> getMaxBlocks(Integer startHeight, Integer maxHeight, Long chunkSize) {
     if (startHeight == null) startHeight = 0;
-    if (endHeight == null) endHeight = getHeight() - 1;
-    List<Integer> heights = new ArrayList<Integer>();
-    for (int height = startHeight; height <= endHeight; height++) heights.add(height);
-    return getBlocksByHeight(heights);
+    if (maxHeight == null) maxHeight = getHeight() - 1;
+    if (chunkSize == null) chunkSize = MAX_REQ_SIZE;
+    
+    // determine end height to fetch
+    int reqSize = 0;
+    int endHeight = startHeight - 1;
+    while (reqSize < chunkSize && endHeight < maxHeight) {
+      
+      // get header of next block
+      MoneroBlockHeader header = getBlockHeaderByHeightCached(endHeight + 1, maxHeight);
+      
+      // block cannot be bigger than max request size
+      assertTrue("Block exceeds maximum request size: " + header.getSize(), header.getSize() <= chunkSize);
+      
+      // done iterating if fetching block would exceed max request size
+      if (reqSize + header.getSize() > chunkSize) break;
+      
+      // otherwise block is included
+      reqSize += header.getSize();
+      endHeight++;
+    }
+    return endHeight >= startHeight ? getBlocksByRange(startHeight, endHeight) : new ArrayList<MoneroBlock>();
   }
   
   /**
