@@ -65,10 +65,10 @@ public class TestSampleCode {
       Integer height = transfer.getTx().getHeight();  // will be null if unconfirmed
     }
 
-    // send to an address
-    MoneroTxWallet sentTx = wallet.send("74oAtjgE2dfD1bJBo4DWW3E6qXCAwUDMgNqUurnX9b2xUvDTwMwExiXDkZskg7Vct37tRGjzHRqL4gH4H3oag3YyMYJzrNp", new BigInteger("50000"));
+    // send to an address from account 0
+    MoneroTxWallet sentTx = wallet.send(0, "74oAtjgE2dfD1bJBo4DWW3E6qXCAwUDMgNqUurnX9b2xUvDTwMwExiXDkZskg7Vct37tRGjzHRqL4gH4H3oag3YyMYJzrNp", new BigInteger("50000"));
 
-    // send to multiple destinations from subaddress 1, 0 which can be split into multiple transactions
+    // send to multiple destinations from multiple subaddresses in account 1 which can be split into multiple transactions
     // see MoneroSendRequest.java for all request options
     List<MoneroTxWallet> sentTxs = wallet.sendSplit(new MoneroSendRequest()
             .setAccountIndex(1)

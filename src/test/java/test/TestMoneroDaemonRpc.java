@@ -543,7 +543,7 @@ public class TestMoneroDaemonRpc {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // submit tx to pool but don't relay
-    MoneroTx tx = getUnrelayedTx(wallet, null);
+    MoneroTx tx = getUnrelayedTx(wallet, 0);
     daemon.submitTxHex(tx.getFullHex(), true);
     
     // fetch txs in pool
@@ -1601,9 +1601,8 @@ public class TestMoneroDaemonRpc {
   }
   
   private static MoneroTx getUnrelayedTx(MoneroWallet wallet, Integer accountIdx) {
-    MoneroSendRequest req = new MoneroSendRequest(wallet.getPrimaryAddress(), TestUtils.MAX_FEE); 
+    MoneroSendRequest req = new MoneroSendRequest(accountIdx, wallet.getPrimaryAddress(), TestUtils.MAX_FEE); 
     req.setDoNotRelay(true);
-    req.setAccountIndex(accountIdx);
     MoneroTx tx = wallet.send(req);
     assertFalse(tx.getFullHex().isEmpty());
     assertEquals(tx.getDoNotRelay(), true);

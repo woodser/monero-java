@@ -126,18 +126,33 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public MoneroTxWallet send(String address, BigInteger sendAmount) {
-    return send(new MoneroSendRequest(address, sendAmount));
+  public MoneroTxWallet send(int accountIndex, String address, BigInteger sendAmount) {
+    return send(accountIndex, address, sendAmount, null);
   }
   
   @Override
-  public List<MoneroTxWallet> sendSplit(String address, BigInteger sendAmount) {
-    return sendSplit(new MoneroSendRequest(address, sendAmount));
+  public MoneroTxWallet send(int accountIndex, String address, BigInteger sendAmount, MoneroSendPriority priority) {
+    return send(new MoneroSendRequest(accountIndex, address, sendAmount, priority));
+  }
+  
+  @Override
+  public List<MoneroTxWallet> sendSplit(int accountIndex, String address, BigInteger sendAmount) {
+    return sendSplit(new MoneroSendRequest(accountIndex, address, sendAmount));
+  }
+  
+  @Override
+  public List<MoneroTxWallet> sendSplit(int accountIndex, String address, BigInteger sendAmount, MoneroSendPriority priority) {
+    return sendSplit(new MoneroSendRequest(accountIndex, address, sendAmount, priority));
+  }
+  
+  @Override
+  public MoneroTxWallet sweepOutput(String address, String keyImage) {
+    return sweepOutput(address, keyImage, null);
   }
   
   @Override
   public MoneroTxWallet sweepOutput(String address, String keyImage, MoneroSendPriority priority) {
-    MoneroSendRequest request = new MoneroSendRequest(address, null, priority);
+    MoneroSendRequest request = new MoneroSendRequest(address).setPriority(priority);
     request.setKeyImage(keyImage);
     return sweepOutput(request);
   }

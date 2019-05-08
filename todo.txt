@@ -16,7 +16,8 @@ sometimes see non-zero spent amount in testCheckReserve()
 14.1.0 RELEASE
 release
 
-"transfer" pulls from all subaddreses by default? no need to fetch subaddress indices then
+support send(...priority...)?
+test wallet.send() which is only in sample code currently
 send tests should look for first account greater than fee
 getUnrelayedTx() auto finds account idx if not given, would lessen -37s
 add warning in PrintBalances.java if balance don't add up for any reason

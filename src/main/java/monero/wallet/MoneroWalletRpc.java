@@ -798,8 +798,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // determine account and subaddresses to send from
     Integer accountIdx = request.getAccountIndex();
-    if (accountIdx == null) accountIdx = 0; // default to account 0
-    List<Integer> subaddressIndices = request.getSubaddressIndices() == null ? getSubaddressIndices(accountIdx) : new ArrayList<Integer>(request.getSubaddressIndices()); // copy given indices or fetch all
+    if (accountIdx == null) throw new MoneroException("Must specify the account index to send from");
+    List<Integer> subaddressIndices = request.getSubaddressIndices() == null ? null : new ArrayList<Integer>(request.getSubaddressIndices()); // fetch all or copy given indices
     
     // build request parameters
     Map<String, Object> params = new HashMap<String, Object>();
@@ -841,7 +841,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     for (MoneroTxWallet tx : txs) {
       initSentTxWallet(request, tx);
       tx.getOutgoingTransfer().setAccountIndex(accountIdx);
-        if (subaddressIndices.size() == 1) tx.getOutgoingTransfer().setSubaddressIndices(subaddressIndices);
+        if (subaddressIndices != null && subaddressIndices.size() == 1) tx.getOutgoingTransfer().setSubaddressIndices(subaddressIndices);
     }
     
     // initialize txs from rpc response
