@@ -33,7 +33,7 @@ public class MoneroSendRequest {
   private String keyImage;
   
   public MoneroSendRequest() {
-    this(null, null);
+    this(null);
   }
   
   public MoneroSendRequest(String address) {
@@ -41,14 +41,20 @@ public class MoneroSendRequest {
   }
   
   public MoneroSendRequest(String address, BigInteger amount) {
-    this(address, amount, null);
+    this(null, address, amount);
   }
   
-  public MoneroSendRequest(String address, BigInteger amount, MoneroSendPriority priority) {
-    // map address and amount to single destination
-    if (address != null || amount != null) {
-      this.destinations = Arrays.asList(new MoneroDestination(address, amount));
-    }
+  public MoneroSendRequest(Integer accountIndex, String address) {
+    this(accountIndex, address, null);
+  }
+
+  public MoneroSendRequest(Integer accountIndex, String address, BigInteger amount) {
+    this(accountIndex, address, amount, null);
+  }
+  
+  public MoneroSendRequest(Integer accountIndex, String address, BigInteger amount, MoneroSendPriority priority) {
+    this.accountIndex = accountIndex;
+    if (address != null || amount != null) this.destinations = Arrays.asList(new MoneroDestination(address, amount)); // map address and amount to default destination
     this.priority = priority;
   }
   

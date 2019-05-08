@@ -57,18 +57,18 @@ for (MoneroTransfer transfer : transfers) {
   Integer height = transfer.getTx().getHeight();  // will be null if unconfirmed
 }
 
-// send to an address
-MoneroTxWallet sentTx = wallet.send("74oAtjgE2dfD1bJBo4DWW3E6qXCAwUDMgNqUurnX9b2xUvDTwMwExiXDkZskg7Vct37tRGjzHRqL4gH4H3oag3YyMYJzrNp", new BigInteger("50000"));
+// send to an address from account 0
+MoneroTxWallet sentTx = wallet.send(0, "74oAtjgE2dfD1bJBo4DW...", new BigInteger("50000"));
 
-// send to multiple destinations from subaddress 1, 0 which can be split into multiple transactions
+// send to multiple destinations from multiple subaddresses in account 1 which can be split into multiple transactions
 // see MoneroSendRequest.java for all request options
 List<MoneroTxWallet> sentTxs = wallet.sendSplit(new MoneroSendRequest()
         .setAccountIndex(1)
         .setSubaddressIndices(0, 1)
         .setPriority(MoneroSendPriority.UNIMPORTANT)  // no rush
         .setDestinations(
-                new MoneroDestination("7BV7iyk9T6kfs7cPfmn7vPZPyWRid7WEwecBkkVr8fpw9MmUgXTPtvMKXuuzqKyr2BegWMhEcGGEt5vNkmJEtgnRFUAvf29", new BigInteger("50000")),
-                new MoneroDestination("78NWrWGgyZeYgckJhuxmtDMqo8Kzq5r9j1kV8BQXGq5CDnECz2KjQeBDc3KKvdMQmR6TWtfbRaedgbSGmmwr1g8N1rBMdvW", new BigInteger("50000"))));
+                new MoneroDestination("7BV7iyk9T6kfs7cPfmn7...", new BigInteger("50000")),
+                new MoneroDestination("78NWrWGgyZeYgckJhuxm...", new BigInteger("50000"))));
 
 // get all confirmed wallet transactions
 for (MoneroTxWallet tx : wallet.getTxs(new MoneroTxRequest().setIsConfirmed(true))) {
@@ -115,7 +115,7 @@ for (MoneroBlock block : blocks) {
 }
 
 // start mining to an address with 4 threads, not in the background, and ignoring the battery
-String address = "74oAtjgE2dfD1bJBo4DWW3E6qXCAwUDMgNqUurnX9b2xUvDTwMwExiXDkZskg7Vct37tRGjzHRqL4gH4H3oag3YyMYJzrNp";
+String address = "74oAtjgE2dfD1bJBo4DW...";
 int numThreads = 4;
 boolean isBackground = false;
 boolean ignoreBattery = false;

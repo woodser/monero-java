@@ -2256,7 +2256,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   @Test
   public void testUpdateLockedSameAccountSplit() {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS && !LITE_MODE);
-    MoneroSendRequest request = new MoneroSendRequest(wallet.getPrimaryAddress(), TestUtils.MAX_FEE);
+    MoneroSendRequest request = new MoneroSendRequest(0, wallet.getPrimaryAddress(), TestUtils.MAX_FEE);
     request.setAccountIndex(0);
     request.setUnlockTime(3);
     request.setCanSplit(true);
@@ -2267,8 +2267,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   @Test
   public void testUpdateLockedDifferentAccounts() {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS && !LITE_MODE);
-    MoneroSendRequest request = new MoneroSendRequest((wallet.getSubaddress(1, 0)).getAddress(), TestUtils.MAX_FEE);
-    request.setAccountIndex(0);
+    MoneroSendRequest request = new MoneroSendRequest(0, wallet.getSubaddress(1, 0).getAddress(), TestUtils.MAX_FEE);
     request.setUnlockTime(3);
     request.setCanSplit(false);
     testSendAndUpdateTxs(request);
@@ -2278,7 +2277,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   @Test
   public void testUpdateLockedDifferentAccountsSplit() {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS && !LITE_MODE);
-    MoneroSendRequest request = new MoneroSendRequest((wallet.getSubaddress(1, 0)).getAddress(), TestUtils.MAX_FEE);
+    MoneroSendRequest request = new MoneroSendRequest(0, wallet.getSubaddress(1, 0).getAddress(), TestUtils.MAX_FEE);
     request.setAccountIndex(0);
     request.setUnlockTime(3);
     request.setCanSplit(true);

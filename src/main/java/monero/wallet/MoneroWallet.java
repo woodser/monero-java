@@ -510,11 +510,24 @@ public interface MoneroWallet {
    * Create and relay a transaction which transfers funds from this wallet to
    * a destination address.
    * 
+   * @param accountIndex is the index of the account to draw funds from
    * @param address is the destination address to send funds to
    * @param sendAmount is the amount being sent
    * @return the resulting transaction
    */
-  public MoneroTxWallet send(String address, BigInteger sendAmount);
+  public MoneroTxWallet send(int accountIndex, String address, BigInteger sendAmount);
+  
+  /**
+   * Create and relay a transaction which transfers funds from this wallet to
+   * a destination address.
+   * 
+   * @param accountIndex is the index of the account to draw funds from
+   * @param address is the destination address to send funds to
+   * @param sendAmount is the amount being sent
+   * @param priority is the send priority (default normal)
+   * @return the resulting transaction
+   */
+  public MoneroTxWallet send(int accountIndex, String address, BigInteger sendAmount, MoneroSendPriority priority);
   
   /**
    * Create and relay (depending on configuration) one or more transactions
@@ -529,11 +542,24 @@ public interface MoneroWallet {
    * Create and relay one or more transactions which transfer funds from this
    * wallet to one or more destination.
    * 
+   * @param accountIndex is the index of the account to draw funds from
    * @param address is the destination address to send funds to
    * @param sendAmount is the amount being sent
    * @return the resulting transactions
    */
-  public List<MoneroTxWallet> sendSplit(String address, BigInteger sendAount);
+  public List<MoneroTxWallet> sendSplit(int accountIndex, String address, BigInteger sendAmount);
+  
+  /**
+   * Create and relay one or more transactions which transfer funds from this
+   * wallet to one or more destination.
+   * 
+   * @param accountIndex is the index of the account to draw funds from
+   * @param address is the destination address to send funds to
+   * @param sendAmount is the amount being sent
+   * @param priority is the send priority (default normal)
+   * @return the resulting transactions
+   */
+  public List<MoneroTxWallet> sendSplit(int accountIndex, String address, BigInteger sendAmount, MoneroSendPriority priority);
   
   /**
    * Sweep an output with a given key image.
@@ -542,6 +568,15 @@ public interface MoneroWallet {
    * @return the resulting transaction from sweeping an output 
    */
   public MoneroTxWallet sweepOutput(MoneroSendRequest request);
+  
+  /**
+   * Sweep an output with a given key image.
+   * 
+   * @param address is the destination address to send to
+   * @param keyImage is the key image hex of the output to sweep
+   * @return the resulting transaction from sweeping an output 
+   */
+  public MoneroTxWallet sweepOutput(String address, String keyImage);
   
   /**
    * Sweep an output with a given key image.
