@@ -22,7 +22,7 @@ A quick reference of the wallet and daemon data models can be found [here](https
 
 ## Wallet Sample Code
 
-See the [src/test/java/](src/test/java) for the most complete examples of using this library.
+See [src/test/java/](src/test/java) for the most complete examples of using this library.
 
 ```java
 // create a wallet that uses a monero-wallet-rpc endpoint with authentication
