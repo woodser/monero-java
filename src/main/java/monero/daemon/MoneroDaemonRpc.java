@@ -19,7 +19,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import common.utils.GenUtils;
 import common.utils.JsonUtils;
-import monero.cpp_bridge.MoneroCppUtils;
 import monero.daemon.model.MoneroAltChain;
 import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
@@ -48,6 +47,7 @@ import monero.daemon.model.MoneroTxBacklogEntry;
 import monero.daemon.model.MoneroTxPoolStats;
 import monero.rpc.MoneroRpc;
 import monero.rpc.MoneroRpcException;
+import monero.utils.MoneroCppUtils;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 

@@ -1,11 +1,11 @@
 #include <jni.h>
 #include <iostream>
-#include "monero_cpp_bridge_MoneroCppUtilsJni.h"
+#include "monero_cpp_bridge_MoneroCppUtilsNative.h"
 #include "monero_binary_utils.hpp"
 //#include "./submodules/mymonero-core-cpp/src/monero_binary_utils.hpp"
 using namespace std;
 
-JNIEXPORT jbyteArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_jsonToBinary(JNIEnv *env, jclass utilsClass, jstring json) {
+JNIEXPORT jbyteArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsNative_jsonToBinary(JNIEnv *env, jclass utilsClass, jstring json) {
 
   // convert json jstring to string
   string jsonStr = jstring2string(env, json);
@@ -30,7 +30,7 @@ JNIEXPORT jbyteArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_jsonToBin
   return result;
 }
 
-JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryToJson(JNIEnv *env, jclass utilsClass, jbyteArray bin) {
+JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsNative_binaryToJson(JNIEnv *env, jclass utilsClass, jbyteArray bin) {
 
   // convert the jbyteArray to a string
   int binLength = env->GetArrayLength(bin);
@@ -46,7 +46,7 @@ JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryToJson
   return env->NewStringUTF(jsonStr.c_str());
 }
 
-JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsJni_binaryBlocksToJson(JNIEnv *env, jclass utilsClass, jbyteArray blocksBin) {
+JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsNative_binaryBlocksToJson(JNIEnv *env, jclass utilsClass, jbyteArray blocksBin) {
 
   // convert the jbyteArray to a string
   int binLength = env->GetArrayLength(blocksBin);
