@@ -13,6 +13,7 @@ import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroNetworkType;
 import monero.rpc.MoneroRpc;
 import monero.rpc.MoneroRpcException;
+import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
 
 /**
@@ -62,7 +63,7 @@ public class TestUtils {
   }
   
   /**
-   * Get a wallet RPC singleton instance shared among tests.
+   * Get a singleton instance of a wallet supported by RPC.
    */
   private static MoneroWalletRpc walletRpc;
   public static MoneroWalletRpc getWalletRpc() {
@@ -98,6 +99,15 @@ public class TestUtils {
     
     // return cached wallet rpc
     return walletRpc;
+  }
+  
+  /**
+   * Get a singleton instance of a wallet supported by JNI.
+   */
+  private static MoneroWalletJni walletJni;
+  public static MoneroWalletJni getWalletJni() {
+    if (walletJni == null) walletJni = MoneroWalletJni.openWallet(WALLET_RPC_NAME_1, WALLET_RPC_PASSWORD);
+    return walletJni;
   }
   
   public static void testUnsignedBigInteger(BigInteger num) {
