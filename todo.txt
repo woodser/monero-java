@@ -1,3 +1,6 @@
+JNI
+CMakeLists.txt uses hardcoded absolute path to my boost source path
+
 WALLET RPC ISSUES
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
 add all_accounts to incoming_transfers, would be huge time saver
