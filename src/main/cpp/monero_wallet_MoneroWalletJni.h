@@ -2,9 +2,6 @@
 
 #ifndef _Included_monero_wallet_MoneroWalletJni
 #define _Included_monero_wallet_MoneroWalletJni
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 jfieldID getHandleField(JNIEnv *env, jobject obj, const char *fieldName = "handle") {
     jclass c = env->GetObjectClass(obj);
@@ -26,6 +23,10 @@ void setHandle(JNIEnv *env, jobject obj, T *t) {
     jlong handle = reinterpret_cast<jlong>(t);
     setHandleFromLong(env, obj, handle);
 }
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef __cplusplus
 }
