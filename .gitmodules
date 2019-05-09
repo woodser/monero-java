@@ -1,3 +1,6 @@
 [submodule "src/main/cpp/submodules/mymonero-core-cpp"]
 	path = src/main/cpp/submodules/mymonero-core-cpp
 	url = https://github.com/woodser/mymonero-core-cpp.git
+[submodule "src/main/cpp/submodules/monero-core"]
+	path = src/main/cpp/submodules/monero-core
+	url = https://github.com/monero-project/monero

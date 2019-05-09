@@ -1,17 +1,17 @@
 WALLET RPC ISSUES
+incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
+add all_accounts to incoming_transfers, would be huge time saver
+sometimes see non-zero spent amount in testCheckReserve()
+WARNING: key proof indicates no funds received despite transfer (txid=76983ebf1d2e62141c19e190355e146145cb03988c5bfaf857b65dc0e15d378f, key=5246bf34d97dd379843ea31cb2bddfe41a89db73be4bd72fdc1ffe1b4d8ac70d, address=76gP3JEGAhnS5sgnB7LHRP2tbidL8ChvkJATJADQF4SpBcbN8bUgSZyQmTpdMQqyW129dh3zV5XscaBhkU6WTUKQVdDykFV, amount=44933)
+ocasional: seg fault 11 in testGetReserveProofAccount() (with no unlocked balance???), wallet rpc get_reserve_proof
+wallet rpc `open_wallet` spends a lot of time generating ssl certificates and Trying to decrypt cache data when wallet is already open, can't just skip check?
 ocasional: testGetTxsByIdsInPool() hangs (have no peer connections?)
 ocasional: testGetTxsByIdsInPool() tx fails testTx() as double spend
-ocasional: seg fault 11 in testGetReserveProofAccount() (with no unlocked balance???), wallet rpc get_reserve_proof
 one time: testCheckTxKey() -24: No tx secret key is stored for this tx, RPC request: 'get_tx_key' with params: {"txid":"e779dbb7fbff77544ea39de062b12c1d722901ed937a833307c1b5b3cea41069"}
-WARNING: key proof indicates no funds received despite transfer (txid=76983ebf1d2e62141c19e190355e146145cb03988c5bfaf857b65dc0e15d378f, key=5246bf34d97dd379843ea31cb2bddfe41a89db73be4bd72fdc1ffe1b4d8ac70d, address=76gP3JEGAhnS5sgnB7LHRP2tbidL8ChvkJATJADQF4SpBcbN8bUgSZyQmTpdMQqyW129dh3zV5XscaBhkU6WTUKQVdDykFV, amount=44933)
-add all_accounts to incoming_transfers, would be huge time saver
 Marking output 18666(<9cd46fd977f2d8f6112cc87592677cbd76801b318c6e607dd31b9a25dd7d9530>) as unspent, it was marked as spent
 cannot send: -4: Known ring does not include the spent output: 1255232 (this fixed itself, not sure how)
 file issue to get received timestamp for unconfirmed wallet txs if wanted
-incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
-wallet rpc `open_wallet` spends a lot of time generating ssl certificates and Trying to decrypt cache data when wallet is already open, can't just skip check?
 No message store file found: /Applications/190322-monero-master//test_wallet_1.mms
-sometimes see non-zero spent amount in testCheckReserve()
 
 14.1.0 RELEASE
 release
