@@ -42,6 +42,13 @@ include_directories("${MYMONERO_MONERO_SRC}/mnemonics")
 include_directories("${MYMONERO_MONERO_SRC}/contrib/libsodium/include") # support sodium/… paths
 include_directories("${MYMONERO_MONERO_SRC}/contrib/libsodium/include/sodium")
 
+set(MONERO "submodules/monero-core")
+set(MONERO_SRC "${MONERO}/src")
+
+include_directories("${MONERO_SRC}")
+include_directories("${MONERO_SRC}/wallet")
+include_directories("${MONERO_SRC}/wallet/api")
+
 ############################# BOOST SETTINGS ##################################
 
 #set(Boost_NO_SYSTEM_PATH ON)
@@ -82,6 +89,8 @@ set(
     SRC_FILES
     monero_cpp_bridge_MoneroCppUtilsNative.h
     monero_cpp_bridge_MoneroCppUtilsNative.cpp
+    #monero_wallet_MoneroWalletJni.h
+    #monero_wallet_MoneroWalletJni.cpp
 	#
     ${MYMONERO_CORE_CPP_SRC}/monero_address_utils.hpp
     ${MYMONERO_CORE_CPP_SRC}/monero_address_utils.cpp
@@ -153,6 +162,9 @@ set(
     ${MYMONERO_MONERO_SRC}/contrib/libsodium/src/crypto_verify/verify.c
     #
     #${boost_SRC}/thread/thread.hpp
+    #
+    #${MONERO_SRC}/wallet/api/wallet2_api.h
+    #/Users/Eric/git/monero-java-rpc/src/main/cpp/submodules/monero-core/src/wallet/api/wallet2_api.h
 )
 
 ########################## BUILD MONERO LIBRARY ###############################
