@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 
-import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroKeyImage;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
@@ -19,20 +18,18 @@ import monero.wallet.model.MoneroSyncProgressListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.request.MoneroOutputRequest;
 import monero.wallet.request.MoneroSendRequest;
 import monero.wallet.request.MoneroTransferRequest;
 import monero.wallet.request.MoneroTxRequest;
-import monero.wallet.request.MoneroOutputRequest;
 
 /**
- * Implements a Monero wallet using client-side crypto and a given daemon.
+ * Implements a Monero wallet using JNI to bridge to Monero Core C++.
  */
-public class MoneroWalletLocal extends MoneroWalletDefault {
+public class MoneroWalletJni extends MoneroWalletDefault {
   
-  private MoneroDaemon daemon;
-  
-  public MoneroWalletLocal(MoneroDaemon daemon) {
-    this.daemon = daemon;
+  public MoneroWalletJni(String walletName) {
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
@@ -89,7 +86,7 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncProgressListener progressListener) {
     throw new RuntimeException("Not implemented");
   }
-  
+
   @Override
   public void rescanBlockchain() {
     throw new RuntimeException("Not implemented");
@@ -206,17 +203,17 @@ public class MoneroWalletLocal extends MoneroWalletDefault {
   }
 
   @Override
+  public MoneroTxWallet sweepOutput(MoneroSendRequest request) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
   public List<MoneroTxWallet> sweepAllUnlocked(MoneroSendRequest request) {
     throw new RuntimeException("Not implemented");
   }
 
   @Override
   public List<MoneroTxWallet> sweepDust(boolean doNotRelay) {
-    throw new RuntimeException("Not implemented");
-  }
-
-  @Override
-  public MoneroTxWallet sweepOutput(MoneroSendRequest request) {
     throw new RuntimeException("Not implemented");
   }
 

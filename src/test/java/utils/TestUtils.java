@@ -13,8 +13,6 @@ import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroNetworkType;
 import monero.rpc.MoneroRpc;
 import monero.rpc.MoneroRpcException;
-import monero.wallet.MoneroWallet;
-import monero.wallet.MoneroWalletLocal;
 import monero.wallet.MoneroWalletRpc;
 
 /**
