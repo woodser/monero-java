@@ -17,6 +17,7 @@ import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroTransfer;
+import utils.TestUtils;
 
 /**
  * Tests the JNI wallet specifically.
@@ -36,7 +37,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
   @Override
   protected MoneroWallet getTestWallet() {
-    return new MoneroWalletJni("test_wallet_1");
+    return TestUtils.getWalletJni();
   }
   
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------

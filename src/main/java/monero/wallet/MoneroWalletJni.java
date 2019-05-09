@@ -28,8 +28,22 @@ import monero.wallet.request.MoneroTxRequest;
  */
 public class MoneroWalletJni extends MoneroWalletDefault {
   
-  public MoneroWalletJni(String walletName) {
-    throw new RuntimeException("Not implemented");
+  // ------------------------------ PUBLIC STATIC -----------------------------
+  
+  public static MoneroWalletJni openWallet(String path, String password) {
+    return new MoneroWalletJni(openWalletJni(path, password, "stagenet"));
+  }
+  
+  // ------------------------------- INSTANCE ---------------------------------
+  
+  private long handle;  // handle to wallet memory address in c++
+  
+  private MoneroWalletJni(long handle) {
+    this.handle = handle;
+  }
+  
+  private long getHandle() {
+    return handle;
   }
 
   @Override
@@ -134,7 +148,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public BigInteger getBalance() {
-    throw new RuntimeException("Not implemented");
+    return new BigInteger(getBalanceWalletJni());
   }
 
   @Override
@@ -361,4 +375,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public void stopMining() {
     throw new RuntimeException("Not implemented");
   }
+  
+  // ------------------------------ NATIVE METHODS ----------------------------
+  
+  private native static long openWalletJni(String path, String password, String networkType);
+  
+  private native String getBalanceWalletJni();
 }
