@@ -2,7 +2,6 @@
 #include <iostream>
 #include "monero_cpp_bridge_MoneroCppUtilsNative.h"
 #include "monero_binary_utils.hpp"
-//#include "./submodules/mymonero-core-cpp/src/monero_binary_utils.hpp"
 using namespace std;
 
 JNIEXPORT jbyteArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsNative_jsonToBinary(JNIEnv *env, jclass utilsClass, jstring json) {
