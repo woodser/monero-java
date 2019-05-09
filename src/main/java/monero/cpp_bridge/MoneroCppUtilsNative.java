@@ -6,7 +6,7 @@ package monero.cpp_bridge;
  * These are separated because otherwise JNI header file cannot be
  * automatically generated without pulling in maven dependencies.
  */
-public class MoneroCppUtilsJni {
+public class MoneroCppUtilsNative {
   
   static {
     System.loadLibrary("monero");

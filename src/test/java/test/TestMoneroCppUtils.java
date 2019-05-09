@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import monero.cpp_bridge.MoneroCppUtils;
+import monero.utils.MoneroCppUtils;
 
 /**
  * Test bridged C++ utilities.

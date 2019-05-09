@@ -80,8 +80,8 @@ set_target_properties(
 #
 set(
     SRC_FILES
-    monero_cpp_bridge_MoneroCppUtilsJni.h
-    monero_cpp_bridge_MoneroCppUtilsJni.cpp
+    monero_cpp_bridge_MoneroCppUtilsNative.h
+    monero_cpp_bridge_MoneroCppUtilsNative.cpp
 	#
     ${MYMONERO_CORE_CPP_SRC}/monero_address_utils.hpp
     ${MYMONERO_CORE_CPP_SRC}/monero_address_utils.cpp
