@@ -160,31 +160,7 @@ set(MONERO_SRC "${MONERO}/src")
 include_directories("$ENV{JAVA_HOME}")
 include_directories("$ENV{JAVA_HOME}/include")
 include_directories("$ENV{JAVA_HOME}/include/darwin")
-
-include_directories("${MONERO}/contrib/epee/include")
-include_directories("${MONERO}/contrib/epee/include/net")
-include_directories("${MONERO}/contrib/libsodium/include") # support sodium/… paths
-include_directories("${MONERO}/contrib/libsodium/include/sodium")
-include_directories("${MONERO}/external")
-include_directories("${MONERO}/external/easylogging++")
-include_directories("${MONERO}/external/boost/archive")
-include_directories("${MONERO}/external/rapidjson/include")
-include_directories("${MONERO}/external/db_drivers/liblmdb")
-include_directories("${MONERO}/build")	# for translation_files.h
-
-include_directories("${MONERO_SRC}")
-include_directories("${MONERO_SRC}/wallet")
 include_directories("${MONERO_SRC}/wallet/api")	# TODO: could replace with include_directories(${EXTERNAL_LIBS_DIR}/monero/include) and put wallet2_api.h in there
-include_directories("${MONERO_SRC}/common")
-include_directories("${MONERO_SRC}/vtlogger")
-include_directories("${MONERO_SRC}/crypto")
-include_directories("${MONERO_SRC}/cryptonote_basic")
-include_directories("${MONERO_SRC}/multisig")
-include_directories("${MONERO_SRC}/cryptonote_core")
-include_directories("${MONERO_SRC}/cryptonote_protocol")
-include_directories("${MONERO_SRC}/rpc")
-include_directories("${MONERO_SRC}/mnemonics")
-#include_directories("${MONERO_SRC}/checkpoints")
 
 message(STATUS EXTERNAL_LIBS_DIR : ${EXTERNAL_LIBS_DIR})
 
@@ -195,9 +171,6 @@ message(STATUS EXTERNAL_LIBS_DIR : ${EXTERNAL_LIBS_DIR})
 set(
     SRC_FILES
     src/main/cpp/monero_wallet_MoneroWalletJni.cpp
-    ${MONERO_SRC}/wallet/api/wallet_manager.cpp
-    ${MONERO_SRC}/wallet/api/wallet.cpp
-    ${MONERO_SRC}/wallet/wallet2.cpp
 )
 add_library(monero-java SHARED ${SRC_FILES})
 
