@@ -9,12 +9,20 @@ project(JavaCppBridge)
 set(EXTERNAL_LIBS_DIR ${CMAKE_SOURCE_DIR}/external-libs)
 
 ############
+# hidapi
+############
+
+#add_library(hidapi STATIC IMPORTED)
+#set_target_properties(hidapi PROPERTIES IMPORTED_LOCATION
+#        ${EXTERNAL_LIBS_DIR}/hidapi/libhidapi.a)
+
+############
 # libsodium
 ############
 
-#add_library(sodium STATIC IMPORTED)
-#set_target_properties(sodium PROPERTIES IMPORTED_LOCATION
-#        ${EXTERNAL_LIBS_DIR}/libsodium/libsodium.a)
+add_library(sodium STATIC IMPORTED)
+set_target_properties(sodium PROPERTIES IMPORTED_LOCATION
+        ${EXTERNAL_LIBS_DIR}/libsodium/libsodium.a)
 
 ############
 # OpenSSL
@@ -66,15 +74,15 @@ set_target_properties(boost_system PROPERTIES IMPORTED_LOCATION
 
 add_library(boost_thread STATIC IMPORTED)
 set_target_properties(boost_thread PROPERTIES IMPORTED_LOCATION
-    ${EXTERNAL_LIBS_DIR}/boost/libboost_thread.a)
+    ${EXTERNAL_LIBS_DIR}/boost/libboost_thread-mt.a)
 
 #############
 # Monero
 #############
 
-#add_library(wallet_api STATIC IMPORTED)
-#set_target_properties(wallet_api PROPERTIES IMPORTED_LOCATION
-#    ${EXTERNAL_LIBS_DIR}/monero/libwallet_api.a)
+add_library(wallet_api STATIC IMPORTED)
+set_target_properties(wallet_api PROPERTIES IMPORTED_LOCATION
+    ${EXTERNAL_LIBS_DIR}/monero/libwallet_api.a)
 
 add_library(wallet STATIC IMPORTED)
 set_target_properties(wallet PROPERTIES IMPORTED_LOCATION
@@ -139,6 +147,10 @@ set_target_properties(checkpoints PROPERTIES IMPORTED_LOCATION
 add_library(device STATIC IMPORTED)
 set_target_properties(device PROPERTIES IMPORTED_LOCATION
     ${EXTERNAL_LIBS_DIR}/monero/libdevice.a)
+    
+add_library(device_trezor STATIC IMPORTED)
+set_target_properties(device_trezor PROPERTIES IMPORTED_LOCATION
+    ${EXTERNAL_LIBS_DIR}/monero/libdevice_trezor.a)
 
 add_library(multisig STATIC IMPORTED)
 set_target_properties(multisig PROPERTIES IMPORTED_LOCATION
@@ -176,7 +188,7 @@ add_library(monero-java SHARED ${SRC_FILES})
 
 target_link_libraries(monero-java
 
-#wallet_api
+wallet_api
 wallet
 cryptonote_core
 cryptonote_basic
@@ -193,6 +205,7 @@ epee
 blocks
 checkpoints
 device
+device_trezor
 multisig
 version
 
@@ -209,7 +222,8 @@ boost_thread
 ssl
 crypto
 
-#sodium
+sodium
+#hidapi
 
 #${log-lib}
 )
