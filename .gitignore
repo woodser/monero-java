@@ -6,7 +6,6 @@
 /build/
 **/pom.xml.versionsBackup
 **/logs
-/bin/
 /external-libs/boost/*
 /external-libs/monero/*
 /external-libs/openssl/*
