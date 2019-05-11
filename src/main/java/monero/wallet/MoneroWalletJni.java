@@ -28,10 +28,14 @@ import monero.wallet.request.MoneroTxRequest;
  */
 public class MoneroWalletJni extends MoneroWalletDefault {
   
+  static {
+    System.loadLibrary("monero-java");
+  }
+  
   // ------------------------------ PUBLIC STATIC -----------------------------
   
   public static MoneroWalletJni openWallet(String path, String password) {
-    return new MoneroWalletJni(openWalletJni(path, password, "stagenet"));
+    return new MoneroWalletJni(openWalletJni(path, password, 0));
   }
   
   // ------------------------------- INSTANCE ---------------------------------
@@ -378,7 +382,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   // ------------------------------ NATIVE METHODS ----------------------------
   
-  private native static long openWalletJni(String path, String password, String networkType);
+  private native static long openWalletJni(String path, String password, int networkType);
   
   private native String getBalanceWalletJni();
 }

@@ -21,10 +21,10 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
     return reinterpret_cast<jlong>(wallet);
 }
 
-JNIEXPORT jstring JNICALL
-Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni(JNIEnv *env, jobject instance) {
-  Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance);
-  wallet->balanceAll();
-  std::string balanceStr = "2";	// TODO
-  return env->NewStringUTF(balanceStr.c_str());
-}
+//JNIEXPORT jstring JNICALL
+//Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni(JNIEnv *env, jobject instance) {
+//  Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance);
+//  wallet->balanceAll();
+//  std::string balanceStr = "2";	// TODO
+//  return env->NewStringUTF(balanceStr.c_str());
+//}
