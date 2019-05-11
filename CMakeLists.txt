@@ -17,26 +17,6 @@ set(EXTERNAL_LIBS_DIR ${CMAKE_SOURCE_DIR}/external-libs)
 #        ${EXTERNAL_LIBS_DIR}/hidapi/libhidapi.a)
 
 ############
-# libsodium
-############
-
-add_library(sodium STATIC IMPORTED)
-set_target_properties(sodium PROPERTIES IMPORTED_LOCATION
-        ${EXTERNAL_LIBS_DIR}/libsodium/libsodium.a)
-
-############
-# OpenSSL
-############
-
-add_library(crypto STATIC IMPORTED)
-set_target_properties(crypto PROPERTIES IMPORTED_LOCATION
-        ${EXTERNAL_LIBS_DIR}/openssl/libcrypto.a)
-
-add_library(ssl STATIC IMPORTED)
-set_target_properties(ssl PROPERTIES IMPORTED_LOCATION
-    ${EXTERNAL_LIBS_DIR}/openssl/libssl.a)
-
-############
 # Boost
 ############
 
@@ -76,6 +56,26 @@ add_library(boost_thread STATIC IMPORTED)
 set_target_properties(boost_thread PROPERTIES IMPORTED_LOCATION
     ${EXTERNAL_LIBS_DIR}/boost/libboost_thread-mt.a)
 
+############
+# OpenSSL
+############
+
+add_library(crypto STATIC IMPORTED)
+set_target_properties(crypto PROPERTIES IMPORTED_LOCATION
+        ${EXTERNAL_LIBS_DIR}/openssl/libcrypto.a)
+
+add_library(ssl STATIC IMPORTED)
+set_target_properties(ssl PROPERTIES IMPORTED_LOCATION
+    ${EXTERNAL_LIBS_DIR}/openssl/libssl.a)
+    
+############
+# libsodium
+############
+
+add_library(sodium STATIC IMPORTED)
+set_target_properties(sodium PROPERTIES IMPORTED_LOCATION
+    ${EXTERNAL_LIBS_DIR}/libsodium/libsodium.a)
+
 #############
 # Monero
 #############
@@ -91,6 +91,22 @@ set_target_properties(wallet_merged PROPERTIES IMPORTED_LOCATION
 #add_library(wallet STATIC IMPORTED)
 #set_target_properties(wallet PROPERTIES IMPORTED_LOCATION
     #${EXTERNAL_LIBS_DIR}/monero/libwallet.a)
+    
+add_library(lmdb STATIC IMPORTED)
+set_target_properties(lmdb PROPERTIES IMPORTED_LOCATION
+    ${EXTERNAL_LIBS_DIR}/monero/liblmdb.a)
+    
+add_library(epee STATIC IMPORTED)
+set_target_properties(epee PROPERTIES IMPORTED_LOCATION
+    ${EXTERNAL_LIBS_DIR}/monero/libepee.a)
+    
+add_library(unbound STATIC IMPORTED)
+set_target_properties(unbound PROPERTIES IMPORTED_LOCATION
+    ${EXTERNAL_LIBS_DIR}/monero/libunbound.a)
+    
+add_library(easylogging STATIC IMPORTED)
+set_target_properties(easylogging PROPERTIES IMPORTED_LOCATION
+    ${EXTERNAL_LIBS_DIR}/monero/libeasylogging.a)
 
 add_library(cryptonote_core STATIC IMPORTED)
 set_target_properties(cryptonote_core PROPERTIES IMPORTED_LOCATION
@@ -123,22 +139,6 @@ set_target_properties(ringct_basic PROPERTIES IMPORTED_LOCATION
 add_library(blockchain_db STATIC IMPORTED)
 set_target_properties(blockchain_db PROPERTIES IMPORTED_LOCATION
     ${EXTERNAL_LIBS_DIR}/monero/libblockchain_db.a)
-
-add_library(lmdb STATIC IMPORTED)
-set_target_properties(lmdb PROPERTIES IMPORTED_LOCATION
-    ${EXTERNAL_LIBS_DIR}/monero/liblmdb.a)
-
-add_library(easylogging STATIC IMPORTED)
-set_target_properties(easylogging PROPERTIES IMPORTED_LOCATION
-    ${EXTERNAL_LIBS_DIR}/monero/libeasylogging.a)
-
-add_library(unbound STATIC IMPORTED)
-set_target_properties(unbound PROPERTIES IMPORTED_LOCATION
-    ${EXTERNAL_LIBS_DIR}/monero/libunbound.a)
-
-add_library(epee STATIC IMPORTED)
-set_target_properties(epee PROPERTIES IMPORTED_LOCATION
-    ${EXTERNAL_LIBS_DIR}/monero/libepee.a)
 
 add_library(blocks STATIC IMPORTED)
 set_target_properties(blocks PROPERTIES IMPORTED_LOCATION
@@ -192,28 +192,6 @@ add_library(monero-java SHARED ${SRC_FILES})
 
 target_link_libraries(monero-java
 
-wallet_merged
-#wallet_api
-#wallet
-cryptonote_core
-cryptonote_basic
-mnemonics
-ringct
-ringct_basic
-common
-cncrypto
-blockchain_db
-lmdb
-easylogging
-unbound
-epee
-blocks
-checkpoints
-device
-device_trezor
-multisig
-version
-
 boost_chrono
 boost_date_time
 boost_filesystem
@@ -227,8 +205,30 @@ boost_thread
 ssl
 crypto
 
-sodium
-#hidapi
+cryptonote_core
+cryptonote_basic
+mnemonics
+ringct
+ringct_basic
+common
+cncrypto
+blockchain_db
+blocks
+checkpoints
+device
+device_trezor
+multisig
+version
 
+wallet_merged
+#wallet_api
+#wallet
+lmdb
+epee
+unbound
+sodium
+easylogging
+
+#hidapi
 #${log-lib}
 )
