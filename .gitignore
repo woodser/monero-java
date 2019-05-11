@@ -10,3 +10,4 @@
 /external-libs/monero/*
 /external-libs/openssl/*
 /external-libs/libsodium/*
+/external-libs/hidapi/*
