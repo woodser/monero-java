@@ -80,13 +80,17 @@ set_target_properties(boost_thread PROPERTIES IMPORTED_LOCATION
 # Monero
 #############
 
-add_library(wallet_api STATIC IMPORTED)
-set_target_properties(wallet_api PROPERTIES IMPORTED_LOCATION
-    ${EXTERNAL_LIBS_DIR}/monero/libwallet_api.a)
+add_library(wallet_merged STATIC IMPORTED)
+set_target_properties(wallet_merged PROPERTIES IMPORTED_LOCATION
+    ${EXTERNAL_LIBS_DIR}/monero/libwallet_merged.a)
 
-add_library(wallet STATIC IMPORTED)
-set_target_properties(wallet PROPERTIES IMPORTED_LOCATION
-    ${EXTERNAL_LIBS_DIR}/monero/libwallet.a)
+#add_library(wallet_api STATIC IMPORTED)
+#set_target_properties(wallet_api PROPERTIES IMPORTED_LOCATION
+    #${EXTERNAL_LIBS_DIR}/monero/libwallet_api.a)
+
+#add_library(wallet STATIC IMPORTED)
+#set_target_properties(wallet PROPERTIES IMPORTED_LOCATION
+    #${EXTERNAL_LIBS_DIR}/monero/libwallet.a)
 
 add_library(cryptonote_core STATIC IMPORTED)
 set_target_properties(cryptonote_core PROPERTIES IMPORTED_LOCATION
@@ -188,8 +192,9 @@ add_library(monero-java SHARED ${SRC_FILES})
 
 target_link_libraries(monero-java
 
-wallet_api
-wallet
+wallet_merged
+#wallet_api
+#wallet
 cryptonote_core
 cryptonote_basic
 mnemonics
