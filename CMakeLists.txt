@@ -2,23 +2,66 @@ cmake_minimum_required(VERSION 3.4.1)
 
 #SET(CMAKE_C_COMPILER /path/to/c/compiler)
 #SET(CMAKE_CXX_COMPILER /path/to/cpp/compiler)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -pthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -F/Library/Frameworks -pthread")
 
 project(JavaCppBridge)
 
+#############
+# System
+#############
+
+#find_library(log-lib log)
+
+set(MONERO "src/main/cpp/submodules/monero-core")
+set(MONERO_SRC "${MONERO}/src")
+
+include_directories("$ENV{JAVA_HOME}")
+include_directories("$ENV{JAVA_HOME}/include")
+include_directories("$ENV{JAVA_HOME}/include/darwin")
+include_directories("${MONERO_SRC}/wallet/api")	# TODO: could replace with include_directories(${EXTERNAL_LIBS_DIR}/monero/include) and put wallet2_api.h in there
+
 set(EXTERNAL_LIBS_DIR ${CMAKE_SOURCE_DIR}/external-libs)
+message(STATUS EXTERNAL_LIBS_DIR : ${EXTERNAL_LIBS_DIR})
+
+# TODO: remove TRUEs, how are APPLE, DEPENDS, etc initialized?
+if (TRUE OR HIDAPI_FOUND OR LibUSB_COMPILE_TEST_PASSED)
+  if (TRUE OR APPLE)
+    if(TRUE OR DEPENDS)
+      list(APPEND EXTRA_LIBRARIES "-framework Foundation -framework IOKit")
+    else()
+      find_library(COREFOUNDATION CoreFoundation)
+      find_library(IOKIT IOKit)
+      list(APPEND EXTRA_LIBRARIES ${IOKIT})
+      list(APPEND EXTRA_LIBRARIES ${COREFOUNDATION})
+    endif()
+  endif()
+  if (WIN32)
+    list(APPEND EXTRA_LIBRARIES setupapi)
+  endif()
+endif()
+
+#list(APPEND EXTRA_LIBRARIES "-framework Foundation -framework IOKit")
+message(STATUS EXTRA_LIBRARIES: ${EXTRA_LIBRARIES})
 
 ############
 # hidapi
 ############
 
-#add_library(hidapi STATIC IMPORTED)
-#set_target_properties(hidapi PROPERTIES IMPORTED_LOCATION
-#        ${EXTERNAL_LIBS_DIR}/hidapi/libhidapi.a)
+add_library(hidapi STATIC IMPORTED)
+set_target_properties(hidapi PROPERTIES IMPORTED_LOCATION
+        ${EXTERNAL_LIBS_DIR}/hidapi/libhidapi.a)
 
 ############
 # Boost
 ############
+
+SET(boost_SRC /Users/Eric/git/build_stuff/boost_1_69_0/boost)
+SET(boost_LIB /Users/Eric/git/build_stuff/boost_1_69_0/stage/lib)
+#include_directories(/Users/Eric/git/build_stuff/boost_1_69_0)
+#include_directories("${boost_SRC}")
+link_directories("${boost_LIB}")
+
+find_package(Boost 1.69 REQUIRED COMPONENTS chrono date_time filesystem program_options regex serialization wserialization system thread)
 
 add_library(boost_chrono STATIC IMPORTED)
 set_target_properties(boost_chrono PROPERTIES IMPORTED_LOCATION
@@ -44,7 +87,7 @@ add_library(boost_serialization STATIC IMPORTED)
 set_target_properties(boost_serialization PROPERTIES IMPORTED_LOCATION
     ${EXTERNAL_LIBS_DIR}/boost/libboost_serialization.a)
     
- add_library(boost_wserialization STATIC IMPORTED)
+add_library(boost_wserialization STATIC IMPORTED)
 set_target_properties(boost_wserialization PROPERTIES IMPORTED_LOCATION
     ${EXTERNAL_LIBS_DIR}/boost/libboost_wserialization.a)
 
@@ -164,22 +207,6 @@ add_library(version STATIC IMPORTED)
 set_target_properties(version PROPERTIES IMPORTED_LOCATION
     ${EXTERNAL_LIBS_DIR}/monero/libversion.a)
 
-#############
-# System
-#############
-
-#find_library(log-lib log)
-
-set(MONERO "src/main/cpp/submodules/monero-core")
-set(MONERO_SRC "${MONERO}/src")
-
-include_directories("$ENV{JAVA_HOME}")
-include_directories("$ENV{JAVA_HOME}/include")
-include_directories("$ENV{JAVA_HOME}/include/darwin")
-include_directories("${MONERO_SRC}/wallet/api")	# TODO: could replace with include_directories(${EXTERNAL_LIBS_DIR}/monero/include) and put wallet2_api.h in there
-
-message(STATUS EXTERNAL_LIBS_DIR : ${EXTERNAL_LIBS_DIR})
-
 #################
 # Build library
 #################
@@ -191,6 +218,8 @@ set(
 add_library(monero-java SHARED ${SRC_FILES})
 
 target_link_libraries(monero-java
+
+hidapi
 
 boost_chrono
 boost_date_time
@@ -204,6 +233,15 @@ boost_thread
 
 ssl
 crypto
+
+wallet_merged
+#wallet_api
+#wallet
+lmdb
+epee
+unbound
+sodium
+easylogging
 
 cryptonote_core
 cryptonote_basic
@@ -220,15 +258,7 @@ device_trezor
 multisig
 version
 
-wallet_merged
-#wallet_api
-#wallet
-lmdb
-epee
-unbound
-sodium
-easylogging
+${EXTRA_LIBRARIES}
 
-#hidapi
 #${log-lib}
 )
