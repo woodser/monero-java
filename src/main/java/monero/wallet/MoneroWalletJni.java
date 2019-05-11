@@ -57,7 +57,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public String getMnemonic() {
-    throw new RuntimeException("Not implemented");
+    return getMnemonicJni();
   }
 
   @Override
@@ -77,7 +77,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public int getHeight() {
-    throw new RuntimeException("Not implemented");
+    return getHeightJni();
   }
 
   @Override
@@ -152,7 +152,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public BigInteger getBalance() {
-    return new BigInteger(getBalanceWalletJni());
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
@@ -384,5 +384,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native static long openWalletJni(String path, String password, int networkType);
   
-  private native String getBalanceWalletJni();
+  private native int getHeightJni();
+  
+  private native String getMnemonicJni();
 }

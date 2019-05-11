@@ -15,8 +15,9 @@ public class Scratchpad {
   public static void main(String[] args) {
     
     // initialize daemon, wallet, and direct rpc interface
-    MoneroDaemon daemon = TestUtils.getDaemonRpc();
-    MoneroWallet wallet = TestUtils.getWalletRpc();
+//    MoneroDaemon daemon = TestUtils.getDaemonRpc();
+//    MoneroWallet walletRpc = TestUtils.getWalletRpc();
+    MoneroWallet walletJni = TestUtils.getWalletJni();
     //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
     
 //    // common variables
@@ -26,7 +27,8 @@ public class Scratchpad {
     String txId = null;
     
     // -------------------------------- SCRATCHPAD ----------------------------
-        
-//    wallet.getAccounts(true);
+    
+    System.out.println("Wallet seed: " + walletJni.getMnemonic());
+    System.out.println("Wallet height: " + walletJni.getHeight());
   }
 }
