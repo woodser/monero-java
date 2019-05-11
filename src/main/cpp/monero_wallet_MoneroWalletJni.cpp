@@ -21,6 +21,17 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
     return reinterpret_cast<jlong>(wallet);
 }
 
+JNIEXPORT jint JNICALL
+Java_monero_wallet_MoneroWalletJni_getHeightJni(JNIEnv *env, jobject instance) {
+  return Bitmonero::WalletManagerFactory::getWalletManager()->blockchainHeight();
+}
+
+JNIEXPORT jstring JNICALL
+Java_monero_wallet_MoneroWalletJni_getMnemonicJni(JNIEnv *env, jobject instance) {
+  Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance);
+  return env->NewStringUTF(wallet->seed().c_str());
+}
+
 //JNIEXPORT jstring JNICALL
 //Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni(JNIEnv *env, jobject instance) {
 //  Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance);
