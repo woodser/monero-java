@@ -5,6 +5,29 @@
 using namespace std;
 
 JNIEXPORT jlong JNICALL
+Java_monero_wallet_MoneroWalletJni_createWalletJni(JNIEnv *env, jobject instance,
+                                                            jstring path, jstring password,
+                                                            jstring language,
+                                                            jint networkType) {
+    const char *_path = env->GetStringUTFChars(path, NULL);
+    const char *_password = env->GetStringUTFChars(password, NULL);
+    const char *_language = env->GetStringUTFChars(language, NULL);
+    Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
+
+    Bitmonero::Wallet *wallet =
+            Bitmonero::WalletManagerFactory::getWalletManager()->createWallet(
+                    std::string(_path),
+                    std::string(_password),
+                    std::string(_language),
+                    _networkType);
+
+    env->ReleaseStringUTFChars(path, _path);
+    env->ReleaseStringUTFChars(password, _password);
+    env->ReleaseStringUTFChars(language, _language);
+    return reinterpret_cast<jlong>(wallet);
+}
+
+JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstring path, jstring password, jint networkType) {
     const char* _path = env->GetStringUTFChars(path, NULL);
     const char* _password = env->GetStringUTFChars(password, NULL);
