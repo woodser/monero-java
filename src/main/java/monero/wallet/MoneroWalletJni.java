@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import monero.daemon.model.MoneroKeyImage;
+import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -24,15 +25,41 @@ import monero.wallet.request.MoneroTransferRequest;
 import monero.wallet.request.MoneroTxRequest;
 
 /**
- * Implements a Monero wallet using JNI to bridge to Monero Core C++.
+ * Implements a Monero wallet using JNI to bridge to Monero core c++.
  */
 public class MoneroWalletJni extends MoneroWalletDefault {
   
+  // load Monero core c++ as a dynamic library
   static {
     System.loadLibrary("monero-java");
   }
   
   // ------------------------------ PUBLIC STATIC -----------------------------
+  
+  /**
+   * Create a new wallet with a randomly generated seed.
+   * 
+   * @param path is the path on the filesystem to create the wallet
+   * @param password is the password to encrypt the wallet file
+   * @param networkType is the wallet's network type
+   * @return the created wallet
+   */
+  public static MoneroWalletJni createWallet(String path, String password, MoneroNetworkType networkType) {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  /**
+   * Create a new wallet with a given 
+   * 
+   * @param path is the path on the filesystem to create the wallet
+   * @param password is the password to encrypt the wallet file
+   * @param networkType is the wallet's network type
+   * @param mnemonic is the mnemonic of the wallet to restore
+   * @return the created wallet
+   */
+  public static MoneroWalletJni createWallet(String path, String password, MoneroNetworkType networkType, String mnemonic) {
+    throw new RuntimeException("Not implemented");
+  }
   
   public static MoneroWalletJni openWallet(String path, String password) {
     return new MoneroWalletJni(openWalletJni(path, password, 0));
@@ -43,6 +70,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private long handle;  // handle to wallet memory address in c++
   
   private MoneroWalletJni(long handle) {
+    System.out.println("Internal handle: " + handle);
     this.handle = handle;
   }
   
