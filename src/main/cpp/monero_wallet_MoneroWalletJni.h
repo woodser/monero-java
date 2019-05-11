@@ -28,6 +28,8 @@ void setHandle(JNIEnv *env, jobject obj, T *t) {
 extern "C" {
 #endif
 
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *, jclass, jstring, jstring, jint);
+
 #ifdef __cplusplus
 }
 #endif
