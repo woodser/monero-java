@@ -2,6 +2,11 @@ JNI
 CMakeLists.txt uses hardcoded absolute path to my boost source path
 jstring2string should be const char *_str = env->GetStringUTFChars(jstr, NULL);?
 minimize unecessary SRC_FILES, most imports are compiler includes
+submodules should be external instead
+license headers
+common wallet manager? openWallet(), createWallet(), walletExists()
+MoneroRpc -> MoneroRpcConnection
+wallet.getLanguages() is rpc specific, not general wallet
 
 WALLET RPC ISSUES
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)

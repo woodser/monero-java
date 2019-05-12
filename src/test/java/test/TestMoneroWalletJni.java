@@ -1,26 +1,24 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import monero.daemon.MoneroDaemon;
+import monero.utils.MoneroException;
+import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
-import monero.wallet.model.MoneroIncomingTransfer;
-import monero.wallet.model.MoneroOutgoingTransfer;
-import monero.wallet.model.MoneroTransfer;
 import utils.TestUtils;
 
 /**
- * Tests the JNI wallet specifically.
+ * Tests specific to the JNI wallet.
  */
 public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
@@ -38,6 +36,63 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   protected MoneroWallet getTestWallet() {
     return TestUtils.getWalletJni();
+  }
+  
+  @Test
+  public void testCreateWalletRandom() {
+    testCreateWallet(null, null, null);
+  }
+  
+  @Test
+  public void testCreateWalletMnemonic() {
+    testCreateWallet(TestUtils.TEST_MNEMONIC, TestUtils.TEST_ADDRESS, 10000);
+  }
+  
+  // Can close the currently open wallet
+  @Test
+  @Ignore   // disabled so wallet is not actually closed TODO: just re-open wallet?
+  public void testClose() {
+    wallet.close();
+  }
+  
+  // ---------------------------------- PRIVATE -------------------------------
+  
+  private void testCreateWallet(String mnemonic, String address, Integer restoreHeight) {
+    
+    // unique wallet path for test
+    String path = "test_wallet_" + UUID.randomUUID().toString();
+    
+    // wallet does not exist
+    assertFalse(MoneroWalletJni.walletExists(path));
+    
+    // cannot open wallet
+    try {
+      MoneroWalletJni.openWallet(path, TestUtils.WALLET_JNI_PW);
+      fail("Cannot open non-existant wallet");
+    } catch (MoneroException e) {
+      assertEquals("Wallet does not exist", e.getMessage());
+    }
+    
+    // create the wallet
+    MoneroWalletJni walletJni;
+    if (mnemonic == null) walletJni = MoneroWalletJni.createWallet(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_NETWORK, TestUtils.getDaemonRpc().getRpc(), TestUtils.TEST_LANGUAGE);
+    else walletJni = MoneroWalletJni.createWallet(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_NETWORK, TestUtils.getDaemonRpc().getRpc(), TestUtils.TEST_LANGUAGE, mnemonic, restoreHeight);
+    
+    // test created wallet
+    assertEquals(path, walletJni.getPath());
+    assertEquals(TestUtils.WALLET_JNI_PW, walletJni.getPassword());
+    assertEquals(TestUtils.TEST_NETWORK, walletJni.getNetworkType());
+    MoneroUtils.validateMnemonic(walletJni.getMnemonic());
+    assertEquals(TestUtils.TEST_LANGUAGE, walletJni.getLanguage());
+    if (mnemonic != null) assertEquals(mnemonic, wallet.getMnemonic());
+    if (address != null) assertEquals(address, wallet.getPrimaryAddress());
+  }
+  
+  // Can save the wallet
+  @Test
+  public void testSave() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    wallet.save();
   }
   
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
@@ -406,51 +461,4 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   protected MoneroDaemon getTestDaemon() {
     return super.getTestDaemon();
   }
-  
-  @SuppressWarnings("unchecked")
-  private static void compareTransferOrder(List<Map<String, Object>> rpcTransfers, List<?> transfers) {
-    if (rpcTransfers == null) {
-      assertTrue(transfers.isEmpty());
-      return;
-    }
-    assertEquals(rpcTransfers.size(), transfers.size());
-    for (int i = 0; i < transfers.size(); i++) {
-      MoneroTransfer transfer = (MoneroTransfer) transfers.get(i);
-      Map<String, Object> rpcTransfer = rpcTransfers.get(i);
-      assertEquals((String) rpcTransfer.get("txid"), transfer.getTx().getId());
-      
-      // collect account and subaddress indices from rpc response
-      List<Map<String, BigInteger>> rpcSubaddrIndices = (List<Map<String, BigInteger>>) rpcTransfer.get("subaddr_indices");
-      Integer accountIdx = null;
-      List<Integer> subaddressIndices = new ArrayList<Integer>();
-      for (Map<String, BigInteger> rpcSubaddrIdx : rpcSubaddrIndices) {
-        if (accountIdx == null) accountIdx = rpcSubaddrIdx.get("major").intValue();
-        else assertEquals((int) accountIdx, (int) rpcSubaddrIdx.get("major").intValue());
-        subaddressIndices.add(rpcSubaddrIdx.get("minor").intValue());
-      }
-      
-      // test transfer
-      assertEquals(accountIdx, transfer.getAccountIndex());
-      if (transfer instanceof MoneroIncomingTransfer) {
-        assertEquals(1, rpcSubaddrIndices.size());
-        assertEquals(subaddressIndices.get(0), ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
-      } else if (transfer instanceof MoneroOutgoingTransfer) {
-        assertEquals(subaddressIndices, ((MoneroOutgoingTransfer) transfer).getSubaddressIndices());
-      } else {
-        fail("Unrecognized transfer instance");
-      }
-    }
-  }
-  
-//  private static void compareTxOrder(List<Map<String, Object>> rpcTransfers, List<MoneroTxWallet> txs) {
-//    List<String> txIds = new ArrayList<String>();
-//    for (Map<String, Object> rpcTransfer : rpcTransfers) {
-//      String txId = (String) rpcTransfer.get("txid");
-//      if (!txIds.contains(txId)) txIds.add(txId);
-//    }
-//    assertEquals(txIds.size(), txs.size());
-//    for (int i = 0; i < txIds.size(); i++) {
-//      assertEquals(txIds.get(i), txs.get(i).getId());
-//    }
-//  }
 }

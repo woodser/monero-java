@@ -295,7 +295,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     wallet.rescanSpent();
   }
   
-  // Can save the wallet file
+  // Can save the wallet
   @Test
   public void testSave() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -316,6 +316,53 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     assertNotNull(entry.getAddress());
     assertNotNull(entry.getDescription());
   }
+  
+  @SuppressWarnings("unchecked")
+  private static void compareTransferOrder(List<Map<String, Object>> rpcTransfers, List<?> transfers) {
+    if (rpcTransfers == null) {
+      assertTrue(transfers.isEmpty());
+      return;
+    }
+    assertEquals(rpcTransfers.size(), transfers.size());
+    for (int i = 0; i < transfers.size(); i++) {
+      MoneroTransfer transfer = (MoneroTransfer) transfers.get(i);
+      Map<String, Object> rpcTransfer = rpcTransfers.get(i);
+      assertEquals((String) rpcTransfer.get("txid"), transfer.getTx().getId());
+      
+      // collect account and subaddress indices from rpc response
+      List<Map<String, BigInteger>> rpcSubaddrIndices = (List<Map<String, BigInteger>>) rpcTransfer.get("subaddr_indices");
+      Integer accountIdx = null;
+      List<Integer> subaddressIndices = new ArrayList<Integer>();
+      for (Map<String, BigInteger> rpcSubaddrIdx : rpcSubaddrIndices) {
+        if (accountIdx == null) accountIdx = rpcSubaddrIdx.get("major").intValue();
+        else assertEquals((int) accountIdx, (int) rpcSubaddrIdx.get("major").intValue());
+        subaddressIndices.add(rpcSubaddrIdx.get("minor").intValue());
+      }
+      
+      // test transfer
+      assertEquals(accountIdx, transfer.getAccountIndex());
+      if (transfer instanceof MoneroIncomingTransfer) {
+        assertEquals(1, rpcSubaddrIndices.size());
+        assertEquals(subaddressIndices.get(0), ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
+      } else if (transfer instanceof MoneroOutgoingTransfer) {
+        assertEquals(subaddressIndices, ((MoneroOutgoingTransfer) transfer).getSubaddressIndices());
+      } else {
+        fail("Unrecognized transfer instance");
+      }
+    }
+  }
+  
+//  private static void compareTxOrder(List<Map<String, Object>> rpcTransfers, List<MoneroTxWallet> txs) {
+//    List<String> txIds = new ArrayList<String>();
+//    for (Map<String, Object> rpcTransfer : rpcTransfers) {
+//      String txId = (String) rpcTransfer.get("txid");
+//      if (!txIds.contains(txId)) txIds.add(txId);
+//    }
+//    assertEquals(txIds.size(), txs.size());
+//    for (int i = 0; i < txIds.size(); i++) {
+//      assertEquals(txIds.get(i), txs.get(i).getId());
+//    }
+//  }
   
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
 
@@ -683,51 +730,4 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   protected MoneroDaemon getTestDaemon() {
     return super.getTestDaemon();
   }
-  
-  @SuppressWarnings("unchecked")
-  private static void compareTransferOrder(List<Map<String, Object>> rpcTransfers, List<?> transfers) {
-    if (rpcTransfers == null) {
-      assertTrue(transfers.isEmpty());
-      return;
-    }
-    assertEquals(rpcTransfers.size(), transfers.size());
-    for (int i = 0; i < transfers.size(); i++) {
-      MoneroTransfer transfer = (MoneroTransfer) transfers.get(i);
-      Map<String, Object> rpcTransfer = rpcTransfers.get(i);
-      assertEquals((String) rpcTransfer.get("txid"), transfer.getTx().getId());
-      
-      // collect account and subaddress indices from rpc response
-      List<Map<String, BigInteger>> rpcSubaddrIndices = (List<Map<String, BigInteger>>) rpcTransfer.get("subaddr_indices");
-      Integer accountIdx = null;
-      List<Integer> subaddressIndices = new ArrayList<Integer>();
-      for (Map<String, BigInteger> rpcSubaddrIdx : rpcSubaddrIndices) {
-        if (accountIdx == null) accountIdx = rpcSubaddrIdx.get("major").intValue();
-        else assertEquals((int) accountIdx, (int) rpcSubaddrIdx.get("major").intValue());
-        subaddressIndices.add(rpcSubaddrIdx.get("minor").intValue());
-      }
-      
-      // test transfer
-      assertEquals(accountIdx, transfer.getAccountIndex());
-      if (transfer instanceof MoneroIncomingTransfer) {
-        assertEquals(1, rpcSubaddrIndices.size());
-        assertEquals(subaddressIndices.get(0), ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
-      } else if (transfer instanceof MoneroOutgoingTransfer) {
-        assertEquals(subaddressIndices, ((MoneroOutgoingTransfer) transfer).getSubaddressIndices());
-      } else {
-        fail("Unrecognized transfer instance");
-      }
-    }
-  }
-  
-//  private static void compareTxOrder(List<Map<String, Object>> rpcTransfers, List<MoneroTxWallet> txs) {
-//    List<String> txIds = new ArrayList<String>();
-//    for (Map<String, Object> rpcTransfer : rpcTransfers) {
-//      String txId = (String) rpcTransfer.get("txid");
-//      if (!txIds.contains(txId)) txIds.add(txId);
-//    }
-//    assertEquals(txIds.size(), txs.size());
-//    for (int i = 0; i < txIds.size(); i++) {
-//      assertEquals(txIds.get(i), txs.get(i).getId());
-//    }
-//  }
 }
