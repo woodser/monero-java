@@ -2,9 +2,11 @@ package utils;
 
 import java.util.List;
 
-import monero.daemon.MoneroDaemon;
+import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
+import monero.rpc.MoneroRpc;
 import monero.wallet.MoneroWallet;
+import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroTransfer;
 
 /**
@@ -27,6 +29,18 @@ public class Scratchpad {
     String txId = null;
     
     // -------------------------------- SCRATCHPAD ----------------------------
+    
+    String path = "wallet_temp";
+    String password = TestUtils.WALLET_RPC_PW;
+    MoneroRpc daemonConnection = TestUtils.getDaemonRpc().getRpc();
+    String language = "English";
+    String mnemonic = TestUtils.TEST_MNEMONIC;
+    MoneroNetworkType networkType = MoneroNetworkType.STAGENET;
+    Integer restoreHeight = null;
+    
+    MoneroWalletJni.createWallet(path, password, networkType, daemonConnection, language, mnemonic, restoreHeight);
+    
+    System.out.println(MoneroWalletJni.walletExists("asdf"));
     
     System.out.println("Wallet seed: " + walletJni.getMnemonic());
     System.out.println("Wallet height: " + walletJni.getHeight());

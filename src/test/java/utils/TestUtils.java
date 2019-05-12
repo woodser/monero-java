@@ -21,23 +21,28 @@ import monero.wallet.MoneroWalletRpc;
  */
 public class TestUtils {
   
-  // monero-daemon-rpc endpoint configuration (adjust per your configuration)
+  // monero daemon rpc endpoint configuration (adjust per your configuration)
   private static final String DAEMON_RPC_URI = "http://localhost:38081";
   private static final String DAEMON_RPC_USERNAME = null;
   private static final String DAEMON_RPC_PASSWORD = null;  
   
-  // monero-wallet-rpc endpoint configuration (adjust per your configuration)
+  // monero wallet rpc configuration (adjust per your configuration)
   private static final String WALLET_RPC_URI = "http://localhost:38083";
   private static final String WALLET_RPC_USERNAME = "rpc_user";
   private static final String WALLET_RPC_PASSWORD = "abc123";
-  
-  // names of test wallets
   public static final String WALLET_RPC_NAME_1 = "test_wallet_1";
   public static final String WALLET_RPC_NAME_2 = "test_wallet_2";
   public static final String WALLET_RPC_PW = "supersecretpassword123";
   
+  // wallet jni configuration (adjust per your configuration)
+  public static final String WALLET_JNI_PATH_1 = "test_wallet_1";
+  public static final String WALLET_JNI_PATH_2 = "test_wallet_2";
+  public static final String WALLET_JNI_PW = "supersecretpassword123";
+  
   // test constants
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
+  public static final MoneroNetworkType TEST_NETWORK = MoneroNetworkType.STAGENET;
+  public static final String TEST_LANGUAGE = "English";
   public static final String TEST_MNEMONIC = "nagged giddy virtual bias spying arsenic fowls hexagon oars frying lava dialect copy gasp utensils muffin tattoo ritual exotic inmate kisses either sprig sunken sprig";
   public static final String TEST_ADDRESS = "59aZULsUF3YNSKGiHz4JPMfjGYkm1S4TB3sPsTr3j85HhXb9crZqGa7jJ8cA87U48kT5wzi2VzGZnN2PKojEwoyaHqtpeZh";
   
@@ -106,7 +111,18 @@ public class TestUtils {
    */
   private static MoneroWalletJni walletJni;
   public static MoneroWalletJni getWalletJni() {
-    if (walletJni == null) walletJni = MoneroWalletJni.openWallet(WALLET_RPC_NAME_1, WALLET_RPC_PASSWORD);
+    if (walletJni == null) {
+      
+      // restore wallet if necessary
+      if (!MoneroWalletJni.walletExists(WALLET_JNI_PATH_1)) {
+        MoneroRpc daemonConnection = new MoneroRpc(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
+        walletJni = MoneroWalletJni.createWallet(WALLET_JNI_PATH_1, WALLET_JNI_PW, TEST_NETWORK, daemonConnection, TEST_LANGUAGE, TestUtils.TEST_MNEMONIC, 30000);
+      } else {
+        walletJni = MoneroWalletJni.openWallet(WALLET_JNI_PATH_1, WALLET_JNI_PW);
+      }
+    }
+    
+    // return cached wallet jni
     return walletJni;
   }
   

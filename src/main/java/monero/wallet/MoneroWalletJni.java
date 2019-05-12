@@ -6,6 +6,7 @@ import java.util.List;
 
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
+import monero.rpc.MoneroRpc;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -34,35 +35,59 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     System.loadLibrary("monero-java");
   }
   
-  // ------------------------------ PUBLIC STATIC -----------------------------
+  // ---------------------------- WALLET MANAGEMENT ---------------------------
   
   /**
-   * Create a new wallet with a randomly generated seed.
+   * Indicates if the wallet at the given path exists.
    * 
-   * @param path is the path on the filesystem to create the wallet
-   * @param password is the password to encrypt the wallet file
-   * @param networkType is the wallet's network type
-   * @return the created wallet
+   * @param path is the path to check for existence
+   * @return true if a wallet exists at the given path, false otherwise
    */
-  public static MoneroWalletJni createWallet(String path, String password, MoneroNetworkType networkType) {
-    throw new RuntimeException("Not implemented");
+  public static boolean walletExists(String path) {
+    return walletExistsJni(path);
   }
   
   /**
-   * Create a new wallet with a given 
+   * Open a wallet.
    * 
-   * @param path is the path on the filesystem to create the wallet
-   * @param password is the password to encrypt the wallet file
-   * @param networkType is the wallet's network type
-   * @param mnemonic is the mnemonic of the wallet to restore
-   * @return the created wallet
+   * @param path is the path on the filesystem of the wallet to open
+   * @param password is the password of the wallet
+   * @return the opened wallet
    */
-  public static MoneroWalletJni createWallet(String path, String password, MoneroNetworkType networkType, String mnemonic) {
-    throw new RuntimeException("Not implemented");
-  }
-  
   public static MoneroWalletJni openWallet(String path, String password) {
     return new MoneroWalletJni(openWalletJni(path, password, 0));
+  }
+  
+  /**
+   * Create a new randomly generated wallet.
+   * 
+   * @param path is the path on the filesystem to create the wallet
+   * @param password is the password to encrypt the wallet
+   * @param networkType is the wallet's network type (default = MoneroNetworkType.MAINNET)
+   * @param daemonConnection is connection information to a daemon (default = an unconnected wallet)
+   * @param language is the wallet and mnemonic's language (default = "English")
+   * @param mnemonic is the mnemonic of a wallet to restore (default = randomly generate a new wallet)
+   * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
+   * @return the created wallet
+   */
+  public static MoneroWalletJni createWallet(String path, String password, MoneroNetworkType networkType, MoneroRpc daemonConnection, String language) {
+    return createWallet(path, password, networkType, daemonConnection, language, null, null);
+  }
+  
+  /**
+   * Create a new wallet.
+   * 
+   * @param path is the path on the filesystem to create the wallet
+   * @param password is the password to encrypt the wallet
+   * @param networkType is the wallet's network type (default = MoneroNetworkType.MAINNET)
+   * @param daemonConnection is connection information to a daemon (default = an unconnected wallet)
+   * @param language is the wallet and mnemonic's language (default = "English")
+   * @param mnemonic is the mnemonic of a wallet to restore (default = randomly generate a new wallet)
+   * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
+   * @return the created wallet
+   */
+  public static MoneroWalletJni createWallet(String path, String password, MoneroNetworkType networkType, MoneroRpc daemonConnection, String language, String mnemonic, Integer restoreHeight) {
+    throw new RuntimeException("Not implemented");
   }
   
   // ------------------------------- INSTANCE ---------------------------------
@@ -76,6 +101,50 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private long getHandle() {
     return handle;
+  }
+  
+  // --------------------------- JNI WALLET METHODS ---------------------------
+  
+  // TODO: comments and other jni specific methods
+  
+  public String getPath() {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  public String getPassword() {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  public String getNetworkType() {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  public String getLanguage() {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  /**
+   * Save the wallet.
+   */
+  public void save() {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  /**
+   * Close the wallet.
+   */
+  public void close() {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  // -------------------------- COMMON WALLET METHODS -------------------------
+  
+  public MoneroRpc getDaemonRpc() {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  public void setDaemonRpc(MoneroRpc daemonRpc) {
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
@@ -411,6 +480,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   // ------------------------------ NATIVE METHODS ----------------------------
   
   private native static long openWalletJni(String path, String password, int networkType);
+  
+  private native static boolean walletExistsJni(String path);
   
   private native int getHeightJni();
   
