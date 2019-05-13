@@ -242,9 +242,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener progressListener) {
+  public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener listener) {
     if (endHeight != null) throw new MoneroException("Monero Wallet RPC does not support syncing to an end height");
-    if (progressListener != null) throw new MoneroException("Monero Wallet RPC does not support reporting sync progress");
+    if (listener != null) throw new MoneroException("Monero Wallet RPC does not support reporting sync progress");
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("start_height", startHeight);
     Map<String, Object> resp = rpc.sendJsonRequest("refresh", params);
