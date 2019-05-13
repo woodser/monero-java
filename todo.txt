@@ -7,6 +7,7 @@ license headers
 common wallet manager? openWallet(), createWallet(), walletExists()
 MoneroRpc -> MoneroRpcConnection
 wallet.getLanguages() is rpc specific, not general wallet
+switch heights to longs
 
 WALLET RPC ISSUES
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)

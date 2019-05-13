@@ -41,7 +41,7 @@ public class TestUtils {
   
   // test constants
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
-  public static final MoneroNetworkType TEST_NETWORK = MoneroNetworkType.STAGENET;
+  public static final MoneroNetworkType NETWORK_TYPE = MoneroNetworkType.STAGENET;
   public static final String TEST_LANGUAGE = "English";
   public static final String TEST_MNEMONIC = "nagged giddy virtual bias spying arsenic fowls hexagon oars frying lava dialect copy gasp utensils muffin tattoo ritual exotic inmate kisses either sprig sunken sprig";
   public static final String TEST_ADDRESS = "59aZULsUF3YNSKGiHz4JPMfjGYkm1S4TB3sPsTr3j85HhXb9crZqGa7jJ8cA87U48kT5wzi2VzGZnN2PKojEwoyaHqtpeZh";
@@ -116,7 +116,7 @@ public class TestUtils {
       // restore wallet if necessary
       if (!MoneroWalletJni.walletExists(WALLET_JNI_PATH_1)) {
         MoneroRpc daemonConnection = new MoneroRpc(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
-        walletJni = MoneroWalletJni.createWalletFromMnemonic(WALLET_JNI_PATH_1, WALLET_JNI_PW, TEST_NETWORK, daemonConnection, TEST_LANGUAGE, TestUtils.TEST_MNEMONIC, 30000);
+        walletJni = MoneroWalletJni.createWalletFromMnemonic(WALLET_JNI_PATH_1, WALLET_JNI_PW, NETWORK_TYPE, daemonConnection, TestUtils.TEST_MNEMONIC, 30000);
       } else {
         walletJni = MoneroWalletJni.openWallet(WALLET_JNI_PATH_1, WALLET_JNI_PW);
       }

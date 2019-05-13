@@ -28,6 +28,11 @@ import monero.wallet.request.MoneroTxRequest;
 public abstract class MoneroWalletDefault implements MoneroWallet {
   
   @Override
+  public String getPrimaryAddress() {
+    return getAddress(0, 0);
+  }
+  
+  @Override
   public MoneroIntegratedAddress getIntegratedAddress() {
     return getIntegratedAddress(null);
   }
