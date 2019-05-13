@@ -37,7 +37,7 @@ import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSubaddress;
-import monero.wallet.model.MoneroSyncProgressListener;
+import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
@@ -148,7 +148,7 @@ public interface MoneroWallet {
    * @param progressListener is invoked as sync progress is made
    * @return the sync result
    */
-  public MoneroSyncResult sync(Integer startHeight, MoneroSyncProgressListener progressListener);
+  public MoneroSyncResult sync(Integer startHeight, MoneroSyncListener progressListener);
   
   /**
    * Synchronizes the wallet with the blockchain.
@@ -158,7 +158,7 @@ public interface MoneroWallet {
    * @param progressListener is invoked as sync progress is made
    * @return the sync result
    */
-  public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncProgressListener progressListener);
+  public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener progressListener);
   
   /**
    * Rescan the blockchain from scratch, losing any information which can not

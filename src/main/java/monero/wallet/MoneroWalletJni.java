@@ -17,7 +17,7 @@ import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSubaddress;
-import monero.wallet.model.MoneroSyncProgressListener;
+import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
@@ -209,7 +209,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncProgressListener progressListener) {
+  public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener progressListener) {
     throw new RuntimeException("Not implemented");
   }
 
