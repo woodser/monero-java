@@ -45,7 +45,7 @@ import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSubaddress;
-import monero.wallet.model.MoneroSyncProgressListener;
+import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
@@ -242,7 +242,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncProgressListener progressListener) {
+  public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener progressListener) {
     if (endHeight != null) throw new MoneroException("Monero Wallet RPC does not support syncing to an end height");
     if (progressListener != null) throw new MoneroException("Monero Wallet RPC does not support reporting sync progress");
     Map<String, Object> params = new HashMap<String, Object>();

@@ -14,7 +14,7 @@ import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSubaddress;
-import monero.wallet.model.MoneroSyncProgressListener;
+import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
@@ -38,7 +38,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public MoneroSyncResult sync(Integer startHeight, MoneroSyncProgressListener listener) {
+  public MoneroSyncResult sync(Integer startHeight, MoneroSyncListener listener) {
     return sync(startHeight, null, listener);
   }
   
