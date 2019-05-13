@@ -32,7 +32,7 @@ import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 
 /**
- * Sends requests to the Monero RPC API.
+ * Maintains a connection and sends requests to a Monero RPC API.
  */
 public class MoneroRpc {
 
@@ -51,6 +51,8 @@ public class MoneroRpc {
   // instance variables
   private URI uri;
   private HttpClient client;
+  private String username;
+  private String password;
   
   public MoneroRpc(URI uri) {
     this(uri, null, null);
@@ -66,6 +68,8 @@ public class MoneroRpc {
   
   public MoneroRpc(URI uri, String username, String password) {
     this.uri = uri;
+    this.username = username;
+    this.password = password;
     if (username != null || password != null) {
       CredentialsProvider creds = new BasicCredentialsProvider();
       creds.setCredentials(new AuthScope(uri.getHost(), uri.getPort()), new UsernamePasswordCredentials(username, password));
@@ -73,6 +77,18 @@ public class MoneroRpc {
     } else {
       this.client = HttpClients.createDefault();
     }
+  }
+  
+  public URI getUri() {
+    return uri;
+  }
+  
+  public String getUsername() {
+    return username;
+  }
+  
+  public String getPassword() {
+    return password;
   }
   
   /**
