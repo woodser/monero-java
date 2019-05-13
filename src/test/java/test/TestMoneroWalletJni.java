@@ -37,7 +37,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   protected MoneroWallet getTestWallet() {
     return TestUtils.getWalletJni();
   }
-  
+
   @Test
   public void testCreateWalletRandom() {
     testCreateWallet(null, null, null);
@@ -62,7 +62,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   // ---------------------------------- PRIVATE -------------------------------
   
-  private void testCreateWallet(String mnemonic, String address, Integer restoreHeight) {
+  private static void testCreateWallet(String mnemonic, String address, Integer restoreHeight) {
     
     // unique wallet path for test
     String path = "test_wallet_" + UUID.randomUUID().toString();
@@ -79,16 +79,15 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
     
     // create the wallet
-    MoneroWalletJni walletJni;
-    if (mnemonic == null) walletJni = MoneroWalletJni.createWallet(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_NETWORK, TestUtils.getDaemonRpc().getRpc(), TestUtils.TEST_LANGUAGE);
-    else walletJni = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_NETWORK, TestUtils.getDaemonRpc().getRpc(), TestUtils.TEST_LANGUAGE, mnemonic, restoreHeight);
+    MoneroWalletJni wallet;
+    if (mnemonic == null) wallet = MoneroWalletJni.createWallet(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpc(), TestUtils.TEST_LANGUAGE);
+    else wallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpc(), mnemonic, restoreHeight);
     
     // test created wallet
-    assertEquals(path, walletJni.getPath());
-    //assertEquals(TestUtils.WALLET_JNI_PW, walletJni.getPassword());
-    assertEquals(TestUtils.TEST_NETWORK, walletJni.getNetworkType());
-    MoneroUtils.validateMnemonic(walletJni.getMnemonic());
-    assertEquals(TestUtils.TEST_LANGUAGE, walletJni.getLanguage());
+    assertEquals(path, wallet.getPath());
+    assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
+    MoneroUtils.validateMnemonic(wallet.getMnemonic());
+    assertEquals(TestUtils.TEST_LANGUAGE, wallet.getLanguage());
     if (mnemonic != null) assertEquals(mnemonic, wallet.getMnemonic());
     if (address != null) assertEquals(address, wallet.getPrimaryAddress());
   }

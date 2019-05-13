@@ -42,34 +42,39 @@ Java_monero_wallet_MoneroWalletJni_createWalletJni(JNIEnv *env, jclass clazz, js
 }
 
 JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring path, jstring password, jstring language, jint networkType, jstring mnemonic, jint restoreHeight) {
-  cout << "createWalletFromMnemonicJni" << endl;
+Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring path, jstring password, jint networkType, jstring mnemonic, jint restoreHeight) {
   const char *_path = env->GetStringUTFChars(path, NULL);
   const char *_password = env->GetStringUTFChars(password, NULL);
-  const char *_language = env->GetStringUTFChars(language, NULL);
+  const char *_mnemonic = env->GetStringUTFChars(mnemonic, NULL);
   Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
 
-  Bitmonero::Wallet *wallet = Bitmonero::WalletManagerFactory::getWalletManager()->createWallet(std::string(_path), std::string(_password), std::string(_language), _networkType);
+  Bitmonero::Wallet *wallet = Bitmonero::WalletManagerFactory::getWalletManager()->recoveryWallet(std::string(_path), std::string(_password), std::string(_mnemonic), _networkType, (uint64_t) restoreHeight);
 
   env->ReleaseStringUTFChars(path, _path);
   env->ReleaseStringUTFChars(password, _password);
-  env->ReleaseStringUTFChars(language, _language);
+  env->ReleaseStringUTFChars(mnemonic, _mnemonic);
+  return reinterpret_cast<jlong>(wallet);
   return reinterpret_cast<jlong>(wallet);
 }
 
 JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass clazz, jstring path, jstring password, jstring language, jint networkType, jstring address, jstring viewKey, jstring spendKey, jint restoreHeight) {
-  cout << "createWalletFromKeysJni" << endl;
   const char *_path = env->GetStringUTFChars(path, NULL);
   const char *_password = env->GetStringUTFChars(password, NULL);
   const char *_language = env->GetStringUTFChars(language, NULL);
   Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
+  const char *_address = env->GetStringUTFChars(address, NULL);
+  const char *_viewKey = env->GetStringUTFChars(viewKey, NULL);
+  const char *_spendKey = env->GetStringUTFChars(spendKey, NULL);
 
-  Bitmonero::Wallet *wallet = Bitmonero::WalletManagerFactory::getWalletManager()->createWallet(std::string(_path), std::string(_password), std::string(_language), _networkType);
+  Bitmonero::Wallet *wallet = Bitmonero::WalletManagerFactory::getWalletManager()->createWalletFromKeys( std::string(_path), std::string(_password), std::string(_language), _networkType, (uint64_t) restoreHeight, std::string(_address), std::string(_viewKey), std::string(_spendKey));
 
   env->ReleaseStringUTFChars(path, _path);
   env->ReleaseStringUTFChars(password, _password);
   env->ReleaseStringUTFChars(language, _language);
+  env->ReleaseStringUTFChars(address, _address);
+  env->ReleaseStringUTFChars(viewKey, _viewKey);
+  env->ReleaseStringUTFChars(spendKey, _spendKey);
   return reinterpret_cast<jlong>(wallet);
 }
 
@@ -81,22 +86,23 @@ Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *env, jobject i
 
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getPathJni(JNIEnv *env, jobject instance) {
-    std::string balanceStr = "2";	// TODO
-    return env->NewStringUTF(balanceStr.c_str());
-}
-
-//JNIEXPORT jint JNICALL
-//Java_monero_wallet_MoneroWalletJni_getNetworkTypeJni(JNIEnv *env, jobject instance) {
-//
-//}
-
-JNIEXPORT jstring JNICALL
-Java_monero_wallet_MoneroWalletJni_getLanguageJni(JNIEnv *env, jobject instance) {
-    std::string balanceStr = "2";	// TODO
-    return env->NewStringUTF(balanceStr.c_str());
+  Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance);
+  return env->NewStringUTF(wallet->path().c_str());
 }
 
 JNIEXPORT jint JNICALL
+Java_monero_wallet_MoneroWalletJni_getNetworkTypeJni(JNIEnv *env, jobject instance) {
+  Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance);
+  return wallet->nettype();
+}
+
+JNIEXPORT jstring JNICALL
+Java_monero_wallet_MoneroWalletJni_getLanguageJni(JNIEnv *env, jobject instance) {
+  Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance);
+  return env->NewStringUTF(wallet->getSeedLanguage().c_str());
+}
+
+JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_getHeightJni(JNIEnv *env, jobject instance) {
   return Bitmonero::WalletManagerFactory::getWalletManager()->blockchainHeight();
 }
@@ -114,3 +120,9 @@ Java_monero_wallet_MoneroWalletJni_getMnemonicJni(JNIEnv *env, jobject instance)
 //  std::string balanceStr = "2";	// TODO
 //  return env->NewStringUTF(balanceStr.c_str());
 //}
+
+JNIEXPORT jstring JNICALL
+Java_monero_wallet_MoneroWalletJni_getAddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
+  Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance);
+  return env->NewStringUTF(wallet->address((uint32_t) accountIdx, (uint32_t) subaddressIdx).c_str());
+}
