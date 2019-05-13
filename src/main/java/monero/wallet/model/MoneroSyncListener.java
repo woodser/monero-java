@@ -1,7 +1,7 @@
 package monero.wallet.model;
 
 /**
- * TODO.
+ * Receive updates as sync progress is made.
  */
 public class MoneroSyncListener {
 
