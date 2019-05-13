@@ -44,8 +44,13 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Test
-  public void testCreateWalletMnemonic() {
+  public void testCreateWalletFromMnemonic() {
     testCreateWallet(TestUtils.TEST_MNEMONIC, TestUtils.TEST_ADDRESS, 10000);
+  }
+  
+  @Test
+  public void testCreateWalletFromKeys() {
+    throw new RuntimeException("Not implemented");
   }
   
   // Can close the currently open wallet
@@ -70,17 +75,17 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       MoneroWalletJni.openWallet(path, TestUtils.WALLET_JNI_PW);
       fail("Cannot open non-existant wallet");
     } catch (MoneroException e) {
-      assertEquals("Wallet does not exist", e.getMessage());
+      assertEquals("Wallet does not exist: " + path, e.getMessage());
     }
     
     // create the wallet
     MoneroWalletJni walletJni;
     if (mnemonic == null) walletJni = MoneroWalletJni.createWallet(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_NETWORK, TestUtils.getDaemonRpc().getRpc(), TestUtils.TEST_LANGUAGE);
-    else walletJni = MoneroWalletJni.createWallet(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_NETWORK, TestUtils.getDaemonRpc().getRpc(), TestUtils.TEST_LANGUAGE, mnemonic, restoreHeight);
+    else walletJni = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_NETWORK, TestUtils.getDaemonRpc().getRpc(), TestUtils.TEST_LANGUAGE, mnemonic, restoreHeight);
     
     // test created wallet
     assertEquals(path, walletJni.getPath());
-    assertEquals(TestUtils.WALLET_JNI_PW, walletJni.getPassword());
+    //assertEquals(TestUtils.WALLET_JNI_PW, walletJni.getPassword());
     assertEquals(TestUtils.TEST_NETWORK, walletJni.getNetworkType());
     MoneroUtils.validateMnemonic(walletJni.getMnemonic());
     assertEquals(TestUtils.TEST_LANGUAGE, walletJni.getLanguage());

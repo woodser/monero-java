@@ -7,6 +7,7 @@ import java.util.List;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
 import monero.rpc.MoneroRpc;
+import monero.utils.MoneroException;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -55,6 +56,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @return the opened wallet
    */
   public static MoneroWalletJni openWallet(String path, String password) {
+    if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist: " + path);
     return new MoneroWalletJni(openWalletJni(path, password, 0));
   }
   
@@ -69,7 +71,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @return the created wallet
    */
   public static MoneroWalletJni createWallet(String path, String password, MoneroNetworkType networkType, MoneroRpc daemonConnection, String language) {
-    MoneroWalletJni wallet = new MoneroWalletJni(createWalletJni(path, password, 0, language));
+    MoneroWalletJni wallet = new MoneroWalletJni(createWalletJni(path, password, language, 0));
     if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
     return wallet;
   }
@@ -87,7 +89,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @return the created wallet
    */
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, MoneroRpc daemonConnection, String language, String mnemonic, Integer restoreHeight) {
-    MoneroWalletJni wallet = new MoneroWalletJni(createWalletFromMnemonicJni(path, password, 0, language, mnemonic, restoreHeight));
+    MoneroWalletJni wallet = new MoneroWalletJni(createWalletFromMnemonicJni(path, password, language, 0, mnemonic, restoreHeight));
     if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
     return wallet;
   }
@@ -105,7 +107,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @return the created wallet
    */
   public static MoneroWalletJni createWalletFromKeys(String path, String password, MoneroNetworkType networkType, MoneroRpc daemonConnection, String language, String address, String viewKey, String spendKey, Integer restoreHeight) {
-    MoneroWalletJni wallet = new MoneroWalletJni(createWalletFromKeysJni(path, password, 0, language, address, viewKey, spendKey, restoreHeight));
+    MoneroWalletJni wallet = new MoneroWalletJni(createWalletFromKeysJni(path, password, language, 0, address, viewKey, spendKey, restoreHeight));
     if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
     return wallet;
   }
@@ -135,19 +137,15 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   // TODO: comments and other jni specific methods
   
   public String getPath() {
-    throw new RuntimeException("Not implemented");
+    return getPathJni();
   }
   
-  public String getPassword() {
-    throw new RuntimeException("Not implemented");
-  }
-  
-  public String getNetworkType() {
-    throw new RuntimeException("Not implemented");
+  public MoneroNetworkType getNetworkType() {
+    return MoneroNetworkType.values()[getNetworkTypeJni()];
   }
   
   public String getLanguage() {
-    throw new RuntimeException("Not implemented");
+    return getLanguageJni();
   }
   
   /**
@@ -502,13 +500,19 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native static long openWalletJni(String path, String password, int networkType);
   
-  private native static long createWalletJni(String path, String password, int networkType, String language);
+  private native static long createWalletJni(String path, String password, String language, int networkType);
   
-  private native static long createWalletFromMnemonicJni(String path, String password, int networkType, String language, String mnemonic, Integer restoreHeight);
+  private native static long createWalletFromMnemonicJni(String path, String password, String language, int networkType, String mnemonic, Integer restoreHeight);
   
-  private native static long createWalletFromKeysJni(String path, String password, int networkType, String language, String address, String viewKey, String spendKey, Integer restoreHeight);
+  private native static long createWalletFromKeysJni(String path, String password, String language, int networkType, String address, String viewKey, String spendKey, Integer restoreHeight);
   
   private native void setDaemonConnectionJni(String uri, String username, String password);
+  
+  private native String getPathJni();
+  
+  private native int getNetworkTypeJni();
+  
+  private native String getLanguageJni();
   
   private native int getHeightJni();
   
