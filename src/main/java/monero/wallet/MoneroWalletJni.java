@@ -59,23 +59,23 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Create a new randomly generated wallet.
+   * Create a wallet with a randomly generated seed.
    * 
    * @param path is the path on the filesystem to create the wallet
    * @param password is the password to encrypt the wallet
    * @param networkType is the wallet's network type (default = MoneroNetworkType.MAINNET)
    * @param daemonConnection is connection information to a daemon (default = an unconnected wallet)
    * @param language is the wallet and mnemonic's language (default = "English")
-   * @param mnemonic is the mnemonic of a wallet to restore (default = randomly generate a new wallet)
-   * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    * @return the created wallet
    */
   public static MoneroWalletJni createWallet(String path, String password, MoneroNetworkType networkType, MoneroRpc daemonConnection, String language) {
-    return createWallet(path, password, networkType, daemonConnection, language, null, null);
+    MoneroWalletJni wallet = new MoneroWalletJni(createWalletJni(path, password, 0, language));
+    if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
+    return wallet;
   }
   
   /**
-   * Create a new wallet.
+   * Create a wallet from an existing mnemonic phrase.
    * 
    * @param path is the path on the filesystem to create the wallet
    * @param password is the password to encrypt the wallet
@@ -86,24 +86,51 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    * @return the created wallet
    */
-  public static MoneroWalletJni createWallet(String path, String password, MoneroNetworkType networkType, MoneroRpc daemonConnection, String language, String mnemonic, Integer restoreHeight) {
-    throw new RuntimeException("Not implemented");
+  public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, MoneroRpc daemonConnection, String language, String mnemonic, Integer restoreHeight) {
+    MoneroWalletJni wallet = new MoneroWalletJni(createWalletFromMnemonicJni(path, password, 0, language, mnemonic, restoreHeight));
+    if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
+    return wallet;
   }
   
-  // ------------------------------- INSTANCE ---------------------------------
+  /**
+   * Create a wallet from existing keys.
+   * 
+   * @param path is the path on the filesystem to create the wallet
+   * @param password is the password to encrypt the wallet
+   * @param networkType is the wallet's network type (default = MoneroNetworkType.MAINNET)
+   * @param daemonConnection is connection information to a daemon (default = an unconnected wallet)
+   * @param language is the wallet and mnemonic's language (default = "English")
+   * @param mnemonic is the mnemonic of a wallet to restore (default = randomly generate a new wallet)
+   * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
+   * @return the created wallet
+   */
+  public static MoneroWalletJni createWalletFromKeys(String path, String password, MoneroNetworkType networkType, MoneroRpc daemonConnection, String language, String address, String viewKey, String spendKey, Integer restoreHeight) {
+    MoneroWalletJni wallet = new MoneroWalletJni(createWalletFromKeysJni(path, password, 0, language, address, viewKey, spendKey, restoreHeight));
+    if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
+    return wallet;
+  }
   
-  private long handle;  // handle to wallet memory address in c++
+  // handle to the wallet's memory address in c++
+  // this variable is read directly by name in c++
+  private long handle;
   
+  /**
+   * Construct a wallet instance.  The constructor is private so static methods
+   * are used.  This wallet instance is given a handle to the memory address of
+   * the corresponding wallet in c++.
+   * 
+   * @param handle is the memory address of the wallet in c++
+   */
   private MoneroWalletJni(long handle) {
-    System.out.println("Internal handle: " + handle);
     this.handle = handle;
   }
   
-  private long getHandle() {
-    return handle;
-  }
-  
   // --------------------------- JNI WALLET METHODS ---------------------------
+  
+  public void setDaemonConnection(MoneroRpc daemonConnection) {
+    if (daemonConnection == null) setDaemonConnectionJni("", "", "");
+    else setDaemonConnectionJni(daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword());
+  }
   
   // TODO: comments and other jni specific methods
   
@@ -138,14 +165,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   // -------------------------- COMMON WALLET METHODS -------------------------
-  
-  public MoneroRpc getDaemonRpc() {
-    throw new RuntimeException("Not implemented");
-  }
-  
-  public void setDaemonRpc(MoneroRpc daemonRpc) {
-    throw new RuntimeException("Not implemented");
-  }
 
   @Override
   public String getSeed() {
@@ -479,9 +498,17 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   // ------------------------------ NATIVE METHODS ----------------------------
   
+  private native static boolean walletExistsJni(String path);
+  
   private native static long openWalletJni(String path, String password, int networkType);
   
-  private native static boolean walletExistsJni(String path);
+  private native static long createWalletJni(String path, String password, int networkType, String language);
+  
+  private native static long createWalletFromMnemonicJni(String path, String password, int networkType, String language, String mnemonic, Integer restoreHeight);
+  
+  private native static long createWalletFromKeysJni(String path, String password, int networkType, String language, String address, String viewKey, String spendKey, Integer restoreHeight);
+  
+  private native void setDaemonConnectionJni(String uri, String username, String password);
   
   private native int getHeightJni();
   
