@@ -134,7 +134,14 @@ public interface MoneroWallet {
   public MoneroIntegratedAddress decodeIntegratedAddress(String integratedAddress);
   
   /**
-   * Synchronizes the wallet with the block chain.
+   * Synchronizes the wallet with the blockchain.
+   * 
+   * @return the sync result
+   */
+  public MoneroSyncResult sync();
+  
+  /**
+   * Synchronizes the wallet with the blockchain.
    * 
    * @param startHeight is the start height to sync from, syncs from the last synced block by default
    * @return the sync result

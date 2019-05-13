@@ -71,8 +71,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   private static final int SEND_DIVISOR = 2;
   
   // instance variables
-  private MoneroWallet wallet;    // wallet instance to test
-  private MoneroDaemon daemon;    // daemon instance to test
+  protected MoneroWallet wallet;        // wallet instance to test
+  protected MoneroDaemon daemon;        // daemon instance to test
   private List<MoneroTxWallet> txCache; // local tx cache
   
   public TestMoneroWalletCommon() {

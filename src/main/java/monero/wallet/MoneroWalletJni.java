@@ -209,7 +209,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener progressListener) {
+  public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener listener) {
     throw new RuntimeException("Not implemented");
   }
 

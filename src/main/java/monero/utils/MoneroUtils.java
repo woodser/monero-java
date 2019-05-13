@@ -29,10 +29,22 @@ public class MoneroUtils {
   }
   
   /**
-   * Validates the given mnemonic seed.
+   * Validates a wallet seed.
+   * 
+   * TODO: beef this up
+   * 
+   * @param seed is the seed to validate
+   */
+  public static void validateSeed(String seed) {
+    assertNotNull(seed);
+    assertEquals(64, seed.length());
+  }
+  
+  /**
+   * Validates the given mnemonic phrase.
    * 
    * @param mnemonic is the mnemonic to validate
-   * @throws MoneroException if the given seed is invalid
+   * @throws MoneroException if the given mnemonic is invalid
    */
   public static void validateMnemonic(String mnemonic) {
     assertNotNull("Mnemonic phrase is not initialized", mnemonic);
