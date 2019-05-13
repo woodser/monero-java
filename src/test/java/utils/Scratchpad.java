@@ -38,7 +38,7 @@ public class Scratchpad {
     MoneroNetworkType networkType = MoneroNetworkType.STAGENET;
     Integer restoreHeight = null;
     
-    MoneroWalletJni.createWallet(path, password, networkType, daemonConnection, language, mnemonic, restoreHeight);
+    MoneroWalletJni.createWalletFromMnemonic(path, password, networkType, daemonConnection, language, mnemonic, restoreHeight);
     
     System.out.println(MoneroWalletJni.walletExists("asdf"));
     
