@@ -218,7 +218,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener listener) {
     if (endHeight != null) throw new MoneroException("Monero core wallet does not support syncing to an end height");
     if (listener != null) throw new RuntimeException("sync listening not yet implemented");
-    throw new RuntimeException("Not implemented");
+    syncJni(startHeight);
+    throw new RuntimeException("Done syncing but need to return sync results");
   }
 
   @Override
@@ -523,6 +524,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String getAddressJni(int accountIdx, int subaddressIdx);
   
   private native long setListenerJni(WalletListenerJni listener);
+  
+  private native void syncJni(Integer startHeight);
   
   // -------------------------- WALLET LISTENER JNI ---------------------------
   
