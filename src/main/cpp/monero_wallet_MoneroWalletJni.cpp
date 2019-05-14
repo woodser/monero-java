@@ -269,6 +269,7 @@ JNIEXPORT void JNICALL
 Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *env, jobject instance, jstring url, jstring username, jstring password) {
   Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance, "walletHandle");
   cout << "Setting daemon connection in c++: " << url << ", " << username << ", " << password << endl;
+  wallet->m_wallet->set_daemon("abcd");
   //wallet->setDaemonLogin("abcd", "abadsf");
 }
 
