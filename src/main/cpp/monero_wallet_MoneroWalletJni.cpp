@@ -20,59 +20,59 @@
 
 // --------------------------------- LISTENER ---------------------------------
 
-//#ifdef __cplusplus
-//extern "C"
-//{
-//#endif
-//
-//static JavaVM *cachedJVM;
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+static JavaVM *cachedJVM;
 //static jclass class_ArrayList;
-//static jclass class_WalletListener;
-////static jclass class_TransactionInfo;
-////static jclass class_Transfer;
-////static jclass class_Ledger;
-//
-//std::mutex _listenerMutex;
-//
-//JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
-//  cachedJVM = jvm;
-//  JNIEnv *jenv;
-//  if (jvm->GetEnv(reinterpret_cast<void **>(&jenv), JNI_VERSION_1_6) != JNI_OK) {
-//    return -1;
-//  }
-//
+static jclass class_WalletListener;
+//static jclass class_TransactionInfo;
+//static jclass class_Transfer;
+//static jclass class_Ledger;
+
+std::mutex _listenerMutex;
+
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
+  cachedJVM = jvm;
+  JNIEnv *jenv;
+  if (jvm->GetEnv(reinterpret_cast<void **>(&jenv), JNI_VERSION_1_6) != JNI_OK) {
+    return -1;
+  }
+
 //  class_ArrayList = static_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("java/util/ArrayList")));
-////  class_TransactionInfo = static_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("com/m2049r/xmrwallet/model/TransactionInfo")));
-////  class_Transfer = static_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("com/m2049r/xmrwallet/model/Transfer")));
-//  class_WalletListener = static_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("monero/wallet/MoneroWalletJni$WalletListenerJni")));
-////  class_Ledger = static_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("com/m2049r/xmrwallet/ledger/Ledger")));
-//  return JNI_VERSION_1_6;
-//}
-//#ifdef __cplusplus
-//}
-//#endif
-//
-//int attachJVM(JNIEnv **jenv) {
-//  int envStat = cachedJVM->GetEnv((void **) jenv, JNI_VERSION_1_6);
-//  if (envStat == JNI_EDETACHED) {
-//    if (cachedJVM->AttachCurrentThread(jenv, nullptr) != 0) {
-//      return JNI_ERR;
-//    }
-//  } else if (envStat == JNI_EVERSION) {
-//    return JNI_ERR;
-//  }
-//  return envStat;
-//}
-//
-//void detachJVM(JNIEnv *jenv, int envStat) {
-//  if (jenv->ExceptionCheck()) {
-//    jenv->ExceptionDescribe();
-//  }
-//  if (envStat == JNI_EDETACHED) {
-//    cachedJVM->DetachCurrentThread();
-//  }
-//}
-//
+//  class_TransactionInfo = static_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("com/m2049r/xmrwallet/model/TransactionInfo")));
+//  class_Transfer = static_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("com/m2049r/xmrwallet/model/Transfer")));
+  class_WalletListener = static_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("monero/wallet/MoneroWalletJni$WalletListenerJni")));
+//  class_Ledger = static_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("com/m2049r/xmrwallet/ledger/Ledger")));
+  return JNI_VERSION_1_6;
+}
+#ifdef __cplusplus
+}
+#endif
+
+int attachJVM(JNIEnv **jenv) {
+  int envStat = cachedJVM->GetEnv((void **) jenv, JNI_VERSION_1_6);
+  if (envStat == JNI_EDETACHED) {
+    if (cachedJVM->AttachCurrentThread((void **) jenv, nullptr) != 0) {
+      return JNI_ERR;
+    }
+  } else if (envStat == JNI_EVERSION) {
+    return JNI_ERR;
+  }
+  return envStat;
+}
+
+void detachJVM(JNIEnv *jenv, int envStat) {
+  if (jenv->ExceptionCheck()) {
+    jenv->ExceptionDescribe();
+  }
+  if (envStat == JNI_EDETACHED) {
+    cachedJVM->DetachCurrentThread();
+  }
+}
+
 struct WalletListenerJni : Bitmonero::WalletListener {
   jobject jlistener;
 
@@ -83,64 +83,64 @@ struct WalletListenerJni : Bitmonero::WalletListener {
   ~WalletListenerJni() { };
 
   void deleteGlobalJavaRef(JNIEnv *env) {
-//    std::lock_guard<std::mutex> lock(_listenerMutex);
-//    env->DeleteGlobalRef(jlistener);
-//    jlistener = nullptr;
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    env->DeleteGlobalRef(jlistener);
+    jlistener = nullptr;
   }
 
   void updated() {
-//    std::lock_guard<std::mutex> lock(_listenerMutex);
-//    if (jlistener == nullptr) return;
-//    JNIEnv *jenv;
-//    int envStat = attachJVM(&jenv);
-//    if (envStat == JNI_ERR) return;
-//
-//    jmethodID listenerClass_updated = jenv->GetMethodID(class_WalletListener, "updated", "()V");
-//    jenv->CallVoidMethod(jlistener, listenerClass_updated);
-//
-//    detachJVM(jenv, envStat);
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+    JNIEnv *jenv;
+    int envStat = attachJVM(&jenv);
+    if (envStat == JNI_ERR) return;
+
+    jmethodID listenerClass_updated = jenv->GetMethodID(class_WalletListener, "updated", "()V");
+    jenv->CallVoidMethod(jlistener, listenerClass_updated);
+
+    detachJVM(jenv, envStat);
   }
 
   void moneySpent(const std::string &txId, uint64_t amount) {
-//    std::lock_guard<std::mutex> lock(_listenerMutex);
-//    if (jlistener == nullptr) return;
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
   }
 
   void moneyReceived(const std::string &txId, uint64_t amount) {
-//    std::lock_guard<std::mutex> lock(_listenerMutex);
-//    if (jlistener == nullptr) return;
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
   }
 
   void unconfirmedMoneyReceived(const std::string &txId, uint64_t amount) {
-//    std::lock_guard<std::mutex> lock(_listenerMutex);
-//    if (jlistener == nullptr) return;
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
   }
 
   void newBlock(uint64_t height) {
-//    std::lock_guard<std::mutex> lock(_listenerMutex);
-//    if (jlistener == nullptr) return;
-//    JNIEnv *jenv;
-//    int envStat = attachJVM(&jenv);
-//    if (envStat == JNI_ERR) return;
-//
-//    jlong h = static_cast<jlong>(height);
-//    jmethodID listenerClass_newBlock = jenv->GetMethodID(class_WalletListener, "newBlock", "(J)V");
-//    jenv->CallVoidMethod(jlistener, listenerClass_newBlock, h);
-//
-//    detachJVM(jenv, envStat);
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+    JNIEnv *jenv;
+    int envStat = attachJVM(&jenv);
+    if (envStat == JNI_ERR) return;
+
+    jlong h = static_cast<jlong>(height);
+    jmethodID listenerClass_newBlock = jenv->GetMethodID(class_WalletListener, "newBlock", "(J)V");
+    jenv->CallVoidMethod(jlistener, listenerClass_newBlock, h);
+
+    detachJVM(jenv, envStat);
   }
 
   void refreshed() {
-//    std::lock_guard<std::mutex> lock(_listenerMutex);
-//    if (jlistener == nullptr) return;
-//    JNIEnv *jenv;
-//
-//    int envStat = attachJVM(&jenv);
-//    if (envStat == JNI_ERR) return;
-//
-//    jmethodID listenerClass_refreshed = jenv->GetMethodID(class_WalletListener, "refreshed", "()V");
-//    jenv->CallVoidMethod(jlistener, listenerClass_refreshed);
-//    detachJVM(jenv, envStat);
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+    JNIEnv *jenv;
+
+    int envStat = attachJVM(&jenv);
+    if (envStat == JNI_ERR) return;
+
+    jmethodID listenerClass_refreshed = jenv->GetMethodID(class_WalletListener, "refreshed", "()V");
+    jenv->CallVoidMethod(jlistener, listenerClass_refreshed);
+    detachJVM(jenv, envStat);
   }
 };
 //
