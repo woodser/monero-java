@@ -112,7 +112,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   // instance variables
-  private long walletHandle;  // memory address of corresponding wallet in c++; this variable is read directly by name in c++
+  private long walletHandle;    // memory address of corresponding wallet in c++; this variable is read directly by name in c++
   private long listenerHandle;  // memory address of corresponding listener in c++; this variable is read directly by name in c++
   
   /**
