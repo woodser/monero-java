@@ -335,6 +335,12 @@ Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *env, jobject instance,
   }
 }
 
+JNIEXPORT void JNICALL
+Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jint startHeight) {
+  Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance, "walletHandle");
+  wallet->refresh();
+}
+
 #ifdef __cplusplus
 }
 #endif

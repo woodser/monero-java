@@ -48,6 +48,8 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressJni(JNIEn
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *, jobject, jobject);
 
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *, jobject, jint);	// TODO: return sync results
+
 #ifdef __cplusplus
 }
 #endif
