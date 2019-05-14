@@ -17,6 +17,7 @@
 #include <iostream>
 #include "monero_wallet_MoneroWalletJni.h"
 #include "wallet2_api.h"
+using namespace std;
 
 // --------------------------------- LISTENER ---------------------------------
 
@@ -266,8 +267,9 @@ Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass c
 
 JNIEXPORT void JNICALL
 Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *env, jobject instance, jstring url, jstring username, jstring password) {
-  //Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance);
-  //cout << "Setting daemon connection in c++: " << url << ", " << username << ", " << password << endl;
+  Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance, "walletHandle");
+  cout << "Setting daemon connection in c++: " << url << ", " << username << ", " << password << endl;
+  //wallet->setDaemonLogin("abcd", "abadsf");
 }
 
 JNIEXPORT jstring JNICALL
