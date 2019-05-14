@@ -111,9 +111,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     return wallet;
   }
   
-  // handle to the wallet's memory address in c++
-  // this variable is read directly by name in c++
-  private long handle;
+  // instance variables
+  private long walletHandle;  // memory address of corresponding wallet in c++; this variable is read directly by name in c++
+  private long listenerHandle;  // memory address of corresponding listener in c++; this variable is read directly by name in c++
   
   /**
    * Construct a wallet instance.  The constructor is private so static methods
@@ -123,10 +123,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param handle is the memory address of the wallet in c++
    */
   private MoneroWalletJni(long handle) {
-    this.handle = handle;
+    this.walletHandle = handle;
+    this.listenerHandle = setListenerJni(new WalletListenerJniImpl());
   }
   
-  // --------------------------- JNI WALLET METHODS ---------------------------
+  // ------------ WALLET METHODS SPECIFIC TO JNI IMPLEMENTATION ---------------
   
   public void setDaemonConnection(MoneroRpc daemonConnection) {
     if (daemonConnection == null) setDaemonConnectionJni("", "", "");
@@ -145,6 +146,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   public String getLanguage() {
     return getLanguageJni();
+  }
+  
+  // TODO: can set height, start, and pause refresh in wallet2
+  public void pauseSync() {
+    throw new RuntimeException("Not implemented");
   }
   
   /**
@@ -513,4 +519,93 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String getMnemonicJni();
   
   private native String getAddressJni(int accountIdx, int subaddressIdx);
+  
+  private native long setListenerJni(WalletListenerJni listener);
+  
+  // -------------------------- WALLET LISTENER JNI ---------------------------
+  
+  /**
+   * Interface to receive notifications from C++ over JNI.
+   * 
+   * TODO: don't longs lose precision?
+   */
+  private interface WalletListenerJni {
+    
+    /**
+     * Called when any event occurs (send, receive, block processed, etc).
+     */
+    public void updated();
+    
+    /**
+     * Called when the wallet is refreshed (explicitly or by the background thread).
+     */
+    public void refreshed();
+    
+    /**
+     * Called when a new block is received.
+     * 
+     * @param height is the height of the received block
+     */
+    public void newBlock(long height);
+    
+    /**
+     * Called when funds are sent from the wallet.
+     * 
+     * @param txId is the id of the outgoing transaction
+     * @param amount is the amount sent from the wallet
+     */
+    public void moneySpent(String txId, long amount);
+    
+    /**
+     * Called when funds are received to the wallet.
+     * 
+     * @param txId is the id of the incoming transaction
+     * @param amount is the amount received to the wallet
+     */
+    public void moneyReceived(String txId, long amount);
+
+    /**
+     * Called when funds are received to the wallet but the tx is still in the tx pool.
+     * 
+     * @param txId is the id of the incoming and unconfirmed transaction
+     * @param amount is the amount received to the wallet
+     */
+    public void unconfirmedMoneyReceived(String txId, long amount);
+  }
+  
+  /**
+   * Handles wallet notifications as they are received from C++ over JNI.
+   */
+  private class WalletListenerJniImpl implements WalletListenerJni {
+    
+    @Override
+    public void updated() {
+      System.out.println("updated()");
+    }
+
+    @Override
+    public void refreshed() {
+      System.out.println("refreshed()");
+    }
+
+    @Override
+    public void newBlock(long height) {
+      System.out.println("newBlock()");
+    }
+
+    @Override
+    public void moneySpent(String txId, long amount) {
+      System.out.println("moneySpent(" + txId + ", " + amount + ")");
+    }
+
+    @Override
+    public void moneyReceived(String txId, long amount) {
+      System.out.println("moneyReceived(" + txId + ", " + amount + ")");
+    }
+
+    @Override
+    public void unconfirmedMoneyReceived(String txId, long amount) {
+      System.out.println("unconfirmedMoneyReceived(" + txId + ", " + amount + ")");
+    }
+  }
 }
