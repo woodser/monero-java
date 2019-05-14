@@ -153,6 +153,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     throw new RuntimeException("Not implemented");
   }
   
+  // TODO: createFromJson? don't automatically create file?
+  public String toJson() {
+    throw new RuntimeException("Not implemented");
+  }
+  
   /**
    * Save the wallet.
    */

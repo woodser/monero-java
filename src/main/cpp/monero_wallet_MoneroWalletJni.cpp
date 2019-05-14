@@ -192,6 +192,11 @@ extern "C"
 
 JNIEXPORT jboolean JNICALL
 Java_monero_wallet_MoneroWalletJni_walletExistsJni(JNIEnv *env, jclass clazz, jstring path) {
+
+
+  //std::unique_ptr<tools::wallet2> wal = tools::wallet2::make_new(vm2, true, nullptr).first;
+
+
   const char* _path = env->GetStringUTFChars(path, NULL);
   bool exists = Bitmonero::WalletManagerFactory::getWalletManager()->walletExists(std::string(_path));
   env->ReleaseStringUTFChars(path, _path);
