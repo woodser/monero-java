@@ -148,7 +148,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     return getLanguageJni();
   }
   
-  // TODO: can set height, start, and pause refresh in wallet2
+  // TODO: can set restore height, start refresh, pause refresh, isSynchronized()
   public void pauseSync() {
     throw new RuntimeException("Not implemented");
   }
@@ -216,6 +216,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener listener) {
+    if (endHeight != null) throw new MoneroException("Monero core wallet does not support syncing to an end height");
+    if (listener != null) throw new RuntimeException("sync listening not yet implemented");
     throw new RuntimeException("Not implemented");
   }
 
