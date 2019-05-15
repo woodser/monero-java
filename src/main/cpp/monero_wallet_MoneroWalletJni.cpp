@@ -194,8 +194,12 @@ extern "C"
 
 JNIEXPORT jboolean JNICALL
 Java_monero_wallet_MoneroWalletJni_walletExistsJni(JNIEnv *env, jclass clazz, jstring path) {
-  //std::unique_ptr<tools::wallet2> wal = tools::wallet2::make_new(vm2, true, nullptr).first;
-  throw std::runtime_error("Not implemented: Java_monero_wallet_MoneroWalletJni_walletExistsJni");
+  const char* _path = env->GetStringUTFChars(path, NULL);
+  bool keys_file_exists;
+  bool wallet_file_exists;
+  tools::wallet2::wallet_exists(std::string(_path), keys_file_exists, wallet_file_exists);
+  env->ReleaseStringUTFChars(path, _path);
+  return static_cast<jboolean>(wallet_file_exists);	// TODO: how is keys file used?
 }
 
 JNIEXPORT jlong JNICALL
