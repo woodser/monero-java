@@ -15,10 +15,19 @@ project(JavaCppBridge)
 set(MONERO "src/main/cpp/submodules/monero-core")
 set(MONERO_SRC "${MONERO}/src")
 
+# header includes
 include_directories("$ENV{JAVA_HOME}")
 include_directories("$ENV{JAVA_HOME}/include")
 include_directories("$ENV{JAVA_HOME}/include/darwin")
+include_directories("${MONERO_SRC}/")
+include_directories("${MONERO_SRC}/wallet")	# TODO: could replace with include_directories(${EXTERNAL_LIBS_DIR}/monero/include) and put wallet2_api.h in there
 include_directories("${MONERO_SRC}/wallet/api")	# TODO: could replace with include_directories(${EXTERNAL_LIBS_DIR}/monero/include) and put wallet2_api.h in there
+include_directories(contrib/boost-sdk)
+include_directories(contrib/openssl-sdk/include)
+include_directories(${MONERO}/contrib/epee/include)
+include_directories(${MONERO}/external/)
+include_directories(${MONERO}/external/easylogging++)
+include_directories(${MONERO_SRC}/crypto/crypto_ops_builder/include/)
 
 set(EXTERNAL_LIBS_DIR ${CMAKE_SOURCE_DIR}/external-libs)
 message(STATUS EXTERNAL_LIBS_DIR : ${EXTERNAL_LIBS_DIR})
@@ -50,16 +59,22 @@ message(STATUS EXTRA_LIBRARIES: ${EXTRA_LIBRARIES})
 add_library(hidapi STATIC IMPORTED)
 set_target_properties(hidapi PROPERTIES IMPORTED_LOCATION
         ${EXTERNAL_LIBS_DIR}/hidapi/libhidapi.a)
+        
+############
+# Epee
+############
+
+
 
 ############
 # Boost
 ############
 
-SET(boost_SRC /Users/Eric/git/build_stuff/boost_1_69_0/boost)
-SET(boost_LIB /Users/Eric/git/build_stuff/boost_1_69_0/stage/lib)
-#include_directories(/Users/Eric/git/build_stuff/boost_1_69_0)
-#include_directories("${boost_SRC}")
-link_directories("${boost_LIB}")
+
+#SET(boost_LIB ${boost_DIR}/stage/lib)
+#link_directories(${boost_LIB})
+
+link_directories(${EXTERNAL_LIBS_DIR}/boost)
 
 find_package(Boost 1.69 REQUIRED COMPONENTS chrono date_time filesystem program_options regex serialization wserialization system thread)
 
