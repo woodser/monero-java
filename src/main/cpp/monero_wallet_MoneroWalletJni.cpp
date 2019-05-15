@@ -204,17 +204,45 @@ Java_monero_wallet_MoneroWalletJni_walletExistsJni(JNIEnv *env, jclass clazz, js
 
 JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstring path, jstring password, jint networkType) {
-  throw std::runtime_error("Not implemented: Java_monero_wallet_MoneroWalletJni_openWalletJni");
-//  const char* _path = env->GetStringUTFChars(path, NULL);
-//  const char* _password = env->GetStringUTFChars(password, NULL);
-//  Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
-//  throw std::runtime_error("Not implemented");
+  const char* _path = env->GetStringUTFChars(path, NULL);
+  const char* _password = env->GetStringUTFChars(password, NULL);
+  //Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
 
-//  Bitmonero::Wallet *wallet = Bitmonero::WalletManagerFactory::getWalletManager()->openWallet(std::string(_path), std::string(_password), _networkType);
-//
-//  env->ReleaseStringUTFChars(path, _path);
-//  env->ReleaseStringUTFChars(password, _password);
-//  return reinterpret_cast<jlong>(wallet);
+//  new tools::wallet2(static_cast<cryptonote::network_type>(nettype), kdf_rounds, true)]
+
+  cout << "Starting creation of vm" << endl;
+
+  namespace po = boost::program_options;
+  po::options_description desc("dummy");
+  const command_line::arg_descriptor<std::string, true> arg_password = {"password", "Specifies the password to decrypt the wallet"};
+  const char *argv[4];
+  int argc = 3;
+  argv[0] = "wallet-rpc";
+  argv[1] = "--password";
+  argv[2] = std::string(_password).c_str();
+  argv[3] = NULL;
+  po::variables_map vm;
+  command_line::add_arg(desc, arg_password);
+  po::store(po::parse_command_line(argc, argv, desc), vm);
+
+  //const command_line::arg_descriptor<std::string, true> arg_password = {"password", "Specifies the password to decrypt the wallet"};
+  const auto vmPassword = command_line::get_arg(vm, arg_password);
+  cout << "Stored password: " << vmPassword << endl;
+
+  cout << "Calling make_from_file" << endl;
+  cout << "Path: " + std::string(_path) << endl;
+
+  std::unique_ptr<tools::wallet2> wallet = tools::wallet2::make_from_file(vm, true, std::string(_path), nullptr).first;
+
+  cout << "Ready to return" << endl;
+
+  cout << wallet << endl;
+
+  env->ReleaseStringUTFChars(path, _path);
+  env->ReleaseStringUTFChars(password, _password);
+  //return reinterpret_cast<jlong>(wallet);
+
+  throw std::runtime_error("Not implemented: Java_monero_wallet_MoneroWalletJni_openWalletJni");
 }
 
 JNIEXPORT jlong JNICALL
