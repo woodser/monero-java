@@ -24,7 +24,7 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_walletExistsJni(JN
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *, jclass, jstring, jstring, jint);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletJni(JNIEnv *, jclass, jstring, jint);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletJni(JNIEnv *, jclass, jstring, jint);	// TODO: rename this to createWalletRandomJni()
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *, jclass, jint, jstring, jint);
 
