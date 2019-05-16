@@ -32,6 +32,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   public static void setUpBeforeClass() throws Exception {
     
   }
+  
+  @Test
+  public void temp() {
+    System.out.println("TEMP");
+  }
 
   @Override
   protected MoneroWallet getTestWallet() {
@@ -80,8 +85,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // create the wallet
     MoneroWalletJni wallet;
-    if (mnemonic == null) wallet = MoneroWalletJni.createWallet(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpc(), TestUtils.TEST_LANGUAGE);
-    else wallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpc(), mnemonic, restoreHeight);
+    if (mnemonic == null) wallet = MoneroWalletJni.createWallet(TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpc(), TestUtils.TEST_LANGUAGE);
+    else wallet = MoneroWalletJni.createWalletFromMnemonic(TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpc(), mnemonic, restoreHeight);
     
     // test created wallet
     assertEquals(path, wallet.getPath());

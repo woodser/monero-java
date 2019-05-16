@@ -57,7 +57,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    */
   public static MoneroWalletJni openWallet(String path, String password) {
     if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist: " + path);
-    return new MoneroWalletJni(openWalletJni(path, password, 0));
+    return new MoneroWalletJni(openWalletJni(path, password, MoneroNetworkType.STAGENET.ordinal()));  // TODO: set network type or auto detect
   }
   
   /**
