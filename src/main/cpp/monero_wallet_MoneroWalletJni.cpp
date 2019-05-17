@@ -224,7 +224,8 @@ Java_monero_wallet_MoneroWalletJni_createWalletJni(JNIEnv *env, jclass clazz, js
 
   tools::wallet2* wallet = new tools::wallet2(static_cast<cryptonote::network_type>(jnetworkType), 1, true);
   wallet->set_seed_language(string(_language));
-  wallet->generate(nullptr, nullptr, nullptr, false);
+  crypto::secret_key recovery_val, secret_key;
+  wallet->generate(string(""), string(""), secret_key, false, false);
 
   // print the mnemonic
   epee::wipeable_string mnemonic;

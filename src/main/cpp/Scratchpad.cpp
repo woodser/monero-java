@@ -22,7 +22,13 @@ void openWallet(string path, string password, int networkType) {
 void createWalletRandom(string language, int networkType) {
   tools::wallet2* wallet = new tools::wallet2(static_cast<cryptonote::network_type>(networkType), 1, true);
   wallet->set_seed_language(language);
-  wallet->generate(nullptr, nullptr, nullptr, false);
+  crypto::secret_key recovery_val, secret_key;
+  wallet->generate(string(""), string(""), secret_key, false, false);
+
+  // print the mnemonic
+  epee::wipeable_string mnemonic;
+  wallet->get_seed(mnemonic);
+  cout << "Mnemonic: " << string(mnemonic.data(), mnemonic.size()) << endl;
 }
 
 /**
