@@ -19,6 +19,12 @@ void openWallet(string path, string password, int networkType) {
   throw runtime_error("Not implemented");
 }
 
+void createWalletRandom(string language, int networkType) {
+  tools::wallet2* wallet = new tools::wallet2(static_cast<cryptonote::network_type>(networkType), 1, true);
+  wallet->set_seed_language(language);
+  wallet->generate(nullptr, nullptr, nullptr, false);
+}
+
 /**
  * Scratchpad main entry point.
  */
@@ -33,9 +39,11 @@ int main(int argc, const char* argv[]) {
 
   string path = "test_wallet_1";
   string password = "supersecretpassword123";
+  string language = "English";
   int networkType = 2;
 
   cout << "Wallet exists: " << walletExists(path) << endl;
-  openWallet(path, password, networkType);
-}
 
+//  openWallet(path, password, networkType);
+  createWalletRandom(language, networkType);
+}

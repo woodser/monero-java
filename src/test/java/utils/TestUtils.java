@@ -124,8 +124,6 @@ public class TestUtils {
       else {
         walletJni = MoneroWalletJni.openWallet(WALLET_JNI_PATH_1, WALLET_JNI_PW);
         walletJni.setDaemonConnection(TestUtils.getDaemonRpc().getRpc());
-        System.out.println("Opened wallet!");
-        System.out.println(walletJni.getMnemonic());
       }
     }
     
