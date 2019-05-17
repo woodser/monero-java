@@ -26,6 +26,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   public TestMoneroWalletJni() {
     this.wallet = (MoneroWalletJni) getTestWallet();
+    System.out.println(wallet.getMnemonic());
   }
 
   @BeforeClass
@@ -84,7 +85,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     else wallet = MoneroWalletJni.createWalletFromMnemonic(TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpc(), mnemonic, restoreHeight);
     
     // test created wallet
-    assertEquals(path, wallet.getPath());
+    assertEquals(null, wallet.getPath());
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
     MoneroUtils.validateMnemonic(wallet.getMnemonic());
     assertEquals(TestUtils.TEST_LANGUAGE, wallet.getLanguage());

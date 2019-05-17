@@ -139,7 +139,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   // TODO: comments and other jni specific methods
   
   public String getPath() {
-    return getPathJni();
+    String path = getPathJni();
+    return path.isEmpty() ? null : path;
   }
   
   public MoneroNetworkType getNetworkType() {
