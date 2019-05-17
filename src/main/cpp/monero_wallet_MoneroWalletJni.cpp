@@ -283,11 +283,29 @@ Java_monero_wallet_MoneroWalletJni_walletExistsJni(JNIEnv *env, jclass clazz, js
 }
 
 JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstring path, jstring password, jint networkType) {
+Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint jnetworkType) {
   cout << "Java_monero_wallet_MoneroWalletJni_openWalletJni" << endl;
-  const char* _path = env->GetStringUTFChars(path, NULL);
-  const char* _password = env->GetStringUTFChars(password, NULL);
+  const char* _path = env->GetStringUTFChars(jpath, NULL);
+  const char* _password = env->GetStringUTFChars(jpassword, NULL);
+
   //Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
+
+
+  tools::wallet2* wallet = new tools::wallet2(static_cast<cryptonote::network_type>(jnetworkType), 1, true);
+  wallet->load(string(_path), string(_password));
+
+
+  // print mnemonic
+  epee::wipeable_string seed;
+  wallet->get_seed(seed);
+  cout << "Mnemonic: " << string(seed.data(), seed.size()) << endl;
+
+
+  //std::unique_ptr<tools::wallet2> wallet;
+  //wallet.reset();
+
+  throw std::runtime_error("Not implemented");
+
 //
 //
 //  cout << "Opening wallet!" << endl;
@@ -358,9 +376,6 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
 
   //new tools::wallet2(cryptonote::network_type::STAGENET, 1, true);
 
-  //std::unique_ptr<tools::wallet2> wallet;
-  //wallet.reset(new tools::wallet2(cryptonote::network_type::STAGENET, 1, true));
-
 //
 //  //tools::wallet2 wallet;
 //
@@ -375,8 +390,6 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
 //  //wallet(nullptr);
 //
 //  cout << "Resetting..." << endl;
-//
-  new tools::wallet2(cryptonote::network_type::STAGENET, 1, true);
 //
 //
 //
@@ -394,8 +407,6 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
 ////
 ////
   //cout << "Seed language: " + wallet->get_seed_language() << endl;
-
-  throw std::runtime_error("Not implemented");
 }
 
 JNIEXPORT jlong JNICALL
