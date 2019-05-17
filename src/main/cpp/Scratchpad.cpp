@@ -10,11 +10,17 @@ bool walletExists(string path) {
   bool wallet_file_exists;
   tools::wallet2::wallet_exists(path, keys_file_exists, wallet_file_exists);
   return wallet_file_exists;
+}
+
+void openWallet(string path, string password, int networkType) {
+  cout << "openWallet(" << path << ", " << password << ", " << networkType << ")" << endl;
+  std::unique_ptr<tools::wallet2> wallet;
+  wallet.reset(new tools::wallet2(cryptonote::network_type::STAGENET, 1, true));
   throw runtime_error("Not implemented");
 }
 
 /**
- * Scratchppad main entry point.
+ * Scratchpad main entry point.
  */
 int main(int argc, const char* argv[]) {
 
@@ -25,6 +31,11 @@ int main(int argc, const char* argv[]) {
   }
   cout << endl;
 
-  cout << "Wallet exists: " << walletExists("test_wallet_2") << endl;
+  string path = "test_wallet_1";
+  string password = "supersecretpassword123";
+  int networkType = 2;
+
+  cout << "Wallet exists: " << walletExists(path) << endl;
+  openWallet(path, password, networkType);
 }
 
