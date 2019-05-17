@@ -307,25 +307,22 @@ Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *env, jobject i
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getPathJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getPathJni" << endl;
-  throw std::runtime_error("Not implemented");
-  //Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance, "walletHandle");
-  //return env->NewStringUTF(wallet->path().c_str());
+  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+  return env->NewStringUTF(wallet->path().c_str());
 }
 
 JNIEXPORT jint JNICALL
 Java_monero_wallet_MoneroWalletJni_getNetworkTypeJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getNetworkTypeJni" << endl;
-  throw std::runtime_error("Not implemented");
-  //Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance, "walletHandle");
-  //return wallet->nettype();
+  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+  return wallet->nettype();
 }
 
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getLanguageJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getLanguageJni" << endl;
-  throw std::runtime_error("Not implemented");
-  //Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance, "walletHandle");
-  //return env->NewStringUTF(wallet->getSeedLanguage().c_str());
+  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+  return env->NewStringUTF(wallet->get_seed_language().c_str());
 }
 
 JNIEXPORT jlong JNICALL
