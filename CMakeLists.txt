@@ -22,7 +22,8 @@ include_directories("$ENV{JAVA_HOME}/include/darwin")
 include_directories("${MONERO_SRC}/")
 include_directories("${MONERO_SRC}/wallet")	# TODO: could replace with include_directories(${EXTERNAL_LIBS_DIR}/monero/include) and put wallet2_api.h in there
 include_directories("${MONERO_SRC}/wallet/api")	# TODO: could replace with include_directories(${EXTERNAL_LIBS_DIR}/monero/include) and put wallet2_api.h in there
-include_directories(contrib/boost-sdk)
+include_directories(/Users/Eric/Downloads/boost_1_70_0)
+#include_directories(contrib/boost-sdk)
 include_directories(contrib/openssl-sdk/include)
 include_directories(${MONERO}/contrib/epee/include)
 include_directories(${MONERO}/external/)
@@ -70,11 +71,17 @@ set_target_properties(hidapi PROPERTIES IMPORTED_LOCATION
 # Boost
 ############
 
+SET(boost_SRC /Users/Eric/git/build_stuff/boost_1_69_0/boost)
+SET(boost_LIB /Users/Eric/git/build_stuff/boost_1_69_0/stage/lib)
+#include_directories(/Users/Eric/git/build_stuff/boost_1_69_0)
+#include_directories("${boost_SRC}")
+link_directories("${boost_LIB}")
+
 
 #SET(boost_LIB ${boost_DIR}/stage/lib)
 #link_directories(${boost_LIB})
 
-link_directories(${EXTERNAL_LIBS_DIR}/boost)
+#link_directories(${EXTERNAL_LIBS_DIR}/boost)
 
 find_package(Boost 1.69 REQUIRED COMPONENTS chrono date_time filesystem program_options regex serialization wserialization system thread)
 
@@ -146,9 +153,9 @@ set_target_properties(wallet_merged PROPERTIES IMPORTED_LOCATION
 #set_target_properties(wallet_api PROPERTIES IMPORTED_LOCATION
     #${EXTERNAL_LIBS_DIR}/monero/libwallet_api.a)
 
-#add_library(wallet STATIC IMPORTED)
-#set_target_properties(wallet PROPERTIES IMPORTED_LOCATION
-    #${EXTERNAL_LIBS_DIR}/monero/libwallet.a)
+add_library(wallet STATIC IMPORTED)
+set_target_properties(wallet PROPERTIES IMPORTED_LOCATION
+    ${EXTERNAL_LIBS_DIR}/monero/libwallet.a)
     
 add_library(lmdb STATIC IMPORTED)
 set_target_properties(lmdb PROPERTIES IMPORTED_LOCATION
@@ -251,7 +258,7 @@ crypto
 
 wallet_merged
 #wallet_api
-#wallet
+wallet
 lmdb
 epee
 unbound
