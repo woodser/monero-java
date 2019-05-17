@@ -61,7 +61,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   public MoneroWalletJni(MoneroNetworkType networkType, MoneroRpc daemonConnection, String language) {
-    throw new RuntimeException("Not implemented");
+    this.walletHandle = createWalletJni(language, networkType.ordinal()); // TODO: re-order params
+    if (daemonConnection != null) setDaemonConnection(daemonConnection);
+    this.listenerHandle = setListenerJni(new WalletListenerJniImpl());
   }
   
   public MoneroWalletJni(MoneroNetworkType networkType, String mnemonic, MoneroRpc daemonConnection, Integer restoreHeight) {
