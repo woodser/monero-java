@@ -229,9 +229,9 @@ add_library(version STATIC IMPORTED)
 set_target_properties(version PROPERTIES IMPORTED_LOCATION
     ${EXTERNAL_LIBS_DIR}/monero/libversion.a)
 
-#################
-# Build library
-#################
+###############################################
+# Build Java dynamic library (.dylib) for JNI
+###############################################
 
 set(
     SRC_FILES
@@ -240,6 +240,63 @@ set(
 add_library(monero-java SHARED ${SRC_FILES})
 
 target_link_libraries(monero-java
+
+hidapi
+
+boost_chrono
+boost_date_time
+boost_filesystem
+boost_program_options
+boost_regex
+boost_serialization
+boost_wserialization
+boost_system
+boost_thread
+
+ssl
+crypto
+
+wallet_merged
+#wallet_api
+wallet
+lmdb
+epee
+unbound
+sodium
+easylogging
+
+cryptonote_core
+cryptonote_basic
+mnemonics
+ringct
+ringct_basic
+common
+cncrypto
+blockchain_db
+blocks
+checkpoints
+device
+device_trezor
+multisig
+version
+
+${EXTRA_LIBRARIES}
+
+#${log-lib}
+)
+
+########################
+# Build C++ scratchpad
+########################
+
+set(
+    SCRATCHPAD_SRC_FILES
+    src/main/cpp/Scratchpad.cpp
+)
+
+add_executable(scratchpad ${SCRATCHPAD_SRC_FILES})
+
+target_link_libraries(scratchpad
 
 hidapi
 
