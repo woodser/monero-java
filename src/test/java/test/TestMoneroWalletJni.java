@@ -32,11 +32,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   public static void setUpBeforeClass() throws Exception {
     
   }
-  
-  @Test
-  public void temp() {
-    System.out.println("TEMP");
-  }
 
   @Override
   protected MoneroWallet getTestWallet() {
