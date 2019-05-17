@@ -12,6 +12,7 @@ don't automatically create file?
 how is keys file used?
 
 WALLET RPC ISSUES
+wallet2 network type auto detected when loaded from files on disk
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
 add all_accounts to incoming_transfers, would be huge time saver
 sometimes see non-zero spent amount in testCheckReserve()

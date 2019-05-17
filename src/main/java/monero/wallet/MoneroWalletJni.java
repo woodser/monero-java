@@ -36,7 +36,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     System.loadLibrary("monero-java");
   }
   
-  // ---------------------------- WALLET MANAGEMENT ---------------------------
+  // ----------------------------- PUBLIC STATIC ------------------------------
   
   /**
    * Indicates if the wallet at the given path exists.
@@ -46,6 +46,30 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    */
   public static boolean walletExists(String path) {
     return walletExistsJni(path);
+  }
+  
+  // --------------------------------- INSTANCE -------------------------------
+  
+  // instance variables
+  private long walletHandle;    // memory address of corresponding wallet in c++; this variable is read directly by name in c++
+  private long listenerHandle;  // memory address of corresponding listener in c++; this variable is read directly by name in c++
+  
+  public MoneroWalletJni(String path, String password, MoneroNetworkType networkType) {
+    if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist: " + path);
+    this.walletHandle = openWalletJni(path, password, networkType.ordinal());
+    this.listenerHandle = setListenerJni(new WalletListenerJniImpl());
+  }
+  
+  public MoneroWalletJni(MoneroNetworkType networkType, MoneroRpc daemonConnection, String language) {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  public MoneroWalletJni(MoneroNetworkType networkType, String mnemonic, MoneroRpc daemonConnection, Integer restoreHeight) {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  public MoneroWalletJni(MoneroNetworkType networkType, String address, String viewKey, String spendKey, MoneroRpc daemonConnection, Integer restoreHeight) {
+    throw new RuntimeException("Not implemented");
   }
   
   /**
@@ -108,10 +132,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
     return wallet;
   }
-  
-  // instance variables
-  private long walletHandle;    // memory address of corresponding wallet in c++; this variable is read directly by name in c++
-  private long listenerHandle;  // memory address of corresponding listener in c++; this variable is read directly by name in c++
   
   /**
    * Construct a wallet instance.  The constructor is private so static methods
