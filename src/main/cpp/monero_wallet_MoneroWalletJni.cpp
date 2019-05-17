@@ -16,8 +16,51 @@
 
 #include <iostream>
 #include "monero_wallet_MoneroWalletJni.h"
-#include "wallet2_api.h"
+#include "wallet2.h"
+//#include "wallet2_api.h"
+//#include "net/http_client.h"
+
+
+
+//#include <boost/program_options/options_description.hpp>
+//#include <boost/program_options/variables_map.hpp>
+//#include <boost/serialization/list.hpp>
+//#include <boost/serialization/vector.hpp>
+//#include <boost/serialization/deque.hpp>
+//#include <boost/thread/lock_guard.hpp>
+//#include <atomic>
+//#include <random>
+//
+//#include "include_base_utils.h"
+//#include "cryptonote_basic/account.h"
+//#include "cryptonote_basic/account_boost_serialization.h"
+//#include "cryptonote_basic/cryptonote_basic_impl.h"
+//#include "storages/http_abstract_invoke.h"
+//#include "rpc/core_rpc_server_commands_defs.h"
+//#include "cryptonote_basic/cryptonote_format_utils.h"
+//#include "cryptonote_core/cryptonote_tx_utils.h"
+//#include "common/unordered_containers_boost_serialization.h"
+//#include "common/util.h"
+//#include "crypto/chacha.h"
+//#include "crypto/hash.h"
+//#include "ringct/rctTypes.h"
+//#include "ringct/rctOps.h"
+//#include "checkpoints/checkpoints.h"
+//#include "serialization/pair.h"
+//
+//#include "wallet_errors.h"
+//#include "common/password.h"
+////#include "node_rpc_proxy.h"
+////#include "message_store.h"
+//#include "wallet_light_rpc.h"
+
+
+
+
+
+
 //#include "wallet/wallet2.h"
+//#include "net/http_client.h"
 //#include "version.h"
 //#include "net/http_client.h"
 //#include <boost/filesystem.hpp>
@@ -198,17 +241,45 @@ extern "C"
 JNIEXPORT jboolean JNICALL
 Java_monero_wallet_MoneroWalletJni_walletExistsJni(JNIEnv *env, jclass clazz, jstring path) {
   cout << "Java_monero_wallet_MoneroWalletJni_walletExistsJni" << endl;
-//  const char* _path = env->GetStringUTFChars(path, NULL);
-//  bool keys_file_exists;
-//  bool wallet_file_exists;
-//  tools::wallet2::wallet_exists(std::string(_path), keys_file_exists, wallet_file_exists);
-//  env->ReleaseStringUTFChars(path, _path);
-//  return static_cast<jboolean>(wallet_file_exists);	// TODO: how is keys file used?
-
   const char* _path = env->GetStringUTFChars(path, NULL);
-  bool exists = Bitmonero::WalletManagerFactory::getWalletManager()->walletExists(std::string(_path));
+  bool keys_file_exists;
+  bool wallet_file_exists;
+  tools::wallet2::wallet_exists(std::string(_path), keys_file_exists, wallet_file_exists);
   env->ReleaseStringUTFChars(path, _path);
-  return static_cast<jboolean>(exists);
+  return static_cast<jboolean>(wallet_file_exists);	// TODO: how is keys file used?
+
+//  try {
+//
+//  } catch (std::exception e) {
+//      cout << "There was a big error" << endl;
+//      cout << e.what() << endl;
+//      throw e;
+//  }
+
+//  try
+//  {
+//      const char* _path = env->GetStringUTFChars(path, NULL);
+//      bool exists = Bitmonero::WalletManagerFactory::getWalletManager()->walletExists(std::string(_path));
+//      env->ReleaseStringUTFChars(path, _path);
+//      return static_cast<jboolean>(exists);  }
+//      catch(const std::runtime_error& re)
+//  {
+//      // speciffic handling for runtime_error
+//      std::cerr << "Runtime error: " << re.what() << std::endl;
+//  }
+//  catch(const std::exception& ex)
+//  {
+//      // speciffic handling for all exceptions extending std::exception, except
+//      // std::runtime_error which is handled explicitly
+//      std::cerr << "Error occurred: " << ex.what() << std::endl;
+//  }
+//  catch(...)
+//  {
+//      // catch any other errors (that we have no information about)
+//      std::cerr << "Unknown failure occurred. Possible memory corruption" << std::endl;
+//  }
+
+  throw std::runtime_error("Not implemented");
 }
 
 JNIEXPORT jlong JNICALL
@@ -216,18 +287,19 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
   cout << "Java_monero_wallet_MoneroWalletJni_openWalletJni" << endl;
   const char* _path = env->GetStringUTFChars(path, NULL);
   const char* _password = env->GetStringUTFChars(password, NULL);
-  Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
-
-
-  cout << "Opening wallet!" << endl;
-
-  Bitmonero::Wallet *wallet = Bitmonero::WalletManagerFactory::getWalletManager()->openWallet(std::string(_path), std::string(_password), _networkType);
-
-  cout << "done opening wallet ? " << endl;
-
-  env->ReleaseStringUTFChars(path, _path);
-  env->ReleaseStringUTFChars(password, _password);
-  return reinterpret_cast<jlong>(wallet);
+  //Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
+//
+//
+//  cout << "Opening wallet!" << endl;
+//
+//  Bitmonero::WalletManagerFactory::getWalletManager();
+  //Bitmonero::Wallet *wallet = Bitmonero::WalletManagerFactory::getWalletManager()->openWallet(std::string(_path), std::string(_password), _networkType);
+//
+//  cout << "done opening wallet ? " << endl;
+//
+//  env->ReleaseStringUTFChars(path, _path);
+//  env->ReleaseStringUTFChars(password, _password);
+//  return reinterpret_cast<jlong>(wallet);
 
 
 
@@ -282,7 +354,13 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
 //  //m_wallet.reset(new tools::wallet2(static_cast<cryptonote::network_type>(-), 1, true))
 //
 //
-//  //std::unique_ptr<tools::wallet2> wallet(new tools::wallet2(static_cast<cryptonote::network_type>(2), 1, true));
+//  std::unique_ptr<tools::wallet2> wallet(new tools::wallet2(static_cast<cryptonote::network_type>(2), 1, true));
+
+  //new tools::wallet2(cryptonote::network_type::STAGENET, 1, true);
+
+  //std::unique_ptr<tools::wallet2> wallet;
+  //wallet.reset(new tools::wallet2(cryptonote::network_type::STAGENET, 1, true));
+
 //
 //  //tools::wallet2 wallet;
 //
@@ -298,7 +376,7 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
 //
 //  cout << "Resetting..." << endl;
 //
-//  new tools::wallet2(cryptonote::network_type::STAGENET, 1, true);
+  new tools::wallet2(cryptonote::network_type::STAGENET, 1, true);
 //
 //
 //
@@ -315,7 +393,7 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
 ////
 ////
 ////
-//  //cout << "Seed language: " + wallet->get_seed_language() << endl;
+  //cout << "Seed language: " + wallet->get_seed_language() << endl;
 
   throw std::runtime_error("Not implemented");
 }
@@ -344,17 +422,17 @@ Java_monero_wallet_MoneroWalletJni_createWalletJni(JNIEnv *env, jclass clazz, js
 JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jint networkType, jstring mnemonic, jint restoreHeight) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni" << endl;
-  const char *_mnemonic = env->GetStringUTFChars(mnemonic, NULL);
-  Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
+//  const char *_mnemonic = env->GetStringUTFChars(mnemonic, NULL);
+//  Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
+//
+//  std::string path = std::string("test_wallet_1");
+//  std::string password = std::string("supersecretpassword123");
+//  Bitmonero::Wallet *wallet = Bitmonero::WalletManagerFactory::getWalletManager()->recoveryWallet(path, password, std::string(_mnemonic), _networkType, (uint64_t) restoreHeight);
+//
+//  env->ReleaseStringUTFChars(mnemonic, _mnemonic);
+//  return reinterpret_cast<jlong>(wallet);
 
-  std::string path = std::string("test_wallet_1");
-  std::string password = std::string("supersecretpassword123");
-  Bitmonero::Wallet *wallet = Bitmonero::WalletManagerFactory::getWalletManager()->recoveryWallet(path, password, std::string(_mnemonic), _networkType, (uint64_t) restoreHeight);
-
-  env->ReleaseStringUTFChars(mnemonic, _mnemonic);
-  return reinterpret_cast<jlong>(wallet);
-
-//  throw std::runtime_error("Not implemented");
+  throw std::runtime_error("Not implemented");
 }
 
 JNIEXPORT jlong JNICALL
@@ -425,9 +503,9 @@ Java_monero_wallet_MoneroWalletJni_getHeightJni(JNIEnv *env, jobject instance) {
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getMnemonicJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getMnemonicJni" << endl;
-  //throw std::runtime_error("Not implemented");
-  Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance, "walletHandle");
-  return env->NewStringUTF(wallet->seed().c_str());
+  throw std::runtime_error("Not implemented");
+  //Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance, "walletHandle");
+  //return env->NewStringUTF(wallet->seed().c_str());
 }
 
 //JNIEXPORT jstring JNICALL
