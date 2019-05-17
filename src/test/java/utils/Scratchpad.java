@@ -4,7 +4,6 @@ import java.util.List;
 
 import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
-import monero.rpc.MoneroRpc;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroTransfer;
@@ -43,7 +42,9 @@ public class Scratchpad {
 //    System.out.println(MoneroWalletJni.walletExists("asdf"));
     
     walletJni = MoneroWalletJni.createWallet(MoneroNetworkType.STAGENET, null, "English");
+    walletJni = MoneroWalletJni.createWalletFromMnemonic(MoneroNetworkType.STAGENET, null, TestUtils.TEST_MNEMONIC, 10000);
     System.out.println("Wallet seed: " + walletJni.getMnemonic());
-    //System.out.println("Wallet height: " + walletJni.getHeight());
+    System.out.println("Wallet address: " + walletJni.getPrimaryAddress());
+    System.out.println("Wallet height: " + walletJni.getHeight());
   }
 }
