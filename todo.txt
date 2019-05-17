@@ -9,6 +9,7 @@ MoneroRpc -> MoneroRpcConnection
 wallet.getLanguages() is rpc specific, not general wallet
 switch heights to longs
 don't automatically create file?
+how is keys file used?
 
 WALLET RPC ISSUES
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
