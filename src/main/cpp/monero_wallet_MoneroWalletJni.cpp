@@ -291,12 +291,23 @@ Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass c
 
 JNIEXPORT jobjectArray JNICALL
 Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni" << endl;
+
+  // get wallet
   tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+
+  // initialize String[3] for uri, username, and password
   jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
+
+  // set daemon address
   if (wallet->get_daemon_address().length() > 0) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(wallet->get_daemon_address().c_str()));
-  env->SetObjectArrayElement(vals, 1, env->NewStringUTF("my username"));	// TODO: get these
-  env->SetObjectArrayElement(vals, 2, env->NewStringUTF("my password"));
+
+  // set daemon username and password
+  if (wallet->get_daemon_login()) {
+    if (wallet->get_daemon_login()->username.length() > 0) env->SetObjectArrayElement(vals, 1, env->NewStringUTF(wallet->get_daemon_login()->username.c_str()));
+    epee::wipeable_string wipeablePassword = wallet->get_daemon_login()->password;
+    string password = string(wipeablePassword.data(), wipeablePassword.size());
+    if (password.length() > 0) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(password.c_str()));
+  }
   return vals;
 }
 
