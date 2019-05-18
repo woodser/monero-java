@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 
+import common.utils.JsonUtils;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
 import monero.rpc.MoneroRpcConnection;
@@ -134,7 +135,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   public MoneroRpcConnection getDaemonConnection() {
-    throw new RuntimeException("Not implemented");
+    String[] vals = getDaemonConnectionJni();
+    System.out.println(JsonUtils.serialize(vals));
+    return new MoneroRpcConnection(vals[0], vals[1], vals[2]);
   }
   
   // TODO: comments and other jni specific methods
@@ -521,6 +524,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native static long createWalletFromMnemonicJni(String mnemonic, int networkType, int restoreHeight);
   
   private native static long createWalletFromKeysJni(String address, String viewKey, String spendKey, int networkType, int restoreHeight, String language);
+  
+  private native String[] getDaemonConnectionJni(); // returns [uri, username, password]
   
   private native void setDaemonConnectionJni(String uri, String username, String password);
   
