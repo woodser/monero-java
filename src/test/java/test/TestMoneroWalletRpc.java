@@ -725,9 +725,4 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testRescanBlockchain() {
     super.testRescanBlockchain();
   }
-
-  @Override
-  protected MoneroDaemon getTestDaemon() {
-    return super.getTestDaemon();
-  }
 }

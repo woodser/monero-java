@@ -10,6 +10,7 @@ wallet.getLanguages() is rpc specific, not general wallet
 switch heights to longs
 don't automatically create file?
 how is keys file used?
+local vs remote requests per second auto-adusts like gui wallet.cpp:2204
 
 WALLET RPC ISSUES
 wallet2 network type auto detected when loaded from files on disk

@@ -91,7 +91,6 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     this.cachedHeaders = new HashMap<Integer, MoneroBlockHeader>();
   }
   
-  
   /**
    * Get the daemon's RPC connection.
    * 
@@ -99,6 +98,20 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    */
   public MoneroRpcConnection getRpcConnection() {
     return this.rpc;
+  }
+  
+  /**
+   * Indicates if the client is connected to the daemon via RPC.
+   * 
+   * @return true if the client is connected to the daemon, false otherwise
+   */
+  public boolean getIsConnected() {
+    try { 
+      getHeight();
+      return true;
+    } catch (MoneroException e) {
+      return false;
+    }
   }
 
   @Override

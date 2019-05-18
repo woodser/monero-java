@@ -1,6 +1,6 @@
 package test;
 
-import monero.daemon.MoneroDaemon;
+import monero.daemon.MoneroDaemonRpc;
 import monero.wallet.MoneroWallet;
 import utils.TestUtils;
 
@@ -14,7 +14,7 @@ public abstract class TestMoneroBase {
    * 
    * @return the daemon to test
    */
-  protected MoneroDaemon getTestDaemon() {
+  protected MoneroDaemonRpc getTestDaemon() {
     return TestUtils.getDaemonRpc();
   }
   

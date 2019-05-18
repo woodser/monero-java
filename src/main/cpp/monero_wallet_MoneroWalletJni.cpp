@@ -220,9 +220,9 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
 }
 
 JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *env, jclass clazz, jint networkType, jstring jlanguage) {
+Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *env, jclass clazz, jint networkType, jstring language) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletJni" << endl;
-  const char* _language = env->GetStringUTFChars(jlanguage, NULL);
+  const char* _language = env->GetStringUTFChars(language, NULL);
 
   tools::wallet2* wallet = new tools::wallet2(static_cast<cryptonote::network_type>(networkType), 1, true);
   wallet->set_seed_language(string(_language));
@@ -234,7 +234,7 @@ Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *env, jclass cla
   wallet->get_seed(mnemonic);
   cout << "Mnemonic: " << string(mnemonic.data(), mnemonic.size()) << endl;
 
-  env->ReleaseStringUTFChars(jlanguage, _language);
+  env->ReleaseStringUTFChars(language, _language);
   return reinterpret_cast<jlong>(wallet);
 }
 
@@ -312,13 +312,27 @@ Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni(JNIEnv *env, jobject i
 }
 
 JNIEXPORT void JNICALL
-Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *env, jobject instance, jstring url, jstring username, jstring password) {
+Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *env, jobject instance, jstring jurl, jstring jusername, jstring jpassword) {
   cout << "Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni" << endl;
-  //Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance, "walletHandle");
-  cout << "TODO: set daemon connection in c++: " << url << ", " << username << ", " << password << endl;
-  //wallet->m_wallet->set_daemon("abcd");
-  //wallet->setDaemonLogin("abcd", "abadsf");
-  //throw std::runtime_error("Not implemented");
+  const char* _url = jurl ? env->GetStringUTFChars(jurl, NULL) : nullptr;
+  const char* _username = jusername ? env->GetStringUTFChars(jusername, NULL) : nullptr;
+  const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
+
+  // prepare url, login, and isTrusted
+  string url = string(jurl ? _url : "");
+  boost::optional<epee::net_utils::http::login> login{};
+  if (jusername) login.emplace(string(_username), string(_password));
+  bool isTrusted = false;
+  try { isTrusted = tools::is_local_address(url); }	// wallet is trusted iff local
+  catch (const exception &e) { }
+
+  // set wallet's daemon connection
+  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+  wallet->set_daemon(url, login, isTrusted);
+
+  env->ReleaseStringUTFChars(jurl, _url);
+  env->ReleaseStringUTFChars(jusername, _username);
+  env->ReleaseStringUTFChars(jpassword, _password);
 }
 
 JNIEXPORT jstring JNICALL

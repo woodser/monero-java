@@ -25,7 +25,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import common.types.Filter;
-import monero.daemon.MoneroDaemon;
+import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
@@ -72,7 +72,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // instance variables
   protected MoneroWallet wallet;        // wallet instance to test
-  protected MoneroDaemon daemon;        // daemon instance to test
+  protected MoneroDaemonRpc daemon;     // daemon instance to test
   private List<MoneroTxWallet> txCache; // local tx cache
   
   public TestMoneroWalletCommon() {
