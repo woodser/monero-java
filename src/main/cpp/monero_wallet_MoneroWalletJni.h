@@ -24,11 +24,11 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_walletExistsJni(JN
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *, jclass, jstring, jstring, jint);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletJni(JNIEnv *, jclass, jstring, jint);	// TODO: rename this to createWalletRandomJni()
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *, jclass, jint, jstring);	// TODO: rename this to createWalletRandomJni()
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *, jclass, jint, jstring, jint);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *, jclass, jstring, jint, jint);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *, jclass, jstring, jint, jstring, jstring, jstring, jint);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *, jclass, jstring, jstring, jstring, jint, jint, jstring);
 
 // ----------------------------- INSTANCE METHODS -----------------------------
 

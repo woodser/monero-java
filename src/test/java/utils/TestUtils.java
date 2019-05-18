@@ -116,13 +116,13 @@ public class TestUtils {
       // create wallet from mnemonic phrase if it doesn't exist
       if (!MoneroWalletJni.walletExists(WALLET_JNI_PATH_1)) {
         MoneroRpc daemonConnection = new MoneroRpc(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
-        walletJni = MoneroWalletJni.createWalletFromMnemonic(NETWORK_TYPE, daemonConnection, TestUtils.TEST_MNEMONIC, 30000);
+        walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, daemonConnection, 30000, NETWORK_TYPE);
         walletJni.save(WALLET_JNI_PATH_1, WALLET_JNI_PW); 
       }
       
       // otherwise open existing wallet and update daemon connection
       else {
-        walletJni = MoneroWalletJni.openWallet(WALLET_JNI_PATH_1, WALLET_JNI_PW);
+        walletJni = new MoneroWalletJni(WALLET_JNI_PATH_1, WALLET_JNI_PW, MoneroNetworkType.STAGENET);
         walletJni.setDaemonConnection(TestUtils.getDaemonRpc().getRpc());
       }
     }
