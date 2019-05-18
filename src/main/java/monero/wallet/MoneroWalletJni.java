@@ -118,7 +118,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * 
    * @param path is the path to the wallet file to open
    * @param password is the password of the wallet file to open
-   * @param networkType is the wallet's network type  // TODO: monero-core: read network type from saved file, auto-detect with try...catch?
+   * @param networkType is the wallet's network type
    */
   public MoneroWalletJni(String path, String password, MoneroNetworkType networkType) {
     if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist: " + path);
