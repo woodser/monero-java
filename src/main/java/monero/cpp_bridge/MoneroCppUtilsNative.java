@@ -4,7 +4,7 @@ package monero.cpp_bridge;
  * JNI calls for the cpp utilities.
  * 
  * These are separated because otherwise JNI header file cannot be
- * automatically generated without pulling in maven dependencies.
+ * automatically generated without pulling in maven dependencies. // TODO: retry?
  */
 public class MoneroCppUtilsNative {
   
