@@ -241,7 +241,7 @@ public class MoneroRpcConnection {
       throw e2;
     } catch (Exception e3) {
       e3.printStackTrace();
-      throw new MoneroException(e3.getMessage());
+      throw new MoneroException(e3);
     }
   }
   

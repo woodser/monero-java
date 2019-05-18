@@ -1,20 +1,14 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.util.UUID;
 
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroNetworkType;
-import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
@@ -29,7 +23,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   public TestMoneroWalletJni() {
     this.wallet = (MoneroWalletJni) getTestWallet();
-    System.out.println(wallet.getMnemonic());
   }
 
   @BeforeClass
@@ -56,16 +49,17 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(1, wallet.getHeight());  // TODO monero core: why does height start at 1?
     
     // create random wallet with non-defaults
-    wallet = new MoneroWalletJni(MoneroNetworkType.TESTNET, TestUtils.getDaemonRpc().getRpcConnection(), "Spanish");
+    wallet = new MoneroWalletJni(MoneroNetworkType.TESTNET, daemon.getRpcConnection(), "Spanish");
     MoneroUtils.validateMnemonic(wallet.getMnemonic());
     MoneroUtils.validateAddress(wallet.getPrimaryAddress());
     assertEquals(MoneroNetworkType.TESTNET, wallet.getNetworkType());
     assertNotNull(wallet.getDaemonConnection());
-    assertTrue(TestUtils.getDaemonRpc().getRpcConnection() != wallet.getDaemonConnection());
-    assertTrue(TestUtils.getDaemonRpc().getRpcConnection().equals(wallet.getDaemonConnection()));
+    assertTrue(daemon.getRpcConnection() != wallet.getDaemonConnection());
+    assertTrue(daemon.getRpcConnection().equals(wallet.getDaemonConnection()));
     assertEquals("Spanish", wallet.getLanguage());
     assertEquals(null, wallet.getPath());
-    assertEquals(TestUtils.getDaemonRpc().getHeight(), wallet.getHeight());
+    if (daemon.getIsConnected()) assertEquals(daemon.getHeight(), wallet.getHeight());
+    else assertEquals(1, wallet.getHeight());  // TODO monero core: why does height start at 1?
   }
   
   @Test
@@ -83,13 +77,13 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // create wallet with mnemonic and defaults
     int restoreHeight = 10000;
-    wallet = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpcConnection(), restoreHeight);
+    wallet = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, daemon.getRpcConnection(), restoreHeight);
     assertEquals(TestUtils.TEST_MNEMONIC, wallet.getMnemonic());
     assertEquals(TestUtils.TEST_ADDRESS, wallet.getPrimaryAddress());
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
     assertNotNull(wallet.getDaemonConnection());
-    assertTrue(TestUtils.getDaemonRpc().getRpcConnection() != wallet.getDaemonConnection());
-    assertTrue(TestUtils.getDaemonRpc().getRpcConnection().equals(wallet.getDaemonConnection()));
+    assertTrue(daemon.getRpcConnection() != wallet.getDaemonConnection());
+    assertTrue(daemon.getRpcConnection().equals(wallet.getDaemonConnection()));
     assertEquals("English", wallet.getLanguage());
     assertEquals(null, wallet.getPath());
     assertEquals(restoreHeight, wallet.getHeight());
@@ -127,8 +121,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 //    
 //    // create the wallet
 //    MoneroWalletJni wallet;
-//    if (mnemonic == null) wallet = new MoneroWalletJni(TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.NETWORK_TYPE, TestUtils.TEST_LANGUAGE);
-//    else wallet = new MoneroWalletJni(mnemonic, TestUtils.getDaemonRpc().getRpcConnection(), restoreHeight, TestUtils.NETWORK_TYPE);
+//    if (mnemonic == null) wallet = new MoneroWalletJni(daemon.getRpcConnection(), TestUtils.NETWORK_TYPE, TestUtils.TEST_LANGUAGE);
+//    else wallet = new MoneroWalletJni(mnemonic, daemon.getRpcConnection(), restoreHeight, TestUtils.NETWORK_TYPE);
 //    
 //    // test created wallet
 //    assertEquals(null, wallet.getPath());
@@ -506,10 +500,5 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   public void testRescanBlockchain() {
     super.testRescanBlockchain();
-  }
-
-  @Override
-  protected MoneroDaemon getTestDaemon() {
-    return super.getTestDaemon();
   }
 }
