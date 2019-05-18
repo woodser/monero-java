@@ -116,7 +116,7 @@ public class TestUtils {
       // create wallet from mnemonic phrase if it doesn't exist
       if (!MoneroWalletJni.walletExists(WALLET_JNI_PATH_1)) {
         MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
-        walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, daemonConnection, 30000, NETWORK_TYPE);
+        walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, NETWORK_TYPE, daemonConnection, 30000);
         walletJni.save(WALLET_JNI_PATH_1, WALLET_JNI_PW); 
       }
       
