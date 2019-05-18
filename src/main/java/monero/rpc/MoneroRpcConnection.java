@@ -49,7 +49,7 @@ public class MoneroRpcConnection {
   }
 
   // instance variables
-  private URI uri;
+  private String uri;
   private HttpClient client;
   private String username;
   private String password;
@@ -59,7 +59,7 @@ public class MoneroRpcConnection {
   }
   
   public MoneroRpcConnection(String uri) {
-    this(MoneroUtils.parseUri(uri));
+    this(uri, null, null);
   }
   
   public MoneroRpcConnection(String uri, String username, String password) {
@@ -67,7 +67,8 @@ public class MoneroRpcConnection {
   }
   
   public MoneroRpcConnection(URI uri, String username, String password) {
-    this.uri = uri;
+    if (uri == null) throw new MoneroException("Must provide URI of RPC endpoint");
+    this.uri = uri.toString();
     this.username = username;
     this.password = password;
     if (username != null || password != null) {
@@ -79,7 +80,7 @@ public class MoneroRpcConnection {
     }
   }
   
-  public URI getUri() {
+  public String getUri() {
     return uri;
   }
   

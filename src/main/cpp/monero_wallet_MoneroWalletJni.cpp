@@ -289,11 +289,22 @@ Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass c
 
 // ----------------------------------- INSTANCE -------------------------------
 
+JNIEXPORT jobjectArray JNICALL
+Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni(JNIEnv *env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni" << endl;
+  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+  jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
+  env->SetObjectArrayElement(vals, 0, env->NewStringUTF(wallet->get_daemon_address().c_str()));
+  env->SetObjectArrayElement(vals, 1, env->NewStringUTF("my username"));
+  env->SetObjectArrayElement(vals, 2, env->NewStringUTF("my password"));
+  return vals;
+}
+
 JNIEXPORT void JNICALL
 Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *env, jobject instance, jstring url, jstring username, jstring password) {
   cout << "Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni" << endl;
   //Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance, "walletHandle");
-  cout << "Setting daemon connection in c++: " << url << ", " << username << ", " << password << endl;
+  cout << "TODO: set daemon connection in c++: " << url << ", " << username << ", " << password << endl;
   //wallet->m_wallet->set_daemon("abcd");
   //wallet->setDaemonLogin("abcd", "abadsf");
   //throw std::runtime_error("Not implemented");
