@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 
-import common.utils.JsonUtils;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
 import monero.rpc.MoneroRpcConnection;
@@ -152,6 +151,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   public String getLanguage() {
     return getLanguageJni();
+  }
+  
+  public int getRestoreHeight() {
+    return (int) getRestoreHeightJni();
   }
   
   // TODO: can set restore height, start refresh, pause refresh, isSynchronized()
@@ -535,6 +538,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String getLanguageJni();
   
   private native long getHeightJni();
+  
+  private native long getRestoreHeightJni();
   
   private native String getMnemonicJni();
   
