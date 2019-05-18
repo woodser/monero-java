@@ -220,7 +220,7 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
 }
 
 JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_createWalletJni(JNIEnv *env, jclass clazz, jstring jlanguage, jint networkType) {
+Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *env, jclass clazz, jint networkType, jstring jlanguage) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletJni" << endl;
   const char* _language = env->GetStringUTFChars(jlanguage, NULL);
 
@@ -239,7 +239,7 @@ Java_monero_wallet_MoneroWalletJni_createWalletJni(JNIEnv *env, jclass clazz, js
 }
 
 JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jint networkType, jstring mnemonic, jint restoreHeight) {
+Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring mnemonic, jint restoreHeight, jint networkType) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni" << endl;
   const char* _mnemonic = env->GetStringUTFChars(mnemonic, NULL);
 
@@ -266,7 +266,7 @@ Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jcla
 }
 
 JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass clazz, jstring language, jint networkType, jstring address, jstring viewKey, jstring spendKey, jint restoreHeight) {
+Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass clazz, jstring address, jstring viewKey, jstring spendKey, jint restoreHeight, jint networkType, jstring language) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni" << endl;
 
 //  const char *_language = env->GetStringUTFChars(language, NULL);

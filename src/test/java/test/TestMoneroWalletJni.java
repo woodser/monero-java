@@ -11,6 +11,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.daemon.MoneroDaemon;
+import monero.daemon.model.MoneroNetworkType;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
@@ -73,7 +74,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // cannot open wallet
     try {
-      MoneroWalletJni.openWallet(path, TestUtils.WALLET_JNI_PW);
+      new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, MoneroNetworkType.STAGENET);
       fail("Cannot open non-existant wallet");
     } catch (MoneroException e) {
       assertEquals("Wallet does not exist: " + path, e.getMessage());
@@ -81,8 +82,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // create the wallet
     MoneroWalletJni wallet;
-    if (mnemonic == null) wallet = MoneroWalletJni.createWallet(TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpc(), TestUtils.TEST_LANGUAGE);
-    else wallet = MoneroWalletJni.createWalletFromMnemonic(TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpc(), mnemonic, restoreHeight);
+    if (mnemonic == null) wallet = new MoneroWalletJni(TestUtils.getDaemonRpc().getRpc(), TestUtils.NETWORK_TYPE, TestUtils.TEST_LANGUAGE);
+    else wallet = new MoneroWalletJni(mnemonic, TestUtils.getDaemonRpc().getRpc(), restoreHeight, TestUtils.NETWORK_TYPE);
     
     // test created wallet
     assertEquals(null, wallet.getPath());
