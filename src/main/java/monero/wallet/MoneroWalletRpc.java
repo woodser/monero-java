@@ -30,7 +30,7 @@ import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
-import monero.rpc.MoneroRpc;
+import monero.rpc.MoneroRpcConnection;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroException;
 import monero.wallet.model.MoneroAccount;
@@ -59,7 +59,7 @@ import monero.wallet.request.MoneroTxRequest;
  */
 public class MoneroWalletRpc extends MoneroWalletDefault {
 
-  private MoneroRpc rpc;  // handles rpc interactions
+  private MoneroRpcConnection rpc;  // handles rpc interactions
   private Map<Integer, Map<Integer, String>> addressCache;  // cache static addresses to reduce requests
   
   // logger
@@ -75,29 +75,34 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   public MoneroWalletRpc(URI uri) {
-    this(new MoneroRpc(uri));
+    this(new MoneroRpcConnection(uri));
   }
   
   public MoneroWalletRpc(String uri) {
-    this(new MoneroRpc(uri));
+    this(new MoneroRpcConnection(uri));
   }
   
   public MoneroWalletRpc(String uri, String username, String password) {
-    this(new MoneroRpc(uri, username, password));
+    this(new MoneroRpcConnection(uri, username, password));
   }
   
   public MoneroWalletRpc(URI uri, String username, String password) {
-    this(new MoneroRpc(uri, username, password));
+    this(new MoneroRpcConnection(uri, username, password));
   }
   
-  public MoneroWalletRpc(MoneroRpc rpc) {
+  public MoneroWalletRpc(MoneroRpcConnection rpc) {
     this.rpc = rpc;
     addressCache = new HashMap<Integer, Map<Integer, String>>();
   }
   
   // --------------------------- RPC WALLET METHODS ---------------------------
   
-  public MoneroRpc getRpc() {
+  /**
+   * Get the wallet's RPC connection.
+   * 
+   * @return the wallet's rpc connection
+   */
+  public MoneroRpcConnection getRpcConnection() {
     return rpc;
   }
 

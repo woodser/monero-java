@@ -2,6 +2,8 @@ package test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.UUID;
@@ -42,7 +44,27 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
   @Test
   public void testCreateWalletRandom() {
-    testCreateWallet(null, null, null);
+    
+    // create random wallet with defaults
+    MoneroWalletJni wallet = new MoneroWalletJni();
+    assertEquals(null, wallet.getPath());
+    assertEquals(null, wallet.getDaemonConnection());
+    assertEquals(MoneroNetworkType.MAINNET, wallet.getNetworkType());
+    assertEquals("English", wallet.getLanguage());
+    MoneroUtils.validateMnemonic(wallet.getMnemonic());
+    MoneroUtils.validateAddress(wallet.getPrimaryAddress());
+    assertEquals(0, wallet.getHeight());
+    
+    // create random wallet with non-defaults
+    wallet = new MoneroWalletJni(TestUtils.getDaemonRpc().getRpcConnection(), MoneroNetworkType.TESTNET, "Spanish");
+    assertEquals(null, wallet.getPath());
+    assertEquals(MoneroNetworkType.TESTNET, wallet.getNetworkType());
+    assertEquals("Spanish", wallet.getLanguage());
+    MoneroUtils.validateMnemonic(wallet.getMnemonic());
+    MoneroUtils.validateAddress(wallet.getPrimaryAddress());
+    assertNotNull(wallet.getDaemonConnection());
+    assertTrue(TestUtils.getDaemonRpc().getRpcConnection() != wallet.getDaemonConnection());
+    assertTrue(TestUtils.getDaemonRpc().getRpcConnection().equals(wallet.getDaemonConnection()));
   }
   
   @Test
@@ -82,8 +104,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // create the wallet
     MoneroWalletJni wallet;
-    if (mnemonic == null) wallet = new MoneroWalletJni(TestUtils.getDaemonRpc().getRpc(), TestUtils.NETWORK_TYPE, TestUtils.TEST_LANGUAGE);
-    else wallet = new MoneroWalletJni(mnemonic, TestUtils.getDaemonRpc().getRpc(), restoreHeight, TestUtils.NETWORK_TYPE);
+    if (mnemonic == null) wallet = new MoneroWalletJni(TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.NETWORK_TYPE, TestUtils.TEST_LANGUAGE);
+    else wallet = new MoneroWalletJni(mnemonic, TestUtils.getDaemonRpc().getRpcConnection(), restoreHeight, TestUtils.NETWORK_TYPE);
     
     // test created wallet
     assertEquals(null, wallet.getPath());

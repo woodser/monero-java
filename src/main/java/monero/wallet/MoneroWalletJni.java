@@ -6,7 +6,7 @@ import java.util.List;
 
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
-import monero.rpc.MoneroRpc;
+import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
@@ -54,17 +54,14 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private long walletHandle;    // memory address of corresponding wallet in c++; this variable is read directly by name in c++
   private long listenerHandle;  // memory address of corresponding listener in c++; this variable is read directly by name in c++
   
+  // private static variables
+  private static String DEFAULT_LANGUAGE = "English";
+  
   /**
-   * Construct a wallet by opening a wallet file on disk.
-   * 
-   * @param path is the path to the wallet file to open
-   * @param password is the password of the wallet file to open
-   * @param networkType is the wallet's network type  // TODO: monero-core: read network type from saved file
+   * Construct a wallet with a randomly generated seed.
    */
-  public MoneroWalletJni(String path, String password, MoneroNetworkType networkType) {
-    if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist: " + path);
-    this.walletHandle = openWalletJni(path, password, networkType.ordinal());
-    this.listenerHandle = setListenerJni(new WalletListenerJniImpl());
+  public MoneroWalletJni() {
+    this(null, MoneroNetworkType.MAINNET, DEFAULT_LANGUAGE);
   }
   
   /**
@@ -74,9 +71,25 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param networkType is the wallet's network type (default = MoneroNetworkType.MAINNET)
    * @param language is the wallet and mnemonic's language (default = "English")
    */
-  public MoneroWalletJni(MoneroRpc daemonConnection, MoneroNetworkType networkType, String language) {
+  public MoneroWalletJni(MoneroRpcConnection daemonConnection, MoneroNetworkType networkType, String language) {
+    if (networkType == null) networkType = MoneroNetworkType.MAINNET;
+    if (language == null) language = DEFAULT_LANGUAGE;
     this.walletHandle = createWalletRandomJni(networkType.ordinal(), language);
     if (daemonConnection != null) setDaemonConnection(daemonConnection);
+    this.listenerHandle = setListenerJni(new WalletListenerJniImpl());
+  }
+  
+  /**
+   * Construct a wallet by opening a wallet file on disk.
+   * 
+   * @param path is the path to the wallet file to open
+   * @param password is the password of the wallet file to open
+   * @param networkType is the wallet's network type  // TODO: monero-core: read network type from saved file
+   */
+  public MoneroWalletJni(String path, String password, MoneroNetworkType networkType) {
+    if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist: " + path);
+    if (networkType == null) networkType = MoneroNetworkType.MAINNET;
+    this.walletHandle = openWalletJni(path, password, networkType.ordinal());
     this.listenerHandle = setListenerJni(new WalletListenerJniImpl());
   }
   
@@ -88,7 +101,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    * @param networkType is the wallet's network type (default = MoneroNetworkType.MAINNET)
    */
-  public MoneroWalletJni(String mnemonic, MoneroRpc daemonConnection, Integer restoreHeight, MoneroNetworkType networkType) {
+  public MoneroWalletJni(String mnemonic, MoneroRpcConnection daemonConnection, Integer restoreHeight, MoneroNetworkType networkType) {
+    if (restoreHeight == null) restoreHeight = 0;
+    if (networkType == null) networkType = MoneroNetworkType.MAINNET;
     this.walletHandle = createWalletFromMnemonicJni(mnemonic, restoreHeight, networkType.ordinal());
     if (daemonConnection != null) setDaemonConnection(daemonConnection);
     this.listenerHandle = setListenerJni(new WalletListenerJniImpl());
@@ -105,20 +120,23 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param networkType is the wallet's network type (default = MoneroNetworkType.MAINNET)
    * @param language is the wallet and mnemonic's language (default = "English")
    */
-  public MoneroWalletJni(String address, String viewKey, String spendKey, MoneroRpc daemonConnection, Integer restoreHeight, MoneroNetworkType networkType, String language) {
-    this.walletHandle = createWalletFromKeysJni(address, viewKey, spendKey, restoreHeight == null ? 0 : restoreHeight, networkType.ordinal(), language);
+  public MoneroWalletJni(String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Integer restoreHeight, MoneroNetworkType networkType, String language) {
+    if (restoreHeight == null) restoreHeight = 0;
+    if (networkType == null) networkType = MoneroNetworkType.MAINNET;
+    if (language == null) language = DEFAULT_LANGUAGE;
+    this.walletHandle = createWalletFromKeysJni(address, viewKey, spendKey, restoreHeight, networkType.ordinal(), language);
     if (daemonConnection != null) setDaemonConnection(daemonConnection);
     this.listenerHandle = setListenerJni(new WalletListenerJniImpl());
   }
   
   // ------------ WALLET METHODS SPECIFIC TO JNI IMPLEMENTATION ---------------
   
-  public void setDaemonConnection(MoneroRpc daemonConnection) {
+  public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
     if (daemonConnection == null) setDaemonConnectionJni("", "", "");
     else setDaemonConnectionJni(daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword());
   }
   
-  public MoneroRpc getDaemonConnection() {
+  public MoneroRpcConnection getDaemonConnection() {
     throw new RuntimeException("Not implemented");
   }
   
