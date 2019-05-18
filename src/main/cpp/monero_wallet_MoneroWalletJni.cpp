@@ -221,13 +221,14 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
 
 JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *env, jclass clazz, jint networkType, jstring language) {
-  cout << "Java_monero_wallet_MoneroWalletJni_createWalletJni" << endl;
+  cout << "Java_monero_wallet_MoneroWalletJni_createWalletRandomJni" << endl;
   const char* _language = env->GetStringUTFChars(language, NULL);
 
   tools::wallet2* wallet = new tools::wallet2(static_cast<cryptonote::network_type>(networkType), 1, true);
   wallet->set_seed_language(string(_language));
   crypto::secret_key recovery_val, secret_key;
   wallet->generate(string(""), string(""), secret_key, false, false);
+  cout << wallet->get_refresh_from_block_height() << endl;
 
   // print the mnemonic
   epee::wipeable_string mnemonic;
@@ -367,6 +368,7 @@ JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni" << endl;
   tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+  cout << wallet->get_refresh_from_block_height() << endl;
   return wallet->get_refresh_from_block_height();
 }
 
