@@ -105,36 +105,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   // ---------------------------------- PRIVATE -------------------------------
   
-//  private static void testCreateWallet(String mnemonic, String address, Integer restoreHeight) {
-//    
-//    // unique wallet path for test
-//    String path = "test_wallet_" + UUID.randomUUID().toString();
-//    
-//    // wallet does not exist
-//    assertFalse(MoneroWalletJni.walletExists(path));
-//    
-//    // cannot open wallet
-//    try {
-//      new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, MoneroNetworkType.STAGENET);
-//      fail("Cannot open non-existant wallet");
-//    } catch (MoneroException e) {
-//      assertEquals("Wallet does not exist: " + path, e.getMessage());
-//    }
-//    
-//    // create the wallet
-//    MoneroWalletJni wallet;
-//    if (mnemonic == null) wallet = new MoneroWalletJni(daemon.getRpcConnection(), TestUtils.NETWORK_TYPE, TestUtils.TEST_LANGUAGE);
-//    else wallet = new MoneroWalletJni(mnemonic, daemon.getRpcConnection(), restoreHeight, TestUtils.NETWORK_TYPE);
-//    
-//    // test created wallet
-//    assertEquals(null, wallet.getPath());
-//    assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
-//    MoneroUtils.validateMnemonic(wallet.getMnemonic());
-//    assertEquals(TestUtils.TEST_LANGUAGE, wallet.getLanguage());
-//    if (mnemonic != null) assertEquals(mnemonic, wallet.getMnemonic());
-//    if (address != null) assertEquals(address, wallet.getPrimaryAddress());
-//  }
-  
   // Can save the wallet
   @Test
   public void testSave() {
