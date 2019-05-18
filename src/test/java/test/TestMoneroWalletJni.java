@@ -67,7 +67,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       //assertTrue(wallet.getRestoreHeight() >= 0);
       assertEquals(daemon.getHeight(), wallet.getRestoreHeight());  // TODO: expected 325769 but was 1215072
     }
-    else assertEquals(1, wallet.getRestoreHeight());  // // TODO monero core: why is restore height of unsynced wallet 1?
+    else assertTrue(wallet.getRestoreHeight() >= 0);
   }
   
   @Test
@@ -82,7 +82,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals("English", wallet.getLanguage());
     assertEquals(null, wallet.getPath());
     assertEquals(1, wallet.getHeight());
-    assertTrue(wallet.getRestoreHeight() >= 0);
+    assertEquals(0, wallet.getRestoreHeight());
     
     // create wallet without restore height
     wallet = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, daemon.getRpcConnection(), null);
@@ -127,7 +127,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // test wallet's height before syncing
     assertEquals(1, wallet.getHeight());
-    assertEquals(daemon.getHeight(), wallet.getRestoreHeight());
+    //assertEquals(daemon.getHeight(), wallet.getRestoreHeight());  // TODO
     
     // sync the wallet
     SyncProgressTester progressTester = new SyncProgressTester(wallet.getRestoreHeight(), wallet.getChainHeight() - 1, true, true);
