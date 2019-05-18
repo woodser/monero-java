@@ -41,7 +41,7 @@ public class Scratchpad {
 //    
 //    System.out.println(MoneroWalletJni.walletExists("asdf"));
     
-    walletJni = new MoneroWalletJni(null, MoneroNetworkType.STAGENET, "English");
+    walletJni = new MoneroWalletJni(MoneroNetworkType.STAGENET, null, "English");
     //walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, null, 10000, MoneroNetworkType.STAGENET);
     System.out.println("Wallet seed: " + walletJni.getMnemonic());
     System.out.println("Wallet address: " + walletJni.getPrimaryAddress());
