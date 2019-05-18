@@ -136,8 +136,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   public MoneroRpcConnection getDaemonConnection() {
     String[] vals = getDaemonConnectionJni();
-    System.out.println(JsonUtils.serialize(vals));
-    return new MoneroRpcConnection(vals[0], vals[1], vals[2]);
+    return vals[0] == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2]);
   }
   
   // TODO: comments and other jni specific methods

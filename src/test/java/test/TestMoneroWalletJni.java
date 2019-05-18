@@ -53,7 +53,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(null, wallet.getDaemonConnection());
     assertEquals("English", wallet.getLanguage());
     assertEquals(null, wallet.getPath());
-    assertEquals(0, wallet.getHeight());
+    assertEquals(1, wallet.getHeight());  // TODO monero core: why does height start at 1?
     
     // create random wallet with non-defaults
     wallet = new MoneroWalletJni(MoneroNetworkType.TESTNET, TestUtils.getDaemonRpc().getRpcConnection(), "Spanish");

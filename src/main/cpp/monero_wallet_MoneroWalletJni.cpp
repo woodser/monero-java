@@ -294,8 +294,8 @@ Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni(JNIEnv *env, jobject i
   cout << "Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni" << endl;
   tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
   jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
-  env->SetObjectArrayElement(vals, 0, env->NewStringUTF(wallet->get_daemon_address().c_str()));
-  env->SetObjectArrayElement(vals, 1, env->NewStringUTF("my username"));
+  if (wallet->get_daemon_address().length() > 0) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(wallet->get_daemon_address().c_str()));
+  env->SetObjectArrayElement(vals, 1, env->NewStringUTF("my username"));	// TODO: get these
   env->SetObjectArrayElement(vals, 2, env->NewStringUTF("my password"));
   return vals;
 }
