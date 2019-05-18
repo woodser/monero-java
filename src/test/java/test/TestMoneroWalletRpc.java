@@ -18,7 +18,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.daemon.MoneroDaemon;
-import monero.rpc.MoneroRpc;
+import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
@@ -109,7 +109,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transfers directly from rpc for comparison to library
-    MoneroRpc rpc = wallet.getRpc();
+    MoneroRpcConnection rpc = wallet.getRpcConnection();
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("all_accounts", true);
     params.put("in", true);

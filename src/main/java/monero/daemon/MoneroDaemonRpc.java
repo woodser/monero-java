@@ -45,7 +45,7 @@ import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxBacklogEntry;
 import monero.daemon.model.MoneroTxPoolStats;
-import monero.rpc.MoneroRpc;
+import monero.rpc.MoneroRpcConnection;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroCppUtils;
 import monero.utils.MoneroException;
@@ -65,33 +65,39 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   private static int NUM_HEADERS_PER_REQ = 750;
   
   // instance variables
-  private MoneroRpc rpc;
+  private MoneroRpcConnection rpc;
   private MoneroDaemonPoller daemonPoller;
   private Map<Integer, MoneroBlockHeader> cachedHeaders;
   
   public MoneroDaemonRpc(URI uri) {
-    this(new MoneroRpc(uri));
+    this(new MoneroRpcConnection(uri));
   }
   
   public MoneroDaemonRpc(String uri) {
-    this(new MoneroRpc(uri));
+    this(new MoneroRpcConnection(uri));
   }
   
   public MoneroDaemonRpc(String uri, String username, String password) {
-    this(new MoneroRpc(uri, username, password));
+    this(new MoneroRpcConnection(uri, username, password));
   }
   
   public MoneroDaemonRpc(URI uri, String username, String password) {
-    this(new MoneroRpc(uri, username, password));
+    this(new MoneroRpcConnection(uri, username, password));
   }
 
-  public MoneroDaemonRpc(MoneroRpc rpc) {
+  public MoneroDaemonRpc(MoneroRpcConnection rpc) {
     this.rpc = rpc;
     this.daemonPoller = new MoneroDaemonPoller(this);
     this.cachedHeaders = new HashMap<Integer, MoneroBlockHeader>();
   }
   
-  public MoneroRpc getRpc() {
+  
+  /**
+   * Get the daemon's RPC connection.
+   * 
+   * @return the daemon's rpc connection
+   */
+  public MoneroRpcConnection getRpcConnection() {
     return this.rpc;
   }
 
@@ -995,7 +1001,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     block.setTxIds(rpcBlock.containsKey("tx_hashes") ? (List<String>) rpcBlock.get("tx_hashes") : new ArrayList<String>());
     
     // build coinbase tx
-    Map<String, Object> rpcCoinbaseTx = (Map<String, Object>) (rpcBlock.containsKey("json") ? JsonUtils.deserialize(MoneroRpc.MAPPER, (String) rpcBlock.get("json"), new TypeReference<Map<String, Object>>(){}).get("miner_tx") : rpcBlock.get("miner_tx")); // may need to be parsed from json
+    Map<String, Object> rpcCoinbaseTx = (Map<String, Object>) (rpcBlock.containsKey("json") ? JsonUtils.deserialize(MoneroRpcConnection.MAPPER, (String) rpcBlock.get("json"), new TypeReference<Map<String, Object>>(){}).get("miner_tx") : rpcBlock.get("miner_tx")); // may need to be parsed from json
     MoneroTx coinbaseTx = new MoneroTx().setIsConfirmed(true).setIsCoinbase(true);
     MoneroDaemonRpc.convertRpcTx(rpcCoinbaseTx, coinbaseTx);
     block.setCoinbaseTx(coinbaseTx);
@@ -1125,8 +1131,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         tx.getVouts().get(i).setIndex(tx.getOutputIndices().get(i));  // transfer output indices to vouts
       }
     }
-    if (rpcTx.containsKey("as_json") && !"".equals(rpcTx.get("as_json"))) convertRpcTx(JsonUtils.deserialize(MoneroRpc.MAPPER, (String) rpcTx.get("as_json"), new TypeReference<Map<String, Object>>(){}), tx);
-    if (rpcTx.containsKey("tx_json") && !"".equals(rpcTx.get("tx_json"))) convertRpcTx(JsonUtils.deserialize(MoneroRpc.MAPPER, (String) rpcTx.get("tx_json"), new TypeReference<Map<String, Object>>(){}), tx);
+    if (rpcTx.containsKey("as_json") && !"".equals(rpcTx.get("as_json"))) convertRpcTx(JsonUtils.deserialize(MoneroRpcConnection.MAPPER, (String) rpcTx.get("as_json"), new TypeReference<Map<String, Object>>(){}), tx);
+    if (rpcTx.containsKey("tx_json") && !"".equals(rpcTx.get("tx_json"))) convertRpcTx(JsonUtils.deserialize(MoneroRpcConnection.MAPPER, (String) rpcTx.get("tx_json"), new TypeReference<Map<String, Object>>(){}), tx);
     if (!Boolean.TRUE.equals(tx.getIsRelayed())) tx.setLastRelayedTimestamp(null);  // TODO monero-daemon-rpc: returns last_relayed_timestamp despite relayed: false, self inconsistent
     
     // return built transaction

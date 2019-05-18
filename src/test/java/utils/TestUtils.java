@@ -11,7 +11,7 @@ import org.apache.log4j.PropertyConfigurator;
 
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroNetworkType;
-import monero.rpc.MoneroRpc;
+import monero.rpc.MoneroRpcConnection;
 import monero.rpc.MoneroRpcException;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
@@ -61,7 +61,7 @@ public class TestUtils {
   private static MoneroDaemonRpc daemonRpc;
   public static MoneroDaemonRpc getDaemonRpc() {
     if (daemonRpc == null) {
-      MoneroRpc rpc = new MoneroRpc(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
+      MoneroRpcConnection rpc = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
       daemonRpc = new MoneroDaemonRpc(rpc);
     }
     return daemonRpc;
@@ -75,7 +75,7 @@ public class TestUtils {
     if (walletRpc == null) {
       
       // construct wallet
-      MoneroRpc rpc = new MoneroRpc(WALLET_RPC_URI, WALLET_RPC_USERNAME, WALLET_RPC_PASSWORD);
+      MoneroRpcConnection rpc = new MoneroRpcConnection(WALLET_RPC_URI, WALLET_RPC_USERNAME, WALLET_RPC_PASSWORD);
       walletRpc = new MoneroWalletRpc(rpc);
       
       // create rpc wallet file if necessary
@@ -115,7 +115,7 @@ public class TestUtils {
       
       // create wallet from mnemonic phrase if it doesn't exist
       if (!MoneroWalletJni.walletExists(WALLET_JNI_PATH_1)) {
-        MoneroRpc daemonConnection = new MoneroRpc(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
+        MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
         walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, daemonConnection, 30000, NETWORK_TYPE);
         walletJni.save(WALLET_JNI_PATH_1, WALLET_JNI_PW); 
       }
@@ -123,7 +123,7 @@ public class TestUtils {
       // otherwise open existing wallet and update daemon connection
       else {
         walletJni = new MoneroWalletJni(WALLET_JNI_PATH_1, WALLET_JNI_PW, MoneroNetworkType.STAGENET);
-        walletJni.setDaemonConnection(TestUtils.getDaemonRpc().getRpc());
+        walletJni.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
       }
     }
     

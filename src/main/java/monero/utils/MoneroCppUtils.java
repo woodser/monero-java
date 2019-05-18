@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import common.utils.JsonUtils;
 import monero.cpp_bridge.MoneroCppUtilsNative;
-import monero.rpc.MoneroRpc;
+import monero.rpc.MoneroRpcConnection;
 
 /**
  * Collection of utilties bridged from Monero Core C++ to Java.
@@ -27,12 +27,12 @@ public class MoneroCppUtils {
   public static Map<String, Object> binaryBlocksToMap(byte[] binBlocks) {
     
     // convert binary blocks to json then to map
-    Map<String, Object> map = JsonUtils.deserialize(MoneroRpc.MAPPER, MoneroCppUtilsNative.binaryBlocksToJson(binBlocks), new TypeReference<Map<String, Object>>(){});
+    Map<String, Object> map = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, MoneroCppUtilsNative.binaryBlocksToJson(binBlocks), new TypeReference<Map<String, Object>>(){});
     
     // parse blocks to maps
     List<Map<String, Object>> blockMaps = new ArrayList<Map<String, Object>>();
     for (String blockStr : (List<String>) map.get("blocks")) {
-      blockMaps.add(JsonUtils.deserialize(MoneroRpc.MAPPER, blockStr, new TypeReference<Map<String, Object>>(){}));
+      blockMaps.add(JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blockStr, new TypeReference<Map<String, Object>>(){}));
     }
     map.put("blocks", blockMaps); // overwrite block strings
     
@@ -46,7 +46,7 @@ public class MoneroCppUtils {
         List<Map<String, Object>> txs = new ArrayList<Map<String, Object>>();
         allTxs.add(txs);
         for (String rpcTx : (List<String>) rpcTxs) {
-          txs.add(JsonUtils.deserialize(MoneroRpc.MAPPER, rpcTx.replaceFirst(",", "{") + "}", new TypeReference<Map<String, Object>>(){})); // modify tx string to proper json and parse // TODO: more efficient way than this json manipulation?
+          txs.add(JsonUtils.deserialize(MoneroRpcConnection.MAPPER, rpcTx.replaceFirst(",", "{") + "}", new TypeReference<Map<String, Object>>(){})); // modify tx string to proper json and parse // TODO: more efficient way than this json manipulation?
         }
       }
     }

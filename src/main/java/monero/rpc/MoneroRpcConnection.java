@@ -34,10 +34,10 @@ import monero.utils.MoneroUtils;
 /**
  * Maintains a connection and sends requests to a Monero RPC API.
  */
-public class MoneroRpc {
+public class MoneroRpcConnection {
 
   // logger
-  private static final Logger LOGGER = Logger.getLogger(MoneroRpc.class);
+  private static final Logger LOGGER = Logger.getLogger(MoneroRpcConnection.class);
 
   // custom mapper to deserialize integers to BigIntegers
   public static ObjectMapper MAPPER;
@@ -54,19 +54,19 @@ public class MoneroRpc {
   private String username;
   private String password;
   
-  public MoneroRpc(URI uri) {
+  public MoneroRpcConnection(URI uri) {
     this(uri, null, null);
   }
   
-  public MoneroRpc(String uri) {
+  public MoneroRpcConnection(String uri) {
     this(MoneroUtils.parseUri(uri));
   }
   
-  public MoneroRpc(String uri, String username, String password) {
+  public MoneroRpcConnection(String uri, String username, String password) {
     this(MoneroUtils.parseUri(uri), username, password);
   }
   
-  public MoneroRpc(URI uri, String username, String password) {
+  public MoneroRpcConnection(URI uri, String username, String password) {
     this.uri = uri;
     this.username = username;
     this.password = password;
@@ -242,6 +242,34 @@ public class MoneroRpc {
       e3.printStackTrace();
       throw new MoneroException(e3.getMessage());
     }
+  }
+  
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((password == null) ? 0 : password.hashCode());
+    result = prime * result + ((uri == null) ? 0 : uri.hashCode());
+    result = prime * result + ((username == null) ? 0 : username.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    MoneroRpcConnection other = (MoneroRpcConnection) obj;
+    if (password == null) {
+      if (other.password != null) return false;
+    } else if (!password.equals(other.password)) return false;
+    if (uri == null) {
+      if (other.uri != null) return false;
+    } else if (!uri.equals(other.uri)) return false;
+    if (username == null) {
+      if (other.username != null) return false;
+    } else if (!username.equals(other.username)) return false;
+    return true;
   }
   
   // ------------------------------ STATIC UTILITIES --------------------------
