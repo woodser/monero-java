@@ -219,7 +219,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public int getChainHeight() {
-    throw new RuntimeException("Not implemented");
+    return (int) getChainHeightJni();  // TODO: switch heights to longs
   }
 
   @Override
@@ -544,6 +544,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String getLanguageJni();
   
   private native long getHeightJni();
+  
+  private native long getChainHeightJni();
   
   private native long getRestoreHeightJni();
   
