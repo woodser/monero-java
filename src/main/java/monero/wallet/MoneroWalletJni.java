@@ -74,8 +74,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public MoneroWalletJni(MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, String language) {
     if (networkType == null) networkType = MoneroNetworkType.MAINNET;
     if (language == null) language = DEFAULT_LANGUAGE;
-    this.walletHandle = createWalletRandomJni(networkType.ordinal(), language);
-    if (daemonConnection != null) setDaemonConnection(daemonConnection);
+    if (daemonConnection == null) this.walletHandle = createWalletRandomJni(networkType.ordinal(), null, null, null, language);
+    else this.walletHandle = createWalletRandomJni(networkType.ordinal(), daemonConnection.getUri(), daemonConnection.getUsername(), daemonConnection.getPassword(), language);
   }
   
   /**
@@ -521,7 +521,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native static long openWalletJni(String path, String password, int networkType);
   
-  private native static long createWalletRandomJni(int networkType, String language);
+  private native static long createWalletRandomJni(int networkType, String daemonUrl, String daemonUsername, String daemonPassword, String language);
+  
+  private native static long createWalletFromMnemonicJni(String mnemonic, int networkType, String daemonUrl, String daemonUsername, String daemonPassword, int restoreHeight);
+  
+  private native static long createWalletFromKeysJni(String address, String viewKey, String spendKey, int networkType, String daemonUrl, String daemonUsername, String daemonPassword, int restoreHeight, String language);
+  
+  //private native static long createWalletRandomJni(int networkType, String language);
   
   private native static long createWalletFromMnemonicJni(String mnemonic, int networkType, int restoreHeight);
   
