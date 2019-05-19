@@ -367,10 +367,17 @@ Java_monero_wallet_MoneroWalletJni_getHeightJni(JNIEnv *env, jobject instance) {
 }
 
 JNIEXPORT jlong JNICALL
+Java_monero_wallet_MoneroWalletJni_getChainHeightJni(JNIEnv *env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getChainHeightJni" << endl;
+  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+  string err;
+  return wallet->get_daemon_blockchain_height(err);
+}
+
+JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni" << endl;
   tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-  cout << wallet->get_refresh_from_block_height() << endl;
   return wallet->get_refresh_from_block_height();
 }
 
