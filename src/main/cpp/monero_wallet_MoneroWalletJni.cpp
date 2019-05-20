@@ -366,9 +366,8 @@ Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *env, jobject instance,
 JNIEXPORT void JNICALL
 Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jint startHeight) {
   cout << "Java_monero_wallet_MoneroWalletJni_syncJni" << endl;
-  throw std::runtime_error("Not implemented");
-  //Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance, "walletHandle");
-  //wallet->refresh();
+  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+  wallet->refresh(wallet->is_trusted_daemon());
 }
 
 #ifdef __cplusplus
