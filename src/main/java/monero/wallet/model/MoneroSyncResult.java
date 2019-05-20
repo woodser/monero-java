@@ -5,23 +5,23 @@ package monero.wallet.model;
  */
 public class MoneroSyncResult {
 
-  private Integer numBlocksFetched;
+  private Long numBlocksFetched;
   private Boolean receivedMoney;
   
   public MoneroSyncResult() {
     this(null, null);
   }
   
-  public MoneroSyncResult(Integer numBlocksFetched, Boolean receivedMoney) {
+  public MoneroSyncResult(Long numBlocksFetched, Boolean receivedMoney) {
     this.numBlocksFetched = numBlocksFetched;
     this.receivedMoney = receivedMoney;
   }
   
-  public Integer getNumBlocksFetched() {
+  public Long getNumBlocksFetched() {
     return numBlocksFetched;
   }
   
-  public void setNumBlocksFetched(Integer numBlocksFetched) {
+  public void setNumBlocksFetched(Long numBlocksFetched) {
     this.numBlocksFetched = numBlocksFetched;
   }
   
