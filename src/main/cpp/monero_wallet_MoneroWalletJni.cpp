@@ -201,7 +201,7 @@ Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *env, jclass cla
 }
 
 JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring mnemonic, jint networkType, jint restoreHeight) {
+Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring mnemonic, jint networkType, jlong restoreHeight) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni" << endl;
   const char* _mnemonic = env->GetStringUTFChars(mnemonic, NULL);
 
@@ -216,7 +216,7 @@ Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jcla
   tools::wallet2* wallet = new tools::wallet2(static_cast<cryptonote::network_type>(networkType), 1, true);
   wallet->set_seed_language(language);
   wallet->generate(string(""), string(""), recoveryKey, true, false);
-  wallet->set_refresh_from_block_height(restoreHeight);
+  wallet->set_refresh_from_block_height((uint64_t) restoreHeight);
 
 //  // print the mnemonic
 //  epee::wipeable_string fetchedMnemonic;
@@ -228,7 +228,7 @@ Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jcla
 }
 
 JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass clazz, jstring address, jstring viewKey, jstring spendKey, jint networkType, jint restoreHeight, jstring language) {
+Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass clazz, jstring address, jstring viewKey, jstring spendKey, jint networkType, jlong restoreHeight, jstring language) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni" << endl;
 
 //  const char *_language = env->GetStringUTFChars(language, NULL);
@@ -364,10 +364,14 @@ Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *env, jobject instance,
 }
 
 JNIEXPORT void JNICALL
-Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jint startHeight) {
+Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong startHeight) {
   cout << "Java_monero_wallet_MoneroWalletJni_syncJni" << endl;
   tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-  wallet->refresh(wallet->is_trusted_daemon());
+  cout << "Start height: " << startHeight << endl;
+  uint64_t blocksFetched;
+  bool receivedMoney;
+  wallet->refresh(wallet->is_trusted_daemon(), startHeight, blocksFetched, receivedMoney, true);
+  cout << "Done refreshing.  Blocks fetched: " << blocksFetched << ", received money: " << receivedMoney << endl;
 }
 
 #ifdef __cplusplus
