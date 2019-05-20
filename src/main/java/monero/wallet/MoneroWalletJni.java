@@ -76,6 +76,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (language == null) language = DEFAULT_LANGUAGE;
     if (daemonConnection == null) this.walletHandle = createWalletRandomJni(networkType.ordinal(), null, null, null, language);
     else this.walletHandle = createWalletRandomJni(networkType.ordinal(), daemonConnection.getUri(), daemonConnection.getUsername(), daemonConnection.getPassword(), language);
+    this.setListenerJni(new WalletListenerJniImpl());
   }
   
   /**
@@ -235,7 +236,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener listener) {
     if (endHeight != null) throw new MoneroException("Monero core wallet does not support syncing to an end height");
-    if (listener != null) throw new RuntimeException("sync listening not yet implemented");
+    //if (listener != null) throw new RuntimeException("sync listening not yet implemented");
     syncJni(startHeight);
     throw new RuntimeException("Done syncing but need to return sync results");
   }
@@ -560,87 +561,52 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   // -------------------------- WALLET LISTENER JNI ---------------------------
   
   /**
-   * Interface to receive notifications from C++ over JNI.
+   * Interface to receive wallet notifications from C++.
    * 
    * TODO: don't longs lose precision?
    */
   private interface WalletListenerJni {
     
     /**
-     * Called when any event occurs (send, receive, block processed, etc).
-     */
-    public void updated();
-    
-    /**
-     * Called when the wallet is refreshed (explicitly or by the background thread).
-     */
-    public void refreshed();
-    
-    /**
      * Called when a new block is received.
      * 
      * @param height is the height of the received block
      */
-    public void newBlock(long height);
+    public void onNewBlock(long height);
     
-    /**
-     * Called when funds are sent from the wallet.
-     * 
-     * @param txId is the id of the outgoing transaction
-     * @param amount is the amount sent from the wallet
-     */
-    public void moneySpent(String txId, long amount);
-    
-    /**
-     * Called when funds are received to the wallet.
-     * 
-     * @param txId is the id of the incoming transaction
-     * @param amount is the amount received to the wallet
-     */
-    public void moneyReceived(String txId, long amount);
-
-    /**
-     * Called when funds are received to the wallet but the tx is still in the tx pool.
-     * 
-     * @param txId is the id of the incoming and unconfirmed transaction
-     * @param amount is the amount received to the wallet
-     */
-    public void unconfirmedMoneyReceived(String txId, long amount);
+//    /**
+//     * Called when funds are sent from the wallet.
+//     * 
+//     * @param txId is the id of the outgoing transaction
+//     * @param amount is the amount sent from the wallet
+//     */
+//    public void moneySpent(String txId, long amount);
+//    
+//    /**
+//     * Called when funds are received to the wallet.
+//     * 
+//     * @param txId is the id of the incoming transaction
+//     * @param amount is the amount received to the wallet
+//     */
+//    public void moneyReceived(String txId, long amount);
+//
+//    /**
+//     * Called when funds are received to the wallet but the tx is still in the tx pool.
+//     * 
+//     * @param txId is the id of the incoming and unconfirmed transaction
+//     * @param amount is the amount received to the wallet
+//     */
+//    public void unconfirmedMoneyReceived(String txId, long amount);
   }
   
   /**
    * Handles wallet notifications as they are received from C++ over JNI.
    */
   private class WalletListenerJniImpl implements WalletListenerJni {
-    
-    @Override
-    public void updated() {
-      System.out.println("updated()");
-    }
 
     @Override
-    public void refreshed() {
-      System.out.println("refreshed()");
-    }
-
-    @Override
-    public void newBlock(long height) {
-      System.out.println("newBlock()");
-    }
-
-    @Override
-    public void moneySpent(String txId, long amount) {
-      System.out.println("moneySpent(" + txId + ", " + amount + ")");
-    }
-
-    @Override
-    public void moneyReceived(String txId, long amount) {
-      System.out.println("moneyReceived(" + txId + ", " + amount + ")");
-    }
-
-    @Override
-    public void unconfirmedMoneyReceived(String txId, long amount) {
-      System.out.println("unconfirmedMoneyReceived(" + txId + ", " + amount + ")");
+    public void onNewBlock(long height) {
+      System.out.println("onNewBlock(" + height + ")");
     }
   }
 }
