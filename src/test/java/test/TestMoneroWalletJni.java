@@ -142,6 +142,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // sync the wallet with default params
     wallet.sync();
     assertEquals(daemon.getHeight(), wallet.getHeight());
+    
+    // TODO: sync wallet with smaller start height, bigger start height, etc
   }
   
   // Can sync a wallet with a given seed and start height
