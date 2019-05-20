@@ -257,7 +257,7 @@ Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni(JNIEnv *env, jobject i
   // get wallet
   tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
 
-  // initialize String[3] for uri, username, and password
+  // initialize String[3] for uri, username, and password, respectively
   jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
 
   // set daemon address
@@ -363,7 +363,7 @@ Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *env, jobject instance,
   }
 }
 
-JNIEXPORT void JNICALL
+JNIEXPORT jobjectArray JNICALL
 Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong startHeight) {
   cout << "Java_monero_wallet_MoneroWalletJni_syncJni" << endl;
   tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
@@ -372,6 +372,18 @@ Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong 
   bool receivedMoney;
   wallet->refresh(wallet->is_trusted_daemon(), startHeight, blocksFetched, receivedMoney, true);
   cout << "Done refreshing.  Blocks fetched: " << blocksFetched << ", received money: " << receivedMoney << endl;
+
+  // build and return results as Object[2]{(long) numBlocksFetched, (boolean) receivedMoney}
+  jobjectArray results = env->NewObjectArray(2, env->FindClass("java/lang/Object"), nullptr);
+  jclass longClass = env->FindClass("java/lang/Long");
+  jmethodID longConstructor = env->GetMethodID(longClass, "<init>", "(J)V");
+  jobject numBlocksFetchedWrapped = env->NewObject(longClass, longConstructor, static_cast<jlong>(blocksFetched));
+  env->SetObjectArrayElement(results, 0, numBlocksFetchedWrapped);
+  jclass booleanClass = env->FindClass("java/lang/Boolean");
+  jmethodID booleanConstructor = env->GetMethodID(booleanClass, "<init>", "(Z)V");
+  jobject receivedMoneyWrapped = env->NewObject(booleanClass, booleanConstructor, static_cast<jboolean>(receivedMoney));
+  env->SetObjectArrayElement(results, 1, receivedMoneyWrapped);
+  return results;
 }
 
 #ifdef __cplusplus

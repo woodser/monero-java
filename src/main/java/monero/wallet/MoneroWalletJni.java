@@ -280,16 +280,16 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (startHeight == null) startHeight = Math.max(getHeight(), getRestoreHeight());
     if (endHeight != null) throw new MoneroException("Monero core wallet does not support syncing to an end height");
     
-    // register external listener
-    MoneroWalletListener addedExternalListener = null;
-    if (listener != null) {
-      addListener(addedExternalListener = new MoneroWalletListener() {
-        @Override
-        public void onSyncProgress(long numBlocksDone, long numBlocksTotal, float percentDone, String message) {
-          listener.onSyncProgress(numBlocksDone, numBlocksTotal, percentDone, message);
-        }
-      });
-    }
+//    // register external listener
+//    MoneroWalletListener addedExternalListener = null;
+//    if (listener != null) {
+//      addListener(addedExternalListener = new MoneroWalletListener() {
+//        @Override
+//        public void onSyncProgress(long numBlocksDone, long numBlocksTotal, float percentDone, String message) {
+//          listener.onSyncProgress(numBlocksDone, numBlocksTotal, percentDone, message);
+//        }
+//      });
+//    }
     
     // register internal listener which notifies external listeners
     Wallet2Listener syncListener;
@@ -298,22 +298,32 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     wallet2Listener.addListener(syncListener = new Wallet2Listener() {
       @Override
       public void onNewBlock(long height) {
+        
+        // ignore if block is not applicable to wallet
         if (height < startHeightConst) return;
+        
+        // notify listener argument
         long numBlocksDone = height - startHeightConst;
+        float percentDone = numBlocksDone / numBlocksTotal;
+        String message = "Synchronizing";
+        if (listener != null) listener.onSyncProgress(numBlocksDone, numBlocksTotal, percentDone, message);
+        
+        // notify registered listeners
         for (MoneroWalletListener listener : listeners) {
-          listener.onSyncProgress(numBlocksDone, numBlocksTotal, numBlocksDone / numBlocksTotal, "Synchronizing");
+          listener.onSyncProgress(numBlocksDone, numBlocksTotal, percentDone, message);
         }
       }
     });
     
     // sync wallet
-    syncJni(startHeight);
+    Object[] results = syncJni(startHeight);
     
     // unregister listeners
-    if (addedExternalListener != null) removeListener(addedExternalListener);
+    //if (addedExternalListener != null) removeListener(addedExternalListener);
     wallet2Listener.removeListener(syncListener);
-
-    throw new RuntimeException("Done syncing but need to return sync results");
+    
+    // return results
+    return new MoneroSyncResult((long) results[0], (boolean) results[1]);
   }
 
   @Override
@@ -625,7 +635,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native long setListenerJni(Wallet2Listener listener);
   
-  private native void syncJni(long startHeight);
+  private native Object[] syncJni(long startHeight);
   
   // -------------------------- WALLET LISTENER JNI ---------------------------
   
