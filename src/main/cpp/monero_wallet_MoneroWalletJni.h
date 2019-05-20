@@ -26,9 +26,9 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv 
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *, jclass, jint, jstring, jstring, jstring, jstring);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *, jclass, jstring, jint, jint);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *, jclass, jstring, jint, jlong);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *, jclass, jstring, jstring, jstring, jint, jint, jstring);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *, jclass, jstring, jstring, jstring, jint, jlong, jstring);
 
 // ----------------------------- INSTANCE METHODS -----------------------------
 
@@ -54,7 +54,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressJni(JNIEn
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *, jobject, jobject);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *, jobject, jint);	// TODO: return sync results
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *, jobject, jlong);	// TODO: return sync results
 
 #ifdef __cplusplus
 }

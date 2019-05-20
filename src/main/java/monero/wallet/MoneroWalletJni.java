@@ -237,8 +237,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener listener) {
     if (endHeight != null) throw new MoneroException("Monero core wallet does not support syncing to an end height");
     //if (listener != null) throw new RuntimeException("sync listening not yet implemented");
+    
+    if (startHeight == null) startHeight = Math.max(getHeight(), getRestoreHeight());
     syncJni(startHeight);
-    throw new RuntimeException("Done syncing but need to return sync results");
+    return null;
+    //throw new RuntimeException("Done syncing but need to return sync results");
   }
 
   @Override
@@ -524,15 +527,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native static long createWalletRandomJni(int networkType, String daemonUrl, String daemonUsername, String daemonPassword, String language);
   
-  private native static long createWalletFromMnemonicJni(String mnemonic, int networkType, String daemonUrl, String daemonUsername, String daemonPassword, int restoreHeight);
+  private native static long createWalletFromMnemonicJni(String mnemonic, int networkType, long restoreHeight);
   
-  private native static long createWalletFromKeysJni(String address, String viewKey, String spendKey, int networkType, String daemonUrl, String daemonUsername, String daemonPassword, int restoreHeight, String language);
-  
-  //private native static long createWalletRandomJni(int networkType, String language);
-  
-  private native static long createWalletFromMnemonicJni(String mnemonic, int networkType, int restoreHeight);
-  
-  private native static long createWalletFromKeysJni(String address, String viewKey, String spendKey, int networkType, int restoreHeight, String language);
+  private native static long createWalletFromKeysJni(String address, String viewKey, String spendKey, int networkType, long restoreHeight, String language);
   
   private native String[] getDaemonConnectionJni(); // returns [uri, username, password]
   
@@ -556,7 +553,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native long setListenerJni(WalletListenerJni listener);
   
-  private native void syncJni(Integer startHeight);
+  private native void syncJni(long startHeight);
   
   // -------------------------- WALLET LISTENER JNI ---------------------------
   
