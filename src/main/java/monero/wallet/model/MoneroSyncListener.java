@@ -1,7 +1,7 @@
 package monero.wallet.model;
 
 /**
- * Receive updates as sync progress is made.
+ * Receives progress notifications as a wallet is synchronized.
  */
 public interface MoneroSyncListener {
 

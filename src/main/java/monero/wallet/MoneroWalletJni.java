@@ -1,8 +1,12 @@
 package monero.wallet;
 
+import static org.junit.Assert.assertTrue;
+
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
@@ -21,6 +25,7 @@ import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.model.MoneroWalletListener;
 import monero.wallet.request.MoneroOutputRequest;
 import monero.wallet.request.MoneroSendRequest;
 import monero.wallet.request.MoneroTransferRequest;
@@ -53,6 +58,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   // instance variables
   private long walletHandle;    // memory address of corresponding wallet in c++; this variable is read directly by name in c++
   private long listenerHandle;  // memory address of corresponding listener in c++; this variable is read directly by name in c++
+  private Wallet2ListenerAggregate wallet2Listener; // internal wallet2 listener to propagate notifications
+  private Set<MoneroWalletListener> listeners;      // external wallet listeners
   
   // private static variables
   private static String DEFAULT_LANGUAGE = "English";
@@ -76,7 +83,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (language == null) language = DEFAULT_LANGUAGE;
     if (daemonConnection == null) this.walletHandle = createWalletRandomJni(networkType.ordinal(), null, null, null, language);
     else this.walletHandle = createWalletRandomJni(networkType.ordinal(), daemonConnection.getUri(), daemonConnection.getUsername(), daemonConnection.getPassword(), language);
-    this.setListenerJni(new WalletListenerJniImpl());
+    initCommon();
   }
   
   /**
@@ -92,6 +99,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (restoreHeight == null) restoreHeight = 0;
     this.walletHandle = createWalletFromMnemonicJni(mnemonic, networkType.ordinal(), restoreHeight);
     if (daemonConnection != null) setDaemonConnection(daemonConnection);
+    initCommon();
   }
 
   /**
@@ -111,7 +119,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (language == null) language = DEFAULT_LANGUAGE;
     this.walletHandle = createWalletFromKeysJni(address, viewKey, spendKey, networkType.ordinal(), restoreHeight, language);
     if (daemonConnection != null) setDaemonConnection(daemonConnection);
-    this.listenerHandle = setListenerJni(new WalletListenerJniImpl());
+    initCommon();
   }
   
   /**
@@ -125,6 +133,12 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist: " + path);
     if (networkType == null) throw new MoneroException("Must provide a network type");
     this.walletHandle = openWalletJni(path, password, networkType.ordinal());
+    initCommon();
+  }
+  
+  private void initCommon() {
+    this.wallet2Listener = new Wallet2ListenerAggregate();
+    this.listeners = new LinkedHashSet<MoneroWalletListener>();
   }
   
   // ------------ WALLET METHODS SPECIFIC TO JNI IMPLEMENTATION ---------------
@@ -156,6 +170,34 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   public int getRestoreHeight() {
     return (int) getRestoreHeightJni();
+  }
+  
+  public void addListener(MoneroWalletListener listener) {
+    
+    // register external listener
+    listeners.add(listener);
+    
+    // register internal listener to notify external listener
+    wallet2Listener.addListener(new Wallet2ListenerExternal(listener));
+  }
+  
+  public void removeListener(MoneroWalletListener listener) {
+    
+    // unregister listener
+    if (!listeners.contains(listener)) throw new MoneroException("Listener is not registered to wallet");
+    listeners.remove(listener);
+    
+    // unregister internal listener which notifies external listener
+    boolean found = false;
+    for (Wallet2Listener w2Listener : wallet2Listener.getListeners()) {
+      if (!(w2Listener instanceof Wallet2ListenerExternal)) continue;
+      if (((Wallet2ListenerExternal) w2Listener).getListener() == listener) {
+        wallet2Listener.removeListener(w2Listener);
+        found = true;
+        break;
+      }
+    }
+    assertTrue("Could not find internal listener to unregister", found);
   }
   
   // TODO: can set restore height, start refresh, pause refresh, isSynchronized()
@@ -235,13 +277,37 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener listener) {
-    if (endHeight != null) throw new MoneroException("Monero core wallet does not support syncing to an end height");
-    //if (listener != null) throw new RuntimeException("sync listening not yet implemented");
-    
     if (startHeight == null) startHeight = Math.max(getHeight(), getRestoreHeight());
+    if (endHeight != null) throw new MoneroException("Monero core wallet does not support syncing to an end height");
+    
+    // register external listener
+    MoneroWalletListener addedExternalListener = null;
+    if (listener != null) {
+      addListener(addedExternalListener = new MoneroWalletListener() {
+        @Override
+        public void onProgress(int numBlocksDone, int numBlocksTotal, float percentDone, String message) {
+          listener.onProgress(numBlocksDone, numBlocksTotal, percentDone, message);
+        }
+      });
+    }
+    
+    // register internal listener which notifies external listeners
+    Wallet2Listener syncListener;
+    wallet2Listener.addListener(syncListener = new Wallet2Listener() {
+      @Override
+      public void onNewBlock(long height) {
+        System.out.println("So... notify syncs?");
+      }
+    });
+    
+    // sync wallet
     syncJni(startHeight);
-    return null;
-    //throw new RuntimeException("Done syncing but need to return sync results");
+    
+    // unregister listeners
+    if (addedExternalListener != null) removeListener(addedExternalListener);
+    wallet2Listener.removeListener(syncListener);
+
+    throw new RuntimeException("Done syncing but need to return sync results");
   }
 
   @Override
@@ -551,25 +617,25 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getAddressJni(int accountIdx, int subaddressIdx);
   
-  private native long setListenerJni(WalletListenerJni listener);
+  private native long setListenerJni(Wallet2Listener listener);
   
   private native void syncJni(long startHeight);
   
   // -------------------------- WALLET LISTENER JNI ---------------------------
   
   /**
-   * Interface to receive wallet notifications from C++.
-   * 
-   * TODO: don't longs lose precision?
+   * Receives notifications from wallet2 in c++ and provides default handling.
    */
-  private interface WalletListenerJni {
+  private class Wallet2Listener {
     
     /**
      * Called when a new block is received.
      * 
      * @param height is the height of the received block
      */
-    public void onNewBlock(long height);
+    public void onNewBlock(long height) {
+      //System.out.println("onNewBlock(" + height + ")");
+    }
     
 //    /**
 //     * Called when funds are sent from the wallet.
@@ -577,7 +643,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 //     * @param txId is the id of the outgoing transaction
 //     * @param amount is the amount sent from the wallet
 //     */
-//    public void moneySpent(String txId, long amount);
+//    public void moneySpent(String txId, long amount) { }
 //    
 //    /**
 //     * Called when funds are received to the wallet.
@@ -585,7 +651,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 //     * @param txId is the id of the incoming transaction
 //     * @param amount is the amount received to the wallet
 //     */
-//    public void moneyReceived(String txId, long amount);
+//    public void moneyReceived(String txId, long amount) { }
 //
 //    /**
 //     * Called when funds are received to the wallet but the tx is still in the tx pool.
@@ -593,17 +659,59 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 //     * @param txId is the id of the incoming and unconfirmed transaction
 //     * @param amount is the amount received to the wallet
 //     */
-//    public void unconfirmedMoneyReceived(String txId, long amount);
+//    public void unconfirmedMoneyReceived(String txId, long amount)  { }
   }
   
   /**
-   * Handles wallet notifications as they are received from C++ over JNI.
+   * Receives notifications from wallet2 in c++ and propagates them to other listeners.
    */
-  private class WalletListenerJniImpl implements WalletListenerJni {
-
-    @Override
+  private class Wallet2ListenerAggregate extends Wallet2Listener {
+    
+    private LinkedHashSet<Wallet2Listener> listeners;
+    
+    public Wallet2ListenerAggregate() {
+      this.listeners = new LinkedHashSet<Wallet2Listener>();
+    }
+    
+    private void addListener(Wallet2Listener listener) {
+      if (listeners.isEmpty()) listenerHandle = setListenerJni(this);
+      listeners.add(listener);
+    }
+    
+    private void removeListener(Wallet2Listener listener) {
+      listeners.remove(listener);
+      if (listeners.isEmpty()) listenerHandle = setListenerJni(null);
+    }
+    
+    public LinkedHashSet<Wallet2Listener> getListeners() {
+      return listeners;
+    }
+    
+    public void onNewBlock(long height) {
+      for (Wallet2Listener listener : listeners) listener.onNewBlock(height);
+    }
+  }
+  
+  /**
+   * Receives notifications from wallet2 in c++ and invokes external listeners.
+   */
+  private class Wallet2ListenerExternal extends Wallet2Listener {
+    
+    private MoneroWalletListener listener;
+    
+    public Wallet2ListenerExternal(MoneroWalletListener listener) {
+      this.listener = listener;
+    }
+    
+    public MoneroWalletListener getListener() {
+      return listener;
+    }
+    
     public void onNewBlock(long height) {
       System.out.println("onNewBlock(" + height + ")");
     }
   }
+  
+  // ---------------------------- PRIVATE HELPERS -----------------------------
+  
 }
