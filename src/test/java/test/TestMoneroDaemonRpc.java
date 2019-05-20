@@ -111,7 +111,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    int height = daemon.getHeight();
+    long height = daemon.getHeight();
     assertTrue("Height must be greater than 0", height > 0);
   }
   
@@ -157,7 +157,7 @@ public class TestMoneroDaemonRpc {
     id = daemon.getBlockId(lastHeader.getHeight() - 1);
     header = daemon.getBlockHeaderById(id);
     testBlockHeader(header, true);
-    assertEquals(lastHeader.getHeight() - 1, (int) header.getHeight());
+    assertEquals(lastHeader.getHeight() - 1, (long) header.getHeight());
   }
   
   // Can get a block header by height
@@ -174,7 +174,7 @@ public class TestMoneroDaemonRpc {
     // retrieve by height of previous to last block
     header = daemon.getBlockHeaderByHeight(lastHeader.getHeight() - 1);
     testBlockHeader(header, true);
-    assertEquals(lastHeader.getHeight() - 1, (int) header.getHeight());
+    assertEquals(lastHeader.getHeight() - 1, (long) header.getHeight());
   }
   
   // Can get block headers by range
@@ -184,11 +184,11 @@ public class TestMoneroDaemonRpc {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // determine start and end height based on number of blocks and how many blocks ago
-    int numBlocks = 100;
-    int numBlocksAgo = 100;
-    int currentHeight = daemon.getHeight();
-    int startHeight = currentHeight - numBlocksAgo;
-    int endHeight = currentHeight - (numBlocksAgo - numBlocks) - 1;
+    long numBlocks = 100;
+    long numBlocksAgo = 100;
+    long currentHeight = daemon.getHeight();
+    long startHeight = currentHeight - numBlocksAgo;
+    long endHeight = currentHeight - (numBlocksAgo - numBlocks) - 1;
     
     // fetch headers
     List<MoneroBlockHeader> headers = daemon.getBlockHeadersByRange(startHeight, endHeight);
@@ -197,7 +197,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(numBlocks, headers.size());
     for (int i = 0; i < numBlocks; i++) {
       MoneroBlockHeader header = headers.get(i);
-      assertEquals(startHeight + i, (int) header.getHeight());
+      assertEquals(startHeight + i, (long) header.getHeight());
       testBlockHeader(header, true);
     }
   }
@@ -256,7 +256,7 @@ public class TestMoneroDaemonRpc {
     // retrieve by height of previous to last block
     block = daemon.getBlockByHeight(lastHeader.getHeight() - 1);
     testBlock(block, ctx);
-    assertEquals(lastHeader.getHeight() - 1, (int) block.getHeight());
+    assertEquals(lastHeader.getHeight() - 1, (long) block.getHeight());
   }
   
   // Can get blocks by height which includes transactions (binary)
@@ -268,11 +268,11 @@ public class TestMoneroDaemonRpc {
     int numBlocks = 200;
     
     // select random heights  // TODO: this is horribly inefficient way of computing last 100 blocks if not shuffling
-    int currentHeight = daemon.getHeight();
-    List<Integer> allHeights = new ArrayList<Integer>();
-    for (int i = 0; i < currentHeight - 1; i++) allHeights.add(i);
+    long currentHeight = daemon.getHeight();
+    List<Long> allHeights = new ArrayList<Long>();
+    for (long i = 0; i < currentHeight - 1; i++) allHeights.add(i);
     //GenUtils.shuffle(allHeights);
-    List<Integer> heights = new ArrayList<Integer>();
+    List<Long> heights = new ArrayList<Long>();
     for (int i = allHeights.size() - numBlocks; i < allHeights.size(); i++) heights.add(allHeights.get(i));
     
     // fetch blocks
@@ -296,14 +296,14 @@ public class TestMoneroDaemonRpc {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get height range
-    int numBlocks = 100;
-    int numBlocksAgo = 190;
+    long numBlocks = 100;
+    long numBlocksAgo = 190;
     assertTrue(numBlocks > 0);
     assertTrue(numBlocksAgo >= numBlocks);
-    int height = daemon.getHeight();
+    long height = daemon.getHeight();
     assertTrue(height - numBlocksAgo + numBlocks - 1 < height);
-    int startHeight = height - numBlocksAgo;
-    int endHeight = height - numBlocksAgo + numBlocks - 1;
+    long startHeight = height - numBlocksAgo;
+    long endHeight = height - numBlocksAgo + numBlocks - 1;
     
     // test known start and end heights
     testGetBlocksRange(startHeight, endHeight, height, false);
@@ -321,12 +321,12 @@ public class TestMoneroDaemonRpc {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // get long height range
-    int numBlocks = 2160; // test ~3 days of blocks
+    long numBlocks = 2160; // test ~3 days of blocks
     assertTrue(numBlocks > 0);
-    int height = daemon.getHeight();
+    long height = daemon.getHeight();
     assertTrue(height - numBlocks - 1 < height);
-    int startHeight = height - numBlocks;
-    int endHeight = height - 1;
+    long startHeight = height - numBlocks;
+    long endHeight = height - 1;
     
     // test known start and end heights
     testGetBlocksRange(startHeight, endHeight, height, true);
@@ -525,7 +525,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetCoinbaseTxSum() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    MoneroCoinbaseTxSum sum = daemon.getCoinbaseTxSum(0, 50000);
+    MoneroCoinbaseTxSum sum = daemon.getCoinbaseTxSum(0l, 50000l);
     testCoinbaseTxSum(sum);
   }
   
@@ -1563,17 +1563,17 @@ public class TestMoneroDaemonRpc {
     assertEquals(tx.toString(), merged.toString());
   }
   
-  private static void testGetBlocksRange(Integer startHeight, Integer endHeight, Integer chainHeight, boolean chunked) {
+  private static void testGetBlocksRange(Long startHeight, Long endHeight, Long chainHeight, boolean chunked) {
     
     // fetch blocks by range
-    int realStartHeight = startHeight == null ? 0 : startHeight;
-    int realEndHeight = endHeight == null ? chainHeight - 1 : endHeight;
+    long realStartHeight = startHeight == null ? 0 : startHeight;
+    long realEndHeight = endHeight == null ? chainHeight - 1 : endHeight;
     List<MoneroBlock> blocks = chunked ? daemon.getBlocksByRangeChunked(startHeight, endHeight) : daemon.getBlocksByRange(startHeight, endHeight);
     assertEquals(realEndHeight - realStartHeight + 1, blocks.size());
     
     // test each block
     for (int i = 0; i < blocks.size(); i++) {
-      assertEquals(realStartHeight + i, (int) blocks.get(i).getHeight());
+      assertEquals(realStartHeight + i, (long) blocks.get(i).getHeight());
       testBlock(blocks.get(i), BINARY_BLOCK_CTX);
     }
   }
@@ -1581,14 +1581,14 @@ public class TestMoneroDaemonRpc {
   private static List<String> getConfirmedTxIds(MoneroDaemon daemon) {
     
     // get valid height range
-    int height = daemon.getHeight();
+    long height = daemon.getHeight();
     int numBlocks = 200;
     int numBlocksAgo = 200;
     assertTrue(numBlocks > 0);
     assertTrue(numBlocksAgo >= numBlocks);
     assertTrue(height - numBlocksAgo + numBlocks - 1 < height);
-    int startHeight = height - numBlocksAgo;
-    int endHeight = height - numBlocksAgo + numBlocks - 1;
+    long startHeight = height - numBlocksAgo;
+    long endHeight = height - numBlocksAgo + numBlocks - 1;
     
     // get blocks
     List<MoneroBlock> blocks = daemon.getBlocksByRange(startHeight, endHeight);
@@ -1665,7 +1665,7 @@ public class TestMoneroDaemonRpc {
   private static List<MoneroTx> getConfirmedTxs(MoneroDaemon daemon, int numTxs) {
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     int numBlocksPerReq = 50;
-    for (int startIdx = daemon.getHeight() - numBlocksPerReq - 1; startIdx >= 0; startIdx -= numBlocksPerReq) {
+    for (long startIdx = daemon.getHeight() - numBlocksPerReq - 1; startIdx >= 0; startIdx -= numBlocksPerReq) {
       List<MoneroBlock> blocks = daemon.getBlocksByRange(startIdx, startIdx + numBlocksPerReq);
       for (MoneroBlock block : blocks) {
         if (block.getTxs() == null) continue;

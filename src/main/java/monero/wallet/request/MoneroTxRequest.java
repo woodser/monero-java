@@ -26,8 +26,8 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
   private Collection<String> txIds;
   private Boolean hasPaymentId;
   private Collection<String> paymentIds;
-  private Integer minHeight;
-  private Integer maxHeight;
+  private Long minHeight;
+  private Long maxHeight;
   private Boolean includeOutputs;
   private MoneroTransferRequest transferRequest;
   
@@ -89,20 +89,20 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return setPaymentIds(Arrays.asList(paymentId));
   }
 
-  public Integer getMinHeight() {
+  public Long getMinHeight() {
     return minHeight;
   }
 
-  public MoneroTxRequest setMinHeight(Integer minHeight) {
+  public MoneroTxRequest setMinHeight(Long minHeight) {
     this.minHeight = minHeight;
     return this;
   }
 
-  public Integer getMaxHeight() {
+  public Long getMaxHeight() {
     return maxHeight;
   }
 
-  public MoneroTxRequest setMaxHeight(Integer maxHeight) {
+  public MoneroTxRequest setMaxHeight(Long maxHeight) {
     this.maxHeight = maxHeight;
     return this;
   }
@@ -173,7 +173,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     }
     
     // filter on remaining fields
-    Integer height = tx.getBlock() == null ? null : tx.getBlock().getHeight();
+    Long height = tx.getBlock() == null ? null : tx.getBlock().getHeight();
     if (this.getTxIds() != null && !this.getTxIds().contains(tx.getId())) return false;
     if (this.getPaymentIds() != null && !this.getPaymentIds().contains(tx.getPaymentId())) return false;
     if (this.getHeight() != null && height != this.getHeight()) return false;

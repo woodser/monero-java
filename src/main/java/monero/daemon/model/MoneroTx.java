@@ -122,7 +122,7 @@ public class MoneroTx {
     return this;
   }
   
-  public Integer getHeight() {
+  public Long getHeight() {
     return this.getBlock() == null ? null : this.getBlock().getHeight();
   }
   

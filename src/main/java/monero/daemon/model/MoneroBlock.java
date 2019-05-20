@@ -181,7 +181,7 @@ public class MoneroBlock extends MoneroBlockHeader {
   }
   
   @Override
-  public MoneroBlock setHeight(Integer height) {
+  public MoneroBlock setHeight(Long height) {
     super.setHeight(height);
     return this;
   }

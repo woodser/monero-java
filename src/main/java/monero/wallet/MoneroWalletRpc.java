@@ -213,14 +213,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public int getHeight() {
+  public long getHeight() {
     Map<String, Object> resp = rpc.sendJsonRequest("get_height");
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return ((BigInteger) result.get("height")).intValue();
+    return ((BigInteger) result.get("height")).longValue();
   }
 
   @Override
-  public int getChainHeight() {
+  public long getChainHeight() {
     throw new MoneroException("monero-wallet-rpc does not support getting the chain height");
   }
 
@@ -247,7 +247,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener listener) {
+  public MoneroSyncResult sync(Long startHeight, Long endHeight, MoneroSyncListener listener) {
     if (endHeight != null) throw new MoneroException("Monero Wallet RPC does not support syncing to an end height");
     if (listener != null) throw new MoneroException("Monero Wallet RPC does not support reporting sync progress");
     Map<String, Object> params = new HashMap<String, Object>();
@@ -1618,7 +1618,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("block_height") || key.equals("height")) {
         if (tx.getIsConfirmed()) {
           if (header == null) header = new MoneroBlockHeader();
-          header.setHeight(((BigInteger) val).intValue());
+          header.setHeight(((BigInteger) val).longValue());
         }
       }
       else if (key.equals("timestamp")) {
@@ -1843,7 +1843,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         vout.setSubaddressIndex(rpcIndices.get("minor").intValue());
       }
       else if (key.equals("block_height")) {
-        int height = ((BigInteger) val).intValue();
+        long height = ((BigInteger) val).longValue();
         tx.setBlock(new MoneroBlock().setHeight(height).setTxs(tx));
       }
       else LOGGER.warn("WARNING: ignoring unexpected transaction field with vout: " + key + ": " + val);

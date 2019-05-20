@@ -12,7 +12,7 @@ import monero.utils.MoneroUtils;
 public class MoneroBlockHeader {
   
   private String id;
-  private Integer height;
+  private Long height;
   private Long timestamp;
   private Long size;
   private Long weight;
@@ -63,11 +63,11 @@ public class MoneroBlockHeader {
     return this;
   }
   
-  public Integer getHeight() {
+  public Long getHeight() {
     return height;
   }
   
-  public MoneroBlockHeader setHeight(Integer height) {
+  public MoneroBlockHeader setHeight(Long height) {
     this.height = height;
     return this;
   }

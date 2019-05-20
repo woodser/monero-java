@@ -43,12 +43,12 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public MoneroSyncResult sync(Integer startHeight) {
+  public MoneroSyncResult sync(Long startHeight) {
     return sync(startHeight, null, null);
   }
   
   @Override
-  public MoneroSyncResult sync(Integer startHeight, MoneroSyncListener listener) {
+  public MoneroSyncResult sync(Long startHeight, MoneroSyncListener listener) {
     return sync(startHeight, null, listener);
   }
   

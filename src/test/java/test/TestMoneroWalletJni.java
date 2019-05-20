@@ -96,7 +96,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(0, wallet.getRestoreHeight());
     
     // create wallet with mnemonic, connection, and restore height
-    int restoreHeight = 10000;
+    long restoreHeight = 10000;
     wallet = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, daemon.getRpcConnection(), restoreHeight);
     assertEquals(TestUtils.TEST_MNEMONIC, wallet.getMnemonic());
     assertEquals(TestUtils.TEST_ADDRESS, wallet.getPrimaryAddress());
@@ -203,16 +203,16 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
    */
   private class SyncProgressTester {
     
-    private Integer startHeight;
-    private Integer endHeight;
+    private Long startHeight;
+    private Long endHeight;
     private Boolean noMidway; // syncing should not have midway progress
     private boolean noProgress; // syncing should not make any progress
     private boolean midwayCalled;
     private Float prevPercent;
-    private Integer prevNumBlocksDone;
-    private Integer prevNumBlocksTotal;
+    private Long prevNumBlocksDone;
+    private Long prevNumBlocksTotal;
     
-    public SyncProgressTester(Integer startHeight, Integer endHeight, Boolean noMidway, boolean noProgress) {
+    public SyncProgressTester(Long startHeight, Long endHeight, Boolean noMidway, boolean noProgress) {
       this.startHeight = startHeight;
       this.endHeight = endHeight;
       this.noMidway = noMidway;
@@ -220,7 +220,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       this.midwayCalled = false;
     }
     
-    public void onProgress(int numBlocksDone, int numBlocksTotal, float percent, String message) {
+    public void onProgress(long numBlocksDone, long numBlocksTotal, float percent, String message) {
       assertFalse("Should not call progress", noProgress);
       assertTrue(numBlocksDone >= 0);
       assertTrue(numBlocksTotal > 0 && numBlocksTotal >= numBlocksDone);
@@ -257,7 +257,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       
       // test last progress
       assertEquals(1, (float) prevPercent, 0);
-      assertEquals(endHeight - startHeight + 1, (int) prevNumBlocksDone);
+      assertEquals(endHeight - startHeight + 1, (long) prevNumBlocksDone);
       assertEquals(prevNumBlocksDone, prevNumBlocksTotal);
     }
   }

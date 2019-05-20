@@ -89,7 +89,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   @Test
   public void testGetHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    int height = wallet.getHeight();
+    long height = wallet.getHeight();
     assertTrue(height >= 0);
   }
   
@@ -172,8 +172,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   @Test
   public void testSyncWithoutProgress() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    int numBlocks = 100;
-    int chainHeight = daemon.getHeight();
+    long numBlocks = 100;
+    long chainHeight = daemon.getHeight();
     assertTrue(chainHeight >= numBlocks);
     MoneroSyncResult result = wallet.sync(chainHeight - numBlocks);  // sync end of chain
     assertTrue(result.getNumBlocksFetched() >= 0);
@@ -450,7 +450,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     ctx.wallet = wallet;
     
     // test each transaction
-    Map<Integer, MoneroBlock> blockPerHeight = new HashMap<Integer, MoneroBlock>();
+    Map<Long, MoneroBlock> blockPerHeight = new HashMap<Long, MoneroBlock>();
     for (int i = 0; i < txs1.size(); i++) {
       testTxWallet(txs1.get(i), ctx);
       testTxWallet(txs2.get(i), ctx);
@@ -639,15 +639,15 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertTrue("No transactions; run send to multiple test", txs.size() > 0);
         
       // get and sort block heights in ascending order
-      List<Integer> heights = new ArrayList<Integer>();
+      List<Long> heights = new ArrayList<Long>();
       for (MoneroTxWallet tx : txs) {
         heights.add(tx.getBlock().getHeight());
       }
       Collections.sort(heights);
       
       // pick minimum and maximum heights for filtering
-      int minHeight = -1;
-      int maxHeight = -1;
+      long minHeight = -1;
+      long maxHeight = -1;
       if (heights.size() == 1) {
         minHeight = 0;
         maxHeight = heights.get(0) - 1;
@@ -661,7 +661,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       txs = getAndTestTxs(wallet, new MoneroTxRequest().setMinHeight(minHeight).setMaxHeight(maxHeight), null, true);
       assertTrue(txs.size() < unfilteredCount);
       for (MoneroTx tx : txs) {
-        int height = tx.getBlock().getHeight();
+        long height = tx.getBlock().getHeight();
         assertTrue(height >= minHeight && height <= maxHeight);
       }
     }

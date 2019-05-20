@@ -94,9 +94,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param daemonConnection is connection information to a daemon (default = an unconnected wallet)
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    */
-  public MoneroWalletJni(String mnemonic, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, Integer restoreHeight) {
+  public MoneroWalletJni(String mnemonic, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, Long restoreHeight) {
     if (networkType == null) throw new MoneroException("Must provide a network type");
-    if (restoreHeight == null) restoreHeight = 0;
+    if (restoreHeight == null) restoreHeight = 0l;
     this.walletHandle = createWalletFromMnemonicJni(mnemonic, networkType.ordinal(), restoreHeight);
     if (daemonConnection != null) setDaemonConnection(daemonConnection);
     initCommon();
@@ -113,8 +113,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    * @param language is the wallet and mnemonic's language (default = "English")
    */
-  public MoneroWalletJni(String address, String viewKey, String spendKey, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, Integer restoreHeight, String language) {
-    if (restoreHeight == null) restoreHeight = 0;
+  public MoneroWalletJni(String address, String viewKey, String spendKey, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
+    if (restoreHeight == null) restoreHeight = 0l;
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (language == null) language = DEFAULT_LANGUAGE;
     this.walletHandle = createWalletFromKeysJni(address, viewKey, spendKey, networkType.ordinal(), restoreHeight, language);
@@ -168,8 +168,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     return getLanguageJni();
   }
   
-  public int getRestoreHeight() {
-    return (int) getRestoreHeightJni();
+  public long getRestoreHeight() {
+    return getRestoreHeightJni();
   }
   
   public void addListener(MoneroWalletListener listener) {
@@ -256,13 +256,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public int getHeight() {
-    return (int) getHeightJni();  // TODO: switch heights to longs
+  public long getHeight() {
+    return getHeightJni();  // TODO: switch heights to longs
   }
 
   @Override
-  public int getChainHeight() {
-    return (int) getChainHeightJni();  // TODO: switch heights to longs
+  public long getChainHeight() {
+    return getChainHeightJni();  // TODO: switch heights to longs
   }
 
   @Override
@@ -276,7 +276,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener listener) {
+  public MoneroSyncResult sync(Long startHeight, Long endHeight, MoneroSyncListener listener) {
     if (startHeight == null) startHeight = Math.max(getHeight(), getRestoreHeight());
     if (endHeight != null) throw new MoneroException("Monero core wallet does not support syncing to an end height");
     

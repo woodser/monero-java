@@ -91,14 +91,14 @@ public interface MoneroWallet {
    * 
    * @return the height of the last block processed by the wallet
    */
-  public int getHeight();
+  public long getHeight();
   
   /**
    * Get the blockchain's height.
    * 
    * @return the block chain's height
    */
-  public int getChainHeight();
+  public long getChainHeight();
   
   /**
    * Get the wallet's primary address.
@@ -146,7 +146,7 @@ public interface MoneroWallet {
    * @param startHeight is the start height to sync from, syncs from the last synced block by default
    * @return the sync result
    */
-  public MoneroSyncResult sync(Integer startHeight);
+  public MoneroSyncResult sync(Long startHeight);
   
   /**
    * Synchronizes the wallet with the block chain.
@@ -155,7 +155,7 @@ public interface MoneroWallet {
    * @param listener is invoked as sync progress is made
    * @return the sync result
    */
-  public MoneroSyncResult sync(Integer startHeight, MoneroSyncListener listener);
+  public MoneroSyncResult sync(Long startHeight, MoneroSyncListener listener);
   
   /**
    * Synchronizes the wallet with the blockchain.
@@ -165,7 +165,7 @@ public interface MoneroWallet {
    * @param listener is invoked as sync progress is made
    * @return the sync result
    */
-  public MoneroSyncResult sync(Integer startHeight, Integer endHeight, MoneroSyncListener listener);
+  public MoneroSyncResult sync(Long startHeight, Long endHeight, MoneroSyncListener listener);
   
   /**
    * Rescan the blockchain from scratch, losing any information which can not

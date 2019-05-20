@@ -45,7 +45,7 @@ for (MoneroTransfer transfer : transfers) {
   boolean isIncoming = transfer.getIsIncoming();
   BigInteger amount = transfer.getAmount();
   int accountIdx = transfer.getAccountIndex();
-  Integer height = transfer.getTx().getHeight();  // will be null if unconfirmed
+  Long height = transfer.getTx().getHeight();  // will be null if unconfirmed
 }
 
 // get incoming transfers to account 0
@@ -54,7 +54,7 @@ for (MoneroTransfer transfer : transfers) {
   assertTrue(transfer.getIsIncoming());
   assertEquals(0, (int) transfer.getAccountIndex());
   BigInteger amount = transfer.getAmount();
-  Integer height = transfer.getTx().getHeight();  // will be null if unconfirmed
+  Long height = transfer.getTx().getHeight();  // will be null if unconfirmed
 }
 
 // send to an address from account 0
@@ -91,7 +91,7 @@ boolean isConfirmed = tx.getIsConfirmed();  // e.g. true
 MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:38081", "admin", "password");
 
 // get daemon info
-int height = daemon.getHeight();                  // e.g. 1523651
+long height = daemon.getHeight();                 // e.g. 1523651
 BigInteger feeEstimate = daemon.getFeeEstimate(); // e.g. 750000
 
 // get last block's header
@@ -99,11 +99,11 @@ MoneroBlockHeader lastBlockHeader = daemon.getLastBlockHeader();
 long lastBlockSize = lastBlockHeader.getSize();
 
 // get first 100 blocks as a binary request
-List<MoneroBlock> blocks = daemon.getBlocksByRange(0, 100);
+List<MoneroBlock> blocks = daemon.getBlocksByRange(0l, 100l);
 
 // get block info
 for (MoneroBlock block : blocks) {
-  int blockHeight = block.getHeight();
+  long blockHeight = block.getHeight();
   String blockId = block.getId();
   List<MoneroTx> txs = block.getTxs();
   
