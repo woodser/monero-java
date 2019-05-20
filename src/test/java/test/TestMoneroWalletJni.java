@@ -15,6 +15,7 @@ import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroSyncListener;
+import monero.wallet.model.MoneroSyncResult;
 import utils.TestUtils;
 
 /**
@@ -128,7 +129,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // sync the wallet
     SyncProgressTester progressTester = new SyncProgressTester(wallet.getRestoreHeight(), wallet.getChainHeight() - 1, true, true);
-    wallet.sync(null, null, new MoneroSyncListener() {
+    MoneroSyncResult result = wallet.sync(null, null, new MoneroSyncListener() {
       @Override
       public void onProgress(int numBlocksDone, int numBlocksTotal, float percent, String message) {
         progressTester.onProgress(numBlocksDone, numBlocksTotal, percent, message);
@@ -136,7 +137,9 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     });
     progressTester.onDone();
     
-    // test wallet's height after syncing
+    // test result after syncing
+    assertEquals(0, (int) result.getNumBlocksFetched());
+    assertFalse(result.getReceivedMoney());
     assertEquals(daemon.getHeight(), wallet.getHeight());
     
     // sync the wallet with default params
