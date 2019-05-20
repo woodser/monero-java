@@ -25,7 +25,7 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   }
   
   @Override
-  public List<MoneroBlock> getBlocksByRangeChunked(Integer startHeight, Integer endHeight) {
+  public List<MoneroBlock> getBlocksByRangeChunked(Long startHeight, Long endHeight) {
     return getBlocksByRangeChunked(startHeight, endHeight, null);
   }
   

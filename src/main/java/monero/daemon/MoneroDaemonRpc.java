@@ -68,7 +68,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   // instance variables
   private MoneroRpcConnection rpc;
   private MoneroDaemonPoller daemonPoller;
-  private Map<Integer, MoneroBlockHeader> cachedHeaders;
+  private Map<Long, MoneroBlockHeader> cachedHeaders;
   
   public MoneroDaemonRpc(URI uri) {
     this(new MoneroRpcConnection(uri));
@@ -89,7 +89,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public MoneroDaemonRpc(MoneroRpcConnection rpc) {
     this.rpc = rpc;
     this.daemonPoller = new MoneroDaemonPoller(this);
-    this.cachedHeaders = new HashMap<Integer, MoneroBlockHeader>();
+    this.cachedHeaders = new HashMap<Long, MoneroBlockHeader>();
   }
   
   /**
@@ -124,14 +124,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public int getHeight() {
+  public long getHeight() {
     Map<String, Object> respMap = rpc.sendJsonRequest("get_block_count");
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return ((BigInteger) resultMap.get("count")).intValue();
   }
 
   @Override
-  public String getBlockId(int height) {
+  public String getBlockId(long height) {
     Map<String, Object> respMap = rpc.sendJsonRequest("on_get_block_hash", Arrays.asList(height));
     return (String) respMap.get("result");
   }
@@ -170,7 +170,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroBlockHeader getBlockHeaderByHeight(int height) {
+  public MoneroBlockHeader getBlockHeaderByHeight(long height) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("height", height);
     Map<String, Object> respMap = rpc.sendJsonRequest("get_block_header_by_height", params);
@@ -181,7 +181,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroBlockHeader> getBlockHeadersByRange(Integer startHeight, Integer endHeight) {
+  public List<MoneroBlockHeader> getBlockHeadersByRange(Long startHeight, Long endHeight) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("start_height", startHeight);
     params.put("end_height", endHeight);
@@ -208,13 +208,13 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public List<MoneroBlock> getBlocksById(List<String> blockIds, Integer startHeight, Boolean prune) {
+  public List<MoneroBlock> getBlocksById(List<String> blockIds, Long startHeight, Boolean prune) {
     throw new RuntimeException("Not implemented");
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroBlock getBlockByHeight(int height) {
+  public MoneroBlock getBlockByHeight(long height) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("height", height);
     Map<String, Object> respMap = rpc.sendJsonRequest("get_block", params);
@@ -225,7 +225,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings({ "unchecked" })
   @Override
-  public List<MoneroBlock> getBlocksByHeight(List<Integer> heights) {
+  public List<MoneroBlock> getBlocksByHeight(List<Long> heights) {
     
     // fetch blocks in binary
     Map<String, Object> params = new HashMap<String, Object>();
@@ -278,19 +278,19 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
   
   @Override
-  public List<MoneroBlock> getBlocksByRange(Integer startHeight, Integer endHeight) {
-    if (startHeight == null) startHeight = 0;
+  public List<MoneroBlock> getBlocksByRange(Long startHeight, Long endHeight) {
+    if (startHeight == null) startHeight = 0l;
     if (endHeight == null) endHeight = getHeight() - 1;
-    List<Integer> heights = new ArrayList<Integer>();
-    for (int height = startHeight; height <= endHeight; height++) heights.add(height);
+    List<Long> heights = new ArrayList<Long>();
+    for (long height = startHeight; height <= endHeight; height++) heights.add(height);
     return getBlocksByHeight(heights);
   }
 
   @Override
-  public List<MoneroBlock> getBlocksByRangeChunked(Integer startHeight, Integer endHeight, Long maxChunkSize) {
-    if (startHeight == null) startHeight = 0;
+  public List<MoneroBlock> getBlocksByRangeChunked(Long startHeight, Long endHeight, Long maxChunkSize) {
+    if (startHeight == null) startHeight = 0l;
     if (endHeight == null) endHeight = getHeight() - 1;
-    int lastHeight = startHeight - 1;
+    long lastHeight = startHeight - 1;
     List<MoneroBlock> blocks = new ArrayList<MoneroBlock>();
     while (lastHeight < endHeight) {
       blocks.addAll(getMaxBlocks(lastHeight + 1, endHeight, maxChunkSize));
@@ -300,7 +300,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
   
   @Override
-  public List<String> getBlockIds(List<String> blockIds, Integer startHeight) {
+  public List<String> getBlockIds(List<String> blockIds, Long startHeight) {
     throw new RuntimeException("Not implemented");
   }
 
@@ -358,7 +358,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroCoinbaseTxSum getCoinbaseTxSum(int height, Integer numBlocks) {
+  public MoneroCoinbaseTxSum getCoinbaseTxSum(long height, Long numBlocks) {
     assertTrue("Height must be an integer >= 0", height >= 0);
     if (numBlocks == null) numBlocks = getHeight();
     else assertTrue("Count must be an integer >= 0", numBlocks >= 0);
@@ -531,7 +531,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public List<MoneroOutputDistributionEntry> getOutputDistribution(Collection<BigInteger> amounts, Boolean isCumulative, Integer startHeight, Integer endHeight) {
+  public List<MoneroOutputDistributionEntry> getOutputDistribution(Collection<BigInteger> amounts, Boolean isCumulative, Long startHeight, Long endHeight) {
     throw new RuntimeException("Not implemented (response 'distribution' field is binary)");
 //  let amountStrs = [];
 //  for (let amount of amounts) amountStrs.push(amount.toJSValue());
@@ -890,14 +890,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * @param chunkSize is the maximum chunk size in any one request (default 3,000,000 bytes)
    * @return List<MoneroBlock> are the resulting chunk of blocks
    */
-  private List<MoneroBlock> getMaxBlocks(Integer startHeight, Integer maxHeight, Long chunkSize) {
-    if (startHeight == null) startHeight = 0;
+  private List<MoneroBlock> getMaxBlocks(Long startHeight, Long maxHeight, Long chunkSize) {
+    if (startHeight == null) startHeight = 0l;
     if (maxHeight == null) maxHeight = getHeight() - 1;
     if (chunkSize == null) chunkSize = MAX_REQ_SIZE;
     
     // determine end height to fetch
     int reqSize = 0;
-    int endHeight = startHeight - 1;
+    long endHeight = startHeight - 1;
     while (reqSize < chunkSize && endHeight < maxHeight) {
       
       // get header of next block
@@ -923,14 +923,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * @param height is the height of the header to retrieve from the cache
    * @param maxHeight is the maximum height of headers to cache
    */
-  private MoneroBlockHeader getBlockHeaderByHeightCached(int height, int maxHeight) {
+  private MoneroBlockHeader getBlockHeaderByHeightCached(long height, long maxHeight) {
     
     // get header from cache
     MoneroBlockHeader cachedHeader = cachedHeaders.get(height);
     if (cachedHeader != null) return cachedHeader;
     
     // fetch and cache headers if not in cache
-    int endHeight = Math.min(maxHeight, height + NUM_HEADERS_PER_REQ - 1);  // TODO: could specify end height to cache to optimize small requests (would like to have time profiling in place though)
+    long endHeight = Math.min(maxHeight, height + NUM_HEADERS_PER_REQ - 1);  // TODO: could specify end height to cache to optimize small requests (would like to have time profiling in place though)
     List<MoneroBlockHeader> headers = getBlockHeadersByRange(height, endHeight);
     for (MoneroBlockHeader header : headers) {
       cachedHeaders.put(header.getHeight(), header);
@@ -985,7 +985,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("wide_difficulty")) header.setDifficulty(MoneroUtils.reconcile(header.getDifficulty(), prefixedHexToBI((String) val)));
       else if (key.equals("wide_cumulative_difficulty")) header.setCumulativeDifficulty(MoneroUtils.reconcile(header.getCumulativeDifficulty(), prefixedHexToBI((String) val)));
       else if (key.equals("hash")) header.setId(MoneroUtils.reconcile(header.getId(), (String) val));
-      else if (key.equals("height")) header.setHeight(MoneroUtils.reconcile(header.getHeight(), ((BigInteger) val).intValue()));
+      else if (key.equals("height")) header.setHeight(MoneroUtils.reconcile(header.getHeight(), ((BigInteger) val).longValue()));
       else if (key.equals("major_version")) header.setMajorVersion(MoneroUtils.reconcile(header.getMajorVersion(), ((BigInteger) val).intValue()));
       else if (key.equals("minor_version")) header.setMinorVersion(MoneroUtils.reconcile(header.getMinorVersion(), ((BigInteger) val).intValue()));
       else if (key.equals("nonce")) header.setNonce(MoneroUtils.reconcile(header.getNonce(), ((BigInteger) val).longValue()));
@@ -1052,7 +1052,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       }
       else if (key.equals("block_height")) {
         if (block == null) block = new MoneroBlock();
-        block.setHeight(MoneroUtils.reconcile(block.getHeight(), ((BigInteger) val).intValue()));
+        block.setHeight(MoneroUtils.reconcile(block.getHeight(), ((BigInteger) val).longValue()));
       }
       else if (key.equals("last_relayed_time")) tx.setLastRelayedTimestamp(MoneroUtils.reconcile(tx.getLastRelayedTimestamp(), ((BigInteger) val).longValue()));
       else if (key.equals("receive_time")) tx.setReceivedTimestamp(MoneroUtils.reconcile(tx.getReceivedTimestamp(), ((BigInteger) val).longValue()));

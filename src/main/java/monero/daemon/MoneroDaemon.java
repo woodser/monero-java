@@ -68,7 +68,7 @@ public interface MoneroDaemon {
    * 
    * @return the number of blocks
    */
-  public int getHeight();
+  public long getHeight();
   
   /**
    * Get a block's id by its height.
@@ -76,7 +76,7 @@ public interface MoneroDaemon {
    * @param height is the height of the block id to get
    * @return the block's id at the given height
    */
-  public String getBlockId(int height);
+  public String getBlockId(long height);
   
   /**
    * Get a block template for mining a new block.
@@ -116,7 +116,7 @@ public interface MoneroDaemon {
    * @param height is the height of the block to get the header of
    * @return the block's header
    */
-  public MoneroBlockHeader getBlockHeaderByHeight(int height);
+  public MoneroBlockHeader getBlockHeaderByHeight(long height);
   
   /**
    * Get block headers for the given range.
@@ -125,7 +125,7 @@ public interface MoneroDaemon {
    * @param endHeight is the end height upper bound inclusive (optional)
    * @return block headers in the given range
    */
-  public List<MoneroBlockHeader> getBlockHeadersByRange(Integer startHeight, Integer endHeight);
+  public List<MoneroBlockHeader> getBlockHeadersByRange(Long startHeight, Long endHeight);
   
   /**
    * Get a block by id.
@@ -145,7 +145,7 @@ public interface MoneroDaemon {
    * @param prune specifies if returned blocks should be pruned (defaults to false)  // TODO: test default
    * @return the retrieved blocks
    */
-  public List<MoneroBlock> getBlocksById(List<String> blockIds, Integer startHeight, Boolean prune);
+  public List<MoneroBlock> getBlocksById(List<String> blockIds, Long startHeight, Boolean prune);
   
   /**
    * Get a block by height.
@@ -153,7 +153,7 @@ public interface MoneroDaemon {
    * @param height is the height of the block to get
    * @return the block at the given height
    */
-  public MoneroBlock getBlockByHeight(int height);
+  public MoneroBlock getBlockByHeight(long height);
   
   /**
    * Get blocks at the given heights.
@@ -161,7 +161,7 @@ public interface MoneroDaemon {
    * @param heights are the heights of the blocks to get
    * @return blocks at the given heights
    */
-  public List<MoneroBlock> getBlocksByHeight(List<Integer> heights);
+  public List<MoneroBlock> getBlocksByHeight(List<Long> heights);
   
   /**
    * Get blocks in the given height range.
@@ -170,7 +170,7 @@ public interface MoneroDaemon {
    * @param endHeight is the end height upper bound inclusive (optional)
    * @return blocks in the given height range
    */
-  public List<MoneroBlock> getBlocksByRange(Integer startHeight, Integer endHeight);
+  public List<MoneroBlock> getBlocksByRange(Long startHeight, Long endHeight);
   
   /**
    * Get blocks in the given height range as chunked requests so that each request is
@@ -180,7 +180,7 @@ public interface MoneroDaemon {
    * @param endHeight is the end height upper bound inclusive (optional)
    * @return blocks in the given height range
    */
-  public List<MoneroBlock> getBlocksByRangeChunked(Integer startHeight, Integer endHeight);
+  public List<MoneroBlock> getBlocksByRangeChunked(Long startHeight, Long endHeight);
   
   /**
    * Get blocks in the given height range as chunked requests so that each request is
@@ -191,7 +191,7 @@ public interface MoneroDaemon {
    * @param maxChunkSize is the maximum chunk size in any one request (default 3,000,000 bytes)
    * @return blocks in the given height range
    */
-  public List<MoneroBlock> getBlocksByRangeChunked(Integer startHeight, Integer endHeight, Long maxChunkSize);
+  public List<MoneroBlock> getBlocksByRangeChunked(Long startHeight, Long endHeight, Long maxChunkSize);
   
   /**
    * Get block ids as a binary request to the daemon.
@@ -202,7 +202,7 @@ public interface MoneroDaemon {
    * @param startHeight is the starting height of block ids to return
    * @return the requested block ids     
    */
-  public List<String> getBlockIds(List<String> blockIds, Integer startHeight);
+  public List<String> getBlockIds(List<String> blockIds, Long startHeight);
   
   /**
    * Get a transaction by id.
@@ -279,7 +279,7 @@ public interface MoneroDaemon {
    * @param numBlocks are the number of blocks to include in the sum
    * @return the sum emission and fees since the geneis block
    */
-  public MoneroCoinbaseTxSum getCoinbaseTxSum(int height, Integer numBlocks);
+  public MoneroCoinbaseTxSum getCoinbaseTxSum(long height, Long numBlocks);
   
   /**
    * Get the fee estimate per kB.
@@ -431,7 +431,7 @@ public interface MoneroDaemon {
    * @param endHeight is the end height upper bound inclusive (optional)
    * @return output distribution entries meeting the parameters
    */
-  public List<MoneroOutputDistributionEntry> getOutputDistribution(Collection<BigInteger> amounts, Boolean isCumulative, Integer startHeight, Integer endHeight);
+  public List<MoneroOutputDistributionEntry> getOutputDistribution(Collection<BigInteger> amounts, Boolean isCumulative, Long startHeight, Long endHeight);
   
   /**
    * Get general information about the state of the node and the network.
