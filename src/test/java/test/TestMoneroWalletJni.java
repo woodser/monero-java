@@ -129,16 +129,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // sync the wallet
     SyncProgressTester progressTester = new SyncProgressTester(wallet.getRestoreHeight(), wallet.getChainHeight() - 1, true, true);
-    MoneroSyncResult result = wallet.sync(null, null, new MoneroSyncListener() {
-      @Override
-      public void onProgress(int numBlocksDone, int numBlocksTotal, float percent, String message) {
-        progressTester.onProgress(numBlocksDone, numBlocksTotal, percent, message);
-      }
-    });
+    MoneroSyncResult result = wallet.sync(null, null, progressTester);
     progressTester.onDone();
     
     // test result after syncing
-    assertEquals(0, (int) result.getNumBlocksFetched());
+    assertEquals(0, (long) result.getNumBlocksFetched());
     assertFalse(result.getReceivedMoney());
     assertEquals(daemon.getHeight(), wallet.getHeight());
     
@@ -201,7 +196,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   /**
    * Internal class to test progress updates.
    */
-  private class SyncProgressTester {
+  private class SyncProgressTester implements MoneroSyncListener {
     
     private Long startHeight;
     private Long endHeight;
@@ -220,24 +215,25 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       this.midwayCalled = false;
     }
     
-    public void onProgress(long numBlocksDone, long numBlocksTotal, float percent, String message) {
+    public void onSyncProgress(long numBlocksDone, long numBlocksTotal, float percentDone, String message) {
+      System.out.println("onSyncProgress" + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message);
       assertFalse("Should not call progress", noProgress);
       assertTrue(numBlocksDone >= 0);
       assertTrue(numBlocksTotal > 0 && numBlocksTotal >= numBlocksDone);
-      assertTrue(percent >= 0);
+      assertTrue(percentDone >= 0);
       assertNotNull(message);
       assertFalse(message.isEmpty());
       if (prevPercent == null) {
         assertEquals(0, numBlocksDone);
-        assertEquals(0, percent, 0);
+        assertEquals(0, percentDone, 0);
       } else {
-        assertTrue(percent > prevPercent);
+        assertTrue(percentDone > prevPercent);
         assertTrue(numBlocksDone >= prevNumBlocksDone);
       }
-      prevPercent = percent;
+      prevPercent = percentDone;
       prevNumBlocksDone = numBlocksDone;
       prevNumBlocksTotal = numBlocksTotal;
-      if (percent > 0 && percent < 1) midwayCalled = true;
+      if (percentDone > 0 && percentDone < 1) midwayCalled = true;
     }
     
     public void onDone() {

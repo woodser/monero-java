@@ -254,7 +254,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("start_height", startHeight);
     Map<String, Object> resp = rpc.sendJsonRequest("refresh", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return new MoneroSyncResult(((BigInteger) result.get("blocks_fetched")).intValue(), (Boolean) result.get("received_money"));
+    return new MoneroSyncResult(((BigInteger) result.get("blocks_fetched")).longValue(), (Boolean) result.get("received_money"));
   }
 
   @SuppressWarnings("unchecked")
