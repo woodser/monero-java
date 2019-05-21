@@ -403,7 +403,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can get the locked and unlocked balances of the wallet, accounts, and subaddresses
   @Test
-  public void getAllBalances() {
+  public void testGetAllBalances() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch accounts with all info as reference

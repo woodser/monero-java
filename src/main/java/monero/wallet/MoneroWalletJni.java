@@ -340,6 +340,12 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag) {
+    
+//    m_wallet->get_num_subaddress_accounts()
+//    m_wallet->get_num_subaddresses(accountIdx)  // returns 0 if account out of index
+//    m_wallet->balance_per_subaddress
+
+    
     throw new RuntimeException("Not implemented");
   }
 

@@ -398,8 +398,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void getAllBalances() {
-    super.getAllBalances();
+  public void testGetAllBalances() {
+    super.testGetAllBalances();
   }
 
   @Override
