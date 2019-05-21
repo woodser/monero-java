@@ -342,9 +342,9 @@ Java_monero_wallet_MoneroWalletJni_getAddressJni(JNIEnv *env, jobject instance, 
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni" << endl;
-  throw runtime_error("Not implemented");
-//  string balance = "2";
-//  return env->NewStringUTF(balance.c_str());
+  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+  uint64_t balance = wallet->balance_all();
+  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
 }
 
 JNIEXPORT jlong JNICALL
