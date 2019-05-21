@@ -17,7 +17,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import monero.daemon.MoneroDaemon;
 import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
@@ -32,9 +31,9 @@ import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.request.MoneroOutputRequest;
 import monero.wallet.request.MoneroTransferRequest;
 import monero.wallet.request.MoneroTxRequest;
-import monero.wallet.request.MoneroOutputRequest;
 import utils.TestUtils;
 
 /**
