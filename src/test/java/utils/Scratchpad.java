@@ -42,7 +42,7 @@ public class Scratchpad {
 //    System.out.println(MoneroWalletJni.walletExists("asdf"));
     
     //walletJni = new MoneroWalletJni(MoneroNetworkType.STAGENET, null, "English");
-    walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpcConnection(), 150000l);
+    walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpcConnection(), 300000l);
     walletJni.sync(new MoneroSyncListener() {
       @Override
       public void onSyncProgress(long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
