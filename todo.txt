@@ -12,6 +12,10 @@ don't automatically create file?
 how is keys file used?
 local vs remote requests per second auto-adusts like gui wallet.cpp:2204
 test online vs offline wallets
+test for memory leaks by initializing precisely one bajillion wallets
+sync progress should report block height
+catch callback exceptions in c++
+end height incorrect when block added during synchronize
 
 WALLET RPC ISSUES
 wallet2 network type auto detected when loaded from files on disk
