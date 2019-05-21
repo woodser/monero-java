@@ -176,11 +176,11 @@ public interface MoneroWallet {
   public MoneroSyncResult sync(Long startHeight, Long endHeight, MoneroSyncListener listener);
   
   /**
-   * Rescan the blockchain from scratch, losing any information which can not
-   * be recovered from the blockchain itself.
+   * Rescan the blockchain from scratch, losing any information which cannot be recovered from
+   * the blockchain itself.
    * 
-   * WARNING: This method discards local wallet data like destination
-   * addresses, tx secret keys, tx notes, etc.
+   * WARNING: This method discards local wallet data like destination addresses, tx secret keys,
+   * tx notes, etc.
    */
   public void rescanBlockchain();
   
