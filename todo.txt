@@ -19,7 +19,7 @@ incoming transactions are missing when outgoing counterpart from same account (h
 add all_accounts to incoming_transfers, would be huge time saver
 sometimes see non-zero spent amount in testCheckReserve()
 WARNING: key proof indicates no funds received despite transfer (txid=76983ebf1d2e62141c19e190355e146145cb03988c5bfaf857b65dc0e15d378f, key=5246bf34d97dd379843ea31cb2bddfe41a89db73be4bd72fdc1ffe1b4d8ac70d, address=76gP3JEGAhnS5sgnB7LHRP2tbidL8ChvkJATJADQF4SpBcbN8bUgSZyQmTpdMQqyW129dh3zV5XscaBhkU6WTUKQVdDykFV, amount=44933)
-ocasional: seg fault 11 in testGetReserveProofAccount() (with no unlocked balance???), wallet rpc get_reserve_proof
+occasional: seg fault 11 in testGetReserveProofAccount() (with no unlocked balance???), wallet rpc get_reserve_proof
 wallet rpc `open_wallet` spends a lot of time generating ssl certificates and Trying to decrypt cache data when wallet is already open, can't just skip check?
 ocasional: testGetTxsByIdsInPool() hangs (have no peer connections?)
 ocasional: testGetTxsByIdsInPool() tx fails testTx() as double spend
