@@ -18,7 +18,7 @@ T *getHandle(JNIEnv *env, jobject obj, const char *fieldName) {
 extern "C" {
 #endif
 
-// ----------------------------- WALLET MANAGEMENT ----------------------------
+// ------------------------------ STATIC METHODS ------------------------------
 
 JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_walletExistsJni(JNIEnv *, jclass, jstring);
 
