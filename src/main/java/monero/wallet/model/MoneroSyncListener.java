@@ -13,5 +13,5 @@ public interface MoneroSyncListener {
    * @param percentDone is the sync progress as a percentage
    * @param message is a human-readable description of the current progress
    */
-  public void onSyncProgress(long numBlocksDone, long numBlocksTotal, float percentDone, String message);
+  public void onSyncProgress(long numBlocksDone, long numBlocksTotal, double percentDone, String message);
 }
