@@ -461,8 +461,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void getAllBalances() {
-    super.getAllBalances();
+  public void testGetAllBalances() {
+    super.testGetAllBalances();
   }
 
   @Override
