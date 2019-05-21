@@ -16,6 +16,7 @@ test for memory leaks by initializing precisely one bajillion wallets
 sync progress should report block height
 catch callback exceptions in c++
 end height incorrect when block added during synchronize
+test getAccounts(), getBalance(), etc with out of range subaddress/account indices (common wallet tests)
 
 WALLET RPC ISSUES
 wallet2 network type auto detected when loaded from files on disk

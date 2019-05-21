@@ -380,27 +380,27 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public BigInteger getBalance(int accountIdx) {
-    throw new RuntimeException("Not implemented");
+    return new BigInteger(getBalanceAccountJni(accountIdx));
   }
 
   @Override
   public BigInteger getBalance(int accountIdx, int subaddressIdx) {
-    throw new RuntimeException("Not implemented");
+    return new BigInteger(getBalanceSubaddressJni(accountIdx, subaddressIdx));
   }
 
   @Override
   public BigInteger getUnlockedBalance() {
-    throw new RuntimeException("Not implemented");
+    return new BigInteger(getUnlockedBalanceWalletJni());
   }
 
   @Override
   public BigInteger getUnlockedBalance(int accountIdx) {
-    throw new RuntimeException("Not implemented");
+    return new BigInteger(getUnlockedBalanceAccountJni(accountIdx));
   }
 
   @Override
   public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx) {
-    throw new RuntimeException("Not implemented");
+    return new BigInteger(getUnlockedBalanceSubaddressJni(accountIdx, subaddressIdx));
   }
 
   @Override
@@ -636,6 +636,16 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String getAddressJni(int accountIdx, int subaddressIdx);
   
   private native String getBalanceWalletJni();
+  
+  private native String getBalanceAccountJni(int accountIdx);
+  
+  private native String getBalanceSubaddressJni(int accountIdx, int subaddressIdx);
+  
+  private native String getUnlockedBalanceWalletJni();
+  
+  private native String getUnlockedBalanceAccountJni(int accountIdx);
+  
+  private native String getUnlockedBalanceSubaddressJni(int accountIdx, int subaddressIdx);
   
   private native long setListenerJni(Wallet2Listener listener);
   

@@ -347,6 +347,41 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni
   return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
 }
 
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceAccountJni(JNIEnv *env, jobject instance, jint accountIdx) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getBalanceAccountJni" << endl;
+  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+  uint64_t balance = wallet->balance(accountIdx);
+  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceSubaddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getBalanceSubaddressJni" << endl;
+  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+  uint64_t balance = wallet->balance_per_subaddress(accountIdx).at(subaddressIdx);
+  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceWalletJni(JNIEnv *env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceWalletJni" << endl;
+  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+  uint64_t balance = wallet->unlocked_balance_all();
+  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceAccountJni(JNIEnv *env, jobject instance, jint accountIdx) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceAccountJni" << endl;
+  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+  uint64_t balance = wallet->unlocked_balance(accountIdx);
+  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni" << endl;
+  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
+  uint64_t balance = wallet->unlocked_balance_per_subaddress(accountIdx).at(subaddressIdx).first;
+  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
+}
+
 JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *env, jobject instance, jobject jlistener) {
   cout << "Java_monero_wallet_MoneroWalletJni_setListenerJni" << endl;
