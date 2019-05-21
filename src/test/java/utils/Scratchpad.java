@@ -2,10 +2,10 @@ package utils;
 
 import java.util.List;
 
-import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
+import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroTransfer;
 
 /**
@@ -41,8 +41,16 @@ public class Scratchpad {
 //    
 //    System.out.println(MoneroWalletJni.walletExists("asdf"));
     
-    walletJni = new MoneroWalletJni(MoneroNetworkType.STAGENET, null, "English");
-    //walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, null, 10000, MoneroNetworkType.STAGENET);
+    //walletJni = new MoneroWalletJni(MoneroNetworkType.STAGENET, null, "English");
+    walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpcConnection(), 150000l);
+    walletJni.sync(new MoneroSyncListener() {
+      @Override
+      public void onSyncProgress(long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
+        if (numBlocksDone % 10000 == 0 || percentDone > .999) System.out.println("onSyncProgress(" + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
+      }
+    });
+
+    System.out.println("Wallet balance: " + walletJni.getBalance());
     System.out.println("Wallet seed: " + walletJni.getMnemonic());
     System.out.println("Wallet address: " + walletJni.getPrimaryAddress());
     System.out.println("Wallet height: " + walletJni.getHeight());
