@@ -51,6 +51,11 @@ public class Scratchpad {
     });
 
     System.out.println("Wallet balance: " + walletJni.getBalance());
+    System.out.println("Account 0 balance: " + walletJni.getBalance(0));
+    System.out.println("Account 0 subaddress 1 balance: " + walletJni.getBalance(0, 1));
+    System.out.println("Wallet unlocked balance: " + walletJni.getUnlockedBalance());
+    System.out.println("Account 0 unlocked balance: " + walletJni.getUnlockedBalance(0));
+    System.out.println("Account 0 subaddress 1 unlocked balance: " + walletJni.getUnlockedBalance(0, 1));
     System.out.println("Wallet seed: " + walletJni.getMnemonic());
     System.out.println("Wallet address: " + walletJni.getPrimaryAddress());
     System.out.println("Wallet height: " + walletJni.getHeight());
