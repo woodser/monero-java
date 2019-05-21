@@ -375,7 +375,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public BigInteger getBalance() {
-    throw new RuntimeException("Not implemented");
+    return new BigInteger(getBalanceWalletJni());
   }
 
   @Override
@@ -634,6 +634,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String getMnemonicJni();
   
   private native String getAddressJni(int accountIdx, int subaddressIdx);
+  
+  private native String getBalanceWalletJni();
   
   private native long setListenerJni(Wallet2Listener listener);
   
