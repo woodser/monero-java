@@ -30,8 +30,8 @@ file issue to get received timestamp for unconfirmed wallet txs if wanted
 No message store file found: /Applications/190322-monero-master//test_wallet_1.mms
 
 14.1.0 RELEASE
-heights should be long
 upgrade to latest release
+sweepDust() should return empty list if no dust to sweep
 cleanup & port javascript
 release
 
