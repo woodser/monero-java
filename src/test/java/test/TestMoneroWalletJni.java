@@ -274,8 +274,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
         assertEquals(0, percentDone, 0);
       } else {
         assertNotNull(height);
-        if (prevHeight == null) assertEquals(1, numBlocksDone);
-        else assertTrue(height > prevHeight);
+        if (prevHeight != null) assertTrue(height > prevHeight);
+        else assertEquals(1, numBlocksDone);  // first block processed so no previous height
         assertTrue(numBlocksDone >= prevNumBlocksDone);
         assertTrue(percentDone > prevPercentDone || Double.compare(percentDone, 1l) == 0);
       }
