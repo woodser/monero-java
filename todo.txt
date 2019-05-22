@@ -17,6 +17,9 @@ sync progress should report block height
 catch callback exceptions in c++
 end height incorrect when block added during synchronize
 test getAccounts(), getBalance(), etc with out of range subaddress/account indices (common wallet tests)
+rps defaults for local vs remote
+update SyncProgressTester to allow consecutive 100% progress if new block added at end
+update SyncProgressTester to allow end height / num blocks processed to increase if blocks added to chain
 
 WALLET RPC ISSUES
 wallet2 network type auto detected when loaded from files on disk
