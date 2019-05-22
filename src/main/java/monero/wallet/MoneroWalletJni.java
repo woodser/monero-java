@@ -290,10 +290,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     // register wallet2 listener which notifies external sync listeners
     SyncNotifier syncNotifier = new SyncNotifier(startHeight, getChainHeight() - 1, new MoneroSyncListener() {
       @Override
-      public void onSyncProgress(long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
-        if (listener != null) listener.onSyncProgress(numBlocksDone, numBlocksTotal, percentDone, message);
+      public void onSyncProgress(Long height, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
+        if (listener != null) listener.onSyncProgress(height, numBlocksDone, numBlocksTotal, percentDone, message);
         for (MoneroSyncListener listener : listeners) {
-          listener.onSyncProgress(numBlocksDone, numBlocksTotal, percentDone, message);
+          listener.onSyncProgress(height, numBlocksDone, numBlocksTotal, percentDone, message);
         }
       }
     });
@@ -762,7 +762,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     public void onStart() {
       if (numBlocksTotal <= 0) return;  // don't notify if no blocks to process
-      listener.onSyncProgress(0, numBlocksTotal, 0, "Synchronizing");
+      listener.onSyncProgress(null, 0, numBlocksTotal, 0, "Synchronizing");
     }
     
     @Override
@@ -780,7 +780,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       String message = "Synchronizing";
       
       // notify listener
-      listener.onSyncProgress(numBlocksDone, numBlocksTotal, percentDone, message);
+      listener.onSyncProgress(height, numBlocksDone, numBlocksTotal, percentDone, message);
     }
   }
   
