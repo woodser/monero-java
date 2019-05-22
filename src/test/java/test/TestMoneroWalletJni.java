@@ -247,9 +247,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     private boolean noMidway;   // syncing should not have midway progress
     private boolean noProgress; // syncing should not make any progress
     private boolean midwayCalled;
-    private Double prevPercent;
+    private Long prevHeight;
     private Long prevNumBlocksDone;
     private Long prevNumBlocksTotal;
+    private Double prevPercentDone;
 
     public SyncProgressTester(long startHeight, long endHeight) {
       this.startHeight = startHeight;
@@ -259,24 +260,29 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       this.midwayCalled = false;
     }
 
-    public void onSyncProgress(long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
-      if (numBlocksDone % 10000 == 0 || percentDone > .999) System.out.println("onSyncProgress(" + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
+    public void onSyncProgress(Long height, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
+      if (numBlocksDone % 10000 == 0 || percentDone > .999) System.out.println("onSyncProgress(" + height + ", " + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
       assertFalse("Should not call progress", noProgress);
       assertTrue(numBlocksDone >= 0);
       assertTrue(numBlocksTotal > 0 && numBlocksTotal >= numBlocksDone);
       assertTrue(percentDone >= 0);
       assertNotNull(message);
       assertFalse(message.isEmpty());
-      if (prevPercent == null) {
+      if (prevPercentDone == null) {
+        assertNull(height);
         assertEquals(0, numBlocksDone);
         assertEquals(0, percentDone, 0);
       } else {
-        assertTrue(percentDone > prevPercent || Double.compare(percentDone, 1l) == 0);
+        assertNotNull(height);
+        if (prevHeight == null) assertEquals(1, numBlocksDone);
+        else assertTrue(height > prevHeight);
         assertTrue(numBlocksDone >= prevNumBlocksDone);
+        assertTrue(percentDone > prevPercentDone || Double.compare(percentDone, 1l) == 0);
       }
-      prevPercent = percentDone;
+      prevHeight = height;
       prevNumBlocksDone = numBlocksDone;
       prevNumBlocksTotal = numBlocksTotal;
+      prevPercentDone = percentDone;
       if (percentDone > 0 && percentDone < 1) midwayCalled = true;
     }
 
@@ -284,21 +290,22 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
       // nothing to test if no progress called
       if (this.noProgress) {
-        assertNull(prevPercent);
+        assertNull(prevPercentDone);
         return;
       }
 
       // ensure progress was called
-      assertNotNull(prevPercent);
+      assertNotNull(prevPercentDone);
 
       // test midway progress
       if (endHeight > startHeight && !Boolean.TRUE.equals(this.noMidway)) assertTrue("No midway progress reported but it should have been", midwayCalled);
       else assertFalse("No midway progress should have been reported but it was", midwayCalled);
 
       // test last progress
-      assertEquals(1, prevPercent, 0);
+      assertEquals(chainHeight - 1, (long) prevHeight);
       assertEquals(chainHeight - startHeight, (long) prevNumBlocksDone);
       assertEquals(prevNumBlocksDone, prevNumBlocksTotal);
+      assertEquals(1, prevPercentDone, 0);
     }
   }
 

@@ -45,7 +45,7 @@ public class Scratchpad {
     walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpcConnection(), 300000l);
     walletJni.sync(new MoneroSyncListener() {
       @Override
-      public void onSyncProgress(long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
+      public void onSyncProgress(Long height, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
         if (numBlocksDone % 10000 == 0 || percentDone > .999) System.out.println("onSyncProgress(" + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
       }
     });

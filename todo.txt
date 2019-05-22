@@ -20,6 +20,7 @@ test getAccounts(), getBalance(), etc with out of range subaddress/account indic
 rps defaults for local vs remote
 update SyncProgressTester to allow consecutive 100% progress if new block added at end
 update SyncProgressTester to allow end height / num blocks processed to increase if blocks added to chain
+ability deconstruct wallet from java which releases memory in c++
 
 WALLET RPC ISSUES
 wallet2 network type auto detected when loaded from files on disk
