@@ -134,7 +134,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // sync the wallet
     SyncProgressTester progressTester = new SyncProgressTester(wallet.getRestoreHeight(), wallet.getChainHeight() - 1);
     MoneroSyncResult result = wallet.sync(null, null, progressTester);
-    progressTester.onDone();
+    progressTester.onDone(wallet.getChainHeight());
 
     // test result after syncing
     assertEquals(0, (long) result.getNumBlocksFetched());
@@ -179,18 +179,20 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // sync the wallet
     SyncProgressTester progressTester = new SyncProgressTester(startHeightActual, chainHeight - 1);
     MoneroSyncResult result = wallet.sync(startHeight, null, progressTester);
-    progressTester.onDone();
+    progressTester.onDone(wallet.getChainHeight());
     
     // test result after syncing
-    assertEquals(chainHeight - startHeightActual, (long) result.getNumBlocksFetched());
+    assertEquals(wallet.getChainHeight() - startHeightActual, (long) result.getNumBlocksFetched());
     assertTrue(result.getReceivedMoney());
     assertEquals(daemon.getHeight(), wallet.getHeight());
+    assertEquals(daemon.getHeight(), wallet.getChainHeight());
     
     // sync the wallet with default params
-    wallet.sync();
+    result = wallet.sync();
     assertEquals(daemon.getHeight(), wallet.getHeight());
+    assertEquals(0, (long) result.getNumBlocksFetched());
+    assertFalse(result.getReceivedMoney());
   }
-  
 
   // Can save the wallet
   @Test
@@ -269,7 +271,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
         assertEquals(0, numBlocksDone);
         assertEquals(0, percentDone, 0);
       } else {
-        assertTrue(percentDone > prevPercent);
+        assertTrue(percentDone > prevPercent || Double.compare(percentDone, 1l) == 0);
         assertTrue(numBlocksDone >= prevNumBlocksDone);
       }
       prevPercent = percentDone;
@@ -278,7 +280,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       if (percentDone > 0 && percentDone < 1) midwayCalled = true;
     }
 
-    public void onDone() {
+    public void onDone(long chainHeight) {
 
       // nothing to test if no progress called
       if (this.noProgress) {
@@ -295,7 +297,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
       // test last progress
       assertEquals(1, prevPercent, 0);
-      assertEquals(endHeight - startHeight + 1, (long) prevNumBlocksDone);
+      assertEquals(chainHeight - startHeight, (long) prevNumBlocksDone);
       assertEquals(prevNumBlocksDone, prevNumBlocksTotal);
     }
   }
