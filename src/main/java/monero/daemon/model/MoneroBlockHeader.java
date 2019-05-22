@@ -63,10 +63,21 @@ public class MoneroBlockHeader {
     return this;
   }
   
+  /**
+   * Return the block's height which is the total number of blocks that have occurred before.
+   * 
+   * @return the block's height
+   */
   public Long getHeight() {
     return height;
   }
   
+  /**
+   * Set the block's height which is the total number of blocks that have occurred before.
+   * 
+   * @param height is the block's height to set
+   * @return a reference to this header for chaining
+   */
   public MoneroBlockHeader setHeight(Long height) {
     this.height = height;
     return this;
