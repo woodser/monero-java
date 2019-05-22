@@ -409,7 +409,6 @@ JNIEXPORT jobjectArray JNICALL
 Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong startHeight) {
   cout << "Java_monero_wallet_MoneroWalletJni_syncJni" << endl;
   tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-  cout << "Start height: " << startHeight << endl;
   uint64_t blocksFetched;
   bool receivedMoney;
   wallet->refresh(wallet->is_trusted_daemon(), startHeight, blocksFetched, receivedMoney, true);
