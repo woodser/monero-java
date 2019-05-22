@@ -3,7 +3,6 @@ package utils;
 import java.util.List;
 
 import monero.daemon.model.MoneroTx;
-import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroTransfer;
@@ -18,7 +17,7 @@ public class Scratchpad {
     // initialize daemon, wallet, and direct rpc interface
 //    MoneroDaemon daemon = TestUtils.getDaemonRpc();
 //    MoneroWallet walletRpc = TestUtils.getWalletRpc();
-    MoneroWallet walletJni = TestUtils.getWalletJni();
+    //MoneroWallet walletJni = TestUtils.getWalletJni();
     //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
     
 //    // common variables
@@ -42,11 +41,11 @@ public class Scratchpad {
 //    System.out.println(MoneroWalletJni.walletExists("asdf"));
     
     //walletJni = new MoneroWalletJni(MoneroNetworkType.STAGENET, null, "English");
-    walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpcConnection(), 300000l);
+    MoneroWalletJni walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpcConnection(), 300000l);
     walletJni.sync(new MoneroSyncListener() {
       @Override
       public void onSyncProgress(Long height, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
-        if (numBlocksDone % 10000 == 0 || percentDone > .999) System.out.println("onSyncProgress(" + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
+        if (numBlocksDone % 10000 == 0 || percentDone > .999) System.out.println("onSyncProgress(" + height + ", " + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
       }
     });
 
