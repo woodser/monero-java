@@ -10,17 +10,14 @@ wallet.getLanguages() is rpc specific, not general wallet
 switch heights to longs
 don't automatically create file?
 how is keys file used?
-local vs remote requests per second auto-adusts like gui wallet.cpp:2204
+local vs remote requests per second auto-adjusts like gui wallet.cpp:2204
 test online vs offline wallets
 test for memory leaks by initializing precisely one bajillion wallets
-sync progress should report block height
 catch callback exceptions in c++
-end height incorrect when block added during synchronize
 test getAccounts(), getBalance(), etc with out of range subaddress/account indices (common wallet tests)
 rps defaults for local vs remote
-update SyncProgressTester to allow consecutive 100% progress if new block added at end
-update SyncProgressTester to allow end height / num blocks processed to increase if blocks added to chain
 ability deconstruct wallet from java which releases memory in c++
+distinguish rpc client being connected to a daemon and a daemon being connected to peers (just clearer documentation?)
 
 WALLET RPC ISSUES
 wallet2 network type auto detected when loaded from files on disk
