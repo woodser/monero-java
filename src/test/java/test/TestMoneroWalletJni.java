@@ -279,9 +279,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
         assertTrue(numBlocksDone >= prevNumBlocksDone);
         if (!(percentDone > prevPercentDone || Double.compare(percentDone, 1l) == 0)) {
           System.out.println("This one broke: onSyncProgress(" + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
-          System.out.println("Previous percent: " + prevPercentDone);
+          System.out.println("Prev height: " + prevHeight);
           System.out.println("Prev num bocks done: " + prevNumBlocksDone);
           System.out.println("Prev blocks total: " + prevNumBlocksTotal);
+          System.out.println("Prev percent done: " + prevPercentDone);
         }
         assertTrue(percentDone > prevPercentDone || Double.compare(percentDone, 1l) == 0);
       }
