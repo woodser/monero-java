@@ -162,14 +162,14 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
 JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *env, jclass clazz, jint jnetworkType, jstring jdaemonUri, jstring jdaemonUsername, jstring jdaemonPassword, jstring jlanguage) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletRandomJni" << endl;
-  const char* _uri = env->GetStringUTFChars(jlanguage, NULL);
-  const char* _username = env->GetStringUTFChars(jlanguage, NULL);
-  const char* _password = env->GetStringUTFChars(jlanguage, NULL);
-  const char* _language = env->GetStringUTFChars(jlanguage, NULL);
+  const char* _uri = jdaemonUri ? env->GetStringUTFChars(jdaemonUri, NULL) : nullptr;
+  const char* _username = jdaemonUsername ? env->GetStringUTFChars(jdaemonUsername, NULL) : nullptr;
+  const char* _password = jdaemonPassword ? env->GetStringUTFChars(jdaemonPassword, NULL) : nullptr;
+  const char* _language = jlanguage ? env->GetStringUTFChars(jlanguage, NULL) : nullptr;
 
   // construct wallet
-  MoneroRpcConnection daemonConnection = MoneroRpcConnection(_uri ? string(_uri) : nullptr, _username ? string(_username) : nullptr, _password ? string(_password) : nullptr);
-  MoneroWallet* wallet = new MoneroWallet(static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, _language ? string(_language) : nullptr);
+  MoneroRpcConnection daemonConnection = MoneroRpcConnection(string(_uri ? _uri : ""), string(_username ? _username : ""), string(_password ? _password : ""));
+  MoneroWallet* wallet = new MoneroWallet(static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, string(_language ? _language : ""));
 
   env->ReleaseStringUTFChars(jdaemonUri, _uri);
   env->ReleaseStringUTFChars(jdaemonUsername, _username);
@@ -240,13 +240,11 @@ Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni(JNIEnv *env, jobject i
   // get daemon connection
   MoneroRpcConnection daemonConnection = wallet->getDaemonConnection();
 
-  // initialize String[3] for uri, username, and password, respectively
+  // return string[uri, username, password]
   jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
   if (!daemonConnection.uri.empty()) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(daemonConnection.uri.c_str()));
   if (!daemonConnection.username.empty()) env->SetObjectArrayElement(vals, 1, env->NewStringUTF(daemonConnection.username.c_str()));
-  epee::wipeable_string wipeablePassword = daemonConnection.password;
-  string password = string(wipeablePassword.data(), wipeablePassword.size());
-  if (!password.empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(password.c_str()));
+  if (!daemonConnection.password.empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(daemonConnection.password.c_str()));
   return vals;
 }
 
@@ -309,9 +307,7 @@ JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getMnemonicJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getMnemonicJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
-  epee::wipeable_string mnemonic;
-  wallet->getMnemonic(mnemonic);
-  return env->NewStringUTF(string(mnemonic.data(), mnemonic.size()).c_str());
+  return env->NewStringUTF(wallet->getMnemonic().c_str());
 }
 
 JNIEXPORT jstring JNICALL
