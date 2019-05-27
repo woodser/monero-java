@@ -233,25 +233,21 @@ Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass c
 JNIEXPORT jobjectArray JNICALL
 Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni()" << endl;
-  throw runtime_error("Not implemented");
 
-//  // get wallet
-//  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-//
-//  // initialize String[3] for uri, username, and password, respectively
-//  jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
-//
-//  // set daemon address
-//  if (wallet->get_daemon_address().length() > 0) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(wallet->get_daemon_address().c_str()));
-//
-//  // set daemon username and password
-//  if (wallet->get_daemon_login()) {
-//    if (wallet->get_daemon_login()->username.length() > 0) env->SetObjectArrayElement(vals, 1, env->NewStringUTF(wallet->get_daemon_login()->username.c_str()));
-//    epee::wipeable_string wipeablePassword = wallet->get_daemon_login()->password;
-//    string password = string(wipeablePassword.data(), wipeablePassword.size());
-//    if (password.length() > 0) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(password.c_str()));
-//  }
-//  return vals;
+  // get wallet
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
+
+  // get daemon connection
+  MoneroRpcConnection daemonConnection = wallet->getDaemonConnection();
+
+  // initialize String[3] for uri, username, and password, respectively
+  jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
+  if (!daemonConnection.uri.empty()) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(daemonConnection.uri.c_str()));
+  if (!daemonConnection.username.empty()) env->SetObjectArrayElement(vals, 1, env->NewStringUTF(daemonConnection.username.c_str()));
+  epee::wipeable_string wipeablePassword = daemonConnection.password;
+  string password = string(wipeablePassword.data(), wipeablePassword.size());
+  if (!password.empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(password.c_str()));
+  return vals;
 }
 
 JNIEXPORT void JNICALL
