@@ -1,5 +1,5 @@
 #include "MoneroWalletJni.h"
-#include "MoneroWallet.h"
+#include "wallet/MoneroWallet.h"
 #include <iostream>
 #include "mnemonics/electrum-words.h"
 #include "mnemonics/english.h"
