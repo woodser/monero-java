@@ -312,11 +312,10 @@ Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni(JNIEnv *env, jobject inst
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getMnemonicJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getMnemonicJni" << endl;
-  throw runtime_error("Not implemented");
-//  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-//  epee::wipeable_string mnemonic;
-//  wallet->get_seed(mnemonic);
-//  return env->NewStringUTF(string(mnemonic.data(), mnemonic.size()).c_str());
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
+  epee::wipeable_string mnemonic;
+  wallet->getMnemonic(mnemonic);
+  return env->NewStringUTF(string(mnemonic.data(), mnemonic.size()).c_str());
 }
 
 JNIEXPORT jstring JNICALL
