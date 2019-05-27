@@ -47,9 +47,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   // ----------------------------- PUBLIC STATIC ------------------------------
   
   /**
-   * Indicates if the wallet at the given path exists.
+   * Indicates if a wallet exists at the given path.
    * 
-   * @param path is the path to check for existence
+   * @param path is the path to check for a wallet
    * @return true if a wallet exists at the given path, false otherwise
    */
   public static boolean walletExists(String path) {

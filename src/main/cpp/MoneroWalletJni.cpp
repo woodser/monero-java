@@ -146,29 +146,24 @@ void setDaemonConnection(JNIEnv *env, tools::wallet2* wallet, jstring jurl, jstr
 JNIEXPORT jboolean JNICALL
 Java_monero_wallet_MoneroWalletJni_walletExistsJni(JNIEnv *env, jclass clazz, jstring path) {
   cout << "Java_monero_wallet_MoneroWalletJni_walletExistsJni" << endl;
-  throw runtime_error("Not implemented");
-//  const char* _path = env->GetStringUTFChars(path, NULL);
-//  bool keys_file_exists;
-//  bool wallet_file_exists;
-//  tools::wallet2::wallet_exists(std::string(_path), keys_file_exists, wallet_file_exists);
-//  env->ReleaseStringUTFChars(path, _path);
-//  return static_cast<jboolean>(wallet_file_exists);
+  const char* _path = env->GetStringUTFChars(path, NULL);
+  bool walletExists = MoneroWallet::walletExists(string(_path));
+  env->ReleaseStringUTFChars(path, _path);
+  return static_cast<jboolean>(walletExists);
 }
 
 JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstring path, jstring password, jint networkType) {
+Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint jnetworkType) {
   cout << "Java_monero_wallet_MoneroWalletJni_openWalletJni" << endl;
-  throw runtime_error("Not implemented");
-//  const char* _path = env->GetStringUTFChars(path, NULL);
-//  const char* _password = env->GetStringUTFChars(password, NULL);
-//
-//  // load wallet from file
-//  tools::wallet2* wallet = new tools::wallet2(static_cast<cryptonote::network_type>(networkType), 1, true);
-//  wallet->load(string(_path), string(_password));
-//
-//  env->ReleaseStringUTFChars(path, _path);
-//  env->ReleaseStringUTFChars(password, _password);
-//  return reinterpret_cast<jlong>(wallet);
+  const char* _path = env->GetStringUTFChars(jpath, NULL);
+  const char* _password = env->GetStringUTFChars(jpassword, NULL);
+
+  // load wallet from file
+  MoneroWallet* wallet = new MoneroWallet(string(_path), string(_password), static_cast<cryptonote::network_type>(jnetworkType));
+
+  env->ReleaseStringUTFChars(jpath, _path);
+  env->ReleaseStringUTFChars(jpassword, _password);
+  return reinterpret_cast<jlong>(wallet);
 }
 
 JNIEXPORT jlong JNICALL
