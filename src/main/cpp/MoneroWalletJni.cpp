@@ -3,7 +3,9 @@
 #include <iostream>
 #include "mnemonics/electrum-words.h"
 #include "mnemonics/english.h"
+
 using namespace std;
+using namespace monero;
 
 // --------------------------------- LISTENER ---------------------------------
 
@@ -158,20 +160,22 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
 }
 
 JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *env, jclass clazz, jint networkType, jstring daemonUri, jstring daemonUsername, jstring daemonPassword, jstring language) {
+Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *env, jclass clazz, jint jnetworkType, jstring jdaemonUri, jstring jdaemonUsername, jstring jdaemonPassword, jstring jlanguage) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletRandomJni" << endl;
-  throw runtime_error("Not implemented");
-//  const char* _language = env->GetStringUTFChars(language, NULL);
-//
-//  // set daemon connection then generate so restore height is correctly set
-//  tools::wallet2* wallet = new tools::wallet2(static_cast<cryptonote::network_type>(networkType), 1, true);
-//  setDaemonConnection(env, wallet, daemonUri, daemonUsername, daemonPassword);
-//  wallet->set_seed_language(string(_language));
-//  crypto::secret_key recovery_val, secret_key;
-//  wallet->generate(string(""), string(""), secret_key, false, false);
-//
-//  env->ReleaseStringUTFChars(language, _language);
-//  return reinterpret_cast<jlong>(wallet);
+  const char* _uri = env->GetStringUTFChars(jlanguage, NULL);
+  const char* _username = env->GetStringUTFChars(jlanguage, NULL);
+  const char* _password = env->GetStringUTFChars(jlanguage, NULL);
+  const char* _language = env->GetStringUTFChars(jlanguage, NULL);
+
+  // construct wallet
+  MoneroRpcConnection daemonConnection = MoneroRpcConnection(_uri ? string(_uri) : nullptr, _username ? string(_username) : nullptr, _password ? string(_password) : nullptr);
+  MoneroWallet* wallet = new MoneroWallet(static_cast<cryptonote::network_type>(jnetworkType), daemonConnection, _language ? string(_language) : nullptr);
+
+  env->ReleaseStringUTFChars(jdaemonUri, _uri);
+  env->ReleaseStringUTFChars(jdaemonUsername, _username);
+  env->ReleaseStringUTFChars(jdaemonPassword, _password);
+  env->ReleaseStringUTFChars(jlanguage, _language);
+  return reinterpret_cast<jlong>(wallet);
 }
 
 JNIEXPORT jlong JNICALL
