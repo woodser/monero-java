@@ -232,6 +232,7 @@ Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass c
 
 JNIEXPORT jobjectArray JNICALL
 Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni(JNIEnv *env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni()" << endl;
   throw runtime_error("Not implemented");
 
 //  // get wallet
@@ -271,17 +272,16 @@ Java_monero_wallet_MoneroWalletJni_getPathJni(JNIEnv *env, jobject instance) {
 JNIEXPORT jint JNICALL
 Java_monero_wallet_MoneroWalletJni_getNetworkTypeJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getNetworkTypeJni" << endl;
-  throw runtime_error("Not implemented");
-//  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-//  return wallet->nettype();
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
+  return wallet->getNetworkType();
 }
 
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getLanguageJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getLanguageJni" << endl;
   throw runtime_error("Not implemented");
-//  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-//  return env->NewStringUTF(wallet->get_seed_language().c_str());
+//  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
+//  return env->NewStringUTF(wallet->getLanguage().c_str());
 }
 
 JNIEXPORT jlong JNICALL
@@ -321,10 +321,9 @@ Java_monero_wallet_MoneroWalletJni_getMnemonicJni(JNIEnv *env, jobject instance)
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getAddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
   cout << "Java_monero_wallet_MoneroWalletJni_getAddressJni" << endl;
-  throw runtime_error("Not implemented");
-//  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-//  string address = wallet->get_subaddress_as_str({(uint32_t) accountIdx, (uint32_t) subaddressIdx});
-//  return env->NewStringUTF(address.c_str());
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
+  string address = wallet->getAddress((uint32_t) accountIdx, (uint32_t) subaddressIdx);
+  return env->NewStringUTF(address.c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni(JNIEnv *env, jobject instance) {
