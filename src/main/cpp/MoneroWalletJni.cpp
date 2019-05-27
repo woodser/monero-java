@@ -152,7 +152,7 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
   const char* _password = env->GetStringUTFChars(jpassword, NULL);
 
   // load wallet from file
-  MoneroWallet* wallet = new MoneroWallet(string(_path), string(_password), static_cast<cryptonote::network_type>(jnetworkType));
+  MoneroWallet* wallet = new MoneroWallet(string(_path), string(_password), static_cast<MoneroNetworkType>(jnetworkType));
 
   env->ReleaseStringUTFChars(jpath, _path);
   env->ReleaseStringUTFChars(jpassword, _password);
@@ -169,7 +169,7 @@ Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *env, jclass cla
 
   // construct wallet
   MoneroRpcConnection daemonConnection = MoneroRpcConnection(_uri ? string(_uri) : nullptr, _username ? string(_username) : nullptr, _password ? string(_password) : nullptr);
-  MoneroWallet* wallet = new MoneroWallet(static_cast<cryptonote::network_type>(jnetworkType), daemonConnection, _language ? string(_language) : nullptr);
+  MoneroWallet* wallet = new MoneroWallet(static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, _language ? string(_language) : nullptr);
 
   env->ReleaseStringUTFChars(jdaemonUri, _uri);
   env->ReleaseStringUTFChars(jdaemonUsername, _username);
