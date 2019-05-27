@@ -119,26 +119,17 @@ extern "C"
 {
 #endif
 
-void setDaemonConnection(JNIEnv *env, tools::wallet2* wallet, jstring jurl, jstring jusername, jstring jpassword) {
-  throw runtime_error("Not implemented");
-//  const char* _url = jurl ? env->GetStringUTFChars(jurl, NULL) : nullptr;
-//  const char* _username = jusername ? env->GetStringUTFChars(jusername, NULL) : nullptr;
-//  const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
-//
-//  // prepare url, login, and isTrusted
-//  string url = string(jurl ? _url : "");
-//  boost::optional<epee::net_utils::http::login> login{};
-//  if (jusername) login.emplace(string(_username), string(_password));
-//  bool isTrusted = false;
-//  try { isTrusted = tools::is_local_address(url); }	// wallet is trusted iff local
-//  catch (const exception &e) { }
-//
-//  // set daemon connection
-//  wallet->set_daemon(url, login, isTrusted);
-//
-//  env->ReleaseStringUTFChars(jurl, _url);
-//  env->ReleaseStringUTFChars(jusername, _username);
-//  env->ReleaseStringUTFChars(jpassword, _password);
+void setDaemonConnection(JNIEnv *env, MoneroWallet* wallet, jstring juri, jstring jusername, jstring jpassword) {
+  const char* _url = juri ? env->GetStringUTFChars(juri, NULL) : nullptr;
+  const char* _username = jusername ? env->GetStringUTFChars(jusername, NULL) : nullptr;
+  const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
+
+  // set daemon connection
+  wallet->setDaemonConnection(string(juri ? _url : ""), string(jusername ? _username : ""), string(jpassword ? _password : ""));
+
+  env->ReleaseStringUTFChars(juri, _url);
+  env->ReleaseStringUTFChars(jusername, _username);
+  env->ReleaseStringUTFChars(jpassword, _password);
 }
 
 // ------------------------------- JNI STATIC ---------------------------------
@@ -259,11 +250,10 @@ Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni(JNIEnv *env, jobject i
 }
 
 JNIEXPORT void JNICALL
-Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *env, jobject instance, jstring jurl, jstring jusername, jstring jpassword) {
+Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *env, jobject instance, jstring juri, jstring jusername, jstring jpassword) {
   cout << "Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni" << endl;
-//  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-//  setDaemonConnection(env, wallet, jurl, jusername, jpassword);
-  throw runtime_error("Not implemented");
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
+  setDaemonConnection(env, wallet, juri, jusername, jpassword);
 }
 
 JNIEXPORT jstring JNICALL
