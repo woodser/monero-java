@@ -18,6 +18,7 @@ test getAccounts(), getBalance(), etc with out of range subaddress/account indic
 rps defaults for local vs remote
 ability deconstruct wallet from java which releases memory in c++
 distinguish rpc client being connected to a daemon and a daemon being connected to peers (just clearer documentation?)
+test block serialization/deserialization
 
 WALLET RPC ISSUES
 wallet2 network type auto detected when loaded from files on disk
