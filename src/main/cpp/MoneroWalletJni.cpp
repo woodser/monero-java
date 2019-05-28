@@ -258,9 +258,8 @@ Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *env, jobject i
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getPathJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getPathJni" << endl;
-  throw runtime_error("Not implemented");
-//  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-//  return env->NewStringUTF(wallet->path().c_str());
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
+  return env->NewStringUTF(wallet->getPath().c_str());
 }
 
 JNIEXPORT jint JNICALL
@@ -273,34 +272,29 @@ Java_monero_wallet_MoneroWalletJni_getNetworkTypeJni(JNIEnv *env, jobject instan
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getLanguageJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getLanguageJni" << endl;
-  throw runtime_error("Not implemented");
-//  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
-//  return env->NewStringUTF(wallet->getLanguage().c_str());
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
+  return env->NewStringUTF(wallet->getLanguage().c_str());
 }
 
 JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_getHeightJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getHeightJni" << endl;
-  throw runtime_error("Not implemented");
-//  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-//  return wallet->get_blockchain_current_height();
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
+  return wallet->getHeight();
 }
 
 JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_getChainHeightJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getChainHeightJni" << endl;
-  throw runtime_error("Not implemented");
-//  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-//  string err;
-//  return wallet->get_daemon_blockchain_height(err);
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
+  return wallet->getChainHeight();
 }
 
 JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni" << endl;
-  throw runtime_error("Not implemented");
-//  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-//  return wallet->get_refresh_from_block_height();
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
+  return wallet->getRestoreHeight();
 }
 
 JNIEXPORT jstring JNICALL
