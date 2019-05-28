@@ -242,12 +242,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
    */
   private class SyncProgressTester implements MoneroSyncListener {
 
-    private Long startHeight;
-    private Long endHeight;
+    private long startHeight;
+    private long endHeight;
     private boolean noMidway;   // syncing should not have midway progress
     private boolean noProgress; // syncing should not make any progress
     private boolean midwayCalled;
-    private Long prevHeight;
     private Long prevNumBlocksDone;
     private Long prevNumBlocksTotal;
     private Double prevPercentDone;
@@ -260,33 +259,28 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       this.midwayCalled = false;
     }
 
-    public void onSyncProgress(Long height, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
-      if (numBlocksDone % 10000 == 0 || percentDone > .999) System.out.println("onSyncProgress(" + height + ", " + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
+    public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
+      if (numBlocksDone % 10000 == 0 || percentDone > .999) System.out.println("onSyncProgress(" + startHeight + ", " + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
       assertFalse("Should not call progress", noProgress);
       assertTrue(numBlocksDone >= 0);
       assertTrue(numBlocksTotal > 0 && numBlocksTotal >= numBlocksDone);
       assertTrue(percentDone >= 0);
       assertNotNull(message);
       assertFalse(message.isEmpty());
+      assertEquals(this.startHeight, startHeight);
       if (prevPercentDone == null) {
-        assertNull(height);
         assertEquals(0, numBlocksDone);
         assertEquals(0, percentDone, 0);
       } else {
-        assertNotNull(height);
-        if (prevHeight != null) assertTrue(height > prevHeight);
-        else assertEquals(1, numBlocksDone);  // first block processed so no previous height
         assertTrue(numBlocksDone >= prevNumBlocksDone);
         if (!(percentDone > prevPercentDone || Double.compare(percentDone, 1l) == 0)) {
           System.out.println("This one broke: onSyncProgress(" + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
-          System.out.println("Prev height: " + prevHeight);
           System.out.println("Prev num bocks done: " + prevNumBlocksDone);
           System.out.println("Prev blocks total: " + prevNumBlocksTotal);
           System.out.println("Prev percent done: " + prevPercentDone);
         }
         assertTrue(percentDone > prevPercentDone || Double.compare(percentDone, 1l) == 0);
       }
-      prevHeight = height;
       prevNumBlocksDone = numBlocksDone;
       prevNumBlocksTotal = numBlocksTotal;
       prevPercentDone = percentDone;
@@ -309,7 +303,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       else assertFalse("No midway progress should have been reported but it was", midwayCalled);
 
       // test last progress
-      assertEquals(chainHeight - 1, (long) prevHeight);
       assertEquals(chainHeight - startHeight, (long) prevNumBlocksDone);
       assertEquals(prevNumBlocksDone, prevNumBlocksTotal);
       assertEquals(1, prevPercentDone, 0);
