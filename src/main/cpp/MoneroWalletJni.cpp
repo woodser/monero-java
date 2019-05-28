@@ -60,57 +60,57 @@ void detachJVM(JNIEnv *jenv, int envStat) {
   }
 }
 
-///**
-// * Invokes Java callbacks on wallet notifications.
-// */
-//struct WalletListenerJni : public tools::i_wallet2_callback {
-//  jobject jlistener;
-//
-//  WalletListenerJni(JNIEnv *env, jobject listener) {
-//    jlistener = env->NewGlobalRef(listener);
-//  }
-//
-//  ~WalletListenerJni() { };
-//
-//  void deleteGlobalJavaRef(JNIEnv *env) {
-//    std::lock_guard<std::mutex> lock(_listenerMutex);
-//    env->DeleteGlobalRef(jlistener);
-//    jlistener = nullptr;
-//  }
-//
-//  // TODO: throttle notifications like wallet.cpp::on_new_block?
-//  void on_new_block(uint64_t height, const cryptonote::block& block) {
-//    std::lock_guard<std::mutex> lock(_listenerMutex);
-//    if (jlistener == nullptr) return;
-//    JNIEnv *jenv;
-//    int envStat = attachJVM(&jenv);
-//    if (envStat == JNI_ERR) return;
-//    jlong h = static_cast<jlong>(height);
-//    jmethodID listenerClass_newBlock = jenv->GetMethodID(class_WalletListener, "onNewBlock", "(J)V");
-//    jenv->CallVoidMethod(jlistener, listenerClass_newBlock, h);
-//    detachJVM(jenv, envStat);
-//  }
-//
-//  void on_money_received(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& tx, uint64_t amount, const cryptonote::subaddress_index& subaddr_index) {
-//    std::lock_guard<std::mutex> lock(_listenerMutex);
-//    if (jlistener == nullptr) return;
-//  }
-//
-//  void on_unconfirmed_money_received(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& tx, uint64_t amount, const cryptonote::subaddress_index& subaddr_index) {
-//    std::lock_guard<std::mutex> lock(_listenerMutex);
-//    if (jlistener == nullptr) return;
-//  }
-//
-//  void on_money_spent(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& in_tx, uint64_t amount, const cryptonote::transaction& spend_tx, const cryptonote::subaddress_index& subaddr_index) {
-//    std::lock_guard<std::mutex> lock(_listenerMutex);
-//    if (jlistener == nullptr) return;
-//  }
-//
-//  void on_pool_tx_removed(const crypto::hash &txid) {
-//    std::lock_guard<std::mutex> lock(_listenerMutex);
-//    if (jlistener == nullptr) return;
-//  }
-//};
+/**
+ * Invokes Java callbacks on wallet notifications.
+ */
+struct WalletListenerJni : public tools::i_wallet2_callback {
+  jobject jlistener;
+
+  WalletListenerJni(JNIEnv *env, jobject listener) {
+    jlistener = env->NewGlobalRef(listener);
+  }
+
+  ~WalletListenerJni() { };
+
+  void deleteGlobalJavaRef(JNIEnv *env) {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    env->DeleteGlobalRef(jlistener);
+    jlistener = nullptr;
+  }
+
+  // TODO: throttle notifications like wallet.cpp::on_new_block?
+  void on_new_block(uint64_t height, const cryptonote::block& block) {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+    JNIEnv *jenv;
+    int envStat = attachJVM(&jenv);
+    if (envStat == JNI_ERR) return;
+    jlong h = static_cast<jlong>(height);
+    jmethodID listenerClass_newBlock = jenv->GetMethodID(class_WalletListener, "onNewBlock", "(J)V");
+    jenv->CallVoidMethod(jlistener, listenerClass_newBlock, h);
+    detachJVM(jenv, envStat);
+  }
+
+  void on_money_received(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& tx, uint64_t amount, const cryptonote::subaddress_index& subaddr_index) {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+  }
+
+  void on_unconfirmed_money_received(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& tx, uint64_t amount, const cryptonote::subaddress_index& subaddr_index) {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+  }
+
+  void on_money_spent(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& in_tx, uint64_t amount, const cryptonote::transaction& spend_tx, const cryptonote::subaddress_index& subaddr_index) {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+  }
+
+  void on_pool_tx_removed(const crypto::hash &txid) {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+  }
+};
 
 // ----------------------------- COMMON HELPERS -------------------------------
 
@@ -346,46 +346,70 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceS
 JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *env, jobject instance, jobject jlistener) {
   cout << "Java_monero_wallet_MoneroWalletJni_setListenerJni" << endl;
-  throw runtime_error("Not implemented");
-//  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-//
-//  // clear old listener
-//  wallet->callback(nullptr);
-//  WalletListenerJni *oldListener = getHandle<WalletListenerJni>(env, instance, "listenerHandle");
-//  if (oldListener != nullptr) {
-//    oldListener->deleteGlobalJavaRef(env);
-//    delete oldListener;
-//  }
-//
-//  // set new listener
-//  if (jlistener == nullptr) {
-//    return 0;
-//  } else {
-//    WalletListenerJni *listener = new WalletListenerJni(env, jlistener);
-//    wallet->callback(listener);
-//    return reinterpret_cast<jlong>(listener);
-//  }
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
+
+  // TODO: use c++ library
+  tools::wallet2* wallet2 = wallet->getWallet2();
+
+  // clear old listener
+  wallet2->callback(nullptr);
+  WalletListenerJni *oldListener = getHandle<WalletListenerJni>(env, instance, "listenerHandle");
+  if (oldListener != nullptr) {
+    oldListener->deleteGlobalJavaRef(env);
+    delete oldListener;
+  }
+
+  // set new listener
+  if (jlistener == nullptr) {
+    return 0;
+  } else {
+    WalletListenerJni *listener = new WalletListenerJni(env, jlistener);
+    wallet2->callback(listener);
+    return reinterpret_cast<jlong>(listener);
+  }
 }
 
 JNIEXPORT jobjectArray JNICALL
 Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong startHeight) {
   cout << "Java_monero_wallet_MoneroWalletJni_syncJni" << endl;
-  throw runtime_error("Not implemented");
-//  tools::wallet2* wallet = getHandle<tools::wallet2>(env, instance, "walletHandle");
-//  uint64_t blocksFetched;
-//  bool receivedMoney;
-//  wallet->refresh(wallet->is_trusted_daemon(), startHeight, blocksFetched, receivedMoney, true);
-//  cout << "Done refreshing.  Blocks fetched: " << blocksFetched << ", received money: " << receivedMoney << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
+  tools::wallet2* wallet2 = wallet->getWallet2();
+  uint64_t blocksFetched;
+  bool receivedMoney;
+  wallet2->refresh(wallet2->is_trusted_daemon(), startHeight, blocksFetched, receivedMoney, true);
+  cout << "Done refreshing.  Blocks fetched: " << blocksFetched << ", received money: " << receivedMoney << endl;
+
+  // build and return results as Object[2]{(long) numBlocksFetched, (boolean) receivedMoney}
+  jobjectArray results = env->NewObjectArray(2, env->FindClass("java/lang/Object"), nullptr);
+  jclass longClass = env->FindClass("java/lang/Long");
+  jmethodID longConstructor = env->GetMethodID(longClass, "<init>", "(J)V");
+  jobject numBlocksFetchedWrapped = env->NewObject(longClass, longConstructor, static_cast<jlong>(blocksFetched));
+  env->SetObjectArrayElement(results, 0, numBlocksFetchedWrapped);
+  jclass booleanClass = env->FindClass("java/lang/Boolean");
+  jmethodID booleanConstructor = env->GetMethodID(booleanClass, "<init>", "(Z)V");
+  jobject receivedMoneyWrapped = env->NewObject(booleanClass, booleanConstructor, static_cast<jboolean>(receivedMoney));
+  env->SetObjectArrayElement(results, 1, receivedMoneyWrapped);
+  return results;
+
+
+
+
+
+//  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
+//
+//  // sync wallet
+//  MoneroSyncResult result = wallet->sync(startHeight);	// TODO: listener
+//  cout << "Done sycing.  Blocks fetched: " << result.numBlocksFetched << ", received money: " << result.receivedMoney << endl;
 //
 //  // build and return results as Object[2]{(long) numBlocksFetched, (boolean) receivedMoney}
 //  jobjectArray results = env->NewObjectArray(2, env->FindClass("java/lang/Object"), nullptr);
 //  jclass longClass = env->FindClass("java/lang/Long");
 //  jmethodID longConstructor = env->GetMethodID(longClass, "<init>", "(J)V");
-//  jobject numBlocksFetchedWrapped = env->NewObject(longClass, longConstructor, static_cast<jlong>(blocksFetched));
+//  jobject numBlocksFetchedWrapped = env->NewObject(longClass, longConstructor, static_cast<jlong>(result.numBlocksFetched));
 //  env->SetObjectArrayElement(results, 0, numBlocksFetchedWrapped);
 //  jclass booleanClass = env->FindClass("java/lang/Boolean");
 //  jmethodID booleanConstructor = env->GetMethodID(booleanClass, "<init>", "(Z)V");
-//  jobject receivedMoneyWrapped = env->NewObject(booleanClass, booleanConstructor, static_cast<jboolean>(receivedMoney));
+//  jobject receivedMoneyWrapped = env->NewObject(booleanClass, booleanConstructor, static_cast<jboolean>(result.receivedMoney));
 //  env->SetObjectArrayElement(results, 1, receivedMoneyWrapped);
 //  return results;
 }
