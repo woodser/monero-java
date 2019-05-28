@@ -6,7 +6,7 @@ package monero.wallet.model;
 public interface MoneroSyncListener {
 
   /**
-   * Invoked with info as sync progress is made.
+   * Invoked when sync progress is made.
    * 
    * @param startHeight is the starting height of the sync request
    * @param numBlocksDone is the number of blocks synced
