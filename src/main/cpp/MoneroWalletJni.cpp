@@ -373,45 +373,22 @@ JNIEXPORT jobjectArray JNICALL
 Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong startHeight) {
   cout << "Java_monero_wallet_MoneroWalletJni_syncJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
-  tools::wallet2* wallet2 = wallet->getWallet2();
-  uint64_t blocksFetched;
-  bool receivedMoney;
-  wallet2->refresh(wallet2->is_trusted_daemon(), startHeight, blocksFetched, receivedMoney, true);
-  cout << "Done refreshing.  Blocks fetched: " << blocksFetched << ", received money: " << receivedMoney << endl;
+
+  // sync wallet
+  MoneroSyncResult result = wallet->sync(startHeight);
+  cout << "Done sycing.  Blocks fetched: " << result.numBlocksFetched << ", received money: " << result.receivedMoney << endl;
 
   // build and return results as Object[2]{(long) numBlocksFetched, (boolean) receivedMoney}
   jobjectArray results = env->NewObjectArray(2, env->FindClass("java/lang/Object"), nullptr);
   jclass longClass = env->FindClass("java/lang/Long");
   jmethodID longConstructor = env->GetMethodID(longClass, "<init>", "(J)V");
-  jobject numBlocksFetchedWrapped = env->NewObject(longClass, longConstructor, static_cast<jlong>(blocksFetched));
+  jobject numBlocksFetchedWrapped = env->NewObject(longClass, longConstructor, static_cast<jlong>(result.numBlocksFetched));
   env->SetObjectArrayElement(results, 0, numBlocksFetchedWrapped);
   jclass booleanClass = env->FindClass("java/lang/Boolean");
   jmethodID booleanConstructor = env->GetMethodID(booleanClass, "<init>", "(Z)V");
-  jobject receivedMoneyWrapped = env->NewObject(booleanClass, booleanConstructor, static_cast<jboolean>(receivedMoney));
+  jobject receivedMoneyWrapped = env->NewObject(booleanClass, booleanConstructor, static_cast<jboolean>(result.receivedMoney));
   env->SetObjectArrayElement(results, 1, receivedMoneyWrapped);
   return results;
-
-
-
-
-
-//  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
-//
-//  // sync wallet
-//  MoneroSyncResult result = wallet->sync(startHeight);	// TODO: listener
-//  cout << "Done sycing.  Blocks fetched: " << result.numBlocksFetched << ", received money: " << result.receivedMoney << endl;
-//
-//  // build and return results as Object[2]{(long) numBlocksFetched, (boolean) receivedMoney}
-//  jobjectArray results = env->NewObjectArray(2, env->FindClass("java/lang/Object"), nullptr);
-//  jclass longClass = env->FindClass("java/lang/Long");
-//  jmethodID longConstructor = env->GetMethodID(longClass, "<init>", "(J)V");
-//  jobject numBlocksFetchedWrapped = env->NewObject(longClass, longConstructor, static_cast<jlong>(result.numBlocksFetched));
-//  env->SetObjectArrayElement(results, 0, numBlocksFetchedWrapped);
-//  jclass booleanClass = env->FindClass("java/lang/Boolean");
-//  jmethodID booleanConstructor = env->GetMethodID(booleanClass, "<init>", "(Z)V");
-//  jobject receivedMoneyWrapped = env->NewObject(booleanClass, booleanConstructor, static_cast<jboolean>(result.receivedMoney));
-//  env->SetObjectArrayElement(results, 1, receivedMoneyWrapped);
-//  return results;
 }
 
 #ifdef __cplusplus
