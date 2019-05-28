@@ -63,7 +63,7 @@ void detachJVM(JNIEnv *jenv, int envStat) {
 /**
  * Invokes Java callbacks on wallet notifications.
  */
-struct WalletListenerJni : public tools::i_wallet2_callback {
+struct WalletListenerJni : public MoneroWalletListener {
   jobject jlistener;
 
   WalletListenerJni(JNIEnv *env, jobject listener) {
@@ -78,38 +78,41 @@ struct WalletListenerJni : public tools::i_wallet2_callback {
     jlistener = nullptr;
   }
 
-  // TODO: throttle notifications like wallet.cpp::on_new_block?
-  void on_new_block(uint64_t height, const cryptonote::block& block) {
+  virtual void onSyncProgress(uint64_t startHeight, uint64_t numBlocksDone, uint64_t numBlocksTotal, double percentDone, string message) {
+    throw runtime_error("WalletListenerJni.onSyncProgress() not implemented");
+  }
+
+  virtual void onNewBlock(MoneroBlock& block) {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *jenv;
     int envStat = attachJVM(&jenv);
     if (envStat == JNI_ERR) return;
-    jlong h = static_cast<jlong>(height);
+    jlong h = static_cast<jlong>(block.height);
     jmethodID listenerClass_newBlock = jenv->GetMethodID(class_WalletListener, "onNewBlock", "(J)V");
     jenv->CallVoidMethod(jlistener, listenerClass_newBlock, h);
     detachJVM(jenv, envStat);
   }
 
-  void on_money_received(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& tx, uint64_t amount, const cryptonote::subaddress_index& subaddr_index) {
-    std::lock_guard<std::mutex> lock(_listenerMutex);
-    if (jlistener == nullptr) return;
-  }
-
-  void on_unconfirmed_money_received(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& tx, uint64_t amount, const cryptonote::subaddress_index& subaddr_index) {
-    std::lock_guard<std::mutex> lock(_listenerMutex);
-    if (jlistener == nullptr) return;
-  }
-
-  void on_money_spent(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& in_tx, uint64_t amount, const cryptonote::transaction& spend_tx, const cryptonote::subaddress_index& subaddr_index) {
-    std::lock_guard<std::mutex> lock(_listenerMutex);
-    if (jlistener == nullptr) return;
-  }
-
-  void on_pool_tx_removed(const crypto::hash &txid) {
-    std::lock_guard<std::mutex> lock(_listenerMutex);
-    if (jlistener == nullptr) return;
-  }
+//  void on_money_received(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& tx, uint64_t amount, const cryptonote::subaddress_index& subaddr_index) {
+//    std::lock_guard<std::mutex> lock(_listenerMutex);
+//    if (jlistener == nullptr) return;
+//  }
+//
+//  void on_unconfirmed_money_received(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& tx, uint64_t amount, const cryptonote::subaddress_index& subaddr_index) {
+//    std::lock_guard<std::mutex> lock(_listenerMutex);
+//    if (jlistener == nullptr) return;
+//  }
+//
+//  void on_money_spent(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& in_tx, uint64_t amount, const cryptonote::transaction& spend_tx, const cryptonote::subaddress_index& subaddr_index) {
+//    std::lock_guard<std::mutex> lock(_listenerMutex);
+//    if (jlistener == nullptr) return;
+//  }
+//
+//  void on_pool_tx_removed(const crypto::hash &txid) {
+//    std::lock_guard<std::mutex> lock(_listenerMutex);
+//    if (jlistener == nullptr) return;
+//  }
 };
 
 // ----------------------------- COMMON HELPERS -------------------------------
@@ -348,11 +351,8 @@ Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *env, jobject instance,
   cout << "Java_monero_wallet_MoneroWalletJni_setListenerJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "walletHandle");
 
-  // TODO: use c++ library
-  tools::wallet2* wallet2 = wallet->getWallet2();
-
   // clear old listener
-  wallet2->callback(nullptr);
+  wallet->setListener(nullptr);
   WalletListenerJni *oldListener = getHandle<WalletListenerJni>(env, instance, "listenerHandle");
   if (oldListener != nullptr) {
     oldListener->deleteGlobalJavaRef(env);
@@ -363,8 +363,8 @@ Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *env, jobject instance,
   if (jlistener == nullptr) {
     return 0;
   } else {
-    WalletListenerJni *listener = new WalletListenerJni(env, jlistener);
-    wallet2->callback(listener);
+    WalletListenerJni* listener = new WalletListenerJni(env, jlistener);
+    wallet->setListener(listener);
     return reinterpret_cast<jlong>(listener);
   }
 }
