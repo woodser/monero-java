@@ -59,9 +59,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   // --------------------------------- INSTANCE -------------------------------
   
   // instance variables
-  private long walletHandle;    // memory address of corresponding wallet in c++; this variable is read directly by name in c++
-  private long listenerHandle;  // memory address of corresponding listener in c++; this variable is read directly by name in c++
-  private Wallet2Repeater wallet2Repeater;      // internal wallet2 listener to repeat notifications to internally subscribed wallet2 listeners
+  private long walletHandle;    // memory address of corresponding c++ wallet; this variable is read directly by name in c++ // TODO: rename to cppWalletHandle, cppListenerHandle
+  private long listenerHandle;  // memory address of corresponding c++ listener; this variable is read directly by name in c++
+  private JniCppListener jniListener;  // listens for notifications from jni c++
   private Set<MoneroWalletListener> listeners;  // externally subscribed wallet listeners
   
   // private static variables
@@ -140,7 +140,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   private void initCommon() {
-    this.wallet2Repeater = new Wallet2Repeater();
+    this.jniListener = new JniCppListener();
     this.listeners = new LinkedHashSet<MoneroWalletListener>();
   }
   
@@ -176,31 +176,14 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   public void addListener(MoneroWalletListener listener) {
-    
-    // register external listener
     listeners.add(listener);
-    
-    // register internal listener to notify external listener
-    wallet2Repeater.addListener(new ExternalListenerNotifier(listener));
+    jniListener.setIsEnabled(true);
   }
   
   public void removeListener(MoneroWalletListener listener) {
-    
-    // unregister external listener
     if (!listeners.contains(listener)) throw new MoneroException("Listener is not registered to wallet");
     listeners.remove(listener);
-    
-    // unregister internal wallet2 listener which notifies external listener
-    boolean found = false;
-    for (Wallet2Listener w2Listener : wallet2Repeater.getListeners()) {
-      if (!(w2Listener instanceof ExternalListenerNotifier)) continue;
-      if (((ExternalListenerNotifier) w2Listener).getListener() == listener) {
-        wallet2Repeater.removeListener(w2Listener);
-        found = true;
-        break;
-      }
-    }
-    assertTrue("Could not find internal wallet2 listener to unregister", found);
+    if (listeners.isEmpty()) jniListener.setIsEnabled(false);
   }
   
   // TODO: can set restore height, start refresh, pause refresh, isSynchronized()
@@ -287,33 +270,30 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     MoneroDaemonRpc daemon = new MoneroDaemonRpc(getDaemonConnection());
     assertTrue("No connection to daemon", daemon.getIsConnected()); // TODO: way to get end height from wallet2?  need to fallback if daemon not connected, let wallet report sync error
     
-    // register wallet2 listener which notifies external sync listeners
-    SyncNotifier syncNotifier = new SyncNotifier(startHeight, getChainHeight() - 1, new MoneroSyncListener() {
-      @Override
-      public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
-        if (listener != null) listener.onSyncProgress(startHeight, numBlocksDone, numBlocksTotal, percentDone, message);
-        for (MoneroSyncListener listener : listeners) {
-          listener.onSyncProgress(startHeight, numBlocksDone, numBlocksTotal, percentDone, message);
-        }
-      }
-    });
-    wallet2Repeater.addListener(syncNotifier);
+    // wrap and register sync listener as normal wallet listener
+    SyncListenerWrapper syncListenerWrapper = new SyncListenerWrapper(listener);
+    addListener(syncListenerWrapper);
     
-    // listen for new blocks added to the chain in order to update sync end height // TODO: no way to get this from wallet2?
-    MoneroDaemonListener daemonListener = new MoneroDaemonListener() {
+    // register listener which notifies all listeners of sync updates
+    SyncNotifier syncNotifier = new SyncNotifier(startHeight, getChainHeight() - 1);
+    addListener(syncNotifier);
+    
+    // listen for new blocks added to the chain in order to update sync height // TODO: no way to get this from wallet2?
+    MoneroDaemonListener syncRangeUpdater = new MoneroDaemonListener() {
       public void onBlockHeader(MoneroBlockHeader header) {
         syncNotifier.setEndHeight(header.getHeight());
       }
     };
-    daemon.addListener(daemonListener);
+    daemon.addListener(syncRangeUpdater);
     
     // sync wallet
     syncNotifier.onStart(); // notify sync listeners of 0% progress
     Object[] results = syncJni(startHeight);
     
     // unregister listeners
-    wallet2Repeater.removeListener(syncNotifier);
-    daemon.removeListener(daemonListener);
+    removeListener(syncNotifier);
+    removeListener(syncListenerWrapper);
+    daemon.removeListener(syncRangeUpdater);
     
     // return results
     return new MoneroSyncResult((long) results[0], (boolean) results[1]);
@@ -644,16 +624,24 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getUnlockedBalanceSubaddressJni(int accountIdx, int subaddressIdx);
   
-  private native long setListenerJni(Wallet2Listener listener);
+  private native long setListenerJni(JniCppListener listener);
   
   private native Object[] syncJni(long startHeight);
   
   // ------------------------------- LISTENERS --------------------------------
   
   /**
-   * Receives notifications from wallet2 in c++ and provides default handling.
+   * Receives notifications from jni c++.
    */
-  private class Wallet2Listener {
+  @SuppressWarnings("unused") // called directly from jni c++
+  private class JniCppListener {
+    
+    /**
+     * Enables or disables listening in the c++ wallet.
+     */
+    public void setIsEnabled(boolean isEnabled) {
+      listenerHandle = setListenerJni(isEnabled ? this : null);
+    }
     
     /**
      * Called when a new block is received.
@@ -661,7 +649,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
      * @param height is the height of the received block
      */
     public void onNewBlock(long height) {
-      //System.out.println("onNewBlock(" + height + ")");
+      
+      // create header  // TODO: build more complete header?
+      MoneroBlockHeader header = new MoneroBlockHeader();
+      header.setHeight(height);
+      
+      // notify external listeners
+      for (MoneroWalletListener listener : listeners) listener.onNewBlock(header);
     }
     
 //    /**
@@ -690,71 +684,35 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Receives notifications from wallet2 in c++ and repeats them to subscribed listeners.
+   * Wraps a sync listener as a general wallet listener.
    */
-  private class Wallet2Repeater extends Wallet2Listener {
+  private class SyncListenerWrapper extends MoneroWalletListener {
     
-    private LinkedHashSet<Wallet2Listener> listeners;
+    private MoneroSyncListener listener;
     
-    public Wallet2Repeater() {
-      this.listeners = new LinkedHashSet<Wallet2Listener>();
-    }
-    
-    private void addListener(Wallet2Listener listener) {
-      if (listeners.isEmpty()) listenerHandle = setListenerJni(this);
-      listeners.add(listener);
-    }
-    
-    private void removeListener(Wallet2Listener listener) {
-      listeners.remove(listener);
-      if (listeners.isEmpty()) listenerHandle = setListenerJni(null);
-    }
-    
-    public LinkedHashSet<Wallet2Listener> getListeners() {
-      return listeners;
-    }
-    
-    public void onNewBlock(long height) {
-      for (Wallet2Listener listener : listeners) listener.onNewBlock(height);
-    }
-  }
-  
-  /**
-   * Notifies externally registered listeners of updates from wallet2 in c++.
-   */
-  private class ExternalListenerNotifier extends Wallet2Listener {
-    
-    private MoneroWalletListener listener;
-    
-    public ExternalListenerNotifier(MoneroWalletListener listener) {
+    public SyncListenerWrapper(MoneroSyncListener listener) {
       this.listener = listener;
     }
     
-    public MoneroWalletListener getListener() {
-      return listener;
-    }
-    
-    public void onNewBlock(long height) {
-      System.out.println("onNewBlock(" + height + ")");
-      //listener.onNewBlock(null);;
+    @Override
+    public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
+      listener.onSyncProgress(startHeight, numBlocksDone, numBlocksTotal, percentDone, message);
     }
   }
   
   /**
-   * Notifies a sync listener of sync updates from wallet2 in c++.
+   * Listens for new blocks in order to notify wallet listeners of sync updates.
    */
-  private class SyncNotifier extends Wallet2Listener {
+  private class SyncNotifier extends MoneroWalletListener {
     
     private long startHeight;
     private long numBlocksTotal;
-    private MoneroSyncListener listener;
     
-    public SyncNotifier(long startHeight, long endHeight, MoneroSyncListener listener) {
+    public SyncNotifier(long startHeight, long endHeight) {
       this.startHeight = startHeight;
       this.numBlocksTotal = endHeight - startHeight + 1;
-      this.listener = listener;
     }
-
+  
     // update the sync end height as blocks are added to the chain to report accurate progress
     public void setEndHeight(long endHeight) {
       this.numBlocksTotal = endHeight - startHeight + 1;
@@ -762,25 +720,31 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     public void onStart() {
       if (numBlocksTotal <= 0) return;  // don't notify if no blocks to process
-      listener.onSyncProgress(startHeight, 0, numBlocksTotal, 0, "Synchronizing");
+      
+      // notify external listeners
+      for (MoneroWalletListener listener : listeners) {
+        listener.onSyncProgress(startHeight, 0, numBlocksTotal, 0, "Synchronizing");
+      }
     }
     
     @Override
-    public void onNewBlock(long height) {
+    public void onNewBlock(MoneroBlockHeader header) {
       
       // ignore if block is not applicable to wallet
-      if (height < startHeight) return;
-
+      if (header.getHeight() < startHeight) return;
+  
       // update num blocks total if this block exceeds original end height (i.e. block added to chain)
-      if (height > startHeight + numBlocksTotal - 1) numBlocksTotal = height - startHeight + 1;
+      if (header.getHeight() > startHeight + numBlocksTotal - 1) numBlocksTotal = header.getHeight() - startHeight + 1;
       
       // prepare notification params
-      long numBlocksDone = height - startHeight + 1;
+      long numBlocksDone = header.getHeight() - startHeight + 1;
       double percentDone = numBlocksDone / (double) numBlocksTotal;
       String message = "Synchronizing";
       
-      // notify listener
-      listener.onSyncProgress(startHeight, numBlocksDone, numBlocksTotal, percentDone, message);
+      // notify external listeners
+      for (MoneroWalletListener listener : listeners) {
+        listener.onSyncProgress(startHeight, numBlocksDone, numBlocksTotal, percentDone, message);
+      }
     }
   }
   
