@@ -1,8 +1,6 @@
 #include "MoneroWalletJni.h"
 #include "wallet/MoneroWallet.h"
 #include <iostream>
-#include "mnemonics/electrum-words.h"
-#include "mnemonics/english.h"
 
 using namespace std;
 using namespace monero;
@@ -179,31 +177,16 @@ Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *env, jclass cla
 }
 
 JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring mnemonic, jint networkType, jlong restoreHeight) {
+Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring jmnemonic, jint jnetworkType, jlong jrestoreHeight) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni" << endl;
-  throw runtime_error("Not implemented");
-//  const char* _mnemonic = env->GetStringUTFChars(mnemonic, NULL);
-//
-//  // validate mnemonic and get recovery key and language
-//  crypto::secret_key recoveryKey;
-//  std::string language;
-//  bool isValid = crypto::ElectrumWords::words_to_bytes(string(_mnemonic), recoveryKey, language);
-//  if (!isValid) throw runtime_error("Invalid mnemnic");	// TODO: need proper error handling
-//  if (language == crypto::ElectrumWords::old_language_name) language = Language::English().get_language_name();
-//
-//  // initialize wallet
-//  tools::wallet2* wallet = new tools::wallet2(static_cast<cryptonote::network_type>(networkType), 1, true);
-//  wallet->set_seed_language(language);
-//  wallet->generate(string(""), string(""), recoveryKey, true, false);
-//  wallet->set_refresh_from_block_height((uint64_t) restoreHeight);
-//
-////  // print the mnemonic
-////  epee::wipeable_string fetchedMnemonic;
-////  wallet->get_seed(fetchedMnemonic);
-////  cout << "Mnemonic: " << string(fetchedMnemonic.data(), fetchedMnemonic.size()) << endl;
-//
-//  env->ReleaseStringUTFChars(mnemonic, _mnemonic);
-//  return reinterpret_cast<jlong>(wallet);
+  const char* _mnemonic = env->GetStringUTFChars(jmnemonic, NULL);
+
+  // construct wallet
+  MoneroRpcConnection daemonConnection;
+  MoneroWallet* wallet = new MoneroWallet(string(_mnemonic), static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, (uint64_t) jrestoreHeight);
+
+  env->ReleaseStringUTFChars(jmnemonic, _mnemonic);
+  return reinterpret_cast<jlong>(wallet);
 }
 
 JNIEXPORT jlong JNICALL
