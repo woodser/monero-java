@@ -177,13 +177,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   public void addListener(MoneroWalletListener listener) {
     listeners.add(listener);
-    jniListener.setIsEnabled(true);
+    jniListener.setIsListening(true);
   }
   
   public void removeListener(MoneroWalletListener listener) {
     if (!listeners.contains(listener)) throw new MoneroException("Listener is not registered to wallet");
     listeners.remove(listener);
-    if (listeners.isEmpty()) jniListener.setIsEnabled(false);
+    if (listeners.isEmpty()) jniListener.setIsListening(false);
   }
   
   // TODO: can set restore height, start refresh, pause refresh, isSynchronized()
@@ -639,7 +639,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     /**
      * Enables or disables listening in the c++ wallet.
      */
-    public void setIsEnabled(boolean isEnabled) {
+    public void setIsListening(boolean isEnabled) {
       jniListenerHandle = setListenerJni(isEnabled ? this : null);
     }
     
