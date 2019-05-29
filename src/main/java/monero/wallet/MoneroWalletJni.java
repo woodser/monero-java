@@ -56,7 +56,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     return walletExistsJni(path);
   }
   
-  // --------------------------------- INSTANCE -------------------------------
+  // ------------------------------- INSTANCE ---------------------------------
   
   // instance variables
   private long jniWalletHandle;                 // memory address of wallet in c++; this variable is read directly by name in c++ // TODO: rename to cppWalletHandle, cppListenerHandle
