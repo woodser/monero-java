@@ -267,7 +267,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     // verify connection to daemon which informs sync end height
     MoneroDaemonRpc daemon = new MoneroDaemonRpc(getDaemonConnection());
-    assertTrue("No connection to daemon", daemon.getIsConnected()); // TODO: way to get end height from wallet2?  need to fallback if daemon not connected, let wallet report sync error
+    assertTrue("No connection to daemon", daemon.getIsConnected()); // TODO: replace with c++
     
     // wrap and register sync listener as wallet listener if given
     SyncListenerWrapper syncListenerWrapper = null;
