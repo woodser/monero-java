@@ -66,7 +66,7 @@ void detachJVM(JNIEnv *jenv, int envStat) {
 struct WalletJniListener : public MoneroWalletListener {
   jobject jlistener;
 
-  WalletJniListener(JNIEnv *env, jobject listener) {
+  WalletJniListener(JNIEnv* env, jobject listener) {
     jlistener = env->NewGlobalRef(listener);
   }
 
@@ -84,14 +84,47 @@ struct WalletJniListener : public MoneroWalletListener {
     JNIEnv *jenv;
     int envStat = attachJVM(&jenv);
     if (envStat == JNI_ERR) return;
-    jlong h = static_cast<jlong>(block.height);
-    jmethodID listenerClass_newBlock = jenv->GetMethodID(class_WalletListener, "onNewBlock", "(J)V");
-    jenv->CallVoidMethod(jlistener, listenerClass_newBlock, h);
+
+    jlong jheight = static_cast<jlong>(block.height);
+    jmethodID listenerClass_onNewBlock = jenv->GetMethodID(class_WalletListener, "onNewBlock", "(J)V");
+    jenv->CallVoidMethod(jlistener, listenerClass_onNewBlock, jheight);
     detachJVM(jenv, envStat);
   }
 
   virtual void onSyncProgress(uint64_t startHeight, uint64_t numBlocksDone, uint64_t numBlocksTotal, double percentDone, string message) {
-    throw runtime_error("WalletJniListener.onSyncProgress() not implemented");
+    cout << "MoneroWalletJni.onSyncProgress()" << endl;
+    //throw runtime_error("WalletJniListener.onSyncProgress() not implemented");
+
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+    JNIEnv *jenv;
+    int envStat = attachJVM(&jenv);
+    if (envStat == JNI_ERR) return;
+
+    cout << "Before prepping params" << endl;
+
+
+    jlong jstartHeight = static_cast<jlong>(startHeight);
+    jlong jnumBlocksDone = static_cast<jlong>(numBlocksDone);
+    jlong jnumBlocksTotal = static_cast<jlong>(numBlocksTotal);
+    jdouble jpercentDone = static_cast<jdouble>(percentDone);
+    jstring jmessage = jenv->NewStringUTF(message.c_str());
+
+    cout << "Done prepping params" << endl;
+
+//    jmethodID listenerClass_onSyncProgress = jenv->GetMethodID(class_WalletListener, "onSyncProgress2", "(JJ)V");
+//    cout << "2" << endl;
+//    jenv->CallVoidMethod(jlistener, listenerClass_onSyncProgress, jstartHeight, jnumBlocksDone);
+////    //jenv->CallVoidMethod(jlistener, listenerClass_onSyncProgress, jstartHeight, jnumBlocksDone, jnumBlocksTotal, jpercentDone, jmessage);
+//    cout << "3" << endl;
+//
+//    detachJVM(jenv, envStat);
+
+    jmethodID listenerClass_onSyncProgress = jenv->GetMethodID(class_WalletListener, "onSyncProgress", "(JJJD)V");
+    cout << "2" << endl;
+    jenv->CallVoidMethod(jlistener, listenerClass_onSyncProgress, jstartHeight, jnumBlocksDone, jnumBlocksTotal, jpercentDone);
+    cout << "3" << endl;
+    detachJVM(jenv, envStat);
   }
 };
 
