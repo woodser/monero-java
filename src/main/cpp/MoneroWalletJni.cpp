@@ -91,39 +91,23 @@ struct WalletJniListener : public MoneroWalletListener {
     detachJVM(jenv, envStat);
   }
 
-  virtual void onSyncProgress(uint64_t startHeight, uint64_t numBlocksDone, uint64_t numBlocksTotal, double percentDone, string message) {
-    cout << "MoneroWalletJni.onSyncProgress()" << endl;
-    //throw runtime_error("WalletJniListener.onSyncProgress() not implemented");
-
+  virtual void onSyncProgress(uint64_t startHeight, uint64_t numBlocksDone, uint64_t numBlocksTotal, double percentDone, string& message) {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *jenv;
     int envStat = attachJVM(&jenv);
     if (envStat == JNI_ERR) return;
 
-    cout << "Before prepping params" << endl;
-
-
+    // prepare callback arguments
     jlong jstartHeight = static_cast<jlong>(startHeight);
     jlong jnumBlocksDone = static_cast<jlong>(numBlocksDone);
     jlong jnumBlocksTotal = static_cast<jlong>(numBlocksTotal);
     jdouble jpercentDone = static_cast<jdouble>(percentDone);
     jstring jmessage = jenv->NewStringUTF(message.c_str());
 
-    cout << "Done prepping params" << endl;
-
-//    jmethodID listenerClass_onSyncProgress = jenv->GetMethodID(class_WalletListener, "onSyncProgress2", "(JJ)V");
-//    cout << "2" << endl;
-//    jenv->CallVoidMethod(jlistener, listenerClass_onSyncProgress, jstartHeight, jnumBlocksDone);
-////    //jenv->CallVoidMethod(jlistener, listenerClass_onSyncProgress, jstartHeight, jnumBlocksDone, jnumBlocksTotal, jpercentDone, jmessage);
-//    cout << "3" << endl;
-//
-//    detachJVM(jenv, envStat);
-
-    jmethodID listenerClass_onSyncProgress = jenv->GetMethodID(class_WalletListener, "onSyncProgress", "(JJJD)V");
-    cout << "2" << endl;
-    jenv->CallVoidMethod(jlistener, listenerClass_onSyncProgress, jstartHeight, jnumBlocksDone, jnumBlocksTotal, jpercentDone);
-    cout << "3" << endl;
+    jmethodID listenerClass_onSyncProgress = jenv->GetMethodID(class_WalletListener, "onSyncProgress", "(JJJDLjava/lang/String;)V");
+    jenv->CallVoidMethod(jlistener, listenerClass_onSyncProgress, jstartHeight, jnumBlocksDone, jnumBlocksTotal, jpercentDone, jmessage);
+    jenv->DeleteLocalRef(jmessage);
     detachJVM(jenv, envStat);
   }
 };
