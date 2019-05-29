@@ -658,10 +658,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       for (MoneroWalletListener listener : listeners) listener.onNewBlock(header);
     }
 
-//    public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
-//      System.out.println("Java received sync notification!");
-//    }
-    public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone) {
+    public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
       System.out.println("Java received sync notification!");
     }
     
