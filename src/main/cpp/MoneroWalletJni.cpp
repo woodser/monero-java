@@ -373,7 +373,7 @@ Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong 
 
   // sync wallet
   MoneroSyncResult result = wallet->sync(startHeight);
-  cout << "Done sycing.  Blocks fetched: " << result.numBlocksFetched << ", received money: " << result.receivedMoney << endl;
+  cout << "Done syncing.  Blocks fetched: " << result.numBlocksFetched << ", received money: " << result.receivedMoney << endl;
 
   // build and return results as Object[2]{(long) numBlocksFetched, (boolean) receivedMoney}
   jobjectArray results = env->NewObjectArray(2, env->FindClass("java/lang/Object"), nullptr);

@@ -10,7 +10,6 @@ import java.util.Set;
 
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroBlockHeader;
-import monero.daemon.model.MoneroDaemonListener;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
 import monero.rpc.MoneroRpcConnection;
@@ -270,30 +269,18 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     MoneroDaemonRpc daemon = new MoneroDaemonRpc(getDaemonConnection());
     assertTrue("No connection to daemon", daemon.getIsConnected()); // TODO: way to get end height from wallet2?  need to fallback if daemon not connected, let wallet report sync error
     
-    // wrap and register sync listener as normal wallet listener
-    SyncListenerWrapper syncListenerWrapper = new SyncListenerWrapper(listener);
-    addListener(syncListenerWrapper);
-    
-    // register listener which notifies all listeners of sync updates
-    SyncNotifier syncNotifier = new SyncNotifier(startHeight, getChainHeight() - 1);
-    addListener(syncNotifier);
-    
-    // listen for new blocks added to the chain in order to update sync height // TODO: no way to get this from wallet2?
-    MoneroDaemonListener syncRangeUpdater = new MoneroDaemonListener() {
-      public void onBlockHeader(MoneroBlockHeader header) {
-        syncNotifier.setEndHeight(header.getHeight());
-      }
-    };
-    daemon.addListener(syncRangeUpdater);
+    // wrap and register sync listener as wallet listener if given
+    SyncListenerWrapper syncListenerWrapper = null;
+    if (listener != null) {
+      syncListenerWrapper = new SyncListenerWrapper(listener);
+      addListener(syncListenerWrapper);
+    }
     
     // sync wallet
-    syncNotifier.onStart(); // notify sync listeners of 0% progress
     Object[] results = syncJni(startHeight);
     
-    // unregister listeners
-    removeListener(syncNotifier);
-    removeListener(syncListenerWrapper);
-    daemon.removeListener(syncRangeUpdater);
+    // unregister sync listener
+    if (syncListenerWrapper != null) removeListener(syncListenerWrapper);
     
     // return results
     return new MoneroSyncResult((long) results[0], (boolean) results[1]);
@@ -659,7 +646,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
 
     public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
-      System.out.println("Java received sync notification!");
+      for (MoneroWalletListener listener : listeners) {
+        listener.onSyncProgress(startHeight, numBlocksDone, numBlocksTotal, percentDone, message);
+      }
     }
     
 //    /**
@@ -701,54 +690,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     @Override
     public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
       listener.onSyncProgress(startHeight, numBlocksDone, numBlocksTotal, percentDone, message);
-    }
-  }
-  
-  /**
-   * Listens for new blocks in order to notify wallet listeners of sync updates.
-   */
-  private class SyncNotifier extends MoneroWalletListener {
-    
-    private long startHeight;
-    private long numBlocksTotal;
-    
-    public SyncNotifier(long startHeight, long endHeight) {
-      this.startHeight = startHeight;
-      this.numBlocksTotal = endHeight - startHeight + 1;
-    }
-  
-    // update the sync end height as blocks are added to the chain to report accurate progress
-    public void setEndHeight(long endHeight) {
-      this.numBlocksTotal = endHeight - startHeight + 1;
-    }
-    
-    public void onStart() {
-      if (numBlocksTotal <= 0) return;  // don't notify if no blocks to process
-      
-      // notify external listeners
-      for (MoneroWalletListener listener : listeners) {
-        listener.onSyncProgress(startHeight, 0, numBlocksTotal, 0, "Synchronizing");
-      }
-    }
-    
-    @Override
-    public void onNewBlock(MoneroBlockHeader header) {
-      
-      // ignore if block is not applicable to wallet
-      if (header.getHeight() < startHeight) return;
-  
-      // update num blocks total if this block exceeds original end height (i.e. block added to chain)
-      if (header.getHeight() > startHeight + numBlocksTotal - 1) numBlocksTotal = header.getHeight() - startHeight + 1;
-      
-      // prepare notification params
-      long numBlocksDone = header.getHeight() - startHeight + 1;
-      double percentDone = numBlocksDone / (double) numBlocksTotal;
-      String message = "Synchronizing";
-      
-      // notify external listeners
-      for (MoneroWalletListener listener : listeners) {
-        listener.onSyncProgress(startHeight, numBlocksDone, numBlocksTotal, percentDone, message);
-      }
     }
   }
   
