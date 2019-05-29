@@ -19,6 +19,7 @@ rps defaults for local vs remote
 ability deconstruct wallet from java which releases memory in c++
 distinguish rpc client being connected to a daemon and a daemon being connected to peers (just clearer documentation?)
 test block serialization/deserialization
+cppWalletHandle, cppListenerHandle string constants in MoneroWalletJni.cpp
 
 WALLET RPC ISSUES
 wallet2 network type auto detected when loaded from files on disk
