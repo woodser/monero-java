@@ -59,9 +59,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   // --------------------------------- INSTANCE -------------------------------
   
   // instance variables
-  private long walletHandle;    // memory address of corresponding c++ wallet; this variable is read directly by name in c++ // TODO: rename to cppWalletHandle, cppListenerHandle
-  private long listenerHandle;  // memory address of corresponding c++ listener; this variable is read directly by name in c++
-  private JniCppListener jniListener;  // listens for notifications from jni c++
+  private long jniWalletHandle;                 // memory address of wallet in c++; this variable is read directly by name in c++ // TODO: rename to cppWalletHandle, cppListenerHandle
+  private long jniListenerHandle;               // memory address of wallet listener in c++; this variable is read directly by name in c++
+  private WalletJniListener jniListener;        // receives notifications from jni c++
   private Set<MoneroWalletListener> listeners;  // externally subscribed wallet listeners
   
   // private static variables
@@ -84,8 +84,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public MoneroWalletJni(MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, String language) {
     if (networkType == null) networkType = MoneroNetworkType.MAINNET;
     if (language == null) language = DEFAULT_LANGUAGE;
-    if (daemonConnection == null) this.walletHandle = createWalletRandomJni(networkType.ordinal(), null, null, null, language);
-    else this.walletHandle = createWalletRandomJni(networkType.ordinal(), daemonConnection.getUri(), daemonConnection.getUsername(), daemonConnection.getPassword(), language);
+    if (daemonConnection == null) this.jniWalletHandle = createWalletRandomJni(networkType.ordinal(), null, null, null, language);
+    else this.jniWalletHandle = createWalletRandomJni(networkType.ordinal(), daemonConnection.getUri(), daemonConnection.getUsername(), daemonConnection.getPassword(), language);
     initCommon();
   }
   
@@ -100,7 +100,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public MoneroWalletJni(String mnemonic, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, Long restoreHeight) {
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (restoreHeight == null) restoreHeight = 0l;
-    this.walletHandle = createWalletFromMnemonicJni(mnemonic, networkType.ordinal(), restoreHeight);
+    this.jniWalletHandle = createWalletFromMnemonicJni(mnemonic, networkType.ordinal(), restoreHeight);
     if (daemonConnection != null) setDaemonConnection(daemonConnection);
     initCommon();
   }
@@ -120,7 +120,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (restoreHeight == null) restoreHeight = 0l;
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (language == null) language = DEFAULT_LANGUAGE;
-    this.walletHandle = createWalletFromKeysJni(address, viewKey, spendKey, networkType.ordinal(), restoreHeight, language);
+    this.jniWalletHandle = createWalletFromKeysJni(address, viewKey, spendKey, networkType.ordinal(), restoreHeight, language);
     if (daemonConnection != null) setDaemonConnection(daemonConnection);
     initCommon();
   }
@@ -135,12 +135,12 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public MoneroWalletJni(String path, String password, MoneroNetworkType networkType) {
     if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist: " + path);
     if (networkType == null) throw new MoneroException("Must provide a network type");
-    this.walletHandle = openWalletJni(path, password, networkType.ordinal());
+    this.jniWalletHandle = openWalletJni(path, password, networkType.ordinal());
     initCommon();
   }
   
   private void initCommon() {
-    this.jniListener = new JniCppListener();
+    this.jniListener = new WalletJniListener();
     this.listeners = new LinkedHashSet<MoneroWalletListener>();
   }
   
@@ -624,7 +624,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getUnlockedBalanceSubaddressJni(int accountIdx, int subaddressIdx);
   
-  private native long setListenerJni(JniCppListener listener);
+  private native long setListenerJni(WalletJniListener listener);
   
   private native Object[] syncJni(long startHeight);
   
@@ -634,13 +634,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * Receives notifications from jni c++.
    */
   @SuppressWarnings("unused") // called directly from jni c++
-  private class JniCppListener {
+  private class WalletJniListener {
     
     /**
      * Enables or disables listening in the c++ wallet.
      */
     public void setIsEnabled(boolean isEnabled) {
-      listenerHandle = setListenerJni(isEnabled ? this : null);
+      jniListenerHandle = setListenerJni(isEnabled ? this : null);
     }
     
     /**
