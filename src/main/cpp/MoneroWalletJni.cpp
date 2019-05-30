@@ -339,7 +339,12 @@ Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong 
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance, jboolean includeSubaddresses, jstring tag) {
   cout << "Java_monero_wallet_MoneroWalletJni_getAccountsJni" << endl;
-  string temp = string("not implemented");
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  list<MoneroAccount> accounts = wallet->getAccounts();
+  cout << "Retrieved accounts!" << endl;
+
+
+  string temp = string("<this json is not implemented yet>");
   return env->NewStringUTF(temp.c_str());
 }
 
