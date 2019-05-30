@@ -96,7 +96,7 @@ public interface MoneroWallet {
   /**
    * Get the blockchain's height.
    * 
-   * @return the block chain's height
+   * @return the blockchain's height
    */
   public long getChainHeight();
   
