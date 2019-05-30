@@ -6,5 +6,4 @@
 /build/
 **/pom.xml.versionsBackup
 **/logs
-/contrib/*
 /external-libs/*
