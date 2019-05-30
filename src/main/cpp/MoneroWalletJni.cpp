@@ -336,7 +336,12 @@ Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong 
 
 // isMultisigImportNeeded
 
-// getAccounts
+JNIEXPORT jstring JNICALL
+Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance, jboolean includeSubaddresses, jstring tag) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getAccountsJni" << endl;
+  string temp = string("not implemented");
+  return env->NewStringUTF(temp.c_str());
+}
 
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getAddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {

@@ -299,10 +299,12 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag) {
     
+    String accountsJson = getAccountsJni(includeSubaddresses, tag);
+    System.out.println("Retrieved accounts from JNI: " + accountsJson);
+    
 //    m_wallet->get_num_subaddress_accounts()
 //    m_wallet->get_num_subaddresses(accountIdx)  // returns 0 if account out of index
 //    m_wallet->balance_per_subaddress
-
     
     throw new RuntimeException("Not implemented");
   }
@@ -587,6 +589,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native int getNetworkTypeJni();
   
+  private native String getMnemonicJni();
+  
   private native String getLanguageJni();
   
   private native long getHeightJni();
@@ -595,7 +599,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native long getRestoreHeightJni();
   
-  private native String getMnemonicJni();
+  private native String getAccountsJni(boolean includeSubaddresses, String tag);
   
   private native String getAddressJni(int accountIdx, int subaddressIdx);
   
