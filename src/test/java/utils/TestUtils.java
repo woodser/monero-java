@@ -117,13 +117,18 @@ public class TestUtils {
       if (!MoneroWalletJni.walletExists(WALLET_JNI_PATH_1)) {
         MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
         walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, NETWORK_TYPE, daemonConnection, 30000l);
-        walletJni.save(WALLET_JNI_PATH_1, WALLET_JNI_PW); 
+        walletJni.sync();
+        //walletJni.save(WALLET_JNI_PATH_1, WALLET_JNI_PW); 
       }
       
       // otherwise open existing wallet and update daemon connection
       else {
         walletJni = new MoneroWalletJni(WALLET_JNI_PATH_1, WALLET_JNI_PW, MoneroNetworkType.STAGENET);
         walletJni.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
+        walletJni.sync((long) 0);
+        System.out.println("Wallet height: " + walletJni.getHeight());
+        System.out.println("Wallet balance: " + walletJni.getBalance());
+        System.out.println("Wallet address: " + walletJni.getAddress(0, 0));
       }
     }
     
