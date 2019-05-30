@@ -13,8 +13,8 @@ public class MoneroAccount {
   private String label;
   private BigInteger balance;
   private BigInteger unlockedBalance;
-  private List<MoneroSubaddress> subaddresses;
   private String tag;
+  private List<MoneroSubaddress> subaddresses;
   
   public MoneroAccount() {
     super();
@@ -70,6 +70,14 @@ public class MoneroAccount {
     this.unlockedBalance = unlockedBalance;
   }
   
+  public String getTag() {
+    return tag;
+  }
+
+  public void setTag(String tag) {
+    this.tag = tag;
+  }
+  
   public List<MoneroSubaddress> getSubaddresses() {
     return subaddresses;
   }
@@ -81,14 +89,6 @@ public class MoneroAccount {
         subaddress.setAccountIndex(index);
       }
     }
-  }
-
-  public String getTag() {
-    return tag;
-  }
-
-  public void setTag(String tag) {
-    this.tag = tag;
   }
 
   @Override
