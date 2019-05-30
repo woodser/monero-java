@@ -14,14 +14,14 @@ set(MONERO_CPP "submodules/monero-cpp-library")
 set(MONERO_CPP_SRC "${MONERO_CPP}/src")
 set(MONERO_CORE ${MONERO_CPP}/submodules/monero-core)
 set(MONERO_CORE_SRC "${MONERO_CORE}/src")
-set(BOOST ${MONERO_CPP}/contrib/boost-sdk)
+set(BOOST ${MONERO_CPP}/external/boost-sdk)
 
 # header includes
 include_directories("$ENV{JAVA_HOME}")
 include_directories("$ENV{JAVA_HOME}/include")
 include_directories("$ENV{JAVA_HOME}/include/darwin")
-include_directories("${MONERO_CPP}/contrib/libsodium/include/sodium")
-include_directories("${MONERO_CPP}/contrib/openssl-sdk/include")
+include_directories("${MONERO_CPP}/external/libsodium/include/sodium")
+include_directories("${MONERO_CPP}/external/openssl-sdk/include")
 include_directories("${MONERO_CPP_SRC}/")
 include_directories("${MONERO_CORE}/contrib/epee/include")
 include_directories("${MONERO_CORE}/external/")
@@ -62,7 +62,7 @@ message(STATUS EXTRA_LIBRARIES: ${EXTRA_LIBRARIES})
 #include_directories(${BOOST})
 add_library(monero-cpp SHARED IMPORTED)
 set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION
-        ${EXTERNAL_LIBS_DIR}/monero-cpp/libmonero-cpp.dylib)
+        ${EXTERNAL_LIBS_DIR}/libmonero-cpp.dylib)
 
 ###############################################
 # Build Java dynamic library (.dylib) for JNI
