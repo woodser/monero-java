@@ -211,7 +211,11 @@ Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass c
 //  return reinterpret_cast<jlong>(wallet);
 }
 
-// --------------------------------- JNI INSTANCE -----------------------------
+// ------------------------------ RESPONSE STRUCTS ----------------------------
+
+
+
+//  ------------------------------- JNI INSTANCE ------------------------------
 
 JNIEXPORT jobjectArray JNICALL
 Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni(JNIEnv *env, jobject instance) {
@@ -344,11 +348,15 @@ Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance,
 
   // print account info
   cout << "Retrieved " << accounts.size() << " accounts!" << endl;
+
   for (uint32_t accountIdx = 0; accountIdx < accounts.size(); accountIdx++) {
     MoneroAccount account = accounts.at(accountIdx);
     cout << "Account index: " << account.index << endl;
     cout << "Account label: " << account.label << endl;
     cout << "Account balance: " << account.balance << endl;
+
+    string json = epee::serialization::store_t_to_json(account);
+    cout << "Converted to JSON: " << json << endl;
   }
 
 
