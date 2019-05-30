@@ -340,8 +340,16 @@ JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance, jboolean includeSubaddresses, jstring tag) {
   cout << "Java_monero_wallet_MoneroWalletJni_getAccountsJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  list<MoneroAccount> accounts = wallet->getAccounts();
-  cout << "Retrieved accounts!" << endl;
+  vector<MoneroAccount> accounts = wallet->getAccounts();
+
+  // print account info
+  cout << "Retrieved " << accounts.size() << " accounts!" << endl;
+  for (uint32_t accountIdx = 0; accountIdx < accounts.size(); accountIdx++) {
+    MoneroAccount account = accounts.at(accountIdx);
+    cout << "Account index: " << account.index << endl;
+    cout << "Account label: " << account.label << endl;
+    cout << "Account balance: " << account.balance << endl;
+  }
 
 
   string temp = string("<this json is not implemented yet>");
@@ -393,7 +401,6 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceA
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
   cout << "Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni" << endl;
-  throw runtime_error("Not implemented");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
   uint64_t balance = wallet->getUnlockedBalance(accountIdx, subaddressIdx);
   return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
