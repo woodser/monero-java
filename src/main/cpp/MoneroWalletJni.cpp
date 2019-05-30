@@ -112,6 +112,15 @@ struct WalletJniListener : public MoneroWalletListener {
   }
 };
 
+// ------------------------------ RESPONSE STRUCTS ----------------------------
+
+struct GetAccountsResp {
+  vector<MoneroAccount> accounts;
+  BEGIN_KV_SERIALIZE_MAP()
+    KV_SERIALIZE(accounts)
+  END_KV_SERIALIZE_MAP()
+};
+
 // ----------------------------- COMMON HELPERS -------------------------------
 
 #ifdef __cplusplus
@@ -210,10 +219,6 @@ Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass c
 //  env->ReleaseStringUTFChars(spendKey, _spendKey);
 //  return reinterpret_cast<jlong>(wallet);
 }
-
-// ------------------------------ RESPONSE STRUCTS ----------------------------
-
-
 
 //  ------------------------------- JNI INSTANCE ------------------------------
 
@@ -344,24 +349,26 @@ JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance, jboolean includeSubaddresses, jstring tag) {
   cout << "Java_monero_wallet_MoneroWalletJni_getAccountsJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+
+  // get accounts
   vector<MoneroAccount> accounts = wallet->getAccounts();
 
-  // print account info
-  cout << "Retrieved " << accounts.size() << " accounts!" << endl;
+//  // print account info
+//  cout << "Retrieved " << accounts.size() << " accounts!" << endl;
+//  for (uint32_t accountIdx = 0; accountIdx < accounts.size(); accountIdx++) {
+//    MoneroAccount account = accounts.at(accountIdx);
+//    cout << "Account index: " << account.index << endl;
+//    cout << "Account label: " << account.label << endl;
+//    cout << "Account balance: " << account.balance << endl;
+//    string json = epee::serialization::store_t_to_json(account);
+//    cout << "Converted to JSON: " << json << endl;
+//  }
 
-  for (uint32_t accountIdx = 0; accountIdx < accounts.size(); accountIdx++) {
-    MoneroAccount account = accounts.at(accountIdx);
-    cout << "Account index: " << account.index << endl;
-    cout << "Account label: " << account.label << endl;
-    cout << "Account balance: " << account.balance << endl;
-
-    string json = epee::serialization::store_t_to_json(account);
-    cout << "Converted to JSON: " << json << endl;
-  }
-
-
-  string temp = string("<this json is not implemented yet>");
-  return env->NewStringUTF(temp.c_str());
+  // wrap and serialize accounts
+  GetAccountsResp resp;
+  resp.accounts = accounts;
+  string accountsJson = epee::serialization::store_t_to_json(resp);
+  return env->NewStringUTF(accountsJson.c_str());
 }
 
 JNIEXPORT jstring JNICALL

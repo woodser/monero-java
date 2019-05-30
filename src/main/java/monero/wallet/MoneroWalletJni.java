@@ -6,8 +6,10 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import common.utils.JsonUtils;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
@@ -298,15 +300,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag) {
-    
     String accountsJson = getAccountsJni(includeSubaddresses, tag);
-    System.out.println("Retrieved accounts from JNI: " + accountsJson);
-    
-//    m_wallet->get_num_subaddress_accounts()
-//    m_wallet->get_num_subaddresses(accountIdx)  // returns 0 if account out of index
-//    m_wallet->balance_per_subaddress
-    
-    throw new RuntimeException("Not implemented");
+    return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountsJson, GetAccountsResp.class).accounts;
   }
 
   @Override
@@ -696,6 +691,12 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       listener.onSyncProgress(startHeight, numBlocksDone, numBlocksTotal, percentDone, message);
     }
   }
+  
+  // ------------------------ RESPONSE DESERIALIZATION ------------------------
+  
+  static class GetAccountsResp {
+    public List<MoneroAccount> accounts;
+  };
   
   // ---------------------------- PRIVATE HELPERS -----------------------------
   

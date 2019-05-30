@@ -19,11 +19,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
 import common.types.Filter;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
@@ -64,15 +59,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   // logger
   private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class);
-  
-  // custom mapper to deserialize integers to BigIntegers
-  public static ObjectMapper MAPPER;
-  static {
-    MAPPER = new ObjectMapper();
-    MAPPER.setSerializationInclusion(Include.NON_NULL);
-    MAPPER.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
-    MAPPER.configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS, true);
-  }
   
   public MoneroWalletRpc(URI uri) {
     this(new MoneroRpcConnection(uri));
