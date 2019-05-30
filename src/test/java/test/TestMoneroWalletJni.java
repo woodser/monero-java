@@ -130,6 +130,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // test wallet's height before syncing
     assertEquals(1, wallet.getHeight());
     assertEquals(daemon.getHeight(), wallet.getRestoreHeight());
+    assertEquals(daemon.getHeight(), wallet.getChainHeight());
 
     // sync the wallet
     SyncProgressTester progressTester = new SyncProgressTester(wallet.getRestoreHeight(), wallet.getChainHeight() - 1);
