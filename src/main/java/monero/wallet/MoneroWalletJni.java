@@ -300,7 +300,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag) {
     String accountsJson = getAccountsJni(includeSubaddresses, tag);
-    return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountsJson, GetAccountsResp.class).accounts;
+    List<MoneroAccount> accounts = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountsJson, GetAccountsResp.class).accounts;
+    for (MoneroAccount account : accounts) sanitizeAccount(account);  // TODO: better way?
+    return accounts;
+  }
+  
+  private static void sanitizeAccount(MoneroAccount account) {
+    if ("".equals(account.getLabel())) account.setLabel(null);
   }
 
   @Override
