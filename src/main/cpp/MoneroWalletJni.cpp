@@ -427,6 +427,13 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceS
   return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
 }
 
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_closeJni(JNIEnv* env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_CloseJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  delete wallet;
+  wallet = nullptr;
+}
+
 #ifdef __cplusplus
 }
 #endif

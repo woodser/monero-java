@@ -208,10 +208,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Close the wallet.
+   * Close the wallet.  // TODO: calling methods after close will access released c++ resources
    */
   public void close() {
-    throw new RuntimeException("Not implemented");
+    closeJni();
   }
   
   // -------------------------- COMMON WALLET METHODS -------------------------
@@ -625,6 +625,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native long setListenerJni(WalletJniListener listener);
   
   private native Object[] syncJni(long startHeight);
+  
+  private native void closeJni();
   
   // ------------------------------- LISTENERS --------------------------------
   
