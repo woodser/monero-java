@@ -388,10 +388,16 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceA
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
   cout << "Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni" << endl;
-  throw runtime_error("Not implemented");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
   uint64_t balance = wallet->getUnlockedBalance(accountIdx, subaddressIdx);
   return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
+}
+
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_closeJni(JNIEnv* env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_CloseJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  delete wallet;
+  wallet = nullptr;
 }
 
 #ifdef __cplusplus
