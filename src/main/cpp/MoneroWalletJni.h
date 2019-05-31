@@ -70,6 +70,8 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceA
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni(JNIEnv *, jobject, jint, jint);
 
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_closeJni(JNIEnv *, jobject);
+
 #ifdef __cplusplus
 }
 #endif
