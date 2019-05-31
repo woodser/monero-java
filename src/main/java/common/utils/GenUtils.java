@@ -27,6 +27,7 @@ public class GenUtils {
    * @return the int array
    */
   public static int[] listToIntArray(List<Integer> list) {
+    if (list == null) return null;
     int[] ints = new int[list.size()];
     for (int i = 0; i < list.size(); i++) ints[i] = list.get(i);
     return ints;

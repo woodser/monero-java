@@ -121,6 +121,13 @@ struct GetAccountsResp {
   END_KV_SERIALIZE_MAP()
 };
 
+struct GetSubaddressesResp {
+  vector<MoneroSubaddress> subaddresses;
+  BEGIN_KV_SERIALIZE_MAP()
+    KV_SERIALIZE(subaddresses)
+  END_KV_SERIALIZE_MAP()
+};
+
 // ----------------------------- COMMON HELPERS -------------------------------
 
 #ifdef __cplusplus
@@ -375,6 +382,46 @@ Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance,
   string accountsJson = epee::serialization::store_t_to_json(resp);
   env->ReleaseStringUTFChars(jtag, _tag);
   return env->NewStringUTF(accountsJson.c_str());
+}
+
+JNIEXPORT jstring JNICALL
+Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(JNIEnv* env, jobject instance, jint accountIdx, jintArray jsubaddressIndices) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getSubaddressesJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+
+  // get subaddress indices
+  vector<uint32_t> subaddressIndices;
+  if (jsubaddressIndices != nullptr) {
+    jsize numSubaddressIndices = env->GetArrayLength(jsubaddressIndices);
+    jint* intArr = env->GetIntArrayElements(jsubaddressIndices, 0);
+    for (int subaddressIndicesIdx = 0; subaddressIndicesIdx < numSubaddressIndices; subaddressIndicesIdx++) {
+      subaddressIndices.push_back(intArr[subaddressIndicesIdx]);
+    }
+  }
+
+  // get subaddresses
+  vector<MoneroSubaddress> subaddresses = wallet->getSubaddresses(accountIdx, subaddressIndices);
+
+  //  // print account info
+  //  cout << "Retrieved " << accounts.size() << " accounts!" << endl;
+  //  for (uint32_t accountIdx = 0; accountIdx < accounts.size(); accountIdx++) {
+  //    MoneroAccount account = accounts.at(accountIdx);
+  //    cout << "Account index: " << account.index << endl;
+  //    cout << "Account label: " << account.label << endl;
+  //    cout << "Account balance: " << account.balance << endl;
+  //    cout << "Account subaddresses: " << account.subaddresses.size() << endl;
+  //
+  //    for (uint32_t subaddressIdx = 0; subaddressIdx < account.subaddresses.size(); subaddressIdx++) {
+  //	    string json = epee::serialization::store_t_to_json(account.subaddresses.at(subaddressIdx));
+  //	    cout << "Converted to JSON: " << json << endl;
+  //    }
+  //  }
+
+  // wrap and serialize subaddresses
+  GetSubaddressesResp resp;
+  resp.subaddresses = subaddresses;
+  string subaddressesJson = epee::serialization::store_t_to_json(resp);
+  return env->NewStringUTF(subaddressesJson.c_str());
 }
 
 JNIEXPORT jstring JNICALL
