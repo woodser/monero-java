@@ -346,12 +346,13 @@ Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong 
 // isMultisigImportNeeded
 
 JNIEXPORT jstring JNICALL
-Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance, jboolean includeSubaddresses, jstring tag) {
+Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance, jboolean includeSubaddresses, jstring jtag) {
   cout << "Java_monero_wallet_MoneroWalletJni_getAccountsJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _tag = jtag ? env->GetStringUTFChars(jtag, NULL) : nullptr;
 
   // get accounts
-  vector<MoneroAccount> accounts = wallet->getAccounts();
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  vector<MoneroAccount> accounts = wallet->getAccounts(includeSubaddresses, _tag ? string(_tag) : "");
 
 //  // print account info
 //  cout << "Retrieved " << accounts.size() << " accounts!" << endl;
@@ -360,14 +361,19 @@ Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance,
 //    cout << "Account index: " << account.index << endl;
 //    cout << "Account label: " << account.label << endl;
 //    cout << "Account balance: " << account.balance << endl;
-//    string json = epee::serialization::store_t_to_json(account);
-//    cout << "Converted to JSON: " << json << endl;
+//    cout << "Account subaddresses: " << account.subaddresses.size() << endl;
+//
+//    for (uint32_t subaddressIdx = 0; subaddressIdx < account.subaddresses.size(); subaddressIdx++) {
+//	    string json = epee::serialization::store_t_to_json(account.subaddresses.at(subaddressIdx));
+//	    cout << "Converted to JSON: " << json << endl;
+//    }
 //  }
 
   // wrap and serialize accounts
   GetAccountsResp resp;
   resp.accounts = accounts;
   string accountsJson = epee::serialization::store_t_to_json(resp);
+  env->ReleaseStringUTFChars(jtag, _tag);
   return env->NewStringUTF(accountsJson.c_str());
 }
 
