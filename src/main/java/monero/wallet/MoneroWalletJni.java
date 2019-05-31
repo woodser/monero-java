@@ -8,6 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import common.utils.GenUtils;
 import common.utils.JsonUtils;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroBlockHeader;
@@ -305,17 +306,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     return accounts;
   }
   
-  private static void sanitizeAccount(MoneroAccount account) {
-    if ("".equals(account.getLabel())) account.setLabel(null);
-    if (account.getSubaddresses() != null) {
-      for (MoneroSubaddress subaddress : account.getSubaddresses()) sanitizeSubaddress(subaddress);
-    }
-  }
-  
-  private static void sanitizeSubaddress(MoneroSubaddress subaddress) {
-    if ("".equals(subaddress.getLabel())) subaddress.setLabel(null);
-  }
-
   @Override
   public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses) {
     throw new RuntimeException("Not implemented");
@@ -328,7 +318,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroSubaddress> getSubaddresses(int accountIdx, List<Integer> subaddressIndices) {
-    throw new RuntimeException("Not implemented");
+    String subaddressesJson = getSubaddressesJni(accountIdx, GenUtils.listToIntArray(subaddressIndices));
+    List<MoneroSubaddress> subaddresses = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressesJson, GetSubaddressesResp.class).subaddresses;
+    for (MoneroSubaddress subaddress : subaddresses) sanitizeSubaddress(subaddress);  // TODO: better way?
+    return subaddresses;
   }
 
   @Override
@@ -608,6 +601,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getAccountsJni(boolean includeSubaddresses, String tag);
   
+  private native String getSubaddressesJni(int accountIdx, int[] subaddressIndices);
+  
   private native String getAddressJni(int accountIdx, int subaddressIdx);
   
   private native String getBalanceWalletJni();
@@ -712,6 +707,20 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     public List<MoneroAccount> accounts;
   };
   
+  static class GetSubaddressesResp {
+    public List<MoneroSubaddress> subaddresses;
+  };
+  
   // ---------------------------- PRIVATE HELPERS -----------------------------
   
+  private static void sanitizeAccount(MoneroAccount account) {
+    if ("".equals(account.getLabel())) account.setLabel(null);
+    if (account.getSubaddresses() != null) {
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) sanitizeSubaddress(subaddress);
+    }
+  }
+  
+  private static void sanitizeSubaddress(MoneroSubaddress subaddress) {
+    if ("".equals(subaddress.getLabel())) subaddress.setLabel(null);
+  }
 }
