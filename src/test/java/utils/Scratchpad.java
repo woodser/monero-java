@@ -4,6 +4,7 @@ import java.util.List;
 
 import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWalletJni;
+import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroTransfer;
 
@@ -58,5 +59,7 @@ public class Scratchpad {
     System.out.println("Wallet seed: " + walletJni.getMnemonic());
     System.out.println("Wallet address: " + walletJni.getPrimaryAddress());
     System.out.println("Wallet height: " + walletJni.getHeight());
+    List<MoneroAccount> accounts = walletJni.getAccounts();
+    System.out.println("Wallet has " + accounts.size() + " accounts");
   }
 }
