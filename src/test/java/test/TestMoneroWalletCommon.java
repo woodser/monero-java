@@ -2759,7 +2759,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // test account
     assertNotNull(account);
     assertTrue(account.getIndex() >= 0);
-    assertNotNull(account.getPrimaryAddress());
+    MoneroUtils.validateAddress(account.getPrimaryAddress());
     TestUtils.testUnsignedBigInteger(account.getBalance());
     TestUtils.testUnsignedBigInteger(account.getUnlockedBalance());
     assertTrue(account.getLabel() == null || !account.getLabel().isEmpty());
