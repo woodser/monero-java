@@ -27,6 +27,7 @@ distinguish rpc client being connected to a daemon and a daemon being connected 
 test block serialization/deserialization
 cppWalletHandle, cppListenerHandle string constants in MoneroWalletJni.cpp
 broken test wallet is synced but no balance or accounts
+new wallet() without connection but restoreHeight is checkpointed; where is that data cached?
 
 WALLET RPC ISSUES
 wallet2 network type auto detected when loaded from files on disk
