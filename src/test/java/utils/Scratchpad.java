@@ -5,7 +5,6 @@ import java.util.List;
 import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroAccount;
-import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroTransfer;
 
 /**
@@ -42,13 +41,16 @@ public class Scratchpad {
 //    System.out.println(MoneroWalletJni.walletExists("asdf"));
     
     //walletJni = new MoneroWalletJni(MoneroNetworkType.STAGENET, null, "English");
-    MoneroWalletJni walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpcConnection(), 300000l);
-    walletJni.sync(new MoneroSyncListener() {
-      @Override
-      public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
-        if (numBlocksDone % 10000 == 0 || percentDone > .999) System.out.println("onSyncProgress(" + startHeight + ", " + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
-      }
-    });
+//    MoneroWalletJni walletJni = new MoneroWalletJni(TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpcConnection(), 300000l);
+//    walletJni.sync(new MoneroSyncListener() {
+//      @Override
+//      public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
+//        if (numBlocksDone % 10000 == 0 || percentDone > .999) System.out.println("onSyncProgress(" + startHeight + ", " + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
+//      }
+//    });
+    
+    
+    MoneroWalletJni walletJni = new MoneroWalletJni("./test_wallets/test_wallet_1", TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
 
     System.out.println("Wallet balance: " + walletJni.getBalance());
     System.out.println("Account 0 balance: " + walletJni.getBalance(0));
