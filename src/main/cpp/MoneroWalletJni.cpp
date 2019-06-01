@@ -474,9 +474,24 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceS
   return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
 }
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, jobject instance, jstring path, jstring password) {
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, jobject instance, jstring jpath, jstring jpassword) {
   cout << "Java_monero_wallet_MoneroWalletJni_saveJni(path, password)" << endl;
-  throw runtime_error("Not implemented");
+  const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
+  const char* _password = jpath ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
+
+  // attempt to save, return error if applicable
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  try {
+    wallet->save(string(_path ? _path : ""), string(_password ? _password : ""));
+  } catch (runtime_error& e) {
+    cout << "Caught error saving!!!" << endl;	    // TODO
+    throw e;
+  }
+
+  env->ReleaseStringUTFChars(jpath, _path);
+  env->ReleaseStringUTFChars(jpassword, _password);
+  string temp = "";
+  return env->NewStringUTF(temp.c_str());
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_closeJni(JNIEnv* env, jobject instance) {
