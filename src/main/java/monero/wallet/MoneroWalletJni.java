@@ -135,7 +135,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param networkType is the wallet's network type
    */
   public MoneroWalletJni(String path, String password, MoneroNetworkType networkType) {
-    if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist: " + path);
+    if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist at path: " + path);
     if (networkType == null) throw new MoneroException("Must provide a network type");
     this.jniWalletHandle = openWalletJni(path, password, networkType.ordinal());
     initCommon();
