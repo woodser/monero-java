@@ -217,7 +217,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // create unique path for new test wallet
-    String path = "test_wallets/test_wallet_" + UUID.randomUUID().toString();
+    String path = TestUtils.TEST_WALLETS_DIR + "/test_wallet_" + UUID.randomUUID().toString();
     
     // wallet does not exist
     assertFalse(MoneroWalletJni.walletExists(path));
@@ -241,15 +241,16 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // attempt to save wallet without a path which hasn't been saved before
     try {
       walletMemory.save();
-      fail("Wallet has not been previously saved so no path exists");
+      fail("Must specify path to save wallet because wallet has not been previously saved");
     } catch (MoneroException e) {
-      assertEquals("Must specify a path to save wallet to", e.getMessage());
+      assertEquals("Must specify path to save wallet because wallet has not been previously saved", e.getMessage());
     }
     
     // save wallet to test_wallets directory
-    walletMemory.save(TestUtils.TEST_WALLETS_DIR, TestUtils.WALLET_JNI_PW);
+    walletMemory.save(path, TestUtils.WALLET_JNI_PW);
     
     // read wallet saved to disk
+    System.out.println("Attempting to read at path: " + path);
     MoneroWalletJni walletDisk1 = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
     testJniWalletEquality(walletMemory, walletDisk1);
     

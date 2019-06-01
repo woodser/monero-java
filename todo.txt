@@ -27,12 +27,8 @@ distinguish rpc client being connected to a daemon and a daemon being connected 
 test block serialization/deserialization
 cppWalletHandle, cppListenerHandle string constants in MoneroWalletJni.cpp
 broken test wallet is synced but no balance or accounts
-new wallet() without connection but restoreHeight is checkpointed; where is that data cached?
 
 WALLET RPC ISSUES
-why delete old wallet files on store_to? seems dangerous
-store() is not throwing error even if never saved before?
-
 wallet2 network type auto detected when loaded from files on disk
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
 add all_accounts to incoming_transfers, would be huge time saver
@@ -47,6 +43,10 @@ Marking output 18666(<9cd46fd977f2d8f6112cc87592677cbd76801b318c6e607dd31b9a25dd
 cannot send: -4: Known ring does not include the spent output: 1255232 (this fixed itself, not sure how)
 file issue to get received timestamp for unconfirmed wallet txs if wanted
 No message store file found: /Applications/190322-monero-master//test_wallet_1.mms
+store()/store_to() does not generate cache file if wallet initially generated with empty strings
+store() does nothing if no name previously set, throw exception instead?
+store_to() deletes old files seems dangerous, could make .new temp file only happen if path is the same
+new wallet() without connection but restoreHeight is checkpointed; where is that data cached?
 
 14.1.0 RELEASE
 wallet.getLanguage() api even if rpc doesn't supported

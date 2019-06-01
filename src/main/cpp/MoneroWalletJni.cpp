@@ -479,19 +479,18 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env
   const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
   const char* _password = jpath ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
 
-  // attempt to save, return error if applicable
+  // attempt to save, return error if one happens
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
   try {
     wallet->save(string(_path ? _path : ""), string(_password ? _password : ""));
   } catch (runtime_error& e) {
-    cout << "Caught error saving!!!" << endl;	    // TODO
-    throw e;
+    string msg = e.what();
+    return env->NewStringUTF(msg.c_str());
   }
 
   env->ReleaseStringUTFChars(jpath, _path);
   env->ReleaseStringUTFChars(jpassword, _password);
-  string temp = "";
-  return env->NewStringUTF(temp.c_str());
+  return nullptr;
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_closeJni(JNIEnv* env, jobject instance) {
