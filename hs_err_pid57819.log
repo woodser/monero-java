@@ -1,7 +1,7 @@
 #
 # A fatal error has been detected by the Java Runtime Environment:
 #
-#  SIGSEGV (0xb) at pc=0x00007fff71ef8712, pid=53447, tid=10499
+#  SIGSEGV (0xb) at pc=0x00007fff71ef8712, pid=57819, tid=6147
 #
 # JRE version: Java(TM) SE Runtime Environment (8.0_66-b17) (build 1.8.0_66-b17)
 # Java VM: Java HotSpot(TM) 64-Bit Server VM (25.66-b17 mixed mode bsd-amd64 compressed oops)
@@ -18,51 +18,51 @@
 
 ---------------  T H R E A D  ---------------
 
-Current thread (0x00007fb330004000):  JavaThread "main" [_thread_in_native, id=10499, stack(0x000070000f15e000,0x000070000f25e000)]
+Current thread (0x00007fb375001800):  JavaThread "main" [_thread_in_native, id=6147, stack(0x000070000b078000,0x000070000b178000)]
 
 siginfo: si_signo: 11 (SIGSEGV), si_code: 1 (SEGV_MAPERR), si_addr: 0x0000000000000000
 
 Registers:
-RAX=0x000070000f25c5b0, RBX=0x000000011e346590, RCX=0x0000000000000000, RDX=0x0000000000000000
-RSP=0x000070000f25c4f0, RBP=0x000070000f25c4f0, RSI=0x0000000000000000, RDI=0x0000000000000000
-R8 =0x0000000000000000, R9 =0x00007fffa4d0ff78, R10=0x0000000000000000, R11=0x00007fffa4d0ff70
-R12=0x0000000000000000, R13=0x000000011e346590, R14=0x000070000f25c728, R15=0x00007fb330004000
+RAX=0x000070000b176630, RBX=0x00000001073cb770, RCX=0x0000000000000000, RDX=0x0000000000000000
+RSP=0x000070000b176540, RBP=0x000070000b176540, RSI=0x0000000000000000, RDI=0x0000000000000000
+R8 =0x000000000000001e, R9 =0x000000076dc31c18, R10=0x0000000000000012, R11=0x0000000104ede760
+R12=0x0000000000000000, R13=0x00000001073cb770, R14=0x000070000b176720, R15=0x00007fb375001800
 RIP=0x00007fff71ef8712, EFLAGS=0x0000000000010246, ERR=0x0000000000000004
   TRAPNO=0x000000000000000e
 
-Top of Stack: (sp=0x000070000f25c4f0)
-0x000070000f25c4f0:   000070000f25c510 0000000121bcb825
-0x000070000f25c500:   000000011e346590 0000000000000000
-0x000070000f25c510:   000070000f25c540 0000000121e0bcc1
-0x000070000f25c520:   0000000000000000 000070000f25c5b0
-0x000070000f25c530:   0000000000000000 000070000f25c5b0
-0x000070000f25c540:   000070000f25c560 0000000121df3bdd
-0x000070000f25c550:   0000000000000000 000070000f25c5b0
-0x000070000f25c560:   000070000f25c5d0 0000000121df6bc5
-0x000070000f25c570:   000070000f25c5b0 0000000000000042
-0x000070000f25c580:   00007fffa445b770 000070000f25c650
-0x000070000f25c590:   00007fb32fd38910 000070000f25c650
-0x000070000f25c5a0:   0000000104814310 0000000000000042
-0x000070000f25c5b0:   0000000000000000 0000000000000000
-0x000070000f25c5c0:   0000000000000000 00007fb32fd38910
-0x000070000f25c5d0:   000070000f25c690 0000000121bbfae4
-0x000070000f25c5e0:   000070000f25c630 0000000000000008
-0x000070000f25c5f0:   000070000f25c610 00000001041f11f6
-0x000070000f25c600:   000070000f25c650 00007fffa445b770
-0x000070000f25c610:   000070000f25c680 00000001042e31a7
-0x000070000f25c620:   00007fb330004000 00007fb330004000
-0x000070000f25c630:   00007fb330004000 000000011e346590
-0x000070000f25c640:   00007fb330004000 000000011e346590
-0x000070000f25c650:   00007fb330004000 000000011e346590
-0x000070000f25c660:   000000011e346590 00007fb32fd38910
-0x000070000f25c670:   0000000000000000 000070000f25c728
-0x000070000f25c680:   000070000f25c728 00007fb3300041f8
-0x000070000f25c690:   000070000f25c6f8 000000010ee90954
-0x000070000f25c6a0:   000070000f25c6f8 000000010ee906e7
-0x000070000f25c6b0:   000000010ee906a2 000070000f25c6b8
-0x000070000f25c6c0:   000000011e346590 000070000f25c728
-0x000070000f25c6d0:   000000011e4773a8 0000000000000000
-0x000070000f25c6e0:   000000011e346590 0000000000000000 
+Top of Stack: (sp=0x000070000b176540)
+0x000070000b176540:   000070000b176560 000000010b201e75
+0x000070000b176550:   000070000b176720 0000000000000000
+0x000070000b176560:   000070000b176590 000000010b2025a1
+0x000070000b176570:   0000000000000000 000070000b176630
+0x000070000b176580:   0000000000000000 000070000b176630
+0x000070000b176590:   000070000b1765b0 000000010b1f2c3d
+0x000070000b1765a0:   0000000000000000 000070000b176630
+0x000070000b1765b0:   000070000b176680 000000010b1f630f
+0x000070000b1765c0:   000070000b176600 00000001073cb770
+0x000070000b1765d0:   000070000b176620 0000000000000008
+0x000070000b1765e0:   00007fb37bd0e6f0 0000000000000000
+0x000070000b1765f0:   0000000000000000 00007fffa445b770
+0x000070000b176600:   000070000b176670 00000001048e31a7
+0x000070000b176610:   00007fb375001800 00007fb375001800
+0x000070000b176620:   00007fb375001800 00000001073cb770
+0x000070000b176630:   0000000000000000 0000000000000000
+0x000070000b176640:   0000000000000000 00007fb37bd0e6f0
+0x000070000b176650:   0000000000000000 0000000000000000
+0x000070000b176660:   0000000000000000 0000000000000000
+0x000070000b176670:   000070000b176720 00007fb3750019f8
+0x000070000b176680:   000070000b1766f0 000000010c4a9954
+0x000070000b176690:   000070000b1766f0 000000010c4a96d9
+0x000070000b1766a0:   000000010c4b5563 000000010c4a96a2
+0x000070000b1766b0:   000070000b1766b0 00000001073cb770
+0x000070000b1766c0:   000070000b176720 000000010753d7f8
+0x000070000b1766d0:   0000000000000000 00000001073cb770
+0x000070000b1766e0:   0000000000000000 000070000b176710
+0x000070000b1766f0:   000070000b176768 000000010c49b9d0
+0x000070000b176700:   0000000000000000 000000010c4a357b
+0x000070000b176710:   0000000000000000 0000000000000000
+0x000070000b176720:   000000076dc31c18 000070000b176728
+0x000070000b176730:   00000001073c7613 000070000b176790 
 
 Instructions: (pc=0x00007fff71ef8712)
 0x00007fff71ef86f2:   90 90 90 90 90 90 90 90 90 90 90 90 90 90 55 48
@@ -72,41 +72,42 @@ Instructions: (pc=0x00007fff71ef8712)
 
 Register to memory mapping:
 
-RAX=0x000070000f25c5b0 is pointing into the stack for thread: 0x00007fb330004000
-RBX={method} {0x000000011e346590} 'getAccountsJni' '(ZLjava/lang/String;)Ljava/lang/String;' in 'monero/wallet/MoneroWalletJni'
+RAX=0x000070000b176630 is pointing into the stack for thread: 0x00007fb375001800
+RBX={method} {0x00000001073cb770} 'saveJni' '(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;' in 'monero/wallet/MoneroWalletJni'
 RCX=0x0000000000000000 is an unknown value
 RDX=0x0000000000000000 is an unknown value
-RSP=0x000070000f25c4f0 is pointing into the stack for thread: 0x00007fb330004000
-RBP=0x000070000f25c4f0 is pointing into the stack for thread: 0x00007fb330004000
+RSP=0x000070000b176540 is pointing into the stack for thread: 0x00007fb375001800
+RBP=0x000070000b176540 is pointing into the stack for thread: 0x00007fb375001800
 RSI=0x0000000000000000 is an unknown value
 RDI=0x0000000000000000 is an unknown value
-R8 =0x0000000000000000 is an unknown value
-R9 =0x00007fffa4d0ff78: __sFX+0xf8 in /usr/lib/system/libsystem_c.dylib at 0x00007fff71d60000
-R10=0x0000000000000000 is an unknown value
-R11=0x00007fffa4d0ff70: __sFX+0xf0 in /usr/lib/system/libsystem_c.dylib at 0x00007fff71d60000
+R8 =0x000000000000001e is an unknown value
+R9 =0x000000076dc31c18 is an oop
+monero.wallet.MoneroWalletJni 
+ - klass: 'monero/wallet/MoneroWalletJni'
+R10=0x0000000000000012 is an unknown value
+R11=0x0000000104ede760: _ZN20SafepointSynchronize18_safepoint_counterE+0 in /Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/jre/lib/server/libjvm.dylib at 0x0000000104600000
 R12=0x0000000000000000 is an unknown value
-R13={method} {0x000000011e346590} 'getAccountsJni' '(ZLjava/lang/String;)Ljava/lang/String;' in 'monero/wallet/MoneroWalletJni'
-R14=0x000070000f25c728 is pointing into the stack for thread: 0x00007fb330004000
-R15=0x00007fb330004000 is a thread
+R13={method} {0x00000001073cb770} 'saveJni' '(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;' in 'monero/wallet/MoneroWalletJni'
+R14=0x000070000b176720 is pointing into the stack for thread: 0x00007fb375001800
+R15=0x00007fb375001800 is a thread
 
 
-Stack: [0x000070000f15e000,0x000070000f25e000],  sp=0x000070000f25c4f0,  free space=1017k
+Stack: [0x000070000b078000,0x000070000b178000],  sp=0x000070000b176540,  free space=1017k
 Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
 C  [libsystem_platform.dylib+0x1712]  _platform_strlen+0x12
-C  [libmonero-java.dylib+0x11825]  std::__1::char_traits<char>::length(char const*)+0x15
-C  [libmonero-cpp.dylib+0x1acc1]  std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::basic_string<std::nullptr_t>(char const*)+0x31
-C  [libmonero-cpp.dylib+0x2bdd]  std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::basic_string<std::nullptr_t>(char const*)+0x1d
-C  [libmonero-cpp.dylib+0x5bc5]  monero::MoneroWallet::getAccounts() const+0x65
-C  [libmonero-java.dylib+0x5ae4]  Java_monero_wallet_MoneroWalletJni_getAccountsJni+0x74
-j  monero.wallet.MoneroWalletJni.getAccountsJni(ZLjava/lang/String;)Ljava/lang/String;+0
-j  monero.wallet.MoneroWalletJni.getAccounts(ZLjava/lang/String;)Ljava/util/List;+3
-j  monero.wallet.MoneroWalletDefault.getAccounts()Ljava/util/List;+3
-j  test.TestMoneroWalletCommon.testGetAccountsWithoutSubaddresses()V+8
+C  [libmonero-java.dylib+0x11e75]  _ZNSt3__111char_traitsIcE6lengthEPKc+0x15
+C  [libmonero-java.dylib+0x125a1]  _ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2IDnEEPKc+0x31
+C  [libmonero-java.dylib+0x2c3d]  _ZNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC1IDnEEPKc+0x1d
+C  [libmonero-java.dylib+0x630f]  Java_monero_wallet_MoneroWalletJni_saveJni+0x11f
+j  monero.wallet.MoneroWalletJni.saveJni(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;+0
+j  monero.wallet.MoneroWalletJni.save(Ljava/lang/String;Ljava/lang/String;)V+3
+j  monero.wallet.MoneroWalletJni.save()V+3
+j  test.TestMoneroWalletJni.testSave()V+128
 v  ~StubRoutines::call_stub
-V  [libjvm.dylib+0x2ea35e]  JavaCalls::call_helper(JavaValue*, methodHandle*, JavaCallArguments*, Thread*)+0x6ae
-V  [libjvm.dylib+0x4ca7e0]  Reflection::invoke(instanceKlassHandle, methodHandle, Handle, bool, objArrayHandle, BasicType, objArrayHandle, bool, Thread*)+0xe12
-V  [libjvm.dylib+0x4cad14]  Reflection::invoke_method(oopDesc*, Handle, objArrayHandle, Thread*)+0x16c
-V  [libjvm.dylib+0x342570]  JVM_InvokeMethod+0x166
+V  [libjvm.dylib+0x2ea35e]
+V  [libjvm.dylib+0x4ca7e0]
+V  [libjvm.dylib+0x4cad14]
+V  [libjvm.dylib+0x342570]
 j  sun.reflect.NativeMethodAccessorImpl.invoke0(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+0
 j  sun.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+100
 j  sun.reflect.DelegatingMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+6
@@ -132,9 +133,9 @@ j  org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(Lorg/eclipse/
 j  org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.run()V+70
 j  org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.main([Ljava/lang/String;)V+14
 v  ~StubRoutines::call_stub
-V  [libjvm.dylib+0x2ea35e]  JavaCalls::call_helper(JavaValue*, methodHandle*, JavaCallArguments*, Thread*)+0x6ae
-V  [libjvm.dylib+0x3210d0]  jni_invoke_static(JNIEnv_*, JavaValue*, _jobject*, JNICallType, _jmethodID*, JNI_ArgumentPusher*, Thread*)+0x1bf
-V  [libjvm.dylib+0x319e4a]  jni_CallStaticVoidMethod+0x15d
+V  [libjvm.dylib+0x2ea35e]
+V  [libjvm.dylib+0x3210d0]
+V  [libjvm.dylib+0x319e4a]
 C  [java+0x393e]  JavaMain+0x9b1
 C  [libsystem_pthread.dylib+0x32eb]  _pthread_body+0x7e
 C  [libsystem_pthread.dylib+0x6249]  _pthread_start+0x42
@@ -142,10 +143,10 @@ C  [libsystem_pthread.dylib+0x240d]  thread_start+0xd
 C  0x0000000000000000
 
 Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
-j  monero.wallet.MoneroWalletJni.getAccountsJni(ZLjava/lang/String;)Ljava/lang/String;+0
-j  monero.wallet.MoneroWalletJni.getAccounts(ZLjava/lang/String;)Ljava/util/List;+3
-j  monero.wallet.MoneroWalletDefault.getAccounts()Ljava/util/List;+3
-j  test.TestMoneroWalletCommon.testGetAccountsWithoutSubaddresses()V+8
+j  monero.wallet.MoneroWalletJni.saveJni(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;+0
+j  monero.wallet.MoneroWalletJni.save(Ljava/lang/String;Ljava/lang/String;)V+3
+j  monero.wallet.MoneroWalletJni.save()V+3
+j  test.TestMoneroWalletJni.testSave()V+128
 v  ~StubRoutines::call_stub
 j  sun.reflect.NativeMethodAccessorImpl.invoke0(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+0
 j  sun.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+100
@@ -176,98 +177,98 @@ v  ~StubRoutines::call_stub
 ---------------  P R O C E S S  ---------------
 
 Java Threads: ( => current thread )
-  0x00007fb330060000 JavaThread "ReaderThread" [_thread_in_native, id=21763, stack(0x0000700010497000,0x0000700010597000)]
-  0x00007fb333049000 JavaThread "Service Thread" daemon [_thread_blocked, id=15619, stack(0x0000700010291000,0x0000700010391000)]
-  0x00007fb330021800 JavaThread "C1 CompilerThread3" daemon [_thread_blocked, id=14339, stack(0x000070001018e000,0x000070001028e000)]
-  0x00007fb330020800 JavaThread "C2 CompilerThread2" daemon [_thread_blocked, id=14083, stack(0x000070001008b000,0x000070001018b000)]
-  0x00007fb33001e000 JavaThread "C2 CompilerThread1" daemon [_thread_blocked, id=13571, stack(0x000070000ff88000,0x0000700010088000)]
-  0x00007fb333026000 JavaThread "C2 CompilerThread0" daemon [_thread_blocked, id=16131, stack(0x000070000fe85000,0x000070000ff85000)]
-  0x00007fb333000800 JavaThread "Signal Dispatcher" daemon [_thread_blocked, id=16643, stack(0x000070000fd82000,0x000070000fe82000)]
-  0x00007fb33080d800 JavaThread "Finalizer" daemon [_thread_blocked, id=18435, stack(0x000070000fc7f000,0x000070000fd7f000)]
-  0x00007fb33080d000 JavaThread "Reference Handler" daemon [_thread_blocked, id=12035, stack(0x000070000fb7c000,0x000070000fc7c000)]
-=>0x00007fb330004000 JavaThread "main" [_thread_in_native, id=10499, stack(0x000070000f15e000,0x000070000f25e000)]
+  0x00007fb373059000 JavaThread "ReaderThread" [_thread_in_native, id=21763, stack(0x000070000c3b1000,0x000070000c4b1000)]
+  0x00007fb375081000 JavaThread "Service Thread" daemon [_thread_blocked, id=16131, stack(0x000070000c1ab000,0x000070000c2ab000)]
+  0x00007fb37383d800 JavaThread "C1 CompilerThread3" daemon [_thread_blocked, id=15107, stack(0x000070000c0a8000,0x000070000c1a8000)]
+  0x00007fb373003800 JavaThread "C2 CompilerThread2" daemon [_thread_blocked, id=16899, stack(0x000070000bfa5000,0x000070000c0a5000)]
+  0x00007fb375054800 JavaThread "C2 CompilerThread1" daemon [_thread_blocked, id=14595, stack(0x000070000bea2000,0x000070000bfa2000)]
+  0x00007fb373834800 JavaThread "C2 CompilerThread0" daemon [_thread_blocked, id=17155, stack(0x000070000bd9f000,0x000070000be9f000)]
+  0x00007fb373820800 JavaThread "Signal Dispatcher" daemon [_thread_blocked, id=17411, stack(0x000070000bc9c000,0x000070000bd9c000)]
+  0x00007fb375050800 JavaThread "Finalizer" daemon [_thread_blocked, id=12803, stack(0x000070000bb99000,0x000070000bc99000)]
+  0x00007fb37504f800 JavaThread "Reference Handler" daemon [_thread_blocked, id=19459, stack(0x000070000ba96000,0x000070000bb96000)]
+=>0x00007fb375001800 JavaThread "main" [_thread_in_native, id=6147, stack(0x000070000b078000,0x000070000b178000)]
 
 Other Threads:
-  0x00007fb33080a800 VMThread [stack: 0x000070000fa79000,0x000070000fb79000] [id=18947]
-  0x00007fb333051800 WatcherThread [stack: 0x0000700010394000,0x0000700010494000] [id=15363]
+  0x00007fb37504d000 VMThread [stack: 0x000070000b993000,0x000070000ba93000] [id=19715]
+  0x00007fb375092000 WatcherThread [stack: 0x000070000c2ae000,0x000070000c3ae000] [id=15619]
 
 VM state:not at safepoint (normal execution)
 
 VM Mutex/Monitor currently owned by a thread: None
 
 Heap:
- PSYoungGen      total 76288K, used 51121K [0x000000076ab00000, 0x0000000770000000, 0x00000007c0000000)
-  eden space 65536K, 78% used [0x000000076ab00000,0x000000076dcec468,0x000000076eb00000)
+ PSYoungGen      total 76288K, used 51139K [0x000000076ab00000, 0x0000000770000000, 0x00000007c0000000)
+  eden space 65536K, 78% used [0x000000076ab00000,0x000000076dcf0e90,0x000000076eb00000)
   from space 10752K, 0% used [0x000000076f580000,0x000000076f580000,0x0000000770000000)
   to   space 10752K, 0% used [0x000000076eb00000,0x000000076eb00000,0x000000076f580000)
  ParOldGen       total 175104K, used 0K [0x00000006c0000000, 0x00000006cab00000, 0x000000076ab00000)
   object space 175104K, 0% used [0x00000006c0000000,0x00000006c0000000,0x00000006cab00000)
- Metaspace       used 14127K, capacity 14338K, committed 14592K, reserved 1062912K
-  class space    used 1627K, capacity 1702K, committed 1792K, reserved 1048576K
+ Metaspace       used 14152K, capacity 14338K, committed 14592K, reserved 1062912K
+  class space    used 1628K, capacity 1702K, committed 1792K, reserved 1048576K
 
-Card table byte_map: [0x0000000105346000,0x0000000105b47000] byte_map_base: 0x0000000101d46000
+Card table byte_map: [0x0000000105998000,0x0000000106199000] byte_map_base: 0x0000000102398000
 
-Marking Bits: (ParMarkBitMap*) 0x00000001048dde20
- Begin Bits: [0x000000010609d000, 0x000000010a09d000)
- End Bits:   [0x000000010a09d000, 0x000000010e09d000)
+Marking Bits: (ParMarkBitMap*) 0x0000000104edde20
+ Begin Bits: [0x000000011b494000, 0x000000011f494000)
+ End Bits:   [0x000000011f494000, 0x0000000123494000)
 
-Polling page: 0x0000000102efc000
+Polling page: 0x00000001035ff000
 
-CodeCache: size=245760Kb used=3845Kb max_used=3857Kb free=241914Kb
- bounds [0x000000010ee7b000, 0x000000010f24b000, 0x000000011de7b000]
- total_blobs=1420 nmethods=1055 adapters=279
+CodeCache: size=245760Kb used=3824Kb max_used=3838Kb free=241935Kb
+ bounds [0x000000010c494000, 0x000000010c864000, 0x000000011b494000]
+ total_blobs=1423 nmethods=1058 adapters=279
  compilation: enabled
 
 Compilation events (10 events):
-Event: 4.618 Thread 0x00007fb330021800 nmethod 1050 0x000000010f234650 code [0x000000010f2347a0, 0x000000010f2348b0]
-Event: 4.618 Thread 0x00007fb330021800 1051       3       com.fasterxml.jackson.databind.introspect.Annotated::<init> (5 bytes)
-Event: 4.618 Thread 0x00007fb330021800 nmethod 1051 0x000000010f23c990 code [0x000000010f23cb00, 0x000000010f23ccb0]
-Event: 4.838 Thread 0x00007fb330021800 1052       3       java.nio.CharBuffer::arrayOffset (35 bytes)
-Event: 4.839 Thread 0x00007fb330021800 nmethod 1052 0x000000010f23cd50 code [0x000000010f23cee0, 0x000000010f23d1f8]
-Event: 4.840 Thread 0x00007fb330021800 1053       3       java.util.HashMap::<init> (8 bytes)
-Event: 4.840 Thread 0x00007fb330021800 nmethod 1053 0x000000010f23d350 code [0x000000010f23d4e0, 0x000000010f23d668]
-Event: 4.841 Thread 0x00007fb333026000 1054 %     4       sun.security.provider.SHA::implCompress @ 364 (491 bytes)
-Event: 4.841 Thread 0x00007fb330021800 1055       3       sun.security.x509.X509CertImpl::getEncodedInternal (22 bytes)
-Event: 4.841 Thread 0x00007fb330021800 nmethod 1055 0x000000010f23d710 code [0x000000010f23d880, 0x000000010f23daa8]
+Event: 3.458 Thread 0x00007fb37383d800 1055       1       com.fasterxml.jackson.databind.introspect.AnnotatedParameter::getOwner (5 bytes)
+Event: 3.458 Thread 0x00007fb37383d800 nmethod 1055 0x000000010c848a50 code [0x000000010c848ba0, 0x000000010c848cb0]
+Event: 3.757 Thread 0x00007fb37383d800 1056       3       java.nio.CharBuffer::arrayOffset (35 bytes)
+Event: 3.758 Thread 0x00007fb37383d800 nmethod 1056 0x000000010c850550 code [0x000000010c8506e0, 0x000000010c8509f8]
+Event: 3.759 Thread 0x00007fb37383d800 1057       3       java.util.HashMap::<init> (8 bytes)
+Event: 3.759 Thread 0x00007fb37383d800 nmethod 1057 0x000000010c850b50 code [0x000000010c850ce0, 0x000000010c850e68]
+Event: 3.760 Thread 0x00007fb37383d800 1058       3       sun.security.x509.X509CertImpl::getEncodedInternal (22 bytes)
+Event: 3.760 Thread 0x00007fb37383d800 nmethod 1058 0x000000010c850f10 code [0x000000010c851080, 0x000000010c8512a8]
+Event: 3.760 Thread 0x00007fb373003800 1059 %     4       sun.security.provider.SHA::implCompress @ 12 (491 bytes)
+Event: 3.773 Thread 0x00007fb373003800 nmethod 1059% 0x000000010c854b10 code [0x000000010c854c80, 0x000000010c8557b8]
 
 GC Heap History (0 events):
 No events
 
 Deoptimization events (10 events):
-Event: 2.999 Thread 0x00007fb330004000 Uncommon trap: reason=bimorphic action=maybe_recompile pc=0x000000010f079c34 method=java.util.regex.Pattern$CharProperty.match(Ljava/util/regex/Matcher;ILjava/lang/CharSequence;)Z @ 18
-Event: 2.999 Thread 0x00007fb330004000 Uncommon trap: reason=bimorphic action=maybe_recompile pc=0x000000010f079c34 method=java.util.regex.Pattern$CharProperty.match(Ljava/util/regex/Matcher;ILjava/lang/CharSequence;)Z @ 18
-Event: 2.999 Thread 0x00007fb330004000 Uncommon trap: reason=bimorphic action=maybe_recompile pc=0x000000010f079c34 method=java.util.regex.Pattern$CharProperty.match(Ljava/util/regex/Matcher;ILjava/lang/CharSequence;)Z @ 18
-Event: 2.999 Thread 0x00007fb330004000 Uncommon trap: reason=bimorphic action=maybe_recompile pc=0x000000010f079c34 method=java.util.regex.Pattern$CharProperty.match(Ljava/util/regex/Matcher;ILjava/lang/CharSequence;)Z @ 18
-Event: 3.000 Thread 0x00007fb330004000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x000000010f070420 method=java.util.regex.ASCII.isType(II)Z @ 6
-Event: 4.532 Thread 0x00007fb330004000 Uncommon trap: reason=class_check action=maybe_recompile pc=0x000000010f155e44 method=java.util.concurrent.ConcurrentHashMap.putVal(Ljava/lang/Object;Ljava/lang/Object;Z)Ljava/lang/Object; @ 192
-Event: 4.565 Thread 0x00007fb330004000 Uncommon trap: reason=unstable_if action=reinterpret pc=0x000000010f16781c method=java.lang.CharacterDataLatin1.digit(II)I @ 82
-Event: 4.585 Thread 0x00007fb330004000 Uncommon trap: reason=class_check action=maybe_recompile pc=0x000000010f155e44 method=java.util.concurrent.ConcurrentHashMap.putVal(Ljava/lang/Object;Ljava/lang/Object;Z)Ljava/lang/Object; @ 192
-Event: 4.585 Thread 0x00007fb330004000 Uncommon trap: reason=class_check action=maybe_recompile pc=0x000000010f155e44 method=java.util.concurrent.ConcurrentHashMap.putVal(Ljava/lang/Object;Ljava/lang/Object;Z)Ljava/lang/Object; @ 192
-Event: 4.585 Thread 0x00007fb330004000 Uncommon trap: reason=class_check action=maybe_recompile pc=0x000000010f155e44 method=java.util.concurrent.ConcurrentHashMap.putVal(Ljava/lang/Object;Ljava/lang/Object;Z)Ljava/lang/Object; @ 192
+Event: 2.960 Thread 0x00007fb375001800 Uncommon trap: reason=bimorphic action=maybe_recompile pc=0x000000010c6941b4 method=java.util.regex.Pattern$CharProperty.match(Ljava/util/regex/Matcher;ILjava/lang/CharSequence;)Z @ 18
+Event: 2.960 Thread 0x00007fb375001800 Uncommon trap: reason=bimorphic action=maybe_recompile pc=0x000000010c6941b4 method=java.util.regex.Pattern$CharProperty.match(Ljava/util/regex/Matcher;ILjava/lang/CharSequence;)Z @ 18
+Event: 2.960 Thread 0x00007fb375001800 Uncommon trap: reason=bimorphic action=maybe_recompile pc=0x000000010c6941b4 method=java.util.regex.Pattern$CharProperty.match(Ljava/util/regex/Matcher;ILjava/lang/CharSequence;)Z @ 18
+Event: 2.960 Thread 0x00007fb375001800 Uncommon trap: reason=bimorphic action=maybe_recompile pc=0x000000010c6941b4 method=java.util.regex.Pattern$CharProperty.match(Ljava/util/regex/Matcher;ILjava/lang/CharSequence;)Z @ 18
+Event: 2.960 Thread 0x00007fb375001800 Uncommon trap: reason=unstable_if action=reinterpret pc=0x000000010c68fb60 method=java.util.regex.ASCII.isType(II)Z @ 6
+Event: 3.379 Thread 0x00007fb375001800 Uncommon trap: reason=class_check action=maybe_recompile pc=0x000000010c76370c method=java.util.concurrent.ConcurrentHashMap.putVal(Ljava/lang/Object;Ljava/lang/Object;Z)Ljava/lang/Object; @ 192
+Event: 3.411 Thread 0x00007fb375001800 Uncommon trap: reason=unstable_if action=reinterpret pc=0x000000010c77d1dc method=java.lang.CharacterDataLatin1.digit(II)I @ 82
+Event: 3.427 Thread 0x00007fb375001800 Uncommon trap: reason=class_check action=maybe_recompile pc=0x000000010c76370c method=java.util.concurrent.ConcurrentHashMap.putVal(Ljava/lang/Object;Ljava/lang/Object;Z)Ljava/lang/Object; @ 192
+Event: 3.427 Thread 0x00007fb375001800 Uncommon trap: reason=class_check action=maybe_recompile pc=0x000000010c76370c method=java.util.concurrent.ConcurrentHashMap.putVal(Ljava/lang/Object;Ljava/lang/Object;Z)Ljava/lang/Object; @ 192
+Event: 3.427 Thread 0x00007fb375001800 Uncommon trap: reason=class_check action=maybe_recompile pc=0x000000010c76370c method=java.util.concurrent.ConcurrentHashMap.putVal(Ljava/lang/Object;Ljava/lang/Object;Z)Ljava/lang/Object; @ 192
 
 Internal exceptions (10 events):
-Event: 0.279 Thread 0x00007fb330004000 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/LayoutCustomizer> (0x000000076b723278) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
-Event: 0.280 Thread 0x00007fb330004000 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/PatternLayoutCustomizer> (0x000000076b73ffc0) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
-Event: 0.297 Thread 0x00007fb330004000 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/ConsoleAppenderBeanInfo> (0x000000076b7a8450) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
-Event: 0.298 Thread 0x00007fb330004000 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/WriterAppenderBeanInfo> (0x000000076b7b4bb0) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
-Event: 0.298 Thread 0x00007fb330004000 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/AppenderSkeletonBeanInfo> (0x000000076b7c1568) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
-Event: 0.298 Thread 0x00007fb330004000 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/AppenderSkeletonCustomizer> (0x000000076b916128) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
-Event: 0.300 Thread 0x00007fb330004000 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/WriterAppenderCustomizer> (0x000000076b936e48) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
-Event: 0.301 Thread 0x00007fb330004000 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/ConsoleAppenderCustomizer> (0x000000076b950190) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
-Event: 2.988 Thread 0x00007fb330004000 Exception <a 'java/lang/NoSuchFieldError': method resolution failed> (0x000000076cc311e8) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/prims/methodHandles.cpp, line 1146]
-Event: 2.989 Thread 0x00007fb330004000 Exception <a 'java/lang/NoSuchFieldError': method resolution failed> (0x000000076cc3eca8) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/prims/methodHandles.cpp, line 1146]
+Event: 0.268 Thread 0x00007fb375001800 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/LayoutCustomizer> (0x000000076b72edf0) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 0.269 Thread 0x00007fb375001800 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/PatternLayoutCustomizer> (0x000000076b74bb38) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 0.284 Thread 0x00007fb375001800 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/ConsoleAppenderBeanInfo> (0x000000076b7b3fc8) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 0.285 Thread 0x00007fb375001800 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/WriterAppenderBeanInfo> (0x000000076b7c0728) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 0.285 Thread 0x00007fb375001800 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/AppenderSkeletonBeanInfo> (0x000000076b914c20) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 0.285 Thread 0x00007fb375001800 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/AppenderSkeletonCustomizer> (0x000000076b921c90) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 0.287 Thread 0x00007fb375001800 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/WriterAppenderCustomizer> (0x000000076b9429b0) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 0.288 Thread 0x00007fb375001800 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/ConsoleAppenderCustomizer> (0x000000076b95bcf8) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 2.949 Thread 0x00007fb375001800 Exception <a 'java/lang/NoSuchFieldError': method resolution failed> (0x000000076cc39578) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/prims/methodHandles.cpp, line 1146]
+Event: 2.950 Thread 0x00007fb375001800 Exception <a 'java/lang/NoSuchFieldError': method resolution failed> (0x000000076cc47038) thrown at [/HUDSON3/workspace/8-2-build-macosx-x86_64/jdk8u66/4988/hotspot/src/share/vm/prims/methodHandles.cpp, line 1146]
 
 Events (10 events):
-Event: 4.840 loading class org/hamcrest/CoreMatchers
-Event: 4.840 loading class org/hamcrest/CoreMatchers done
-Event: 4.840 loading class org/hamcrest/core/Is
-Event: 4.840 loading class org/hamcrest/core/Is done
-Event: 4.841 loading class org/hamcrest/BaseMatcher
-Event: 4.841 loading class org/hamcrest/BaseMatcher done
-Event: 4.841 loading class org/hamcrest/Matcher
-Event: 4.841 loading class org/hamcrest/Matcher done
-Event: 4.841 loading class org/hamcrest/core/IsEqual
-Event: 4.841 loading class org/hamcrest/core/IsEqual done
+Event: 3.760 loading class org/hamcrest/BaseMatcher
+Event: 3.760 loading class org/hamcrest/BaseMatcher done
+Event: 3.760 loading class org/hamcrest/Matcher
+Event: 3.760 loading class org/hamcrest/Matcher done
+Event: 3.760 loading class org/hamcrest/core/IsEqual
+Event: 3.760 loading class org/hamcrest/core/IsEqual done
+Event: 3.761 loading class java/util/UUID$Holder
+Event: 3.761 loading class java/util/UUID$Holder done
+Event: 4.093 Executing VM operation: EnableBiasedLocking
+Event: 4.093 Executing VM operation: EnableBiasedLocking done
 
 
 Dynamic libraries:
@@ -492,11 +493,11 @@ Dynamic libraries:
 0x000000001a277000 	/System/Library/PrivateFrameworks/CoreSymbolication.framework/Versions/A/CoreSymbolication
 0x000000001a277000 	/System/Library/PrivateFrameworks/Symbolication.framework/Versions/A/Symbolication
 0x000000001a277000 	/System/Library/PrivateFrameworks/SpeechRecognitionCore.framework/Versions/A/SpeechRecognitionCore
-0x0000000104000000 	/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/jre/lib/server/libjvm.dylib
+0x0000000104600000 	/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/jre/lib/server/libjvm.dylib
 0x000000001a277000 	/usr/lib/libstdc++.6.dylib
-0x0000000102eb9000 	/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/jre/lib/libverify.dylib
-0x0000000102ec7000 	/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/jre/lib/libjava.dylib
-0x0000000102f46000 	/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/jre/lib/libzip.dylib
+0x00000001035bc000 	/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/jre/lib/libverify.dylib
+0x00000001035ca000 	/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/jre/lib/libjava.dylib
+0x00000001055cf000 	/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/jre/lib/libzip.dylib
 0x000000001a277000 	/System/Library/Frameworks/JavaVM.framework/Versions/A/Frameworks/JavaRuntimeSupport.framework/Versions/A/JavaRuntimeSupport
 0x000000001a277000 	/System/Library/Frameworks/JavaVM.framework/Versions/A/Frameworks/JavaNativeFoundation.framework/Versions/A/JavaNativeFoundation
 0x000000001a277000 	/System/Library/Frameworks/JavaVM.framework/Versions/A/JavaVM
@@ -508,14 +509,14 @@ Dynamic libraries:
 0x000000001a277000 	/System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/OpenScripting.framework/Versions/A/OpenScripting
 0x000000001a277000 	/System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/Print.framework/Versions/A/Print
 0x000000001a277000 	/System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/SecurityHI.framework/Versions/A/SecurityHI
-0x0000000121b0b000 	/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/jre/lib/libnet.dylib
-0x0000000121bba000 	/Users/Eric/git/monero-java-rpc/lib/libmonero-java.dylib
-0x0000000121df1000 	/Users/Eric/git/monero-java-rpc/external-libs/libmonero-cpp.dylib
-0x00000001230b4000 	/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/jre/lib/libsunec.dylib
+0x000000010b141000 	/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/jre/lib/libnet.dylib
+0x000000010b1f0000 	/Users/Eric/git/monero-java-rpc/lib/libmonero-java.dylib
+0x000000010b42a000 	/Users/Eric/git/monero-java-rpc/external-libs/libmonero-cpp.dylib
+0x00000001239f8000 	/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/jre/lib/libsunec.dylib
 
 VM Arguments:
 jvm_args: -ea -Djava.library.path=/Users/Eric/git/monero-java-rpc/lib:/Users/Eric/git/monero-java-rpc/src/main/cpp/build -Dfile.encoding=UTF-8 
-java_command: org.eclipse.jdt.internal.junit.runner.RemoteTestRunner -version 3 -port 53487 -testLoaderClass org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader -loaderpluginname org.eclipse.jdt.junit4.runtime -test test.TestMoneroWalletJni:testGetAccountsWithoutSubaddresses
+java_command: org.eclipse.jdt.internal.junit.runner.RemoteTestRunner -version 3 -port 62592 -testLoaderClass org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader -loaderpluginname org.eclipse.jdt.junit4.runtime -test test.TestMoneroWalletJni:testSave
 java_class_path (initial): /Users/Eric/git/monero-java-rpc/target/test-classes:/Users/Eric/git/monero-java-rpc/target/classes:/Users/Eric/.p2/pool/plugins/org.junit_4.12.0.v201504281640/junit.jar:/Users/Eric/.p2/pool/plugins/org.hamcrest.core_1.3.0.v201303031735.jar:/Users/Eric/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.9.8/jackson-core-2.9.8.jar:/Users/Eric/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.9.8/jackson-databind-2.9.8.jar:/Users/Eric/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.9.0/jackson-annotations-2.9.0.jar:/Users/Eric/.m2/repository/com/fasterxml/jackson/module/jackson-module-jaxb-annotations/2.9.8/jackson-module-jaxb-annotations-2.9.8.jar:/Users/Eric/.m2/repository/org/apache/httpcomponents/httpclient/4.5.3/httpclient-4.5.3.jar:/Users/Eric/.m2/repository/org/apache/httpcomponents/httpcore/4.4.6/httpcore-4.4.6.jar:/Users/Eric/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar:/Users/Eric/.m2/repository/commons-codec/commons-codec/1.9/commons-codec-1.9.jar:/Users/Eric/.m2/repository/commons-io/commons-io/2.5/commons-io-2.5.jar:/Users/Eric/.m2/repository/com/google/guava/guava/21.0/guava-21.0.jar:/Users/Eric/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar:/Users/Eric/.m2/repository/junit/junit/4.12/junit-4.12.jar:/Users/Eric/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/Users/Eric/eclipse/javascript-oxygen/Eclipse.app/Contents/Eclipse/configuration/org.eclipse.osgi/707/0/.cp:/Users/Eric/eclipse/javascript-oxygen/Eclipse.app/Contents/Eclipse/configuration/org.eclipse.osgi/493/0/.cp
 Launcher Type: SUN_STANDARD
 
@@ -542,17 +543,17 @@ SIGQUIT: [libjvm.dylib+0x47e3dd], sa_mask[0]=11111111011111110111111111111111, s
 
 OS:Bsduname:Darwin 18.5.0 Darwin Kernel Version 18.5.0: Mon Mar 11 20:40:32 PDT 2019; root:xnu-4903.251.3~3/RELEASE_X86_64 x86_64
 rlimit: STACK 8192k, CORE 0k, NPROC 1418, NOFILE 10240, AS infinity
-load average:2.16 2.16 2.02
+load average:1.36 1.66 1.73
 
 CPU:total 8 (4 cores per cpu, 2 threads per core) family 6 model 70 stepping 1, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, avx, avx2, aes, clmul, erms, lzcnt, ht, tsc, tscinvbit, bmi1, bmi2
 
-Memory: 4k page, physical 16777216k(490356k free)
+Memory: 4k page, physical 16777216k(1077900k free)
 
 /proc/meminfo:
 
 
 vm_info: Java HotSpot(TM) 64-Bit Server VM (25.66-b17) for bsd-amd64 JRE (1.8.0_66-b17), built on Oct  6 2015 16:09:13 by "java_re" with gcc 4.2.1 (Based on Apple Inc. build 5658) (LLVM build 2336.11.00)
 
-time: Thu May 30 21:20:00 2019
-elapsed time: 4 seconds (0d 0h 0m 4s)
+time: Sat Jun  1 11:07:38 2019
+elapsed time: 5 seconds (0d 0h 0m 5s)
 
