@@ -1,3 +1,13 @@
+save
+put wallets into ignored directory
+reference c++ implementation
+wallet.getAddress(), getAddressIndex() arranged under getPrimaryAddress(), etc
+remove hardcoded absolute path in cmake lists
+sweepDust() should return empty list if no dust to sweep
+cleanup & port javascript
+incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
+test having multiple wallets open explicitly
+
 JNI
 CMakeLists.txt uses hardcoded absolute path to my boost source path
 jstring2string should be const char *_str = env->GetStringUTFChars(jstr, NULL);?
@@ -7,16 +17,12 @@ license headers
 common wallet manager? openWallet(), createWallet(), walletExists()
 MoneroRpc -> MoneroRpcConnection
 wallet.getLanguages() is rpc specific, not general wallet
-switch heights to longs
-don't automatically create file?
 how is keys file used?
 local vs remote requests per second auto-adjusts like gui wallet.cpp:2204
 test online vs offline wallets
 test for memory leaks by initializing precisely one bajillion wallets
 catch callback exceptions in c++
 test getAccounts(), getBalance(), etc with out of range subaddress/account indices (common wallet tests)
-rps defaults for local vs remote
-ability deconstruct wallet from java which releases memory in c++
 distinguish rpc client being connected to a daemon and a daemon being connected to peers (just clearer documentation?)
 test block serialization/deserialization
 cppWalletHandle, cppListenerHandle string constants in MoneroWalletJni.cpp
@@ -40,11 +46,6 @@ No message store file found: /Applications/190322-monero-master//test_wallet_1.m
 
 14.1.0 RELEASE
 wallet.getLanguage() api even if rpc doesn't supported
-wallet.getAddress(), getAddressIndex() arranged under getPrimaryAddress(), etc
-
-
-sweepDust() should return empty list if no dust to sweep
-cleanup & port javascript
 release
 
 test wallet.send() which is only in sample code currently

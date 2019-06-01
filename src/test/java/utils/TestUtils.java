@@ -40,6 +40,7 @@ public class TestUtils {
   public static final String WALLET_JNI_PW = "supersecretpassword123";
   
   // test constants
+  public static final String TEST_WALLETS_DIR = "./test_wallets";
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
   public static final MoneroNetworkType NETWORK_TYPE = MoneroNetworkType.STAGENET;
   public static final String TEST_LANGUAGE = "English";

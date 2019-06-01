@@ -69,7 +69,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private static String DEFAULT_LANGUAGE = "English";
   
   /**
-   * Construct an unconnected English wallet with a randomly generated seed on mainnet.
+   * Construct a wallet with a randomly generated seed and default values (i.e. mainnet,
+   * no connection, english).
    */
   public MoneroWalletJni() {
     this(MoneroNetworkType.MAINNET, null, null);
