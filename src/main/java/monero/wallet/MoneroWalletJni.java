@@ -209,7 +209,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Save the wallet at the given path.
+   * Save the wallet to the given path, deleting old wallet files if
+   * applicable.  // TODO monero-core: why delete old wallet files on store_to? seems dangerous
    * 
    * @param path is the path to save the wallet at
    * @param password is the password to encrypt the wallet
