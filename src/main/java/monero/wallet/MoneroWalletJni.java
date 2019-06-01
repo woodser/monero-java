@@ -197,16 +197,26 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public String toJson() {
     throw new RuntimeException("Not implemented");
   }
-  
-  public void save(String path, String password) {
-    throw new RuntimeException("Not implemented");
+
+  /**
+   * Re-save the wallet at its current path.
+   * 
+   * Throws an exception if the wallet was not loaded from a path and has not
+   * been saved to an explicit path.
+   */
+  public void save() {
+    save(null, null);
   }
   
   /**
-   * Re-save the wallet at its current path.
+   * Save the wallet at the given path.
+   * 
+   * @param path is the path to save the wallet at
+   * @param password is the password to encrypt the wallet
    */
-  public void save() {
-    throw new RuntimeException("Not implemented");
+  public void save(String path, String password) {
+    String err = saveJni(path, password);
+    if (err != null) throw new MoneroException(err);
   }
   
   /**
@@ -621,6 +631,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native long setListenerJni(WalletJniListener listener);
   
   private native Object[] syncJni(long startHeight);
+  
+  private native String saveJni(String path, String password);
   
   private native void closeJni();
   
