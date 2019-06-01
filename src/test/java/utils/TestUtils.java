@@ -35,12 +35,12 @@ public class TestUtils {
   public static final String WALLET_RPC_PW = "supersecretpassword123";
   
   // wallet jni configuration (adjust per your configuration)
-  public static final String WALLET_JNI_PATH_1 = "test_wallet_1";
-  public static final String WALLET_JNI_PATH_2 = "test_wallet_2";
+  public static final String TEST_WALLETS_DIR = "./test_wallets";
+  public static final String WALLET_JNI_PATH_1 = TEST_WALLETS_DIR + "/test_wallet_1";
+  public static final String WALLET_JNI_PATH_2 = TEST_WALLETS_DIR + "/test_wallet_2";
   public static final String WALLET_JNI_PW = "supersecretpassword123";
   
   // test constants
-  public static final String TEST_WALLETS_DIR = "./test_wallets";
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
   public static final MoneroNetworkType NETWORK_TYPE = MoneroNetworkType.STAGENET;
   public static final String TEST_LANGUAGE = "English";
@@ -127,6 +127,7 @@ public class TestUtils {
         walletJni = new MoneroWalletJni(WALLET_JNI_PATH_1, WALLET_JNI_PW, MoneroNetworkType.STAGENET);
         walletJni.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
         walletJni.sync((long) 0);
+        //walletJni.save();
         System.out.println("Wallet height: " + walletJni.getHeight());
         System.out.println("Wallet balance: " + walletJni.getBalance());
         System.out.println("Wallet address: " + walletJni.getAddress(0, 0));
