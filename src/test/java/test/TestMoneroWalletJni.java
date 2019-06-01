@@ -5,12 +5,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.UUID;
 
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.daemon.model.MoneroNetworkType;
+import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
@@ -211,34 +215,80 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Test
   public void testSave() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    throw new RuntimeException("Not implemented");
-
-    // // unique wallet path for test
-    // String path = "test_wallet_" + UUID.randomUUID().toString();
-    //
-    // // wallet does not exist
-    // assertFalse(MoneroWalletJni.walletExists(path));
-    //
-    // // cannot open wallet
-    // try {
-    // MoneroWalletJni.openWallet(path, TestUtils.WALLET_JNI_PW);
-    // fail("Cannot open non-existant wallet");
-    // } catch (MoneroException e) {
-    // assertEquals("Wallet does not exist: " + path, e.getMessage());
-    // }
-    //
-    // // create the wallet
-    // MoneroWalletJni wallet;
-    // if (mnemonic == null) wallet = MoneroWalletJni.createWallet(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpc(), TestUtils.TEST_LANGUAGE);
-    // else wallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpc(), mnemonic, restoreHeight);
-    //
-    // // test created wallet
-    // assertEquals(path, wallet.getPath());
-    // assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
-    // MoneroUtils.validateMnemonic(wallet.getMnemonic());
-    // assertEquals(TestUtils.TEST_LANGUAGE, wallet.getLanguage());
-    // if (mnemonic != null) assertEquals(mnemonic, wallet.getMnemonic());
-    // if (address != null) assertEquals(address, wallet.getPrimaryAddress());
+    
+    // create unique path for new test wallet
+    String path = "test_wallets/test_wallet_" + UUID.randomUUID().toString();
+    
+    // wallet does not exist
+    assertFalse(MoneroWalletJni.walletExists(path));
+    
+    // cannot open non-existant wallet
+    try {
+      new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
+      fail("Cannot open non-existant wallet");
+    } catch (MoneroException e) {
+      assertEquals("Wallet does not exist at path:" + path, e.getMessage());
+    }
+    
+    // create in-memory wallet to test (no connection, english)
+    MoneroWalletJni walletMemory = new MoneroWalletJni(TestUtils.NETWORK_TYPE, null, null);
+    assertEquals(TestUtils.NETWORK_TYPE, walletMemory.getNetworkType());
+    assertNull(walletMemory.getDaemonConnection());
+    assertEquals("English", walletMemory.getLanguage());
+    assertEquals(0, walletMemory.getHeight());
+    assertEquals(1, walletMemory.getRestoreHeight());
+    
+    // attempt to save wallet without a path which hasn't been saved before
+    try {
+      walletMemory.save();
+      fail("Wallet has not been previously saved so no path exists");
+    } catch (MoneroException e) {
+      assertEquals("Must specify a path to save wallet to", e.getMessage());
+    }
+    
+    // save wallet to test_wallets directory
+    walletMemory.save(TestUtils.TEST_WALLETS_DIR, TestUtils.WALLET_JNI_PW);
+    
+    // read wallet saved to disk
+    MoneroWalletJni walletDisk1 = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
+    testJniWalletEquality(walletMemory, walletDisk1);
+    
+    // sync wallet which isn't connected
+    try {
+      walletDisk1.sync();
+    } catch (MoneroException e) {
+      assertEquals("Wallet has no daemon connection", e.getMessage());
+      assertEquals(0, walletMemory.getHeight());
+      assertEquals(1, walletMemory.getRestoreHeight());
+    }
+    
+    // set daemon connection
+    walletDisk1.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
+    assertNull(walletMemory.getDaemonConnection());
+    
+    // save wallet to default path
+    wallet.save();
+    
+    // read wallet saved to disk
+    MoneroWalletJni walletDisk2 = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
+    testJniWalletEquality(walletDisk1, walletDisk2);
+    
+    // sync wallet
+    long chainHeight = daemon.getHeight();
+    walletDisk2.sync();
+    assertEquals(chainHeight, walletDisk2.getHeight());
+    assertEquals(chainHeight, walletDisk2.getRestoreHeight());
+    
+    // save and re-open wallet
+    walletDisk2.save();
+    MoneroWalletJni walletDisk3 = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
+    testJniWalletEquality(walletDisk2, walletDisk3);
+    
+    // close wallets to release (c++) resources
+    walletMemory.close();
+    walletDisk1.close();
+    walletDisk2.close();
+    walletDisk3.close();
   }
 
   // Can close the currently open wallet
@@ -320,6 +370,19 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals(prevNumBlocksDone, prevNumBlocksTotal);
       assertEquals(1, prevPercentDone, 0);
     }
+  }
+  
+  private static void testJniWalletEquality(MoneroWalletJni wallet1, MoneroWalletJni wallet2) {
+    assertEquals(wallet1.getNetworkType(), wallet2.getNetworkType());
+    assertEquals(wallet1.getHeight(), wallet2.getHeight());
+    assertEquals(wallet1.getRestoreHeight(), wallet2.getRestoreHeight());
+    assertEquals(wallet1.getMnemonic(), wallet2.getMnemonic());
+    assertEquals(wallet1.getDaemonConnection(), wallet2.getDaemonConnection());
+    assertEquals(wallet1.getLanguage(), wallet2.getLanguage());
+    assertEquals(wallet1.getPrimaryAddress(), wallet2.getPrimaryAddress());
+    assertEquals(wallet1.getPrivateViewKey(), wallet2.getPrivateViewKey());
+    assertEquals(wallet1.getAccounts(), wallet2.getAccounts());
+    // TODO: txs, transfers, outputs, integrated addresses
   }
 
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
