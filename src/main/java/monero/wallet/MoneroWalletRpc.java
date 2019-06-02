@@ -1137,8 +1137,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     MoneroCheckReserve check = new MoneroCheckReserve();
     check.setIsGood(isGood);
     if (isGood) {
-      check.setSpentAmount((BigInteger) result.get("spent"));
       check.setTotalAmount((BigInteger) result.get("total"));
+      check.setUnconfirmedSpentAmount((BigInteger) result.get("spent"));
     }
     return check;
   }

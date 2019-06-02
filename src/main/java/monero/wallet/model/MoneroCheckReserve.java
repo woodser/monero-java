@@ -7,16 +7,8 @@ import java.math.BigInteger;
  */
 public class MoneroCheckReserve extends MoneroCheck {
   
-  private BigInteger spentAmount;
   private BigInteger totalAmount;
-  
-  public BigInteger getSpentAmount() {
-    return spentAmount;
-  }
-  
-  public void setSpentAmount(BigInteger spentAmount) {
-    this.spentAmount = spentAmount;
-  }
+  private BigInteger unconfirmedSpentAmount;
   
   public BigInteger getTotalAmount() {
     return totalAmount;
@@ -24,5 +16,13 @@ public class MoneroCheckReserve extends MoneroCheck {
   
   public void setTotalAmount(BigInteger totalAmount) {
     this.totalAmount = totalAmount;
+  }
+  
+  public BigInteger getUnconfirmedSpentAmount() {
+    return unconfirmedSpentAmount;
+  }
+  
+  public void setUnconfirmedSpentAmount(BigInteger unconfirmedSpentAmount) {
+    this.unconfirmedSpentAmount = unconfirmedSpentAmount;
   }
 }
