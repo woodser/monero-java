@@ -1,5 +1,4 @@
 revert last 2 changes to mymonero-core-cpp
-
 save
 sweepDust() should return empty list if no dust to sweep
 cleanup & port javascript
@@ -7,7 +6,6 @@ incoming transactions are missing when outgoing counterpart from same account (h
 test having multiple wallets open explicitly
 
 JNI
-CMakeLists.txt uses hardcoded absolute path to my boost source path
 jstring2string should be const char *_str = env->GetStringUTFChars(jstr, NULL);?
 minimize unecessary SRC_FILES, most imports are compiler includes
 submodules should be external instead
