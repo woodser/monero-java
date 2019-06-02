@@ -71,38 +71,45 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   /**
    * Construct a wallet with a randomly generated seed and default values (i.e. mainnet,
    * no connection, english).
+   * 
+   * @param path is the path to create the wallet
+   * @param password is the password encrypt the wallet
    */
-  public MoneroWalletJni() {
-    this(MoneroNetworkType.MAINNET, null, null);
+  public MoneroWalletJni(String path, String password) {
+    this(path, password, MoneroNetworkType.MAINNET, null, null);
   }
   
   /**
    * Construct a wallet with a randomly generated seed.
    * 
+   * @param path is the path to create the wallet
+   * @param password is the password encrypt the wallet
    * @param networkType is the wallet's network type (default = MoneroNetworkType.MAINNET)
    * @param daemonConnection is connection information to a daemon (default = an unconnected wallet)
    * @param language is the wallet and mnemonic's language (default = "English")
    */
-  public MoneroWalletJni(MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, String language) {
+  public MoneroWalletJni(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, String language) {
     if (networkType == null) networkType = MoneroNetworkType.MAINNET;
     if (language == null) language = DEFAULT_LANGUAGE;
-    if (daemonConnection == null) this.jniWalletHandle = createWalletRandomJni(networkType.ordinal(), null, null, null, language);
-    else this.jniWalletHandle = createWalletRandomJni(networkType.ordinal(), daemonConnection.getUri(), daemonConnection.getUsername(), daemonConnection.getPassword(), language);
+    if (daemonConnection == null) this.jniWalletHandle = createWalletRandomJni(path, password, networkType.ordinal(), null, null, null, language);
+    else this.jniWalletHandle = createWalletRandomJni(path, password, networkType.ordinal(), daemonConnection.getUri(), daemonConnection.getUsername(), daemonConnection.getPassword(), language);
     initCommon();
   }
   
   /**
    * Construct a wallet from a mnemonic phrase.
    * 
+   * @param path is the path to create the wallet
+   * @param password is the password encrypt the wallet
    * @param mnemonic is the mnemonic of the wallet to construct
    * @param networkType is the wallet's network type
    * @param daemonConnection is connection information to a daemon (default = an unconnected wallet)
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    */
-  public MoneroWalletJni(String mnemonic, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, Long restoreHeight) {
+  public MoneroWalletJni(String path, String password, String mnemonic, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, Long restoreHeight) {
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (restoreHeight == null) restoreHeight = 0l;
-    this.jniWalletHandle = createWalletFromMnemonicJni(mnemonic, networkType.ordinal(), restoreHeight);
+    this.jniWalletHandle = createWalletFromMnemonicJni(path, password, mnemonic, networkType.ordinal(), restoreHeight);
     if (daemonConnection != null) setDaemonConnection(daemonConnection);
     initCommon();
   }
@@ -110,6 +117,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   /**
    * Construct a wallet from an address, view key, and spend key.
    * 
+   * @param path is the path to create the wallet
+   * @param password is the password encrypt the wallet
    * @param address is the address of the wallet to construct
    * @param viewKey is the view key of the wallet to construct
    * @param spendKey is the spend key of the wallet to construct
@@ -118,11 +127,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    * @param language is the wallet and mnemonic's language (default = "English")
    */
-  public MoneroWalletJni(String address, String viewKey, String spendKey, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
+  public MoneroWalletJni(String path, String password, String address, String viewKey, String spendKey, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
     if (restoreHeight == null) restoreHeight = 0l;
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (language == null) language = DEFAULT_LANGUAGE;
-    this.jniWalletHandle = createWalletFromKeysJni(address, viewKey, spendKey, networkType.ordinal(), restoreHeight, language);
+    this.jniWalletHandle = createWalletFromKeysJni(path, password, address, viewKey, spendKey, networkType.ordinal(), restoreHeight, language);
     if (daemonConnection != null) setDaemonConnection(daemonConnection);
     initCommon();
   }
@@ -587,11 +596,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native static long openWalletJni(String path, String password, int networkType);
   
-  private native static long createWalletRandomJni(int networkType, String daemonUrl, String daemonUsername, String daemonPassword, String language);
+  private native static long createWalletRandomJni(String path, String password, int networkType, String daemonUrl, String daemonUsername, String daemonPassword, String language);
   
-  private native static long createWalletFromMnemonicJni(String mnemonic, int networkType, long restoreHeight);
+  private native static long createWalletFromMnemonicJni(String path, String password, String mnemonic, int networkType, long restoreHeight);
   
-  private native static long createWalletFromKeysJni(String address, String viewKey, String spendKey, int networkType, long restoreHeight, String language);
+  private native static long createWalletFromKeysJni(String path, String password, String address, String viewKey, String spendKey, int networkType, long restoreHeight, String language);
   
   private native String[] getDaemonConnectionJni(); // returns [uri, username, password]
   
