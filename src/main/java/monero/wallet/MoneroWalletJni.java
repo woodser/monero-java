@@ -322,14 +322,17 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag) {
     String accountsJson = getAccountsJni(includeSubaddresses, tag);
-    List<MoneroAccount> accounts = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountsJson, GetAccountsResp.class).accounts;
+    List<MoneroAccount> accounts = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountsJson, AccountsContainer.class).accounts;
     for (MoneroAccount account : accounts) sanitizeAccount(account);  // TODO: better way?
     return accounts;
   }
   
   @Override
   public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses) {
-    throw new RuntimeException("Not implemented");
+    String accountJson = getAccountJni(accountIdx, includeSubaddresses);
+    MoneroAccount account = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountJson, AccountsContainer.class).accounts.get(0);
+    sanitizeAccount(account);
+    return account;
   }
 
   @Override
@@ -340,7 +343,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<MoneroSubaddress> getSubaddresses(int accountIdx, List<Integer> subaddressIndices) {
     String subaddressesJson = getSubaddressesJni(accountIdx, GenUtils.listToIntArray(subaddressIndices));
-    List<MoneroSubaddress> subaddresses = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressesJson, GetSubaddressesResp.class).subaddresses;
+    List<MoneroSubaddress> subaddresses = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressesJson, SubaddressesContainer.class).subaddresses;
     for (MoneroSubaddress subaddress : subaddresses) sanitizeSubaddress(subaddress);  // TODO: better way?
     return subaddresses;
   }
@@ -622,6 +625,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getAccountsJni(boolean includeSubaddresses, String tag);
   
+  private native String getAccountJni(int accountIdx, boolean includeSubaddresses);
+  
   private native String getSubaddressesJni(int accountIdx, int[] subaddressIndices);
   
   private native String getAddressJni(int accountIdx, int subaddressIdx);
@@ -726,11 +731,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   // ------------------------ RESPONSE DESERIALIZATION ------------------------
   
-  static class GetAccountsResp {
+  static class AccountsContainer {
     public List<MoneroAccount> accounts;
   };
   
-  static class GetSubaddressesResp {
+  static class SubaddressesContainer {
     public List<MoneroSubaddress> subaddresses;
   };
   
