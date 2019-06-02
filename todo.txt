@@ -1,6 +1,4 @@
-mymonero submodule under submodules
-javascript submodule under submodules
-remove hardcoded absolute path in cmake lists
+revert last 2 changes to mymonero-core-cpp
 
 save
 sweepDust() should return empty list if no dust to sweep
