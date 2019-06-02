@@ -174,39 +174,47 @@ Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstr
 }
 
 JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *env, jclass clazz, jint jnetworkType, jstring jdaemonUri, jstring jdaemonUsername, jstring jdaemonPassword, jstring jlanguage) {
+Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint jnetworkType, jstring jdaemonUri, jstring jdaemonUsername, jstring jdaemonPassword, jstring jlanguage) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletRandomJni" << endl;
-  const char* _uri = jdaemonUri ? env->GetStringUTFChars(jdaemonUri, NULL) : nullptr;
-  const char* _username = jdaemonUsername ? env->GetStringUTFChars(jdaemonUsername, NULL) : nullptr;
-  const char* _password = jdaemonPassword ? env->GetStringUTFChars(jdaemonPassword, NULL) : nullptr;
+  const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
+  const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
+  const char* _daemonUri = jdaemonUri ? env->GetStringUTFChars(jdaemonUri, NULL) : nullptr;
+  const char* _daemonUsername = jdaemonUsername ? env->GetStringUTFChars(jdaemonUsername, NULL) : nullptr;
+  const char* _daemonPassword = jdaemonPassword ? env->GetStringUTFChars(jdaemonPassword, NULL) : nullptr;
   const char* _language = jlanguage ? env->GetStringUTFChars(jlanguage, NULL) : nullptr;
 
   // construct wallet
-  MoneroRpcConnection daemonConnection = MoneroRpcConnection(string(_uri ? _uri : ""), string(_username ? _username : ""), string(_password ? _password : ""));
-  MoneroWallet* wallet = new MoneroWallet(static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, string(_language ? _language : ""));
+  MoneroRpcConnection daemonConnection = MoneroRpcConnection(string(_daemonUri ? _daemonUri : ""), string(_daemonUsername ? _daemonUsername : ""), string(_daemonPassword ? _daemonPassword : ""));
+  MoneroWallet* wallet = new MoneroWallet(string(_path ? _path : ""), string(_password ? _password : ""), static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, string(_language ? _language : ""));
 
-  env->ReleaseStringUTFChars(jdaemonUri, _uri);
-  env->ReleaseStringUTFChars(jdaemonUsername, _username);
-  env->ReleaseStringUTFChars(jdaemonPassword, _password);
+  env->ReleaseStringUTFChars(jpath, _path);
+  env->ReleaseStringUTFChars(jpassword, _password);
+  env->ReleaseStringUTFChars(jdaemonUri, _daemonUri);
+  env->ReleaseStringUTFChars(jdaemonUsername, _daemonUsername);
+  env->ReleaseStringUTFChars(jdaemonPassword, _daemonPassword);
   env->ReleaseStringUTFChars(jlanguage, _language);
   return reinterpret_cast<jlong>(wallet);
 }
 
 JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring jmnemonic, jint jnetworkType, jlong jrestoreHeight) {
+Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jstring jmnemonic, jint jnetworkType, jlong jrestoreHeight) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni" << endl;
+  const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
+  const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
   const char* _mnemonic = env->GetStringUTFChars(jmnemonic, NULL);
 
   // construct wallet
   MoneroRpcConnection daemonConnection;
-  MoneroWallet* wallet = new MoneroWallet(string(_mnemonic), static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, (uint64_t) jrestoreHeight);
+  MoneroWallet* wallet = new MoneroWallet(string(_path ? _path : ""), string(_password ? _password : ""), string(_mnemonic), static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, (uint64_t) jrestoreHeight);
 
+  env->ReleaseStringUTFChars(jpath, _path);
+  env->ReleaseStringUTFChars(jpassword, _password);
   env->ReleaseStringUTFChars(jmnemonic, _mnemonic);
   return reinterpret_cast<jlong>(wallet);
 }
 
 JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass clazz, jstring address, jstring viewKey, jstring spendKey, jint networkType, jlong restoreHeight, jstring language) {
+Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass clazz, jstring path, jstring password, jstring address, jstring viewKey, jstring spendKey, jint networkType, jlong restoreHeight, jstring language) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni" << endl;
   throw std::runtime_error("Not implemented");
 
