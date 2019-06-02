@@ -197,17 +197,44 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return (List<String>) result.get("languages");
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public long getHeight() {
-    Map<String, Object> resp = rpc.sendJsonRequest("get_height");
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return ((BigInteger) result.get("height")).longValue();
+  public String getAddress(int accountIdx, int subaddressIdx) {
+    Map<Integer, String> subaddressMap = addressCache.get(accountIdx);
+    if (subaddressMap == null) {
+      getSubaddresses(accountIdx, null, true);      // cache's all addresses at this account
+      return getAddress(accountIdx, subaddressIdx); // uses cache
+    }
+    String address = subaddressMap.get(subaddressIdx);
+    if (address == null) {
+      getSubaddresses(accountIdx, null, true);      // cache's all addresses at this account
+      return addressCache.get(accountIdx).get(subaddressIdx);
+    }
+    return address;
   }
 
+  // TODO: use cache
+  @SuppressWarnings("unchecked")
   @Override
-  public long getChainHeight() {
-    throw new MoneroException("monero-wallet-rpc does not support getting the chain height");
+  public MoneroSubaddress getAddressIndex(String address) {
+    
+    // fetch result and normalize error if address does not belong to the wallet
+    Map<String, Object> result;
+    try {
+      Map<String, Object> params =  new HashMap<String, Object>();
+      params.put("address", address);
+      Map<String, Object> resp = rpc.sendJsonRequest("get_address_index", params);
+      result = (Map<String, Object>) resp.get("result");
+    } catch (MoneroRpcException e) {
+      if (e.getCode() == -2) throw new MoneroException("Address does not belong to the wallet");
+      throw e;
+    }
+    
+    // convert rpc response
+    Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) result.get("index");
+    MoneroSubaddress subaddress = new MoneroSubaddress(address);
+    subaddress.setAccountIndex(rpcIndices.get("major").intValue());
+    subaddress.setIndex(rpcIndices.get("minor").intValue());
+    return subaddress;
   }
 
   @SuppressWarnings("unchecked")
@@ -242,6 +269,19 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return new MoneroSyncResult(((BigInteger) result.get("blocks_fetched")).longValue(), (Boolean) result.get("received_money"));
   }
+  
+  @SuppressWarnings("unchecked")
+  @Override
+  public long getHeight() {
+    Map<String, Object> resp = rpc.sendJsonRequest("get_height");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return ((BigInteger) result.get("height")).longValue();
+  }
+
+  @Override
+  public long getChainHeight() {
+    throw new MoneroException("monero-wallet-rpc does not support getting the chain height");
+  }
 
   @SuppressWarnings("unchecked")
   @Override
@@ -249,6 +289,36 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resp = rpc.sendJsonRequest("get_balance");
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return Boolean.TRUE.equals((Boolean) result.get("multisig_import_needed"));
+  }
+
+  @Override
+  public BigInteger getBalance() {
+    return getBalances(null, null)[0];
+  }
+
+  @Override
+  public BigInteger getBalance(int accountIdx) {
+    return getBalances(accountIdx, null)[0];
+  }
+
+  @Override
+  public BigInteger getBalance(int accountIdx, int subaddressIdx) {
+    return getBalances(accountIdx, subaddressIdx)[0];
+  }
+
+  @Override
+  public BigInteger getUnlockedBalance() {
+    return getBalances(null, null)[1];
+  }
+
+  @Override
+  public BigInteger getUnlockedBalance(int accountIdx) {
+    return getBalances(accountIdx, null)[1];
+  }
+
+  @Override
+  public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx) {
+    return getBalances(accountIdx, subaddressIdx)[1];
   }
   
   @Override
@@ -430,77 +500,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     subaddress.setIsUsed(false);
     subaddress.setNumBlocksToUnlock(0);
     return subaddress;
-  }
-
-  @Override
-  public String getAddress(int accountIdx, int subaddressIdx) {
-    Map<Integer, String> subaddressMap = addressCache.get(accountIdx);
-    if (subaddressMap == null) {
-      getSubaddresses(accountIdx, null, true);      // cache's all addresses at this account
-      return getAddress(accountIdx, subaddressIdx); // uses cache
-    }
-    String address = subaddressMap.get(subaddressIdx);
-    if (address == null) {
-      getSubaddresses(accountIdx, null, true);      // cache's all addresses at this account
-      return addressCache.get(accountIdx).get(subaddressIdx);
-    }
-    return address;
-  }
-
-  // TODO: use cache
-  @SuppressWarnings("unchecked")
-  @Override
-  public MoneroSubaddress getAddressIndex(String address) {
-    
-    // fetch result and normalize error if address does not belong to the wallet
-    Map<String, Object> result;
-    try {
-      Map<String, Object> params =  new HashMap<String, Object>();
-      params.put("address", address);
-      Map<String, Object> resp = rpc.sendJsonRequest("get_address_index", params);
-      result = (Map<String, Object>) resp.get("result");
-    } catch (MoneroRpcException e) {
-      if (e.getCode() == -2) throw new MoneroException("Address does not belong to the wallet");
-      throw e;
-    }
-    
-    // convert rpc response
-    Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) result.get("index");
-    MoneroSubaddress subaddress = new MoneroSubaddress(address);
-    subaddress.setAccountIndex(rpcIndices.get("major").intValue());
-    subaddress.setIndex(rpcIndices.get("minor").intValue());
-    return subaddress;
-  }
-
-
-  @Override
-  public BigInteger getBalance() {
-    return getBalances(null, null)[0];
-  }
-
-  @Override
-  public BigInteger getBalance(int accountIdx) {
-    return getBalances(accountIdx, null)[0];
-  }
-
-  @Override
-  public BigInteger getBalance(int accountIdx, int subaddressIdx) {
-    return getBalances(accountIdx, subaddressIdx)[0];
-  }
-
-  @Override
-  public BigInteger getUnlockedBalance() {
-    return getBalances(null, null)[1];
-  }
-
-  @Override
-  public BigInteger getUnlockedBalance(int accountIdx) {
-    return getBalances(accountIdx, null)[1];
-  }
-
-  @Override
-  public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx) {
-    return getBalances(accountIdx, subaddressIdx)[1];
   }
 
   @Override
