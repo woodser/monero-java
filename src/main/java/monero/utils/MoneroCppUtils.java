@@ -7,27 +7,30 @@ import java.util.Map;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import common.utils.JsonUtils;
-import monero.cpp_bridge.MoneroCppUtilsNative;
 import monero.rpc.MoneroRpcConnection;
 
 /**
  * Collection of utilties bridged from Monero Core C++ to Java.
  */
 public class MoneroCppUtils {
+  
+  static {
+    System.loadLibrary("monero-java");
+  }
 
   public static byte[] mapToBinary(Map<String, Object> map) {
-    return MoneroCppUtilsNative.jsonToBinary(JsonUtils.serialize(map));
+    return jsonToBinaryJni(JsonUtils.serialize(map));
   }
   
   public static Map<String, Object> binaryToMap(byte[] bin) {
-    return JsonUtils.deserialize(MoneroCppUtilsNative.binaryToJson(bin), new TypeReference<Map<String, Object>>(){});
+    return JsonUtils.deserialize(binaryToJsonJni(bin), new TypeReference<Map<String, Object>>(){});
   }
   
   @SuppressWarnings("unchecked")
   public static Map<String, Object> binaryBlocksToMap(byte[] binBlocks) {
     
     // convert binary blocks to json then to map
-    Map<String, Object> map = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, MoneroCppUtilsNative.binaryBlocksToJson(binBlocks), new TypeReference<Map<String, Object>>(){});
+    Map<String, Object> map = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, binaryBlocksToJsonJni(binBlocks), new TypeReference<Map<String, Object>>(){});
     
     // parse blocks to maps
     List<Map<String, Object>> blockMaps = new ArrayList<Map<String, Object>>();
@@ -55,4 +58,12 @@ public class MoneroCppUtils {
     // return map containing blocks and txs as maps
     return map;
   }
+  
+  // ------------------------------- NATIVE METHODS ---------------------------
+  
+  private native static byte[] jsonToBinaryJni(String json);
+  
+  private native static String binaryToJsonJni(byte[] bin);
+  
+  private native static String binaryBlocksToJsonJni(byte[] binBlocks);
 }
