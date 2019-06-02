@@ -70,6 +70,8 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceS
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv *, jobject, jboolean, jstring);
 
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountJni(JNIEnv *, jobject, jint, jboolean);
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(JNIEnv *, jobject, jint, jintArray);
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv *, jobject, jstring, jstring);

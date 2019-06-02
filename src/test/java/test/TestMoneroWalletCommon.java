@@ -61,7 +61,7 @@ import utils.TestUtils;
 public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // test constants
-  protected static final boolean LITE_MODE = false;
+  protected static final boolean LITE_MODE = true;
   protected static final boolean TEST_NON_RELAYS = true;
   protected static final boolean TEST_RELAYS = true;
   protected static final boolean TEST_NOTIFICATIONS = false;
