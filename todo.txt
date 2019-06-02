@@ -1,8 +1,8 @@
-save
-put wallets into ignored directory
-reference c++ implementation
-wallet.getAddress(), getAddressIndex() arranged under getPrimaryAddress(), etc
+mymonero submodule under submodules
+javascript submodule under submodules
 remove hardcoded absolute path in cmake lists
+
+save
 sweepDust() should return empty list if no dust to sweep
 cleanup & port javascript
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
