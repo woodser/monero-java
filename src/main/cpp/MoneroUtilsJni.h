@@ -13,7 +13,7 @@ extern "C" {
  * Method:    jsonToBinary
  * Signature: (Ljava/lang/String;)[I
  */
-JNIEXPORT jbyteArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsNative_jsonToBinary
+JNIEXPORT jbyteArray JNICALL Java_monero_utils_MoneroCppUtils_jsonToBinaryJni
   (JNIEnv *, jclass, jstring);
 
 /*
@@ -21,7 +21,7 @@ JNIEXPORT jbyteArray JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsNative_jsonTo
  * Method:    binaryToJson
  * Signature: ([I)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsNative_binaryToJson
+JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryToJsonJni
   (JNIEnv *, jclass, jbyteArray);
 
 /*
@@ -29,7 +29,7 @@ JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsNative_binaryToJ
  * Method:    binaryBlocksToJson
  * Signature: ([I)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_monero_cpp_1bridge_MoneroCppUtilsNative_binaryBlocksToJson
+JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryBlocksToJsonJni
   (JNIEnv *, jclass, jbyteArray);
 
 // TODO: this causes warning
