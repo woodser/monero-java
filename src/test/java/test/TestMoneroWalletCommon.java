@@ -3181,12 +3181,12 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   private static void testCheckReserve(MoneroCheckReserve check) {
     assertNotNull(check.getIsGood());
     if (check.getIsGood()) {
-      TestUtils.testUnsignedBigInteger(check.getSpentAmount());
-      assertEquals(BigInteger.valueOf(0), check.getSpentAmount());  // TODO sometimes see non-zero, seg fault after sweep and send tests
+      TestUtils.testUnsignedBigInteger(check.getUnconfirmedSpentAmount());
+      assertTrue(check.getUnconfirmedSpentAmount().compareTo(BigInteger.valueOf(0)) >= 0);
       TestUtils.testUnsignedBigInteger(check.getTotalAmount());
       assert(check.getTotalAmount().compareTo(BigInteger.valueOf(0)) >= 0);
     } else {
-      assertNull(check.getSpentAmount());
+      assertNull(check.getUnconfirmedSpentAmount());
       assertNull(check.getTotalAmount());
     }
   }
