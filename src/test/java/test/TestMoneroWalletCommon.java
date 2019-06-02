@@ -85,14 +85,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
   }
   
-  // Can get the current height that the wallet is synchronized to
-  @Test
-  public void testGetHeight() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    long height = wallet.getHeight();
-    assertTrue(height >= 0);
-  }
-  
   // Can get the mnemonic phrase derived from the seed
   @Test
   public void testGetMnemonic() {
@@ -126,6 +118,60 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     String primaryAddress = wallet.getPrimaryAddress();
     MoneroUtils.validateAddress(primaryAddress);
     assertEquals((wallet.getSubaddress(0, 0)).getAddress(), primaryAddress);
+  }
+  
+  // Can get the address of a subaddress at a specified account and subaddress index
+  @Test
+  public void testGetSubaddressAddress() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    assertEquals(wallet.getPrimaryAddress(), (wallet.getSubaddress(0, 0)).getAddress());
+    for (MoneroAccount account : wallet.getAccounts(true)) {
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
+        assertEquals(subaddress.getAddress(), wallet.getAddress(account.getIndex(), subaddress.getIndex()));
+      }
+    }
+    
+    // test out of range indices
+    List<MoneroAccount> accounts = wallet.getAccounts(true);
+    int accountIdx = accounts.size() - 1;
+    int subaddressIdx = accounts.get(accountIdx).getSubaddresses().size();
+    String address = wallet.getAddress(accountIdx, subaddressIdx);
+    assertNull(address);
+  }
+  
+  // Can get the account and subaddress indices of an address
+  @Test
+  public void testGetAddressIndices() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    
+    // get last subaddress to test
+    List<MoneroAccount> accounts = wallet.getAccounts(true);
+    int accountIdx = accounts.size() - 1;
+    int subaddressIdx = accounts.get(accountIdx).getSubaddresses().size() - 1;
+    String address = wallet.getAddress(accountIdx, subaddressIdx);
+    assertNotNull(address);
+    
+    // get address index
+    MoneroSubaddress subaddress = wallet.getAddressIndex(address);
+    assertEquals(accountIdx, (int) subaddress.getAccountIndex());
+    assertEquals(subaddressIdx, (int) subaddress.getIndex());
+
+    // test valid but unfound address
+    String nonWalletAddress = TestUtils.getRandomWalletAddress();
+    try {
+      subaddress = wallet.getAddressIndex(nonWalletAddress);
+      fail("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals("Address does not belong to the wallet", e.getMessage());
+    }
+    
+    // test invalid address
+    try {
+      subaddress = wallet.getAddressIndex("this is definitely not an address");
+      fail("Should have thrown exception");
+    } catch (MoneroException e) {
+      assertEquals("Address does not belong to the wallet", e.getMessage());
+    }
   }
   
   // Can get an integrated address given a payment id
@@ -178,6 +224,49 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     MoneroSyncResult result = wallet.sync(chainHeight - numBlocks);  // sync end of chain
     assertTrue(result.getNumBlocksFetched() >= 0);
     assertNotNull(result.getReceivedMoney());
+  }
+  
+  // Can get the current height that the wallet is synchronized to
+  @Test
+  public void testGetHeight() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    long height = wallet.getHeight();
+    assertTrue(height >= 0);
+  }
+  
+  // Can get the locked and unlocked balances of the wallet, accounts, and subaddresses
+  @Test
+  public void testGetAllBalances() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    
+    // fetch accounts with all info as reference
+    List<MoneroAccount> accounts = wallet.getAccounts(true);
+    
+    // test that balances add up between accounts and wallet
+    BigInteger accountsBalance = BigInteger.valueOf(0);
+    BigInteger accountsUnlockedBalance = BigInteger.valueOf(0);
+    for (MoneroAccount account : accounts) {
+      accountsBalance = accountsBalance.add(account.getBalance());
+      accountsUnlockedBalance = accountsUnlockedBalance.add(account.getUnlockedBalance());
+      
+      // test that balances add up between subaddresses and accounts
+      BigInteger subaddressesBalance = BigInteger.valueOf(0);
+      BigInteger subaddressesUnlockedBalance = BigInteger.valueOf(0);
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
+        subaddressesBalance = subaddressesBalance.add(subaddress.getBalance());
+        subaddressesUnlockedBalance = subaddressesUnlockedBalance.add(subaddress.getUnlockedBalance());
+        
+        // test that balances are consistent with getAccounts() call
+        assertEquals((wallet.getBalance(subaddress.getAccountIndex(), subaddress.getIndex())).toString(), subaddress.getBalance().toString());
+        assertEquals((wallet.getUnlockedBalance(subaddress.getAccountIndex(), subaddress.getIndex())).toString(), subaddress.getUnlockedBalance().toString());
+      }
+      assertEquals((wallet.getBalance(account.getIndex())).toString(), subaddressesBalance.toString());
+      assertEquals((wallet.getUnlockedBalance(account.getIndex())).toString(), subaddressesUnlockedBalance.toString());
+    }
+    TestUtils.testUnsignedBigInteger(accountsBalance);
+    TestUtils.testUnsignedBigInteger(accountsUnlockedBalance);
+    assertEquals((wallet.getBalance()).toString(), accountsBalance.toString());
+    assertEquals((wallet.getUnlockedBalance()).toString(), accountsUnlockedBalance.toString());
   }
   
   // Can get accounts without subaddresses
@@ -345,95 +434,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
       assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
     }
-  }
-  
-  // Can get the address of a subaddress at a specified account and subaddress index
-  @Test
-  public void testGetSubaddressAddress() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    assertEquals(wallet.getPrimaryAddress(), (wallet.getSubaddress(0, 0)).getAddress());
-    for (MoneroAccount account : wallet.getAccounts(true)) {
-      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
-        assertEquals(subaddress.getAddress(), wallet.getAddress(account.getIndex(), subaddress.getIndex()));
-      }
-    }
-    
-    // test out of range indices
-    List<MoneroAccount> accounts = wallet.getAccounts(true);
-    int accountIdx = accounts.size() - 1;
-    int subaddressIdx = accounts.get(accountIdx).getSubaddresses().size();
-    String address = wallet.getAddress(accountIdx, subaddressIdx);
-    assertNull(address);
-  }
-  
-  // Can get the account and subaddress indices of an address
-  @Test
-  public void testGetAddressIndices() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    
-    // get last subaddress to test
-    List<MoneroAccount> accounts = wallet.getAccounts(true);
-    int accountIdx = accounts.size() - 1;
-    int subaddressIdx = accounts.get(accountIdx).getSubaddresses().size() - 1;
-    String address = wallet.getAddress(accountIdx, subaddressIdx);
-    assertNotNull(address);
-    
-    // get address index
-    MoneroSubaddress subaddress = wallet.getAddressIndex(address);
-    assertEquals(accountIdx, (int) subaddress.getAccountIndex());
-    assertEquals(subaddressIdx, (int) subaddress.getIndex());
-
-    // test valid but unfound address
-    String nonWalletAddress = TestUtils.getRandomWalletAddress();
-    try {
-      subaddress = wallet.getAddressIndex(nonWalletAddress);
-      fail("Should have thrown exception");
-    } catch (MoneroException e) {
-      assertEquals("Address does not belong to the wallet", e.getMessage());
-    }
-    
-    // test invalid address
-    try {
-      subaddress = wallet.getAddressIndex("this is definitely not an address");
-      fail("Should have thrown exception");
-    } catch (MoneroException e) {
-      assertEquals("Address does not belong to the wallet", e.getMessage());
-    }
-  }
-  
-  // Can get the locked and unlocked balances of the wallet, accounts, and subaddresses
-  @Test
-  public void testGetAllBalances() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    
-    // fetch accounts with all info as reference
-    List<MoneroAccount> accounts = wallet.getAccounts(true);
-    
-    // test that balances add up between accounts and wallet
-    BigInteger accountsBalance = BigInteger.valueOf(0);
-    BigInteger accountsUnlockedBalance = BigInteger.valueOf(0);
-    for (MoneroAccount account : accounts) {
-      accountsBalance = accountsBalance.add(account.getBalance());
-      accountsUnlockedBalance = accountsUnlockedBalance.add(account.getUnlockedBalance());
-      
-      // test that balances add up between subaddresses and accounts
-      BigInteger subaddressesBalance = BigInteger.valueOf(0);
-      BigInteger subaddressesUnlockedBalance = BigInteger.valueOf(0);
-      for (MoneroSubaddress subaddress : account.getSubaddresses()) {
-        subaddressesBalance = subaddressesBalance.add(subaddress.getBalance());
-        subaddressesUnlockedBalance = subaddressesUnlockedBalance.add(subaddress.getUnlockedBalance());
-        
-        // test that balances are consistent with getAccounts() call
-        assertEquals((wallet.getBalance(subaddress.getAccountIndex(), subaddress.getIndex())).toString(), subaddress.getBalance().toString());
-        assertEquals((wallet.getUnlockedBalance(subaddress.getAccountIndex(), subaddress.getIndex())).toString(), subaddress.getUnlockedBalance().toString());
-      }
-      assertEquals((wallet.getBalance(account.getIndex())).toString(), subaddressesBalance.toString());
-      assertEquals((wallet.getUnlockedBalance(account.getIndex())).toString(), subaddressesUnlockedBalance.toString());
-    }
-    TestUtils.testUnsignedBigInteger(accountsBalance);
-    TestUtils.testUnsignedBigInteger(accountsUnlockedBalance);
-    assertEquals((wallet.getBalance()).toString(), accountsBalance.toString());
-    assertEquals((wallet.getUnlockedBalance()).toString(), accountsUnlockedBalance.toString());
   }
   
   // Can get transactions in the wallet

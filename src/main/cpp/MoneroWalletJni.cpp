@@ -290,25 +290,12 @@ Java_monero_wallet_MoneroWalletJni_getLanguageJni(JNIEnv *env, jobject instance)
   return env->NewStringUTF(wallet->getLanguage().c_str());
 }
 
-JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_getHeightJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getHeightJni" << endl;
+JNIEXPORT jstring JNICALL
+Java_monero_wallet_MoneroWalletJni_getAddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getAddressJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  return wallet->getHeight();
-}
-
-JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_getChainHeightJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getChainHeightJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  return wallet->getChainHeight();
-}
-
-JNIEXPORT jlong JNICALL
-Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  return wallet->getRestoreHeight();
+  string address = wallet->getAddress((uint32_t) accountIdx, (uint32_t) subaddressIdx);
+  return env->NewStringUTF(address.c_str());
 }
 
 JNIEXPORT jlong JNICALL
@@ -359,6 +346,69 @@ Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong 
 // rescanBlockchain
 
 // isMultisigImportNeeded
+
+JNIEXPORT jlong JNICALL
+Java_monero_wallet_MoneroWalletJni_getHeightJni(JNIEnv *env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getHeightJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  return wallet->getHeight();
+}
+
+JNIEXPORT jlong JNICALL
+Java_monero_wallet_MoneroWalletJni_getChainHeightJni(JNIEnv *env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getChainHeightJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  return wallet->getChainHeight();
+}
+
+JNIEXPORT jlong JNICALL
+Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni(JNIEnv *env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  return wallet->getRestoreHeight();
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni(JNIEnv *env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  uint64_t balance = wallet->getBalance();
+  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceAccountJni(JNIEnv *env, jobject instance, jint accountIdx) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getBalanceAccountJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  uint64_t balance = wallet->getBalance(accountIdx);
+  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceSubaddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getBalanceSubaddressJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  uint64_t balance = wallet->getBalance(accountIdx, subaddressIdx);
+  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceWalletJni(JNIEnv *env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceWalletJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  uint64_t balance = wallet->getUnlockedBalance();
+  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceAccountJni(JNIEnv *env, jobject instance, jint accountIdx) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceAccountJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  uint64_t balance = wallet->getUnlockedBalance(accountIdx);
+  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  uint64_t balance = wallet->getUnlockedBalance(accountIdx, subaddressIdx);
+  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
+}
 
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance, jboolean includeSubaddresses, jstring jtag) {
@@ -430,56 +480,6 @@ Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(JNIEnv* env, jobject insta
   resp.subaddresses = subaddresses;
   string subaddressesJson = epee::serialization::store_t_to_json(resp);
   return env->NewStringUTF(subaddressesJson.c_str());
-}
-
-JNIEXPORT jstring JNICALL
-Java_monero_wallet_MoneroWalletJni_getAddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getAddressJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  string address = wallet->getAddress((uint32_t) accountIdx, (uint32_t) subaddressIdx);
-  return env->NewStringUTF(address.c_str());
-}
-
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  uint64_t balance = wallet->getBalance();
-  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
-}
-
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceAccountJni(JNIEnv *env, jobject instance, jint accountIdx) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getBalanceAccountJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  uint64_t balance = wallet->getBalance(accountIdx);
-  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
-}
-
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceSubaddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getBalanceSubaddressJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  uint64_t balance = wallet->getBalance(accountIdx, subaddressIdx);
-  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
-}
-
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceWalletJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceWalletJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  uint64_t balance = wallet->getUnlockedBalance();
-  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
-}
-
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceAccountJni(JNIEnv *env, jobject instance, jint accountIdx) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceAccountJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  uint64_t balance = wallet->getUnlockedBalance(accountIdx);
-  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
-}
-
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  uint64_t balance = wallet->getUnlockedBalance(accountIdx, subaddressIdx);
-  return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, jobject instance, jstring jpath, jstring jpassword) {

@@ -87,25 +87,29 @@ public interface MoneroWallet {
   public List<String> getLanguages();
   
   /**
-   * Get the height of the last block processed by the wallet (its index + 1).  // TODO: should be the height of the last block processed + 1, which is the height of the next block to process
-   * 
-   * @return the height of the last block processed by the wallet
-   */
-  public long getHeight();
-  
-  /**
-   * Get the blockchain's height.
-   * 
-   * @return the blockchain's height
-   */
-  public long getChainHeight();
-  
-  /**
    * Get the wallet's primary address.
    * 
    * @return the wallet's primary address
    */
   public String getPrimaryAddress();
+  
+  /**
+   * Get the address of a specific subaddress.
+   * 
+   * @param accountIdx specifies the account index of the address's subaddress
+   * @param subaddressIdx specifies the subaddress index within the account
+   * @return the receive address of the specified subaddress
+   */
+  public String getAddress(int accountIdx, int subaddressIdx);
+  
+  /**
+   * Get the account and subaddress index of the given address.
+   * 
+   * @param address is the address to get the account and subaddress index from
+   * @return the account and subaddress indices
+   * @throws exception if address is not a wallet address
+   */
+  public MoneroSubaddress getAddressIndex(String address);
   
   /**
    * Get an integrated address based on this wallet's primary address and a
@@ -190,6 +194,68 @@ public interface MoneroWallet {
    * @return true if importing multisig data is needed for returning a correct balance, false otherwise
    */
   public boolean isMultisigImportNeeded();
+  
+  /**
+   * Get the height of the last block processed by the wallet (its index + 1).  // TODO: should be the height of the last block processed + 1, which is the height of the next block to process
+   * 
+   * @return the height of the last block processed by the wallet
+   */
+  public long getHeight();
+  
+  /**
+   * Get the blockchain's height.
+   * 
+   * @return the blockchain's height
+   */
+  public long getChainHeight();
+  
+  /**
+   * Get the wallet's balance.
+   * 
+   * @return the wallet's balance
+   */
+  public BigInteger getBalance();
+  
+  /**
+   * Get an account's balance.
+   * 
+   * @param accountIdx is the index of the account to get the balance of
+   * @return the account's balance
+   */
+  public BigInteger getBalance(int accountIdx);
+  
+  /**
+   * Get a subaddress's balance.
+   * 
+   * @param accountIdx is the index of the subaddress's account to get the balance of
+   * @param subaddressIdx is the index of the subaddress to get the balance of
+   * @return the subaddress's balance
+   */
+  public BigInteger getBalance(int accountIdx, int subaddressIdx);
+  
+  /**
+   * Get the wallet's unlocked balance.
+   * 
+   * @return the wallet's unlocked balance
+   */
+  public BigInteger getUnlockedBalance();
+  
+  /**
+   * Get an account's unlocked balance.
+   * 
+   * @param accountIdx is the index of the account to get the unlocked balance of
+   * @return the account's unlocked balance
+   */
+  public BigInteger getUnlockedBalance(int accountIdx);
+  
+  /**
+   * Get a subaddress's unlocked balance.
+   * 
+   * @param accountIdx is the index of the subaddress's account to get the unlocked balance of
+   * @param subaddressIdx is the index of the subaddress to get the unlocked balance of
+   * @return the subaddress's balance
+   */
+  public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx);
   
   /**
    * Get all accounts.
@@ -297,72 +363,6 @@ public interface MoneroWallet {
    * @return the created subaddress
    */
   public MoneroSubaddress createSubaddress(int accountIdx, String label);
-  
-  /**
-   * Get the address of a specific subaddress.
-   * 
-   * @param accountIdx specifies the account index of the address's subaddress
-   * @param subaddressIdx specifies the subaddress index within the account
-   * @return the receive address of the specified subaddress
-   */
-  public String getAddress(int accountIdx, int subaddressIdx);
-  
-  /**
-   * Get the account and subaddress index of the given address.
-   * 
-   * @param address is the address to get the account and subaddress index from
-   * @return the account and subaddress indices
-   * @throws exception if address is not a wallet address
-   */
-  public MoneroSubaddress getAddressIndex(String address);
-  
-  /**
-   * Get the wallet's balance.
-   * 
-   * @return the wallet's balance
-   */
-  public BigInteger getBalance();
-  
-  /**
-   * Get an account's balance.
-   * 
-   * @param accountIdx is the index of the account to get the balance of
-   * @return the account's balance
-   */
-  public BigInteger getBalance(int accountIdx);
-  
-  /**
-   * Get a subaddress's balance.
-   * 
-   * @param accountIdx is the index of the subaddress's account to get the balance of
-   * @param subaddressIdx is the index of the subaddress to get the balance of
-   * @return the subaddress's balance
-   */
-  public BigInteger getBalance(int accountIdx, int subaddressIdx);
-  
-  /**
-   * Get the wallet's unlocked balance.
-   * 
-   * @return the wallet's unlocked balance
-   */
-  public BigInteger getUnlockedBalance();
-  
-  /**
-   * Get an account's unlocked balance.
-   * 
-   * @param accountIdx is the index of the account to get the unlocked balance of
-   * @return the account's unlocked balance
-   */
-  public BigInteger getUnlockedBalance(int accountIdx);
-  
-  /**
-   * Get a subaddress's unlocked balance.
-   * 
-   * @param accountIdx is the index of the subaddress's account to get the unlocked balance of
-   * @param subaddressIdx is the index of the subaddress to get the unlocked balance of
-   * @return the subaddress's balance
-   */
-  public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx);
   
   /**
    * Get a wallet transaction by id.
