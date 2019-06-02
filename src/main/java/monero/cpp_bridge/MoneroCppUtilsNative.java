@@ -9,7 +9,7 @@ package monero.cpp_bridge;
 public class MoneroCppUtilsNative {
   
   static {
-    System.loadLibrary("monero");
+    System.loadLibrary("monero-java");
   }
 
   public native static byte[] jsonToBinary(String json);
