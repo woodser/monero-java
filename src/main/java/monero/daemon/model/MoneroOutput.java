@@ -9,7 +9,7 @@ import java.util.List;
 import monero.utils.MoneroUtils;
 
 /**
- * Represents a transaction output.
+ * Models a Monero transaction output.
  */
 public class MoneroOutput {
 

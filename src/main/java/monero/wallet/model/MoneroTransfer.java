@@ -5,7 +5,7 @@ import java.math.BigInteger;
 import monero.utils.MoneroUtils;
 
 /**
- * Base model for a transfer of funds to or from the wallet.
+ * Models a base transfer of funds to or from the wallet.
  */
 public class MoneroTransfer {
 
