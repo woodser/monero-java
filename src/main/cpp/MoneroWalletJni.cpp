@@ -112,7 +112,7 @@ struct WalletJniListener : public MoneroWalletListener {
   }
 };
 
-// ------------------------------ RESPONSE STRUCTS ----------------------------
+// ------------------------- RESPONSE CONTAINER STRUCTS -----------------------
 
 struct AccountsContainer {
   vector<MoneroAccount> accounts;
@@ -125,6 +125,13 @@ struct SubaddressesContainer {
   vector<MoneroSubaddress> subaddresses;
   BEGIN_KV_SERIALIZE_MAP()
     KV_SERIALIZE(subaddresses)
+  END_KV_SERIALIZE_MAP()
+};
+
+struct BlocksContainer {
+  vector<MoneroBlock> blocks;
+  BEGIN_KV_SERIALIZE_MAP()
+    KV_SERIALIZE(blocks)
   END_KV_SERIALIZE_MAP()
 };
 
@@ -301,10 +308,10 @@ Java_monero_wallet_MoneroWalletJni_getAddressJni(JNIEnv *env, jobject instance, 
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getAddressIndexJni(JNIEnv *env, jobject instance, jstring jaddress) {
   cout << "Java_monero_wallet_MoneroWalletJni_getAddressIndexJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
   const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
 
   // get indices of address's subaddress
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
   MoneroSubaddress subaddress;
   try {
     subaddress = wallet->getAddressIndex(string(_address));
@@ -436,10 +443,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceS
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance, jboolean includeSubaddresses, jstring jtag) {
   cout << "Java_monero_wallet_MoneroWalletJni_getAccountsJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
   const char* _tag = jtag ? env->GetStringUTFChars(jtag, NULL) : nullptr;
 
   // get accounts
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
   vector<MoneroAccount> accounts = wallet->getAccounts(includeSubaddresses, _tag ? string(_tag) : "");
 
 //  // print account info
@@ -467,9 +474,9 @@ Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance,
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountJni(JNIEnv* env, jobject instance, jint accountIdx, jboolean includeSubaddresses) {
   cout << "Java_monero_wallet_MoneroWalletJni_getAccountJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
 
   // get account
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
   MoneroAccount account = wallet->getAccount(accountIdx, includeSubaddresses);
 
 //  // print account info
@@ -537,7 +544,36 @@ Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(JNIEnv* env, jobject insta
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* env, jobject instance, jstring jtxRequest) {
   cout << "Java_monero_wallet_MoneroWalletJni_getTxsJni" << endl;
-  throw runtime_error("Not implemented");
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _txRequest = jtxRequest ? env->GetStringUTFChars(jtxRequest, NULL) : nullptr;
+
+  // deserialize tx request
+  MoneroTxRequest txRequest;
+  // TODO: deserialize here
+
+  // get txs
+  vector<MoneroTx> txs = wallet->getTxs(txRequest);
+
+  // return unique blocks to preserve model relationships as tree
+  vector<MoneroBlock> blocks;
+  unordered_set<MoneroBlock> seen;
+  for (auto const& tx : txs) {
+    for (auto const& block : tx.block) {
+      unordered_set<MoneroBlock>::const_iterator got = seen.find(block);
+      if (got == seen.end()) {
+        seen.insert(block); // TODO: is this deep copying each block?  insert pointers instead?
+        blocks.push_back(block);
+      }
+    }
+  }
+  cout << "Returning " << blocks.size() << " blocks" << endl;
+
+  // wrap and serialize blocks
+  BlocksContainer resp;
+  resp.blocks = blocks;
+  string blocksJson = epee::serialization::store_t_to_json(resp);
+  env->ReleaseStringUTFChars(jtxRequest, _txRequest);
+  return env->NewStringUTF(blocksJson.c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, jobject instance, jstring jpath, jstring jpassword) {
