@@ -3,9 +3,11 @@ package utils;
 import java.util.List;
 
 import monero.daemon.model.MoneroTx;
+import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroTransfer;
+import monero.wallet.model.MoneroTxWallet;
 
 /**
  * Scratchpad for quick scripting.
@@ -16,13 +18,13 @@ public class Scratchpad {
     
     // initialize daemon, wallet, and direct rpc interface
 //    MoneroDaemon daemon = TestUtils.getDaemonRpc();
-//    MoneroWallet walletRpc = TestUtils.getWalletRpc();
+    MoneroWallet walletRpc = TestUtils.getWalletRpc();
     //MoneroWallet walletJni = TestUtils.getWalletJni();
     //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
     
 //    // common variables
-    MoneroTx tx = null;
-    List<MoneroTx> txs = null;
+    //MoneroTx tx = null;
+    //List<MoneroTx> txs = null;
     List<MoneroTransfer> transfers = null;
     String txId = null;
     
@@ -49,19 +51,24 @@ public class Scratchpad {
 //      }
 //    });
     
+    List<MoneroTxWallet> txs = walletRpc.getTxs();
+    for (MoneroTxWallet tx : txs) {
+      System.out.println(tx.getBlock());
+    }
     
-    MoneroWalletJni walletJni = new MoneroWalletJni("./test_wallets/test_wallet_1", TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
-
-    System.out.println("Wallet balance: " + walletJni.getBalance());
-    System.out.println("Account 0 balance: " + walletJni.getBalance(0));
-    System.out.println("Account 0 subaddress 1 balance: " + walletJni.getBalance(0, 1));
-    System.out.println("Wallet unlocked balance: " + walletJni.getUnlockedBalance());
-    System.out.println("Account 0 unlocked balance: " + walletJni.getUnlockedBalance(0));
-    System.out.println("Account 0 subaddress 1 unlocked balance: " + walletJni.getUnlockedBalance(0, 1));
-    System.out.println("Wallet seed: " + walletJni.getMnemonic());
-    System.out.println("Wallet address: " + walletJni.getPrimaryAddress());
-    System.out.println("Wallet height: " + walletJni.getHeight());
-    List<MoneroAccount> accounts = walletJni.getAccounts();
-    System.out.println("Wallet has " + accounts.size() + " accounts");
+    
+//    MoneroWalletJni walletJni = new MoneroWalletJni("./test_wallets/test_wallet_1", TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
+//
+//    System.out.println("Wallet balance: " + walletJni.getBalance());
+//    System.out.println("Account 0 balance: " + walletJni.getBalance(0));
+//    System.out.println("Account 0 subaddress 1 balance: " + walletJni.getBalance(0, 1));
+//    System.out.println("Wallet unlocked balance: " + walletJni.getUnlockedBalance());
+//    System.out.println("Account 0 unlocked balance: " + walletJni.getUnlockedBalance(0));
+//    System.out.println("Account 0 subaddress 1 unlocked balance: " + walletJni.getUnlockedBalance(0, 1));
+//    System.out.println("Wallet seed: " + walletJni.getMnemonic());
+//    System.out.println("Wallet address: " + walletJni.getPrimaryAddress());
+//    System.out.println("Wallet height: " + walletJni.getHeight());
+//    List<MoneroAccount> accounts = walletJni.getAccounts();
+//    System.out.println("Wallet has " + accounts.size() + " accounts");
   }
 }
