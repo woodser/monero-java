@@ -1,5 +1,6 @@
 package monero.wallet;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
@@ -360,7 +361,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroSubaddress getAddressIndex(String address) {
-    throw new RuntimeException("Not implemented");
+    String subaddressesJson = getAddressIndexJni(address);
+    List<MoneroSubaddress> subaddresses = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressesJson, SubaddressesContainer.class).subaddresses;
+    assertEquals("Address does not belong to a subaddress", 1, subaddresses.size());
+    return sanitizeSubaddress(subaddresses.get(0));
   }
 
   @Override
@@ -631,6 +635,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getAddressJni(int accountIdx, int subaddressIdx);
   
+  private native String getAddressIndexJni(String address);
+  
   private native String getBalanceWalletJni();
   
   private native String getBalanceAccountJni(int accountIdx);
@@ -741,14 +747,16 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   // ---------------------------- PRIVATE HELPERS -----------------------------
   
-  private static void sanitizeAccount(MoneroAccount account) {
+  private static MoneroAccount sanitizeAccount(MoneroAccount account) {
     if ("".equals(account.getLabel())) account.setLabel(null);
     if (account.getSubaddresses() != null) {
       for (MoneroSubaddress subaddress : account.getSubaddresses()) sanitizeSubaddress(subaddress);
     }
+    return account;
   }
   
-  private static void sanitizeSubaddress(MoneroSubaddress subaddress) {
+  private static MoneroSubaddress sanitizeSubaddress(MoneroSubaddress subaddress) {
     if ("".equals(subaddress.getLabel())) subaddress.setLabel(null);
+    return subaddress;
   }
 }

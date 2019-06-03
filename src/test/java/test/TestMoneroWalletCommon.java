@@ -162,7 +162,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       subaddress = wallet.getAddressIndex(nonWalletAddress);
       fail("Should have thrown exception");
     } catch (MoneroException e) {
-      assertEquals("Address does not belong to the wallet", e.getMessage());
+      assertEquals("Address doesn't belong to the wallet", e.getMessage());
     }
     
     // test invalid address
@@ -170,7 +170,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       subaddress = wallet.getAddressIndex("this is definitely not an address");
       fail("Should have thrown exception");
     } catch (MoneroException e) {
-      assertEquals("Address does not belong to the wallet", e.getMessage());
+      assertEquals("Invalid address", e.getMessage());
     }
   }
   
