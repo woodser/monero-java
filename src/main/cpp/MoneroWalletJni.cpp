@@ -535,6 +535,11 @@ Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(JNIEnv* env, jobject insta
   return env->NewStringUTF(subaddressesJson.c_str());
 }
 
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* env, jobject instance, jstring jtxRequest) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getTxsJni" << endl;
+  throw runtime_error("Not implemented");
+}
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, jobject instance, jstring jpath, jstring jpassword) {
   cout << "Java_monero_wallet_MoneroWalletJni_saveJni(path, password)" << endl;
   const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
