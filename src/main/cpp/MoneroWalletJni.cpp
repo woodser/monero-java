@@ -552,18 +552,17 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   // TODO: deserialize here
 
   // get txs
-  vector<MoneroTx> txs = wallet->getTxs(txRequest);
+  vector<MoneroTxWallet> txs = wallet->getTxs(txRequest);
 
   // return unique blocks to preserve model relationships as tree
   vector<MoneroBlock> blocks;
-  unordered_set<MoneroBlock> seen;
+  unordered_set<uint64_t> seenBlockPtrs;
   for (auto const& tx : txs) {
-    for (auto const& block : tx.block) {
-      unordered_set<MoneroBlock>::const_iterator got = seen.find(block);
-      if (got == seen.end()) {
-        seen.insert(block); // TODO: is this deep copying each block?  insert pointers instead?
-        blocks.push_back(block);
-      }
+    if (!tx.block) throw runtime_error("Tx block is null");
+    unordered_set<uint64_t>::const_iterator got = seenBlockPtrs.find((uint64_t) tx.block);
+    if (got == seenBlockPtrs.end()) {
+      seenBlockPtrs.insert((uint64_t) tx.block);
+      blocks.push_back(*tx.block);
     }
   }
   cout << "Returning " << blocks.size() << " blocks" << endl;
@@ -571,7 +570,8 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   // wrap and serialize blocks
   BlocksContainer resp;
   resp.blocks = blocks;
-  string blocksJson = epee::serialization::store_t_to_json(resp);
+//  string blocksJson = epee::serialization::store_t_to_json(resp);
+  string blocksJson = "temp";
   env->ReleaseStringUTFChars(jtxRequest, _txRequest);
   return env->NewStringUTF(blocksJson.c_str());
 }
