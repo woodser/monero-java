@@ -4,6 +4,7 @@ sweepDust() should return empty list if no dust to sweep
 cleanup & port javascript
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
 test having multiple wallets open explicitly
+catch exceptions thrown in Java callback functions using ExceptionCheck()
 
 JNI
 jstring2string should be const char *_str = env->GetStringUTFChars(jstr, NULL);?
@@ -45,6 +46,7 @@ store_to() is actually move(), deleting old files if they exist.  support "save 
 new wallet() without connection but restoreHeight is checkpointed; where is that data cached?
 
 14.1.0 RELEASE
+getAddressIndex() -> getSubaddress(String address) and that returns full subaddress info?
 wallet.getLanguage() api even if rpc doesn't supported
 release
 

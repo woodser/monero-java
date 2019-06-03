@@ -298,6 +298,29 @@ Java_monero_wallet_MoneroWalletJni_getAddressJni(JNIEnv *env, jobject instance, 
   return env->NewStringUTF(address.c_str());
 }
 
+JNIEXPORT jstring JNICALL
+Java_monero_wallet_MoneroWalletJni_getAddressIndexJni(JNIEnv *env, jobject instance, jstring jaddress) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getAddressIndexJni" << endl;
+  const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
+
+  // get indices of address's subaddress
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  MoneroSubaddress subaddress;
+  try {
+    subaddress = wallet->getAddressIndex(string(_address));
+  } catch (runtime_error& e) {
+    jclass jcls = env->FindClass("monero/utils/MoneroException");
+    env->ThrowNew(jcls, e.what());
+  }
+
+  // wrap and serialize subaddress which contains indices
+  SubaddressesContainer resp;
+  resp.subaddresses.push_back(subaddress);
+  string subaddressesJson = epee::serialization::store_t_to_json(resp);
+  env->ReleaseStringUTFChars(jaddress, _address);
+  return env->NewStringUTF(subaddressesJson.c_str());
+}
+
 JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *env, jobject instance, jobject jlistener) {
   cout << "Java_monero_wallet_MoneroWalletJni_setListenerJni" << endl;

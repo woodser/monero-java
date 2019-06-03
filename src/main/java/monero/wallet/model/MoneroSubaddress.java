@@ -31,72 +31,81 @@ public class MoneroSubaddress {
     return accountIndex;
   }
   
-  public void setAccountIndex(Integer accountIndex) {
+  public MoneroSubaddress setAccountIndex(Integer accountIndex) {
     this.accountIndex = accountIndex;
+    return this;
   }
   
   public Integer getIndex() {
     return index;
   }
   
-  public void setIndex(Integer index) {
+  public MoneroSubaddress setIndex(Integer index) {
     this.index = index;
+    return this;
   }
   
   public String getAddress() {
     return address;
   }
   
-  public void setAddress(String address) {
+  public MoneroSubaddress setAddress(String address) {
     this.address = address;
+    return this;
   }
   
   public String getLabel() {
     return label;
   }
   
-  public void setLabel(String label) {
+  public MoneroSubaddress setLabel(String label) {
     this.label = label;
+    return this;
   }
   
   public BigInteger getBalance() {
     return balance;
   }
   
-  public void setBalance(BigInteger balance) {
+  public MoneroSubaddress setBalance(BigInteger balance) {
     this.balance = balance;
+    return this;
   }
   
   public BigInteger getUnlockedBalance() {
     return unlockedBalance;
   }
   
-  public void setUnlockedBalance(BigInteger unlockedBalance) {
+  public MoneroSubaddress setUnlockedBalance(BigInteger unlockedBalance) {
     this.unlockedBalance = unlockedBalance;
+    return this;
   }
   
   public Integer getNumUnspentOutputs() {
     return numUnspentOutputs;
   }
   
-  public void setNumUnspentOutputs(Integer numUnspentOutputs) {
+  public MoneroSubaddress setNumUnspentOutputs(Integer numUnspentOutputs) {
     this.numUnspentOutputs = numUnspentOutputs;
+    return this;
   }
   
   public Boolean getIsUsed() {
     return isUsed;
   }
   
-  public void setIsUsed(Boolean isUsed) {
+  public MoneroSubaddress setIsUsed(Boolean isUsed) {
     this.isUsed = isUsed;
+    return this;
   }
 
   public Integer getNumBlocksToUnlock() {
     return numBlocksToUnlock;
   }
 
-  public void setNumBlocksToUnlock(Integer numBlocksToUnlock) {
+  public MoneroSubaddress setNumBlocksToUnlock(Integer numBlocksToUnlock) {
     this.numBlocksToUnlock = numBlocksToUnlock;
+    return this;
   }
   
   public String toString() {
