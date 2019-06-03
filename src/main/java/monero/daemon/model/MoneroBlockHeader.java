@@ -7,7 +7,7 @@ import java.math.BigInteger;
 import monero.utils.MoneroUtils;
 
 /**
- * Monero block header information.
+ * Models a Monero block header which contains information about the block.
  */
 public class MoneroBlockHeader {
   

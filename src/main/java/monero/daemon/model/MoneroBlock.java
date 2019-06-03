@@ -10,7 +10,7 @@ import common.utils.GenUtils;
 import monero.utils.MoneroUtils;
 
 /**
- * Monero block.
+ * Models a Monero block in the blockchain.
  */
 public class MoneroBlock extends MoneroBlockHeader {
 
