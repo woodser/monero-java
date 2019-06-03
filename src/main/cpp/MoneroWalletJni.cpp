@@ -570,8 +570,8 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   // wrap and serialize blocks
   BlocksContainer resp;
   resp.blocks = blocks;
-//  string blocksJson = epee::serialization::store_t_to_json(resp);
-  string blocksJson = "temp";
+  string blocksJson = epee::serialization::store_t_to_json(resp);
+  //string blocksJson = "temp";
   env->ReleaseStringUTFChars(jtxRequest, _txRequest);
   return env->NewStringUTF(blocksJson.c_str());
 }
