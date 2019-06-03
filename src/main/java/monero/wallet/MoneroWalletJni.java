@@ -403,6 +403,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<MoneroTxWallet> getTxs(MoneroTxRequest request) {
     String blocksJson = getTxsJni(request == null ? null : JsonUtils.serialize(request));
+    System.out.println("Received response from JNI: " + blocksJson);
     List<MoneroBlock> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
     for (MoneroBlock block : blocks) sanitizeBlock(block);
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
