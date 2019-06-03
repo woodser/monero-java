@@ -82,8 +82,12 @@ public class MoneroTxWallet extends MoneroTx {
    * @return vouts of type MoneroOutputWallet
    */
   public List<MoneroOutputWallet> getVoutsWallet() {
+    List<MoneroOutput> vouts = getVouts();
+    if (vouts == null) return null;
     List<MoneroOutputWallet> voutsWallet = new ArrayList<MoneroOutputWallet>();
-    for (MoneroOutput vout : getVouts()) voutsWallet.add((MoneroOutputWallet) vout);
+    for (MoneroOutput vout : getVouts()) {
+      voutsWallet.add((MoneroOutputWallet) vout);
+    }
     return voutsWallet;
   }
   

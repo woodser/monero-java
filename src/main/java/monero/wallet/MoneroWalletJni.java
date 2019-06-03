@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.Set;
 import common.utils.GenUtils;
 import common.utils.JsonUtils;
 import monero.daemon.MoneroDaemonRpc;
+import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
+import monero.daemon.model.MoneroTx;
 import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
 import monero.wallet.model.MoneroAccount;
@@ -399,7 +402,16 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroTxWallet> getTxs(MoneroTxRequest request) {
-    throw new RuntimeException("Not implemented");
+    String blocksJson = getTxsJni(request == null ? null : JsonUtils.serialize(request));
+    List<MoneroBlock> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
+    for (MoneroBlock block : blocks) sanitizeBlock(block);
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    for (MoneroBlock block : blocks) {
+      for (MoneroTx tx : block.getTxs()) {
+        txs.add((MoneroTxWallet) tx);
+      }
+    }
+    return txs;
   }
 
   @Override
@@ -621,21 +633,19 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getLanguageJni();
   
+  private native String getAddressJni(int accountIdx, int subaddressIdx);
+  
+  private native String getAddressIndexJni(String address);
+  
+  private native long setListenerJni(WalletJniListener listener);
+  
+  private native Object[] syncJni(long startHeight);
+  
   private native long getHeightJni();
   
   private native long getChainHeightJni();
   
   private native long getRestoreHeightJni();
-  
-  private native String getAccountsJni(boolean includeSubaddresses, String tag);
-  
-  private native String getAccountJni(int accountIdx, boolean includeSubaddresses);
-  
-  private native String getSubaddressesJni(int accountIdx, int[] subaddressIndices);
-  
-  private native String getAddressJni(int accountIdx, int subaddressIdx);
-  
-  private native String getAddressIndexJni(String address);
   
   private native String getBalanceWalletJni();
   
@@ -649,9 +659,19 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getUnlockedBalanceSubaddressJni(int accountIdx, int subaddressIdx);
   
-  private native long setListenerJni(WalletJniListener listener);
+  private native String getAccountsJni(boolean includeSubaddresses, String tag);
   
-  private native Object[] syncJni(long startHeight);
+  private native String getAccountJni(int accountIdx, boolean includeSubaddresses);
+  
+  private native String getSubaddressesJni(int accountIdx, int[] subaddressIndices);
+  
+  /**
+   * Gets txs from the native layer using strings to communicate.
+   * 
+   * @param txRequestJson is a tx request serialized to a json string
+   * @return a serialized BlocksContainer to preserve model relationships
+   */
+  private native String getTxsJni(String txRequestJson);
   
   private native String saveJni(String path, String password);
   
@@ -745,6 +765,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     public List<MoneroSubaddress> subaddresses;
   };
   
+  static class BlocksContainer {
+    public List<MoneroBlock> blocks;
+  }
+  
   // ---------------------------- PRIVATE HELPERS -----------------------------
   
   private static MoneroAccount sanitizeAccount(MoneroAccount account) {
@@ -758,5 +782,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private static MoneroSubaddress sanitizeSubaddress(MoneroSubaddress subaddress) {
     if ("".equals(subaddress.getLabel())) subaddress.setLabel(null);
     return subaddress;
+  }
+  
+  private static MoneroBlock sanitizeBlock(MoneroBlock block) {
+    return block;
   }
 }
