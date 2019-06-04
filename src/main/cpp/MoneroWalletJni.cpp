@@ -150,12 +150,6 @@ void setDaemonConnection(JNIEnv *env, MoneroWallet* wallet, jstring juri, jstrin
   env->ReleaseStringUTFChars(jpassword, _password);
 }
 
-MoneroTxRequest deserializeTxRequest(string txRequestStr) {
-  cout << "deserializeTxRequest(txRequestStr)" << endl;
-  cout << txRequestStr << endl;
-  throw runtime_error("deserializeTxRequest(txRequestStr) not implemneted");
-}
-
 // ------------------------------- JNI STATIC ---------------------------------
 
 #ifdef __cplusplus
@@ -546,7 +540,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   const char* _txRequest = jtxRequest ? env->GetStringUTFChars(jtxRequest, NULL) : nullptr;
 
   // deserialize tx request
-  MoneroTxRequest txRequest = deserializeTxRequest(string(_txRequest));
+  MoneroTxRequest txRequest = MoneroUtils::deserializeTxRequest(string(_txRequest));
 
   // get txs
   vector<MoneroTxWallet> txs = wallet->getTxs(txRequest);
