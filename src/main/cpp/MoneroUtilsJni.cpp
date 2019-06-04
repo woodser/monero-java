@@ -1,7 +1,7 @@
-#include <jni.h>
 #include <iostream>
 #include "MoneroUtilsJni.h"
 #include "utils/MoneroUtils.h"
+
 using namespace std;
 
 JNIEXPORT jbyteArray JNICALL Java_monero_utils_MoneroCppUtils_jsonToBinaryJni(JNIEnv *env, jclass utilsClass, jstring json) {
