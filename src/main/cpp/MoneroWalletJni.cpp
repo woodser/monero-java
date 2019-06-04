@@ -540,7 +540,8 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   const char* _txRequest = jtxRequest ? env->GetStringUTFChars(jtxRequest, NULL) : nullptr;
 
   // deserialize tx request
-  MoneroTxRequest txRequest = MoneroUtils::deserializeTxRequest(string(_txRequest));
+  MoneroTxRequest txRequest;
+  MoneroUtils::deserializeTxRequest(string(_txRequest), txRequest);
 
   // get txs
   vector<MoneroTxWallet> txs = wallet->getTxs(txRequest);
