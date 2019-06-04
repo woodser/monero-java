@@ -1,5 +1,5 @@
 #include "MoneroWalletJni.h"
-#include "wallet/MoneroWallet.h"
+#include "utils/MoneroUtils.h"
 #include <iostream>
 
 using namespace std;
@@ -548,29 +548,28 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   const char* _txRequest = jtxRequest ? env->GetStringUTFChars(jtxRequest, NULL) : nullptr;
 
   // deserialize tx request
-  MoneroTxRequest txRequest;
-  // TODO: deserialize here
+  MoneroTxRequest txRequest = MoneroUtils::deserialize(string(_txRequest));
 
   // get txs
   vector<MoneroTxWallet> txs = wallet->getTxs(txRequest);
 
   // return unique blocks to preserve model relationships as tree
   vector<MoneroBlock> blocks;
-  unordered_set<uint64_t> seenBlockPtrs;
+  unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
   for (auto const& tx : txs) {
     if (!tx.block) throw runtime_error("Tx block is null");
-    unordered_set<uint64_t>::const_iterator got = seenBlockPtrs.find((uint64_t) tx.block);
+    unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(tx.block);
     if (got == seenBlockPtrs.end()) {
-      seenBlockPtrs.insert((uint64_t) tx.block);
+      seenBlockPtrs.insert(tx.block);
       blocks.push_back(*tx.block);
     }
   }
   cout << "Returning " << blocks.size() << " blocks" << endl;
 
   // wrap and serialize blocks
-  BlocksContainer resp;
-  resp.blocks = blocks;
-  string blocksJson = epee::serialization::store_t_to_json(resp);
+  //BlocksContainer resp;
+  //resp.blocks = blocks;
+  string blocksJson = MoneroUtils::serialize(blocks);
   //string blocksJson = "temp";
   env->ReleaseStringUTFChars(jtxRequest, _txRequest);
   return env->NewStringUTF(blocksJson.c_str());
