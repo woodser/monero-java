@@ -364,11 +364,11 @@ Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong 
   jobjectArray results = env->NewObjectArray(2, env->FindClass("java/lang/Object"), nullptr);
   jclass longClass = env->FindClass("java/lang/Long");
   jmethodID longConstructor = env->GetMethodID(longClass, "<init>", "(J)V");
-  jobject numBlocksFetchedWrapped = env->NewObject(longClass, longConstructor, static_cast<jlong>(*result.numBlocksFetched));
+  jobject numBlocksFetchedWrapped = env->NewObject(longClass, longConstructor, static_cast<jlong>(result.numBlocksFetched));
   env->SetObjectArrayElement(results, 0, numBlocksFetchedWrapped);
   jclass booleanClass = env->FindClass("java/lang/Boolean");
   jmethodID booleanConstructor = env->GetMethodID(booleanClass, "<init>", "(Z)V");
-  jobject receivedMoneyWrapped = env->NewObject(booleanClass, booleanConstructor, static_cast<jboolean>(*result.receivedMoney));
+  jobject receivedMoneyWrapped = env->NewObject(booleanClass, booleanConstructor, static_cast<jboolean>(result.receivedMoney));
   env->SetObjectArrayElement(results, 1, receivedMoneyWrapped);
   return results;
 }
