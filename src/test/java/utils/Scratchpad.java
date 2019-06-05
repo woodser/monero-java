@@ -68,6 +68,6 @@ public class Scratchpad {
 //    System.out.println("Wallet height: " + walletJni.getHeight());
 //    List<MoneroAccount> accounts = walletJni.getAccounts();
 //    System.out.println("Wallet has " + accounts.size() + " accounts");
-    walletJni.getTxs(new MoneroTxRequest().setIsOutgoing(true));
+    walletJni.getTxs(new MoneroTxRequest().setIsOutgoing(true).setId("abcdef"));
   }
 }
