@@ -189,14 +189,22 @@ void setDaemonConnection(JNIEnv *env, MoneroWallet* wallet, jstring juri, jstrin
 //  }
 //}
 
+// TODO: no common utility?  make common utility
+bool stringToBool(string str) {
+  transform(str.begin(), str.end(), str.begin(), ::tolower);
+  if (string("true") == str) return true;
+  if (string("false") == str) return false;
+  return boost::lexical_cast<bool>(str);
+}
+
 void txNodeToModel(const boost::property_tree::ptree& node, MoneroTx& tx) {
   cout << "txNodeToModel()" << endl;
 
-  // print for debug
-  std::stringstream ss;
-  boost::property_tree::write_json(ss, node, false);
-  string receivedNode = ss.str();
-  cout << "Received node: " << receivedNode << endl;
+//  // print for debug
+//  std::stringstream ss;
+//  boost::property_tree::write_json(ss, node, false);
+//  string receivedNode = ss.str();
+//  cout << "Received node: " << receivedNode << endl;
 
   // initialize tx from node
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
@@ -205,23 +213,11 @@ void txNodeToModel(const boost::property_tree::ptree& node, MoneroTx& tx) {
     if (key == string("id")) tx.id = shared_ptr<string>(make_shared<string>(it->second.data()));
   }
 
-  cout << "ID: " << *tx.id << endl;
-
-
   //throw runtime_error("txNodeToModel");
 }
 
 void txWalletNodeToModel(const boost::property_tree::ptree& node, MoneroTxWallet& tx) {
   txNodeToModel(node, tx);
-  //throw runtime_error("txWalletNodeToModel");
-}
-
-// TODO: no common utility?  make common utility
-bool stringToBool(string str) {
-  transform(str.begin(), str.end(), str.begin(), ::tolower);
-  if (string("true") == str) return true;
-  if (string("false") == str) return false;
-  return boost::lexical_cast<bool>(str);
 }
 
 void txRequestNodeToModel(const boost::property_tree::ptree& node, MoneroTxRequest& txRequest) {
@@ -231,14 +227,8 @@ void txRequestNodeToModel(const boost::property_tree::ptree& node, MoneroTxReque
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
     string key = it->first;
     cout << "Tx request node key: " << key << endl;
-    if (key == string("isOutgoing")) {
-        txRequest.isOutgoing = shared_ptr<bool>(make_shared<bool>(stringToBool(it->second.data())));
-    }
+    if (key == string("isOutgoing")) txRequest.isOutgoing = shared_ptr<bool>(make_shared<bool>(stringToBool(it->second.data())));
   }
-
-  cout << "isOutgoing: " << *txRequest.isOutgoing << endl;
-
-  throw runtime_error("txRequestNodeToModel");
 }
 
 void transferNodeToModel(const boost::property_tree::ptree& node, MoneroTransfer& transfer) {
@@ -708,6 +698,12 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
 
   // deserialize tx request
   MoneroTxRequest txRequest = deserializeTxRequest(string(_txRequest ? _txRequest : ""));
+
+  // print for debug
+  std::stringstream ss;
+  boost::property_tree::write_json(ss, MoneroUtils::txWalletToPropertyTree(txRequest), false);
+  string temp = ss.str();
+  cout << "Re-serialized tx request: " << temp << endl;
 
   // get txs
   vector<MoneroTxWallet> txs = wallet->getTxs(txRequest);
