@@ -190,16 +190,54 @@ void setDaemonConnection(JNIEnv *env, MoneroWallet* wallet, jstring juri, jstrin
 //}
 
 void txNodeToModel(const boost::property_tree::ptree& node, MoneroTx& tx) {
-  throw runtime_error("txNodeToModel");
+  cout << "txNodeToModel()" << endl;
+
+  // print for debug
+  std::stringstream ss;
+  boost::property_tree::write_json(ss, node, false);
+  string receivedNode = ss.str();
+  cout << "Received node: " << receivedNode << endl;
+
+  // initialize tx from node
+  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+    string key = it->first;
+    cout << "Tx node key: " << key << endl;
+    if (key == string("id")) tx.id = shared_ptr<string>(make_shared<string>(it->second.data()));
+  }
+
+  cout << "ID: " << *tx.id << endl;
+
+
+  //throw runtime_error("txNodeToModel");
 }
 
 void txWalletNodeToModel(const boost::property_tree::ptree& node, MoneroTxWallet& tx) {
   txNodeToModel(node, tx);
-  throw runtime_error("txWalletNodeToModel");
+  //throw runtime_error("txWalletNodeToModel");
+}
+
+// TODO: no common utility?  make common utility
+bool stringToBool(string str) {
+  transform(str.begin(), str.end(), str.begin(), ::tolower);
+  if (string("true") == str) return true;
+  if (string("false") == str) return false;
+  return boost::lexical_cast<bool>(str);
 }
 
 void txRequestNodeToModel(const boost::property_tree::ptree& node, MoneroTxRequest& txRequest) {
   txWalletNodeToModel(node, txRequest);
+
+  // initialize request from node
+  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+    string key = it->first;
+    cout << "Tx request node key: " << key << endl;
+    if (key == string("isOutgoing")) {
+        txRequest.isOutgoing = shared_ptr<bool>(make_shared<bool>(stringToBool(it->second.data())));
+    }
+  }
+
+  cout << "isOutgoing: " << *txRequest.isOutgoing << endl;
+
   throw runtime_error("txRequestNodeToModel");
 }
 
@@ -229,7 +267,7 @@ void blockNodeToModel(const boost::property_tree::ptree& node, MoneroBlock& bloc
       boost::property_tree::ptree txsNode = it->second;
       for (boost::property_tree::ptree::const_iterator it2 = txsNode.begin(); it2 != txsNode.end(); ++it2) {
         MoneroTxRequest txRequest;
-        txRequestNodeToModel(txsNode, txRequest);
+        txRequestNodeToModel(it2->second, txRequest);
         block.txs.push_back(txRequest);
       }
     }
