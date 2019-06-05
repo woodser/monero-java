@@ -194,10 +194,12 @@ void txNodeToModel(const boost::property_tree::ptree& node, MoneroTx& tx) {
 }
 
 void txWalletNodeToModel(const boost::property_tree::ptree& node, MoneroTxWallet& tx) {
+  txNodeToModel(node, tx);
   throw runtime_error("txWalletNodeToModel");
 }
 
 void txRequestNodeToModel(const boost::property_tree::ptree& node, MoneroTxRequest& txRequest) {
+  txWalletNodeToModel(node, txRequest);
   throw runtime_error("txRequestNodeToModel");
 }
 
@@ -224,7 +226,12 @@ void blockNodeToModel(const boost::property_tree::ptree& node, MoneroBlock& bloc
     cout << "Block node Key: " << key << endl;
     if (key == string("height")) block.height = std::shared_ptr<uint64_t>(std::make_shared<uint64_t>((uint64_t) 7));
     else if (key == string("txs")) {
-      throw runtime_error("ok need to process txs");
+      boost::property_tree::ptree txsNode = it->second;
+      for (boost::property_tree::ptree::const_iterator it2 = txsNode.begin(); it2 != txsNode.end(); ++it2) {
+        MoneroTxRequest txRequest;
+        txRequestNodeToModel(txsNode, txRequest);
+        block.txs.push_back(txRequest);
+      }
     }
   }
 }
