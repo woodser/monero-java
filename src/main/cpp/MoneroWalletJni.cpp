@@ -150,6 +150,21 @@ void setDaemonConnection(JNIEnv *env, MoneroWallet* wallet, jstring juri, jstrin
   env->ReleaseStringUTFChars(jpassword, _password);
 }
 
+void toModel(const boost::property_tree::ptree& root, MoneroTxRequest& request) {
+
+  // print node to convert for shiggles
+  std::stringstream ss;
+  boost::property_tree::write_json(ss, root, false);
+  string serialized = ss.str();
+  cout << "Converting property tree to MoneroTxRequest:  " << serialized << endl;
+
+  // initialize request from property tree
+  MoneroUtils::toModel(root, request);
+  cout << "Block's height: " << endl;
+  cout << *(*request.block).height << endl;
+  throw runtime_error("Need to initialize fields specific to request");
+}
+
 // ------------------------------- JNI STATIC ---------------------------------
 
 #ifdef __cplusplus
@@ -565,8 +580,15 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
   const char* _txRequest = jtxRequest ? env->GetStringUTFChars(jtxRequest, NULL) : nullptr;
 
-  // deserialize tx request
-  MoneroTxRequest txRequest;  // TODO
+  cout << "Tx request string: " << endl;
+  if (_txRequest) cout << string(_txRequest) << endl;
+
+  // deserialize tx request string to property tree
+  MoneroTxRequest txRequest;
+  std::istringstream iss = _txRequest ? std::istringstream(string(_txRequest)) : std::istringstream();
+  boost::property_tree::ptree txRequestNode;
+  boost:property_tree:read_json(iss, txRequestNode);
+  toModel(txRequestNode, txRequest);
 
   // get txs
   vector<MoneroTxWallet> txs = wallet->getTxs(txRequest);

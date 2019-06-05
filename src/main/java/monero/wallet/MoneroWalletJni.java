@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -402,7 +403,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroTxWallet> getTxs(MoneroTxRequest request) {
-    String blocksJson = getTxsJni(request == null ? null : JsonUtils.serialize(request));
+    String blocksJson = getTxsJni(request == null ? null : JsonUtils.serialize(request.getBlock() != null ? request.getBlock() : new MoneroBlock().setTxs(Arrays.asList(request))));
     System.out.println("Received response from JNI: " + blocksJson);
     List<MoneroBlock> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
     for (MoneroBlock block : blocks) sanitizeBlock(block);
