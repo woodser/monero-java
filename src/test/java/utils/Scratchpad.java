@@ -2,12 +2,10 @@ package utils;
 
 import java.util.List;
 
-import monero.daemon.model.MoneroTx;
-import monero.wallet.MoneroWallet;
+import monero.daemon.model.MoneroBlock;
 import monero.wallet.MoneroWalletJni;
-import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroTransfer;
-import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.request.MoneroTxRequest;
 
 /**
  * Scratchpad for quick scripting.
@@ -18,7 +16,7 @@ public class Scratchpad {
     
     // initialize daemon, wallet, and direct rpc interface
 //    MoneroDaemon daemon = TestUtils.getDaemonRpc();
-    MoneroWallet walletRpc = TestUtils.getWalletRpc();
+//    MoneroWallet walletRpc = TestUtils.getWalletRpc();
     //MoneroWallet walletJni = TestUtils.getWalletJni();
     //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
     
@@ -51,13 +49,13 @@ public class Scratchpad {
 //      }
 //    });
     
-    List<MoneroTxWallet> txs = walletRpc.getTxs();
-    for (MoneroTxWallet tx : txs) {
-      System.out.println(tx.getBlock());
-    }
+//    List<MoneroTxWallet> txs = walletRpc.getTxs();
+//    for (MoneroTxWallet tx : txs) {
+//      System.out.println(tx.getBlock());
+//    }
     
     
-//    MoneroWalletJni walletJni = new MoneroWalletJni("./test_wallets/test_wallet_1", TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
+    MoneroWalletJni walletJni = new MoneroWalletJni("./test_wallets/test_wallet_1", TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
 //
 //    System.out.println("Wallet balance: " + walletJni.getBalance());
 //    System.out.println("Account 0 balance: " + walletJni.getBalance(0));
@@ -70,5 +68,6 @@ public class Scratchpad {
 //    System.out.println("Wallet height: " + walletJni.getHeight());
 //    List<MoneroAccount> accounts = walletJni.getAccounts();
 //    System.out.println("Wallet has " + accounts.size() + " accounts");
+    walletJni.getTxs(new MoneroTxRequest().setBlock(new MoneroBlock().setHeight(1500l)));
   }
 }
