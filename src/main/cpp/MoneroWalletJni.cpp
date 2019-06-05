@@ -150,19 +150,106 @@ void setDaemonConnection(JNIEnv *env, MoneroWallet* wallet, jstring juri, jstrin
   env->ReleaseStringUTFChars(jpassword, _password);
 }
 
-void toModel(const boost::property_tree::ptree& root, MoneroTxRequest& request) {
+//void toModel(const boost::property_tree::ptree& root, MoneroTxRequest& request) {
+//
+//  // print node to convert for shiggles
+//  std::stringstream ss;
+//  boost::property_tree::write_json(ss, root, false);
+//  string serialized = ss.str();
+//  cout << "Converting property tree to MoneroTxRequest:  " << serialized << endl;
+//
+//  // initialize block
+//  MoneroBlock block;
+//  blockNodeToModel(root, block);
+//
+//  // initialize tx request extensions
+//  for (boost::property_tree::ptree::const_iterator it = root.begin(); it != root.end(); ++it) {
+//    string key = it->first;
+//    if (key == string("isOutgoing")) {
+//      cout << "Handling isOutgoing key" << endl;
+//      request.isOutgoing = shared_ptr<bool>(make_shared<bool>(boost::lexical_cast<bool>(it->second.data())));
+//      cout << *request.isOutgoing << endl;
+//    }
+//  }
+//
+//  cout << "Block's height: " << endl;
+//  throw runtime_error("Need to initialize fields specific to request");
+//}
 
-  // print node to convert for shiggles
-  std::stringstream ss;
-  boost::property_tree::write_json(ss, root, false);
-  string serialized = ss.str();
-  cout << "Converting property tree to MoneroTxRequest:  " << serialized << endl;
+//void toModel(const boost::property_tree::ptree& node, MoneroTxWallet& tx) {
+//  cout << "toModel(txWallet)" << endl;
+//  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+//    string key = it->first;
+//    cout << "Property tree key: " << key << endl;
+//    if (key == string("height")) {
+//      MoneroBlock block;
+//      block.height = std::shared_ptr<uint64_t>(std::make_shared<uint64_t>((uint64_t) 7));
+//      tx.block = std::shared_ptr<MoneroBlock>(std::make_shared<MoneroBlock>(block));
+//    }
+//  }
+//}
 
-  // initialize request from property tree
-  MoneroUtils::toModel(root, request);
-  cout << "Block's height: " << endl;
-  cout << *(*request.block).height << endl;
-  throw runtime_error("Need to initialize fields specific to request");
+void txNodeToModel(const boost::property_tree::ptree& node, MoneroTx& tx) {
+  throw runtime_error("txNodeToModel");
+}
+
+void txWalletNodeToModel(const boost::property_tree::ptree& node, MoneroTxWallet& tx) {
+  throw runtime_error("txWalletNodeToModel");
+}
+
+void txRequestNodeToModel(const boost::property_tree::ptree& node, MoneroTxRequest& txRequest) {
+  throw runtime_error("txRequestNodeToModel");
+}
+
+void transferNodeToModel(const boost::property_tree::ptree& node, MoneroTransfer& transfer) {
+  throw runtime_error("transferNodeToModel");
+}
+
+void transferRequestNodeToModel(const boost::property_tree::ptree& node, MoneroTransferRequest& transferRequest) {
+  throw runtime_error("transferRequestNodeToModel");
+}
+
+void outputNodeToModel(const boost::property_tree::ptree& node, MoneroOutput& output) {
+  throw runtime_error("outputNodeToModel");
+}
+
+void outputRequestNodeToModel(const boost::property_tree::ptree& node, MoneroOutputRequest& outputRequest) {
+  throw runtime_error("outputRequestNodeToModel");
+}
+
+void blockNodeToModel(const boost::property_tree::ptree& node, MoneroBlock& block) {
+  throw runtime_error("blockNodeToModel");
+
+//  cout << "blockNodeToModel()" << endl;
+//  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+//    string key = it->first;
+//    cout << "Property tree key: " << key << endl;
+//    if (key == string("height")) {
+//      MoneroBlock block;
+//      block.height = std::shared_ptr<uint64_t>(std::make_shared<uint64_t>((uint64_t) 7));
+//      tx.block = std::shared_ptr<MoneroBlock>(std::make_shared<MoneroBlock>(block));
+//    } else if (key == string("txs")) {
+//      throw runtime_error("ok need to process txs");
+//    }
+//  }
+}
+
+MoneroTxRequest deserializeTxRequest(string txRequestStr) {
+  cout << "deserializeTxRequest" << endl;
+  cout << txRequestStr << endl;
+
+  // deserialize tx request string to property rooted at block
+  MoneroTxRequest txRequest;
+  std::istringstream iss = txRequestStr.empty() ? std::istringstream() : std::istringstream(txRequestStr);
+  boost::property_tree::ptree blockNode;
+  boost:property_tree:read_json(iss, blockNode);
+
+  // convert property tree to block
+  MoneroBlock block;
+  blockNodeToModel(blockNode, block);
+
+  // return tx which represents request
+  return static_cast<MoneroTxRequest&>(block.txs[0]);
 }
 
 // ------------------------------- JNI STATIC ---------------------------------
@@ -583,12 +670,8 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   cout << "Tx request string: " << endl;
   if (_txRequest) cout << string(_txRequest) << endl;
 
-  // deserialize tx request string to property tree
-  MoneroTxRequest txRequest;
-  std::istringstream iss = _txRequest ? std::istringstream(string(_txRequest)) : std::istringstream();
-  boost::property_tree::ptree txRequestNode;
-  boost:property_tree:read_json(iss, txRequestNode);
-  toModel(txRequestNode, txRequest);
+  // deserialize tx request
+  MoneroTxRequest txRequest = deserializeTxRequest(string(_txRequest ? _txRequest : ""));
 
   // get txs
   vector<MoneroTxWallet> txs = wallet->getTxs(txRequest);
