@@ -321,7 +321,7 @@ Java_monero_wallet_MoneroWalletJni_getAddressIndexJni(JNIEnv *env, jobject insta
   }
 
   // serialize subaddresses which contain indices
-  string subaddressJson = MoneroUtils::serialize(subaddress);
+  string subaddressJson = string("temp");
   env->ReleaseStringUTFChars(jaddress, _address);
   return env->NewStringUTF(subaddressJson.c_str());
 }
@@ -462,10 +462,36 @@ Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance,
 //    }
 //  }
 
-  // serialize and return accounts
-  string accountsJson = MoneroUtils::serialize(accounts);
+  // convert accounts to property tree
+  boost::property_tree::ptree accountsNode = MoneroUtils::toPropertyTree(accounts);
+
+  // serialize property tree to json
+  boost::property_tree::ptree root;
+  root.add_child("accounts", accountsNode);
+  std::stringstream ss;
+  boost::property_tree::write_json(ss, root, false);
+  string accountsJson = ss.str();
+  cout << "Serialized " << accountsJson << endl;
   env->ReleaseStringUTFChars(jtag, _tag);
   return env->NewStringUTF(accountsJson.c_str());
+
+//  string accountsJson = MoneroUtils::serialize(accounts);
+//  cout << "Serialized " << accountsJson << endl;
+//  env->ReleaseStringUTFChars(jtag, _tag);
+//  return env->NewStringUTF(accountsJson.c_str());
+
+
+
+
+  //std::stringstream ss;
+  //json_archive<true> ar(ss);
+  //accounts[0].serialize_base(ar);
+
+//  for (int i = 0; i < accounts.size(); i++) {
+//    ar << accounts[i];
+//  }
+  //string accountsJson = ss.str();
+  //string accountsJson = string("temp");
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountJni(JNIEnv* env, jobject instance, jint accountIdx, jboolean includeSubaddresses) {
@@ -491,7 +517,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountJni(JNIEn
 //  }
 
   // serialize and returna account
-  string accountJson = MoneroUtils::serialize(account);
+  string accountJson = string("temp");
   return env->NewStringUTF(accountJson.c_str());
 }
 
@@ -530,7 +556,7 @@ Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(JNIEnv* env, jobject insta
   //  }
 
   // serialize and return subaddresses
-  string subaddressesJson = MoneroUtils::serialize(subaddresses);
+  string subaddressesJson = string("temp");
   return env->NewStringUTF(subaddressesJson.c_str());
 }
 
@@ -540,8 +566,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   const char* _txRequest = jtxRequest ? env->GetStringUTFChars(jtxRequest, NULL) : nullptr;
 
   // deserialize tx request
-  MoneroTxRequest txRequest;
-  MoneroUtils::deserializeTxRequest(string(_txRequest), txRequest);
+  MoneroTxRequest txRequest;  // TODO
 
   // get txs
   vector<MoneroTxWallet> txs = wallet->getTxs(txRequest);
@@ -562,7 +587,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   // wrap and serialize blocks
   //BlocksContainer resp;
   //resp.blocks = blocks;
-  string blocksJson = MoneroUtils::serialize(blocks);
+  string blocksJson = string("temp");
   //string blocksJson = "temp";
   env->ReleaseStringUTFChars(jtxRequest, _txRequest);
   return env->NewStringUTF(blocksJson.c_str());
