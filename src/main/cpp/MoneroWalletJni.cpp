@@ -699,12 +699,6 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   // deserialize tx request
   MoneroTxRequest txRequest = deserializeTxRequest(string(_txRequest ? _txRequest : ""));
 
-  // print for debug
-  std::stringstream ss;
-  boost::property_tree::write_json(ss, MoneroUtils::txRequestToPropertyTree(txRequest), false);
-  string temp = ss.str();
-  cout << "Re-serialized tx request: " << temp << endl;
-
   // get txs
   vector<MoneroTxWallet> txs = wallet->getTxs(txRequest);
 
