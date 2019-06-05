@@ -218,25 +218,19 @@ void outputRequestNodeToModel(const boost::property_tree::ptree& node, MoneroOut
 }
 
 void blockNodeToModel(const boost::property_tree::ptree& node, MoneroBlock& block) {
-  throw runtime_error("blockNodeToModel");
-
-//  cout << "blockNodeToModel()" << endl;
-//  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
-//    string key = it->first;
-//    cout << "Property tree key: " << key << endl;
-//    if (key == string("height")) {
-//      MoneroBlock block;
-//      block.height = std::shared_ptr<uint64_t>(std::make_shared<uint64_t>((uint64_t) 7));
-//      tx.block = std::shared_ptr<MoneroBlock>(std::make_shared<MoneroBlock>(block));
-//    } else if (key == string("txs")) {
-//      throw runtime_error("ok need to process txs");
-//    }
-//  }
+  cout << "blockNodeToModel()" << endl;
+  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+    string key = it->first;
+    cout << "Block node Key: " << key << endl;
+    if (key == string("height")) block.height = std::shared_ptr<uint64_t>(std::make_shared<uint64_t>((uint64_t) 7));
+    else if (key == string("txs")) {
+      throw runtime_error("ok need to process txs");
+    }
+  }
 }
 
 MoneroTxRequest deserializeTxRequest(string txRequestStr) {
-  cout << "deserializeTxRequest" << endl;
-  cout << txRequestStr << endl;
+  cout << "deserializeTxRequest(): " <<  txRequestStr << endl;
 
   // deserialize tx request string to property rooted at block
   MoneroTxRequest txRequest;
@@ -666,9 +660,6 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   cout << "Java_monero_wallet_MoneroWalletJni_getTxsJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
   const char* _txRequest = jtxRequest ? env->GetStringUTFChars(jtxRequest, NULL) : nullptr;
-
-  cout << "Tx request string: " << endl;
-  if (_txRequest) cout << string(_txRequest) << endl;
 
   // deserialize tx request
   MoneroTxRequest txRequest = deserializeTxRequest(string(_txRequest ? _txRequest : ""));
