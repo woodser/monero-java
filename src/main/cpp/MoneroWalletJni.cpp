@@ -210,7 +210,7 @@ void txNodeToModel(const boost::property_tree::ptree& node, MoneroTx& tx) {
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
     string key = it->first;
     cout << "Tx node key: " << key << endl;
-    if (key == string("id")) tx.id = shared_ptr<string>(make_shared<string>(it->second.data()));
+    if (key == string("id")) tx.id = it->second.data();
   }
 
   //throw runtime_error("txNodeToModel");
@@ -252,7 +252,7 @@ void blockNodeToModel(const boost::property_tree::ptree& node, MoneroBlock& bloc
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
     string key = it->first;
     cout << "Block node Key: " << key << endl;
-    if (key == string("height")) block.height = std::shared_ptr<uint64_t>(std::make_shared<uint64_t>((uint64_t) 7));
+    if (key == string("height")) block.height = (uint64_t) 7;  // TODO
     else if (key == string("txs")) {
       boost::property_tree::ptree txsNode = it->second;
       for (boost::property_tree::ptree::const_iterator it2 = txsNode.begin(); it2 != txsNode.end(); ++it2) {
@@ -463,7 +463,7 @@ Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *env, jobject instance,
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
 
   // clear old listener
-  wallet->setListener(nullptr);
+  wallet->setListener(boost::none);
   WalletJniListener *oldListener = getHandle<WalletJniListener>(env, instance, "jniListenerHandle");
   if (oldListener != nullptr) {
     oldListener->deleteGlobalJavaRef(env);
@@ -475,7 +475,7 @@ Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *env, jobject instance,
     return 0;
   } else {
     WalletJniListener* listener = new WalletJniListener(env, jlistener);
-    wallet->setListener(listener);
+    wallet->setListener(*listener);
     return reinterpret_cast<jlong>(listener);
   }
 }
@@ -706,11 +706,11 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   vector<MoneroBlock> blocks;
   unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
   for (auto const& tx : txs) {
-    if (!tx.block) throw runtime_error("Tx block is null");
-    unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(tx.block);
+    if (tx.block == boost::none) throw runtime_error("Tx block is null");
+    unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx.block);
     if (got == seenBlockPtrs.end()) {
-      seenBlockPtrs.insert(tx.block);
-      blocks.push_back(*tx.block);
+      seenBlockPtrs.insert(*tx.block);
+      blocks.push_back(**tx.block);
     }
   }
   cout << "Returning " << blocks.size() << " blocks" << endl;
