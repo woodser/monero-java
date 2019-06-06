@@ -276,7 +276,8 @@ MoneroTxRequest deserializeTxRequest(string txRequestStr) {
   MoneroBlock block;
   blockNodeToModel(blockNode, block);
 
-  // return tx request
+  // return deserialized request
+  if (block.txs.empty()) return MoneroTxRequest();
   return static_cast<MoneroTxRequest&>(*block.txs[0]);
 }
 
@@ -292,7 +293,8 @@ MoneroTransferRequest deserializeTransferRequest(string transferRequestStr) {
   MoneroBlock block;
   blockNodeToModel(blockNode, block);
 
-  // return transfer request
+  // return deserialized request
+  if (block.txs.empty()) return MoneroTransferRequest();
   return *static_cast<MoneroTxRequest&>(*block.txs[0]).transferRequest;
 }
 
