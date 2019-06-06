@@ -258,7 +258,7 @@ void blockNodeToModel(const boost::property_tree::ptree& node, MoneroBlock& bloc
       for (boost::property_tree::ptree::const_iterator it2 = txsNode.begin(); it2 != txsNode.end(); ++it2) {
         MoneroTxRequest txRequest;
         txRequestNodeToModel(it2->second, txRequest);
-        block.txs.push_back(txRequest);
+        block.txs.push_back(make_shared<MoneroTxRequest>(txRequest));
       }
     }
   }
@@ -277,7 +277,7 @@ MoneroTxRequest deserializeTxRequest(string txRequestStr) {
   blockNodeToModel(blockNode, block);
 
   // return tx which represents request
-  return static_cast<MoneroTxRequest&>(block.txs[0]);
+  return static_cast<MoneroTxRequest&>(*block.txs[0]);
 }
 
 // ------------------------------- JNI STATIC ---------------------------------
