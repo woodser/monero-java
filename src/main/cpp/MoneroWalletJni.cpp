@@ -276,8 +276,24 @@ MoneroTxRequest deserializeTxRequest(string txRequestStr) {
   MoneroBlock block;
   blockNodeToModel(blockNode, block);
 
-  // return tx which represents request
+  // return tx request
   return static_cast<MoneroTxRequest&>(*block.txs[0]);
+}
+
+MoneroTransferRequest deserializeTransferRequest(string transferRequestStr) {
+  cout << "deserializeTransferRequest(): " <<  transferRequestStr << endl;
+
+  // deserialize transfer request string to property rooted at block
+  std::istringstream iss = transferRequestStr.empty() ? std::istringstream() : std::istringstream(transferRequestStr);
+  boost::property_tree::ptree blockNode;
+  boost:property_tree:read_json(iss, blockNode);
+
+  // convert property tree to block
+  MoneroBlock block;
+  blockNodeToModel(blockNode, block);
+
+  // return transfer request
+  return *static_cast<MoneroTxRequest&>(*block.txs[0]).transferRequest;
 }
 
 // ------------------------------- JNI STATIC ---------------------------------
@@ -721,6 +737,41 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   //string blocksJson = "temp";
   env->ReleaseStringUTFChars(jtxRequest, _txRequest);
   return env->NewStringUTF(blocksJson.c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNIEnv* env, jobject instance, jstring jtransferRequest) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getTransfersJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _transferRequest = jtransferRequest ? env->GetStringUTFChars(jtransferRequest, NULL) : nullptr;
+
+  // deserialize transfer request
+  MoneroTransferRequest transferRequest = deserializeTransferRequest(string(_transferRequest ? _transferRequest : ""));
+
+  // get transfers
+  vector<MoneroTransfer> transfers = wallet->getTransfers(transferRequest);
+  cout << "Got " << transfers.size() << endl;
+
+//  // return unique blocks to preserve model relationships as tree
+//  vector<MoneroBlock> blocks;
+//  unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
+//  for (auto const& tx : txs) {
+//    if (tx.block == boost::none) throw runtime_error("Tx block is null");
+//    unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx.block);
+//    if (got == seenBlockPtrs.end()) {
+//      seenBlockPtrs.insert(*tx.block);
+//      blocks.push_back(**tx.block);
+//    }
+//  }
+//  cout << "Returning " << blocks.size() << " blocks" << endl;
+//
+//  // wrap and serialize blocks
+//  //BlocksContainer resp;
+//  //resp.blocks = blocks;
+//  string blocksJson = string("temp");
+//  //string blocksJson = "temp";
+//  env->ReleaseStringUTFChars(jtxRequest, _txRequest);
+//  return env->NewStringUTF(blocksJson.c_str());
+  throw runtime_error("Not implemented");
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, jobject instance, jstring jpath, jstring jpassword) {
