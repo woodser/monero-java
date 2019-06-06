@@ -268,7 +268,6 @@ MoneroTxRequest deserializeTxRequest(string txRequestStr) {
   cout << "deserializeTxRequest(): " <<  txRequestStr << endl;
 
   // deserialize tx request string to property rooted at block
-  MoneroTxRequest txRequest;
   std::istringstream iss = txRequestStr.empty() ? std::istringstream() : std::istringstream(txRequestStr);
   boost::property_tree::ptree blockNode;
   boost:property_tree:read_json(iss, blockNode);
