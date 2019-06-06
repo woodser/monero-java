@@ -578,20 +578,20 @@ Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance,
   // get accounts
   vector<MoneroAccount> accounts = wallet->getAccounts(includeSubaddresses, _tag ? string(_tag) : "");
 
-//  // print account info
-//  cout << "Retrieved " << accounts.size() << " accounts!" << endl;
-//  for (uint32_t accountIdx = 0; accountIdx < accounts.size(); accountIdx++) {
-//    MoneroAccount account = accounts.at(accountIdx);
-//    cout << "Account index: " << account.index << endl;
-//    cout << "Account label: " << account.label << endl;
-//    cout << "Account balance: " << account.balance << endl;
-//    cout << "Account subaddresses: " << account.subaddresses.size() << endl;
-//
+  // print account info
+  cout << "Retrieved " << accounts.size() << " accounts!" << endl;
+  for (uint32_t accountIdx = 0; accountIdx < accounts.size(); accountIdx++) {
+    MoneroAccount account = accounts.at(accountIdx);
+    cout << "Account index: " << account.index << endl;
+    cout << "Account label: " << account.label << endl;
+    cout << "Account balance: " << account.balance << endl;
+    cout << "Account subaddresses: " << account.subaddresses.size() << endl;
+
 //    for (uint32_t subaddressIdx = 0; subaddressIdx < account.subaddresses.size(); subaddressIdx++) {
 //	    string json = epee::serialization::store_t_to_json(account.subaddresses.at(subaddressIdx));
 //	    cout << "Converted to JSON: " << json << endl;
 //    }
-//  }
+  }
 
   // convert accounts to property tree
   boost::property_tree::ptree accountsNode = MoneroUtils::toPropertyTree(accounts);
