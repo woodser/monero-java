@@ -751,29 +751,31 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
 
   // get transfers
   vector<MoneroTransfer> transfers = wallet->getTransfers(transferRequest);
-  cout << "Got " << transfers.size() << endl;
+  cout << "Got " << transfers.size() << " transfers" << endl;
 
-//  // return unique blocks to preserve model relationships as tree
-//  vector<MoneroBlock> blocks;
-//  unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
-//  for (auto const& tx : txs) {
-//    if (tx.block == boost::none) throw runtime_error("Tx block is null");
-//    unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx.block);
-//    if (got == seenBlockPtrs.end()) {
-//      seenBlockPtrs.insert(*tx.block);
-//      blocks.push_back(**tx.block);
-//    }
-//  }
-//  cout << "Returning " << blocks.size() << " blocks" << endl;
-//
-//  // wrap and serialize blocks
-//  //BlocksContainer resp;
-//  //resp.blocks = blocks;
-//  string blocksJson = string("temp");
-//  //string blocksJson = "temp";
-//  env->ReleaseStringUTFChars(jtxRequest, _txRequest);
-//  return env->NewStringUTF(blocksJson.c_str());
-  throw runtime_error("Not implemented");
+  // return unique blocks to preserve model relationships as tree
+  vector<MoneroBlock> blocks;
+  unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
+  for (auto const& transfer : transfers) {
+    shared_ptr<MoneroTxWallet> tx = transfer.tx;
+    if (tx->block == boost::none) throw runtime_error("Need to handle unconfirmed transfer");
+    unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx->block);
+    if (got == seenBlockPtrs.end()) {
+      seenBlockPtrs.insert(*tx->block);
+      blocks.push_back(**tx->block);
+    }
+  }
+  cout << "Returning " << blocks.size() << " blocks" << endl;
+
+  // wrap and serialize blocks
+  std::stringstream ss;
+  boost::property_tree::ptree container;
+  container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
+  boost::property_tree::write_json(ss, container, false);
+  string blocksJson = ss.str();
+  cout << "Returning transfers " << blocksJson << endl;
+  env->ReleaseStringUTFChars(jtransferRequest, _transferRequest);
+  return env->NewStringUTF(blocksJson.c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, jobject instance, jstring jpath, jstring jpassword) {
