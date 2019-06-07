@@ -439,20 +439,20 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     String blocksJson = getTransfersJni(JsonUtils.serialize(requestBlock));
     System.out.println("Received getTransfers() response from JNI: " + blocksJson);
     
-    
+    // create custom mapper to deserialize to wallet subclasses
     TxWalletDeserializer txDeserializer = new TxWalletDeserializer();
     SimpleModule module = new SimpleModule("TxWalletDeserializer", new Version(1, 0, 0, null, null, null));
     module.addDeserializer(MoneroTx.class, txDeserializer);
     ObjectMapper mapper = new ObjectMapper();
     mapper.registerModule(module);
     
+    // deserialize blocks
     List<MoneroBlock> blocks = JsonUtils.deserialize(mapper, blocksJson, BlocksContainer.class).blocks;
     
-    // collect results
+    // collect transfers
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
     for (MoneroBlock block : blocks) {
       sanitizeBlock(block);
-      System.out.println("We have a block!");
       System.out.println(JsonUtils.serialize(block));
       for (MoneroTx tx : block.getTxs()) {
         MoneroTxWallet txWallet = (MoneroTxWallet) tx;
@@ -461,6 +461,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
         }
         if (txWallet.getOutgoingTransfer() != null) transfers.add(txWallet.getOutgoingTransfer());
       }
+      throw new RuntimeException("No need to continue ya?");
     }
     return transfers;
   }
