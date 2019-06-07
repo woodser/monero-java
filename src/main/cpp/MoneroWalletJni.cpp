@@ -610,6 +610,7 @@ Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance,
 //    }
 //  }
 
+
   // convert accounts to property tree
   boost::property_tree::ptree accountsNode = MoneroUtils::toPropertyTree(accounts);
 
