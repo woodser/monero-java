@@ -754,6 +754,15 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
   vector<MoneroTransfer> transfers = wallet->getTransfers(transferRequest);
   cout << "Got " << transfers.size() << " transfers" << endl;
 
+  for (const auto& transfer : transfers) {
+      if (transfer.tx == nullptr) throw runtime_error("tx is null");
+      if (transfer.tx->id == boost::none) throw runtime_error("tx is missing id");
+      if (transfer.tx->block == boost::none) throw runtime_error("block is none");
+      MoneroBlock& block = **transfer.tx->block;
+      if (block.height == boost::none) throw runtime_error("block height mis missing");
+      if (block.txs.empty()) throw runtime_error("but it doesn't have txs");
+  }
+
   // return unique blocks to preserve model relationships as tree
   vector<MoneroBlock> blocks;
   unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
