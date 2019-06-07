@@ -1,5 +1,8 @@
 package monero.wallet.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroException;
@@ -38,12 +41,14 @@ public class MoneroOutputWallet extends MoneroOutput {
     return (MoneroTxWallet) super.getTx();
   }
   
+  @JsonIgnore
   public MoneroOutputWallet setTx(MoneroTx tx) {
     if (tx != null && !(tx instanceof MoneroTxWallet)) throw new MoneroException("Wallet output's transaction must be of type MoneroTxWallet");
     super.setTx(tx);
     return this;
   }
   
+  @JsonProperty("tx")
   public MoneroOutputWallet setTx(MoneroTxWallet tx) {
     super.setTx(tx);
     return this;

@@ -6,6 +6,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import common.utils.GenUtils;
 import monero.utils.MoneroUtils;
 
@@ -60,11 +63,13 @@ public class MoneroBlock extends MoneroBlockHeader {
     return txs;
   }
   
+  @JsonProperty("txs")
   public MoneroBlock setTxs(List<MoneroTx> txs) {
     this.txs = txs;
     return this;
   }
   
+  @JsonIgnore
   public MoneroBlock setTxs(MoneroTx... txs) {
     this.txs = GenUtils.arrayToList(txs);
     return this;

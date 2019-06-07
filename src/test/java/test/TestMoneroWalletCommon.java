@@ -61,7 +61,7 @@ import utils.TestUtils;
 public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // test constants
-  protected static final boolean LITE_MODE = true;
+  protected static final boolean LITE_MODE = false;
   protected static final boolean TEST_NON_RELAYS = true;
   protected static final boolean TEST_RELAYS = true;
   protected static final boolean TEST_NOTIFICATIONS = false;
@@ -2703,7 +2703,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   private static List<MoneroTransfer> getAndTestTransfers(MoneroWallet wallet, MoneroTransferRequest request, TestContext ctx, Boolean isExpected) {
     List<MoneroTransfer> transfers = wallet.getTransfers(request);
     if (Boolean.FALSE.equals(isExpected)) assertEquals(0, transfers.size());
-    if (Boolean.TRUE.equals(isExpected)) assertTrue("Transactions were expected but not found; run send tests?", transfers.size() > 0);
+    if (Boolean.TRUE.equals(isExpected)) assertTrue("Transfers were expected but not found; run send tests?", transfers.size() > 0);
     if (ctx == null) ctx = new TestContext();
     ctx.wallet = wallet;
     for (MoneroTransfer transfer : transfers) testTxWallet(transfer.getTx(), ctx);
