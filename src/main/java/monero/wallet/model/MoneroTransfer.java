@@ -2,6 +2,8 @@ package monero.wallet.model;
 
 import java.math.BigInteger;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import monero.utils.MoneroUtils;
 
 /**
@@ -22,6 +24,7 @@ public class MoneroTransfer {
     this.accountIndex = transfer.accountIndex;
   }
   
+  @JsonBackReference
   public MoneroTxWallet getTx() {
     return tx;
   }
