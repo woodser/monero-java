@@ -12,12 +12,15 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
@@ -415,7 +418,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<MoneroTxWallet> getTxs(MoneroTxRequest request) {
     String blocksJson = getTxsJni(request == null ? null : JsonUtils.serialize(request.getBlock() != null ? request.getBlock() : new MoneroBlock().setTxs(Arrays.asList(request))));
-    System.out.println("Received getTxs() response from JNI: " + blocksJson);
+    System.out.println("Received getTxs() response from JNI: " + blocksJson.substring(0, 10000) + "...");
     List<MoneroBlock> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
     for (MoneroBlock block : blocks) sanitizeBlock(block);
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
@@ -437,14 +440,25 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     // serialize request from block and deserialize response
     String blocksJson = getTransfersJni(JsonUtils.serialize(requestBlock));
-    System.out.println("Received getTransfers() response from JNI: " + blocksJson);
+    System.out.println("Received getTransfers() response from JNI: " + blocksJson.substring(0, 10000) + "...");
     
-    // create custom mapper to deserialize to wallet subclasses
-    TxWalletDeserializer txDeserializer = new TxWalletDeserializer();
-    SimpleModule module = new SimpleModule("TxWalletDeserializer", new Version(1, 0, 0, null, null, null));
-    module.addDeserializer(MoneroTx.class, txDeserializer);
+    // custom deserialization using mapper
     ObjectMapper mapper = new ObjectMapper();
-    mapper.registerModule(module);
+    mapper.setSerializationInclusion(Include.NON_NULL);
+    mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+    mapper.configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS, true);
+    
+    // deserialize txs to MoneroTxWallet TODO: except coinbaseTx?
+    TxWalletDeserializer txWalletDeserializer = new TxWalletDeserializer();
+    SimpleModule txWalletDeserializerModule = new SimpleModule("TxWalletDeserilizerModule", new Version(1, 0, 0, null, null, null));
+    txWalletDeserializerModule.addDeserializer(MoneroTx.class, txWalletDeserializer);
+    mapper.registerModule(txWalletDeserializerModule);
+    
+    // deserialize transfers to MoneroIncomingTransfer xor MoneroOutgoingTransfer
+    TransferDeserializer transferDeserializer = new TransferDeserializer();
+    SimpleModule transferDeserializerModule = new SimpleModule("TransferDeserilizerModule", new Version(1, 0, 0, null, null, null));
+    transferDeserializerModule.addDeserializer(MoneroTransfer.class, transferDeserializer);
+    mapper.registerModule(transferDeserializerModule);
     
     // deserialize blocks
     List<MoneroBlock> blocks = JsonUtils.deserialize(mapper, blocksJson, BlocksContainer.class).blocks;
@@ -453,7 +467,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
     for (MoneroBlock block : blocks) {
       sanitizeBlock(block);
-      System.out.println(JsonUtils.serialize(block));
       for (MoneroTx tx : block.getTxs()) {
         MoneroTxWallet txWallet = (MoneroTxWallet) tx;
         if (txWallet.getIncomingTransfers() != null) {
@@ -461,7 +474,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
         }
         if (txWallet.getOutgoingTransfer() != null) transfers.add(txWallet.getOutgoingTransfer());
       }
-      throw new RuntimeException("No need to continue ya?");
     }
     return transfers;
   }
@@ -819,10 +831,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Deserializes a block with wallet subclasses.
+   * Deserializes MoneroTx as MoneroTxWallet.
    */
   private class TxWalletDeserializer extends StdDeserializer<MoneroTx> {
-    
+    private static final long serialVersionUID = 8098255188385074924L;
+
     protected TxWalletDeserializer() {
       super(MoneroTx.class);
     }
@@ -831,6 +844,24 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     public MoneroTx deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
       TreeNode node = p.readValueAsTree();
       return p.getCodec().treeToValue(node, MoneroTxWallet.class);
+    }
+  }
+  
+  
+  /**
+   * Deserializes MoneroTransfer as MoneroIncomingTransfer xor MoneroOutgoingTransfer.
+   */
+  private class TransferDeserializer extends StdDeserializer<MoneroTransfer> {
+    private static final long serialVersionUID = -8524060141695794874L;
+
+    protected TransferDeserializer() {
+      super(MoneroTransfer.class);
+    }
+
+    @Override
+    public MoneroTransfer deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+      TreeNode node = p.readValueAsTree();
+      throw new RuntimeException("Not implemented");
     }
   }
   

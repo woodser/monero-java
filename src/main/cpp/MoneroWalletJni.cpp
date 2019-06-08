@@ -754,6 +754,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
   vector<MoneroTransfer> transfers = wallet->getTransfers(transferRequest);
   cout << "Got " << transfers.size() << " transfers" << endl;
 
+  // TODO: DELETE THIS
   for (const auto& transfer : transfers) {
       if (transfer.tx == nullptr) throw runtime_error("tx is null");
       if (transfer.tx->id == boost::none) throw runtime_error("tx is missing id");
@@ -783,7 +784,6 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
   container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
   boost::property_tree::write_json(ss, container, false);
   string blocksJson = ss.str();
-  cout << "Returning transfers " << blocksJson << endl;
   env->ReleaseStringUTFChars(jtransferRequest, _transferRequest);
   return env->NewStringUTF(blocksJson.c_str());
 }
