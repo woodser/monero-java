@@ -4,6 +4,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
@@ -58,6 +60,7 @@ public class MoneroTxWallet extends MoneroTx {
     return getOutgoingTransfer() != null ? getOutgoingTransfer().getAmount() : null;
   }
   
+  @JsonManagedReference
   public List<MoneroIncomingTransfer> getIncomingTransfers() {
     return incomingTransfers;
   }
@@ -67,6 +70,7 @@ public class MoneroTxWallet extends MoneroTx {
     return this;
   }
   
+  @JsonManagedReference
   public MoneroOutgoingTransfer getOutgoingTransfer() {
     return outgoingTransfer;
   }
