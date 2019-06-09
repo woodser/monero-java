@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import common.utils.GenUtils;
 import monero.utils.MoneroUtils;
 
@@ -113,6 +115,7 @@ public class MoneroTx {
     if (tx.signatures != null) this.signatures = new ArrayList<String>(tx.signatures);
   }
   
+  @JsonBackReference
   public MoneroBlock getBlock() {
     return block;
   }
