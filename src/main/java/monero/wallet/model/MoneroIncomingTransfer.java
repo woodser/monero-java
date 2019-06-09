@@ -103,23 +103,29 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     return true;
   }
   
-//------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
+  //------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
 
- @Override
- public MoneroIncomingTransfer setTx(MoneroTxWallet tx) {
-   super.setTx(tx);
-   return this;
- }
-
- @Override
- public MoneroIncomingTransfer setAmount(BigInteger amount) {
-   super.setAmount(amount);
-   return this;
- }
-
- @Override
- public MoneroIncomingTransfer setAccountIndex(Integer accountIndex) {
-   super.setAccountIndex(accountIndex);
-   return this;
- }
+  @Override
+  public MoneroIncomingTransfer setTx(MoneroTxWallet tx) {
+    super.setTx(tx);
+    return this;
+  }
+  
+  @Override
+  public MoneroIncomingTransfer setAmount(BigInteger amount) {
+    super.setAmount(amount);
+    return this;
+  }
+  
+  @Override
+  public MoneroIncomingTransfer setAccountIndex(Integer accountIndex) {
+    super.setAccountIndex(accountIndex);
+    return this;
+  }
+  
+  @Override
+  public MoneroIncomingTransfer setNumSuggestedConfirmations(Integer numSuggestedConfirmations) {
+    super.setNumSuggestedConfirmations(numSuggestedConfirmations);
+    return this;
+  }
 }

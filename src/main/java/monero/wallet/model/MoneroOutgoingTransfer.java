@@ -154,4 +154,10 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
     super.setAccountIndex(accountIndex);
     return this;
   }
+  
+  @Override
+  public MoneroOutgoingTransfer setNumSuggestedConfirmations(Integer numSuggestedConfirmations) {
+    super.setNumSuggestedConfirmations(numSuggestedConfirmations);
+    return this;
+  }
 }

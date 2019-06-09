@@ -2846,10 +2846,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       // these should be initialized unless a response from sending
       if (!Boolean.TRUE.equals(ctx.isSendResponse)) {
         //assertTrue(tx.getReceivedTimestamp() > 0);  // TODO: re-enable when received timestamp returned in wallet rpc
-        assertTrue(tx.getNumSuggestedConfirmations() > 0);
       }
     } else {
-      assertNull(tx.getNumSuggestedConfirmations());
       assertNull(tx.getLastRelayedTimestamp());
     }
     
@@ -3072,6 +3070,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertNotNull(transfer);
     TestUtils.testUnsignedBigInteger(transfer.getAmount());
     if (!Boolean.TRUE.equals(ctx.isSweepOutputResponse)) assertTrue(transfer.getAccountIndex() >= 0);
+    assertTrue(transfer.getNumSuggestedConfirmations() >= 0); // TODO monero-wallet-rpc: some outgoing transfers have suggested_confirmations_threshold = 0
     if (transfer.getIsIncoming()) testIncomingTransfer((MoneroIncomingTransfer) transfer);
     else testOutgoingTransfer((MoneroOutgoingTransfer) transfer, ctx);
     
@@ -3088,6 +3087,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertFalse(transfer.getIsOutgoing());
     assertNotNull(transfer.getAddress());
     assertTrue(transfer.getSubaddressIndex() >= 0);
+    assertTrue(transfer.getNumSuggestedConfirmations() > 0);
   }
   
   private static void testOutgoingTransfer(MoneroOutgoingTransfer transfer, TestContext ctx) {

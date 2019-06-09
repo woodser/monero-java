@@ -282,12 +282,6 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
   }
 
   @Override
-  public MoneroTxRequest setNumSuggestedConfirmations(Integer numSuggestedConfirmations) {
-    super.setNumSuggestedConfirmations(numSuggestedConfirmations);
-    return this;
-  }
-
-  @Override
   public MoneroTxRequest setUnlockTime(Integer unlockTime) {
     super.setUnlockTime(unlockTime);
     return this;
