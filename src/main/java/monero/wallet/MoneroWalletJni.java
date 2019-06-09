@@ -844,6 +844,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     public MoneroTx deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
       TreeNode node = p.readValueAsTree();
       return p.getCodec().treeToValue(node, MoneroTxWallet.class);
+//      JsonParser parser = node.traverse();
+//      parser.setCodec(p.getCodec());
+//      return parser.readValueAs(MoneroTxWallet.class);
     }
   }
   
