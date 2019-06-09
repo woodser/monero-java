@@ -47,10 +47,10 @@ store() does nothing if no name previously set, throw exception instead?
 store_to() is actually move(), deleting old files if they exist.  support "save as"
 new wallet() without connection but restoreHeight is checkpointed; where is that data cached?
 wallet_rpc_server.cpp:404: entry.address = m_wallet->get_subaddress_as_str({pd.m_subaddr_account, 0}) will always use subaddress idx 0, ignoring all actual subaddress indices
+suggested_confirmations_threshold comes back as 0 for some (not all) outgoing transfers, but always >0 for incoming transfers, even if they’re transfers to/from the same wallet.  Can a value of 0 make sense?
 
 14.1.0 RELEASE
 for consistency, MoneroTransfer has field isIncoming inherited by MoneroIncoming/OutgoingTransfer
-model change: numSuggestedConfirmtions is per transfer
 MoneroTxRequest, MoneroTransferRequest, etc do not need to extend from MoneroTx, MoneroTransfer, etc (they are not technically those but filters upon them) and those could have non-optional values.  Binding is just convenient for dev but could be split apart
 MoneroTransferRequest has txRequest in addition to tx, get rid of tx?  problem solved if they don't extend
 getAddressIndex() -> getSubaddress(String address) and that returns full subaddress info?
