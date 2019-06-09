@@ -64,7 +64,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   protected static final boolean LITE_MODE = false;
   protected static final boolean TEST_NON_RELAYS = true;
   protected static final boolean TEST_RELAYS = true;
-  protected static final boolean TEST_NOTIFICATIONS = false;
+  protected static final boolean TEST_NOTIFICATIONS = true;
   protected static final boolean TEST_RESETS = false;
   private static final int MAX_TX_PROOFS = 25;   // maximum number of transactions to check for each proof, undefined to check all
   private static final int SEND_MAX_DIFF = 60;
@@ -2310,7 +2310,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         try {
           wallet.startMining(8, false, true);
           startedMining = true;
-        } catch (MoneroException e) {
+        } catch (Exception e) {
           // no problem
         }
       }
@@ -3070,7 +3070,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertNotNull(transfer);
     TestUtils.testUnsignedBigInteger(transfer.getAmount());
     if (!Boolean.TRUE.equals(ctx.isSweepOutputResponse)) assertTrue(transfer.getAccountIndex() >= 0);
-    assertTrue(transfer.getNumSuggestedConfirmations() >= 0); // TODO monero-wallet-rpc: some outgoing transfers have suggested_confirmations_threshold = 0
+    if (!Boolean.TRUE.equals(ctx.isSendResponse)) assertTrue(transfer.getNumSuggestedConfirmations() >= 0); // TODO monero-wallet-rpc: some outgoing transfers have suggested_confirmations_threshold = 0
     if (transfer.getIsIncoming()) testIncomingTransfer((MoneroIncomingTransfer) transfer);
     else testOutgoingTransfer((MoneroOutgoingTransfer) transfer, ctx);
     
