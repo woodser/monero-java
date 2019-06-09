@@ -430,7 +430,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     // serialize request from block and deserialize response
     String blocksJson = getTransfersJni(JsonUtils.serialize(requestBlock));
-    System.out.println("Received getTransfers() response from JNI: " + blocksJson.substring(0, 10000) + "...");
+    System.out.println("Received getTransfers() response from JNI: " + blocksJson.substring(0, 1000) + "...");
     
 //    // custom deserialization using mapper
 //    ObjectMapper mapper = new ObjectMapper();

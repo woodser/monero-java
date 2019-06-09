@@ -2829,8 +2829,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertEquals(false, tx.getIsFailed());
       assertEquals(false, tx.getInTxPool());
       assertEquals(false, tx.getDoNotRelay());
-      assertTrue(tx.getNumConfirmations() > 0);
       assertEquals(false, tx.getIsDoubleSpend());
+      assertTrue(tx.getNumConfirmations() > 0);
     } else {
       assertNull(tx.getBlock());
       assertEquals(0, (int) tx.getNumConfirmations());
