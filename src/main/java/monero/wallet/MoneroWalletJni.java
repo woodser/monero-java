@@ -466,6 +466,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     // deserialize blocks
     List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
+    //System.out.println("Re-serialized: " + JsonUtils.serialize(blocks));
     
     // collect transfers
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
