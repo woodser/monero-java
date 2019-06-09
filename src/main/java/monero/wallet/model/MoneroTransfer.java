@@ -14,6 +14,7 @@ public class MoneroTransfer {
   private MoneroTxWallet tx;
   private BigInteger amount;
   private Integer accountIndex;
+  private Integer numSuggestedConfirmations;
   
   public MoneroTransfer() {
     // nothing to initialize
@@ -22,6 +23,7 @@ public class MoneroTransfer {
   public MoneroTransfer(MoneroTransfer transfer) {
     this.amount = transfer.amount;
     this.accountIndex = transfer.accountIndex;
+    this.numSuggestedConfirmations = transfer.numSuggestedConfirmations;
   }
   
   @JsonBackReference
@@ -60,6 +62,23 @@ public class MoneroTransfer {
     return this;
   }
   
+  /**
+   * Return how many confirmations till it's not economically worth re-writing the chain.
+   * That is, the number of confirmations before the transaction is highly unlikely to be
+   * double spent or overwritten and may be considered settled, e.g. for a merchant to trust
+   * as finalized.
+   * 
+   * @return Integer is the number of confirmations before it's not worth rewriting the chain
+   */
+  public Integer getNumSuggestedConfirmations() {
+    return numSuggestedConfirmations;
+  }
+  
+  public MoneroTransfer setNumSuggestedConfirmations(Integer numSuggestedConfirmations) {
+    this.numSuggestedConfirmations = numSuggestedConfirmations;
+    return this;
+  }
+  
   public MoneroTransfer copy() {
     return new MoneroTransfer(this);
   }
@@ -84,6 +103,7 @@ public class MoneroTransfer {
     else {
       this.setAmount(MoneroUtils.reconcile(this.getAmount(), transfer.getAmount()));
       this.setAccountIndex(MoneroUtils.reconcile(this.getAccountIndex(), transfer.getAccountIndex()));
+      this.setNumSuggestedConfirmations(MoneroUtils.reconcile(this.getNumSuggestedConfirmations(), transfer.getNumSuggestedConfirmations()));
     }
     
     return this;
@@ -97,6 +117,7 @@ public class MoneroTransfer {
     StringBuilder sb = new StringBuilder();
     sb.append(MoneroUtils.kvLine("Amount", this.getAmount() != null ? this.getAmount().toString() : null, indent));
     sb.append(MoneroUtils.kvLine("Account index", this.getAccountIndex(), indent));
+    sb.append(MoneroUtils.kvLine("Num suggested confirmations", getNumSuggestedConfirmations(), indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);
   }
@@ -107,6 +128,7 @@ public class MoneroTransfer {
     int result = 1;
     result = prime * result + ((accountIndex == null) ? 0 : accountIndex.hashCode());
     result = prime * result + ((amount == null) ? 0 : amount.hashCode());
+    result = prime * result + ((numSuggestedConfirmations == null) ? 0 : numSuggestedConfirmations.hashCode());
     return result;
   }
 
@@ -122,6 +144,9 @@ public class MoneroTransfer {
     if (amount == null) {
       if (other.amount != null) return false;
     } else if (!amount.equals(other.amount)) return false;
+    if (numSuggestedConfirmations == null) {
+      if (other.numSuggestedConfirmations != null) return false;
+    } else if (!numSuggestedConfirmations.equals(other.numSuggestedConfirmations)) return false;
     return true;
   }
 }
