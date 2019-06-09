@@ -48,6 +48,7 @@ store_to() is actually move(), deleting old files if they exist.  support "save 
 new wallet() without connection but restoreHeight is checkpointed; where is that data cached?
 
 14.1.0 RELEASE
+for consistency, MoneroTransfer has field isIncoming inherited by MoneroIncoming/OutgoingTransfer
 model change: numSuggestedConfirmtions is per transfer
 MoneroTxRequest, MoneroTransferRequest, etc do not need to extend from MoneroTx, MoneroTransfer, etc (they are not technically those but filters upon them) and those could have non-optional values.  Binding is just convenient for dev but could be split apart
 MoneroTransferRequest has txRequest in addition to tx, get rid of tx?  problem solved if they don't extend
