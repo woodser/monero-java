@@ -46,6 +46,7 @@ cannot save after creating wallet2 because store()/store_to() does not generate 
 store() does nothing if no name previously set, throw exception instead?
 store_to() is actually move(), deleting old files if they exist.  support "save as"
 new wallet() without connection but restoreHeight is checkpointed; where is that data cached?
+wallet_rpc_server.cpp:404: entry.address = m_wallet->get_subaddress_as_str({pd.m_subaddr_account, 0}) will always use subaddress idx 0, ignoring all actual subaddress indices
 
 14.1.0 RELEASE
 for consistency, MoneroTransfer has field isIncoming inherited by MoneroIncoming/OutgoingTransfer
