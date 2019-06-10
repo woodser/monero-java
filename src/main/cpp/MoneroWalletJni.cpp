@@ -295,7 +295,7 @@ MoneroTransferRequest deserializeTransferRequest(string transferRequestStr) {
 
   // return deserialized request
   if (block.txs.empty()) return MoneroTransferRequest();
-  return *static_cast<MoneroTxRequest&>(*block.txs[0]).transferRequest;
+  return **static_cast<MoneroTxRequest&>(*block.txs[0]).transferRequest;
 }
 
 // ------------------------------- JNI STATIC ---------------------------------
@@ -751,15 +751,15 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
   MoneroTransferRequest transferRequest = deserializeTransferRequest(string(_transferRequest ? _transferRequest : ""));
 
   // get transfers
-  vector<MoneroTransfer> transfers = wallet->getTransfers(transferRequest);
+  vector<shared_ptr<MoneroTransfer>> transfers = wallet->getTransfers(transferRequest);
   cout << "Got " << transfers.size() << " transfers" << endl;
 
   // TODO: DELETE THIS
   for (const auto& transfer : transfers) {
-      if (transfer.tx == nullptr) throw runtime_error("tx is null");
-      if (transfer.tx->id == boost::none) throw runtime_error("tx is missing id");
-      if (transfer.tx->block == boost::none) throw runtime_error("block is none");
-      MoneroBlock& block = **transfer.tx->block;
+      if (transfer->tx == nullptr) throw runtime_error("tx is null");
+      if (transfer->tx->id == boost::none) throw runtime_error("tx is missing id");
+      if (transfer->tx->block == boost::none) throw runtime_error("block is none");
+      MoneroBlock& block = **transfer->tx->block;
       if (block.height == boost::none) throw runtime_error("block height mis missing");
       if (block.txs.empty()) throw runtime_error("but it doesn't have txs");
   }
@@ -768,7 +768,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
   vector<MoneroBlock> blocks;
   unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
   for (auto const& transfer : transfers) {
-    shared_ptr<MoneroTxWallet> tx = transfer.tx;
+    shared_ptr<MoneroTxWallet> tx = transfer->tx;
     if (tx->block == boost::none) throw runtime_error("Need to handle unconfirmed transfer");
     unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx->block);
     if (got == seenBlockPtrs.end()) {
