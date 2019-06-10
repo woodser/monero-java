@@ -178,7 +178,7 @@ For convenience, a pre-built library for MacOSX is included with this project.  
 
 ### Build Steps
 
-1. Build the [C++ library as a dynamic library](https://github.com/woodser/monero-cpp-library)
+1. Build the [C++ library as a dynamic library](https://github.com/woodser/monero-cpp-library#building-a-dynamic--shared-library)
 2. Copy the built libmonero-cpp.dylib in step 1 to ./external-libs
 3. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/` (change as appropriate)
 4. Build libmonero-java.dylib to ./build: `./bin/build-libmonero-java.sh`
