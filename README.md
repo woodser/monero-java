@@ -170,7 +170,7 @@ Note: some tests are failing as not all functionality is implemented.
 
 ## Building platform-specific Monero binaries
 
-In order to use a local wallet or fetch and process binary data (e.g. raw blocks) in Java, C++ source code must be built as a dynamic library for Java to access using JNI.  This project depends on the associated [C++ reference implementation] (included as a submodule in ./submodules/monero-cpp-library) to support a local wallet and convert between JSON and binary data in Monero's portable storage format.
+In order to use a local wallet or fetch and process binary data (e.g. raw blocks) in Java, C++ source code must be built as a dynamic library for Java to access using JNI.  This project depends on the associated [C++ library](https://github.com/woodser/monero-cpp-library) (included as a submodule in ./submodules/monero-cpp-library) to support a local wallet and convert between JSON and binary data in Monero's portable storage format in Java.
 
 The dynamic library is platform-specific so it must be built from source for the specific platform it is running on (e.g. Linux, Mac, Windows, etc).
 
@@ -178,7 +178,7 @@ For convenience, a pre-built library for MacOSX is included with this project.  
 
 ### Build Steps
 
-1. Build the [C++ reference implementation as a dynamic library]
+1. Build the [C++ library as a dynamic library](https://github.com/woodser/monero-cpp-library)
 2. Copy the built libmonero-cpp.dylib in step 1 to ./external-libs
 3. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/` (change as appropriate)
 4. Build libmonero-java.dylib to ./build: `./bin/build-libmonero-java.sh`
