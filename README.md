@@ -163,14 +163,14 @@ Here is the source code to the main interfaces, implementations, and models:
 2. Clone the Java repository: `git clone --recurse-submodules https://github.com/monero-ecosystem/monero-java-rpc.git`
 3. Install project dependencies: `maven install`
 4. Configure the appropriate RPC endpoints and authentication by modifying `WALLET_RPC_CONFIG` and `DAEMON_RPC_CONFIG` in [src/test/main/test/TestUtils.java](src/test/main/TestUtils.java).
-5.  [Build a dynamic library from Monero C++ for your platform](#building-platform-specific-monero-binaries)
+5. [Build a dynamic library from Monero C++ for your platform](#building-platform-specific-monero-binaries)
 6. Run all *.java files in src/main/test as JUnits.
 
 Note: some tests are failing as not all functionality is implemented.
 
 ## Building platform-specific Monero binaries
 
-In order to fetch and process binary data from the daemon, C++ source code is built as a dynamic library for Java to access using JNI.  The C++ code being built is contained in src/main/cpp/submodules.  A fork of MyMonero is currently used with added utilities to convert binary data between JSON and Monero's portable storage format.
+In order to use a local wallet or fetch and process binary data (e.g. raw blocks) in Java, C++ source code must be built as a dynamic library for Java to access using JNI.  This project depends on the associated [C++ reference implementation] (included as a submodule in ./submodules/monero-cpp-library) to support a local wallet and convert between JSON and binary data in Monero's portable storage format.
 
 The dynamic library is platform-specific so it must be built from source for the specific platform it is running on (e.g. Linux, Mac, Windows, etc).
 
@@ -178,11 +178,12 @@ For convenience, a pre-built library for MacOSX is included with this project.  
 
 ### Build Steps
 
-1. Build boost for your system
-2. Copy boost_system.a, boost_thread.a, and boost_chrono.a into src/main/cpp/build/boost/lib
+1. Build the [C++ reference implementation as a dynamic library]
+2. Copy the built libmonero-cpp.dylib in step 1 to ./external-libs
 3. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/` (change as appropriate)
-4. Build libmonero.dylib to src/main/cpp/build/: `cd src/main/cpp && ./bin/build-libmonero.sh`
-5. Run TestMoneroCppUtils.java JUnit tests to verify the dynamic library is working with Java JNI
+4. Build libmonero-java.dylib to ./build: `./bin/build-libmonero-java.sh`
+5. Copy ./build/libmonero-java.dylib to ./lib
+6. Run TestMoneroCppUtils.java JUnit tests to verify the dynamic library is working with Java JNI
 
 ## Project Goals
 
