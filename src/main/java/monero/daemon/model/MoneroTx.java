@@ -463,7 +463,6 @@ public class MoneroTx {
   }
   
   public MoneroTx merge(MoneroTx tx) {
-    assertTrue(tx instanceof MoneroTx);
     if (this == tx) return this;
     this.setId(MoneroUtils.reconcile(this.getId(), tx.getId()));
     this.setVersion(MoneroUtils.reconcile(this.getVersion(), tx.getVersion()));
