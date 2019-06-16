@@ -256,9 +256,9 @@ void blockNodeToModel(const boost::property_tree::ptree& node, MoneroBlock& bloc
     else if (key == string("txs")) {
       boost::property_tree::ptree txsNode = it->second;
       for (boost::property_tree::ptree::const_iterator it2 = txsNode.begin(); it2 != txsNode.end(); ++it2) {
-        MoneroTxRequest txRequest;
-        txRequestNodeToModel(it2->second, txRequest);
-        block.txs.push_back(make_shared<MoneroTxRequest>(txRequest));
+        MoneroTxRequest* txRequest = new MoneroTxRequest(); // TODO: how is this deleted?
+        txRequestNodeToModel(it2->second, *txRequest);
+        block.txs.push_back(txRequest);
       }
     }
   }
@@ -715,17 +715,17 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   const char* _txRequest = jtxRequest ? env->GetStringUTFChars(jtxRequest, NULL) : nullptr;
 
   // deserialize tx request
-  MoneroTxRequest txRequest = deserializeTxRequest(string(_txRequest ? _txRequest : ""));
+  MoneroTxRequest txRequest = deserializeTxRequest(string(_txRequest ? _txRequest : "")); // TODO: change to return newed txRequest*
 
   // get txs
   vector<shared_ptr<MoneroTxWallet>> txs = wallet->getTxs(txRequest);
 
   // return unique blocks to preserve model relationships as tree
   vector<MoneroBlock> blocks;
-  unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
+  unordered_set<MoneroBlock*> seenBlockPtrs;
   for (auto const& tx : txs) {
     if (tx->block == boost::none) throw runtime_error("Tx block is null");
-    unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx->block);
+    unordered_set<MoneroBlock*>::const_iterator got = seenBlockPtrs.find(*tx->block);
     if (got == seenBlockPtrs.end()) {
       seenBlockPtrs.insert(*tx->block);
       blocks.push_back(**tx->block);
@@ -766,11 +766,11 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
 
   // return unique blocks to preserve model relationships as tree
   vector<MoneroBlock> blocks;
-  unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
+  unordered_set<MoneroBlock*> seenBlockPtrs;
   for (auto const& transfer : transfers) {
-    shared_ptr<MoneroTxWallet> tx = transfer->tx;
+    MoneroTxWallet* tx = transfer->tx;
     if (tx->block == boost::none) throw runtime_error("Need to handle unconfirmed transfer");
-    unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx->block);
+    unordered_set<MoneroBlock*>::const_iterator got = seenBlockPtrs.find(*tx->block);
     if (got == seenBlockPtrs.end()) {
       seenBlockPtrs.insert(*tx->block);
       blocks.push_back(**tx->block);
