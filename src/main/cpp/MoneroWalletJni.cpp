@@ -718,17 +718,17 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   MoneroTxRequest txRequest = deserializeTxRequest(string(_txRequest ? _txRequest : ""));
 
   // get txs
-  vector<MoneroTxWallet> txs = wallet->getTxs(txRequest);
+  vector<shared_ptr<MoneroTxWallet>> txs = wallet->getTxs(txRequest);
 
   // return unique blocks to preserve model relationships as tree
   vector<MoneroBlock> blocks;
   unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
   for (auto const& tx : txs) {
-    if (tx.block == boost::none) throw runtime_error("Tx block is null");
-    unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx.block);
+    if (tx->block == boost::none) throw runtime_error("Tx block is null");
+    unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx->block);
     if (got == seenBlockPtrs.end()) {
-      seenBlockPtrs.insert(*tx.block);
-      blocks.push_back(**tx.block);
+      seenBlockPtrs.insert(*tx->block);
+      blocks.push_back(**tx->block);
     }
   }
   cout << "Returning " << blocks.size() << " blocks" << endl;
