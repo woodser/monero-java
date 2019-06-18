@@ -4,6 +4,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import common.types.Filter;
 import common.utils.GenUtils;
 import monero.wallet.model.MoneroDestination;
@@ -110,6 +112,7 @@ public class MoneroTransferRequest extends MoneroTransfer implements Filter<Mone
     return this;
   }
 
+  @JsonIgnore
   public MoneroTxRequest getTxRequest() {
     return txRequest;
   }

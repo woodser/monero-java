@@ -227,7 +227,7 @@ void txRequestNodeToModel(const boost::property_tree::ptree& node, MoneroTxReque
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
     string key = it->first;
     cout << "Tx request node key: " << key << endl;
-    if (key == string("isOutgoing")) txRequest.isOutgoing = shared_ptr<bool>(make_shared<bool>(stringToBool(it->second.data())));
+    //if (key == string("isOutgoing")) txRequest.isOutgoing = shared_ptr<bool>(make_shared<bool>(stringToBool(it->second.data())));
   }
 }
 
@@ -291,7 +291,9 @@ MoneroTransferRequest deserializeTransferRequest(string transferRequestStr) {
 
   // convert property tree to block
   MoneroBlock block;
-  blockNodeToModel(blockNode, block);
+  blockNodeToModel(blockNode, block); // TODO: rename to nodeToBlock()
+
+  cout << "Returning deserialized request" << endl;
 
   // return deserialized request
   if (block.txs.empty()) return MoneroTransferRequest();
@@ -749,7 +751,9 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
   const char* _transferRequest = jtransferRequest ? env->GetStringUTFChars(jtransferRequest, NULL) : nullptr;
 
   // deserialize transfer request
+  cout << "JNI received transfer request string: " << string(_transferRequest ? _transferRequest : "") << endl;
   MoneroTransferRequest transferRequest = deserializeTransferRequest(string(_transferRequest ? _transferRequest : ""));
+  cout << "Fetching transfers with request: " << MoneroUtils::serialize(transferRequest.toPropertyTree()) << endl;
 
   // get transfers
   vector<shared_ptr<MoneroTransfer>> transfers = wallet->getTransfers(transferRequest);
