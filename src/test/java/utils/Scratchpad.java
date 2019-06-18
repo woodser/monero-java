@@ -1,11 +1,12 @@
 package utils;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.List;
 
-import monero.daemon.model.MoneroBlock;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroTransfer;
-import monero.wallet.request.MoneroTxRequest;
+import monero.wallet.request.MoneroTransferRequest;
 
 /**
  * Scratchpad for quick scripting.
@@ -55,7 +56,8 @@ public class Scratchpad {
 //    }
     
     
-    MoneroWalletJni walletJni = new MoneroWalletJni("./test_wallets/test_wallet_1", TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
+    MoneroWalletJni walletJni = TestUtils.getWalletJni();
+    //MoneroWalletJni walletJni = new MoneroWalletJni("./test_wallets/test_wallet_1", TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
 //
 //    System.out.println("Wallet balance: " + walletJni.getBalance());
 //    System.out.println("Account 0 balance: " + walletJni.getBalance(0));
@@ -68,6 +70,10 @@ public class Scratchpad {
 //    System.out.println("Wallet height: " + walletJni.getHeight());
 //    List<MoneroAccount> accounts = walletJni.getAccounts();
 //    System.out.println("Wallet has " + accounts.size() + " accounts");
-    walletJni.getTxs(new MoneroTxRequest().setIsOutgoing(true).setId("abcdef"));
+    //walletJni.getTxs(new MoneroTxRequest().setIsOutgoing(true).setId("abcdef"));
+    transfers = walletJni.getTransfers(new MoneroTransferRequest().setAccountIndex(1));
+    for (MoneroTransfer transfer : transfers) {
+      assertEquals(1, (int) transfer.getAccountIndex());
+    }
   }
 }

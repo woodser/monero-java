@@ -425,11 +425,14 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     // normalize request up to block
     if (request == null) request = new MoneroTransferRequest();
-    MoneroTxRequest txRequest = request.getTxRequest() == null ? new MoneroTxRequest() : request.getTxRequest();
-    MoneroBlock requestBlock = txRequest.getBlock() == null ? new MoneroBlock() : txRequest.getBlock();
+    if (request.getTxRequest() == null) request.setTxRequest(new MoneroTxRequest().setTransferRequest(request));
+    if (request.getTxRequest().getBlock() == null) request.getTxRequest().setBlock(new MoneroBlock().setTxs(request.getTxRequest()));
+    
+    System.out.println("FETCHING: " + request.getAccountIndex());
+    System.out.println("SERIALIZED: " + JsonUtils.serialize(request.getTxRequest().getBlock()));
     
     // serialize request from block and deserialize response
-    String blocksJson = getTransfersJni(JsonUtils.serialize(requestBlock));
+    String blocksJson = getTransfersJni(JsonUtils.serialize(request.getTxRequest().getBlock()));
     System.out.println("Received getTransfers() response from JNI: " + blocksJson.substring(0, 1000) + "...");
     
 //    // custom deserialization using mapper
