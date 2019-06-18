@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -433,7 +432,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     // serialize request from block and deserialize response
     String blocksJson = getTransfersJni(JsonUtils.serialize(request.getTxRequest().getBlock()));
-    System.out.println("Received getTransfers() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
+    //System.out.println("Received getTransfers() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
     
 //    // custom deserialization using mapper
 //    ObjectMapper mapper = new ObjectMapper();
