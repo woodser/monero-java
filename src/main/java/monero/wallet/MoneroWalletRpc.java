@@ -1789,6 +1789,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
       
       // merge common block of different txs
+      // TODO: possible bug for java/js, this executes for every tx until tx found.  are remaining blocks not merged?  refactor to use c++ impl
       if (tx.getHeight() != null && tx.getHeight().equals(aTx.getHeight())) {
         aTx.getBlock().merge(tx.getBlock());
         if (aTx.getIsConfirmed()) assertTrue(aTx.getBlock().getTxs().contains(aTx));
