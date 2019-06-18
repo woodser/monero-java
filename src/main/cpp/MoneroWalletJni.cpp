@@ -197,8 +197,25 @@ bool stringToBool(string str) {
   return boost::lexical_cast<bool>(str);
 }
 
-void txNodeToModel(const boost::property_tree::ptree& node, MoneroTx& tx) {
-  cout << "txNodeToModel()" << endl;
+void nodeToTransfer(const boost::property_tree::ptree& node, shared_ptr<MoneroTransfer> transfer) {
+  throw runtime_error("nodeToTransfer not implemented");
+}
+
+shared_ptr<MoneroTransferRequest> nodeToTransferRequest(const boost::property_tree::ptree& node) {
+  shared_ptr<MoneroTransferRequest> transferRequest = shared_ptr<MoneroTransferRequest>(new MoneroTransferRequest());
+  nodeToTransfer(node, transferRequest);
+
+  // initialize request from node
+  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+    string key = it->first;
+    cout << "Transfer request node key: " << key << endl;
+  }
+
+  return transferRequest;
+}
+
+void nodeToTx(const boost::property_tree::ptree& node, shared_ptr<MoneroTx> tx) {
+  cout << "nodeToTx()" << endl;
 
 //  // print for debug
 //  std::stringstream ss;
@@ -210,94 +227,65 @@ void txNodeToModel(const boost::property_tree::ptree& node, MoneroTx& tx) {
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
     string key = it->first;
     cout << "Tx node key: " << key << endl;
-    if (key == string("id")) tx.id = it->second.data();
+    if (key == string("id")) tx->id = it->second.data();
   }
 
   //throw runtime_error("txNodeToModel");
 }
 
-void txWalletNodeToModel(const boost::property_tree::ptree& node, MoneroTxWallet& tx) {
-  txNodeToModel(node, tx);
+void nodeToTxWallet(const boost::property_tree::ptree& node, shared_ptr<MoneroTxWallet> txWallet) {
+  nodeToTx(node, txWallet);
 }
 
-void txRequestNodeToModel(const boost::property_tree::ptree& node, MoneroTxRequest& txRequest) {
-  txWalletNodeToModel(node, txRequest);
+shared_ptr<MoneroTxRequest> nodeToTxRequest(const boost::property_tree::ptree& node) {
+  shared_ptr<MoneroTxRequest> txRequest = shared_ptr<MoneroTxRequest>(new MoneroTxRequest());
+  nodeToTxWallet(node, txRequest);
 
   // initialize request from node
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
     string key = it->first;
     cout << "Tx request node key: " << key << endl;
+    if (key == string("transferRequest")) txRequest->transferRequest = nodeToTransferRequest(it->second);
     //if (key == string("isOutgoing")) txRequest.isOutgoing = shared_ptr<bool>(make_shared<bool>(stringToBool(it->second.data())));
   }
+
+  return txRequest;
 }
 
-void transferNodeToModel(const boost::property_tree::ptree& node, MoneroTransfer& transfer) {
-  throw runtime_error("transferNodeToModel");
-}
-
-void transferRequestNodeToModel(const boost::property_tree::ptree& node, MoneroTransferRequest& transferRequest) {
-  throw runtime_error("transferRequestNodeToModel");
-}
-
-void outputNodeToModel(const boost::property_tree::ptree& node, MoneroOutput& output) {
-  throw runtime_error("outputNodeToModel");
-}
-
-void outputRequestNodeToModel(const boost::property_tree::ptree& node, MoneroOutputRequest& outputRequest) {
-  throw runtime_error("outputRequestNodeToModel");
-}
-
-void blockNodeToModel(const boost::property_tree::ptree& node, MoneroBlock& block) {
-  cout << "blockNodeToModel()" << endl;
+shared_ptr<MoneroBlock> nodeToBlock(const boost::property_tree::ptree& node) {
+  cout << "nodeToBlock()" << endl;
+  shared_ptr<MoneroBlock> block = shared_ptr<MoneroBlock>(new MoneroBlock());
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
     string key = it->first;
-    cout << "Block node Key: " << key << endl;
-    if (key == string("height")) block.height = (uint64_t) 7;  // TODO
+    cout << "Block node key: " << key << endl;
+    if (key == string("height")) block->height = (uint64_t) 7;  // TODO
     else if (key == string("txs")) {
       boost::property_tree::ptree txsNode = it->second;
       for (boost::property_tree::ptree::const_iterator it2 = txsNode.begin(); it2 != txsNode.end(); ++it2) {
-        MoneroTxRequest txRequest;  // TODO: use new here, then allocate from shared pointer? prolly
-        txRequestNodeToModel(it2->second, txRequest);
-        block.txs.push_back(make_shared<MoneroTxRequest>(txRequest));
+        block->txs.push_back(nodeToTxRequest(it2->second));
       }
     }
   }
+  return block;
 }
 
-MoneroTxRequest deserializeTxRequest(string txRequestStr) {
-  cout << "deserializeTxRequest(): " <<  txRequestStr << endl;
-
-  // deserialize tx request string to property rooted at block
-  std::istringstream iss = txRequestStr.empty() ? std::istringstream() : std::istringstream(txRequestStr);
-  boost::property_tree::ptree blockNode;
-  boost:property_tree:read_json(iss, blockNode);
-
-  // convert property tree to block
-  MoneroBlock block;
-  blockNodeToModel(blockNode, block);
-
-  // return deserialized request
-  if (block.txs.empty()) return MoneroTxRequest();
-  return static_cast<MoneroTxRequest&>(*block.txs[0]);
-}
-
-MoneroTransferRequest deserializeTransferRequest(string transferRequestStr) {
-  cout << "deserializeTransferRequest(): " <<  transferRequestStr << endl;
+shared_ptr<MoneroTransferRequest> deserializeTransferRequest(const string& transferRequestStr) {
+  cout << "deserializeTransferRequest2(): " <<  transferRequestStr << endl;
 
   // deserialize transfer request string to property rooted at block
   std::istringstream iss = transferRequestStr.empty() ? std::istringstream() : std::istringstream(transferRequestStr);
   boost::property_tree::ptree blockNode;
-  boost:property_tree:read_json(iss, blockNode);
+  boost::property_tree::read_json(iss, blockNode);
 
   // convert property tree to block
-  MoneroBlock block;
-  blockNodeToModel(blockNode, block); // TODO: rename to nodeToBlock()
+  shared_ptr<MoneroBlock> block = nodeToBlock(blockNode);
+  //shared_ptr<MoneroBlock> block = shared_ptr<MoneroBlock>(new MoneroBlock());
 
   cout << "Returning deserialized request" << endl;
 
   // return deserialized request
-  if (block.txs.empty()) return MoneroTransferRequest();
-  return **static_cast<MoneroTxRequest&>(*block.txs[0]).transferRequest;
+  if (block->txs.empty()) return shared_ptr<MoneroTransferRequest>(new MoneroTransferRequest());
+  return *static_pointer_cast<MoneroTxRequest>(block->txs[0])->transferRequest;
 }
 
 // ------------------------------- JNI STATIC ---------------------------------
@@ -717,7 +705,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   const char* _txRequest = jtxRequest ? env->GetStringUTFChars(jtxRequest, NULL) : nullptr;
 
   // deserialize tx request
-  MoneroTxRequest txRequest = deserializeTxRequest(string(_txRequest ? _txRequest : ""));
+  //MoneroTxRequest txRequest = deserializeTxRequest(string(_txRequest ? _txRequest : ""));
 
   // get txs
   throw runtime_error("not implemented");
@@ -752,11 +740,11 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
 
   // deserialize transfer request
   cout << "JNI received transfer request string: " << string(_transferRequest ? _transferRequest : "") << endl;
-  MoneroTransferRequest transferRequest = deserializeTransferRequest(string(_transferRequest ? _transferRequest : ""));
-  cout << "Fetching transfers with request: " << MoneroUtils::serialize(transferRequest.toPropertyTree()) << endl;
+  shared_ptr<MoneroTransferRequest> transferRequest = deserializeTransferRequest(string(_transferRequest ? _transferRequest : ""));
+  cout << "Fetching transfers with request: " << MoneroUtils::serialize(transferRequest->toPropertyTree()) << endl;
 
   // get transfers
-  vector<shared_ptr<MoneroTransfer>> transfers = wallet->getTransfers(transferRequest);
+  vector<shared_ptr<MoneroTransfer>> transfers = wallet->getTransfers(*transferRequest);
   cout << "Got " << transfers.size() << " transfers" << endl;
 
   // TODO: DELETE THIS
