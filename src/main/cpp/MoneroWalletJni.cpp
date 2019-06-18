@@ -198,7 +198,13 @@ bool stringToBool(string str) {
 }
 
 void nodeToTransfer(const boost::property_tree::ptree& node, shared_ptr<MoneroTransfer> transfer) {
-  throw runtime_error("nodeToTransfer not implemented");
+
+  // initialize transfer from node
+  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+    string key = it->first;
+    cout << "Transfer node key: " << key << endl;
+    if (key == string("accountIndex")) transfer->accountIndex = boost::lexical_cast<uint64_t>(it->second.data());
+  }
 }
 
 shared_ptr<MoneroTransferRequest> nodeToTransferRequest(const boost::property_tree::ptree& node) {
