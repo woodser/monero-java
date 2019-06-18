@@ -215,7 +215,10 @@ shared_ptr<MoneroTransferRequest> nodeToTransferRequest(const boost::property_tr
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
     string key = it->first;
     cout << "Transfer request node key: " << key << endl;
+    if (key == string("subaddressIndex")) transferRequest->subaddressIndex = boost::lexical_cast<uint64_t>(it->second.data());
   }
+
+  cout << "SERIALIZED: " << MoneroUtils::serialize(transferRequest->toPropertyTree()) << endl;
 
   return transferRequest;
 }

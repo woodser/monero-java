@@ -1,10 +1,13 @@
 package utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
 import monero.wallet.MoneroWalletJni;
+import monero.wallet.model.MoneroIncomingTransfer;
+import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.request.MoneroTransferRequest;
 
@@ -71,9 +74,14 @@ public class Scratchpad {
 //    List<MoneroAccount> accounts = walletJni.getAccounts();
 //    System.out.println("Wallet has " + accounts.size() + " accounts");
     //walletJni.getTxs(new MoneroTxRequest().setIsOutgoing(true).setId("abcdef"));
-    transfers = walletJni.getTransfers(new MoneroTransferRequest().setAccountIndex(1));
+    transfers = walletJni.getTransfers(new MoneroTransferRequest().setAccountIndex(1).setSubaddressIndex(2));
     for (MoneroTransfer transfer : transfers) {
       assertEquals(1, (int) transfer.getAccountIndex());
+      if (transfer instanceof MoneroIncomingTransfer) {
+        assertEquals(2, (int) ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
+      } else {
+        assertTrue(((MoneroOutgoingTransfer) transfer).getSubaddressIndices().contains(2));
+      }
     }
   }
 }
