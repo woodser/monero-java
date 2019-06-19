@@ -215,10 +215,15 @@ shared_ptr<MoneroTransferRequest> nodeToTransferRequest(const boost::property_tr
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
     string key = it->first;
     cout << "Transfer request node key: " << key << endl;
-    if (key == string("subaddressIndex")) transferRequest->subaddressIndex = boost::lexical_cast<uint64_t>(it->second.data());
+    if (key == string("isIncoming")) transferRequest->isIncoming = stringToBool(it->second.data());
+    if (key == string("address")) transferRequest->address = it->second.data();
+    if (key == string("addresses")) throw runtime_error("addresses not implemented");
+    if (key == string("subaddressIndex")) transferRequest->subaddressIndex = stringToBool(it->second.data());
+    if (key == string("subaddressIndices")) throw runtime_error("subaddressIndices not implemented");
+    if (key == string("destinations")) throw runtime_error("destinations not implemented");
+    if (key == string("hasDestinations")) transferRequest->hasDestinations = stringToBool(it->second.data());
+    if (key == string("txRequest")) throw runtime_error("txRequest not implemented");
   }
-
-  cout << "SERIALIZED: " << MoneroUtils::serialize(transferRequest->toPropertyTree()) << endl;
 
   return transferRequest;
 }
@@ -288,7 +293,6 @@ shared_ptr<MoneroTransferRequest> deserializeTransferRequest(const string& trans
 
   // convert property tree to block
   shared_ptr<MoneroBlock> block = nodeToBlock(blockNode);
-  //shared_ptr<MoneroBlock> block = shared_ptr<MoneroBlock>(new MoneroBlock());
 
   cout << "Returning deserialized request" << endl;
 
