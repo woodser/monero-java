@@ -74,14 +74,15 @@ public class Scratchpad {
 //    List<MoneroAccount> accounts = walletJni.getAccounts();
 //    System.out.println("Wallet has " + accounts.size() + " accounts");
     //walletJni.getTxs(new MoneroTxRequest().setIsOutgoing(true).setId("abcdef"));
-    transfers = walletJni.getTransfers(new MoneroTransferRequest().setAccountIndex(1).setSubaddressIndex(2));
+    transfers = walletJni.getTransfers(new MoneroTransferRequest().setIsIncoming(true));
     for (MoneroTransfer transfer : transfers) {
-      assertEquals(1, (int) transfer.getAccountIndex());
-      if (transfer instanceof MoneroIncomingTransfer) {
-        assertEquals(2, (int) ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
-      } else {
-        assertTrue(((MoneroOutgoingTransfer) transfer).getSubaddressIndices().contains(2));
-      }
+      assertTrue(transfer.getIsIncoming());
+//      assertEquals(1, (int) transfer.getAccountIndex());
+//      if (transfer instanceof MoneroIncomingTransfer) {
+//        assertEquals(2, (int) ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
+//      } else {
+//        assertTrue(((MoneroOutgoingTransfer) transfer).getSubaddressIndices().contains(2));
+//      }
     }
   }
 }
