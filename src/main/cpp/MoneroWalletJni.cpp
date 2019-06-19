@@ -270,8 +270,8 @@ shared_ptr<MoneroTxRequest> nodeToTxRequest(const boost::property_tree::ptree& n
   return txRequest;
 }
 
-shared_ptr<MoneroBlock> nodeToBlock(const boost::property_tree::ptree& node) {
-  cout << "nodeToBlock()" << endl;
+shared_ptr<MoneroBlock> nodeToBlockRequest(const boost::property_tree::ptree& node) {
+  cout << "nodeToBlockRequest()" << endl;
   shared_ptr<MoneroBlock> block = shared_ptr<MoneroBlock>(new MoneroBlock());
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
     string key = it->first;
@@ -295,14 +295,26 @@ shared_ptr<MoneroTransferRequest> deserializeTransferRequest(const string& trans
   boost::property_tree::ptree blockNode;
   boost::property_tree::read_json(iss, blockNode);
 
-  // convert property tree to block
-  shared_ptr<MoneroBlock> block = nodeToBlock(blockNode);
+  // convert request property tree to block
+  shared_ptr<MoneroBlock> block = nodeToBlockRequest(blockNode);
 
+  // empty request if no txs
+  if (block->txs.empty()) return shared_ptr<MoneroTransferRequest>(new MoneroTransferRequest());
+
+  // get tx request
+  shared_ptr<MoneroTxRequest> txReq = static_pointer_cast<MoneroTxRequest>(block->txs[0]);
+
+  // initialize transfer request if necessary
+  if (txReq->transferRequest == boost::none) {
+    txReq->transferRequest = shared_ptr<MoneroTransferRequest>(new MoneroTransferRequest());
+    (*txReq->transferRequest)->txRequest = txReq;  // requests reference each other
+  }
+
+  //cout << block->serialize() << endl;
   cout << "Returning deserialized request" << endl;
 
   // return deserialized request
-  if (block->txs.empty()) return shared_ptr<MoneroTransferRequest>(new MoneroTransferRequest());
-  return *static_pointer_cast<MoneroTxRequest>(block->txs[0])->transferRequest;
+  return *txReq->transferRequest;
 }
 
 // ------------------------------- JNI STATIC ---------------------------------
@@ -758,7 +770,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
   // deserialize transfer request
   cout << "JNI received transfer request string: " << string(_transferRequest ? _transferRequest : "") << endl;
   shared_ptr<MoneroTransferRequest> transferRequest = deserializeTransferRequest(string(_transferRequest ? _transferRequest : ""));
-  cout << "Fetching transfers with request: " << MoneroUtils::serialize(transferRequest->toPropertyTree()) << endl;
+  cout << "Fetching transfers with request: " << transferRequest->serialize() << endl;
 
   // get transfers
   vector<shared_ptr<MoneroTransfer>> transfers = wallet->getTransfers(*transferRequest);
