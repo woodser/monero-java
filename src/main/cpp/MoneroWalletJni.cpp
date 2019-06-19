@@ -218,7 +218,7 @@ shared_ptr<MoneroTransferRequest> nodeToTransferRequest(const boost::property_tr
     if (key == string("isIncoming")) transferRequest->isIncoming = stringToBool(it->second.data());
     if (key == string("address")) transferRequest->address = it->second.data();
     if (key == string("addresses")) throw runtime_error("addresses not implemented");
-    if (key == string("subaddressIndex")) transferRequest->subaddressIndex = stringToBool(it->second.data());
+    if (key == string("subaddressIndex")) transferRequest->subaddressIndex = boost::lexical_cast<uint64_t>(it->second.data());
     if (key == string("subaddressIndices")) throw runtime_error("subaddressIndices not implemented");
     if (key == string("destinations")) throw runtime_error("destinations not implemented");
     if (key == string("hasDestinations")) transferRequest->hasDestinations = stringToBool(it->second.data());
