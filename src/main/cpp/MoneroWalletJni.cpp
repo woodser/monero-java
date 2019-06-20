@@ -216,17 +216,17 @@ shared_ptr<MoneroTransferRequest> nodeToTransferRequest(const boost::property_tr
     string key = it->first;
     cout << "Transfer request node key: " << key << endl;
     if (key == string("isIncoming")) transferRequest->isIncoming = stringToBool(it->second.data());
-    if (key == string("address")) transferRequest->address = it->second.data();
-    if (key == string("addresses")) throw runtime_error("addresses not implemented");
-    if (key == string("subaddressIndex")) transferRequest->subaddressIndex = it->second.get_value<uint32_t>();
-    if (key == string("subaddressIndices")) {
+    else if (key == string("address")) transferRequest->address = it->second.data();
+    else if (key == string("addresses")) throw runtime_error("addresses not implemented");
+    else if (key == string("subaddressIndex")) transferRequest->subaddressIndex = it->second.get_value<uint32_t>();
+    else if (key == string("subaddressIndices")) {
       vector<uint32_t> subaddressIndices;
       for (const auto& child : it->second) subaddressIndices.push_back(child.second.get_value<uint32_t>());
       transferRequest->subaddressIndices = subaddressIndices;
     }
-    if (key == string("destinations")) throw runtime_error("destinations not implemented");
-    if (key == string("hasDestinations")) transferRequest->hasDestinations = stringToBool(it->second.data());
-    if (key == string("txRequest")) throw runtime_error("txRequest not implemented");
+    else if (key == string("destinations")) throw runtime_error("destinations not implemented");
+    else if (key == string("hasDestinations")) transferRequest->hasDestinations = stringToBool(it->second.data());
+    else if (key == string("txRequest")) throw runtime_error("txRequest not implemented");
   }
 
   return transferRequest;
