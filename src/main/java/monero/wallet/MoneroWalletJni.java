@@ -432,7 +432,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     // serialize request from block and deserialize response
     String blocksJson = getTransfersJni(JsonUtils.serialize(request.getTxRequest().getBlock()));
-    //System.out.println("Received getTransfers() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
+    System.out.println("Received getTransfers() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
     
 //    // custom deserialization using mapper
 //    ObjectMapper mapper = new ObjectMapper();
@@ -472,14 +472,16 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     // collect transfers
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
-    for (MoneroBlock block : blocks) {
-      sanitizeBlock(block);
-      for (MoneroTx tx : block.getTxs()) {
-        MoneroTxWallet txWallet = (MoneroTxWallet) tx;
-        if (txWallet.getIncomingTransfers() != null) {
-          for (MoneroIncomingTransfer transfer : txWallet.getIncomingTransfers()) transfers.add(transfer);
+    if (blocks != null) {
+      for (MoneroBlock block : blocks) {
+        sanitizeBlock(block);
+        for (MoneroTx tx : block.getTxs()) {
+          MoneroTxWallet txWallet = (MoneroTxWallet) tx;
+          if (txWallet.getIncomingTransfers() != null) {
+            for (MoneroIncomingTransfer transfer : txWallet.getIncomingTransfers()) transfers.add(transfer);
+          }
+          if (txWallet.getOutgoingTransfer() != null) transfers.add(txWallet.getOutgoingTransfer());
         }
-        if (txWallet.getOutgoingTransfer() != null) transfers.add(txWallet.getOutgoingTransfer());
       }
     }
     return transfers;
