@@ -173,12 +173,12 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     }
     
     // filter on remaining fields
-    Long height = tx.getBlock() == null ? null : tx.getBlock().getHeight();
+    Long txHeight = tx.getBlock() == null ? null : tx.getBlock().getHeight();
     if (this.getTxIds() != null && !this.getTxIds().contains(tx.getId())) return false;
     if (this.getPaymentIds() != null && !this.getPaymentIds().contains(tx.getPaymentId())) return false;
-    if (this.getHeight() != null && height != this.getHeight()) return false;
-    if (this.getMinHeight() != null && (height == null || height < this.getMinHeight())) return false;
-    if (this.getMaxHeight() != null && (height == null || height > this.getMaxHeight())) return false;
+    if (this.getHeight() != null && txHeight != this.getHeight()) return false;
+    if (this.getMinHeight() != null && (txHeight == null || txHeight < this.getMinHeight())) return false;
+    if (this.getMaxHeight() != null && (txHeight == null || txHeight > this.getMaxHeight())) return false;
     
     // transaction meets request criteria
     return true;

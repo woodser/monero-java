@@ -803,7 +803,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
   // wrap and serialize blocks
   std::stringstream ss;
   boost::property_tree::ptree container;
-  container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
+  if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
   boost::property_tree::write_json(ss, container, false);
   string blocksJson = ss.str();
   env->ReleaseStringUTFChars(jtransferRequest, _transferRequest);
