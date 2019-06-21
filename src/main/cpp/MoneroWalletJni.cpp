@@ -523,7 +523,7 @@ Java_monero_wallet_MoneroWalletJni_getAddressIndexJni(JNIEnv *env, jobject insta
   }
 
   // serialize subaddresses which contain indices
-  string subaddressJson = string("temp");
+  string subaddressJson = subaddress.serialize();
   env->ReleaseStringUTFChars(jaddress, _address);
   return env->NewStringUTF(subaddressJson.c_str());
 }
@@ -758,8 +758,12 @@ Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(JNIEnv* env, jobject insta
   //    }
   //  }
 
-  // serialize and return subaddresses
-  string subaddressesJson = string("temp");
+  // wrap and serialize subaddresses
+  std::stringstream ss;
+  boost::property_tree::ptree container;
+  if (!subaddresses.empty()) container.add_child("subaddresses", MoneroUtils::toPropertyTree(subaddresses));
+  boost::property_tree::write_json(ss, container, false);
+  string subaddressesJson = ss.str();
   return env->NewStringUTF(subaddressesJson.c_str());
 }
 
@@ -810,16 +814,6 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
   // get transfers
   vector<shared_ptr<MoneroTransfer>> transfers = wallet->getTransfers(*transferRequest);
   cout << "Got " << transfers.size() << " transfers" << endl;
-
-  // TODO: DELETE THIS
-  for (const auto& transfer : transfers) {
-      if (transfer->tx == nullptr) throw runtime_error("tx is null");
-      if (transfer->tx->id == boost::none) throw runtime_error("tx is missing id");
-      if (transfer->tx->block == boost::none) throw runtime_error("block is none");
-      MoneroBlock& block = **transfer->tx->block;
-      if (block.height == boost::none) throw runtime_error("block height mis missing");
-      if (block.txs.empty()) throw runtime_error("but it doesn't have txs");
-  }
 
   // return unique blocks to preserve model relationships as tree
   vector<MoneroBlock> blocks;
