@@ -3,6 +3,8 @@ package monero.wallet.request;
 import java.math.BigInteger;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import common.types.Filter;
 import common.utils.GenUtils;
 import monero.daemon.model.MoneroKeyImage;
@@ -38,7 +40,8 @@ public class MoneroOutputRequest extends MoneroOutputWallet implements Filter<Mo
     this.subaddressIndices = GenUtils.arrayToList(subaddressIndices);
     return this;
   }
-
+  
+  @JsonIgnore
   public MoneroTxRequest getTxRequest() {
     return txRequest;
   }
