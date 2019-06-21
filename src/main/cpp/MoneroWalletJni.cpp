@@ -246,10 +246,43 @@ void nodeToTx(const boost::property_tree::ptree& node, shared_ptr<MoneroTx> tx) 
     string key = it->first;
     cout << "Tx node key: " << key << endl;
     if (key == string("id")) tx->id = it->second.data();
-    // TODO: finish this
+    else if (key == string("version")) throw runtime_error("version deserializationn not implemented");
+    else if (key == string("isCoinbase")) tx->isCoinbase = stringToBool(it->second.data());
+    else if (key == string("paymentId")) throw runtime_error("paymentId deserializationn not implemented");
+    else if (key == string("fee")) throw runtime_error("fee deserialization not implemented");
+    else if (key == string("mixin")) throw runtime_error("mixin deserialization not implemented");
+    else if (key == string("doNotRelay")) tx->doNotRelay = stringToBool(it->second.data());
+    else if (key == string("isRelayed")) tx->isRelayed = stringToBool(it->second.data());
+    else if (key == string("isConfirmed")) tx->isConfirmed = stringToBool(it->second.data());
+    else if (key == string("inTxPool")) tx->inTxPool = stringToBool(it->second.data());
+    else if (key == string("numConfirmations")) throw runtime_error("numConfirmations deserialization not implemented");
+    else if (key == string("unlockTime")) throw runtime_error("unlockTime deserialization not implemented");
+    else if (key == string("lastRelayedTimestamp")) throw runtime_error("lastRelayedTimestamp deserialization not implemented");
+    else if (key == string("receivedTimestamp")) throw runtime_error("receivedTimestamp deserializationn not implemented");
+    else if (key == string("isDoubleSpend")) tx->isDoubleSpend = stringToBool(it->second.data());
+    else if (key == string("key")) tx->key = it->second.data();
+    else if (key == string("fullHex")) tx->fullHex = it->second.data();
+    else if (key == string("prunedHex")) tx->prunedHex = it->second.data();
+    else if (key == string("prunableHex")) tx->prunableHex = it->second.data();
+    else if (key == string("prunableHash")) tx->prunableHash = it->second.data();
+    else if (key == string("size")) throw runtime_error("size deserialization not implemented");
+    else if (key == string("weight")) throw runtime_error("weight deserialization not implemented");
+    else if (key == string("vins")) throw runtime_error("vins deserializationn not implemented");
+    else if (key == string("vouts")) throw runtime_error("vouts deserializationn not implemented");
+    else if (key == string("outputIndices")) throw runtime_error("outputIndices deserialization not implemented");
+    else if (key == string("metadata")) throw runtime_error("metadata deserialization not implemented");
+    else if (key == string("commonTxSets")) throw runtime_error("commonTxSets deserialization not implemented");
+    else if (key == string("extra")) throw runtime_error("extra deserialization not implemented");
+    else if (key == string("rctSignatures")) throw runtime_error("rctSignatures deserialization not implemented");
+    else if (key == string("rctSigPrunable")) throw runtime_error("rctSigPrunable deserialization not implemented");
+    else if (key == string("isKeptByBlock")) tx->isKeptByBlock = stringToBool(it->second.data());
+    else if (key == string("isFailed")) tx->isFailed = stringToBool(it->second.data());
+    else if (key == string("lastFailedHeight")) throw runtime_error("lastFailedHeight deserialization not implemented");
+    else if (key == string("lastFailedId")) tx->lastFailedId = it->second.data();
+    else if (key == string("maxUsedBlockHeight")) throw runtime_error("maxUsedBlockHeight deserialization not implemented");
+    else if (key == string("maxUsedBlockId")) tx->maxUsedBlockId = it->second.data();
+    else if (key == string("signatures")) throw runtime_error("signatures deserialization not implemented");
   }
-
-  //throw runtime_error("txNodeToModel");
 }
 
 void nodeToTxWallet(const boost::property_tree::ptree& node, shared_ptr<MoneroTxWallet> txWallet) {

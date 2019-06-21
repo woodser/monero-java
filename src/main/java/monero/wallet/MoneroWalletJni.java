@@ -1,6 +1,7 @@
 package monero.wallet;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
@@ -425,6 +426,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     // normalize request up to block
     if (request == null) request = new MoneroTransferRequest();
     if (request.getTxRequest() == null) request.setTxRequest(new MoneroTxRequest().setTransferRequest(request));
+    else request.getTxRequest().setTransferRequest(request);
     if (request.getTxRequest().getBlock() == null) request.getTxRequest().setBlock(new MoneroBlock().setTxs(request.getTxRequest()));
     
     System.out.println("FETCHING: " + request.getAccountIndex());
