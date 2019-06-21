@@ -351,6 +351,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<MoneroSubaddress> getSubaddresses(int accountIdx, List<Integer> subaddressIndices) {
     String subaddressesJson = getSubaddressesJni(accountIdx, GenUtils.listToIntArray(subaddressIndices));
+    System.out.println("Deserializing subaddresses: " + subaddressesJson);
     List<MoneroSubaddress> subaddresses = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressesJson, SubaddressesContainer.class).subaddresses;
     for (MoneroSubaddress subaddress : subaddresses) sanitizeSubaddress(subaddress);  // TODO: better way?
     return subaddresses;
@@ -828,7 +829,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   // ------------------------ RESPONSE DESERIALIZATION ------------------------
-  
   
   /**
    * Override MoneroBlock with wallet types for polymorphic deserialization.
