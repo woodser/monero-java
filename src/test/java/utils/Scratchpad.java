@@ -1,15 +1,15 @@
 package utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
 import monero.wallet.MoneroWalletJni;
-import monero.wallet.model.MoneroIncomingTransfer;
-import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.request.MoneroTransferRequest;
+import monero.wallet.request.MoneroTxRequest;
 
 /**
  * Scratchpad for quick scripting.
@@ -74,15 +74,39 @@ public class Scratchpad {
 //    List<MoneroAccount> accounts = walletJni.getAccounts();
 //    System.out.println("Wallet has " + accounts.size() + " accounts");
     //walletJni.getTxs(new MoneroTxRequest().setIsOutgoing(true).setId("abcdef"));
-    transfers = walletJni.getTransfers(new MoneroTransferRequest().setIsIncoming(true));
+    
+//    transfers = walletJni.getTransfers(new MoneroTransferRequest().setIsOutgoing(true));
+//    assertFalse(transfers.isEmpty());
+//    for (MoneroTransfer transfer : transfers) {
+//      assertEquals(0, (int) transfer.getAccountIndex());
+//      assertTrue(transfer.getTx().getIsConfirmed());
+//    }
+//    System.out.println("Done");
+    
+    System.out.println("Starting...");
+    transfers = walletJni.getTransfers(new MoneroTransferRequest().setAccountIndex(0).setTxRequest(new MoneroTxRequest().setIsConfirmed(true)));
+    System.out.println("Returned!!!");
+    assertFalse(transfers.isEmpty());
     for (MoneroTransfer transfer : transfers) {
-      assertTrue(transfer.getIsIncoming());
+      assertEquals(0, (int) transfer.getAccountIndex());
+      assertTrue(transfer.getTx().getIsConfirmed());
+    }
+    System.out.println("Done");
+    
+//    // get confirmed transfers to account 0
+//    transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setAccountIndex(0).setTxRequest(new MoneroTxRequest().setIsConfirmed(true)), null, true);
+//    for (MoneroTransfer transfer : transfers) {
+//      assertEquals(0, (int) transfer.getAccountIndex());
+//      assertTrue(transfer.getTx().getIsConfirmed());
+//    }
+//    assertFalse(transfers.isEmpty());
+//    for (MoneroTransfer transfer : transfers) {
 //      assertEquals(1, (int) transfer.getAccountIndex());
 //      if (transfer instanceof MoneroIncomingTransfer) {
 //        assertEquals(2, (int) ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
 //      } else {
 //        assertTrue(((MoneroOutgoingTransfer) transfer).getSubaddressIndices().contains(2));
 //      }
-    }
+//    }
   }
 }

@@ -302,19 +302,20 @@ shared_ptr<MoneroTransferRequest> deserializeTransferRequest(const string& trans
   if (block->txs.empty()) return shared_ptr<MoneroTransferRequest>(new MoneroTransferRequest());
 
   // get tx request
-  shared_ptr<MoneroTxRequest> txReq = static_pointer_cast<MoneroTxRequest>(block->txs[0]);
+  shared_ptr<MoneroTxRequest> txRequest = static_pointer_cast<MoneroTxRequest>(block->txs[0]);
 
-  // initialize transfer request if necessary
-  if (txReq->transferRequest == boost::none) {
-    txReq->transferRequest = shared_ptr<MoneroTransferRequest>(new MoneroTransferRequest());
-    (*txReq->transferRequest)->txRequest = txReq;  // requests reference each other
-  }
+  // get / create transfer request
+  shared_ptr<MoneroTransferRequest> transferRequest = txRequest->transferRequest == boost::none ? shared_ptr<MoneroTransferRequest>(new MoneroTransferRequest()) : *txRequest->transferRequest;
+
+  // transfer request references tx request but not the other way around to avoid circular loop // TODO: could add check within meetsCriterias()
+  transferRequest->txRequest = txRequest;
+  txRequest->transferRequest = boost::none;
 
   //cout << block->serialize() << endl;
   cout << "Returning deserialized request" << endl;
 
   // return deserialized request
-  return *txReq->transferRequest;
+  return transferRequest;
 }
 
 // ------------------------------- JNI STATIC ---------------------------------
