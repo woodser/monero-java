@@ -30,6 +30,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
   private Long maxHeight;
   private Boolean includeOutputs;
   private MoneroTransferRequest transferRequest;
+  private MoneroOutputRequest outputRequest;
   
   public Boolean getIsOutgoing() {
     return isOutgoing;
@@ -122,6 +123,15 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
 
   public MoneroTxRequest setTransferRequest(MoneroTransferRequest transferRequest) {
     this.transferRequest = transferRequest;
+    return this;
+  }
+  
+  public MoneroOutputRequest getOutputRequest() {
+    return outputRequest;
+  }
+
+  public MoneroTxRequest setOutputRequest(MoneroOutputRequest outputRequest) {
+    this.outputRequest = outputRequest;
     return this;
   }
   

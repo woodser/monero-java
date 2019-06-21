@@ -346,10 +346,41 @@ shared_ptr<MoneroTransferRequest> deserializeTransferRequest(const string& trans
   txRequest->transferRequest = boost::none;
 
   //cout << block->serialize() << endl;
-  cout << "Returning deserialized request" << endl;
+  cout << "Returning deserialized transfer request" << endl;
 
   // return deserialized request
   return transferRequest;
+}
+
+shared_ptr<MoneroOutputRequest> deserializeOutputRequest(const string& outputRequestStr) {
+  cout << "deserializeOutputRequest(): " <<  outputRequestStr << endl;
+
+  // deserialize output request string to property rooted at block
+  std::istringstream iss = outputRequestStr.empty() ? std::istringstream() : std::istringstream(outputRequestStr);
+  boost::property_tree::ptree blockNode;
+  boost::property_tree::read_json(iss, blockNode);
+
+  // convert request property tree to block
+  shared_ptr<MoneroBlock> block = nodeToBlockRequest(blockNode);
+
+  // empty request if no txs
+  if (block->txs.empty()) return shared_ptr<MoneroOutputRequest>(new MoneroOutputRequest());
+
+  // get tx request
+  shared_ptr<MoneroTxRequest> txRequest = static_pointer_cast<MoneroTxRequest>(block->txs[0]);
+
+  // get / create output request
+  shared_ptr<MoneroOutputRequest> outputRequest = txRequest->outputRequest == boost::none ? shared_ptr<MoneroOutputRequest>(new MoneroOutputRequest()) : *txRequest->outputRequest;
+
+  // output request references tx request but not the other way around to avoid circular loop // TODO: could add check within meetsCriterias()
+  outputRequest->txRequest = txRequest;
+  txRequest->outputRequest = boost::none;
+
+  //cout << block->serialize() << endl;
+  cout << "Returning deserialized output request" << endl;
+
+  // return deserialized request
+  return outputRequest;
 }
 
 // ------------------------------- JNI STATIC ---------------------------------
@@ -812,6 +843,44 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
   boost::property_tree::write_json(ss, container, false);
   string blocksJson = ss.str();
   env->ReleaseStringUTFChars(jtransferRequest, _transferRequest);
+  return env->NewStringUTF(blocksJson.c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEnv* env, jobject instance, jstring joutputRequest) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getOutputsJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _outputRequest = joutputRequest ? env->GetStringUTFChars(joutputRequest, NULL) : nullptr;
+
+  // deserialize output request
+  cout << "JNI received output request string: " << string(_outputRequest ? _outputRequest : "") << endl;
+  shared_ptr<MoneroOutputRequest> outputRequest = deserializeOutputRequest(string(_outputRequest ? _outputRequest : ""));
+  cout << "Fetching outputs with request: " << outputRequest->serialize() << endl;
+
+  // get outputs
+  vector<shared_ptr<MoneroOutputWallet>> outputs = wallet->getOutputs(*outputRequest);
+  cout << "Got " << outputs.size() << " outputs" << endl;
+
+  // return unique blocks to preserve model relationships as tree
+  vector<MoneroBlock> blocks;
+  unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
+  for (auto const& output : outputs) {
+    shared_ptr<MoneroTxWallet> tx = static_pointer_cast<MoneroTxWallet>(output->tx);
+    if (tx->block == boost::none) throw runtime_error("Need to handle unconfirmed output");
+    unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx->block);
+    if (got == seenBlockPtrs.end()) {
+      seenBlockPtrs.insert(*tx->block);
+      blocks.push_back(**tx->block);
+    }
+  }
+  cout << "Returning " << blocks.size() << " blocks" << endl;
+
+  // wrap and serialize blocks
+  std::stringstream ss;
+  boost::property_tree::ptree container;
+  if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
+  boost::property_tree::write_json(ss, container, false);
+  string blocksJson = ss.str();
+  env->ReleaseStringUTFChars(joutputRequest, _outputRequest);
   return env->NewStringUTF(blocksJson.c_str());
 }
 
