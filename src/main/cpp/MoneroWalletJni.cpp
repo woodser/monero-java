@@ -246,6 +246,7 @@ void nodeToTx(const boost::property_tree::ptree& node, shared_ptr<MoneroTx> tx) 
     string key = it->first;
     cout << "Tx node key: " << key << endl;
     if (key == string("id")) tx->id = it->second.data();
+    // TODO: finish this
   }
 
   //throw runtime_error("txNodeToModel");
