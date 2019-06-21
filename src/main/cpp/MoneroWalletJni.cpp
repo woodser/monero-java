@@ -664,37 +664,13 @@ Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance,
 //    }
 //  }
 
-
-  // convert accounts to property tree
-  boost::property_tree::ptree accountsNode = MoneroUtils::toPropertyTree(accounts);
-
-  // serialize property tree to json
-  boost::property_tree::ptree root;
-  root.add_child("accounts", accountsNode);
+  // wrap and serialize accounts
   std::stringstream ss;
-  boost::property_tree::write_json(ss, root, false);
+  boost::property_tree::ptree container;
+  if (!accounts.empty()) container.add_child("accounts", MoneroUtils::toPropertyTree(accounts));
+  boost::property_tree::write_json(ss, container, false);
   string accountsJson = ss.str();
-  cout << "Serialized " << accountsJson << endl;
-  env->ReleaseStringUTFChars(jtag, _tag);
   return env->NewStringUTF(accountsJson.c_str());
-
-//  string accountsJson = MoneroUtils::serialize(accounts);
-//  cout << "Serialized " << accountsJson << endl;
-//  env->ReleaseStringUTFChars(jtag, _tag);
-//  return env->NewStringUTF(accountsJson.c_str());
-
-
-
-
-  //std::stringstream ss;
-  //json_archive<true> ar(ss);
-  //accounts[0].serialize_base(ar);
-
-//  for (int i = 0; i < accounts.size(); i++) {
-//    ar << accounts[i];
-//  }
-  //string accountsJson = ss.str();
-  //string accountsJson = string("temp");
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountJni(JNIEnv* env, jobject instance, jint accountIdx, jboolean includeSubaddresses) {
@@ -720,7 +696,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountJni(JNIEn
 //  }
 
   // serialize and returna account
-  string accountJson = string("temp");
+  string accountJson = account.serialize();
   return env->NewStringUTF(accountJson.c_str());
 }
 

@@ -338,7 +338,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses) {
     String accountJson = getAccountJni(accountIdx, includeSubaddresses);
-    MoneroAccount account = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountJson, AccountsContainer.class).accounts.get(0);
+    System.out.println("Deserializing account: " + accountJson);
+    MoneroAccount account = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountJson, MoneroAccount.class);
     sanitizeAccount(account);
     return account;
   }
