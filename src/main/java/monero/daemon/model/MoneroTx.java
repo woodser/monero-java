@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import common.utils.GenUtils;
 import monero.utils.MoneroUtils;
@@ -327,6 +328,7 @@ public class MoneroTx {
     return this;
   }
   
+  @JsonManagedReference
   public List<MoneroOutput> getVins() {
     return vins;
   }
@@ -336,6 +338,7 @@ public class MoneroTx {
     return this;
   }
   
+  @JsonManagedReference
   public List<MoneroOutput> getVouts() {
     return vouts;
   }
