@@ -69,13 +69,13 @@ public class MoneroOutputRequest extends MoneroOutputWallet implements Filter<Mo
       if (this.getKeyImage().getSignature() != null && !this.getKeyImage().getSignature().equals(output.getKeyImage().getSignature())) return false;
     }
     
-    // filter extensions
+    // filter on extensions
     if (this.getSubaddressIndices() != null && !this.getSubaddressIndices().contains(output.getSubaddressIndex())) return false;
     
-    // filter with transaction request
+    // filter with tx request
     if (this.getTxRequest() != null && !this.getTxRequest().meetsCriteria(output.getTx())) return false;
     
-    // output meets filter criteria
+    // output meets request
     return true;
   }
   
