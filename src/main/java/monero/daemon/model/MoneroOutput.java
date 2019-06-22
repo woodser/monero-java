@@ -6,6 +6,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import monero.utils.MoneroUtils;
 
 /**
@@ -32,6 +34,7 @@ public class MoneroOutput {
     this.stealthPublicKey = output.stealthPublicKey;
   }
   
+  @JsonBackReference
   public MoneroTx getTx() {
     return tx;
   }
