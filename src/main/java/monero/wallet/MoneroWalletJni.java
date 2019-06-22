@@ -19,6 +19,7 @@ import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
+import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
@@ -839,7 +840,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
     
     @JsonProperty("txs")
-    public MoneroBlockWallet setTxWallets(List<MoneroTxWallet> txs) {
+    public MoneroBlockWallet setTxWallets(List<MoneroTxWalletDeserialize> txs) {
       super.setTxs(new ArrayList<MoneroTx>(txs));
       return this;
     }
@@ -852,6 +853,21 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private static class SubaddressesContainer {
     public List<MoneroSubaddress> subaddresses;
   };
+  
+  private static class MoneroTxWalletDeserialize extends MoneroTxWallet {
+    
+    // default constructor necessary for serialization
+    @SuppressWarnings("unused")
+    public MoneroTxWalletDeserialize() {
+      super();
+    }
+    
+    @JsonProperty("vouts")
+    public MoneroTxWalletDeserialize setVoutsWallet(List<MoneroOutputWallet> outputs) {
+      super.setVouts(new ArrayList<MoneroOutput>(outputs));
+      return this;
+    }
+  }
   
   private static class BlocksContainer {
     public List<MoneroBlockWallet> blocks;
