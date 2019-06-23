@@ -232,6 +232,55 @@ shared_ptr<MoneroTransferRequest> nodeToTransferRequest(const boost::property_tr
   return transferRequest;
 }
 
+void nodeToOutput(const boost::property_tree::ptree& node, shared_ptr<MoneroOutput> output) {
+  cout << "nodeToOutput()" << endl;
+
+//  // print for debug
+//  std::stringstream ss;
+//  boost::property_tree::write_json(ss, node, false);
+//  string receivedNode = ss.str();
+//  cout << "Received node: " << receivedNode << endl;
+
+  // initialize output from node
+  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+    string key = it->first;
+    cout << "Output node key: " << key << endl;
+    if (key == string("keyImage")) throw runtime_error("nodeToTx() deserialize keyImage not implemented");
+    else if (key == string("amount")) output->amount = it->second.get_value<uint64_t>();
+    else if (key == string("index")) output->index = it->second.get_value<uint32_t>();
+    else if (key == string("ringOutputIndices")) throw runtime_error("nodeToTx() deserialize ringOutputIndices not implemented");
+    else if (key == string("stealthPublicKey")) throw runtime_error("nodeToTx() deserialize stealthPublicKey not implemented");
+  }
+}
+
+void nodeToOutputWallet(const boost::property_tree::ptree& node, shared_ptr<MoneroOutputWallet> outputWallet) {
+  nodeToOutput(node, outputWallet);
+  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+    string key = it->first;
+    cout << "Output wallet node key: " << key << endl;
+    if (key == string("accountIndex")) outputWallet->accountIndex = it->second.get_value<uint32_t>();
+    else if (key == string("subaddressIndex")) outputWallet->subaddressIndex = it->second.get_value<uint32_t>();
+    else if (key == string("isSpent")) outputWallet->isSpent = stringToBool(it->second.data());
+    else if (key == string("isUnlocked")) outputWallet->isUnlocked = stringToBool(it->second.data());
+    else if (key == string("isFrozen")) outputWallet->isFrozen = stringToBool(it->second.data());
+  }
+}
+
+shared_ptr<MoneroOutputRequest> nodeToOutputRequest(const boost::property_tree::ptree& node) {
+  shared_ptr<MoneroOutputRequest> outputRequest = shared_ptr<MoneroOutputRequest>(new MoneroOutputRequest());
+  nodeToOutputWallet(node, outputRequest);
+
+  // initialize request from node
+  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+    string key = it->first;
+    cout << "Output request node key: " << key << endl;
+    if (key == string("subaddressIndices")) throw runtime_error("nodeToOutputRequest() deserialize subaddressIndices");
+    else if (key == string("txRequest")) {} // ignored
+  }
+
+  return outputRequest;
+}
+
 void nodeToTx(const boost::property_tree::ptree& node, shared_ptr<MoneroTx> tx) {
   cout << "nodeToTx()" << endl;
 
@@ -287,6 +336,12 @@ void nodeToTx(const boost::property_tree::ptree& node, shared_ptr<MoneroTx> tx) 
 
 void nodeToTxWallet(const boost::property_tree::ptree& node, shared_ptr<MoneroTxWallet> txWallet) {
   nodeToTx(node, txWallet);
+
+  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+    string key = it->first;
+    cout << "Tx wallet node key: " << key << endl;
+    //if (key == string("id")) tx->id = it->second.data();
+  }
 }
 
 shared_ptr<MoneroTxRequest> nodeToTxRequest(const boost::property_tree::ptree& node) {
@@ -297,8 +352,16 @@ shared_ptr<MoneroTxRequest> nodeToTxRequest(const boost::property_tree::ptree& n
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
     string key = it->first;
     cout << "Tx request node key: " << key << endl;
-    if (key == string("transferRequest")) txRequest->transferRequest = nodeToTransferRequest(it->second);
-    //if (key == string("isOutgoing")) txRequest.isOutgoing = shared_ptr<bool>(make_shared<bool>(stringToBool(it->second.data())));
+    if (key == string("isOutgoing")) txRequest->isOutgoing = stringToBool(it->second.data());
+    else if (key == string("isIncoming")) txRequest->isIncoming = stringToBool(it->second.data());
+    else if (key == string("txIds")) throw runtime_error("nodeToTxRequest txIds not implemented");
+    else if (key == string("hasPaymentId")) throw runtime_error("nodeToTxRequest hasPaymentId not implemented");
+    else if (key == string("paymentIds")) throw runtime_error("nodeToTxRequest paymentIds not implemented");
+    else if (key == string("minHeight")) throw runtime_error("nodeToTxRequest minHeight not implemented");
+    else if (key == string("maxHeight")) throw runtime_error("nodeToTxRequest maxHeight not implemented");
+    else if (key == string("includeOutputs")) throw runtime_error("nodeToTxRequest includeOutputs not implemented");
+    else if (key == string("transferRequest")) txRequest->transferRequest = nodeToTransferRequest(it->second);
+    else if (key == string("outputRequest")) txRequest->outputRequest = nodeToOutputRequest(it->second);
   }
 
   return txRequest;

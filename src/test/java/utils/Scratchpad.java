@@ -7,9 +7,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import monero.wallet.MoneroWalletJni;
+import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroTransfer;
-import monero.wallet.request.MoneroTransferRequest;
-import monero.wallet.request.MoneroTxRequest;
+import monero.wallet.request.MoneroOutputRequest;
 
 /**
  * Scratchpad for quick scripting.
@@ -83,13 +83,13 @@ public class Scratchpad {
 //    }
 //    System.out.println("Done");
     
+    
+    
     System.out.println("Starting...");
-    transfers = walletJni.getTransfers(new MoneroTransferRequest().setAccountIndex(0).setTxRequest(new MoneroTxRequest().setIsConfirmed(true)));
+    List<MoneroOutputWallet> outputs = walletJni.getOutputs(new MoneroOutputRequest().setAccountIndex(1));
     System.out.println("Returned!!!");
-    assertFalse(transfers.isEmpty());
-    for (MoneroTransfer transfer : transfers) {
-      assertEquals(0, (int) transfer.getAccountIndex());
-      assertTrue(transfer.getTx().getIsConfirmed());
+    for (MoneroOutputWallet output : outputs) {
+      assertEquals(1, (int) output.getAccountIndex());
     }
     System.out.println("Done");
     
