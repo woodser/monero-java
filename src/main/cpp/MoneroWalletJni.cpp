@@ -274,7 +274,7 @@ shared_ptr<MoneroOutputRequest> nodeToOutputRequest(const boost::property_tree::
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
     string key = it->first;
     cout << "Output request node key: " << key << endl;
-    if (key == string("subaddressIndices")) throw runtime_error("nodeToOutputRequest() deserialize subaddressIndices");
+    if (key == string("subaddressIndices")) for (boost::property_tree::ptree::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) outputRequest->subaddressIndices.push_back(it2->second.get_value<uint32_t>());
     else if (key == string("txRequest")) {} // ignored
   }
 
