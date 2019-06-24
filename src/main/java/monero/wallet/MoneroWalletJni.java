@@ -408,33 +408,39 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroTxWallet> getTxs(MoneroTxRequest request) {
-//    String blocksJson = getTxsJni(request == null ? null : JsonUtils.serialize(request.getBlock() != null ? request.getBlock() : new MoneroBlock().setTxs(Arrays.asList(request))));
-//    System.out.println("Received getTxs() response from JNI: " + blocksJson.substring(0, 10000) + "...");
-//    List<MoneroBlock> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
-//    for (MoneroBlock block : blocks) sanitizeBlock(block);
-//    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-//    for (MoneroBlock block : blocks) {
-//      for (MoneroTx tx : block.getTxs()) {
-//        txs.add((MoneroTxWallet) tx);
-//      }
-//    }
-//    return txs;
-    throw new RuntimeException("Not implemented");
+    
+    // initialize request up to block
+    if (request == null) request = new MoneroTxRequest();
+    if (request.getBlock() == null) request.setBlock(new MoneroBlock().setTxs(request));
+    
+    // serialize request from block and fetch txs from jni
+    String blocksJson = getTxsJni(JsonUtils.serialize(request.getBlock()));
+    System.out.println("Received getTxs() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
+    
+    // deserialize blocks
+    List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
+    
+    // collect txs
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    if (blocks != null) {
+      for (MoneroBlock block : blocks) {
+        sanitizeBlock(block);
+        for (MoneroTx tx : block.getTxs()) txs.add((MoneroTxWallet) tx);
+      }
+    }
+    return txs;
   }
 
   @Override
   public List<MoneroTransfer> getTransfers(MoneroTransferRequest request) {
     
-    // normalize request up to block
+    // initialize request up to block
     if (request == null) request = new MoneroTransferRequest();
     if (request.getTxRequest() == null) request.setTxRequest(new MoneroTxRequest().setTransferRequest(request));
     else request.getTxRequest().setTransferRequest(request);
     if (request.getTxRequest().getBlock() == null) request.getTxRequest().setBlock(new MoneroBlock().setTxs(request.getTxRequest()));
     
-    System.out.println("FETCHING: " + request.getAccountIndex());
-    System.out.println("SERIALIZED: " + JsonUtils.serialize(request.getTxRequest().getBlock()));
-    
-    // serialize request from block and deserialize response
+    // serialize request from block and fetch transfers from jni
     String blocksJson = getTransfersJni(JsonUtils.serialize(request.getTxRequest().getBlock()));
     System.out.println("Received getTransfers() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
     
@@ -461,7 +467,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<MoneroOutputWallet> getOutputs(MoneroOutputRequest request) {
     
-    // normalize request up to block
+    // initialize request up to block
     if (request == null) request = new MoneroOutputRequest();
     if (request.getTxRequest() == null) request.setTxRequest(new MoneroTxRequest().setOutputRequest(request));
     else request.getTxRequest().setOutputRequest(request);
@@ -470,7 +476,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     System.out.println("FETCHING: " + request.getAccountIndex());
     System.out.println("SERIALIZED: " + JsonUtils.serialize(request.getTxRequest().getBlock()));
     
-    // serialize request from block and deserialize response
+    // serialize request from block and fetch outputs from jni
     String blocksJson = getOutputsJni(JsonUtils.serialize(request.getTxRequest().getBlock()));
     System.out.println("Received getOutputs() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
     
