@@ -232,6 +232,20 @@ shared_ptr<MoneroTransferRequest> nodeToTransferRequest(const boost::property_tr
   return transferRequest;
 }
 
+shared_ptr<MoneroKeyImage> nodeToKeyImage(const boost::property_tree::ptree& node) {
+
+  // initialize key image from node
+  shared_ptr<MoneroKeyImage> keyImage = shared_ptr<MoneroKeyImage>(new MoneroKeyImage());
+  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+    string key = it->first;
+    cout << "Key image node key: " << key << endl;
+    if (key == string("hex")) keyImage->hex = it->second.data();
+    else if (key == string("signature")) keyImage->signature = it->second.data();
+  }
+
+  return keyImage;
+}
+
 void nodeToOutput(const boost::property_tree::ptree& node, shared_ptr<MoneroOutput> output) {
   cout << "nodeToOutput()" << endl;
 
@@ -245,7 +259,7 @@ void nodeToOutput(const boost::property_tree::ptree& node, shared_ptr<MoneroOutp
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
     string key = it->first;
     cout << "Output node key: " << key << endl;
-    if (key == string("keyImage")) throw runtime_error("nodeToTx() deserialize keyImage not implemented");
+    if (key == string("keyImage")) output->keyImage = nodeToKeyImage(it->second);
     else if (key == string("amount")) output->amount = it->second.get_value<uint64_t>();
     else if (key == string("index")) output->index = it->second.get_value<uint32_t>();
     else if (key == string("ringOutputIndices")) throw runtime_error("nodeToTx() deserialize ringOutputIndices not implemented");
@@ -354,7 +368,7 @@ shared_ptr<MoneroTxRequest> nodeToTxRequest(const boost::property_tree::ptree& n
     cout << "Tx request node key: " << key << endl;
     if (key == string("isOutgoing")) txRequest->isOutgoing = stringToBool(it->second.data());
     else if (key == string("isIncoming")) txRequest->isIncoming = stringToBool(it->second.data());
-    else if (key == string("txIds")) throw runtime_error("nodeToTxRequest txIds not implemented");
+    else if (key == string("txIds")) for (boost::property_tree::ptree::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) txRequest->txIds.push_back(it2->second.data());
     else if (key == string("hasPaymentId")) throw runtime_error("nodeToTxRequest hasPaymentId not implemented");
     else if (key == string("paymentIds")) throw runtime_error("nodeToTxRequest paymentIds not implemented");
     else if (key == string("minHeight")) throw runtime_error("nodeToTxRequest minHeight not implemented");
