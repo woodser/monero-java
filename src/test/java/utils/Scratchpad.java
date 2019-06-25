@@ -7,9 +7,10 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import monero.wallet.MoneroWalletJni;
-import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroTransfer;
-import monero.wallet.request.MoneroOutputRequest;
+import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.request.MoneroTransferRequest;
+import monero.wallet.request.MoneroTxRequest;
 
 /**
  * Scratchpad for quick scripting.
@@ -75,23 +76,29 @@ public class Scratchpad {
 //    System.out.println("Wallet has " + accounts.size() + " accounts");
     //walletJni.getTxs(new MoneroTxRequest().setIsOutgoing(true).setId("abcdef"));
     
-//    transfers = walletJni.getTransfers(new MoneroTransferRequest().setIsOutgoing(true));
+//    transfers = walletJni.getTransfers(new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setIsConfirmed(true)));
 //    assertFalse(transfers.isEmpty());
 //    for (MoneroTransfer transfer : transfers) {
-//      assertEquals(0, (int) transfer.getAccountIndex());
+//      //assertEquals(0, (int) transfer.getAccountIndex());
 //      assertTrue(transfer.getTx().getIsConfirmed());
 //    }
 //    System.out.println("Done");
     
     
     
-    System.out.println("Starting...");
-    List<MoneroOutputWallet> outputs = walletJni.getOutputs(new MoneroOutputRequest().setAccountIndex(1));
-    System.out.println("Returned!!!");
-    for (MoneroOutputWallet output : outputs) {
-      assertEquals(1, (int) output.getAccountIndex());
+//    System.out.println("Starting...");
+//    List<MoneroOutputWallet> outputs = walletJni.getOutputs(new MoneroOutputRequest().setAccountIndex(1));
+//    System.out.println("Returned!!!");
+//    for (MoneroOutputWallet output : outputs) {
+//      assertEquals(1, (int) output.getAccountIndex());
+//    }
+//    System.out.println("Done");
+    
+    List<MoneroTxWallet> txs = walletJni.getTxs(new MoneroTxRequest().setIsConfirmed(true));
+    for (MoneroTxWallet tx : txs) {
+      assertTrue(tx.getIsConfirmed());
     }
-    System.out.println("Done");
+    System.out.println("Done!");
     
 //    // get confirmed transfers to account 0
 //    transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setAccountIndex(0).setTxRequest(new MoneroTxRequest().setIsConfirmed(true)), null, true);
