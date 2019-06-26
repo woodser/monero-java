@@ -192,6 +192,12 @@ For convenience, a pre-built library for MacOSX is included with this project.  
 - Expose a Monero wallet in Java backed by a MyMonero-compatible endpoint which shares the view key with a 3rd party to scan the blockchain.
 - Offer consistent terminology and APIs for Monero's developer ecosystem with a working reference implementation.
 
+## See Also
+
+[JavaScript reference implementation](https://github.com/monero-ecosystem/monero-javascript)
+
+[C++ reference implementation](https://github.com/woodser/monero-cpp-library)
+
 ## License
 
 This project is licensed under MIT.
