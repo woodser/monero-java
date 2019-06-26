@@ -26,6 +26,7 @@ cppWalletHandle, cppListenerHandle string constants in MoneroWalletJni.cpp
 broken test wallet is synced but no balance or accounts
 remove javastring2string warning from cpp utils
 constants to represent model fields for serialization/deserialization
+performance: profile, maybe switch to return native jni types
 
 MONERO CORE ISSUES
 wallet2 network type auto detected when loaded from files on disk
