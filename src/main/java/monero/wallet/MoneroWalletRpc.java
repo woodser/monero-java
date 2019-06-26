@@ -50,7 +50,7 @@ import monero.wallet.request.MoneroTransferRequest;
 import monero.wallet.request.MoneroTxRequest;
 
 /**
- * Implements a Monero Wallet using monero-wallet-rpc.
+ * Implements a Monero wallet using monero-wallet-rpc.
  */
 public class MoneroWalletRpc extends MoneroWalletDefault {
 

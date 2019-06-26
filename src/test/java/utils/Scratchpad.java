@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import monero.wallet.MoneroWallet;
+import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.request.MoneroTransferRequest;
@@ -58,17 +59,17 @@ public class Scratchpad {
 //      System.out.println(tx.getBlock());
 //    }
     
-    List<MoneroTxWallet> txs = walletJni.getTxs(new MoneroTxRequest().setTxId("6797fe576c895e1e9e57a0a35e9fc6f8bc28eae5e408695e06f412d9b25af7d5"));
-    assertEquals(1, txs.size());
+    List<MoneroTxWallet> txs = walletJni.getTxs(new MoneroTxRequest().setTransferRequest(new MoneroTransferRequest().setAccountIndex(1)));
+    //assertEquals(1, txs.size());
+    //assertEquals("17830761dc1507ee5512e7382b566ee2ab391280f489aa4c277f32131514a9f5", txs.get(0).getId());
     for (MoneroTxWallet tx : txs) {
-      if (tx.getOutgoingTransfer() != null) {
-        
-      } else {
-        System.out.println("Yeah");
-        assertTrue(tx.getIncomingTransfers().size() > 0);
+      boolean found = false;
+      if (tx.getOutgoingTransfer() != null && tx.getOutgoingTransfer().getAccountIndex() == 1) found = true;
+      for (MoneroIncomingTransfer incomingTransfer : tx.getIncomingTransfers()) {
+        if (incomingTransfer.getAccountIndex() == 1) found = true;
       }
+      assertTrue("Yo why is this not foudn", found);
     }
-    
     
     List<MoneroTransfer> transfers = walletJni.getTransfers(new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setIsConfirmed(true)));
     System.out.println(transfers.get(0).getTx().getBlock().getClass());
