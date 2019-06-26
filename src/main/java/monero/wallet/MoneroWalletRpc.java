@@ -569,10 +569,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       Map<String, MoneroTxWallet> txsById = new HashMap<String, MoneroTxWallet>();  // store txs in temporary map for sorting
       for (MoneroTxWallet tx : txs) txsById.put(tx.getId(), tx);
       List<MoneroTxWallet> orderedTxs = new ArrayList<MoneroTxWallet>();
-      for (String txId : request.getTxIds()) {
-        if (txsById.containsKey(txId)) throw new RuntimeException("Tx id not contained in map");  // TODO: delete this since it's unecessary with above check
-        orderedTxs.add(txsById.get(txId));
-      }
+      for (String txId : request.getTxIds()) orderedTxs.add(txsById.get(txId));
       txs = orderedTxs;
     }
     return txs;
