@@ -8,7 +8,7 @@ This project provides Java interfaces for a Monero wallet and daemon.
 
 The interfaces currently rely on running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html).
 
-A primary goal of this project make the Monero Core C++ wallet accessible through a Java interface.
+A primary goal of this project is to make the Monero Core C++ wallet accessible through a Java interface.
 
 Main Features
 
