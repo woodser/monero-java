@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroOutput;
@@ -113,6 +114,17 @@ public class MoneroTxWallet extends MoneroTx {
     }
     super.setVouts(vouts);
     return this;
+  }
+  
+  /**
+   * Set vouts with compile-time binding to MoneroOutputWallet for deserialization.
+   * 
+   * @param outputs are the tx's vouts
+   * @return MoneroTxWallet is a reference to this tx for chaining
+   */
+  @JsonProperty("vouts")
+  public MoneroTxWallet setVoutsWallet(List<MoneroOutputWallet> outputs) {
+    return setVouts(new ArrayList<MoneroOutput>(outputs));
   }
   
   public String getNote() {

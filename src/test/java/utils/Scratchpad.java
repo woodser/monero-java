@@ -1,7 +1,5 @@
 package utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -28,7 +26,7 @@ public class Scratchpad {
 //    // common variables
     //MoneroTx tx = null;
     //List<MoneroTx> txs = null;
-    List<MoneroTransfer> transfers = null;
+    //List<MoneroTransfer> transfers = null;
     String txId = null;
     
     // -------------------------------- SCRATCHPAD ----------------------------
@@ -61,7 +59,8 @@ public class Scratchpad {
     
     
     MoneroWalletJni walletJni = TestUtils.getWalletJni();
-    walletJni.getTransfers(new MoneroTransferRequest().setAccountIndex(0).setSubaddressIndex(-1));
+    List<MoneroTransfer> transfers = walletJni.getTransfers(new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setIsConfirmed(true)));
+    System.out.println(transfers.get(0).getTx().getBlock().getClass());
     
     //MoneroWalletJni walletJni = new MoneroWalletJni("./test_wallets/test_wallet_1", TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
 //
