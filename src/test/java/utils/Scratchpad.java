@@ -1,10 +1,11 @@
 package utils;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import monero.wallet.MoneroWalletJni;
+import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.request.MoneroTransferRequest;
@@ -20,7 +21,7 @@ public class Scratchpad {
     // initialize daemon, wallet, and direct rpc interface
 //    MoneroDaemon daemon = TestUtils.getDaemonRpc();
 //    MoneroWallet walletRpc = TestUtils.getWalletRpc();
-    //MoneroWallet walletJni = TestUtils.getWalletJni();
+    MoneroWallet walletJni = TestUtils.getWalletJni();
     //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
     
 //    // common variables
@@ -57,8 +58,18 @@ public class Scratchpad {
 //      System.out.println(tx.getBlock());
 //    }
     
+    List<MoneroTxWallet> txs = walletJni.getTxs(new MoneroTxRequest().setTxId("6797fe576c895e1e9e57a0a35e9fc6f8bc28eae5e408695e06f412d9b25af7d5"));
+    assertEquals(1, txs.size());
+    for (MoneroTxWallet tx : txs) {
+      if (tx.getOutgoingTransfer() != null) {
+        
+      } else {
+        System.out.println("Yeah");
+        assertTrue(tx.getIncomingTransfers().size() > 0);
+      }
+    }
     
-    MoneroWalletJni walletJni = TestUtils.getWalletJni();
+    
     List<MoneroTransfer> transfers = walletJni.getTransfers(new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setIsConfirmed(true)));
     System.out.println(transfers.get(0).getTx().getBlock().getClass());
     
@@ -95,11 +106,7 @@ public class Scratchpad {
 //    }
 //    System.out.println("Done");
     
-    List<MoneroTxWallet> txs = walletJni.getTxs(new MoneroTxRequest().setIsConfirmed(true));
-    for (MoneroTxWallet tx : txs) {
-      assertTrue(tx.getIsConfirmed());
-    }
-    System.out.println("Done!");
+
     
 //    // get confirmed transfers to account 0
 //    transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setAccountIndex(0).setTxRequest(new MoneroTxRequest().setIsConfirmed(true)), null, true);
