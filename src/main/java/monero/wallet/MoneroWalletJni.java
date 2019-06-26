@@ -973,6 +973,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   private static MoneroBlock sanitizeBlock(MoneroBlock block) {
+    for (MoneroTx tx : block.getTxs()) sanitizeTxWallet((MoneroTxWallet) tx);
     return block;
+  }
+  
+  private static MoneroTxWallet sanitizeTxWallet(MoneroTxWallet tx) {
+    return tx;
   }
 }
