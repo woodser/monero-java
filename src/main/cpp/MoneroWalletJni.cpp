@@ -911,39 +911,44 @@ Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(JNIEnv* env, jobject insta
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* env, jobject instance, jstring jtxRequest) {
   cout << "Java_monero_wallet_MoneroWalletJni_getTxsJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  const char* _txRequest = jtxRequest ? env->GetStringUTFChars(jtxRequest, NULL) : nullptr;
+  try {
+    MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+    const char* _txRequest = jtxRequest ? env->GetStringUTFChars(jtxRequest, NULL) : nullptr;
 
-  // deserialize tx request
-  cout << "JNI received tx request string: " << string(_txRequest ? _txRequest : "") << endl;
-  shared_ptr<MoneroTxRequest> txRequest = deserializeTxRequest(string(_txRequest ? _txRequest : ""));
-  cout << "Fetching txs with request: " << txRequest->serialize() << endl;
+    // deserialize tx request
+    cout << "JNI received tx request string: " << string(_txRequest ? _txRequest : "") << endl;
+    shared_ptr<MoneroTxRequest> txRequest = deserializeTxRequest(string(_txRequest ? _txRequest : ""));
+    cout << "Fetching txs with request: " << txRequest->serialize() << endl;
 
-  // get txs
-  vector<shared_ptr<MoneroTxWallet>> txs = wallet->getTxs(*txRequest);
-  cout << "Got " << txs.size() << " txs" << endl;
+    // get txs
+    vector<shared_ptr<MoneroTxWallet>> txs = wallet->getTxs(*txRequest);
+    cout << "Got " << txs.size() << " txs" << endl;
 
-  // return unique blocks to preserve model relationships as tree
-  vector<MoneroBlock> blocks;
-  unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
-  for (const shared_ptr<MoneroTxWallet>& tx : txs) {
-    if (tx->block == boost::none) throw runtime_error("Need to handle unconfirmed transfer");
-    unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(tx->block.get());
-    if (got == seenBlockPtrs.end()) {
-      seenBlockPtrs.insert(tx->block.get());
-      blocks.push_back(*tx->block.get());
+    // return unique blocks to preserve model relationships as tree
+    vector<MoneroBlock> blocks;
+    unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
+    for (const shared_ptr<MoneroTxWallet>& tx : txs) {
+      if (tx->block == boost::none) throw runtime_error("Need to handle unconfirmed transfer");
+      unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(tx->block.get());
+      if (got == seenBlockPtrs.end()) {
+        seenBlockPtrs.insert(tx->block.get());
+        blocks.push_back(*tx->block.get());
+      }
     }
-  }
-  cout << "Returning " << blocks.size() << " blocks" << endl;
+    cout << "Returning " << blocks.size() << " blocks" << endl;
 
-  // wrap and serialize blocks
-  std::stringstream ss;
-  boost::property_tree::ptree container;
-  if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
-  boost::property_tree::write_json(ss, container, false);
-  string blocksJson = ss.str();
-  env->ReleaseStringUTFChars(jtxRequest, _txRequest);
-  return env->NewStringUTF(blocksJson.c_str());
+    // wrap and serialize blocks
+    std::stringstream ss;
+    boost::property_tree::ptree container;
+    if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
+    boost::property_tree::write_json(ss, container, false);
+    string blocksJson = ss.str();
+    env->ReleaseStringUTFChars(jtxRequest, _txRequest);
+    return env->NewStringUTF(blocksJson.c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNIEnv* env, jobject instance, jstring jtransferRequest) {
