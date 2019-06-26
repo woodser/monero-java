@@ -7,6 +7,24 @@ using namespace monero;
 
 // --------------------------------- LISTENER ---------------------------------
 
+// ---- START MONERUJO-BASED CODE ----
+
+/**
+ * Copyright (c) 2017 m2049r
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -59,6 +77,8 @@ void detachJVM(JNIEnv *jenv, int envStat) {
     cachedJVM->DetachCurrentThread();
   }
 }
+
+// ---- END MONERUJO-BASE CODE ----
 
 /**
  * Listens for wallet notifications and notifies the cpp listener in Java.
@@ -188,6 +208,25 @@ void setDaemonConnection(JNIEnv *env, MoneroWallet* wallet, jstring juri, jstrin
 //    }
 //  }
 //}
+
+// Based on: https://stackoverflow.com/questions/2054598/how-to-catch-jni-java-exception/2125673#2125673
+void rethrow_cpp_exception_as_java_exception(JNIEnv* env) {
+  try {
+    throw;  // throw exception to determine and handle type
+  } catch (const std::bad_alloc& e) {
+    jclass jc = env->FindClass("java/lang/OutOfMemoryError");
+    if (jc) env->ThrowNew(jc, e.what());
+  } catch (const std::ios_base::failure& e) {
+    jclass jc = env->FindClass("java/io/IOException");
+    if (jc) env->ThrowNew(jc, e.what());
+  } catch (const std::exception& e) {
+    jclass jc = env->FindClass("java/lang/Exception");
+    if (jc) env->ThrowNew(jc, e.what());
+  } catch (...) {
+    jclass jc = env->FindClass("java/lang/Exception");
+    if (jc) env->ThrowNew(jc, "Unidentfied C++ exception");
+  }
+}
 
 // TODO: no common utility?  make common utility
 bool stringToBool(string str) {
@@ -369,11 +408,11 @@ shared_ptr<MoneroTxRequest> nodeToTxRequest(const boost::property_tree::ptree& n
     if (key == string("isOutgoing")) txRequest->isOutgoing = stringToBool(it->second.data());
     else if (key == string("isIncoming")) txRequest->isIncoming = stringToBool(it->second.data());
     else if (key == string("txIds")) for (boost::property_tree::ptree::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) txRequest->txIds.push_back(it2->second.data());
-    else if (key == string("hasPaymentId")) throw runtime_error("nodeToTxRequest hasPaymentId not implemented");
+    else if (key == string("hasPaymentId")) txRequest->hasPaymentId = stringToBool(it->second.data());
     else if (key == string("paymentIds")) throw runtime_error("nodeToTxRequest paymentIds not implemented");
     else if (key == string("minHeight")) throw runtime_error("nodeToTxRequest minHeight not implemented");
     else if (key == string("maxHeight")) throw runtime_error("nodeToTxRequest maxHeight not implemented");
-    else if (key == string("includeOutputs")) throw runtime_error("nodeToTxRequest includeOutputs not implemented");
+    else if (key == string("includeOutputs")) txRequest->includeOutputs = stringToBool(it->second.data());
     else if (key == string("transferRequest")) txRequest->transferRequest = nodeToTransferRequest(it->second);
     else if (key == string("outputRequest")) txRequest->outputRequest = nodeToOutputRequest(it->second);
   }
@@ -909,40 +948,45 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNIEnv* env, jobject instance, jstring jtransferRequest) {
   cout << "Java_monero_wallet_MoneroWalletJni_getTransfersJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  const char* _transferRequest = jtransferRequest ? env->GetStringUTFChars(jtransferRequest, NULL) : nullptr;
+  try {
+    MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+    const char* _transferRequest = jtransferRequest ? env->GetStringUTFChars(jtransferRequest, NULL) : nullptr;
 
-  // deserialize transfer request
-  cout << "JNI received transfer request string: " << string(_transferRequest ? _transferRequest : "") << endl;
-  shared_ptr<MoneroTransferRequest> transferRequest = deserializeTransferRequest(string(_transferRequest ? _transferRequest : ""));
-  cout << "Fetching transfers with request: " << transferRequest->serialize() << endl;
+    // deserialize transfer request
+    cout << "JNI received transfer request string: " << string(_transferRequest ? _transferRequest : "") << endl;
+    shared_ptr<MoneroTransferRequest> transferRequest = deserializeTransferRequest(string(_transferRequest ? _transferRequest : ""));
+    cout << "Fetching transfers with request: " << transferRequest->serialize() << endl;
 
-  // get transfers
-  vector<shared_ptr<MoneroTransfer>> transfers = wallet->getTransfers(*transferRequest);
-  cout << "Got " << transfers.size() << " transfers" << endl;
+    // get transfers
+    vector<shared_ptr<MoneroTransfer>> transfers = wallet->getTransfers(*transferRequest);
+    cout << "Got " << transfers.size() << " transfers" << endl;
 
-  // return unique blocks to preserve model relationships as tree
-  vector<MoneroBlock> blocks;
-  unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
-  for (auto const& transfer : transfers) {
-    shared_ptr<MoneroTxWallet> tx = transfer->tx;
-    if (tx->block == boost::none) throw runtime_error("Need to handle unconfirmed transfer");
-    unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx->block);
-    if (got == seenBlockPtrs.end()) {
-      seenBlockPtrs.insert(*tx->block);
-      blocks.push_back(**tx->block);
+    // return unique blocks to preserve model relationships as tree
+    vector<MoneroBlock> blocks;
+    unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
+    for (auto const& transfer : transfers) {
+      shared_ptr<MoneroTxWallet> tx = transfer->tx;
+      if (tx->block == boost::none) throw runtime_error("Need to handle unconfirmed transfer");
+      unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx->block);
+      if (got == seenBlockPtrs.end()) {
+        seenBlockPtrs.insert(*tx->block);
+        blocks.push_back(**tx->block);
+      }
     }
-  }
-  cout << "Returning " << blocks.size() << " blocks" << endl;
+    cout << "Returning " << blocks.size() << " blocks" << endl;
 
-  // wrap and serialize blocks
-  std::stringstream ss;
-  boost::property_tree::ptree container;
-  if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
-  boost::property_tree::write_json(ss, container, false);
-  string blocksJson = ss.str();
-  env->ReleaseStringUTFChars(jtransferRequest, _transferRequest);
-  return env->NewStringUTF(blocksJson.c_str());
+    // wrap and serialize blocks
+    std::stringstream ss;
+    boost::property_tree::ptree container;
+    if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
+    boost::property_tree::write_json(ss, container, false);
+    string blocksJson = ss.str();
+    env->ReleaseStringUTFChars(jtransferRequest, _transferRequest);
+    return env->NewStringUTF(blocksJson.c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEnv* env, jobject instance, jstring joutputRequest) {

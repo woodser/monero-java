@@ -61,6 +61,8 @@ public class Scratchpad {
     
     
     MoneroWalletJni walletJni = TestUtils.getWalletJni();
+    walletJni.getTransfers(new MoneroTransferRequest().setAccountIndex(0).setSubaddressIndex(-1));
+    
     //MoneroWalletJni walletJni = new MoneroWalletJni("./test_wallets/test_wallet_1", TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
 //
 //    System.out.println("Wallet balance: " + walletJni.getBalance());
