@@ -414,8 +414,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (request.getBlock() == null) request.setBlock(new MoneroBlock().setTxs(request));
     
     // serialize request from block and fetch txs from jni
-    String blocksJson = getTxsJni(JsonUtils.serialize(request.getBlock()));
-    System.out.println("Received getTxs() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
+    String blocksJson;
+    try {
+      blocksJson = getTxsJni(JsonUtils.serialize(request.getBlock()));
+      System.out.println("Received getTxs() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
     
     // deserialize blocks
     List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
@@ -434,40 +439,39 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<MoneroTransfer> getTransfers(MoneroTransferRequest request) {
     
-    // wrap jni exceptions with MoneroException
+    // initialize request up to block
+    if (request == null) request = new MoneroTransferRequest();
+    if (request.getTxRequest() == null) request.setTxRequest(new MoneroTxRequest().setTransferRequest(request));
+    else request.getTxRequest().setTransferRequest(request);
+    if (request.getTxRequest().getBlock() == null) request.getTxRequest().setBlock(new MoneroBlock().setTxs(request.getTxRequest()));
+    
+    // serialize request from block and fetch transfers from jni
+    String blocksJson;
     try {
-      
-      // initialize request up to block
-      if (request == null) request = new MoneroTransferRequest();
-      if (request.getTxRequest() == null) request.setTxRequest(new MoneroTxRequest().setTransferRequest(request));
-      else request.getTxRequest().setTransferRequest(request);
-      if (request.getTxRequest().getBlock() == null) request.getTxRequest().setBlock(new MoneroBlock().setTxs(request.getTxRequest()));
-      
-      // serialize request from block and fetch transfers from jni
-      String blocksJson = getTransfersJni(JsonUtils.serialize(request.getTxRequest().getBlock()));
+      blocksJson = getTransfersJni(JsonUtils.serialize(request.getTxRequest().getBlock()));
       System.out.println("Received getTransfers() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
-      
-      // deserialize blocks
-      List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
-      
-      // collect transfers
-      List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
-      if (blocks != null) {
-        for (MoneroBlock block : blocks) {
-          sanitizeBlock(block);
-          for (MoneroTx tx : block.getTxs()) {
-            MoneroTxWallet txWallet = (MoneroTxWallet) tx;
-            if (txWallet.getIncomingTransfers() != null) {
-              for (MoneroIncomingTransfer transfer : txWallet.getIncomingTransfers()) transfers.add(transfer);
-            }
-            if (txWallet.getOutgoingTransfer() != null) transfers.add(txWallet.getOutgoingTransfer());
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+    
+    // deserialize blocks
+    List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
+    
+    // collect transfers
+    List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
+    if (blocks != null) {
+      for (MoneroBlock block : blocks) {
+        sanitizeBlock(block);
+        for (MoneroTx tx : block.getTxs()) {
+          MoneroTxWallet txWallet = (MoneroTxWallet) tx;
+          if (txWallet.getIncomingTransfers() != null) {
+            for (MoneroIncomingTransfer transfer : txWallet.getIncomingTransfers()) transfers.add(transfer);
           }
+          if (txWallet.getOutgoingTransfer() != null) transfers.add(txWallet.getOutgoingTransfer());
         }
       }
-      return transfers;
-    } catch (Exception e) {
-      throw new MoneroException(e);
     }
+    return transfers;
   }
 
   @Override
