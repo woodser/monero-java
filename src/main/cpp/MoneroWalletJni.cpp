@@ -410,8 +410,8 @@ shared_ptr<MoneroTxRequest> nodeToTxRequest(const boost::property_tree::ptree& n
     else if (key == string("txIds")) for (boost::property_tree::ptree::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) txRequest->txIds.push_back(it2->second.data());
     else if (key == string("hasPaymentId")) txRequest->hasPaymentId = stringToBool(it->second.data());
     else if (key == string("paymentIds")) throw runtime_error("nodeToTxRequest paymentIds not implemented");
-    else if (key == string("minHeight")) throw runtime_error("nodeToTxRequest minHeight not implemented");
-    else if (key == string("maxHeight")) throw runtime_error("nodeToTxRequest maxHeight not implemented");
+    else if (key == string("minHeight")) txRequest->minHeight = it->second.get_value<uint32_t>();
+    else if (key == string("maxHeight")) txRequest->maxHeight = it->second.get_value<uint32_t>();
     else if (key == string("includeOutputs")) txRequest->includeOutputs = stringToBool(it->second.data());
     else if (key == string("transferRequest")) txRequest->transferRequest = nodeToTransferRequest(it->second);
     else if (key == string("outputRequest")) txRequest->outputRequest = nodeToOutputRequest(it->second);
