@@ -524,8 +524,8 @@ shared_ptr<MoneroDestination> nodeToDestination(const boost::property_tree::ptre
   for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
     string key = it->first;
     cout << "Destination node key: " << key << endl;
-    if (key == string("address")) throw runtime_error("nodeToDestination address not implemeneted");
-    else if (key == string("amount")) throw runtime_error("nodeToDestination amount not implemented");
+    if (key == string("address")) destination->address = it->second.data();
+    else if (key == string("amount")) destination->amount = it->second.get_value<uint64_t>();
   }
   return destination;
 }
