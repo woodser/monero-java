@@ -57,8 +57,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   private MoneroRpcConnection rpc;  // handles rpc interactions
   private Map<Integer, Map<Integer, String>> addressCache;  // cache static addresses to reduce requests
   
-  // logger
-  private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class);
+  // static
+  private static final int ERROR_CODE_INVALID_PAYMENT_ID = -5;  // invalid payment id error code
+  private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class); // logger
   
   public MoneroWalletRpc(URI uri) {
     this(new MoneroRpcConnection(uri));
@@ -241,12 +242,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @SuppressWarnings("unchecked")
   @Override
   public MoneroIntegratedAddress getIntegratedAddress(String paymentId) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("payment_id", paymentId);
-    Map<String, Object> resp = rpc.sendJsonRequest("make_integrated_address", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    String integratedAddressStr = (String) result.get("integrated_address");
-    return decodeIntegratedAddress(integratedAddressStr);
+    try {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("payment_id", paymentId);
+      Map<String, Object> resp = rpc.sendJsonRequest("make_integrated_address", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      String integratedAddressStr = (String) result.get("integrated_address");
+      return decodeIntegratedAddress(integratedAddressStr);
+    } catch (MoneroRpcException e) {
+      if (e.getMessage().contains("Invalid payment ID")) throw new MoneroException("Invalid payment ID: " + paymentId, ERROR_CODE_INVALID_PAYMENT_ID);
+      throw e;
+    }
   }
 
   @SuppressWarnings("unchecked")

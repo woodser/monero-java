@@ -9,6 +9,10 @@ public class MoneroIntegratedAddress {
   private String paymentId;
   private String integratedAddress;
   
+  public MoneroIntegratedAddress() {
+    // necessary for deserialization
+  }
+  
   public MoneroIntegratedAddress(String standardAddress, String paymentId, String integratedAddress) {
     super();
     this.standardAddress = standardAddress;

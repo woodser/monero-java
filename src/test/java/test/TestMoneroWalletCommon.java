@@ -194,13 +194,13 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertFalse(integratedAddress.getPaymentId().isEmpty());
     
     // test invalid payment id
+    String invalidPaymentId = "invalid_payment_id_123456";
     try {
-      String invalidPaymentId = "invalid_payment_id_123456";
       integratedAddress = wallet.getIntegratedAddress(invalidPaymentId);
       fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have thrown a RPC exception");
     } catch (MoneroException e) {
-      assertEquals(-5, (int) e.getCode());
-      assertEquals("Invalid payment ID", e.getDescription());
+      //assertEquals(-5, (int) e.getCode());  // TODO: error codes specific to rpc?
+      assertEquals("Invalid payment ID: " + invalidPaymentId, e.getDescription());
     }
   }
   

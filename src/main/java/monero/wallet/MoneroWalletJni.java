@@ -282,12 +282,22 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroIntegratedAddress getIntegratedAddress(String paymentId) {
-    throw new RuntimeException("Not implemented");
+    try {
+      String integratedAddressJson = getIntegratedAddressJni("", paymentId);
+      return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, integratedAddressJson, MoneroIntegratedAddress.class);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public MoneroIntegratedAddress decodeIntegratedAddress(String integratedAddress) {
-    throw new RuntimeException("Not implemented");
+    try {
+      String integratedAddressJson = decodeIntegratedAddressJni(integratedAddress);
+      return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, integratedAddressJson, MoneroIntegratedAddress.class);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
@@ -718,6 +728,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String getAddressJni(int accountIdx, int subaddressIdx);
   
   private native String getAddressIndexJni(String address);
+  
+  private native String getIntegratedAddressJni(String standardAddress, String paymentId);
+  
+  private native String decodeIntegratedAddressJni(String integratedAddress);
   
   private native long setListenerJni(WalletJniListener listener);
   

@@ -680,6 +680,7 @@ Java_monero_wallet_MoneroWalletJni_getAddressIndexJni(JNIEnv *env, jobject insta
   const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
 
   // get indices of address's subaddress
+  // TODO: try...catch is unecessary because all jni can invoke Java Exception class, catch in Java
   MoneroSubaddress subaddress;
   try {
     subaddress = wallet->getAddressIndex(string(_address));
@@ -714,6 +715,48 @@ Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *env, jobject instance,
     WalletJniListener* listener = new WalletJniListener(env, jlistener);
     wallet->setListener(*listener);
     return reinterpret_cast<jlong>(listener);
+  }
+}
+
+JNIEXPORT jstring JNICALL
+Java_monero_wallet_MoneroWalletJni_getIntegratedAddressJni(JNIEnv *env, jobject instance, jstring jstandardAddress, jstring jpaymentId) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getIntegratedAddressJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _standardAddress = jstandardAddress ? env->GetStringUTFChars(jstandardAddress, NULL) : nullptr;
+  const char* _paymentId = jpaymentId ? env->GetStringUTFChars(jpaymentId, NULL) : nullptr;
+  try {
+
+    // get integrated address
+    MoneroIntegratedAddress integratedAddress = wallet->getIntegratedAddress(string(_standardAddress ? _standardAddress : ""), string(_paymentId ? _paymentId : ""));
+
+    // serialize integrated address
+    string integratedAddressJson = integratedAddress.serialize();
+    env->ReleaseStringUTFChars(jstandardAddress, _standardAddress);
+    env->ReleaseStringUTFChars(jpaymentId, _paymentId);
+    return env->NewStringUTF(integratedAddressJson.c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+}
+
+JNIEXPORT jstring JNICALL
+Java_monero_wallet_MoneroWalletJni_decodeIntegratedAddressJni(JNIEnv *env, jobject instance, jstring jintegratedAddress) {
+  cout << "Java_monero_wallet_MoneroWalletJni_decodeIntegratedAddressJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _integratedAddress = jintegratedAddress ? env->GetStringUTFChars(jintegratedAddress, NULL) : nullptr;
+  try {
+
+    // get integrated address
+    MoneroIntegratedAddress integratedAddress = wallet->decodeIntegratedAddress(string(_integratedAddress ? _integratedAddress : ""));
+
+    // serialize integrated address
+    string integratedAddressJson = integratedAddress.serialize();
+    env->ReleaseStringUTFChars(jintegratedAddress, _integratedAddress);
+    return env->NewStringUTF(integratedAddressJson.c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
   }
 }
 
