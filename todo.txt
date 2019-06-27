@@ -51,6 +51,7 @@ wallet_rpc_server.cpp:404: entry.address = m_wallet->get_subaddress_as_str({pd.m
 suggested_confirmations_threshold comes back as 0 for some (not all) outgoing transfers, but always >0 for incoming transfers, even if they’re transfers to/from the same wallet.  Can a value of 0 make sense?
 
 14.1.0 RELEASE
+rpc getIntegratedAddress(standardAddress, integratedAddress) wallet extension
 getIntegratedAddress(standardAddress, paymentId) per make_integrated_wallet rpc
 document requests, tx request now has output request
 MoneroBlock merge coinbaseTx does not set parent block reference

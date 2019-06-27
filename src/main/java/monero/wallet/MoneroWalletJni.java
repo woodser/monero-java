@@ -347,7 +347,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses) {
     String accountJson = getAccountJni(accountIdx, includeSubaddresses);
-    System.out.println("Deserializing account: " + accountJson);
     MoneroAccount account = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountJson, MoneroAccount.class);
     sanitizeAccount(account);
     return account;
@@ -355,7 +354,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroAccount createAccount(String label) {
-    throw new RuntimeException("Not implemented");
+    String accountJson = createAccountJni(label);
+    MoneroAccount account = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountJson, MoneroAccount.class);
+    sanitizeAccount(account);
+    return account;
   }
 
   @Override
@@ -758,6 +760,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String getAccountsJni(boolean includeSubaddresses, String tag);
   
   private native String getAccountJni(int accountIdx, boolean includeSubaddresses);
+  
+  private native String createAccountJni(String label);
   
   private native String getSubaddressesJni(int accountIdx, int[] subaddressIndices);
   
