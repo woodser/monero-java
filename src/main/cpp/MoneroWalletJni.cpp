@@ -549,21 +549,21 @@ shared_ptr<MoneroSendRequest> deserializeSendRequest(const string& sendRequestSt
         sendRequest->destinations.push_back(nodeToDestination(it2->second));
       }
     }
-    else if (key == string("paymentId")) it->second.data();
+    else if (key == string("paymentId")) sendRequest->paymentId = it->second.data();
     else if (key == string("priority")) throw runtime_error("deserializeSendRequest() paymentId not implemented");
-    else if (key == string("mixin")) it->second.get_value<uint32_t>();
-    else if (key == string("ringSize")) it->second.get_value<uint32_t>();
-    else if (key == string("fee")) it->second.get_value<uint64_t>();
-    else if (key == string("accountIndex")) it->second.get_value<uint32_t>();
+    else if (key == string("mixin")) sendRequest->mixin = it->second.get_value<uint32_t>();
+    else if (key == string("ringSize")) sendRequest->ringSize = it->second.get_value<uint32_t>();
+    else if (key == string("fee")) sendRequest->fee = it->second.get_value<uint64_t>();
+    else if (key == string("accountIndex")) sendRequest->accountIndex = it->second.get_value<uint32_t>();
     else if (key == string("subaddressIndices")) for (boost::property_tree::ptree::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) sendRequest->subaddressIndices.push_back(it2->second.get_value<uint32_t>());
-    else if (key == string("unlockTime")) it->second.get_value<uint64_t>();
-    else if (key == string("canSplit")) it->second.get_value<bool>();
-    else if (key == string("doNotRelay")) it->second.get_value<bool>();
-    else if (key == string("note")) it->second.data();
-    else if (key == string("recipientName")) it->second.data();
-    else if (key == string("belowAmount")) it->second.get_value<uint64_t>();
-    else if (key == string("sweepEachSubaddress")) it->second.get_value<bool>();
-    else if (key == string("keyImage")) it->second.data();
+    else if (key == string("unlockTime")) sendRequest->unlockTime = it->second.get_value<uint64_t>();
+    else if (key == string("canSplit")) sendRequest->canSplit = it->second.get_value<bool>();
+    else if (key == string("doNotRelay")) sendRequest->doNotRelay = it->second.get_value<bool>();
+    else if (key == string("note")) sendRequest->note = it->second.data();
+    else if (key == string("recipientName")) sendRequest->recipientName = it->second.data();
+    else if (key == string("belowAmount")) sendRequest->belowAmount = it->second.get_value<uint64_t>();
+    else if (key == string("sweepEachSubaddress")) sendRequest->sweepEachSubaddress = it->second.get_value<bool>();
+    else if (key == string("keyImage")) sendRequest->keyImage = it->second.data();
   }
 
   cout << "Returning deserialized send request" << endl;
