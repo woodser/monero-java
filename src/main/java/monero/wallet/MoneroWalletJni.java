@@ -538,6 +538,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroTxWallet send(MoneroSendRequest request) {
+    System.out.println("java send(request)");
+    System.out.println("Send request: " + JsonUtils.serialize(request));
+    String txsJson = sendJni(JsonUtils.serialize(request));
+    System.out.println("RECEIVED SEND TXS JSON: " + txsJson);
     throw new RuntimeException("Not implemented");
   }
 
@@ -781,6 +785,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String getTransfersJni(String transferRequestJson);
   
   private native String getOutputsJni(String outputsRequestJson);
+  
+  private native String sendJni(String sendRequestJson);
   
   private native String saveJni(String path, String password);
   
