@@ -966,6 +966,22 @@ Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(JNIEnv* env, jobject insta
   return env->NewStringUTF(subaddressesJson.c_str());
 }
 
+JNIEXPORT jstring JNICALL
+Java_monero_wallet_MoneroWalletJni_createSubaddressJni(JNIEnv* env, jobject instance, jint accountIdx, jstring jlabel) {
+  cout << "Java_monero_wallet_MoneroWalletJni_createSubaddressJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+
+  // create subaddress
+  const char* _label = jlabel ? env->GetStringUTFChars(jlabel, NULL) : nullptr;
+  MoneroSubaddress subaddress = wallet->createSubaddress(accountIdx, string(_label ? _label : ""));
+  env->ReleaseStringUTFChars(jlabel, _label);
+
+  // serialize and return subaddress
+  string subaddressJson = subaddress.serialize();
+  cout << "JNI returning serialized subaddress: " << subaddressJson << endl;
+  return env->NewStringUTF(subaddressJson.c_str());
+}
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* env, jobject instance, jstring jtxRequest) {
   cout << "Java_monero_wallet_MoneroWalletJni_getTxsJni" << endl;
   try {

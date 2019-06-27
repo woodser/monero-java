@@ -371,7 +371,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroSubaddress createSubaddress(int accountIdx, String label) {
-    throw new RuntimeException("Not implemented");
+    String subaddressJson = createSubaddressJni(accountIdx, label);
+    MoneroSubaddress subaddress = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressJson, MoneroSubaddress.class);
+    sanitizeSubaddress(subaddress);
+    return subaddress;
   }
 
   @Override
@@ -764,6 +767,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String createAccountJni(String label);
   
   private native String getSubaddressesJni(int accountIdx, int[] subaddressIndices);
+  
+  private native String createSubaddressJni(int accountIdx, String label);
   
   /**
    * Gets txs from the native layer using strings to communicate.

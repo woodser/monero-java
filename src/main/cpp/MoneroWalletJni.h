@@ -82,6 +82,8 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createAccountJni(JN
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(JNIEnv *, jobject, jint, jintArray);
 
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createSubaddressJni(JNIEnv *, jobject, jint, jstring);
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv *, jobject, jstring);
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNIEnv *, jobject, jstring);
