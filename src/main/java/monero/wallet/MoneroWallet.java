@@ -513,8 +513,8 @@ public interface MoneroWallet {
   public List<MoneroKeyImage> getNewKeyImagesFromLastImport();
   
   /**
-   * Create and relay (depending on configuration) a transaction which
-   * transfers funds from this wallet to one or more destination addresses.
+   * Create a transaction which transfers funds from this wallet to one or more
+   * destinations depending on the given request.
    * 
    * @param request configures the transaction
    * @return the resulting transaction
@@ -545,8 +545,8 @@ public interface MoneroWallet {
   public MoneroTxWallet send(int accountIndex, String address, BigInteger sendAmount, MoneroSendPriority priority);
   
   /**
-   * Create and relay (depending on configuration) one or more transactions
-   * which transfer funds from this wallet to one or more destination.
+   * Create one or more transactions which transfer funds from this wallet to
+   * one or more destinations depending on the given configuration.
    * 
    * @param request configures the transactions
    * @return the resulting transactions

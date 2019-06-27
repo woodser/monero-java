@@ -518,6 +518,43 @@ shared_ptr<MoneroOutputRequest> deserializeOutputRequest(const string& outputReq
   return outputRequest;
 }
 
+shared_ptr<MoneroDestination> nodeToDestination(const boost::property_tree::ptree& node) {
+  cout << "nodeToDestination()" << endl;
+  shared_ptr<MoneroDestination> destination = shared_ptr<MoneroDestination>(new MoneroDestination());
+  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+    string key = it->first;
+    cout << "Destination node key: " << key << endl;
+    if (key == string("address")) throw runtime_error("nodeToDestination address not implemeneted");
+    else if (key == string("amount")) throw runtime_error("nodeToDestination amount not implemented");
+  }
+  return destination;
+}
+
+shared_ptr<MoneroSendRequest> deserializeSendRequest(const string& sendRequestStr) {
+  cout << "deserializeSendRequest(): " <<  sendRequestStr << endl;
+
+  // deserialize send request json to property node
+  std::istringstream iss = sendRequestStr.empty() ? std::istringstream() : std::istringstream(sendRequestStr);
+  boost::property_tree::ptree node;
+  boost::property_tree::read_json(iss, node);
+
+  // convert request property tree to MoneroSendRequest
+  shared_ptr<MoneroSendRequest> sendRequest = shared_ptr<MoneroSendRequest>(new MoneroSendRequest());
+  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+    string key = it->first;
+    cout << "Send request node key: " << key << endl;
+    if (key == string("destinations")) {
+      boost::property_tree::ptree destinationsNode = it->second;
+      for (boost::property_tree::ptree::const_iterator it2 = destinationsNode.begin(); it2 != destinationsNode.end(); ++it2) {
+        sendRequest->destinations.push_back(nodeToDestination(it2->second));
+      }
+    }
+    else throw runtime_error("Deserialize send request key not implemented! " + key);
+  }
+  cout << "Returning deserialized send request" << endl;
+  return sendRequest;
+}
+
 // ------------------------------- JNI STATIC ---------------------------------
 
 #ifdef __cplusplus
@@ -1102,6 +1139,44 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
   boost::property_tree::write_json(ss, container, false);
   string blocksJson = ss.str();
   env->ReleaseStringUTFChars(joutputRequest, _outputRequest);
+  return env->NewStringUTF(blocksJson.c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendJni(JNIEnv* env, jobject instance, jstring jsendRequest) {
+  cout << "Java_monero_wallet_MoneroWalletJni_sendJni(request)" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _sendRequest = jsendRequest ? env->GetStringUTFChars(jsendRequest, NULL) : nullptr;
+
+  cout << "Send request json: " << string(_sendRequest ? _sendRequest : "") << endl;
+
+  // deserialize send request
+  shared_ptr<MoneroSendRequest> sendRequest = deserializeSendRequest(string(_sendRequest ? _sendRequest : ""));
+  cout << "Deserialized send request, re-serialized: " << sendRequest->serialize() << endl;
+
+  // submit send request
+  vector<shared_ptr<MoneroTxWallet>> txs = wallet->sendTxs(*sendRequest); // TODO: normalize send() vs sendTxs(), sendSingle(), sendSplit()
+  cout << "Got " << txs.size() << " txs" << endl;
+
+  // return unique blocks to preserve model relationships as tree
+  vector<MoneroBlock> blocks;
+  unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
+  for (auto const& tx : txs) {
+    if (tx->block == boost::none) throw runtime_error("Need to handle unconfirmed tx");
+    unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx->block);
+    if (got == seenBlockPtrs.end()) {
+      seenBlockPtrs.insert(*tx->block);
+      blocks.push_back(**tx->block);
+    }
+  }
+  cout << "Returning " << blocks.size() << " blocks" << endl;
+
+  // wrap and serialize blocks
+  std::stringstream ss;
+  boost::property_tree::ptree container;
+  if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
+  boost::property_tree::write_json(ss, container, false);
+  string blocksJson = ss.str();
+  env->ReleaseStringUTFChars(jsendRequest, _sendRequest);
   return env->NewStringUTF(blocksJson.c_str());
 }
 
