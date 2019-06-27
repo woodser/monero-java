@@ -909,6 +909,20 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountJni(JNIEn
   return env->NewStringUTF(accountJson.c_str());
 }
 
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createAccountJni(JNIEnv* env, jobject instance, jstring jlabel) {
+  cout << "Java_monero_wallet_MoneroWalletJni_createAccountJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+
+  // create account
+  const char* _label = jlabel ? env->GetStringUTFChars(jlabel, NULL) : nullptr;
+  MoneroAccount account = wallet->createAccount(string(_label ? _label : ""));
+  env->ReleaseStringUTFChars(jlabel, _label);
+
+  // serialize and return account
+  string accountJson = account.serialize();
+  cout << "JNI returning serialized account: " << accountJson << endl;
+  return env->NewStringUTF(accountJson.c_str());
+}
 
 JNIEXPORT jstring JNICALL
 Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(JNIEnv* env, jobject instance, jint accountIdx, jintArray jsubaddressIndices) {
