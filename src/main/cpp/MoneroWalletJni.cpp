@@ -1157,6 +1157,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
   return env->NewStringUTF(blocksJson.c_str());
 }
 
+// TODO: rename to sendTxsJni()
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendJni(JNIEnv* env, jobject instance, jstring jsendRequest) {
   cout << "Java_monero_wallet_MoneroWalletJni_sendJni(request)" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
@@ -1169,8 +1170,14 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendJni(JNIEnv* env
   cout << "Deserialized send request, re-serialized: " << sendRequest->serialize() << endl;
 
   // submit send request
-  vector<shared_ptr<MoneroTxWallet>> txs = wallet->sendTxs(*sendRequest); // TODO: normalize send() vs sendTxs(), sendSingle(), sendSplit()
-  cout << "Got " << txs.size() << " txs" << endl;
+  vector<shared_ptr<MoneroTxWallet>> txs;
+  try {
+    txs = wallet->sendTxs(*sendRequest); // TODO: normalize send() vs sendTxs(), sendSingle(), sendSplit()
+    cout << "Got " << txs.size() << " txs" << endl;
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+
 
   // return unique blocks to preserve model relationships as tree
   vector<MoneroBlock> blocks;
@@ -1201,6 +1208,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env
   const char* _password = jpath ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
 
   // attempt to save, return error if one happens
+  // TODO: throw Java error instead like others
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
   try {
     wallet->save(string(_path ? _path : ""), string(_password ? _password : ""));
