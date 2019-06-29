@@ -535,12 +535,22 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public List<MoneroKeyImage> getNewKeyImagesFromLastImport() {
     throw new RuntimeException("Not implemented");
   }
-
+  
   @Override
   public MoneroTxWallet send(MoneroSendRequest request) {
+    sendTxs(request);
+    throw new RuntimeException("Not implemented");
+  }
+
+  public MoneroTxWallet sendTxs(MoneroSendRequest request) {
     System.out.println("java send(request)");
     System.out.println("Send request: " + JsonUtils.serialize(request));
-    String txsJson = sendJni(JsonUtils.serialize(request));
+    String txsJson = sendTxsJni(JsonUtils.serialize(request));
+    
+    
+    
+    
+    
     System.out.println("RECEIVED SEND TXS JSON: " + txsJson);
     throw new RuntimeException("Not implemented");
   }
@@ -786,7 +796,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getOutputsJni(String outputsRequestJson);
   
-  private native String sendJni(String sendRequestJson);
+  private native String sendTxsJni(String sendRequestJson);
   
   private native String saveJni(String path, String password);
   

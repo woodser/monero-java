@@ -90,7 +90,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendTxsJni(JNIEnv *, jobject, jstring);
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv *, jobject, jstring, jstring);
 
