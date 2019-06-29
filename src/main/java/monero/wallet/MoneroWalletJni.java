@@ -538,21 +538,37 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   @Override
   public MoneroTxWallet send(MoneroSendRequest request) {
-    sendTxs(request);
-    throw new RuntimeException("Not implemented");
+    if (request == null) request = new MoneroSendRequest();
+    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with sendTx() which prevents splitting");
+    request.setCanSplit(false);
+    return sendTxs(request).get(0);
   }
 
-  public MoneroTxWallet sendTxs(MoneroSendRequest request) {
+  public List<MoneroTxWallet> sendTxs(MoneroSendRequest request) {
     System.out.println("java send(request)");
     System.out.println("Send request: " + JsonUtils.serialize(request));
-    String txsJson = sendTxsJni(JsonUtils.serialize(request));
     
+    // submit send request to JNI and get response as json rooted at blocks
+    String blocksJson;
+    try {
+      blocksJson = sendTxsJni(JsonUtils.serialize(request));
+      System.out.println("Received sendTxs() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
     
+    // deserialize blocks
+    List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
     
-    
-    
-    System.out.println("RECEIVED SEND TXS JSON: " + txsJson);
-    throw new RuntimeException("Not implemented");
+    // collect txs
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    if (blocks != null) {
+      for (MoneroBlock block : blocks) {
+        sanitizeBlock(block);
+        for (MoneroTx tx : block.getTxs()) txs.add((MoneroTxWallet) tx);
+      }
+    }
+    return txs;
   }
 
   @Override
