@@ -564,8 +564,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     if (blocks != null) {
       for (MoneroBlock block : blocks) {
-        sanitizeBlock(block);
-        for (MoneroTx tx : block.getTxs()) txs.add((MoneroTxWallet) tx);
+        if (block.getHeight() != null) sanitizeBlock(block);
+        for (MoneroTx tx : block.getTxs()) {
+          if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
+          txs.add((MoneroTxWallet) tx);
+        }
       }
     }
     return txs;
