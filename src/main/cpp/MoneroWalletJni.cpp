@@ -1181,10 +1181,15 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendJni(JNIEnv* env
 
 
   // return unique blocks to preserve model relationships as tree
+  shared_ptr<MoneroBlock> unconfirmedBlock = nullptr; // placeholder block with no height to store unconfirmed txs
   vector<MoneroBlock> blocks;
   unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
   for (auto const& tx : txs) {
-    if (tx->block == boost::none) throw runtime_error("Need to handle unconfirmed tx");
+    if (tx->block == boost::none) {
+      if (unconfirmedBlock == nullptr) unconfirmedBlock = shared_ptr<MoneroBlock>(new MoneroBlock());
+      tx->block = unconfirmedBlock;
+      unconfirmedBlock->txs.push_back(tx);
+    }
     unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx->block);
     if (got == seenBlockPtrs.end()) {
       seenBlockPtrs.insert(*tx->block);
