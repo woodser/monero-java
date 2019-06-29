@@ -1176,6 +1176,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendJni(JNIEnv* env
     cout << "Got " << txs.size() << " txs" << endl;
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
+    return 0;
   }
 
 
