@@ -274,6 +274,7 @@ public class MoneroBlockHeader {
     sb.append(MoneroUtils.kvLine("Reward", getReward(), indent));
     sb.append(MoneroUtils.kvLine("Pow hash", getPowHash(), indent));
     String str = sb.toString();
+    if (str.isEmpty()) return "";
     return str.charAt(str.length() - 1) == '\n' ? str.substring(0, str.length() - 1) : str; // strip newline
   }
 
