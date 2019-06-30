@@ -167,6 +167,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
   // Can sync a wallet with a mnemonic
   @Test
+  @Ignore
   public void testSyncMnemonicFromGenesis() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     testSyncMnemonic(null);
