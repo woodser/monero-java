@@ -703,25 +703,21 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
 
   @Override
-  @Ignore // TODO: remove ignores, only temporarily ignored to speed up tests for dev
   public void testUpdateLockedSameAccount() {
     super.testUpdateLockedSameAccount();
   }
 
   @Override
-  @Ignore
   public void testUpdateLockedSameAccountSplit() {
     super.testUpdateLockedSameAccountSplit();
   }
 
   @Override
-  @Ignore
   public void testUpdateLockedDifferentAccounts() {
     super.testUpdateLockedDifferentAccounts();
   }
 
   @Override
-  @Ignore
   public void testUpdateLockedDifferentAccountsSplit() {
     super.testUpdateLockedDifferentAccountsSplit();
   }

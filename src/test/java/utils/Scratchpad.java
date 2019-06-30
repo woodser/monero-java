@@ -1,6 +1,5 @@
 package utils;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -59,7 +58,11 @@ public class Scratchpad {
 //      System.out.println(tx.getBlock());
 //    }
     
+    System.out.println("FETCHING TXS");
     List<MoneroTxWallet> txs = walletJni.getTxs(new MoneroTxRequest().setTransferRequest(new MoneroTransferRequest().setAccountIndex(1)));
+    System.out.println("DONE!!!");
+    
+    
     //assertEquals(1, txs.size());
     //assertEquals("17830761dc1507ee5512e7382b566ee2ab391280f489aa4c277f32131514a9f5", txs.get(0).getId());
     for (MoneroTxWallet tx : txs) {

@@ -2243,6 +2243,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can update a locked tx sent from/to the same account as blocks are added to the chain
   @Test
+  @Ignore
   public void testUpdateLockedSameAccount() {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
     MoneroSendRequest request = new MoneroSendRequest(wallet.getPrimaryAddress(), TestUtils.MAX_FEE);
@@ -2254,6 +2255,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can update split locked txs sent from/to the same account as blocks are added to the chain
   @Test
+  @Ignore // TODO: remove these ignores
   public void testUpdateLockedSameAccountSplit() {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS && !LITE_MODE);
     MoneroSendRequest request = new MoneroSendRequest(0, wallet.getPrimaryAddress(), TestUtils.MAX_FEE);
@@ -2265,6 +2267,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can update a locked tx sent from/to different accounts as blocks are added to the chain
   @Test
+  @Ignore
   public void testUpdateLockedDifferentAccounts() {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS && !LITE_MODE);
     MoneroSendRequest request = new MoneroSendRequest(0, wallet.getSubaddress(1, 0).getAddress(), TestUtils.MAX_FEE);
@@ -2275,6 +2278,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can update locked, split txs sent from/to different accounts as blocks are added to the chain
   @Test
+  @Ignore
   public void testUpdateLockedDifferentAccountsSplit() {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS && !LITE_MODE);
     MoneroSendRequest request = new MoneroSendRequest(0, wallet.getSubaddress(1, 0).getAddress(), TestUtils.MAX_FEE);
