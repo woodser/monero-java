@@ -6,8 +6,10 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -449,6 +451,15 @@ public class MoneroWalletJni extends MoneroWalletDefault {
           txs.add((MoneroTxWallet) tx);
         }
       }
+    }
+    
+    // re-sort txs which is lost over jni serialization
+    if (request.getTxIds() != null) {
+      Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
+      for (MoneroTxWallet tx : txs) txMap.put(tx.getId(), tx);
+      List<MoneroTxWallet> txsSorted = new ArrayList<MoneroTxWallet>();
+      for (String txId : request.getTxIds()) txsSorted.add(txMap.get(txId));
+      txs = txsSorted;
     }
     return txs;
   }
