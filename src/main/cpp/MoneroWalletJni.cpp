@@ -1051,7 +1051,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
 
     // return unique blocks to preserve model relationships as tree
     shared_ptr<MoneroBlock> unconfirmedBlock = nullptr; // placeholder to store unconfirmed txs in return json
-    vector<MoneroBlock> blocks;
+    vector<shared_ptr<MoneroBlock>> blocks;
     unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
     for (const shared_ptr<MoneroTxWallet>& tx : txs) {
       if (tx->block == boost::none) {
@@ -1062,7 +1062,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
       unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(tx->block.get());
       if (got == seenBlockPtrs.end()) {
         seenBlockPtrs.insert(tx->block.get());
-        blocks.push_back(*tx->block.get());
+        blocks.push_back(tx->block.get());
       }
     }
     cout << "Returning " << blocks.size() << " blocks" << endl;
@@ -1098,7 +1098,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
 
     // return unique blocks to preserve model relationships as tree
     shared_ptr<MoneroBlock> unconfirmedBlock = nullptr; // placeholder to store unconfirmed txs in return json
-    vector<MoneroBlock> blocks;
+    vector<shared_ptr<MoneroBlock>> blocks;
     unordered_set<shared_ptr<MoneroBlock>> seenBlockPtrs;
     for (auto const& transfer : transfers) {
       shared_ptr<MoneroTxWallet> tx = transfer->tx;
@@ -1107,13 +1107,12 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
         tx->block = unconfirmedBlock;
         unconfirmedBlock->txs.push_back(tx);
       }
-      unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(*tx->block);
+      unordered_set<shared_ptr<MoneroBlock>>::const_iterator got = seenBlockPtrs.find(tx->block.get());
       if (got == seenBlockPtrs.end()) {
-        seenBlockPtrs.insert(*tx->block);
-        blocks.push_back(**tx->block);
+        seenBlockPtrs.insert(tx->block.get());
+        blocks.push_back(tx->block.get());
       }
     }
-    cout << "Returning " << blocks.size() << " blocks" << endl;
 
     // wrap and serialize blocks
     std::stringstream ss;
