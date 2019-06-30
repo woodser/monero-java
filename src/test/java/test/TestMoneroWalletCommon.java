@@ -1867,7 +1867,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
     MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress();
     String paymentId = integratedAddress.getPaymentId();
-    testSendToSingle(new MoneroSendRequest(paymentId + paymentId + paymentId + paymentId));  // 64 character payment id
+    testSendToSingle(new MoneroSendRequest().setPaymentId(paymentId + paymentId + paymentId + paymentId));  // 64 character payment id
   }
   
   // Can send to an address in a single transaction with a ring size
