@@ -404,6 +404,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   // jni-specific tx tests
   @Override
   protected void testTxWallet(MoneroTxWallet tx, TestContext ctx) {
+    if (ctx == null) ctx = new TestContext();
     
     // run common tests
     super.testTxWallet(tx, ctx);
