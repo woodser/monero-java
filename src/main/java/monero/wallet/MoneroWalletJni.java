@@ -444,7 +444,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (blocks != null) {
       for (MoneroBlock block : blocks) {
         sanitizeBlock(block);
-        for (MoneroTx tx : block.getTxs()) txs.add((MoneroTxWallet) tx);
+        for (MoneroTx tx : block.getTxs()) {
+          if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
+          txs.add((MoneroTxWallet) tx);
+        }
       }
     }
     return txs;
@@ -556,7 +559,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     String blocksJson;
     try {
       blocksJson = sendSplitJni(JsonUtils.serialize(request));
-      System.out.println("Received sendTxs() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
+      System.out.println("Received sendSplit() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
