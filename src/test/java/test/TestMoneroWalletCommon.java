@@ -130,13 +130,17 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         assertEquals(subaddress.getAddress(), wallet.getAddress(account.getIndex(), subaddress.getIndex()));
       }
     }
-    
-    // test out of range indices
+  }
+  
+  // Can get addresses out of range of used accounts and subaddresses
+  @Test
+  public void testGetSubaddressAddressOutOfRange() {
     List<MoneroAccount> accounts = wallet.getAccounts(true);
     int accountIdx = accounts.size() - 1;
     int subaddressIdx = accounts.get(accountIdx).getSubaddresses().size();
     String address = wallet.getAddress(accountIdx, subaddressIdx);
-    assertNull(address);
+    assertNotNull(address);
+    assertTrue(address.length() > 0);
   }
   
   // Can get the account and subaddress indices of an address
@@ -2692,7 +2696,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
    * 
    * TODO: ensure each tx passes request filter, same with testGetTransfer and getAndTestVouts
    */
-  private static List<MoneroTxWallet> getAndTestTxs(MoneroWallet wallet, MoneroTxRequest request, TestContext ctx, Boolean isExpected) {
+  private List<MoneroTxWallet> getAndTestTxs(MoneroWallet wallet, MoneroTxRequest request, TestContext ctx, Boolean isExpected) {
     List<MoneroTxWallet> txs = wallet.getTxs(request);
     assertNotNull(txs);
     if (Boolean.FALSE.equals(isExpected)) assertTrue(txs.isEmpty());
@@ -2704,7 +2708,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   /**
    * Fetches and tests transfers according to the given request.
    */
-  private static List<MoneroTransfer> getAndTestTransfers(MoneroWallet wallet, MoneroTransferRequest request, TestContext ctx, Boolean isExpected) {
+  private List<MoneroTransfer> getAndTestTransfers(MoneroWallet wallet, MoneroTransferRequest request, TestContext ctx, Boolean isExpected) {
     List<MoneroTransfer> transfers = wallet.getTransfers(request);
     if (Boolean.FALSE.equals(isExpected)) assertEquals(0, transfers.size());
     if (Boolean.TRUE.equals(isExpected)) assertTrue("Transfers were expected but not found; run send tests?", transfers.size() > 0);
@@ -2808,8 +2812,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
    *        ctx.hasDestinations specifies if the tx has an outgoing transfer with destinations, undefined if doesn't matter
    *        ctx.includeOutputs specifies if outputs were fetched and should therefore be expected with incoming transfers
    */
-  protected static void testTxWallet(MoneroTxWallet tx) { testTxWallet(tx, null); }
-  protected static void testTxWallet(MoneroTxWallet tx, TestContext ctx) {
+  protected void testTxWallet(MoneroTxWallet tx) { testTxWallet(tx, null); }
+  protected void testTxWallet(MoneroTxWallet tx, TestContext ctx) {
     
     // validate / sanitize inputs
     ctx = new TestContext(ctx);
@@ -2941,8 +2945,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertEquals(request.getMixin(), tx.getMixin());
       assertEquals(request.getUnlockTime() != null ? request.getUnlockTime() : 0, (int) tx.getUnlockTime());
       assertNull(tx.getBlock());
-      if (Boolean.TRUE.equals(request.getCanSplit())) assertNull(tx.getKey());  // tx key unknown if from split response
-      else assertTrue(tx.getKey().length() > 0);
+      if (!Boolean.TRUE.equals(request.getCanSplit())) assertTrue(tx.getKey().length() > 0);
       assertNotNull(tx.getFullHex());
       assertTrue(tx.getFullHex().length() > 0);
       assertNotNull(tx.getMetadata());
@@ -3026,7 +3029,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertNull(tx.getReceivedTimestamp());  // TODO monero-wallet-rpc: return received timestamp (asked to file issue if wanted)
   }
 
-  private static void testTxWalletCopy(MoneroTxWallet tx, TestContext ctx) {
+  private void testTxWalletCopy(MoneroTxWallet tx, TestContext ctx) {
     
     // copy tx and assert deep equality
     MoneroTxWallet copy = tx.copy();

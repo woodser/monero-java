@@ -2,6 +2,7 @@ package test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -207,6 +208,16 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     }
   }
   
+  // Can get addresses out of range of used accounts and subaddresses
+  @Test
+  public void testGetSubaddressAddressOutOfRange() {
+    List<MoneroAccount> accounts = wallet.getAccounts(true);
+    int accountIdx = accounts.size() - 1;
+    int subaddressIdx = accounts.get(accountIdx).getSubaddresses().size();
+    String address = wallet.getAddress(accountIdx, subaddressIdx);
+    assertNull(address);
+  }
+  
   // Has an address book
   @Test
   public void testAddressBook() {
@@ -362,6 +373,19 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
 //      assertEquals(txIds.get(i), txs.get(i).getId());
 //    }
 //  }
+  
+  // rpc-specific tx tests
+  @Override
+  protected void testTxWallet(MoneroTxWallet tx, TestContext ctx) {
+    
+    // run common tests
+    super.testTxWallet(tx, ctx);
+    
+    // test tx results from send or relay
+    if (Boolean.TRUE.equals(ctx.isSendResponse)) {
+      if (Boolean.TRUE.equals(ctx.sendRequest.getCanSplit())) assertNull(tx.getKey());  // TODO monero-wallet-rpc: tx key is not returned from transfer_split
+    }
+  }
   
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
 
