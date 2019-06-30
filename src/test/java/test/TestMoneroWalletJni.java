@@ -18,6 +18,7 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
+import monero.wallet.model.MoneroTxWallet;
 import utils.TestUtils;
 
 /**
@@ -398,6 +399,19 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(wallet1.getPrivateViewKey(), wallet2.getPrivateViewKey());
     assertEquals(wallet1.getAccounts(), wallet2.getAccounts());
     // TODO: txs, transfers, outputs, integrated addresses
+  }
+  
+  // jni-specific tx tests
+  @Override
+  protected void testTxWallet(MoneroTxWallet tx, TestContext ctx) {
+    
+    // run common tests
+    super.testTxWallet(tx, ctx);
+    
+    // test tx results from send or relay
+    if (Boolean.TRUE.equals(ctx.isSendResponse)) {
+      assertNotNull(tx.getKey());
+    }
   }
 
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
