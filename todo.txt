@@ -52,7 +52,6 @@ suggested_confirmations_threshold comes back as 0 for some (not all) outgoing tr
 
 14.1.0 RELEASE
 preserve original send request instead of modifying it?  implement copy constructor
-rename all sends to sendTx(), sendTxs()
 consistent accountIdx vs accountIndex in model vs api method args
 rpc getIntegratedAddress(standardAddress, integratedAddress) wallet extension
 getIntegratedAddress(standardAddress, paymentId) per make_integrated_wallet rpc

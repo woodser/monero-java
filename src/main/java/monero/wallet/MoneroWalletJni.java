@@ -538,20 +538,24 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   @Override
   public MoneroTxWallet send(MoneroSendRequest request) {
-    if (request == null) request = new MoneroSendRequest();
-    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with sendTx() which prevents splitting");
+    if (request == null) throw new MoneroException("Send request cannot be null");
+    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with send() which prevents splitting; use sendSplit() instead");
     request.setCanSplit(false);
-    return sendTxs(request).get(0);
+    return sendSplit(request).get(0);
   }
 
-  public List<MoneroTxWallet> sendTxs(MoneroSendRequest request) {
-    System.out.println("java send(request)");
+  @Override
+  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
+    System.out.println("java sendSplit(request)");
     System.out.println("Send request: " + JsonUtils.serialize(request));
+    
+    // validate request
+    if (request == null) throw new MoneroException("Send request cannot be null");
     
     // submit send request to JNI and get response as json rooted at blocks
     String blocksJson;
     try {
-      blocksJson = sendTxsJni(JsonUtils.serialize(request));
+      blocksJson = sendSplitJni(JsonUtils.serialize(request));
       System.out.println("Received sendTxs() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
@@ -560,7 +564,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     // deserialize blocks
     List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
     
-    // collect txs
+    // collect and return txs
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     if (blocks != null) {
       for (MoneroBlock block : blocks) {
@@ -572,11 +576,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       }
     }
     return txs;
-  }
-
-  @Override
-  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
-    throw new RuntimeException("Not implemented");
   }
 
   @Override
@@ -815,7 +814,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getOutputsJni(String outputsRequestJson);
   
-  private native String sendTxsJni(String sendRequestJson);
+  private native String sendSplitJni(String sendRequestJson);
   
   private native String saveJni(String path, String password);
   
