@@ -1157,9 +1157,8 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
   return env->NewStringUTF(blocksJson.c_str());
 }
 
-// TODO: rename to sendTxsJni()
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendTxsJni(JNIEnv* env, jobject instance, jstring jsendRequest) {
-  cout << "Java_monero_wallet_MoneroWalletJni_sendTxsJni(request)" << endl;
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv* env, jobject instance, jstring jsendRequest) {
+  cout << "Java_monero_wallet_MoneroWalletJni_sendSplitJni(request)" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
   const char* _sendRequest = jsendRequest ? env->GetStringUTFChars(jsendRequest, NULL) : nullptr;
 
@@ -1172,13 +1171,12 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendTxsJni(JNIEnv* 
   // submit send request
   vector<shared_ptr<MoneroTxWallet>> txs;
   try {
-    txs = wallet->sendTxs(*sendRequest); // TODO: normalize send() vs sendTxs(), sendSingle(), sendSplit()
+    txs = wallet->sendSplit(*sendRequest);
     cout << "Got " << txs.size() << " txs" << endl;
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
   }
-
 
   // return unique blocks to preserve model relationships as tree
   shared_ptr<MoneroBlock> unconfirmedBlock = nullptr; // placeholder to store unconfirmed txs in return json
