@@ -1180,6 +1180,23 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
   return env->NewStringUTF(blocksJson.c_str());
 }
 
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getKeyImagesJni(JNIEnv* env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getKeyImagesJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+
+  // fetch key images
+  vector<shared_ptr<MoneroKeyImage>> keyImages = wallet->getKeyImages();
+  cout << "Fetched " << keyImages.size() << " key images" << endl;
+
+  // wrap and serialize key images
+  std::stringstream ss;
+  boost::property_tree::ptree container;
+  if (!keyImages.empty()) container.add_child("keyImages", MoneroUtils::toPropertyTree(keyImages));
+  boost::property_tree::write_json(ss, container, false);
+  string keyImagesJson = ss.str();
+  return env->NewStringUTF(keyImagesJson.c_str());
+}
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv* env, jobject instance, jstring jsendRequest) {
   cout << "Java_monero_wallet_MoneroWalletJni_sendSplitJni(request)" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
