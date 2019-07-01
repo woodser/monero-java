@@ -386,10 +386,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroSubaddress getAddressIndex(String address) {
-    String subaddressesJson = getAddressIndexJni(address);
-    List<MoneroSubaddress> subaddresses = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressesJson, SubaddressesContainer.class).subaddresses;
-    assertEquals("Address does not belong to a subaddress", 1, subaddresses.size());
-    return sanitizeSubaddress(subaddresses.get(0));
+    String subaddressJson = getAddressIndexJni(address);
+    System.out.println("Deserialize: " + subaddressJson);
+    MoneroSubaddress subaddress = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressJson, MoneroSubaddress.class);
+    return sanitizeSubaddress(subaddress);
   }
 
   @Override
