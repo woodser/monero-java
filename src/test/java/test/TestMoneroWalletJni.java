@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.UUID;
 
@@ -13,6 +14,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.daemon.model.MoneroNetworkType;
+import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
@@ -218,7 +220,105 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   @Test
   public void testSave() {
-    throw new RuntimeException("Not implemented");
+    
+    // create unique path for new test wallet
+    String path = TestUtils.TEST_WALLETS_DIR + "/test_wallet_" + UUID.randomUUID().toString();
+    
+    // wallet does not exist
+    assertFalse(MoneroWalletJni.walletExists(path));
+    
+    // cannot open non-existant wallet
+    try {
+      new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
+      fail("Cannot open non-existant wallet");
+    } catch (MoneroException e) {
+      assertEquals("Wallet does not exist at path: " + path, e.getMessage());
+    }
+    
+    // create wallet at the path
+    long restoreHeight = daemon.getHeight() - 200;
+    MoneroWalletJni wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, null, restoreHeight);
+    
+    // test wallet is at newly created state
+    assertTrue(MoneroWalletJni.walletExists(path));
+    assertEquals(TestUtils.TEST_MNEMONIC, wallet.getMnemonic());
+    assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
+    assertNull(wallet.getDaemonConnection());
+    assertEquals(restoreHeight, wallet.getRestoreHeight());
+    assertEquals("English", wallet.getLanguage());
+    assertEquals(1, wallet.getHeight());
+    assertEquals(0, wallet.getChainHeight()); // TODO: this causes dylib runtime_error; test default state of unconnected wallet 
+    //assertEquals(1, wallet.getRestoreHeight()); // TODO: new wallet() without connection but restoreHeight
+    
+    // set the wallet's connection and sync
+    wallet.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
+    wallet.sync();
+    assertEquals(wallet.getChainHeight(), wallet.getHeight());
+    
+    // close the wallet without saving
+    wallet.close();
+    try {
+      wallet.getDaemonConnection();
+      fail("Should not be able to interact with closed wallet");
+    } catch (Exception e) {
+      assertEquals("Wallet is closed", e.getMessage());
+    }
+    
+    // re-open the wallet
+    wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
+    
+    // test wallet is at newly created state
+    assertTrue(MoneroWalletJni.walletExists(path));
+    assertEquals(TestUtils.TEST_MNEMONIC, wallet.getMnemonic());
+    assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
+    assertNull(wallet.getDaemonConnection());
+    assertEquals(restoreHeight, wallet.getRestoreHeight());
+    assertEquals("English", wallet.getLanguage());
+    assertEquals(1, wallet.getHeight());
+    assertEquals(0, wallet.getChainHeight()); // TODO: this causes dylib runtime_error; test default state of unconnected wallet 
+    //assertEquals(1, wallet.getRestoreHeight()); // TODO: new wallet() without connection but restoreHeight
+    
+    // set the wallet's connection and sync
+    wallet.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
+    wallet.sync();
+    assertEquals(wallet.getChainHeight(), wallet.getHeight());
+    
+    // save and close the wallet
+    wallet.save();
+    wallet.close();
+    try {
+      wallet.getHeight();
+      fail("Should not be able to interact with closed wallet");
+    } catch (Exception e) {
+      assertEquals("Wallet is closed", e.getMessage());
+    }
+    
+    // re-open the wallet
+    wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
+    
+    // test wallet is still synced
+    assertTrue(MoneroWalletJni.walletExists(path));
+    assertEquals(TestUtils.TEST_MNEMONIC, wallet.getMnemonic());
+    assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
+    assertEquals(TestUtils.getDaemonRpc().getRpcConnection(), wallet.getDaemonConnection());
+    assertEquals(restoreHeight, wallet.getRestoreHeight());
+    assertEquals("English", wallet.getLanguage());
+    assertEquals(wallet.getChainHeight(), wallet.getHeight());
+    assertTrue(wallet.getChainHeight() > 0);   // TODO: this causes dylib runtime_error; test default state of unconnected wallet
+    assertEquals(0, wallet.getChainHeight());
+    
+    // sync
+    wallet.sync();
+    
+    // save and close the wallet
+    wallet.save();
+    wallet.close();
+    try {
+      wallet.getHeight();
+      fail("Should not be able to interact with closed wallet");
+    } catch (Exception e) {
+      assertEquals("Wallet is closed", e.getMessage());
+    }
   }
   
   // TODO: this version assumes a wallet can be saved after creation which is not currently supported in wallet2
