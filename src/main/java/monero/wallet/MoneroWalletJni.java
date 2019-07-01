@@ -1,6 +1,5 @@
 package monero.wallet;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
@@ -259,12 +258,12 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public String getPublicViewKey() {
-    throw new RuntimeException("Not implemented");
+    return getPrivateViewKeyJni();
   }
 
   @Override
   public String getPrivateViewKey() {
-    throw new RuntimeException("Not implemented");
+    return getPrivateViewKeyJni();
   }
 
   @Override
@@ -774,6 +773,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native int getNetworkTypeJni();
   
   private native String getMnemonicJni();
+  
+  private native String getPublicViewKeyJni();
+  
+  private native String getPrivateViewKeyJni();
   
   private native String getLanguageJni();
   
