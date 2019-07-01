@@ -538,7 +538,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroKeyImage> getKeyImages() {
-    throw new RuntimeException("Not implemented");
+    String keyImagesJson = getKeyImagesJni();
+    System.out.println("Received key images json from jni: " + keyImagesJson);
+    List<MoneroKeyImage> keyImages = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, keyImagesJson, KeyImagesContainer.class).keyImages;
+    return keyImages;
   }
 
   @Override
@@ -848,6 +851,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getOutputsJni(String outputsRequestJson);
   
+  private native String getKeyImagesJni();
+  
   private native String sendSplitJni(String sendRequestJson);
   
   private native String[] relayTxsJni(String[] txMetadatas);
@@ -968,6 +973,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private static class BlocksContainer {
     public List<MoneroBlockWallet> blocks;
+  }
+  
+  private static class KeyImagesContainer {
+    public List<MoneroKeyImage> keyImages;
   }
   
 //  /**
