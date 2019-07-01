@@ -2,6 +2,8 @@
 #include "MoneroWalletJni.h"
 #include "utils/MoneroUtils.h"
 
+// TODO: add warnings to all deserialization methods for unrecognized fields
+
 using namespace std;
 using namespace monero;
 
@@ -571,7 +573,25 @@ shared_ptr<MoneroSendRequest> deserializeSendRequest(const string& sendRequestSt
 }
 
 vector<shared_ptr<MoneroKeyImage>> deserializeKeyImages(const string& keyImagesJson) {
-  throw runtime_error("deserializeKeyImages() not implemented");
+
+  // deserialize json to property node
+  std::istringstream iss = keyImagesJson.empty() ? std::istringstream() : std::istringstream(keyImagesJson);
+  boost::property_tree::ptree node;
+  boost::property_tree::read_json(iss, node);
+
+  // convert property tree to key images
+  vector<shared_ptr<MoneroKeyImage>> keyImages;
+  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+    string key = it->first;
+    //cout << "deserializeKeyImage() key: " << key << endl;
+    if (key == string("keyImages")) {
+      for (boost::property_tree::ptree::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+        keyImages.push_back(nodeToKeyImage(it2->second));
+      }
+    }
+    else cout << "WARNING MoneroWalletJni::deserializeKeyImages() unrecognized key: " << key << endl;
+  }
+  return keyImages;
 }
 
 // ------------------------------- JNI STATIC ---------------------------------
