@@ -33,6 +33,7 @@ import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.request.MoneroOutputRequest;
+import monero.wallet.request.MoneroSendRequest;
 import monero.wallet.request.MoneroTransferRequest;
 import monero.wallet.request.MoneroTxRequest;
 import utils.TestUtils;
@@ -624,9 +625,33 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     super.testSetKeyValues();
   }
 
+  // test custom rpc error codes
   @Override
   public void testCreatePaymentUri() {
     super.testCreatePaymentUri();
+    
+    // test with undefined address
+    MoneroSendRequest request = new MoneroSendRequest(wallet.getAddress(0, 0), BigInteger.valueOf(0));
+    String address = request.getDestinations().get(0).getAddress();
+    request.getDestinations().get(0).setAddress(null);
+    try {
+      wallet.createPaymentUri(request);
+      fail("Should have thrown RPC exception with invalid parameters");
+    } catch (MoneroException e) {
+      assertEquals(-11, (int) e.getCode());
+      assertTrue(e.getMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
+    }
+    request.getDestinations().get(0).setAddress(address);
+    
+    // test with invalid payment id
+    request.setPaymentId("bizzup");
+    try {
+      wallet.createPaymentUri(request);
+      fail("Should have thrown RPC exception with invalid parameters");
+    } catch (MoneroException e) {
+      assertEquals(-11, (int) e.getCode());
+      assertTrue(e.getMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
+    }
   }
 
   @Override

@@ -1711,7 +1711,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.createPaymentUri(request1);
       fail("Should have thrown RPC exception with invalid parameters");
     } catch (MoneroException e) {
-      assertEquals(-11, (int) e.getCode());
       assertTrue(e.getMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
     }
     request1.getDestinations().get(0).setAddress(address);
@@ -1722,7 +1721,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.createPaymentUri(request1);
       fail("Should have thrown RPC exception with invalid parameters");
     } catch (MoneroException e) {
-      assertEquals(-11, (int) e.getCode());
       assertTrue(e.getMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
     }
   }
