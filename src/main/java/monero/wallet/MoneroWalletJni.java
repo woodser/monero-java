@@ -721,9 +721,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public String createPaymentUri(MoneroSendRequest request) {
     try {
-      String paymentUriJson = createPaymentUriJni(JsonUtils.serialize(request));
-      System.out.println("GOT PAYMENT URI: " + paymentUriJson);
-      throw new RuntimeException("Not implemented");
+      return createPaymentUriJni(JsonUtils.serialize(request));
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
