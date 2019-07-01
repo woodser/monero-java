@@ -3,6 +3,7 @@
 #include "utils/MoneroUtils.h"
 
 // TODO: add warnings to all deserialization methods for unrecognized fields
+// TODO: do rethrows return before memory freed causing memory leak?
 
 using namespace std;
 using namespace monero;
@@ -1231,16 +1232,17 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_importKeyImagesJni(
   cout << "Deserialized " << keyImages.size() << " key images from java json" << endl;
 
   // import key images
-  shared_ptr<MoneroKeyImageImportResult> keyImageImportResult;
+  shared_ptr<MoneroKeyImageImportResult> result;
   try {
-    keyImageImportResult = wallet->importKeyImages(keyImages);
+    result = wallet->importKeyImages(keyImages);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
   }
 
   // serialize and return result
-  throw runtime_error("importKeyImagesJni() ready to serialize and return result");
+  env->ReleaseStringUTFChars(jkeyImagesJson, _keyImagesJson);
+  return env->NewStringUTF(result->serialize().c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv* env, jobject instance, jstring jsendRequest) {
