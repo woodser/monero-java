@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -609,7 +610,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<String> relayTxs(Collection<String> txMetadatas) {
-    throw new RuntimeException("Not implemented");
+    String[] txMetadatasArr = txMetadatas.toArray(new String[txMetadatas.size()]);  // convert to array for jni
+    return Arrays.asList(relayTxsJni(txMetadatasArr));
   }
 
   @Override
@@ -833,6 +835,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String getOutputsJni(String outputsRequestJson);
   
   private native String sendSplitJni(String sendRequestJson);
+  
+  private native String[] relayTxsJni(String[] txMetadatas);
   
   private native String saveJni(String path, String password);
   

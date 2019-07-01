@@ -1229,6 +1229,11 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv
   return env->NewStringUTF(blocksJson.c_str());
 }
 
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_relayTxsJni(JNIEnv* env, jobject instance, jobjectArray jtxMetadatas) {
+  cout << "Java_monero_wallet_MoneroWalletJni_relayTxsJni" << endl;
+  throw runtime_error("Not implemented");
+}
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, jobject instance, jstring jpath, jstring jpassword) {
   cout << "Java_monero_wallet_MoneroWalletJni_saveJni(path, password)" << endl;
   const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
