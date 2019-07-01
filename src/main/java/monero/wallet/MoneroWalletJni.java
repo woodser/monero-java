@@ -78,6 +78,20 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private static String DEFAULT_LANGUAGE = "English";
   
   /**
+   * Construct a wallet by opening a wallet file on disk.
+   * 
+   * @param path is the path to the wallet file to open
+   * @param password is the password of the wallet file to open
+   * @param networkType is the wallet's network type
+   */
+  public MoneroWalletJni(String path, String password, MoneroNetworkType networkType) {
+    if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist at path: " + path);
+    if (networkType == null) throw new MoneroException("Must provide a network type");
+    this.jniWalletHandle = openWalletJni(path, password, networkType.ordinal());
+    initCommon();
+  }
+  
+  /**
    * Construct a wallet with a randomly generated seed and default values (i.e. mainnet,
    * no connection, english).
    * 
@@ -142,20 +156,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (language == null) language = DEFAULT_LANGUAGE;
     this.jniWalletHandle = createWalletFromKeysJni(path, password, address, viewKey, spendKey, networkType.ordinal(), restoreHeight, language);
     if (daemonConnection != null) setDaemonConnection(daemonConnection);
-    initCommon();
-  }
-  
-  /**
-   * Construct a wallet by opening a wallet file on disk.
-   * 
-   * @param path is the path to the wallet file to open
-   * @param password is the password of the wallet file to open
-   * @param networkType is the wallet's network type
-   */
-  public MoneroWalletJni(String path, String password, MoneroNetworkType networkType) {
-    if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist at path: " + path);
-    if (networkType == null) throw new MoneroException("Must provide a network type");
-    this.jniWalletHandle = openWalletJni(path, password, networkType.ordinal());
     initCommon();
   }
   
