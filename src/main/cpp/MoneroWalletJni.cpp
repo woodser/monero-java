@@ -1244,7 +1244,13 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_relayTxsJni(JN
   }
 
   // relay tx metadata
-  vector<string> txIds = wallet->relayTxs(txMetadatas);
+  vector<string> txIds;
+  try {
+    txIds = wallet->relayTxs(txMetadatas);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 
   // convert and return tx ids as jobjectArray
   jobjectArray jtxIds = env->NewObjectArray(txIds.size(), env->FindClass("java/lang/String"), nullptr);
@@ -1252,6 +1258,31 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_relayTxsJni(JN
     env->SetObjectArrayElement(jtxIds, i, env->NewStringUTF(txIds[i].c_str()));
   }
   return jtxIds;
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createPaymentUriJni(JNIEnv* env, jobject instance, jstring jsendRequest) {
+  cout << "Java_monero_wallet_MoneroWalletJni_createPaymentUriJni(path, password)" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _sendRequest = jsendRequest ? env->GetStringUTFChars(jsendRequest, NULL) : nullptr;
+
+  // deserialize tx request
+  cout << "JNI received tx request string: " << string(_sendRequest ? _sendRequest : "") << endl;
+  shared_ptr<MoneroSendRequest> sendRequest = deserializeSendRequest(string(_sendRequest ? _sendRequest : ""));
+  cout << "Fetching payment uri with : " << sendRequest->serialize() << endl;
+
+  // get payment uri
+  string paymentUri;
+  try {
+    paymentUri = wallet->createPaymentUri(*sendRequest.get());
+    cout << "Got payment uri: " << paymentUri << endl;
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+
+  // release and return
+  env->ReleaseStringUTFChars(jsendRequest, _sendRequest);
+  return env->NewStringUTF(paymentUri.c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, jobject instance, jstring jpath, jstring jpassword) {

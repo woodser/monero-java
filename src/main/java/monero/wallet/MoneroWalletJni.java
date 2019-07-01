@@ -611,7 +611,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<String> relayTxs(Collection<String> txMetadatas) {
     String[] txMetadatasArr = txMetadatas.toArray(new String[txMetadatas.size()]);  // convert to array for jni
-    return Arrays.asList(relayTxsJni(txMetadatasArr));
+    try {
+      return Arrays.asList(relayTxsJni(txMetadatasArr));
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
@@ -716,7 +720,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public String createPaymentUri(MoneroSendRequest request) {
-    throw new RuntimeException("Not implemented");
+    try {
+      String paymentUriJson = createPaymentUriJni(JsonUtils.serialize(request));
+      System.out.println("GOT PAYMENT URI: " + paymentUriJson);
+      throw new RuntimeException("Not implemented");
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
@@ -837,6 +847,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String sendSplitJni(String sendRequestJson);
   
   private native String[] relayTxsJni(String[] txMetadatas);
+  
+  private native String createPaymentUriJni(String sendRequestJson);
   
   private native String saveJni(String path, String password);
   
