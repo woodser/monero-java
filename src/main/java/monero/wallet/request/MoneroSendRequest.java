@@ -4,6 +4,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import common.utils.GenUtils;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroSendPriority;
@@ -62,6 +64,7 @@ public class MoneroSendRequest {
     return destinations;
   }
   
+  @JsonProperty("destinations")
   public MoneroSendRequest setDestinations(List<MoneroDestination> destinations) {
     this.destinations = destinations;
     return this;
@@ -130,6 +133,7 @@ public class MoneroSendRequest {
     return subaddressIndices;
   }
   
+  @JsonProperty("subaddressIndices")
   public MoneroSendRequest setSubaddressIndices(List<Integer> subaddressIndices) {
     this.subaddressIndices = subaddressIndices;
     return this;

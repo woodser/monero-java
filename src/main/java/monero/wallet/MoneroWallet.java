@@ -904,7 +904,7 @@ public interface MoneroWallet {
   public String createPaymentUri(MoneroSendRequest request);
   
   /**
-   * Parses a payment URI to a send configuration.
+   * Parses a payment URI to a send request.
    * 
    * @param uri is the payment uri to parse
    * @return the send configuration parsed from the uri
