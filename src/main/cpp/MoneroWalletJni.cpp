@@ -995,7 +995,7 @@ Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(JNIEnv* env, jobject insta
   cout << "Java_monero_wallet_MoneroWalletJni_getSubaddressesJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
 
-  // get subaddress indices
+  // convert subaddress indices from jintArray to vector<uint32_t>
   vector<uint32_t> subaddressIndices;
   if (jsubaddressIndices != nullptr) {
     jsize numSubaddressIndices = env->GetArrayLength(jsubaddressIndices);
@@ -1231,7 +1231,27 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv
 
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_relayTxsJni(JNIEnv* env, jobject instance, jobjectArray jtxMetadatas) {
   cout << "Java_monero_wallet_MoneroWalletJni_relayTxsJni" << endl;
-  throw runtime_error("Not implemented");
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+
+  // get tx metadatas from jobjectArray to vector<string>
+  vector<string> txMetadatas;
+  if (jtxMetadatas != nullptr) {
+    jsize size = env->GetArrayLength(jtxMetadatas);
+    for (int idx = 0; idx < size; idx++) {
+      jstring jstr = (jstring) env->GetObjectArrayElement(jtxMetadatas, idx);
+      txMetadatas.push_back(env->GetStringUTFChars(jstr, NULL));
+    }
+  }
+
+  // relay tx metadata
+  vector<string> txIds = wallet->relayTxs(txMetadatas);
+
+  // convert and return tx ids as jobjectArray
+  jobjectArray jtxIds = env->NewObjectArray(txIds.size(), env->FindClass("java/lang/String"), nullptr);
+  for (int i = 0; i < txIds.size(); i++) {
+    env->SetObjectArrayElement(jtxIds, i, env->NewStringUTF(txIds[i].c_str()));
+  }
+  return jtxIds;
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, jobject instance, jstring jpath, jstring jpassword) {
