@@ -2,6 +2,9 @@
 #include "MoneroWalletJni.h"
 #include "utils/MoneroUtils.h"
 
+// TODO: add warnings to all deserialization methods for unrecognized fields
+// TODO: do rethrows return before memory freed causing memory leak?
+
 using namespace std;
 using namespace monero;
 
@@ -568,6 +571,28 @@ shared_ptr<MoneroSendRequest> deserializeSendRequest(const string& sendRequestSt
 
   cout << "Returning deserialized send request" << endl;
   return sendRequest;
+}
+
+vector<shared_ptr<MoneroKeyImage>> deserializeKeyImages(const string& keyImagesJson) {
+
+  // deserialize json to property node
+  std::istringstream iss = keyImagesJson.empty() ? std::istringstream() : std::istringstream(keyImagesJson);
+  boost::property_tree::ptree node;
+  boost::property_tree::read_json(iss, node);
+
+  // convert property tree to key images
+  vector<shared_ptr<MoneroKeyImage>> keyImages;
+  for (boost::property_tree::ptree::const_iterator it = node.begin(); it != node.end(); ++it) {
+    string key = it->first;
+    //cout << "deserializeKeyImage() key: " << key << endl;
+    if (key == string("keyImages")) {
+      for (boost::property_tree::ptree::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+        keyImages.push_back(nodeToKeyImage(it2->second));
+      }
+    }
+    else cout << "WARNING MoneroWalletJni::deserializeKeyImages() unrecognized key: " << key << endl;
+  }
+  return keyImages;
 }
 
 // ------------------------------- JNI STATIC ---------------------------------
@@ -1178,6 +1203,46 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
   string blocksJson = ss.str();
   env->ReleaseStringUTFChars(joutputRequest, _outputRequest);
   return env->NewStringUTF(blocksJson.c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getKeyImagesJni(JNIEnv* env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getKeyImagesJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+
+  // fetch key images
+  vector<shared_ptr<MoneroKeyImage>> keyImages = wallet->getKeyImages();
+  cout << "Fetched " << keyImages.size() << " key images" << endl;
+
+  // wrap and serialize key images
+  std::stringstream ss;
+  boost::property_tree::ptree container;
+  if (!keyImages.empty()) container.add_child("keyImages", MoneroUtils::toPropertyTree(keyImages));
+  boost::property_tree::write_json(ss, container, false);
+  string keyImagesJson = ss.str();
+  return env->NewStringUTF(keyImagesJson.c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_importKeyImagesJni(JNIEnv* env, jobject instance, jstring jkeyImagesJson) {
+  cout << "Java_monero_wallet_MoneroWalletJni_importKeyImagesJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _keyImagesJson = jkeyImagesJson ? env->GetStringUTFChars(jkeyImagesJson, NULL) : nullptr;
+
+  // deserialize key images to import
+  vector<shared_ptr<MoneroKeyImage>> keyImages = deserializeKeyImages(string(_keyImagesJson));
+  cout << "Deserialized " << keyImages.size() << " key images from java json" << endl;
+
+  // import key images
+  shared_ptr<MoneroKeyImageImportResult> result;
+  try {
+    result = wallet->importKeyImages(keyImages);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+
+  // serialize and return result
+  env->ReleaseStringUTFChars(jkeyImagesJson, _keyImagesJson);
+  return env->NewStringUTF(result->serialize().c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv* env, jobject instance, jstring jsendRequest) {

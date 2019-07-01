@@ -204,6 +204,8 @@ This project is licensed under MIT.
 
 ## Donate
 
+## Donate
+
 Please consider donating if you want to support this project.  Thank you!
 
 <p align="center">
