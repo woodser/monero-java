@@ -888,7 +888,12 @@ JNIEXPORT jlong JNICALL
 Java_monero_wallet_MoneroWalletJni_getChainHeightJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getChainHeightJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  return wallet->getChainHeight();
+  try {
+    return wallet->getChainHeight();
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
 JNIEXPORT jlong JNICALL

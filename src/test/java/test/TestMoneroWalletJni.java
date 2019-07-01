@@ -247,7 +247,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(restoreHeight, wallet.getRestoreHeight());
     assertEquals("English", wallet.getLanguage());
     assertEquals(1, wallet.getHeight());
-    assertEquals(0, wallet.getChainHeight()); // TODO: this causes dylib runtime_error; test default state of unconnected wallet 
+    assertEquals(0, wallet.getChainHeight()); 
     //assertEquals(1, wallet.getRestoreHeight()); // TODO: new wallet() without connection but restoreHeight
     
     // set the wallet's connection and sync
