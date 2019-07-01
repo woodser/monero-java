@@ -729,7 +729,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroSendRequest parsePaymentUri(String uri) {
-    throw new RuntimeException("Not implemented");
+    try {
+      String sendRequestJson = parsePaymentUriJni(uri);
+      System.out.println("Received send request json from jni: " + sendRequestJson);
+      return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, sendRequestJson, MoneroSendRequest.class);
+    } catch (Exception e) {
+      throw new MoneroException(e);
+    }
   }
 
   @Override
@@ -847,6 +853,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String[] relayTxsJni(String[] txMetadatas);
   
   private native String createPaymentUriJni(String sendRequestJson);
+  
+  private native String parsePaymentUriJni(String uri);
   
   private native String saveJni(String path, String password);
   

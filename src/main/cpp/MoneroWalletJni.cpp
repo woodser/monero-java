@@ -1261,12 +1261,12 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_relayTxsJni(JN
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createPaymentUriJni(JNIEnv* env, jobject instance, jstring jsendRequest) {
-  cout << "Java_monero_wallet_MoneroWalletJni_createPaymentUriJni(path, password)" << endl;
+  cout << "Java_monero_wallet_MoneroWalletJni_createPaymentUriJni()" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
   const char* _sendRequest = jsendRequest ? env->GetStringUTFChars(jsendRequest, NULL) : nullptr;
 
-  // deserialize tx request
-  cout << "JNI received tx request string: " << string(_sendRequest ? _sendRequest : "") << endl;
+  // deserialize send request
+  cout << "JNI received send request string: " << string(_sendRequest ? _sendRequest : "") << endl;
   shared_ptr<MoneroSendRequest> sendRequest = deserializeSendRequest(string(_sendRequest ? _sendRequest : ""));
   cout << "Fetching payment uri with : " << sendRequest->serialize() << endl;
 
@@ -1274,7 +1274,6 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createPaymentUriJni
   string paymentUri;
   try {
     paymentUri = wallet->createPaymentUri(*sendRequest.get());
-    cout << "Got payment uri: " << paymentUri << endl;
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
@@ -1283,6 +1282,25 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createPaymentUriJni
   // release and return
   env->ReleaseStringUTFChars(jsendRequest, _sendRequest);
   return env->NewStringUTF(paymentUri.c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_parsePaymentUriJni(JNIEnv* env, jobject instance, jstring juri) {
+  cout << "Java_monero_wallet_MoneroWalletJni_parsePaymentUriJni()" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _uri = juri ? env->GetStringUTFChars(juri, NULL) : nullptr;
+
+  // parse uri to send request
+  shared_ptr<MoneroSendRequest> sendRequest;
+  try {
+    sendRequest = wallet->parsePaymentUri(string(_uri ? _uri : ""));
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+
+  // release and return serialized request
+  env->ReleaseStringUTFChars(juri, _uri);
+  return env->NewStringUTF(sendRequest->serialize().c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, jobject instance, jstring jpath, jstring jpassword) {
