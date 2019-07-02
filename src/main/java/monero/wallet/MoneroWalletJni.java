@@ -195,6 +195,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     return getRestoreHeightJni();
   }
   
+  public void setRestoreHeight(long restoreHeight) {
+    setRestoreHeightJni(restoreHeight);
+  }
+  
   public void addListener(MoneroWalletListener listener) {
     listeners.add(listener);
     jniListener.setIsListening(true);
@@ -217,25 +221,20 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   /**
-   * Re-save the wallet at its current path.
-   * 
-   * Throws an exception if the wallet was not loaded from a path and has not
-   * been saved to an explicit path.
+   * Save the wallet at its current path.
    */
   public void save() {
-    save(null, null);
+    saveJni();
   }
   
   /**
-   * Save the wallet to the given path, deleting old wallet files if
-   * applicable.  // TODO monero-core: why delete old wallet files on store_to? seems dangerous
+   * Move the wallet from its current path to the given path.
    * 
-   * @param path is the path to save the wallet at
-   * @param password is the password to encrypt the wallet
+   * @param path is the new wallet's path
+   * @param password is the new wallet's password // TODO: can this be used to change wallet password?
    */
-  public void save(String path, String password) {
-    String err = saveJni(path, password);
-    if (err != null) throw new MoneroException(err);
+  public void moveTo(String path, String password) {
+    moveToJni(path, password);
   }
   
   /**
@@ -828,6 +827,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native long getRestoreHeightJni();
   
+  private native void setRestoreHeightJni(long height);
+  
   private native String getBalanceWalletJni();
   
   private native String getBalanceAccountJni(int accountIdx);
@@ -874,7 +875,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String parsePaymentUriJni(String uri);
   
-  private native String saveJni(String path, String password);
+  private native void saveJni();
+  
+  private native void moveToJni(String path, String password);
   
   private native void closeJni();
   
