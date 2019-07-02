@@ -1392,6 +1392,20 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsHexJni(JN
   }
 }
 
+JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_importOutputsHexJni(JNIEnv* env, jobject instance, jstring joutputsHex) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getOutputsHexJni()" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _outputsHex = joutputsHex ? env->GetStringUTFChars(joutputsHex, NULL) : nullptr;
+  try {
+    int numImported = wallet->importOutputsHex(string(_outputsHex == nullptr ? "" : _outputsHex));
+    env->ReleaseStringUTFChars(joutputsHex, _outputsHex);
+    return numImported;
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+}
+
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_saveJni(path, password)" << endl;
 
