@@ -322,6 +322,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     wallet.close();
   }
   
+  @Test
+  public void testMoveTo() {
+    throw new RuntimeException("Not implemented");
+  }
+  
   // TODO: this version assumes a wallet can be saved after creation which is not currently supported in wallet2
 //  // Can save the wallet
 //  @Test
