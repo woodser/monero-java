@@ -118,9 +118,22 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(1, wallet.getHeight()); // TODO monero core: why does height of new unsynced wallet start at 1?
     assertEquals(0, wallet.getRestoreHeight());
     wallet.close();
+    
+    // create wallet with mnemonic, no connection, and restore height
+    long restoreHeight = 10000;
+    path = getRandomWalletPath();
+    wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, null, restoreHeight);
+    assertEquals(TestUtils.TEST_MNEMONIC, wallet.getMnemonic());
+    assertEquals(TestUtils.TEST_ADDRESS, wallet.getPrimaryAddress());
+    assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
+    assertNull(wallet.getDaemonConnection());
+    assertEquals("English", wallet.getLanguage());
+    assertEquals(path, wallet.getPath());
+    assertEquals(1, wallet.getHeight()); // TODO monero core: why does height of new unsynced wallet start at 1?
+    assertEquals(restoreHeight, wallet.getRestoreHeight());
+    wallet.close();
 
     // create wallet with mnemonic, connection, and restore height
-    long restoreHeight = 10000;
     path = getRandomWalletPath();
     wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, daemon.getRpcConnection(), restoreHeight);
     assertEquals(TestUtils.TEST_MNEMONIC, wallet.getMnemonic());
@@ -256,7 +269,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(restoreHeight, wallet.getRestoreHeight());
     assertEquals("English", wallet.getLanguage());
     assertEquals(1, wallet.getHeight());
-    //assertEquals(1, wallet.getRestoreHeight()); // TODO: new wallet() without connection but restoreHeight
+    assertEquals(restoreHeight, wallet.getRestoreHeight());
     
     // set the wallet's connection and sync
     wallet.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
@@ -274,13 +287,13 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(TestUtils.TEST_MNEMONIC, wallet.getMnemonic());
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
     assertNull(wallet.getDaemonConnection());
-    //assertEquals(restoreHeight, wallet.getRestoreHeight()); // TODO: this is reset to 0 after re-opening
     assertEquals("English", wallet.getLanguage());
     assertEquals(1, wallet.getHeight());
-    //assertEquals(1, wallet.getRestoreHeight()); // TODO: new wallet() without connection but restoreHeight
+    assertEquals(0, wallet.getRestoreHeight()); // TODO monero-core: restoreHeight is reset to 0 after closing
     
     // set the wallet's connection and sync
     wallet.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
+    wallet.setRestoreHeight(restoreHeight);
     wallet.sync();
     assertEquals(wallet.getChainHeight(), wallet.getHeight());
     
@@ -295,12 +308,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertTrue(MoneroWalletJni.walletExists(path));
     assertEquals(TestUtils.TEST_MNEMONIC, wallet.getMnemonic());
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
+    wallet.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());  // TODO monero-core: daemon connection not stored in wallet files so must be explicitly set each time
     assertEquals(TestUtils.getDaemonRpc().getRpcConnection(), wallet.getDaemonConnection());
-    assertEquals(restoreHeight, wallet.getRestoreHeight()); // TODO: this is reset to 0 after re-opening
     assertEquals("English", wallet.getLanguage());
     assertEquals(wallet.getChainHeight(), wallet.getHeight());
-    assertTrue(wallet.getChainHeight() > 0);   // TODO: this causes dylib runtime_error; test default state of unconnected wallet
-    assertEquals(0, wallet.getChainHeight());
+    assertEquals(0, wallet.getRestoreHeight()); // TODO monero-core: restoreHeight is reset to 0 after closing
     
     // sync
     wallet.sync();
