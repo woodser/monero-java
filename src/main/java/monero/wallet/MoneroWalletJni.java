@@ -653,47 +653,53 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public String getTxKey(String txId) {
-    throw new RuntimeException("Not implemented");
+    return getTxKeyJni(txId);
   }
 
   @Override
   public MoneroCheckTx checkTxKey(String txId, String txKey, String address) {
-    throw new RuntimeException("Not implemented");
+    String checkStr = checkTxKeyJni(txId, txKey, address);
+    System.out.println("Java received MoneroCheckTx json from jni: " + checkStr);
+    return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckTx.class);
   }
 
   @Override
   public String getTxProof(String txId, String address, String message) {
-    throw new RuntimeException("Not implemented");
+    return getTxProofJni(txId, address, message);
   }
 
   @Override
   public MoneroCheckTx checkTxProof(String txId, String address, String message, String signature) {
-    throw new RuntimeException("Not implemented");
+    String checkStr = checkTxProofJni(txId, address, message, signature);
+    System.out.println("Java received MoneroCheckTx json from jni: " + checkStr);
+    return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckTx.class);
   }
 
   @Override
   public String getSpendProof(String txId, String message) {
-    throw new RuntimeException("Not implemented");
+    return getSpendProofJni(txId, message);
   }
 
   @Override
   public boolean checkSpendProof(String txId, String message, String signature) {
-    throw new RuntimeException("Not implemented");
+    return checkSpendProofJni(txId, message, signature);
   }
 
   @Override
   public String getReserveProofWallet(String message) {
-    throw new RuntimeException("Not implemented");
+    return getReserveProofWalletJni(message);
   }
 
   @Override
   public String getReserveProofAccount(int accountIdx, BigInteger amount, String message) {
-    throw new RuntimeException("Not implemented");
+    return getReserveProofAccountJni(accountIdx, amount.toString(), message);
   }
 
   @Override
   public MoneroCheckReserve checkReserveProof(String address, String message, String signature) {
-    throw new RuntimeException("Not implemented");
+    String checkStr = checkReserveProofJni(address, message, signature);
+    System.out.println("Java received MoneroCheckReserve json from jni: " + checkStr);
+    return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckReserve.class);
   }
 
   @Override
@@ -881,6 +887,24 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String signJni(String msg);
   
   private native boolean verifyJni(String msg, String address, String signature);
+  
+  private native String getTxKeyJni(String txId);
+  
+  private native String checkTxKeyJni(String txId, String txKey, String address);
+  
+  private native String getTxProofJni(String txId, String address, String message);
+  
+  private native String checkTxProofJni(String txId, String address, String message, String signature);
+  
+  private native String getSpendProofJni(String txId, String message);
+  
+  private native boolean checkSpendProofJni(String txId, String message, String signature);
+  
+  private native String getReserveProofWalletJni(String message);
+  
+  private native String getReserveProofAccountJni(int accountIdx, String amount, String message);
+  
+  private native String checkReserveProofJni(String address, String message, String signature);
   
   private native String createPaymentUriJni(String sendRequestJson);
   
