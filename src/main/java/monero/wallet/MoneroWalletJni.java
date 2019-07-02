@@ -633,12 +633,12 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<String> getTxNotes(Collection<String> txIds) {
-    throw new RuntimeException("Not implemented");
+    return Arrays.asList(getTxNotesJni(txIds.toArray(new String[txIds.size()])));  // convert to array for jni
   }
 
   @Override
   public void setTxNotes(Collection<String> txIds, Collection<String> notes) {
-    throw new RuntimeException("Not implemented");
+    setTxNotesJni(txIds.toArray(new String[txIds.size()]), notes.toArray(new String[notes.size()]));
   }
 
   @Override
@@ -873,6 +873,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String sendSplitJni(String sendRequestJson);
   
   private native String[] relayTxsJni(String[] txMetadatas);
+  
+  private native String[] getTxNotesJni(String[] txIds);
+  
+  private native void setTxNotesJni(String[] txIds, String[] notes); 
   
   private native String createPaymentUriJni(String sendRequestJson);
   

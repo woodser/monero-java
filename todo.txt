@@ -51,7 +51,8 @@ wallet_rpc_server.cpp:404: entry.address = m_wallet->get_subaddress_as_str({pd.m
 suggested_confirmations_threshold comes back as 0 for some (not all) outgoing transfers, but always >0 for incoming transfers, even if they’re transfers to/from the same wallet.  Can a value of 0 make sense?
 
 14.1.0 RELEASE
-move getOutputsHex() with other getOutputs() methods
+re-order getTxNotes() above setTxNotes()
+re-order getOutputsHex() with other getOutputs() methods
 update model with save(), moveTo()
 testSendWithPaymentId() test that unconfirmed tx is immediately returned from getTxs() with payment id filter
 preserve original send request instead of modifying it?  implement copy constructor
