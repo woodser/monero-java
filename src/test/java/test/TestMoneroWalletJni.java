@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 
 import java.util.UUID;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -29,14 +30,28 @@ import utils.TestUtils;
 public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
   protected MoneroWalletJni wallet;
+  private static MoneroWalletJni walletStatic;  // static reference to enable access in static afterClass()
 
   public TestMoneroWalletJni() {
     this.wallet = (MoneroWalletJni) getTestWallet();
+    walletStatic = wallet;
   }
 
   @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
+  public static void beforeClass() throws Exception {
 
+  }
+  
+  /**
+   * Save and close the jni wallet when this test object is destroyed in order
+   * to preserve local wallet data (e.g. destination addresses and amounts).
+   * 
+   * This is not necessary in the rpc wallet which saves automatically.
+   */
+  @AfterClass
+  public static void afterClass() {
+    walletStatic.save();  // save local wallet data
+    walletStatic.close();
   }
 
   @Override
