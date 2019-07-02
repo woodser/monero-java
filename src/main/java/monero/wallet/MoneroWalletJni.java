@@ -759,7 +759,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public int importOutputsHex(String outputsHex) {
-    throw new RuntimeException("Not implemented");
+    return importOutputsHexJni(outputsHex);
   }
 
   @Override
@@ -879,6 +879,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String parsePaymentUriJni(String uri);
   
   private native String getOutputsHexJni();
+  
+  private native int importOutputsHexJni(String outputsHex);
   
   private native void saveJni();
   
