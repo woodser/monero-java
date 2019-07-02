@@ -291,7 +291,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // re-open the wallet
     wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
     
-    // test wallet is still synced
+    // test wallet state is saved
     assertTrue(MoneroWalletJni.walletExists(path));
     assertEquals(TestUtils.TEST_MNEMONIC, wallet.getMnemonic());
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
