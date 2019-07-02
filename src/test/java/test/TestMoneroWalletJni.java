@@ -59,6 +59,15 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(path, wallet.getPath());
     assertEquals(1, wallet.getHeight()); // TODO monero core: why does height of new unsynced wallet start at 1?
     assertTrue(wallet.getRestoreHeight() >= 0);
+    
+    // cannot get daemon chain height
+    try {
+      wallet.getChainHeight();
+    } catch (MoneroException e) {
+      assertEquals("No connection to daemon", e.getMessage());
+    }
+    
+    // close wallet which releases resources
     wallet.close();
 
     // create random wallet with non-defaults
