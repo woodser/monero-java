@@ -268,7 +268,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<String> getLanguages() {
-    throw new RuntimeException("Not implemented");
+    return Arrays.asList(getLanguagesJni());
   }
 
   @Override
@@ -808,6 +808,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String getPrivateViewKeyJni();
   
   private native String getLanguageJni();
+  
+  private native String[] getLanguagesJni();
   
   private native String getAddressJni(int accountIdx, int subaddressIdx);
   
