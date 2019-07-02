@@ -173,7 +173,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   public MoneroRpcConnection getDaemonConnection() {
     String[] vals = getDaemonConnectionJni();
-    return vals[0] == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2]); // TODO: return same connection if same values
+    return vals == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2]); // TODO: return same connection if same values
   }
   
   // TODO: comments and other jni specific methods
@@ -274,12 +274,16 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public long getHeight() {
-    return getHeightJni();  // TODO: switch heights to longs
+    return getHeightJni();
   }
 
   @Override
   public long getChainHeight() {
-    return getChainHeightJni();  // TODO: switch heights to longs
+    try {
+      return getChainHeightJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override

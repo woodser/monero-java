@@ -697,13 +697,14 @@ Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni(JNIEnv *env, jobject i
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
 
   // get daemon connection
-  MoneroRpcConnection daemonConnection = wallet->getDaemonConnection();
+  shared_ptr<MoneroRpcConnection> daemonConnection = wallet->getDaemonConnection();
+  if (daemonConnection == nullptr) return 0;
 
   // return string[uri, username, password]
   jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
-  if (!daemonConnection.uri.empty()) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(daemonConnection.uri.c_str()));
-  if (!daemonConnection.username.empty()) env->SetObjectArrayElement(vals, 1, env->NewStringUTF(daemonConnection.username.c_str()));
-  if (!daemonConnection.password.empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(daemonConnection.password.c_str()));
+  if (!daemonConnection->uri.empty()) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(daemonConnection->uri.c_str()));
+  if (!daemonConnection->username.empty()) env->SetObjectArrayElement(vals, 1, env->NewStringUTF(daemonConnection->username.c_str()));
+  if (!daemonConnection->password.empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(daemonConnection->password.c_str()));
   return vals;
 }
 
