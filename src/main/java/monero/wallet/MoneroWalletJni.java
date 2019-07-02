@@ -643,12 +643,12 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public String sign(String msg) {
-    throw new RuntimeException("Not implemented");
+    return signJni(msg);
   }
 
   @Override
   public boolean verify(String msg, String address, String signature) {
-    throw new RuntimeException("Not implemented");
+    return verifyJni(msg, address, signature);
   }
 
   @Override
@@ -876,7 +876,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String[] getTxNotesJni(String[] txIds);
   
-  private native void setTxNotesJni(String[] txIds, String[] notes); 
+  private native void setTxNotesJni(String[] txIds, String[] notes);
+  
+  private native String signJni(String msg);
+  
+  private native boolean verifyJni(String msg, String address, String signature);
   
   private native String createPaymentUriJni(String sendRequestJson);
   

@@ -1401,6 +1401,38 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setTxNotesJni(JNIEnv* 
   }
 }
 
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signJni(JNIEnv* env, jobject instance, jstring jmsg) {
+  cout << "Java_monero_wallet_MoneroWalletJni_signJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _msg = jmsg ? env->GetStringUTFChars(jmsg, NULL) : nullptr;
+  try {
+    string signature = wallet->sign(string(_msg == nullptr ? "" : _msg));
+    env->ReleaseStringUTFChars(jmsg, _msg);
+    return env->NewStringUTF(signature.c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+}
+
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_verifyJni(JNIEnv* env, jobject instance, jstring jmsg, jstring jaddress, jstring jsignature) {
+  cout << "Java_monero_wallet_MoneroWalletJni_verifyJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _msg = jmsg ? env->GetStringUTFChars(jmsg, NULL) : nullptr;
+  const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
+  const char* _signature = jsignature ? env->GetStringUTFChars(jsignature, NULL) : nullptr;
+  try {
+    bool isGood = wallet->verify(string(_msg == nullptr ? "" : _msg), string(_address == nullptr ? "" : _address), string(_signature == nullptr ? "" : _signature));
+    env->ReleaseStringUTFChars(jmsg, _msg);
+    env->ReleaseStringUTFChars(jaddress, _address);
+    env->ReleaseStringUTFChars(jsignature, _signature);
+    return static_cast<jboolean>(isGood);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+}
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createPaymentUriJni(JNIEnv* env, jobject instance, jstring jsendRequest) {
   cout << "Java_monero_wallet_MoneroWalletJni_createPaymentUriJni()" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
