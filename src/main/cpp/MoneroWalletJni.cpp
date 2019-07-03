@@ -1677,6 +1677,16 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_startMiningJni(JNIEnv*
   }
 }
 
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_stopMiningJni(JNIEnv* env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_startMiningJni()" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  try {
+    wallet->stopMining();
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_saveJni(path, password)" << endl;
 
