@@ -805,7 +805,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public void startMining(Integer numThreads, Boolean backgroundMining, Boolean ignoreBattery) {
     try {
-      startMiningJni(numThreads == null ? null : (long) numThreads, backgroundMining, ignoreBattery); // TODO: startMining(Long, ...)? wallet2 uses uint64_t
+      startMiningJni(numThreads == null ? 0 : (long) numThreads, backgroundMining, ignoreBattery); // TODO: startMining(Long, ...)? wallet2 uses uint64_t
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -813,7 +813,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public void stopMining() {
-    throw new RuntimeException("Not implemented");
+    try {
+      stopMiningJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
   
   // ------------------------------ NATIVE METHODS ----------------------------
@@ -942,7 +946,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native int importOutputsHexJni(String outputsHex);
   
-  private native void startMiningJni(Long numThreads, Boolean backgroundMining, Boolean ignoreBattery);
+  private native void startMiningJni(long numThreads, Boolean backgroundMining, Boolean ignoreBattery);
+  
+  private native void stopMiningJni();
   
   private native void saveJni();
   
