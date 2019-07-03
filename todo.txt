@@ -51,6 +51,8 @@ wallet_rpc_server.cpp:404: entry.address = m_wallet->get_subaddress_as_str({pd.m
 suggested_confirmations_threshold comes back as 0 for some (not all) outgoing transfers, but always >0 for incoming transfers, even if they’re transfers to/from the same wallet.  Can a value of 0 make sense?
 
 14.1.0 RELEASE
+MoneroOutputWallet implement merge in both Java and c++
+tx merge should merge blocks if they're different in the same way that MoneroTransfer merges txs if they're different which comes back to transfers, repeat elsewhere in tree
 re-order getTxNotes() above setTxNotes()
 re-order getOutputsHex() with other getOutputs() methods
 update model with save(), moveTo()

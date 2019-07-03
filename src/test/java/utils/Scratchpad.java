@@ -1,11 +1,13 @@
 package utils;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
 import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroTransfer;
+import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.request.MoneroTransferRequest;
 import monero.wallet.request.MoneroTxRequest;
 
@@ -18,7 +20,7 @@ public class Scratchpad {
     
     // initialize daemon, wallet, and direct rpc interface
 //    MoneroDaemon daemon = TestUtils.getDaemonRpc();
-//    MoneroWallet walletRpc = TestUtils.getWalletRpc();
+    MoneroWallet walletRpc = TestUtils.getWalletRpc();
     MoneroWallet walletJni = TestUtils.getWalletJni();
     //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
     
@@ -56,14 +58,32 @@ public class Scratchpad {
 //      System.out.println(tx.getBlock());
 //    }
     
-    System.out.println("FETCHING TXS");
-    List<MoneroTransfer> transfers = walletJni.getTransfers(new MoneroTransferRequest().setAccountIndex(0).setTxRequest(new MoneroTxRequest().setIsConfirmed(false)));
-    System.out.println("GOT " + transfers.size() + " TRANSFERS");
-    for (MoneroTransfer transfer : transfers) {
-      assertFalse(transfer.getTx().getIsConfirmed());
-      System.out.println(transfer.getTx().getId() + ": " + transfer);
+//    for (MoneroTxWallet tx : walletRpc.getTxs()) {
+//      if (tx.getIsOutgoing() && tx.getIsIncoming()) {
+//        assertTrue(tx.getIsOutgoing());
+//        assertFalse(tx.getOutgoingTransfer() == null);
+//        System.out.println(tx);
+//      }
+//    }
+    
+//    System.out.println("RPC");
+//    for (MoneroTxWallet tx : walletRpc.getTxs("c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755")) {
+//      System.out.println(tx);
+//    }
+    
+    System.out.println("JNI");
+    for (MoneroTxWallet tx : walletJni.getTxs("c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755")) {
+      System.out.println(tx);
     }
-    System.out.println("DONE!!!");
+    
+//    System.out.println("FETCHING TXS");
+//    List<MoneroTransfer> transfers = walletJni.getTransfers(new MoneroTransferRequest().setAccountIndex(0).setTxRequest(new MoneroTxRequest().setIsConfirmed(false)));
+//    System.out.println("GOT " + transfers.size() + " TRANSFERS");
+//    for (MoneroTransfer transfer : transfers) {
+//      assertFalse(transfer.getTx().getIsConfirmed());
+//      System.out.println(transfer.getTx().getId() + ": " + transfer);
+//    }
+//    System.out.println("DONE!!!");
     
     
     //MoneroWalletJni walletJni = new MoneroWalletJni("./test_wallets/test_wallet_1", TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
