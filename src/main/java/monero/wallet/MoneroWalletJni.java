@@ -653,36 +653,60 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public String getTxKey(String txId) {
-    return getTxKeyJni(txId);
+    try {
+      return getTxKeyJni(txId);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public MoneroCheckTx checkTxKey(String txId, String txKey, String address) {
-    String checkStr = checkTxKeyJni(txId, txKey, address);
-    System.out.println("Java received MoneroCheckTx json from jni: " + checkStr);
-    return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckTx.class);
+    try {
+      String checkStr = checkTxKeyJni(txId, txKey, address);
+      System.out.println("Java received MoneroCheckTx json from jni: " + checkStr);
+      return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckTx.class);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public String getTxProof(String txId, String address, String message) {
-    return getTxProofJni(txId, address, message);
+    try {
+      return getTxProofJni(txId, address, message);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public MoneroCheckTx checkTxProof(String txId, String address, String message, String signature) {
-    String checkStr = checkTxProofJni(txId, address, message, signature);
-    System.out.println("Java received MoneroCheckTx json from jni: " + checkStr);
-    return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckTx.class);
+    try {
+      String checkStr = checkTxProofJni(txId, address, message, signature);
+      System.out.println("Java received MoneroCheckTx json from jni: " + checkStr);
+      return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckTx.class);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public String getSpendProof(String txId, String message) {
-    return getSpendProofJni(txId, message);
+    try {
+      return getSpendProofJni(txId, message);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public boolean checkSpendProof(String txId, String message, String signature) {
-    return checkSpendProofJni(txId, message, signature);
+    try {
+      return checkSpendProofJni(txId, message, signature);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override

@@ -1280,7 +1280,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.getTxKey("invalid_tx_id");
       fail("Should throw exception for invalid key");
     } catch (MoneroException e) {
-      assertEquals(-8, (int) e.getCode());
+      testInvalidTxIdException(e);
     }
     
     // test check with invalid tx id
@@ -1291,7 +1291,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.checkTxKey("invalid_tx_id", key, destination.getAddress());
       fail("Should have thrown exception");
     } catch (MoneroException e) {
-      assertEquals(-8, (int) e.getCode());
+      testInvalidTxIdException(e);
     }
     
     // test check with invalid key
@@ -1299,7 +1299,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.checkTxKey(tx.getId(), "invalid_tx_key", destination.getAddress());
       fail("Should have thrown exception");
     } catch (MoneroException e) {
-      assertEquals(-25, (int) e.getCode());
+      testInvalidTxKeyException(e);
     }
     
     // test check with invalid address
@@ -1307,7 +1307,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.checkTxKey(tx.getId(), key, "invalid_tx_address");
       throw new RuntimeException("Should have thrown exception");
     } catch (MoneroException e) {
-      assertEquals(-2, (int) e.getCode());
+      testInvalidAddressException(e);
     }
     
     // test check with different address
@@ -1363,7 +1363,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.getTxProof("invalid_tx_id", destination.getAddress());
       throw new RuntimeException("Should throw exception for invalid key");
     } catch (MoneroException e) {
-      assertEquals(-8, (int) e.getCode());
+      testInvalidTxIdException(e);
     }
     
     // test check with invalid tx id
@@ -1371,7 +1371,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.checkTxProof("invalid_tx_id", destination.getAddress(), null, signature);
       fail("Should have thrown exception");
     } catch (MoneroException e) {
-      assertEquals(-8, (int) e.getCode());
+      testInvalidTxIdException(e);
     }
     
     // test check with invalid address
@@ -1379,7 +1379,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.checkTxProof(tx.getId(), "invalid_tx_address", null, signature);
       fail("Should have thrown exception");
     } catch (MoneroException e) {
-      assertEquals(-2, (int) e.getCode());
+      testInvalidAddressException(e);
     }
     
     // test check with wrong message
@@ -1427,7 +1427,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.getSpendProof("invalid_tx_id");
       throw new RuntimeException("Should throw exception for invalid key");
     } catch (MoneroException e) {
-      assertEquals(-8, (int) e.getCode());
+      testInvalidTxIdException(e);
     }
     
     // test check with invalid tx id
@@ -1435,7 +1435,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.checkSpendProof("invalid_tx_id", null, signature);
       throw new RuntimeException("Should have thrown exception");
     } catch (MoneroException e) {
-      assertEquals(-8, (int) e.getCode());
+      testInvalidTxIdException(e);
     }
     
     // test check with invalid message
@@ -2758,6 +2758,18 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  protected void testInvalidAddressException(MoneroException e) {
+    assertEquals("Invalid address", e.getDescription());
+  }
+  
+  protected void testInvalidTxIdException(MoneroException e) {
+    assertEquals("TX ID has invalid format", e.getDescription());
+  }
+  
+  protected void testInvalidTxKeyException(MoneroException e) {
+    assertEquals("Tx key has invalid format", e.getDescription());
+  }
+  
   // ------------------------------ PRIVATE STATIC ----------------------------
 
    private static void testAccount(MoneroAccount account) {
@@ -3177,9 +3189,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       if (check.getInTxPool()) assertEquals(0, (int) check.getNumConfirmations());
       else assertTrue(check.getNumConfirmations() > 0); // TODO (monero-wall-rpc) this fails (confirmations is 0) for (at least one) transaction that has 1 confirmation on testCheckTxKey()
     } else {
-      assertNull(check.getNumConfirmations());
       assertNull(check.getInTxPool());
       assertNull(check.getNumConfirmations());
+      assertNull(check.getReceivedAmount());
     }
   }
 
