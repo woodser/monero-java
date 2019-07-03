@@ -1394,7 +1394,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       check = wallet.checkTxProof(tx.getId(), destination.getAddress(), "This is the right message", wrongSignature);  
       assertEquals(check.getIsGood(), false);
     } catch (MoneroException e) {
-      assertEquals(-1, (int) e.getCode()); // TODO: sometimes comes back bad, sometimes throws exception.  ensure txs come from different addresses?
+      testInvalidSignatureException(e);
     }
   }
   
@@ -2743,18 +2743,17 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     Boolean isSweepOutputResponse;  // TODO monero-wallet-rpc: this only necessary because sweep_output does not return account index
     public TestContext() { }
     public TestContext(TestContext ctx) {
-      if (ctx != null) {
-        this.wallet = ctx.wallet;
-        this.sendRequest = ctx.sendRequest;
-        this.hasOutgoingTransfer = ctx.hasOutgoingTransfer;
-        this.hasIncomingTransfers = ctx.hasIncomingTransfers;
-        this.hasDestinations = ctx.hasDestinations;
-        this.doNotTestCopy = ctx.doNotTestCopy;
-        this.includeOutputs = ctx.includeOutputs;
-        this.isSendResponse = ctx.isSendResponse;
-        this.isSweepResponse = ctx.isSweepResponse;
-        this.isSweepOutputResponse = ctx.isSweepOutputResponse;
-      }
+      if (ctx == null) return;
+      this.wallet = ctx.wallet;
+      this.sendRequest = ctx.sendRequest;
+      this.hasOutgoingTransfer = ctx.hasOutgoingTransfer;
+      this.hasIncomingTransfers = ctx.hasIncomingTransfers;
+      this.hasDestinations = ctx.hasDestinations;
+      this.doNotTestCopy = ctx.doNotTestCopy;
+      this.includeOutputs = ctx.includeOutputs;
+      this.isSendResponse = ctx.isSendResponse;
+      this.isSweepResponse = ctx.isSweepResponse;
+      this.isSweepOutputResponse = ctx.isSweepOutputResponse;
     }
   }
   
@@ -2768,6 +2767,10 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   protected void testInvalidTxKeyException(MoneroException e) {
     assertEquals("Tx key has invalid format", e.getDescription());
+  }
+  
+  protected void testInvalidSignatureException(MoneroException e) {
+    assertEquals("Signature size mismatch with additional tx pubkeys", e.getMessage());
   }
   
   // ------------------------------ PRIVATE STATIC ----------------------------

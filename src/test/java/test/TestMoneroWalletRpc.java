@@ -378,6 +378,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   // rpc-specific tx tests
   @Override
   protected void testTxWallet(MoneroTxWallet tx, TestContext ctx) {
+    ctx = new TestContext(ctx);
     
     // run common tests
     super.testTxWallet(tx, ctx);
@@ -401,6 +402,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   protected void testInvalidAddressException(MoneroException e) {
     super.testInvalidAddressException(e);
     assertEquals(-2, (int) e.getCode());
+  }
+  
+  protected void testInvalidSignatureException(MoneroException e) {
+    super.testInvalidSignatureException(e);
+    assertEquals(-1, (int) e.getCode()); // TODO: sometimes comes back bad, sometimes throws exception.  ensure txs come from different addresses?
   }
   
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
