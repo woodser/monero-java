@@ -388,6 +388,21 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     }
   }
   
+  protected void testInvalidTxIdException(MoneroException e) {
+    super.testInvalidTxIdException(e);
+    assertEquals(-8, (int) e.getCode());
+  }
+  
+  protected void testInvalidTxKeyException(MoneroException e) {
+    super.testInvalidTxKeyException(e);
+    assertEquals(-25, (int) e.getCode());
+  }
+  
+  protected void testInvalidAddressException(MoneroException e) {
+    super.testInvalidAddressException(e);
+    assertEquals(-2, (int) e.getCode());
+  }
+  
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
 
   @Override
