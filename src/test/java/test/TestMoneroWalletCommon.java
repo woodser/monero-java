@@ -1471,7 +1471,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.checkReserveProof(differentAddress, "Test message", signature);
       fail("Should have thrown exception");
     } catch (MoneroException e) {
-      assertEquals(-1, (int) e.getCode());
+      testNoSubaddressException(e);
     }
     
     // test subaddress
@@ -1479,7 +1479,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.checkReserveProof((wallet.getSubaddress(0, 1)).getAddress(), "Test message", signature);
       fail("Should have thrown exception");
     } catch (MoneroException e) {
-      assertEquals(-1, (int) e.getCode());
+      testNoSubaddressException(e);
     }
     
     // test wrong message
@@ -1492,7 +1492,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", "wrong signature");
       fail("Should have thrown exception");
     } catch (MoneroException e) {
-      assertEquals(-1, (int) e.getCode());
+      testSignatureHeaderCheckException(e);
     }
   }
   
@@ -2770,7 +2770,15 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   }
   
   protected void testInvalidSignatureException(MoneroException e) {
-    assertEquals("Signature size mismatch with additional tx pubkeys", e.getMessage());
+    assertEquals("Signature size mismatch with additional tx pubkeys", e.getDescription());
+  }
+  
+  protected void testNoSubaddressException(MoneroException e) {
+    assertEquals("Address must not be a subaddress", e.getDescription());
+  }
+  
+  protected void testSignatureHeaderCheckException(MoneroException e) {
+    assertEquals("Signature header check error", e.getDescription());
   }
   
   // ------------------------------ PRIVATE STATIC ----------------------------

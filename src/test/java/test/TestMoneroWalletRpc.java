@@ -409,6 +409,16 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     assertEquals(-1, (int) e.getCode()); // TODO: sometimes comes back bad, sometimes throws exception.  ensure txs come from different addresses?
   }
   
+  protected void testNoSubaddressException(MoneroException e) {
+    super.testNoSubaddressException(e);
+    assertEquals(-1, (int) e.getCode());
+  }
+  
+  protected void testSignatureHeaderCheckException(MoneroException e) {
+    super.testSignatureHeaderCheckException(e);
+    assertEquals(-1, (int) e.getCode());
+  }
+  
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
 
   @Override
