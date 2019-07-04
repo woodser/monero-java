@@ -1,5 +1,6 @@
 package monero.wallet;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
@@ -608,7 +609,15 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroTxWallet sweepOutput(MoneroSendRequest request) {
-    throw new RuntimeException("Not implemented");
+    try {
+      String blocksJson = sweepOutputJni(JsonUtils.serialize(request));
+      List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
+      assertNull(blocks.get(0).getTxs().get(0).getBlock());
+      blocks.get(0).getTxs().get(0).setBlock(null);
+      return (MoneroTxWallet) blocks.get(0).getTxs().get(0);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
@@ -921,6 +930,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String importKeyImagesJni(String keyImagesJson);
   
   private native String sendSplitJni(String sendRequestJson);
+  
+  private native String sweepOutputJni(String sendRequestJson);
   
   private native String[] relayTxsJni(String[] txMetadatas);
   

@@ -1307,6 +1307,41 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv
   return env->NewStringUTF(blocksJson.c_str());
 }
 
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepOutputJni(JNIEnv* env, jobject instance, jstring jsendRequest) {
+  cout << "Java_monero_wallet_MoneroWalletJni_sweepOutputJni(request)" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _sendRequest = jsendRequest ? env->GetStringUTFChars(jsendRequest, NULL) : nullptr;
+  string sendRequestJson = string(_sendRequest);
+  env->ReleaseStringUTFChars(jsendRequest, _sendRequest);
+
+  cout << "Send request json: " << sendRequestJson << endl;
+
+  // deserialize send request
+  shared_ptr<MoneroSendRequest> sendRequest = deserializeSendRequest(sendRequestJson);
+  cout << "Deserialized send request, re-serialized: " << sendRequest->serialize() << endl;
+
+  // submit send request
+  shared_ptr<MoneroTxWallet> tx;
+  try {
+    tx = wallet->sweepOutput(*sendRequest);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+
+  // wrap and serialize blocks to preserve model relationships as tree
+  MoneroBlock block;
+  block.txs.push_back(tx);
+  vector<MoneroBlock> blocks;
+  blocks.push_back(block);
+  std::stringstream ss;
+  boost::property_tree::ptree container;
+  if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
+  boost::property_tree::write_json(ss, container, false);
+  string blocksJson = ss.str();
+  return env->NewStringUTF(blocksJson.c_str());
+}
+
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_relayTxsJni(JNIEnv* env, jobject instance, jobjectArray jtxMetadatas) {
   cout << "Java_monero_wallet_MoneroWalletJni_relayTxsJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
