@@ -612,8 +612,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     try {
       String blocksJson = sweepOutputJni(JsonUtils.serialize(request));
       List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
-      assertNull(blocks.get(0).getTxs().get(0).getBlock());
-      blocks.get(0).getTxs().get(0).setBlock(null);
+      blocks.get(0).getTxs().get(0).setBlock(null); // dereference placeholder block
       return (MoneroTxWallet) blocks.get(0).getTxs().get(0);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
