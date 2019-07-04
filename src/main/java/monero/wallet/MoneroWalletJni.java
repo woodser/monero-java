@@ -711,19 +711,31 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public String getReserveProofWallet(String message) {
-    return getReserveProofWalletJni(message);
+    try {
+      return getReserveProofWalletJni(message);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public String getReserveProofAccount(int accountIdx, BigInteger amount, String message) {
-    return getReserveProofAccountJni(accountIdx, amount.toString(), message);
+    try {
+      return getReserveProofAccountJni(accountIdx, amount.toString(), message);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public MoneroCheckReserve checkReserveProof(String address, String message, String signature) {
-    String checkStr = checkReserveProofJni(address, message, signature);
-    System.out.println("Java received MoneroCheckReserve json from jni: " + checkStr);
-    return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckReserve.class);
+    try {
+      String checkStr = checkReserveProofJni(address, message, signature);
+      System.out.println("Java received MoneroCheckReserve json from jni: " + checkStr);
+      return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckReserve.class);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
@@ -777,7 +789,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       System.out.println("Received send request json from jni: " + sendRequestJson);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, sendRequestJson, MoneroSendRequest.class);
     } catch (Exception e) {
-      throw new MoneroException(e);
+      throw new MoneroException(e.getMessage());
     }
   }
 
