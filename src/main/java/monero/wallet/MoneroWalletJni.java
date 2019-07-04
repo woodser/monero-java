@@ -794,12 +794,12 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public void setAttribute(String key, String val) {
-    throw new RuntimeException("Not implemented");
+    setAttributeJni(key, val);
   }
 
   @Override
   public String getAttribute(String key) {
-    throw new RuntimeException("Not implemented");
+    return getAttributeJni(key);
   }
 
   @Override
@@ -945,6 +945,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String getOutputsHexJni();
   
   private native int importOutputsHexJni(String outputsHex);
+  
+  private native void setAttributeJni(String key, String val);
+
+  private native String getAttributeJni(String key);
   
   private native void startMiningJni(long numThreads, Boolean backgroundMining, Boolean ignoreBattery);
   
