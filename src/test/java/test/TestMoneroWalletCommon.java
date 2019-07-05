@@ -84,7 +84,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   public static void setUpBeforeClass() throws Exception {
     
   }
-  
+
   // Can get the mnemonic phrase derived from the seed
   @Test
   public void testGetMnemonic() {
@@ -2699,7 +2699,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
-  // --------------------------------- PRIVATE --------------------------------
+  // --------------------------------- HELPERS --------------------------------
   
   private List<MoneroTxWallet> getCachedTxs() {
     if (txCache != null) return txCache;
@@ -2775,6 +2775,16 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  public static void testWalletsEqual(MoneroWallet wallet1, MoneroWallet wallet2) {
+    assertEquals(wallet1.getMnemonic(), wallet2.getMnemonic());
+    assertEquals(wallet1.getHeight(), wallet2.getHeight());
+    assertEquals(wallet1.getPrimaryAddress(), wallet2.getPrimaryAddress());
+    assertEquals(wallet1.getPrivateViewKey(), wallet2.getPrivateViewKey());
+    assertEquals(wallet1.getPrivateSpendKey(), wallet2.getPrivateSpendKey());
+    assertEquals(wallet1.getAccounts(), wallet2.getAccounts());
+    // TODO: txs, transfers, outputs, integrated addresses, etc
+  }
+  
   protected void testInvalidAddressException(MoneroException e) {
     assertEquals("Invalid address", e.getDescription());
   }
@@ -2799,8 +2809,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertEquals("Signature header check error", e.getDescription());
   }
   
-  // ------------------------------ PRIVATE STATIC ----------------------------
-
    private static void testAccount(MoneroAccount account) {
     
     // test account
