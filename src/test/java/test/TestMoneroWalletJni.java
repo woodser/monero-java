@@ -15,7 +15,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.daemon.model.MoneroNetworkType;
-import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
@@ -28,6 +27,9 @@ import utils.TestUtils;
 
 /**
  * Tests specific to the JNI wallet.
+ * 
+ * TODO: testPublicViewKey()
+ * TODO: testPublicSpendKey()
  */
 public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
@@ -175,6 +177,22 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     MoneroWalletJni walletKeys = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), wallet.getNetworkType(), wallet.getDaemonConnection(), daemon.getHeight() - 200, "English");
     
     throw new RuntimeException("Not implemented");
+  }
+  
+  // Can get the public view key
+  @Test
+  public void testGetPublicViewKey() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    String publicViewKey = wallet.getPublicViewKey();
+    MoneroUtils.validatePublicViewKey(publicViewKey);
+  }
+  
+  // Can get the public spend key
+  @Test
+  public void testGetPublicSpendKey() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    String publicSpendKey = wallet.getPublicSpendKey();
+    MoneroUtils.validatePublicSpendKey(publicSpendKey);
   }
 
   // Can sync a wallet with a randomly generated seed
@@ -606,6 +624,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   public void testGetPrivateViewKey() {
     super.testGetPrivateViewKey();
+  }
+  
+  @Override
+  public void testGetPrivateSpendKey() {
+    super.testGetPrivateSpendKey();
   }
 
   @Override

@@ -53,6 +53,7 @@ suggested_confirmations_threshold comes back as 0 for some (not all) outgoing tr
 document query_key spend_key parameter
 
 14.1.0 RELEASE
+document MoneroTxRequest and MoneroTransferRequest
 wallet.getSpendKey() possible using rpc query_key of type "spend_key" which is not documented
 rpc getPublicViewKey() getPrivateViewKey() implementations are equivalent so one is wrong (equivalence test will reveal this)
 account label is actually first subaddress's label

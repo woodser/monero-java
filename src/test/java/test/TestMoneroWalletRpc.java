@@ -440,6 +440,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testGetPrivateViewKey() {
     super.testGetPrivateViewKey();
   }
+  
+  @Override
+  public void testGetPrivateSpendKey() {
+    super.testGetPrivateSpendKey();
+  }
 
   @Override
   public void testGetPrimaryAddress() {

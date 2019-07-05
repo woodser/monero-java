@@ -111,6 +111,14 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     MoneroUtils.validatePrivateViewKey(privateViewKey);
   }
   
+  // Can get the private spend key
+  @Test
+  public void testGetPrivateSpendKey() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    String privateSpendKey = wallet.getPrivateSpendKey();
+    MoneroUtils.validatePrivateSpendKey(privateSpendKey);
+  }
+  
   // Can get the primary address
   @Test
   public void testGetPrimaryAddress() {
