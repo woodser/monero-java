@@ -29,6 +29,7 @@ constants to represent model fields for serialization/deserialization
 performance: profile, maybe switch to return native jni types
 
 MONERO CORE ISSUES
+move MoneroWallet open constructor to top
 wallet2 network type auto detected when loaded from files on disk
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
 add all_accounts to incoming_transfers, would be huge time saver
@@ -49,8 +50,11 @@ store_to() is actually move(), deleting old files if they exist.  support "save 
 new wallet() without connection but restoreHeight is checkpointed; where is that data cached?
 wallet_rpc_server.cpp:404: entry.address = m_wallet->get_subaddress_as_str({pd.m_subaddr_account, 0}) will always use subaddress idx 0, ignoring all actual subaddress indices
 suggested_confirmations_threshold comes back as 0 for some (not all) outgoing transfers, but always >0 for incoming transfers, even if they’re transfers to/from the same wallet.  Can a value of 0 make sense?
+document query_key spend_key parameter
 
 14.1.0 RELEASE
+wallet.getSpendKey() possible using rpc query_key of type "spend_key" which is not documented
+rpc getPublicViewKey() getPrivateViewKey() implementations are equivalent so one is wrong (equivalence test will reveal this)
 account label is actually first subaddress's label
 rename to setAttribute() setKeyValued()
 MoneroOutputWallet implement merge in both Java and c++
