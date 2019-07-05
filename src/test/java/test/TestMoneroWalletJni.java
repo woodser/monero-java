@@ -19,6 +19,7 @@ import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
+import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTxWallet;
@@ -339,7 +340,50 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   @Test
   public void testMoveTo() {
-    throw new RuntimeException("Not implemented");
+    
+    // create unique name for test wallet
+    String walletName = "test_wallet_" + UUID.randomUUID().toString();
+    String path = TestUtils.TEST_WALLETS_DIR + "/" + walletName;
+    
+    // wallet does not exist
+    assertFalse(MoneroWalletJni.walletExists(path));
+    
+    // create wallet at the path
+    long restoreHeight = daemon.getHeight() - 200;
+    MoneroWalletJni wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, null, restoreHeight);
+    String accountLabel = "Move test wallet account!";
+    MoneroAccount account = wallet.createAccount(accountLabel);
+    wallet.save();
+    
+    // wallet exists
+    assertTrue(MoneroWalletJni.walletExists(path));
+    
+    // move wallet to a subdirectory
+    String movedPath = TestUtils.TEST_WALLETS_DIR + "/moved/" + walletName;
+    wallet.moveTo(movedPath, TestUtils.WALLET_JNI_PW);
+    assertFalse(MoneroWalletJni.walletExists(path));
+    assertFalse(MoneroWalletJni.walletExists(movedPath)); // wallet does not exist until saved
+    wallet.save();
+    assertFalse(MoneroWalletJni.walletExists(path));
+    assertTrue(MoneroWalletJni.walletExists(movedPath));
+    wallet.close();
+    assertFalse(MoneroWalletJni.walletExists(path));
+    assertTrue(MoneroWalletJni.walletExists(movedPath));
+    
+    // re-open and test wallet
+    wallet = new MoneroWalletJni(movedPath, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
+    assertEquals(accountLabel, wallet.getAccount(account.getIndex()).getLabel());
+    
+    // move wallet back
+    wallet.moveTo(path, TestUtils.WALLET_JNI_PW);
+    assertFalse(MoneroWalletJni.walletExists(path));  // wallet does not exist until saved
+    assertFalse(MoneroWalletJni.walletExists(movedPath));
+    wallet.save();
+    assertTrue(MoneroWalletJni.walletExists(path));
+    assertFalse(MoneroWalletJni.walletExists(movedPath));
+    wallet.close();
+    assertTrue(MoneroWalletJni.walletExists(path));
+    assertFalse(MoneroWalletJni.walletExists(movedPath));
   }
   
   // TODO: this version assumes a wallet can be saved after creation which is not currently supported in wallet2
