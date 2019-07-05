@@ -15,6 +15,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.daemon.model.MoneroNetworkType;
+import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
@@ -168,6 +169,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Test
   public void testCreateWalletFromKeys() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    
+    // recreate test wallet from keys
+    String path = getRandomWalletPath();
+    MoneroWalletJni walletKeys = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), wallet.getNetworkType(), wallet.getDaemonConnection(), daemon.getHeight() - 200, "English");
+    
     throw new RuntimeException("Not implemented");
   }
 
