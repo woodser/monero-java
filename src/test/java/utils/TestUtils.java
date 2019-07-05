@@ -22,14 +22,14 @@ import monero.wallet.MoneroWalletRpc;
 public class TestUtils {
   
   // monero daemon rpc endpoint configuration (adjust per your configuration)
-  private static final String DAEMON_RPC_URI = "http://localhost:38081";
-  private static final String DAEMON_RPC_USERNAME = null;
-  private static final String DAEMON_RPC_PASSWORD = null;  
+  public static final String DAEMON_RPC_URI = "http://localhost:38081";
+  public static final String DAEMON_RPC_USERNAME = null;
+  public static final String DAEMON_RPC_PASSWORD = null;  
   
   // monero wallet rpc configuration (adjust per your configuration)
-  private static final String WALLET_RPC_URI = "http://localhost:38083";
-  private static final String WALLET_RPC_USERNAME = "rpc_user";
-  private static final String WALLET_RPC_PASSWORD = "abc123";
+  public static final String WALLET_RPC_URI = "http://localhost:38083";
+  public static final String WALLET_RPC_USERNAME = "rpc_user";
+  public static final String WALLET_RPC_PASSWORD = "abc123";
   public static final String WALLET_RPC_NAME_1 = "test_wallet_1";
   public static final String WALLET_RPC_NAME_2 = "test_wallet_2";
   public static final String WALLET_RPC_PW = "supersecretpassword123";
@@ -117,20 +117,17 @@ public class TestUtils {
       // create wallet from mnemonic phrase if it doesn't exist
       if (!MoneroWalletJni.walletExists(WALLET_JNI_PATH_1)) {
         MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
-        walletJni = new MoneroWalletJni(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, NETWORK_TYPE, daemonConnection, 30000l);
-        walletJni.sync();
-        //walletJni.save(WALLET_JNI_PATH_1, WALLET_JNI_PW); 
+        walletJni = new MoneroWalletJni(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, NETWORK_TYPE, daemonConnection, 300000l);
+        walletJni.sync(new MoneroSyncPrinter());
+        walletJni.save();
       }
       
       // otherwise open existing wallet and update daemon connection
       else {
         walletJni = new MoneroWalletJni(WALLET_JNI_PATH_1, WALLET_JNI_PW, MoneroNetworkType.STAGENET);
         walletJni.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
-        walletJni.sync((long) 0);
-        //walletJni.save();
-        System.out.println("Wallet height: " + walletJni.getHeight());
-        System.out.println("Wallet balance: " + walletJni.getBalance());
-        System.out.println("Wallet address: " + walletJni.getAddress(0, 0));
+        walletJni.sync((long) 0, new MoneroSyncPrinter());
+        walletJni.save();
       }
     }
     

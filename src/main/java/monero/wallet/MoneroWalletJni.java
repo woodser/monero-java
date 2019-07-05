@@ -154,9 +154,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (restoreHeight == null) restoreHeight = 0l;
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (language == null) language = DEFAULT_LANGUAGE;
-    this.jniWalletHandle = createWalletFromKeysJni(path, password, address, viewKey, spendKey, networkType.ordinal(), restoreHeight, language);
-    if (daemonConnection != null) setDaemonConnection(daemonConnection);
-    initCommon();
+    try {
+      this.jniWalletHandle = createWalletFromKeysJni(path, password, address, viewKey, spendKey, networkType.ordinal(), restoreHeight, language);
+      if (daemonConnection != null) setDaemonConnection(daemonConnection);
+      initCommon();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
   
   private void initCommon() {
@@ -183,6 +187,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     return path.isEmpty() ? null : path;
   }
   
+  /**
+   * Get the wallet's network type (mainnet, testnet, or stagenet).
+   * 
+   * @return the wallet's network type
+   */
   public MoneroNetworkType getNetworkType() {
     return MoneroNetworkType.values()[getNetworkTypeJni()];
   }

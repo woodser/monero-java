@@ -23,13 +23,11 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTxWallet;
+import utils.MoneroSyncPrinter;
 import utils.TestUtils;
 
 /**
  * Tests specific to the JNI wallet.
- * 
- * TODO: testPublicViewKey()
- * TODO: testPublicSpendKey()
  */
 public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
@@ -150,6 +148,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(path, wallet.getPath());
     assertEquals(1, wallet.getHeight()); // TODO monero core: why does height of new unsynced wallet start at 1?
     assertEquals(restoreHeight, wallet.getRestoreHeight());
+    wallet.save();
+    wallet.close();
+    wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
+    assertEquals(0, wallet.getRestoreHeight()); // restore height is lost after closing
     wallet.close();
 
     // create wallet with mnemonic, connection, and restore height
@@ -174,9 +176,12 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // recreate test wallet from keys
     String path = getRandomWalletPath();
-    MoneroWalletJni walletKeys = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), wallet.getNetworkType(), wallet.getDaemonConnection(), daemon.getHeight() - 200, "English");
+    MoneroWalletJni walletKeys = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), wallet.getNetworkType(), wallet.getDaemonConnection(), 300000l, null);
+    walletKeys.sync(new MoneroSyncPrinter());
+    walletKeys.save();
     
-    throw new RuntimeException("Not implemented");
+    // test equality
+    testWalletsEqual(wallet, walletKeys);
   }
   
   // Can get the public view key
@@ -499,7 +504,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     wallet.close();
   }
 
-  // ---------------------------------- PRIVATE -------------------------------
+  // ---------------------------------- HELPERS -------------------------------
   
   private static String getRandomWalletPath() {
     return TestUtils.TEST_WALLETS_DIR + "/test_wallet_" + UUID.randomUUID().toString();
@@ -577,17 +582,13 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
   }
   
-  private static void testJniWalletEquality(MoneroWalletJni wallet1, MoneroWalletJni wallet2) {
+  public static void testWalletsEqual(MoneroWalletJni wallet1, MoneroWalletJni wallet2) {
+    TestMoneroWalletCommon.testWalletsEqual(wallet1, wallet2);
     assertEquals(wallet1.getNetworkType(), wallet2.getNetworkType());
-    assertEquals(wallet1.getHeight(), wallet2.getHeight());
-    assertEquals(wallet1.getRestoreHeight(), wallet2.getRestoreHeight());
-    assertEquals(wallet1.getMnemonic(), wallet2.getMnemonic());
+    //assertEquals(wallet1.getRestoreHeight(), wallet2.getRestoreHeight()); // TODO monero-core: restore height is lost after close
     assertEquals(wallet1.getDaemonConnection(), wallet2.getDaemonConnection());
     assertEquals(wallet1.getLanguage(), wallet2.getLanguage());
-    assertEquals(wallet1.getPrimaryAddress(), wallet2.getPrimaryAddress());
-    assertEquals(wallet1.getPrivateViewKey(), wallet2.getPrivateViewKey());
-    assertEquals(wallet1.getAccounts(), wallet2.getAccounts());
-    // TODO: txs, transfers, outputs, integrated addresses
+    // TODO: more jni-specific extensions
   }
   
   // jni-specific tx tests

@@ -645,6 +645,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletRandomJni
   return reinterpret_cast<jlong>(wallet);
 }
 
+// TODO: update this impl and others like it to be like e.g. createWalletFromKeysJni
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jstring jmnemonic, jint jnetworkType, jlong jrestoreHeight) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni" << endl;
   const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
@@ -661,25 +662,38 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemo
   return reinterpret_cast<jlong>(wallet);
 }
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass clazz, jstring path, jstring password, jstring address, jstring viewKey, jstring spendKey, jint networkType, jlong restoreHeight, jstring language) {
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jstring jaddress, jstring jviewKey, jstring jspendKey, jint networkType, jlong restoreHeight, jstring jlanguage) {
   cout << "Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni" << endl;
-  throw std::runtime_error("Not implemented");
 
-//  const char *_language = env->GetStringUTFChars(language, NULL);
-//  Monero::NetworkType _networkType = static_cast<Monero::NetworkType>(networkType);
-//  const char *_address = env->GetStringUTFChars(address, NULL);
-//  const char *_viewKey = env->GetStringUTFChars(viewKey, NULL);
-//  const char *_spendKey = env->GetStringUTFChars(spendKey, NULL);
+  // collect string params
+  const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
+  const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
+  const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
+  const char* _viewKey = jviewKey ? env->GetStringUTFChars(jviewKey, NULL) : nullptr;
+  const char* _spendKey = jspendKey ? env->GetStringUTFChars(jspendKey, NULL) : nullptr;
+  const char* _language = jlanguage ? env->GetStringUTFChars(jlanguage, NULL) : nullptr;
+  string path = string(_path == nullptr ? "" : _path);
+  string password = string(_password == nullptr ? "" : _password);
+  string address = string(_address == nullptr ? "" : _address);
+  string viewKey = string(_viewKey == nullptr ? "" : _viewKey);
+  string spendKey = string(_spendKey == nullptr ? "" : _spendKey);
+  string language = string(_language == nullptr ? "" : _language);
+  env->ReleaseStringUTFChars(jpath, _path);
+  env->ReleaseStringUTFChars(jpassword, _password);
+  env->ReleaseStringUTFChars(jaddress, _address);
+  env->ReleaseStringUTFChars(jviewKey, _viewKey);
+  env->ReleaseStringUTFChars(jspendKey, _spendKey);
+  env->ReleaseStringUTFChars(jlanguage, _language);
 
-//  Bitmonero::Wallet *wallet = Bitmonero::WalletManagerFactory::getWalletManager()->createWalletFromKeys( std::string(_path), std::string(_password), std::string(_language), _networkType, (uint64_t) restoreHeight, std::string(_address), std::string(_viewKey), std::string(_spendKey));
-//
-//  env->ReleaseStringUTFChars(path, _path);
-//  env->ReleaseStringUTFChars(password, _password);
-//  env->ReleaseStringUTFChars(language, _language);
-//  env->ReleaseStringUTFChars(address, _address);
-//  env->ReleaseStringUTFChars(viewKey, _viewKey);
-//  env->ReleaseStringUTFChars(spendKey, _spendKey);
-//  return reinterpret_cast<jlong>(wallet);
+  // construct wallet and return reference
+  try {
+    MoneroRpcConnection daemonConnection; // TODO: take daemon connection parameters
+    MoneroWallet* wallet = new MoneroWallet(path, password, address, viewKey, spendKey, static_cast<MoneroNetworkType>(networkType), daemonConnection, restoreHeight, language);
+    return reinterpret_cast<jlong>(wallet);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
 //  ------------------------------- JNI INSTANCE ------------------------------
