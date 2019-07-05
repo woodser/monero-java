@@ -59,6 +59,24 @@ public class MoneroUtils {
     assertEquals(64, privateViewKey.length());
   }
   
+  // TODO: beef this up
+  public static void validatePrivateSpendKey(String privateSpendKey) {
+    assertNotNull(privateSpendKey);
+    assertEquals(64, privateSpendKey.length());
+  }
+  
+  // TODO: beef this up
+  public static void validatePublicViewKey(String publicViewKey) {
+    assertNotNull(publicViewKey);
+    assertEquals(64, publicViewKey.length());
+  }
+  
+  // TODO: beef this up
+  public static void validatePublicSpendKey(String publicSpendKey) {
+    assertNotNull(publicSpendKey);
+    assertEquals(64, publicSpendKey.length());
+  }
+  
   // TODO: beef this up, will require knowing network type
   public static void validateAddress(String address) {
     assertNotNull(address);

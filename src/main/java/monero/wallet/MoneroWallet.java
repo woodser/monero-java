@@ -66,18 +66,18 @@ public interface MoneroWallet {
   public String getMnemonic();
   
   /**
-   * Get the wallet's public view key.
-   * 
-   * @return the wallet's public view key
-   */
-  public String getPublicViewKey();
-  
-  /**
    * Get the wallet's private view key.
    * 
    * @return the wallet's private view key
    */
   public String getPrivateViewKey();
+  
+  /**
+   * Get the wallet's private spend key.
+   * 
+   * @return the wallet's private spend key
+   */
+  public String getPrivateSpendKey();
   
   /**
    * Get a list of available languages for the wallet's seed.

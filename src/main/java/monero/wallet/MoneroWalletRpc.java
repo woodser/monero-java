@@ -172,19 +172,19 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public String getPublicViewKey() {
+  public String getPrivateViewKey() {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("key_type", "view_key");
     Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return (String) result.get("key");
   }
-
+  
   @SuppressWarnings("unchecked")
   @Override
-  public String getPrivateViewKey() {
+  public String getPrivateSpendKey() {
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("key_type", "view_key");
+    params.put("key_type", "spend_key");
     Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return (String) result.get("key");

@@ -1,6 +1,5 @@
 package monero.wallet;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
@@ -188,6 +187,24 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     return MoneroNetworkType.values()[getNetworkTypeJni()];
   }
   
+  /**
+   * Get the wallet's public view key.
+   * 
+   * @return the wallet's public view key
+   */
+  public String getPublicViewKey() {
+    return getPublicViewKeyJni();
+  }
+  
+  /**
+   * Get the wallet's public spend key.
+   * 
+   * @return the wallet's public spend key
+   */
+  public String getPublicSpendKey() {
+    return getPublicSpendKeyJni();
+  }
+  
   public String getLanguage() {
     return getLanguageJni();
   }
@@ -258,13 +275,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public String getPublicViewKey() {
-    return getPrivateViewKeyJni();
-  }
-
-  @Override
   public String getPrivateViewKey() {
     return getPrivateViewKeyJni();
+  }
+  
+  @Override
+  public String getPrivateSpendKey() {
+    return getPrivateSpendKeyJni();
   }
 
   @Override
@@ -865,6 +882,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String getPublicViewKeyJni();
   
   private native String getPrivateViewKeyJni();
+  
+  private native String getPublicSpendKeyJni();
+  
+  private native String getPrivateSpendKeyJni();
   
   private native String getLanguageJni();
   
