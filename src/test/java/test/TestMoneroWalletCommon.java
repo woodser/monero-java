@@ -324,7 +324,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     MoneroAccount createdAccount = wallet.createAccount();
     testAccount(createdAccount);
     assertNull(createdAccount.getLabel());
-    assertTrue(accountsBefore.size() == (wallet.getAccounts()).size() - 1);
+    assertEquals(accountsBefore.size(), (wallet.getAccounts()).size() - 1);
   }
   
   // Can create a new account with a label
@@ -338,13 +338,23 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     MoneroAccount createdAccount = wallet.createAccount(label);
     testAccount(createdAccount);
     assertEquals(label, createdAccount.getLabel());
-    assertTrue(accountsBefore.size() == (wallet.getAccounts()).size() - 1);
+    assertEquals(accountsBefore.size(), (wallet.getAccounts()).size() - 1);
+    
+    // fetch and test account
+    createdAccount = wallet.getAccount(createdAccount.getIndex());
+    testAccount(createdAccount);
+    assertEquals(label, createdAccount.getLabel());
 
     // create account with same label
     createdAccount = wallet.createAccount(label);
     testAccount(createdAccount);
     assertEquals(label, createdAccount.getLabel());
-    assertTrue(accountsBefore.size() == (wallet.getAccounts()).size() - 2);
+    assertEquals(accountsBefore.size(), (wallet.getAccounts()).size() - 2);
+    
+    // fetch and test account
+    createdAccount = wallet.getAccount(createdAccount.getIndex());
+    testAccount(createdAccount);
+    assertEquals(label, createdAccount.getLabel());
   }
   
   // Can get subaddresses at a specified account index
