@@ -652,18 +652,21 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroTxWallet> sweepDust(boolean doNotRelay) {
+    String blocksJson;
     try {
-      String blocksJson = sweepDustJni(doNotRelay);
-      List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
-      List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-      for (MoneroTx tx : blocks.get(0).getTxs()) {
-        tx.setBlock(null); // dereference placeholder block
-        txs.add((MoneroTxWallet) tx);
-      }
-      return txs;
+      blocksJson = sweepDustJni(doNotRelay);
+      System.out.println("Received from JNI:" + blocksJson);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
+    List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    if (blocks == null) return txs;
+    for (MoneroTx tx : blocks.get(0).getTxs()) {
+      tx.setBlock(null); // dereference placeholder block
+      txs.add((MoneroTxWallet) tx);
+    }
+    return txs;
   }
 
   @Override

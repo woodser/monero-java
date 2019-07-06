@@ -1382,10 +1382,12 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepDustJni(JNIEnv
   }
 
   // wrap and serialize blocks to preserve model relationships as tree
-  MoneroBlock block;
-  for (const auto& tx : txs) block.txs.push_back(tx);
   vector<MoneroBlock> blocks;
-  blocks.push_back(block);
+  if (!txs.empty()) {
+    MoneroBlock block;
+    for (const auto& tx : txs) block.txs.push_back(tx);
+    blocks.push_back(block);
+  }
   std::stringstream ss;
   boost::property_tree::ptree container;
   if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
