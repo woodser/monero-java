@@ -18,37 +18,34 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */
-
-#include <iostream>
-#include "MoneroWalletJni.h"
-#include "utils/MoneroUtils.h"
-
-// TODO: add warnings to all deserialization methods for unrecognized fields
-// TODO: do rethrows return before memory freed causing memory leak? re-write like Java_monero_wallet_MoneroWalletJni_checkTxKeyJni
-
-using namespace std;
-using namespace monero;
-
-// --------------------------------- LISTENER ---------------------------------
-
-// ---- START MONERUJO-BASED CODE ----
-
-/**
- * Copyright (c) 2017 m2049r
- * <p>
+ *
+ * Parts of this file are originally copyright (c) 2017 m2049r Monerujo
+ * *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <iostream>
+#include "MoneroWalletJni.h"
+#include "utils/MoneroUtils.h"
+
+using namespace std;
+using namespace monero;
+
+// initialize names of private instance variables used in Java JNI wallet which contain memory references to native wallet and listener
+static const char* JNI_WALLET_HANDLE = "jniWalletHandle";
+static const char* JNI_LISTENER_HANDLE = "jniListenerHandle";
+
+// --------------------------------- LISTENER ---------------------------------
 
 #ifdef __cplusplus
 extern "C"
@@ -102,8 +99,6 @@ void detachJVM(JNIEnv *jenv, int envStat) {
     cachedJVM->DetachCurrentThread();
   }
 }
-
-// ---- END MONERUJO-BASE CODE ----
 
 /**
  * Listens for wallet notifications and notifies the cpp listener in Java.
@@ -724,7 +719,7 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonConne
   cout << "Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni()" << endl;
 
   // get wallet
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
 
   // get daemon connection
   shared_ptr<MoneroRpcConnection> daemonConnection = wallet->getDaemonConnection();
@@ -847,7 +842,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv
 
   // clear old listener
   wallet->setListener(boost::none);
-  WalletJniListener *oldListener = getHandle<WalletJniListener>(env, instance, "jniListenerHandle");
+  WalletJniListener *oldListener = getHandle<WalletJniListener>(env, instance, JNI_LISTENER_HANDLE);
   if (oldListener != nullptr) {
     oldListener->deleteGlobalJavaRef(env);
     delete oldListener;
