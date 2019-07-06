@@ -100,7 +100,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private static String DEFAULT_LANGUAGE = "English";
   
   /**
-   * Construct a wallet by opening a wallet file on disk.
+   * Open an existing wallet.
    * 
    * @param path is the path to the wallet file to open
    * @param password is the password of the wallet file to open
@@ -114,8 +114,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Construct a wallet with a randomly generated seed and default values (i.e. mainnet,
-   * no connection, english).
+   * Create a new wallet with a randomly generated seed on mainnet in English.
    * 
    * @param path is the path to create the wallet
    * @param password is the password encrypt the wallet
@@ -125,7 +124,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Construct a wallet with a randomly generated seed.
+   * Create a new wallet with a randomly generated seed.
    * 
    * @param path is the path to create the wallet
    * @param password is the password encrypt the wallet
@@ -142,7 +141,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Construct a wallet from a mnemonic phrase.
+   * Create a wallet from an existing mnemonic phrase.
    * 
    * @param path is the path to create the wallet
    * @param password is the password encrypt the wallet
@@ -160,7 +159,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   /**
-   * Construct a wallet from an address, view key, and spend key.
+   * Create a wallet from an address, view key, and spend key.
    * 
    * @param path is the path to create the wallet
    * @param password is the password encrypt the wallet
