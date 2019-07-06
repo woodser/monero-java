@@ -1368,6 +1368,32 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepOutputJni(JNIE
   return env->NewStringUTF(blocksJson.c_str());
 }
 
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepDustJni(JNIEnv* env, jobject instance, jboolean doNotRelay) {
+  cout << "Java_monero_wallet_MoneroWalletJni_sweepDustJni(request)" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+
+  // sweep dust
+  vector<shared_ptr<MoneroTxWallet>> txs;
+  try {
+    txs = wallet->sweepDust(doNotRelay);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+
+  // wrap and serialize blocks to preserve model relationships as tree
+  MoneroBlock block;
+  for (const auto& tx : txs) block.txs.push_back(tx);
+  vector<MoneroBlock> blocks;
+  blocks.push_back(block);
+  std::stringstream ss;
+  boost::property_tree::ptree container;
+  if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
+  boost::property_tree::write_json(ss, container, false);
+  string blocksJson = ss.str();
+  return env->NewStringUTF(blocksJson.c_str());
+}
+
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_relayTxsJni(JNIEnv* env, jobject instance, jobjectArray jtxMetadatas) {
   cout << "Java_monero_wallet_MoneroWalletJni_relayTxsJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
