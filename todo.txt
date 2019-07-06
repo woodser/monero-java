@@ -33,7 +33,6 @@ port changes from diff of jni39+ to master_bkp_jni to js
 getAddressIndex() -> getSubaddress(String address) and that returns full subaddress info?
 re-order getTxNotes() above setTxNotes()
 re-order getOutputsHex() with other getOutputs() methods
-license headers
 document MoneroTxRequest, MoneroTransferRequest, MoneroTxRequest now has output request
 update model with save(), moveTo()
 test getAccounts(), getBalance(), etc with out of range subaddress/account indices (common wallet tests)
