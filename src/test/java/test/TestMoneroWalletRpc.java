@@ -432,8 +432,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testGetSupportedLanguages() {
-    super.testGetSupportedLanguages();
+  public void testGetLanguages() {
+    super.testGetLanguages();
   }
 
   @Override
