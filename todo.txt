@@ -1,33 +1,3 @@
-revert last 2 changes to mymonero-core-cpp
-save
-sweepDust() should return empty list if no dust to sweep
-cleanup & port javascript
-incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
-test having multiple wallets open explicitly
-catch exceptions thrown in Java callback functions using ExceptionCheck()
-
-JNI
-jstring2string should be const char *_str = env->GetStringUTFChars(jstr, NULL);?
-minimize unecessary SRC_FILES, most imports are compiler includes
-submodules should be external instead
-license headers
-common wallet manager? openWallet(), createWallet(), walletExists()
-MoneroRpc -> MoneroRpcConnection
-wallet.getLanguages() is rpc specific, not general wallet
-how is keys file used?
-local vs remote requests per second auto-adjusts like gui wallet.cpp:2204
-test online vs offline wallets
-test for memory leaks by initializing precisely one bajillion wallets
-catch callback exceptions in c++
-test getAccounts(), getBalance(), etc with out of range subaddress/account indices (common wallet tests)
-distinguish rpc client being connected to a daemon and a daemon being connected to peers (just clearer documentation?)
-test block serialization/deserialization
-cppWalletHandle, cppListenerHandle string constants in MoneroWalletJni.cpp
-broken test wallet is synced but no balance or accounts
-remove javastring2string warning from cpp utils
-constants to represent model fields for serialization/deserialization
-performance: profile, maybe switch to return native jni types
-
 MONERO CORE ISSUES
 move MoneroWallet open constructor to top
 wallet2 network type auto detected when loaded from files on disk
@@ -53,31 +23,31 @@ suggested_confirmations_threshold comes back as 0 for some (not all) outgoing tr
 document query_key spend_key parameter
 
 14.1.0 RELEASE
-document MoneroTxRequest and MoneroTransferRequest
-wallet.getSpendKey() possible using rpc query_key of type "spend_key" which is not documented
-rpc getPublicViewKey() getPrivateViewKey() implementations are equivalent so one is wrong (equivalence test will reveal this)
 account label is actually first subaddress's label
-rename to setAttribute() setKeyValued()
-MoneroOutputWallet implement merge in both Java and c++
 tx merge should merge blocks if they're different in the same way that MoneroTransfer merges txs if they're different which comes back to transfers, repeat elsewhere in tree
+MoneroOutputWallet implement merge in both Java and c++
+MoneroBlock merge coinbaseTx does not set parent block reference
+port changes from diff of jni39+ to master_bkp_jni to js
+getAddressIndex() -> getSubaddress(String address) and that returns full subaddress info?
 re-order getTxNotes() above setTxNotes()
 re-order getOutputsHex() with other getOutputs() methods
+license headers
+document MoneroTxRequest, MoneroTransferRequest, MoneroTxRequest now has output request
 update model with save(), moveTo()
+test getAccounts(), getBalance(), etc with out of range subaddress/account indices (common wallet tests)
+local vs remote requests per second auto-adjusts like gui wallet.cpp:2204
+submodules should be external instead
+revert last 2 changes to mymonero-core-cpp
+performance tests (memory leaks, concurrent wallets, maybe switch to native jni types, etc)
+rename to setAttribute() setKeyValued()
 testSendWithPaymentId() test that unconfirmed tx is immediately returned from getTxs() with payment id filter
 preserve original send request instead of modifying it?  implement copy constructor
 consistent accountIdx vs accountIndex in model vs api method args
 rpc getIntegratedAddress(standardAddress, integratedAddress) wallet extension
 getIntegratedAddress(standardAddress, paymentId) per make_integrated_wallet rpc
-document requests, tx request now has output request
-MoneroBlock merge coinbaseTx does not set parent block reference
-port changes from diff of jni39+ to master_bkp_jni to js
 for consistency, MoneroTransfer has field isIncoming inherited by MoneroIncoming/OutgoingTransfer
-MoneroTxRequest, MoneroTransferRequest, etc do not need to extend from MoneroTx, MoneroTransfer, etc (they are not technically those but filters upon them) and those could have non-optional values.  Binding is just convenient for dev but could be split apart
-MoneroTransferRequest has txRequest in addition to tx, get rid of tx?  problem solved if they don't extend
-getAddressIndex() -> getSubaddress(String address) and that returns full subaddress info?
-wallet.getLanguage() api even if rpc doesn't supported
-release
-
+wallet.getLanguage() api even if rpc doesn't supported?
+local vs remote requests per second auto-adjusts like gui wallet.cpp:2204
 test wallet.send() which is only in sample code currently
 send tests should look for first account greater than fee
 getUnrelayedTx() auto finds account idx if not given, would lessen -37s
@@ -110,11 +80,14 @@ port getTxs(req, string[], getTxs(String)
 wallet.getTx(), getTxs() support many types (str, str[], req, obj) but they all get turned into req
 
 NEXT
-clean up todos
 jni binding
-model rct_signatures and rct_prunable
+wallet2 refactor
+js local wallet
+new wallet/daemon rest api
+bisq integration
 multisig
 pruning
+model rct_signatures, rct_prunable, unsigned_tx_set, etc
 
 MONERO-RPC
 HIGH
