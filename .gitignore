@@ -8,3 +8,4 @@
 **/logs
 /external-libs/*
 /test_wallets/*
+/lib/*
