@@ -69,7 +69,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   // ------------------------------- INSTANCE ---------------------------------
   
   // instance variables
-  private long jniWalletHandle;                 // memory address of wallet in c++; this variable is read directly by name in c++ // TODO: rename to cppWalletHandle, cppListenerHandle
+  private long jniWalletHandle;                 // memory address of wallet in c++; this variable is read directly by name in c++
   private long jniListenerHandle;               // memory address of wallet listener in c++; this variable is read directly by name in c++
   private WalletJniListener jniListener;        // receives notifications from jni c++
   private Set<MoneroWalletListener> listeners;  // externally subscribed wallet listeners
@@ -177,7 +177,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   public MoneroRpcConnection getDaemonConnection() {
     String[] vals = getDaemonConnectionJni();
-    return vals == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2]); // TODO: return same connection if same values
+    return vals == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2]);
   }
   
   // TODO: comments and other jni specific methods
@@ -265,7 +265,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Close the wallet.  // TODO: calling methods after close will access released c++ resources
+   * Close the wallet.
    */
   public void close() {
     closeJni();
