@@ -1261,6 +1261,31 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
   return env->NewStringUTF(blocksJson.c_str());
 }
 
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsHexJni(JNIEnv* env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getOutputsHexJni()" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  try {
+    return env->NewStringUTF(wallet->getOutputsHex().c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+}
+
+JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_importOutputsHexJni(JNIEnv* env, jobject instance, jstring joutputsHex) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getOutputsHexJni()" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  const char* _outputsHex = joutputsHex ? env->GetStringUTFChars(joutputsHex, NULL) : nullptr;
+  try {
+    int numImported = wallet->importOutputsHex(string(_outputsHex == nullptr ? "" : _outputsHex));
+    env->ReleaseStringUTFChars(joutputsHex, _outputsHex);
+    return numImported;
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+}
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getKeyImagesJni(JNIEnv* env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getKeyImagesJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
@@ -1746,31 +1771,6 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_parsePaymentUriJni(
   // release and return serialized request
   env->ReleaseStringUTFChars(juri, _uri);
   return env->NewStringUTF(sendRequest->serialize().c_str());
-}
-
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsHexJni(JNIEnv* env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getOutputsHexJni()" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  try {
-    return env->NewStringUTF(wallet->getOutputsHex().c_str());
-  } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
-    return 0;
-  }
-}
-
-JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_importOutputsHexJni(JNIEnv* env, jobject instance, jstring joutputsHex) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getOutputsHexJni()" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  const char* _outputsHex = joutputsHex ? env->GetStringUTFChars(joutputsHex, NULL) : nullptr;
-  try {
-    int numImported = wallet->importOutputsHex(string(_outputsHex == nullptr ? "" : _outputsHex));
-    env->ReleaseStringUTFChars(joutputsHex, _outputsHex);
-    return numImported;
-  } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
-    return 0;
-  }
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setAttributeJni(JNIEnv* env, jobject instance, jstring jkey, jstring jval) {

@@ -586,6 +586,17 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
     return outputs;
   }
+  
+  @Override
+  public String getOutputsHex() {
+    String outputsHex = getOutputsHexJni();
+    return outputsHex.isEmpty() ? null : outputsHex;
+  }
+
+  @Override
+  public int importOutputsHex(String outputsHex) {
+    return importOutputsHexJni(outputsHex);
+  }
 
   @Override
   public List<MoneroKeyImage> getKeyImages() {
@@ -859,17 +870,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public String getOutputsHex() {
-    String outputsHex = getOutputsHexJni();
-    return outputsHex.isEmpty() ? null : outputsHex;
-  }
-
-  @Override
-  public int importOutputsHex(String outputsHex) {
-    return importOutputsHexJni(outputsHex);
-  }
-
-  @Override
   public void setAttribute(String key, String val) {
     setAttributeJni(key, val);
   }
@@ -985,6 +985,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getOutputsJni(String outputsRequestJson);
   
+  private native String getOutputsHexJni();
+  
+  private native int importOutputsHexJni(String outputsHex);
+  
   private native String getKeyImagesJni();
   
   private native String importKeyImagesJni(String keyImagesJson);
@@ -1026,10 +1030,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String createPaymentUriJni(String sendRequestJson);
   
   private native String parsePaymentUriJni(String uri);
-  
-  private native String getOutputsHexJni();
-  
-  private native int importOutputsHexJni(String outputsHex);
   
   private native void setAttributeJni(String key, String val);
 

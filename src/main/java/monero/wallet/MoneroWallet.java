@@ -491,6 +491,21 @@ public interface MoneroWallet {
   public List<MoneroOutputWallet> getOutputs(MoneroOutputRequest request);
   
   /**
+   * Export all outputs in hex format.
+   * 
+   * @return all outputs in hex format, null if no outputs
+   */
+  public String getOutputsHex();
+  
+  /**
+   * Import outputs in hex format.
+   * 
+   * @param outputsHex are outputs in hex format
+   * @return the number of outputs imported
+   */
+  public int importOutputsHex(String outputsHex);
+  
+  /**
    * Get all signed key images.
    * 
    * @return the wallet's signed key images
@@ -910,21 +925,6 @@ public interface MoneroWallet {
    * @return the send configuration parsed from the uri
    */
   public MoneroSendRequest parsePaymentUri(String uri);
-  
-  /**
-   * Export all outputs in hex format.
-   * 
-   * @return all outputs in hex format, null if no outputs
-   */
-  public String getOutputsHex();
-  
-  /**
-   * Import outputs in hex format.
-   * 
-   * @param outputsHex are outputs in hex format
-   * @return the number of outputs imported
-   */
-  public int importOutputsHex(String outputsHex);
   
   /**
    * Set an arbitrary attribute.

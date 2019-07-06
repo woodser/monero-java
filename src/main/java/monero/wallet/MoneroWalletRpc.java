@@ -733,6 +733,24 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     return vouts;
   }
+  
+  @SuppressWarnings("unchecked")
+  @Override
+  public String getOutputsHex() {
+    Map<String, Object> resp = rpc.sendJsonRequest("export_outputs");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("outputs_data_hex");
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public int importOutputsHex(String outputsHex) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("outputs_data_hex", outputsHex);
+    Map<String, Object> resp = rpc.sendJsonRequest("import_outputs", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return ((BigInteger) result.get("num_imported")).intValue();
+  }
 
   @Override
   public List<MoneroKeyImage> getKeyImages() {
@@ -1289,24 +1307,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if ("".equals(request.getRecipientName())) request.setRecipientName(null);
     if ("".equals(request.getNote())) request.setNote(null);
     return request;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public String getOutputsHex() {
-    Map<String, Object> resp = rpc.sendJsonRequest("export_outputs");
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (String) result.get("outputs_data_hex");
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public int importOutputsHex(String outputsHex) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("outputs_data_hex", outputsHex);
-    Map<String, Object> resp = rpc.sendJsonRequest("import_outputs", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return ((BigInteger) result.get("num_imported")).intValue();
   }
 
   @Override
