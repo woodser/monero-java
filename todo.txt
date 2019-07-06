@@ -24,6 +24,7 @@ document query_key spend_key parameter
 
 14.1.0 RELEASE
 jni readme documentation
+rename project to monero-java
 scan code for issues using automated tool
 test notification of receiving funds
 account label is actually first subaddress's label
