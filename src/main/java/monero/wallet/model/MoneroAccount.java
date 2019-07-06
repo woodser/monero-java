@@ -3,6 +3,8 @@ package monero.wallet.model;
 import java.math.BigInteger;
 import java.util.List;
 
+import monero.utils.MoneroUtils;
+
 /**
  * Monero account model.
  */
@@ -89,6 +91,29 @@ public class MoneroAccount {
         subaddress.setAccountIndex(index);
       }
     }
+  }
+  
+  public String toString() {
+    return toString(0);
+  }
+  
+  public String toString(int indent) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(MoneroUtils.kvLine("Index", this.getIndex(), indent));
+    sb.append(MoneroUtils.kvLine("Primary address", this.getPrimaryAddress(), indent));
+    sb.append(MoneroUtils.kvLine("Label", this.getLabel(), indent));
+    sb.append(MoneroUtils.kvLine("Balance", this.getBalance(), indent));
+    sb.append(MoneroUtils.kvLine("Unlocked balance", this.getUnlockedBalance(), indent));
+    sb.append(MoneroUtils.kvLine("Tag", this.getTag(), indent));
+    if (this.getSubaddresses() != null) {
+      sb.append(MoneroUtils.kvLine("Subaddresses", "", indent));
+      for (int i = 0; i < this.getSubaddresses().size(); i++) {
+        sb.append(MoneroUtils.kvLine(i + 1, "", indent + 1));
+        sb.append(this.getSubaddresses().get(i).toString(indent + 2) + "\n");
+      }
+    }
+    String str = sb.toString();
+    return str.substring(0, str.length() - 1);  // strip last newline
   }
 
   @Override
