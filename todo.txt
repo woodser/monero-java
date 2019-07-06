@@ -22,8 +22,6 @@ suggested_confirmations_threshold comes back as 0 for some (not all) outgoing tr
 document query_key spend_key parameter
 
 14.1.0 RELEASE
-re-order getTxNotes() above setTxNotes()
-re-order getOutputsHex() with other getOutputs() methods
 document MoneroTxRequest, MoneroTransferRequest, MoneroTxRequest now has output request
 update model with save(), moveTo()
 move deserialization to common MoneroUtils
@@ -77,6 +75,7 @@ first open then create wallet in TestUtils
 jni readme documentation
 rename project to monero-java
 scan code for issues using automated tool
+regenerate api docs
 
 API IDEAS
 getTxsByIds, getTxById, vs getBlockById()

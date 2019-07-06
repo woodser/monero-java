@@ -1131,6 +1131,30 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     for (MoneroOutputWallet output : outputs) assertTrue(tx == output.getTx());
   }
   
+  // Can get outputs in hex format
+  @Test
+  public void testGetOutputsHex() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    String outputsHex = wallet.getOutputsHex();
+    assertNotNull(outputsHex);  // TODO: this will fail if wallet has no outputs; run these tests on new wallet
+    assertTrue(outputsHex.length() > 0);
+  }
+  
+  // Can import outputs in hex format
+  @Test
+  public void testImportOutputsHex() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    
+    // get outputs hex
+    String outputsHex = wallet.getOutputsHex();
+    
+    // import outputs hex
+    if (outputsHex != null) {
+      int numImported = wallet.importOutputsHex(outputsHex);
+      assertTrue(numImported > 0);
+    }
+  }
+  
   // Has correct accounting across accounts, subaddresses, txs, transfers, and outputs
   @Test
   public void testAccounting() {
@@ -1587,30 +1611,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       fail("Should have thrown exception");
     } catch (MoneroException e) {
       assertEquals(-1, (int) e.getCode());
-    }
-  }
-  
-  // Can get outputs in hex format
-  @Test
-  public void testGetOutputsHex() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    String outputsHex = wallet.getOutputsHex();
-    assertNotNull(outputsHex);  // TODO: this will fail if wallet has no outputs; run these tests on new wallet
-    assertTrue(outputsHex.length() > 0);
-  }
-  
-  // Can import outputs in hex format
-  @Test
-  public void testImportOutputsHex() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    
-    // get outputs hex
-    String outputsHex = wallet.getOutputsHex();
-    
-    // import outputs hex
-    if (outputsHex != null) {
-      int numImported = wallet.importOutputsHex(outputsHex);
-      assertTrue(numImported > 0);
     }
   }
   
