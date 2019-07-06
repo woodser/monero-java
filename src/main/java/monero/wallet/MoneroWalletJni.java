@@ -49,7 +49,7 @@ import monero.wallet.request.MoneroTxRequest;
  */
 public class MoneroWalletJni extends MoneroWalletDefault {
   
-  // load Monero core c++ as a dynamic library
+  // load Monero Core C++ as a dynamic library
   static {
     System.loadLibrary("monero-java");
   }
@@ -653,12 +653,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<MoneroTxWallet> sweepDust(boolean doNotRelay) {
     String blocksJson;
-    try {
-      blocksJson = sweepDustJni(doNotRelay);
-      System.out.println("Received from JNI:" + blocksJson);
-    } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
-    }
+    try { blocksJson = sweepDustJni(doNotRelay); }
+    catch (Exception e) { throw new MoneroException(e.getMessage()); }
     List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     if (blocks == null) return txs;
