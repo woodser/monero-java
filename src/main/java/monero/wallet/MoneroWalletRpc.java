@@ -194,6 +194,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
+  public List<String> getLanguages() {
+    Map<String, Object> resp = rpc.sendJsonRequest("get_languages");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (List<String>) result.get("languages");
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
   public String getPrivateViewKey() {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("key_type", "view_key");
@@ -210,14 +218,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return (String) result.get("key");
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public List<String> getLanguages() {
-    Map<String, Object> resp = rpc.sendJsonRequest("get_languages");
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (List<String>) result.get("languages");
   }
 
   @Override

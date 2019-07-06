@@ -22,8 +22,6 @@ suggested_confirmations_threshold comes back as 0 for some (not all) outgoing tr
 document query_key spend_key parameter
 
 14.1.0 RELEASE
-document MoneroTxRequest, MoneroTransferRequest, MoneroTxRequest now has output request
-update model with save(), moveTo()
 move deserialization to common MoneroUtils
 add warnings to all deserialization methods for unrecognized fields
 
@@ -76,6 +74,9 @@ jni readme documentation
 rename project to monero-java
 scan code for issues using automated tool
 regenerate api docs
+
+LOW
+rename getLanguages() to getSupportedLanguages()?
 
 API IDEAS
 getTxsByIds, getTxById, vs getBlockById()

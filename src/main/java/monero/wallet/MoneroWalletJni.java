@@ -218,6 +218,15 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
+   * Get the language of the wallet's mnemonic phrase.
+   * 
+   * @return the language of the wallet's mnemonic phrase
+   */
+  public String getLanguage() {
+    return getLanguageJni();
+  }
+  
+  /**
    * Get the wallet's public view key.
    * 
    * @return the wallet's public view key
@@ -233,10 +242,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    */
   public String getPublicSpendKey() {
     return getPublicSpendKeyJni();
-  }
-  
-  public String getLanguage() {
-    return getLanguageJni();
   }
   
   public long getRestoreHeight() {
@@ -303,6 +308,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public String getMnemonic() {
     return getMnemonicJni();
   }
+  
+  @Override
+  public List<String> getLanguages() {
+    return Arrays.asList(getLanguagesJni());
+  }
 
   @Override
   public String getPrivateViewKey() {
@@ -312,11 +322,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public String getPrivateSpendKey() {
     return getPrivateSpendKeyJni();
-  }
-
-  @Override
-  public List<String> getLanguages() {
-    return Arrays.asList(getLanguagesJni());
   }
 
   @Override
@@ -919,6 +924,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getMnemonicJni();
   
+  private native String getLanguageJni();
+  
+  private native String[] getLanguagesJni();
+  
   private native String getPublicViewKeyJni();
   
   private native String getPrivateViewKeyJni();
@@ -926,10 +935,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String getPublicSpendKeyJni();
   
   private native String getPrivateSpendKeyJni();
-  
-  private native String getLanguageJni();
-  
-  private native String[] getLanguagesJni();
   
   private native String getAddressJni(int accountIdx, int subaddressIdx);
   
