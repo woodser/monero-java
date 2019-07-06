@@ -66,6 +66,13 @@ public interface MoneroWallet {
   public String getMnemonic();
   
   /**
+   * Get a list of available languages for the wallet's mnemonic phrase.
+   * 
+   * @return the available languages for the wallet's mnemonic phrase
+   */
+  public List<String> getLanguages();
+  
+  /**
    * Get the wallet's private view key.
    * 
    * @return the wallet's private view key
@@ -78,13 +85,6 @@ public interface MoneroWallet {
    * @return the wallet's private spend key
    */
   public String getPrivateSpendKey();
-  
-  /**
-   * Get a list of available languages for the wallet's seed.
-   * 
-   * @return the available languages for the wallet's seed
-   */
-  public List<String> getLanguages();
   
   /**
    * Get the wallet's primary address.

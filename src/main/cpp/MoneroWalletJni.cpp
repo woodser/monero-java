@@ -757,30 +757,6 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMnemonicJni(JNIE
   return env->NewStringUTF(wallet->getMnemonic().c_str());
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPublicViewKeyJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getPublicViewKeyJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  return env->NewStringUTF(wallet->getPublicViewKey().c_str());
-}
-
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPrivateViewKeyJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getPrivateViewKeyJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  return env->NewStringUTF(wallet->getPrivateViewKey().c_str());
-}
-
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPublicSpendKeyJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getPublicSpendKeyJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  return env->NewStringUTF(wallet->getPublicSpendKey().c_str());
-}
-
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPrivateSpendKeyJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getPrivateSpendKeyJni" << endl;
-  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
-  return env->NewStringUTF(wallet->getPrivateSpendKey().c_str());
-}
-
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getLanguageJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getLanguageJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
@@ -806,6 +782,30 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getLanguagesJn
     env->SetObjectArrayElement(jlanguages, i, env->NewStringUTF(languages[i].c_str()));
   }
   return jlanguages;
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPublicViewKeyJni(JNIEnv *env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getPublicViewKeyJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  return env->NewStringUTF(wallet->getPublicViewKey().c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPrivateViewKeyJni(JNIEnv *env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getPrivateViewKeyJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  return env->NewStringUTF(wallet->getPrivateViewKey().c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPublicSpendKeyJni(JNIEnv *env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getPublicSpendKeyJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  return env->NewStringUTF(wallet->getPublicSpendKey().c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPrivateSpendKeyJni(JNIEnv *env, jobject instance) {
+  cout << "Java_monero_wallet_MoneroWalletJni_getPrivateSpendKeyJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  return env->NewStringUTF(wallet->getPrivateSpendKey().c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {

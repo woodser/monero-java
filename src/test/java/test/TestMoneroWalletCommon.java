@@ -96,7 +96,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can get a list of supported languages for the mnemonic phrase
   @Test
-  public void testGetSupportedLanguages() {
+  public void testGetLanguages() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<String> languages = wallet.getLanguages();
     assertFalse(languages.isEmpty());
