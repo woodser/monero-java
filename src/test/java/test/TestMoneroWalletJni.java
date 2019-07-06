@@ -181,7 +181,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     walletKeys.save();
     
     // test equality
-    testWalletsEqual(wallet, walletKeys);
+    testWalletsEqual(wallet, walletKeys); // TODO: walletKeys is allowed to be at greater height than test wallet after syncing, need test to accomodate this
   }
   
   // Can get the public view key
