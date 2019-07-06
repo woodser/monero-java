@@ -2775,14 +2775,55 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
-  public static void testWalletsEqual(MoneroWallet wallet1, MoneroWallet wallet2) {
-    assertEquals(wallet1.getMnemonic(), wallet2.getMnemonic());
-    assertEquals(wallet1.getHeight(), wallet2.getHeight());
-    assertEquals(wallet1.getPrimaryAddress(), wallet2.getPrimaryAddress());
-    assertEquals(wallet1.getPrivateViewKey(), wallet2.getPrivateViewKey());
-    assertEquals(wallet1.getPrivateSpendKey(), wallet2.getPrivateSpendKey());
-    assertEquals(wallet1.getAccounts(), wallet2.getAccounts());
+  public static void testWalletsEqual(MoneroWallet w1, MoneroWallet w2) {
+    assertEquals(w1.getMnemonic(), w2.getMnemonic());
+    assertEquals(w1.getHeight(), w2.getHeight());
+    assertEquals(w1.getPrimaryAddress(), w2.getPrimaryAddress());
+    assertEquals(w1.getPrivateViewKey(), w2.getPrivateViewKey());
+    assertEquals(w1.getPrivateSpendKey(), w2.getPrivateSpendKey());
+    testAccountsEqual(w1.getAccounts(true), w2.getAccounts(true));  // test accounts which can include local data not used on chain
+   
     // TODO: txs, transfers, outputs, integrated addresses, etc
+  }
+  
+  private static void testAccountsEqual(List<MoneroAccount> accounts1, List<MoneroAccount> accounts2) {
+    for (int i = 0; i < Math.max(accounts1.size(), accounts2.size()); i++) {
+      if (i < accounts1.size() && i < accounts2.size()) {
+        testSubaddressesEqual(accounts1.get(i).getSubaddresses(), accounts2.get(i).getSubaddresses());
+      } else if (i >= accounts1.size()) {
+        for (int j = i; j < accounts2.size(); j++) {
+          assertEquals(BigInteger.valueOf(0), accounts2.get(j).getBalance());
+          assertEquals(1, accounts2.get(j).getSubaddresses().size());
+        }
+        return;
+      } else {
+        for (int j = i; j < accounts1.size(); j++) {
+          assertEquals(BigInteger.valueOf(0), accounts1.get(j).getBalance());
+          assertEquals(1, accounts1.get(j).getSubaddresses().size());
+        }
+        return;
+      }
+    }
+  }
+  
+  private static void testSubaddressesEqual(List<MoneroSubaddress> subaddresses1, List<MoneroSubaddress> subaddresses2) {
+    for (int i = 0; i < Math.max(subaddresses1.size(), subaddresses2.size()); i++) {
+      if (i < subaddresses1.size() && i < subaddresses2.size()) {
+        assertEquals(subaddresses1.get(i), subaddresses2.get(i));
+      } else if (i >= subaddresses1.size()) {
+        for (int j = i; j < subaddresses2.size(); j++) {
+          assertEquals(BigInteger.valueOf(0), subaddresses2.get(j).getBalance());
+          assertFalse(subaddresses2.get(j).getIsUsed());
+        }
+        return;
+      } else {
+        for (int j = i; j < subaddresses1.size(); j++) {
+          assertEquals(BigInteger.valueOf(0), subaddresses1.get(i).getBalance());
+          assertFalse(subaddresses1.get(j).getIsUsed());
+        }
+        return;
+      }
+    }
   }
   
   protected void testInvalidAddressException(MoneroException e) {
