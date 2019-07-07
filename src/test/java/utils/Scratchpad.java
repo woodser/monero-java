@@ -23,8 +23,8 @@ public class Scratchpad {
     
     // initialize daemon, wallet, and direct rpc interface
 //    MoneroDaemon daemon = TestUtils.getDaemonRpc();
-    //MoneroWallet walletRpc = TestUtils.getWalletRpc();
-    //MoneroWallet walletJni = TestUtils.getWalletJni();
+    MoneroWallet walletRpc = TestUtils.getWalletRpc();
+    MoneroWallet walletJni = TestUtils.getWalletJni();
     //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
     
 //    // common variables
@@ -74,12 +74,18 @@ public class Scratchpad {
 //      System.out.println(tx);
 //    }
     
-    MoneroRpcConnection daemonConnection = new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD);
+    MoneroTxWallet txInQuestion1 = walletRpc.getTx("c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755");
+    System.out.println(txInQuestion1);
+    
+    MoneroTxWallet txInQuestion = walletJni.getTx("c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755");
+    System.out.println(txInQuestion);
+    
+//    MoneroRpcConnection daemonConnection = new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD);
     //walletJni = new MoneroWalletJni(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, NETWORK_TYPE, daemonConnection, 0l);
     
-    String path = TestUtils.TEST_WALLETS_DIR + "/test_wallet_" + UUID.randomUUID().toString();
-    MoneroWallet walletJni = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, daemonConnection, 0l);
-    walletJni.sync(new MoneroSyncPrinter(1));
+//    String path = TestUtils.TEST_WALLETS_DIR + "/test_wallet_" + UUID.randomUUID().toString();
+//    MoneroWallet walletJni = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, daemonConnection, 0l);
+//    walletJni.sync(new MoneroSyncPrinter(1));
     
 //    System.out.println("JNI");
 //    for (MoneroTxWallet tx : walletJni.getTxs("c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755")) {
