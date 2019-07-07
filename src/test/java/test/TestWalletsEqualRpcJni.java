@@ -8,7 +8,7 @@ import utils.TestUtils;
 /**
  * Tests the test rpc and jni wallets for equality.
  */
-public class TestWalletEqualityRpcJni {
+public class TestWalletsEqualRpcJni {
 
   @Test
   public void testWalletsEqualRpcJni() {
