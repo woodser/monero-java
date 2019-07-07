@@ -2790,6 +2790,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertEquals(w1.getBalance(), w2.getBalance());
     assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
     testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
+    testTxWalletsEqualOnChain(w1.getTxs(), w2.getTxs());
+    
     // TODO: txs, transfers, outputs, etc
   }
   
@@ -2851,14 +2853,38 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   }
   
   private static void testSubaddressesEqualOnChain(MoneroSubaddress subaddress1, MoneroSubaddress subaddress2) {
-    assertEquals(subaddress1.getAccountIndex(), subaddress2.getAccountIndex());
-    assertEquals(subaddress1.getIndex(), subaddress2.getIndex());
-    assertEquals(subaddress1.getAddress(), subaddress2.getAddress());
-    assertEquals(subaddress1.getBalance(), subaddress2.getBalance());
-    assertEquals(subaddress1.getUnlockedBalance(), subaddress2.getUnlockedBalance());
-    assertEquals(subaddress1.getNumUnspentOutputs(), subaddress2.getNumUnspentOutputs());
-    assertEquals(subaddress1.getIsUsed(), subaddress2.getIsUsed());
-    assertEquals(subaddress1.getNumBlocksToUnlock(), subaddress2.getNumBlocksToUnlock());
+    
+    // nullify off-chain data for comparison
+    subaddress1.setLabel(null);
+    subaddress2.setLabel(null);
+    
+    // test subaddress equality
+    assertEquals(subaddress1, subaddress2);
+  }
+  
+  private static void testTxWalletsEqualOnChain(List<MoneroTxWallet> txs1, List<MoneroTxWallet> txs2) {
+    assertEquals(txs1.size(), txs2.size());
+    for (int i = 0; i < txs1.size(); i++) {
+      testTxWalletsOnChain(txs1.get(i), txs2.get(i));
+    }
+  }
+  
+  private static void testTxWalletsOnChain(MoneroTxWallet tx1, MoneroTxWallet tx2) {
+    
+    // nullify off-chain data for comparison
+    List<MoneroIncomingTransfer> inTransfers1 = tx1.getIncomingTransfers();
+    List<MoneroIncomingTransfer> inTransfers2 = tx2.getIncomingTransfers();
+    MoneroOutgoingTransfer outTransfer1 = tx1.getOutgoingTransfer();
+    MoneroOutgoingTransfer outTransfer2 = tx2.getOutgoingTransfer();
+    tx1.setNote(null);
+    tx2.setNote(null);
+    
+    // test tx equality
+    assertEquals(tx1.getBlock(), tx1.getBlock());
+    assertEquals(tx1, tx2);
+    
+    // TODO: compare transfers
+    throw new RuntimeException("Not implemented");
   }
   
   protected void testInvalidAddressException(MoneroException e) {
