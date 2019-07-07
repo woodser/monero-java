@@ -1080,9 +1080,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       for (MoneroWalletListener listener : listeners) listener.onNewBlock(header);
     }
 
-    public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
+    public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
       for (MoneroWalletListener listener : listeners) {
-        listener.onSyncProgress(startHeight, numBlocksDone, numBlocksTotal, percentDone, message);
+        listener.onSyncProgress(height, startHeight, endHeight, percentDone, message);
       }
     }
     
@@ -1123,8 +1123,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
     
     @Override
-    public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
-      listener.onSyncProgress(startHeight, numBlocksDone, numBlocksTotal, percentDone, message);
+    public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
+      listener.onSyncProgress(height, startHeight, endHeight, percentDone, message);
     }
   }
   
