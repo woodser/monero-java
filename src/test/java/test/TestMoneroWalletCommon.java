@@ -2815,7 +2815,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   private static void testSubaddressesEqualOnChain(List<MoneroSubaddress> subaddresses1, List<MoneroSubaddress> subaddresses2) {
     for (int i = 0; i < Math.max(subaddresses1.size(), subaddresses2.size()); i++) {
       if (i < subaddresses1.size() && i < subaddresses2.size()) {
-        assertEquals(subaddresses1.get(i), subaddresses2.get(i));
+        testSubaddressesEqualOnChain(subaddresses1.get(i), subaddresses2.get(i));
       } else if (i >= subaddresses1.size()) {
         for (int j = i; j < subaddresses2.size(); j++) {
           assertEquals(BigInteger.valueOf(0), subaddresses2.get(j).getBalance());
@@ -2830,6 +2830,17 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         return;
       }
     }
+  }
+  
+  private static void testSubaddressesEqualOnChain(MoneroSubaddress subaddress1, MoneroSubaddress subaddress2) {
+    assertEquals(subaddress1.getAccountIndex(), subaddress2.getAccountIndex());
+    assertEquals(subaddress1.getIndex(), subaddress2.getIndex());
+    assertEquals(subaddress1.getAddress(), subaddress2.getAddress());
+    assertEquals(subaddress1.getBalance(), subaddress2.getBalance());
+    assertEquals(subaddress1.getUnlockedBalance(), subaddress2.getUnlockedBalance());
+    assertEquals(subaddress1.getNumUnspentOutputs(), subaddress2.getNumUnspentOutputs());
+    assertEquals(subaddress1.getIsUsed(), subaddress2.getIsUsed());
+    assertEquals(subaddress1.getNumBlocksToUnlock(), subaddress2.getNumBlocksToUnlock());
   }
   
   protected void testInvalidAddressException(MoneroException e) {
