@@ -14,6 +14,6 @@ public class TestWalletEqualityRpcJni {
   public void testWalletEqualityRpcJni() {
     MoneroWallet walletRpc = TestUtils.getWalletRpc();
     MoneroWallet walletJni = TestUtils.getWalletJni();
-    TestMoneroWalletCommon.testWalletsEqual(walletRpc, walletJni);
+    TestMoneroWalletCommon.testWalletsEqualOnChain(walletRpc, walletJni);
   }
 }
