@@ -548,15 +548,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
   }
   
-  public static void testWalletsEqualOnChain(MoneroWalletJni wallet1, MoneroWalletJni wallet2) {
-    TestMoneroWalletCommon.testWalletsEqualOnChain(wallet1, wallet2);
-    assertEquals(wallet1.getNetworkType(), wallet2.getNetworkType());
-    //assertEquals(wallet1.getRestoreHeight(), wallet2.getRestoreHeight()); // TODO monero-core: restore height is lost after close
-    assertEquals(wallet1.getDaemonConnection(), wallet2.getDaemonConnection());
-    assertEquals(wallet1.getLanguage(), wallet2.getLanguage());
-    // TODO: more jni-specific extensions
-  }
-  
   // jni-specific tx tests
   @Override
   protected void testTxWallet(MoneroTxWallet tx, TestContext ctx) {
@@ -569,6 +560,15 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     if (Boolean.TRUE.equals(ctx.isSendResponse)) {
       assertNotNull(tx.getKey());
     }
+  }
+  
+  private static void testWalletsEqualOnChain(MoneroWalletJni wallet1, MoneroWalletJni wallet2) {
+    new TestMoneroWalletsEqual().setWallet1(wallet1).setWallet2(wallet2).testWalletsEqualOnChain();
+    assertEquals(wallet1.getNetworkType(), wallet2.getNetworkType());
+    //assertEquals(wallet1.getRestoreHeight(), wallet2.getRestoreHeight()); // TODO monero-core: restore height is lost after close
+    assertEquals(wallet1.getDaemonConnection(), wallet2.getDaemonConnection());
+    assertEquals(wallet1.getLanguage(), wallet2.getLanguage());
+    // TODO: more jni-specific extensions
   }
 
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
