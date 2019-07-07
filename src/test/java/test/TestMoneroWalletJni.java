@@ -181,7 +181,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     walletKeys.save();
     
     // test equality
-    testWalletsEqual(wallet, walletKeys); // TODO: walletKeys is allowed to be at greater height than test wallet after syncing, need test to accomodate this
+    testWalletsEqualOnChain(wallet, walletKeys);
   }
   
   // Can get the public view key
@@ -548,8 +548,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
   }
   
-  public static void testWalletsEqual(MoneroWalletJni wallet1, MoneroWalletJni wallet2) {
-    TestMoneroWalletCommon.testWalletsEqual(wallet1, wallet2);
+  public static void testWalletsEqualOnChain(MoneroWalletJni wallet1, MoneroWalletJni wallet2) {
+    TestMoneroWalletCommon.testWalletsEqualOnChain(wallet1, wallet2);
     assertEquals(wallet1.getNetworkType(), wallet2.getNetworkType());
     //assertEquals(wallet1.getRestoreHeight(), wallet2.getRestoreHeight()); // TODO monero-core: restore height is lost after close
     assertEquals(wallet1.getDaemonConnection(), wallet2.getDaemonConnection());

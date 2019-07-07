@@ -18,9 +18,9 @@ public class MoneroSyncPrinter implements MoneroSyncListener {
   }
   
   @Override
-  public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
-    if (numBlocksDone % blockResolution == 0) {
-      System.out.println("onSyncProgress(" + startHeight + ", " + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
+  public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
+    if ((startHeight - height) % blockResolution == 0) {
+      System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
     }
   }
 }

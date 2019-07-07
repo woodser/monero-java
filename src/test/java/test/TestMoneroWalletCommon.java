@@ -2775,21 +2775,27 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
-  public static void testWalletsEqual(MoneroWallet w1, MoneroWallet w2) {
+  /**
+   * Tests that two wallets provide equal results for on-chain data.
+   * 
+   * @param w1 is the wallet synced first
+   * @param w2 is the wallet synced second
+   */
+  public static void testWalletsEqualOnChain(MoneroWallet w1, MoneroWallet w2) {
+    assertTrue(w1.getHeight() <= w2.getHeight());
     assertEquals(w1.getMnemonic(), w2.getMnemonic());
-    assertEquals(w1.getHeight(), w2.getHeight());
     assertEquals(w1.getPrimaryAddress(), w2.getPrimaryAddress());
     assertEquals(w1.getPrivateViewKey(), w2.getPrivateViewKey());
     assertEquals(w1.getPrivateSpendKey(), w2.getPrivateSpendKey());
-    testAccountsEqual(w1.getAccounts(true), w2.getAccounts(true));  // test accounts which can include local data not used on chain
-   
-    // TODO: txs, transfers, outputs, integrated addresses, etc
+    assertEquals(w1.getBalance(), w2.getBalance());
+    assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
+    testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
   }
   
-  private static void testAccountsEqual(List<MoneroAccount> accounts1, List<MoneroAccount> accounts2) {
+  private static void testAccountsEqualOnChain(List<MoneroAccount> accounts1, List<MoneroAccount> accounts2) {
     for (int i = 0; i < Math.max(accounts1.size(), accounts2.size()); i++) {
       if (i < accounts1.size() && i < accounts2.size()) {
-        testSubaddressesEqual(accounts1.get(i).getSubaddresses(), accounts2.get(i).getSubaddresses());
+        testSubaddressesEqualOnChain(accounts1.get(i).getSubaddresses(), accounts2.get(i).getSubaddresses());
       } else if (i >= accounts1.size()) {
         for (int j = i; j < accounts2.size(); j++) {
           assertEquals(BigInteger.valueOf(0), accounts2.get(j).getBalance());
@@ -2806,7 +2812,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
-  private static void testSubaddressesEqual(List<MoneroSubaddress> subaddresses1, List<MoneroSubaddress> subaddresses2) {
+  private static void testSubaddressesEqualOnChain(List<MoneroSubaddress> subaddresses1, List<MoneroSubaddress> subaddresses2) {
     for (int i = 0; i < Math.max(subaddresses1.size(), subaddresses2.size()); i++) {
       if (i < subaddresses1.size() && i < subaddresses2.size()) {
         assertEquals(subaddresses1.get(i), subaddresses2.get(i));
