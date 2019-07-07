@@ -464,7 +464,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     boolean nonDefaultIncoming = false;
     List<MoneroTxWallet> txs1 = getCachedTxs();
+    testTxWalletOrder(txs1);
     List<MoneroTxWallet> txs2 = getAndTestTxs(wallet, null, null, true);
+    testTxWalletOrder(txs2);
     assertEquals(txs2.size(), txs1.size());
     
     // build test context
@@ -506,6 +508,10 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // ensure non-default account and subaddress tested
     assertTrue("No incoming transfers found to non-default account and subaddress; run send-to-multiple tests first", nonDefaultIncoming);
+  }
+  
+  private static void testTxWalletOrder(List<MoneroTxWallet> txs) {
+    throw new RuntimeException("Not implemented");
   }
   
   // Can get transactions by id
