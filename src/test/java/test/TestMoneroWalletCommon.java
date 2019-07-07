@@ -2814,12 +2814,20 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   }
   
   private static void testAccountsEqualOnChain(MoneroAccount account1, MoneroAccount account2) {
-    assertEquals(account1.getIndex(), account2.getIndex());
-    assertEquals(account1.getPrimaryAddress(), account2.getPrimaryAddress());
-    assertEquals(account1.getBalance(), account2.getBalance());
-    assertEquals(account1.getUnlockedBalance(), account2.getUnlockedBalance());
-    assertEquals(account1.getPrimaryAddress(), account2.getPrimaryAddress());
-    testSubaddressesEqualOnChain(account1.getSubaddresses(), account2.getSubaddresses());
+    
+    // nullify off-chain data for comparison
+    List<MoneroSubaddress> subaddresses1 = account1.getSubaddresses();
+    List<MoneroSubaddress> subaddresses2 = account2.getSubaddresses();
+    account1.setSubaddresses(null);
+    account2.setSubaddresses(null);
+    account1.setLabel(null);
+    account2.setLabel(null);
+    account1.setTag(null);
+    account2.setTag(null);
+    
+    // test account equality
+    assertEquals(account1, account2);
+    testSubaddressesEqualOnChain(subaddresses1, subaddresses2);
   }
   
   private static void testSubaddressesEqualOnChain(List<MoneroSubaddress> subaddresses1, List<MoneroSubaddress> subaddresses2) {
