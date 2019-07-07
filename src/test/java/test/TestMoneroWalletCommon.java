@@ -2880,7 +2880,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     tx2.setNote(null);
     
     // test tx equality
-    assertEquals(tx1.getBlock(), tx1.getBlock());
+    assertEquals(tx1.getBlock(), tx2.getBlock());
     assertEquals(tx1, tx2);
     
     // TODO: compare transfers
