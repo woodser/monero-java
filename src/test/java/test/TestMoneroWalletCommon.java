@@ -464,9 +464,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     boolean nonDefaultIncoming = false;
     List<MoneroTxWallet> txs1 = getCachedTxs();
-    testTxWalletOrder(txs1);
+    testGetTxsStructure(txs1);
     List<MoneroTxWallet> txs2 = getAndTestTxs(wallet, null, null, true);
-    testTxWalletOrder(txs2);
     assertEquals(txs2.size(), txs1.size());
     
     // build test context
@@ -510,8 +509,58 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertTrue("No incoming transfers found to non-default account and subaddress; run send-to-multiple tests first", nonDefaultIncoming);
   }
   
-  private static void testTxWalletOrder(List<MoneroTxWallet> txs) {
-    throw new RuntimeException("Not implemented");
+  private void testGetTxsStructure(List<MoneroTxWallet> txs) { testGetTxsStructure(txs, null); }
+  private void testGetTxsStructure(List<MoneroTxWallet> txs, MoneroTxRequest request) {
+    if (request == null) request = new MoneroTxRequest();
+    
+    // collect unique blocks in order (using set and list instead of TreeSet for direct portability to other languages)
+    Set<MoneroBlock> seenBlocks = new HashSet<MoneroBlock>();
+    List<MoneroBlock> blocks = new ArrayList<MoneroBlock>();
+    List<MoneroTxWallet> unconfirmedTxs = new ArrayList<MoneroTxWallet>();
+    for (MoneroTxWallet tx : txs) {
+      if (tx.getBlock() == null) unconfirmedTxs.add(tx);
+      else {
+        assertTrue(unconfirmedTxs.isEmpty());
+        if (!seenBlocks.contains(tx.getBlock())) {
+          seenBlocks.add(tx.getBlock());
+          blocks.add(tx.getBlock());
+        }
+      }
+    }
+    
+    // validate txs and block txs consistent
+    int index = 0;
+    Long prevBlockHeight = null;
+    for (MoneroBlock block : blocks) {
+      if (prevBlockHeight == null) prevBlockHeight = block.getHeight();
+      else assertTrue("Blocks are not in order of heights: " + prevBlockHeight + " vs " + block.getHeight(), block.getHeight() > prevBlockHeight);
+      for (MoneroTx tx : block.getTxs()) {
+        assertTrue(tx.getBlock() == block);
+        assertTrue(txs.get(index) == tx);
+        index++;
+      }
+    }
+    assertEquals(txs.size(), index + unconfirmedTxs.size());
+    
+    // fetch network blocks at tx heights
+    List<Long> heights = new ArrayList<Long>();
+    for (MoneroBlock block : blocks) heights.add(block.getHeight());
+    List<MoneroBlock> networkBlocks = daemon.getBlocksByHeight(heights);
+    
+    // collect given tx ids
+    List<String> txIds = new ArrayList<String>();
+    for (MoneroTx tx : txs) txIds.add(tx.getId());
+    
+    // collect matching tx ids from network blocks in order
+    List<String> expectedTxIds = new ArrayList<String>();
+    for (MoneroBlock networkBlock : networkBlocks) {
+      for (String txId : networkBlock.getTxIds()) {
+        if (!txIds.contains(txId)) expectedTxIds.add(txId);
+      }
+    }
+    
+    // order of ids must match
+    assertEquals(expectedTxIds, txIds);
   }
   
   // Can get transactions by id
@@ -2724,6 +2773,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     if (Boolean.FALSE.equals(isExpected)) assertTrue(txs.isEmpty());
     if (Boolean.TRUE.equals(isExpected)) assertFalse(txs.isEmpty());
     for (MoneroTxWallet tx : txs) testTxWallet(tx, ctx);
+    testGetTxsStructure(txs, request);
     return txs;
   }
   
