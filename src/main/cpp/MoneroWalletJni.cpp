@@ -131,7 +131,7 @@ struct WalletJniListener : public MoneroWalletListener {
     detachJVM(jenv, envStat);
   }
 
-  virtual void onSyncProgress(uint64_t startHeight, uint64_t numBlocksDone, uint64_t numBlocksTotal, double percentDone, string& message) {
+  virtual void onSyncProgress(uint64_t height, uint64_t startHeight, uint64_t endHeight, double percentDone, const string& message) {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *jenv;
@@ -139,14 +139,14 @@ struct WalletJniListener : public MoneroWalletListener {
     if (envStat == JNI_ERR) return;
 
     // prepare callback arguments
+    jlong jheight = static_cast<jlong>(height);
     jlong jstartHeight = static_cast<jlong>(startHeight);
-    jlong jnumBlocksDone = static_cast<jlong>(numBlocksDone);
-    jlong jnumBlocksTotal = static_cast<jlong>(numBlocksTotal);
+    jlong jendHeight = static_cast<jlong>(endHeight);
     jdouble jpercentDone = static_cast<jdouble>(percentDone);
     jstring jmessage = jenv->NewStringUTF(message.c_str());
 
     jmethodID listenerClass_onSyncProgress = jenv->GetMethodID(class_WalletListener, "onSyncProgress", "(JJJDLjava/lang/String;)V");
-    jenv->CallVoidMethod(jlistener, listenerClass_onSyncProgress, jstartHeight, jnumBlocksDone, jnumBlocksTotal, jpercentDone, jmessage);
+    jenv->CallVoidMethod(jlistener, listenerClass_onSyncProgress, jheight, jstartHeight, jendHeight, jpercentDone, jmessage);
     jenv->DeleteLocalRef(jmessage);
     detachJVM(jenv, envStat);
   }

@@ -8,11 +8,11 @@ public interface MoneroSyncListener {
   /**
    * Invoked when sync progress is made.
    * 
+   * @param height is the height of the synced block 
    * @param startHeight is the starting height of the sync request
-   * @param numBlocksDone is the number of blocks synced
-   * @param numBlocksTotal is the total number of blocks to sync
+   * @param endHeight is the ending height of the sync request
    * @param percentDone is the sync progress as a percentage
    * @param message is a human-readable description of the current progress
    */
-  public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message);
+  public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message);
 }

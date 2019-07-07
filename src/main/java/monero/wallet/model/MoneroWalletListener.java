@@ -10,5 +10,5 @@ public class MoneroWalletListener implements MoneroSyncListener {
   public void onNewBlock(MoneroBlockHeader header) { }
 
   @Override
-  public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message) { }
+  public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) { }
 }

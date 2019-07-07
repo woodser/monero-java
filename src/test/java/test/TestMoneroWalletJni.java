@@ -216,7 +216,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(daemon.getHeight(), wallet.getChainHeight());
 
     // sync the wallet
-    SyncProgressTester progressTester = new SyncProgressTester(wallet.getRestoreHeight(), wallet.getChainHeight() - 1);
+    SyncProgressTester progressTester = new SyncProgressTester(wallet.getRestoreHeight(), wallet.getChainHeight());
     MoneroSyncResult result = wallet.sync(null, null, progressTester);
     progressTester.onDone(wallet.getChainHeight());
 
@@ -237,7 +237,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
   // Can sync a wallet with a mnemonic
   @Test
-  @Ignore
   public void testSyncMnemonicFromGenesis() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     testSyncMnemonic(null);
@@ -265,7 +264,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     long chainHeight = wallet.getChainHeight();
     
     // sync the wallet
-    SyncProgressTester progressTester = new SyncProgressTester(startHeightActual, chainHeight - 1);
+    SyncProgressTester progressTester = new SyncProgressTester(startHeightActual, chainHeight);
     MoneroSyncResult result = wallet.sync(startHeight, null, progressTester);
     progressTester.onDone(wallet.getChainHeight());
     
@@ -509,76 +508,43 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   private static String getRandomWalletPath() {
     return TestUtils.TEST_WALLETS_DIR + "/test_wallet_" + UUID.randomUUID().toString();
   }
-
+  
   /**
    * Internal class to test progress updates.
    */
   private class SyncProgressTester implements MoneroSyncListener {
-
+    
     private long startHeight;
-    private long endHeight;
-    private boolean noMidway;   // syncing should not have midway progress
-    private boolean noProgress; // syncing should not make any progress
-    private boolean midwayCalled;
-    private Long prevNumBlocksDone;
-    private Long prevNumBlocksTotal;
-    private Double prevPercentDone;
-
+    private long prevEndHeight;
+    private Long prevHeight;
+    
     public SyncProgressTester(long startHeight, long endHeight) {
+      assertTrue(startHeight >= 0);
+      assertTrue(endHeight >= 0);
       this.startHeight = startHeight;
-      this.endHeight = endHeight;
-      this.noMidway = endHeight - startHeight <= 1;
-      this.noProgress = endHeight - startHeight <= 0;
-      this.midwayCalled = false;
+      this.prevEndHeight = endHeight;
     }
 
-    public void onSyncProgress(long startHeight, long numBlocksDone, long numBlocksTotal, double percentDone, String message) {
-      if (numBlocksDone % 10000 == 0 || percentDone > .999) System.out.println("onSyncProgress(" + startHeight + ", " + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
-      assertFalse("Should not call progress", noProgress);
-      assertTrue(numBlocksDone >= 0);
-      assertTrue(numBlocksTotal > 0 && numBlocksTotal >= numBlocksDone);
-      assertTrue(percentDone >= 0);
-      assertNotNull(message);
-      assertFalse(message.isEmpty());
+    @Override
+    public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
+      if ((height - startHeight) % 10000 == 0 || percentDone > .999) System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
+      assertFalse("Should not call progress if end height <= start height", endHeight <= startHeight);
       assertEquals(this.startHeight, startHeight);
-      if (prevPercentDone == null) {
-        assertEquals(0, numBlocksDone);
-        assertEquals(0, percentDone, 0);
-      } else {
-        assertTrue(numBlocksDone >= prevNumBlocksDone);
-        if (!(percentDone > prevPercentDone || Double.compare(percentDone, 1l) == 0)) {
-          System.out.println("This one broke: onSyncProgress(" + numBlocksDone + ", " + numBlocksTotal + ", " + percentDone + ", " + message + ")");
-          System.out.println("Prev num bocks done: " + prevNumBlocksDone);
-          System.out.println("Prev blocks total: " + prevNumBlocksTotal);
-          System.out.println("Prev percent done: " + prevPercentDone);
-        }
-        assertTrue(percentDone > prevPercentDone || Double.compare(percentDone, 1l) == 0);
-      }
-      prevNumBlocksDone = numBlocksDone;
-      prevNumBlocksTotal = numBlocksTotal;
-      prevPercentDone = percentDone;
-      if (percentDone > 0 && percentDone < 1) midwayCalled = true;
+      assertTrue(endHeight >= this.prevEndHeight);  // chain can grow while syncing
+      prevEndHeight = endHeight;
+      assertTrue(height >= startHeight);
+      assertTrue(height < endHeight);
+      double expectedPercentDone = (double) (height - startHeight + 1) / (double) (endHeight - startHeight);
+      assertTrue(Double.compare(expectedPercentDone, percentDone) == 0);
+      if (prevHeight == null) assertEquals(startHeight, height);
+      else assertEquals(height, prevHeight + 1);
+      prevHeight = height;
     }
-
+    
     public void onDone(long chainHeight) {
-
-      // nothing to test if no progress called
-      if (this.noProgress) {
-        assertNull(prevPercentDone);
-        return;
-      }
-
-      // ensure progress was called
-      assertNotNull(prevPercentDone);
-
-      // test midway progress
-      if (endHeight > startHeight && !Boolean.TRUE.equals(this.noMidway)) assertTrue("No midway progress reported but it should have been", midwayCalled);
-      else assertFalse("No midway progress should have been reported but it was", midwayCalled);
-
-      // test last progress
-      assertEquals(chainHeight - startHeight, (long) prevNumBlocksDone);
-      assertEquals(prevNumBlocksDone, prevNumBlocksTotal);
-      assertEquals(1, prevPercentDone, 0);
+      assertEquals(chainHeight, prevEndHeight);
+      if (prevEndHeight <= startHeight) assertNull(prevHeight); // progress never called
+      else assertEquals(chainHeight - 1, (long) prevHeight);  // otherwise last height is chain height - 1
     }
   }
   
