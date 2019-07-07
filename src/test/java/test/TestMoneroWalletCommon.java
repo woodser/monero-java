@@ -2790,12 +2790,13 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertEquals(w1.getBalance(), w2.getBalance());
     assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
     testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
+    // TODO: txs, transfers, outputs, etc
   }
   
   private static void testAccountsEqualOnChain(List<MoneroAccount> accounts1, List<MoneroAccount> accounts2) {
     for (int i = 0; i < Math.max(accounts1.size(), accounts2.size()); i++) {
       if (i < accounts1.size() && i < accounts2.size()) {
-        testSubaddressesEqualOnChain(accounts1.get(i).getSubaddresses(), accounts2.get(i).getSubaddresses());
+        testAccountsEqualOnChain(accounts1.get(i), accounts2.get(i));
       } else if (i >= accounts1.size()) {
         for (int j = i; j < accounts2.size(); j++) {
           assertEquals(BigInteger.valueOf(0), accounts2.get(j).getBalance());
@@ -2810,6 +2811,15 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         return;
       }
     }
+  }
+  
+  private static void testAccountsEqualOnChain(MoneroAccount account1, MoneroAccount account2) {
+    assertEquals(account1.getIndex(), account2.getIndex());
+    assertEquals(account1.getPrimaryAddress(), account2.getPrimaryAddress());
+    assertEquals(account1.getBalance(), account2.getBalance());
+    assertEquals(account1.getUnlockedBalance(), account2.getUnlockedBalance());
+    assertEquals(account1.getPrimaryAddress(), account2.getPrimaryAddress());
+    testSubaddressesEqualOnChain(account1.getSubaddresses(), account2.getSubaddresses());
   }
   
   private static void testSubaddressesEqualOnChain(List<MoneroSubaddress> subaddresses1, List<MoneroSubaddress> subaddresses2) {
