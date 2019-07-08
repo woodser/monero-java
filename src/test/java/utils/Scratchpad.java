@@ -4,14 +4,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
-import java.util.UUID;
 
-import monero.rpc.MoneroRpcConnection;
+import monero.daemon.model.MoneroBlock;
 import monero.wallet.MoneroWallet;
-import monero.wallet.MoneroWalletJni;
-import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
-import monero.wallet.request.MoneroTransferRequest;
 import monero.wallet.request.MoneroTxRequest;
 
 /**
@@ -74,11 +70,27 @@ public class Scratchpad {
 //      System.out.println(tx);
 //    }
     
-    MoneroTxWallet txInQuestion1 = walletRpc.getTx("c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755");
-    System.out.println(txInQuestion1);
+    // TODO: implement height
+    List<MoneroTxWallet> txs = walletJni.getTxs();
+    MoneroBlock block = null;
+    assertFalse(txs.isEmpty());
+    for (MoneroTxWallet tx : txs) {
+      if (tx.getHeight() != 360559l) continue;
+      System.out.println("We have one!!!");
+      if (block == null) block = tx.getBlock();
+      else {
+        if (block != tx.getBlock()) {
+          System.out.println("boom");
+          System.out.println(block);
+          System.out.println("----- VS -----");
+          System.out.println(tx.getBlock());
+        }
+        assertTrue(block == tx.getBlock());
+      }
+    }
     
-    MoneroTxWallet txInQuestion = walletJni.getTx("c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755");
-    System.out.println(txInQuestion);
+//    MoneroTxWallet txInQuestion = walletJni.getTx("c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755");
+//    System.out.println(txInQuestion);
     
 //    MoneroRpcConnection daemonConnection = new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD);
     //walletJni = new MoneroWalletJni(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, NETWORK_TYPE, daemonConnection, 0l);
