@@ -97,14 +97,15 @@ public class MoneroTransfer {
     if (this == transfer) return this;
     
     // merge txs if they're different which comes back to merging transfers
-    if (this.getTx() != transfer.getTx()) this.getTx().merge(transfer.getTx());
+    if (this.getTx() != transfer.getTx()) {
+      this.getTx().merge(transfer.getTx());
+      return this;
+    }
     
     // otherwise merge transfer fields
-    else {
-      this.setAmount(MoneroUtils.reconcile(this.getAmount(), transfer.getAmount()));
-      this.setAccountIndex(MoneroUtils.reconcile(this.getAccountIndex(), transfer.getAccountIndex()));
-      this.setNumSuggestedConfirmations(MoneroUtils.reconcile(this.getNumSuggestedConfirmations(), transfer.getNumSuggestedConfirmations(), null, null, false));  // TODO monero-wallet-rpc: outgoing txs become 0 when confirmed
-    }
+    this.setAmount(MoneroUtils.reconcile(this.getAmount(), transfer.getAmount()));
+    this.setAccountIndex(MoneroUtils.reconcile(this.getAccountIndex(), transfer.getAccountIndex()));
+    this.setNumSuggestedConfirmations(MoneroUtils.reconcile(this.getNumSuggestedConfirmations(), transfer.getNumSuggestedConfirmations(), null, null, false));  // TODO monero-wallet-rpc: outgoing txs become 0 when confirmed
     
     return this;
   }
