@@ -22,6 +22,8 @@ suggested_confirmations_threshold comes back as 0 for some (not all) outgoing tr
 document query_key spend_key parameter
 
 14.1.0 RELEASE
+walletRpc.getTxs(new MoneroTxRequest().setMinHeight(360559l).setMaxHeight(360559l)) not returning tx despite their being one for rpc and jni
+add setHeight() to MoneroTxRequest and add test
 rpc v jni equality test
 add warnings to all deserialization methods for unrecognized fields
 review wallet jni cpp for leaking memory
