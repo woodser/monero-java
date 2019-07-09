@@ -566,6 +566,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
   }
   
+  // possible configuration: on chain xor local wallet data ("strict"), txs ordered same way? TBD
   private static void testWalletsEqualOnChain(MoneroWalletJni wallet1, MoneroWalletJni wallet2) {
     new TestMoneroWalletsEqual().setWallet1(wallet1).setWallet2(wallet2).testWalletsEqualOnChain();
     assertEquals(wallet1.getNetworkType(), wallet2.getNetworkType());
