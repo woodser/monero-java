@@ -24,8 +24,10 @@ wallet2->get_payments() does not return transfers in order of height, probably o
 no way to get order of block txs from wallet2
 
 14.1.0 RELEASE
+create new wallet
+debug why testGetOutputsValidateInputs() and testImportKeyImages() fail because cannot connect to daemon only if running with all other tests
+add setHeight() to MoneroTxRequest, convenience function getTxs(height), add tests
 walletRpc.getTxs(new MoneroTxRequest().setMinHeight(360559l).setMaxHeight(360559l)) not returning tx despite their being one for rpc and jni
-add setHeight() to MoneroTxRequest and add test
 rpc v jni equality test
 add warnings to all deserialization methods for unrecognized fields
 review wallet jni cpp for leaking memory
