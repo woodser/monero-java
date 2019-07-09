@@ -181,7 +181,13 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     walletKeys.save();
     
     // test equality
-    testWalletsEqualOnChain(wallet, walletKeys);
+    try {
+      testWalletsEqualOnChain(wallet, walletKeys);
+    } catch (AssertionError ae) {
+      System.out.println("Yo is this getting hit?");
+      walletKeys.close();
+      throw ae;
+    }
   }
   
   // Can get the public view key
