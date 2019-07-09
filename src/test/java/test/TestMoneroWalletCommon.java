@@ -511,7 +511,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   private void testGetTxsStructure(List<MoneroTxWallet> txs) { testGetTxsStructure(txs, null); }
   private void testGetTxsStructure(List<MoneroTxWallet> txs, MoneroTxRequest request) {
-    if (true) return;
     if (request == null) request = new MoneroTxRequest();
     
     // collect unique blocks in order (using set and list instead of TreeSet for direct portability to other languages)
@@ -529,39 +528,48 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       }
     }
     
-    // validate txs and block txs consistent
+    // tx ids must be in order if requested
+    if (request.getTxIds() != null) {
+      assertEquals(txs.size(), request.getTxIds().size());
+      for (int i = 0; i < request.getTxIds().size(); i++) {
+        assertEquals(request.getTxIds().get(i), txs.get(i).getId());
+      }
+    }
+    
+    // validate txs and blocks reference each other and blocks are in ascending order (unless specific tx ids requested)
     int index = 0;
     Long prevBlockHeight = null;
     for (MoneroBlock block : blocks) {
       if (prevBlockHeight == null) prevBlockHeight = block.getHeight();
-      else assertTrue("Blocks are not in order of heights: " + prevBlockHeight + " vs " + block.getHeight(), block.getHeight() > prevBlockHeight);
+      else if (request.getTxIds() == null) assertTrue("Blocks are not in order of heights: " + prevBlockHeight + " vs " + block.getHeight(), block.getHeight() > prevBlockHeight);
       for (MoneroTx tx : block.getTxs()) {
         assertTrue(tx.getBlock() == block);
-        assertTrue(txs.get(index) == tx);
+        if (request.getTxIds() == null) assertTrue(txs.get(index) == tx); // verify tx order relative to blocks unless txs manually re-ordered by requesting by id
         index++;
       }
     }
     assertEquals(txs.size(), index + unconfirmedTxs.size());
     
-    // fetch network blocks at tx heights
-    List<Long> heights = new ArrayList<Long>();
-    for (MoneroBlock block : blocks) heights.add(block.getHeight());
-    List<MoneroBlock> networkBlocks = daemon.getBlocksByHeight(heights);
-    
-    // collect given tx ids
-    List<String> txIds = new ArrayList<String>();
-    for (MoneroTx tx : txs) txIds.add(tx.getId());
-    
-    // collect matching tx ids from network blocks in order
-    List<String> expectedTxIds = new ArrayList<String>();
-    for (MoneroBlock networkBlock : networkBlocks) {
-      for (String txId : networkBlock.getTxIds()) {
-        if (!txIds.contains(txId)) expectedTxIds.add(txId);
-      }
-    }
-    
-    // order of ids must match
-    assertEquals(expectedTxIds, txIds);
+    // TODO monero core wallet2 does not provide ordered blocks or txs
+//    // collect given tx ids
+//    List<String> txIds = new ArrayList<String>();
+//    for (MoneroTx tx : txs) txIds.add(tx.getId());
+//    
+//    // fetch network blocks at tx heights
+//    List<Long> heights = new ArrayList<Long>();
+//    for (MoneroBlock block : blocks) heights.add(block.getHeight());
+//    List<MoneroBlock> networkBlocks = daemon.getBlocksByHeight(heights);
+//    
+//    // collect matching tx ids from network blocks in order
+//    List<String> expectedTxIds = new ArrayList<String>();
+//    for (MoneroBlock networkBlock : networkBlocks) {
+//      for (String txId : networkBlock.getTxIds()) {
+//        if (!txIds.contains(txId)) expectedTxIds.add(txId);
+//      }
+//    }
+//    
+//    // order of ids must match
+//    assertEquals(expectedTxIds, txIds);
   }
   
   // Can get transactions by id

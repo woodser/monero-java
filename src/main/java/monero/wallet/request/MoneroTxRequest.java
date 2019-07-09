@@ -2,7 +2,6 @@ package monero.wallet.request;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import common.types.Filter;
@@ -23,9 +22,9 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
   
   private Boolean isOutgoing;
   private Boolean isIncoming;
-  private Collection<String> txIds;
+  private List<String> txIds;
   private Boolean hasPaymentId;
-  private Collection<String> paymentIds;
+  private List<String> paymentIds;
   private Long minHeight;
   private Long maxHeight;
   private Boolean includeOutputs;
@@ -50,11 +49,11 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return this;
   }
 
-  public Collection<String> getTxIds() {
+  public List<String> getTxIds() {
     return txIds;
   }
 
-  public MoneroTxRequest setTxIds(Collection<String> txIds) {
+  public MoneroTxRequest setTxIds(List<String> txIds) {
     this.txIds = txIds;
     return this;
   }
@@ -77,11 +76,11 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return this;
   }
 
-  public Collection<String> getPaymentIds() {
+  public List<String> getPaymentIds() {
     return paymentIds;
   }
 
-  public MoneroTxRequest setPaymentIds(Collection<String> paymentIds) {
+  public MoneroTxRequest setPaymentIds(List<String> paymentIds) {
     this.paymentIds = paymentIds;
     return this;
   }

@@ -26,7 +26,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import monero.utils.MoneroException;
@@ -136,7 +135,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
     return getTxs(new MoneroTxRequest().setTxIds(txIds));
   }
   
-  public List<MoneroTxWallet> getTxs(Collection<String> txIds) {
+  public List<MoneroTxWallet> getTxs(List<String> txIds) {
     return getTxs(new MoneroTxRequest().setTxIds(txIds));
   }
   

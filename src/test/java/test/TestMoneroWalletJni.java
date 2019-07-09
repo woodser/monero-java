@@ -183,10 +183,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // test equality
     try {
       testWalletsEqualOnChain(wallet, walletKeys);
-    } catch (AssertionError ae) {
-      System.out.println("Yo is this getting hit?");
+    } finally {
       walletKeys.close();
-      throw ae;
     }
   }
   

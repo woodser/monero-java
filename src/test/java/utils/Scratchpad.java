@@ -5,10 +5,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroBlock;
 import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroTxWallet;
-import monero.wallet.request.MoneroTxRequest;
 
 /**
  * Scratchpad for quick scripting.
@@ -18,8 +18,8 @@ public class Scratchpad {
   public static void main(String[] args) {
     
     // initialize daemon, wallet, and direct rpc interface
-//    MoneroDaemon daemon = TestUtils.getDaemonRpc();
-    MoneroWallet walletRpc = TestUtils.getWalletRpc();
+    MoneroDaemon daemon = TestUtils.getDaemonRpc();
+    //MoneroWallet walletRpc = TestUtils.getWalletRpc();
     MoneroWallet walletJni = TestUtils.getWalletJni();
     //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
     
@@ -70,24 +70,27 @@ public class Scratchpad {
 //      System.out.println(tx);
 //    }
     
-    // TODO: implement height
-    List<MoneroTxWallet> txs = walletJni.getTxs();
-    MoneroBlock block = null;
-    assertFalse(txs.isEmpty());
-    for (MoneroTxWallet tx : txs) {
-      if (tx.getHeight() != 360559l) continue;
-      System.out.println("We have one!!!");
-      if (block == null) block = tx.getBlock();
-      else {
-        if (block != tx.getBlock()) {
-          System.out.println("boom");
-          System.out.println(block);
-          System.out.println("----- VS -----");
-          System.out.println(tx.getBlock());
-        }
-        assertTrue(block == tx.getBlock());
-      }
-    }
+    MoneroBlock block = daemon.getBlockByHeight(359300l);
+    System.out.println(block);
+    
+//    // TODO: implement height
+//    List<MoneroTxWallet> txs = walletJni.getTxs();
+//    MoneroBlock block = null;
+//    assertFalse(txs.isEmpty());
+//    for (MoneroTxWallet tx : txs) {
+//      if (tx.getHeight() != 360559l) continue;
+//      System.out.println("We have one!!!");
+//      if (block == null) block = tx.getBlock();
+//      else {
+//        if (block != tx.getBlock()) {
+//          System.out.println("boom");
+//          System.out.println(block);
+//          System.out.println("----- VS -----");
+//          System.out.println(tx.getBlock());
+//        }
+//        assertTrue(block == tx.getBlock());
+//      }
+//    }
     
 //    MoneroTxWallet txInQuestion = walletJni.getTx("c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755");
 //    System.out.println(txInQuestion);
