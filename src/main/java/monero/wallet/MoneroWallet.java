@@ -368,7 +368,7 @@ public interface MoneroWallet {
    * Get a wallet transaction by id.
    * 
    * @param txId is an id of a transaction to get
-   * @return MoneroTxWallet is the identified transactions
+   * @return the identified transactions
    */
   public MoneroTxWallet getTx(String txId);
   
@@ -384,7 +384,7 @@ public interface MoneroWallet {
    * Get wallet transactions by id.
    * 
    * @param txIds are ids of transactions to get
-   * @return List<MoneroTxWallet> are the identified transactions
+   * @return the identified transactions
    */
   public List<MoneroTxWallet> getTxs(String... txIds);
   
@@ -392,9 +392,9 @@ public interface MoneroWallet {
    * Get wallet transactions by id.
    * 
    * @param txIds are ids of transactions to get
-   * @return List<MoneroTxWallet> are the identified transactions
+   * @return the identified transactions
    */
-  public List<MoneroTxWallet> getTxs(Collection<String> txIds);
+  public List<MoneroTxWallet> getTxs(List<String> txIds);
   
   /**
    * Get wallet transactions.  Wallet transactions contain one or more

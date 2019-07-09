@@ -1,8 +1,7 @@
 package utils;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWallet;
@@ -19,7 +18,7 @@ public class PrintTransactions {
     MoneroTxRequest request = new MoneroTxRequest();
     //request.setIsOutgoing(false);
     //request.setIsIncoming(false);
-    Set<String> ids = new HashSet<String>();
+    List<String> ids = new ArrayList<String>();
     ids.add("d16e603efed00a3d2e14085d0ebe96734145d9eba851f6afd02ab76f9d5b62c0");
     request.setTxIds(ids);
     List<MoneroTxWallet> txs = wallet.getTxs(request);
