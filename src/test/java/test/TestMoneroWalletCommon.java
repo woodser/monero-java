@@ -1197,6 +1197,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       MoneroWalletJni walletJni = (MoneroWalletJni) wallet;
       System.out.println("Wallet height: " + walletJni.getHeight());
       System.out.println(JsonUtils.serialize(walletJni.getDaemonConnection()));
+      System.out.println("Re-attempting request...");
+      randomTxs = getRandomTransactions(wallet, new MoneroTxRequest().setIsConfirmed(true).setIncludeOutputs(true), 3, 5);
+      System.out.println("This time it worked!!!  But we're still throwing...");
       throw e;
     }
     for (MoneroTxWallet randomTx : randomTxs) assertFalse(randomTx.getVouts().isEmpty());
