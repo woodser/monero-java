@@ -132,18 +132,8 @@ public class TestMoneroWalletsEqual {
   }
   
   protected void testSubaddressesEqualOnChain(MoneroSubaddress subaddress1, MoneroSubaddress subaddress2) {
-    
-    // nullify off-chain data for comparison
-    subaddress1.setLabel(null);
+    subaddress1.setLabel(null); // nullify off-chain data for comparison
     subaddress2.setLabel(null);
-    
-    // test subaddress equality
-    if (!subaddress1.equals(subaddress2)) {
-      System.out.println("These subaddresses are not equal:");
-      System.out.println(subaddress1);
-      System.out.println(subaddress2);
-      subaddress1.equals(subaddress2);
-    }
     assertEquals(subaddress1, subaddress2);
   }
   
