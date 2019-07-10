@@ -24,19 +24,25 @@ wallet2->get_payments() does not return transfers in order of height, probably o
 no way to get order of block txs from wallet2
 
 14.1.0 RELEASE
-document git checkout <project> then git submodule update --init --recursive then build libmonero-cpp.a and copy into lib directory then ./bin/build-libmonero-java.sh in java readme
-remove .project file from git, else eclipse fails to import
-debug why testGetOutputsValidateInputs() and testImportKeyImages() fail because cannot connect to daemon only if running with all other tests
+
+HIGH
+wallet equality tests
 add setHeight() to MoneroTxRequest, convenience function getTxs(height), add tests
 walletRpc.getTxs(new MoneroTxRequest().setMinHeight(360559l).setMaxHeight(360559l)) not returning tx despite their being one for rpc and jni
-rpc v jni equality test
-add warnings to all deserialization methods for unrecognized fields
-review wallet jni cpp for leaking memory
-test notification of receiving funds
 account label is actually first subaddress's label
 MoneroOutputWallet implement merge in both Java and c++
-tx merge should merge blocks if they're different in the same way that MoneroTransfer merges txs if they're different which comes back to transfers, repeat elsewhere in tree
+port merging to java (tx merge should merge blocks if they're different, etc)
 MoneroBlock merge coinbaseTx does not set parent block reference
+
+MEDIUM
+test notification of receiving funds
+review wallet jni cpp for leaking memory
+debug why testGetOutputsValidateInputs() and testImportKeyImages() fail because cannot connect to daemon only if running with all other tests
+document git checkout <project> then git submodule update --init --recursive then build libmonero-cpp.a and copy into lib directory then ./bin/build-libmonero-java.sh in java readme
+remove .project file from git, else eclipse fails to import
+
+LOW
+add warnings to all deserialization methods for unrecognized fields
 port changes from diff of jni39+ to master_bkp_jni to js
 getAddressIndex() -> getSubaddress(String address) and that returns full subaddress info?
 test getAccounts(), getBalance(), etc with out of range subaddress/account indices (common wallet tests)
