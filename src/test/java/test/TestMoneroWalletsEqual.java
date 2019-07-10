@@ -20,7 +20,7 @@ import utils.TestUtils;
 /**
  * Compares two wallets for equality using only on-chain data.
  * 
- * For this test, wallet 2 is assumed to have been synced after wallet 1 so its height may be greater.
+ * This test will sync the two wallets until their height is equal to guarantee equal state.
  * 
  * The RPC and JNI wallets are tested by default unless overriden by subclassing or using the setters.
  */
@@ -49,18 +49,23 @@ public class TestMoneroWalletsEqual {
   
   @Test
   public void testWalletsEqualOnChain() {
+    
+    // default to rpc and jni wallets
     if (w1 == null) w1 = TestUtils.getWalletRpc();
     if (w2 == null) w2 = TestUtils.getWalletJni();
-    assertTrue(w1.getHeight() <= w2.getHeight());
+    
+    // sync the wallets until same height
+    while (w1.getHeight() != w2.getHeight()) {
+      w1.sync();
+      w2.sync();
+    }
+    
+    // test that wallets are equal based using only on-chain data
+    assertEquals(w1.getHeight(), w2.getHeight());
     assertEquals(w1.getMnemonic(), w2.getMnemonic());
     assertEquals(w1.getPrimaryAddress(), w2.getPrimaryAddress());
     assertEquals(w1.getPrivateViewKey(), w2.getPrivateViewKey());
     assertEquals(w1.getPrivateSpendKey(), w2.getPrivateSpendKey());
-    if (!w1.getBalance().equals(w2.getBalance())) {
-      System.out.println("WARNING: balances are not equal, attempting to re-sync one time");
-      w1.sync();
-      w2.sync();
-    }
     assertEquals(w1.getBalance(), w2.getBalance());
     assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
     testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
@@ -74,13 +79,15 @@ public class TestMoneroWalletsEqual {
       } else if (i >= accounts1.size()) {
         for (int j = i; j < accounts2.size(); j++) {
           assertEquals(BigInteger.valueOf(0), accounts2.get(j).getBalance());
-          assertEquals(1, accounts2.get(j).getSubaddresses().size());
+          assertTrue(accounts2.get(j).getSubaddresses().size() >= 1);
+          for (MoneroSubaddress subaddress : accounts2.get(j).getSubaddresses()) assertFalse(subaddress.getIsUsed());
         }
         return;
       } else {
         for (int j = i; j < accounts1.size(); j++) {
           assertEquals(BigInteger.valueOf(0), accounts1.get(j).getBalance());
-          assertEquals(1, accounts1.get(j).getSubaddresses().size());
+          assertTrue(accounts1.get(j).getSubaddresses().size() >= 1);
+          for (MoneroSubaddress subaddress : accounts1.get(j).getSubaddresses()) assertFalse(subaddress.getIsUsed());
         }
         return;
       }
