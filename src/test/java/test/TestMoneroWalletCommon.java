@@ -553,9 +553,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertEquals(txs.size(), index + unconfirmedTxs.size());
     
     // test that incoming transfers are in order of ascending accounts and subaddresses
-    Integer prevAccountIdx = null;
-    Integer prevSubaddressIdx = null;
     for (MoneroTxWallet tx : txs) {
+      Integer prevAccountIdx = null;
+      Integer prevSubaddressIdx = null;
       for (MoneroIncomingTransfer transfer : tx.getIncomingTransfers()) {
         if (prevAccountIdx == null) prevAccountIdx = transfer.getAccountIndex();
         else {
