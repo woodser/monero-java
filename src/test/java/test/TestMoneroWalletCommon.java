@@ -552,6 +552,24 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     assertEquals(txs.size(), index + unconfirmedTxs.size());
     
+    // test that incoming transfers are in order of ascending accounts and subaddresses
+    Integer prevAccountIdx = null;
+    Integer prevSubaddressIdx = null;
+    for (MoneroTxWallet tx : txs) {
+      for (MoneroIncomingTransfer transfer : tx.getIncomingTransfers()) {
+        if (prevAccountIdx == null) prevAccountIdx = transfer.getAccountIndex();
+        else {
+          assertTrue(prevAccountIdx <= transfer.getAccountIndex());
+          if (prevAccountIdx < transfer.getAccountIndex()) {
+            prevSubaddressIdx = null;
+            prevAccountIdx = transfer.getAccountIndex();
+          }
+          if (prevSubaddressIdx == null) prevSubaddressIdx = transfer.getSubaddressIndex();
+          else assertTrue(prevSubaddressIdx < transfer.getSubaddressIndex());
+        }
+      }
+    }
+    
     // TODO monero core wallet2 does not provide ordered blocks or txs
 //    // collect given tx ids
 //    List<String> txIds = new ArrayList<String>();
@@ -1457,7 +1475,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // get random txs that are confirmed and have outgoing destinations
     List<MoneroTxWallet> txs;
     try {
-      txs = getRandomTransactions(wallet, new MoneroTxRequest().setIsConfirmed(true).setTransferRequest(new MoneroTransferRequest().setHasDestinations(true)), 1, MAX_TX_PROOFS);
+      txs = getRandomTransactions(wallet, new MoneroTxRequest().setIsConfirmed(true).setTransferRequest(new MoneroTransferRequest().setHasDestinations(true)), 2, MAX_TX_PROOFS);
     } catch (AssertionError e) {
       if (e.getMessage().contains("found with")) fail("No txs with outgoing destinations found; run send tests");
       throw e;
@@ -2820,7 +2838,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   private static List<MoneroOutputWallet> getAndTestOutputs(MoneroWallet wallet, MoneroOutputRequest request, Boolean isExpected) {
     List<MoneroOutputWallet> vouts = wallet.getOutputs(request);
     if (Boolean.FALSE.equals(isExpected)) assertEquals(0, vouts.size());
-    if (Boolean.TRUE.equals(isExpected)) assertTrue("Vouts were expected but not found; run send tests?", vouts.size() > 0);
+    if (Boolean.TRUE.equals(isExpected)) assertTrue("Vouts were expected but not found; run send tests", vouts.size() > 0);
     for (MoneroOutputWallet vout : vouts) testOutputWallet(vout);
     return vouts;
   }
