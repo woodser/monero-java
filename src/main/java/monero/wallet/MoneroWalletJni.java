@@ -67,7 +67,7 @@ import monero.wallet.request.MoneroTransferRequest;
 import monero.wallet.request.MoneroTxRequest;
 
 /**
- * Implements a Monero wallet using JNI to bridge to Monero core c++.
+ * Implements a Monero wallet using JNI to bridge to Monero Core c++.
  */
 public class MoneroWalletJni extends MoneroWalletDefault {
   
