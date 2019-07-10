@@ -44,8 +44,8 @@ public class TestUtils {
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
   public static final MoneroNetworkType NETWORK_TYPE = MoneroNetworkType.STAGENET;
   public static final String TEST_LANGUAGE = "English";
-  public static final String TEST_MNEMONIC = "upload toenail nephew megabyte reorder bicycle oxygen relic casket ledge wrist puffin hiding awoken under bovine sarcasm waking faked yoga urban myth atlas basin wrist"; 
-  public static final String TEST_ADDRESS = "59M2dSSmrKiimFavjWQ8zFGWe6ziHr9XUjhHcMVEj9ut4EdkcmcqawfgMrtEERipUJA8iNzU65eaELoFYcor1c4jK4FRj1N";
+  public static final String TEST_MNEMONIC = "dilute arrow koala gorilla loudly uttered bygones stockpile problems efficient alerts lordship sighting launching hire tycoon hence ultimate fetches napkin cube usage agony army efficient"; 
+  public static final String TEST_ADDRESS = "55PEGdaqz7iW3M4Puddfup1LumsrF2hHc4cQrVnFLVJ2eXexULWwYEUDRKHTRb6uouM9ybJs7GYcEXFht25jw3HZKHcULwp";
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class);

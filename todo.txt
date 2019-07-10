@@ -25,7 +25,6 @@ no way to get order of block txs from wallet2
 
 14.1.0 RELEASE
 remove .project file from git, else eclipse fails to import
-create new wallet
 debug why testGetOutputsValidateInputs() and testImportKeyImages() fail because cannot connect to daemon only if running with all other tests
 add setHeight() to MoneroTxRequest, convenience function getTxs(height), add tests
 walletRpc.getTxs(new MoneroTxRequest().setMinHeight(360559l).setMaxHeight(360559l)) not returning tx despite their being one for rpc and jni
