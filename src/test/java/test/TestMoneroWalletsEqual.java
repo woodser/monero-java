@@ -157,7 +157,7 @@ public class TestMoneroWalletsEqual {
     // compare from blocks which compare entire trees
     assertTrue(tx1.getBlock().getTxs().contains(tx1));
     assertTrue(tx2.getBlock().getTxs().contains(tx2));
-    if (tx1.getBlock() != tx2.getBlock()) {
+    if (!tx1.getBlock().equals(tx2.getBlock())) {
       System.out.println("Blocks not equal!");
       tx1.getBlock().equals(tx2.getBlock());
     }
