@@ -56,6 +56,11 @@ public class TestMoneroWalletsEqual {
     assertEquals(w1.getPrimaryAddress(), w2.getPrimaryAddress());
     assertEquals(w1.getPrivateViewKey(), w2.getPrivateViewKey());
     assertEquals(w1.getPrivateSpendKey(), w2.getPrivateSpendKey());
+    if (w1.getBalance().equals(w2.getBalance())) {
+      System.out.println("WARNING: balances are not equal, attempting to re-sync one time");
+      w1.sync();
+      w2.sync();
+    }
     assertEquals(w1.getBalance(), w2.getBalance());
     assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
     testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
@@ -126,6 +131,12 @@ public class TestMoneroWalletsEqual {
     subaddress2.setLabel(null);
     
     // test subaddress equality
+    if (!subaddress1.equals(subaddress2)) {
+      System.out.println("These subaddresses are not equal:");
+      System.out.println(subaddress1);
+      System.out.println(subaddress2);
+      subaddress1.equals(subaddress2);
+    }
     assertEquals(subaddress1, subaddress2);
   }
   

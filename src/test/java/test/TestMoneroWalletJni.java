@@ -178,7 +178,9 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     String path = getRandomWalletPath();
     MoneroWalletJni walletKeys = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), wallet.getNetworkType(), wallet.getDaemonConnection(), 300000l, null);
     walletKeys.sync(new MoneroSyncPrinter());
-    walletKeys.save();
+    
+    // re-sync test wallet so results are fresh for comparison
+    wallet.sync();
     
     // test equality
     try {
