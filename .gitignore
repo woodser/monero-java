@@ -6,6 +6,6 @@
 /build/
 **/pom.xml.versionsBackup
 **/logs
-/lib
-/external-libs
 /test_wallets
+/lib/*
+/external-libs/*
