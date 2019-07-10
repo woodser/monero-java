@@ -24,6 +24,7 @@ wallet2->get_payments() does not return transfers in order of height, probably o
 no way to get order of block txs from wallet2
 
 14.1.0 RELEASE
+document git checkout <project> then git submodule update --init --recursive then build libmonero-cpp.a and copy into lib directory then ./bin/build-libmonero-java.sh in java readme
 remove .project file from git, else eclipse fails to import
 debug why testGetOutputsValidateInputs() and testImportKeyImages() fail because cannot connect to daemon only if running with all other tests
 add setHeight() to MoneroTxRequest, convenience function getTxs(height), add tests
