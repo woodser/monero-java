@@ -25,6 +25,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import common.types.Filter;
+import common.utils.JsonUtils;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
@@ -34,6 +35,7 @@ import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
+import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
@@ -1182,11 +1184,21 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // test with invalid id
+    System.out.println("testGetOutputsValidateInputs()");
     List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputRequest().setTxRequest(new MoneroTxRequest().setId("invalid_id")));
     assertEquals(0, outputs.size());
     
     // test invalid id in collection
-    List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, new MoneroTxRequest().setIsConfirmed(true).setIncludeOutputs(true), 3, 5);
+    List<MoneroTxWallet> randomTxs;
+    try {
+      randomTxs = getRandomTransactions(wallet, new MoneroTxRequest().setIsConfirmed(true).setIncludeOutputs(true), 3, 5);
+    } catch (MoneroException e) {
+      System.out.println("NO CONNECTION TO DAEMON!!!");
+      MoneroWalletJni walletJni = (MoneroWalletJni) wallet;
+      System.out.println("Wallet height: " + walletJni.getHeight());
+      System.out.println(JsonUtils.serialize(walletJni.getDaemonConnection()));
+      throw e;
+    }
     for (MoneroTxWallet randomTx : randomTxs) assertFalse(randomTx.getVouts().isEmpty());
     outputs = wallet.getOutputs(new MoneroOutputRequest().setTxRequest(new MoneroTxRequest().setTxIds(randomTxs.get(0).getId(), "invalid_id")));
     assertFalse(outputs.isEmpty());

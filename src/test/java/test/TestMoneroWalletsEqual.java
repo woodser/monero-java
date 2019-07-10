@@ -56,7 +56,7 @@ public class TestMoneroWalletsEqual {
     assertEquals(w1.getPrimaryAddress(), w2.getPrimaryAddress());
     assertEquals(w1.getPrivateViewKey(), w2.getPrivateViewKey());
     assertEquals(w1.getPrivateSpendKey(), w2.getPrivateSpendKey());
-    if (w1.getBalance().equals(w2.getBalance())) {
+    if (!w1.getBalance().equals(w2.getBalance())) {
       System.out.println("WARNING: balances are not equal, attempting to re-sync one time");
       w1.sync();
       w2.sync();
