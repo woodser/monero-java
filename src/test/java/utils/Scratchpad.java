@@ -1,14 +1,15 @@
 package utils;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroBlock;
+import monero.daemon.model.MoneroNetworkType;
+import monero.rpc.MoneroRpcConnection;
 import monero.wallet.MoneroWallet;
-import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.MoneroWalletJni;
 
 /**
  * Scratchpad for quick scripting.
@@ -95,8 +96,8 @@ public class Scratchpad {
 //    MoneroTxWallet txInQuestion = walletJni.getTx("c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755");
 //    System.out.println(txInQuestion);
     
-//    MoneroRpcConnection daemonConnection = new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD);
-    //walletJni = new MoneroWalletJni(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, NETWORK_TYPE, daemonConnection, 0l);
+
+    
     
 //    String path = TestUtils.TEST_WALLETS_DIR + "/test_wallet_" + UUID.randomUUID().toString();
 //    MoneroWallet walletJni = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, daemonConnection, 0l);
@@ -167,5 +168,21 @@ public class Scratchpad {
 //        assertTrue(((MoneroOutgoingTransfer) transfer).getSubaddressIndices().contains(2));
 //      }
 //    }
+    
+    // generate 20 random stagenet wallets
+    MoneroRpcConnection daemonConnection = new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD);
+    List<String> mnemonics = new ArrayList<String>();
+    List<String> addresses = new ArrayList<String>();
+    for (int i = 0; i < 20; i++) {
+      String temp = UUID.randomUUID().toString();
+      walletJni = new MoneroWalletJni(TestUtils.TEST_WALLETS_DIR + "/" + temp, TestUtils.WALLET_JNI_PW, MoneroNetworkType.STAGENET, daemonConnection, "English");
+      mnemonics.add(walletJni.getMnemonic());
+      addresses.add(walletJni.getPrimaryAddress());
+      ((MoneroWalletJni) walletJni).close();
+    }
+    for (int i = 0; i < 20; i++) {
+      System.out.println(mnemonics.get(i));
+      System.out.println(addresses.get(i));
+    }
   }
 }
