@@ -499,13 +499,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     // collect txs
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-    if (blocks != null) {
-      for (MoneroBlock block : blocks) {
-        sanitizeBlock(block);
-        for (MoneroTx tx : block.getTxs()) {
-          if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
-          txs.add((MoneroTxWallet) tx);
-        }
+    for (MoneroBlock block : blocks) {
+      sanitizeBlock(block);
+      for (MoneroTx tx : block.getTxs()) {
+        if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
+        txs.add((MoneroTxWallet) tx);
       }
     }
     
@@ -543,17 +541,15 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     // collect transfers
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
-    if (blocks != null) {
-      for (MoneroBlock block : blocks) {
-        sanitizeBlock(block);
-        for (MoneroTx tx : block.getTxs()) {
-          if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
-          MoneroTxWallet txWallet = (MoneroTxWallet) tx;
-          if (txWallet.getIncomingTransfers() != null) {
-            for (MoneroIncomingTransfer transfer : txWallet.getIncomingTransfers()) transfers.add(transfer);
-          }
-          if (txWallet.getOutgoingTransfer() != null) transfers.add(txWallet.getOutgoingTransfer());
+    for (MoneroBlock block : blocks) {
+      sanitizeBlock(block);
+      for (MoneroTx tx : block.getTxs()) {
+        if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
+        MoneroTxWallet txWallet = (MoneroTxWallet) tx;
+        if (txWallet.getIncomingTransfers() != null) {
+          for (MoneroIncomingTransfer transfer : txWallet.getIncomingTransfers()) transfers.add(transfer);
         }
+        if (txWallet.getOutgoingTransfer() != null) transfers.add(txWallet.getOutgoingTransfer());
       }
     }
     return transfers;
@@ -580,13 +576,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     // collect outputs
     List<MoneroOutputWallet> outputs = new ArrayList<MoneroOutputWallet>();
-    if (blocks != null) {
-      for (MoneroBlock block : blocks) {
-        sanitizeBlock(block);
-        for (MoneroTx tx : block.getTxs()) {
-          MoneroTxWallet txWallet = (MoneroTxWallet) tx;
-          outputs.addAll(txWallet.getVoutsWallet());
-        }
+    for (MoneroBlock block : blocks) {
+      sanitizeBlock(block);
+      for (MoneroTx tx : block.getTxs()) {
+        MoneroTxWallet txWallet = (MoneroTxWallet) tx;
+        outputs.addAll(txWallet.getVoutsWallet());
       }
     }
     return outputs;
@@ -658,13 +652,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     // collect and return txs
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-    if (blocks != null) {
-      for (MoneroBlock block : blocks) {
-        if (block.getHeight() != null) sanitizeBlock(block);
-        for (MoneroTx tx : block.getTxs()) {
-          if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
-          txs.add((MoneroTxWallet) tx);
-        }
+    for (MoneroBlock block : blocks) {
+      if (block.getHeight() != null) sanitizeBlock(block);
+      for (MoneroTx tx : block.getTxs()) {
+        if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
+        txs.add((MoneroTxWallet) tx);
       }
     }
     return txs;
@@ -694,7 +686,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     catch (Exception e) { throw new MoneroException(e.getMessage()); }
     List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-    if (blocks == null) return txs;
     for (MoneroTx tx : blocks.get(0).getTxs()) {
       tx.setBlock(null); // dereference placeholder block
       txs.add((MoneroTxWallet) tx);
@@ -1204,6 +1195,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private static List<MoneroBlock> deserializeBlocks(String blocksJson) {
     List<MoneroBlockWallet> blockWallets =  JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
     List<MoneroBlock> blocks = new ArrayList<MoneroBlock>();
+    if (blockWallets == null) return blocks;
     for (MoneroBlockWallet blockWallet: blockWallets) blocks.add(blockWallet.toBlock());
     return blocks;
   }
