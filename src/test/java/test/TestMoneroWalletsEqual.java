@@ -159,7 +159,27 @@ public class TestMoneroWalletsEqual {
     assertTrue(tx2.getBlock().getTxs().contains(tx2));
     if (!tx1.getBlock().equals(tx2.getBlock())) {
       System.out.println("Blocks not equal!");
+      System.out.println(tx1.getBlock());
+      System.out.println(tx2.getBlock());
       tx1.getBlock().equals(tx2.getBlock());
+      assertEquals(tx1.getBlock().getTxs().size(), tx2.getBlock().getTxs().size());
+      for (int i = 0; i < tx1.getBlock().getTxs().size(); i++) {
+        MoneroTxWallet txA = (MoneroTxWallet) tx1.getBlock().getTxs().get(i);
+        MoneroTxWallet txB = (MoneroTxWallet) tx2.getBlock().getTxs().get(i);
+        assertTrue(txA.getIncomingTransfers().size() > 0 || txA.getOutgoingTransfer() != null);
+        assertTrue(txB.getIncomingTransfers().size() > 0 || txB.getOutgoingTransfer() != null);
+        System.out.println("HERE!!!");
+        System.out.println(txB);
+        assertEquals(txA.getIncomingTransfers().size(), txB.getIncomingTransfers().size());
+        for (int j = 0; j < txA.getIncomingTransfers().size(); j++) {
+          MoneroIncomingTransfer inTransferA = txA.getIncomingTransfers().get(j);
+          MoneroIncomingTransfer inTransferB = txB.getIncomingTransfers().get(j);
+          if (!inTransferA.equals(inTransferB)) {
+            inTransferA.equals(inTransferB);
+          }
+        }
+        txA.equals(txB);
+      }
     }
     assertEquals(tx1.getBlock(), tx2.getBlock());
   }

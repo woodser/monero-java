@@ -32,6 +32,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -672,6 +674,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // filter and return transfers
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
     for (MoneroTxWallet tx : txs) {
+      Collections.sort(tx.getIncomingTransfers(), new IncomingTransferComparator());  // sort transfers
       if (request.meetsCriteria(tx.getOutgoingTransfer())) transfers.add(tx.getOutgoingTransfer());
       if (tx.getIncomingTransfers() != null) {
         transfers.addAll(Filter.apply(request, tx.getIncomingTransfers()));
@@ -1869,5 +1872,19 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     vouts.add((MoneroOutput) vout); // have to cast to extended type because Java paramaterized types do not recognize inheritance
     tx.setVouts(vouts);
     return tx;
+  }
+  
+  /**
+   * Orders two incoming transfers by ascending account and subaddress indices.
+   */
+  private class IncomingTransferComparator implements Comparator<MoneroIncomingTransfer> {
+
+    @Override
+    public int compare(MoneroIncomingTransfer t1, MoneroIncomingTransfer t2) {
+      if (t1.getAccountIndex() < t2.getAccountIndex()) return -1;
+      else if (t1.getAccountIndex() == t2.getAccountIndex()) return t1.getSubaddressIndex().compareTo(t2.getSubaddressIndex());
+      return 1;
+    }
+    
   }
 }
