@@ -1,5 +1,6 @@
 MONERO CORE ISSUES
 wallet2 getting corrupted (transfers go missing), possibly related to attempting double spend transactions which the daemon rejects
+185d6fc3f67554c6e8f40be4866c05a877c4c7c75da7a4562d35938daca0946c missing incoming transfers but they are known when determining isUsed - #4500 transfer is occluded by same account FIX
 wallet2 network type auto detected when loaded from files on disk
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
 add all_accounts to incoming_transfers, would be huge time saver
@@ -25,15 +26,11 @@ wallet2->get_payments() does not return transfers in order of height, probably o
 no way to get order of block txs from wallet2
 
 14.1.0 RELEASE
-
 - after fresh confirmation, txWalletsEqualOnChain disagrees on txs - that's because one wallet had failed txs
+- why numBlocks discrepency between rpc and jni? - bug in MoneroWallet.cpp where numBlocksToUnlock assigned on 0 balance subaddresses
 
 HIGH
-185d6fc3f67554c6e8f40be4866c05a877c4c7c75da7a4562d35938daca0946c missing incoming transfers but they are known when determining isUsed
-how is subaddress used? transfer does not appear
-why numBlocks discrepency between rpc and jni?
-
-fresh send txs, txWalletsEqualOnChain disagree on numBlocksToUnlock for accounts
+debug wallet rpc tx structure
 test double spend in common wallet, get daemon to reject the transaction, this may then corrupt wallet (verify via 69a0d27a3e019526cb5a969ce9f65f1433b8069b68b3ff3c6a5b992a2983f7a2 which is balanced tx)
 tx c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755 should have outgoing but does not according to jni 
 tx 121158a7e51044e27de6958a9501cc9eba811b2e37bc651ab9a04e749d11cc38 should have outgoing but does not according to rpc
