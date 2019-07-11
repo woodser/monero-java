@@ -672,6 +672,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
     }
     
+    // sort txs by block height
+    Collections.sort(txs, new TxHeightComparator());
+    
     // filter and return transfers
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
     for (MoneroTxWallet tx : txs) {
@@ -1876,16 +1879,27 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   /**
-   * Orders two incoming transfers by ascending account and subaddress indices.
+   * Compares two transfers by ascending account and subaddress indices.
    */
   private class IncomingTransferComparator implements Comparator<MoneroIncomingTransfer> {
-
     @Override
     public int compare(MoneroIncomingTransfer t1, MoneroIncomingTransfer t2) {
       if (t1.getAccountIndex() < t2.getAccountIndex()) return -1;
       else if (t1.getAccountIndex() == t2.getAccountIndex()) return t1.getSubaddressIndex().compareTo(t2.getSubaddressIndex());
       return 1;
     }
-    
+  }
+  
+  /**
+   * Compares two transactions by their height.
+   */
+  private class TxHeightComparator implements Comparator<MoneroTx> {
+    @Override
+    public int compare(MoneroTx tx1, MoneroTx tx2) {
+      if (tx1.getHeight() == null && tx2.getHeight() == null) return 0; // both unconfirmed
+      else if (tx1.getHeight() == null) return 1;   // tx1 is unconfirmed
+      else if (tx2.getHeight() == null) return -1;  // tx2 is unconfirmed
+      return tx1.getHeight().compareTo(tx2.getHeight());
+    }
   }
 }
