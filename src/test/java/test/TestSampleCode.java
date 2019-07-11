@@ -87,8 +87,8 @@ public class TestSampleCode {
     }
     
     // get a wallet transaction by id
-    MoneroTxWallet tx = wallet.getTx("c936b213b236a8ff60da84067c39409db6934faf6c0acffce752ac5a0d53f6b6");
-    String txId = tx.getId();                   // e.g. c936b213b236a8ff6...
+    MoneroTxWallet tx = wallet.getTx("69a0d27a3e019526cb5a969ce9f65f1433b8069b68b3ff3c6a5b992a2983f7a2");
+    String txId = tx.getId();                   // e.g. 69a0d27a3e019526c...
     BigInteger txFee = tx.getFee();             // e.g. 750000
     boolean isConfirmed = tx.getIsConfirmed();  // e.g. true
   }
