@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroSubaddress;
@@ -141,7 +142,6 @@ public class TestMoneroWalletsEqual {
   }
   
   protected void testTxWalletsEqualOnChain(List<MoneroTxWallet> txs1, List<MoneroTxWallet> txs2) {
-    assertEquals(txs1.size(), txs2.size());
     
     // nullify off-chain data for comparison
     List<MoneroTxWallet> allTxs = new ArrayList<MoneroTxWallet>(txs1);
@@ -151,40 +151,27 @@ public class TestMoneroWalletsEqual {
       if (tx.getOutgoingTransfer() != null) tx.getOutgoingTransfer().setAddresses(null);
     }
     
-    // separate unconfirmed txs which are not ordered
-    List<MoneroTxWallet> txs1Confirmed;
-    List<MoneroTxWallet> txs1Unconfirmed = new ArrayList<MoneroTxWallet>();
-    List<MoneroTxWallet> txs2Confirmed;
-    List<MoneroTxWallet> txs2Unconfirmed = new ArrayList<MoneroTxWallet>();
-    Integer firstUnconfirmedIdx;
-    if ((firstUnconfirmedIdx = getFirstUnconfirmedIdx(txs1)) != null) {
-      txs1Unconfirmed = txs1.subList(firstUnconfirmedIdx, txs1.size());
-      txs1Confirmed = txs1.subList(0, firstUnconfirmedIdx);
-    } else {
-      txs1Confirmed = new ArrayList<MoneroTxWallet>(txs1);
-    }
-    if ((firstUnconfirmedIdx = getFirstUnconfirmedIdx(txs2)) != null) {
-      txs2Unconfirmed = txs2.subList(firstUnconfirmedIdx, txs2.size());
-      txs2Confirmed = txs2.subList(0, firstUnconfirmedIdx);
-    } else {
-      txs2Confirmed = new ArrayList<MoneroTxWallet>(txs2);
-    }
-    
-    // test confirmed tx equality which is ordered
-    assertEquals(txs1Confirmed.size(), txs2Confirmed.size());
-    for (int i = 0; i < txs1Confirmed.size(); i++) {
-      testTxWalletsOnChain(txs1.get(i), txs2.get(i));
-    }
-    
-    // test unconfirmed tx equality which is not ordered
-    assertEquals(txs1Unconfirmed.size(), txs2Unconfirmed.size());
+    // compare txs
+    assertEquals(txs1.size(), txs2.size());
     for (MoneroTxWallet tx1 : txs1) {
       boolean found = false;
       for (MoneroTxWallet tx2 : txs2) {
         if (tx1.getId().equals(tx2.getId())) {
+          
+          // test tx equality
           assertEquals(tx1, tx2);
           found = true;
-          break;
+          
+          // test block equality except txs to ignore order
+          if (tx1.getBlock() != null) {
+            List<MoneroTx> blockTxs1 = tx1.getBlock().getTxs();
+            List<MoneroTx> blockTxs2 = tx2.getBlock().getTxs();
+            tx1.getBlock().setTxs();
+            tx2.getBlock().setTxs();
+            assertEquals(tx1.getBlock(), tx2.getBlock());
+            tx1.getBlock().setTxs(blockTxs1);
+            tx2.getBlock().setTxs(blockTxs2);
+          }
         }
       }
       assertTrue(found);  // each tx must have one and only one match
