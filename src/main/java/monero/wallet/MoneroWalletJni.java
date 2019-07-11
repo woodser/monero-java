@@ -495,7 +495,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
     
     // deserialize blocks
-    List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
+    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
     
     // collect txs
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
@@ -539,7 +539,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
     
     // deserialize blocks
-    List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
+    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
     
     // collect transfers
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
@@ -576,7 +576,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     System.out.println("Received getOutputs() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
     
     // deserialize blocks
-    List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
+    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
     
     // collect outputs
     List<MoneroOutputWallet> outputs = new ArrayList<MoneroOutputWallet>();
@@ -654,7 +654,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
     
     // deserialize blocks
-    List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
+    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
     
     // collect and return txs
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
@@ -674,7 +674,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public MoneroTxWallet sweepOutput(MoneroSendRequest request) {
     try {
       String blocksJson = sweepOutputJni(JsonUtils.serialize(request));
-      List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
+      List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
       blocks.get(0).getTxs().get(0).setBlock(null); // dereference placeholder block
       return (MoneroTxWallet) blocks.get(0).getTxs().get(0);
     } catch (Exception e) {
@@ -692,7 +692,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     String blocksJson;
     try { blocksJson = sweepDustJni(doNotRelay); }
     catch (Exception e) { throw new MoneroException(e.getMessage()); }
-    List<MoneroBlockWallet> blocks = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
+    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     if (blocks == null) return txs;
     for (MoneroTx tx : blocks.get(0).getTxs()) {
@@ -1146,6 +1146,41 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       super.setTxs(new ArrayList<MoneroTx>(txs));
       return this;
     }
+    
+    /**
+     * Initializes a new MoneroBlock with direct references to this block.
+     * 
+     * TODO: more efficient way to deserialize directly into MoneroBlock?
+     * 
+     * @return MoneroBlock is the newly initialized block with direct references to this block
+     */
+    public MoneroBlock toBlock() {
+      MoneroBlock block = new MoneroBlock();
+      block.setId(getId());
+      block.setHeight(getHeight());
+      block.setTimestamp(getTimestamp());
+      block.setSize(getSize());
+      block.setWeight(getWeight());
+      block.setLongTermWeight(getLongTermWeight());
+      block.setDepth(getDepth());
+      block.setDifficulty(getDifficulty());
+      block.setCumulativeDifficulty(getCumulativeDifficulty());
+      block.setMajorVersion(getMajorVersion());
+      block.setMinorVersion(getMinorVersion());
+      block.setNonce(getNonce());
+      block.setCoinbaseTxId(getCoinbaseTxId());
+      block.setNumTxs(getNumTxs());
+      block.setOrphanStatus(getOrphanStatus());
+      block.setPrevId(getPrevId());
+      block.setReward(getReward());
+      block.setPowHash(getPowHash());
+      block.setHex(getHex());
+      block.setCoinbaseTx(getCoinbaseTx());
+      block.setTxs(getTxs());
+      block.setTxIds(getTxIds());
+      for (MoneroTx tx : getTxs()) tx.setBlock(block);  // re-assign tx block references
+      return block;
+    }
   }
   
   private static class AccountsContainer {
@@ -1164,6 +1199,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     public List<MoneroKeyImage> keyImages;
     @SuppressWarnings("unused") public KeyImagesContainer() { } // necessary for serialization
     public KeyImagesContainer(List<MoneroKeyImage> keyImages) { this.keyImages = keyImages; };
+  }
+  
+  private static List<MoneroBlock> deserializeBlocks(String blocksJson) {
+    List<MoneroBlockWallet> blockWallets =  JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
+    List<MoneroBlock> blocks = new ArrayList<MoneroBlock>();
+    for (MoneroBlockWallet blockWallet: blockWallets) blocks.add(blockWallet.toBlock());
+    return blocks;
   }
   
 //  /**
