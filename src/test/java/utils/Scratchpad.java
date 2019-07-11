@@ -2,7 +2,9 @@ package utils;
 
 import monero.daemon.MoneroDaemon;
 import monero.wallet.MoneroWalletJni;
-import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.MoneroWalletRpc;
+import monero.wallet.request.MoneroTransferRequest;
+import monero.wallet.request.MoneroTxRequest;
 
 /**
  * Scratchpad for quick scripting.
@@ -13,7 +15,7 @@ public class Scratchpad {
     
     // initialize daemon, wallet, and direct rpc interface
     MoneroDaemon daemon = TestUtils.getDaemonRpc();
-//    MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
+    MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
     MoneroWalletJni walletJni = TestUtils.getWalletJni();
     //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
     
@@ -67,17 +69,43 @@ public class Scratchpad {
 //    MoneroBlock block = daemon.getBlockByHeight(359300l);
 //    System.out.println(block);
     
-//    System.out.println("1");
-//    MoneroTxWallet tx1 = walletJni.getTx("69a0d27a3e019526cb5a969ce9f65f1433b8069b68b3ff3c6a5b992a2983f7a2");
-//    System.out.println(tx1.getBlock());
+    System.out.println("*** HERE ***");
+    System.out.println(walletRpc.getSubaddress(0, 3));
+    System.out.println(walletJni.getSubaddress(0, 3));
+    
+//    System.out.println(walletRpc.getAccounts(true));
+//    System.out.println(walletJni.getAccounts(true));
+    
+//    System.out.println("=== TX 1 ===");
+//
+//    MoneroTxWallet tx0 = walletRpc.getTx("e0fbdbec23253a8f38520b59eea8984045ac90f1344be9e7858318e56826bcac");
+//    System.out.println(tx0);
+//    MoneroSubaddress s1 = walletRpc.getSubaddress(0, 0);
 //    
+//    //System.out.println(s1);
+//    
+//    //System.out.println(tx0);
+//    System.out.println("=== TX 2 ===");
 //    String path = "./test_wallets/test_wallet_5";
 //    MoneroWalletJni wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, walletJni.getDaemonConnection(), 300000l);
 //    wallet.sync();
-//    System.out.println("2");
-//    System.out.println(wallet.getTx("69a0d27a3e019526cb5a969ce9f65f1433b8069b68b3ff3c6a5b992a2983f7a2"));
+//    System.out.println(wallet.getTx("e0fbdbec23253a8f38520b59eea8984045ac90f1344be9e7858318e56826bcac"));
 //    wallet.save();
 //    wallet.close();
+//    
+//    System.out.println("=== TX 3 ===");
+//    walletJni.getTx("e0fbdbec23253a8f38520b59eea8984045ac90f1344be9e7858318e56826bcac");
+    
+
+    
+    
+    
+//    System.out.println("TXS 1");
+//    System.out.println(walletRpc.getTxs());
+//    System.out.println("TXS 2");
+//    System.out.println(walletJni.getTxs());
+//    
+
 //    
 //    System.out.println("3");
 //    wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
