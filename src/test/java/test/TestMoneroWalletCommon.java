@@ -537,7 +537,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       }
     }
     
-    // validate txs and blocks reference each other and blocks are in ascending order unless specific tx ids requested
+    // test that txs and blocks reference each other and blocks are in ascending order unless specific tx ids requested
     int index = 0;
     Long prevBlockHeight = null;
     for (MoneroBlock block : blocks) {
