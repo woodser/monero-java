@@ -574,7 +574,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // filter txs that don't meet transfer request
     request.setTransferRequest(transferRequest);
-    txs = Filter.apply(request, txs);
+    List<MoneroTxWallet> txsRequested = new ArrayList<MoneroTxWallet>();
+    for (MoneroTxWallet tx : txs) {
+      if (request.meetsCriteria(tx)) txsRequested.add(tx);
+      else if (tx.getBlock() != null) tx.getBlock().getTxs().remove(tx);
+    }
+    txs = txsRequested;
     
     // verify all specified tx ids found
     if (request.getTxIds() != null) {
@@ -678,10 +683,28 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // filter and return transfers
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
     for (MoneroTxWallet tx : txs) {
+      
+      // sort transfers
       if (tx.getIncomingTransfers() != null) Collections.sort(tx.getIncomingTransfers(), new IncomingTransferComparator());  // sort transfers
+      
+      // collect outgoing transfer, erase if filtered
       if (request.meetsCriteria(tx.getOutgoingTransfer())) transfers.add(tx.getOutgoingTransfer());
+      else tx.setOutgoingTransfer(null);
+      
+      // collect incoming transfers, erase if unrequested
       if (tx.getIncomingTransfers() != null) {
-        transfers.addAll(Filter.apply(request, tx.getIncomingTransfers()));
+        List<MoneroIncomingTransfer> toRemoves = new ArrayList<MoneroIncomingTransfer>();
+        for (MoneroIncomingTransfer transfer : tx.getIncomingTransfers()) {
+          if (request.meetsCriteria(transfer)) transfers.add(transfer);
+          else toRemoves.add(transfer);
+        }
+        tx.getIncomingTransfers().removeAll(toRemoves);
+        if (tx.getIncomingTransfers().isEmpty()) tx.setIncomingTransfers(null);
+      }
+      
+      // remove unrequested txs from block
+      if (tx.getBlock() != null && tx.getOutgoingTransfer() == null && tx.getIncomingTransfers() == null ) {
+        tx.getBlock().getTxs().remove(tx);
       }
     }
     return transfers;

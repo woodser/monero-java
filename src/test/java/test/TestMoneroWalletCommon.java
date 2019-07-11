@@ -545,7 +545,10 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       else if (request.getTxIds() == null) assertTrue("Blocks are not in order of heights: " + prevBlockHeight + " vs " + block.getHeight(), block.getHeight() > prevBlockHeight);
       for (MoneroTx tx : block.getTxs()) {
         assertTrue(tx.getBlock() == block);
-        if (request.getTxIds() == null) assertTrue(txs.get(index) == tx); // verify tx order relative to blocks unless txs manually re-ordered by requesting by id
+        if (request.getTxIds() == null) {
+          assertEquals(txs.get(index), tx); // verify tx order relative to blocks unless txs manually re-ordered by requesting by id
+          assertTrue(txs.get(index) == tx);
+        }
         index++;
       }
     }
