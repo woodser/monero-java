@@ -2,6 +2,7 @@ package test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
@@ -151,9 +152,19 @@ public class TestMoneroWalletsEqual {
     if (tx1.getOutgoingTransfer() != null) tx1.getOutgoingTransfer().setAddresses(null);
     if (tx2.getOutgoingTransfer() != null) tx2.getOutgoingTransfer().setAddresses(null);
     
-    // compare from blocks which compare entire trees
-    assertTrue(tx1.getBlock().getTxs().contains(tx1));
-    assertTrue(tx2.getBlock().getTxs().contains(tx2));
-    assertEquals(tx1.getBlock(), tx2.getBlock());
+    // handle unconfirmed blocks which are known to daemon
+    if (tx1.getBlock() == null || tx2.getBlock() == null) {
+      assertNull(tx1.getBlock());
+      assertNull(tx2.getBlock());
+      assertTrue(tx1.equals(tx2));
+      return;
+    }
+    
+    // otherwise compare tx's blocks which compare entire trees
+    else {
+      assertTrue(tx1.getBlock().getTxs().contains(tx1));
+      assertTrue(tx2.getBlock().getTxs().contains(tx2));
+      assertEquals(tx1.getBlock(), tx2.getBlock());
+    }
   }
 }
