@@ -1787,7 +1787,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(peer.getRpcPort() >= 0);
     assertNotNull(peer.getIsOnline());
     if (fromConnection) assertNull(peer.getLastSeenTimestamp());
-    else assertTrue(peer.getLastSeenTimestamp() > 0);
+    else assertTrue(peer.getLastSeenTimestamp() >= 0);
     assertTrue(peer.getPruningSeed() >= 0);
   }
 
