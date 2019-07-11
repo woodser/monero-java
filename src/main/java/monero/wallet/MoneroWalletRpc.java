@@ -405,6 +405,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           if (subaddress.getBalance() != null) tgtSubaddress.setBalance(subaddress.getBalance());
           if (subaddress.getUnlockedBalance() != null) tgtSubaddress.setUnlockedBalance(subaddress.getUnlockedBalance());
           if (subaddress.getNumUnspentOutputs() != null) tgtSubaddress.setNumUnspentOutputs(subaddress.getNumUnspentOutputs());
+          if (subaddress.getNumBlocksToUnlock() != null) tgtSubaddress.setNumBlocksToUnlock(subaddress.getNumBlocksToUnlock());
         }
       }
     }
