@@ -34,6 +34,7 @@ account label is actually first subaddress's label
 MoneroOutputWallet implement merge in both Java and c++
 port merging to java (tx merge should merge blocks if they're different, etc)
 MoneroBlock merge coinbaseTx does not set parent block reference
+ability to open wallet while specifying daemon connection; consider switching back to utilities?  thinking that could be clearer
 
 MEDIUM
 test notification of receiving funds
