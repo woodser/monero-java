@@ -686,6 +686,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     catch (Exception e) { throw new MoneroException(e.getMessage()); }
     List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    if (blocks.isEmpty()) return txs;
     for (MoneroTx tx : blocks.get(0).getTxs()) {
       tx.setBlock(null); // dereference placeholder block
       txs.add((MoneroTxWallet) tx);
