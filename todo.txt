@@ -30,6 +30,7 @@ no way to get order of block txs from wallet2
 - why numBlocks discrepency between rpc and jni? - bug in MoneroWallet.cpp where numBlocksToUnlock assigned on 0 balance subaddresses
 
 HIGH
+rpc structure tests
 why is jni wallet not self consistent (testCreateWalletFromKeys)?
 why is wallet data in rpc and jni getting corrupted?  (could be causing jni consistency problem)
 cap creation of accounts by ignoring test if more than X accounts already exist
