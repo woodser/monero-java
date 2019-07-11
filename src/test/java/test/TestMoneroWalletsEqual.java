@@ -14,6 +14,7 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.request.MoneroTxRequest;
 import utils.TestUtils;
 
 /**
@@ -68,7 +69,8 @@ public class TestMoneroWalletsEqual {
     assertEquals(w1.getBalance(), w2.getBalance());
     assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
     testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
-    testTxWalletsEqualOnChain(w1.getTxs(), w2.getTxs());
+    MoneroTxRequest noFailedTxs = new MoneroTxRequest().setIsFailed(false);
+    testTxWalletsEqualOnChain(w1.getTxs(noFailedTxs), w2.getTxs(noFailedTxs));
     // TOOD: compare outputs, etc
   }
   
