@@ -26,7 +26,6 @@ no way to get order of block txs from wallet2
 14.1.0 RELEASE
 
 HIGH
-69a0d27a3e019526cb5a969ce9f65f1433b8069b68b3ff3c6a5b992a2983f7a2 has 9 transfers in one jni and 12 in the other
 wallet equality tests
 add setHeight() to MoneroTxRequest, convenience function getTxs(height), add tests
 walletRpc.getTxs(new MoneroTxRequest().setMinHeight(360559l).setMaxHeight(360559l)) not returning tx despite their being one for rpc and jni
