@@ -3,14 +3,13 @@ package utils;
 import monero.daemon.MoneroDaemon;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
-import monero.wallet.request.MoneroTransferRequest;
-import monero.wallet.request.MoneroTxRequest;
 
 /**
  * Scratchpad for quick scripting.
  */
 public class Scratchpad {
 
+  @SuppressWarnings("unused")
   public static void main(String[] args) {
     
     // initialize daemon, wallet, and direct rpc interface
