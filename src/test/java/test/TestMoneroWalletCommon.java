@@ -522,7 +522,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     for (MoneroTxWallet tx : txs) {
       if (tx.getBlock() == null) unconfirmedTxs.add(tx);
       else {
-        assertTrue(unconfirmedTxs.isEmpty());
         if (!seenBlocks.contains(tx.getBlock())) {
           seenBlocks.add(tx.getBlock());
           blocks.add(tx.getBlock());
