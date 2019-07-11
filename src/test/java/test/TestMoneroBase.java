@@ -8,7 +8,7 @@ import utils.TestUtils;
  * Test base for subclasses to supply the wallet or daemon to test.
  */
 public abstract class TestMoneroBase {
-  
+
   /**
    * Get the daemon to test.
    * 
