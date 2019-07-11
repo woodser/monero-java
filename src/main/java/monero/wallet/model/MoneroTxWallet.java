@@ -185,6 +185,10 @@ public class MoneroTxWallet extends MoneroTx {
     return toString(0, false);
   }
   
+  public String toString(int indent) {
+    return toString(indent, false);
+  }
+  
   public String toString(int indent, boolean oneLine) {
     StringBuilder sb = new StringBuilder();
     

@@ -123,10 +123,6 @@ public class MoneroBlock extends MoneroBlockHeader {
     this.setTxIds(MoneroUtils.reconcile(this.getTxIds(), block.getTxIds()));
     return this;
   }
-
-  public String toString() {
-    return toString(0);
-  }
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();

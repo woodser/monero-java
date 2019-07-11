@@ -11,8 +11,6 @@ import org.junit.Test;
 
 import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroAccount;
-import monero.wallet.model.MoneroIncomingTransfer;
-import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTxWallet;
 import utils.TestUtils;
@@ -70,6 +68,7 @@ public class TestMoneroWalletsEqual {
     assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
     testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
     testTxWalletsEqualOnChain(w1.getTxs(), w2.getTxs());
+    // TOOD: compare outputs, etc
   }
   
   protected void testAccountsEqualOnChain(List<MoneroAccount> accounts1, List<MoneroAccount> accounts2) {
@@ -147,40 +146,14 @@ public class TestMoneroWalletsEqual {
   protected void testTxWalletsOnChain(MoneroTxWallet tx1, MoneroTxWallet tx2) {
     
     // nullify off-chain data for comparison
-    List<MoneroIncomingTransfer> inTransfers1 = tx1.getIncomingTransfers();
-    List<MoneroIncomingTransfer> inTransfers2 = tx2.getIncomingTransfers();
-    MoneroOutgoingTransfer outTransfer1 = tx1.getOutgoingTransfer();
-    MoneroOutgoingTransfer outTransfer2 = tx2.getOutgoingTransfer();
     tx1.setNote(null);
     tx2.setNote(null);
+    if (tx1.getOutgoingTransfer() != null) tx1.getOutgoingTransfer().setAddresses(null);
+    if (tx2.getOutgoingTransfer() != null) tx2.getOutgoingTransfer().setAddresses(null);
     
     // compare from blocks which compare entire trees
     assertTrue(tx1.getBlock().getTxs().contains(tx1));
     assertTrue(tx2.getBlock().getTxs().contains(tx2));
-    if (!tx1.getBlock().equals(tx2.getBlock())) {
-      System.out.println("Blocks not equal!");
-      System.out.println(tx1.getBlock());
-      System.out.println(tx2.getBlock());
-      tx1.getBlock().equals(tx2.getBlock());
-      assertEquals(tx1.getBlock().getTxs().size(), tx2.getBlock().getTxs().size());
-      for (int i = 0; i < tx1.getBlock().getTxs().size(); i++) {
-        MoneroTxWallet txA = (MoneroTxWallet) tx1.getBlock().getTxs().get(i);
-        MoneroTxWallet txB = (MoneroTxWallet) tx2.getBlock().getTxs().get(i);
-        assertTrue(txA.getIncomingTransfers().size() > 0 || txA.getOutgoingTransfer() != null);
-        assertTrue(txB.getIncomingTransfers().size() > 0 || txB.getOutgoingTransfer() != null);
-        System.out.println("HERE!!!");
-        System.out.println(txB);
-        assertEquals(txA.getIncomingTransfers().size(), txB.getIncomingTransfers().size());
-        for (int j = 0; j < txA.getIncomingTransfers().size(); j++) {
-          MoneroIncomingTransfer inTransferA = txA.getIncomingTransfers().get(j);
-          MoneroIncomingTransfer inTransferB = txB.getIncomingTransfers().get(j);
-          if (!inTransferA.equals(inTransferB)) {
-            inTransferA.equals(inTransferB);
-          }
-        }
-        txA.equals(txB);
-      }
-    }
     assertEquals(tx1.getBlock(), tx2.getBlock());
   }
 }
