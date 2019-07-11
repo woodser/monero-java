@@ -674,7 +674,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // filter and return transfers
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
     for (MoneroTxWallet tx : txs) {
-      Collections.sort(tx.getIncomingTransfers(), new IncomingTransferComparator());  // sort transfers
+      if (tx.getIncomingTransfers() != null) Collections.sort(tx.getIncomingTransfers(), new IncomingTransferComparator());  // sort transfers
       if (request.meetsCriteria(tx.getOutgoingTransfer())) transfers.add(tx.getOutgoingTransfer());
       if (tx.getIncomingTransfers() != null) {
         transfers.addAll(Filter.apply(request, tx.getIncomingTransfers()));
