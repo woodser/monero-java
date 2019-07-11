@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -85,7 +84,7 @@ public class TestMoneroDaemonRpc {
   }
   
   // logger
-  private static final Logger LOGGER = Logger.getLogger(TestMoneroDaemonRpc.class);
+  //private static final Logger LOGGER = Logger.getLogger(TestMoneroDaemonRpc.class);
   
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {

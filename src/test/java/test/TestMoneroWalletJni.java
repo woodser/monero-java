@@ -23,7 +23,6 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTxWallet;
-import utils.MoneroSyncPrinter;
 import utils.TestUtils;
 
 /**

@@ -31,6 +31,7 @@ import utils.TestUtils;
 public class TestSampleCode {
   
   @Test
+  @SuppressWarnings("unused")
   public void testWalletSample() {
     
     // create a wallet that uses a monero-wallet-rpc endpoint with authentication
@@ -93,6 +94,7 @@ public class TestSampleCode {
   }
   
   @Test
+  @SuppressWarnings("unused")
   public void testDaemonSample() {
     
     // create a daemon that uses a monero-daemon-rpc endpoint
