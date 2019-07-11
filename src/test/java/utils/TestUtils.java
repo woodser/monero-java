@@ -119,7 +119,6 @@ public class TestUtils {
         MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
         walletJni = new MoneroWalletJni(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, NETWORK_TYPE, daemonConnection, 300000l);
         walletJni.sync(new MoneroSyncPrinter());
-        walletJni.save();
       }
       
       // otherwise open existing wallet and update daemon connection
@@ -127,7 +126,6 @@ public class TestUtils {
         walletJni = new MoneroWalletJni(WALLET_JNI_PATH_1, WALLET_JNI_PW, MoneroNetworkType.STAGENET);
         walletJni.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
         walletJni.sync((long) 0, new MoneroSyncPrinter());
-        walletJni.save();
       }
       
       // Save and close the JNI wallet when the runtime is shutting down in order
