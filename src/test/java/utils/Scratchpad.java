@@ -1,15 +1,8 @@
 package utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import monero.daemon.MoneroDaemon;
-import monero.daemon.model.MoneroBlock;
-import monero.daemon.model.MoneroNetworkType;
-import monero.rpc.MoneroRpcConnection;
-import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
+import monero.wallet.model.MoneroTxWallet;
 
 /**
  * Scratchpad for quick scripting.
@@ -20,8 +13,8 @@ public class Scratchpad {
     
     // initialize daemon, wallet, and direct rpc interface
     MoneroDaemon daemon = TestUtils.getDaemonRpc();
-    //MoneroWallet walletRpc = TestUtils.getWalletRpc();
-    MoneroWallet walletJni = TestUtils.getWalletJni();
+//    MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
+    MoneroWalletJni walletJni = TestUtils.getWalletJni();
     //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
     
 //    // common variables
@@ -71,8 +64,26 @@ public class Scratchpad {
 //      System.out.println(tx);
 //    }
     
-    MoneroBlock block = daemon.getBlockByHeight(359300l);
-    System.out.println(block);
+//    MoneroBlock block = daemon.getBlockByHeight(359300l);
+//    System.out.println(block);
+    
+//    System.out.println("1");
+//    MoneroTxWallet tx1 = walletJni.getTx("69a0d27a3e019526cb5a969ce9f65f1433b8069b68b3ff3c6a5b992a2983f7a2");
+//    System.out.println(tx1.getBlock());
+//    
+//    String path = "./test_wallets/test_wallet_5";
+//    MoneroWalletJni wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, walletJni.getDaemonConnection(), 300000l);
+//    wallet.sync();
+//    System.out.println("2");
+//    System.out.println(wallet.getTx("69a0d27a3e019526cb5a969ce9f65f1433b8069b68b3ff3c6a5b992a2983f7a2"));
+//    wallet.save();
+//    wallet.close();
+//    
+//    System.out.println("3");
+//    wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
+//    wallet.setDaemonConnection(walletJni.getDaemonConnection());
+//    System.out.println(wallet.getTx("69a0d27a3e019526cb5a969ce9f65f1433b8069b68b3ff3c6a5b992a2983f7a2"));
+//    wallet.close();
     
 //    // TODO: implement height
 //    List<MoneroTxWallet> txs = walletJni.getTxs();
@@ -169,20 +180,20 @@ public class Scratchpad {
 //      }
 //    }
     
-    // generate 20 random stagenet wallets
-    MoneroRpcConnection daemonConnection = new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD);
-    List<String> mnemonics = new ArrayList<String>();
-    List<String> addresses = new ArrayList<String>();
-    for (int i = 0; i < 20; i++) {
-      String temp = UUID.randomUUID().toString();
-      walletJni = new MoneroWalletJni(TestUtils.TEST_WALLETS_DIR + "/" + temp, TestUtils.WALLET_JNI_PW, MoneroNetworkType.STAGENET, daemonConnection, "English");
-      mnemonics.add(walletJni.getMnemonic());
-      addresses.add(walletJni.getPrimaryAddress());
-      ((MoneroWalletJni) walletJni).close();
-    }
-    for (int i = 0; i < 20; i++) {
-      System.out.println(mnemonics.get(i));
-      System.out.println(addresses.get(i));
-    }
+//    // generate 20 random stagenet wallets
+//    MoneroRpcConnection daemonConnection = new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD);
+//    List<String> mnemonics = new ArrayList<String>();
+//    List<String> addresses = new ArrayList<String>();
+//    for (int i = 0; i < 20; i++) {
+//      String temp = UUID.randomUUID().toString();
+//      walletJni = new MoneroWalletJni(TestUtils.TEST_WALLETS_DIR + "/" + temp, TestUtils.WALLET_JNI_PW, MoneroNetworkType.STAGENET, daemonConnection, "English");
+//      mnemonics.add(walletJni.getMnemonic());
+//      addresses.add(walletJni.getPrimaryAddress());
+//      ((MoneroWalletJni) walletJni).close();
+//    }
+//    for (int i = 0; i < 20; i++) {
+//      System.out.println(mnemonics.get(i));
+//      System.out.println(addresses.get(i));
+//    }
   }
 }
