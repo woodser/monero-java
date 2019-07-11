@@ -556,6 +556,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     for (MoneroTxWallet tx : txs) {
       Integer prevAccountIdx = null;
       Integer prevSubaddressIdx = null;
+      if (tx.getIncomingTransfers() == null) continue;
       for (MoneroIncomingTransfer transfer : tx.getIncomingTransfers()) {
         if (prevAccountIdx == null) prevAccountIdx = transfer.getAccountIndex();
         else {
