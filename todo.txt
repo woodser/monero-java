@@ -30,8 +30,7 @@ no way to get order of block txs from wallet2
 - why numBlocks discrepency between rpc and jni? - bug in MoneroWallet.cpp where numBlocksToUnlock assigned on 0 balance subaddresses
 
 HIGH
-wallet equality does not test tx order within block
-why is jni wallet not self consistent (testCreateWalletFromKeys)?
+why is rpc vs jni balance different?
 why is wallet data in rpc and jni getting corrupted?  (could be causing jni consistency problem)
 test double spend in common wallet, get daemon to reject the transaction, this may then corrupt wallet (verify via 69a0d27a3e019526cb5a969ce9f65f1433b8069b68b3ff3c6a5b992a2983f7a2 which is balanced tx)
 tx c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755 should have outgoing but does not according to jni 
