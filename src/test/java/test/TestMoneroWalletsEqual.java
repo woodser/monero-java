@@ -2,18 +2,21 @@ package test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
 
 import monero.daemon.model.MoneroTx;
+import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
+import monero.wallet.MoneroWalletRpc.IncomingTransferComparator;
 import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.request.MoneroTxRequest;
@@ -27,6 +30,8 @@ import utils.TestUtils;
  * The RPC and JNI wallets are tested by default unless overriden by subclassing or using the setters.
  */
 public class TestMoneroWalletsEqual {
+  
+  //private static final Logger LOGGER = Logger.getLogger(TestMoneroWalletsEqual.class); // logger
   
   private MoneroWallet w1;
   private MoneroWallet w2;
@@ -68,8 +73,8 @@ public class TestMoneroWalletsEqual {
     assertEquals(w1.getPrimaryAddress(), w2.getPrimaryAddress());
     assertEquals(w1.getPrivateViewKey(), w2.getPrivateViewKey());
     assertEquals(w1.getPrivateSpendKey(), w2.getPrivateSpendKey());
-    MoneroTxRequest noFailedTxs = new MoneroTxRequest().setIsFailed(false);
-    testTxWalletsEqualOnChain(w1.getTxs(noFailedTxs), w2.getTxs(noFailedTxs));
+    MoneroTxRequest confirmedReq = new MoneroTxRequest().setIsConfirmed(true);
+    testTxWalletsEqualOnChain(w1.getTxs(confirmedReq), w2.getTxs(confirmedReq));
     testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
     assertEquals(w1.getBalance(), w2.getBalance());
     assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
@@ -148,50 +153,67 @@ public class TestMoneroWalletsEqual {
     allTxs.addAll(txs2);
     for (MoneroTxWallet tx : allTxs) {
       tx.setNote(null);
-      if (tx.getOutgoingTransfer() != null) tx.getOutgoingTransfer().setAddresses(null);
+      if (tx.getOutgoingTransfer() != null) {
+        tx.getOutgoingTransfer().setAddresses(null);
+        
+        
+        //tx.getOutgoingTransfer().setDestinations(null);
+      }
     }
     
     // compare txs
+    System.out.println(txs1.size() + " txs vs " + txs2.size() + " txs");
     assertEquals(txs1.size(), txs2.size());
     for (MoneroTxWallet tx1 : txs1) {
       boolean found = false;
       for (MoneroTxWallet tx2 : txs2) {
         if (tx1.getId().equals(tx2.getId())) {
           
+          // transfer destination info if known for comparison
+          if (tx1.getOutgoingTransfer() != null && tx1.getOutgoingTransfer().getDestinations() != null) {
+            if (tx2.getOutgoingTransfer() == null || tx2.getOutgoingTransfer().getDestinations() == null) {
+              transferDestinationInfo(tx1, tx2);
+            }
+          } else if (tx2.getOutgoingTransfer() != null && tx2.getOutgoingTransfer().getDestinations() != null) {
+            transferDestinationInfo(tx2, tx1);
+          }
+          
           // test tx equality
           assertEquals(tx1, tx2);
           found = true;
           
           // test block equality except txs to ignore order
-          if (tx1.getBlock() != null) {
-            List<MoneroTx> blockTxs1 = tx1.getBlock().getTxs();
-            List<MoneroTx> blockTxs2 = tx2.getBlock().getTxs();
-            tx1.getBlock().setTxs();
-            tx2.getBlock().setTxs();
-            assertEquals(tx1.getBlock(), tx2.getBlock());
-            tx1.getBlock().setTxs(blockTxs1);
-            tx2.getBlock().setTxs(blockTxs2);
-          }
+          List<MoneroTx> blockTxs1 = tx1.getBlock().getTxs();
+          List<MoneroTx> blockTxs2 = tx2.getBlock().getTxs();
+          tx1.getBlock().setTxs();
+          tx2.getBlock().setTxs();
+          assertEquals(tx1.getBlock(), tx2.getBlock());
+          tx1.getBlock().setTxs(blockTxs1);
+          tx2.getBlock().setTxs(blockTxs2);
         }
       }
       assertTrue(found);  // each tx must have one and only one match
     }
   }
   
-  protected void testTxWalletsOnChain(MoneroTxWallet tx1, MoneroTxWallet tx2) {
+  private static void transferDestinationInfo(MoneroTxWallet src, MoneroTxWallet tgt) {
     
-    // handle unconfirmed blocks which are known to daemon
-    if (tx1.getBlock() == null || tx2.getBlock() == null) {
-      assertNull(tx1.getBlock());
-      assertNull(tx2.getBlock());
-      assertEquals(tx1, tx2);
+    // fill in missing incoming transfers when sending from/to the same account
+    if (src.getIncomingTransfers() != null) {
+      for (MoneroIncomingTransfer inTransfer : src.getIncomingTransfers()) {
+        if (inTransfer.getAccountIndex() == src.getOutgoingTransfer().getAccountIndex()) {
+          tgt.getIncomingTransfers().add(inTransfer);
+        }
+      }
+      Collections.sort(tgt.getIncomingTransfers(), new IncomingTransferComparator());
     }
     
-    // otherwise compare tx's blocks which compare entire trees
+    // transfer info to outgoing transfer
+    if (tgt.getOutgoingTransfer() == null) tgt.setOutgoingTransfer(src.getOutgoingTransfer());
     else {
-      assertTrue(tx1.getBlock().getTxs().contains(tx1));
-      assertTrue(tx2.getBlock().getTxs().contains(tx2));
-      assertEquals(tx1.getBlock(), tx2.getBlock());
+      tgt.getOutgoingTransfer().setDestinations(src.getOutgoingTransfer().getDestinations());
+      tgt.getOutgoingTransfer().setAmount(src.getOutgoingTransfer().getAmount());
+      tgt.getOutgoingTransfer().setNumSuggestedConfirmations(MoneroUtils.reconcile(src.getOutgoingTransfer().getNumSuggestedConfirmations(), tgt.getOutgoingTransfer().getNumSuggestedConfirmations(), null, null, true));  // suggested confirmations can grow with amount
     }
   }
 }

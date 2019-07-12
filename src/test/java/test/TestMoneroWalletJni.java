@@ -243,6 +243,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
 
   private void testSyncMnemonic(Long startHeight) {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     assertTrue("Not connected to daemon", daemon.getIsConnected());
 
     // create wallet from mnemonic
@@ -279,6 +280,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   @Test
   public void testSave() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // create unique path for new test wallet
     String path = TestUtils.TEST_WALLETS_DIR + "/test_wallet_" + UUID.randomUUID().toString();
@@ -362,6 +364,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   @Test
   public void testMoveTo() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // create unique name for test wallet
     String walletName = "test_wallet_" + UUID.randomUUID().toString();
@@ -768,6 +771,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     super.testGetReserveProofWallet();
   }
 
+  @Ignore // TODO: investigate and re-enable
   @Override
   public void testGetReserveProofAccount() {
     super.testGetReserveProofAccount();

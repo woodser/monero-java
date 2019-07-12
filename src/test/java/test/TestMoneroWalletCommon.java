@@ -80,6 +80,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   public TestMoneroWalletCommon() {
     wallet = getTestWallet();
     daemon = getTestDaemon();
+    daemon.flushTxPool(); // start with fresh tx pool
   }
 
   @BeforeClass
@@ -145,6 +146,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   // Can get addresses out of range of used accounts and subaddresses
   @Test
   public void testGetSubaddressAddressOutOfRange() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroAccount> accounts = wallet.getAccounts(true);
     int accountIdx = accounts.size() - 1;
     int subaddressIdx = accounts.get(accountIdx).getSubaddresses().size();
@@ -2314,7 +2316,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // generate non-relayed transactions to sweep dust
     List<MoneroTxWallet> txs = wallet.sweepDust(true);
-    if (txs.isEmpty()) return;  // dust does not exist after rct
+    org.junit.Assume.assumeFalse(txs.isEmpty()); // dust does not exist after rct
     
     // test txs
     TestContext ctx = new TestContext();
@@ -2345,7 +2347,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   public void testSweepDust() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
     List<MoneroTxWallet> txs = wallet.sweepDust();
-    if (txs.isEmpty()) return;  // dust does not exist after rct
+    org.junit.Assume.assumeFalse(txs.isEmpty()); // dust does not exist after rct
     TestContext ctx = new TestContext();
     ctx.wallet = wallet;
     ctx.sendRequest = null;
