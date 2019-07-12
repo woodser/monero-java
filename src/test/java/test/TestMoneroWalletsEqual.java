@@ -178,13 +178,6 @@ public class TestMoneroWalletsEqual {
     }
   }
   
-  private static Integer getFirstUnconfirmedIdx(List<MoneroTxWallet> txs) {
-    for (int i = 0; i < txs.size(); i++) {
-      if (!txs.get(i).getIsConfirmed()) return i;
-    }
-    return null;
-  }
-  
   protected void testTxWalletsOnChain(MoneroTxWallet tx1, MoneroTxWallet tx2) {
     
     // handle unconfirmed blocks which are known to daemon
