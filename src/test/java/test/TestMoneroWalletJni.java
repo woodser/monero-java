@@ -771,7 +771,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     super.testGetReserveProofWallet();
   }
 
-  @Ignore // TODO: investigate and re-enable
   @Override
   public void testGetReserveProofAccount() {
     super.testGetReserveProofAccount();
