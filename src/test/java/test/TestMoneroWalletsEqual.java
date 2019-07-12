@@ -68,11 +68,11 @@ public class TestMoneroWalletsEqual {
     assertEquals(w1.getPrimaryAddress(), w2.getPrimaryAddress());
     assertEquals(w1.getPrivateViewKey(), w2.getPrivateViewKey());
     assertEquals(w1.getPrivateSpendKey(), w2.getPrivateSpendKey());
-    assertEquals(w1.getBalance(), w2.getBalance());
-    assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
-    testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
     MoneroTxRequest noFailedTxs = new MoneroTxRequest().setIsFailed(false);
     testTxWalletsEqualOnChain(w1.getTxs(noFailedTxs), w2.getTxs(noFailedTxs));
+    testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
+    assertEquals(w1.getBalance(), w2.getBalance());
+    assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
     // TOOD: compare outputs, etc
   }
   

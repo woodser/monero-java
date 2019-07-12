@@ -23,6 +23,7 @@ import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTxWallet;
 import utils.TestUtils;
+import utils.WalletSyncPrinter;
 
 /**
  * Tests specific to the JNI wallet.
@@ -165,7 +166,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // sync the wallets until same height
     while (wallet.getHeight() != walletKeys.getHeight()) {
       wallet.sync();
-      walletKeys.sync();
+      walletKeys.sync(new WalletSyncPrinter());
     }
     
     // test equality
