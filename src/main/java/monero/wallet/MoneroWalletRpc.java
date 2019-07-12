@@ -1904,7 +1904,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   /**
    * Compares two transfers by ascending account and subaddress indices.
    */
-  private class IncomingTransferComparator implements Comparator<MoneroIncomingTransfer> {
+  public static class IncomingTransferComparator implements Comparator<MoneroIncomingTransfer> {
     @Override
     public int compare(MoneroIncomingTransfer t1, MoneroIncomingTransfer t2) {
       if (t1.getAccountIndex() < t2.getAccountIndex()) return -1;
