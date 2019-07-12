@@ -44,6 +44,7 @@ MoneroOutputWallet implement merge in both Java and c++
 port merging to java (tx merge should merge blocks if they're different, etc)
 MoneroBlock merge coinbaseTx does not set parent block reference
 ability to open wallet while specifying daemon connection; consider switching back to utilities?  thinking that could be clearer
+work through problems of testing fresh wallet again
 
 MEDIUM
 test notification of receiving funds

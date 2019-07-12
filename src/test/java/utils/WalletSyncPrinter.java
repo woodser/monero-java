@@ -5,15 +5,15 @@ import monero.wallet.model.MoneroSyncListener;
 /**
  * Print sync progress every X blocks.
  */
-public class MoneroSyncPrinter implements MoneroSyncListener {
+public class WalletSyncPrinter implements MoneroSyncListener {
   
   private long blockResolution;
   
-  public MoneroSyncPrinter() {
+  public WalletSyncPrinter() {
     this(25000l);
   }
   
-  public MoneroSyncPrinter(long blockResolution) {
+  public WalletSyncPrinter(long blockResolution) {
     this.blockResolution = blockResolution;
   }
   

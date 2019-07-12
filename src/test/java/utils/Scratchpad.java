@@ -68,9 +68,7 @@ public class Scratchpad {
 //    MoneroBlock block = daemon.getBlockByHeight(359300l);
 //    System.out.println(block);
     
-    System.out.println("*** HERE ***");
-    System.out.println(walletRpc.getSubaddress(0, 3));
-    System.out.println(walletJni.getSubaddress(0, 3));
+    System.out.println(walletJni.getTx("c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755"));
     
 //    System.out.println(walletRpc.getAccounts(true));
 //    System.out.println(walletJni.getAccounts(true));
