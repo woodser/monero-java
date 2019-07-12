@@ -1,6 +1,7 @@
 MONERO CORE ISSUES
 wallet2 getting corrupted (transfers go missing), possibly related to attempting double spend transactions which the daemon rejects
 185d6fc3f67554c6e8f40be4866c05a877c4c7c75da7a4562d35938daca0946c missing incoming transfers but they are known when determining isUsed - #4500 transfer is occluded by same account FIX
+ocasional: testGetTxsByIdsInPool() hangs (have no peer connections?)
 wallet2 network type auto detected when loaded from files on disk
 incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
 add all_accounts to incoming_transfers, would be huge time saver
@@ -8,7 +9,6 @@ sometimes see non-zero spent amount in testCheckReserve()
 WARNING: key proof indicates no funds received despite transfer (txid=76983ebf1d2e62141c19e190355e146145cb03988c5bfaf857b65dc0e15d378f, key=5246bf34d97dd379843ea31cb2bddfe41a89db73be4bd72fdc1ffe1b4d8ac70d, address=76gP3JEGAhnS5sgnB7LHRP2tbidL8ChvkJATJADQF4SpBcbN8bUgSZyQmTpdMQqyW129dh3zV5XscaBhkU6WTUKQVdDykFV, amount=44933)
 occasional: seg fault 11 in testGetReserveProofAccount() (with no unlocked balance???), wallet rpc get_reserve_proof
 wallet rpc `open_wallet` spends a lot of time generating ssl certificates and Trying to decrypt cache data when wallet is already open, can't just skip check?
-ocasional: testGetTxsByIdsInPool() hangs (have no peer connections?)
 ocasional: testGetTxsByIdsInPool() tx fails testTx() as double spend
 one time: testCheckTxKey() -24: No tx secret key is stored for this tx, RPC request: 'get_tx_key' with params: {"txid":"e779dbb7fbff77544ea39de062b12c1d722901ed937a833307c1b5b3cea41069"}
 Marking output 18666(<9cd46fd977f2d8f6112cc87592677cbd76801b318c6e607dd31b9a25dd7d9530>) as unspent, it was marked as spent
@@ -37,6 +37,7 @@ test double spend in common wallet, get daemon to reject the transaction, this m
 tx c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755 should have outgoing but does not according to jni 
 tx 121158a7e51044e27de6958a9501cc9eba811b2e37bc651ab9a04e749d11cc38 should have outgoing but does not according to rpc
 wallet equality tests
+getReserveProofAccount() failing again
 cap creation of accounts by ignoring test if more than X accounts already exist
 add setHeight() to MoneroTxRequest, convenience function getTxs(height), add tests
 walletRpc.getTxs(new MoneroTxRequest().setMinHeight(360559l).setMaxHeight(360559l)) not returning tx despite their being one for rpc and jni
