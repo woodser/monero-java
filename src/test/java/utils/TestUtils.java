@@ -75,32 +75,20 @@ public class TestUtils {
   public static MoneroWalletRpc getWalletRpc() {
     if (walletRpc == null) {
       
-      // construct wallet
+      // construct wallet rpc instance with daemon connection
       MoneroRpcConnection rpc = new MoneroRpcConnection(WALLET_RPC_URI, WALLET_RPC_USERNAME, WALLET_RPC_PASSWORD);
       walletRpc = new MoneroWalletRpc(rpc);
       
-      // create rpc wallet file if necessary
-      try {
-        walletRpc.createWallet(WALLET_RPC_NAME_1, WALLET_RPC_PW, "English");
-      } catch (MoneroRpcException e) {
-        assertEquals(-21, (int) e.getCode());  // exception is ok if wallet already created
-      }
-      
-      // open rpc wallet file
+      // open rpc test wallet
       try {
         walletRpc.openWallet(WALLET_RPC_NAME_1, WALLET_RPC_PW);
       } catch (MoneroRpcException e) {
-        assertEquals(-1, (int) e.getCode()); // TODO (monero-wallet-rpc): -1: Failed to open wallet if wallet is already open; better code and message
+        if (-1 != e.getCode()) throw e; // -1 indicates wallet is already open, which is ok
       }
       
-      // refresh wallet
-      try {
-        walletRpc.rescanSpent();
-      } catch (MoneroRpcException e) {
-        e.printStackTrace();
-        assertEquals((int) -38, (int) e.getCode());  // TODO: (monero-wallet-rpc) sometimes getting -38: no connection to daemon on rescan call (after above calls)
-        System.out.println("WARNING: received -38: no connection to daemon on rescan call after create/open, ignoring...");
-      }
+      // ensure we're testing the right wallet
+      assertEquals(TestUtils.TEST_MNEMONIC, walletRpc.getMnemonic());
+      assertEquals(TestUtils.TEST_ADDRESS, walletRpc.getPrimaryAddress());
     }
     
     // return cached wallet rpc
