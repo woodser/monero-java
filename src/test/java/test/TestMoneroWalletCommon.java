@@ -1753,6 +1753,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   }
   
   // Can import key images
+  @Ignore // TODO monero core: importing key images can cause erasure of incoming transfers per wallet2.cpp:11957
   @Test
   public void testImportKeyImages() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);

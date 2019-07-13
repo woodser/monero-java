@@ -34,6 +34,7 @@ get_transfers should default to all subaddresses, else all subaddresses must be 
 get_transfer_by_txid add tx_size
 incoming_transfers add address (low priority), fee, timestamp, unlock_time, is_double_spend, height, tx_size (misdocumented)
 get transactions per block
+lots of internal wallet errors when daemon rpc tests run
 
 LOW
 get_reserve_proof document default account 0
