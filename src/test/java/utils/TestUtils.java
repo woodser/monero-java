@@ -46,7 +46,7 @@ public class TestUtils {
   public static final String TEST_LANGUAGE = "English";
   public static final String TEST_MNEMONIC = "dilute arrow koala gorilla loudly uttered bygones stockpile problems efficient alerts lordship sighting launching hire tycoon hence ultimate fetches napkin cube usage agony army efficient"; 
   public static final String TEST_ADDRESS = "55PEGdaqz7iW3M4Puddfup1LumsrF2hHc4cQrVnFLVJ2eXexULWwYEUDRKHTRb6uouM9ybJs7GYcEXFht25jw3HZKHcULwp";
-  public static final long TEST_RESTORE_HEIGHT = 3000000l;
+  public static final long TEST_RESTORE_HEIGHT = 3630000l;
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class);
