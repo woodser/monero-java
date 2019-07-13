@@ -4,6 +4,7 @@ HIGH
 incoming transactions are missing when outgoing counterpart from same account (only on unconfirmed because wallet cache data becomes used?) (https://github.com/monero-project/monero/issues/4500)
 wallet2 incoming transfers from/to same account go missing on key image export and re-import (wallet2.cpp:11957 erases incoming counterpart)
 185d6fc3f67554c6e8f40be4866c05a877c4c7c75da7a4562d35938daca0946c missing incoming transfers but they are known when determining isUsed - #4500 transfer is occluded by same account FIX
+getReserveProofAccount() failing again
 
 MEDIUM
 my daemon on stagenet says `Sync data returned a new top block candidate: 365062 -> 365545`.  if I mine, the daemon seems to mine on 365062.  if I create a new wallet, its restore height is set to 365545, but daemon `get_height` reports 365062
@@ -58,10 +59,9 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 - why is rpc vs jni balance different? - rpc calls rescan_spent which queries daemon's tx pool which needed to be flushed (lingering double spends in there?)
 
 HIGH
-wallet equality tests
 jni manually recognize unconfirmed data
+wallet equality tests
 testCheckTxProof() claims no outgoing tx with destinations after running sendToMultiple() and confirmations
-getReserveProofAccount() failing again
 cap creation of accounts by ignoring test if more than X accounts already exist
 add setHeight() to MoneroTxRequest, convenience function getTxs(height), add tests
 walletRpc.getTxs(new MoneroTxRequest().setMinHeight(360559l).setMaxHeight(360559l)) not returning tx despite their being one for rpc and jni
