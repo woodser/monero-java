@@ -5,6 +5,7 @@ incoming transactions are missing when outgoing counterpart from same account (o
 wallet2 incoming transfers from/to same account go missing on key image export and re-import (wallet2.cpp:11957 erases incoming counterpart)
 185d6fc3f67554c6e8f40be4866c05a877c4c7c75da7a4562d35938daca0946c missing incoming transfers but they are known when determining isUsed - #4500 transfer is occluded by same account FIX
 getReserveProofAccount() failing again
+wallet2 get_payments() min_height is exclusive and max_height is inclusive
 
 MEDIUM
 my daemon on stagenet says `Sync data returned a new top block candidate: 365062 -> 365545`.  if I mine, the daemon seems to mine on 365062.  if I create a new wallet, its restore height is set to 365545, but daemon `get_height` reports 365062

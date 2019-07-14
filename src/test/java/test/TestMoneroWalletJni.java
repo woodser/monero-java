@@ -693,6 +693,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   public void testGetTxsWithConfiguration() {
     super.testGetTxsWithConfiguration();
   }
+  
+  @Override
+  public void testGetTxsByHeight() {
+    super.testGetTxsByHeight();
+  }
 
   @Override
   public void testGetTxsWithPaymentIds() {
