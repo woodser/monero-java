@@ -1,8 +1,14 @@
 package utils;
 
+import static org.junit.Assert.assertFalse;
+
+import java.util.List;
+
 import monero.daemon.MoneroDaemon;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
+import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.request.MoneroTxRequest;
 
 /**
  * Scratchpad for quick scripting.
@@ -68,7 +74,10 @@ public class Scratchpad {
 //    MoneroBlock block = daemon.getBlockByHeight(359300l);
 //    System.out.println(block);
     
-    System.out.println(walletJni.getTx("c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755"));
+    List<MoneroTxWallet> txs = walletJni.getTxs(new MoneroTxRequest().setMinHeight(364866l).setMaxHeight(364866l));
+    assertFalse(txs.isEmpty());
+    
+    //System.out.println(walletJni.getTx("c40d5dbf49172a1a42111e414ee243e8c7a45cf0c09c5d91c5cef21672145755"));
     
 //    System.out.println(walletRpc.getAccounts(true));
 //    System.out.println(walletJni.getAccounts(true));

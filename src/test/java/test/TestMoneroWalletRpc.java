@@ -540,6 +540,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testGetTxsWithConfiguration() {
     super.testGetTxsWithConfiguration();
   }
+  
+  @Override
+  public void testGetTxsByHeight() {
+    super.testGetTxsByHeight();
+  }
 
   @Override
   public void testGetTxsWithPaymentIds() {

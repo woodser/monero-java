@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -660,7 +661,56 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertTrue(tx.getOutgoingTransfer().getDestinations().size() > 0);
     }
     
-    // test block height filtering
+    // include outputs with transactions
+    ctx = new TestContext();
+    ctx.includeOutputs = true;
+    txs = getAndTestTxs(wallet, new MoneroTxRequest().setIncludeOutputs(true), ctx, true);
+    boolean found = false;
+    for (MoneroTxWallet tx : txs) {
+      if (tx.getVouts() != null) {
+        assertTrue(tx.getVouts().size() > 0);
+        found = true;
+      } else {
+        assertTrue(tx.getIsOutgoing() || (tx.getIsIncoming() && !tx.getIsConfirmed())); // TODO: monero-wallet-rpc: return vouts for unconfirmed txs
+      }
+    }
+    assertTrue("No vouts found in txs", found);
+  }
+  
+  @Test
+  public void testGetTxsByHeight() {
+    
+    // get all confirmed txs for testing
+    List<MoneroTxWallet> txs = wallet.getTxs(new MoneroTxRequest().setIsConfirmed(true));
+    
+    // collect all tx heights
+    List<Long> txHeights = new ArrayList<Long>();
+    for (MoneroTxWallet tx : txs) txHeights.add(tx.getHeight());
+    
+    // get height that most txs occur at
+    Map<Long, Integer> heightCounts = countNumInstances(txHeights);
+    assertFalse("Wallet has no confirmed txs; run send tests", heightCounts.isEmpty());
+    Set<Long> heightModes = getModes(heightCounts);
+    Long modeHeight = heightModes.iterator().next();
+    
+    // fetch txs at mode height
+    List<MoneroTxWallet> modeTxs = wallet.getTxs(new MoneroTxRequest().setHeight(modeHeight));
+    //assertEquals(modeTxs, wallet.getTxsByHeight(modeHeight)); // TODO: enable this
+    assertEquals((int) heightCounts.get(modeHeight), (int) modeTxs.size());
+    for (MoneroTxWallet tx : modeTxs) {
+      assertEquals(modeHeight, tx.getHeight());
+    }
+    
+    // fetch txs at mode height by range
+    System.out.println("Mode height: " + modeHeight);
+    List<MoneroTxWallet> modeTxsByRange = wallet.getTxs(new MoneroTxRequest().setMinHeight(modeHeight - 1).setMaxHeight(modeHeight));
+    assertEquals(modeTxs.size(), modeTxsByRange.size());
+    assertEquals(modeTxs, modeTxsByRange);
+    
+    // fetch all txs by range
+    assertEquals(txs, wallet.getTxs(new MoneroTxRequest().setMinHeight(txs.get(0).getHeight()).setMaxHeight(txs.get(txs.size() - 1).getHeight())));
+    
+    // test some filtered by range
     {
       txs = wallet.getTxs(new MoneroTxRequest().setIsConfirmed(true));
       assertTrue("No transactions; run send to multiple test", txs.size() > 0);
@@ -692,21 +742,27 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         assertTrue(height >= minHeight && height <= maxHeight);
       }
     }
-    
-    // include outputs with transactions
-    ctx = new TestContext();
-    ctx.includeOutputs = true;
-    txs = getAndTestTxs(wallet, new MoneroTxRequest().setIncludeOutputs(true), ctx, true);
-    boolean found = false;
-    for (MoneroTxWallet tx : txs) {
-      if (tx.getVouts() != null) {
-        assertTrue(tx.getVouts().size() > 0);
-        found = true;
-      } else {
-        assertTrue(tx.getIsOutgoing() || (tx.getIsIncoming() && !tx.getIsConfirmed())); // TODO: monero-wallet-rpc: return vouts for unconfirmed txs
-      }
+  }
+  
+  private static Map<Long, Integer> countNumInstances(List<Long> instances) {
+    Map<Long, Integer> heightCounts = new HashMap<Long, Integer>();
+    for (Long instance : instances) {
+      Integer count = heightCounts.get(instance);
+      heightCounts.put(instance, count == null ? 1 : count + 1);
     }
-    assertTrue("No vouts found in txs", found);
+    return heightCounts;
+  }
+  
+  private static Set<Long> getModes(Map<Long, Integer> counts) {
+    Set<Long> modes = new HashSet<Long>();
+    Integer maxCount = null;
+    for (Integer count : counts.values()) {
+      if (maxCount == null || count > maxCount) maxCount = count;
+    }
+    for (Entry<Long, Integer> entry : counts.entrySet()) {
+      if (entry.getValue() == maxCount) modes.add(entry.getKey());
+    }
+    return modes;
   }
   
   // NOTE: payment ids are deprecated so this test will require an old wallet to pass

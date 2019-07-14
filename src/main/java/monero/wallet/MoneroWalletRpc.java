@@ -623,7 +623,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // build params for get_transfers rpc call
     Map<String, Object> params = new HashMap<String, Object>();
     boolean canBeConfirmed = !Boolean.FALSE.equals(txReq.getIsConfirmed()) && !Boolean.TRUE.equals(txReq.getInTxPool()) && !Boolean.TRUE.equals(txReq.getIsFailed()) && !Boolean.FALSE.equals(txReq.getIsRelayed());
-    boolean canBeInTxPool = !Boolean.TRUE.equals(txReq.getIsConfirmed()) && !Boolean.FALSE.equals(txReq.getInTxPool()) && !Boolean.TRUE.equals(txReq.getIsFailed()) && !Boolean.FALSE.equals(txReq.getIsRelayed()) && txReq.getHeight() == null && txReq.getMinHeight() == null;
+    boolean canBeInTxPool = !Boolean.TRUE.equals(txReq.getIsConfirmed()) && !Boolean.FALSE.equals(txReq.getInTxPool()) && !Boolean.TRUE.equals(txReq.getIsFailed()) && !Boolean.FALSE.equals(txReq.getIsRelayed()) && txReq.getHeight() == null && txReq.getMinHeight() == null && txReq.getMaxHeight() == null;
     boolean canBeIncoming = !Boolean.FALSE.equals(request.getIsIncoming()) && !Boolean.TRUE.equals(request.getIsOutgoing()) && !Boolean.TRUE.equals(request.getHasDestinations());
     boolean canBeOutgoing = !Boolean.FALSE.equals(request.getIsOutgoing()) && !Boolean.TRUE.equals(request.getIsIncoming());
     params.put("in", canBeIncoming && canBeConfirmed);
