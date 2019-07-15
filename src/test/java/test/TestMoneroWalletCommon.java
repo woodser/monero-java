@@ -677,6 +677,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertTrue("No vouts found in txs", found);
   }
   
+  // Can get transactions by height
   @Test
   public void testGetTxsByHeight() {
     
@@ -695,15 +696,13 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // fetch txs at mode height
     List<MoneroTxWallet> modeTxs = wallet.getTxs(new MoneroTxRequest().setHeight(modeHeight));
-    //assertEquals(modeTxs, wallet.getTxsByHeight(modeHeight)); // TODO: enable this
     assertEquals((int) heightCounts.get(modeHeight), (int) modeTxs.size());
     for (MoneroTxWallet tx : modeTxs) {
       assertEquals(modeHeight, tx.getHeight());
     }
     
     // fetch txs at mode height by range
-    System.out.println("Mode height: " + modeHeight);
-    List<MoneroTxWallet> modeTxsByRange = wallet.getTxs(new MoneroTxRequest().setMinHeight(modeHeight - 1).setMaxHeight(modeHeight));
+    List<MoneroTxWallet> modeTxsByRange = wallet.getTxs(new MoneroTxRequest().setMinHeight(modeHeight).setMaxHeight(modeHeight));
     assertEquals(modeTxs.size(), modeTxsByRange.size());
     assertEquals(modeTxs, modeTxsByRange);
     

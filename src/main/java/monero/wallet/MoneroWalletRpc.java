@@ -631,7 +631,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("pool", canBeIncoming && canBeInTxPool);
     params.put("pending", canBeOutgoing && canBeInTxPool);
     params.put("failed", !Boolean.FALSE.equals(txReq.getIsFailed()) && !Boolean.TRUE.equals(txReq.getIsConfirmed()) && !Boolean.TRUE.equals(txReq.getInTxPool()));
-    if (txReq.getMinHeight() != null) params.put("min_height", txReq.getMinHeight()); 
+    if (txReq.getMinHeight() != null) {
+      if (txReq.getMinHeight() > 0) params.put("min_height", txReq.getMinHeight() - 1); // TODO monero core: wallet2::get_payments() min_height is exclusive, so manually offset to match intended range (issues #5751, #5598)
+      else params.put("min_height", txReq.getMinHeight());
+    }
     if (txReq.getMaxHeight() != null) params.put("max_height", txReq.getMaxHeight());
     params.put("filter_by_height", txReq.getMinHeight() != null || txReq.getMaxHeight() != null);
     if (request.getAccountIndex() == null) {
