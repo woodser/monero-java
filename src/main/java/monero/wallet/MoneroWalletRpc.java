@@ -688,7 +688,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     for (MoneroTxWallet tx : txs) {
       
       // sort transfers
-      if (tx.getIncomingTransfers() != null) Collections.sort(tx.getIncomingTransfers(), new IncomingTransferComparator());  // sort transfers
+      if (tx.getIncomingTransfers() != null) Collections.sort(tx.getIncomingTransfers(), new IncomingTransferComparator());
       
       // collect outgoing transfer, erase if filtered
       if (request.meetsCriteria(tx.getOutgoingTransfer())) transfers.add(tx.getOutgoingTransfer());
@@ -1925,7 +1925,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (tx1.getHeight() == null && tx2.getHeight() == null) return 0; // both unconfirmed
       else if (tx1.getHeight() == null) return 1;   // tx1 is unconfirmed
       else if (tx2.getHeight() == null) return -1;  // tx2 is unconfirmed
-      return tx1.getHeight().compareTo(tx2.getHeight());
+      int diff = tx1.getHeight().compareTo(tx2.getHeight());
+      if (diff != 0) return diff;
+      return tx1.getBlock().getTxs().indexOf(tx1) - tx2.getBlock().getTxs().indexOf(tx2); // txs are in the same block so retain their original order
     }
   }
 }

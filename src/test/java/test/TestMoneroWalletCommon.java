@@ -469,7 +469,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     boolean nonDefaultIncoming = false;
     List<MoneroTxWallet> txs1 = getCachedTxs();
-    testGetTxsStructure(txs1);
     List<MoneroTxWallet> txs2 = getAndTestTxs(wallet, null, null, true);
     assertEquals(txs2.size(), txs1.size());
     
@@ -741,27 +740,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         assertTrue(height >= minHeight && height <= maxHeight);
       }
     }
-  }
-  
-  private static Map<Long, Integer> countNumInstances(List<Long> instances) {
-    Map<Long, Integer> heightCounts = new HashMap<Long, Integer>();
-    for (Long instance : instances) {
-      Integer count = heightCounts.get(instance);
-      heightCounts.put(instance, count == null ? 1 : count + 1);
-    }
-    return heightCounts;
-  }
-  
-  private static Set<Long> getModes(Map<Long, Integer> counts) {
-    Set<Long> modes = new HashSet<Long>();
-    Integer maxCount = null;
-    for (Integer count : counts.values()) {
-      if (maxCount == null || count > maxCount) maxCount = count;
-    }
-    for (Entry<Long, Integer> entry : counts.entrySet()) {
-      if (entry.getValue() == maxCount) modes.add(entry.getKey());
-    }
-    return modes;
   }
   
   // NOTE: payment ids are deprecated so this test will require an old wallet to pass
@@ -2778,6 +2756,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   private List<MoneroTxWallet> getCachedTxs() {
     if (txCache != null) return txCache;
     txCache = wallet.getTxs();
+    testGetTxsStructure(txCache);
     return txCache;
   }
   
@@ -3349,7 +3328,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       for (MoneroTx tx : block.getTxs()) {
         assertTrue(tx.getBlock() == block);
         if (request.getTxIds() == null) {
-          assertEquals(txs.get(index), tx); // verify tx order relative to blocks unless txs manually re-ordered by requesting by id
+          assertEquals(txs.get(index).getId(), tx.getId()); // verify tx order is self-consistent with blocks unless txs manually re-ordered by requesting by id
           assertTrue(txs.get(index) == tx);
         }
         index++;
@@ -3396,5 +3375,26 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
 //    
 //    // order of ids must match
 //    assertEquals(expectedTxIds, txIds);
+  }
+  
+  private static Map<Long, Integer> countNumInstances(List<Long> instances) {
+    Map<Long, Integer> heightCounts = new HashMap<Long, Integer>();
+    for (Long instance : instances) {
+      Integer count = heightCounts.get(instance);
+      heightCounts.put(instance, count == null ? 1 : count + 1);
+    }
+    return heightCounts;
+  }
+  
+  private static Set<Long> getModes(Map<Long, Integer> counts) {
+    Set<Long> modes = new HashSet<Long>();
+    Integer maxCount = null;
+    for (Integer count : counts.values()) {
+      if (maxCount == null || count > maxCount) maxCount = count;
+    }
+    for (Entry<Long, Integer> entry : counts.entrySet()) {
+      if (entry.getValue() == maxCount) modes.add(entry.getKey());
+    }
+    return modes;
   }
 }
