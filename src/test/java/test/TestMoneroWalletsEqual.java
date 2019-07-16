@@ -110,8 +110,6 @@ public class TestMoneroWalletsEqual {
     List<MoneroSubaddress> subaddresses2 = account2.getSubaddresses();
     account1.setSubaddresses(null);
     account2.setSubaddresses(null);
-    account1.setLabel(null);
-    account2.setLabel(null);
     account1.setTag(null);
     account2.setTag(null);
     

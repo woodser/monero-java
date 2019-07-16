@@ -307,16 +307,16 @@ public interface MoneroWallet {
   public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses);
   
   /**
-   * Create a new account without a label.
+   * Create a new account.
    * 
    * @return the created account
    */
   public MoneroAccount createAccount();
 
   /**
-   * Create a new account.
+   * Create a new account with a label for the first subaddress.
    * 
-   * @param label specifies the label for the account (optional)
+   * @param label specifies the label for account's first subaddress (optional)
    * @return the created account
    */
   public MoneroAccount createAccount(String label);
