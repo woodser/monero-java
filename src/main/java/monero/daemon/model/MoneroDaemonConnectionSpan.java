@@ -10,10 +10,10 @@ public class MoneroDaemonConnectionSpan {
   private String connectionId;
   private Integer numBlocks;
   private String remoteAddress;
-  private BigInteger rate;
-  private BigInteger speed;
-  private BigInteger size;
-  private Integer startBlockHeight;
+  private Long rate;
+  private Long speed;
+  private Long size;
+  private BigInteger startBlockHeight;
   
   public String getConnectionId() {
     return connectionId;
@@ -39,35 +39,35 @@ public class MoneroDaemonConnectionSpan {
     this.remoteAddress = remoteAddress;
   }
   
-  public BigInteger getRate() {
+  public Long getRate() {
     return rate;
   }
   
-  public void setRate(BigInteger rate) {
+  public void setRate(Long rate) {
     this.rate = rate;
   }
   
-  public BigInteger getSpeed() {
+  public Long getSpeed() {
     return speed;
   }
   
-  public void setSpeed(BigInteger speed) {
+  public void setSpeed(Long speed) {
     this.speed = speed;
   }
   
-  public BigInteger getSize() {
+  public Long getSize() {
     return size;
   }
   
-  public void setSize(BigInteger size) {
+  public void setSize(Long size) {
     this.size = size;
   }
   
-  public Integer getStartBlockHeight() {
+  public BigInteger getStartBlockHeight() {
     return startBlockHeight;
   }
   
-  public void setStartBlockHeight(Integer startBlockHeight) {
+  public void setStartBlockHeight(BigInteger startBlockHeight) {
     this.startBlockHeight = startBlockHeight;
   }
 }

@@ -1732,6 +1732,17 @@ public class TestMoneroDaemonRpc {
     assertTrue(syncInfo.getNextNeededPruningSeed() >= 0);
     assertNull(syncInfo.getOverview());
   }
+  
+  private static void testDaemonConnectionSpan(MoneroDaemonConnectionSpan span) {
+    assertNotNull(span);
+    assertNotNull(span.getConnectionId());
+    assertFalse(span.getConnectionId().isEmpty());
+    assertTrue(span.getNumBlocks() > 0);
+    assertTrue(span.getRemoteAddress() == null || !span.getRemoteAddress().isEmpty());
+    assertTrue(span.getRate() > 0);
+    assertTrue(span.getSpeed() > 0);
+    assertTrue(span.getSize() > 0);
+  }
 
   private static void testHardForkInfo(MoneroHardForkInfo hardForkInfo) {
     assertNotNull(hardForkInfo.getEarliestHeight());
@@ -1816,10 +1827,6 @@ public class TestMoneroDaemonRpc {
     } else {
       assertNull(result.getDownloadPath());
     }
-  }
-  
-  private static void testDaemonConnectionSpan(MoneroDaemonConnectionSpan span) {
-    throw new RuntimeException("Not implemented");
   }
   
   private static void testSubmitTxResultGood(MoneroSubmitTxResult result) {

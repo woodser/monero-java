@@ -1391,7 +1391,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
           List<Object> overview = JsonUtils.deserialize((String) val, new TypeReference<List<Object>>(){});
           if (!overview.isEmpty()) LOGGER.warn("WARNING: ignoring non-empty 'overview' field (not implemented): " + overview); // TODO
         } catch (Exception e) {
-          e.printStackTrace();
+          //e.printStackTrace();
           LOGGER.warn("WARNING: failed to parse 'overview' field: " + val);
         }
       }
@@ -1420,7 +1420,19 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
   
   private static MoneroDaemonConnectionSpan convertRpcConnectionSpan(Map<String, Object> rpcConnectionSpan) {
-    throw new RuntimeException("Not implemented");
+    MoneroDaemonConnectionSpan span = new MoneroDaemonConnectionSpan();
+    for (String key : rpcConnectionSpan.keySet()) {
+      Object val = rpcConnectionSpan.get(key);
+      if (key.equals("connection_id")) span.setConnectionId((String) val);
+      else if (key.equals("nblocks")) span.setNumBlocks(((BigInteger) val).intValue());
+      else if (key.equals("rate")) span.setRate(((BigInteger) val).longValue());
+      else if (key.equals("remote_address")) { if (!"".equals(val)) span.setRemoteAddress((String) val); }
+      else if (key.equals("size")) span.setSize(((BigInteger) val).longValue());
+      else if (key.equals("speed")) span.setSpeed(((BigInteger) val).longValue());
+      else if (key.equals("start_block_height")) span.setStartBlockHeight((BigInteger) val);
+      else LOGGER.warn("WARNING: ignoring unexpected field in daemon connection span: " + key + ": " + val);
+    }
+    return span;
   }
   
   private static Map<String, Object> convertToRpcBan(MoneroBan ban) {
