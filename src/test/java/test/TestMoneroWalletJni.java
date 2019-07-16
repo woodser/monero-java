@@ -379,8 +379,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // create wallet at the path
     long restoreHeight = daemon.getHeight() - 200;
     MoneroWalletJni wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, null, restoreHeight);
-    String accountLabel = "Move test wallet account!";
-    MoneroAccount account = wallet.createAccount(accountLabel);
+    String subaddressLabel = "Move test wallet subaddress!";
+    MoneroAccount account = wallet.createAccount(subaddressLabel);
     wallet.save();
     
     // wallet exists
@@ -400,7 +400,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // re-open and test wallet
     wallet = new MoneroWalletJni(movedPath, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE);
-    assertEquals(accountLabel, wallet.getAccount(account.getIndex()).getLabel());
+    assertEquals(subaddressLabel, wallet.getSubaddress(account.getIndex(), 0).getLabel());
     
     // move wallet back
     wallet.moveTo(path, TestUtils.WALLET_JNI_PW);

@@ -32,7 +32,6 @@ public class PrintBalances {
     for (MoneroAccount account : accounts) {
       add(pairs, "ACCOUNT", account.getIndex());
       add(pairs, "SUBADDRESS", "");
-      add(pairs, "LABEL", account.getLabel());
       add(pairs, "ADDRESS", "");
       add(pairs, "BALANCE", account.getBalance());
       add(pairs, "UNLOCKED", account.getUnlockedBalance());

@@ -1288,7 +1288,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   // ---------------------------- PRIVATE HELPERS -----------------------------
   
   private static MoneroAccount sanitizeAccount(MoneroAccount account) {
-    if ("".equals(account.getLabel())) account.setLabel(null);
     if (account.getSubaddresses() != null) {
       for (MoneroSubaddress subaddress : account.getSubaddresses()) sanitizeSubaddress(subaddress);
     }

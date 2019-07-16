@@ -336,7 +336,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     List<MoneroAccount> accountsBefore = wallet.getAccounts();
     MoneroAccount createdAccount = wallet.createAccount();
     testAccount(createdAccount);
-    assertNull(createdAccount.getLabel());
     assertEquals(accountsBefore.size(), (wallet.getAccounts()).size() - 1);
   }
   
@@ -350,24 +349,22 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     String label = UUID.randomUUID().toString();
     MoneroAccount createdAccount = wallet.createAccount(label);
     testAccount(createdAccount);
-    assertEquals(label, createdAccount.getLabel());
     assertEquals(accountsBefore.size(), (wallet.getAccounts()).size() - 1);
+    assertEquals(label, wallet.getSubaddress(createdAccount.getIndex(), 0).getLabel());
     
     // fetch and test account
     createdAccount = wallet.getAccount(createdAccount.getIndex());
     testAccount(createdAccount);
-    assertEquals(label, createdAccount.getLabel());
 
     // create account with same label
     createdAccount = wallet.createAccount(label);
     testAccount(createdAccount);
-    assertEquals(label, createdAccount.getLabel());
     assertEquals(accountsBefore.size(), (wallet.getAccounts()).size() - 2);
+    assertEquals(label, wallet.getSubaddress(createdAccount.getIndex(), 0).getLabel());
     
     // fetch and test account
     createdAccount = wallet.getAccount(createdAccount.getIndex());
     testAccount(createdAccount);
-    assertEquals(label, createdAccount.getLabel());
   }
   
   // Can get subaddresses at a specified account index
@@ -2861,7 +2858,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     MoneroUtils.validateAddress(account.getPrimaryAddress());
     TestUtils.testUnsignedBigInteger(account.getBalance());
     TestUtils.testUnsignedBigInteger(account.getUnlockedBalance());
-    assertTrue(account.getLabel() == null || !account.getLabel().isEmpty());
     
     // if given, test subaddresses and that their balances add up to account balances
     if (account.getSubaddresses() != null) {

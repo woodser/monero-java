@@ -12,7 +12,6 @@ public class MoneroAccount {
 
   private Integer index;
   private String primaryAddress;
-  private String label;
   private BigInteger balance;
   private BigInteger unlockedBalance;
   private String tag;
@@ -22,11 +21,10 @@ public class MoneroAccount {
     super();
   }
   
-  public MoneroAccount(int index, String primaryAddress, String label, BigInteger balance, BigInteger unlockedBalance, List<MoneroSubaddress> subaddresses) {
+  public MoneroAccount(int index, String primaryAddress, BigInteger balance, BigInteger unlockedBalance, List<MoneroSubaddress> subaddresses) {
     super();
     this.index = index;
     this.primaryAddress = primaryAddress;
-    this.label = label;
     this.balance = balance;
     this.unlockedBalance = unlockedBalance;
     this.subaddresses = subaddresses;
@@ -46,14 +44,6 @@ public class MoneroAccount {
 
   public void setPrimaryAddress(String primaryAddress) {
     this.primaryAddress = primaryAddress;
-  }
-
-  public String getLabel() {
-    return label;
-  }
-  
-  public void setLabel(String label) {
-    this.label = label;
   }
   
   public BigInteger getBalance() {
@@ -101,7 +91,6 @@ public class MoneroAccount {
     StringBuilder sb = new StringBuilder();
     sb.append(MoneroUtils.kvLine("Index", this.getIndex(), indent));
     sb.append(MoneroUtils.kvLine("Primary address", this.getPrimaryAddress(), indent));
-    sb.append(MoneroUtils.kvLine("Label", this.getLabel(), indent));
     sb.append(MoneroUtils.kvLine("Balance", this.getBalance(), indent));
     sb.append(MoneroUtils.kvLine("Unlocked balance", this.getUnlockedBalance(), indent));
     sb.append(MoneroUtils.kvLine("Tag", this.getTag(), indent));
@@ -122,7 +111,6 @@ public class MoneroAccount {
     int result = 1;
     result = prime * result + ((balance == null) ? 0 : balance.hashCode());
     result = prime * result + ((index == null) ? 0 : index.hashCode());
-    result = prime * result + ((label == null) ? 0 : label.hashCode());
     result = prime * result + ((primaryAddress == null) ? 0 : primaryAddress.hashCode());
     result = prime * result + ((subaddresses == null) ? 0 : subaddresses.hashCode());
     result = prime * result + ((tag == null) ? 0 : tag.hashCode());
@@ -142,9 +130,6 @@ public class MoneroAccount {
     if (index == null) {
       if (other.index != null) return false;
     } else if (!index.equals(other.index)) return false;
-    if (label == null) {
-      if (other.label != null) return false;
-    } else if (!label.equals(other.label)) return false;
     if (primaryAddress == null) {
       if (other.primaryAddress != null) return false;
     } else if (!primaryAddress.equals(other.primaryAddress)) return false;

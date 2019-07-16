@@ -439,7 +439,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("label", label);
     Map<String, Object> resp = rpc.sendJsonRequest("create_account", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return new MoneroAccount(((BigInteger) result.get("account_index")).intValue(), (String) result.get("address"), label, BigInteger.valueOf(0), BigInteger.valueOf(0), null);
+    return new MoneroAccount(((BigInteger) result.get("account_index")).intValue(), (String) result.get("address"), BigInteger.valueOf(0), BigInteger.valueOf(0), null);
   }
   
   @Override
@@ -1522,8 +1522,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("balance")) account.setBalance((BigInteger) val);
       else if (key.equals("unlocked_balance")) account.setUnlockedBalance((BigInteger) val);
       else if (key.equals("base_address")) account.setPrimaryAddress((String) val);
-      else if (key.equals("label")) { if (!"".equals(val)) account.setLabel((String) val); }
       else if (key.equals("tag")) account.setTag((String) val);
+      else if (key.equals("label")) { } // label belongs to first subaddress
       else LOGGER.warn("WARNING: ignoring unexpected account field: " + key + ": " + val);
     }
     return account;
