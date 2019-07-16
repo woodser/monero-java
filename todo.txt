@@ -61,7 +61,6 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 
 HIGH
 MoneroBlock merge coinbaseTx does not set parent block reference
-account label is actually first subaddress's label
 port account label, MoneroBlock/MoneroTx/MoneroTxWallet from cpp to java and js
 jni manually recognize unconfirmed data
 wallet equality tests
