@@ -70,6 +70,7 @@ ability to open wallet while specifying daemon connection; consider switching ba
 work through problems of testing fresh wallet again
 
 MEDIUM
+transfer amount != sum on split txs; test force split
 test notification of receiving funds
 testCreateWalletFromKeys just checks basics, separate test for jni wallet equality test
 debug why testGetOutputsValidateInputs() and testImportKeyImages() fail because cannot connect to daemon only if running with all other tests
