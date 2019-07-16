@@ -1740,7 +1740,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(span.getNumBlocks() > 0);
     assertTrue(span.getRemoteAddress() == null || !span.getRemoteAddress().isEmpty());
     assertTrue(span.getRate() > 0);
-    assertTrue(span.getSpeed() > 0);
+    assertTrue(span.getSpeed() >= 0);
     assertTrue(span.getSize() > 0);
   }
 

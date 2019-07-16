@@ -80,7 +80,7 @@ public class MoneroTxWallet extends MoneroTx {
   }
   
   /**
-   * Returns vouts as List<MoneroOutputWallet>.
+   * Returns a copy of this model's vouts as List<MoneroOutputWallet>.
    * 
    * @return vouts of type MoneroOutputWallet
    */
@@ -157,6 +157,8 @@ public class MoneroTxWallet extends MoneroTx {
   public MoneroTxWallet merge(MoneroTxWallet tx) {
     if (!(tx instanceof MoneroTxWallet)) throw new MoneroException("Wallet transaction must be merged with type MoneroTxWallet");
     if (this == tx) return this;
+    
+    // merge base classes
     super.merge(tx);
     
     // merge wallet extensions

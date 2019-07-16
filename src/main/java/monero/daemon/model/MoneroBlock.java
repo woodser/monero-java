@@ -97,30 +97,25 @@ public class MoneroBlock extends MoneroBlockHeader {
     // merge header fields
     super.merge(block);
     
-    // merge coinbase tx
-    if (this.getCoinbaseTx() == null) this.setCoinbaseTx(block.getCoinbaseTx());
-    else if (block.getCoinbaseTx() != null) this.getCoinbaseTx().merge(block.getCoinbaseTx());
-    
-    // merge non-coinbase txs
-    if (this.getTxs() == null) this.setTxs(block.getTxs());
-    else if (block.getTxs() != null) {
-      for (MoneroTx thatTx : block.getTxs()) {
-        boolean found = false;
-        for (MoneroTx thisTx : this.getTxs()) {
-          if (thatTx.getId().equals(thisTx.getId())) {
-            thisTx.merge(thatTx);
-            found = true;
-            break;
-          }
-        }
-        if (!found) this.getTxs().add(thatTx);
-      }
-    }
-    if (this.getTxs() != null) for (MoneroTx tx : this.getTxs()) tx.setBlock(this);
-    
-    // merge other fields
+    // merge reconcilable block extensions
     this.setHex(MoneroUtils.reconcile(this.getHex(), block.getHex()));
     this.setTxIds(MoneroUtils.reconcile(this.getTxIds(), block.getTxIds()));
+    
+    // merge coinbase tx
+    if (this.getCoinbaseTx() == null) this.setCoinbaseTx(block.getCoinbaseTx());
+    if (block.getCoinbaseTx() != null) {
+      block.getCoinbaseTx().setBlock(this);
+      coinbaseTx.merge(block.getCoinbaseTx());
+    }
+    
+    // merge non-coinbase txs
+    if (block.getTxs() != null) {
+      for (MoneroTx tx : block.getTxs()) {
+        tx.setBlock(this);
+        mergeTx(txs, tx);
+      }
+    }
+
     return this;
   }
   
@@ -174,6 +169,18 @@ public class MoneroBlock extends MoneroBlockHeader {
       if (other.txs != null) return false;
     } else if (!txs.equals(other.txs)) return false;
     return true;
+  }
+  
+  // -------------------------- PRIVATE HELPERS -------------------------------
+  
+  private static void mergeTx(List<MoneroTx> txs, MoneroTx tx) {
+    for (MoneroTx aTx : txs) {
+      if (aTx.getId().equals(tx.getId())) {
+        aTx.merge(tx);
+        return;
+      }
+    }
+    txs.add(tx);
   }
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------

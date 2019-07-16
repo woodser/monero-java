@@ -467,6 +467,24 @@ public class MoneroTx {
   
   public MoneroTx merge(MoneroTx tx) {
     if (this == tx) return this;
+    
+    // merge blocks if they're different which comes back to merging txs
+    if (block != tx.getBlock()) {
+      if (block == null) {
+        block = new MoneroBlock();
+        block.setTxs(this);
+        block.setHeight(tx.getHeight());
+      }
+      if (tx.getBlock() == null) {
+        tx.setBlock(new MoneroBlock());
+        tx.getBlock().setTxs(tx);
+        tx.getBlock().setHeight(getHeight());
+      }
+      block.merge(tx.getBlock());
+      return this;
+    }
+    
+    // otherwise merge tx fields
     this.setId(MoneroUtils.reconcile(this.getId(), tx.getId()));
     this.setVersion(MoneroUtils.reconcile(this.getVersion(), tx.getVersion()));
     this.setPaymentId(MoneroUtils.reconcile(this.getPaymentId(), tx.getPaymentId()));
