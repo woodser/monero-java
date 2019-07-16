@@ -18,7 +18,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
@@ -26,16 +25,9 @@ import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
-import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
-import monero.wallet.model.MoneroOutgoingTransfer;
-import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
-import monero.wallet.request.MoneroOutputRequest;
 import monero.wallet.request.MoneroSendRequest;
-import monero.wallet.request.MoneroTransferRequest;
-import monero.wallet.request.MoneroTxRequest;
 import utils.TestUtils;
 
 /**
@@ -100,51 +92,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       } catch (MoneroException e) {
         assertEquals(-1, (int) e.getCode()); // ok if wallet is already open
       }
-    }
-  }
-  
-  // Preserves order from rpc
-  @SuppressWarnings("unchecked")
-  @Test
-  public void testRpcOrder() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    
-    // fetch transfers directly from rpc for comparison to library
-    MoneroRpcConnection rpc = wallet.getRpcConnection();
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("all_accounts", true);
-    params.put("in", true);
-    params.put("out", true);
-    params.put("pool", true);
-    params.put("pending", true);
-    params.put("failed", true);
-    Map<String, Object> resp = rpc.sendJsonRequest("get_transfers", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    
-    // compare transfer order to rpc
-    compareTransferOrder((List<Map<String, Object>>) result.get("in"), wallet.getTransfers(new MoneroTransferRequest().setIsIncoming(true).setTxRequest(new MoneroTxRequest().setIsConfirmed(true))));
-    compareTransferOrder((List<Map<String, Object>>) result.get("out"), wallet.getTransfers(new MoneroTransferRequest().setIsOutgoing(true).setTxRequest(new MoneroTxRequest().setIsConfirmed(true))));
-    compareTransferOrder((List<Map<String, Object>>) result.get("pool"), wallet.getTransfers(new MoneroTransferRequest().setIsIncoming(true).setTxRequest(new MoneroTxRequest().setIsConfirmed(false))));
-    compareTransferOrder((List<Map<String, Object>>) result.get("pending"), wallet.getTransfers(new MoneroTransferRequest().setIsOutgoing(true).setTxRequest(new MoneroTxRequest().setIsConfirmed(false).setIsFailed(false))));
-    compareTransferOrder((List<Map<String, Object>>) result.get("failed"), wallet.getTransfers(new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setIsFailed(true))));
-    
-    // fetch outputs directly from rpc for comparison to library
-    params.clear();
-    params.put("transfer_type", "all");
-    params.put("verbose", true);
-    params.put("account_index", 0);
-    resp = rpc.sendJsonRequest("incoming_transfers", params);
-    result = (Map<String, Object>) resp.get("result");
-    List<Map<String, Object>> rpcOutputs = (List<Map<String, Object>>) result.get("transfers");
-    
-    // compare output order to rpc
-    List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputRequest().setAccountIndex(0));
-    assertEquals(rpcOutputs.size(), outputs.size());
-    for (int i = 0; i < outputs.size(); i++) {
-      assertEquals(rpcOutputs.get(i).get("key_image"), outputs.get(i).getKeyImage().getHex());
-      Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) rpcOutputs.get(i).get("subaddr_index");
-      assertEquals(rpcIndices.get("major").intValue(), (int) outputs.get(i).getAccountIndex());
-      assertEquals(rpcIndices.get("minor").intValue(), (int) outputs.get(i).getSubaddressIndex());
     }
   }
 
@@ -327,53 +274,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     assertNotNull(entry.getAddress());
     assertNotNull(entry.getDescription());
   }
-  
-  @SuppressWarnings("unchecked")
-  private static void compareTransferOrder(List<Map<String, Object>> rpcTransfers, List<?> transfers) {
-    if (rpcTransfers == null) {
-      assertTrue(transfers.isEmpty());
-      return;
-    }
-    assertEquals(rpcTransfers.size(), transfers.size());
-    for (int i = 0; i < transfers.size(); i++) {
-      MoneroTransfer transfer = (MoneroTransfer) transfers.get(i);
-      Map<String, Object> rpcTransfer = rpcTransfers.get(i);
-      assertEquals((String) rpcTransfer.get("txid"), transfer.getTx().getId());
-      
-      // collect account and subaddress indices from rpc response
-      List<Map<String, BigInteger>> rpcSubaddrIndices = (List<Map<String, BigInteger>>) rpcTransfer.get("subaddr_indices");
-      Integer accountIdx = null;
-      List<Integer> subaddressIndices = new ArrayList<Integer>();
-      for (Map<String, BigInteger> rpcSubaddrIdx : rpcSubaddrIndices) {
-        if (accountIdx == null) accountIdx = rpcSubaddrIdx.get("major").intValue();
-        else assertEquals((int) accountIdx, (int) rpcSubaddrIdx.get("major").intValue());
-        subaddressIndices.add(rpcSubaddrIdx.get("minor").intValue());
-      }
-      
-      // test transfer
-      assertEquals(accountIdx, transfer.getAccountIndex());
-      if (transfer instanceof MoneroIncomingTransfer) {
-        assertEquals(1, rpcSubaddrIndices.size());
-        assertEquals(subaddressIndices.get(0), ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
-      } else if (transfer instanceof MoneroOutgoingTransfer) {
-        assertEquals(subaddressIndices, ((MoneroOutgoingTransfer) transfer).getSubaddressIndices());
-      } else {
-        fail("Unrecognized transfer instance");
-      }
-    }
-  }
-  
-//  private static void compareTxOrder(List<Map<String, Object>> rpcTransfers, List<MoneroTxWallet> txs) {
-//    List<String> txIds = new ArrayList<String>();
-//    for (Map<String, Object> rpcTransfer : rpcTransfers) {
-//      String txId = (String) rpcTransfer.get("txid");
-//      if (!txIds.contains(txId)) txIds.add(txId);
-//    }
-//    assertEquals(txIds.size(), txs.size());
-//    for (int i = 0; i < txIds.size(); i++) {
-//      assertEquals(txIds.get(i), txs.get(i).getId());
-//    }
-//  }
   
   // rpc-specific tx tests
   @Override
