@@ -43,7 +43,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import common.types.Filter;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
@@ -558,6 +557,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
     }
     
+    // cache types into maps for merging and lookup
+    Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
+    Map<Long, MoneroBlock> blockMap = new HashMap<Long, MoneroBlock>();
+    for (MoneroTxWallet tx : txs) {
+      mergeTx(tx, txMap, blockMap, false);
+    }
+    
     // fetch and merge outputs if requested
     if (Boolean.TRUE.equals(request.getIncludeOutputs())) {
       List<MoneroOutputWallet> outputs = getOutputs(new MoneroOutputRequest().setTxRequest(request));
@@ -566,7 +572,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       Set<MoneroTxWallet> outputTxs = new HashSet<MoneroTxWallet>();
       for (MoneroOutputWallet output : outputs) {
         if (!outputTxs.contains(output.getTx())){
-          mergeTx(txs, output.getTx(), true);
+          mergeTx(output.getTx(), txMap, blockMap, true);
           outputTxs.add(output.getTx());
         }
       }
@@ -652,8 +658,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (!subaddressIndices.isEmpty()) params.put("subaddr_indices", new ArrayList<Integer>(subaddressIndices));
     }
     
+    // cache unique txs and blocks
+    Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
+    Map<Long, MoneroBlock> blockMap = new HashMap<Long, MoneroBlock>();
+    
     // build txs using `get_transfers`
-    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     Map<String, Object> resp = rpc.sendJsonRequest("get_transfers", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     for (String key : result.keySet()) {
@@ -676,11 +685,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
         
         // merge tx
-        mergeTx(txs, tx);
+        mergeTx(tx, txMap, blockMap, false);
       }
     }
     
     // sort txs by block height
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>(txMap.values());
     Collections.sort(txs, new TxHeightComparator());
     
     // filter and return transfers
@@ -734,8 +744,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       indices = getAccountIndices(false);  // fetch all account indices without subaddresses
     }
     
+    // cache unique txs and blocks
+    Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
+    Map<Long, MoneroBlock> blockMap = new HashMap<Long, MoneroBlock>();
+    
     // collect txs with vouts for each indicated account using `incoming_transfers` rpc call
-    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     Map<String, Object> params = new HashMap<String, Object>();
     String transferType;
     if (Boolean.TRUE.equals(request.getIsSpent())) transferType = "unavailable";
@@ -755,14 +768,28 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (!result.containsKey("transfers")) continue;
       for (Map<String, Object> rpcVout : (List<Map<String, Object>>) result.get("transfers")) {
         MoneroTxWallet tx = convertRpcTxWalletWithVout(rpcVout);
-        mergeTx(txs, tx);
+        mergeTx(tx, txMap, blockMap, false);
       }
     }
     
-    // filter and return vouts
+    // sort txs by block height
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>(txMap.values());
+    Collections.sort(txs, new TxHeightComparator());
+    
+    // collect requested vouts
     List<MoneroOutputWallet> vouts = new ArrayList<MoneroOutputWallet>();
     for (MoneroTxWallet tx : txs) {
-      vouts.addAll(Filter.apply(request, tx.getVoutsWallet()));
+      List<MoneroOutput> toRemoves = new ArrayList<MoneroOutput>();
+      for (MoneroOutput vout : tx.getVouts()) {
+        if (request.meetsCriteria((MoneroOutputWallet) vout)) vouts.add((MoneroOutputWallet) vout);
+        else toRemoves.add(vout);
+      }
+      
+      // remove unrequested vouts
+      tx.getVouts().removeAll(toRemoves);
+      
+      // remove txs without requested vout
+      if (tx.getVouts().isEmpty() && tx.getBlock() != null) tx.getBlock().getTxs().remove(tx);
     }
     return vouts;
   }
@@ -1814,54 +1841,43 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return isOutgoing;
   }
   
-  private static void mergeTx(List<MoneroTxWallet> txs, MoneroTxWallet tx) {
-    mergeTx(txs, tx, false);
-  }
-  
   /**
    * Merges a transaction into a unique set of transactions.
-   * 
-   * TODO monero-wallet-rpc: skipIfAbsent only necessary because incoming payments not returned
-   * when sent from/to same account
-   * 
-   * @param txs are existing transactions to merge into
+   *
+   * TODO monero-core: skipIfAbsent only necessary because incoming payments not returned
+   * when sent from/to same account #4500
+   *
    * @param tx is the transaction to merge into the existing txs
-   * @param skipIfAbsent specifies if the tx should not be added
-   *        if it doesn't already exist.  Only necessasry to handle
-   *        missing incoming payments from #4500. // TODO
-   * @returns the merged tx
+   * @param txMap maps tx ids to txs
+   * @param blockMap maps block heights to blocks
+   * @param skipIfAbsent specifies if the tx should not be added if it doesn't already exist
    */
-  private static void mergeTx(List<MoneroTxWallet> txs, MoneroTxWallet tx, boolean skipIfAbsent) {
+  private static void mergeTx(MoneroTxWallet tx, Map<String, MoneroTxWallet> txMap, Map<Long, MoneroBlock> blockMap, boolean skipIfAbsent) {
     assertNotNull(tx.getId());
-    for (MoneroTxWallet aTx : txs) {
-      
-      // merge tx
-      if (aTx.getId().equals(tx.getId())) {
-        
-        // merge blocks which only exist when confirmed
-        if (aTx.getBlock() != null || tx.getBlock() != null) {
-          if (aTx.getBlock() == null) aTx.setBlock(new MoneroBlock().setTxs(new ArrayList<MoneroTx>(Arrays.asList(aTx))).setHeight(tx.getHeight()));
-          if (tx.getBlock() == null) tx.setBlock(new MoneroBlock().setTxs(new ArrayList<MoneroTx>(Arrays.asList(tx))).setHeight(aTx.getHeight()));
-          aTx.getBlock().merge(tx.getBlock());
-        } else {
-          aTx.merge(tx);
-        }
-        return;
-      }
-      
-      // merge common block of different txs
-      // TODO: possible bug for java/js, this executes for every tx until tx found.  are remaining blocks not merged?  refactor to use c++ impl
-      if (tx.getHeight() != null && tx.getHeight().equals(aTx.getHeight())) {
-        aTx.getBlock().merge(tx.getBlock());
-        if (aTx.getIsConfirmed()) assertTrue(aTx.getBlock().getTxs().contains(aTx));
+
+    // if tx doesn't exist, add it (unless skipped)
+    MoneroTxWallet aTx = txMap.get(tx.getId());
+    if (aTx == null) {
+      if (!skipIfAbsent) {
+        txMap.put(tx.getId(), tx);
+      } else {
+        LOGGER.warn("WARNING: tx does not already exist");
       }
     }
-    
-    // add tx if it doesn't already exist unless skipped
-    if (!skipIfAbsent) {
-      txs.add(tx);
-    } else {
-      LOGGER.warn("WARNING: tx does not already exist"); 
+
+    // otherwise merge with existing tx
+    else {
+      aTx.merge(tx);
+    }
+
+    // if confirmed, merge tx's block
+    if (tx.getHeight() != null) {
+      MoneroBlock aBlock = blockMap.get(tx.getHeight());
+      if (aBlock == null) {
+        blockMap.put(tx.getHeight(), tx.getBlock());
+      } else {
+        aBlock.merge(tx.getBlock());
+      }
     }
   }
   

@@ -60,8 +60,7 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 - why is rpc vs jni balance different? - rpc calls rescan_spent which queries daemon's tx pool which needed to be flushed (lingering double spends in there?)
 
 HIGH
-MoneroBlock merge coinbaseTx does not set parent block reference
-port account label, MoneroBlock/MoneroTx/MoneroTxWallet from cpp to java and js
+review wallet jni cpp for leaking memory
 jni manually recognize unconfirmed data
 wallet equality tests
 testCheckTxProof() claims no outgoing tx with destinations after running sendToMultiple() and confirmations
@@ -71,7 +70,7 @@ work through problems of testing fresh wallet again
 
 MEDIUM
 test notification of receiving funds
-review wallet jni cpp for leaking memory
+testCreateWalletFromKeys just checks basics, separate test for jni wallet equality test
 debug why testGetOutputsValidateInputs() and testImportKeyImages() fail because cannot connect to daemon only if running with all other tests
 document git checkout <project> then git submodule update --init --recursive then build libmonero-cpp.a and copy into lib directory then ./bin/build-libmonero-java.sh in java readme
 remove .project file from git, else eclipse fails to import

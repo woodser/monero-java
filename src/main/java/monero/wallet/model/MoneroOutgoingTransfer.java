@@ -68,6 +68,11 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
     return new MoneroOutgoingTransfer(this);
   }
   
+  public MoneroOutgoingTransfer merge(MoneroTransfer transfer) {
+    assertTrue(transfer instanceof MoneroOutgoingTransfer);
+    return merge((MoneroOutgoingTransfer) transfer);
+  }
+  
   /**
    * Updates this transaction by merging the latest information from the given
    * transaction.

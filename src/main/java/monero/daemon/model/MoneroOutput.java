@@ -100,10 +100,18 @@ public class MoneroOutput {
   public MoneroOutput merge(MoneroOutput output) {
     assertTrue(output instanceof MoneroOutput);
     if (this == output) return this;
-    if (this.getKeyImage() == null) this.setKeyImage(output.getKeyImage());
-    else if (output.getKeyImage() != null) this.getKeyImage().merge(output.getKeyImage());
-    this.setAmount(MoneroUtils.reconcile(this.getAmount(), output.getAmount()));
-    this.setIndex(MoneroUtils.reconcile(this.getIndex(), output.getIndex()));
+    
+    // merge txs if they're different which comes back to merging outputs
+    if (this.getTx() != output.getTx()) this.getTx().merge(output.getTx());
+    
+    // otherwise merge output fields
+    else {
+      if (this.getKeyImage() == null) this.setKeyImage(output.getKeyImage());
+      else if (output.getKeyImage() != null) this.getKeyImage().merge(output.getKeyImage());
+      this.setAmount(MoneroUtils.reconcile(this.getAmount(), output.getAmount()));
+      this.setIndex(MoneroUtils.reconcile(this.getIndex(), output.getIndex()));
+    }
+
     return this;
   }
   
