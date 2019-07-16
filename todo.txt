@@ -61,6 +61,7 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 
 HIGH
 review wallet jni cpp for leaking memory
+jni testUpdateLockedDifferentAccounts() not recognizing tx confirmations
 jni manually recognize unconfirmed data
 wallet equality tests
 testCheckTxProof() claims no outgoing tx with destinations after running sendToMultiple() and confirmations
