@@ -60,7 +60,8 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 - why is rpc vs jni balance different? - rpc calls rescan_spent which queries daemon's tx pool which needed to be flushed (lingering double spends in there?)
 
 HIGH
-review wallet jni cpp for leaking memory
+connect to peers
+test notification of receiving funds
 jni testUpdateLockedDifferentAccounts() not recognizing tx confirmations
 jni manually recognize unconfirmed data
 wallet equality tests
@@ -71,7 +72,6 @@ work through problems of testing fresh wallet again
 
 MEDIUM
 transfer amount != sum on split txs; test force split
-test notification of receiving funds
 testCreateWalletFromKeys just checks basics, separate test for jni wallet equality test
 debug why testGetOutputsValidateInputs() and testImportKeyImages() fail because cannot connect to daemon only if running with all other tests
 document git checkout <project> then git submodule update --init --recursive then build libmonero-cpp.a and copy into lib directory then ./bin/build-libmonero-java.sh in java readme
