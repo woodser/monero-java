@@ -58,6 +58,7 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 14.1.0+ RELEASE
 
 HIGH
+wallet2->deinit() on close
 test notification of receiving funds
 jni testUpdateLockedDifferentAccounts() not recognizing tx confirmations
 jni manually recognize unconfirmed data
@@ -68,6 +69,8 @@ ability to open wallet while specifying daemon connection; consider switching ba
 work through problems of testing fresh wallet again
 
 MEDIUM
+syncAsync()
+rescanAsync()
 connect to peers
 todo test all wallet2 notifications
 transfer amount != sum on split txs; test force split
