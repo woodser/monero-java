@@ -53,11 +53,9 @@ address book entries work by index instead of id which changes
 tx_hash in incoming_transfers vs txid in get_transfers; standardize on tx_hash or tx_id
 standardize terminology transactions vs transfers
 standardize terminology payment vs output; one payment may be fulfilled with multiple outputs
+wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 
 14.1.0+ RELEASE
-- after fresh confirmation, txWalletsEqualOnChain disagrees on txs - that's because one wallet had failed txs
-- why numBlocks discrepency between rpc and jni? - bug in MoneroWallet.cpp where numBlocksToUnlock assigned on 0 balance subaddresses
-- why is rpc vs jni balance different? - rpc calls rescan_spent which queries daemon's tx pool which needed to be flushed (lingering double spends in there?)
 
 HIGH
 test notification of receiving funds

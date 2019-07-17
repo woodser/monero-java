@@ -529,6 +529,16 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv
   return results;
 }
 
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setAutoSyncJni(JNIEnv *env, jobject instance, jboolean autoSync) {
+  cout << "Java_monero_wallet_MoneroWalletJni_setAutoSyncJni" << endl;
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  try {
+    wallet->setAutoSync(autoSync);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
 // rescanBlockchain
 
 // isMultisigImportNeeded
