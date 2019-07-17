@@ -299,12 +299,12 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJ
   const char* _viewKey = jviewKey ? env->GetStringUTFChars(jviewKey, NULL) : nullptr;
   const char* _spendKey = jspendKey ? env->GetStringUTFChars(jspendKey, NULL) : nullptr;
   const char* _language = jlanguage ? env->GetStringUTFChars(jlanguage, NULL) : nullptr;
-  string path = string(_path == nullptr ? "" : _path);
-  string password = string(_password == nullptr ? "" : _password);
-  string address = string(_address == nullptr ? "" : _address);
-  string viewKey = string(_viewKey == nullptr ? "" : _viewKey);
-  string spendKey = string(_spendKey == nullptr ? "" : _spendKey);
-  string language = string(_language == nullptr ? "" : _language);
+  string path = string(_path ? _path : "");
+  string password = string(_password ? _password : "");
+  string address = string(_address ? _address : "");
+  string viewKey = string(_viewKey ? _viewKey : "");
+  string spendKey = string(_spendKey ? _spendKey : "");
+  string language = string(_language ? _language : "");
   env->ReleaseStringUTFChars(jpath, _path);
   env->ReleaseStringUTFChars(jpassword, _password);
   env->ReleaseStringUTFChars(jaddress, _address);

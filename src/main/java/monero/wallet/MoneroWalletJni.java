@@ -442,10 +442,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroSubaddress getAddressIndex(String address) {
-    String subaddressJson = getAddressIndexJni(address);
-    System.out.println("Deserialize: " + subaddressJson);
-    MoneroSubaddress subaddress = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressJson, MoneroSubaddress.class);
-    return sanitizeSubaddress(subaddress);
+    try {
+      String subaddressJson = getAddressIndexJni(address);
+      MoneroSubaddress subaddress = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressJson, MoneroSubaddress.class);
+      return sanitizeSubaddress(subaddress);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
