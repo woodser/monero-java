@@ -22,6 +22,7 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.model.MoneroWalletListener;
 import utils.TestUtils;
 
 /**
@@ -86,6 +87,18 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     if (daemon.getIsConnected()) assertEquals(daemon.getHeight(), wallet.getRestoreHeight());
     else assertTrue(wallet.getRestoreHeight() >= 0);
     wallet.close();
+  }
+  
+  @Test
+  public void testReceiveNotification() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
+
+    // register wallet listener
+    wallet.addListener(new MoneroWalletListener() {
+      //public void onMoneyReceived
+    });
+    
+    throw new RuntimeException("Not implemented");
   }
 
   @Test
