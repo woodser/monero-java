@@ -383,6 +383,19 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     // return results
     return new MoneroSyncResult((long) results[0], (boolean) results[1]);
   }
+  
+  /**
+   * Enable or disable automatic synchronization.
+   *
+   * @param autoSync specifies if automatic synchronization is enabled or disabled
+   */
+  public void setAutoSync(boolean autoSync) {
+    try {
+      setAutoSyncJni(autoSync);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
 
   @Override
   public void rescanBlockchain() {
@@ -942,6 +955,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native long setListenerJni(WalletJniListener listener);
   
   private native Object[] syncJni(long startHeight);
+  
+  private native void setAutoSyncJni(boolean autoSync);
   
   private native long getHeightJni();
   

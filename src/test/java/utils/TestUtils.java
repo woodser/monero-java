@@ -115,6 +115,7 @@ public class TestUtils {
         walletJni = new MoneroWalletJni(WALLET_JNI_PATH_1, WALLET_JNI_PW, MoneroNetworkType.STAGENET);
         walletJni.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
         walletJni.sync((long) 0, new WalletSyncPrinter());
+        walletJni.setAutoSync(true);
       }
       
       // Save and close the JNI wallet when the runtime is shutting down in order
