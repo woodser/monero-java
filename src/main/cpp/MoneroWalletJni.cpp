@@ -349,6 +349,51 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni
   setDaemonConnection(env, wallet, juri, jusername, jpassword);
 }
 
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_getIsConnectedJni(JNIEnv* env, jobject instance) {
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    return static_cast<jboolean>(wallet->getIsConnected());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonHeightJni(JNIEnv* env, jobject instance) {
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  try {
+    return wallet->getDaemonHeight();
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonTargetHeightJni(JNIEnv* env, jobject instance) {
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  try {
+    return wallet->getDaemonTargetHeight();
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_getIsDaemonSyncedJni(JNIEnv* env, jobject instance) {
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  try {
+    return wallet->getIsDaemonSynced();
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_getIsSyncedJni(JNIEnv* env, jobject instance) {
+  MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
+  try {
+    return wallet->getIsSynced();
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPathJni(JNIEnv *env, jobject instance) {
   cout << "Java_monero_wallet_MoneroWalletJni_getPathJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, "jniWalletHandle");
