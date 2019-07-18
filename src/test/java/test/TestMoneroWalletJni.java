@@ -53,7 +53,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertTrue(daemonHeight > 0);
     long daemonTargetHeight = wallet.getDaemonTargetHeight();
     assertTrue(daemonTargetHeight >= daemonHeight);
-    assertEquals(wallet.getDaemonIsSynced(), daemonHeight == daemonTargetHeight);
+    assertEquals(wallet.getIsDaemonSynced(), daemonHeight == daemonTargetHeight);
   }
 
   @Test
