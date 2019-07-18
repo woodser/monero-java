@@ -59,7 +59,8 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 14.1.0+ RELEASE
 
 HIGH
-wallet.getHeight(),  wallet.isSynced(), wallet.isConnected(), wallet.getDaemonHeight(), wallet.getDaemonTargetHeight(),wallet.isDaemonSynced(), wallet.isDaemonConnected()
+wallet.getHeight(),  wallet.getIsSynced(), wallet.getIsConnected(), wallet.getDaemonHeight(), wallet.getDaemonTargetHeight(),wallet.getIsDaemonSynced(), wallet.getIsDaemonConnected()
+
 wallet2->deinit() on close
 confirm that sync from start height syncs from that start height even if wallet created with later/earlier height?
 assert restore height == txs[0].getHeight() in js testGetTxsWallet()
