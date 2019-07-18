@@ -90,6 +90,7 @@ document git checkout <project> then git submodule update --init --recursive the
 remove .project file from git, else eclipse fails to import
 
 LOW
+Activate UTF-8 support for Boost filesystem classes on Windows (search for that text in core)
 add warnings to all deserialization methods for unrecognized fields
 port changes from diff of jni39+ to master_bkp_jni to js
 getAddressIndex() -> getSubaddress(String address) and that returns full subaddress info?
