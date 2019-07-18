@@ -8,6 +8,7 @@ getReserveProofAccount() failing again
 
 MEDIUM
 wallet2 get_payments() min_height is exclusive and max_height is inclusive: #5598, 5751
+start height processed > requested start height unless restore height manually set
 my daemon on stagenet says `Sync data returned a new top block candidate: 365062 -> 365545`.  if I mine, the daemon seems to mine on 365062.  if I create a new wallet, its restore height is set to 365545, but daemon `get_height` reports 365062
 ocasional: testGetTxsByIdsInPool() hangs (have no peer connections?)
 wallet2 network type auto detected when loaded from files on disk
@@ -58,7 +59,10 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 14.1.0+ RELEASE
 
 HIGH
+wallet.getHeight(),  wallet.isSynced(), wallet.isConnected(), wallet.getDaemonHeight(), wallet.getDaemonTargetHeight(),wallet.isDaemonSynced(), wallet.isDaemonConnected()
 wallet2->deinit() on close
+confirm that sync from start height syncs from that start height even if wallet created with later/earlier height?
+assert restore height == txs[0].getHeight() in js testGetTxsWallet()
 test notification of receiving funds
 jni testUpdateLockedDifferentAccounts() not recognizing tx confirmations
 jni manually recognize unconfirmed data
@@ -69,6 +73,9 @@ ability to open wallet while specifying daemon connection; consider switching ba
 work through problems of testing fresh wallet again
 
 MEDIUM
+get_daemon_blockchain_target_height indicates blockchain's target height, not daemon's current synced height
+no more sync(endHeight)
+wallet.isSynced(), wallet.isDaemonSynced()
 syncAsync()
 rescanAsync()
 connect to peers

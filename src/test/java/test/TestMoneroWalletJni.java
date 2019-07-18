@@ -243,46 +243,67 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // close wallet to free c++ resources
     wallet.close();
   }
-
+  
   // Can sync a wallet with a mnemonic
   @Test
   public void testSyncMnemonicFromGenesis() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
-    testSyncMnemonic(null);
+    testSyncMnemonic(null, null);
   }
-
-  // Can sync a wallet with a mnemonic and a start height
+  
   @Test
-  public void testSyncMnemonicFromHeight() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    testSyncMnemonic(wallet.getChainHeight() - 25000);
+  public void testSyncMnemonicFromRestoreHeight() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
+    testSyncMnemonic(null, TestUtils.TEST_RESTORE_HEIGHT);
   }
-
-  private void testSyncMnemonic(Long startHeight) {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+  
+  @Test
+  public void testSyncMnemonicFromStartHeight() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
+    testSyncMnemonic(TestUtils.TEST_RESTORE_HEIGHT, null);
+  }
+  
+  @Test
+  public void testSyncMnemonicStartHeightLTRestoreHeight() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
+    testSyncMnemonic(TestUtils.TEST_RESTORE_HEIGHT, TestUtils.TEST_RESTORE_HEIGHT + 3l);
+  }
+  
+  @Test
+  public void testSyncMnemonicStartHeightGTRestoreHeight() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
+    testSyncMnemonic(TestUtils.TEST_RESTORE_HEIGHT + 3l, TestUtils.TEST_RESTORE_HEIGHT);
+  }
+  
+  private void testSyncMnemonic(Long startHeight, Long restoreHeight) {
     assertTrue("Not connected to daemon", daemon.getIsConnected());
+    if (startHeight != null && restoreHeight != null) assertTrue(startHeight <= TestUtils.TEST_RESTORE_HEIGHT || restoreHeight <= TestUtils.TEST_RESTORE_HEIGHT);
 
     // create wallet from mnemonic
-    MoneroWalletJni wallet = new MoneroWalletJni(getRandomWalletPath(), TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpcConnection(), startHeight);
+    MoneroWalletJni wallet = new MoneroWalletJni(getRandomWalletPath(), TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpcConnection(), restoreHeight);
     
     // test wallet's height before syncing
     assertEquals(1, wallet.getHeight());
-    assertEquals(startHeight == null ? 0 : startHeight, wallet.getRestoreHeight());
+    if (restoreHeight == null) restoreHeight = 0l;
+    assertEquals((long) restoreHeight, (long) wallet.getRestoreHeight());
     
     // sanitize bounds
-    long startHeightActual = Math.max(wallet.getHeight(), wallet.getRestoreHeight());
+    long startHeightExpected = startHeight == null ? restoreHeight : startHeight;
+    if (startHeightExpected == 0) startHeightExpected = 1;
     long chainHeight = wallet.getChainHeight();
     
     // sync the wallet
-    SyncProgressTester progressTester = new SyncProgressTester(startHeightActual, chainHeight);
+    SyncProgressTester progressTester = new SyncProgressTester(startHeightExpected, chainHeight);
     MoneroSyncResult result = wallet.sync(startHeight, null, progressTester);
     progressTester.onDone(wallet.getChainHeight());
     
     // test result after syncing
-    assertEquals(wallet.getChainHeight() - startHeightActual, (long) result.getNumBlocksFetched());
+    assertEquals(wallet.getChainHeight() - startHeightExpected, (long) result.getNumBlocksFetched());
     assertTrue(result.getReceivedMoney());
     assertEquals(daemon.getHeight(), wallet.getHeight());
     assertEquals(daemon.getHeight(), wallet.getChainHeight());
+    if (startHeightExpected > TestUtils.TEST_RESTORE_HEIGHT) assertTrue(wallet.getTxs().get(0).getHeight() > TestUtils.TEST_RESTORE_HEIGHT);  // wallet is partially synced so first tx happens after true restore height
+    else assertEquals(TestUtils.TEST_RESTORE_HEIGHT, (long) wallet.getTxs().get(0).getHeight());  // wallet should be fully synced so first tx happens on true restore height
     
     // sync the wallet with default params
     result = wallet.sync();
