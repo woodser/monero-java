@@ -59,7 +59,7 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 14.1.0+ RELEASE
 
 HIGH
-wallet.getHeight(),  wallet.getIsSynced(), wallet.getIsConnected(), wallet.getDaemonHeight(), wallet.getDaemonTargetHeight(),wallet.getIsDaemonSynced(), wallet.getIsDaemonConnected()
+wallet.getHeight(),  wallet.getIsSynced(), wallet.getIsConnected(), wallet.getDaemonHeight(), wallet.getDaemonTargetHeight(), wallet.getIsDaemonSynced()
 
 wallet2->deinit() on close
 confirm that sync from start height syncs from that start height even if wallet created with later/earlier height?
@@ -67,6 +67,7 @@ assert restore height == txs[0].getHeight() in js testGetTxsWallet()
 test notification of receiving funds
 jni testUpdateLockedDifferentAccounts() not recognizing tx confirmations
 jni manually recognize unconfirmed data
+test that wallet.getIsSynced() returns false after block added to chain if not auto syncing
 wallet equality tests
 testCheckTxProof() claims no outgoing tx with destinations after running sendToMultiple() and confirmations
 cap creation of accounts by ignoring test if more than X accounts already exist
