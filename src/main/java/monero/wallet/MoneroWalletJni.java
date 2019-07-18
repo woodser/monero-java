@@ -191,6 +191,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   // ------------ WALLET METHODS SPECIFIC TO JNI IMPLEMENTATION ---------------
   
+  // TODO: comments and other jni specific methods
+  
   public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
     if (daemonConnection == null) setDaemonConnectionJni("", "", "");
     else setDaemonConnectionJni(daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword());
@@ -201,7 +203,45 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     return vals == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2]);
   }
   
-  // TODO: comments and other jni specific methods
+  public boolean getIsConnected() {
+    try {
+      return getIsConnectedJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
+  
+  public long getDaemonHeight() {
+    try {
+      return getDaemonHeightJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
+  
+  public long getDaemonTargetHeight() {
+    try {
+      return getDaemonTargetHeightJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
+  
+  public boolean getIsDaemonSynced() {
+    try {
+      return getIsDaemonSyncedJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
+  
+  public boolean getIsSynced() {
+    try {
+      return getIsSyncedJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
   
   public String getPath() {
     String path = getPathJni();
@@ -215,6 +255,14 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    */
   public MoneroNetworkType getNetworkType() {
     return MoneroNetworkType.values()[getNetworkTypeJni()];
+  }
+  
+  public long getRestoreHeight() {
+    return getRestoreHeightJni();
+  }
+  
+  public void setRestoreHeight(long restoreHeight) {
+    setRestoreHeightJni(restoreHeight);
   }
   
   /**
@@ -242,14 +290,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    */
   public String getPublicSpendKey() {
     return getPublicSpendKeyJni();
-  }
-  
-  public long getRestoreHeight() {
-    return getRestoreHeightJni();
-  }
-  
-  public void setRestoreHeight(long restoreHeight) {
-    setRestoreHeightJni(restoreHeight);
   }
   
   public void addListener(MoneroWalletListener listener) {
@@ -925,6 +965,16 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String[] getDaemonConnectionJni(); // returns [uri, username, password]
   
   private native void setDaemonConnectionJni(String uri, String username, String password);
+  
+  private native boolean getIsConnectedJni();
+  
+  private native long getDaemonHeightJni();
+  
+  private native long getDaemonTargetHeightJni();
+  
+  private native boolean getIsDaemonSyncedJni();
+  
+  private native boolean getIsSyncedJni();
   
   private native String getPathJni();
   
