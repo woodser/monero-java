@@ -118,7 +118,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Test
   public void testCreateWalletFromMnemonic() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-
+    
     // create wallet with mnemonic and defaults
     String path = getRandomWalletPath();
     MoneroWalletJni wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, null, null);
@@ -133,7 +133,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(1, wallet.getHeight());
     assertEquals(0, wallet.getRestoreHeight());
     wallet.close();
-
+    
     // create wallet without restore height
     path = getRandomWalletPath();
     wallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, TestUtils.NETWORK_TYPE, daemon.getRpcConnection(), null);

@@ -332,21 +332,30 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonConne
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
 
   // get daemon connection
-  shared_ptr<MoneroRpcConnection> daemonConnection = wallet->getDaemonConnection();
-  if (daemonConnection == nullptr) return 0;
+  try {
+    shared_ptr<MoneroRpcConnection> daemonConnection = wallet->getDaemonConnection();
+    if (daemonConnection == nullptr) return 0;
 
-  // return string[uri, username, password]
-  jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
-  if (!daemonConnection->uri.empty()) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(daemonConnection->uri.c_str()));
-  if (!daemonConnection->username.empty()) env->SetObjectArrayElement(vals, 1, env->NewStringUTF(daemonConnection->username.c_str()));
-  if (!daemonConnection->password.empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(daemonConnection->password.c_str()));
-  return vals;
+    // return string[uri, username, password]
+    jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
+    if (!daemonConnection->uri.empty()) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(daemonConnection->uri.c_str()));
+    if (!daemonConnection->username.empty()) env->SetObjectArrayElement(vals, 1, env->NewStringUTF(daemonConnection->username.c_str()));
+    if (!daemonConnection->password.empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(daemonConnection->password.c_str()));
+    return vals;
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *env, jobject instance, jstring juri, jstring jusername, jstring jpassword) {
   cout << "Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
-  setDaemonConnection(env, wallet, juri, jusername, jpassword);
+  try {
+    setDaemonConnection(env, wallet, juri, jusername, jpassword);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
 }
 
 JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_getIsConnectedJni(JNIEnv* env, jobject instance) {
