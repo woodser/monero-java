@@ -60,7 +60,7 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 
 HIGH
 wallet.getHeight(),  wallet.getIsSynced(), wallet.getIsConnected(), wallet.getDaemonHeight(), wallet.getDaemonTargetHeight(), wallet.getIsDaemonSynced()
-
+is auto sync causing sync slow down?
 wallet2->deinit() on close
 confirm that sync from start height syncs from that start height even if wallet created with later/earlier height?
 assert restore height == txs[0].getHeight() in js testGetTxsWallet()

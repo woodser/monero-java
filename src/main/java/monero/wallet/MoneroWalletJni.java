@@ -195,12 +195,20 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
     if (daemonConnection == null) setDaemonConnectionJni("", "", "");
-    else setDaemonConnectionJni(daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword());
+    try {
+      setDaemonConnectionJni(daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword());
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
   
   public MoneroRpcConnection getDaemonConnection() {
-    String[] vals = getDaemonConnectionJni();
-    return vals == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2]);
+    try {
+      String[] vals = getDaemonConnectionJni();
+      return vals == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2]);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
   
   public boolean getIsConnected() {

@@ -108,6 +108,7 @@ public class TestUtils {
         MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
         walletJni = new MoneroWalletJni(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, NETWORK_TYPE, daemonConnection, TEST_RESTORE_HEIGHT);
         walletJni.sync(new WalletSyncPrinter());
+        walletJni.setAutoSync(true);
       }
       
       // otherwise open existing wallet and update daemon connection

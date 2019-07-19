@@ -2415,7 +2415,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       int numConfirmationsTotal = 2; // number of confirmations to test
       while (numConfirmations < numConfirmationsTotal) {
         System.out.println(numConfirmations + " < " + numConfirmationsTotal + " needed confirmations");
-        wallet.sync();
         
         // wait for a block
         MoneroBlockHeader header = daemon.getNextBlockHeader();
