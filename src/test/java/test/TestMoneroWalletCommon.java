@@ -469,7 +469,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     List<MoneroTxWallet> txs2 = getAndTestTxs(wallet, null, null, true);
     assertEquals(txs2.size(), txs1.size());
     assertFalse("Wallet has no txs to test", txs1.isEmpty());
-    assertEquals("First tx's restore height must match the restore height in TestUtils", TestUtils.TEST_RESTORE_HEIGHT, (long) txs1.get(0).getHeight());  // TODO: port this to js
+    assertEquals("First tx's restore height must match the restore height in TestUtils", TestUtils.TEST_RESTORE_HEIGHT, (long) txs1.get(0).getHeight());
     
     // build test context
     TestContext ctx = new TestContext();
