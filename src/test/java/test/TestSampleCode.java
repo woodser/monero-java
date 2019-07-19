@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigInteger;
 import java.util.List;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import monero.daemon.MoneroDaemon;
@@ -34,9 +33,6 @@ public class TestSampleCode {
   @Test
   @SuppressWarnings("unused")
   public void testWalletSample() {
-    
-    // test setup
-    TestUtils.getDaemonRpc().flushTxPool();
     
     // create a wallet that uses a monero-wallet-rpc endpoint with authentication
     MoneroWallet wallet = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
