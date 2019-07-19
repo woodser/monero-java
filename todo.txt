@@ -7,6 +7,7 @@ wallet2 incoming transfers from/to same account go missing on key image export a
 getReserveProofAccount() failing again
 
 MEDIUM
+peer.getLastSeenTimestamp() occasionally returns -4
 wallet2 get_payments() min_height is exclusive and max_height is inclusive: #5598, 5751
 start height processed > requested start height unless restore height manually set
 my daemon on stagenet says `Sync data returned a new top block candidate: 365062 -> 365545`.  if I mine, the daemon seems to mine on 365062.  if I create a new wallet, its restore height is set to 365545, but daemon `get_height` reports 365062
@@ -59,7 +60,6 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 14.1.0+ RELEASE
 wallet equality tests
 test notification of receiving funds
-no more sync(endHeight)
 test that wallet.getIsSynced() returns false after block added to chain if not auto syncing
 compare time to manual sync vs auto sync
 testCheckTxProof() claims no outgoing tx with destinations after running sendToMultiple() and confirmations
