@@ -73,6 +73,7 @@ work through problems of testing fresh wallet again
 rename MoneroWalletJni.cpp -> MoneroWalletJniBridge.h/MoneroWalletJniBridge.cpp
 
 MEDIUM
+./submodules/ boost, openssl, monero-cpp-library?
 get_daemon_blockchain_target_height indicates blockchain's target height, not daemon's current synced height
 no more sync(endHeight)
 wallet.isSynced(), wallet.isDaemonSynced()
