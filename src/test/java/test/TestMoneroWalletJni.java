@@ -248,7 +248,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     long startHeight = 0;
     SyncProgressTester progressTester = new SyncProgressTester(startHeight, wallet.getChainHeight());
     wallet.setRestoreHeight(1);
-    MoneroSyncResult result = wallet.sync(1l, null, progressTester);
+    MoneroSyncResult result = wallet.sync(1l, progressTester);
     progressTester.onDone(wallet.getChainHeight());
     
     // test result after syncing
@@ -278,7 +278,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
     // sync the wallet
     SyncProgressTester progressTester = new SyncProgressTester(wallet.getRestoreHeight(), wallet.getChainHeight());
-    MoneroSyncResult result = wallet.sync(null, null, progressTester);
+    MoneroSyncResult result = wallet.sync(null, progressTester);
     progressTester.onDone(wallet.getChainHeight());
 
     // test result after syncing
@@ -351,7 +351,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // sync the wallet
     SyncProgressTester progressTester = new SyncProgressTester(startHeightExpected, chainHeight);
-    MoneroSyncResult result = wallet.sync(startHeight, null, progressTester);
+    MoneroSyncResult result = wallet.sync(startHeight, progressTester);
     progressTester.onDone(wallet.getChainHeight());
     
     // test result after syncing

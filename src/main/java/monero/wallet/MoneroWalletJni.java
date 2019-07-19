@@ -407,9 +407,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public MoneroSyncResult sync(Long startHeight, Long endHeight, MoneroSyncListener listener) {
+  public MoneroSyncResult sync(Long startHeight, MoneroSyncListener listener) {
     if (startHeight == null) startHeight = Math.max(getHeight(), getRestoreHeight());
-    if (endHeight != null) throw new MoneroException("Monero core wallet does not support syncing to an end height");
     
     // verify connection to daemon which informs sync end height
     MoneroDaemonRpc daemon = new MoneroDaemonRpc(getDaemonConnection());

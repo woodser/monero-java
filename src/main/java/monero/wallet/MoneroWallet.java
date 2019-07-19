@@ -170,16 +170,6 @@ public interface MoneroWallet {
   public MoneroSyncResult sync(Long startHeight, MoneroSyncListener listener);
   
   /**
-   * Synchronizes the wallet with the blockchain.
-   * 
-   * @param startHeight is the start height to sync from, syncs from the last synced block by default
-   * @param endHeight is the end height to sync to (exclusive), syncs to the current chain height by default
-   * @param listener is invoked as sync progress is made
-   * @return the sync result
-   */
-  public MoneroSyncResult sync(Long startHeight, Long endHeight, MoneroSyncListener listener);
-  
-  /**
    * Rescan the blockchain from scratch, losing any information which cannot be recovered from
    * the blockchain itself.
    * 
