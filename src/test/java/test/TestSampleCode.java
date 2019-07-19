@@ -34,6 +34,9 @@ public class TestSampleCode {
   @SuppressWarnings("unused")
   public void testWalletSample() {
     
+    // test setup
+    TestUtils.getDaemonRpc().flushTxPool();
+    
     // create a wallet that uses a monero-wallet-rpc endpoint with authentication
     MoneroWallet wallet = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
 
@@ -128,7 +131,7 @@ public class TestSampleCode {
     // start mining to an address with 4 threads, not in the background, and ignoring the battery
     String address = TestUtils.TEST_ADDRESS;
     //String address = "74oAtjgE2dfD1bJBo4DWW3E6qXCAwUDMgNqUurnX9b2xUvDTwMwExiXDkZskg7Vct37tRGjzHRqL4gH4H3oag3YyMYJzrNp";
-    int numThreads = 4;
+    int numThreads = 8;
     boolean isBackground = false;
     boolean ignoreBattery = false;
     daemon.startMining(address, numThreads, isBackground, ignoreBattery);
