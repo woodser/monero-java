@@ -200,12 +200,12 @@ public class MoneroUtils {
       
       // resolve integers
       if (val1 instanceof Integer && val2 instanceof Integer) {
-        return (T) (Integer) (resolveMax ? Math.max((int) val1, (int) val2) : Math.min((int) val1, (int) val2));
+        return (T) (Integer) (resolveMax ? Math.max((Integer) val1, (Integer) val2) : Math.min((Integer) val1, (Integer) val2));
       }
       
       // resolve longs
       if (val1 instanceof Long && val2 instanceof Long) {
-        return (T) (Long) (resolveMax ? Math.max((long) val1, (long) val2) : Math.min((long) val1, (long) val2));
+        return (T) (Long) (resolveMax ? Math.max((Long) val1, (Long) val2) : Math.min((Long) val1, (Long) val2));
       }
 
       throw new RuntimeException("Need to resolve primitives and object versions");
