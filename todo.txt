@@ -75,14 +75,15 @@ MEDIUM
 accounting tests
 syncAsync()
 rescanAsync()
+daemon.getTargetHeight()
 connect to peers
 test all wallet2 notifications
 transfer amount != sum on split txs; test force split
+add warnings to all deserialization methods for unrecognized fields
 debug why testGetOutputsValidateInputs() and testImportKeyImages() fail because cannot connect to daemon only if running with all other tests
 
 LOW
 Activate UTF-8 support for Boost filesystem classes on Windows (search for that text in core)
-add warnings to all deserialization methods for unrecognized fields
 port changes from diff of jni39+ to master_bkp_jni to js
 getAddressIndex() -> getSubaddress(String address) and that returns full subaddress info?
 test getAccounts(), getBalance(), etc with out of range subaddress/account indices (common wallet tests)
