@@ -1798,7 +1798,10 @@ public class TestMoneroDaemonRpc {
     assertTrue(peer.getRpcPort() >= 0);
     assertNotNull(peer.getIsOnline());
     if (fromConnection) assertNull(peer.getLastSeenTimestamp());
-    else assertTrue(peer.getLastSeenTimestamp() >= 0);
+    else {
+      if (peer.getLastSeenTimestamp() < 0) System.out.println("Last seen timestamp is invalid: " + peer.getLastSeenTimestamp());
+      assertTrue(peer.getLastSeenTimestamp() >= 0);
+    }
     assertTrue(peer.getPruningSeed() >= 0);
   }
 

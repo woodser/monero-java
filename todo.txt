@@ -59,7 +59,7 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 14.1.0+ RELEASE
 
 HIGH
-account tests
+accounting tests
 wallet equality tests
 test notification of receiving funds
 test that wallet.getIsSynced() returns false after block added to chain if not auto syncing
