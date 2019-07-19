@@ -55,7 +55,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertTrue(daemonTargetHeight >= daemonHeight);
     assertEquals(wallet.getIsDaemonSynced(), daemonHeight == daemonTargetHeight);
   }
-
+  
   @Test
   public void testCreateWalletRandom() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -197,9 +197,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // recreate test wallet from keys
     String path = getRandomWalletPath();
-    MoneroWalletJni walletKeys = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), wallet.getNetworkType(), wallet.getDaemonConnection(), 363492l, null);
+    MoneroWalletJni walletKeys = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), wallet.getNetworkType(), wallet.getDaemonConnection(), TestUtils.TEST_RESTORE_HEIGHT, null);
+    assertEquals(TestUtils.TEST_RESTORE_HEIGHT, walletKeys.getRestoreHeight());
     assertTrue(walletKeys.getIsConnected());
     assertFalse(walletKeys.getIsSynced());
+    
 
     // TODO monero core: importing key images can cause erasure of incoming transfers per wallet2.cpp:11957 which causes this test to fail
 //    // sync the wallets until same height
@@ -233,6 +235,28 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     String publicSpendKey = wallet.getPublicSpendKey();
     MoneroUtils.validatePublicSpendKey(publicSpendKey);
+  }
+  
+  // Can re-sync an existing wallet from scratch
+  @Test
+  @Ignore // TODO monero core: cannot re-sync from lower block height after wallet saved
+  public void testResyncExisting() {
+    assertTrue(MoneroWalletJni.walletExists(TestUtils.WALLET_JNI_PATH_1));
+    MoneroWalletJni wallet = new MoneroWalletJni(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, MoneroNetworkType.STAGENET);
+    wallet.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
+    //long startHeight = TestUtils.TEST_RESTORE_HEIGHT;
+    long startHeight = 0;
+    SyncProgressTester progressTester = new SyncProgressTester(startHeight, wallet.getChainHeight());
+    wallet.setRestoreHeight(1);
+    MoneroSyncResult result = wallet.sync(1l, null, progressTester);
+    progressTester.onDone(wallet.getChainHeight());
+    
+    // test result after syncing
+    assertTrue(wallet.getIsConnected());
+    assertTrue(wallet.getIsSynced());
+    assertEquals(wallet.getChainHeight() - startHeight, (long) result.getNumBlocksFetched());
+    assertTrue(result.getReceivedMoney());
+    assertEquals(daemon.getHeight(), wallet.getHeight());
   }
 
   // Can sync a wallet with a randomly generated seed
@@ -619,7 +643,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     public void onDone(long chainHeight) {
       assertEquals(chainHeight, prevEndHeight);
       if (prevEndHeight <= startHeight) assertNull(prevHeight); // progress never called
-      else assertEquals(chainHeight - 1, (long) prevHeight);  // otherwise last height is chain height - 1
+      else {
+        assertNotNull("Progress never called", prevHeight);
+        assertEquals(chainHeight - 1, (long) prevHeight);  // otherwise last height is chain height - 1
+      }
     }
   }
   
