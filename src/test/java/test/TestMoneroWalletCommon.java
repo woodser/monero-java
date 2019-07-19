@@ -1261,7 +1261,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
 //      assertEquals(incomingSum.subtract(outgoingSum).toString(), account.getBalance().toString());
 //    }
     
-    // balance may not equal sum of unspent outputs if if unconfirmed txs
+    // balance may not equal sum of unspent outputs if unconfirmed txs
     // TODO monero-wallet-rpc: reason not to return unspent outputs on unconfirmed txs? then this isn't necessary
     boolean hasUnconfirmedTx = false;
     for (MoneroTxWallet tx : txs) if (tx.getInTxPool()) hasUnconfirmedTx = true;
