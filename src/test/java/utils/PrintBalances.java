@@ -1,5 +1,8 @@
 package utils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +35,7 @@ public class PrintBalances {
     for (MoneroAccount account : accounts) {
       add(pairs, "ACCOUNT", account.getIndex());
       add(pairs, "SUBADDRESS", "");
+      add(pairs, "LABEL", "");
       add(pairs, "ADDRESS", "");
       add(pairs, "BALANCE", account.getBalance());
       add(pairs, "UNLOCKED", account.getUnlockedBalance());
@@ -46,10 +50,17 @@ public class PrintBalances {
     }
     
     // convert info to csv
+    Integer length = null;
+    for (Pair<String, List<Object>> pair : pairs) {
+      if (length == null) length = pair.getSecond().size();
+      else assertEquals((int) length, (int) pair.getSecond().size());
+    }
+    
     System.out.println(pairsToCsv(pairs));
   }
   
   private static void add(List<Pair<String, List<Object>>> pairs, String header, Object value) {
+    if (value == null) value = "";
     Pair<String, List<Object>> pair = null;
     for (Pair<String, List<Object>> aPair : pairs) {
       if (aPair.getFirst().equals(header)) {
@@ -62,6 +73,7 @@ public class PrintBalances {
       pair = new Pair<String, List<Object>>(header, vals);
       pairs.add(pair);
     }
+    assertNotNull(value);
     pair.getSecond().add(value);
   }
   
