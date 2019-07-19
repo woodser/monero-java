@@ -59,13 +59,11 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 14.1.0+ RELEASE
 
 HIGH
-compare time to manual sync vs auto sync
-assert restore height == txs[0].getHeight() in js testGetTxsWallet()
-test notification of receiving funds
-jni testUpdateLockedDifferentAccounts() not recognizing tx confirmations
-jni manually recognize unconfirmed data
-test that wallet.getIsSynced() returns false after block added to chain if not auto syncing
+account tests
 wallet equality tests
+test notification of receiving funds
+test that wallet.getIsSynced() returns false after block added to chain if not auto syncing
+compare time to manual sync vs auto sync
 testCheckTxProof() claims no outgoing tx with destinations after running sendToMultiple() and confirmations
 cap creation of accounts by ignoring test if more than X accounts already exist
 ability to open wallet while specifying daemon connection; consider switching back to utilities?  thinking that could be clearer
