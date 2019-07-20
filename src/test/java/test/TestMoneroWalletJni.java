@@ -616,16 +616,19 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     private long startHeight;
     private long prevEndHeight;
     private Long prevHeight;
+    private boolean isDone;
     
     public SyncProgressTester(long startHeight, long endHeight) {
       assertTrue(startHeight >= 0);
       assertTrue(endHeight >= 0);
       this.startHeight = startHeight;
       this.prevEndHeight = endHeight;
+      this.isDone = false;
     }
 
     @Override
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
+      assertFalse("Sync has completed and progress should not be called again", isDone);
       if ((height - startHeight) % 10000 == 0 || percentDone > .999) System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
       assertFalse("Should not call progress if end height <= start height", endHeight <= startHeight);
       assertEquals(this.startHeight, startHeight);
@@ -641,6 +644,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
     
     public void onDone(long chainHeight) {
+      this.isDone = true;
       assertEquals(chainHeight, prevEndHeight);
       if (prevEndHeight <= startHeight) assertNull(prevHeight); // progress never called
       else {
