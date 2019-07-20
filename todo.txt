@@ -83,6 +83,7 @@ wallet equality tests - rpc send failures (known ring does not include the spent
     re-run equals test: cannot reconcile integrals!
     added debug statements to reconcile, traced to duplicate incoming transfers but one with transfer amount of 0
     copied jni wallet to rpc and reproduced bug in javascript (i.e. rpc is serving up duplicate transfer but with incoming amount of 0)
+    summary observations: running send tests repeatedly will break rpc or jni.  rescan_bc will make equality tests pass, but send tests will still be problematic.  Rebuilding wallet helps at first but eventually breaks too. consider recreating shared dbs or starting new test mnemonic
 testCreateWalletFromKeys() serves as ground truth comparison with newly built wallet and equality test; separate into another test or make ground truth comparison wherever applicable?
 test notification of receiving funds
 test that wallet.getIsSynced() returns false after block added to chain if not auto syncing
