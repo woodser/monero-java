@@ -446,7 +446,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public void rescanBlockchain() {
-    throw new RuntimeException("Not implemented");
+    try {
+      rescanBlockchainJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
@@ -1014,6 +1018,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native Object[] syncJni(long startHeight);
   
   private native void setAutoSyncJni(boolean autoSync);
+  
+  private native void rescanBlockchainJni();
   
   private native long getHeightJni();
   
