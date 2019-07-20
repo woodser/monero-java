@@ -2382,7 +2382,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       MoneroMiningStatus miningStatus = daemon.getMiningStatus();
       if (!miningStatus.getIsActive()) {
         try {
-          wallet.startMining(8, false, true);
+          wallet.startMining(7, false, true);
           startedMining = true;
         } catch (Exception e) {
           // no problem

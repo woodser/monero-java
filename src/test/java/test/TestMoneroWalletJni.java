@@ -48,6 +48,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   @Test
   public void testDaemon() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     assertTrue(wallet.getIsConnected());
     long daemonHeight = wallet.getDaemonHeight();
     assertTrue(daemonHeight > 0);

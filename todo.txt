@@ -7,6 +7,7 @@ wallet2 incoming transfers from/to same account go missing on key image export a
 getReserveProofAccount() failing again
 
 MEDIUM
+failed tx in pool (after testUpdateLockedDifferentAccounts()) causes non-originating saved wallets to return duplicate incoming transfers but one has amount/numSuggestedConfirmations of 0, possibly no outgoingTransfer
 peer.getLastSeenTimestamp() occasionally returns -4
 wallet2 get_payments() min_height is exclusive and max_height is inclusive: #5598, 5751
 start height processed > requested start height unless restore height manually set
@@ -64,6 +65,24 @@ wallet equality tests - rpc send failures (known ring does not include the spent
   find and move ringdb to rebuild it
   move rpc wallet file to jni test_wallets
   add init() and find_and_save_rings(false) to wallet rpc and build
+  DEBUG
+    rpc wallet testSend() causes wallets to be unequal until first confirmation
+    rpc wallet testSendSameAccount() causes wallets to be unequal until first confirmation
+    rpc wallet run all sends (testSendFromSubaddressesSplit() has -4 tx rejected by daemon) causes wallets to be unequal until first confirmation
+    rpc non-relay tests did not affect equality
+    running **all rpc tests together** caused a tx with many key images and with "last_failed_height" and "last_failed_id" to go into the pool which isn't confirming and wallets to become unequal after first confirmation.  jni wallet has lesser balance.  Not recognizing tx as failed?
+    tx cleared from pool automatically/createWalletFromKeys() passed, but rpc vs jni still different.  it appears rpc is corrupted with far too high of a balance?
+    actually, incoming miner txs are not being reflected.  available in 40 blocks
+    restoring determinstic wallet in cli agrees with jni wallet confering that rpc is corrupted
+    the rpc wallet is self corrupting without running jni tests
+    recreated rpc test wallet1 from cli gt, wallet equality tests pass
+    running all rpc tests except non relays: equality tests equal, tx in pool with 0 last_failed_height unlike prior failure, which confirmed
+    rpc non_relays run normally, equality unaffected
+    running all rpc tests except non relays: interesting... testUpdateLockedDifferentAccounts()'s tx failed in the pool, so it looped forever, and rpc wallet became corrupted again, then got "cannot reconcile integrals" in jni wallet running equality test (did tx become recognized as failed mid call?
+    re-run equals test: cannot reconcile integrals!
+    added debug statements to reconcile, traced to duplicate incoming transfers but one with transfer amount of 0
+    copied jni wallet to rpc and reproduced bug in javascript (i.e. rpc is serving up duplicate transfer but with incoming amount of 0)
+testCreateWalletFromKeys() serves as ground truth comparison with newly built wallet and equality test; separate into another test or make ground truth comparison wherever applicable?
 test notification of receiving funds
 test that wallet.getIsSynced() returns false after block added to chain if not auto syncing
 compare time to manual sync vs auto sync
@@ -81,6 +100,7 @@ update readme with jni support
 announce
 
 MEDIUM
+testCreateThenRelay() passes when no internet connection?
 tx in pool can reconcile to failed
 rescanBlockchain(bool hard, bool refresh, bool keep_key_images)
 accounting tests

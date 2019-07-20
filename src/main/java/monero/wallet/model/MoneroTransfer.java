@@ -103,9 +103,17 @@ public class MoneroTransfer {
     }
     
     // otherwise merge transfer fields
-    this.setAmount(MoneroUtils.reconcile(this.getAmount(), transfer.getAmount()));
     this.setAccountIndex(MoneroUtils.reconcile(this.getAccountIndex(), transfer.getAccountIndex()));
-    this.setNumSuggestedConfirmations(MoneroUtils.reconcile(this.getNumSuggestedConfirmations(), transfer.getNumSuggestedConfirmations(), null, null, false));  // TODO monero-wallet-rpc: outgoing txs become 0 when confirmed
+    
+    // TODO monero core: failed tx in pool (after testUpdateLockedDifferentAccounts()) causes non-originating saved wallets to return duplicate incoming transfers but one has amount/numSuggestedConfirmations of 0
+    if (this.getAmount() != null && transfer.getAmount() != null && !this.getAmount().equals(transfer.getAmount()) && (BigInteger.valueOf(0).equals(this.getAmount()) || BigInteger.valueOf(0).equals(transfer.getAmount()))) {
+      this.setAmount(MoneroUtils.reconcile(this.getAmount(), transfer.getAmount(), null, null, true));
+      this.setNumSuggestedConfirmations(MoneroUtils.reconcile(this.getNumSuggestedConfirmations(), transfer.getNumSuggestedConfirmations(), null, null, true));
+      System.out.println("WARNING: failed tx in pool causes non-originating wallets to return duplicate incoming transfers but with one amount/numSuggestedConfirmations of 0");
+    } else {
+      this.setAmount(MoneroUtils.reconcile(this.getAmount(), transfer.getAmount()));
+      this.setNumSuggestedConfirmations(MoneroUtils.reconcile(this.getNumSuggestedConfirmations(), transfer.getNumSuggestedConfirmations(), null, null, false));  // TODO monero-wallet-rpc: outgoing txs become 0 when confirmed
+    }
     
     return this;
   }
