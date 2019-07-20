@@ -73,6 +73,7 @@ cap creation of accounts by ignoring test if more than X accounts already exist
 ability to open wallet while specifying daemon connection; consider switching back to utilities?  thinking that could be clearer
 work through problems of testing fresh wallet again
 rename MoneroWalletJni.cpp -> MoneroWalletJniBridge.h/MoneroWalletJniBridge.cpp
+onSyncProgress(370019, 370019, 370021, 0.5, Synchronizing) 50% for 1/3 blocks processed?
 ./submodules/ boost, openssl, monero-cpp-library?
 regenerate api docs
 update readme with jni support
