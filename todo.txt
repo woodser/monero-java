@@ -69,6 +69,7 @@ test that wallet.getIsSynced() returns false after block added to chain if not a
 compare time to manual sync vs auto sync
 testCheckTxProof() claims no outgoing tx with destinations after running sendToMultiple() and confirmations
 reconcile error message
+make daemon interval == wallet cpp sync interval else need to wait for extra blocks
 cap creation of accounts by ignoring test if more than X accounts already exist
 ability to open wallet while specifying daemon connection; consider switching back to utilities?  thinking that could be clearer
 work through problems of testing fresh wallet again
