@@ -159,6 +159,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   // Can get addresses out of range of used accounts and subaddresses
   @Test
   public void testGetSubaddressAddressOutOfRange() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroAccount> accounts = wallet.getAccounts(true);
     int accountIdx = accounts.size() - 1;
     int subaddressIdx = accounts.get(accountIdx).getSubaddresses().size();
@@ -443,6 +444,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   public void testGetTxsByHeight() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     super.testGetTxsByHeight();
   }
 

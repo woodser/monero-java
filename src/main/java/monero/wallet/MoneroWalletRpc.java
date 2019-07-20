@@ -1866,6 +1866,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
     // otherwise merge with existing tx
     else {
+      if (aTx.getIsFailed() != null & tx.getIsFailed() != null && !aTx.getIsFailed().equals(tx.getIsFailed())) {
+        System.out.println("ERROR: Merging these transactions will throw an error because their isFailed state is different");
+        System.out.println(aTx);
+        System.out.println(tx);
+      }
       aTx.merge(tx);
     }
 

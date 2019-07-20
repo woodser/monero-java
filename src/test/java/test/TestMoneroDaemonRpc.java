@@ -421,6 +421,7 @@ public class TestMoneroDaemonRpc {
   }
   
   // Can get transactions by ids that are in the transaction pool
+  //@Ignore // TODO re-enable, monero-core: fix daemon.getTxs() hanging occasionally
   @Test
   public void testGetTxsByIdsInPool() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);

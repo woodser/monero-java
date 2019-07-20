@@ -1493,7 +1493,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     private MoneroDaemon daemon;
     private MoneroDaemonPollerRunnable runnable;
     private List<MoneroDaemonListener> listeners;
-    private static final long POLL_INTERVAL = 5000; // poll every X ms  TODO: poll interval should come from configuration
+    private static final long POLL_INTERVAL_MS = 10000; // poll every X ms  TODO: poll interval should come from configuration
     
     public MoneroDaemonPoller(MoneroDaemon daemon) {
       this.daemon = daemon;
@@ -1507,7 +1507,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       
       // start polling thread
       if (runnable == null) {
-        runnable = new MoneroDaemonPollerRunnable(daemon, POLL_INTERVAL);
+        runnable = new MoneroDaemonPollerRunnable(daemon, POLL_INTERVAL_MS);
         Thread thread = new Thread(runnable);
         thread.setDaemon(true); // daemon thread does not prevent JVM from halting
         thread.start();
