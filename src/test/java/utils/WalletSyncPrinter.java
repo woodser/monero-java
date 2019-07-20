@@ -10,7 +10,7 @@ public class WalletSyncPrinter implements MoneroSyncListener {
   private long blockResolution;
   
   public WalletSyncPrinter() {
-    this(25000l);
+    this(5000l);
   }
   
   public WalletSyncPrinter(long blockResolution) {
@@ -19,7 +19,7 @@ public class WalletSyncPrinter implements MoneroSyncListener {
   
   @Override
   public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
-    if ((startHeight - height) % blockResolution == 0) {
+    if (percentDone == 1 || (startHeight - height) % blockResolution == 0) {
       System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
     }
   }
