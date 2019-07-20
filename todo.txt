@@ -59,21 +59,23 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 
 14.1.0+ RELEASE
 wallet equality tests - Known ring does not include the spent output, jni balance too high
-	sent txs from rpc recognized but outputs not correctly marked as spent?
-	does rpc known ring problem happen if jni tests are not run? could rpc be recognizing jni's sent txs but not marking them as spent?
-	find and move ringdb to rebuild it
-	move rpc wallet file to jni test_wallets
-	add init() and find_and_save_rings(false) to wallet rpc and build
+  sent txs from rpc recognized but outputs not correctly marked as spent?
+  does rpc known ring problem happen if jni tests are not run? could rpc be recognizing jni's sent txs but not marking them as spent?
+  find and move ringdb to rebuild it
+  move rpc wallet file to jni test_wallets
+  add init() and find_and_save_rings(false) to wallet rpc and build
 test notification of receiving funds
 test that wallet.getIsSynced() returns false after block added to chain if not auto syncing
 compare time to manual sync vs auto sync
 testCheckTxProof() claims no outgoing tx with destinations after running sendToMultiple() and confirmations
+reconcile error message
 cap creation of accounts by ignoring test if more than X accounts already exist
 ability to open wallet while specifying daemon connection; consider switching back to utilities?  thinking that could be clearer
 work through problems of testing fresh wallet again
 rename MoneroWalletJni.cpp -> MoneroWalletJniBridge.h/MoneroWalletJniBridge.cpp
 ./submodules/ boost, openssl, monero-cpp-library?
 regenerate api docs
+update readme with jni support
 announce
 
 MEDIUM
