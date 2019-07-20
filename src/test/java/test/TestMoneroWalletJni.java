@@ -24,6 +24,7 @@ import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletListener;
 import utils.TestUtils;
+import utils.WalletSyncPrinter;
 
 /**
  * Tests specific to the JNI wallet.
@@ -202,7 +203,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(TestUtils.TEST_RESTORE_HEIGHT, walletKeys.getRestoreHeight());
     assertTrue(walletKeys.getIsConnected());
     assertFalse(walletKeys.getIsSynced());
-    
+    walletKeys.sync(new WalletSyncPrinter());
 
     // TODO monero core: importing key images can cause erasure of incoming transfers per wallet2.cpp:11957 which causes this test to fail
 //    // sync the wallets until same height

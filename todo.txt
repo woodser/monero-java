@@ -60,6 +60,7 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 
 14.1.0+ RELEASE
 wallet equality tests - rpc send failures (known ring does not include the spent output, -4 tx rejected by daemon, failed to commit), jni balance too high
+  rpc wallet rescanBlockchain() makes send and equality tests pass
   sent txs from rpc recognized but outputs not correctly marked as spent?
   does rpc known ring problem happen if jni tests are not run? could rpc be recognizing jni's sent txs but not marking them as spent?
   find and move ringdb to rebuild it
