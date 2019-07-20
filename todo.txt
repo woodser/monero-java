@@ -80,6 +80,7 @@ update readme with jni support
 announce
 
 MEDIUM
+tx in pool can reconcile to failed
 rescanBlockchain(bool hard, bool refresh, bool keep_key_images)
 accounting tests
 syncAsync()
