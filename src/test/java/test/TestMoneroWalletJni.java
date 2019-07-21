@@ -99,14 +99,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(1, wallet.getHeight()); // TODO monero core: why is height of unsynced wallet 1?
     if (daemon.getIsConnected()) assertEquals(daemon.getHeight(), wallet.getRestoreHeight());
     else assertTrue(wallet.getRestoreHeight() >= 0);
-    
-    // test ground truth equality and close
-    try {
-      testWalletsEqualOnChain(TestUtils.createWalletGroundTruth(MoneroNetworkType.TESTNET, wallet.getMnemonic(), null), wallet);
-    } finally {
-      wallet.close();
-    }
-    wallet.close();
   }
   
   @Test
@@ -143,12 +135,13 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertFalse(wallet.getIsSynced());
     assertEquals(1, wallet.getHeight()); // TODO monero core: why does height of new unsynced wallet start at 1?
     assertEquals(0, wallet.getRestoreHeight());
-    wallet.close();
     
     // test ground truth equality and close
+    MoneroWalletJni walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, null);
     try {
-      testWalletsEqualOnChain(TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, null), wallet);
+      testWalletsEqualOnChain(walletGt, wallet);
     } finally {
+      walletGt.close();
       wallet.close();
     }
     
@@ -191,9 +184,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(restoreHeight, wallet.getRestoreHeight());
     
     // test ground truth equality and close
+    walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, restoreHeight);
     try {
-      testWalletsEqualOnChain(TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.RESTORE_HEIGHT), wallet);
+      testWalletsEqualOnChain(walletGt, wallet);
     } finally {
+      walletGt.close();
       wallet.close();
     }
   }
@@ -221,9 +216,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 //    walletKeys.importKeyImages(keyImages);
     
     // test ground truth equality
+    MoneroWalletJni walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.RESTORE_HEIGHT);
     try {
-      testWalletsEqualOnChain(TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.RESTORE_HEIGHT), walletKeys);
+      testWalletsEqualOnChain(walletGt, walletKeys);
     } finally {
+      walletGt.close();
       walletKeys.close();
     }
   }

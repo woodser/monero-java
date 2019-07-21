@@ -571,21 +571,26 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_decodeIntegratedAdd
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong startHeight) {
   cout << "Java_monero_wallet_MoneroWalletJni_syncJni" << endl;
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
 
-  // sync wallet
-  MoneroSyncResult result = wallet->sync(startHeight);
+    // sync wallet
+    MoneroSyncResult result = wallet->sync(startHeight);
 
-  // build and return results as Object[2]{(long) numBlocksFetched, (boolean) receivedMoney}
-  jobjectArray results = env->NewObjectArray(2, env->FindClass("java/lang/Object"), nullptr);
-  jclass longClass = env->FindClass("java/lang/Long");
-  jmethodID longConstructor = env->GetMethodID(longClass, "<init>", "(J)V");
-  jobject numBlocksFetchedWrapped = env->NewObject(longClass, longConstructor, static_cast<jlong>(result.numBlocksFetched));
-  env->SetObjectArrayElement(results, 0, numBlocksFetchedWrapped);
-  jclass booleanClass = env->FindClass("java/lang/Boolean");
-  jmethodID booleanConstructor = env->GetMethodID(booleanClass, "<init>", "(Z)V");
-  jobject receivedMoneyWrapped = env->NewObject(booleanClass, booleanConstructor, static_cast<jboolean>(result.receivedMoney));
-  env->SetObjectArrayElement(results, 1, receivedMoneyWrapped);
-  return results;
+    // build and return results as Object[2]{(long) numBlocksFetched, (boolean) receivedMoney}
+    jobjectArray results = env->NewObjectArray(2, env->FindClass("java/lang/Object"), nullptr);
+    jclass longClass = env->FindClass("java/lang/Long");
+    jmethodID longConstructor = env->GetMethodID(longClass, "<init>", "(J)V");
+    jobject numBlocksFetchedWrapped = env->NewObject(longClass, longConstructor, static_cast<jlong>(result.numBlocksFetched));
+    env->SetObjectArrayElement(results, 0, numBlocksFetchedWrapped);
+    jclass booleanClass = env->FindClass("java/lang/Boolean");
+    jmethodID booleanConstructor = env->GetMethodID(booleanClass, "<init>", "(Z)V");
+    jobject receivedMoneyWrapped = env->NewObject(booleanClass, booleanConstructor, static_cast<jboolean>(result.receivedMoney));
+    env->SetObjectArrayElement(results, 1, receivedMoneyWrapped);
+    return results;
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setAutoSyncJni(JNIEnv *env, jobject instance, jboolean autoSync) {
