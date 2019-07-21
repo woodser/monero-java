@@ -64,6 +64,10 @@ ground truth tests
 isolate incorrect balances bug
 ux test including receiving funds
 
+need to confirm close at end, but double .close() will seg fault, so need wallet.isClosed()
+rename MoneroWalletJni.cpp -> MoneroWalletJniBridge.h/MoneroWalletJniBridge.cpp
+refactor getIs() to is...()
+
 tests should treat pool as common resource and only flush what they use
 wallet equality tests - rpc send failures (known ring does not include the spent output, -4 tx rejected by daemon, failed to commit), jni balance too high
   rpc wallet rescanBlockchain() makes send and equality tests pass
@@ -96,14 +100,15 @@ compare time to manual sync vs auto sync
 cap creation of accounts by ignoring test if more than X accounts already exist
 ability to open wallet while specifying daemon connection; consider switching back to utilities?  thinking that could be clearer
 work through problems of testing fresh wallet again
-rename MoneroWalletJni.cpp -> MoneroWalletJniBridge.h/MoneroWalletJniBridge.cpp
-onSyncProgress(370019, 370019, 370021, 0.5, Synchronizing) 50% for 1/3 blocks processed?
+
+
 ./submodules/ boost, openssl, monero-cpp-library?
 regenerate api docs
 update readme with jni support
 announce
 
 MEDIUM
+rpc supports on_restore_determinstic_wallet, implement!
 testCreateThenRelay() passes when no internet connection?
 tx in pool can reconcile to failed
 rescanBlockchain(bool hard, bool refresh, bool keep_key_images)

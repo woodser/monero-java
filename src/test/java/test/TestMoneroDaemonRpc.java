@@ -128,7 +128,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetBlockTemplate() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    MoneroBlockTemplate template = daemon.getBlockTemplate(TestUtils.TEST_ADDRESS, 2);
+    MoneroBlockTemplate template = daemon.getBlockTemplate(TestUtils.ADDRESS, 2);
     testBlockTemplate(template);
   }
   
@@ -1003,7 +1003,7 @@ public class TestMoneroDaemonRpc {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get template to mine on
-    MoneroBlockTemplate template = daemon.getBlockTemplate(TestUtils.TEST_ADDRESS);
+    MoneroBlockTemplate template = daemon.getBlockTemplate(TestUtils.ADDRESS);
     
     // TODO monero rpc: way to get mining nonce when found in order to submit?
     

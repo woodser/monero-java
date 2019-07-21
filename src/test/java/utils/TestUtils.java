@@ -40,13 +40,13 @@ public class TestUtils {
   public static final String WALLET_JNI_PATH_2 = TEST_WALLETS_DIR + "/test_wallet_2";
   public static final String WALLET_JNI_PW = "supersecretpassword123";
   
-  // test constants
+  // test wallet constants
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
   public static final MoneroNetworkType NETWORK_TYPE = MoneroNetworkType.STAGENET;
-  public static final String TEST_LANGUAGE = "English";
-  public static final String TEST_MNEMONIC = "veteran inwardly films myriad godfather feel odds legion rarest dating adopt onward wetsuit atrium drying ruined relic refer bamboo voted baffles agnostic cycling dexterity relic"; 
-  public static final String TEST_ADDRESS = "57QzhZAYSHeWG8EpUT8iNTcYATUoMv7hf6MoVCWge6HoV1vGTor1ZkSGa6pH1Xv3xMRh53m5KWFdbSnmmMmzSgpQCrVUyTL";
-  public static final long TEST_RESTORE_HEIGHT = 370987;
+  public static final String LANGUAGE = "English";
+  public static final String MNEMONIC = "veteran inwardly films myriad godfather feel odds legion rarest dating adopt onward wetsuit atrium drying ruined relic refer bamboo voted baffles agnostic cycling dexterity relic"; 
+  public static final String ADDRESS = "57QzhZAYSHeWG8EpUT8iNTcYATUoMv7hf6MoVCWge6HoV1vGTor1ZkSGa6pH1Xv3xMRh53m5KWFdbSnmmMmzSgpQCrVUyTL";
+  public static final long RESTORE_HEIGHT = 370987;
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class);
@@ -88,8 +88,8 @@ public class TestUtils {
       }
       
       // ensure we're testing the right wallet
-      assertEquals(TestUtils.TEST_MNEMONIC, walletRpc.getMnemonic());
-      assertEquals(TestUtils.TEST_ADDRESS, walletRpc.getPrimaryAddress());
+      assertEquals(TestUtils.MNEMONIC, walletRpc.getMnemonic());
+      assertEquals(TestUtils.ADDRESS, walletRpc.getPrimaryAddress());
     }
     
     // return cached wallet rpc
@@ -106,8 +106,8 @@ public class TestUtils {
       // create wallet from mnemonic phrase if it doesn't exist
       if (!MoneroWalletJni.walletExists(WALLET_JNI_PATH_1)) {
         MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
-        walletJni = new MoneroWalletJni(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, TestUtils.TEST_MNEMONIC, NETWORK_TYPE, daemonConnection, TEST_RESTORE_HEIGHT);
-        assertEquals(TestUtils.TEST_RESTORE_HEIGHT, walletJni.getRestoreHeight());
+        walletJni = new MoneroWalletJni(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, TestUtils.MNEMONIC, NETWORK_TYPE, daemonConnection, RESTORE_HEIGHT);
+        assertEquals(TestUtils.RESTORE_HEIGHT, walletJni.getRestoreHeight());
         walletJni.sync(new WalletSyncPrinter());
         walletJni.setAutoSync(true);
       }
@@ -133,6 +133,29 @@ public class TestUtils {
     
     // return cached wallet jni
     return walletJni;
+  }
+  
+  /**
+   * Creates a new wallet which is considered to be "ground truth".
+   * 
+   * The best wallet known to serve as ground truth is a freshly created jni wallet restored from mnemonic.
+   * By observation, it is consistent with a freshly restored wallet using cli even when persisted rpc and
+   * jni wallets become inconsistent.
+   * 
+   * The caller of this method should close the returned wallet when done using it. // TODO: need to confirm close at end, but double .close() will seg fault, so need wallet.getIsClosed() check
+   * 
+   * @param networkType is the ground truth wallet's network type
+   * @param mnemonic is the ground truth wallet's mnemonic
+   * @param restoreHeight is the ground truth wallet's restore height
+   */
+  public static MoneroWalletJni createWalletGroundTruth(MoneroNetworkType networkType, String mnemonic, Long restoreHeight) {
+    MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
+    String path = TestUtils.TEST_WALLETS_DIR + "/gt_wallet_" + System.currentTimeMillis();
+    MoneroWalletJni gtWallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.MNEMONIC, NETWORK_TYPE, daemonConnection, RESTORE_HEIGHT);
+    assertEquals(TestUtils.RESTORE_HEIGHT, gtWallet.getRestoreHeight());
+    gtWallet.sync(new WalletSyncPrinter());
+    gtWallet.setAutoSync(true);
+    return gtWallet;
   }
   
   public static void testUnsignedBigInteger(BigInteger num) {
