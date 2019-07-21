@@ -94,7 +94,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     String mnemonic = wallet.getMnemonic();
     MoneroUtils.validateMnemonic(mnemonic);
-    assertEquals(TestUtils.TEST_MNEMONIC, mnemonic);
+    assertEquals(TestUtils.MNEMONIC, mnemonic);
   }
   
   // Can get a list of supported languages for the mnemonic phrase
@@ -240,6 +240,17 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     MoneroSyncResult result = wallet.sync(chainHeight - numBlocks);  // sync end of chain
     assertTrue(result.getNumBlocksFetched() >= 0);
     assertNotNull(result.getReceivedMoney());
+  }
+  
+  // Is equal to a ground truth wallet according to on-chain data
+  @Test
+  public void testCompareGroundTruth() {
+    MoneroWalletJni gtWallet = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, null);
+    try {
+      testWalletsEqualOnChain(gtWallet, wallet);
+    } finally {
+      gtWallet.close();
+    }
   }
   
   // Can get the current height that the wallet is synchronized to
@@ -468,7 +479,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     List<MoneroTxWallet> txs2 = getAndTestTxs(wallet, null, null, true);
     assertEquals(txs2.size(), txs1.size());
     assertFalse("Wallet has no txs to test", txs1.isEmpty());
-    assertEquals("First tx's restore height must match the restore height in TestUtils", TestUtils.TEST_RESTORE_HEIGHT, (long) txs1.get(0).getHeight());
+    assertEquals("First tx's restore height must match the restore height in TestUtils", TestUtils.RESTORE_HEIGHT, (long) txs1.get(0).getHeight());
     
     // build test context
     TestContext ctx = new TestContext();
@@ -2077,6 +2088,12 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   public void testSendToMultiple() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
     testSendToMultiple(5, 3, false);
+    testSendToMultiple(5, 3, false);
+    testSendToMultiple(5, 3, false);
+    testSendToMultiple(5, 3, false);
+    testSendToMultiple(5, 3, false);
+    testSendToMultiple(5, 3, false);
+    testSendToMultiple(5, 3, false);
   }
   
   // Can send to multiple addresses in split transactions
@@ -2851,7 +2868,11 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertEquals("Signature header check error", e.getDescription());
   }
   
-   private static void testAccount(MoneroAccount account) {
+  protected static void testWalletsEqualOnChain(MoneroWallet wallet1, MoneroWallet wallet2) {
+    new TestMoneroWalletsEqual().setWallet1(wallet1).setWallet2(wallet2).testWalletsEqualOnChain();
+  }
+  
+  private static void testAccount(MoneroAccount account) {
     
     // test account
     assertNotNull(account);

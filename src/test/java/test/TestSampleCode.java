@@ -129,7 +129,7 @@ public class TestSampleCode {
     }
     
     // start mining to an address with 4 threads, not in the background, and ignoring the battery
-    String address = TestUtils.TEST_ADDRESS;
+    String address = TestUtils.ADDRESS;
     //String address = "74oAtjgE2dfD1bJBo4DWW3E6qXCAwUDMgNqUurnX9b2xUvDTwMwExiXDkZskg7Vct37tRGjzHRqL4gH4H3oag3YyMYJzrNp";
     int numThreads = 8;
     boolean isBackground = false;

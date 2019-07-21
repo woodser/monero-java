@@ -25,8 +25,8 @@ public class PrintBalances {
     
     // collect info about subaddresses
     List<Pair<String, List<Object>>> pairs = new ArrayList<Pair<String, List<Object>>>();
-    MoneroWallet wallet = TestUtils.getWalletRpc();
-    //MoneroWallet wallet = TestUtils.getWalletJni();
+    //MoneroWallet wallet = TestUtils.getWalletRpc();
+    MoneroWallet wallet = TestUtils.getWalletJni();
     BigInteger balance = wallet.getBalance();
     BigInteger unlockedBalance = wallet.getUnlockedBalance();
     List<MoneroAccount> accounts = wallet.getAccounts(true);

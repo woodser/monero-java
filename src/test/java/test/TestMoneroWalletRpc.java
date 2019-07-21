@@ -366,6 +366,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testSyncWithoutProgress() {
     super.testSyncWithoutProgress();
   }
+  
+  @Override
+  public void testCompareGroundTruth() {
+    super.testCompareGroundTruth();
+  }
 
   @Override
   public void testGetAccountsWithoutSubaddresses() {
