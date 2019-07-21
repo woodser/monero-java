@@ -60,15 +60,13 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 
 14.1.0+ RELEASE
-ground truth tests
+tests should treat pool as common resource and only flush what they use
 isolate incorrect balances bug
 ux test including receiving funds
 
 need to confirm close at end, but double .close() will seg fault, so need wallet.isClosed()
 rename MoneroWalletJni.cpp -> MoneroWalletJniBridge.h/MoneroWalletJniBridge.cpp
 refactor getIs() to is...()
-
-tests should treat pool as common resource and only flush what they use
 wallet equality tests - rpc send failures (known ring does not include the spent output, -4 tx rejected by daemon, failed to commit), jni balance too high
   working theory: wallet 1 sends tx and honors spent outputs right away, does not honor incoming from pool.  GT wallet does not honor incoming or outgoing in pool.  After first confirmation, both should be updated to be correct. tx pool should not be cleared as it is a shared resource
   rpc wallet rescanBlockchain() makes send and equality tests pass

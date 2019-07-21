@@ -688,6 +688,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   // Can get transactions by height
   @Test
   public void testGetTxsByHeight() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get all confirmed txs for testing
     List<MoneroTxWallet> txs = wallet.getTxs(new MoneroTxRequest().setIsConfirmed(true));
