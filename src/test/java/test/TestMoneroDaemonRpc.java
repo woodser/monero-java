@@ -94,7 +94,7 @@ public class TestMoneroDaemonRpc {
   
   @Before
   public void before() {
-    daemon.flushTxPool();
+    daemon.flushTxPool(); // TODO: tests should treat pool as common resource and not flush it
   }
   
   // -------------------------------- NON RELAYS ------------------------------
