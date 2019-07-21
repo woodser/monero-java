@@ -2088,12 +2088,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   public void testSendToMultiple() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
     testSendToMultiple(5, 3, false);
-    testSendToMultiple(5, 3, false);
-    testSendToMultiple(5, 3, false);
-    testSendToMultiple(5, 3, false);
-    testSendToMultiple(5, 3, false);
-    testSendToMultiple(5, 3, false);
-    testSendToMultiple(5, 3, false);
   }
   
   // Can send to multiple addresses in split transactions
