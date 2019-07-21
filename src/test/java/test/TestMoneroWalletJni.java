@@ -35,7 +35,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-
+    //Assume.assumeTrue(false); // ignore entire class
   }
 
   @Override
