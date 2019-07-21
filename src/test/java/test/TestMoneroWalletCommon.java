@@ -66,7 +66,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   // test constants
   protected static final boolean LITE_MODE = false;
   protected static final boolean TEST_NON_RELAYS = true;
-  protected static final boolean TEST_RELAYS = true;
+  protected static final boolean TEST_RELAYS = false;
   protected static final boolean TEST_NOTIFICATIONS = true;
   protected static final boolean TEST_RESETS = false;
   private static final int MAX_TX_PROOFS = 25;   // maximum number of transactions to check for each proof, undefined to check all
@@ -245,7 +245,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   // Is equal to a ground truth wallet according to on-chain data
   @Test
   public void testCompareGroundTruth() {
-    MoneroWalletJni walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, null);
+    MoneroWalletJni walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.RESTORE_HEIGHT);
     try {
       testWalletsEqualOnChain(walletGt, wallet);
     } finally {

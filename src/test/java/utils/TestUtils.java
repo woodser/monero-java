@@ -151,8 +151,8 @@ public class TestUtils {
   public static MoneroWalletJni createWalletGroundTruth(MoneroNetworkType networkType, String mnemonic, Long restoreHeight) {
     MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
     String path = TestUtils.TEST_WALLETS_DIR + "/gt_wallet_" + System.currentTimeMillis();
-    MoneroWalletJni gtWallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, TestUtils.MNEMONIC, NETWORK_TYPE, daemonConnection, RESTORE_HEIGHT);
-    assertEquals(TestUtils.RESTORE_HEIGHT, gtWallet.getRestoreHeight());
+    MoneroWalletJni gtWallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, mnemonic, networkType, daemonConnection, restoreHeight);
+    assertEquals(restoreHeight == null ? 0 : (long) restoreHeight, gtWallet.getRestoreHeight());
     gtWallet.sync(new WalletSyncPrinter());
     gtWallet.setAutoSync(true);
     return gtWallet;
