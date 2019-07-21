@@ -81,12 +81,11 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   public TestMoneroWalletCommon() {
     wallet = getTestWallet();
     daemon = getTestDaemon();
-    daemon.flushTxPool(); // start with fresh tx pool
   }
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    
+    TestUtils.getDaemonRpc().flushTxPool();
   }
 
   // Can get the mnemonic phrase derived from the seed

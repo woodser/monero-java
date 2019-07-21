@@ -1,6 +1,7 @@
 MONERO CORE ISSUES
 
 HIGH
+unconfirmed transactions should be reflected in the balance for ux
 incoming transactions are missing when outgoing counterpart from same account (only on unconfirmed because wallet cache data becomes used?) (https://github.com/monero-project/monero/issues/4500)
 wallet2 incoming transfers from/to same account go missing on key image export and re-import (wallet2.cpp:11957 erases incoming counterpart)
 185d6fc3f67554c6e8f40be4866c05a877c4c7c75da7a4562d35938daca0946c missing incoming transfers but they are known when determining isUsed - #4500 transfer is occluded by same account FIX
@@ -59,6 +60,11 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 
 14.1.0+ RELEASE
+ground truth tests
+isolate incorrect balances bug
+ux test including receiving funds
+
+tests should treat pool as common resource and only flush what they use
 wallet equality tests - rpc send failures (known ring does not include the spent output, -4 tx rejected by daemon, failed to commit), jni balance too high
   rpc wallet rescanBlockchain() makes send and equality tests pass
   sent txs from rpc recognized but outputs not correctly marked as spent?
@@ -85,12 +91,8 @@ wallet equality tests - rpc send failures (known ring does not include the spent
     copied jni wallet to rpc and reproduced bug in javascript (i.e. rpc is serving up duplicate transfer but with incoming amount of 0)
     summary observations: running send tests repeatedly will break rpc or jni.  rescan_bc will make equality tests pass, but send tests will still be problematic.  Rebuilding wallet helps at first but eventually breaks too. consider recreating shared dbs or starting new test mnemonic
 testCreateWalletFromKeys() serves as ground truth comparison with newly built wallet and equality test; separate into another test or make ground truth comparison wherever applicable?
-test notification of receiving funds
 test that wallet.getIsSynced() returns false after block added to chain if not auto syncing
 compare time to manual sync vs auto sync
-testCheckTxProof() claims no outgoing tx with destinations after running sendToMultiple() and confirmations
-reconcile error message
-make daemon interval == wallet cpp sync interval else need to wait for extra blocks
 cap creation of accounts by ignoring test if more than X accounts already exist
 ability to open wallet while specifying daemon connection; consider switching back to utilities?  thinking that could be clearer
 work through problems of testing fresh wallet again
