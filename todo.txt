@@ -108,6 +108,7 @@ update readme with jni support
 announce
 
 MEDIUM
+sync(listener) should not be part of rpc api unless listening supported (could be supported)
 rpc supports on_restore_determinstic_wallet, implement!
 testCreateThenRelay() passes when no internet connection?
 tx in pool can reconcile to failed

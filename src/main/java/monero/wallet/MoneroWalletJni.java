@@ -421,14 +421,15 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       addListener(syncListenerWrapper);
     }
     
-    // sync wallet
-    Object[] results = syncJni(startHeight);
-    
-    // unregister sync listener
-    if (syncListenerWrapper != null) removeListener(syncListenerWrapper);
-    
-    // return results
-    return new MoneroSyncResult((long) results[0], (boolean) results[1]);
+    // sync wallet and handle exception
+    try {
+      Object[] results = syncJni(startHeight);
+      return new MoneroSyncResult((long) results[0], (boolean) results[1]);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    } finally {
+      if (syncListenerWrapper != null) removeListener(syncListenerWrapper); // unregister sync listener
+    }
   }
   
   /**
