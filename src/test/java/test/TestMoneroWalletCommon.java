@@ -85,7 +85,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    TestUtils.getDaemonRpc().flushTxPool();
+    
   }
 
   // Can get the mnemonic phrase derived from the seed
