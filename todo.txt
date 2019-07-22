@@ -60,59 +60,29 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 
 14.1.0+ RELEASE
-tests should treat pool as common resource and only flush what they use
-isolate incorrect balances bug
-ux test including receiving funds
-
-need to confirm close at end, but double .close() will seg fault, so need wallet.isClosed()
 rename MoneroWalletJni.cpp -> MoneroWalletJniBridge.h/MoneroWalletJniBridge.cpp
-refactor getIs() to is...()
-wallet equality tests - rpc send failures (known ring does not include the spent output, -4 tx rejected by daemon, failed to commit), jni balance too high
-  working theory: wallet 1 sends tx and honors spent outputs right away, does not honor incoming from pool.  GT wallet does not honor incoming or outgoing in pool.  After first confirmation, both should be updated to be correct. tx pool should not be cleared as it is a shared resource
-  rpc wallet rescanBlockchain() makes send and equality tests pass
-  sent txs from rpc recognized but outputs not correctly marked as spent?
-  does rpc known ring problem happen if jni tests are not run? could rpc be recognizing jni's sent txs but not marking them as spent?
-  find and move ringdb to rebuild it
-  move rpc wallet file to jni test_wallets
-  add init() and find_and_save_rings(false) to wallet rpc and build
-  DEBUG
-    rpc wallet testSend() causes wallets to be unequal until first confirmation
-    rpc wallet testSendSameAccount() causes wallets to be unequal until first confirmation
-    rpc wallet run all sends (testSendFromSubaddressesSplit() has -4 tx rejected by daemon) causes wallets to be unequal until first confirmation
-    rpc non-relay tests did not affect equality
-    running **all rpc tests together** caused a tx with many key images and with "last_failed_height" and "last_failed_id" to go into the pool which isn't confirming and wallets to become unequal after first confirmation.  jni wallet has lesser balance.  Not recognizing tx as failed?
-    tx cleared from pool automatically/createWalletFromKeys() passed, but rpc vs jni still different.  it appears rpc is corrupted with far too high of a balance?
-    actually, incoming miner txs are not being reflected.  available in 40 blocks
-    restoring determinstic wallet in cli agrees with jni wallet confering that rpc is corrupted
-    the rpc wallet is self corrupting without running jni tests
-    recreated rpc test wallet1 from cli gt, wallet equality tests pass
-    running all rpc tests except non relays: equality tests equal, tx in pool with 0 last_failed_height unlike prior failure, which confirmed
-    rpc non_relays run normally, equality unaffected
-    running all rpc tests except non relays: interesting... testUpdateLockedDifferentAccounts()'s tx failed in the pool, so it looped forever, and rpc wallet became corrupted again, then got "cannot reconcile integrals" in jni wallet running equality test (did tx become recognized as failed mid call?
-    re-run equals test: cannot reconcile integrals!
-    added debug statements to reconcile, traced to duplicate incoming transfers but one with transfer amount of 0
-    copied jni wallet to rpc and reproduced bug in javascript (i.e. rpc is serving up duplicate transfer but with incoming amount of 0)
-    summary observations: running send tests repeatedly will break rpc or jni.  rescan_bc will make equality tests pass, but send tests will still be problematic.  Rebuilding wallet helps at first but eventually breaks too. consider recreating shared dbs or starting new test mnemonic
-testCreateWalletFromKeys() serves as ground truth comparison with newly built wallet and equality test; separate into another test or make ground truth comparison wherever applicable?
+MoneroWalletJni.createWalletFromMnemonic(), createWalletFromMnemonic(), createWalletRandom(), openWallet(connection), etc
+tests should treat pool as common resource and only flush what they use
+wallet.isClosed() check, update wallet.close() test
+refactor getIs...() to is...()
+code todos
+testGetTransfers() cannot reconcile integrals: new MoneroTransferRequest().setAccountIndex(subaddress.getAccountIndex()).setSubaddressIndex(subaddress.getIndex())
 test that wallet.getIsSynced() returns false after block added to chain if not auto syncing
 compare time to manual sync vs auto sync
 cap creation of accounts by ignoring test if more than X accounts already exist
-ability to open wallet while specifying daemon connection; consider switching back to utilities?  thinking that could be clearer
 work through problems of testing fresh wallet again
-
-
-./submodules/ boost, openssl, monero-cpp-library?
 regenerate api docs
 update readme with jni support
+./submodules -> ./external for monero-cpp-library and monero-core?
 announce
 
 MEDIUM
+ux test including receiving funds
 sync(listener) should not be part of rpc api unless listening supported (could be supported)
 rpc supports on_restore_determinstic_wallet, implement!
 testCreateThenRelay() passes when no internet connection?
 tx in pool can reconcile to failed
 rescanBlockchain(bool hard, bool refresh, bool keep_key_images)
-accounting tests
 syncAsync()
 rescanAsync()
 daemon.getTargetHeight()
@@ -187,3 +157,30 @@ bisq integration
 multisig
 pruning
 model rct_signatures, rct_prunable, unsigned_tx_set, etc
+
+wallet equality tests - rpc send failures (known ring does not include the spent output, -4 tx rejected by daemon, failed to commit), jni balance too high
+  working theory: wallet 1 sends tx and honors spent outputs right away, does not honor incoming from pool.  GT wallet does not honor incoming or outgoing in pool.  After first confirmation, both should be updated to be correct. tx pool should not be cleared as it is a shared resource
+  rpc wallet rescanBlockchain() makes send and equality tests pass
+  sent txs from rpc recognized but outputs not correctly marked as spent?
+  does rpc known ring problem happen if jni tests are not run? could rpc be recognizing jni's sent txs but not marking them as spent?
+  find and move ringdb to rebuild it
+  move rpc wallet file to jni test_wallets
+  add init() and find_and_save_rings(false) to wallet rpc and build
+  DEBUG
+    rpc wallet testSend() causes wallets to be unequal until first confirmation
+    rpc wallet testSendSameAccount() causes wallets to be unequal until first confirmation
+    rpc wallet run all sends (testSendFromSubaddressesSplit() has -4 tx rejected by daemon) causes wallets to be unequal until first confirmation
+    rpc non-relay tests did not affect equality
+    running **all rpc tests together** caused a tx with many key images and with "last_failed_height" and "last_failed_id" to go into the pool which isn't confirming and wallets to become unequal after first confirmation.  jni wallet has lesser balance.  Not recognizing tx as failed?
+    tx cleared from pool automatically/createWalletFromKeys() passed, but rpc vs jni still different.  it appears rpc is corrupted with far too high of a balance?
+    actually, incoming miner txs are not being reflected.  available in 40 blocks
+    restoring determinstic wallet in cli agrees with jni wallet confering that rpc is corrupted
+    the rpc wallet is self corrupting without running jni tests
+    recreated rpc test wallet1 from cli gt, wallet equality tests pass
+    running all rpc tests except non relays: equality tests equal, tx in pool with 0 last_failed_height unlike prior failure, which confirmed
+    rpc non_relays run normally, equality unaffected
+    running all rpc tests except non relays: interesting... testUpdateLockedDifferentAccounts()'s tx failed in the pool, so it looped forever, and rpc wallet became corrupted again, then got "cannot reconcile integrals" in jni wallet running equality test (did tx become recognized as failed mid call?
+    re-run equals test: cannot reconcile integrals!
+    added debug statements to reconcile, traced to duplicate incoming transfers but one with transfer amount of 0
+    copied jni wallet to rpc and reproduced bug in javascript (i.e. rpc is serving up duplicate transfer but with incoming amount of 0)
+    summary observations: running send tests repeatedly will break rpc or jni.  rescan_bc will make equality tests pass, but send tests will still be problematic.  Rebuilding wallet helps at first but eventually breaks too. consider recreating shared dbs or starting new test mnemonic
