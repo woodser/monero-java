@@ -34,9 +34,6 @@ public class TestSampleCode {
   @SuppressWarnings("unused")
   public void testWalletSample() {
     
-    // test setup
-    TestUtils.getDaemonRpc().flushTxPool();
-    
     // create a wallet that uses a monero-wallet-rpc endpoint with authentication
     MoneroWallet wallet = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
 

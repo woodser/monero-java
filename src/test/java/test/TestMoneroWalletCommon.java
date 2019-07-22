@@ -32,6 +32,7 @@ import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroMiningStatus;
+import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
@@ -1816,6 +1817,36 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   }
   
   // ------------------------------- TEST RELAYS ------------------------------
+  
+  // Can submit and flush txs
+  @Test
+  public void testSubmitAndFlushTxs() {
+    
+    String address = wallet.getPrimaryAddress();
+    BigInteger amount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(4));
+    MoneroTxWallet tx = wallet.send(new MoneroSendRequest().setAccountIndex(0).setDoNotRelay(true).setDestinations(new MoneroDestination(address, amount)));
+    assertTrue(tx.getDoNotRelay());
+    BigInteger balanceBefore = wallet.getBalance();
+    
+    // assert tx is not in the pool
+    boolean found = false;
+    for (MoneroTx poolTx : daemon.getTxPool()) {
+      if (poolTx.getId().equals(tx.getId())) {
+        found = true;
+        break;
+      }
+    }
+    assertFalse("tx should not be in the pool", found);
+    
+    // submit the tx to the pool but don't relay
+    MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
+    assertTrue(result.getIsGood());
+    
+    // txs submitted directly to the pool are not recognized
+    // TODO: way to incorporate them?
+    wallet.sync();
+    assertEquals(wallet.getBalance(), balanceBefore);
+  }
   
   // Can send from multiple subaddresses in a single transaction
   @Test
