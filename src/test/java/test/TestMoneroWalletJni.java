@@ -994,6 +994,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   public void testMining() {
     super.testMining();
   }
+  
+  @Override
+  public void testSubmitAndFlushTxs() {
+    super.testSubmitAndFlushTxs();
+  }
 
   @Override
   public void testSendFromSubaddresses() {
