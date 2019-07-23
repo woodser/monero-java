@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -35,7 +36,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    //Assume.assumeTrue(false); // ignore entire class
+    Assume.assumeTrue(false); // ignore entire class
   }
 
   @Override
@@ -996,8 +997,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Override
-  public void testSubmitAndFlushTxs() {
-    super.testSubmitAndFlushTxs();
+  public void testWalletUpdatesFromPool() {
+    super.testWalletUpdatesFromPool();
   }
 
   @Override
