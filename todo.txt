@@ -1,6 +1,7 @@
 MONERO CORE ISSUES
 
 HIGH
+testGetTxsByIdsInPool() hangs (have no peer connections?)
 unconfirmed transactions should be reflected in the balance for ux
 incoming transactions are missing when outgoing counterpart from same account (only on unconfirmed because wallet cache data becomes used?) (https://github.com/monero-project/monero/issues/4500)
 wallet2 incoming transfers from/to same account go missing on key image export and re-import (wallet2.cpp:11957 erases incoming counterpart)
@@ -13,14 +14,12 @@ peer.getLastSeenTimestamp() occasionally returns -4
 wallet2 get_payments() min_height is exclusive and max_height is inclusive: #5598, 5751
 start height processed > requested start height unless restore height manually set
 my daemon on stagenet says `Sync data returned a new top block candidate: 365062 -> 365545`.  if I mine, the daemon seems to mine on 365062.  if I create a new wallet, its restore height is set to 365545, but daemon `get_height` reports 365062
-ocasional: testGetTxsByIdsInPool() hangs (have no peer connections?)
 wallet2 network type auto detected when loaded from files on disk
 add all_accounts to incoming_transfers, would be huge time saver
 sometimes see non-zero spent amount in testCheckReserve()
 WARNING: key proof indicates no funds received despite transfer (txid=76983ebf1d2e62141c19e190355e146145cb03988c5bfaf857b65dc0e15d378f, key=5246bf34d97dd379843ea31cb2bddfe41a89db73be4bd72fdc1ffe1b4d8ac70d, address=76gP3JEGAhnS5sgnB7LHRP2tbidL8ChvkJATJADQF4SpBcbN8bUgSZyQmTpdMQqyW129dh3zV5XscaBhkU6WTUKQVdDykFV, amount=44933)
 occasional: seg fault 11 in testGetReserveProofAccount() (with no unlocked balance???), wallet rpc get_reserve_proof
 wallet rpc `open_wallet` spends a lot of time generating ssl certificates and Trying to decrypt cache data when wallet is already open, can't just skip check?
-ocasional: testGetTxsByIdsInPool() tx fails testTx() as double spend
 one time: testCheckTxKey() -24: No tx secret key is stored for this tx, RPC request: 'get_tx_key' with params: {"txid":"e779dbb7fbff77544ea39de062b12c1d722901ed937a833307c1b5b3cea41069"}
 Marking output 18666(<9cd46fd977f2d8f6112cc87592677cbd76801b318c6e607dd31b9a25dd7d9530>) as unspent, it was marked as spent
 cannot send: -4: Known ring does not include the spent output: 1255232 (this fixed itself, not sure how)

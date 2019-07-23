@@ -1822,13 +1822,17 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   @Test
   public void testSubmitAndFlushTxs() {
     
+    // record balances before
+    BigInteger balanceBefore = wallet.getBalance();
+    BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance();
+    
+    // create tx sent from/to different accounts
     String address = wallet.getPrimaryAddress();
     BigInteger amount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(4));
-    MoneroTxWallet tx = wallet.send(new MoneroSendRequest().setAccountIndex(0).setDoNotRelay(true).setDestinations(new MoneroDestination(address, amount)));
+    MoneroTxWallet tx = wallet.send(new MoneroSendRequest().setAccountIndex(2).setDoNotRelay(true).setDestinations(new MoneroDestination(address, amount)));
     assertTrue(tx.getDoNotRelay());
-    BigInteger balanceBefore = wallet.getBalance();
     
-    // assert tx is not in the pool
+    // tx is not in the pool
     boolean found = false;
     for (MoneroTx poolTx : daemon.getTxPool()) {
       if (poolTx.getId().equals(tx.getId())) {
@@ -1838,14 +1842,21 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     assertFalse("tx should not be in the pool", found);
     
-    // submit the tx to the pool but don't relay
-    MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
+    // submit tx directly to the pool but do not relay
+    MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), false);
     assertTrue(result.getIsGood());
     
-    // txs submitted directly to the pool are not recognized
-    // TODO: way to incorporate them?
+    // sync the wallet which should check the pool
     wallet.sync();
-    assertEquals(wallet.getBalance(), balanceBefore);
+    
+    // txs submitted directly to the pool should be recognized
+    try {
+      wallet.getTx(tx.getId());
+      assertNotEquals("Wallet did not incorporate unconfirmed tx submitted directly to tx pool", wallet.getBalance(), balanceBefore);
+      assertNotEquals("Wallet did not incorporate unconfirmed tx submitted directly to tx pool", wallet.getUnlockedBalance(), unlockedBalanceBefore);
+    } finally {
+      daemon.flushTxPoolById(tx.getId());
+    }
   }
   
   // Can send from multiple subaddresses in a single transaction
