@@ -608,8 +608,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   @Override
-  public void testSubmitAndFlushTxs() {
-    super.testSubmitAndFlushTxs();
+  public void testWalletUpdatesFromPool() {
+    super.testWalletUpdatesFromPool();
   }
 
   @Override

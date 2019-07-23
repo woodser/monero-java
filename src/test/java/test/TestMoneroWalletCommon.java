@@ -1820,7 +1820,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can submit and flush txs
   @Test
-  public void testSubmitAndFlushTxs() {
+  public void testWalletUpdatesFromPool() {
     
     // record balances before
     BigInteger balanceBefore = wallet.getBalance();
@@ -1828,33 +1828,51 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // create tx sent from/to different accounts
     String address = wallet.getPrimaryAddress();
-    BigInteger amount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(4));
+    BigInteger amount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(5));
     MoneroTxWallet tx = wallet.send(new MoneroSendRequest().setAccountIndex(2).setDoNotRelay(true).setDestinations(new MoneroDestination(address, amount)));
     assertTrue(tx.getDoNotRelay());
     
-    // tx is not in the pool
-    boolean found = false;
-    for (MoneroTx poolTx : daemon.getTxPool()) {
-      if (poolTx.getId().equals(tx.getId())) {
-        found = true;
-        break;
-      }
-    }
-    assertFalse("tx should not be in the pool", found);
+    // create tx using same from/to accounts which is double spend
+    MoneroTxWallet txDoubleSpend = wallet.send(new MoneroSendRequest().setAccountIndex(2).setDoNotRelay(true).setDestinations(new MoneroDestination(address, amount)));
+    assertTrue(txDoubleSpend.getDoNotRelay());
     
     // submit tx directly to the pool but do not relay
-    MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), false);
+    MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
+    if (!result.getIsGood()) throw new RuntimeException("Transaction could not be submitted to the pool" + JsonUtils.serialize(result));
     assertTrue(result.getIsGood());
     
-    // sync the wallet which should check the pool
+    // sync wallet which updates from pool
     wallet.sync();
     
-    // txs submitted directly to the pool should be recognized
     try {
-      wallet.getTx(tx.getId());
-      assertNotEquals("Wallet did not incorporate unconfirmed tx submitted directly to tx pool", wallet.getBalance(), balanceBefore);
-      assertNotEquals("Wallet did not incorporate unconfirmed tx submitted directly to tx pool", wallet.getUnlockedBalance(), unlockedBalanceBefore);
-    } finally {
+      
+      // wallet is aware of tx
+      MoneroTxWallet fetched = wallet.getTx(tx.getId());
+      System.out.println(fetched);
+      
+      // submit double spend tx
+      MoneroSubmitTxResult resultDoubleSpend = daemon.submitTxHex(txDoubleSpend.getFullHex(), true);
+      if (resultDoubleSpend.getIsGood()) {
+        daemon.flushTxPoolById(txDoubleSpend.getId());
+        throw new RuntimeException("Tx should have been double spend");
+      }
+      
+      // create tx using same from/to accounts which should not be double spend
+      MoneroTxWallet tx2 = wallet.send(new MoneroSendRequest().setAccountIndex(2).setDoNotRelay(true).setDestinations(new MoneroDestination(address, amount)));
+      MoneroSubmitTxResult result2 = daemon.submitTxHex(tx2.getFullHex(), true);
+      if (!result2.getIsGood()) throw new RuntimeException("Transaction could not be submitted to the pool" + JsonUtils.serialize(result2));
+      
+      // wallet is aware of tx2
+      try {
+        wallet.getTx(tx2.getId());
+      } finally  {
+        daemon.flushTxPoolById(tx2.getId());
+      }
+      
+      // wallet balance has changed
+      assertNotEquals(balanceBefore, wallet.getBalance());
+      assertNotEquals(unlockedBalanceBefore, wallet.getUnlockedBalance());  // TODO: compare exact amounts, maybe in ux test
+    } finally  {
       daemon.flushTxPoolById(tx.getId());
     }
   }
