@@ -2,6 +2,7 @@ MONERO CORE ISSUES
 
 HIGH
 testGetTxsByIdsInPool() hangs (have no peer connections?)
+update from pool does not prevent double spend
 unconfirmed transactions should be reflected in the balance for ux
 incoming transactions are missing when outgoing counterpart from same account (only on unconfirmed because wallet cache data becomes used?) (https://github.com/monero-project/monero/issues/4500)
 wallet2 incoming transfers from/to same account go missing on key image export and re-import (wallet2.cpp:11957 erases incoming counterpart)

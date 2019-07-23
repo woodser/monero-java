@@ -1841,10 +1841,10 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     if (!result.getIsGood()) throw new RuntimeException("Transaction could not be submitted to the pool" + JsonUtils.serialize(result));
     assertTrue(result.getIsGood());
     
-    // sync wallet which updates from pool
-    wallet.sync();
-    
     try {
+      
+      // sync wallet which updates from pool
+      wallet.sync();
       
       // wallet is aware of tx
       MoneroTxWallet fetched = wallet.getTx(tx.getId());
@@ -1857,10 +1857,13 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         throw new RuntimeException("Tx should have been double spend");
       }
       
+      // sync wallet which updates from pool
+      wallet.sync();
+      
       // create tx using same from/to accounts which should not be double spend
       MoneroTxWallet tx2 = wallet.send(new MoneroSendRequest().setAccountIndex(2).setDoNotRelay(true).setDestinations(new MoneroDestination(address, amount)));
       MoneroSubmitTxResult result2 = daemon.submitTxHex(tx2.getFullHex(), true);
-      if (!result2.getIsGood()) throw new RuntimeException("Transaction could not be submitted to the pool" + JsonUtils.serialize(result2));
+      if (!result2.getIsGood()) throw new RuntimeException("Wallet failed to create non-double spend transaction after syncing with the pool" + JsonUtils.serialize(result2));
       
       // wallet is aware of tx2
       try {

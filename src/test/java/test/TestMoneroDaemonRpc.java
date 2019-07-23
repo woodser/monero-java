@@ -111,11 +111,9 @@ public class TestMoneroDaemonRpc {
     List<MoneroTx> walletTxsInPool = new ArrayList<MoneroTx>();
     for (MoneroTx tx : txsPool) {
       try {
-        wallet.getTx(tx.getId()); // throws exception if tx not found // TODO: wallet.hasTx()?
+        wallet.getTx(tx.getId());
         walletTxsInPool.add(tx);
-      } catch (MoneroException e) {
-        
-      }
+      } catch (MoneroException e) { } // throws exception if tx not found // TODO: wallet.hasTx()?
     }
     
     // wait for wallet txs to clear from the pool
