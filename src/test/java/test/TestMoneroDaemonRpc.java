@@ -97,6 +97,31 @@ public class TestMoneroDaemonRpc {
     
   }
   
+  private static void waitOnce() {
+    
+    // if (noNeedToWait) return;  // TODO
+    
+    // sync the wallet which refreshes txs from the pool
+    wallet.sync();
+    
+    // get txs from pool
+    List<MoneroTx> txsPool = daemon.getTxPool();
+    
+    // collect txs in the pool that belong to the wallet
+    List<MoneroTx> walletTxsInPool = new ArrayList<MoneroTx>();
+    for (MoneroTx tx : txsPool) {
+      try {
+        wallet.getTx(tx.getId()); // throws exception if tx not found // TODO: wallet.hasTx()?
+        walletTxsInPool.add(tx);
+      } catch (MoneroException e) {
+        
+      }
+    }
+    
+    // wait for wallet txs to clear from the pool
+    // TODO
+  }
+  
   // -------------------------------- NON RELAYS ------------------------------
   
   // Can indicate if it's trusted
