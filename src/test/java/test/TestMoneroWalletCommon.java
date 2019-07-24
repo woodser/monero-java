@@ -2266,9 +2266,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       }
       for (String txId : txIds) assertEquals(64, txId.length());
       
-      // sync wallet after relaying TOOD monero core: next test will fail unless wallet is synced after relay
-      wallet.sync();
-      
       // fetch txs for testing
       txs = wallet.getTxs(new MoneroTxRequest().setTxIds(txIds));
     }
@@ -2304,6 +2301,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         }
       }
     }
+    
+    // TOOD monero core: next test will fail unless wallet waits for relayed tx to clear
+    TestUtils.waitForWalletTxsToClearPool(daemon, wallet);
   }
   
   // Can send to multiple addresses in a single transaction
