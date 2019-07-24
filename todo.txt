@@ -62,6 +62,7 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 14.1.0+ RELEASE
 wallet createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), no more doNotRelay in send request
 tx.getIsDoubleSpend() -> isDoubleSpendSeen() since tx will still be accepted, will just be marked with double spend seen from pool
+waitForTxsToClear() should refresh more frequently than blocks so it continues if pool manually flushed
 wallet tx pool test: create and submit non-relayed tx to pool, then flush it.  does wallet balance change back?
 clearUnrelayedTxs() on test start
 waitForRelayedTxsToClear() on applicable tests (only run once per junit that uses local wallet to avoid test wallets respending outs)
