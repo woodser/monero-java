@@ -2256,6 +2256,13 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         testTxWallet(tx, ctx);
       }
       
+      // txs are not in the pool
+      for (MoneroTxWallet txCreated : txs) {
+        for (MoneroTx txPool : daemon.getTxPool()) {
+          assertFalse("Created tx should not be in the pool", txPool.getId().equals(txCreated.getId()));
+        }
+      }
+      
       // relay txs
       List<String> txIds = null;
       if (!Boolean.TRUE.equals(request.getCanSplit())) txIds = Arrays.asList(wallet.relayTx(txs.get(0).getMetadata())); // test relayTx() with single transaction
