@@ -61,15 +61,12 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 
 14.1.0+ RELEASE
 wallet createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), no more doNotRelay in send request
-
-
-
-
-wallet tx pool test: create and submt non-relayed tx to pool, then flush it.  does wallet balance change back?
+tx.getIsDoubleSpend() -> isDoubleSpendSeen() since tx will still be accepted, will just be marked with double spend seen from pool
+wallet tx pool test: create and submit non-relayed tx to pool, then flush it.  does wallet balance change back?
 clearUnrelayedTxs() on test start
 waitForRelayedTxsToClear() on applicable tests (only run once per junit that uses local wallet to avoid test wallets respending outs)
 tests should treat pool as common resource and only flush what they use
-
+convert couts to logging
 wallet.isClosed() check, update wallet.close() test
 MoneroWalletJni.createWalletFromMnemonic(), createWalletFromMnemonic(), createWalletRandom(), openWallet(connection), etc
 wallet createTx(), createSplitTxs(), relayTx(), relayTxs(), then send(), sendSplit() uses those
@@ -104,6 +101,7 @@ debug why testGetOutputsValidateInputs() and testImportKeyImages() fail because 
 support sign_transfer, submit_transfer, etc
 
 LOW
+test filtering with not relayed
 tx pool stats and other binary calls
 refine model to not use null where inappropriate e.g. tx pool status numTxs() should never be null
 Activate UTF-8 support for Boost filesystem classes on Windows (search for that text in core)

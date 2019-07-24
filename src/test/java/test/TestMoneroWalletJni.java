@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -27,6 +26,16 @@ import utils.TestUtils;
  * Tests specific to the JNI wallet.
  */
 public class TestMoneroWalletJni extends TestMoneroWalletCommon {
+  
+  // test class waits for wallet txs to clear pool once in order to fully recognize pool txs and avoid double spends
+  // TODO monero core: fully sync txs from pool to avoid double spends
+  private static boolean WALLET_TXS_CLEARED_ONCE = false;
+  protected void waitForWalletTxsToClearPoolOnce() {
+    if (!WALLET_TXS_CLEARED_ONCE) {
+      TestUtils.waitForWalletTxsToClearPool(daemon, wallet);
+      WALLET_TXS_CLEARED_ONCE = true;
+    }
+  }
 
   protected MoneroWalletJni wallet;
 
@@ -36,13 +45,15 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    Assume.assumeTrue(false); // ignore entire class
+    //Assume.assumeTrue(false); // ignore entire class
   }
 
   @Override
   protected MoneroWallet getTestWallet() {
     return TestUtils.getWalletJni();
   }
+  
+  // ------------------------------- BEGIN TESTS ------------------------------
   
   @Test
   public void testDaemon() {
@@ -997,8 +1008,23 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Override
-  public void testWalletUpdatesFromPool() {
-    super.testWalletUpdatesFromPool();
+  public void testSyncWithPoolSameAccounts() {
+    super.testSyncWithPoolSameAccounts();
+  }
+  
+  @Override
+  public void testSyncWithPoolSubmitAndDiscard() {
+    super.testSyncWithPoolSubmitAndDiscard();
+  }
+  
+  @Override
+  public void testSyncWithPoolSubmitAndRelay() {
+    super.testSyncWithPoolSubmitAndRelay();
+  }
+  
+  @Override
+  public void testSyncWithPoolRelay() {
+    super.testSyncWithPoolRelay();
   }
 
   @Override
