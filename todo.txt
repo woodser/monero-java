@@ -64,6 +64,7 @@ MoneroWalletJni.createWalletFromMnemonic(), createWalletFromMnemonic(), createWa
 refactor getIs...() to is...() depending if this interferes with js syntax
 update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen
 convert couts to logging
+auto destroy wallet if garbage collected by vm
 wallet.isClosed() check, update wallet.close() test
 waitForTxsToClear() should refresh more frequently than blocks so it continues if pool manually flushed
 code todos

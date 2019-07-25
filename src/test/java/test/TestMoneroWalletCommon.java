@@ -566,7 +566,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   // Can get transactions with additional configuration
   @Test
   public void testGetTxsWithConfiguration() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get random transactions for testing
     List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, null, 3, 5);
@@ -969,7 +969,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   // Can get transfers with additional configuration
   @Test
   public void testGetTransfersWithConfiguration() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get incoming transfers
     List<MoneroTransfer> transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setIsIncoming(true), null, true);
@@ -1114,7 +1114,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   // Can get outputs with additional configuration
   @Test
   public void testGetOutputsWithConfiguration() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get unspent outputs to account 0
     List<MoneroOutputWallet> outputs = getAndTestOutputs(wallet, new MoneroOutputRequest().setAccountIndex(0).setIsSpent(false), null);
@@ -2316,7 +2316,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // TOOD monero core: next test will fail unless wallet waits for relayed tx to clear
-    TestUtils.waitForWalletTxsToClearPool(daemon, wallet);
+    if (Boolean.TRUE.equals(request.getDoNotRelay())) TestUtils.waitForWalletTxsToClearPool(daemon, wallet);
   }
   
   // Can send to multiple addresses in a single transaction
