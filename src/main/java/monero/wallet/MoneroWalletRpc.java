@@ -848,36 +848,28 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return rpcExportKeyImages(false);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public MoneroTxWallet send(MoneroSendRequest request) {
-    
-    // normalize request
-    assertNotNull("Send request must not be null", request);
-    if (request.getCanSplit() == null) request.setCanSplit(false);
-    else assertEquals(false, request.getCanSplit());
-    
-    // send with common method
-    return sendCommon(request).get(0);
-  }
-
-  @Override
-  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
-    
-    // normalize request
-    assertNotNull("Send request must not be null", request);
-    if (request.getCanSplit() == null) request.setCanSplit(true);
-    else assertEquals(true, request.getCanSplit());
-    
-    // send with common method
-    return sendCommon(request);
+  public List<String> relayTxs(Collection<String> txMetadatas) {
+    if (txMetadatas == null || txMetadatas.isEmpty()) throw new MoneroException("Must provide an array of tx metadata to relay");
+    List<String> txIds = new ArrayList<String>();
+    for (String txMetadata : txMetadatas) {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("hex", txMetadata);
+      Map<String, Object> resp = rpc.sendJsonRequest("relay_tx", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      txIds.add((String) result.get("tx_hash"));
+    }
+    return txIds;
   }
   
   @SuppressWarnings("unchecked")
-  private List<MoneroTxWallet> sendCommon(MoneroSendRequest request) {
+  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
     
-    // validate request
+    // validate / sanitize request
+    if (request == null) throw new MoneroException("Send request cannot be null");
     assertNotNull(request.getDestinations());
-    assertNotNull(request.getCanSplit());
+    if (request.getCanSplit() == null) request.setCanSplit(true);
     assertNull(request.getSweepEachSubaddress());
     assertNull(request.getBelowAmount());
     
@@ -1055,22 +1047,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     return txs;
   }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public List<String> relayTxs(Collection<String> txMetadatas) {
-    if (txMetadatas == null || txMetadatas.isEmpty()) throw new MoneroException("Must provide an array of tx metadata to relay");
-    List<String> txIds = new ArrayList<String>();
-    for (String txMetadata : txMetadatas) {
-      Map<String, Object> params = new HashMap<String, Object>();
-      params.put("hex", txMetadata);
-      Map<String, Object> resp = rpc.sendJsonRequest("relay_tx", params);
-      Map<String, Object> result = (Map<String, Object>) resp.get("result");
-      txIds.add((String) result.get("tx_hash"));
-    }
-    return txIds;
-  }
-
+  
   @SuppressWarnings("unchecked")
   @Override
   public List<String> getTxNotes(Collection<String> txIds) {
@@ -1532,7 +1509,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (tx.getUnlockTime() == null) tx.setUnlockTime(request.getUnlockTime() == null ? 0 : request.getUnlockTime());
       if (!tx.getDoNotRelay()) {
         if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
-        if (tx.getIsDoubleSpend() == null) tx.setIsDoubleSpend(false);
+        if (tx.getIsDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
       }
     }
     return txs;
@@ -1600,7 +1577,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (tx.getUnlockTime() == null) tx.setUnlockTime(request.getUnlockTime() == null ? 0 : request.getUnlockTime());
     if (!Boolean.TRUE.equals(tx.getDoNotRelay())) {
       if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
-      if (tx.getIsDoubleSpend() == null) tx.setIsDoubleSpend(false);
+      if (tx.getIsDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
     }
     return tx;
   }
@@ -1687,7 +1664,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("unlock_time")) tx.setUnlockTime(((BigInteger) val).intValue());
       else if (key.equals("tx_blob")) tx.setFullHex((String) val);
       else if (key.equals("tx_metadata")) tx.setMetadata((String) val);
-      else if (key.equals("double_spend_seen")) tx.setIsDoubleSpend((Boolean) val);
+      else if (key.equals("double_spend_seen")) tx.setIsDoubleSpendSeen((Boolean) val);
       else if (key.equals("block_height") || key.equals("height")) {
         if (tx.getIsConfirmed()) {
           if (header == null) header = new MoneroBlockHeader();

@@ -319,8 +319,8 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
   }
 
   @Override
-  public MoneroTxRequest setIsDoubleSpend(Boolean isDoubleSpend) {
-    super.setIsDoubleSpend(isDoubleSpend);
+  public MoneroTxRequest setIsDoubleSpendSeen(Boolean isDoubleSpend) {
+    super.setIsDoubleSpendSeen(isDoubleSpend);
     return this;
   }
 

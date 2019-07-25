@@ -35,7 +35,7 @@
  */
 
 #include <iostream>
-#include "MoneroWalletJni.h"
+#include "MoneroWalletJniBridge.h"
 #include "utils/MoneroUtils.h"
 
 using namespace std;

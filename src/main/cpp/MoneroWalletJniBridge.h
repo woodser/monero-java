@@ -22,8 +22,8 @@
 
 #include <jni.h>
 
-#ifndef _Included_MoneroWalletJni
-#define _Included_MoneroWalletJni
+#ifndef _Included_MoneroWalletJniBridge
+#define _Included_MoneroWalletJniBridge
 
 jfieldID getHandleField(JNIEnv *env, jobject obj, const char *fieldName) {
   jclass c = env->GetObjectClass(obj);

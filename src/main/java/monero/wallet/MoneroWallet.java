@@ -518,8 +518,58 @@ public interface MoneroWallet {
   public List<MoneroKeyImage> getNewKeyImagesFromLastImport();
   
   /**
-   * Create a transaction which transfers funds from this wallet to one or more
-   * destinations depending on the given request.
+   * Create a transaction to transfer funds from this wallet according to the
+   * given request.  The transaction may later be relayed.
+   * 
+   * @param request configures the transaction to create
+   * @return the created transaction
+   */
+  public MoneroTxWallet createTx(MoneroSendRequest request);
+  
+  /**
+   * Create one or more transactions to transfer funds from this wallet
+   * according to the given request.  The transactions may later be relayed.
+   * 
+   * @param request configures the transactions to create
+   * @return the created transactions
+   */
+  public List<MoneroTxWallet> createTxs(MoneroSendRequest request);
+  
+  /**
+   * Relay a previously created transaction.
+   * 
+   * @param tx is the transaction to relay
+   * @return the id of the relayed tx
+   */
+  public String relayTx(MoneroTxWallet tx);
+  
+  /**
+   * Relay a previously created transaction.
+   * 
+   * @param txMetadata is transaction metadata previously created without relaying
+   * @return the id of the relayed tx
+   */
+  public String relayTx(String txMetadata);
+  
+  /**
+   * Relay previously created transactions.
+   * 
+   * @param txs are the transactions to relay
+   * @return the ids of the relayed txs
+   */
+  public List<String> relayTxs(List<MoneroTxWallet> txs);
+  
+  /**
+   * Relay previously created transactions.
+   * 
+   * @param txMetadatas are transaction metadata previously created without relaying
+   * @return the ids of the relayed txs
+   */
+  public List<String> relayTxs(Collection<String> txMetadatas);
+  
+  /**
+   * Create and relay a transaction to transfer funds from this wallet
+   * according to the given request.
    * 
    * @param request configures the transaction
    * @return the resulting transaction
@@ -527,31 +577,31 @@ public interface MoneroWallet {
   public MoneroTxWallet send(MoneroSendRequest request);
   
   /**
-   * Create and relay a transaction which transfers funds from this wallet to
+   * Create and relay a transaction to transfers funds from this wallet to
    * a destination address.
    * 
    * @param accountIndex is the index of the account to draw funds from
    * @param address is the destination address to send funds to
-   * @param sendAmount is the amount being sent
+   * @param amount is the amount being sent
    * @return the resulting transaction
    */
-  public MoneroTxWallet send(int accountIndex, String address, BigInteger sendAmount);
+  public MoneroTxWallet send(int accountIndex, String address, BigInteger amount);
   
   /**
-   * Create and relay a transaction which transfers funds from this wallet to
+   * Create and relay a transaction to transfers funds from this wallet to
    * a destination address.
    * 
    * @param accountIndex is the index of the account to draw funds from
    * @param address is the destination address to send funds to
-   * @param sendAmount is the amount being sent
+   * @param amount is the amount being sent
    * @param priority is the send priority (default normal)
    * @return the resulting transaction
    */
-  public MoneroTxWallet send(int accountIndex, String address, BigInteger sendAmount, MoneroSendPriority priority);
+  public MoneroTxWallet send(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
   
   /**
-   * Create one or more transactions which transfer funds from this wallet to
-   * one or more destinations depending on the given configuration.
+   * Create and relay one or more transactions to transfer funds from this
+   * wallet according to the given request.
    * 
    * @param request configures the transactions
    * @return the resulting transactions
@@ -560,26 +610,26 @@ public interface MoneroWallet {
   
   /**
    * Create and relay one or more transactions which transfer funds from this
-   * wallet to one or more destination.
+   * wallet to a destination address.
    * 
    * @param accountIndex is the index of the account to draw funds from
    * @param address is the destination address to send funds to
-   * @param sendAmount is the amount being sent
+   * @param amount is the amount being sent
    * @return the resulting transactions
    */
-  public List<MoneroTxWallet> sendSplit(int accountIndex, String address, BigInteger sendAmount);
+  public List<MoneroTxWallet> sendSplit(int accountIndex, String address, BigInteger amount);
   
   /**
-   * Create and relay one or more transactions which transfer funds from this
-   * wallet to one or more destination.
+   * Create and relay one or more transactions to transfer funds from this
+   * wallet to a destination address with a priority.
    * 
    * @param accountIndex is the index of the account to draw funds from
    * @param address is the destination address to send funds to
-   * @param sendAmount is the amount being sent
+   * @param amount is the amount being sent
    * @param priority is the send priority (default normal)
    * @return the resulting transactions
    */
-  public List<MoneroTxWallet> sendSplit(int accountIndex, String address, BigInteger sendAmount, MoneroSendPriority priority);
+  public List<MoneroTxWallet> sendSplit(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
   
   /**
    * Sweep an output with a given key image.
@@ -659,22 +709,6 @@ public interface MoneroWallet {
    * @return the resulting transactions from sweeping dust
    */
   public List<MoneroTxWallet> sweepDust(boolean doNotRelay);
-  
-  /**
-   * Relay a transaction previously created without relaying.
-   * 
-   * @param txMetadata is transaction metadata previously created without relaying
-   * @return String is the id of the relayed tx
-   */
-  public String relayTx(String txMetadata);
-  
-  /**
-   * Relay transactions previously created without relaying.
-   * 
-   * @param txMetadatas are transaction metadata previously created without relaying
-   * @return the ids of the relayed txs
-   */
-  public List<String> relayTxs(Collection<String> txMetadatas);
   
   /**
    * Get a transaction note.
