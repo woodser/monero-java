@@ -20,6 +20,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import common.utils.JsonUtils;
 import monero.daemon.MoneroDaemon;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroAltChain;
@@ -67,6 +68,16 @@ public class TestMoneroDaemonRpc {
   private static boolean TEST_RELAYS = true; // creates and relays outgoing txs
   private static boolean TEST_NOTIFICATIONS = false;
   
+  // test class waits for wallet txs to clear pool once in order to fully recognize pool txs and avoid double spends
+  // TODO monero core: fully sync txs from pool to avoid double spends
+  private static boolean WALLET_TXS_CLEARED_ONCE = false;
+  private static void waitForWalletTxsToClearPoolOnce() {
+    if (!WALLET_TXS_CLEARED_ONCE) {
+      TestUtils.waitForWalletTxsToClearPool(daemon, wallet);
+      WALLET_TXS_CLEARED_ONCE = true;
+    }
+  }
+  
   // config for testing binary blocks
   // TODO: binary blocks have inconsistent client-side pruning
   // TODO: get_blocks_by_height.bin does not return output indices (#5127)
@@ -94,7 +105,7 @@ public class TestMoneroDaemonRpc {
   
   @Before
   public void before() {
-    daemon.flushTxPool(); // TODO: tests should treat pool as common resource and not flush it
+    
   }
   
   // -------------------------------- NON RELAYS ------------------------------
@@ -425,14 +436,17 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetTxsByIdsInPool() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    waitForWalletTxsToClearPoolOnce();
     
     // submit txs to the pool but don't relay
     List<String> txIds = new ArrayList<String>();
-    for (int i = 0; i < 3; i++) {
+    for (int i = 1; i < 3; i++) {
       System.out.print("Fetching unrelayed tx...");
       MoneroTx tx = getUnrelayedTx(wallet, i);
       System.out.println("done");
-      daemon.submitTxHex(tx.getFullHex(), true);
+      MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
+      assertFalse(result.getIsDoubleSpend());
+      assertTrue(result.getIsGood());
       txIds.add(tx.getId());
     }
     
@@ -452,6 +466,10 @@ public class TestMoneroDaemonRpc {
     for (MoneroTx tx : txs) {
       testTx(tx, ctx);
     }
+    
+    // clear txs from pool
+    daemon.flushTxPoolByIds(txIds);
+    wallet.sync();
   }
   
   // Can get a transaction hex by id with and without pruning
@@ -541,10 +559,13 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetTxsInPool() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    waitForWalletTxsToClearPoolOnce();
     
     // submit tx to pool but don't relay
-    MoneroTx tx = getUnrelayedTx(wallet, 0);
-    daemon.submitTxHex(tx.getFullHex(), true);
+    MoneroTx tx = getUnrelayedTx(wallet, 1);
+    MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
+    assertTrue(result.getIsGood());
+    assertFalse(result.getIsRelayed());
     
     // fetch txs in pool
     List<MoneroTx> txs = daemon.getTxPool();
@@ -563,6 +584,7 @@ public class TestMoneroDaemonRpc {
     
     // flush the tx from the pool, gg
     daemon.flushTxPoolById(tx.getId());
+    wallet.sync();
   }
   
   // Can get ids of transactions in the transaction pool (binary)
@@ -585,18 +607,25 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetTxPoolStatisticsBin() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    waitForWalletTxsToClearPoolOnce();
     
     // submit txs to the pool but don't relay (multiple txs result in binary `histo` field)
-    for (int i = 0; i < 2; i++) {
+    for (int i = 1; i < 3; i++) {
       
       // submit tx hex
       MoneroTx tx =  getUnrelayedTx(wallet, i);
-      daemon.submitTxHex(tx.getFullHex(), true);
+      MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
+      assertTrue(result.getIsGood());
       
       // test stats
-      MoneroTxPoolStats stats = daemon.getTxPoolStats();
-      assertTrue(stats.getNumTxs() > i);
-      testTxPoolStats(stats);
+      try {
+        MoneroTxPoolStats stats = daemon.getTxPoolStats();
+        assertTrue(stats.getNumTxs() > i);
+        testTxPoolStats(stats);
+      } finally {
+        daemon.flushTxPoolById(tx.getId());
+        wallet.sync();
+      }
     }
   }
   
@@ -604,37 +633,51 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testFlushTxsFromPool() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    waitForWalletTxsToClearPoolOnce();
     
-    // pool starts flushed for each test
-    List<MoneroTx> txs = daemon.getTxPool();
-    assertEquals(0, txs.size());
+    // preserve original transactions in the pool
+    List<MoneroTx> txPoolBefore = daemon.getTxPool();
     
     // submit txs to the pool but don't relay
-    for (int i = 0; i < 2; i++) {
+    for (int i = 1; i < 3; i++) {
       MoneroTx tx =  getUnrelayedTx(wallet, i);
-      daemon.submitTxHex(tx.getFullHex(), true);
+      MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
+      assertTrue(result.getIsGood());
     }
-    
-    // txs are in pool
-    txs = daemon.getTxPool();
-    assertTrue(txs.size() >= 2);
+    assertEquals(txPoolBefore.size() + 2, daemon.getTxPool().size());
     
     // flush tx pool
     daemon.flushTxPool();
-    txs = daemon.getTxPool();
-    assertTrue(txs.isEmpty());
+    assertEquals(0, daemon.getTxPool().size());
+    
+    // re-submit original transactions
+    for (MoneroTx tx : txPoolBefore) {
+      MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), tx.getIsRelayed());
+      assertTrue(result.getIsGood());
+    }
+    
+    // pool is back to original state
+    assertEquals(txPoolBefore.size(), daemon.getTxPool().size());
+    
+    // sync wallet for next test
+    wallet.sync();
   }
   
   // Can flush a transaction from the pool by id
   @Test
   public void testFlushTxFromPoolById() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    waitForWalletTxsToClearPoolOnce();
+    
+    // preserve original transactions in the pool
+    List<MoneroTx> txPoolBefore = daemon.getTxPool();
     
     // submit txs to the pool but don't relay
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    for (int i = 0; i < 3; i++) {
+    for (int i = 1; i < 3; i++) {
       MoneroTx tx =  getUnrelayedTx(wallet, i);
-      daemon.submitTxHex(tx.getFullHex(), true);
+      MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
+      assertTrue(result.getIsGood());
       txs.add(tx);
     }
     
@@ -648,37 +691,52 @@ public class TestMoneroDaemonRpc {
       List<MoneroTx> poolTxs = daemon.getTxPool();
       assertEquals(txs.size() - i - 1, poolTxs.size());
     }
+    
+    // pool is back to original state
+    assertEquals(txPoolBefore.size(), daemon.getTxPool().size());
+    
+    // sync wallet for next test
+    wallet.sync();
   }
   
   // Can flush transactions from the pool by ids
   @Test
   public void testFlushTxsFromPoolByIds() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    waitForWalletTxsToClearPoolOnce();
+    
+    // preserve original transactions in the pool
+    List<MoneroTx> txPoolBefore = daemon.getTxPool();
     
     // submit txs to the pool but don't relay
     List<String> txIds = new ArrayList<String>();
-    for (int i = 0; i < 3; i++) {
+    for (int i = 1; i < 3; i++) {
       MoneroTx tx =  getUnrelayedTx(wallet, i);
-      daemon.submitTxHex(tx.getFullHex(), true);
+      MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
+      assertFalse(result.getIsDoubleSpend());
+      assertTrue(result.getIsGood());
       txIds.add(tx.getId());
     }
+    assertEquals(txPoolBefore.size() + txIds.size(), daemon.getTxPool().size());
     
     // remove all txs by ids
     daemon.flushTxPoolByIds(txIds);
     
-    // test tx pool
-    List<MoneroTx> txs = daemon.getTxPool();
-    assertEquals(0, txs.size());
+    // pool is back to original state
+    assertEquals(txPoolBefore.size(), daemon.getTxPool().size());
+    wallet.sync();
   }
   
   // Can get the spent status of key images
   @Test
+  @Ignore // TODO: hanging like getTxsByIds()
   public void testGetSpentStatusOfKeyImages() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    waitForWalletTxsToClearPoolOnce();
     
-    // submit txs to the pool to collect key images then flush
+    // submit txs to the pool to collect key images then flush them
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    for (int i = 0; i < 3; i++) {
+    for (int i = 1; i < 3; i++) {
       MoneroTx tx =  getUnrelayedTx(wallet, i);
       daemon.submitTxHex(tx.getFullHex(), true);
       txs.add(tx);
@@ -709,6 +767,9 @@ public class TestMoneroDaemonRpc {
     
     // key images are all spent
     testSpentStatuses(keyImages, MoneroKeyImageSpentStatus.CONFIRMED);
+    
+    // flush this test's txs from pool
+    daemon.flushTxPoolByIds(txIds);
   }
   
   // Can get output indices given a list of transaction ids (binary)
@@ -1027,6 +1088,7 @@ public class TestMoneroDaemonRpc {
   
   // Can download an update
   @Test
+  @Ignore
   public void testDownloadUpdate() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
@@ -1077,11 +1139,15 @@ public class TestMoneroDaemonRpc {
   // Can submit a tx in hex format to the pool and relay in one call
   @Test
   public void testSubmitAndRelayTxHex() {
-    org.junit.Assume.assumeTrue(TEST_RELAYS);
+    org.junit.Assume.assumeTrue(TEST_RELAYS && !LITE_MODE);
+    
+    // wait one time for wallet txs in the pool to clear
+    // TODO monero core: update from pool does not prevent creating double spend tx
+    waitForWalletTxsToClearPoolOnce();
     
     // create 2 txs, the second will double spend outputs of first
-    MoneroTx tx1 = getUnrelayedTx(wallet, 0);
-    MoneroTx tx2 = getUnrelayedTx(wallet, 0);
+    MoneroTx tx1 = getUnrelayedTx(wallet, 2); // TODO: this test requires tx to be from/to different accounts else the occlusion issue (#4500) causes the tx to not be recognized by the wallet at all
+    MoneroTx tx2 = getUnrelayedTx(wallet, 2);
     
     // submit and relay tx1
     MoneroSubmitTxResult result = daemon.submitTxHex(tx1.getFullHex());
@@ -1100,6 +1166,10 @@ public class TestMoneroDaemonRpc {
     }
     assertTrue("Tx1 was not found after being submitted to the daemon's tx pool", found);
     
+    // tx1 is recognized by the wallet
+    wallet.sync();
+    wallet.getTx(tx1.getId());
+    
     // submit and relay tx2 hex which double spends tx1
     result = daemon.submitTxHex(tx2.getFullHex());
     assertEquals(result.getIsRelayed(), true);
@@ -1115,12 +1185,19 @@ public class TestMoneroDaemonRpc {
       }
     }
     assertTrue("Tx2 should not be in the pool because it double spends tx1 which is in the pool", !found);
+    
+    // wait for tx1 to clear the pool as otherwise the wallet will create double spend txs  // TODO monero core: sync fully with tx pool
+    TestUtils.waitForTxsToClearPool(daemon, wallet, tx1.getId());
+    
+    // sync before the next test
+    wallet.sync();
   }
   
   // Can submit a tx in hex format to the pool then relay
   @Test
   public void testSubmitThenRelayTxHex() {
-    org.junit.Assume.assumeTrue(TEST_RELAYS);
+    org.junit.Assume.assumeTrue(TEST_RELAYS && !LITE_MODE);
+    waitForWalletTxsToClearPoolOnce();
     MoneroTx tx = getUnrelayedTx(wallet, 1);
     testSubmitThenRelay(Arrays.asList(tx));
   }
@@ -1128,7 +1205,8 @@ public class TestMoneroDaemonRpc {
   // Can submit txs in hex format to the pool then relay
   @Test
   public void testSubmitThenRelayTxHexes() {
-    org.junit.Assume.assumeTrue(TEST_RELAYS);
+    org.junit.Assume.assumeTrue(TEST_RELAYS && !LITE_MODE);
+    waitForWalletTxsToClearPoolOnce();
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     txs.add(getUnrelayedTx(wallet, 2));
     txs.add(getUnrelayedTx(wallet, 3));  // TODO: accounts cannot be re-used across send tests else isRelayed is true; wallet needs to update?
@@ -1179,6 +1257,12 @@ public class TestMoneroDaemonRpc {
       }
       assertTrue("Tx was not found after being submitted to the daemon's tx pool", found);
     }
+    
+    // wait for tx1 to clear the pool as otherwise the wallet will create double spend txs  // TODO monero core: sync fully with tx pool
+    TestUtils.waitForTxsToClearPool(daemon, wallet, txIds.toArray(new String[0]));
+    
+    // sync before the next test
+    wallet.sync();
   }
   
   // -------------------------- NOTIFICATION TESTS ---------------------------
@@ -1361,7 +1445,7 @@ public class TestMoneroDaemonRpc {
     assertNotNull(tx.getIsConfirmed());
     assertNotNull(tx.getInTxPool());
     assertNotNull(tx.getIsCoinbase());
-    assertNotNull(tx.getIsDoubleSpend());
+    assertNotNull(tx.getIsDoubleSpendSeen());
     assertTrue(tx.getVersion() >= 0);
     assertTrue(tx.getUnlockTime() >= 0);
     assertNotNull(tx.getVins());
@@ -1391,7 +1475,7 @@ public class TestMoneroDaemonRpc {
       assertEquals(false, tx.getIsFailed());
       assertEquals(false, tx.getInTxPool());
       assertEquals(false, tx.getDoNotRelay());
-      assertEquals(false, tx.getIsDoubleSpend());
+      assertEquals(false, tx.getIsDoubleSpendSeen());
       assertEquals(null, tx.getNumConfirmations()); // client must compute
     } else {
       assertEquals(null, tx.getBlock());
@@ -1401,7 +1485,7 @@ public class TestMoneroDaemonRpc {
     // test in tx pool
     if (tx.getInTxPool()) {
       assertEquals(tx.getIsConfirmed(), false);
-      assertEquals(tx.getIsDoubleSpend(), false);
+      assertEquals(tx.getIsDoubleSpendSeen(), false);
       assertEquals(tx.getLastFailedHeight(), null);
       assertEquals(tx.getLastFailedId(), null);
       assertTrue(tx.getReceivedTimestamp() > 0);
@@ -1430,15 +1514,15 @@ public class TestMoneroDaemonRpc {
       assertTrue(tx.getReceivedTimestamp() > 0);
     } else {
       if (tx.getIsRelayed() == null) assertEquals(null, tx.getDoNotRelay()); // TODO monero-daemon-rpc: add relayed to get_transactions
-      else if (tx.getIsRelayed()) assertEquals(false, tx.getIsDoubleSpend());
+      else if (tx.getIsRelayed()) assertEquals(false, tx.getIsDoubleSpendSeen());
       else {
         assertEquals(false, tx.getIsRelayed());
         assertEquals(true, tx.getDoNotRelay());
-        assertNotNull(tx.getIsDoubleSpend());
+        assertNotNull(tx.getIsDoubleSpendSeen());
       }
     }
-    assertEquals(tx.getLastFailedHeight(), null);
-    assertEquals(tx.getLastFailedId(), null);
+    assertNull(tx.getLastFailedHeight());
+    assertNull(tx.getLastFailedId());
     
     // received time only for tx pool or failed txs
     if (tx.getReceivedTimestamp() != null) {
@@ -1446,11 +1530,12 @@ public class TestMoneroDaemonRpc {
     }
     
     // test relayed tx
-    if (tx.getIsRelayed()) assertEquals(tx.getDoNotRelay(), false);
-    if (tx.getDoNotRelay()) {
-      assertTrue(!tx.getIsRelayed());
-      assertTrue(!tx.getIsConfirmed());
-    }
+    // this is not strictly correct because a tx can be submitted then relayed
+//    if (tx.getIsRelayed()) assertEquals(false, tx.getDoNotRelay());
+//    if (tx.getDoNotRelay()) {
+//      assertTrue(!tx.getIsRelayed());
+//      assertTrue(!tx.getIsConfirmed());
+//    }
     
     // test vins and vouts
     if (!tx.getIsCoinbase()) assertFalse(tx.getVins().isEmpty());
@@ -1480,7 +1565,7 @@ public class TestMoneroDaemonRpc {
       else assertFalse(tx.getFullHex().isEmpty());
       if (Boolean.TRUE.equals(ctx.fromBinaryBlock)) assertNull(tx.getRctSigPrunable());  // TODO: getBlocksByHeight() has inconsistent client-side pruning
       //else assertNotNull(tx.getRctSigPrunable()); // TODO: define and test this
-      assertFalse(tx.getIsDoubleSpend());
+      assertFalse(tx.getIsDoubleSpendSeen());
       if (tx.getIsConfirmed()) {
         assertNull(tx.getLastRelayedTimestamp());
         assertNull(tx.getReceivedTimestamp());
@@ -1601,6 +1686,7 @@ public class TestMoneroDaemonRpc {
   }
   
   private static MoneroTx getUnrelayedTx(MoneroWallet wallet, Integer accountIdx) {
+    assertTrue("Txs sent from/to same account are not properly synced from the pool", accountIdx > 0);
     MoneroSendRequest req = new MoneroSendRequest(accountIdx, wallet.getPrimaryAddress(), TestUtils.MAX_FEE); 
     req.setDoNotRelay(true);
     MoneroTx tx = wallet.send(req);
@@ -1657,7 +1743,7 @@ public class TestMoneroDaemonRpc {
     }
     
     // test array of images
-    List<MoneroKeyImageSpentStatus> statuses = daemon.getKeyImageSpentStatuses(keyImages);
+    List<MoneroKeyImageSpentStatus> statuses = keyImages.isEmpty() ? new ArrayList<MoneroKeyImageSpentStatus>() : daemon.getKeyImageSpentStatuses(keyImages);
     assertEquals(keyImages.size(), statuses.size());
     for (MoneroKeyImageSpentStatus status : statuses) assertEquals(expectedStatus, status);
   }
@@ -1835,16 +1921,21 @@ public class TestMoneroDaemonRpc {
   
   private static void testSubmitTxResultGood(MoneroSubmitTxResult result) {
     testSubmitTxResultCommon(result);
-    assertEquals(true, result.getIsGood());
-    assertEquals(false, result.getIsDoubleSpend());
-    assertEquals(false, result.getIsFeeTooLow());
-    assertEquals(false, result.getIsMixinTooLow());
-    assertEquals(false, result.getHasInvalidInput());
-    assertEquals(false, result.getHasInvalidOutput());
-    assertEquals(true, result.getIsRct());
-    assertEquals(false, result.getIsOverspend());
-    assertEquals(false, result.getIsTooBig());
-    assertEquals(false, result.getSanityCheckFailed());
+    try {
+      assertEquals(true, result.getIsGood());
+      assertEquals(false, result.getIsDoubleSpend());
+      assertEquals(false, result.getIsFeeTooLow());
+      assertEquals(false, result.getIsMixinTooLow());
+      assertEquals(false, result.getHasInvalidInput());
+      assertEquals(false, result.getHasInvalidOutput());
+      assertEquals(true, result.getIsRct());
+      assertEquals(false, result.getIsOverspend());
+      assertEquals(false, result.getIsTooBig());
+      assertEquals(false, result.getSanityCheckFailed());
+    } catch (Exception e) {
+      System.out.println("Submit result is not good: " + JsonUtils.serialize(result));
+      throw e;
+    }
   }
   
   private static void testSubmitTxResultDoubleSpend(MoneroSubmitTxResult result) {

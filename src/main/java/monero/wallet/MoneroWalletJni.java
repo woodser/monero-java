@@ -22,8 +22,6 @@
 
 package monero.wallet;
 
-import static org.junit.Assert.assertTrue;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,12 +69,34 @@ import monero.wallet.request.MoneroTxRequest;
  */
 public class MoneroWalletJni extends MoneroWalletDefault {
   
+  // ----------------------------- PRIVATE SETUP ------------------------------
+
   // load Monero Core C++ as a dynamic library
   static {
     System.loadLibrary("monero-java");
   }
   
-  // ----------------------------- PUBLIC STATIC ------------------------------
+  // default config
+  private static String DEFAULT_LANGUAGE = "English";
+  
+  // instance variables
+  private long jniWalletHandle;                 // memory address of the wallet in c++; this variable is read directly by name in c++
+  private long jniListenerHandle;               // memory address of the wallet listener in c++; this variable is read directly by name in c++
+  private WalletJniListener jniListener;        // receives notifications from jni c++
+  private Set<MoneroWalletListener> listeners;  // externally subscribed wallet listeners
+  
+  /**
+   * Private constructor with a handle to the memory address of the wallet in c++.
+   * 
+   * @param jniWalletHandle is the memory address of the wallet in c++
+   */
+  private MoneroWalletJni(long jniWalletHandle) {
+    this.jniWalletHandle = jniWalletHandle;
+    this.jniListener = new WalletJniListener();
+    this.listeners = new LinkedHashSet<MoneroWalletListener>();
+  }
+  
+  // --------------------- WALLET MANAGEMENT UTILITIES ------------------------
   
   /**
    * Indicates if a wallet exists at the given path.
@@ -88,39 +108,30 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     return walletExistsJni(path);
   }
   
-  // ------------------------------- INSTANCE ---------------------------------
-  
-  // instance variables
-  private long jniWalletHandle;                 // memory address of wallet in c++; this variable is read directly by name in c++
-  private long jniListenerHandle;               // memory address of wallet listener in c++; this variable is read directly by name in c++
-  private WalletJniListener jniListener;        // receives notifications from jni c++
-  private Set<MoneroWalletListener> listeners;  // externally subscribed wallet listeners
-  
-  // private static variables
-  private static String DEFAULT_LANGUAGE = "English";
-  
   /**
    * Open an existing wallet.
    * 
    * @param path is the path to the wallet file to open
    * @param password is the password of the wallet file to open
    * @param networkType is the wallet's network type
+   * @return the opened wallet
    */
-  public MoneroWalletJni(String path, String password, MoneroNetworkType networkType) {
+  public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType) {
     if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist at path: " + path);
     if (networkType == null) throw new MoneroException("Must provide a network type");
-    this.jniWalletHandle = openWalletJni(path, password, networkType.ordinal());
-    initCommon();
+    long jniWalletHandle = openWalletJni(path, password, networkType.ordinal());
+    return new MoneroWalletJni(jniWalletHandle);
   }
   
   /**
-   * Create a new wallet with a randomly generated seed on mainnet in English.
+   * Create a new wallet with a randomly generated seed and default options (mainnet, English, etc).
    * 
    * @param path is the path to create the wallet
    * @param password is the password encrypt the wallet
+   * @return newly created wallet
    */
-  public MoneroWalletJni(String path, String password) {
-    this(path, password, MoneroNetworkType.MAINNET, null, null);
+  public static MoneroWalletJni createWalletRandom(String path, String password) {
+    return createWalletRandom(path, password, MoneroNetworkType.MAINNET, null, null);
   }
   
   /**
@@ -131,13 +142,15 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param networkType is the wallet's network type (default = MoneroNetworkType.MAINNET)
    * @param daemonConnection is connection information to a daemon (default = an unconnected wallet)
    * @param language is the wallet and mnemonic's language (default = "English")
+   * @return the newly created wallet
    */
-  public MoneroWalletJni(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, String language) {
+  public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, String language) {
     if (networkType == null) networkType = MoneroNetworkType.MAINNET;
     if (language == null) language = DEFAULT_LANGUAGE;
-    if (daemonConnection == null) this.jniWalletHandle = createWalletRandomJni(path, password, networkType.ordinal(), null, null, null, language);
-    else this.jniWalletHandle = createWalletRandomJni(path, password, networkType.ordinal(), daemonConnection.getUri(), daemonConnection.getUsername(), daemonConnection.getPassword(), language);
-    initCommon();
+    long jniWalletHandle;
+    if (daemonConnection == null) jniWalletHandle = createWalletRandomJni(path, password, networkType.ordinal(), null, null, null, language);
+    else jniWalletHandle = createWalletRandomJni(path, password, networkType.ordinal(), daemonConnection.getUri(), daemonConnection.getUsername(), daemonConnection.getPassword(), language);
+    return new MoneroWalletJni(jniWalletHandle);
   }
   
   /**
@@ -150,14 +163,15 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param daemonConnection is connection information to a daemon (default = an unconnected wallet)
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    */
-  public MoneroWalletJni(String path, String password, String mnemonic, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, Long restoreHeight) {
+  public static MoneroWalletJni createWalletFromMnemonic(String path, String password, String mnemonic, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, Long restoreHeight) {
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (restoreHeight == null) restoreHeight = 0l;
-    this.jniWalletHandle = createWalletFromMnemonicJni(path, password, mnemonic, networkType.ordinal(), restoreHeight);
-    if (daemonConnection != null) setDaemonConnection(daemonConnection);
-    initCommon();
+    long jniWalletHandle = createWalletFromMnemonicJni(path, password, mnemonic, networkType.ordinal(), restoreHeight);
+    MoneroWalletJni wallet = new MoneroWalletJni(jniWalletHandle);
+    wallet.setDaemonConnection(daemonConnection);
+    return wallet;
   }
-
+  
   /**
    * Create a wallet from an address, view key, and spend key.
    * 
@@ -171,22 +185,18 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    * @param language is the wallet and mnemonic's language (default = "English")
    */
-  public MoneroWalletJni(String path, String password, String address, String viewKey, String spendKey, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
+  public static MoneroWalletJni createWalletFromKeys(String path, String password, String address, String viewKey, String spendKey, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
     if (restoreHeight == null) restoreHeight = 0l;
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (language == null) language = DEFAULT_LANGUAGE;
     try {
-      this.jniWalletHandle = createWalletFromKeysJni(path, password, address, viewKey, spendKey, networkType.ordinal(), restoreHeight, language);
-      if (daemonConnection != null) setDaemonConnection(daemonConnection);
-      initCommon();
+      long jniWalletHandle = createWalletFromKeysJni(path, password, address, viewKey, spendKey, networkType.ordinal(), restoreHeight, language);
+      MoneroWalletJni wallet = new MoneroWalletJni(jniWalletHandle);
+      wallet.setDaemonConnection(daemonConnection);
+      return wallet;
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
-  }
-  
-  private void initCommon() {
-    this.jniListener = new WalletJniListener();
-    this.listeners = new LinkedHashSet<MoneroWalletListener>();
   }
   
   // ------------ WALLET METHODS SPECIFIC TO JNI IMPLEMENTATION ---------------
@@ -195,10 +205,12 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
     if (daemonConnection == null) setDaemonConnectionJni("", "", "");
-    try {
-      setDaemonConnectionJni(daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword());
-    } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+    else {
+      try {
+        setDaemonConnectionJni(daemonConnection.getUri() == null ? "" : daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword());
+      } catch (Exception e) {
+        throw new MoneroException(e.getMessage());
+      }
     }
   }
   
@@ -411,8 +423,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (startHeight == null) startHeight = Math.max(getHeight(), getRestoreHeight());
     
     // verify connection to daemon which informs sync end height
+    // TODO: replace with c++
+    MoneroRpcConnection rpc = getDaemonConnection();
+    if (rpc == null) throw new MoneroException("No connection to daemon");
     MoneroDaemonRpc daemon = new MoneroDaemonRpc(getDaemonConnection());
-    assertTrue("No connection to daemon", daemon.getIsConnected()); // TODO: replace with c++
+    if (!daemon.getIsConnected()) throw new MoneroException("No connection to daemon"); 
     
     // wrap and register sync listener as wallet listener if given
     SyncListenerWrapper syncListenerWrapper = null;
@@ -518,32 +533,56 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public BigInteger getBalance() {
-    return new BigInteger(getBalanceWalletJni());
+    try {
+      return new BigInteger(getBalanceWalletJni());
+    } catch (MoneroException e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public BigInteger getBalance(int accountIdx) {
-    return new BigInteger(getBalanceAccountJni(accountIdx));
+    try {
+      return new BigInteger(getBalanceAccountJni(accountIdx));
+    } catch (MoneroException e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public BigInteger getBalance(int accountIdx, int subaddressIdx) {
-    return new BigInteger(getBalanceSubaddressJni(accountIdx, subaddressIdx));
+    try {
+      return new BigInteger(getBalanceSubaddressJni(accountIdx, subaddressIdx));
+    } catch (MoneroException e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public BigInteger getUnlockedBalance() {
-    return new BigInteger(getUnlockedBalanceWalletJni());
+    try {
+      return new BigInteger(getUnlockedBalanceWalletJni());
+    } catch (MoneroException e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public BigInteger getUnlockedBalance(int accountIdx) {
-    return new BigInteger(getUnlockedBalanceAccountJni(accountIdx));
+    try {
+      return new BigInteger(getUnlockedBalanceAccountJni(accountIdx));
+    } catch (MoneroException e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx) {
-    return new BigInteger(getUnlockedBalanceSubaddressJni(accountIdx, subaddressIdx));
+    try {
+      return new BigInteger(getUnlockedBalanceSubaddressJni(accountIdx, subaddressIdx));
+    } catch (MoneroException e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
@@ -691,11 +730,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   @Override
-  public MoneroTxWallet send(MoneroSendRequest request) {
-    if (request == null) throw new MoneroException("Send request cannot be null");
-    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with send() which prevents splitting; use sendSplit() instead");
-    request.setCanSplit(false);
-    return sendSplit(request).get(0);
+  public List<String> relayTxs(Collection<String> txMetadatas) {
+    String[] txMetadatasArr = txMetadatas.toArray(new String[txMetadatas.size()]);  // convert to array for jni
+    try {
+      return Arrays.asList(relayTxsJni(txMetadatasArr));
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
@@ -760,16 +801,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       txs.add((MoneroTxWallet) tx);
     }
     return txs;
-  }
-
-  @Override
-  public List<String> relayTxs(Collection<String> txMetadatas) {
-    String[] txMetadatasArr = txMetadatas.toArray(new String[txMetadatas.size()]);  // convert to array for jni
-    try {
-      return Arrays.asList(relayTxsJni(txMetadatasArr));
-    } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
-    }
   }
 
   @Override
@@ -1072,13 +1103,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String importKeyImagesJni(String keyImagesJson);
   
+  private native String[] relayTxsJni(String[] txMetadatas);
+  
   private native String sendSplitJni(String sendRequestJson);
   
   private native String sweepOutputJni(String sendRequestJson);
   
   private native String sweepDustJni(boolean doNotRelay);
-  
-  private native String[] relayTxsJni(String[] txMetadatas);
   
   private native String[] getTxNotesJni(String[] txIds);
   

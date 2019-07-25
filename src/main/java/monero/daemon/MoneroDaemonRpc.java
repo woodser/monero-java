@@ -109,6 +109,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   public MoneroDaemonRpc(MoneroRpcConnection rpc) {
+    assertNotNull(rpc);
     this.rpc = rpc;
     this.daemonPoller = new MoneroDaemonPoller(this);
     this.cachedHeaders = new HashMap<Long, MoneroBlockHeader>();
@@ -129,7 +130,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * @return true if the client is connected to the daemon, false otherwise
    */
   public boolean getIsConnected() {
-    try { 
+    try {
       getHeight();
       return true;
     } catch (MoneroException e) {
@@ -283,7 +284,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         tx.setDoNotRelay(false);
         tx.setIsRelayed(true);
         tx.setIsFailed(false);
-        tx.setIsDoubleSpend(false);
+        tx.setIsDoubleSpendSeen(false);
         List<Map<String, Object>> blockTxs = (List<Map<String, Object>>) rpcTxs.get(blockIdx);
         convertRpcTx(blockTxs.get(txIdx), tx);
       }
@@ -511,6 +512,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public List<MoneroKeyImageSpentStatus> getKeyImageSpentStatuses(Collection<String> keyImages) {
+    if (keyImages == null || keyImages.isEmpty()) throw new MoneroException("Must provide key images to check the status of");
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("key_images", keyImages);
     Map<String, Object> resp = rpc.sendPathRequest("is_key_image_spent", params);
@@ -1083,7 +1085,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         tx.setIsConfirmed(MoneroUtils.reconcile(tx.getIsConfirmed(), !(Boolean) val));
         tx.setInTxPool(MoneroUtils.reconcile(tx.getInTxPool(), (Boolean) val));
       }
-      else if (key.equals("double_spend_seen")) tx.setIsDoubleSpend(MoneroUtils.reconcile(tx.getIsDoubleSpend(), (Boolean) val));
+      else if (key.equals("double_spend_seen")) tx.setIsDoubleSpendSeen(MoneroUtils.reconcile(tx.getIsDoubleSpendSeen(), (Boolean) val));
       else if (key.equals("version")) tx.setVersion(MoneroUtils.reconcile(tx.getVersion(), ((BigInteger) val).intValue()));
       else if (key.equals("extra")) {
         List<Integer> ints = new ArrayList<Integer>();
