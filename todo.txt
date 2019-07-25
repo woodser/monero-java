@@ -61,6 +61,8 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 
 14.1.0+ RELEASE
 convert couts to logging
+test set connection to invalid url
+test stop daemon while wallet syncing
 wallet.isClosed() check, update wallet.close() test
 refactor getIs...() to is...() depending if this interferes with js syntax
 finalize wallet management utilties, setAutoSync() vs startSyncing() & pauseSyncing()
