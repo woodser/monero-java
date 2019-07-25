@@ -1908,8 +1908,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       if (runFailingCoreCode) {
         
         // wallet balances should change
-        assertNotEquals("Wallet balance does not recognize tx sent directly to the pool after sync()", balanceBefore, wallet.getBalance());
-        assertNotEquals("Wallet unlocked balance does not recognize tx sent directly to the pool after sync()", unlockedBalanceBefore, wallet.getUnlockedBalance());  // TODO: test exact amounts, maybe in ux test
+        assertNotEquals("Wallet balance should revert to original after flushing tx from pool without relaying", balanceBefore, wallet.getBalance());
+        assertNotEquals("Wallet unlocked balance should revert to original after flushing tx from pool without relaying", unlockedBalanceBefore, wallet.getUnlockedBalance());  // TODO: test exact amounts, maybe in ux test
         
         // create tx using same request which is no longer double spend
         MoneroTxWallet tx2 = wallet.send(request);
@@ -1939,6 +1939,10 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       } catch (MoneroException e) {
         // exception expected
       }
+      
+      // wallet balances should be unchanged
+      assertEquals("Wallet balance should be same as original since tx was flushed and not relayed", balanceBefore, wallet.getBalance());
+      assertEquals("Wallet unlocked balance should be same as original since tx was flushed and not relayed", unlockedBalanceBefore, wallet.getUnlockedBalance());
     } finally  {
       if (doNotRelay) {
         daemon.flushTxPoolById(tx.getId());
