@@ -64,6 +64,7 @@ equality tests
 convert couts to logging
 test set connection to invalid url
 test stop daemon while wallet syncing
+MoneroTxRequest -> MoneroTxQuery, etc?
 wallet.isClosed() check, update wallet.close() test
 refactor getIs...() to is...() depending if this interferes with js syntax
 finalize wallet management utilties, setAutoSync() vs startSyncing() & pauseSyncing()
