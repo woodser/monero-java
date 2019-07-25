@@ -61,13 +61,11 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 
 14.1.0+ RELEASE
 MoneroWalletJni.createWalletFromMnemonic(), createWalletFromMnemonic(), createWalletRandom(), openWallet(connection), etc
-refactor getIs...() to is...()
+refactor getIs...() to is...() depending if this interferes with js syntax
 update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen
-
 convert couts to logging
 wallet.isClosed() check, update wallet.close() test
 waitForTxsToClear() should refresh more frequently than blocks so it continues if pool manually flushed
-
 code todos
 testGetTransfers() cannot reconcile integrals: new MoneroTransferRequest().setAccountIndex(subaddress.getAccountIndex()).setSubaddressIndex(subaddress.getIndex())
 test that wallet.getIsSynced() returns false after block added to chain if not auto syncing
