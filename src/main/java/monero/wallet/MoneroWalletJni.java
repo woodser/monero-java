@@ -691,11 +691,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   @Override
-  public MoneroTxWallet send(MoneroSendRequest request) {
-    if (request == null) throw new MoneroException("Send request cannot be null");
-    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with send() which prevents splitting; use sendSplit() instead");
-    request.setCanSplit(false);
-    return sendSplit(request).get(0);
+  public List<String> relayTxs(Collection<String> txMetadatas) {
+    String[] txMetadatasArr = txMetadatas.toArray(new String[txMetadatas.size()]);  // convert to array for jni
+    try {
+      return Arrays.asList(relayTxsJni(txMetadatasArr));
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
@@ -760,16 +762,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       txs.add((MoneroTxWallet) tx);
     }
     return txs;
-  }
-
-  @Override
-  public List<String> relayTxs(Collection<String> txMetadatas) {
-    String[] txMetadatasArr = txMetadatas.toArray(new String[txMetadatas.size()]);  // convert to array for jni
-    try {
-      return Arrays.asList(relayTxsJni(txMetadatasArr));
-    } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
-    }
   }
 
   @Override
@@ -1072,13 +1064,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String importKeyImagesJni(String keyImagesJson);
   
+  private native String[] relayTxsJni(String[] txMetadatas);
+  
   private native String sendSplitJni(String sendRequestJson);
   
   private native String sweepOutputJni(String sendRequestJson);
   
   private native String sweepDustJni(boolean doNotRelay);
-  
-  private native String[] relayTxsJni(String[] txMetadatas);
   
   private native String[] getTxNotesJni(String[] txIds);
   
