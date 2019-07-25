@@ -1509,7 +1509,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (tx.getUnlockTime() == null) tx.setUnlockTime(request.getUnlockTime() == null ? 0 : request.getUnlockTime());
       if (!tx.getDoNotRelay()) {
         if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
-        if (tx.getIsDoubleSpend() == null) tx.setIsDoubleSpend(false);
+        if (tx.getIsDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
       }
     }
     return txs;
@@ -1577,7 +1577,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (tx.getUnlockTime() == null) tx.setUnlockTime(request.getUnlockTime() == null ? 0 : request.getUnlockTime());
     if (!Boolean.TRUE.equals(tx.getDoNotRelay())) {
       if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
-      if (tx.getIsDoubleSpend() == null) tx.setIsDoubleSpend(false);
+      if (tx.getIsDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
     }
     return tx;
   }
@@ -1664,7 +1664,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("unlock_time")) tx.setUnlockTime(((BigInteger) val).intValue());
       else if (key.equals("tx_blob")) tx.setFullHex((String) val);
       else if (key.equals("tx_metadata")) tx.setMetadata((String) val);
-      else if (key.equals("double_spend_seen")) tx.setIsDoubleSpend((Boolean) val);
+      else if (key.equals("double_spend_seen")) tx.setIsDoubleSpendSeen((Boolean) val);
       else if (key.equals("block_height") || key.equals("height")) {
         if (tx.getIsConfirmed()) {
           if (header == null) header = new MoneroBlockHeader();

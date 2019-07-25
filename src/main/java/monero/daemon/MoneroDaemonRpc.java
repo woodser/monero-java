@@ -283,7 +283,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         tx.setDoNotRelay(false);
         tx.setIsRelayed(true);
         tx.setIsFailed(false);
-        tx.setIsDoubleSpend(false);
+        tx.setIsDoubleSpendSeen(false);
         List<Map<String, Object>> blockTxs = (List<Map<String, Object>>) rpcTxs.get(blockIdx);
         convertRpcTx(blockTxs.get(txIdx), tx);
       }
@@ -1084,7 +1084,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         tx.setIsConfirmed(MoneroUtils.reconcile(tx.getIsConfirmed(), !(Boolean) val));
         tx.setInTxPool(MoneroUtils.reconcile(tx.getInTxPool(), (Boolean) val));
       }
-      else if (key.equals("double_spend_seen")) tx.setIsDoubleSpend(MoneroUtils.reconcile(tx.getIsDoubleSpend(), (Boolean) val));
+      else if (key.equals("double_spend_seen")) tx.setIsDoubleSpendSeen(MoneroUtils.reconcile(tx.getIsDoubleSpendSeen(), (Boolean) val));
       else if (key.equals("version")) tx.setVersion(MoneroUtils.reconcile(tx.getVersion(), ((BigInteger) val).intValue()));
       else if (key.equals("extra")) {
         List<Integer> ints = new ArrayList<Integer>();

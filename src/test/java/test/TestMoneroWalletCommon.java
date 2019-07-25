@@ -3180,7 +3180,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertEquals(false, tx.getIsFailed());
       assertEquals(false, tx.getInTxPool());
       assertEquals(false, tx.getDoNotRelay());
-      assertEquals(false, tx.getIsDoubleSpend());
+      assertEquals(false, tx.getIsDoubleSpendSeen());
       assertTrue(tx.getNumConfirmations() > 0);
     } else {
       assertNull(tx.getBlock());
@@ -3192,7 +3192,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertEquals(false, tx.getIsConfirmed());
       assertEquals(false, tx.getDoNotRelay());
       assertEquals(true, tx.getIsRelayed());
-      assertEquals(false, tx.getIsDoubleSpend()); // TODO: test double spend attempt
+      assertEquals(false, tx.getIsDoubleSpendSeen()); // TODO: test double spend attempt
       
       // these should be initialized unless a response from sending
       if (!Boolean.TRUE.equals(ctx.isSendResponse)) {
@@ -3213,11 +3213,11 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertTrue(tx.getOutgoingTransfer() instanceof MoneroTransfer);
       //assertTrue(tx.getReceivedTimestamp() > 0);  // TODO: re-enable when received timestamp returned in wallet rpc
     } else {
-      if (tx.getIsRelayed()) assertEquals(tx.getIsDoubleSpend(), false);
+      if (tx.getIsRelayed()) assertEquals(tx.getIsDoubleSpendSeen(), false);
       else {
         assertEquals(false, tx.getIsRelayed());
         assertEquals(true, tx.getDoNotRelay());
-        assertNull(tx.getIsDoubleSpend());
+        assertNull(tx.getIsDoubleSpendSeen());
       }
     }
     assertNull(tx.getLastFailedHeight());
@@ -3313,7 +3313,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         assertEquals(false, tx.getDoNotRelay());
         assertEquals(true, tx.getIsRelayed());
         assertTrue(tx.getLastRelayedTimestamp() > 0);
-        assertEquals(false, tx.getIsDoubleSpend());
+        assertEquals(false, tx.getIsDoubleSpendSeen());
       }
       
       // test non-relayed txs
@@ -3322,7 +3322,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         assertEquals(true, tx.getDoNotRelay());
         assertEquals(false, tx.getIsRelayed());
         assertNull(tx.getLastRelayedTimestamp());
-        assertNull(tx.getIsDoubleSpend());
+        assertNull(tx.getIsDoubleSpendSeen());
       }
     }
     

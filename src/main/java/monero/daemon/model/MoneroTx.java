@@ -37,7 +37,7 @@ public class MoneroTx {
   private Integer unlockTime;
   private Long lastRelayedTimestamp;
   private Long receivedTimestamp;
-  private Boolean isDoubleSpend;
+  private Boolean isDoubleSpendSeen;
   private String key;
   private String fullHex;
   private String prunedHex;
@@ -85,7 +85,7 @@ public class MoneroTx {
     this.unlockTime = tx.unlockTime;
     this.lastRelayedTimestamp = tx.lastRelayedTimestamp;
     this.receivedTimestamp = tx.receivedTimestamp;
-    this.isDoubleSpend = tx.isDoubleSpend;
+    this.isDoubleSpendSeen = tx.isDoubleSpendSeen;
     this.key = tx.key;
     this.fullHex = tx.fullHex;
     this.prunedHex = tx.prunedHex;
@@ -256,12 +256,12 @@ public class MoneroTx {
     return this;
   }
   
-  public Boolean getIsDoubleSpend() {
-    return isDoubleSpend;
+  public Boolean getIsDoubleSpendSeen() {
+    return isDoubleSpendSeen;
   }
   
-  public MoneroTx setIsDoubleSpend(Boolean isDoubleSpend) {
-    this.isDoubleSpend = isDoubleSpend;
+  public MoneroTx setIsDoubleSpendSeen(Boolean isDoubleSpend) {
+    this.isDoubleSpendSeen = isDoubleSpend;
     return this;
   }
   
@@ -493,7 +493,7 @@ public class MoneroTx {
     this.setIsConfirmed(MoneroUtils.reconcile(this.getIsConfirmed(), tx.getIsConfirmed(), null, true, null));
     this.setDoNotRelay(MoneroUtils.reconcile(this.getDoNotRelay(), tx.getDoNotRelay(), null, false, null));  // tx can become relayed
     this.setIsRelayed(MoneroUtils.reconcile(this.getIsRelayed(), tx.getIsRelayed(), null, true, null));      // tx can become relayed
-    this.setIsDoubleSpend(MoneroUtils.reconcile(this.getIsDoubleSpend(), tx.getIsDoubleSpend()));
+    this.setIsDoubleSpendSeen(MoneroUtils.reconcile(this.getIsDoubleSpendSeen(), tx.getIsDoubleSpendSeen()));
     this.setKey(MoneroUtils.reconcile(this.getKey(), tx.getKey()));
     this.setFullHex(MoneroUtils.reconcile(this.getFullHex(), tx.getFullHex()));
     this.setPrunedHex(MoneroUtils.reconcile(this.getPrunedHex(), tx.getPrunedHex()));
@@ -622,7 +622,7 @@ public class MoneroTx {
     sb.append(MoneroUtils.kvLine("Unlock time", getUnlockTime(), indent));
     sb.append(MoneroUtils.kvLine("Last relayed time", getLastRelayedTimestamp(), indent));
     sb.append(MoneroUtils.kvLine("Received time", getReceivedTimestamp(), indent));
-    sb.append(MoneroUtils.kvLine("Is double spend", getIsDoubleSpend(), indent));
+    sb.append(MoneroUtils.kvLine("Is double spend", getIsDoubleSpendSeen(), indent));
     sb.append(MoneroUtils.kvLine("Key", getKey(), indent));
     sb.append(MoneroUtils.kvLine("Full hex", getFullHex(), indent));
     sb.append(MoneroUtils.kvLine("Pruned hex", getPrunedHex(), indent));
@@ -676,7 +676,7 @@ public class MoneroTx {
     result = prime * result + ((inTxPool == null) ? 0 : inTxPool.hashCode());
     result = prime * result + ((isCoinbase == null) ? 0 : isCoinbase.hashCode());
     result = prime * result + ((isConfirmed == null) ? 0 : isConfirmed.hashCode());
-    result = prime * result + ((isDoubleSpend == null) ? 0 : isDoubleSpend.hashCode());
+    result = prime * result + ((isDoubleSpendSeen == null) ? 0 : isDoubleSpendSeen.hashCode());
     result = prime * result + ((isFailed == null) ? 0 : isFailed.hashCode());
     result = prime * result + ((isKeptByBlock == null) ? 0 : isKeptByBlock.hashCode());
     result = prime * result + ((isRelayed == null) ? 0 : isRelayed.hashCode());
@@ -738,9 +738,9 @@ public class MoneroTx {
     if (isConfirmed == null) {
       if (other.isConfirmed != null) return false;
     } else if (!isConfirmed.equals(other.isConfirmed)) return false;
-    if (isDoubleSpend == null) {
-      if (other.isDoubleSpend != null) return false;
-    } else if (!isDoubleSpend.equals(other.isDoubleSpend)) return false;
+    if (isDoubleSpendSeen == null) {
+      if (other.isDoubleSpendSeen != null) return false;
+    } else if (!isDoubleSpendSeen.equals(other.isDoubleSpendSeen)) return false;
     if (isFailed == null) {
       if (other.isFailed != null) return false;
     } else if (!isFailed.equals(other.isFailed)) return false;
