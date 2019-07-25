@@ -1445,7 +1445,7 @@ public class TestMoneroDaemonRpc {
     assertNotNull(tx.getIsConfirmed());
     assertNotNull(tx.getInTxPool());
     assertNotNull(tx.getIsCoinbase());
-    assertNotNull(tx.getIsDoubleSpend());
+    assertNotNull(tx.getIsDoubleSpendSeen());
     assertTrue(tx.getVersion() >= 0);
     assertTrue(tx.getUnlockTime() >= 0);
     assertNotNull(tx.getVins());
@@ -1475,7 +1475,7 @@ public class TestMoneroDaemonRpc {
       assertEquals(false, tx.getIsFailed());
       assertEquals(false, tx.getInTxPool());
       assertEquals(false, tx.getDoNotRelay());
-      assertEquals(false, tx.getIsDoubleSpend());
+      assertEquals(false, tx.getIsDoubleSpendSeen());
       assertEquals(null, tx.getNumConfirmations()); // client must compute
     } else {
       assertEquals(null, tx.getBlock());
@@ -1485,7 +1485,7 @@ public class TestMoneroDaemonRpc {
     // test in tx pool
     if (tx.getInTxPool()) {
       assertEquals(tx.getIsConfirmed(), false);
-      assertEquals(tx.getIsDoubleSpend(), false);
+      assertEquals(tx.getIsDoubleSpendSeen(), false);
       assertEquals(tx.getLastFailedHeight(), null);
       assertEquals(tx.getLastFailedId(), null);
       assertTrue(tx.getReceivedTimestamp() > 0);
@@ -1514,11 +1514,11 @@ public class TestMoneroDaemonRpc {
       assertTrue(tx.getReceivedTimestamp() > 0);
     } else {
       if (tx.getIsRelayed() == null) assertEquals(null, tx.getDoNotRelay()); // TODO monero-daemon-rpc: add relayed to get_transactions
-      else if (tx.getIsRelayed()) assertEquals(false, tx.getIsDoubleSpend());
+      else if (tx.getIsRelayed()) assertEquals(false, tx.getIsDoubleSpendSeen());
       else {
         assertEquals(false, tx.getIsRelayed());
         assertEquals(true, tx.getDoNotRelay());
-        assertNotNull(tx.getIsDoubleSpend());
+        assertNotNull(tx.getIsDoubleSpendSeen());
       }
     }
     assertNull(tx.getLastFailedHeight());
@@ -1565,7 +1565,7 @@ public class TestMoneroDaemonRpc {
       else assertFalse(tx.getFullHex().isEmpty());
       if (Boolean.TRUE.equals(ctx.fromBinaryBlock)) assertNull(tx.getRctSigPrunable());  // TODO: getBlocksByHeight() has inconsistent client-side pruning
       //else assertNotNull(tx.getRctSigPrunable()); // TODO: define and test this
-      assertFalse(tx.getIsDoubleSpend());
+      assertFalse(tx.getIsDoubleSpendSeen());
       if (tx.getIsConfirmed()) {
         assertNull(tx.getLastRelayedTimestamp());
         assertNull(tx.getReceivedTimestamp());

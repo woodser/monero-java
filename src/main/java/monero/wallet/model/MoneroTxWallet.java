@@ -359,8 +359,8 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setIsDoubleSpend(Boolean isDoubleSpend) {
-    super.setIsDoubleSpend(isDoubleSpend);
+  public MoneroTxWallet setIsDoubleSpendSeen(Boolean isDoubleSpend) {
+    super.setIsDoubleSpendSeen(isDoubleSpend);
     return this;
   }
 
