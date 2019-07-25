@@ -60,18 +60,16 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 
 14.1.0+ RELEASE
-MoneroWalletJni.createWalletFromMnemonic(), createWalletFromMnemonic(), createWalletRandom(), openWallet(connection), etc
-refactor getIs...() to is...() depending if this interferes with js syntax
-update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen
 convert couts to logging
-auto destroy wallet if garbage collected by vm
 wallet.isClosed() check, update wallet.close() test
+refactor getIs...() to is...() depending if this interferes with js syntax
+finalize wallet management utilties, setAutoSync() vs startSyncing() & pauseSyncing()
+update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen
 waitForTxsToClear() should refresh more frequently than blocks so it continues if pool manually flushed
 code todos
 testGetTransfers() cannot reconcile integrals: new MoneroTransferRequest().setAccountIndex(subaddress.getAccountIndex()).setSubaddressIndex(subaddress.getIndex())
 test that wallet.getIsSynced() returns false after block added to chain if not auto syncing
 compare time to manual sync vs auto sync
-cap creation of accounts by ignoring test if more than X accounts already exist
 work through problems of testing fresh wallet again
 regenerate api docs
 update readme with jni support
@@ -79,6 +77,8 @@ update readme with jni support
 announce
 
 MEDIUM
+cap creation of accounts by ignoring test if more than X accounts already exist
+auto destroy wallet if garbage collected by vm
 ux test including receiving funds
 sync(listener) should not be part of rpc api unless listening supported (could be supported)
 rpc supports on_restore_determinstic_wallet, implement!
