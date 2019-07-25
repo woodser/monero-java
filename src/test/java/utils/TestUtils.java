@@ -112,7 +112,7 @@ public class TestUtils {
       // create wallet from mnemonic phrase if it doesn't exist
       if (!MoneroWalletJni.walletExists(WALLET_JNI_PATH_1)) {
         MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
-        walletJni = new MoneroWalletJni(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, TestUtils.MNEMONIC, NETWORK_TYPE, daemonConnection, RESTORE_HEIGHT);
+        walletJni = MoneroWalletJni.createWalletFromMnemonic(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, TestUtils.MNEMONIC, NETWORK_TYPE, daemonConnection, RESTORE_HEIGHT);
         assertEquals(TestUtils.RESTORE_HEIGHT, walletJni.getRestoreHeight());
         walletJni.sync(new WalletSyncPrinter());
         walletJni.setAutoSync(true);
@@ -120,7 +120,7 @@ public class TestUtils {
       
       // otherwise open existing wallet and update daemon connection
       else {
-        walletJni = new MoneroWalletJni(WALLET_JNI_PATH_1, WALLET_JNI_PW, MoneroNetworkType.STAGENET);
+        walletJni = MoneroWalletJni.openWallet(WALLET_JNI_PATH_1, WALLET_JNI_PW, MoneroNetworkType.STAGENET);
         walletJni.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
         walletJni.sync(new WalletSyncPrinter());
         walletJni.setAutoSync(true);
@@ -157,7 +157,7 @@ public class TestUtils {
   public static MoneroWalletJni createWalletGroundTruth(MoneroNetworkType networkType, String mnemonic, Long restoreHeight) {
     MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
     String path = TestUtils.TEST_WALLETS_DIR + "/gt_wallet_" + System.currentTimeMillis();
-    MoneroWalletJni gtWallet = new MoneroWalletJni(path, TestUtils.WALLET_JNI_PW, mnemonic, networkType, daemonConnection, restoreHeight);
+    MoneroWalletJni gtWallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_JNI_PW, mnemonic, networkType, daemonConnection, restoreHeight);
     assertEquals(restoreHeight == null ? 0 : (long) restoreHeight, gtWallet.getRestoreHeight());
     gtWallet.sync(new WalletSyncPrinter());
     gtWallet.setAutoSync(true);
