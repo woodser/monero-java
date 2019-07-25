@@ -109,6 +109,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   public MoneroDaemonRpc(MoneroRpcConnection rpc) {
+    assertNotNull(rpc);
     this.rpc = rpc;
     this.daemonPoller = new MoneroDaemonPoller(this);
     this.cachedHeaders = new HashMap<Long, MoneroBlockHeader>();
@@ -129,7 +130,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * @return true if the client is connected to the daemon, false otherwise
    */
   public boolean getIsConnected() {
-    try { 
+    try {
       getHeight();
       return true;
     } catch (MoneroException e) {
