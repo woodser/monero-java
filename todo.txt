@@ -60,8 +60,11 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 
 14.1.0+ RELEASE
-wallet createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), no more doNotRelay in send request
+wallet createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit()
 tx.getIsDoubleSpend() -> isDoubleSpendSeen() since tx will still be accepted, will just be marked with double spend seen from pool
+MoneroWalletJni.createWalletFromMnemonic(), createWalletFromMnemonic(), createWalletRandom(), openWallet(connection), etc
+refactor getIs...() to is...()
+
 waitForTxsToClear() should refresh more frequently than blocks so it continues if pool manually flushed
 wallet tx pool test: create and submit non-relayed tx to pool, then flush it.  does wallet balance change back?
 clearUnrelayedTxs() on test start
@@ -69,9 +72,7 @@ waitForRelayedTxsToClear() on applicable tests (only run once per junit that use
 tests should treat pool as common resource and only flush what they use
 convert couts to logging
 wallet.isClosed() check, update wallet.close() test
-MoneroWalletJni.createWalletFromMnemonic(), createWalletFromMnemonic(), createWalletRandom(), openWallet(connection), etc
-wallet createTx(), createSplitTxs(), relayTx(), relayTxs(), then send(), sendSplit() uses those
-refactor getIs...() to is...()
+
 code todos
 testGetTransfers() cannot reconcile integrals: new MoneroTransferRequest().setAccountIndex(subaddress.getAccountIndex()).setSubaddressIndex(subaddress.getIndex())
 test that wallet.getIsSynced() returns false after block added to chain if not auto syncing

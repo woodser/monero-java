@@ -25,6 +25,7 @@ package monero.wallet;
 import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -162,6 +163,49 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
+  public MoneroTxWallet createTx(MoneroSendRequest request) {
+    if (request == null) throw new MoneroException("Send request cannot be null");
+    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with sendTx() which prevents splitting; use sendTxs() instead");
+    if (Boolean.FALSE.equals(request.getDoNotRelay())) throw new MoneroException("Cannot relay with createTx(); use sendTx() instead");
+    request.setCanSplit(false);
+    request.setDoNotRelay(true);
+    return createTxs(request).get(0);
+  }
+  
+  @Override
+  public List<MoneroTxWallet> createTxs(MoneroSendRequest request) {
+    if (request == null) throw new MoneroException("Send request cannot be null");
+    if (Boolean.FALSE.equals(request.getDoNotRelay())) throw new MoneroException("Cannot relay with createTxs(); use sendTxs() instead");
+    request.setDoNotRelay(true);
+    return sendSplit(request);
+  }
+  
+  @Override
+  public String relayTx(MoneroTxWallet tx) {
+    return relayTx(tx.getFullHex());
+  }
+  
+  @Override
+  public String relayTx(String txMetadata) {
+    return relayTxs(Arrays.asList(txMetadata)).get(0);
+  }
+  
+  @Override
+  public List<String> relayTxs(List<MoneroTxWallet> txs) {
+    List<String> txHexes = new ArrayList<String>();
+    for (MoneroTxWallet tx : txs) txHexes.add(tx.getFullHex());
+    return relayTxs(txHexes);
+  }
+  
+  @Override
+  public MoneroTxWallet send(MoneroSendRequest request) {
+    if (request == null) throw new MoneroException("Send request cannot be null");
+    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with sendTx() which prevents splitting; use sendTxs() instead");
+    request.setCanSplit(false);
+    return sendSplit(request).get(0);
+  }
+  
+  @Override
   public MoneroTxWallet send(int accountIndex, String address, BigInteger sendAmount) {
     return send(accountIndex, address, sendAmount, null);
   }
@@ -169,6 +213,11 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   @Override
   public MoneroTxWallet send(int accountIndex, String address, BigInteger sendAmount, MoneroSendPriority priority) {
     return send(new MoneroSendRequest(accountIndex, address, sendAmount, priority));
+  }
+
+  @Override
+  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
+    throw new RuntimeException("Not implemented");
   }
   
   @Override
@@ -216,11 +265,6 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   @Override
   public List<MoneroTxWallet> sweepDust() {
     return sweepDust(false);
-  }
-  
-  @Override
-  public String relayTx(String txMetadata) {
-    return relayTxs(Arrays.asList(txMetadata)).get(0);
   }
   
   @Override

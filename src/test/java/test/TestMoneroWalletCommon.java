@@ -2235,11 +2235,13 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     request.setSubaddressIndices(fromSubaddress.getIndex());
     
     // send to self
+    // can use create() or send() because request's doNotRelay is used, but exercise both calls
     if (Boolean.TRUE.equals(request.getCanSplit())) {
-      List<MoneroTxWallet> sendTxs = wallet.sendSplit(request);
+      List<MoneroTxWallet> sendTxs = Boolean.TRUE.equals(request.getDoNotRelay()) ? wallet.createTxs(request) : wallet.sendSplit(request);  
       for (MoneroTxWallet tx : sendTxs) txs.add(tx);
     } else {
-      txs.add(wallet.send(request));
+      MoneroTxWallet sendTx = Boolean.TRUE.equals(request.getDoNotRelay()) ? wallet.createTx(request) : wallet.send(request);
+      txs.add(sendTx);
     }
     
     // handle non-relayed transaction

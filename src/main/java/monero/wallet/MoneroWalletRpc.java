@@ -848,36 +848,28 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return rpcExportKeyImages(false);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public MoneroTxWallet send(MoneroSendRequest request) {
-    
-    // normalize request
-    assertNotNull("Send request must not be null", request);
-    if (request.getCanSplit() == null) request.setCanSplit(false);
-    else assertEquals(false, request.getCanSplit());
-    
-    // send with common method
-    return sendCommon(request).get(0);
-  }
-
-  @Override
-  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
-    
-    // normalize request
-    assertNotNull("Send request must not be null", request);
-    if (request.getCanSplit() == null) request.setCanSplit(true);
-    else assertEquals(true, request.getCanSplit());
-    
-    // send with common method
-    return sendCommon(request);
+  public List<String> relayTxs(Collection<String> txMetadatas) {
+    if (txMetadatas == null || txMetadatas.isEmpty()) throw new MoneroException("Must provide an array of tx metadata to relay");
+    List<String> txIds = new ArrayList<String>();
+    for (String txMetadata : txMetadatas) {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("hex", txMetadata);
+      Map<String, Object> resp = rpc.sendJsonRequest("relay_tx", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      txIds.add((String) result.get("tx_hash"));
+    }
+    return txIds;
   }
   
   @SuppressWarnings("unchecked")
-  private List<MoneroTxWallet> sendCommon(MoneroSendRequest request) {
+  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
     
-    // validate request
+    // validate / sanitize request
+    if (request == null) throw new MoneroException("Send request cannot be null");
     assertNotNull(request.getDestinations());
-    assertNotNull(request.getCanSplit());
+    if (request.getCanSplit() == null) request.setCanSplit(true);
     assertNull(request.getSweepEachSubaddress());
     assertNull(request.getBelowAmount());
     
@@ -1055,22 +1047,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     return txs;
   }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public List<String> relayTxs(Collection<String> txMetadatas) {
-    if (txMetadatas == null || txMetadatas.isEmpty()) throw new MoneroException("Must provide an array of tx metadata to relay");
-    List<String> txIds = new ArrayList<String>();
-    for (String txMetadata : txMetadatas) {
-      Map<String, Object> params = new HashMap<String, Object>();
-      params.put("hex", txMetadata);
-      Map<String, Object> resp = rpc.sendJsonRequest("relay_tx", params);
-      Map<String, Object> result = (Map<String, Object>) resp.get("result");
-      txIds.add((String) result.get("tx_hash"));
-    }
-    return txIds;
-  }
-
+  
   @SuppressWarnings("unchecked")
   @Override
   public List<String> getTxNotes(Collection<String> txIds) {
