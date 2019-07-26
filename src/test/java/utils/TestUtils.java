@@ -23,10 +23,10 @@ import monero.wallet.MoneroWalletRpc;
 public class TestUtils {
   
   // c++ log configuration
-  private static boolean CPP_LOG_ENABLED = true;
-  private static String CPP_LOG_PATH = "log_java_tests.txt";
-  private static int CPP_LOG_LEVEL = 4;
-  private static boolean CPP_LOG_CONSOLE = true;
+  public static boolean CPP_LOG_ENABLED = true;
+  public static String CPP_LOG_PATH = "log_java_tests.txt";
+  public static int CPP_LOG_LEVEL = 4;
+  public static boolean CPP_LOG_CONSOLE = true;
   static {
     if (CPP_LOG_ENABLED) {
       System.loadLibrary("monero-java");
