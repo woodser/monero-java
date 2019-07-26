@@ -11,7 +11,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
@@ -33,17 +32,6 @@ import utils.TestUtils;
 public class TestMoneroWalletsEqual {
   
   //private static final Logger LOGGER = Logger.getLogger(TestMoneroWalletsEqual.class); // logger
-  
-  // test class waits for wallet txs to clear pool once in order to fully recognize pool txs
-  // TODO monero core: fully sync txs from pool to avoid double spends
-  private static boolean WALLET_TXS_CLEARED_ONCE = false;
-  private static void waitForWalletTxsToClearPoolOnce(MoneroDaemon daemon, MoneroWallet w1, MoneroWallet w2) {
-    if (!WALLET_TXS_CLEARED_ONCE) {
-      TestUtils.waitForWalletTxsToClearPool(TestUtils.getDaemonRpc(), w1);
-      TestUtils.waitForWalletTxsToClearPool(TestUtils.getDaemonRpc(), w2);
-      WALLET_TXS_CLEARED_ONCE = true;
-    }
-  }
   
   private MoneroWallet w1;
   private MoneroWallet w2;
@@ -68,13 +56,14 @@ public class TestMoneroWalletsEqual {
   
   @Test
   public void testWalletsEqualOnChain() {
+    TestUtils.TX_POOL_WALLET_TRACKER.reset(); // all wallets need to wait for txs to confirm to reliably sync
     
     // default to rpc and jni wallets
     if (w1 == null) w1 = TestUtils.getWalletRpc();
     if (w2 == null) w2 = TestUtils.getWalletJni();
     
-    // wait for relayed txs to clear pool
-    waitForWalletTxsToClearPoolOnce(TestUtils.getDaemonRpc(), w1, w2);
+    // wait for relayed txs associated with wallets to clear pool
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(w1, w2);
     
     // sync the wallets until same height
     while (w1.getHeight() != w2.getHeight()) {

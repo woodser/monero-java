@@ -35,16 +35,6 @@ import utils.TestUtils;
  */
 public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
-  // test class waits for wallet txs to clear pool once in order to fully recognize pool txs and avoid double spends
-  // TODO monero core: fully sync txs from pool to avoid double spends
-  private static boolean WALLET_TXS_CLEARED_ONCE = false;
-  protected void waitForWalletTxsToClearPoolOnce() {
-    if (!WALLET_TXS_CLEARED_ONCE) {
-      TestUtils.waitForWalletTxsToClearPool(daemon, wallet);
-      WALLET_TXS_CLEARED_ONCE = true;
-    }
-  }
-  
   protected MoneroWalletRpc wallet;
   
   public TestMoneroWalletRpc() {

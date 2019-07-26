@@ -68,16 +68,6 @@ public class TestMoneroDaemonRpc {
   private static boolean TEST_RELAYS = true; // creates and relays outgoing txs
   private static boolean TEST_NOTIFICATIONS = false;
   
-  // test class waits for wallet txs to clear pool once in order to fully recognize pool txs and avoid double spends
-  // TODO monero core: fully sync txs from pool to avoid double spends
-  private static boolean WALLET_TXS_CLEARED_ONCE = false;
-  private static void waitForWalletTxsToClearPoolOnce() {
-    if (!WALLET_TXS_CLEARED_ONCE) {
-      TestUtils.waitForWalletTxsToClearPool(daemon, wallet);
-      WALLET_TXS_CLEARED_ONCE = true;
-    }
-  }
-  
   // config for testing binary blocks
   // TODO: binary blocks have inconsistent client-side pruning
   // TODO: get_blocks_by_height.bin does not return output indices (#5127)
@@ -101,6 +91,7 @@ public class TestMoneroDaemonRpc {
   public static void setUpBeforeClass() throws Exception {
     daemon = TestUtils.getDaemonRpc();
     wallet = TestUtils.getWalletRpc();
+    TestUtils.TX_POOL_WALLET_TRACKER.reset(); // all wallets need to wait for txs to confirm to reliably sync
   }
   
   @Before
@@ -436,7 +427,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetTxsByIdsInPool() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    waitForWalletTxsToClearPoolOnce();
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet); // wait for wallet's txs in the pool to clear to ensure reliable sync
     
     // submit txs to the pool but don't relay
     List<String> txIds = new ArrayList<String>();
@@ -559,7 +550,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetTxsInPool() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    waitForWalletTxsToClearPoolOnce();
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // submit tx to pool but don't relay
     MoneroTx tx = getUnrelayedTx(wallet, 1);
@@ -607,7 +598,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetTxPoolStatisticsBin() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    waitForWalletTxsToClearPoolOnce();
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // submit txs to the pool but don't relay (multiple txs result in binary `histo` field)
     for (int i = 1; i < 3; i++) {
@@ -633,7 +624,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testFlushTxsFromPool() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    waitForWalletTxsToClearPoolOnce();
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // preserve original transactions in the pool
     List<MoneroTx> txPoolBefore = daemon.getTxPool();
@@ -667,7 +658,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testFlushTxFromPoolById() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    waitForWalletTxsToClearPoolOnce();
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // preserve original transactions in the pool
     List<MoneroTx> txPoolBefore = daemon.getTxPool();
@@ -703,7 +694,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testFlushTxsFromPoolByIds() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    waitForWalletTxsToClearPoolOnce();
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // preserve original transactions in the pool
     List<MoneroTx> txPoolBefore = daemon.getTxPool();
@@ -732,7 +723,7 @@ public class TestMoneroDaemonRpc {
   @Ignore // TODO: hanging like getTxsByIds()
   public void testGetSpentStatusOfKeyImages() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    waitForWalletTxsToClearPoolOnce();
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // submit txs to the pool to collect key images then flush them
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
@@ -1143,7 +1134,7 @@ public class TestMoneroDaemonRpc {
     
     // wait one time for wallet txs in the pool to clear
     // TODO monero core: update from pool does not prevent creating double spend tx
-    waitForWalletTxsToClearPoolOnce();
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // create 2 txs, the second will double spend outputs of first
     MoneroTx tx1 = getUnrelayedTx(wallet, 2); // TODO: this test requires tx to be from/to different accounts else the occlusion issue (#4500) causes the tx to not be recognized by the wallet at all
@@ -1186,18 +1177,15 @@ public class TestMoneroDaemonRpc {
     }
     assertTrue("Tx2 should not be in the pool because it double spends tx1 which is in the pool", !found);
     
-    // wait for tx1 to clear the pool as otherwise the wallet will create double spend txs  // TODO monero core: sync fully with tx pool
-    TestUtils.waitForTxsToClearPool(daemon, wallet, tx1.getId());
-    
-    // sync before the next test
-    wallet.sync();
+    // all wallets will need to wait for tx to confirm in order to properly sync
+    TestUtils.TX_POOL_WALLET_TRACKER.reset();
   }
   
   // Can submit a tx in hex format to the pool then relay
   @Test
   public void testSubmitThenRelayTxHex() {
     org.junit.Assume.assumeTrue(TEST_RELAYS && !LITE_MODE);
-    waitForWalletTxsToClearPoolOnce();
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     MoneroTx tx = getUnrelayedTx(wallet, 1);
     testSubmitThenRelay(Arrays.asList(tx));
   }
@@ -1206,7 +1194,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testSubmitThenRelayTxHexes() {
     org.junit.Assume.assumeTrue(TEST_RELAYS && !LITE_MODE);
-    waitForWalletTxsToClearPoolOnce();
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     txs.add(getUnrelayedTx(wallet, 2));
     txs.add(getUnrelayedTx(wallet, 3));  // TODO: accounts cannot be re-used across send tests else isRelayed is true; wallet needs to update?
@@ -1258,11 +1246,8 @@ public class TestMoneroDaemonRpc {
       assertTrue("Tx was not found after being submitted to the daemon's tx pool", found);
     }
     
-    // wait for tx1 to clear the pool as otherwise the wallet will create double spend txs  // TODO monero core: sync fully with tx pool
-    TestUtils.waitForTxsToClearPool(daemon, wallet, txIds.toArray(new String[0]));
-    
-    // sync before the next test
-    wallet.sync();
+    // wallets will need to wait for tx to confirm in order to properly sync
+    TestUtils.TX_POOL_WALLET_TRACKER.reset();
   }
   
   // -------------------------- NOTIFICATION TESTS ---------------------------

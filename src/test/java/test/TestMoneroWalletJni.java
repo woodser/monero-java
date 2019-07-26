@@ -29,16 +29,6 @@ import utils.TestUtils;
  * Tests specific to the JNI wallet.
  */
 public class TestMoneroWalletJni extends TestMoneroWalletCommon {
-  
-  // test class waits for wallet txs to clear pool once in order to fully recognize pool txs and avoid double spends
-  // TODO monero core: fully sync txs from pool to avoid double spends
-  private static boolean WALLET_TXS_CLEARED_ONCE = false;
-  protected void waitForWalletTxsToClearPoolOnce() {
-    if (!WALLET_TXS_CLEARED_ONCE) {
-      TestUtils.waitForWalletTxsToClearPool(daemon, wallet);
-      WALLET_TXS_CLEARED_ONCE = true;
-    }
-  }
 
   protected MoneroWalletJni wallet;
 
@@ -454,6 +444,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   @Test
   public void testSetAutoSync() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // test unconnected wallet
     String path = getRandomWalletPath();
@@ -506,8 +497,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       }
       
       // test that wallet is synced
-      assertEquals(daemon.getHeight(), wallet.getHeight());
       assertTrue(wallet.getIsSynced());
+      assertEquals(daemon.getHeight(), wallet.getHeight());
     } finally {
       wallet.close();
     }

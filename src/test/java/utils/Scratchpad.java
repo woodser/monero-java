@@ -1,6 +1,7 @@
 package utils;
 
 import monero.daemon.MoneroDaemon;
+import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
 
@@ -26,10 +27,14 @@ public class Scratchpad {
     
     // -------------------------------- SCRATCHPAD ----------------------------
     
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom("hello5", "supersecretpassword123");
-    //System.out.println("Wallet created with mnemonic: " + wallet.getMnemonic());
-//    wallet.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
-    wallet.setAutoSync(true);
+    for (MoneroTx tx : daemon.getTxPool()) {
+      System.out.println(tx);
+    }
+    
+//    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom("hello5", "supersecretpassword123");
+//    //System.out.println("Wallet created with mnemonic: " + wallet.getMnemonic());
+////    wallet.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
+//    wallet.setAutoSync(true);
     //System.out.println("Wallet height: " + wallet.getHeight());
     //System.out.println("Wallet is synced: " + wallet.getIsSynced());
     //System.out.println("Wallet balance: " + wallet.getBalance());
