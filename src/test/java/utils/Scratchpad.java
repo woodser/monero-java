@@ -2,6 +2,7 @@ package utils;
 
 import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroTx;
+import monero.utils.MoneroCppUtils;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
 
@@ -12,6 +13,9 @@ public class Scratchpad {
 
   @SuppressWarnings("unused")
   public static void main(String[] args) {
+
+    // initialize logging in c++
+    MoneroCppUtils.initLogging("log_scratchpad_java.txt", 4, true);
     
     // initialize daemon, wallet, and direct rpc interface
     MoneroDaemon daemon = TestUtils.getDaemonRpc();
@@ -26,6 +30,8 @@ public class Scratchpad {
     String txId = null;
     
     // -------------------------------- SCRATCHPAD ----------------------------
+    
+    //MoneroCppUtils.setLogLevel(1);
     
     for (MoneroTx tx : daemon.getTxPool()) {
       System.out.println(tx);
