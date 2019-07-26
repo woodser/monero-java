@@ -5,22 +5,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import monero.daemon.MoneroDaemon;
 import monero.daemon.MoneroDaemonRpc;
-import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroNetworkType;
-import monero.daemon.model.MoneroTx;
 import monero.rpc.MoneroRpcConnection;
 import monero.rpc.MoneroRpcException;
-import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
-import monero.wallet.model.MoneroTxWallet;
 
 /**
  * Test utilities and constants.
@@ -59,6 +53,9 @@ public class TestUtils {
   static {
     PropertyConfigurator.configure("src/main/resources/log4j.properties");
   }
+  
+  // used to track which wallets are in sync with pool so associated txs in the pool do not need to be waited on
+  public static TxPoolWalletTracker TX_POOL_WALLET_TRACKER = new TxPoolWalletTracker();
   
   // test constants
   public static final int MIXIN = 11;
@@ -192,85 +189,5 @@ public class TestUtils {
       default:
         throw new RuntimeException("Invalid network type: " + networkType);
     }
-  }
-  
-  public static void waitForWalletTxsToClearPool(MoneroDaemon daemon, MoneroWallet wallet) {
-    
-    // attempt to start mining to push the network along
-    boolean startedMining = false;
-    MoneroMiningStatus miningStatus = daemon.getMiningStatus();
-    if (!miningStatus.getIsActive()) {
-      try {
-        wallet.startMining(7, false, true);
-        startedMining = true;
-      } catch (Exception e) { } // no problem
-    }
-    
-    // loop until wallet does not have txs in pool
-    while (walletHasTxInPool(daemon, wallet)) {
-      System.out.println("Waiting for next block because wallet has tx in pool which does not fully sync");
-      wallet.sync();
-      daemon.getNextBlockHeader();
-      wallet.sync();
-    }
-    
-    // stop mining at end of test
-    if (startedMining) daemon.stopMining();
-  }
-  
-  public static boolean walletHasTxInPool(MoneroDaemon daemon, MoneroWallet wallet) {
-    
-    // get txs in the pool
-    List<MoneroTx> txsPool = daemon.getTxPool();
-    
-    // get wallet txs
-    List<MoneroTxWallet> txsWallet = wallet.getTxs();
-    
-    // check if any txs in pool belong to wallet
-    for (MoneroTx txPool : txsPool) {
-      if (txPool.getIsFailed()) continue;
-      for (MoneroTxWallet txWallet : txsWallet) {
-        if (txPool.getId().equals(txWallet.getId())) {
-          return true;
-        }
-      }
-    }
-    
-    // wallet has no txs in pool
-    return false;
-  }
-  
-  public static void waitForTxsToClearPool(MoneroDaemon daemon, MoneroWallet wallet, String... txIds) {
-    
-    // attempt to start mining to push the network along
-    boolean startedMining = false;
-    MoneroMiningStatus miningStatus = daemon.getMiningStatus();
-    if (!miningStatus.getIsActive()) {
-      try {
-        wallet.startMining(7, false, true);
-        startedMining = true;
-      } catch (Exception e) { } // no problem
-    }
-    
-    // loop until wallet does not have txs in pool
-    while (txsInPool(daemon, txIds)) {
-      System.out.println("Waiting for next block so txs cleared from pool to avoid double spend attempt");
-      wallet.sync();
-      daemon.getNextBlockHeader();
-      wallet.sync();
-    }
-    
-    // stop mining at end of test
-    if (startedMining) daemon.stopMining();
-  }
-  
-  public static boolean txsInPool(MoneroDaemon daemon, String...txIds) {
-    List<MoneroTx> txsPool = daemon.getTxPool();
-    for (MoneroTx txPool : txsPool) {
-      for (String txId : txIds) {
-        if (txId.equals(txPool.getId())) return true;
-      }
-    }
-    return false;
   }
 }
