@@ -67,7 +67,6 @@ MoneroTxRequest -> MoneroTxQuery, etc?
 wallet.isClosed() check, update wallet.close() test
 refactor getIs...() to is...() depending if this interferes with js syntax
 update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing()
-waitForTxsToClear() should refresh more frequently than blocks so it continue s if pool manually flushed
 verify number of sent txs run during tests and count from wallet
 code todos
 compare time to manual sync vs auto sync
@@ -78,6 +77,7 @@ update readme with jni support
 announce
 
 MEDIUM
+waitForTxsToClear() should refresh more frequently than blocks so it continue s if pool manually flushed
 cap creation of accounts by ignoring test if more than X accounts already exist
 auto destroy wallet if garbage collected by vm
 ux test including receiving funds
