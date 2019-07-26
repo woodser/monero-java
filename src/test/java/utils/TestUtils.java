@@ -112,7 +112,7 @@ public class TestUtils {
         walletJni = MoneroWalletJni.createWalletFromMnemonic(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, TestUtils.MNEMONIC, NETWORK_TYPE, daemonConnection, RESTORE_HEIGHT);
         assertEquals(TestUtils.RESTORE_HEIGHT, walletJni.getRestoreHeight());
         walletJni.sync(new WalletSyncPrinter());
-        walletJni.setAutoSync(true);
+        walletJni.startSyncing();
       }
       
       // otherwise open existing wallet and update daemon connection
@@ -120,7 +120,7 @@ public class TestUtils {
         walletJni = MoneroWalletJni.openWallet(WALLET_JNI_PATH_1, WALLET_JNI_PW, MoneroNetworkType.STAGENET);
         walletJni.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
         walletJni.sync(new WalletSyncPrinter());
-        walletJni.setAutoSync(true);
+        walletJni.startSyncing();
       }
       
       // Save and close the JNI wallet when the runtime is shutting down in order
@@ -157,7 +157,7 @@ public class TestUtils {
     MoneroWalletJni gtWallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_JNI_PW, mnemonic, networkType, daemonConnection, restoreHeight);
     assertEquals(restoreHeight == null ? 0 : (long) restoreHeight, gtWallet.getRestoreHeight());
     gtWallet.sync(new WalletSyncPrinter());
-    gtWallet.setAutoSync(true);
+    gtWallet.startSyncing();
     return gtWallet;
   }
   

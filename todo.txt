@@ -60,6 +60,7 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 
 14.1.0+ RELEASE
+startSyncing(), stopSyncing(), sync() instead of setAutoSync(true|false)
 convert couts to logging
 test set connection to invalid url
 test stop daemon while wallet syncing
@@ -67,7 +68,7 @@ MoneroTxRequest -> MoneroTxQuery, etc?
 wallet.isClosed() check, update wallet.close() test
 refactor getIs...() to is...() depending if this interferes with js syntax
 finalize wallet management utilties, setAutoSync() vs startSyncing() & pauseSyncing()
-update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen
+update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing()
 waitForTxsToClear() should refresh more frequently than blocks so it continues if pool manually flushed
 code todos
 testGetTransfers() cannot reconcile integrals: new MoneroTransferRequest().setAccountIndex(subaddress.getAccountIndex()).setSubaddressIndex(subaddress.getIndex())

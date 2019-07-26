@@ -34,7 +34,6 @@ public class Scratchpad {
 //    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom("hello5", "supersecretpassword123");
 //    //System.out.println("Wallet created with mnemonic: " + wallet.getMnemonic());
 ////    wallet.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
-//    wallet.setAutoSync(true);
     //System.out.println("Wallet height: " + wallet.getHeight());
     //System.out.println("Wallet is synced: " + wallet.getIsSynced());
     //System.out.println("Wallet balance: " + wallet.getBalance());
