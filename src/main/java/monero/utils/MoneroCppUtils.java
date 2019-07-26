@@ -78,5 +78,5 @@ public class MoneroCppUtils {
   
   private native static void initLoggingJni(String path, boolean console);
 
-  public native static void setLogLevelJni(int level);
+  private native static void setLogLevelJni(int level);
 }

@@ -202,7 +202,7 @@ extern "C"
 #endif
 
 JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_walletExistsJni(JNIEnv *env, jclass clazz, jstring jpath) {
-  cout << "Java_monero_wallet_MoneroWalletJni_walletExistsJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_walletExistsJni");
   const char* _path = env->GetStringUTFChars(jpath, NULL);
   string path = string(_path);
   env->ReleaseStringUTFChars(jpath, _path);
@@ -211,7 +211,7 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_walletExistsJni(JN
 }
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint jnetworkType) {
-  cout << "Java_monero_wallet_MoneroWalletJni_openWalletJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_openWalletJni");
   const char* _path = env->GetStringUTFChars(jpath, NULL);
   const char* _password = env->GetStringUTFChars(jpassword, NULL);
   string path = string(_path);
@@ -230,7 +230,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv 
 }
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint jnetworkType, jstring jdaemonUri, jstring jdaemonUsername, jstring jdaemonPassword, jstring jlanguage) {
-  cout << "Java_monero_wallet_MoneroWalletJni_createWalletRandomJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_createWalletRandomJni");
 
   // collect and release string params
   const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
@@ -265,7 +265,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletRandomJni
 
 // TODO: update this impl and others like it to be like e.g. createWalletFromKeysJni
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jstring jmnemonic, jint jnetworkType, jlong jrestoreHeight) {
-  cout << "Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni");
 
   // collect and release string params
   const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
@@ -290,7 +290,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemo
 }
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jstring jaddress, jstring jviewKey, jstring jspendKey, jint networkType, jlong restoreHeight, jstring jlanguage) {
-  cout << "Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni");
 
   // collect and release string params
   const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
@@ -326,7 +326,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJ
 //  ------------------------------- JNI INSTANCE ------------------------------
 
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni()" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni()");
 
   // get wallet
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
@@ -349,7 +349,7 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonConne
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *env, jobject instance, jstring juri, jstring jusername, jstring jpassword) {
-  cout << "Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   try {
     setDaemonConnection(env, wallet, juri, jusername, jpassword);
@@ -409,31 +409,31 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_getIsSyncedJni(JNI
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPathJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getPathJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getPathJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   return env->NewStringUTF(wallet->getPath().c_str());
 }
 
 JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_getNetworkTypeJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getNetworkTypeJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getNetworkTypeJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   return wallet->getNetworkType();
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMnemonicJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getMnemonicJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getMnemonicJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   return env->NewStringUTF(wallet->getMnemonic().c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getLanguageJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getLanguageJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getLanguageJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   return env->NewStringUTF(wallet->getLanguage().c_str());
 }
 
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getLanguagesJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getLanguagesJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getLanguagesJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
 
   // get languages
@@ -454,38 +454,38 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getLanguagesJn
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPublicViewKeyJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getPublicViewKeyJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getPublicViewKeyJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   return env->NewStringUTF(wallet->getPublicViewKey().c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPrivateViewKeyJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getPrivateViewKeyJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getPrivateViewKeyJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   return env->NewStringUTF(wallet->getPrivateViewKey().c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPublicSpendKeyJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getPublicSpendKeyJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getPublicSpendKeyJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   return env->NewStringUTF(wallet->getPublicSpendKey().c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPrivateSpendKeyJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getPrivateSpendKeyJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getPrivateSpendKeyJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   return env->NewStringUTF(wallet->getPrivateSpendKey().c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getAddressJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getAddressJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   string address = wallet->getAddress((uint32_t) accountIdx, (uint32_t) subaddressIdx);
   return env->NewStringUTF(address.c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressIndexJni(JNIEnv *env, jobject instance, jstring jaddress) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getAddressIndexJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getAddressIndexJni");
 
   // collect and release string param
   const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
@@ -505,7 +505,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressIndexJni(
 }
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *env, jobject instance, jobject jlistener) {
-  cout << "Java_monero_wallet_MoneroWalletJni_setListenerJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_setListenerJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
 
   // clear old listener
@@ -528,7 +528,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getIntegratedAddressJni(JNIEnv *env, jobject instance, jstring jstandardAddress, jstring jpaymentId) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getIntegratedAddressJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getIntegratedAddressJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
 
   // collect and release string params
@@ -551,7 +551,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getIntegratedAddres
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_decodeIntegratedAddressJni(JNIEnv *env, jobject instance, jstring jintegratedAddress) {
-  cout << "Java_monero_wallet_MoneroWalletJni_decodeIntegratedAddressJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_decodeIntegratedAddressJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _integratedAddress = jintegratedAddress ? env->GetStringUTFChars(jintegratedAddress, NULL) : nullptr;
   string integratedAddress = string(_integratedAddress ? _integratedAddress : "");
@@ -569,7 +569,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_decodeIntegratedAdd
 }
 
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong startHeight) {
-  cout << "Java_monero_wallet_MoneroWalletJni_syncJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_syncJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   try {
 
@@ -594,7 +594,7 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_startSyncingJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_startSyncingJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_startSyncingJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   try {
     wallet->startSyncing();
@@ -604,7 +604,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_startSyncingJni(JNIEnv
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_stopSyncingJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_stopSyncingJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_stopSyncingJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   try {
     wallet->stopSyncing();
@@ -614,7 +614,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_stopSyncingJni(JNIEnv 
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_rescanBlockchainJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_rescanBlockchainJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_rescanBlockchainJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   try {
     wallet->rescanBlockchain();
@@ -626,13 +626,13 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_rescanBlockchainJni(JN
 // isMultisigImportNeeded
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getHeightJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getHeightJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getHeightJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   return wallet->getHeight();
 }
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getChainHeightJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getChainHeightJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getChainHeightJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   try {
     return wallet->getChainHeight();
@@ -643,13 +643,13 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getChainHeightJni(JNI
 }
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   return wallet->getRestoreHeight();
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setRestoreHeightJni(JNIEnv *env, jobject instance, jlong restoreHeight) {
-  cout << "Java_monero_wallet_MoneroWalletJni_setRestoreHeightJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_setRestoreHeightJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   try {
     wallet->setRestoreHeight(restoreHeight);
@@ -659,49 +659,49 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setRestoreHeightJni(JN
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   uint64_t balance = wallet->getBalance();
   return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceAccountJni(JNIEnv *env, jobject instance, jint accountIdx) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getBalanceAccountJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getBalanceAccountJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   uint64_t balance = wallet->getBalance(accountIdx);
   return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceSubaddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getBalanceSubaddressJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getBalanceSubaddressJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   uint64_t balance = wallet->getBalance(accountIdx, subaddressIdx);
   return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceWalletJni(JNIEnv *env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceWalletJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceWalletJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   uint64_t balance = wallet->getUnlockedBalance();
   return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceAccountJni(JNIEnv *env, jobject instance, jint accountIdx) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceAccountJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceAccountJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   uint64_t balance = wallet->getUnlockedBalance(accountIdx);
   return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni(JNIEnv *env, jobject instance, jint accountIdx, jint subaddressIdx) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   uint64_t balance = wallet->getUnlockedBalance(accountIdx, subaddressIdx);
   return env->NewStringUTF(boost::lexical_cast<std::string>(balance).c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv* env, jobject instance, jboolean includeSubaddresses, jstring jtag) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getAccountsJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getAccountsJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _tag = jtag ? env->GetStringUTFChars(jtag, NULL) : nullptr;
   string tag = string(_tag ? _tag : "");
@@ -720,7 +720,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIE
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountJni(JNIEnv* env, jobject instance, jint accountIdx, jboolean includeSubaddresses) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getAccountJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getAccountJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
 
   // get account
@@ -732,7 +732,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountJni(JNIEn
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createAccountJni(JNIEnv* env, jobject instance, jstring jlabel) {
-  cout << "Java_monero_wallet_MoneroWalletJni_createAccountJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_createAccountJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _label = jlabel ? env->GetStringUTFChars(jlabel, NULL) : nullptr;
   string label = string(_label ? _label : "");
@@ -747,7 +747,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createAccountJni(JN
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(JNIEnv* env, jobject instance, jint accountIdx, jintArray jsubaddressIndices) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getSubaddressesJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getSubaddressesJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
 
   // convert subaddress indices from jintArray to vector<uint32_t>
@@ -773,7 +773,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createSubaddressJni(JNIEnv* env, jobject instance, jint accountIdx, jstring jlabel) {
-  cout << "Java_monero_wallet_MoneroWalletJni_createSubaddressJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_createSubaddressJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _label = jlabel ? env->GetStringUTFChars(jlabel, NULL) : nullptr;
   string label = string(_label ? _label : "");
@@ -788,7 +788,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createSubaddressJni
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* env, jobject instance, jstring jtxRequest) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getTxsJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getTxsJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _txRequest = jtxRequest ? env->GetStringUTFChars(jtxRequest, NULL) : nullptr;
   string txRequestJson = string(_txRequest ? _txRequest : "");
@@ -797,11 +797,11 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
 
     // deserialize tx request
     shared_ptr<MoneroTxRequest> txRequest = MoneroUtils::deserializeTxRequest(txRequestJson);
-    cout << "Fetching txs with request: " << txRequest->serialize() << endl;
+    MTRACE("Fetching txs with request: " << txRequest->serialize());
 
     // get txs
     vector<shared_ptr<MoneroTxWallet>> txs = wallet->getTxs(*txRequest);
-    cout << "Got " << txs.size() << " txs" << endl;
+    MTRACE("Got " << txs.size() << " txs");
 
     // return unique blocks to preserve model relationships as tree
     shared_ptr<MoneroBlock> unconfirmedBlock = nullptr; // placeholder to store unconfirmed txs in return json
@@ -819,7 +819,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
         blocks.push_back(tx->block.get());
       }
     }
-    cout << "Returning " << blocks.size() << " blocks" << endl;
+    MTRACE("Returning " << blocks.size() << " blocks");
 
     // wrap and serialize blocks
     std::stringstream ss;
@@ -835,7 +835,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNIEnv* env, jobject instance, jstring jtransferRequest) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getTransfersJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getTransfersJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _transferRequest = jtransferRequest ? env->GetStringUTFChars(jtransferRequest, NULL) : nullptr;
   string transferRequestJson = string(_transferRequest ? _transferRequest : "");
@@ -844,11 +844,11 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
 
     // deserialize transfer request
     shared_ptr<MoneroTransferRequest> transferRequest = MoneroUtils::deserializeTransferRequest(transferRequestJson);
-    cout << "Fetching transfers with request: " << transferRequest->serialize() << endl;
+    MTRACE("Fetching transfers with request: " << transferRequest->serialize());
 
     // get transfers
     vector<shared_ptr<MoneroTransfer>> transfers = wallet->getTransfers(*transferRequest);
-    cout << "Got " << transfers.size() << " transfers" << endl;
+    MTRACE("Got " << transfers.size() << " transfers");
 
     // return unique blocks to preserve model relationships as tree
     shared_ptr<MoneroBlock> unconfirmedBlock = nullptr; // placeholder to store unconfirmed txs in return json
@@ -882,7 +882,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEnv* env, jobject instance, jstring joutputRequest) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getOutputsJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getOutputsJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _outputRequest = joutputRequest ? env->GetStringUTFChars(joutputRequest, NULL) : nullptr;
   string outputRequestJson = string(_outputRequest ? _outputRequest : "");
@@ -891,11 +891,11 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
 
     // deserialize output request
     shared_ptr<MoneroOutputRequest> outputRequest = MoneroUtils::deserializeOutputRequest(outputRequestJson);
-    cout << "Fetching outputs with request: " << outputRequest->serialize() << endl;
+    MTRACE("Fetching outputs with request: " << outputRequest->serialize());
 
     // get outputs
     vector<shared_ptr<MoneroOutputWallet>> outputs = wallet->getOutputs(*outputRequest);
-    cout << "Got " << outputs.size() << " outputs" << endl;
+    MTRACE("Got " << outputs.size() << " outputs");
 
     // return unique blocks to preserve model relationships as tree
     vector<MoneroBlock> blocks;
@@ -909,7 +909,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
         blocks.push_back(**tx->block);
       }
     }
-    cout << "Returning " << blocks.size() << " blocks" << endl;
+    MTRACE("Returning " << blocks.size() << " blocks");
 
     // wrap and serialize blocks
     std::stringstream ss;
@@ -925,7 +925,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsHexJni(JNIEnv* env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getOutputsHexJni()" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getOutputsHexJni()");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   try {
     return env->NewStringUTF(wallet->getOutputsHex().c_str());
@@ -936,7 +936,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsHexJni(JN
 }
 
 JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_importOutputsHexJni(JNIEnv* env, jobject instance, jstring joutputsHex) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getOutputsHexJni()" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getOutputsHexJni()");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _outputsHex = joutputsHex ? env->GetStringUTFChars(joutputsHex, NULL) : nullptr;
   string outputsHex = string(_outputsHex ? _outputsHex : "");
@@ -950,12 +950,12 @@ JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_importOutputsHexJni(JN
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getKeyImagesJni(JNIEnv* env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getKeyImagesJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getKeyImagesJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
 
   // fetch key images
   vector<shared_ptr<MoneroKeyImage>> keyImages = wallet->getKeyImages();
-  cout << "Fetched " << keyImages.size() << " key images" << endl;
+  MTRACE("Fetched " << keyImages.size() << " key images");
 
   // wrap and serialize key images
   std::stringstream ss;
@@ -967,7 +967,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getKeyImagesJni(JNI
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_importKeyImagesJni(JNIEnv* env, jobject instance, jstring jkeyImagesJson) {
-  cout << "Java_monero_wallet_MoneroWalletJni_importKeyImagesJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_importKeyImagesJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _keyImagesJson = jkeyImagesJson ? env->GetStringUTFChars(jkeyImagesJson, NULL) : nullptr;
   string keyImagesJsonn = string(_keyImagesJson ? _keyImagesJson : "");
@@ -975,7 +975,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_importKeyImagesJni(
 
   // deserialize key images to import
   vector<shared_ptr<MoneroKeyImage>> keyImages = MoneroUtils::deserializeKeyImages(keyImagesJsonn);
-  cout << "Deserialized " << keyImages.size() << " key images from java json" << endl;
+  MTRACE("Deserialized " << keyImages.size() << " key images from java json");
 
   // import key images
   shared_ptr<MoneroKeyImageImportResult> result;
@@ -989,7 +989,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_importKeyImagesJni(
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv* env, jobject instance, jstring jsendRequest) {
-  cout << "Java_monero_wallet_MoneroWalletJni_sendSplitJni(request)" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_sendSplitJni(request)");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _sendRequest = jsendRequest ? env->GetStringUTFChars(jsendRequest, NULL) : nullptr;
   string sendRequestJson = string(_sendRequest ? _sendRequest : "");
@@ -997,13 +997,13 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv
 
   // deserialize send request
   shared_ptr<MoneroSendRequest> sendRequest = MoneroUtils::deserializeSendRequest(sendRequestJson);
-  cout << "Deserialized send request, re-serialized: " << sendRequest->serialize() << endl;
+  MTRACE("Deserialized send request, re-serialized: " << sendRequest->serialize());
 
   // submit send request
   vector<shared_ptr<MoneroTxWallet>> txs;
   try {
     txs = wallet->sendSplit(*sendRequest);
-    cout << "Got " << txs.size() << " txs" << endl;
+    MTRACE("Got " << txs.size() << " txs");
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
@@ -1025,7 +1025,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv
       blocks.push_back(**tx->block);
     }
   }
-  cout << "Returning " << blocks.size() << " blocks" << endl;
+  MTRACE("Returning " << blocks.size() << " blocks");
 
   // wrap and serialize blocks
   std::stringstream ss;
@@ -1037,17 +1037,17 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepOutputJni(JNIEnv* env, jobject instance, jstring jsendRequest) {
-  cout << "Java_monero_wallet_MoneroWalletJni_sweepOutputJni(request)" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_sweepOutputJni(request)");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _sendRequest = jsendRequest ? env->GetStringUTFChars(jsendRequest, NULL) : nullptr;
   string sendRequestJson = string(_sendRequest);
   env->ReleaseStringUTFChars(jsendRequest, _sendRequest);
 
-  cout << "Send request json: " << sendRequestJson << endl;
+  MTRACE("Send request json: " << sendRequestJson);
 
   // deserialize send request
   shared_ptr<MoneroSendRequest> sendRequest = MoneroUtils::deserializeSendRequest(sendRequestJson);
-  cout << "Deserialized send request, re-serialized: " << sendRequest->serialize() << endl;
+  MTRACE("Deserialized send request, re-serialized: " << sendRequest->serialize());
 
   // submit send request
   shared_ptr<MoneroTxWallet> tx;
@@ -1072,7 +1072,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepOutputJni(JNIE
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepDustJni(JNIEnv* env, jobject instance, jboolean doNotRelay) {
-  cout << "Java_monero_wallet_MoneroWalletJni_sweepDustJni(request)" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_sweepDustJni(request)");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
 
   // sweep dust
@@ -1100,7 +1100,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepDustJni(JNIEnv
 }
 
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_relayTxsJni(JNIEnv* env, jobject instance, jobjectArray jtxMetadatas) {
-  cout << "Java_monero_wallet_MoneroWalletJni_relayTxsJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_relayTxsJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
 
   // get tx metadatas from jobjectArray to vector<string>
@@ -1131,7 +1131,7 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_relayTxsJni(JN
 }
 
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getTxNotesJni(JNIEnv* env, jobject instance, jobjectArray jtxIds) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getTxNotesJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getTxNotesJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
 
   // get tx ids from jobjectArray to vector<string>
@@ -1162,7 +1162,7 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getTxNotesJni(
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setTxNotesJni(JNIEnv* env, jobject instance, jobjectArray jtxIds, jobjectArray jtxNotes) {
-  cout << "Java_monero_wallet_MoneroWalletJni_setTxNotesJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_setTxNotesJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
 
   // get tx ids from jobjectArray to vector<string>
@@ -1194,7 +1194,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setTxNotesJni(JNIEnv* 
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signJni(JNIEnv* env, jobject instance, jstring jmsg) {
-  cout << "Java_monero_wallet_MoneroWalletJni_signJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_signJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _msg = jmsg ? env->GetStringUTFChars(jmsg, NULL) : nullptr;
   string msg = string(_msg ? _msg : "");
@@ -1209,7 +1209,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signJni(JNIEnv* env
 }
 
 JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_verifyJni(JNIEnv* env, jobject instance, jstring jmsg, jstring jaddress, jstring jsignature) {
-  cout << "Java_monero_wallet_MoneroWalletJni_verifyJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_verifyJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _msg = jmsg ? env->GetStringUTFChars(jmsg, NULL) : nullptr;
   const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
@@ -1230,7 +1230,7 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_verifyJni(JNIEnv* 
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxKeyJni(JNIEnv* env, jobject instance, jstring jtxId) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getTxKeyJniJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getTxKeyJniJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _txId = jtxId ? env->GetStringUTFChars(jtxId, NULL) : nullptr;
   string txId = string(_txId == nullptr ? "" : _txId);
@@ -1244,7 +1244,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxKeyJni(JNIEnv*
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_checkTxKeyJni(JNIEnv* env, jobject instance, jstring jtxId, jstring jtxKey, jstring jaddress) {
-  cout << "Java_monero_wallet_MoneroWalletJni_checkTxKeyJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_checkTxKeyJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _txId = jtxId ? env->GetStringUTFChars(jtxId, NULL) : nullptr;
   const char* _txKey = jtxKey ? env->GetStringUTFChars(jtxKey, NULL) : nullptr;
@@ -1264,7 +1264,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_checkTxKeyJni(JNIEn
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxProofJni(JNIEnv* env, jobject instance, jstring jtxId, jstring jaddress, jstring jmessage) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getTxProofJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getTxProofJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _txId = jtxId ? env->GetStringUTFChars(jtxId, NULL) : nullptr;
   const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
@@ -1284,7 +1284,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxProofJni(JNIEn
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_checkTxProofJni(JNIEnv* env, jobject instance, jstring jtxId, jstring jaddress, jstring jmessage, jstring jsignature) {
-  cout << "Java_monero_wallet_MoneroWalletJni_checkTxProofJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_checkTxProofJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _txId = jtxId ? env->GetStringUTFChars(jtxId, NULL) : nullptr;
   const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
@@ -1307,7 +1307,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_checkTxProofJni(JNI
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getSpendProofJni(JNIEnv* env, jobject instance, jstring jtxId, jstring jmessage) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getSpendProofJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getSpendProofJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _txId = jtxId ? env->GetStringUTFChars(jtxId, NULL) : nullptr;
   const char* _message = jmessage ? env->GetStringUTFChars(jmessage, NULL) : nullptr;
@@ -1324,7 +1324,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getSpendProofJni(JN
 }
 
 JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_checkSpendProofJni(JNIEnv* env, jobject instance, jstring jtxId, jstring jmessage, jstring jsignature) {
-  cout << "Java_monero_wallet_MoneroWalletJni_checkSpendProofJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_checkSpendProofJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _txId = jtxId ? env->GetStringUTFChars(jtxId, NULL) : nullptr;
   const char* _message = jmessage ? env->GetStringUTFChars(jmessage, NULL) : nullptr;
@@ -1344,7 +1344,7 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_checkSpendProofJni
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getReserveProofWalletJni(JNIEnv* env, jobject instance, jstring jmessage) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getReserveProofWalletJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getReserveProofWalletJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _message = jmessage ? env->GetStringUTFChars(jmessage, NULL) : nullptr;
   string message = string(_message == nullptr ? "" : _message);
@@ -1358,7 +1358,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getReserveProofWall
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getReserveProofAccountJni(JNIEnv* env, jobject instance, jint accountIdx, jstring jamountStr, jstring jmessage) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getReserveProofWalletJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getReserveProofWalletJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _amountStr = jamountStr ? env->GetStringUTFChars(jamountStr, NULL) : nullptr;
   const char* _message = jmessage ? env->GetStringUTFChars(jmessage, NULL) : nullptr;
@@ -1376,7 +1376,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getReserveProofAcco
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_checkReserveProofJni(JNIEnv* env, jobject instance, jstring jaddress, jstring jmessage, jstring jsignature) {
-  cout << "Java_monero_wallet_MoneroWalletJni_checkReserveProofAccountJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_checkReserveProofAccountJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
   const char* _message = jmessage ? env->GetStringUTFChars(jmessage, NULL) : nullptr;
@@ -1396,7 +1396,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_checkReserveProofJn
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createPaymentUriJni(JNIEnv* env, jobject instance, jstring jsendRequest) {
-  cout << "Java_monero_wallet_MoneroWalletJni_createPaymentUriJni()" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_createPaymentUriJni()");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _sendRequest = jsendRequest ? env->GetStringUTFChars(jsendRequest, NULL) : nullptr;
   string sendRequestJson = string(_sendRequest ? _sendRequest : "");
@@ -1404,7 +1404,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createPaymentUriJni
 
   // deserialize send request
   shared_ptr<MoneroSendRequest> sendRequest = MoneroUtils::deserializeSendRequest(sendRequestJson);
-  cout << "Fetching payment uri with : " << sendRequest->serialize() << endl;
+  MTRACE("Fetching payment uri with : " << sendRequest->serialize());
 
   // get payment uri
   string paymentUri;
@@ -1420,7 +1420,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createPaymentUriJni
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_parsePaymentUriJni(JNIEnv* env, jobject instance, jstring juri) {
-  cout << "Java_monero_wallet_MoneroWalletJni_parsePaymentUriJni()" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_parsePaymentUriJni()");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _uri = juri ? env->GetStringUTFChars(juri, NULL) : nullptr;
   string uri = string(_uri ? _uri : "");
@@ -1440,7 +1440,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_parsePaymentUriJni(
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setAttributeJni(JNIEnv* env, jobject instance, jstring jkey, jstring jval) {
-  cout << "Java_monero_wallet_MoneroWalletJni_setAttribute()" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_setAttribute()");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _key = jkey ? env->GetStringUTFChars(jkey, NULL) : nullptr;
   const char* _val = jval ? env->GetStringUTFChars(jval, NULL) : nullptr;
@@ -1456,7 +1456,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setAttributeJni(JNIEnv
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAttributeJni(JNIEnv* env, jobject instance, jstring jkey) {
-  cout << "Java_monero_wallet_MoneroWalletJni_getAttribute()" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getAttribute()");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _key = jkey ? env->GetStringUTFChars(jkey, NULL) : nullptr;
   string key = string(_key);
@@ -1470,7 +1470,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAttributeJni(JNI
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_startMiningJni(JNIEnv* env, jobject instance, jlong numThreads, jboolean backgroundMining, jboolean ignoreBattery) {
-  cout << "Java_monero_wallet_MoneroWalletJni_startMiningJni()" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_startMiningJni()");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   try {
     wallet->startMining(numThreads, backgroundMining, ignoreBattery);
@@ -1480,7 +1480,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_startMiningJni(JNIEnv*
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_stopMiningJni(JNIEnv* env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_startMiningJni()" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_startMiningJni()");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   try {
     wallet->stopMining();
@@ -1490,7 +1490,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_stopMiningJni(JNIEnv* 
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_saveJni(path, password)" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_saveJni(path, password)");
 
   // save wallet
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
@@ -1502,7 +1502,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, j
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_moveToJni(JNIEnv* env, jobject instance, jstring jpath, jstring jpassword) {
-  cout << "Java_monero_wallet_MoneroWalletJni_moveToJni(path, password)" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_moveToJni(path, password)");
   const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
   const char* _password = jpath ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
   string path = string(_path ? _path : "");
@@ -1520,7 +1520,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_moveToJni(JNIEnv* env,
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_closeJni(JNIEnv* env, jobject instance) {
-  cout << "Java_monero_wallet_MoneroWalletJni_CloseJni" << endl;
+  MTRACE("Java_monero_wallet_MoneroWalletJni_CloseJni");
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   delete wallet;
   wallet = nullptr;

@@ -13,6 +13,7 @@ import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroNetworkType;
 import monero.rpc.MoneroRpcConnection;
 import monero.rpc.MoneroRpcException;
+import monero.utils.MoneroCppUtils;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
 
@@ -20,6 +21,18 @@ import monero.wallet.MoneroWalletRpc;
  * Test utilities and constants.
  */
 public class TestUtils {
+  
+  // c++ log configuration
+  private static boolean CPP_LOG_ENABLED = true;
+  private static String CPP_LOG_PATH = "log_java_tests.txt";
+  private static int CPP_LOG_LEVEL = 4;
+  private static boolean CPP_LOG_CONSOLE = true;
+  static {
+    if (CPP_LOG_ENABLED) {
+      System.loadLibrary("monero-java");
+      MoneroCppUtils.initLogging(CPP_LOG_PATH, CPP_LOG_LEVEL, CPP_LOG_CONSOLE);
+    }
+  }
   
   // monero daemon rpc endpoint configuration (adjust per your configuration)
   public static final String DAEMON_RPC_URI = "http://localhost:38081";
