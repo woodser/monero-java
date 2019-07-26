@@ -32,11 +32,15 @@ std::string jstring2string(JNIEnv *env, jstring jStr);
 extern "C" {
 #endif
 
-JNIEXPORT jbyteArray JNICALL Java_monero_utils_MoneroCppUtils_jsonToBinaryJni (JNIEnv *, jclass, jstring);
+JNIEXPORT jbyteArray JNICALL Java_monero_utils_MoneroCppUtils_jsonToBinaryJni(JNIEnv *, jclass, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryToJsonJni (JNIEnv *, jclass, jbyteArray);
+JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryToJsonJni(JNIEnv *, jclass, jbyteArray);
 
-JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryBlocksToJsonJni (JNIEnv *, jclass, jbyteArray);
+JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryBlocksToJsonJni(JNIEnv *, jclass, jbyteArray);
+
+JNIEXPORT void JNICALL Java_monero_utils_MoneroCppUtils_initLoggingJni(JNIEnv *, jclass, jstring jpath, jboolean);
+
+JNIEXPORT void JNICALL Java_monero_utils_MoneroCppUtils_setLogLevelJni(JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus
 }

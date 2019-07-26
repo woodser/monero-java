@@ -59,6 +59,15 @@ public class MoneroCppUtils {
     return map;
   }
   
+  public static void initLogging(String path, int level, boolean console) {
+    initLoggingJni(path, console);
+    setLogLevelJni(level);
+  }
+  
+  public static void setLogLevel(int level) {
+    setLogLevelJni(level);
+  }
+  
   // ------------------------------- NATIVE METHODS ---------------------------
   
   private native static byte[] jsonToBinaryJni(String json);
@@ -66,4 +75,8 @@ public class MoneroCppUtils {
   private native static String binaryToJsonJni(byte[] bin);
   
   private native static String binaryBlocksToJsonJni(byte[] binBlocks);
+  
+  private native static void initLoggingJni(String path, boolean console);
+
+  public native static void setLogLevelJni(int level);
 }

@@ -26,7 +26,7 @@
 
 using namespace std;
 
-JNIEXPORT jbyteArray JNICALL Java_monero_utils_MoneroCppUtils_jsonToBinaryJni(JNIEnv *env, jclass utilsClass, jstring json) {
+JNIEXPORT jbyteArray JNICALL Java_monero_utils_MoneroCppUtils_jsonToBinaryJni(JNIEnv *env, jclass clazz, jstring json) {
 
   // convert json jstring to string
   string jsonStr = jstring2string(env, json);
@@ -51,7 +51,7 @@ JNIEXPORT jbyteArray JNICALL Java_monero_utils_MoneroCppUtils_jsonToBinaryJni(JN
   return result;
 }
 
-JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryToJsonJni(JNIEnv *env, jclass utilsClass, jbyteArray bin) {
+JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryToJsonJni(JNIEnv *env, jclass clazz, jbyteArray bin) {
 
   // convert the jbyteArray to a string
   int binLength = env->GetArrayLength(bin);
@@ -67,7 +67,7 @@ JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryToJsonJni(JNIEn
   return env->NewStringUTF(jsonStr.c_str());
 }
 
-JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryBlocksToJsonJni(JNIEnv *env, jclass utilsClass, jbyteArray blocksBin) {
+JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryBlocksToJsonJni(JNIEnv *env, jclass clazz, jbyteArray blocksBin) {
 
   // convert the jbyteArray to a string
   int binLength = env->GetArrayLength(blocksBin);
@@ -85,20 +85,30 @@ JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryBlocksToJsonJni
 
 // credit: https://stackoverflow.com/questions/41820039/jstringjni-to-stdstringc-with-utf8-characters
 std::string jstring2string(JNIEnv *env, jstring jStr) {
-    if (!jStr)
-        return "";
+  if (!jStr) return "";
 
-    const jclass stringClass = env->GetObjectClass(jStr);
-    const jmethodID getBytes = env->GetMethodID(stringClass, "getBytes", "(Ljava/lang/String;)[B");
-    const jbyteArray stringJbytes = (jbyteArray) env->CallObjectMethod(jStr, getBytes, env->NewStringUTF("UTF-8"));
+  const jclass stringClass = env->GetObjectClass(jStr);
+  const jmethodID getBytes = env->GetMethodID(stringClass, "getBytes", "(Ljava/lang/String;)[B");
+  const jbyteArray stringJbytes = (jbyteArray) env->CallObjectMethod(jStr, getBytes, env->NewStringUTF("UTF-8"));
 
-    size_t length = (size_t) env->GetArrayLength(stringJbytes);
-    jbyte* pBytes = env->GetByteArrayElements(stringJbytes, NULL);
+  size_t length = (size_t) env->GetArrayLength(stringJbytes);
+  jbyte* pBytes = env->GetByteArrayElements(stringJbytes, NULL);
 
-    std::string ret = std::string((char *)pBytes, length);
-    env->ReleaseByteArrayElements(stringJbytes, pBytes, JNI_ABORT);
+  std::string ret = std::string((char *)pBytes, length);
+  env->ReleaseByteArrayElements(stringJbytes, pBytes, JNI_ABORT);
 
-    env->DeleteLocalRef(stringJbytes);
-    env->DeleteLocalRef(stringClass);
-    return ret;
+  env->DeleteLocalRef(stringJbytes);
+  env->DeleteLocalRef(stringClass);
+  return ret;
+}
+
+JNIEXPORT void JNICALL Java_monero_utils_MoneroCppUtils_initLoggingJni(JNIEnv* env, jclass clazz, jstring jpath, jboolean console) {
+  const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
+  string path = string(_path ? _path : "");
+  env->ReleaseStringUTFChars(jpath, _path);
+  mlog_configure(path, console);
+}
+
+JNIEXPORT void JNICALL Java_monero_utils_MoneroCppUtils_setLogLevelJni(JNIEnv* env, jclass clazz, jint level) {
+  mlog_set_log_level(level);
 }
