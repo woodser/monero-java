@@ -61,7 +61,6 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 
 14.1.0+ RELEASE
 finalize/port utilities to cpp
-finalize wallet management utilties, setAutoSync() vs startSyncing() & pauseSyncing()
 test set connection to invalid url
 test stop daemon while wallet syncing
 MoneroTxRequest -> MoneroTxQuery, etc?
