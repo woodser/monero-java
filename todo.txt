@@ -60,7 +60,6 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 
 14.1.0+ RELEASE
-remove extra newlines from serializes
 finalize/port utilities to cpp
 test set connection to invalid url
 test stop daemon while wallet syncing
