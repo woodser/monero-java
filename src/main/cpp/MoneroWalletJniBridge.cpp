@@ -221,7 +221,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv 
 
   // load wallet from file
   try {
-    MoneroWallet* wallet = new MoneroWallet(path, password, static_cast<MoneroNetworkType>(jnetworkType));
+    MoneroWallet* wallet = MoneroWallet::openWallet(path, password, static_cast<MoneroNetworkType>(jnetworkType));
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -255,7 +255,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletRandomJni
   // construct wallet
   try {
     MoneroRpcConnection daemonConnection = MoneroRpcConnection(daemonUri, daemonUsername, daemonPassword);
-    MoneroWallet* wallet = new MoneroWallet(path, password, static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, language);
+    MoneroWallet* wallet = MoneroWallet::createWalletRandom(path, password, static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, language);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -281,7 +281,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemo
   // construct wallet
   try {
     MoneroRpcConnection daemonConnection;
-    MoneroWallet* wallet = new MoneroWallet(path, password, mnemonic, static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, (uint64_t) jrestoreHeight);
+    MoneroWallet* wallet = MoneroWallet::createWalletFromMnemonic(path, password, mnemonic, static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, (uint64_t) jrestoreHeight);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -315,7 +315,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJ
   // construct wallet and return reference
   try {
     MoneroRpcConnection daemonConnection; // TODO: take daemon connection parameters
-    MoneroWallet* wallet = new MoneroWallet(path, password, address, viewKey, spendKey, static_cast<MoneroNetworkType>(networkType), daemonConnection, restoreHeight, language);
+    MoneroWallet* wallet = MoneroWallet::createWalletFromKeys(path, password, address, viewKey, spendKey, static_cast<MoneroNetworkType>(networkType), daemonConnection, restoreHeight, language);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
