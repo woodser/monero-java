@@ -442,8 +442,9 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 //  walletKeys.importKeyImages(keyImages);
   }
   
+  // TODO: test start syncing, notification of syncs happening, stop syncing, no notifications, etc
   @Test
-  public void testSetAutoSync() {
+  public void testStartStopSyncing() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // test unconnected wallet
@@ -451,9 +452,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE, null, null);
     try {
       assertNotNull(wallet.getMnemonic());
-      wallet.setAutoSync(true);
+      wallet.startSyncing();
       assertEquals(1, wallet.getHeight());
       assertEquals(BigInteger.valueOf(0), wallet.getBalance());
+      wallet.stopSyncing();
     } finally {
       wallet.close();
     }
@@ -464,7 +466,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     try {
       assertNotNull(wallet.getMnemonic());
       wallet.setDaemonConnection(daemon.getRpcConnection());
-      wallet.setAutoSync(true);
+      wallet.startSyncing();
       assertEquals(1, wallet.getHeight());
       long chainHeight = wallet.getChainHeight();
       assertFalse(wallet.getIsSynced());
@@ -472,6 +474,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       wallet.setRestoreHeight(chainHeight - 3);
       assertEquals(chainHeight - 3, wallet.getRestoreHeight());
       assertEquals(daemon.getRpcConnection(), wallet.getDaemonConnection());
+      wallet.stopSyncing();
       wallet.sync();
     } finally {
       wallet.close();
@@ -483,9 +486,9 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     wallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_JNI_PW, TestUtils.MNEMONIC, TestUtils.NETWORK_TYPE, daemon.getRpcConnection(), restoreHeight);
     try {
       
-      // enable auto sync
+      // start syncing
       assertEquals(restoreHeight, wallet.getRestoreHeight());
-      wallet.setAutoSync(true);
+      wallet.startSyncing();
       
       // pause for sync to complete automatically
       try {

@@ -448,13 +448,22 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Enable or disable automatic synchronization.
-   *
-   * @param autoSync specifies if automatic synchronization is enabled or disabled
+   * Start automatic syncing as its own thread.
    */
-  public void setAutoSync(boolean autoSync) {
+  public void startSyncing() {
     try {
-      setAutoSyncJni(autoSync);
+      startSyncingJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
+  
+  /**
+   * Stop automatic syncing as its own thread.
+   */
+  public void stopSyncing() {
+    try {
+      stopSyncingJni();
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -1049,7 +1058,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native Object[] syncJni(long startHeight);
   
-  private native void setAutoSyncJni(boolean autoSync);
+  private native void startSyncingJni();
+  
+  private native void stopSyncingJni();
   
   private native void rescanBlockchainJni();
   
