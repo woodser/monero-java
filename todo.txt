@@ -10,6 +10,7 @@ wallet2 incoming transfers from/to same account go missing on key image export a
 getReserveProofAccount() failing again
 
 MEDIUM
+getDaemonTargetHeight() > getDaemonHeight() sometimes
 failed tx in pool (after testUpdateLockedDifferentAccounts()) causes non-originating saved wallets to return duplicate incoming transfers but one has amount/numSuggestedConfirmations of 0, possibly no outgoingTransfer
 peer.getLastSeenTimestamp() occasionally returns -4
 wallet2 get_payments() min_height is exclusive and max_height is inclusive: #5598, 5751
