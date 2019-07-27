@@ -343,8 +343,8 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonConne
     // return string[uri, username, password]
     jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
     if (!daemonConnection->uri.empty()) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(daemonConnection->uri.c_str()));
-    if (!daemonConnection->username.empty()) env->SetObjectArrayElement(vals, 1, env->NewStringUTF(daemonConnection->username.c_str()));
-    if (!daemonConnection->password.empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(daemonConnection->password.c_str()));
+    if (daemonConnection->username != boost::none && !daemonConnection->username.get().empty()) env->SetObjectArrayElement(vals, 1, env->NewStringUTF(daemonConnection->username.get().c_str()));
+    if (daemonConnection->password != boost::none && !daemonConnection->password.get().empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(daemonConnection->password.get().c_str()));
     return vals;
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
