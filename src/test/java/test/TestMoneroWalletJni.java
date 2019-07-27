@@ -549,11 +549,12 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       wallet.stopSyncing();
       assertTrue(wallet.getIsSynced()); // wallet is still synced
       
-      // wait for block to be added to chain
-      daemon.getNextBlockHeader();
-      
-      // wallet is no longer synced
-      //assertFalse(wallet.getIsSynced());  // TODO: wallet.cpp m_synchronized only ever set to true, never false
+   // TODO monero core: wallet.cpp m_synchronized only ever set to true, never false
+//      // wait for block to be added to chain
+//      daemon.getNextBlockHeader();
+//      
+//      // wallet is no longer synced
+//      assertFalse(wallet.getIsSynced());  
     } finally {
       wallet.close();
     }
