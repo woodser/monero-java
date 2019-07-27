@@ -80,6 +80,7 @@ write up issues for announce
 announce
 
 MEDIUM
+moar notifications
 wallet.getIsSynced() should return false after block added to chain if not auto syncing
 waitForTxsToClear() should refresh more frequently than blocks so it continues if pool manually flushed
 wallet.close() applies to rpc as well, add rpc isClosed()

@@ -203,14 +203,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   // ------------ WALLET METHODS SPECIFIC TO JNI IMPLEMENTATION ---------------
   
-  // TODO: comments and other jni specific methods
-  
   /**
    * Set the wallet's daemon connection.
    * 
    * @param uri is the uri of the daemon for the wallet to use
-   * @param username is the username to authenticate with the daemon
-   * @param password is the password to authenticate with the daemon
    */
   public void setDaemonConnection(String uri) {
     setDaemonConnection(uri, null, null);
@@ -219,7 +215,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   /**
    * Set the wallet's daemon connection.
    * 
-   * @param uri is the uri of the daemon for the wallet to use
+   * @param uri is the daemon's URI
    * @param username is the username to authenticate with the daemon (optional)
    * @param password is the password to authenticate with the daemon (optional)
    */
@@ -402,9 +398,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Register a listener to be notified of wallet events.
+   * Register a listener receive wallet notifications.
    * 
-   * @param listener is the listener to register for wallet notifications
+   * @param listener is the listener to receive wallet notifications
    */
   public void addListener(MoneroWalletListener listener) {
     assertNotClosed();
@@ -413,9 +409,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Unregister a listener to be notified of wallet events.
+   * Unregister a listener to receive wallet notifications.
    * 
-   * @param listener is the listener to be unregistered
+   * @param listener is the listener to unregister
    */
   public void removeListener(MoneroWalletListener listener) {
     assertNotClosed();
@@ -1493,90 +1489,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     for (MoneroBlockWallet blockWallet: blockWallets) blocks.add(blockWallet.toBlock());
     return blocks;
   }
-  
-//  /**
-//   * Deserializes MoneroTx as MoneroTxWallet.
-//   */
-//  private class TxWalletDeserializer extends StdDeserializer<MoneroTx> {
-//    private static final long serialVersionUID = 8098255188385074924L;
-//
-//    protected TxWalletDeserializer() {
-//      super(MoneroTx.class);
-//    }
-//
-//    @Override
-//    public MoneroTx deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-//      TreeNode node = p.readValueAsTree();
-//      return p.getCodec().treeToValue(node, MoneroTxWallet.class);
-////      JsonParser parser = node.traverse();
-////      parser.setCodec(p.getCodec());
-////      return parser.readValueAs(MoneroTxWallet.class);
-//    }
-//  }
-  
-//  private class TxWalletDeserializer2 extends DelegatingDeserializer {
-//    
-//    public TxWalletDeserializer2(JsonDeserializer<?> delegate) {
-//      super(delegate);
-//    }
-//    
-//    @Override
-//    protected JsonDeserializer<?> newDelegatingInstance(JsonDeserializer<?> newDelegate) {
-//      return new TxWalletDeserializer2(newDelegate);
-//    }
-//
-//    @Override
-//    public MoneroTxWallet deserialize(JsonParser p, DeserializationContext ctx) throws IOException {
-//      //TreeNode node = p.readValueAsTree();
-//      //return p.getCodec().treeToValue(node, MoneroTxWallet.class);
-//      
-//      
-//      //String key = p.getCurrentName();
-//      //System.out.println("Key: " + key);
-//      return (MoneroTxWallet) super.deserialize(p, ctx);
-////      result.userId = key;
-////      return result;
-//    }
-//  }
-  
-//  private class TxWalletDeserializer2 extends StdDeserializer<MoneroTxWallet> implements ResolvableDeserializer {
-//    
-//    private static final long serialVersionUID = 4375869015667210070L;
-//    private final JsonDeserializer<?> defaultDeserializer;
-//    
-//    public TxWalletDeserializer2(JsonDeserializer<?> defaultDeserializer) {
-//      super(MoneroTxWallet.class);
-//      this.defaultDeserializer = defaultDeserializer;
-//    }
-//
-//    @Override
-//    public MoneroTxWallet deserialize(JsonParser jp, DeserializationContext ctx) throws IOException {
-//      return (MoneroTxWallet) defaultDeserializer.deserialize(jp, ctx);
-//    }
-//
-//    @Override
-//    public void resolve(DeserializationContext ctxt) throws JsonMappingException {
-//      ((ResolvableDeserializer) defaultDeserializer).resolve(ctxt);
-//    }
-//  }
-  
-  
-//  /**
-//   * Deserializes MoneroTransfer as MoneroIncomingTransfer xor MoneroOutgoingTransfer.
-//   */
-//  private class TransferDeserializer extends StdDeserializer<MoneroTransfer> {
-//    private static final long serialVersionUID = -8524060141695794874L;
-//
-//    protected TransferDeserializer() {
-//      super(MoneroTransfer.class);
-//    }
-//
-//    @Override
-//    public MoneroTransfer deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-//      TreeNode node = p.readValueAsTree();
-//      throw new RuntimeException("Not implemented");
-//    }
-//  }
   
   // ---------------------------- PRIVATE HELPERS -----------------------------
   
