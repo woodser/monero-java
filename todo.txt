@@ -16,6 +16,7 @@ wallet2 get_payments() min_height is exclusive and max_height is inclusive: #559
 start height processed > requested start height unless restore height manually set
 my daemon on stagenet says `Sync data returned a new top block candidate: 365062 -> 365545`.  if I mine, the daemon seems to mine on 365062.  if I create a new wallet, its restore height is set to 365545, but daemon `get_height` reports 365062
 wallet2 network type auto detected when loaded from files on disk
+don't require writing to disk to make working wallet
 add all_accounts to incoming_transfers, would be huge time saver
 sometimes see non-zero spent amount in testCheckReserve()
 WARNING: key proof indicates no funds received despite transfer (txid=76983ebf1d2e62141c19e190355e146145cb03988c5bfaf857b65dc0e15d378f, key=5246bf34d97dd379843ea31cb2bddfe41a89db73be4bd72fdc1ffe1b4d8ac70d, address=76gP3JEGAhnS5sgnB7LHRP2tbidL8ChvkJATJADQF4SpBcbN8bUgSZyQmTpdMQqyW129dh3zV5XscaBhkU6WTUKQVdDykFV, amount=44933)
@@ -80,6 +81,7 @@ announce
 MEDIUM
 wallet.getIsSynced() should return false after block added to chain if not auto syncing
 waitForTxsToClear() should refresh more frequently than blocks so it continues if pool manually flushed
+wallet.close() applies to rpc as well, add rpc isClosed()
 cap creation of accounts by ignoring test if more than X accounts already exist
 auto destroy wallet if garbage collected by vm
 ux test including receiving funds

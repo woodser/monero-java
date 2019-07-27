@@ -84,6 +84,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private long jniListenerHandle;               // memory address of the wallet listener in c++; this variable is read directly by name in c++
   private WalletJniListener jniListener;        // receives notifications from jni c++
   private Set<MoneroWalletListener> listeners;  // externally subscribed wallet listeners
+  private boolean isClosed;                     // whether or not wallet is closed
   
   /**
    * Private constructor with a handle to the memory address of the wallet in c++.
@@ -94,6 +95,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     this.jniWalletHandle = jniWalletHandle;
     this.jniListener = new WalletJniListener();
     this.listeners = new LinkedHashSet<MoneroWalletListener>();
+    this.isClosed = false;
   }
   
   // --------------------- WALLET MANAGEMENT UTILITIES ------------------------
@@ -114,13 +116,18 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param path is the path to the wallet file to open
    * @param password is the password of the wallet file to open
    * @param networkType is the wallet's network type
+   * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
    * @return the opened wallet
    */
-  public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType) {
+  public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType) { return openWallet(path, password, networkType, (MoneroRpcConnection) null); }
+  public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType, String daemonUri) { return openWallet(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri)); }
+  public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection) {
     if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist at path: " + path);
     if (networkType == null) throw new MoneroException("Must provide a network type");
     long jniWalletHandle = openWalletJni(path, password, networkType.ordinal());
-    return new MoneroWalletJni(jniWalletHandle);
+    MoneroWalletJni wallet = new MoneroWalletJni(jniWalletHandle);
+    if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
+    return wallet;
   }
   
   /**
@@ -129,12 +136,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param path is the path to create the wallet
    * @param password is the password encrypt the wallet
    * @param networkType is the wallet's network type (default = MoneroNetworkType.MAINNET)
-   * @param daemonConnection is connection information to a daemon (default = an unconnected wallet)
+   * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
    * @param language is the wallet and mnemonic's language (default = "English")
    * @return the newly created wallet
    */
   public static MoneroWalletJni createWalletRandom(String path, String password) { return createWalletRandom(path, password, null, null, null); }
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType) { return createWalletRandom(path, password, networkType, null, null); }
+  public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, String daemonUri) { return createWalletRandom(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri), null); }
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, String language) {
     if (networkType == null) networkType = MoneroNetworkType.MAINNET;
     if (language == null) language = DEFAULT_LANGUAGE;
@@ -151,7 +159,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param password is the password encrypt the wallet
    * @param mnemonic is the mnemonic of the wallet to construct
    * @param networkType is the wallet's network type
-   * @param daemonConnection is connection information to a daemon (default = an unconnected wallet)
+   * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    */
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, String mnemonic, MoneroNetworkType networkType) { return createWalletFromMnemonic(path, password, mnemonic, networkType, null, null); }
@@ -173,7 +181,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param viewKey is the view key of the wallet to construct
    * @param spendKey is the spend key of the wallet to construct
    * @param networkType is the wallet's network type
-   * @param daemonConnection is connection information to a daemon (default = an unconnected wallet)
+   * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    * @param language is the wallet and mnemonic's language (default = "English")
    */
@@ -207,6 +215,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
+    assertNotClosed();
     if (daemonConnection == null) setDaemonConnectionJni("", "", "");
     else {
       try {
@@ -218,6 +227,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   public MoneroRpcConnection getDaemonConnection() {
+    assertNotClosed();
     try {
       String[] vals = getDaemonConnectionJni();
       return vals == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2]);
@@ -227,6 +237,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   public boolean getIsConnected() {
+    assertNotClosed();
     try {
       return getIsConnectedJni();
     } catch (Exception e) {
@@ -235,6 +246,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   public long getDaemonHeight() {
+    assertNotClosed();
     try {
       return getDaemonHeightJni();
     } catch (Exception e) {
@@ -243,6 +255,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   public long getDaemonTargetHeight() {
+    assertNotClosed();
     try {
       return getDaemonTargetHeightJni();
     } catch (Exception e) {
@@ -251,6 +264,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   public boolean getIsDaemonSynced() {
+    assertNotClosed();
     try {
       return getIsDaemonSyncedJni();
     } catch (Exception e) {
@@ -259,6 +273,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   public boolean getIsSynced() {
+    assertNotClosed();
     try {
       return getIsSyncedJni();
     } catch (Exception e) {
@@ -267,6 +282,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   public String getPath() {
+    assertNotClosed();
     String path = getPathJni();
     return path.isEmpty() ? null : path;
   }
@@ -277,14 +293,17 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @return the wallet's network type
    */
   public MoneroNetworkType getNetworkType() {
+    assertNotClosed();
     return MoneroNetworkType.values()[getNetworkTypeJni()];
   }
   
   public long getRestoreHeight() {
+    assertNotClosed();
     return getRestoreHeightJni();
   }
   
   public void setRestoreHeight(long restoreHeight) {
+    assertNotClosed();
     setRestoreHeightJni(restoreHeight);
   }
   
@@ -294,6 +313,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @return the language of the wallet's mnemonic phrase
    */
   public String getLanguage() {
+    assertNotClosed();
     return getLanguageJni();
   }
   
@@ -303,6 +323,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @return the wallet's public view key
    */
   public String getPublicViewKey() {
+    assertNotClosed();
     return getPublicViewKeyJni();
   }
   
@@ -312,34 +333,28 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @return the wallet's public spend key
    */
   public String getPublicSpendKey() {
+    assertNotClosed();
     return getPublicSpendKeyJni();
   }
   
   public void addListener(MoneroWalletListener listener) {
+    assertNotClosed();
     listeners.add(listener);
     jniListener.setIsListening(true);
   }
   
   public void removeListener(MoneroWalletListener listener) {
+    assertNotClosed();
     if (!listeners.contains(listener)) throw new MoneroException("Listener is not registered to wallet");
     listeners.remove(listener);
     if (listeners.isEmpty()) jniListener.setIsListening(false);
-  }
-  
-  // TODO: can set restore height, start refresh, pause refresh, isSynchronized()
-  public void pauseSync() {
-    throw new RuntimeException("Not implemented");
-  }
-  
-  // TODO: createFromJson? don't automatically create file?
-  public String toJson() {
-    throw new RuntimeException("Not implemented");
   }
 
   /**
    * Save the wallet at its current path.
    */
   public void save() {
+    assertNotClosed();
     saveJni();
   }
   
@@ -350,50 +365,72 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param password is the new wallet's password // TODO: can this be used to change wallet password?
    */
   public void moveTo(String path, String password) {
+    assertNotClosed();
     moveToJni(path, password);
+  }
+  
+  /**
+   * Indicates if this wallet is closed or not.
+   * 
+   * @return true if the wallet is closed, false otherwise
+   */
+  public boolean getIsClosed() {
+    return isClosed;
   }
   
   /**
    * Close the wallet.
    */
   public void close() {
-    closeJni();
+    isClosed = true;
+    try {
+      closeJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
   
   // -------------------------- COMMON WALLET METHODS -------------------------
 
   @Override
   public String getSeed() {
+    assertNotClosed();
     throw new RuntimeException("Not implemented");
   }
 
   @Override
   public String getMnemonic() {
+    assertNotClosed();
     return getMnemonicJni();
   }
   
   @Override
   public List<String> getLanguages() {
+    assertNotClosed();
     return Arrays.asList(getLanguagesJni());
   }
 
   @Override
   public String getPrivateViewKey() {
+    assertNotClosed();
     return getPrivateViewKeyJni();
   }
   
   @Override
   public String getPrivateSpendKey() {
+    assertNotClosed();
     return getPrivateSpendKeyJni();
   }
 
   @Override
   public long getHeight() {
+    assertNotClosed();
     return getHeightJni();
   }
 
   @Override
   public long getChainHeight() {
+    assertNotClosed();
     try {
       return getChainHeightJni();
     } catch (Exception e) {
@@ -403,6 +440,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroIntegratedAddress getIntegratedAddress(String paymentId) {
+    assertNotClosed();
     try {
       String integratedAddressJson = getIntegratedAddressJni("", paymentId);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, integratedAddressJson, MoneroIntegratedAddress.class);
@@ -413,6 +451,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroIntegratedAddress decodeIntegratedAddress(String integratedAddress) {
+    assertNotClosed();
     try {
       String integratedAddressJson = decodeIntegratedAddressJni(integratedAddress);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, integratedAddressJson, MoneroIntegratedAddress.class);
@@ -423,6 +462,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroSyncResult sync(Long startHeight, MoneroSyncListener listener) {
+    assertNotClosed();
     if (startHeight == null) startHeight = Math.max(getHeight(), getRestoreHeight());
     
     // verify connection to daemon which informs sync end height
@@ -454,6 +494,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * Start automatic syncing as its own thread.
    */
   public void startSyncing() {
+    assertNotClosed();
     try {
       startSyncingJni();
     } catch (Exception e) {
@@ -465,6 +506,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * Stop automatic syncing as its own thread.
    */
   public void stopSyncing() {
+    assertNotClosed();
     try {
       stopSyncingJni();
     } catch (Exception e) {
@@ -474,6 +516,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public void rescanBlockchain() {
+    assertNotClosed();
     try {
       rescanBlockchainJni();
     } catch (Exception e) {
@@ -483,11 +526,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public boolean isMultisigImportNeeded() {
+    assertNotClosed();
     throw new RuntimeException("Not implemented");
   }
 
   @Override
   public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag) {
+    assertNotClosed();
     String accountsJson = getAccountsJni(includeSubaddresses, tag);
     List<MoneroAccount> accounts = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountsJson, AccountsContainer.class).accounts;
     for (MoneroAccount account : accounts) sanitizeAccount(account);  // TODO: better way?
@@ -496,6 +541,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   @Override
   public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses) {
+    assertNotClosed();
     String accountJson = getAccountJni(accountIdx, includeSubaddresses);
     MoneroAccount account = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountJson, MoneroAccount.class);
     sanitizeAccount(account);
@@ -504,6 +550,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroAccount createAccount(String label) {
+    assertNotClosed();
     String accountJson = createAccountJni(label);
     MoneroAccount account = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountJson, MoneroAccount.class);
     sanitizeAccount(account);
@@ -512,6 +559,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroSubaddress> getSubaddresses(int accountIdx, List<Integer> subaddressIndices) {
+    assertNotClosed();
     String subaddressesJson = getSubaddressesJni(accountIdx, GenUtils.listToIntArray(subaddressIndices));
     System.out.println("Deserializing subaddresses: " + subaddressesJson);
     List<MoneroSubaddress> subaddresses = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressesJson, SubaddressesContainer.class).subaddresses;
@@ -521,6 +569,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroSubaddress createSubaddress(int accountIdx, String label) {
+    assertNotClosed();
     String subaddressJson = createSubaddressJni(accountIdx, label);
     MoneroSubaddress subaddress = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressJson, MoneroSubaddress.class);
     sanitizeSubaddress(subaddress);
@@ -529,11 +578,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public String getAddress(int accountIdx, int subaddressIdx) {
+    assertNotClosed();
     return getAddressJni(accountIdx, subaddressIdx);
   }
 
   @Override
   public MoneroSubaddress getAddressIndex(String address) {
+    assertNotClosed();
     try {
       String subaddressJson = getAddressIndexJni(address);
       MoneroSubaddress subaddress = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressJson, MoneroSubaddress.class);
@@ -545,6 +596,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public BigInteger getBalance() {
+    assertNotClosed();
     try {
       return new BigInteger(getBalanceWalletJni());
     } catch (MoneroException e) {
@@ -554,6 +606,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public BigInteger getBalance(int accountIdx) {
+    assertNotClosed();
     try {
       return new BigInteger(getBalanceAccountJni(accountIdx));
     } catch (MoneroException e) {
@@ -563,6 +616,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public BigInteger getBalance(int accountIdx, int subaddressIdx) {
+    assertNotClosed();
     try {
       return new BigInteger(getBalanceSubaddressJni(accountIdx, subaddressIdx));
     } catch (MoneroException e) {
@@ -572,6 +626,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public BigInteger getUnlockedBalance() {
+    assertNotClosed();
     try {
       return new BigInteger(getUnlockedBalanceWalletJni());
     } catch (MoneroException e) {
@@ -581,6 +636,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public BigInteger getUnlockedBalance(int accountIdx) {
+    assertNotClosed();
     try {
       return new BigInteger(getUnlockedBalanceAccountJni(accountIdx));
     } catch (MoneroException e) {
@@ -590,6 +646,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx) {
+    assertNotClosed();
     try {
       return new BigInteger(getUnlockedBalanceSubaddressJni(accountIdx, subaddressIdx));
     } catch (MoneroException e) {
@@ -599,6 +656,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroTxWallet> getTxs(MoneroTxRequest request) {
+    assertNotClosed();
     
     // initialize request up to block
     if (request == null) request = new MoneroTxRequest();
@@ -639,6 +697,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroTransfer> getTransfers(MoneroTransferRequest request) {
+    assertNotClosed();
     
     // initialize request up to block
     if (request == null) request = new MoneroTransferRequest();
@@ -676,6 +735,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroOutputWallet> getOutputs(MoneroOutputRequest request) {
+    assertNotClosed();
     
     // initialize request up to block
     if (request == null) request = new MoneroOutputRequest();
@@ -707,17 +767,20 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   @Override
   public String getOutputsHex() {
+    assertNotClosed();
     String outputsHex = getOutputsHexJni();
     return outputsHex.isEmpty() ? null : outputsHex;
   }
 
   @Override
   public int importOutputsHex(String outputsHex) {
+    assertNotClosed();
     return importOutputsHexJni(outputsHex);
   }
 
   @Override
   public List<MoneroKeyImage> getKeyImages() {
+    assertNotClosed();
     String keyImagesJson = getKeyImagesJni();
     System.out.println("Received key images json from jni: " + keyImagesJson);
     List<MoneroKeyImage> keyImages = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, keyImagesJson, KeyImagesContainer.class).keyImages;
@@ -726,6 +789,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroKeyImageImportResult importKeyImages(List<MoneroKeyImage> keyImages) {
+    assertNotClosed();
     
     // wrap and serialize key images in container for jni
     KeyImagesContainer keyImageContainer = new KeyImagesContainer(keyImages);
@@ -738,11 +802,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroKeyImage> getNewKeyImagesFromLastImport() {
+    assertNotClosed();
     throw new RuntimeException("Not implemented");
   }
   
   @Override
   public List<String> relayTxs(Collection<String> txMetadatas) {
+    assertNotClosed();
     String[] txMetadatasArr = txMetadatas.toArray(new String[txMetadatas.size()]);  // convert to array for jni
     try {
       return Arrays.asList(relayTxsJni(txMetadatasArr));
@@ -753,6 +819,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
+    assertNotClosed();
     System.out.println("java sendSplit(request)");
     System.out.println("Send request: " + JsonUtils.serialize(request));
     
@@ -785,6 +852,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroTxWallet sweepOutput(MoneroSendRequest request) {
+    assertNotClosed();
     try {
       String blocksJson = sweepOutputJni(JsonUtils.serialize(request));
       List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
@@ -797,11 +865,13 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroTxWallet> sweepAllUnlocked(MoneroSendRequest request) {
+    assertNotClosed();
     throw new RuntimeException("Not implemented");
   }
 
   @Override
   public List<MoneroTxWallet> sweepDust(boolean doNotRelay) {
+    assertNotClosed();
     String blocksJson;
     try { blocksJson = sweepDustJni(doNotRelay); }
     catch (Exception e) { throw new MoneroException(e.getMessage()); }
@@ -817,26 +887,31 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<String> getTxNotes(Collection<String> txIds) {
+    assertNotClosed();
     return Arrays.asList(getTxNotesJni(txIds.toArray(new String[txIds.size()])));  // convert to array for jni
   }
 
   @Override
   public void setTxNotes(Collection<String> txIds, Collection<String> notes) {
+    assertNotClosed();
     setTxNotesJni(txIds.toArray(new String[txIds.size()]), notes.toArray(new String[notes.size()]));
   }
 
   @Override
   public String sign(String msg) {
+    assertNotClosed();
     return signJni(msg);
   }
 
   @Override
   public boolean verify(String msg, String address, String signature) {
+    assertNotClosed();
     return verifyJni(msg, address, signature);
   }
 
   @Override
   public String getTxKey(String txId) {
+    assertNotClosed();
     try {
       return getTxKeyJni(txId);
     } catch (Exception e) {
@@ -846,6 +921,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroCheckTx checkTxKey(String txId, String txKey, String address) {
+    assertNotClosed();
     try {
       String checkStr = checkTxKeyJni(txId, txKey, address);
       System.out.println("Java received MoneroCheckTx json from jni: " + checkStr);
@@ -857,6 +933,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public String getTxProof(String txId, String address, String message) {
+    assertNotClosed();
     try {
       return getTxProofJni(txId, address, message);
     } catch (Exception e) {
@@ -866,6 +943,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroCheckTx checkTxProof(String txId, String address, String message, String signature) {
+    assertNotClosed();
     try {
       String checkStr = checkTxProofJni(txId, address, message, signature);
       System.out.println("Java received MoneroCheckTx json from jni: " + checkStr);
@@ -877,6 +955,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public String getSpendProof(String txId, String message) {
+    assertNotClosed();
     try {
       return getSpendProofJni(txId, message);
     } catch (Exception e) {
@@ -886,6 +965,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public boolean checkSpendProof(String txId, String message, String signature) {
+    assertNotClosed();
     try {
       return checkSpendProofJni(txId, message, signature);
     } catch (Exception e) {
@@ -904,6 +984,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public String getReserveProofAccount(int accountIdx, BigInteger amount, String message) {
+    assertNotClosed();
     try {
       return getReserveProofAccountJni(accountIdx, amount.toString(), message);
     } catch (Exception e) {
@@ -913,6 +994,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroCheckReserve checkReserveProof(String address, String message, String signature) {
+    assertNotClosed();
     try {
       String checkStr = checkReserveProofJni(address, message, signature);
       System.out.println("Java received MoneroCheckReserve json from jni: " + checkStr);
@@ -924,41 +1006,49 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public List<MoneroAddressBookEntry> getAddressBookEntries(Collection<Integer> entryIndices) {
+    assertNotClosed();
     throw new RuntimeException("Not implemented");
   }
 
   @Override
   public int addAddressBookEntry(String address, String description, String paymentId) {
+    assertNotClosed();
     throw new RuntimeException("Not implemented");
   }
 
   @Override
   public void deleteAddressBookEntry(int entryIdx) {
+    assertNotClosed();
     throw new RuntimeException("Not implemented");
   }
 
   @Override
   public void tagAccounts(String tag, Collection<Integer> accountIndices) {
+    assertNotClosed();
     throw new RuntimeException("Not implemented");
   }
 
   @Override
   public void untagAccounts(Collection<Integer> accountIndices) {
+    assertNotClosed();
     throw new RuntimeException("Not implemented");
   }
 
   @Override
   public List<MoneroAccountTag> getAccountTags() {
+    assertNotClosed();
     throw new RuntimeException("Not implemented");
   }
 
   @Override
   public void setAccountTagLabel(String tag, String label) {
+    assertNotClosed();
     throw new RuntimeException("Not implemented");
   }
 
   @Override
   public String createPaymentUri(MoneroSendRequest request) {
+    assertNotClosed();
     try {
       return createPaymentUriJni(JsonUtils.serialize(request));
     } catch (Exception e) {
@@ -968,6 +1058,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public MoneroSendRequest parsePaymentUri(String uri) {
+    assertNotClosed();
     try {
       String sendRequestJson = parsePaymentUriJni(uri);
       System.out.println("Received send request json from jni: " + sendRequestJson);
@@ -979,16 +1070,19 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public void setAttribute(String key, String val) {
+    assertNotClosed();
     setAttributeJni(key, val);
   }
 
   @Override
   public String getAttribute(String key) {
+    assertNotClosed();
     return getAttributeJni(key);
   }
 
   @Override
   public void startMining(Integer numThreads, Boolean backgroundMining, Boolean ignoreBattery) {
+    assertNotClosed();
     try {
       startMiningJni(numThreads == null ? 0 : (long) numThreads, backgroundMining, ignoreBattery); // TODO: startMining(Long, ...)? wallet2 uses uint64_t
     } catch (Exception e) {
@@ -998,6 +1092,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 
   @Override
   public void stopMining() {
+    assertNotClosed();
     try {
       stopMiningJni();
     } catch (Exception e) {
@@ -1413,6 +1508,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
 //  }
   
   // ---------------------------- PRIVATE HELPERS -----------------------------
+  
+  private void assertNotClosed() {
+    if (isClosed) throw new MoneroException("Wallet is closed");
+  }
   
   private static MoneroAccount sanitizeAccount(MoneroAccount account) {
     if (account.getSubaddresses() != null) {

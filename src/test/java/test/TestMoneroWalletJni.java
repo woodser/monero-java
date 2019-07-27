@@ -786,16 +786,45 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 //    walletDisk3.close();
 //  }
 
-  // Can close the currently open wallet
-  // TODO: create a new wallet and close that one
+  // Can close a wallet
   @Test
-  @Ignore // disabled so wallet is not actually closed TODO: re-open wallet, or create a new wallet and close that one, test getIsClosed() 
   public void testClose() {
+    
+    // create a test wallet
+    String path = getRandomWalletPath();
+    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_RPC_PASSWORD, TestUtils.NETWORK_TYPE, TestUtils.DAEMON_RPC_URI);
+    wallet.sync();
+    assertTrue(wallet.getHeight() > 1);
+    assertTrue(wallet.getIsSynced());
+    assertFalse(wallet.getIsClosed());
+    
+    // close the wallet
     wallet.close();
+    assertTrue(wallet.getIsClosed());
+    
+    // attempt to interact with the wallet
+    try { wallet.getHeight(); }
+    catch (MoneroException e) { assertEquals("Wallet is closed", e.getMessage()); }
+    try { wallet.getMnemonic(); }
+    catch (MoneroException e) { assertEquals("Wallet is closed", e.getMessage()); }
+    try { wallet.sync(); }
+    catch (MoneroException e) { assertEquals("Wallet is closed", e.getMessage()); }
+    try { wallet.startSyncing(); }
+    catch (MoneroException e) { assertEquals("Wallet is closed", e.getMessage()); }
+    try { wallet.stopSyncing(); }
+    catch (MoneroException e) { assertEquals("Wallet is closed", e.getMessage()); }
+    
+    // re-open the wallet
+    wallet = MoneroWalletJni.openWallet(path, TestUtils.WALLET_RPC_PASSWORD, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpcConnection());
+    wallet.sync();
+    assertEquals(wallet.getChainHeight(), wallet.getHeight());
+    assertFalse(wallet.getIsClosed());
+    
+    // close the wallet
+    wallet.close();
+    assertTrue(wallet.getIsClosed());
   }
   
-  
-
   // ---------------------------------- HELPERS -------------------------------
   
   private static String getRandomWalletPath() {
