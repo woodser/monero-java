@@ -60,7 +60,6 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 
 14.1.0+ RELEASE
-test stop daemon while wallet syncing
 test that wallet.getIsSynced() returns false after block added to chain if not auto syncing
 MoneroTxRequest -> MoneroTxQuery, etc?
 wallet.isClosed() check, update wallet.close() test
