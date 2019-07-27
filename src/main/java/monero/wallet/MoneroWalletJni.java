@@ -197,6 +197,15 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   // TODO: comments and other jni specific methods
   
+  public void setDaemonConnection(String uri) {
+    setDaemonConnection(uri, null, null);
+  }
+  
+  public void setDaemonConnection(String uri, String username, String password) {
+    if (uri == null) setDaemonConnection((MoneroRpcConnection) null);
+    else setDaemonConnection(new MoneroRpcConnection(uri, username, password));
+  }
+  
   public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
     if (daemonConnection == null) setDaemonConnectionJni("", "", "");
     else {

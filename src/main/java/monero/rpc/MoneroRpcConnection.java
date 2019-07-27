@@ -63,7 +63,7 @@ public class MoneroRpcConnection {
   }
   
   public MoneroRpcConnection(String uri, String username, String password) {
-    this(MoneroUtils.parseUri(uri), username, password);
+    this((URI) (uri == null ? null : MoneroUtils.parseUri(uri)), username, password);
   }
   
   public MoneroRpcConnection(URI uri, String username, String password) {

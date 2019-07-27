@@ -15,6 +15,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.daemon.model.MoneroNetworkType;
+import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
@@ -57,6 +58,47 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     long daemonTargetHeight = wallet.getDaemonTargetHeight();
     assertTrue("Expected target height >= daemon height but " + daemonTargetHeight + " < "  + daemonHeight, daemonTargetHeight >= daemonHeight);
     assertEquals(wallet.getIsDaemonSynced(), daemonHeight == daemonTargetHeight);
+  }
+  
+  @Test
+  public void testSetDaemonConnection() {
+    
+    // create random wallet with defaults
+    String path = getRandomWalletPath();
+    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_JNI_PW);
+    assertEquals(null, wallet.getDaemonConnection());
+    
+    // set daemon uri
+    wallet.setDaemonConnection(TestUtils.DAEMON_RPC_URI);
+    assertEquals(new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI), wallet.getDaemonConnection());
+    assertTrue(daemon.getIsConnected());
+    
+    // nullify daemon connection
+    wallet.setDaemonConnection((String) null);
+    assertEquals(null, wallet.getDaemonConnection());
+    wallet.setDaemonConnection(TestUtils.DAEMON_RPC_URI);
+    assertEquals(new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI), wallet.getDaemonConnection());
+    wallet.setDaemonConnection((MoneroRpcConnection) null);
+    assertEquals(null, wallet.getDaemonConnection());
+    
+    // set daemon uri to non-daemon
+    wallet.setDaemonConnection("www.getmonero.org");
+    assertEquals(new MoneroRpcConnection("www.getmonero.org"), wallet.getDaemonConnection());
+    assertFalse(wallet.getIsConnected());
+    
+    // set daemon to invalid uri
+    wallet.setDaemonConnection("abc123");
+    assertFalse(wallet.getIsConnected());
+    
+    // attempt to sync
+    try {
+      wallet.sync();
+      fail("Exception expected");
+    } catch (MoneroException e) {
+      assertEquals("No connection to daemon", e.getMessage());
+    } finally {
+      wallet.close();
+    }
   }
   
   @Test
