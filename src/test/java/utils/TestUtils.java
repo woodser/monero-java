@@ -23,7 +23,7 @@ import monero.wallet.MoneroWalletRpc;
 public class TestUtils {
   
   // c++ log configuration
-  public static boolean CPP_LOG_ENABLED = true;
+  public static boolean CPP_LOG_ENABLED = false;
   public static String CPP_LOG_PATH = "log_java_tests.txt";
   public static int CPP_LOG_LEVEL = 1;
   public static boolean CPP_LOG_CONSOLE = true;

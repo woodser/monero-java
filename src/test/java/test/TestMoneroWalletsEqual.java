@@ -164,7 +164,6 @@ public class TestMoneroWalletsEqual {
     }
     
     // compare txs
-    System.out.println(txs1.size() + " txs vs " + txs2.size() + " txs");
     assertEquals(txs1.size(), txs2.size());
     for (MoneroTxWallet tx1 : txs1) {
       boolean found = false;
