@@ -560,6 +560,7 @@ public class MoneroTx {
         if (numKeyImages > 0) {
           for (MoneroOutput merger : tx.getVouts()) {
             boolean merged = false;
+            merger.setTx(this);
             if (this.getVouts() == null) this.setVouts(new ArrayList<MoneroOutput>());
             for (MoneroOutput mergee : this.getVouts()) {
               if (mergee.getKeyImage().getHex().equals(merger.getKeyImage().getHex())) {
