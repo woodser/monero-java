@@ -743,9 +743,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     else request.getTxRequest().setOutputRequest(request);
     if (request.getTxRequest().getBlock() == null) request.getTxRequest().setBlock(new MoneroBlock().setTxs(request.getTxRequest()));
     
-    System.out.println("FETCHING: " + request.getAccountIndex());
-    System.out.println("SERIALIZED: " + JsonUtils.serialize(request.getTxRequest().getBlock()));
-    
     // serialize request from block and fetch outputs from jni
     String blocksJson = getOutputsJni(JsonUtils.serialize(request.getTxRequest().getBlock()));
     System.out.println("Received getOutputs() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
