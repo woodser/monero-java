@@ -194,6 +194,10 @@ void setDaemonConnection(JNIEnv *env, MoneroWallet* wallet, jstring juri, jstrin
   }
 }
 
+string stripLastChar(const string& str) {
+  return str.substr(0, str.size() - 1);
+}
+
 // ------------------------------- JNI STATIC ---------------------------------
 
 #ifdef __cplusplus
@@ -715,7 +719,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIE
   boost::property_tree::ptree container;
   if (!accounts.empty()) container.add_child("accounts", MoneroUtils::toPropertyTree(accounts));
   boost::property_tree::write_json(ss, container, false);
-  string accountsJson = ss.str();
+  string accountsJson = stripLastChar(ss.str());
   return env->NewStringUTF(accountsJson.c_str());
 }
 
@@ -768,7 +772,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(
   boost::property_tree::ptree container;
   if (!subaddresses.empty()) container.add_child("subaddresses", MoneroUtils::toPropertyTree(subaddresses));
   boost::property_tree::write_json(ss, container, false);
-  string subaddressesJson = ss.str();
+  string subaddressesJson = stripLastChar(ss.str());
   return env->NewStringUTF(subaddressesJson.c_str());
 }
 
@@ -826,7 +830,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
     boost::property_tree::ptree container;
     if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
     boost::property_tree::write_json(ss, container, false);
-    string blocksJson = ss.str();
+    string blocksJson = stripLastChar(ss.str());
     return env->NewStringUTF(blocksJson.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -873,7 +877,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
     boost::property_tree::ptree container;
     if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
     boost::property_tree::write_json(ss, container, false);
-    string blocksJson = ss.str();
+    string blocksJson = stripLastChar(ss.str());
     return env->NewStringUTF(blocksJson.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -916,7 +920,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
     boost::property_tree::ptree container;
     if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
     boost::property_tree::write_json(ss, container, false);
-    string blocksJson = ss.str();
+    string blocksJson = stripLastChar(ss.str());
     return env->NewStringUTF(blocksJson.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -962,7 +966,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getKeyImagesJni(JNI
   boost::property_tree::ptree container;
   if (!keyImages.empty()) container.add_child("keyImages", MoneroUtils::toPropertyTree(keyImages));
   boost::property_tree::write_json(ss, container, false);
-  string keyImagesJson = ss.str();
+  string keyImagesJson = stripLastChar(ss.str());
   return env->NewStringUTF(keyImagesJson.c_str());
 }
 
@@ -1032,7 +1036,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv
   boost::property_tree::ptree container;
   if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
   boost::property_tree::write_json(ss, container, false);
-  string blocksJson = ss.str();
+  string blocksJson = stripLastChar(ss.str());
   return env->NewStringUTF(blocksJson.c_str());
 }
 
@@ -1067,7 +1071,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepOutputJni(JNIE
   boost::property_tree::ptree container;
   if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
   boost::property_tree::write_json(ss, container, false);
-  string blocksJson = ss.str();
+  string blocksJson = stripLastChar(ss.str());
   return env->NewStringUTF(blocksJson.c_str());
 }
 
@@ -1095,7 +1099,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepDustJni(JNIEnv
   boost::property_tree::ptree container;
   if (!blocks.empty()) container.add_child("blocks", MoneroUtils::toPropertyTree(blocks));
   boost::property_tree::write_json(ss, container, false);
-  string blocksJson = ss.str();
+  string blocksJson = stripLastChar(ss.str());
   return env->NewStringUTF(blocksJson.c_str());
 }
 
