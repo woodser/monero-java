@@ -2007,7 +2007,12 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.sync();
       
       // create tx using same request which is no longer double spend
-      MoneroTxWallet tx2 = wallet.send(request);  // TODO: expected failure because wallet does not sync tx relayed directly to tx pool
+      MoneroTxWallet tx2;
+      try {
+        tx2 = wallet.send(request);  
+      } catch (Exception e) {
+        throw new RuntimeException("wallet did not sync tx relayed directly to tx pool"); // TODO monero core: this fails meaning wallet did not recognize tx relayed directly to pool
+      }
       MoneroSubmitTxResult result2 = daemon.submitTxHex(tx2.getFullHex(), true);
       
       // test result and flush on finally
