@@ -61,16 +61,17 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 
 14.1.0+ RELEASE
+wallet.isClosed() check, update wallet.close() test
+code todos
+work through problems of testing fresh wallet again
+compare time to manual sync vs auto sync
+verify number of sent txs run during tests and count from wallet
+
 rpc supports on_restore_determinstic_wallet, implement!
 better sample code, maybe with two wallets, sending each other funds
-wallet.isClosed() check, update wallet.close() test
 MoneroTxRequest -> MoneroTxQuery, etc?
 refactor getIs...() to is...() depending if this interferes with js syntax
 update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing()
-verify number of sent txs run during tests and count from wallet
-code todos
-compare time to manual sync vs auto sync
-work through problems of testing fresh wallet again
 regenerate api docs
 update readme with jni support
 ./submodules -> ./external for monero-cpp-library and monero-core?
