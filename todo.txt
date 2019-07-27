@@ -44,6 +44,7 @@ get transactions per block
 lots of internal wallet errors when daemon rpc tests run
 
 LOW
+wallet.cpp m_synchronized only ever set to true, never false
 get_reserve_proof document default account 0
 check_reserve_proof documentation spent and total not documented as outputs
 -1: Failed to open wallet if wallet is already open; better code and message
@@ -60,9 +61,10 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 
 14.1.0+ RELEASE
-test that wallet.getIsSynced() returns false after block added to chain if not auto syncing
-MoneroTxRequest -> MoneroTxQuery, etc?
+rpc supports on_restore_determinstic_wallet, implement!
+better sample code, maybe with two wallets, sending each other funds
 wallet.isClosed() check, update wallet.close() test
+MoneroTxRequest -> MoneroTxQuery, etc?
 refactor getIs...() to is...() depending if this interferes with js syntax
 update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing()
 verify number of sent txs run during tests and count from wallet
@@ -75,12 +77,12 @@ update readme with jni support
 announce
 
 MEDIUM
-waitForTxsToClear() should refresh more frequently than blocks so it continue s if pool manually flushed
+wallet.getIsSynced() should return false after block added to chain if not auto syncing
+waitForTxsToClear() should refresh more frequently than blocks so it continues if pool manually flushed
 cap creation of accounts by ignoring test if more than X accounts already exist
 auto destroy wallet if garbage collected by vm
 ux test including receiving funds
 sync(listener) should not be part of rpc api unless listening supported (could be supported)
-rpc supports on_restore_determinstic_wallet, implement!
 testCreateThenRelay() passes when no internet connection?
 tx in pool can reconcile to failed
 rescanBlockchain(bool hard, bool refresh, bool keep_key_images)
