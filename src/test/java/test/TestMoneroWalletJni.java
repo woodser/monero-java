@@ -544,6 +544,16 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       // test that wallet is synced
       assertTrue(wallet.getIsSynced());
       assertEquals(daemon.getHeight(), wallet.getHeight());
+      
+      // stop syncing
+      wallet.stopSyncing();
+      assertTrue(wallet.getIsSynced()); // wallet is still synced
+      
+      // wait for block to be added to chain
+      daemon.getNextBlockHeader();
+      
+      // wallet is no longer synced
+      //assertFalse(wallet.getIsSynced());  // TODO: wallet.cpp m_synchronized only ever set to true, never false
     } finally {
       wallet.close();
     }
