@@ -75,6 +75,7 @@ update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSpli
 regenerate api docs
 update readme with jni support
 ./submodules -> ./external for monero-cpp-library and monero-core?
+write up issues for announce
 announce
 
 MEDIUM
