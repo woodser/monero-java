@@ -65,7 +65,7 @@ import monero.wallet.request.MoneroTransferRequest;
 import monero.wallet.request.MoneroTxRequest;
 
 /**
- * Implements a Monero wallet using JNI to bridge to Monero Core c++.
+ * Implements a Monero wallet using JNI to bridge to Monero Core C++.
  */
 public class MoneroWalletJni extends MoneroWalletDefault {
   
@@ -205,15 +205,34 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   // TODO: comments and other jni specific methods
   
+  /**
+   * Set the wallet's daemon connection.
+   * 
+   * @param uri is the uri of the daemon for the wallet to use
+   * @param username is the username to authenticate with the daemon
+   * @param password is the password to authenticate with the daemon
+   */
   public void setDaemonConnection(String uri) {
     setDaemonConnection(uri, null, null);
   }
   
+  /**
+   * Set the wallet's daemon connection.
+   * 
+   * @param uri is the uri of the daemon for the wallet to use
+   * @param username is the username to authenticate with the daemon (optional)
+   * @param password is the password to authenticate with the daemon (optional)
+   */
   public void setDaemonConnection(String uri, String username, String password) {
     if (uri == null) setDaemonConnection((MoneroRpcConnection) null);
     else setDaemonConnection(new MoneroRpcConnection(uri, username, password));
   }
   
+  /**
+   * Set the wallet's daemon connection
+   * 
+   * @param daemonConnection manages daemon connection information
+   */
   public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
     assertNotClosed();
     if (daemonConnection == null) setDaemonConnectionJni("", "", "");
@@ -226,6 +245,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
   }
   
+  /**
+   * Get the wallet's daemon connection.
+   * 
+   * @return the wallet's daemon connection
+   */
   public MoneroRpcConnection getDaemonConnection() {
     assertNotClosed();
     try {
@@ -236,6 +260,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
   }
   
+  /**
+   * Indicates if the wallet is connected a daemon.
+   * 
+   * @return true if the wallet is connected to a daemon, false otherwise
+   */
   public boolean getIsConnected() {
     assertNotClosed();
     try {
@@ -245,6 +274,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
   }
   
+  /**
+   * Get the height that the wallet's daemon is synced to.
+   * 
+   * @return the height that the wallet's daemon is synced to
+   */
   public long getDaemonHeight() {
     assertNotClosed();
     try {
@@ -254,6 +288,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
   }
   
+  /**
+   * Get the height of the next block in the chain.
+   * 
+   * @return the height of the next block in the chain
+   */
   public long getDaemonTargetHeight() {
     assertNotClosed();
     try {
@@ -263,6 +302,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
   }
   
+  /**
+   * Indicates if the wallet's daemon is synced with the network.
+   * 
+   * @return true if the daemon is synced with the network, false otherwise
+   */
   public boolean getIsDaemonSynced() {
     assertNotClosed();
     try {
@@ -272,6 +316,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
   }
   
+  /**
+   * Indicates if the wallet is synced with the daemon.
+   * 
+   * @return true if the wallet is synced with the daemon, false otherwise
+   */
   public boolean getIsSynced() {
     assertNotClosed();
     try {
@@ -281,6 +330,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
   }
   
+  /**
+   * Get the path of this wallet's file on disk.
+   * 
+   * @return the path of this wallet's file on disk
+   */
   public String getPath() {
     assertNotClosed();
     String path = getPathJni();
@@ -297,11 +351,21 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     return MoneroNetworkType.values()[getNetworkTypeJni()];
   }
   
+  /**
+   * Get the height of the first block that the wallet scans.
+   * 
+   * @return the height of the first block that the wallet scans
+   */
   public long getRestoreHeight() {
     assertNotClosed();
     return getRestoreHeightJni();
   }
   
+  /**
+   * Set the height of the first block that the wallet scans.
+   * 
+   * @param restoreHeight is the height of the first block that the wallet scans
+   */
   public void setRestoreHeight(long restoreHeight) {
     assertNotClosed();
     setRestoreHeightJni(restoreHeight);
@@ -337,12 +401,22 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     return getPublicSpendKeyJni();
   }
   
+  /**
+   * Register a listener to be notified of wallet events.
+   * 
+   * @param listener is the listener to register for wallet notifications
+   */
   public void addListener(MoneroWalletListener listener) {
     assertNotClosed();
     listeners.add(listener);
     jniListener.setIsListening(true);
   }
   
+  /**
+   * Unregister a listener to be notified of wallet events.
+   * 
+   * @param listener is the listener to be unregistered
+   */
   public void removeListener(MoneroWalletListener listener) {
     assertNotClosed();
     if (!listeners.contains(listener)) throw new MoneroException("Listener is not registered to wallet");
