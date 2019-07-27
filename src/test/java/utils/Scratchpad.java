@@ -29,7 +29,7 @@ public class Scratchpad {
     
     //MoneroCppUtils.setLogLevel(1);
     
-    for (MoneroTx tx : daemon.getTxPool()) {
+    for (MoneroTx tx : walletJni.getTxs()) {
       System.out.println(tx);
     }
     

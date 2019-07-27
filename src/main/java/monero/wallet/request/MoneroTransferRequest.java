@@ -1,5 +1,7 @@
 package monero.wallet.request;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,7 +126,7 @@ public class MoneroTransferRequest extends MoneroTransfer implements Filter<Mone
 
   @Override
   public boolean meetsCriteria(MoneroTransfer transfer) {
-    if (transfer == null) return false;
+    assertNotNull("transfer is null", transfer);
     
     // filter on common fields
     if (this.getIsIncoming() != null && this.getIsIncoming() != transfer.getIsIncoming()) return false;

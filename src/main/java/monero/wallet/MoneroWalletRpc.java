@@ -700,7 +700,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (tx.getIncomingTransfers() != null) Collections.sort(tx.getIncomingTransfers(), new IncomingTransferComparator());
       
       // collect outgoing transfer, erase if filtered
-      if (request.meetsCriteria(tx.getOutgoingTransfer())) transfers.add(tx.getOutgoingTransfer());
+      if (tx.getOutgoingTransfer() != null && request.meetsCriteria(tx.getOutgoingTransfer())) transfers.add(tx.getOutgoingTransfer());
       else tx.setOutgoingTransfer(null);
       
       // collect incoming transfers, erase if unrequested

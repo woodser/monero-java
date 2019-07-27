@@ -2011,7 +2011,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       try {
         tx2 = wallet.send(request);  
       } catch (Exception e) {
-        throw new RuntimeException("wallet did not sync tx relayed directly to tx pool"); // TODO monero core: this fails meaning wallet did not recognize tx relayed directly to pool
+        throw new RuntimeException("Wallet did not sync tx relayed directly to tx pool"); // TODO monero core: this fails meaning wallet did not recognize tx relayed directly to pool
       }
       MoneroSubmitTxResult result2 = daemon.submitTxHex(tx2.getFullHex(), true);
       
