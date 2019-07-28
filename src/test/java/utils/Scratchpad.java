@@ -3,10 +3,14 @@ package utils;
 import java.util.List;
 
 import monero.daemon.MoneroDaemon;
+import monero.daemon.model.MoneroNetworkType;
+import monero.rpc.MoneroRpcConnection;
+import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.request.MoneroTxRequest;
+import test.TestMoneroWalletJni;
 
 /**
  * Scratchpad for quick scripting.
@@ -19,7 +23,7 @@ public class Scratchpad {
     // initialize daemon, wallet, and direct rpc interface
     MoneroDaemon daemon = TestUtils.getDaemonRpc();
     MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
-    MoneroWalletJni walletJni = TestUtils.getWalletJni();
+    //MoneroWalletJni walletJni = TestUtils.getWalletJni();
     //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
     
 //    // common variables
@@ -32,18 +36,28 @@ public class Scratchpad {
     
     //MoneroCppUtils.setLogLevel(1);
     
-    txs = walletJni.getTxs();
-    System.out.println("Wallet height: " + walletJni.getHeight());
+    String path = TestMoneroWalletJni.getRandomWalletPath();
+    String password = TestUtils.WALLET_RPC_PW;
+    MoneroRpcConnection daemonConnection = TestUtils.getDaemonRpc().getRpcConnection();
+    String language = "English";
+    String mnemonic = TestUtils.MNEMONIC;
+    MoneroNetworkType networkType = MoneroNetworkType.STAGENET;
+    Long restoreHeight = TestUtils.RESTORE_HEIGHT;
+    
+    MoneroWallet wallet = MoneroWalletJni.createWalletFromMnemonic(path, password, mnemonic, networkType, daemonConnection, restoreHeight);
+    wallet.sync();
+    
+    txs = wallet.getTxs();
+    System.out.println("Wallet height: " + wallet.getHeight());
     System.out.println("Wallet has " + txs.size() + " txs");
     
     long height = 375707;
     //txs = walletJni.getTxs(new MoneroTxRequest().setMinHeight(height - 30).setMaxHeight(height));
-    txs = walletJni.getTxs(new MoneroTxRequest().setMinHeight(walletJni.getChainHeight() - 1));
+    txs = wallet.getTxs(new MoneroTxRequest().setMinHeight(375734l));
     System.out.println("Got " + txs.size() + " txs since that height");
     for (MoneroTxWallet tx : txs) {
       System.out.println(tx);
     }
-    
     
 //    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom("hello5", "supersecretpassword123");
 //    //System.out.println("Wallet created with mnemonic: " + wallet.getMnemonic());
@@ -53,15 +67,7 @@ public class Scratchpad {
     //System.out.println("Wallet balance: " + wallet.getBalance());
     //wallet.close();
     
-//    String path = "wallet_temp";
-//    String password = TestUtils.WALLET_RPC_PW;
-//    MoneroRpc daemonConnection = TestUtils.getDaemonRpc().getRpc();
-//    String language = "English";
-//    String mnemonic = TestUtils.TEST_MNEMONIC;
-//    MoneroNetworkType networkType = MoneroNetworkType.STAGENET;
-//    Integer restoreHeight = null;
-//    
-//    MoneroWalletJni.createWalletFromMnemonic(path, password, networkType, daemonConnection, mnemonic, restoreHeight);
+
 //    
 //    System.out.println(MoneroWalletJni.walletExists("asdf"));
     
