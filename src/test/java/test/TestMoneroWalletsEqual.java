@@ -82,7 +82,7 @@ public class TestMoneroWalletsEqual {
     testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
     assertEquals(w1.getBalance(), w2.getBalance());
     assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
-    // TOOD: compare outputs, etc
+    // TOOD **: compare outputs, etc
   }
   
   protected void testAccountsEqualOnChain(List<MoneroAccount> accounts1, List<MoneroAccount> accounts2) {

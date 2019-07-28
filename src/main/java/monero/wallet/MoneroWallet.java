@@ -186,7 +186,7 @@ public interface MoneroWallet {
   public boolean isMultisigImportNeeded();
   
   /**
-   * Get the height of the last block processed by the wallet (its index + 1).  // TODO: should be the height of the last block processed + 1, which is the height of the next block to process
+   * Get the height of the last block processed by the wallet (its index + 1).  // TODO **: should be the height of the last block processed + 1, which is the height of the next block to process
    * 
    * @return the height of the last block processed by the wallet
    */

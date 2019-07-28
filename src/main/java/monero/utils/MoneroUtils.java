@@ -53,37 +53,37 @@ public class MoneroUtils {
     if (words.length != MoneroUtils.NUM_MNEMONIC_WORDS) throw new Error("Mnemonic phrase is " + words.length + " words but must be " + MoneroUtils.NUM_MNEMONIC_WORDS);
   }
   
-  // TODO: beef this up
+  // TODO: improve validation
   public static void validatePrivateViewKey(String privateViewKey) {
     assertNotNull(privateViewKey);
     assertEquals(64, privateViewKey.length());
   }
   
-  // TODO: beef this up
+  // TODO: improve validation
   public static void validatePrivateSpendKey(String privateSpendKey) {
     assertNotNull(privateSpendKey);
     assertEquals(64, privateSpendKey.length());
   }
   
-  // TODO: beef this up
+  // TODO: improve validation
   public static void validatePublicViewKey(String publicViewKey) {
     assertNotNull(publicViewKey);
     assertEquals(64, publicViewKey.length());
   }
   
-  // TODO: beef this up
+  // TODO: improve validation
   public static void validatePublicSpendKey(String publicSpendKey) {
     assertNotNull(publicSpendKey);
     assertEquals(64, publicSpendKey.length());
   }
   
-  // TODO: beef this up, will require knowing network type
+  // TODO: improve validation
   public static void validateAddress(String address) {
     assertNotNull(address);
     assertFalse(address.isEmpty());
   }
   
-  // TODO: implement this
+  // TODO: improve validation
   public static void validatePaymentId(String paymentId) {
     assertTrue(paymentId.length() == 16 || paymentId.length() == 64);
   }
