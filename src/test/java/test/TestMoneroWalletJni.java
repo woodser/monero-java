@@ -828,7 +828,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   // ---------------------------------- HELPERS -------------------------------
   
-  private static String getRandomWalletPath() {
+  public static String getRandomWalletPath() {
     return TestUtils.TEST_WALLETS_DIR + "/test_wallet_" + System.currentTimeMillis();
   }
   
