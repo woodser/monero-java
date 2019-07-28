@@ -1,9 +1,12 @@
 package utils;
 
+import java.util.List;
+
 import monero.daemon.MoneroDaemon;
-import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
+import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.request.MoneroTxRequest;
 
 /**
  * Scratchpad for quick scripting.
@@ -21,7 +24,7 @@ public class Scratchpad {
     
 //    // common variables
     //MoneroTx tx = null;
-    //List<MoneroTx> txs = null;
+    List<MoneroTxWallet> txs = null;
     //List<MoneroTransfer> transfers = null;
     String txId = null;
     
@@ -29,9 +32,18 @@ public class Scratchpad {
     
     //MoneroCppUtils.setLogLevel(1);
     
-    for (MoneroTx tx : walletJni.getTxs()) {
+    txs = walletJni.getTxs();
+    System.out.println("Wallet height: " + walletJni.getHeight());
+    System.out.println("Wallet has " + txs.size() + " txs");
+    
+    long height = 375707;
+    //txs = walletJni.getTxs(new MoneroTxRequest().setMinHeight(height - 30).setMaxHeight(height));
+    txs = walletJni.getTxs(new MoneroTxRequest().setMinHeight(walletJni.getChainHeight() - 1));
+    System.out.println("Got " + txs.size() + " txs since that height");
+    for (MoneroTxWallet tx : txs) {
       System.out.println(tx);
     }
+    
     
 //    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom("hello5", "supersecretpassword123");
 //    //System.out.println("Wallet created with mnemonic: " + wallet.getMnemonic());

@@ -66,7 +66,7 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 code todos
 work through problems of testing fresh wallet again
 compare time to gui vs manual sync vs auto sync - 1:22 vs 1:52 vs ?
-verify number of sent txs run during tests and count from wallet
+verify number of sent txs run during tests and count from wallet - 1364 + full test run -> 1409 txs just before height 375707
 
 rpc supports on_restore_determinstic_wallet, implement!
 better sample code, maybe with two wallets, sending each other funds

@@ -1823,7 +1823,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   // TODO: this test fails because wallet does not recognize pool tx sent from/to same account
   @Test
   public void testSyncWithPoolSameAccounts() {
-    org.junit.Assume.assumeTrue(TEST_RELAYS);
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     String address = wallet.getPrimaryAddress();
     BigInteger amount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(5));
     MoneroSendRequest request = new MoneroSendRequest().setAccountIndex(0).setDoNotRelay(true).setDestinations(new MoneroDestination(address, amount));
@@ -1833,7 +1833,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   // Can sync with txs submitted and discarded from the pool
   @Test
   public void testSyncWithPoolSubmitAndDiscard() {
-    org.junit.Assume.assumeTrue(TEST_RELAYS);
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     String address = wallet.getPrimaryAddress();
     BigInteger amount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(5));
     MoneroSendRequest request = new MoneroSendRequest().setAccountIndex(2).setDoNotRelay(true).setDestinations(new MoneroDestination(address, amount));
