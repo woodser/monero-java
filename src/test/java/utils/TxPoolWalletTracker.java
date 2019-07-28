@@ -93,7 +93,7 @@ public class TxPoolWalletTracker {
       
       // print debug messsage one time
       if (isFirst) {  
-        System.out.println("Waiting for next block so txs cleared from pool to avoid double spend attempt");
+        System.out.println("Waiting for wallet txs to clear from the pool in order to fully sync and avoid double spend attempts (known issue)");
         isFirst = false;
       }
       
