@@ -158,7 +158,7 @@ public class TestUtils {
    * By observation, it is consistent with a freshly restored wallet using cli even when persisted rpc and
    * jni wallets become inconsistent.
    * 
-   * The caller of this method should close the returned wallet when done using it. // TODO: need to confirm close at end, but double .close() will seg fault, so need wallet.getIsClosed() check
+   * The caller of this method should close the returned wallet when done using it.
    * 
    * @param networkType is the ground truth wallet's network type
    * @param mnemonic is the ground truth wallet's mnemonic
@@ -171,6 +171,14 @@ public class TestUtils {
     assertEquals(restoreHeight == null ? 0 : (long) restoreHeight, gtWallet.getRestoreHeight());
     gtWallet.sync(new WalletSyncPrinter());
     gtWallet.startSyncing();
+    
+    // close the JNI wallet when the runtime is shutting down to release resources
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      public void run() {
+        gtWallet.close();
+      }
+    });
+    
     return gtWallet;
   }
   

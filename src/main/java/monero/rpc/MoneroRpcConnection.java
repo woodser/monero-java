@@ -230,7 +230,6 @@ public class MoneroRpcConnection {
       // deserialize response
       return EntityUtils.toByteArray(resp.getEntity());
       
-      // TODO: js code checks for map containing "error"; necessary?
 //    // send request and store binary response as Uint8Array
 //    let resp = await this._throttledRequest(opts);
 //    if (resp.error) throw new MoneroRpcError(resp.error.code, resp.error.message, opts);

@@ -32,11 +32,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
 import common.utils.JsonUtils;
-import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
@@ -75,6 +76,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   static {
     System.loadLibrary("monero-java");
   }
+  
+  // logger
+  private static final Logger LOGGER = Logger.getLogger(MoneroWalletJni.class);
   
   // default config
   private static String DEFAULT_LANGUAGE = "English";
@@ -432,7 +436,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * Move the wallet from its current path to the given path.
    * 
    * @param path is the new wallet's path
-   * @param password is the new wallet's password // TODO: can this be used to change wallet password?
+   * @param password is the new wallet's password
    */
   public void moveTo(String path, String password) {
     assertNotClosed();
@@ -452,6 +456,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * Close the wallet.
    */
   public void close() {
+    if (isClosed) return; // closing a closed wallet has no effect
     isClosed = true;
     try {
       closeJni();
@@ -535,13 +540,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     assertNotClosed();
     if (startHeight == null) startHeight = Math.max(getHeight(), getRestoreHeight());
     
-    // verify connection to daemon which informs sync end height
-    // TODO: replace with c++
-    MoneroRpcConnection rpc = getDaemonConnection();
-    if (rpc == null) throw new MoneroException("No connection to daemon");
-    MoneroDaemonRpc daemon = new MoneroDaemonRpc(getDaemonConnection());
-    if (!daemon.getIsConnected()) throw new MoneroException("No connection to daemon"); 
-    
     // wrap and register sync listener as wallet listener if given
     SyncListenerWrapper syncListenerWrapper = null;
     if (listener != null) {
@@ -605,7 +603,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     assertNotClosed();
     String accountsJson = getAccountsJni(includeSubaddresses, tag);
     List<MoneroAccount> accounts = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountsJson, AccountsContainer.class).accounts;
-    for (MoneroAccount account : accounts) sanitizeAccount(account);  // TODO: better way?
+    for (MoneroAccount account : accounts) sanitizeAccount(account);
     return accounts;
   }
   
@@ -631,9 +629,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public List<MoneroSubaddress> getSubaddresses(int accountIdx, List<Integer> subaddressIndices) {
     assertNotClosed();
     String subaddressesJson = getSubaddressesJni(accountIdx, GenUtils.listToIntArray(subaddressIndices));
-    System.out.println("Deserializing subaddresses: " + subaddressesJson);
     List<MoneroSubaddress> subaddresses = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressesJson, SubaddressesContainer.class).subaddresses;
-    for (MoneroSubaddress subaddress : subaddresses) sanitizeSubaddress(subaddress);  // TODO: better way?
+    for (MoneroSubaddress subaddress : subaddresses) sanitizeSubaddress(subaddress);
     return subaddresses;
   }
 
@@ -736,7 +733,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     String blocksJson;
     try {
       blocksJson = getTxsJni(JsonUtils.serialize(request.getBlock()));
-      System.out.println("Received getTxs() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -762,6 +758,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       for (String txId : request.getTxIds()) txsSorted.add(txMap.get(txId));
       txs = txsSorted;
     }
+    LOGGER.info("getTxs() returning " + txs.size() + " transactions");
     return txs;
   }
 
@@ -779,7 +776,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     String blocksJson;
     try {
       blocksJson = getTransfersJni(JsonUtils.serialize(request.getTxRequest().getBlock()));
-      System.out.println("Received getTransfers() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -815,7 +811,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     // serialize request from block and fetch outputs from jni
     String blocksJson = getOutputsJni(JsonUtils.serialize(request.getTxRequest().getBlock()));
-    System.out.println("Received getOutputs() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
     
     // deserialize blocks
     List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
@@ -849,7 +844,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public List<MoneroKeyImage> getKeyImages() {
     assertNotClosed();
     String keyImagesJson = getKeyImagesJni();
-    System.out.println("Received key images json from jni: " + keyImagesJson);
     List<MoneroKeyImage> keyImages = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, keyImagesJson, KeyImagesContainer.class).keyImages;
     return keyImages;
   }
@@ -863,7 +857,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     String importResultJson = importKeyImagesJni(JsonUtils.serialize(keyImageContainer));
     
     // deserialize response
-    System.out.println("Received import result json from jni: " + importResultJson);
     return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, importResultJson, MoneroKeyImageImportResult.class);
   }
 
@@ -887,8 +880,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
     assertNotClosed();
-    System.out.println("java sendSplit(request)");
-    System.out.println("Send request: " + JsonUtils.serialize(request));
+    LOGGER.info("java sendSplit(request)");
+    LOGGER.info("Send request: " + JsonUtils.serialize(request));
     
     // validate request
     if (request == null) throw new MoneroException("Send request cannot be null");
@@ -897,7 +890,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     String blocksJson;
     try {
       blocksJson = sendSplitJni(JsonUtils.serialize(request));
-      System.out.println("Received sendSplit() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
+      LOGGER.info("Received sendSplit() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -914,6 +907,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
         txs.add((MoneroTxWallet) tx);
       }
     }
+    LOGGER.info("Created " + txs.size() + " transaction(s) in last send request");
     return txs;
   }
 
@@ -991,7 +985,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     assertNotClosed();
     try {
       String checkStr = checkTxKeyJni(txId, txKey, address);
-      System.out.println("Java received MoneroCheckTx json from jni: " + checkStr);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckTx.class);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
@@ -1013,7 +1006,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     assertNotClosed();
     try {
       String checkStr = checkTxProofJni(txId, address, message, signature);
-      System.out.println("Java received MoneroCheckTx json from jni: " + checkStr);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckTx.class);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
@@ -1064,7 +1056,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     assertNotClosed();
     try {
       String checkStr = checkReserveProofJni(address, message, signature);
-      System.out.println("Java received MoneroCheckReserve json from jni: " + checkStr);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckReserve.class);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
@@ -1128,7 +1119,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     assertNotClosed();
     try {
       String sendRequestJson = parsePaymentUriJni(uri);
-      System.out.println("Received send request json from jni: " + sendRequestJson);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, sendRequestJson, MoneroSendRequest.class);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
@@ -1151,7 +1141,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public void startMining(Integer numThreads, Boolean backgroundMining, Boolean ignoreBattery) {
     assertNotClosed();
     try {
-      startMiningJni(numThreads == null ? 0 : (long) numThreads, backgroundMining, ignoreBattery); // TODO: startMining(Long, ...)? wallet2 uses uint64_t
+      startMiningJni(numThreads == null ? 0 : (long) numThreads, backgroundMining, ignoreBattery);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }

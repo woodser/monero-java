@@ -899,7 +899,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     //assertEquals(wallet1.getRestoreHeight(), wallet2.getRestoreHeight()); // TODO monero-core: restore height is lost after close
     assertEquals(wallet1.getDaemonConnection(), wallet2.getDaemonConnection());
     assertEquals(wallet1.getLanguage(), wallet2.getLanguage());
-    // TODO: more jni-specific extensions
+    // TODO **: more jni-specific extensions
   }
   
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
