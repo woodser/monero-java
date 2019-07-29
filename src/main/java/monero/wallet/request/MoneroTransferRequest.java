@@ -31,6 +31,30 @@ public class MoneroTransferRequest extends MoneroTransfer implements Filter<Mone
   private List<MoneroDestination> destinations;
   private Boolean hasDestinations;
   private MoneroTxRequest txRequest;
+  
+  public MoneroTransferRequest() {
+    
+  }
+  
+  public MoneroTransferRequest(final MoneroTransferRequest request) {
+    super(request);
+    this.isIncoming = request.isIncoming;
+    this.address = request.address;
+    if (request.addresses != null) this.addresses = new ArrayList<String>(request.addresses);
+    this.subaddressIndex = request.subaddressIndex;
+    if (request.subaddressIndices != null) this.subaddressIndices = new ArrayList<Integer>(request.subaddressIndices);
+    if (request.destinations != null) {
+      this.destinations = new ArrayList<MoneroDestination>();
+      for (MoneroDestination destination : request.getDestinations()) this.destinations.add(destination.copy());
+    }
+    this.hasDestinations = request.hasDestinations;
+    this.txRequest = request.txRequest;  // reference original by default, MoneroTxRequest's deep copy will set this to itself
+  }
+  
+  @Override
+  public MoneroTransferRequest copy() {
+    return new MoneroTransferRequest(this);
+  }
 
   public Boolean getIsIncoming() {
     return isIncoming;
@@ -127,6 +151,7 @@ public class MoneroTransferRequest extends MoneroTransfer implements Filter<Mone
   @Override
   public boolean meetsCriteria(MoneroTransfer transfer) {
     assertNotNull("transfer is null", transfer);
+    if (txRequest != null && txRequest.getTransferRequest() != null) throw new RuntimeException("Transfer request's tx request cannot have a circular transfer request");   // TODO: could auto detect and handle this.  port to js
     
     // filter on common fields
     if (this.getIsIncoming() != null && this.getIsIncoming() != transfer.getIsIncoming()) return false;

@@ -163,7 +163,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public MoneroTxWallet createTx(MoneroSendRequest request) {
+  public MoneroTxWallet createTx(final MoneroSendRequest request) {
     if (request == null) throw new MoneroException("Send request cannot be null");
     if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with sendTx() which prevents splitting; use sendTxs() instead");
     request.setCanSplit(false);
@@ -171,7 +171,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public List<MoneroTxWallet> createTxs(MoneroSendRequest request) {
+  public List<MoneroTxWallet> createTxs(final MoneroSendRequest request) {
     if (request == null) throw new MoneroException("Send request cannot be null");
     
     // modify request to not relay
@@ -207,7 +207,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public MoneroTxWallet send(MoneroSendRequest request) {
+  public MoneroTxWallet send(final MoneroSendRequest request) {
     if (request == null) throw new MoneroException("Send request cannot be null");
     if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with sendTx() which prevents splitting; use sendTxs() instead");
     request.setCanSplit(false);
@@ -225,7 +225,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
 
   @Override
-  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
+  public List<MoneroTxWallet> sendSplit(final MoneroSendRequest request) {
     throw new RuntimeException("Not implemented");
   }
   

@@ -44,6 +44,7 @@ get_transfer_by_txid add tx_size
 incoming_transfers add address (low priority), fee, timestamp, unlock_time, is_double_spend, height, tx_size (misdocumented)
 get transactions per block
 lots of internal wallet errors when daemon rpc tests run
+add final keyword to method args where appropriate
 
 LOW
 wallet.cpp m_synchronized only ever set to true, never false
@@ -74,12 +75,15 @@ MoneroTxRequest -> MoneroTxQuery, etc?
 refactor getIs...() to is...() depending if this interferes with js syntax
 update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing()
 regenerate api docs
+rename *withConfiguration() tests to *Request or *Query
 update readme with jni support
 ./submodules -> ./external for monero-cpp-library and monero-core?
+build a picture of types and how they relate to each other
 write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, etc, tx pool syncing)
 announce
 
 MEDIUM
+build a picture of overall architecture
 isMultisigNeeded()
 wallet.getIsSynced() should return false after block added to chain if not auto syncing
 waitForTxsToClear() should refresh more frequently than blocks so it continues if pool manually flushed

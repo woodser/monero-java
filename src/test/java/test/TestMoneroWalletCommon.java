@@ -1010,6 +1010,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // get transfers with tx ids
+    System.out.println("Checking for ids: " + txIds);
     transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setTxIds(txIds)), null, true);
     for (MoneroTransfer transfer : transfers) assertTrue(txIds.contains(transfer.getTx().getId()));
     

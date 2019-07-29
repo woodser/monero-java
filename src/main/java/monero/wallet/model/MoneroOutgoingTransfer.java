@@ -21,7 +21,7 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
     // nothing to initialize
   }
   
-  public MoneroOutgoingTransfer(MoneroOutgoingTransfer transfer) {
+  public MoneroOutgoingTransfer(final MoneroOutgoingTransfer transfer) {
     super(transfer);
     if (transfer.subaddressIndices != null) this.subaddressIndices = new ArrayList<Integer>(transfer.subaddressIndices);
     if (transfer.addresses != null) this.addresses = new ArrayList<String>(transfer.addresses);
@@ -31,6 +31,11 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
         this.destinations.add(destination.copy()); 
       }
     }
+  }
+  
+  @Override
+  public MoneroOutgoingTransfer copy() {
+    return new MoneroOutgoingTransfer(this);
   }
   
   public Boolean getIsIncoming() {
@@ -62,10 +67,6 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
   public MoneroOutgoingTransfer setDestinations(List<MoneroDestination> destinations) {
     this.destinations = destinations;
     return this;
-  }
-  
-  public MoneroOutgoingTransfer copy() {
-    return new MoneroOutgoingTransfer(this);
   }
   
   public MoneroOutgoingTransfer merge(MoneroTransfer transfer) {

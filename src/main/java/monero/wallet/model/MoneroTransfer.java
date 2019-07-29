@@ -8,8 +8,10 @@ import monero.utils.MoneroUtils;
 
 /**
  * Models a base transfer of funds to or from the wallet.
+ * 
+ * Transfers are either of type MoneroIncomingTransfer or MoneroOutgoingTransfer so this class is abstract.
  */
-public class MoneroTransfer {
+public abstract class MoneroTransfer {
 
   private MoneroTxWallet tx;
   private BigInteger amount;
@@ -20,11 +22,13 @@ public class MoneroTransfer {
     // nothing to initialize
   }
   
-  public MoneroTransfer(MoneroTransfer transfer) {
+  public MoneroTransfer(final MoneroTransfer transfer) {
     this.amount = transfer.amount;
     this.accountIndex = transfer.accountIndex;
     this.numSuggestedConfirmations = transfer.numSuggestedConfirmations;
   }
+  
+  public abstract MoneroTransfer copy();
   
   @JsonBackReference
   public MoneroTxWallet getTx() {
@@ -40,9 +44,7 @@ public class MoneroTransfer {
     return !getIsIncoming();
   }
   
-  public Boolean getIsIncoming() {
-    throw new RuntimeException("Subclass must implement");
-  }
+  public abstract Boolean getIsIncoming();
   
   public BigInteger getAmount() {
     return amount;
@@ -77,10 +79,6 @@ public class MoneroTransfer {
   public MoneroTransfer setNumSuggestedConfirmations(Integer numSuggestedConfirmations) {
     this.numSuggestedConfirmations = numSuggestedConfirmations;
     return this;
-  }
-  
-  public MoneroTransfer copy() {
-    return new MoneroTransfer(this);
   }
   
   /**
@@ -128,7 +126,7 @@ public class MoneroTransfer {
     sb.append(MoneroUtils.kvLine("Account index", this.getAccountIndex(), indent));
     sb.append(MoneroUtils.kvLine("Num suggested confirmations", getNumSuggestedConfirmations(), indent));
     String str = sb.toString();
-    return str.substring(0, str.length() - 1);
+    return str.isEmpty() ? str :  str.substring(0, str.length() - 1);
   }
 
   @Override

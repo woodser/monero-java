@@ -1,6 +1,7 @@
 package monero.wallet.request;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,6 +32,34 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
   private Boolean includeOutputs;
   private MoneroTransferRequest transferRequest;
   private MoneroOutputRequest outputRequest;
+  
+  public MoneroTxRequest() {
+    
+  }
+  
+  public MoneroTxRequest(final MoneroTxRequest req) {
+    super(req);
+    this.isOutgoing = req.isOutgoing;
+    this.isIncoming = req.isIncoming;
+    if (req.txIds != null) this.txIds = new ArrayList<String>(req.txIds);
+    this.hasPaymentId = req.hasPaymentId;
+    this.height = req.height;
+    this.minHeight = req.minHeight;
+    this.maxHeight = req.maxHeight;
+    this.includeOutputs = req.includeOutputs;
+    if (req.transferRequest != null) {
+      this.transferRequest = new MoneroTransferRequest(req.transferRequest);
+      if (req.transferRequest.getTxRequest() == req) this.transferRequest.setTxRequest(this);
+    }
+    if (req.outputRequest != null) {
+      this.outputRequest = new MoneroOutputRequest(req.outputRequest);
+      if (req.outputRequest.getTxRequest() == req) this.outputRequest.setTxRequest(this) ;
+    }
+  }
+  
+  public MoneroTxRequest copy() {
+    return new MoneroTxRequest(this);
+  }
   
   public Boolean getIsOutgoing() {
     return isOutgoing;

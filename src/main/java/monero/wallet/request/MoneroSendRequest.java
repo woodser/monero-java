@@ -1,6 +1,7 @@
 package monero.wallet.request;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,8 +13,6 @@ import monero.wallet.model.MoneroSendPriority;
 
 /**
  * Configures a request to send/sweep funds or create a payment URI.
- * 
- * TODO: allow setAddress(), setAmount() for default destination?
  */
 public class MoneroSendRequest {
 
@@ -35,7 +34,7 @@ public class MoneroSendRequest {
   private String keyImage;
   
   public MoneroSendRequest() {
-    this(null);
+    this((String) null);
   }
   
   public MoneroSendRequest(String address) {
@@ -58,6 +57,32 @@ public class MoneroSendRequest {
     this.accountIndex = accountIndex;
     if (address != null || amount != null) this.destinations = Arrays.asList(new MoneroDestination(address, amount)); // map address and amount to default destination
     this.priority = priority;
+  }
+  
+  MoneroSendRequest(final MoneroSendRequest req) {
+    if (req.destinations != null) {
+      this.destinations = new ArrayList<MoneroDestination>();
+      for (MoneroDestination destination : req.getDestinations()) this.destinations.add(destination.copy());
+    }
+    this.paymentId = req.paymentId;
+    this.priority = req.priority;
+    this.mixin = req.mixin;
+    this.ringSize = req.ringSize;
+    this.fee = req.fee;
+    this.accountIndex = req.accountIndex;
+    if (req.subaddressIndices != null) this.subaddressIndices = new ArrayList<Integer>(req.subaddressIndices);
+    this.unlockTime = req.unlockTime;
+    this.canSplit = req.canSplit;
+    this.doNotRelay = req.doNotRelay;
+    this.note = req.note;
+    this.recipientName = req.recipientName;
+    this.belowAmount = req.belowAmount;
+    this.sweepEachSubaddress = req.sweepEachSubaddress;
+    this.keyImage = req.keyImage;
+  }
+  
+  public MoneroSendRequest copy() {
+    return new MoneroSendRequest(this);
   }
   
   public List<MoneroDestination> getDestinations() {

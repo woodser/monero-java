@@ -70,7 +70,7 @@ public class MoneroTx {
    * 
    * @param tx is the transaction to make a deep copy of
    */
-  public MoneroTx(MoneroTx tx) {
+  public MoneroTx(final MoneroTx tx) {
     this.id = tx.id;
     this.version = tx.version;
     this.isCoinbase = tx.isCoinbase;
@@ -114,6 +114,10 @@ public class MoneroTx {
     this.maxUsedBlockHeight = tx.maxUsedBlockHeight;
     this.maxUsedBlockId = tx.maxUsedBlockId;
     if (tx.signatures != null) this.signatures = new ArrayList<String>(tx.signatures);
+  }
+  
+  public MoneroTx copy() {
+    return new MoneroTx(this);
   }
   
   @JsonBackReference
@@ -595,10 +599,6 @@ public class MoneroTx {
     }
     
     return this;  // for chaining
-  }
-  
-  public MoneroTx copy() {
-    return new MoneroTx(this);
   }
   
   public String toString() {
