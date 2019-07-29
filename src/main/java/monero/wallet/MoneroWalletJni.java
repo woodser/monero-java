@@ -774,8 +774,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     else {
       if (request.getTxRequest() == null) req = request.copy();
       else {
-        
-        // copy tx request
         MoneroTxRequest txReq = request.getTxRequest().copy();
         if (request.getTxRequest().getTransferRequest() == request) req = txReq.getTransferRequest();
         else {
@@ -826,8 +824,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     else {
       if (request.getTxRequest() == null) req = request.copy();
       else {
-        
-        // copy tx request
         MoneroTxRequest txReq = request.getTxRequest().copy();
         if (request.getTxRequest().getOutputRequest() == request) req = txReq.getOutputRequest();
         else {

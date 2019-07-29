@@ -620,14 +620,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public List<MoneroTransfer> getTransfers(final MoneroTransferRequest request) {
     
-    // copy and normalize request 
+    // copy and normalize request up to block
     MoneroTransferRequest req;
     if (request == null) req = new MoneroTransferRequest();
     else {
       if (request.getTxRequest() == null) req = request.copy();
       else {
-        
-        // copy tx request
         MoneroTxRequest txReq = request.getTxRequest().copy();
         if (request.getTxRequest().getTransferRequest() == request) req = txReq.getTransferRequest();
         else {
@@ -742,14 +740,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public List<MoneroOutputWallet> getOutputs(final MoneroOutputRequest request) {
     
-    // copy and normalize request 
+    // copy and normalize request up to block
     MoneroOutputRequest req;
     if (request == null) req = new MoneroOutputRequest();
     else {
       if (request.getTxRequest() == null) req = request.copy();
       else {
-        
-        // copy tx request
         MoneroTxRequest txReq = request.getTxRequest().copy();
         if (request.getTxRequest().getOutputRequest() == request) req = txReq.getOutputRequest();
         else {
