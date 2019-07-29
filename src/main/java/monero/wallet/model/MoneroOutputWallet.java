@@ -28,13 +28,17 @@ public class MoneroOutputWallet extends MoneroOutput {
    * 
    * @param output is the output to initialize from
    */
-  public MoneroOutputWallet(MoneroOutputWallet output) {
+  public MoneroOutputWallet(final MoneroOutputWallet output) {
     super(output);
-    accountIndex = output.accountIndex;
-    subaddressIndex = output.subaddressIndex;
-    isSpent = output.isSpent;
-    isUnlocked = output.isUnlocked;
-    isFrozen = output.isFrozen;
+    this.accountIndex = output.accountIndex;
+    this.subaddressIndex = output.subaddressIndex;
+    this.isSpent = output.isSpent;
+    this.isUnlocked = output.isUnlocked;
+    this.isFrozen = output.isFrozen;
+  }
+  
+  public MoneroOutputWallet copy() {
+    return new MoneroOutputWallet(this);
   }
   
   public MoneroTxWallet getTx() {
@@ -103,10 +107,6 @@ public class MoneroOutputWallet extends MoneroOutput {
   public MoneroOutputWallet setIsFrozen(Boolean isFrozen) {
     this.isFrozen = isFrozen;
     return this;
-  }
-  
-  public MoneroOutputWallet copy() {
-    return new MoneroOutputWallet(this);
   }
   
   public MoneroOutputWallet merge(MoneroOutput output) {

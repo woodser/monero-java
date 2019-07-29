@@ -26,12 +26,16 @@ public class MoneroOutput {
     // nothing to build
   }
   
-  public MoneroOutput(MoneroOutput output) {
+  public MoneroOutput(final MoneroOutput output) {
     if (output.keyImage != null) this.keyImage = output.keyImage.copy();
     this.amount = output.amount;
     this.index = output.index;
     if (output.ringOutputIndices != null) this.ringOutputIndices = new ArrayList<Integer>(output.ringOutputIndices);
     this.stealthPublicKey = output.stealthPublicKey;
+  }
+  
+  public MoneroOutput copy() {
+    return new MoneroOutput(this);
   }
   
   @JsonBackReference
@@ -87,10 +91,6 @@ public class MoneroOutput {
   public MoneroOutput setStealthPublicKey(String stealthPublicKey) {
     this.stealthPublicKey = stealthPublicKey;
     return this;
-  }
-  
-  public MoneroOutput copy() {
-    return new MoneroOutput(this);
   }
   
   public String toString() {

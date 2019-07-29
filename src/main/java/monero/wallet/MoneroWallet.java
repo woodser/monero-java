@@ -398,7 +398,7 @@ public interface MoneroWallet {
    * @param request filters query results (optional)
    * @return wallet transactions per the request
    */
-  public List<MoneroTxWallet> getTxs(MoneroTxRequest request);
+  public List<MoneroTxWallet> getTxs(final MoneroTxRequest request);
   
   /**
    * Get all incoming and outgoing transfers to and from this wallet.  An
@@ -455,7 +455,7 @@ public interface MoneroWallet {
    * @param request filters query results (optional)
    * @return wallet transfers per the request
    */
-  public List<MoneroTransfer> getTransfers(MoneroTransferRequest request);
+  public List<MoneroTransfer> getTransfers(final MoneroTransferRequest request);
   
   /**
    * Get outputs created from previous transactions that belong to the wallet
@@ -478,7 +478,7 @@ public interface MoneroWallet {
    * @param request specifies request options (optional)
    * @return List<MoneroOutputWallet> are wallet outputs per the request
    */
-  public List<MoneroOutputWallet> getOutputs(MoneroOutputRequest request);
+  public List<MoneroOutputWallet> getOutputs(final MoneroOutputRequest request);
   
   /**
    * Export all outputs in hex format.

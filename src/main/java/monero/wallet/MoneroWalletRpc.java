@@ -533,18 +533,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroTxWallet> getTxs(MoneroTxRequest request) {
+  public List<MoneroTxWallet> getTxs(final MoneroTxRequest request) {
     
-    // normalize tx request
-    if (request == null) request = new MoneroTxRequest();
-    if (request.getTransferRequest() == null) request.setTransferRequest(new MoneroTransferRequest());
-    MoneroTransferRequest transferRequest = request.getTransferRequest();
+    // copy and normalize tx request
+    MoneroTxRequest req = request == null ? new MoneroTxRequest() : request.copy();
+    if (req.getTransferRequest() == null) req.setTransferRequest(new MoneroTransferRequest());
+    MoneroTransferRequest transferReq = req.getTransferRequest();
     
     // temporarily disable transfer request
-    request.setTransferRequest(null);
+    req.setTransferRequest(null);
     
     // fetch all transfers that meet tx request
-    List<MoneroTransfer> transfers = getTransfers(new MoneroTransferRequest().setTxRequest(request));
+    List<MoneroTransfer> transfers = getTransfers(new MoneroTransferRequest().setTxRequest(req));
     
     // collect unique txs from transfers while retaining order
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
@@ -564,8 +564,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     // fetch and merge outputs if requested
-    if (Boolean.TRUE.equals(request.getIncludeOutputs())) {
-      List<MoneroOutputWallet> outputs = getOutputs(new MoneroOutputRequest().setTxRequest(request));
+    if (Boolean.TRUE.equals(req.getIncludeOutputs())) {
+      List<MoneroOutputWallet> outputs = getOutputs(new MoneroOutputRequest().setTxRequest(req));
       
       // merge output txs one time while retaining order
       Set<MoneroTxWallet> outputTxs = new HashSet<MoneroTxWallet>();
@@ -578,17 +578,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     // filter txs that don't meet transfer request
-    request.setTransferRequest(transferRequest);
+    req.setTransferRequest(transferReq);
     List<MoneroTxWallet> txsRequested = new ArrayList<MoneroTxWallet>();
     for (MoneroTxWallet tx : txs) {
-      if (request.meetsCriteria(tx)) txsRequested.add(tx);
+      if (req.meetsCriteria(tx)) txsRequested.add(tx);
       else if (tx.getBlock() != null) tx.getBlock().getTxs().remove(tx);
     }
     txs = txsRequested;
     
     // verify all specified tx ids found
-    if (request.getTxIds() != null) {
-      for (String txId : request.getTxIds()) {
+    if (req.getTxIds() != null) {
+      for (String txId : req.getTxIds()) {
         boolean found = false;
         for (MoneroTxWallet tx : txs) {
           if (txId.equals(tx.getId())) {
@@ -602,15 +602,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // special case: re-fetch txs if inconsistency caused by needing to make multiple rpc calls
     for (MoneroTxWallet tx : txs) {
-      if (tx.getIsConfirmed() && tx.getBlock() == null) return getTxs(request);
+      if (tx.getIsConfirmed() && tx.getBlock() == null) return getTxs(req);
     }
     
     // otherwise order txs if tx ids given then return
-    if (request.getTxIds() != null && !request.getTxIds().isEmpty()) {
+    if (req.getTxIds() != null && !req.getTxIds().isEmpty()) {
       Map<String, MoneroTxWallet> txsById = new HashMap<String, MoneroTxWallet>();  // store txs in temporary map for sorting
       for (MoneroTxWallet tx : txs) txsById.put(tx.getId(), tx);
       List<MoneroTxWallet> orderedTxs = new ArrayList<MoneroTxWallet>();
-      for (String txId : request.getTxIds()) orderedTxs.add(txsById.get(txId));
+      for (String txId : req.getTxIds()) orderedTxs.add(txsById.get(txId));
       txs = orderedTxs;
     }
     return txs;
@@ -618,19 +618,35 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroTransfer> getTransfers(MoneroTransferRequest request) {
+  public List<MoneroTransfer> getTransfers(final MoneroTransferRequest request) {
     
-    // normalize transfer request
-    if (request == null) request = new MoneroTransferRequest();
-    if (request.getTxRequest() == null) request.setTxRequest(new MoneroTxRequest());
-    MoneroTxRequest txReq = request.getTxRequest();
-    
+    // copy and normalize request 
+    MoneroTransferRequest req;
+    if (request == null) req = new MoneroTransferRequest();
+    else {
+      if (request.getTxRequest() == null) req = request.copy();
+      else {
+        
+        // copy tx request
+        MoneroTxRequest txReq = request.getTxRequest().copy();
+        if (request.getTxRequest().getTransferRequest() == request) req = txReq.getTransferRequest();
+        else {
+          assertNull("Transfer request's tx request must be circular reference or null", request.getTxRequest().getTransferRequest());
+          req = request.copy();
+          req.setTxRequest(txReq);
+        }
+      }
+    }
+    if (req.getTxRequest() == null) req.setTxRequest(new MoneroTxRequest());
+    MoneroTxRequest txReq = req.getTxRequest();
+    txReq.setTransferRequest(null); // break circular link for meetsCriteria()
+
     // build params for get_transfers rpc call
     Map<String, Object> params = new HashMap<String, Object>();
     boolean canBeConfirmed = !Boolean.FALSE.equals(txReq.getIsConfirmed()) && !Boolean.TRUE.equals(txReq.getInTxPool()) && !Boolean.TRUE.equals(txReq.getIsFailed()) && !Boolean.FALSE.equals(txReq.getIsRelayed());
     boolean canBeInTxPool = !Boolean.TRUE.equals(txReq.getIsConfirmed()) && !Boolean.FALSE.equals(txReq.getInTxPool()) && !Boolean.TRUE.equals(txReq.getIsFailed()) && !Boolean.FALSE.equals(txReq.getIsRelayed()) && txReq.getHeight() == null && txReq.getMinHeight() == null && txReq.getMaxHeight() == null;
-    boolean canBeIncoming = !Boolean.FALSE.equals(request.getIsIncoming()) && !Boolean.TRUE.equals(request.getIsOutgoing()) && !Boolean.TRUE.equals(request.getHasDestinations());
-    boolean canBeOutgoing = !Boolean.FALSE.equals(request.getIsOutgoing()) && !Boolean.TRUE.equals(request.getIsIncoming());
+    boolean canBeIncoming = !Boolean.FALSE.equals(req.getIsIncoming()) && !Boolean.TRUE.equals(req.getIsOutgoing()) && !Boolean.TRUE.equals(req.getHasDestinations());
+    boolean canBeOutgoing = !Boolean.FALSE.equals(req.getIsOutgoing()) && !Boolean.TRUE.equals(req.getIsIncoming());
     params.put("in", canBeIncoming && canBeConfirmed);
     params.put("out", canBeOutgoing && canBeConfirmed);
     params.put("pool", canBeIncoming && canBeInTxPool);
@@ -642,17 +658,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     if (txReq.getMaxHeight() != null) params.put("max_height", txReq.getMaxHeight());
     params.put("filter_by_height", txReq.getMinHeight() != null || txReq.getMaxHeight() != null);
-    if (request.getAccountIndex() == null) {
-      assertTrue("Filter specifies a subaddress index but not an account index", request.getSubaddressIndex() == null && request.getSubaddressIndices() == null);
+    if (req.getAccountIndex() == null) {
+      assertTrue("Filter specifies a subaddress index but not an account index", req.getSubaddressIndex() == null && req.getSubaddressIndices() == null);
       params.put("all_accounts", true);
     } else {
-      params.put("account_index", request.getAccountIndex());
+      params.put("account_index", req.getAccountIndex());
       
       // set subaddress indices param
       Set<Integer> subaddressIndices = new HashSet<Integer>();
-      if (request.getSubaddressIndex() != null) subaddressIndices.add(request.getSubaddressIndex());
-      if (request.getSubaddressIndices() != null) {
-        for (int subaddressIdx : request.getSubaddressIndices()) subaddressIndices.add(subaddressIdx);
+      if (req.getSubaddressIndex() != null) subaddressIndices.add(req.getSubaddressIndex());
+      if (req.getSubaddressIndices() != null) {
+        for (int subaddressIdx : req.getSubaddressIndices()) subaddressIndices.add(subaddressIdx);
       }
       if (!subaddressIndices.isEmpty()) params.put("subaddr_indices", new ArrayList<Integer>(subaddressIndices));
     }
@@ -700,14 +716,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (tx.getIncomingTransfers() != null) Collections.sort(tx.getIncomingTransfers(), new IncomingTransferComparator());
       
       // collect outgoing transfer, erase if filtered
-      if (tx.getOutgoingTransfer() != null && request.meetsCriteria(tx.getOutgoingTransfer())) transfers.add(tx.getOutgoingTransfer());
+      if (tx.getOutgoingTransfer() != null && req.meetsCriteria(tx.getOutgoingTransfer())) transfers.add(tx.getOutgoingTransfer());
       else tx.setOutgoingTransfer(null);
       
       // collect incoming transfers, erase if unrequested
       if (tx.getIncomingTransfers() != null) {
         List<MoneroIncomingTransfer> toRemoves = new ArrayList<MoneroIncomingTransfer>();
         for (MoneroIncomingTransfer transfer : tx.getIncomingTransfers()) {
-          if (request.meetsCriteria(transfer)) transfers.add(transfer);
+          if (req.meetsCriteria(transfer)) transfers.add(transfer);
           else toRemoves.add(transfer);
         }
         tx.getIncomingTransfers().removeAll(toRemoves);
@@ -724,22 +740,39 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroOutputWallet> getOutputs(MoneroOutputRequest request) {
+  public List<MoneroOutputWallet> getOutputs(final MoneroOutputRequest request) {
     
-    // normalize output request
-    if (request == null) request = new MoneroOutputRequest();
-    if (request.getTxRequest() == null) request.setTxRequest(new MoneroTxRequest());
+    // copy and normalize request 
+    MoneroOutputRequest req;
+    if (request == null) req = new MoneroOutputRequest();
+    else {
+      if (request.getTxRequest() == null) req = request.copy();
+      else {
+        
+        // copy tx request
+        MoneroTxRequest txReq = request.getTxRequest().copy();
+        if (request.getTxRequest().getOutputRequest() == request) req = txReq.getOutputRequest();
+        else {
+          assertNull("Transfer request's tx request must be circular reference or null", request.getTxRequest().getOutputRequest());
+          req = request.copy();
+          req.setTxRequest(txReq);
+        }
+      }
+    }
+    if (req.getTxRequest() == null) req.setTxRequest(new MoneroTxRequest());
+    MoneroTxRequest txReq = req.getTxRequest();
+    txReq.setOutputRequest(null); // break circular link for meetsCriteria()
     
     // determine account and subaddress indices to be queried
     Map<Integer, List<Integer>> indices = new HashMap<Integer, List<Integer>>();
-    if (request.getAccountIndex() != null) {
+    if (req.getAccountIndex() != null) {
       Set<Integer> subaddressIndices = new HashSet<Integer>();
-      if (request.getSubaddressIndex() != null) subaddressIndices.add(request.getSubaddressIndex());
-      if (request.getSubaddressIndices() != null) for (int subaddressIdx : request.getSubaddressIndices()) subaddressIndices.add(subaddressIdx);
-      indices.put(request.getAccountIndex(), subaddressIndices.isEmpty() ? null : new ArrayList<Integer>(subaddressIndices));  // null will fetch from all subaddresses
+      if (req.getSubaddressIndex() != null) subaddressIndices.add(req.getSubaddressIndex());
+      if (req.getSubaddressIndices() != null) for (int subaddressIdx : req.getSubaddressIndices()) subaddressIndices.add(subaddressIdx);
+      indices.put(req.getAccountIndex(), subaddressIndices.isEmpty() ? null : new ArrayList<Integer>(subaddressIndices));  // null will fetch from all subaddresses
     } else {
-      assertEquals("Request specifies a subaddress index but not an account index", null, request.getSubaddressIndex());
-      assertTrue("Request specifies subaddress indices but not an account index", request.getSubaddressIndices() == null || request.getSubaddressIndices().size() == 0);
+      assertEquals("Request specifies a subaddress index but not an account index", null, req.getSubaddressIndex());
+      assertTrue("Request specifies subaddress indices but not an account index", req.getSubaddressIndices() == null || req.getSubaddressIndices().size() == 0);
       indices = getAccountIndices(false);  // fetch all account indices without subaddresses
     }
     
@@ -750,14 +783,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // collect txs with vouts for each indicated account using `incoming_transfers` rpc call
     Map<String, Object> params = new HashMap<String, Object>();
     String transferType;
-    if (Boolean.TRUE.equals(request.getIsSpent())) transferType = "unavailable";
-    else if (Boolean.FALSE.equals(request.getIsSpent())) transferType = "available";
+    if (Boolean.TRUE.equals(req.getIsSpent())) transferType = "unavailable";
+    else if (Boolean.FALSE.equals(req.getIsSpent())) transferType = "available";
     else transferType = "all";
     params.put("transfer_type", transferType);
     params.put("verbose", true);
     for (int accountIdx : indices.keySet()) {
     
-      // send request
+      // send reqCopy
       params.put("account_index", accountIdx);
       params.put("subaddr_indices", indices.get(accountIdx));
       Map<String, Object> resp = rpc.sendJsonRequest("incoming_transfers", params);
@@ -780,7 +813,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     for (MoneroTxWallet tx : txs) {
       List<MoneroOutput> toRemoves = new ArrayList<MoneroOutput>();
       for (MoneroOutput vout : tx.getVouts()) {
-        if (request.meetsCriteria((MoneroOutputWallet) vout)) vouts.add((MoneroOutputWallet) vout);
+        if (req.meetsCriteria((MoneroOutputWallet) vout)) vouts.add((MoneroOutputWallet) vout);
         else toRemoves.add(vout);
       }
       
@@ -864,7 +897,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   @SuppressWarnings("unchecked")
-  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
+  public List<MoneroTxWallet> sendSplit(final MoneroSendRequest request) {
     
     // validate / sanitize request
     if (request == null) throw new MoneroException("Send request cannot be null");

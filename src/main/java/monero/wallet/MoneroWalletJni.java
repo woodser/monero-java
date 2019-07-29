@@ -22,6 +22,8 @@
 
 package monero.wallet;
 
+import static org.junit.Assert.assertNull;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -722,17 +724,17 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroTxWallet> getTxs(MoneroTxRequest request) {
+  public List<MoneroTxWallet> getTxs(final MoneroTxRequest request) {
     assertNotClosed();
     
-    // initialize request up to block
-    if (request == null) request = new MoneroTxRequest();
-    if (request.getBlock() == null) request.setBlock(new MoneroBlock().setTxs(request));
+    // copy and normalize tx request up to block
+    MoneroTxRequest req = request == null ? new MoneroTxRequest() : request.copy();
+    if (req.getBlock() == null) req.setBlock(new MoneroBlock().setTxs(req));
     
-    // serialize request from block and fetch txs from jni
+    // serialize req from block and fetch txs from jni
     String blocksJson;
     try {
-      blocksJson = getTxsJni(JsonUtils.serialize(request.getBlock()));
+      blocksJson = getTxsJni(JsonUtils.serialize(req.getBlock()));
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -751,11 +753,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
     
     // re-sort txs which is lost over jni serialization
-    if (request.getTxIds() != null) {
+    if (req.getTxIds() != null) {
       Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
       for (MoneroTxWallet tx : txs) txMap.put(tx.getId(), tx);
       List<MoneroTxWallet> txsSorted = new ArrayList<MoneroTxWallet>();
-      for (String txId : request.getTxIds()) txsSorted.add(txMap.get(txId));
+      for (String txId : req.getTxIds()) txsSorted.add(txMap.get(txId));
       txs = txsSorted;
     }
     LOGGER.info("getTxs() returning " + txs.size() + " transactions");
@@ -763,19 +765,34 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroTransfer> getTransfers(MoneroTransferRequest request) {
+  public List<MoneroTransfer> getTransfers(final MoneroTransferRequest request) {
     assertNotClosed();
     
-    // initialize request up to block
-    if (request == null) request = new MoneroTransferRequest();
-    if (request.getTxRequest() == null) request.setTxRequest(new MoneroTxRequest().setTransferRequest(request));
-    else request.getTxRequest().setTransferRequest(request);
-    if (request.getTxRequest().getBlock() == null) request.getTxRequest().setBlock(new MoneroBlock().setTxs(request.getTxRequest()));
+    // copy and normalize request up to block
+    MoneroTransferRequest req;
+    if (request == null) req = new MoneroTransferRequest();
+    else {
+      if (request.getTxRequest() == null) req = request.copy();
+      else {
+        
+        // copy tx request
+        MoneroTxRequest txReq = request.getTxRequest().copy();
+        if (request.getTxRequest().getTransferRequest() == request) req = txReq.getTransferRequest();
+        else {
+          assertNull("Transfer request's tx request must be circular reference or null", request.getTxRequest().getTransferRequest());
+          req = request.copy();
+          req.setTxRequest(txReq);
+        }
+      }
+    }
+    if (req.getTxRequest() == null) req.setTxRequest(new MoneroTxRequest());
+    req.getTxRequest().setTransferRequest(req);
+    if (req.getTxRequest().getBlock() == null) req.getTxRequest().setBlock(new MoneroBlock().setTxs(req.getTxRequest()));
     
-    // serialize request from block and fetch transfers from jni
+    // serialize req from block and fetch transfers from jni
     String blocksJson;
     try {
-      blocksJson = getTransfersJni(JsonUtils.serialize(request.getTxRequest().getBlock()));
+      blocksJson = getTransfersJni(JsonUtils.serialize(req.getTxRequest().getBlock()));
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -800,17 +817,32 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroOutputWallet> getOutputs(MoneroOutputRequest request) {
+  public List<MoneroOutputWallet> getOutputs(final MoneroOutputRequest request) {
     assertNotClosed();
     
-    // initialize request up to block
-    if (request == null) request = new MoneroOutputRequest();
-    if (request.getTxRequest() == null) request.setTxRequest(new MoneroTxRequest().setOutputRequest(request));
-    else request.getTxRequest().setOutputRequest(request);
-    if (request.getTxRequest().getBlock() == null) request.getTxRequest().setBlock(new MoneroBlock().setTxs(request.getTxRequest()));
+    // copy and normalize request up to block
+    MoneroOutputRequest req;
+    if (request == null) req = new MoneroOutputRequest();
+    else {
+      if (request.getTxRequest() == null) req = request.copy();
+      else {
+        
+        // copy tx request
+        MoneroTxRequest txReq = request.getTxRequest().copy();
+        if (request.getTxRequest().getOutputRequest() == request) req = txReq.getOutputRequest();
+        else {
+          assertNull("Output request's tx request must be circular reference or null", request.getTxRequest().getOutputRequest());
+          req = request.copy();
+          req.setTxRequest(txReq);
+        }
+      }
+    }
+    if (req.getTxRequest() == null) req.setTxRequest(new MoneroTxRequest());
+    req.getTxRequest().setOutputRequest(req);
+    if (req.getTxRequest().getBlock() == null) req.getTxRequest().setBlock(new MoneroBlock().setTxs(req.getTxRequest()));
     
-    // serialize request from block and fetch outputs from jni
-    String blocksJson = getOutputsJni(JsonUtils.serialize(request.getTxRequest().getBlock()));
+    // serialize req from block and fetch outputs from jni
+    String blocksJson = getOutputsJni(JsonUtils.serialize(req.getTxRequest().getBlock()));
     
     // deserialize blocks
     List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
@@ -878,7 +910,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
+  public List<MoneroTxWallet> sendSplit(final MoneroSendRequest request) {
     assertNotClosed();
     LOGGER.info("java sendSplit(request)");
     LOGGER.info("Send request: " + JsonUtils.serialize(request));

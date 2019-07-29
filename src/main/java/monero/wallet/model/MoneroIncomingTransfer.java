@@ -18,10 +18,15 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     // nothing to initialize
   }
   
-  public MoneroIncomingTransfer(MoneroIncomingTransfer transfer) {
+  public MoneroIncomingTransfer(final MoneroIncomingTransfer transfer) {
     super(transfer);
     this.subaddressIndex = transfer.subaddressIndex;
     this.address = transfer.address;
+  }
+  
+  @Override
+  public MoneroIncomingTransfer copy() {
+    return new MoneroIncomingTransfer(this);
   }
   
   public Boolean getIsIncoming() {
@@ -46,10 +51,6 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     return this;
   }
 
-  public MoneroIncomingTransfer copy() {
-    return new MoneroIncomingTransfer(this);
-  }
-  
   public MoneroIncomingTransfer merge(MoneroTransfer transfer) {
     assertTrue(transfer instanceof MoneroIncomingTransfer);
     return merge((MoneroIncomingTransfer) transfer);

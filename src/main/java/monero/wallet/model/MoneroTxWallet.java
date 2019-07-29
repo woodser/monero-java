@@ -26,7 +26,7 @@ public class MoneroTxWallet extends MoneroTx {
     // nothing to initialize
   }
   
-  public MoneroTxWallet(MoneroTxWallet tx) {
+  public MoneroTxWallet(final MoneroTxWallet tx) {
     super(tx);
     if (tx.incomingTransfers != null) {
       this.incomingTransfers = new ArrayList<MoneroIncomingTransfer>();
@@ -36,6 +36,10 @@ public class MoneroTxWallet extends MoneroTx {
     }
     if (tx.outgoingTransfer != null) this.outgoingTransfer = tx.outgoingTransfer.copy().setTx(this);
     this.note = tx.note;
+  }
+  
+  public MoneroTxWallet copy() {
+    return new MoneroTxWallet(this);
   }
   
   // ----------------------------- WALLET-SPECIFIC ----------------------------
@@ -134,10 +138,6 @@ public class MoneroTxWallet extends MoneroTx {
   public MoneroTxWallet setNote(String note) {
     this.note = note;
     return this;
-  }
-  
-  public MoneroTxWallet copy() {
-    return new MoneroTxWallet(this);
   }
   
   public MoneroTxWallet merge(MoneroTx tx) {

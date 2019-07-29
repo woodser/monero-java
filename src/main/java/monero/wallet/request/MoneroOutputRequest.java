@@ -1,6 +1,7 @@
 package monero.wallet.request;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -25,6 +26,16 @@ public class MoneroOutputRequest extends MoneroOutputWallet implements Filter<Mo
   
   public MoneroOutputRequest() {
     super();
+  }
+  
+  public MoneroOutputRequest(final MoneroOutputRequest req) {
+    super(req);
+    if (req.subaddressIndices != null) this.subaddressIndices = new ArrayList<Integer>(req.subaddressIndices);
+    this.txRequest = req.txRequest;  // reference original by default, MoneroTxRequest's deep copy will set this to itself
+  }
+  
+  public MoneroOutputRequest copy() {
+    return new MoneroOutputRequest(this);
   }
   
   public List<Integer> getSubaddressIndices() {
