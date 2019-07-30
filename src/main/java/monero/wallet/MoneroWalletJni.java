@@ -760,7 +760,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       for (String txId : req.getTxIds()) txsSorted.add(txMap.get(txId));
       txs = txsSorted;
     }
-    LOGGER.info("getTxs() returning " + txs.size() + " transactions");
+    LOGGER.debug("getTxs() returning " + txs.size() + " transactions");
     return txs;
   }
 
@@ -908,8 +908,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<MoneroTxWallet> sendSplit(final MoneroSendRequest request) {
     assertNotClosed();
-    LOGGER.info("java sendSplit(request)");
-    LOGGER.info("Send request: " + JsonUtils.serialize(request));
+    LOGGER.debug("java sendSplit(request)");
+    LOGGER.debug("Send request: " + JsonUtils.serialize(request));
     
     // validate request
     if (request == null) throw new MoneroException("Send request cannot be null");
@@ -918,7 +918,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     String blocksJson;
     try {
       blocksJson = sendSplitJni(JsonUtils.serialize(request));
-      LOGGER.info("Received sendSplit() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
+      LOGGER.debug("Received sendSplit() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -935,7 +935,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
         txs.add((MoneroTxWallet) tx);
       }
     }
-    LOGGER.info("Created " + txs.size() + " transaction(s) in last send request");
+    LOGGER.debug("Created " + txs.size() + " transaction(s) in last send request");
     return txs;
   }
 
