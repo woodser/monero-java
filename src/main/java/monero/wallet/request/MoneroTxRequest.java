@@ -43,6 +43,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     this.isIncoming = req.isIncoming;
     if (req.txIds != null) this.txIds = new ArrayList<String>(req.txIds);
     this.hasPaymentId = req.hasPaymentId;
+    if (req.paymentIds != null) this.paymentIds = new ArrayList<String>(req.paymentIds);
     this.height = req.height;
     this.minHeight = req.minHeight;
     this.maxHeight = req.maxHeight;
