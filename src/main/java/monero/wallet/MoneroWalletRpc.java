@@ -1956,7 +1956,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       MoneroOutputWallet ow1 = (MoneroOutputWallet) o1;
       MoneroOutputWallet ow2 = (MoneroOutputWallet) o2;
       if (ow1.getAccountIndex() < ow2.getAccountIndex()) return -1;
-      else if (ow1.getAccountIndex() == ow2.getAccountIndex()) return ow1.getSubaddressIndex().compareTo(ow2.getSubaddressIndex());
+      else if (ow1.getAccountIndex() == ow2.getAccountIndex()) {
+        int compare = ow1.getSubaddressIndex().compareTo(ow2.getSubaddressIndex());
+        if (compare != 0) return compare;
+        return ow1.getIndex().compareTo(ow2.getIndex());
+      }
       return 1;
     }
   }
