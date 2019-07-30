@@ -47,6 +47,7 @@ lots of internal wallet errors when daemon rpc tests run
 add final keyword to method args where appropriate
 
 LOW
+common wallet tests test structures of txs, transfers, and outputs in testGetTxs(), etc
 should vouts be part of incoming transfers?  typically one vout per transfer but not necessarily?
 wallet.cpp m_synchronized only ever set to true, never false
 get_reserve_proof document default account 0
