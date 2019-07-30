@@ -21,8 +21,8 @@ import monero.wallet.model.MoneroTxWallet;
  */
 public class MoneroOutputRequest extends MoneroOutputWallet implements Filter<MoneroOutputWallet> {
 
-  private List<Integer> subaddressIndices;
   private MoneroTxRequest txRequest;
+  private List<Integer> subaddressIndices;
   
   public MoneroOutputRequest() {
     super();
@@ -36,6 +36,16 @@ public class MoneroOutputRequest extends MoneroOutputWallet implements Filter<Mo
   
   public MoneroOutputRequest copy() {
     return new MoneroOutputRequest(this);
+  }
+  
+  @JsonIgnore
+  public MoneroTxRequest getTxRequest() {
+    return txRequest;
+  }
+
+  public MoneroOutputRequest setTxRequest(MoneroTxRequest txRequest) {
+    this.txRequest = txRequest;
+    return this;
   }
   
   public List<Integer> getSubaddressIndices() {
@@ -52,16 +62,6 @@ public class MoneroOutputRequest extends MoneroOutputWallet implements Filter<Mo
     return this;
   }
   
-  @JsonIgnore
-  public MoneroTxRequest getTxRequest() {
-    return txRequest;
-  }
-
-  public MoneroOutputRequest setTxRequest(MoneroTxRequest txRequest) {
-    this.txRequest = txRequest;
-    return this;
-  }
-
   @Override
   public boolean meetsCriteria(MoneroOutputWallet output) {
     if (!(output instanceof MoneroOutputWallet)) return false;
