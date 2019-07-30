@@ -10,10 +10,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.junit.Test;
 
+import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
@@ -317,11 +317,64 @@ public class TestMoneroWalletsEqual {
   
   protected void testOutputWalletsEqualOnChain(List<MoneroOutputWallet> outputs1, List<MoneroOutputWallet> outputs2) {
     assertEquals(outputs1.size(), outputs2.size());
+    
+    // test and collect outputs per transaction
+    Map<String, List<MoneroOutputWallet>> txsOutputs1 = new HashMap<String, List<MoneroOutputWallet>>();
+    Map<String, List<MoneroOutputWallet>> txsOutputs2 = new HashMap<String, List<MoneroOutputWallet>>();
+    Long lastHeight = null;
+    MoneroTxWallet lastTx1 = null;
+    MoneroTxWallet lastTx2 = null;
     for (int i = 0; i < outputs1.size(); i++) {
-      MoneroOutputWallet o1 = outputs1.get(i);
-      MoneroOutputWallet o2 = outputs2.get(i);
-      assertEquals(o1.getTx().getId(), o2.getTx().getId());
-      assertEquals(o1, o2);
+      MoneroOutputWallet output1 = outputs1.get(i);
+      MoneroOutputWallet output2 = outputs2.get(i);
+      
+      // outputs must have same height even if they don't belong to same tx (because tx ordering within blocks is not currently provided by wallet2)
+      assertEquals((long) output1.getTx().getHeight(), (long) output2.getTx().getHeight());
+      
+      // outputs must be in ascending order by height
+      if (lastHeight == null) lastHeight = output1.getTx().getHeight();
+      else assertTrue(lastHeight <= output1.getTx().getHeight());
+      
+      // outputs must be consecutive per transaction
+      if (lastTx1 != output1.getTx()) {
+        assertFalse(txsOutputs1.containsKey(output1.getTx().getId()));  // cannot be seen before
+        lastTx1 = (MoneroTxWallet) output1.getTx();
+      }
+      if (lastTx2 != output2.getTx()) {
+        assertFalse(txsOutputs2.containsKey(output2.getTx().getId()));  // cannot be seen before
+        lastTx2 = (MoneroTxWallet) output2.getTx();
+      }
+      
+      // collect tx1 output
+      List<MoneroOutputWallet> txOutputs1 = txsOutputs1.get(output1.getTx().getId());
+      if (txOutputs1 == null) {
+        txOutputs1 = new ArrayList<MoneroOutputWallet>();
+        txsOutputs1.put(output1.getTx().getId(), txOutputs1);
+      }
+      txOutputs1.add(output1);
+      
+      // collect tx2 output
+      List<MoneroOutputWallet> txOutputs2 = txsOutputs2.get(output2.getTx().getId());
+      if (txOutputs2 == null) {
+        txOutputs2 = new ArrayList<MoneroOutputWallet>();
+        txsOutputs2.put(output2.getTx().getId(), txOutputs2);
+      }
+      txOutputs2.add(output2);
+    }
+    
+    // compare collected outputs per tx for equality
+    for (String txId : txsOutputs1.keySet()) {
+      List<MoneroOutputWallet> txOutputs1 = txsOutputs1.get(txId);
+      List<MoneroOutputWallet> txOutputs2 = txsOutputs2.get(txId);
+      assertEquals(txOutputs1.size(), txOutputs2.size());
+      
+      // normalize and compare outputs
+      for (int i = 0; i < txOutputs1.size(); i++) {
+        MoneroOutput output1 = txOutputs1.get(i);
+        MoneroOutput output2 = txOutputs2.get(i);
+        assertEquals(output1.getTx().getId(), output2.getTx().getId());
+        assertEquals(output1, output2);
+      }
     }
   }
 }
