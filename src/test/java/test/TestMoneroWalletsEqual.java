@@ -7,7 +7,10 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.Test;
 
@@ -225,29 +228,100 @@ public class TestMoneroWalletsEqual {
   
   protected void testTransfersEqualOnChain(List<MoneroTransfer> transfers1, List<MoneroTransfer> transfers2) {
     assertEquals(transfers1.size(), transfers2.size());
+    
+    // test and collect transfers per transaction
+    Map<String, List<MoneroTransfer>> txsTransfers1 = new HashMap<String, List<MoneroTransfer>>();
+    Map<String, List<MoneroTransfer>> txsTransfers2 = new HashMap<String, List<MoneroTransfer>>();
+    Long lastHeight = null;
+    MoneroTxWallet lastTx1 = null;
+    MoneroTxWallet lastTx2 = null;
     for (int i = 0; i < transfers1.size(); i++) {
-      MoneroTransfer t1 = transfers1.get(0);
-      MoneroTransfer t2 = transfers2.get(0);
+      MoneroTransfer transfer1 = transfers1.get(i);
+      MoneroTransfer transfer2 = transfers2.get(i);
       
-      // transfer destinations if known for comparison
-      if (t1 instanceof MoneroOutgoingTransfer) {
-        MoneroOutgoingTransfer ot1 = (MoneroOutgoingTransfer) t1;
-        MoneroOutgoingTransfer ot2 = (MoneroOutgoingTransfer) t2;
-        
-        // transfer destination info if known for comparison
-        if (ot1.getDestinations() != null) {
-          if (ot2.getDestinations() == null) transferDestinationInfo(ot1.getTx(), ot2.getTx());
-        } else if (ot2.getDestinations() != null) {
-          transferDestinationInfo(ot2.getTx(), ot1.getTx());
-        }
+      // transfers must have same height even if they don't belong to same tx (because tx ordering within blocks is not currently provided by wallet2)
+      assertEquals((long) transfer1.getTx().getHeight(), (long) transfer2.getTx().getHeight());
+      
+      // transfers must be in ascending order by height
+      if (lastHeight == null) lastHeight = transfer1.getTx().getHeight();
+      else assertTrue(lastHeight <= transfer1.getTx().getHeight());
+      
+      // transfers must be consecutive per transaction
+      if (lastTx1 != transfer1.getTx()) {
+        assertFalse(txsTransfers1.containsKey(transfer1.getTx().getId()));  // cannot be seen before
+        lastTx1 = transfer1.getTx();
+      }
+      if (lastTx2 != transfer2.getTx()) {
+        assertFalse(txsTransfers2.containsKey(transfer2.getTx().getId()));  // cannot be seen before
+        lastTx2 = transfer2.getTx();
       }
       
-      // transfers should be equal
-      assertEquals(t1, t2);
+      // collect tx1 transfer
+      List<MoneroTransfer> txTransfers1 = txsTransfers1.get(transfer1.getTx().getId());
+      if (txTransfers1 == null) {
+        txTransfers1 = new ArrayList<MoneroTransfer>();
+        txsTransfers1.put(transfer1.getTx().getId(), txTransfers1);
+      }
+      txTransfers1.add(transfer1);
+      
+      // collect tx2 transfer
+      List<MoneroTransfer> txTransfers2 = txsTransfers2.get(transfer2.getTx().getId());
+      if (txTransfers2 == null) {
+        txTransfers2 = new ArrayList<MoneroTransfer>();
+        txsTransfers2.put(transfer2.getTx().getId(), txTransfers2);
+      }
+      txTransfers2.add(transfer2);
+    }
+    
+    // compare collected transfers per tx for equality
+    for (String txId : txsTransfers1.keySet()) {
+      List<MoneroTransfer> txTransfers1 = txsTransfers1.get(txId);
+      List<MoneroTransfer> txTransfers2 = txsTransfers2.get(txId);
+      assertEquals(txTransfers1.size(), txTransfers2.size());
+      
+      // normalize and compare transfers
+      for (int i = 0; i < txTransfers1.size(); i++) {
+        MoneroTransfer transfer1 = txTransfers1.get(i);
+        MoneroTransfer transfer2 = txTransfers2.get(i);
+        
+        // normalize outgoing transfers
+        if (transfer1 instanceof MoneroOutgoingTransfer) {
+          MoneroOutgoingTransfer ot1 = (MoneroOutgoingTransfer) transfer1;
+          MoneroOutgoingTransfer ot2 = (MoneroOutgoingTransfer) transfer2;
+    
+          // transfer destination info if known for comparison
+          if (ot1.getDestinations() != null) {
+            if (ot2.getDestinations() == null) transferDestinationInfo(ot1.getTx(), ot2.getTx());
+          } else if (ot2.getDestinations() != null) {
+            transferDestinationInfo(ot2.getTx(), ot1.getTx());
+          }
+          
+          // nullify other local wallet data
+          ot1.setAddresses(null);
+          ot2.setAddresses(null);
+        }
+        
+        // normalize incoming transfers
+        else {
+          MoneroIncomingTransfer it1 = (MoneroIncomingTransfer) transfer1;
+          MoneroIncomingTransfer it2 = (MoneroIncomingTransfer) transfer2;
+          it1.setAddress(null);
+          it2.setAddress(null);
+        }
+        
+        // compare transfer equality
+        assertEquals(transfer1, transfer2);
+      }
     }
   }
   
   protected void testOutputWalletsEqualOnChain(List<MoneroOutputWallet> outputs1, List<MoneroOutputWallet> outputs2) {
-    assertEquals(outputs1, outputs2);
+    assertEquals(outputs1.size(), outputs2.size());
+    for (int i = 0; i < outputs1.size(); i++) {
+      MoneroOutputWallet o1 = outputs1.get(i);
+      MoneroOutputWallet o2 = outputs2.get(i);
+      assertEquals(o1.getTx().getId(), o2.getTx().getId());
+      assertEquals(o1, o2);
+    }
   }
 }
