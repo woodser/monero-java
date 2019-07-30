@@ -66,10 +66,9 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 
 14.1.0+ RELEASE
-wallet equality should compares more extensions
-work through problems of testing fresh wallet again
-compare time to gui vs manual sync vs auto sync - 1:22 vs 1:52 vs ?
 moar notifications
+compare time to gui vs manual sync vs auto sync - 1:22 vs 1:52 vs ?
+work through problems of testing fresh wallet again
 rpc supports on_restore_determinstic_wallet, implement!
 better sample code, maybe with two wallets, sending each other funds
 MoneroTxRequest -> MoneroTxQuery, etc?
@@ -112,6 +111,7 @@ support sign_transfer, submit_transfer, etc
 test changing wallet password with moveTo()
 
 LOW
+more wallet comparison?
 test filtering with not relayed
 tx pool stats and other binary calls
 refine model to not use null where inappropriate e.g. tx pool status numTxs() should never be null
