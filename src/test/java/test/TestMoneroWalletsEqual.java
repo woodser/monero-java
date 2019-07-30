@@ -17,9 +17,13 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc.IncomingTransferComparator;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroIncomingTransfer;
+import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSubaddress;
+import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.request.MoneroOutputRequest;
+import monero.wallet.request.MoneroTransferRequest;
 import monero.wallet.request.MoneroTxRequest;
 import utils.TestUtils;
 
@@ -78,15 +82,17 @@ public class TestMoneroWalletsEqual {
     assertEquals(w1.getPrimaryAddress(), w2.getPrimaryAddress());
     assertEquals(w1.getPrivateViewKey(), w2.getPrivateViewKey());
     assertEquals(w1.getPrivateSpendKey(), w2.getPrivateSpendKey());
-    MoneroTxRequest confirmedReq = new MoneroTxRequest().setIsConfirmed(true);
-    testTxWalletsEqualOnChain(w1.getTxs(confirmedReq), w2.getTxs(confirmedReq));
-    confirmedReq.setIncludeOutputs(true);
-    testTxWalletsEqualOnChain(w1.getTxs(confirmedReq), w2.getTxs(confirmedReq));  // fetch and compare outputs
+    MoneroTxRequest txRequest = new MoneroTxRequest().setIsConfirmed(true);
+    testTxWalletsEqualOnChain(w1.getTxs(txRequest), w2.getTxs(txRequest));
+    txRequest.setIncludeOutputs(true);
+    testTxWalletsEqualOnChain(w1.getTxs(txRequest), w2.getTxs(txRequest));  // fetch and compare outputs
     testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
     assertEquals(w1.getBalance(), w2.getBalance());
     assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
-    //testOutputWalletsEqualOnChain(w1.getOutputs(), w2.getOutputs());
-    // TOOD **: compare outputs, etc
+    MoneroTransferRequest transferRequest = new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setIsConfirmed(true));
+    testTransfersEqualOnChain(w1.getTransfers(transferRequest), w2.getTransfers(transferRequest));
+    MoneroOutputRequest outputRequest = new MoneroOutputRequest().setTxRequest(new MoneroTxRequest().setIsConfirmed(true));
+    testOutputWalletsEqualOnChain(w1.getOutputs(outputRequest), w2.getOutputs(outputRequest));
   }
   
   protected void testAccountsEqualOnChain(List<MoneroAccount> accounts1, List<MoneroAccount> accounts2) {
@@ -173,9 +179,7 @@ public class TestMoneroWalletsEqual {
           
           // transfer destination info if known for comparison
           if (tx1.getOutgoingTransfer() != null && tx1.getOutgoingTransfer().getDestinations() != null) {
-            if (tx2.getOutgoingTransfer() == null || tx2.getOutgoingTransfer().getDestinations() == null) {
-              transferDestinationInfo(tx1, tx2);
-            }
+            if (tx2.getOutgoingTransfer() == null || tx2.getOutgoingTransfer().getDestinations() == null) transferDestinationInfo(tx1, tx2);
           } else if (tx2.getOutgoingTransfer() != null && tx2.getOutgoingTransfer().getDestinations() != null) {
             transferDestinationInfo(tx2, tx1);
           }
@@ -219,7 +223,31 @@ public class TestMoneroWalletsEqual {
     }
   }
   
+  protected void testTransfersEqualOnChain(List<MoneroTransfer> transfers1, List<MoneroTransfer> transfers2) {
+    assertEquals(transfers1.size(), transfers2.size());
+    for (int i = 0; i < transfers1.size(); i++) {
+      MoneroTransfer t1 = transfers1.get(0);
+      MoneroTransfer t2 = transfers2.get(0);
+      
+      // transfer destinations if known for comparison
+      if (t1 instanceof MoneroOutgoingTransfer) {
+        MoneroOutgoingTransfer ot1 = (MoneroOutgoingTransfer) t1;
+        MoneroOutgoingTransfer ot2 = (MoneroOutgoingTransfer) t2;
+        
+        // transfer destination info if known for comparison
+        if (ot1.getDestinations() != null) {
+          if (ot2.getDestinations() == null) transferDestinationInfo(ot1.getTx(), ot2.getTx());
+        } else if (ot2.getDestinations() != null) {
+          transferDestinationInfo(ot2.getTx(), ot1.getTx());
+        }
+      }
+      
+      // transfers should be equal
+      assertEquals(t1, t2);
+    }
+  }
+  
   protected void testOutputWalletsEqualOnChain(List<MoneroOutputWallet> outputs1, List<MoneroOutputWallet> outputs2) {
-    throw new RuntimeException("Not implemented");
+    assertEquals(outputs1, outputs2);
   }
 }
