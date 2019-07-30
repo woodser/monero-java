@@ -805,10 +805,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       for (MoneroTx tx : block.getTxs()) {
         if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
         MoneroTxWallet txWallet = (MoneroTxWallet) tx;
+        if (txWallet.getOutgoingTransfer() != null) transfers.add(txWallet.getOutgoingTransfer());
         if (txWallet.getIncomingTransfers() != null) {
           for (MoneroIncomingTransfer transfer : txWallet.getIncomingTransfers()) transfers.add(transfer);
         }
-        if (txWallet.getOutgoingTransfer() != null) transfers.add(txWallet.getOutgoingTransfer());
       }
     }
     return transfers;

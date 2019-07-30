@@ -1,12 +1,9 @@
 package utils;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import monero.daemon.MoneroDaemon;
+import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
@@ -24,7 +21,7 @@ public class Scratchpad {
     // initialize daemon, wallet, and direct rpc interface
     MoneroDaemon daemon = TestUtils.getDaemonRpc();
     MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
-    //MoneroWalletJni walletJni = TestUtils.getWalletJni();
+    MoneroWalletJni walletJni = TestUtils.getWalletJni();
     //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
     
 //    // common variables
@@ -35,18 +32,24 @@ public class Scratchpad {
     
     // -------------------------------- SCRATCHPAD ----------------------------
     
-    List<String> txIds = new ArrayList<String>();
-    txIds.add("04d110bae5645928eb10b242a3cad27a5b6fd5fde0c336f75c40ab234f29d774");
-    txIds.add("a76ae3097320ecb63961dfc0be85823a8c9fbc20a36275e403ed53169b71d817");
-    txIds.add("daa951386877a42226a012117929b626b00a98836cf0ca3c9f1f11c597595dc9");
-    MoneroTransferRequest req = new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setTxIds(txIds));
-    assertFalse(req.getTxRequest().getTransferRequest() == req);
-    List<MoneroTransfer> transfers = walletRpc.getTransfers(req);
-    System.out.println("Found " + transfers.size() + " transfers");
-    for (MoneroTransfer transfer : transfers) {
-      assertTrue(req.meetsCriteria(transfer));
-      assertTrue(txIds.contains(transfer.getTx().getId()));
-    }
+    MoneroTransferRequest req = new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setTxId("af908410ce4f9e4e6474be51f0524c30e4aaefb6b2bee490fe72ddea516b34d8"));
+//    List<MoneroTransfer> transfers1 = walletRpc.getTransfers(req);
+//    System.out.println(transfers1);
+    List<MoneroTransfer> transfers2 = walletJni.getTransfers(req);
+    System.out.println(transfers2);
+    
+//    List<String> txIds = new ArrayList<String>();
+//    txIds.add("04d110bae5645928eb10b242a3cad27a5b6fd5fde0c336f75c40ab234f29d774");
+//    txIds.add("a76ae3097320ecb63961dfc0be85823a8c9fbc20a36275e403ed53169b71d817");
+//    txIds.add("daa951386877a42226a012117929b626b00a98836cf0ca3c9f1f11c597595dc9");
+//    MoneroTransferRequest req = new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setTxIds(txIds));
+//    assertFalse(req.getTxRequest().getTransferRequest() == req);
+//    List<MoneroTransfer> transfers = walletRpc.getTransfers(req);
+//    System.out.println("Found " + transfers.size() + " transfers");
+//    for (MoneroTransfer transfer : transfers) {
+//      assertTrue(req.meetsCriteria(transfer));
+//      assertTrue(txIds.contains(transfer.getTx().getId()));
+//    }
     
     //MoneroCppUtils.setLogLevel(1);
     
