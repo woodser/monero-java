@@ -17,6 +17,7 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc.IncomingTransferComparator;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroIncomingTransfer;
+import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.request.MoneroTxRequest;
@@ -79,9 +80,12 @@ public class TestMoneroWalletsEqual {
     assertEquals(w1.getPrivateSpendKey(), w2.getPrivateSpendKey());
     MoneroTxRequest confirmedReq = new MoneroTxRequest().setIsConfirmed(true);
     testTxWalletsEqualOnChain(w1.getTxs(confirmedReq), w2.getTxs(confirmedReq));
+    confirmedReq.setIncludeOutputs(true);
+    testTxWalletsEqualOnChain(w1.getTxs(confirmedReq), w2.getTxs(confirmedReq));  // fetch and compare outputs
     testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
     assertEquals(w1.getBalance(), w2.getBalance());
     assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
+    //testOutputWalletsEqualOnChain(w1.getOutputs(), w2.getOutputs());
     // TOOD **: compare outputs, etc
   }
   
@@ -157,9 +161,6 @@ public class TestMoneroWalletsEqual {
       tx.setNote(null);
       if (tx.getOutgoingTransfer() != null) {
         tx.getOutgoingTransfer().setAddresses(null);
-        
-        
-        //tx.getOutgoingTransfer().setDestinations(null);
       }
     }
     
@@ -216,5 +217,9 @@ public class TestMoneroWalletsEqual {
       tgt.getOutgoingTransfer().setAmount(src.getOutgoingTransfer().getAmount());
       tgt.getOutgoingTransfer().setNumSuggestedConfirmations(MoneroUtils.reconcile(src.getOutgoingTransfer().getNumSuggestedConfirmations(), tgt.getOutgoingTransfer().getNumSuggestedConfirmations(), null, null, true));  // suggested confirmations can grow with amount
     }
+  }
+  
+  protected void testOutputWalletsEqualOnChain(List<MoneroOutputWallet> outputs1, List<MoneroOutputWallet> outputs2) {
+    throw new RuntimeException("Not implemented");
   }
 }
