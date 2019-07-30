@@ -3599,6 +3599,25 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       }
     }
     
+    // test that outputs are in order of ascending accounts and subaddresses
+    for (MoneroTxWallet tx : txs) {
+      Integer prevAccountIdx = null;
+      Integer prevSubaddressIdx = null;
+      if (tx.getVouts() == null) continue;
+      for (MoneroOutputWallet vout : tx.getVoutsWallet()) {
+        if (prevAccountIdx == null) prevAccountIdx = vout.getAccountIndex();
+        else {
+          assertTrue(prevAccountIdx <= vout.getAccountIndex());
+          if (prevAccountIdx < vout.getAccountIndex()) {
+            prevSubaddressIdx = null;
+            prevAccountIdx = vout.getAccountIndex();
+          }
+          if (prevSubaddressIdx == null) prevSubaddressIdx = vout.getSubaddressIndex();
+          else assertTrue(vout.getKeyImage().toString() + " " + prevSubaddressIdx + " > " + vout.getSubaddressIndex(), prevSubaddressIdx <= vout.getSubaddressIndex());
+        }
+      }
+    }
+    
     // TODO monero core wallet2 does not provide ordered blocks or txs
 //    // collect given tx ids
 //    List<String> txIds = new ArrayList<String>();

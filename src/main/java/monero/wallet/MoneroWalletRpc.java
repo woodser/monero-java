@@ -605,7 +605,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (tx.getIsConfirmed() && tx.getBlock() == null) return getTxs(req);
     }
     
-    // otherwise order txs if tx ids given then return
+    // order txs if tx ids given
     if (req.getTxIds() != null && !req.getTxIds().isEmpty()) {
       Map<String, MoneroTxWallet> txsById = new HashMap<String, MoneroTxWallet>();  // store txs in temporary map for sorting
       for (MoneroTxWallet tx : txs) txsById.put(tx.getId(), tx);
@@ -713,7 +713,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       // sort transfers
       if (tx.getIncomingTransfers() != null) Collections.sort(tx.getIncomingTransfers(), new IncomingTransferComparator());
       
-      // collect outgoing transfer, erase if filtered
+      // collect outgoing transfer, erase if unrequested
       if (tx.getOutgoingTransfer() != null && req.meetsCriteria(tx.getOutgoingTransfer())) transfers.add(tx.getOutgoingTransfer());
       else tx.setOutgoingTransfer(null);
       
@@ -807,16 +807,21 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // collect requested vouts
     List<MoneroOutputWallet> vouts = new ArrayList<MoneroOutputWallet>();
     for (MoneroTxWallet tx : txs) {
+      
+      // sort vouts
+      if (tx.getVouts() != null) Collections.sort(tx.getVouts(), new VoutComparator());
+      
+      // collect requested vouts
       List<MoneroOutput> toRemoves = new ArrayList<MoneroOutput>();
       for (MoneroOutput vout : tx.getVouts()) {
         if (req.meetsCriteria((MoneroOutputWallet) vout)) vouts.add((MoneroOutputWallet) vout);
         else toRemoves.add(vout);
       }
       
-      // remove unrequested vouts
+      // remove unrequested vouts from tx
       tx.getVouts().removeAll(toRemoves);
       
-      // remove txs without requested vout
+      // remove unrequested txs from block
       if (tx.getVouts().isEmpty() && tx.getBlock() != null) tx.getBlock().getTxs().remove(tx);
     }
     return vouts;
@@ -1938,6 +1943,20 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     public int compare(MoneroIncomingTransfer t1, MoneroIncomingTransfer t2) {
       if (t1.getAccountIndex() < t2.getAccountIndex()) return -1;
       else if (t1.getAccountIndex() == t2.getAccountIndex()) return t1.getSubaddressIndex().compareTo(t2.getSubaddressIndex());
+      return 1;
+    }
+  }
+  
+  /**
+   * Compares two vouts by ascending account and subaddress indices.
+   */
+  public static class VoutComparator implements Comparator<MoneroOutput> {
+    @Override
+    public int compare(MoneroOutput o1, MoneroOutput o2) {
+      MoneroOutputWallet ow1 = (MoneroOutputWallet) o1;
+      MoneroOutputWallet ow2 = (MoneroOutputWallet) o2;
+      if (ow1.getAccountIndex() < ow2.getAccountIndex()) return -1;
+      else if (ow1.getAccountIndex() == ow2.getAccountIndex()) return ow1.getSubaddressIndex().compareTo(ow2.getSubaddressIndex());
       return 1;
     }
   }
