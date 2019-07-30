@@ -83,6 +83,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   // static
   private static final int ERROR_CODE_INVALID_PAYMENT_ID = -5;  // invalid payment id error code
   private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class); // logger
+  private static final TxHeightComparator TX_HEIGHT_COMPARATOR = new TxHeightComparator();
   
   public MoneroWalletRpc(URI uri) {
     this(new MoneroRpcConnection(uri));
@@ -1936,11 +1937,32 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   /**
+   * Compares two transactions by their height.
+   */
+  private static class TxHeightComparator implements Comparator<MoneroTx> {
+    @Override
+    public int compare(MoneroTx tx1, MoneroTx tx2) {
+      if (tx1.getHeight() == null && tx2.getHeight() == null) return 0; // both unconfirmed
+      else if (tx1.getHeight() == null) return 1;   // tx1 is unconfirmed
+      else if (tx2.getHeight() == null) return -1;  // tx2 is unconfirmed
+      int diff = tx1.getHeight().compareTo(tx2.getHeight());
+      if (diff != 0) return diff;
+      return tx1.getBlock().getTxs().indexOf(tx1) - tx2.getBlock().getTxs().indexOf(tx2); // txs are in the same block so retain their original order
+    }
+  }
+  
+  /**
    * Compares two transfers by ascending account and subaddress indices.
    */
   public static class IncomingTransferComparator implements Comparator<MoneroIncomingTransfer> {
     @Override
     public int compare(MoneroIncomingTransfer t1, MoneroIncomingTransfer t2) {
+      
+      // compare by height
+      int heightComparison = TX_HEIGHT_COMPARATOR.compare(t1.getTx(), t2.getTx());
+      if (heightComparison != 0) return heightComparison;
+      
+      // compare by account and subaddress index
       if (t1.getAccountIndex() < t2.getAccountIndex()) return -1;
       else if (t1.getAccountIndex() == t2.getAccountIndex()) return t1.getSubaddressIndex().compareTo(t2.getSubaddressIndex());
       return 1;
@@ -1951,10 +1973,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * Compares two vouts by ascending account and subaddress indices.
    */
   public static class VoutComparator implements Comparator<MoneroOutput> {
+    
     @Override
     public int compare(MoneroOutput o1, MoneroOutput o2) {
       MoneroOutputWallet ow1 = (MoneroOutputWallet) o1;
       MoneroOutputWallet ow2 = (MoneroOutputWallet) o2;
+      
+      // compare by height
+      int heightComparison = TX_HEIGHT_COMPARATOR.compare(o1.getTx(), ow2.getTx());
+      if (heightComparison != 0) return heightComparison;
+      
+      // compare by account index, subaddress index, and output
       if (ow1.getAccountIndex() < ow2.getAccountIndex()) return -1;
       else if (ow1.getAccountIndex() == ow2.getAccountIndex()) {
         int compare = ow1.getSubaddressIndex().compareTo(ow2.getSubaddressIndex());
@@ -1962,21 +1991,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         return ow1.getIndex().compareTo(ow2.getIndex());
       }
       return 1;
-    }
-  }
-  
-  /**
-   * Compares two transactions by their height.
-   */
-  private class TxHeightComparator implements Comparator<MoneroTx> {
-    @Override
-    public int compare(MoneroTx tx1, MoneroTx tx2) {
-      if (tx1.getHeight() == null && tx2.getHeight() == null) return 0; // both unconfirmed
-      else if (tx1.getHeight() == null) return 1;   // tx1 is unconfirmed
-      else if (tx2.getHeight() == null) return -1;  // tx2 is unconfirmed
-      int diff = tx1.getHeight().compareTo(tx2.getHeight());
-      if (diff != 0) return diff;
-      return tx1.getBlock().getTxs().indexOf(tx1) - tx2.getBlock().getTxs().indexOf(tx2); // txs are in the same block so retain their original order
     }
   }
 }
