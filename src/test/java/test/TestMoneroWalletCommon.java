@@ -3613,7 +3613,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
             prevAccountIdx = vout.getAccountIndex();
           }
           if (prevSubaddressIdx == null) prevSubaddressIdx = vout.getSubaddressIndex();
-          else assertTrue(vout.getKeyImage().toString() + " " + prevSubaddressIdx + " > " + vout.getSubaddressIndex(), prevSubaddressIdx <= vout.getSubaddressIndex());
+          else assertTrue(vout.getKeyImage().toString() + " " + prevSubaddressIdx + " > " + vout.getSubaddressIndex(), prevSubaddressIdx <= vout.getSubaddressIndex()); // TODO: this does not test that index < other index if subaddresses are equal
         }
       }
     }
