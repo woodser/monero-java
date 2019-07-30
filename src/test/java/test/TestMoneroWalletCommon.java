@@ -1010,7 +1010,6 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // get transfers with tx ids
-    System.out.println("Checking for ids: " + txIds);
     transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setTxIds(txIds)), null, true);
     for (MoneroTransfer transfer : transfers) assertTrue(txIds.contains(transfer.getTx().getId()));
     
@@ -1875,7 +1874,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       // wallet should be aware of tx
       try {
         MoneroTxWallet fetched = wallet.getTx(tx.getId());
-        System.out.println(fetched);
+        assertNotNull(fetched);
       } catch (MoneroException e) {
         throw new RuntimeException("Wallet should be aware of its tx in pool after syncing");
       }
@@ -1978,7 +1977,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       // wallet should be aware of tx
       try {
         MoneroTxWallet fetched = wallet.getTx(tx.getId());
-        System.out.println(fetched);
+        assertNotNull(fetched);
       } catch (MoneroException e) {
         throw new RuntimeException("Wallet should be aware of its tx in pool after syncing");
       }

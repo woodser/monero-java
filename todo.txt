@@ -64,7 +64,6 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 
 14.1.0+ RELEASE
-code todos
 wallet equality should compares more extensions
 work through problems of testing fresh wallet again
 compare time to gui vs manual sync vs auto sync - 1:22 vs 1:52 vs ?
@@ -72,6 +71,7 @@ moar notifications
 rpc supports on_restore_determinstic_wallet, implement!
 better sample code, maybe with two wallets, sending each other funds
 MoneroTxRequest -> MoneroTxQuery, etc?
+cleanup logging; tests produce many messages at info which should be trace
 refactor getIs...() to is...() depending if this interferes with js syntax
 update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing()
 regenerate api docs
@@ -83,7 +83,9 @@ write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), impor
 announce
 
 MEDIUM
+port request copying to js (or rather, from ~jni93)
 build a picture of overall architecture
+java rpc sweepAllUnlocked() modifies original send request
 isMultisigNeeded()
 wallet.getIsSynced() should return false after block added to chain if not auto syncing
 waitForTxsToClear() should refresh more frequently than blocks so it continues if pool manually flushed
