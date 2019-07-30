@@ -74,11 +74,12 @@ better sample code, maybe with two wallets, sending each other funds
 MoneroTxRequest -> MoneroTxQuery, etc?
 cleanup logging; tests produce many messages at info which should be trace
 refactor getIs...() to is...() depending if this interferes with js syntax
-update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing()
-regenerate api docs
 rename *withConfiguration() tests to *Request or *Query
-update readme with jni support
 ./submodules -> ./external for monero-cpp-library and monero-core?
+
+update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing()
+update readme with jni support
+regenerate api docs
 build a picture of types and how they relate to each other
 write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, etc, tx pool syncing)
 announce
