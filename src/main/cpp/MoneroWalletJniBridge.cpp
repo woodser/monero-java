@@ -118,20 +118,7 @@ struct WalletJniListener : public MoneroWalletListener {
     jlistener = nullptr;
   }
 
-  virtual void onNewBlock(uint64_t height) {
-    std::lock_guard<std::mutex> lock(_listenerMutex);
-    if (jlistener == nullptr) return;
-    JNIEnv *jenv;
-    int envStat = attachJVM(&jenv);
-    if (envStat == JNI_ERR) return;
-
-    jlong jheight = static_cast<jlong>(height);
-    jmethodID listenerClass_onNewBlock = jenv->GetMethodID(class_WalletListener, "onNewBlock", "(J)V");
-    jenv->CallVoidMethod(jlistener, listenerClass_onNewBlock, jheight);
-    detachJVM(jenv, envStat);
-  }
-
-  virtual void onSyncProgress(uint64_t height, uint64_t startHeight, uint64_t endHeight, double percentDone, const string& message) {
+  void onSyncProgress(uint64_t height, uint64_t startHeight, uint64_t endHeight, double percentDone, const string& message) {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *jenv;
@@ -148,6 +135,65 @@ struct WalletJniListener : public MoneroWalletListener {
     jmethodID listenerClass_onSyncProgress = jenv->GetMethodID(class_WalletListener, "onSyncProgress", "(JJJDLjava/lang/String;)V");
     jenv->CallVoidMethod(jlistener, listenerClass_onSyncProgress, jheight, jstartHeight, jendHeight, jpercentDone, jmessage);
     jenv->DeleteLocalRef(jmessage);
+    detachJVM(jenv, envStat);
+  }
+
+  void onNewBlock(uint64_t height) {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+    JNIEnv *jenv;
+    int envStat = attachJVM(&jenv);
+    if (envStat == JNI_ERR) return;
+
+    jlong jheight = static_cast<jlong>(height);
+    jmethodID listenerClass_onNewBlock = jenv->GetMethodID(class_WalletListener, "onNewBlock", "(J)V");
+    jenv->CallVoidMethod(jlistener, listenerClass_onNewBlock, jheight);
+    detachJVM(jenv, envStat);
+  }
+
+  void onIncomingTransfer(const MoneroIncomingTransfer& transfer) {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+    JNIEnv *jenv;
+    int envStat = attachJVM(&jenv);
+    if (envStat == JNI_ERR) return;
+
+    // serialize transfer to string rooted at block
+    string blockJson;
+    if (transfer.tx->block != boost::none) blockJson = transfer.tx->block.get()->serialize();
+    else {
+      MoneroBlock block = MoneroBlock();  // placeholder block for unconfirmed tx
+      block.txs.push_back(transfer.tx);
+      blockJson = block.serialize();
+    }
+
+    // invoke Java listener
+    jstring jblockJson = jenv->NewStringUTF(blockJson.c_str());
+    jmethodID listenerClass_onIncomingTransfer = jenv->GetMethodID(class_WalletListener, "onIncomingTransfer", "(Ljava/lang/String;)V");
+    jenv->CallVoidMethod(jlistener, listenerClass_onIncomingTransfer, jblockJson);
+    detachJVM(jenv, envStat);
+  }
+
+  void onOutgoingTransfer(const MoneroOutgoingTransfer& transfer) {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+    JNIEnv *jenv;
+    int envStat = attachJVM(&jenv);
+    if (envStat == JNI_ERR) return;
+
+    // serialize transfer to string rooted at block
+    string blockJson;
+    if (transfer.tx->block != boost::none) blockJson = transfer.tx->block.get()->serialize();
+    else {
+      MoneroBlock block = MoneroBlock();  // placeholder block for unconfirmed tx
+      block.txs.push_back(transfer.tx);
+      blockJson = block.serialize();
+    }
+
+    // invoke Java listener
+    jstring jblockJson = jenv->NewStringUTF(blockJson.c_str());
+    jmethodID listenerClass_onOutgoingTransfer = jenv->GetMethodID(class_WalletListener, "onOutgoingTransfer", "(Ljava/lang/String;)V");
+    jenv->CallVoidMethod(jlistener, listenerClass_onOutgoingTransfer, jblockJson);
     detachJVM(jenv, envStat);
   }
 };

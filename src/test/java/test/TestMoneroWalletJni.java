@@ -21,6 +21,8 @@ import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroIncomingTransfer;
+import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTxWallet;
@@ -402,7 +404,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals((long) restoreHeight, (long) wallet.getRestoreHeight());
       
       // register a wallet listener which tests notifications throughout the sync
-      WalletSyncTester walletSyncTester = new WalletSyncTester(startHeightExpected, endHeightExpected);
+      WalletSyncTester walletSyncTester = new WalletSyncTester(wallet, startHeightExpected, endHeightExpected);
       wallet.addListener(walletSyncTester);
       
       // sync the wallet with a listener which tests sync notifications
@@ -892,18 +894,23 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
    */
   private class WalletSyncTester extends SyncProgressTester implements MoneroWalletListenerI {
     
-    private MoneroTxWallet lastTx;
-    private MoneroTxWallet lastTxReceived;
-    private MoneroTxWallet lastTxSent;
-    private Long prevHeight;   
+    private MoneroWallet wallet;
+    private Long prevHeight;
+    private MoneroIncomingTransfer prevIncomingTransfer;
+    private MoneroOutgoingTransfer prevOutgoingTransfer;
+    private BigInteger incomingTotal;
+    private BigInteger outgoingTotal;
     
-    public WalletSyncTester(long startHeight, long endHeight) {
+    public WalletSyncTester(MoneroWallet wallet, long startHeight, long endHeight) {
       super(startHeight, endHeight);
+      this.wallet = wallet;
       assertTrue(startHeight >= 0);
       assertTrue(endHeight >= 0);
       this.startHeight = startHeight;
       this.prevEndHeight = endHeight;
       this.isDone = false;
+      incomingTotal = BigInteger.valueOf(0);
+      outgoingTotal = BigInteger.valueOf(0);
     }
     
     @Override
@@ -912,31 +919,32 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       if (prevHeight != null) assertEquals(prevHeight + 1, height);
       prevHeight = height;
     }
-    
+
     @Override
-    public void onNewTx(MoneroTxWallet tx) {
-      lastTx = tx;
-      throw new RuntimeException("onNewTx() not implemented");
+    public void onIncomingTransfer(MoneroIncomingTransfer transfer) {
+      assertNotNull(transfer);
+      assertNotNull(transfer.getAmount());
+      incomingTotal = incomingTotal.add(transfer.getAmount());
+      prevIncomingTransfer = transfer;
+      //throw new RuntimeException("onIncomingTransfer() not implemented"); // TODO **: test the rest of the transfer
     }
 
     @Override
-    public void onMoneyReceived(MoneroTxWallet tx) {
-      lastTxReceived = tx;
-      throw new RuntimeException("onMoneyReceived() not implemented");
-    }
-    
-    @Override
-    public void onMoneySent(MoneroTxWallet tx) {
-      lastTxSent = tx;
-      throw new RuntimeException("onMoneySent() not implemented");
+    public void onOutgoingTransfer(MoneroOutgoingTransfer transfer) {
+      assertNotNull(transfer);
+      assertNotNull(transfer.getAmount());
+      outgoingTotal = outgoingTotal.add(transfer.getAmount());
+      prevOutgoingTransfer = transfer;
+      //throw new RuntimeException("onOutgoingTransfer() not implemented");  // TODO **: test the rest of the transfer
     }
     
     public void onDone(long chainHeight) {
       super.onDone(chainHeight);
       assertNotNull(prevHeight);
-      assertNotNull(lastTx);
-      assertNotNull(lastTxReceived);
-      assertNotNull(lastTxSent);
+      assertNotNull(prevIncomingTransfer);
+      assertNotNull(prevOutgoingTransfer);
+      BigInteger balance = incomingTotal.subtract(outgoingTotal);
+      assertEquals(balance, wallet.getBalance());
     }
   }
   
