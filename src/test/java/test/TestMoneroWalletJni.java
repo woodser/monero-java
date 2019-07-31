@@ -14,6 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroNetworkType;
 import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
@@ -24,6 +25,7 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.model.MoneroWalletListener;
 import utils.TestUtils;
 
 /**
@@ -400,10 +402,17 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals(1, wallet.getHeight());
       assertEquals((long) restoreHeight, (long) wallet.getRestoreHeight());
       
-      // sync the wallet
+      // register a wallet listener which tests notifications throughout the sync
+      WalletSyncTester walletSyncTester = new WalletSyncTester(startHeightExpected, endHeightExpected);
+      wallet.addListener(walletSyncTester);
+      
+      // sync the wallet with a listener which tests sync notifications
       SyncProgressTester progressTester = new SyncProgressTester(startHeightExpected, endHeightExpected);
       MoneroSyncResult result = wallet.sync(startHeight, progressTester);
+      
+      // test completion of the wallet and sync listeners
       progressTester.onDone(wallet.getChainHeight());
+      walletSyncTester.onDone(wallet.getChainHeight());
       
       // test result after syncing
       assertTrue(wallet.getIsSynced());
@@ -837,10 +846,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
    */
   private class SyncProgressTester implements MoneroSyncListener {
     
-    private long startHeight;
-    private long prevEndHeight;
+    protected long startHeight;
+    protected long prevEndHeight;
     private Long prevHeight;
-    private boolean isDone;
+    protected boolean isDone;
     
     public SyncProgressTester(long startHeight, long endHeight) {
       assertTrue(startHeight >= 0);
@@ -868,6 +877,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
     
     public void onDone(long chainHeight) {
+      assertFalse(isDone);
       this.isDone = true;
       assertEquals(chainHeight, prevEndHeight);
       if (prevEndHeight <= startHeight) assertNull(prevHeight); // progress never called
@@ -875,6 +885,35 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
         assertNotNull("Progress never called", prevHeight);
         assertEquals(chainHeight - 1, (long) prevHeight);  // otherwise last height is chain height - 1
       }
+    }
+  }
+  
+  /**
+   * Internal class to test all wallet notifications on sync. 
+   */
+  private class WalletSyncTester extends SyncProgressTester implements MoneroWalletListener {
+    
+    private MoneroBlockHeader prevHeader;   
+    
+    public WalletSyncTester(long startHeight, long endHeight) {
+      super(startHeight, endHeight);
+      assertTrue(startHeight >= 0);
+      assertTrue(endHeight >= 0);
+      this.startHeight = startHeight;
+      this.prevEndHeight = endHeight;
+      this.isDone = false;
+    }
+    
+    @Override
+    public void onNewBlock(MoneroBlockHeader header) {
+      assertFalse(isDone);
+      if (prevHeader != null) assertEquals(prevHeader.getHeight() + 1, (long) header.getHeight());
+      prevHeader = header;
+    }
+    
+    public void onDone(long chainHeight) {
+      super.onDone(chainHeight);
+      assertNotNull(prevHeader);
     }
   }
   
