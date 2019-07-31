@@ -12,4 +12,13 @@ public class MoneroWalletListenerDefault implements MoneroWalletListener {
 
   @Override
   public void onNewBlock(MoneroBlockHeader header) { }
+
+  @Override
+  public void onNewTx(MoneroTxWallet tx) { }
+
+  @Override
+  public void onMoneyReceived(MoneroTxWallet tx) { }
+
+  @Override
+  public void onMoneySent(MoneroTxWallet tx) { }
 }
