@@ -24,7 +24,7 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTxWallet;
-import monero.wallet.model.MoneroWalletListener;
+import monero.wallet.model.MoneroWalletListenerI;
 import utils.TestUtils;
 
 /**
@@ -890,7 +890,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   /**
    * Internal class to test all wallet notifications on sync. 
    */
-  private class WalletSyncTester extends SyncProgressTester implements MoneroWalletListener {
+  private class WalletSyncTester extends SyncProgressTester implements MoneroWalletListenerI {
     
     private MoneroTxWallet lastTx;
     private MoneroTxWallet lastTxReceived;

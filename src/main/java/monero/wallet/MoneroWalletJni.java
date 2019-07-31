@@ -60,8 +60,8 @@ import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.model.MoneroWalletListenerI;
 import monero.wallet.model.MoneroWalletListener;
-import monero.wallet.model.MoneroWalletListenerDefault;
 import monero.wallet.request.MoneroOutputRequest;
 import monero.wallet.request.MoneroSendRequest;
 import monero.wallet.request.MoneroTransferRequest;
@@ -89,7 +89,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private long jniWalletHandle;                 // memory address of the wallet in c++; this variable is read directly by name in c++
   private long jniListenerHandle;               // memory address of the wallet listener in c++; this variable is read directly by name in c++
   private WalletJniListener jniListener;        // receives notifications from jni c++
-  private Set<MoneroWalletListener> listeners;  // externally subscribed wallet listeners
+  private Set<MoneroWalletListenerI> listeners;  // externally subscribed wallet listeners
   private boolean isClosed;                     // whether or not wallet is closed
   
   /**
@@ -100,7 +100,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private MoneroWalletJni(long jniWalletHandle) {
     this.jniWalletHandle = jniWalletHandle;
     this.jniListener = new WalletJniListener();
-    this.listeners = new LinkedHashSet<MoneroWalletListener>();
+    this.listeners = new LinkedHashSet<MoneroWalletListenerI>();
     this.isClosed = false;
   }
   
@@ -408,7 +408,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * 
    * @param listener is the listener to receive wallet notifications
    */
-  public void addListener(MoneroWalletListener listener) {
+  public void addListener(MoneroWalletListenerI listener) {
     assertNotClosed();
     listeners.add(listener);
     jniListener.setIsListening(true);
@@ -419,7 +419,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * 
    * @param listener is the listener to unregister
    */
-  public void removeListener(MoneroWalletListener listener) {
+  public void removeListener(MoneroWalletListenerI listener) {
     assertNotClosed();
     if (!listeners.contains(listener)) throw new MoneroException("Listener is not registered to wallet");
     listeners.remove(listener);
@@ -1370,11 +1370,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
      * @param height is the height of the received block
      */
     public void onNewBlock(long height) {
-      for (MoneroWalletListener listener : listeners) listener.onNewBlock(height);
+      for (MoneroWalletListenerI listener : listeners) listener.onNewBlock(height);
     }
 
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
-      for (MoneroWalletListener listener : listeners) {
+      for (MoneroWalletListenerI listener : listeners) {
         listener.onSyncProgress(height, startHeight, endHeight, percentDone, message);
       }
     }
@@ -1407,7 +1407,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   /**
    * Wraps a sync listener as a general wallet listener.
    */
-  private class SyncListenerWrapper extends MoneroWalletListenerDefault {
+  private class SyncListenerWrapper extends MoneroWalletListener {
     
     private MoneroSyncListener listener;
     
