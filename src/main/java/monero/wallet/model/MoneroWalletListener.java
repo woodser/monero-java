@@ -1,7 +1,5 @@
 package monero.wallet.model;
 
-import monero.daemon.model.MoneroBlockHeader;
-
 /**
  * Interface to receive wallet notifications.
  */
@@ -10,9 +8,9 @@ public interface MoneroWalletListener extends MoneroSyncListener {
   /**
    * Invoked when a new block is added to the chain.
    * 
-   * @param header is the header of the block added to the chain
+   * @param height is the height of the block added to the chain
    */
-  public void onNewBlock(MoneroBlockHeader header);
+  public void onNewBlock(long height);
   
   /**
    * Invoked when the wallet observes a transaction with incoming or outgoing transfers

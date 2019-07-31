@@ -118,14 +118,14 @@ struct WalletJniListener : public MoneroWalletListener {
     jlistener = nullptr;
   }
 
-  virtual void onNewBlock(MoneroBlock& block) {
+  virtual void onNewBlock(uint64_t height) {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *jenv;
     int envStat = attachJVM(&jenv);
     if (envStat == JNI_ERR) return;
 
-    jlong jheight = static_cast<jlong>(*block.height);
+    jlong jheight = static_cast<jlong>(height);
     jmethodID listenerClass_onNewBlock = jenv->GetMethodID(class_WalletListener, "onNewBlock", "(J)V");
     jenv->CallVoidMethod(jlistener, listenerClass_onNewBlock, jheight);
     detachJVM(jenv, envStat);
