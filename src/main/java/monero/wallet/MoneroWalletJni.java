@@ -62,6 +62,7 @@ import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletListener;
+import monero.wallet.model.MoneroWalletListenerDefault;
 import monero.wallet.request.MoneroOutputRequest;
 import monero.wallet.request.MoneroSendRequest;
 import monero.wallet.request.MoneroTransferRequest;
@@ -1413,7 +1414,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   /**
    * Wraps a sync listener as a general wallet listener.
    */
-  private class SyncListenerWrapper extends MoneroWalletListener {
+  private class SyncListenerWrapper extends MoneroWalletListenerDefault {
     
     private MoneroSyncListener listener;
     
