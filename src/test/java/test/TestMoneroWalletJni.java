@@ -933,8 +933,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     public void onDone(long chainHeight) {
       super.onDone(chainHeight);
-      assertNull(prevHeight);
-      //assertNotNull(prevHeight);
+      assertNotNull(prevHeight);
       assertNotNull(lastTx);
       assertNotNull(lastTxReceived);
       assertNotNull(lastTxSent);
