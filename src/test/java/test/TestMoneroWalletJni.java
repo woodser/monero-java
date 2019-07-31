@@ -910,6 +910,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     @Override
     public void onNewBlock(MoneroBlockHeader header) {
       assertFalse(isDone);
+      assertNotNull(header.getHeight());  // TODO: what else to test?
       if (prevHeader != null) assertEquals(prevHeader.getHeight() + 1, (long) header.getHeight());
       prevHeader = header;
     }
