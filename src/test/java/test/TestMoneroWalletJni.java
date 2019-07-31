@@ -14,7 +14,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroNetworkType;
 import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
@@ -896,7 +895,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     private MoneroTxWallet lastTx;
     private MoneroTxWallet lastTxReceived;
     private MoneroTxWallet lastTxSent;
-    private MoneroBlockHeader prevHeader;   
+    private Long prevHeight;   
     
     public WalletSyncTester(long startHeight, long endHeight) {
       super(startHeight, endHeight);
@@ -908,11 +907,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
     
     @Override
-    public void onNewBlock(MoneroBlockHeader header) {
+    public void onNewBlock(long height) {
       assertFalse(isDone);
-      assertNotNull(header.getHeight());  // TODO: what else to test?
-      if (prevHeader != null) assertEquals(prevHeader.getHeight() + 1, (long) header.getHeight());
-      prevHeader = header;
+      if (prevHeight != null) assertEquals(prevHeight + 1, height);
+      prevHeight = height;
     }
     
     @Override
@@ -935,7 +933,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     public void onDone(long chainHeight) {
       super.onDone(chainHeight);
-      assertNotNull(prevHeader);
+      assertNull(prevHeight);
+      //assertNotNull(prevHeight);
       assertNotNull(lastTx);
       assertNotNull(lastTxReceived);
       assertNotNull(lastTxSent);

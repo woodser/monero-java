@@ -41,7 +41,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import common.utils.GenUtils;
 import common.utils.JsonUtils;
 import monero.daemon.model.MoneroBlock;
-import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
@@ -1371,13 +1370,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
      * @param height is the height of the received block
      */
     public void onNewBlock(long height) {
-      
-      // create header  // TODO: build more complete header?
-      MoneroBlockHeader header = new MoneroBlockHeader();
-      header.setHeight(height);
-      
-      // notify external listeners
-      for (MoneroWalletListener listener : listeners) listener.onNewBlock(header);
+      for (MoneroWalletListener listener : listeners) listener.onNewBlock(height);
     }
 
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
