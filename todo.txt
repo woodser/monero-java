@@ -67,15 +67,15 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 
 14.1.0+ RELEASE
 moar notifications
-compare time to gui vs manual sync vs auto sync - 1:22 vs 1:52 vs ?
+compare time to gui vs manual sync vs auto sync vs no notifications - 1:22 vs 1:52 vs ?
 work through problems of testing fresh wallet again
 rpc supports on_restore_determinstic_wallet, implement!
-better sample code, maybe with two wallets, sending each other funds
 MoneroTxRequest -> MoneroTxQuery, etc?
 cleanup logging; tests produce many messages at info which should be trace
 refactor getIs...() to is...() depending if this interferes with js syntax
 rename *withConfiguration() tests to *Request or *Query
 ./submodules -> ./external for monero-cpp-library and monero-core?
+better sample code, maybe with two wallets, sending each other funds
 
 update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing()
 update readme with jni support
