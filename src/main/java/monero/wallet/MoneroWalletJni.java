@@ -1352,7 +1352,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   // ------------------------------- LISTENERS --------------------------------
   
   /**
-   * Receives notifications from jni c++.
+   * Receives notifications directly from jni c++.
    */
   @SuppressWarnings("unused") // called directly from jni c++
   private class WalletJniListener {
@@ -1364,44 +1364,29 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       jniListenerHandle = setListenerJni(isEnabled ? this : null);
     }
     
-    /**
-     * Called when a new block is received.
-     * 
-     * @param height is the height of the received block
-     */
-    public void onNewBlock(long height) {
-      for (MoneroWalletListenerI listener : listeners) listener.onNewBlock(height);
-    }
-
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
       for (MoneroWalletListenerI listener : listeners) {
         listener.onSyncProgress(height, startHeight, endHeight, percentDone, message);
       }
     }
     
-//    /**
-//     * Called when funds are sent from the wallet.
-//     * 
-//     * @param txId is the id of the outgoing transaction
-//     * @param amount is the amount sent from the wallet
-//     */
-//    public void moneySpent(String txId, long amount) { }
-//    
-//    /**
-//     * Called when funds are received to the wallet.
-//     * 
-//     * @param txId is the id of the incoming transaction
-//     * @param amount is the amount received to the wallet
-//     */
-//    public void moneyReceived(String txId, long amount) { }
-//
-//    /**
-//     * Called when funds are received to the wallet but the tx is still in the tx pool.
-//     * 
-//     * @param txId is the id of the incoming and unconfirmed transaction
-//     * @param amount is the amount received to the wallet
-//     */
-//    public void unconfirmedMoneyReceived(String txId, long amount)  { }
+    public void onNewBlock(long height) {
+      for (MoneroWalletListenerI listener : listeners) listener.onNewBlock(height);
+    }
+    
+    public void onIncomingTransfer(String blockJson) {
+      MoneroBlockWallet blockWallet =  JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blockJson, MoneroBlockWallet.class);
+      MoneroBlock block = blockWallet.toBlock();
+      MoneroTxWallet tx = (MoneroTxWallet) block.getTxs().get(0);
+      for (MoneroWalletListenerI listener : listeners) listener.onIncomingTransfer(tx.getIncomingTransfers().get(0));
+    }
+    
+    public void onOutgoingTransfer(String blockJson) {
+      MoneroBlockWallet blockWallet =  JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blockJson, MoneroBlockWallet.class);
+      MoneroBlock block = blockWallet.toBlock();
+      MoneroTxWallet tx = (MoneroTxWallet) block.getTxs().get(0);
+      for (MoneroWalletListenerI listener : listeners) listener.onOutgoingTransfer(tx.getOutgoingTransfer());
+    }
   }
   
   /**

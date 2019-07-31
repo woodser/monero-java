@@ -13,25 +13,16 @@ public interface MoneroWalletListenerI extends MoneroSyncListener {
   public void onNewBlock(long height);
   
   /**
-   * Invoked when the wallet observes a transaction with incoming or outgoing transfers
-   * to or from the wallet.
+   * Invoked when the wallet receives an incoming transfer.
    * 
-   * @param tx is the transaction with incoming or outgoing transfers to or from the wallet
+   * @param transfer is the incoming transfer to the wallet
    */
-  public void onNewTx(MoneroTxWallet tx);
-  
-  /**
-   * Invoked when the wallet receives one or more incoming transfers as part of
-   * a transaction.
-   * 
-   * @param tx is the transaction with incoming transfers
-   */
-  public void onMoneyReceived(MoneroTxWallet tx);
+  public void onIncomingTransfer(MoneroIncomingTransfer transfer);
   
   /**
    * Invoked when the wallet sends an outgoing transfer.
    * 
-   * @param tx is the transaction with an outgoing transfer
+   * @param transfer is the outgoing transfer from the wallet
    */
-  public void onMoneySent(MoneroTxWallet tx);
+  public void onOutgoingTransfer(MoneroOutgoingTransfer transfer);
 }
