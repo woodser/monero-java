@@ -893,6 +893,9 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
    */
   private class WalletSyncTester extends SyncProgressTester implements MoneroWalletListener {
     
+    private MoneroTxWallet lastTx;
+    private MoneroTxWallet lastTxReceived;
+    private MoneroTxWallet lastTxSent;
     private MoneroBlockHeader prevHeader;   
     
     public WalletSyncTester(long startHeight, long endHeight) {
@@ -911,9 +914,30 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       prevHeader = header;
     }
     
+    @Override
+    public void onNewTx(MoneroTxWallet tx) {
+      lastTx = tx;
+      throw new RuntimeException("onNewTx() not implemented");
+    }
+
+    @Override
+    public void onMoneyReceived(MoneroTxWallet tx) {
+      lastTxReceived = tx;
+      throw new RuntimeException("onMoneyReceived() not implemented");
+    }
+    
+    @Override
+    public void onMoneySent(MoneroTxWallet tx) {
+      lastTxSent = tx;
+      throw new RuntimeException("onMoneySent() not implemented");
+    }
+    
     public void onDone(long chainHeight) {
       super.onDone(chainHeight);
       assertNotNull(prevHeader);
+      assertNotNull(lastTx);
+      assertNotNull(lastTxReceived);
+      assertNotNull(lastTxSent);
     }
   }
   
