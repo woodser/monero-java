@@ -67,6 +67,7 @@ wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does 
 
 14.1.0+ RELEASE
 moar notifications
+"Sync has completed and progress should not be called again"
 rename coinbaseTx to minerTx
 compare time to gui vs manual sync vs auto sync vs no notifications - 1:22 vs 1:52 vs ?
 work through problems of testing fresh wallet again
