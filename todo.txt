@@ -104,6 +104,7 @@ syncAsync()
 rescanAsync()
 daemon.getTargetHeight()
 auto select account index if not provided
+transfer notifications tx only includes one transfer so tx amounts will be incomplete.  Don't auto-compute tx amounts?  Aggregate all transfers per tx?
 connect to peers
 test all wallet2 notifications
 transfer amount != sum on split txs; test force split
@@ -113,6 +114,7 @@ support sign_transfer, submit_transfer, etc
 test changing wallet password with moveTo()
 
 LOW
+detect error in java from c++ jni bridge and error out
 more wallet comparison?
 test filtering with not relayed
 tx pool stats and other binary calls
