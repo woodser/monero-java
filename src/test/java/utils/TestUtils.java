@@ -158,8 +158,6 @@ public class TestUtils {
    * By observation, it is consistent with a freshly restored wallet using cli even when persisted rpc and
    * jni wallets become inconsistent.
    * 
-   * The caller of this method should close the returned wallet when done using it.
-   * 
    * @param networkType is the ground truth wallet's network type
    * @param mnemonic is the ground truth wallet's mnemonic
    * @param restoreHeight is the ground truth wallet's restore height
