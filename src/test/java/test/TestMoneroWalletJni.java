@@ -15,6 +15,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.daemon.model.MoneroNetworkType;
+import monero.daemon.model.MoneroOutput;
 import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
@@ -390,11 +391,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     if (startHeightExpected == 0) startHeightExpected = 1;
     long endHeightExpected = wallet.getDaemonTargetHeight();
     
-    // create ground truth wallet for comparison
-    MoneroWalletJni walletGt = null;
-    if (!skipGtComparison) walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, wallet.getMnemonic(), startHeightExpected);
-    
     // test wallet and close as final step
+    MoneroWalletJni walletGt = null;
     try {
       
       // test wallet's height before syncing
@@ -432,9 +430,12 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertFalse(result.getReceivedMoney());
       
       // compare with ground truth
-      if (!skipGtComparison) testWalletsEqualOnChain(walletGt, wallet);
+      if (!skipGtComparison) {
+        walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, wallet.getMnemonic(), startHeightExpected);
+        testWalletsEqualOnChain(walletGt, wallet);
+      }
     } finally {
-      if (!skipGtComparison) walletGt.close();
+      if (walletGt != null) walletGt.close();
       wallet.close();
     }
   }
@@ -847,6 +848,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
    */
   private class SyncProgressTester implements MoneroSyncListener {
     
+    private static final long PRINT_INCREMENT = 2500; // print every 2500 blocks
+    
     protected long startHeight;
     protected long prevEndHeight;
     private Long prevHeight;
@@ -863,7 +866,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     @Override
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
       assertFalse("Sync has completed and progress should not be called again", isDone);
-      if ((height - startHeight) % 10000 == 0 || percentDone > .999) System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
+      if ((height - startHeight) % PRINT_INCREMENT == 0) System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
       assertFalse("Should not call progress if end height <= start height", endHeight <= startHeight);
       assertEquals(this.startHeight, startHeight);
       assertTrue(endHeight >= this.prevEndHeight);  // chain can grow while syncing
@@ -923,10 +926,47 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     @Override
     public void onIncomingTransfer(MoneroIncomingTransfer transfer) {
       assertNotNull(transfer);
-      assertNotNull(transfer.getAmount());
-      incomingTotal = incomingTotal.add(transfer.getAmount());
       prevIncomingTransfer = transfer;
-      //throw new RuntimeException("onIncomingTransfer() not implemented"); // TODO **: test the rest of the transfer
+      
+      // test transfer
+      assertNotNull(transfer.getAmount());
+      assertTrue(transfer.getAccountIndex() >= 0);
+      assertTrue(transfer.getSubaddressIndex() >= 0);
+      
+      // test transfer's tx
+      assertNotNull(transfer.getTx());
+      assertNotNull(transfer.getTx().getId());
+      assertEquals(64, transfer.getTx().getId().length());
+      assertTrue(transfer.getTx().getVersion() >= 0);
+      assertTrue(transfer.getTx().getUnlockTime() >= 0);
+      assertNotNull(transfer.getTx().getExtra());
+      assertTrue(transfer.getTx().getExtra().length > 0);
+      assertEquals(1, transfer.getTx().getIncomingTransfers().size());
+      assertTrue(transfer.getTx().getIncomingTransfers().get(0) == transfer);
+      
+      // test transfer's tx's vins
+      if (transfer.getTx().getVins() == null) {
+        assertTrue(transfer.getTx().getIsCoinbase());
+      } else {
+        assertFalse(transfer.getTx().getIsCoinbase());
+        assertFalse(transfer.getTx().getVins().isEmpty());
+        for (MoneroOutput vin : transfer.getTx().getVins()) {
+          assertNotNull(vin.getAmount());
+          assertNotNull(vin.getKeyImage().getHex());
+          assertFalse(vin.getRingOutputIndices().isEmpty());
+        }
+      }
+      
+      // test transfer's tx's vouts
+      assertNotNull(transfer.getTx().getVouts());
+      assertFalse(transfer.getTx().getVouts().isEmpty());
+      for (MoneroOutput vout : transfer.getTx().getVouts()) {
+        assertNotNull(vout.getAmount());
+        assertNotNull(vout.getStealthPublicKey());
+      }
+      
+      // add transfer amount to running total
+      incomingTotal = incomingTotal.add(transfer.getAmount());
     }
 
     @Override
