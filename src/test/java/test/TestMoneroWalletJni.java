@@ -965,17 +965,54 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
         assertNotNull(vout.getStealthPublicKey());
       }
       
-      // add transfer amount to running total
+      // add incoming amount to running total
       incomingTotal = incomingTotal.add(transfer.getAmount());
     }
 
     @Override
     public void onOutgoingTransfer(MoneroOutgoingTransfer transfer) {
       assertNotNull(transfer);
-      assertNotNull(transfer.getAmount());
-      outgoingTotal = outgoingTotal.add(transfer.getAmount());
       prevOutgoingTransfer = transfer;
-      //throw new RuntimeException("onOutgoingTransfer() not implemented");  // TODO **: test the rest of the transfer
+      
+      // test transfer
+      assertNotNull(transfer.getAmount());
+      assertTrue(transfer.getAccountIndex() >= 0);
+      assertEquals(1, transfer.getSubaddressIndices().size());
+      assertTrue(transfer.getSubaddressIndices().get(0) >= 0);
+      
+      // test transfer's tx
+      assertNotNull(transfer.getTx());
+      assertNotNull(transfer.getTx().getId());
+      assertEquals(64, transfer.getTx().getId().length());
+      assertTrue(transfer.getTx().getVersion() >= 0);
+      assertTrue(transfer.getTx().getUnlockTime() >= 0);
+      assertNotNull(transfer.getTx().getExtra());
+      assertTrue(transfer.getTx().getExtra().length > 0);
+      assertTrue(transfer == transfer.getTx().getOutgoingTransfer());
+      
+      // test transfer's tx's vins
+      if (transfer.getTx().getVins() == null) {
+        assertTrue(transfer.getTx().getIsCoinbase());
+      } else {
+        assertFalse(transfer.getTx().getIsCoinbase());
+        assertFalse(transfer.getTx().getVins().isEmpty());
+        for (MoneroOutput vin : transfer.getTx().getVins()) {
+          assertNotNull(vin.getAmount());
+          assertNotNull(vin.getKeyImage().getHex());
+          assertFalse(vin.getRingOutputIndices().isEmpty());
+        }
+      }
+      
+      // test transfer's tx's vouts
+      assertNotNull(transfer.getTx().getVouts());
+      assertFalse(transfer.getTx().getVouts().isEmpty());
+      for (MoneroOutput vout : transfer.getTx().getVouts()) {
+        assertNotNull(vout.getAmount());
+        assertNotNull(vout.getStealthPublicKey());
+      }
+      
+      // add outgoing amount to running total
+      outgoingTotal = outgoingTotal.add(transfer.getAmount());
     }
     
     public void onDone(long chainHeight) {

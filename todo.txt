@@ -45,8 +45,10 @@ incoming_transfers add address (low priority), fee, timestamp, unlock_time, is_d
 get transactions per block
 lots of internal wallet errors when daemon rpc tests run
 add final keyword to method args where appropriate
+update send end height mid sync so 100% figure is accurate
 
 LOW
+on_money_spent() tx in vs out are same tx always
 common wallet tests test structures of txs, transfers, and outputs in testGetTxs(), etc
 should vouts be part of incoming transfers?  typically one vout per transfer but not necessarily?
 wallet.cpp m_synchronized only ever set to true, never false
