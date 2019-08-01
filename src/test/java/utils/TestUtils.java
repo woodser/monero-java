@@ -59,7 +59,7 @@ public class TestUtils {
   public static final String LANGUAGE = "English";
   public static final String MNEMONIC = "veteran inwardly films myriad godfather feel odds legion rarest dating adopt onward wetsuit atrium drying ruined relic refer bamboo voted baffles agnostic cycling dexterity relic"; 
   public static final String ADDRESS = "57QzhZAYSHeWG8EpUT8iNTcYATUoMv7hf6MoVCWge6HoV1vGTor1ZkSGa6pH1Xv3xMRh53m5KWFdbSnmmMmzSgpQCrVUyTL";
-  public static final long RESTORE_HEIGHT = 370987;
+  public static final long RESTORE_HEIGHT = 370987; // NOTE: this value MUST be the height of the wallet's first tx for tests
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class);
