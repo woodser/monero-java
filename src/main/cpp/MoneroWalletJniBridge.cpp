@@ -158,19 +158,14 @@ struct WalletJniListener : public MoneroWalletListener {
     int envStat = attachJVM(&jenv);
     if (envStat == JNI_ERR) return;
 
-    // serialize transfer to string rooted at block
-    string blockJson;
-    if (transfer.tx->block != boost::none) blockJson = transfer.tx->block.get()->serialize();
-    else {
-      MoneroBlock block = MoneroBlock();  // placeholder block for unconfirmed tx
-      block.txs.push_back(transfer.tx);
-      blockJson = block.serialize();
-    }
+    // prepare parameters to invoke Java listener
+    boost::optional<uint64_t> height = transfer.tx->getHeight();
+    jstring jtxId = jenv->NewStringUTF(transfer.tx->id.get().c_str());
+    jstring jamountStr = jenv->NewStringUTF(to_string(*transfer.amount).c_str());
 
     // invoke Java listener
-    jstring jblockJson = jenv->NewStringUTF(blockJson.c_str());
-    jmethodID listenerClass_onIncomingTransfer = jenv->GetMethodID(class_WalletListener, "onIncomingTransfer", "(Ljava/lang/String;)V");
-    jenv->CallVoidMethod(jlistener, listenerClass_onIncomingTransfer, jblockJson);
+    jmethodID listenerClass_onIncomingTransfer = jenv->GetMethodID(class_WalletListener, "onIncomingTransfer", "(JLjava/lang/String;Ljava/lang/String;IIII)V");
+    jenv->CallVoidMethod(jlistener, listenerClass_onIncomingTransfer, height == boost::none ? 0 : *height, jtxId, jamountStr, *transfer.accountIndex, *transfer.subaddressIndex, *transfer.tx->version, *transfer.tx->unlockTime);
     detachJVM(jenv, envStat);
   }
 
@@ -181,19 +176,14 @@ struct WalletJniListener : public MoneroWalletListener {
     int envStat = attachJVM(&jenv);
     if (envStat == JNI_ERR) return;
 
-    // serialize transfer to string rooted at block
-    string blockJson;
-    if (transfer.tx->block != boost::none) blockJson = transfer.tx->block.get()->serialize();
-    else {
-      MoneroBlock block = MoneroBlock();  // placeholder block for unconfirmed tx
-      block.txs.push_back(transfer.tx);
-      blockJson = block.serialize();
-    }
+    // prepare parameters to invoke Java listener
+    boost::optional<uint64_t> height = transfer.tx->getHeight();
+    jstring jtxId = jenv->NewStringUTF(transfer.tx->id.get().c_str());
+    jstring jamountStr = jenv->NewStringUTF(to_string(*transfer.amount).c_str());
 
     // invoke Java listener
-    jstring jblockJson = jenv->NewStringUTF(blockJson.c_str());
-    jmethodID listenerClass_onOutgoingTransfer = jenv->GetMethodID(class_WalletListener, "onOutgoingTransfer", "(Ljava/lang/String;)V");
-    jenv->CallVoidMethod(jlistener, listenerClass_onOutgoingTransfer, jblockJson);
+    jmethodID listenerClass_onOutgoingTransfer = jenv->GetMethodID(class_WalletListener, "onOutgoingTransfer", "(JLjava/lang/String;Ljava/lang/String;IIII)V");
+    jenv->CallVoidMethod(jlistener, listenerClass_onOutgoingTransfer, height == boost::none ? 0 : *height, jtxId, jamountStr, *transfer.accountIndex, transfer.subaddressIndices[0], *transfer.tx->version, *transfer.tx->unlockTime);
     detachJVM(jenv, envStat);
   }
 };

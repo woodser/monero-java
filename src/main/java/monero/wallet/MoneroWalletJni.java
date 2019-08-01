@@ -54,14 +54,15 @@ import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
-import monero.wallet.model.MoneroWalletListenerI;
 import monero.wallet.model.MoneroWalletListener;
+import monero.wallet.model.MoneroWalletListenerI;
 import monero.wallet.request.MoneroOutputRequest;
 import monero.wallet.request.MoneroSendRequest;
 import monero.wallet.request.MoneroTransferRequest;
@@ -1374,17 +1375,50 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       for (MoneroWalletListenerI listener : listeners) listener.onNewBlock(height);
     }
     
-    public void onIncomingTransfer(String blockJson) {
-      MoneroBlockWallet blockWallet =  JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blockJson, MoneroBlockWallet.class);
-      MoneroBlock block = blockWallet.toBlock();
-      MoneroTxWallet tx = (MoneroTxWallet) block.getTxs().get(0);
+    public void onIncomingTransfer(long height, String txId, String amountStr, int accountIdx, int subaddressIdx, int version, int unlockTime) {
+      
+      // build incoming transfer
+      MoneroIncomingTransfer transfer = new MoneroIncomingTransfer();
+      transfer.setAmount(new BigInteger(amountStr));
+      transfer.setAccountIndex(accountIdx);
+      transfer.setSubaddressIndex(subaddressIdx);
+      MoneroTxWallet tx = new MoneroTxWallet();
+      tx.setId(txId);
+      tx.setVersion(version);
+      tx.setUnlockTime(unlockTime);
+      transfer.setTx(tx);
+      tx.setIncomingTransfers(Arrays.asList(transfer));
+      if (height > 0) {
+        MoneroBlock block = new MoneroBlock().setHeight(height);
+        block.setTxs(Arrays.asList(tx));
+        tx.setBlock(block);
+      }
+      
+      // announce transfer
       for (MoneroWalletListenerI listener : listeners) listener.onIncomingTransfer(tx.getIncomingTransfers().get(0));
     }
     
-    public void onOutgoingTransfer(String blockJson) {
-      MoneroBlockWallet blockWallet =  JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blockJson, MoneroBlockWallet.class);
-      MoneroBlock block = blockWallet.toBlock();
-      MoneroTxWallet tx = (MoneroTxWallet) block.getTxs().get(0);
+    // TODO monero-core: provide all subaddress indices for outgoing transfers
+    public void onOutgoingTransfer(long height, String txId, String amountStr, int accountIdx, int subaddressIdx, int version, int unlockTime) {
+      
+      // build outgoing transfer
+      MoneroOutgoingTransfer transfer = new MoneroOutgoingTransfer();
+      transfer.setAmount(new BigInteger(amountStr));
+      transfer.setAccountIndex(accountIdx);
+      transfer.setSubaddressIndices(Arrays.asList(subaddressIdx));
+      MoneroTxWallet tx = new MoneroTxWallet();
+      tx.setId(txId);
+      tx.setVersion(version);
+      tx.setUnlockTime(unlockTime);
+      transfer.setTx(tx);
+      tx.setOutgoingTransfer(transfer);
+      if (height > 0) {
+        MoneroBlock block = new MoneroBlock().setHeight(height);
+        block.setTxs(Arrays.asList(tx));
+        tx.setBlock(block);
+      }
+      
+      // announce transfer
       for (MoneroWalletListenerI listener : listeners) listener.onOutgoingTransfer(tx.getOutgoingTransfer());
     }
   }
