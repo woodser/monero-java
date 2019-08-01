@@ -15,7 +15,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.daemon.model.MoneroNetworkType;
-import monero.daemon.model.MoneroOutput;
 import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
@@ -939,31 +938,13 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals(64, transfer.getTx().getId().length());
       assertTrue(transfer.getTx().getVersion() >= 0);
       assertTrue(transfer.getTx().getUnlockTime() >= 0);
-      assertNotNull(transfer.getTx().getExtra());
-      assertTrue(transfer.getTx().getExtra().length > 0);
       assertEquals(1, transfer.getTx().getIncomingTransfers().size());
       assertTrue(transfer.getTx().getIncomingTransfers().get(0) == transfer);
       
-      // test transfer's tx's vins
-      if (transfer.getTx().getVins() == null) {
-        assertTrue(transfer.getTx().getIsCoinbase());
-      } else {
-        assertFalse(transfer.getTx().getIsCoinbase());
-        assertFalse(transfer.getTx().getVins().isEmpty());
-        for (MoneroOutput vin : transfer.getTx().getVins()) {
-          assertNotNull(vin.getAmount());
-          assertNotNull(vin.getKeyImage().getHex());
-          assertFalse(vin.getRingOutputIndices().isEmpty());
-        }
-      }
-      
-      // test transfer's tx's vouts
-      assertNotNull(transfer.getTx().getVouts());
-      assertFalse(transfer.getTx().getVouts().isEmpty());
-      for (MoneroOutput vout : transfer.getTx().getVouts()) {
-        assertNotNull(vout.getAmount());
-        assertNotNull(vout.getStealthPublicKey());
-      }
+      // this fields are not sent over the jni bridge
+      assertNull(transfer.getTx().getExtra());
+      assertNull(transfer.getTx().getVins());
+      assertNull(transfer.getTx().getVouts());
       
       // add incoming amount to running total
       incomingTotal = incomingTotal.add(transfer.getAmount());
@@ -986,30 +967,12 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals(64, transfer.getTx().getId().length());
       assertTrue(transfer.getTx().getVersion() >= 0);
       assertTrue(transfer.getTx().getUnlockTime() >= 0);
-      assertNotNull(transfer.getTx().getExtra());
-      assertTrue(transfer.getTx().getExtra().length > 0);
       assertTrue(transfer == transfer.getTx().getOutgoingTransfer());
       
-      // test transfer's tx's vins
-      if (transfer.getTx().getVins() == null) {
-        assertTrue(transfer.getTx().getIsCoinbase());
-      } else {
-        assertFalse(transfer.getTx().getIsCoinbase());
-        assertFalse(transfer.getTx().getVins().isEmpty());
-        for (MoneroOutput vin : transfer.getTx().getVins()) {
-          assertNotNull(vin.getAmount());
-          assertNotNull(vin.getKeyImage().getHex());
-          assertFalse(vin.getRingOutputIndices().isEmpty());
-        }
-      }
-      
-      // test transfer's tx's vouts
-      assertNotNull(transfer.getTx().getVouts());
-      assertFalse(transfer.getTx().getVouts().isEmpty());
-      for (MoneroOutput vout : transfer.getTx().getVouts()) {
-        assertNotNull(vout.getAmount());
-        assertNotNull(vout.getStealthPublicKey());
-      }
+      // this fields are not sent over the jni bridge
+      assertNull(transfer.getTx().getExtra());
+      assertNull(transfer.getTx().getVins());
+      assertNull(transfer.getTx().getVouts());
       
       // add outgoing amount to running total
       outgoingTotal = outgoingTotal.add(transfer.getAmount());
