@@ -866,7 +866,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     @Override
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
       assertFalse("Sync has completed and progress should not be called again", isDone);
-      if ((height - startHeight) % PRINT_INCREMENT == 0) System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
+      if ((height - startHeight) % PRINT_INCREMENT == 0 || percentDone == 1.0) System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
       assertFalse("Should not call progress if end height <= start height", endHeight <= startHeight);
       assertEquals(this.startHeight, startHeight);
       assertTrue(endHeight >= this.prevEndHeight);  // chain can grow while syncing
