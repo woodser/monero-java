@@ -46,6 +46,7 @@ get transactions per block
 lots of internal wallet errors when daemon rpc tests run
 add final keyword to method args where appropriate
 update send end height mid sync so 100% figure is accurate
+failure in sync test does not propagate back through c++ and back to Java to indicate test failure
 
 LOW
 unlockTime should probably be long / uint64_t

@@ -80,6 +80,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     System.loadLibrary("monero-java");
   }
   
+  // if enabled, wallet auto syncs on a fixed interval
+  public static final long SYNC_INTERVAL = 10000; // 10 seconds
+  
   // logger
   private static final Logger LOGGER = Logger.getLogger(MoneroWalletJni.class);
   
@@ -425,6 +428,14 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (!listeners.contains(listener)) throw new MoneroException("Listener is not registered to wallet");
     listeners.remove(listener);
     if (listeners.isEmpty()) jniListener.setIsListening(false);
+  }
+  
+  /**
+   * Get the listeners registered with the wallet.
+   */
+  public Set<MoneroWalletListenerI> getListeners() {
+    assertNotClosed();
+    return listeners;
   }
 
   /**
