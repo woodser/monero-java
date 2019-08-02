@@ -45,153 +45,10 @@ using namespace monero;
 static const char* JNI_WALLET_HANDLE = "jniWalletHandle";
 static const char* JNI_LISTENER_HANDLE = "jniListenerHandle";
 
-// --------------------------------- LISTENER ---------------------------------
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-static JavaVM *cachedJVM;
-//static jclass class_ArrayList;
-static jclass class_WalletListener;
-//static jclass class_TransactionInfo;
-//static jclass class_Transfer;
-//static jclass class_Ledger;
-
-std::mutex _listenerMutex;
-
-JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
-  cachedJVM = jvm;
-  JNIEnv *jenv;
-  if (jvm->GetEnv(reinterpret_cast<void **>(&jenv), JNI_VERSION_1_6) != JNI_OK) {
-    return -1;
-  }
-
-//  class_ArrayList = static_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("java/util/ArrayList")));
-//  class_TransactionInfo = static_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("com/m2049r/xmrwallet/model/TransactionInfo")));
-//  class_Transfer = static_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("com/m2049r/xmrwallet/model/Transfer")));
-  class_WalletListener = static_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("monero/wallet/MoneroWalletJni$WalletJniListener")));
-//  class_Ledger = static_cast<jclass>(jenv->NewGlobalRef(jenv->FindClass("com/m2049r/xmrwallet/ledger/Ledger")));
-  return JNI_VERSION_1_6;
-}
-#ifdef __cplusplus
-}
-#endif
-
-int attachJVM(JNIEnv **jenv) {
-  int envStat = cachedJVM->GetEnv((void **) jenv, JNI_VERSION_1_6);
-  if (envStat == JNI_EDETACHED) {
-    if (cachedJVM->AttachCurrentThread((void **) jenv, nullptr) != 0) {
-      return JNI_ERR;
-    }
-  } else if (envStat == JNI_EVERSION) {
-    return JNI_ERR;
-  }
-  return envStat;
-}
-
-void detachJVM(JNIEnv *jenv, int envStat) {
-  if (jenv->ExceptionCheck()) {
-    jenv->ExceptionDescribe();
-  }
-  if (envStat == JNI_EDETACHED) {
-    cachedJVM->DetachCurrentThread();
-  }
-}
-
-/**
- * Listens for wallet notifications and notifies the cpp listener in Java.
- */
-struct WalletJniListener : public MoneroWalletListener {
-  jobject jlistener;
-
-  WalletJniListener(JNIEnv* env, jobject listener) {
-    jlistener = env->NewGlobalRef(listener);
-  }
-
-  ~WalletJniListener() { };
-
-  void deleteGlobalJavaRef(JNIEnv *env) {
-    std::lock_guard<std::mutex> lock(_listenerMutex);
-    env->DeleteGlobalRef(jlistener);
-    jlistener = nullptr;
-  }
-
-  void onSyncProgress(uint64_t height, uint64_t startHeight, uint64_t endHeight, double percentDone, const string& message) {
-    std::lock_guard<std::mutex> lock(_listenerMutex);
-    if (jlistener == nullptr) return;
-    JNIEnv *jenv;
-    int envStat = attachJVM(&jenv);
-    if (envStat == JNI_ERR) return;
-
-    // prepare callback arguments
-    jlong jheight = static_cast<jlong>(height);
-    jlong jstartHeight = static_cast<jlong>(startHeight);
-    jlong jendHeight = static_cast<jlong>(endHeight);
-    jdouble jpercentDone = static_cast<jdouble>(percentDone);
-    jstring jmessage = jenv->NewStringUTF(message.c_str());
-
-    jmethodID listenerClass_onSyncProgress = jenv->GetMethodID(class_WalletListener, "onSyncProgress", "(JJJDLjava/lang/String;)V");
-    jenv->CallVoidMethod(jlistener, listenerClass_onSyncProgress, jheight, jstartHeight, jendHeight, jpercentDone, jmessage);
-    jenv->DeleteLocalRef(jmessage);
-    detachJVM(jenv, envStat);
-  }
-
-  void onNewBlock(uint64_t height) {
-    std::lock_guard<std::mutex> lock(_listenerMutex);
-    if (jlistener == nullptr) return;
-    JNIEnv *jenv;
-    int envStat = attachJVM(&jenv);
-    if (envStat == JNI_ERR) return;
-
-    jlong jheight = static_cast<jlong>(height);
-    jmethodID listenerClass_onNewBlock = jenv->GetMethodID(class_WalletListener, "onNewBlock", "(J)V");
-    jenv->CallVoidMethod(jlistener, listenerClass_onNewBlock, jheight);
-    detachJVM(jenv, envStat);
-  }
-
-  void onOutputReceived(const MoneroOutputWallet& output) {
-    std::lock_guard<std::mutex> lock(_listenerMutex);
-    if (jlistener == nullptr) return;
-    JNIEnv *jenv;
-    int envStat = attachJVM(&jenv);
-    if (envStat == JNI_ERR) return;
-
-    // prepare parameters to invoke Java listener
-    boost::optional<uint64_t> height = output.tx->getHeight();
-    jstring jtxId = jenv->NewStringUTF(output.tx->id.get().c_str());
-    jstring jamountStr = jenv->NewStringUTF(to_string(*output.amount).c_str());
-
-    // invoke Java listener
-    jmethodID listenerClass_onOutputReceived = jenv->GetMethodID(class_WalletListener, "onOutputReceived", "(JLjava/lang/String;Ljava/lang/String;IIII)V");
-    jenv->CallVoidMethod(jlistener, listenerClass_onOutputReceived, height == boost::none ? 0 : *height, jtxId, jamountStr, *output.accountIndex, *output.subaddressIndex, *output.tx->version, *output.tx->unlockTime);
-    detachJVM(jenv, envStat);
-  }
-
-  void onOutputSpent(const MoneroOutputWallet& output) {
-    std::lock_guard<std::mutex> lock(_listenerMutex);
-    if (jlistener == nullptr) return;
-    JNIEnv *jenv;
-    int envStat = attachJVM(&jenv);
-    if (envStat == JNI_ERR) return;
-
-    // prepare parameters to invoke Java listener
-    boost::optional<uint64_t> height = output.tx->getHeight();
-    jstring jtxId = jenv->NewStringUTF(output.tx->id.get().c_str());
-    jstring jamountStr = jenv->NewStringUTF(to_string(*output.amount).c_str());
-
-    // invoke Java listener
-    jmethodID listenerClass_onOutputSpent = jenv->GetMethodID(class_WalletListener, "onOutputSpent", "(JLjava/lang/String;Ljava/lang/String;III)V");
-    jenv->CallVoidMethod(jlistener, listenerClass_onOutputSpent, height == boost::none ? 0 : *height, jtxId, jamountStr, *output.accountIndex, output.subaddressIndex, *output.tx->version);
-    detachJVM(jenv, envStat);
-  }
-};
-
 // ----------------------------- COMMON HELPERS -------------------------------
 
 // Based on: https://stackoverflow.com/questions/2054598/how-to-catch-jni-java-exception/2125673#2125673
-void rethrow_cpp_exception_as_java_exception(JNIEnv* env) {
+void rethrowCppExceptionAsJavaException(JNIEnv* env) {
   try {
     throw;  // throw exception to determine and handle type
   } catch (const std::bad_alloc& e) {
@@ -207,6 +64,27 @@ void rethrow_cpp_exception_as_java_exception(JNIEnv* env) {
     jclass jc = env->FindClass("java/lang/Exception");
     if (jc) env->ThrowNew(jc, "Unidentfied C++ exception");
   }
+}
+
+void rethrowJavaExceptionAsCppException(JNIEnv* env, jthrowable jexception) {
+
+  // print stacktrace to the console
+  env->ExceptionDescribe();
+
+  // clear the exception
+  //env->ExceptionClear();
+
+  // get the exception's message
+  jclass throwableClass = env->FindClass("java/lang/Throwable");
+  jmethodID throwableClass_getMessage = env->GetMethodID(throwableClass, "getMessage", "()Ljava/lang/String;");
+  jstring jmsg = (jstring) env->CallObjectMethod(jexception, throwableClass_getMessage, 0);
+  const char* _msg = env->GetStringUTFChars(jmsg, NULL);
+  string msg = string(_msg);
+  env->ReleaseStringUTFChars(jmsg, _msg);
+
+  // throw exception in c++
+  MERROR("Exception occurred in Java: " << msg);
+  throw runtime_error(msg);
 }
 
 void setDaemonConnection(JNIEnv *env, MoneroWallet* wallet, jstring juri, jstring jusername, jstring jpassword) {
@@ -226,13 +104,180 @@ void setDaemonConnection(JNIEnv *env, MoneroWallet* wallet, jstring juri, jstrin
   try {
     wallet->setDaemonConnection(uri, username, password);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
   }
 }
 
 string stripLastChar(const string& str) {
   return str.substr(0, str.size() - 1);
 }
+
+// ---------------------------- WALLET LISTENER -------------------------------
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+static JavaVM *cachedJVM;
+//static jclass class_ArrayList;
+static jclass class_WalletListener;
+//static jclass class_TransactionInfo;
+//static jclass class_Transfer;
+//static jclass class_Ledger;
+
+std::mutex _listenerMutex;
+
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
+  cachedJVM = jvm;
+  JNIEnv *env;
+  if (jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+    return -1;
+  }
+
+//  class_ArrayList = static_cast<jclass>(env->NewGlobalRef(env->FindClass("java/util/ArrayList")));
+//  class_TransactionInfo = static_cast<jclass>(env->NewGlobalRef(env->FindClass("com/m2049r/xmrwallet/model/TransactionInfo")));
+//  class_Transfer = static_cast<jclass>(env->NewGlobalRef(env->FindClass("com/m2049r/xmrwallet/model/Transfer")));
+  class_WalletListener = static_cast<jclass>(env->NewGlobalRef(env->FindClass("monero/wallet/MoneroWalletJni$WalletJniListener")));
+//  class_Ledger = static_cast<jclass>(env->NewGlobalRef(env->FindClass("com/m2049r/xmrwallet/ledger/Ledger")));
+  return JNI_VERSION_1_6;
+}
+#ifdef __cplusplus
+}
+#endif
+
+int attachJVM(JNIEnv **env) {
+  int envStat = cachedJVM->GetEnv((void **) env, JNI_VERSION_1_6);
+  if (envStat == JNI_EDETACHED) {
+    if (cachedJVM->AttachCurrentThread((void **) env, nullptr) != 0) {
+      return JNI_ERR;
+    }
+  } else if (envStat == JNI_EVERSION) {
+    return JNI_ERR;
+  }
+  return envStat;
+}
+
+void detachJVM(JNIEnv *env, int envStat) {
+  if (env->ExceptionCheck()) {
+    env->ExceptionDescribe();
+  }
+  if (envStat == JNI_EDETACHED) {
+    cachedJVM->DetachCurrentThread();
+  }
+}
+
+/**
+ * Listens for wallet notifications and notifies the cpp listener in Java.
+ */
+struct WalletJniListener : public MoneroWalletListener {
+
+  jobject jlistener;
+
+  // TODO: use this env instead of attaching each time? performance improvement?
+  WalletJniListener(JNIEnv* env, jobject listener) {
+    jlistener = env->NewGlobalRef(listener);
+  }
+
+  ~WalletJniListener() { };
+
+  void deleteGlobalJavaRef(JNIEnv *env) {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    env->DeleteGlobalRef(jlistener);
+    jlistener = nullptr;
+  }
+
+  void onSyncProgress(uint64_t height, uint64_t startHeight, uint64_t endHeight, double percentDone, const string& message) {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+    JNIEnv *env;
+    int envStat = attachJVM(&env);
+    if (envStat == JNI_ERR) return;
+
+    // prepare callback arguments
+    jlong jheight = static_cast<jlong>(height);
+    jlong jstartHeight = static_cast<jlong>(startHeight);
+    jlong jendHeight = static_cast<jlong>(endHeight);
+    jdouble jpercentDone = static_cast<jdouble>(percentDone);
+    jstring jmessage = env->NewStringUTF(message.c_str());
+
+    // invoke Java listener's onSyncProgress()
+    jmethodID listenerClass_onSyncProgress = env->GetMethodID(class_WalletListener, "onSyncProgress", "(JJJDLjava/lang/String;)V");
+    env->CallVoidMethod(jlistener, listenerClass_onSyncProgress, jheight, jstartHeight, jendHeight, jpercentDone, jmessage);
+    env->DeleteLocalRef(jmessage);
+
+    // check for and rethrow Java exception
+    jthrowable jexception = env->ExceptionOccurred();
+    if (jexception) rethrowJavaExceptionAsCppException(env, jexception);  // TODO: does not detach JVM
+
+    detachJVM(env, envStat);
+  }
+
+  void onNewBlock(uint64_t height) {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+    JNIEnv *env;
+    int envStat = attachJVM(&env);
+    if (envStat == JNI_ERR) return;
+
+    // invoke Java listener's onNewBlock()
+    jlong jheight = static_cast<jlong>(height);
+    jmethodID listenerClass_onNewBlock = env->GetMethodID(class_WalletListener, "onNewBlock", "(J)V");
+    env->CallVoidMethod(jlistener, listenerClass_onNewBlock, jheight);
+
+    // check for and rethrow Java exception
+    jthrowable jexception = env->ExceptionOccurred();
+    if (jexception) rethrowJavaExceptionAsCppException(env, jexception);  // TODO: does not detach JVM
+
+    detachJVM(env, envStat);
+  }
+
+  void onOutputReceived(const MoneroOutputWallet& output) {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+    JNIEnv *env;
+    int envStat = attachJVM(&env);
+    if (envStat == JNI_ERR) return;
+
+    // prepare parameters to invoke Java listener
+    boost::optional<uint64_t> height = output.tx->getHeight();
+    jstring jtxId = env->NewStringUTF(output.tx->id.get().c_str());
+    jstring jamountStr = env->NewStringUTF(to_string(*output.amount).c_str());
+
+    // invoke Java listener's onOutputReceived()
+    jmethodID listenerClass_onOutputReceived = env->GetMethodID(class_WalletListener, "onOutputReceived", "(JLjava/lang/String;Ljava/lang/String;IIII)V");
+    env->CallVoidMethod(jlistener, listenerClass_onOutputReceived, height == boost::none ? 0 : *height, jtxId, jamountStr, *output.accountIndex, *output.subaddressIndex, *output.tx->version, *output.tx->unlockTime);
+
+    // check for and rethrow Java exception
+    jthrowable jexception = env->ExceptionOccurred();
+    if (jexception) rethrowJavaExceptionAsCppException(env, jexception);  // TODO: does not detach JVM
+
+    detachJVM(env, envStat);
+  }
+
+  void onOutputSpent(const MoneroOutputWallet& output) {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+    JNIEnv *env;
+    int envStat = attachJVM(&env);
+    if (envStat == JNI_ERR) return;
+
+    // prepare parameters to invoke Java listener
+    boost::optional<uint64_t> height = output.tx->getHeight();
+    jstring jtxId = env->NewStringUTF(output.tx->id.get().c_str());
+    jstring jamountStr = env->NewStringUTF(to_string(*output.amount).c_str());
+
+    // invoke Java listener's onOutputSpent()
+    jmethodID listenerClass_onOutputSpent = env->GetMethodID(class_WalletListener, "onOutputSpent", "(JLjava/lang/String;Ljava/lang/String;III)V");
+    env->CallVoidMethod(jlistener, listenerClass_onOutputSpent, height == boost::none ? 0 : *height, jtxId, jamountStr, *output.accountIndex, output.subaddressIndex, *output.tx->version);
+
+    // check for and rethrow Java exception
+    jthrowable jexception = env->ExceptionOccurred();
+    if (jexception) rethrowJavaExceptionAsCppException(env, jexception);  // TODO: does not detach JVM
+
+    detachJVM(env, envStat);
+  }
+};
 
 // ------------------------------- JNI STATIC ---------------------------------
 
@@ -264,7 +309,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv 
     MoneroWallet* wallet = MoneroWallet::openWallet(path, password, static_cast<MoneroNetworkType>(jnetworkType));
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -298,7 +343,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletRandomJni
     MoneroWallet* wallet = MoneroWallet::createWalletRandom(path, password, static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, language);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -324,7 +369,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemo
     MoneroWallet* wallet = MoneroWallet::createWalletFromMnemonic(path, password, mnemonic, static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, (uint64_t) jrestoreHeight);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -358,7 +403,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJ
     MoneroWallet* wallet = MoneroWallet::createWalletFromKeys(path, password, address, viewKey, spendKey, static_cast<MoneroNetworkType>(networkType), daemonConnection, restoreHeight, language);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -383,7 +428,7 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonConne
     if (daemonConnection->password != boost::none && !daemonConnection->password.get().empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(daemonConnection->password.get().c_str()));
     return vals;
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -394,7 +439,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni
   try {
     setDaemonConnection(env, wallet, juri, jusername, jpassword);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
   }
 }
 
@@ -403,7 +448,7 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_getIsConnectedJni(
   try {
     return static_cast<jboolean>(wallet->getIsConnected());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -413,7 +458,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonHeightJni(JN
   try {
     return wallet->getDaemonHeight();
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -423,7 +468,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonTargetHeight
   try {
     return wallet->getDaemonTargetHeight();
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -433,7 +478,7 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_getIsDaemonSyncedJ
   try {
     return wallet->getIsDaemonSynced();
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -443,7 +488,7 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_getIsSyncedJni(JNI
   try {
     return wallet->getIsSynced();
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -481,7 +526,7 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getLanguagesJn
   try {
     languages = wallet->getLanguages();
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 
@@ -539,7 +584,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressIndexJni(
     string subaddressJson = subaddress.serialize();
     return env->NewStringUTF(subaddressJson.c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -585,7 +630,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getIntegratedAddres
     string integratedAddressJson = integratedAddress.serialize();
     return env->NewStringUTF(integratedAddressJson.c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -603,7 +648,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_decodeIntegratedAdd
     string integratedAddressJson = integratedAddress.serialize();
     return env->NewStringUTF(integratedAddressJson.c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -628,7 +673,7 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv
     env->SetObjectArrayElement(results, 1, receivedMoneyWrapped);
     return results;
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -639,7 +684,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_startSyncingJni(JNIEnv
   try {
     wallet->startSyncing();
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
   }
 }
 
@@ -649,7 +694,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_stopSyncingJni(JNIEnv 
   try {
     wallet->stopSyncing();
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
   }
 }
 
@@ -659,7 +704,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_rescanBlockchainJni(JN
   try {
     wallet->rescanBlockchain();
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
   }
 }
 
@@ -677,7 +722,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getChainHeightJni(JNI
   try {
     return wallet->getChainHeight();
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -694,7 +739,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setRestoreHeightJni(JN
   try {
     wallet->setRestoreHeight(restoreHeight);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
   }
 }
 
@@ -869,7 +914,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
     string blocksJson = stripLastChar(ss.str());
     return env->NewStringUTF(blocksJson.c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -916,7 +961,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
     string blocksJson = stripLastChar(ss.str());
     return env->NewStringUTF(blocksJson.c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -959,7 +1004,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
     string blocksJson = stripLastChar(ss.str());
     return env->NewStringUTF(blocksJson.c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -970,7 +1015,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsHexJni(JN
   try {
     return env->NewStringUTF(wallet->getOutputsHex().c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -984,7 +1029,7 @@ JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_importOutputsHexJni(JN
   try {
     return wallet->importOutputsHex(outputsHex);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -1023,7 +1068,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_importKeyImagesJni(
     result = wallet->importKeyImages(keyImages);
     return env->NewStringUTF(result->serialize().c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -1045,7 +1090,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv
     txs = wallet->sendSplit(*sendRequest);
     MTRACE("Got " << txs.size() << " txs");
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 
@@ -1094,7 +1139,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepOutputJni(JNIE
   try {
     tx = wallet->sweepOutput(*sendRequest);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 
@@ -1120,7 +1165,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepDustJni(JNIEnv
   try {
     txs = wallet->sweepDust(doNotRelay);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 
@@ -1158,7 +1203,7 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_relayTxsJni(JN
   try {
     txIds = wallet->relayTxs(txMetadatas);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 
@@ -1189,7 +1234,7 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getTxNotesJni(
   try {
     txNotes = wallet->getTxNotes(txIds);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 
@@ -1229,7 +1274,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setTxNotesJni(JNIEnv* 
   try {
     wallet->setTxNotes(txIds, txNotes);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
   }
 }
 
@@ -1243,7 +1288,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signJni(JNIEnv* env
     string signature = wallet->sign(msg);
     return env->NewStringUTF(signature.c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -1264,7 +1309,7 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_verifyJni(JNIEnv* 
     bool isGood = wallet->verify(msg, address, signature);
     return static_cast<jboolean>(isGood);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -1278,7 +1323,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxKeyJni(JNIEnv*
   try {
     return env->NewStringUTF(wallet->getTxKey(txId).c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -1298,7 +1343,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_checkTxKeyJni(JNIEn
   try {
     return env->NewStringUTF(wallet->checkTxKey(txId, txKey, address)->serialize().c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -1318,7 +1363,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxProofJni(JNIEn
   try {
     return env->NewStringUTF(wallet->getTxProof(txId, address, message).c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -1341,7 +1386,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_checkTxProofJni(JNI
   try {
     return env->NewStringUTF(wallet->checkTxProof(txId, address, message, signature)->serialize().c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -1358,7 +1403,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getSpendProofJni(JN
   try {
     return env->NewStringUTF(wallet->getSpendProof(txId, message).c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -1378,7 +1423,7 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_checkSpendProofJni
   try {
     return static_cast<jboolean>(wallet->checkSpendProof(txId, message, signature));
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -1392,7 +1437,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getReserveProofWall
   try {
     return env->NewStringUTF(wallet->getReserveProofWallet(message).c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -1410,7 +1455,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getReserveProofAcco
   try {
     return env->NewStringUTF(wallet->getReserveProofAccount(accountIdx, amount, message).c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -1430,7 +1475,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_checkReserveProofJn
   try {
     return env->NewStringUTF(wallet->checkReserveProof(address, message, signature)->serialize().c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -1451,7 +1496,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createPaymentUriJni
   try {
     paymentUri = wallet->createPaymentUri(*sendRequest.get());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 
@@ -1471,7 +1516,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_parsePaymentUriJni(
   try {
     sendRequest = wallet->parsePaymentUri(uri);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 
@@ -1491,7 +1536,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setAttributeJni(JNIEnv
   try {
     wallet->setAttribute(key, val);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
   }
 }
 
@@ -1504,7 +1549,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAttributeJni(JNI
   try {
     return env->NewStringUTF(wallet->getAttribute(key).c_str());
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
@@ -1515,7 +1560,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_startMiningJni(JNIEnv*
   try {
     wallet->startMining(numThreads, backgroundMining, ignoreBattery);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
   }
 }
 
@@ -1525,7 +1570,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_stopMiningJni(JNIEnv* 
   try {
     wallet->stopMining();
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
   }
 }
 
@@ -1537,7 +1582,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv* env, j
   try {
     wallet->save();
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
   }
 }
 
@@ -1555,7 +1600,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_moveToJni(JNIEnv* env,
   try {
     wallet->moveTo(path, password);
   } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
+    rethrowCppExceptionAsJavaException(env);
   }
 }
 
