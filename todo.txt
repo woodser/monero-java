@@ -120,7 +120,6 @@ support sign_transfer, submit_transfer, etc
 test changing wallet password with moveTo()
 
 LOW
-detect error in java from c++ jni bridge and error out
 more wallet comparison?
 test filtering with not relayed
 tx pool stats and other binary calls
