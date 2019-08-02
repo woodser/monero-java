@@ -72,8 +72,7 @@ standardize terminology payment vs output; one payment may be fulfilled with mul
 wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 
 14.1.0+ RELEASE
-moar notifications
-test onNewBlock() post sync notification
+check for error after invoking java notifications
 wallet.sync() then wallet.startSyncing() to enable auto syncing is confusing?
 rename coinbaseTx to minerTx
 compare time to gui vs manual sync vs auto sync vs no notifications - 1:22 vs 1:52 vs ?
@@ -103,7 +102,7 @@ waitForTxsToClear() should refresh more frequently than blocks so it continues i
 wallet.close() applies to rpc as well, add rpc isClosed()
 cap creation of accounts by ignoring test if more than X accounts already exist
 auto destroy wallet if garbage collected by vm
-ux test including receiving funds
+full ux test among multiple wallets
 sync(listener) should not be part of rpc api unless listening supported (could be supported)
 testCreateThenRelay() passes when no internet connection?
 tx in pool can reconcile to failed
