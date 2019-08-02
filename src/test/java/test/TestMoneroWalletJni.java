@@ -473,8 +473,9 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
             throw new RuntimeException(e.getMessage());
           }
           
-          // test that wallet listener's onSycnProgress() was invoked after previous completion
+          // test that wallet listener's onSyncProgress() and onNewBlock() were invoked after previous completion
           assertTrue(walletSyncTester.getOnSyncProgressAfterDone());
+          assertTrue(walletSyncTester.getOnNewBlockAfterDone());
         } finally {
           if (startedMining) wallet.stopMining();
         }
@@ -1089,6 +1090,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     @SuppressWarnings("unlikely-arg-type")
     @Override
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
+      //if (true) throw new RuntimeException("Hold the show");
       
       // registered wallet listeners will continue to get sync notifications after the wallet's initial sync
       if (isDone) {
@@ -1141,6 +1143,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     private MoneroOutputWallet prevOutputSent;
     private BigInteger incomingTotal;
     private BigInteger outgoingTotal;
+    private Boolean onNewBlockAfterDone;
     
     public WalletSyncTester(MoneroWalletJni wallet, long startHeight, long endHeight) {
       super(wallet, startHeight, endHeight);
@@ -1155,13 +1158,18 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     @Override
     public void onNewBlock(long height) {
-      if (isDone) assertTrue("Listener has completed and is not registered so should not be called again", wallet.getListeners().contains(this));
+      //if (true) throw new RuntimeException("Hold the show");
+      if (isDone) {
+        assertTrue("Listener has completed and is not registered so should not be called again", wallet.getListeners().contains(this));
+        onNewBlockAfterDone = true;
+      }
       if (prevHeight != null) assertEquals(prevHeight + 1, height);
       prevHeight = height;
     }
 
     @Override
     public void onOutputReceived(MoneroOutputWallet output) {
+      //if (true) throw new RuntimeException("Hold the show");
       assertNotNull(output);
       prevOutputReceived = output;
       
@@ -1176,13 +1184,12 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals(64, output.getTx().getId().length());
       assertTrue(output.getTx().getVersion() >= 0);
       assertTrue(output.getTx().getUnlockTime() >= 0);
-      assertEquals(1, output.getTx().getVins().size());
-      assertTrue(output.getTx().getVins().get(0) == output);
-      
-      // this fields are not sent over the jni bridge
-      assertNull(output.getTx().getExtra());
       assertNull(output.getTx().getVins());
-      assertNull(output.getTx().getVouts());
+      assertEquals(1, output.getTx().getVouts().size());
+      assertTrue(output.getTx().getVouts().get(0) == output);
+      
+      // extra is not sent over the jni bridge
+      assertNull(output.getTx().getExtra());
       
       // add incoming amount to running total
       incomingTotal = incomingTotal.add(output.getAmount());
@@ -1190,6 +1197,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
     @Override
     public void onOutputSpent(MoneroOutputWallet output) {
+      //if (true) throw new RuntimeException("Hold the show");
+      
       assertNotNull(output);
       prevOutputSent = output;
       
@@ -1203,14 +1212,13 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertNotNull(output.getTx().getId());
       assertEquals(64, output.getTx().getId().length());
       assertTrue(output.getTx().getVersion() >= 0);
-      assertTrue(output.getTx().getUnlockTime() >= 0);
+      assertNull(output.getTx().getUnlockTime());
       assertEquals(1, output.getTx().getVins().size());
-      assertTrue(output.getTx().getVouts().get(0) == output);
-      
-      // this fields are not sent over the jni bridge
-      assertNull(output.getTx().getExtra());
-      assertNull(output.getTx().getVins());
+      assertTrue(output.getTx().getVins().get(0) == output);
       assertNull(output.getTx().getVouts());
+      
+      // extra is not sent over the jni bridge
+      assertNull(output.getTx().getExtra());
       
       // add outgoing amount to running total
       outgoingTotal = outgoingTotal.add(output.getAmount());
@@ -1223,6 +1231,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertNotNull(prevOutputSent);
       BigInteger balance = incomingTotal.subtract(outgoingTotal);
       assertEquals(balance, wallet.getBalance());
+      onNewBlockAfterDone = false;  // test subsequent onNewBlock() calls
+    }
+    
+    public Boolean getOnNewBlockAfterDone() {
+      return onNewBlockAfterDone;
     }
   }
   
