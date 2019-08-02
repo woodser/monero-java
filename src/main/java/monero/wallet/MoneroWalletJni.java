@@ -54,7 +54,6 @@ import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
-import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncListener;
@@ -1386,51 +1385,49 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       for (MoneroWalletListenerI listener : listeners) listener.onNewBlock(height);
     }
     
-    public void onIncomingTransfer(long height, String txId, String amountStr, int accountIdx, int subaddressIdx, int version, int unlockTime) {
+    public void onOutputReceived(long height, String txId, String amountStr, int accountIdx, int subaddressIdx, int version, int unlockTime) {
       
-      // build incoming transfer
-      MoneroIncomingTransfer transfer = new MoneroIncomingTransfer();
-      transfer.setAmount(new BigInteger(amountStr));
-      transfer.setAccountIndex(accountIdx);
-      transfer.setSubaddressIndex(subaddressIdx);
+      // build received output
+      MoneroOutputWallet output = new MoneroOutputWallet();
+      output.setAmount(new BigInteger(amountStr));
+      output.setAccountIndex(accountIdx);
+      output.setSubaddressIndex(subaddressIdx);
       MoneroTxWallet tx = new MoneroTxWallet();
       tx.setId(txId);
       tx.setVersion(version);
       tx.setUnlockTime(unlockTime);
-      transfer.setTx(tx);
-      tx.setIncomingTransfers(Arrays.asList(transfer));
+      output.setTx(tx);
+      tx.setVins(Arrays.asList(output));
       if (height > 0) {
         MoneroBlock block = new MoneroBlock().setHeight(height);
         block.setTxs(Arrays.asList(tx));
         tx.setBlock(block);
       }
       
-      // announce transfer
-      for (MoneroWalletListenerI listener : listeners) listener.onIncomingTransfer(tx.getIncomingTransfers().get(0));
+      // announce output
+      for (MoneroWalletListenerI listener : listeners) listener.onOutputReceived((MoneroOutputWallet) tx.getVins().get(0));
     }
     
-    // TODO monero-core: provide all subaddress indices for outgoing transfers
-    public void onOutgoingTransfer(long height, String txId, String amountStr, int accountIdx, int subaddressIdx, int version, int unlockTime) {
+    public void onOutputSpent(long height, String txId, String amountStr, int accountIdx, int subaddressIdx, int version) {
       
-      // build outgoing transfer
-      MoneroOutgoingTransfer transfer = new MoneroOutgoingTransfer();
-      transfer.setAmount(new BigInteger(amountStr));
-      transfer.setAccountIndex(accountIdx);
-      transfer.setSubaddressIndices(Arrays.asList(subaddressIdx));
+      // build spent output
+      MoneroOutputWallet output = new MoneroOutputWallet();
+      output.setAmount(new BigInteger(amountStr));
+      output.setAccountIndex(accountIdx);
+      output.setSubaddressIndex(subaddressIdx);
       MoneroTxWallet tx = new MoneroTxWallet();
       tx.setId(txId);
       tx.setVersion(version);
-      tx.setUnlockTime(unlockTime);
-      transfer.setTx(tx);
-      tx.setOutgoingTransfer(transfer);
+      output.setTx(tx);
+      tx.setVouts(Arrays.asList(output));
       if (height > 0) {
         MoneroBlock block = new MoneroBlock().setHeight(height);
         block.setTxs(Arrays.asList(tx));
         tx.setBlock(block);
       }
       
-      // announce transfer
-      for (MoneroWalletListenerI listener : listeners) listener.onOutgoingTransfer(tx.getOutgoingTransfer());
+      // announce output
+      for (MoneroWalletListenerI listener : listeners) listener.onOutputSpent((MoneroOutputWallet) tx.getVouts().get(0));
     }
   }
   
