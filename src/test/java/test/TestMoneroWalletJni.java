@@ -1092,7 +1092,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     @SuppressWarnings("unlikely-arg-type")
     @Override
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
-      //if (true) throw new RuntimeException("Hold the show");
       
       // registered wallet listeners will continue to get sync notifications after the wallet's initial sync
       if (isDone) {
@@ -1142,7 +1141,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     private Long prevHeight;
     private MoneroOutputWallet prevOutputReceived;
-    private MoneroOutputWallet prevOutputSent;
+    private MoneroOutputWallet prevOutputSpent;
     private BigInteger incomingTotal;
     private BigInteger outgoingTotal;
     private Boolean onNewBlockAfterDone;
@@ -1160,7 +1159,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     @Override
     public void onNewBlock(long height) {
-      //if (true) throw new RuntimeException("Hold the show");
       if (isDone) {
         assertTrue("Listener has completed and is not registered so should not be called again", wallet.getListeners().contains(this));
         onNewBlockAfterDone = true;
@@ -1171,7 +1169,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
     @Override
     public void onOutputReceived(MoneroOutputWallet output) {
-      //if (true) throw new RuntimeException("Hold the show");
       assertNotNull(output);
       prevOutputReceived = output;
       
@@ -1199,10 +1196,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
     @Override
     public void onOutputSpent(MoneroOutputWallet output) {
-      //if (true) throw new RuntimeException("Hold the show");
-      
       assertNotNull(output);
-      prevOutputSent = output;
+      prevOutputSpent = output;
       
       // test output
       assertNotNull(output.getAmount());
@@ -1230,7 +1225,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       super.onDone(chainHeight);
       assertNotNull(prevHeight);
       assertNotNull(prevOutputReceived);
-      assertNotNull(prevOutputSent);
+      assertNotNull(prevOutputSpent);
       BigInteger balance = incomingTotal.subtract(outgoingTotal);
       assertEquals(balance, wallet.getBalance());
       onNewBlockAfterDone = false;  // test subsequent onNewBlock() calls
