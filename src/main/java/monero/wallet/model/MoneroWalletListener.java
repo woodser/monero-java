@@ -12,8 +12,8 @@ public class MoneroWalletListener implements MoneroWalletListenerI {
   public void onNewBlock(long height) { }
 
   @Override
-  public void onIncomingTransfer(MoneroIncomingTransfer transfer) { }
+  public void onOutputReceived(MoneroOutputWallet output) { }
 
   @Override
-  public void onOutgoingTransfer(MoneroOutgoingTransfer transfer) { }
+  public void onOutputSpent(MoneroOutputWallet output) { }
 }
