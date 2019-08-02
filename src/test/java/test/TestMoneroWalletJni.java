@@ -947,7 +947,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     BigInteger balanceAfter = wallet.getBalance();
     BigInteger unlockedBalanceAfter = wallet.getUnlockedBalance();
     BigInteger balanceAfterExpected = balanceBefore.subtract(tx.getFee());  // txs sent from/to same wallet so only decrease in balance is tx fee
-    if (!balanceAfterExpected.equals(balanceAfter)) errors.add("WARNING: Wallet balance immediately after send expected to be " + balanceAfterExpected + " but was " + balanceAfter);
+    if (!balanceAfterExpected.equals(balanceAfter)) errors.add("WARNING: sallet balance immediately after send expected to be " + balanceAfterExpected + " but was " + balanceAfter);
     if (unlockedBalanceBefore.compareTo(unlockedBalanceAfter) <= 0 && !unlockedBalanceBefore.equals(BigInteger.valueOf(0))) errors.add("WARNING: Wallet unlocked balance immediately after send was expected to decrease but changed from " + unlockedBalanceBefore + " to " + unlockedBalanceAfter);
         
     // wait for wallet to send notifications
@@ -1009,7 +1009,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   private static String issuesToStr(List<String> issues) {
     if (issues.isEmpty()) return null;
     StringBuilder sb = new StringBuilder();
-    sb.append("Notification test generated " + issues.size() + " issues\n");
+    sb.append("Output notification test generated " + issues.size() + " issues\n");
     for (int i = 0; i < issues.size(); i++) {
       sb.append((i + 1) + ": " + issues.get(i));
       if (i < issues.size() - 1) sb.append('\n');
