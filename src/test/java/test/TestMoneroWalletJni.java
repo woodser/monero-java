@@ -947,12 +947,12 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     BigInteger balanceAfter = wallet.getBalance();
     BigInteger unlockedBalanceAfter = wallet.getUnlockedBalance();
     BigInteger balanceAfterExpected = balanceBefore.subtract(tx.getFee());  // txs sent from/to same wallet so only decrease in balance is tx fee
-    if (!balanceAfterExpected.equals(balanceAfter)) errors.add("WARNING: sallet balance immediately after send expected to be " + balanceAfterExpected + " but was " + balanceAfter);
+    if (!balanceAfterExpected.equals(balanceAfter)) errors.add("WARNING: wallet balance immediately after send expected to be " + balanceAfterExpected + " but was " + balanceAfter);
     if (unlockedBalanceBefore.compareTo(unlockedBalanceAfter) <= 0 && !unlockedBalanceBefore.equals(BigInteger.valueOf(0))) errors.add("WARNING: Wallet unlocked balance immediately after send was expected to decrease but changed from " + unlockedBalanceBefore + " to " + unlockedBalanceAfter);
         
     // wait for wallet to send notifications
     if (listener.getOutputsSpent().isEmpty()) {
-      errors.add("WARNING: wallet does not notify listeners of outputs when tx sent directly through wallet or when refreshed from the pool; must wait for confirmation to receive notificaitons and have correct balance");
+      errors.add("WARNING: wallet does not notify listeners of outputs when tx sent directly through wallet or when refreshed from the pool; must wait for confirmation to receive notifications and have correct balance");
       try {
         
         // mine until next block
