@@ -8,6 +8,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.BeforeClass;
@@ -22,12 +24,15 @@ import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.model.MoneroWalletListener;
 import monero.wallet.model.MoneroWalletListenerI;
+import monero.wallet.request.MoneroSendRequest;
 import utils.TestUtils;
 
 /**
@@ -614,6 +619,121 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Test
   public void testCompareRpcWallet() {
     testWalletsEqualOnChain(TestUtils.getWalletRpc(), wallet);
+  }
+
+  // Notifies listeners of incoming and outgoing transactions to the same account
+  @Test
+  public void testTransferNotificationsSameAccount() {
+    List<String> warnings = testTransferNotifications(true);
+    assertTrue("Notification test returned 1 or more warnings\n:" + warnings, warnings.isEmpty());
+  }
+  
+  // Notifies listeners of incoming and outgoing transactions to different accounts
+  @Test
+  public void testTransferNotificationsDifferentAccounts() {
+    List<String> warnings = testTransferNotifications(false);
+    assertTrue("Notification test returned 1 or more warnings:\n" + warnings, warnings.isEmpty());
+  }
+  
+  private List<String> testTransferNotifications(boolean sameAccount) {
+    
+    // collect non-critical / known warnings
+    List<String> warnings = new ArrayList<String>();
+    
+    // wait for wallet txs in the pool in case they were sent from another wallet and therefore will not fully sync until confirmed // TODO monero core
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
+    
+    // create send request
+    MoneroSendRequest request = new MoneroSendRequest();
+    request.setAccountIndex(0);
+    int[] destinationAccounts = sameAccount ? new int[] {0, 1, 2} : new int[] {1, 2, 3};
+    for (int destinationAccount : destinationAccounts) {
+      request.addDestination(new MoneroDestination(wallet.getAddress(destinationAccount, 0), TestUtils.MAX_FEE));
+    }
+    
+    // get balances before for later comparison
+    BigInteger balanceBefore = wallet.getBalance();
+    BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance();
+    
+    // register a listener to collect notifications
+    MoneroTransferNotificationCollector listener = new MoneroTransferNotificationCollector();
+    wallet.addListener(listener);
+    
+    // send tx
+    MoneroTxWallet tx = wallet.send(request);
+    wallet.sync();
+    
+    // wait for wallet to send notifications
+    if (listener.getOutgoingTransfers().isEmpty()) {
+      warnings.add("Wallet did not immediately notify listeners of transfers when tx sent through wallet, waiting a few seconds");
+      try {
+        TimeUnit.MILLISECONDS.sleep(MoneroWalletJni.SYNC_INTERVAL * 2);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+        throw new RuntimeException(e.getMessage());
+      }
+    }
+    
+    // test outgoing transfer notification
+    assertEquals("Received " + listener.getOutgoingTransfers().size() + " outgoing transfer notifications when 1 was expected", 1, listener.getOutgoingTransfers().size());
+    MoneroOutgoingTransfer outgoingTransfer = listener.getOutgoingTransfers().get(0);
+    BigInteger expectedOutgoingAmount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3));
+    if (!expectedOutgoingAmount.equals(outgoingTransfer.getAmount())) warnings.add("Outgoing tranfer amount expected to be " + expectedOutgoingAmount + " but was " + outgoingTransfer.getAmount());
+    
+    // test incoming transfer notifications
+    if (listener.getIncomingTransfers().size() != 3) {
+      warnings.add("Received " + listener.getIncomingTransfers().size() + " incoming transfer notifications when 3 were expected");
+      return warnings;  // cannot continue test
+    }
+    for (int i = 0; i < listener.getIncomingTransfers().size(); i++) {
+      MoneroIncomingTransfer transfer = listener.getIncomingTransfers().get(i);
+      assertEquals(destinationAccounts[i], (int) transfer.getAccountIndex());
+      assertEquals(TestUtils.MAX_FEE, transfer.getAmount());
+    }
+    
+    // test wallet's balance
+    BigInteger balanceAfter = wallet.getBalance();
+    BigInteger unlockedBalanceAfter = wallet.getBalance();
+    BigInteger balanceAfterExpected = balanceBefore.subtract(tx.getOutgoingAmount()).add(tx.getIncomingAmount()).subtract(tx.getFee());
+    if (!balanceAfterExpected.equals(balanceAfter)) warnings.add("Wallet balance expected to be " + balanceAfterExpected + " but was " + balanceAfter);
+    if (unlockedBalanceBefore.compareTo(unlockedBalanceAfter) >= 0) warnings.add("Wallet unlocked balance was expected to decrease but changed from " + unlockedBalanceBefore + " to " + unlockedBalanceAfter);
+
+    // return cumulative warnings
+    return warnings;
+  }
+  
+  /**
+   * Wallet listener to collect transfer notifications.
+   */
+  private class MoneroTransferNotificationCollector extends MoneroWalletListener {
+    
+    private List<MoneroIncomingTransfer> incomingTransfers;
+    private List<MoneroOutgoingTransfer> outgoingTransfers;
+    
+    public MoneroTransferNotificationCollector() {
+      incomingTransfers = new ArrayList<MoneroIncomingTransfer>();
+      outgoingTransfers = new ArrayList<MoneroOutgoingTransfer>();
+    }
+    
+    @Override
+    public void onIncomingTransfer(MoneroIncomingTransfer transfer) {
+      System.out.println("ON INCOMING TRANSFER!!!");
+      incomingTransfers.add(transfer);
+    }
+    
+    @Override
+    public void onOutgoingTransfer(MoneroOutgoingTransfer transfer) {
+      System.out.println("ON OUTGOING TRANSFER!!!");
+      outgoingTransfers.add(transfer);
+    }
+    
+    public List<MoneroIncomingTransfer> getIncomingTransfers() {
+      return incomingTransfers;
+    }
+    
+    public List<MoneroOutgoingTransfer> getOutgoingTransfers() {
+      return outgoingTransfers;
+    }
   }
   
   @Test
