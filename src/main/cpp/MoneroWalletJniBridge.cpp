@@ -77,9 +77,9 @@ void rethrowJavaExceptionAsCppException(JNIEnv* env, jthrowable jexception) {
   // get the exception's message
   jclass throwableClass = env->FindClass("java/lang/Throwable");
   jmethodID throwableClass_getMessage = env->GetMethodID(throwableClass, "getMessage", "()Ljava/lang/String;");
-  jstring jmsg = (jstring) env->CallObjectMethod(jexception, throwableClass_getMessage, 0);
-  const char* _msg = env->GetStringUTFChars(jmsg, NULL);
-  string msg = string(_msg);
+  jstring jmsg = (jstring) env->CallObjectMethod(jexception, throwableClass_getMessage);
+  const char* _msg = jmsg == 0 ? 0 : env->GetStringUTFChars(jmsg, NULL);
+  string msg = string(_msg == 0 ? "" : _msg);
   env->ReleaseStringUTFChars(jmsg, _msg);
 
   // throw exception in c++

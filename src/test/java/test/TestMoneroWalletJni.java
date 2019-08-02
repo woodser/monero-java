@@ -1097,6 +1097,14 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       if (isDone) {
         assertTrue("Listener has completed and is not registered so should not be called again", wallet.getListeners().contains(this));
         onSyncProgressAfterDone = true;
+        if (Double.compare(percentDone, 1) != 0) {
+          System.err.println("BAD PERCENT DONE");
+          System.err.println("height: " + height);
+          System.err.println("startHeight: " + startHeight);
+          System.err.println("endHeight: " + endHeight);
+          System.err.println("percentDone: " + percentDone);
+          System.err.println("message: " + message);
+        }
         assertTrue(Double.compare(percentDone, 1) == 0);
         assertEquals(prevEndHeight, startHeight); // each sync notification picks up where the last left off
         prevEndHeight = startHeight;

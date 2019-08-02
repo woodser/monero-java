@@ -125,6 +125,7 @@ public class TestUtils {
         walletJni = MoneroWalletJni.createWalletFromMnemonic(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, TestUtils.MNEMONIC, NETWORK_TYPE, daemonConnection, RESTORE_HEIGHT);
         assertEquals(TestUtils.RESTORE_HEIGHT, walletJni.getRestoreHeight());
         walletJni.sync(new WalletSyncPrinter());
+        walletJni.save(); // save progress
         walletJni.startSyncing();
       }
       
