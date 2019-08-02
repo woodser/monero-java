@@ -624,21 +624,19 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   // Notifies listeners of incoming and outgoing transactions to the same account
   @Test
   public void testTransferNotificationsSameAccount() {
-    List<String> warnings = testTransferNotifications(true);
-    assertTrue("Notification test returned 1 or more warnings\n:" + warnings, warnings.isEmpty());
+    assertNull(testTransferNotifications(false));
   }
   
   // Notifies listeners of incoming and outgoing transactions to different accounts
   @Test
   public void testTransferNotificationsDifferentAccounts() {
-    List<String> warnings = testTransferNotifications(false);
-    assertTrue("Notification test returned 1 or more warnings:\n" + warnings, warnings.isEmpty());
+    assertNull(testTransferNotifications(false));
   }
   
-  private List<String> testTransferNotifications(boolean sameAccount) {
+  private String testTransferNotifications(boolean sameAccount) {
     
-    // collect non-critical / known warnings
-    List<String> warnings = new ArrayList<String>();
+    // collect errors and warnings
+    List<String> errors = new ArrayList<String>();
     
     // wait for wallet txs in the pool in case they were sent from another wallet and therefore will not fully sync until confirmed // TODO monero core
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
@@ -661,13 +659,16 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // send tx
     MoneroTxWallet tx = wallet.send(request);
-    wallet.sync();
+    
+    // TODO: test balance and unlocked balance right away
     
     // wait for wallet to send notifications
     if (listener.getOutgoingTransfers().isEmpty()) {
-      warnings.add("Wallet did not immediately notify listeners of transfers when tx sent through wallet, waiting a few seconds");
+      errors.add("WARNING: wallet does not notify listeners of transfers when tx sent directly through wallet or when refreshed from the pool.  Waiting for confirmation.");
       try {
-        TimeUnit.MILLISECONDS.sleep(MoneroWalletJni.SYNC_INTERVAL * 2);
+        System.out.println("WAITING FOR BLOCK");  // TODO: mine until next block
+        daemon.getNextBlockHeader();  
+        TimeUnit.MILLISECONDS.sleep(MoneroWalletJni.SYNC_INTERVAL); // ensure wallet has time to sync block
       } catch (InterruptedException e) {
         e.printStackTrace();
         throw new RuntimeException(e.getMessage());
@@ -675,15 +676,18 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
     
     // test outgoing transfer notification
-    assertEquals("Received " + listener.getOutgoingTransfers().size() + " outgoing transfer notifications when 1 was expected", 1, listener.getOutgoingTransfers().size());
+    if (listener.getOutgoingTransfers().size() != 1) {
+      errors.add("ERROR: received " + listener.getOutgoingTransfers().size() + " outgoing transfer notifications when 1 was expected");
+      return errorsToStr(errors);
+    }
     MoneroOutgoingTransfer outgoingTransfer = listener.getOutgoingTransfers().get(0);
     BigInteger expectedOutgoingAmount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3));
-    if (!expectedOutgoingAmount.equals(outgoingTransfer.getAmount())) warnings.add("Outgoing tranfer amount expected to be " + expectedOutgoingAmount + " but was " + outgoingTransfer.getAmount());
+    if (!expectedOutgoingAmount.equals(outgoingTransfer.getAmount())) errors.add("Outgoing tranfer amount expected to be " + expectedOutgoingAmount + " but was " + outgoingTransfer.getAmount());
     
     // test incoming transfer notifications
     if (listener.getIncomingTransfers().size() != 3) {
-      warnings.add("Received " + listener.getIncomingTransfers().size() + " incoming transfer notifications when 3 were expected");
-      return warnings;  // cannot continue test
+      errors.add("ERROR: received " + listener.getIncomingTransfers().size() + " incoming transfer notifications when 3 were expected");
+      return errorsToStr(errors);  // cannot continue test
     }
     for (int i = 0; i < listener.getIncomingTransfers().size(); i++) {
       MoneroIncomingTransfer transfer = listener.getIncomingTransfers().get(i);
@@ -695,11 +699,22 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     BigInteger balanceAfter = wallet.getBalance();
     BigInteger unlockedBalanceAfter = wallet.getBalance();
     BigInteger balanceAfterExpected = balanceBefore.subtract(tx.getOutgoingAmount()).add(tx.getIncomingAmount()).subtract(tx.getFee());
-    if (!balanceAfterExpected.equals(balanceAfter)) warnings.add("Wallet balance expected to be " + balanceAfterExpected + " but was " + balanceAfter);
-    if (unlockedBalanceBefore.compareTo(unlockedBalanceAfter) >= 0) warnings.add("Wallet unlocked balance was expected to decrease but changed from " + unlockedBalanceBefore + " to " + unlockedBalanceAfter);
+    if (!balanceAfterExpected.equals(balanceAfter)) errors.add("WARNING: Wallet balance expected to be " + balanceAfterExpected + " but was " + balanceAfter);
+    if (unlockedBalanceBefore.compareTo(unlockedBalanceAfter) >= 0) errors.add("WARNING: Wallet unlocked balance was expected to decrease but changed from " + unlockedBalanceBefore + " to " + unlockedBalanceAfter);
 
-    // return cumulative warnings
-    return warnings;
+    // return all errors and warnings as single string
+    return errorsToStr(errors);
+  }
+  
+  private static String errorsToStr(List<String> warnings) {
+    if (warnings.isEmpty()) return null;
+    StringBuilder sb = new StringBuilder();
+    sb.append("Notification test generated " + warnings.size() + " warnings\n");
+    for (int i = 0; i < warnings.size(); i++) {
+      sb.append((i + 1) + ": " + warnings.get(i));
+      if (i < warnings.size() - 1) sb.append('\n');
+    }
+    return sb.toString();
   }
   
   /**
