@@ -85,6 +85,12 @@ public class MoneroSendRequest {
     return new MoneroSendRequest(this);
   }
   
+  public MoneroSendRequest addDestination(MoneroDestination destination) {
+    if (this.destinations == null) this.destinations = new ArrayList<MoneroDestination>();
+    this.destinations.add(destination);
+    return this;
+  }
+  
   public List<MoneroDestination> getDestinations() {
     return destinations;
   }

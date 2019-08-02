@@ -16,6 +16,11 @@ public class MoneroDestination {
     // nothing to construct
   }
   
+  public MoneroDestination(String address) {
+    super();
+    this.address = address;
+  }
+  
   public MoneroDestination(String address, BigInteger amount) {
     super();
     this.address = address;
