@@ -2661,7 +2661,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         // give wallet time to catch up, otherwise incoming tx may not appear
         // TODO: this lets new block slip, okay?
         try {
-          TimeUnit.SECONDS.sleep(5);
+          TimeUnit.SECONDS.sleep(MoneroWalletJni.SYNC_INTERVAL);
         } catch (InterruptedException e) {
           throw new RuntimeException(e);
         }
