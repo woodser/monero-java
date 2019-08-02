@@ -901,22 +901,24 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   // Test #1: notifies listeners of outputs sent from/to the same account using local wallet data
   @Test
   public void testOutputNotificationsSameAccounts() {
-    String errors = testOutputNotifications(true);
-    if (errors == null) return;
-    System.out.println(errors);
-    assertFalse(errors, errors.contains("ERROR:"));
+    List<String> issues = testOutputNotifications(true);
+    if (issues == null) return;
+    String msg = "testOutputNotificationsSameAccounts() generated " + issues.size() + " issues:\n" + issuesToStr(issues);
+    System.out.println(msg);
+    assertFalse(msg, msg.contains("ERROR:"));
   }
   
   // Test #2: notifies listeners of outputs sent from/to different accounts using local wallet data
   @Test
   public void testOutputNotificationsDifferentAccounts() {
-    String errors = testOutputNotifications(false);
-    if (errors == null) return;
-    System.out.println(errors);
-    assertFalse(errors, errors.contains("ERROR:"));
+    List<String> issues = testOutputNotifications(false);
+    if (issues == null) return;
+    String msg = "testOutputNotificationsDifferentAccounts() generated " + issues.size() + " issues:\n" + issuesToStr(issues);
+    System.out.println(msg);
+    assertFalse(msg, msg.contains("ERROR:"));
   }
   
-  private String testOutputNotifications(boolean sameAccount) {
+  private List<String> testOutputNotifications(boolean sameAccount) {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
     
     // collect errors and warnings
@@ -972,19 +974,20 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // test sent output notifications
     if (listener.getOutputsSpent().isEmpty()) {
       errors.add("ERROR: did not receive any sent output notifications");
-      return issuesToStr(errors);
+      return errors;
     }
     
     // test received output notifications
     if (listener.getOutputsReceived().size() < 4) {  // 3+ outputs received from transfers + 1 change output (very unlikely to send exact output amount)
       errors.add("ERROR: received " + listener.getOutputsReceived().size() + " output notifications when at least 4 were expected");
-      return issuesToStr(errors);
+      return errors;
     }
     
     // must receive outputs with known subaddresses and amounts
     for (int destinationAccount : destinationAccounts) {
       if (!hasOutput(listener.getOutputsReceived(), destinationAccount, 0, TestUtils.MAX_FEE)) {
-
+        errors.add("ERROR: missing expected received output to subaddress [" + destinationAccount + ", 0] of amount " + TestUtils.MAX_FEE);
+        return errors;
       }
     }
     
@@ -994,7 +997,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     for (MoneroOutputWallet outputReceived : listener.getOutputsReceived()) netAmount = netAmount.subtract(outputReceived.getAmount());
     if (tx.getFee().compareTo(netAmount) != 0) {
       errors.add("ERROR: net output amount must equal tx fee");
-      return issuesToStr(errors);
+      return errors;
     }
     
     // test wallet's balance
@@ -1004,13 +1007,12 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     if (unlockedBalanceBefore.compareTo(unlockedBalanceAfter) <= 0 && !unlockedBalanceBefore.equals(BigInteger.valueOf(0))) errors.add("WARNING: Wallet unlocked balance immediately after send was expected to decrease but changed from " + unlockedBalanceBefore + " to " + unlockedBalanceAfter);
 
     // return all errors and warnings as single string
-    return issuesToStr(errors);
+    return errors;
   }
   
   private static String issuesToStr(List<String> issues) {
     if (issues.isEmpty()) return null;
     StringBuilder sb = new StringBuilder();
-    sb.append("Output notification test generated " + issues.size() + " issues\n");
     for (int i = 0; i < issues.size(); i++) {
       sb.append((i + 1) + ": " + issues.get(i));
       if (i < issues.size() - 1) sb.append('\n');
