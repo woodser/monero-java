@@ -917,7 +917,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   private String testOutputNotifications(boolean sameAccount) {
-    //org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
+    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
     
     // collect errors and warnings
     List<String> errors = new ArrayList<String>();
