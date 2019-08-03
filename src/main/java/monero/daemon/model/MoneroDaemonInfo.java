@@ -2,6 +2,8 @@ package monero.daemon.model;
 
 import java.math.BigInteger;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Monero daemon info.
  */
@@ -157,6 +159,7 @@ public class MoneroDaemonInfo {
     this.networkType = networkType;
   }
   
+  @JsonProperty("isOffline")
   public Boolean isOffline() {
     return isOffline;
   }

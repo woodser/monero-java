@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import common.types.Filter;
 import common.utils.GenUtils;
 import monero.daemon.model.MoneroBlock;
@@ -62,6 +64,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return new MoneroTxRequest(this);
   }
   
+  @JsonProperty("isOutgoing")
   public Boolean isOutgoing() {
     return isOutgoing;
   }
@@ -71,6 +74,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return this;
   }
 
+  @JsonProperty("isIncoming")
   public Boolean isIncoming() {
     return isIncoming;
   }

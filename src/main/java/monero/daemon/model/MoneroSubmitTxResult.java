@@ -1,5 +1,7 @@
 package monero.daemon.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Models the result from submitting a tx to a daemon.
  */
@@ -18,6 +20,7 @@ public class MoneroSubmitTxResult {
   private Boolean sanityCheckFailed;
   private String reason;
   
+  @JsonProperty("isGood")
   public Boolean isGood() {
     return isGood;
   }
@@ -26,6 +29,7 @@ public class MoneroSubmitTxResult {
     this.isGood = isGood;
   }
   
+  @JsonProperty("isRelayed")
   public Boolean isRelayed() {
     return isRelayed;
   }
@@ -34,6 +38,7 @@ public class MoneroSubmitTxResult {
     this.isRelayed = isRelayed;
   }
   
+  @JsonProperty("isDoubleSpend")
   public Boolean isDoubleSpend() {
     return isDoubleSpend;
   }
@@ -42,6 +47,7 @@ public class MoneroSubmitTxResult {
     this.isDoubleSpend = isDoubleSpend;
   }
   
+  @JsonProperty("isFeeTooLow")
   public Boolean isFeeTooLow() {
     return isFeeTooLow;
   }
@@ -50,6 +56,7 @@ public class MoneroSubmitTxResult {
     this.isFeeTooLow = isFeeTooLow;
   }
   
+  @JsonProperty("isMixinTooLow")
   public Boolean isMixinTooLow() {
     return isMixinTooLow;
   }
@@ -74,6 +81,7 @@ public class MoneroSubmitTxResult {
     this.hasInvalidOutput = hasInvalidOutput;
   }
   
+  @JsonProperty("isRct")
   public Boolean isRct() {
     return isRct;
   }
@@ -82,6 +90,7 @@ public class MoneroSubmitTxResult {
     this.isRct = isRct;
   }
   
+  @JsonProperty("isOverspend")
   public Boolean isOverspend() {
     return isOverspend;
   }
@@ -90,6 +99,7 @@ public class MoneroSubmitTxResult {
     this.isOverspend = isOverspend;
   }
   
+  @JsonProperty("isTooBig")
   public Boolean isTooBig() {
     return isTooBig;
   }

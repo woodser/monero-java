@@ -1,5 +1,7 @@
 package monero.daemon.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Monero daemon connection.
  */
@@ -79,6 +81,7 @@ public class MoneroDaemonConnection {
     this.height = height;
   }
   
+  @JsonProperty("isIncoming")
   public Boolean isIncoming() {
     return isIncoming;
   }
@@ -95,6 +98,7 @@ public class MoneroDaemonConnection {
     this.liveTime = liveTime;
   }
   
+  @JsonProperty("isLocalIp")
   public Boolean isLocalIp() {
     return isLocalIp;
   }

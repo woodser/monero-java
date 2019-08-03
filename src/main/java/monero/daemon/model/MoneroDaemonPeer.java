@@ -1,5 +1,7 @@
 package monero.daemon.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Models a peer to the daemon.
  */
@@ -54,6 +56,7 @@ public class MoneroDaemonPeer {
     this.rpcPort = rpcPort;
   }
   
+  @JsonProperty("isOnline")
   public Boolean isOnline() {
     return isOnline;
   }

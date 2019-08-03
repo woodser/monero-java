@@ -1,5 +1,7 @@
 package monero.daemon.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Monero banhammer.
  */
@@ -26,6 +28,7 @@ public class MoneroBan {
     this.ip = ip;
   }
   
+  @JsonProperty("isBanned")
   public Boolean isBanned() {
     return isBanned;
   }

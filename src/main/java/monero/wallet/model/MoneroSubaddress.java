@@ -2,6 +2,8 @@ package monero.wallet.model;
 
 import java.math.BigInteger;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import monero.utils.MoneroUtils;
 
 /**
@@ -90,6 +92,7 @@ public class MoneroSubaddress {
     return this;
   }
   
+  @JsonProperty("isUsed")
   public Boolean isUsed() {
     return isUsed;
   }
