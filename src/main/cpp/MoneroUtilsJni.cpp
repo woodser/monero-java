@@ -34,7 +34,7 @@ JNIEXPORT jbyteArray JNICALL Java_monero_utils_MoneroCppUtils_jsonToBinaryJni(JN
 
   // convert json to monero's portable storage binary format
   string binStr;
-  MoneroUtils::jsonToBinary(jsonStr, binStr);
+  MoneroUtils::json_to_binary(jsonStr, binStr);
 
   // convert binary string to jbyteArray
   jbyteArray result = env->NewByteArray(binStr.length());
@@ -61,7 +61,7 @@ JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryToJsonJni(JNIEn
 
   // convert monero's portable storage binary format to json
   string jsonStr;
-  MoneroUtils::binaryToJson(binStr, jsonStr);
+  MoneroUtils::binary_to_json(binStr, jsonStr);
 
   // convert string to jstring
   return env->NewStringUTF(jsonStr.c_str());
@@ -77,7 +77,7 @@ JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryBlocksToJsonJni
 
   // convert monero's portable storage binary format to json
   string jsonStr;
-  MoneroUtils::binaryBlocksToJson(binStr, jsonStr);
+  MoneroUtils::binary_blocks_to_json(binStr, jsonStr);
 
   // convert string to jstring
   return env->NewStringUTF(jsonStr.c_str());
