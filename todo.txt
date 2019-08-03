@@ -1,5 +1,4 @@
 14.1.0+ RELEASE
-rename coinbaseTx to minerTx
 MoneroTxRequest -> MoneroTxQuery, etc?
 refactor getIs...() to is...() depending if this interferes with js syntax
 rename *withConfiguration() tests to *Request or *Query
