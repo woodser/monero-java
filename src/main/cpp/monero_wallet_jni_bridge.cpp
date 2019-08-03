@@ -170,16 +170,16 @@ void detachJVM(JNIEnv *env, int envStat) {
 /**
  * Listens for wallet notifications and notifies the cpp listener in Java.
  */
-struct WalletJniListener : public monero_wallet_listener {
+struct wallet_jni_listener : public monero_wallet_listener {
 
   jobject jlistener;
 
   // TODO: use this env instead of attaching each time? performance improvement?
-  WalletJniListener(JNIEnv* env, jobject listener) {
+  wallet_jni_listener(JNIEnv* env, jobject listener) {
     jlistener = env->NewGlobalRef(listener);
   }
 
-  ~WalletJniListener() { };
+  ~wallet_jni_listener() { };
 
   void deleteGlobalJavaRef(JNIEnv *env) {
     std::lock_guard<std::mutex> lock(_listenerMutex);
@@ -187,7 +187,7 @@ struct WalletJniListener : public monero_wallet_listener {
     jlistener = nullptr;
   }
 
-  void onSyncProgress(uint64_t height, uint64_t start_height, uint64_t end_height, double percent_done, const string& message) {
+  void on_sync_progress(uint64_t height, uint64_t start_height, uint64_t end_height, double percent_done, const string& message) {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *env;
@@ -213,7 +213,7 @@ struct WalletJniListener : public monero_wallet_listener {
     detachJVM(env, envStat);
   }
 
-  void onNewBlock(uint64_t height) {
+  void on_new_block(uint64_t height) {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *env;
@@ -232,7 +232,7 @@ struct WalletJniListener : public monero_wallet_listener {
     detachJVM(env, envStat);
   }
 
-  void onOutputReceived(const monero_output_wallet& output) {
+  void on_output_received(const monero_output_wallet& output) {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *env;
@@ -255,7 +255,7 @@ struct WalletJniListener : public monero_wallet_listener {
     detachJVM(env, envStat);
   }
 
-  void onOutputSpent(const monero_output_wallet& output) {
+  void on_output_spent(const monero_output_wallet& output) {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *env;
@@ -595,7 +595,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv
 
   // clear old listener
   wallet->set_listener(boost::none);
-  WalletJniListener *old_listener = get_handle<WalletJniListener>(env, instance, JNI_LISTENER_HANDLE);
+  wallet_jni_listener *old_listener = get_handle<wallet_jni_listener>(env, instance, JNI_LISTENER_HANDLE);
   if (old_listener != nullptr) {
     old_listener->deleteGlobalJavaRef(env);
     delete old_listener;
@@ -605,7 +605,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv
   if (jlistener == nullptr) {
     return 0;
   } else {
-    WalletJniListener* listener = new WalletJniListener(env, jlistener);
+    wallet_jni_listener* listener = new wallet_jni_listener(env, jlistener);
     monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
     wallet->set_listener(*listener);
     return reinterpret_cast<jlong>(listener);
