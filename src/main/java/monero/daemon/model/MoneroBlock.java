@@ -19,7 +19,7 @@ import monero.utils.MoneroUtils;
 public class MoneroBlock extends MoneroBlockHeader {
 
   private String hex;
-  private MoneroTx coinbaseTx;
+  private MoneroTx minerTx;
   private List<MoneroTx> txs;
   private List<String> txIds;
   
@@ -34,7 +34,7 @@ public class MoneroBlock extends MoneroBlockHeader {
   public MoneroBlock(MoneroBlock block) {
     super(block);
     this.hex = block.getHex();
-    if (block.coinbaseTx != null) this.coinbaseTx = block.coinbaseTx.copy().setBlock(this);
+    if (block.minerTx != null) this.minerTx = block.minerTx.copy().setBlock(this);
     if (block.txs != null) {
       this.txs = new ArrayList<MoneroTx>();
       for (MoneroTx tx : block.txs) txs.add(tx.copy().setBlock(this));
@@ -51,12 +51,12 @@ public class MoneroBlock extends MoneroBlockHeader {
     return this;
   }
   
-  public MoneroTx getCoinbaseTx() {
-    return coinbaseTx;
+  public MoneroTx getMinerTx() {
+    return minerTx;
   }
   
-  public MoneroBlock setCoinbaseTx(MoneroTx coinbaseTx) {
-    this.coinbaseTx = coinbaseTx;
+  public MoneroBlock setMinerTx(MoneroTx minerTx) {
+    this.minerTx = minerTx;
     return this;
   }
   
@@ -101,14 +101,14 @@ public class MoneroBlock extends MoneroBlockHeader {
     this.setHex(MoneroUtils.reconcile(this.getHex(), block.getHex()));
     this.setTxIds(MoneroUtils.reconcile(this.getTxIds(), block.getTxIds()));
     
-    // merge coinbase tx
-    if (this.getCoinbaseTx() == null) this.setCoinbaseTx(block.getCoinbaseTx());
-    if (block.getCoinbaseTx() != null) {
-      block.getCoinbaseTx().setBlock(this);
-      coinbaseTx.merge(block.getCoinbaseTx());
+    // merge miner tx
+    if (this.getMinerTx() == null) this.setMinerTx(block.getMinerTx());
+    if (block.getMinerTx() != null) {
+      block.getMinerTx().setBlock(this);
+      minerTx.merge(block.getMinerTx());
     }
     
-    // merge non-coinbase txs
+    // merge non-miner txs
     if (block.getTxs() != null) {
       for (MoneroTx tx : block.getTxs()) {
         tx.setBlock(this);
@@ -125,9 +125,9 @@ public class MoneroBlock extends MoneroBlockHeader {
     sb.append("\n");
     sb.append(MoneroUtils.kvLine("Hex", getHex(), indent));
     sb.append(MoneroUtils.kvLine("Txs ids", getTxIds(), indent));
-    if (getCoinbaseTx() != null) {
-      sb.append(MoneroUtils.kvLine("Coinbase tx", "", indent));
-      sb.append(getCoinbaseTx().toString(indent + 1) + "\n");
+    if (getMinerTx() != null) {
+      sb.append(MoneroUtils.kvLine("Miner tx", "", indent));
+      sb.append(getMinerTx().toString(indent + 1) + "\n");
     }
     if (getTxs() != null) {
       sb.append(MoneroUtils.kvLine("Txs", "", indent));
@@ -143,7 +143,7 @@ public class MoneroBlock extends MoneroBlockHeader {
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
-    result = prime * result + ((coinbaseTx == null) ? 0 : coinbaseTx.hashCode());
+    result = prime * result + ((minerTx == null) ? 0 : minerTx.hashCode());
     result = prime * result + ((hex == null) ? 0 : hex.hashCode());
     result = prime * result + ((txIds == null) ? 0 : txIds.hashCode());
     result = prime * result + ((txs == null) ? 0 : txs.hashCode());
@@ -156,9 +156,9 @@ public class MoneroBlock extends MoneroBlockHeader {
     if (!super.equals(obj)) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroBlock other = (MoneroBlock) obj;
-    if (coinbaseTx == null) {
-      if (other.coinbaseTx != null) return false;
-    } else if (!coinbaseTx.equals(other.coinbaseTx)) return false;
+    if (minerTx == null) {
+      if (other.minerTx != null) return false;
+    } else if (!minerTx.equals(other.minerTx)) return false;
     if (hex == null) {
       if (other.hex != null) return false;
     } else if (!hex.equals(other.hex)) return false;

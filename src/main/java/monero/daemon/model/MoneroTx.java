@@ -25,7 +25,7 @@ public class MoneroTx {
   private MoneroBlock block;
   private String id;
   private Integer version;
-  private Boolean isCoinbase;
+  private Boolean isMinerTx;
   private String paymentId;
   private BigInteger fee;
   private Integer mixin;
@@ -73,7 +73,7 @@ public class MoneroTx {
   public MoneroTx(final MoneroTx tx) {
     this.id = tx.id;
     this.version = tx.version;
-    this.isCoinbase = tx.isCoinbase;
+    this.isMinerTx = tx.isMinerTx;
     this.paymentId = tx.paymentId;
     this.fee = tx.fee;
     this.mixin = tx.mixin;
@@ -152,12 +152,12 @@ public class MoneroTx {
     return this;
   }
   
-  public Boolean getIsCoinbase() {
-    return isCoinbase;
+  public Boolean getIsMinerTx() {
+    return isMinerTx;
   }
   
-  public MoneroTx setIsCoinbase(Boolean isCoinbase) {
-    this.isCoinbase = isCoinbase;
+  public MoneroTx setIsMinerTx(Boolean isMinerTx) {
+    this.isMinerTx = isMinerTx;
     return this;
   }
   
@@ -611,7 +611,7 @@ public class MoneroTx {
     sb.append(MoneroUtils.kvLine("Tx ID: ", getId(), indent));
     sb.append(MoneroUtils.kvLine("Height", getHeight(), indent));
     sb.append(MoneroUtils.kvLine("Version", getVersion(), indent));
-    sb.append(MoneroUtils.kvLine("Is coinbase", getIsCoinbase(), indent));
+    sb.append(MoneroUtils.kvLine("Is miner tx", getIsMinerTx(), indent));
     sb.append(MoneroUtils.kvLine("Payment ID", getPaymentId(), indent));
     sb.append(MoneroUtils.kvLine("Fee", getFee(), indent));
     sb.append(MoneroUtils.kvLine("Mixin", getMixin(), indent));
@@ -675,7 +675,7 @@ public class MoneroTx {
     result = prime * result + ((fullHex == null) ? 0 : fullHex.hashCode());
     result = prime * result + ((id == null) ? 0 : id.hashCode());
     result = prime * result + ((inTxPool == null) ? 0 : inTxPool.hashCode());
-    result = prime * result + ((isCoinbase == null) ? 0 : isCoinbase.hashCode());
+    result = prime * result + ((isMinerTx == null) ? 0 : isMinerTx.hashCode());
     result = prime * result + ((isConfirmed == null) ? 0 : isConfirmed.hashCode());
     result = prime * result + ((isDoubleSpendSeen == null) ? 0 : isDoubleSpendSeen.hashCode());
     result = prime * result + ((isFailed == null) ? 0 : isFailed.hashCode());
@@ -733,9 +733,9 @@ public class MoneroTx {
     if (inTxPool == null) {
       if (other.inTxPool != null) return false;
     } else if (!inTxPool.equals(other.inTxPool)) return false;
-    if (isCoinbase == null) {
-      if (other.isCoinbase != null) return false;
-    } else if (!isCoinbase.equals(other.isCoinbase)) return false;
+    if (isMinerTx == null) {
+      if (other.isMinerTx != null) return false;
+    } else if (!isMinerTx.equals(other.isMinerTx)) return false;
     if (isConfirmed == null) {
       if (other.isConfirmed != null) return false;
     } else if (!isConfirmed.equals(other.isConfirmed)) return false;
