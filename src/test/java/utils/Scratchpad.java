@@ -33,7 +33,7 @@ public class Scratchpad {
     
     // TIMING TEST
     String path = TestMoneroWalletJni.getRandomWalletPath();
-    MoneroWalletJni myWallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_JNI_PW, TestUtils.MNEMONIC, MoneroNetworkType.STAGENET, TestUtils.getDaemonRpc().getRpcConnection());
+    MoneroWalletJni myWallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_JNI_PW, MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, TestUtils.getDaemonRpc().getRpcConnection());
     myWallet.save();
     long now = System.currentTimeMillis();;
     myWallet.addListener(new MoneroWalletListener());

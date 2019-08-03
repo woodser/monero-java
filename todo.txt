@@ -1,5 +1,4 @@
 14.1.0+ RELEASE
-createWalletFromMnemonic() network type before mnemonic as more common denominator / goes in order of most meta to least
 work through problems of testing fresh wallet again
 rpc supports on_restore_determinstic_wallet, implement!
 wallet.sync() then wallet.startSyncing() to enable auto syncing is confusing?

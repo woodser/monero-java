@@ -349,7 +349,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletRandomJni
 }
 
 // TODO: update this impl and others like it to be like e.g. createWalletFromKeysJni
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jstring jmnemonic, jint jnetworkType, jlong jrestoreHeight) {
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint jnetworkType, jstring jmnemonic, jlong jrestoreHeight) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni");
 
   // collect and release string params
@@ -366,7 +366,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemo
   // construct wallet
   try {
     MoneroRpcConnection daemonConnection;
-    MoneroWallet* wallet = MoneroWallet::createWalletFromMnemonic(path, password, mnemonic, static_cast<MoneroNetworkType>(jnetworkType), daemonConnection, (uint64_t) jrestoreHeight);
+    MoneroWallet* wallet = MoneroWallet::createWalletFromMnemonic(path, password, static_cast<MoneroNetworkType>(jnetworkType), mnemonic, daemonConnection, (uint64_t) jrestoreHeight);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
     rethrowCppExceptionAsJavaException(env);
@@ -374,7 +374,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemo
   }
 }
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jstring jaddress, jstring jviewKey, jstring jspendKey, jint networkType, jlong restoreHeight, jstring jlanguage) {
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint networkType, jstring jaddress, jstring jviewKey, jstring jspendKey, jlong restoreHeight, jstring jlanguage) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni");
 
   // collect and release string params
@@ -400,7 +400,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJ
   // construct wallet and return reference
   try {
     MoneroRpcConnection daemonConnection; // TODO: take daemon connection parameters
-    MoneroWallet* wallet = MoneroWallet::createWalletFromKeys(path, password, address, viewKey, spendKey, static_cast<MoneroNetworkType>(networkType), daemonConnection, restoreHeight, language);
+    MoneroWallet* wallet = MoneroWallet::createWalletFromKeys(path, password, static_cast<MoneroNetworkType>(networkType), address, viewKey, spendKey, daemonConnection, restoreHeight, language);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
     rethrowCppExceptionAsJavaException(env);
