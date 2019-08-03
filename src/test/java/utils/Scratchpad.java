@@ -3,12 +3,11 @@ package utils;
 import java.util.List;
 
 import monero.daemon.MoneroDaemon;
+import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.MoneroWalletJni;
-import monero.wallet.MoneroWalletRpc;
-import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTxWallet;
-import monero.wallet.request.MoneroTransferRequest;
-import monero.wallet.request.MoneroTxRequest;
+import monero.wallet.model.MoneroWalletListener;
+import test.TestMoneroWalletJni;
 
 /**
  * Scratchpad for quick scripting.
@@ -20,8 +19,8 @@ public class Scratchpad {
     
     // initialize daemon, wallet, and direct rpc interface
     MoneroDaemon daemon = TestUtils.getDaemonRpc();
-    MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
-    MoneroWalletJni walletJni = TestUtils.getWalletJni();
+    //MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
+    //MoneroWalletJni walletJni = TestUtils.getWalletJni();
     //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
     
 //    // common variables
@@ -32,11 +31,21 @@ public class Scratchpad {
     
     // -------------------------------- SCRATCHPAD ----------------------------
     
-    MoneroTransferRequest req = new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setTxId("af908410ce4f9e4e6474be51f0524c30e4aaefb6b2bee490fe72ddea516b34d8"));
-//    List<MoneroTransfer> transfers1 = walletRpc.getTransfers(req);
-//    System.out.println(transfers1);
-    List<MoneroTransfer> transfers2 = walletJni.getTransfers(req);
-    System.out.println(transfers2);
+    // TIMING TEST
+    String path = TestMoneroWalletJni.getRandomWalletPath();
+    MoneroWalletJni myWallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_JNI_PW, TestUtils.MNEMONIC, MoneroNetworkType.STAGENET, TestUtils.getDaemonRpc().getRpcConnection());
+    myWallet.save();
+    long now = System.currentTimeMillis();;
+    myWallet.addListener(new MoneroWalletListener());
+    myWallet.sync(new WalletSyncPrinter());
+    long newNow = System.currentTimeMillis();
+    System.out.println("Sync took " + (((double) newNow - (double) now) / (double) 1000) + " seconds");
+    
+//    MoneroTransferRequest req = new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setTxId("af908410ce4f9e4e6474be51f0524c30e4aaefb6b2bee490fe72ddea516b34d8"));
+////    List<MoneroTransfer> transfers1 = walletRpc.getTransfers(req);
+////    System.out.println(transfers1);
+//    List<MoneroTransfer> transfers2 = walletJni.getTransfers(req);
+//    System.out.println(transfers2);
     
 //    List<String> txIds = new ArrayList<String>();
 //    txIds.add("04d110bae5645928eb10b242a3cad27a5b6fd5fde0c336f75c40ab234f29d774");
