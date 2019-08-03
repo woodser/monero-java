@@ -1045,7 +1045,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getKeyImagesJni(JNI
   // wrap and serialize key images
   std::stringstream ss;
   boost::property_tree::ptree container;
-  if (!key_images.empty()) container.add_child("key_images", monero_utils::to_property_tree(key_images));
+  if (!key_images.empty()) container.add_child("keyImages", monero_utils::to_property_tree(key_images));
   boost::property_tree::write_json(ss, container, false);
   string key_images_json = strip_last_char(ss.str());
   return env->NewStringUTF(key_images_json.c_str());
