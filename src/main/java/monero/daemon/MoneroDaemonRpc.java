@@ -47,7 +47,7 @@ import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroBlockTemplate;
-import monero.daemon.model.MoneroCoinbaseTxSum;
+import monero.daemon.model.MoneroMinerTxSum;
 import monero.daemon.model.MoneroDaemonConnection;
 import monero.daemon.model.MoneroDaemonConnectionSpan;
 import monero.daemon.model.MoneroDaemonInfo;
@@ -280,7 +280,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         tx.setId(txIds.get(txIdx));
         tx.setIsConfirmed(true);
         tx.setInTxPool(false);
-        tx.setIsCoinbase(false);
+        tx.setIsMinerTx(false);
         tx.setDoNotRelay(false);
         tx.setIsRelayed(true);
         tx.setIsFailed(false);
@@ -355,7 +355,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     if (rpcTxs != null) {
       for (int i = 0; i < rpcTxs.size(); i++) {
         MoneroTx tx = new MoneroTx();
-        tx.setIsCoinbase(false);
+        tx.setIsMinerTx(false);
         txs.add(convertRpcTx(rpcTxs.get(i), tx));
       }
     }
@@ -381,7 +381,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroCoinbaseTxSum getCoinbaseTxSum(long height, Long numBlocks) {
+  public MoneroMinerTxSum getMinerTxSum(long height, Long numBlocks) {
     assertTrue("Height must be an integer >= 0", height >= 0);
     if (numBlocks == null) numBlocks = getHeight();
     else assertTrue("Count must be an integer >= 0", numBlocks >= 0);
@@ -391,7 +391,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     Map<String, Object> respMap = rpc.sendJsonRequest("get_coinbase_tx_sum", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     checkResponseStatus(resultMap);
-    MoneroCoinbaseTxSum txSum = new MoneroCoinbaseTxSum();
+    MoneroMinerTxSum txSum = new MoneroMinerTxSum();
     txSum.setEmissionSum((BigInteger) resultMap.get("emission_amount"));
     txSum.setFeeSum((BigInteger) resultMap.get("fee_amount"));
     return txSum;
@@ -449,7 +449,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         MoneroTx tx = new MoneroTx();
         txs.add(tx);
         tx.setIsConfirmed(false);
-        tx.setIsCoinbase(false);
+        tx.setIsMinerTx(false);
         tx.setInTxPool(true);
         tx.setNumConfirmations(0);
         convertRpcTx(rpcTx, tx);
@@ -1024,7 +1024,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("pow_hash")) header.setPowHash(MoneroUtils.reconcile(header.getPowHash(), "".equals(val) ? null : (String) val));
       else if (key.equals("tx_hashes")) {}  // used in block model, not header model
       else if (key.equals("miner_tx")) {}   // used in block model, not header model
-      else if (key.equals("miner_tx_hash")) header.setCoinbaseTxId((String) val);
+      else if (key.equals("miner_tx_hash")) header.setMinerTxId((String) val);
       else LOGGER.warn("WARNING: ignoring unexpected block header field: '" + key + "': " + val);
     }
     return header;
@@ -1039,11 +1039,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     block.setHex((String) rpcBlock.get("blob"));
     block.setTxIds(rpcBlock.containsKey("tx_hashes") ? (List<String>) rpcBlock.get("tx_hashes") : new ArrayList<String>());
     
-    // build coinbase tx
-    Map<String, Object> rpcCoinbaseTx = (Map<String, Object>) (rpcBlock.containsKey("json") ? JsonUtils.deserialize(MoneroRpcConnection.MAPPER, (String) rpcBlock.get("json"), new TypeReference<Map<String, Object>>(){}).get("miner_tx") : rpcBlock.get("miner_tx")); // may need to be parsed from json
-    MoneroTx coinbaseTx = new MoneroTx().setIsConfirmed(true).setIsCoinbase(true);
-    MoneroDaemonRpc.convertRpcTx(rpcCoinbaseTx, coinbaseTx);
-    block.setCoinbaseTx(coinbaseTx);
+    // build miner tx
+    Map<String, Object> rpcMinerTx = (Map<String, Object>) (rpcBlock.containsKey("json") ? JsonUtils.deserialize(MoneroRpcConnection.MAPPER, (String) rpcBlock.get("json"), new TypeReference<Map<String, Object>>(){}).get("miner_tx") : rpcBlock.get("miner_tx")); // may need to be parsed from json
+    MoneroTx minerTx = new MoneroTx().setIsConfirmed(true).setIsMinerTx(true);
+    MoneroDaemonRpc.convertRpcTx(rpcMinerTx, minerTx);
+    block.setMinerTx(minerTx);
     
     return block;
   }
@@ -1094,7 +1094,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       }
       else if (key.equals("vin")) {
         List<Map<String, Object>> rpcVins = (List<Map<String, Object>>) val;
-        if (rpcVins.size() != 1 || !rpcVins.get(0).containsKey("gen")) {  // ignore coinbase vin TODO: why? probably needs re-enabled
+        if (rpcVins.size() != 1 || !rpcVins.get(0).containsKey("gen")) {  // ignore miner vin TODO: why? probably needs re-enabled
           List<MoneroOutput> vins = new ArrayList<MoneroOutput>();
           for (Map<String, Object> rpcVin : rpcVins) vins.add(convertRpcOutput(rpcVin, tx));
           tx.setVins(vins);
@@ -1184,7 +1184,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     output.setTx(tx);
     for (String key : rpcOutput.keySet()) {
       Object val = rpcOutput.get(key);
-      if (key.equals("gen")) throw new Error("Output with 'gen' from daemon rpc is coinbase tx which we ignore (i.e. each coinbase vin is null)");
+      if (key.equals("gen")) throw new Error("Output with 'gen' from daemon rpc is miner tx which we ignore (i.e. each miner vin is null)");
       else if (key.equals("key")) {
         Map<String, Object> rpcKey = (Map<String, Object>) val;
         output.setAmount(MoneroUtils.reconcile(output.getAmount(), (BigInteger) rpcKey.get("amount")));

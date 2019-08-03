@@ -1,16 +1,17 @@
 14.1.0+ RELEASE
-work through problems of testing fresh wallet again
-rpc supports on_restore_determinstic_wallet, implement!
-start syncing automatically if given rpc connection, e.g. random wallet + rpc connection = auto sync?
 rename coinbaseTx to minerTx
 MoneroTxRequest -> MoneroTxQuery, etc?
-cleanup logging; tests produce many messages at info which should be trace
 refactor getIs...() to is...() depending if this interferes with js syntax
 rename *withConfiguration() tests to *Request or *Query
 ./submodules -> ./external for monero-cpp-library and monero-core?
+what is daemon target height vs height?
+
+work through problems of testing fresh wallet again
+rpc supports on_restore_determinstic_wallet, implement!
+cleanup logging; tests produce many messages at info which should be trace
 better sample code, maybe with two wallets, sending each other funds
 
-update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing()
+update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing(), coinbaseTx->minerTx, request copying from ~jni93
 update readme with jni support
 regenerate api docs
 build a picture of types and how they relate to each other
@@ -18,7 +19,6 @@ write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), impor
 announce
 
 MEDIUM
-port request copying to js (or rather, from ~jni93)
 build a picture of overall architecture
 java rpc sweepAllUnlocked() modifies original send request
 isMultisigNeeded()

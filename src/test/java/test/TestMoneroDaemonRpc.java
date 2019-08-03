@@ -28,7 +28,7 @@ import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroBlockTemplate;
-import monero.daemon.model.MoneroCoinbaseTxSum;
+import monero.daemon.model.MoneroMinerTxSum;
 import monero.daemon.model.MoneroDaemonConnection;
 import monero.daemon.model.MoneroDaemonConnectionSpan;
 import monero.daemon.model.MoneroDaemonInfo;
@@ -531,12 +531,12 @@ public class TestMoneroDaemonRpc {
     }
   }
   
-  // Can get the coinbase transaction sum
+  // Can get the miner transaction sum
   @Test
-  public void testGetCoinbaseTxSum() {
+  public void testGetMinerTxSum() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    MoneroCoinbaseTxSum sum = daemon.getCoinbaseTxSum(0l, 50000l);
-    testCoinbaseTxSum(sum);
+    MoneroMinerTxSum sum = daemon.getMinerTxSum(0l, 50000l);
+    testMinerTxSum(sum);
   }
   
   // Can get a fee estimate
@@ -1298,7 +1298,7 @@ public class TestMoneroDaemonRpc {
     Boolean isPruned;
     Boolean isFull;
     Boolean isConfirmed;
-    Boolean isCoinbase;
+    Boolean isMinerTx;
     Boolean fromGetTxPool;
     Boolean fromBinaryBlock;
     Boolean hasOutputIndices;
@@ -1313,7 +1313,7 @@ public class TestMoneroDaemonRpc {
       this.isPruned = ctx.isPruned;
       this.isFull = ctx.isFull;
       this.isConfirmed = ctx.isConfirmed;
-      this.isCoinbase = ctx.isCoinbase;
+      this.isMinerTx = ctx.isMinerTx;
       this.fromGetTxPool = ctx.fromGetTxPool;
       this.fromBinaryBlock = ctx.fromBinaryBlock;
       this.hasOutputIndices = ctx.hasOutputIndices;
@@ -1350,7 +1350,7 @@ public class TestMoneroDaemonRpc {
       assertTrue(header.getDifficulty().compareTo(BigInteger.valueOf(0)) > 0);
       assertTrue(header.getCumulativeDifficulty().compareTo(BigInteger.valueOf(0)) > 0);
       assertEquals(64, header.getId().length());
-      assertEquals(64, header.getCoinbaseTxId().length());
+      assertEquals(64, header.getMinerTxId().length());
       assertTrue(header.getNumTxs() >= 0);
       assertNotNull(header.getOrphanStatus());
       assertNotNull(header.getReward());
@@ -1361,7 +1361,7 @@ public class TestMoneroDaemonRpc {
       assertNull(header.getDifficulty());
       assertNull(header.getCumulativeDifficulty());
       assertNull(header.getId());
-      assertNull(header.getCoinbaseTxId());
+      assertNull(header.getMinerTxId());
       assertNull(header.getNumTxs());
       assertNull(header.getOrphanStatus());
       assertNull(header.getReward());
@@ -1374,7 +1374,7 @@ public class TestMoneroDaemonRpc {
     
     // test required fields
     assertNotNull(block);
-    testCoinbaseTx(block.getCoinbaseTx());  // TODO: coinbase tx doesn't have as much stuff, can't call testTx?
+    testMinerTx(block.getMinerTx());  // TODO: miner tx doesn't have as much stuff, can't call testTx?
     testBlockHeader(block, ctx.headerIsFull);
     
     if (ctx.hasHex) {
@@ -1396,23 +1396,23 @@ public class TestMoneroDaemonRpc {
     }
   }
   
-  private static void testCoinbaseTx(MoneroTx coinbaseTx) {
-    assertNotNull(coinbaseTx);
-    assertNotNull(coinbaseTx.getIsCoinbase());
-    assertTrue(coinbaseTx.getVersion() >= 0);
-    assertNotNull(coinbaseTx.getExtra());
-    assertTrue(coinbaseTx.getExtra().length > 0);
-    assertTrue(coinbaseTx.getUnlockTime() >= 0);
+  private static void testMinerTx(MoneroTx minerTx) {
+    assertNotNull(minerTx);
+    assertNotNull(minerTx.getIsMinerTx());
+    assertTrue(minerTx.getVersion() >= 0);
+    assertNotNull(minerTx.getExtra());
+    assertTrue(minerTx.getExtra().length > 0);
+    assertTrue(minerTx.getUnlockTime() >= 0);
 
-//    // TODO: coinbase tx does not have ids in binary requests so this will fail, need to derive using prunable data
+//    // TODO: miner tx does not have ids in binary requests so this will fail, need to derive using prunable data
 //    TestContext ctx = new TestContext();
 //    ctx.hasJson = false;
 //    ctx.isPruned = true;
 //    ctx.isFull = false;
 //    ctx.isConfirmed = true;
-//    ctx.isCoinbase = true;
+//    ctx.isMiner = true;
 //    ctx.fromGetTxPool = true;
-//    testTx(coinbaseTx, ctx);
+//    testTx(minerTx, ctx);
   }
   
   private static void testTx(MoneroTx tx, TestContext ctx) {
@@ -1430,7 +1430,7 @@ public class TestMoneroDaemonRpc {
     else assertNotNull(tx.getIsRelayed());
     assertNotNull(tx.getIsConfirmed());
     assertNotNull(tx.getInTxPool());
-    assertNotNull(tx.getIsCoinbase());
+    assertNotNull(tx.getIsMinerTx());
     assertNotNull(tx.getIsDoubleSpendSeen());
     assertTrue(tx.getVersion() >= 0);
     assertTrue(tx.getUnlockTime() >= 0);
@@ -1440,7 +1440,7 @@ public class TestMoneroDaemonRpc {
     
     // test presence of output indices
     // TODO: change this over to vouts only
-    if (tx.getIsCoinbase()) assertEquals(tx.getOutputIndices(), null); // TODO: how to get output indices for coinbase transactions?
+    if (tx.getIsMinerTx()) assertEquals(tx.getOutputIndices(), null); // TODO: how to get output indices for miner transactions?
     if (tx.getInTxPool() || ctx.fromGetTxPool || Boolean.FALSE.equals(ctx.hasOutputIndices)) assertEquals(null, tx.getOutputIndices());
     else assertNotNull(tx.getOutputIndices());
     if (tx.getOutputIndices() != null) assertFalse(tx.getOutputIndices().isEmpty());
@@ -1486,8 +1486,8 @@ public class TestMoneroDaemonRpc {
       assertEquals(tx.getLastRelayedTimestamp(), null);
     }
     
-    // test coinbase tx
-    if (tx.getIsCoinbase()) {
+    // test miner tx
+    if (tx.getIsMinerTx()) {
       assertEquals(0, tx.getFee().equals(BigInteger.valueOf(0)));
       assertEquals(null, tx.getVins());
       assertNull(tx.getSignatures());
@@ -1524,7 +1524,7 @@ public class TestMoneroDaemonRpc {
 //    }
     
     // test vins and vouts
-    if (!tx.getIsCoinbase()) assertFalse(tx.getVins().isEmpty());
+    if (!tx.getIsMinerTx()) assertFalse(tx.getVins().isEmpty());
     for (MoneroOutput vin : tx.getVins()) {
       assertTrue(tx == vin.getTx());
       testVin(vin, ctx);
@@ -1681,7 +1681,7 @@ public class TestMoneroDaemonRpc {
     return tx;
   }
   
-  private static void testCoinbaseTxSum(MoneroCoinbaseTxSum txSum) {
+  private static void testMinerTxSum(MoneroMinerTxSum txSum) {
     TestUtils.testUnsignedBigInteger(txSum.getEmissionSum(), true);
     TestUtils.testUnsignedBigInteger(txSum.getFeeSum(), true);
   }

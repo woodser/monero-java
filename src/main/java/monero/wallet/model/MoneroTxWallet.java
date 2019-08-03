@@ -287,8 +287,8 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setIsCoinbase(Boolean isCoinbase) {
-    super.setIsCoinbase(isCoinbase);
+  public MoneroTxWallet setIsMinerTx(Boolean isMinerTx) {
+    super.setIsMinerTx(isMinerTx);
     return this;
   }
 

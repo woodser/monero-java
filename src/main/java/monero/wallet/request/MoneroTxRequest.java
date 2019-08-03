@@ -186,7 +186,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     if (this.getDoNotRelay() != null && this.getDoNotRelay() != tx.getDoNotRelay()) return false;
     if (this.getIsRelayed() != null && this.getIsRelayed() != tx.getIsRelayed()) return false;
     if (this.getIsFailed() != null && this.getIsFailed() != tx.getIsFailed()) return false;
-    if (this.getIsCoinbase() != null && this.getIsCoinbase() != tx.getIsCoinbase()) return false;
+    if (this.getIsMinerTx() != null && this.getIsMinerTx() != tx.getIsMinerTx()) return false;
     
     // at least one transfer must meet transfer request if defined
     if (this.getTransferRequest() != null) {
@@ -283,8 +283,8 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
   }
 
   @Override
-  public MoneroTxRequest setIsCoinbase(Boolean isCoinbase) {
-    super.setIsCoinbase(isCoinbase);
+  public MoneroTxRequest setIsMinerTx(Boolean isMinerTx) {
+    super.setIsMinerTx(isMinerTx);
     return this;
   }
 

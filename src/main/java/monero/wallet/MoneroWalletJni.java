@@ -1487,14 +1487,14 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       block.setMajorVersion(getMajorVersion());
       block.setMinorVersion(getMinorVersion());
       block.setNonce(getNonce());
-      block.setCoinbaseTxId(getCoinbaseTxId());
+      block.setMinerTxId(getMinerTxId());
       block.setNumTxs(getNumTxs());
       block.setOrphanStatus(getOrphanStatus());
       block.setPrevId(getPrevId());
       block.setReward(getReward());
       block.setPowHash(getPowHash());
       block.setHex(getHex());
-      block.setCoinbaseTx(getCoinbaseTx());
+      block.setMinerTx(getMinerTx());
       block.setTxs(getTxs());
       block.setTxIds(getTxIds());
       for (MoneroTx tx : getTxs()) tx.setBlock(block);  // re-assign tx block references

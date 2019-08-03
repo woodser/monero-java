@@ -23,7 +23,7 @@ public class MoneroBlockHeader {
   private Integer majorVersion;
   private Integer minorVersion;
   private Long nonce;
-  private String coinbaseTxId;
+  private String minerTxId;
   private Integer numTxs;
   private Boolean orphanStatus;
   private String prevId;
@@ -173,12 +173,12 @@ public class MoneroBlockHeader {
     return this;
   }
   
-  public String getCoinbaseTxId() {
-    return coinbaseTxId;
+  public String getMinerTxId() {
+    return minerTxId;
   }
   
-  public MoneroBlockHeader setCoinbaseTxId(String coinbaseTxId) {
-    this.coinbaseTxId = coinbaseTxId;
+  public MoneroBlockHeader setMinerTxId(String minerTxId) {
+    this.minerTxId = minerTxId;
     return this;
   }
   
@@ -241,7 +241,7 @@ public class MoneroBlockHeader {
     this.setMajorVersion(MoneroUtils.reconcile(this.getMajorVersion(), header.getMajorVersion()));
     this.setMinorVersion(MoneroUtils.reconcile(this.getMinorVersion(), header.getMinorVersion()));
     this.setNonce(MoneroUtils.reconcile(this.getNonce(), header.getNonce()));
-    this.setCoinbaseTxId(MoneroUtils.reconcile(this.getCoinbaseTxId(), header.getCoinbaseTxId()));
+    this.setMinerTxId(MoneroUtils.reconcile(this.getMinerTxId(), header.getMinerTxId()));
     this.setNumTxs(MoneroUtils.reconcile(this.getNumTxs(), header.getNumTxs()));
     this.setOrphanStatus(MoneroUtils.reconcile(this.getOrphanStatus(), header.getOrphanStatus()));
     this.setPrevId(MoneroUtils.reconcile(this.getPrevId(), header.getPrevId()));
@@ -267,7 +267,7 @@ public class MoneroBlockHeader {
     sb.append(MoneroUtils.kvLine("Major version", getMajorVersion(), indent));
     sb.append(MoneroUtils.kvLine("Minor version", getMinorVersion(), indent));
     sb.append(MoneroUtils.kvLine("Nonce", getNonce(), indent));
-    sb.append(MoneroUtils.kvLine("Coinbase tx id", getCoinbaseTxId(), indent));
+    sb.append(MoneroUtils.kvLine("Miner tx id", getMinerTxId(), indent));
     sb.append(MoneroUtils.kvLine("Num txs", getNumTxs(), indent));
     sb.append(MoneroUtils.kvLine("Orphan status", getOrphanStatus(), indent));
     sb.append(MoneroUtils.kvLine("Prev id", getPrevId(), indent));
@@ -282,7 +282,7 @@ public class MoneroBlockHeader {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((coinbaseTxId == null) ? 0 : coinbaseTxId.hashCode());
+    result = prime * result + ((minerTxId == null) ? 0 : minerTxId.hashCode());
     result = prime * result + ((cumulativeDifficulty == null) ? 0 : cumulativeDifficulty.hashCode());
     result = prime * result + ((depth == null) ? 0 : depth.hashCode());
     result = prime * result + ((difficulty == null) ? 0 : difficulty.hashCode());
@@ -309,9 +309,9 @@ public class MoneroBlockHeader {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroBlockHeader other = (MoneroBlockHeader) obj;
-    if (coinbaseTxId == null) {
-      if (other.coinbaseTxId != null) return false;
-    } else if (!coinbaseTxId.equals(other.coinbaseTxId)) return false;
+    if (minerTxId == null) {
+      if (other.minerTxId != null) return false;
+    } else if (!minerTxId.equals(other.minerTxId)) return false;
     if (cumulativeDifficulty == null) {
       if (other.cumulativeDifficulty != null) return false;
     } else if (!cumulativeDifficulty.equals(other.cumulativeDifficulty)) return false;

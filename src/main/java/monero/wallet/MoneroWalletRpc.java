@@ -1531,7 +1531,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setInTxPool(Boolean.TRUE.equals(request.getDoNotRelay()) ? false : true);
       tx.setDoNotRelay(Boolean.TRUE.equals(request.getDoNotRelay()) ? true : false);
       tx.setIsRelayed(!tx.getDoNotRelay());
-      tx.setIsCoinbase(false);
+      tx.setIsMinerTx(false);
       tx.setIsFailed(false);
       tx.setMixin(request.getMixin());
       MoneroOutgoingTransfer transfer = tx.getOutgoingTransfer();
@@ -1599,7 +1599,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setInTxPool(Boolean.TRUE.equals(request.getDoNotRelay()) ? false : true);
     tx.setDoNotRelay(Boolean.TRUE.equals(request.getDoNotRelay()) ? true : false);
     tx.setIsRelayed(!Boolean.TRUE.equals(tx.getDoNotRelay()));
-    tx.setIsCoinbase(false);
+    tx.setIsMinerTx(false);
     tx.setIsFailed(false);
     tx.setMixin(request.getMixin());
     MoneroOutgoingTransfer transfer = new MoneroOutgoingTransfer().setTx(tx);
@@ -1678,7 +1678,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       assertNotNull("Must indicate if tx is outgoing (true) xor incoming (false) since unknown", isOutgoing);
       assertNotNull(tx.getIsConfirmed());
       assertNotNull(tx.getInTxPool());
-      assertNotNull(tx.getIsCoinbase());
+      assertNotNull(tx.getIsMinerTx());
       assertNotNull(tx.getIsFailed());
       assertNotNull(tx.getDoNotRelay());
     }
@@ -1805,7 +1805,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setIsRelayed(true);
       tx.setDoNotRelay(false);
       tx.setIsFailed(false);
-      tx.setIsCoinbase(false);
+      tx.setIsMinerTx(false);
     } else if (rpcType.equals("out")) {
       isOutgoing = true;
       tx.setIsConfirmed(true);
@@ -1813,7 +1813,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setIsRelayed(true);
       tx.setDoNotRelay(false);
       tx.setIsFailed(false);
-      tx.setIsCoinbase(false);
+      tx.setIsMinerTx(false);
     } else if (rpcType.equals("pool")) {
       isOutgoing = false;
       tx.setIsConfirmed(false);
@@ -1821,7 +1821,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setIsRelayed(true);
       tx.setDoNotRelay(false);
       tx.setIsFailed(false);
-      tx.setIsCoinbase(false);  // TODO: but could it be?
+      tx.setIsMinerTx(false);  // TODO: but could it be?
     } else if (rpcType.equals("pending")) {
       isOutgoing = true;
       tx.setIsConfirmed(false);
@@ -1829,7 +1829,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setIsRelayed(true);
       tx.setDoNotRelay(false);
       tx.setIsFailed(false);
-      tx.setIsCoinbase(false);
+      tx.setIsMinerTx(false);
     } else if (rpcType.equals("block")) {
       isOutgoing = false;
       tx.setIsConfirmed(true);
@@ -1837,7 +1837,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setIsRelayed(true);
       tx.setDoNotRelay(false);
       tx.setIsFailed(false);
-      tx.setIsCoinbase(true);
+      tx.setIsMinerTx(true);
     } else if (rpcType.equals("failed")) {
       isOutgoing = true;
       tx.setIsConfirmed(false);
@@ -1845,7 +1845,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setIsRelayed(true);
       tx.setDoNotRelay(false);
       tx.setIsFailed(true);
-      tx.setIsCoinbase(false);
+      tx.setIsMinerTx(false);
     } else {
       throw new MoneroException("Unrecognized transfer type: " + rpcType);
     }

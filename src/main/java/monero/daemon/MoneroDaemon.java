@@ -31,7 +31,7 @@ import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroBlockTemplate;
-import monero.daemon.model.MoneroCoinbaseTxSum;
+import monero.daemon.model.MoneroMinerTxSum;
 import monero.daemon.model.MoneroDaemonConnection;
 import monero.daemon.model.MoneroDaemonInfo;
 import monero.daemon.model.MoneroDaemonListener;
@@ -81,7 +81,7 @@ public interface MoneroDaemon {
   /**
    * Get a block template for mining a new block.
    * 
-   * @param walletAddress is the address of the wallet to receive coinbase transactions if block is successfully mined
+   * @param walletAddress is the address of the wallet to receive miner transactions if block is successfully mined
    * @return a block template for mining a new block
    */
   public MoneroBlockTemplate getBlockTemplate(String walletAddress);
@@ -89,7 +89,7 @@ public interface MoneroDaemon {
   /**
    * Get a block template for mining a new block.
    * 
-   * @param walletAddress is the address of the wallet to receive coinbase transactions if block is successfully mined
+   * @param walletAddress is the address of the wallet to receive miner transactions if block is successfully mined
    * @param reserveSize is the reserve size (optional)
    * @return a block template for mining a new block
    */
@@ -275,11 +275,11 @@ public interface MoneroDaemon {
   /**
    * Gets the total emissions and fees from the genesis block to the current height.
    * 
-   * @param height is the height to start computing the coinbase sum
+   * @param height is the height to start computing the miner sum
    * @param numBlocks are the number of blocks to include in the sum
    * @return the sum emission and fees since the geneis block
    */
-  public MoneroCoinbaseTxSum getCoinbaseTxSum(long height, Long numBlocks);
+  public MoneroMinerTxSum getMinerTxSum(long height, Long numBlocks);
   
   /**
    * Get the fee estimate per kB.

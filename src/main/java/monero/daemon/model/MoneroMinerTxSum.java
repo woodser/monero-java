@@ -3,9 +3,9 @@ package monero.daemon.model;
 import java.math.BigInteger;
 
 /**
- * Model for the summation of coinbase emissions and fees.
+ * Model for the summation of miner emissions and fees.
  */
-public class MoneroCoinbaseTxSum {
+public class MoneroMinerTxSum {
 
   private BigInteger emissionSum;
   private BigInteger feeSum;
