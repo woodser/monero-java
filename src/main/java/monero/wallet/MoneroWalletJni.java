@@ -170,6 +170,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    */
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, String mnemonic, MoneroNetworkType networkType) { return createWalletFromMnemonic(path, password, mnemonic, networkType, null, null); }
+  public static MoneroWalletJni createWalletFromMnemonic(String path, String password, String mnemonic, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection) { return createWalletFromMnemonic(path, password, mnemonic, networkType, daemonConnection, null); }
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, String mnemonic, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, Long restoreHeight) {
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (restoreHeight == null) restoreHeight = 0l;
