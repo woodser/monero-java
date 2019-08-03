@@ -4,6 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import monero.utils.MoneroUtils;
 
 /**
@@ -29,6 +31,7 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     return new MoneroIncomingTransfer(this);
   }
   
+  @JsonProperty("isIncoming")
   public Boolean isIncoming() {
     return true;
   }

@@ -1,5 +1,7 @@
 package monero.daemon.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Models the result of checking for a daemon update.
  */
@@ -23,6 +25,7 @@ public class MoneroDaemonUpdateCheckResult {
     this.userUri = checkResult.userUri;
   }
   
+  @JsonProperty("isUpdateAvailable")
   public Boolean isUpdateAvailable() {
     return isUpdateAvailable;
   }

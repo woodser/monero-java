@@ -1,5 +1,7 @@
 package monero.daemon.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Monero hard fork info.
  */
@@ -22,6 +24,7 @@ public class MoneroHardForkInfo {
     this.earliestHeight = earliestHeight;
   }
   
+  @JsonProperty("isEnabled")
   public Boolean isEnabled() {
     return isEnabled;
   }

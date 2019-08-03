@@ -3,6 +3,7 @@ package monero.wallet.model;
 import java.math.BigInteger;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import monero.utils.MoneroUtils;
 
@@ -40,10 +41,12 @@ public abstract class MoneroTransfer {
     return this;
   }
   
+  @JsonProperty("isOutgoing")
   public Boolean isOutgoing() {
     return !isIncoming();
   }
   
+  @JsonProperty("isIncoming")
   public abstract Boolean isIncoming();
   
   public BigInteger getAmount() {

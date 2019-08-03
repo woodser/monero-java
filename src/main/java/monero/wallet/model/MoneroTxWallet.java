@@ -44,10 +44,12 @@ public class MoneroTxWallet extends MoneroTx {
   
   // ----------------------------- WALLET-SPECIFIC ----------------------------
   
+  @JsonProperty("isOutgoing")
   public Boolean isOutgoing() {
     return getOutgoingTransfer() != null;
   }
   
+  @JsonProperty("isIncoming")
   public Boolean isIncoming() {
     return getIncomingTransfers() != null && !getIncomingTransfers().isEmpty();
   }

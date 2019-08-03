@@ -1,5 +1,7 @@
 package monero.daemon.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Monero daemon mining status.
  */
@@ -11,6 +13,7 @@ public class MoneroMiningStatus {
   private Integer speed;
   private Integer numThreads;
   
+  @JsonProperty("isActive")
   public Boolean isActive() {
     return isActive;
   }
@@ -19,6 +22,7 @@ public class MoneroMiningStatus {
     this.isActive = isActive;
   }
   
+  @JsonProperty("isBackground")
   public Boolean isBackground() {
     return isBackground;
   }

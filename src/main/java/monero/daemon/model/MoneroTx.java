@@ -11,6 +11,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
 import monero.utils.MoneroUtils;
@@ -152,6 +153,7 @@ public class MoneroTx {
     return this;
   }
   
+  @JsonProperty("isMinerTx")
   public Boolean isMinerTx() {
     return isMinerTx;
   }
@@ -197,6 +199,7 @@ public class MoneroTx {
     return this;
   }
   
+  @JsonProperty("isRelayed")
   public Boolean isRelayed() {
     return isRelayed;
   }
@@ -206,6 +209,7 @@ public class MoneroTx {
     return this;
   }
   
+  @JsonProperty("isConfirmed")
   public Boolean isConfirmed() {
     return isConfirmed;
   }
@@ -260,6 +264,7 @@ public class MoneroTx {
     return this;
   }
   
+  @JsonProperty("isDoubleSpendSeen")
   public Boolean isDoubleSpendSeen() {
     return isDoubleSpendSeen;
   }
@@ -406,6 +411,7 @@ public class MoneroTx {
     return this;
   }
   
+  @JsonProperty("isKeptByBlock")
   public Boolean isKeptByBlock() {
     return isKeptByBlock;
   }
@@ -415,6 +421,7 @@ public class MoneroTx {
     return this;
   }
   
+  @JsonProperty("isFailed")
   public Boolean isFailed() {
     return isFailed;
   }

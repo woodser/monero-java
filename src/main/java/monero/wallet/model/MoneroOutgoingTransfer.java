@@ -6,6 +6,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import monero.utils.MoneroUtils;
 
 /**
@@ -38,6 +40,7 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
     return new MoneroOutgoingTransfer(this);
   }
   
+  @JsonProperty("isIncoming")
   public Boolean isIncoming() {
     return false;
   }

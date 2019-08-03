@@ -76,6 +76,7 @@ public class MoneroOutputWallet extends MoneroOutput {
     return this;
   }
   
+  @JsonProperty("isSpent")
   public Boolean isSpent() {
     return isSpent;
   }
@@ -85,6 +86,7 @@ public class MoneroOutputWallet extends MoneroOutput {
     return this;
   }
   
+  @JsonProperty("isUnlocked")
   public Boolean isUnlocked() {
     return isUnlocked;
   }
@@ -100,6 +102,7 @@ public class MoneroOutputWallet extends MoneroOutput {
    * 
    * @return Boolean is whether or not this output is frozen
    */
+  @JsonProperty("isFrozen")
   public Boolean isFrozen() {
     return isFrozen;
   }
