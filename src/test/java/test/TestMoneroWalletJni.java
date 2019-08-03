@@ -1034,7 +1034,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // create a random stagenet wallet
     String path = getRandomWalletPath();
-    MoneroWalletJni myWallet = MoneroWalletJni.createWalletRandom(path, "mysupersecretpassword123", MoneroNetworkType.STAGENET);
+    MoneroWalletJni myWallet = MoneroWalletJni.createWalletRandom(path, "mysupersecretpassword123", MoneroNetworkType.STAGENET, TestUtils.getDaemonRpc().getRpcConnection());
+    myWallet.startSyncing();
     
     // listen for received outputs
     OutputNotificationCollector myListener = new OutputNotificationCollector();
@@ -1048,10 +1049,18 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     daemon.getNextBlockHeader();
     try { daemon.stopMining(); } catch (Exception e) { }
     
+    // give wallets time to observe block
+    try {
+      TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e.getMessage());
+    }
+    
     // tx is now confirmed
     assertTrue(wallet.getTx(sentTx.getId()).getIsConfirmed());
     
-    // outputs should have been received
+    // created wallet should have notified listeners of received outputs
     assertFalse(myListener.getOutputsReceived().isEmpty());
   }
   
