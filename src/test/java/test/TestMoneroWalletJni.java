@@ -1045,6 +1045,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     MoneroTxWallet sentTx = wallet.send(0, myWallet.getPrimaryAddress(), TestUtils.MAX_FEE);
     
     // wait until block added to the chain
+    // TODO monero core: notify on refresh from pool instead instead of confirmation
     try { StartMining.startMining(); } catch (Exception e) { }
     daemon.getNextBlockHeader();
     try { daemon.stopMining(); } catch (Exception e) { }
