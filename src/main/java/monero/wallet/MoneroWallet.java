@@ -138,14 +138,14 @@ public interface MoneroWallet {
   public MoneroIntegratedAddress decodeIntegratedAddress(String integratedAddress);
   
   /**
-   * Synchronizes the wallet with the blockchain.
+   * Synchronize the wallet with the daemon as a one-time synchronous process.
    * 
    * @return the sync result
    */
   public MoneroSyncResult sync();
   
   /**
-   * Synchronizes the wallet with the blockchain.
+   * Synchronize the wallet with the daemon as a one-time synchronous process.
    * 
    * @param listener is invoked as sync progress is made
    * @return the sync result
@@ -153,17 +153,17 @@ public interface MoneroWallet {
   public MoneroSyncResult sync(MoneroSyncListener listener);
   
   /**
-   * Synchronizes the wallet with the blockchain.
+   * Synchronize the wallet with the daemon as a one-time synchronous process.
    * 
-   * @param startHeight is the start height to sync from, syncs from the last synced block by default
+   * @param startHeight is the start height to sync from (defaults to the last synced block)
    * @return the sync result
    */
   public MoneroSyncResult sync(Long startHeight);
   
   /**
-   * Synchronizes the wallet with the blockchain.
+   * Synchronize the wallet with the daemon as a one-time synchronous process.
    * 
-   * @param startHeight is the start height to sync from, syncs from the last synced block by default
+   * @param startHeight is the start height to sync from (defaults to the last synced block)
    * @param listener is invoked as sync progress is made
    * @return the sync result
    */
