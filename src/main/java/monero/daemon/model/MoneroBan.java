@@ -26,7 +26,7 @@ public class MoneroBan {
     this.ip = ip;
   }
   
-  public Boolean getIsBanned() {
+  public Boolean isBanned() {
     return isBanned;
   }
   

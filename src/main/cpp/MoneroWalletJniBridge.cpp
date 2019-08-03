@@ -443,10 +443,10 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni
   }
 }
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_getIsConnectedJni(JNIEnv* env, jobject instance) {
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isConnectedJni(JNIEnv* env, jobject instance) {
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   try {
-    return static_cast<jboolean>(wallet->getIsConnected());
+    return static_cast<jboolean>(wallet->isConnected());
   } catch (...) {
     rethrowCppExceptionAsJavaException(env);
     return 0;
@@ -473,20 +473,20 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonTargetHeight
   }
 }
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_getIsDaemonSyncedJni(JNIEnv* env, jobject instance) {
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isDaemonSyncedJni(JNIEnv* env, jobject instance) {
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   try {
-    return wallet->getIsDaemonSynced();
+    return wallet->isDaemonSynced();
   } catch (...) {
     rethrowCppExceptionAsJavaException(env);
     return 0;
   }
 }
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_getIsSyncedJni(JNIEnv* env, jobject instance) {
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isSyncedJni(JNIEnv* env, jobject instance) {
   MoneroWallet* wallet = getHandle<MoneroWallet>(env, instance, JNI_WALLET_HANDLE);
   try {
-    return wallet->getIsSynced();
+    return wallet->isSynced();
   } catch (...) {
     rethrowCppExceptionAsJavaException(env);
     return 0;

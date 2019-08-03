@@ -70,8 +70,8 @@ public class MoneroOutputRequest extends MoneroOutputWallet implements Filter<Mo
     if (this.getAccountIndex() != null && !this.getAccountIndex().equals(output.getAccountIndex())) return false;
     if (this.getSubaddressIndex() != null && !this.getSubaddressIndex().equals(output.getSubaddressIndex())) return false;
     if (this.getAmount() != null && this.getAmount().compareTo(output.getAmount()) != 0) return false;
-    if (this.getIsSpent() != null && !this.getIsSpent().equals(output.getIsSpent())) return false;
-    if (this.getIsUnlocked() != null && !this.getIsUnlocked().equals(output.getIsUnlocked())) return false;
+    if (this.isSpent() != null && !this.isSpent().equals(output.isSpent())) return false;
+    if (this.isUnlocked() != null && !this.isUnlocked().equals(output.isUnlocked())) return false;
     
     // filter on output key image
     if (this.getKeyImage() != null) {

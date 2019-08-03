@@ -79,7 +79,7 @@ public class MoneroDaemonConnection {
     this.height = height;
   }
   
-  public Boolean getIsIncoming() {
+  public Boolean isIncoming() {
     return isIncoming;
   }
   
@@ -95,7 +95,7 @@ public class MoneroDaemonConnection {
     this.liveTime = liveTime;
   }
   
-  public Boolean getIsLocalIp() {
+  public Boolean isLocalIp() {
     return isLocalIp;
   }
   
@@ -103,7 +103,7 @@ public class MoneroDaemonConnection {
     this.isLocalIp = isLocalIp;
   }
   
-  public Boolean getIsLocalHost() {
+  public Boolean isLocalHost() {
     return isLocalHost;
   }
   

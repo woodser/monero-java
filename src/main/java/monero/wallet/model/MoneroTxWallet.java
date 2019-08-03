@@ -44,11 +44,11 @@ public class MoneroTxWallet extends MoneroTx {
   
   // ----------------------------- WALLET-SPECIFIC ----------------------------
   
-  public Boolean getIsOutgoing() {
+  public Boolean isOutgoing() {
     return getOutgoingTransfer() != null;
   }
   
-  public Boolean getIsIncoming() {
+  public Boolean isIncoming() {
     return getIncomingTransfers() != null && !getIncomingTransfers().isEmpty();
   }
   
@@ -198,8 +198,8 @@ public class MoneroTxWallet extends MoneroTx {
     // TODO: proper csv export
     if (oneLine) {
       sb.append(this.getId() + ", ");
-      sb.append((this.getIsConfirmed() ? this.getBlock().getTimestamp() : this.getReceivedTimestamp()) + ", ");
-      sb.append(this.getIsConfirmed() + ", ");
+      sb.append((this.isConfirmed() ? this.getBlock().getTimestamp() : this.getReceivedTimestamp()) + ", ");
+      sb.append(this.isConfirmed() + ", ");
       sb.append((this.getOutgoingAmount() != null? this.getOutgoingAmount().toString() : "") + ", ");
       sb.append(this.getIncomingAmount() != null ? this.getIncomingAmount().toString() : "");
       return sb.toString();
@@ -207,7 +207,7 @@ public class MoneroTxWallet extends MoneroTx {
     
     // otherwise stringify all fields
     sb.append(super.toString(indent) + "\n");
-    sb.append(MoneroUtils.kvLine("Is incoming", this.getIsIncoming(), indent));
+    sb.append(MoneroUtils.kvLine("Is incoming", this.isIncoming(), indent));
     sb.append(MoneroUtils.kvLine("Incoming amount", this.getIncomingAmount(), indent));
     if (this.getIncomingTransfers() != null) {
       sb.append(MoneroUtils.kvLine("Incoming transfers", "", indent));
@@ -216,7 +216,7 @@ public class MoneroTxWallet extends MoneroTx {
         sb.append(this.getIncomingTransfers().get(i).toString(indent + 2) + "\n");
       }
     }
-    sb.append(MoneroUtils.kvLine("Is outgoing", this.getIsOutgoing(), indent));
+    sb.append(MoneroUtils.kvLine("Is outgoing", this.isOutgoing(), indent));
     sb.append(MoneroUtils.kvLine("Outgoing amount", this.getOutgoingAmount(), indent));
     if (this.getOutgoingTransfer() != null) {
       sb.append(MoneroUtils.kvLine("Outgoing transfer", "", indent));

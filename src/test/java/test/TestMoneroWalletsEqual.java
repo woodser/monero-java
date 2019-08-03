@@ -106,14 +106,14 @@ public class TestMoneroWalletsEqual {
         for (int j = i; j < accounts2.size(); j++) {
           assertEquals(BigInteger.valueOf(0), accounts2.get(j).getBalance());
           assertTrue(accounts2.get(j).getSubaddresses().size() >= 1);
-          for (MoneroSubaddress subaddress : accounts2.get(j).getSubaddresses()) assertFalse(subaddress.getIsUsed());
+          for (MoneroSubaddress subaddress : accounts2.get(j).getSubaddresses()) assertFalse(subaddress.isUsed());
         }
         return;
       } else {
         for (int j = i; j < accounts1.size(); j++) {
           assertEquals(BigInteger.valueOf(0), accounts1.get(j).getBalance());
           assertTrue(accounts1.get(j).getSubaddresses().size() >= 1);
-          for (MoneroSubaddress subaddress : accounts1.get(j).getSubaddresses()) assertFalse(subaddress.getIsUsed());
+          for (MoneroSubaddress subaddress : accounts1.get(j).getSubaddresses()) assertFalse(subaddress.isUsed());
         }
         return;
       }
@@ -142,13 +142,13 @@ public class TestMoneroWalletsEqual {
       } else if (i >= subaddresses1.size()) {
         for (int j = i; j < subaddresses2.size(); j++) {
           assertEquals(BigInteger.valueOf(0), subaddresses2.get(j).getBalance());
-          assertFalse(subaddresses2.get(j).getIsUsed());
+          assertFalse(subaddresses2.get(j).isUsed());
         }
         return;
       } else {
         for (int j = i; j < subaddresses1.size(); j++) {
           assertEquals(BigInteger.valueOf(0), subaddresses1.get(i).getBalance());
-          assertFalse(subaddresses1.get(j).getIsUsed());
+          assertFalse(subaddresses1.get(j).isUsed());
         }
         return;
       }

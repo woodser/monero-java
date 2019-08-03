@@ -29,7 +29,7 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     return new MoneroIncomingTransfer(this);
   }
   
-  public Boolean getIsIncoming() {
+  public Boolean isIncoming() {
     return true;
   }
   

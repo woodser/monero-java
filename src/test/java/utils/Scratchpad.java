@@ -89,7 +89,7 @@ public class Scratchpad {
 //    transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setAccountIndex(0).setTxRequest(new MoneroTxRequest().setIsConfirmed(true)), null, true);
 //    for (MoneroTransfer transfer : transfers) {
 //      assertEquals(0, (int) transfer.getAccountIndex());
-//      assertTrue(transfer.getTx().getIsConfirmed());
+//      assertTrue(transfer.getTx().isConfirmed());
 //    }
 //    assertFalse(transfers.isEmpty());
 //    for (MoneroTransfer transfer : transfers) {

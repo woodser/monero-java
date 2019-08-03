@@ -61,7 +61,7 @@ public interface MoneroDaemon {
    * 
    * @return true if the daemon is trusted, false otherwise
    */
-  public boolean getIsTrusted();
+  public boolean isTrusted();
   
   /**
    * Get the number of blocks in the longest chain known to the node.

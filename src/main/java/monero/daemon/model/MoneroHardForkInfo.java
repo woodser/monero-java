@@ -22,7 +22,7 @@ public class MoneroHardForkInfo {
     this.earliestHeight = earliestHeight;
   }
   
-  public Boolean getIsEnabled() {
+  public Boolean isEnabled() {
     return isEnabled;
   }
   

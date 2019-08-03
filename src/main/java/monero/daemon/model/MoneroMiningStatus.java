@@ -11,7 +11,7 @@ public class MoneroMiningStatus {
   private Integer speed;
   private Integer numThreads;
   
-  public Boolean getIsActive() {
+  public Boolean isActive() {
     return isActive;
   }
   
@@ -19,7 +19,7 @@ public class MoneroMiningStatus {
     this.isActive = isActive;
   }
   
-  public Boolean getIsBackground() {
+  public Boolean isBackground() {
     return isBackground;
   }
   

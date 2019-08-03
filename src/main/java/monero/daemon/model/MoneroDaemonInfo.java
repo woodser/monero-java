@@ -157,7 +157,7 @@ public class MoneroDaemonInfo {
     this.networkType = networkType;
   }
   
-  public Boolean getIsOffline() {
+  public Boolean isOffline() {
     return isOffline;
   }
   

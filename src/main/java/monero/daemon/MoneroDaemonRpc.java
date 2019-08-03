@@ -129,7 +129,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * 
    * @return true if the client is connected to the daemon, false otherwise
    */
-  public boolean getIsConnected() {
+  public boolean isConnected() {
     try {
       getHeight();
       return true;
@@ -139,7 +139,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public boolean getIsTrusted() {
+  public boolean isTrusted() {
     Map<String, Object> resp = rpc.sendPathRequest("get_height");
     checkResponseStatus(resp);
     return !(boolean) resp.get("untrusted");
@@ -1082,10 +1082,10 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("last_relayed_time")) tx.setLastRelayedTimestamp(MoneroUtils.reconcile(tx.getLastRelayedTimestamp(), ((BigInteger) val).longValue()));
       else if (key.equals("receive_time")) tx.setReceivedTimestamp(MoneroUtils.reconcile(tx.getReceivedTimestamp(), ((BigInteger) val).longValue()));
       else if (key.equals("in_pool")) {
-        tx.setIsConfirmed(MoneroUtils.reconcile(tx.getIsConfirmed(), !(Boolean) val));
+        tx.setIsConfirmed(MoneroUtils.reconcile(tx.isConfirmed(), !(Boolean) val));
         tx.setInTxPool(MoneroUtils.reconcile(tx.getInTxPool(), (Boolean) val));
       }
-      else if (key.equals("double_spend_seen")) tx.setIsDoubleSpendSeen(MoneroUtils.reconcile(tx.getIsDoubleSpendSeen(), (Boolean) val));
+      else if (key.equals("double_spend_seen")) tx.setIsDoubleSpendSeen(MoneroUtils.reconcile(tx.isDoubleSpendSeen(), (Boolean) val));
       else if (key.equals("version")) tx.setVersion(MoneroUtils.reconcile(tx.getVersion(), ((BigInteger) val).intValue()));
       else if (key.equals("extra")) {
         List<Integer> ints = new ArrayList<Integer>();
@@ -1114,27 +1114,27 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("blob_size")) tx.setSize(MoneroUtils.reconcile(tx.getSize(), ((BigInteger) val).intValue()));
       else if (key.equals("weight")) tx.setWeight(MoneroUtils.reconcile(tx.getWeight(), ((BigInteger) val).intValue()));
       else if (key.equals("fee")) tx.setFee(MoneroUtils.reconcile(tx.getFee(), (BigInteger) val));
-      else if (key.equals("relayed")) tx.setIsRelayed(MoneroUtils.reconcile(tx.getIsRelayed(), (Boolean) val));
+      else if (key.equals("relayed")) tx.setIsRelayed(MoneroUtils.reconcile(tx.isRelayed(), (Boolean) val));
       else if (key.equals("output_indices")) {
         List<Integer> indices = new ArrayList<Integer>();
         for (BigInteger bi : (List<BigInteger>) val) indices.add(bi.intValue());
         tx.setOutputIndices(MoneroUtils.reconcile(tx.getOutputIndices(), indices));
       }
       else if (key.equals("do_not_relay")) tx.setDoNotRelay(MoneroUtils.reconcile(tx.getDoNotRelay(), (Boolean) val));
-      else if (key.equals("kept_by_block")) tx.setIsKeptByBlock(MoneroUtils.reconcile(tx.getIsKeptByBlock(), (Boolean) val));
+      else if (key.equals("kept_by_block")) tx.setIsKeptByBlock(MoneroUtils.reconcile(tx.isKeptByBlock(), (Boolean) val));
       else if (key.equals("signatures")) tx.setSignatures(MoneroUtils.reconcile(tx.getSignatures(), (List<String>) val));
       else if (key.equals("last_failed_height")) {
         int lastFailedHeight = ((BigInteger) val).intValue();
-        if (lastFailedHeight == 0) tx.setIsFailed(MoneroUtils.reconcile(tx.getIsFailed(), false));
+        if (lastFailedHeight == 0) tx.setIsFailed(MoneroUtils.reconcile(tx.isFailed(), false));
         else {
-          tx.setIsFailed(MoneroUtils.reconcile(tx.getIsFailed(), true));
+          tx.setIsFailed(MoneroUtils.reconcile(tx.isFailed(), true));
           tx.setLastFailedHeight(MoneroUtils.reconcile(tx.getLastFailedHeight(), lastFailedHeight));
         }
       }
       else if (key.equals("last_failed_id_hash")) {
-        if (DEFAULT_ID.equals((String) val)) tx.setIsFailed(MoneroUtils.reconcile(tx.getIsFailed(), false));
+        if (DEFAULT_ID.equals((String) val)) tx.setIsFailed(MoneroUtils.reconcile(tx.isFailed(), false));
         else {
-          tx.setIsFailed(MoneroUtils.reconcile(tx.getIsFailed(), true));
+          tx.setIsFailed(MoneroUtils.reconcile(tx.isFailed(), true));
           tx.setLastFailedId(MoneroUtils.reconcile(tx.getLastFailedId(), (String) val));
         }
       }
@@ -1156,14 +1156,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     }
     
     // initialize remaining known fields
-    if (tx.getIsConfirmed()) {
-      tx.setIsRelayed(MoneroUtils.reconcile(tx.getIsRelayed(), true));
+    if (tx.isConfirmed()) {
+      tx.setIsRelayed(MoneroUtils.reconcile(tx.isRelayed(), true));
       tx.setDoNotRelay(MoneroUtils.reconcile(tx.getDoNotRelay(), false));
-      tx.setIsFailed(MoneroUtils.reconcile(tx.getIsFailed(), false));
+      tx.setIsFailed(MoneroUtils.reconcile(tx.isFailed(), false));
     } else {
       tx.setNumConfirmations(0);
     }
-    if (tx.getIsFailed() == null) tx.setIsFailed(false);
+    if (tx.isFailed() == null) tx.setIsFailed(false);
     if (tx.getOutputIndices() != null && tx.getVouts() != null)  {
       assertEquals(tx.getOutputIndices().size(), (int) tx.getVouts().size());
       for (int i = 0; i < tx.getVouts().size(); i++) {
@@ -1172,7 +1172,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     }
     if (rpcTx.containsKey("as_json") && !"".equals(rpcTx.get("as_json"))) convertRpcTx(JsonUtils.deserialize(MoneroRpcConnection.MAPPER, (String) rpcTx.get("as_json"), new TypeReference<Map<String, Object>>(){}), tx);
     if (rpcTx.containsKey("tx_json") && !"".equals(rpcTx.get("tx_json"))) convertRpcTx(JsonUtils.deserialize(MoneroRpcConnection.MAPPER, (String) rpcTx.get("tx_json"), new TypeReference<Map<String, Object>>(){}), tx);
-    if (!Boolean.TRUE.equals(tx.getIsRelayed())) tx.setLastRelayedTimestamp(null);  // TODO monero-daemon-rpc: returns last_relayed_timestamp despite relayed: false, self inconsistent
+    if (!Boolean.TRUE.equals(tx.isRelayed())) tx.setLastRelayedTimestamp(null);  // TODO monero-daemon-rpc: returns last_relayed_timestamp despite relayed: false, self inconsistent
     
     // return built transaction
     return tx;
@@ -1442,7 +1442,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     Map<String, Object> rpcBan = new HashMap<String, Object>();
     rpcBan.put("host", ban.getHost());
     rpcBan.put("ip", ban.getIp());
-    rpcBan.put("ban", ban.getIsBanned());
+    rpcBan.put("ban", ban.isBanned());
     rpcBan.put("seconds", ban.getSeconds());
     return rpcBan;
   }
@@ -1452,7 +1452,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     status.setIsActive((Boolean) rpcStatus.get("active"));
     status.setSpeed(((BigInteger) rpcStatus.get("speed")).intValue());
     status.setNumThreads(((BigInteger) rpcStatus.get("threads_count")).intValue());
-    if (status.getIsActive()) {
+    if (status.isActive()) {
       status.setAddress((String) rpcStatus.get("address"));
       status.setIsBackground((Boolean) rpcStatus.get("is_background_mining_enabled"));
     }

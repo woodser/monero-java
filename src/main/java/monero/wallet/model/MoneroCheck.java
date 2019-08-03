@@ -7,7 +7,7 @@ public class MoneroCheck {
 
   public Boolean isGood;
 
-  public Boolean getIsGood() {
+  public Boolean isGood() {
     return isGood;
   }
 

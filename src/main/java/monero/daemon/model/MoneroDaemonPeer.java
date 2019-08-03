@@ -54,7 +54,7 @@ public class MoneroDaemonPeer {
     this.rpcPort = rpcPort;
   }
   
-  public Boolean getIsOnline() {
+  public Boolean isOnline() {
     return isOnline;
   }
   

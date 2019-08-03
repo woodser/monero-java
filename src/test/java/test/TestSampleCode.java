@@ -51,7 +51,7 @@ public class TestSampleCode {
     // get incoming and outgoing transfers
     List<MoneroTransfer> transfers = wallet.getTransfers();
     for (MoneroTransfer transfer : transfers) {
-      boolean isIncoming = transfer.getIsIncoming();
+      boolean isIncoming = transfer.isIncoming();
       BigInteger amount = transfer.getAmount();
       int accountIdx = transfer.getAccountIndex();
       Long height = transfer.getTx().getHeight();  // will be null if unconfirmed
@@ -60,7 +60,7 @@ public class TestSampleCode {
     // get incoming transfers to account 0
     transfers = wallet.getTransfers(new MoneroTransferRequest().setAccountIndex(0).setIsIncoming(true));
     for (MoneroTransfer transfer : transfers) {
-      assertTrue(transfer.getIsIncoming());
+      assertTrue(transfer.isIncoming());
       assertEquals(0, (int) transfer.getAccountIndex());
       BigInteger amount = transfer.getAmount();
       Long height = transfer.getTx().getHeight();  // will be null if unconfirmed
@@ -83,14 +83,14 @@ public class TestSampleCode {
     for (MoneroTxWallet tx : wallet.getTxs(new MoneroTxRequest().setIsConfirmed(true))) {
       String txId = tx.getId();                   // e.g. f8b2f0baa80bf6b...
       BigInteger txFee = tx.getFee();             // e.g. 750000
-      boolean isConfirmed = tx.getIsConfirmed();  // e.g. true
+      boolean isConfirmed = tx.isConfirmed();  // e.g. true
     }
     
     // get a wallet transaction by id
     MoneroTxWallet tx = wallet.getTx("3276252c5a545b90c8e147fcde45d3e1917726470a8f7d4c8977b527a44dfd15");
     String txId = tx.getId();                   // e.g. 69a0d27a3e019526c...
     BigInteger txFee = tx.getFee();             // e.g. 750000
-    boolean isConfirmed = tx.getIsConfirmed();  // e.g. true
+    boolean isConfirmed = tx.isConfirmed();  // e.g. true
   }
   
   @Test

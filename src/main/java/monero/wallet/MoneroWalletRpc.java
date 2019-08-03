@@ -603,7 +603,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // special case: re-fetch txs if inconsistency caused by needing to make multiple rpc calls
     for (MoneroTxWallet tx : txs) {
-      if (tx.getIsConfirmed() && tx.getBlock() == null) return getTxs(req);
+      if (tx.isConfirmed() && tx.getBlock() == null) return getTxs(req);
     }
     
     // order txs if tx ids given
@@ -642,15 +642,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
     // build params for get_transfers rpc call
     Map<String, Object> params = new HashMap<String, Object>();
-    boolean canBeConfirmed = !Boolean.FALSE.equals(txReq.getIsConfirmed()) && !Boolean.TRUE.equals(txReq.getInTxPool()) && !Boolean.TRUE.equals(txReq.getIsFailed()) && !Boolean.FALSE.equals(txReq.getIsRelayed());
-    boolean canBeInTxPool = !Boolean.TRUE.equals(txReq.getIsConfirmed()) && !Boolean.FALSE.equals(txReq.getInTxPool()) && !Boolean.TRUE.equals(txReq.getIsFailed()) && !Boolean.FALSE.equals(txReq.getIsRelayed()) && txReq.getHeight() == null && txReq.getMinHeight() == null && txReq.getMaxHeight() == null;
-    boolean canBeIncoming = !Boolean.FALSE.equals(req.getIsIncoming()) && !Boolean.TRUE.equals(req.getIsOutgoing()) && !Boolean.TRUE.equals(req.getHasDestinations());
-    boolean canBeOutgoing = !Boolean.FALSE.equals(req.getIsOutgoing()) && !Boolean.TRUE.equals(req.getIsIncoming());
+    boolean canBeConfirmed = !Boolean.FALSE.equals(txReq.isConfirmed()) && !Boolean.TRUE.equals(txReq.getInTxPool()) && !Boolean.TRUE.equals(txReq.isFailed()) && !Boolean.FALSE.equals(txReq.isRelayed());
+    boolean canBeInTxPool = !Boolean.TRUE.equals(txReq.isConfirmed()) && !Boolean.FALSE.equals(txReq.getInTxPool()) && !Boolean.TRUE.equals(txReq.isFailed()) && !Boolean.FALSE.equals(txReq.isRelayed()) && txReq.getHeight() == null && txReq.getMinHeight() == null && txReq.getMaxHeight() == null;
+    boolean canBeIncoming = !Boolean.FALSE.equals(req.isIncoming()) && !Boolean.TRUE.equals(req.isOutgoing()) && !Boolean.TRUE.equals(req.getHasDestinations());
+    boolean canBeOutgoing = !Boolean.FALSE.equals(req.isOutgoing()) && !Boolean.TRUE.equals(req.isIncoming());
     params.put("in", canBeIncoming && canBeConfirmed);
     params.put("out", canBeOutgoing && canBeConfirmed);
     params.put("pool", canBeIncoming && canBeInTxPool);
     params.put("pending", canBeOutgoing && canBeInTxPool);
-    params.put("failed", !Boolean.FALSE.equals(txReq.getIsFailed()) && !Boolean.TRUE.equals(txReq.getIsConfirmed()) && !Boolean.TRUE.equals(txReq.getInTxPool()));
+    params.put("failed", !Boolean.FALSE.equals(txReq.isFailed()) && !Boolean.TRUE.equals(txReq.isConfirmed()) && !Boolean.TRUE.equals(txReq.getInTxPool()));
     if (txReq.getMinHeight() != null) {
       if (txReq.getMinHeight() > 0) params.put("min_height", txReq.getMinHeight() - 1); // TODO monero core: wallet2::get_payments() min_height is exclusive, so manually offset to match intended range (issues #5751, #5598)
       else params.put("min_height", txReq.getMinHeight());
@@ -682,7 +682,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     for (String key : result.keySet()) {
       for (Map<String, Object> rpcTx :((List<Map<String, Object>>) result.get(key))) {
         MoneroTxWallet tx = convertRpcTxWalletWithTransfer(rpcTx, null, null);
-        if (tx.getIsConfirmed()) assertTrue(tx.getBlock().getTxs().contains(tx));
+        if (tx.isConfirmed()) assertTrue(tx.getBlock().getTxs().contains(tx));
 //        if (tx.getId().equals("38436c710dfbebfb24a14cddfd430d422e7282bbe94da5e080643a1bd2880b44")) {
 //          System.out.println(rpcTx);
 //          System.out.println(tx.getOutgoingAmount().compareTo(BigInteger.valueOf(0)) == 0);
@@ -690,7 +690,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         
         // replace transfer amount with destination sum
         // TODO monero-wallet-rpc: confirmed tx from/to same account has amount 0 but cached transfers
-        if (tx.getOutgoingTransfer() != null && Boolean.TRUE.equals(tx.getIsRelayed()) && !Boolean.TRUE.equals(tx.getIsFailed()) &&
+        if (tx.getOutgoingTransfer() != null && Boolean.TRUE.equals(tx.isRelayed()) && !Boolean.TRUE.equals(tx.isFailed()) &&
             tx.getOutgoingTransfer().getDestinations() != null && tx.getOutgoingAmount().compareTo(BigInteger.valueOf(0)) == 0) {
           MoneroOutgoingTransfer outgoingTransfer = tx.getOutgoingTransfer();
           BigInteger transferTotal = BigInteger.valueOf(0);
@@ -780,8 +780,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // collect txs with vouts for each indicated account using `incoming_transfers` rpc call
     Map<String, Object> params = new HashMap<String, Object>();
     String transferType;
-    if (Boolean.TRUE.equals(req.getIsSpent())) transferType = "unavailable";
-    else if (Boolean.FALSE.equals(req.getIsSpent())) transferType = "available";
+    if (Boolean.TRUE.equals(req.isSpent())) transferType = "unavailable";
+    else if (Boolean.FALSE.equals(req.isSpent())) transferType = "available";
     else transferType = "all";
     params.put("transfer_type", transferType);
     params.put("verbose", true);
@@ -1078,7 +1078,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<MoneroTxWallet> txs = convertRpcSentTxWallets(result, null);
     for (MoneroTxWallet tx : txs) {
       tx.setIsRelayed(!doNotRelay);
-      tx.setInTxPool(tx.getIsRelayed());
+      tx.setInTxPool(tx.isRelayed());
     }
     return txs;
   }
@@ -1544,7 +1544,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (tx.getUnlockTime() == null) tx.setUnlockTime(request.getUnlockTime() == null ? 0 : request.getUnlockTime());
       if (!tx.getDoNotRelay()) {
         if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
-        if (tx.getIsDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
+        if (tx.isDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
       }
     }
     return txs;
@@ -1612,7 +1612,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (tx.getUnlockTime() == null) tx.setUnlockTime(request.getUnlockTime() == null ? 0 : request.getUnlockTime());
     if (!Boolean.TRUE.equals(tx.getDoNotRelay())) {
       if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
-      if (tx.getIsDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
+      if (tx.isDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
     }
     return tx;
   }
@@ -1676,10 +1676,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (rpcTx.containsKey("type")) isOutgoing = decodeRpcType((String) rpcTx.get("type"), tx);
     else {
       assertNotNull("Must indicate if tx is outgoing (true) xor incoming (false) since unknown", isOutgoing);
-      assertNotNull(tx.getIsConfirmed());
+      assertNotNull(tx.isConfirmed());
       assertNotNull(tx.getInTxPool());
-      assertNotNull(tx.getIsMinerTx());
-      assertNotNull(tx.getIsFailed());
+      assertNotNull(tx.isMinerTx());
+      assertNotNull(tx.isFailed());
       assertNotNull(tx.getDoNotRelay());
     }
     
@@ -1701,13 +1701,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("tx_metadata")) tx.setMetadata((String) val);
       else if (key.equals("double_spend_seen")) tx.setIsDoubleSpendSeen((Boolean) val);
       else if (key.equals("block_height") || key.equals("height")) {
-        if (tx.getIsConfirmed()) {
+        if (tx.isConfirmed()) {
           if (header == null) header = new MoneroBlockHeader();
           header.setHeight(((BigInteger) val).longValue());
         }
       }
       else if (key.equals("timestamp")) {
-        if (tx.getIsConfirmed()) {
+        if (tx.isConfirmed()) {
           if (header == null) header = new MoneroBlockHeader();
           header.setTimestamp(((BigInteger) val).longValue());
         } else {
@@ -1715,7 +1715,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
       }
       else if (key.equals("confirmations")) {
-        if (!tx.getIsConfirmed()) tx.setNumConfirmations(0);
+        if (!tx.isConfirmed()) tx.setNumConfirmations(0);
         else tx.setNumConfirmations(((BigInteger) val).intValue());
       }
       else if (key.equals("suggested_confirmations_threshold")) {
@@ -1878,7 +1878,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
     // otherwise merge with existing tx
     else {
-      if (aTx.getIsFailed() != null & tx.getIsFailed() != null && !aTx.getIsFailed().equals(tx.getIsFailed())) {
+      if (aTx.isFailed() != null & tx.isFailed() != null && !aTx.isFailed().equals(tx.isFailed())) {
         System.out.println("ERROR: Merging these transactions will throw an error because their isFailed state is different");
         System.out.println(aTx);
         System.out.println(tx);

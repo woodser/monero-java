@@ -269,10 +269,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * 
    * @return true if the wallet is connected to a daemon, false otherwise
    */
-  public boolean getIsConnected() {
+  public boolean isConnected() {
     assertNotClosed();
     try {
-      return getIsConnectedJni();
+      return isConnectedJni();
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -311,10 +311,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * 
    * @return true if the daemon is synced with the network, false otherwise
    */
-  public boolean getIsDaemonSynced() {
+  public boolean isDaemonSynced() {
     assertNotClosed();
     try {
-      return getIsDaemonSyncedJni();
+      return isDaemonSyncedJni();
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -325,10 +325,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * 
    * @return true if the wallet is synced with the daemon, false otherwise
    */
-  public boolean getIsSynced() {
+  public boolean isSynced() {
     assertNotClosed();
     try {
-      return getIsSyncedJni();
+      return isSyncedJni();
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -460,7 +460,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * 
    * @return true if the wallet is closed, false otherwise
    */
-  public boolean getIsClosed() {
+  public boolean isClosed() {
     return isClosed;
   }
   
@@ -1211,15 +1211,15 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native void setDaemonConnectionJni(String uri, String username, String password);
   
-  private native boolean getIsConnectedJni();
+  private native boolean isConnectedJni();
   
   private native long getDaemonHeightJni();
   
   private native long getDaemonTargetHeightJni();
   
-  private native boolean getIsDaemonSyncedJni();
+  private native boolean isDaemonSyncedJni();
   
-  private native boolean getIsSyncedJni();
+  private native boolean isSyncedJni();
   
   private native String getPathJni();
   

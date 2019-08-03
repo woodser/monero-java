@@ -18,7 +18,7 @@ public class MoneroSubmitTxResult {
   private Boolean sanityCheckFailed;
   private String reason;
   
-  public Boolean getIsGood() {
+  public Boolean isGood() {
     return isGood;
   }
   
@@ -26,7 +26,7 @@ public class MoneroSubmitTxResult {
     this.isGood = isGood;
   }
   
-  public Boolean getIsRelayed() {
+  public Boolean isRelayed() {
     return isRelayed;
   }
   
@@ -34,7 +34,7 @@ public class MoneroSubmitTxResult {
     this.isRelayed = isRelayed;
   }
   
-  public Boolean getIsDoubleSpend() {
+  public Boolean isDoubleSpend() {
     return isDoubleSpend;
   }
   
@@ -42,7 +42,7 @@ public class MoneroSubmitTxResult {
     this.isDoubleSpend = isDoubleSpend;
   }
   
-  public Boolean getIsFeeTooLow() {
+  public Boolean isFeeTooLow() {
     return isFeeTooLow;
   }
   
@@ -50,7 +50,7 @@ public class MoneroSubmitTxResult {
     this.isFeeTooLow = isFeeTooLow;
   }
   
-  public Boolean getIsMixinTooLow() {
+  public Boolean isMixinTooLow() {
     return isMixinTooLow;
   }
   
@@ -74,7 +74,7 @@ public class MoneroSubmitTxResult {
     this.hasInvalidOutput = hasInvalidOutput;
   }
   
-  public Boolean getIsRct() {
+  public Boolean isRct() {
     return isRct;
   }
   
@@ -82,7 +82,7 @@ public class MoneroSubmitTxResult {
     this.isRct = isRct;
   }
   
-  public Boolean getIsOverspend() {
+  public Boolean isOverspend() {
     return isOverspend;
   }
   
@@ -90,7 +90,7 @@ public class MoneroSubmitTxResult {
     this.isOverspend = isOverspend;
   }
   
-  public Boolean getIsTooBig() {
+  public Boolean isTooBig() {
     return isTooBig;
   }
   

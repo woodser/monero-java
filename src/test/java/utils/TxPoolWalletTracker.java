@@ -48,7 +48,7 @@ public class TxPoolWalletTracker {
     // get ids of txs in the pool
     Set<String> txIdsPool = new HashSet<String>();
     for (MoneroTx tx : TestUtils.getDaemonRpc().getTxPool()) {
-      if (!tx.getIsRelayed() || tx.getIsFailed()) continue;
+      if (!tx.isRelayed() || tx.isFailed()) continue;
       txIdsPool.add(tx.getId());
     }
     
@@ -80,7 +80,7 @@ public class TxPoolWalletTracker {
     // attempt to start mining to push the network along
     boolean startedMining = false;
     MoneroMiningStatus miningStatus = daemon.getMiningStatus();
-    if (!miningStatus.getIsActive()) {
+    if (!miningStatus.isActive()) {
       try {
         StartMining.startMining();
         startedMining = true;

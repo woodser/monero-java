@@ -90,7 +90,7 @@ public class MoneroSubaddress {
     return this;
   }
   
-  public Boolean getIsUsed() {
+  public Boolean isUsed() {
     return isUsed;
   }
   
@@ -121,7 +121,7 @@ public class MoneroSubaddress {
     sb.append(MoneroUtils.kvLine("Balance", this.getBalance(), indent));
     sb.append(MoneroUtils.kvLine("Unlocked balance", this.getUnlockedBalance(), indent));
     sb.append(MoneroUtils.kvLine("Num unspent outputs", this.getNumUnspentOutputs(), indent));
-    sb.append(MoneroUtils.kvLine("Is used", this.getIsUsed(), indent));
+    sb.append(MoneroUtils.kvLine("Is used", this.isUsed(), indent));
     sb.append(MoneroUtils.kvLine("Num blocks to unlock", this.getNumBlocksToUnlock(), indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);  // strip last newline
