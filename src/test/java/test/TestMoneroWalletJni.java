@@ -467,7 +467,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
           
           // ensure wallet has time to detect new block
           try {
-            TimeUnit.MILLISECONDS.sleep(MoneroWalletJni.SYNC_INTERVAL);
+            TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL);
           } catch (InterruptedException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
@@ -940,7 +940,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance();
     
     // register a listener to collect notifications
-    MoneroOutputNotificationTester listener = new MoneroOutputNotificationTester();
+    OutputNotificationCollector listener = new OutputNotificationCollector();
     wallet.addListener(listener);
     
     // send tx
@@ -964,7 +964,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
         try { daemon.stopMining(); } catch (MoneroException e) { }
         
         // sleep to ensure wallet has time to see added block
-        TimeUnit.MILLISECONDS.sleep(MoneroWalletJni.SYNC_INTERVAL);
+        TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL);
       } catch (InterruptedException e) {
         e.printStackTrace();
         throw new RuntimeException(e.getMessage());
@@ -1028,26 +1028,55 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     return false;
   }
   
+  @Test
+  public void testCreateWalletAndReceive() {
+    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
+    
+    // create a random stagenet wallet
+    String path = getRandomWalletPath();
+    MoneroWalletJni myWallet = MoneroWalletJni.createWalletRandom(path, "mysupersecretpassword123", MoneroNetworkType.STAGENET);
+    
+    // listen for received outputs
+    OutputNotificationCollector myListener = new OutputNotificationCollector();
+    myWallet.addListener(myListener);
+    
+    // send funds to the created wallet
+    MoneroTxWallet sentTx = wallet.send(0, myWallet.getPrimaryAddress(), TestUtils.MAX_FEE);
+    
+    // wait until block added to the chain
+    try { StartMining.startMining(); } catch (Exception e) { }
+    daemon.getNextBlockHeader();
+    try { daemon.stopMining(); } catch (Exception e) { }
+    
+    // tx is now confirmed
+    assertTrue(wallet.getTx(sentTx.getId()).getIsConfirmed());
+    
+    // outputs should have been received
+    assertFalse(myListener.getOutputsReceived().isEmpty());
+  }
+  
   /**
-   * Wallet listener to collect transfer notifications.
+   * Wallet listener to collect output notifications.
    */
-  private class MoneroOutputNotificationTester extends MoneroWalletListener {
+  private class OutputNotificationCollector extends MoneroWalletListener {
     
     private List<MoneroOutputWallet> outputsReceived;
     private List<MoneroOutputWallet> outputsSpent;
     
-    public MoneroOutputNotificationTester() {
+    public OutputNotificationCollector() {
       outputsReceived = new ArrayList<MoneroOutputWallet>();
       outputsSpent = new ArrayList<MoneroOutputWallet>();
     }
     
     @Override
     public void onOutputReceived(MoneroOutputWallet output) {
+      System.out.println("OUTPUT RECEIVED!!!");
       outputsReceived.add(output);
     }
     
     @Override
     public void onOutputSpent(MoneroOutputWallet output) {
+      System.out.println("OUTPUT RECEIVED!!!");
       outputsSpent.add(output);
     }
     

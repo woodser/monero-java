@@ -17,6 +17,9 @@ import common.utils.GenUtils;
  * Collection of Monero utilities.
  */
 public class MoneroUtils {
+  
+  // core wallet2 syncs on a fixed intervals
+  public static final long WALLET2_REFRESH_INTERVAL = 10000;
 
   private static final int NUM_MNEMONIC_WORDS = 25;
   private static final int VIEW_KEY_LENGTH = 64;

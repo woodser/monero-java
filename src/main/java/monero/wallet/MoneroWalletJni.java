@@ -79,9 +79,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     System.loadLibrary("monero-java");
   }
   
-  // if enabled, wallet auto syncs on a fixed interval
-  public static final long SYNC_INTERVAL = 10000; // 10 seconds
-  
   // logger
   private static final Logger LOGGER = Logger.getLogger(MoneroWalletJni.class);
   
