@@ -21,33 +21,33 @@
  */
 
 #include <iostream>
-#include "MoneroUtilsJni.h"
-#include "utils/MoneroUtils.h"
+#include "monero_utils_jni.h"
+#include "utils/monero_utils.h"
 
 using namespace std;
 
 JNIEXPORT jbyteArray JNICALL Java_monero_utils_MoneroCppUtils_jsonToBinaryJni(JNIEnv *env, jclass clazz, jstring json) {
 
   // convert json jstring to string
-  string jsonStr = jstring2string(env, json);
-  //string jsonStr = "{\"heights\":[123456,1234567,870987]}";
+  string json_str = jstring2string(env, json);
+  //string json_str = "{\"heights\":[123456,1234567,870987]}";
 
   // convert json to monero's portable storage binary format
-  string binStr;
-  MoneroUtils::json_to_binary(jsonStr, binStr);
+  string bin_str;
+  monero_utils::json_to_binary(json_str, bin_str);
 
   // convert binary string to jbyteArray
-  jbyteArray result = env->NewByteArray(binStr.length());
+  jbyteArray result = env->NewByteArray(bin_str.length());
   if (result == NULL) {
      return NULL; // out of memory error thrown
   }
 
   // fill a temp structure to use to populate the java byte array
-  jbyte fill[binStr.length()];
-  for (int i = 0; i < binStr.length(); i++) {
-     fill[i] = binStr[i];
+  jbyte fill[bin_str.length()];
+  for (int i = 0; i < bin_str.length(); i++) {
+     fill[i] = bin_str[i];
   }
-  env->SetByteArrayRegion(result, 0, binStr.length(), fill);
+  env->SetByteArrayRegion(result, 0, bin_str.length(), fill);
   return result;
 }
 
@@ -55,32 +55,32 @@ JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryToJsonJni(JNIEn
 
   // convert the jbyteArray to a string
   int binLength = env->GetArrayLength(bin);
-  jboolean isCopy;
-  jbyte* jbytes = env->GetByteArrayElements(bin, &isCopy);
-  string binStr = string((char*) jbytes, binLength);
+  jboolean is_copy;
+  jbyte* jbytes = env->GetByteArrayElements(bin, &is_copy);
+  string bin_str = string((char*) jbytes, binLength);
 
   // convert monero's portable storage binary format to json
-  string jsonStr;
-  MoneroUtils::binary_to_json(binStr, jsonStr);
+  string json_str;
+  monero_utils::binary_to_json(bin_str, json_str);
 
   // convert string to jstring
-  return env->NewStringUTF(jsonStr.c_str());
+  return env->NewStringUTF(json_str.c_str());
 }
 
-JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryBlocksToJsonJni(JNIEnv *env, jclass clazz, jbyteArray blocksBin) {
+JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryBlocksToJsonJni(JNIEnv *env, jclass clazz, jbyteArray blocks_bin) {
 
   // convert the jbyteArray to a string
-  int binLength = env->GetArrayLength(blocksBin);
-  jboolean isCopy;
-  jbyte* jbytes = env->GetByteArrayElements(blocksBin, &isCopy);
-  string binStr = string((char*) jbytes, binLength);
+  int binLength = env->GetArrayLength(blocks_bin);
+  jboolean is_copy;
+  jbyte* jbytes = env->GetByteArrayElements(blocks_bin, &is_copy);
+  string bin_str = string((char*) jbytes, binLength);
 
   // convert monero's portable storage binary format to json
-  string jsonStr;
-  MoneroUtils::binary_blocks_to_json(binStr, jsonStr);
+  string json_str;
+  monero_utils::binary_blocks_to_json(bin_str, json_str);
 
   // convert string to jstring
-  return env->NewStringUTF(jsonStr.c_str());
+  return env->NewStringUTF(json_str.c_str());
 }
 
 // credit: https://stackoverflow.com/questions/41820039/jstringjni-to-stdstringc-with-utf8-characters
