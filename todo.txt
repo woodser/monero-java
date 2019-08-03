@@ -1,7 +1,6 @@
 14.1.0+ RELEASE
 work through problems of testing fresh wallet again
 rpc supports on_restore_determinstic_wallet, implement!
-wallet.sync() then wallet.startSyncing() to enable auto syncing is confusing?
 start syncing automatically if given rpc connection, e.g. random wallet + rpc connection = auto sync?
 rename coinbaseTx to minerTx
 MoneroTxRequest -> MoneroTxQuery, etc?
