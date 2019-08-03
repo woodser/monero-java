@@ -25,14 +25,14 @@
 #ifndef _Included_MoneroWalletJniBridge
 #define _Included_MoneroWalletJniBridge
 
-jfieldID getHandleField(JNIEnv *env, jobject obj, const char *fieldName) {
+jfieldID get_handle_field(JNIEnv *env, jobject obj, const char *field_name) {
   jclass c = env->GetObjectClass(obj);
-  return env->GetFieldID(c, fieldName, "J"); // of type long
+  return env->GetFieldID(c, field_name, "J"); // of type long
 }
 
 template<typename T>
-T *getHandle(JNIEnv *env, jobject obj, const char *fieldName) {
-  jlong handle = env->GetLongField(obj, getHandleField(env, obj, fieldName));
+T *get_handle(JNIEnv *env, jobject obj, const char *field_name) {
+  jlong handle = env->GetLongField(obj, get_handle_field(env, obj, field_name));
   return reinterpret_cast<T *>(handle);
 }
 
