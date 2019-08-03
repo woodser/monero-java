@@ -23,7 +23,7 @@ public class MoneroDaemonUpdateCheckResult {
     this.userUri = checkResult.userUri;
   }
   
-  public Boolean getIsUpdateAvailable() {
+  public Boolean isUpdateAvailable() {
     return isUpdateAvailable;
   }
   

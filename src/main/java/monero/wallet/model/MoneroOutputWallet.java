@@ -76,7 +76,7 @@ public class MoneroOutputWallet extends MoneroOutput {
     return this;
   }
   
-  public Boolean getIsSpent() {
+  public Boolean isSpent() {
     return isSpent;
   }
   
@@ -85,7 +85,7 @@ public class MoneroOutputWallet extends MoneroOutput {
     return this;
   }
   
-  public Boolean getIsUnlocked() {
+  public Boolean isUnlocked() {
     return isUnlocked;
   }
   
@@ -100,7 +100,7 @@ public class MoneroOutputWallet extends MoneroOutput {
    * 
    * @return Boolean is whether or not this output is frozen
    */
-  public Boolean getIsFrozen() {
+  public Boolean isFrozen() {
     return isFrozen;
   }
   
@@ -118,7 +118,7 @@ public class MoneroOutputWallet extends MoneroOutput {
     super.merge(output);
     this.setAccountIndex(MoneroUtils.reconcile(this.getAccountIndex(), output.getAccountIndex()));
     this.setSubaddressIndex(MoneroUtils.reconcile(this.getSubaddressIndex(), output.getSubaddressIndex()));
-    this.setIsSpent(MoneroUtils.reconcile(this.getIsSpent(), output.getIsSpent(), null, true, null)); // output can become spent
+    this.setIsSpent(MoneroUtils.reconcile(this.isSpent(), output.isSpent(), null, true, null)); // output can become spent
     return this;
   }
   
@@ -127,9 +127,9 @@ public class MoneroOutputWallet extends MoneroOutput {
     sb.append(super.toString(indent) + "\n");
     sb.append(MoneroUtils.kvLine("Account index", this.getAccountIndex(), indent));
     sb.append(MoneroUtils.kvLine("Subaddress index", this.getSubaddressIndex(), indent));
-    sb.append(MoneroUtils.kvLine("Is spent", this.getIsSpent(), indent));
-    sb.append(MoneroUtils.kvLine("Is unlocked", this.getIsUnlocked(), indent));
-    sb.append(MoneroUtils.kvLine("Is frozen", this.getIsFrozen(), indent));
+    sb.append(MoneroUtils.kvLine("Is spent", this.isSpent(), indent));
+    sb.append(MoneroUtils.kvLine("Is unlocked", this.isUnlocked(), indent));
+    sb.append(MoneroUtils.kvLine("Is frozen", this.isFrozen(), indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);  // strip last newline
   }

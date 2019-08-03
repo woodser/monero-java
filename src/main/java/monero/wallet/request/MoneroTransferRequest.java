@@ -56,7 +56,7 @@ public class MoneroTransferRequest extends MoneroTransfer implements Filter<Mone
     return new MoneroTransferRequest(this);
   }
 
-  public Boolean getIsIncoming() {
+  public Boolean isIncoming() {
     return isIncoming;
   }
 
@@ -65,7 +65,7 @@ public class MoneroTransferRequest extends MoneroTransfer implements Filter<Mone
     return this;
   }
   
-  public Boolean getIsOutgoing() {
+  public Boolean isOutgoing() {
     return isIncoming == null ? null : !isIncoming;
   }
   
@@ -154,8 +154,8 @@ public class MoneroTransferRequest extends MoneroTransfer implements Filter<Mone
     if (txRequest != null && txRequest.getTransferRequest() != null) throw new RuntimeException("Transfer request's tx request cannot have a circular transfer request");   // TODO: could auto detect and handle this.  port to js
     
     // filter on common fields
-    if (this.getIsIncoming() != null && this.getIsIncoming() != transfer.getIsIncoming()) return false;
-    if (this.getIsOutgoing() != null && this.getIsOutgoing() != transfer.getIsOutgoing()) return false;
+    if (this.isIncoming() != null && this.isIncoming() != transfer.isIncoming()) return false;
+    if (this.isOutgoing() != null && this.isOutgoing() != transfer.isOutgoing()) return false;
     if (this.getAmount() != null && this.getAmount().compareTo(transfer.getAmount()) != 0) return false;
     if (this.getAccountIndex() != null && !this.getAccountIndex().equals(transfer.getAccountIndex())) return false;
     

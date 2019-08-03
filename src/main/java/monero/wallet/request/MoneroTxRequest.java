@@ -62,7 +62,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return new MoneroTxRequest(this);
   }
   
-  public Boolean getIsOutgoing() {
+  public Boolean isOutgoing() {
     return isOutgoing;
   }
 
@@ -71,7 +71,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return this;
   }
 
-  public Boolean getIsIncoming() {
+  public Boolean isIncoming() {
     return isIncoming;
   }
 
@@ -181,12 +181,12 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     // filter on tx
     if (this.getId() != null && !this.getId().equals(tx.getId())) return false;
     if (this.getPaymentId() != null && !this.getPaymentId().equals(tx.getPaymentId())) return false;
-    if (this.getIsConfirmed() != null && this.getIsConfirmed() != tx.getIsConfirmed()) return false;
+    if (this.isConfirmed() != null && this.isConfirmed() != tx.isConfirmed()) return false;
     if (this.getInTxPool() != null && this.getInTxPool() != tx.getInTxPool()) return false;
     if (this.getDoNotRelay() != null && this.getDoNotRelay() != tx.getDoNotRelay()) return false;
-    if (this.getIsRelayed() != null && this.getIsRelayed() != tx.getIsRelayed()) return false;
-    if (this.getIsFailed() != null && this.getIsFailed() != tx.getIsFailed()) return false;
-    if (this.getIsMinerTx() != null && this.getIsMinerTx() != tx.getIsMinerTx()) return false;
+    if (this.isRelayed() != null && this.isRelayed() != tx.isRelayed()) return false;
+    if (this.isFailed() != null && this.isFailed() != tx.isFailed()) return false;
+    if (this.isMinerTx() != null && this.isMinerTx() != tx.isMinerTx()) return false;
     
     // at least one transfer must meet transfer request if defined
     if (this.getTransferRequest() != null) {
@@ -210,15 +210,15 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     }
     
     // filter on incoming
-    if (this.getIsIncoming() != null) {
-      if (this.getIsIncoming() && !tx.getIsIncoming()) return false;
-      if (!this.getIsIncoming() && tx.getIsIncoming()) return false;
+    if (this.isIncoming() != null) {
+      if (this.isIncoming() && !tx.isIncoming()) return false;
+      if (!this.isIncoming() && tx.isIncoming()) return false;
     }
     
     // filter on outgoing
-    if (this.getIsOutgoing() != null) {
-      if (this.getIsOutgoing() && !tx.getIsOutgoing()) return false;
-      if (!this.getIsOutgoing() && tx.getIsOutgoing()) return false;
+    if (this.isOutgoing() != null) {
+      if (this.isOutgoing() && !tx.isOutgoing()) return false;
+      if (!this.isOutgoing() && tx.isOutgoing()) return false;
     }
     
     // filter on remaining fields

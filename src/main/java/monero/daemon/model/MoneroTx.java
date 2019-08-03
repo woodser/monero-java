@@ -152,7 +152,7 @@ public class MoneroTx {
     return this;
   }
   
-  public Boolean getIsMinerTx() {
+  public Boolean isMinerTx() {
     return isMinerTx;
   }
   
@@ -197,7 +197,7 @@ public class MoneroTx {
     return this;
   }
   
-  public Boolean getIsRelayed() {
+  public Boolean isRelayed() {
     return isRelayed;
   }
   
@@ -206,7 +206,7 @@ public class MoneroTx {
     return this;
   }
   
-  public Boolean getIsConfirmed() {
+  public Boolean isConfirmed() {
     return isConfirmed;
   }
   
@@ -260,7 +260,7 @@ public class MoneroTx {
     return this;
   }
   
-  public Boolean getIsDoubleSpendSeen() {
+  public Boolean isDoubleSpendSeen() {
     return isDoubleSpendSeen;
   }
   
@@ -406,7 +406,7 @@ public class MoneroTx {
     return this;
   }
   
-  public Boolean getIsKeptByBlock() {
+  public Boolean isKeptByBlock() {
     return isKeptByBlock;
   }
   
@@ -415,7 +415,7 @@ public class MoneroTx {
     return this;
   }
   
-  public Boolean getIsFailed() {
+  public Boolean isFailed() {
     return isFailed;
   }
   
@@ -494,10 +494,10 @@ public class MoneroTx {
     this.setPaymentId(MoneroUtils.reconcile(this.getPaymentId(), tx.getPaymentId()));
     this.setFee(MoneroUtils.reconcile(this.getFee(), tx.getFee()));
     this.setMixin(MoneroUtils.reconcile(this.getMixin(), tx.getMixin()));
-    this.setIsConfirmed(MoneroUtils.reconcile(this.getIsConfirmed(), tx.getIsConfirmed(), null, true, null));
+    this.setIsConfirmed(MoneroUtils.reconcile(this.isConfirmed(), tx.isConfirmed(), null, true, null));
     this.setDoNotRelay(MoneroUtils.reconcile(this.getDoNotRelay(), tx.getDoNotRelay(), null, false, null));  // tx can become relayed
-    this.setIsRelayed(MoneroUtils.reconcile(this.getIsRelayed(), tx.getIsRelayed(), null, true, null));      // tx can become relayed
-    this.setIsDoubleSpendSeen(MoneroUtils.reconcile(this.getIsDoubleSpendSeen(), tx.getIsDoubleSpendSeen()));
+    this.setIsRelayed(MoneroUtils.reconcile(this.isRelayed(), tx.isRelayed(), null, true, null));      // tx can become relayed
+    this.setIsDoubleSpendSeen(MoneroUtils.reconcile(this.isDoubleSpendSeen(), tx.isDoubleSpendSeen()));
     this.setKey(MoneroUtils.reconcile(this.getKey(), tx.getKey()));
     this.setFullHex(MoneroUtils.reconcile(this.getFullHex(), tx.getFullHex()));
     this.setPrunedHex(MoneroUtils.reconcile(this.getPrunedHex(), tx.getPrunedHex()));
@@ -511,8 +511,8 @@ public class MoneroTx {
     this.setExtra(MoneroUtils.reconcileIntArrays(this.getExtra(), tx.getExtra()));
     this.setRctSignatures(MoneroUtils.reconcile(this.getRctSignatures(), tx.getRctSignatures()));
     this.setRctSigPrunable(MoneroUtils.reconcile(this.getRctSigPrunable(), tx.getRctSigPrunable()));
-    this.setIsKeptByBlock(MoneroUtils.reconcile(this.getIsKeptByBlock(), tx.getIsKeptByBlock()));
-    this.setIsFailed(MoneroUtils.reconcile(this.getIsFailed(), tx.getIsFailed()));
+    this.setIsKeptByBlock(MoneroUtils.reconcile(this.isKeptByBlock(), tx.isKeptByBlock()));
+    this.setIsFailed(MoneroUtils.reconcile(this.isFailed(), tx.isFailed()));
     this.setLastFailedHeight(MoneroUtils.reconcile(this.getLastFailedHeight(), tx.getLastFailedHeight()));
     this.setLastFailedId(MoneroUtils.reconcile(this.getLastFailedId(), tx.getLastFailedId()));
     this.setMaxUsedBlockHeight(MoneroUtils.reconcile(this.getMaxUsedBlockHeight(), tx.getMaxUsedBlockHeight()));
@@ -588,7 +588,7 @@ public class MoneroTx {
     }
     
     // handle unrelayed -> relayed -> confirmed
-    if (this.getIsConfirmed()) {
+    if (this.isConfirmed()) {
       this.setInTxPool(false);
       this.setReceivedTimestamp(null);
       this.setLastRelayedTimestamp(null);
@@ -611,19 +611,19 @@ public class MoneroTx {
     sb.append(MoneroUtils.kvLine("Tx ID: ", getId(), indent));
     sb.append(MoneroUtils.kvLine("Height", getHeight(), indent));
     sb.append(MoneroUtils.kvLine("Version", getVersion(), indent));
-    sb.append(MoneroUtils.kvLine("Is miner tx", getIsMinerTx(), indent));
+    sb.append(MoneroUtils.kvLine("Is miner tx", isMinerTx(), indent));
     sb.append(MoneroUtils.kvLine("Payment ID", getPaymentId(), indent));
     sb.append(MoneroUtils.kvLine("Fee", getFee(), indent));
     sb.append(MoneroUtils.kvLine("Mixin", getMixin(), indent));
     sb.append(MoneroUtils.kvLine("Do not relay", getDoNotRelay(), indent));
-    sb.append(MoneroUtils.kvLine("Is relayed", getIsRelayed(), indent));
-    sb.append(MoneroUtils.kvLine("Is confirmed", getIsConfirmed(), indent));
+    sb.append(MoneroUtils.kvLine("Is relayed", isRelayed(), indent));
+    sb.append(MoneroUtils.kvLine("Is confirmed", isConfirmed(), indent));
     sb.append(MoneroUtils.kvLine("In tx pool", getInTxPool(), indent));
     sb.append(MoneroUtils.kvLine("Num confirmations", getNumConfirmations(), indent));
     sb.append(MoneroUtils.kvLine("Unlock time", getUnlockTime(), indent));
     sb.append(MoneroUtils.kvLine("Last relayed time", getLastRelayedTimestamp(), indent));
     sb.append(MoneroUtils.kvLine("Received time", getReceivedTimestamp(), indent));
-    sb.append(MoneroUtils.kvLine("Is double spend", getIsDoubleSpendSeen(), indent));
+    sb.append(MoneroUtils.kvLine("Is double spend", isDoubleSpendSeen(), indent));
     sb.append(MoneroUtils.kvLine("Key", getKey(), indent));
     sb.append(MoneroUtils.kvLine("Full hex", getFullHex(), indent));
     sb.append(MoneroUtils.kvLine("Pruned hex", getPrunedHex(), indent));
@@ -637,8 +637,8 @@ public class MoneroTx {
     sb.append(MoneroUtils.kvLine("Extra", Arrays.toString(getExtra()), indent));
     sb.append(MoneroUtils.kvLine("RCT signatures", getRctSignatures(), indent));
     sb.append(MoneroUtils.kvLine("RCT sig prunable", getRctSigPrunable(), indent));
-    sb.append(MoneroUtils.kvLine("Kept by block", getIsKeptByBlock(), indent));
-    sb.append(MoneroUtils.kvLine("Is failed", getIsFailed(), indent));
+    sb.append(MoneroUtils.kvLine("Kept by block", isKeptByBlock(), indent));
+    sb.append(MoneroUtils.kvLine("Is failed", isFailed(), indent));
     sb.append(MoneroUtils.kvLine("Last failed height", getLastFailedHeight(), indent));
     sb.append(MoneroUtils.kvLine("Last failed id", getLastFailedId(), indent));
     sb.append(MoneroUtils.kvLine("Max used block height", getMaxUsedBlockHeight(), indent));

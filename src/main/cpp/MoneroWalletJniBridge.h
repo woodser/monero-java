@@ -58,15 +58,15 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonConne
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *, jobject, jstring, jstring, jstring);
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_getIsConnectedJni(JNIEnv *, jobject);
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isConnectedJni(JNIEnv *, jobject);
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonHeightJni(JNIEnv *, jobject);
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonTargetHeightJni(JNIEnv *, jobject);
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_getIsDaemonSyncedJni(JNIEnv *, jobject);
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isDaemonSyncedJni(JNIEnv *, jobject);
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_getIsSyncedJni(JNIEnv *, jobject);
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isSyncedJni(JNIEnv *, jobject);
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPathJni(JNIEnv *, jobject);
 

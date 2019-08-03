@@ -106,7 +106,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetIsTrusted() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    daemon.getIsTrusted();
+    daemon.isTrusted();
   }
   
   // Can get the blockchain height
@@ -437,8 +437,8 @@ public class TestMoneroDaemonRpc {
       MoneroTx tx = getUnrelayedTx(wallet, i);
       System.out.println("done");
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-      assertFalse(result.getIsDoubleSpend());
-      assertTrue(result.getIsGood());
+      assertFalse(result.isDoubleSpend());
+      assertTrue(result.isGood());
       txIds.add(tx.getId());
     }
     
@@ -556,8 +556,8 @@ public class TestMoneroDaemonRpc {
     // submit tx to pool but don't relay
     MoneroTx tx = getUnrelayedTx(wallet, 1);
     MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-    assertTrue(result.getIsGood());
-    assertFalse(result.getIsRelayed());
+    assertTrue(result.isGood());
+    assertFalse(result.isRelayed());
     
     // fetch txs in pool
     List<MoneroTx> txs = daemon.getTxPool();
@@ -607,7 +607,7 @@ public class TestMoneroDaemonRpc {
       // submit tx hex
       MoneroTx tx =  getUnrelayedTx(wallet, i);
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-      assertTrue(result.getIsGood());
+      assertTrue(result.isGood());
       
       // test stats
       try {
@@ -634,7 +634,7 @@ public class TestMoneroDaemonRpc {
     for (int i = 1; i < 3; i++) {
       MoneroTx tx =  getUnrelayedTx(wallet, i);
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-      assertTrue(result.getIsGood());
+      assertTrue(result.isGood());
     }
     assertEquals(txPoolBefore.size() + 2, daemon.getTxPool().size());
     
@@ -644,8 +644,8 @@ public class TestMoneroDaemonRpc {
     
     // re-submit original transactions
     for (MoneroTx tx : txPoolBefore) {
-      MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), tx.getIsRelayed());
-      assertTrue(result.getIsGood());
+      MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), tx.isRelayed());
+      assertTrue(result.isGood());
     }
     
     // pool is back to original state
@@ -669,7 +669,7 @@ public class TestMoneroDaemonRpc {
     for (int i = 1; i < 3; i++) {
       MoneroTx tx =  getUnrelayedTx(wallet, i);
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-      assertTrue(result.getIsGood());
+      assertTrue(result.isGood());
       txs.add(tx);
     }
     
@@ -705,8 +705,8 @@ public class TestMoneroDaemonRpc {
     for (int i = 1; i < 3; i++) {
       MoneroTx tx =  getUnrelayedTx(wallet, i);
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-      assertFalse(result.getIsDoubleSpend());
-      assertTrue(result.getIsGood());
+      assertFalse(result.isDoubleSpend());
+      assertTrue(result.isGood());
       txIds.add(tx.getId());
     }
     assertEquals(txPoolBefore.size() + txIds.size(), daemon.getTxPool().size());
@@ -1023,11 +1023,11 @@ public class TestMoneroDaemonRpc {
       
       // test status without mining
       MoneroMiningStatus status = daemon.getMiningStatus();
-      assertEquals(false, status.getIsActive());
+      assertEquals(false, status.isActive());
       assertNull(status.getAddress());
       assertEquals(0, (int) status.getSpeed());
       assertEquals(0, (int) status.getNumThreads());
-      assertNull(status.getIsBackground());
+      assertNull(status.isBackground());
       
       // test status with mining
       String address = wallet.getPrimaryAddress();
@@ -1035,11 +1035,11 @@ public class TestMoneroDaemonRpc {
       boolean isBackground = false;
       daemon.startMining(address, threadCount, isBackground, true);
       status = daemon.getMiningStatus();
-      assertEquals(true, status.getIsActive());
+      assertEquals(true, status.isActive());
       assertEquals(address, status.getAddress());
       assertTrue(status.getSpeed() >= 0);
       assertEquals(threadCount, (int) status.getNumThreads());
-      assertEquals(isBackground, status.getIsBackground());
+      assertEquals(isBackground, status.isBackground());
     } catch (MoneroException e) {
       throw e;
     } finally {
@@ -1094,7 +1094,7 @@ public class TestMoneroDaemonRpc {
     testUpdateDownloadResult(result, path);
     
     // test invalid path
-    if (result.getIsUpdateAvailable()) {
+    if (result.isUpdateAvailable()) {
       try {
         result = daemon.downloadUpdate("./ohhai/there");
         fail("Should have thrown error");
@@ -1143,7 +1143,7 @@ public class TestMoneroDaemonRpc {
     
     // submit and relay tx1
     MoneroSubmitTxResult result = daemon.submitTxHex(tx1.getFullHex());
-    assertEquals(true, result.getIsRelayed());
+    assertEquals(true, result.isRelayed());
     testSubmitTxResultGood(result);
     
     // tx1 is in the pool
@@ -1151,7 +1151,7 @@ public class TestMoneroDaemonRpc {
     boolean found = false;
     for (MoneroTx aTx : txs) {
       if (aTx.getId().equals(tx1.getId())) {
-        assertEquals(true, aTx.getIsRelayed());
+        assertEquals(true, aTx.isRelayed());
         found = true;
         break;
       }
@@ -1164,7 +1164,7 @@ public class TestMoneroDaemonRpc {
     
     // submit and relay tx2 hex which double spends tx1
     result = daemon.submitTxHex(tx2.getFullHex());
-    assertEquals(result.getIsRelayed(), true);
+    assertEquals(result.isRelayed(), true);
     testSubmitTxResultDoubleSpend(result);
     
     // tx2 is in not the pool
@@ -1210,14 +1210,14 @@ public class TestMoneroDaemonRpc {
       txIds.add(tx.getId());
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
       testSubmitTxResultGood(result);
-      assertEquals(false, result.getIsRelayed());
+      assertEquals(false, result.isRelayed());
       
       // ensure tx is in pool
       List<MoneroTx> poolTxs = daemon.getTxPool();
       boolean found = false;
       for (MoneroTx aTx : poolTxs) {
         if (aTx.getId().equals(tx.getId())) {
-          assertEquals(false, aTx.getIsRelayed());
+          assertEquals(false, aTx.isRelayed());
           found = true;
           break;
         }
@@ -1226,7 +1226,7 @@ public class TestMoneroDaemonRpc {
       
       // fetch tx by id and ensure not relayed
       MoneroTx fetchedTx = daemon.getTx(tx.getId());
-      assertFalse(fetchedTx.getIsRelayed());
+      assertFalse(fetchedTx.isRelayed());
     }
     
     // relay the txs
@@ -1239,7 +1239,7 @@ public class TestMoneroDaemonRpc {
       boolean found = false;
       for (MoneroTx aTx : poolTxs) {
         if (aTx.getId().equals(tx.getId())) {
-          assertEquals(true, aTx.getIsRelayed());
+          assertEquals(true, aTx.isRelayed());
           found = true;
           break;
         }
@@ -1398,7 +1398,7 @@ public class TestMoneroDaemonRpc {
   
   private static void testMinerTx(MoneroTx minerTx) {
     assertNotNull(minerTx);
-    assertNotNull(minerTx.getIsMinerTx());
+    assertNotNull(minerTx.isMinerTx());
     assertTrue(minerTx.getVersion() >= 0);
     assertNotNull(minerTx.getExtra());
     assertTrue(minerTx.getExtra().length > 0);
@@ -1426,12 +1426,12 @@ public class TestMoneroDaemonRpc {
     
     // standard across all txs
     assertEquals(64, tx.getId().length());
-    if (tx.getIsRelayed() == null) assertTrue(tx.getInTxPool());  // TODO monero-daemon-rpc: add relayed to get_transactions
-    else assertNotNull(tx.getIsRelayed());
-    assertNotNull(tx.getIsConfirmed());
+    if (tx.isRelayed() == null) assertTrue(tx.getInTxPool());  // TODO monero-daemon-rpc: add relayed to get_transactions
+    else assertNotNull(tx.isRelayed());
+    assertNotNull(tx.isConfirmed());
     assertNotNull(tx.getInTxPool());
-    assertNotNull(tx.getIsMinerTx());
-    assertNotNull(tx.getIsDoubleSpendSeen());
+    assertNotNull(tx.isMinerTx());
+    assertNotNull(tx.isDoubleSpendSeen());
     assertTrue(tx.getVersion() >= 0);
     assertTrue(tx.getUnlockTime() >= 0);
     assertNotNull(tx.getVins());
@@ -1440,28 +1440,28 @@ public class TestMoneroDaemonRpc {
     
     // test presence of output indices
     // TODO: change this over to vouts only
-    if (tx.getIsMinerTx()) assertEquals(tx.getOutputIndices(), null); // TODO: how to get output indices for miner transactions?
+    if (tx.isMinerTx()) assertEquals(tx.getOutputIndices(), null); // TODO: how to get output indices for miner transactions?
     if (tx.getInTxPool() || ctx.fromGetTxPool || Boolean.FALSE.equals(ctx.hasOutputIndices)) assertEquals(null, tx.getOutputIndices());
     else assertNotNull(tx.getOutputIndices());
     if (tx.getOutputIndices() != null) assertFalse(tx.getOutputIndices().isEmpty());
     
     // test confirmed ctx
-    if (ctx.isConfirmed == true) assertEquals(true, tx.getIsConfirmed());
-    if (ctx.isConfirmed == false) assertEquals(false, tx.getIsConfirmed());
+    if (ctx.isConfirmed == true) assertEquals(true, tx.isConfirmed());
+    if (ctx.isConfirmed == false) assertEquals(false, tx.isConfirmed());
     
     // test confirmed
-    if (tx.getIsConfirmed()) {
+    if (tx.isConfirmed()) {
       assertNotNull(tx.getBlock());
       assertTrue(tx.getBlock().getTxs().contains(tx));
       assertTrue(tx.getBlock().getHeight() > 0);
       assertTrue(tx.getBlock().getTxs().contains(tx));
       assertTrue(tx.getBlock().getHeight() > 0);
       assertTrue(tx.getBlock().getTimestamp() > 0);
-      assertEquals(true, tx.getIsRelayed());
-      assertEquals(false, tx.getIsFailed());
+      assertEquals(true, tx.isRelayed());
+      assertEquals(false, tx.isFailed());
       assertEquals(false, tx.getInTxPool());
       assertEquals(false, tx.getDoNotRelay());
-      assertEquals(false, tx.getIsDoubleSpendSeen());
+      assertEquals(false, tx.isDoubleSpendSeen());
       assertEquals(null, tx.getNumConfirmations()); // client must compute
     } else {
       assertEquals(null, tx.getBlock());
@@ -1470,14 +1470,14 @@ public class TestMoneroDaemonRpc {
     
     // test in tx pool
     if (tx.getInTxPool()) {
-      assertEquals(tx.getIsConfirmed(), false);
-      assertEquals(tx.getIsDoubleSpendSeen(), false);
+      assertEquals(tx.isConfirmed(), false);
+      assertEquals(tx.isDoubleSpendSeen(), false);
       assertEquals(tx.getLastFailedHeight(), null);
       assertEquals(tx.getLastFailedId(), null);
       assertTrue(tx.getReceivedTimestamp() > 0);
       assertTrue(tx.getSize() > 0);
       assertTrue(tx.getWeight() > 0);
-      assertNotNull(tx.getIsKeptByBlock());
+      assertNotNull(tx.isKeptByBlock());
       assertEquals(null, tx.getLastFailedHeight());
       assertEquals(null, tx.getLastFailedId());
       assertTrue(tx.getMaxUsedBlockHeight() >= 0);
@@ -1487,7 +1487,7 @@ public class TestMoneroDaemonRpc {
     }
     
     // test miner tx
-    if (tx.getIsMinerTx()) {
+    if (tx.isMinerTx()) {
       assertEquals(0, tx.getFee().equals(BigInteger.valueOf(0)));
       assertEquals(null, tx.getVins());
       assertNull(tx.getSignatures());
@@ -1496,15 +1496,15 @@ public class TestMoneroDaemonRpc {
     }
     
     // test failed  // TODO: what else to test associated with failed
-    if (tx.getIsFailed()) {
+    if (tx.isFailed()) {
       assertTrue(tx.getReceivedTimestamp() > 0);
     } else {
-      if (tx.getIsRelayed() == null) assertEquals(null, tx.getDoNotRelay()); // TODO monero-daemon-rpc: add relayed to get_transactions
-      else if (tx.getIsRelayed()) assertEquals(false, tx.getIsDoubleSpendSeen());
+      if (tx.isRelayed() == null) assertEquals(null, tx.getDoNotRelay()); // TODO monero-daemon-rpc: add relayed to get_transactions
+      else if (tx.isRelayed()) assertEquals(false, tx.isDoubleSpendSeen());
       else {
-        assertEquals(false, tx.getIsRelayed());
+        assertEquals(false, tx.isRelayed());
         assertEquals(true, tx.getDoNotRelay());
-        assertNotNull(tx.getIsDoubleSpendSeen());
+        assertNotNull(tx.isDoubleSpendSeen());
       }
     }
     assertNull(tx.getLastFailedHeight());
@@ -1512,19 +1512,19 @@ public class TestMoneroDaemonRpc {
     
     // received time only for tx pool or failed txs
     if (tx.getReceivedTimestamp() != null) {
-      assertTrue(tx.getInTxPool() || tx.getIsFailed());
+      assertTrue(tx.getInTxPool() || tx.isFailed());
     }
     
     // test relayed tx
     // this is not strictly correct because a tx can be submitted then relayed
-//    if (tx.getIsRelayed()) assertEquals(false, tx.getDoNotRelay());
+//    if (tx.isRelayed()) assertEquals(false, tx.getDoNotRelay());
 //    if (tx.getDoNotRelay()) {
-//      assertTrue(!tx.getIsRelayed());
-//      assertTrue(!tx.getIsConfirmed());
+//      assertTrue(!tx.isRelayed());
+//      assertTrue(!tx.isConfirmed());
 //    }
     
     // test vins and vouts
-    if (!tx.getIsMinerTx()) assertFalse(tx.getVins().isEmpty());
+    if (!tx.isMinerTx()) assertFalse(tx.getVins().isEmpty());
     for (MoneroOutput vin : tx.getVins()) {
       assertTrue(tx == vin.getTx());
       testVin(vin, ctx);
@@ -1551,18 +1551,18 @@ public class TestMoneroDaemonRpc {
       else assertFalse(tx.getFullHex().isEmpty());
       if (Boolean.TRUE.equals(ctx.fromBinaryBlock)) assertNull(tx.getRctSigPrunable());  // TODO: getBlocksByHeight() has inconsistent client-side pruning
       //else assertNotNull(tx.getRctSigPrunable()); // TODO: define and test this
-      assertFalse(tx.getIsDoubleSpendSeen());
-      if (tx.getIsConfirmed()) {
+      assertFalse(tx.isDoubleSpendSeen());
+      if (tx.isConfirmed()) {
         assertNull(tx.getLastRelayedTimestamp());
         assertNull(tx.getReceivedTimestamp());
       } else {
-        if (tx.getIsRelayed()) assert(tx.getLastRelayedTimestamp() > 0);
+        if (tx.isRelayed()) assert(tx.getLastRelayedTimestamp() > 0);
         else assertNull(tx.getLastRelayedTimestamp());
         assert(tx.getReceivedTimestamp() > 0);
       }
     }
     
-    if (tx.getIsFailed()) {
+    if (tx.isFailed()) {
       // TODO: implement this
     }
     
@@ -1771,7 +1771,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(info.getHeightWithoutBootstrap() > 0);
     assertTrue(info.getNumIncomingConnections() >= 0);
     assertNotNull(info.getNetworkType());
-    assertNotNull(info.getIsOffline());
+    assertNotNull(info.isOffline());
     assertTrue(info.getNumOutgoingConnections() >= 0);
     assertTrue(info.getNumRpcConnections() >= 0);
     assertTrue(info.getStartTimestamp() > 0);
@@ -1819,7 +1819,7 @@ public class TestMoneroDaemonRpc {
 
   private static void testHardForkInfo(MoneroHardForkInfo hardForkInfo) {
     assertNotNull(hardForkInfo.getEarliestHeight());
-    assertNotNull(hardForkInfo.getIsEnabled());
+    assertNotNull(hardForkInfo.isEnabled());
     assertNotNull(hardForkInfo.getState());
     assertNotNull(hardForkInfo.getThreshold());
     assertNotNull(hardForkInfo.getVersion());
@@ -1853,8 +1853,8 @@ public class TestMoneroDaemonRpc {
     assertTrue(connection.getCurrentUpload() >= 0);
     assertTrue(connection.getHeight() >= 0);
     assertTrue(connection.getLiveTime() >= 0);
-    assertNotNull(connection.getIsLocalIp());
-    assertNotNull(connection.getIsLocalHost());
+    assertNotNull(connection.isLocalIp());
+    assertNotNull(connection.isLocalHost());
     assertTrue(connection.getNumReceives() >= 0);
     assertTrue(connection.getReceiveIdleTime() >= 0);
     assertTrue(connection.getNumSends() >= 0);
@@ -1869,7 +1869,7 @@ public class TestMoneroDaemonRpc {
     assertFalse(peer.getHost().isEmpty());
     assertTrue(peer.getPort() > 0);
     assertTrue(peer.getRpcPort() >= 0);
-    assertNotNull(peer.getIsOnline());
+    assertNotNull(peer.isOnline());
     if (fromConnection) assertNull(peer.getLastSeenTimestamp());
     else {
       if (peer.getLastSeenTimestamp() < 0) System.out.println("Last seen timestamp is invalid: " + peer.getLastSeenTimestamp());
@@ -1880,8 +1880,8 @@ public class TestMoneroDaemonRpc {
 
   private static void testUpdateCheckResult(MoneroDaemonUpdateCheckResult result) {
     assertTrue(result instanceof MoneroDaemonUpdateCheckResult);
-    assertNotNull(result.getIsUpdateAvailable());
-    if (result.getIsUpdateAvailable()) {
+    assertNotNull(result.isUpdateAvailable());
+    if (result.isUpdateAvailable()) {
       assertFalse("No auto uri; is daemon online?", result.getAutoUri().isEmpty());
       assertFalse(result.getUserUri().isEmpty());
       assertFalse(result.getVersion().isEmpty());
@@ -1897,7 +1897,7 @@ public class TestMoneroDaemonRpc {
 
   private static void testUpdateDownloadResult(MoneroDaemonUpdateDownloadResult result, String path) {
     testUpdateCheckResult(result);
-    if (result.getIsUpdateAvailable()) {
+    if (result.isUpdateAvailable()) {
       if (path != null) assertEquals(path, result.getDownloadPath());
       else assertNotNull(result.getDownloadPath());
     } else {
@@ -1908,15 +1908,15 @@ public class TestMoneroDaemonRpc {
   private static void testSubmitTxResultGood(MoneroSubmitTxResult result) {
     testSubmitTxResultCommon(result);
     try {
-      assertEquals(true, result.getIsGood());
-      assertEquals(false, result.getIsDoubleSpend());
-      assertEquals(false, result.getIsFeeTooLow());
-      assertEquals(false, result.getIsMixinTooLow());
+      assertEquals(true, result.isGood());
+      assertEquals(false, result.isDoubleSpend());
+      assertEquals(false, result.isFeeTooLow());
+      assertEquals(false, result.isMixinTooLow());
       assertEquals(false, result.getHasInvalidInput());
       assertEquals(false, result.getHasInvalidOutput());
-      assertEquals(true, result.getIsRct());
-      assertEquals(false, result.getIsOverspend());
-      assertEquals(false, result.getIsTooBig());
+      assertEquals(true, result.isRct());
+      assertEquals(false, result.isOverspend());
+      assertEquals(false, result.isTooBig());
       assertEquals(false, result.getSanityCheckFailed());
     } catch (Exception e) {
       System.out.println("Submit result is not good: " + JsonUtils.serialize(result));
@@ -1926,28 +1926,28 @@ public class TestMoneroDaemonRpc {
   
   private static void testSubmitTxResultDoubleSpend(MoneroSubmitTxResult result) {
     testSubmitTxResultCommon(result);
-    assertEquals(false, result.getIsGood());
-    assertEquals(true, result.getIsDoubleSpend());
-    assertEquals(false, result.getIsFeeTooLow());
-    assertEquals(false, result.getIsMixinTooLow());
+    assertEquals(false, result.isGood());
+    assertEquals(true, result.isDoubleSpend());
+    assertEquals(false, result.isFeeTooLow());
+    assertEquals(false, result.isMixinTooLow());
     assertEquals(false, result.getHasInvalidInput());
     assertEquals(false, result.getHasInvalidOutput());
-    assertEquals(true, result.getIsRct());
-    assertEquals(false, result.getIsOverspend());
-    assertEquals(false, result.getIsTooBig());
+    assertEquals(true, result.isRct());
+    assertEquals(false, result.isOverspend());
+    assertEquals(false, result.isTooBig());
   }
 
   private static void testSubmitTxResultCommon(MoneroSubmitTxResult result) {
-    assertNotNull(result.getIsGood());
-    assertNotNull(result.getIsRelayed());
-    assertNotNull(result.getIsDoubleSpend());
-    assertNotNull(result.getIsFeeTooLow());
-    assertNotNull(result.getIsMixinTooLow());
+    assertNotNull(result.isGood());
+    assertNotNull(result.isRelayed());
+    assertNotNull(result.isDoubleSpend());
+    assertNotNull(result.isFeeTooLow());
+    assertNotNull(result.isMixinTooLow());
     assertNotNull(result.getHasInvalidInput());
     assertNotNull(result.getHasInvalidOutput());
-    assertNotNull(result.getIsRct());
-    assertNotNull(result.getIsOverspend());
-    assertNotNull(result.getIsTooBig());
+    assertNotNull(result.isRct());
+    assertNotNull(result.isOverspend());
+    assertNotNull(result.isTooBig());
     assertNotNull(result.getSanityCheckFailed());
     assertTrue(result.getReason() == null || !result.getReason().isEmpty());
   }

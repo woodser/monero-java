@@ -38,7 +38,7 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
     return new MoneroOutgoingTransfer(this);
   }
   
-  public Boolean getIsIncoming() {
+  public Boolean isIncoming() {
     return false;
   }
   

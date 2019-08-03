@@ -40,11 +40,11 @@ public abstract class MoneroTransfer {
     return this;
   }
   
-  public Boolean getIsOutgoing() {
-    return !getIsIncoming();
+  public Boolean isOutgoing() {
+    return !isIncoming();
   }
   
-  public abstract Boolean getIsIncoming();
+  public abstract Boolean isIncoming();
   
   public BigInteger getAmount() {
     return amount;
