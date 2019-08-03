@@ -49,6 +49,7 @@ import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxPoolStats;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroException;
+import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.request.MoneroSendRequest;
 import utils.TestUtils;
@@ -1113,8 +1114,8 @@ public class TestMoneroDaemonRpc {
     // stop the daemon
     daemon.stop();
     
-    // give the daemon 10 seconds to shut down
-    TimeUnit.SECONDS.sleep(10);
+    // give the daemon time to shut down
+    TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL);
     
     // try to interact with the daemon
     try {
