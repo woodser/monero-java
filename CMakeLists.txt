@@ -70,8 +70,8 @@ set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION
 
 set(
     MONERO_JNI_SRC_FILES
-    src/main/cpp/MoneroWalletJniBridge.cpp
-    src/main/cpp/MoneroUtilsJni.cpp
+    src/main/cpp/monero_wallet_jni_bridge.cpp
+    src/main/cpp/monero_wallet_jni_bridge.cpp
 )
 add_library(monero-java SHARED ${MONERO_JNI_SRC_FILES})
 
