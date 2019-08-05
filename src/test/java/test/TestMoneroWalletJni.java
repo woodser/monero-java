@@ -1081,13 +1081,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     @Override
     public void onOutputReceived(MoneroOutputWallet output) {
-      System.out.println("OUTPUT RECEIVED!!!");
       outputsReceived.add(output);
     }
     
     @Override
     public void onOutputSpent(MoneroOutputWallet output) {
-      System.out.println("OUTPUT RECEIVED!!!");
       outputsSpent.add(output);
     }
     
