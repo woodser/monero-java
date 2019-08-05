@@ -240,13 +240,13 @@ struct wallet_jni_listener : public monero_wallet_listener {
     if (envStat == JNI_ERR) return;
 
     // prepare parameters to invoke Java listener
-    boost::optional<uint64_t> height = output.tx->get_height();
-    jstring jtx_id = env->NewStringUTF(output.tx->id.get().c_str());
-    jstring jamount_str = env->NewStringUTF(to_string(*output.amount).c_str());
+    boost::optional<uint64_t> height = output.m_tx->get_height();
+    jstring jtx_id = env->NewStringUTF(output.m_tx->m_id.get().c_str());
+    jstring jamount_str = env->NewStringUTF(to_string(*output.m_amount).c_str());
 
     // invoke Java listener's onOutputReceived()
     jmethodID listenerClass_onOutputReceived = env->GetMethodID(class_WalletListener, "onOutputReceived", "(JLjava/lang/String;Ljava/lang/String;IIII)V");
-    env->CallVoidMethod(jlistener, listenerClass_onOutputReceived, height == boost::none ? 0 : *height, jtx_id, jamount_str, *output.account_index, *output.subaddress_index, *output.tx->version, *output.tx->unlock_time);
+    env->CallVoidMethod(jlistener, listenerClass_onOutputReceived, height == boost::none ? 0 : *height, jtx_id, jamount_str, *output.m_account_index, *output.m_subaddress_index, *output.m_tx->m_version, *output.m_tx->m_unlock_time);
 
     // check for and rethrow Java exception
     jthrowable jexception = env->ExceptionOccurred();
@@ -263,13 +263,13 @@ struct wallet_jni_listener : public monero_wallet_listener {
     if (envStat == JNI_ERR) return;
 
     // prepare parameters to invoke Java listener
-    boost::optional<uint64_t> height = output.tx->get_height();
-    jstring jtx_id = env->NewStringUTF(output.tx->id.get().c_str());
-    jstring jamount_str = env->NewStringUTF(to_string(*output.amount).c_str());
+    boost::optional<uint64_t> height = output.m_tx->get_height();
+    jstring jtx_id = env->NewStringUTF(output.m_tx->m_id.get().c_str());
+    jstring jamount_str = env->NewStringUTF(to_string(*output.m_amount).c_str());
 
     // invoke Java listener's onOutputSpent()
     jmethodID listenerClass_onOutputSpent = env->GetMethodID(class_WalletListener, "onOutputSpent", "(JLjava/lang/String;Ljava/lang/String;III)V");
-    env->CallVoidMethod(jlistener, listenerClass_onOutputSpent, height == boost::none ? 0 : *height, jtx_id, jamount_str, *output.account_index, output.subaddress_index, *output.tx->version);
+    env->CallVoidMethod(jlistener, listenerClass_onOutputSpent, height == boost::none ? 0 : *height, jtx_id, jamount_str, *output.m_account_index, output.m_subaddress_index, *output.m_tx->m_version);
 
     // check for and rethrow Java exception
     jthrowable jexception = env->ExceptionOccurred();
@@ -423,9 +423,9 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonConne
 
     // return string[uri, username, password]
     jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
-    if (!daemon_connection->uri.empty()) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(daemon_connection->uri.c_str()));
-    if (daemon_connection->username != boost::none && !daemon_connection->username.get().empty()) env->SetObjectArrayElement(vals, 1, env->NewStringUTF(daemon_connection->username.get().c_str()));
-    if (daemon_connection->password != boost::none && !daemon_connection->password.get().empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(daemon_connection->password.get().c_str()));
+    if (!daemon_connection->m_uri.empty()) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(daemon_connection->m_uri.c_str()));
+    if (daemon_connection->m_username != boost::none && !daemon_connection->m_username.get().empty()) env->SetObjectArrayElement(vals, 1, env->NewStringUTF(daemon_connection->m_username.get().c_str()));
+    if (daemon_connection->m_password != boost::none && !daemon_connection->m_password.get().empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(daemon_connection->m_password.get().c_str()));
     return vals;
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -665,11 +665,11 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv
     jobjectArray results = env->NewObjectArray(2, env->FindClass("java/lang/Object"), nullptr);
     jclass longClass = env->FindClass("java/lang/Long");
     jmethodID longConstructor = env->GetMethodID(longClass, "<init>", "(J)V");
-    jobject numBlocksFetchedWrapped = env->NewObject(longClass, longConstructor, static_cast<jlong>(result.num_blocks_fetched));
+    jobject numBlocksFetchedWrapped = env->NewObject(longClass, longConstructor, static_cast<jlong>(result.m_num_blocks_fetched));
     env->SetObjectArrayElement(results, 0, numBlocksFetchedWrapped);
     jclass booleanClass = env->FindClass("java/lang/Boolean");
     jmethodID booleanConstructor = env->GetMethodID(booleanClass, "<init>", "(Z)V");
-    jobject receivedMoneyWrapped = env->NewObject(booleanClass, booleanConstructor, static_cast<jboolean>(result.received_money));
+    jobject receivedMoneyWrapped = env->NewObject(booleanClass, booleanConstructor, static_cast<jboolean>(result.m_received_money));
     env->SetObjectArrayElement(results, 1, receivedMoneyWrapped);
     return results;
   } catch (...) {
@@ -893,15 +893,15 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
     vector<shared_ptr<monero_block>> blocks;
     unordered_set<shared_ptr<monero_block>> seen_block_ptrs;
     for (const shared_ptr<monero_tx_wallet>& tx : txs) {
-      if (tx->block == boost::none) {
+      if (tx->m_block == boost::none) {
         if (unconfirmed_block == nullptr) unconfirmed_block = shared_ptr<monero_block>(new monero_block());
-        tx->block = unconfirmed_block;
-        unconfirmed_block->txs.push_back(tx);
+        tx->m_block = unconfirmed_block;
+        unconfirmed_block->m_txs.push_back(tx);
       }
-      unordered_set<shared_ptr<monero_block>>::const_iterator got = seen_block_ptrs.find(tx->block.get());
+      unordered_set<shared_ptr<monero_block>>::const_iterator got = seen_block_ptrs.find(tx->m_block.get());
       if (got == seen_block_ptrs.end()) {
-        seen_block_ptrs.insert(tx->block.get());
-        blocks.push_back(tx->block.get());
+        seen_block_ptrs.insert(tx->m_block.get());
+        blocks.push_back(tx->m_block.get());
       }
     }
     MTRACE("Returning " << blocks.size() << " blocks");
@@ -940,16 +940,16 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
     vector<shared_ptr<monero_block>> blocks;
     unordered_set<shared_ptr<monero_block>> seen_block_ptrs;
     for (auto const& transfer : transfers) {
-      shared_ptr<monero_tx_wallet> tx = transfer->tx;
-      if (tx->block == boost::none) {
+      shared_ptr<monero_tx_wallet> tx = transfer->m_tx;
+      if (tx->m_block == boost::none) {
         if (unconfirmed_block == nullptr) unconfirmed_block = shared_ptr<monero_block>(new monero_block());
-        tx->block = unconfirmed_block;
-        unconfirmed_block->txs.push_back(tx);
+        tx->m_block = unconfirmed_block;
+        unconfirmed_block->m_txs.push_back(tx);
       }
-      unordered_set<shared_ptr<monero_block>>::const_iterator got = seen_block_ptrs.find(tx->block.get());
+      unordered_set<shared_ptr<monero_block>>::const_iterator got = seen_block_ptrs.find(tx->m_block.get());
       if (got == seen_block_ptrs.end()) {
-        seen_block_ptrs.insert(tx->block.get());
-        blocks.push_back(tx->block.get());
+        seen_block_ptrs.insert(tx->m_block.get());
+        blocks.push_back(tx->m_block.get());
       }
     }
 
@@ -986,12 +986,12 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
     vector<monero_block> blocks;
     unordered_set<shared_ptr<monero_block>> seen_block_ptrs;
     for (auto const& output : outputs) {
-      shared_ptr<monero_tx_wallet> tx = static_pointer_cast<monero_tx_wallet>(output->tx);
-      if (tx->block == boost::none) throw runtime_error("Need to handle unconfirmed output");
-      unordered_set<shared_ptr<monero_block>>::const_iterator got = seen_block_ptrs.find(*tx->block);
+      shared_ptr<monero_tx_wallet> tx = static_pointer_cast<monero_tx_wallet>(output->m_tx);
+      if (tx->m_block == boost::none) throw runtime_error("Need to handle unconfirmed output");
+      unordered_set<shared_ptr<monero_block>>::const_iterator got = seen_block_ptrs.find(*tx->m_block);
       if (got == seen_block_ptrs.end()) {
-        seen_block_ptrs.insert(*tx->block);
-        blocks.push_back(**tx->block);
+        seen_block_ptrs.insert(*tx->m_block);
+        blocks.push_back(**tx->m_block);
       }
     }
     MTRACE("Returning " << blocks.size() << " blocks");
@@ -1099,15 +1099,15 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv
   vector<monero_block> blocks;
   unordered_set<shared_ptr<monero_block>> seen_block_ptrs;
   for (auto const& tx : txs) {
-    if (tx->block == boost::none) {
+    if (tx->m_block == boost::none) {
       if (unconfirmed_block == nullptr) unconfirmed_block = shared_ptr<monero_block>(new monero_block());
-      tx->block = unconfirmed_block;
-      unconfirmed_block->txs.push_back(tx);
+      tx->m_block = unconfirmed_block;
+      unconfirmed_block->m_txs.push_back(tx);
     }
-    unordered_set<shared_ptr<monero_block>>::const_iterator got = seen_block_ptrs.find(*tx->block);
+    unordered_set<shared_ptr<monero_block>>::const_iterator got = seen_block_ptrs.find(*tx->m_block);
     if (got == seen_block_ptrs.end()) {
-      seen_block_ptrs.insert(*tx->block);
-      blocks.push_back(**tx->block);
+      seen_block_ptrs.insert(*tx->m_block);
+      blocks.push_back(**tx->m_block);
     }
   }
   MTRACE("Returning " << blocks.size() << " blocks");
@@ -1145,7 +1145,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepOutputJni(JNIE
 
   // wrap and serialize blocks to preserve model relationships as tree
   monero_block block;
-  block.txs.push_back(tx);
+  block.m_txs.push_back(tx);
   vector<monero_block> blocks;
   blocks.push_back(block);
   std::stringstream ss;
@@ -1173,7 +1173,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepDustJni(JNIEnv
   vector<monero_block> blocks;
   if (!txs.empty()) {
     monero_block block;
-    for (const auto& tx : txs) block.txs.push_back(tx);
+    for (const auto& tx : txs) block.m_txs.push_back(tx);
     blocks.push_back(block);
   }
   std::stringstream ss;
