@@ -1,8 +1,4 @@
 14.1.0+ RELEASE
-c++ underscores instead of camelcase
-is() instead of getIs()
-has() instead of getHas()
-in() instead of getIn()
 MoneroTxRequest -> MoneroTxQuery
 rename *withConfiguration() tests to *Request or *Query
 ./submodules -> ./external for monero-cpp-library and monero-core?
