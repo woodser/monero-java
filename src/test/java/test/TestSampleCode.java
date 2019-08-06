@@ -17,12 +17,12 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroSendPriority;
+import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTransfer;
+import monero.wallet.model.MoneroTransferQuery;
+import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxWallet;
-import monero.wallet.request.MoneroSendRequest;
-import monero.wallet.request.MoneroTransferRequest;
-import monero.wallet.request.MoneroTxRequest;
 import utils.TestUtils;
 
 /**
@@ -58,7 +58,7 @@ public class TestSampleCode {
     }
     
     // get incoming transfers to account 0
-    transfers = wallet.getTransfers(new MoneroTransferRequest().setAccountIndex(0).setIsIncoming(true));
+    transfers = wallet.getTransfers(new MoneroTransferQuery().setAccountIndex(0).setIsIncoming(true));
     for (MoneroTransfer transfer : transfers) {
       assertTrue(transfer.isIncoming());
       assertEquals(0, (int) transfer.getAccountIndex());
@@ -80,7 +80,7 @@ public class TestSampleCode {
                     new MoneroDestination("78NWrWGgyZeYgckJhuxmtDMqo8Kzq5r9j1kV8BQXGq5CDnECz2KjQeBDc3KKvdMQmR6TWtfbRaedgbSGmmwr1g8N1rBMdvW", new BigInteger("50000"))));
     
     // get all confirmed wallet transactions
-    for (MoneroTxWallet tx : wallet.getTxs(new MoneroTxRequest().setIsConfirmed(true))) {
+    for (MoneroTxWallet tx : wallet.getTxs(new MoneroTxQuery().setIsConfirmed(true))) {
       String txId = tx.getId();                   // e.g. f8b2f0baa80bf6b...
       BigInteger txFee = tx.getFee();             // e.g. 750000
       boolean isConfirmed = tx.isConfirmed();  // e.g. true

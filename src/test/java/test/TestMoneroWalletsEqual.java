@@ -21,13 +21,13 @@ import monero.wallet.MoneroWalletRpc.IncomingTransferComparator;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroOutgoingTransfer;
+import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTransfer;
+import monero.wallet.model.MoneroTransferQuery;
+import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxWallet;
-import monero.wallet.request.MoneroOutputRequest;
-import monero.wallet.request.MoneroTransferRequest;
-import monero.wallet.request.MoneroTxRequest;
 import utils.TestUtils;
 
 /**
@@ -85,17 +85,17 @@ public class TestMoneroWalletsEqual {
     assertEquals(w1.getPrimaryAddress(), w2.getPrimaryAddress());
     assertEquals(w1.getPrivateViewKey(), w2.getPrivateViewKey());
     assertEquals(w1.getPrivateSpendKey(), w2.getPrivateSpendKey());
-    MoneroTxRequest txRequest = new MoneroTxRequest().setIsConfirmed(true);
-    testTxWalletsEqualOnChain(w1.getTxs(txRequest), w2.getTxs(txRequest));
-    txRequest.setIncludeOutputs(true);
-    testTxWalletsEqualOnChain(w1.getTxs(txRequest), w2.getTxs(txRequest));  // fetch and compare outputs
+    MoneroTxQuery txQuery = new MoneroTxQuery().setIsConfirmed(true);
+    testTxWalletsEqualOnChain(w1.getTxs(txQuery), w2.getTxs(txQuery));
+    txQuery.setIncludeOutputs(true);
+    testTxWalletsEqualOnChain(w1.getTxs(txQuery), w2.getTxs(txQuery));  // fetch and compare outputs
     testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
     assertEquals(w1.getBalance(), w2.getBalance());
     assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
-    MoneroTransferRequest transferRequest = new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setIsConfirmed(true));
-    testTransfersEqualOnChain(w1.getTransfers(transferRequest), w2.getTransfers(transferRequest));
-    MoneroOutputRequest outputRequest = new MoneroOutputRequest().setTxRequest(new MoneroTxRequest().setIsConfirmed(true));
-    testOutputWalletsEqualOnChain(w1.getOutputs(outputRequest), w2.getOutputs(outputRequest));
+    MoneroTransferQuery transferQuery = new MoneroTransferQuery().setTxQuery(new MoneroTxQuery().setIsConfirmed(true));
+    testTransfersEqualOnChain(w1.getTransfers(transferQuery), w2.getTransfers(transferQuery));
+    MoneroOutputQuery outputQuery = new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setIsConfirmed(true));
+    testOutputWalletsEqualOnChain(w1.getOutputs(outputQuery), w2.getOutputs(outputQuery));
   }
   
   protected void testAccountsEqualOnChain(List<MoneroAccount> accounts1, List<MoneroAccount> accounts2) {

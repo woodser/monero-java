@@ -25,14 +25,14 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroDestination;
+import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
+import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletListener;
 import monero.wallet.model.MoneroWalletListenerI;
-import monero.wallet.request.MoneroOutputRequest;
-import monero.wallet.request.MoneroSendRequest;
 import utils.StartMining;
 import utils.TestUtils;
 
@@ -1022,9 +1022,9 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   private static boolean hasOutput(List<MoneroOutputWallet> outputs, int accountIdx, int subaddressIdx, BigInteger amount) { // TODO: use comon filter?
-    MoneroOutputRequest req = new MoneroOutputRequest().setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx).setAmount(amount);
+    MoneroOutputQuery query = new MoneroOutputQuery().setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx).setAmount(amount);
     for (MoneroOutputWallet output : outputs) {
-      if (req.meetsCriteria(output)) return true;
+      if (query.meetsCriteria(output)) return true;
     }
     return false;
   }

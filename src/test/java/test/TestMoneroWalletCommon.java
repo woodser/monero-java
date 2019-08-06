@@ -46,15 +46,15 @@ import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroOutgoingTransfer;
+import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
+import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
+import monero.wallet.model.MoneroTransferQuery;
+import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxWallet;
-import monero.wallet.request.MoneroOutputRequest;
-import monero.wallet.request.MoneroSendRequest;
-import monero.wallet.request.MoneroTransferRequest;
-import monero.wallet.request.MoneroTxRequest;
 import utils.TestUtils;
 
 /**
@@ -573,21 +573,21 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     List<String> txIds = new ArrayList<String>();
     for (MoneroTxWallet randomTx : randomTxs) {
       txIds.add(randomTx.getId());
-      List<MoneroTxWallet> txs = getAndTestTxs(wallet, new MoneroTxRequest().setTxId(randomTx.getId()), null, true);
+      List<MoneroTxWallet> txs = getAndTestTxs(wallet, new MoneroTxQuery().setTxId(randomTx.getId()), null, true);
       assertEquals(txs.size(), 1);
       MoneroTxWallet merged = txs.get(0).merge(randomTx.copy()); // txs change with chain so check mergeability
       testTxWallet(merged, null);
     }
     
     // get transactions by ids
-    List<MoneroTxWallet> txs = getAndTestTxs(wallet, new MoneroTxRequest().setTxIds(txIds), null, null);
+    List<MoneroTxWallet> txs = getAndTestTxs(wallet, new MoneroTxQuery().setTxIds(txIds), null, null);
     assertEquals(txs.size(), randomTxs.size());
     for (MoneroTxWallet tx : txs) assertTrue(txIds.contains(tx.getId()));
     
     // get transactions with an outgoing transfer
     TestContext ctx = new TestContext();
     ctx.hasOutgoingTransfer = true;
-    txs = getAndTestTxs(wallet, new MoneroTxRequest().setIsOutgoing(true), ctx, true);
+    txs = getAndTestTxs(wallet, new MoneroTxQuery().setIsOutgoing(true), ctx, true);
     for (MoneroTxWallet tx : txs) {
       assertTrue(tx.isOutgoing());
       assertNotNull(tx.getOutgoingTransfer());
@@ -596,13 +596,13 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // get transactions without an outgoing transfer
     ctx.hasOutgoingTransfer = false;
-    txs = getAndTestTxs(wallet, new MoneroTxRequest().setIsOutgoing(false), ctx, true);
+    txs = getAndTestTxs(wallet, new MoneroTxQuery().setIsOutgoing(false), ctx, true);
     for (MoneroTxWallet tx : txs) assertNull(tx.getOutgoingTransfer());
     
     // get transactions with incoming transfers
     ctx = new TestContext();
     ctx.hasIncomingTransfers = true;
-    txs = getAndTestTxs(wallet, new MoneroTxRequest().setIsIncoming(true), ctx, true);
+    txs = getAndTestTxs(wallet, new MoneroTxQuery().setIsIncoming(true), ctx, true);
     for (MoneroTxWallet tx : txs) {
       assertTrue(tx.isIncoming());
       assertTrue(tx.getIncomingTransfers().size() > 0);
@@ -613,7 +613,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // get transactions without incoming transfers
     ctx.hasIncomingTransfers = false;
-    txs = getAndTestTxs(wallet, new MoneroTxRequest().setIsIncoming(false), ctx, true);
+    txs = getAndTestTxs(wallet, new MoneroTxQuery().setIsIncoming(false), ctx, true);
     for (MoneroTxWallet tx : txs)  {
       assertFalse(tx.isIncoming());
       assertNull(tx.getIncomingTransfers());
@@ -621,7 +621,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // get transactions associated with an account
     int accountIdx = 1;
-    txs = wallet.getTxs(new MoneroTxRequest().setTransferRequest(new MoneroTransferRequest().setAccountIndex(accountIdx)));
+    txs = wallet.getTxs(new MoneroTxQuery().setTransferQuery(new MoneroTransferQuery().setAccountIndex(accountIdx)));
     for (MoneroTxWallet tx : txs) {
       boolean found = false;
       if (tx.isOutgoing() && tx.getOutgoingTransfer().getAccountIndex() == accountIdx) found = true;
@@ -637,7 +637,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // get transactions with incoming transfers to an account
-    txs = wallet.getTxs(new MoneroTxRequest().setTransferRequest(new MoneroTransferRequest().setIsIncoming(true).setAccountIndex(accountIdx)));
+    txs = wallet.getTxs(new MoneroTxQuery().setTransferQuery(new MoneroTransferQuery().setIsIncoming(true).setAccountIndex(accountIdx)));
     for (MoneroTxWallet tx : txs) {
       assertTrue(tx.getIncomingTransfers().size() > 0);
       boolean found = false;
@@ -650,13 +650,13 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertTrue("No incoming transfers to account " + accountIdx + " found:\n" + tx.toString(), found);
     }
     
-    // get txs with manually built request that are confirmed and have an outgoing transfer from account 0
+    // get txs with manually built query that are confirmed and have an outgoing transfer from account 0
     ctx = new TestContext();
     ctx.hasOutgoingTransfer = true;
-    MoneroTxRequest txRequest = new MoneroTxRequest();
-    txRequest.setIsConfirmed(true);
-    txRequest.setTransferRequest(new MoneroTransferRequest().setAccountIndex(0).setIsOutgoing(true));
-    txs = getAndTestTxs(wallet, txRequest, ctx, true);
+    MoneroTxQuery txQuery = new MoneroTxQuery();
+    txQuery.setIsConfirmed(true);
+    txQuery.setTransferQuery(new MoneroTransferQuery().setAccountIndex(0).setIsOutgoing(true));
+    txs = getAndTestTxs(wallet, txQuery, ctx, true);
     for (MoneroTxWallet tx : txs) {
       if (!tx.isConfirmed()) System.out.println(tx);
       assertEquals(true, tx.isConfirmed());
@@ -665,7 +665,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // get txs with outgoing transfers that have destinations to account 1
-    txs = getAndTestTxs(wallet, new MoneroTxRequest().setTransferRequest(new MoneroTransferRequest().setHasDestinations(true).setAccountIndex(0)), null, null);
+    txs = getAndTestTxs(wallet, new MoneroTxQuery().setTransferQuery(new MoneroTransferQuery().setHasDestinations(true).setAccountIndex(0)), null, null);
     for (MoneroTxWallet tx : txs) {
       assertTrue(tx.isOutgoing());
       assertTrue(tx.getOutgoingTransfer().getDestinations().size() > 0);
@@ -674,7 +674,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // include outputs with transactions
     ctx = new TestContext();
     ctx.includeOutputs = true;
-    txs = getAndTestTxs(wallet, new MoneroTxRequest().setIncludeOutputs(true), ctx, true);
+    txs = getAndTestTxs(wallet, new MoneroTxQuery().setIncludeOutputs(true), ctx, true);
     boolean found = false;
     for (MoneroTxWallet tx : txs) {
       if (tx.getVouts() != null) {
@@ -693,7 +693,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get all confirmed txs for testing
-    List<MoneroTxWallet> txs = wallet.getTxs(new MoneroTxRequest().setIsConfirmed(true));
+    List<MoneroTxWallet> txs = wallet.getTxs(new MoneroTxQuery().setIsConfirmed(true));
     
     // collect all tx heights
     List<Long> txHeights = new ArrayList<Long>();
@@ -706,23 +706,23 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     Long modeHeight = heightModes.iterator().next();
     
     // fetch txs at mode height
-    List<MoneroTxWallet> modeTxs = wallet.getTxs(new MoneroTxRequest().setHeight(modeHeight));
+    List<MoneroTxWallet> modeTxs = wallet.getTxs(new MoneroTxQuery().setHeight(modeHeight));
     assertEquals((int) heightCounts.get(modeHeight), (int) modeTxs.size());
     for (MoneroTxWallet tx : modeTxs) {
       assertEquals(modeHeight, tx.getHeight());
     }
     
     // fetch txs at mode height by range
-    List<MoneroTxWallet> modeTxsByRange = wallet.getTxs(new MoneroTxRequest().setMinHeight(modeHeight).setMaxHeight(modeHeight));
+    List<MoneroTxWallet> modeTxsByRange = wallet.getTxs(new MoneroTxQuery().setMinHeight(modeHeight).setMaxHeight(modeHeight));
     assertEquals(modeTxs.size(), modeTxsByRange.size());
     assertEquals(modeTxs, modeTxsByRange);
     
     // fetch all txs by range
-    assertEquals(txs, wallet.getTxs(new MoneroTxRequest().setMinHeight(txs.get(0).getHeight()).setMaxHeight(txs.get(txs.size() - 1).getHeight())));
+    assertEquals(txs, wallet.getTxs(new MoneroTxQuery().setMinHeight(txs.get(0).getHeight()).setMaxHeight(txs.get(txs.size() - 1).getHeight())));
     
     // test some filtered by range
     {
-      txs = wallet.getTxs(new MoneroTxRequest().setIsConfirmed(true));
+      txs = wallet.getTxs(new MoneroTxQuery().setIsConfirmed(true));
       assertTrue("No transactions; run send to multiple test", txs.size() > 0);
         
       // get and sort block heights in ascending order
@@ -745,7 +745,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       
       // assert some transactions filtered
       int unfilteredCount = txs.size();
-      txs = getAndTestTxs(wallet, new MoneroTxRequest().setMinHeight(minHeight).setMaxHeight(maxHeight), null, true);
+      txs = getAndTestTxs(wallet, new MoneroTxQuery().setMinHeight(minHeight).setMaxHeight(maxHeight), null, true);
       assertTrue(txs.size() < unfilteredCount);
       for (MoneroTx tx : txs) {
         long height = tx.getBlock().getHeight();
@@ -760,7 +760,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // get random transactions with payment ids for testing
-    List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, new MoneroTxRequest().setHasPaymentId(true), 3, 5);
+    List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, new MoneroTxQuery().setHasPaymentId(true), 3, 5);
     for (MoneroTxWallet randomTx : randomTxs) {
       assertNotNull(randomTx.getPaymentId());
     }
@@ -770,14 +770,14 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     for (MoneroTxWallet tx : randomTxs) paymentIds.add(tx.getPaymentId());
     assertTrue(paymentIds.size() > 1);
     for (String paymentId : paymentIds) {
-      List<MoneroTxWallet> txs = getAndTestTxs(wallet, new MoneroTxRequest().setPaymentId(paymentId), null, null);
+      List<MoneroTxWallet> txs = getAndTestTxs(wallet, new MoneroTxQuery().setPaymentId(paymentId), null, null);
       assertEquals(1, txs.size());
       assertNotNull(txs.get(0).getPaymentId());
       MoneroUtils.validatePaymentId(txs.get(0).getPaymentId());
     }
     
     // get transactions by payment ids
-    List<MoneroTxWallet> txs = getAndTestTxs(wallet, new MoneroTxRequest().setPaymentIds(paymentIds), null, null);
+    List<MoneroTxWallet> txs = getAndTestTxs(wallet, new MoneroTxQuery().setPaymentIds(paymentIds), null, null);
     for (MoneroTxWallet tx : txs) {
       assertTrue(paymentIds.contains(tx.getPaymentId()));
     }
@@ -789,7 +789,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch wallet txs
-    List<MoneroTxWallet> txs = wallet.getTxs(new MoneroTxRequest().setIsConfirmed(true));
+    List<MoneroTxWallet> txs = wallet.getTxs(new MoneroTxQuery().setIsConfirmed(true));
     for (MoneroTxWallet tx : txs) {
       
       // find tx sent to same wallet with incoming transfer in different account than src account
@@ -798,8 +798,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         if (transfer.getAccountIndex() == tx.getOutgoingTransfer().getAccountIndex()) continue;
         
         // fetch tx with filtering
-        List<MoneroTxWallet> filteredTxs = wallet.getTxs(new MoneroTxRequest().setTransferRequest(new MoneroTransferRequest().setIsIncoming(true).setAccountIndex(transfer.getAccountIndex())));
-        MoneroTxWallet filteredTx = Filter.apply(new MoneroTxRequest().setTxIds(tx.getId()), filteredTxs).get(0);
+        List<MoneroTxWallet> filteredTxs = wallet.getTxs(new MoneroTxQuery().setTransferQuery(new MoneroTransferQuery().setIsIncoming(true).setAccountIndex(transfer.getAccountIndex())));
+        MoneroTxWallet filteredTx = Filter.apply(new MoneroTxQuery().setTxIds(tx.getId()), filteredTxs).get(0);
         
         // txs should be the same (mergeable)
         assertEquals(tx.getId(), filteredTx.getId());
@@ -836,9 +836,9 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertEquals("Tx not found in wallet: " + unknownId1, e.getDescription());
     }
     
-    // fetch unknown tx id using request
+    // fetch unknown tx id using query
     try {
-      wallet.getTxs(new MoneroTxRequest().setTxId(unknownId1));
+      wallet.getTxs(new MoneroTxQuery().setTxId(unknownId1));
       throw new Error("Should have thrown error getting tx id unknown to wallet");
     } catch (MoneroException e) {
       assertEquals("Tx not found in wallet: " + unknownId1, e.getDescription());
@@ -896,13 +896,13 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // get transfers by account index
     boolean nonDefaultIncoming = false;
     for (MoneroAccount account : wallet.getAccounts(true)) {
-      List<MoneroTransfer> accountTransfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setAccountIndex(account.getIndex()), null, null);
+      List<MoneroTransfer> accountTransfers = getAndTestTransfers(wallet, new MoneroTransferQuery().setAccountIndex(account.getIndex()), null, null);
       for (MoneroTransfer transfer : accountTransfers) assertEquals(transfer.getAccountIndex(), account.getIndex());
       
       // get transfers by subaddress index
       List<MoneroTransfer> subaddressTransfers = new ArrayList<MoneroTransfer>();
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
-        List<MoneroTransfer> transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setAccountIndex(subaddress.getAccountIndex()).setSubaddressIndex(subaddress.getIndex()), null, null);
+        List<MoneroTransfer> transfers = getAndTestTransfers(wallet, new MoneroTransferQuery().setAccountIndex(subaddress.getAccountIndex()).setSubaddressIndex(subaddress.getIndex()), null, null);
         for (MoneroTransfer transfer : transfers) {
           
           // test account and subaddress indices
@@ -945,7 +945,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       }
       
       // get and test transfers by subaddress indices
-      List<MoneroTransfer> transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setAccountIndex(account.getIndex()).setSubaddressIndices(new ArrayList<Integer>(subaddressIndices)), null, null);
+      List<MoneroTransfer> transfers = getAndTestTransfers(wallet, new MoneroTransferQuery().setAccountIndex(account.getIndex()).setSubaddressIndices(new ArrayList<Integer>(subaddressIndices)), null, null);
       //if (transfers.size() != subaddressTransfers.size()) System.out.println("WARNING: outgoing transfers always from subaddress 0 (monero-wallet-rpc #5171)");
       assertEquals(subaddressTransfers.size(), transfers.size()); // TODO monero-wallet-rpc: these may not be equal because outgoing transfers are always from subaddress 0 (#5171) and/or incoming transfers from/to same account are occluded (#4500)
       for (MoneroTransfer transfer : transfers) {
@@ -969,22 +969,22 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get incoming transfers
-    List<MoneroTransfer> transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setIsIncoming(true), null, true);
+    List<MoneroTransfer> transfers = getAndTestTransfers(wallet, new MoneroTransferQuery().setIsIncoming(true), null, true);
     for (MoneroTransfer transfer : transfers) assertTrue(transfer.isIncoming());
     
     // get outgoing transfers
-    transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setIsOutgoing(true), null, true);
+    transfers = getAndTestTransfers(wallet, new MoneroTransferQuery().setIsOutgoing(true), null, true);
     for (MoneroTransfer transfer : transfers) assertTrue(transfer.isOutgoing());
     
     // get confirmed transfers to account 0
-    transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setAccountIndex(0).setTxRequest(new MoneroTxRequest().setIsConfirmed(true)), null, true);
+    transfers = getAndTestTransfers(wallet, new MoneroTransferQuery().setAccountIndex(0).setTxQuery(new MoneroTxQuery().setIsConfirmed(true)), null, true);
     for (MoneroTransfer transfer : transfers) {
       assertEquals(0, (int) transfer.getAccountIndex());
       assertTrue(transfer.getTx().isConfirmed());
     }
     
     // get confirmed transfers to [1, 2]
-    transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setAccountIndex(1).setSubaddressIndex(2).setTxRequest(new MoneroTxRequest().setIsConfirmed(true)), null, true);
+    transfers = getAndTestTransfers(wallet, new MoneroTransferQuery().setAccountIndex(1).setSubaddressIndex(2).setTxQuery(new MoneroTxQuery().setIsConfirmed(true)), null, true);
     for (MoneroTransfer transfer : transfers) {
       assertEquals(1, (int) transfer.getAccountIndex());
       if (transfer.isIncoming()) assertEquals(2, (int) ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
@@ -993,7 +993,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // get transfers in the tx pool
-    transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setInTxPool(true)), null, null);
+    transfers = getAndTestTransfers(wallet, new MoneroTransferQuery().setTxQuery(new MoneroTxQuery().setInTxPool(true)), null, null);
     for (MoneroTransfer transfer : transfers) {
       assertEquals(true, transfer.getTx().inTxPool());
     }
@@ -1005,24 +1005,24 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     List<String> txIds = new ArrayList<String>();
     for (MoneroTxWallet tx : txs) {
       txIds.add(tx.getId());
-      transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setId(tx.getId())), null, true);
+      transfers = getAndTestTransfers(wallet, new MoneroTransferQuery().setTxQuery(new MoneroTxQuery().setId(tx.getId())), null, true);
       for (MoneroTransfer transfer : transfers) assertEquals(tx.getId(), transfer.getTx().getId());
     }
     
     // get transfers with tx ids
-    transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setTxIds(txIds)), null, true);
+    transfers = getAndTestTransfers(wallet, new MoneroTransferQuery().setTxQuery(new MoneroTxQuery().setTxIds(txIds)), null, true);
     for (MoneroTransfer transfer : transfers) assertTrue(txIds.contains(transfer.getTx().getId()));
     
     // TODO: test that transfers with the same txId have the same tx reference
     
     // TODO: test transfers destinations
     
-    // get transfers with pre-built request that are confirmed and have outgoing destinations
-    MoneroTransferRequest transferRequest = new MoneroTransferRequest();
-    transferRequest.setIsOutgoing(true);
-    transferRequest.setHasDestinations(true);
-    transferRequest.setTxRequest(new MoneroTxRequest().setIsConfirmed(true));
-    transfers = getAndTestTransfers(wallet, transferRequest, null, null);
+    // get transfers with pre-built query that are confirmed and have outgoing destinations
+    MoneroTransferQuery transferQuery = new MoneroTransferQuery();
+    transferQuery.setIsOutgoing(true);
+    transferQuery.setHasDestinations(true);
+    transferQuery.setTxQuery(new MoneroTxQuery().setIsConfirmed(true));
+    transfers = getAndTestTransfers(wallet, transferQuery, null, null);
     for (MoneroTransfer transfer : transfers) {
       assertEquals(true, transfer.isOutgoing());
       assertTrue(((MoneroOutgoingTransfer) transfer).getDestinations().size() > 0);
@@ -1036,23 +1036,23 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // test with invalid id
-    List<MoneroTransfer> transfers = wallet.getTransfers(new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setId("invalid_id")));
+    List<MoneroTransfer> transfers = wallet.getTransfers(new MoneroTransferQuery().setTxQuery(new MoneroTxQuery().setId("invalid_id")));
     assertEquals(0, transfers.size());
     
     // test invalid id in collection
     List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, null, 3, 5);
-    transfers = wallet.getTransfers(new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setTxIds(randomTxs.get(0).getId(), "invalid_id")));
+    transfers = wallet.getTransfers(new MoneroTransferQuery().setTxQuery(new MoneroTxQuery().setTxIds(randomTxs.get(0).getId(), "invalid_id")));
     assertTrue(transfers.size() > 0);
     MoneroTxWallet tx = transfers.get(0).getTx();
     for (MoneroTransfer transfer : transfers) assertTrue(tx == transfer.getTx());
     
     // test unused subaddress indices
-    transfers = wallet.getTransfers(new MoneroTransferRequest().setAccountIndex(0).setSubaddressIndices(1234907));
+    transfers = wallet.getTransfers(new MoneroTransferQuery().setAccountIndex(0).setSubaddressIndices(1234907));
     assertTrue(transfers.size() == 0);
     
     // test invalid subaddress index
     try {
-      transfers = wallet.getTransfers(new MoneroTransferRequest().setAccountIndex(0).setSubaddressIndex(-1));
+      transfers = wallet.getTransfers(new MoneroTransferQuery().setAccountIndex(0).setSubaddressIndex(-1));
       throw new RuntimeException("Should have failed");
     } catch (MoneroException e) {
       assertNotEquals("Should have failed", e.getMessage());
@@ -1077,13 +1077,13 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       for (MoneroSubaddress subaddress : account.getSubaddresses()) if (subaddress.isUsed()) isUsed = true;
       
       // get outputs by account index
-      List<MoneroOutputWallet> accountOutputs = getAndTestOutputs(wallet, new MoneroOutputRequest().setAccountIndex(account.getIndex()), isUsed);
+      List<MoneroOutputWallet> accountOutputs = getAndTestOutputs(wallet, new MoneroOutputQuery().setAccountIndex(account.getIndex()), isUsed);
       for (MoneroOutputWallet output : accountOutputs) assertEquals(account.getIndex(), output.getAccountIndex());
       
       // get outputs by subaddress index
       List<MoneroOutputWallet> subaddressOutputs = new ArrayList<MoneroOutputWallet>();
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
-        List<MoneroOutputWallet> outputs = getAndTestOutputs(wallet, new MoneroOutputRequest().setAccountIndex(account.getIndex()).setSubaddressIndex(subaddress.getIndex()), subaddress.isUsed());
+        List<MoneroOutputWallet> outputs = getAndTestOutputs(wallet, new MoneroOutputQuery().setAccountIndex(account.getIndex()).setSubaddressIndex(subaddress.getIndex()), subaddress.isUsed());
         for (MoneroOutputWallet output : outputs) {
           assertEquals(subaddress.getAccountIndex(), output.getAccountIndex());
           assertEquals(subaddress.getIndex(), output.getSubaddressIndex());
@@ -1096,7 +1096,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       // get outputs by subaddress indices
       Set<Integer> subaddressIndices = new HashSet<Integer>();
       for (MoneroOutputWallet output : subaddressOutputs) subaddressIndices.add(output.getSubaddressIndex());
-      List<MoneroOutputWallet> outputs = getAndTestOutputs(wallet, new MoneroOutputRequest().setAccountIndex(account.getIndex()).setSubaddressIndices(new ArrayList<Integer>(subaddressIndices)), isUsed);
+      List<MoneroOutputWallet> outputs = getAndTestOutputs(wallet, new MoneroOutputQuery().setAccountIndex(account.getIndex()).setSubaddressIndices(new ArrayList<Integer>(subaddressIndices)), isUsed);
       assertEquals(outputs.size(), subaddressOutputs.size());
       for (MoneroOutputWallet output : outputs) {
         assertEquals(account.getIndex(), output.getAccountIndex());
@@ -1114,41 +1114,41 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get unspent outputs to account 0
-    List<MoneroOutputWallet> outputs = getAndTestOutputs(wallet, new MoneroOutputRequest().setAccountIndex(0).setIsSpent(false), null);
+    List<MoneroOutputWallet> outputs = getAndTestOutputs(wallet, new MoneroOutputQuery().setAccountIndex(0).setIsSpent(false), null);
     for (MoneroOutputWallet output : outputs) {
       assertEquals(0, output.getAccountIndex(), 0);
       assertEquals(false, output.isSpent());
     }
     
     // get spent vouts to account 1
-    outputs = getAndTestOutputs(wallet, new MoneroOutputRequest().setAccountIndex(1).setIsSpent(true), true);
+    outputs = getAndTestOutputs(wallet, new MoneroOutputQuery().setAccountIndex(1).setIsSpent(true), true);
     for (MoneroOutputWallet output : outputs) {
       assertEquals(1, (int) output.getAccountIndex());
       assertEquals(true, output.isSpent());
     }
     
     // get random transactions
-    List<MoneroTxWallet> txs = getRandomTransactions(wallet, new MoneroTxRequest().setIsConfirmed(true), 3, 5);
+    List<MoneroTxWallet> txs = getRandomTransactions(wallet, new MoneroTxQuery().setIsConfirmed(true), 3, 5);
     
     // get outputs with a tx id
     List<String> txIds = new ArrayList<String>();
     for (MoneroTxWallet tx : txs) {
       txIds.add(tx.getId());
-      outputs = getAndTestOutputs(wallet, new MoneroOutputRequest().setTxRequest(new MoneroTxRequest().setId(tx.getId())), true);
+      outputs = getAndTestOutputs(wallet, new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setId(tx.getId())), true);
       for (MoneroOutputWallet vout : outputs) assertEquals(vout.getTx().getId(), tx.getId());
     }
     
     // get outputs with tx ids
-    outputs = getAndTestOutputs(wallet, new MoneroOutputRequest().setTxRequest(new MoneroTxRequest().setTxIds(txIds)), true);
+    outputs = getAndTestOutputs(wallet, new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setTxIds(txIds)), true);
     for (MoneroOutputWallet vout : outputs) assertTrue(txIds.contains(vout.getTx().getId()));
     
-    // get confirmed outputs to specific subaddress with pre-built request
+    // get confirmed outputs to specific subaddress with pre-built query
     int accountIdx = 0;
     int subaddressIdx = 1;
-    MoneroOutputRequest outputRequest = new MoneroOutputRequest();
-    outputRequest.setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx);
-    outputRequest.setTxRequest(new MoneroTxRequest().setIsConfirmed(true));
-    outputs = getAndTestOutputs(wallet, outputRequest, true);
+    MoneroOutputQuery outputQuery = new MoneroOutputQuery();
+    outputQuery.setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx);
+    outputQuery.setTxQuery(new MoneroTxQuery().setIsConfirmed(true));
+    outputs = getAndTestOutputs(wallet, outputQuery, true);
     for (MoneroOutputWallet output : outputs) {
       assertEquals(accountIdx, (int) output.getAccountIndex());
       assertEquals(subaddressIdx, (int) output.getSubaddressIndex());
@@ -1157,7 +1157,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // get output by key image
     String keyImage = outputs.get(0).getKeyImage().getHex();
-    outputs = wallet.getOutputs(new MoneroOutputRequest().setKeyImage(new MoneroKeyImage(keyImage)));
+    outputs = wallet.getOutputs(new MoneroOutputQuery().setKeyImage(new MoneroKeyImage(keyImage)));
     assertEquals(1, outputs.size());
     assertEquals(keyImage, outputs.get(0).getKeyImage().getHex());
   }
@@ -1169,19 +1169,19 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // test with invalid id
     System.out.println("testGetOutputsValidateInputs()");
-    List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputRequest().setTxRequest(new MoneroTxRequest().setId("invalid_id")));
+    List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setId("invalid_id")));
     assertEquals(0, outputs.size());
     
     // test invalid id in collection
     List<MoneroTxWallet> randomTxs;
     try {
-      randomTxs = getRandomTransactions(wallet, new MoneroTxRequest().setIsConfirmed(true).setIncludeOutputs(true), 3, 5);
+      randomTxs = getRandomTransactions(wallet, new MoneroTxQuery().setIsConfirmed(true).setIncludeOutputs(true), 3, 5);
     } catch (MoneroException e) {
-      randomTxs = getRandomTransactions(wallet, new MoneroTxRequest().setIsConfirmed(true).setIncludeOutputs(true), 3, 5);
+      randomTxs = getRandomTransactions(wallet, new MoneroTxQuery().setIsConfirmed(true).setIncludeOutputs(true), 3, 5);
       throw e;
     }
     for (MoneroTxWallet randomTx : randomTxs) assertFalse(randomTx.getVouts().isEmpty());
-    outputs = wallet.getOutputs(new MoneroOutputRequest().setTxRequest(new MoneroTxRequest().setTxIds(randomTxs.get(0).getId(), "invalid_id")));
+    outputs = wallet.getOutputs(new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setTxIds(randomTxs.get(0).getId(), "invalid_id")));
     assertFalse(outputs.isEmpty());
     assertEquals(outputs.size(), randomTxs.get(0).getVouts().size());
     MoneroTxWallet tx = outputs.get(0).getTx();
@@ -1275,20 +1275,20 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // wallet balance is sum of all unspent outputs
     BigInteger walletSum = BigInteger.valueOf(0);
-    for (MoneroOutputWallet output : wallet.getOutputs(new MoneroOutputRequest().setIsSpent(false))) walletSum = walletSum.add(output.getAmount());
+    for (MoneroOutputWallet output : wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false))) walletSum = walletSum.add(output.getAmount());
     if (!walletBalance.equals(walletSum)) assertTrue("Wallet balance must equal sum of unspent outputs if no unconfirmed txs", hasUnconfirmedTx);
     
     // account balances are sum of their unspent outputs
     for (MoneroAccount account : accounts) {
       BigInteger accountSum = BigInteger.valueOf(0);
-      List<MoneroOutputWallet> accountOutputs = wallet.getOutputs(new MoneroOutputRequest().setAccountIndex(account.getIndex()).setIsSpent(false));
+      List<MoneroOutputWallet> accountOutputs = wallet.getOutputs(new MoneroOutputQuery().setAccountIndex(account.getIndex()).setIsSpent(false));
       for (MoneroOutputWallet output : accountOutputs) accountSum = accountSum.add(output.getAmount());
       if (!account.getBalance().equals(accountSum)) assertTrue("Account balance must equal sum of its unspent outputs if no unconfirmed txs", hasUnconfirmedTx);
       
       // subaddress balances are sum of their unspent outputs
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         BigInteger subaddressSum = BigInteger.valueOf(0);
-        List<MoneroOutputWallet> subaddressOutputs = wallet.getOutputs(new MoneroOutputRequest().setAccountIndex(account.getIndex()).setSubaddressIndex(subaddress.getIndex()).setIsSpent(false));
+        List<MoneroOutputWallet> subaddressOutputs = wallet.getOutputs(new MoneroOutputQuery().setAccountIndex(account.getIndex()).setSubaddressIndex(subaddress.getIndex()).setIsSpent(false));
         for (MoneroOutputWallet output : subaddressOutputs) subaddressSum = subaddressSum.add(output.getAmount());
         if (!subaddress.getBalance().equals(subaddressSum)) assertTrue("Subaddress balance must equal sum of its unspent outputs if no unconfirmed txs", hasUnconfirmedTx);
       }
@@ -1348,7 +1348,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // get random txs that are confirmed and have outgoing destinations
     List<MoneroTxWallet> txs;
     try {
-      txs = getRandomTransactions(wallet, new MoneroTxRequest().setIsConfirmed(true).setTransferRequest(new MoneroTransferRequest().setHasDestinations(true)), 1, MAX_TX_PROOFS);
+      txs = getRandomTransactions(wallet, new MoneroTxQuery().setIsConfirmed(true).setTransferQuery(new MoneroTransferQuery().setHasDestinations(true)), 1, MAX_TX_PROOFS);
     } catch (AssertionError e) {
       if (e.getMessage().contains("found with")) fail("No txs with outgoing destinations found; run send tests");
       throw e;
@@ -1435,7 +1435,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // get random txs that are confirmed and have outgoing destinations
     List<MoneroTxWallet> txs;
     try {
-      txs = getRandomTransactions(wallet, new MoneroTxRequest().setIsConfirmed(true).setTransferRequest(new MoneroTransferRequest().setHasDestinations(true)), 2, MAX_TX_PROOFS);
+      txs = getRandomTransactions(wallet, new MoneroTxQuery().setIsConfirmed(true).setTransferQuery(new MoneroTransferQuery().setHasDestinations(true)), 2, MAX_TX_PROOFS);
     } catch (AssertionError e) {
       if (e.getMessage().contains("found with")) fail("No txs with outgoing destinations found; run send tests");
       throw e;
@@ -1503,7 +1503,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get random confirmed outgoing txs
-    List<MoneroTxWallet> txs = getRandomTransactions(wallet, new MoneroTxRequest().setIsIncoming(false).setInTxPool(false).setIsFailed(false), 2, MAX_TX_PROOFS);
+    List<MoneroTxWallet> txs = getRandomTransactions(wallet, new MoneroTxQuery().setIsIncoming(false).setInTxPool(false).setIsFailed(false), 2, MAX_TX_PROOFS);
     for (MoneroTxWallet tx : txs) {
       assertEquals(true, tx.isConfirmed());
       assertNull(tx.getIncomingTransfers());
@@ -1560,7 +1560,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     testCheckReserve(check);
     BigInteger balance = wallet.getBalance();
     if (!balance.equals(check.getTotalAmount())) {  // TODO monero-wallet-rpc: this check fails with unconfirmed txs
-      List<MoneroTxWallet> unconfirmedTxs = wallet.getTxs(new MoneroTxRequest().setInTxPool(true));
+      List<MoneroTxWallet> unconfirmedTxs = wallet.getTxs(new MoneroTxQuery().setInTxPool(true));
       assertTrue("Reserve amount must equal balance unless wallet has unconfirmed txs", unconfirmedTxs.size() > 0);
     }
     
@@ -1718,7 +1718,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertTrue(result.getHeight() > 0);
     
     // determine if non-zero spent and unspent amounts are expected
-    List<MoneroTxWallet> txs = wallet.getTxs(new MoneroTxRequest().setIsOutgoing(true).setIsConfirmed(true));
+    List<MoneroTxWallet> txs = wallet.getTxs(new MoneroTxQuery().setIsOutgoing(true).setIsConfirmed(true));
     BigInteger balance = wallet.getBalance();
     boolean hasSpent = txs.size() > 0;
     boolean hasUnspent = balance.compareTo(BigInteger.valueOf(0)) > 0;
@@ -2265,7 +2265,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       for (String txId : txIds) assertEquals(64, txId.length());
       
       // fetch txs for testing
-      txs = wallet.getTxs(new MoneroTxRequest().setTxIds(txIds));
+      txs = wallet.getTxs(new MoneroTxQuery().setTxIds(txIds));
     }
     
     // test that balance and unlocked balance decreased
@@ -2448,7 +2448,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     int numOutputs = 3;
     
     // get outputs to sweep (not spent, unlocked, and amount >= fee)
-    List<MoneroOutputWallet> spendableUnlockedOutputs = wallet.getOutputs(new MoneroOutputRequest().setIsSpent(false).setIsUnlocked(true));
+    List<MoneroOutputWallet> spendableUnlockedOutputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setIsUnlocked(true));
     List<MoneroOutputWallet> outputsToSweep = new ArrayList<MoneroOutputWallet>();
     for (int i = 0; i < spendableUnlockedOutputs.size() && outputsToSweep.size() < numOutputs; i++) {
       if (spendableUnlockedOutputs.get(i).getAmount().compareTo(TestUtils.MAX_FEE) > 0) outputsToSweep.add(spendableUnlockedOutputs.get(i));  // output cannot be swept if amount does not cover fee
@@ -2521,7 +2521,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     for (String txId : txIds) assertEquals(64, txId.length());
     
     // fetch and test txs
-    txs = wallet.getTxs(new MoneroTxRequest().setTxIds(txIds));
+    txs = wallet.getTxs(new MoneroTxQuery().setTxIds(txIds));
     ctx.sendRequest.setDoNotRelay(false);
     for (MoneroTxWallet tx : txs) {
       testTxWallet(tx, ctx);
@@ -2669,8 +2669,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         // get incoming/outgoing txs with sent ids
         List<String> txIds = new ArrayList<String>();
         for (MoneroTxWallet sentTx : sentTxs) txIds.add(sentTx.getId());
-        MoneroTxRequest txRequest = new MoneroTxRequest().setTxIds(txIds);
-        List<MoneroTxWallet> fetchedTxs = getAndTestTxs(wallet, txRequest, null, true);
+        MoneroTxQuery txQuery = new MoneroTxQuery().setTxIds(txIds);
+        List<MoneroTxWallet> fetchedTxs = getAndTestTxs(wallet, txQuery, null, true);
         assertFalse(fetchedTxs.isEmpty());
         
         // test fetched txs
@@ -2965,7 +2965,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // all unspent, unlocked outputs must be less than fee
-    List<MoneroOutputWallet> spendableOutputs = wallet.getOutputs(new MoneroOutputRequest().setIsSpent(false).setIsUnlocked(true));
+    List<MoneroOutputWallet> spendableOutputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setIsUnlocked(true));
     for (MoneroOutputWallet spendableOutput : spendableOutputs) {
       assertTrue("Unspent output should have been swept\n" + spendableOutput.toString(), spendableOutput.getAmount().compareTo(TestUtils.MAX_FEE) < 0);
     }
@@ -3001,25 +3001,25 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   }
   
   /**
-   * Fetches and tests transactions according to the given request.
+   * Fetches and tests transactions according to the given query.
    * 
-   * TODO: ensure each tx passes request filter, same with testGetTransfer and getAndTestVouts
+   * TODO: ensure each tx passes query filter, same with testGetTransfer and getAndTestVouts
    */
-  private List<MoneroTxWallet> getAndTestTxs(MoneroWallet wallet, MoneroTxRequest request, TestContext ctx, Boolean isExpected) {
-    List<MoneroTxWallet> txs = wallet.getTxs(request);
+  private List<MoneroTxWallet> getAndTestTxs(MoneroWallet wallet, MoneroTxQuery query, TestContext ctx, Boolean isExpected) {
+    List<MoneroTxWallet> txs = wallet.getTxs(query);
     assertNotNull(txs);
     if (Boolean.FALSE.equals(isExpected)) assertTrue(txs.isEmpty());
     if (Boolean.TRUE.equals(isExpected)) assertFalse(txs.isEmpty());
     for (MoneroTxWallet tx : txs) testTxWallet(tx, ctx);
-    testGetTxsStructure(txs, request);
+    testGetTxsStructure(txs, query);
     return txs;
   }
   
   /**
-   * Fetches and tests transfers according to the given request.
+   * Fetches and tests transfers according to the given query.
    */
-  private List<MoneroTransfer> getAndTestTransfers(MoneroWallet wallet, MoneroTransferRequest request, TestContext ctx, Boolean isExpected) {
-    List<MoneroTransfer> transfers = wallet.getTransfers(request);
+  private List<MoneroTransfer> getAndTestTransfers(MoneroWallet wallet, MoneroTransferQuery query, TestContext ctx, Boolean isExpected) {
+    List<MoneroTransfer> transfers = wallet.getTransfers(query);
     if (Boolean.FALSE.equals(isExpected)) assertEquals(0, transfers.size());
     if (Boolean.TRUE.equals(isExpected)) assertTrue("Transfers were expected but not found; run send tests?", transfers.size() > 0);
     if (ctx == null) ctx = new TestContext();
@@ -3029,10 +3029,10 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   }
 
   /**
-   * Fetches and tests wallet outputs (i.e. wallet tx vouts) according to the given request.
+   * Fetches and tests wallet outputs (i.e. wallet tx vouts) according to the given query.
    */
-  private static List<MoneroOutputWallet> getAndTestOutputs(MoneroWallet wallet, MoneroOutputRequest request, Boolean isExpected) {
-    List<MoneroOutputWallet> vouts = wallet.getOutputs(request);
+  private static List<MoneroOutputWallet> getAndTestOutputs(MoneroWallet wallet, MoneroOutputQuery query, Boolean isExpected) {
+    List<MoneroOutputWallet> vouts = wallet.getOutputs(query);
     if (Boolean.FALSE.equals(isExpected)) assertEquals(0, vouts.size());
     if (Boolean.TRUE.equals(isExpected)) assertTrue("Vouts were expected but not found; run send tests", vouts.size() > 0);
     for (MoneroOutputWallet vout : vouts) testOutputWallet(vout);
@@ -3491,14 +3491,14 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
    * Gets random transactions.
    * 
    * @param wallet is the wallet to query for transactions
-   * @param txRequest specifies the transactions to retrieve
+   * @param txQuery specifies the transactions to retrieve
    * @param minTxs specifies the minimum number of transactions (null for no minimum)
    * @param maxTxs specifies the maximum number of transactions (null for all filtered transactions)
    * @return List<MoneroTxWallet> are the random transactions
    */
-  private static List<MoneroTxWallet> getRandomTransactions(MoneroWallet wallet, MoneroTxRequest txRequest, Integer minTxs, Integer maxTxs) {
-    List<MoneroTxWallet> txs = wallet.getTxs(txRequest);
-    if (minTxs != null) assertTrue(txs.size() + "/" + minTxs + " transactions found with request", txs.size() >= minTxs);
+  private static List<MoneroTxWallet> getRandomTransactions(MoneroWallet wallet, MoneroTxQuery txQuery, Integer minTxs, Integer maxTxs) {
+    List<MoneroTxWallet> txs = wallet.getTxs(txQuery);
+    if (minTxs != null) assertTrue(txs.size() + "/" + minTxs + " transactions found with the query", txs.size() >= minTxs);
     Collections.shuffle(txs);
     if (maxTxs == null) return txs;
     else return txs.subList(0, Math.min(maxTxs, txs.size()));
@@ -3537,8 +3537,8 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
    * to transfers / destinations.
    */
   private void testGetTxsStructure(List<MoneroTxWallet> txs) { testGetTxsStructure(txs, null); }
-  private void testGetTxsStructure(List<MoneroTxWallet> txs, MoneroTxRequest request) {
-    if (request == null) request = new MoneroTxRequest();
+  private void testGetTxsStructure(List<MoneroTxWallet> txs, MoneroTxQuery query) {
+    if (query == null) query = new MoneroTxQuery();
     
     // collect unique blocks in order (using set and list instead of TreeSet for direct portability to other languages)
     Set<MoneroBlock> seenBlocks = new HashSet<MoneroBlock>();
@@ -3556,23 +3556,23 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // tx ids must be in order if requested
-    if (request.getTxIds() != null) {
-      assertEquals(txs.size(), request.getTxIds().size());
-      for (int i = 0; i < request.getTxIds().size(); i++) {
-        assertEquals(request.getTxIds().get(i), txs.get(i).getId());
+    if (query.getTxIds() != null) {
+      assertEquals(txs.size(), query.getTxIds().size());
+      for (int i = 0; i < query.getTxIds().size(); i++) {
+        assertEquals(query.getTxIds().get(i), txs.get(i).getId());
       }
     }
     
-    // test that txs and blocks reference each other and blocks are in ascending order unless specific tx ids requested
+    // test that txs and blocks reference each other and blocks are in ascending order unless specific tx ids queried
     int index = 0;
     Long prevBlockHeight = null;
     for (MoneroBlock block : blocks) {
       if (prevBlockHeight == null) prevBlockHeight = block.getHeight();
-      else if (request.getTxIds() == null) assertTrue("Blocks are not in order of heights: " + prevBlockHeight + " vs " + block.getHeight(), block.getHeight() > prevBlockHeight);
+      else if (query.getTxIds() == null) assertTrue("Blocks are not in order of heights: " + prevBlockHeight + " vs " + block.getHeight(), block.getHeight() > prevBlockHeight);
       for (MoneroTx tx : block.getTxs()) {
         assertTrue(tx.getBlock() == block);
-        if (request.getTxIds() == null) {
-          assertEquals(txs.get(index).getId(), tx.getId()); // verify tx order is self-consistent with blocks unless txs manually re-ordered by requesting by id
+        if (query.getTxIds() == null) {
+          assertEquals(txs.get(index).getId(), tx.getId()); // verify tx order is self-consistent with blocks unless txs manually re-ordered by querying by id
           assertTrue(txs.get(index) == tx);
         }
         index++;

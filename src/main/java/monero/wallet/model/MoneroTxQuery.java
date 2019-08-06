@@ -1,4 +1,4 @@
-package monero.wallet.request;
+package monero.wallet.model;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -11,17 +11,13 @@ import common.types.Filter;
 import common.utils.GenUtils;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroOutput;
-import monero.wallet.model.MoneroIncomingTransfer;
-import monero.wallet.model.MoneroOutgoingTransfer;
-import monero.wallet.model.MoneroTransfer;
-import monero.wallet.model.MoneroTxWallet;
 
 /**
- * Configures a request to retrieve transactions.
+ * Configures a query to retrieve transactions.
  * 
- * All transactions are returned except those that do not meet the criteria defined in this request.
+ * All transactions are returned except those that do not meet the criteria defined in this query.
  */
-public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWallet> {
+public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWallet> {
   
   private Boolean isOutgoing;
   private Boolean isIncoming;
@@ -32,36 +28,36 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
   private Long minHeight;
   private Long maxHeight;
   private Boolean includeOutputs;
-  private MoneroTransferRequest transferRequest;
-  private MoneroOutputRequest outputRequest;
+  private MoneroTransferQuery transferQuery;
+  private MoneroOutputQuery outputQuery;
   
-  public MoneroTxRequest() {
+  public MoneroTxQuery() {
     
   }
   
-  public MoneroTxRequest(final MoneroTxRequest req) {
-    super(req);
-    this.isOutgoing = req.isOutgoing;
-    this.isIncoming = req.isIncoming;
-    if (req.txIds != null) this.txIds = new ArrayList<String>(req.txIds);
-    this.hasPaymentId = req.hasPaymentId;
-    if (req.paymentIds != null) this.paymentIds = new ArrayList<String>(req.paymentIds);
-    this.height = req.height;
-    this.minHeight = req.minHeight;
-    this.maxHeight = req.maxHeight;
-    this.includeOutputs = req.includeOutputs;
-    if (req.transferRequest != null) {
-      this.transferRequest = new MoneroTransferRequest(req.transferRequest);
-      if (req.transferRequest.getTxRequest() == req) this.transferRequest.setTxRequest(this);
+  public MoneroTxQuery(final MoneroTxQuery query) {
+    super(query);
+    this.isOutgoing = query.isOutgoing;
+    this.isIncoming = query.isIncoming;
+    if (query.txIds != null) this.txIds = new ArrayList<String>(query.txIds);
+    this.hasPaymentId = query.hasPaymentId;
+    if (query.paymentIds != null) this.paymentIds = new ArrayList<String>(query.paymentIds);
+    this.height = query.height;
+    this.minHeight = query.minHeight;
+    this.maxHeight = query.maxHeight;
+    this.includeOutputs = query.includeOutputs;
+    if (query.transferQuery != null) {
+      this.transferQuery = new MoneroTransferQuery(query.transferQuery);
+      if (query.transferQuery.getTxQuery() == query) this.transferQuery.setTxQuery(this);
     }
-    if (req.outputRequest != null) {
-      this.outputRequest = new MoneroOutputRequest(req.outputRequest);
-      if (req.outputRequest.getTxRequest() == req) this.outputRequest.setTxRequest(this) ;
+    if (query.outputQuery != null) {
+      this.outputQuery = new MoneroOutputQuery(query.outputQuery);
+      if (query.outputQuery.getTxQuery() == query) this.outputQuery.setTxQuery(this) ;
     }
   }
   
-  public MoneroTxRequest copy() {
-    return new MoneroTxRequest(this);
+  public MoneroTxQuery copy() {
+    return new MoneroTxQuery(this);
   }
   
   @JsonProperty("isOutgoing")
@@ -69,7 +65,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return isOutgoing;
   }
 
-  public MoneroTxRequest setIsOutgoing(Boolean isOutgoing) {
+  public MoneroTxQuery setIsOutgoing(Boolean isOutgoing) {
     this.isOutgoing = isOutgoing;
     return this;
   }
@@ -79,7 +75,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return isIncoming;
   }
 
-  public MoneroTxRequest setIsIncoming(Boolean isIncoming) {
+  public MoneroTxQuery setIsIncoming(Boolean isIncoming) {
     this.isIncoming = isIncoming;
     return this;
   }
@@ -88,17 +84,17 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return txIds;
   }
 
-  public MoneroTxRequest setTxIds(List<String> txIds) {
+  public MoneroTxQuery setTxIds(List<String> txIds) {
     this.txIds = txIds;
     return this;
   }
   
-  public MoneroTxRequest setTxIds(String... txIds) {
+  public MoneroTxQuery setTxIds(String... txIds) {
     this.txIds = GenUtils.arrayToList(txIds);
     return this;
   }
   
-  public MoneroTxRequest setTxId(String txId) {
+  public MoneroTxQuery setTxId(String txId) {
     return setTxIds(Arrays.asList(txId));
   }
 
@@ -107,7 +103,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return hasPaymentId;
   }
 
-  public MoneroTxRequest setHasPaymentId(Boolean hasPaymentId) {
+  public MoneroTxQuery setHasPaymentId(Boolean hasPaymentId) {
     this.hasPaymentId = hasPaymentId;
     return this;
   }
@@ -116,12 +112,12 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return paymentIds;
   }
 
-  public MoneroTxRequest setPaymentIds(List<String> paymentIds) {
+  public MoneroTxQuery setPaymentIds(List<String> paymentIds) {
     this.paymentIds = paymentIds;
     return this;
   }
   
-  public MoneroTxRequest setPaymentId(String paymentId) {
+  public MoneroTxQuery setPaymentId(String paymentId) {
     return setPaymentIds(Arrays.asList(paymentId));
   }
   
@@ -129,7 +125,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return height;
   }
 
-  public MoneroTxRequest setHeight(Long height) {
+  public MoneroTxQuery setHeight(Long height) {
     this.height = height;
     return this;
   }
@@ -138,7 +134,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return minHeight;
   }
 
-  public MoneroTxRequest setMinHeight(Long minHeight) {
+  public MoneroTxQuery setMinHeight(Long minHeight) {
     this.minHeight = minHeight;
     return this;
   }
@@ -147,7 +143,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return maxHeight;
   }
 
-  public MoneroTxRequest setMaxHeight(Long maxHeight) {
+  public MoneroTxQuery setMaxHeight(Long maxHeight) {
     this.maxHeight = maxHeight;
     return this;
   }
@@ -156,26 +152,26 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return includeOutputs;
   }
 
-  public MoneroTxRequest setIncludeOutputs(Boolean includeOutputs) {
+  public MoneroTxQuery setIncludeOutputs(Boolean includeOutputs) {
     this.includeOutputs = includeOutputs;
     return this;
   }
 
-  public MoneroTransferRequest getTransferRequest() {
-    return transferRequest;
+  public MoneroTransferQuery getTransferQuery() {
+    return transferQuery;
   }
 
-  public MoneroTxRequest setTransferRequest(MoneroTransferRequest transferRequest) {
-    this.transferRequest = transferRequest;
+  public MoneroTxQuery setTransferQuery(MoneroTransferQuery transferQuery) {
+    this.transferQuery = transferQuery;
     return this;
   }
   
-  public MoneroOutputRequest getOutputRequest() {
-    return outputRequest;
+  public MoneroOutputQuery getOutputQuery() {
+    return outputQuery;
   }
 
-  public MoneroTxRequest setOutputRequest(MoneroOutputRequest outputRequest) {
-    this.outputRequest = outputRequest;
+  public MoneroTxQuery setOutputQuery(MoneroOutputQuery outputQuery) {
+    this.outputQuery = outputQuery;
     return this;
   }
   
@@ -193,13 +189,13 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     if (this.isFailed() != null && this.isFailed() != tx.isFailed()) return false;
     if (this.isMinerTx() != null && this.isMinerTx() != tx.isMinerTx()) return false;
     
-    // at least one transfer must meet transfer request if defined
-    if (this.getTransferRequest() != null) {
+    // at least one transfer must meet transfer query if defined
+    if (this.getTransferQuery() != null) {
       boolean matchFound = false;
-      if (tx.getOutgoingTransfer() != null && this.getTransferRequest().meetsCriteria(tx.getOutgoingTransfer())) matchFound = true;
+      if (tx.getOutgoingTransfer() != null && this.getTransferQuery().meetsCriteria(tx.getOutgoingTransfer())) matchFound = true;
       else if (tx.getIncomingTransfers() != null) {
         for (MoneroTransfer incomingTransfer : tx.getIncomingTransfers()) {
-          if (this.getTransferRequest().meetsCriteria(incomingTransfer)) {
+          if (this.getTransferQuery().meetsCriteria(incomingTransfer)) {
             matchFound = true;
             break;
           }
@@ -234,7 +230,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     if (this.getMinHeight() != null && (txHeight == null || txHeight < this.getMinHeight())) return false;
     if (this.getMaxHeight() != null && (txHeight == null || txHeight > this.getMaxHeight())) return false;
     
-    // transaction meets request criteria
+    // transaction meets query criteria
     return true;
   }
   
@@ -246,241 +242,241 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
 
   @Override
-  public MoneroTxRequest setIncomingTransfers(List<MoneroIncomingTransfer> incomingTransfers) {
+  public MoneroTxQuery setIncomingTransfers(List<MoneroIncomingTransfer> incomingTransfers) {
     super.setIncomingTransfers(incomingTransfers);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setOutgoingTransfer(MoneroOutgoingTransfer outgoingTransfer) {
+  public MoneroTxQuery setOutgoingTransfer(MoneroOutgoingTransfer outgoingTransfer) {
     super.setOutgoingTransfer(outgoingTransfer);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setVouts(List<MoneroOutput> vouts) {
+  public MoneroTxQuery setVouts(List<MoneroOutput> vouts) {
     super.setVouts(vouts);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setNote(String note) {
+  public MoneroTxQuery setNote(String note) {
     super.setNote(note);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setBlock(MoneroBlock block) {
+  public MoneroTxQuery setBlock(MoneroBlock block) {
     super.setBlock(block);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setId(String id) {
+  public MoneroTxQuery setId(String id) {
     super.setId(id);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setVersion(Integer version) {
+  public MoneroTxQuery setVersion(Integer version) {
     super.setVersion(version);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setIsMinerTx(Boolean isMinerTx) {
+  public MoneroTxQuery setIsMinerTx(Boolean isMinerTx) {
     super.setIsMinerTx(isMinerTx);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setFee(BigInteger fee) {
+  public MoneroTxQuery setFee(BigInteger fee) {
     super.setFee(fee);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setMixin(Integer mixin) {
+  public MoneroTxQuery setMixin(Integer mixin) {
     super.setMixin(mixin);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setDoNotRelay(Boolean doNotRelay) {
+  public MoneroTxQuery setDoNotRelay(Boolean doNotRelay) {
     super.setDoNotRelay(doNotRelay);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setIsRelayed(Boolean isRelayed) {
+  public MoneroTxQuery setIsRelayed(Boolean isRelayed) {
     super.setIsRelayed(isRelayed);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setIsConfirmed(Boolean isConfirmed) {
+  public MoneroTxQuery setIsConfirmed(Boolean isConfirmed) {
     super.setIsConfirmed(isConfirmed);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setInTxPool(Boolean inTxPool) {
+  public MoneroTxQuery setInTxPool(Boolean inTxPool) {
     super.setInTxPool(inTxPool);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setNumConfirmations(Integer numConfirmations) {
+  public MoneroTxQuery setNumConfirmations(Integer numConfirmations) {
     super.setNumConfirmations(numConfirmations);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setUnlockTime(Integer unlockTime) {
+  public MoneroTxQuery setUnlockTime(Integer unlockTime) {
     super.setUnlockTime(unlockTime);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setLastRelayedTimestamp(Long lastRelayedTimestamp) {
+  public MoneroTxQuery setLastRelayedTimestamp(Long lastRelayedTimestamp) {
     super.setLastRelayedTimestamp(lastRelayedTimestamp);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setReceivedTimestamp(Long receivedTimestamp) {
+  public MoneroTxQuery setReceivedTimestamp(Long receivedTimestamp) {
     super.setReceivedTimestamp(receivedTimestamp);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setIsDoubleSpendSeen(Boolean isDoubleSpend) {
+  public MoneroTxQuery setIsDoubleSpendSeen(Boolean isDoubleSpend) {
     super.setIsDoubleSpendSeen(isDoubleSpend);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setKey(String key) {
+  public MoneroTxQuery setKey(String key) {
     super.setKey(key);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setFullHex(String hex) {
+  public MoneroTxQuery setFullHex(String hex) {
     super.setFullHex(hex);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setPrunedHex(String prunedHex) {
+  public MoneroTxQuery setPrunedHex(String prunedHex) {
     super.setPrunedHex(prunedHex);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setPrunableHex(String prunableHex) {
+  public MoneroTxQuery setPrunableHex(String prunableHex) {
     super.setPrunableHex(prunableHex);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setPrunableHash(String prunableHash) {
+  public MoneroTxQuery setPrunableHash(String prunableHash) {
     super.setPrunableHash(prunableHash);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setSize(Integer size) {
+  public MoneroTxQuery setSize(Integer size) {
     super.setSize(size);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setWeight(Integer weight) {
+  public MoneroTxQuery setWeight(Integer weight) {
     super.setWeight(weight);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setVins(List<MoneroOutput> vins) {
+  public MoneroTxQuery setVins(List<MoneroOutput> vins) {
     super.setVins(vins);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setOutputIndices(List<Integer> outputIndices) {
+  public MoneroTxQuery setOutputIndices(List<Integer> outputIndices) {
     super.setOutputIndices(outputIndices);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setMetadata(String metadata) {
+  public MoneroTxQuery setMetadata(String metadata) {
     super.setMetadata(metadata);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setCommonTxSets(String commonTxSets) {
+  public MoneroTxQuery setCommonTxSets(String commonTxSets) {
     super.setCommonTxSets(commonTxSets);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setExtra(int[] extra) {
+  public MoneroTxQuery setExtra(int[] extra) {
     super.setExtra(extra);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setRctSignatures(Object rctSignatures) {
+  public MoneroTxQuery setRctSignatures(Object rctSignatures) {
     super.setRctSignatures(rctSignatures);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setRctSigPrunable(Object rctSigPrunable) {
+  public MoneroTxQuery setRctSigPrunable(Object rctSigPrunable) {
     super.setRctSigPrunable(rctSigPrunable);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setIsKeptByBlock(Boolean isKeptByBlock) {
+  public MoneroTxQuery setIsKeptByBlock(Boolean isKeptByBlock) {
     super.setIsKeptByBlock(isKeptByBlock);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setIsFailed(Boolean isFailed) {
+  public MoneroTxQuery setIsFailed(Boolean isFailed) {
     super.setIsFailed(isFailed);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setLastFailedHeight(Integer lastFailedHeight) {
+  public MoneroTxQuery setLastFailedHeight(Integer lastFailedHeight) {
     super.setLastFailedHeight(lastFailedHeight);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setLastFailedId(String lastFailedId) {
+  public MoneroTxQuery setLastFailedId(String lastFailedId) {
     super.setLastFailedId(lastFailedId);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setMaxUsedBlockHeight(Integer maxUsedBlockHeight) {
+  public MoneroTxQuery setMaxUsedBlockHeight(Integer maxUsedBlockHeight) {
     super.setMaxUsedBlockHeight(maxUsedBlockHeight);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setMaxUsedBlockId(String maxUsedBlockId) {
+  public MoneroTxQuery setMaxUsedBlockId(String maxUsedBlockId) {
     super.setMaxUsedBlockId(maxUsedBlockId);
     return this;
   }
 
   @Override
-  public MoneroTxRequest setSignatures(List<String> signatures) {
+  public MoneroTxQuery setSignatures(List<String> signatures) {
     super.setSignatures(signatures);
     return this;
   }

@@ -54,18 +54,18 @@ import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
+import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
+import monero.wallet.model.MoneroTransferQuery;
+import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletListener;
 import monero.wallet.model.MoneroWalletListenerI;
-import monero.wallet.request.MoneroOutputRequest;
-import monero.wallet.request.MoneroSendRequest;
-import monero.wallet.request.MoneroTransferRequest;
-import monero.wallet.request.MoneroTxRequest;
 
 /**
  * Implements a Monero wallet using JNI to bridge to Monero Core C++.
@@ -734,23 +734,23 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroTxWallet> getTxs(final MoneroTxRequest request) {
+  public List<MoneroTxWallet> getTxs(MoneroTxQuery query) {
     assertNotClosed();
     
-    // copy and normalize tx request up to block
-    MoneroTxRequest req = request == null ? new MoneroTxRequest() : request.copy();
-    if (req.getBlock() == null) req.setBlock(new MoneroBlock().setTxs(req));
+    // copy and normalize tx query up to block
+    query = query == null ? new MoneroTxQuery() : query.copy();
+    if (query.getBlock() == null) query.setBlock(new MoneroBlock().setTxs(query));
     
-    // serialize req from block and fetch txs from jni
-    String blocks_json;
+    // serialize query from block and fetch txs from jni
+    String blocksJson;
     try {
-      blocks_json = getTxsJni(JsonUtils.serialize(req.getBlock()));
+      blocksJson = getTxsJni(JsonUtils.serialize(query.getBlock()));
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
     
     // deserialize blocks
-    List<MoneroBlock> blocks = deserializeBlocks(blocks_json);
+    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
     
     // collect txs
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
@@ -763,11 +763,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
     
     // re-sort txs which is lost over jni serialization
-    if (req.getTxIds() != null) {
+    if (query.getTxIds() != null) {
       Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
       for (MoneroTxWallet tx : txs) txMap.put(tx.getId(), tx);
       List<MoneroTxWallet> txsSorted = new ArrayList<MoneroTxWallet>();
-      for (String txId : req.getTxIds()) txsSorted.add(txMap.get(txId));
+      for (String txId : query.getTxIds()) txsSorted.add(txMap.get(txId));
       txs = txsSorted;
     }
     LOGGER.debug("getTxs() returning " + txs.size() + " transactions");
@@ -775,38 +775,37 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroTransfer> getTransfers(final MoneroTransferRequest request) {
+  public List<MoneroTransfer> getTransfers(MoneroTransferQuery query) {
     assertNotClosed();
     
-    // copy and normalize request up to block
-    MoneroTransferRequest req;
-    if (request == null) req = new MoneroTransferRequest();
+    // copy and normalize query up to block
+    if (query == null) query = new MoneroTransferQuery();
     else {
-      if (request.getTxRequest() == null) req = request.copy();
+      if (query.getTxQuery() == null) query = query.copy();
       else {
-        MoneroTxRequest txReq = request.getTxRequest().copy();
-        if (request.getTxRequest().getTransferRequest() == request) req = txReq.getTransferRequest();
+        MoneroTxQuery txQuery = query.getTxQuery().copy();
+        if (query.getTxQuery().getTransferQuery() == query) query = txQuery.getTransferQuery();
         else {
-          assertNull("Transfer request's tx request must be circular reference or null", request.getTxRequest().getTransferRequest());
-          req = request.copy();
-          req.setTxRequest(txReq);
+          assertNull("Transfer query's tx query must be circular reference or null", query.getTxQuery().getTransferQuery());
+          query = query.copy();
+          query.setTxQuery(txQuery);
         }
       }
     }
-    if (req.getTxRequest() == null) req.setTxRequest(new MoneroTxRequest());
-    req.getTxRequest().setTransferRequest(req);
-    if (req.getTxRequest().getBlock() == null) req.getTxRequest().setBlock(new MoneroBlock().setTxs(req.getTxRequest()));
+    if (query.getTxQuery() == null) query.setTxQuery(new MoneroTxQuery());
+    query.getTxQuery().setTransferQuery(query);
+    if (query.getTxQuery().getBlock() == null) query.getTxQuery().setBlock(new MoneroBlock().setTxs(query.getTxQuery()));
     
-    // serialize req from block and fetch transfers from jni
-    String blocks_json;
+    // serialize query from block and fetch transfers from jni
+    String blocksJson;
     try {
-      blocks_json = getTransfersJni(JsonUtils.serialize(req.getTxRequest().getBlock()));
+      blocksJson = getTransfersJni(JsonUtils.serialize(query.getTxQuery().getBlock()));
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
     
     // deserialize blocks
-    List<MoneroBlock> blocks = deserializeBlocks(blocks_json);
+    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
     
     // collect transfers
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
@@ -825,33 +824,32 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroOutputWallet> getOutputs(final MoneroOutputRequest request) {
+  public List<MoneroOutputWallet> getOutputs(MoneroOutputQuery query) {
     assertNotClosed();
     
-    // copy and normalize request up to block
-    MoneroOutputRequest req;
-    if (request == null) req = new MoneroOutputRequest();
+    // copy and normalize query up to block
+    if (query == null) query = new MoneroOutputQuery();
     else {
-      if (request.getTxRequest() == null) req = request.copy();
+      if (query.getTxQuery() == null) query = query.copy();
       else {
-        MoneroTxRequest txReq = request.getTxRequest().copy();
-        if (request.getTxRequest().getOutputRequest() == request) req = txReq.getOutputRequest();
+        MoneroTxQuery txQuery = query.getTxQuery().copy();
+        if (query.getTxQuery().getOutputQuery() == query) query = txQuery.getOutputQuery();
         else {
-          assertNull("Output request's tx request must be circular reference or null", request.getTxRequest().getOutputRequest());
-          req = request.copy();
-          req.setTxRequest(txReq);
+          assertNull("Output query's tx query must be circular reference or null", query.getTxQuery().getOutputQuery());
+          query = query.copy();
+          query.setTxQuery(txQuery);
         }
       }
     }
-    if (req.getTxRequest() == null) req.setTxRequest(new MoneroTxRequest());
-    req.getTxRequest().setOutputRequest(req);
-    if (req.getTxRequest().getBlock() == null) req.getTxRequest().setBlock(new MoneroBlock().setTxs(req.getTxRequest()));
+    if (query.getTxQuery() == null) query.setTxQuery(new MoneroTxQuery());
+    query.getTxQuery().setOutputQuery(query);
+    if (query.getTxQuery().getBlock() == null) query.getTxQuery().setBlock(new MoneroBlock().setTxs(query.getTxQuery()));
     
-    // serialize req from block and fetch outputs from jni
-    String blocks_json = getOutputsJni(JsonUtils.serialize(req.getTxRequest().getBlock()));
+    // serialize query from block and fetch outputs from jni
+    String blocksJson = getOutputsJni(JsonUtils.serialize(query.getTxQuery().getBlock()));
     
     // deserialize blocks
-    List<MoneroBlock> blocks = deserializeBlocks(blocks_json);
+    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
     
     // collect outputs
     List<MoneroOutputWallet> outputs = new ArrayList<MoneroOutputWallet>();
@@ -916,7 +914,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroTxWallet> sendSplit(final MoneroSendRequest request) {
+  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
     assertNotClosed();
     LOGGER.debug("java sendSplit(request)");
     LOGGER.debug("Send request: " + JsonUtils.serialize(request));
@@ -925,16 +923,16 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     if (request == null) throw new MoneroException("Send request cannot be null");
     
     // submit send request to JNI and get response as json rooted at blocks
-    String blocks_json;
+    String blocksJson;
     try {
-      blocks_json = sendSplitJni(JsonUtils.serialize(request));
-      LOGGER.debug("Received sendSplit() response from JNI: " + blocks_json.substring(0, Math.min(5000, blocks_json.length())) + "...");
+      blocksJson = sendSplitJni(JsonUtils.serialize(request));
+      LOGGER.debug("Received sendSplit() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
     
     // deserialize blocks
-    List<MoneroBlock> blocks = deserializeBlocks(blocks_json);
+    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
     
     // collect and return txs
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
@@ -953,8 +951,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public MoneroTxWallet sweepOutput(MoneroSendRequest request) {
     assertNotClosed();
     try {
-      String blocks_json = sweepOutputJni(JsonUtils.serialize(request));
-      List<MoneroBlock> blocks = deserializeBlocks(blocks_json);
+      String blocksJson = sweepOutputJni(JsonUtils.serialize(request));
+      List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
       blocks.get(0).getTxs().get(0).setBlock(null); // dereference placeholder block
       return (MoneroTxWallet) blocks.get(0).getTxs().get(0);
     } catch (Exception e) {
@@ -971,10 +969,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<MoneroTxWallet> sweepDust(boolean doNotRelay) {
     assertNotClosed();
-    String blocks_json;
-    try { blocks_json = sweepDustJni(doNotRelay); }
+    String blocksJson;
+    try { blocksJson = sweepDustJni(doNotRelay); }
     catch (Exception e) { throw new MoneroException(e.getMessage()); }
-    List<MoneroBlock> blocks = deserializeBlocks(blocks_json);
+    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     if (blocks.isEmpty()) return txs;
     for (MoneroTx tx : blocks.get(0).getTxs()) {
@@ -1290,14 +1288,14 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   /**
    * Gets txs from the native layer using strings to communicate.
    * 
-   * @param tx_request_json is a tx request serialized to a json string
+   * @param txQueryJson is a tx query serialized to a json string
    * @return a serialized BlocksContainer to preserve model relationships
    */
-  private native String getTxsJni(String tx_request_json);
+  private native String getTxsJni(String txQueryJson);
   
-  private native String getTransfersJni(String transferRequestJson);
+  private native String getTransfersJni(String transferQueryJson);
   
-  private native String getOutputsJni(String outputsRequestJson);
+  private native String getOutputsJni(String outputQueryJson);
   
   private native String getOutputsHexJni();
   
@@ -1520,8 +1518,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     public KeyImagesContainer(List<MoneroKeyImage> keyImages) { this.keyImages = keyImages; };
   }
   
-  private static List<MoneroBlock> deserializeBlocks(String blocks_json) {
-    List<MoneroBlockWallet> blockWallets =  JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocks_json, BlocksContainer.class).blocks;
+  private static List<MoneroBlock> deserializeBlocks(String blocksJson) {
+    List<MoneroBlockWallet> blockWallets =  JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
     List<MoneroBlock> blocks = new ArrayList<MoneroBlock>();
     if (blockWallets == null) return blocks;
     for (MoneroBlockWallet blockWallet: blockWallets) blocks.add(blockWallet.toBlock());
