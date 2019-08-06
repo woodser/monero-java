@@ -1426,10 +1426,10 @@ public class TestMoneroDaemonRpc {
     
     // standard across all txs
     assertEquals(64, tx.getId().length());
-    if (tx.isRelayed() == null) assertTrue(tx.getInTxPool());  // TODO monero-daemon-rpc: add relayed to get_transactions
+    if (tx.isRelayed() == null) assertTrue(tx.inTxPool());  // TODO monero-daemon-rpc: add relayed to get_transactions
     else assertNotNull(tx.isRelayed());
     assertNotNull(tx.isConfirmed());
-    assertNotNull(tx.getInTxPool());
+    assertNotNull(tx.inTxPool());
     assertNotNull(tx.isMinerTx());
     assertNotNull(tx.isDoubleSpendSeen());
     assertTrue(tx.getVersion() >= 0);
@@ -1441,7 +1441,7 @@ public class TestMoneroDaemonRpc {
     // test presence of output indices
     // TODO: change this over to vouts only
     if (tx.isMinerTx()) assertEquals(tx.getOutputIndices(), null); // TODO: how to get output indices for miner transactions?
-    if (tx.getInTxPool() || ctx.fromGetTxPool || Boolean.FALSE.equals(ctx.hasOutputIndices)) assertEquals(null, tx.getOutputIndices());
+    if (tx.inTxPool() || ctx.fromGetTxPool || Boolean.FALSE.equals(ctx.hasOutputIndices)) assertEquals(null, tx.getOutputIndices());
     else assertNotNull(tx.getOutputIndices());
     if (tx.getOutputIndices() != null) assertFalse(tx.getOutputIndices().isEmpty());
     
@@ -1459,7 +1459,7 @@ public class TestMoneroDaemonRpc {
       assertTrue(tx.getBlock().getTimestamp() > 0);
       assertEquals(true, tx.isRelayed());
       assertEquals(false, tx.isFailed());
-      assertEquals(false, tx.getInTxPool());
+      assertEquals(false, tx.inTxPool());
       assertEquals(false, tx.getDoNotRelay());
       assertEquals(false, tx.isDoubleSpendSeen());
       assertEquals(null, tx.getNumConfirmations()); // client must compute
@@ -1469,7 +1469,7 @@ public class TestMoneroDaemonRpc {
     }
     
     // test in tx pool
-    if (tx.getInTxPool()) {
+    if (tx.inTxPool()) {
       assertEquals(tx.isConfirmed(), false);
       assertEquals(tx.isDoubleSpendSeen(), false);
       assertEquals(tx.getLastFailedHeight(), null);
@@ -1512,7 +1512,7 @@ public class TestMoneroDaemonRpc {
     
     // received time only for tx pool or failed txs
     if (tx.getReceivedTimestamp() != null) {
-      assertTrue(tx.getInTxPool() || tx.isFailed());
+      assertTrue(tx.inTxPool() || tx.isFailed());
     }
     
     // test relayed tx
@@ -1586,7 +1586,7 @@ public class TestMoneroDaemonRpc {
 
   private static void testVout(MoneroOutput vout, TestContext ctx) {
     testOutput(vout);
-    if (vout.getTx().getInTxPool() || Boolean.FALSE.equals(ctx.hasOutputIndices)) assertEquals(null, vout.getIndex());
+    if (vout.getTx().inTxPool() || Boolean.FALSE.equals(ctx.hasOutputIndices)) assertEquals(null, vout.getIndex());
     else assertTrue(vout.getIndex() >= 0);
     assertEquals(64, vout.getStealthPublicKey().length());
   }
@@ -1912,7 +1912,7 @@ public class TestMoneroDaemonRpc {
       assertEquals(false, result.isDoubleSpend());
       assertEquals(false, result.isFeeTooLow());
       assertEquals(false, result.isMixinTooLow());
-      assertEquals(false, result.getHasInvalidInput());
+      assertEquals(false, result.hasInvalidInput());
       assertEquals(false, result.getHasInvalidOutput());
       assertEquals(true, result.isRct());
       assertEquals(false, result.isOverspend());
@@ -1930,7 +1930,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(true, result.isDoubleSpend());
     assertEquals(false, result.isFeeTooLow());
     assertEquals(false, result.isMixinTooLow());
-    assertEquals(false, result.getHasInvalidInput());
+    assertEquals(false, result.hasInvalidInput());
     assertEquals(false, result.getHasInvalidOutput());
     assertEquals(true, result.isRct());
     assertEquals(false, result.isOverspend());
@@ -1943,7 +1943,7 @@ public class TestMoneroDaemonRpc {
     assertNotNull(result.isDoubleSpend());
     assertNotNull(result.isFeeTooLow());
     assertNotNull(result.isMixinTooLow());
-    assertNotNull(result.getHasInvalidInput());
+    assertNotNull(result.hasInvalidInput());
     assertNotNull(result.getHasInvalidOutput());
     assertNotNull(result.isRct());
     assertNotNull(result.isOverspend());

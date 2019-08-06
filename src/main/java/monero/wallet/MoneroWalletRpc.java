@@ -642,15 +642,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
     // build params for get_transfers rpc call
     Map<String, Object> params = new HashMap<String, Object>();
-    boolean canBeConfirmed = !Boolean.FALSE.equals(txReq.isConfirmed()) && !Boolean.TRUE.equals(txReq.getInTxPool()) && !Boolean.TRUE.equals(txReq.isFailed()) && !Boolean.FALSE.equals(txReq.isRelayed());
-    boolean canBeInTxPool = !Boolean.TRUE.equals(txReq.isConfirmed()) && !Boolean.FALSE.equals(txReq.getInTxPool()) && !Boolean.TRUE.equals(txReq.isFailed()) && !Boolean.FALSE.equals(txReq.isRelayed()) && txReq.getHeight() == null && txReq.getMinHeight() == null && txReq.getMaxHeight() == null;
-    boolean canBeIncoming = !Boolean.FALSE.equals(req.isIncoming()) && !Boolean.TRUE.equals(req.isOutgoing()) && !Boolean.TRUE.equals(req.getHasDestinations());
+    boolean canBeConfirmed = !Boolean.FALSE.equals(txReq.isConfirmed()) && !Boolean.TRUE.equals(txReq.inTxPool()) && !Boolean.TRUE.equals(txReq.isFailed()) && !Boolean.FALSE.equals(txReq.isRelayed());
+    boolean canBeInTxPool = !Boolean.TRUE.equals(txReq.isConfirmed()) && !Boolean.FALSE.equals(txReq.inTxPool()) && !Boolean.TRUE.equals(txReq.isFailed()) && !Boolean.FALSE.equals(txReq.isRelayed()) && txReq.getHeight() == null && txReq.getMinHeight() == null && txReq.getMaxHeight() == null;
+    boolean canBeIncoming = !Boolean.FALSE.equals(req.isIncoming()) && !Boolean.TRUE.equals(req.isOutgoing()) && !Boolean.TRUE.equals(req.hasDestinations());
     boolean canBeOutgoing = !Boolean.FALSE.equals(req.isOutgoing()) && !Boolean.TRUE.equals(req.isIncoming());
     params.put("in", canBeIncoming && canBeConfirmed);
     params.put("out", canBeOutgoing && canBeConfirmed);
     params.put("pool", canBeIncoming && canBeInTxPool);
     params.put("pending", canBeOutgoing && canBeInTxPool);
-    params.put("failed", !Boolean.FALSE.equals(txReq.isFailed()) && !Boolean.TRUE.equals(txReq.isConfirmed()) && !Boolean.TRUE.equals(txReq.getInTxPool()));
+    params.put("failed", !Boolean.FALSE.equals(txReq.isFailed()) && !Boolean.TRUE.equals(txReq.isConfirmed()) && !Boolean.TRUE.equals(txReq.inTxPool()));
     if (txReq.getMinHeight() != null) {
       if (txReq.getMinHeight() > 0) params.put("min_height", txReq.getMinHeight() - 1); // TODO monero core: wallet2::get_payments() min_height is exclusive, so manually offset to match intended range (issues #5751, #5598)
       else params.put("min_height", txReq.getMinHeight());
@@ -1677,7 +1677,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     else {
       assertNotNull("Must indicate if tx is outgoing (true) xor incoming (false) since unknown", isOutgoing);
       assertNotNull(tx.isConfirmed());
-      assertNotNull(tx.getInTxPool());
+      assertNotNull(tx.inTxPool());
       assertNotNull(tx.isMinerTx());
       assertNotNull(tx.isFailed());
       assertNotNull(tx.getDoNotRelay());

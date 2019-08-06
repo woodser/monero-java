@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.types.Filter;
 import common.utils.GenUtils;
@@ -129,7 +130,8 @@ public class MoneroTransferRequest extends MoneroTransfer implements Filter<Mone
     return this;
   }
 
-  public Boolean getHasDestinations() {
+  @JsonProperty("hasDestinations")
+  public Boolean hasDestinations() {
     return hasDestinations;
   }
 
@@ -161,7 +163,7 @@ public class MoneroTransferRequest extends MoneroTransfer implements Filter<Mone
     
     // filter on incoming fields
     if (transfer instanceof MoneroIncomingTransfer) {
-      if (Boolean.TRUE.equals(this.getHasDestinations())) return false;
+      if (Boolean.TRUE.equals(this.hasDestinations())) return false;
       MoneroIncomingTransfer inTransfer = (MoneroIncomingTransfer) transfer;
       if (this.getAddress() != null && !this.getAddress().equals(inTransfer.getAddress())) return false;
       if (this.getAddresses() != null && !this.getAddresses().contains(inTransfer.getAddress())) return false;
@@ -190,9 +192,9 @@ public class MoneroTransferRequest extends MoneroTransfer implements Filter<Mone
       }
       
       // filter on having destinations
-      if (this.getHasDestinations() != null) {
-        if (this.getHasDestinations() && outTransfer.getDestinations() == null) return false;
-        if (!this.getHasDestinations() && outTransfer.getDestinations() != null) return false;
+      if (this.hasDestinations() != null) {
+        if (this.hasDestinations() && outTransfer.getDestinations() == null) return false;
+        if (!this.hasDestinations() && outTransfer.getDestinations() != null) return false;
       }
       
       // filter on destinations TODO: start with test for this

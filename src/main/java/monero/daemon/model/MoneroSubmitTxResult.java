@@ -65,7 +65,8 @@ public class MoneroSubmitTxResult {
     this.isMixinTooLow = isMixinTooLow;
   }
   
-  public Boolean getHasInvalidInput() {
+  @JsonProperty("hasInvalidInput")
+  public Boolean hasInvalidInput() {
     return hasInvalidInput;
   }
   

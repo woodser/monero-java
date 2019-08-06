@@ -995,7 +995,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // get transfers in the tx pool
     transfers = getAndTestTransfers(wallet, new MoneroTransferRequest().setTxRequest(new MoneroTxRequest().setInTxPool(true)), null, null);
     for (MoneroTransfer transfer : transfers) {
-      assertEquals(true, transfer.getTx().getInTxPool());
+      assertEquals(true, transfer.getTx().inTxPool());
     }
     
     // get random transactions
@@ -1271,7 +1271,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     // balance may not equal sum of unspent outputs if unconfirmed txs
     // TODO monero-wallet-rpc: reason not to return unspent outputs on unconfirmed txs? then this isn't necessary
     boolean hasUnconfirmedTx = false;
-    for (MoneroTxWallet tx : txs) if (tx.getInTxPool()) hasUnconfirmedTx = true;
+    for (MoneroTxWallet tx : txs) if (tx.inTxPool()) hasUnconfirmedTx = true;
     
     // wallet balance is sum of all unspent outputs
     BigInteger walletSum = BigInteger.valueOf(0);
@@ -2642,7 +2642,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       for (MoneroTxWallet tx : sentTxs) {
         testTxWallet(tx, ctx);
         assertEquals(false, tx.isConfirmed());
-        assertEquals(true, tx.getInTxPool());
+        assertEquals(true, tx.inTxPool());
       }
       
       // track resulting outgoing and incoming txs as blocks are added to the chain
@@ -3169,7 +3169,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       assertTrue(tx.getBlock().getTimestamp() > 0);
       assertEquals(true, tx.isRelayed());
       assertEquals(false, tx.isFailed());
-      assertEquals(false, tx.getInTxPool());
+      assertEquals(false, tx.inTxPool());
       assertEquals(false, tx.getDoNotRelay());
       assertEquals(false, tx.isDoubleSpendSeen());
       assertTrue(tx.getNumConfirmations() > 0);
@@ -3179,7 +3179,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
     
     // test in tx pool
-    if (tx.getInTxPool()) {
+    if (tx.inTxPool()) {
       assertEquals(false, tx.isConfirmed());
       assertEquals(false, tx.getDoNotRelay());
       assertEquals(true, tx.isRelayed());
@@ -3216,7 +3216,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     
     // received time only for tx pool or failed txs
     if (tx.getReceivedTimestamp() != null) {
-      assertTrue(tx.getInTxPool() || tx.isFailed());
+      assertTrue(tx.inTxPool() || tx.isFailed());
     }
     
     // test relayed tx
@@ -3300,7 +3300,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       
       // test relayed txs
       if (!Boolean.TRUE.equals(request.getDoNotRelay())) {
-        assertEquals(true, tx.getInTxPool());
+        assertEquals(true, tx.inTxPool());
         assertEquals(false, tx.getDoNotRelay());
         assertEquals(true, tx.isRelayed());
         assertTrue(tx.getLastRelayedTimestamp() > 0);
@@ -3309,7 +3309,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       
       // test non-relayed txs
       else {
-        assertEquals(false, tx.getInTxPool());
+        assertEquals(false, tx.inTxPool());
         assertEquals(true, tx.getDoNotRelay());
         assertEquals(false, tx.isRelayed());
         assertNull(tx.getLastRelayedTimestamp());
@@ -3352,7 +3352,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     assertNotNull(tx.isMinerTx());
     assertNotNull(tx.isFailed());
     assertNotNull(tx.isRelayed());
-    assertNotNull(tx.getInTxPool());
+    assertNotNull(tx.inTxPool());
     TestUtils.testUnsignedBigInteger(tx.getFee());
     assertNull(tx.getVins());
     if (tx.getPaymentId() != null) assertNotEquals(MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId()); // default payment id converted to null
