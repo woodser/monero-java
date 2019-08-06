@@ -9,7 +9,7 @@ rpc supports on_restore_determinstic_wallet, implement!
 cleanup logging; tests produce many messages at info which should be trace
 better sample code, maybe with two wallets, sending each other funds
 
-update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), getIs() -> is() ??, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing(), coinbaseTx->minerTx, request copying from ~jni93
+update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), get is/has/in, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing(), coinbaseTx->minerTx, request copying from ~jni93, request -> query
 update readme with jni support
 regenerate api docs
 build a picture of types and how they relate to each other

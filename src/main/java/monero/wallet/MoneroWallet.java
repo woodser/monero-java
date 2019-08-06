@@ -34,17 +34,17 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
+import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
+import monero.wallet.model.MoneroTransferQuery;
+import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxWallet;
-import monero.wallet.request.MoneroOutputRequest;
-import monero.wallet.request.MoneroSendRequest;
-import monero.wallet.request.MoneroTransferRequest;
-import monero.wallet.request.MoneroTxRequest;
 
 /**
  * Monero wallet interface.
@@ -390,15 +390,15 @@ public interface MoneroWallet {
    * Get wallet transactions.  Wallet transactions contain one or more
    * transfers that are either incoming or outgoing to the wallet.
    * 
-   * Query results can be filtered by passing in a transaction request.
-   * Transactions must meet every criteria defined in the request in order to
+   * Query results can be filtered by passing a transaction query.
+   * Transactions must meet every criteria defined in the query in order to
    * be returned.  All filtering is optional and no filtering is applied when
    * not defined.
    * 
-   * @param request filters query results (optional)
-   * @return wallet transactions per the request
+   * @param query filters results (optional)
+   * @return wallet transactions per the query
    */
-  public List<MoneroTxWallet> getTxs(final MoneroTxRequest request);
+  public List<MoneroTxWallet> getTxs(MoneroTxQuery query);
   
   /**
    * Get all incoming and outgoing transfers to and from this wallet.  An
@@ -447,15 +447,15 @@ public interface MoneroWallet {
    * a subaddress within an account.  Transfers belong to transactions which
    * are stored on the blockchain.
    * 
-   * Query results can be filtered by passing in a MoneroTransferRequest.
-   * Transfers must meet every criteria defined in the request in order to be
+   * Query results can be filtered by passing in a MoneroTransferQuery.
+   * Transfers must meet every criteria defined in the query in order to be
    * returned.  All filtering is optional and no filtering is applied when not
    * defined.
    * 
-   * @param request filters query results (optional)
-   * @return wallet transfers per the request
+   * @param query filters query results (optional)
+   * @return wallet transfers per the query
    */
-  public List<MoneroTransfer> getTransfers(final MoneroTransferRequest request);
+  public List<MoneroTransfer> getTransfers(MoneroTransferQuery query);
   
   /**
    * Get outputs created from previous transactions that belong to the wallet
@@ -471,14 +471,14 @@ public interface MoneroWallet {
    * (i.e. that the wallet can spend one time).  Outputs are part of
    * transactions which are stored in blocks on the blockchain.
    * 
-   * Results can be configured by passing a MoneroOutputRequest.  Outputs must
-   * meet every criteria defined in the request in order to be returned.  All
+   * Results can be configured by passing a MoneroOutputQuery.  Outputs must
+   * meet every criteria defined in the query in order to be returned.  All
    * filtering is optional and no filtering is applied when not defined.
    * 
-   * @param request specifies request options (optional)
-   * @return List<MoneroOutputWallet> are wallet outputs per the request
+   * @param query specifies query options (optional)
+   * @return List<MoneroOutputWallet> are wallet outputs per the query
    */
-  public List<MoneroOutputWallet> getOutputs(final MoneroOutputRequest request);
+  public List<MoneroOutputWallet> getOutputs(MoneroOutputQuery query);
   
   /**
    * Export all outputs in hex format.

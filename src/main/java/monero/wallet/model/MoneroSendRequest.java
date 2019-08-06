@@ -1,4 +1,4 @@
-package monero.wallet.request;
+package monero.wallet.model;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -8,8 +8,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
-import monero.wallet.model.MoneroDestination;
-import monero.wallet.model.MoneroSendPriority;
 
 /**
  * Configures a request to send/sweep funds or create a payment URI.

@@ -26,8 +26,8 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroTxWallet;
-import monero.wallet.request.MoneroSendRequest;
 import utils.TestUtils;
 
 /**

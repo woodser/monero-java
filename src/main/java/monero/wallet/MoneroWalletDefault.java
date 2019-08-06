@@ -35,14 +35,14 @@ import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
+import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
+import monero.wallet.model.MoneroTransferQuery;
+import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxWallet;
-import monero.wallet.request.MoneroSendRequest;
-import monero.wallet.request.MoneroTransferRequest;
-import monero.wallet.request.MoneroTxRequest;
 
 /**
  * Default implementation of a Monero Wallet.
@@ -129,15 +129,15 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   
   @Override
   public List<MoneroTxWallet> getTxs() {
-    return getTxs(new MoneroTxRequest());
+    return getTxs(new MoneroTxQuery());
   }
   
   public List<MoneroTxWallet> getTxs(String... txIds) {
-    return getTxs(new MoneroTxRequest().setTxIds(txIds));
+    return getTxs(new MoneroTxQuery().setTxIds(txIds));
   }
   
   public List<MoneroTxWallet> getTxs(List<String> txIds) {
-    return getTxs(new MoneroTxRequest().setTxIds(txIds));
+    return getTxs(new MoneroTxQuery().setTxIds(txIds));
   }
   
   @Override
@@ -147,14 +147,14 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   
   @Override
   public List<MoneroTransfer> getTransfers(int accountIdx) {
-    MoneroTransferRequest request = new MoneroTransferRequest().setAccountIndex(accountIdx);
-    return getTransfers(request);
+    MoneroTransferQuery query = new MoneroTransferQuery().setAccountIndex(accountIdx);
+    return getTransfers(query);
   }
   
   @Override
   public List<MoneroTransfer> getTransfers(int accountIdx, int subaddressIdx) {
-    MoneroTransferRequest request = new MoneroTransferRequest().setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx);
-    return getTransfers(request);
+    MoneroTransferQuery query = new MoneroTransferQuery().setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx);
+    return getTransfers(query);
   }
   
   @Override
@@ -163,7 +163,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public MoneroTxWallet createTx(final MoneroSendRequest request) {
+  public MoneroTxWallet createTx(MoneroSendRequest request) {
     if (request == null) throw new MoneroException("Send request cannot be null");
     if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with sendTx() which prevents splitting; use sendTxs() instead");
     request.setCanSplit(false);
@@ -171,14 +171,14 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public List<MoneroTxWallet> createTxs(final MoneroSendRequest request) {
+  public List<MoneroTxWallet> createTxs(MoneroSendRequest request) {
     if (request == null) throw new MoneroException("Send request cannot be null");
     
     // modify request to not relay
     Boolean requestedDoNotRelay = request.getDoNotRelay();
     request.setDoNotRelay(true);
     
-    // invoke common method which doens't relay
+    // invoke common method which doesn't relay
     List<MoneroTxWallet> createdTxs = sendSplit(request);
     
     // restore doNotRelay of request and txs
@@ -207,7 +207,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public MoneroTxWallet send(final MoneroSendRequest request) {
+  public MoneroTxWallet send(MoneroSendRequest request) {
     if (request == null) throw new MoneroException("Send request cannot be null");
     if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with sendTx() which prevents splitting; use sendTxs() instead");
     request.setCanSplit(false);
@@ -225,7 +225,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
 
   @Override
-  public List<MoneroTxWallet> sendSplit(final MoneroSendRequest request) {
+  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
     throw new RuntimeException("Not implemented");
   }
   

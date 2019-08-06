@@ -51,7 +51,7 @@ import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
-import monero.wallet.request.MoneroSendRequest;
+import monero.wallet.model.MoneroSendRequest;
 import utils.TestUtils;
 
 /**

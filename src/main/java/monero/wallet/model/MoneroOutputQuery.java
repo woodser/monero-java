@@ -1,4 +1,4 @@
-package monero.wallet.request;
+package monero.wallet.model;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -10,41 +10,39 @@ import common.types.Filter;
 import common.utils.GenUtils;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroTx;
-import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroTxWallet;
 
 /**
- * Configures a request to retrieve wallet outputs (i.e. outputs that the wallet has or had the
+ * Configures a query to retrieve wallet outputs (i.e. outputs that the wallet has or had the
  * ability to spend).
  * 
- * All outputs are returned except those that do not meet the criteria defined in this request.
+ * All outputs are returned except those that do not meet the criteria defined in this query.
  */
-public class MoneroOutputRequest extends MoneroOutputWallet implements Filter<MoneroOutputWallet> {
+public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<MoneroOutputWallet> {
 
-  private MoneroTxRequest txRequest;
+  private MoneroTxQuery txQuery;
   private List<Integer> subaddressIndices;
   
-  public MoneroOutputRequest() {
+  public MoneroOutputQuery() {
     super();
   }
   
-  public MoneroOutputRequest(final MoneroOutputRequest req) {
-    super(req);
-    if (req.subaddressIndices != null) this.subaddressIndices = new ArrayList<Integer>(req.subaddressIndices);
-    this.txRequest = req.txRequest;  // reference original by default, MoneroTxRequest's deep copy will set this to itself
+  public MoneroOutputQuery(final MoneroOutputQuery query) {
+    super(query);
+    if (query.subaddressIndices != null) this.subaddressIndices = new ArrayList<Integer>(query.subaddressIndices);
+    this.txQuery = query.txQuery;  // reference original by default, MoneroTxQuery's deep copy will set this to itself
   }
   
-  public MoneroOutputRequest copy() {
-    return new MoneroOutputRequest(this);
+  public MoneroOutputQuery copy() {
+    return new MoneroOutputQuery(this);
   }
   
   @JsonIgnore
-  public MoneroTxRequest getTxRequest() {
-    return txRequest;
+  public MoneroTxQuery getTxQuery() {
+    return txQuery;
   }
 
-  public MoneroOutputRequest setTxRequest(MoneroTxRequest txRequest) {
-    this.txRequest = txRequest;
+  public MoneroOutputQuery setTxQuery(MoneroTxQuery txQuery) {
+    this.txQuery = txQuery;
     return this;
   }
   
@@ -52,12 +50,12 @@ public class MoneroOutputRequest extends MoneroOutputWallet implements Filter<Mo
     return subaddressIndices;
   }
 
-  public MoneroOutputRequest setSubaddressIndices(List<Integer> subaddressIndices) {
+  public MoneroOutputQuery setSubaddressIndices(List<Integer> subaddressIndices) {
     this.subaddressIndices = subaddressIndices;
     return this;
   }
   
-  public MoneroOutputRequest setSubaddressIndices(Integer... subaddressIndices) {
+  public MoneroOutputQuery setSubaddressIndices(Integer... subaddressIndices) {
     this.subaddressIndices = GenUtils.arrayToList(subaddressIndices);
     return this;
   }
@@ -83,78 +81,78 @@ public class MoneroOutputRequest extends MoneroOutputWallet implements Filter<Mo
     // filter on extensions
     if (this.getSubaddressIndices() != null && !this.getSubaddressIndices().contains(output.getSubaddressIndex())) return false;
     
-    // filter with tx request
-    if (this.getTxRequest() != null && !this.getTxRequest().meetsCriteria(output.getTx())) return false;
+    // filter with tx query
+    if (this.getTxQuery() != null && !this.getTxQuery().meetsCriteria(output.getTx())) return false;
     
-    // output meets request
+    // output meets query
     return true;
   }
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
 
   @Override
-  public MoneroOutputRequest setTx(MoneroTx tx) {
+  public MoneroOutputQuery setTx(MoneroTx tx) {
     super.setTx(tx);
     return this;
   }
 
   @Override
-  public MoneroOutputRequest setTx(MoneroTxWallet tx) {
+  public MoneroOutputQuery setTx(MoneroTxWallet tx) {
     super.setTx(tx);
     return this;
   }
 
   @Override
-  public MoneroOutputRequest setAccountIndex(Integer accountIndex) {
+  public MoneroOutputQuery setAccountIndex(Integer accountIndex) {
     super.setAccountIndex(accountIndex);
     return this;
   }
 
   @Override
-  public MoneroOutputRequest setSubaddressIndex(Integer subaddressIndex) {
+  public MoneroOutputQuery setSubaddressIndex(Integer subaddressIndex) {
     super.setSubaddressIndex(subaddressIndex);
     return this;
   }
 
   @Override
-  public MoneroOutputRequest setIsSpent(Boolean isSpent) {
+  public MoneroOutputQuery setIsSpent(Boolean isSpent) {
     super.setIsSpent(isSpent);
     return this;
   }
   
   @Override
-  public MoneroOutputRequest setIsUnlocked(Boolean isUnlocked) {
+  public MoneroOutputQuery setIsUnlocked(Boolean isUnlocked) {
     super.setIsUnlocked(isUnlocked);
     return this;
   }
 
 
   @Override
-  public MoneroOutputRequest setKeyImage(MoneroKeyImage keyImage) {
+  public MoneroOutputQuery setKeyImage(MoneroKeyImage keyImage) {
     super.setKeyImage(keyImage);
     return this;
   }
 
   @Override
-  public MoneroOutputRequest setAmount(BigInteger amount) {
+  public MoneroOutputQuery setAmount(BigInteger amount) {
     super.setAmount(amount);
     return this;
   }
 
   @Override
-  public MoneroOutputRequest setIndex(Integer index) {
+  public MoneroOutputQuery setIndex(Integer index) {
     super.setIndex(index);
     return this;
   }
 
   @Override
-  public MoneroOutputRequest setRingOutputIndices(List<Integer> ringOutputIndices) {
+  public MoneroOutputQuery setRingOutputIndices(List<Integer> ringOutputIndices) {
     super.setRingOutputIndices(ringOutputIndices);
     return this;
   }
 
   @Override
-  public MoneroOutputRequest setStealthPublicKey(String stealthPublicKey) {
+  public MoneroOutputQuery setStealthPublicKey(String stealthPublicKey) {
     super.setStealthPublicKey(stealthPublicKey);
     return this;
   }
