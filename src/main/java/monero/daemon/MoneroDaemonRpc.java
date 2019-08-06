@@ -1083,7 +1083,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("receive_time")) tx.setReceivedTimestamp(MoneroUtils.reconcile(tx.getReceivedTimestamp(), ((BigInteger) val).longValue()));
       else if (key.equals("in_pool")) {
         tx.setIsConfirmed(MoneroUtils.reconcile(tx.isConfirmed(), !(Boolean) val));
-        tx.setInTxPool(MoneroUtils.reconcile(tx.getInTxPool(), (Boolean) val));
+        tx.setInTxPool(MoneroUtils.reconcile(tx.inTxPool(), (Boolean) val));
       }
       else if (key.equals("double_spend_seen")) tx.setIsDoubleSpendSeen(MoneroUtils.reconcile(tx.isDoubleSpendSeen(), (Boolean) val));
       else if (key.equals("version")) tx.setVersion(MoneroUtils.reconcile(tx.getVersion(), ((BigInteger) val).intValue()));

@@ -102,7 +102,8 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     return setTxIds(Arrays.asList(txId));
   }
 
-  public Boolean getHasPaymentId() {
+  @JsonProperty("hasPaymentId")
+  public Boolean hasPaymentId() {
     return hasPaymentId;
   }
 
@@ -186,7 +187,7 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     if (this.getId() != null && !this.getId().equals(tx.getId())) return false;
     if (this.getPaymentId() != null && !this.getPaymentId().equals(tx.getPaymentId())) return false;
     if (this.isConfirmed() != null && this.isConfirmed() != tx.isConfirmed()) return false;
-    if (this.getInTxPool() != null && this.getInTxPool() != tx.getInTxPool()) return false;
+    if (this.inTxPool() != null && this.inTxPool() != tx.inTxPool()) return false;
     if (this.getDoNotRelay() != null && this.getDoNotRelay() != tx.getDoNotRelay()) return false;
     if (this.isRelayed() != null && this.isRelayed() != tx.isRelayed()) return false;
     if (this.isFailed() != null && this.isFailed() != tx.isFailed()) return false;
@@ -208,9 +209,9 @@ public class MoneroTxRequest extends MoneroTxWallet implements Filter<MoneroTxWa
     }
     
     // filter on having a payment id
-    if (this.getHasPaymentId() != null) {
-      if (this.getHasPaymentId() && tx.getPaymentId() == null) return false;
-      if (!this.getHasPaymentId() && tx.getPaymentId() != null) return false;
+    if (this.hasPaymentId() != null) {
+      if (this.hasPaymentId() && tx.getPaymentId() == null) return false;
+      if (!this.hasPaymentId() && tx.getPaymentId() != null) return false;
     }
     
     // filter on incoming

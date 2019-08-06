@@ -219,7 +219,8 @@ public class MoneroTx {
     return this;
   }
   
-  public Boolean getInTxPool() {
+  @JsonProperty("inTxPool")
+  public Boolean inTxPool() {
     return inTxPool;
   }
   
@@ -600,7 +601,7 @@ public class MoneroTx {
       this.setReceivedTimestamp(null);
       this.setLastRelayedTimestamp(null);
     } else {
-      this.setInTxPool(MoneroUtils.reconcile(this.getInTxPool(), tx.getInTxPool(), null, true, null)); // unrelayed -> tx pool
+      this.setInTxPool(MoneroUtils.reconcile(this.inTxPool(), tx.inTxPool(), null, true, null)); // unrelayed -> tx pool
       this.setReceivedTimestamp(MoneroUtils.reconcile(this.getReceivedTimestamp(), tx.getReceivedTimestamp(), null, null, false)); // take earliest receive time
       this.setLastRelayedTimestamp(MoneroUtils.reconcile(this.getLastRelayedTimestamp(), tx.getLastRelayedTimestamp(), null, null, true));  // take latest relay time
     }
@@ -625,7 +626,7 @@ public class MoneroTx {
     sb.append(MoneroUtils.kvLine("Do not relay", getDoNotRelay(), indent));
     sb.append(MoneroUtils.kvLine("Is relayed", isRelayed(), indent));
     sb.append(MoneroUtils.kvLine("Is confirmed", isConfirmed(), indent));
-    sb.append(MoneroUtils.kvLine("In tx pool", getInTxPool(), indent));
+    sb.append(MoneroUtils.kvLine("In tx pool", inTxPool(), indent));
     sb.append(MoneroUtils.kvLine("Num confirmations", getNumConfirmations(), indent));
     sb.append(MoneroUtils.kvLine("Unlock time", getUnlockTime(), indent));
     sb.append(MoneroUtils.kvLine("Last relayed time", getLastRelayedTimestamp(), indent));
