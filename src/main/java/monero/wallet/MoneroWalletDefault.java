@@ -201,7 +201,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   
   @Override
   public String relayTx(MoneroTxWallet tx) {
-    return relayTx(tx.getFullHex());
+    return relayTx(tx.getMetadata());
   }
   
   @Override
