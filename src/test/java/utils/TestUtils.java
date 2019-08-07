@@ -57,9 +57,9 @@ public class TestUtils {
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
   public static final MoneroNetworkType NETWORK_TYPE = MoneroNetworkType.STAGENET;
   public static final String LANGUAGE = "English";
-  public static final String MNEMONIC = "veteran inwardly films myriad godfather feel odds legion rarest dating adopt onward wetsuit atrium drying ruined relic refer bamboo voted baffles agnostic cycling dexterity relic"; 
-  public static final String ADDRESS = "57QzhZAYSHeWG8EpUT8iNTcYATUoMv7hf6MoVCWge6HoV1vGTor1ZkSGa6pH1Xv3xMRh53m5KWFdbSnmmMmzSgpQCrVUyTL";
-  public static final long RESTORE_HEIGHT = 370987; // NOTE: this value MUST be the height of the wallet's first tx for tests
+  public static final String MNEMONIC = "hefty value later extra artistic firm radar yodel talent future fungal nutshell because sanity awesome nail unjustly rage unafraid cedar delayed thumbs comb custom sanity"; 
+  public static final String ADDRESS = "528qdm2pXnYYesCy5VdmBneWeaSZutEijFVAKjpVHeVd4unsCSM55CjgViQsK9WFNHK1eZgcCuZ3fRqYpzKDokqSKp4yp38";
+  public static final long FIRST_RECEIVE_HEIGHT = 370987; // NOTE: this value MUST be the height of the wallet's first tx for tests
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class);
@@ -122,8 +122,8 @@ public class TestUtils {
       // create wallet from mnemonic phrase if it doesn't exist
       if (!MoneroWalletJni.walletExists(WALLET_JNI_PATH_1)) {
         MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
-        walletJni = MoneroWalletJni.createWalletFromMnemonic(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, NETWORK_TYPE, TestUtils.MNEMONIC, daemonConnection, RESTORE_HEIGHT);
-        assertEquals(TestUtils.RESTORE_HEIGHT, walletJni.getRestoreHeight());
+        walletJni = MoneroWalletJni.createWalletFromMnemonic(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_JNI_PW, NETWORK_TYPE, TestUtils.MNEMONIC, daemonConnection, FIRST_RECEIVE_HEIGHT);
+        assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, walletJni.getRestoreHeight());
         walletJni.sync(new WalletSyncPrinter());
         walletJni.save(); // save progress
         walletJni.startSyncing();

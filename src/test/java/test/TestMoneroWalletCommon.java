@@ -247,7 +247,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   @Test
   public void testCompareGroundTruth() {
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
-    MoneroWalletJni walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.RESTORE_HEIGHT);
+    MoneroWalletJni walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT);
     try {
       testWalletsEqualOnChain(walletGt, wallet);
     } finally {
@@ -481,7 +481,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     List<MoneroTxWallet> txs2 = getAndTestTxs(wallet, null, null, true);
     assertEquals(txs2.size(), txs1.size());
     assertFalse("Wallet has no txs to test", txs1.isEmpty());
-    assertEquals("First tx's restore height must match the restore height in TestUtils", TestUtils.RESTORE_HEIGHT, (long) txs1.get(0).getHeight());
+    assertEquals("First tx's restore height must match the restore height in TestUtils", TestUtils.FIRST_RECEIVE_HEIGHT, (long) txs1.get(0).getHeight());
     
     // build test context
     TestContext ctx = new TestContext();

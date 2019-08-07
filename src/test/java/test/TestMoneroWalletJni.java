@@ -251,7 +251,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // recreate test wallet from keys
     String path = getRandomWalletPath();
-    MoneroWalletJni walletKeys = MoneroWalletJni.createWalletFromKeys(path, TestUtils.WALLET_JNI_PW, wallet.getNetworkType(), wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), wallet.getDaemonConnection(), TestUtils.RESTORE_HEIGHT, null);
+    MoneroWalletJni walletKeys = MoneroWalletJni.createWalletFromKeys(path, TestUtils.WALLET_JNI_PW, wallet.getNetworkType(), wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), wallet.getDaemonConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
     try {
       assertEquals(wallet.getMnemonic(), walletKeys.getMnemonic());
       assertEquals(wallet.getPrimaryAddress(), walletKeys.getPrimaryAddress());
@@ -259,7 +259,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals(wallet.getPublicViewKey(), walletKeys.getPublicViewKey());
       assertEquals(wallet.getPrivateSpendKey(), walletKeys.getPrivateSpendKey());
       assertEquals(wallet.getPublicSpendKey(), walletKeys.getPublicSpendKey());
-      assertEquals(TestUtils.RESTORE_HEIGHT, walletKeys.getRestoreHeight());
+      assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, walletKeys.getRestoreHeight());
       assertTrue(walletKeys.isConnected());
       assertFalse(walletKeys.isSynced());
     } finally {
@@ -372,31 +372,31 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Test
   public void testSyncMnemonicFromRestoreHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    testSyncMnemonic(null, TestUtils.RESTORE_HEIGHT);
+    testSyncMnemonic(null, TestUtils.FIRST_RECEIVE_HEIGHT);
   }
   
   @Test
   public void testSyncMnemonicFromStartHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
-    testSyncMnemonic(TestUtils.RESTORE_HEIGHT, null, false, true);
+    testSyncMnemonic(TestUtils.FIRST_RECEIVE_HEIGHT, null, false, true);
   }
   
   @Test
   public void testSyncMnemonicStartHeightLTRestoreHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
-    testSyncMnemonic(TestUtils.RESTORE_HEIGHT, TestUtils.RESTORE_HEIGHT + 3l);
+    testSyncMnemonic(TestUtils.FIRST_RECEIVE_HEIGHT, TestUtils.FIRST_RECEIVE_HEIGHT + 3l);
   }
   
   @Test
   public void testSyncMnemonicStartHeightGTRestoreHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
-    testSyncMnemonic(TestUtils.RESTORE_HEIGHT + 3l, TestUtils.RESTORE_HEIGHT);
+    testSyncMnemonic(TestUtils.FIRST_RECEIVE_HEIGHT + 3l, TestUtils.FIRST_RECEIVE_HEIGHT);
   }
   
   private void testSyncMnemonic(Long startHeight, Long restoreHeight) { testSyncMnemonic(startHeight, restoreHeight, false, false); }
   private void testSyncMnemonic(Long startHeight, Long restoreHeight, boolean skipGtComparison, boolean testPostSyncNotifications) {
     assertTrue("Not connected to daemon", daemon.isConnected());
-    if (startHeight != null && restoreHeight != null) assertTrue(startHeight <= TestUtils.RESTORE_HEIGHT || restoreHeight <= TestUtils.RESTORE_HEIGHT);
+    if (startHeight != null && restoreHeight != null) assertTrue(startHeight <= TestUtils.FIRST_RECEIVE_HEIGHT || restoreHeight <= TestUtils.FIRST_RECEIVE_HEIGHT);
     
     // create wallet from mnemonic
     MoneroWalletJni wallet = MoneroWalletJni.createWalletFromMnemonic(getRandomWalletPath(), TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.getDaemonRpc().getRpcConnection(), restoreHeight);
@@ -435,8 +435,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertTrue(result.getReceivedMoney());
       assertEquals(daemon.getHeight(), wallet.getHeight());
       assertEquals(daemon.getHeight(), wallet.getDaemonHeight());
-      if (startHeightExpected > TestUtils.RESTORE_HEIGHT) assertTrue(wallet.getTxs().get(0).getHeight() > TestUtils.RESTORE_HEIGHT);  // wallet is partially synced so first tx happens after true restore height
-      else assertEquals(TestUtils.RESTORE_HEIGHT, (long) wallet.getTxs().get(0).getHeight());  // wallet should be fully synced so first tx happens on true restore height
+      if (startHeightExpected > TestUtils.FIRST_RECEIVE_HEIGHT) assertTrue(wallet.getTxs().get(0).getHeight() > TestUtils.FIRST_RECEIVE_HEIGHT);  // wallet is partially synced so first tx happens after true restore height
+      else assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, (long) wallet.getTxs().get(0).getHeight());  // wallet should be fully synced so first tx happens on true restore height
       
       // sync the wallet with default params
       result = wallet.sync();
@@ -504,10 +504,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // recreate test wallet from keys
     String path = getRandomWalletPath();
-    MoneroWalletJni walletKeys = MoneroWalletJni.createWalletFromKeys(path, TestUtils.WALLET_JNI_PW,  wallet.getNetworkType(), wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), wallet.getDaemonConnection(), TestUtils.RESTORE_HEIGHT, null);
+    MoneroWalletJni walletKeys = MoneroWalletJni.createWalletFromKeys(path, TestUtils.WALLET_JNI_PW,  wallet.getNetworkType(), wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), wallet.getDaemonConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
     
     // create ground truth wallet for comparison
-    MoneroWalletJni walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.RESTORE_HEIGHT);
+    MoneroWalletJni walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT);
     
     // test wallet and close as final step
     try {
@@ -517,22 +517,22 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals(walletKeys.getPublicViewKey(), walletKeys.getPublicViewKey());
       assertEquals(walletKeys.getPrivateSpendKey(), walletKeys.getPrivateSpendKey());
       assertEquals(walletKeys.getPublicSpendKey(), walletKeys.getPublicSpendKey());
-      assertEquals(TestUtils.RESTORE_HEIGHT, walletKeys.getRestoreHeight());
+      assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, walletKeys.getRestoreHeight());
       assertTrue(walletKeys.isConnected());
       assertFalse(walletKeys.isSynced());
       
       // sync the wallet
-      SyncProgressTester progressTester = new SyncProgressTester(walletKeys, TestUtils.RESTORE_HEIGHT, walletKeys.getDaemonMaxPeerHeight());
+      SyncProgressTester progressTester = new SyncProgressTester(walletKeys, TestUtils.FIRST_RECEIVE_HEIGHT, walletKeys.getDaemonMaxPeerHeight());
       MoneroSyncResult result = walletKeys.sync(progressTester);
       progressTester.onDone(walletKeys.getDaemonHeight());
       
       // test result after syncing
       assertTrue(walletKeys.isSynced());
-      assertEquals(walletKeys.getDaemonHeight() - TestUtils.RESTORE_HEIGHT, (long) result.getNumBlocksFetched());
+      assertEquals(walletKeys.getDaemonHeight() - TestUtils.FIRST_RECEIVE_HEIGHT, (long) result.getNumBlocksFetched());
       assertTrue(result.getReceivedMoney());
       assertEquals(daemon.getHeight(), walletKeys.getHeight());
       assertEquals(daemon.getHeight(), walletKeys.getDaemonHeight());
-      assertEquals(TestUtils.RESTORE_HEIGHT, (long) walletKeys.getTxs().get(0).getHeight());  // wallet should be fully synced so first tx happens on true restore height
+      assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, (long) walletKeys.getTxs().get(0).getHeight());  // wallet should be fully synced so first tx happens on true restore height
       
       // compare with ground truth
       testWalletsEqualOnChain(walletGt, walletKeys);
