@@ -94,6 +94,20 @@ public interface MoneroWallet {
   public String getPrimaryAddress();
   
   /**
+   * Get the height of the last block processed by the wallet (its index + 1).  // TODO **: should be the height of the last block processed + 1, which is the height of the next block to process
+   * 
+   * @return the height of the last block processed by the wallet
+   */
+  public long getHeight();
+  
+  /**
+   * Get the blockchain's height.
+   * 
+   * @return the blockchain's height
+   */
+  public long getDaemonHeight();
+  
+  /**
    * Get the address of a specific subaddress.
    * 
    * @param accountIdx specifies the account index of the address's subaddress
@@ -184,20 +198,6 @@ public interface MoneroWallet {
    * @return true if importing multisig data is needed for returning a correct balance, false otherwise
    */
   public boolean isMultisigImportNeeded();
-  
-  /**
-   * Get the height of the last block processed by the wallet (its index + 1).  // TODO **: should be the height of the last block processed + 1, which is the height of the next block to process
-   * 
-   * @return the height of the last block processed by the wallet
-   */
-  public long getHeight();
-  
-  /**
-   * Get the blockchain's height.
-   * 
-   * @return the blockchain's height
-   */
-  public long getChainHeight();
   
   /**
    * Get the wallet's balance.
