@@ -872,20 +872,20 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createSubaddressJni
   return env->NewStringUTF(subaddress_json.c_str());
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* env, jobject instance, jstring jtxRequest) {
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* env, jobject instance, jstring jtx_query) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_getTxsJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  const char* _txRequest = jtxRequest ? env->GetStringUTFChars(jtxRequest, NULL) : nullptr;
-  string tx_request_json = string(_txRequest ? _txRequest : "");
-  env->ReleaseStringUTFChars(jtxRequest, _txRequest);
+  const char* _tx_query = jtx_query ? env->GetStringUTFChars(jtx_query, NULL) : nullptr;
+  string tx_query_json = string(_tx_query ? _tx_query : "");
+  env->ReleaseStringUTFChars(jtx_query, _tx_query);
   try {
 
-    // deserialize tx request
-    shared_ptr<monero_tx_request> tx_request = monero_utils::deserialize_tx_request(tx_request_json);
-    MTRACE("Fetching txs with request: " << tx_request->serialize());
+    // deserialize tx query
+    shared_ptr<monero_tx_query> tx_query = monero_utils::deserialize_tx_query(tx_query_json);
+    MTRACE("Fetching txs with query: " << tx_query->serialize());
 
     // get txs
-    vector<shared_ptr<monero_tx_wallet>> txs = wallet->get_txs(*tx_request);
+    vector<shared_ptr<monero_tx_wallet>> txs = wallet->get_txs(*tx_query);
     MTRACE("Got " << txs.size() << " txs");
 
     // return unique blocks to preserve model relationships as tree
@@ -919,20 +919,20 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   }
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNIEnv* env, jobject instance, jstring jtransferRequest) {
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNIEnv* env, jobject instance, jstring jtransfer_query) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_getTransfersJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  const char* _transferRequest = jtransferRequest ? env->GetStringUTFChars(jtransferRequest, NULL) : nullptr;
-  string transfer_request_json = string(_transferRequest ? _transferRequest : "");
-  env->ReleaseStringUTFChars(jtransferRequest, _transferRequest);
+  const char* _transfer_query = jtransfer_query ? env->GetStringUTFChars(jtransfer_query, NULL) : nullptr;
+  string transfer_query_json = string(_transfer_query ? _transfer_query : "");
+  env->ReleaseStringUTFChars(jtransfer_query, _transfer_query);
   try {
 
-    // deserialize transfer request
-    shared_ptr<monero_transfer_request> transfer_request = monero_utils::deserialize_transfer_request(transfer_request_json);
-    MTRACE("Fetching transfers with request: " << transfer_request->serialize());
+    // deserialize transfer query
+    shared_ptr<monero_transfer_query> transfer_query = monero_utils::deserialize_transfer_query(transfer_query_json);
+    MTRACE("Fetching transfers with query: " << transfer_query->serialize());
 
     // get transfers
-    vector<shared_ptr<monero_transfer>> transfers = wallet->get_transfers(*transfer_request);
+    vector<shared_ptr<monero_transfer>> transfers = wallet->get_transfers(*transfer_query);
     MTRACE("Got " << transfers.size() << " transfers");
 
     // return unique blocks to preserve model relationships as tree
@@ -966,20 +966,20 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
   }
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEnv* env, jobject instance, jstring joutput_request) {
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEnv* env, jobject instance, jstring joutput_query) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_getOutputsJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  const char* _output_request = joutput_request ? env->GetStringUTFChars(joutput_request, NULL) : nullptr;
-  string output_request_json = string(_output_request ? _output_request : "");
-  env->ReleaseStringUTFChars(joutput_request, _output_request);
+  const char* _output_query = joutput_query ? env->GetStringUTFChars(joutput_query, NULL) : nullptr;
+  string output_query_json = string(_output_query ? _output_query : "");
+  env->ReleaseStringUTFChars(joutput_query, _output_query);
   try {
 
     // deserialize output request
-    shared_ptr<monero_output_request> output_request = monero_utils::deserialize_output_request(output_request_json);
-    MTRACE("Fetching outputs with request: " << output_request->serialize());
+    shared_ptr<monero_output_query> output_query = monero_utils::deserialize_output_query(output_query_json);
+    MTRACE("Fetching outputs with request: " << output_query->serialize());
 
     // get outputs
-    vector<shared_ptr<monero_output_wallet>> outputs = wallet->get_outputs(*output_request);
+    vector<shared_ptr<monero_output_wallet>> outputs = wallet->get_outputs(*output_query);
     MTRACE("Got " << outputs.size() << " outputs");
 
     // return unique blocks to preserve model relationships as tree
