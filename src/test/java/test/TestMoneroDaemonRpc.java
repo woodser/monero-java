@@ -67,7 +67,7 @@ public class TestMoneroDaemonRpc {
   private static final boolean LITE_MODE = false;
   private static boolean TEST_NON_RELAYS = true;
   private static boolean TEST_RELAYS = true; // creates and relays outgoing txs
-  private static boolean TEST_NOTIFICATIONS = false;
+  private static boolean TEST_NOTIFICATIONS = true;
   
   // config for testing binary blocks
   // TODO: binary blocks have inconsistent client-side pruning
