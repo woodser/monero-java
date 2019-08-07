@@ -518,8 +518,31 @@ public interface MoneroWallet {
   public List<MoneroKeyImage> getNewKeyImagesFromLastImport();
   
   /**
+   * Create a transaction to transfers funds from this wallet to a destination address.
+   * The transaction may be relayed later.
+   * 
+   * @param accountIndex is the index of the account to draw funds from
+   * @param address is the destination address to send funds to
+   * @param amount is the amount being sent
+   * @return the resulting transaction
+   */
+  public MoneroTxWallet createTx(int accountIndex, String address, BigInteger amount);
+  
+  /**
+   * Create a transaction to transfers funds from this wallet to a destination address.
+   * The transaction may be relayed later.
+   * 
+   * @param accountIndex is the index of the account to draw funds from
+   * @param address is the destination address to send funds to
+   * @param amount is the amount being sent
+   * @param priority is the send priority (default normal)
+   * @return the resulting transaction
+   */
+  public MoneroTxWallet createTx(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
+  
+  /**
    * Create a transaction to transfer funds from this wallet according to the
-   * given request.  The transaction may later be relayed.
+   * given request.  The transaction may be relayed later.
    * 
    * @param request configures the transaction to create
    * @return the created transaction

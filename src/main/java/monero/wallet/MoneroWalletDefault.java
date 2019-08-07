@@ -163,6 +163,16 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
+  public MoneroTxWallet createTx(int accountIndex, String address, BigInteger sendAmount) {
+    return createTx(accountIndex, address, sendAmount, null);
+  }
+  
+  @Override
+  public MoneroTxWallet createTx(int accountIndex, String address, BigInteger sendAmount, MoneroSendPriority priority) {
+    return createTx(new MoneroSendRequest(accountIndex, address, sendAmount, priority));
+  }
+  
+  @Override
   public MoneroTxWallet createTx(MoneroSendRequest request) {
     if (request == null) throw new MoneroException("Send request cannot be null");
     if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with sendTx() which prevents splitting; use sendTxs() instead");
