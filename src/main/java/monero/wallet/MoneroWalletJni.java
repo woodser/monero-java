@@ -279,28 +279,14 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Get the height that the wallet's daemon is synced to.
-   * 
-   * @return the height that the wallet's daemon is synced to
+   * Get the maximum height of the peers the wallet's daemon is connected to.
+   *
+   * @return the maximum height of the peers the wallet's daemon is connected to
    */
-  public long getDaemonHeight() {
+  public long getDaemonMaxPeerHeight() {
     assertNotClosed();
     try {
-      return getDaemonHeightJni();
-    } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
-    }
-  }
-  
-  /**
-   * Get the height of the next block in the chain.
-   * 
-   * @return the height of the next block in the chain
-   */
-  public long getDaemonTargetHeight() {
-    assertNotClosed();
-    try {
-      return getDaemonTargetHeightJni();
+      return getDaemonMaxPeerHeightJni();
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -516,10 +502,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public long getChainHeight() {
+  public long getDaemonHeight() {
     assertNotClosed();
     try {
-      return getChainHeightJni();
+      return getDaemonHeightJni();
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -1205,15 +1191,21 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native static long createWalletFromKeysJni(String path, String password, int networkType, String address, String viewKey, String spendKey, long restoreHeight, String language);
   
+  private native long getHeightJni();
+  
+  private native long getRestoreHeightJni();
+  
+  private native void setRestoreHeightJni(long height);
+  
+  private native long getDaemonHeightJni();
+  
+  private native long getDaemonMaxPeerHeightJni();
+  
   private native String[] getDaemonConnectionJni(); // returns [uri, username, password]
   
   private native void setDaemonConnectionJni(String uri, String username, String password);
   
   private native boolean isConnectedJni();
-  
-  private native long getDaemonHeightJni();
-  
-  private native long getDaemonTargetHeightJni();
   
   private native boolean isDaemonSyncedJni();
   
@@ -1254,14 +1246,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native void stopSyncingJni();
   
   private native void rescanBlockchainJni();
-  
-  private native long getHeightJni();
-  
-  private native long getChainHeightJni();
-  
-  private native long getRestoreHeightJni();
-  
-  private native void setRestoreHeightJni(long height);
   
   private native String getBalanceWalletJni();
   

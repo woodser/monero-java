@@ -309,7 +309,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
-  public long getChainHeight() {
+  public long getDaemonHeight() {
     throw new MoneroException("monero-wallet-rpc does not support getting the chain height");
   }
 
