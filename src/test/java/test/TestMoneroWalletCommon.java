@@ -2256,7 +2256,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       
       // relay txs
       List<String> txIds = null;
-      if (!Boolean.TRUE.equals(request.getCanSplit())) txIds = Arrays.asList(wallet.relayTx(txs.get(0).getMetadata())); // test relayTx() with single transaction
+      if (!Boolean.TRUE.equals(request.getCanSplit())) txIds = Arrays.asList(wallet.relayTx(txs.get(0))); // test relayTx() with single transaction
       else {
         List<String> txMetadatas = new ArrayList<String>();
         for (MoneroTxWallet tx : txs) txMetadatas.add(tx.getMetadata());
