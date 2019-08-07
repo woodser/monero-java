@@ -1,5 +1,4 @@
 14.1.0+ RELEASE
-./submodules -> ./external for monero-cpp-library and monero-core?
 work through problems of testing fresh wallet again
 rpc supports on_restore_determinstic_wallet, implement!
 cleanup logging; tests produce many messages at info which should be trace
