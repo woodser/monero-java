@@ -1,6 +1,5 @@
 14.1.0+ RELEASE
 udpate test names with testIs, testHas, testIn, etc
-MoneroTxRequest -> MoneroTxQuery
 rename *withConfiguration() tests to *Request or *Query
 ./submodules -> ./external for monero-cpp-library and monero-core?
 what is daemon target height vs height?
