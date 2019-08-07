@@ -10,9 +10,9 @@ project(MoneroJavaJni)
 # System
 #############
 
-set(MONERO_CPP "submodules/monero-cpp-library")
+set(MONERO_CPP "external/monero-cpp-library")
 set(MONERO_CPP_SRC "${MONERO_CPP}/src")
-set(MONERO_CORE ${MONERO_CPP}/submodules/monero-core)
+set(MONERO_CORE ${MONERO_CPP}/external/monero-core)
 set(MONERO_CORE_SRC "${MONERO_CORE}/src")
 set(BOOST ${MONERO_CPP}/external/boost-sdk)
 
