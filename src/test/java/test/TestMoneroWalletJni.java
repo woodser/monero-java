@@ -1429,8 +1429,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testGetTxsWithConfiguration() {
-    super.testGetTxsWithConfiguration();
+  public void testGetTxsWithQuery() {
+    super.testGetTxsWithQuery();
   }
   
   @Override
@@ -1459,8 +1459,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testGetTransfersWithConfiguration() {
-    super.testGetTransfersWithConfiguration();
+  public void testGetTransfersWithQuery() {
+    super.testGetTransfersWithQuery();
   }
 
   @Override
@@ -1474,8 +1474,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testGetOutputsWithConfiguration() {
-    super.testGetOutputsWithConfiguration();
+  public void testGetOutputsWithQuery() {
+    super.testGetOutputsWithQuery();
   }
 
   @Override
