@@ -104,7 +104,7 @@ public class TestMoneroDaemonRpc {
   
   // Can indicate if it's trusted
   @Test
-  public void testGetIsTrusted() {
+  public void testIsTrusted() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     daemon.isTrusted();
   }

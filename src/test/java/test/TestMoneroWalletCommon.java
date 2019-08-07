@@ -562,7 +562,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can get transactions with additional configuration
   @Test
-  public void testGetTxsWithConfiguration() {
+  public void testGetTxsWithQuery() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get random transactions for testing
@@ -965,7 +965,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   
   // Can get transfers with additional configuration
   @Test
-  public void testGetTransfersWithConfiguration() {
+  public void testGetTransfersWithQuery() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get incoming transfers
@@ -1110,7 +1110,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
 
   // Can get outputs with additional configuration
   @Test
-  public void testGetOutputsWithConfiguration() {
+  public void testGetOutputsWithQuery() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // get unspent outputs to account 0
