@@ -1,8 +1,9 @@
 14.1.0+ RELEASE
 sample code test
 fix post sync
-rename monero-model to monero-spec which is clearer, update links
+update to boron butterfly
 write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, etc, tx pool syncing)
+remove spec from javascript project
 announce
 
 MEDIUM
