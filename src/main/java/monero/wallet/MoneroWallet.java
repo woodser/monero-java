@@ -51,6 +51,8 @@ import monero.wallet.model.MoneroTxWallet;
  */
 public interface MoneroWallet {
   
+  public static final String DEFAULT_LANGUAGE = "English";
+  
   /**
    * Get the wallet's seed.
    * 

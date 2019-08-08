@@ -1,6 +1,6 @@
 14.1.0+ RELEASE
+MoneroException no description vs toString()
 work through problems of testing fresh wallet again
-rpc supports on_restore_determinstic_wallet, implement!
 cleanup logging; tests produce many messages at info which should be trace
 better sample code, maybe with two wallets, sending each other funds
 update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), get is/has/in, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing(), coinbaseTx->minerTx, request copying from ~jni93, request -> query, height methods + ordering
@@ -37,6 +37,7 @@ add warnings to all deserialization methods for unrecognized fields
 debug why testGetOutputsValidateInputs() and testImportKeyImages() fail because cannot connect to daemon only if running with all other tests
 support sign_transfer, submit_transfer, etc
 test changing wallet password with moveTo()
+rpc on_generate_from_keys
 pruning
 model rct_signatures, rct_prunable, unsigned_tx_set, etc
 
