@@ -101,40 +101,39 @@ BigInteger fee = createdTx.getFee();  // "Are you sure you want to send ...?"
 walletRPC.relayTx(createdTx);
 ```
 
-## Monero RPC Setup
+## How to Use This Library
 
-1. Download and extract the latest [Monero CLI](https://getmonero.org/downloads/) for your platform.
-2. Start Monero daemon locally: `./monerod --stagenet` (or use a remote daemon).
-3. Create a wallet file if one does not exist.  This is only necessary one time.
-	- Create new / open existing: `./monero-wallet-cli --daemon-address http://localhost:38081 --stagenet`
-	- Restore from mnemonic seed: `./monero-wallet-cli --daemon-address http://localhost:38081 --stagenet --restore-deterministic-wallet`
-4. Start monero-wallet-rpc (requires --wallet-dir to run tests):
-	
-	e.g. For wallet name `test_wallet_1`, user `rpc_user`, password `abc123`, stagenet: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir /Applications/monero-v0.14.0.3`
+1. Clone the Java repository: `git clone --recurse-submodules https://github.com/monero-ecosystem/monero-java-rpc.git`
+2. Install project dependencies: `maven install`
 
-## Build Libraries for Java JNI
+You are now ready to use this library with [monero-daemon-rpc](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.
 
-In order to use a local wallet or fetch and process binary data (e.g. raw blocks) in Java, C++ source code must be built as a dynamic library for Java to access using JNI.  This project depends on the associated [C++ library](https://github.com/woodser/monero-cpp-library) (included as a submodule in ./external/monero-cpp-library) to support a local wallet and convert between JSON and binary data in Monero's portable storage format in Java.
+If you want to process binary data or use a Monero wallet using JNI instead of RPC, a dynamic library must be built for your specific platform for this Java library to use.  This project uses a [C++ counterpart library](https://github.com/woodser/monero-cpp-library) (included as a submodule in ./external/monero-cpp-library) to support JNI.
 
-The dynamic library is platform-specific so it must be built from source for the specific platform it is running on (e.g. Linux, Mac, Windows, etc).
-
-### Build Steps
-
-1. Build the [C++ library as a dynamic library](https://github.com/woodser/monero-cpp-library#building-a-dynamic--shared-library)
+1. [Build the counterpart C++ library as a dynamic library](https://github.com/woodser/monero-cpp-library#building-a-dynamic--shared-library)
 2. Copy the built libmonero-cpp.dylib in step 1 to ./external-libs
 3. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/` (change as appropriate)
 4. Build libmonero-java.dylib to ./build: `./bin/build-libmonero-java.sh`
 5. Copy ./build/libmonero-java.dylib to ./lib
 6. Run TestMoneroCppUtils.java JUnit tests to verify the dynamic library is working with Java JNI
 
+## How to Set Up Monero RPC
+
+1. Download and extract the latest [Monero CLI](https://getmonero.org/downloads/) for your platform.
+2. Start Monero daemon locally: `./monerod --stagenet` (or use a remote daemon).
+3. Create a wallet file if one does not exist.
+	- Create new / open existing: `./monero-wallet-cli --daemon-address http://localhost:38081 --stagenet`
+	- Restore from mnemonic seed: `./monero-wallet-cli --daemon-address http://localhost:38081 --stagenet --restore-deterministic-wallet`
+4. Start monero-wallet-rpc (requires --wallet-dir to run tests):
+	
+	e.g. For wallet name `test_wallet_1`, user `rpc_user`, password `abc123`, stagenet: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir /Applications/monero-v0.14.0.3`
+
 ## Run Tests
 
-1. Clone the Java repository: `git clone --recurse-submodules https://github.com/monero-ecosystem/monero-java-rpc.git`
-2. Install project dependencies: `maven install`
-3. Set up running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html).  See [Monero RPC Setup](#monero-rpc-setup). 
-4. Configure the desired RPC endpoints, authentication, and test wallet in [TestUtils.java](src/test/java/utils/TestUtils.java).
-5. [Build a dynamic library from this library's C++ counterpart](#build-libraries-for-java-jni).
-6. Run all *.java files in src/main/test as JUnits.
+1. [Set up this library with JNI support](how-to-use-this-library)
+2. Set up running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html).  See [Monero RPC Setup](#how-to-set-up-monero-rpc). 
+3. Configure the desired RPC endpoints, authentication, and test wallet in [TestUtils.java](src/test/java/utils/TestUtils.java).
+4. Run all *.java files in src/main/test as JUnits.
 
 ## See Also
 
