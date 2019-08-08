@@ -130,7 +130,7 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 
 ## How to Run Tests
 
-1. [Set up this library with JNI support](how-to-use-this-library)
+1. [Set up this library with JNI support](#how-to-use-this-library)
 2. Set up running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html).  See [Monero RPC Setup](#how-to-set-up-monero-rpc). 
 3. Configure the desired RPC endpoints, authentication, and test wallet in [TestUtils.java](src/test/java/utils/TestUtils.java).
 4. Run all *.java files in src/main/test as JUnits.
