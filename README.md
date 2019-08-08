@@ -2,19 +2,19 @@
 
 This project is an extensive library for interacting with a Monero wallet and daemon in Java using RPC and native bindings to [Monero Core](https://github.com/monero-project/monero).
 
-In addition, this project offers an [API specification](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf) for interacting with a wallet and daemon.  The specification is intended to be intuitive, robust, and for long-term use in the Monero project.
+In addition, this project offers an [API specification](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf) for interacting with a Monero wallet and daemon.  The specification is intended to be intuitive, robust, and for long-term use in the Monero project.
 
 ## Main Features
 
 - RPC and JNI bindings to Monero Core
-- Query wallet transactions and outputs by their attributes
 - Fetch and process binary data from the daemon (e.g. raw blocks)
-- Rigorous focus on ease-of-use
+- Query wallet transactions and outputs by their attributes
 - Over 250 automated tests
+- Rigorous focus on developer ease-of-use
 
 ## Sample Code
 
-This code is a brief demonstration of the API.  See the JavaDoc, [specification PDF](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf), or [JUnit tests](src/test/java) for more details.
+This code demonstrates the API.  See the JavaDoc, [specification PDF](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf), or [JUnit tests](src/test/java) for more details.
 
 ```java
 // connect to a daemon
