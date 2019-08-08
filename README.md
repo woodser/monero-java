@@ -6,8 +6,8 @@ In addition, this project offers an [API specification](https://github.com/moner
 
 ## Main Features
 
-- Manage a Monero daemon over RPC
-- Manage a Monero wallet over RPC and JNI
+- Manage a Monero daemon using RPC
+- Manage a Monero wallet using RPC and JNI
 - Object-oriented model with rigorous focus on ease-of-use
 - Fetch and process binary data from the daemon (e.g. raw blocks)
 - Query wallet transactions, transfers, and outputs by their attributes
