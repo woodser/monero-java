@@ -6,10 +6,10 @@ In addition, this project offers an [API specification](https://github.com/moner
 
 ## Main Features
 
-- Extensive API to interact with a Monero wallet and daemon in Java
 - RPC and JNI bindings to Monero Core
 - Query wallet transactions and outputs by their attributes
 - Fetch and process binary data from the daemon (e.g. raw blocks)
+- Rigorous focus on ease-of-use
 - Over 250 automated tests
 
 ## Sample Code
