@@ -1,150 +1,104 @@
 # Monero Java
 
-**Compatible with Monero Core v14.1.0**
+This project is an extensive library for interacting with a Monero wallet and daemon in Java using RPC and native bindings to [Monero Core](https://github.com/monero-project/monero).
 
-## Introduction
+In addition, this project offers an [API specification](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf) for interacting with a wallet and daemon.  The specification is intended to be intuitive, robust, and for long-term use in the Monero project.
 
-This project provides Java interfaces for a Monero wallet and daemon.
+## Main Features
 
-The interfaces currently rely on running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html).
+- Extensive API to interact with a Monero wallet and daemon in Java
+- RPC and JNI bindings to Monero Core
+- Query wallet transactions and outputs by their attributes
+- Fetch and process binary data from the daemon (e.g. raw blocks)
+- Over 250 automated tests
 
-A primary goal of this project is to make the Monero Core C++ wallet accessible through a Java interface.
+## Sample Code
 
-Main Features
-
-- General-purpose library to access a Monero wallet and daemon with focus on ease-of-use
-- Clear object-oriented models to formalize Monero types and their relationships to each other
-- Powerful API to query transactions, transfers, and vouts by their attributes
-- Fetch and process binary data from the daemon (e.g. raw blocks) in Java using JNI to bridge C++ utilities
-- Extensive test suite (130+ passing tests)
-
-A quick reference of the wallet and daemon data models can be found [here](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf).
-
-## Wallet Sample Code
-
-See [src/test/java/](src/test/java) for the most complete examples of using this library.
+This code is a brief demonstration of the API.  See the JavaDoc, [specification PDF](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf), or the [JUnit tests](src/test/java) for details.
 
 ```java
-// create a wallet that uses a monero-wallet-rpc endpoint with authentication
-MoneroWallet wallet = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
+// connect to a daemon
+MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:38081");
+long height = daemon.getHeight();                 // 1523651
+BigInteger feeEstimate = daemon.getFeeEstimate(); // 1014313512
 
-// get wallet balance as BigInteger
-BigInteger balance = wallet.getBalance();  // e.g. 533648366742
-
-// get wallet primary address
-String primaryAddress = wallet.getPrimaryAddress();  // e.g. 59aZULsUF3YNSKGiHz4J...
-
-// get address and balance of subaddress [1, 0]
-MoneroSubaddress subaddress = wallet.getSubaddress(1, 0);
-BigInteger subaddressBalance = subaddress.getBalance();
-String subaddressAddress = subaddress.getAddress();
-
-// get incoming and outgoing transfers
-List<MoneroTransfer> transfers = wallet.getTransfers();
-for (MoneroTransfer transfer : transfers) {
-  boolean isIncoming = transfer.getIsIncoming();
-  BigInteger amount = transfer.getAmount();
-  int accountIdx = transfer.getAccountIndex();
-  Long height = transfer.getTx().getHeight();  // will be null if unconfirmed
+// get transactions in the pool
+List<MoneroTx> txsInPool = daemon.getTxPool();
+for (MoneroTx tx : txsInPool) {
+  String id = tx.getId();
+  BigInteger fee = tx.getFee();
+  boolean isDoubleSpendSeen = tx.isDoubleSpendSeen();
 }
 
-// get incoming transfers to account 0
-transfers = wallet.getTransfers(new MoneroTransferRequest().setAccountIndex(0).setIsIncoming(true));
-for (MoneroTransfer transfer : transfers) {
-  assertTrue(transfer.getIsIncoming());
-  assertEquals(0, (int) transfer.getAccountIndex());
-  BigInteger amount = transfer.getAmount();
-  Long height = transfer.getTx().getHeight();  // will be null if unconfirmed
-}
-
-// send to an address from account 0
-MoneroTxWallet sentTx = wallet.send(0, "74oAtjgE2dfD1bJBo4DW...", new BigInteger("50000"));
-
-// send to multiple destinations from multiple subaddresses in account 1 which can be split into multiple transactions
-// see MoneroSendRequest.java for all request options
-List<MoneroTxWallet> sentTxs = wallet.sendSplit(new MoneroSendRequest()
-        .setAccountIndex(1)
-        .setSubaddressIndices(0, 1)
-        .setPriority(MoneroSendPriority.UNIMPORTANT)  // no rush
-        .setDestinations(
-                new MoneroDestination("7BV7iyk9T6kfs7cPfmn7...", new BigInteger("50000")),
-                new MoneroDestination("78NWrWGgyZeYgckJhuxm...", new BigInteger("50000"))));
-
-// get all confirmed wallet transactions
-for (MoneroTxWallet tx : wallet.getTxs(new MoneroTxRequest().setIsConfirmed(true))) {
-  String txId = tx.getId();                   // e.g. f8b2f0baa80bf6b...
-  BigInteger txFee = tx.getFee();             // e.g. 750000
-  boolean isConfirmed = tx.getIsConfirmed();  // e.g. true
-}
-
-// get a wallet transaction by id
-MoneroTxWallet tx = wallet.getTx("c936b213b236a8ff60da84067c39409db6934faf6c0acffce752ac5a0d53f6b6");
-String txId = tx.getId();                   // e.g. c936b213b236a8ff6...
-BigInteger txFee = tx.getFee();             // e.g. 750000
-boolean isConfirmed = tx.getIsConfirmed();  // e.g. true
-```
-
-## Daemon Sample Code
-
-```java
-// create a daemon that uses a monero-daemon-rpc endpoint
-MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:38081", "admin", "password");
-
-// get daemon info
-long height = daemon.getHeight();                 // e.g. 1523651
-BigInteger feeEstimate = daemon.getFeeEstimate(); // e.g. 750000
-
-// get last block's header
-MoneroBlockHeader lastBlockHeader = daemon.getLastBlockHeader();
-long lastBlockSize = lastBlockHeader.getSize();
-
-// get first 100 blocks as a binary request
-List<MoneroBlock> blocks = daemon.getBlocksByRange(0l, 100l);
-
-// get block info
+// get last 100 blocks as a binary request
+List<MoneroBlock> blocks = daemon.getBlocksByRange(height - 100, height);
 for (MoneroBlock block : blocks) {
-  long blockHeight = block.getHeight();
-  String blockId = block.getId();
-  List<MoneroTx> txs = block.getTxs();
-  
-  // get tx ids and keys
-  for (MoneroTx tx : txs) {
-    String txId = tx.getId();
-    String txKey = tx.getKey();
-  }
+  int numTxs = block.getTxs().size();
 }
 
-// start mining to an address with 4 threads, not in the background, and ignoring the battery
+// mine with 2 threads in the background
 String address = "74oAtjgE2dfD1bJBo4DW...";
-int numThreads = 4;
-boolean isBackground = false;
+int numThreads = 2;
+boolean isBackground = true;
 boolean ignoreBattery = false;
 daemon.startMining(address, numThreads, isBackground, ignoreBattery);
+daemon.stopMining();
 
-// wait for the header of the next block added to the chain
+// wait for the next block to be added to the chain
 MoneroBlockHeader nextBlockHeader = daemon.getNextBlockHeader();
 long nextNumTxs = nextBlockHeader.getNumTxs();
 
-// stop mining
-daemon.stopMining();
+// connect to a wallet using RPC
+MoneroWallet walletRPC = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
+BigInteger balance = walletRPC.getBalance();           // 533648366742
+String primaryAddress = walletRPC.getPrimaryAddress(); // 59aZULsUF3YNSKGiHz4J...
+MoneroSubaddress subaddress = walletRPC.getSubaddress(1, 0);
+BigInteger subaddressBalance = subaddress.getBalance();
+
+// query a transaction
+MoneroTxWallet tx = walletRPC.getTx("3276252c5a545b90c8e147fcde45d3e1917726470a8f7d4c8977b527a44dfd15");
+List<MoneroIncomingTransfer> incomingTransfers = tx.getIncomingTransfers();
+List<MoneroDestination> destinations = tx.getOutgoingTransfer().getDestinations();
+
+// query incoming transfers to account 1
+MoneroTransferQuery transferQuery = new MoneroTransferQuery().setIsIncoming(true).setAccountIndex(1);
+List<MoneroTransfer> transfers = walletRPC.getTransfers(transferQuery);
+
+// query unspent outputs
+MoneroOutputQuery outputQuery = new MoneroOutputQuery().setIsSpent(false);
+List<MoneroOutputWallet> outputs = walletRPC.getOutputs(outputQuery);
+
+// create a new wallet using native Java binding to Monero Core
+MoneroWalletJni walletJNI = MoneroWalletJni.createWalletRandom("MyWallet", "supersecretpassword123", MoneroNetworkType.MAINNET);
+walletJNI.startSyncing();
+
+// listen for incoming funds to the JNI wallet
+walletJNI.addListener(new MoneroWalletListener() {
+  
+  @Override
+  public void onOutputReceived(MoneroOutputWallet output) {
+    System.out.println("Funds received!"); 
+    int accountIdx = output.getAccountIndex();
+    int subaddressIdx = output.getSubaddressIndex();
+    MoneroKeyImage keyImage = output.getKeyImage();
+  }
+});
+
+// send funds from the RPC wallet to the JNI wallet
+MoneroTxWallet sentTx = walletRPC.send(0, walletJNI.getPrimaryAddress(), new BigInteger("50000"));
+
+// create and relay tx which sends funds to multiple destinations in the JNI wallet
+MoneroSendRequest request = new MoneroSendRequest()
+        .setAccountIndex(1)                           // send from account 1
+        .setSubaddressIndices(0, 1)                   // send from subaddreses in account 1
+        .setPriority(MoneroSendPriority.UNIMPORTANT)  // no rush
+        .setDestinations(
+                new MoneroDestination(walletJNI.getAddress(1, 0), new BigInteger("50000")),
+                new MoneroDestination(walletJNI.getAddress(2, 0), new BigInteger("50000")));
+MoneroTxWallet createdTx = walletRPC.createTx(request);
+BigInteger fee = createdTx.getFee();  // could confirm "Are you sure you want to send?"
+walletRPC.relayTx(createdTx);
 ```
-
-## API Documentation
-
-This library follows the wallet and daemon interfaces and models defined [here](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf).
-
-Javadoc is provided in the [doc](doc) folder (best viewed opening [doc/index.html](doc/index.html) in a browser).
-
-The main interfaces are [MoneroWallet.java](src/main/java/monero/wallet/MoneroWallet.java) and [MoneroDaemon.java](src/main/java/monero/daemon/MoneroDaemon.java).
-
-Here is the source code to the main interfaces, implementations, and models:
-
-- [Monero daemon (MoneroDaemon.java)](src/main/java/monero/daemon/MoneroDaemon.java)
-- [Monero daemon rpc implementation](src/main/java/monero/daemon/MoneroDaemonRpc.java)
-- [Monero daemon models](src/main/java/monero/daemon/model)
-- [Monero wallet (MoneroWallet.java)](src/main/java/monero/wallet/MoneroWallet.java)
-- [Monero wallet rpc implementation](src/main/java/monero/wallet/MoneroWalletRpc.java)
-- [Monero wallet models](src/main/java/monero/wallet/model)
 
 ## Monero RPC Setup
 
@@ -157,24 +111,11 @@ Here is the source code to the main interfaces, implementations, and models:
 	
 	e.g. For wallet name `test_wallet_1`, user `rpc_user`, password `abc123`, stagenet: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir /Applications/monero-v0.14.0.3`
 
-## Running Tests
-
-1. Set up running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html) with two test wallets named `test_wallet_1` and `test_wallet_2`.  The mnemonic phrase and public address of `test_wallet_1` must match `TestUtils.TEST_MNEMONIC` and `TestUtils.TEST_ADDRESS`, respectively.  Both wallets must be encrypted with a password which matches `TestUtils.WALLET_RPC_PW` ("supersecretpassword123").  See [Monero RPC Setup](#monero-rpc-setup).
-2. Clone the Java repository: `git clone --recurse-submodules https://github.com/monero-ecosystem/monero-java-rpc.git`
-3. Install project dependencies: `maven install`
-4. Configure the appropriate RPC endpoints and authentication by modifying `WALLET_RPC_CONFIG` and `DAEMON_RPC_CONFIG` in [src/test/main/test/TestUtils.java](src/test/main/TestUtils.java).
-5. [Build a dynamic library from Monero C++ for your platform](#building-platform-specific-monero-binaries)
-6. Run all *.java files in src/main/test as JUnits.
-
-Note: some tests are failing as not all functionality is implemented.
-
-## Building platform-specific Monero binaries
+## Build Libraries for Java JNI
 
 In order to use a local wallet or fetch and process binary data (e.g. raw blocks) in Java, C++ source code must be built as a dynamic library for Java to access using JNI.  This project depends on the associated [C++ library](https://github.com/woodser/monero-cpp-library) (included as a submodule in ./submodules/monero-cpp-library) to support a local wallet and convert between JSON and binary data in Monero's portable storage format in Java.
 
 The dynamic library is platform-specific so it must be built from source for the specific platform it is running on (e.g. Linux, Mac, Windows, etc).
-
-For convenience, a pre-built library for MacOSX is included with this project.  **This executable is suitable for development and testing only and should be re-built from source to verify its integrity for any other purpose.**
 
 ### Build Steps
 
@@ -185,12 +126,14 @@ For convenience, a pre-built library for MacOSX is included with this project.  
 5. Copy ./build/libmonero-java.dylib to ./lib
 6. Run TestMoneroCppUtils.java JUnit tests to verify the dynamic library is working with Java JNI
 
-## Project Goals
+## Run Tests
 
-- Expose a Monero daemon and wallet in Java using Monero Core RPC.
-- Expose a Monero wallet in Java by binding to Monero Core's wallet in C++.
-- Expose a Monero wallet in Java backed by a MyMonero-compatible endpoint which shares the view key with a 3rd party to scan the blockchain.
-- Offer consistent terminology and APIs for Monero's developer ecosystem with a working reference implementation.
+1. Set up running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html) with two test wallets named `test_wallet_1` and `test_wallet_2`.  The mnemonic phrase and public address of `test_wallet_1` must match `TestUtils.TEST_MNEMONIC` and `TestUtils.TEST_ADDRESS`, respectively.  Both wallets must be encrypted with a password which matches `TestUtils.WALLET_RPC_PW` ("supersecretpassword123").  See [Monero RPC Setup](#monero-rpc-setup).
+2. Clone the Java repository: `git clone --recurse-submodules https://github.com/monero-ecosystem/monero-java-rpc.git`
+3. Install project dependencies: `maven install`
+4. Configure the appropriate RPC endpoints and authentication by modifying `WALLET_RPC_CONFIG` and `DAEMON_RPC_CONFIG` in [src/test/main/test/TestUtils.java](src/test/main/TestUtils.java).
+5. [Build a dynamic library from Monero C++ for your platform](#build-libraries-for-java-jni).
+6. Run all *.java files in src/main/test as JUnits.
 
 ## See Also
 
@@ -204,7 +147,7 @@ This project is licensed under MIT.
 
 ## Donate
 
-Please consider donating if you want to support this project.  Thank you!
+Donations are gratefully accepted.  Thank you for supporting this project.
 
 <p align="center">
 	<img src="donate.png" width="150" height="150"/>
