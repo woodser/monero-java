@@ -143,8 +143,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       List<String> mnemonics = new ArrayList<String>();
       for (String name : names) {
         wallet.createWalletRandom(name, TestUtils.WALLET_RPC_PW);
-        wallet.close();
         mnemonics.add(wallet.getMnemonic());
+        wallet.close();
       }
       
       // open test wallets
@@ -171,7 +171,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       
       // open main test wallet for other tests
       try {
-        wallet.close();
         wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_RPC_PW);
       } catch (MoneroException e) {
         assertEquals(-1, (int) e.getCode()); // ok if wallet is already open
