@@ -1,16 +1,17 @@
 # Monero Java Library
 
-This project is an extensive library for interacting with a Monero wallet and daemon in Java using RPC and native bindings to [Monero Core](https://github.com/monero-project/monero).
+This project is a library for working with a Monero wallet and daemon in Java using RPC and JNI bindings to [Monero Core](https://github.com/monero-project/monero).
 
-In addition, this project offers an [API specification](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf) for interacting with a Monero wallet and daemon.  The specification is intended to be intuitive, robust, and for long-term use in the Monero project.
+In addition, this project offers an [API specification](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf) for wallet and daemon methods and types.  The specification is intended to be intuitive, robust, and for long-term use in the Monero project.
 
 ## Main Features
 
-- RPC and JNI bindings to Monero Core
+- Manage a Monero daemon over RPC
+- Manage a Monero wallet over RPC and JNI
+- Object-oriented model with rigorous focus on ease-of-use
 - Fetch and process binary data from the daemon (e.g. raw blocks)
-- Query wallet transactions and outputs by their attributes
-- Over 250 automated tests
-- Rigorous focus on developer ease-of-use
+- Query wallet transactions, transfers, and outputs by their attributes
+- Over 250 JUnits
 
 ## Sample Code
 
@@ -137,7 +138,7 @@ The dynamic library is platform-specific so it must be built from source for the
 
 ## See Also
 
-These libraries conform the same API specification as this library.
+These libraries conform to the same [API specification](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf).
 
 [JavaScript reference implementation](https://github.com/monero-ecosystem/monero-javascript)
 
@@ -149,7 +150,7 @@ This project is licensed under MIT.
 
 ## Donate
 
-Donations are gratefully accepted.  Thank you for supporting this project!
+Donations are gratefully accepted.  Thank you for your support!
 
 <p align="center">
 	<img src="donate.png" width="125" height="125"/>
