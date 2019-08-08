@@ -14,7 +14,7 @@ In addition, this project offers an [API specification](https://github.com/moner
 
 ## Sample Code
 
-This code is a brief demonstration of the API.  See the JavaDoc, [specification PDF](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf), or the [JUnit tests](src/test/java) for details.
+This code is a brief demonstration of the API.  See the JavaDoc, [specification PDF](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf), or [JUnit tests](src/test/java) for details.
 
 ```java
 // connect to a daemon
@@ -96,7 +96,7 @@ MoneroSendRequest request = new MoneroSendRequest()
                 new MoneroDestination(walletJNI.getAddress(1, 0), new BigInteger("50000")),
                 new MoneroDestination(walletJNI.getAddress(2, 0), new BigInteger("50000")));
 MoneroTxWallet createdTx = walletRPC.createTx(request);
-BigInteger fee = createdTx.getFee();  // could confirm "Are you sure you want to send?"
+BigInteger fee = createdTx.getFee();  // "Are you sure you want to send ...?"
 walletRPC.relayTx(createdTx);
 ```
 
@@ -136,6 +136,8 @@ The dynamic library is platform-specific so it must be built from source for the
 6. Run all *.java files in src/main/test as JUnits.
 
 ## See Also
+
+These libraries conform the same API specification as this library.
 
 [JavaScript reference implementation](https://github.com/monero-ecosystem/monero-javascript)
 
