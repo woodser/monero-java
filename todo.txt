@@ -1,11 +1,7 @@
 14.1.0+ RELEASE
-update readme with jni support
-better sample code, maybe with two wallets, sending each other funds
-regenerate api docs
-host api docs on github
-update spec: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), get is/has/in, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing(), coinbaseTx->minerTx, request copying from ~jni93, request -> query, height methods + ordering
-
+sample code test
 fix post sync
+rename monero-model to monero-spec which is clearer, update links
 write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, etc, tx pool syncing)
 announce
 

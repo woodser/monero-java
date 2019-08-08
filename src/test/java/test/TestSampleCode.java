@@ -129,7 +129,7 @@ public class TestSampleCode {
   @Ignore
   @Deprecated
   @SuppressWarnings("unused")
-  public void testWalletSample1() {
+  public void testWalletSample() {
     
     // create a wallet that uses a monero-wallet-rpc endpoint with authentication
     MoneroWallet wallet = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
@@ -194,7 +194,7 @@ public class TestSampleCode {
   @Ignore
   @Deprecated
   @SuppressWarnings("unused")
-  public void testDaemonSample2() {
+  public void testDaemonSample() {
     
     // create a daemon that uses a monero-daemon-rpc endpoint
     MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:38081");
