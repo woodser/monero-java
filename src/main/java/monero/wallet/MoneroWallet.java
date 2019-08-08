@@ -123,7 +123,6 @@ public interface MoneroWallet {
    * 
    * @param address is the address to get the account and subaddress index from
    * @return the account and subaddress indices
-   * @throws exception if address is not a wallet address
    */
   public MoneroSubaddress getAddressIndex(String address);
   
@@ -252,7 +251,7 @@ public interface MoneroWallet {
   /**
    * Get all accounts.
    * 
-   * @return List<MoneroAccount> are all accounts within the wallet
+   * @return all accounts
    */
   public List<MoneroAccount> getAccounts();
   
@@ -260,7 +259,7 @@ public interface MoneroWallet {
    * Get all accounts.
    * 
    * @param includeSubaddresses specifies if subaddresses should be included
-   * @return List<MoneroAccount> are all accounts
+   * @return all accounts
    */
   public List<MoneroAccount> getAccounts(boolean includeSubaddresses);
   
@@ -268,7 +267,7 @@ public interface MoneroWallet {
    * Get accounts with a given tag.
    * 
    * @param tag is the tag for filtering accounts, all accounts if null
-   * @return List<MoneroAccount> are all accounts for the wallet with the given tag
+   * @return all accounts with the given tag
    */
   public List<MoneroAccount> getAccounts(String tag);
   
@@ -277,7 +276,7 @@ public interface MoneroWallet {
    * 
    * @param includeSubaddresses specifies if subaddresses should be included
    * @param tag is the tag for filtering accounts, all accounts if null
-   * @return List<MoneroAccount> are all accounts for the wallet with the given tag
+   * @return all accounts with the given tag
    */
   public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag);
   
@@ -317,7 +316,7 @@ public interface MoneroWallet {
    * Get all subaddresses in an account.
    * 
    * @param accountIdx specifies the account to get subaddresses within
-   * @return List<MoneroSubaddress> are the retrieved subaddresses
+   * @return the retrieved subaddresses
    */
   public List<MoneroSubaddress> getSubaddresses(int accountIdx);
   
@@ -755,7 +754,7 @@ public interface MoneroWallet {
    * Get notes for multiple transactions.
    * 
    * @param txIds identify the transactions to get notes for
-   * @preturns notes for the transactions
+   * @return notes for the transactions
    */
   public List<String> getTxNotes(Collection<String> txIds);
   
