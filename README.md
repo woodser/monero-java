@@ -11,7 +11,7 @@ In addition, this project offers an [API specification](monero-spec.pdf) for wal
 - Object-oriented model with rigorous focus on ease-of-use
 - Fetch and process binary data from the daemon (e.g. raw blocks)
 - Query wallet transactions, transfers, and outputs by their many attributes
-- Over 220 passing JUnit tests
+- Over 200 passing JUnit tests
 
 ## Sample Code
 
