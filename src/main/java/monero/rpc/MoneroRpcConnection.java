@@ -43,7 +43,6 @@ public class MoneroRpcConnection {
   static {
     MAPPER = new ObjectMapper();
     MAPPER.setSerializationInclusion(Include.NON_NULL);
-    //MAPPER.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
     MAPPER.configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS, true);
   }
 
