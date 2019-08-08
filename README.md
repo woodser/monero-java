@@ -1,4 +1,4 @@
-# Monero Java
+# Monero Java Library
 
 This project is an extensive library for interacting with a Monero wallet and daemon in Java using RPC and native bindings to [Monero Core](https://github.com/monero-project/monero).
 
