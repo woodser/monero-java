@@ -3,9 +3,9 @@ update readme with jni support
 better sample code, maybe with two wallets, sending each other funds
 regenerate api docs
 host api docs on github
+update spec: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), get is/has/in, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing(), coinbaseTx->minerTx, request copying from ~jni93, request -> query, height methods + ordering
 
 fix post sync
-update spec: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), get is/has/in, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing(), coinbaseTx->minerTx, request copying from ~jni93, request -> query, height methods + ordering
 write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, etc, tx pool syncing)
 announce
 
