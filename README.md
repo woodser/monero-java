@@ -14,7 +14,7 @@ In addition, this project offers an [API specification](https://github.com/moner
 
 ## Sample Code
 
-This code is a brief demonstration of the API.  See the JavaDoc, [specification PDF](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf), or [JUnit tests](src/test/java) for details.
+This code is a brief demonstration of the API.  See the JavaDoc, [specification PDF](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf), or [JUnit tests](src/test/java) for more details.
 
 ```java
 // connect to a daemon
@@ -113,7 +113,7 @@ walletRPC.relayTx(createdTx);
 
 ## Build Libraries for Java JNI
 
-In order to use a local wallet or fetch and process binary data (e.g. raw blocks) in Java, C++ source code must be built as a dynamic library for Java to access using JNI.  This project depends on the associated [C++ library](https://github.com/woodser/monero-cpp-library) (included as a submodule in ./submodules/monero-cpp-library) to support a local wallet and convert between JSON and binary data in Monero's portable storage format in Java.
+In order to use a local wallet or fetch and process binary data (e.g. raw blocks) in Java, C++ source code must be built as a dynamic library for Java to access using JNI.  This project depends on the associated [C++ library](https://github.com/woodser/monero-cpp-library) (included as a submodule in ./external/monero-cpp-library) to support a local wallet and convert between JSON and binary data in Monero's portable storage format in Java.
 
 The dynamic library is platform-specific so it must be built from source for the specific platform it is running on (e.g. Linux, Mac, Windows, etc).
 
@@ -149,7 +149,7 @@ This project is licensed under MIT.
 
 ## Donate
 
-Donations are gratefully accepted.  Thank you for supporting this project.
+Donations are gratefully accepted.  Thank you for supporting this project!
 
 <p align="center">
 	<img src="donate.png" width="150" height="150"/>
