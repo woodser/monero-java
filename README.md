@@ -1,6 +1,6 @@
 # Monero Java Library
 
-This project is a library for working with a Monero wallet and daemon in Java using RPC and JNI bindings to [Monero Core](https://github.com/monero-project/monero).
+This project is a library for working with Monero wallets and a daemon in Java using RPC and JNI bindings to [Monero Core](https://github.com/monero-project/monero).
 
 In addition, this project offers an [API specification](monero-spec.pdf) for wallet and daemon methods and types.  The specification is intended to be intuitive, robust, and for long-term use in the Monero project.
 
@@ -10,8 +10,8 @@ In addition, this project offers an [API specification](monero-spec.pdf) for wal
 - Manage a Monero wallet using RPC and JNI
 - Object-oriented model with rigorous focus on ease-of-use
 - Fetch and process binary data from the daemon (e.g. raw blocks)
-- Query wallet transactions, transfers, and outputs by their attributes
-- Over 250 JUnits
+- Query wallet transactions, transfers, and outputs by their many attributes
+- Over 220 passing JUnit tests
 
 ## Sample Code
 
