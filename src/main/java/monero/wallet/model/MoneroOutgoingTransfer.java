@@ -85,6 +85,7 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
    * should not be re-used or it should be copied before calling this method.
    * 
    * @param transfer is the transfer to merge into this one
+   * @return this transfer for chaining
    */
   public MoneroOutgoingTransfer merge(MoneroOutgoingTransfer transfer) {
     super.merge(transfer);

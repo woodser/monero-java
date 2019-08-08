@@ -86,7 +86,7 @@ public class MoneroTxWallet extends MoneroTx {
   }
   
   /**
-   * Returns a copy of this model's vouts as List<MoneroOutputWallet>.
+   * Returns a copy of this model's vouts as a list of type MoneroOutputWallet.
    * 
    * @return vouts of type MoneroOutputWallet
    */
@@ -155,6 +155,7 @@ public class MoneroTxWallet extends MoneroTx {
    * should not be re-used or it should be copied before calling this method.
    * 
    * @param tx is the transaction to merge into this transaction
+   * @return this tx for chaining
    */
   public MoneroTxWallet merge(MoneroTxWallet tx) {
     if (!(tx instanceof MoneroTxWallet)) throw new MoneroException("Wallet transaction must be merged with type MoneroTxWallet");

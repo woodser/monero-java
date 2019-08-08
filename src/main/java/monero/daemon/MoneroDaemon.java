@@ -371,7 +371,7 @@ public interface MoneroDaemon {
   /**
    * Flush transactions from the tx pool.
    * 
-   * @paramids are ids of transactions to flush
+   * @param ids are ids of transactions to flush
    */
   public void flushTxPoolByIds(List<String> ids);
   
@@ -395,7 +395,7 @@ public interface MoneroDaemon {
    * Get outputs identified by a list of output amounts and indices as a binary
    * request.
    * 
-   * @param identify each output by amount and index
+   * @param outputs identify each output by amount and index
    * @return the identified outputs
    */
   public List<MoneroOutput> getOutputs(Collection<MoneroOutput> outputs);

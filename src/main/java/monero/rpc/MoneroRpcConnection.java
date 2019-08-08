@@ -94,7 +94,7 @@ public class MoneroRpcConnection {
    * Sends a request to the RPC API.
    * 
    * @param method specifies the method to request
-   * @return Map<String, Object> is the RPC API response as a map
+   * @return the RPC API response as a map
    */
   public Map<String, Object> sendJsonRequest(String method) {
     return sendJsonRequest(method, (Map<String, Object>) null);
@@ -105,7 +105,7 @@ public class MoneroRpcConnection {
    * 
    * @param method specifies the method to request
    * @param params specifies input parameters (Map<String, Object>, List<Object>, String, etc)
-   * @return Map<String, Object> is the RPC API response as a map
+   * @return the RPC API response as a map
    */
   public Map<String, Object> sendJsonRequest(String method, Object params) {
     try {

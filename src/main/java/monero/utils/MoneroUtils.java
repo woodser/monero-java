@@ -152,7 +152,7 @@ public class MoneroUtils {
    * @param val1 is a value to reconcile
    * @param val2 is a value to reconcile
    * @return the reconciled value if reconcilable
-   * @throws Exceptionif the values cannot be reconciled
+   * @throws Exception if the values cannot be reconciled
    */
   public static <T> T reconcile(T val1, T val2) {
     return reconcile(val1, val2, null, null, null);
@@ -253,7 +253,7 @@ public class MoneroUtils {
    * @param key is the key
    * @param value is the value
    * @param indent indents the line
-   * @returns {string} is the human-friendly key value line
+   * @return the human-friendly key value line
    */
   public static String kvLine(Object key, Object value, int indent) {
     return kvLine(key, value, indent, true, true);
@@ -267,7 +267,7 @@ public class MoneroUtils {
    * @param indent indents the line
    * @param newline specifies if the string should be terminated with a newline or not
    * @param ignoreUndefined specifies if undefined values should return an empty string
-   * @returns {string} is the human-friendly key value line
+   * @return the human-friendly key value line
    */
   public static String kvLine(Object key, Object value, int indent, boolean newline, boolean ignoreUndefined) {
     if (value == null && ignoreUndefined) return "";
