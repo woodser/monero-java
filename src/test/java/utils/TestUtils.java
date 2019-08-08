@@ -59,7 +59,7 @@ public class TestUtils {
   public static final String LANGUAGE = "English";
   public static final String MNEMONIC = "hefty value later extra artistic firm radar yodel talent future fungal nutshell because sanity awesome nail unjustly rage unafraid cedar delayed thumbs comb custom sanity"; 
   public static final String ADDRESS = "528qdm2pXnYYesCy5VdmBneWeaSZutEijFVAKjpVHeVd4unsCSM55CjgViQsK9WFNHK1eZgcCuZ3fRqYpzKDokqSKp4yp38";
-  public static final long FIRST_RECEIVE_HEIGHT = 383339; // NOTE: this value MUST be the height of the wallet's first tx for tests
+  public static final long FIRST_RECEIVE_HEIGHT = 383341; // NOTE: this value MUST be the height of the wallet's first tx for tests
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class);
@@ -96,17 +96,29 @@ public class TestUtils {
       MoneroRpcConnection rpc = new MoneroRpcConnection(WALLET_RPC_URI, WALLET_RPC_USERNAME, WALLET_RPC_PASSWORD);
       walletRpc = new MoneroWalletRpc(rpc);
       
-      // open rpc test wallet
+      // attempt to open test wallet
       try {
         walletRpc.openWallet(WALLET_RPC_NAME_1, WALLET_RPC_PW);
       } catch (MoneroRpcException e) {
-        if (-1 != e.getCode()) throw e; // -1 indicates wallet is already open, which is ok
+        
+        // -1 returned when the wallet does not exist or it's open by another application
+        if (e.getCode() == -1) {
+          
+          // create wallet
+          walletRpc.createWalletFromMnemonic(WALLET_RPC_NAME_1, WALLET_RPC_PW, MNEMONIC, FIRST_RECEIVE_HEIGHT);
+        } else {
+          throw e;
+        }
       }
       
       // ensure we're testing the right wallet
       assertEquals(TestUtils.MNEMONIC, walletRpc.getMnemonic());
       assertEquals(TestUtils.ADDRESS, walletRpc.getPrimaryAddress());
     }
+    
+    // sync and save the wallet
+    walletRpc.sync();
+    walletRpc.save();
     
     // return cached wallet rpc
     return walletRpc;

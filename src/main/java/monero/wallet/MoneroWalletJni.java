@@ -82,9 +82,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   // logger
   private static final Logger LOGGER = Logger.getLogger(MoneroWalletJni.class);
   
-  // default config
-  private static String DEFAULT_LANGUAGE = "English";
-  
   // instance variables
   private long jniWalletHandle;                 // memory address of the wallet in c++; this variable is read directly by name in c++
   private long jniListenerHandle;               // memory address of the wallet listener in c++; this variable is read directly by name in c++
@@ -167,7 +164,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param networkType is the wallet's network type
    * @param mnemonic is the mnemonic of the wallet to construct
    * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
-   * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
+   * @param restoreHeight is the block height to restore from (default = 0)
    */
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic) { return createWalletFromMnemonic(path, password, networkType, mnemonic, null, null); }
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection) { return createWalletFromMnemonic(path, password, networkType, mnemonic, daemonConnection, null); }
