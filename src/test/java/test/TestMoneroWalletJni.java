@@ -115,7 +115,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       wallet.sync();
       fail("Exception expected");
     } catch (MoneroException e) {
-      assertEquals("No connection to daemon", e.getMessage());
+      assertEquals("Wallet is not connected to daemon", e.getMessage());
     } finally {
       wallet.close();
     }
@@ -143,7 +143,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     try {
       wallet.getDaemonHeight();
     } catch (MoneroException e) {
-      assertEquals("No connection to daemon", e.getMessage());
+      assertEquals("Wallet is not connected to daemon", e.getMessage());
     }
     
     // set daemon connection and check chain height

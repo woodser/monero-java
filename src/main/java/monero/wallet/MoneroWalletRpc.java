@@ -286,8 +286,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       Map<String, Object> resp = rpc.sendJsonRequest("get_address_index", params);
       result = (Map<String, Object>) resp.get("result");
     } catch (MoneroRpcException e) {
-      System.out.println(e.getDescription());
-      if (e.getCode() == -2) throw new MoneroException(e.getDescription());
+      System.out.println(e.getMessage());
+      if (e.getCode() == -2) throw new MoneroException(e.getMessage(), e.getCode());
       throw e;
     }
     

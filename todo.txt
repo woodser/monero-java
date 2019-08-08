@@ -1,9 +1,6 @@
 14.1.0+ RELEASE
-MoneroException no description vs toString()
-work through problems of testing fresh wallet again
-cleanup logging; tests produce many messages at info which should be trace
 better sample code, maybe with two wallets, sending each other funds
-update spec/js: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), get is/has/in, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing(), coinbaseTx->minerTx, request copying from ~jni93, request -> query, height methods + ordering
+update spec: createTx(), createTxs(), relayTx(), relayTxs(), send(), sendSplit(), get is/has/in, isDoubleSpend -> isDoubleSpendSeen, startSyncing(), stopSyncing(), coinbaseTx->minerTx, request copying from ~jni93, request -> query, height methods + ordering
 update readme with jni support
 regenerate api docs
 build a picture of types and how they relate to each other
