@@ -133,7 +133,7 @@ The dynamic library is platform-specific so it must be built from source for the
 2. Install project dependencies: `maven install`
 3. Set up running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html).  See [Monero RPC Setup](#monero-rpc-setup). 
 4. Configure the desired RPC endpoints, authentication, and test wallet in [TestUtils.java](src/test/java/utils/TestUtils.java).
-5. [Build a dynamic library from Monero C++ for your platform](#build-libraries-for-java-jni).
+5. [Build a dynamic library from this library's C++ counterpart](#build-libraries-for-java-jni).
 6. Run all *.java files in src/main/test as JUnits.
 
 ## See Also
