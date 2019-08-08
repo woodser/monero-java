@@ -103,7 +103,7 @@ walletRPC.relayTx(createdTx);
 
 ## How to Use This Library
 
-1. Clone the Java repository: `git clone --recurse-submodules https://github.com/monero-ecosystem/monero-java-rpc.git`
+1. Clone the Java repository: `git clone --recurse-submodules https://github.com/monero-ecosystem/monero-java.git`
 2. Install project dependencies: `maven install`
 
 You are now ready to use this library with [monero-daemon-rpc](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.
