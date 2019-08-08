@@ -15,7 +15,7 @@ In addition, this project offers an [API specification](https://github.com/moner
 
 ## Sample Code
 
-This code demonstrates the API.  See the [Javadoc](https://moneroecosystem.org/monero-java/), [specification PDF](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf), or [JUnit tests](src/test/java) for more details.
+This code demonstrates the API.  See the [Javadoc](https://moneroecosystem.org/monero-java/), [specification PDF](https://github.com/monero-ecosystem/monero-javascript/blob/master/monero-model.pdf), or [JUnit tests](src/test/java) for full details.
 
 ```java
 // connect to a daemon
@@ -88,7 +88,7 @@ walletJNI.addListener(new MoneroWalletListener() {
 // send funds from the RPC wallet to the JNI wallet
 MoneroTxWallet sentTx = walletRPC.send(0, walletJNI.getPrimaryAddress(), new BigInteger("50000"));
 
-// create and relay tx which sends funds to multiple destinations in the JNI wallet
+// create and relay a tx which sends funds to multiple destinations in the JNI wallet
 MoneroSendRequest request = new MoneroSendRequest()
         .setAccountIndex(1)                           // send from account 1
         .setSubaddressIndices(0, 1)                   // send from subaddreses in account 1
