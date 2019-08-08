@@ -1066,7 +1066,7 @@ public class TestMoneroDaemonRpc {
       fail("Should have thrown error");
     } catch (MoneroRpcException e) {
       assertEquals(-7, (int) e.getCode());
-      assertEquals("Block not accepted", e.getDescription());
+      assertEquals("Block not accepted", e.getMessage());
     }
   }
   

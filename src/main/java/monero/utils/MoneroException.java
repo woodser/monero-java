@@ -1,5 +1,7 @@
 package monero.utils;
 
+import static org.junit.Assert.assertNotNull;
+
 /**
  * Exception when interacting with a Monero wallet or daemon.
  */
@@ -7,7 +9,6 @@ public class MoneroException extends RuntimeException {
 
   private static final long serialVersionUID = -6282368684634114151L;
   
-  private String description;
   private Integer code;
   
   /**
@@ -22,46 +23,30 @@ public class MoneroException extends RuntimeException {
   /**
    * Construct the exception.
    * 
-   * @param description is a human-readable description of the error
+   * @param message is a human-readable description of the error
    */
-  public MoneroException(String description) {
-    this(description, null);
+  public MoneroException(String message) {
+    this(message, null);
   }
   
   /**
    * Construct the exception.
    * 
-   * @param description is a human-readable description of the error
+   * @param message is a human-readable description of the error
    * @param code is the error code (optional)
    */
-  public MoneroException(String description, Integer code) {
-    super();
-    this.description = description;
+  public MoneroException(String message, Integer code) {
+    super(message);
+    assertNotNull("Exeption message cannot be null", message);
     this.code = code;
-  }
-  
-  /**
-   * Get a human-readable description of the error without error code, etc.
-   * 
-   * @return String is a human-readable description of the error
-   */
-  public String getDescription() {
-    return description;
   }
 
   public Integer getCode() {
     return code;
   }
   
-  public String getMessage() {
-    return toString();
-  }
-  
   public String toString() {
-    if (description == null && code == null) return super.getMessage();
-    String str = "";
-    if (code != null) str += code + ": ";
-    str += getDescription();
-    return str;
+    if (code == null) return getMessage();
+    return code + ": " + getMessage();
   }
 }

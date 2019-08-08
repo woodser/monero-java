@@ -27,10 +27,6 @@ public class MoneroRpcException extends MoneroException {
     return rpcParams;
   }
   
-  public String getMessage() {
-    return toString();
-  }
-  
   public String toString() {
     String str = super.toString();
     str += "\nRPC request: '" + rpcMethod + "' with params: " + JsonUtils.serialize(rpcParams);

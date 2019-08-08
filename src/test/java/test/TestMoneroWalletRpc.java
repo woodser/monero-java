@@ -368,19 +368,19 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       wallet.getHeight();
     } catch (MoneroException e) {
       assertEquals(-13, (int) e.getCode());
-      assertEquals("No wallet file", e.getDescription());
+      assertEquals("No wallet file", e.getMessage());
     }
     try {
       wallet.getMnemonic();
     } catch (MoneroException e) {
       assertEquals(-13, (int) e.getCode());
-      assertEquals("No wallet file", e.getDescription());
+      assertEquals("No wallet file", e.getMessage());
     }
     try {
       wallet.sync();
     } catch (MoneroException e) {
       assertEquals(-13, (int) e.getCode());
-      assertEquals("No wallet file", e.getDescription());
+      assertEquals("No wallet file", e.getMessage());
     }
     
     // re-open the wallet
@@ -390,6 +390,9 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     
     // close the wallet
     wallet.close();
+    
+    // re-open main test wallet for other tests
+    wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_RPC_PW);
   }
   
   // Can stop the RPC server

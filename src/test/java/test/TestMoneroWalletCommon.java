@@ -217,7 +217,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have thrown a RPC exception");
     } catch (MoneroException e) {
       //assertEquals(-5, (int) e.getCode());  // TODO: error codes specific to rpc?
-      assertEquals("Invalid payment ID: " + invalidPaymentId, e.getDescription());
+      assertEquals("Invalid payment ID: " + invalidPaymentId, e.getMessage());
     }
   }
   
@@ -833,7 +833,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.getTx(unknownId1);
       fail("Should have thrown error getting tx id unknown to wallet");
     } catch (MoneroException e) {
-      assertEquals("Tx not found in wallet: " + unknownId1, e.getDescription());
+      assertEquals("Tx not found in wallet: " + unknownId1, e.getMessage());
     }
     
     // fetch unknown tx id using query
@@ -841,7 +841,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.getTxs(new MoneroTxQuery().setTxId(unknownId1));
       throw new Error("Should have thrown error getting tx id unknown to wallet");
     } catch (MoneroException e) {
-      assertEquals("Tx not found in wallet: " + unknownId1, e.getDescription());
+      assertEquals("Tx not found in wallet: " + unknownId1, e.getMessage());
     }
     
     // fetch unknown tx id in collection
@@ -849,7 +849,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.getTxs(txId, unknownId1);
       fail("Should have thrown error getting tx id unknown to wallet");
     } catch (MoneroException e) {
-      assertEquals("Tx not found in wallet: " + unknownId1, e.getDescription());
+      assertEquals("Tx not found in wallet: " + unknownId1, e.getMessage());
     }
     
     // fetch unknown tx ids in collection
@@ -857,7 +857,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.getTxs(txId, unknownId1, unknownId2);
       fail("Should have thrown error getting tx id unknown to wallet");
     } catch (MoneroException e) {
-      assertEquals("Tx not found in wallet: " + unknownId1, e.getDescription()); // TODO: list all invalid ids in error description?
+      assertEquals("Tx not found in wallet: " + unknownId1, e.getMessage()); // TODO: list all invalid ids in error description?
     }
     
     // fetch invalid id
@@ -865,7 +865,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.getTx(invalidId);
       fail("Should have thrown error getting tx id unknown to wallet");
     } catch (MoneroException e) {
-      assertEquals("Tx not found in wallet: " + invalidId, e.getDescription());
+      assertEquals("Tx not found in wallet: " + invalidId, e.getMessage());
     }
     
     // fetch invalid id collection
@@ -873,7 +873,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.getTxs(txId, invalidId);
       fail("Should have thrown error getting tx id unknown to wallet");
     } catch (MoneroException e) {
-      assertEquals("Tx not found in wallet: " + invalidId, e.getDescription());
+      assertEquals("Tx not found in wallet: " + invalidId, e.getMessage());
     }
     
     // fetch invalid ids in collection
@@ -881,7 +881,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.getTxs(txId, invalidId, "invalid_id_2");
       fail("Should have thrown error getting tx id unknown to wallet");
     } catch (MoneroException e) {
-      assertEquals("Tx not found in wallet: " + invalidId, e.getDescription());
+      assertEquals("Tx not found in wallet: " + invalidId, e.getMessage());
     }
   }
 
@@ -3070,27 +3070,27 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
   }
   
   protected void testInvalidAddressException(MoneroException e) {
-    assertEquals("Invalid address", e.getDescription());
+    assertEquals("Invalid address", e.getMessage());
   }
   
   protected void testInvalidTxIdException(MoneroException e) {
-    assertEquals("TX ID has invalid format", e.getDescription());
+    assertEquals("TX ID has invalid format", e.getMessage());
   }
   
   protected void testInvalidTxKeyException(MoneroException e) {
-    assertEquals("Tx key has invalid format", e.getDescription());
+    assertEquals("Tx key has invalid format", e.getMessage());
   }
   
   protected void testInvalidSignatureException(MoneroException e) {
-    assertEquals("Signature size mismatch with additional tx pubkeys", e.getDescription());
+    assertEquals("Signature size mismatch with additional tx pubkeys", e.getMessage());
   }
   
   protected void testNoSubaddressException(MoneroException e) {
-    assertEquals("Address must not be a subaddress", e.getDescription());
+    assertEquals("Address must not be a subaddress", e.getMessage());
   }
   
   protected void testSignatureHeaderCheckException(MoneroException e) {
-    assertEquals("Signature header check error", e.getDescription());
+    assertEquals("Signature header check error", e.getMessage());
   }
   
   protected static void testWalletsEqualOnChain(MoneroWallet wallet1, MoneroWallet wallet2) {
