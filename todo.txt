@@ -1,11 +1,14 @@
 14.1.0+ RELEASE
 c++ sample code and readme
+c++ define send convenience methods, destination constructor
 sample code test
 fix post sync
+in -> isIn*
 update to boron butterfly
-write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, etc, tx pool syncing)
-streamline readme to get up and running, optionally with jni support, then section for running tests which requires up and running
 remove spec from javascript project
+
+regen api docs
+write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, etc, tx pool syncing)
 announce
 
 MEDIUM

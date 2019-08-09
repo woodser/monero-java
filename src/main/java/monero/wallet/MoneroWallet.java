@@ -396,7 +396,7 @@ public interface MoneroWallet {
    * be returned.  All filtering is optional and no filtering is applied when
    * not defined.
    * 
-   * @param query filters results (optional)
+   * @param query specifies attributes of transactions to get
    * @return wallet transactions per the query
    */
   public List<MoneroTxWallet> getTxs(MoneroTxQuery query);
@@ -453,7 +453,7 @@ public interface MoneroWallet {
    * returned.  All filtering is optional and no filtering is applied when not
    * defined.
    * 
-   * @param query filters query results (optional)
+   * @param query specifies attributes of transfers to get
    * @return wallet transfers per the query
    */
   public List<MoneroTransfer> getTransfers(MoneroTransferQuery query);
@@ -476,7 +476,7 @@ public interface MoneroWallet {
    * meet every criteria defined in the query in order to be returned.  All
    * filtering is optional and no filtering is applied when not defined.
    * 
-   * @param query specifies query options (optional)
+   * @param query specifies attributes of outputs to get
    * @return List<MoneroOutputWallet> are wallet outputs per the query
    */
   public List<MoneroOutputWallet> getOutputs(MoneroOutputQuery query);

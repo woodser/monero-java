@@ -348,7 +348,6 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletRandomJni
   }
 }
 
-// TODO: update this impl and others like it to be like e.g. createWalletFromKeysJni
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint jnetwork_type, jstring jmnemonic, jlong jrestore_height) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni");
 
@@ -811,7 +810,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountJni(JNIEn
   // get account
   monero_account account = wallet->get_account(account_idx, include_subaddresses);
 
-  // serialize and returna account
+  // serialize and return account
   string account_json = account.serialize();
   return env->NewStringUTF(account_json.c_str());
 }
