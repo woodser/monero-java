@@ -519,10 +519,19 @@ public interface MoneroWallet {
   public List<MoneroKeyImage> getNewKeyImagesFromLastImport();
   
   /**
+   * Create a transaction to transfer funds from this wallet according to the
+   * given request.  The transaction may be relayed later.
+   * 
+   * @param request configures the transaction to create
+   * @return the created transaction
+   */
+  public MoneroTxWallet createTx(MoneroSendRequest request);
+  
+  /**
    * Create a transaction to transfers funds from this wallet to a destination address.
    * The transaction may be relayed later.
    * 
-   * @param accountIndex is the index of the account to draw funds from
+   * @param accountIndex is the index of the account to withdraw funds from
    * @param address is the destination address to send funds to
    * @param amount is the amount being sent
    * @return the resulting transaction
@@ -533,22 +542,13 @@ public interface MoneroWallet {
    * Create a transaction to transfers funds from this wallet to a destination address.
    * The transaction may be relayed later.
    * 
-   * @param accountIndex is the index of the account to draw funds from
+   * @param accountIndex is the index of the account to withdraw funds from
    * @param address is the destination address to send funds to
    * @param amount is the amount being sent
    * @param priority is the send priority (default normal)
    * @return the resulting transaction
    */
   public MoneroTxWallet createTx(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
-  
-  /**
-   * Create a transaction to transfer funds from this wallet according to the
-   * given request.  The transaction may be relayed later.
-   * 
-   * @param request configures the transaction to create
-   * @return the created transaction
-   */
-  public MoneroTxWallet createTx(MoneroSendRequest request);
   
   /**
    * Create one or more transactions to transfer funds from this wallet
@@ -562,26 +562,18 @@ public interface MoneroWallet {
   /**
    * Relay a previously created transaction.
    * 
-   * @param tx is the transaction to relay
-   * @return the id of the relayed tx
-   */
-  public String relayTx(MoneroTxWallet tx);
-  
-  /**
-   * Relay a previously created transaction.
-   * 
    * @param txMetadata is transaction metadata previously created without relaying
    * @return the id of the relayed tx
    */
   public String relayTx(String txMetadata);
   
   /**
-   * Relay previously created transactions.
+   * Relay a previously created transaction.
    * 
-   * @param txs are the transactions to relay
-   * @return the ids of the relayed txs
+   * @param tx is the transaction to relay
+   * @return the id of the relayed tx
    */
-  public List<String> relayTxs(List<MoneroTxWallet> txs);
+  public String relayTx(MoneroTxWallet tx);
   
   /**
    * Relay previously created transactions.
@@ -590,6 +582,14 @@ public interface MoneroWallet {
    * @return the ids of the relayed txs
    */
   public List<String> relayTxs(Collection<String> txMetadatas);
+  
+  /**
+   * Relay previously created transactions.
+   * 
+   * @param txs are the transactions to relay
+   * @return the ids of the relayed txs
+   */
+  public List<String> relayTxs(List<MoneroTxWallet> txs);
   
   /**
    * Create and relay a transaction to transfer funds from this wallet
@@ -604,7 +604,7 @@ public interface MoneroWallet {
    * Create and relay a transaction to transfers funds from this wallet to
    * a destination address.
    * 
-   * @param accountIndex is the index of the account to draw funds from
+   * @param accountIndex is the index of the account to withdraw funds from
    * @param address is the destination address to send funds to
    * @param amount is the amount being sent
    * @return the resulting transaction
@@ -615,7 +615,7 @@ public interface MoneroWallet {
    * Create and relay a transaction to transfers funds from this wallet to
    * a destination address.
    * 
-   * @param accountIndex is the index of the account to draw funds from
+   * @param accountIndex is the index of the account to withdraw funds from
    * @param address is the destination address to send funds to
    * @param amount is the amount being sent
    * @param priority is the send priority (default normal)
@@ -636,7 +636,7 @@ public interface MoneroWallet {
    * Create and relay one or more transactions which transfer funds from this
    * wallet to a destination address.
    * 
-   * @param accountIndex is the index of the account to draw funds from
+   * @param accountIndex is the index of the account to withdraw funds from
    * @param address is the destination address to send funds to
    * @param amount is the amount being sent
    * @return the resulting transactions
@@ -647,7 +647,7 @@ public interface MoneroWallet {
    * Create and relay one or more transactions to transfer funds from this
    * wallet to a destination address with a priority.
    * 
-   * @param accountIndex is the index of the account to draw funds from
+   * @param accountIndex is the index of the account to withdraw funds from
    * @param address is the destination address to send funds to
    * @param amount is the amount being sent
    * @param priority is the send priority (default normal)
