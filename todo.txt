@@ -1,4 +1,5 @@
 14.1.0+ RELEASE
+retrival by ranges end height should be exclusive
 sample code test
 fix post sync
 
