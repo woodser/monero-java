@@ -8,7 +8,7 @@ In addition, this project conforms to an [API specification](monero-spec.pdf) in
 
 - Manage a Monero daemon using RPC
 - Manage a Monero wallet using RPC and JNI
-- Object-oriented model with rigorous focus on ease-of-use
+- Cohesive APIs and models with rigorous focus on ease-of-use
 - Fetch and process binary data from the daemon (e.g. raw blocks)
 - Query wallet transactions, transfers, and outputs by their many attributes
 - Be notified when blocks are added to the chain, as the wallet synchronizes, or when the wallet sends or receives funds
