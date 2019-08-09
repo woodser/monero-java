@@ -2,7 +2,7 @@
 
 This project is a library for working with Monero wallets and daemons in Java using RPC and JNI bindings to [Monero Core](https://github.com/monero-project/monero).
 
-In addition, this project offers an [API specification](monero-spec.pdf) for wallet and daemon methods and types.  The specification is intended to be intuitive, robust, and for long-term use in the Monero project.
+In addition, this project conforms to an [API specification](monero-spec.pdf) intended to be intuitive, robust, and for long-term use in the Monero project.
 
 ## Main Features
 
@@ -11,11 +11,12 @@ In addition, this project offers an [API specification](monero-spec.pdf) for wal
 - Object-oriented model with rigorous focus on ease-of-use
 - Fetch and process binary data from the daemon (e.g. raw blocks)
 - Query wallet transactions, transfers, and outputs by their many attributes
+- Be notified when blocks are added to the chain, as the wallet synchronizes, or when the wallet sends or receives funds
 - Over 200 passing JUnit tests
 
 ## Sample Code
 
-This code demonstrates the API.  See the [Javadoc](https://moneroecosystem.org/monero-java/), [specification PDF](monero-spec.pdf), or [JUnit tests](src/test/java) for full details.
+This code introduces the API.  See the [Javadoc](https://moneroecosystem.org/monero-java/), [specification PDF](monero-spec.pdf), or [JUnit tests](src/test/java) for full details.
 
 ```java
 // connect to a daemon
@@ -51,12 +52,12 @@ long nextNumTxs = nextBlockHeader.getNumTxs();
 
 // connect to a wallet using RPC
 MoneroWallet walletRPC = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
-BigInteger balance = walletRPC.getBalance();           // 533648366742
 String primaryAddress = walletRPC.getPrimaryAddress(); // 59aZULsUF3YNSKGiHz4J...
+BigInteger balance = walletRPC.getBalance();           // 533648366742
 MoneroSubaddress subaddress = walletRPC.getSubaddress(1, 0);
 BigInteger subaddressBalance = subaddress.getBalance();
 
-// query a transaction
+// query a transaction by id
 MoneroTxWallet tx = walletRPC.getTx("3276252c5a545b90c8e147fcde45d3e1917726470a8f7d4c8977b527a44dfd15");
 List<MoneroIncomingTransfer> incomingTransfers = tx.getIncomingTransfers();
 List<MoneroDestination> destinations = tx.getOutgoingTransfer().getDestinations();
@@ -71,14 +72,16 @@ List<MoneroOutputWallet> outputs = walletRPC.getOutputs(outputQuery);
 
 // create a new wallet using native Java binding to Monero Core
 MoneroWalletJni walletJNI = MoneroWalletJni.createWalletRandom("MyWallet", "supersecretpassword123", MoneroNetworkType.MAINNET);
+
+// continuously synchronize the wallet as its own thread (asynchronously)
 walletJNI.startSyncing();
 
-// listen for incoming funds to the JNI wallet
+// be notified when the wallet receives funds
 walletJNI.addListener(new MoneroWalletListener() {
   
   @Override
   public void onOutputReceived(MoneroOutputWallet output) {
-    System.out.println("Funds received!"); 
+    System.out.println("Wallet received funds!"); 
     int accountIdx = output.getAccountIndex();
     int subaddressIdx = output.getSubaddressIndex();
     MoneroKeyImage keyImage = output.getKeyImage();
@@ -87,8 +90,9 @@ walletJNI.addListener(new MoneroWalletListener() {
 
 // send funds from the RPC wallet to the JNI wallet
 MoneroTxWallet sentTx = walletRPC.send(0, walletJNI.getPrimaryAddress(), new BigInteger("50000"));
+assertTrue(sentTx.inTxPool());
 
-// create and relay a tx which sends funds to multiple destinations in the JNI wallet
+// create a request to send funds to multiple destinations in the random wallet
 MoneroSendRequest request = new MoneroSendRequest()
         .setAccountIndex(1)                           // send from account 1
         .setSubaddressIndices(0, 1)                   // send from subaddreses in account 1
@@ -96,9 +100,11 @@ MoneroSendRequest request = new MoneroSendRequest()
         .setDestinations(
                 new MoneroDestination(walletJNI.getAddress(1, 0), new BigInteger("50000")),
                 new MoneroDestination(walletJNI.getAddress(2, 0), new BigInteger("50000")));
+
+// create the transaction, confirm with the user, and relay to the network
 MoneroTxWallet createdTx = walletRPC.createTx(request);
 BigInteger fee = createdTx.getFee();  // "Are you sure you want to send ...?"
-walletRPC.relayTx(createdTx);
+walletRPC.relayTx(createdTx); //submit the transaction to the Monero network which will notify the recipient wallet
 ```
 
 ## How to Use This Library
