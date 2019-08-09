@@ -1,10 +1,8 @@
 14.1.0+ RELEASE
-c++ sample code and readme
-c++ define send convenience methods, destination constructor
+update to boron butterfly
 sample code test
 fix post sync
 in -> isIn*
-update to boron butterfly
 remove spec from javascript project
 
 regen api docs
