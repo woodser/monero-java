@@ -1,11 +1,11 @@
 14.1.0+ RELEASE
-update java project ref in spec
 update to boron butterfly
+in -> isIn*
 sample code test
 fix post sync
-in -> isIn*
 remove spec from javascript project
 
+spec: update java project ref, based on boron butterfly
 regen api docs
 write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, etc, tx pool syncing)
 announce
