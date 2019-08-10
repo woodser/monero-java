@@ -67,7 +67,7 @@ walletJNI.startSyncing();
 
 // be notified when the wallet receives funds
 walletJNI.addListener(new MoneroWalletListener() {
-  
+  create a request to send funds from the RPC wallet to multiple destinations in the JNI wallet
   @Override
   public void onOutputReceived(MoneroOutputWallet output) {
     System.out.println("Wallet received funds!");
@@ -99,7 +99,7 @@ daemon.stopMining();
 TimeUnit.SECONDS.sleep(10); // let the wallet refresh
 boolean isConfirmed = walletRPC.getTx(sentTx.getId()).isConfirmed();
 
-// create a request to send funds to multiple destinations in the JNI wallet
+// create a request to send funds from the RPC wallet to multiple destinations in the JNI wallet
 MoneroSendRequest request = new MoneroSendRequest()
         .setAccountIndex(1)                           // send from account 1
         .setSubaddressIndices(0, 1)                   // send from subaddreses in account 1
