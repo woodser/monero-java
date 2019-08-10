@@ -127,7 +127,7 @@ public class TestSampleCode {
     daemon.stopMining();
     
     // the transaction is (probably) confirmed
-    TimeUnit.SECONDS.sleep(15); // let the wallet refresh
+    TimeUnit.SECONDS.sleep(10); // let the wallet refresh
     boolean isConfirmed = walletRPC.getTx(sentTx.getId()).isConfirmed();
     
     // create a request to send funds to multiple destinations in the JNI wallet
