@@ -93,7 +93,7 @@ public class TestSampleCode {
     MoneroWalletJni walletJNI = MoneroWalletJni.createWalletFromMnemonic("test_wallets/" + UUID.randomUUID().toString(), "supersecretpassword123", MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, new MoneroRpcConnection("http://localhost:38081"), TestUtils.FIRST_RECEIVE_HEIGHT);
     //MoneroWalletJni walletJNI = MoneroWalletJni.createWalletFromMnemonic("MyWallet", "supersecretpassword123", MoneroNetworkType.STAGENET, "hefty value ...", new MoneroRpcConnection("http://localhost:38081"), 384151l);
     
-    // synchronize the wallet and receive notifications which could feed a progress bar
+    // synchronize the wallet and receive progress notifications
     walletJNI.sync(new MoneroSyncListener() {
       @Override
       public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
@@ -122,18 +122,17 @@ public class TestSampleCode {
     assertTrue(sentTx.inTxPool());
     
     // mine with 7 threads to push the network along
-    String address = "528qdm2pXnYYesCy5VdmBneWeaSZutEijFVAKjpVHeVd4unsCSM55CjgViQsK9WFNHK1eZgcCuZ3fRqYpzKDokqSKp4yp38";
     int numThreads = 7;
     boolean isBackground = false;
     boolean ignoreBattery = false;
-    daemon.startMining(address, numThreads, isBackground, ignoreBattery);
+    walletRPC.startMining(numThreads, isBackground, ignoreBattery);
     
     // wait for the next block to be added to the chain
     MoneroBlockHeader nextBlockHeader = daemon.getNextBlockHeader();
     long nextNumTxs = nextBlockHeader.getNumTxs();
     
     // stop mining
-    daemon.stopMining();
+    walletRPC.stopMining();
     
     // the transaction is (probably) confirmed
     TimeUnit.SECONDS.sleep(10); // let the wallet refresh
