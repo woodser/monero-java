@@ -74,8 +74,8 @@ public class TestSampleCode {
     BigInteger subaddressBalance = subaddress.getBalance();
     
     // query a transaction by id
-    //System.out.println("Use this ID: " + walletRPC.getTxs(new MoneroTxQuery().setIsOutgoing(true)).get(0).getId());
-    MoneroTxWallet tx = walletRPC.getTx("314a0f1375db31cea4dac4e0a51514a6282b43792269b3660166d4d2b46437ca");
+    MoneroTxWallet tx = walletRPC.getTx(walletRPC.getTxs(new MoneroTxQuery().setIsOutgoing(true)).get(0).getId());
+    //MoneroTxWallet tx = walletRPC.getTx("314a0f1375db31cea4dac4e0a51514a6282b43792269b3660166d4d2b46437ca");
     long txHeight = tx.getHeight();
     List<MoneroIncomingTransfer> incomingTransfers = tx.getIncomingTransfers();
     List<MoneroDestination> destinations = tx.getOutgoingTransfer().getDestinations();
