@@ -32,7 +32,7 @@ for (MoneroTx tx : txsInPool) {
   boolean isDoubleSpendSeen = tx.isDoubleSpendSeen();
 }
 
-// get last 100 blocks as a binary request
+// get the last 100 blocks as a binary request
 List<MoneroBlock> blocks = daemon.getBlocksByRange(height - 100, height);
 for (MoneroBlock block : blocks) {
   int numTxs = block.getTxs().size();
