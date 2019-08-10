@@ -104,7 +104,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
       assertEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
       assertEquals(1, wallet.getHeight());
-      assertTrue(wallet.getTxs().isEmpty()); // wallet is not synced
+      assertEquals(0, wallet.getTxs().size());  // wallet is not synced
       wallet.sync();
       assertEquals(daemon.getHeight(), wallet.getHeight());
       List<MoneroTxWallet> txs = wallet.getTxs();
