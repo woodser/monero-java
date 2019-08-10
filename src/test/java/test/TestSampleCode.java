@@ -90,7 +90,7 @@ public class TestSampleCode {
     
     // create a new wallet with a randomly generated seed using native Java binding to Monero Core
     MoneroWalletJni walletJNI = MoneroWalletJni.createWalletRandom("test_wallets/" + UUID.randomUUID().toString(), "supersecretpassword123", MoneroNetworkType.STAGENET, new MoneroRpcConnection("http://localhost:38081"));
-    //MoneroWalletJni walletJNI = MoneroWalletJni.createWalletRandom("test_wallets/MyWallet", "supersecretpassword123", MoneroNetworkType.STAGENET, new MoneroRpcConnection("http://localhost:38083"));
+    //MoneroWalletJni walletJNI = MoneroWalletJni.createWalletRandom("MyWallet", "supersecretpassword123", MoneroNetworkType.STAGENET, new MoneroRpcConnection("http://localhost:38083"));
     
     // continuously synchronize the wallet as its own thread (asynchronously)
     walletJNI.startSyncing();
