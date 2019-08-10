@@ -29,6 +29,7 @@ import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroSubaddress;
+import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxQuery;
@@ -88,11 +89,19 @@ public class TestSampleCode {
     MoneroOutputQuery outputQuery = new MoneroOutputQuery().setIsSpent(false);
     List<MoneroOutputWallet> outputs = walletRPC.getOutputs(outputQuery);
     
-    // create a new wallet with a randomly generated seed using native Java binding to Monero Core
-    MoneroWalletJni walletJNI = MoneroWalletJni.createWalletRandom("test_wallets/" + UUID.randomUUID().toString(), "supersecretpassword123", MoneroNetworkType.STAGENET, new MoneroRpcConnection("http://localhost:38081"));
-    //MoneroWalletJni walletJNI = MoneroWalletJni.createWalletRandom("MyWallet", "supersecretpassword123", MoneroNetworkType.STAGENET, new MoneroRpcConnection("http://localhost:38083"));
+    // create a wallet from a mnemonic phrase using Java native bindings to Monero Core
+    MoneroWalletJni walletJNI = MoneroWalletJni.createWalletFromMnemonic("test_wallets/" + UUID.randomUUID().toString(), "supersecretpassword123", MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, new MoneroRpcConnection("http://localhost:38081"), TestUtils.FIRST_RECEIVE_HEIGHT);
+    //MoneroWalletJni walletJNI = MoneroWalletJni.createWalletFromMnemonic("MyWallet", "supersecretpassword123", MoneroNetworkType.STAGENET, "hefty value ...", new MoneroRpcConnection("http://localhost:38081"), 384151l);
     
-    // continuously synchronize the wallet as its own thread (asynchronously)
+    // synchronize the wallet and receive notifications which could feed a progress bar
+    walletJNI.sync(new MoneroSyncListener() {
+      @Override
+      public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
+        System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message);
+      }
+    });
+    
+    // start syncing the wallet continuously in the background
     walletJNI.startSyncing();
     
     // be notified when the JNI wallet receives funds
