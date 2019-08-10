@@ -1,6 +1,6 @@
 14.1.0+ RELEASE
-retrival by ranges end height should be exclusive
 sample code test
+should not be able to startSync() if no connection to daemon
 fix post sync
 
 regen api docs
@@ -38,6 +38,7 @@ test changing wallet password with moveTo()
 rpc on_generate_from_keys
 pruning
 model rct_signatures, rct_prunable, unsigned_tx_set, etc
+retrival by ranges end height should be exclusive? would be inconsistent with current rpc api
 
 LOW
 more wallet comparison?
@@ -129,6 +130,7 @@ getReserveProofAccount() failing again
 monerod high cpu usage when multiple wallets connected and not closed
 
 MEDIUM
+Mining to subaddress isn't supported yet
 getDaemonTargetHeight() > getDaemonHeight() sometimes
 failed tx in pool (after testUpdateLockedDifferentAccounts()) causes non-originating saved wallets to return duplicate incoming transfers but one has amount/numSuggestedConfirmations of 0, possibly no outgoingTransfer
 peer.getLastSeenTimestamp() occasionally returns -4
