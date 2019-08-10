@@ -95,7 +95,7 @@ public class TestSampleCode {
     // continuously synchronize the wallet as its own thread (asynchronously)
     walletJNI.startSyncing();
     
-    // be notified when the wallet receives funds
+    // be notified when the JNI wallet receives funds
     walletJNI.addListener(new MoneroWalletListener() {
       
       @Override
