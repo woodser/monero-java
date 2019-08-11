@@ -41,6 +41,7 @@ LOW
 more wallet comparison?
 test filtering with not relayed
 tx pool stats and other binary calls
+remove filter?
 refine model to not use null where inappropriate e.g. tx pool status numTxs() should never be null
 Activate UTF-8 support for Boost filesystem classes on Windows (search for that text in core)
 port changes from diff of jni39+ to master_bkp_jni to js
