@@ -1149,16 +1149,16 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
         onSyncProgressAfterDone = true;
       }
       
-      // start height must pick up where the last end height left off
-      if (prevCompleteHeight != null) {
-        assertEquals((long) prevCompleteHeight, startHeight);
-        if (startHeight == prevCompleteHeight) this.startHeight = startHeight;  // new sync session, so update tester's start height
-      }
+      // update tester's start height if new sync session
+      if (prevCompleteHeight != null && startHeight == prevCompleteHeight) this.startHeight = startHeight;  
       
       // if sync is complete, record completion height for subsequent start heights
       if (Double.compare(percentDone, 1) == 0) prevCompleteHeight = endHeight;
       
-      assertFalse("end height <= start height", endHeight <= startHeight);
+      // otherwise start height is equal to previous completion height
+      else if (prevCompleteHeight != null) assertEquals((long) prevCompleteHeight, startHeight);
+      
+      assertTrue("end height > start height", endHeight > startHeight);
       assertEquals(this.startHeight, startHeight);
       assertTrue(endHeight >= prevEndHeight);  // chain can grow while syncing
       prevEndHeight = endHeight;
