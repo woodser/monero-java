@@ -1,5 +1,4 @@
 14.1.0+ RELEASE
-regen api docs
 write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, etc, tx pool syncing)
 announce
 
