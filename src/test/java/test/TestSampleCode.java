@@ -102,7 +102,7 @@ public class TestSampleCode {
     walletJNI.sync(new MoneroSyncListener() {
       @Override
       public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
-        System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message);
+        System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
       }
     });
     
