@@ -2,10 +2,10 @@ package common.utils;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import common.types.JsonException;
 
@@ -21,7 +21,7 @@ public class JsonUtils {
   static {
     DEFAULT_MAPPER = new ObjectMapper();
     DEFAULT_MAPPER.setSerializationInclusion(Include.NON_NULL);
-    DEFAULT_MAPPER.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+    DEFAULT_MAPPER.setDefaultPropertyInclusion(JsonInclude.Value.construct(Include.ALWAYS, Include.NON_NULL));
   }
   
   /**
@@ -95,7 +95,6 @@ public class JsonUtils {
    * @param type is the parameterized type to deserialize to (e.g. new TypeReference<Map<String, Object>>(){})
    * @return T is the object deserialized from JSON to the given parameterized type
    */
-  @SuppressWarnings("unchecked")
   public static <T> T deserialize(ObjectMapper mapper, String json, TypeReference<T> type) {
     try {
       return (T) mapper.readValue(json, type);
