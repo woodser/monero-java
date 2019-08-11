@@ -1,7 +1,4 @@
 14.1.0+ RELEASE
-testOutputNotificationsDifferentAccounts occasionally fails
-random wallet should be synced if created with rpc connection
-should not be able to startSync() if no connection to daemon
 regen api docs
 write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, etc, tx pool syncing)
 announce
@@ -38,6 +35,7 @@ rpc on_generate_from_keys
 pruning
 model rct_signatures, rct_prunable, unsigned_tx_set, etc
 retrival by ranges end height should be exclusive? would be inconsistent with current rpc api
+random wallet should be synced if created with rpc connection?
 
 LOW
 more wallet comparison?
