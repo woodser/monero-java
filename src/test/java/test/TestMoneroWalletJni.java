@@ -188,6 +188,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertFalse(wallet.isSynced());
     assertEquals(1, wallet.getHeight());
     assertEquals(0, wallet.getRestoreHeight());
+    try { wallet.startSyncing(); } catch (MoneroException e) { assertEquals("Wallet is not connected to daemon", e.getMessage()); }
     wallet.close();
     
     // create wallet without restore height
