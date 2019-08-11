@@ -86,7 +86,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private long jniWalletHandle;                 // memory address of the wallet in c++; this variable is read directly by name in c++
   private long jniListenerHandle;               // memory address of the wallet listener in c++; this variable is read directly by name in c++
   private WalletJniListener jniListener;        // receives notifications from jni c++
-  private Set<MoneroWalletListenerI> listeners;  // externally subscribed wallet listeners
+  private Set<MoneroWalletListenerI> listeners; // externally subscribed wallet listeners
   private boolean isClosed;                     // whether or not wallet is closed
   
   /**

@@ -568,27 +568,27 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressIndexJni(
   }
 }
 
+/**
+ * Only one listener needs to subscribe over JNI, so this removes the previously registered listener
+ * and registers the new listener.
+ */
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *env, jobject instance, jobject jlistener) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_setListenerJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
 
-  // clear old listener
-  wallet->set_listener(boost::none);
-  wallet_jni_listener *old_listener = get_handle<wallet_jni_listener>(env, instance, JNI_LISTENER_HANDLE);
+  // remove old listener
+  wallet_jni_listener* old_listener = get_handle<wallet_jni_listener>(env, instance, JNI_LISTENER_HANDLE);
   if (old_listener != nullptr) {
+    wallet->remove_listener(*old_listener);
     old_listener->deleteGlobalJavaRef(env);
     delete old_listener;
   }
 
-  // set new listener
-  if (jlistener == nullptr) {
-    return 0;
-  } else {
-    wallet_jni_listener* listener = new wallet_jni_listener(env, jlistener);
-    monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-    wallet->set_listener(*listener);
-    return reinterpret_cast<jlong>(listener);
-  }
+  // add new listener
+  if (jlistener == nullptr) return 0;
+  wallet_jni_listener* listener = new wallet_jni_listener(env, jlistener);
+  wallet->add_listener(*listener);
+  return reinterpret_cast<jlong>(listener);
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getIntegratedAddressJni(JNIEnv *env, jobject instance, jstring jstandard_address, jstring jpayment_id) {
