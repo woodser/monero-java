@@ -15,7 +15,6 @@ import monero.daemon.MoneroDaemon;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
-import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
 import monero.rpc.MoneroRpcConnection;
@@ -110,9 +109,9 @@ public class TestSampleCode {
       @Override
       public void onOutputReceived(MoneroOutputWallet output) {
         System.out.println("Wallet received funds!");
+        String txId = output.getTx().getId();
         int accountIdx = output.getAccountIndex();
         int subaddressIdx = output.getSubaddressIndex();
-        MoneroKeyImage keyImage = output.getKeyImage();
         JNI_OUTPUT_RECEIVED = true;
       }
     });

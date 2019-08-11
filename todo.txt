@@ -1,5 +1,5 @@
 14.1.0+ RELEASE
-sample code test
+random wallet should be synced if created with rpc connection
 should not be able to startSync() if no connection to daemon
 fix post sync
 
