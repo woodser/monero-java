@@ -66,7 +66,7 @@ MoneroWalletJni walletJNI = MoneroWalletJni.createWalletFromMnemonic("MyWallet",
 walletJNI.sync(new MoneroSyncListener() {
   @Override
   public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
-    System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
+    // feed a progress bar?
   }
 });
 
