@@ -62,7 +62,7 @@ List<MoneroOutputWallet> outputs = walletRPC.getOutputs(outputQuery);
 // create a wallet from a mnemonic phrase using Java native bindings to Monero Core
 MoneroWalletJni walletJNI = MoneroWalletJni.createWalletFromMnemonic("MyWallet", "supersecretpassword123", MoneroNetworkType.STAGENET, "hefty value ...", new MoneroRpcConnection("http://localhost:38081"), 384151l);
 
-// synchronize the wallet and receive notifications which could feed a progress bar
+// synchronize the wallet and receive progress notifications
 walletJNI.sync(new MoneroSyncListener() {
   @Override
   public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
@@ -75,13 +75,14 @@ walletJNI.startSyncing();
 
 // be notified when the JNI wallet receives funds
 walletJNI.addListener(new MoneroWalletListener() {
-
+  
   @Override
   public void onOutputReceived(MoneroOutputWallet output) {
     System.out.println("Wallet received funds!");
+    String txId = output.getTx().getId();
     int accountIdx = output.getAccountIndex();
     int subaddressIdx = output.getSubaddressIndex();
-    MoneroKeyImage keyImage = output.getKeyImage();
+    JNI_OUTPUT_RECEIVED = true;
   }
 });
 
@@ -90,18 +91,17 @@ MoneroTxWallet sentTx = walletRPC.send(0, walletJNI.getPrimaryAddress(), new Big
 assertTrue(sentTx.inTxPool());
 
 // mine with 7 threads to push the network along
-String address = "528qdm2pXnYYesCy5VdmBneWeaSZutEijFVAKjpVHeVd4unsCSM55CjgViQsK9WFNHK1eZgcCuZ3fRqYpzKDokqSKp4yp38";
 int numThreads = 7;
 boolean isBackground = false;
 boolean ignoreBattery = false;
-daemon.startMining(address, numThreads, isBackground, ignoreBattery);
+walletRPC.startMining(numThreads, isBackground, ignoreBattery);
 
 // wait for the next block to be added to the chain
 MoneroBlockHeader nextBlockHeader = daemon.getNextBlockHeader();
 long nextNumTxs = nextBlockHeader.getNumTxs();
 
 // stop mining
-daemon.stopMining();
+walletRPC.stopMining();
 
 // the transaction is (probably) confirmed
 TimeUnit.SECONDS.sleep(10); // let the wallet refresh
@@ -120,6 +120,10 @@ MoneroSendRequest request = new MoneroSendRequest()
 MoneroTxWallet createdTx = walletRPC.createTx(request);
 BigInteger fee = createdTx.getFee();  // "Are you sure you want to send ...?"
 walletRPC.relayTx(createdTx); // submit the transaction which will notify the JNI wallet
+
+// JNI wallet will receive notification of incoming output after a moment
+TimeUnit.SECONDS.sleep(10);
+assertTrue(JNI_OUTPUT_RECEIVED);
 ```
 
 ## How to Use This Library
