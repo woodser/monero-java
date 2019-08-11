@@ -1,5 +1,6 @@
 14.1.0+ RELEASE
 write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, etc, tx pool syncing)
+release
 announce
 
 MEDIUM
