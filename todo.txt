@@ -1,8 +1,8 @@
 14.1.0+ RELEASE
+fix post sync
+testOutputNotificationsDifferentAccounts occasionally fails
 random wallet should be synced if created with rpc connection
 should not be able to startSync() if no connection to daemon
-fix post sync
-
 regen api docs
 write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, etc, tx pool syncing)
 announce

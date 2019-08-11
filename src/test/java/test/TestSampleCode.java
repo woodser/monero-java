@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -42,6 +43,11 @@ import utils.TestUtils;
 public class TestSampleCode {
   
   private static boolean JNI_OUTPUT_RECEIVED = false;
+  
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    TestUtils.TX_POOL_WALLET_TRACKER.reset(); // all wallets need to wait for txs to confirm to reliably sync
+  }
   
   @SuppressWarnings("unused")
   @Test
@@ -117,6 +123,7 @@ public class TestSampleCode {
     });
     
     // send funds from the RPC wallet to the JNI wallet
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(walletRPC); // wait for txs to clear pool *** REMOVE FROM README SAMPLE ***
     MoneroTxWallet sentTx = walletRPC.send(0, walletJNI.getPrimaryAddress(), new BigInteger("50000"));
     assertTrue(sentTx.inTxPool());
     
