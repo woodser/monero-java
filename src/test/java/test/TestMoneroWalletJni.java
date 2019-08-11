@@ -1122,9 +1122,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     private static final long PRINT_INCREMENT = 2500; // print every 2500 blocks
     
     protected MoneroWalletJni wallet;
-    protected long startHeight;
-    protected long prevEndHeight;
     private Long prevHeight;
+    private long startHeight;
+    private long prevEndHeight;
+    private Long prevCompleteHeight;
     protected boolean isDone;
     private Boolean onSyncProgressAfterDone;
     
@@ -1140,29 +1141,26 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     @SuppressWarnings("unlikely-arg-type")
     @Override
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
+      if ((height - startHeight) % PRINT_INCREMENT == 0 || percentDone == 1.0) System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
       
       // registered wallet listeners will continue to get sync notifications after the wallet's initial sync
       if (isDone) {
         assertTrue("Listener has completed and is not registered so should not be called again", wallet.getListeners().contains(this));
         onSyncProgressAfterDone = true;
-        if (Double.compare(percentDone, 1) != 0) {
-          System.err.println("BAD PERCENT DONE");
-          System.err.println("height: " + height);
-          System.err.println("startHeight: " + startHeight);
-          System.err.println("endHeight: " + endHeight);
-          System.err.println("percentDone: " + percentDone);
-          System.err.println("message: " + message);
-        }
-        assertTrue(Double.compare(percentDone, 1) == 0);
-        assertEquals(prevEndHeight, startHeight); // each sync notification picks up where the last left off
-        prevEndHeight = startHeight;
-        return;
       }
       
-      if ((height - startHeight) % PRINT_INCREMENT == 0 || percentDone == 1.0) System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
-      assertFalse("Should not call progress if end height <= start height", endHeight <= startHeight);
+      // start height must pick up where the last end height left off
+      if (prevCompleteHeight != null) {
+        assertEquals((long) prevCompleteHeight, startHeight);
+        if (startHeight == prevCompleteHeight) this.startHeight = startHeight;  // new sync session, so update tester's start height
+      }
+      
+      // if sync is complete, record completion height for subsequent start heights
+      if (Double.compare(percentDone, 1) == 0) prevCompleteHeight = endHeight;
+      
+      assertFalse("end height <= start height", endHeight <= startHeight);
       assertEquals(this.startHeight, startHeight);
-      assertTrue(endHeight >= this.prevEndHeight);  // chain can grow while syncing
+      assertTrue(endHeight >= prevEndHeight);  // chain can grow while syncing
       prevEndHeight = endHeight;
       assertTrue(height >= startHeight);
       assertTrue(height < endHeight);
@@ -1176,11 +1174,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     public void onDone(long chainHeight) {
       assertFalse(isDone);
       this.isDone = true;
-      assertEquals(chainHeight, prevEndHeight);
-      if (prevEndHeight <= startHeight) assertNull(prevHeight); // progress never called
-      else {
-        assertNotNull("Progress never called", prevHeight);
+      if (prevHeight == null) {
+        assertNull(prevCompleteHeight);
+      } else {
         assertEquals(chainHeight - 1, (long) prevHeight);  // otherwise last height is chain height - 1
+        assertEquals(chainHeight, (long) prevCompleteHeight);
       }
       onSyncProgressAfterDone = false;  // test subsequent onSyncProgress() calls
     }
@@ -1195,7 +1193,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
    */
   private class WalletSyncTester extends SyncProgressTester implements MoneroWalletListenerI {
     
-    private Long prevHeight;
+    private Long prevHeight;  // independent from super
     private MoneroOutputWallet prevOutputReceived;
     private MoneroOutputWallet prevOutputSpent;
     private BigInteger incomingTotal;
@@ -1206,9 +1204,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       super(wallet, startHeight, endHeight);
       assertTrue(startHeight >= 0);
       assertTrue(endHeight >= 0);
-      this.startHeight = startHeight;
-      this.prevEndHeight = endHeight;
-      this.isDone = false;
       incomingTotal = BigInteger.valueOf(0);
       outgoingTotal = BigInteger.valueOf(0);
     }

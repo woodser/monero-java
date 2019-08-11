@@ -1,5 +1,4 @@
 14.1.0+ RELEASE
-fix post sync
 testOutputNotificationsDifferentAccounts occasionally fails
 random wallet should be synced if created with rpc connection
 should not be able to startSync() if no connection to daemon
