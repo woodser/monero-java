@@ -2,7 +2,6 @@ package common.utils;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +20,6 @@ public class JsonUtils {
   static {
     DEFAULT_MAPPER = new ObjectMapper();
     DEFAULT_MAPPER.setSerializationInclusion(Include.NON_NULL);
-    DEFAULT_MAPPER.setDefaultPropertyInclusion(JsonInclude.Value.construct(Include.ALWAYS, Include.NON_NULL));
   }
   
   /**

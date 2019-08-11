@@ -19,7 +19,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,7 +44,6 @@ public class MoneroRpcConnection {
     MAPPER = new ObjectMapper();
     MAPPER.setSerializationInclusion(Include.NON_NULL);
     MAPPER.configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS, true);
-    MAPPER.setDefaultPropertyInclusion(JsonInclude.Value.construct(Include.ALWAYS, Include.NON_NULL));
   }
 
   // instance variables
