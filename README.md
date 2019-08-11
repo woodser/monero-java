@@ -16,7 +16,7 @@ In addition, this project conforms to an [API specification](https://github.com/
 
 ## Sample Code
 
-This code introduces the API.  See the [Javadoc](https://moneroecosystem.org/monero-java/), [specification PDF](https://github.com/monero-ecosystem/monero-java/blob/master/monero-spec.pdf), or [JUnit tests](src/test/java) for full details.
+This code introduces the API.  See the [Javadoc](https://moneroecosystem.org/monero-java/), [specification PDF](https://github.com/monero-ecosystem/monero-java/blob/master/monero-spec.pdf), or [JUnit tests](src/test/java) for more details.
 
 ```java
 // connect to a daemon
