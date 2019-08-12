@@ -103,7 +103,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       wallet.createWalletFromMnemonic(path, TestUtils.WALLET_RPC_PW, TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT);
       assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
       assertEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
-      assertEquals(1, wallet.getHeight());
+      assertEquals(1, wallet.getHeight());      // TODO monero-core: sometimes wallet is synced after fresh creation here, but not if run alone
       assertEquals(0, wallet.getTxs().size());  // wallet is not synced
       wallet.sync();
       assertEquals(daemon.getHeight(), wallet.getHeight());
