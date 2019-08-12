@@ -1,4 +1,4 @@
-BIG PICTURE
+NEXT - BIG PICTURE
 open main library issues
 open monero core issues
 separate tests which demonstrate monero core issues
