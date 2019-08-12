@@ -1,119 +1,75 @@
-NEXT
-write up core issues (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, tx pool syncing, etc)
-build a picture of overall architecture
-java rpc sweepAllUnlocked() modifies original send request
-isMultisigNeeded()
-spec shows visual types and relationships? block -> txs -> tranfsers and outputs -> ...
-wallet.getIsSynced() should return false after block added to chain if not auto syncing
-waitForTxsToClear() should refresh more frequently than blocks so it continues if pool manually flushed
-wallet.close() applies to rpc as well, add rpc isClosed()
-cap creation of accounts by ignoring test if more than X accounts already exist
-auto destroy wallet if garbage collected by vm
-full ux test among multiple wallets
-approximate chain height
-sync(listener) should not be part of rpc api unless listening supported (could be supported)
-testCreateThenRelay() passes when no internet connection?
-tx in pool can reconcile to failed
-rescanBlockchain(bool hard, bool refresh, bool keep_key_images)
-syncAsync()
-rescanAsync()
-daemon.getTargetHeight()
-auto select account index if not provided
-transfer notifications tx only includes one transfer so tx amounts will be incomplete.  Don't auto-compute tx amounts?  Aggregate all transfers per tx?
-connect to peers
-test all wallet2 notifications
-transfer amount != sum on split txs; test force split
-add warnings to all deserialization methods for unrecognized fields
-debug why testGetOutputsValidateInputs() and testImportKeyImages() fail because cannot connect to daemon only if running with all other tests
-support sign_transfer, submit_transfer, etc
-test changing wallet password with moveTo()
-rpc on_generate_from_keys
-pruning
-model rct_signatures, rct_prunable, unsigned_tx_set, etc
-retrival by ranges end height should be exclusive? would be inconsistent with current rpc api
-random wallet should be synced if created with rpc connection?
-
-LOW
-more wallet comparison?
-test filtering with not relayed
-tx pool stats and other binary calls
-remove filter?
-refine model to not use null where inappropriate e.g. tx pool status numTxs() should never be null
-Activate UTF-8 support for Boost filesystem classes on Windows (search for that text in core)
-port changes from diff of jni39+ to master_bkp_jni to js
-getAddressIndex() -> getSubaddress(String address) and that returns full subaddress info?
-test getAccounts(), getBalance(), etc with out of range subaddress/account indices (common wallet tests)
-local vs remote requests per second auto-adjusts like gui wallet.cpp:2204
-submodules should be external instead
-test double spend in wallet
-revert last 2 changes to mymonero-core-cpp
-calling methods after close will access released c++ resources
-performance tests (memory leaks, concurrent wallets, maybe switch to native jni types, etc)
-rename to setAttribute() setKeyValued()
-testSendWithPaymentId() test that unconfirmed tx is immediately returned from getTxs() with payment id filter
-preserve original send request instead of modifying it?  implement copy constructor
-consistent accountIdx vs accountIndex in model vs api method args
-rpc getIntegratedAddress(standardAddress, integratedAddress) wallet extension
-getIntegratedAddress(standardAddress, paymentId) per make_integrated_wallet rpc
-for consistency, MoneroTransfer has field isIncoming inherited by MoneroIncoming/OutgoingTransfer
-wallet.getLanguage() api even if rpc doesn't supported?
-local vs remote requests per second auto-adjusts like gui wallet.cpp:2204
-test wallet.send() which is only in sample code currently
-send tests should look for first account greater than fee
-getUnrelayedTx() auto finds account idx if not given, would lessen -37s
-add warning in PrintBalances.java if balance don't add up for any reason
-untangle and re-file: incoming transactions are missing when outgoing counterpart from same account (https://github.com/monero-project/monero/issues/4500)
-clearer dynamic library readme instructions, verify other platforms
-testGetNewKeyImagesFromLastImport
-refactor getAccounts(Boolean includeSubaddresses, Boolean isUsed, String tag, Boolean, Integer accountIdx, List<Integer> subaddressIndices, [includeBalaneDetails?]) that's filtering with most known options (in internal wallet rpc)
-handle blocks_to_unlock at top level of get_balance call which reflects account, but is it based only on queried subaddresses?
-balances: getBalanceWallet(), getBalanceAccount(), getBalancesSubaddress() : return MoneroBalances .getUnlockedBalance(), .getLockedBalance()
-more convenient filtering, e.g. one filter class with getTxId(), getInTxPool(), getIsOutgoing(), which is used in getTransfers(), etc
-remove typing on e.g. MoneroOutput.getVouts()?
-daemon.getTx(id), wallet needs equivalent convenience function
-testGetTransactionsWallet() how are txs in same order since internal implementation uses set?
-wallet.getTxs() returns txs in no particular order
-fetched vout's tx is incoming and outgoing are false
-multisig_txset and unsigned_txset on send tests
-test wallet gets should send test transaction so unconfirmed tx can be tested with the others
-deterministic ordering of txs, vouts?
-sync progress can made way more reliable by getting output distribution
-test priority in common tests (only in sample code currently)
-api updates: setSubaddressIndices(...) and others, , getBalancesWallet, more convenient filtering, remove typing on vouts, etc
-first open then create wallet in TestUtils
-jni readme documentation
-rename project to monero-java
-scan code for issues using automated tool
-announce: jni, cpp, model, notable features, next steps
-rename getLanguages() to getSupportedLanguages()?
-
-API IDEAS
-getTxsByIds, getTxById, vs getBlockById()
-getTxs(req, str, str[]) | getTx(str)
-getTxs(req), getTxsById(str|strs[]), getTxById(str)
-port getTxs(req, string[], getTxs(String)
-wallet.getTx(), getTxs() support many types (str, str[], req, obj) but they all get turned into req
-
-NEXT
-multisig
-release cpp
-release java jni
-document core issues
-fix core issues
-refactor wallet2
-define rest api
-javascript binding
+BIG PICTURE
+open main library issues
+open monero core issues
+separate tests which demonstrate monero core issues
+investigate monero core issues
+(in no particular order...)
+Monero REST API 2.0 based on refined model
+refactor wallet2 to support wasm
+native javascript binding
 integrate gui
 cpp test suite
 bisq
-javascript wallet ui
+javascript local wallet ui
 stress tester
 
-
-
-MONERO CORE ISSUES
+---- LIBRARY TODOS ----
 
 HIGH
+open main library issues
+open monero core issues
+architecture diagram
+add multisig support
+integrate with bisq
+approximate chain height
+c++ library build automation
+support sign_transfer, submit_transfer, etc
+rpc on_generate_from_keys
+update javascript library to Java (difference from Java master to jni93 branch)
+tx pool stats and other binary calls
+
+MEDIUM
+performance tests (memory leaks, concurrent wallets, maybe switch to native jni types, etc)
+sync progress can made more accurate by basing on output distribution
+test force split transactions
+if txs are split or only specific vouts/outputs are requested, tx amounts, isIncoming, etc will be incomplete and not based on all sub-transfers.  Issue at all?
+auto-select account index for send request if not given?
+support rpc wallet sync(listener)
+rpc sweepAllUnlocked() modifies original send request
+test changing wallet password with moveTo()
+preserve original send request instead of modifying it?  implement copy constructor
+getAddressIndex() -> getSubaddress(String address) and that returns full subaddress info?
+wallet.getIsSynced() should return false after block added to chain if not auto syncing
+full ux test among multiple wallets
+support args rescanBlockchain(bool hard, bool refresh, bool keep_key_images)
+test pruning?
+local vs remote requests per second auto-adjusts like gui wallet.cpp:2204
+define specification for rct_signatures, rct_prunable, multisig_txset, unsigned_tx_set
+retrival by ranges end height should be exclusive? would be inconsistent with current rpc api
+random wallet should be synced if created with rpc connection?
+introduce query object for accounts? includeSubaddresses
+testSendWithPaymentId() test that unconfirmed tx is immediately returned from getTxs() with payment id filter
+test out of range subaddress access for offline access
+
+LOW
+wallet.getLanguage() api even if rpc doesn't support?
+testGetNewKeyImagesFromLastImport
+connect to peers
+support syncAsync() - immediate asynchronous invocation
+rescanAsync()
+waitForTxsToClear() should refresh more frequently than blocks so it continues if pool manually flushed
+tests cap creation of accounts by ignoring test if more than X accounts already exist
+tx in pool can reconcile to failed
+add warnings to all deserialization methods for unrecognized fields
+test wallet gets should send test transaction so unconfirmed tx can be tested with the others
+test querying with not relayed
+scan code for issues using automated tool
+rename getLanguages() to getSupportedLanguages()?
+
+--------- MONERO CORE ISSUES ---------
+
+HIGH
+write up core issues (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, tx pool syncing, etc)
 testGetTxsByIdsInPool() hangs (have no peer connections?)
 update from pool does not prevent double spend
 unconfirmed transactions should be reflected in the balance for ux
