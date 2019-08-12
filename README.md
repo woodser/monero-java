@@ -39,7 +39,7 @@ for (MoneroBlock block : blocks) {
 }
 
 // connect to a wallet using RPC
-MoneroWallet walletRPC = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
+MoneroWalletRpc walletRPC = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
 String primaryAddress = walletRPC.getPrimaryAddress(); // 59aZULsUF3YNSKGiHz4J...
 BigInteger balance = walletRPC.getBalance();           // 533648366742
 MoneroSubaddress subaddress = walletRPC.getSubaddress(1, 0);
@@ -124,6 +124,12 @@ walletRPC.relayTx(createdTx); // submit the transaction which will notify the JN
 // JNI wallet will receive notification of incoming output after a moment
 TimeUnit.SECONDS.sleep(10);
 assertTrue(JNI_OUTPUT_RECEIVED);
+
+// save and close both wallets
+walletRPC.save();
+walletRPC.close();
+walletJNI.save();
+walletJNI.close();
 ```
 
 ## How to Use This Library
