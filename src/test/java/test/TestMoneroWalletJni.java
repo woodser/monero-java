@@ -563,10 +563,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_JNI_PW, TestUtils.NETWORK_TYPE, null, null);
     try {
       assertNotNull(wallet.getMnemonic());
-      wallet.startSyncing();
       assertEquals(1, wallet.getHeight());
       assertEquals(BigInteger.valueOf(0), wallet.getBalance());
-      wallet.stopSyncing();
+      wallet.startSyncing();
+    } catch (MoneroException e) {
+      assertEquals("Wallet is not connected to daemon", e.getMessage());
     } finally {
       wallet.close();
     }
