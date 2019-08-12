@@ -29,7 +29,7 @@ update javascript library to Java (difference from Java master to jni93 branch)
 tx pool stats and other binary calls
 
 MEDIUM
-performance tests (memory leaks, concurrent wallets, maybe switch to native jni types, etc)
+performance tests (memory leaks, concurrent wallets, etc)
 sync progress can made more accurate by basing on output distribution
 test force split transactions
 if txs are split or only specific vouts/outputs are requested, tx amounts, isIncoming, etc will be incomplete and not based on all sub-transfers.  Issue at all?
@@ -52,6 +52,7 @@ testSendWithPaymentId() test that unconfirmed tx is immediately returned from ge
 test out of range subaddress access for offline access
 
 LOW
+switch jni bridge json serialization to automated construction of native types for performance
 wallet.getLanguage() api even if rpc doesn't support?
 testGetNewKeyImagesFromLastImport
 connect to peers
