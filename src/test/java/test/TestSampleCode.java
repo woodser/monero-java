@@ -162,9 +162,7 @@ public class TestSampleCode {
     TimeUnit.SECONDS.sleep(10);
     assertTrue(JNI_OUTPUT_RECEIVED);
     
-    // save and close both wallets
-    walletRPC.save();
-    walletRPC.close();
+    // save and close the JNI wallet
     walletJNI.save();
     walletJNI.close();
   }
