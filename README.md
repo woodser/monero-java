@@ -125,7 +125,7 @@ walletRPC.relayTx(createdTx); // submit the transaction which will notify the JN
 TimeUnit.SECONDS.sleep(10);
 assertTrue(JNI_OUTPUT_RECEIVED);
 
-// save and close both wallets
+// save and close the JNI wallet
 walletJNI.save();
 walletJNI.close();
 ```
