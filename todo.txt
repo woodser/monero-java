@@ -1,9 +1,5 @@
-14.1.0+ RELEASE
-write up issues for announce (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, etc, tx pool syncing)
-release
-announce
-
-MEDIUM
+NEXT
+write up core issues (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, tx pool syncing, etc)
 build a picture of overall architecture
 java rpc sweepAllUnlocked() modifies original send request
 isMultisigNeeded()
