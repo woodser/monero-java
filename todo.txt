@@ -128,6 +128,7 @@ getReserveProofAccount() failing again
 monerod high cpu usage when multiple wallets connected and not closed
 
 MEDIUM
+rpc testCreateWalletFromMnemonic() sometimes wallet is synced after fresh creation when run with other tests
 Mining to subaddress isn't supported yet
 getDaemonTargetHeight() > getDaemonHeight() sometimes
 failed tx in pool (after testUpdateLockedDifferentAccounts()) causes non-originating saved wallets to return duplicate incoming transfers but one has amount/numSuggestedConfirmations of 0, possibly no outgoingTransfer
