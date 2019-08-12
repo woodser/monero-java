@@ -126,8 +126,6 @@ TimeUnit.SECONDS.sleep(10);
 assertTrue(JNI_OUTPUT_RECEIVED);
 
 // save and close both wallets
-walletRPC.save();
-walletRPC.close();
 walletJNI.save();
 walletJNI.close();
 ```
