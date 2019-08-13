@@ -8,6 +8,7 @@ rpc on_generate_from_keys
 update javascript library to Java (difference from Java master to jni93 branch)
 
 MEDIUM
+update send end height mid sync so 100% figure is accurate
 tx pool stats and other binary calls
 performance tests (memory leaks, concurrent wallets, etc)
 sync progress can made more accurate by basing on output distribution
@@ -84,30 +85,32 @@ stress tester
 
 --------- MONERO CORE ISSUES ---------
 
+ISSUES TO INVESTIGATE
+importKeyImages() causing erasure of transfers
+	wallet2 incoming transfers from/to same account go missing on key image export and re-import (wallet2.cpp:11957 erases incoming counterpart)
+unconfirmed transactions should be reflected in the balance for ux
+	wallet balance reports that 5 - 1 != 4 until confirmation; we should confirmation will happen as is the case in the vast majority
+getTxPool() occasionally hangs (have no peer connections?)
+wallet does not fully sync transactions (incoming + outgoing outputs) from the pool
+185d6fc3f67554c6e8f40be4866c05a877c4c7c75da7a4562d35938daca0946c missing incoming transfers but they are known when determining isUsed - #4500 transfer is occluded by same account FIX
+getReserveProofAccount() seg faulting
+incoming transactions are missing when outgoing counterpart from same account (only on unconfirmed because wallet cache data becomes used?) (https://github.com/monero-project/monero/issues/4500)
+monerod high cpu usage when multiple wallets connected and not closed
+save network type with wallet export/import
+
+
 ISSUES TO OPEN
 
 
-HIGH
-write up core issues (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, tx pool syncing, etc)
-testGetTxsByIdsInPool() hangs (have no peer connections?)
-update from pool does not prevent double spend
-unconfirmed transactions should be reflected in the balance for ux
-incoming transactions are missing when outgoing counterpart from same account (only on unconfirmed because wallet cache data becomes used?) (https://github.com/monero-project/monero/issues/4500)
-wallet2 incoming transfers from/to same account go missing on key image export and re-import (wallet2.cpp:11957 erases incoming counterpart)
-185d6fc3f67554c6e8f40be4866c05a877c4c7c75da7a4562d35938daca0946c missing incoming transfers but they are known when determining isUsed - #4500 transfer is occluded by same account FIX
-getReserveProofAccount() failing again
-monerod high cpu usage when multiple wallets connected and not closed
-
-MEDIUM
+MEDIUM / OUTDATED?
 rpc testCreateWalletFromMnemonic() sometimes wallet is synced after fresh creation when run with other tests
 Mining to subaddress isn't supported yet
-getDaemonTargetHeight() > getDaemonHeight() sometimes
 failed tx in pool (after testUpdateLockedDifferentAccounts()) causes non-originating saved wallets to return duplicate incoming transfers but one has amount/numSuggestedConfirmations of 0, possibly no outgoingTransfer
 peer.getLastSeenTimestamp() occasionally returns -4
-wallet2 get_payments() min_height is exclusive and max_height is inclusive: #5598, 5751
+wallet2 get_payments() min_height is exclusive and max_height is inclusive: #5598, #5751
+wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 start height processed > requested start height unless restore height manually set
 my daemon on stagenet says `Sync data returned a new top block candidate: 365062 -> 365545`.  if I mine, the daemon seems to mine on 365062.  if I create a new wallet, its restore height is set to 365545, but daemon `get_height` reports 365062
-wallet2 network type auto detected when loaded from files on disk
 don't require writing to disk to make working wallet
 add all_accounts to incoming_transfers, would be huge time saver
 sometimes see non-zero spent amount in testCheckReserve()
@@ -159,4 +162,3 @@ address book entries work by index instead of id which changes
 tx_hash in incoming_transfers vs txid in get_transfers; standardize on tx_hash or tx_id
 standardize terminology transactions vs transfers
 standardize terminology payment vs output; one payment may be fulfilled with multiple outputs
-wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
