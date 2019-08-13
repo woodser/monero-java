@@ -1,34 +1,14 @@
-NEXT - BIG PICTURE
-open main library issues
-open monero core issues
-separate tests which demonstrate monero core issues
-investigate monero core issues
-(in no particular order...)
-Monero REST API 2.0 based on refined model
-refactor wallet2 to support wasm
-native javascript binding
-integrate gui
-cpp test suite
-bisq
-javascript local wallet ui
-stress tester
-
----- LIBRARY TODOS ----
-
 HIGH
-open main library issues
+open library issues
 open monero core issues
-architecture diagram
 add multisig support
-integrate with bisq
 approximate chain height
-c++ library build automation
 support sign_transfer, submit_transfer, etc
 rpc on_generate_from_keys
 update javascript library to Java (difference from Java master to jni93 branch)
-tx pool stats and other binary calls
 
 MEDIUM
+tx pool stats and other binary calls
 performance tests (memory leaks, concurrent wallets, etc)
 sync progress can made more accurate by basing on output distribution
 test force split transactions
@@ -50,6 +30,7 @@ random wallet should be synced if created with rpc connection?
 introduce query object for accounts? includeSubaddresses
 testSendWithPaymentId() test that unconfirmed tx is immediately returned from getTxs() with payment id filter
 test out of range subaddress access for offline access
+architecture diagram
 
 LOW
 switch jni bridge json serialization to automated construction of native types for performance
@@ -67,7 +48,44 @@ test querying with not relayed
 scan code for issues using automated tool
 rename getLanguages() to getSupportedLanguages()?
 
+JAVASCRIPT LIBRARY ISSUES
+implement MoneroWallet.js interface with a MyMonero-style back end
+implement remaining binary calls in daemon RPC
+support client-side binding to Monero Core wallet using wasm
+support MyMonero adapter
+
+JAVA LIBRARY ISSUES
+collect feedback and update specification
+support MyMonero adapter
+implement remaining binary calls in daemon RPC
+Investigate integration of this library into Bisq
+
+C++ LIBRARY ISSUES
+automate build, reference Monerujo
+support MyMonero adapter
+build test suite for C++ library
+RPC 2.0 reference implementation based on this library's API
+
+BIG PICTURE
+open library issues
+open monero core issues
+separate tests which demonstrate monero core issues
+investigate monero core issues
+(in no particular order...)
+Monero REST API 2.0 based on refined model
+refactor wallet2 to support wasm
+native javascript binding
+integrate gui
+cpp test suite
+bisq
+javascript local wallet ui
+MyMonero implementations
+stress tester
+
 --------- MONERO CORE ISSUES ---------
+
+ISSUES TO OPEN
+
 
 HIGH
 write up core issues (getTxsPoolByIds(), getReserveProofAccount(), importKeyImages() causing erasure of transfers, tx pool syncing, etc)
