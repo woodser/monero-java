@@ -1634,12 +1634,17 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   public void testSyncWithPoolRelay() {
     super.testSyncWithPoolRelay();
   }
+  
+  @Override
+  public void testSendToExternal() {
+    super.testSendToExternal();
+  }
 
   @Override
   public void testSendFromSubaddresses() {
     super.testSendFromSubaddresses();
   }
-
+  
   @Override
   public void testSendFromSubaddressesSplit() {
     super.testSendFromSubaddressesSplit();
