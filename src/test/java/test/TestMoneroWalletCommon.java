@@ -1941,7 +1941,7 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
-  // Can sync with txs relayed from the pool
+  // Can sync with txs relayed to the pool
   @Test
   public void testSyncWithPoolRelay() {
   org.junit.Assume.assumeTrue(TEST_RELAYS && !LITE_MODE);
@@ -1960,18 +1960,21 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance();
     
     // create tx to relay
-    MoneroTx tx = wallet.createTx(request);
+    MoneroTxWallet tx = wallet.createTx(request);
     
     // create another tx using same request which would be double spend
     MoneroTxWallet txDoubleSpend = wallet.createTx(request);
     
-    // relay first tx
+    // relay first tx directly to daemon
     MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex());
     if (!result.isGood()) throw new RuntimeException("Transaction could not be submitted to the pool" + JsonUtils.serialize(result));
     assertTrue(result.isGood());
     
     // sync wallet which updates from pool
     wallet.sync();
+    
+    // collect issues to report at end of test
+    List<String> issues = new ArrayList<String>();
     
     try {
       
@@ -1983,13 +1986,10 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
         throw new RuntimeException("Wallet should be aware of its tx in pool after syncing");
       }
       
-      // wallet balance has changed
-      // TODO: balance does not change
-      boolean runFailingCode = false;
-      if (runFailingCode) {
-        assertNotEquals("Wallet unlocked balance does not recognize tx sent directly to the pool after sync()", unlockedBalanceBefore, wallet.getUnlockedBalance());  // TODO: test exact amounts, maybe in ux test
-        assertNotEquals("Wallet balance does not recognize tx sent directly to the pool after sync()", balanceBefore, wallet.getBalance());
-      }
+      // test wallet balances
+      if (unlockedBalanceBefore.compareTo(wallet.getUnlockedBalance()) != 1) issues.add("WARNING: unlocked balance should have decreased after relaying tx directly to the daemon");
+      BigInteger expectedBalance = balanceBefore.subtract(tx.getOutgoingAmount()).subtract(tx.getFee());
+      if (!expectedBalance.equals(wallet.getBalance())) issues.add("WARNING: expected balance after relaying tx directly to the daemon to be " + expectedBalance + " but was " + wallet.getBalance());
       
       // submit double spend tx
       MoneroSubmitTxResult resultDoubleSpend = daemon.submitTxHex(txDoubleSpend.getFullHex(), true);
@@ -2002,23 +2002,25 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
       wallet.sync();
       
       // create tx using same request which is no longer double spend
-      MoneroTxWallet tx2;
+      MoneroTxWallet tx2 = null;
       try {
         tx2 = wallet.send(request);  
       } catch (Exception e) {
-        throw new RuntimeException("Wallet did not sync tx relayed directly to tx pool"); // TODO monero core: this fails meaning wallet did not recognize tx relayed directly to pool
+        issues.add("WARNING: creating and sending tx through wallet should succeed after syncing wallet with pool but creates a double spend"); // TODO monero core: this fails meaning wallet did not recognize tx relayed directly to pool
       }
-      MoneroSubmitTxResult result2 = daemon.submitTxHex(tx2.getFullHex(), true);
       
-      // test result and flush on finally
-      try {
-        if (result2.isDoubleSpend()) throw new RuntimeException("Wallet created double spend transaction after syncing with the pool: " + JsonUtils.serialize(result2));
-        assertTrue(result.isGood());
+      // submit the transaction to the pool and test
+      if (tx2 != null) {
+        MoneroSubmitTxResult result2 = daemon.submitTxHex(tx2.getFullHex(), true);
+        if (result2.isDoubleSpend()) issues.add("WARNING: creating and submitting tx to daemon should succeed after syncing wallet with pool but was a double spend: " + JsonUtils.serialize(result2));
+        else assertTrue(result.isGood());
         wallet.sync();
         wallet.getTx(tx2.getId()); // wallet is aware of tx2
-      } finally  {
         daemon.flushTxPoolById(tx2.getId());
       }
+      
+      // should be no issues
+      assertEquals("testSyncWithPoolRelay() issues: " + issues, 0, issues.size());
     } finally {
       TestUtils.TX_POOL_WALLET_TRACKER.reset(); // all wallets need to wait for tx to confirm to reliably sync tx
     }
