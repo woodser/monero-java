@@ -762,6 +762,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testSyncWithPoolRelay() {
     super.testSyncWithPoolRelay();
   }
+  
+  @Override
+  public void testSendToExternal() {
+    super.testSendToExternal();
+  }
 
   @Override
   public void testSendFromSubaddresses() {

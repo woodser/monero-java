@@ -2026,6 +2026,27 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  // Can send to external address
+  @Test
+  public void testSendToExternal() {
+    
+    // collect balances before
+    BigInteger balance1 = wallet.getBalance();
+    BigInteger unlockedBalance1 = wallet.getUnlockedBalance();
+    
+    // send funds to external address
+    MoneroTxWallet tx = wallet.send(0, TestUtils.getRandomWalletAddress(), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3)));
+    
+    // collect balances after
+    BigInteger balance2 = wallet.getBalance();
+    BigInteger unlockedBalance2 = wallet.getUnlockedBalance();
+    
+    // test balances
+    assertTrue(unlockedBalance2.compareTo(unlockedBalance1) < 0); // unlocked balance should decrease
+    BigInteger expectedBalance = balance1.subtract(tx.getOutgoingAmount().subtract(tx.getFee()));
+    assertEquals("Balance after send was not balance before - net tx amount - fee (5 - 1 != 4 test)", expectedBalance, balance2);
+  }
+  
   // Can send from multiple subaddresses in a single transaction
   @Test
   public void testSendFromSubaddresses() {
