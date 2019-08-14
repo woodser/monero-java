@@ -1066,7 +1066,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     try {
       return getReserveProofAccountJni(accountIdx, amount.toString(), message);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroException(e.getMessage(), -1);
     }
   }
 
@@ -1077,7 +1077,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       String checkStr = checkReserveProofJni(address, message, signature);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckReserve.class);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroException(e.getMessage(), -1);
     }
   }
 
