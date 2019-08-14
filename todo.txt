@@ -90,14 +90,14 @@ importKeyImages() causing erasure of transfers
 	wallet2 incoming transfers from/to same account go missing on key image export and re-import (wallet2.cpp:11957 erases incoming counterpart)
 	WARNING: key proof indicates no funds received despite transfer (txid=76983ebf1d2e62141c19e190355e146145cb03988c5bfaf857b65dc0e15d378f, key=5246bf34d97dd379843ea31cb2bddfe41a89db73be4bd72fdc1ffe1b4d8ac70d, address=76gP3JEGAhnS5sgnB7LHRP2tbidL8ChvkJATJADQF4SpBcbN8bUgSZyQmTpdMQqyW129dh3zV5XscaBhkU6WTUKQVdDykFV, amount=44933)
 unconfirmed transactions should be reflected in the balance for ux
-	wallet balance reports that 5 - 1 != 4 until confirmation; we should confirmation will happen as is the case in the vast majority
-getTxPool() occasionally hangs (have no peer connections?)
+	wallet balance reports that 5 - 1 != 4 until confirmation; we should assume confirmation will happen as is the case in the vast majority
 wallet does not fully sync transactions (incoming + outgoing outputs) from the pool
 185d6fc3f67554c6e8f40be4866c05a877c4c7c75da7a4562d35938daca0946c missing incoming transfers but they are known when determining isUsed - #4500 transfer is occluded by same account FIX
 getReserveProofAccount() seg faulting (with no unlocked balance / spending 0-conf???), wallet rpc get_reserve_proof
 incoming transactions are missing when outgoing counterpart from same account (only on unconfirmed because wallet cache data becomes used?) (https://github.com/monero-project/monero/issues/4500)
 monerod high cpu usage when multiple wallets connected and not closed
 save network type with wallet export/import
+getTxPool() occasionally hangs (have no peer connections?)
 10 block lock - it sounds like it's technically possible to remove the 10 block lock, giving users the choice to use low confirmation outputs at an increased risk of being double spent, by referencing outputs by their tx id instead of offsets, and by ordering txs within a block by their tx id.  Then transactions and their referenced outputs would remain valid across re-orgs.  This would require a consensus change and come at some space and bandwidth cost (64 bit int becomes 256 bit hash per output barring any wizardy?) in order to reference tx ids instead of offsets.  But then the 10 block lock could safely be removed unless it's agreed to enforce protection from double spends.
 
 ISSUES TO OPEN

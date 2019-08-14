@@ -16,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroNetworkType;
 import monero.rpc.MoneroRpcConnection;
@@ -30,6 +31,8 @@ import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
+import monero.wallet.model.MoneroTransfer;
+import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletListener;
 import monero.wallet.model.MoneroWalletListenerI;
@@ -55,6 +58,43 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   protected MoneroWallet getTestWallet() {
     return TestUtils.getWalletJni();
+  }
+  
+  // --------------- DEMONSTRATION OF MONERO CORE ISSUES ----------------------
+  
+  /**
+   * This test demonstrates that importing key images erases incoming transfers.
+   */
+  @Test
+  public void testImportKeyImagesAndTransfers() {
+    MoneroWalletJni wallet = null; // create a wallet for this test since it becomes corrupt TODO: use common wallet and move to common tests when fixed
+    try {
+      
+      // create and sync a new wallet
+      String path = getRandomWalletPath();
+      wallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_JNI_PW, MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT);
+      wallet.sync();
+      
+      // repeatedly export and re-import key images and test transfer size
+      for (int i = 0; i < 3; i++) {
+        
+        // get incoming transfers before importing
+        List<MoneroTransfer> inTransfers1 = wallet.getTransfers(new MoneroTransferQuery().setIsIncoming(true));
+        
+        // export and re-import key images
+        List<MoneroKeyImage> keyImages = wallet.getKeyImages();
+        wallet.importKeyImages(keyImages);
+        
+        // get incoming transfers after importing
+        List<MoneroTransfer> inTransfers2 = wallet.getTransfers(new MoneroTransferQuery().setIsIncoming(true));
+        
+        // incoming transfers should be equal
+        assertEquals(inTransfers1.size(), inTransfers2.size());
+        assertEquals(inTransfers1, inTransfers2);
+      }
+    } finally {
+      wallet.close();
+    }
   }
   
   // ------------------------------- BEGIN TESTS ------------------------------
