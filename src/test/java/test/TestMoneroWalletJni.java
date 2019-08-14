@@ -97,6 +97,26 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
   }
   
+  /**
+   * Tests the daemon's ability to not get bogged down with wallets that will use all of its time and then leave
+   * without saying goodbye if it lets it.  Wallets are a dime a dozen.  You gotta be able to handle the attention.
+   */
+  @Test
+  public void testCreateWalletsWithoutClose() {
+    
+    // lets make some wallets and then go away
+    for (int i = 0; i < 20; i++) {
+      String path = getRandomWalletPath();
+      MoneroWallet willLeaveYouHanging = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_JNI_PW, MoneroNetworkType.STAGENET, TestUtils.getDaemonRpc().getRpcConnection());
+      willLeaveYouHanging.sync();
+    }
+    
+    // check in on the daemon
+    daemon.getHeight();
+    
+    // daemon da man
+  }
+  
   // ------------------------------- BEGIN TESTS ------------------------------
   
   @Test
