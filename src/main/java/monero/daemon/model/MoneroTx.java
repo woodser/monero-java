@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
 import monero.utils.MoneroUtils;
+import monero.wallet.model.MoneroTxSet;
 
 /**
  * Represents a transaction on the Monero network.
@@ -50,7 +51,7 @@ public class MoneroTx {
   private List<MoneroOutput> vouts;
   private List<Integer> outputIndices;
   private String metadata;
-  private String commonTxSets;
+  private MoneroTxSet txSet;
   private int[] extra;
   private Object rctSignatures; // TODO: implement
   private Object rctSigPrunable;  // TODO: implement
@@ -104,7 +105,7 @@ public class MoneroTx {
     }
     if (tx.outputIndices != null) this.outputIndices = new ArrayList<Integer>(tx.outputIndices);
     this.metadata = tx.metadata;
-    this.commonTxSets = tx.commonTxSets;
+    this.txSet = tx.txSet;
     if (tx.extra != null) this.extra = tx.extra.clone();
     this.rctSignatures = tx.rctSignatures;
     this.rctSigPrunable = tx.rctSigPrunable;
@@ -376,12 +377,12 @@ public class MoneroTx {
     return this;
   }
   
-  public String getCommonTxSets() {
-    return commonTxSets;
+  public MoneroTxSet getTxSet() {
+    return txSet;
   }
   
-  public MoneroTx setCommonTxSets(String commonTxSets) {
-    this.commonTxSets = commonTxSets;
+  public MoneroTx setTxSet(MoneroTxSet txSet) {
+    this.txSet = txSet;
     return this;
   }
   
@@ -496,6 +497,20 @@ public class MoneroTx {
       return this;
     }
     
+    // merge tx set if they're different which comes back to merging txs
+    if (txSet != tx.getTxSet()) {
+      if (txSet == null) {
+        txSet = new MoneroTxSet();
+        txSet.setTxs(this);
+      }
+      if (tx.getTxSet() == null) {
+        tx.setTxSet(new MoneroTxSet());
+        tx.getTxSet().setTxs(tx);
+      }
+      txSet.merge(tx.getTxSet());
+      return this;
+    }
+    
     // otherwise merge tx fields
     this.setId(MoneroUtils.reconcile(this.getId(), tx.getId()));
     this.setVersion(MoneroUtils.reconcile(this.getVersion(), tx.getVersion()));
@@ -515,7 +530,6 @@ public class MoneroTx {
     this.setWeight(MoneroUtils.reconcile(this.getWeight(), tx.getWeight()));
     this.setOutputIndices(MoneroUtils.reconcile(this.getOutputIndices(), tx.getOutputIndices()));
     this.setMetadata(MoneroUtils.reconcile(this.getMetadata(), tx.getMetadata()));
-    this.setCommonTxSets(MoneroUtils.reconcile(this.getCommonTxSets(), tx.getCommonTxSets()));
     this.setExtra(MoneroUtils.reconcileIntArrays(this.getExtra(), tx.getExtra()));
     this.setRctSignatures(MoneroUtils.reconcile(this.getRctSignatures(), tx.getRctSignatures()));
     this.setRctSigPrunable(MoneroUtils.reconcile(this.getRctSigPrunable(), tx.getRctSigPrunable()));
@@ -641,7 +655,7 @@ public class MoneroTx {
     sb.append(MoneroUtils.kvLine("Weight", getWeight(), indent));
     sb.append(MoneroUtils.kvLine("Output indices", getOutputIndices(), indent));
     sb.append(MoneroUtils.kvLine("Metadata", getMetadata(), indent));
-    sb.append(MoneroUtils.kvLine("Common tx sets", getCommonTxSets(), indent));
+    sb.append(MoneroUtils.kvLine("Common tx sets", getTxSet(), indent));
     sb.append(MoneroUtils.kvLine("Extra", Arrays.toString(getExtra()), indent));
     sb.append(MoneroUtils.kvLine("RCT signatures", getRctSignatures(), indent));
     sb.append(MoneroUtils.kvLine("RCT sig prunable", getRctSigPrunable(), indent));
@@ -676,7 +690,7 @@ public class MoneroTx {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((commonTxSets == null) ? 0 : commonTxSets.hashCode());
+    result = prime * result + ((txSet == null) ? 0 : txSet.hashCode());
     result = prime * result + ((doNotRelay == null) ? 0 : doNotRelay.hashCode());
     result = prime * result + Arrays.hashCode(extra);
     result = prime * result + ((fee == null) ? 0 : fee.hashCode());
@@ -722,9 +736,9 @@ public class MoneroTx {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroTx other = (MoneroTx) obj;
-    if (commonTxSets == null) {
-      if (other.commonTxSets != null) return false;
-    } else if (!commonTxSets.equals(other.commonTxSets)) return false;
+    if (txSet == null) {
+      if (other.txSet != null) return false;
+    } else if (!txSet.equals(other.txSet)) return false;
     if (doNotRelay == null) {
       if (other.doNotRelay != null) return false;
     } else if (!doNotRelay.equals(other.doNotRelay)) return false;

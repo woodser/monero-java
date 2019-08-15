@@ -112,7 +112,7 @@ public class MoneroBlock extends MoneroBlockHeader {
     if (block.getTxs() != null) {
       for (MoneroTx tx : block.getTxs()) {
         tx.setBlock(this);
-        mergeTx(txs, tx);
+        MoneroUtils.mergeTx(txs, tx);
       }
     }
 
@@ -169,18 +169,6 @@ public class MoneroBlock extends MoneroBlockHeader {
       if (other.txs != null) return false;
     } else if (!txs.equals(other.txs)) return false;
     return true;
-  }
-  
-  // -------------------------- PRIVATE HELPERS -------------------------------
-  
-  private static void mergeTx(List<MoneroTx> txs, MoneroTx tx) {
-    for (MoneroTx aTx : txs) {
-      if (aTx.getId().equals(tx.getId())) {
-        aTx.merge(tx);
-        return;
-      }
-    }
-    txs.add(tx);
   }
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
