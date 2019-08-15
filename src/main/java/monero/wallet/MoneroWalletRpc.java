@@ -60,10 +60,12 @@ import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendRequest;
+import monero.wallet.model.MoneroSignMultisigResult;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
@@ -2026,5 +2028,55 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
       return 1;
     }
+  }
+
+  @Override
+  public boolean isMultisig() {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public MoneroMultisigInfo getMultisigInfo() {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public String prepareMultisig() {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public String makeMultisig(List<String> multisigHexes, int threshold, String password) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public String finalizeMultisig(List<String> multisigHexes, String password) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public String exchangeMultisigKeys(List<String> multisigHexes, String password) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public String getMultisigHex() {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public int importMultisigHex(List<String> multisigHexes) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public MoneroSignMultisigResult signMultisigTxs(String multisigTxHex) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public List<String> submitMultisigTxs(String signedMultisigTxHex) {
+    throw new RuntimeException("Not implemented");
   }
 }
