@@ -85,6 +85,9 @@ stress tester
 
 --------- MONERO CORE ISSUES ---------
 
+wallet2 refactor
+deprecate finalize_multisig and replacing with exchange_multisig_keys to be more general
+
 ISSUES TO INVESTIGATE
 importKeyImages() causing erasure of transfers
 	wallet2 incoming transfers from/to same account go missing on key image export and re-import (wallet2.cpp:11957 erases incoming counterpart)

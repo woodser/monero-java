@@ -194,13 +194,6 @@ public interface MoneroWallet {
   public void rescanBlockchain();
   
   /**
-   * Indicates if importing multisig data is needed for returning a correct balance.
-   * 
-   * @return true if importing multisig data is needed for returning a correct balance, false otherwise
-   */
-  public boolean isMultisigImportNeeded();
-  
-  /**
    * Get the wallet's balance.
    * 
    * @return the wallet's balance
@@ -1003,4 +996,67 @@ public interface MoneroWallet {
    * Stop mining.
    */
   public void stopMining();
+  
+  /**
+   * Indicates if this wallet is a multisig wallet.
+   * 
+   * @return true if this is a multisig wallet, false otherwise
+   */
+  public boolean isMultisig();
+  
+  /**
+   * Indicates if importing multisig data is needed for returning a correct balance.
+   * 
+   * @return true if importing multisig data is needed for returning a correct balance, false otherwise
+   */
+  public boolean isMultisigImportNeeded();
+  
+  /**
+   * Get multisig info to share with peers to begin the process of creating a multisig wallet.
+   * 
+   * @return this wallet's multisig info to share with peers to begin the process of creating a multisig wallet
+   */
+  public String prepareMultisig();
+  
+  /**
+   * Makes this wallet multisig by importing multisig info from peers.
+   * 
+   * @param multisigInfos are multisig info of each participating peer
+   * @param threshold is the number of signatures needed to sign transfers
+   * @password is the wallet password
+   * @return this wallet's multisig info to share with peers to continue creating the multisig wallet iff not N/N
+   */
+  public String makeMultisig(List<String> multisigInfos, int threshold, String password);
+  
+  /**
+   * Finalize a N-1/N multisig wallet.
+   * 
+   * TODO monero core: this is a special case of exchangeMultisigKeys() for N-1/N multisig.  use that as the last step instead and remove this?  that would further generalize the process
+   * 
+   * @param multisigInfos are multisig info of each participating peer
+   * @param password is the wallet's password // TODO monero core: redundant? wallet is created with password
+   * @return the multisig wallet's address
+   */
+  public String finalizeMultisig(List<String> multisigInfos, String password);
+  
+  /**
+   * Exchange multisig info with peers in a M/N multisig wallet.
+   * 
+   * This process must be repeated with peers N-M times.
+   * 
+   * @param multisigInfos are multisig info of each participating peer
+   * @param password is the wallet's password // TODO monero core: redundant? wallet is created with password
+   * @return this wallet's multisig info to share with peers to continue creating the multisig wallet
+   */
+  public String exchangeMultisigKeys(List<String> multisigInfos, String password);
+  
+  //public SignMultisigResult signMultisig(String multisigTxSet);
+  
+  /**
+   * Submit a signed multisig tx set.
+   * 
+   * @param multisigTxSet is the signed multisig tx set
+   * @return the resulting transaction ids
+   */
+  public List<String> submitMultisig(String multisigTxSet);
 }
