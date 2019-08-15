@@ -9,12 +9,6 @@ public class MoneroSignMultisigResult {
   
   private String signedMultisigTxHex;
   private List<String> txIds;
-  
-  public MoneroSignMultisigResult(String signedMultisigTxHex, List<String> txIds) {
-    super();
-    this.signedMultisigTxHex = signedMultisigTxHex;
-    this.txIds = txIds;
-  }
 
   public String getSignedMultisigTxHex() {
     return signedMultisigTxHex;

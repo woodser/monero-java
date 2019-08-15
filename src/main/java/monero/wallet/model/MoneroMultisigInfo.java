@@ -14,7 +14,7 @@ public class MoneroMultisigInfo {
     return isMultisig;
   }
   
-  public void setMultisig(boolean isMultisig) {
+  public void setIsMultisig(boolean isMultisig) {
     this.isMultisig = isMultisig;
   }
   
