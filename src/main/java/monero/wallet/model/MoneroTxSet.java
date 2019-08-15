@@ -13,17 +13,19 @@ import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroUtils;
 
 /**
- * Retains common information for a group of transactions which belong to a set.
+ * Groups transactions who share common hex data which is needed in order to
+ * sign and submit the transactions.
  * 
- * For example, transactions returned from sendSplit() belong to a set whose
- * common information is needed in order to sign and submit a multisig tx.
+ * For example, multisig transactions created from sendSplit() share a common
+ * hex string which is needed in order to sign and submit the multisig
+ * transactions.
  */
 public class MoneroTxSet {
 
   private List<MoneroTx> txs;
-  private String signedTxSet;
-  private String unsignedTxSet;
-  private String multisigTxSet;
+  private String signedTxHex;
+  private String unsignedTxHex;
+  private String multisigTxHex;
   
   @JsonManagedReference
   public List<MoneroTx> getTxs() {
@@ -42,30 +44,30 @@ public class MoneroTxSet {
     return this;
   }
 
-  public String getSignedTxSet() {
-    return signedTxSet;
+  public String getSignedTxHex() {
+    return signedTxHex;
   }
   
-  public MoneroTxSet setSignedTxSet(String signedTxSet) {
-    this.signedTxSet = signedTxSet;
+  public MoneroTxSet setSignedTxHex(String signedTxHex) {
+    this.signedTxHex = signedTxHex;
     return this;
   }
   
-  public String getUnsignedTxSet() {
-    return unsignedTxSet;
+  public String getUnsignedTxHex() {
+    return unsignedTxHex;
   }
   
-  public MoneroTxSet setUnsignedTxSet(String unsignedTxSet) {
-    this.unsignedTxSet = unsignedTxSet;
+  public MoneroTxSet setUnsignedTxHex(String unsignedTxHex) {
+    this.unsignedTxHex = unsignedTxHex;
     return this;
   }
   
-  public String getMultisigTxSet() {
-    return multisigTxSet;
+  public String getMultisigTxHex() {
+    return multisigTxHex;
   }
   
-  public MoneroTxSet setMultisigTxSet(String multisigTxSet) {
-    this.multisigTxSet = multisigTxSet;
+  public MoneroTxSet setMultisigTxHex(String multisigTxHex) {
+    this.multisigTxHex = multisigTxHex;
     return this;
   }
   
@@ -74,9 +76,9 @@ public class MoneroTxSet {
     if (this == txSet) return this;
     
     // merge sets
-    this.setSignedTxSet(MoneroUtils.reconcile(this.getSignedTxSet(), txSet.getSignedTxSet()));
-    this.setUnsignedTxSet(MoneroUtils.reconcile(this.getUnsignedTxSet(), txSet.getUnsignedTxSet()));
-    this.setMultisigTxSet(MoneroUtils.reconcile(this.getMultisigTxSet(), txSet.getMultisigTxSet()));
+    this.setSignedTxHex(MoneroUtils.reconcile(this.getSignedTxHex(), txSet.getSignedTxHex()));
+    this.setUnsignedTxHex(MoneroUtils.reconcile(this.getUnsignedTxHex(), txSet.getUnsignedTxHex()));
+    this.setMultisigTxHex(MoneroUtils.reconcile(this.getMultisigTxHex(), txSet.getMultisigTxHex()));
     
     // merge txs
     if (txSet.getTxs() != null) {
@@ -93,10 +95,10 @@ public class MoneroTxSet {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((multisigTxSet == null) ? 0 : multisigTxSet.hashCode());
-    result = prime * result + ((signedTxSet == null) ? 0 : signedTxSet.hashCode());
+    result = prime * result + ((multisigTxHex == null) ? 0 : multisigTxHex.hashCode());
+    result = prime * result + ((signedTxHex == null) ? 0 : signedTxHex.hashCode());
     result = prime * result + ((txs == null) ? 0 : txs.hashCode());
-    result = prime * result + ((unsignedTxSet == null) ? 0 : unsignedTxSet.hashCode());
+    result = prime * result + ((unsignedTxHex == null) ? 0 : unsignedTxHex.hashCode());
     return result;
   }
 
@@ -106,18 +108,18 @@ public class MoneroTxSet {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroTxSet other = (MoneroTxSet) obj;
-    if (multisigTxSet == null) {
-      if (other.multisigTxSet != null) return false;
-    } else if (!multisigTxSet.equals(other.multisigTxSet)) return false;
-    if (signedTxSet == null) {
-      if (other.signedTxSet != null) return false;
-    } else if (!signedTxSet.equals(other.signedTxSet)) return false;
+    if (multisigTxHex == null) {
+      if (other.multisigTxHex != null) return false;
+    } else if (!multisigTxHex.equals(other.multisigTxHex)) return false;
+    if (signedTxHex == null) {
+      if (other.signedTxHex != null) return false;
+    } else if (!signedTxHex.equals(other.signedTxHex)) return false;
     if (txs == null) {
       if (other.txs != null) return false;
     } else if (!txs.equals(other.txs)) return false;
-    if (unsignedTxSet == null) {
-      if (other.unsignedTxSet != null) return false;
-    } else if (!unsignedTxSet.equals(other.unsignedTxSet)) return false;
+    if (unsignedTxHex == null) {
+      if (other.unsignedTxHex != null) return false;
+    } else if (!unsignedTxHex.equals(other.unsignedTxHex)) return false;
     return true;
   }
 }

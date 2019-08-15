@@ -38,6 +38,7 @@ import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSendRequest;
+import monero.wallet.model.MoneroSignMultisigResult;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
@@ -1012,19 +1013,19 @@ public interface MoneroWallet {
   public boolean isMultisigImportNeeded();
   
   /**
-   * Get multisig info to share with peers to begin the process of creating a multisig wallet.
+   * Get multisig info to share with participants to begin the process of creating a multisig wallet.
    * 
-   * @return this wallet's multisig info to share with peers to begin the process of creating a multisig wallet
+   * @return this wallet's multisig info to share with participants to begin the process of creating a multisig wallet
    */
   public String prepareMultisig();
   
   /**
-   * Makes this wallet multisig by importing multisig info from peers.
+   * Makes this wallet multisig by importing multisig info from participants.
    * 
-   * @param multisigInfos are multisig info of each participating peer
+   * @param multisigInfos are multisig info of each participant
    * @param threshold is the number of signatures needed to sign transfers
    * @password is the wallet password
-   * @return this wallet's multisig info to share with peers to continue creating the multisig wallet iff not N/N
+   * @return this wallet's multisig info to share with participants to continue creating the multisig wallet iff not N/N
    */
   public String makeMultisig(List<String> multisigInfos, int threshold, String password);
   
@@ -1033,34 +1034,51 @@ public interface MoneroWallet {
    * 
    * TODO monero core: this is a special case of exchangeMultisigKeys() for N-1/N multisig.  use that as the last step instead and remove this?  that would further generalize the process
    * 
-   * @param multisigInfos are multisig info of each participating peer
+   * @param multisigInfos are multisig info of each participant
    * @param password is the wallet's password // TODO monero core: redundant? wallet is created with password
    * @return the multisig wallet's address
    */
   public String finalizeMultisig(List<String> multisigInfos, String password);
   
   /**
-   * Exchange multisig info with peers in a M/N multisig wallet.
+   * Exchange multisig info with participants in a M/N multisig wallet.
    * 
-   * This process must be repeated with peers N-M times.
+   * This process must be repeated with participants N-M times.
    * 
-   * @param multisigInfos are multisig info of each participating peer
+   * @param multisigInfos are multisig info of each participant
    * @param password is the wallet's password // TODO monero core: redundant? wallet is created with password
-   * @return this wallet's multisig info to share with peers to continue creating the multisig wallet
+   * @return this wallet's multisig info to share with participants to continue creating the multisig wallet
    */
   public String exchangeMultisigKeys(List<String> multisigInfos, String password);
   
-  //public SignMultisigResult signMultisig(String multisigTxSet);
+  /**
+   * Sign previously created multisig transactions.
+   * 
+   * @param multisigTxHex is the hex value shared among the multisig transactions when they were created
+   * @return the result of signing the multisig transactions
+   */
+  public MoneroSignMultisigResult signMultisig(String multisigTxHex);
   
   /**
-   * Submit a signed multisig tx set.
+   * Submit previously created and signed multisig transactions.
    * 
-   * @param multisigTxSet is the signed multisig tx set
+   * @param signedMultisigTxHex is the signed multisig hex returned from signMultisig()
    * @return the resulting transaction ids
    */
-  public List<String> submitMultisig(String multisigTxSet);
+  public List<String> submitMultisig(String signedMultisigTxHex);
   
+  /**
+   * Export multisig info for other participants.
+   * 
+   * @return the multisig info in hex format for other participants
+   */
   public String getMultisigInfo();
   
+  /**
+   * Import multisig info from other participants.
+   * 
+   * @param multisigInfos are multisig info from each participant
+   * @return the number of outputs signed with the given multisig info
+   */
   public int importMultisigInfo(List<String> multisigInfos);
 }
