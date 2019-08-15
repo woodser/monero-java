@@ -34,6 +34,7 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
@@ -999,13 +1000,6 @@ public interface MoneroWallet {
   public void stopMining();
   
   /**
-   * Indicates if this wallet is a multisig wallet.
-   * 
-   * @return true if this is a multisig wallet, false otherwise
-   */
-  public boolean isMultisig();
-  
-  /**
    * Indicates if importing multisig data is needed for returning a correct balance.
    * 
    * @return true if importing multisig data is needed for returning a correct balance, false otherwise
@@ -1013,72 +1007,87 @@ public interface MoneroWallet {
   public boolean isMultisigImportNeeded();
   
   /**
-   * Get multisig info to share with participants to begin the process of creating a multisig wallet.
+   * Indicates if this wallet is a multisig wallet.
    * 
-   * @return this wallet's multisig info to share with participants to begin the process of creating a multisig wallet
+   * @return true if this is a multisig wallet, false otherwise
+   */
+  public boolean isMultisig();
+  
+  /**
+   * Get multisig info about this wallet.
+   * 
+   * @return multisig info about this wallet
+   */
+  public MoneroMultisigInfo getMultisigInfo();
+  
+  /**
+   * Get multisig info as hex to share with participants to begin creating a
+   * multisig wallet.
+   * 
+   * @return this wallet's multisig hex to share with participants
    */
   public String prepareMultisig();
   
   /**
-   * Makes this wallet multisig by importing multisig info from participants.
+   * Make this wallet multisig by importing multisig hex from participants.
    * 
-   * @param multisigInfos are multisig info of each participant
+   * @param multisigHexes are multisig hex from each participant
    * @param threshold is the number of signatures needed to sign transfers
    * @password is the wallet password
-   * @return this wallet's multisig info to share with participants to continue creating the multisig wallet iff not N/N
+   * @return this wallet's multisig hex to share with participants to continue creating the multisig wallet iff not N/N
    */
-  public String makeMultisig(List<String> multisigInfos, int threshold, String password);
+  public String makeMultisig(List<String> multisigHexes, int threshold, String password);
   
   /**
    * Finalize a N-1/N multisig wallet.
    * 
    * TODO monero core: this is a special case of exchangeMultisigKeys() for N-1/N multisig.  use that as the last step instead and remove this?  that would further generalize the process
    * 
-   * @param multisigInfos are multisig info of each participant
+   * @param multisigHexes are multisig hex from each participant
    * @param password is the wallet's password // TODO monero core: redundant? wallet is created with password
    * @return the multisig wallet's address
    */
-  public String finalizeMultisig(List<String> multisigInfos, String password);
+  public String finalizeMultisig(List<String> multisigHexes, String password);
   
   /**
-   * Exchange multisig info with participants in a M/N multisig wallet.
+   * Exchange multisig hex with participants in a M/N multisig wallet.
    * 
-   * This process must be repeated with participants N-M times.
+   * This process must be repeated with participants exactly N-M times.
    * 
-   * @param multisigInfos are multisig info of each participant
+   * @param multisigHexes are multisig hex from each participant
    * @param password is the wallet's password // TODO monero core: redundant? wallet is created with password
-   * @return this wallet's multisig info to share with participants to continue creating the multisig wallet
+   * @return this wallet's multisig hex to share with participants to continue creating the multisig wallet
    */
-  public String exchangeMultisigKeys(List<String> multisigInfos, String password);
+  public String exchangeMultisigKeys(List<String> multisigHexes, String password);
+  
+  /**
+   * Export this wallet's multisig info as hex for other participants.
+   * 
+   * @return this wallet's multisig info as hex for other participants
+   */
+  public String getMultisigHex();
+  
+  /**
+   * Import multisig info as hex from other participants.
+   * 
+   * @param multisigHexes are multisig hex from each participant
+   * @return the number of outputs signed with the given multisig hex
+   */
+  public int importMultisigHex(List<String> multisigHexes);
   
   /**
    * Sign previously created multisig transactions.
    * 
-   * @param multisigTxHex is the hex value shared among the multisig transactions when they were created
+   * @param multisigTxHex is the hex shared among the multisig transactions when they were created
    * @return the result of signing the multisig transactions
    */
-  public MoneroSignMultisigResult signMultisig(String multisigTxHex);
+  public MoneroSignMultisigResult signMultisigTxs(String multisigTxHex);
   
   /**
    * Submit previously created and signed multisig transactions.
    * 
-   * @param signedMultisigTxHex is the signed multisig hex returned from signMultisig()
+   * @param signedMultisigTxHex is the signed multisig hex returned from signMultisigTxs()
    * @return the resulting transaction ids
    */
-  public List<String> submitMultisig(String signedMultisigTxHex);
-  
-  /**
-   * Export multisig info for other participants.
-   * 
-   * @return the multisig info in hex format for other participants
-   */
-  public String getMultisigInfo();
-  
-  /**
-   * Import multisig info from other participants.
-   * 
-   * @param multisigInfos are multisig info from each participant
-   * @return the number of outputs signed with the given multisig info
-   */
-  public int importMultisigInfo(List<String> multisigInfos);
+  public List<String> submitMultisigTxs(String signedMultisigTxHex);
 }
