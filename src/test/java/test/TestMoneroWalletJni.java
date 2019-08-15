@@ -10,12 +10,14 @@ import static org.junit.Assert.fail;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import common.types.Pair;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroNetworkType;
@@ -58,6 +60,20 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   protected MoneroWallet getTestWallet() {
     return TestUtils.getWalletJni();
+  }
+  
+
+  @Override
+  protected Pair<MoneroWallet, String> createRandomWallet() {
+    Pair<MoneroWallet, String> pair = new Pair<MoneroWallet, String>(null, UUID.randomUUID().toString());
+    MoneroWallet wallet = MoneroWalletJni.createWalletRandom(pair.getSecond(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
+    pair.setFirst(wallet);
+    return pair;
+  }
+
+  @Override
+  protected MoneroWallet openWallet(String path) {
+    return MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
   }
   
   // --------------- DEMONSTRATION OF MONERO CORE ISSUES ----------------------
@@ -1773,5 +1789,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   public void testRescanBlockchain() {
     super.testRescanBlockchain();
+  }
+  
+  @Override
+  public void testMultisig() {
+    super.testMultisig();
   }
 }

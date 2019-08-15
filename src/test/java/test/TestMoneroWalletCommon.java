@@ -26,6 +26,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import common.types.Filter;
+import common.types.Pair;
 import common.utils.JsonUtils;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroBlock;
@@ -93,19 +94,26 @@ public abstract class TestMoneroWalletCommon {
   }
   
   /**
-   * Get the wallet to test.
+   * Get the main wallet to test.
    * 
    * @return the wallet to test
    */
   protected abstract MoneroWallet getTestWallet();
   
   /**
-   * Get a random test wallet.
+   * Create and open a random test wallet.
    * 
-   * @return the randomly generated test wallet
+   * @return the wallet's identifier and reference
    */
-  protected abstract MoneroWallet getRandomWallet();
-
+  protected abstract Pair<MoneroWallet, String> createRandomWallet();
+  
+  /**
+   * Open a test wallet.
+   * 
+   * @param path identifies the test wallet to open
+   * @return MoneroWallet returns a reference to the opened wallet
+   */
+  protected abstract MoneroWallet openWallet(String path);
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -2616,25 +2624,33 @@ public abstract class TestMoneroWalletCommon {
   
   private void testMultisig(int m, int n) {
     
-    // create n wallets
-    List<MoneroWallet> wallets = new ArrayList<MoneroWallet>();
-    for (int i = 0; i < n; i++) wallets.add(getRandomWallet());
-    
-    // prepare multisig hexes
+    // create n wallets and prepare multisig hexes
     List<String> prepareMultisigHexes = new ArrayList<String>();
-    for (MoneroWallet wallet : wallets) prepareMultisigHexes.add(wallet.prepareMultisig());
-    
+    List<String> walletIds = new ArrayList<String>();
+    for (int i = 0; i < n; i++) {
+      Pair<MoneroWallet, String> pair = createRandomWallet();
+      walletIds.add(pair.getSecond());
+      prepareMultisigHexes.add(wallet.prepareMultisig());
+      pair.getFirst().close();
+    }
+
     // make wallets multisig
     List<String> makeMultisigHexes = new ArrayList<String>();
-    for (MoneroWallet wallet : wallets) makeMultisigHexes.add(wallet.makeMultisig(prepareMultisigHexes, m, TestUtils.WALLET_PASSWORD));  // TODO: ok to pass its own multisig hex?
+    for (String walletId : walletIds) {
+      MoneroWallet wallet = openWallet(walletId);
+      makeMultisigHexes.add(wallet.makeMultisig(prepareMultisigHexes, m, TestUtils.WALLET_PASSWORD));  // TODO: ok to pass its own multisig hex?
+      wallet.close();
+    }
     
     // handle (n-1)/n which uses finalize
     String address = null;
     if (m == n - 1) {
-      for (MoneroWallet wallet : wallets) {
+      for (String walletId : walletIds) {
+        MoneroWallet wallet = openWallet(walletId);
         String walletAddress = wallet.finalizeMultisig(makeMultisigHexes, TestUtils.WALLET_PASSWORD);
         if (address == null) address = walletAddress;
         else assertEquals(address, walletAddress);
+        wallet.close();
       }
     }
     
@@ -2647,12 +2663,15 @@ public abstract class TestMoneroWalletCommon {
         
         // exchange multisig keys with each wallet and collect results
         List<String> exchangeMultisigHexes = new ArrayList<String>();
-        for (MoneroWallet wallet : wallets) {
+        for (int j = 0; j < walletIds.size(); j++) {
+          String walletId = walletIds.get(j);
+          MoneroWallet wallet = openWallet(walletId);
           String exchangeMultisigHex = wallet.exchangeMultisigKeys(prevMultisigHexes, TestUtils.WALLET_PASSWORD);
+          wallet.close();
           
           // result is null on last round
           if (exchangeMultisigHex != null) exchangeMultisigHexes.add(exchangeMultisigHex);
-          else assertTrue(wallet == wallets.get(wallets.size() - 1));
+          else assertEquals(walletIds.size() - 1, j);
         }
         
         // use results for next round of exchange
@@ -2661,12 +2680,19 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // test multisig wallets
-    for (MoneroWallet wallet : wallets) {
+    for (String walletId : walletIds) {
+      MoneroWallet wallet = openWallet(walletId);
       assertTrue(wallet.isMultisig());
       MoneroMultisigInfo multisigInfo = wallet.getMultisigInfo();
-      // TODO: what is in this?
+      assertTrue(multisigInfo.isMultisig());
+      assertTrue(multisigInfo.isReady());
+      assertEquals(m, (int) multisigInfo.getThreshold());
+      assertEquals(n, (int) multisigInfo.getNumParticipants());
+      wallet.close();
     }
-    throw new RuntimeException("Not implemented");
+    
+    // send a transaction to the multisig wallet
+    throw new RuntimeException("Ready to test multisig transaction");
   }
   
   // --------------------------- NOTIFICATION TESTS ---------------------------
