@@ -45,6 +45,7 @@ import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
@@ -60,7 +61,7 @@ import utils.TestUtils;
 /**
  * Runs common tests that every Monero wallet implementation should support.
  */
-public abstract class TestMoneroWalletCommon extends TestMoneroBase {
+public abstract class TestMoneroWalletCommon {
   
   // test constants
   protected static final boolean LITE_MODE = false;
@@ -81,6 +82,30 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     wallet = getTestWallet();
     daemon = getTestDaemon();
   }
+  
+  /**
+   * Get the daemon to test.
+   * 
+   * @return the daemon to test
+   */
+  protected MoneroDaemonRpc getTestDaemon() {
+    return TestUtils.getDaemonRpc();
+  }
+  
+  /**
+   * Get the wallet to test.
+   * 
+   * @return the wallet to test
+   */
+  protected abstract MoneroWallet getTestWallet();
+  
+  /**
+   * Get a random test wallet.
+   * 
+   * @return the randomly generated test wallet
+   */
+  protected abstract MoneroWallet getRandomWallet();
+
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -2578,18 +2603,69 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     testMultisig(4, 4);
     testMultisig(5, 5);
     
-    // test (n - 1) / n
+    // test (n-1)/n
     testMultisig(2, 3);
     testMultisig(3, 4);
     testMultisig(5, 6);
     
-    // test m / n
+    // test m/n
     testMultisig(2, 4);
     testMultisig(3, 5);
     testMultisig(10, 20);
   }
   
   private void testMultisig(int m, int n) {
+    
+    // create n wallets
+    List<MoneroWallet> wallets = new ArrayList<MoneroWallet>();
+    for (int i = 0; i < n; i++) wallets.add(getRandomWallet());
+    
+    // prepare multisig exes
+    List<String> prepareMultisigHexes = new ArrayList<String>();
+    for (MoneroWallet wallet : wallets) prepareMultisigHexes.add(wallet.prepareMultisig());
+    
+    // make wallets multisig
+    List<String> makeMultisigHexes = new ArrayList<String>();
+    for (MoneroWallet wallet : wallets) makeMultisigHexes.add(wallet.makeMultisig(prepareMultisigHexes, m, TestUtils.WALLET_PASSWORD));  // TODO: ok to pass its own multisig hex?
+    
+    // handle (n-1)/n which uses finalize
+    String address = null;
+    if (m == n - 1) {
+      for (MoneroWallet wallet : wallets) {
+        String walletAddress = wallet.finalizeMultisig(makeMultisigHexes, TestUtils.WALLET_PASSWORD);
+        if (address == null) address = walletAddress;
+        else assertEquals(address, walletAddress);
+      }
+    }
+    
+    // otherwise handle m/n which exchanges keys n - m times
+    else {
+      
+      // exchange keys n - m times
+      List<String> prevMultisigHexes = makeMultisigHexes;
+      for (int i = 0; i < n - m; i++) {
+        
+        // exchange multisig keys with each wallet and collect results
+        List<String> exchangeMultisigHexes = new ArrayList<String>();
+        for (MoneroWallet wallet : wallets) {
+          String exchangeMultisigHex = wallet.exchangeMultisigKeys(prevMultisigHexes, TestUtils.WALLET_PASSWORD);
+          
+          // result is null on last round
+          if (exchangeMultisigHex != null) exchangeMultisigHexes.add(exchangeMultisigHex);
+          else assertTrue(wallet == wallets.get(wallets.size() - 1));
+        }
+        
+        // use results for next round of exchange
+        prevMultisigHexes = exchangeMultisigHexes;
+      }
+    }
+    
+    // test multisig wallets
+    for (MoneroWallet wallet : wallets) {
+      assertTrue(wallet.isMultisig());
+      MoneroMultisigInfo multisigInfo = wallet.getMultisigInfo();
+      // TODO: what is in this?
+    }
     throw new RuntimeException("Not implemented");
   }
   

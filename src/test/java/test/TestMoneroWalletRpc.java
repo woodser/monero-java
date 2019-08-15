@@ -61,7 +61,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       
       // create random wallet with defaults
       String path = UUID.randomUUID().toString();
-      wallet.createWalletRandom(path, TestUtils.WALLET_RPC_PW);
+      wallet.createWalletRandom(path, TestUtils.WALLET_PASSWORD);
       String mnemonic = wallet.getMnemonic();
       MoneroUtils.validateMnemonic(mnemonic);
       assertNotEquals(TestUtils.MNEMONIC, mnemonic);
@@ -72,7 +72,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
 
       // create random wallet with non defaults
       path = UUID.randomUUID().toString();
-      wallet.createWalletRandom(path, TestUtils.WALLET_RPC_PW, "Spanish");
+      wallet.createWalletRandom(path, TestUtils.WALLET_PASSWORD, "Spanish");
       MoneroUtils.validateMnemonic(wallet.getMnemonic());
       assertNotEquals(mnemonic, wallet.getMnemonic());
       MoneroUtils.validateAddress(wallet.getPrimaryAddress());
@@ -81,14 +81,14 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       
       // attempt to create wallet which already exists
       try {
-        wallet.createWalletRandom(path, TestUtils.WALLET_RPC_PW, "Spanish");
+        wallet.createWalletRandom(path, TestUtils.WALLET_PASSWORD, "Spanish");
       } catch (MoneroException e) {
         assertEquals(-21, (int) e.getCode());
       }
     } finally {
       
       // open main test wallet for other tests
-      wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_RPC_PW);
+      wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
     }
   }
   
@@ -100,7 +100,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       
       // create wallet with mnemonic and defaults
       String path = UUID.randomUUID().toString();
-      wallet.createWalletFromMnemonic(path, TestUtils.WALLET_RPC_PW, TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT);
+      wallet.createWalletFromMnemonic(path, TestUtils.WALLET_PASSWORD, TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT);
       assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
       assertEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
       assertEquals(1, wallet.getHeight());      // TODO monero-core: sometimes wallet is synced after fresh creation here, but not if run alone
@@ -114,7 +114,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       
       // create wallet with non-defaults
       path = UUID.randomUUID().toString();
-      wallet.createWalletFromMnemonic(path, TestUtils.WALLET_RPC_PW, TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT, "German", "my offset!", false);
+      wallet.createWalletFromMnemonic(path, TestUtils.WALLET_PASSWORD, TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT, "German", "my offset!", false);
       MoneroUtils.validateMnemonic(wallet.getMnemonic());
       assertNotEquals(TestUtils.MNEMONIC, wallet.getMnemonic());  // mnemonic is different because of offset
       assertNotEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
@@ -124,7 +124,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     } finally {
       
       // open main test wallet for other tests
-      wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_RPC_PW);
+      wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
     }
   }
   
@@ -142,28 +142,28 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       // create test wallets
       List<String> mnemonics = new ArrayList<String>();
       for (String name : names) {
-        wallet.createWalletRandom(name, TestUtils.WALLET_RPC_PW);
+        wallet.createWalletRandom(name, TestUtils.WALLET_PASSWORD);
         mnemonics.add(wallet.getMnemonic());
         wallet.close();
       }
       
       // open test wallets
       for (int i = 0; i < numTestWallets; i++) {
-        wallet.openWallet(names.get(i), TestUtils.WALLET_RPC_PW);
+        wallet.openWallet(names.get(i), TestUtils.WALLET_PASSWORD);
         assertEquals(mnemonics.get(i), wallet.getMnemonic());
         wallet.close();
       }
       
       // attempt to re-open already opened wallet
       try {
-        wallet.openWallet(names.get(numTestWallets - 1), TestUtils.WALLET_RPC_PW);
+        wallet.openWallet(names.get(numTestWallets - 1), TestUtils.WALLET_PASSWORD);
       } catch (MoneroException e) {
         assertEquals(-1, (int) e.getCode());
       }
       
       // attempt to open non-existent
       try {
-        wallet.openWallet("btc_integrity", TestUtils.WALLET_RPC_PW);
+        wallet.openWallet("btc_integrity", TestUtils.WALLET_PASSWORD);
       } catch (MoneroException e) {
         assertEquals(-1, (int) e.getCode());  // -1 indicates wallet does not exist (or is open by another app)
       }
@@ -171,7 +171,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       
       // open main test wallet for other tests
       try {
-        wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_RPC_PW);
+        wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
       } catch (MoneroException e) {
         assertEquals(-1, (int) e.getCode()); // ok if wallet is already open
       }
@@ -394,7 +394,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     wallet.close();
     
     // re-open main test wallet for other tests
-    wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_RPC_PW);
+    wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
   }
   
   // Can stop the RPC server
