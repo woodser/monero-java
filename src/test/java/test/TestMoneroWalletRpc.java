@@ -20,6 +20,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import common.types.Pair;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
@@ -52,6 +53,21 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   protected MoneroWallet getTestWallet() {
     return TestUtils.getWalletRpc();
   }
+  
+  @Override
+  protected Pair<MoneroWallet, String> createRandomWallet() {
+    Pair<MoneroWallet, String> pair = new Pair<MoneroWallet, String>(wallet, UUID.randomUUID().toString());
+    wallet.createWalletRandom(pair.getSecond(), TestUtils.WALLET_PASSWORD);
+    return pair;
+  }
+
+  @Override
+  protected MoneroWallet openWallet(String path) {
+    wallet.openWallet(path, TestUtils.WALLET_PASSWORD);
+    return wallet;
+  }
+  
+  // ---------------------------- BEGIN TESTS ---------------------------------
   
   // Can create a wallet with a randomly generated seed
   @Test
@@ -881,5 +897,10 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Override
   public void testRescanBlockchain() {
     super.testRescanBlockchain();
+  }
+  
+  @Override
+  public void testMultisig() {
+    super.testMultisig();
   }
 }

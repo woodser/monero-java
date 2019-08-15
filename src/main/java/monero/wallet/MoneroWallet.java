@@ -1000,6 +1000,16 @@ public interface MoneroWallet {
   public void stopMining();
   
   /**
+   * Save the wallet.
+   */
+  public void save();
+  
+  /**
+   * Close the wallet.
+   */
+  public void close();
+  
+  /**
    * Indicates if importing multisig data is needed for returning a correct balance.
    * 
    * @return true if importing multisig data is needed for returning a correct balance, false otherwise
