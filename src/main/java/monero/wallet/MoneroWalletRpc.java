@@ -2064,7 +2064,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("multisig_info", multisigHexes);
     params.put("threshold", threshold);
     params.put("password", password);
-    Map<String, Object> resp = rpc.sendJsonRequest("prepare_multisig", params);
+    Map<String, Object> resp = rpc.sendJsonRequest("make_multisig", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     MoneroInitMultisigResult msResult = new MoneroInitMultisigResult();
     msResult.setAddress((String) result.get("address"));
