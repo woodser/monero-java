@@ -2568,6 +2568,31 @@ public abstract class TestMoneroWalletCommon extends TestMoneroBase {
     }
   }
   
+  // Can support multisig wallets
+  @Test
+  public void testMultisig() {
+    
+    // test n/n
+    testMultisig(2, 2);
+    testMultisig(3, 3);
+    testMultisig(4, 4);
+    testMultisig(5, 5);
+    
+    // test (n - 1) / n
+    testMultisig(2, 3);
+    testMultisig(3, 4);
+    testMultisig(5, 6);
+    
+    // test m / n
+    testMultisig(2, 4);
+    testMultisig(3, 5);
+    testMultisig(10, 20);
+  }
+  
+  private void testMultisig(int m, int n) {
+    throw new RuntimeException("Not implemented");
+  }
+  
   // --------------------------- NOTIFICATION TESTS ---------------------------
   
   // TODO: test sending to multiple accounts
