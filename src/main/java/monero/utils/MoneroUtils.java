@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import common.utils.GenUtils;
+import monero.daemon.model.MoneroTx;
 
 /**
  * Collection of Monero utilities.
@@ -272,5 +273,21 @@ public class MoneroUtils {
   public static String kvLine(Object key, Object value, int indent, boolean newline, boolean ignoreUndefined) {
     if (value == null && ignoreUndefined) return "";
     return GenUtils.getIndent(indent) + key + ": " + value + (newline ? '\n' : "");
+  }
+  
+  /**
+   * Merges a transaction into a list of existing transactions.
+   * 
+   * @param txs are existing transactions to merge into
+   * @param tx is the transaction to merge into the list
+   */
+  public static void mergeTx(List<MoneroTx> txs, MoneroTx tx) {
+    for (MoneroTx aTx : txs) {
+      if (aTx.getId().equals(tx.getId())) {
+        aTx.merge(tx);
+        return;
+      }
+    }
+    txs.add(tx);
   }
 }

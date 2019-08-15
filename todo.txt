@@ -86,7 +86,8 @@ stress tester
 --------- MONERO CORE ISSUES ---------
 
 wallet2 refactor
-deprecate finalize_multisig and replacing with exchange_multisig_keys to be more general
+test rapid send through a wallet
+generalize multisig wallet creation to 1) prepare, 2) make, 3) for M-N times.  This issue proposes deprecating finalize_multisig and replacing it with exchange_multisig_keys
 
 ISSUES TO INVESTIGATE
 importKeyImages() causing erasure of transfers
@@ -100,7 +101,6 @@ incoming transactions are missing when outgoing counterpart from same account (o
 10 block lock - it sounds like it's technically possible to remove the 10 block lock, giving users the choice to use low confirmation outputs at an increased risk of being double spent, by referencing outputs by their tx id instead of offsets, and by ordering txs within a block by their tx id.  Then transactions and their referenced outputs would remain valid across re-orgs.  This would require a consensus change and come at some space and bandwidth cost (64 bit int becomes 256 bit hash per output barring any wizardy?) in order to reference tx ids instead of offsets.  But then the 10 block lock could safely be removed unless it's agreed to enforce protection from double spends.
 
 ISSUES TO OPEN
-wallet2 import_key_images erases incoming transfers
 
 MEDIUM / OUTDATED?
 getReserveProofAccount() seg faulting (with no unlocked balance / spending 0-conf???), wallet rpc get_reserve_proof

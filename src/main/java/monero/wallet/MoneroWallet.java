@@ -1059,4 +1059,8 @@ public interface MoneroWallet {
    * @return the resulting transaction ids
    */
   public List<String> submitMultisig(String multisigTxSet);
+  
+  public String getMultisigInfo();
+  
+  public int importMultisigInfo(List<String> multisigInfos);
 }

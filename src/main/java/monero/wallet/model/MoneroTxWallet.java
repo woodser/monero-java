@@ -428,8 +428,8 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setCommonTxSets(String commonTxSets) {
-    super.setCommonTxSets(commonTxSets);
+  public MoneroTxWallet setTxSet(MoneroTxSet txSet) {
+    super.setTxSet(txSet);
     return this;
   }
 

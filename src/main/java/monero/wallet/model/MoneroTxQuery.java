@@ -416,8 +416,8 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setCommonTxSets(String commonTxSets) {
-    super.setCommonTxSets(commonTxSets);
+  public MoneroTxQuery setTxSet(MoneroTxSet commonTxSets) {
+    super.setTxSet(commonTxSets);
     return this;
   }
 
