@@ -58,6 +58,7 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
+import monero.wallet.model.MoneroInitMultisigResult;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroMultisigInfo;
@@ -2032,51 +2033,108 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public boolean isMultisig() {
-    throw new RuntimeException("Not implemented");
+    return getMultisigInfo().isMultisig();
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public MoneroMultisigInfo getMultisigInfo() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendJsonRequest("is_multisig");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    MoneroMultisigInfo info = new MoneroMultisigInfo();
+    info.setIsMultisig((boolean) result.get("multisig"));
+    info.setIsReady((boolean) result.get("ready"));
+    info.setThreshold(((BigInteger) result.get("threshold")).intValue());
+    info.setNumParticipants(((BigInteger) result.get("total")).intValue());
+    return info;
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public String prepareMultisig() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendJsonRequest("prepare_multisig");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("multisig_info");
   }
 
   @Override
-  public String makeMultisig(List<String> multisigHexes, int threshold, String password) {
-    throw new RuntimeException("Not implemented");
+  @SuppressWarnings("unchecked")
+  public MoneroInitMultisigResult makeMultisig(List<String> multisigHexes, int threshold, String password) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("multisig_info", multisigHexes);
+    params.put("threshold", threshold);
+    params.put("password", password);
+    Map<String, Object> resp = rpc.sendJsonRequest("prepare_multisig", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    MoneroInitMultisigResult msResult = new MoneroInitMultisigResult();
+    msResult.setAddress((String) result.get("address"));
+    msResult.setMultisigHex((String) result.get("multisig_info"));
+    return msResult;
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public String finalizeMultisig(List<String> multisigHexes, String password) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("multisig_info", multisigHexes);
+    params.put("password", password);
+    Map<String, Object> resp = rpc.sendJsonRequest("finalize_multisig", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("address");
   }
 
   @Override
-  public String exchangeMultisigKeys(List<String> multisigHexes, String password) {
-    throw new RuntimeException("Not implemented");
+  @SuppressWarnings("unchecked")
+  public MoneroInitMultisigResult exchangeMultisigKeys(List<String> multisigHexes, String password) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("multisig_info", multisigHexes);
+    params.put("password", password);
+    Map<String, Object> resp = rpc.sendJsonRequest("exchange_multisig_keys", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    MoneroInitMultisigResult msResult = new MoneroInitMultisigResult();
+    msResult.setAddress((String) result.get("address"));
+    msResult.setMultisigHex((String) result.get("multisig_info"));
+    return msResult;
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public String getMultisigHex() {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> resp = rpc.sendJsonRequest("export_multisig_info");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("info");
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public int importMultisigHex(List<String> multisigHexes) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("info", multisigHexes);
+    Map<String, Object> resp = rpc.sendJsonRequest("import_multisig_info", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return ((BigInteger) result.get("n_outputs")).intValue();
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public MoneroSignMultisigResult signMultisigTxs(String multisigTxHex) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("tx_data_hex", multisigTxHex);
+    Map<String, Object> resp = rpc.sendJsonRequest("sign_multisig", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    MoneroSignMultisigResult signResult = new MoneroSignMultisigResult();
+    signResult.setSignedMultisigTxHex((String) result.get("tx_data_hex"));
+    signResult.setTxIds((List<String>) result.get("tx_hash_list"));
+    return signResult;
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public List<String> submitMultisigTxs(String signedMultisigTxHex) {
-    throw new RuntimeException("Not implemented");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("tx_data_hex", signedMultisigTxHex);
+    Map<String, Object> resp = rpc.sendJsonRequest("submit_multisig", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (List<String>) result.get("tx_hash_list");
   }
 }

@@ -34,6 +34,7 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroInitMultisigResult;
 import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
@@ -1044,9 +1045,9 @@ public interface MoneroWallet {
    * @param multisigHexes are multisig hex from each participant
    * @param threshold is the number of signatures needed to sign transfers
    * @password is the wallet password
-   * @return this wallet's multisig hex to share with participants to continue creating the multisig wallet iff not N/N
+   * @return the result which has the multisig's address xor this wallet's multisig hex to share with participants iff not N/N
    */
-  public String makeMultisig(List<String> multisigHexes, int threshold, String password);
+  public MoneroInitMultisigResult makeMultisig(List<String> multisigHexes, int threshold, String password);
   
   /**
    * Finalize a N-1/N multisig wallet.
@@ -1066,9 +1067,9 @@ public interface MoneroWallet {
    * 
    * @param multisigHexes are multisig hex from each participant
    * @param password is the wallet's password // TODO monero core: redundant? wallet is created with password
-   * @return this wallet's multisig hex to share with participants to continue creating the multisig wallet
+   * @return the result which has the multisig's address xor this wallet's multisig hex to share with participants iff not done
    */
-  public String exchangeMultisigKeys(List<String> multisigHexes, String password);
+  public MoneroInitMultisigResult exchangeMultisigKeys(List<String> multisigHexes, String password);
   
   /**
    * Export this wallet's multisig info as hex for other participants.

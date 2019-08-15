@@ -46,6 +46,7 @@ import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroInitMultisigResult;
 import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputQuery;
@@ -2635,15 +2636,19 @@ public abstract class TestMoneroWalletCommon {
     }
 
     // make wallets multisig
+    String address = null;
     List<String> makeMultisigHexes = new ArrayList<String>();
     for (String walletId : walletIds) {
       MoneroWallet wallet = openWallet(walletId);
-      makeMultisigHexes.add(wallet.makeMultisig(prepareMultisigHexes, m, TestUtils.WALLET_PASSWORD));  // TODO: ok to pass its own multisig hex?
+      MoneroInitMultisigResult result = wallet.makeMultisig(prepareMultisigHexes, m, TestUtils.WALLET_PASSWORD); // TODO: ok to pass its own multisig hex?
+      if (address == null) address = result.getAddress();
+      else assertEquals(address, result.getAddress());
+      makeMultisigHexes.add(result.getMultisigHex());
       wallet.close();
     }
     
     // handle (n-1)/n which uses finalize
-    String address = null;
+    address = null;
     if (m == n - 1) {
       for (String walletId : walletIds) {
         MoneroWallet wallet = openWallet(walletId);
@@ -2666,12 +2671,18 @@ public abstract class TestMoneroWalletCommon {
         for (int j = 0; j < walletIds.size(); j++) {
           String walletId = walletIds.get(j);
           MoneroWallet wallet = openWallet(walletId);
-          String exchangeMultisigHex = wallet.exchangeMultisigKeys(prevMultisigHexes, TestUtils.WALLET_PASSWORD);
+          MoneroInitMultisigResult result = wallet.exchangeMultisigKeys(prevMultisigHexes, TestUtils.WALLET_PASSWORD);
           wallet.close();
           
-          // result is null on last round
-          if (exchangeMultisigHex != null) exchangeMultisigHexes.add(exchangeMultisigHex);
-          else assertEquals(walletIds.size() - 1, j);
+          // result on last round has address and not multisig hex to share
+          if (j == walletIds.size() - 1) {
+            assertNotNull(result.getAddress());
+            assertNull(result.getMultisigHex());
+          } else {
+            assertNull(result.getAddress());
+            assertNotNull(result.getMultisigHex());
+            exchangeMultisigHexes.add(result.getMultisigHex());
+          }
         }
         
         // use results for next round of exchange
