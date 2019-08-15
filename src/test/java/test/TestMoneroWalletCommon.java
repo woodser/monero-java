@@ -2620,7 +2620,7 @@ public abstract class TestMoneroWalletCommon {
     List<MoneroWallet> wallets = new ArrayList<MoneroWallet>();
     for (int i = 0; i < n; i++) wallets.add(getRandomWallet());
     
-    // prepare multisig exes
+    // prepare multisig hexes
     List<String> prepareMultisigHexes = new ArrayList<String>();
     for (MoneroWallet wallet : wallets) prepareMultisigHexes.add(wallet.prepareMultisig());
     
