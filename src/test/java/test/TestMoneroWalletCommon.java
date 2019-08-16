@@ -2680,7 +2680,7 @@ public abstract class TestMoneroWalletCommon {
       assertEquals(n, madeMultisigHexes.size());
       List<String> prevMultisigHexes = madeMultisigHexes;
       for (int i = 0; i < n - m; i++) {
-        System.out.println("Exchanging multisig keys round " + (i + 1) + " / " + (m - n));
+        System.out.println("Exchanging multisig keys round " + (i + 1) + " / " + (n - m));
         
         // exchange multisig keys with each wallet and collect results
         List<String> exchangeMultisigHexes = new ArrayList<String>();
