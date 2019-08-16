@@ -188,6 +188,11 @@ public interface MoneroWallet {
   public MoneroSyncResult sync(Long startHeight, MoneroSyncListener listener);
   
   /**
+   * Start an asynchronous thread to continuously synchronize the wallet with the daemon.
+   */
+  public void startSyncing();
+  
+  /**
    * Rescan the blockchain from scratch, losing any information which cannot be recovered from
    * the blockchain itself.
    * 
