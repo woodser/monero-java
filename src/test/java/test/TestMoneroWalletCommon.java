@@ -2739,6 +2739,7 @@ public abstract class TestMoneroWalletCommon {
     MoneroWallet wallet = getTestWallet();
     assertTrue(wallet.getBalance().compareTo(BigInteger.valueOf(0)) > 0);
     wallet.send(0, address, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(10)));
+    String testWalletAddress = wallet.getAddress(1, 0);
     
     // open one of the multisig participants
     MoneroWallet msWallet = openWallet(walletIds.get(0));
@@ -2784,7 +2785,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // create transaction to send from multisig wallet but don't relay
-    List<MoneroTxWallet> sweepTxs = msWallet.sweepAllUnlocked(new MoneroSendRequest(wallet.getAddress(1, 0)).setDoNotRelay(true));
+    List<MoneroTxWallet> sweepTxs = msWallet.sweepAllUnlocked(new MoneroSendRequest(testWalletAddress).setDoNotRelay(true));
     System.out.println(sweepTxs);
     
     throw new RuntimeException("Ready to send multisig tx!");
