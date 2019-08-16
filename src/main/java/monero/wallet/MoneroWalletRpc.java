@@ -357,14 +357,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     throw new MoneroException("monero-wallet-rpc does not support getting the chain height");
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public boolean isMultisigImportNeeded() {
-    Map<String, Object> resp = rpc.sendJsonRequest("get_balance");
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return Boolean.TRUE.equals((Boolean) result.get("multisig_import_needed"));
-  }
-
   @Override
   public BigInteger getBalance() {
     return getBalances(null, null)[0];
@@ -2034,6 +2026,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
       return 1;
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public boolean isMultisigImportNeeded() {
+    Map<String, Object> resp = rpc.sendJsonRequest("get_balance");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return Boolean.TRUE.equals((Boolean) result.get("multisig_import_needed"));
   }
 
   @Override
