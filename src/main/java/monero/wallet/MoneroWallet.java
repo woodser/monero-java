@@ -1092,18 +1092,18 @@ public interface MoneroWallet {
   public int importMultisigHex(List<String> multisigHexes);
   
   /**
-   * Sign previously created multisig transactions.
+   * Sign previously created multisig transactions as represented by hex.
    * 
    * @param multisigTxHex is the hex shared among the multisig transactions when they were created
    * @return the result of signing the multisig transactions
    */
-  public MoneroSignMultisigResult signMultisigTxs(String multisigTxHex);
+  public MoneroSignMultisigResult signMultisigTxHex(String multisigTxHex);
   
   /**
-   * Submit previously created and signed multisig transactions.
+   * Submit signed multisig transactions as represented by a hex string.
    * 
    * @param signedMultisigTxHex is the signed multisig hex returned from signMultisigTxs()
    * @return the resulting transaction ids
    */
-  public List<String> submitMultisigTxs(String signedMultisigTxHex);
+  public List<String> submitMultisigTxHex(String signedMultisigTxHex);
 }

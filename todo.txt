@@ -2,6 +2,7 @@ HIGH
 open library issues
 open monero core issues
 add multisig support
+add multisig model and sample code to taming monero: the hidden model
 open issue: investigate integration of this library into Bisq
 add getIncomingTransfers(), getOutgoingTransfers() convenience methods
 new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
@@ -21,6 +22,7 @@ test force split transactions
 if txs are split or only specific vouts/outputs are requested, tx amounts, isIncoming, etc will be incomplete and not based on all sub-transfers.  Issue at all?
 auto-select account index for send request if not given?
 support rpc wallet sync(listener)
+remove createAccount() and addAccount(), manage automatically as sparse matrix?
 rpc sweepAllUnlocked() modifies original send request
 test changing wallet password with moveTo()
 preserve original send request instead of modifying it?  implement copy constructor
@@ -136,6 +138,7 @@ lots of internal wallet errors when daemon rpc tests run
 add final keyword to method args where appropriate
 update send end height mid sync so 100% figure is accurate
 failure in sync test does not propagate back through c++ and back to Java to indicate test failure
+wallet2 sweep_all if subaddress_indices are not specified it chooses random subaddress, 0 last in create_transactions_all()
 
 LOW
 unlockTime should probably be long / uint64_t

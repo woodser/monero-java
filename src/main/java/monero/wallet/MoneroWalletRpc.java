@@ -1083,27 +1083,24 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // sweep from each account and collect unique transactions
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     for (Integer accountIdx : indices.keySet()) {
-      request.setAccountIndex(accountIdx);  // TODO: this modifies original request param; deep copy with new MoneroSendRequest(request)
+      
+      // copy the request to not modify the original
+      MoneroSendRequest copy = request.copy();
+      
+      // set the account to sweep from
+      copy.setAccountIndex(accountIdx);
       
       // sweep all subaddresses together  // TODO monero-wallet-rpc: doesn't this reveal outputs belong to same wallet?
-      if (!Boolean.TRUE.equals(request.getSweepEachSubaddress())) {
-        request.setSubaddressIndices(indices.get(accountIdx));
-        try {
-          txs.addAll(rpcSweepAll(request));
-        } catch (MoneroException e) {
-          // account cannot be swept
-        }
+      if (!Boolean.TRUE.equals(copy.getSweepEachSubaddress())) {
+        copy.setSubaddressIndices(indices.get(accountIdx));
+        txs.addAll(rpcSweepAll(copy));
       }
       
       // sweep each subaddress individually
       else {
         for (int subaddressIdx : indices.get(accountIdx)) {
-          request.setSubaddressIndices(subaddressIdx);
-          try {
-            txs.addAll(rpcSweepAll(request));
-          } catch (MoneroException e) {
-            // subaddress cannot be swept
-          }
+          copy.setSubaddressIndices(subaddressIdx);
+          txs.addAll(rpcSweepAll(copy));
         }
       }
     }
@@ -2130,7 +2127,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   @SuppressWarnings("unchecked")
-  public MoneroSignMultisigResult signMultisigTxs(String multisigTxHex) {
+  public MoneroSignMultisigResult signMultisigTxHex(String multisigTxHex) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("tx_data_hex", multisigTxHex);
     Map<String, Object> resp = rpc.sendJsonRequest("sign_multisig", params);
@@ -2143,7 +2140,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   @SuppressWarnings("unchecked")
-  public List<String> submitMultisigTxs(String signedMultisigTxHex) {
+  public List<String> submitMultisigTxHex(String signedMultisigTxHex) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("tx_data_hex", signedMultisigTxHex);
     Map<String, Object> resp = rpc.sendJsonRequest("submit_multisig", params);
