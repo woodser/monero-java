@@ -2743,47 +2743,64 @@ public abstract class TestMoneroWalletCommon {
     
     // open one of the multisig participants
     MoneroWallet msWallet = openWallet(walletIds.get(0));
-    
-    // sync the multisig wallet so it sees the tx TODO: could replace with all wallets support it
-    try { TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL); }  // wait a moment for tx to be seen
-    catch (InterruptedException e) {  throw new RuntimeException(e); }
-    msWallet.sync();
-    
-    // wallet has incoming transfers
-    assertFalse(wallet.getTransfers(new MoneroTransferQuery().setIsIncoming(true)).isEmpty());
+    msWallet.startSyncing();
     
     // start mining
     StartMining.startMining();
     
-    try {
+    // wait for the multisig wallet's funds to unlock
+    while (true) {
       
-      // wait for the multisig wallet's funds to unlock
+      // wait a moment
+      try { TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL); }
+      catch (InterruptedException e) {  throw new RuntimeException(e); }
+      
+      // fetch and test outputs
       List<MoneroOutputWallet> outputs = msWallet.getOutputs();
-      while (outputs.isEmpty() || !outputs.get(0).isUnlocked()) {
-        if (outputs.isEmpty()) System.out.println("No outputs reported yet");
-        else System.out.println("Output has " + (daemon.getHeight() - outputs.get(0).getTx().getHeight()) + " num confirmations");  // TODO: use tx.getNumConfirmations() here
+      if (outputs.isEmpty()) System.out.println("No outputs reported yet");
+      else{
+        System.out.println("Output has " + (daemon.getHeight() - outputs.get(0).getTx().getHeight()) + " num confirmations");  // TODO: use tx.getNumConfirmations() here
         for (MoneroOutputWallet output : outputs) {
           assertFalse(output.isSpent());
-          assertFalse(output.isUnlocked());
         }
-        daemon.getNextBlockHeader();
-        outputs = msWallet.getOutputs();
+        
+        // break if output is unlocked
+        if (outputs.get(0).isUnlocked()) break;
       }
-    } finally {
+    }
       
-      // stop mining even on error
-      daemon.stopMining();
+    // stop mining
+    daemon.stopMining();
+    
+    // wallet has unlocked balance in subaddress [1, 0]
+    try {
+      msWallet.sync();
+      assertTrue(msWallet.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0);
+      assertTrue(msWallet.getUnlockedBalance(1).compareTo(BigInteger.valueOf(0)) > 0);
+      assertTrue(msWallet.getUnlockedBalance(1, 0).compareTo(BigInteger.valueOf(0)) > 0);
+    } catch (Exception e) {
+      List<MoneroOutputWallet> hi = wallet.getOutputs();
+      System.out.println(hi);
+      
+      try { TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL); }  // wait a moment for tx to be seen
+      catch (InterruptedException e2) {  throw new RuntimeException(e); }
+      
+      assertTrue(msWallet.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0);
+      assertTrue(msWallet.getUnlockedBalance(1).compareTo(BigInteger.valueOf(0)) > 0);
+      assertTrue(msWallet.getUnlockedBalance(1, 0).compareTo(BigInteger.valueOf(0)) > 0);
     }
 
+    
     // attempt creating and relaying transaction without participants
     try {
-      msWallet.sweepWallet(wallet.getAddress(0, 1));
+      List<MoneroTxWallet> sweepTxs = msWallet.sweepWallet(testWalletAddress);
+      if (sweepTxs.isEmpty()) fail("Wallet sweep returned empty tx list");
       fail("Should have failed sweeping wallet without participants");
     } catch (MoneroException e) {
       System.out.println("TODO: expected message: " + e.getMessage());
       System.out.println("TODO: expected code: " + e.getCode());
     }
-    
+
     // create transaction to send from multisig wallet but don't relay
     List<MoneroTxWallet> sweepTxs = msWallet.sweepAllUnlocked(new MoneroSendRequest(testWalletAddress).setDoNotRelay(true));
     System.out.println(sweepTxs);

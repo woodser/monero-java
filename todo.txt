@@ -3,7 +3,6 @@ open library issues
 open monero core issues
 add multisig support
 add getIncomingTransfers(), getOutgoingTransfers() convenience methods
-add startSyncing() to common wallet interface which is no-op on rpc
 new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
 tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
 rpc wallet listener

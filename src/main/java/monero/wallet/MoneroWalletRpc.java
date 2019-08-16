@@ -339,6 +339,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return new MoneroSyncResult(((BigInteger) result.get("blocks_fetched")).longValue(), (Boolean) result.get("received_money"));
   }
   
+  @Override
+  public void startSyncing() {
+    // no-op because wallet rpc automatically syncs
+  }
+  
   @SuppressWarnings("unchecked")
   @Override
   public long getHeight() {
@@ -1040,7 +1045,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // validate request
     if (request == null) throw new MoneroException("Must specify sweep request");
-    if (request.getDestinations() == null || request.getDestinations().size() != 1) throw new MoneroException("Must specify exactly one destination to sweep to");
+    if (request.getDestinations() == null || request.getDestinations().size() != 1) {
+      System.out.println(request.getDestinations());
+      throw new MoneroException("Must specify exactly one destination to sweep to");
+    }
     if (request.getDestinations().get(0).getAddress() == null) throw new MoneroException("Must specify destination address to sweep to");
     if (request.getDestinations().get(0).getAmount() != null) throw new MoneroException("Cannot specify amount in sweep request");
     if (request.getKeyImage() != null) throw new MoneroException("Key image defined; use sweepOutput() to sweep an output by its key image");
