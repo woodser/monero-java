@@ -2037,11 +2037,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
-  public boolean isMultisig() {
-    return getMultisigInfo().isMultisig();
-  }
-
-  @Override
   @SuppressWarnings("unchecked")
   public MoneroMultisigInfo getMultisigInfo() {
     Map<String, Object> resp = rpc.sendJsonRequest("is_multisig");
