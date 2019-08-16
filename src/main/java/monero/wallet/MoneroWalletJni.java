@@ -1333,6 +1333,26 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native void closeJni();
   
+  private native boolean isMultisigImportNeededJni();
+  
+  private native String getMultisigInfoJni();
+  
+  private native String makeMultisigJni(List<String> multisigHexes, int threshold, String password);
+  
+  private native String prepareMultisigJni();
+  
+  private native String finalizeMultisigJni(List<String> multisigHexes, String password);
+  
+  private native String exchangeMultisigKeysJni(List<String> multisigHexes, String password);
+  
+  private native String getMultisigHexJni();
+  
+  private native int importMultisigHexJni(List<String> multisigHexes);
+  
+  private native String signMultisigTxHexJni(String multisigTxHex);
+  
+  private native List<String> submitMultisigTxHexJni(String signedMultisigTxHex);
+  
   // ------------------------------- LISTENERS --------------------------------
   
   /**
@@ -1532,56 +1552,87 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public boolean isMultisigImportNeeded() {
     assertNotClosed();
-    throw new RuntimeException("Not implemented");
+    return isMultisigImportNeededJni();
   }
-
-  @Override
-  public boolean isMultisig() {
-    throw new RuntimeException("Not implemented");
-  }
-
+  
   @Override
   public MoneroMultisigInfo getMultisigInfo() {
-    throw new RuntimeException("Not implemented");
+    try {
+      String multisigInfoJson = getMultisigInfoJni();
+      return JsonUtils.deserialize(multisigInfoJson, MoneroMultisigInfo.class);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public String prepareMultisig() {
-    throw new RuntimeException("Not implemented");
+    return prepareMultisigJni();
   }
 
   @Override
   public MoneroInitMultisigResult makeMultisig(List<String> multisigHexes, int threshold, String password) {
-    throw new RuntimeException("Not implemented");
+    try {
+      String initMultisigResultJson = makeMultisigJni(multisigHexes, threshold, password);
+      return JsonUtils.deserialize(initMultisigResultJson, MoneroInitMultisigResult.class);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public String finalizeMultisig(List<String> multisigHexes, String password) {
-    throw new RuntimeException("Not implemented");
+    try {
+      return finalizeMultisigJni(multisigHexes, password);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public MoneroInitMultisigResult exchangeMultisigKeys(List<String> multisigHexes, String password) {
-    throw new RuntimeException("Not implemented");
+    try {
+      String initMultisigResultJson = exchangeMultisigKeysJni(multisigHexes, password);
+      return JsonUtils.deserialize(initMultisigResultJson, MoneroInitMultisigResult.class);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public String getMultisigHex() {
-    throw new RuntimeException("Not implemented");
+    try {
+      return getMultisigHexJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
-
+  
   @Override
   public int importMultisigHex(List<String> multisigHexes) {
-    throw new RuntimeException("Not implemented");
+    try {
+      return importMultisigHexJni(multisigHexes);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public MoneroSignMultisigResult signMultisigTxHex(String multisigTxHex) {
-    throw new RuntimeException("Not implemented");
+    try {
+      String signMultisigResultJson = signMultisigTxHexJni(multisigTxHex);
+      return JsonUtils.deserialize(signMultisigResultJson, MoneroSignMultisigResult.class);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public List<String> submitMultisigTxHex(String signedMultisigTxHex) {
-    throw new RuntimeException("Not implemented");
+    try {
+      return submitMultisigTxHexJni(signedMultisigTxHex);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 }
