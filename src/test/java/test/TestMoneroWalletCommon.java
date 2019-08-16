@@ -58,6 +58,7 @@ import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxWallet;
+import utils.StartMining;
 import utils.TestUtils;
 
 /**
@@ -2607,22 +2608,22 @@ public abstract class TestMoneroWalletCommon {
   public void testMultisig() {
     
     // test n/n
-    testMultisig(2, 2);
-    testMultisig(3, 3);
-    testMultisig(4, 4);
+    testMultisig(2, 2, true);
+    //testMultisig(3, 3, false);
+    //testMultisig(4, 4, false);
     
     // test (n-1)/n
-    testMultisig(2, 3);
-    testMultisig(3, 4);
-    testMultisig(5, 6);
+    //testMultisig(2, 3, false);
+    //testMultisig(3, 4, false);
+    //testMultisig(5, 6, false);
     
     // test m/n
-    testMultisig(2, 4);
-    testMultisig(3, 5);
-    testMultisig(3, 7);
+    //testMultisig(2, 4, false);
+    //testMultisig(3, 5, false);
+    //testMultisig(3, 7, false);
   }
   
-  private void testMultisig(int m, int n) {
+  private void testMultisig(int m, int n, boolean testTx) {
     System.out.println("testMultisig(" + m + ", " + n + ")");
     
     // create n wallets and prepare multisig hexes
@@ -2655,8 +2656,8 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // handle (n-1)/n which uses finalize
-    address = null;
     if (m == n - 1) {
+      address = null;
       for (int i = 0; i < walletIds.size(); i++) {
         
         // open the wallet
@@ -2674,7 +2675,8 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // otherwise handle m/n which exchanges keys n - m times
-    else {
+    else if (m != n) {
+      address = null;
       
       // exchange keys n - m times
       assertEquals(n, madeMultisigHexes.size());
@@ -2701,6 +2703,8 @@ public abstract class TestMoneroWalletCommon {
           if (i == n - m - 1) {  // result on last round has address and not multisig hex to share
             assertNotNull(result.getAddress());
             assertFalse(result.getAddress().isEmpty());
+            if (address == null) address = result.getAddress();
+            else assertEquals(address, result.getAddress());
             assertNull(result.getMultisigHex());
           } else {
             assertNotNull(result.getMultisigHex());
@@ -2718,6 +2722,7 @@ public abstract class TestMoneroWalletCommon {
     // test multisig wallets
     for (String walletId : walletIds) {
       MoneroWallet wallet = openWallet(walletId);
+      assertEquals(address, wallet.getPrimaryAddress());
       assertTrue(wallet.isMultisig());
       MoneroMultisigInfo multisigInfo = wallet.getMultisigInfo();
       assertTrue(multisigInfo.isMultisig());
@@ -2727,8 +2732,62 @@ public abstract class TestMoneroWalletCommon {
       wallet.close();
     }
     
+    // done if not sending a multisig tx
+    if (!testTx) return;
+    
     // send a transaction to the multisig wallet
-    //throw new RuntimeException("Ready to test multisig transaction");
+    MoneroWallet wallet = getTestWallet();
+    assertTrue(wallet.getBalance().compareTo(BigInteger.valueOf(0)) > 0);
+    wallet.send(0, address, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(10)));
+    
+    // open one of the multisig participants
+    MoneroWallet msWallet = openWallet(walletIds.get(0));
+    
+    // sync the multisig wallet so it sees the tx TODO: could replace with all wallets support it
+    try { TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL); }  // wait a moment for tx to be seen
+    catch (InterruptedException e) {  throw new RuntimeException(e); }
+    msWallet.sync();
+    
+    // wallet has incoming transfers
+    assertFalse(wallet.getTransfers(new MoneroTransferQuery().setIsIncoming(true)).isEmpty());
+    
+    // start mining
+    StartMining.startMining();
+    
+    try {
+      
+      // wait for the multisig wallet's funds to unlock
+      List<MoneroOutputWallet> outputs = msWallet.getOutputs();
+      while (outputs.isEmpty() || !outputs.get(0).isUnlocked()) {
+        if (outputs.isEmpty()) System.out.println("No outputs reported yet");
+        else System.out.println("Output has " + (daemon.getHeight() - outputs.get(0).getTx().getHeight()) + " num confirmations");  // TODO: use tx.getNumConfirmations() here
+        daemon.getNextBlockHeader();
+        outputs = msWallet.getOutputs();
+        for (MoneroOutputWallet output : outputs) {
+          assertFalse(output.isSpent());
+          assertFalse(output.isUnlocked());
+        }
+      }
+    } finally {
+      
+      // stop mining even on error
+      daemon.stopMining();
+    }
+
+    // attempt creating and relaying transaction without participants
+    try {
+      msWallet.sweepWallet(wallet.getAddress(0, 1));
+      fail("Should have failed sweeping wallet without participants");
+    } catch (MoneroException e) {
+      System.out.println("TODO: expected message: " + e.getMessage());
+      System.out.println("TODO: expected code: " + e.getCode());
+    }
+    
+    // create transaction to send from multisig wallet but don't relay
+    List<MoneroTxWallet> sweepTxs = msWallet.sweepAllUnlocked(new MoneroSendRequest(wallet.getAddress(1, 0)).setDoNotRelay(true));
+    System.out.println(sweepTxs);
+    
+    throw new RuntimeException("Ready to send multisig tx!");
   }
   
   // --------------------------- NOTIFICATION TESTS ---------------------------
