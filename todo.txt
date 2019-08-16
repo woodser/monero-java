@@ -2,6 +2,7 @@ HIGH
 open library issues
 open monero core issues
 add multisig support
+new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
 approximate chain height
 support sign_transfer, submit_transfer, etc
 rpc on_generate_from_keys
