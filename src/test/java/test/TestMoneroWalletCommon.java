@@ -2607,31 +2607,23 @@ public abstract class TestMoneroWalletCommon {
   public void testMultisig() {
     
     // test n/n
-    System.out.println("1");
     testMultisig(2, 2);
-    System.out.println("2");
     testMultisig(3, 3);
-    System.out.println("3");
     testMultisig(4, 4);
-    System.out.println("4");
     
     // test (n-1)/n
     testMultisig(2, 3);
-    System.out.println("6");
     testMultisig(3, 4);
-    System.out.println("7");
     testMultisig(5, 6);
-    System.out.println("8");
     
     // test m/n
     testMultisig(2, 4);
-    System.out.println("9");
     testMultisig(3, 5);
-    System.out.println("10");
     testMultisig(3, 7);
   }
   
   private void testMultisig(int m, int n) {
+    System.out.println("testMultisig(" + m + ", " + n + ")");
     
     // create n wallets and prepare multisig hexes
     List<String> preparedMultisigHexes = new ArrayList<String>();
