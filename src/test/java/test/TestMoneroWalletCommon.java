@@ -2784,6 +2784,9 @@ public abstract class TestMoneroWalletCommon {
     assertFalse(outputs.isEmpty());
     for (MoneroOutputWallet output : outputs) assertTrue(output.isUnlocked());
     
+    // wallet requires importing multisig to be reliable (?)
+    assertTrue(curWallet.isMultisigImportNeeded());
+    
     // attempt creating and relaying transaction without synchronizing with participants
     try {
       curWallet.sweepWallet(testWalletAddress);
