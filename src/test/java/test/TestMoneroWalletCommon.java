@@ -2761,12 +2761,12 @@ public abstract class TestMoneroWalletCommon {
       while (outputs.isEmpty() || !outputs.get(0).isUnlocked()) {
         if (outputs.isEmpty()) System.out.println("No outputs reported yet");
         else System.out.println("Output has " + (daemon.getHeight() - outputs.get(0).getTx().getHeight()) + " num confirmations");  // TODO: use tx.getNumConfirmations() here
-        daemon.getNextBlockHeader();
-        outputs = msWallet.getOutputs();
         for (MoneroOutputWallet output : outputs) {
           assertFalse(output.isSpent());
           assertFalse(output.isUnlocked());
         }
+        daemon.getNextBlockHeader();
+        outputs = msWallet.getOutputs();
       }
     } finally {
       
