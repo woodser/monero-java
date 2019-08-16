@@ -2,7 +2,11 @@ HIGH
 open library issues
 open monero core issues
 add multisig support
+add getIncomingTransfers(), getOutgoingTransfers() convenience methods
+add startSyncing() to common wallet interface which is no-op on rpc
 new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
+tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
+rpc wallet listener
 approximate chain height
 support sign_transfer, submit_transfer, etc
 rpc on_generate_from_keys
@@ -89,6 +93,7 @@ stress tester
 wallet2 refactor
 test rapid send through a wallet
 generalize multisig wallet creation to 1) prepare, 2) make, 3) for M-N times.  This issue proposes deprecating finalize_multisig and replacing it with exchange_multisig_keys
+incoming outputs do not appear until first confirmation, sub-issue?
 
 ISSUES TO INVESTIGATE
 importKeyImages() causing erasure of transfers

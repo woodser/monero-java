@@ -94,26 +94,26 @@ public class TestUtils {
       // construct wallet rpc instance with daemon connection
       MoneroRpcConnection rpc = new MoneroRpcConnection(WALLET_RPC_URI, WALLET_RPC_USERNAME, WALLET_RPC_PASSWORD);
       walletRpc = new MoneroWalletRpc(rpc);
-      
-      // attempt to open test wallet
-      try {
-        walletRpc.openWallet(WALLET_RPC_NAME_1, WALLET_PASSWORD);
-      } catch (MoneroRpcException e) {
-        
-        // -1 returned when the wallet does not exist or it's open by another application
-        if (e.getCode() == -1) {
-          
-          // create wallet
-          walletRpc.createWalletFromMnemonic(WALLET_RPC_NAME_1, WALLET_PASSWORD, MNEMONIC, FIRST_RECEIVE_HEIGHT);
-        } else {
-          throw e;
-        }
-      }
-      
-      // ensure we're testing the right wallet
-      assertEquals(TestUtils.MNEMONIC, walletRpc.getMnemonic());
-      assertEquals(TestUtils.ADDRESS, walletRpc.getPrimaryAddress());
     }
+    
+    // attempt to open test wallet
+    try {
+      walletRpc.openWallet(WALLET_RPC_NAME_1, WALLET_PASSWORD);
+    } catch (MoneroRpcException e) {
+      
+      // -1 returned when the wallet does not exist or it's open by another application
+      if (e.getCode() == -1) {
+        
+        // create wallet
+        walletRpc.createWalletFromMnemonic(WALLET_RPC_NAME_1, WALLET_PASSWORD, MNEMONIC, FIRST_RECEIVE_HEIGHT);
+      } else {
+        throw e;
+      }
+    }
+    
+    // ensure we're testing the right wallet
+    assertEquals(TestUtils.MNEMONIC, walletRpc.getMnemonic());
+    assertEquals(TestUtils.ADDRESS, walletRpc.getPrimaryAddress());
     
     // sync and save the wallet
     walletRpc.sync();
