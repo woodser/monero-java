@@ -3,10 +3,12 @@ package utils;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroTx;
+import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroTxWallet;
 
@@ -97,8 +99,9 @@ public class TxPoolWalletTracker {
         isFirst = false;
       }
       
-      // TODO: loop every e.g. 10s to check for txs in pool in case manually removed
-      daemon.getNextBlockHeader();  
+      // sleep for a moment
+      try { TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL); }
+      catch (InterruptedException e) {  throw new RuntimeException(e); } 
     }
     
     // stop mining at end of test

@@ -2607,6 +2607,7 @@ public abstract class TestMoneroWalletCommon {
   
   // Can support multisig wallets
   @Test
+  @Ignore
   public void testMultisig() {
     
     // test n/n
@@ -2628,7 +2629,7 @@ public abstract class TestMoneroWalletCommon {
   private void testMultisig(int m, int n, boolean testTx) {
     System.out.println("testMultisig(" + m + ", " + n + ")");
     
-    //wallet.close();
+    wallet.close();
     
     // create n wallets and prepare multisig hexes
     List<String> preparedMultisigHexes = new ArrayList<String>();
@@ -2658,6 +2659,7 @@ public abstract class TestMoneroWalletCommon {
       
       // make the wallet multisig
       MoneroMultisigInitResult result = wallet.makeMultisig(peerMultisigHexes, m, TestUtils.WALLET_PASSWORD);
+      System.out.println(JsonUtils.serialize(result));
       if (address == null) address = result.getAddress();
       else assertEquals(address, result.getAddress());
       madeMultisigHexes.add(result.getMultisigHex());
@@ -2674,6 +2676,7 @@ public abstract class TestMoneroWalletCommon {
       for (int i = 0; i < walletIds.size(); i++) {
         
         // open the wallet
+        System.out.println("Opening wallet");
         MoneroWallet wallet = openWallet(walletIds.get(i));
         
         // collect made multisig hexes from wallet's peers
@@ -2685,8 +2688,8 @@ public abstract class TestMoneroWalletCommon {
         if (address == null) address = walletAddress;
         else assertEquals(address, walletAddress);
         
-//        wallet.save();
-//        wallet.close();
+        wallet.save();
+        wallet.close();
       }
     }
     
