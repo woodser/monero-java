@@ -1519,7 +1519,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_parsePaymentUriJni(
     return 0;
   }
 
-  // release and return serialized request
+  // return serialized request
   return env->NewStringUTF(send_request->serialize().c_str());
 }
 
@@ -1612,47 +1612,186 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_closeJni(JNIEnv* env, 
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMultisigInfoJni(JNIEnv* env, jobject instance) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_getMultisigInfoJni");
-  throw runtime_error("Java_monero_wallet_MoneroWalletJni_getMultisigInfoJni to implemented");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    monero_multisig_info info = wallet->get_multisig_info();
+    return env->NewStringUTF(info.serialize().c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_makeMultisigJni(JNIEnv* env, jobject instance, jobjectArray multisigHexes, jint threshold, jstring password) {
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_makeMultisigJni(JNIEnv* env, jobject instance, jobjectArray jmultisig_hexes, jint threshold, jstring jpassword) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_makeMultisigJni");
-  throw runtime_error("Java_monero_wallet_MoneroWalletJni_makeMultisigJni to implemented");
+
+  // get multisig hex as vector<string>
+  vector<string> multisig_hexes;
+  if (jmultisig_hexes != nullptr) {
+    jsize size = env->GetArrayLength(jmultisig_hexes);
+    for (int idx = 0; idx < size; idx++) {
+      jstring jstr = (jstring) env->GetObjectArrayElement(jmultisig_hexes, idx);
+      multisig_hexes.push_back(env->GetStringUTFChars(jstr, NULL));
+    }
+  }
+
+  // get password as string
+  const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
+  string password = string(_password ? _password : "");
+  env->ReleaseStringUTFChars(jpassword, _password);
+
+  // make the wallet multisig and return result
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    monero_multisig_init_result result = wallet->make_multisig(multisig_hexes, threshold, password);
+    return env->NewStringUTF(result.serialize().c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_prepareMultisigJni(JNIEnv* env, jobject instance) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_prepareMultisigJni");
-  throw runtime_error("Java_monero_wallet_MoneroWalletJni_prepareMultisigJni to implemented");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    string multisig_hex = wallet->prepare_multisig();
+    return env->NewStringUTF(multisig_hex.c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_finalizeMultisigJni(JNIEnv* env, jobject instance, jobjectArray multisigHexes, jstring password) {
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_finalizeMultisigJni(JNIEnv* env, jobject instance, jobjectArray jmultisig_hexes, jstring jpassword) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_finalizeMultisigJni");
-  throw runtime_error("Java_monero_wallet_MoneroWalletJni_finalizeMultisigJni to implemented");
+
+  // get multisig hex as vector<string>
+  vector<string> multisig_hexes;
+  if (jmultisig_hexes != nullptr) {
+    jsize size = env->GetArrayLength(jmultisig_hexes);
+    for (int idx = 0; idx < size; idx++) {
+      jstring jstr = (jstring) env->GetObjectArrayElement(jmultisig_hexes, idx);
+      multisig_hexes.push_back(env->GetStringUTFChars(jstr, NULL));
+    }
+  }
+
+  // get password as string
+  const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
+  string password = string(_password ? _password : "");
+  env->ReleaseStringUTFChars(jpassword, _password);
+
+  // finalize the multisig wallet and return the wallet's multisig address
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    string address = wallet->finalize_multisig(multisig_hexes, password);
+    return env->NewStringUTF(address.c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_exchangeMultisigKeysJni(JNIEnv* env, jobject instance, jobjectArray multisigHexes, jstring password) {
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_exchangeMultisigKeysJni(JNIEnv* env, jobject instance, jobjectArray jmultisig_hexes, jstring jpassword) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_exchangeMultisigKeysJni");
-  throw runtime_error("Java_monero_wallet_MoneroWalletJni_exchangeMultisigKeysJni to implemented");
+
+  // get multisig hex as vector<string>
+  vector<string> multisig_hexes;
+  if (jmultisig_hexes != nullptr) {
+    jsize size = env->GetArrayLength(jmultisig_hexes);
+    for (int idx = 0; idx < size; idx++) {
+      jstring jstr = (jstring) env->GetObjectArrayElement(jmultisig_hexes, idx);
+      multisig_hexes.push_back(env->GetStringUTFChars(jstr, NULL));
+    }
+  }
+
+  // get password as string
+  const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
+  string password = string(_password ? _password : "");
+  env->ReleaseStringUTFChars(jpassword, _password);
+
+  // import peer multisig keys and export result with address xor multisig hex for next round
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    monero_multisig_init_result result = wallet->exchange_multisig_keys(multisig_hexes, password);
+    return env->NewStringUTF(result.serialize().c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMultisigHexJni(JNIEnv* env, jobject instance) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_getMultisigHexJni");
-  throw runtime_error("Java_monero_wallet_MoneroWalletJni_getMultisigHexJni to implemented");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    string multisig_hex = wallet->get_multisig_hex();
+    return env->NewStringUTF(multisig_hex.c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
 }
 
-JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_importMultisigHexJni(JNIEnv* env, jobject instance, jobjectArray multisigHexes) {
+JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_importMultisigHexJni(JNIEnv* env, jobject instance, jobjectArray jmultisig_hexes) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_importMultisigHexJni");
-  throw runtime_error("Java_monero_wallet_MoneroWalletJni_importMultisigHexJni to implemented");
+
+  // get peer multisig hex as vector<string>
+  vector<string> multisig_hexes;
+  if (jmultisig_hexes != nullptr) {
+    jsize size = env->GetArrayLength(jmultisig_hexes);
+    for (int idx = 0; idx < size; idx++) {
+      jstring jstr = (jstring) env->GetObjectArrayElement(jmultisig_hexes, idx);
+      multisig_hexes.push_back(env->GetStringUTFChars(jstr, NULL));
+    }
+  }
+
+  // import peer multisig hex and return the number of outputs they signed
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    int num_outputs = wallet->import_multisig_hex(multisig_hexes);
+    return num_outputs;
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signMultisigTxHexJni(JNIEnv* env, jobject instance, jstring multisigTxHex) {
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signMultisigTxHexJni(JNIEnv* env, jobject instance, jstring jmultisig_tx_hex) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_signMultisigTxHexJni");
-  throw runtime_error("Java_monero_wallet_MoneroWalletJni_signMultisigTxHexJni to implemented");
+
+  // get multisig tx hex as string
+  const char* _multisig_tx_hex = jmultisig_tx_hex ? env->GetStringUTFChars(jmultisig_tx_hex, NULL) : nullptr;
+  string multisig_tx_hex = string(_multisig_tx_hex ? _multisig_tx_hex : "");
+  env->ReleaseStringUTFChars(jmultisig_tx_hex, _multisig_tx_hex);
+
+  // sign multisig tx hex and return result
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    monero_multisig_sign_result result = wallet->sign_multisig_tx_hex(multisig_tx_hex);
+    return env->NewStringUTF(result.serialize().c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
-JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_submitMultisigTxHexJni(JNIEnv* env, jobject instance, jstring signedMultisigTxHex) {
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_submitMultisigTxHexJni(JNIEnv* env, jobject instance, jstring jsigned_multisig_tx_hex) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_submitMultisigTxHexJni");
-  throw runtime_error("Java_monero_wallet_MoneroWalletJni_submitMultisigTxHexJni to implemented");
+
+  // get signed multisig tx hex as string
+  const char* _signed_multisig_tx_hex = jsigned_multisig_tx_hex ? env->GetStringUTFChars(jsigned_multisig_tx_hex, NULL) : nullptr;
+  string signed_multisig_tx_hex = string(_signed_multisig_tx_hex ? _signed_multisig_tx_hex : "");
+  env->ReleaseStringUTFChars(jsigned_multisig_tx_hex, _signed_multisig_tx_hex);
+
+  // submit signed multisig tx hex and return the resulting tx ids
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    vector<string> tx_ids = wallet->submit_multisig_tx_hex(signed_multisig_tx_hex);
+    jobjectArray jtx_ids = env->NewObjectArray(tx_ids.size(), env->FindClass("java/lang/String"), nullptr);
+    for (int i = 0; i < tx_ids.size(); i++) env->SetObjectArrayElement(jtx_ids, i, env->NewStringUTF(tx_ids[i].c_str()));
+    return jtx_ids;
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
 #ifdef __cplusplus
