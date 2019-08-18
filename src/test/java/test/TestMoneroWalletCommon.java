@@ -2607,11 +2607,10 @@ public abstract class TestMoneroWalletCommon {
   
   // Can support multisig wallets
   @Test
-  @Ignore
   public void testMultisig() {
     
     // test n/n
-//    testMultisig(2, 2, false);
+    testMultisig(2, 2, true);
     //testMultisig(3, 3, false);
     //testMultisig(4, 4, false);
     
@@ -2629,7 +2628,7 @@ public abstract class TestMoneroWalletCommon {
   private void testMultisig(int m, int n, boolean testTx) {
     System.out.println("testMultisig(" + m + ", " + n + ")");
     
-    wallet.close();
+    //wallet.close();
     
     // create n wallets and prepare multisig hexes
     List<String> preparedMultisigHexes = new ArrayList<String>();
