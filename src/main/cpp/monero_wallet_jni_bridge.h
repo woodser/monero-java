@@ -108,6 +108,8 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_startSyncing(JNIEnv *,
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_stopSyncing(JNIEnv *, jobject);
 
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_rescanSpentJni(JNIEnv *, jobject);
+
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_rescanBlockchainJni(JNIEnv *, jobject);
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni(JNIEnv *, jobject);

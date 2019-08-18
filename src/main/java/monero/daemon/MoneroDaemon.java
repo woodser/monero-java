@@ -57,7 +57,7 @@ import monero.daemon.model.MoneroTxPoolStats;
 public interface MoneroDaemon {
   
   /**
-   * Indicates if the daemon is trusted xor untrusted.
+   * Indicates if the daemon is trusted or untrusted.
    * 
    * @return true if the daemon is trusted, false otherwise
    */
