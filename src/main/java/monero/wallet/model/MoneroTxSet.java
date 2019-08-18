@@ -27,7 +27,7 @@ public class MoneroTxSet {
   private String unsignedTxHex;
   private String multisigTxHex;
   
-  @JsonManagedReference
+  @JsonManagedReference("tx_set")
   public List<MoneroTx> getTxs() {
     return txs;
   }

@@ -7,6 +7,7 @@ add multisig model and sample code to taming monero: the hidden model
 update model: multisig methods and models, rescan_spent()  
 open issue: investigate integration of this library into Bisq
 add getIncomingTransfers(), getOutgoingTransfers() convenience methods
+daemon.getNextBlockHeader() sometimes hangs
 new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
 tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
 rpc wallet listener
@@ -62,12 +63,7 @@ JAVASCRIPT LIBRARY ISSUES
 implement remaining binary calls in daemon RPC
 support client-side binding to Monero Core wallet using wasm
 support MyMonero adapter
-
-C++ LIBRARY ISSUES
-automate build, reference Monerujo
-support MyMonero adapter
-build test suite for C++ library
-RPC 2.0 reference implementation based on this library's API
+support multisig through the rpc interface
 
 BIG PICTURE
 open library issues

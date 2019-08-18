@@ -60,7 +60,7 @@ public class MoneroBlock extends MoneroBlockHeader {
     return this;
   }
   
-  @JsonManagedReference
+  @JsonManagedReference("block_txs")
   public List<MoneroTx> getTxs() {
     return txs;
   }

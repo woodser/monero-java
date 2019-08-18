@@ -18,7 +18,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import common.types.Pair;
-import common.utils.JsonUtils;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroNetworkType;
@@ -67,14 +66,20 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   protected Pair<MoneroWallet, String> createRandomWallet() {
     Pair<MoneroWallet, String> pair = new Pair<MoneroWallet, String>(null, TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString());
-    MoneroWallet wallet = MoneroWalletJni.createWalletRandom(pair.getSecond(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
+    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(pair.getSecond(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
+    System.out.println(wallet.getNetworkType());
+    wallet.sync();
+//    wallet.startSyncing();
     pair.setFirst(wallet);
     return pair;
   }
 
   @Override
   protected MoneroWallet openWallet(String path) {
-    MoneroWallet wallet = MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
+    MoneroWalletJni wallet = MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
+    System.out.println(wallet.getNetworkType());
+    wallet.sync();
+//    wallet.startSyncing();
     return wallet;
   }
   
@@ -83,6 +88,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   /**
    * This test demonstrates that importing key images erases incoming transfers.
    */
+  @Ignore // TODO monero-core: fix this https://github.com/monero-project/monero/issues/5812
   @Test
   public void testImportKeyImagesAndTransfers() {
     MoneroWalletJni wallet = null; // create a wallet for this test since it becomes corrupt TODO: use common wallet and move to common tests when fixed

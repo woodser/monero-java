@@ -123,7 +123,7 @@ public class MoneroTx {
     return new MoneroTx(this);
   }
   
-  @JsonBackReference
+  @JsonBackReference("block_txs")
   public MoneroBlock getBlock() {
     return block;
   }
@@ -378,6 +378,7 @@ public class MoneroTx {
     return this;
   }
   
+  @JsonBackReference("tx_set")
   public MoneroTxSet getTxSet() {
     return txSet;
   }
