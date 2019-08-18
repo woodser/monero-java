@@ -65,7 +65,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
   @Override
   protected Pair<MoneroWallet, String> createRandomWallet() {
-    Pair<MoneroWallet, String> pair = new Pair<MoneroWallet, String>(null, UUID.randomUUID().toString());
+    Pair<MoneroWallet, String> pair = new Pair<MoneroWallet, String>(null, TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString());
     MoneroWallet wallet = MoneroWalletJni.createWalletRandom(pair.getSecond(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
     pair.setFirst(wallet);
     return pair;
