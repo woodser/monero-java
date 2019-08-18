@@ -3,6 +3,7 @@ open library issues
 open monero core issues
 add multisig support
 test multisig with transfer and other sends
+jni sweepAllUnlocked()
 add multisig model and sample code to taming monero: the hidden model
 update model: multisig methods and models, rescan_spent()  
 open issue: investigate integration of this library into Bisq
