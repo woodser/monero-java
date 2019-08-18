@@ -902,6 +902,5 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Override
   public void testMultisig() {
     super.testMultisig();
-    wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
   }
 }

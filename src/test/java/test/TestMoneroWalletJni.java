@@ -18,6 +18,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import common.types.Pair;
+import common.utils.JsonUtils;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroNetworkType;
@@ -66,14 +67,15 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   protected Pair<MoneroWallet, String> createRandomWallet() {
     Pair<MoneroWallet, String> pair = new Pair<MoneroWallet, String>(null, TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString());
-    MoneroWallet wallet = MoneroWalletJni.createWalletRandom(pair.getSecond(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
+    MoneroWallet wallet = MoneroWalletJni.createWalletRandom(pair.getSecond(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
     pair.setFirst(wallet);
     return pair;
   }
 
   @Override
   protected MoneroWallet openWallet(String path) {
-    return MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
+    MoneroWallet wallet = MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
+    return wallet;
   }
   
   // --------------- DEMONSTRATION OF MONERO CORE ISSUES ----------------------
