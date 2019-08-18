@@ -184,17 +184,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   /**
-   * Rescan the blockchain for spent outputs.
-   */
-  public void rescanSpent() {
-    rpc.sendJsonRequest("rescan_spent");
-  }
-  
-  public void rescanBlockchain() {
-    rpc.sendJsonRequest("rescan_blockchain");
-  }
-  
-  /**
    * Save the currently open wallet file at the remote endpoint.
    */
   public void save() {
@@ -356,6 +345,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public long getDaemonHeight() {
     throw new MoneroException("monero-wallet-rpc does not support getting the chain height");
+  }
+  
+  @Override
+  public void rescanSpent() {
+    rpc.sendJsonRequest("rescan_spent");
+  }
+  
+  public void rescanBlockchain() {
+    rpc.sendJsonRequest("rescan_blockchain");
   }
 
   @Override

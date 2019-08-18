@@ -577,6 +577,16 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       throw new MoneroException(e.getMessage());
     }
   }
+  
+  @Override
+  public void rescanSpent() {
+    assertNotClosed();
+    try {
+      rescanSpentJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
 
   @Override
   public void rescanBlockchain() {
@@ -1236,6 +1246,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native void startSyncingJni();
   
   private native void stopSyncingJni();
+  
+  private native void rescanSpentJni();
   
   private native void rescanBlockchainJni();
   

@@ -2,7 +2,9 @@ HIGH
 open library issues
 open monero core issues
 add multisig support
+test multisig with transfer and other sends
 add multisig model and sample code to taming monero: the hidden model
+update model: multisig methods and models, rescan_spent()  
 open issue: investigate integration of this library into Bisq
 add getIncomingTransfers(), getOutgoingTransfers() convenience methods
 new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc

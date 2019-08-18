@@ -193,6 +193,17 @@ public interface MoneroWallet {
   public void startSyncing();
   
   /**
+   * Rescan the blockchain for spent outputs.
+   *
+   * Note: this can only be called with a trusted daemon.
+   *
+   * Example use case: peer multisig hex is import when connected to an untrusted daemon,
+   * so the wallet will not rescan spent outputs.  Then the wallet connects to a trusted
+   * daemon.  This method should be manually invoked to rescan outputs.
+   */
+  public void rescanSpent();
+  
+  /**
    * Rescan the blockchain from scratch, losing any information which cannot be recovered from
    * the blockchain itself.
    * 

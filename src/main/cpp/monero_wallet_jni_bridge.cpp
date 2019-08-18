@@ -677,6 +677,16 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_stopSyncingJni(JNIEnv 
   }
 }
 
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_rescanSpentJni(JNIEnv *env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_rescanSpentJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    wallet->rescan_spent();
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_rescanBlockchainJni(JNIEnv *env, jobject instance) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_rescanBlockchainJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
