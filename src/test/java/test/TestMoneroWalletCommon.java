@@ -2610,7 +2610,7 @@ public abstract class TestMoneroWalletCommon {
   public void testMultisig() {
     
     // test n/n
-    testMultisig(2, 2, false);
+//    testMultisig(2, 2, false);
     //testMultisig(3, 3, false);
     //testMultisig(4, 4, false);
     
@@ -2620,13 +2620,15 @@ public abstract class TestMoneroWalletCommon {
     //testMultisig(5, 6, false);
     
     // test m/n
-    testMultisig(2, 4, true);
+//    testMultisig(2, 4, true);
     //testMultisig(3, 5, false);
     //testMultisig(3, 7, false);
   }
   
   private void testMultisig(int m, int n, boolean testTx) {
     System.out.println("testMultisig(" + m + ", " + n + ")");
+    
+    //wallet.close();
     
     // create n wallets and prepare multisig hexes
     List<String> preparedMultisigHexes = new ArrayList<String>();
@@ -2636,6 +2638,10 @@ public abstract class TestMoneroWalletCommon {
       walletIds.add(pair.getSecond());
       MoneroWallet wallet = pair.getFirst();
       preparedMultisigHexes.add(wallet.prepareMultisig());
+      //System.out.println(wallet.prepareMultisig());
+      
+      wallet.save();
+      wallet.close();
     }
 
     // make wallets multisig
@@ -2655,6 +2661,11 @@ public abstract class TestMoneroWalletCommon {
       if (address == null) address = result.getAddress();
       else assertEquals(address, result.getAddress());
       madeMultisigHexes.add(result.getMultisigHex());
+      
+      wallet.save();
+      wallet.close();
+//      wallet.sync();
+//      wallet.startSyncing();
     }
     
     // handle (n-1)/n which uses finalize
@@ -2673,6 +2684,9 @@ public abstract class TestMoneroWalletCommon {
         String walletAddress = wallet.finalizeMultisig(peerMultisigHexes, TestUtils.WALLET_PASSWORD);
         if (address == null) address = walletAddress;
         else assertEquals(address, walletAddress);
+        
+//        wallet.save();
+//        wallet.close();
       }
     }
     

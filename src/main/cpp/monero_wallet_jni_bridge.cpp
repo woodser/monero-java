@@ -1203,7 +1203,10 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_relayTxsJni(JN
     jsize size = env->GetArrayLength(jtx_metadatas);
     for (int idx = 0; idx < size; idx++) {
       jstring jstr = (jstring) env->GetObjectArrayElement(jtx_metadatas, idx);
-      tx_metadatas.push_back(env->GetStringUTFChars(jstr, NULL));
+      const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
+      string str = string(_str ? _str : "");
+      env->ReleaseStringUTFChars(jstr, _str);
+      tx_metadatas.push_back(str);
     }
   }
 
@@ -1234,7 +1237,10 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getTxNotesJni(
     jsize size = env->GetArrayLength(jtx_ids);
     for (int idx = 0; idx < size; idx++) {
       jstring jstr = (jstring) env->GetObjectArrayElement(jtx_ids, idx);
-      tx_ids.push_back(env->GetStringUTFChars(jstr, NULL));
+      const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
+      string str = string(_str ? _str : "");
+      env->ReleaseStringUTFChars(jstr, _str);
+      tx_ids.push_back(str);
     }
   }
 
@@ -1265,7 +1271,10 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setTxNotesJni(JNIEnv* 
     jsize size = env->GetArrayLength(jtx_ids);
     for (int idx = 0; idx < size; idx++) {
       jstring jstr = (jstring) env->GetObjectArrayElement(jtx_ids, idx);
-      tx_ids.push_back(env->GetStringUTFChars(jstr, NULL));
+      const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
+      string str = string(_str ? _str : "");
+      env->ReleaseStringUTFChars(jstr, _str);
+      tx_ids.push_back(str);
     }
   }
 
@@ -1275,7 +1284,10 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setTxNotesJni(JNIEnv* 
     jsize size = env->GetArrayLength(jtx_notes);
     for (int idx = 0; idx < size; idx++) {
       jstring jstr = (jstring) env->GetObjectArrayElement(jtx_notes, idx);
-      notes.push_back(env->GetStringUTFChars(jstr, NULL));
+      const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
+      string str = string(_str ? _str : "");
+      env->ReleaseStringUTFChars(jstr, _str);
+      notes.push_back(str);
     }
   }
 
@@ -1632,6 +1644,18 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMultisigInfoJni(
   }
 }
 
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_prepareMultisigJni(JNIEnv* env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_prepareMultisigJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    string multisig_hex = wallet->prepare_multisig();
+    return env->NewStringUTF(multisig_hex.c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+}
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_makeMultisigJni(JNIEnv* env, jobject instance, jobjectArray jmultisig_hexes, jint threshold, jstring jpassword) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_makeMultisigJni");
 
@@ -1641,7 +1665,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_makeMultisigJni(JNI
     jsize size = env->GetArrayLength(jmultisig_hexes);
     for (int idx = 0; idx < size; idx++) {
       jstring jstr = (jstring) env->GetObjectArrayElement(jmultisig_hexes, idx);
-      multisig_hexes.push_back(env->GetStringUTFChars(jstr, NULL));
+      const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
+      string str = string(_str ? _str : "");
+      env->ReleaseStringUTFChars(jstr, _str);
+      multisig_hexes.push_back(str);
     }
   }
 
@@ -1661,18 +1688,6 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_makeMultisigJni(JNI
   }
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_prepareMultisigJni(JNIEnv* env, jobject instance) {
-  MTRACE("Java_monero_wallet_MoneroWalletJni_prepareMultisigJni");
-  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  try {
-    string multisig_hex = wallet->prepare_multisig();
-    return env->NewStringUTF(multisig_hex.c_str());
-  } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
-    return 0;
-  }
-}
-
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_finalizeMultisigJni(JNIEnv* env, jobject instance, jobjectArray jmultisig_hexes, jstring jpassword) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_finalizeMultisigJni");
 
@@ -1682,7 +1697,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_finalizeMultisigJni
     jsize size = env->GetArrayLength(jmultisig_hexes);
     for (int idx = 0; idx < size; idx++) {
       jstring jstr = (jstring) env->GetObjectArrayElement(jmultisig_hexes, idx);
-      multisig_hexes.push_back(env->GetStringUTFChars(jstr, NULL));
+      const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
+      string str = string(_str ? _str : "");
+      env->ReleaseStringUTFChars(jstr, _str);
+      multisig_hexes.push_back(str);
     }
   }
 
@@ -1711,7 +1729,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_exchangeMultisigKey
     jsize size = env->GetArrayLength(jmultisig_hexes);
     for (int idx = 0; idx < size; idx++) {
       jstring jstr = (jstring) env->GetObjectArrayElement(jmultisig_hexes, idx);
-      multisig_hexes.push_back(env->GetStringUTFChars(jstr, NULL));
+      const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
+      string str = string(_str ? _str : "");
+      env->ReleaseStringUTFChars(jstr, _str);
+      multisig_hexes.push_back(str);
     }
   }
 
@@ -1727,6 +1748,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_exchangeMultisigKey
     return env->NewStringUTF(result.serialize().c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
+    return 0;
   }
 }
 
@@ -1738,6 +1760,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMultisigHexJni(J
     return env->NewStringUTF(multisig_hex.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
+    return 0;
   }
 }
 
@@ -1750,7 +1773,10 @@ JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_importMultisigHexJni(J
     jsize size = env->GetArrayLength(jmultisig_hexes);
     for (int idx = 0; idx < size; idx++) {
       jstring jstr = (jstring) env->GetObjectArrayElement(jmultisig_hexes, idx);
-      multisig_hexes.push_back(env->GetStringUTFChars(jstr, NULL));
+      const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
+      string str = string(_str ? _str : "");
+      env->ReleaseStringUTFChars(jstr, _str);
+      multisig_hexes.push_back(str);
     }
   }
 
@@ -1761,6 +1787,7 @@ JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_importMultisigHexJni(J
     return num_outputs;
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
+    return 0;
   }
 }
 
