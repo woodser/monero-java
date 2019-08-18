@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Models the result of signing multisig tx hex.
  */
-public class MoneroSignMultisigResult {
+public class MoneroMultisigSignResult {
   
   private String signedMultisigTxHex;
   private List<String> txIds;
@@ -40,7 +40,7 @@ public class MoneroSignMultisigResult {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    MoneroSignMultisigResult other = (MoneroSignMultisigResult) obj;
+    MoneroMultisigSignResult other = (MoneroMultisigSignResult) obj;
     if (signedMultisigTxHex == null) {
       if (other.signedMultisigTxHex != null) return false;
     } else if (!signedMultisigTxHex.equals(other.signedMultisigTxHex)) return false;

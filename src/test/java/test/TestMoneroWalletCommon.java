@@ -44,7 +44,7 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
-import monero.wallet.model.MoneroInitMultisigResult;
+import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroMultisigInfo;
@@ -52,7 +52,7 @@ import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendRequest;
-import monero.wallet.model.MoneroSignMultisigResult;
+import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
@@ -2651,7 +2651,7 @@ public abstract class TestMoneroWalletCommon {
       for (int j = 0; j < walletIds.size(); j++) if (j != i) peerMultisigHexes.add(preparedMultisigHexes.get(j));
       
       // make the wallet multisig
-      MoneroInitMultisigResult result = wallet.makeMultisig(peerMultisigHexes, m, TestUtils.WALLET_PASSWORD);
+      MoneroMultisigInitResult result = wallet.makeMultisig(peerMultisigHexes, m, TestUtils.WALLET_PASSWORD);
       if (address == null) address = result.getAddress();
       else assertEquals(address, result.getAddress());
       madeMultisigHexes.add(result.getMultisigHex());
@@ -2699,7 +2699,7 @@ public abstract class TestMoneroWalletCommon {
           for (int k = 0; k < walletIds.size(); k++) if (k != j) peerMultisigHexes.add(prevMultisigHexes.get(k));
           
           // import the multisig hexes of the wallet's peers
-          MoneroInitMultisigResult result = wallet.exchangeMultisigKeys(peerMultisigHexes, TestUtils.WALLET_PASSWORD);
+          MoneroMultisigInitResult result = wallet.exchangeMultisigKeys(peerMultisigHexes, TestUtils.WALLET_PASSWORD);
           
           // test result
           if (i == n - m - 1) {  // result on last round has address and not multisig hex to share
@@ -2802,7 +2802,7 @@ public abstract class TestMoneroWalletCommon {
     // sign the tx with participants 1 through m - 1 to meet threshold
     for (int i = 1; i < m; i++) {
       curWallet = openWallet(walletIds.get(i));
-      MoneroSignMultisigResult result = curWallet.signMultisigTxHex(multisigTxHex);
+      MoneroMultisigSignResult result = curWallet.signMultisigTxHex(multisigTxHex);
       multisigTxHex = result.getSignedMultisigTxHex();
     }
     
