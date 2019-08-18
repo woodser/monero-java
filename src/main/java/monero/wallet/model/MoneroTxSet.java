@@ -90,15 +90,27 @@ public class MoneroTxSet {
 
     return this;
   }
+  
+  @Override
+  public String toString() {
+    return toString(0);
+  }
+  
+  public String toString(int indent) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(MoneroUtils.kvLine("Signed tx hex: ", getSignedTxHex(), indent));
+    sb.append(MoneroUtils.kvLine("Unsigned tx hex: ", getUnsignedTxHex(), indent));
+    sb.append(MoneroUtils.kvLine("Multisig tx hex: ", getMultisigTxHex(), indent));
+    return sb.toString();
+  }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((multisigTxHex == null) ? 0 : multisigTxHex.hashCode());
-    result = prime * result + ((signedTxHex == null) ? 0 : signedTxHex.hashCode());
-    result = prime * result + ((txs == null) ? 0 : txs.hashCode());
     result = prime * result + ((unsignedTxHex == null) ? 0 : unsignedTxHex.hashCode());
+    result = prime * result + ((multisigTxHex == null) ? 0 : multisigTxHex.hashCode());
     return result;
   }
 

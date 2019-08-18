@@ -162,6 +162,11 @@ public class MoneroSendRequest {
     return subaddressIndices;
   }
   
+  public MoneroSendRequest setSubaddressIndex(int subaddressIndex) {
+    setSubaddressIndices(subaddressIndex);
+    return this;
+  }
+  
   @JsonProperty("subaddressIndices")
   public MoneroSendRequest setSubaddressIndices(List<Integer> subaddressIndices) {
     this.subaddressIndices = subaddressIndices;
