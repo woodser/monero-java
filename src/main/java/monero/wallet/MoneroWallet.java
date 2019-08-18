@@ -34,13 +34,13 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
-import monero.wallet.model.MoneroInitMultisigResult;
+import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSendRequest;
-import monero.wallet.model.MoneroSignMultisigResult;
+import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
@@ -1052,7 +1052,7 @@ public interface MoneroWallet {
    * @password is the wallet password
    * @return the result which has the multisig's address xor this wallet's multisig hex to share with participants iff not N/N
    */
-  public MoneroInitMultisigResult makeMultisig(List<String> multisigHexes, int threshold, String password);
+  public MoneroMultisigInitResult makeMultisig(List<String> multisigHexes, int threshold, String password);
   
   /**
    * Finalize a N-1/N multisig wallet.
@@ -1074,7 +1074,7 @@ public interface MoneroWallet {
    * @param password is the wallet's password // TODO monero core: redundant? wallet is created with password
    * @return the result which has the multisig's address xor this wallet's multisig hex to share with participants iff not done
    */
-  public MoneroInitMultisigResult exchangeMultisigKeys(List<String> multisigHexes, String password);
+  public MoneroMultisigInitResult exchangeMultisigKeys(List<String> multisigHexes, String password);
   
   /**
    * Export this wallet's multisig info as hex for other participants.
@@ -1097,7 +1097,7 @@ public interface MoneroWallet {
    * @param multisigTxHex is the hex shared among the multisig transactions when they were created
    * @return the result of signing the multisig transactions
    */
-  public MoneroSignMultisigResult signMultisigTxHex(String multisigTxHex);
+  public MoneroMultisigSignResult signMultisigTxHex(String multisigTxHex);
   
   /**
    * Submit signed multisig transactions as represented by a hex string.

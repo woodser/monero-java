@@ -58,7 +58,7 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
-import monero.wallet.model.MoneroInitMultisigResult;
+import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroMultisigInfo;
@@ -66,7 +66,7 @@ import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendRequest;
-import monero.wallet.model.MoneroSignMultisigResult;
+import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
@@ -2070,14 +2070,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   @SuppressWarnings("unchecked")
-  public MoneroInitMultisigResult makeMultisig(List<String> multisigHexes, int threshold, String password) {
+  public MoneroMultisigInitResult makeMultisig(List<String> multisigHexes, int threshold, String password) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("multisig_info", multisigHexes);
     params.put("threshold", threshold);
     params.put("password", password);
     Map<String, Object> resp = rpc.sendJsonRequest("make_multisig", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    MoneroInitMultisigResult msResult = new MoneroInitMultisigResult();
+    MoneroMultisigInitResult msResult = new MoneroMultisigInitResult();
     msResult.setAddress((String) result.get("address"));
     msResult.setMultisigHex((String) result.get("multisig_info"));
     if (msResult.getAddress().isEmpty()) msResult.setAddress(null);
@@ -2099,13 +2099,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   @SuppressWarnings("unchecked")
-  public MoneroInitMultisigResult exchangeMultisigKeys(List<String> multisigHexes, String password) {
+  public MoneroMultisigInitResult exchangeMultisigKeys(List<String> multisigHexes, String password) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("multisig_info", multisigHexes);
     params.put("password", password);
     Map<String, Object> resp = rpc.sendJsonRequest("exchange_multisig_keys", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    MoneroInitMultisigResult msResult = new MoneroInitMultisigResult();
+    MoneroMultisigInitResult msResult = new MoneroMultisigInitResult();
     msResult.setAddress((String) result.get("address"));
     msResult.setMultisigHex((String) result.get("multisig_info"));
     if (msResult.getAddress().isEmpty()) msResult.setAddress(null);
@@ -2133,12 +2133,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   @SuppressWarnings("unchecked")
-  public MoneroSignMultisigResult signMultisigTxHex(String multisigTxHex) {
+  public MoneroMultisigSignResult signMultisigTxHex(String multisigTxHex) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("tx_data_hex", multisigTxHex);
     Map<String, Object> resp = rpc.sendJsonRequest("sign_multisig", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    MoneroSignMultisigResult signResult = new MoneroSignMultisigResult();
+    MoneroMultisigSignResult signResult = new MoneroMultisigSignResult();
     signResult.setSignedMultisigTxHex((String) result.get("tx_data_hex"));
     signResult.setTxIds((List<String>) result.get("tx_hash_list"));
     return signResult;

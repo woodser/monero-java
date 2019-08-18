@@ -5,7 +5,7 @@ package monero.wallet.model;
  * multisig wallet's address xor another multisig hex to share with
  * participants to create the wallet.
  */
-public class MoneroInitMultisigResult {
+public class MoneroMultisigInitResult {
 
   private String address;
   private String multisigHex;

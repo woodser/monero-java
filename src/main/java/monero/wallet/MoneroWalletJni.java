@@ -52,14 +52,14 @@ import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIncomingTransfer;
-import monero.wallet.model.MoneroInitMultisigResult;
+import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendRequest;
-import monero.wallet.model.MoneroSignMultisigResult;
+import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
@@ -1571,10 +1571,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public MoneroInitMultisigResult makeMultisig(List<String> multisigHexes, int threshold, String password) {
+  public MoneroMultisigInitResult makeMultisig(List<String> multisigHexes, int threshold, String password) {
     try {
       String initMultisigResultJson = makeMultisigJni(multisigHexes, threshold, password);
-      return JsonUtils.deserialize(initMultisigResultJson, MoneroInitMultisigResult.class);
+      return JsonUtils.deserialize(initMultisigResultJson, MoneroMultisigInitResult.class);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -1590,10 +1590,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public MoneroInitMultisigResult exchangeMultisigKeys(List<String> multisigHexes, String password) {
+  public MoneroMultisigInitResult exchangeMultisigKeys(List<String> multisigHexes, String password) {
     try {
       String initMultisigResultJson = exchangeMultisigKeysJni(multisigHexes, password);
-      return JsonUtils.deserialize(initMultisigResultJson, MoneroInitMultisigResult.class);
+      return JsonUtils.deserialize(initMultisigResultJson, MoneroMultisigInitResult.class);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -1618,10 +1618,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public MoneroSignMultisigResult signMultisigTxHex(String multisigTxHex) {
+  public MoneroMultisigSignResult signMultisigTxHex(String multisigTxHex) {
     try {
       String signMultisigResultJson = signMultisigTxHexJni(multisigTxHex);
-      return JsonUtils.deserialize(signMultisigResultJson, MoneroSignMultisigResult.class);
+      return JsonUtils.deserialize(signMultisigResultJson, MoneroMultisigSignResult.class);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
