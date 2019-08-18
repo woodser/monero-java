@@ -1610,6 +1610,51 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_closeJni(JNIEnv* env, 
   wallet = nullptr;
 }
 
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMultisigInfoJni(JNIEnv* env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getMultisigInfoJni");
+  throw runtime_error("Java_monero_wallet_MoneroWalletJni_getMultisigInfoJni to implemented");
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_makeMultisigJni(JNIEnv* env, jobject instance, jobjectArray multisigHexes, jint threshold, jstring password) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_makeMultisigJni");
+  throw runtime_error("Java_monero_wallet_MoneroWalletJni_makeMultisigJni to implemented");
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_prepareMultisigJni(JNIEnv* env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_prepareMultisigJni");
+  throw runtime_error("Java_monero_wallet_MoneroWalletJni_prepareMultisigJni to implemented");
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_finalizeMultisigJni(JNIEnv* env, jobject instance, jobjectArray multisigHexes, jstring password) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_finalizeMultisigJni");
+  throw runtime_error("Java_monero_wallet_MoneroWalletJni_finalizeMultisigJni to implemented");
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_exchangeMultisigKeysJni(JNIEnv* env, jobject instance, jobjectArray multisigHexes, jstring password) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_exchangeMultisigKeysJni");
+  throw runtime_error("Java_monero_wallet_MoneroWalletJni_exchangeMultisigKeysJni to implemented");
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMultisigHexJni(JNIEnv* env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getMultisigHexJni");
+  throw runtime_error("Java_monero_wallet_MoneroWalletJni_getMultisigHexJni to implemented");
+}
+
+JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_importMultisigHexJni(JNIEnv* env, jobject instance, jobjectArray multisigHexes) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_importMultisigHexJni");
+  throw runtime_error("Java_monero_wallet_MoneroWalletJni_importMultisigHexJni to implemented");
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signMultisigTxHexJni(JNIEnv* env, jobject instance, jstring multisigTxHex) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_signMultisigTxHexJni");
+  throw runtime_error("Java_monero_wallet_MoneroWalletJni_signMultisigTxHexJni to implemented");
+}
+
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_submitMultisigTxHexJni(JNIEnv* env, jobject instance, jstring signedMultisigTxHex) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_submitMultisigTxHexJni");
+  throw runtime_error("Java_monero_wallet_MoneroWalletJni_submitMultisigTxHexJni to implemented");
+}
+
 #ifdef __cplusplus
 }
 #endif

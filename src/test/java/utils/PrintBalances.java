@@ -22,11 +22,15 @@ public class PrintBalances {
   }
   
   public static void printBalances() {
+    printBalances(null);
+  }
+  
+  public static void printBalances(MoneroWallet wallet) {
     
     // collect info about subaddresses
     List<Pair<String, List<Object>>> pairs = new ArrayList<Pair<String, List<Object>>>();
-    //MoneroWallet wallet = TestUtils.getWalletRpc();
-    MoneroWallet wallet = TestUtils.getWalletJni();
+    if (wallet == null) wallet = TestUtils.getWalletRpc();
+    //if (wallet == null) wallet = TestUtils.getWalletJni();
     BigInteger balance = wallet.getBalance();
     BigInteger unlockedBalance = wallet.getUnlockedBalance();
     List<MoneroAccount> accounts = wallet.getAccounts(true);

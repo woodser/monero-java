@@ -73,6 +73,7 @@ import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxQuery;
+import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 
 /**
@@ -1669,25 +1670,35 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<BigInteger> amounts = (List<BigInteger>) rpcTxs.get("amount_list");
     
     // ensure all lists are the same size
-    Set<Integer> sizes = new HashSet<Integer>(Arrays.asList(ids.size(), blobs.size(), metadatas.size(), fees.size(), amounts.size()));
+    Set<Integer> sizes = new HashSet<Integer>(Arrays.asList(fees.size(), amounts.size()));
+    if (ids != null) sizes.add(ids.size());
+    if (keys != null) sizes.add(keys.size());
+    if (blobs != null) sizes.add(blobs.size());
+    if (metadatas != null) sizes.add(metadatas.size());
     assertEquals("RPC lists are different sizes", 1, sizes.size());
     
-    // pre-initialize txs if necessary
+    // pre-initialize txs if not given
     if (txs == null) {
       txs = new ArrayList<MoneroTxWallet>();
-      for (int i = 0; i < ids.size(); i++) txs.add(new MoneroTxWallet());
+      for (int i = 0; i < fees.size(); i++) txs.add(new MoneroTxWallet());
     }
+
+    // build shared tx set information
+    MoneroTxSet txSet = new MoneroTxSet();
+    txSet.setMultisigTxHex((String) rpcTxs.get("multisig_txset"));
+    txSet.setUnsignedTxHex((String) rpcTxs.get("unsigned_txset"));
     
     // build transactions
-    for (int i = 0; i < ids.size(); i++) {
+    for (int i = 0; i < fees.size(); i++) {
       MoneroTxWallet tx = txs.get(i);
-      tx.setId(ids.get(i));
+      if (ids != null) tx.setId(ids.get(i));
       if (keys != null) tx.setKey(keys.get(i));
-      tx.setFullHex(blobs.get(i));
-      tx.setMetadata(metadatas.get(i));
+      if (blobs != null) tx.setFullHex(blobs.get(i));
+      if (metadatas != null) tx.setMetadata(metadatas.get(i));
       tx.setFee((BigInteger) fees.get(i));
       if (tx.getOutgoingTransfer() != null) tx.getOutgoingTransfer().setAmount((BigInteger) amounts.get(i));
       else tx.setOutgoingTransfer(new MoneroOutgoingTransfer().setTx(tx).setAmount((BigInteger) amounts.get(i)));
+      tx.setTxSet(txSet);
     }
     return txs;
   }

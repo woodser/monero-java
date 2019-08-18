@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
+import common.utils.JsonUtils;
 import monero.utils.MoneroUtils;
 import monero.wallet.model.MoneroTxSet;
 
@@ -655,7 +656,7 @@ public class MoneroTx {
     sb.append(MoneroUtils.kvLine("Weight", getWeight(), indent));
     sb.append(MoneroUtils.kvLine("Output indices", getOutputIndices(), indent));
     sb.append(MoneroUtils.kvLine("Metadata", getMetadata(), indent));
-    sb.append(MoneroUtils.kvLine("Common tx sets", getTxSet(), indent));
+    sb.append(MoneroUtils.kvLine("Tx sets", JsonUtils.serialize(getTxSet()), indent));
     sb.append(MoneroUtils.kvLine("Extra", Arrays.toString(getExtra()), indent));
     sb.append(MoneroUtils.kvLine("RCT signatures", getRctSignatures(), indent));
     sb.append(MoneroUtils.kvLine("RCT sig prunable", getRctSigPrunable(), indent));

@@ -198,6 +198,24 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_moveToJni(JNIEnv *, jo
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_closeJni(JNIEnv *, jobject);
 
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMultisigInfoJni(JNIEnv *, jobject);
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_makeMultisigJni(JNIEnv *, jobject, jobjectArray, jint, jstring);
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_prepareMultisigJni(JNIEnv *, jobject);
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_finalizeMultisigJni(JNIEnv *, jobject, jobjectArray, jstring);
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_exchangeMultisigKeysJni(JNIEnv *, jobject, jobjectArray, jstring);
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMultisigHexJni(JNIEnv *, jobject);
+
+JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_importMultisigHexJni(JNIEnv *, jobject, jobjectArray);
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signMultisigTxHexJni(JNIEnv *, jobject, jstring);
+
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_submitMultisigTxHexJni(JNIEnv *, jobject, jstring);
+
 #ifdef __cplusplus
 }
 #endif
