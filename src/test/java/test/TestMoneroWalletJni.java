@@ -1580,16 +1580,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testSetTransactionNote() {
-    super.testSetTransactionNote();
-  }
-
-  @Override
-  public void testSetTransactionNotes() {
-    super.testSetTransactionNotes();
-  }
-
-  @Override
   public void testCheckTxKey() {
     super.testCheckTxKey();
   }
@@ -1612,6 +1602,16 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   public void testGetReserveProofAccount() {
     super.testGetReserveProofAccount();
+  }
+
+  @Override
+  public void testSetTransactionNote() {
+    super.testSetTransactionNote();
+  }
+
+  @Override
+  public void testSetTransactionNotes() {
+    super.testSetTransactionNotes();
   }
 
   @Override

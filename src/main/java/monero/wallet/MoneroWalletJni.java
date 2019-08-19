@@ -971,40 +971,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public List<String> getTxNotes(Collection<String> txIds) {
-    assertNotClosed();
-    return Arrays.asList(getTxNotesJni(txIds.toArray(new String[txIds.size()])));  // convert to array for jni
-  }
-
-  @Override
-  public void setTxNotes(Collection<String> txIds, Collection<String> notes) {
-    assertNotClosed();
-    setTxNotesJni(txIds.toArray(new String[txIds.size()]), notes.toArray(new String[notes.size()]));
-  }
-
-  @Override
-  public String sign(String msg) {
-    assertNotClosed();
-    return signJni(msg);
-  }
-
-  @Override
-  public boolean verify(String msg, String address, String signature) {
-    assertNotClosed();
-    return verifyJni(msg, address, signature);
-  }
-
-  @Override
-  public String getTxKey(String txId) {
-    assertNotClosed();
-    try {
-      return getTxKeyJni(txId);
-    } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
-    }
-  }
-
-  @Override
   public MoneroCheckTx checkTxKey(String txId, String txKey, String address) {
     assertNotClosed();
     try {
@@ -1084,6 +1050,40 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     } catch (Exception e) {
       throw new MoneroException(e.getMessage(), -1);
     }
+  }
+
+  @Override
+  public String sign(String msg) {
+    assertNotClosed();
+    return signJni(msg);
+  }
+
+  @Override
+  public boolean verify(String msg, String address, String signature) {
+    assertNotClosed();
+    return verifyJni(msg, address, signature);
+  }
+
+  @Override
+  public String getTxKey(String txId) {
+    assertNotClosed();
+    try {
+      return getTxKeyJni(txId);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
+
+  @Override
+  public List<String> getTxNotes(Collection<String> txIds) {
+    assertNotClosed();
+    return Arrays.asList(getTxNotesJni(txIds.toArray(new String[txIds.size()])));  // convert to array for jni
+  }
+
+  @Override
+  public void setTxNotes(Collection<String> txIds, Collection<String> notes) {
+    assertNotClosed();
+    setTxNotesJni(txIds.toArray(new String[txIds.size()]), notes.toArray(new String[notes.size()]));
   }
 
   @Override

@@ -34,19 +34,20 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
-import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroMultisigInfo;
+import monero.wallet.model.MoneroMultisigInitResult;
+import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSendRequest;
-import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxQuery;
+import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 
 /**
@@ -535,9 +536,9 @@ public interface MoneroWallet {
    * given request.  The transaction may be relayed later.
    * 
    * @param request configures the transaction to create
-   * @return the created transaction
+   * @return a tx set for the requested transaction if possible
    */
-  public MoneroTxWallet createTx(MoneroSendRequest request);
+  public MoneroTxSet createTx(MoneroSendRequest request);
   
   /**
    * Create a transaction to transfers funds from this wallet to a destination address.
@@ -546,9 +547,9 @@ public interface MoneroWallet {
    * @param accountIndex is the index of the account to withdraw funds from
    * @param address is the destination address to send funds to
    * @param amount is the amount being sent
-   * @return the resulting transaction
+   * @return a tx set for the requested transaction if possible
    */
-  public MoneroTxWallet createTx(int accountIndex, String address, BigInteger amount);
+  public MoneroTxSet createTx(int accountIndex, String address, BigInteger amount);
   
   /**
    * Create a transaction to transfers funds from this wallet to a destination address.
@@ -558,18 +559,18 @@ public interface MoneroWallet {
    * @param address is the destination address to send funds to
    * @param amount is the amount being sent
    * @param priority is the send priority (default normal)
-   * @return the resulting transaction
+   * @return a tx set for the requested transaction if possible
    */
-  public MoneroTxWallet createTx(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
+  public MoneroTxSet createTx(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
   
   /**
    * Create one or more transactions to transfer funds from this wallet
    * according to the given request.  The transactions may later be relayed.
    * 
    * @param request configures the transactions to create
-   * @return the created transactions
+   * @return a tx set for the requested transactions if possible
    */
-  public List<MoneroTxWallet> createTxs(MoneroSendRequest request);
+  public MoneroTxSet createTxs(MoneroSendRequest request);
   
   /**
    * Relay a previously created transaction.
@@ -608,9 +609,9 @@ public interface MoneroWallet {
    * according to the given request.
    * 
    * @param request configures the transaction
-   * @return the resulting transaction
+   * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxWallet send(MoneroSendRequest request);
+  public MoneroTxSet send(MoneroSendRequest request);
   
   /**
    * Create and relay a transaction to transfers funds from this wallet to
@@ -619,9 +620,9 @@ public interface MoneroWallet {
    * @param accountIndex is the index of the account to withdraw funds from
    * @param address is the destination address to send funds to
    * @param amount is the amount being sent
-   * @return the resulting transaction
+   * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxWallet send(int accountIndex, String address, BigInteger amount);
+  public MoneroTxSet send(int accountIndex, String address, BigInteger amount);
   
   /**
    * Create and relay a transaction to transfers funds from this wallet to
@@ -631,18 +632,18 @@ public interface MoneroWallet {
    * @param address is the destination address to send funds to
    * @param amount is the amount being sent
    * @param priority is the send priority (default normal)
-   * @return the resulting transaction
+   * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxWallet send(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
+  public MoneroTxSet send(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
   
   /**
    * Create and relay one or more transactions to transfer funds from this
    * wallet according to the given request.
    * 
    * @param request configures the transactions
-   * @return the resulting transactions
+   * @return a tx set with the requested transaction if possible
    */
-  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request);
+  public MoneroTxSet sendSplit(MoneroSendRequest request);
   
   /**
    * Create and relay one or more transactions which transfer funds from this
@@ -651,9 +652,9 @@ public interface MoneroWallet {
    * @param accountIndex is the index of the account to withdraw funds from
    * @param address is the destination address to send funds to
    * @param amount is the amount being sent
-   * @return the resulting transactions
+   * @return a tx set with the requested transaction if possible
    */
-  public List<MoneroTxWallet> sendSplit(int accountIndex, String address, BigInteger amount);
+  public MoneroTxSet sendSplit(int accountIndex, String address, BigInteger amount);
   
   /**
    * Create and relay one or more transactions to transfer funds from this
@@ -663,26 +664,26 @@ public interface MoneroWallet {
    * @param address is the destination address to send funds to
    * @param amount is the amount being sent
    * @param priority is the send priority (default normal)
-   * @return the resulting transactions
+   * @return a tx set with the requested transaction if possible
    */
-  public List<MoneroTxWallet> sendSplit(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
+  public MoneroTxSet sendSplit(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
   
   /**
    * Sweep an output with a given key image.
    * 
    * @param request configures the sweep transaction
-   * @return the resulting transaction from sweeping an output 
+   * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxWallet sweepOutput(MoneroSendRequest request);
+  public MoneroTxSet sweepOutput(MoneroSendRequest request);
   
   /**
    * Sweep an output with a given key image.
    * 
    * @param address is the destination address to send to
    * @param keyImage is the key image hex of the output to sweep
-   * @return the resulting transaction from sweeping an output 
+   * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxWallet sweepOutput(String address, String keyImage);
+  public MoneroTxSet sweepOutput(String address, String keyImage);
   
   /**
    * Sweep an output with a given key image.
@@ -690,9 +691,9 @@ public interface MoneroWallet {
    * @param address is the destination address to send to
    * @param keyImage is the key image hex of the output to sweep
    * @param priority is the transaction priority (optional)
-   * @return the resulting transaction from sweeping an output 
+   * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxWallet sweepOutput(String address, String keyImage, MoneroSendPriority priority);
+  public MoneroTxSet sweepOutput(String address, String keyImage, MoneroSendPriority priority);
   
   /**
    * Sweep a subaddress's unlocked funds to an address.
@@ -700,83 +701,51 @@ public interface MoneroWallet {
    * @param accountIdx is the index of the account
    * @param subaddressIdx is the index of the subaddress
    * @param address is the address to sweep the subaddress's funds to
-   * @return the resulting transactions
+   * @return a tx set with the requested transactions if possible
    */
-  public List<MoneroTxWallet> sweepSubaddress(int accountIdx, int subaddressIdx, String address);
+  public MoneroTxSet sweepSubaddress(int accountIdx, int subaddressIdx, String address);
   
   /**
    * Sweep an acount's unlocked funds to an address.
    * 
    * @param accountIdx is the index of the account
    * @param address is the address to sweep the account's funds to
-   * @return the resulting transactions
+   * @return a tx set with the requested transactions if possible
    */
-  public List<MoneroTxWallet> sweepAccount(int accountIdx, String address);
+  public MoneroTxSet sweepAccount(int accountIdx, String address);
   
   /**
    * Sweep the wallet's unlocked funds to an address.
    * 
    * @param address is the address to sweep the wallet's funds to
-   * @return the resulting transactions
+   * @return a tx set with the requested transactions if possible
    */
-  public List<MoneroTxWallet> sweepWallet(String address);
+  public MoneroTxSet sweepWallet(String address);
 
   /**
    * Sweep all unlocked funds according to the given request.
    * 
    * @param request is the sweep configuration
-   * @return the resulting transactions
+   * @return a tx set with the requested transactions if possible
    */
-  public List<MoneroTxWallet> sweepAllUnlocked(MoneroSendRequest request);
+  public MoneroTxSet sweepAllUnlocked(MoneroSendRequest request);
   
   /**
    * Sweep all unmixable dust outputs back to the wallet to make them easier to spend and mix.
    * 
-   * NOTE: Dust only exists pre RCT, so this method will return "no dust to sweep" on new wallets.
+   * NOTE: Dust only exists pre RCT, so this method will throw "no dust to sweep" on new wallets.
    * 
-   * @return the resulting transactions from sweeping dust
+   * @return a tx set with the requested transactions if possible
    */
-  public List<MoneroTxWallet> sweepDust();
+  public MoneroTxSet sweepDust();
   
   /**
    * Sweep all unmixable dust outputs back to the wallet to make them easier to spend and mix.
    * 
    * @param doNotRelay specifies if the resulting transaction should not be relayed (defaults to false i.e. relayed)
-   * @return the resulting transactions from sweeping dust
+   * @return a tx set with the requested transactions if possible
    */
-  public List<MoneroTxWallet> sweepDust(boolean doNotRelay);
-  
-  /**
-   * Get a transaction note.
-   * 
-   * @param txId specifies the transaction to get the note of
-   * @return the tx note
-   */
-  public String getTxNote(String txId);
-  
-  /**
-   * Set a note for a specific transaction.
-   * 
-   * @param txId specifies the transaction
-   * @param note specifies the note
-   */
-  public void setTxNote(String txId, String note);
-  
-  /**
-   * Get notes for multiple transactions.
-   * 
-   * @param txIds identify the transactions to get notes for
-   * @return notes for the transactions
-   */
-  public List<String> getTxNotes(Collection<String> txIds);
-  
-  /**
-   * Set notes for multiple transactions.
-   * 
-   * @param txIds specify the transactions to set notes for
-   * @param notes are the notes to set for the transactions
-   */
-  public void setTxNotes(Collection<String> txIds, Collection<String> notes);
+  public MoneroTxSet sweepDust(boolean doNotRelay);
   
   /**
    * Sign a message.
@@ -898,6 +867,38 @@ public interface MoneroWallet {
    * @return the result of checking the signature proof
    */
   public MoneroCheckReserve checkReserveProof(String address, String message, String signature);
+  
+  /**
+   * Get a transaction note.
+   * 
+   * @param txId specifies the transaction to get the note of
+   * @return the tx note
+   */
+  public String getTxNote(String txId);
+  
+  /**
+   * Set a note for a specific transaction.
+   * 
+   * @param txId specifies the transaction
+   * @param note specifies the note
+   */
+  public void setTxNote(String txId, String note);
+  
+  /**
+   * Get notes for multiple transactions.
+   * 
+   * @param txIds identify the transactions to get notes for
+   * @return notes for the transactions
+   */
+  public List<String> getTxNotes(Collection<String> txIds);
+  
+  /**
+   * Set notes for multiple transactions.
+   * 
+   * @param txIds specify the transactions to set notes for
+   * @param notes are the notes to set for the transactions
+   */
+  public void setTxNotes(Collection<String> txIds, Collection<String> notes);
   
   /**
    * Get all address book entries.
