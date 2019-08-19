@@ -43,6 +43,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import common.utils.JsonUtils;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
@@ -978,7 +979,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     if (!request.getCanSplit()) txs.add(new MoneroTxWallet());
     else {
-      List<String> txHashes = (List<String>) result.get("tx_hash_list");
+      System.out.println("Temp: " + JsonUtils.serialize(result));
+      List<String> txHashes = (List<String>) result.get("fee_list");
       for (int i = 0; i < txHashes.size(); i++) txs.add(new MoneroTxWallet());
     }
     
@@ -1114,24 +1116,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setInTxPool(tx.isRelayed());
     }
     return txs;
-  }
-  
-  @SuppressWarnings("unchecked")
-  @Override
-  public List<String> getTxNotes(Collection<String> txIds) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txids", txIds);
-    Map<String, Object> resp = rpc.sendJsonRequest("get_tx_notes", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (List<String>) result.get("notes");
-  }
-
-  @Override
-  public void setTxNotes(Collection<String> txIds, Collection<String> notes) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txids", txIds);
-    params.put("notes", notes);
-    rpc.sendJsonRequest("set_tx_notes", params);
   }
 
   @SuppressWarnings("unchecked")
@@ -1291,6 +1275,24 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       check.setUnconfirmedSpentAmount((BigInteger) result.get("spent"));
     }
     return check;
+  }
+  
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<String> getTxNotes(Collection<String> txIds) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txids", txIds);
+    Map<String, Object> resp = rpc.sendJsonRequest("get_tx_notes", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (List<String>) result.get("notes");
+  }
+
+  @Override
+  public void setTxNotes(Collection<String> txIds, Collection<String> notes) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txids", txIds);
+    params.put("notes", notes);
+    rpc.sendJsonRequest("set_tx_notes", params);
   }
 
   @SuppressWarnings("unchecked")

@@ -288,16 +288,6 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public String getTxNote(String txId) {
-    return getTxNotes(Arrays.asList(txId)).get(0);
-  }
-  
-  @Override
-  public void setTxNote(String txId, String note) {
-    setTxNotes(Arrays.asList(txId), Arrays.asList(note));
-  }
-  
-  @Override
   public String getTxProof(String txId, String address) {
     return getTxProof(txId, address, null);
   }
@@ -305,6 +295,16 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   @Override
   public String getSpendProof(String txId) {
     return getSpendProof(txId, null);
+  }
+  
+  @Override
+  public String getTxNote(String txId) {
+    return getTxNotes(Arrays.asList(txId)).get(0);
+  }
+  
+  @Override
+  public void setTxNote(String txId, String note) {
+    setTxNotes(Arrays.asList(txId), Arrays.asList(note));
   }
   
   @Override
