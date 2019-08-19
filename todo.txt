@@ -4,8 +4,9 @@ open monero core issues
 add multisig support
 test multisig with transfer and other sends
 jni sweepAllUnlocked()
+sweepAllUnlocked() -> sweepUnlocked()
 add multisig model and sample code to taming monero: the hidden model
-update model: multisig methods and models, rescan_spent()  
+update model: multisig methods and models, rescan_spent(), MoneroTxSet attribute of MoneroTxWallet
 open issue: investigate integration of this library into Bisq
 add getIncomingTransfers(), getOutgoingTransfers() convenience methods
 daemon.getNextBlockHeader() sometimes hangs

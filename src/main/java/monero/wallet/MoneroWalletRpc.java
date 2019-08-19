@@ -43,7 +43,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import common.utils.JsonUtils;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
@@ -59,15 +58,15 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
-import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroMultisigInfo;
+import monero.wallet.model.MoneroMultisigInitResult;
+import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendRequest;
-import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
@@ -716,7 +715,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     for (String key : result.keySet()) {
       for (Map<String, Object> rpcTx :((List<Map<String, Object>>) result.get(key))) {
-        MoneroTxWallet tx = convertRpcTxWalletWithTransfer(rpcTx, null, null);
+        MoneroTxWallet tx = convertRpcTxWithTransfer(rpcTx, null, null);
         if (tx.isConfirmed()) assertTrue(tx.getBlock().getTxs().contains(tx));
 //        if (tx.getId().equals("38436c710dfbebfb24a14cddfd430d422e7282bbe94da5e080643a1bd2880b44")) {
 //          System.out.println(rpcTx);
@@ -830,7 +829,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       // convert response to txs with vouts and merge
       if (!result.containsKey("transfers")) continue;
       for (Map<String, Object> rpcVout : (List<Map<String, Object>>) result.get("transfers")) {
-        MoneroTxWallet tx = convertRpcTxWalletWithVout(rpcVout);
+        MoneroTxWallet tx = convertRpcTxWithVout(rpcVout);
         mergeTx(tx, txMap, blockMap, false);
       }
     }
@@ -933,7 +932,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   @SuppressWarnings("unchecked")
-  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
+  public MoneroTxSet sendSplit(MoneroSendRequest request) {
     
     // validate / sanitize request
     if (request == null) throw new MoneroException("Send request cannot be null");
@@ -975,31 +974,32 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resp = rpc.sendJsonRequest(request.getCanSplit() ? "transfer_split" : "transfer", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     
-    // pre-initialize txs to return
-    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-    if (!request.getCanSplit()) txs.add(new MoneroTxWallet());
-    else {
-      System.out.println("Temp: " + JsonUtils.serialize(result));
-      List<String> txHashes = (List<String>) result.get("fee_list");
-      for (int i = 0; i < txHashes.size(); i++) txs.add(new MoneroTxWallet());
-    }
-    
-    // initialize known fields of txs
-    for (MoneroTxWallet tx : txs) {
-      initSentTxWallet(request, tx);
-      tx.getOutgoingTransfer().setAccountIndex(accountIdx);
+    // pre-initialize txs if present.  multisig and watch-only wallets will have tx set without transactions
+    List<MoneroTxWallet> txs = null;
+    if (result.containsKey("tx_hash_list")) {
+      txs = new ArrayList<MoneroTxWallet>();
+      if (!request.getCanSplit()) txs.add(new MoneroTxWallet());
+      else {
+        int numTxs = ((List<String>) result.get("tx_hash_list")).size();
+        for (int i = 0; i < numTxs; i++) txs.add(new MoneroTxWallet());
+      }
+      
+      // initialize known fields of txs
+      for (MoneroTxWallet tx : txs) {
+        initSentTxWallet(request, tx);
+        tx.getOutgoingTransfer().setAccountIndex(accountIdx);
         if (subaddressIndices != null && subaddressIndices.size() == 1) tx.getOutgoingTransfer().setSubaddressIndices(subaddressIndices);
+      }
     }
     
-    // initialize txs from rpc response
-    if (request.getCanSplit()) convertRpcSentTxWallets(result, txs);
-    else convertRpcTxWalletWithTransfer(result, txs.get(0), true);
-    return txs;
+    // initialize tx set from rpc response with pre-initialized txs
+    if (request.getCanSplit()) return convertRpcSentTxsToTxSet(result, txs);
+    else return convertRpcTxToTxSet(result, txs.get(0), true);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroTxWallet sweepOutput(MoneroSendRequest request) {
+  public MoneroTxSet sweepOutput(MoneroSendRequest request) {
     
     // validate request
     assertNull(request.getSweepEachSubaddress());
@@ -1028,20 +1028,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
     // build and return tx response
     MoneroTxWallet tx = initSentTxWallet(request, null);
-    convertRpcTxWalletWithTransfer(result, tx, true);
+    MoneroTxSet txSet = convertRpcTxToTxSet(result, tx, true);
     tx.getOutgoingTransfer().getDestinations().get(0).setAmount(tx.getOutgoingTransfer().getAmount());  // initialize destination amount
-    return tx;
+    return txSet;
   }
   
   @Override
-  public List<MoneroTxWallet> sweepAllUnlocked(MoneroSendRequest request) {
+  public List<MoneroTxSet> sweepUnlocked(MoneroSendRequest request) {
     
     // validate request
-    if (request == null) throw new MoneroException("Must specify sweep request");
-    if (request.getDestinations() == null || request.getDestinations().size() != 1) {
-      System.out.println(request.getDestinations());
-      throw new MoneroException("Must specify exactly one destination to sweep to");
-    }
+    if (request == null) throw new MoneroException("Sweep request cannot be null");
+    if (request.getDestinations() == null || request.getDestinations().size() != 1) throw new MoneroException("Must specify exactly one destination to sweep to");
     if (request.getDestinations().get(0).getAddress() == null) throw new MoneroException("Must specify destination address to sweep to");
     if (request.getDestinations().get(0).getAmount() != null) throw new MoneroException("Cannot specify amount in sweep request");
     if (request.getKeyImage() != null) throw new MoneroException("Key image defined; use sweepOutput() to sweep an output by its key image");
@@ -1073,8 +1070,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
     }
     
-    // sweep from each account and collect unique transactions
-    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    // sweep from each account and collect resulting tx sets
+    List<MoneroTxSet> txSets = new ArrayList<MoneroTxSet>();
     for (Integer accountIdx : indices.keySet()) {
       
       // copy the request to not modify the original
@@ -1086,36 +1083,36 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       // sweep all subaddresses together  // TODO monero-wallet-rpc: doesn't this reveal outputs belong to same wallet?
       if (!Boolean.TRUE.equals(copy.getSweepEachSubaddress())) {
         copy.setSubaddressIndices(indices.get(accountIdx));
-        txs.addAll(rpcSweepAll(copy));
+        txSets.add(rpcSweepAccount(copy));
       }
       
       // sweep each subaddress individually
       else {
         for (int subaddressIdx : indices.get(accountIdx)) {
           copy.setSubaddressIndices(subaddressIdx);
-          txs.addAll(rpcSweepAll(copy));
+          txSets.add(rpcSweepAccount(copy));
         }
       }
     }
     
-    // return sweep transactions
-    return txs;
+    // return resulting tx sets
+    return txSets;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroTxWallet> sweepDust(boolean doNotRelay) {
+  public MoneroTxSet sweepDust(boolean doNotRelay) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("do_not_relay", doNotRelay);
     Map<String, Object> resp = rpc.sendJsonRequest("sweep_dust", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    if (!result.containsKey("tx_hash_list")) return new ArrayList<MoneroTxWallet>();  // no dust to sweep
-    List<MoneroTxWallet> txs = convertRpcSentTxWallets(result, null);
-    for (MoneroTxWallet tx : txs) {
+    //if (!result.containsKey("tx_hash_list")) return new ArrayList<MoneroTxWallet>();  // no dust to sweep // TODO: NPE without this? test  others are expected to throw exception if cannot be done.  be consistent
+    MoneroTxSet txSet = convertRpcSentTxsToTxSet(result, null);
+    for (MoneroTxWallet tx : txSet.getTxs()) {
       tx.setIsRelayed(!doNotRelay);
       tx.setInTxPool(tx.isRelayed());
     }
-    return txs;
+    return txSet;
   }
 
   @SuppressWarnings("unchecked")
@@ -1516,16 +1513,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   @SuppressWarnings("unchecked")
-  private List<MoneroTxWallet> rpcSweepAll(MoneroSendRequest request) {
+  private MoneroTxSet rpcSweepAccount(MoneroSendRequest request) {
     
     // validate request
-    if (request == null) throw new MoneroException("Must specify sweep request");
+    if (request == null) throw new MoneroException("Sweep request cannot be null");
     if (request.getAccountIndex() == null) throw new MoneroException("Must specify an account index to sweep from");
     if (request.getDestinations() == null || request.getDestinations().size() != 1) throw new MoneroException("Must specify exactly one destination to sweep to");
     if (request.getDestinations().get(0).getAddress() == null) throw new MoneroException("Must specify destination address to sweep to");
     if (request.getDestinations().get(0).getAmount() != null) throw new MoneroException("Cannot specify amount in sweep request");
     if (request.getKeyImage() != null) throw new MoneroException("Key image defined; use sweepOutput() to sweep an output by its key image");
     if (request.getSubaddressIndices() != null && request.getSubaddressIndices().isEmpty()) request.setSubaddressIndices((List<Integer>) null);
+    if (Boolean.TRUE.equals(request.getSweepEachSubaddress())) throw new MoneroException("Cannot sweep each subaddress with RPC `sweep_all`");
     
     // sweep from all subaddresses if not otherwise defined
     if (request.getSubaddressIndices() == null) {
@@ -1557,10 +1555,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     
     // initialize txs from response
-    List<MoneroTxWallet> txs = convertRpcSentTxWallets(result, null);
+    MoneroTxSet txSet = convertRpcSentTxsToTxSet(result, null);
     
     // initialize remaining known fields
-    for (MoneroTxWallet tx : txs) {
+    for (MoneroTxWallet tx : txSet.getTxs()) {
       tx.setIsConfirmed(false);
       tx.setNumConfirmations(0);
       tx.setInTxPool(Boolean.TRUE.equals(request.getDoNotRelay()) ? false : true);
@@ -1582,7 +1580,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (tx.isDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
       }
     }
-    return txs;
+    return txSet;
   }
   
   // ---------------------------- PRIVATE STATIC ------------------------------
@@ -1659,7 +1657,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @param txs are existing txs to initialize (optional)
    */
   @SuppressWarnings("unchecked")
-  private static List<MoneroTxWallet> convertRpcSentTxWallets(Map<String, Object> rpcTxs, List<MoneroTxWallet> txs) {
+  private static MoneroTxSet convertRpcSentTxsToTxSet(Map<String, Object> rpcTxs, List<MoneroTxWallet> txs) {
     
     // get lists
     List<String> ids = (List<String>) rpcTxs.get("tx_hash_list");
@@ -1683,7 +1681,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       for (int i = 0; i < fees.size(); i++) txs.add(new MoneroTxWallet());
     }
 
-    // build shared tx set information
+    // build shared tx set
     MoneroTxSet txSet = new MoneroTxSet();
     txSet.setMultisigTxHex((String) rpcTxs.get("multisig_txset"));
     txSet.setUnsignedTxHex((String) rpcTxs.get("unsigned_txset"));
@@ -1699,8 +1697,26 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (tx.getOutgoingTransfer() != null) tx.getOutgoingTransfer().setAmount((BigInteger) amounts.get(i));
       else tx.setOutgoingTransfer(new MoneroOutgoingTransfer().setTx(tx).setAmount((BigInteger) amounts.get(i)));
       tx.setTxSet(txSet);
+      txSet.getTxs().add(tx);
     }
-    return txs;
+    
+    return txSet;
+  }
+  
+  /**
+   * Converts a rpc tx with a transfer to a tx set with a tx and transfer.
+   * 
+   * @param rpcTx is the rpc tx to build from
+   * @param tx is an existing tx to continue initializing (optional)
+   * @param isOutgoing specifies if the tx is outgoing if true, incoming if false, or decodes from type if undefined
+   * @returns the initialized tx set with a tx
+   */
+  private static MoneroTxSet convertRpcTxToTxSet(Map<String, Object> rpcTx, MoneroTxWallet tx, Boolean isOutgoing) {
+    MoneroTxSet txSet = new MoneroTxSet();
+    txSet.setMultisigTxHex((String) rpcTx.get("multisig_txset"));
+    txSet.setUnsignedTxHex((String) rpcTx.get("unsigned_txset"));
+    txSet.setTxs(Arrays.asList(convertRpcTxWithTransfer(rpcTx, tx, isOutgoing)));
+    return txSet;
   }
   
   /**
@@ -1709,10 +1725,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @param rpcTx is the rpc tx to build from
    * @param tx is an existing tx to continue initializing (optional)
    * @param isOutgoing specifies if the tx is outgoing if true, incoming if false, or decodes from type if undefined
-   * @returns {MoneroTxWallet} is the initialized tx
+   * @returns the initialized tx with a transfer
    */
   @SuppressWarnings("unchecked")
-  private static MoneroTxWallet convertRpcTxWalletWithTransfer(Map<String, Object> rpcTx, MoneroTxWallet tx, Boolean isOutgoing) {  // TODO: change everything to safe set
+  private static MoneroTxWallet convertRpcTxWithTransfer(Map<String, Object> rpcTx, MoneroTxWallet tx, Boolean isOutgoing) {  // TODO: change everything to safe set
     
     // initialize tx to return
     if (tx == null) tx = new MoneroTxWallet();
@@ -1809,8 +1825,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (transfer == null) transfer = new MoneroOutgoingTransfer().setTx(tx);
         ((MoneroOutgoingTransfer) transfer).setDestinations(destinations);
       }
-      else if (key.equals("multisig_txset") && val != null) {} // TODO: handle this with value
-      else if (key.equals("unsigned_txset") && val != null) {} // TODO: handle this with value
+      else if (key.equals("multisig_txset") && val != null) {} // handled elsewhere; this method only builds a tx wallet
+      else if (key.equals("unsigned_txset") && val != null) {} // handled elsewhere; this method only builds a tx wallet
       else LOGGER.warn("WARNING: ignoring unexpected transaction field: " + key + ": " + val);
     }
     
@@ -1828,6 +1844,45 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     // return initialized transaction
+    return tx;
+  }
+  
+  @SuppressWarnings("unchecked")
+  private static MoneroTxWallet convertRpcTxWithVout(Map<String, Object> rpcVout) {
+    
+    // initialize tx
+    MoneroTxWallet tx = new MoneroTxWallet();
+    tx.setIsConfirmed(true);
+    tx.setIsRelayed(true);
+    tx.setIsFailed(false);
+    
+    // initialize vout
+    MoneroOutputWallet vout = new MoneroOutputWallet().setTx(tx);
+    for (String key : rpcVout.keySet()) {
+      Object val = rpcVout.get(key);
+      if (key.equals("amount")) vout.setAmount((BigInteger) val);
+      else if (key.equals("spent")) vout.setIsSpent((Boolean) val);
+      else if (key.equals("key_image")) vout.setKeyImage(new MoneroKeyImage((String) val));
+      else if (key.equals("global_index")) vout.setIndex(((BigInteger) val).intValue());
+      else if (key.equals("tx_hash")) tx.setId((String) val);
+      else if (key.equals("unlocked")) vout.setIsUnlocked((Boolean) val);
+      else if (key.equals("frozen")) vout.setIsFrozen((Boolean) val);
+      else if (key.equals("subaddr_index")) {
+        Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) val;
+        vout.setAccountIndex(rpcIndices.get("major").intValue());
+        vout.setSubaddressIndex(rpcIndices.get("minor").intValue());
+      }
+      else if (key.equals("block_height")) {
+        long height = ((BigInteger) val).longValue();
+        tx.setBlock(new MoneroBlock().setHeight(height).setTxs(tx));
+      }
+      else LOGGER.warn("WARNING: ignoring unexpected transaction field with vout: " + key + ": " + val);
+    }
+    
+    // initialize tx with vout
+    List<MoneroOutput> vouts = new ArrayList<MoneroOutput>();
+    vouts.add((MoneroOutput) vout); // have to cast to extended type because Java paramaterized types do not recognize inheritance
+    tx.setVouts(vouts);
     return tx;
   }
   
@@ -1940,45 +1995,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         aBlock.merge(tx.getBlock());
       }
     }
-  }
-  
-  @SuppressWarnings("unchecked")
-  private static MoneroTxWallet convertRpcTxWalletWithVout(Map<String, Object> rpcVout) {
-    
-    // initialize tx
-    MoneroTxWallet tx = new MoneroTxWallet();
-    tx.setIsConfirmed(true);
-    tx.setIsRelayed(true);
-    tx.setIsFailed(false);
-    
-    // initialize vout
-    MoneroOutputWallet vout = new MoneroOutputWallet().setTx(tx);
-    for (String key : rpcVout.keySet()) {
-      Object val = rpcVout.get(key);
-      if (key.equals("amount")) vout.setAmount((BigInteger) val);
-      else if (key.equals("spent")) vout.setIsSpent((Boolean) val);
-      else if (key.equals("key_image")) vout.setKeyImage(new MoneroKeyImage((String) val));
-      else if (key.equals("global_index")) vout.setIndex(((BigInteger) val).intValue());
-      else if (key.equals("tx_hash")) tx.setId((String) val);
-      else if (key.equals("unlocked")) vout.setIsUnlocked((Boolean) val);
-      else if (key.equals("frozen")) vout.setIsFrozen((Boolean) val);
-      else if (key.equals("subaddr_index")) {
-        Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) val;
-        vout.setAccountIndex(rpcIndices.get("major").intValue());
-        vout.setSubaddressIndex(rpcIndices.get("minor").intValue());
-      }
-      else if (key.equals("block_height")) {
-        long height = ((BigInteger) val).longValue();
-        tx.setBlock(new MoneroBlock().setHeight(height).setTxs(tx));
-      }
-      else LOGGER.warn("WARNING: ignoring unexpected transaction field with vout: " + key + ": " + val);
-    }
-    
-    // initialize tx with vout
-    List<MoneroOutput> vouts = new ArrayList<MoneroOutput>();
-    vouts.add((MoneroOutput) vout); // have to cast to extended type because Java paramaterized types do not recognize inheritance
-    tx.setVouts(vouts);
-    return tx;
   }
   
   /**

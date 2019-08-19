@@ -13,6 +13,7 @@ import java.util.List;
 
 import common.utils.GenUtils;
 import monero.daemon.model.MoneroTx;
+import monero.wallet.model.MoneroTxWallet;
 
 /**
  * Collection of Monero utilities.
@@ -282,6 +283,22 @@ public class MoneroUtils {
    * @param tx is the transaction to merge into the list
    */
   public static void mergeTx(List<MoneroTx> txs, MoneroTx tx) {
+    for (MoneroTx aTx : txs) {
+      if (aTx.getId().equals(tx.getId())) {
+        aTx.merge(tx);
+        return;
+      }
+    }
+    txs.add(tx);
+  }
+  
+  /**
+   * Merges a transaction into a list of existing transactions.
+   * 
+   * @param txs are existing transactions to merge into
+   * @param tx is the transaction to merge into the list
+   */
+  public static void mergeTx(List<MoneroTxWallet> txs, MoneroTxWallet tx) {
     for (MoneroTx aTx : txs) {
       if (aTx.getId().equals(tx.getId())) {
         aTx.merge(tx);

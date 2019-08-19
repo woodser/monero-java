@@ -949,7 +949,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroTxWallet> sweepAllUnlocked(MoneroSendRequest request) {
+  public List<MoneroTxWallet> sweepUnlocked(MoneroSendRequest request) {
     assertNotClosed();
     throw new RuntimeException("Not implemented");
   }
