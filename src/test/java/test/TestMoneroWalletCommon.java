@@ -44,20 +44,21 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
-import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroMultisigInfo;
+import monero.wallet.model.MoneroMultisigInitResult;
+import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendRequest;
-import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxQuery;
+import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 import utils.PrintBalances;
 import utils.StartMining;
@@ -1892,10 +1893,10 @@ public abstract class TestMoneroWalletCommon {
     BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance();
     
     // create tx but do not relay
-    MoneroTx tx = wallet.createTx(request);
+    MoneroTxWallet tx = wallet.createTx(request).getTxs().get(0);
     
     // create tx using same request which would be double spend
-    MoneroTxWallet txDoubleSpend = wallet.createTx(request);
+    MoneroTxWallet txDoubleSpend = wallet.createTx(request).getTxs().get(0);
     
     // submit tx directly to the pool but do not relay
     MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
@@ -1938,7 +1939,7 @@ public abstract class TestMoneroWalletCommon {
         assertNotEquals("Wallet unlocked balance should revert to original after flushing tx from pool without relaying", unlockedBalanceBefore, wallet.getUnlockedBalance());  // TODO: test exact amounts, maybe in ux test
         
         // create tx using same request which is no longer double spend
-        MoneroTxWallet tx2 = wallet.send(request);
+        MoneroTxWallet tx2 = wallet.send(request).getTxs().get(0);
         MoneroSubmitTxResult result2 = daemon.submitTxHex(tx2.getFullHex(), true);
         
         // test result and flush on finally
@@ -1996,10 +1997,10 @@ public abstract class TestMoneroWalletCommon {
     BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance();
     
     // create tx to relay
-    MoneroTxWallet tx = wallet.createTx(request);
+    MoneroTxWallet tx = wallet.createTx(request).getTxs().get(0);
     
     // create another tx using same request which would be double spend
-    MoneroTxWallet txDoubleSpend = wallet.createTx(request);
+    MoneroTxWallet txDoubleSpend = wallet.createTx(request).getTxs().get(0);
     
     // relay first tx directly to daemon
     MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex());
@@ -2040,7 +2041,7 @@ public abstract class TestMoneroWalletCommon {
       // create tx using same request which is no longer double spend
       MoneroTxWallet tx2 = null;
       try {
-        tx2 = wallet.send(request);  
+        tx2 = wallet.send(request).getTxs().get(0);
       } catch (Exception e) {
         issues.add("WARNING: creating and sending tx through wallet should succeed after syncing wallet with pool but creates a double spend"); // TODO monero core: this fails meaning wallet did not recognize tx relayed directly to pool
       }
@@ -2071,7 +2072,7 @@ public abstract class TestMoneroWalletCommon {
     BigInteger unlockedBalance1 = wallet.getUnlockedBalance();
     
     // send funds to external address
-    MoneroTxWallet tx = wallet.send(0, TestUtils.getRandomWalletAddress(), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3)));
+    MoneroTxWallet tx = wallet.send(0, TestUtils.getRandomWalletAddress(), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).getTxs().get(0);
     
     // collect balances after
     BigInteger balance2 = wallet.getBalance();
@@ -2151,12 +2152,12 @@ public abstract class TestMoneroWalletCommon {
     request.setAccountIndex(srcAccount.getIndex());
     request.setSubaddressIndices(fromSubaddressIndices);
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-    if (Boolean.TRUE.equals(request.getCanSplit())) {
-      List<MoneroTxWallet> sendTxs = wallet.sendSplit(request);
-      for (MoneroTxWallet tx : sendTxs) txs.add(tx);
+    if (!Boolean.FALSE.equals(request.getCanSplit())) {
+      txs.addAll(wallet.sendSplit(request).getTxs());
     } else {
-      txs.add(wallet.send(request));
+      txs.addAll(wallet.send(request).getTxs());
     }
+    if (Boolean.FALSE.equals(request.getCanSplit())) assertEquals(1, txs.size());  // must have exactly one tx if no split
     
     // test that balances of intended subaddresses decreased
     List<MoneroAccount> accountsAfter = wallet.getAccounts(true);
@@ -2285,13 +2286,12 @@ public abstract class TestMoneroWalletCommon {
     
     // send to self
     // can use create() or send() because request's doNotRelay is used, but exercise both calls
-    if (Boolean.TRUE.equals(request.getCanSplit())) {
-      List<MoneroTxWallet> sendTxs = Boolean.TRUE.equals(request.getDoNotRelay()) ? wallet.createTxs(request) : wallet.sendSplit(request);  
-      for (MoneroTxWallet tx : sendTxs) txs.add(tx);
+    if (!Boolean.FALSE.equals(request.getCanSplit())) {
+      txs.addAll((Boolean.TRUE.equals(request.getDoNotRelay()) ? wallet.createTxs(request) : wallet.sendSplit(request)).getTxs());
     } else {
-      MoneroTxWallet sendTx = Boolean.TRUE.equals(request.getDoNotRelay()) ? wallet.createTx(request) : wallet.send(request);
-      txs.add(sendTx);
+      txs.addAll((Boolean.TRUE.equals(request.getDoNotRelay()) ? wallet.createTx(request) : wallet.send(request)).getTxs());
     }
+    if (Boolean.FALSE.equals(request.getCanSplit())) assertEquals(1, txs.size());  // must have exactly one tx if no split
     
     // handle non-relayed transaction
     if (Boolean.TRUE.equals(request.getDoNotRelay())) {
@@ -2459,11 +2459,11 @@ public abstract class TestMoneroWalletCommon {
     // send tx(s) with request
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     if (canSplit) {
-      List<MoneroTxWallet> sendTxs = wallet.sendSplit(request);
-      for (MoneroTxWallet tx : sendTxs) txs.add(tx);
+      txs.addAll(wallet.sendSplit(request).getTxs());
     } else {
-      txs.add(wallet.send(request));
+      txs.addAll(wallet.send(request).getTxs());
     }
+    if (!canSplit) assertEquals(1, txs.size());
     
     // test that wallet balance decreased
     MoneroAccount account = wallet.getAccount(srcAccount.getIndex());
@@ -2527,8 +2527,8 @@ public abstract class TestMoneroWalletCommon {
       String address = wallet.getAddress(output.getAccountIndex(), output.getSubaddressIndex());
       MoneroSendRequest request = new MoneroSendRequest(address).setKeyImage(output.getKeyImage().getHex());
       MoneroTxWallet tx;
-      if (useParams) tx = wallet.sweepOutput(address, output.getKeyImage().getHex(), null); // test params
-      else tx = wallet.sweepOutput(request);  // test config
+      if (useParams) tx = wallet.sweepOutput(address, output.getKeyImage().getHex(), null).getTxs().get(0); // test params
+      else tx = wallet.sweepOutput(request).getTxs().get(0);  // test config
       
       // test resulting tx
       TestContext ctx = new TestContext();
@@ -2561,7 +2561,7 @@ public abstract class TestMoneroWalletCommon {
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // generate non-relayed transactions to sweep dust
-    List<MoneroTxWallet> txs = wallet.sweepDust(true);
+    List<MoneroTxWallet> txs = wallet.sweepDust(true).getTxs();
     org.junit.Assume.assumeFalse(txs.isEmpty()); // dust does not exist after rct
     
     // test txs
@@ -2593,7 +2593,7 @@ public abstract class TestMoneroWalletCommon {
   public void testSweepDust() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
-    List<MoneroTxWallet> txs = wallet.sweepDust();
+    List<MoneroTxWallet> txs = wallet.sweepDust().getTxs();
     org.junit.Assume.assumeFalse(txs.isEmpty()); // dust does not exist after rct
     TestContext ctx = new TestContext();
     ctx.wallet = wallet;
@@ -2813,7 +2813,7 @@ public abstract class TestMoneroWalletCommon {
     
     // create transaction to send from multisig wallet but don't relay?
     //List<MoneroTxWallet> sendTxs = curWallet.sweepAllUnlocked(new MoneroSendRequest(testWalletAddress).setDoNotRelay(true));
-    List<MoneroTxWallet> sendTxs = curWallet.sendSplit(new MoneroSendRequest(testWalletAddress, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).setAccountIndex(1).setDoNotRelay(true));
+    List<MoneroTxWallet> sendTxs = curWallet.sendSplit(new MoneroSendRequest(testWalletAddress, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).setAccountIndex(1).setDoNotRelay(true)).getTxs();
     System.out.println(sendTxs);
     
     // get the multisig tx hex which is common among the multisig txs
@@ -2966,8 +2966,7 @@ public abstract class TestMoneroWalletCommon {
       
       // send transactions
       List<MoneroTxWallet> sentTxs;
-      if (request.getCanSplit()) sentTxs = wallet.sendSplit(request);
-      else sentTxs = Arrays.asList(wallet.send(request));
+      sentTxs = (request.getCanSplit() ? wallet.sendSplit(request) : wallet.send(request)).getTxs();
       
       // build test context
       TestContext ctx = new TestContext();
@@ -3131,7 +3130,7 @@ public abstract class TestMoneroWalletCommon {
       
       // sweep unlocked account
       MoneroSubaddress unlockedSubaddress = subaddressesUnlocked.get(i);
-      List<MoneroTxWallet> txs = wallet.sweepSubaddress(unlockedSubaddress.getAccountIndex(), unlockedSubaddress.getIndex(), wallet.getPrimaryAddress());
+      List<MoneroTxWallet> txs = wallet.sweepSubaddress(unlockedSubaddress.getAccountIndex(), unlockedSubaddress.getIndex(), wallet.getPrimaryAddress()).getTxs();
       
       // test transactions
       assertTrue(txs.size() > 0);
@@ -3208,7 +3207,7 @@ public abstract class TestMoneroWalletCommon {
       
       // sweep unlocked account
       MoneroAccount unlockedAccount = accountsUnlocked.get(i);
-      List<MoneroTxWallet> txs = wallet.sweepAccount(unlockedAccount.getIndex(), wallet.getPrimaryAddress());
+      List<MoneroTxWallet> txs = wallet.sweepAccount(unlockedAccount.getIndex(), wallet.getPrimaryAddress()).getTxs();
       
       // test transactions
       assertTrue(txs.size() > 0);
@@ -3287,7 +3286,14 @@ public abstract class TestMoneroWalletCommon {
     // sweep
     String destination = wallet.getPrimaryAddress();
     MoneroSendRequest req = new MoneroSendRequest(destination).setSweepEachSubaddress(sweepEachSubaddress);
-    List<MoneroTxWallet> txs = wallet.sweepUnlocked(req);
+    List<MoneroTxSet> txSets = wallet.sweepUnlocked(req);
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    for (MoneroTxSet txSet : txSets) {
+      assertNull(txSet.getMultisigTxHex());
+      assertNull(txSet.getSignedTxHex());
+      assertNull(txSet.getUnsignedTxHex());
+      txs.addAll(txSet.getTxs());
+    }
     assertTrue(txs.size() > 0);
     for (MoneroTxWallet tx : txs) {
       MoneroSendRequest request = new MoneroSendRequest(destination);

@@ -4,6 +4,9 @@ open monero core issues
 add multisig support
 test multisig with transfer and other sends
 jni sweepAllUnlocked()
+test tx set in non multisig/cold wallets
+support sign_transfer, submit_transfer, etc
+test tx set in cold wallet with sign and submit
 sweepAllUnlocked() -> sweepUnlocked()
 add multisig model and sample code to taming monero: the hidden model
 update model: multisig methods and models, rescan_spent(), MoneroTxSet attribute of MoneroTxWallet
@@ -15,7 +18,6 @@ new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeig
 tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
 rpc wallet listener
 approximate chain height
-support sign_transfer, submit_transfer, etc
 rpc on_generate_from_keys
 update javascript library to Java (difference from Java master to jni93 branch)
 
