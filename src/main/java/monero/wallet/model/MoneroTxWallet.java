@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -18,6 +19,7 @@ import monero.utils.MoneroUtils;
  */
 public class MoneroTxWallet extends MoneroTx {
 
+  private MoneroTxSet txSet;
   private List<MoneroIncomingTransfer> incomingTransfers;
   private MoneroOutgoingTransfer outgoingTransfer;
   private String note;
@@ -28,6 +30,7 @@ public class MoneroTxWallet extends MoneroTx {
   
   public MoneroTxWallet(final MoneroTxWallet tx) {
     super(tx);
+    this.txSet = tx.txSet;
     if (tx.incomingTransfers != null) {
       this.incomingTransfers = new ArrayList<MoneroIncomingTransfer>();
       for (MoneroIncomingTransfer transfer : tx.incomingTransfers) {
@@ -42,7 +45,15 @@ public class MoneroTxWallet extends MoneroTx {
     return new MoneroTxWallet(this);
   }
   
-  // ----------------------------- WALLET-SPECIFIC ----------------------------
+  @JsonBackReference("tx_set")
+  public MoneroTxSet getTxSet() {
+    return txSet;
+  }
+  
+  public MoneroTx setTxSet(MoneroTxSet txSet) {
+    this.txSet = txSet;
+    return this;
+  }
   
   @JsonProperty("isOutgoing")
   public Boolean isOutgoing() {
@@ -164,8 +175,19 @@ public class MoneroTxWallet extends MoneroTx {
     // merge base classes
     super.merge(tx);
     
-    // merge wallet extensions
-    this.setNote(MoneroUtils.reconcile(this.getNote(), tx.getNote()));
+    // merge tx set if they're different which comes back to merging txs
+    if (txSet != tx.getTxSet()) {
+      if (txSet == null) {
+        txSet = new MoneroTxSet();
+        txSet.setTxs(this);
+      }
+      if (tx.getTxSet() == null) {
+        tx.setTxSet(new MoneroTxSet());
+        tx.getTxSet().setTxs(tx);
+      }
+      txSet.merge(tx.getTxSet());
+      return this;
+    }
     
     // merge incoming transfers
     if (tx.getIncomingTransfers() != null) {
@@ -182,6 +204,9 @@ public class MoneroTxWallet extends MoneroTx {
       if (this.getOutgoingTransfer() == null) this.setOutgoingTransfer(tx.getOutgoingTransfer());
       else this.getOutgoingTransfer().merge(tx.getOutgoingTransfer());
     }
+    
+    // merge simple extensions
+    this.setNote(MoneroUtils.reconcile(this.getNote(), tx.getNote()));
     
     return this;  // for chaining
   }
@@ -424,12 +449,6 @@ public class MoneroTxWallet extends MoneroTx {
   @Override
   public MoneroTxWallet setMetadata(String metadata) {
     super.setMetadata(metadata);
-    return this;
-  }
-
-  @Override
-  public MoneroTxWallet setTxSet(MoneroTxSet txSet) {
-    super.setTxSet(txSet);
     return this;
   }
 

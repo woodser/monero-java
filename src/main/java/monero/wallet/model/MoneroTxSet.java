@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
-import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroUtils;
 
 /**
@@ -22,24 +21,24 @@ import monero.utils.MoneroUtils;
  */
 public class MoneroTxSet {
 
-  private List<MoneroTx> txs;
+  private List<MoneroTxWallet> txs;
   private String signedTxHex;
   private String unsignedTxHex;
   private String multisigTxHex;
   
   @JsonManagedReference("tx_set")
-  public List<MoneroTx> getTxs() {
+  public List<MoneroTxWallet> getTxs() {
     return txs;
   }
 
   @JsonProperty("txs")
-  public MoneroTxSet setTxs(List<MoneroTx> txs) {
+  public MoneroTxSet setTxs(List<MoneroTxWallet> txs) {
     this.txs = txs;
     return this;
   }
   
   @JsonIgnore
-  public MoneroTxSet setTxs(MoneroTx... txs) {
+  public MoneroTxSet setTxs(MoneroTxWallet... txs) {
     this.txs = GenUtils.arrayToList(txs);
     return this;
   }
@@ -82,7 +81,7 @@ public class MoneroTxSet {
     
     // merge txs
     if (txSet.getTxs() != null) {
-      for (MoneroTx tx : txSet.getTxs()) {
+      for (MoneroTxWallet tx : txSet.getTxs()) {
         tx.setTxSet(this);
         MoneroUtils.mergeTx(txs, tx);
       }

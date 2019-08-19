@@ -718,17 +718,17 @@ public interface MoneroWallet {
    * Sweep the wallet's unlocked funds to an address.
    * 
    * @param address is the address to sweep the wallet's funds to
-   * @return a tx set with the requested transactions if possible
+   * @return the tx sets with the transactions which sweep the wallet
    */
-  public MoneroTxSet sweepWallet(String address);
+  public List<MoneroTxSet> sweepWallet(String address);
 
   /**
    * Sweep all unlocked funds according to the given request.
    * 
    * @param request is the sweep configuration
-   * @return a tx set with the requested transactions if possible
+   * @return the tx sets with the requested transactions
    */
-  public MoneroTxSet sweepAllUnlocked(MoneroSendRequest request);
+  public List<MoneroTxSet> sweepUnlocked(MoneroSendRequest request);
   
   /**
    * Sweep all unmixable dust outputs back to the wallet to make them easier to spend and mix.

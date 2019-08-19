@@ -3287,7 +3287,7 @@ public abstract class TestMoneroWalletCommon {
     // sweep
     String destination = wallet.getPrimaryAddress();
     MoneroSendRequest req = new MoneroSendRequest(destination).setSweepEachSubaddress(sweepEachSubaddress);
-    List<MoneroTxWallet> txs = wallet.sweepAllUnlocked(req);
+    List<MoneroTxWallet> txs = wallet.sweepUnlocked(req);
     assertTrue(txs.size() > 0);
     for (MoneroTxWallet tx : txs) {
       MoneroSendRequest request = new MoneroSendRequest(destination);
