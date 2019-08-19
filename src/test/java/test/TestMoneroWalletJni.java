@@ -1041,7 +1041,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     wallet.addListener(listener);
     
     // send tx
-    MoneroTxWallet tx = wallet.send(request);
+    MoneroTxWallet tx = wallet.send(request).getTxs().get(0);
     
     // test wallet's balance
     BigInteger balanceAfter = wallet.getBalance();
@@ -1139,7 +1139,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     myWallet.addListener(myListener);
     
     // send funds to the created wallet
-    MoneroTxWallet sentTx = wallet.send(0, myWallet.getPrimaryAddress(), TestUtils.MAX_FEE);
+    MoneroTxWallet sentTx = wallet.send(0, myWallet.getPrimaryAddress(), TestUtils.MAX_FEE).getTxs().get(0);
     
     // wait until block added to the chain
     // TODO monero core: notify on refresh from pool instead instead of confirmation
