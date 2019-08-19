@@ -2593,8 +2593,17 @@ public abstract class TestMoneroWalletCommon {
   public void testSweepDust() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
-    List<MoneroTxWallet> txs = wallet.sweepDust().getTxs();
-    org.junit.Assume.assumeFalse(txs.isEmpty()); // dust does not exist after rct
+    
+    // sweep dust which will throw exception if no dust to sweep (dust does not exist after rct) 
+    List<MoneroTxWallet> txs = null;
+    try {
+      txs = wallet.sweepDust().getTxs();
+    } catch (MoneroException e) {
+      assertEquals("No dust to sweep", e.getMessage());
+      return;
+    }
+    
+    // if dust swept, test txs
     TestContext ctx = new TestContext();
     ctx.wallet = wallet;
     ctx.sendRequest = null;
