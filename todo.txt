@@ -6,6 +6,7 @@ test multisig with transfer and other sends
 jni sweepAllUnlocked()
 test tx set in non multisig/cold wallets
 support sign_transfer, submit_transfer, etc
+test sending without enough money, should be consistent across calls
 test tx set in cold wallet with sign and submit
 sweepAllUnlocked() -> sweepUnlocked()
 add multisig model and sample code to taming monero: the hidden model
