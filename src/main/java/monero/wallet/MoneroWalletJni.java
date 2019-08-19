@@ -66,6 +66,7 @@ import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxQuery;
+import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletListener;
 import monero.wallet.model.MoneroWalletListenerI;
@@ -902,7 +903,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroTxWallet> sendSplit(MoneroSendRequest request) {
+  public MoneroTxSet sendSplit(MoneroSendRequest request) {
     assertNotClosed();
     LOGGER.debug("java sendSplit(request)");
     LOGGER.debug("Send request: " + JsonUtils.serialize(request));
@@ -910,64 +911,47 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     // validate request
     if (request == null) throw new MoneroException("Send request cannot be null");
     
-    // submit send request to JNI and get response as json rooted at blocks
-    String blocksJson;
+    // submit send request to JNI and get response as json rooted at tx set
+    String txSetJson;
     try {
-      blocksJson = sendSplitJni(JsonUtils.serialize(request));
-      LOGGER.debug("Received sendSplit() response from JNI: " + blocksJson.substring(0, Math.min(5000, blocksJson.length())) + "...");
+      txSetJson = sendSplitJni(JsonUtils.serialize(request));
+      LOGGER.debug("Received sendSplit() response from JNI: " + txSetJson.substring(0, Math.min(5000, txSetJson.length())) + "...");
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
     
-    // deserialize blocks
-    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
-    
-    // collect and return txs
-    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-    for (MoneroBlock block : blocks) {
-      if (block.getHeight() != null) sanitizeBlock(block);
-      for (MoneroTx tx : block.getTxs()) {
-        if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
-        txs.add((MoneroTxWallet) tx);
-      }
-    }
-    LOGGER.debug("Created " + txs.size() + " transaction(s) in last send request");
-    return txs;
+    // deserialize and return tx set
+    MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
+    LOGGER.debug("Created " + txSet.getTxs().size() + " transaction(s) in last send request");
+    return txSet;
   }
 
   @Override
-  public MoneroTxWallet sweepOutput(MoneroSendRequest request) {
+  public MoneroTxSet sweepOutput(MoneroSendRequest request) {
     assertNotClosed();
     try {
-      String blocksJson = sweepOutputJni(JsonUtils.serialize(request));
-      List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
-      blocks.get(0).getTxs().get(0).setBlock(null); // dereference placeholder block
-      return (MoneroTxWallet) blocks.get(0).getTxs().get(0);
+      String txSetJson = sweepOutputJni(JsonUtils.serialize(request));
+      MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
+      return txSet;
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
   }
 
   @Override
-  public List<MoneroTxWallet> sweepUnlocked(MoneroSendRequest request) {
+  public List<MoneroTxSet> sweepUnlocked(MoneroSendRequest request) {
     assertNotClosed();
     throw new RuntimeException("Not implemented");
   }
 
   @Override
-  public List<MoneroTxWallet> sweepDust(boolean doNotRelay) {
+  public MoneroTxSet sweepDust(boolean doNotRelay) {
     assertNotClosed();
-    String blocksJson;
-    try { blocksJson = sweepDustJni(doNotRelay); }
+    String txSetJson;
+    try { txSetJson = sweepDustJni(doNotRelay); }
     catch (Exception e) { throw new MoneroException(e.getMessage()); }
-    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
-    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-    if (blocks.isEmpty()) return txs;
-    for (MoneroTx tx : blocks.get(0).getTxs()) {
-      tx.setBlock(null); // dereference placeholder block
-      txs.add((MoneroTxWallet) tx);
-    }
-    return txs;
+    MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
+    return txSet;
   }
 
   @Override
