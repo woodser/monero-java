@@ -1068,11 +1068,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<MoneroTxSet> txSets = new ArrayList<MoneroTxSet>();
     for (Integer accountIdx : indices.keySet()) {
       
-      // copy the request to not modify the original
+      // copy and modify the original request
       MoneroSendRequest copy = request.copy();
-      
-      // set the account to sweep from
       copy.setAccountIndex(accountIdx);
+      copy.setSweepEachSubaddress(false);
       
       // sweep all subaddresses together  // TODO monero core: can this reveal outputs belong to the same wallet?
       if (!Boolean.TRUE.equals(copy.getSweepEachSubaddress())) {
