@@ -2619,12 +2619,12 @@ public abstract class TestMoneroWalletCommon {
   public void testMultisig() {
     
     // test n/n
-    testMultisig(2, 2, false);
+    //testMultisig(2, 2, false);
     //testMultisig(3, 3, false);
     //testMultisig(4, 4, false);
     
     // test (n-1)/n
-    //testMultisig(2, 3, false);
+    testMultisig(2, 3, false);
     //testMultisig(3, 4, false);
     //testMultisig(5, 6, false);
     
@@ -2825,8 +2825,7 @@ public abstract class TestMoneroWalletCommon {
         MoneroTxSet txSet = curWallet.sendSplit(1, testWalletAddress, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3)));
         System.out.println("Received this tx set? " + JsonUtils.serialize(txSet));
         //curWallet.sweepWallet(testWalletAddress);
-        System.out.println("FAIL: Should have failed sweeping wallet without participants");
-        //fail("Should have failed sweeping wallet without participants");
+        fail("Should have failed sweeping wallet without participants");
       } catch (MoneroException e) {
         System.out.println("Code: " + e.getCode());
         System.out.println("Message: " + e.getMessage());
