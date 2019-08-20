@@ -922,7 +922,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     
     // deserialize and return tx set
     MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
-    LOGGER.debug("Created " + txSet.getTxs().size() + " transaction(s) in last send request");
+    if (txSet.getTxs() == null) LOGGER.debug("Created tx set without txs: " + JsonUtils.serialize(txSet) + " in sendSplit()");
+    else LOGGER.debug("Created " + txSet.getTxs().size() + " transaction(s) in last send request");
     return txSet;
   }
 

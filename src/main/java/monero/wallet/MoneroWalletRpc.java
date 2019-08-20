@@ -1037,7 +1037,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (request.getDestinations().get(0).getAmount() != null) throw new MoneroException("Cannot specify amount in sweep request");
     if (request.getKeyImage() != null) throw new MoneroException("Key image defined; use sweepOutput() to sweep an output by its key image");
     if (request.getSubaddressIndices() != null && request.getSubaddressIndices().isEmpty()) request.setSubaddressIndices((List<Integer>) null);
-    if (request.getAccountIndex() == null && request.getSubaddressIndices() != null) throw new MoneroException("Must specify account index with subaddress indicies");
+    if (request.getAccountIndex() == null && request.getSubaddressIndices() != null) throw new MoneroException("Must specify account index if subaddress indices are specified");
     
     // determine account and subaddress indices to sweep; default to all with unlocked balance if not specified
     LinkedHashMap<Integer, List<Integer>> indices = new LinkedHashMap<Integer, List<Integer>>();  // java type preserves insertion order
