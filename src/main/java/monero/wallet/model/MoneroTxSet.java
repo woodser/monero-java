@@ -22,9 +22,9 @@ import monero.utils.MoneroUtils;
 public class MoneroTxSet {
 
   private List<MoneroTxWallet> txs;
-  private String signedTxHex;
-  private String unsignedTxHex;
   private String multisigTxHex;
+  private String unsignedTxHex;
+  private String signedTxHex;
   
   @JsonManagedReference("tx_set")
   public List<MoneroTxWallet> getTxs() {
@@ -43,12 +43,12 @@ public class MoneroTxSet {
     return this;
   }
 
-  public String getSignedTxHex() {
-    return signedTxHex;
+  public String getMultisigTxHex() {
+    return multisigTxHex;
   }
   
-  public MoneroTxSet setSignedTxHex(String signedTxHex) {
-    this.signedTxHex = signedTxHex;
+  public MoneroTxSet setMultisigTxHex(String multisigTxHex) {
+    this.multisigTxHex = multisigTxHex;
     return this;
   }
   
@@ -61,12 +61,12 @@ public class MoneroTxSet {
     return this;
   }
   
-  public String getMultisigTxHex() {
-    return multisigTxHex;
+  public String getSignedTxHex() {
+    return signedTxHex;
   }
   
-  public MoneroTxSet setMultisigTxHex(String multisigTxHex) {
-    this.multisigTxHex = multisigTxHex;
+  public MoneroTxSet setSignedTxHex(String signedTxHex) {
+    this.signedTxHex = signedTxHex;
     return this;
   }
   
@@ -75,9 +75,10 @@ public class MoneroTxSet {
     if (this == txSet) return this;
     
     // merge sets
-    this.setSignedTxHex(MoneroUtils.reconcile(this.getSignedTxHex(), txSet.getSignedTxHex()));
-    this.setUnsignedTxHex(MoneroUtils.reconcile(this.getUnsignedTxHex(), txSet.getUnsignedTxHex()));
     this.setMultisigTxHex(MoneroUtils.reconcile(this.getMultisigTxHex(), txSet.getMultisigTxHex()));
+    this.setUnsignedTxHex(MoneroUtils.reconcile(this.getUnsignedTxHex(), txSet.getUnsignedTxHex()));
+    this.setSignedTxHex(MoneroUtils.reconcile(this.getSignedTxHex(), txSet.getSignedTxHex()));
+
     
     // merge txs
     if (txSet.getTxs() != null) {
@@ -97,9 +98,9 @@ public class MoneroTxSet {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
-    sb.append(MoneroUtils.kvLine("Signed tx hex: ", getSignedTxHex(), indent));
-    sb.append(MoneroUtils.kvLine("Unsigned tx hex: ", getUnsignedTxHex(), indent));
     sb.append(MoneroUtils.kvLine("Multisig tx hex: ", getMultisigTxHex(), indent));
+    sb.append(MoneroUtils.kvLine("Unsigned tx hex: ", getUnsignedTxHex(), indent));
+    sb.append(MoneroUtils.kvLine("Signed tx hex: ", getSignedTxHex(), indent));
     return sb.toString();
   }
 
@@ -108,8 +109,8 @@ public class MoneroTxSet {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((multisigTxHex == null) ? 0 : multisigTxHex.hashCode());
+    result = prime * result + ((signedTxHex == null) ? 0 : signedTxHex.hashCode());
     result = prime * result + ((unsignedTxHex == null) ? 0 : unsignedTxHex.hashCode());
-    result = prime * result + ((multisigTxHex == null) ? 0 : multisigTxHex.hashCode());
     return result;
   }
 
@@ -125,9 +126,6 @@ public class MoneroTxSet {
     if (signedTxHex == null) {
       if (other.signedTxHex != null) return false;
     } else if (!signedTxHex.equals(other.signedTxHex)) return false;
-    if (txs == null) {
-      if (other.txs != null) return false;
-    } else if (!txs.equals(other.txs)) return false;
     if (unsignedTxHex == null) {
       if (other.unsignedTxHex != null) return false;
     } else if (!unsignedTxHex.equals(other.unsignedTxHex)) return false;
