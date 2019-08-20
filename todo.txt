@@ -3,25 +3,25 @@ open library issues
 open monero core issues
 add multisig support
 test multisig with transfer and other sends
-jni sweepAllUnlocked()
-add testSweepUnlocked() which targets accounts and subaddresses
-test tx set in non multisig/cold wallets
-support sign_transfer, submit_transfer, etc
-test sending without enough money, should be consistent across calls
-test tx set in cold wallet with sign and submit
 sweepAllUnlocked() -> sweepUnlocked()
-add multisig model and sample code to taming monero: the hidden model
-update model: multisig methods and models, rescan_spent(), MoneroTxSet attribute of MoneroTxWallet
-open issue: investigate integration of this library into Bisq
 add getIncomingTransfers(), getOutgoingTransfers() convenience methods
+add testSweepUnlocked() which targets accounts and subaddresses
+support sign_transfer, submit_transfer
+test tx set in cold wallet with sign and submit
+test tx set in regular wallet (null values + txs)
+test sending without enough money, should be consistent across calls
+update model: multisig methods and models, sample code rescan_spent(), MoneroTxSet attribute of MoneroTxWallet
 daemon.getNextBlockHeader() sometimes hangs
 wallet rpc get_balance res.multisig_import_needed = m_wallet->multisig() && m_wallet->has_multisig_partial_key_images();
 new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
 tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
+fix qr
 rpc wallet listener
 approximate chain height
 rpc on_generate_from_keys
 update javascript library to Java (difference from Java master to jni93 branch)
+release
+open issue: investigate integration of this library into Bisq
 
 MEDIUM
 update send end height mid sync so 100% figure is accurate
