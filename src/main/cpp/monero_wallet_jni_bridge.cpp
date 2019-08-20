@@ -1107,6 +1107,36 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv
   return env->NewStringUTF(tx_set.serialize().c_str());
 }
 
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepUnlockedJni(JNIEnv* env, jobject instance, jstring jsend_request) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_sweepUnlockedJni(request)");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  const char* _send_request = jsend_request ? env->GetStringUTFChars(jsend_request, NULL) : nullptr;
+  string send_request_json = string(_send_request ? _send_request : "");
+  env->ReleaseStringUTFChars(jsend_request, _send_request);
+
+  // deserialize send request
+  shared_ptr<monero_send_request> send_request = monero_utils::deserialize_send_request(send_request_json);
+  MTRACE("Deserialized send request, re-serialized: " << send_request->serialize());
+
+  // submit send request
+  vector<monero_tx_set> tx_sets;
+  try {
+    tx_sets = wallet->sweep_unlocked(*send_request);
+    MTRACE("Got " << tx_sets.size() << " tx sets");
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+
+  // wrap and serialize tx sets
+  std::stringstream ss;
+  boost::property_tree::ptree container;
+  if (!tx_sets.empty()) container.add_child("tx_sets", monero_utils::to_property_tree(tx_sets));
+  boost::property_tree::write_json(ss, container, false);
+  string tx_sets_json = strip_last_char(ss.str());
+  return env->NewStringUTF(tx_sets_json.c_str());
+}
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepOutputJni(JNIEnv* env, jobject instance, jstring jsend_request) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_sweepOutputJni(request)");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);

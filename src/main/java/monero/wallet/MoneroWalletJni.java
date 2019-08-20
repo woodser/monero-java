@@ -926,6 +926,26 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     else LOGGER.debug("Created " + txSet.getTxs().size() + " transaction(s) in last send request");
     return txSet;
   }
+  
+  @Override
+  public List<MoneroTxSet> sweepUnlocked(MoneroSendRequest request) {
+    assertNotClosed();
+    
+    // validate request
+    if (request == null) throw new MoneroException("Send request cannot be null");
+    
+    // submit send request to JNI and get response as json rooted at tx set
+    String txSetsJson;
+    try {
+      txSetsJson = sweepUnlockedJni(JsonUtils.serialize(request));
+      LOGGER.debug("Received sweepUnlocked() response from JNI: " + txSetsJson.substring(0, Math.min(5000, txSetsJson.length())) + "...");
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+    
+    // deserialize and return tx sets
+    return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, txSetsJson, TxSetsContainer.class).txSets;
+  }
 
   @Override
   public MoneroTxSet sweepOutput(MoneroSendRequest request) {
@@ -937,12 +957,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
-  }
-
-  @Override
-  public List<MoneroTxSet> sweepUnlocked(MoneroSendRequest request) {
-    assertNotClosed();
-    throw new RuntimeException("Not implemented");
   }
 
   @Override
@@ -1370,6 +1384,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String sendSplitJni(String sendRequestJson);
   
+  private native String sweepUnlockedJni(String sendRequestJson);
+  
   private native String sweepOutputJni(String sendRequestJson);
   
   private native String sweepDustJni(boolean doNotRelay);
@@ -1591,6 +1607,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private static class BlocksContainer {
     public List<MoneroBlockWallet> blocks;
+  }
+  
+  private static class TxSetsContainer {
+    public List<MoneroTxSet> txSets;
   }
   
   private static class KeyImagesContainer {
