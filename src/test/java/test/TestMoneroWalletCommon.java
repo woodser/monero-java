@@ -2640,7 +2640,7 @@ public abstract class TestMoneroWalletCommon {
     // set name attribute of test wallet at beginning of test
     String BEGIN_MULTISIG_NAME = "begin_multisig_wallet";
     wallet.setAttribute("name", BEGIN_MULTISIG_NAME);
-    //wallet.close();
+    wallet.close();
     
     // create n wallets and prepare multisig hexes
     List<String> preparedMultisigHexes = new ArrayList<String>();
@@ -2651,7 +2651,7 @@ public abstract class TestMoneroWalletCommon {
       MoneroWallet wallet = pair.getFirst();
       wallet.setAttribute("name", pair.getSecond());  // set the name of each wallet as an attribute
       preparedMultisigHexes.add(wallet.prepareMultisig());
-      //System.out.println(wallet.prepareMultisig());
+      System.out.println("PREPARED HEX: " + preparedMultisigHexes.get(preparedMultisigHexes.size() - 1));
       
       wallet.save();
       wallet.close();
@@ -2672,15 +2672,14 @@ public abstract class TestMoneroWalletCommon {
       
       // make the wallet multisig
       MoneroMultisigInitResult result = wallet.makeMultisig(peerMultisigHexes, m, TestUtils.WALLET_PASSWORD);
-      System.out.println(JsonUtils.serialize(result));
+      wallet.sync();
+      System.out.println("Make init result: " + JsonUtils.serialize(result));
       if (address == null) address = result.getAddress();
       else assertEquals(address, result.getAddress());
       madeMultisigHexes.add(result.getMultisigHex());
       
       wallet.save();
       wallet.close();
-//      wallet.sync();
-//      wallet.startSyncing();
     }
     
     // handle (n-1)/n which uses finalize
@@ -2689,7 +2688,6 @@ public abstract class TestMoneroWalletCommon {
       for (int i = 0; i < walletIds.size(); i++) {
         
         // open the wallet
-        System.out.println("Opening wallet");
         MoneroWallet wallet = openWallet(walletIds.get(i));
         assertEquals(walletIds.get(i), wallet.getAttribute("name"));
         
@@ -2698,6 +2696,7 @@ public abstract class TestMoneroWalletCommon {
         for (int j = 0; j < walletIds.size(); j++) if (j != i) peerMultisigHexes.add(madeMultisigHexes.get(j));
         
         // finalize the multisig wallet
+        System.out.println("Finalizing multisig: " + peerMultisigHexes.toString());
         String walletAddress = wallet.finalizeMultisig(peerMultisigHexes, TestUtils.WALLET_PASSWORD);
         if (address == null) address = walletAddress;
         else assertEquals(address, walletAddress);
