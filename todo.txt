@@ -4,6 +4,7 @@ open monero core issues
 add multisig support
 test multisig with transfer and other sends
 jni sweepAllUnlocked()
+add testSweepUnlocked() which targets accounts and subaddresses
 test tx set in non multisig/cold wallets
 support sign_transfer, submit_transfer, etc
 test sending without enough money, should be consistent across calls
