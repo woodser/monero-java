@@ -222,7 +222,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   public MoneroTxSet send(MoneroSendRequest request) {
     if (request == null) throw new MoneroException("Send request cannot be null");
     if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with send() which prevents splitting; use sendSplit() instead");
-    request.setCanSplit(false);
+    request.setCanSplit(false); // TODO: this modifies request, copy
     return sendSplit(request);
   }
   
