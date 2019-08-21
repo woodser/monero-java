@@ -67,12 +67,6 @@ test querying with not relayed
 scan code for issues using automated tool
 rename getLanguages() to getSupportedLanguages()?
 
-JAVASCRIPT LIBRARY ISSUES
-implement remaining binary calls in daemon RPC
-support client-side binding to Monero Core wallet using wasm
-support MyMonero adapter
-support multisig through the rpc interface
-
 BIG PICTURE
 open library issues
 open monero core issues
@@ -100,11 +94,11 @@ wallet2 does not report incoming transfers with outgoing counterpart from same a
 
 ISSUES TO OPEN
 wallet2 refactor
-test rapid send through a wallet
 generalize multisig wallet creation to 1) prepare, 2) make, 3) for M-N times.  This issue proposes deprecating finalize_multisig and replacing it with exchange_multisig_keys
-incoming outputs do not appear until first confirmation, sub-issue?
 
 MEDIUM / OUTDATED?
+test rapid send through a wallet
+incoming outputs do not appear until first confirmation, sub-issue?
 getReserveProofAccount() seg faulting (with no unlocked balance / spending 0-conf???), wallet rpc get_reserve_proof
 save network type with wallet export/import
 getTxPool() occasionally hangs (have no peer connections?)
