@@ -1,5 +1,4 @@
 HIGH
-open library issues
 open monero core issues
 add multisig support
 test multisig with transfer and other sends
