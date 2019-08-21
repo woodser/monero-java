@@ -2640,6 +2640,7 @@ public abstract class TestMoneroWalletCommon {
     // set name attribute of test wallet at beginning of test
     String BEGIN_MULTISIG_NAME = "begin_multisig_wallet";
     wallet.setAttribute("name", BEGIN_MULTISIG_NAME);
+    wallet.save();
     wallet.close();
     
     // create n wallets and prepare multisig hexes
@@ -2653,9 +2654,8 @@ public abstract class TestMoneroWalletCommon {
       preparedMultisigHexes.add(wallet.prepareMultisig());
       System.out.println("PREPARED HEX: " + preparedMultisigHexes.get(preparedMultisigHexes.size() - 1));
       
-//      wallet.sync();
       wallet.save();
-      //wallet.close();
+      wallet.close();
     }
 
     // make wallets multisig
@@ -2674,14 +2674,12 @@ public abstract class TestMoneroWalletCommon {
       // make the wallet multisig
       MoneroMultisigInitResult result = wallet.makeMultisig(peerMultisigHexes, m, TestUtils.WALLET_PASSWORD);
       System.out.println("Make init result: " + JsonUtils.serialize(result));
-      wallet.sync();
       if (address == null) address = result.getAddress();
       else assertEquals(address, result.getAddress());
       madeMultisigHexes.add(result.getMultisigHex());
       
-      //wallet.sync();
       wallet.save();
-      //wallet.close();
+      wallet.close();
     }
     
     // handle (n-1)/n which uses finalize
@@ -2704,8 +2702,8 @@ public abstract class TestMoneroWalletCommon {
         else assertEquals(address, walletAddress);
         
 //        wallet.sync();
-//        wallet.save();
-//        wallet.close();
+        wallet.save();
+        wallet.close();
       }
     }
     
