@@ -1,6 +1,6 @@
 HIGH
 open monero core issues
-add multisig support
+optimize multisig tests
 test multisig with transfer and other sends
 sweepAllUnlocked() -> sweepUnlocked()
 add getIncomingTransfers(), getOutgoingTransfers() convenience methods
