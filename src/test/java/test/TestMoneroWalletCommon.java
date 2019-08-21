@@ -2619,12 +2619,12 @@ public abstract class TestMoneroWalletCommon {
   public void testMultisig() {
     
     // test n/n
-    //testMultisig(2, 2, false);
+    testMultisig(2, 2, false);
     //testMultisig(3, 3, false);
     //testMultisig(4, 4, false);
     
     // test (n-1)/n
-    //testMultisig(2, 3, false);
+    testMultisig(2, 3, false);
     //testMultisig(3, 4, false);
     //testMultisig(5, 6, false);
     
