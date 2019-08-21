@@ -77,7 +77,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   protected MoneroWallet openWallet(String path) {
     MoneroWalletJni wallet = MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
-    //wallet.sync();
+    wallet.sync();
     wallet.save();
     //wallet.startSyncing();
     return wallet;
