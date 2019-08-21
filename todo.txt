@@ -95,6 +95,7 @@ wallet2 does not report incoming transfers with outgoing counterpart from same a
 ISSUES TO OPEN
 wallet2 refactor
 generalize multisig wallet creation to 1) prepare, 2) make, 3) for M-N times.  This issue proposes deprecating finalize_multisig and replacing it with exchange_multisig_keys
+wallet rpc on_transfer_split should throw if no txs are created, same as how transfer throws if exactly one tx is not created
 
 MEDIUM / OUTDATED?
 test rapid send through a wallet
