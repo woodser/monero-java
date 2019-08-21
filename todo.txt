@@ -9,6 +9,7 @@ add testSweepUnlocked() which targets accounts and subaddresses
 support sign_transfer, submit_transfer
 test tx set in cold wallet with sign and submit
 test tx set in regular wallet (null values + txs)
+add any open init steps from make_from_json?
 test sending without enough money, should be consistent across calls
 update model: multisig methods and models, sample code rescan_spent(), MoneroTxSet attribute of MoneroTxWallet
 daemon.getNextBlockHeader() sometimes hangs
