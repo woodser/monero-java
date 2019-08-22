@@ -1,15 +1,15 @@
 HIGH
 merging by output indices if available
+test multisig with transfer and other sends
+remove merge by key images and test since multiple outputs can map to common key image
 saving wallet after make_multisig() causes refresh thread exception
 optimize multisig tests: profile diff with startSyncing() running
 jni multisig 2/3 after duration occassionally shuts down (??)
+optimize multisig tests: jni can keep references of open jni wallets so wallets are not closed and re-opened
+
 open monero core issues
-test multisig with transfer and other sends
 add testSweepUnlocked() which targets accounts and subaddresses
 support close(bool save)
-optimize multisig tests: jni can keep references of open jni wallets so wallets are not closed and re-opened
-remove merge by key images and test since multiple outputs can map to common key image
-
 support sign_transfer, submit_transfer
 test tx set in cold wallet with sign and submit
 test tx set in regular wallet (null values + txs)
