@@ -1,10 +1,12 @@
 HIGH
+saving wallet after make_multisig() causess refresh thread exception
 open monero core issues
 optimize multisig tests
 test multisig with transfer and other sends
 sweepAllUnlocked() -> sweepUnlocked()
 add getIncomingTransfers(), getOutgoingTransfers() convenience methods
 add testSweepUnlocked() which targets accounts and subaddresses
+support close(bool save)
 support sign_transfer, submit_transfer
 test tx set in cold wallet with sign and submit
 test tx set in regular wallet (null values + txs)
@@ -20,6 +22,7 @@ rpc wallet listener
 approximate chain height
 rpc on_generate_from_keys
 update javascript library to Java (difference from Java master to jni93 branch)
+re-enable sample code build
 release
 open issue: investigate integration of this library into Bisq
 
