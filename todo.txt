@@ -1,6 +1,4 @@
 HIGH
-merging by output indices if available
-test multisig with transfer and other sends
 remove merge by key images and test since multiple outputs can map to common key image
 saving wallet after make_multisig() causes refresh thread exception
 optimize multisig tests: profile diff with startSyncing() running
