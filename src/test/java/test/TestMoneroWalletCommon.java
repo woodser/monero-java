@@ -2684,7 +2684,7 @@ public abstract class TestMoneroWalletCommon {
     //testMultisig(5, 6, false);
     
     // test m/n
-    testMultisig(2, 4, true);
+    testMultisig(2, 4, false);
     //testMultisig(3, 5, false);
     //testMultisig(3, 7, false);
   }
@@ -2895,7 +2895,6 @@ public abstract class TestMoneroWalletCommon {
       
       // wallet has unlocked balance in subaddress [0, 1]
       assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
-      curWallet.sync();
       assertTrue(curWallet.getUnlockedBalance(1, 0).compareTo(BigInteger.valueOf(0)) > 0);
       List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setAccountIndex(1).setSubaddressIndex(0));
       assertFalse(outputs.isEmpty());
@@ -2976,7 +2975,7 @@ public abstract class TestMoneroWalletCommon {
     List<String> multisigHexes = new ArrayList<String>();
     for (String walletId : walletIds) {
       MoneroWallet wallet = openWallet(walletId);
-      wallet.sync();
+      //wallet.sync();
       multisigHexes.add(wallet.getMultisigHex());
       wallet.save();
       wallet.close();
@@ -2988,14 +2987,14 @@ public abstract class TestMoneroWalletCommon {
       for (int j = 0; j < walletIds.size(); j++) if (j != i) peerMultisigHexes.add(multisigHexes.get(j));
       MoneroWallet wallet = openWallet(walletIds.get(i));
       wallet.importMultisigHex(peerMultisigHexes);
-      wallet.sync();
+      //wallet.sync();
       wallet.save();
       wallet.close();
     }
     
     // open end wallet
     MoneroWallet endWallet = openWallet(endWalletId);
-    endWallet.sync();
+    //endWallet.sync();
     return endWallet;
   }
   
