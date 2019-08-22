@@ -2616,8 +2616,13 @@ public abstract class TestMoneroWalletCommon {
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // generate non-relayed transactions to sweep dust
-    List<MoneroTxWallet> txs = wallet.sweepDust(true).getTxs();
-    org.junit.Assume.assumeFalse(txs.isEmpty()); // dust does not exist after rct
+    List<MoneroTxWallet> txs = null;
+    try {
+      txs = wallet.sweepDust(true).getTxs();
+    } catch (MoneroException e) {
+      assertEquals("No dust to sweep", e.getMessage());
+      return;
+    }
     
     // test txs
     TestContext ctx = new TestContext();
