@@ -1097,6 +1097,62 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
+  // Can get the wallet's incoming and outgoing transfers using convenience methods
+  @Test
+  public void testGetIncomingOutgoingTransfers() {
+    
+    // get incoming transfers
+    List<MoneroIncomingTransfer> inTransfers = wallet.getIncomingTransfers();
+    assertFalse(inTransfers.isEmpty());
+    for (MoneroIncomingTransfer transfer : inTransfers) {
+      assertTrue(transfer.isIncoming());
+      testTransfer(transfer, null);
+    }
+    
+    // get incoming transfers with query
+    inTransfers = wallet.getIncomingTransfers(new MoneroTransferQuery().setAccountIndex(0).setSubaddressIndex(1));
+    assertFalse(inTransfers.isEmpty());
+    for (MoneroIncomingTransfer transfer : inTransfers) {
+      assertTrue(transfer.isIncoming());
+      assertEquals(0, (int) transfer.getAccountIndex());
+      assertEquals(1, (int) transfer.getSubaddressIndex());
+      testTransfer(transfer, null);
+    }
+    
+    // get incoming transfers with contradictory query
+    try {
+      inTransfers = wallet.getIncomingTransfers(new MoneroTransferQuery().setIsIncoming(false));
+    } catch (MoneroException e) {
+      assertEquals("Transfer query contradicts getting incoming transfers", e.getMessage());
+    }
+    
+    // get outgoing transfers
+    List<MoneroOutgoingTransfer> outTransfers = wallet.getOutgoingTransfers();
+    assertFalse(outTransfers.isEmpty());
+    for (MoneroOutgoingTransfer transfer : outTransfers) {
+      assertTrue(transfer.isOutgoing());
+      testTransfer(transfer, null);
+    }
+    
+    // get outgoing transfers with query
+    outTransfers = wallet.getOutgoingTransfers(new MoneroTransferQuery().setAccountIndex(0).setSubaddressIndex(1));
+    assertFalse(outTransfers.isEmpty());
+    for (MoneroOutgoingTransfer transfer : outTransfers) {
+      assertTrue(transfer.isOutgoing());
+      assertEquals(0, (int) transfer.getAccountIndex());
+      assertEquals(1, transfer.getSubaddressIndices().size());
+      assertEquals(1, (int) transfer.getSubaddressIndices().get(0));
+      testTransfer(transfer, null);
+    }
+    
+    // get outgoing transfers with contradictory query
+    try {
+      outTransfers = wallet.getOutgoingTransfers(new MoneroTransferQuery().setIsOutgoing(false));
+    } catch (MoneroException e) {
+      assertEquals("Transfer query contradicts getting outgoing transfers", e.getMessage());
+    }
+  }
+  
   // Can get outputs in the wallet, accounts, and subaddresses
   @Test
   public void testGetOutputs() {
@@ -2853,6 +2909,7 @@ public abstract class TestMoneroWalletCommon {
       try {
         MoneroTxSet txSet = curWallet.sendSplit(1, testWalletAddress, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3)));
         System.out.println("WARNING: wallet returned a tx set from sendSplit() even though it has not been synchronized with participants, expected exception: " + JsonUtils.serialize(txSet));  // TODO monero core: wallet_rpc_server.cpp:995 should throw if no txs created
+        fail("Should have failed sending funds without synchronizing with peers");
       } catch (MoneroException e) {
         if (!e.getMessage().contains("Should have failed")) { // TODO: remove this check when wallet rpc throws exception as expected
           assertEquals("No transaction created", e.getMessage());
