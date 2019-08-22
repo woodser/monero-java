@@ -10,8 +10,7 @@ optimize multisig tests: jni can keep references of open jni wallets so wallets 
 open monero core issues
 add testSweepUnlocked() which targets accounts and subaddresses
 support close(bool save)
-support sign_transfer, submit_transfer
-test tx set in cold wallet with sign and submit
+
 test tx set in regular wallet (null values + txs)
 add any open init steps from make_from_json?
 test sending without enough money, should be consistent across calls
@@ -21,6 +20,7 @@ new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeig
 tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
 fix qr
 approximate chain height
+
 update model: multisig methods and models, sample code rescan_spent(), MoneroTxSet attribute of MoneroTxWallet, sweepAllUnlocked()->sweepUnlocked(), getIncomingTransfers(query), getOutgoingTransfers(query)
 update javascript library to Java (difference from Java master to jni93 branch)
 re-enable sample code build
@@ -28,6 +28,8 @@ release
 open issue: investigate integration of this library into Bisq
 
 MEDIUM
+support sign_transfer, submit_transfer
+test tx set in cold wallet with sign and submit
 rpc wallet listener
 rpc on_generate_from_keys
 add types to model
@@ -102,8 +104,8 @@ wallet2 does not report incoming transfers with outgoing counterpart from same a
 
 ISSUES TO OPEN
 wallet2 refactor
-generalize multisig wallet creation to 1) prepare, 2) make, 3) for M-N times.  This issue proposes deprecating finalize_multisig and replacing it with exchange_multisig_keys
 wallet rpc on_transfer_split should throw if no txs are created, same as how transfer throws if exactly one tx is not created
+generalize multisig wallet creation to 1) prepare, 2) make, 3) for M-N times.  This issue proposes deprecating finalize_multisig and replacing it with exchange_multisig_keys
 
 MEDIUM / OUTDATED?
 test rapid send through a wallet
