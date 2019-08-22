@@ -2977,11 +2977,11 @@ public abstract class TestMoneroWalletCommon {
       
       // sweep remaining balance
       System.out.println("Sweeping");
-      List<MoneroTxSet> txSets = curWallet.sweepUnlocked(new MoneroSendRequest(returnAddress, TestUtils.MAX_FEE).setAccountIndex(1)); // TODO: test multisig with sweepEachSubaddress which will generate multiple tx sets without synchronizing participants
+      List<MoneroTxSet> txSets = curWallet.sweepUnlocked(new MoneroSendRequest(returnAddress).setAccountIndex(1)); // TODO: test multisig with sweepEachSubaddress which will generate multiple tx sets without synchronizing participants
       assertEquals(1, txSets.size()); // only one tx set created per account
       
       // sign the tx with participants 1 through m - 1 to meet threshold
-      multisigTxHex = txSet.getMultisigTxHex();
+      multisigTxHex = txSets.get(0).getMultisigTxHex();
       System.out.println("Signing sweep");
       for (int i = 1; i < m; i++) {
         curWallet = openWallet(walletIds.get(i));
