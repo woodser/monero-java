@@ -2629,7 +2629,7 @@ public abstract class TestMoneroWalletCommon {
     //testMultisig(5, 6, false);
     
     // test m/n
-    testMultisig(2, 4, true);
+    testMultisig(2, 4, false);
     //testMultisig(3, 5, false);
     //testMultisig(3, 7, false);
   }
@@ -2637,11 +2637,18 @@ public abstract class TestMoneroWalletCommon {
   private void testMultisig(int m, int n, boolean testTx) {
     System.out.println("testMultisig(" + m + ", " + n + ")");
     
+    long startTime = System.currentTimeMillis();
+    
     // set name attribute of test wallet at beginning of test
     String BEGIN_MULTISIG_NAME = "begin_multisig_wallet";
     wallet.setAttribute("name", BEGIN_MULTISIG_NAME);
     wallet.save();
     //wallet.close();
+    
+    // print duration
+    long endTime = System.currentTimeMillis();
+    System.out.println("Duration 1: " + (endTime - startTime));
+    startTime = endTime;
     
     // create n wallets and prepare multisig hexes
     List<String> preparedMultisigHexes = new ArrayList<String>();
@@ -2657,6 +2664,11 @@ public abstract class TestMoneroWalletCommon {
       wallet.save();
       wallet.close();
     }
+    
+    // print duration
+    endTime = System.currentTimeMillis();
+    System.out.println("Duration 2: " + (endTime - startTime));
+    startTime = endTime;
 
     // make wallets multisig
     String address = null;
@@ -2670,7 +2682,7 @@ public abstract class TestMoneroWalletCommon {
       // collect prepared multisig hexes from wallet's peers
       List<String> peerMultisigHexes = new ArrayList<String>();
       for (int j = 0; j < walletIds.size(); j++) if (j != i) peerMultisigHexes.add(preparedMultisigHexes.get(j));
-      
+
       // make the wallet multisig
       MoneroMultisigInitResult result = wallet.makeMultisig(peerMultisigHexes, m, TestUtils.WALLET_PASSWORD);
       System.out.println("MADE RESULT: " + JsonUtils.serialize(result));
@@ -2678,9 +2690,15 @@ public abstract class TestMoneroWalletCommon {
       else assertEquals(address, result.getAddress());
       madeMultisigHexes.add(result.getMultisigHex());
       
-      wallet.save();
+//      wallet.sync();
+//      wallet.save();
       wallet.close();
     }
+    
+    // print duration
+    endTime = System.currentTimeMillis();
+    System.out.println("Duration 3: " + (endTime - startTime));
+    startTime = endTime;
     
     // handle (n-1)/n which uses finalize
     if (m == n - 1) {
@@ -2697,11 +2715,12 @@ public abstract class TestMoneroWalletCommon {
         
         // finalize the multisig wallet
         String walletAddress = wallet.finalizeMultisig(peerMultisigHexes, TestUtils.WALLET_PASSWORD);
+        System.out.println("Finalized address: " + walletAddress);
         if (address == null) address = walletAddress;
         else assertEquals(address, walletAddress);
         
 //        wallet.sync();
-        wallet.save();
+//        wallet.save();
         wallet.close();
       }
     }
@@ -2747,7 +2766,7 @@ public abstract class TestMoneroWalletCommon {
             exchangeMultisigHexes.add(result.getMultisigHex());
           }
           
-          wallet.save();
+          //wallet.save();
           wallet.close();
         }
         
@@ -2760,11 +2779,18 @@ public abstract class TestMoneroWalletCommon {
     MoneroWallet curWallet = openWallet(walletIds.get(0));
     assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
     System.out.println("FINAL MULTISIG ADDRESS: " + curWallet.getPrimaryAddress());
+    curWallet.close();
+    
+    // print duration
+    endTime = System.currentTimeMillis();
+    System.out.println("Duration 4: " + (endTime - startTime));
+    startTime = endTime;
     
     // test sending a multisig transaction if configured
     if (testTx) {
       
       // get a destination address in the first multisig wallet
+      curWallet = openWallet(walletIds.get(0));
       assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
       curWallet.createAccount();
       String destinationAddress = curWallet.getAddress(1, 0);
@@ -2837,9 +2863,9 @@ public abstract class TestMoneroWalletCommon {
       curWallet = synchronizeMultisigParticipants(walletIds, walletIds.get(0));
       assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
       
-      // create transaction to send from multisig wallet but don't relay?
-      //List<MoneroTxWallet> sendTxs = curWallet.sweepAllUnlocked(new MoneroSendRequest(testWalletAddress).setDoNotRelay(true));
-      MoneroTxSet txSet = curWallet.sendSplit(new MoneroSendRequest(testWalletAddress, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).setAccountIndex(1).setDoNotRelay(true));
+      // create transaction to send from multisig wallet
+      //List<MoneroTxWallet> sendTxs = curWallet.sweepUnlocked(new MoneroSendRequest(testWalletAddress).setDoNotRelay(true));
+      MoneroTxSet txSet = curWallet.sendSplit(new MoneroSendRequest(testWalletAddress, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).setAccountIndex(1));
       
       // get the multisig tx hex which is common among the multisig txs
       String multisigTxHex = txSet.getMultisigTxHex();
@@ -2866,14 +2892,26 @@ public abstract class TestMoneroWalletCommon {
       List<MoneroTxWallet> multisigTxs = curWallet.getTxs(new MoneroTxQuery().setTxIds(txIds));
       assertEquals(multisigTxs.size(), txIds.size());
     }
-        
+    
     // close multisig test wallets and re-assign main test wallet
+    // TODO: unecessary
     for (String walletId : walletIds) {
       curWallet = openWallet(walletId);
       curWallet.close();
     }
+    
+    // print duration
+    endTime = System.currentTimeMillis();
+    System.out.println("Duration 5: " + (endTime - startTime));
+    startTime = endTime;
+    
     wallet = getTestWallet();
     assertEquals(BEGIN_MULTISIG_NAME, wallet.getAttribute("name"));
+    
+    // print duration
+    endTime = System.currentTimeMillis();
+    System.out.println("Duration 6: " + (endTime - startTime));
+    startTime = endTime;
   }
   
   private MoneroWallet synchronizeMultisigParticipants(List<String> walletIds, String endWalletId) {
