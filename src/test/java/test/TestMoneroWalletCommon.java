@@ -2672,21 +2672,28 @@ public abstract class TestMoneroWalletCommon {
   // Can support multisig wallets
   @Test
   public void testMultisig() {
-    
-    // test n/n
-    testMultisig(2, 2, false);
-    //testMultisig(3, 3, false);
-    //testMultisig(4, 4, false);
-    
-    // test (n-1)/n
-    testMultisig(2, 3, false);
-    //testMultisig(3, 4, false);
-    //testMultisig(5, 6, false);
-    
-    // test m/n
-    testMultisig(2, 4, true);
-    //testMultisig(3, 5, false);
-    //testMultisig(3, 7, false);
+    try {
+      
+      // test n/n
+      testMultisig(2, 2, false);
+      //testMultisig(3, 3, false);
+      //testMultisig(4, 4, false);
+      
+      // test (n-1)/n
+      testMultisig(2, 3, false);
+      //testMultisig(3, 4, false);
+      //testMultisig(5, 6, false);
+      
+      // test m/n
+      testMultisig(2, 4, true);
+      //testMultisig(3, 5, false);
+      //testMultisig(3, 7, false);
+    } finally {
+      
+      // stop mining at end of test
+      try { daemon.stopMining(); }
+      catch (MoneroException e) { }
+    }
   }
   
   private void testMultisig(int m, int n, boolean testTx) {
