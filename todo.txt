@@ -1,33 +1,36 @@
 HIGH
+jni multisig test not enough money
 saving wallet after make_multisig() causes refresh thread exception
 open monero core issues
-optimize multisig tests: profile diff with startSyncing() running
-optimize multisig tests: jni can keep references of open jni wallets so wallets are not closed and re-opened
 test multisig with transfer and other sends
 add testSweepUnlocked() which targets accounts and subaddresses
 support close(bool save)
-add output min, max, height to output query, transfer query
+
+optimize multisig tests: profile diff with startSyncing() running
+optimize multisig tests: jni can keep references of open jni wallets so wallets are not closed and re-opened
+
 support sign_transfer, submit_transfer
 test tx set in cold wallet with sign and submit
 test tx set in regular wallet (null values + txs)
 add any open init steps from make_from_json?
 test sending without enough money, should be consistent across calls
-update model: multisig methods and models, sample code rescan_spent(), MoneroTxSet attribute of MoneroTxWallet, sweepAllUnlocked()->sweepUnlocked(), getIncomingTransfers(query), getOutgoingTransfers(query)
 daemon.getNextBlockHeader() sometimes hangs
 wallet rpc get_balance res.multisig_import_needed = m_wallet->multisig() && m_wallet->has_multisig_partial_key_images();
 new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
 tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
 fix qr
-rpc wallet listener
 approximate chain height
-rpc on_generate_from_keys
+update model: multisig methods and models, sample code rescan_spent(), MoneroTxSet attribute of MoneroTxWallet, sweepAllUnlocked()->sweepUnlocked(), getIncomingTransfers(query), getOutgoingTransfers(query)
 update javascript library to Java (difference from Java master to jni93 branch)
 re-enable sample code build
 release
 open issue: investigate integration of this library into Bisq
 
 MEDIUM
+rpc wallet listener
+rpc on_generate_from_keys
 add types to model
+add output min, max, height to output query, transfer query
 update send end height mid sync so 100% figure is accurate
 tx pool stats and other binary calls
 performance tests (memory leaks, concurrent wallets, etc)
