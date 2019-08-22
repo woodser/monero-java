@@ -32,7 +32,9 @@ import java.util.List;
 import monero.utils.MoneroException;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
+import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSendRequest;
@@ -156,6 +158,27 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   public List<MoneroTransfer> getTransfers(int accountIdx, int subaddressIdx) {
     MoneroTransferQuery query = new MoneroTransferQuery().setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx);
     return getTransfers(query);
+  }
+  
+
+  @Override
+  public List<MoneroIncomingTransfer> getIncomingTransfers() {
+    return getIncomingTransfers(null);
+  }
+
+  @Override
+  public List<MoneroIncomingTransfer> getIncomingTransfers(MoneroTransferQuery query) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public List<MoneroOutgoingTransfer> getOutgoingTransfers() {
+    return getOutgoingTransfers(null);
+  }
+
+  @Override
+  public List<MoneroOutgoingTransfer> getOutgoingTransfers(MoneroTransferQuery query) {
+    throw new RuntimeException("Not implemented");
   }
   
   @Override

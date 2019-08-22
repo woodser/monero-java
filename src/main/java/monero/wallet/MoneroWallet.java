@@ -32,11 +32,13 @@ import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
+import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroMultisigSignResult;
+import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
@@ -493,6 +495,36 @@ public interface MoneroWallet {
    * @return List<MoneroOutputWallet> are wallet outputs per the query
    */
   public List<MoneroOutputWallet> getOutputs(MoneroOutputQuery query);
+  
+  /**
+   * Get all of the wallet's incoming transfers.
+   * 
+   * @return the wallet's incoming transfers
+   */
+  public List<MoneroIncomingTransfer> getIncomingTransfers();
+  
+  /**
+   * Get the wallet's incoming transfers according to the given query.
+   * 
+   * @param query specifies which incoming transfers to get
+   * @return the wallet's incoming transfers according to the given query
+   */
+  public List<MoneroIncomingTransfer> getIncomingTransfers(MoneroTransferQuery query);
+  
+  /**
+   * Get all of the wallet's outgoing transfers.
+   * 
+   * @return the wallet's outgoing transfers
+   */
+  public List<MoneroOutgoingTransfer> getOutgoingTransfers();
+  
+  /**
+   * Get the wallet's outgoing transfers according to the given query.
+   * 
+   * @param query specifies which outgoing transfers to get
+   * @return the wallet's outgoing transfers according to the given query
+   */
+  public List<MoneroOutgoingTransfer> getOutgoingTransfers(MoneroTransferQuery query);
   
   /**
    * Export all outputs in hex format.
