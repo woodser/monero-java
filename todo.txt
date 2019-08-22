@@ -7,6 +7,7 @@ test multisig with transfer and other sends
 add getIncomingTransfers(), getOutgoingTransfers() convenience methods
 add testSweepUnlocked() which targets accounts and subaddresses
 support close(bool save)
+add output min, max, height to output query, transfer query
 support sign_transfer, submit_transfer
 test tx set in cold wallet with sign and submit
 test tx set in regular wallet (null values + txs)
