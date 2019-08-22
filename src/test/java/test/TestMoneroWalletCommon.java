@@ -2862,6 +2862,7 @@ public abstract class TestMoneroWalletCommon {
       int accountIdx = 1;
       List<MoneroDestination> destinations = new ArrayList<MoneroDestination>();
       for (int i = 0; i < 3; i++) {
+        curWallet.createSubaddress(accountIdx);
         destinations.add(new MoneroDestination(curWallet.getAddress(accountIdx, i), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(2))));
       }
       
