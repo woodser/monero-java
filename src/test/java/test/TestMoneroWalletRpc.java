@@ -634,6 +634,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testGetTransfersValidateInputs() {
     super.testGetTransfersValidateInputs();
   }
+  
+  @Override
+  public void testGetIncomingOutgoingTransfers() {
+    super.testGetIncomingOutgoingTransfers();
+  }
 
   @Override
   public void testGetOutputs() {
