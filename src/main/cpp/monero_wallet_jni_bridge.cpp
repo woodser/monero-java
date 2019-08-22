@@ -1131,7 +1131,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepUnlockedJni(JN
   // wrap and serialize tx sets
   std::stringstream ss;
   boost::property_tree::ptree container;
-  if (!tx_sets.empty()) container.add_child("tx_sets", monero_utils::to_property_tree(tx_sets));
+  if (!tx_sets.empty()) container.add_child("txSets", monero_utils::to_property_tree(tx_sets));
   boost::property_tree::write_json(ss, container, false);
   string tx_sets_json = strip_last_char(ss.str());
   return env->NewStringUTF(tx_sets_json.c_str());
