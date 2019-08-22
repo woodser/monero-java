@@ -2684,7 +2684,7 @@ public abstract class TestMoneroWalletCommon {
     //testMultisig(5, 6, false);
     
     // test m/n
-    testMultisig(2, 4, false);
+    testMultisig(2, 4, true);
     //testMultisig(3, 5, false);
     //testMultisig(3, 7, false);
   }
@@ -2844,26 +2844,38 @@ public abstract class TestMoneroWalletCommon {
     // test sending a multisig transaction if configured
     if (testTx) {
       
-      // get a destination address in the first multisig wallet
+      System.out.println("Creating account");
+      
+      // create an account in the first multisig wallet to receive funds to
       curWallet = openWallet(walletIds.get(0));
       assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
       curWallet.createAccount();
-      String destinationAddress = curWallet.getAddress(1, 0);
-      assertNotNull(destinationAddress);
-      assertFalse(destinationAddress.isEmpty());
       
-      // send a transaction from the main test wallet to the multisig wallet
+      // get destinations to subaddresses within the account of the multisig wallet
+      int accountIdx = 1;
+      List<MoneroDestination> destinations = new ArrayList<MoneroDestination>();
+      for (int i = 0; i < 3; i++) {
+        destinations.add(new MoneroDestination(curWallet.getAddress(accountIdx, i), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(2))));
+      }
+      
+      System.out.println("Sending funds from main wallet");
+      
+      // send funds from the main test wallet to destinations in the first multisig wallet
       curWallet = getTestWallet();  // get / open the main test wallet
       assertEquals(BEGIN_MULTISIG_NAME, curWallet.getAttribute("name"));
       assertTrue(curWallet.getBalance().compareTo(BigInteger.valueOf(0)) > 0);
-      curWallet.send(0, destinationAddress, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(10)));
-      String testWalletAddress = curWallet.getAddress(1, 0);
+      curWallet.send(new MoneroSendRequest().setAccountIndex(0).setDestinations(destinations));
+      String returnAddress = curWallet.getPrimaryAddress(); // funds will be returned to this address from the multisig wallet
       
-      // open one of the multisig participants
+      System.out.println("opening first multisig participant");
+      
+      // open the first multisig participants
       curWallet = openWallet(walletIds.get(0));
       assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
       testMultisigInfo(curWallet.getMultisigInfo(), m, n);
       curWallet.startSyncing();
+      
+      System.out.println("Starting mining");
       
       // attempt to start mining
       try { StartMining.startMining(); }
@@ -2893,11 +2905,15 @@ public abstract class TestMoneroWalletCommon {
       // stop mining
       daemon.stopMining();
       
-      // wallet has unlocked balance in subaddress [0, 1]
+      // multisig wallet should have unlocked balance in account 1 subaddresses 0-3
       assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
-      assertTrue(curWallet.getUnlockedBalance(1, 0).compareTo(BigInteger.valueOf(0)) > 0);
-      List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setAccountIndex(1).setSubaddressIndex(0));
+      for (int i = 0; i < 3; i++) {
+        assertTrue(curWallet.getUnlockedBalance(1, i).compareTo(BigInteger.valueOf(0)) > 0);
+      }
+      List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setAccountIndex(1));
       assertFalse(outputs.isEmpty());
+      if (outputs.size() < 3) System.out.println("WARNING: not one output per subaddress?");
+      //assertTrue(outputs.size() >= 3);  // TODO
       for (MoneroOutputWallet output : outputs) assertTrue(output.isUnlocked());
       
       // wallet requires importing multisig to be reliable
@@ -2905,7 +2921,7 @@ public abstract class TestMoneroWalletCommon {
       
       // attempt creating and relaying transaction without synchronizing with participants
       try {
-        MoneroTxSet txSet = curWallet.sendSplit(1, testWalletAddress, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3)));
+        MoneroTxSet txSet = curWallet.sendSplit(1, returnAddress, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3)));
         System.out.println("WARNING: wallet returned a tx set from sendSplit() even though it has not been synchronized with participants, expected exception: " + JsonUtils.serialize(txSet));  // TODO monero core: wallet_rpc_server.cpp:995 should throw if no txs created
         //throw new RuntimeException("Should have failed sending funds without synchronizing with peers");
       } catch (MoneroException e) {
@@ -2915,36 +2931,70 @@ public abstract class TestMoneroWalletCommon {
       }
       
       // synchronize the multisig participants since receiving outputs
+      System.out.println("Synchronizing participants");
       curWallet = synchronizeMultisigParticipants(walletIds, walletIds.get(0));
       assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
       
-      // create transaction to send from multisig wallet
+      // send funds from a subaddress in the multisig wallet
       //List<MoneroTxWallet> sendTxs = curWallet.sweepUnlocked(new MoneroSendRequest(testWalletAddress).setDoNotRelay(true));
-      MoneroTxSet txSet = curWallet.sendSplit(new MoneroSendRequest(testWalletAddress, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).setAccountIndex(1));
-      
-      // get the multisig tx hex which is common among the multisig txs
-      String multisigTxHex = txSet.getMultisigTxHex();
+      System.out.println("Sending");
+      MoneroTxSet txSet = curWallet.sendSplit(new MoneroSendRequest(returnAddress, TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0));
       
       // sign the tx with participants 1 through m - 1 to meet threshold
+      String multisigTxHex = txSet.getMultisigTxHex();
+      System.out.println("Signing");
       for (int i = 1; i < m; i++) {
         curWallet = openWallet(walletIds.get(i));
         MoneroMultisigSignResult result = curWallet.signMultisigTxHex(multisigTxHex);
         multisigTxHex = result.getSignedMultisigTxHex();
+        curWallet.close();
       }
       
       //System.out.println("Submitting signed multisig tx hex: " + multisigTxHex);
       
       // submit the signed multisig tx hex to the network
+      System.out.println("Submitting");
       curWallet = openWallet(walletIds.get(0));
       List<String> txIds = curWallet.submitMultisigTxHex(multisigTxHex);
       curWallet.save();
       
       // synchronize the multisig participants since spending outputs
+      System.out.println("Synchronizing participants");
       curWallet = synchronizeMultisigParticipants(walletIds, walletIds.get(0));
       PrintBalances.printBalances(curWallet);
       
       // fetch the wallet's multisig txs
       List<MoneroTxWallet> multisigTxs = curWallet.getTxs(new MoneroTxQuery().setTxIds(txIds));
+      assertEquals(multisigTxs.size(), txIds.size());
+      
+      // sweep remaining balance
+      System.out.println("Sweeping");
+      List<MoneroTxSet> txSets = curWallet.sweepUnlocked(new MoneroSendRequest(returnAddress, TestUtils.MAX_FEE).setAccountIndex(1)); // TODO: test multisig with sweepEachSubaddress which will generate multiple tx sets without synchronizing participants
+      assertEquals(1, txSets.size()); // only one tx set created per account
+      
+      // sign the tx with participants 1 through m - 1 to meet threshold
+      multisigTxHex = txSet.getMultisigTxHex();
+      System.out.println("Signing sweep");
+      for (int i = 1; i < m; i++) {
+        curWallet = openWallet(walletIds.get(i));
+        MoneroMultisigSignResult result = curWallet.signMultisigTxHex(multisigTxHex);
+        multisigTxHex = result.getSignedMultisigTxHex();
+        curWallet.close();
+      }
+      
+      // submit the signed multisig tx hex to the network
+      System.out.println("Submitting sweep");
+      curWallet = openWallet(walletIds.get(0));
+      txIds = curWallet.submitMultisigTxHex(multisigTxHex);
+      curWallet.save();
+      
+      // synchronize the multisig participants since spending outputs
+      System.out.println("Synchronizing participants");
+      curWallet = synchronizeMultisigParticipants(walletIds, walletIds.get(0));
+      PrintBalances.printBalances(curWallet);
+      
+      // fetch the wallet's multisig txs
+      multisigTxs = curWallet.getTxs(new MoneroTxQuery().setTxIds(txIds));
       assertEquals(multisigTxs.size(), txIds.size());
     }
     
@@ -2975,7 +3025,7 @@ public abstract class TestMoneroWalletCommon {
     List<String> multisigHexes = new ArrayList<String>();
     for (String walletId : walletIds) {
       MoneroWallet wallet = openWallet(walletId);
-      //wallet.sync();
+      wallet.sync();
       multisigHexes.add(wallet.getMultisigHex());
       wallet.save();
       wallet.close();
@@ -2987,14 +3037,14 @@ public abstract class TestMoneroWalletCommon {
       for (int j = 0; j < walletIds.size(); j++) if (j != i) peerMultisigHexes.add(multisigHexes.get(j));
       MoneroWallet wallet = openWallet(walletIds.get(i));
       wallet.importMultisigHex(peerMultisigHexes);
-      //wallet.sync();
+      wallet.sync();
       wallet.save();
       wallet.close();
     }
     
     // open end wallet
     MoneroWallet endWallet = openWallet(endWalletId);
-    //endWallet.sync();
+    endWallet.sync();
     return endWallet;
   }
   

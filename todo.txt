@@ -1,12 +1,11 @@
 HIGH
-jni multisig test not enough money
 saving wallet after make_multisig() causes refresh thread exception
+optimize multisig tests: profile diff with startSyncing() running
+jni multisig 2/3 after duration occassionally shuts down
 open monero core issues
 test multisig with transfer and other sends
 add testSweepUnlocked() which targets accounts and subaddresses
 support close(bool save)
-
-optimize multisig tests: profile diff with startSyncing() running
 optimize multisig tests: jni can keep references of open jni wallets so wallets are not closed and re-opened
 
 support sign_transfer, submit_transfer
