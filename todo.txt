@@ -50,6 +50,7 @@ define specification for rct_signatures, rct_prunable, multisig_txset, unsigned_
 retrival by ranges end height should be exclusive? would be inconsistent with current rpc api
 random wallet should be synced if created with rpc connection?
 introduce query object for accounts? includeSubaddresses
+MoneroTransfer accountIdx, subaddressIdx could be int.  only query needs to support null.  same with other models
 testSendWithPaymentId() test that unconfirmed tx is immediately returned from getTxs() with payment id filter
 test out of range subaddress access for offline access
 architecture diagram
