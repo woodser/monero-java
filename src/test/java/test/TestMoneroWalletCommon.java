@@ -2629,7 +2629,7 @@ public abstract class TestMoneroWalletCommon {
     //testMultisig(5, 6, false);
     
     // test m/n
-    testMultisig(2, 4, false);
+    testMultisig(2, 4, true);
     //testMultisig(3, 5, false);
     //testMultisig(3, 7, false);
   }
