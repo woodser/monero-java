@@ -67,9 +67,9 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   protected Pair<MoneroWallet, String> createRandomWallet() {
     Pair<MoneroWallet, String> pair = new Pair<MoneroWallet, String>(null, TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString());
     MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(pair.getSecond(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
-    wallet.sync();
+    //wallet.sync();
     //wallet.save();
-    //wallet.startSyncing();
+    wallet.startSyncing();
     pair.setFirst(wallet);
     return pair;
   }
@@ -77,9 +77,9 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   protected MoneroWallet openWallet(String path) {
     MoneroWalletJni wallet = MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
-    wallet.sync();
+    //wallet.sync();
     //wallet.save();
-    //wallet.startSyncing();
+    wallet.startSyncing();
     return wallet;
   }
   
