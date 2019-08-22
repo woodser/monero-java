@@ -540,30 +540,20 @@ public class MoneroTx {
       if (this.getVouts() == null) this.setVouts(tx.getVouts());
       else {
         
-        // determine if key images present
-        int numKeyImages = 0;
-        for (MoneroOutput vout : this.getVouts()) {
-          if (vout.getKeyImage() != null) {
-            assertNotNull(vout.getKeyImage().getHex());
-            numKeyImages++;
-          }
-        }
-        for (MoneroOutput vout : tx.getVouts()) {
-          if (vout.getKeyImage() != null) {
-            assertNotNull(vout.getKeyImage().getHex());
-            numKeyImages++;
-          }
-        }
-        assertTrue("Some vouts have a key image and some do not", numKeyImages == 0 || this.getVouts().size() + tx.getVouts().size() == numKeyImages);
+        // validate output indices if present
+        int numIndices = 0;
+        for (MoneroOutput vout : this.getVouts()) if (vout.getIndex() != null) numIndices++;
+        for (MoneroOutput vout : tx.getVouts()) if (vout.getIndex() != null) numIndices++;
+        assertTrue("Some vouts have an output index and some do not", numIndices == 0 || this.getVouts().size() + tx.getVouts().size() == numIndices);
         
-        // merge by key images
-        if (numKeyImages > 0) {
+        // merge by output indices if present
+        if (numIndices > 0) {
           for (MoneroOutput merger : tx.getVouts()) {
             boolean merged = false;
             merger.setTx(this);
             if (this.getVouts() == null) this.setVouts(new ArrayList<MoneroOutput>());
             for (MoneroOutput mergee : this.getVouts()) {
-              if (mergee.getKeyImage().getHex().equals(merger.getKeyImage().getHex())) {
+              if (mergee.getIndex().equals(merger.getIndex())) {
                 mergee.merge(merger);
                 merged = true;
                 break;
@@ -571,13 +561,47 @@ public class MoneroTx {
             }
             if (!merged) this.getVouts().add(merger);
           }
-        }
+        } else {
+          
+          // determine if key images present
+          int numKeyImages = 0;
+          for (MoneroOutput vout : this.getVouts()) {
+            if (vout.getKeyImage() != null) {
+              assertNotNull(vout.getKeyImage().getHex());
+              numKeyImages++;
+            }
+          }
+          for (MoneroOutput vout : tx.getVouts()) {
+            if (vout.getKeyImage() != null) {
+              assertNotNull(vout.getKeyImage().getHex());
+              numKeyImages++;
+            }
+          }
+          assertTrue("Some vouts have a key image and some do not", numKeyImages == 0 || this.getVouts().size() + tx.getVouts().size() == numKeyImages);
+          
+          // merge by key images if present
+          if (numKeyImages > 0) {
+            for (MoneroOutput merger : tx.getVouts()) {
+              boolean merged = false;
+              merger.setTx(this);
+              if (this.getVouts() == null) this.setVouts(new ArrayList<MoneroOutput>());
+              for (MoneroOutput mergee : this.getVouts()) {
+                if (mergee.getKeyImage().getHex().equals(merger.getKeyImage().getHex())) {
+                  mergee.merge(merger);
+                  merged = true;
+                  break;
+                }
+              }
+              if (!merged) this.getVouts().add(merger);
+            }
+          }
 
-        // merge by position
-        else {
-          assertEquals(this.getVouts().size(), tx.getVouts().size());
-          for (int i = 0; i < tx.getVouts().size(); i++) {
-            this.getVouts().get(i).merge(tx.getVouts().get(i));
+          // otherwise merge by position
+          else {
+            assertEquals(this.getVouts().size(), tx.getVouts().size());
+            for (int i = 0; i < tx.getVouts().size(); i++) {
+              this.getVouts().get(i).merge(tx.getVouts().get(i));
+            }
           }
         }
       }
