@@ -27,6 +27,8 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroDestination;
+import monero.wallet.model.MoneroMultisigInfo;
+import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendRequest;
@@ -1160,6 +1162,74 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertFalse(myListener.getOutputsReceived().isEmpty());
   }
   
+  @Test
+  public void testSampleMultisig() {
+    createMultisigWallet(2, 2);
+    createMultisigWallet(2, 3);
+    createMultisigWallet(2, 4);
+  }
+  
+  private void createMultisigWallet(int M, int N) {
+    
+    // create participating wallets
+    List<MoneroWallet> wallets = new ArrayList<MoneroWallet>();
+    for (int i = 0; i < N; i++) {
+      wallets.add(createRandomWallet());  // TODO: switch to use utility
+    }
+    
+    // prepare and collect multisig hex from each participant
+    List<String> preparedMultisigHexes = new ArrayList<String>();
+    for (MoneroWallet wallet : wallets) preparedMultisigHexes.add(wallet.prepareMultisig());
+    
+    // make each participant multisig and collect resulting hex
+    List<String> madeMultisigHexes = new ArrayList<String>();
+    for (MoneroWallet wallet : wallets) {
+      MoneroMultisigInitResult result = wallet.makeMultisig(preparedMultisigHexes, N, TestUtils.WALLET_PASSWORD);
+      madeMultisigHexes.add(result.getMultisigHex());
+    }
+    
+    // if wallet is (N-1)/N, finalize the participants
+    if (M == N - 1) {
+      for (MoneroWallet wallet : wallets) {
+        String primaryAddress = wallet.finalizeMultisig(madeMultisigHexes, TestUtils.WALLET_PASSWORD);
+        System.out.println("Multisig address: " + primaryAddress);
+      }
+    }
+    
+    // if wallet is M/N, exchange multisig keys N - M times
+    else if (M != N) {
+      List<String> multisigHexes = madeMultisigHexes;
+      for (int i = 0; i < N - M; i++) {
+        
+        // exchange multisig keys among participants and collect results for next round if applicable
+        List<String> resultMultisigHexes = new ArrayList<String>();
+        for (MoneroWallet wallet : wallets) {
+          
+          // import the multisig hex of other participants and collect result
+          MoneroMultisigInitResult result = wallet.exchangeMultisigKeys(multisigHexes, TestUtils.WALLET_PASSWORD);
+          resultMultisigHexes.add(result.getMultisigHex());
+        }
+        
+        // use resulting multisig hex for next round of exchange if applicable
+        multisigHexes = resultMultisigHexes;
+      }
+    }
+    
+    // wallets are now multisig
+    for (MoneroWallet wallet : wallets) {
+      String primaryAddress = wallet.getAddress(0, 0);
+      System.out.println("Multisig address: " + primaryAddress);
+      MoneroMultisigInfo info = wallet.getMultisigInfo();
+      assertTrue(info.isMultisig());
+      assertTrue(info.isReady());
+      assertEquals(M, (int) info.getThreshold());
+      assertEquals(N, (int) info.getNumParticipants());
+      wallet.close(true);
+    }
+  }
+  
+  // ---------------------------------- HELPERS -------------------------------
+  
   /**
    * Wallet listener to collect output notifications.
    */
@@ -1191,8 +1261,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       return outputsSpent;
     }
   }
-  
-  // ---------------------------------- HELPERS -------------------------------
   
   public static String getRandomWalletPath() {
     return TestUtils.TEST_WALLETS_DIR + "/test_wallet_" + System.currentTimeMillis();
