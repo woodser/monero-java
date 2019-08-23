@@ -377,6 +377,6 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   
   @Override
   public void close() {
-    close(true); // save and close
+    close(false); // close without saving
   }
 }
