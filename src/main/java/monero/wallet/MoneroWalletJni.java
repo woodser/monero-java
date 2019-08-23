@@ -1425,12 +1425,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native void stopMiningJni();
   
-  private native void saveJni();
-  
-  private native void moveToJni(String path, String password);
-  
-  private native void closeJni(boolean save);
-  
   private native boolean isMultisigImportNeededJni();
   
   private native String getMultisigInfoJni();
@@ -1450,6 +1444,12 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String signMultisigTxHexJni(String multisigTxHex);
   
   private native String[] submitMultisigTxHexJni(String signedMultisigTxHex);
+  
+  private native void saveJni();
+  
+  private native void moveToJni(String path, String password);
+  
+  private native void closeJni(boolean save);
   
   // ------------------------------- LISTENERS --------------------------------
   
