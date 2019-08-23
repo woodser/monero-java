@@ -1169,6 +1169,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     createMultisigWallet(2, 4);
   }
   
+  @SuppressWarnings("unused")
   private void createMultisigWallet(int M, int N) {
     System.out.println("Creating " + M + "/" + N + " multisig wallet");
     
@@ -1190,7 +1191,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       List<String> peerMultisigHexes = new ArrayList<String>();
       for (int j = 0; j < wallets.size(); j++) if (j != i) peerMultisigHexes.add(preparedMultisigHexes.get(j));
     
-      MoneroMultisigInitResult result = wallets.get(i).makeMultisig(peerMultisigHexes, N, TestUtils.WALLET_PASSWORD);
+      MoneroMultisigInitResult result = wallets.get(i).makeMultisig(peerMultisigHexes, M, TestUtils.WALLET_PASSWORD);
       madeMultisigHexes.add(result.getMultisigHex());
     }
     
@@ -1200,12 +1201,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       
         // collect made multisig hexes from wallet's peers
         List<String> peerMultisigHexes = new ArrayList<String>();
-        for (int j = 0; j < wallets.size(); j++) if (j != i) peerMultisigHexes.add(preparedMultisigHexes.get(j));
+        for (int j = 0; j < wallets.size(); j++) if (j != i) peerMultisigHexes.add(madeMultisigHexes.get(j));
 
-        System.out.println("Finalizing wallet: " + wallet.getPath());
         // finalize the multisig wallet using peer hex
         String primaryAddress = wallets.get(i).finalizeMultisig(peerMultisigHexes, TestUtils.WALLET_PASSWORD);
-        System.out.println("Multisig address: " + primaryAddress);
       }
     }
     
@@ -1231,7 +1230,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // wallets are now multisig
     for (MoneroWallet wallet : wallets) {
       String primaryAddress = wallet.getAddress(0, 0);
-      System.out.println("Multisig address: " + primaryAddress);
       MoneroMultisigInfo info = wallet.getMultisigInfo();
       assertTrue(info.isMultisig());
       assertTrue(info.isReady());
