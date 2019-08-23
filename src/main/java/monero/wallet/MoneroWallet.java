@@ -1154,7 +1154,7 @@ public interface MoneroWallet {
   /**
    * Optionally save then close the wallet.
    *
-   * @param save specifies if the wallet should be saved before being closed (default true)
+   * @param save specifies if the wallet should be saved before being closed (default false)
    */
   public void close(boolean save);
 }
