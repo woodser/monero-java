@@ -374,4 +374,9 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   public boolean isMultisig() {
     return getMultisigInfo().isMultisig();
   }
+  
+  @Override
+  public void close() {
+    close(true); // save and close
+  }
 }

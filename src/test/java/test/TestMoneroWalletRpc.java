@@ -726,8 +726,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testSetKeyValues() {
-    super.testSetKeyValues();
+  public void testSetAttributes() {
+    super.testSetAttributes();
   }
 
   // test custom rpc error codes
@@ -907,5 +907,10 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Override
   public void testMultisig() {
     super.testMultisig();
+  }
+  
+  @Override
+  public void testSaveAndClose() {
+    super.testSaveAndClose();
   }
 }

@@ -191,10 +191,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   /**
-   * Save and close the current wallet.
+   * Optionally save then close the current wallet.
    */
-  public void close() {
-    rpc.sendJsonRequest("close_wallet");
+  public void close(boolean save) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("autosave_current", save);
+    rpc.sendJsonRequest("close_wallet", params);
     addressCache.clear();
   }
   
@@ -1407,15 +1409,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if ("".equals(request.getNote())) request.setNote(null);
     return request;
   }
-
-  @Override
-  public void setAttribute(String key, String val) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("key", key);
-    params.put("value", val);
-    rpc.sendJsonRequest("set_attribute", params);
-  }
-
+  
   @SuppressWarnings("unchecked")
   @Override
   public String getAttribute(String key) {
@@ -1423,7 +1417,16 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("key", key);
     Map<String, Object> resp = rpc.sendJsonRequest("get_attribute", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (String) result.get("value");
+    String value = (String) result.get("value");
+    return value.isEmpty() ? null : value;
+  }
+
+  @Override
+  public void setAttribute(String key, String val) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key", key);
+    params.put("value", val);
+    rpc.sendJsonRequest("set_attribute", params);
   }
 
   @Override

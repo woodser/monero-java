@@ -1835,7 +1835,7 @@ public abstract class TestMoneroWalletCommon {
   
   // Can get and set arbitrary key/value attributes
   @Test
-  public void testSetKeyValues() {
+  public void testSetAttributes() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // set attributes
@@ -1851,6 +1851,9 @@ public abstract class TestMoneroWalletCommon {
     for (String key : attrs.keySet()) {
       assertEquals(wallet.getAttribute(key), attrs.get(key));
     }
+    
+    // get an undefined attribute
+    assertEquals(null, wallet.getAttribute("unset_key"));
   }
   
   // Can convert between a tx send request and payment URI
@@ -2677,6 +2680,7 @@ public abstract class TestMoneroWalletCommon {
   // Can support multisig wallets
   @Test
   public void testMultisig() {
+    org.junit.Assume.assumeTrue(!LITE_MODE && TEST_RELAYS);
     try {
       
       // test n/n
@@ -3518,6 +3522,39 @@ public abstract class TestMoneroWalletCommon {
     for (MoneroTxWallet tx : wallet.getTxs()) {
       testTxWallet(tx, null);
     }
+  }
+  
+  // Can save and close the wallet in a single call
+  @Test
+  public void testSaveAndClose() {
+    
+    // create a random wallet
+    Pair<MoneroWallet, String> walletPair = createRandomWallet();
+    MoneroWallet wallet = walletPair.getFirst();
+    String name = walletPair.getSecond();
+            
+    // set an attribute
+    String uuid = UUID.randomUUID().toString();
+    wallet.setAttribute("id", uuid);
+    
+    // close the wallet without saving
+    wallet.close(false);
+    
+    // re-open the wallet and ensure attribute was not saved
+    wallet = openWallet(name);
+    assertEquals(null, wallet.getAttribute("id"));
+    
+    // set the attribute and close with saving
+    wallet.setAttribute("id", uuid);
+    wallet.close(); // defaults to saving
+    
+    // re-open the wallet and ensure attribute was saved
+    wallet = openWallet(name);
+    assertEquals(uuid, wallet.getAttribute("id"));
+    
+    // re-open main test wallet
+    wallet.close();
+    this.wallet = getTestWallet();
   }
   
   // --------------------------------- HELPERS --------------------------------
