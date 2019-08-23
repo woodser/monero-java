@@ -20,7 +20,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import common.types.Pair;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
@@ -55,10 +54,9 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   @Override
-  protected Pair<MoneroWallet, String> createRandomWallet() {
-    Pair<MoneroWallet, String> pair = new Pair<MoneroWallet, String>(wallet, UUID.randomUUID().toString());
-    wallet.createWalletRandom(pair.getSecond(), TestUtils.WALLET_PASSWORD);
-    return pair;
+  protected MoneroWallet createRandomWallet() {
+    wallet.createWalletRandom(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD);
+    return wallet;
   }
 
   @Override
@@ -473,6 +471,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
+  
+  @Test
+  public void testGetPath() {
+    super.testGetPath();
+  }
 
   @Override
   public void testGetHeight() {

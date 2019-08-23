@@ -17,7 +17,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import common.types.Pair;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroNetworkType;
@@ -64,14 +63,12 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
 
   @Override
-  protected Pair<MoneroWallet, String> createRandomWallet() {
-    Pair<MoneroWallet, String> pair = new Pair<MoneroWallet, String>(null, TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString());
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(pair.getSecond(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
+  protected MoneroWallet createRandomWallet() {
+    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
     //wallet.sync();
     //wallet.save();
     wallet.startSyncing();
-    pair.setFirst(wallet);
-    return pair;
+    return wallet;
   }
 
   @Override
@@ -1398,6 +1395,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
+  
+  @Test
+  public void testGetPath() {
+    super.testGetPath();
+  }
 
   @Override
   public void testGetHeight() {

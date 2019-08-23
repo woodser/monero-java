@@ -60,6 +60,13 @@ public interface MoneroWallet {
   public static final String DEFAULT_LANGUAGE = "English";
   
   /**
+   * Get the wallet's path.
+   * 
+   * @return the wallet's path that it can later be opened with
+   */
+  public String getPath();
+  
+  /**
    * Get the wallet's seed.
    * 
    * @return the wallet's seed
