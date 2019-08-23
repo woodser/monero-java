@@ -1196,7 +1196,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       }
     }
     
-    // if wallet is M/N, exchange multisig keys N - M times
+    // if wallet is M/N, exchange multisig keys N-M times
     else if (M != N) {
       List<String> multisigHexes = madeMultisigHexes;
       for (int i = 0; i < N - M; i++) {
