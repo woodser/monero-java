@@ -322,17 +322,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Get the path of this wallet's file on disk.
-   * 
-   * @return the path of this wallet's file on disk
-   */
-  public String getPath() {
-    assertNotClosed();
-    String path = getPathJni();
-    return path.isEmpty() ? null : path;
-  }
-  
-  /**
    * Get the wallet's network type (mainnet, testnet, or stagenet).
    * 
    * @return the wallet's network type
@@ -444,7 +433,14 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   // -------------------------- COMMON WALLET METHODS -------------------------
-
+  
+  @Override
+  public String getPath() {
+    assertNotClosed();
+    String path = getPathJni();
+    return path.isEmpty() ? null : path;
+  }
+  
   @Override
   public String getSeed() {
     assertNotClosed();
@@ -1297,9 +1293,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native boolean isSyncedJni();
   
-  private native String getPathJni();
-  
   private native int getNetworkTypeJni();
+  
+  private native String getPathJni();
   
   private native String getMnemonicJni();
   

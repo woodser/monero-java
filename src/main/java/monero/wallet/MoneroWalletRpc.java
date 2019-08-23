@@ -81,6 +81,7 @@ import monero.wallet.model.MoneroTxWallet;
  */
 public class MoneroWalletRpc extends MoneroWalletDefault {
 
+  private String path;  // wallet's path identifier
   private MoneroRpcConnection rpc;  // handles rpc interactions
   private Map<Integer, Map<Integer, String>> addressCache;  // cache static addresses to reduce requests
   
@@ -115,36 +116,38 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   /**
    * Open an existing wallet on the RPC server.
    * 
-   * @param filename is the name of the wallet file to open
+   * @param name is the name of the wallet file to open
    * @param password is the wallet's password
    */
-  public void openWallet(String filename, String password) {
-    if (filename == null || filename.isEmpty()) throw new MoneroException("Filename is not initialized");
+  public void openWallet(String name, String password) {
+    if (name == null || name.isEmpty()) throw new MoneroException("Filename is not initialized");
     if (password == null || password.isEmpty()) throw new MoneroException("Password is not initialized");
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("filename", filename);
+    params.put("filename", name);
     params.put("password", password);
     rpc.sendJsonRequest("open_wallet", params);
     addressCache.clear();
+    path = name;
   }
   
   /**
    * Create and open a new wallet with a randomly generated seed on the RPC server.
    * 
-   * @param filename is the name of the wallet file to create
+   * @param name is the name of the wallet file to create
    * @param password is the wallet's password
    * @param language is the language for the wallet's mnemonic seed
    */
-  public void createWalletRandom(String filename, String password) { createWalletRandom(filename, password, null); }
-  public void createWalletRandom(String filename, String password, String language) {
-    if (filename == null || filename.isEmpty()) throw new MoneroException("Filename is not initialized");
+  public void createWalletRandom(String name, String password) { createWalletRandom(name, password, null); }
+  public void createWalletRandom(String name, String password, String language) {
+    if (name == null || name.isEmpty()) throw new MoneroException("Wallet name is not initialized");
     if (password == null || password.isEmpty()) throw new MoneroException("Password is not initialized");
     if (language == null || language.isEmpty()) language = DEFAULT_LANGUAGE;
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("filename", filename);
+    params.put("filename", name);
     params.put("password", password);
     params.put("language", language);
     rpc.sendJsonRequest("create_wallet", params);
+    path = name;
   }
   
   /**
@@ -172,6 +175,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("language", language);
     params.put("autosave_current", saveCurrent);
     rpc.sendJsonRequest("restore_deterministic_wallet", params);
+    path = name;
   }
   
   /**
@@ -198,6 +202,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("autosave_current", save);
     rpc.sendJsonRequest("close_wallet", params);
     addressCache.clear();
+    path = null;
   }
   
   /**
@@ -206,9 +211,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public void stop() {
     rpc.sendJsonRequest("stop_wallet");
     addressCache.clear();
+    path = null;
   }
   
   // -------------------------- COMMON WALLET METHODS -------------------------
+  
+  @Override
+  public String getPath() {
+    return path;
+  }
 
   @Override
   public String getSeed() {

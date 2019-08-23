@@ -26,7 +26,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import common.types.Filter;
-import common.types.Pair;
 import common.utils.JsonUtils;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroBlock;
@@ -108,9 +107,9 @@ public abstract class TestMoneroWalletCommon {
   /**
    * Create and open a random test wallet.
    * 
-   * @return the wallet's identifier and reference
+   * @return the random test wallet
    */
-  protected abstract Pair<MoneroWallet, String> createRandomWallet();
+  protected abstract MoneroWallet createRandomWallet();
   
   /**
    * Open a test wallet.
@@ -126,6 +125,33 @@ public abstract class TestMoneroWalletCommon {
   }
   
   // ------------------------------ BEGIN TESTS -------------------------------
+  
+  // Can get the wallet's path
+  @Test
+  public void testGetPath() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    
+    // create a random wallet
+    MoneroWallet wallet = createRandomWallet();
+    
+    // set a random attribute
+    String uuid = UUID.randomUUID().toString();
+    wallet.setAttribute("uuid", uuid);
+    
+    // record the wallet's path then save and close
+    String path = wallet.getPath();
+    wallet.close(true);
+    
+    // re-open the wallet using its path
+    wallet = openWallet(path);
+    
+    // test the attribute
+    assertEquals(uuid, wallet.getAttribute("uuid"));
+    
+    // re-open main test wallet
+    wallet.close();
+    this.wallet = getTestWallet();
+  }
 
   // Can get the mnemonic phrase derived from the seed
   @Test
@@ -2725,10 +2751,9 @@ public abstract class TestMoneroWalletCommon {
     List<String> preparedMultisigHexes = new ArrayList<String>();
     List<String> walletIds = new ArrayList<String>();
     for (int i = 0; i < n; i++) {
-      Pair<MoneroWallet, String> pair = createRandomWallet();
-      walletIds.add(pair.getSecond());
-      MoneroWallet wallet = pair.getFirst();
-      wallet.setAttribute("name", pair.getSecond());  // set the name of each wallet as an attribute
+      MoneroWallet wallet = createRandomWallet();
+      walletIds.add(wallet.getPath());
+      wallet.setAttribute("name", wallet.getPath());  // set the name of each wallet as an attribute
       preparedMultisigHexes.add(wallet.prepareMultisig());
       //System.out.println("PREPARED HEX: " + preparedMultisigHexes.get(preparedMultisigHexes.size() - 1));
       
@@ -3529,9 +3554,8 @@ public abstract class TestMoneroWalletCommon {
   public void testSaveAndClose() {
     
     // create a random wallet
-    Pair<MoneroWallet, String> walletPair = createRandomWallet();
-    MoneroWallet wallet = walletPair.getFirst();
-    String name = walletPair.getSecond();
+    MoneroWallet wallet = createRandomWallet();
+    String path = wallet.getPath();
             
     // set an attribute
     String uuid = UUID.randomUUID().toString();
@@ -3541,7 +3565,7 @@ public abstract class TestMoneroWalletCommon {
     wallet.close();
     
     // re-open the wallet and ensure attribute was not saved
-    wallet = openWallet(name);
+    wallet = openWallet(path);
     assertEquals(null, wallet.getAttribute("id"));
     
     // set the attribute and close with saving
@@ -3549,7 +3573,7 @@ public abstract class TestMoneroWalletCommon {
     wallet.close(true); // defaults to saving
     
     // re-open the wallet and ensure attribute was saved
-    wallet = openWallet(name);
+    wallet = openWallet(path);
     assertEquals(uuid, wallet.getAttribute("id"));
     
     // re-open main test wallet
