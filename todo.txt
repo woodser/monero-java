@@ -6,6 +6,7 @@ saving wallet after make_multisig() causes refresh thread exception (haven't see
 
 support wallet.getPath() then no need to return Pair<MoneroWallet, String>
 multisig sample code
+daemon.getNextBlockHeader() hanging, synchronize issue? re-enable testUpdateLockedSameAccount() when fixed
 open monero core issues
 add testSweepUnlocked() which targets accounts and subaddresses
 test tx set in regular wallet (null values + txs)
