@@ -16,7 +16,8 @@ tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
 fix qr
 approximate chain height
 
-update model: multisig methods and models, sample code rescan_spent(), MoneroTxSet attribute of MoneroTxWallet, sweepAllUnlocked()->sweepUnlocked(), getIncomingTransfers(query), getOutgoingTransfers(query)
+update model: multisig methods and models, sample code rescan_spent(), MoneroTxSet attribute of MoneroTxWallet, sweepAllUnlocked()->sweepUnlocked(), getIncomingTransfers(query), getOutgoingTransfers(query), close(save)
+update model: uint vs ulong feedback
 update javascript library to Java (difference from Java master to jni93 branch)
 re-enable sample code build
 release
