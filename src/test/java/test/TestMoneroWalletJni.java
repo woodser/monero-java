@@ -1163,13 +1163,14 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Test
-  public void testSampleMultisig() {
+  public void testMultisigSample() {
     createMultisigWallet(2, 2);
     createMultisigWallet(2, 3);
     createMultisigWallet(2, 4);
   }
   
   private void createMultisigWallet(int M, int N) {
+    System.out.println("Creating " + M + "/" + N + " multisig wallet");
     
     // create participating wallets
     List<MoneroWallet> wallets = new ArrayList<MoneroWallet>();
@@ -1191,6 +1192,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // if wallet is (N-1)/N, finalize the participants
     if (M == N - 1) {
       for (MoneroWallet wallet : wallets) {
+        System.out.println("Finalizing wallet: " + wallet.getPath());
         String primaryAddress = wallet.finalizeMultisig(madeMultisigHexes, TestUtils.WALLET_PASSWORD);
         System.out.println("Multisig address: " + primaryAddress);
       }

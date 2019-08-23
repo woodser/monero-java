@@ -2924,14 +2924,21 @@ public abstract class TestMoneroWalletCommon {
       while (true) {
         
         // wait a moment
+        System.out.println("Sleeping for " + MoneroUtils.WALLET2_REFRESH_INTERVAL + " ms...");
         try { TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL); }
         catch (InterruptedException e) {  throw new RuntimeException(e); }
+        System.out.println("Done");
         
         // fetch and test outputs
+        System.out.println("Fetching current wallet's outputs...");
         List<MoneroOutputWallet> outputs = curWallet.getOutputs();
+        System.out.println("Done");
         if (outputs.isEmpty()) System.out.println("No outputs reported yet");
         else{
-          System.out.println("Output has " + (daemon.getHeight() - outputs.get(0).getTx().getHeight()) + " confirmations");  // TODO: use tx.getNumConfirmations() here
+          System.out.println("Fetching daemon's height...");
+          long height = daemon.getHeight();
+          System.out.println("Done");
+          System.out.println("Output has " + (height - outputs.get(0).getTx().getHeight()) + " confirmations");  // TODO: use tx.getNumConfirmations() here
           for (MoneroOutputWallet output : outputs) {
             assertFalse(output.isSpent());
           }
