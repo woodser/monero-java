@@ -1650,8 +1650,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testSetKeyValues() {
-    super.testSetKeyValues();
+  public void testSetAttributes() {
+    super.testSetAttributes();
   }
 
   @Override
@@ -1807,5 +1807,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   public void testMultisig() {
     super.testMultisig();
+  }
+  
+  @Override
+  public void testSaveAndClose() {
+    super.testSaveAndClose();
   }
 }

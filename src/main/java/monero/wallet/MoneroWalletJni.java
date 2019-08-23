@@ -424,14 +424,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   /**
-   * Save the wallet at its current path.
-   */
-  public void save() {
-    assertNotClosed();
-    saveJni();
-  }
-  
-  /**
    * Move the wallet from its current path to the given path.
    * 
    * @param path is the new wallet's path
@@ -449,19 +441,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    */
   public boolean isClosed() {
     return isClosed;
-  }
-  
-  /**
-   * Close the wallet.
-   */
-  public void close() {
-    if (isClosed) return; // closing a closed wallet has no effect
-    isClosed = true;
-    try {
-      closeJni();
-    } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
-    }
   }
   
   // -------------------------- COMMON WALLET METHODS -------------------------
@@ -1147,17 +1126,18 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       throw new MoneroException(e.getMessage());
     }
   }
+  
+  @Override
+  public String getAttribute(String key) {
+    assertNotClosed();
+    String value = getAttributeJni(key);
+    return value.isEmpty() ? null : value;
+  }
 
   @Override
   public void setAttribute(String key, String val) {
     assertNotClosed();
     setAttributeJni(key, val);
-  }
-
-  @Override
-  public String getAttribute(String key) {
-    assertNotClosed();
-    return getAttributeJni(key);
   }
 
   @Override
@@ -1263,6 +1243,23 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public List<String> submitMultisigTxHex(String signedMultisigTxHex) {
     try {
       return Arrays.asList(submitMultisigTxHexJni(signedMultisigTxHex));
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
+  
+  @Override
+  public void save() {
+    assertNotClosed();
+    saveJni();
+  }
+  
+  @Override
+  public void close(boolean save) {
+    if (isClosed) return; // closing a closed wallet has no effect
+    isClosed = true;
+    try {
+      closeJni(save);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -1420,10 +1417,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String parsePaymentUriJni(String uri);
   
-  private native void setAttributeJni(String key, String val);
-
   private native String getAttributeJni(String key);
   
+  private native void setAttributeJni(String key, String val);
+
   private native void startMiningJni(long numThreads, Boolean backgroundMining, Boolean ignoreBattery);
   
   private native void stopMiningJni();
@@ -1432,7 +1429,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native void moveToJni(String path, String password);
   
-  private native void closeJni();
+  private native void closeJni(boolean save);
   
   private native boolean isMultisigImportNeededJni();
   

@@ -1020,20 +1020,20 @@ public interface MoneroWallet {
   public MoneroSendRequest parsePaymentUri(String uri);
   
   /**
-   * Set an arbitrary attribute.
-   * 
-   * @param key is the attribute key
-   * @param val is the attribute value
-   */
-  public void setAttribute(String key, String val);
-  
-  /**
    * Get an attribute.
    * 
    * @param key is the attribute to get the value of
    * @return the attribute's value
    */
   public String getAttribute(String key);
+  
+  /**
+   * Set an arbitrary attribute.
+   * 
+   * @param key is the attribute key
+   * @param val is the attribute value
+   */
+  public void setAttribute(String key, String val);
   
   /**
    * Start mining.
@@ -1048,16 +1048,6 @@ public interface MoneroWallet {
    * Stop mining.
    */
   public void stopMining();
-  
-  /**
-   * Save the wallet.
-   */
-  public void save();
-  
-  /**
-   * Close the wallet.
-   */
-  public void close();
   
   /**
    * Indicates if importing multisig data is needed for returning a correct balance.
@@ -1150,4 +1140,21 @@ public interface MoneroWallet {
    * @return the resulting transaction ids
    */
   public List<String> submitMultisigTxHex(String signedMultisigTxHex);
+
+  /**
+   * Save the wallet at its current path.
+   */
+  public void save();
+  
+  /**
+   * Save and close the wallet.
+   */
+  public void close();
+  
+  /**
+   * Optionally save then close the wallet.
+   *
+   * @param save specifies if the wallet should be saved before being closed (default true)
+   */
+  public void close(boolean save);
 }
