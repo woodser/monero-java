@@ -27,6 +27,7 @@ release
 open issue: investigate integration of this library into Bisq
 
 MEDIUM
+support wallet.open(password) after close?
 support sign_transfer, submit_transfer
 test tx set in cold wallet with sign and submit
 rpc wallet listener
