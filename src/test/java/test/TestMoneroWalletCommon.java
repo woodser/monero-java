@@ -3538,7 +3538,7 @@ public abstract class TestMoneroWalletCommon {
     wallet.setAttribute("id", uuid);
     
     // close the wallet without saving
-    wallet.close(false);
+    wallet.close();
     
     // re-open the wallet and ensure attribute was not saved
     wallet = openWallet(name);
@@ -3546,7 +3546,7 @@ public abstract class TestMoneroWalletCommon {
     
     // set the attribute and close with saving
     wallet.setAttribute("id", uuid);
-    wallet.close(); // defaults to saving
+    wallet.close(true); // defaults to saving
     
     // re-open the wallet and ensure attribute was saved
     wallet = openWallet(name);
