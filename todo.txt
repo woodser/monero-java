@@ -1,11 +1,10 @@
 HIGH
-remove merge by key images and test since multiple outputs can map to common key image
-saving wallet after make_multisig() causes refresh thread exception
+jni multisig 2/3 after duration 1 occassionally shuts down (??)
 optimize multisig tests: profile diff with startSyncing() running
-jni multisig 2/3 after duration occassionally shuts down (??)
 optimize multisig tests: jni can keep references of open jni wallets so wallets are not closed and re-opened
 
 open monero core issues
+saving wallet after make_multisig() causes refresh thread exception (haven't seen in awhile)
 add testSweepUnlocked() which targets accounts and subaddresses
 support close(bool save)
 
@@ -31,6 +30,7 @@ test tx set in cold wallet with sign and submit
 rpc wallet listener
 rpc on_generate_from_keys
 add types to model
+remove merge by key images since multiple outputs can map to common key image?
 add output min, max, height to output query, transfer query
 update send end height mid sync so 100% figure is accurate
 tx pool stats and other binary calls
