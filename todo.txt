@@ -1,12 +1,9 @@
 HIGH
-tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
-add testSweepUnlocked() which targets accounts and subaddresses
-test tx set in regular wallet (null values + txs)
-add any open init steps from make_from_json?
 wallet rpc get_balance res.multisig_import_needed = m_wallet->multisig() && m_wallet->has_multisig_partial_key_images();
+add testSweepUnlocked() which targets accounts and subaddresses
+tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
 new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
 testCreateWalletAndReceive() or other registered listeners cause all tests to hang if not closed
-approximate chain height
 open monero core issues
 
 update model: multisig methods and models, sample code rescan_spent(), MoneroTxSet attribute of MoneroTxWallet, sweepAllUnlocked()->sweepUnlocked(), getIncomingTransfers(query), getOutgoingTransfers(query), close(save)
@@ -17,6 +14,8 @@ release
 open issue: investigate integration of this library into Bisq
 
 MEDIUM
+approximate chain height
+add any open init steps from make_from_json?
 optimize multisig tests: profile diff with startSyncing() running
 optimize multisig tests: jni can keep references of open jni wallets so wallets are not closed and re-opened
 support wallet.open(password) after close?
