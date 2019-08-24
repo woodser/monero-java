@@ -1,5 +1,4 @@
 HIGH
-fix qr
 tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
 add testSweepUnlocked() which targets accounts and subaddresses
 test tx set in regular wallet (null values + txs)
