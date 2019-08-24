@@ -1,9 +1,4 @@
 HIGH
-run all tests together
-testCreateWalletAndReceive() causes daemon to hang if not closed?
-jni multisig 2/3 after duration 1 occassionally shuts down (??)
-optimize multisig tests: profile diff with startSyncing() running
-optimize multisig tests: jni can keep references of open jni wallets so wallets are not closed and re-opened
 saving wallet after make_multisig() causes refresh thread exception (haven't seen in awhile)
 open monero core issues
 add testSweepUnlocked() which targets accounts and subaddresses
@@ -15,6 +10,7 @@ wallet rpc get_balance res.multisig_import_needed = m_wallet->multisig() && m_wa
 new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
 tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
 fix qr
+testCreateWalletAndReceive() causes daemon to hang when run with rest of test if not closed?
 approximate chain height
 
 update model: multisig methods and models, sample code rescan_spent(), MoneroTxSet attribute of MoneroTxWallet, sweepAllUnlocked()->sweepUnlocked(), getIncomingTransfers(query), getOutgoingTransfers(query), close(save)
@@ -25,6 +21,8 @@ release
 open issue: investigate integration of this library into Bisq
 
 MEDIUM
+optimize multisig tests: profile diff with startSyncing() running
+optimize multisig tests: jni can keep references of open jni wallets so wallets are not closed and re-opened
 support wallet.open(password) after close?
 support sign_transfer, submit_transfer
 test tx set in cold wallet with sign and submit
