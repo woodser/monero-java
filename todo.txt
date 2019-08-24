@@ -1,16 +1,14 @@
 HIGH
-open monero core issues
+fix qr
+tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
 add testSweepUnlocked() which targets accounts and subaddresses
 test tx set in regular wallet (null values + txs)
 add any open init steps from make_from_json?
-test sending without enough money, should be consistent across calls
-daemon.getNextBlockHeader() sometimes hangs
 wallet rpc get_balance res.multisig_import_needed = m_wallet->multisig() && m_wallet->has_multisig_partial_key_images();
 new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
-tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
-fix qr
-testCreateWalletAndReceive() causes daemon to hang when run with rest of test if not closed?
+testCreateWalletAndReceive() or other registered listeners cause all tests to hang if not closed
 approximate chain height
+open monero core issues
 
 update model: multisig methods and models, sample code rescan_spent(), MoneroTxSet attribute of MoneroTxWallet, sweepAllUnlocked()->sweepUnlocked(), getIncomingTransfers(query), getOutgoingTransfers(query), close(save)
 update model: uint vs ulong feedback
