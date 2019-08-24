@@ -1,5 +1,4 @@
 HIGH
-saving wallet after make_multisig() causes refresh thread exception (haven't seen in awhile)
 open monero core issues
 add testSweepUnlocked() which targets accounts and subaddresses
 test tx set in regular wallet (null values + txs)
