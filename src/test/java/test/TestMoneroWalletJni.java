@@ -1187,7 +1187,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     List<String> preparedMultisigHexes = new ArrayList<String>();
     for (MoneroWallet wallet : wallets) preparedMultisigHexes.add(wallet.prepareMultisig());
     
-    // make wallets multsig and collect results
+    // make each wallet multsig and collect results
     List<String> madeMultisigHexes = new ArrayList<String>();
     for (int i = 0; i < wallets.size(); i++) {
       
@@ -1195,11 +1195,12 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       List<String> peerMultisigHexes = new ArrayList<String>();
       for (int j = 0; j < wallets.size(); j++) if (j != i) peerMultisigHexes.add(preparedMultisigHexes.get(j));
     
+      // make wallet multisig and collect result hex
       MoneroMultisigInitResult result = wallets.get(i).makeMultisig(peerMultisigHexes, M, TestUtils.WALLET_PASSWORD);
       madeMultisigHexes.add(result.getMultisigHex());
     }
     
-    // if wallet is (N-1)/N, finalize the participants
+    // if wallet is (N-1)/N, finalize each participant
     if (M == N - 1) {
       for (int i = 0; i < wallets.size(); i++) {
       
