@@ -253,6 +253,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(1, wallet.getHeight()); // TODO monero core: why is height of unsynced wallet 1?
     if (daemon.isConnected()) assertEquals(daemon.getHeight(), wallet.getRestoreHeight());
     else assertTrue(wallet.getRestoreHeight() >= 0);
+    wallet.close();
   }
   
   @Test
@@ -290,6 +291,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertFalse(wallet.isSynced());
     assertEquals(1, wallet.getHeight()); // TODO monero core: why does height of new unsynced wallet start at 1?
     assertEquals(0, wallet.getRestoreHeight());
+    wallet.close();
     
     // create wallet with mnemonic, no connection, and restore height
     long restoreHeight = 10000;
@@ -328,6 +330,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertFalse(wallet.isSynced());
     assertEquals(1, wallet.getHeight()); // TODO monero core: why does height of new unsynced wallet start at 1?
     assertEquals(restoreHeight, wallet.getRestoreHeight());
+    wallet.close();
   }
 
   @Test
@@ -1160,6 +1163,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // created wallet should have notified listeners of received outputs
     assertFalse(myListener.getOutputsReceived().isEmpty());
+    myWallet.close();
   }
   
   @Test
