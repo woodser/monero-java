@@ -2924,20 +2924,14 @@ public abstract class TestMoneroWalletCommon {
       while (true) {
         
         // wait a moment
-        System.out.println("Sleeping for " + MoneroUtils.WALLET2_REFRESH_INTERVAL + " ms...");
         try { TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL); }
         catch (InterruptedException e) {  throw new RuntimeException(e); }
-        System.out.println("Done");
         
         // fetch and test outputs
-        System.out.println("Fetching current wallet's outputs...");
         List<MoneroOutputWallet> outputs = curWallet.getOutputs();
-        System.out.println("Done");
         if (outputs.isEmpty()) System.out.println("No outputs reported yet");
         else{
-          System.out.println("Fetching daemon's height...");
           long height = daemon.getHeight();
-          System.out.println("Done");
           System.out.println("Output has " + (height - outputs.get(0).getTx().getHeight()) + " confirmations");  // TODO: use tx.getNumConfirmations() here
           for (MoneroOutputWallet output : outputs) {
             assertFalse(output.isSpent());
@@ -2985,6 +2979,10 @@ public abstract class TestMoneroWalletCommon {
       //List<MoneroTxWallet> sendTxs = curWallet.sweepUnlocked(new MoneroSendRequest(testWalletAddress).setDoNotRelay(true));
       System.out.println("Sending");
       MoneroTxSet txSet = curWallet.sendSplit(new MoneroSendRequest(returnAddress, TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0));
+      assertNotNull(txSet.getMultisigTxHex());
+      assertNull(txSet.getSignedTxHex());
+      assertNull(txSet.getUnsignedTxHex());
+      assertNull(txSet.getTxs());
       
       // sign the tx with participants 1 through m - 1 to meet threshold
       String multisigTxHex = txSet.getMultisigTxHex();
@@ -3017,9 +3015,14 @@ public abstract class TestMoneroWalletCommon {
       System.out.println("Sweeping");
       List<MoneroTxSet> txSets = curWallet.sweepUnlocked(new MoneroSendRequest(returnAddress).setAccountIndex(1)); // TODO: test multisig with sweepEachSubaddress which will generate multiple tx sets without synchronizing participants
       assertEquals(1, txSets.size()); // only one tx set created per account
+      txSet = txSets.get(0);
+      assertNotNull(txSet.getMultisigTxHex());
+      assertNull(txSet.getSignedTxHex());
+      assertNull(txSet.getUnsignedTxHex());
+      assertNull(txSet.getTxs());
       
       // sign the tx with participants 1 through m - 1 to meet threshold
-      multisigTxHex = txSets.get(0).getMultisigTxHex();
+      multisigTxHex = txSet.getMultisigTxHex();
       System.out.println("Signing sweep");
       for (int i = 1; i < m; i++) {
         curWallet = openWallet(walletIds.get(i));
@@ -3864,6 +3867,10 @@ public abstract class TestMoneroWalletCommon {
     // test tx results from send or relay
     if (Boolean.TRUE.equals(ctx.isSendResponse)) {
       
+      // test tx set
+      assertNotNull(tx.getTxSet());
+      assertTrue(tx.getTxSet().getTxs().contains(tx));
+      
       // test common attributes
       MoneroSendRequest request = ctx.sendRequest;
       assertEquals(false, tx.isConfirmed());
@@ -3911,6 +3918,7 @@ public abstract class TestMoneroWalletCommon {
     
     // test tx result query
     else {
+      assertNull(tx.getTxSet());  // tx set only initialized on send responses
       assertNull(tx.getMixin());
       assertNull(tx.getKey());
       assertNull(tx.getFullHex());
