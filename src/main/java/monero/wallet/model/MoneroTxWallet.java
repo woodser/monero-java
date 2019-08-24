@@ -50,7 +50,7 @@ public class MoneroTxWallet extends MoneroTx {
     return txSet;
   }
   
-  public MoneroTx setTxSet(MoneroTxSet txSet) {
+  public MoneroTxWallet setTxSet(MoneroTxSet txSet) {
     this.txSet = txSet;
     return this;
   }

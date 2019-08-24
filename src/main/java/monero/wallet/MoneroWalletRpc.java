@@ -1747,7 +1747,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    */
   private static MoneroTxSet convertRpcTxToTxSet(Map<String, Object> rpcTx, MoneroTxWallet tx, Boolean isOutgoing) {
     MoneroTxSet txSet = convertRpcMapToTxSet(rpcTx);
-    txSet.setTxs(Arrays.asList(convertRpcTxWithTransfer(rpcTx, tx, isOutgoing)));
+    txSet.setTxs(Arrays.asList(convertRpcTxWithTransfer(rpcTx, tx, isOutgoing).setTxSet(txSet)));
     return txSet;
   }
   
