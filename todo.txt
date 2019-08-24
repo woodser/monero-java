@@ -1,12 +1,10 @@
 HIGH
+run all tests together
+testCreateWalletAndReceive() causes daemon to hang if not closed?
 jni multisig 2/3 after duration 1 occassionally shuts down (??)
 optimize multisig tests: profile diff with startSyncing() running
 optimize multisig tests: jni can keep references of open jni wallets so wallets are not closed and re-opened
 saving wallet after make_multisig() causes refresh thread exception (haven't seen in awhile)
-
-support wallet.getPath() then no need to return Pair<MoneroWallet, String>
-multisig sample code
-daemon.getNextBlockHeader() hanging, synchronize issue? re-enable testUpdateLockedSameAccount() when fixed
 open monero core issues
 add testSweepUnlocked() which targets accounts and subaddresses
 test tx set in regular wallet (null values + txs)
