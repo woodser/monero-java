@@ -2,7 +2,7 @@
 
 This project is a library for using a Monero wallet and daemon in Java using RPC and JNI bindings to [Monero Core](https://github.com/monero-project/monero).
 
-In addition, this project conforms to an [API specification](https://github.com/monero-ecosystem/monero-java/blob/master/monero-spec.pdf) intended to be intuitive, robust, and for long-term use in the Monero project.
+In addition, this project conforms to an [API specification](http://moneroecosystem.org/monero-java/monero-spec.pdf) intended to be intuitive, robust, and for long-term use in the Monero project.
 
 ## Main Features
 
@@ -12,12 +12,12 @@ In addition, this project conforms to an [API specification](https://github.com/
 - Fetch and process binary data from the daemon (e.g. raw blocks)
 - Query wallet transactions, transfers, and outputs by their many attributes
 - Be notified when blocks are added to the chain, as the wallet synchronizes, or when the wallet sends or receives funds
-- Supports multisig
+- Full multisig support
 - Over 200 passing JUnit tests
 
 ## Sample Code
 
-This code introduces the API.  See the [Javadoc](https://moneroecosystem.org/monero-java/), [specification PDF](https://github.com/monero-ecosystem/monero-java/blob/master/monero-spec.pdf), or [JUnit tests](src/test/java) for more details.
+This code introduces the API.  See the [Javadoc](https://moneroecosystem.org/monero-java/), [specification PDF](http://moneroecosystem.org/monero-java/monero-spec.pdf), or [JUnit tests](src/test/java) for more details.
 
 ```java
 // connect to a daemon
@@ -166,7 +166,7 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 
 ## See Also
 
-These libraries conform to the same [API specification](https://github.com/monero-ecosystem/monero-java/blob/master/monero-spec.pdf).
+These libraries conform to the same [API specification](http://moneroecosystem.org/monero-java/monero-spec.pdf).
 
 [JavaScript reference implementation](https://github.com/monero-ecosystem/monero-javascript)
 
@@ -181,7 +181,7 @@ This project is licensed under MIT.
 Donations are gratefully accepted.  Thank you for your support!
 
 <p align="center">
-	<img src="donate.png" width="120" height="120"/>
+	<img src="donate.png" width="115" height="115"/>
 </p>
 
 `46FR1GKVqFNQnDiFkH7AuzbUBrGQwz2VdaXTDD4jcjRE8YkkoTYTmZ2Vohsz9gLSqkj5EM6ai9Q7sBoX4FPPYJdGKQQXPVz`
