@@ -1,5 +1,4 @@
 HIGH
-re-enable sample code build
 update model: uint vs ulong, param types, color keywords and constants?
 update javascript library to Java (difference from Java master to jni93 branch)
 open monero core issues
