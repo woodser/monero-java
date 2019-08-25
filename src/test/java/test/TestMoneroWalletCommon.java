@@ -2921,6 +2921,7 @@ public abstract class TestMoneroWalletCommon {
       catch (MoneroException e) { }
       
       // wait for the multisig wallet's funds to unlock // TODO: could replace with condition_variable and notify
+      Long lastNumConfirmations = null;
       while (true) {
         
         // wait a moment
@@ -2931,11 +2932,15 @@ public abstract class TestMoneroWalletCommon {
         List<MoneroOutputWallet> outputs = curWallet.getOutputs();
         if (outputs.isEmpty()) System.out.println("No outputs reported yet");
         else{
+          
+          // print num confirmations
           long height = daemon.getHeight();
-          System.out.println("Output has " + (height - outputs.get(0).getTx().getHeight()) + " confirmations");  // TODO: use tx.getNumConfirmations() here
-          for (MoneroOutputWallet output : outputs) {
-            assertFalse(output.isSpent());
-          }
+          long numConfirmations = height - outputs.get(0).getTx().getHeight();
+          if (numConfirmations != lastNumConfirmations) System.out.println("Output has " + (height - outputs.get(0).getTx().getHeight()) + " confirmations");  // TODO: use tx.getNumConfirmations() here?
+          lastNumConfirmations = numConfirmations;
+          
+          // outputs are not spent
+          for (MoneroOutputWallet output : outputs)  assertFalse(output.isSpent());
           
           // break if output is unlocked
           if (outputs.get(0).isUnlocked()) break;
@@ -3004,7 +3009,6 @@ public abstract class TestMoneroWalletCommon {
       // synchronize the multisig participants since spending outputs
       System.out.println("Synchronizing participants");
       curWallet = synchronizeMultisigParticipants(curWallet, walletIds);
-      PrintBalances.printBalances(curWallet);
       
       // fetch the wallet's multisig txs
       List<MoneroTxWallet> multisigTxs = curWallet.getTxs(new MoneroTxQuery().setTxIds(txIds));
@@ -3039,7 +3043,6 @@ public abstract class TestMoneroWalletCommon {
       // synchronize the multisig participants since spending outputs
       System.out.println("Synchronizing participants");
       curWallet = synchronizeMultisigParticipants(curWallet, walletIds);
-      PrintBalances.printBalances(curWallet);
       
       // fetch the wallet's multisig txs
       multisigTxs = curWallet.getTxs(new MoneroTxQuery().setTxIds(txIds));
