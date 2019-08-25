@@ -1,5 +1,4 @@
 HIGH
-test sweep outputs in multisig test
 test sweep subaddresses, account, wallets
 new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
 testCreateAndReceive() or other registered listeners cause all tests to hang if not closed
