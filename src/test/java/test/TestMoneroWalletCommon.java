@@ -2734,18 +2734,11 @@ public abstract class TestMoneroWalletCommon {
   private void testMultisig(int m, int n, boolean testTx) {
     System.out.println("testMultisig(" + m + ", " + n + ")");
     
-    long startTime = System.currentTimeMillis();
-    
     // set name attribute of test wallet at beginning of test
     String BEGIN_MULTISIG_NAME = "begin_multisig_wallet";
     wallet.setAttribute("name", BEGIN_MULTISIG_NAME);
     wallet.save();
     //wallet.close();
-    
-    // print duration
-    long endTime = System.currentTimeMillis();
-    System.out.println("Duration 1: " + (endTime - startTime));
-    startTime = endTime;
     
     // create n wallets and prepare multisig hexes
     List<String> preparedMultisigHexes = new ArrayList<String>();
@@ -2759,11 +2752,6 @@ public abstract class TestMoneroWalletCommon {
       
       wallet.close(true);
     }
-    
-    // print duration
-    endTime = System.currentTimeMillis();
-    System.out.println("Duration 2: " + (endTime - startTime));
-    startTime = endTime;
 
     // make wallets multisig
     String address = null;
@@ -2787,11 +2775,6 @@ public abstract class TestMoneroWalletCommon {
       
       wallet.close();
     }
-    
-    // print duration
-    endTime = System.currentTimeMillis();
-    System.out.println("Duration 3: " + (endTime - startTime));
-    startTime = endTime;
     
     // handle (n-1)/n which uses finalize
     if (m == n - 1) {
@@ -2872,11 +2855,6 @@ public abstract class TestMoneroWalletCommon {
     assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
     //System.out.println("FINAL MULTISIG ADDRESS: " + curWallet.getPrimaryAddress());
     curWallet.close();
-    
-    // print duration
-    endTime = System.currentTimeMillis();
-    System.out.println("Duration 4: " + (endTime - startTime));
-    startTime = endTime;
     
     // test sending a multisig transaction if configured
     if (testTx) {
@@ -3077,7 +3055,6 @@ public abstract class TestMoneroWalletCommon {
       // synchronize the multisig participants since spending outputs
       System.out.println("Synchronizing participants");
       curWallet = synchronizeMultisigParticipants(curWallet, walletIds);
-      PrintBalances.printBalances(curWallet);
       
       // fetch the wallet's multisig txs
       multisigTxs = curWallet.getTxs(new MoneroTxQuery().setTxIds(txIds));
@@ -3086,19 +3063,9 @@ public abstract class TestMoneroWalletCommon {
       curWallet.close(true);
     }
     
-    // print duration
-    endTime = System.currentTimeMillis();
-    System.out.println("Duration 5: " + (endTime - startTime));
-    startTime = endTime;
-    
     // re-open main test wallet
     wallet = getTestWallet();
     assertEquals(BEGIN_MULTISIG_NAME, wallet.getAttribute("name"));
-    
-    // print duration
-    endTime = System.currentTimeMillis();
-    System.out.println("Duration 6: " + (endTime - startTime));
-    startTime = endTime;
   }
   
   private MoneroWallet synchronizeMultisigParticipants(MoneroWallet currentWallet, List<String> walletIds) {
