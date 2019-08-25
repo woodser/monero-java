@@ -2936,7 +2936,7 @@ public abstract class TestMoneroWalletCommon {
           // print num confirmations
           long height = daemon.getHeight();
           long numConfirmations = height - outputs.get(0).getTx().getHeight();
-          if (numConfirmations != lastNumConfirmations) System.out.println("Output has " + (height - outputs.get(0).getTx().getHeight()) + " confirmations");  // TODO: use tx.getNumConfirmations() here?
+          if (lastNumConfirmations == null || lastNumConfirmations != numConfirmations) System.out.println("Output has " + (height - outputs.get(0).getTx().getHeight()) + " confirmations");
           lastNumConfirmations = numConfirmations;
           
           // outputs are not spent

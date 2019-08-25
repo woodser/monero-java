@@ -162,7 +162,6 @@ public class TestSampleCode {
     assertTrue(JNI_OUTPUT_RECEIVED);
     
     // save and close the JNI wallet
-    walletJNI.save();
-    walletJNI.close();
+    walletJNI.close(true);
   }
 }
