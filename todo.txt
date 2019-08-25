@@ -4,9 +4,9 @@ new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeig
 testCreateAndReceive() or other registered listeners cause all tests to hang if not closed
 
 open monero core issues
-update model: multisig methods and models, sample code rescan_spent(), MoneroTxSet attribute of MoneroTxWallet, sweepAllUnlocked()->sweepUnlocked(), getIncomingTransfers(query), getOutgoingTransfers(query), close(save), uint vs ulong
-update javascript library to Java (difference from Java master to jni93 branch)
 re-enable sample code build
+update model: multisig methods and models, sample code, MoneroTxSet attribute of MoneroTxWallet, sweepAllUnlocked()->sweepUnlocked(), getIncomingTransfers(query), getOutgoingTransfers(query), close(save), uint vs ulong
+update javascript library to Java (difference from Java master to jni93 branch)
 open issue: investigate integration of this library into Bisq
 release
 
