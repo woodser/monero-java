@@ -1,26 +1,23 @@
 HIGH
-wallet rpc get_balance res.multisig_import_needed = m_wallet->multisig() && m_wallet->has_multisig_partial_key_images();
-add testSweepUnlocked() which targets accounts and subaddresses
-tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
+test sweep outputs in multisig test
+test sweep subaddresses, account, wallets
 new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
-testCreateWalletAndReceive() or other registered listeners cause all tests to hang if not closed
-open monero core issues
+testCreateAndReceive() or other registered listeners cause all tests to hang if not closed
 
-update model: multisig methods and models, sample code rescan_spent(), MoneroTxSet attribute of MoneroTxWallet, sweepAllUnlocked()->sweepUnlocked(), getIncomingTransfers(query), getOutgoingTransfers(query), close(save)
-update model: uint vs ulong feedback
+open monero core issues
+update model: multisig methods and models, sample code rescan_spent(), MoneroTxSet attribute of MoneroTxWallet, sweepAllUnlocked()->sweepUnlocked(), getIncomingTransfers(query), getOutgoingTransfers(query), close(save), uint vs ulong
 update javascript library to Java (difference from Java master to jni93 branch)
 re-enable sample code build
-release
 open issue: investigate integration of this library into Bisq
+release
 
 MEDIUM
+support cold wallet with sign_transfer, submit_transfer
 approximate chain height
+tx.getNumConfirmations() should be initialized whenever tx.getHeight() is
 add any open init steps from make_from_json?
-optimize multisig tests: profile diff with startSyncing() running
-optimize multisig tests: jni can keep references of open jni wallets so wallets are not closed and re-opened
+optimize multisig tests: profile diff with/without startSyncing() running
 support wallet.open(password) after close?
-support sign_transfer, submit_transfer
-test tx set in cold wallet with sign and submit
 rpc wallet listener
 rpc on_generate_from_keys
 add types to model
@@ -41,7 +38,7 @@ preserve original send request instead of modifying it?  implement copy construc
 getAddressIndex() -> getSubaddress(String address) and that returns full subaddress info?
 wallet.getIsSynced() should return false after block added to chain if not auto syncing
 full ux test among multiple wallets
-support args rescanBlockchain(bool hard, bool refresh, bool keep_key_images)
+support args rescanBlockchain(bool hard, bool refresh, bool keep_key_images) 
 test pruning?
 local vs remote requests per second auto-adjusts like gui wallet.cpp:2204
 define specification for rct_signatures, rct_prunable, multisig_txset, unsigned_tx_set
@@ -54,6 +51,8 @@ test out of range subaddress access for offline access
 architecture diagram
 
 LOW
+get_balance / get_unlocked_balance should throw exception if multisig needed? can balance be useful otherwise?
+optimize multisig tests: jni can keep references of open jni wallets so wallets are not closed and re-opened
 switch jni bridge json serialization to automated construction of native types for performance
 wallet.getLanguage() api even if rpc doesn't support?
 testGetNewKeyImagesFromLastImport

@@ -2975,6 +2975,12 @@ public abstract class TestMoneroWalletCommon {
       curWallet = synchronizeMultisigParticipants(curWallet, walletIds);
       assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
       
+      // TODO: delete
+      outputs = wallet.getOutputs(new MoneroOutputQuery().setAccountIndex(1).setSubaddressIndex(1));
+      assertFalse(outputs.isEmpty());
+      System.out.println("Num outputs: " + outputs.size());
+      for (MoneroOutputWallet output : outputs) assertFalse(output.isSpent());
+      
       // send funds from a subaddress in the multisig wallet
       //List<MoneroTxWallet> sendTxs = curWallet.sweepUnlocked(new MoneroSendRequest(testWalletAddress).setDoNotRelay(true));
       System.out.println("Sending");
@@ -2982,7 +2988,7 @@ public abstract class TestMoneroWalletCommon {
       assertNotNull(txSet.getMultisigTxHex());
       assertNull(txSet.getSignedTxHex());
       assertNull(txSet.getUnsignedTxHex());
-      assertNull(txSet.getTxs());
+      assertFalse(txSet.getTxs().isEmpty());
       
       // sign the tx with participants 1 through m - 1 to meet threshold
       String multisigTxHex = txSet.getMultisigTxHex();
@@ -3011,6 +3017,41 @@ public abstract class TestMoneroWalletCommon {
       List<MoneroTxWallet> multisigTxs = curWallet.getTxs(new MoneroTxQuery().setTxIds(txIds));
       assertEquals(multisigTxs.size(), txIds.size());
       
+      // sweep an output from subaddress [1,1]
+      outputs = wallet.getOutputs(new MoneroOutputQuery().setAccountIndex(1).setSubaddressIndex(1));
+      assertFalse(outputs.isEmpty());
+      assertFalse(outputs.get(0).isSpent());
+      txSet = curWallet.sweepOutput(returnAddress, outputs.get(0).getKeyImage().getHex());
+      assertNotNull(txSet.getMultisigTxHex());
+      assertNull(txSet.getSignedTxHex());
+      assertNull(txSet.getUnsignedTxHex());
+      assertFalse(txSet.getTxs().isEmpty());
+      
+      // sign the tx with participants 1 through m - 1 to meet threshold
+      multisigTxHex = txSet.getMultisigTxHex();
+      System.out.println("Signing sweep output");
+      for (int i = 1; i < m; i++) {
+        curWallet = openWallet(walletIds.get(i));
+        MoneroMultisigSignResult result = curWallet.signMultisigTxHex(multisigTxHex);
+        multisigTxHex = result.getSignedMultisigTxHex();
+        curWallet.close();
+      }
+      
+      // submit the signed multisig tx hex to the network
+      System.out.println("Submitting sweep output");
+      curWallet = openWallet(walletIds.get(0));
+      txIds = curWallet.submitMultisigTxHex(multisigTxHex);
+      curWallet.save();
+      
+      // synchronize the multisig participants since spending outputs
+      System.out.println("Synchronizing participants");
+      curWallet = synchronizeMultisigParticipants(curWallet, walletIds);
+      PrintBalances.printBalances(curWallet);
+      
+      // fetch the wallet's multisig txs
+      multisigTxs = curWallet.getTxs(new MoneroTxQuery().setTxIds(txIds));
+      assertEquals(multisigTxs.size(), txIds.size());
+      
       // sweep remaining balance
       System.out.println("Sweeping");
       List<MoneroTxSet> txSets = curWallet.sweepUnlocked(new MoneroSendRequest(returnAddress).setAccountIndex(1)); // TODO: test multisig with sweepEachSubaddress which will generate multiple tx sets without synchronizing participants
@@ -3019,7 +3060,7 @@ public abstract class TestMoneroWalletCommon {
       assertNotNull(txSet.getMultisigTxHex());
       assertNull(txSet.getSignedTxHex());
       assertNull(txSet.getUnsignedTxHex());
-      assertNull(txSet.getTxs());
+      assertFalse(txSet.getTxs().isEmpty());
       
       // sign the tx with participants 1 through m - 1 to meet threshold
       multisigTxHex = txSet.getMultisigTxHex();
@@ -3334,6 +3375,7 @@ public abstract class TestMoneroWalletCommon {
     List<MoneroSubaddress> subaddressesBalance = new ArrayList<MoneroSubaddress>();
     List<MoneroSubaddress> subaddressesUnlocked = new ArrayList<MoneroSubaddress>();
     for (MoneroAccount account : wallet.getAccounts(true)) {
+      if (account.getIndex() == 0) continue;  // skip default account
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         subaddresses.add(subaddress);
         if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0) subaddressesBalance.add(subaddress);
@@ -3342,7 +3384,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // test requires at least one more subaddresses than the number being swept to verify it does not change
-    assertTrue("Test requires balance in at least " + (NUM_SUBADDRESSES_TO_SWEEP + 1) + " subaddresses; run send-to-multiple tests", subaddressesBalance.size() >= NUM_SUBADDRESSES_TO_SWEEP + 1);
+    assertTrue("Test requires balance in at least " + (NUM_SUBADDRESSES_TO_SWEEP + 1) + " subaddresses from non-default acccount; run send-to-multiple tests", subaddressesBalance.size() >= NUM_SUBADDRESSES_TO_SWEEP + 1);
     assertTrue("Wallet is waiting on unlocked funds", subaddressesUnlocked.size() >= NUM_SUBADDRESSES_TO_SWEEP + 1);
     
     // sweep from first unlocked subaddresses
@@ -3414,12 +3456,13 @@ public abstract class TestMoneroWalletCommon {
     List<MoneroAccount> accountsBalance = new ArrayList<MoneroAccount>();
     List<MoneroAccount> accountsUnlocked = new ArrayList<MoneroAccount>();
     for (MoneroAccount account : accounts) {
+      if (account.getIndex() == 0) continue;  // skip default default
       if (account.getBalance().compareTo(TestUtils.MAX_FEE) > 0) accountsBalance.add(account);
       if (account.getUnlockedBalance().compareTo(TestUtils.MAX_FEE) > 0) accountsUnlocked.add(account);
     }
     
     // test requires at least one more accounts than the number being swept to verify it does not change
-    assertTrue("Test requires balance greater than the fee in at least " + (NUM_ACCOUNTS_TO_SWEEP + 1) + " accounts; run send-to-multiple tests", accountsBalance.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
+    assertTrue("Test requires balance greater than the fee in at least " + (NUM_ACCOUNTS_TO_SWEEP + 1) + " non-default accounts; run send-to-multiple tests", accountsBalance.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
     assertTrue("Wallet is waiting on unlocked funds", accountsUnlocked.size() >= NUM_ACCOUNTS_TO_SWEEP + 1);
     
     // sweep from first unlocked accounts

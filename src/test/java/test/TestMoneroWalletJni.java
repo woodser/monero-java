@@ -121,8 +121,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   /**
-   * Tests the daemon's ability to not get bogged down with wallets that will use all of its time and then leave
-   * without saying goodbye if it lets it.  Wallets are a dime a dozen.  You gotta be able to handle the attention.
+   * Test the daemon's ability to not hang from wallets which are continuously
+   * syncing, have registered listeners, and which are not closed.
    */
   @Test
   @Ignore // TODO monero core: disabled because observing memory leak behavior when all tests run together
@@ -131,9 +131,13 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // lets make some wallets and then go away
     for (int i = 0; i < 20; i++) {
       String path = getRandomWalletPath();
-      MoneroWallet willLeaveYouHanging = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_PASSWORD, MoneroNetworkType.STAGENET, TestUtils.getDaemonRpc().getRpcConnection());
-      willLeaveYouHanging.sync();
+      MoneroWalletJni willLeaveYouHanging = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_PASSWORD, MoneroNetworkType.STAGENET, TestUtils.getDaemonRpc().getRpcConnection());
+      willLeaveYouHanging.startSyncing();
+      willLeaveYouHanging.addListener(new MoneroWalletListener());  // listen for wallet events which could aggrevate hanging
     }
+    
+    // wait for a block
+    daemon.getNextBlockHeader();
     
     // check in on the daemon
     daemon.getHeight();
@@ -1129,7 +1133,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Test
-  public void testCreateWalletAndReceive() {
+  public void testCreateAndReceive() {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
     
     // create a random stagenet wallet
