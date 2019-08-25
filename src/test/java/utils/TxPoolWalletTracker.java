@@ -67,7 +67,7 @@ public class TxPoolWalletTracker {
     
     // wait for txs to clear pool
     txIdsPool.retainAll(txIdsWallet);
-    waitForTxsToClearPool(txIdsPool.toArray(new String[0]));
+    waitForTxsToClearPool(txIdsPool.toArray(new String[txIdsPool.size()]));
     
     // sync wallets with the pool
     for (MoneroWallet wallet : wallets) {
