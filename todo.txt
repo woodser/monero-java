@@ -1,7 +1,7 @@
 HIGH
 testCreateAndReceive() or other registered listeners cause all tests to hang if not closed
 re-enable sample code build
-update model: multisig methods and models, sample code, MoneroTxSet attribute of MoneroTxWallet, sweepAllUnlocked()->sweepUnlocked(), getIncomingTransfers(query), getOutgoingTransfers(query), close(save), uint vs ulong
+update model: sample code, uint vs ulong, param types?
 update javascript library to Java (difference from Java master to jni93 branch)
 open monero core issues
 open issue: investigate integration of this library into Bisq
