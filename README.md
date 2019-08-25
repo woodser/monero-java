@@ -8,10 +8,11 @@ In addition, this project conforms to an [API specification](https://github.com/
 
 - Manage a Monero daemon using RPC
 - Manage a Monero wallet using RPC and JNI
-- Cohesive APIs and models with rigorous focus on ease-of-use
+- Cohesive APIs with rigorous focus on ease-of-use
 - Fetch and process binary data from the daemon (e.g. raw blocks)
 - Query wallet transactions, transfers, and outputs by their many attributes
 - Be notified when blocks are added to the chain, as the wallet synchronizes, or when the wallet sends or receives funds
+- Supports multisig
 - Over 200 passing JUnit tests
 
 ## Sample Code
@@ -180,7 +181,7 @@ This project is licensed under MIT.
 Donations are gratefully accepted.  Thank you for your support!
 
 <p align="center">
-	<img src="donate.png" width="125" height="125"/>
+	<img src="donate.png" width="120" height="120"/>
 </p>
 
 `46FR1GKVqFNQnDiFkH7AuzbUBrGQwz2VdaXTDD4jcjRE8YkkoTYTmZ2Vohsz9gLSqkj5EM6ai9Q7sBoX4FPPYJdGKQQXPVz`
