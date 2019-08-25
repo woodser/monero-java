@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
+import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroUtils;
 
 /**
@@ -101,6 +102,12 @@ public class MoneroTxSet {
     sb.append(MoneroUtils.kvLine("Multisig tx hex: ", getMultisigTxHex(), indent));
     sb.append(MoneroUtils.kvLine("Unsigned tx hex: ", getUnsignedTxHex(), indent));
     sb.append(MoneroUtils.kvLine("Signed tx hex: ", getSignedTxHex(), indent));
+    if (getTxs() != null) {
+      sb.append(MoneroUtils.kvLine("Txs", "", indent));
+      for (MoneroTx tx : getTxs()) {
+        sb.append(tx.toString(indent + 1) + "\n");
+      }
+    }
     return sb.toString();
   }
 
