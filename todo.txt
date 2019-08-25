@@ -1,16 +1,15 @@
 HIGH
 test sweep subaddresses, account, wallets
-new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
 testCreateAndReceive() or other registered listeners cause all tests to hang if not closed
-
-open monero core issues
 re-enable sample code build
 update model: multisig methods and models, sample code, MoneroTxSet attribute of MoneroTxWallet, sweepAllUnlocked()->sweepUnlocked(), getIncomingTransfers(query), getOutgoingTransfers(query), close(save), uint vs ulong
 update javascript library to Java (difference from Java master to jni93 branch)
+open monero core issues
 open issue: investigate integration of this library into Bisq
 release
 
 MEDIUM
+new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
 support cold wallet with sign_transfer, submit_transfer
 approximate chain height
 tx.getNumConfirmations() should be initialized whenever tx.getHeight() is

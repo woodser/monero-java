@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroNetworkType;
 import monero.utils.MoneroUtils;
-import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroDestination;
