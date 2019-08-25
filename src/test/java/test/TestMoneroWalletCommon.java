@@ -3388,11 +3388,13 @@ public abstract class TestMoneroWalletCommon {
       
       // sweep unlocked account
       MoneroSubaddress unlockedSubaddress = subaddressesUnlocked.get(i);
-      List<MoneroTxWallet> txs = wallet.sweepSubaddress(unlockedSubaddress.getAccountIndex(), unlockedSubaddress.getIndex(), wallet.getPrimaryAddress()).getTxs();
+      MoneroTxSet txSet = wallet.sweepSubaddress(unlockedSubaddress.getAccountIndex(), unlockedSubaddress.getIndex(), wallet.getPrimaryAddress());
       
       // test transactions
+      List<MoneroTxWallet> txs = txSet.getTxs();
       assertTrue(txs.size() > 0);
       for (MoneroTxWallet tx : txs) {
+        assertTrue(txSet == tx.getTxSet());
         MoneroSendRequest request = new MoneroSendRequest(wallet.getPrimaryAddress());
         request.setAccountIndex(unlockedSubaddress.getAccountIndex());
         request.setSubaddressIndices(unlockedSubaddress.getIndex());
@@ -3412,6 +3414,7 @@ public abstract class TestMoneroWalletCommon {
     // test subaddresses after sweeping
     List<MoneroSubaddress> subaddressesAfter = new ArrayList<MoneroSubaddress>();
     for (MoneroAccount account : wallet.getAccounts(true)) {
+      if (account.getIndex() == 0) continue;  // skip default account
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         subaddressesAfter.add(subaddress);
       }
@@ -3489,7 +3492,7 @@ public abstract class TestMoneroWalletCommon {
     // test accounts after sweeping
     List<MoneroAccount> accountsAfter = wallet.getAccounts(true);
     assertEquals(accounts.size(), accountsAfter.size());
-    for (int i = 0; i < accounts.size(); i++) {
+    for (int i = 1; i < accounts.size(); i++) {
       MoneroAccount accountBefore = accounts.get(i);
       MoneroAccount accountAfter = accountsAfter.get(i);
       
