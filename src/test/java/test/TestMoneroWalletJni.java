@@ -136,13 +136,24 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       willLeaveYouHanging.addListener(new MoneroWalletListener());  // listen for wallet events which could aggrevate hanging
     }
     
+    // check in on the daemon
+    daemon.getHeight();
+    
+    // start mining
+    try { StartMining.startMining(); }
+    catch (MoneroException e) { }
+    
     // wait for a block
     daemon.getNextBlockHeader();
+    
+    // stop mining
+    try { daemon.stopMining(); }
+    catch (MoneroException e) { }
     
     // check in on the daemon
     daemon.getHeight();
     
-    // daemon da man
+    // wallet's intentionally not closed (daemon da man)
   }
   
   // ------------------------------- BEGIN TESTS ------------------------------
