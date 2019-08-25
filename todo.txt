@@ -1,6 +1,7 @@
 HIGH
-update model: uint vs ulong, param types, color keywords and constants?
 update javascript library to Java (difference from Java master to jni93 branch)
+update model: uint vs ulong, param types, color keywords and constants?
+regenerate docs
 open monero core issues
 open issue: investigate integration of this library into Bisq
 release
