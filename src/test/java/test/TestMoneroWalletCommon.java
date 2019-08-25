@@ -59,7 +59,6 @@ import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
-import utils.PrintBalances;
 import utils.StartMining;
 import utils.TestUtils;
 
