@@ -2975,14 +2975,7 @@ public abstract class TestMoneroWalletCommon {
       curWallet = synchronizeMultisigParticipants(curWallet, walletIds);
       assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
       
-      // TODO: delete
-      outputs = wallet.getOutputs(new MoneroOutputQuery().setAccountIndex(1).setSubaddressIndex(1));
-      assertFalse(outputs.isEmpty());
-      System.out.println("Num outputs: " + outputs.size());
-      for (MoneroOutputWallet output : outputs) assertFalse(output.isSpent());
-      
       // send funds from a subaddress in the multisig wallet
-      //List<MoneroTxWallet> sendTxs = curWallet.sweepUnlocked(new MoneroSendRequest(testWalletAddress).setDoNotRelay(true));
       System.out.println("Sending");
       MoneroTxSet txSet = curWallet.sendSplit(new MoneroSendRequest(returnAddress, TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0));
       assertNotNull(txSet.getMultisigTxHex());
@@ -3018,7 +3011,7 @@ public abstract class TestMoneroWalletCommon {
       assertEquals(multisigTxs.size(), txIds.size());
       
       // sweep an output from subaddress [1,1]
-      outputs = wallet.getOutputs(new MoneroOutputQuery().setAccountIndex(1).setSubaddressIndex(1));
+      outputs = curWallet.getOutputs(new MoneroOutputQuery().setAccountIndex(1).setSubaddressIndex(1));
       assertFalse(outputs.isEmpty());
       assertFalse(outputs.get(0).isSpent());
       txSet = curWallet.sweepOutput(returnAddress, outputs.get(0).getKeyImage().getHex());
