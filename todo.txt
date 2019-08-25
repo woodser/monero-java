@@ -1,7 +1,6 @@
 HIGH
-testCreateAndReceive() or other registered listeners cause all tests to hang if not closed
 re-enable sample code build
-update model: sample code, uint vs ulong, param types?
+update model: uint vs ulong, param types, color keywords and constants?
 update javascript library to Java (difference from Java master to jni93 branch)
 open monero core issues
 open issue: investigate integration of this library into Bisq
@@ -48,6 +47,7 @@ test out of range subaddress access for offline access
 architecture diagram
 
 LOW
+testCreateAndReceive() or other registered listeners cause all tests to hang if not closed
 get_balance / get_unlocked_balance should throw exception if multisig needed? can balance be useful otherwise?
 optimize multisig tests: jni can keep references of open jni wallets so wallets are not closed and re-opened
 switch jni bridge json serialization to automated construction of native types for performance

@@ -126,8 +126,7 @@ TimeUnit.SECONDS.sleep(10);
 assertTrue(JNI_OUTPUT_RECEIVED);
 
 // save and close the JNI wallet
-walletJNI.save();
-walletJNI.close();
+walletJNI.close(true);
 ```
 
 ## How to Use This Library
