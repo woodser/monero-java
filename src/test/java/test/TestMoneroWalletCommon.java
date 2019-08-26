@@ -2003,7 +2003,7 @@ public abstract class TestMoneroWalletCommon {
       // submit double spend tx
       MoneroSubmitTxResult resultDoubleSpend = daemon.submitTxHex(txDoubleSpend.getFullHex(), true);
       if (resultDoubleSpend.isGood()) {
-        daemon.flushTxPoolById(txDoubleSpend.getId());
+        daemon.flushTxPool(txDoubleSpend.getId());
         throw new RuntimeException("Tx submit result should have been double spend");
       }
       
@@ -2032,14 +2032,14 @@ public abstract class TestMoneroWalletCommon {
           wallet.sync();
           wallet.getTx(tx2.getId()); // wallet is aware of tx2
         } finally  {
-          daemon.flushTxPoolById(tx2.getId());
+          daemon.flushTxPool(tx2.getId());
         }
       }
     } finally  {
       if (Boolean.TRUE.equals(request.getDoNotRelay())) {
         
         // flush the tx from the pool
-        daemon.flushTxPoolById(tx.getId());
+        daemon.flushTxPool(tx.getId());
         
         // sync wallet which checks pool
         wallet.sync(); 
@@ -2114,7 +2114,7 @@ public abstract class TestMoneroWalletCommon {
       // submit double spend tx
       MoneroSubmitTxResult resultDoubleSpend = daemon.submitTxHex(txDoubleSpend.getFullHex(), true);
       if (resultDoubleSpend.isGood()) {
-        daemon.flushTxPoolById(txDoubleSpend.getId());
+        daemon.flushTxPool(txDoubleSpend.getId());
         throw new RuntimeException("Tx submit result should have been double spend");
       }
 
@@ -2136,7 +2136,7 @@ public abstract class TestMoneroWalletCommon {
         else assertTrue(result.isGood());
         wallet.sync();
         wallet.getTx(tx2.getId()); // wallet is aware of tx2
-        daemon.flushTxPoolById(tx2.getId());
+        daemon.flushTxPool(tx2.getId());
       }
       
       // should be no issues

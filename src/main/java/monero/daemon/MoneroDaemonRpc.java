@@ -47,7 +47,6 @@ import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroBlockTemplate;
-import monero.daemon.model.MoneroMinerTxSum;
 import monero.daemon.model.MoneroDaemonConnection;
 import monero.daemon.model.MoneroDaemonConnectionSpan;
 import monero.daemon.model.MoneroDaemonInfo;
@@ -59,6 +58,7 @@ import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
 import monero.daemon.model.MoneroHardForkInfo;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroKeyImageSpentStatus;
+import monero.daemon.model.MoneroMinerTxSum;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroOutput;
@@ -491,22 +491,22 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public void flushTxPool() {
-    flushTxPoolByIds(null);
+    flushTxPool(new String[0]);
   }
-
-  @Override
-  public void flushTxPoolById(String id) {
-    flushTxPoolByIds(Arrays.asList(id));
-  }
-
+  
   @SuppressWarnings("unchecked")
   @Override
-  public void flushTxPoolByIds(List<String> ids) {
+  public void flushTxPool(String... ids) {
     if (ids == null) System.out.println("*** FLUSHING ENTIRE TX POOL ***");
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("txids", ids);
     Map<String, Object> resp = rpc.sendJsonRequest("flush_txpool", params);
     checkResponseStatus((Map<String, Object>) resp.get("result"));
+  }
+  
+  @Override
+  public void flushTxPool(Collection<String> ids) {
+    flushTxPool(ids.toArray(new String[0]));
   }
 
   @SuppressWarnings("unchecked")

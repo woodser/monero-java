@@ -460,7 +460,7 @@ public class TestMoneroDaemonRpc {
     }
     
     // clear txs from pool
-    daemon.flushTxPoolByIds(txIds);
+    daemon.flushTxPool(txIds);
     wallet.sync();
   }
   
@@ -575,7 +575,7 @@ public class TestMoneroDaemonRpc {
     }
     
     // flush the tx from the pool, gg
-    daemon.flushTxPoolById(tx.getId());
+    daemon.flushTxPool(tx.getId());
     wallet.sync();
   }
   
@@ -615,7 +615,7 @@ public class TestMoneroDaemonRpc {
         assertTrue(stats.getNumTxs() > i);
         testTxPoolStats(stats);
       } finally {
-        daemon.flushTxPoolById(tx.getId());
+        daemon.flushTxPool(tx.getId());
         wallet.sync();
       }
     }
@@ -667,7 +667,7 @@ public class TestMoneroDaemonRpc {
     // submit txs to the pool but don't relay
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
     for (int i = 1; i < 3; i++) {
-      MoneroTx tx =  getUnrelayedTx(wallet, i);
+      MoneroTx tx = getUnrelayedTx(wallet, i);
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
       assertTrue(result.isGood());
       txs.add(tx);
@@ -677,7 +677,7 @@ public class TestMoneroDaemonRpc {
     for (int i = 0; i < txs.size(); i++) {
       
       // flush tx from pool
-      daemon.flushTxPoolById(txs.get(i).getId());
+      daemon.flushTxPool(txs.get(i).getId());
       
       // test tx pool
       List<MoneroTx> poolTxs = daemon.getTxPool();
@@ -703,7 +703,7 @@ public class TestMoneroDaemonRpc {
     // submit txs to the pool but don't relay
     List<String> txIds = new ArrayList<String>();
     for (int i = 1; i < 3; i++) {
-      MoneroTx tx =  getUnrelayedTx(wallet, i);
+      MoneroTx tx = getUnrelayedTx(wallet, i);
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
       assertFalse(result.isDoubleSpend());
       assertTrue(result.isGood());
@@ -712,7 +712,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(txPoolBefore.size() + txIds.size(), daemon.getTxPool().size());
     
     // remove all txs by ids
-    daemon.flushTxPoolByIds(txIds);
+    daemon.flushTxPool(txIds);
     
     // pool is back to original state
     assertEquals(txPoolBefore.size(), daemon.getTxPool().size());
@@ -739,7 +739,7 @@ public class TestMoneroDaemonRpc {
     for (MoneroTx tx : daemon.getTxs(txIds)) {
       for (MoneroOutput vin : tx.getVins()) keyImages.add(vin.getKeyImage().getHex());
     }
-    daemon.flushTxPoolByIds(txIds);
+    daemon.flushTxPool(txIds);
     
     // key images are not spent
     testSpentStatuses(keyImages, MoneroKeyImageSpentStatus.NOT_SPENT);
@@ -761,7 +761,7 @@ public class TestMoneroDaemonRpc {
     testSpentStatuses(keyImages, MoneroKeyImageSpentStatus.CONFIRMED);
     
     // flush this test's txs from pool
-    daemon.flushTxPoolByIds(txIds);
+    daemon.flushTxPool(txIds);
   }
   
   // Can get output indices given a list of transaction ids (binary)

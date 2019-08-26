@@ -76,7 +76,7 @@ public class TxPoolWalletTracker {
     }
   }
   
-  private void waitForTxsToClearPool(String... txIds) {
+  private static void waitForTxsToClearPool(String... txIds) {
     MoneroDaemon daemon = TestUtils.getDaemonRpc(); 
       
     // attempt to start mining to push the network along
