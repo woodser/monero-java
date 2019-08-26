@@ -1154,7 +1154,7 @@ public interface MoneroWallet {
   public void save();
   
   /**
-   * Save and close the wallet.
+   * Close the wallet (does not save).
    */
   public void close();
   
