@@ -1,12 +1,18 @@
 HIGH
-update javascript library to Java (difference from Java master to jni93 branch)
-update model: flushTxPool, uint vs ulong, param types, color keywords and constants?
+re-order height to be above sync
+MoneroDaemonConnectionSpan numBlocks and startBlockHeight are Long
+MoneroWalletRpc() should support rpc connection as parameter
+testSendAndUpdateTxs() needs to wrap try catch
+does multisig work if exchange_keys is called instead of finalize_multisig?
+update model: flushTxPool, uint/ulong/etc -> uint64, param types, sample color keywords and constants with and smaller size
 regenerate docs
 open monero core issues
 open issue: investigate integration of this library into Bisq
-release
+update javascript library
+announce
 
 MEDIUM
+cleanup: order all methods and tests the same, even overrides
 should sweepUnlocked() sweep all accounts if not specified?
 prevent common occasional test failures caused by testing equality instead of mergeability (e.g. tx num confirmations increasing is expected) 
 new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
