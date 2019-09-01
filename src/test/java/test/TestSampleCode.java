@@ -70,7 +70,7 @@ public class TestSampleCode {
       int numTxs = block.getTxs().size();
     }
     
-    // connect to a wallet using RPC
+    // create a wallet using RPC bindings to monero-wallet-rpc
     MoneroWalletRpc walletRPC = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
     String primaryAddress = walletRPC.getPrimaryAddress(); // 59aZULsUF3YNSKGiHz4J...
     BigInteger balance = walletRPC.getBalance();           // 533648366742
