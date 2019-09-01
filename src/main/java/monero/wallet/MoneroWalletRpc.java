@@ -1718,6 +1718,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("label")) { } // label belongs to first subaddress
       else LOGGER.warn("WARNING: ignoring unexpected account field: " + key + ": " + val);
     }
+    if ("".equals(account.getTag())) account.setTag(null);
     return account;
   }
   
