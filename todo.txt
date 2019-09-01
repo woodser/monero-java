@@ -3,11 +3,10 @@ fix memleak
 compare by merging when appropriate
 "how to use this library" -> "how to set up this library" across readmes
 re-order height to be above sync
-MoneroDaemonConnectionSpan numBlocks and startBlockHeight are Long
 MoneroWalletRpc() should support rpc connection as parameter
 testSendAndUpdateTxs() needs to wrap try catch
 does multisig work if exchange_keys is called instead of finalize_multisig?
-update model: flushTxPool, uint/ulong/etc -> uint64, param types, list->[], sample color keywords and constants with and smaller size, isMinerTx, remove "reference"
+update model: flushTxPool, uint/ulong/etc -> uint64, param types, list->[], sample color keywords and constants with and smaller size, isMinerTx, remove "reference", numBlocks/startHeight Long
 regenerate docs
 open monero core issues
 open issue: investigate integration of this library into Bisq

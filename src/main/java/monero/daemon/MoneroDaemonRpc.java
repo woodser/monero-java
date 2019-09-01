@@ -1426,12 +1426,12 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     for (String key : rpcConnectionSpan.keySet()) {
       Object val = rpcConnectionSpan.get(key);
       if (key.equals("connection_id")) span.setConnectionId((String) val);
-      else if (key.equals("nblocks")) span.setNumBlocks(((BigInteger) val).intValue());
+      else if (key.equals("nblocks")) span.setNumBlocks(((BigInteger) val).longValue());
       else if (key.equals("rate")) span.setRate(((BigInteger) val).longValue());
       else if (key.equals("remote_address")) { if (!"".equals(val)) span.setRemoteAddress((String) val); }
       else if (key.equals("size")) span.setSize(((BigInteger) val).longValue());
       else if (key.equals("speed")) span.setSpeed(((BigInteger) val).longValue());
-      else if (key.equals("start_block_height")) span.setStartBlockHeight((BigInteger) val);
+      else if (key.equals("start_block_height")) span.setStartHeight(((BigInteger) val).longValue());
       else LOGGER.warn("WARNING: ignoring unexpected field in daemon connection span: " + key + ": " + val);
     }
     return span;

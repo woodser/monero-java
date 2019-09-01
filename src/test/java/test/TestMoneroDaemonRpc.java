@@ -1810,6 +1810,7 @@ public class TestMoneroDaemonRpc {
     assertNotNull(span);
     assertNotNull(span.getConnectionId());
     assertFalse(span.getConnectionId().isEmpty());
+    assertTrue(span.getStartHeight() > 0);
     assertTrue(span.getNumBlocks() > 0);
     assertTrue(span.getRemoteAddress() == null || !span.getRemoteAddress().isEmpty());
     assertTrue(span.getRate() > 0);
