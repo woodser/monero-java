@@ -2870,7 +2870,7 @@ public abstract class TestMoneroWalletCommon {
         curWallet.createSubaddress(accountIdx);
         destinations.add(new MoneroDestination(curWallet.getAddress(accountIdx, i), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(2))));
       }
-      curWallet.close();
+      curWallet.close(true);
       
       System.out.println("Sending funds from main wallet");
       
@@ -2928,7 +2928,7 @@ public abstract class TestMoneroWalletCommon {
       for (int i = 0; i < 3; i++) {
         assertTrue(curWallet.getUnlockedBalance(1, i).compareTo(BigInteger.valueOf(0)) > 0);
       }
-      List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setAccountIndex(1));
+      List<MoneroOutputWallet> outputs = curWallet.getOutputs(new MoneroOutputQuery().setAccountIndex(1));
       assertFalse(outputs.isEmpty());
       if (outputs.size() < 3) System.out.println("WARNING: not one output per subaddress?");
       //assertTrue(outputs.size() >= 3);  // TODO
@@ -2968,7 +2968,7 @@ public abstract class TestMoneroWalletCommon {
         curWallet = openWallet(walletIds.get(i));
         MoneroMultisigSignResult result = curWallet.signMultisigTxHex(multisigTxHex);
         multisigTxHex = result.getSignedMultisigTxHex();
-        curWallet.close();
+        curWallet.close(true);
       }
       
       //System.out.println("Submitting signed multisig tx hex: " + multisigTxHex);
@@ -3004,7 +3004,7 @@ public abstract class TestMoneroWalletCommon {
         curWallet = openWallet(walletIds.get(i));
         MoneroMultisigSignResult result = curWallet.signMultisigTxHex(multisigTxHex);
         multisigTxHex = result.getSignedMultisigTxHex();
-        curWallet.close();
+        curWallet.close(true);
       }
       
       // submit the signed multisig tx hex to the network
@@ -3038,7 +3038,7 @@ public abstract class TestMoneroWalletCommon {
         curWallet = openWallet(walletIds.get(i));
         MoneroMultisigSignResult result = curWallet.signMultisigTxHex(multisigTxHex);
         multisigTxHex = result.getSignedMultisigTxHex();
-        curWallet.close();
+        curWallet.close(true);
       }
       
       // submit the signed multisig tx hex to the network
@@ -3067,7 +3067,7 @@ public abstract class TestMoneroWalletCommon {
     
     // close the current wallet
     String path = currentWallet.getPath();
-    currentWallet.close();
+    currentWallet.close(true);
 
     // collect multisig hex of all participants to synchronize
     List<String> multisigHexes = new ArrayList<String>();

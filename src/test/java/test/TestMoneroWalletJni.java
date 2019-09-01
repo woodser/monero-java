@@ -406,7 +406,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(wallet.getDaemonHeight() - startHeight, (long) result.getNumBlocksFetched());
     assertTrue(result.getReceivedMoney());
     assertEquals(daemon.getHeight(), wallet.getHeight());
-    wallet.close();
+    wallet.close(true);
   }
 
   // Can sync a wallet with a randomly generated seed

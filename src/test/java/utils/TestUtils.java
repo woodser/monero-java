@@ -153,8 +153,7 @@ public class TestUtils {
       // This is not necessary in the rpc wallet which saves automatically.
       Runtime.getRuntime().addShutdownHook(new Thread() {
         public void run() {
-          walletJni.save();
-          walletJni.close();
+          walletJni.close(true);
         }
       });
     }

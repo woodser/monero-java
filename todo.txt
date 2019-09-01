@@ -1,4 +1,6 @@
 HIGH
+fix memleak
+compare by merging when appropriate
 "how to use this library" -> "how to set up this library" across readmes
 re-order height to be above sync
 MoneroDaemonConnectionSpan numBlocks and startBlockHeight are Long
