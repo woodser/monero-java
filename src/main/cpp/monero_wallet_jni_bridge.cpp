@@ -632,6 +632,59 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_decodeIntegratedAdd
   }
 }
 
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getHeightJni(JNIEnv *env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getHeightJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  return wallet->get_height();
+}
+
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getChainHeightJni(JNIEnv *env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getChainHeightJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    return wallet->get_daemon_height();
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+}
+
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni(JNIEnv *env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  return wallet->get_restore_height();
+}
+
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setRestoreHeightJni(JNIEnv *env, jobject instance, jlong restore_height) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_setRestoreHeightJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    wallet->set_restore_height(restore_height);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonHeightJni(JNIEnv* env, jobject instance) {
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    return wallet->get_daemon_height();
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+}
+
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonMaxPeerHeightJni(JNIEnv* env, jobject instance) {
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    return wallet->get_daemon_max_peer_height();
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+}
+
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong start_height) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_syncJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
@@ -694,61 +747,6 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_rescanBlockchainJni(JN
     wallet->rescan_blockchain();
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
-  }
-}
-
-// isMultisigImportNeeded
-
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getHeightJni(JNIEnv *env, jobject instance) {
-  MTRACE("Java_monero_wallet_MoneroWalletJni_getHeightJni");
-  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  return wallet->get_height();
-}
-
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getChainHeightJni(JNIEnv *env, jobject instance) {
-  MTRACE("Java_monero_wallet_MoneroWalletJni_getChainHeightJni");
-  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  try {
-    return wallet->get_daemon_height();
-  } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
-    return 0;
-  }
-}
-
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni(JNIEnv *env, jobject instance) {
-  MTRACE("Java_monero_wallet_MoneroWalletJni_getRestoreHeightJni");
-  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  return wallet->get_restore_height();
-}
-
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setRestoreHeightJni(JNIEnv *env, jobject instance, jlong restore_height) {
-  MTRACE("Java_monero_wallet_MoneroWalletJni_setRestoreHeightJni");
-  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  try {
-    wallet->set_restore_height(restore_height);
-  } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
-  }
-}
-
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonHeightJni(JNIEnv* env, jobject instance) {
-  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  try {
-    return wallet->get_daemon_height();
-  } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
-    return 0;
-  }
-}
-
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonMaxPeerHeightJni(JNIEnv* env, jobject instance) {
-  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  try {
-    return wallet->get_daemon_max_peer_height();
-  } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
-    return 0;
   }
 }
 

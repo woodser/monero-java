@@ -100,20 +100,6 @@ public interface MoneroWallet {
    * @return the wallet's private spend key
    */
   public String getPrivateSpendKey();
-  
-  /**
-   * Get the height of the last block processed by the wallet (its index + 1).  // TODO **: should be the height of the last block processed + 1, which is the height of the next block to process
-   * 
-   * @return the height of the last block processed by the wallet
-   */
-  public long getHeight();
-  
-  /**
-   * Get the blockchain's height.
-   * 
-   * @return the blockchain's height
-   */
-  public long getDaemonHeight();
     
   /**
    * Get the wallet's primary address.
@@ -164,6 +150,20 @@ public interface MoneroWallet {
    * @return the decoded integrated address including standard address and payment id
    */
   public MoneroIntegratedAddress decodeIntegratedAddress(String integratedAddress);
+  
+  /**
+   * Get the height of the last block processed by the wallet (its index + 1).  // TODO **: should be the height of the last block processed + 1, which is the height of the next block to process
+   * 
+   * @return the height of the last block processed by the wallet
+   */
+  public long getHeight();
+  
+  /**
+   * Get the blockchain's height.
+   * 
+   * @return the blockchain's height
+   */
+  public long getDaemonHeight();
   
   /**
    * Synchronize the wallet with the daemon as a one-time synchronous process.

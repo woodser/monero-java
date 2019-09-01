@@ -312,6 +312,19 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return new MoneroIntegratedAddress((String) result.get("standard_address"), (String) result.get("payment_id"), integratedAddress);
   }
+  
+  @SuppressWarnings("unchecked")
+  @Override
+  public long getHeight() {
+    Map<String, Object> resp = rpc.sendJsonRequest("get_height");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return ((BigInteger) result.get("height")).longValue();
+  }
+
+  @Override
+  public long getDaemonHeight() {
+    throw new MoneroException("monero-wallet-rpc does not support getting the chain height");
+  }
 
   @SuppressWarnings("unchecked")
   @Override
@@ -327,19 +340,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public void startSyncing() {
     // nothing to do because wallet rpc syncs automatically
-  }
-  
-  @SuppressWarnings("unchecked")
-  @Override
-  public long getHeight() {
-    Map<String, Object> resp = rpc.sendJsonRequest("get_height");
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return ((BigInteger) result.get("height")).longValue();
-  }
-
-  @Override
-  public long getDaemonHeight() {
-    throw new MoneroException("monero-wallet-rpc does not support getting the chain height");
   }
   
   @Override

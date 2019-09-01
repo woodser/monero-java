@@ -476,22 +476,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public long getHeight() {
-    assertNotClosed();
-    return getHeightJni();
-  }
-
-  @Override
-  public long getDaemonHeight() {
-    assertNotClosed();
-    try {
-      return getDaemonHeightJni();
-    } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
-    }
-  }
-
-  @Override
   public MoneroIntegratedAddress getIntegratedAddress(String paymentId) {
     assertNotClosed();
     try {
@@ -508,6 +492,22 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     try {
       String integratedAddressJson = decodeIntegratedAddressJni(integratedAddress);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, integratedAddressJson, MoneroIntegratedAddress.class);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
+
+  @Override
+  public long getHeight() {
+    assertNotClosed();
+    return getHeightJni();
+  }
+
+  @Override
+  public long getDaemonHeight() {
+    assertNotClosed();
+    try {
+      return getDaemonHeightJni();
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
