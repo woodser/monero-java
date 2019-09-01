@@ -497,7 +497,6 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public void flushTxPool(String... ids) {
-    if (ids == null) System.out.println("*** FLUSHING ENTIRE TX POOL ***");
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("txids", ids);
     Map<String, Object> resp = rpc.sendJsonRequest("flush_txpool", params);

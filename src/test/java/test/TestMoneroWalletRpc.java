@@ -8,7 +8,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,7 +27,6 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIntegratedAddress;
-import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroTxWallet;
 import utils.TestUtils;
 
@@ -413,7 +411,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   // Can stop the RPC server
   @Test
-  @Ignore   // disabled server not actually stopped
+  @Ignore   // disabled so server not actually stopped
   public void testStop() {
     wallet.stop();
   }
@@ -731,35 +729,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Override
   public void testSetAttributes() {
     super.testSetAttributes();
-  }
-
-  // test custom rpc error codes
-  @Override
-  public void testCreatePaymentUri() {
-    super.testCreatePaymentUri();
-    
-    // test with undefined address
-    MoneroSendRequest request = new MoneroSendRequest(wallet.getAddress(0, 0), BigInteger.valueOf(0));
-    String address = request.getDestinations().get(0).getAddress();
-    request.getDestinations().get(0).setAddress(null);
-    try {
-      wallet.createPaymentUri(request);
-      fail("Should have thrown RPC exception with invalid parameters");
-    } catch (MoneroException e) {
-      assertEquals(-11, (int) e.getCode());
-      assertTrue(e.getMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
-    }
-    request.getDestinations().get(0).setAddress(address);
-    
-    // test with invalid payment id
-    request.setPaymentId("bizzup");
-    try {
-      wallet.createPaymentUri(request);
-      fail("Should have thrown RPC exception with invalid parameters");
-    } catch (MoneroException e) {
-      assertEquals(-11, (int) e.getCode());
-      assertTrue(e.getMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
-    }
   }
 
   @Override

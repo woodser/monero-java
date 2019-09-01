@@ -279,6 +279,8 @@ public class MoneroUtils {
   /**
    * Merges a transaction into a list of existing transactions.
    * 
+   * TODO: collapse into MoneroUtils.mergeTx(List<MoneroTxWallet> txs, ...)?
+   * 
    * @param txs are existing transactions to merge into
    * @param tx is the transaction to merge into the list
    */

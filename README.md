@@ -2,7 +2,7 @@
 
 This project is a library for using a Monero wallet and daemon in Java using RPC and JNI bindings to [Monero Core](https://github.com/monero-project/monero).
 
-In addition, this project conforms to an [API specification](http://moneroecosystem.org/monero-java/monero-spec.pdf) intended to be intuitive, robust, and for long-term use in the Monero project.
+In addition, this project conforms to an [API specification](http://moneroecosystem.org/monero-java/monero-spec.pdf) intended to be intuitive, robust, and suitable for long-term use in the Monero project.
 
 ## Main Features
 
@@ -161,7 +161,7 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 
 1. [Set up this library with JNI support](#how-to-use-this-library)
 2. Set up running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html).  See [Monero RPC Setup](#how-to-set-up-monero-rpc). 
-3. Configure the desired RPC endpoints, authentication, and test wallet in [TestUtils.java](src/test/java/utils/TestUtils.java).
+3. Configure the appropriate RPC endpoints, authentication, and test wallet in [TestUtils.java](src/test/java/utils/TestUtils.java).
 4. Run all *.java files in src/main/test as JUnits.
 
 ## See Also

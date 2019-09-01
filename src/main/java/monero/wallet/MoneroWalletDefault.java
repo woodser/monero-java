@@ -219,7 +219,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   @Override
   public MoneroTxSet createTx(MoneroSendRequest request) {
     if (request == null) throw new MoneroException("Send request cannot be null");
-    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with createTx() which prevents splitting; use sendTxs() instead");
+    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with createTx() which prevents splitting; use createTxs() instead");
     request.setCanSplit(false);
     return createTxs(request);
   }
@@ -247,7 +247,9 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
     
     // restore doNotRelay of request and txs
     request.setDoNotRelay(requestedDoNotRelay);
-    for (MoneroTxWallet tx : txSet.getTxs()) tx.setDoNotRelay(requestedDoNotRelay);
+    if (txSet.getTxs() != null) {
+      for (MoneroTxWallet tx : txSet.getTxs()) tx.setDoNotRelay(requestedDoNotRelay);
+    }
     
     // return results
     return txSet;

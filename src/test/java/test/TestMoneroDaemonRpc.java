@@ -1164,7 +1164,7 @@ public class TestMoneroDaemonRpc {
     
     // submit and relay tx2 hex which double spends tx1
     result = daemon.submitTxHex(tx2.getFullHex());
-    assertEquals(result.isRelayed(), true);
+    assertEquals(true, result.isRelayed());
     testSubmitTxResultDoubleSpend(result);
     
     // tx2 is in not the pool
@@ -1913,7 +1913,7 @@ public class TestMoneroDaemonRpc {
       assertEquals(false, result.isFeeTooLow());
       assertEquals(false, result.isMixinTooLow());
       assertEquals(false, result.hasInvalidInput());
-      assertEquals(false, result.getHasInvalidOutput());
+      assertEquals(false, result.hasInvalidOutput());
       assertEquals(true, result.isRct());
       assertEquals(false, result.isOverspend());
       assertEquals(false, result.isTooBig());
@@ -1931,7 +1931,7 @@ public class TestMoneroDaemonRpc {
     assertEquals(false, result.isFeeTooLow());
     assertEquals(false, result.isMixinTooLow());
     assertEquals(false, result.hasInvalidInput());
-    assertEquals(false, result.getHasInvalidOutput());
+    assertEquals(false, result.hasInvalidOutput());
     assertEquals(true, result.isRct());
     assertEquals(false, result.isOverspend());
     assertEquals(false, result.isTooBig());
@@ -1944,7 +1944,7 @@ public class TestMoneroDaemonRpc {
     assertNotNull(result.isFeeTooLow());
     assertNotNull(result.isMixinTooLow());
     assertNotNull(result.hasInvalidInput());
-    assertNotNull(result.getHasInvalidOutput());
+    assertNotNull(result.hasInvalidOutput());
     assertNotNull(result.isRct());
     assertNotNull(result.isOverspend());
     assertNotNull(result.isTooBig());

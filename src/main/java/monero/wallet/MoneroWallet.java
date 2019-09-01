@@ -62,7 +62,7 @@ public interface MoneroWallet {
   /**
    * Get the wallet's path.
    * 
-   * @return the wallet's path that it can later be opened with
+   * @return the path the wallet can be opened with
    */
   public String getPath();
   
@@ -102,13 +102,6 @@ public interface MoneroWallet {
   public String getPrivateSpendKey();
   
   /**
-   * Get the wallet's primary address.
-   * 
-   * @return the wallet's primary address
-   */
-  public String getPrimaryAddress();
-  
-  /**
    * Get the height of the last block processed by the wallet (its index + 1).  // TODO **: should be the height of the last block processed + 1, which is the height of the next block to process
    * 
    * @return the height of the last block processed by the wallet
@@ -121,6 +114,13 @@ public interface MoneroWallet {
    * @return the blockchain's height
    */
   public long getDaemonHeight();
+    
+  /**
+   * Get the wallet's primary address.
+   * 
+   * @return the wallet's primary address
+   */
+  public String getPrimaryAddress();
   
   /**
    * Get the address of a specific subaddress.
@@ -1014,7 +1014,7 @@ public interface MoneroWallet {
    * Creates a payment URI from a send configuration.
    * 
    * @param request specifies configuration for a potential tx
-   * @return is the payment uri
+   * @return the payment uri
    */
   public String createPaymentUri(MoneroSendRequest request);
   
@@ -1090,7 +1090,7 @@ public interface MoneroWallet {
    * 
    * @param multisigHexes are multisig hex from each participant
    * @param threshold is the number of signatures needed to sign transfers
-   * @password is the wallet password
+   * @param password is the wallet password
    * @return the result which has the multisig's address xor this wallet's multisig hex to share with participants iff not N/N
    */
   public MoneroMultisigInitResult makeMultisig(List<String> multisigHexes, int threshold, String password);

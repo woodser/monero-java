@@ -1,10 +1,11 @@
 HIGH
+"how to use this library" -> "how to set up this library" across readmes
 re-order height to be above sync
 MoneroDaemonConnectionSpan numBlocks and startBlockHeight are Long
 MoneroWalletRpc() should support rpc connection as parameter
 testSendAndUpdateTxs() needs to wrap try catch
 does multisig work if exchange_keys is called instead of finalize_multisig?
-update model: flushTxPool, uint/ulong/etc -> uint64, param types, sample color keywords and constants with and smaller size
+update model: flushTxPool, uint/ulong/etc -> uint64, param types, list->[], sample color keywords and constants with and smaller size, isMinerTx, remove "reference"
 regenerate docs
 open monero core issues
 open issue: investigate integration of this library into Bisq
@@ -76,6 +77,7 @@ rename getLanguages() to getSupportedLanguages()?
 BIG PICTURE
 open library issues
 open monero core issues
+testGetReserveProofAccount() still fails if 0 confirmations, could prevent with tx pool tracker
 separate tests which demonstrate monero core issues
 investigate monero core issues
 (in no particular order...)
@@ -97,6 +99,7 @@ User experience: let users spend low confirmation funds without being locked for
 wallet2 does not fully sync transactions in the pool: https://github.com/monero-project/monero/issues/5811
 wallet2 import_key_images erases incoming transfers: https://github.com/monero-project/monero/issues/5812
 wallet2 does not report incoming transfers with outgoing counterpart from same account (older): https://github.com/monero-project/monero/issues/4500
+peer.getLastSeenTimestamp() occasionally returns -4, -7, etc
 
 ISSUES TO OPEN
 wallet2 refactor
@@ -112,7 +115,6 @@ getTxPool() occasionally hangs (have no peer connections?)
 rpc testCreateWalletFromMnemonic() sometimes wallet is synced after fresh creation when run with other tests
 Mining to subaddress isn't supported yet
 failed tx in pool (after testUpdateLockedDifferentAccounts()) causes non-originating saved wallets to return duplicate incoming transfers but one has amount/numSuggestedConfirmations of 0, possibly no outgoingTransfer
-peer.getLastSeenTimestamp() occasionally returns -4
 wallet2 get_payments() min_height is exclusive and max_height is inclusive: #5598, #5751
 wallet.cpp:2093 doRefresh() calls find_and_save_rings but wallet rpc run() does not?
 start height processed > requested start height unless restore height manually set
