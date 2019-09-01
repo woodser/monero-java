@@ -1,5 +1,8 @@
 package utils;
 
+/**
+ * Utility class to start mining.
+ */
 public class StartMining {
 
   public static void main(String[] args) {

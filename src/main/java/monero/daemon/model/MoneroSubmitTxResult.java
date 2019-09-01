@@ -74,7 +74,7 @@ public class MoneroSubmitTxResult {
     this.hasInvalidInput = hasInvalidInput;
   }
   
-  public Boolean getHasInvalidOutput() {
+  public Boolean hasInvalidOutput() {
     return hasInvalidOutput;
   }
   

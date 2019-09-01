@@ -129,7 +129,7 @@ public abstract class MoneroTransfer {
     sb.append(MoneroUtils.kvLine("Account index", this.getAccountIndex(), indent));
     sb.append(MoneroUtils.kvLine("Num suggested confirmations", getNumSuggestedConfirmations(), indent));
     String str = sb.toString();
-    return str.isEmpty() ? str :  str.substring(0, str.length() - 1);
+    return str.isEmpty() ? str :  str.substring(0, str.length() - 1);	  // strip last newline
   }
 
   @Override

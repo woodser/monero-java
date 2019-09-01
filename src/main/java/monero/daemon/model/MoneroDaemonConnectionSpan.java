@@ -8,12 +8,12 @@ import java.math.BigInteger;
 public class MoneroDaemonConnectionSpan {
 
   private String connectionId;
-  private Integer numBlocks;
+  private Integer numBlocks;	// TODO: LONG
   private String remoteAddress;
   private Long rate;
   private Long speed;
   private Long size;
-  private BigInteger startBlockHeight;
+  private BigInteger startBlockHeight;  // TODO: Long
   
   public String getConnectionId() {
     return connectionId;

@@ -114,6 +114,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   // --------------------------- RPC WALLET METHODS ---------------------------
   
   /**
+   * Get the wallet's RPC connection.
+   * 
+   * @return the wallet's rpc connection
+   */
+  public MoneroRpcConnection getRpcConnection() {
+    return rpc;
+  }
+  
+  /**
    * Open an existing wallet on the RPC server.
    * 
    * @param name is the name of the wallet file to open
@@ -176,33 +185,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("autosave_current", saveCurrent);
     rpc.sendJsonRequest("restore_deterministic_wallet", params);
     path = name;
-  }
-  
-  /**
-   * Get the wallet's RPC connection.
-   * 
-   * @return the wallet's rpc connection
-   */
-  public MoneroRpcConnection getRpcConnection() {
-    return rpc;
-  }
-
-  /**
-   * Save the currently open wallet file at the remote endpoint.
-   */
-  public void save() {
-    rpc.sendJsonRequest("store");
-  }
-  
-  /**
-   * Optionally save then close the current wallet.
-   */
-  public void close(boolean save) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("autosave_current", save);
-    rpc.sendJsonRequest("close_wallet", params);
-    addressCache.clear();
-    path = null;
   }
   
   /**
@@ -344,7 +326,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @Override
   public void startSyncing() {
-    // no-op because wallet rpc automatically syncs
+    // nothing to do because wallet rpc syncs automatically
   }
   
   @SuppressWarnings("unchecked")
@@ -1454,6 +1436,135 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     rpc.sendJsonRequest("stop_mining");
   }
   
+  @SuppressWarnings("unchecked")
+  @Override
+  public boolean isMultisigImportNeeded() {
+    Map<String, Object> resp = rpc.sendJsonRequest("get_balance");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return Boolean.TRUE.equals((Boolean) result.get("multisig_import_needed"));
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public MoneroMultisigInfo getMultisigInfo() {
+    Map<String, Object> resp = rpc.sendJsonRequest("is_multisig");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    MoneroMultisigInfo info = new MoneroMultisigInfo();
+    info.setIsMultisig((boolean) result.get("multisig"));
+    info.setIsReady((boolean) result.get("ready"));
+    info.setThreshold(((BigInteger) result.get("threshold")).intValue());
+    info.setNumParticipants(((BigInteger) result.get("total")).intValue());
+    return info;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public String prepareMultisig() {
+    Map<String, Object> resp = rpc.sendJsonRequest("prepare_multisig");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("multisig_info");
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public MoneroMultisigInitResult makeMultisig(List<String> multisigHexes, int threshold, String password) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("multisig_info", multisigHexes);
+    params.put("threshold", threshold);
+    params.put("password", password);
+    Map<String, Object> resp = rpc.sendJsonRequest("make_multisig", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    MoneroMultisigInitResult msResult = new MoneroMultisigInitResult();
+    msResult.setAddress((String) result.get("address"));
+    msResult.setMultisigHex((String) result.get("multisig_info"));
+    if (msResult.getAddress().isEmpty()) msResult.setAddress(null);
+    if (msResult.getMultisigHex().isEmpty()) msResult.setMultisigHex(null);
+    return msResult;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public String finalizeMultisig(List<String> multisigHexes, String password) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("multisig_info", multisigHexes);
+    params.put("password", password);
+    Map<String, Object> resp = rpc.sendJsonRequest("finalize_multisig", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    String address = (String) result.get("address");
+    return address.isEmpty() ? null : address;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public MoneroMultisigInitResult exchangeMultisigKeys(List<String> multisigHexes, String password) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("multisig_info", multisigHexes);
+    params.put("password", password);
+    Map<String, Object> resp = rpc.sendJsonRequest("exchange_multisig_keys", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    MoneroMultisigInitResult msResult = new MoneroMultisigInitResult();
+    msResult.setAddress((String) result.get("address"));
+    msResult.setMultisigHex((String) result.get("multisig_info"));
+    if (msResult.getAddress().isEmpty()) msResult.setAddress(null);
+    if (msResult.getMultisigHex().isEmpty()) msResult.setMultisigHex(null);
+    return msResult;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public String getMultisigHex() {
+    Map<String, Object> resp = rpc.sendJsonRequest("export_multisig_info");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("info");
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public int importMultisigHex(List<String> multisigHexes) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("info", multisigHexes);
+    Map<String, Object> resp = rpc.sendJsonRequest("import_multisig_info", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return ((BigInteger) result.get("n_outputs")).intValue();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public MoneroMultisigSignResult signMultisigTxHex(String multisigTxHex) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("tx_data_hex", multisigTxHex);
+    Map<String, Object> resp = rpc.sendJsonRequest("sign_multisig", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    MoneroMultisigSignResult signResult = new MoneroMultisigSignResult();
+    signResult.setSignedMultisigTxHex((String) result.get("tx_data_hex"));
+    signResult.setTxIds((List<String>) result.get("tx_hash_list"));
+    return signResult;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public List<String> submitMultisigTxHex(String signedMultisigTxHex) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("tx_data_hex", signedMultisigTxHex);
+    Map<String, Object> resp = rpc.sendJsonRequest("submit_multisig", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (List<String>) result.get("tx_hash_list");
+  }
+  
+  @Override
+  public void save() {
+    rpc.sendJsonRequest("store");
+  }
+  
+  @Override
+  public void close(boolean save) {
+    addressCache.clear();
+    path = null;
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("autosave_current", save);
+    rpc.sendJsonRequest("close_wallet", params);
+  }
+  
   // ------------------------------ PRIVATE -----------------------------------
   
   private Map<Integer, List<Integer>> getAccountIndices(boolean getSubaddressIndices) {
@@ -1682,6 +1793,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * 
    * @param rpcTxs are sent rpc txs to initialize the set from
    * @param txs are existing txs to further initialize (optional)
+   * @return the converted tx set
    */
   @SuppressWarnings("unchecked")
   private static MoneroTxSet convertRpcSentTxsToTxSet(Map<String, Object> rpcTxs, List<MoneroTxWallet> txs) {
@@ -1704,13 +1816,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<BigInteger> amounts = (List<BigInteger>) rpcTxs.get("amount_list");
     
     // ensure all lists are the same size
-    Set<Integer> sizes = new HashSet<Integer>(Arrays.asList(fees.size(), amounts.size()));
-    sizes.add(fees.size());
+    Set<Integer> sizes = new HashSet<Integer>();
     if (amounts != null) sizes.add(amounts.size());
     if (ids != null) sizes.add(ids.size());
     if (keys != null) sizes.add(keys.size());
     if (blobs != null) sizes.add(blobs.size());
     if (metadatas != null) sizes.add(metadatas.size());
+    if (fees != null) sizes.add(fees.size());
+    if (amounts != null) sizes.add(amounts.size());
     assertEquals("RPC lists are different sizes", 1, sizes.size());
     
     // pre-initialize txs if none given
@@ -1857,8 +1970,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (transfer == null) transfer = new MoneroOutgoingTransfer().setTx(tx);
         ((MoneroOutgoingTransfer) transfer).setDestinations(destinations);
       }
-      else if (key.equals("multisig_txset") && val != null) {} // handled elsewhere; this method only builds a tx wallet
-      else if (key.equals("unsigned_txset") && val != null) {} // handled elsewhere; this method only builds a tx wallet
+      else if (key.equals("multisig_txset") && val != null) {}  // handled elsewhere; this method only builds a tx wallet
+      else if (key.equals("unsigned_txset") && val != null) {}  // handled elsewhere; this method only builds a tx wallet
       else LOGGER.warn("WARNING: ignoring unexpected transaction field: " + key + ": " + val);
     }
     
@@ -2073,7 +2186,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       MoneroOutputWallet ow2 = (MoneroOutputWallet) o2;
       
       // compare by height
-      int heightComparison = TX_HEIGHT_COMPARATOR.compare(o1.getTx(), ow2.getTx());
+      int heightComparison = TX_HEIGHT_COMPARATOR.compare(ow1.getTx(), ow2.getTx());
       if (heightComparison != 0) return heightComparison;
       
       // compare by account index, subaddress index, and output
@@ -2085,120 +2198,5 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
       return 1;
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public boolean isMultisigImportNeeded() {
-    Map<String, Object> resp = rpc.sendJsonRequest("get_balance");
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return Boolean.TRUE.equals((Boolean) result.get("multisig_import_needed"));
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public MoneroMultisigInfo getMultisigInfo() {
-    Map<String, Object> resp = rpc.sendJsonRequest("is_multisig");
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    MoneroMultisigInfo info = new MoneroMultisigInfo();
-    info.setIsMultisig((boolean) result.get("multisig"));
-    info.setIsReady((boolean) result.get("ready"));
-    info.setThreshold(((BigInteger) result.get("threshold")).intValue());
-    info.setNumParticipants(((BigInteger) result.get("total")).intValue());
-    return info;
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public String prepareMultisig() {
-    Map<String, Object> resp = rpc.sendJsonRequest("prepare_multisig");
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (String) result.get("multisig_info");
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public MoneroMultisigInitResult makeMultisig(List<String> multisigHexes, int threshold, String password) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("multisig_info", multisigHexes);
-    params.put("threshold", threshold);
-    params.put("password", password);
-    Map<String, Object> resp = rpc.sendJsonRequest("make_multisig", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    MoneroMultisigInitResult msResult = new MoneroMultisigInitResult();
-    msResult.setAddress((String) result.get("address"));
-    msResult.setMultisigHex((String) result.get("multisig_info"));
-    if (msResult.getAddress().isEmpty()) msResult.setAddress(null);
-    if (msResult.getMultisigHex().isEmpty()) msResult.setMultisigHex(null);
-    return msResult;
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public String finalizeMultisig(List<String> multisigHexes, String password) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("multisig_info", multisigHexes);
-    params.put("password", password);
-    Map<String, Object> resp = rpc.sendJsonRequest("finalize_multisig", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    String address = (String) result.get("address");
-    return address.isEmpty() ? null : address;
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public MoneroMultisigInitResult exchangeMultisigKeys(List<String> multisigHexes, String password) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("multisig_info", multisigHexes);
-    params.put("password", password);
-    Map<String, Object> resp = rpc.sendJsonRequest("exchange_multisig_keys", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    MoneroMultisigInitResult msResult = new MoneroMultisigInitResult();
-    msResult.setAddress((String) result.get("address"));
-    msResult.setMultisigHex((String) result.get("multisig_info"));
-    if (msResult.getAddress().isEmpty()) msResult.setAddress(null);
-    if (msResult.getMultisigHex().isEmpty()) msResult.setMultisigHex(null);
-    return msResult;
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public String getMultisigHex() {
-    Map<String, Object> resp = rpc.sendJsonRequest("export_multisig_info");
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (String) result.get("info");
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public int importMultisigHex(List<String> multisigHexes) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("info", multisigHexes);
-    Map<String, Object> resp = rpc.sendJsonRequest("import_multisig_info", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return ((BigInteger) result.get("n_outputs")).intValue();
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public MoneroMultisigSignResult signMultisigTxHex(String multisigTxHex) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("tx_data_hex", multisigTxHex);
-    Map<String, Object> resp = rpc.sendJsonRequest("sign_multisig", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    MoneroMultisigSignResult signResult = new MoneroMultisigSignResult();
-    signResult.setSignedMultisigTxHex((String) result.get("tx_data_hex"));
-    signResult.setTxIds((List<String>) result.get("tx_hash_list"));
-    return signResult;
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public List<String> submitMultisigTxHex(String signedMultisigTxHex) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("tx_data_hex", signedMultisigTxHex);
-    Map<String, Object> resp = rpc.sendJsonRequest("submit_multisig", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (List<String>) result.get("tx_hash_list");
   }
 }
