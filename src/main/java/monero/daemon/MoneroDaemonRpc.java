@@ -1483,7 +1483,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * @return BigInteger is the hexicedimal converted to decimal
    */
   private static BigInteger prefixedHexToBI(String hex) {
-    assertTrue(hex.startsWith("0x"));
+    assertTrue("Given hex does not start with \"0x\": " + hex, hex.startsWith("0x"));
     return new BigInteger(hex.substring(2), 16);
   }
   
