@@ -129,7 +129,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType) { return openWallet(path, password, networkType, (MoneroRpcConnection) null); }
   public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType, String daemonUri) { return openWallet(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri)); }
   public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection) {
-    System.out.println("ASDFBD OPEN " + path);
     if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist at path: " + path);
     if (networkType == null) throw new MoneroException("Must provide a network type");
     long jniWalletHandle = openWalletJni(path, password, networkType.ordinal());
@@ -153,7 +152,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, String daemonUri) { return createWalletRandom(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri), null); }
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection) { return createWalletRandom(path, password, networkType, daemonConnection, null); }
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, String language) {
-    System.out.println("ASDFBD RANDOM " + path);
     if (networkType == null) networkType = MoneroNetworkType.MAINNET;
     if (language == null) language = DEFAULT_LANGUAGE;
     long jniWalletHandle;
@@ -175,7 +173,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic) { return createWalletFromMnemonic(path, password, networkType, mnemonic, null, null); }
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection) { return createWalletFromMnemonic(path, password, networkType, mnemonic, daemonConnection, null); }
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight) {
-    System.out.println("ASDFBD MNEMONIC " + path);
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (restoreHeight == null) restoreHeight = 0l;
     long jniWalletHandle = createWalletFromMnemonicJni(path, password, networkType.ordinal(), mnemonic, restoreHeight);
@@ -200,7 +197,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public static MoneroWalletJni createWalletFromKeys(String path, String password, MoneroNetworkType networkType, String address, String viewKey, String spendKey) { return createWalletFromKeys(path, password, networkType, address, viewKey, spendKey, null, null, null); }
   public static MoneroWalletJni createWalletFromKeys(String path, String password, MoneroNetworkType networkType, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight) { return createWalletFromKeys(path, password, networkType, address, viewKey, spendKey, daemonConnection, restoreHeight, null); }
   public static MoneroWalletJni createWalletFromKeys(String path, String password, MoneroNetworkType networkType, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
-    System.out.println("ASDFBD KEYS " + path);
     if (restoreHeight == null) restoreHeight = 0l;
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (language == null) language = DEFAULT_LANGUAGE;
@@ -1251,13 +1247,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public void save() {
     assertNotClosed();
-    System.out.println("ASDFBD SAVE " + getPath());
     saveJni();
   }
   
   @Override
   public void close(boolean save) {
-    System.out.println("ASDFBD CLOSE(" + save + ") " + getPath());
     if (isClosed) return; // closing a closed wallet has no effect
     isClosed = true;
     try {
