@@ -1,19 +1,17 @@
 package monero.daemon.model;
 
-import java.math.BigInteger;
-
 /**
  * Monero daemon connection span.
  */
 public class MoneroDaemonConnectionSpan {
 
   private String connectionId;
-  private Integer numBlocks;	// TODO: LONG
+  private Long numBlocks;
   private String remoteAddress;
   private Long rate;
   private Long speed;
   private Long size;
-  private BigInteger startBlockHeight;  // TODO: Long
+  private Long startBlockHeight;
   
   public String getConnectionId() {
     return connectionId;
@@ -23,11 +21,11 @@ public class MoneroDaemonConnectionSpan {
     this.connectionId = connectionId;
   }
   
-  public Integer getNumBlocks() {
+  public Long getNumBlocks() {
     return numBlocks;
   }
   
-  public void setNumBlocks(Integer numBlocks) {
+  public void setNumBlocks(Long numBlocks) {
     this.numBlocks = numBlocks;
   }
   
@@ -63,11 +61,11 @@ public class MoneroDaemonConnectionSpan {
     this.size = size;
   }
   
-  public BigInteger getStartBlockHeight() {
+  public Long getStartHeight() {
     return startBlockHeight;
   }
   
-  public void setStartBlockHeight(BigInteger startBlockHeight) {
-    this.startBlockHeight = startBlockHeight;
+  public void setStartHeight(Long startHeight) {
+    this.startBlockHeight = startHeight;
   }
 }
