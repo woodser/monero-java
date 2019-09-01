@@ -3719,6 +3719,10 @@ public abstract class TestMoneroWalletCommon {
       assertTrue("Subaddress balances " + balance + " does not equal account " + account.getIndex() + " balance " + account.getBalance(), account.getBalance().equals(balance));
       assertTrue("Subaddress unlocked balances " + unlockedBalance + " does not equal account " + account.getIndex() + " unlocked balance " + account.getUnlockedBalance(), account.getUnlockedBalance().equals(unlockedBalance));
     }
+    
+    // tag must be undefined or non-empty
+    String tag = account.getTag();
+    assertTrue(tag == null || tag.length() > 0);
   }
 
   private static void testSubaddress(MoneroSubaddress subaddress) {
