@@ -71,33 +71,33 @@ public class TestSampleCode {
     }
     
     // create a wallet using RPC bindings to monero-wallet-rpc
-    MoneroWalletRpc walletRPC = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
-    String primaryAddress = walletRPC.getPrimaryAddress(); // 59aZULsUF3YNSKGiHz4J...
-    BigInteger balance = walletRPC.getBalance();           // 533648366742
-    MoneroSubaddress subaddress = walletRPC.getSubaddress(1, 0);
+    MoneroWalletRpc walletRpc = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
+    String primaryAddress = walletRpc.getPrimaryAddress(); // 59aZULsUF3YNSKGiHz4J...
+    BigInteger balance = walletRpc.getBalance();           // 533648366742
+    MoneroSubaddress subaddress = walletRpc.getSubaddress(1, 0);
     BigInteger subaddressBalance = subaddress.getBalance();
     
     // query a transaction by id
-    MoneroTxWallet tx = walletRPC.getTx(walletRPC.getTxs(new MoneroTxQuery().setIsOutgoing(true)).get(0).getId());  // *** REMOVE FROM README SAMPLE ***
-    //MoneroTxWallet tx = walletRPC.getTx("314a0f1375db31cea4dac4e0a51514a6282b43792269b3660166d4d2b46437ca");
+    MoneroTxWallet tx = walletRpc.getTx(walletRpc.getTxs(new MoneroTxQuery().setIsOutgoing(true)).get(0).getId());  // *** REMOVE FROM README SAMPLE ***
+    //MoneroTxWallet tx = walletRpc.getTx("314a0f1375db31cea4dac4e0a51514a6282b43792269b3660166d4d2b46437ca");
     long txHeight = tx.getHeight();
     List<MoneroIncomingTransfer> incomingTransfers = tx.getIncomingTransfers();
     List<MoneroDestination> destinations = tx.getOutgoingTransfer().getDestinations();
     
     // query incoming transfers to account 1
     MoneroTransferQuery transferQuery = new MoneroTransferQuery().setIsIncoming(true).setAccountIndex(1);
-    List<MoneroTransfer> transfers = walletRPC.getTransfers(transferQuery);
+    List<MoneroTransfer> transfers = walletRpc.getTransfers(transferQuery);
     
     // query unspent outputs
     MoneroOutputQuery outputQuery = new MoneroOutputQuery().setIsSpent(false);
-    List<MoneroOutputWallet> outputs = walletRPC.getOutputs(outputQuery);
+    List<MoneroOutputWallet> outputs = walletRpc.getOutputs(outputQuery);
     
     // create a wallet from a mnemonic phrase using Java native bindings to Monero Core
-    MoneroWalletJni walletJNI = MoneroWalletJni.createWalletFromMnemonic("./test_wallets/" + UUID.randomUUID().toString(), "supersecretpassword123", MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, new MoneroRpcConnection("http://localhost:38081"), TestUtils.FIRST_RECEIVE_HEIGHT);
-    //MoneroWalletJni walletJNI = MoneroWalletJni.createWalletFromMnemonic("MyWallet", "supersecretpassword123", MoneroNetworkType.STAGENET, "hefty value ...", new MoneroRpcConnection("http://localhost:38081"), 384151l);
+    MoneroWalletJni walletJni = MoneroWalletJni.createWalletFromMnemonic("./test_wallets/" + UUID.randomUUID().toString(), "supersecretpassword123", MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, new MoneroRpcConnection("http://localhost:38081"), TestUtils.FIRST_RECEIVE_HEIGHT);
+    //MoneroWalletJni walletJni = MoneroWalletJni.createWalletFromMnemonic("MyWallet", "supersecretpassword123", MoneroNetworkType.STAGENET, "hefty value ...", new MoneroRpcConnection("http://localhost:38081"), 384151l);
     
     // synchronize the wallet and receive progress notifications
-    walletJNI.sync(new MoneroSyncListener() {
+    walletJni.sync(new MoneroSyncListener() {
       @Override
       public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
         // feed a progress bar?
@@ -105,10 +105,10 @@ public class TestSampleCode {
     });
     
     // start syncing the wallet continuously in the background
-    walletJNI.startSyncing();
+    walletJni.startSyncing();
     
     // be notified when the JNI wallet receives funds
-    walletJNI.addListener(new MoneroWalletListener() {
+    walletJni.addListener(new MoneroWalletListener() {
       
       @Override
       public void onOutputReceived(MoneroOutputWallet output) {
@@ -121,8 +121,8 @@ public class TestSampleCode {
     });
     
     // send funds from the RPC wallet to the JNI wallet
-    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(walletRPC); // wait for txs to clear pool *** REMOVE FROM README SAMPLE ***
-    MoneroTxSet txSet = walletRPC.send(0, walletJNI.getPrimaryAddress(), new BigInteger("50000"));
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(walletRpc); // wait for txs to clear pool *** REMOVE FROM README SAMPLE ***
+    MoneroTxSet txSet = walletRpc.send(0, walletJni.getPrimaryAddress(), new BigInteger("50000"));
     MoneroTxWallet sentTx = txSet.getTxs().get(0);  // send methods return tx set(s) which contain sent txs unless further steps needed in a multisig or watch-only wallet
     assertTrue(sentTx.inTxPool());
     
@@ -130,18 +130,18 @@ public class TestSampleCode {
     int numThreads = 7;
     boolean isBackground = false;
     boolean ignoreBattery = false;
-    walletRPC.startMining(numThreads, isBackground, ignoreBattery);
+    walletRpc.startMining(numThreads, isBackground, ignoreBattery);
     
     // wait for the next block to be added to the chain
     MoneroBlockHeader nextBlockHeader = daemon.getNextBlockHeader();
     long nextNumTxs = nextBlockHeader.getNumTxs();
     
     // stop mining
-    walletRPC.stopMining();
+    walletRpc.stopMining();
     
     // the transaction is (probably) confirmed
     TimeUnit.SECONDS.sleep(10); // let the wallet refresh
-    boolean isConfirmed = walletRPC.getTx(sentTx.getId()).isConfirmed();
+    boolean isConfirmed = walletRpc.getTx(sentTx.getId()).isConfirmed();
     
     // create a request to send funds from the RPC wallet to multiple destinations in the JNI wallet
     MoneroSendRequest request = new MoneroSendRequest()
@@ -149,19 +149,19 @@ public class TestSampleCode {
             .setSubaddressIndices(0, 1)                   // send from subaddreses in account 1
             .setPriority(MoneroSendPriority.UNIMPORTANT)  // no rush
             .setDestinations(
-                    new MoneroDestination(walletJNI.getAddress(1, 0), new BigInteger("50000")),
-                    new MoneroDestination(walletJNI.getAddress(2, 0), new BigInteger("50000")));
+                    new MoneroDestination(walletJni.getAddress(1, 0), new BigInteger("50000")),
+                    new MoneroDestination(walletJni.getAddress(2, 0), new BigInteger("50000")));
     
     // create the transaction, confirm with the user, and relay to the network
-    MoneroTxWallet createdTx = walletRPC.createTx(request).getTxs().get(0);
+    MoneroTxWallet createdTx = walletRpc.createTx(request).getTxs().get(0);
     BigInteger fee = createdTx.getFee();  // "Are you sure you want to send ...?"
-    walletRPC.relayTx(createdTx); // submit the transaction which will notify the JNI wallet
+    walletRpc.relayTx(createdTx); // submit the transaction which will notify the JNI wallet
     
     // JNI wallet will receive notification of incoming output after a moment
     TimeUnit.SECONDS.sleep(10);
     assertTrue(JNI_OUTPUT_RECEIVED);
     
     // save and close the JNI wallet
-    walletJNI.close(true);
+    walletJni.close(true);
   }
 }
