@@ -105,7 +105,7 @@ long nextNumTxs = nextBlockHeader.getNumTxs();
 walletRpc.stopMining();
 
 // the transaction is (probably) confirmed
-TimeUnit.SECONDS.sleep(10); // let the wallet refresh
+TimeUnit.SECONDS.sleep(10); // wait 10s for auto refresh
 boolean isConfirmed = walletRpc.getTx(sentTx.getId()).isConfirmed();
 
 // create a request to send funds from the RPC wallet to multiple destinations in the JNI wallet
