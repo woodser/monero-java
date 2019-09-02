@@ -4,7 +4,7 @@ MoneroWalletRpc() should support rpc connection as parameter
 update javascript library
 
 does multisig work if exchange_keys is called instead of finalize_multisig?
-update model: flushTxPool, uint/ulong/etc -> uint64, param types, list->[], sample color keywords and constants with and smaller size, isMinerTx, remove "reference", numBlocks/startHeight Long
+update model: flushTxPool, uint/ulong/etc -> uint64, param types, list->[], sample update and color keywords and constants with and smaller size, isMinerTx, remove "reference", numBlocks/startHeight Long
 regenerate docs
 open monero core issues
 open issue: investigate integration of this library into Bisq

@@ -70,8 +70,11 @@ public class TestSampleCode {
       int numTxs = block.getTxs().size();
     }
     
-    // create a wallet using RPC bindings to monero-wallet-rpc
+    // connect to a monero-wallet-rpc endpoint with authentication
     MoneroWalletRpc walletRpc = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
+    
+    // open a wallet on the server
+    walletRpc.openWallet("test_wallet_1", "supersecretpassword123");
     String primaryAddress = walletRpc.getPrimaryAddress(); // 59aZULsUF3YNSKGiHz4J...
     BigInteger balance = walletRpc.getBalance();           // 533648366742
     MoneroSubaddress subaddress = walletRpc.getSubaddress(1, 0);
