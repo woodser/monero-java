@@ -39,8 +39,11 @@ for (MoneroBlock block : blocks) {
   int numTxs = block.getTxs().size();
 }
 
-// create a wallet using RPC bindings to monero-wallet-rpc
+// connect to a monero-wallet-rpc endpoint with authentication
 MoneroWalletRpc walletRpc = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
+    
+// open a wallet on the server
+walletRpc.openWallet("test_wallet_1", "supersecretpassword123");
 String primaryAddress = walletRpc.getPrimaryAddress(); // 59aZULsUF3YNSKGiHz4J...
 BigInteger balance = walletRpc.getBalance();           // 533648366742
 MoneroSubaddress subaddress = walletRpc.getSubaddress(1, 0);
@@ -157,7 +160,7 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 	
 	e.g. For wallet name `test_wallet_1`, user `rpc_user`, password `abc123`, stagenet: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir /Applications/monero-v0.14.0.3`
 
-## How to Run Tests
+## How to Run JUnit Tests
 
 1. [Set up this library with JNI support](#how-to-run-this-library)
 2. Set up running instances of [Monero Wallet RPC](https://getmonero.org/resources/developer-guides/wallet-rpc.html) and [Monero Daemon RPC](https://getmonero.org/resources/developer-guides/daemon-rpc.html).  See [Monero RPC Setup](#how-to-set-up-monero-rpc). 
