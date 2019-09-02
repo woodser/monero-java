@@ -1970,10 +1970,15 @@ public abstract class TestMoneroWalletCommon {
     BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance();
     
     // create tx but do not relay
+    MoneroSendRequest reqCopy = request.copy();
     MoneroTxWallet tx = wallet.createTx(request).getTxs().get(0);
     
     // create tx using same request which would be double spend
     MoneroTxWallet txDoubleSpend = wallet.createTx(request).getTxs().get(0);
+    
+    // test that request is unchanged
+    assert(reqCopy != request);
+    assertEquals(reqCopy, request);
     
     // submit tx directly to the pool but do not relay
     MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
@@ -2229,12 +2234,17 @@ public abstract class TestMoneroWalletCommon {
     request.setAccountIndex(srcAccount.getIndex());
     request.setSubaddressIndices(fromSubaddressIndices);
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    MoneroSendRequest reqCopy = request.copy();
     if (!Boolean.FALSE.equals(request.getCanSplit())) {
       txs.addAll(wallet.sendSplit(request).getTxs());
     } else {
       txs.addAll(wallet.send(request).getTxs());
     }
     if (Boolean.FALSE.equals(request.getCanSplit())) assertEquals(1, txs.size());  // must have exactly one tx if no split
+    
+    // test that request is unchanged
+    assert(reqCopy != request);
+    assertEquals(reqCopy, request);
     
     // test that balances of intended subaddresses decreased
     List<MoneroAccount> accountsAfter = wallet.getAccounts(true);
@@ -2360,6 +2370,7 @@ public abstract class TestMoneroWalletCommon {
     request.setDestinations(new MoneroDestination(address, sendAmount));
     request.setAccountIndex(fromAccount.getIndex());
     request.setSubaddressIndices(fromSubaddress.getIndex());
+    MoneroSendRequest reqCopy = request.copy();
     
     // send to self
     // can use create() or send() because request's doNotRelay is used, but exercise both calls
@@ -2369,6 +2380,10 @@ public abstract class TestMoneroWalletCommon {
       txs.addAll((Boolean.TRUE.equals(request.getDoNotRelay()) ? wallet.createTx(request) : wallet.send(request)).getTxs());
     }
     if (Boolean.FALSE.equals(request.getCanSplit())) assertEquals(1, txs.size());  // must have exactly one tx if no split
+    
+    // test that request is unchanged
+    assert(reqCopy != request);
+    assertEquals(reqCopy, request);
     
     // test common tx set among txs
     testCommonTxSets(txs, false, false, false);
@@ -2526,15 +2541,15 @@ public abstract class TestMoneroWalletCommon {
       for (int j = 0; j < numSubaddressesPerAccount; j++) destinationAddresses.add(subaddresses.get(j).getAddress());
     }
     
-    // build send request using MoneoSendRequest
+    // build send request using MoneroSendRequest
     MoneroSendRequest request = new MoneroSendRequest();
     request.setMixin(TestUtils.MIXIN);
     request.setAccountIndex(srcAccount.getIndex());
     request.setDestinations(new ArrayList<MoneroDestination>());
-    request.setCanSplit(canSplit);
     for (int i = 0; i < destinationAddresses.size(); i++) {
       request.getDestinations().add(new MoneroDestination(destinationAddresses.get(i), sendAmountPerSubaddress));
     }
+    MoneroSendRequest reqCopy = request.copy();
     
     // send tx(s) with request
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
@@ -2545,12 +2560,17 @@ public abstract class TestMoneroWalletCommon {
     }
     if (!canSplit) assertEquals(1, txs.size());
     
+    // test that request is unchanged
+    assert(reqCopy != request);
+    assertEquals(reqCopy, request);
+    
     // test that wallet balance decreased
     MoneroAccount account = wallet.getAccount(srcAccount.getIndex());
     assertTrue(account.getBalance().compareTo(balance) < 0);
     assertTrue(account.getUnlockedBalance().compareTo(unlockedBalance) < 0);
     
     // build test context
+    request.setCanSplit(canSplit);  // for test context
     TestContext ctx = new TestContext();
     ctx.wallet = wallet;
     ctx.sendRequest = request;
@@ -3510,7 +3530,9 @@ public abstract class TestMoneroWalletCommon {
     // sweep
     String destination = wallet.getPrimaryAddress();
     MoneroSendRequest req = new MoneroSendRequest(destination).setSweepEachSubaddress(sweepEachSubaddress);
+    MoneroSendRequest copy = req.copy();
     List<MoneroTxSet> txSets = wallet.sweepUnlocked(req);
+    assertEquals(copy, req);  // request is unchanged
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     for (MoneroTxSet txSet : txSets) {
       assertNull(txSet.getMultisigTxHex());
