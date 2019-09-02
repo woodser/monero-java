@@ -929,12 +929,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @SuppressWarnings("unchecked")
   public MoneroTxSet sendSplit(MoneroSendRequest request) {
     
-    // validate / sanitize request
+    // validate and sanitize request but preserve original
     if (request == null) throw new MoneroException("Send request cannot be null");
     assertNotNull(request.getDestinations());
-    if (request.getCanSplit() == null) request.setCanSplit(true);
     assertNull(request.getSweepEachSubaddress());
     assertNull(request.getBelowAmount());
+    if (request.getCanSplit() == null) {
+      request = request.copy();
+      request.setCanSplit(true);
+    }
     
     // determine account and subaddresses to send from
     Integer accountIdx = request.getAccountIndex();

@@ -3627,14 +3627,15 @@ public abstract class TestMoneroWalletCommon {
    * TODO: ensure each tx passes query filter, same with testGetTransfer and getAndTestVouts
    */
   private List<MoneroTxWallet> getAndTestTxs(MoneroWallet wallet, MoneroTxQuery query, TestContext ctx, Boolean isExpected) {
-    MoneroTxQuery copy = query.copy();
+    MoneroTxQuery copy = null;
+    if (query != null) copy = query.copy();
     List<MoneroTxWallet> txs = wallet.getTxs(query);
-    assertEquals(copy, query);
     assertNotNull(txs);
     if (Boolean.FALSE.equals(isExpected)) assertTrue(txs.isEmpty());
     if (Boolean.TRUE.equals(isExpected)) assertFalse(txs.isEmpty());
     for (MoneroTxWallet tx : txs) testTxWallet(tx, ctx);
     testGetTxsStructure(txs, query);
+    if (query != null) assertEquals(copy, query);
     return txs;
   }
   
@@ -3642,14 +3643,15 @@ public abstract class TestMoneroWalletCommon {
    * Fetches and tests transfers according to the given query.
    */
   private List<MoneroTransfer> getAndTestTransfers(MoneroWallet wallet, MoneroTransferQuery query, TestContext ctx, Boolean isExpected) {
-    MoneroTransferQuery copy = query.copy();
+    MoneroTransferQuery copy = null;
+    if (query != null) copy = query.copy();
     List<MoneroTransfer> transfers = wallet.getTransfers(query);
-    assertEquals(copy, query);
     if (Boolean.FALSE.equals(isExpected)) assertEquals(0, transfers.size());
     if (Boolean.TRUE.equals(isExpected)) assertTrue("Transfers were expected but not found; run send tests?", transfers.size() > 0);
     if (ctx == null) ctx = new TestContext();
     ctx.wallet = wallet;
     for (MoneroTransfer transfer : transfers) testTxWallet(transfer.getTx(), ctx);
+    if (query != null) assertEquals(copy, query);
     return transfers;
   }
 
@@ -3657,12 +3659,14 @@ public abstract class TestMoneroWalletCommon {
    * Fetches and tests wallet outputs (i.e. wallet tx vouts) according to the given query.
    */
   private static List<MoneroOutputWallet> getAndTestOutputs(MoneroWallet wallet, MoneroOutputQuery query, Boolean isExpected) {
-    MoneroOutputQuery copy = query.copy();
+    MoneroOutputQuery copy = null;
+    if (query != null) copy = query.copy();
     List<MoneroOutputWallet> vouts = wallet.getOutputs(query);
     assertEquals(copy, query);
     if (Boolean.FALSE.equals(isExpected)) assertEquals(0, vouts.size());
     if (Boolean.TRUE.equals(isExpected)) assertTrue("Vouts were expected but not found; run send tests", vouts.size() > 0);
     for (MoneroOutputWallet vout : vouts) testOutputWallet(vout);
+    if (query != null) assertEquals(copy, query);
     return vouts;
   }
   
