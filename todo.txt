@@ -1,6 +1,5 @@
 HIGH
 update javascript library
-MoneroWalletRpc() should support rpc connection as parameter
 remove finalizeMultisig()?
 update model: flushTxPool, uint/ulong/etc -> uint64, param types, list->[], sample update and color keywords and constants with and smaller size, isMinerTx, remove "reference", numBlocks/startHeight Long
 regenerate docs
