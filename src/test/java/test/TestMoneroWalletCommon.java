@@ -2809,32 +2809,8 @@ public abstract class TestMoneroWalletCommon {
       wallet.close();
     }
     
-    // handle (n-1)/n which uses finalize
-    if (m == n - 1) {
-      address = null;
-      for (int i = 0; i < walletIds.size(); i++) {
-        
-        // open the wallet
-        MoneroWallet wallet = openWallet(walletIds.get(i));
-        assertEquals(walletIds.get(i), wallet.getAttribute("name"));
-        
-        // collect made multisig hexes from wallet's peers
-        List<String> peerMultisigHexes = new ArrayList<String>();
-        for (int j = 0; j < walletIds.size(); j++) if (j != i) peerMultisigHexes.add(madeMultisigHexes.get(j));
-        
-        // finalize the multisig wallet
-        String walletAddress = wallet.finalizeMultisig(peerMultisigHexes, TestUtils.WALLET_PASSWORD);
-        //System.out.println("Finalized address: " + walletAddress);
-        if (address == null) address = walletAddress;
-        else assertEquals(address, walletAddress);
-        
-//        wallet.sync();
-        wallet.close();
-      }
-    }
-    
-    // otherwise handle m/n which exchanges keys n - m times
-    else if (m != n) {
+    // handle m/n which exchanges keys n - m times
+    if (m != n) {
       address = null;
       
       // exchange keys n - m times

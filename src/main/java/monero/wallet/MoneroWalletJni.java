@@ -1189,15 +1189,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public String finalizeMultisig(List<String> multisigHexes, String password) {
-    try {
-      return finalizeMultisigJni(multisigHexes.toArray(new String[multisigHexes.size()]), password);
-    } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
-    }
-  }
-
-  @Override
   public MoneroMultisigInitResult exchangeMultisigKeys(List<String> multisigHexes, String password) {
     try {
       String initMultisigResultJson = exchangeMultisigKeysJni(multisigHexes.toArray(new String[multisigHexes.size()]), password);
@@ -1428,8 +1419,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String prepareMultisigJni();
   
   private native String makeMultisigJni(String[] multisigHexes, int threshold, String password);
-  
-  private native String finalizeMultisigJni(String[] multisigHexes, String password);
   
   private native String exchangeMultisigKeysJni(String[] multisigHexes, String password);
   

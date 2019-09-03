@@ -1493,18 +1493,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   @SuppressWarnings("unchecked")
-  public String finalizeMultisig(List<String> multisigHexes, String password) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("multisig_info", multisigHexes);
-    params.put("password", password);
-    Map<String, Object> resp = rpc.sendJsonRequest("finalize_multisig", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    String address = (String) result.get("address");
-    return address.isEmpty() ? null : address;
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
   public MoneroMultisigInitResult exchangeMultisigKeys(List<String> multisigHexes, String password) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("multisig_info", multisigHexes);
