@@ -126,7 +126,7 @@ public class MoneroOutput {
     sb.append(MoneroUtils.kvLine("Ring output indices", getRingOutputIndices(), indent));
     sb.append(MoneroUtils.kvLine("Stealth public key", getStealthPublicKey(), indent));
     String str = sb.toString();
-    return str.substring(0, str.length() - 1);  // strip newline
+    return str.isEmpty() ? str : str.substring(0, str.length() - 1);  // strip newline
   }
 
   @Override
