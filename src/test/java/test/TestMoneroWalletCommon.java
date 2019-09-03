@@ -749,7 +749,21 @@ public abstract class TestMoneroWalletCommon {
     }
     assertTrue("No vouts found in txs", found);
     
-    // TODO: get txs with outputs query
+    // get txs with output query
+    MoneroOutputQuery outputQuery = new MoneroOutputQuery().setIsSpent(false).setAccountIndex(1).setSubaddressIndex(2);
+    txs = wallet.getTxs(new MoneroTxQuery().setIncludeOutputs(true).setOutputQuery(outputQuery));
+    assertFalse(txs.isEmpty());
+    for (MoneroTxWallet tx : txs) {
+      assertFalse(tx.getVouts() == null || tx.getVouts().isEmpty());
+      found = false;
+      for (MoneroOutputWallet vout : tx.getVoutsWallet()) {
+        if (vout.isSpent() == false && vout.getAccountIndex() == 1 && vout.getSubaddressIndex() == 2) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) fail("Tx does not contain specified vout");
+    }
   }
   
   // Can get transactions by height
