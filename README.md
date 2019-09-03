@@ -121,7 +121,7 @@ MoneroSendRequest request = new MoneroSendRequest()
                 new MoneroDestination(walletJni.getAddress(2, 0), new BigInteger("50000")));
 
 // create the transaction, confirm with the user, and relay to the network
-MoneroTxWallet createdTx = walletRpc.createTx(request);
+MoneroTxWallet createdTx = walletRpc.createTx(request).getTxs().get(0);
 BigInteger fee = createdTx.getFee();  // "Are you sure you want to send ...?"
 walletRpc.relayTx(createdTx); // submit the transaction which will notify the JNI wallet
 
