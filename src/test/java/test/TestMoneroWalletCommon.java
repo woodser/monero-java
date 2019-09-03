@@ -748,6 +748,8 @@ public abstract class TestMoneroWalletCommon {
       }
     }
     assertTrue("No vouts found in txs", found);
+    
+    // TODO: get txs with outputs query
   }
   
   // Can get transactions by height
