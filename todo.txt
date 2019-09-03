@@ -1,5 +1,6 @@
 HIGH
 MoneroOutputQuery wasn't in MoneroTxQuery?
+no need to setIncludeOutputs(true) if output query included?
 remove finalizeMultisig()?
 update javascript library
 

@@ -569,10 +569,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // copy and normalize tx query
     query = query == null ? new MoneroTxQuery() : query.copy();
     if (query.getTransferQuery() == null) query.setTransferQuery(new MoneroTransferQuery());
-    MoneroTransferQuery transferQuery = query.getTransferQuery();
+    if (query.getOutputQuery() == null) query.setOutputQuery(new MoneroOutputQuery());
     
-    // temporarily disable transfer query
+    // temporarily disable transfer and output queries in order to collect all tx information
+    MoneroTransferQuery transferQuery = query.getTransferQuery();
+    MoneroOutputQuery  outputQuery = query.getOutputQuery();
     query.setTransferQuery(null);
+    query.setOutputQuery(null);
     
     // fetch all transfers that meet tx query
     List<MoneroTransfer> transfers = getTransfers(new MoneroTransferQuery().setTxQuery(query));
@@ -596,20 +599,25 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // fetch and merge outputs if queried
     if (Boolean.TRUE.equals(query.getIncludeOutputs())) {
+      
+      // fetch all outputs that meet tx query
       List<MoneroOutputWallet> outputs = getOutputs(new MoneroOutputQuery().setTxQuery(query));
       
       // merge output txs one time while retaining order
       Set<MoneroTxWallet> outputTxs = new HashSet<MoneroTxWallet>();
       for (MoneroOutputWallet output : outputs) {
-        if (!outputTxs.contains(output.getTx())){
+        if (!outputTxs.contains(output.getTx())) {
           mergeTx(output.getTx(), txMap, blockMap, true);
           outputTxs.add(output.getTx());
         }
       }
     }
     
-    // filter txs that don't meet transfer query
+    // restore transfer and output queries
     query.setTransferQuery(transferQuery);
+    query.setOutputQuery(outputQuery);
+    
+    // filter txs that don't meet transfer and output queries
     List<MoneroTxWallet> txsQueried = new ArrayList<MoneroTxWallet>();
     for (MoneroTxWallet tx : txs) {
       if (query.meetsCriteria(tx)) txsQueried.add(tx);
@@ -778,7 +786,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         MoneroTxQuery txQuery = query.getTxQuery().copy();
         if (query.getTxQuery().getOutputQuery() == query) query = txQuery.getOutputQuery();
         else {
-          assertNull("Transfer request's tx request must be circular reference or null", query.getTxQuery().getOutputQuery());
+          assertNull("Output request's tx request must be circular reference or null", query.getTxQuery().getOutputQuery());
           query = query.copy();
           query.setTxQuery(txQuery);
         }

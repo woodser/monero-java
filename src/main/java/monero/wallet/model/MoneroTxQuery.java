@@ -204,6 +204,19 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
       if (!matchFound) return false;
     }
     
+    // at least one output must meet output query if defined
+    if (this.getOutputQuery() != null && !this.getOutputQuery().isDefault()) {
+      if (tx.getVouts() == null || tx.getVouts().isEmpty()) return false;
+      boolean matchFound = false;
+      for (MoneroOutputWallet vout : tx.getVoutsWallet()) {
+        if (this.getOutputQuery().meetsCriteria(vout)) {
+          matchFound = true;
+          break;
+        }
+      }
+      if (!matchFound) return false;
+    }
+    
     // filter on having a payment id
     if (this.hasPaymentId() != null) {
       if (this.hasPaymentId() && tx.getPaymentId() == null) return false;

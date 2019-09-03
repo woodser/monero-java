@@ -21,6 +21,7 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
 
   private MoneroTxQuery txQuery;
   private List<Integer> subaddressIndices;
+  private static MoneroOutputWallet EMPTY_OUTPUT = new MoneroOutputWallet();
   
   public MoneroOutputQuery() {
     super();
@@ -86,6 +87,10 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
     
     // output meets query
     return true;
+  }
+  
+  public boolean isDefault() {
+    return meetsCriteria(EMPTY_OUTPUT);
   }
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
