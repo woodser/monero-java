@@ -1,4 +1,5 @@
 HIGH
+only have send() and createTxs() which return tx set?
 update javascript library
 MoneroWalletRpc() should support rpc connection as parameter
 does multisig work if exchange_keys is called instead of finalize_multisig?
