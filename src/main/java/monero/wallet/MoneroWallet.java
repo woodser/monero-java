@@ -1096,17 +1096,6 @@ public interface MoneroWallet {
   public MoneroMultisigInitResult makeMultisig(List<String> multisigHexes, int threshold, String password);
   
   /**
-   * Finalize a N-1/N multisig wallet.
-   * 
-   * TODO monero core: this is a special case of exchangeMultisigKeys() for N-1/N multisig.  use that as the last step instead and remove this?  that would further generalize the process
-   * 
-   * @param multisigHexes are multisig hex from each participant
-   * @param password is the wallet's password // TODO monero core: redundant? wallet is created with password
-   * @return the multisig wallet's address
-   */
-  public String finalizeMultisig(List<String> multisigHexes, String password);
-  
-  /**
    * Exchange multisig hex with participants in a M/N multisig wallet.
    * 
    * This process must be repeated with participants exactly N-M times.

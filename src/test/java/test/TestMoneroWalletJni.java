@@ -1215,21 +1215,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       madeMultisigHexes.add(result.getMultisigHex());
     }
     
-    // if wallet is (N-1)/N, finalize each participant
-    if (M == N - 1) {
-      for (int i = 0; i < wallets.size(); i++) {
-      
-        // collect made multisig hexes from wallet's peers
-        List<String> peerMultisigHexes = new ArrayList<String>();
-        for (int j = 0; j < wallets.size(); j++) if (j != i) peerMultisigHexes.add(madeMultisigHexes.get(j));
-
-        // finalize the multisig wallet using peer hex
-        String primaryAddress = wallets.get(i).finalizeMultisig(peerMultisigHexes, TestUtils.WALLET_PASSWORD);
-      }
-    }
-    
-    // if wallet is M/N, exchange multisig keys N-M times
-    else if (M != N) {
+    // if wallet is not N/N, exchange multisig keys N-M times
+    if (M != N) {
       List<String> multisigHexes = madeMultisigHexes;
       for (int i = 0; i < N - M; i++) {
         
