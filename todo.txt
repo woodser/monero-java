@@ -1,7 +1,6 @@
 HIGH
-no need to setIncludeOutputs(true) if output query included?
-remove finalizeMultisig()?
 update javascript library
+no need to setIncludeOutputs(true) if output query included?
 
 update model: flushTxPool, uint/ulong/etc -> uint64, param types, list->[], sample update and color keywords and constants with and smaller size, isMinerTx, remove "reference", numBlocks/startHeight Long
 regenerate docs
