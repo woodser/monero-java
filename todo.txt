@@ -1,8 +1,7 @@
 HIGH
-only have send() and createTxs() which return tx set?
 update javascript library
 MoneroWalletRpc() should support rpc connection as parameter
-does multisig work if exchange_keys is called instead of finalize_multisig?
+remove finalizeMultisig()?
 update model: flushTxPool, uint/ulong/etc -> uint64, param types, list->[], sample update and color keywords and constants with and smaller size, isMinerTx, remove "reference", numBlocks/startHeight Long
 regenerate docs
 open monero core issues
@@ -13,7 +12,8 @@ MEDIUM
 compare by merging when appropriate
 cleanup: order all methods and tests the same, even overrides
 should sweepUnlocked() sweep all accounts if not specified?
-prevent common occasional test failures caused by testing equality instead of mergeability (e.g. tx num confirmations increasing is expected) 
+prevent common occasional test failures caused by testing equality instead of mergeability (e.g. tx num confirmations increasing is expected)
+only have send() and createTxs() which return tx set? 
 new MoneroWalletJni(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
 support cold wallet with sign_transfer, submit_transfer
 approximate chain height
