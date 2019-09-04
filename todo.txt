@@ -11,6 +11,7 @@ numThreads mining is long
 stopSyncing() in wallet interface, throws exception in rpc impl
 getTxNote, getTxNotes grouped, then setters
 move account tags lower
+cpp sample code
 
 update javascript library
 regenerate docs
