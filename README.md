@@ -13,7 +13,7 @@ In addition, this project conforms to an [API specification](http://moneroecosys
 - Query wallet transactions, transfers, and outputs by their many attributes
 - Be notified when blocks are added to the chain, as the wallet synchronizes, or when the wallet sends or receives funds
 - Full multisig support
-- Over 200 passing JUnit tests
+- Over 200 passing JUnit test cases
 
 ## Sample Code
 
