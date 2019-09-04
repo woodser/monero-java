@@ -413,7 +413,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           subaddress.setBalance(BigInteger.valueOf(0));
           subaddress.setUnlockedBalance(BigInteger.valueOf(0));
           subaddress.setNumUnspentOutputs(0);
-          subaddress.setNumBlocksToUnlock(0);
+          subaddress.setNumBlocksToUnlock(0l);
         }
       }
       
@@ -502,7 +502,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         subaddress.setBalance(BigInteger.valueOf(0));
         subaddress.setUnlockedBalance(BigInteger.valueOf(0));
         subaddress.setNumUnspentOutputs(0);
-        subaddress.setNumBlocksToUnlock(0);
+        subaddress.setNumBlocksToUnlock(0l);
       }
 
       // fetch and initialize balances
@@ -559,7 +559,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     subaddress.setUnlockedBalance(BigInteger.valueOf(0));
     subaddress.setNumUnspentOutputs(0);
     subaddress.setIsUsed(false);
-    subaddress.setNumBlocksToUnlock(0);
+    subaddress.setNumBlocksToUnlock(0l);
     return subaddress;
   }
 
@@ -906,7 +906,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // build and return result
     MoneroKeyImageImportResult importResult = new MoneroKeyImageImportResult();
-    importResult.setHeight(((BigInteger) result.get("height")).intValue());
+    importResult.setHeight(((BigInteger) result.get("height")).longValue());
     importResult.setSpentAmount((BigInteger) result.get("spent"));
     importResult.setUnspentAmount((BigInteger) result.get("unspent"));
     return importResult;
@@ -1162,7 +1162,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     MoneroCheckTx check = new MoneroCheckTx();
     check.setIsGood(true);
-    check.setNumConfirmations(((BigInteger) result.get("confirmations")).intValue());
+    check.setNumConfirmations(((BigInteger) result.get("confirmations")).longValue());
     check.setInTxPool((Boolean) result.get("in_pool"));
     check.setReceivedAmount((BigInteger) result.get("received"));
     return check;
@@ -1198,7 +1198,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     MoneroCheckTx check = new MoneroCheckTx();
     check.setIsGood(isGood);
     if (isGood) {
-      check.setNumConfirmations(((BigInteger) result.get("confirmations")).intValue());
+      check.setNumConfirmations(((BigInteger) result.get("confirmations")).longValue());
       check.setInTxPool((boolean) result.get("in_pool"));
       check.setReceivedAmount((BigInteger) result.get("received"));
     }
@@ -1731,7 +1731,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("num_unspent_outputs")) subaddress.setNumUnspentOutputs(((BigInteger) val).intValue());
       else if (key.equals("label")) { if (!"".equals(val)) subaddress.setLabel((String) val); }
       else if (key.equals("used")) subaddress.setIsUsed((Boolean) val);
-      else if (key.equals("blocks_to_unlock")) subaddress.setNumBlocksToUnlock(((BigInteger) val).intValue());
+      else if (key.equals("blocks_to_unlock")) subaddress.setNumBlocksToUnlock(((BigInteger) val).longValue());
       else LOGGER.warn("WARNING: ignoring unexpected subaddress field: " + key + ": " + val);
     }
     return subaddress;
@@ -1924,7 +1924,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
       else if (key.equals("suggested_confirmations_threshold")) {
         if (transfer == null) transfer = (isOutgoing ? new MoneroOutgoingTransfer() : new MoneroIncomingTransfer()).setTx(tx);
-        transfer.setNumSuggestedConfirmations(((BigInteger) val).intValue());
+        transfer.setNumSuggestedConfirmations(((BigInteger) val).longValue());
       }
       else if (key.equals("amount")) {
         if (transfer == null) transfer = (isOutgoing ? new MoneroOutgoingTransfer() : new MoneroIncomingTransfer()).setTx(tx);

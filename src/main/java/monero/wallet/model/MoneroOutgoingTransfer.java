@@ -166,7 +166,7 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
   }
   
   @Override
-  public MoneroOutgoingTransfer setNumSuggestedConfirmations(Integer numSuggestedConfirmations) {
+  public MoneroOutgoingTransfer setNumSuggestedConfirmations(Long numSuggestedConfirmations) {
     super.setNumSuggestedConfirmations(numSuggestedConfirmations);
     return this;
   }

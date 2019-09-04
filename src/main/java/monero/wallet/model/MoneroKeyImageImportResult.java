@@ -7,15 +7,15 @@ import java.math.BigInteger;
  */
 public class MoneroKeyImageImportResult {
   
-  private Integer height;
+  private Long height;
   private BigInteger spentAmount;
   private BigInteger unspentAmount;
   
-  public Integer getHeight() {
+  public Long getHeight() {
     return height;
   }
   
-  public void setHeight(Integer height) {
+  public void setHeight(Long height) {
     this.height = height;
   }
   
