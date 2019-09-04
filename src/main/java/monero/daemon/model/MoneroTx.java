@@ -34,8 +34,8 @@ public class MoneroTx {
   private Boolean isRelayed;
   private Boolean isConfirmed;
   private Boolean inTxPool;
-  private Integer numConfirmations;
-  private Integer unlockTime;
+  private Long numConfirmations;
+  private Long unlockTime;
   private Long lastRelayedTimestamp;
   private Long receivedTimestamp;
   private Boolean isDoubleSpendSeen;
@@ -44,8 +44,8 @@ public class MoneroTx {
   private String prunedHex;
   private String prunableHex;
   private String prunableHash;
-  private Integer size;
-  private Integer weight;
+  private Long size;
+  private Long weight;
   private List<MoneroOutput> vins;
   private List<MoneroOutput> vouts;
   private List<Integer> outputIndices;
@@ -55,9 +55,9 @@ public class MoneroTx {
   private Object rctSigPrunable;  // TODO: implement
   private Boolean isKeptByBlock;
   private Boolean isFailed;
-  private Integer lastFailedHeight;
+  private Long lastFailedHeight;
   private String lastFailedId;
-  private Integer maxUsedBlockHeight;
+  private Long maxUsedBlockHeight;
   private String maxUsedBlockId;
   private List<String> signatures;
   
@@ -227,20 +227,20 @@ public class MoneroTx {
     return this;
   }
   
-  public Integer getNumConfirmations() {
+  public Long getNumConfirmations() {
     return numConfirmations;
   }
   
-  public MoneroTx setNumConfirmations(Integer numConfirmations) {
+  public MoneroTx setNumConfirmations(Long numConfirmations) {
     this.numConfirmations = numConfirmations;
     return this;
   }
   
-  public Integer getUnlockTime() {
+  public Long getUnlockTime() {
     return unlockTime;
   }
   
-  public MoneroTx setUnlockTime(Integer unlockTime) {
+  public MoneroTx setUnlockTime(Long unlockTime) {
     this.unlockTime = unlockTime;
     return this;
   }
@@ -318,20 +318,20 @@ public class MoneroTx {
     return this;
   }
   
-  public Integer getSize() {
+  public Long getSize() {
     return size;
   }
   
-  public MoneroTx setSize(Integer size) {
+  public MoneroTx setSize(Long size) {
     this.size = size;
     return this;
   }
   
-  public Integer getWeight() {
+  public Long getWeight() {
     return weight;
   }
   
-  public MoneroTx setWeight(Integer weight) {
+  public MoneroTx setWeight(Long weight) {
     this.weight = weight;
     return this;
   }
@@ -421,11 +421,11 @@ public class MoneroTx {
     return this;
   }
   
-  public Integer getLastFailedHeight() {
+  public Long getLastFailedHeight() {
     return lastFailedHeight;
   }
   
-  public MoneroTx setLastFailedHeight(Integer lastFailedHeight) {
+  public MoneroTx setLastFailedHeight(Long lastFailedHeight) {
     this.lastFailedHeight = lastFailedHeight;
     return this;
   }
@@ -439,11 +439,11 @@ public class MoneroTx {
     return this;
   }
   
-  public Integer getMaxUsedBlockHeight() {
+  public Long getMaxUsedBlockHeight() {
     return maxUsedBlockHeight;
   }
   
-  public MoneroTx setMaxUsedBlockHeight(Integer maxUsedBlockHeight) {
+  public MoneroTx setMaxUsedBlockHeight(Long maxUsedBlockHeight) {
     this.maxUsedBlockHeight = maxUsedBlockHeight;
     return this;
   }

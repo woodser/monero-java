@@ -339,13 +339,13 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setNumConfirmations(Integer numConfirmations) {
+  public MoneroTxQuery setNumConfirmations(Long numConfirmations) {
     super.setNumConfirmations(numConfirmations);
     return this;
   }
 
   @Override
-  public MoneroTxQuery setUnlockTime(Integer unlockTime) {
+  public MoneroTxQuery setUnlockTime(Long unlockTime) {
     super.setUnlockTime(unlockTime);
     return this;
   }
@@ -399,13 +399,13 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setSize(Integer size) {
+  public MoneroTxQuery setSize(Long size) {
     super.setSize(size);
     return this;
   }
 
   @Override
-  public MoneroTxQuery setWeight(Integer weight) {
+  public MoneroTxQuery setWeight(Long weight) {
     super.setWeight(weight);
     return this;
   }
@@ -465,7 +465,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setLastFailedHeight(Integer lastFailedHeight) {
+  public MoneroTxQuery setLastFailedHeight(Long lastFailedHeight) {
     super.setLastFailedHeight(lastFailedHeight);
     return this;
   }
@@ -477,7 +477,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setMaxUsedBlockHeight(Integer maxUsedBlockHeight) {
+  public MoneroTxQuery setMaxUsedBlockHeight(Long maxUsedBlockHeight) {
     super.setMaxUsedBlockHeight(maxUsedBlockHeight);
     return this;
   }

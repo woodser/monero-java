@@ -8,9 +8,9 @@ import java.math.BigInteger;
 public class MoneroOutputHistogramEntry {
   
   private BigInteger amount;
-  private Integer numInstances;
-  private Integer numUnlockedInstances;
-  private Integer numRecentInstances;
+  private Long numInstances;
+  private Long numUnlockedInstances;
+  private Long numRecentInstances;
   
   public BigInteger getAmount() {
     return amount;
@@ -20,27 +20,27 @@ public class MoneroOutputHistogramEntry {
     this.amount = amount;
   }
   
-  public Integer getNumInstances() {
+  public Long getNumInstances() {
     return numInstances;
   }
   
-  public void setNumInstances(Integer numInstances) {
+  public void setNumInstances(Long numInstances) {
     this.numInstances = numInstances;
   }
   
-  public Integer getNumUnlockedInstances() {
+  public Long getNumUnlockedInstances() {
     return numUnlockedInstances;
   }
   
-  public void setNumUnlockedInstances(Integer numUnlockedInstances) {
+  public void setNumUnlockedInstances(Long numUnlockedInstances) {
     this.numUnlockedInstances = numUnlockedInstances;
   }
   
-  public Integer getNumRecentInstances() {
+  public Long getNumRecentInstances() {
     return numRecentInstances;
   }
   
-  public void setNumRecentInstances(Integer numRecentInstances) {
+  public void setNumRecentInstances(Long numRecentInstances) {
     this.numRecentInstances = numRecentInstances;
   }
 }

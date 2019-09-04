@@ -3213,8 +3213,8 @@ public abstract class TestMoneroWalletCommon {
       }
       
       // loop to update txs through confirmations
-      int numConfirmations = 0;
-      int numConfirmationsTotal = 2; // number of confirmations to test
+      long numConfirmations = 0;
+      long numConfirmationsTotal = 2; // number of confirmations to test
       while (numConfirmations < numConfirmationsTotal) {
         System.out.println(numConfirmations + " < " + numConfirmationsTotal + " needed confirmations");
         
@@ -3799,7 +3799,7 @@ public abstract class TestMoneroWalletCommon {
       assertTrue(tx.getNumConfirmations() > 0);
     } else {
       assertNull(tx.getBlock());
-      assertEquals(0, (int) tx.getNumConfirmations());
+      assertEquals(0, (long) tx.getNumConfirmations());
     }
     
     // test in tx pool
@@ -3913,7 +3913,7 @@ public abstract class TestMoneroWalletCommon {
       assertEquals(false, tx.isConfirmed());
       testTransfer(tx.getOutgoingTransfer(), ctx);
       assertEquals(request.getMixin(), tx.getMixin());
-      assertEquals(request.getUnlockTime() != null ? request.getUnlockTime() : 0, (int) tx.getUnlockTime());
+      assertEquals(request.getUnlockTime() != null ? request.getUnlockTime() : 0, (long) tx.getUnlockTime());
       assertNull(tx.getBlock());
       if (Boolean.FALSE.equals(request.getCanSplit())) assertTrue(tx.getKey().length() > 0);
       assertNotNull(tx.getFullHex());

@@ -10,8 +10,8 @@ public class MoneroAltChain {
   
   private List<String> blockIds;
   private BigInteger difficulty;
-  private Integer height;
-  private Integer length;
+  private Long height;
+  private Long length;
   private String mainChainParentBlockId;
   
   public List<String> getBlockIds() {
@@ -30,19 +30,19 @@ public class MoneroAltChain {
     this.difficulty = difficulty;
   }
   
-  public Integer getHeight() {
+  public Long getHeight() {
     return height;
   }
   
-  public void setHeight(Integer height) {
+  public void setHeight(Long height) {
     this.height = height;
   }
   
-  public Integer getLength() {
+  public Long getLength() {
     return length;
   }
   
-  public void setLength(Integer length) {
+  public void setLength(Long length) {
     this.length = length;
   }
   

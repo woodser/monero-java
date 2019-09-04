@@ -11,9 +11,9 @@ public class MoneroBlockTemplate {
   private String blockHashingBlob;
   private BigInteger difficulty;
   private BigInteger expectedReward;
-  private Integer height;
+  private Long height;
   private String prevId;
-  private Integer reservedOffset;
+  private Long reservedOffset;
   
   public String getBlockTemplateBlob() {
     return blockTemplateBlob;
@@ -47,11 +47,11 @@ public class MoneroBlockTemplate {
     this.expectedReward = expectedReward;
   }
   
-  public Integer getHeight() {
+  public Long getHeight() {
     return height;
   }
   
-  public void setHeight(Integer height) {
+  public void setHeight(Long height) {
     this.height = height;
   }
   
@@ -63,11 +63,11 @@ public class MoneroBlockTemplate {
     this.prevId = prevId;
   }
   
-  public Integer getReservedOffset() {
+  public Long getReservedOffset() {
     return reservedOffset;
   }
   
-  public void setReservedOffset(Integer reservedOffset) {
+  public void setReservedOffset(Long reservedOffset) {
     this.reservedOffset = reservedOffset;
   }
 }

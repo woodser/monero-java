@@ -10,7 +10,7 @@ public class MoneroMiningStatus {
   private Boolean isActive;
   private Boolean isBackground;
   private String address;
-  private Integer speed;
+  private Long speed;
   private Integer numThreads;
   
   @JsonProperty("isActive")
@@ -39,11 +39,11 @@ public class MoneroMiningStatus {
     this.address = address;
   }
   
-  public Integer getSpeed() {
+  public Long getSpeed() {
     return speed;
   }
   
-  public void setSpeed(Integer speed) {
+  public void setSpeed(Long speed) {
     this.speed = speed;
   }
   

@@ -10,14 +10,14 @@ public class MoneroTxPoolStats {
   private Integer numFailing;
   private Integer numDoubleSpends;
   private Integer num10m;
-  private Integer feeTotal;
-  private Integer bytesMax;
-  private Integer bytesMed;
-  private Integer bytesMin;
-  private Integer bytesTotal;
+  private Long feeTotal;
+  private Long bytesMax;
+  private Long bytesMed;
+  private Long bytesMin;
+  private Long bytesTotal;
   private Object histo;
-  private Integer histo98pc;
-  private Integer oldestTimestamp;
+  private Long histo98pc;
+  private Long oldestTimestamp;
   
   public Integer getNumTxs() {
     return numTxs;
@@ -59,43 +59,43 @@ public class MoneroTxPoolStats {
     this.num10m = num10m;
   }
   
-  public Integer getFeeTotal() {
+  public Long getFeeTotal() {
     return feeTotal;
   }
   
-  public void setFeeTotal(Integer feeTotal) {
+  public void setFeeTotal(Long feeTotal) {
     this.feeTotal = feeTotal;
   }
   
-  public Integer getBytesMax() {
+  public Long getBytesMax() {
     return bytesMax;
   }
   
-  public void setBytesMax(Integer bytesMax) {
+  public void setBytesMax(Long bytesMax) {
     this.bytesMax = bytesMax;
   }
   
-  public Integer getBytesMed() {
+  public Long getBytesMed() {
     return bytesMed;
   }
   
-  public void setBytesMed(Integer bytesMed) {
+  public void setBytesMed(Long bytesMed) {
     this.bytesMed = bytesMed;
   }
   
-  public Integer getBytesMin() {
+  public Long getBytesMin() {
     return bytesMin;
   }
   
-  public void setBytesMin(Integer bytesMin) {
+  public void setBytesMin(Long bytesMin) {
     this.bytesMin = bytesMin;
   }
   
-  public Integer getBytesTotal() {
+  public Long getBytesTotal() {
     return bytesTotal;
   }
   
-  public void setBytesTotal(Integer bytesTotal) {
+  public void setBytesTotal(Long bytesTotal) {
     this.bytesTotal = bytesTotal;
   }
   
@@ -107,19 +107,19 @@ public class MoneroTxPoolStats {
     this.histo = histo;
   }
   
-  public Integer getHisto98pc() {
+  public Long getHisto98pc() {
     return histo98pc;
   }
   
-  public void setHisto98pc(Integer histo98pc) {
+  public void setHisto98pc(Long histo98pc) {
     this.histo98pc = histo98pc;
   }
   
-  public Integer getOldestTimestamp() {
+  public Long getOldestTimestamp() {
     return oldestTimestamp;
   }
   
-  public void setOldestTimestamp(Integer oldestTimestamp) {
+  public void setOldestTimestamp(Long oldestTimestamp) {
     this.oldestTimestamp = oldestTimestamp;
   }
 }

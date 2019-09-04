@@ -10,32 +10,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MoneroDaemonInfo {
   
   private String version;
-  private Integer numAltBlocks;
-  private Integer blockSizeLimit;
-  private Integer blockSizeMedian;
-  private Integer blockWeightLimit;
-  private Integer blockWeightMedian;
+  private Long numAltBlocks;
+  private Long blockSizeLimit;
+  private Long blockSizeMedian;
+  private Long blockWeightLimit;
+  private Long blockWeightMedian;
   private String bootstrapDaemonAddress;
   private BigInteger difficulty;
   private BigInteger cumulativeDifficulty;
   private BigInteger freeSpace;
   private Integer numOfflinePeers;
   private Integer numOnlinePeers;
-  private Integer height;
-  private Integer heightWithoutBootstrap;
+  private Long height;
+  private Long heightWithoutBootstrap;
   private MoneroNetworkType networkType;
   private Boolean isOffline;
   private Integer numIncomingConnections;
   private Integer numOutgoingConnections;
   private Integer numRpcConnections;
   private Long startTimestamp;
-  private Integer target;
-  private Integer targetHeight;
+  private Long target;
+  private Long targetHeight;
   private String topBlockId;
   private Integer numTxs;
   private Integer numTxsPool;
   private Boolean wasBootstrapEverUsed;
-  private Integer databaseSize;
+  private Long databaseSize;
   private Boolean updateAvailable;
   
   public String getVersion() {
@@ -46,44 +46,44 @@ public class MoneroDaemonInfo {
     this.version = version;
   }
   
-  public Integer getNumAltBlocks() {
+  public Long getNumAltBlocks() {
     return numAltBlocks;
   }
   
-  public void setNumAltBlocks(Integer numAltBlocks) {
+  public void setNumAltBlocks(Long numAltBlocks) {
     this.numAltBlocks = numAltBlocks;
   }
   
-  public Integer getBlockSizeLimit() {
+  public Long getBlockSizeLimit() {
     return blockSizeLimit;
   }
   
-  public void setBlockSizeLimit(Integer blockSizeLimit) {
+  public void setBlockSizeLimit(Long blockSizeLimit) {
     this.blockSizeLimit = blockSizeLimit;
   }
   
-  public Integer getBlockSizeMedian() {
+  public Long getBlockSizeMedian() {
     return blockSizeMedian;
   }
   
-  public void setBlockSizeMedian(Integer blockSizeMedian) {
+  public void setBlockSizeMedian(Long blockSizeMedian) {
     this.blockSizeMedian = blockSizeMedian;
   }
   
-  public Integer getBlockWeightLimit() {
+  public Long getBlockWeightLimit() {
     return blockWeightLimit;
   }
   
-  public MoneroDaemonInfo setBlockWeightLimit(Integer blockWeightLimit) {
+  public MoneroDaemonInfo setBlockWeightLimit(Long blockWeightLimit) {
     this.blockWeightLimit = blockWeightLimit;
     return this;
   }
   
-  public Integer getBlockWeightMedian() {
+  public Long getBlockWeightMedian() {
     return blockWeightMedian;
   }
   
-  public void setBlockWeightMedian(Integer blockWeightMedian) {
+  public void setBlockWeightMedian(Long blockWeightMedian) {
     this.blockWeightMedian = blockWeightMedian;
   }
   
@@ -135,19 +135,19 @@ public class MoneroDaemonInfo {
     this.numOnlinePeers = numOnlinePeers;
   }
   
-  public Integer getHeight() {
+  public Long getHeight() {
     return height;
   }
   
-  public void setHeight(Integer height) {
+  public void setHeight(Long height) {
     this.height = height;
   }
   
-  public Integer getHeightWithoutBootstrap() {
+  public Long getHeightWithoutBootstrap() {
     return heightWithoutBootstrap;
   }
   
-  public void setHeightWithoutBootstrap(Integer heightWithoutBootstrap) {
+  public void setHeightWithoutBootstrap(Long heightWithoutBootstrap) {
     this.heightWithoutBootstrap = heightWithoutBootstrap;
   }
   
@@ -200,19 +200,19 @@ public class MoneroDaemonInfo {
     this.startTimestamp = startTimestamp;
   }
   
-  public Integer getTarget() {
+  public Long getTarget() {
     return target;
   }
   
-  public void setTarget(Integer target) {
+  public void setTarget(Long target) {
     this.target = target;
   }
   
-  public Integer getTargetHeight() {
+  public Long getTargetHeight() {
     return targetHeight;
   }
   
-  public void setTargetHeight(Integer targetHeight) {
+  public void setTargetHeight(Long targetHeight) {
     this.targetHeight = targetHeight;
   }
   
@@ -248,11 +248,11 @@ public class MoneroDaemonInfo {
     this.wasBootstrapEverUsed = wasBootstrapEverUsed;
   }
   
-  public Integer getDatabaseSize() {
+  public Long getDatabaseSize() {
     return databaseSize;
   }
   
-  public void setDatabaseSize(Integer databaseSize) {
+  public void setDatabaseSize(Long databaseSize) {
     this.databaseSize = databaseSize;
   }
   

@@ -363,13 +363,13 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setNumConfirmations(Integer numConfirmations) {
+  public MoneroTxWallet setNumConfirmations(Long numConfirmations) {
     super.setNumConfirmations(numConfirmations);
     return this;
   }
 
   @Override
-  public MoneroTxWallet setUnlockTime(Integer unlockTime) {
+  public MoneroTxWallet setUnlockTime(Long unlockTime) {
     super.setUnlockTime(unlockTime);
     return this;
   }
@@ -423,13 +423,13 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setSize(Integer size) {
+  public MoneroTxWallet setSize(Long size) {
     super.setSize(size);
     return this;
   }
 
   @Override
-  public MoneroTxWallet setWeight(Integer weight) {
+  public MoneroTxWallet setWeight(Long weight) {
     super.setWeight(weight);
     return this;
   }
@@ -483,7 +483,7 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setLastFailedHeight(Integer lastFailedHeight) {
+  public MoneroTxWallet setLastFailedHeight(Long lastFailedHeight) {
     super.setLastFailedHeight(lastFailedHeight);
     return this;
   }
@@ -495,7 +495,7 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setMaxUsedBlockHeight(Integer maxUsedBlockHeight) {
+  public MoneroTxWallet setMaxUsedBlockHeight(Long maxUsedBlockHeight) {
     super.setMaxUsedBlockHeight(maxUsedBlockHeight);
     return this;
   }
