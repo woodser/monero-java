@@ -1432,7 +1432,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
-  public void startMining(Integer numThreads, Boolean backgroundMining, Boolean ignoreBattery) {
+  public void startMining(Long numThreads, Boolean backgroundMining, Boolean ignoreBattery) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("threads_count", numThreads);
     params.put("backgroundMining", backgroundMining);

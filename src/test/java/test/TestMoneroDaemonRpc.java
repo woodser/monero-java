@@ -1004,7 +1004,7 @@ public class TestMoneroDaemonRpc {
     String address = wallet.getPrimaryAddress();
     
     // start mining
-    daemon.startMining(address, 2, false, true);
+    daemon.startMining(address, 2l, false, true);
     
     // stop mining
     daemon.stopMining();
@@ -1031,7 +1031,7 @@ public class TestMoneroDaemonRpc {
       
       // test status with mining
       String address = wallet.getPrimaryAddress();
-      int threadCount = 3;
+      long threadCount = 3;
       boolean isBackground = false;
       daemon.startMining(address, threadCount, isBackground, true);
       status = daemon.getMiningStatus();
@@ -1262,7 +1262,7 @@ public class TestMoneroDaemonRpc {
             
       // start mining if possible to help push the network along
       String address = wallet.getPrimaryAddress();
-      try { daemon.startMining(address, 8, false, true); }
+      try { daemon.startMining(address, 8l, false, true); }
       catch (MoneroException e) { }
       
       // register a listener

@@ -1049,7 +1049,7 @@ public interface MoneroWallet {
    * @param backgroundMining specifies if mining should occur in the background (optional)
    * @param ignoreBattery specifies if the battery should be ignored for mining (optional)
    */
-  public void startMining(Integer numThreads, Boolean backgroundMining, Boolean ignoreBattery);
+  public void startMining(Long numThreads, Boolean backgroundMining, Boolean ignoreBattery);
   
   /**
    * Stop mining.

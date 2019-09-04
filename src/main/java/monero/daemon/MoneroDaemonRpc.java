@@ -794,7 +794,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 //  }
 
   @Override
-  public void startMining(String address, Integer numThreads, Boolean isBackground, Boolean ignoreBattery) {
+  public void startMining(String address, Long numThreads, Boolean isBackground, Boolean ignoreBattery) {
     if (address == null || address.isEmpty()) throw new MoneroException("Must provide address to mine to");
     if (numThreads == null || numThreads <= 0) throw new MoneroException("Number of threads must be an integer greater than 0");
     Map<String, Object> params = new HashMap<String, Object>();

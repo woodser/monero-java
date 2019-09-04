@@ -1137,10 +1137,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public void startMining(Integer numThreads, Boolean backgroundMining, Boolean ignoreBattery) {
+  public void startMining(Long numThreads, Boolean backgroundMining, Boolean ignoreBattery) {
     assertNotClosed();
     try {
-      startMiningJni(numThreads == null ? 0 : (long) numThreads, backgroundMining, ignoreBattery);
+      startMiningJni(numThreads == null ? 0l : (long) numThreads, backgroundMining, ignoreBattery);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }

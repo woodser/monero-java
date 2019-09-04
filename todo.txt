@@ -5,9 +5,6 @@ model:
    	add page numbers
 
 sweepOutput(string keyImage, string address), send(accountIdx, amount, address), createTxs, sendSplit(...)? probably
-all sizes and weights are ulong (blockSizeLimit, blockSizeMedian, blockWeightLimit, etc)
-long: heightWithoutBootstrap long, targetHeight in daemon info, maxUsedBlockHeight, lastFailedHeight, height and targetHeight in MoneorDaemonSyncInfo, height in MoneroDaemonConnection, MoneroBlockTemplate height, MoneroAltChain height and length, MoneroHardForkInfo earliestHeight, MoneroTxPoolStats, numBlocksToUnlock and numUnspentOutputs in MoneroSubaddress, height in MoneroKeyImageImportResult, numConfirmations in MoneroCheckTx
-numThreads mining is long
 stopSyncing() in wallet interface, throws exception in rpc impl
 getTxNote, getTxNotes grouped, then setters
 move account tags lower

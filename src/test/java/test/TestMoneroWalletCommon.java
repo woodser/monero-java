@@ -1938,7 +1938,7 @@ public abstract class TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     MoneroMiningStatus status = daemon.getMiningStatus();
     if (status.isActive()) wallet.stopMining();
-    wallet.startMining(2, false, true);
+    wallet.startMining(2l, false, true);
     wallet.stopMining();
   }
   
@@ -3205,7 +3205,7 @@ public abstract class TestMoneroWalletCommon {
       MoneroMiningStatus miningStatus = daemon.getMiningStatus();
       if (!miningStatus.isActive()) {
         try {
-          wallet.startMining(7, false, true);
+          wallet.startMining(7l, false, true);
           startedMining = true;
         } catch (Exception e) {
           // no problem
