@@ -412,7 +412,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         for (MoneroSubaddress subaddress : account.getSubaddresses()) {
           subaddress.setBalance(BigInteger.valueOf(0));
           subaddress.setUnlockedBalance(BigInteger.valueOf(0));
-          subaddress.setNumUnspentOutputs(0);
+          subaddress.setNumUnspentOutputs(0l);
           subaddress.setNumBlocksToUnlock(0l);
         }
       }
@@ -501,7 +501,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       for (MoneroSubaddress subaddress : subaddresses) {
         subaddress.setBalance(BigInteger.valueOf(0));
         subaddress.setUnlockedBalance(BigInteger.valueOf(0));
-        subaddress.setNumUnspentOutputs(0);
+        subaddress.setNumUnspentOutputs(0l);
         subaddress.setNumBlocksToUnlock(0l);
       }
 
@@ -557,7 +557,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     subaddress.setLabel(label);
     subaddress.setBalance(BigInteger.valueOf(0));
     subaddress.setUnlockedBalance(BigInteger.valueOf(0));
-    subaddress.setNumUnspentOutputs(0);
+    subaddress.setNumUnspentOutputs(0l);
     subaddress.setIsUsed(false);
     subaddress.setNumBlocksToUnlock(0l);
     return subaddress;
@@ -1728,7 +1728,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("address")) subaddress.setAddress((String) val);
       else if (key.equals("balance")) subaddress.setBalance((BigInteger) val);
       else if (key.equals("unlocked_balance")) subaddress.setUnlockedBalance((BigInteger) val);
-      else if (key.equals("num_unspent_outputs")) subaddress.setNumUnspentOutputs(((BigInteger) val).intValue());
+      else if (key.equals("num_unspent_outputs")) subaddress.setNumUnspentOutputs(((BigInteger) val).longValue());
       else if (key.equals("label")) { if (!"".equals(val)) subaddress.setLabel((String) val); }
       else if (key.equals("used")) subaddress.setIsUsed((Boolean) val);
       else if (key.equals("blocks_to_unlock")) subaddress.setNumBlocksToUnlock(((BigInteger) val).longValue());
