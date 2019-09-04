@@ -1,8 +1,16 @@
 HIGH
-stopSyncing() in wallet interface, throws exception in rpc impl
-update model: add page numbers, flushTxPool, uint/ulong/etc -> uint64, param types, list->[], sample update and color keywords and constants with and smaller size, isMinerTx, remove "reference", numBlocks/startHeight Long, show mappings of types, some params can be optional if it makes sense, refer to reference implementations for specifics, generally, null means all or auto
-sweepOutput(string keyImage, string address), send(accountIdx, amount, address), createTxs, sendSplit(...)? probably
+model:
+    sample update and color keywords
+    show mappings of types, some params can be optional if it makes sense, refer to reference implementations for specifics, generally, null means all or auto
+   	add page numbers
 
+sweepOutput(string keyImage, string address), send(accountIdx, amount, address), createTxs, sendSplit(...)? probably
+all sizes and weights are ulong (blockSizeLimit, blockSizeMedian, blockWeightLimit, etc)
+long: heightWithoutBootstrap long, targetHeight in daemon info, maxUsedBlockHeight, lastFailedHeight, height and targetHeight in MoneorDaemonSyncInfo, height in MoneroDaemonConnection, MoneroBlockTemplate height, MoneroAltChain height and length, MoneroHardForkInfo earliestHeight, MoneroTxPoolStats, numBlocksToUnlock and numUnspentOutputs in MoneroSubaddress, height in MoneroKeyImageImportResult, numConfirmations in MoneroCheckTx
+numThreads mining is long
+stopSyncing() in wallet interface, throws exception in rpc impl
+getTxNote, getTxNotes grouped, then setters
+move account tags lower
 
 update javascript library
 regenerate docs
