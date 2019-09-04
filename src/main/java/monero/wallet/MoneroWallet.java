@@ -921,20 +921,20 @@ public interface MoneroWallet {
   public String getTxNote(String txId);
   
   /**
-   * Set a note for a specific transaction.
-   * 
-   * @param txId specifies the transaction
-   * @param note specifies the note
-   */
-  public void setTxNote(String txId, String note);
-  
-  /**
    * Get notes for multiple transactions.
    * 
    * @param txIds identify the transactions to get notes for
    * @return notes for the transactions
    */
   public List<String> getTxNotes(Collection<String> txIds);
+  
+  /**
+   * Set a note for a specific transaction.
+   * 
+   * @param txId specifies the transaction
+   * @param note specifies the note
+   */
+  public void setTxNote(String txId, String note);
   
   /**
    * Set notes for multiple transactions.
