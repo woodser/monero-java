@@ -1,5 +1,4 @@
 HIGH
-sweepOutput(string keyImage, string address), send(accountIdx, amount, address), createTxs, sendSplit(...)? probably
 model:
     sample update and color keywords
     show mappings of types, some params can be optional if it makes sense, refer to reference implementations for specifics, generally, null means all or auto
