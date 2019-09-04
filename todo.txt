@@ -1,6 +1,10 @@
 HIGH
+stopSyncing() in wallet interface, throws exception in rpc impl
+update model: add page numbers, flushTxPool, uint/ulong/etc -> uint64, param types, list->[], sample update and color keywords and constants with and smaller size, isMinerTx, remove "reference", numBlocks/startHeight Long, show mappings of types, some params can be optional if it makes sense, refer to reference implementations for specifics, generally, null means all or auto
+sweepOutput(string keyImage, string address), send(accountIdx, amount, address), createTxs, sendSplit(...)? probably
+
+
 update javascript library
-update model: flushTxPool, uint/ulong/etc -> uint64, param types, list->[], sample update and color keywords and constants with and smaller size, isMinerTx, remove "reference", numBlocks/startHeight Long
 regenerate docs
 open monero core issues
 open issue: investigate integration of this library into Bisq

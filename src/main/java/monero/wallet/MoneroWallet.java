@@ -481,29 +481,6 @@ public interface MoneroWallet {
   public List<MoneroTransfer> getTransfers(MoneroTransferQuery query);
   
   /**
-   * Get outputs created from previous transactions that belong to the wallet
-   * (i.e. that the wallet can spend one time).  Outputs are part of
-   * transactions which are stored in blocks on the blockchain.
-   * 
-   * @return List<MoneroOutputWallet> are all wallet outputs
-   */
-  public List<MoneroOutputWallet> getOutputs();
-  
-  /**
-   * Get outputs created from previous transactions that belong to the wallet
-   * (i.e. that the wallet can spend one time).  Outputs are part of
-   * transactions which are stored in blocks on the blockchain.
-   * 
-   * Results can be configured by passing a MoneroOutputQuery.  Outputs must
-   * meet every criteria defined in the query in order to be returned.  All
-   * filtering is optional and no filtering is applied when not defined.
-   * 
-   * @param query specifies attributes of outputs to get
-   * @return List<MoneroOutputWallet> are wallet outputs per the query
-   */
-  public List<MoneroOutputWallet> getOutputs(MoneroOutputQuery query);
-  
-  /**
    * Get all of the wallet's incoming transfers.
    * 
    * @return the wallet's incoming transfers
@@ -532,6 +509,29 @@ public interface MoneroWallet {
    * @return the wallet's outgoing transfers according to the given query
    */
   public List<MoneroOutgoingTransfer> getOutgoingTransfers(MoneroTransferQuery query);
+  
+  /**
+   * Get outputs created from previous transactions that belong to the wallet
+   * (i.e. that the wallet can spend one time).  Outputs are part of
+   * transactions which are stored in blocks on the blockchain.
+   * 
+   * @return List<MoneroOutputWallet> are all wallet outputs
+   */
+  public List<MoneroOutputWallet> getOutputs();
+  
+  /**
+   * Get outputs created from previous transactions that belong to the wallet
+   * (i.e. that the wallet can spend one time).  Outputs are part of
+   * transactions which are stored in blocks on the blockchain.
+   * 
+   * Results can be configured by passing a MoneroOutputQuery.  Outputs must
+   * meet every criteria defined in the query in order to be returned.  All
+   * filtering is optional and no filtering is applied when not defined.
+   * 
+   * @param query specifies attributes of outputs to get
+   * @return List<MoneroOutputWallet> are wallet outputs per the query
+   */
+  public List<MoneroOutputWallet> getOutputs(MoneroOutputQuery query);
   
   /**
    * Export all outputs in hex format.
@@ -789,20 +789,20 @@ public interface MoneroWallet {
   /**
    * Sign a message.
    * 
-   * @param msg is the message to sign
+   * @param message is the message to sign
    * @return the signature
    */
-  public String sign(String msg);
+  public String sign(String message);
   
   /**
    * Verify a signature on a message.
    * 
-   * @param msg is the signed message
+   * @param message is the signed message
    * @param address is the signing address
    * @param signature is the signature
    * @return true if the signature is good, false otherwise
    */
-  public boolean verify(String msg, String address, String signature);
+  public boolean verify(String message, String address, String signature);
   
   /**
    * Get a transaction's secret key from its id.
