@@ -598,7 +598,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     // fetch and merge outputs if queried
-    if (Boolean.TRUE.equals(query.getIncludeOutputs())) {
+    if (Boolean.TRUE.equals(query.getIncludeOutputs()) || !outputQuery.isDefault()) {
       List<MoneroOutputWallet> outputs = getOutputs(new MoneroOutputQuery().setTxQuery(query));
       
       // merge output txs one time while retaining order
