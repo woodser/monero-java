@@ -245,7 +245,7 @@ struct wallet_jni_listener : public monero_wallet_listener {
     jstring jamount_str = env->NewStringUTF(to_string(*output.m_amount).c_str());
 
     // invoke Java listener's onOutputReceived()
-    jmethodID listenerClass_onOutputReceived = env->GetMethodID(class_WalletListener, "onOutputReceived", "(JLjava/lang/String;Ljava/lang/String;IIII)V");
+    jmethodID listenerClass_onOutputReceived = env->GetMethodID(class_WalletListener, "onOutputReceived", "(JLjava/lang/String;Ljava/lang/String;IIIJ)V");
     env->CallVoidMethod(jlistener, listenerClass_onOutputReceived, height == boost::none ? 0 : *height, jtx_id, jamount_str, *output.m_account_index, *output.m_subaddress_index, *output.m_tx->m_version, *output.m_tx->m_unlock_time);
 
     // check for and rethrow Java exception
