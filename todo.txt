@@ -5,7 +5,6 @@ model:
    	add page numbers
 
 sweepOutput(string keyImage, string address), send(accountIdx, amount, address), createTxs, sendSplit(...)? probably
-getTxNote, getTxNotes grouped, then setters
 move account tags lower
 cpp sample code
 
