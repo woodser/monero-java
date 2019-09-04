@@ -585,7 +585,7 @@ public interface MoneroDaemon {
    * @param isBackground specifies if the miner should run in the background or not
    * @param ignoreBattery specifies if the battery state (e.g. on laptop) should be ignored or not
    */
-  public void startMining(String address, Integer numThreads, Boolean isBackground, Boolean ignoreBattery);
+  public void startMining(String address, Long numThreads, Boolean isBackground, Boolean ignoreBattery);
   
   /**
    * Stop mining.

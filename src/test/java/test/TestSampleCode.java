@@ -130,7 +130,7 @@ public class TestSampleCode {
     assertTrue(sentTx.inTxPool());
     
     // mine with 7 threads to push the network along
-    int numThreads = 7;
+    long numThreads = 7;
     boolean isBackground = false;
     boolean ignoreBattery = false;
     walletRpc.startMining(numThreads, isBackground, ignoreBattery);

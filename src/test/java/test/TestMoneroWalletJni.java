@@ -567,7 +567,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
         MoneroMiningStatus miningStatus = daemon.getMiningStatus();
         if (!miningStatus.isActive()) {
           try {
-            wallet.startMining(7, false, true);
+            wallet.startMining(7l, false, true);
             startedMining = true;
           } catch (Exception e) {
             // no problem
