@@ -3131,7 +3131,6 @@ public abstract class TestMoneroWalletCommon {
   
   // Can update split locked txs sent from/to the same account as blocks are added to the chain
   @Test
-  @Ignore
   public void testUpdateLockedSameAccountSplit() {
     org.junit.Assume.assumeTrue(TEST_RELAYS && TEST_NOTIFICATIONS && !LITE_MODE);
     MoneroSendRequest request = new MoneroSendRequest(0, wallet.getPrimaryAddress(), TestUtils.MAX_FEE);
@@ -3143,7 +3142,6 @@ public abstract class TestMoneroWalletCommon {
   
   // Can update a locked tx sent from/to different accounts as blocks are added to the chain
   @Test
-  @Ignore
   public void testUpdateLockedDifferentAccounts() {
     org.junit.Assume.assumeTrue(TEST_RELAYS && TEST_NOTIFICATIONS && !LITE_MODE);
     MoneroSendRequest request = new MoneroSendRequest(0, wallet.getSubaddress(1, 0).getAddress(), TestUtils.MAX_FEE);
@@ -3154,13 +3152,11 @@ public abstract class TestMoneroWalletCommon {
   
   // Can update locked, split txs sent from/to different accounts as blocks are added to the chain
   @Test
-  @Ignore
   public void testUpdateLockedDifferentAccountsSplit() {
     org.junit.Assume.assumeTrue(TEST_RELAYS && TEST_NOTIFICATIONS && !LITE_MODE);
     MoneroSendRequest request = new MoneroSendRequest(0, wallet.getSubaddress(1, 0).getAddress(), TestUtils.MAX_FEE);
     request.setAccountIndex(0);
     request.setUnlockTime(3);
-    request.setCanSplit(true);
     testSendAndUpdateTxs(request);
   }
   
@@ -3186,7 +3182,7 @@ public abstract class TestMoneroWalletCommon {
       
       // send transactions
       List<MoneroTxWallet> sentTxs;
-      sentTxs = (request.getCanSplit() ? wallet.sendSplit(request) : wallet.send(request)).getTxs();
+      sentTxs = (!Boolean.FALSE.equals(request.getCanSplit()) ? wallet.sendSplit(request) : wallet.send(request)).getTxs();
       
       // build test context
       TestContext ctx = new TestContext();
