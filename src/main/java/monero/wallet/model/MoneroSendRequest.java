@@ -22,7 +22,7 @@ public class MoneroSendRequest {
   private BigInteger fee;
   private Integer accountIndex;
   private List<Integer> subaddressIndices;
-  private Integer unlockTime;
+  private Long unlockTime;
   private Boolean canSplit;
   private Boolean doNotRelay;
   private String note;
@@ -178,11 +178,11 @@ public class MoneroSendRequest {
     return this;
   }
   
-  public Integer getUnlockTime() {
+  public Long getUnlockTime() {
     return unlockTime;
   }
 
-  public MoneroSendRequest setUnlockTime(Integer unlockTime) {
+  public MoneroSendRequest setUnlockTime(Long unlockTime) {
     this.unlockTime = unlockTime;
     return this;
   }

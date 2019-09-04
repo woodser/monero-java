@@ -8,7 +8,7 @@ import java.math.BigInteger;
 public class MoneroCheckTx extends MoneroCheck {
 
   public Boolean inTxPool;
-  public Integer numConfirmations;
+  public Long numConfirmations;
   public BigInteger receivedAmount;
   
   public Boolean getInTxPool() {
@@ -19,11 +19,11 @@ public class MoneroCheckTx extends MoneroCheck {
     this.inTxPool = inTxPool;
   }
   
-  public Integer getNumConfirmations() {
+  public Long getNumConfirmations() {
     return numConfirmations;
   }
   
-  public void setNumConfirmations(Integer numConfirmations) {
+  public void setNumConfirmations(Long numConfirmations) {
     this.numConfirmations = numConfirmations;
   }
   

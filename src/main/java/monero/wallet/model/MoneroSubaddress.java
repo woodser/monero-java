@@ -19,7 +19,7 @@ public class MoneroSubaddress {
   private BigInteger unlockedBalance;
   private Integer numUnspentOutputs;
   private Boolean isUsed;
-  private Integer numBlocksToUnlock;
+  private Long numBlocksToUnlock;
   
   public MoneroSubaddress() {
     // nothing to construct
@@ -102,11 +102,11 @@ public class MoneroSubaddress {
     return this;
   }
 
-  public Integer getNumBlocksToUnlock() {
+  public Long getNumBlocksToUnlock() {
     return numBlocksToUnlock;
   }
 
-  public MoneroSubaddress setNumBlocksToUnlock(Integer numBlocksToUnlock) {
+  public MoneroSubaddress setNumBlocksToUnlock(Long numBlocksToUnlock) {
     this.numBlocksToUnlock = numBlocksToUnlock;
     return this;
   }

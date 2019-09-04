@@ -3124,7 +3124,7 @@ public abstract class TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_RELAYS && TEST_NOTIFICATIONS);
     MoneroSendRequest request = new MoneroSendRequest(wallet.getPrimaryAddress(), TestUtils.MAX_FEE);
     request.setAccountIndex(0);
-    request.setUnlockTime(3);
+    request.setUnlockTime(3l);
     request.setCanSplit(false);
     testSendAndUpdateTxs(request);
   }
@@ -3135,7 +3135,7 @@ public abstract class TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_RELAYS && TEST_NOTIFICATIONS && !LITE_MODE);
     MoneroSendRequest request = new MoneroSendRequest(0, wallet.getPrimaryAddress(), TestUtils.MAX_FEE);
     request.setAccountIndex(0);
-    request.setUnlockTime(3);
+    request.setUnlockTime(3l);
     request.setCanSplit(true);
     testSendAndUpdateTxs(request);
   }
@@ -3145,7 +3145,7 @@ public abstract class TestMoneroWalletCommon {
   public void testUpdateLockedDifferentAccounts() {
     org.junit.Assume.assumeTrue(TEST_RELAYS && TEST_NOTIFICATIONS && !LITE_MODE);
     MoneroSendRequest request = new MoneroSendRequest(0, wallet.getSubaddress(1, 0).getAddress(), TestUtils.MAX_FEE);
-    request.setUnlockTime(3);
+    request.setUnlockTime(3l);
     request.setCanSplit(false);
     testSendAndUpdateTxs(request);
   }
@@ -3156,7 +3156,7 @@ public abstract class TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_RELAYS && TEST_NOTIFICATIONS && !LITE_MODE);
     MoneroSendRequest request = new MoneroSendRequest(0, wallet.getSubaddress(1, 0).getAddress(), TestUtils.MAX_FEE);
     request.setAccountIndex(0);
-    request.setUnlockTime(3);
+    request.setUnlockTime(3l);
     testSendAndUpdateTxs(request);
   }
   
@@ -4174,7 +4174,7 @@ public abstract class TestMoneroWalletCommon {
       assert(check.getNumConfirmations() >= 0);
       assertNotNull(check.getInTxPool());
       TestUtils.testUnsignedBigInteger(check.getReceivedAmount());
-      if (check.getInTxPool()) assertEquals(0, (int) check.getNumConfirmations());
+      if (check.getInTxPool()) assertEquals(0, (long) check.getNumConfirmations());
       else assertTrue(check.getNumConfirmations() > 0); // TODO (monero-wall-rpc) this fails (confirmations is 0) for (at least one) transaction that has 1 confirmation on testCheckTxKey()
     } else {
       assertNull(check.getInTxPool());

@@ -17,7 +17,7 @@ public abstract class MoneroTransfer {
   private MoneroTxWallet tx;
   private BigInteger amount;
   private Integer accountIndex;
-  private Integer numSuggestedConfirmations;
+  private Long numSuggestedConfirmations;
   
   public MoneroTransfer() {
     // nothing to initialize
@@ -75,11 +75,11 @@ public abstract class MoneroTransfer {
    * 
    * @return Integer is the number of confirmations before it's not worth rewriting the chain
    */
-  public Integer getNumSuggestedConfirmations() {
+  public Long getNumSuggestedConfirmations() {
     return numSuggestedConfirmations;
   }
   
-  public MoneroTransfer setNumSuggestedConfirmations(Integer numSuggestedConfirmations) {
+  public MoneroTransfer setNumSuggestedConfirmations(Long numSuggestedConfirmations) {
     this.numSuggestedConfirmations = numSuggestedConfirmations;
     return this;
   }
