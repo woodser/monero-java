@@ -2650,6 +2650,7 @@ public abstract class TestMoneroWalletCommon {
       TestContext ctx = new TestContext();
       ctx.wallet = wallet;
       ctx.sendRequest = request;
+      ctx.sendRequest.setCanSplit(false);
       ctx.isSendResponse = true;
       ctx.isSweepResponse = true;
       ctx.isSweepOutputResponse = true;
