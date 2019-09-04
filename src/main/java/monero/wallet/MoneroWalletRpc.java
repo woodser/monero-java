@@ -343,6 +343,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   @Override
+  public void stopSyncing() {
+    throw new MoneroException("Monero Wallet RPC does not support the ability to stop syncing");
+  }
+  
+  @Override
   public void rescanSpent() {
     rpc.sendJsonRequest("rescan_spent");
   }

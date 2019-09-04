@@ -542,9 +542,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
   }
   
-  /**
-   * Stop the asynchronous thread to continuously synchronize the wallet with the daemon.
-   */
   public void stopSyncing() {
     assertNotClosed();
     try {

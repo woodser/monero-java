@@ -203,6 +203,11 @@ public interface MoneroWallet {
   public void startSyncing();
   
   /**
+   * Stop the asynchronous thread to continuously synchronize the wallet with the daemon.
+   */
+  public void stopSyncing();
+  
+  /**
    * Rescan the blockchain for spent outputs.
    *
    * Note: this can only be called with a trusted daemon.
