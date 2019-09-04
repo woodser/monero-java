@@ -9,11 +9,11 @@ public class MoneroDaemonConnection {
   
   private MoneroDaemonPeer peer;
   private String id;
-  private Integer avgDownload;
-  private Integer avgUpload;
-  private Integer currentDownload;
-  private Integer currentUpload;
-  private Integer height;
+  private Long avgDownload;
+  private Long avgUpload;
+  private Long currentDownload;
+  private Long currentUpload;
+  private Long height;
   private Boolean isIncoming;
   private Long liveTime;
   private Boolean isLocalIp;
@@ -41,43 +41,43 @@ public class MoneroDaemonConnection {
     this.id = id;
   }
   
-  public Integer getAvgDownload() {
+  public Long getAvgDownload() {
     return avgDownload;
   }
   
-  public void setAvgDownload(Integer avgDownload) {
+  public void setAvgDownload(Long avgDownload) {
     this.avgDownload = avgDownload;
   }
   
-  public Integer getAvgUpload() {
+  public Long getAvgUpload() {
     return avgUpload;
   }
   
-  public void setAvgUpload(Integer avgUpload) {
+  public void setAvgUpload(Long avgUpload) {
     this.avgUpload = avgUpload;
   }
   
-  public Integer getCurrentDownload() {
+  public Long getCurrentDownload() {
     return currentDownload;
   }
   
-  public void setCurrentDownload(Integer currentDownload) {
+  public void setCurrentDownload(Long currentDownload) {
     this.currentDownload = currentDownload;
   }
   
-  public Integer getCurrentUpload() {
+  public Long getCurrentUpload() {
     return currentUpload;
   }
   
-  public void setCurrentUpload(Integer currentUpload) {
+  public void setCurrentUpload(Long currentUpload) {
     this.currentUpload = currentUpload;
   }
   
-  public Integer getHeight() {
+  public Long getHeight() {
     return height;
   }
   
-  public void setHeight(Integer height) {
+  public void setHeight(Long height) {
     this.height = height;
   }
   

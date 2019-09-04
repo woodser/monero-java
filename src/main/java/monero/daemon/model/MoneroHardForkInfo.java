@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class MoneroHardForkInfo {
 
-  private Integer earliestHeight;
+  private Long earliestHeight;
   private Boolean isEnabled;
   private Integer state;
   private Integer threshold;
@@ -16,11 +16,11 @@ public class MoneroHardForkInfo {
   private Integer window;
   private Integer voting;
   
-  public Integer getEarliestHeight() {
+  public Long getEarliestHeight() {
     return earliestHeight;
   }
   
-  public void setEarliestHeight(Integer earliestHeight) {
+  public void setEarliestHeight(Long earliestHeight) {
     this.earliestHeight = earliestHeight;
   }
   

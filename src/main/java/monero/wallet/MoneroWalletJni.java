@@ -1461,7 +1461,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       for (MoneroWalletListenerI listener : listeners) listener.onNewBlock(height);
     }
     
-    public void onOutputReceived(long height, String txId, String amountStr, int accountIdx, int subaddressIdx, int version, int unlockTime) {
+    public void onOutputReceived(long height, String txId, String amountStr, int accountIdx, int subaddressIdx, int version, long unlockTime) {
       
       // build received output
       MoneroOutputWallet output = new MoneroOutputWallet();

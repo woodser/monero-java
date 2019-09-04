@@ -1678,7 +1678,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // initialize remaining known fields
     for (MoneroTxWallet tx : txSet.getTxs()) {
       tx.setIsConfirmed(false);
-      tx.setNumConfirmations(0);
+      tx.setNumConfirmations(0l);
       tx.setInTxPool(Boolean.TRUE.equals(request.getDoNotRelay()) ? false : true);
       tx.setDoNotRelay(Boolean.TRUE.equals(request.getDoNotRelay()) ? true : false);
       tx.setIsRelayed(!tx.getDoNotRelay());
@@ -1692,7 +1692,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       transfer.setDestinations(Arrays.asList(destination));
       tx.setOutgoingTransfer(transfer);
       tx.setPaymentId(request.getPaymentId());
-      if (tx.getUnlockTime() == null) tx.setUnlockTime(request.getUnlockTime() == null ? 0 : request.getUnlockTime());
+      if (tx.getUnlockTime() == null) tx.setUnlockTime(request.getUnlockTime() == null ? 0l : request.getUnlockTime());
       if (!tx.getDoNotRelay()) {
         if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
         if (tx.isDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
@@ -1747,7 +1747,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   private static MoneroTxWallet initSentTxWallet(MoneroSendRequest request, MoneroTxWallet tx) {
     if (tx == null) tx = new MoneroTxWallet();
     tx.setIsConfirmed(false);
-    tx.setNumConfirmations(0);
+    tx.setNumConfirmations(0l);
     tx.setInTxPool(Boolean.TRUE.equals(request.getDoNotRelay()) ? false : true);
     tx.setDoNotRelay(Boolean.TRUE.equals(request.getDoNotRelay()) ? true : false);
     tx.setIsRelayed(!Boolean.TRUE.equals(tx.getDoNotRelay()));
@@ -1761,7 +1761,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     transfer.setDestinations(destCopies);
     tx.setOutgoingTransfer(transfer);
     tx.setPaymentId(request.getPaymentId());
-    if (tx.getUnlockTime() == null) tx.setUnlockTime(request.getUnlockTime() == null ? 0 : request.getUnlockTime());
+    if (tx.getUnlockTime() == null) tx.setUnlockTime(request.getUnlockTime() == null ? 0l : request.getUnlockTime());
     if (!Boolean.TRUE.equals(tx.getDoNotRelay())) {
       if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
       if (tx.isDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
@@ -1899,8 +1899,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("note")) { if (!"".equals(val)) tx.setNote((String) val); }
       else if (key.equals("tx_key")) tx.setKey((String) val);
       else if (key.equals("type")) { } // type already handled
-      else if (key.equals("tx_size")) tx.setSize(((BigInteger) val).intValue());
-      else if (key.equals("unlock_time")) tx.setUnlockTime(((BigInteger) val).intValue());
+      else if (key.equals("tx_size")) tx.setSize(((BigInteger) val).longValue());
+      else if (key.equals("unlock_time")) tx.setUnlockTime(((BigInteger) val).longValue());
       else if (key.equals("tx_blob")) tx.setFullHex((String) val);
       else if (key.equals("tx_metadata")) tx.setMetadata((String) val);
       else if (key.equals("double_spend_seen")) tx.setIsDoubleSpendSeen((Boolean) val);
@@ -1919,8 +1919,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
       }
       else if (key.equals("confirmations")) {
-        if (!tx.isConfirmed()) tx.setNumConfirmations(0);
-        else tx.setNumConfirmations(((BigInteger) val).intValue());
+        if (!tx.isConfirmed()) tx.setNumConfirmations(0l);
+        else tx.setNumConfirmations(((BigInteger) val).longValue());
       }
       else if (key.equals("suggested_confirmations_threshold")) {
         if (transfer == null) transfer = (isOutgoing ? new MoneroOutgoingTransfer() : new MoneroIncomingTransfer()).setTx(tx);

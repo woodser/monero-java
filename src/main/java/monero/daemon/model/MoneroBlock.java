@@ -239,7 +239,7 @@ public class MoneroBlock extends MoneroBlockHeader {
   }
   
   @Override
-  public MoneroBlock setNonce(Long nonce) {
+  public MoneroBlock setNonce(Integer nonce) {
     super.setNonce(nonce);
     return this;
   }

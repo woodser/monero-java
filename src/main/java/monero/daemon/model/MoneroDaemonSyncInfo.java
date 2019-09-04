@@ -7,18 +7,18 @@ import java.util.List;
  */
 public class MoneroDaemonSyncInfo {
 
-  private Integer height;
+  private Long height;
   private List<MoneroDaemonConnection> connections;
   private List<MoneroDaemonConnectionSpan> spans;
-  private Integer targetHeight;
+  private Long targetHeight;
   private Integer nextNeededPruningSeed;
   private String overview;
   
-  public Integer getHeight() {
+  public Long getHeight() {
     return height;
   }
   
-  public void setHeight(Integer height) {
+  public void setHeight(Long height) {
     this.height = height;
   }
   
@@ -38,11 +38,11 @@ public class MoneroDaemonSyncInfo {
     this.spans = spans;
   }
   
-  public Integer getTargetHeight() {
+  public Long getTargetHeight() {
     return targetHeight;
   }
   
-  public void setTargetHeight(Integer targetHeight) {
+  public void setTargetHeight(Long targetHeight) {
     this.targetHeight = targetHeight;
   }
   

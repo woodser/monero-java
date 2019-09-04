@@ -11,7 +11,7 @@ public class MoneroOutputDistributionEntry {
   private BigInteger amount;
   private Integer base;
   private List<Integer> distribution;
-  private Integer startHeight;
+  private Long startHeight;
   
   public BigInteger getAmount() {
     return amount;
@@ -37,11 +37,11 @@ public class MoneroOutputDistributionEntry {
     this.distribution = distribution;
   }
   
-  public Integer getStartHeight() {
+  public Long getStartHeight() {
     return startHeight;
   }
   
-  public void setStartHeight(Integer startHeight) {
+  public void setStartHeight(Long startHeight) {
     this.startHeight = startHeight;
   }
 }

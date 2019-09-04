@@ -1025,7 +1025,7 @@ public class TestMoneroDaemonRpc {
       MoneroMiningStatus status = daemon.getMiningStatus();
       assertEquals(false, status.isActive());
       assertNull(status.getAddress());
-      assertEquals(0, (int) status.getSpeed());
+      assertEquals(0, (long) status.getSpeed());
       assertEquals(0, (int) status.getNumThreads());
       assertNull(status.isBackground());
       
@@ -1465,7 +1465,7 @@ public class TestMoneroDaemonRpc {
       assertEquals(null, tx.getNumConfirmations()); // client must compute
     } else {
       assertEquals(null, tx.getBlock());
-      assertEquals(0, (int) tx.getNumConfirmations());
+      assertEquals(0, (long) tx.getNumConfirmations());
     }
     
     // test in tx pool
@@ -1709,7 +1709,7 @@ public class TestMoneroDaemonRpc {
       assertNull(stats.getBytesMax());
       assertNull(stats.getBytesMed());
       assertNull(stats.getBytesMin());
-      assertEquals(0, (int) stats.getBytesTotal());
+      assertEquals(0, (long) stats.getBytesTotal());
       assertNull(stats.getHisto98pc());
       assertNull(stats.getOldestTimestamp());
       assertEquals(0, (int) stats.getNum10m());
