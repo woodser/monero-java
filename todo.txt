@@ -1,13 +1,9 @@
 HIGH
+sweepOutput(string keyImage, string address), send(accountIdx, amount, address), createTxs, sendSplit(...)? probably
 model:
     sample update and color keywords
     show mappings of types, some params can be optional if it makes sense, refer to reference implementations for specifics, generally, null means all or auto
    	add page numbers
-
-sweepOutput(string keyImage, string address), send(accountIdx, amount, address), createTxs, sendSplit(...)? probably
-move account tags lower
-cpp sample code
-
 update javascript library
 regenerate docs
 open monero core issues
