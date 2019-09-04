@@ -751,7 +751,7 @@ public abstract class TestMoneroWalletCommon {
     
     // get txs with output query
     MoneroOutputQuery outputQuery = new MoneroOutputQuery().setIsSpent(false).setAccountIndex(1).setSubaddressIndex(2);
-    txs = wallet.getTxs(new MoneroTxQuery().setIncludeOutputs(true).setOutputQuery(outputQuery));
+    txs = wallet.getTxs(new MoneroTxQuery().setOutputQuery(outputQuery));
     assertFalse(txs.isEmpty());
     for (MoneroTxWallet tx : txs) {
       assertFalse(tx.getVouts() == null || tx.getVouts().isEmpty());
