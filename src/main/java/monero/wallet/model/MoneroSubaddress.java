@@ -17,7 +17,7 @@ public class MoneroSubaddress {
   private String label;
   private BigInteger balance;
   private BigInteger unlockedBalance;
-  private Integer numUnspentOutputs;
+  private Long numUnspentOutputs;
   private Boolean isUsed;
   private Long numBlocksToUnlock;
   
@@ -83,11 +83,11 @@ public class MoneroSubaddress {
     return this;
   }
   
-  public Integer getNumUnspentOutputs() {
+  public Long getNumUnspentOutputs() {
     return numUnspentOutputs;
   }
   
-  public MoneroSubaddress setNumUnspentOutputs(Integer numUnspentOutputs) {
+  public MoneroSubaddress setNumUnspentOutputs(Long numUnspentOutputs) {
     this.numUnspentOutputs = numUnspentOutputs;
     return this;
   }
