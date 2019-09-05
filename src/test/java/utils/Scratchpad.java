@@ -79,38 +79,5 @@ public class Scratchpad {
 //      System.out.println(mnemonics.get(i));
 //      System.out.println(addresses.get(i));
 //    }
-    
-//    // create and fund 10 wallets
-//    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(walletJni);
-//    for (int i = 0; i < 10; i++) {
-//      
-//      // create wallet and create and collect subaddresses
-//      List<String> subaddresses = new ArrayList<String>();
-//      String path = TestUtils.TEST_WALLETS_DIR + "/funded_" + UUID.randomUUID().toString();
-//      MoneroWalletJni fundedWallet = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_PASSWORD, MoneroNetworkType.STAGENET);
-//      for (int accountIdx = 0; accountIdx < 3; accountIdx++) {
-//        fundedWallet.createAccount();
-//        for (int subaddressIdx = 0; subaddressIdx < 5; subaddressIdx++) {
-//          fundedWallet.createSubaddress(accountIdx);
-//          subaddresses.add(fundedWallet.getAddress(accountIdx, subaddressIdx));
-//        }
-//      }
-//      fundedWallet.close(true);
-//      
-//      // wait for unlocked funds
-//      while (walletJni.getUnlockedBalance(0).compareTo(TestUtils.MAX_FEE) < 0) {
-//        System.out.println("Waiting...");
-//        try { TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL); }
-//        catch (InterruptedException e) { throw new RuntimeException(e.getMessage()); }
-//      }
-//      
-//      // transfer funds to subaddresses
-//      List<MoneroDestination> destinations = new ArrayList<MoneroDestination>();
-//      for (String address : subaddresses) destinations.add(new MoneroDestination(address, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(2))));
-//      System.out.println("Transferring....");
-//      MoneroTxSet txSet = walletJni.sendSplit(new MoneroSendRequest().setDestinations(destinations).setAccountIndex(0));
-//      System.out.println("Tx set has " + txSet.getTxs().size() + " transactions");
-//      for (MoneroTxWallet tx : txSet.getTxs()) System.out.println(tx);
-//    }
   }
 }
