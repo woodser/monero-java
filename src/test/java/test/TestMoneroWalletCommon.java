@@ -3915,7 +3915,7 @@ public abstract class TestMoneroWalletCommon {
       assertEquals(request.getMixin(), tx.getMixin());
       assertEquals(request.getUnlockTime() != null ? request.getUnlockTime() : 0, (long) tx.getUnlockTime());
       assertNull(tx.getBlock());
-      if (Boolean.FALSE.equals(request.getCanSplit())) assertTrue(tx.getKey().length() > 0);
+      assertTrue(tx.getKey().length() > 0);
       assertNotNull(tx.getFullHex());
       assertTrue(tx.getFullHex().length() > 0);
       assertNotNull(tx.getMetadata());
