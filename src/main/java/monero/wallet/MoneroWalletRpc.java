@@ -975,7 +975,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("unlock_time", request.getUnlockTime());
     params.put("do_not_relay", request.getDoNotRelay());
     params.put("priority", request.getPriority() == null ? null : request.getPriority().ordinal());
-    params.put("get_tx_key", true);
+    params.put("get_tx_keys", true);
     params.put("get_tx_hex", true);
     params.put("get_tx_metadata", true);
     
