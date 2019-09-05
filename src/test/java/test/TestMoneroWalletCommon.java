@@ -3426,7 +3426,7 @@ public abstract class TestMoneroWalletCommon {
     List<MoneroAccount> accountsBalance = new ArrayList<MoneroAccount>();
     List<MoneroAccount> accountsUnlocked = new ArrayList<MoneroAccount>();
     for (MoneroAccount account : accounts) {
-      if (account.getIndex() == 0) continue;  // skip default default
+      if (account.getIndex() == 0) continue;  // skip default account
       if (account.getBalance().compareTo(TestUtils.MAX_FEE) > 0) accountsBalance.add(account);
       if (account.getUnlockedBalance().compareTo(TestUtils.MAX_FEE) > 0) accountsUnlocked.add(account);
     }
@@ -3463,7 +3463,7 @@ public abstract class TestMoneroWalletCommon {
     // test accounts after sweeping
     List<MoneroAccount> accountsAfter = wallet.getAccounts(true);
     assertEquals(accounts.size(), accountsAfter.size());
-    for (int i = 1; i < accounts.size(); i++) {
+    for (int i = 0; i < accounts.size(); i++) {
       MoneroAccount accountBefore = accounts.get(i);
       MoneroAccount accountAfter = accountsAfter.get(i);
       
