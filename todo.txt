@@ -1,7 +1,6 @@
 HIGH
-open monero core issues
 open js issue: release as node module
-open issue: investigate integration of this library into Bisq
+open monero core issues
 announce
 
 MEDIUM
