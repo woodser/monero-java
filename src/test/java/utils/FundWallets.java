@@ -19,7 +19,7 @@ import monero.wallet.model.MoneroTxSet;
 /**
  * Utility to fund test wallets.
  */
-public class WalletFunder {
+public class FundWallets {
   
   public static final int NUM_WALLETS = 10;
   public static final int NUM_ACCOUNTS = 5;
