@@ -975,9 +975,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("unlock_time", request.getUnlockTime());
     params.put("do_not_relay", request.getDoNotRelay());
     params.put("priority", request.getPriority() == null ? null : request.getPriority().ordinal());
-    params.put("get_tx_keys", true);
     params.put("get_tx_hex", true);
     params.put("get_tx_metadata", true);
+    if (request.getCanSplit()) params.put("get_tx_keys", true); // param to get tx key(s) depends if split
+    else params.put("get_tx_key", true);
     
     // send request
     Map<String, Object> resp = rpc.sendJsonRequest(request.getCanSplit() ? "transfer_split" : "transfer", params);
