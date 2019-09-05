@@ -433,11 +433,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     
     // run common tests
     super.testTxWallet(tx, ctx);
-    
-    // test tx results from send or relay
-    if (Boolean.TRUE.equals(ctx.isSendResponse)) {
-      if (!Boolean.FALSE.equals(ctx.sendRequest.getCanSplit())) assertNull(tx.getKey());  // TODO monero-wallet-rpc: tx key is not returned from transfer_split
-    }
   }
   
   protected void testInvalidTxIdException(MoneroException e) {
