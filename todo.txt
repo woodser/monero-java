@@ -9,6 +9,7 @@ open issue: investigate integration of this library into Bisq
 announce
 
 MEDIUM
+automate sweep tests by funding wallets, waiting, then testing, rather than manually running funded wallets
 compare by merging when appropriate
 cleanup: order all methods and tests the same, even overrides
 should sweepUnlocked() sweep all accounts if not specified?
