@@ -3,9 +3,8 @@ model:
     sample update and color keywords
     show mappings of types, some params can be optional if it makes sense, refer to reference implementations for specifics, generally, null means all or auto
    	add page numbers
-update javascript library
-regenerate docs
 open monero core issues
+open js issue: release as node module
 open issue: investigate integration of this library into Bisq
 announce
 
