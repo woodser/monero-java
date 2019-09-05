@@ -1464,11 +1464,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // run common tests
     super.testTxWallet(tx, ctx);
-    
-    // test tx results from send or relay
-    if (Boolean.TRUE.equals(ctx.isSendResponse)) {
-      assertNotNull(tx.getKey());
-    }
   }
   
   // possible configuration: on chain xor local wallet data ("strict"), txs ordered same way? TBD
