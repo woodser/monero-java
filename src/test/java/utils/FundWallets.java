@@ -26,11 +26,19 @@ public class FundWallets {
   public static final int NUM_SUBADDRESSES_PER_ACCOUNT = 3; // num accounts x num subaddresses must be <= 16 per protocol restriction // TODO: could be made 
   
   public static void main(String[] args) {
-    fundWallets(TestUtils.getWalletJni());
+    fundWallets(TestUtils.getWalletJni(), NUM_WALLETS, NUM_ACCOUNTS, NUM_SUBADDRESSES_PER_ACCOUNT);
   }
   
-  public static void fundWallets(MoneroWallet wallet) {
-    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
+  /**
+   * Utility to create and fund test wallets.
+   * 
+   * @param srcWallet is the source wallet to fund test wallets with
+   * @param numWallets is the number of wallets to fund
+   * @param numAccounts is the number of accounts to fund in each test wallet
+   * @param numSubaddressesPerAccount is the number of subaddresses to fund in each account
+   */
+  public static void fundWallets(MoneroWallet srcWallet, int numWallets, int numAccounts, int numSubaddressesPerAccount) {
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(srcWallet);
     for (int i = 0; i < NUM_WALLETS; i++) {
       
       // create wallet and create and collect subaddresses
@@ -47,7 +55,7 @@ public class FundWallets {
       fundedWallet.close(true);
       
       // wait for unlocked funds
-      while (wallet.getUnlockedBalance(0).compareTo(TestUtils.MAX_FEE) < 0) {
+      while (srcWallet.getUnlockedBalance(0).compareTo(TestUtils.MAX_FEE) < 0) {
         System.out.println("Waiting...");
         try { TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL); }
         catch (InterruptedException e) { throw new RuntimeException(e.getMessage()); }
@@ -57,7 +65,7 @@ public class FundWallets {
       List<MoneroDestination> destinations = new ArrayList<MoneroDestination>();
       for (String address : subaddresses) destinations.add(new MoneroDestination(address, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(2))));
       System.out.println("Transferring....");
-      MoneroTxSet txSet = wallet.sendSplit(new MoneroSendRequest().setDestinations(destinations).setAccountIndex(0));
+      MoneroTxSet txSet = srcWallet.sendSplit(new MoneroSendRequest().setDestinations(destinations).setAccountIndex(0));
       System.out.println("Tx set has " + txSet.getTxs().size() + " transactions");
       assertFalse(txSet.getTxs().isEmpty());
       //for (MoneroTxWallet tx : txSet.getTxs()) System.out.println(tx);
