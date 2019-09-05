@@ -1658,6 +1658,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (request.getSubaddressIndices().size() == 0) throw new MoneroException("No subaddresses to sweep from");
     
     // common request params
+    boolean doNotRelay = request.getDoNotRelay() != null && request.getDoNotRelay();
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("account_index", request.getAccountIndex());
     params.put("subaddr_indices", request.getSubaddressIndices());
@@ -1667,7 +1668,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("ring_size", request.getRingSize());
     params.put("unlock_time", request.getUnlockTime());
     params.put("payment_id", request.getPaymentId());
-    params.put("do_not_relay", request.getDoNotRelay());
+    params.put("do_not_relay", doNotRelay);
     params.put("below_amount", request.getBelowAmount());
     params.put("get_tx_keys", true);
     params.put("get_tx_hex", true);
@@ -1684,9 +1685,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     for (MoneroTxWallet tx : txSet.getTxs()) {
       tx.setIsConfirmed(false);
       tx.setNumConfirmations(0l);
-      tx.setInTxPool(Boolean.TRUE.equals(request.getDoNotRelay()) ? false : true);
-      tx.setDoNotRelay(Boolean.TRUE.equals(request.getDoNotRelay()) ? true : false);
-      tx.setIsRelayed(!tx.getDoNotRelay());
+      tx.setDoNotRelay(doNotRelay);
+      tx.setInTxPool(!doNotRelay);
+      tx.setIsRelayed(!doNotRelay);
       tx.setIsMinerTx(false);
       tx.setIsFailed(false);
       tx.setMixin(request.getMixin());
