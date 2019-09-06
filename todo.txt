@@ -88,11 +88,11 @@ User experience: let users spend low confirmation funds without being locked for
 wallet2 does not fully sync transactions in the pool: https://github.com/monero-project/monero/issues/5811
 wallet2 import_key_images erases incoming transfers: https://github.com/monero-project/monero/issues/5812
 wallet2 does not report incoming transfers with outgoing counterpart from same account (older): https://github.com/monero-project/monero/issues/4500
+monero-wallet-rpc on_transfer_split throw error if no transactions are created
+Separate wallet2 core wallet functionality from networking, persistence, and other application-specific dependencies
+Generalize multisig wallet creation to 1) prepare, 2) make, 3) exchange for M-N times
 
 ISSUES TO OPEN
-wallet2 refactor
-wallet rpc on_transfer_split should throw if no txs are created, same as how transfer throws if exactly one tx is not created
-generalize multisig wallet creation to 1) prepare, 2) make, 3) for M-N times.  This issue proposes deprecating finalize_multisig and replacing it with exchange_multisig_keys
 peer.getLastSeenTimestamp() occasionally returns -1, -4, -7, -8, etc
 prove reserves still not working on 0 conf
 wallet rpc restore from mnemonic sometimes has height or wallet txs as if already synced
