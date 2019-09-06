@@ -1,9 +1,4 @@
 HIGH
-open js issue: release as node module
-open monero core issues
-announce
-
-MEDIUM
 automate sweep tests by funding wallets, waiting, then testing, rather than manually running funded wallets
 compare by merging when appropriate
 cleanup: order all methods and tests the same, even overrides
