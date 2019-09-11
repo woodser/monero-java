@@ -1,6 +1,7 @@
 HIGH
 automate sweep tests by funding wallets, waiting, then testing, rather than manually running funded wallets
 compare by merging when appropriate
+testSyncFromMnemonicFromStartHeight() onDone() assertion error when daemon is actively syncing blocks
 cleanup: order all methods and tests the same, even overrides
 should sweepUnlocked() sweep all accounts if not specified?
 prevent common occasional test failures caused by testing equality instead of mergeability (e.g. tx num confirmations increasing is expected)
