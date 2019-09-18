@@ -58,6 +58,11 @@
 		</dependency>
 
 	</dependencies>
+	<scm>
+	  <connection>scm:git:git://github.com/monero-ecosystem/monero-java.git</connection>
+	  <developerConnection>scm:git:ssh://github.com/monero-ecosystem/monero-java.git</developerConnection>
+	  <url>http://github.com/monero-ecosystem/monero-java/tree/master</url>
+	</scm>
 	<licenses>
 	  <license>
 	    <name>MIT License</name>
