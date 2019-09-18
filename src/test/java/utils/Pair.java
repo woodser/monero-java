@@ -1,4 +1,4 @@
-package common.types;
+package utils;
 
 /**
  * Generic parameterized pair.
