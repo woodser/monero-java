@@ -23,7 +23,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import common.types.HttpException;
 import common.utils.JsonUtils;
 import common.utils.StreamUtils;
 import monero.utils.MoneroCppUtils;
@@ -133,13 +132,11 @@ public class MoneroRpcConnection {
       // check RPC response for errors
       validateRpcResponse(respMap, method, params);
       return respMap;
-    } catch (HttpException e1) {
+    } catch (MoneroRpcException e1) {
       throw e1;
-    } catch (MoneroRpcException e2) {
-      throw e2;
-    } catch (Exception e3) {
+    } catch (Exception e2) {
       //e3.printStackTrace();
-      throw new MoneroException(e3);
+      throw new MoneroException(e2);
     }
   }
   
@@ -189,13 +186,11 @@ public class MoneroRpcConnection {
       // check RPC response for errors
       validateRpcResponse(respMap, path, params);
       return respMap;
-    } catch (HttpException e1) {
+    } catch (MoneroRpcException e1) {
       throw e1;
-    } catch (MoneroRpcException e2) {
-      throw e2;
-    } catch (Exception e3) {
-      e3.printStackTrace();
-      throw new MoneroException(e3);
+    } catch (Exception e2) {
+      e2.printStackTrace();
+      throw new MoneroException(e2);
     }
   }
   
@@ -232,13 +227,11 @@ public class MoneroRpcConnection {
 //    let resp = await this._throttledRequest(opts);
 //    if (resp.error) throw new MoneroRpcError(resp.error.code, resp.error.message, opts);
 //    return new Uint8Array(resp, 0, resp.length);
-    } catch (HttpException e1) {
+    } catch (MoneroRpcException e1) {
       throw e1;
-    } catch (MoneroRpcException e2) {
-      throw e2;
-    } catch (Exception e3) {
-      e3.printStackTrace();
-      throw new MoneroException(e3);
+    } catch (Exception e2) {
+      e2.printStackTrace();
+      throw new MoneroException(e2);
     }
   }
   
@@ -281,7 +274,7 @@ public class MoneroRpcConnection {
       } catch (Exception e) {
         // could not get content
       }
-      throw new HttpException(code, code + " " + resp.getStatusLine().getReasonPhrase() + (content == null || content.isEmpty() ? "" : (": " + content)));
+      throw new MoneroRpcException(code + " " + resp.getStatusLine().getReasonPhrase() + (content == null || content.isEmpty() ? "" : (": " + content)), code, null, null);
     }
   }
 
