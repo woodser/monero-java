@@ -171,6 +171,8 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 
 These libraries conform to the same [API specification](http://moneroecosystem.org/monero-java/monero-spec.pdf).
 
+[Java reference implementation (lite version)](https://github.com/woodser/monero-java-lite)
+
 [JavaScript reference implementation](https://github.com/monero-ecosystem/monero-javascript)
 
 [C++ reference implementation](https://github.com/woodser/monero-cpp-library)
