@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import common.utils.JsonUtils;
-import common.utils.StreamUtils;
 import monero.utils.MoneroCppUtils;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
@@ -125,7 +124,7 @@ public class MoneroRpcConnection {
       validateHttpResponse(resp);
 
       // deserialize response
-      Map<String, Object> respMap = JsonUtils.toMap(MAPPER, StreamUtils.streamToString(resp.getEntity().getContent()));
+      Map<String, Object> respMap = JsonUtils.toMap(MAPPER, EntityUtils.toString(resp.getEntity(), "UTF-8"));
       LOGGER.debug("Received response to method '" + method + "': " + JsonUtils.serialize(respMap));
       EntityUtils.consume(resp.getEntity());
 
@@ -179,7 +178,7 @@ public class MoneroRpcConnection {
       validateHttpResponse(resp);
       
       // deserialize response
-      Map<String, Object> respMap = JsonUtils.toMap(MAPPER, StreamUtils.streamToString(resp.getEntity().getContent()));
+      Map<String, Object> respMap = JsonUtils.toMap(MAPPER, EntityUtils.toString(resp.getEntity(), "UTF-8"));
       LOGGER.debug("Received response to path '" + path + "': " + JsonUtils.serialize(respMap));
       EntityUtils.consume(resp.getEntity());
 
@@ -270,7 +269,7 @@ public class MoneroRpcConnection {
     if (code < 200 || code > 299) {
       String content = null;
       try {
-        content = StreamUtils.streamToString(resp.getEntity().getContent());
+        content = EntityUtils.toString(resp.getEntity(), "UTF-8");
       } catch (Exception e) {
         // could not get content
       }

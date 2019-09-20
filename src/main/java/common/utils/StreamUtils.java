@@ -1,10 +1,7 @@
 package common.utils;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-
-import org.apache.commons.io.IOUtils;
 
 /**
  * Collection of utilities for working with streams.
@@ -12,19 +9,6 @@ import org.apache.commons.io.IOUtils;
  * @author woodser
  */
 public class StreamUtils {
-
-  /**
-   * Converts an input stream to a byte array.
-   * 
-   * @param is is the input stream
-   * @return byte[] are the contents of the input stream as a byte array
-   * @throws IOException 
-   */
-  public static byte[] streamToBytes(InputStream is) throws IOException {
-    byte[] bytes = IOUtils.toByteArray(is);
-    is.close();
-    return bytes;
-  }
   
   /**
    * Converts a byte array to an input stream.
@@ -34,16 +18,5 @@ public class StreamUtils {
    */
   public static InputStream bytesToStream(byte[] bytes) {
     return new ByteArrayInputStream(bytes);
-  }
-  
-  /**
-   * Converts an input stream to a string.
-   * 
-   * @param is is the input stream to convert to a string
-   * @return String is the input stream converted to a string
-   * @throws IOException 
-   */
-  public static String streamToString(InputStream is) throws IOException {
-    return new String(streamToBytes(is));
   }
 }
