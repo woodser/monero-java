@@ -33,8 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -84,7 +83,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   // logger
-  private static final Logger LOGGER = Logger.getLogger(MoneroWalletJni.class);
+  private static final Logger LOGGER = Logger.getLogger(MoneroWalletJni.class.getName());
   
   // instance variables
   private long jniWalletHandle;                 // memory address of the wallet in c++; this variable is read directly by name in c++
@@ -731,7 +730,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       for (String txId : query.getTxIds()) txsSorted.add(txMap.get(txId));
       txs = txsSorted;
     }
-    LOGGER.debug("getTxs() returning " + txs.size() + " transactions");
+    LOGGER.fine("getTxs() returning " + txs.size() + " transactions");
     return txs;
   }
 
@@ -877,8 +876,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public MoneroTxSet sendSplit(MoneroSendRequest request) {
     assertNotClosed();
-    LOGGER.debug("java sendSplit(request)");
-    LOGGER.debug("Send request: " + JsonUtils.serialize(request));
+    LOGGER.fine("java sendSplit(request)");
+    LOGGER.fine("Send request: " + JsonUtils.serialize(request));
     
     // validate request
     if (request == null) throw new MoneroException("Send request cannot be null");
@@ -887,15 +886,15 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     String txSetJson;
     try {
       txSetJson = sendSplitJni(JsonUtils.serialize(request));
-      LOGGER.debug("Received sendSplit() response from JNI: " + txSetJson.substring(0, Math.min(5000, txSetJson.length())) + "...");
+      LOGGER.fine("Received sendSplit() response from JNI: " + txSetJson.substring(0, Math.min(5000, txSetJson.length())) + "...");
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
     
     // deserialize and return tx set
     MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
-    if (txSet.getTxs() == null) LOGGER.debug("Created tx set without txs: " + JsonUtils.serialize(txSet) + " in sendSplit()");
-    else LOGGER.debug("Created " + txSet.getTxs().size() + " transaction(s) in last send request");
+    if (txSet.getTxs() == null) LOGGER.info("Created tx set without txs: " + JsonUtils.serialize(txSet) + " in sendSplit()");
+    else LOGGER.fine("Created " + txSet.getTxs().size() + " transaction(s) in last send request");
     return txSet;
   }
   
@@ -910,7 +909,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     String txSetsJson;
     try {
       txSetsJson = sweepUnlockedJni(JsonUtils.serialize(request));
-      LOGGER.debug("Received sweepUnlocked() response from JNI: " + txSetsJson.substring(0, Math.min(5000, txSetsJson.length())) + "...");
+      LOGGER.fine("Received sweepUnlocked() response from JNI: " + txSetsJson.substring(0, Math.min(5000, txSetsJson.length())) + "...");
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }

@@ -4,10 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
-
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroNetworkType;
@@ -61,9 +62,14 @@ public class TestUtils {
   public static final long FIRST_RECEIVE_HEIGHT = 383338; // NOTE: this value MUST be the height of the wallet's first tx for tests
   
   // logger configuration
-  public static final Logger LOGGER = Logger.getLogger(TestUtils.class);
+  public static final Logger LOGGER = Logger.getLogger(TestUtils.class.getName());
   static {
-    PropertyConfigurator.configure("src/main/resources/log4j.properties");
+    try {
+      InputStream is = TestUtils.class.getClassLoader().getResourceAsStream("logger.properties");
+      LogManager.getLogManager().readConfiguration(is);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
   
   // used to track which wallets are in sync with pool so associated txs in the pool do not need to be waited on
