@@ -40,8 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
@@ -87,7 +86,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   // static
   private static final int ERROR_CODE_INVALID_PAYMENT_ID = -5;  // invalid payment id error code
-  private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class); // logger
+  private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class.getName()); // logger
   private static final TxHeightComparator TX_HEIGHT_COMPARATOR = new TxHeightComparator();
   
   public MoneroWalletRpc(URI uri) {
@@ -1720,7 +1719,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("base_address")) account.setPrimaryAddress((String) val);
       else if (key.equals("tag")) account.setTag((String) val);
       else if (key.equals("label")) { } // label belongs to first subaddress
-      else LOGGER.warn("WARNING: ignoring unexpected account field: " + key + ": " + val);
+      else LOGGER.warning("WARNING: ignoring unexpected account field: " + key + ": " + val);
     }
     if ("".equals(account.getTag())) account.setTag(null);
     return account;
@@ -1739,7 +1738,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("label")) { if (!"".equals(val)) subaddress.setLabel((String) val); }
       else if (key.equals("used")) subaddress.setIsUsed((Boolean) val);
       else if (key.equals("blocks_to_unlock")) subaddress.setNumBlocksToUnlock(((BigInteger) val).longValue());
-      else LOGGER.warn("WARNING: ignoring unexpected subaddress field: " + key + ": " + val);
+      else LOGGER.warning("WARNING: ignoring unexpected subaddress field: " + key + ": " + val);
     }
     return subaddress;
   }
@@ -1977,7 +1976,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
       else if (key.equals("multisig_txset") && val != null) {}  // handled elsewhere; this method only builds a tx wallet
       else if (key.equals("unsigned_txset") && val != null) {}  // handled elsewhere; this method only builds a tx wallet
-      else LOGGER.warn("WARNING: ignoring unexpected transaction field: " + key + ": " + val);
+      else LOGGER.warning("WARNING: ignoring unexpected transaction field: " + key + ": " + val);
     }
     
     // link block and tx
@@ -2026,7 +2025,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         long height = ((BigInteger) val).longValue();
         tx.setBlock(new MoneroBlock().setHeight(height).setTxs(tx));
       }
-      else LOGGER.warn("WARNING: ignoring unexpected transaction field with vout: " + key + ": " + val);
+      else LOGGER.warning("WARNING: ignoring unexpected transaction field with vout: " + key + ": " + val);
     }
     
     // initialize tx with vout
@@ -2122,7 +2121,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (!skipIfAbsent) {
         txMap.put(tx.getId(), tx);
       } else {
-        LOGGER.warn("WARNING: tx does not already exist");
+        LOGGER.warning("WARNING: tx does not already exist");
       }
     }
 

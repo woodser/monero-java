@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -17,7 +18,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -34,7 +34,7 @@ import monero.utils.MoneroUtils;
 public class MoneroRpcConnection {
 
   // logger
-  private static final Logger LOGGER = Logger.getLogger(MoneroRpcConnection.class);
+  private static final Logger LOGGER = Logger.getLogger(MoneroRpcConnection.class.getName());
 
   // custom mapper to deserialize integers to BigIntegers
   public static ObjectMapper MAPPER;
@@ -114,7 +114,7 @@ public class MoneroRpcConnection {
       body.put("id", "0");
       body.put("method", method);
       if (params != null) body.put("params", params);
-      LOGGER.debug("Sending json request with method '" + method + "' and body: " + JsonUtils.serialize(body));
+      LOGGER.fine("Sending json request with method '" + method + "' and body: " + JsonUtils.serialize(body));
 
       // send http request and validate response
       HttpPost post = new HttpPost(uri.toString() + "/json_rpc");
@@ -125,7 +125,7 @@ public class MoneroRpcConnection {
 
       // deserialize response
       Map<String, Object> respMap = JsonUtils.toMap(MAPPER, EntityUtils.toString(resp.getEntity(), "UTF-8"));
-      LOGGER.debug("Received response to method '" + method + "': " + JsonUtils.serialize(respMap));
+      LOGGER.fine("Received response to method '" + method + "': " + JsonUtils.serialize(respMap));
       EntityUtils.consume(resp.getEntity());
 
       // check RPC response for errors
@@ -171,7 +171,7 @@ public class MoneroRpcConnection {
         HttpEntity entity = new StringEntity(JsonUtils.serialize(params));
         post.setEntity(entity);
       }
-      LOGGER.debug("Sending path request with path '" + path + "' and params: " + JsonUtils.serialize(params));
+      LOGGER.fine("Sending path request with path '" + path + "' and params: " + JsonUtils.serialize(params));
       
       // send request and validate response
       HttpResponse resp = client.execute(post);
@@ -179,7 +179,7 @@ public class MoneroRpcConnection {
       
       // deserialize response
       Map<String, Object> respMap = JsonUtils.toMap(MAPPER, EntityUtils.toString(resp.getEntity(), "UTF-8"));
-      LOGGER.debug("Received response to path '" + path + "': " + JsonUtils.serialize(respMap));
+      LOGGER.fine("Received response to path '" + path + "': " + JsonUtils.serialize(respMap));
       EntityUtils.consume(resp.getEntity());
 
       // check RPC response for errors
@@ -213,7 +213,7 @@ public class MoneroRpcConnection {
         HttpEntity entity = new ByteArrayEntity(paramsBin);
         post.setEntity(entity);
       }
-      LOGGER.debug("Sending binary request with path '" + path + "' and params: " + JsonUtils.serialize(params));
+      LOGGER.fine("Sending binary request with path '" + path + "' and params: " + JsonUtils.serialize(params));
       
       // send request and validate response
       HttpResponse resp = client.execute(post);
