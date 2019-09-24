@@ -140,7 +140,7 @@ public class MoneroUtils {
 
     String decodedAddrStr = decodeToHexString(address);
     assertTrue(isValidAddressNetwork(decodedAddrStr, isIntegratedAddress, moneroNetworkType));
-    assertTrue(isValidAddressHash(decodedAddrStr, isIntegratedAddress));
+    assertTrue(isValidAddressHash(decodedAddrStr));
   }
   
   protected static boolean isValidAddressNetwork(String decodedAddrStr,
@@ -168,7 +168,7 @@ public class MoneroUtils {
     return match;
   }
     
-  protected static boolean isValidAddressHash(String decodedAddrStr, boolean isIntegratedAddress) {
+  protected static boolean isValidAddressHash(String decodedAddrStr) {
     String checksumCheck = decodedAddrStr.substring(decodedAddrStr.length() - 8);
     String withoutChecksumStr = decodedAddrStr.substring(0, decodedAddrStr.length() - 8);
     byte[] withoutChecksumBytes = hexToBin(withoutChecksumStr);
