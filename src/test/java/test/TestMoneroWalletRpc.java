@@ -727,6 +727,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testSetAttributes() {
     super.testSetAttributes();
   }
+  
+  @Override
+  public void testCreatePaymentUri() {
+    super.testCreatePaymentUri();
+  }
 
   @Override
   public void testMining() {
