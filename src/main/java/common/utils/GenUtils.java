@@ -14,7 +14,7 @@ public class GenUtils {
    * @param val is the boolean to assert as true
    */
   public static void assertTrue(boolean val) {
-    assert(val);
+    if (!val) throw new AssertionError("value asserted as true but was false");
   }
   
   /**
@@ -24,7 +24,7 @@ public class GenUtils {
    * @param val is the boolean to assert as true
    */
   public static void assertTrue(String failMsg, boolean val) {
-    if (!val) throw new RuntimeException(failMsg);
+    if (!val) throw new AssertionError(failMsg);
   }
   
   /**
@@ -33,7 +33,7 @@ public class GenUtils {
    * @param val is the boolean to assert as false
    */
   public static void assertFalse(boolean val) {
-    assert(!val);
+    if (val) throw new AssertionError("value asserted as false but was true");
   }
   
   /**
@@ -43,7 +43,7 @@ public class GenUtils {
    * @param val is the boolean to assert as false
    */
   public static void assertFalse(String failMsg, boolean val) {
-    if (val) throw new RuntimeException(failMsg);
+    if (val) throw new AssertionError(failMsg);
   }
   
   /**
@@ -52,7 +52,7 @@ public class GenUtils {
    * @param val is the value to assert as null
    */
   public static void assertNull(Object val) {
-    assert(val == null);
+    if (val != null) throw new AssertionError("value asserted as null but was not null");
   }
   
   /**
@@ -62,7 +62,7 @@ public class GenUtils {
    * @param val is the value to assert as null
    */
   public static void assertNull(String failMsg, Object val) {
-    if (val != null) throw new RuntimeException(failMsg);
+    if (val != null) throw new AssertionError(failMsg);
   }
   
   /**
@@ -71,7 +71,7 @@ public class GenUtils {
    * @param val is the value to assert as not null
    */
   public static void assertNotNull(Object val) {
-    assert(val != null);
+    if (val == null) throw new AssertionError("value asserted as not null but was null");
   }
   
   /**
@@ -81,7 +81,7 @@ public class GenUtils {
    * @param val is the value to assert as not null
    */
   public static void assertNotNull(String failMsg, Object val) {
-    if (val == null) throw new RuntimeException(failMsg);
+    if (val == null) throw new AssertionError(failMsg);
   }
   
   /**
@@ -107,7 +107,7 @@ public class GenUtils {
     try {
       assertEquals(val1, val2);
     } catch (Exception e) {
-      throw new RuntimeException(failMsg);
+      throw new AssertionError(failMsg);
     }
   }
   
@@ -133,7 +133,7 @@ public class GenUtils {
     try {
       assertNotEquals(val1, val2);
     } catch (Exception e) {
-      throw new RuntimeException(failMsg);
+      throw new AssertionError(failMsg);
     }
   }
   
