@@ -1,11 +1,10 @@
 package monero.wallet.model;
 
-import static org.junit.Assert.assertTrue;
-
 import java.math.BigInteger;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import common.utils.GenUtils;
 import monero.utils.MoneroUtils;
 
 /**
@@ -55,7 +54,7 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
   }
 
   public MoneroIncomingTransfer merge(MoneroTransfer transfer) {
-    assertTrue(transfer instanceof MoneroIncomingTransfer);
+    GenUtils.assertTrue(transfer instanceof MoneroIncomingTransfer);
     return merge((MoneroIncomingTransfer) transfer);
   }
   

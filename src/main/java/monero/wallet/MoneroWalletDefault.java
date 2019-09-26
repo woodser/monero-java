@@ -22,13 +22,12 @@
 
 package monero.wallet;
 
-import static org.junit.Assert.assertEquals;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import common.utils.GenUtils;
 import monero.utils.MoneroException;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -116,7 +115,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   public MoneroSubaddress getSubaddress(int accountIdx, int subaddressIdx) {
     List<MoneroSubaddress> subaddresses = getSubaddresses(accountIdx, Arrays.asList(subaddressIdx));
     if (subaddresses.isEmpty()) throw new MoneroException("Subaddress at index " + subaddressIdx + " is not initialized");
-    assertEquals("Only 1 subaddress should be returned", 1, subaddresses.size());
+    GenUtils.assertEquals("Only 1 subaddress should be returned", 1, subaddresses.size());
     return subaddresses.get(0);
   }
   
@@ -321,7 +320,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
     request.setAccountIndex(accountIdx);
     request.setSubaddressIndices(subaddressIdx);
     List<MoneroTxSet> txSets = sweepUnlocked(request);
-    assertEquals("Only one tx set should be created when sweeping from a subaddress", 1, (int) txSets.size());
+    GenUtils.assertEquals("Only one tx set should be created when sweeping from a subaddress", 1, (int) txSets.size());
     return txSets.get(0);
   }
   
@@ -330,7 +329,7 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
     MoneroSendRequest request = new MoneroSendRequest(address);
     request.setAccountIndex(accountIdx);
     List<MoneroTxSet> txSets = sweepUnlocked(request);
-    assertEquals("Only one tx set should be created when sweeping from an account", 1, (int) txSets.size());
+    GenUtils.assertEquals("Only one tx set should be created when sweeping from an account", 1, (int) txSets.size());
     return txSets.get(0);
   }
   

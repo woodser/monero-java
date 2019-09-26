@@ -1,7 +1,5 @@
 package monero.wallet.model;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -72,7 +70,7 @@ public class MoneroTxSet {
   }
   
   public MoneroTxSet merge(MoneroTxSet txSet) {
-    assertNotNull(txSet);
+    GenUtils.assertNotNull(txSet);
     if (this == txSet) return this;
     
     // merge sets
