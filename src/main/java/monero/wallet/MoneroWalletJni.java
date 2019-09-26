@@ -22,8 +22,6 @@
 
 package monero.wallet;
 
-import static org.junit.Assert.assertNull;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -746,7 +744,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
         MoneroTxQuery txQuery = query.getTxQuery().copy();
         if (query.getTxQuery().getTransferQuery() == query) query = txQuery.getTransferQuery();
         else {
-          assertNull("Transfer query's tx query must be circular reference or null", query.getTxQuery().getTransferQuery());
+          GenUtils.assertNull("Transfer query's tx query must be circular reference or null", query.getTxQuery().getTransferQuery());
           query = query.copy();
           query.setTxQuery(txQuery);
         }
@@ -795,7 +793,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
         MoneroTxQuery txQuery = query.getTxQuery().copy();
         if (query.getTxQuery().getOutputQuery() == query) query = txQuery.getOutputQuery();
         else {
-          assertNull("Output query's tx query must be circular reference or null", query.getTxQuery().getOutputQuery());
+          GenUtils.assertNull("Output query's tx query must be circular reference or null", query.getTxQuery().getOutputQuery());
           query = query.copy();
           query.setTxQuery(txQuery);
         }
