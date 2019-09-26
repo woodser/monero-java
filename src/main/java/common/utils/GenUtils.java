@@ -27,49 +27,108 @@ public class GenUtils {
     if (!val) throw new RuntimeException(failMsg);
   }
   
+  /**
+   * Asserts that the given boolean is false.
+   * 
+   * @param val is the boolean to assert as false
+   */
   public static void assertFalse(boolean val) {
     assert(!val);
   }
   
+  /**
+   * Asserts that the given boolean is false.
+   * 
+   * @param failMsg is the failure message if the booelean is not false
+   * @param val is the boolean to assert as false
+   */
   public static void assertFalse(String failMsg, boolean val) {
     if (val) throw new RuntimeException(failMsg);
   }
   
+  /**
+   * Asserts that the given value is null.
+   * 
+   * @param val is the value to assert as null
+   */
   public static void assertNull(Object val) {
     assert(val == null);
   }
   
+  /**
+   * Asserts that the given value is null.
+   * 
+   * @param failMsg is the failure message if the value is not null
+   * @param val is the value to assert as null
+   */
   public static void assertNull(String failMsg, Object val) {
     if (val != null) throw new RuntimeException(failMsg);
   }
   
+  /**
+   * Asserts that the given value is not null.
+   * 
+   * @param val is the value to assert as not null
+   */
   public static void assertNotNull(Object val) {
     assert(val != null);
   }
   
+  /**
+   * Asserts that the given value is not null.
+   * 
+   * @param failMsg is the failure message if the value is null
+   * @param val is the value to assert as not null
+   */
   public static void assertNotNull(String failMsg, Object val) {
     if (val == null) throw new RuntimeException(failMsg);
   }
   
+  /**
+   * Asserts that the given values are equal.  Throws an exception if not equal.
+   * 
+   * @param val1 is a value to assert as equal
+   * @param val2 is a value to assert as equal
+   */
   public static void assertEquals(Object val1, Object val2) {
     if (val1 == null && val2 == null) return;
     assertFalse(val1 + " != " + val2, val1 == null || val2 == null);
     assertTrue(val1 + " != " + val2, val1.equals(val2));
   }
   
+  /**
+   * Asserts that the given values are equal.  Throws an exception if not equal.
+   * 
+   * @param failMsg is the failure message if the values are not equal
+   * @param val1 is a value to assert as equal
+   * @param val2 is a value to assert as equal
+   */
   public static void assertEquals(String failMsg, Object val1, Object val2) {
     try {
-      GenUtils.assertEquals(val1, val2);
+      assertEquals(val1, val2);
     } catch (Exception e) {
       throw new RuntimeException(failMsg);
     }
   }
   
+  /**
+   * Asserts that the given values are not equal.  Throws an exception if equal.
+   * 
+   * @param val1 is a value to assert as not equal
+   * @param val2 is a value to assert as not equal
+   */
   public static void assertNotEquals(Object val1, Object val2) {
     assertFalse(val1 == null && val2 == null);
     assertTrue(val1 + " equals " + val2, val1 == null || val2 == null || !val1.equals(val2));
   }
   
+  /**
+   * Asserts that the given values are not equal.  Throws an exception if equal.
+   * 
+   * @param failMsg is the failure message if the values are equal
+   * @param val1 is a value to assert as not equal
+   * @param val2 is a value to assert as not equal
+   */
   public static void assertNotEquals(String failMsg, Object val1, Object val2) {
     try {
       assertNotEquals(val1, val2);
