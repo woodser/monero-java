@@ -35,8 +35,8 @@ public class MoneroUtils {
       CHARS.add(c);
     }
   }
-  protected final static BigDecimal ALPHABET_SIZE = new BigDecimal(ALPHABET.length());
-  protected final static Map<Integer, Integer> ENCODED_BLOCK_SIZE = new HashMap<Integer, Integer>();
+  private final static BigDecimal ALPHABET_SIZE = new BigDecimal(ALPHABET.length());
+  private final static Map<Integer, Integer> ENCODED_BLOCK_SIZE = new HashMap<Integer, Integer>();
   static {
       ENCODED_BLOCK_SIZE.put(0, 0);
       ENCODED_BLOCK_SIZE.put(2, 1);
@@ -48,16 +48,11 @@ public class MoneroUtils {
       ENCODED_BLOCK_SIZE.put(10, 7);
       ENCODED_BLOCK_SIZE.put(11, 8);
   };
-  protected final static int FULL_BLOCK_SIZE = 8;
-  protected final static int FULL_ENCODED_BLOCK_SIZE = 11;
-  protected final static BigDecimal UINT64_MAX = new BigDecimal(Math.pow(2, 64));
-  protected final static int[] EMPTY_INT_ARRAY = new int[0];
-  
-  protected final static Pattern MONERO_REGULAR_ADDRESS_PATTERN =
-      Pattern.compile("^[" + ALPHABET + "]{95}$");
-
-  protected final static Pattern MONERO_INTEGRATED_ADDRESS_PATTERN =
-        Pattern.compile("^[" + ALPHABET + "]{106}$");
+  private final static int FULL_BLOCK_SIZE = 8;
+  private final static int FULL_ENCODED_BLOCK_SIZE = 11;
+  private final static BigDecimal UINT64_MAX = new BigDecimal(Math.pow(2, 64));
+  private final static Pattern STANDARD_ADDRESS_PATERN = Pattern.compile("^[" + ALPHABET + "]{95}$");
+  private final static Pattern INTEGRATED_ADDRESS_PATTERN = Pattern.compile("^[" + ALPHABET + "]{106}$");
 
   /**
    * Validates a wallet seed.
@@ -107,25 +102,21 @@ public class MoneroUtils {
     GenUtils.assertNotNull(publicSpendKey);
     GenUtils.assertEquals(64, publicSpendKey.length());
   }
-  
+
   /**
-   * Validate an address but ignore the type of network.
+   * Validates the given address.
+   * 
+   * @param address is the address to validate
+   * @param networkType is the
    */
-  public static void validateAddress(String address) {
-    validateAddress(address, null);
-  }
-  
-  /**
-   * @param moneroNetworkType if <code>null</code> the validation will
-   * ignore the type of network.
-   */
-  public static void validateAddress(String address, MoneroNetworkType moneroNetworkType) {
-    GenUtils.assertNotNull(address);
-    GenUtils.assertFalse(address.isEmpty()); 
-    
+  public static void validateAddress(String address, MoneroNetworkType networkType) {
+    GenUtils.assertNotNull("Address to validate is null", address);
+    GenUtils.assertFalse("Address to validate is empty", address.isEmpty());
+    GenUtils.assertNotNull("Network type is null", networkType);
+
     boolean isIntegratedAddress = false;
-    if (!MONERO_REGULAR_ADDRESS_PATTERN.matcher(address).matches()) {
-      if (MONERO_INTEGRATED_ADDRESS_PATTERN.matcher(address).matches()) {
+    if (!STANDARD_ADDRESS_PATERN.matcher(address).matches()) {
+      if (INTEGRATED_ADDRESS_PATTERN.matcher(address).matches()) {
         isIntegratedAddress = true;
       } else {
         throw new MoneroException("Invalid regEx pattern for the address");
@@ -133,42 +124,10 @@ public class MoneroUtils {
     }
 
     String decodedAddrStr = decodeToHexString(address);
-    GenUtils.assertTrue(isValidAddressNetwork(decodedAddrStr, isIntegratedAddress, moneroNetworkType));
+    GenUtils.assertTrue(isValidAddressNetwork(decodedAddrStr, isIntegratedAddress, networkType));
     GenUtils.assertTrue(isValidAddressHash(decodedAddrStr));
   }
-  
-  protected static boolean isValidAddressNetwork(String decodedAddrStr, boolean isIntegratedAddress, MoneroNetworkType moneroNetworkType) {
-    int networkType = Integer.parseInt(decodedAddrStr.substring(0, 2), 16);
-    
-    boolean match = false;
-    if (moneroNetworkType == null || moneroNetworkType == MoneroNetworkType.MAINNET) {
-      match = isIntegratedAddress ? MoneroNetworkType.MAINNET.getIntegratedAddressCode() == networkType : MoneroNetworkType.MAINNET.getStandardAddressCode() == networkType;
-    }
-    
-    if (match == false && (moneroNetworkType == null || moneroNetworkType == MoneroNetworkType.TESTNET)) {
-      match = isIntegratedAddress ? MoneroNetworkType.TESTNET.getIntegratedAddressCode() == networkType : MoneroNetworkType.TESTNET.getStandardAddressCode() == networkType;
-    }
-    
-    if (match == false && (moneroNetworkType == null || moneroNetworkType == MoneroNetworkType.STAGENET)) {
-      match = isIntegratedAddress ? MoneroNetworkType.STAGENET.getIntegratedAddressCode() == networkType : MoneroNetworkType.STAGENET.getStandardAddressCode() == networkType;
-    }
-    
-    return match;
-  }
-    
-  protected static boolean isValidAddressHash(String decodedAddrStr) {
-    String checksumCheck = decodedAddrStr.substring(decodedAddrStr.length() - 8);
-    String withoutChecksumStr = decodedAddrStr.substring(0, decodedAddrStr.length() - 8);
-    byte[] withoutChecksumBytes = hexToBin(withoutChecksumStr);
-    
-    Keccak.Digest256 digest256 = new Keccak.Digest256();
-    byte[] hashbytes = digest256.digest(withoutChecksumBytes);
-    String encodedStr = Hex.encodeHexString(hashbytes);
-    
-    String hashChecksum = encodedStr.substring(0, 8);
-    return hashChecksum != null && hashChecksum.equals(checksumCheck);
-  }
-  
+
   // TODO: improve validation
   public static void validatePaymentId(String paymentId) {
     GenUtils.assertTrue(paymentId.length() == 16 || paymentId.length() == 64);
@@ -390,6 +349,36 @@ public class MoneroUtils {
     }
     txs.add(tx);
   }
+
+  // ---------------------------- PRIVATE HELPERS -----------------------------
+
+  private static boolean isValidAddressNetwork(String decodedAddrStr, boolean isIntegratedAddress, MoneroNetworkType networkType) {
+    int networkInt = Integer.parseInt(decodedAddrStr.substring(0, 2), 16);
+    boolean match = false;
+    if (networkType == null || networkType == MoneroNetworkType.MAINNET) {
+      match = isIntegratedAddress ? MoneroNetworkType.MAINNET.getIntegratedAddressCode() == networkInt : MoneroNetworkType.MAINNET.getStandardAddressCode() == networkInt;
+    }
+    if (match == false && (networkType == null || networkType == MoneroNetworkType.TESTNET)) {
+      match = isIntegratedAddress ? MoneroNetworkType.TESTNET.getIntegratedAddressCode() == networkInt : MoneroNetworkType.TESTNET.getStandardAddressCode() == networkInt;
+    }
+    if (match == false && (networkType == null || networkType == MoneroNetworkType.STAGENET)) {
+      match = isIntegratedAddress ? MoneroNetworkType.STAGENET.getIntegratedAddressCode() == networkInt : MoneroNetworkType.STAGENET.getStandardAddressCode() == networkInt;
+    }
+    return match;
+  }
+
+  private static boolean isValidAddressHash(String decodedAddrStr) {
+    String checksumCheck = decodedAddrStr.substring(decodedAddrStr.length() - 8);
+    String withoutChecksumStr = decodedAddrStr.substring(0, decodedAddrStr.length() - 8);
+    byte[] withoutChecksumBytes = hexToBin(withoutChecksumStr);
+
+    Keccak.Digest256 digest256 = new Keccak.Digest256();
+    byte[] hashbytes = digest256.digest(withoutChecksumBytes);
+    String encodedStr = Hex.encodeHexString(hashbytes);
+
+    String hashChecksum = encodedStr.substring(0, 8);
+    return hashChecksum != null && hashChecksum.equals(checksumCheck);
+  }
   
   private static String decodeToHexString(String address) {
     int[] bin = new int[address.length()];
@@ -407,20 +396,11 @@ public class MoneroUtils {
     int dataSize = fullBlockCount * FULL_BLOCK_SIZE + lastBlockDecodedSize;
     int[] data = new int[dataSize];
     for (int i = 0; i < fullBlockCount; i++) {
-      data = decodeBlock(GenUtils.subarray(bin,
-                    i * FULL_ENCODED_BLOCK_SIZE,
-                    i * FULL_ENCODED_BLOCK_SIZE + FULL_ENCODED_BLOCK_SIZE),
-                 data,
-                 i * FULL_BLOCK_SIZE);
+      data = decodeBlock(GenUtils.subarray(bin, i * FULL_ENCODED_BLOCK_SIZE, i * FULL_ENCODED_BLOCK_SIZE + FULL_ENCODED_BLOCK_SIZE), data, i * FULL_BLOCK_SIZE);
     }
     if (lastBlockSize > 0) {
-      int[] subarray = GenUtils.subarray(bin,
-                    fullBlockCount * FULL_ENCODED_BLOCK_SIZE,
-                    fullBlockCount * FULL_ENCODED_BLOCK_SIZE + FULL_BLOCK_SIZE);
-
-      data = decodeBlock(subarray,
-                 data,
-                 fullBlockCount * FULL_BLOCK_SIZE);
+      int[] subarray = GenUtils.subarray(bin, fullBlockCount * FULL_ENCODED_BLOCK_SIZE, fullBlockCount * FULL_ENCODED_BLOCK_SIZE + FULL_BLOCK_SIZE);
+      data = decodeBlock(subarray, data, fullBlockCount * FULL_BLOCK_SIZE);
     }
 
     return toHexString(data);
@@ -494,5 +474,4 @@ public class MoneroUtils {
     }
     return builder.toString();
   }
-  
 }

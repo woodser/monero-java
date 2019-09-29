@@ -19,6 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import monero.daemon.model.MoneroNetworkType;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
