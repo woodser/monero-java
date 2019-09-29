@@ -1,10 +1,5 @@
 package monero.utils;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
@@ -125,43 +120,37 @@ public class MoneroUtils {
    * ignore the type of network.
    */
   public static void validateAddress(String address, MoneroNetworkType moneroNetworkType) {
-    assertNotNull(address);
-    assertFalse(address.isEmpty()); 
+    GenUtils.assertNotNull(address);
+    GenUtils.assertFalse(address.isEmpty()); 
     
     boolean isIntegratedAddress = false;
     if (!MONERO_REGULAR_ADDRESS_PATTERN.matcher(address).matches()) {
-        if (MONERO_INTEGRATED_ADDRESS_PATTERN.matcher(address).matches()) {
-            isIntegratedAddress = true;
-        } else {
-            fail("Invalid regEx pattern for the address");
-        }
+      if (MONERO_INTEGRATED_ADDRESS_PATTERN.matcher(address).matches()) {
+        isIntegratedAddress = true;
+      } else {
+        throw new MoneroException("Invalid regEx pattern for the address");
+      }
     }
 
     String decodedAddrStr = decodeToHexString(address);
-    assertTrue(isValidAddressNetwork(decodedAddrStr, isIntegratedAddress, moneroNetworkType));
-    assertTrue(isValidAddressHash(decodedAddrStr));
+    GenUtils.assertTrue(isValidAddressNetwork(decodedAddrStr, isIntegratedAddress, moneroNetworkType));
+    GenUtils.assertTrue(isValidAddressHash(decodedAddrStr));
   }
   
-  protected static boolean isValidAddressNetwork(String decodedAddrStr,
-                                                 boolean isIntegratedAddress,
-                                                 MoneroNetworkType moneroNetworkType) {
-
+  protected static boolean isValidAddressNetwork(String decodedAddrStr, boolean isIntegratedAddress, MoneroNetworkType moneroNetworkType) {
     int networkType = Integer.parseInt(decodedAddrStr.substring(0, 2), 16);
     
     boolean match = false;
     if (moneroNetworkType == null || moneroNetworkType == MoneroNetworkType.MAINNET) {
-      match = isIntegratedAddress ? MoneroNetworkType.MAINNET.getCodeForIntegratedAddress() == networkType : 
-                                    MoneroNetworkType.MAINNET.getCodeForRegularAddress() == networkType;
+      match = isIntegratedAddress ? MoneroNetworkType.MAINNET.getCodeForIntegratedAddress() == networkType : MoneroNetworkType.MAINNET.getCodeForRegularAddress() == networkType;
     }
     
     if (match == false && (moneroNetworkType == null || moneroNetworkType == MoneroNetworkType.TESTNET)) {
-      match = isIntegratedAddress ? MoneroNetworkType.TESTNET.getCodeForIntegratedAddress() == networkType : 
-                                    MoneroNetworkType.TESTNET.getCodeForRegularAddress() == networkType;
+      match = isIntegratedAddress ? MoneroNetworkType.TESTNET.getCodeForIntegratedAddress() == networkType : MoneroNetworkType.TESTNET.getCodeForRegularAddress() == networkType;
     }
     
     if (match == false && (moneroNetworkType == null || moneroNetworkType == MoneroNetworkType.STAGENET)) {
-      match = isIntegratedAddress ? MoneroNetworkType.STAGENET.getCodeForIntegratedAddress() == networkType : 
-                                    MoneroNetworkType.STAGENET.getCodeForRegularAddress() == networkType;
+      match = isIntegratedAddress ? MoneroNetworkType.STAGENET.getCodeForIntegratedAddress() == networkType : MoneroNetworkType.STAGENET.getCodeForRegularAddress() == networkType;
     }
     
     return match;
