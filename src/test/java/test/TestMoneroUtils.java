@@ -5,7 +5,7 @@ import org.junit.Test;
 import monero.daemon.model.MoneroNetworkType;
 import monero.utils.MoneroUtils;
 
-public class TestMoneroWalletGeneric {
+public class TestMoneroUtils {
 
   @Test
   public void testAddressValidation() {
