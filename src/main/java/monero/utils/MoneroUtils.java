@@ -142,15 +142,15 @@ public class MoneroUtils {
     
     boolean match = false;
     if (moneroNetworkType == null || moneroNetworkType == MoneroNetworkType.MAINNET) {
-      match = isIntegratedAddress ? MoneroNetworkType.MAINNET.getCodeForIntegratedAddress() == networkType : MoneroNetworkType.MAINNET.getCodeForRegularAddress() == networkType;
+      match = isIntegratedAddress ? MoneroNetworkType.MAINNET.getIntegratedAddressCode() == networkType : MoneroNetworkType.MAINNET.getStandardAddressCode() == networkType;
     }
     
     if (match == false && (moneroNetworkType == null || moneroNetworkType == MoneroNetworkType.TESTNET)) {
-      match = isIntegratedAddress ? MoneroNetworkType.TESTNET.getCodeForIntegratedAddress() == networkType : MoneroNetworkType.TESTNET.getCodeForRegularAddress() == networkType;
+      match = isIntegratedAddress ? MoneroNetworkType.TESTNET.getIntegratedAddressCode() == networkType : MoneroNetworkType.TESTNET.getStandardAddressCode() == networkType;
     }
     
     if (match == false && (moneroNetworkType == null || moneroNetworkType == MoneroNetworkType.STAGENET)) {
-      match = isIntegratedAddress ? MoneroNetworkType.STAGENET.getCodeForIntegratedAddress() == networkType : MoneroNetworkType.STAGENET.getCodeForRegularAddress() == networkType;
+      match = isIntegratedAddress ? MoneroNetworkType.STAGENET.getIntegratedAddressCode() == networkType : MoneroNetworkType.STAGENET.getStandardAddressCode() == networkType;
     }
     
     return match;

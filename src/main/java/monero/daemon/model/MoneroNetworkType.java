@@ -8,19 +8,19 @@ public enum MoneroNetworkType {
   TESTNET(53, 54),
   STAGENET(53, 54);
 
-  private final int codeForRegularAddress;
-  private final int codeForIntegratedAddress;
+  private final int standardAddressCode;
+  private final int integratedAddressCode;
 
-  private MoneroNetworkType(int codeForRegularAddress, int codeForIntegratedAddress) {
-    this.codeForRegularAddress = codeForRegularAddress;
-    this.codeForIntegratedAddress = codeForIntegratedAddress;
+  private MoneroNetworkType(int standardAddressCode, int integratedAddressCode) {
+    this.standardAddressCode = standardAddressCode;
+    this.integratedAddressCode = integratedAddressCode;
   }
 
-  public int getCodeForRegularAddress() {
-    return this.codeForRegularAddress;
+  public int getStandardAddressCode() {
+    return this.standardAddressCode;
   }
 
-  public int getCodeForIntegratedAddress() {
-    return this.codeForIntegratedAddress;
+  public int getIntegratedAddressCode() {
+    return this.integratedAddressCode;
   }
 }
