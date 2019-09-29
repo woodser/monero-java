@@ -1,12 +1,25 @@
 package monero.utils;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.jcajce.provider.digest.Keccak;
 
 import common.utils.GenUtils;
+import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
 import monero.wallet.model.MoneroTxWallet;
 
@@ -20,14 +33,37 @@ public class MoneroUtils {
 
   private static final int NUM_MNEMONIC_WORDS = 25;
   private static final int VIEW_KEY_LENGTH = 64;
-  private static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
+  private static final String ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
   private static final List<Character> CHARS = new ArrayList<Character>();
   static {
-    for (char c : ALPHABET) {
+    for (char c : ALPHABET.toCharArray()) {
       CHARS.add(c);
     }
   }
+  protected final static BigDecimal ALPHABET_SIZE = new BigDecimal(ALPHABET.length());
+  protected final static Map<Integer, Integer> ENCODED_BLOCK_SIZE = new HashMap<Integer, Integer>();
+  static {
+      ENCODED_BLOCK_SIZE.put(0, 0);
+      ENCODED_BLOCK_SIZE.put(2, 1);
+      ENCODED_BLOCK_SIZE.put(3, 2);
+      ENCODED_BLOCK_SIZE.put(5, 3);
+      ENCODED_BLOCK_SIZE.put(6, 4);
+      ENCODED_BLOCK_SIZE.put(7, 5);
+      ENCODED_BLOCK_SIZE.put(9, 6);
+      ENCODED_BLOCK_SIZE.put(10, 7);
+      ENCODED_BLOCK_SIZE.put(11, 8);
+  };
+  protected final static int FULL_BLOCK_SIZE = 8;
+  protected final static int FULL_ENCODED_BLOCK_SIZE = 11;
+  protected final static BigDecimal UINT64_MAX = new BigDecimal(Math.pow(2, 64));
+  protected final static int[] EMPTY_INT_ARRAY = new int[0];
   
+  protected final static Pattern MONERO_REGULAR_ADDRESS_PATTERN =
+      Pattern.compile("^[" + ALPHABET + "]{95}$");
+
+  protected final static Pattern MONERO_INTEGRATED_ADDRESS_PATTERN =
+        Pattern.compile("^[" + ALPHABET + "]{106}$");
+
   /**
    * Validates a wallet seed.
    * 
@@ -77,10 +113,71 @@ public class MoneroUtils {
     GenUtils.assertEquals(64, publicSpendKey.length());
   }
   
-  // TODO: improve validation
+  /**
+   * Validate an address but ignore the type of network.
+   */
   public static void validateAddress(String address) {
-    GenUtils.assertNotNull(address);
-    GenUtils.assertFalse(address.isEmpty());
+    validateAddress(address, null);
+  }
+  
+  /**
+   * @param moneroNetworkType if <code>null</code> the validation will
+   * ignore the type of network.
+   */
+  public static void validateAddress(String address, MoneroNetworkType moneroNetworkType) {
+    assertNotNull(address);
+    assertFalse(address.isEmpty()); 
+    
+    boolean isIntegratedAddress = false;
+    if (!MONERO_REGULAR_ADDRESS_PATTERN.matcher(address).matches()) {
+        if (MONERO_INTEGRATED_ADDRESS_PATTERN.matcher(address).matches()) {
+            isIntegratedAddress = true;
+        } else {
+            fail("Invalid regEx pattern for the address");
+        }
+    }
+
+    String decodedAddrStr = decodeToHexString(address);
+    assertTrue(isValidAddressNetwork(decodedAddrStr, isIntegratedAddress, moneroNetworkType));
+    assertTrue(isValidAddressHash(decodedAddrStr));
+  }
+  
+  protected static boolean isValidAddressNetwork(String decodedAddrStr,
+                                                 boolean isIntegratedAddress,
+                                                 MoneroNetworkType moneroNetworkType) {
+
+    int networkType = Integer.parseInt(decodedAddrStr.substring(0, 2), 16);
+    
+    boolean match = false;
+    if (moneroNetworkType == null || moneroNetworkType == MoneroNetworkType.MAINNET) {
+      match = isIntegratedAddress ? MoneroNetworkType.MAINNET.getCodeForIntegratedAddress() == networkType : 
+                                    MoneroNetworkType.MAINNET.getCodeForRegularAddress() == networkType;
+    }
+    
+    if (match == false && (moneroNetworkType == null || moneroNetworkType == MoneroNetworkType.TESTNET)) {
+      match = isIntegratedAddress ? MoneroNetworkType.TESTNET.getCodeForIntegratedAddress() == networkType : 
+                                    MoneroNetworkType.TESTNET.getCodeForRegularAddress() == networkType;
+    }
+    
+    if (match == false && (moneroNetworkType == null || moneroNetworkType == MoneroNetworkType.STAGENET)) {
+      match = isIntegratedAddress ? MoneroNetworkType.STAGENET.getCodeForIntegratedAddress() == networkType : 
+                                    MoneroNetworkType.STAGENET.getCodeForRegularAddress() == networkType;
+    }
+    
+    return match;
+  }
+    
+  protected static boolean isValidAddressHash(String decodedAddrStr) {
+    String checksumCheck = decodedAddrStr.substring(decodedAddrStr.length() - 8);
+    String withoutChecksumStr = decodedAddrStr.substring(0, decodedAddrStr.length() - 8);
+    byte[] withoutChecksumBytes = hexToBin(withoutChecksumStr);
+    
+    Keccak.Digest256 digest256 = new Keccak.Digest256();
+    byte[] hashbytes = digest256.digest(withoutChecksumBytes);
+    String encodedStr = Hex.encodeHexString(hashbytes);
+    
+    String hashChecksum = encodedStr.substring(0, 8);
+    return hashChecksum != null && hashChecksum.equals(checksumCheck);
   }
   
   // TODO: improve validation
@@ -304,4 +401,109 @@ public class MoneroUtils {
     }
     txs.add(tx);
   }
+  
+  private static String decodeToHexString(String address) {
+    int[] bin = new int[address.length()];
+    for (int i = 0; i < address.length(); i++) {
+      bin[i] = address.codePointAt(i);
+    }
+
+    int fullBlockCount = (int)Math.floor(bin.length / FULL_ENCODED_BLOCK_SIZE);
+    int lastBlockSize = (int)bin.length % FULL_ENCODED_BLOCK_SIZE;
+    int lastBlockDecodedSize = ENCODED_BLOCK_SIZE.get(lastBlockSize);
+    if (lastBlockDecodedSize < 0) {
+      throw new IllegalArgumentException("Invalid encoded length");
+    }
+
+    int dataSize = fullBlockCount * FULL_BLOCK_SIZE + lastBlockDecodedSize;
+    int[] data = new int[dataSize];
+    for (int i = 0; i < fullBlockCount; i++) {
+      data = decodeBlock(GenUtils.subarray(bin,
+                    i * FULL_ENCODED_BLOCK_SIZE,
+                    i * FULL_ENCODED_BLOCK_SIZE + FULL_ENCODED_BLOCK_SIZE),
+                 data,
+                 i * FULL_BLOCK_SIZE);
+    }
+    if (lastBlockSize > 0) {
+      int[] subarray = GenUtils.subarray(bin,
+                    fullBlockCount * FULL_ENCODED_BLOCK_SIZE,
+                    fullBlockCount * FULL_ENCODED_BLOCK_SIZE + FULL_BLOCK_SIZE);
+
+      data = decodeBlock(subarray,
+                 data,
+                 fullBlockCount * FULL_BLOCK_SIZE);
+    }
+
+    return toHexString(data);
+  }
+
+  private static int[] decodeBlock(int[] data, int[] buf, int index) {
+
+    if (data.length < 1 || data.length > FULL_ENCODED_BLOCK_SIZE) {
+      throw new RuntimeException("Invalid block length: " + data.length);
+    }
+
+    int resSize = ENCODED_BLOCK_SIZE.get(data.length);
+    if (resSize <= 0) {
+      throw new RuntimeException("Invalid block size");
+    }
+    BigDecimal resNum = BigDecimal.ZERO;
+    BigDecimal order = BigDecimal.ONE;
+    for (int i = data.length - 1; i >= 0; i--) {
+      int digit = ALPHABET.indexOf(data[i]);
+      if (digit < 0) {
+        throw new RuntimeException("Invalid symbol");
+      }
+      BigDecimal product = order.multiply(new BigDecimal(digit)).add(resNum);
+      // if product > UINT64_MAX
+      if (product.compareTo(UINT64_MAX) > 0) {
+        throw new RuntimeException("Overflow");
+      }
+      resNum = product;
+      order = order.multiply(ALPHABET_SIZE);
+    }
+    if (resSize < FULL_BLOCK_SIZE && (new BigDecimal(2).pow(8 * resSize).compareTo(resNum) <= 0)) {
+      throw new RuntimeException("Overflow 2");
+    }
+
+    int[] tmpBuf = uint64To8be(resNum, resSize);
+    for (int j = 0; j < tmpBuf.length; j++) {
+      buf[j + index] = tmpBuf[j];
+    }
+
+    return buf;
+  }
+
+  private static int[] uint64To8be(BigDecimal num, int size) {
+    int[] res = new int[size];
+    if (size < 1 || size > 8) {
+      throw new RuntimeException("Invalid input length");
+    }
+    BigDecimal twopow8 = new BigDecimal(2).pow(8);
+    for (int i = size - 1; i >= 0; i--) {
+      res[i] = num.remainder(twopow8).intValue();
+      num = num.divide(twopow8);
+    }
+    return res;
+  }
+
+  private static byte[] hexToBin(String hexStr) {
+    if (hexStr == null || hexStr.length() % 2 != 0) {
+      return null;
+    }
+    byte[] res = new byte[hexStr.length() / 2];
+    for (int i = 0; i < hexStr.length() / 2; ++i) {
+      res[i] = (byte)Integer.parseInt(hexStr.substring(i * 2, i * 2 + 2), 16);
+    }
+    return res;
+  }
+
+  private static String toHexString(int[] data) {
+    StringBuilder builder = new StringBuilder();
+    for (int i : data) {
+      builder.append(String.format("%02x", i));
+    }
+    return builder.toString();
+  }
+  
 }
