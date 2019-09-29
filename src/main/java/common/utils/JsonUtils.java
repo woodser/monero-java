@@ -93,7 +93,6 @@ public class JsonUtils {
    * @param type is the parameterized type to deserialize to (e.g. new TypeReference<Map<String, Object>>(){})
    * @return T is the object deserialized from JSON to the given parameterized type
    */
-  @SuppressWarnings("unchecked")
   public static <T> T deserialize(ObjectMapper mapper, String json, TypeReference<T> type) {
     try {
       return (T) mapper.readValue(json, type);
