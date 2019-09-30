@@ -357,13 +357,13 @@ public class MoneroUtils {
     
     boolean match = false;
     if (networkType == null || networkType == MoneroNetworkType.MAINNET) {
-      match = isIntegratedAddress ? MoneroNetworkType.MAINNET.getIntegratedAddressCode() == networkInt : MoneroNetworkType.MAINNET.getStandardAddressCode() == networkInt;
+      match = isIntegratedAddress ? MoneroNetworkType.MAINNET.getIntegratedAddressCode() == networkInt : MoneroNetworkType.MAINNET.getPrimaryAddressCode() == networkInt;
     }
     if (match == false && (networkType == null || networkType == MoneroNetworkType.TESTNET)) {
-      match = isIntegratedAddress ? MoneroNetworkType.TESTNET.getIntegratedAddressCode() == networkInt : MoneroNetworkType.TESTNET.getStandardAddressCode() == networkInt;
+      match = isIntegratedAddress ? MoneroNetworkType.TESTNET.getIntegratedAddressCode() == networkInt : MoneroNetworkType.TESTNET.getPrimaryAddressCode() == networkInt;
     }
     if (match == false && (networkType == null || networkType == MoneroNetworkType.STAGENET)) {
-      match = isIntegratedAddress ? MoneroNetworkType.STAGENET.getIntegratedAddressCode() == networkInt : MoneroNetworkType.STAGENET.getStandardAddressCode() == networkInt;
+      match = isIntegratedAddress ? MoneroNetworkType.STAGENET.getIntegratedAddressCode() == networkInt : MoneroNetworkType.STAGENET.getPrimaryAddressCode() == networkInt;
     }
     
     return match;
