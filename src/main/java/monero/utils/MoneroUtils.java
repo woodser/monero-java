@@ -107,7 +107,7 @@ public class MoneroUtils {
    * Validates the given address.
    * 
    * @param address is the address to validate
-   * @param networkType is the
+   * @param networkType is the address's network type
    */
   public static void validateAddress(String address, MoneroNetworkType networkType) {
     GenUtils.assertNotNull("Address to validate is null", address);
@@ -354,6 +354,7 @@ public class MoneroUtils {
 
   private static boolean isValidAddressNetwork(String decodedAddrStr, boolean isIntegratedAddress, MoneroNetworkType networkType) {
     int networkInt = Integer.parseInt(decodedAddrStr.substring(0, 2), 16);
+    
     boolean match = false;
     if (networkType == null || networkType == MoneroNetworkType.MAINNET) {
       match = isIntegratedAddress ? MoneroNetworkType.MAINNET.getIntegratedAddressCode() == networkInt : MoneroNetworkType.MAINNET.getStandardAddressCode() == networkInt;
@@ -364,6 +365,7 @@ public class MoneroUtils {
     if (match == false && (networkType == null || networkType == MoneroNetworkType.STAGENET)) {
       match = isIntegratedAddress ? MoneroNetworkType.STAGENET.getIntegratedAddressCode() == networkInt : MoneroNetworkType.STAGENET.getStandardAddressCode() == networkInt;
     }
+    
     return match;
   }
 
