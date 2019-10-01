@@ -169,8 +169,12 @@ public class MoneroUtils {
    * @param networkType is the address's network type
    */
   public static void validateAddress(String address, MoneroNetworkType networkType) {
-    DecodedAddress decodedAddress = decodeAddress(address);
-    GenUtils.assertEquals("Address network type mismatch: " + networkType + " vs " + decodedAddress.getNetworkType(), networkType, decodedAddress.getNetworkType());
+    try {
+      DecodedAddress decodedAddress = decodeAddress(address);
+      GenUtils.assertEquals("Address network type mismatch: " + networkType + " vs " + decodedAddress.getNetworkType(), networkType, decodedAddress.getNetworkType());
+    } catch (AssertionError e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   // TODO: improve validation
