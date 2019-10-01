@@ -89,25 +89,25 @@ public class GenUtils {
   /**
    * Asserts that the given values are equal.  Throws an exception if not equal.
    * 
-   * @param val1 is a value to assert as equal
-   * @param val2 is a value to assert as equal
+   * @param expected is the expected value to assert as equal
+   * @param actual is the actual value to assert as equal
    */
-  public static void assertEquals(Object val1, Object val2) {
-    if (val1 == null && val2 == null) return;
-    assertFalse(val1 + " != " + val2, val1 == null || val2 == null);
-    assertTrue(val1 + " != " + val2, val1.equals(val2));
+  public static void assertEquals(Object expected, Object actual) {
+    if (expected == null && actual == null) return;
+    assertFalse(expected + " != " + actual, expected == null || actual == null);
+    assertTrue(expected + " != " + actual, expected.equals(actual));
   }
   
   /**
    * Asserts that the given values are equal.  Throws an exception if not equal.
    * 
    * @param failMsg is the failure message if the values are not equal
-   * @param val1 is a value to assert as equal
-   * @param val2 is a value to assert as equal
+   * @param expected is the expected value to assert as equal
+   * @param actual is the actual value to assert as equal
    */
-  public static void assertEquals(String failMsg, Object val1, Object val2) {
+  public static void assertEquals(String failMsg, Object expected, Object actual) {
     try {
-      assertEquals(val1, val2);
+      assertEquals(expected, actual);
     } catch (Exception e) {
       throw new AssertionError(failMsg);
     }
