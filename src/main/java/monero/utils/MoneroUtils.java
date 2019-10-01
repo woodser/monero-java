@@ -108,7 +108,7 @@ public class MoneroUtils {
   /**
    * Decodes the given address.
    * 
-   * @param address is the address to code
+   * @param address is the address to decode
    * @return the decoded address and network types
    */
   public static DecodedAddress decodeAddress(String address) {
