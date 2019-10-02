@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.daemon.model.MoneroNetworkType;
@@ -71,90 +70,44 @@ public class TestMoneroUtils {
     MoneroUtils.validateAddress("747wPpaPKrjDPZrF48jAfz9pRRUHLMCWfYu2UanP4ZfTG8NrmYrSEWNW8gYoadU8hTiwBjV14e6DLaC5xfhyEpX5154aMm6", MoneroNetworkType.STAGENET);
     
     // test invalid addresses on mainnet
-    try {
-      MoneroUtils.validateAddress("", MoneroNetworkType.MAINNET);
-      fail("Should have thrown exception");
-    } catch (MoneroException e) {
-      assertFalse(e.getMessage().isEmpty());
-    }
-    try {
-      MoneroUtils.validateAddress("42ZxX3Y2y5s4nJ8fdz2w65TrTEp9PRsv5J8iHSShkHQcE2V31FhnWptioNst1K9oeDY4KpWZ7v8V2BZNVa4Wdky89iqmPz2", MoneroNetworkType.MAINNET);
-      fail("Should have thrown exception");
-    } catch (MoneroException e) {
-      assertFalse(e.getMessage().isEmpty());
-    }
-    try {
-      MoneroUtils.validateAddress("41ApvrfMgUFZEePHBZHwuSckQXebuZu299NSmVEmQ41YJZQhKcPyujyMSzpDH4VMMVSBo3U3b54JaNvQLwAjqDhKeGLQ9vfRBRKFKnBtVH", MoneroNetworkType.MAINNET);
-      fail("Should have thrown exception");
-    } catch (MoneroException e) {
-      assertFalse(e.getMessage().isEmpty());
-    }
-    try {
-      MoneroUtils.validateAddress("81fyq3t8Gxn1QWMG189EufHtMHXZXkfJtJKFJXqeA4GpSiuyfjVwVyp47PeQJnD7Tc8iK8TDvvhcmEmfh8nx7Va2ToP8wAo", MoneroNetworkType.MAINNET);
-      fail("Should have thrown exception");
-    } catch (MoneroException e) {
-      assertFalse(e.getMessage().isEmpty());
-    }
+    testInvalidAddress(null, MoneroNetworkType.MAINNET);
+    testInvalidAddress("", MoneroNetworkType.MAINNET);
+    testInvalidAddress("42ZxX3Y2y5s4nJ8fdz2w65TrTEp9PRsv5J8iHSShkHQcE2V31FhnWptioNst1K9oeDY4KpWZ7v8V2BZNVa4Wdky89iqmPz2", MoneroNetworkType.MAINNET);
+    testInvalidAddress("41ApvrfMgUFZEePHBZHwuSckQXebuZu299NSmVEmQ41YJZQhKcPyujyMSzpDH4VMMVSBo3U3b54JaNvQLwAjqDhKeGLQ9vfRBRKFKnBtVH", MoneroNetworkType.MAINNET);
+    testInvalidAddress("81fyq3t8Gxn1QWMG189EufHtMHXZXkfJtJKFJXqeA4GpSiuyfjVwVyp47PeQJnD7Tc8iK8TDvvhcmEmfh8nx7Va2ToP8wAo", MoneroNetworkType.MAINNET);
     
     // test invalid addresses on testnet
-    try {
-      MoneroUtils.validateAddress("", MoneroNetworkType.TESTNET);
-      fail("Should have thrown exception");
-    } catch (MoneroException e) {
-      assertFalse(e.getMessage().isEmpty());
-    }
-    try {
-      MoneroUtils.validateAddress("91UBnNCkC3UKGygHCwYvAB1FscpjUuq5e9MYJd2rXuiiTjjfVeSVjnbSG5VTnJgBgy9Y7GTLfxpZNMUwNZjGfdFr1z79eV1", MoneroNetworkType.TESTNET);
-      fail("Should have thrown exception");
-    } catch (MoneroException e) {
-      assertFalse(e.getMessage().isEmpty());
-    }
-    try {
-      MoneroUtils.validateAddress("A1AroB2EoJzKGygHCwYvAB1FscpjUuq5e9MYJd2rXuiiTjjfVeSVjnbSG5VTnJgBgy9Y7GTLfxpZNMUwNZjGfdFr2QY5Ba2aHhTEdQa2ra", MoneroNetworkType.TESTNET);
-      fail("Should have thrown exception");
-    } catch (MoneroException e) {
-      assertFalse(e.getMessage().isEmpty());
-    }
-    try {
-      MoneroUtils.validateAddress("B1nKzHPJQDcg7xiP7bMN9MfPv9Z8ciT71iEMYnCdgBRBFETWgu9nKTr8fnzyGfU9h9gyNA8SFzYYzHfTS9KhqytSU943Nu1", MoneroNetworkType.TESTNET);
-      fail("Should have thrown exception");
-    } catch (MoneroException e) {
-      assertFalse(e.getMessage().isEmpty());
-    }
+    testInvalidAddress(null, MoneroNetworkType.TESTNET);
+    testInvalidAddress("", MoneroNetworkType.TESTNET);
+    testInvalidAddress("91UBnNCkC3UKGygHCwYvAB1FscpjUuq5e9MYJd2rXuiiTjjfVeSVjnbSG5VTnJgBgy9Y7GTLfxpZNMUwNZjGfdFr1z79eV1", MoneroNetworkType.TESTNET);
+    testInvalidAddress("A1AroB2EoJzKGygHCwYvAB1FscpjUuq5e9MYJd2rXuiiTjjfVeSVjnbSG5VTnJgBgy9Y7GTLfxpZNMUwNZjGfdFr2QY5Ba2aHhTEdQa2ra", MoneroNetworkType.TESTNET);
+    testInvalidAddress("B1nKzHPJQDcg7xiP7bMN9MfPv9Z8ciT71iEMYnCdgBRBFETWgu9nKTr8fnzyGfU9h9gyNA8SFzYYzHfTS9KhqytSU943Nu1", MoneroNetworkType.TESTNET);
     
     // test invalid addresses on stagenet
+    testInvalidAddress(null, MoneroNetworkType.STAGENET);
+    testInvalidAddress("", MoneroNetworkType.STAGENET);
+    testInvalidAddress("518s3obCY2ETeQB3GNAGPK2zRGen5UeW1WzegSizVsmf6z5NvM2GLoN6zzk1vHyzGAAfA8pGhuYAeCFZjHAp59jRVQkunGS", MoneroNetworkType.STAGENET);
+    testInvalidAddress("51qY4cQh9HkTeQB3GNAGPK2zRGen5UeW1WzegSizVsmf6z5NvM2GLoN6zzk1vHyzGAAfA8pGhuYAeCFZjHAp59jRj6LZRFrjuGK8Whthg2", MoneroNetworkType.STAGENET);
+    testInvalidAddress("718B5D2JmMh5TJVWFbygJR15dvio5Z5B24hfSrWDzeroM8j8Lqc9sMoFE6324xg2ReaAZqHJkgfGFRugRmYHugHZ4f17Gxo", MoneroNetworkType.STAGENET);
+  }
+  
+  private static void testInvalidAddress(String address, MoneroNetworkType networkType) {
     try {
-      MoneroUtils.validateAddress("", MoneroNetworkType.STAGENET);
-      fail("Should have thrown exception");
-    } catch (MoneroException e) {
-      assertFalse(e.getMessage().isEmpty());
-    }
-    try {
-      MoneroUtils.validateAddress("518s3obCY2ETeQB3GNAGPK2zRGen5UeW1WzegSizVsmf6z5NvM2GLoN6zzk1vHyzGAAfA8pGhuYAeCFZjHAp59jRVQkunGS", MoneroNetworkType.STAGENET);
-      fail("Should have thrown exception");
-    } catch (MoneroException e) {
-      assertFalse(e.getMessage().isEmpty());
-    }
-    try {
-      MoneroUtils.validateAddress("51qY4cQh9HkTeQB3GNAGPK2zRGen5UeW1WzegSizVsmf6z5NvM2GLoN6zzk1vHyzGAAfA8pGhuYAeCFZjHAp59jRj6LZRFrjuGK8Whthg2", MoneroNetworkType.STAGENET);
-      fail("Should have thrown exception");
-    } catch (MoneroException e) {
-      assertFalse(e.getMessage().isEmpty());
-    }
-    try {
-      MoneroUtils.validateAddress("718B5D2JmMh5TJVWFbygJR15dvio5Z5B24hfSrWDzeroM8j8Lqc9sMoFE6324xg2ReaAZqHJkgfGFRugRmYHugHZ4f17Gxo", MoneroNetworkType.STAGENET);
+      MoneroUtils.validateAddress(address, networkType);
       fail("Should have thrown exception");
     } catch (MoneroException e) {
       assertFalse(e.getMessage().isEmpty());
     }
   }
   
+  public static void main(String[] args) {
+    printAddressValidationTestCode();
+  }
+  
   /**
    * Prints code to test address validation.
    */
-  @Test
-  @Ignore
-  public void createAddressValidationTestCode() {
+  private static void printAddressValidationTestCode() {
     int repeat = 3;
     
     // test each network

@@ -112,7 +112,7 @@ public class MoneroUtils {
    * @return the decoded address and network types
    */
   public static DecodedAddress decodeAddress(String address) {
-    GenUtils.assertNotNull("Address is null");
+    GenUtils.assertNotNull("Address is null", address);
     
     // determine if address has integrated address pattern
     boolean isIntegrated = false;
