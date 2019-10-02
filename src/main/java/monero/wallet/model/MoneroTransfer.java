@@ -5,7 +5,7 @@ import java.math.BigInteger;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import monero.utils.MoneroUtils;
+import common.utils.GenUtils;
 
 /**
  * Models a base transfer of funds to or from the wallet.
@@ -104,16 +104,16 @@ public abstract class MoneroTransfer {
     }
     
     // otherwise merge transfer fields
-    this.setAccountIndex(MoneroUtils.reconcile(this.getAccountIndex(), transfer.getAccountIndex()));
+    this.setAccountIndex(GenUtils.reconcile(this.getAccountIndex(), transfer.getAccountIndex()));
     
     // TODO monero core: failed tx in pool (after testUpdateLockedDifferentAccounts()) causes non-originating saved wallets to return duplicate incoming transfers but one has amount/numSuggestedConfirmations of 0
     if (this.getAmount() != null && transfer.getAmount() != null && !this.getAmount().equals(transfer.getAmount()) && (BigInteger.valueOf(0).equals(this.getAmount()) || BigInteger.valueOf(0).equals(transfer.getAmount()))) {
-      this.setAmount(MoneroUtils.reconcile(this.getAmount(), transfer.getAmount(), null, null, true));
-      this.setNumSuggestedConfirmations(MoneroUtils.reconcile(this.getNumSuggestedConfirmations(), transfer.getNumSuggestedConfirmations(), null, null, true));
+      this.setAmount(GenUtils.reconcile(this.getAmount(), transfer.getAmount(), null, null, true));
+      this.setNumSuggestedConfirmations(GenUtils.reconcile(this.getNumSuggestedConfirmations(), transfer.getNumSuggestedConfirmations(), null, null, true));
       System.out.println("WARNING: failed tx in pool causes non-originating wallets to return duplicate incoming transfers but with one amount/numSuggestedConfirmations of 0");
     } else {
-      this.setAmount(MoneroUtils.reconcile(this.getAmount(), transfer.getAmount()));
-      this.setNumSuggestedConfirmations(MoneroUtils.reconcile(this.getNumSuggestedConfirmations(), transfer.getNumSuggestedConfirmations(), null, null, false));  // TODO monero-wallet-rpc: outgoing txs become 0 when confirmed
+      this.setAmount(GenUtils.reconcile(this.getAmount(), transfer.getAmount()));
+      this.setNumSuggestedConfirmations(GenUtils.reconcile(this.getNumSuggestedConfirmations(), transfer.getNumSuggestedConfirmations(), null, null, false));  // TODO monero-wallet-rpc: outgoing txs become 0 when confirmed
     }
     
     return this;
@@ -125,9 +125,9 @@ public abstract class MoneroTransfer {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
-    sb.append(MoneroUtils.kvLine("Amount", this.getAmount() != null ? this.getAmount().toString() : null, indent));
-    sb.append(MoneroUtils.kvLine("Account index", this.getAccountIndex(), indent));
-    sb.append(MoneroUtils.kvLine("Num suggested confirmations", getNumSuggestedConfirmations(), indent));
+    sb.append(GenUtils.kvLine("Amount", this.getAmount() != null ? this.getAmount().toString() : null, indent));
+    sb.append(GenUtils.kvLine("Account index", this.getAccountIndex(), indent));
+    sb.append(GenUtils.kvLine("Num suggested confirmations", getNumSuggestedConfirmations(), indent));
     String str = sb.toString();
     return str.isEmpty() ? str :  str.substring(0, str.length() - 1);	  // strip last newline
   }

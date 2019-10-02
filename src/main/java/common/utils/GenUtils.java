@@ -1,6 +1,8 @@
 package common.utils;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -192,5 +194,132 @@ public class GenUtils {
     final int[] subarray = new int[newSize];
     System.arraycopy(array, startIndexInclusive, subarray, 0, newSize);
     return subarray;
+  }
+  
+  /**
+   * Convenience method to reconcile two values with default configuration by
+   * calling reconcile(val1, val2, null, null, null).
+   * 
+   * @param val1 is a value to reconcile
+   * @param val2 is a value to reconcile
+   * @return the reconciled value if reconcilable
+   * @throws Exception if the values cannot be reconciled
+   */
+  public static <T> T reconcile(T val1, T val2) {
+    return reconcile(val1, val2, null, null, null);
+  }
+  
+  /**
+   * Reconciles two values.
+   * 
+   * @param val1 is a value to reconcile
+   * @param val2 is a value to reconcile
+   * @param resolveDefined uses defined value if true or null, null if false
+   * @param resolveTrue uses true over false if true, false over true if false, must be equal if null
+   * @param resolveMax uses max over min if true, min over max if false, must be equal if null
+   * @returns the reconciled value if reconcilable
+   * @throws Exception if the values cannot be reconciled
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T reconcile(T val1, T val2, Boolean resolveDefined, Boolean resolveTrue, Boolean resolveMax) {
+    
+    // check for same reference
+    if (val1 == val2) return val1;
+    
+    // check for BigInteger equality
+    Integer comparison = null; // save comparison for later if applicable
+    if (val1 instanceof BigInteger && val2 instanceof BigInteger) {
+      comparison = ((BigInteger) val1).compareTo((BigInteger) val2);  
+      if (comparison == 0) return val1;
+    }
+    
+    // resolve one value null
+    if (val1 == null || val2 == null) {
+      if (Boolean.FALSE.equals(resolveDefined)) return null;  // use null
+      else return val1 == null ? val2 : val1;  // use defined value
+    }
+    
+    // resolve different booleans
+    if (resolveTrue != null && Boolean.class.isInstance(val1) && Boolean.class.isInstance(val2)) {
+      return (T) resolveTrue;
+    }
+    
+    // resolve different numbers
+    if (resolveMax != null) {
+      
+      // resolve BigIntegers
+      if (val1 instanceof BigInteger && val2 instanceof BigInteger) {
+        return resolveMax ? (comparison < 0 ? val2 : val1) : (comparison < 0 ? val1 : val2);
+      }
+      
+      // resolve integers
+      if (val1 instanceof Integer && val2 instanceof Integer) {
+        return (T) (Integer) (resolveMax ? Math.max((Integer) val1, (Integer) val2) : Math.min((Integer) val1, (Integer) val2));
+      }
+      
+      // resolve longs
+      if (val1 instanceof Long && val2 instanceof Long) {
+        return (T) (Long) (resolveMax ? Math.max((Long) val1, (Long) val2) : Math.min((Long) val1, (Long) val2));
+      }
+
+      throw new RuntimeException("Need to resolve primitives and object versions");
+//      // resolve js numbers
+//      if (typeof val1 === "number" && typeof val2 === "number") {
+//        return config.resolveMax ? Math.max(val1, val2) : Math.min(val1, val2);
+//      }
+    }
+    
+    // assert deep equality
+    GenUtils.assertEquals("Cannot reconcile values " + val1 + " and " + val2 + " with config: [" + resolveDefined + ", " + resolveTrue + ", " + resolveMax + "]", val1, val2);
+    return val1;
+  }
+  
+  /**
+   * Reconciles two int arrays.  The arrays must be identical or an exception is thrown.
+   * 
+   * @param arr1 is an array to reconcile
+   * @param arr2 is an array to reconcile
+   * @return T[] is the reconciled array
+   */
+  public static int[] reconcileIntArrays(int[] arr1, int[] arr2) {
+    
+    // check for same reference or null
+    if (arr1 == arr2) return arr1;
+    
+    // resolve one value defined
+    if (arr1 == null || arr2 == null) {
+      return arr1 == null ? arr2 : arr1;
+    }
+    
+    // assert deep equality
+    GenUtils.assertTrue("Cannot reconcile arrays", Arrays.equals(arr1, arr2));
+    return arr1;
+  }
+  
+  /**
+   * Returns a human-friendly key value line.
+   * 
+   * @param key is the key
+   * @param value is the value
+   * @param indent indents the line
+   * @return the human-friendly key value line
+   */
+  public static String kvLine(Object key, Object value, int indent) {
+    return kvLine(key, value, indent, true, true);
+  }
+  
+  /**
+   * Returns a human-friendly key value line.
+   * 
+   * @param key is the key
+   * @param value is the value
+   * @param indent indents the line
+   * @param newline specifies if the string should be terminated with a newline or not
+   * @param ignoreUndefined specifies if undefined values should return an empty string
+   * @return the human-friendly key value line
+   */
+  public static String kvLine(Object key, Object value, int indent, boolean newline, boolean ignoreUndefined) {
+    if (value == null && ignoreUndefined) return "";
+    return GenUtils.getIndent(indent) + key + ": " + value + (newline ? '\n' : "");
   }
 }

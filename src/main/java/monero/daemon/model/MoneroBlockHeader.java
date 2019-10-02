@@ -3,7 +3,6 @@ package monero.daemon.model;
 import java.math.BigInteger;
 
 import common.utils.GenUtils;
-import monero.utils.MoneroUtils;
 
 /**
  * Models a Monero block header which contains information about the block.
@@ -229,23 +228,23 @@ public class MoneroBlockHeader {
   public MoneroBlockHeader merge(MoneroBlockHeader header) {
     GenUtils.assertNotNull(header);
     if (this == header) return this;
-    this.setId(MoneroUtils.reconcile(this.getId(), header.getId()));
-    this.setHeight(MoneroUtils.reconcile(this.getHeight(), header.getHeight(), null, null, true));  // height can increase
-    this.setTimestamp(MoneroUtils.reconcile(this.getTimestamp(), header.getTimestamp(), null, null, true));  // block timestamp can increase
-    this.setSize(MoneroUtils.reconcile(this.getSize(), header.getSize()));
-    this.setWeight(MoneroUtils.reconcile(this.getWeight(), header.getWeight()));
-    this.setDepth(MoneroUtils.reconcile(this.getDepth(), header.getDepth()));
-    this.setDifficulty(MoneroUtils.reconcile(this.getDifficulty(), header.getDifficulty()));
-    this.setCumulativeDifficulty(MoneroUtils.reconcile(this.getCumulativeDifficulty(), header.getCumulativeDifficulty()));
-    this.setMajorVersion(MoneroUtils.reconcile(this.getMajorVersion(), header.getMajorVersion()));
-    this.setMinorVersion(MoneroUtils.reconcile(this.getMinorVersion(), header.getMinorVersion()));
-    this.setNonce(MoneroUtils.reconcile(this.getNonce(), header.getNonce()));
-    this.setMinerTxId(MoneroUtils.reconcile(this.getMinerTxId(), header.getMinerTxId()));
-    this.setNumTxs(MoneroUtils.reconcile(this.getNumTxs(), header.getNumTxs()));
-    this.setOrphanStatus(MoneroUtils.reconcile(this.getOrphanStatus(), header.getOrphanStatus()));
-    this.setPrevId(MoneroUtils.reconcile(this.getPrevId(), header.getPrevId()));
-    this.setReward(MoneroUtils.reconcile(this.getReward(), header.getReward()));
-    this.setPowHash(MoneroUtils.reconcile(this.getPowHash(), header.getPowHash()));
+    this.setId(GenUtils.reconcile(this.getId(), header.getId()));
+    this.setHeight(GenUtils.reconcile(this.getHeight(), header.getHeight(), null, null, true));  // height can increase
+    this.setTimestamp(GenUtils.reconcile(this.getTimestamp(), header.getTimestamp(), null, null, true));  // block timestamp can increase
+    this.setSize(GenUtils.reconcile(this.getSize(), header.getSize()));
+    this.setWeight(GenUtils.reconcile(this.getWeight(), header.getWeight()));
+    this.setDepth(GenUtils.reconcile(this.getDepth(), header.getDepth()));
+    this.setDifficulty(GenUtils.reconcile(this.getDifficulty(), header.getDifficulty()));
+    this.setCumulativeDifficulty(GenUtils.reconcile(this.getCumulativeDifficulty(), header.getCumulativeDifficulty()));
+    this.setMajorVersion(GenUtils.reconcile(this.getMajorVersion(), header.getMajorVersion()));
+    this.setMinorVersion(GenUtils.reconcile(this.getMinorVersion(), header.getMinorVersion()));
+    this.setNonce(GenUtils.reconcile(this.getNonce(), header.getNonce()));
+    this.setMinerTxId(GenUtils.reconcile(this.getMinerTxId(), header.getMinerTxId()));
+    this.setNumTxs(GenUtils.reconcile(this.getNumTxs(), header.getNumTxs()));
+    this.setOrphanStatus(GenUtils.reconcile(this.getOrphanStatus(), header.getOrphanStatus()));
+    this.setPrevId(GenUtils.reconcile(this.getPrevId(), header.getPrevId()));
+    this.setReward(GenUtils.reconcile(this.getReward(), header.getReward()));
+    this.setPowHash(GenUtils.reconcile(this.getPowHash(), header.getPowHash()));
     return this;
   }
   
@@ -255,23 +254,23 @@ public class MoneroBlockHeader {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
-    sb.append(MoneroUtils.kvLine("Id", getId(), indent));
-    sb.append(MoneroUtils.kvLine("Height", getHeight(), indent));
-    sb.append(MoneroUtils.kvLine("Timestamp", getTimestamp(), indent));
-    sb.append(MoneroUtils.kvLine("Size", getSize(), indent));
-    sb.append(MoneroUtils.kvLine("Weight", getWeight(), indent));
-    sb.append(MoneroUtils.kvLine("Depth", getDepth(), indent));
-    sb.append(MoneroUtils.kvLine("Difficulty", getDifficulty(), indent));
-    sb.append(MoneroUtils.kvLine("Cumulative difficulty", getCumulativeDifficulty(), indent));
-    sb.append(MoneroUtils.kvLine("Major version", getMajorVersion(), indent));
-    sb.append(MoneroUtils.kvLine("Minor version", getMinorVersion(), indent));
-    sb.append(MoneroUtils.kvLine("Nonce", getNonce(), indent));
-    sb.append(MoneroUtils.kvLine("Miner tx id", getMinerTxId(), indent));
-    sb.append(MoneroUtils.kvLine("Num txs", getNumTxs(), indent));
-    sb.append(MoneroUtils.kvLine("Orphan status", getOrphanStatus(), indent));
-    sb.append(MoneroUtils.kvLine("Prev id", getPrevId(), indent));
-    sb.append(MoneroUtils.kvLine("Reward", getReward(), indent));
-    sb.append(MoneroUtils.kvLine("Pow hash", getPowHash(), indent));
+    sb.append(GenUtils.kvLine("Id", getId(), indent));
+    sb.append(GenUtils.kvLine("Height", getHeight(), indent));
+    sb.append(GenUtils.kvLine("Timestamp", getTimestamp(), indent));
+    sb.append(GenUtils.kvLine("Size", getSize(), indent));
+    sb.append(GenUtils.kvLine("Weight", getWeight(), indent));
+    sb.append(GenUtils.kvLine("Depth", getDepth(), indent));
+    sb.append(GenUtils.kvLine("Difficulty", getDifficulty(), indent));
+    sb.append(GenUtils.kvLine("Cumulative difficulty", getCumulativeDifficulty(), indent));
+    sb.append(GenUtils.kvLine("Major version", getMajorVersion(), indent));
+    sb.append(GenUtils.kvLine("Minor version", getMinorVersion(), indent));
+    sb.append(GenUtils.kvLine("Nonce", getNonce(), indent));
+    sb.append(GenUtils.kvLine("Miner tx id", getMinerTxId(), indent));
+    sb.append(GenUtils.kvLine("Num txs", getNumTxs(), indent));
+    sb.append(GenUtils.kvLine("Orphan status", getOrphanStatus(), indent));
+    sb.append(GenUtils.kvLine("Prev id", getPrevId(), indent));
+    sb.append(GenUtils.kvLine("Reward", getReward(), indent));
+    sb.append(GenUtils.kvLine("Pow hash", getPowHash(), indent));
     String str = sb.toString();
     if (str.isEmpty()) return "";
     return str.charAt(str.length() - 1) == '\n' ? str.substring(0, str.length() - 1) : str; // strip newline

@@ -96,8 +96,8 @@ public class MoneroBlock extends MoneroBlockHeader {
     super.merge(block);
     
     // merge reconcilable block extensions
-    this.setHex(MoneroUtils.reconcile(this.getHex(), block.getHex()));
-    this.setTxIds(MoneroUtils.reconcile(this.getTxIds(), block.getTxIds()));
+    this.setHex(GenUtils.reconcile(this.getHex(), block.getHex()));
+    this.setTxIds(GenUtils.reconcile(this.getTxIds(), block.getTxIds()));
     
     // merge miner tx
     if (this.getMinerTx() == null) this.setMinerTx(block.getMinerTx());
@@ -121,14 +121,14 @@ public class MoneroBlock extends MoneroBlockHeader {
     StringBuilder sb = new StringBuilder();
     sb.append(super.toString(indent));
     sb.append("\n");
-    sb.append(MoneroUtils.kvLine("Hex", getHex(), indent));
-    sb.append(MoneroUtils.kvLine("Txs ids", getTxIds(), indent));
+    sb.append(GenUtils.kvLine("Hex", getHex(), indent));
+    sb.append(GenUtils.kvLine("Txs ids", getTxIds(), indent));
     if (getMinerTx() != null) {
-      sb.append(MoneroUtils.kvLine("Miner tx", "", indent));
+      sb.append(GenUtils.kvLine("Miner tx", "", indent));
       sb.append(getMinerTx().toString(indent + 1) + "\n");
     }
     if (getTxs() != null) {
-      sb.append(MoneroUtils.kvLine("Txs", "", indent));
+      sb.append(GenUtils.kvLine("Txs", "", indent));
       for (MoneroTx tx : getTxs()) {
         sb.append(tx.toString(indent + 1) + "\n");
       }

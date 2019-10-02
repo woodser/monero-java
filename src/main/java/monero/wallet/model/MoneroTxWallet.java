@@ -8,11 +8,11 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import common.utils.GenUtils;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroException;
-import monero.utils.MoneroUtils;
 
 /**
  * Models a Monero transaction with wallet extensions.
@@ -206,7 +206,7 @@ public class MoneroTxWallet extends MoneroTx {
     }
     
     // merge simple extensions
-    this.setNote(MoneroUtils.reconcile(this.getNote(), tx.getNote()));
+    this.setNote(GenUtils.reconcile(this.getNote(), tx.getNote()));
     
     return this;  // for chaining
   }
@@ -235,22 +235,22 @@ public class MoneroTxWallet extends MoneroTx {
     
     // otherwise stringify all fields
     sb.append(super.toString(indent) + "\n");
-    sb.append(MoneroUtils.kvLine("Is incoming", this.isIncoming(), indent));
-    sb.append(MoneroUtils.kvLine("Incoming amount", this.getIncomingAmount(), indent));
+    sb.append(GenUtils.kvLine("Is incoming", this.isIncoming(), indent));
+    sb.append(GenUtils.kvLine("Incoming amount", this.getIncomingAmount(), indent));
     if (this.getIncomingTransfers() != null) {
-      sb.append(MoneroUtils.kvLine("Incoming transfers", "", indent));
+      sb.append(GenUtils.kvLine("Incoming transfers", "", indent));
       for (int i = 0; i < this.getIncomingTransfers().size(); i++) {
-        sb.append(MoneroUtils.kvLine(i + 1, "", indent + 1));
+        sb.append(GenUtils.kvLine(i + 1, "", indent + 1));
         sb.append(this.getIncomingTransfers().get(i).toString(indent + 2) + "\n");
       }
     }
-    sb.append(MoneroUtils.kvLine("Is outgoing", this.isOutgoing(), indent));
-    sb.append(MoneroUtils.kvLine("Outgoing amount", this.getOutgoingAmount(), indent));
+    sb.append(GenUtils.kvLine("Is outgoing", this.isOutgoing(), indent));
+    sb.append(GenUtils.kvLine("Outgoing amount", this.getOutgoingAmount(), indent));
     if (this.getOutgoingTransfer() != null) {
-      sb.append(MoneroUtils.kvLine("Outgoing transfer", "", indent));
+      sb.append(GenUtils.kvLine("Outgoing transfer", "", indent));
       sb.append(this.getOutgoingTransfer().toString(indent + 1) + "\n");
     }
-    sb.append(MoneroUtils.kvLine("Note: ", this.getNote(), indent));
+    sb.append(GenUtils.kvLine("Note: ", this.getNote(), indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);  // strip last newline
   }

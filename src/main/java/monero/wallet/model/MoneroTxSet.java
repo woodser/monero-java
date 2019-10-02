@@ -74,9 +74,9 @@ public class MoneroTxSet {
     if (this == txSet) return this;
     
     // merge sets
-    this.setMultisigTxHex(MoneroUtils.reconcile(this.getMultisigTxHex(), txSet.getMultisigTxHex()));
-    this.setUnsignedTxHex(MoneroUtils.reconcile(this.getUnsignedTxHex(), txSet.getUnsignedTxHex()));
-    this.setSignedTxHex(MoneroUtils.reconcile(this.getSignedTxHex(), txSet.getSignedTxHex()));
+    this.setMultisigTxHex(GenUtils.reconcile(this.getMultisigTxHex(), txSet.getMultisigTxHex()));
+    this.setUnsignedTxHex(GenUtils.reconcile(this.getUnsignedTxHex(), txSet.getUnsignedTxHex()));
+    this.setSignedTxHex(GenUtils.reconcile(this.getSignedTxHex(), txSet.getSignedTxHex()));
     
     // merge txs
     if (txSet.getTxs() != null) {
@@ -96,11 +96,11 @@ public class MoneroTxSet {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
-    sb.append(MoneroUtils.kvLine("Multisig tx hex: ", getMultisigTxHex(), indent));
-    sb.append(MoneroUtils.kvLine("Unsigned tx hex: ", getUnsignedTxHex(), indent));
-    sb.append(MoneroUtils.kvLine("Signed tx hex: ", getSignedTxHex(), indent));
+    sb.append(GenUtils.kvLine("Multisig tx hex: ", getMultisigTxHex(), indent));
+    sb.append(GenUtils.kvLine("Unsigned tx hex: ", getUnsignedTxHex(), indent));
+    sb.append(GenUtils.kvLine("Signed tx hex: ", getSignedTxHex(), indent));
     if (getTxs() != null) {
-      sb.append(MoneroUtils.kvLine("Txs", "", indent));
+      sb.append(GenUtils.kvLine("Txs", "", indent));
       for (MoneroTx tx : getTxs()) {
         sb.append(tx.toString(indent + 1) + "\n");
       }

@@ -3,10 +3,10 @@ package monero.wallet.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import common.utils.GenUtils;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.utils.MoneroException;
-import monero.utils.MoneroUtils;
 
 /**
  * Models a Monero output with wallet extensions.
@@ -119,20 +119,20 @@ public class MoneroOutputWallet extends MoneroOutput {
   public MoneroOutputWallet merge(MoneroOutputWallet output) {
     if (this == output) return this;
     super.merge(output);
-    this.setAccountIndex(MoneroUtils.reconcile(this.getAccountIndex(), output.getAccountIndex()));
-    this.setSubaddressIndex(MoneroUtils.reconcile(this.getSubaddressIndex(), output.getSubaddressIndex()));
-    this.setIsSpent(MoneroUtils.reconcile(this.isSpent(), output.isSpent(), null, true, null)); // output can become spent
+    this.setAccountIndex(GenUtils.reconcile(this.getAccountIndex(), output.getAccountIndex()));
+    this.setSubaddressIndex(GenUtils.reconcile(this.getSubaddressIndex(), output.getSubaddressIndex()));
+    this.setIsSpent(GenUtils.reconcile(this.isSpent(), output.isSpent(), null, true, null)); // output can become spent
     return this;
   }
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
     sb.append(super.toString(indent) + "\n");
-    sb.append(MoneroUtils.kvLine("Account index", this.getAccountIndex(), indent));
-    sb.append(MoneroUtils.kvLine("Subaddress index", this.getSubaddressIndex(), indent));
-    sb.append(MoneroUtils.kvLine("Is spent", this.isSpent(), indent));
-    sb.append(MoneroUtils.kvLine("Is unlocked", this.isUnlocked(), indent));
-    sb.append(MoneroUtils.kvLine("Is frozen", this.isFrozen(), indent));
+    sb.append(GenUtils.kvLine("Account index", this.getAccountIndex(), indent));
+    sb.append(GenUtils.kvLine("Subaddress index", this.getSubaddressIndex(), indent));
+    sb.append(GenUtils.kvLine("Is spent", this.isSpent(), indent));
+    sb.append(GenUtils.kvLine("Is unlocked", this.isUnlocked(), indent));
+    sb.append(GenUtils.kvLine("Is frozen", this.isFrozen(), indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);  // strip last newline
   }

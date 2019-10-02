@@ -1,7 +1,6 @@
 package monero.daemon.model;
 
 import common.utils.GenUtils;
-import monero.utils.MoneroUtils;
 
 /**
  * Models a Monero key image.
@@ -54,8 +53,8 @@ public class MoneroKeyImage {
   public MoneroKeyImage merge(MoneroKeyImage keyImage) {
     GenUtils.assertTrue(keyImage instanceof MoneroKeyImage);
     if (keyImage == this) return this;
-    this.setHex(MoneroUtils.reconcile(this.getHex(), keyImage.getHex()));
-    this.setSignature(MoneroUtils.reconcile(this.getSignature(), keyImage.getSignature()));
+    this.setHex(GenUtils.reconcile(this.getHex(), keyImage.getHex()));
+    this.setSignature(GenUtils.reconcile(this.getSignature(), keyImage.getSignature()));
     return this;
   }
   
@@ -65,8 +64,8 @@ public class MoneroKeyImage {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
-    sb.append(MoneroUtils.kvLine("Hex", getHex(), indent));
-    sb.append(MoneroUtils.kvLine("Signature", getSignature(), indent));
+    sb.append(GenUtils.kvLine("Hex", getHex(), indent));
+    sb.append(GenUtils.kvLine("Signature", getSignature(), indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);  // strip newline
   }

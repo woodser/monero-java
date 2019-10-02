@@ -67,7 +67,6 @@ import monero.rpc.MoneroRpcConnection;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroCppUtils;
 import monero.utils.MoneroException;
-import monero.utils.MoneroUtils;
 
 /**
  * Implements a Monero daemon using monero-daemon-rpc.
@@ -976,7 +975,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("expected_reward")) template.setExpectedReward((BigInteger) val);
       else if (key.equals("difficulty")) { }  // handled by wide_difficulty
       else if (key.equals("difficulty_top64")) { }  // handled by wide_difficulty
-      else if (key.equals("wide_difficulty")) template.setDifficulty(MoneroUtils.reconcile(template.getDifficulty(), prefixedHexToBI((String) val)));
+      else if (key.equals("wide_difficulty")) template.setDifficulty(GenUtils.reconcile(template.getDifficulty(), prefixedHexToBI((String) val)));
       else if (key.equals("height")) template.setHeight(((BigInteger) val).longValue());
       else if (key.equals("prev_hash")) template.setPrevId((String) val);
       else if (key.equals("reserved_offset")) template.setReservedOffset(((BigInteger) val).longValue());
@@ -995,27 +994,27 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     if (header == null) header = new MoneroBlockHeader();
     for (String key : rpcHeader.keySet()) {
       Object val = rpcHeader.get(key);
-      if (key.equals("block_size")) header.setSize(MoneroUtils.reconcile(header.getSize(), ((BigInteger) val).longValue()));
-      else if (key.equals("depth")) header.setDepth(MoneroUtils.reconcile(header.getDepth(), ((BigInteger) val).longValue()));
+      if (key.equals("block_size")) header.setSize(GenUtils.reconcile(header.getSize(), ((BigInteger) val).longValue()));
+      else if (key.equals("depth")) header.setDepth(GenUtils.reconcile(header.getDepth(), ((BigInteger) val).longValue()));
       else if (key.equals("difficulty")) { }  // handled by wide_difficulty
       else if (key.equals("cumulative_difficulty")) { } // handled by wide_cumulative_difficulty
       else if (key.equals("difficulty_top64")) { }  // handled by wide_difficulty
       else if (key.equals("cumulative_difficulty_top64")) { } // handled by wide_cumulative_difficulty
-      else if (key.equals("wide_difficulty")) header.setDifficulty(MoneroUtils.reconcile(header.getDifficulty(), prefixedHexToBI((String) val)));
-      else if (key.equals("wide_cumulative_difficulty")) header.setCumulativeDifficulty(MoneroUtils.reconcile(header.getCumulativeDifficulty(), prefixedHexToBI((String) val)));
-      else if (key.equals("hash")) header.setId(MoneroUtils.reconcile(header.getId(), (String) val));
-      else if (key.equals("height")) header.setHeight(MoneroUtils.reconcile(header.getHeight(), ((BigInteger) val).longValue()));
-      else if (key.equals("major_version")) header.setMajorVersion(MoneroUtils.reconcile(header.getMajorVersion(), ((BigInteger) val).intValue()));
-      else if (key.equals("minor_version")) header.setMinorVersion(MoneroUtils.reconcile(header.getMinorVersion(), ((BigInteger) val).intValue()));
-      else if (key.equals("nonce")) header.setNonce(MoneroUtils.reconcile(header.getNonce(), ((BigInteger) val).intValue()));
-      else if (key.equals("num_txes")) header.setNumTxs(MoneroUtils.reconcile(header.getNumTxs(), ((BigInteger) val).intValue()));
-      else if (key.equals("orphan_status")) header.setOrphanStatus(MoneroUtils.reconcile(header.getOrphanStatus(), (Boolean) val));
-      else if (key.equals("prev_hash") || key.equals("prev_id")) header.setPrevId(MoneroUtils.reconcile(header.getPrevId(), (String) val));
-      else if (key.equals("reward")) header.setReward(MoneroUtils.reconcile(header.getReward(), (BigInteger) val));
-      else if (key.equals("timestamp")) header.setTimestamp(MoneroUtils.reconcile(header.getTimestamp(), ((BigInteger) val).longValue()));
-      else if (key.equals("block_weight")) header.setWeight(MoneroUtils.reconcile(header.getWeight(), ((BigInteger) val).longValue()));
-      else if (key.equals("long_term_weight")) header.setLongTermWeight(MoneroUtils.reconcile(header.getLongTermWeight(), ((BigInteger) val).longValue()));
-      else if (key.equals("pow_hash")) header.setPowHash(MoneroUtils.reconcile(header.getPowHash(), "".equals(val) ? null : (String) val));
+      else if (key.equals("wide_difficulty")) header.setDifficulty(GenUtils.reconcile(header.getDifficulty(), prefixedHexToBI((String) val)));
+      else if (key.equals("wide_cumulative_difficulty")) header.setCumulativeDifficulty(GenUtils.reconcile(header.getCumulativeDifficulty(), prefixedHexToBI((String) val)));
+      else if (key.equals("hash")) header.setId(GenUtils.reconcile(header.getId(), (String) val));
+      else if (key.equals("height")) header.setHeight(GenUtils.reconcile(header.getHeight(), ((BigInteger) val).longValue()));
+      else if (key.equals("major_version")) header.setMajorVersion(GenUtils.reconcile(header.getMajorVersion(), ((BigInteger) val).intValue()));
+      else if (key.equals("minor_version")) header.setMinorVersion(GenUtils.reconcile(header.getMinorVersion(), ((BigInteger) val).intValue()));
+      else if (key.equals("nonce")) header.setNonce(GenUtils.reconcile(header.getNonce(), ((BigInteger) val).intValue()));
+      else if (key.equals("num_txes")) header.setNumTxs(GenUtils.reconcile(header.getNumTxs(), ((BigInteger) val).intValue()));
+      else if (key.equals("orphan_status")) header.setOrphanStatus(GenUtils.reconcile(header.getOrphanStatus(), (Boolean) val));
+      else if (key.equals("prev_hash") || key.equals("prev_id")) header.setPrevId(GenUtils.reconcile(header.getPrevId(), (String) val));
+      else if (key.equals("reward")) header.setReward(GenUtils.reconcile(header.getReward(), (BigInteger) val));
+      else if (key.equals("timestamp")) header.setTimestamp(GenUtils.reconcile(header.getTimestamp(), ((BigInteger) val).longValue()));
+      else if (key.equals("block_weight")) header.setWeight(GenUtils.reconcile(header.getWeight(), ((BigInteger) val).longValue()));
+      else if (key.equals("long_term_weight")) header.setLongTermWeight(GenUtils.reconcile(header.getLongTermWeight(), ((BigInteger) val).longValue()));
+      else if (key.equals("pow_hash")) header.setPowHash(GenUtils.reconcile(header.getPowHash(), "".equals(val) ? null : (String) val));
       else if (key.equals("tx_hashes")) {}  // used in block model, not header model
       else if (key.equals("miner_tx")) {}   // used in block model, not header model
       else if (key.equals("miner_tx_hash")) header.setMinerTxId((String) val);
@@ -1064,27 +1063,27 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     MoneroBlock block = null;
     for (String key : rpcTx.keySet()) {
       Object val = rpcTx.get(key);
-      if (key.equals("tx_hash") || key.equals("id_hash")) tx.setId(MoneroUtils.reconcile(tx.getId(), (String) val));
+      if (key.equals("tx_hash") || key.equals("id_hash")) tx.setId(GenUtils.reconcile(tx.getId(), (String) val));
       else if (key.equals("block_timestamp")) {
         if (block == null) block = new MoneroBlock();
-        block.setTimestamp(MoneroUtils.reconcile(block.getTimestamp(), ((BigInteger) val).longValue()));
+        block.setTimestamp(GenUtils.reconcile(block.getTimestamp(), ((BigInteger) val).longValue()));
       }
       else if (key.equals("block_height")) {
         if (block == null) block = new MoneroBlock();
-        block.setHeight(MoneroUtils.reconcile(block.getHeight(), ((BigInteger) val).longValue()));
+        block.setHeight(GenUtils.reconcile(block.getHeight(), ((BigInteger) val).longValue()));
       }
-      else if (key.equals("last_relayed_time")) tx.setLastRelayedTimestamp(MoneroUtils.reconcile(tx.getLastRelayedTimestamp(), ((BigInteger) val).longValue()));
-      else if (key.equals("receive_time")) tx.setReceivedTimestamp(MoneroUtils.reconcile(tx.getReceivedTimestamp(), ((BigInteger) val).longValue()));
+      else if (key.equals("last_relayed_time")) tx.setLastRelayedTimestamp(GenUtils.reconcile(tx.getLastRelayedTimestamp(), ((BigInteger) val).longValue()));
+      else if (key.equals("receive_time")) tx.setReceivedTimestamp(GenUtils.reconcile(tx.getReceivedTimestamp(), ((BigInteger) val).longValue()));
       else if (key.equals("in_pool")) {
-        tx.setIsConfirmed(MoneroUtils.reconcile(tx.isConfirmed(), !(Boolean) val));
-        tx.setInTxPool(MoneroUtils.reconcile(tx.inTxPool(), (Boolean) val));
+        tx.setIsConfirmed(GenUtils.reconcile(tx.isConfirmed(), !(Boolean) val));
+        tx.setInTxPool(GenUtils.reconcile(tx.inTxPool(), (Boolean) val));
       }
-      else if (key.equals("double_spend_seen")) tx.setIsDoubleSpendSeen(MoneroUtils.reconcile(tx.isDoubleSpendSeen(), (Boolean) val));
-      else if (key.equals("version")) tx.setVersion(MoneroUtils.reconcile(tx.getVersion(), ((BigInteger) val).intValue()));
+      else if (key.equals("double_spend_seen")) tx.setIsDoubleSpendSeen(GenUtils.reconcile(tx.isDoubleSpendSeen(), (Boolean) val));
+      else if (key.equals("version")) tx.setVersion(GenUtils.reconcile(tx.getVersion(), ((BigInteger) val).intValue()));
       else if (key.equals("extra")) {
         List<Integer> ints = new ArrayList<Integer>();
         for (BigInteger bi : (List<BigInteger>) val) ints.add(bi.intValue());
-        tx.setExtra(MoneroUtils.reconcile(tx.getExtra(), GenUtils.listToIntArray(ints)));
+        tx.setExtra(GenUtils.reconcile(tx.getExtra(), GenUtils.listToIntArray(ints)));
       }
       else if (key.equals("vin")) {
         List<Map<String, Object>> rpcVins = (List<Map<String, Object>>) val;
@@ -1100,43 +1099,43 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         for (Map<String, Object> rpcVout : rpcVouts) vouts.add(convertRpcOutput(rpcVout, tx));
         tx.setVouts(vouts);
       }
-      else if (key.equals("rct_signatures")) tx.setRctSignatures(MoneroUtils.reconcile(tx.getRctSignatures(), (Map<String, Object>) val));
-      else if (key.equals("rctsig_prunable")) tx.setRctSigPrunable(MoneroUtils.reconcile(tx.getRctSigPrunable(), val));
-      else if (key.equals("unlock_time")) tx.setUnlockTime(MoneroUtils.reconcile(tx.getUnlockTime(), ((BigInteger) val).longValue()));
+      else if (key.equals("rct_signatures")) tx.setRctSignatures(GenUtils.reconcile(tx.getRctSignatures(), (Map<String, Object>) val));
+      else if (key.equals("rctsig_prunable")) tx.setRctSigPrunable(GenUtils.reconcile(tx.getRctSigPrunable(), val));
+      else if (key.equals("unlock_time")) tx.setUnlockTime(GenUtils.reconcile(tx.getUnlockTime(), ((BigInteger) val).longValue()));
       else if (key.equals("as_json") || key.equals("tx_json")) { }  // handled last so tx is as initialized as possible
-      else if (key.equals("as_hex") || key.equals("tx_blob")) tx.setFullHex(MoneroUtils.reconcile(tx.getFullHex(), "".equals((String) val) ? null : (String) val));
-      else if (key.equals("blob_size")) tx.setSize(MoneroUtils.reconcile(tx.getSize(), ((BigInteger) val).longValue()));
-      else if (key.equals("weight")) tx.setWeight(MoneroUtils.reconcile(tx.getWeight(), ((BigInteger) val).longValue()));
-      else if (key.equals("fee")) tx.setFee(MoneroUtils.reconcile(tx.getFee(), (BigInteger) val));
-      else if (key.equals("relayed")) tx.setIsRelayed(MoneroUtils.reconcile(tx.isRelayed(), (Boolean) val));
+      else if (key.equals("as_hex") || key.equals("tx_blob")) tx.setFullHex(GenUtils.reconcile(tx.getFullHex(), "".equals((String) val) ? null : (String) val));
+      else if (key.equals("blob_size")) tx.setSize(GenUtils.reconcile(tx.getSize(), ((BigInteger) val).longValue()));
+      else if (key.equals("weight")) tx.setWeight(GenUtils.reconcile(tx.getWeight(), ((BigInteger) val).longValue()));
+      else if (key.equals("fee")) tx.setFee(GenUtils.reconcile(tx.getFee(), (BigInteger) val));
+      else if (key.equals("relayed")) tx.setIsRelayed(GenUtils.reconcile(tx.isRelayed(), (Boolean) val));
       else if (key.equals("output_indices")) {
         List<Integer> indices = new ArrayList<Integer>();
         for (BigInteger bi : (List<BigInteger>) val) indices.add(bi.intValue());
-        tx.setOutputIndices(MoneroUtils.reconcile(tx.getOutputIndices(), indices));
+        tx.setOutputIndices(GenUtils.reconcile(tx.getOutputIndices(), indices));
       }
-      else if (key.equals("do_not_relay")) tx.setDoNotRelay(MoneroUtils.reconcile(tx.getDoNotRelay(), (Boolean) val));
-      else if (key.equals("kept_by_block")) tx.setIsKeptByBlock(MoneroUtils.reconcile(tx.isKeptByBlock(), (Boolean) val));
-      else if (key.equals("signatures")) tx.setSignatures(MoneroUtils.reconcile(tx.getSignatures(), (List<String>) val));
+      else if (key.equals("do_not_relay")) tx.setDoNotRelay(GenUtils.reconcile(tx.getDoNotRelay(), (Boolean) val));
+      else if (key.equals("kept_by_block")) tx.setIsKeptByBlock(GenUtils.reconcile(tx.isKeptByBlock(), (Boolean) val));
+      else if (key.equals("signatures")) tx.setSignatures(GenUtils.reconcile(tx.getSignatures(), (List<String>) val));
       else if (key.equals("last_failed_height")) {
         long lastFailedHeight = ((BigInteger) val).longValue();
-        if (lastFailedHeight == 0) tx.setIsFailed(MoneroUtils.reconcile(tx.isFailed(), false));
+        if (lastFailedHeight == 0) tx.setIsFailed(GenUtils.reconcile(tx.isFailed(), false));
         else {
-          tx.setIsFailed(MoneroUtils.reconcile(tx.isFailed(), true));
-          tx.setLastFailedHeight(MoneroUtils.reconcile(tx.getLastFailedHeight(), lastFailedHeight));
+          tx.setIsFailed(GenUtils.reconcile(tx.isFailed(), true));
+          tx.setLastFailedHeight(GenUtils.reconcile(tx.getLastFailedHeight(), lastFailedHeight));
         }
       }
       else if (key.equals("last_failed_id_hash")) {
-        if (DEFAULT_ID.equals((String) val)) tx.setIsFailed(MoneroUtils.reconcile(tx.isFailed(), false));
+        if (DEFAULT_ID.equals((String) val)) tx.setIsFailed(GenUtils.reconcile(tx.isFailed(), false));
         else {
-          tx.setIsFailed(MoneroUtils.reconcile(tx.isFailed(), true));
-          tx.setLastFailedId(MoneroUtils.reconcile(tx.getLastFailedId(), (String) val));
+          tx.setIsFailed(GenUtils.reconcile(tx.isFailed(), true));
+          tx.setLastFailedId(GenUtils.reconcile(tx.getLastFailedId(), (String) val));
         }
       }
-      else if (key.equals("max_used_block_height")) tx.setMaxUsedBlockHeight(MoneroUtils.reconcile(tx.getMaxUsedBlockHeight(), ((BigInteger) val).longValue()));
-      else if (key.equals("max_used_block_id_hash")) tx.setMaxUsedBlockId(MoneroUtils.reconcile(tx.getMaxUsedBlockId(), (String) val));
-      else if (key.equals("prunable_hash")) tx.setPrunableHash(MoneroUtils.reconcile(tx.getPrunableHash(), "".equals((String) val) ? null : (String) val));
-      else if (key.equals("prunable_as_hex")) tx.setPrunableHex(MoneroUtils.reconcile(tx.getPrunableHex(), "".equals((String) val) ? null : (String) val));
-      else if (key.equals("pruned_as_hex")) tx.setPrunedHex(MoneroUtils.reconcile(tx.getPrunedHex(), "".equals((String) val) ? null : (String) val));
+      else if (key.equals("max_used_block_height")) tx.setMaxUsedBlockHeight(GenUtils.reconcile(tx.getMaxUsedBlockHeight(), ((BigInteger) val).longValue()));
+      else if (key.equals("max_used_block_id_hash")) tx.setMaxUsedBlockId(GenUtils.reconcile(tx.getMaxUsedBlockId(), (String) val));
+      else if (key.equals("prunable_hash")) tx.setPrunableHash(GenUtils.reconcile(tx.getPrunableHash(), "".equals((String) val) ? null : (String) val));
+      else if (key.equals("prunable_as_hex")) tx.setPrunableHex(GenUtils.reconcile(tx.getPrunableHex(), "".equals((String) val) ? null : (String) val));
+      else if (key.equals("pruned_as_hex")) tx.setPrunedHex(GenUtils.reconcile(tx.getPrunedHex(), "".equals((String) val) ? null : (String) val));
       else LOGGER.warning("WARNING: ignoring unexpected field in rpc tx: " + key + ": " + val);
     }
     
@@ -1151,9 +1150,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     
     // initialize remaining known fields
     if (tx.isConfirmed()) {
-      tx.setIsRelayed(MoneroUtils.reconcile(tx.isRelayed(), true));
-      tx.setDoNotRelay(MoneroUtils.reconcile(tx.getDoNotRelay(), false));
-      tx.setIsFailed(MoneroUtils.reconcile(tx.isFailed(), false));
+      tx.setIsRelayed(GenUtils.reconcile(tx.isRelayed(), true));
+      tx.setDoNotRelay(GenUtils.reconcile(tx.getDoNotRelay(), false));
+      tx.setIsFailed(GenUtils.reconcile(tx.isFailed(), false));
     } else {
       tx.setNumConfirmations(0l);
     }
@@ -1181,14 +1180,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       if (key.equals("gen")) throw new Error("Output with 'gen' from daemon rpc is miner tx which we ignore (i.e. each miner vin is null)");
       else if (key.equals("key")) {
         Map<String, Object> rpcKey = (Map<String, Object>) val;
-        output.setAmount(MoneroUtils.reconcile(output.getAmount(), (BigInteger) rpcKey.get("amount")));
-        output.setKeyImage(MoneroUtils.reconcile(output.getKeyImage(), new MoneroKeyImage((String) rpcKey.get("k_image"))));
+        output.setAmount(GenUtils.reconcile(output.getAmount(), (BigInteger) rpcKey.get("amount")));
+        output.setKeyImage(GenUtils.reconcile(output.getKeyImage(), new MoneroKeyImage((String) rpcKey.get("k_image"))));
         List<Integer> ringOutputIndices = new ArrayList<Integer>();
         for (BigInteger bi : (List<BigInteger>) rpcKey.get("key_offsets")) ringOutputIndices.add(bi.intValue());
-        output.setRingOutputIndices(MoneroUtils.reconcile(output.getRingOutputIndices(), ringOutputIndices));
+        output.setRingOutputIndices(GenUtils.reconcile(output.getRingOutputIndices(), ringOutputIndices));
       }
-      else if (key.equals("amount")) output.setAmount(MoneroUtils.reconcile(output.getAmount(), (BigInteger) val));
-      else if (key.equals("target")) output.setStealthPublicKey(MoneroUtils.reconcile(output.getStealthPublicKey(), (String) ((Map<String, Object>) val).get("key")));
+      else if (key.equals("amount")) output.setAmount(GenUtils.reconcile(output.getAmount(), (BigInteger) val));
+      else if (key.equals("target")) output.setStealthPublicKey(GenUtils.reconcile(output.getStealthPublicKey(), (String) ((Map<String, Object>) val).get("key")));
       else LOGGER.warning("WARNING: ignoring unexpected field output: " + key + ": " + val);
     }
     return output;
@@ -1324,8 +1323,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("cumulative_difficulty")) { } // handled by wide_cumulative_difficulty
       else if (key.equals("difficulty_top64")) { }  // handled by wide_difficulty
       else if (key.equals("cumulative_difficulty_top64")) { } // handled by wide_cumulative_difficulty
-      else if (key.equals("wide_difficulty")) info.setDifficulty(MoneroUtils.reconcile(info.getDifficulty(), prefixedHexToBI((String) val)));
-      else if (key.equals("wide_cumulative_difficulty")) info.setCumulativeDifficulty(MoneroUtils.reconcile(info.getCumulativeDifficulty(), prefixedHexToBI((String) val)));
+      else if (key.equals("wide_difficulty")) info.setDifficulty(GenUtils.reconcile(info.getDifficulty(), prefixedHexToBI((String) val)));
+      else if (key.equals("wide_cumulative_difficulty")) info.setCumulativeDifficulty(GenUtils.reconcile(info.getCumulativeDifficulty(), prefixedHexToBI((String) val)));
       else if (key.equals("free_space")) info.setFreeSpace((BigInteger) val);
       else if (key.equals("database_size")) info.setDatabaseSize(((BigInteger) val).longValue());
       else if (key.equals("grey_peerlist_size")) info.setNumOfflinePeers(((BigInteger) val).intValue());
@@ -1346,10 +1345,10 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("was_bootstrap_ever_used")) info.setWasBootstrapEverUsed((Boolean) val);
       else if (key.equals("white_peerlist_size")) info.setNumOnlinePeers(((BigInteger) val).intValue());
       else if (key.equals("update_available")) info.setUpdateAvailable((Boolean) val);
-      else if (key.equals("nettype")) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroDaemon.parseNetworkType((String) val)));
-      else if (key.equals("mainnet")) { if ((Boolean) val) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroNetworkType.MAINNET)); }
-      else if (key.equals("testnet")) { if ((Boolean) val) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroNetworkType.TESTNET)); }
-      else if (key.equals("stagenet")) { if ((Boolean) val) info.setNetworkType(MoneroUtils.reconcile(info.getNetworkType(), MoneroNetworkType.STAGENET)); }
+      else if (key.equals("nettype")) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroDaemon.parseNetworkType((String) val)));
+      else if (key.equals("mainnet")) { if ((Boolean) val) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroNetworkType.MAINNET)); }
+      else if (key.equals("testnet")) { if ((Boolean) val) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroNetworkType.TESTNET)); }
+      else if (key.equals("stagenet")) { if ((Boolean) val) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroNetworkType.STAGENET)); }
       else LOGGER.warning("WARNING: Ignoring unexpected info field: " + key + ": " + val);
     }
     return info;
@@ -1461,7 +1460,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       if (key.equals("block_hash")) {}  // using block_hashes instead
       else if (key.equals("difficulty")) { } // handled by wide_difficulty
       else if (key.equals("difficulty_top64")) { }  // handled by wide_difficulty
-      else if (key.equals("wide_difficulty")) chain.setDifficulty(MoneroUtils.reconcile(chain.getDifficulty(), prefixedHexToBI((String) val)));
+      else if (key.equals("wide_difficulty")) chain.setDifficulty(GenUtils.reconcile(chain.getDifficulty(), prefixedHexToBI((String) val)));
       else if (key.equals("height")) chain.setHeight(((BigInteger) val).longValue());
       else if (key.equals("length")) chain.setLength(((BigInteger) val).longValue());
       else if (key.equals("block_hashes")) chain.setBlockIds((List<String>) val);

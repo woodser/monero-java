@@ -4,7 +4,7 @@ import java.math.BigInteger;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import monero.utils.MoneroUtils;
+import common.utils.GenUtils;
 
 /**
  * Monero subaddress model.
@@ -117,15 +117,15 @@ public class MoneroSubaddress {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
-    sb.append(MoneroUtils.kvLine("Account index", this.getAccountIndex(), indent));
-    sb.append(MoneroUtils.kvLine("Subaddress index", this.getIndex(), indent));
-    sb.append(MoneroUtils.kvLine("Address", this.getAddress(), indent));
-    sb.append(MoneroUtils.kvLine("Label", this.getLabel(), indent));
-    sb.append(MoneroUtils.kvLine("Balance", this.getBalance(), indent));
-    sb.append(MoneroUtils.kvLine("Unlocked balance", this.getUnlockedBalance(), indent));
-    sb.append(MoneroUtils.kvLine("Num unspent outputs", this.getNumUnspentOutputs(), indent));
-    sb.append(MoneroUtils.kvLine("Is used", this.isUsed(), indent));
-    sb.append(MoneroUtils.kvLine("Num blocks to unlock", this.getNumBlocksToUnlock(), indent));
+    sb.append(GenUtils.kvLine("Account index", this.getAccountIndex(), indent));
+    sb.append(GenUtils.kvLine("Subaddress index", this.getIndex(), indent));
+    sb.append(GenUtils.kvLine("Address", this.getAddress(), indent));
+    sb.append(GenUtils.kvLine("Label", this.getLabel(), indent));
+    sb.append(GenUtils.kvLine("Balance", this.getBalance(), indent));
+    sb.append(GenUtils.kvLine("Unlocked balance", this.getUnlockedBalance(), indent));
+    sb.append(GenUtils.kvLine("Num unspent outputs", this.getNumUnspentOutputs(), indent));
+    sb.append(GenUtils.kvLine("Is used", this.isUsed(), indent));
+    sb.append(GenUtils.kvLine("Num blocks to unlock", this.getNumBlocksToUnlock(), indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);  // strip last newline
   }

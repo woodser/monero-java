@@ -3,7 +3,7 @@ package monero.wallet.model;
 import java.math.BigInteger;
 import java.util.List;
 
-import monero.utils.MoneroUtils;
+import common.utils.GenUtils;
 
 /**
  * Monero account model.
@@ -89,15 +89,15 @@ public class MoneroAccount {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
-    sb.append(MoneroUtils.kvLine("Index", this.getIndex(), indent));
-    sb.append(MoneroUtils.kvLine("Primary address", this.getPrimaryAddress(), indent));
-    sb.append(MoneroUtils.kvLine("Balance", this.getBalance(), indent));
-    sb.append(MoneroUtils.kvLine("Unlocked balance", this.getUnlockedBalance(), indent));
-    sb.append(MoneroUtils.kvLine("Tag", this.getTag(), indent));
+    sb.append(GenUtils.kvLine("Index", this.getIndex(), indent));
+    sb.append(GenUtils.kvLine("Primary address", this.getPrimaryAddress(), indent));
+    sb.append(GenUtils.kvLine("Balance", this.getBalance(), indent));
+    sb.append(GenUtils.kvLine("Unlocked balance", this.getUnlockedBalance(), indent));
+    sb.append(GenUtils.kvLine("Tag", this.getTag(), indent));
     if (this.getSubaddresses() != null) {
-      sb.append(MoneroUtils.kvLine("Subaddresses", "", indent));
+      sb.append(GenUtils.kvLine("Subaddresses", "", indent));
       for (int i = 0; i < this.getSubaddresses().size(); i++) {
-        sb.append(MoneroUtils.kvLine(i + 1, "", indent + 1));
+        sb.append(GenUtils.kvLine(i + 1, "", indent + 1));
         sb.append(this.getSubaddresses().get(i).toString(indent + 2) + "\n");
       }
     }

@@ -7,7 +7,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
-import monero.utils.MoneroUtils;
 
 /**
  * Models an outgoing transfer of funds from the wallet.
@@ -90,9 +89,9 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
     super.merge(transfer);
     GenUtils.assertTrue(transfer instanceof MoneroOutgoingTransfer);
     if (this == transfer) return this;
-    this.setSubaddressIndices(MoneroUtils.reconcile(this.getSubaddressIndices(), transfer.getSubaddressIndices()));
-    this.setAddresses(MoneroUtils.reconcile(this.getAddresses(), transfer.getAddresses()));
-    this.setDestinations(MoneroUtils.reconcile(this.getDestinations(), transfer.getDestinations()));
+    this.setSubaddressIndices(GenUtils.reconcile(this.getSubaddressIndices(), transfer.getSubaddressIndices()));
+    this.setAddresses(GenUtils.reconcile(this.getAddresses(), transfer.getAddresses()));
+    this.setDestinations(GenUtils.reconcile(this.getDestinations(), transfer.getDestinations()));
     return this;
   }
   
@@ -103,12 +102,12 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
     sb.append(super.toString(indent) + "\n");
-    sb.append(MoneroUtils.kvLine("Subaddress indices", this.getSubaddressIndices(), indent));
-    sb.append(MoneroUtils.kvLine("Addresses", this.getAddresses(), indent));
+    sb.append(GenUtils.kvLine("Subaddress indices", this.getSubaddressIndices(), indent));
+    sb.append(GenUtils.kvLine("Addresses", this.getAddresses(), indent));
     if (this.getDestinations() != null) {
-      sb.append(MoneroUtils.kvLine("Destinations", "", indent));
+      sb.append(GenUtils.kvLine("Destinations", "", indent));
       for (int i = 0; i < this.getDestinations().size(); i++) {
-        sb.append(MoneroUtils.kvLine(i + 1, "", indent + 1));
+        sb.append(GenUtils.kvLine(i + 1, "", indent + 1));
         sb.append(getDestinations().get(i).toString(indent + 2) + "\n");
       }
     }

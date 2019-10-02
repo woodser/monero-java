@@ -13,9 +13,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import common.utils.GenUtils;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
-import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc.IncomingTransferComparator;
 import monero.wallet.model.MoneroAccount;
@@ -222,7 +222,7 @@ public class TestMoneroWalletsEqual {
     else {
       tgt.getOutgoingTransfer().setDestinations(src.getOutgoingTransfer().getDestinations());
       tgt.getOutgoingTransfer().setAmount(src.getOutgoingTransfer().getAmount());
-      tgt.getOutgoingTransfer().setNumSuggestedConfirmations(MoneroUtils.reconcile(src.getOutgoingTransfer().getNumSuggestedConfirmations(), tgt.getOutgoingTransfer().getNumSuggestedConfirmations(), null, null, true));  // suggested confirmations can grow with amount
+      tgt.getOutgoingTransfer().setNumSuggestedConfirmations(GenUtils.reconcile(src.getOutgoingTransfer().getNumSuggestedConfirmations(), tgt.getOutgoingTransfer().getNumSuggestedConfirmations(), null, null, true));  // suggested confirmations can grow with amount
     }
   }
   

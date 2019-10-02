@@ -7,7 +7,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import common.utils.GenUtils;
-import monero.utils.MoneroUtils;
 
 /**
  * Models a Monero transaction output.
@@ -107,8 +106,8 @@ public class MoneroOutput {
     else {
       if (this.getKeyImage() == null) this.setKeyImage(output.getKeyImage());
       else if (output.getKeyImage() != null) this.getKeyImage().merge(output.getKeyImage());
-      this.setAmount(MoneroUtils.reconcile(this.getAmount(), output.getAmount()));
-      this.setIndex(MoneroUtils.reconcile(this.getIndex(), output.getIndex()));
+      this.setAmount(GenUtils.reconcile(this.getAmount(), output.getAmount()));
+      this.setIndex(GenUtils.reconcile(this.getIndex(), output.getIndex()));
     }
 
     return this;
@@ -117,13 +116,13 @@ public class MoneroOutput {
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
     if (getKeyImage() != null) {
-      sb.append(MoneroUtils.kvLine("Key image", "", indent));
+      sb.append(GenUtils.kvLine("Key image", "", indent));
       sb.append(getKeyImage().toString(indent + 1) + "\n");
     }
-    sb.append(MoneroUtils.kvLine("Amount", getAmount(), indent));
-    sb.append(MoneroUtils.kvLine("Index", getIndex(), indent));
-    sb.append(MoneroUtils.kvLine("Ring output indices", getRingOutputIndices(), indent));
-    sb.append(MoneroUtils.kvLine("Stealth public key", getStealthPublicKey(), indent));
+    sb.append(GenUtils.kvLine("Amount", getAmount(), indent));
+    sb.append(GenUtils.kvLine("Index", getIndex(), indent));
+    sb.append(GenUtils.kvLine("Ring output indices", getRingOutputIndices(), indent));
+    sb.append(GenUtils.kvLine("Stealth public key", getStealthPublicKey(), indent));
     String str = sb.toString();
     return str.isEmpty() ? str : str.substring(0, str.length() - 1);  // strip newline
   }

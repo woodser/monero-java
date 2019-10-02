@@ -2,7 +2,7 @@ package monero.wallet.model;
 
 import java.math.BigInteger;
 
-import monero.utils.MoneroUtils;
+import common.utils.GenUtils;
 
 /**
  * Models an outgoing transfer destination.
@@ -58,8 +58,8 @@ public class MoneroDestination {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
-    sb.append(MoneroUtils.kvLine("Address", this.getAddress(), indent));
-    sb.append(MoneroUtils.kvLine("Amount", this.getAmount() != null ? this.getAmount().toString() : null, indent));
+    sb.append(GenUtils.kvLine("Address", this.getAddress(), indent));
+    sb.append(GenUtils.kvLine("Amount", this.getAmount() != null ? this.getAmount().toString() : null, indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);
   }

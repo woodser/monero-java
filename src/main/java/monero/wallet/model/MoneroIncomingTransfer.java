@@ -5,7 +5,6 @@ import java.math.BigInteger;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
-import monero.utils.MoneroUtils;
 
 /**
  * Models an incoming transfer of funds to the wallet.
@@ -72,8 +71,8 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     super.merge(transfer);
     assert(transfer instanceof MoneroIncomingTransfer);
     if (this == transfer) return this;
-    this.setSubaddressIndex(MoneroUtils.reconcile(this.getSubaddressIndex(), transfer.getSubaddressIndex()));
-    this.setAddress(MoneroUtils.reconcile(this.getAddress(), transfer.getAddress()));
+    this.setSubaddressIndex(GenUtils.reconcile(this.getSubaddressIndex(), transfer.getSubaddressIndex()));
+    this.setAddress(GenUtils.reconcile(this.getAddress(), transfer.getAddress()));
     return this;
   }
   
@@ -84,8 +83,8 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
     sb.append(super.toString(indent) + "\n");
-    sb.append(MoneroUtils.kvLine("Subaddress index", this.getSubaddressIndex(), indent));
-    sb.append(MoneroUtils.kvLine("Address", this.getAddress(), indent));
+    sb.append(GenUtils.kvLine("Subaddress index", this.getSubaddressIndex(), indent));
+    sb.append(GenUtils.kvLine("Address", this.getAddress(), indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);
   }
