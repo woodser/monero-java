@@ -1,9 +1,5 @@
 package monero.daemon.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -544,7 +540,7 @@ public class MoneroTx {
         int numIndices = 0;
         for (MoneroOutput vout : this.getVouts()) if (vout.getIndex() != null) numIndices++;
         for (MoneroOutput vout : tx.getVouts()) if (vout.getIndex() != null) numIndices++;
-        assertTrue("Some vouts have an output index and some do not", numIndices == 0 || this.getVouts().size() + tx.getVouts().size() == numIndices);
+        GenUtils.assertTrue("Some vouts have an output index and some do not", numIndices == 0 || this.getVouts().size() + tx.getVouts().size() == numIndices);
         
         // merge by output indices if present
         if (numIndices > 0) {
@@ -567,17 +563,17 @@ public class MoneroTx {
           int numKeyImages = 0;
           for (MoneroOutput vout : this.getVouts()) {
             if (vout.getKeyImage() != null) {
-              assertNotNull(vout.getKeyImage().getHex());
+              GenUtils.assertNotNull(vout.getKeyImage().getHex());
               numKeyImages++;
             }
           }
           for (MoneroOutput vout : tx.getVouts()) {
             if (vout.getKeyImage() != null) {
-              assertNotNull(vout.getKeyImage().getHex());
+              GenUtils.assertNotNull(vout.getKeyImage().getHex());
               numKeyImages++;
             }
           }
-          assertTrue("Some vouts have a key image and some do not", numKeyImages == 0 || this.getVouts().size() + tx.getVouts().size() == numKeyImages);
+          GenUtils.assertTrue("Some vouts have a key image and some do not", numKeyImages == 0 || this.getVouts().size() + tx.getVouts().size() == numKeyImages);
           
           // merge by key images if present
           if (numKeyImages > 0) {
@@ -598,7 +594,7 @@ public class MoneroTx {
 
           // otherwise merge by position
           else {
-            assertEquals(this.getVouts().size(), tx.getVouts().size());
+            GenUtils.assertEquals(this.getVouts().size(), tx.getVouts().size());
             for (int i = 0; i < tx.getVouts().size(); i++) {
               this.getVouts().get(i).merge(tx.getVouts().get(i));
             }

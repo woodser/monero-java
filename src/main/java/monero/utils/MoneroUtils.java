@@ -73,8 +73,8 @@ public class MoneroUtils {
    * @param seed is the seed to validate
    */
   public static void validateSeed(String seed) {
-    assertNotNull(seed);
-    assertEquals(64, seed.length());
+    GenUtils.assertNotNull(seed);
+    GenUtils.assertEquals(64, seed.length());
   }
   
   /**
@@ -84,34 +84,34 @@ public class MoneroUtils {
    * @throws MoneroException if the given mnemonic is invalid
    */
   public static void validateMnemonic(String mnemonic) {
-    assertNotNull("Mnemonic phrase is not initialized", mnemonic);
-    assertFalse("Mnemonic phrase is empty", mnemonic.isEmpty());
+    GenUtils.assertNotNull("Mnemonic phrase is not initialized", mnemonic);
+    GenUtils.assertFalse("Mnemonic phrase is empty", mnemonic.isEmpty());
     String[] words = mnemonic.split(" ");
     if (words.length != MoneroUtils.NUM_MNEMONIC_WORDS) throw new Error("Mnemonic phrase is " + words.length + " words but must be " + MoneroUtils.NUM_MNEMONIC_WORDS);
   }
   
   // TODO: improve validation
   public static void validatePrivateViewKey(String privateViewKey) {
-    assertNotNull(privateViewKey);
-    assertEquals(64, privateViewKey.length());
+    GenUtils.assertNotNull(privateViewKey);
+    GenUtils.assertEquals(64, privateViewKey.length());
   }
   
   // TODO: improve validation
   public static void validatePrivateSpendKey(String privateSpendKey) {
-    assertNotNull(privateSpendKey);
-    assertEquals(64, privateSpendKey.length());
+    GenUtils.assertNotNull(privateSpendKey);
+    GenUtils.assertEquals(64, privateSpendKey.length());
   }
   
   // TODO: improve validation
   public static void validatePublicViewKey(String publicViewKey) {
-    assertNotNull(publicViewKey);
-    assertEquals(64, publicViewKey.length());
+    GenUtils.assertNotNull(publicViewKey);
+    GenUtils.assertEquals(64, publicViewKey.length());
   }
   
   // TODO: improve validation
   public static void validatePublicSpendKey(String publicSpendKey) {
-    assertNotNull(publicSpendKey);
-    assertEquals(64, publicSpendKey.length());
+    GenUtils.assertNotNull(publicSpendKey);
+    GenUtils.assertEquals(64, publicSpendKey.length());
   }
   
   /**
@@ -183,7 +183,7 @@ public class MoneroUtils {
   
   // TODO: improve validation
   public static void validatePaymentId(String paymentId) {
-    assertTrue(paymentId.length() == 16 || paymentId.length() == 64);
+    GenUtils.assertTrue(paymentId.length() == 16 || paymentId.length() == 64);
   }
   
   /**
@@ -314,7 +314,7 @@ public class MoneroUtils {
     }
     
     // assert deep equality
-    assertEquals("Cannot reconcile values " + val1 + " and " + val2 + " with config: [" + resolveDefined + ", " + resolveTrue + ", " + resolveMax + "]", val1, val2);
+    GenUtils.assertEquals("Cannot reconcile values " + val1 + " and " + val2 + " with config: [" + resolveDefined + ", " + resolveTrue + ", " + resolveMax + "]", val1, val2);
     return val1;
   }
   
@@ -337,7 +337,7 @@ public class MoneroUtils {
     }
     
     // assert deep equality
-    assertTrue("Cannot reconcile arrays", Arrays.equals(arr1, arr2));
+    GenUtils.assertTrue("Cannot reconcile arrays", Arrays.equals(arr1, arr2));
     return arr1;
   }
 

@@ -1,9 +1,8 @@
 package monero.daemon.model;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.math.BigInteger;
 
+import common.utils.GenUtils;
 import monero.utils.MoneroUtils;
 
 /**
@@ -228,7 +227,7 @@ public class MoneroBlockHeader {
   }
   
   public MoneroBlockHeader merge(MoneroBlockHeader header) {
-    assertNotNull(header);
+    GenUtils.assertNotNull(header);
     if (this == header) return this;
     this.setId(MoneroUtils.reconcile(this.getId(), header.getId()));
     this.setHeight(MoneroUtils.reconcile(this.getHeight(), header.getHeight(), null, null, true));  // height can increase
