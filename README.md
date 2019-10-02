@@ -12,6 +12,7 @@ In addition, this project conforms to an [API specification](http://moneroecosys
 - Fetch and process binary data from the daemon (e.g. raw blocks)
 - Query wallet transactions, transfers, and outputs by their many attributes
 - Be notified when blocks are added to the chain, as the wallet synchronizes, or when the wallet sends or receives funds
+- Validate addresses in native Java
 - Full multisig support
 - Over 200 passing JUnit test cases
 
