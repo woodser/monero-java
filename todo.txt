@@ -1,5 +1,6 @@
 HIGH
 automate sweep tests by funding wallets, waiting, then testing, rather than manually running funded wallets
+replace MoneroIntegratedAddress and MoneroDecodedAddress with MoneroAddress with address, address type, network type, primaryAddress, paymentId?
 compare by merging when appropriate
 testSyncFromMnemonicFromStartHeight() onDone() assertion error when daemon is actively syncing blocks
 cleanup: order all methods and tests the same, even overrides
