@@ -77,7 +77,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       String mnemonic = wallet.getMnemonic();
       MoneroUtils.validateMnemonic(mnemonic);
       assertNotEquals(TestUtils.MNEMONIC, mnemonic);
-      MoneroUtils.validateAddress(wallet.getPrimaryAddress());
+      MoneroUtils.validateAddress(wallet.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
       assertEquals(1, wallet.getHeight()); // TODO monero core: why does height of new unsynced wallet start at 1?
       wallet.sync();  // very quick because restore height is chain height
       wallet.close();
@@ -87,7 +87,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       wallet.createWalletRandom(path, TestUtils.WALLET_PASSWORD, "Spanish");
       MoneroUtils.validateMnemonic(wallet.getMnemonic());
       assertNotEquals(mnemonic, wallet.getMnemonic());
-      MoneroUtils.validateAddress(wallet.getPrimaryAddress());
+      MoneroUtils.validateAddress(wallet.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
       assertEquals(1, wallet.getHeight()); // TODO monero core: why is height of unsynced wallet 1?
       wallet.close();
       

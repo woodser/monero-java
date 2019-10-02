@@ -191,7 +191,7 @@ public abstract class TestMoneroWalletCommon {
   public void testGetPrimaryAddress() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     String primaryAddress = wallet.getPrimaryAddress();
-    MoneroUtils.validateAddress(primaryAddress);
+    MoneroUtils.validateAddress(primaryAddress, TestUtils.NETWORK_TYPE);
     assertEquals((wallet.getSubaddress(0, 0)).getAddress(), primaryAddress);
   }
   
@@ -3722,7 +3722,7 @@ public abstract class TestMoneroWalletCommon {
     // test account
     assertNotNull(account);
     assertTrue(account.getIndex() >= 0);
-    MoneroUtils.validateAddress(account.getPrimaryAddress());
+    MoneroUtils.validateAddress(account.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
     TestUtils.testUnsignedBigInteger(account.getBalance());
     TestUtils.testUnsignedBigInteger(account.getUnlockedBalance());
     

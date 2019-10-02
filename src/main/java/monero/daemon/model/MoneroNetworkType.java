@@ -4,23 +4,29 @@ package monero.daemon.model;
  * Enumerates daemon networks.
  */
 public enum MoneroNetworkType {
-  MAINNET(18, 19),
-  TESTNET(53, 54),
-  STAGENET(53, 54);
+  MAINNET(18, 19, 42),
+  TESTNET(53, 54, 63),
+  STAGENET(24, 25, 36);
 
-  private final int codeForRegularAddress;
-  private final int codeForIntegratedAddress;
+  private final int primaryAddressCode;
+  private final int integratedAddressCode;
+  private final int subaddressCode;
 
-  private MoneroNetworkType(int codeForRegularAddress, int codeForIntegratedAddress) {
-    this.codeForRegularAddress = codeForRegularAddress;
-    this.codeForIntegratedAddress = codeForIntegratedAddress;
+  private MoneroNetworkType(int primaryAddressCode, int integratedAddressCode, int subaddressCode) {
+    this.primaryAddressCode = primaryAddressCode;
+    this.integratedAddressCode = integratedAddressCode;
+    this.subaddressCode = subaddressCode;
   }
 
-  public int getCodeForRegularAddress() {
-    return this.codeForRegularAddress;
+  public int getPrimaryAddressCode() {
+    return primaryAddressCode;
   }
 
-  public int getCodeForIntegratedAddress() {
-    return this.codeForIntegratedAddress;
+  public int getIntegratedAddressCode() {
+    return integratedAddressCode;
+  }
+  
+  public int getSubaddressCode() {
+    return subaddressCode;
   }
 }

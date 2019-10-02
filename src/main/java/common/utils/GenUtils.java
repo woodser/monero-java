@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class GenUtils {
   
-  public static final int[] EMPTY_INT_ARRAY = new int[0];
+  private static final int[] EMPTY_INT_ARRAY = new int[0];
   
   /**
    * Asserts that the given boolean is true.
@@ -89,25 +89,25 @@ public class GenUtils {
   /**
    * Asserts that the given values are equal.  Throws an exception if not equal.
    * 
-   * @param val1 is a value to assert as equal
-   * @param val2 is a value to assert as equal
+   * @param expected is the expected value to assert as equal
+   * @param actual is the actual value to assert as equal
    */
-  public static void assertEquals(Object val1, Object val2) {
-    if (val1 == null && val2 == null) return;
-    assertFalse(val1 + " != " + val2, val1 == null || val2 == null);
-    assertTrue(val1 + " != " + val2, val1.equals(val2));
+  public static void assertEquals(Object expected, Object actual) {
+    if (expected == null && actual == null) return;
+    assertFalse(expected + " != " + actual, expected == null || actual == null);
+    assertTrue(expected + " != " + actual, expected.equals(actual));
   }
   
   /**
    * Asserts that the given values are equal.  Throws an exception if not equal.
    * 
    * @param failMsg is the failure message if the values are not equal
-   * @param val1 is a value to assert as equal
-   * @param val2 is a value to assert as equal
+   * @param expected is the expected value to assert as equal
+   * @param actual is the actual value to assert as equal
    */
-  public static void assertEquals(String failMsg, Object val1, Object val2) {
+  public static void assertEquals(String failMsg, Object expected, Object actual) {
     try {
-      assertEquals(val1, val2);
+      assertEquals(expected, actual);
     } catch (Exception e) {
       throw new AssertionError(failMsg);
     }
@@ -177,25 +177,17 @@ public class GenUtils {
   }
   
   /**
-   * Produces a new array containing the elements between
-   * the start and end indices.
+   * Produces a new array containing the elements between the start and end indices.
    * <p>
    * Code from <a href="https://commons.apache.org/proper/commons-lang/">Apache Commons Lang</a>.
    */
   public static int[] subarray(final int[] array, int startIndexInclusive, int endIndexExclusive) {
-    if (array == null) {
-        return null;
-    }
-    if (startIndexInclusive < 0) {
-        startIndexInclusive = 0;
-    }
-    if (endIndexExclusive > array.length) {
-        endIndexExclusive = array.length;
-    }
+    if (array == null) return null;
+    if (startIndexInclusive < 0) startIndexInclusive = 0;
+    if (endIndexExclusive > array.length) endIndexExclusive = array.length;
+    
     final int newSize = endIndexExclusive - startIndexInclusive;
-    if (newSize <= 0) {
-        return EMPTY_INT_ARRAY;
-    }
+    if (newSize <= 0) return EMPTY_INT_ARRAY;
 
     final int[] subarray = new int[newSize];
     System.arraycopy(array, startIndexInclusive, subarray, 0, newSize);
