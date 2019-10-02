@@ -22,10 +22,6 @@
 
 package monero.daemon;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
@@ -108,7 +104,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   public MoneroDaemonRpc(MoneroRpcConnection rpc) {
-    assertNotNull(rpc);
+    GenUtils.assertNotNull(rpc);
     this.rpc = rpc;
     this.daemonPoller = new MoneroDaemonPoller(this);
     this.cachedHeaders = new HashMap<Long, MoneroBlockHeader>();
@@ -262,7 +258,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     List<MoneroBlock> blocks = new ArrayList<MoneroBlock>();
     List<Map<String, Object>> rpcBlocks = (List<Map<String, Object>>) rpcResp.get("blocks");
     List<List<Map<String, Object>>> rpcTxs = (List<List<Map<String, Object>>>) rpcResp.get("txs");
-    assertEquals(rpcBlocks.size(), rpcTxs.size());
+    GenUtils.assertEquals(rpcBlocks.size(), rpcTxs.size());
     for (int blockIdx = 0; blockIdx < rpcBlocks.size(); blockIdx++) {
       
       // build block
@@ -381,9 +377,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public MoneroMinerTxSum getMinerTxSum(long height, Long numBlocks) {
-    assertTrue("Height must be an integer >= 0", height >= 0);
+    GenUtils.assertTrue("Height must be an integer >= 0", height >= 0);
     if (numBlocks == null) numBlocks = getHeight();
-    else assertTrue("Count must be an integer >= 0", numBlocks >= 0);
+    else GenUtils.assertTrue("Count must be an integer >= 0", numBlocks >= 0);
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("height", height);
     params.put("count", numBlocks);
@@ -927,7 +923,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       MoneroBlockHeader header = getBlockHeaderByHeightCached(endHeight + 1, maxHeight);
       
       // block cannot be bigger than max request size
-      assertTrue("Block exceeds maximum request size: " + header.getSize(), header.getSize() <= chunkSize);
+      GenUtils.assertTrue("Block exceeds maximum request size: " + header.getSize(), header.getSize() <= chunkSize);
       
       // done iterating if fetching block would exceed max request size
       if (reqSize + header.getSize() > chunkSize) break;
@@ -1163,7 +1159,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     }
     if (tx.isFailed() == null) tx.setIsFailed(false);
     if (tx.getOutputIndices() != null && tx.getVouts() != null)  {
-      assertEquals(tx.getOutputIndices().size(), (int) tx.getVouts().size());
+      GenUtils.assertEquals(tx.getOutputIndices().size(), (int) tx.getVouts().size());
       for (int i = 0; i < tx.getVouts().size(); i++) {
         tx.getVouts().get(i).setIndex(tx.getOutputIndices().get(i));  // transfer output indices to vouts
       }
@@ -1226,7 +1222,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
   
   private static MoneroDaemonPeer convertRpcPeer(Map<String, Object> rpcPeer) {
-    assertNotNull(rpcPeer);
+    GenUtils.assertNotNull(rpcPeer);
     MoneroDaemonPeer peer = new MoneroDaemonPeer();
     for (String key : rpcPeer.keySet()) {
       Object val = rpcPeer.get(key);
@@ -1243,7 +1239,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
   
   private static MoneroSubmitTxResult convertRpcSubmitTxResult(Map<String, Object> rpcResult) {
-    assertNotNull(rpcResult);
+    GenUtils.assertNotNull(rpcResult);
     MoneroSubmitTxResult result = new MoneroSubmitTxResult();
     for (String key : rpcResult.keySet()) {
       Object val = rpcResult.get(key);
@@ -1482,7 +1478,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * @return BigInteger is the hexicedimal converted to decimal
    */
   private static BigInteger prefixedHexToBI(String hex) {
-    assertTrue("Given hex does not start with \"0x\": " + hex, hex.startsWith("0x"));
+    GenUtils.assertTrue("Given hex does not start with \"0x\": " + hex, hex.startsWith("0x"));
     return new BigInteger(hex.substring(2), 16);
   }
   

@@ -1,7 +1,5 @@
 package monero.wallet.model;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -147,7 +145,7 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
 
   @Override
   public boolean meetsCriteria(MoneroTransfer transfer) {
-    assertNotNull("transfer is null", transfer);
+    GenUtils.assertNotNull("transfer is null", transfer);
     if (txQuery != null && txQuery.getTransferQuery() != null) throw new RuntimeException("Transfer query's tx query cannot have a circular transfer query");   // TODO: could auto detect and handle this.  port to js
     
     // filter on common fields

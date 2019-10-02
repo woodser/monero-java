@@ -1,7 +1,5 @@
 package monero.daemon.model;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,7 +89,7 @@ public class MoneroBlock extends MoneroBlockHeader {
   }
   
   public MoneroBlock merge(MoneroBlock block) {
-    assertNotNull(block);
+    GenUtils.assertNotNull(block);
     if (this == block) return this;
     
     // merge header fields

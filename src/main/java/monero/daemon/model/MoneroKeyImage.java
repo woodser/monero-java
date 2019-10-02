@@ -1,7 +1,6 @@
 package monero.daemon.model;
 
-import static org.junit.Assert.assertTrue;
-
+import common.utils.GenUtils;
 import monero.utils.MoneroUtils;
 
 /**
@@ -53,7 +52,7 @@ public class MoneroKeyImage {
   }
   
   public MoneroKeyImage merge(MoneroKeyImage keyImage) {
-    assertTrue(keyImage instanceof MoneroKeyImage);
+    GenUtils.assertTrue(keyImage instanceof MoneroKeyImage);
     if (keyImage == this) return this;
     this.setHex(MoneroUtils.reconcile(this.getHex(), keyImage.getHex()));
     this.setSignature(MoneroUtils.reconcile(this.getSignature(), keyImage.getSignature()));

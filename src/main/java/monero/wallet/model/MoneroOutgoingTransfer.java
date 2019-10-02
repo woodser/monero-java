@@ -1,13 +1,12 @@
 package monero.wallet.model;
 
-import static org.junit.Assert.assertTrue;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import common.utils.GenUtils;
 import monero.utils.MoneroUtils;
 
 /**
@@ -73,7 +72,7 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
   }
   
   public MoneroOutgoingTransfer merge(MoneroTransfer transfer) {
-    assertTrue(transfer instanceof MoneroOutgoingTransfer);
+    GenUtils.assertTrue(transfer instanceof MoneroOutgoingTransfer);
     return merge((MoneroOutgoingTransfer) transfer);
   }
   
@@ -89,7 +88,7 @@ public class MoneroOutgoingTransfer extends MoneroTransfer {
    */
   public MoneroOutgoingTransfer merge(MoneroOutgoingTransfer transfer) {
     super.merge(transfer);
-    assertTrue(transfer instanceof MoneroOutgoingTransfer);
+    GenUtils.assertTrue(transfer instanceof MoneroOutgoingTransfer);
     if (this == transfer) return this;
     this.setSubaddressIndices(MoneroUtils.reconcile(this.getSubaddressIndices(), transfer.getSubaddressIndices()));
     this.setAddresses(MoneroUtils.reconcile(this.getAddresses(), transfer.getAddresses()));

@@ -1,6 +1,6 @@
 package monero.utils;
 
-import static org.junit.Assert.assertNotNull;
+import common.utils.GenUtils;
 
 /**
  * Exception when interacting with a Monero wallet or daemon.
@@ -37,7 +37,7 @@ public class MoneroException extends RuntimeException {
    */
   public MoneroException(String message, Integer code) {
     super(message);
-    assertNotNull("Exeption message cannot be null", message);
+    GenUtils.assertNotNull("Exeption message cannot be null", message);
     this.code = code;
   }
 

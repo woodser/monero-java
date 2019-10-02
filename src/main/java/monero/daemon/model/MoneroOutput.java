@@ -1,13 +1,12 @@
 package monero.daemon.model;
 
-import static org.junit.Assert.assertTrue;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import common.utils.GenUtils;
 import monero.utils.MoneroUtils;
 
 /**
@@ -98,7 +97,7 @@ public class MoneroOutput {
   }
   
   public MoneroOutput merge(MoneroOutput output) {
-    assertTrue(output instanceof MoneroOutput);
+    GenUtils.assertTrue(output instanceof MoneroOutput);
     if (this == output) return this;
     
     // merge txs if they're different which comes back to merging outputs
