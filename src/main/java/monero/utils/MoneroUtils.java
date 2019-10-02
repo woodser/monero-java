@@ -420,8 +420,8 @@ public class MoneroUtils {
       bin[i] = address.codePointAt(i);
     }
 
-    int fullBlockCount = (int)Math.floor(bin.length / FULL_ENCODED_BLOCK_SIZE);
-    int lastBlockSize = (int)bin.length % FULL_ENCODED_BLOCK_SIZE;
+    int fullBlockCount = (int) Math.floor(bin.length / FULL_ENCODED_BLOCK_SIZE);
+    int lastBlockSize = (int) bin.length % FULL_ENCODED_BLOCK_SIZE;
     int lastBlockDecodedSize = ENCODED_BLOCK_SIZE.get(lastBlockSize);
     if (lastBlockDecodedSize < 0) {
       throw new IllegalArgumentException("Invalid encoded length");
