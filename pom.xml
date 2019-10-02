@@ -42,6 +42,11 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.63</version>
+        </dependency>
 	</dependencies>
 	<scm>
 	  <connection>scm:git:git://github.com/monero-ecosystem/monero-java.git</connection>
