@@ -34,7 +34,7 @@ getAddressIndex() -> getSubaddress(String address) and that returns full subaddr
 wallet.getIsSynced() should return false after block added to chain if not auto syncing
 full ux test among multiple wallets
 support args rescanBlockchain(bool hard, bool refresh, bool keep_key_images) 
-test pruning?
+test pruning
 local vs remote requests per second auto-adjusts like gui wallet.cpp:2204
 define specification for rct_signatures, rct_prunable, multisig_txset, unsigned_tx_set
 retrival by ranges end height should be exclusive? would be inconsistent with current rpc api
