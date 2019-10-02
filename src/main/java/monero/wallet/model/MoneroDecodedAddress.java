@@ -1,15 +1,17 @@
-package monero.daemon.model;
+package monero.wallet.model;
+
+import monero.daemon.model.MoneroNetworkType;
 
 /**
  * Maintains metadata for a decoded address.
  */
-public class DecodedAddress {
+public class MoneroDecodedAddress {
   
   private String address;
-  private AddressType addressType;
+  private MoneroAddressType addressType;
   private MoneroNetworkType networkType;
   
-  public DecodedAddress(String address, AddressType addressType, MoneroNetworkType networkType) {
+  public MoneroDecodedAddress(String address, MoneroAddressType addressType, MoneroNetworkType networkType) {
     this.address = address;
     this.addressType = addressType;
     this.networkType = networkType;
@@ -23,11 +25,11 @@ public class DecodedAddress {
     this.address = address;
   }
 
-  public AddressType getAddressType() {
+  public MoneroAddressType getAddressType() {
     return addressType;
   }
   
-  public void setAddressType(AddressType addressType) {
+  public void setAddressType(MoneroAddressType addressType) {
     this.addressType = addressType;
   }
   

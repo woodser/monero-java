@@ -14,10 +14,10 @@ import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
 
 import common.utils.GenUtils;
-import monero.daemon.model.AddressType;
-import monero.daemon.model.DecodedAddress;
 import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
+import monero.wallet.model.MoneroAddressType;
+import monero.wallet.model.MoneroDecodedAddress;
 import monero.wallet.model.MoneroTxWallet;
 
 /**
@@ -111,7 +111,7 @@ public class MoneroUtils {
    * @param address is the address to decode
    * @return the decoded address and network types
    */
-  public static DecodedAddress decodeAddress(String address) {
+  public static MoneroDecodedAddress decodeAddress(String address) {
     GenUtils.assertNotNull("Address is null", address);
     
     // determine if address has integrated address pattern
@@ -134,22 +134,22 @@ public class MoneroUtils {
     int addressCode = Integer.parseInt(addressHex.substring(0, 2), 16);
     
     // determine network and address types
-    AddressType addressType = null;
+    MoneroAddressType addressType = null;
     MoneroNetworkType networkType = null;
     for (MoneroNetworkType aNetworkType : MoneroNetworkType.values()) {
       if (addressCode == aNetworkType.getPrimaryAddressCode()) {
         GenUtils.assertFalse("Address has primary address code but integrated address pattern", isIntegrated);
-        addressType = AddressType.PRIMARY_ADDRESS;
+        addressType = MoneroAddressType.PRIMARY_ADDRESS;
         networkType = aNetworkType;
         break;
       } else if (addressCode == aNetworkType.getIntegratedAddressCode()) {
         GenUtils.assertTrue("Address has integrated address code but non-integrated address pattern", isIntegrated);
-        addressType = AddressType.INTEGRATED_ADDRESS;
+        addressType = MoneroAddressType.INTEGRATED_ADDRESS;
         networkType = aNetworkType;
         break;
       } else if (addressCode == aNetworkType.getSubaddressCode()) {
         GenUtils.assertFalse("Address has subaddress code but integrated address pattern", isIntegrated);
-        addressType = AddressType.SUBADDRESS;
+        addressType = MoneroAddressType.SUBADDRESS;
         networkType = aNetworkType;
         break;
       }
@@ -159,7 +159,7 @@ public class MoneroUtils {
     GenUtils.assertTrue("Address has invalid code: " + addressCode, addressType != null && networkType != null);
     
     // return decoded address
-    return new DecodedAddress(address, addressType, networkType);
+    return new MoneroDecodedAddress(address, addressType, networkType);
   }
   
   /**
@@ -170,7 +170,7 @@ public class MoneroUtils {
    */
   public static void validateAddress(String address, MoneroNetworkType networkType) {
     try {
-      DecodedAddress decodedAddress = decodeAddress(address);
+      MoneroDecodedAddress decodedAddress = decodeAddress(address);
       GenUtils.assertEquals("Address network type mismatch: " + networkType + " vs " + decodedAddress.getNetworkType(), networkType, decodedAddress.getNetworkType());
     } catch (AssertionError e) {
       throw new MoneroException(e.getMessage());
