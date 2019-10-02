@@ -1,5 +1,5 @@
 HIGH
-jni wallet does not connect to remote testnet daemon
+add ability for jni and c++ wallets to disallow rpc version misamtch by configuration 
 move general utilities  (e.g. reconcile) from MoneroUtils to GenUtils
 automate sweep tests by funding wallets, waiting, then testing, rather than manually running funded wallets
 replace MoneroIntegratedAddress and MoneroDecodedAddress with MoneroAddress with address, address type, network type, primaryAddress, paymentId?
