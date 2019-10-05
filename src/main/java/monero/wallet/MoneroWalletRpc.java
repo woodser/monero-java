@@ -1418,10 +1418,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public String getAttribute(String key) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("key", key);
-    Map<String, Object> resp = rpc.sendJsonRequest("get_attribute", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    String value = (String) result.get("value");
-    return value.isEmpty() ? null : value;
+    try {
+      Map<String, Object> resp = rpc.sendJsonRequest("get_attribute", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      String value = (String) result.get("value");
+      return value.isEmpty() ? null : value;
+    } catch (MoneroRpcException e) {
+      if (e.getCode() == -45) return null;  // -45: attribute not found
+      throw e;
+    }
   }
 
   @Override
