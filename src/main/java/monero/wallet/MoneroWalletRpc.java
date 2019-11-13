@@ -1115,6 +1115,16 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     return txSet;
   }
+  
+  @Override
+  public void parseTxSet(MoneroTxSet txSet) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("unsigned_txset", txSet.getUnsignedTxHex());
+    params.put("multisig_txset", txSet.getMultisigTxHex());
+    Map<String, Object> resp = rpc.sendJsonRequest("describe_transfer", params);
+    System.out.println(resp);
+    throw new RuntimeException("Not implemented");
+  }
 
   @SuppressWarnings("unchecked")
   @Override

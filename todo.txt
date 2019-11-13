@@ -1,4 +1,5 @@
 HIGH
+implement describe transfer in java jni, js rpc, js wasm, cpp
 support createWallet(MoneroWalletConfig) with all possible fields?
 add ability for jni and c++ wallets to disallow rpc version misamtch by configuration 
 automate sweep tests by funding wallets, waiting, then testing, rather than manually running funded wallets

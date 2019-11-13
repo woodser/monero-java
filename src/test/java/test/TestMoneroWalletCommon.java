@@ -2164,6 +2164,7 @@ public abstract class TestMoneroWalletCommon {
   // Can send to external address
   @Test
   public void testSendToExternal() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
     
     // collect balances before
     BigInteger balance1 = wallet.getBalance();
@@ -2735,6 +2736,24 @@ public abstract class TestMoneroWalletCommon {
     for (MoneroTxWallet tx : txs) {
       testTxWallet(tx, ctx);
     }
+  }
+  
+  // Can parse a tx set hex returned from sending transfers.
+  @Test
+  public void testParseTxSet() {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
+    
+    // create unsigned transactions to send funds
+    // TODO: this is not unsigned because it is not cold wallet
+    MoneroTxWallet tx = wallet.createTx(0, wallet.getPrimaryAddress(), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).getTxs().get(0);
+    
+    // test resulting tx set
+    MoneroTxSet txSet = tx.getTxSet();
+    assertNotNull(txSet.getUnsignedTxHex());
+    assertFalse(txSet.getUnsignedTxHex().isEmpty());
+    
+    // parse the tx set
+    wallet.parseTxSet(txSet);
   }
   
   // Supports multisig wallets

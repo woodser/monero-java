@@ -874,6 +874,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   @Override
+  public void testParseTxSet() {
+    super.testParseTxSet();
+  }
+  
+  @Override
   public void testRescanBlockchain() {
     super.testRescanBlockchain();
   }

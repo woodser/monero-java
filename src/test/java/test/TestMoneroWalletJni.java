@@ -1882,6 +1882,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   public void testSweepDust() {
     super.testSweepDust();
   }
+  
+  @Override
+  public void testParseTxSet() {
+    super.testParseTxSet();
+  }
 
   @Override
   public void testRescanBlockchain() {

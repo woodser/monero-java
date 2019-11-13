@@ -792,6 +792,12 @@ public interface MoneroWallet {
   public MoneroTxSet sweepDust(boolean doNotRelay);
   
   /**
+   * TODO
+   * @param txSet
+   */
+  public void parseTxSet(MoneroTxSet txSet);
+  
+  /**
    * Sign a message.
    * 
    * @param message is the message to sign
