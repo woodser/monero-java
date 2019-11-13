@@ -937,6 +937,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
     return txSet;
   }
+  
+  @Override
+  public void parseTxSet(MoneroTxSet txSet) {
+    throw new RuntimeException("MoneroWalletJni.parseTxSet() not implemented");
+  }
 
   @Override
   public MoneroCheckTx checkTxKey(String txId, String txKey, String address) {
