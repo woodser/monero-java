@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import common.utils.GenUtils;
+import common.utils.JsonUtils;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
@@ -183,6 +184,36 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   /**
+   * Create a wallet on the RPC server from an address, view key, and (optionally) spend key.
+   * 
+   * @param name is the name of the wallet to create on the RPC server
+   * @param password is the password encrypt the wallet
+   * @param networkType is the wallet's network type
+   * @param address is the address of the wallet to construct
+   * @param viewKey is the view key of the wallet to construct
+   * @param spendKey is the spend key of the wallet to construct or null to create a view-only wallet
+   * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
+   * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
+   * @param language is the wallet and mnemonic's language (default = "English")
+   */
+  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey) { createWalletFromKeys(name, password, address, viewKey, spendKey, null, null, null, null); }
+  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight) { createWalletFromKeys(name, password, address, viewKey, spendKey, daemonConnection, restoreHeight, null, null); }
+  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language, Boolean saveCurrent) {
+    if (restoreHeight == null) restoreHeight = 0l;
+    if (language == null) language = DEFAULT_LANGUAGE;
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("filename", name);
+    params.put("password", password);
+    params.put("address", address);
+    params.put("viewkey", viewKey);
+    params.put("spendkey", spendKey);
+    params.put("restore_height", restoreHeight);
+    params.put("autosave_current", saveCurrent);
+    rpc.sendJsonRequest("generate_from_keys", params);  // TODO: info indicates if wallet is watch-only, programatically expose?
+    path = name;
+  }
+  
+  /**
    * Save and close the current wallet and stop the RPC server.
    */
   public void stop() {
@@ -234,11 +265,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @SuppressWarnings("unchecked")
   @Override
   public String getPrivateSpendKey() {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("key_type", "spend_key");
-    Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (String) result.get("key");
+
+    // get private spend key which returns error if wallet is watch-only
+    try {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("key_type", "spend_key");
+      Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      return (String) result.get("key");
+    } catch (MoneroRpcException e) {
+      if (e.getCode() == -29 && e.getMessage().contains("watch-only")) return null; // return null if wallet is watch-only
+      throw e;
+    }
   }
 
   @Override
@@ -1121,8 +1159,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("unsigned_txset", txSet.getUnsignedTxHex());
     params.put("multisig_txset", txSet.getMultisigTxHex());
+    //System.out.println("REQUEST BODY");
+    //System.out.println(JsonUtils.serialize(params).substring(0, 2000));
     Map<String, Object> resp = rpc.sendJsonRequest("describe_transfer", params);
-    System.out.println(resp);
+    System.out.println("RESPONSE BODY");
+    System.out.println(JsonUtils.serialize(resp));
     throw new RuntimeException("Not implemented");
   }
 

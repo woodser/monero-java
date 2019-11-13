@@ -8,6 +8,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 import utils.TestUtils;
 
@@ -135,6 +137,96 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       assertEquals(1, wallet.getHeight());
       wallet.close();
       
+    } finally {
+      
+      // open main test wallet for other tests
+      wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
+    }
+  }
+  
+  // Can create a wallet from keys.
+  @Test
+  public void testCreateWalletFromKeys() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    try {
+
+      // recreate test wallet from keys
+      String path = UUID.randomUUID().toString();
+      wallet.createWalletFromKeys(path, TestUtils.WALLET_PASSWORD, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null, null);
+      try {
+        //assertEquals(wallet.getMnemonic(), wallet.getMnemonic()); // TODO cannot get mnemonic from wallet created from keys?
+        assertEquals(wallet.getPrimaryAddress(), wallet.getPrimaryAddress());
+        assertEquals(wallet.getPrivateViewKey(), wallet.getPrivateViewKey());
+        assertEquals(wallet.getPrivateSpendKey(), wallet.getPrivateSpendKey());
+      } finally {
+        wallet.close();
+      }
+
+    } finally {
+      
+      // open main test wallet for other tests
+      wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
+    }
+  }
+  
+  // Can create a watch-only wallet.
+  @Test
+  public void testCreateWatchOnlyWallet() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    try {
+
+      // create watch-only wallet by witholding spend key
+      String path = UUID.randomUUID().toString();
+      wallet.createWalletFromKeys(path, TestUtils.WALLET_PASSWORD, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null, null);
+      try {
+        //assertEquals(wallet.getMnemonic(), wallet.getMnemonic()); // TODO cannot get mnemonic from wallet created from keys?
+        assertEquals(wallet.getPrimaryAddress(), wallet.getPrimaryAddress());
+        assertEquals(wallet.getPrivateViewKey(), wallet.getPrivateViewKey());
+        assertEquals(null, wallet.getPrivateSpendKey());
+      } finally {
+        wallet.close();
+      }
+
+    } finally {
+      
+      // open main test wallet for other tests
+      wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
+    }
+  }
+  
+  // Can parse a tx set hex returned from sending transfers.
+  @Test
+  public void testParseTxSet() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    try {
+
+      // create watch-only wallet by witholding spend key
+      String path = UUID.randomUUID().toString();
+      wallet.createWalletFromKeys(path, TestUtils.WALLET_PASSWORD, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null, null);
+      wallet.sync();
+      
+      try {
+      
+        // create unsigned transactions to send funds
+        MoneroTxWallet tx = wallet.createTx(0, wallet.getPrimaryAddress(), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).getTxs().get(0);
+        
+        // test resulting tx set
+        MoneroTxSet txSet = tx.getTxSet();
+        assertNotNull(txSet.getUnsignedTxHex());
+        assertFalse(txSet.getUnsignedTxHex().isEmpty());
+        
+        // switch to main test wallet
+        wallet.close();
+        wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
+        
+        // parse the tx set
+        wallet.parseTxSet(txSet);
+        
+        throw new RuntimeException("Now what");
+      } finally {
+        wallet.close();
+      }
+
     } finally {
       
       // open main test wallet for other tests
@@ -871,11 +963,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Override
   public void testSweepDust() {
     super.testSweepDust();
-  }
-  
-  @Override
-  public void testParseTxSet() {
-    super.testParseTxSet();
   }
   
   @Override
