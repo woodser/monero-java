@@ -148,7 +148,7 @@ public class TestUtils {
       
       // otherwise open existing wallet and update daemon connection
       else {
-        walletJni = MoneroWalletJni.openWallet(WALLET_JNI_PATH_1, WALLET_PASSWORD, MoneroNetworkType.STAGENET);
+        walletJni = MoneroWalletJni.openWallet(WALLET_JNI_PATH_1, WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
         walletJni.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
         walletJni.sync(new WalletSyncPrinter());
         walletJni.startSyncing();
