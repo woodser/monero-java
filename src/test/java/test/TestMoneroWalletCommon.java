@@ -496,6 +496,7 @@ public abstract class TestMoneroWalletCommon {
       List<MoneroSubaddress> subaddresses = wallet.getSubaddresses(account.getIndex());
       assertTrue(subaddresses.size() > 0);
       for (MoneroSubaddress subaddress : subaddresses) {
+        testSubaddress(subaddress);
         assertEquals(subaddress, wallet.getSubaddress(account.getIndex(), subaddress.getIndex()));
         assertEquals(subaddress, (wallet.getSubaddresses(account.getIndex(), Arrays.asList(subaddress.getIndex()))).get(0)); // test plural call with single subaddr number
       }
