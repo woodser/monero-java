@@ -208,7 +208,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       try {
       
         // create unsigned transactions to send funds
-        MoneroTxWallet tx = wallet.createTx(0, wallet.getPrimaryAddress(), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).getTxs().get(0);
+        MoneroTxWallet tx = wallet.createTx(0, TestUtils.getRandomWalletAddress(), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).getTxs().get(0);
         
         // test resulting tx set
         MoneroTxSet txSet = tx.getTxSet();
@@ -375,7 +375,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     
     // test adding standard addresses
     int NUM_ENTRIES = 5;
-    String address = wallet.getSubaddress(0, 0).getAddress();
+    String address = TestUtils.getRandomWalletAddress();
     List<Integer> indices = new ArrayList<Integer>();
     for (int i = 0; i < NUM_ENTRIES; i++) {
       indices.add(wallet.addAddressBookEntry(address, "hi there!"));
@@ -394,6 +394,15 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
         }
       }
       assertTrue("Index " + idx + " not found in address book indices", found);
+    }
+    
+    // edit each address book entry
+    for (int idx : indices) {
+      wallet.editAddressBookEntry(idx, false, null, false, null, true, "hello there!!");
+    }
+    entries = wallet.getAddressBookEntries(indices);
+    for (MoneroAddressBookEntry entry : entries) {
+      assertEquals(entry.getDescription(), "hello there!!");
     }
     
     // delete entries at starting index

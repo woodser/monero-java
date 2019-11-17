@@ -1159,8 +1159,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("unsigned_txset", txSet.getUnsignedTxHex());
     params.put("multisig_txset", txSet.getMultisigTxHex());
-    //System.out.println("REQUEST BODY");
-    //System.out.println(JsonUtils.serialize(params).substring(0, 2000));
+    System.out.println("REQUEST BODY");
+    System.out.println(JsonUtils.serialize(params).substring(0, 2000));
     Map<String, Object> resp = rpc.sendJsonRequest("describe_transfer", params);
     System.out.println("RESPONSE BODY");
     System.out.println(JsonUtils.serialize(resp));
@@ -1375,6 +1375,19 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> respMap = rpc.sendJsonRequest("add_address_book", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     return ((BigInteger) resultMap.get("index")).intValue();
+  }
+  
+  @Override
+  public void editAddressBookEntry(int index, boolean setAddress, String address, boolean setPaymentId, String paymentId, boolean setDescription, String description) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("index", index);
+    params.put("set_address", setAddress);
+    params.put("address", address);
+    params.put("set_payment_id", setPaymentId);
+    params.put("payment_id", paymentId);
+    params.put("set_description", setDescription);
+    params.put("description", description);
+    rpc.sendJsonRequest("edit_address_book", params);
   }
 
   @Override

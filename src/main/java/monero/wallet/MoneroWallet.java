@@ -985,6 +985,19 @@ public interface MoneroWallet {
   public int addAddressBookEntry(String address, String description, String paymentId);
   
   /**
+   * Edit an address book entry.
+   * 
+   * @param index is the index of the address book entry to edit
+   * @param setAddress specifies if the address should be updated
+   * @param address is the updated address
+   * @param setPaymentId specifies if the payment id should be updated
+   * @param paymentId is the updated payment id
+   * @param setDescription specifies if the description should be updated
+   * @param description is the updated description
+   */
+  public void editAddressBookEntry(int index, boolean setAddress, String address, boolean setPaymentId, String paymentId, boolean setDescription, String description);
+  
+  /**
    * Delete an address book entry.
    * 
    * @param entryIdx is the index of the entry to delete
