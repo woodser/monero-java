@@ -1,6 +1,16 @@
+v15.0.0
+kept_by_block: T stuck in mempool?
+test get_attribute() with unset key
+known ring does not include the spent outputs
+standardize expected test failures vs exceptions
+port differences from master to v0.1.4 to js
+implement describe transfer in java jni, js rpc, js wasm, cpp
+compare duplicated code in monero_wallet to v15
+replace output isUnlocked with MoneroTxWallet isUnlocked?
+
 HIGH
 MoneroRpcConnection LOGGER.fine() executing? would be major performance hit
-implement describe transfer in java jni, js rpc, js wasm, cpp
+remove dependency on libwallet_merged, randomx if possible
 support wallet.isWatchOnly()
 support createWallet(MoneroWalletConfig) with all possible fields?
 add ability for jni and c++ wallets to disallow rpc version misamtch by configuration 

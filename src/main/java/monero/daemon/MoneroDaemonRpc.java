@@ -1349,6 +1349,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("mainnet")) { if ((Boolean) val) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroNetworkType.MAINNET)); }
       else if (key.equals("testnet")) { if ((Boolean) val) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroNetworkType.TESTNET)); }
       else if (key.equals("stagenet")) { if ((Boolean) val) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroNetworkType.STAGENET)); }
+      //else if (key.equals("credits")) throw new RuntimeException("Not implemented");
+      //else if (key.equals("top_hash")) throw new RuntimeException("Not implemented");
       else LOGGER.warning("WARNING: Ignoring unexpected info field: " + key + ": " + val);
     }
     return info;

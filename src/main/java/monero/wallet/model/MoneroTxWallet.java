@@ -23,6 +23,7 @@ public class MoneroTxWallet extends MoneroTx {
   private List<MoneroIncomingTransfer> incomingTransfers;
   private MoneroOutgoingTransfer outgoingTransfer;
   private String note;
+  private Boolean isUnlocked;
   
   public MoneroTxWallet() {
     // nothing to initialize
@@ -150,6 +151,15 @@ public class MoneroTxWallet extends MoneroTx {
   
   public MoneroTxWallet setNote(String note) {
     this.note = note;
+    return this;
+  }
+  
+  public Boolean getIsUnlocked() {
+    return isUnlocked;
+  }
+  
+  public MoneroTxWallet setIsUnlocked(Boolean isUnlocked) {
+    this.isUnlocked = isUnlocked;
     return this;
   }
   

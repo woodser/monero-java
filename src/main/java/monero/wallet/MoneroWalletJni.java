@@ -1132,8 +1132,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public String getAttribute(String key) {
     assertNotClosed();
-    String value = getAttributeJni(key);
-    return value.isEmpty() ? null : value;
+    return getAttributeJni(key);
   }
 
   @Override

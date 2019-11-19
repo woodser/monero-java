@@ -1536,7 +1536,9 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAttributeJni(JNI
   string key = string(_key);
   env->ReleaseStringUTFChars(jkey, _key);
   try {
-    return env->NewStringUTF(wallet->get_attribute(key).c_str());
+    string value;
+    if (!wallet->get_attribute(key, value)) return 0;
+    return env->NewStringUTF(value.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;

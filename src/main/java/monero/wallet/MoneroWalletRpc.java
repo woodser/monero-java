@@ -1972,6 +1972,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("type")) { } // type already handled
       else if (key.equals("tx_size")) tx.setSize(((BigInteger) val).longValue());
       else if (key.equals("unlock_time")) tx.setUnlockTime(((BigInteger) val).longValue());
+      else if (key.equals("locked")) tx.setIsUnlocked(!(Boolean) val);  // reverse to be consistent with outputs
       else if (key.equals("tx_blob")) tx.setFullHex((String) val);
       else if (key.equals("tx_metadata")) tx.setMetadata((String) val);
       else if (key.equals("double_spend_seen")) tx.setIsDoubleSpendSeen((Boolean) val);

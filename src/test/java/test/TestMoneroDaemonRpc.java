@@ -634,7 +634,7 @@ public class TestMoneroDaemonRpc {
     for (int i = 1; i < 3; i++) {
       MoneroTx tx =  getUnrelayedTx(wallet, i);
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-      assertTrue(result.isGood());
+      testSubmitTxResultGood(result);
     }
     assertEquals(txPoolBefore.size() + 2, daemon.getTxPool().size());
     
@@ -645,7 +645,7 @@ public class TestMoneroDaemonRpc {
     // re-submit original transactions
     for (MoneroTx tx : txPoolBefore) {
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), tx.isRelayed());
-      assertTrue(result.isGood());
+      testSubmitTxResultGood(result);
     }
     
     // pool is back to original state
@@ -669,7 +669,7 @@ public class TestMoneroDaemonRpc {
     for (int i = 1; i < 3; i++) {
       MoneroTx tx = getUnrelayedTx(wallet, i);
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-      assertTrue(result.isGood());
+      testSubmitTxResultGood(result);
       txs.add(tx);
     }
     
@@ -705,8 +705,7 @@ public class TestMoneroDaemonRpc {
     for (int i = 1; i < 3; i++) {
       MoneroTx tx = getUnrelayedTx(wallet, i);
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-      assertFalse(result.isDoubleSpend());
-      assertTrue(result.isGood());
+      testSubmitTxResultGood(result);
       txIds.add(tx.getId());
     }
     assertEquals(txPoolBefore.size() + txIds.size(), daemon.getTxPool().size());
@@ -1909,7 +1908,6 @@ public class TestMoneroDaemonRpc {
   private static void testSubmitTxResultGood(MoneroSubmitTxResult result) {
     testSubmitTxResultCommon(result);
     try {
-      assertEquals(true, result.isGood());
       assertEquals(false, result.isDoubleSpend());
       assertEquals(false, result.isFeeTooLow());
       assertEquals(false, result.isMixinTooLow());
@@ -1919,6 +1917,7 @@ public class TestMoneroDaemonRpc {
       assertEquals(false, result.isOverspend());
       assertEquals(false, result.isTooBig());
       assertEquals(false, result.getSanityCheckFailed());
+      assertEquals(true, result.isGood());
     } catch (Exception e) {
       System.out.println("Submit result is not good: " + JsonUtils.serialize(result));
       throw e;
