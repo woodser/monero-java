@@ -1261,8 +1261,10 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("sanity_check_failed")) result.setSanityCheckFailed((Boolean) val);
       else if (key.equals("credits")) result.setCredits((BigInteger) val);
       else if (key.equals("status") || key.equals("untrusted")) {}  // handled elsewhere
+      else if (key.equals("top_hash")) result.setTopHash((String) val);
       else LOGGER.warning("WARNING: ignoring unexpected field in submit tx hex result: " + key + ": " + val);
     }
+    if ("".equals(result.getTopHash())) result.setTopHash(null);
     return result;
   }
   
@@ -1419,8 +1421,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("votes")) info.setNumVotes(((BigInteger) val).intValue());
       else if (key.equals("voting")) info.setVoting(((BigInteger) val).intValue());
       else if (key.equals("window")) info.setWindow(((BigInteger) val).intValue());
+      else if (key.equals("top_hash")) info.setTopHash((String) val);
+      else if (key.equals("credits")) info.setCredits((BigInteger) val);
       else LOGGER.warning("WARNING: ignoring unexpected field in hard fork info: " + key + ": " + val);
     }
+    if ("".equals(info.getTopHash())) info.setTopHash(null);
     return info;
   }
   

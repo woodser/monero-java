@@ -28,7 +28,6 @@ import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroBlockTemplate;
-import monero.daemon.model.MoneroMinerTxSum;
 import monero.daemon.model.MoneroDaemonConnection;
 import monero.daemon.model.MoneroDaemonConnectionSpan;
 import monero.daemon.model.MoneroDaemonInfo;
@@ -40,6 +39,7 @@ import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
 import monero.daemon.model.MoneroHardForkInfo;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroKeyImageSpentStatus;
+import monero.daemon.model.MoneroMinerTxSum;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroOutputDistributionEntry;
@@ -1831,6 +1831,8 @@ public class TestMoneroDaemonRpc {
     assertNotNull(hardForkInfo.getNumVotes());
     assertNotNull(hardForkInfo.getVoting());
     assertNotNull(hardForkInfo.getWindow());
+    TestUtils.testUnsignedBigInteger(hardForkInfo.getCredits());
+    assertNull(hardForkInfo.getTopHash());
   }
 
   private static void testMoneroBan(MoneroBan ban) {
@@ -1925,6 +1927,7 @@ public class TestMoneroDaemonRpc {
       assertEquals(false, result.isTooBig());
       assertEquals(false, result.getSanityCheckFailed());
       TestUtils.testUnsignedBigInteger(result.getCredits());
+      assertNull(result.getTopHash());
       assertEquals(true, result.isGood());
     } catch (Exception e) {
       System.out.println("Submit result is not good: " + JsonUtils.serialize(result));
