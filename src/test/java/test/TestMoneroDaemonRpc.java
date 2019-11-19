@@ -1332,6 +1332,11 @@ public class TestMoneroDaemonRpc {
     assertNotNull(template.getHeight());
     assertNotNull(template.getPrevId());
     assertNotNull(template.getReservedOffset());
+    assertNotNull(template.getSeedHeight());
+    assertTrue(template.getSeedHeight() > 0);
+    assertNotNull(template.getSeedHash());
+    assertFalse(template.getSeedHash().isEmpty());
+    assertNull(template.getNextSeedHash());
   }
   
   private static void testBlockHeader(MoneroBlockHeader header, boolean isFull) {

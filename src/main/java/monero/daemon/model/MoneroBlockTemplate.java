@@ -14,6 +14,9 @@ public class MoneroBlockTemplate {
   private Long height;
   private String prevId;
   private Long reservedOffset;
+  private Long seedHeight;
+  private String seedHash;
+  private String nextSeedHash;
   
   public String getBlockTemplateBlob() {
     return blockTemplateBlob;
@@ -69,5 +72,29 @@ public class MoneroBlockTemplate {
   
   public void setReservedOffset(Long reservedOffset) {
     this.reservedOffset = reservedOffset;
+  }
+
+  public Long getSeedHeight() {
+    return seedHeight;
+  }
+
+  public void setSeedHeight(Long seedHeight) {
+    this.seedHeight = seedHeight;
+  }
+
+  public String getSeedHash() {
+    return seedHash;
+  }
+
+  public void setSeedHash(String seedHash) {
+    this.seedHash = seedHash;
+  }
+
+  public String getNextSeedHash() {
+    return nextSeedHash;
+  }
+
+  public void setNextSeedHash(String nextSeedHash) {
+    this.nextSeedHash = nextSeedHash;
   }
 }

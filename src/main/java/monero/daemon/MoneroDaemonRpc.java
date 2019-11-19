@@ -981,8 +981,12 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("reserved_offset")) template.setReservedOffset(((BigInteger) val).longValue());
       else if (key.equals("status")) {}  // handled elsewhere
       else if (key.equals("untrusted")) {}  // handled elsewhere
+      else if (key.equals("seed_height")) template.setSeedHeight(((BigInteger) val).longValue());
+      else if (key.equals("seed_hash")) template.setSeedHash((String) val);
+      else if (key.equals("next_seed_hash")) template.setNextSeedHash((String) val);
       else LOGGER.warning("WARNING: ignoring unexpected field in block template: " + key + ": " + val);
     }
+    if ("".equals(template.getNextSeedHash())) template.setNextSeedHash(null);
     return template;
   }
   
