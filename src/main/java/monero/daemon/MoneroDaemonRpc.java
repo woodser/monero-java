@@ -1232,6 +1232,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("port")) peer.setPort(((BigInteger) val).intValue());
       else if (key.equals("rpc_port")) peer.setRpcPort(((BigInteger) val).intValue());
       else if (key.equals("pruning_seed")) peer.setPruningSeed(((BigInteger) val).intValue());
+      else if (key.equals("rpc_credits_per_hash")) peer.setRpcCreditsPerHash((BigInteger) val);
       else LOGGER.warning("WARNING: ignoring unexpected field in rpc peer: " + key + ": " + val);
     }
     return peer;

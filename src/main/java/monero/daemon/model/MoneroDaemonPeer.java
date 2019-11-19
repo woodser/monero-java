@@ -1,5 +1,7 @@
 package monero.daemon.model;
 
+import java.math.BigInteger;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -11,49 +13,46 @@ public class MoneroDaemonPeer {
   private String address;
   private String host;
   private Integer port;
-  private Integer rpcPort;
   private Boolean isOnline;
   private Long lastSeenTimestamp;
   private Integer pruningSeed;
+  private Integer rpcPort;
+  private BigInteger rpcCreditsPerHash;
   
   public String getId() {
     return id;
   }
   
-  public void setId(String id) {
+  public MoneroDaemonPeer setId(String id) {
     this.id = id;
+    return this;
   }
   
   public String getAddress() {
     return address;
   }
   
-  public void setAddress(String address) {
+  public MoneroDaemonPeer setAddress(String address) {
     this.address = address;
+    return this;
   }
   
   public String getHost() {
     return host;
   }
   
-  public void setHost(String host) {
+  public MoneroDaemonPeer setHost(String host) {
     this.host = host;
+    return this;
   }
   
   public Integer getPort() {
     return port;
   }
   
-  public void setPort(Integer port) {
+  public MoneroDaemonPeer setPort(Integer port) {
     this.port = port;
-  }
-  
-  public Integer getRpcPort() {
-    return rpcPort;
-  }
-  
-  public void setRpcPort(Integer rpcPort) {
-    this.rpcPort = rpcPort;
+    return this;
   }
   
   @JsonProperty("isOnline")
@@ -61,23 +60,44 @@ public class MoneroDaemonPeer {
     return isOnline;
   }
   
-  public void setIsOnline(Boolean isOnline) {
+  public MoneroDaemonPeer setIsOnline(Boolean isOnline) {
     this.isOnline = isOnline;
+    return this;
   }
   
   public Long getLastSeenTimestamp() {
     return lastSeenTimestamp;
   }
   
-  public void setLastSeenTimestamp(Long lastSeenTimestamp) {
+  public MoneroDaemonPeer setLastSeenTimestamp(Long lastSeenTimestamp) {
     this.lastSeenTimestamp = lastSeenTimestamp;
+    return this;
   }
   
   public Integer getPruningSeed() {
     return pruningSeed;
   }
   
-  public void setPruningSeed(Integer pruningSeed) {
+  public MoneroDaemonPeer setPruningSeed(Integer pruningSeed) {
     this.pruningSeed = pruningSeed;
+    return this;
+  }
+  
+  public Integer getRpcPort() {
+    return rpcPort;
+  }
+  
+  public MoneroDaemonPeer setRpcPort(Integer rpcPort) {
+    this.rpcPort = rpcPort;
+    return this;
+  }
+  
+  public BigInteger getRpcCreditsPerHash() {
+    return this.rpcCreditsPerHash;
+  }
+  
+  public MoneroDaemonPeer setRpcCreditsPerHash(BigInteger rpcCreditsPerHash) {
+    this.rpcCreditsPerHash = rpcCreditsPerHash;
+    return this;
   }
 }
