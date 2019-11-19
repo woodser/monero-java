@@ -1824,6 +1824,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setIsRelayed(!Boolean.TRUE.equals(tx.getDoNotRelay()));
     tx.setIsMinerTx(false);
     tx.setIsFailed(false);
+    tx.setIsUnlocked(false);
     tx.setMixin(request.getMixin());
     MoneroOutgoingTransfer transfer = new MoneroOutgoingTransfer().setTx(tx);
     if (request.getSubaddressIndices() != null && request.getSubaddressIndices().size() == 1) transfer.setSubaddressIndices(new ArrayList<Integer>(request.getSubaddressIndices())); // we know src subaddress indices iff request specifies 1

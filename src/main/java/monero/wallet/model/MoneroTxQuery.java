@@ -277,6 +277,12 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     super.setNote(note);
     return this;
   }
+  
+  @Override
+  public MoneroTxQuery setIsUnlocked(Boolean isUnlocked) {
+    super.setIsUnlocked(isUnlocked);
+    return this;
+  }
 
   @Override
   public MoneroTxQuery setBlock(MoneroBlock block) {
@@ -463,7 +469,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     super.setIsFailed(isFailed);
     return this;
   }
-
+  
   @Override
   public MoneroTxQuery setLastFailedHeight(Long lastFailedHeight) {
     super.setLastFailedHeight(lastFailedHeight);

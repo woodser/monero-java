@@ -765,6 +765,13 @@ public abstract class TestMoneroWalletCommon {
       }
       if (!found) fail("Tx does not contain specified vout");
     }
+    
+    // get unlocked txs
+    txs = wallet.getTxs(new MoneroTxQuery().setIsUnlocked(true));
+    assertFalse(txs.isEmpty());
+    for (MoneroTxWallet tx : txs) {
+      assertTrue(tx.isUnlocked());
+    }
   }
   
   // Can get transactions by height
@@ -3810,6 +3817,7 @@ public abstract class TestMoneroWalletCommon {
       assertEquals(false, tx.getDoNotRelay());
       assertEquals(true, tx.isRelayed());
       assertEquals(false, tx.isDoubleSpendSeen()); // TODO: test double spend attempt
+      assertEquals(false, tx.isUnlocked());
       
       // these should be initialized unless a response from sending
       if (!Boolean.TRUE.equals(ctx.isSendResponse)) {
@@ -3922,6 +3930,16 @@ public abstract class TestMoneroWalletCommon {
       assertTrue(tx.getFullHex().length() > 0);
       assertNotNull(tx.getMetadata());
       assertNull(tx.getReceivedTimestamp());
+      assertFalse(tx.isUnlocked());
+      
+      // test locked state
+      if (tx.getUnlockTime() == 0) assertEquals(tx.isConfirmed(), tx.isUnlocked());
+      else assertEquals(false, tx.isUnlocked());
+      if (tx.getVoutsWallet() != null) {
+        for (MoneroOutputWallet vout : tx.getVoutsWallet()) {
+          assertEquals(tx.isUnlocked(), vout.isUnlocked());
+        }
+      }
       
       // test destinations of sent tx
       assertEquals(request.getDestinations().size(), tx.getOutgoingTransfer().getDestinations().size());
@@ -3992,6 +4010,7 @@ public abstract class TestMoneroWalletCommon {
     assertNotNull(tx.isFailed());
     assertNotNull(tx.isRelayed());
     assertNotNull(tx.inTxPool());
+    assertNotNull(tx.isUnlocked());
     TestUtils.testUnsignedBigInteger(tx.getFee());
     assertNull(tx.getVins());
     if (tx.getPaymentId() != null) assertNotEquals(MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId()); // default payment id converted to null

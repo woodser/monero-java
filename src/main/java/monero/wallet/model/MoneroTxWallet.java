@@ -40,6 +40,7 @@ public class MoneroTxWallet extends MoneroTx {
     }
     if (tx.outgoingTransfer != null) this.outgoingTransfer = tx.outgoingTransfer.copy().setTx(this);
     this.note = tx.note;
+    this.isUnlocked = tx.isUnlocked;
   }
   
   public MoneroTxWallet copy() {
@@ -154,7 +155,8 @@ public class MoneroTxWallet extends MoneroTx {
     return this;
   }
   
-  public Boolean getIsUnlocked() {
+  @JsonProperty("isUnlocked")
+  public Boolean isUnlocked() {
     return isUnlocked;
   }
   
@@ -217,6 +219,7 @@ public class MoneroTxWallet extends MoneroTx {
     
     // merge simple extensions
     this.setNote(GenUtils.reconcile(this.getNote(), tx.getNote()));
+    this.setIsUnlocked(GenUtils.reconcile(this.isUnlocked(), tx.isUnlocked()));
     
     return this;  // for chaining
   }
