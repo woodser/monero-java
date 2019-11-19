@@ -1,5 +1,7 @@
 package monero.daemon.model;
 
+import java.math.BigInteger;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -14,11 +16,13 @@ public class MoneroSubmitTxResult {
   private Boolean isMixinTooLow;
   private Boolean hasInvalidInput;
   private Boolean hasInvalidOutput;
+  private Boolean hasTooFewOutputs;
   private Boolean isRct;
   private Boolean isOverspend;
   private Boolean isTooBig;
   private Boolean sanityCheckFailed;
   private String reason;
+  private BigInteger credits;
   
   @JsonProperty("isGood")
   public Boolean isGood() {
@@ -82,6 +86,14 @@ public class MoneroSubmitTxResult {
     this.hasInvalidOutput = hasInvalidOutput;
   }
   
+  public Boolean hasTooFewOutputs() {
+    return hasTooFewOutputs;
+  }
+  
+  public void setHasTooFewOutputs(Boolean hasTooFewOutputs) {
+    this.hasTooFewOutputs = hasTooFewOutputs;
+  }
+  
   @JsonProperty("isRct")
   public Boolean isRct() {
     return isRct;
@@ -123,5 +135,13 @@ public class MoneroSubmitTxResult {
   
   public void setReason(String reason) {
     this.reason = reason;
+  }
+  
+  public BigInteger getCredits() {
+    return credits;
+  }
+  
+  public void setCredits(BigInteger credits) {
+    this.credits = credits;
   }
 }

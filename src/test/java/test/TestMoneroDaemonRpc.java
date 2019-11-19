@@ -1914,10 +1914,12 @@ public class TestMoneroDaemonRpc {
       assertEquals(false, result.isMixinTooLow());
       assertEquals(false, result.hasInvalidInput());
       assertEquals(false, result.hasInvalidOutput());
+      assertEquals(false, result.hasTooFewOutputs());
       assertEquals(true, result.isRct());
       assertEquals(false, result.isOverspend());
       assertEquals(false, result.isTooBig());
       assertEquals(false, result.getSanityCheckFailed());
+      TestUtils.testUnsignedBigInteger(result.getCredits());
       assertEquals(true, result.isGood());
     } catch (Exception e) {
       System.out.println("Submit result is not good: " + JsonUtils.serialize(result));

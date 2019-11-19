@@ -1247,6 +1247,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("fee_too_low")) result.setIsFeeTooLow((Boolean) val);
       else if (key.equals("invalid_input")) result.setHasInvalidInput((Boolean) val);
       else if (key.equals("invalid_output")) result.setHasInvalidOutput((Boolean) val);
+      else if (key.equals("too_few_outputs")) result.setHasTooFewOutputs((Boolean) val);
       else if (key.equals("low_mixin")) result.setIsMixinTooLow((Boolean) val);
       else if (key.equals("not_rct")) result.setIsRct(!Boolean.TRUE.equals(val));
       else if (key.equals("not_relayed")) result.setIsRelayed(!Boolean.TRUE.equals(val));
@@ -1254,6 +1255,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("reason")) result.setReason("".equals((String) val) ? null : (String) val);
       else if (key.equals("too_big")) result.setIsTooBig((Boolean) val);
       else if (key.equals("sanity_check_failed")) result.setSanityCheckFailed((Boolean) val);
+      else if (key.equals("credits")) result.setCredits((BigInteger) val);
       else if (key.equals("status") || key.equals("untrusted")) {}  // handled elsewhere
       else LOGGER.warning("WARNING: ignoring unexpected field in submit tx hex result: " + key + ": " + val);
     }
