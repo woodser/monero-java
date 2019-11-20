@@ -188,6 +188,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     if (this.isRelayed() != null && this.isRelayed() != tx.isRelayed()) return false;
     if (this.isFailed() != null && this.isFailed() != tx.isFailed()) return false;
     if (this.isMinerTx() != null && this.isMinerTx() != tx.isMinerTx()) return false;
+    if (this.isUnlocked() != null && this.isUnlocked() != tx.isUnlocked()) return false;
     
     // at least one transfer must meet transfer query if defined
     if (this.getTransferQuery() != null) {

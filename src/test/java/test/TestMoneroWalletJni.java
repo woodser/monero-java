@@ -1174,7 +1174,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
     
     // tx is now confirmed
-    assertTrue(wallet.getTx(sentTx.getId()).isConfirmed());
+    assertTrue(wallet.getTx(sentTx.getId()).isConfirmed()); // TODO: tx is not guaranteed to confirm, which can cause occasional test failure
     
     // created wallet should have notified listeners of received outputs
     assertFalse(myListener.getOutputsReceived().isEmpty());
