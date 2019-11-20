@@ -23,7 +23,7 @@ public class MoneroSubmitTxResult {
   private Boolean sanityCheckFailed;
   private String reason;
   private BigInteger credits;
-  private String topHash;
+  private String topBlockHash;
   
   @JsonProperty("isGood")
   public Boolean isGood() {
@@ -146,11 +146,11 @@ public class MoneroSubmitTxResult {
     this.credits = credits;
   }
 
-  public String getTopHash() {
-    return topHash;
+  public String getTopBlockHash() {
+    return topBlockHash;
   }
 
-  public void setTopHash(String topHash) {
-    this.topHash = topHash;
+  public void setTopBlockHash(String topBlockHash) {
+    this.topBlockHash = topBlockHash;
   }
 }

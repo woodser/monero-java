@@ -31,12 +31,13 @@ public class MoneroDaemonInfo {
   private Long startTimestamp;
   private Long target;
   private Long targetHeight;
-  private String topBlockId;
+  private String topBlockHash;
   private Integer numTxs;
   private Integer numTxsPool;
   private Boolean wasBootstrapEverUsed;
   private Long databaseSize;
   private Boolean updateAvailable;
+  private BigInteger credits;
   
   public String getVersion() {
     return version;
@@ -216,12 +217,12 @@ public class MoneroDaemonInfo {
     this.targetHeight = targetHeight;
   }
   
-  public String getTopBlockId() {
-    return topBlockId;
+  public String getTopBlockHash() {
+    return topBlockHash;
   }
   
-  public void setTopBlockId(String topBlockId) {
-    this.topBlockId = topBlockId;
+  public void setTopBlockHash(String topBlockHash) {
+    this.topBlockHash = topBlockHash;
   }
   
   public Integer getNumTxs() {
@@ -262,5 +263,13 @@ public class MoneroDaemonInfo {
   
   public void setUpdateAvailable(Boolean updateAvailable) {
     this.updateAvailable = updateAvailable;
+  }
+
+  public BigInteger getCredits() {
+    return credits;
+  }
+
+  public void setCredits(BigInteger credits) {
+    this.credits = credits;
   }
 }

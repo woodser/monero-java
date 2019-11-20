@@ -1262,10 +1262,10 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("sanity_check_failed")) result.setSanityCheckFailed((Boolean) val);
       else if (key.equals("credits")) result.setCredits((BigInteger) val);
       else if (key.equals("status") || key.equals("untrusted")) {}  // handled elsewhere
-      else if (key.equals("top_hash")) result.setTopHash((String) val);
+      else if (key.equals("top_hash")) result.setTopBlockHash((String) val);
       else LOGGER.warning("WARNING: ignoring unexpected field in submit tx hex result: " + key + ": " + val);
     }
-    if ("".equals(result.getTopHash())) result.setTopHash(null);
+    if ("".equals(result.getTopBlockHash())) result.setTopBlockHash(null);
     return result;
   }
   
@@ -1358,7 +1358,6 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("status")) {}  // handled elsewhere
       else if (key.equals("target")) info.setTarget(((BigInteger) val).longValue());
       else if (key.equals("target_height")) info.setTargetHeight(((BigInteger) val).longValue());
-      else if (key.equals("top_block_hash")) info.setTopBlockId((String) val);
       else if (key.equals("tx_count")) info.setNumTxs(((BigInteger) val).intValue());
       else if (key.equals("tx_pool_size")) info.setNumTxsPool(((BigInteger) val).intValue());
       else if (key.equals("untrusted")) {} // handled elsewhere
@@ -1369,8 +1368,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("mainnet")) { if ((Boolean) val) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroNetworkType.MAINNET)); }
       else if (key.equals("testnet")) { if ((Boolean) val) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroNetworkType.TESTNET)); }
       else if (key.equals("stagenet")) { if ((Boolean) val) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroNetworkType.STAGENET)); }
-      //else if (key.equals("credits")) throw new RuntimeException("Not implemented");
-      //else if (key.equals("top_hash")) throw new RuntimeException("Not implemented");
+      else if (key.equals("credits")) info.setCredits((BigInteger) val);
+      else if (key.equals("top_block_hash") || key.equals("top_hash")) info.setTopBlockHash(GenUtils.reconcile(info.getTopBlockHash(), "".equals(val) ? null : (String) val));  // TODO monero-wallet-rpc: daemon info top_hash is redundant with top_block_hash, only returned if pay-for-service enabled
       else LOGGER.warning("WARNING: Ignoring unexpected info field: " + key + ": " + val);
     }
     return info;
@@ -1413,8 +1412,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
           LOGGER.warning("WARNING: failed to parse 'overview' field: " + val);
         }
       }
-      //else if (key.equals("credits")) throw new RuntimeException("Not implemented");
-      //else if (key.equals("top_hash")) throw new RuntimeException("Not implemented");
+      else if (key.equals("credits")) syncInfo.setCredits((BigInteger) val);
+      else if (key.equals("top_hash")) syncInfo.setTopBlockHash((String) val);
       else if (key.equals("untrusted")) {}  // handled elsewhere
       else LOGGER.warning("WARNING: ignoring unexpected field in sync info: " + key + ": " + val);
     }
@@ -1435,11 +1434,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("votes")) info.setNumVotes(((BigInteger) val).intValue());
       else if (key.equals("voting")) info.setVoting(((BigInteger) val).intValue());
       else if (key.equals("window")) info.setWindow(((BigInteger) val).intValue());
-      else if (key.equals("top_hash")) info.setTopHash((String) val);
       else if (key.equals("credits")) info.setCredits((BigInteger) val);
+      else if (key.equals("top_hash")) info.setTopBlockHash((String) val);
       else LOGGER.warning("WARNING: ignoring unexpected field in hard fork info: " + key + ": " + val);
     }
-    if ("".equals(info.getTopHash())) info.setTopHash(null);
+    if ("".equals(info.getTopBlockHash())) info.setTopBlockHash(null);
     return info;
   }
   

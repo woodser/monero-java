@@ -1781,7 +1781,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(info.getStartTimestamp() > 0);
     assertTrue(info.getTarget() > 0);
     assertTrue(info.getTargetHeight() >= 0);
-    assertFalse(info.getTopBlockId().isEmpty());
+    assertFalse(info.getTopBlockHash().isEmpty());
     assertTrue(info.getNumTxs() >= 0);
     assertTrue(info.getNumTxsPool() >= 0);
     assertNotNull(info.getWasBootstrapEverUsed());
@@ -1832,7 +1832,7 @@ public class TestMoneroDaemonRpc {
     assertNotNull(hardForkInfo.getVoting());
     assertNotNull(hardForkInfo.getWindow());
     TestUtils.testUnsignedBigInteger(hardForkInfo.getCredits());
-    assertNull(hardForkInfo.getTopHash());
+    assertNull(hardForkInfo.getTopBlockHash());
   }
 
   private static void testMoneroBan(MoneroBan ban) {
@@ -1928,7 +1928,7 @@ public class TestMoneroDaemonRpc {
       assertEquals(false, result.isTooBig());
       assertEquals(false, result.getSanityCheckFailed());
       TestUtils.testUnsignedBigInteger(result.getCredits());
-      assertNull(result.getTopHash());
+      assertNull(result.getTopBlockHash());
       assertEquals(true, result.isGood());
     } catch (Exception e) {
       System.out.println("Submit result is not good: " + JsonUtils.serialize(result));

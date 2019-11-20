@@ -17,8 +17,8 @@ public class MoneroHardForkInfo {
   private Integer numVotes;
   private Integer window;
   private Integer voting;
-  private String topHash;
   private BigInteger credits;
+  private String topBlockHash;
   
   public Long getEarliestHeight() {
     return earliestHeight;
@@ -85,19 +85,19 @@ public class MoneroHardForkInfo {
     this.voting = voting;
   }
 
-  public String getTopHash() {
-    return topHash;
-  }
-
-  public void setTopHash(String topHash) {
-    this.topHash = topHash;
-  }
-
   public BigInteger getCredits() {
     return credits;
   }
 
   public void setCredits(BigInteger credits) {
     this.credits = credits;
+  }
+  
+  public String getTopBlockHash() {
+    return topBlockHash;
+  }
+
+  public void setTopBlockHash(String topBlockHash) {
+    this.topBlockHash = topBlockHash;
   }
 }

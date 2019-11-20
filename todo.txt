@@ -1,6 +1,8 @@
 v15.0.0
 implement isUnlocked, rpc_credits_per_hash, credits, seed_hash, next_seed_hash, seed_height, address_type
 test isUnlocked, rpc_credits_per_hash, credits, seed_hash, next_seed_hash, seed_height, address_type, including filtering
+test pay for service
+rename block id terminology to block hashes
 implement new methods: describe_transfer, ...
 test get_attribute() with unset key
 compare duplicated code in monero_wallet to v15
@@ -9,6 +11,7 @@ merge latest js, java-lite, cpp
 standardize expected test failures vs exceptions
 kept_by_block: T stuck in mempool?
 known ring does not include the spent outputs
+update spec: block ids -> hashes
 
 HIGH
 MoneroRpcConnection LOGGER.fine() executing? would be major performance hit

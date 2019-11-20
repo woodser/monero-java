@@ -1,5 +1,6 @@
 package monero.daemon.model;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -13,6 +14,8 @@ public class MoneroDaemonSyncInfo {
   private Long targetHeight;
   private Integer nextNeededPruningSeed;
   private String overview;
+  private BigInteger credits;
+  private String topBlockHash;
   
   public Long getHeight() {
     return height;
@@ -60,5 +63,21 @@ public class MoneroDaemonSyncInfo {
   
   public void setOverview(String overview) {
     this.overview = overview;
+  }
+
+  public BigInteger getCredits() {
+    return credits;
+  }
+
+  public void setCredits(BigInteger credits) {
+    this.credits = credits;
+  }
+
+  public String getTopBlockHash() {
+    return topBlockHash;
+  }
+
+  public void setTopBlockHash(String topBlockHash) {
+    this.topBlockHash = topBlockHash;
   }
 }
