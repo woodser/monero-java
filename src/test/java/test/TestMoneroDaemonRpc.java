@@ -1781,7 +1781,6 @@ public class TestMoneroDaemonRpc {
     assertTrue(info.getStartTimestamp() > 0);
     assertTrue(info.getTarget() > 0);
     assertTrue(info.getTargetHeight() >= 0);
-    assertFalse(info.getTopBlockHash().isEmpty());
     assertTrue(info.getNumTxs() >= 0);
     assertTrue(info.getNumTxsPool() >= 0);
     assertNotNull(info.getWasBootstrapEverUsed());
@@ -1789,6 +1788,8 @@ public class TestMoneroDaemonRpc {
     assertTrue(info.getBlockWeightMedian() > 0);
     assertTrue(info.getDatabaseSize() > 0);
     assertNotNull(info.getUpdateAvailable());
+    TestUtils.testUnsignedBigInteger(info.getCredits(), false); // 0 credits
+    assertFalse(info.getTopBlockHash().isEmpty());
   }
 
   private static void testSyncInfo(MoneroDaemonSyncInfo syncInfo) { // TODO: consistent naming, daemon in name?
@@ -1808,6 +1809,8 @@ public class TestMoneroDaemonRpc {
     }
     assertTrue(syncInfo.getNextNeededPruningSeed() >= 0);
     assertNull(syncInfo.getOverview());
+    TestUtils.testUnsignedBigInteger(syncInfo.getCredits(), false); // 0 credits
+    assertNull(syncInfo.getTopBlockHash());
   }
   
   private static void testDaemonConnectionSpan(MoneroDaemonConnectionSpan span) {
@@ -1831,7 +1834,7 @@ public class TestMoneroDaemonRpc {
     assertNotNull(hardForkInfo.getNumVotes());
     assertNotNull(hardForkInfo.getVoting());
     assertNotNull(hardForkInfo.getWindow());
-    TestUtils.testUnsignedBigInteger(hardForkInfo.getCredits());
+    TestUtils.testUnsignedBigInteger(hardForkInfo.getCredits(), false); // 0 credits
     assertNull(hardForkInfo.getTopBlockHash());
   }
 
@@ -1927,7 +1930,7 @@ public class TestMoneroDaemonRpc {
       assertEquals(false, result.isOverspend());
       assertEquals(false, result.isTooBig());
       assertEquals(false, result.getSanityCheckFailed());
-      TestUtils.testUnsignedBigInteger(result.getCredits());
+      TestUtils.testUnsignedBigInteger(result.getCredits(), false); // 0 credits
       assertNull(result.getTopBlockHash());
       assertEquals(true, result.isGood());
     } catch (Exception e) {
