@@ -24,6 +24,7 @@ public class MoneroDaemonConnection {
   private Long sendIdleTime;
   private String state;
   private Integer numSupportFlags;
+  private ConnectionType type;
   
   public MoneroDaemonPeer getPeer() {
     return peer;
@@ -161,5 +162,13 @@ public class MoneroDaemonConnection {
   
   public void setNumSupportFlags(Integer numSupportFlags) {
     this.numSupportFlags = numSupportFlags;
+  }
+
+  public ConnectionType getType() {
+    return type;
+  }
+
+  public void setType(ConnectionType type) {
+    this.type = type;
   }
 }

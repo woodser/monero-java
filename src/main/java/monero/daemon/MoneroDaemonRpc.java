@@ -37,6 +37,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import common.utils.GenUtils;
 import common.utils.JsonUtils;
+import monero.daemon.model.ConnectionType;
 import monero.daemon.model.MoneroAltChain;
 import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
@@ -1298,6 +1299,16 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("state")) connection.setState((String) val);
       else if (key.equals("support_flags")) connection.setNumSupportFlags(((BigInteger) val).intValue());
       else if (key.equals("pruning_seed")) peer.setPruningSeed(((BigInteger) val).intValue());
+      else if (key.equals("rpc_credits_per_hash"))  peer.setRpcCreditsPerHash((BigInteger) val);
+      else if (key.equals("address_type")) {
+        int rpcType = ((BigInteger) val).intValue();
+        if (rpcType == 0) connection.setType(ConnectionType.INVALID);
+        else if (rpcType == 1) connection.setType(ConnectionType.IPV4);
+        else if (rpcType == 2) connection.setType(ConnectionType.IPV6);
+        else if (rpcType == 3) connection.setType(ConnectionType.TOR);
+        else if (rpcType == 4) connection.setType(ConnectionType.I2P);
+        else throw new MoneroException("Invalid RPC connection type, expected 0-4: " + rpcType);
+      }
       else LOGGER.warning("WARNING: ignoring unexpected field in connection: " + key + ": " + val);
     }
     return connection;

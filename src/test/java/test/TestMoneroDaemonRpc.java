@@ -1868,6 +1868,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(connection.getSendIdleTime() >= 0);
     assertNotNull(connection.getState());
     assertTrue(connection.getNumSupportFlags() >= 0); 
+    assertNotNull(connection.getType());
   }
 
   private static void testKnownPeer(MoneroDaemonPeer peer, boolean fromConnection) {
