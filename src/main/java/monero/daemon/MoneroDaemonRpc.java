@@ -1413,6 +1413,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
           LOGGER.warning("WARNING: failed to parse 'overview' field: " + val);
         }
       }
+      //else if (key.equals("credits")) throw new RuntimeException("Not implemented");
+      //else if (key.equals("top_hash")) throw new RuntimeException("Not implemented");
+      else if (key.equals("untrusted")) {}  // handled elsewhere
       else LOGGER.warning("WARNING: ignoring unexpected field in sync info: " + key + ": " + val);
     }
     return syncInfo;
