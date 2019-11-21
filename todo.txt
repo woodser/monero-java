@@ -4,11 +4,9 @@ test isUnlocked, rpc_credits_per_hash, credits, seed_hash, next_seed_hash, seed_
 switch to isLocked() for consistency with monero-project? wallet2 uses unlocked
 convertRpcTxWithVout, rpcSweepAccount not setting tx.setIsUnlocked(), test
 test pay for service
+support wallet getVersion(), parseTxSet(), editAddressBook(), get/set_rpc_client_secret_key
 rename block id terminology to block hashes
-implement new methods: describe_transfer, ...
-test get_attribute() with unset key
-compare duplicated code in monero_wallet to v15
-replace output isUnlocked with MoneroTxWallet isUnlocked?
+replace output isUnlocked with MoneroTxWallet isUnlocked? technically redundant
 merge latest js, java-lite, cpp
 standardize expected test failures vs exceptions
 kept_by_block: T stuck in mempool?
@@ -16,9 +14,9 @@ known ring does not include the spent outputs
 update spec: block ids -> hashes
 add compatibility monero-project compatiblity version to readme
 support cpp address book
-parseTxSet() implementation
-compare wallet_rpc_server from v15.0.1 to v14.1.0 for differences affecting monero_wallet.cpp
 update to released v15.0.1 and test
+update from latest monero-cpp-library wasm branch which switches serialization, and vice versa
+compare wallet_rpc_server from v15.0.1 to v14.1.0 for differences affecting monero_wallet.cpp
 
 HIGH
 MoneroRpcConnection LOGGER.fine() executing? would be major performance hit
