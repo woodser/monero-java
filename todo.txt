@@ -1,6 +1,8 @@
 v15.0.0
 implement isUnlocked, rpc_credits_per_hash, credits, seed_hash, next_seed_hash, seed_height, address_type
 test isUnlocked, rpc_credits_per_hash, credits, seed_hash, next_seed_hash, seed_height, address_type, including filtering
+switch to isLocked() for consistency with monero-project? wallet2 uses unlocked
+convertRpcTxWithVout, rpcSweepAccount not setting tx.setIsUnlocked(), test
 test pay for service
 rename block id terminology to block hashes
 implement new methods: describe_transfer, ...
@@ -12,6 +14,11 @@ standardize expected test failures vs exceptions
 kept_by_block: T stuck in mempool?
 known ring does not include the spent outputs
 update spec: block ids -> hashes
+add compatibility monero-project compatiblity version to readme
+support cpp address book
+parseTxSet() implementation
+compare wallet_rpc_server from v15.0.1 to v14.1.0 for differences affecting monero_wallet.cpp
+update to released v15.0.1 and test
 
 HIGH
 MoneroRpcConnection LOGGER.fine() executing? would be major performance hit
