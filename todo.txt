@@ -1,5 +1,6 @@
 v15.0.0
-implement isUnlocked, rpc_credits_per_hash, credits, seed_hash, next_seed_hash, seed_height, address_type
+test rpcCreditsPerHash, credits with 
+
 test isUnlocked, rpc_credits_per_hash, credits, seed_hash, next_seed_hash, seed_height, address_type, including filtering
 convertRpcTxWithVout, rpcSweepAccount not setting tx.setIsUnlocked(), test
 test pay for service

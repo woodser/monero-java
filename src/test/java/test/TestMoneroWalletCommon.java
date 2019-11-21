@@ -2454,6 +2454,10 @@ public abstract class TestMoneroWalletCommon {
     assertTrue(subaddress.getBalance().compareTo(balanceBefore) < 0);
     assertTrue(subaddress.getUnlockedBalance().compareTo(unlockedBalanceBefore) < 0);
     
+    // query unlocked txs
+    List<MoneroTxWallet> lockedTxs = getAndTestTxs(wallet, new MoneroTxQuery().setIsUnlocked(false), null, true);
+    for (MoneroTxWallet lockedTx : lockedTxs) assertEquals(false, lockedTx.isUnlocked());
+    
     // build test context
     TestContext ctx = new TestContext();
     ctx.wallet = wallet;
@@ -2478,6 +2482,16 @@ public abstract class TestMoneroWalletCommon {
           assertTrue(sendAmount.equals(destination.getAmount()));
         }
       }
+      
+      // tx is among locked txs
+      boolean found = false;
+      for (MoneroTxWallet locked : lockedTxs) {
+        if (locked.getId().equals(tx.getId())) {
+          found = true;
+          break;
+        }
+      }
+      assertTrue("Created txs should be among locked txs", found);
     }
     
     // if tx was relayed, all wallets will need to wait for tx to confirm in order to reliably sync
