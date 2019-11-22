@@ -2329,7 +2329,11 @@ public abstract class TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
     MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress();
     String paymentId = integratedAddress.getPaymentId();
-    testSendToSingle(new MoneroSendRequest().setCanSplit(false).setPaymentId(paymentId + paymentId + paymentId + paymentId));  // 64 character payment id
+    try {
+      testSendToSingle(new MoneroSendRequest().setCanSplit(false).setPaymentId(paymentId + paymentId + paymentId + paymentId));  // 64 character payment id
+    } catch (MoneroException e) {
+      assertEquals("Standalone payment IDs are obsolete. Use subaddresses or integrated addresses instead", e.getMessage());
+    }
   }
   
   // Can send to an address in a single transaction with a ring size
