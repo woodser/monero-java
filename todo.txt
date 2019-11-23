@@ -1,9 +1,6 @@
 v15.0.0
-test rpcCreditsPerHash, credits with 
-
-test isUnlocked, rpc_credits_per_hash, credits, seed_hash, next_seed_hash, seed_height, address_type, including filtering
-convertRpcTxWithVout, rpcSweepAccount not setting tx.setIsUnlocked(), test
-test pay for service
+test pay for service, rpcCreditsPerHash, credits
+test rpcSweeAccount, convertRpcTxWithVout which do not calltx.setIsUnlocked()
 support wallet getVersion(), parseTxSet(), editAddressBook(), get/set_rpc_client_secret_key
 rename block id terminology to block hashes
 replace output isUnlocked with MoneroTxWallet isUnlocked? technically redundant

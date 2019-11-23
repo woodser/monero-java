@@ -31,7 +31,6 @@ import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroBlockTemplate;
-import monero.daemon.model.MoneroMinerTxSum;
 import monero.daemon.model.MoneroDaemonConnection;
 import monero.daemon.model.MoneroDaemonInfo;
 import monero.daemon.model.MoneroDaemonListener;
@@ -41,6 +40,7 @@ import monero.daemon.model.MoneroDaemonUpdateCheckResult;
 import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
 import monero.daemon.model.MoneroHardForkInfo;
 import monero.daemon.model.MoneroKeyImageSpentStatus;
+import monero.daemon.model.MoneroMinerTxSum;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroOutput;
@@ -50,11 +50,19 @@ import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxBacklogEntry;
 import monero.daemon.model.MoneroTxPoolStats;
+import monero.daemon.model.MoneroVersion;
 
 /**
  * Monero daemon interface.
  */
 public interface MoneroDaemon {
+  
+  /**
+   * Gets the version of the daemon.
+   * 
+   * @return the version of the daemon
+   */
+  public MoneroVersion getVersion();
   
   /**
    * Indicates if the daemon is trusted or untrusted.

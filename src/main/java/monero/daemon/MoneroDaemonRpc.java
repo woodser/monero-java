@@ -64,6 +64,7 @@ import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxBacklogEntry;
 import monero.daemon.model.MoneroTxPoolStats;
+import monero.daemon.model.MoneroVersion;
 import monero.rpc.MoneroRpcConnection;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroCppUtils;
@@ -131,6 +132,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     } catch (MoneroException e) {
       return false;
     }
+  }
+  
+  @SuppressWarnings("unchecked")
+  @Override
+  public MoneroVersion getVersion() {
+    Map<String, Object> resp = rpc.sendJsonRequest("get_version");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return new MoneroVersion(((BigInteger) result.get("version")).intValue(), (Boolean) result.get("release"));
   }
 
   @Override

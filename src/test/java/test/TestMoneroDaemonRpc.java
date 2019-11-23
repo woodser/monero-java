@@ -47,6 +47,7 @@ import monero.daemon.model.MoneroOutputHistogramEntry;
 import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxPoolStats;
+import monero.daemon.model.MoneroVersion;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
@@ -101,6 +102,16 @@ public class TestMoneroDaemonRpc {
   }
   
   // -------------------------------- NON RELAYS ------------------------------
+  
+  // Can get the daemon's version
+  @Test
+  public void testGetVersion() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    MoneroVersion version = daemon.getVersion();
+    assertNotNull(version.getVersionNumber());
+    assertTrue(version.getVersionNumber() > 0);
+    assertNotNull(version.getIsRelease());
+  }
   
   // Can indicate if it's trusted
   @Test
