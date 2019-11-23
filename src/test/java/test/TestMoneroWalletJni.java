@@ -1479,6 +1479,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
   
   @Test
+  public void testGetVersion() {
+    super.testGetVersion();
+  }
+  
+  @Test
   public void testGetPath() {
     super.testGetPath();
   }

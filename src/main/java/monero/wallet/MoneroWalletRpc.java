@@ -44,6 +44,7 @@ import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
+import monero.daemon.model.MoneroVersion;
 import monero.rpc.MoneroRpcConnection;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroException;
@@ -223,6 +224,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   // -------------------------- COMMON WALLET METHODS -------------------------
+  
+  @SuppressWarnings("unchecked")
+  @Override
+  public MoneroVersion getVersion() {
+    Map<String, Object> resp = rpc.sendJsonRequest("get_version");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return new MoneroVersion(((BigInteger) result.get("version")).intValue(), (Boolean) result.get("release"));
+  }
   
   @Override
   public String getPath() {

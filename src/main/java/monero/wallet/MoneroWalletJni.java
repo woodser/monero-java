@@ -41,6 +41,7 @@ import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
+import monero.daemon.model.MoneroVersion;
 import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
 import monero.wallet.model.MoneroAccount;
@@ -430,6 +431,17 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   // -------------------------- COMMON WALLET METHODS -------------------------
+  
+  @Override
+  public MoneroVersion getVersion() {
+    assertNotClosed();
+    try {
+      String versionJson = getVersionJni();
+      return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, versionJson, MoneroVersion.class);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
   
   @Override
   public String getPath() {
@@ -1290,6 +1302,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native boolean isSyncedJni();
   
   private native int getNetworkTypeJni();
+  
+  private native String getVersionJni();
   
   private native String getPathJni();
   

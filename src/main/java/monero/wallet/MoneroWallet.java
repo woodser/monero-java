@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.List;
 
 import monero.daemon.model.MoneroKeyImage;
+import monero.daemon.model.MoneroVersion;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -58,6 +59,13 @@ import monero.wallet.model.MoneroTxWallet;
 public interface MoneroWallet {
   
   public static final String DEFAULT_LANGUAGE = "English";
+  
+  /**
+   * Returns the wallet version.
+   * 
+   * @return the wallet version
+   */
+  public MoneroVersion getVersion();
   
   /**
    * Get the wallet's path.

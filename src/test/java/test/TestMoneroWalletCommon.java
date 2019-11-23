@@ -34,6 +34,7 @@ import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
+import monero.daemon.model.MoneroVersion;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
@@ -150,6 +151,16 @@ public abstract class TestMoneroWalletCommon {
     // re-open main test wallet
     wallet.close();
     this.wallet = getTestWallet();
+  }
+  
+  // Can get the wallet's version
+  @Test
+  public void testGetVersion() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    MoneroVersion version = wallet.getVersion();
+    assertNotNull(version.getVersionNumber());
+    assertTrue(version.getVersionNumber() > 0);
+    assertNotNull(version.getIsRelease());
   }
 
   // Can get the mnemonic phrase derived from the seed
