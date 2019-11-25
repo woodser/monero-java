@@ -24,6 +24,12 @@ public class MoneroTxWallet extends MoneroTx {
   private MoneroOutgoingTransfer outgoingTransfer;
   private String note;
   private Boolean isUnlocked;
+  private BigInteger inputSum;
+  private BigInteger outputSum;
+  private String changeAddress;
+  private BigInteger changeAmount;
+  private Integer numDummyOutputs;
+  private String extraHex;  // TODO: refactor MoneroTx to only use extra as hex string
   
   public MoneroTxWallet() {
     // nothing to initialize
@@ -162,6 +168,60 @@ public class MoneroTxWallet extends MoneroTx {
   
   public MoneroTxWallet setIsUnlocked(Boolean isUnlocked) {
     this.isUnlocked = isUnlocked;
+    return this;
+  }
+
+  public BigInteger getInputSum() {
+    return inputSum;
+  }
+
+  public MoneroTxWallet setInputSum(BigInteger inputSum) {
+    this.inputSum = inputSum;
+    return this;
+  }
+
+  public BigInteger getOutputSum() {
+    return outputSum;
+  }
+
+  public MoneroTxWallet setOutputSum(BigInteger outputSum) {
+    this.outputSum = outputSum;
+    return this;
+  }
+
+  public String getChangeAddress() {
+    return changeAddress;
+  }
+
+  public MoneroTxWallet setChangeAddress(String changeAddress) {
+    this.changeAddress = changeAddress;
+    return this;
+  }
+
+  public BigInteger getChangeAmount() {
+    return changeAmount;
+  }
+
+  public MoneroTxWallet setChangeAmount(BigInteger changeAmount) {
+    this.changeAmount = changeAmount;
+    return this;
+  }
+
+  public Integer getNumDummyOutputs() {
+    return numDummyOutputs;
+  }
+
+  public MoneroTxWallet setNumDummyOutputs(Integer numDummyOutputs) {
+    this.numDummyOutputs = numDummyOutputs;
+    return this;
+  }
+
+  public String getExtraHex() {
+    return extraHex;
+  }
+
+  public MoneroTxWallet setExtraHex(String extraHex) {
+    this.extraHex = extraHex;
     return this;
   }
   

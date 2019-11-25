@@ -1163,8 +1163,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return txSet;
   }
   
+  @SuppressWarnings("unchecked")
   @Override
-  public void parseTxSet(MoneroTxSet txSet) {
+  public MoneroTxSet parseTxSet(MoneroTxSet txSet) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("unsigned_txset", txSet.getUnsignedTxHex());
     params.put("multisig_txset", txSet.getMultisigTxHex());
@@ -1173,7 +1174,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resp = rpc.sendJsonRequest("describe_transfer", params);
     System.out.println("RESPONSE BODY");
     System.out.println(JsonUtils.serialize(resp));
-    throw new RuntimeException("Not implemented");
+    return convertRpcDescribeTransfer((Map<String, Object>) resp.get("result"));
   }
 
   @SuppressWarnings("unchecked")
@@ -1856,7 +1857,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @param rpcMap is the map to initialize the tx set from
    * @return MoneroTxSet is the initialized tx set
    */
-  private static MoneroTxSet convertRpcMapToTxSet(Map<String, Object> rpcMap) {
+  private static MoneroTxSet convertRpcTxSet(Map<String, Object> rpcMap) {
     MoneroTxSet txSet = new MoneroTxSet();
     txSet.setMultisigTxHex((String) rpcMap.get("multisig_txset"));
     txSet.setUnsignedTxHex((String) rpcMap.get("unsigned_txset"));
@@ -1878,7 +1879,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   private static MoneroTxSet convertRpcSentTxsToTxSet(Map<String, Object> rpcTxs, List<MoneroTxWallet> txs) {
     
     // build shared tx set
-    MoneroTxSet txSet = convertRpcMapToTxSet(rpcTxs);
+    MoneroTxSet txSet = convertRpcTxSet(rpcTxs);
     
     // done if rpc contains no txs
     if (!rpcTxs.containsKey("fee_list")) {
@@ -1938,7 +1939,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @returns the initialized tx set with a tx
    */
   private static MoneroTxSet convertRpcTxToTxSet(Map<String, Object> rpcTx, MoneroTxWallet tx, Boolean isOutgoing) {
-    MoneroTxSet txSet = convertRpcMapToTxSet(rpcTx);
+    MoneroTxSet txSet = convertRpcTxSet(rpcTx);
     txSet.setTxs(Arrays.asList(convertRpcTxWithTransfer(rpcTx, tx, isOutgoing).setTxSet(txSet)));
     return txSet;
   }
@@ -1961,11 +1962,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (rpcTx.containsKey("type")) isOutgoing = decodeRpcType((String) rpcTx.get("type"), tx);
     else {
       GenUtils.assertNotNull("Must indicate if tx is outgoing (true) xor incoming (false) since unknown", isOutgoing);
-      GenUtils.assertNotNull(tx.isConfirmed());
-      GenUtils.assertNotNull(tx.inTxPool());
-      GenUtils.assertNotNull(tx.isMinerTx());
-      GenUtils.assertNotNull(tx.isFailed());
-      GenUtils.assertNotNull(tx.getDoNotRelay());
+//      GenUtils.assertNotNull(tx.isConfirmed());
+//      GenUtils.assertNotNull(tx.inTxPool());
+//      GenUtils.assertNotNull(tx.isMinerTx());
+//      GenUtils.assertNotNull(tx.isFailed());
+//      GenUtils.assertNotNull(tx.getDoNotRelay());
     }
     
     // TODO: safe set
@@ -2019,7 +2020,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
       }
       else if (key.equals("payment_id")) {
-        if (!MoneroTxWallet.DEFAULT_PAYMENT_ID.equals(val)) tx.setPaymentId((String) val);  // default is undefined
+        if (!"".equals(val) && !MoneroTxWallet.DEFAULT_PAYMENT_ID.equals(val)) tx.setPaymentId((String) val);  // default is undefined
       }
       else if (key.equals("subaddr_index")) GenUtils.assertTrue(rpcTx.containsKey("subaddr_indices")); // handled by subaddr_indices
       else if (key.equals("subaddr_indices")) {
@@ -2035,7 +2036,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           ((MoneroIncomingTransfer) transfer).setSubaddressIndex(rpcIndices.get(0).get("minor").intValue());
         }
       }
-      else if (key.equals("destinations")) {
+      else if (key.equals("destinations") || key.equals("recipients")) {
         GenUtils.assertTrue(isOutgoing);
         List<MoneroDestination> destinations = new ArrayList<MoneroDestination>();
         for (Map<String, Object> rpcDestination : (List<Map<String, Object>>) val) {
@@ -2052,6 +2053,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
       else if (key.equals("multisig_txset") && val != null) {}  // handled elsewhere; this method only builds a tx wallet
       else if (key.equals("unsigned_txset") && val != null) {}  // handled elsewhere; this method only builds a tx wallet
+      else if (key.equals("amount_in")) tx.setInputSum((BigInteger) val);
+      else if (key.equals("amount_out")) tx.setOutputSum((BigInteger) val);
+      else if (key.equals("change_address")) tx.setChangeAddress((String) val);
+      else if (key.equals("change_amount")) tx.setChangeAmount((BigInteger) val);
+      else if (key.equals("dummy_outputs")) tx.setNumDummyOutputs(((BigInteger) val).intValue());
+      else if (key.equals("extra")) tx.setExtraHex((String) val);
+      else if (key.equals("ring_size")) tx.setMixin(((BigInteger) val).intValue() - 1);
       else LOGGER.warning("WARNING: ignoring unexpected transaction field: " + key + ": " + val);
     }
     
@@ -2109,6 +2117,22 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     vouts.add((MoneroOutput) vout); // have to cast to extended type because Java paramaterized types do not recognize inheritance
     tx.setVouts(vouts);
     return tx;
+  }
+  
+  @SuppressWarnings("unchecked")
+  private static MoneroTxSet convertRpcDescribeTransfer(Map<String, Object> rpcDescribeTransferResult) {
+    MoneroTxSet txSet = new MoneroTxSet();
+    for (String key : rpcDescribeTransferResult.keySet()) {
+      Object val = rpcDescribeTransferResult.get(key);
+      if (key.equals("desc")) {
+        txSet.setTxs(new ArrayList<MoneroTxWallet>());
+        for (Map<String, Object> txMap : (List<Map<String, Object>>) val) {
+          txSet.getTxs().add(convertRpcTxWithTransfer(txMap, null, true));
+        }
+      }
+      else LOGGER.warning("WARNING: ignoring unexpected describe transfer field: " + key + ": " + val);
+    }
+    return txSet;
   }
   
   /**

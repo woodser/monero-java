@@ -1,11 +1,13 @@
 v15.0.0
-switch from tx mixin to ring size?
+switch from tx and request mixin to ring size?
 test pay for service, rpcCreditsPerHash, credits
 test rpcSweeAccount, convertRpcTxWithVout which do not calltx.setIsUnlocked()
 support wallet getVersion(), parseTxSet(), editAddressBook(), get/set_rpc_client_secret_key
 support cpp address book
 rename block id terminology to block hashes
 update spec: block ids -> hashes
+convert MoneroTx extra to string
+rename MoneroOutput to MoneroRingMember, rename MoneroTx vins and vouts to inputs and outputs?
 replace output isUnlocked with MoneroTxWallet isUnlocked? technically redundant
 merge latest js, java-lite, cpp
 standardize expected test failures vs exceptions

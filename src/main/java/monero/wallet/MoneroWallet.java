@@ -800,10 +800,12 @@ public interface MoneroWallet {
   public MoneroTxSet sweepDust(boolean doNotRelay);
   
   /**
-   * TODO
-   * @param txSet
+   * Parses a tx set containing unsigned or multisig tx hex to a new tx set containing structured transactions.
+   * 
+   * @param txSet is a tx set containing unsigned or multisig tx hex
+   * @return the parsed tx set containing structured transactions
    */
-  public void parseTxSet(MoneroTxSet txSet);
+  public MoneroTxSet parseTxSet(MoneroTxSet txSet);
   
   /**
    * Sign a message.

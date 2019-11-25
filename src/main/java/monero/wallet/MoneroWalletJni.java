@@ -951,7 +951,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   @Override
-  public void parseTxSet(MoneroTxSet txSet) {
+  public MoneroTxSet parseTxSet(MoneroTxSet txSet) {
     throw new RuntimeException("MoneroWalletJni.parseTxSet() not implemented");
   }
 

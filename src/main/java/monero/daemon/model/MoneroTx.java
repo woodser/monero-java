@@ -45,7 +45,7 @@ public class MoneroTx {
   private List<MoneroOutput> vouts;
   private List<Integer> outputIndices;
   private String metadata;
-  private int[] extra;
+  private int[] extra;  // TODO: switch to string
   private Object rctSignatures; // TODO: implement
   private Object rctSigPrunable;  // TODO: implement
   private Boolean isKeptByBlock;

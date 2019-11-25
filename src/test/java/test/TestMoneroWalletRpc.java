@@ -27,6 +27,7 @@ import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
+import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
@@ -195,6 +196,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   // Can parse a tx set hex returned from sending transfers.
+  // TODO: move this to common tests, which means exposing createWalletFromKeys() as extendable common test class method
   @Test
   public void testParseTxSet() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -220,9 +222,38 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
         wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
         
         // parse the tx set
-        wallet.parseTxSet(txSet);
+        MoneroTxSet parsedTxSet = wallet.parseTxSet(txSet);
         
-        throw new RuntimeException("Now what");
+        // test the parsed tx set
+        assertNotNull(parsedTxSet.getTxs());
+        assertNull(parsedTxSet.getSignedTxHex());
+        assertNull(parsedTxSet.getUnsignedTxHex());
+        assertNull(parsedTxSet.getMultisigTxHex());
+        for (MoneroTxWallet parsedTx : parsedTxSet.getTxs()) {
+          
+          // TODO: use common tx wallet tests where applicable
+          TestUtils.testUnsignedBigInteger(parsedTx.getInputSum(), true);
+          TestUtils.testUnsignedBigInteger(parsedTx.getOutputSum(), true);
+          TestUtils.testUnsignedBigInteger(parsedTx.getFee());
+          assertFalse(parsedTx.getChangeAddress().isEmpty());
+          assertTrue(parsedTx.getMixin() > 0);
+          assertTrue(parsedTx.getUnlockTime() >= 0);
+          TestUtils.testUnsignedBigInteger(parsedTx.getChangeAmount());
+          assertTrue(parsedTx.getNumDummyOutputs() >= 0);
+          assertFalse(parsedTx.getExtraHex().isEmpty());
+          assertTrue(parsedTx.getPaymentId() == null || !parsedTx.getPaymentId().isEmpty());
+          assertTrue(parsedTx.isOutgoing());
+          assertNotNull(parsedTx.getOutgoingTransfer());
+          assertNotNull(parsedTx.getOutgoingTransfer().getDestinations());
+          assertFalse(parsedTx.getOutgoingTransfer().getDestinations().isEmpty());
+          assertNull(parsedTx.isIncoming());  // TODO: switch model to use field
+          for (MoneroDestination destination : parsedTx.getOutgoingTransfer().getDestinations()) {
+            
+            // TODO: factor this to testDestination()
+            MoneroUtils.validateAddress(destination.getAddress(), TestUtils.NETWORK_TYPE);
+            TestUtils.testUnsignedBigInteger(destination.getAmount(), true);
+          }
+        }
       } finally {
         wallet.close();
       }
