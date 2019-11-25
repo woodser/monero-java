@@ -1,4 +1,5 @@
 v15.0.0
+switch from tx mixin to ring size?
 test pay for service, rpcCreditsPerHash, credits
 test rpcSweeAccount, convertRpcTxWithVout which do not calltx.setIsUnlocked()
 support wallet getVersion(), parseTxSet(), editAddressBook(), get/set_rpc_client_secret_key
