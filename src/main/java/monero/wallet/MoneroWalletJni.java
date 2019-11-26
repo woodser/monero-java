@@ -952,7 +952,14 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   @Override
   public MoneroTxSet parseTxSet(MoneroTxSet txSet) {
-    throw new RuntimeException("MoneroWalletJni.parseTxSet() not implemented");
+    assertNotClosed();
+    String parsedTxSetJson;
+    try {
+      parsedTxSetJson = parseTxSetJni(JsonUtils.serialize(txSet));
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+    return JsonUtils.deserialize(parsedTxSetJson, MoneroTxSet.class);
   }
 
   @Override
@@ -1391,6 +1398,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String sweepOutputJni(String sendRequestJson);
   
   private native String sweepDustJni(boolean doNotRelay);
+  
+  private native String parseTxSetJni(String txSetJson);
   
   private native String[] getTxNotesJni(String[] txIds);
   

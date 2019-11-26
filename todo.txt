@@ -1,4 +1,6 @@
 v15.0.0
+cpp library deserialization part of models and using rapidjson
+test parseTxSet() with multisig
 switch from tx and request mixin to ring size?
 test rpcSweepAccount, convertRpcTxWithVout which does not calltx.setIsUnlocked()
 support wallet getVersion(), parseTxSet(), editAddressBook(), get/set_rpc_client_secret_key
