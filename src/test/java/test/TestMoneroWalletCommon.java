@@ -35,6 +35,7 @@ import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroVersion;
+import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
@@ -105,6 +106,14 @@ public abstract class TestMoneroWalletCommon {
   protected abstract MoneroWallet getTestWallet();
   
   /**
+   * Open a test wallet.
+   * 
+   * @param path identifies the test wallet to open
+   * @return MoneroWallet returns a reference to the opened wallet
+   */
+  protected abstract MoneroWallet openWallet(String path);
+  
+  /**
    * Create and open a random test wallet.
    * 
    * @return the random test wallet
@@ -112,12 +121,9 @@ public abstract class TestMoneroWalletCommon {
   protected abstract MoneroWallet createRandomWallet();
   
   /**
-   * Open a test wallet.
-   * 
-   * @param path identifies the test wallet to open
-   * @return MoneroWallet returns a reference to the opened wallet
+   * Creates a wallet from keys.
    */
-  protected abstract MoneroWallet openWallet(String path);
+  protected abstract MoneroWallet createWalletFromKeys(String path, String password, String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long firstReceiveHeight, String language);
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -1873,6 +1879,75 @@ public abstract class TestMoneroWalletCommon {
     // test amounts
     TestUtils.testUnsignedBigInteger(result.getSpentAmount(), hasSpent);
     TestUtils.testUnsignedBigInteger(result.getUnspentAmount(), hasUnspent);
+  }
+  
+  // Can parse a tx set hex returned from sending transfers.
+  @Test
+  public void testParseTxSet() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    try {
+
+      // create watch-only wallet by witholding spend key
+      String path = UUID.randomUUID().toString();
+      wallet = createWalletFromKeys(path, TestUtils.WALLET_PASSWORD, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      wallet.sync();  
+      
+      try {
+      
+        // create unsigned transactions to send funds
+        MoneroTxWallet tx = wallet.createTx(0, TestUtils.getRandomWalletAddress(), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).getTxs().get(0);
+        
+        // test resulting tx set
+        MoneroTxSet txSet = tx.getTxSet();
+        assertNotNull(txSet.getUnsignedTxHex());
+        assertFalse(txSet.getUnsignedTxHex().isEmpty());
+        
+        // switch to main test wallet
+        wallet.close();
+        openWallet(TestUtils.WALLET_RPC_NAME_1);
+        
+        // parse the tx set
+        MoneroTxSet parsedTxSet = wallet.parseTxSet(txSet);
+        
+        // test the parsed tx set
+        assertNotNull(parsedTxSet.getTxs());
+        assertNull(parsedTxSet.getSignedTxHex());
+        assertNull(parsedTxSet.getUnsignedTxHex());
+        assertNull(parsedTxSet.getMultisigTxHex());
+        for (MoneroTxWallet parsedTx : parsedTxSet.getTxs()) {
+          
+          // TODO: use common tx wallet tests where applicable
+          TestUtils.testUnsignedBigInteger(parsedTx.getInputSum(), true);
+          TestUtils.testUnsignedBigInteger(parsedTx.getOutputSum(), true);
+          TestUtils.testUnsignedBigInteger(parsedTx.getFee());
+          assertFalse(parsedTx.getChangeAddress().isEmpty());
+          assertTrue(parsedTx.getMixin() > 0);
+          assertTrue(parsedTx.getUnlockTime() >= 0);
+          TestUtils.testUnsignedBigInteger(parsedTx.getChangeAmount());
+          assertTrue(parsedTx.getNumDummyOutputs() >= 0);
+          assertFalse(parsedTx.getExtraHex().isEmpty());
+          assertTrue(parsedTx.getPaymentId() == null || !parsedTx.getPaymentId().isEmpty());
+          assertTrue(parsedTx.isOutgoing());
+          assertNotNull(parsedTx.getOutgoingTransfer());
+          assertNotNull(parsedTx.getOutgoingTransfer().getDestinations());
+          assertFalse(parsedTx.getOutgoingTransfer().getDestinations().isEmpty());
+          assertNull(parsedTx.isIncoming());  // TODO: switch model to use field
+          for (MoneroDestination destination : parsedTx.getOutgoingTransfer().getDestinations()) {
+            
+            // TODO: factor this to testDestination()
+            MoneroUtils.validateAddress(destination.getAddress(), TestUtils.NETWORK_TYPE);
+            TestUtils.testUnsignedBigInteger(destination.getAmount(), true);
+          }
+        }
+      } finally {
+        wallet.close();
+      }
+
+    } finally {
+      
+      // open main test wallet for other tests
+      wallet = openWallet(TestUtils.WALLET_RPC_NAME_1);
+    }
   }
   
   // Can sign and verify messages

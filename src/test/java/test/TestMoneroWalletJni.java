@@ -63,6 +63,14 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     return TestUtils.getWalletJni();
   }
   
+  @Override
+  protected MoneroWallet openWallet(String path) {
+    MoneroWalletJni wallet = MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
+    //wallet.sync();
+    //wallet.save();
+    wallet.startSyncing();
+    return wallet;
+  }
 
   @Override
   protected MoneroWallet createRandomWallet() {
@@ -72,16 +80,13 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     wallet.startSyncing();
     return wallet;
   }
-
+  
   @Override
-  protected MoneroWallet openWallet(String path) {
-    MoneroWalletJni wallet = MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
-    //wallet.sync();
-    //wallet.save();
-    wallet.startSyncing();
+  protected MoneroWallet createWalletFromKeys(String path, String password, String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
+    MoneroWalletJni.createWalletFromKeys(path, password, TestUtils.NETWORK_TYPE, address, privateViewKey, privateSpendKey, daemonConnection, restoreHeight, language);
     return wallet;
   }
-  
+
   // --------------- DEMONSTRATION OF MONERO CORE ISSUES ----------------------
   
   /**
@@ -1731,6 +1736,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   public void testImportKeyImages() {
     super.testImportKeyImages();
+  }
+  
+  @Override
+  public void testParseTxSet() {
+    super.testParseTxSet();
   }
 
   @Override

@@ -14,10 +14,11 @@ standardize expected test failures vs exceptions
 add compatibility monero-project compatiblity version to readme
 update to released v15.0.1 and test
 compare wallet_rpc_server from v15.0.1 to v14.1.0 for differences affecting monero_wallet.cpp
-
 switch to isLocked() for consistency with monero-project? wallet2 uses unlocked
 kept_by_block: T stuck in mempool?
 known ring does not include the spent outputs
+monero-javascript uses monero-cpp-library
+config object for wallet creation
 
 HIGH
 MoneroRpcConnection LOGGER.fine() executing? would be major performance hit
