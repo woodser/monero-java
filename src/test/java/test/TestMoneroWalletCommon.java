@@ -123,7 +123,7 @@ public abstract class TestMoneroWalletCommon {
   /**
    * Creates a wallet from keys.
    */
-  protected abstract MoneroWallet createWalletFromKeys(String path, String password, String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long firstReceiveHeight, String language);
+  protected abstract MoneroWallet createWalletFromKeys(String password, String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long firstReceiveHeight, String language);
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -1888,8 +1888,7 @@ public abstract class TestMoneroWalletCommon {
     try {
 
       // create watch-only wallet by witholding spend key
-      String path = UUID.randomUUID().toString();
-      wallet = createWalletFromKeys(path, TestUtils.WALLET_PASSWORD, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      wallet = createWalletFromKeys(TestUtils.WALLET_PASSWORD, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
       wallet.sync();  
       
       try {
@@ -1943,7 +1942,7 @@ public abstract class TestMoneroWalletCommon {
     } finally {
       
       // open main test wallet for other tests
-      wallet = openWallet(TestUtils.WALLET_RPC_NAME_1);
+      wallet = getTestWallet();
     }
   }
   

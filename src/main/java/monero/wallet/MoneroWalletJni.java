@@ -1082,7 +1082,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     assertNotClosed();
     throw new RuntimeException("Not implemented");
   }
-  
 
   @Override
   public void editAddressBookEntry(int index, boolean setAddress, String address, boolean setPaymentId, String paymentId, boolean setDescription, String description) {
