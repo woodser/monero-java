@@ -20,6 +20,8 @@ import monero.utils.MoneroException;
 public class MoneroTxWallet extends MoneroTx {
 
   private MoneroTxSet txSet;
+  private Boolean isIncoming;
+  private Boolean isOutgoing;
   private List<MoneroIncomingTransfer> incomingTransfers;
   private MoneroOutgoingTransfer outgoingTransfer;
   private String note;
@@ -38,6 +40,8 @@ public class MoneroTxWallet extends MoneroTx {
   public MoneroTxWallet(final MoneroTxWallet tx) {
     super(tx);
     this.txSet = tx.txSet;
+    this.isIncoming = tx.isIncoming;
+    this.isOutgoing = tx.isOutgoing;
     if (tx.incomingTransfers != null) {
       this.incomingTransfers = new ArrayList<MoneroIncomingTransfer>();
       for (MoneroIncomingTransfer transfer : tx.incomingTransfers) {
@@ -47,6 +51,14 @@ public class MoneroTxWallet extends MoneroTx {
     if (tx.outgoingTransfer != null) this.outgoingTransfer = tx.outgoingTransfer.copy().setTx(this);
     this.note = tx.note;
     this.isUnlocked = tx.isUnlocked;
+  }
+  
+  /**
+   * Initializes implied fields based on the state of other fields.
+   */
+  public void initImplied() {
+    isOutgoing = outgoingTransfer != null;
+    isIncoming = incomingTransfers != null && !incomingTransfers.isEmpty();
   }
   
   public MoneroTxWallet copy() {
@@ -63,14 +75,24 @@ public class MoneroTxWallet extends MoneroTx {
     return this;
   }
   
-  @JsonProperty("isOutgoing")
-  public Boolean isOutgoing() {
-    return getOutgoingTransfer() != null;
-  }
-  
   @JsonProperty("isIncoming")
   public Boolean isIncoming() {
-    return getIncomingTransfers() != null && !getIncomingTransfers().isEmpty();
+    return isIncoming;
+  }
+  
+  public MoneroTxWallet setIsIncoming(Boolean isIncoming) {
+    this.isIncoming = isIncoming;
+    return this;
+  }
+  
+  @JsonProperty("isOutgoing")
+  public Boolean isOutgoing() {
+    return isOutgoing;
+  }
+  
+  public MoneroTxWallet setIsOutgoing(Boolean isOutgoing) {
+    this.isOutgoing = isOutgoing;
+    return this;
   }
   
   public BigInteger getIncomingAmount() {
@@ -281,6 +303,9 @@ public class MoneroTxWallet extends MoneroTx {
     this.setNote(GenUtils.reconcile(this.getNote(), tx.getNote()));
     this.setIsUnlocked(GenUtils.reconcile(this.isUnlocked(), tx.isUnlocked()));
     
+    // initialize implied fields
+    initImplied();
+    
     return this;  // for chaining
   }
   
@@ -324,6 +349,13 @@ public class MoneroTxWallet extends MoneroTx {
       sb.append(this.getOutgoingTransfer().toString(indent + 1) + "\n");
     }
     sb.append(GenUtils.kvLine("Note: ", this.getNote(), indent));
+    sb.append(GenUtils.kvLine("Is unlocked: ", this.getNote(), indent));
+    sb.append(GenUtils.kvLine("Input sum: ", this.getInputSum(), indent));
+    sb.append(GenUtils.kvLine("Output sum: ", this.getOutputSum(), indent));
+    sb.append(GenUtils.kvLine("Change address: ", this.getChangeAddress(), indent));
+    sb.append(GenUtils.kvLine("Change amount: ", this.getChangeAmount(), indent));
+    sb.append(GenUtils.kvLine("Num dummy outputs: ", this.getNumDummyOutputs(), indent));
+    sb.append(GenUtils.kvLine("Extra hex: ", this.getExtraHex(), indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);  // strip last newline
   }
@@ -343,9 +375,18 @@ public class MoneroTxWallet extends MoneroTx {
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
+    result = prime * result + ((changeAddress == null) ? 0 : changeAddress.hashCode());
+    result = prime * result + ((changeAmount == null) ? 0 : changeAmount.hashCode());
+    result = prime * result + ((extraHex == null) ? 0 : extraHex.hashCode());
     result = prime * result + ((incomingTransfers == null) ? 0 : incomingTransfers.hashCode());
+    result = prime * result + ((inputSum == null) ? 0 : inputSum.hashCode());
+    result = prime * result + ((isIncoming == null) ? 0 : isIncoming.hashCode());
+    result = prime * result + ((isOutgoing == null) ? 0 : isOutgoing.hashCode());
+    result = prime * result + ((isUnlocked == null) ? 0 : isUnlocked.hashCode());
     result = prime * result + ((note == null) ? 0 : note.hashCode());
+    result = prime * result + ((numDummyOutputs == null) ? 0 : numDummyOutputs.hashCode());
     result = prime * result + ((outgoingTransfer == null) ? 0 : outgoingTransfer.hashCode());
+    result = prime * result + ((outputSum == null) ? 0 : outputSum.hashCode());
     return result;
   }
 
@@ -355,15 +396,42 @@ public class MoneroTxWallet extends MoneroTx {
     if (!super.equals(obj)) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroTxWallet other = (MoneroTxWallet) obj;
+    if (changeAddress == null) {
+      if (other.changeAddress != null) return false;
+    } else if (!changeAddress.equals(other.changeAddress)) return false;
+    if (changeAmount == null) {
+      if (other.changeAmount != null) return false;
+    } else if (!changeAmount.equals(other.changeAmount)) return false;
+    if (extraHex == null) {
+      if (other.extraHex != null) return false;
+    } else if (!extraHex.equals(other.extraHex)) return false;
     if (incomingTransfers == null) {
       if (other.incomingTransfers != null) return false;
     } else if (!incomingTransfers.equals(other.incomingTransfers)) return false;
+    if (inputSum == null) {
+      if (other.inputSum != null) return false;
+    } else if (!inputSum.equals(other.inputSum)) return false;
+    if (isIncoming == null) {
+      if (other.isIncoming != null) return false;
+    } else if (!isIncoming.equals(other.isIncoming)) return false;
+    if (isOutgoing == null) {
+      if (other.isOutgoing != null) return false;
+    } else if (!isOutgoing.equals(other.isOutgoing)) return false;
+    if (isUnlocked == null) {
+      if (other.isUnlocked != null) return false;
+    } else if (!isUnlocked.equals(other.isUnlocked)) return false;
     if (note == null) {
       if (other.note != null) return false;
     } else if (!note.equals(other.note)) return false;
+    if (numDummyOutputs == null) {
+      if (other.numDummyOutputs != null) return false;
+    } else if (!numDummyOutputs.equals(other.numDummyOutputs)) return false;
     if (outgoingTransfer == null) {
       if (other.outgoingTransfer != null) return false;
     } else if (!outgoingTransfer.equals(other.outgoingTransfer)) return false;
+    if (outputSum == null) {
+      if (other.outputSum != null) return false;
+    } else if (!outputSum.equals(other.outputSum)) return false;
     return true;
   }
   

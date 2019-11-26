@@ -1931,7 +1931,7 @@ public abstract class TestMoneroWalletCommon {
           assertNotNull(parsedTx.getOutgoingTransfer());
           assertNotNull(parsedTx.getOutgoingTransfer().getDestinations());
           assertFalse(parsedTx.getOutgoingTransfer().getDestinations().isEmpty());
-          assertNull(parsedTx.isIncoming());  // TODO: switch model to use field
+          assertNull(parsedTx.isIncoming());
           for (MoneroDestination destination : parsedTx.getOutgoingTransfer().getDestinations()) {
             testDestination(destination);
           }

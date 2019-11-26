@@ -38,7 +38,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import common.utils.GenUtils;
-import common.utils.JsonUtils;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
@@ -1169,11 +1168,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("unsigned_txset", txSet.getUnsignedTxHex());
     params.put("multisig_txset", txSet.getMultisigTxHex());
-    System.out.println("REQUEST BODY");
-    System.out.println(JsonUtils.serialize(params).substring(0, 2000));
     Map<String, Object> resp = rpc.sendJsonRequest("describe_transfer", params);
-    System.out.println("RESPONSE BODY");
-    System.out.println(JsonUtils.serialize(resp));
     return convertRpcDescribeTransfer((Map<String, Object>) resp.get("result"));
   }
 
@@ -1848,6 +1843,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
       if (tx.isDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
     }
+    tx.initImplied();
     return tx;
   }
   
@@ -1924,6 +1920,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setFee((BigInteger) fees.get(i));
       if (tx.getOutgoingTransfer() != null) tx.getOutgoingTransfer().setAmount((BigInteger) amounts.get(i));
       else tx.setOutgoingTransfer(new MoneroOutgoingTransfer().setTx(tx).setAmount((BigInteger) amounts.get(i)));
+      tx.initImplied();
       tx.setTxSet(txSet); // link tx to parent set
     }
     
@@ -2075,6 +2072,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         tx.setIncomingTransfers(new ArrayList<MoneroIncomingTransfer>(Arrays.asList((MoneroIncomingTransfer) transfer)));
       }
     }
+    tx.initImplied();
     
     // return initialized transaction
     return tx;
@@ -2116,6 +2114,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<MoneroOutput> vouts = new ArrayList<MoneroOutput>();
     vouts.add((MoneroOutput) vout); // have to cast to extended type because Java paramaterized types do not recognize inheritance
     tx.setVouts(vouts);
+    tx.initImplied();
     return tx;
   }
   
@@ -2127,7 +2126,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (key.equals("desc")) {
         txSet.setTxs(new ArrayList<MoneroTxWallet>());
         for (Map<String, Object> txMap : (List<Map<String, Object>>) val) {
-          txSet.getTxs().add(convertRpcTxWithTransfer(txMap, null, true));
+          MoneroTxWallet tx = convertRpcTxWithTransfer(txMap, null, true);
+          tx.setIsIncoming(null); // unknown
+          txSet.getTxs().add(tx);
         }
       }
       else LOGGER.warning("WARNING: ignoring unexpected describe transfer field: " + key + ": " + val);
