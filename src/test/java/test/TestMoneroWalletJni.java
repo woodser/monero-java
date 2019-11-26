@@ -83,7 +83,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   @Override
   protected MoneroWallet createWalletFromKeys(String password, String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
-    MoneroWalletJni.createWalletFromKeys(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), password, TestUtils.NETWORK_TYPE, address, privateViewKey, privateSpendKey, daemonConnection, restoreHeight, language);
+    MoneroWalletJni wallet = MoneroWalletJni.createWalletFromKeys(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), password, TestUtils.NETWORK_TYPE, address, privateViewKey, privateSpendKey, daemonConnection, restoreHeight, language);
+    wallet.startSyncing();
     return wallet;
   }
 

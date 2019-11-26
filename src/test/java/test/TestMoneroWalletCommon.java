@@ -1903,7 +1903,7 @@ public abstract class TestMoneroWalletCommon {
         
         // switch to main test wallet
         wallet.close();
-        openWallet(TestUtils.WALLET_RPC_NAME_1);
+        wallet = getTestWallet();
         
         // parse the tx set
         MoneroTxSet parsedTxSet = wallet.parseTxSet(txSet);
