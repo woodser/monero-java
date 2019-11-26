@@ -475,7 +475,12 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isSyncedJni(JNIEnv
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getVersionJni(JNIEnv *env, jobject instance) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_getVersionJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  return env->NewStringUTF(wallet->get_version().serialize().c_str());
+  try {
+    return env->NewStringUTF(wallet->get_version().serialize().c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPathJni(JNIEnv *env, jobject instance) {

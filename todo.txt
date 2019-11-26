@@ -1,7 +1,6 @@
 v15.0.0
 switch from tx and request mixin to ring size?
-test pay for service, rpcCreditsPerHash, credits
-test rpcSweeAccount, convertRpcTxWithVout which do not calltx.setIsUnlocked()
+test rpcSweepAccount, convertRpcTxWithVout which does not calltx.setIsUnlocked()
 support wallet getVersion(), parseTxSet(), editAddressBook(), get/set_rpc_client_secret_key
 support cpp address book
 rename block id terminology to block hashes
@@ -15,10 +14,10 @@ add compatibility monero-project compatiblity version to readme
 update to released v15.0.1 and test
 compare wallet_rpc_server from v15.0.1 to v14.1.0 for differences affecting monero_wallet.cpp
 switch to isLocked() for consistency with monero-project? wallet2 uses unlocked
-kept_by_block: T stuck in mempool?
-known ring does not include the spent outputs
 monero-javascript uses monero-cpp-library
+new todos
 config object for wallet creation
+exclude heavy tests by config, e.g. testMultisig
 
 HIGH
 MoneroRpcConnection LOGGER.fine() executing? would be major performance hit
