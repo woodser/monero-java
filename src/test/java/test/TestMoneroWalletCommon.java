@@ -1916,7 +1916,7 @@ public abstract class TestMoneroWalletCommon {
         assertNull(parsedTxSet.getMultisigTxHex());
         for (MoneroTxWallet parsedTx : parsedTxSet.getTxs()) {
           
-          // TODO: use common tx wallet tests where applicable
+          // TODO: use common tx wallet test?
           TestUtils.testUnsignedBigInteger(parsedTx.getInputSum(), true);
           TestUtils.testUnsignedBigInteger(parsedTx.getOutputSum(), true);
           TestUtils.testUnsignedBigInteger(parsedTx.getFee());
@@ -1933,10 +1933,7 @@ public abstract class TestMoneroWalletCommon {
           assertFalse(parsedTx.getOutgoingTransfer().getDestinations().isEmpty());
           assertNull(parsedTx.isIncoming());  // TODO: switch model to use field
           for (MoneroDestination destination : parsedTx.getOutgoingTransfer().getDestinations()) {
-            
-            // TODO: factor this to testDestination()
-            MoneroUtils.validateAddress(destination.getAddress(), TestUtils.NETWORK_TYPE);
-            TestUtils.testUnsignedBigInteger(destination.getAmount(), true);
+            testDestination(destination);
           }
         }
       } finally {
@@ -2388,6 +2385,7 @@ public abstract class TestMoneroWalletCommon {
       if (tx.getOutgoingTransfer() != null && tx.getOutgoingTransfer().getDestinations() != null) {
         BigInteger destinationSum = BigInteger.valueOf(0);
         for (MoneroDestination destination : tx.getOutgoingTransfer().getDestinations()) {
+          testDestination(destination);
           assertEquals(address, destination.getAddress());
           destinationSum = destinationSum.add(destination.getAmount());
         }
@@ -2568,6 +2566,7 @@ public abstract class TestMoneroWalletCommon {
       if (tx.getOutgoingTransfer() != null && tx.getOutgoingTransfer().getDestinations() != null) {
         assertEquals(1, tx.getOutgoingTransfer().getDestinations().size());
         for (MoneroDestination destination : tx.getOutgoingTransfer().getDestinations()) {
+          testDestination(destination);
           assertEquals(destination.getAddress(), address);
           assertTrue(sendAmount.equals(destination.getAmount()));
         }
@@ -2714,6 +2713,7 @@ public abstract class TestMoneroWalletCommon {
       if (tx.getOutgoingTransfer() != null && tx.getOutgoingTransfer().getDestinations() != null) {
         BigInteger destinationSum = BigInteger.valueOf(0);
         for (MoneroDestination destination : tx.getOutgoingTransfer().getDestinations()) {
+          testDestination(destination);
           assertTrue(destinationAddresses.contains(destination.getAddress()));
           destinationSum = destinationSum.add(destination.getAmount());
         }
@@ -4211,13 +4211,17 @@ public abstract class TestMoneroWalletCommon {
       assertTrue(transfer.getDestinations().size() > 0);
       BigInteger sum = BigInteger.valueOf(0);
       for (MoneroDestination destination : transfer.getDestinations()) {
-        assertNotNull(destination.getAddress());
-        TestUtils.testUnsignedBigInteger(destination.getAmount(), true);
+        testDestination(destination);
         sum = sum.add(destination.getAmount());
       }
       if (!transfer.getAmount().equals(sum)) System.out.println(transfer.getTx().toString());
       assertEquals(transfer.getAmount(), sum);
     }
+  }
+  
+  private static void testDestination(MoneroDestination destination) {
+    MoneroUtils.validateAddress(destination.getAddress(), TestUtils.NETWORK_TYPE);
+    TestUtils.testUnsignedBigInteger(destination.getAmount(), true);
   }
   
   private static void testOutputWallet(MoneroOutputWallet output) {
