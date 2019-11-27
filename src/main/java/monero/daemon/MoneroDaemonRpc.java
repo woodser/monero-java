@@ -1218,6 +1218,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("update")) result.setIsUpdateAvailable((Boolean) val);
       else if (key.equals("user_uri")) result.setUserUri((String) val);
       else if (key.equals("version")) result.setVersion((String) val);
+      else if (key.equals("untrusted")) {}  // handled elsewhere
       else LOGGER.warning("WARNING: ignoring unexpected field in rpc check update result: " + key + ": " + val);
     }
     if ("".equals(result.getAutoUri())) result.setAutoUri(null);
