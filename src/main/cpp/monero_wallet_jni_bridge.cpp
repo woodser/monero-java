@@ -1202,7 +1202,6 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_parseTxSetJni(JNIEn
 
     // deserialize tx set to parse
     monero_tx_set tx_set = monero_utils::deserialize_tx_set(tx_set_json);
-    MTRACE("Deserialized tx set, re-serialized: " << tx_set.serialize());
 
     // parse tx set
     monero_tx_set parsed_tx_set = wallet->parse_tx_set(tx_set);

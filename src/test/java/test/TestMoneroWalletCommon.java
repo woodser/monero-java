@@ -1910,6 +1910,7 @@ public abstract class TestMoneroWalletCommon {
         
         // test the parsed tx set
         assertNotNull(parsedTxSet.getTxs());
+        assertFalse(parsedTxSet.getTxs().isEmpty());
         assertNull(parsedTxSet.getSignedTxHex());
         assertNull(parsedTxSet.getUnsignedTxHex());
         assertNull(parsedTxSet.getMultisigTxHex());
