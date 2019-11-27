@@ -5,6 +5,7 @@ support cpp address book
 support wallet getVersion(), parseTxSet(), editAddressBook(), get/set_rpc_client_secret_key
 update to released v15.0.1 and test
 compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
+core pr to remove unused ptx variable
 new todos
 
 add compatibility monero-project compatiblity version to readme
