@@ -298,6 +298,8 @@ public class MoneroTxWallet extends MoneroTx {
     }
     
     // merge simple extensions
+    this.setIsIncoming(GenUtils.reconcile(this.isIncoming(), tx.isIncoming()));
+    this.setIsOutgoing(GenUtils.reconcile(this.isOutgoing(), tx.isOutgoing()));
     this.setNote(GenUtils.reconcile(this.getNote(), tx.getNote()));
     this.setIsUnlocked(GenUtils.reconcile(this.isUnlocked(), tx.isUnlocked()));
     this.setInputSum(GenUtils.reconcile(this.getInputSum(), tx.getInputSum()));
@@ -306,8 +308,6 @@ public class MoneroTxWallet extends MoneroTx {
     this.setChangeAmount(GenUtils.reconcile(this.getChangeAmount(), tx.getChangeAmount()));
     this.setNumDummyOutputs(GenUtils.reconcile(this.getNumDummyOutputs(), tx.getNumDummyOutputs()));
     this.setExtraHex(GenUtils.reconcile(this.getExtraHex(), tx.getExtraHex()));
-    this.setIsIncoming(GenUtils.reconcile(this.isIncoming(), tx.isIncoming()));
-    this.setIsOutgoing(GenUtils.reconcile(this.isOutgoing(), tx.isOutgoing()));
     
     return this;  // for chaining
   }

@@ -134,7 +134,7 @@ public class TestUtils {
    */
   private static MoneroWalletJni walletJni;
   public static MoneroWalletJni getWalletJni() {
-    if (walletJni == null) {
+    if (walletJni == null || walletJni.isClosed()) {
       
       // create wallet from mnemonic phrase if it doesn't exist
       if (!MoneroWalletJni.walletExists(WALLET_JNI_PATH_1)) {

@@ -793,8 +793,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     for (MoneroTxWallet tx : txs) {    // tx is not incoming/outgoing unless already set
 
       // tx is not incoming/outgoing unless already set
-      if (tx.isOutgoing() == null) tx.setIsOutgoing(false);
       if (tx.isIncoming() == null) tx.setIsIncoming(false);
+      if (tx.isOutgoing() == null) tx.setIsOutgoing(false);
       
       // sort transfers
       if (tx.getIncomingTransfers() != null) Collections.sort(tx.getIncomingTransfers(), new IncomingTransferComparator());
