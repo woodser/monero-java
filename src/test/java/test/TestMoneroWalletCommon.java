@@ -1852,7 +1852,7 @@ public abstract class TestMoneroWalletCommon {
     
     // get and test new key images from last import
     List<MoneroKeyImage> images = wallet.getNewKeyImagesFromLastImport();
-    if (images.isEmpty()) throw new RuntimeException("No new key images in last import"); // TODO: these are already known to the wallet, so no new key images will be imported
+    if (images.isEmpty()) fail("No new key images in last import"); // TODO: these are already known to the wallet, so no new key images will be imported
     for (MoneroKeyImage image : images) {
       assertTrue(image.getHex().length() > 0);
       assertTrue(image.getSignature().length() > 0);
@@ -2102,7 +2102,7 @@ public abstract class TestMoneroWalletCommon {
         MoneroTxWallet fetched = wallet.getTx(tx.getId());
         assertNotNull(fetched);
       } catch (MoneroException e) {
-        throw new RuntimeException("Wallet should be aware of its tx in pool after syncing");
+        fail("Wallet should be aware of its tx in pool after syncing");
       }
       
       // submit double spend tx

@@ -51,14 +51,12 @@ public class MoneroTxWallet extends MoneroTx {
     if (tx.outgoingTransfer != null) this.outgoingTransfer = tx.outgoingTransfer.copy().setTx(this);
     this.note = tx.note;
     this.isUnlocked = tx.isUnlocked;
-  }
-  
-  /**
-   * Initializes implied fields based on the state of other fields.
-   */
-  public void initImplied() {
-    isOutgoing = outgoingTransfer != null;
-    isIncoming = incomingTransfers != null && !incomingTransfers.isEmpty();
+    this.inputSum = tx.inputSum;
+    this.outputSum = tx.outputSum;
+    this.changeAddress = tx.changeAddress;
+    this.changeAmount = tx.changeAmount;
+    this.numDummyOutputs = tx.numDummyOutputs;
+    this.extraHex = tx.extraHex;
   }
   
   public MoneroTxWallet copy() {
@@ -302,9 +300,14 @@ public class MoneroTxWallet extends MoneroTx {
     // merge simple extensions
     this.setNote(GenUtils.reconcile(this.getNote(), tx.getNote()));
     this.setIsUnlocked(GenUtils.reconcile(this.isUnlocked(), tx.isUnlocked()));
-    
-    // initialize implied fields
-    initImplied();
+    this.setInputSum(GenUtils.reconcile(this.getInputSum(), tx.getInputSum()));
+    this.setOutputSum(GenUtils.reconcile(this.getOutputSum(), tx.getOutputSum()));
+    this.setChangeAddress(GenUtils.reconcile(this.getChangeAddress(), tx.getChangeAddress()));
+    this.setChangeAmount(GenUtils.reconcile(this.getChangeAmount(), tx.getChangeAmount()));
+    this.setNumDummyOutputs(GenUtils.reconcile(this.getNumDummyOutputs(), tx.getNumDummyOutputs()));
+    this.setExtraHex(GenUtils.reconcile(this.getExtraHex(), tx.getExtraHex()));
+    this.setIsIncoming(GenUtils.reconcile(this.isIncoming(), tx.isIncoming()));
+    this.setIsOutgoing(GenUtils.reconcile(this.isOutgoing(), tx.isOutgoing()));
     
     return this;  // for chaining
   }

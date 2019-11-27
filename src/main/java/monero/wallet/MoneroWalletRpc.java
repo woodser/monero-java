@@ -790,7 +790,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // filter and return transfers
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
-    for (MoneroTxWallet tx : txs) {
+    for (MoneroTxWallet tx : txs) {    // tx is not incoming/outgoing unless already set
+
+      // tx is not incoming/outgoing unless already set
+      if (tx.isOutgoing() == null) tx.setIsOutgoing(false);
+      if (tx.isIncoming() == null) tx.setIsIncoming(false);
       
       // sort transfers
       if (tx.getIncomingTransfers() != null) Collections.sort(tx.getIncomingTransfers(), new IncomingTransferComparator());
@@ -1822,6 +1826,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    */
   private static MoneroTxWallet initSentTxWallet(MoneroSendRequest request, MoneroTxWallet tx) {
     if (tx == null) tx = new MoneroTxWallet();
+    tx.setIsOutgoing(true);
     tx.setIsConfirmed(false);
     tx.setNumConfirmations(0l);
     tx.setInTxPool(Boolean.TRUE.equals(request.getDoNotRelay()) ? false : true);
@@ -1843,7 +1848,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
       if (tx.isDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
     }
-    tx.initImplied();
     return tx;
   }
   
@@ -1918,9 +1922,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (blobs != null) tx.setFullHex(blobs.get(i));
       if (metadatas != null) tx.setMetadata(metadatas.get(i));
       tx.setFee((BigInteger) fees.get(i));
+      tx.setIsOutgoing(true);
       if (tx.getOutgoingTransfer() != null) tx.getOutgoingTransfer().setAmount((BigInteger) amounts.get(i));
       else tx.setOutgoingTransfer(new MoneroOutgoingTransfer().setTx(tx).setAmount((BigInteger) amounts.get(i)));
-      tx.initImplied();
       tx.setTxSet(txSet); // link tx to parent set
     }
     
@@ -2066,13 +2070,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // initialize final fields
     if (transfer != null) {
       if (isOutgoing) {
+        tx.setIsOutgoing(true);
         if (tx.getOutgoingTransfer() != null) tx.getOutgoingTransfer().merge(transfer);
         else tx.setOutgoingTransfer((MoneroOutgoingTransfer) transfer);
       } else {
+        tx.setIsIncoming(true);
         tx.setIncomingTransfers(new ArrayList<MoneroIncomingTransfer>(Arrays.asList((MoneroIncomingTransfer) transfer)));
       }
     }
-    tx.initImplied();
     
     // return initialized transaction
     return tx;
@@ -2114,7 +2119,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<MoneroOutput> vouts = new ArrayList<MoneroOutput>();
     vouts.add((MoneroOutput) vout); // have to cast to extended type because Java paramaterized types do not recognize inheritance
     tx.setVouts(vouts);
-    tx.initImplied();
     return tx;
   }
   
@@ -2127,7 +2131,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         txSet.setTxs(new ArrayList<MoneroTxWallet>());
         for (Map<String, Object> txMap : (List<Map<String, Object>>) val) {
           MoneroTxWallet tx = convertRpcTxWithTransfer(txMap, null, true);
-          tx.setIsIncoming(null); // unknown
           txSet.getTxs().add(tx);
         }
       }
