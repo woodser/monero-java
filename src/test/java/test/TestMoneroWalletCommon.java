@@ -4088,7 +4088,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // test vouts
-    if (tx.isIncoming() && Boolean.TRUE.equals(ctx.includeOutputs)) {
+    if (Boolean.TRUE.equals(tx.isIncoming()) && Boolean.TRUE.equals(ctx.includeOutputs)) {
       if (tx.isConfirmed()) {
         assertNotNull(tx.getVouts());
         assertTrue(tx.getVouts().size() > 0);
