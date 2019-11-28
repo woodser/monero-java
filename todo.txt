@@ -1,10 +1,6 @@
-v15.0.2
-sweepAccounts() is leaving behind dust
-support cpp address book including editAddressBook()
-compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
-core pr to remove unused ptx variable
-support pay for service in wallet, get/set_rpc_client_secret_key
+v15.0.1
 new todos
+support cpp address book including editAddressBook()
 
 add compatibility monero-project compatiblity version to readme
 standardize expected test failures vs exceptions
@@ -19,11 +15,17 @@ replace output isUnlocked with MoneroTxWallet isUnlocked? technically redundant
 config object for wallet creation
 update spec: block ids -> hashes, mixin -> ring size, extra
 
+core pr to remove unused ptx variable
+compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
+sweepAccounts() is leaving behind dust
+monero-cpp-library's monero-core submodule could point to upstream
+support pay for service in wallet, get/set_rpc_client_secret_key
 merge latest js, java-lite, cpp
 test sweeps
 monero-javascript uses monero-cpp-library
 
 HIGH
+new rpc api will need containers for every call
 MoneroRpcConnection LOGGER.fine() executing? would be major performance hit
 remove dependency on libwallet_merged, randomx if possible
 support wallet.isWatchOnly()

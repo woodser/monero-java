@@ -1521,6 +1521,37 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setTxNotesJni(JNIEnv* 
   }
 }
 
+//JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_getAddressBookEntriesJni(JNIEnv* env, jobject instance, jobjectArray jindices) {
+//  MTRACE("Java_monero_wallet_MoneroWalletJni_getAddressBookEntriesJni");
+//  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+//
+//  // get indices from jobjectArray to vector<int>
+//  vector<int> indices;
+//  if (jindices != nullptr) {
+//    jsize size = env->GetArrayLength(jindices);
+//    for (int idx = 0; idx < size; idx++) {
+//      indices.push_back((int) env->GetObjectArrayElement(jindices, idx));
+//    }
+//  }
+//
+//  try {
+//
+//    // get address book entries
+//    vector<monero_address_book_entry> entries = wallet->get_address_book_entries(indices);
+//
+//    // wrap and serialize entries
+//    std::stringstream ss;
+//    boost::property_tree::ptree container;
+//    if (!accounts.empty()) container.add_child("entries", monero_utils::to_property_tree(entries));
+//    boost::property_tree::write_json(ss, container, false);
+//    string entries_json = strip_last_char(ss.str());
+//    return env->NewStringUTF(entries_json.c_str());
+//  } catch (...) {
+//    rethrow_cpp_exception_as_java_exception(env);
+//    return 0;
+//  }
+//}
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createPaymentUriJni(JNIEnv* env, jobject instance, jstring jsend_request) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_createPaymentUriJni()");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);

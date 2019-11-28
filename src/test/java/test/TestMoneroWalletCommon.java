@@ -41,6 +41,7 @@ import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroAccount;
+import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroDestination;
@@ -1780,7 +1781,7 @@ public abstract class TestMoneroWalletCommon {
   
   // Can get and set a transaction note
   @Test
-  public void testSetTransactionNote() {
+  public void testSetTxNote() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     List<MoneroTxWallet> txs = getRandomTransactions(wallet, null, 1, 5);
     
@@ -1799,7 +1800,7 @@ public abstract class TestMoneroWalletCommon {
   // Can get and set multiple transaction notes
   // TODO: why does getting cached txs take 2 seconds when should already be cached?
   @Test
-  public void testSetTransactionNotes() {
+  public void testSetTxNotes() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // set tx notes
@@ -1931,6 +1932,95 @@ public abstract class TestMoneroWalletCommon {
     assertEquals(true, verified);
     verified = wallet.verify(msg, TestUtils.getRandomWalletAddress(), signature);
     assertEquals(false, verified);
+  }
+  
+  // Has an address book
+  @Test
+  public void testAddressBook() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    
+    // initial state
+    List<MoneroAddressBookEntry> entries = wallet.getAddressBookEntries();
+    int numEntriesStart = entries.size();
+    for (MoneroAddressBookEntry entry : entries) testAddressBookEntry(entry);
+    
+    // test adding standard addresses
+    int NUM_ENTRIES = 5;
+    String address = TestUtils.getRandomWalletAddress();
+    List<Integer> indices = new ArrayList<Integer>();
+    for (int i = 0; i < NUM_ENTRIES; i++) {
+      indices.add(wallet.addAddressBookEntry(address, "hi there!"));
+    }
+    entries = wallet.getAddressBookEntries();
+    assertEquals(numEntriesStart + NUM_ENTRIES, entries.size());
+    for (int idx : indices) {
+      boolean found = false;
+      for (MoneroAddressBookEntry entry : entries) {
+        if (idx == entry.getIndex()) {
+          testAddressBookEntry(entry);
+          assertEquals(entry.getAddress(), address);
+          assertEquals(entry.getDescription(), "hi there!");
+          found = true;
+          break;
+        }
+      }
+      assertTrue("Index " + idx + " not found in address book indices", found);
+    }
+    
+    // edit each address book entry
+    for (int idx : indices) {
+      wallet.editAddressBookEntry(idx, false, null, false, null, true, "hello there!!");
+    }
+    entries = wallet.getAddressBookEntries(indices);
+    for (MoneroAddressBookEntry entry : entries) {
+      assertEquals(entry.getDescription(), "hello there!!");
+    }
+    
+    // delete entries at starting index
+    int deleteIdx = indices.get(0);
+    for (int i = 0; i < indices.size(); i++) {
+      wallet.deleteAddressBookEntry(deleteIdx);
+    }
+    entries = wallet.getAddressBookEntries();
+    assertEquals(entries.size(), numEntriesStart);
+    
+    // test adding integrated addresses
+    indices = new ArrayList<Integer>();
+    String paymentId = "03284e41c342f03"; // payment id less one character
+    Map<Integer, MoneroIntegratedAddress> integratedAddresses = new HashMap<Integer, MoneroIntegratedAddress>();
+    Map<Integer, String> integratedDescriptions = new HashMap<Integer, String>();
+    for (int i = 0; i < NUM_ENTRIES; i++) {
+      MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(paymentId + i); // create unique integrated address
+      String uuid = UUID.randomUUID().toString();
+      int idx = wallet.addAddressBookEntry(integratedAddress.toString(), uuid);
+      indices.add(idx);
+      integratedAddresses.put(idx, integratedAddress);
+      integratedDescriptions.put(idx, uuid);
+    }
+    entries = wallet.getAddressBookEntries();
+    assertEquals(entries.size(), numEntriesStart + NUM_ENTRIES);
+    for (int idx : indices) {
+      boolean found = false;
+      for (MoneroAddressBookEntry entry : entries) {
+        if (idx == entry.getIndex()) {
+          testAddressBookEntry(entry);
+          assertEquals(entry.getDescription(), integratedDescriptions.get(idx));
+          assertEquals(entry.getAddress(), integratedAddresses.get(idx).getStandardAddress());
+          assertTrue(MoneroUtils.paymentIdsEqual(integratedAddresses.get(idx).getPaymentId(), entry.getPaymentId()));
+          found = true;
+          break;
+        }
+      }
+      assertTrue("Index " + idx + " not found in address book indices", found);
+    }
+    
+    // delete entries at starting index
+    deleteIdx = indices.get(0);
+    for (int i = 0; i < indices.size(); i++) {
+      wallet.deleteAddressBookEntry(deleteIdx);
+    }
+    entries = wallet.getAddressBookEntries();
+    assertEquals(numEntriesStart, entries.size());
   }
   
   // Can get and set arbitrary key/value attributes
@@ -4341,6 +4431,12 @@ public abstract class TestMoneroWalletCommon {
         testDestination(destination);
       }
     }
+  }
+  
+  private static void testAddressBookEntry(MoneroAddressBookEntry entry) {
+    assertTrue(entry.getIndex() >= 0);
+    assertNotNull(entry.getAddress());
+    assertNotNull(entry.getDescription());
   }
   
   /**

@@ -1705,13 +1705,13 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testSetTransactionNote() {
-    super.testSetTransactionNote();
+  public void testSetTxNote() {
+    super.testSetTxNote();
   }
 
   @Override
-  public void testSetTransactionNotes() {
-    super.testSetTransactionNotes();
+  public void testSetTxNotes() {
+    super.testSetTxNotes();
   }
 
   @Override
@@ -1747,6 +1747,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   public void testSignAndVerifyMessages() {
     super.testSignAndVerifyMessages();
+  }
+  
+  @Override
+  public void testAddressBook() {
+    super.testAddressBook();
   }
 
   @Override
