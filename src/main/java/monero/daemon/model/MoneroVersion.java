@@ -1,9 +1,15 @@
 package monero.daemon.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Defines a Monero version.
  */
 public class MoneroVersion {
+  
+  public MoneroVersion() {
+    // necessary for deserialization
+  }
   
   public MoneroVersion(Integer versionNumber, Boolean isRelease) {
     this.versionNumber = versionNumber;
@@ -21,6 +27,7 @@ public class MoneroVersion {
     this.versionNumber = version;
   }
   
+  @JsonProperty("isRelease")
   public Boolean getIsRelease() {
     return isRelease;
   }

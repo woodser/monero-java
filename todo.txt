@@ -1,9 +1,10 @@
 v15.0.2
-support cpp address book
-support wallet getVersion(), editAddressBook(), get/set_rpc_client_secret_key
 update to released v15.0.1 and test
+sweepAccounts() is leaving behind dust
+support cpp address book including editAddressBook()
 compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
 core pr to remove unused ptx variable
+support pay for service in wallet, get/set_rpc_client_secret_key
 new todos
 
 add compatibility monero-project compatiblity version to readme
