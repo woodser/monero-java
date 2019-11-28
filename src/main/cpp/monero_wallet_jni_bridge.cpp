@@ -1557,7 +1557,7 @@ JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_addAddressBookEntryJni
   MTRACE("Java_monero_wallet_MoneroWalletJni_addAddressBookEntryJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
 
-  // collect params as strings
+  // collect string params
   const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
   const char* _description = jdescription ? env->GetStringUTFChars(jdescription, NULL) : nullptr;
   const char* _payment_id = jpayment_id ? env->GetStringUTFChars(jpayment_id, NULL) : nullptr;
@@ -1580,11 +1580,36 @@ JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_addAddressBookEntryJni
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_editAddressBookEntryJni(JNIEnv* env, jobject instance, jint index, jboolean set_address, jstring jaddress, jboolean set_description, jstring jdescription, jboolean set_payment_id, jstring jpayment_id) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_editAddressBookEntryJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+
+  // collect string params
+  const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
+  const char* _description = jdescription ? env->GetStringUTFChars(jdescription, NULL) : nullptr;
+  const char* _payment_id = jpayment_id ? env->GetStringUTFChars(jpayment_id, NULL) : nullptr;
+  string address = string(_address == nullptr ? "" : _address);
+  boost::optional<string> description = _description == nullptr ? boost::none : (boost::optional<string>) string(_description);
+  boost::optional<string> payment_id = _payment_id == nullptr ? boost::none : (boost::optional<string>) string(_payment_id);
+  env->ReleaseStringUTFChars(jaddress, _address);
+  env->ReleaseStringUTFChars(jdescription, _description);
+  env->ReleaseStringUTFChars(jpayment_id, _payment_id);
+
+  // edit address book entry
+  try {
+    wallet->edit_address_book_entry(index, set_address, address, set_description, description, set_payment_id, payment_id);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
 }
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_deleteAddressBookEntryJni(JNIEnv* env, jobject instance, jint entry_idx) {
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_deleteAddressBookEntryJni(JNIEnv* env, jobject instance, jint index) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_deleteAddressBookEntryJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+
+  // delete address book entry
+  try {
+    wallet->delete_address_book_entry(index);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createPaymentUriJni(JNIEnv* env, jobject instance, jstring jsend_request) {
