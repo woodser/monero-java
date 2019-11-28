@@ -970,7 +970,7 @@ public interface MoneroWallet {
   /**
    * Get address book entries.
    * 
-   * @param entryIndices are indices of the entries to get
+   * @param entryIndices are indices of the entries to get (optional)
    * @return the address book entries
    */
   public List<MoneroAddressBookEntry> getAddressBookEntries(Collection<Integer> entryIndices);
@@ -1000,12 +1000,12 @@ public interface MoneroWallet {
    * @param index is the index of the address book entry to edit
    * @param setAddress specifies if the address should be updated
    * @param address is the updated address
-   * @param setPaymentId specifies if the payment id should be updated
-   * @param paymentId is the updated payment id
    * @param setDescription specifies if the description should be updated
    * @param description is the updated description
+   * @param setPaymentId specifies if the payment id should be updated
+   * @param paymentId is the updated payment id
    */
-  public void editAddressBookEntry(int index, boolean setAddress, String address, boolean setPaymentId, String paymentId, boolean setDescription, String description);
+  public void editAddressBookEntry(int index, boolean setAddress, String address, boolean setDescription, String description, boolean setPaymentId, String paymentId);
   
   /**
    * Delete an address book entry.

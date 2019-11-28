@@ -1969,7 +1969,7 @@ public abstract class TestMoneroWalletCommon {
     
     // edit each address book entry
     for (int idx : indices) {
-      wallet.editAddressBookEntry(idx, false, null, false, null, true, "hello there!!");
+      wallet.editAddressBookEntry(idx, false, null, true, "hello there!!", false, null);
     }
     entries = wallet.getAddressBookEntries(indices);
     for (MoneroAddressBookEntry entry : entries) {

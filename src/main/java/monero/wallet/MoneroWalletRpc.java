@@ -1387,7 +1387,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   @Override
-  public void editAddressBookEntry(int index, boolean setAddress, String address, boolean setPaymentId, String paymentId, boolean setDescription, String description) {
+  public void editAddressBookEntry(int index, boolean setAddress, String address, boolean setDescription, String description, boolean setPaymentId, String paymentId) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("index", index);
     params.put("set_address", setAddress);
