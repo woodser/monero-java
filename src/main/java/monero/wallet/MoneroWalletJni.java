@@ -1091,19 +1091,19 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public int addAddressBookEntry(String address, String description, String paymentId) {
     assertNotClosed();
-    throw new RuntimeException("Not implemented");
+    return addAddressBookEntryJni(address, description, paymentId);
   }
 
   @Override
   public void editAddressBookEntry(int index, boolean setAddress, String address, boolean setDescription, String description, boolean setPaymentId, String paymentId) {
     assertNotClosed();
-    throw new RuntimeException("Not implemented");
+    editAddressBookEntryJni(index, setAddress, address, setDescription, description, setPaymentId, paymentId);
   }
 
   @Override
   public void deleteAddressBookEntry(int entryIdx) {
     assertNotClosed();
-    throw new RuntimeException("Not implemented");
+    deleteAddressBookEntryJni(entryIdx);
   }
 
   @Override
@@ -1432,6 +1432,12 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String checkReserveProofJni(String address, String message, String signature);
   
   private native String getAddressBookEntriesJni(Integer[] indices);
+  
+  private native int addAddressBookEntryJni(String address, String description, String paymentId);
+  
+  private native void editAddressBookEntryJni(int index, boolean setAddress, String address, boolean setDescription, String description, boolean setPaymentId, String paymentId);
+  
+  private native void deleteAddressBookEntryJni(int entryIdx);
   
   private native String createPaymentUriJni(String sendRequestJson);
   

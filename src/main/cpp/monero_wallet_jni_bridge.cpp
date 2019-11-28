@@ -1553,6 +1553,42 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressBookEntri
   }
 }
 
+JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_addAddressBookEntryJni(JNIEnv* env, jobject instance, jstring jaddress, jstring jdescription, jstring jpayment_id) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_addAddressBookEntryJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+
+  // collect params as strings
+  const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
+  const char* _description = jdescription ? env->GetStringUTFChars(jdescription, NULL) : nullptr;
+  const char* _payment_id = jpayment_id ? env->GetStringUTFChars(jpayment_id, NULL) : nullptr;
+  string address = string(_address == nullptr ? "" : _address);
+  boost::optional<string> description = boost::none;
+  boost::optional<string> payment_id = boost::none;
+  if (_description != nullptr) description = string(_description);
+  if (_payment_id != nullptr) payment_id = string(_payment_id);
+  env->ReleaseStringUTFChars(jaddress, _address);
+  env->ReleaseStringUTFChars(jdescription, _description);
+  env->ReleaseStringUTFChars(jpayment_id, _payment_id);
+
+  // add address book entry
+  try {
+    return wallet->add_address_book_entry(address, description, payment_id);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+}
+
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_editAddressBookEntryJni(JNIEnv* env, jobject instance, jint index, jboolean set_address, jstring jaddress, jboolean set_description, jstring jdescription, jboolean set_payment_id, jstring jpayment_id) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_editAddressBookEntryJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+}
+
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_deleteAddressBookEntryJni(JNIEnv* env, jobject instance, jint entry_idx) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_deleteAddressBookEntryJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+}
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createPaymentUriJni(JNIEnv* env, jobject instance, jstring jsend_request) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_createPaymentUriJni()");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
