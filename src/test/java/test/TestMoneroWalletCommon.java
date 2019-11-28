@@ -1909,33 +1909,7 @@ public abstract class TestMoneroWalletCommon {
         MoneroTxSet parsedTxSet = wallet.parseTxSet(txSet);
         
         // test the parsed tx set
-        assertNotNull(parsedTxSet.getTxs());
-        assertFalse(parsedTxSet.getTxs().isEmpty());
-        assertNull(parsedTxSet.getSignedTxHex());
-        assertNull(parsedTxSet.getUnsignedTxHex());
-        assertNull(parsedTxSet.getMultisigTxHex());
-        for (MoneroTxWallet parsedTx : parsedTxSet.getTxs()) {
-          
-          // TODO: use common tx wallet test?
-          TestUtils.testUnsignedBigInteger(parsedTx.getInputSum(), true);
-          TestUtils.testUnsignedBigInteger(parsedTx.getOutputSum(), true);
-          TestUtils.testUnsignedBigInteger(parsedTx.getFee());
-          assertFalse(parsedTx.getChangeAddress().isEmpty());
-          assertTrue(parsedTx.getMixin() > 0);
-          assertTrue(parsedTx.getUnlockTime() >= 0);
-          TestUtils.testUnsignedBigInteger(parsedTx.getChangeAmount());
-          assertTrue(parsedTx.getNumDummyOutputs() >= 0);
-          assertFalse(parsedTx.getExtraHex().isEmpty());
-          assertTrue(parsedTx.getPaymentId() == null || !parsedTx.getPaymentId().isEmpty());
-          assertTrue(parsedTx.isOutgoing());
-          assertNotNull(parsedTx.getOutgoingTransfer());
-          assertNotNull(parsedTx.getOutgoingTransfer().getDestinations());
-          assertFalse(parsedTx.getOutgoingTransfer().getDestinations().isEmpty());
-          assertNull(parsedTx.isIncoming());
-          for (MoneroDestination destination : parsedTx.getOutgoingTransfer().getDestinations()) {
-            testDestination(destination);
-          }
-        }
+        testParsedTxSet(parsedTxSet);
       } finally {
         wallet.close();
       }
@@ -3007,7 +2981,7 @@ public abstract class TestMoneroWalletCommon {
       curWallet.send(new MoneroSendRequest().setAccountIndex(0).setDestinations(destinations));
       String returnAddress = curWallet.getPrimaryAddress(); // funds will be returned to this address from the multisig wallet
       
-      // open the first multisig participants
+      // open the first multisig participant
       curWallet = openWallet(walletIds.get(0));
       assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
       testMultisigInfo(curWallet.getMultisigInfo(), m, n);
@@ -3087,6 +3061,9 @@ public abstract class TestMoneroWalletCommon {
       assertNull(txSet.getUnsignedTxHex());
       assertFalse(txSet.getTxs().isEmpty());
       
+      // parse multisig tx hex and test
+      testParsedTxSet(curWallet.parseTxSet(txSet));
+      
       // sign the tx with participants 1 through m - 1 to meet threshold
       String multisigTxHex = txSet.getMultisigTxHex();
       System.out.println("Signing");
@@ -3123,6 +3100,9 @@ public abstract class TestMoneroWalletCommon {
       assertNull(txSet.getUnsignedTxHex());
       assertFalse(txSet.getTxs().isEmpty());
       
+      // parse multisig tx hex and test
+      testParsedTxSet(curWallet.parseTxSet(txSet));
+      
       // sign the tx with participants 1 through m - 1 to meet threshold
       multisigTxHex = txSet.getMultisigTxHex();
       System.out.println("Signing sweep output");
@@ -3156,6 +3136,11 @@ public abstract class TestMoneroWalletCommon {
       assertNull(txSet.getSignedTxHex());
       assertNull(txSet.getUnsignedTxHex());
       assertFalse(txSet.getTxs().isEmpty());
+      
+      // parse each multisig tx hex and test
+      for (MoneroTxSet sweepTxSet : txSets) {
+        testParsedTxSet(curWallet.parseTxSet(sweepTxSet));
+      }
       
       // sign the tx with participants 1 through m - 1 to meet threshold
       multisigTxHex = txSet.getMultisigTxHex();
@@ -4322,6 +4307,38 @@ public abstract class TestMoneroWalletCommon {
     } else {
       assertNull(check.getTotalAmount());
       assertNull(check.getUnconfirmedSpentAmount());
+    }
+  }
+  
+  private static void testParsedTxSet(MoneroTxSet parsedTxSet) {
+    assertNotNull(parsedTxSet.getTxs());
+    assertFalse(parsedTxSet.getTxs().isEmpty());
+    assertNull(parsedTxSet.getSignedTxHex());
+    assertNull(parsedTxSet.getUnsignedTxHex());
+    
+    // test each transaction        
+    // TODO: use common tx wallet test?
+    assertNull(parsedTxSet.getMultisigTxHex());
+    for (MoneroTxWallet parsedTx : parsedTxSet.getTxs()) {
+      TestUtils.testUnsignedBigInteger(parsedTx.getInputSum(), true);
+      TestUtils.testUnsignedBigInteger(parsedTx.getOutputSum(), true);
+      TestUtils.testUnsignedBigInteger(parsedTx.getFee());
+      TestUtils.testUnsignedBigInteger(parsedTx.getChangeAmount());
+      if (parsedTx.getChangeAmount().equals(BigInteger.valueOf(0))) assertNull(parsedTx.getChangeAddress());
+      else MoneroUtils.validateAddress(parsedTx.getChangeAddress(), TestUtils.NETWORK_TYPE);
+      assertTrue(parsedTx.getMixin() > 0);
+      assertTrue(parsedTx.getUnlockTime() >= 0);
+      assertTrue(parsedTx.getNumDummyOutputs() >= 0);
+      assertFalse(parsedTx.getExtraHex().isEmpty());
+      assertTrue(parsedTx.getPaymentId() == null || !parsedTx.getPaymentId().isEmpty());
+      assertTrue(parsedTx.isOutgoing());
+      assertNotNull(parsedTx.getOutgoingTransfer());
+      assertNotNull(parsedTx.getOutgoingTransfer().getDestinations());
+      assertFalse(parsedTx.getOutgoingTransfer().getDestinations().isEmpty());
+      assertNull(parsedTx.isIncoming());
+      for (MoneroDestination destination : parsedTx.getOutgoingTransfer().getDestinations()) {
+        testDestination(destination);
+      }
     }
   }
   
