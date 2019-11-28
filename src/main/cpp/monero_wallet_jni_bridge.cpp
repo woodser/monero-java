@@ -1562,10 +1562,8 @@ JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_addAddressBookEntryJni
   const char* _description = jdescription ? env->GetStringUTFChars(jdescription, NULL) : nullptr;
   const char* _payment_id = jpayment_id ? env->GetStringUTFChars(jpayment_id, NULL) : nullptr;
   string address = string(_address == nullptr ? "" : _address);
-  boost::optional<string> description = boost::none;
-  boost::optional<string> payment_id = boost::none;
-  if (_description != nullptr) description = string(_description);
-  if (_payment_id != nullptr) payment_id = string(_payment_id);
+  boost::optional<string> description = _description == nullptr ? boost::none : (boost::optional<string>) string(_description);
+  boost::optional<string> payment_id = _payment_id == nullptr ? boost::none : (boost::optional<string>) string(_payment_id);
   env->ReleaseStringUTFChars(jaddress, _address);
   env->ReleaseStringUTFChars(jdescription, _description);
   env->ReleaseStringUTFChars(jpayment_id, _payment_id);
