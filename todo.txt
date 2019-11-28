@@ -1,5 +1,4 @@
 v15.0.2
-test convertRpcTxWithVout which does not call tx.setIsUnlocked()
 support cpp address book
 support wallet getVersion(), editAddressBook(), get/set_rpc_client_secret_key
 update to released v15.0.1 and test
