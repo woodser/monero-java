@@ -1081,11 +1081,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public List<MoneroAddressBookEntry> getAddressBookEntries(Collection<Integer> entryIndices) {
     assertNotClosed();
-    throw new RuntimeException("Not implemented");
-//    String entriesJson = getAddressBookEntriesJni(entryIndices.toArray(new Integer[entryIndices.size()]));
-//    List<MoneroAddressBookEntry> entries = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, entriesJson, AddressBookEntriesContainer.class).entries;
-//    //for (MoneroAccount entry : entries) sanitizeAddressBookEntry(entry);
-//    return entries;
+    if (entryIndices == null) entryIndices = new ArrayList<Integer>();
+    String entriesJson = getAddressBookEntriesJni(entryIndices.toArray(new Integer[entryIndices.size()]));
+    List<MoneroAddressBookEntry> entries = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, entriesJson, AddressBookEntriesContainer.class).entries;
+    //for (MoneroAccount entry : entries) sanitizeAddressBookEntry(entry);
+    return entries;
   }
 
   @Override
@@ -1642,9 +1642,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     return blocks;
   }
   
-//  private static class AddressBookEntriesContainer {
-//    public List<MoneroAddressBookEntry> entries;
-//  }
+  private static class AddressBookEntriesContainer {
+    public List<MoneroAddressBookEntry> entries;
+  }
   
   // ---------------------------- PRIVATE HELPERS -----------------------------
   
