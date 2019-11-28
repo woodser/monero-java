@@ -3555,7 +3555,7 @@ public abstract class TestMoneroWalletCommon {
       
       // assert no unlocked funds in account
       MoneroAccount account = wallet.getAccount(unlockedAccount.getIndex());
-      assertTrue(account.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) == 0);
+      assertEquals(BigInteger.valueOf(0), account.getUnlockedBalance());
     }
     
     // test accounts after sweeping
@@ -4226,6 +4226,7 @@ public abstract class TestMoneroWalletCommon {
     assertNotNull(tx);
     assertTrue(tx.getVouts().contains(output));
     assertNotNull(tx.getId());
+    assertNotNull(tx.isUnlocked());
     assertEquals(true, tx.isConfirmed());  // TODO monero-wallet-rpc: possible to get unconfirmed vouts?
     assertEquals(true, tx.isRelayed());
     assertEquals(false, tx.isFailed());

@@ -1,7 +1,7 @@
 v15.0.2
-test rpcSweepAccount, convertRpcTxWithVout which does not call tx.setIsUnlocked()
+test convertRpcTxWithVout which does not call tx.setIsUnlocked()
 support cpp address book
-support wallet getVersion(), parseTxSet(), editAddressBook(), get/set_rpc_client_secret_key
+support wallet getVersion(), editAddressBook(), get/set_rpc_client_secret_key
 update to released v15.0.1 and test
 compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
 core pr to remove unused ptx variable
@@ -21,6 +21,7 @@ config object for wallet creation
 update spec: block ids -> hashes, mixin -> ring size, extra
 
 merge latest js, java-lite, cpp
+test sweeps
 monero-javascript uses monero-cpp-library
 
 HIGH

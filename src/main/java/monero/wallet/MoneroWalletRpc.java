@@ -1757,6 +1757,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // initialize remaining known fields
     for (MoneroTxWallet tx : txSet.getTxs()) {
+      tx.setIsUnlocked(false);
       tx.setIsConfirmed(false);
       tx.setNumConfirmations(0l);
       tx.setDoNotRelay(doNotRelay);
@@ -2101,7 +2102,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("key_image")) vout.setKeyImage(new MoneroKeyImage((String) val));
       else if (key.equals("global_index")) vout.setIndex(((BigInteger) val).intValue());
       else if (key.equals("tx_hash")) tx.setId((String) val);
-      else if (key.equals("unlocked")) vout.setIsUnlocked((Boolean) val);
+      else if (key.equals("unlocked"))  {
+        tx.setIsUnlocked((Boolean) val);
+        vout.setIsUnlocked((Boolean) val);  // TODO: this is redundant with vout's tx
+      }
       else if (key.equals("frozen")) vout.setIsFrozen((Boolean) val);
       else if (key.equals("subaddr_index")) {
         Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) val;
