@@ -942,7 +942,7 @@ public interface MoneroWallet {
    * @param txIds identify the transactions to get notes for
    * @return notes for the transactions
    */
-  public List<String> getTxNotes(Collection<String> txIds);
+  public List<String> getTxNotes(List<String> txIds);
   
   /**
    * Set a note for a specific transaction.
@@ -958,7 +958,7 @@ public interface MoneroWallet {
    * @param txIds specify the transactions to set notes for
    * @param notes are the notes to set for the transactions
    */
-  public void setTxNotes(Collection<String> txIds, Collection<String> notes);
+  public void setTxNotes(List<String> txIds, List<String> notes);
   
   /**
    * Get all address book entries.
@@ -973,7 +973,7 @@ public interface MoneroWallet {
    * @param entryIndices are indices of the entries to get (optional)
    * @return the address book entries
    */
-  public List<MoneroAddressBookEntry> getAddressBookEntries(Collection<Integer> entryIndices);
+  public List<MoneroAddressBookEntry> getAddressBookEntries(List<Integer> entryIndices);
   
   /**
    * Add an address book entry.

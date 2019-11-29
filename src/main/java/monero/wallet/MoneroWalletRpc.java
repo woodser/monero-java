@@ -1337,7 +1337,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @SuppressWarnings("unchecked")
   @Override
-  public List<String> getTxNotes(Collection<String> txIds) {
+  public List<String> getTxNotes(List<String> txIds) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("txids", txIds);
     Map<String, Object> resp = rpc.sendJsonRequest("get_tx_notes", params);
@@ -1346,7 +1346,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
-  public void setTxNotes(Collection<String> txIds, Collection<String> notes) {
+  public void setTxNotes(List<String> txIds, List<String> notes) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("txids", txIds);
     params.put("notes", notes);
@@ -1355,7 +1355,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroAddressBookEntry> getAddressBookEntries(Collection<Integer> entryIndices) {
+  public List<MoneroAddressBookEntry> getAddressBookEntries(List<Integer> entryIndices) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("entries", entryIndices);
     Map<String, Object> respMap = rpc.sendJsonRequest("get_address_book", params);

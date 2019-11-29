@@ -1526,7 +1526,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressBookEntri
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
 
   // convert subaddress indices from jintArray to vector<uint32_t>
-  vector<uint32_t> indices;
+  vector<uint64_t> indices;
   if (jindices != nullptr) {
     jsize numIndices = env->GetArrayLength(jindices);
     jint* intArr = env->GetIntArrayElements(jindices, 0);
@@ -1553,6 +1553,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressBookEntri
   }
 }
 
+// TODO: return jlong for uint64_t
 JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_addAddressBookEntryJni(JNIEnv* env, jobject instance, jstring jaddress, jstring jdescription, jstring jpayment_id) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_addAddressBookEntryJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
@@ -1562,8 +1563,8 @@ JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_addAddressBookEntryJni
   const char* _description = jdescription ? env->GetStringUTFChars(jdescription, NULL) : nullptr;
   const char* _payment_id = jpayment_id ? env->GetStringUTFChars(jpayment_id, NULL) : nullptr;
   string address = string(_address == nullptr ? "" : _address);
-  boost::optional<string> description = _description == nullptr ? boost::none : (boost::optional<string>) string(_description);
-  boost::optional<string> payment_id = _payment_id == nullptr ? boost::none : (boost::optional<string>) string(_payment_id);
+  string description = string(_description == nullptr ? "" : _description);
+  string payment_id = string(_payment_id == nullptr ? "" : _payment_id);
   env->ReleaseStringUTFChars(jaddress, _address);
   env->ReleaseStringUTFChars(jdescription, _description);
   env->ReleaseStringUTFChars(jpayment_id, _payment_id);
@@ -1586,8 +1587,8 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_editAddressBookEntryJn
   const char* _description = jdescription ? env->GetStringUTFChars(jdescription, NULL) : nullptr;
   const char* _payment_id = jpayment_id ? env->GetStringUTFChars(jpayment_id, NULL) : nullptr;
   string address = string(_address == nullptr ? "" : _address);
-  boost::optional<string> description = _description == nullptr ? boost::none : (boost::optional<string>) string(_description);
-  boost::optional<string> payment_id = _payment_id == nullptr ? boost::none : (boost::optional<string>) string(_payment_id);
+  string description = string(_description == nullptr ? "" : _description);
+  string payment_id = string(_payment_id == nullptr ? "" : _payment_id);
   env->ReleaseStringUTFChars(jaddress, _address);
   env->ReleaseStringUTFChars(jdescription, _description);
   env->ReleaseStringUTFChars(jpayment_id, _payment_id);

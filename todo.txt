@@ -1,7 +1,5 @@
 v15.0.1
 new todos
-support cpp address book including editAddressBook()
-
 add compatibility monero-project compatiblity version to readme
 standardize expected test failures vs exceptions
 exclude heavy tests by config, e.g. testMultisig

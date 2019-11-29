@@ -1067,22 +1067,22 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public List<String> getTxNotes(Collection<String> txIds) {
+  public List<String> getTxNotes(List<String> txIds) {
     assertNotClosed();
     return Arrays.asList(getTxNotesJni(txIds.toArray(new String[txIds.size()])));  // convert to array for jni
   }
 
   @Override
-  public void setTxNotes(Collection<String> txIds, Collection<String> notes) {
+  public void setTxNotes(List<String> txIds, List<String> notes) {
     assertNotClosed();
     setTxNotesJni(txIds.toArray(new String[txIds.size()]), notes.toArray(new String[notes.size()]));
   }
 
   @Override
-  public List<MoneroAddressBookEntry> getAddressBookEntries(Collection<Integer> entryIndices) {
+  public List<MoneroAddressBookEntry> getAddressBookEntries(List<Integer> entryIndices) {
     assertNotClosed();
     if (entryIndices == null) entryIndices = new ArrayList<Integer>();
-    String entriesJson = getAddressBookEntriesJni(entryIndices.toArray(new Integer[entryIndices.size()]));
+    String entriesJson = getAddressBookEntriesJni(GenUtils.listToIntArray(entryIndices));
     List<MoneroAddressBookEntry> entries = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, entriesJson, AddressBookEntriesContainer.class).entries;
     if (entries == null) entries = new ArrayList<MoneroAddressBookEntry>();
     //for (MoneroAccount entry : entries) sanitizeAddressBookEntry(entry);
@@ -1432,7 +1432,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String checkReserveProofJni(String address, String message, String signature);
   
-  private native String getAddressBookEntriesJni(Integer[] indices);
+  private native String getAddressBookEntriesJni(int[] indices);
   
   private native int addAddressBookEntryJni(String address, String description, String paymentId);
   
