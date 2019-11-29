@@ -10,7 +10,11 @@ public class MoneroAddressBookEntry {
   private String paymentId;
   private String description;
   
-  public MoneroAddressBookEntry(int index, String address, String paymentId, String description) {
+  public MoneroAddressBookEntry() {
+    // necessary for deserialization
+  }
+  
+  public MoneroAddressBookEntry(int index, String address, String description, String paymentId) {
     super();
     this.index = index;
     this.address = address;

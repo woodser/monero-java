@@ -1366,8 +1366,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       MoneroAddressBookEntry entry = new MoneroAddressBookEntry(
               ((BigInteger) entryMap.get("index")).intValue(),
               (String) entryMap.get("address"),
-              (String) entryMap.get("payment_id"),
-              (String) entryMap.get("description")
+              (String) entryMap.get("description"),
+              (String) entryMap.get("payment_id")
       );
       entries.add(entry);
     }
