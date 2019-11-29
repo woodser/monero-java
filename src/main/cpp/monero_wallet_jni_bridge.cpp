@@ -36,6 +36,7 @@
 
 #include <iostream>
 #include "monero_wallet_jni_bridge.h"
+#include "wallet/monero_wallet.h"
 #include "utils/monero_utils.h"
 
 using namespace std;
@@ -814,11 +815,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIE
   vector<monero_account> accounts = wallet->get_accounts(include_subaddresses, tag);
 
   // wrap and serialize accounts
-  std::stringstream ss;
-  boost::property_tree::ptree container;
-  if (!accounts.empty()) container.add_child("accounts", monero_utils::to_property_tree(accounts));
-  boost::property_tree::write_json(ss, container, false);
-  string accounts_json = strip_last_char(ss.str());
+  rapidjson::Document doc;
+  doc.SetObject();
+  doc.AddMember("accounts", monero_utils::to_json_val(doc.GetAllocator(), accounts), doc.GetAllocator());
+  string accounts_json = monero_utils::serialize(doc);
   return env->NewStringUTF(accounts_json.c_str());
 }
 
@@ -867,11 +867,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(
   vector<monero_subaddress> subaddresses = wallet->get_subaddresses(account_idx, subaddress_indices);
 
   // wrap and serialize subaddresses
-  std::stringstream ss;
-  boost::property_tree::ptree container;
-  if (!subaddresses.empty()) container.add_child("subaddresses", monero_utils::to_property_tree(subaddresses));
-  boost::property_tree::write_json(ss, container, false);
-  string subaddresses_json = strip_last_char(ss.str());
+  rapidjson::Document doc;
+  doc.SetObject();
+  doc.AddMember("subaddresses", monero_utils::to_json_val(doc.GetAllocator(), subaddresses), doc.GetAllocator());
+  string subaddresses_json = monero_utils::serialize(doc);
   return env->NewStringUTF(subaddresses_json.c_str());
 }
 
@@ -925,11 +924,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
     MTRACE("Returning " << blocks.size() << " blocks");
 
     // wrap and serialize blocks
-    std::stringstream ss;
-    boost::property_tree::ptree container;
-    if (!blocks.empty()) container.add_child("blocks", monero_utils::to_property_tree(blocks));
-    boost::property_tree::write_json(ss, container, false);
-    string blocks_json = strip_last_char(ss.str());
+    rapidjson::Document doc;
+    doc.SetObject();
+    doc.AddMember("blocks", monero_utils::to_json_val(doc.GetAllocator(), blocks), doc.GetAllocator());
+    string blocks_json = monero_utils::serialize(doc);
     return env->NewStringUTF(blocks_json.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -972,11 +970,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
     }
 
     // wrap and serialize blocks
-    std::stringstream ss;
-    boost::property_tree::ptree container;
-    if (!blocks.empty()) container.add_child("blocks", monero_utils::to_property_tree(blocks));
-    boost::property_tree::write_json(ss, container, false);
-    string blocks_json = strip_last_char(ss.str());
+    rapidjson::Document doc;
+    doc.SetObject();
+    doc.AddMember("blocks", monero_utils::to_json_val(doc.GetAllocator(), blocks), doc.GetAllocator());
+    string blocks_json = monero_utils::serialize(doc);
     return env->NewStringUTF(blocks_json.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -1015,11 +1012,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
     MTRACE("Returning " << blocks.size() << " blocks");
 
     // wrap and serialize blocks
-    std::stringstream ss;
-    boost::property_tree::ptree container;
-    if (!blocks.empty()) container.add_child("blocks", monero_utils::to_property_tree(blocks));
-    boost::property_tree::write_json(ss, container, false);
-    string blocks_json = strip_last_char(ss.str());
+    rapidjson::Document doc;
+    doc.SetObject();
+    doc.AddMember("blocks", monero_utils::to_json_val(doc.GetAllocator(), blocks), doc.GetAllocator());
+    string blocks_json = monero_utils::serialize(doc);
     return env->NewStringUTF(blocks_json.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -1061,11 +1057,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getKeyImagesJni(JNI
   MTRACE("Fetched " << key_images.size() << " key images");
 
   // wrap and serialize key images
-  std::stringstream ss;
-  boost::property_tree::ptree container;
-  if (!key_images.empty()) container.add_child("keyImages", monero_utils::to_property_tree(key_images));
-  boost::property_tree::write_json(ss, container, false);
-  string key_images_json = strip_last_char(ss.str());
+  rapidjson::Document doc;
+  doc.SetObject();
+  doc.AddMember("keyImages", monero_utils::to_json_val(doc.GetAllocator(), key_images), doc.GetAllocator());
+  string key_images_json = monero_utils::serialize(doc);
   return env->NewStringUTF(key_images_json.c_str());
 }
 
@@ -1138,11 +1133,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepUnlockedJni(JN
   }
 
   // wrap and serialize tx sets
-  std::stringstream ss;
-  boost::property_tree::ptree container;
-  if (!tx_sets.empty()) container.add_child("txSets", monero_utils::to_property_tree(tx_sets));
-  boost::property_tree::write_json(ss, container, false);
-  string tx_sets_json = strip_last_char(ss.str());
+  rapidjson::Document doc;
+  doc.SetObject();
+  doc.AddMember("txSets", monero_utils::to_json_val(doc.GetAllocator(), tx_sets), doc.GetAllocator());
+  string tx_sets_json = monero_utils::serialize(doc);
   return env->NewStringUTF(tx_sets_json.c_str());
 }
 
@@ -1541,11 +1535,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressBookEntri
     vector<monero_address_book_entry> entries = wallet->get_address_book_entries(indices);
 
     // wrap and serialize entries
-    std::stringstream ss;
-    boost::property_tree::ptree container;
-    if (!entries.empty()) container.add_child("entries", monero_utils::to_property_tree(entries));
-    boost::property_tree::write_json(ss, container, false);
-    string entries_json = strip_last_char(ss.str());
+    rapidjson::Document doc;
+    doc.SetObject();
+    doc.AddMember("entries", monero_utils::to_json_val(doc.GetAllocator(), entries), doc.GetAllocator());
+    string entries_json = monero_utils::serialize(doc);
     return env->NewStringUTF(entries_json.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);

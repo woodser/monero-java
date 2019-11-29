@@ -1,10 +1,9 @@
 v15.0.1
-convert MoneroTx extra to string
 rename MoneroOutput to MoneroRingMember, rename MoneroTx vins and vouts to inputs and outputs?
 cpp library deserialization part of models and using rapidjson
 all deserialization methods should log warning for unrecognized field keys (monero_utils.cpp)
 new todos
-update spec: mixin -> ring size, extra
+update spec: extra?
 
 merge latest js, java-lite, cpp
 cpp library points to unmodified monero-project
@@ -15,6 +14,7 @@ exclude heavy tests by config, e.g. testMultisig
 config object for wallet creation
 daemon.getNextBlockHeader() sometimes hangs, daemon hangs
 rename block and tx id terminology to hashes
+convert MoneroTx extra to string
 core pr to remove unused ptx variable
 compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
 sweepAccounts() is leaving behind dust
