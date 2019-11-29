@@ -1,26 +1,26 @@
 v15.0.1
-switch mixin to ring size in tx and tx request
-rename block and tx id terminology to hashes
 convert MoneroTx extra to string
 rename MoneroOutput to MoneroRingMember, rename MoneroTx vins and vouts to inputs and outputs?
 cpp library deserialization part of models and using rapidjson
 all deserialization methods should log warning for unrecognized field keys (monero_utils.cpp)
 new todos
-config object for wallet creation
-update spec: block ids -> hashes, mixin -> ring size, extra
+update spec: mixin -> ring size, extra
+
+merge latest js, java-lite, cpp
+cpp library points to unmodified monero-project
+monero-javascript uses monero-cpp-library
 
 standardize expected test failures vs exceptions
 exclude heavy tests by config, e.g. testMultisig
+config object for wallet creation
 daemon.getNextBlockHeader() sometimes hangs, daemon hangs
-cpp library points to unmodified monero-project
+rename block and tx id terminology to hashes
 core pr to remove unused ptx variable
 compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
 sweepAccounts() is leaving behind dust
 monero-cpp-library's monero-core submodule could point to upstream
 support pay for service in wallet, get/set_rpc_client_secret_key
-merge latest js, java-lite, cpp
 test sweeps
-monero-javascript uses monero-cpp-library
 
 HIGH
 new rpc api will need containers for every call
