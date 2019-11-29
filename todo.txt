@@ -1,6 +1,5 @@
 v15.0.1
 new todos
-add compatibility monero-project compatiblity version to readme
 standardize expected test failures vs exceptions
 exclude heavy tests by config, e.g. testMultisig
 switch to isLocked() for consistency with monero-project? wallet2 uses unlocked
@@ -13,6 +12,7 @@ replace output isUnlocked with MoneroTxWallet isUnlocked? technically redundant
 config object for wallet creation
 update spec: block ids -> hashes, mixin -> ring size, extra
 
+cpp library points to unmodified monero-project
 core pr to remove unused ptx variable
 compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
 sweepAccounts() is leaving behind dust

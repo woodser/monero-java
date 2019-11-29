@@ -4,6 +4,8 @@ This project is a library for using a Monero wallet and daemon in Java using RPC
 
 In addition, this project conforms to an [API specification](http://moneroecosystem.org/monero-java/monero-spec.pdf) intended to be intuitive, robust, and suitable for long-term use in the Monero project.
 
+This library is compatible with [Monero Core v0.15.0.1 Carbon Chamaeleon](https://github.com/monero-project/monero/tree/v0.15.0.1).
+
 ## Main Features
 
 - Manage a Monero daemon using RPC
