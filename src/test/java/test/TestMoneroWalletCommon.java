@@ -2735,7 +2735,7 @@ public abstract class TestMoneroWalletCommon {
     
     // build send request using MoneroSendRequest
     MoneroSendRequest request = new MoneroSendRequest();
-    request.setMixin(TestUtils.MIXIN);
+    request.setRingSize(TestUtils.RING_SIZE);
     request.setAccountIndex(srcAccount.getIndex());
     request.setDestinations(new ArrayList<MoneroDestination>());
     for (int i = 0; i < destinationAddresses.size(); i++) {
@@ -4051,7 +4051,7 @@ public abstract class TestMoneroWalletCommon {
       assertTrue(tx.getIncomingTransfers().size() > 0);
       assertNull(tx.getOutgoingAmount());
       assertNull(tx.getOutgoingTransfer());
-      assertNull(tx.getMixin());
+      assertNull(tx.getRingSize());
       assertNull(tx.getFullHex());
       assertNull(tx.getMetadata());
       assertNull(tx.getKey());
@@ -4101,7 +4101,7 @@ public abstract class TestMoneroWalletCommon {
       MoneroSendRequest request = ctx.sendRequest;
       assertEquals(false, tx.isConfirmed());
       testTransfer(tx.getOutgoingTransfer(), ctx);
-      assertEquals(request.getMixin(), tx.getMixin());
+      assertEquals(request.getRingSize(), tx.getRingSize());
       assertEquals(request.getUnlockTime() != null ? request.getUnlockTime() : 0, (long) tx.getUnlockTime());
       assertNull(tx.getBlock());
       assertTrue(tx.getKey().length() > 0);
@@ -4155,7 +4155,7 @@ public abstract class TestMoneroWalletCommon {
     // test tx result query
     else {
       assertNull(tx.getTxSet());  // tx set only initialized on send responses
-      assertNull(tx.getMixin());
+      assertNull(tx.getRingSize());
       assertNull(tx.getKey());
       assertNull(tx.getFullHex());
       assertNull(tx.getMetadata());
@@ -4417,7 +4417,7 @@ public abstract class TestMoneroWalletCommon {
       TestUtils.testUnsignedBigInteger(parsedTx.getChangeAmount());
       if (parsedTx.getChangeAmount().equals(BigInteger.valueOf(0))) assertNull(parsedTx.getChangeAddress());
       else MoneroUtils.validateAddress(parsedTx.getChangeAddress(), TestUtils.NETWORK_TYPE);
-      assertTrue(parsedTx.getMixin() > 0);
+      assertTrue(parsedTx.getRingSize() > 1);
       assertTrue(parsedTx.getUnlockTime() >= 0);
       assertTrue(parsedTx.getNumDummyOutputs() >= 0);
       assertFalse(parsedTx.getExtraHex().isEmpty());

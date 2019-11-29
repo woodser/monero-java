@@ -17,7 +17,6 @@ public class MoneroSendRequest {
   private List<MoneroDestination> destinations;
   private String paymentId;
   private MoneroSendPriority priority;
-  private Integer mixin;
   private Integer ringSize;
   private BigInteger fee;
   private Integer accountIndex;
@@ -64,7 +63,6 @@ public class MoneroSendRequest {
     }
     this.paymentId = req.paymentId;
     this.priority = req.priority;
-    this.mixin = req.mixin;
     this.ringSize = req.ringSize;
     this.fee = req.fee;
     this.accountIndex = req.accountIndex;
@@ -119,15 +117,6 @@ public class MoneroSendRequest {
   
   public MoneroSendRequest setPriority(MoneroSendPriority priority) {
     this.priority = priority;
-    return this;
-  }
-  
-  public Integer getMixin() {
-    return mixin;
-  }
-  
-  public MoneroSendRequest setMixin(Integer mixin) {
-    this.mixin = mixin;
     return this;
   }
   
@@ -261,7 +250,6 @@ public class MoneroSendRequest {
     result = prime * result + ((doNotRelay == null) ? 0 : doNotRelay.hashCode());
     result = prime * result + ((fee == null) ? 0 : fee.hashCode());
     result = prime * result + ((keyImage == null) ? 0 : keyImage.hashCode());
-    result = prime * result + ((mixin == null) ? 0 : mixin.hashCode());
     result = prime * result + ((note == null) ? 0 : note.hashCode());
     result = prime * result + ((paymentId == null) ? 0 : paymentId.hashCode());
     result = prime * result + ((priority == null) ? 0 : priority.hashCode());
@@ -300,9 +288,6 @@ public class MoneroSendRequest {
     if (keyImage == null) {
       if (other.keyImage != null) return false;
     } else if (!keyImage.equals(other.keyImage)) return false;
-    if (mixin == null) {
-      if (other.mixin != null) return false;
-    } else if (!mixin.equals(other.mixin)) return false;
     if (note == null) {
       if (other.note != null) return false;
     } else if (!note.equals(other.note)) return false;

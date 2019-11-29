@@ -1,5 +1,4 @@
 v15.0.1
-replace output isLocked with MoneroTxWallet isLocked? technically redundant
 switch mixin to ring size in tx and tx request
 rename block and tx id terminology to hashes
 convert MoneroTx extra to string

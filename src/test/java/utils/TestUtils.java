@@ -76,7 +76,7 @@ public class TestUtils {
   public static TxPoolWalletTracker TX_POOL_WALLET_TRACKER = new TxPoolWalletTracker();
   
   // test constants
-  public static final int MIXIN = 11;
+  public static final int RING_SIZE = 12;
   
   /**
    * Get a daemon RPC singleton instance shared among tests.

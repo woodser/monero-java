@@ -477,8 +477,8 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setMixin(Integer mixin) {
-    super.setMixin(mixin);
+  public MoneroTxWallet setRingSize(Integer ringSize) {
+    super.setRingSize(ringSize);
     return this;
   }
 

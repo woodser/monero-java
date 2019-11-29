@@ -24,7 +24,7 @@ public class MoneroTx {
   private Boolean isMinerTx;
   private String paymentId;
   private BigInteger fee;
-  private Integer mixin;
+  private Integer ringSize;
   private Boolean doNotRelay;
   private Boolean isRelayed;
   private Boolean isConfirmed;
@@ -71,7 +71,7 @@ public class MoneroTx {
     this.isMinerTx = tx.isMinerTx;
     this.paymentId = tx.paymentId;
     this.fee = tx.fee;
-    this.mixin = tx.mixin;
+    this.ringSize = tx.ringSize;
     this.doNotRelay = tx.doNotRelay;
     this.isRelayed = tx.isRelayed;
     this.isConfirmed = tx.isConfirmed;
@@ -174,12 +174,12 @@ public class MoneroTx {
     return this;
   }
   
-  public Integer getMixin() {
-    return mixin;
+  public Integer getRingSize() {
+    return ringSize;
   }
   
-  public MoneroTx setMixin(Integer mixin) {
-    this.mixin = mixin;
+  public MoneroTx setRingSize(Integer ringSize) {
+    this.ringSize = ringSize;
     return this;
   }
   
@@ -485,7 +485,7 @@ public class MoneroTx {
     this.setVersion(GenUtils.reconcile(this.getVersion(), tx.getVersion()));
     this.setPaymentId(GenUtils.reconcile(this.getPaymentId(), tx.getPaymentId()));
     this.setFee(GenUtils.reconcile(this.getFee(), tx.getFee()));
-    this.setMixin(GenUtils.reconcile(this.getMixin(), tx.getMixin()));
+    this.setRingSize(GenUtils.reconcile(this.getRingSize(), tx.getRingSize()));
     this.setIsConfirmed(GenUtils.reconcile(this.isConfirmed(), tx.isConfirmed(), null, true, null));
     this.setDoNotRelay(GenUtils.reconcile(this.getDoNotRelay(), tx.getDoNotRelay(), null, false, null));  // tx can become relayed
     this.setIsRelayed(GenUtils.reconcile(this.isRelayed(), tx.isRelayed(), null, true, null));      // tx can become relayed
@@ -629,7 +629,7 @@ public class MoneroTx {
     sb.append(GenUtils.kvLine("Is miner tx", isMinerTx(), indent));
     sb.append(GenUtils.kvLine("Payment ID", getPaymentId(), indent));
     sb.append(GenUtils.kvLine("Fee", getFee(), indent));
-    sb.append(GenUtils.kvLine("Mixin", getMixin(), indent));
+    sb.append(GenUtils.kvLine("Ring size", getRingSize(), indent));
     sb.append(GenUtils.kvLine("Do not relay", getDoNotRelay(), indent));
     sb.append(GenUtils.kvLine("Is relayed", isRelayed(), indent));
     sb.append(GenUtils.kvLine("Is confirmed", isConfirmed(), indent));
@@ -701,7 +701,7 @@ public class MoneroTx {
     result = prime * result + ((maxUsedBlockHeight == null) ? 0 : maxUsedBlockHeight.hashCode());
     result = prime * result + ((maxUsedBlockId == null) ? 0 : maxUsedBlockId.hashCode());
     result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
-    result = prime * result + ((mixin == null) ? 0 : mixin.hashCode());
+    result = prime * result + ((ringSize == null) ? 0 : ringSize.hashCode());
     result = prime * result + ((numConfirmations == null) ? 0 : numConfirmations.hashCode());
     result = prime * result + ((outputIndices == null) ? 0 : outputIndices.hashCode());
     result = prime * result + ((paymentId == null) ? 0 : paymentId.hashCode());
@@ -782,9 +782,9 @@ public class MoneroTx {
     if (metadata == null) {
       if (other.metadata != null) return false;
     } else if (!metadata.equals(other.metadata)) return false;
-    if (mixin == null) {
-      if (other.mixin != null) return false;
-    } else if (!mixin.equals(other.mixin)) return false;
+    if (ringSize == null) {
+      if (other.ringSize != null) return false;
+    } else if (!ringSize.equals(other.ringSize)) return false;
     if (numConfirmations == null) {
       if (other.numConfirmations != null) return false;
     } else if (!numConfirmations.equals(other.numConfirmations)) return false;

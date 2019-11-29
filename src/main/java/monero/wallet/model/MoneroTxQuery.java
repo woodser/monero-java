@@ -316,8 +316,8 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setMixin(Integer mixin) {
-    super.setMixin(mixin);
+  public MoneroTxQuery setRingSize(Integer ringSize) {
+    super.setRingSize(ringSize);
     return this;
   }
 
