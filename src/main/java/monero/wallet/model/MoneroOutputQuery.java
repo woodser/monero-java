@@ -61,6 +61,28 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
     return this;
   }
   
+  /**
+   * Indicates if the this query will fetch locked outputs, unlocked outputs, or both (null).
+   * 
+   * @return true if locked outputs queried, false of unlocked outputs queried, null if both
+   */
+  public Boolean getIsLocked() {
+    if (txQuery == null) return null;
+    return txQuery.isLocked();
+  }
+  
+  /**
+   * Convenience method to query outputs by the locked state of their tx.
+   * 
+   * @param isLocked specifies if the output's tx must be locked or unlocked (optional)
+   * @return this query for chaining
+   */
+  public MoneroOutputQuery setIsLocked(Boolean isLocked) {
+    if (txQuery == null) txQuery = new MoneroTxQuery();
+    txQuery.setIsLocked(isLocked);
+    return this;
+  }
+  
   @Override
   public boolean meetsCriteria(MoneroOutputWallet output) {
     if (!(output instanceof MoneroOutputWallet)) return false;
@@ -70,7 +92,6 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
     if (this.getSubaddressIndex() != null && !this.getSubaddressIndex().equals(output.getSubaddressIndex())) return false;
     if (this.getAmount() != null && this.getAmount().compareTo(output.getAmount()) != 0) return false;
     if (this.isSpent() != null && !this.isSpent().equals(output.isSpent())) return false;
-    if (this.isLocked() != null && !this.isLocked().equals(output.isLocked())) return false;
     
     // filter on output key image
     if (this.getKeyImage() != null) {
@@ -125,13 +146,6 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
     return this;
   }
   
-  @Override
-  public MoneroOutputQuery setIsLocked(Boolean isLocked) {
-    super.setIsLocked(isLocked);
-    return this;
-  }
-
-
   @Override
   public MoneroOutputQuery setKeyImage(MoneroKeyImage keyImage) {
     super.setKeyImage(keyImage);

@@ -1266,7 +1266,7 @@ public class TestMoneroDaemonRpc {
   // Can notify listeners when a new block is added to the chain
   @Test
   public void testBlockListener() {
-    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
+    org.junit.Assume.assumeTrue(!LITE_MODE && TEST_NOTIFICATIONS);
     
     try {
             

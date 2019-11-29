@@ -2102,10 +2102,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("key_image")) vout.setKeyImage(new MoneroKeyImage((String) val));
       else if (key.equals("global_index")) vout.setIndex(((BigInteger) val).intValue());
       else if (key.equals("tx_hash")) tx.setId((String) val);
-      else if (key.equals("unlocked"))  {
-        tx.setIsLocked(!(Boolean) val);
-        vout.setIsLocked(!(Boolean) val);  // TODO: this is redundant with vout's tx
-      }
+      else if (key.equals("unlocked")) tx.setIsLocked(!(Boolean) val);
       else if (key.equals("frozen")) vout.setIsFrozen((Boolean) val);
       else if (key.equals("subaddr_index")) {
         Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) val;

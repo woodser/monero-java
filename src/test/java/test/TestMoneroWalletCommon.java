@@ -3106,7 +3106,7 @@ public abstract class TestMoneroWalletCommon {
           for (MoneroOutputWallet output : outputs) assertFalse(output.isSpent());
           
           // break if output is unlocked
-          if (outputs.get(0).isLocked()) break;
+          if (!outputs.get(0).isLocked()) break;
         }
       }
         

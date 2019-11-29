@@ -1,16 +1,18 @@
 v15.0.1
-new todos
-standardize expected test failures vs exceptions
-exclude heavy tests by config, e.g. testMultisig
-cpp library deserialization part of models and using rapidjson
+replace output isLocked with MoneroTxWallet isLocked? technically redundant
 switch mixin to ring size in tx and tx request
-rename block id terminology to block hashes
+rename block and tx id terminology to hashes
 convert MoneroTx extra to string
 rename MoneroOutput to MoneroRingMember, rename MoneroTx vins and vouts to inputs and outputs?
-replace output isUnlocked with MoneroTxWallet isUnlocked? technically redundant
+cpp library deserialization part of models and using rapidjson
+all deserialization methods should log warning for unrecognized field keys (monero_utils.cpp)
+new todos
 config object for wallet creation
 update spec: block ids -> hashes, mixin -> ring size, extra
 
+standardize expected test failures vs exceptions
+exclude heavy tests by config, e.g. testMultisig
+daemon.getNextBlockHeader() sometimes hangs, daemon hangs
 cpp library points to unmodified monero-project
 core pr to remove unused ptx variable
 compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
