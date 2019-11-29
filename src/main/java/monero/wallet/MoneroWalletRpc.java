@@ -1757,7 +1757,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // initialize remaining known fields
     for (MoneroTxWallet tx : txSet.getTxs()) {
-      tx.setIsUnlocked(false);
+      tx.setIsLocked(true);
       tx.setIsConfirmed(false);
       tx.setNumConfirmations(0l);
       tx.setDoNotRelay(doNotRelay);
@@ -1835,7 +1835,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setIsRelayed(!Boolean.TRUE.equals(tx.getDoNotRelay()));
     tx.setIsMinerTx(false);
     tx.setIsFailed(false);
-    tx.setIsUnlocked(false);
+    tx.setIsLocked(true);
     tx.setMixin(request.getMixin());
     MoneroOutgoingTransfer transfer = new MoneroOutgoingTransfer().setTx(tx);
     if (request.getSubaddressIndices() != null && request.getSubaddressIndices().size() == 1) transfer.setSubaddressIndices(new ArrayList<Integer>(request.getSubaddressIndices())); // we know src subaddress indices iff request specifies 1
@@ -1985,7 +1985,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("type")) { } // type already handled
       else if (key.equals("tx_size")) tx.setSize(((BigInteger) val).longValue());
       else if (key.equals("unlock_time")) tx.setUnlockTime(((BigInteger) val).longValue());
-      else if (key.equals("locked")) tx.setIsUnlocked(!(Boolean) val);  // reverse to be consistent with outputs
+      else if (key.equals("locked")) tx.setIsLocked((Boolean) val);
       else if (key.equals("tx_blob")) tx.setFullHex((String) val);
       else if (key.equals("tx_metadata")) tx.setMetadata((String) val);
       else if (key.equals("double_spend_seen")) tx.setIsDoubleSpendSeen((Boolean) val);
@@ -2103,8 +2103,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("global_index")) vout.setIndex(((BigInteger) val).intValue());
       else if (key.equals("tx_hash")) tx.setId((String) val);
       else if (key.equals("unlocked"))  {
-        tx.setIsUnlocked((Boolean) val);
-        vout.setIsUnlocked((Boolean) val);  // TODO: this is redundant with vout's tx
+        tx.setIsLocked(!(Boolean) val);
+        vout.setIsLocked(!(Boolean) val);  // TODO: this is redundant with vout's tx
       }
       else if (key.equals("frozen")) vout.setIsFrozen((Boolean) val);
       else if (key.equals("subaddr_index")) {

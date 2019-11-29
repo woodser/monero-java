@@ -785,10 +785,10 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // get unlocked txs
-    txs = wallet.getTxs(new MoneroTxQuery().setIsUnlocked(true));
+    txs = wallet.getTxs(new MoneroTxQuery().setIsLocked(false));
     assertFalse(txs.isEmpty());
     for (MoneroTxWallet tx : txs) {
-      assertTrue(tx.isUnlocked());
+      assertFalse(tx.isLocked());
     }
   }
   
@@ -2606,9 +2606,9 @@ public abstract class TestMoneroWalletCommon {
     assertTrue(subaddress.getBalance().compareTo(balanceBefore) < 0);
     assertTrue(subaddress.getUnlockedBalance().compareTo(unlockedBalanceBefore) < 0);
     
-    // query unlocked txs
-    List<MoneroTxWallet> lockedTxs = getAndTestTxs(wallet, new MoneroTxQuery().setIsUnlocked(false), null, true);
-    for (MoneroTxWallet lockedTx : lockedTxs) assertEquals(false, lockedTx.isUnlocked());
+    // query locked txs
+    List<MoneroTxWallet> lockedTxs = getAndTestTxs(wallet, new MoneroTxQuery().setIsLocked(true), null, true);
+    for (MoneroTxWallet lockedTx : lockedTxs) assertEquals(true, lockedTx.isLocked());
     
     // build test context
     TestContext ctx = new TestContext();
@@ -2801,7 +2801,7 @@ public abstract class TestMoneroWalletCommon {
     int numOutputs = 3;
     
     // get outputs to sweep (not spent, unlocked, and amount >= fee)
-    List<MoneroOutputWallet> spendableUnlockedOutputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setIsUnlocked(true));
+    List<MoneroOutputWallet> spendableUnlockedOutputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setIsLocked(false));
     List<MoneroOutputWallet> outputsToSweep = new ArrayList<MoneroOutputWallet>();
     for (int i = 0; i < spendableUnlockedOutputs.size() && outputsToSweep.size() < numOutputs; i++) {
       if (spendableUnlockedOutputs.get(i).getAmount().compareTo(TestUtils.MAX_FEE) > 0) outputsToSweep.add(spendableUnlockedOutputs.get(i));  // output cannot be swept if amount does not cover fee
@@ -2813,7 +2813,7 @@ public abstract class TestMoneroWalletCommon {
     for (MoneroOutputWallet output : outputsToSweep) {
       testOutputWallet(output);
       assertFalse(output.isSpent());
-      assertTrue(output.isUnlocked());
+      assertFalse(output.isLocked());
       if (output.getAmount().compareTo(TestUtils.MAX_FEE) <= 0) continue;
       
       // sweep output to address
@@ -3106,7 +3106,7 @@ public abstract class TestMoneroWalletCommon {
           for (MoneroOutputWallet output : outputs) assertFalse(output.isSpent());
           
           // break if output is unlocked
-          if (outputs.get(0).isUnlocked()) break;
+          if (outputs.get(0).isLocked()) break;
         }
       }
         
@@ -3122,7 +3122,7 @@ public abstract class TestMoneroWalletCommon {
       assertFalse(outputs.isEmpty());
       if (outputs.size() < 3) System.out.println("WARNING: not one output per subaddress?");
       //assertTrue(outputs.size() >= 3);  // TODO
-      for (MoneroOutputWallet output : outputs) assertTrue(output.isUnlocked());
+      for (MoneroOutputWallet output : outputs) assertTrue(output.isLocked());
       
       // wallet requires importing multisig to be reliable
       assertTrue(curWallet.isMultisigImportNeeded());
@@ -3731,7 +3731,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // all unspent, unlocked outputs must be less than fee
-    List<MoneroOutputWallet> spendableOutputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setIsUnlocked(true));
+    List<MoneroOutputWallet> spendableOutputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setIsLocked(false));
     for (MoneroOutputWallet spendableOutput : spendableOutputs) {
       assertTrue("Unspent output should have been swept\n" + spendableOutput.toString(), spendableOutput.getAmount().compareTo(TestUtils.MAX_FEE) < 0);
     }
@@ -3996,7 +3996,7 @@ public abstract class TestMoneroWalletCommon {
       assertEquals(false, tx.getDoNotRelay());
       assertEquals(true, tx.isRelayed());
       assertEquals(false, tx.isDoubleSpendSeen()); // TODO: test double spend attempt
-      assertEquals(false, tx.isUnlocked());
+      assertEquals(true, tx.isLocked());
       
       // these should be initialized unless a response from sending
       if (!Boolean.TRUE.equals(ctx.isSendResponse)) {
@@ -4109,14 +4109,14 @@ public abstract class TestMoneroWalletCommon {
       assertTrue(tx.getFullHex().length() > 0);
       assertNotNull(tx.getMetadata());
       assertNull(tx.getReceivedTimestamp());
-      assertFalse(tx.isUnlocked());
+      assertTrue(tx.isLocked());
       
       // test locked state
-      if (tx.getUnlockTime() == 0) assertEquals(tx.isConfirmed(), tx.isUnlocked());
-      else assertEquals(false, tx.isUnlocked());
+      if (tx.getUnlockTime() == 0) assertEquals(tx.isConfirmed(), !tx.isLocked());
+      else assertEquals(true, tx.isLocked());
       if (tx.getVoutsWallet() != null) {
         for (MoneroOutputWallet vout : tx.getVoutsWallet()) {
-          assertEquals(tx.isUnlocked(), vout.isUnlocked());
+          assertEquals(tx.isLocked(), vout.isLocked());
         }
       }
       
@@ -4189,7 +4189,7 @@ public abstract class TestMoneroWalletCommon {
     assertNotNull(tx.isFailed());
     assertNotNull(tx.isRelayed());
     assertNotNull(tx.inTxPool());
-    assertNotNull(tx.isUnlocked());
+    assertNotNull(tx.isLocked());
     TestUtils.testUnsignedBigInteger(tx.getFee());
     assertNull(tx.getVins());
     if (tx.getPaymentId() != null) assertNotEquals(MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId()); // default payment id converted to null
@@ -4305,7 +4305,7 @@ public abstract class TestMoneroWalletCommon {
     assertTrue(output.getSubaddressIndex() >= 0);
     assertTrue(output.getIndex() >= 0);
     assertNotNull(output.isSpent());
-    assertNotNull(output.isUnlocked());
+    assertNotNull(output.isLocked());
     assertNotNull(output.isFrozen());
     assertNotNull(output.getKeyImage());
     assertTrue(output.getKeyImage().getHex().length() > 0);
@@ -4316,7 +4316,7 @@ public abstract class TestMoneroWalletCommon {
     assertNotNull(tx);
     assertTrue(tx.getVouts().contains(output));
     assertNotNull(tx.getId());
-    assertNotNull(tx.isUnlocked());
+    assertNotNull(tx.isLocked());
     assertEquals(true, tx.isConfirmed());  // TODO monero-wallet-rpc: possible to get unconfirmed vouts?
     assertEquals(true, tx.isRelayed());
     assertEquals(false, tx.isFailed());

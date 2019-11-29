@@ -70,7 +70,7 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
     if (this.getSubaddressIndex() != null && !this.getSubaddressIndex().equals(output.getSubaddressIndex())) return false;
     if (this.getAmount() != null && this.getAmount().compareTo(output.getAmount()) != 0) return false;
     if (this.isSpent() != null && !this.isSpent().equals(output.isSpent())) return false;
-    if (this.isUnlocked() != null && !this.isUnlocked().equals(output.isUnlocked())) return false;
+    if (this.isLocked() != null && !this.isLocked().equals(output.isLocked())) return false;
     
     // filter on output key image
     if (this.getKeyImage() != null) {
@@ -126,8 +126,8 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
   }
   
   @Override
-  public MoneroOutputQuery setIsUnlocked(Boolean isUnlocked) {
-    super.setIsUnlocked(isUnlocked);
+  public MoneroOutputQuery setIsLocked(Boolean isLocked) {
+    super.setIsLocked(isLocked);
     return this;
   }
 

@@ -188,7 +188,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     if (this.isRelayed() != null && this.isRelayed() != tx.isRelayed()) return false;
     if (this.isFailed() != null && this.isFailed() != tx.isFailed()) return false;
     if (this.isMinerTx() != null && this.isMinerTx() != tx.isMinerTx()) return false;
-    if (this.isUnlocked() != null && this.isUnlocked() != tx.isUnlocked()) return false;
+    if (this.isLocked() != null && this.isLocked() != tx.isLocked()) return false;
     
     // at least one transfer must meet transfer query if defined
     if (this.getTransferQuery() != null) {
@@ -280,8 +280,8 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
   
   @Override
-  public MoneroTxQuery setIsUnlocked(Boolean isUnlocked) {
-    super.setIsUnlocked(isUnlocked);
+  public MoneroTxQuery setIsLocked(Boolean isLocked) {
+    super.setIsLocked(isLocked);
     return this;
   }
 
