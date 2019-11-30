@@ -1085,7 +1085,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     String entriesJson = getAddressBookEntriesJni(GenUtils.listToIntArray(entryIndices));
     List<MoneroAddressBookEntry> entries = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, entriesJson, AddressBookEntriesContainer.class).entries;
     if (entries == null) entries = new ArrayList<MoneroAddressBookEntry>();
-    //for (MoneroAccount entry : entries) sanitizeAddressBookEntry(entry);
     return entries;
   }
 

@@ -790,7 +790,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // filter and return transfers
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
-    for (MoneroTxWallet tx : txs) {    // tx is not incoming/outgoing unless already set
+    for (MoneroTxWallet tx : txs) {
 
       // tx is not incoming/outgoing unless already set
       if (tx.isIncoming() == null) tx.setIsIncoming(false);
@@ -1962,14 +1962,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // initialize tx state from rpc type
     if (rpcTx.containsKey("type")) isOutgoing = decodeRpcType((String) rpcTx.get("type"), tx);
-    else {
-      GenUtils.assertNotNull("Must indicate if tx is outgoing (true) xor incoming (false) since unknown", isOutgoing);
-//      GenUtils.assertNotNull(tx.isConfirmed());
-//      GenUtils.assertNotNull(tx.inTxPool());
-//      GenUtils.assertNotNull(tx.isMinerTx());
-//      GenUtils.assertNotNull(tx.isFailed());
-//      GenUtils.assertNotNull(tx.getDoNotRelay());
-    }
+    else GenUtils.assertNotNull("Must indicate if tx is outgoing (true) xor incoming (false) since unknown", isOutgoing);
     
     // TODO: safe set
     // initialize remaining fields  TODO: seems this should be part of common function with DaemonRpc._convertRpcTx

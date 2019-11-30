@@ -1,19 +1,22 @@
 v15.0.1
-rename MoneroOutput to MoneroRingMember, rename MoneroTx vins and vouts to inputs and outputs?
-cpp use rapidjson for model deserialization
-all deserialization methods should log warning for unrecognized field keys (monero_utils.cpp)
+monero_tx::from_property_tree payment id threw runtime_error, how is "Can get transactions by payment ids" test passing in Java?
 new todos
-update spec: extra?
-
+rename MoneroOutput to MoneroRingMember, rename MoneroTx vins and vouts to inputs and outputs?
+pull from latest js
+push to js, java-lite
 merge latest js, java-lite, cpp
 cpp library points to unmodified monero-project
 monero-javascript uses monero-cpp-library
 
+MoneroRpcConnection LOGGER.fine() executing? would be major performance hit
 standardize expected test failures vs exceptions
 exclude heavy tests by config, e.g. testMultisig
 config object for wallet creation
+cpp use rapidjson for model deserialization
+all deserialization methods should log warning for unrecognized field keys (monero_utils.cpp)
 daemon.getNextBlockHeader() sometimes hangs, daemon hangs
 rename block and tx id terminology to hashes
+update spec
 convert MoneroTx extra to string
 core pr to remove unused ptx variable
 compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
@@ -23,8 +26,8 @@ support pay for service in wallet, get/set_rpc_client_secret_key
 test sweeps
 
 HIGH
+update wasm cpp
 new rpc api will need containers for every call
-MoneroRpcConnection LOGGER.fine() executing? would be major performance hit
 remove dependency on libwallet_merged, randomx if possible
 support wallet.isWatchOnly()
 support createWallet(MoneroWalletConfig) with all possible fields?
