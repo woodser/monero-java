@@ -1,12 +1,10 @@
 v15.0.1
 monero_tx::from_property_tree payment id threw runtime_error, how is "Can get transactions by payment ids" test passing in Java?
-new todos
 rename MoneroOutput to MoneroRingMember, rename MoneroTx vins and vouts to inputs and outputs?
 pull from latest js
 push to js, java-lite
-merge latest js, java-lite, cpp
-cpp library points to unmodified monero-project
-monero-javascript uses monero-cpp-library
+cpp library uses unmodified monero-project submodule
+monero-javascript uses only monero-cpp-library submodule
 
 MoneroRpcConnection LOGGER.fine() executing? would be major performance hit
 standardize expected test failures vs exceptions
