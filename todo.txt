@@ -1,6 +1,6 @@
 v15.0.1
 rename MoneroOutput to MoneroRingMember, rename MoneroTx vins and vouts to inputs and outputs?
-cpp library deserialization part of models and using rapidjson
+cpp use rapidjson for model deserialization
 all deserialization methods should log warning for unrecognized field keys (monero_utils.cpp)
 new todos
 update spec: extra?
