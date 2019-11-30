@@ -1,6 +1,4 @@
 v15.0.1
-move serialization methods above class methods, static void from_property_tree(const boost::property_tree::ptree& node, const shared_ptr<monero_output_query>& output_query);
-rename to_json_val to to_rapidjson_val
 rename MoneroOutput to MoneroRingMember, rename MoneroTx vins and vouts to inputs and outputs?
 cpp library deserialization part of models and using rapidjson
 all deserialization methods should log warning for unrecognized field keys (monero_utils.cpp)

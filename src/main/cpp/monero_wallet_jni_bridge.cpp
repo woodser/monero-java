@@ -817,7 +817,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIE
   // wrap and serialize accounts
   rapidjson::Document doc;
   doc.SetObject();
-  doc.AddMember("accounts", monero_utils::to_json_val(doc.GetAllocator(), accounts), doc.GetAllocator());
+  doc.AddMember("accounts", monero_utils::to_rapidjson_val(doc.GetAllocator(), accounts), doc.GetAllocator());
   string accounts_json = monero_utils::serialize(doc);
   return env->NewStringUTF(accounts_json.c_str());
 }
@@ -869,7 +869,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(
   // wrap and serialize subaddresses
   rapidjson::Document doc;
   doc.SetObject();
-  doc.AddMember("subaddresses", monero_utils::to_json_val(doc.GetAllocator(), subaddresses), doc.GetAllocator());
+  doc.AddMember("subaddresses", monero_utils::to_rapidjson_val(doc.GetAllocator(), subaddresses), doc.GetAllocator());
   string subaddresses_json = monero_utils::serialize(doc);
   return env->NewStringUTF(subaddresses_json.c_str());
 }
@@ -926,7 +926,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
     // wrap and serialize blocks
     rapidjson::Document doc;
     doc.SetObject();
-    doc.AddMember("blocks", monero_utils::to_json_val(doc.GetAllocator(), blocks), doc.GetAllocator());
+    doc.AddMember("blocks", monero_utils::to_rapidjson_val(doc.GetAllocator(), blocks), doc.GetAllocator());
     string blocks_json = monero_utils::serialize(doc);
     return env->NewStringUTF(blocks_json.c_str());
   } catch (...) {
@@ -972,7 +972,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
     // wrap and serialize blocks
     rapidjson::Document doc;
     doc.SetObject();
-    doc.AddMember("blocks", monero_utils::to_json_val(doc.GetAllocator(), blocks), doc.GetAllocator());
+    doc.AddMember("blocks", monero_utils::to_rapidjson_val(doc.GetAllocator(), blocks), doc.GetAllocator());
     string blocks_json = monero_utils::serialize(doc);
     return env->NewStringUTF(blocks_json.c_str());
   } catch (...) {
@@ -1014,7 +1014,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
     // wrap and serialize blocks
     rapidjson::Document doc;
     doc.SetObject();
-    doc.AddMember("blocks", monero_utils::to_json_val(doc.GetAllocator(), blocks), doc.GetAllocator());
+    doc.AddMember("blocks", monero_utils::to_rapidjson_val(doc.GetAllocator(), blocks), doc.GetAllocator());
     string blocks_json = monero_utils::serialize(doc);
     return env->NewStringUTF(blocks_json.c_str());
   } catch (...) {
@@ -1059,7 +1059,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getKeyImagesJni(JNI
   // wrap and serialize key images
   rapidjson::Document doc;
   doc.SetObject();
-  doc.AddMember("keyImages", monero_utils::to_json_val(doc.GetAllocator(), key_images), doc.GetAllocator());
+  doc.AddMember("keyImages", monero_utils::to_rapidjson_val(doc.GetAllocator(), key_images), doc.GetAllocator());
   string key_images_json = monero_utils::serialize(doc);
   return env->NewStringUTF(key_images_json.c_str());
 }
@@ -1135,7 +1135,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepUnlockedJni(JN
   // wrap and serialize tx sets
   rapidjson::Document doc;
   doc.SetObject();
-  doc.AddMember("txSets", monero_utils::to_json_val(doc.GetAllocator(), tx_sets), doc.GetAllocator());
+  doc.AddMember("txSets", monero_utils::to_rapidjson_val(doc.GetAllocator(), tx_sets), doc.GetAllocator());
   string tx_sets_json = monero_utils::serialize(doc);
   return env->NewStringUTF(tx_sets_json.c_str());
 }
@@ -1537,7 +1537,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressBookEntri
     // wrap and serialize entries
     rapidjson::Document doc;
     doc.SetObject();
-    doc.AddMember("entries", monero_utils::to_json_val(doc.GetAllocator(), entries), doc.GetAllocator());
+    doc.AddMember("entries", monero_utils::to_rapidjson_val(doc.GetAllocator(), entries), doc.GetAllocator());
     string entries_json = monero_utils::serialize(doc);
     return env->NewStringUTF(entries_json.c_str());
   } catch (...) {
