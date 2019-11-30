@@ -898,7 +898,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   try {
 
     // deserialize tx query
-    shared_ptr<monero_tx_query> tx_query = monero_utils::deserialize_tx_query(tx_query_json);
+    shared_ptr<monero_tx_query> tx_query = monero_tx_query::deserialize(tx_query_json);
     MTRACE("Fetching txs with query: " << tx_query->serialize());
 
     // get txs
@@ -944,7 +944,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
   try {
 
     // deserialize transfer query
-    shared_ptr<monero_transfer_query> transfer_query = monero_utils::deserialize_transfer_query(transfer_query_json);
+    shared_ptr<monero_transfer_query> transfer_query = monero_transfer_query::deserialize(transfer_query_json);
     MTRACE("Fetching transfers with query: " << transfer_query->serialize());
 
     // get transfers
@@ -990,7 +990,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
   try {
 
     // deserialize output request
-    shared_ptr<monero_output_query> output_query = monero_utils::deserialize_output_query(output_query_json);
+    shared_ptr<monero_output_query> output_query = monero_output_query::deserialize(output_query_json);
     MTRACE("Fetching outputs with request: " << output_query->serialize());
 
     // get outputs
@@ -1072,7 +1072,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_importKeyImagesJni(
   env->ReleaseStringUTFChars(jkey_images_json, _key_images_json);
 
   // deserialize key images to import
-  vector<shared_ptr<monero_key_image>> key_images = monero_utils::deserialize_key_images(key_images_json);
+  vector<shared_ptr<monero_key_image>> key_images = monero_key_image::deserialize_key_images(key_images_json);
   MTRACE("Deserialized " << key_images.size() << " key images from java json");
 
   // import key images
@@ -1094,7 +1094,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv
   env->ReleaseStringUTFChars(jsend_request, _send_request);
 
   // deserialize send request
-  shared_ptr<monero_send_request> send_request = monero_utils::deserialize_send_request(send_request_json);
+  shared_ptr<monero_send_request> send_request = monero_send_request::deserialize(send_request_json);
   MTRACE("Deserialized send request, re-serialized: " << send_request->serialize());
 
   // submit send request
@@ -1119,7 +1119,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepUnlockedJni(JN
   env->ReleaseStringUTFChars(jsend_request, _send_request);
 
   // deserialize send request
-  shared_ptr<monero_send_request> send_request = monero_utils::deserialize_send_request(send_request_json);
+  shared_ptr<monero_send_request> send_request = monero_send_request::deserialize(send_request_json);
   MTRACE("Deserialized send request, re-serialized: " << send_request->serialize());
 
   // submit send request
@@ -1150,7 +1150,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepOutputJni(JNIE
   MTRACE("Send request json: " << send_request_json);
 
   // deserialize send request
-  shared_ptr<monero_send_request> send_request = monero_utils::deserialize_send_request(send_request_json);
+  shared_ptr<monero_send_request> send_request = monero_send_request::deserialize(send_request_json);
   MTRACE("Deserialized send request, re-serialized: " << send_request->serialize());
 
   // submit send request
@@ -1195,7 +1195,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_parseTxSetJni(JNIEn
   try {
 
     // deserialize tx set to parse
-    monero_tx_set tx_set = monero_utils::deserialize_tx_set(tx_set_json);
+    monero_tx_set tx_set = monero_tx_set::deserialize(tx_set_json);
 
     // parse tx set
     monero_tx_set parsed_tx_set = wallet->parse_tx_set(tx_set);
@@ -1614,7 +1614,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createPaymentUriJni
   env->ReleaseStringUTFChars(jsend_request, _send_request);
 
   // deserialize send request
-  shared_ptr<monero_send_request> send_request = monero_utils::deserialize_send_request(send_request_json);
+  shared_ptr<monero_send_request> send_request = monero_send_request::deserialize(send_request_json);
   MTRACE("Fetching payment uri with : " << send_request->serialize());
 
   // get payment uri
