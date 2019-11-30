@@ -7,8 +7,10 @@ pull from latest js
 push to js, java-lite
 cpp library uses unmodified monero-project submodule
 monero-javascript uses only monero-cpp-library submodule
+compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
+test sweeps
 
-MoneroRpcConnection LOGGER.fine() executing? would be major performance hit
+MoneroRpcConnection LOGGER.fine() executing? could be major performance hit
 standardize expected test failures vs exceptions
 exclude heavy tests by config, e.g. testMultisig
 config object for wallet creation
@@ -19,11 +21,8 @@ rename block and tx id terminology to hashes
 update spec
 convert MoneroTx extra to string
 core pr to remove unused ptx variable
-compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
 sweepAccounts() is leaving behind dust
-monero-cpp-library's monero-core submodule could point to upstream
 support pay for service in wallet, get/set_rpc_client_secret_key
-test sweeps
 
 HIGH
 update wasm cpp
