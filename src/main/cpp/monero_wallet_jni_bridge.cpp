@@ -898,7 +898,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
   try {
 
     // deserialize tx query
-    shared_ptr<monero_tx_query> tx_query = monero_tx_query::deserialize(tx_query_json);
+    shared_ptr<monero_tx_query> tx_query = monero_tx_query::deserialize_from_block(tx_query_json);
     MTRACE("Fetching txs with query: " << tx_query->serialize());
 
     // get txs
@@ -944,7 +944,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
   try {
 
     // deserialize transfer query
-    shared_ptr<monero_transfer_query> transfer_query = monero_transfer_query::deserialize(transfer_query_json);
+    shared_ptr<monero_transfer_query> transfer_query = monero_transfer_query::deserialize_from_block(transfer_query_json);
     MTRACE("Fetching transfers with query: " << transfer_query->serialize());
 
     // get transfers
@@ -990,7 +990,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
   try {
 
     // deserialize output request
-    shared_ptr<monero_output_query> output_query = monero_output_query::deserialize(output_query_json);
+    shared_ptr<monero_output_query> output_query = monero_output_query::deserialize_from_block(output_query_json);
     MTRACE("Fetching outputs with request: " << output_query->serialize());
 
     // get outputs
