@@ -1,26 +1,29 @@
 v15.0.1
+update js
+cpp library uses unmodified monero-project submodule
+monero-javascript uses only monero-cpp-library submodule
+update spec
+update java-lite
+test sweeps
+RELEASE
+
+CLEANUP
 wallet rpc tests: WARNING: unrecognized field deserializing node to output: default
 monero_tx::from_property_tree payment id threw runtime_error, how is "Can get transactions by payment ids" test passing in Java?
 rename MoneroOutput to MoneroRingMember, rename MoneroTx vins and vouts to inputs and outputs?
-push to js, java-lite
-cpp library uses unmodified monero-project submodule
-monero-javascript uses only monero-cpp-library submodule
 compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
-test sweeps
-
 MoneroRpcConnection LOGGER.fine() executing? could be major performance hit
 standardize expected test failures vs exceptions
+sweepAccounts() is leaving behind dust
 exclude heavy tests by config, e.g. testMultisig
 config object for wallet creation
 cpp use rapidjson for model deserialization
-all deserialization methods should log warning for unrecognized field keys (monero_utils.cpp)
 daemon.getNextBlockHeader() sometimes hangs, daemon hangs
 rename block and tx id terminology to hashes
-update spec
 convert MoneroTx extra to string
 core pr to remove unused ptx variable
-sweepAccounts() is leaving behind dust
 support pay for service in wallet, get/set_rpc_client_secret_key
+all deserialization methods should log warning for unrecognized field keys (monero_utils.cpp)
 
 HIGH
 update wasm cpp
