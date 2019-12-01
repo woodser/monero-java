@@ -985,7 +985,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @SuppressWarnings("unchecked")
   public MoneroTxSet sendSplit(MoneroSendRequest request) {
     
-    // validate, copy, and sanitize request
+    // validate, copy, and normalize request
     if (request == null) throw new MoneroException("Send request cannot be null");
     GenUtils.assertNotNull(request.getDestinations());
     GenUtils.assertNull(request.getSweepEachSubaddress());
