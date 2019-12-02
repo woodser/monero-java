@@ -448,8 +448,7 @@ public class TestMoneroDaemonRpc {
       MoneroTx tx = getUnrelayedTx(wallet, i);
       System.out.println("done");
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-      assertFalse(result.isDoubleSpend());
-      assertTrue(result.isGood());
+      testSubmitTxResultGood(result);
       txIds.add(tx.getId());
     }
     
