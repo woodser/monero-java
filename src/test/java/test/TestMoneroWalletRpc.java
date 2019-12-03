@@ -144,56 +144,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     }
   }
   
-  // Can create a wallet from keys.
-  @Test
-  public void testCreateWalletFromKeys() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    try {
-
-      // recreate test wallet from keys
-      String path = UUID.randomUUID().toString();
-      wallet.createWalletFromKeys(path, TestUtils.WALLET_PASSWORD, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null, null);
-      try {
-        //assertEquals(wallet.getMnemonic(), wallet.getMnemonic()); // TODO cannot get mnemonic from wallet created from keys?
-        assertEquals(wallet.getPrimaryAddress(), wallet.getPrimaryAddress());
-        assertEquals(wallet.getPrivateViewKey(), wallet.getPrivateViewKey());
-        assertEquals(wallet.getPrivateSpendKey(), wallet.getPrivateSpendKey());
-      } finally {
-        wallet.close();
-      }
-
-    } finally {
-      
-      // open main test wallet for other tests
-      wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
-    }
-  }
-  
-  // Can create a watch-only wallet.
-  @Test
-  public void testCreateWatchOnlyWallet() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    try {
-
-      // create watch-only wallet by witholding spend key
-      String path = UUID.randomUUID().toString();
-      wallet.createWalletFromKeys(path, TestUtils.WALLET_PASSWORD, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null, null);
-      try {
-        //assertEquals(wallet.getMnemonic(), wallet.getMnemonic()); // TODO cannot get mnemonic from wallet created from keys?
-        assertEquals(wallet.getPrimaryAddress(), wallet.getPrimaryAddress());
-        assertEquals(wallet.getPrivateViewKey(), wallet.getPrivateViewKey());
-        assertEquals(null, wallet.getPrivateSpendKey());
-      } finally {
-        wallet.close();
-      }
-
-    } finally {
-      
-      // open main test wallet for other tests
-      wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
-    }
-  }
-  
   // Can open wallets
   @Test
   public void testOpenWallet() {
@@ -432,6 +382,16 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
+  
+  @Test
+  public void testCreateWalletFromKeys() {
+    super.testCreateWalletFromKeys();
+  }
+  
+  @Test
+  public void testCreateWatchOnlyWallet() {
+    super.testCreateWatchOnlyWallet();
+  }
   
   @Test
   public void testGetVersion() {

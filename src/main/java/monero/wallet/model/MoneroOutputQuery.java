@@ -66,7 +66,8 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
    * 
    * @return true if locked outputs queried, false of unlocked outputs queried, null if both
    */
-  public Boolean getIsLocked() {
+  @Override
+  public Boolean isLocked() {
     if (txQuery == null) return null;
     return txQuery.isLocked();
   }

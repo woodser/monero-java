@@ -352,7 +352,7 @@ public class MoneroTxWallet extends MoneroTx {
       sb.append(this.getOutgoingTransfer().toString(indent + 1) + "\n");
     }
     sb.append(GenUtils.kvLine("Note: ", this.getNote(), indent));
-    sb.append(GenUtils.kvLine("Is unlocked: ", this.getNote(), indent));
+    sb.append(GenUtils.kvLine("Is locked: ", this.isLocked(), indent));
     sb.append(GenUtils.kvLine("Input sum: ", this.getInputSum(), indent));
     sb.append(GenUtils.kvLine("Output sum: ", this.getOutputSum(), indent));
     sb.append(GenUtils.kvLine("Change address: ", this.getChangeAddress(), indent));

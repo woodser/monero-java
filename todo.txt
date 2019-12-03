@@ -1,5 +1,8 @@
 v15.0.1
 update js
+rename version.versionNumber to version.number
+testSyncWithPoolSubmit not ported to js
+MoneroSubmitTxResult() topBlockHash or topBlockId
 cpp library uses unmodified monero-project submodule
 monero-javascript uses only monero-cpp-library submodule
 update spec

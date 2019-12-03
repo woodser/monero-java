@@ -355,7 +355,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testCreateWalletFromKeys() {
+  public void testCreateWalletFromKeysJni() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // recreate test wallet from keys
@@ -1483,6 +1483,16 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
+  
+  @Test
+  public void testCreateWalletFromKeys() {
+    super.testCreateWalletFromKeys();
+  }
+  
+  @Test
+  public void testCreateWatchOnlyWallet() {
+    super.testCreateWatchOnlyWallet();
+  }
   
   @Test
   public void testGetVersion() {

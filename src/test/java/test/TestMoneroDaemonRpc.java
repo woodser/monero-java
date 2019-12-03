@@ -566,7 +566,7 @@ public class TestMoneroDaemonRpc {
     // submit tx to pool but don't relay
     MoneroTx tx = getUnrelayedTx(wallet, 1);
     MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-    assertTrue(result.isGood());
+    testSubmitTxResultGood(result);
     assertFalse(result.isRelayed());
     
     // fetch txs in pool

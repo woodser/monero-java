@@ -133,6 +133,83 @@ public abstract class TestMoneroWalletCommon {
   
   // ------------------------------ BEGIN TESTS -------------------------------
   
+  // Can create a wallet from keys.
+  @Test
+  public void testCreateWalletFromKeys() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    Exception e1 = null;  // emulating Java "finally" but compatible with other languages
+    try {
+      
+      //String mnemonic = wallet.getMnemonic(); // TODO monero-wallet-rpc: cannot get mnemonic from wallet created from keys?
+      String primaryAddress = wallet.getPrimaryAddress();
+      String privateViewKey = wallet.getPrivateViewKey();
+      String privateSpendKey = wallet.getPrivateSpendKey();
+      
+      // recreate test wallet from keys
+      wallet = createWalletFromKeys(TestUtils.WALLET_PASSWORD, primaryAddress, privateViewKey, privateSpendKey, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      Exception e2 = null;
+      try {
+        //assertEquals(mnemonic, wallet.getMnemonic());
+        assertEquals(primaryAddress, wallet.getPrimaryAddress());
+        assertEquals(privateViewKey, wallet.getPrivateViewKey());
+        assertEquals(privateSpendKey, wallet.getPrivateSpendKey());
+      } catch (Exception e) {
+        e2 = e;
+      }
+      wallet.close();
+      if (e2 != null) throw e2;
+    } catch (Exception e) {
+      e1 = e;
+    }
+    
+    // open main test wallet for other tests
+    wallet = getTestWallet();
+    if (e1 != null) throw new RuntimeException(e1);
+  }
+  
+  // Can create a watch-only wallet.
+  @Test
+  public void testCreateWatchOnlyWallet() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    Exception e1 = null;
+    try {
+      
+      //String mnemonic = wallet.getMnemonic(); // TODO monero-wallet-rpc: cannot get mnemonic from wallet created from keys?
+      String primaryAddress = wallet.getPrimaryAddress();
+      String privateViewKey = wallet.getPrivateViewKey();
+
+      // create watch-only wallet by witholding spend key
+      wallet = createWalletFromKeys(TestUtils.WALLET_PASSWORD, primaryAddress, privateViewKey, null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      Exception e2 = null;
+      try {
+        //assertEquals(mnemonic, wallet.getMnemonic());
+        assertEquals(primaryAddress, wallet.getPrimaryAddress());
+        assertEquals(privateViewKey, wallet.getPrivateViewKey());
+        assertEquals(null, wallet.getPrivateSpendKey());
+      } catch (Exception e) {
+        e2 = e;
+      }
+      this.wallet.close();
+      if (e2 != null) throw e2;
+    } catch (Exception e) {
+      e1 = e;
+    }
+    
+    // open main test wallet for other tests
+    this.wallet = getTestWallet();
+    if (e1 != null) throw new RuntimeException(e1);
+  }
+  
+  // Can get the wallet's version
+  @Test
+  public void testGetVersion() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    MoneroVersion version = wallet.getVersion();
+    assertNotNull(version.getVersionNumber());
+    assertTrue(version.getVersionNumber() > 0);
+    assertNotNull(version.getIsRelease());
+  }
+  
   // Can get the wallet's path
   @Test
   public void testGetPath() {
@@ -158,16 +235,6 @@ public abstract class TestMoneroWalletCommon {
     // re-open main test wallet
     wallet.close();
     this.wallet = getTestWallet();
-  }
-  
-  // Can get the wallet's version
-  @Test
-  public void testGetVersion() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    MoneroVersion version = wallet.getVersion();
-    assertNotNull(version.getVersionNumber());
-    assertTrue(version.getVersionNumber() > 0);
-    assertNotNull(version.getIsRelease());
   }
 
   // Can get the mnemonic phrase derived from the seed
@@ -1973,7 +2040,7 @@ public abstract class TestMoneroWalletCommon {
     }
     entries = wallet.getAddressBookEntries(indices);
     for (MoneroAddressBookEntry entry : entries) {
-      assertEquals(entry.getDescription(), "hello there!!");
+      assertEquals("hello there!!", entry.getDescription());
     }
     
     // delete entries at starting index
@@ -3122,7 +3189,7 @@ public abstract class TestMoneroWalletCommon {
       assertFalse(outputs.isEmpty());
       if (outputs.size() < 3) System.out.println("WARNING: not one output per subaddress?");
       //assertTrue(outputs.size() >= 3);  // TODO
-      for (MoneroOutputWallet output : outputs) assertTrue(output.isLocked());
+      for (MoneroOutputWallet output : outputs) assertFalse(output.isLocked());
       
       // wallet requires importing multisig to be reliable
       assertTrue(curWallet.isMultisigImportNeeded());
@@ -4435,7 +4502,7 @@ public abstract class TestMoneroWalletCommon {
   
   private static void testAddressBookEntry(MoneroAddressBookEntry entry) {
     assertTrue(entry.getIndex() >= 0);
-    assertNotNull(entry.getAddress());
+    MoneroUtils.validateAddress(entry.getAddress(), TestUtils.NETWORK_TYPE);
     assertNotNull(entry.getDescription());
   }
   

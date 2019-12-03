@@ -477,7 +477,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public String getPrivateSpendKey() {
     assertNotClosed();
-    return getPrivateSpendKeyJni();
+    String privateSpendKey = getPrivateSpendKeyJni();
+    if ("".equals(privateSpendKey)) return null;
+    return privateSpendKey;
   }
 
   @Override

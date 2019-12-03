@@ -120,6 +120,7 @@ public class MoneroOutputWallet extends MoneroOutput {
     this.setAccountIndex(GenUtils.reconcile(this.getAccountIndex(), output.getAccountIndex()));
     this.setSubaddressIndex(GenUtils.reconcile(this.getSubaddressIndex(), output.getSubaddressIndex()));
     this.setIsSpent(GenUtils.reconcile(this.isSpent(), output.isSpent(), null, true, null)); // output can become spent
+    this.setIsFrozen(GenUtils.reconcile(this.isFrozen(), output.isFrozen()));
     return this;
   }
   
