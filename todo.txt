@@ -1,37 +1,34 @@
 v15.0.1
-MoneroSubmitTxResult() topBlockHash or topBlockId
 cpp library uses unmodified monero-project submodule
 monero-javascript uses only monero-cpp-library submodule
-update spec
-update java-lite
 test sweeps
-RELEASE
-
-CLEANUP
+block and tx id or hash, including MoneroSubmitTxResult
 testSyncWithPoolSubmit not ported to js
 wallet rpc tests: WARNING: unrecognized field deserializing node to output: default
 monero_tx::from_property_tree payment id threw runtime_error, how is "Can get transactions by payment ids" test passing in Java?
 rename MoneroOutput to MoneroRingMember, rename MoneroTx vins and vouts to inputs and outputs?
 compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
 MoneroRpcConnection LOGGER.fine() executing? could be major performance hit
-standardize expected test failures vs exceptions
 sweepAccounts() is leaving behind dust
-exclude heavy tests by config, e.g. testMultisig
-config object for wallet creation
-cpp use rapidjson for model deserialization
-daemon.getNextBlockHeader() sometimes hangs, daemon hangs
-rename block and tx id terminology to hashes
-convert MoneroTx extra to string
-core pr to remove unused ptx variable
-support pay for service in wallet, get/set_rpc_client_secret_key
-all deserialization methods should log warning for unrecognized field keys (monero_utils.cpp)
+support createWallet(MoneroWalletConfig) with all possible fields?
+
+update java-lite
+update spec
+update docs
+release
 
 HIGH
+all deserialization methods should log warning for unrecognized field keys (monero_utils.cpp)
+support pay for service in wallet, get/set_rpc_client_secret_key
+convert MoneroTx extra to string
+standardize expected test failures vs exceptions
+exclude heavy tests by config, e.g. testMultisig
+cpp use rapidjson for model deserialization
+daemon.getNextBlockHeader() sometimes hangs, daemon hangs
 update wasm cpp
 new rpc api will need containers for every call
 remove dependency on libwallet_merged, randomx if possible
 support wallet.isWatchOnly()
-support createWallet(MoneroWalletConfig) with all possible fields?
 add ability for jni and c++ wallets to disallow rpc version misamtch by configuration 
 automate sweep tests by funding wallets, waiting, then testing, rather than manually running funded wallets
 replace MoneroIntegratedAddress and MoneroDecodedAddress with MoneroAddress with address, address type, network type, primaryAddress, paymentId?
