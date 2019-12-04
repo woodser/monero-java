@@ -124,8 +124,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * 
    * @param name is the name of the wallet file to open
    * @param password is the wallet's password
+   * @return a reference to this rpc instance for convenience
    */
-  public void openWallet(String name, String password) {
+  public MoneroWalletRpc openWallet(String name, String password) {
     if (name == null || name.isEmpty()) throw new MoneroException("Filename is not initialized");
     if (password == null || password.isEmpty()) throw new MoneroException("Password is not initialized");
     Map<String, Object> params = new HashMap<String, Object>();
@@ -134,6 +135,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     rpc.sendJsonRequest("open_wallet", params);
     addressCache.clear();
     path = name;
+    return this;
   }
   
   /**
@@ -142,9 +144,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @param name is the name of the wallet file to create
    * @param password is the wallet's password
    * @param language is the language for the wallet's mnemonic seed
+   * @return a reference to this rpc instance for convenience
    */
-  public void createWalletRandom(String name, String password) { createWalletRandom(name, password, null); }
-  public void createWalletRandom(String name, String password, String language) {
+  public MoneroWalletRpc createWalletRandom(String name, String password) { return createWalletRandom(name, password, null); }
+  public MoneroWalletRpc createWalletRandom(String name, String password, String language) {
     if (name == null || name.isEmpty()) throw new MoneroException("Wallet name is not initialized");
     if (password == null || password.isEmpty()) throw new MoneroException("Password is not initialized");
     if (language == null || language.isEmpty()) language = DEFAULT_LANGUAGE;
@@ -154,6 +157,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("language", language);
     rpc.sendJsonRequest("create_wallet", params);
     path = name;
+    return this;
   }
   
   /**
@@ -167,10 +171,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @param language is the language of the mnemonic in case the old language is invalid
    * @param offset is the offset for restoring from mnemonic
    * @param saveCurrent specifies if the current RPC wallet should be saved before being closed
+   * @return a reference to this rpc instance for convenience
    */
-  public void createWalletFromMnemonic(String name, String password, String mnemonic) { createWalletFromMnemonic(name, password, mnemonic, null, null, null, null); }
-  public void createWalletFromMnemonic(String name, String password, String mnemonic, Long restoreHeight) { createWalletFromMnemonic(name, password, mnemonic, restoreHeight, null, null, null); }
-  public void createWalletFromMnemonic(String name, String password, String mnemonic, Long restoreHeight, String language, String offset, Boolean saveCurrent) {
+  public MoneroWalletRpc createWalletFromMnemonic(String name, String password, String mnemonic) { return createWalletFromMnemonic(name, password, mnemonic, null, null, null, null); }
+  public MoneroWalletRpc createWalletFromMnemonic(String name, String password, String mnemonic, Long restoreHeight) { return createWalletFromMnemonic(name, password, mnemonic, restoreHeight, null, null, null); }
+  public MoneroWalletRpc createWalletFromMnemonic(String name, String password, String mnemonic, Long restoreHeight, String language, String offset, Boolean saveCurrent) {
     if (language == null) language = DEFAULT_LANGUAGE;
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("filename", name);
@@ -182,6 +187,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("autosave_current", saveCurrent);
     rpc.sendJsonRequest("restore_deterministic_wallet", params);
     path = name;
+    return this;
   }
   
   /**
@@ -196,10 +202,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    * @param language is the wallet and mnemonic's language (default = "English")
+   * @return this rpc instance for convenience
    */
-  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey) { createWalletFromKeys(name, password, address, viewKey, spendKey, null, null, null, null); }
-  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight) { createWalletFromKeys(name, password, address, viewKey, spendKey, daemonConnection, restoreHeight, null, null); }
-  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language, Boolean saveCurrent) {
+  public MoneroWalletRpc createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey) { return createWalletFromKeys(name, password, address, viewKey, spendKey, null, null, null, null); }
+  public MoneroWalletRpc createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight) { return createWalletFromKeys(name, password, address, viewKey, spendKey, daemonConnection, restoreHeight, null, null); }
+  public MoneroWalletRpc createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language, Boolean saveCurrent) {
     if (restoreHeight == null) restoreHeight = 0l;
     if (language == null) language = DEFAULT_LANGUAGE;
     Map<String, Object> params = new HashMap<String, Object>();
@@ -212,6 +219,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("autosave_current", saveCurrent);
     rpc.sendJsonRequest("generate_from_keys", params);  // TODO: info indicates if wallet is watch-only, programatically expose?
     path = name;
+    return this;
   }
   
   /**

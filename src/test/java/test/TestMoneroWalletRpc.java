@@ -49,20 +49,17 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   protected MoneroWallet openWallet(String path) {
-    wallet.openWallet(path, TestUtils.WALLET_PASSWORD);
-    return wallet;
+    return wallet.openWallet(path, TestUtils.WALLET_PASSWORD);
   }
   
   @Override
   protected MoneroWallet createRandomWallet() {
-    wallet.createWalletRandom(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD);
-    return wallet;
+    return wallet.createWalletRandom(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD);
   }
   
   @Override
   protected MoneroWallet createWalletFromKeys(String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long firstReceiveHeight, String language) {
-    wallet.createWalletFromKeys(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, address, privateViewKey, privateSpendKey, daemonConnection, firstReceiveHeight, language, true);
-    return wallet;
+    return wallet.createWalletFromKeys(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, address, privateViewKey, privateSpendKey, daemonConnection, firstReceiveHeight, language, true);
   }
   
   // ---------------------------- BEGIN TESTS ---------------------------------
