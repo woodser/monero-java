@@ -47,6 +47,7 @@ import monero.daemon.model.MoneroVersion;
 import monero.rpc.MoneroRpcConnection;
 import monero.rpc.MoneroRpcException;
 import monero.utils.MoneroException;
+import monero.utils.MoneroUtils;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -1015,8 +1016,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("account_index", accountIdx);
     params.put("subaddr_indices", subaddressIndices);
     params.put("payment_id", request.getPaymentId());
-    params.put("mixin", request.getRingSize() == null ? null : request.getRingSize() - 1);
-    params.put("ring_size", request.getRingSize());
     params.put("unlock_time", request.getUnlockTime());
     params.put("do_not_relay", request.getDoNotRelay());
     params.put("priority", request.getPriority() == null ? null : request.getPriority().ordinal());
@@ -1061,8 +1060,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("account_index", request.getAccountIndex());
     params.put("subaddr_indices", request.getSubaddressIndices());
     params.put("key_image", request.getKeyImage());
-    params.put("mixin", request.getRingSize() == null ? null : request.getRingSize() - 1);
-    params.put("ring_size", request.getRingSize());
     params.put("unlock_time", request.getUnlockTime());
     params.put("do_not_relay", request.getDoNotRelay());
     params.put("priority", request.getPriority() == null ? null : request.getPriority().ordinal());
@@ -1738,8 +1735,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("subaddr_indices", request.getSubaddressIndices());
     params.put("address", request.getDestinations().get(0).getAddress());
     params.put("priority", request.getPriority() == null ? null : request.getPriority().ordinal());
-    params.put("mixin", request.getRingSize() == null ? null : request.getRingSize() - 1);
-    params.put("ring_size", request.getRingSize());
     params.put("unlock_time", request.getUnlockTime());
     params.put("payment_id", request.getPaymentId());
     params.put("do_not_relay", doNotRelay);
@@ -1765,7 +1760,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       tx.setIsRelayed(!doNotRelay);
       tx.setIsMinerTx(false);
       tx.setIsFailed(false);
-      tx.setRingSize(request.getRingSize());
+      tx.setRingSize(MoneroUtils.RING_SIZE);
       MoneroOutgoingTransfer transfer = tx.getOutgoingTransfer();
       transfer.setAccountIndex(request.getAccountIndex());
       if (request.getSubaddressIndices().size() == 1) transfer.setSubaddressIndices(new ArrayList<Integer>(request.getSubaddressIndices()));
@@ -1836,7 +1831,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setIsMinerTx(false);
     tx.setIsFailed(false);
     tx.setIsLocked(true);
-    tx.setRingSize(request.getRingSize());
+    tx.setRingSize(MoneroUtils.RING_SIZE);
     MoneroOutgoingTransfer transfer = new MoneroOutgoingTransfer().setTx(tx);
     if (request.getSubaddressIndices() != null && request.getSubaddressIndices().size() == 1) transfer.setSubaddressIndices(new ArrayList<Integer>(request.getSubaddressIndices())); // we know src subaddress indices iff request specifies 1
     List<MoneroDestination> destCopies = new ArrayList<MoneroDestination>();

@@ -75,9 +75,6 @@ public class TestUtils {
   // used to track which wallets are in sync with pool so associated txs in the pool do not need to be waited on
   public static TxPoolWalletTracker TX_POOL_WALLET_TRACKER = new TxPoolWalletTracker();
   
-  // test constants
-  public static final int RING_SIZE = 12;
-  
   /**
    * Get a daemon RPC singleton instance shared among tests.
    */

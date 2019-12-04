@@ -17,7 +17,6 @@ public class MoneroSendRequest {
   private List<MoneroDestination> destinations;
   private String paymentId;
   private MoneroSendPriority priority;
-  private Integer ringSize;
   private BigInteger fee;
   private Integer accountIndex;
   private List<Integer> subaddressIndices;
@@ -63,7 +62,6 @@ public class MoneroSendRequest {
     }
     this.paymentId = req.paymentId;
     this.priority = req.priority;
-    this.ringSize = req.ringSize;
     this.fee = req.fee;
     this.accountIndex = req.accountIndex;
     if (req.subaddressIndices != null) this.subaddressIndices = new ArrayList<Integer>(req.subaddressIndices);
@@ -117,15 +115,6 @@ public class MoneroSendRequest {
   
   public MoneroSendRequest setPriority(MoneroSendPriority priority) {
     this.priority = priority;
-    return this;
-  }
-  
-  public Integer getRingSize() {
-    return ringSize;
-  }
-  
-  public MoneroSendRequest setRingSize(Integer ringSize) {
-    this.ringSize = ringSize;
     return this;
   }
   
@@ -254,7 +243,6 @@ public class MoneroSendRequest {
     result = prime * result + ((paymentId == null) ? 0 : paymentId.hashCode());
     result = prime * result + ((priority == null) ? 0 : priority.hashCode());
     result = prime * result + ((recipientName == null) ? 0 : recipientName.hashCode());
-    result = prime * result + ((ringSize == null) ? 0 : ringSize.hashCode());
     result = prime * result + ((subaddressIndices == null) ? 0 : subaddressIndices.hashCode());
     result = prime * result + ((sweepEachSubaddress == null) ? 0 : sweepEachSubaddress.hashCode());
     result = prime * result + ((unlockTime == null) ? 0 : unlockTime.hashCode());
@@ -298,9 +286,6 @@ public class MoneroSendRequest {
     if (recipientName == null) {
       if (other.recipientName != null) return false;
     } else if (!recipientName.equals(other.recipientName)) return false;
-    if (ringSize == null) {
-      if (other.ringSize != null) return false;
-    } else if (!ringSize.equals(other.ringSize)) return false;
     if (subaddressIndices == null) {
       if (other.subaddressIndices != null) return false;
     } else if (!subaddressIndices.equals(other.subaddressIndices)) return false;

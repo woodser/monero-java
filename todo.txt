@@ -1,5 +1,4 @@
 v15.0.1
-remove ring size from request since disallowed?
 rename version.versionNumber to version.number
 MoneroSubmitTxResult() topBlockHash or topBlockId
 cpp library uses unmodified monero-project submodule

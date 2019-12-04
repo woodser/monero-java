@@ -725,11 +725,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testSendWithRingSize() {
-    super.testSendWithRingSize();
-  }
-
-  @Override
   public void testSendSplit() {
     super.testSendSplit();
   }

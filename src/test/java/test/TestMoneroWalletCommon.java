@@ -2383,7 +2383,7 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
-  // Can send to external address
+  // Can send to an external address
   @Test
   public void testSendToExternal() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
@@ -2549,13 +2549,6 @@ public abstract class TestMoneroWalletCommon {
     } catch (MoneroException e) {
       assertEquals("Standalone payment IDs are obsolete. Use subaddresses or integrated addresses instead", e.getMessage());
     }
-  }
-  
-  // Can send to an address in a single transaction with a ring size
-  @Test
-  public void testSendWithRingSize() {
-    org.junit.Assume.assumeTrue(TEST_RELAYS);
-    testSendToSingle(new MoneroSendRequest().setCanSplit(false).setRingSize(8));
   }
   
   // Can send to an address with split transactions
@@ -2802,7 +2795,6 @@ public abstract class TestMoneroWalletCommon {
     
     // build send request using MoneroSendRequest
     MoneroSendRequest request = new MoneroSendRequest();
-    request.setRingSize(TestUtils.RING_SIZE);
     request.setAccountIndex(srcAccount.getIndex());
     request.setDestinations(new ArrayList<MoneroDestination>());
     for (int i = 0; i < destinationAddresses.size(); i++) {
@@ -4168,7 +4160,7 @@ public abstract class TestMoneroWalletCommon {
       MoneroSendRequest request = ctx.sendRequest;
       assertEquals(false, tx.isConfirmed());
       testTransfer(tx.getOutgoingTransfer(), ctx);
-      assertEquals(request.getRingSize(), tx.getRingSize());
+      assertEquals(MoneroUtils.RING_SIZE, (int) tx.getRingSize());
       assertEquals(request.getUnlockTime() != null ? request.getUnlockTime() : 0, (long) tx.getUnlockTime());
       assertNull(tx.getBlock());
       assertTrue(tx.getKey().length() > 0);

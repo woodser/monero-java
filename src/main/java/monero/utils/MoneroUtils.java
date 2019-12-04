@@ -23,8 +23,8 @@ import monero.wallet.model.MoneroTxWallet;
  */
 public class MoneroUtils {
   
-  // core wallet2 syncs on a fixed intervals
-  public static final long WALLET2_REFRESH_INTERVAL = 10000;
+  public static final long WALLET2_REFRESH_INTERVAL = 10000;  // core wallet2 syncs on a fixed intervals
+  public static final int RING_SIZE = 12;                     // network-enforced ring size
 
   private static final int NUM_MNEMONIC_WORDS = 25;
   private static final int VIEW_KEY_LENGTH = 64;
