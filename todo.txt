@@ -1,8 +1,6 @@
 v15.0.1
-ConnectionType -> MoneroConnectionType?
 remove ring size from request since disallowed?
 rename version.versionNumber to version.number
-testSyncWithPoolSubmit not ported to js
 MoneroSubmitTxResult() topBlockHash or topBlockId
 cpp library uses unmodified monero-project submodule
 monero-javascript uses only monero-cpp-library submodule
@@ -12,6 +10,7 @@ test sweeps
 RELEASE
 
 CLEANUP
+testSyncWithPoolSubmit not ported to js
 wallet rpc tests: WARNING: unrecognized field deserializing node to output: default
 monero_tx::from_property_tree payment id threw runtime_error, how is "Can get transactions by payment ids" test passing in Java?
 rename MoneroOutput to MoneroRingMember, rename MoneroTx vins and vouts to inputs and outputs?
