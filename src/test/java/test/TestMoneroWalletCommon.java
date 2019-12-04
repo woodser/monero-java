@@ -124,7 +124,7 @@ public abstract class TestMoneroWalletCommon {
   /**
    * Creates a wallet from keys.
    */
-  protected abstract MoneroWallet createWalletFromKeys(String password, String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long firstReceiveHeight, String language);
+  protected abstract MoneroWallet createWalletFromKeys(String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long firstReceiveHeight, String language);
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -146,7 +146,7 @@ public abstract class TestMoneroWalletCommon {
       String privateSpendKey = wallet.getPrivateSpendKey();
       
       // recreate test wallet from keys
-      wallet = createWalletFromKeys(TestUtils.WALLET_PASSWORD, primaryAddress, privateViewKey, privateSpendKey, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      wallet = createWalletFromKeys(primaryAddress, privateViewKey, privateSpendKey, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
       Exception e2 = null;
       try {
         //assertEquals(mnemonic, wallet.getMnemonic());
@@ -179,7 +179,7 @@ public abstract class TestMoneroWalletCommon {
       String privateViewKey = wallet.getPrivateViewKey();
 
       // create watch-only wallet by witholding spend key
-      wallet = createWalletFromKeys(TestUtils.WALLET_PASSWORD, primaryAddress, privateViewKey, null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      wallet = createWalletFromKeys(primaryAddress, privateViewKey, null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
       Exception e2 = null;
       try {
         //assertEquals(mnemonic, wallet.getMnemonic());
@@ -1956,7 +1956,7 @@ public abstract class TestMoneroWalletCommon {
     try {
 
       // create watch-only wallet by witholding spend key
-      wallet = createWalletFromKeys(TestUtils.WALLET_PASSWORD, wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      wallet = createWalletFromKeys(wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
       wallet.sync();  
       
       try {
