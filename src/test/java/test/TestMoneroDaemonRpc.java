@@ -108,8 +108,8 @@ public class TestMoneroDaemonRpc {
   public void testGetVersion() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     MoneroVersion version = daemon.getVersion();
-    assertNotNull(version.getVersionNumber());
-    assertTrue(version.getVersionNumber() > 0);
+    assertNotNull(version.getNumber());
+    assertTrue(version.getNumber() > 0);
     assertNotNull(version.getIsRelease());
   }
   

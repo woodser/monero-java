@@ -11,20 +11,20 @@ public class MoneroVersion {
     // necessary for deserialization
   }
   
-  public MoneroVersion(Integer versionNumber, Boolean isRelease) {
-    this.versionNumber = versionNumber;
+  public MoneroVersion(Integer number, Boolean isRelease) {
+    this.number = number;
     this.isRelease = isRelease;
   }
 
-  private Integer versionNumber;
+  private Integer number;
   private Boolean isRelease;
   
-  public Integer getVersionNumber() {
-    return versionNumber;
+  public Integer getNumber() {
+    return number;
   }
   
-  public void setVersionNumber(Integer version) {
-    this.versionNumber = version;
+  public void setNumber(Integer number) {
+    this.number = number;
   }
   
   @JsonProperty("isRelease")
