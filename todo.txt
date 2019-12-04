@@ -1,5 +1,6 @@
 v15.0.1
-update js
+ConnectionType -> MoneroConnectionType?
+remove ring size from request since disallowed?
 rename version.versionNumber to version.number
 testSyncWithPoolSubmit not ported to js
 MoneroSubmitTxResult() topBlockHash or topBlockId
