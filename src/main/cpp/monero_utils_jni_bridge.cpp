@@ -21,7 +21,7 @@
  */
 
 #include <iostream>
-#include "monero_utils_jni.h"
+#include "monero_utils_jni_bridge.h"
 #include "utils/monero_utils.h"
 
 using namespace std;
