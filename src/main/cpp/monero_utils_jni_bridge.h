@@ -22,8 +22,8 @@
 
 #include <jni.h>
 
-#ifndef _Included_monero_cpp_bridge_MoneroCppUtilsNative
-#define _Included_monero_cpp_bridge_MoneroCppUtilsNative
+#ifndef _Included_monero_cpp_bridge_MoneroUtilsJniNative
+#define _Included_monero_cpp_bridge_MoneroUtilsJniNative
 
 // TODO: this causes warning
 std::string jstring2string(JNIEnv *env, jstring jStr);
@@ -32,15 +32,15 @@ std::string jstring2string(JNIEnv *env, jstring jStr);
 extern "C" {
 #endif
 
-JNIEXPORT jbyteArray JNICALL Java_monero_utils_MoneroCppUtils_jsonToBinaryJni(JNIEnv *, jclass, jstring);
+JNIEXPORT jbyteArray JNICALL Java_monero_utils_MoneroUtilsJni_jsonToBinaryJni(JNIEnv *, jclass, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryToJsonJni(JNIEnv *, jclass, jbyteArray);
+JNIEXPORT jstring JNICALL Java_monero_utils_MoneroUtilsJni_binaryToJsonJni(JNIEnv *, jclass, jbyteArray);
 
-JNIEXPORT jstring JNICALL Java_monero_utils_MoneroCppUtils_binaryBlocksToJsonJni(JNIEnv *, jclass, jbyteArray);
+JNIEXPORT jstring JNICALL Java_monero_utils_MoneroUtilsJni_binaryBlocksToJsonJni(JNIEnv *, jclass, jbyteArray);
 
-JNIEXPORT void JNICALL Java_monero_utils_MoneroCppUtils_initLoggingJni(JNIEnv *, jclass, jstring jpath, jboolean);
+JNIEXPORT void JNICALL Java_monero_utils_MoneroUtilsJni_initLoggingJni(JNIEnv *, jclass, jstring jpath, jboolean);
 
-JNIEXPORT void JNICALL Java_monero_utils_MoneroCppUtils_setLogLevelJni(JNIEnv *, jclass, jint);
+JNIEXPORT void JNICALL Java_monero_utils_MoneroUtilsJni_setLogLevelJni(JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus
 }

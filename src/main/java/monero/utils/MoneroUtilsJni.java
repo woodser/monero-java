@@ -12,7 +12,7 @@ import monero.rpc.MoneroRpcConnection;
 /**
  * Collection of utilties bridged from Monero Core C++ to Java.
  */
-public class MoneroCppUtils {
+public class MoneroUtilsJni {
   
   static {
     System.loadLibrary("monero-java");
