@@ -2045,7 +2045,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("unsigned_txset") && val != null) {}  // handled elsewhere; this method only builds a tx wallet
       else if (key.equals("amount_in")) tx.setInputSum((BigInteger) val);
       else if (key.equals("amount_out")) tx.setOutputSum((BigInteger) val);
-      else if (key.equals("change_address")) tx.setChangeAddress((String) val);
+      else if (key.equals("change_address")) tx.setChangeAddress("".equals(val) ? null : (String) val);
       else if (key.equals("change_amount")) tx.setChangeAmount((BigInteger) val);
       else if (key.equals("dummy_outputs")) tx.setNumDummyOutputs(((BigInteger) val).intValue());
       else if (key.equals("extra")) tx.setExtraHex((String) val);

@@ -1,4 +1,6 @@
 v15.0.1
+seed == private spend key
+get_languages() should be static utility for wasm and jni?
 backport get_language on monero_wallet interface
 collapse jni bridge utils and wallet functions
 wallet.getSeed() test and impls
@@ -14,6 +16,7 @@ compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting mone
 MoneroRpcConnection LOGGER.fine() executing? could be major performance hit
 sweepAccounts() is leaving behind dust
 support createWallet(MoneroWalletConfig) with all possible fields?
+ability to set mnemonic language and get different mnemonic?
 
 update java-lite
 update spec

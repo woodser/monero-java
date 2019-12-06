@@ -1490,8 +1490,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Test
-  public void testCreateWatchOnlyWallet() {
-    super.testCreateWatchOnlyWallet();
+  public void createWalletWithoutSpendKey() {
+    super.createWalletWithoutSpendKey();
   }
   
   @Test

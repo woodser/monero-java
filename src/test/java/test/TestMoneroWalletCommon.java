@@ -167,14 +167,13 @@ public abstract class TestMoneroWalletCommon {
     if (e1 != null) throw new RuntimeException(e1);
   }
   
-  // Can create a watch-only wallet.
+  // Can create a wallet without the spend key.
   @Test
-  public void testCreateWatchOnlyWallet() {
+  public void createWalletWithoutSpendKey() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     Exception e1 = null;
     try {
       
-      //String mnemonic = wallet.getMnemonic(); // TODO monero-wallet-rpc: cannot get mnemonic from wallet created from keys?
       String primaryAddress = wallet.getPrimaryAddress();
       String privateViewKey = wallet.getPrivateViewKey();
 
@@ -182,7 +181,6 @@ public abstract class TestMoneroWalletCommon {
       wallet = createWalletFromKeys(primaryAddress, privateViewKey, null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
       Exception e2 = null;
       try {
-        //assertEquals(mnemonic, wallet.getMnemonic());
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
         assertEquals(privateViewKey, wallet.getPrivateViewKey());
         assertEquals(null, wallet.getPrivateSpendKey());
