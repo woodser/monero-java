@@ -36,7 +36,7 @@
 
 #include <iostream>
 #include "monero_wallet_jni_bridge.h"
-#include "wallet/monero_wallet_w2.h"
+#include "wallet/monero_wallet_core.h"
 #include "utils/monero_utils.h"
 
 using namespace std;
@@ -292,7 +292,7 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_walletExistsJni(JN
   const char* _path = env->GetStringUTFChars(jpath, NULL);
   string path = string(_path);
   env->ReleaseStringUTFChars(jpath, _path);
-  bool wallet_exists = monero_wallet_w2::wallet_exists(path);
+  bool wallet_exists = monero_wallet_core::wallet_exists(path);
   return static_cast<jboolean>(wallet_exists);
 }
 
@@ -307,7 +307,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv 
 
   // load wallet from file
   try {
-    monero_wallet* wallet = monero_wallet_w2::open_wallet(path, password, static_cast<monero_network_type>(jnetwork_type));
+    monero_wallet* wallet = monero_wallet_core::open_wallet(path, password, static_cast<monero_network_type>(jnetwork_type));
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -341,7 +341,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletRandomJni
   // construct wallet
   try {
     monero_rpc_connection daemon_connection = monero_rpc_connection(daemon_uri, daemon_username, daemon_password);
-    monero_wallet* wallet = monero_wallet_w2::create_wallet_random(path, password, static_cast<monero_network_type>(jnetwork_type), daemon_connection, language);
+    monero_wallet* wallet = monero_wallet_core::create_wallet_random(path, password, static_cast<monero_network_type>(jnetwork_type), daemon_connection, language);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -366,7 +366,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemo
   // construct wallet
   try {
     monero_rpc_connection daemon_connection;
-    monero_wallet* wallet = monero_wallet_w2::create_wallet_from_mnemonic(path, password, static_cast<monero_network_type>(jnetwork_type), mnemonic, daemon_connection, (uint64_t) jrestore_height);
+    monero_wallet* wallet = monero_wallet_core::create_wallet_from_mnemonic(path, password, static_cast<monero_network_type>(jnetwork_type), mnemonic, daemon_connection, (uint64_t) jrestore_height);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -400,7 +400,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJ
   // construct wallet and return reference
   try {
     monero_rpc_connection daemon_connection; // TODO: take daemon connection parameters
-    monero_wallet* wallet = monero_wallet_w2::create_wallet_from_keys(path, password, static_cast<monero_network_type>(network_type), address, view_key, spend_key, daemon_connection, restore_height, language);
+    monero_wallet* wallet = monero_wallet_core::create_wallet_from_keys(path, password, static_cast<monero_network_type>(network_type), address, view_key, spend_key, daemon_connection, restore_height, language);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
