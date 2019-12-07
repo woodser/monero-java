@@ -350,16 +350,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
   
   /**
-   * Get the language of the wallet's mnemonic phrase.
-   * 
-   * @return the language of the wallet's mnemonic phrase
-   */
-  public String getMnemonicLanguage() {
-    assertNotClosed();
-    return getLanguageJni();
-  }
-  
-  /**
    * Register a listener receive wallet notifications.
    * 
    * @param listener is the listener to receive wallet notifications
@@ -433,7 +423,21 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   @Override
   public String getMnemonic() {
     assertNotClosed();
-    return getMnemonicJni();
+    try {
+      return getMnemonicJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
+  
+  @Override
+  public String getMnemonicLanguage() {
+    assertNotClosed();
+    try {
+      return getMnemonicLanguageJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
   
   @Override
@@ -1307,7 +1311,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getMnemonicJni();
   
-  private native String getLanguageJni();
+  private native String getMnemonicLanguageJni();
   
   private native String[] getLanguagesJni();
   
