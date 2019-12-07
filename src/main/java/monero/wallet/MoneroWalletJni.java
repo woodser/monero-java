@@ -354,29 +354,9 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * 
    * @return the language of the wallet's mnemonic phrase
    */
-  public String getLanguage() {
+  public String getMnemonicLanguage() {
     assertNotClosed();
     return getLanguageJni();
-  }
-  
-  /**
-   * Get the wallet's public view key.
-   * 
-   * @return the wallet's public view key
-   */
-  public String getPublicViewKey() {
-    assertNotClosed();
-    return getPublicViewKeyJni();
-  }
-  
-  /**
-   * Get the wallet's public spend key.
-   * 
-   * @return the wallet's public spend key
-   */
-  public String getPublicSpendKey() {
-    assertNotClosed();
-    return getPublicSpendKeyJni();
   }
   
   /**
@@ -449,12 +429,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     String path = getPathJni();
     return path.isEmpty() ? null : path;
   }
-  
-  @Override
-  public String getSeed() {
-    assertNotClosed();
-    throw new RuntimeException("Not implemented");
-  }
 
   @Override
   public String getMnemonic() {
@@ -480,6 +454,18 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     String privateSpendKey = getPrivateSpendKeyJni();
     if ("".equals(privateSpendKey)) return null;
     return privateSpendKey;
+  }
+  
+  @Override
+  public String getPublicViewKey() {
+    assertNotClosed();
+    return getPublicViewKeyJni();
+  }
+  
+  @Override
+  public String getPublicSpendKey() {
+    assertNotClosed();
+    return getPublicSpendKeyJni();
   }
 
   @Override

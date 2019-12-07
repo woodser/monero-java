@@ -1,7 +1,10 @@
 v15.0.1
 seed == private spend key
+rename getLanguages() -> getMnemonicLanguages()
+wallet rpc support getting mnemonic, public view key, public spend key?
 get_languages() should be static utility for wasm and jni?
 backport get_language on monero_wallet interface
+ability to get mnemonic from wallet restored from keys
 collapse jni bridge utils and wallet functions
 wallet.getSeed() test and impls
 cpp library uses unmodified monero-project submodule

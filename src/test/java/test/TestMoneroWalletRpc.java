@@ -54,8 +54,14 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   @Override
-  protected MoneroWallet createRandomWallet() {
+  protected MoneroWallet createWalletRandom() {
     wallet.createWalletRandom(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD);
+    return wallet;
+  }
+  
+  @Override
+  protected MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight) {
+    wallet.createWalletFromMnemonic(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, mnemonic, restoreHeight);
     return wallet;
   }
   
@@ -67,9 +73,9 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   // ---------------------------- BEGIN TESTS ---------------------------------
   
-  // Can create a wallet with a randomly generated seed
+  // Can create a wallet with a randomly generated mnemonic
   @Test
-  public void testCreateWalletRandom() {
+  public void testCreateWalletRandomRpc() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     try {
       
@@ -108,7 +114,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   // Can create a wallet from a mnemonic phrase
   @Test
-  public void testCreateWalletFromMnemonic() {
+  public void testCreateWalletFromMnemonicRpc() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     try {
       
@@ -384,13 +390,23 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
   
   @Test
+  public void testCreateWalletRandom() {
+    super.testCreateWalletRandom();
+  }
+  
+  @Test
+  public void testCreateWalletFromMnemonic() {
+    super.testCreateWalletRandom();
+  }
+  
+  @Test
   public void testCreateWalletFromKeys() {
     super.testCreateWalletFromKeys();
   }
   
   @Test
-  public void createWalletWithoutSpendKey() {
-    super.createWalletWithoutSpendKey();
+  public void testCreateWalletWithoutSpendKey() {
+    super.testCreateWalletWithoutSpendKey();
   }
   
   @Test
@@ -426,6 +442,16 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Override
   public void testGetPrivateSpendKey() {
     super.testGetPrivateSpendKey();
+  }
+  
+  @Override
+  public void testGetPublicViewKey() {
+    super.testGetPublicViewKey();
+  }
+  
+  @Override
+  public void testGetPublicSpendKey() {
+    super.testGetPublicSpendKey();
   }
 
   @Override

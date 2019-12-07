@@ -73,10 +73,17 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
 
   @Override
-  protected MoneroWallet createRandomWallet() {
+  protected MoneroWallet createWalletRandom() {
     MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
     //wallet.sync();
     //wallet.save();
+    wallet.startSyncing();
+    return wallet;
+  }
+  
+  @Override
+  protected MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight) {
+    MoneroWalletJni wallet = MoneroWalletJni.createWalletFromMnemonic(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, mnemonic, daemon.getRpcConnection(), restoreHeight);
     wallet.startSyncing();
     return wallet;
   }
@@ -227,7 +234,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Test
-  public void testCreateWalletRandom() {
+  public void testCreateWalletRandomJni() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
 
     // create random wallet with defaults
@@ -238,7 +245,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(MoneroNetworkType.MAINNET, wallet.getNetworkType());
     assertEquals(null, wallet.getDaemonConnection());
     assertFalse(wallet.isConnected());
-    assertEquals("English", wallet.getLanguage());
+    assertEquals("English", wallet.getMnemonicLanguage());
     assertEquals(path, wallet.getPath());
     assertFalse(wallet.isSynced());
     assertEquals(1, wallet.getHeight()); // TODO monero core: why does height of new unsynced wallet start at 1?
@@ -268,7 +275,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertTrue(daemon.getRpcConnection() != wallet.getDaemonConnection());
     assertTrue(daemon.getRpcConnection().equals(wallet.getDaemonConnection()));
     assertTrue(wallet.isConnected());
-    assertEquals("Spanish", wallet.getLanguage());
+    assertEquals("Spanish", wallet.getMnemonicLanguage());
     assertEquals(path, wallet.getPath());
     assertFalse(wallet.isSynced());
     assertEquals(1, wallet.getHeight()); // TODO monero core: why is height of unsynced wallet 1?
@@ -278,7 +285,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Test
-  public void testCreateWalletFromMnemonic() {
+  public void testCreateWalletFromMnemonicJni() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // create wallet with mnemonic and defaults
@@ -289,7 +296,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
     assertEquals(null, wallet.getDaemonConnection());
     assertFalse(wallet.isConnected());
-    assertEquals("English", wallet.getLanguage());
+    assertEquals("English", wallet.getMnemonicLanguage());
     assertEquals(path, wallet.getPath());
     assertFalse(wallet.isSynced());
     assertEquals(1, wallet.getHeight());
@@ -307,7 +314,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertTrue(daemon.getRpcConnection() != wallet.getDaemonConnection());
     assertTrue(daemon.getRpcConnection().equals(wallet.getDaemonConnection()));
     assertTrue(wallet.isConnected());
-    assertEquals("English", wallet.getLanguage());
+    assertEquals("English", wallet.getMnemonicLanguage());
     assertEquals(path, wallet.getPath());
     assertFalse(wallet.isSynced());
     assertEquals(1, wallet.getHeight()); // TODO monero core: why does height of new unsynced wallet start at 1?
@@ -323,7 +330,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
     assertNull(wallet.getDaemonConnection());
     assertFalse(wallet.isConnected());
-    assertEquals("English", wallet.getLanguage());
+    assertEquals("English", wallet.getMnemonicLanguage());
     assertEquals(path, wallet.getPath());
     assertEquals(1, wallet.getHeight()); // TODO monero core: why does height of new unsynced wallet start at 1?
     assertEquals(restoreHeight, wallet.getRestoreHeight());
@@ -346,7 +353,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertTrue(daemon.getRpcConnection() != wallet.getDaemonConnection());
     assertTrue(daemon.getRpcConnection().equals(wallet.getDaemonConnection()));
     assertTrue(wallet.isConnected());
-    assertEquals("English", wallet.getLanguage());
+    assertEquals("English", wallet.getMnemonicLanguage());
     assertEquals(path, wallet.getPath());
     assertFalse(wallet.isSynced());
     assertEquals(1, wallet.getHeight()); // TODO monero core: why does height of new unsynced wallet start at 1?
@@ -374,22 +381,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     } finally {
       walletKeys.close();
     }
-  }
-  
-  // Can get the public view key
-  @Test
-  public void testGetPublicViewKey() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    String publicViewKey = wallet.getPublicViewKey();
-    MoneroUtils.validatePublicViewKey(publicViewKey);
-  }
-  
-  // Can get the public spend key
-  @Test
-  public void testGetPublicSpendKey() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    String publicSpendKey = wallet.getPublicSpendKey();
-    MoneroUtils.validatePublicSpendKey(publicSpendKey);
   }
   
   // Can re-sync an existing wallet from scratch
@@ -773,7 +764,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
     assertNull(wallet.getDaemonConnection());
     assertEquals(restoreHeight, wallet.getRestoreHeight());
-    assertEquals("English", wallet.getLanguage());
+    assertEquals("English", wallet.getMnemonicLanguage());
     assertEquals(1, wallet.getHeight());
     assertEquals(restoreHeight, wallet.getRestoreHeight());
     
@@ -794,7 +785,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
     assertNull(wallet.getDaemonConnection());
     assertFalse(wallet.isConnected());
-    assertEquals("English", wallet.getLanguage());
+    assertEquals("English", wallet.getMnemonicLanguage());
     assertFalse(wallet.isSynced());
     assertEquals(1, wallet.getHeight());
     assertEquals(0, wallet.getRestoreHeight()); // TODO monero-core: restoreHeight is reset to 0 after closing
@@ -825,7 +816,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertTrue(MoneroWalletJni.walletExists(path));
     assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
-    assertEquals("English", wallet.getLanguage());
+    assertEquals("English", wallet.getMnemonicLanguage());
     
     // sync
     wallet.sync();
@@ -907,7 +898,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 //    MoneroWalletJni walletMemory = new MoneroWalletJni(TestUtils.NETWORK_TYPE, null, null);
 //    assertEquals(TestUtils.NETWORK_TYPE, walletMemory.getNetworkType());
 //    assertNull(walletMemory.getDaemonConnection());
-//    assertEquals("English", walletMemory.getLanguage());
+//    assertEquals("English", walletMemory.getMnemonicLanguage());
 //    assertEquals(1, walletMemory.getHeight());
 //    //assertEquals(0, walletMemory.getChainHeight()); // TODO: this causes dylib runtime_error; test default state of unconnected wallet 
 //    //assertEquals(1, walletMemory.getRestoreHeight()); // TODO; new wallet() without connection but restoreHeight is checkpointed; where is that data cached?
@@ -1201,7 +1192,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // create participating wallets
     List<MoneroWallet> wallets = new ArrayList<MoneroWallet>();
     for (int i = 0; i < N; i++) {
-      wallets.add(createRandomWallet());  // TODO: switch to use utility
+      wallets.add(createWalletRandom());  // TODO: switch to use utility
     }
     
     // prepare and collect multisig hex from each participant
@@ -1478,11 +1469,21 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(wallet1.getNetworkType(), wallet2.getNetworkType());
     //assertEquals(wallet1.getRestoreHeight(), wallet2.getRestoreHeight()); // TODO monero-core: restore height is lost after close
     assertEquals(wallet1.getDaemonConnection(), wallet2.getDaemonConnection());
-    assertEquals(wallet1.getLanguage(), wallet2.getLanguage());
+    assertEquals(wallet1.getMnemonicLanguage(), wallet2.getMnemonicLanguage());
     // TODO **: more jni-specific extensions
   }
   
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
+  
+  @Test
+  public void testCreateWalletRandom() {
+    super.testCreateWalletRandom();
+  }
+  
+  @Test
+  public void testCreateWalletFromMnemonic() {
+    super.testCreateWalletRandom();
+  }
   
   @Test
   public void testCreateWalletFromKeys() {
@@ -1490,8 +1491,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Test
-  public void createWalletWithoutSpendKey() {
-    super.createWalletWithoutSpendKey();
+  public void testCreateWalletWithoutSpendKey() {
+    super.testCreateWalletWithoutSpendKey();
   }
   
   @Test
@@ -1527,6 +1528,16 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   public void testGetPrivateSpendKey() {
     super.testGetPrivateSpendKey();
+  }
+  
+  @Override
+  public void testGetPublicViewKey() {
+    super.testGetPublicViewKey();
+  }
+  
+  @Override
+  public void testGetPublicSpendKey() {
+    super.testGetPublicSpendKey();
   }
 
   @Override

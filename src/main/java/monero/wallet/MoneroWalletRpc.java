@@ -238,11 +238,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     return path;
   }
 
-  @Override
-  public String getSeed() {
-    throw new MoneroException("monero-wallet-rpc does not support getting the wallet seed");
-  }
-
   @SuppressWarnings("unchecked")
   @Override
   public String getMnemonic() {
@@ -251,6 +246,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return (String) result.get("key");
+  }
+
+  @Override
+  public String getMnemonicLanguage() {
+    throw new MoneroException("MoneroWalletRpc.getMnemonicLanguage() not supported");
   }
 
   @SuppressWarnings("unchecked")
@@ -269,6 +269,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return (String) result.get("key");
+  }
+  
+
+  @Override
+  public String getPublicViewKey() {
+    throw new MoneroException("MoneroWalletRpc.getPublicViewKey() not supported");
+  }
+
+  @Override
+  public String getPublicSpendKey() {
+    throw new MoneroException("MoneroWalletRpc.getPublicSpendKey() not supported");
   }
   
   @SuppressWarnings("unchecked")

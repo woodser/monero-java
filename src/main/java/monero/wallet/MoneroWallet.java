@@ -75,18 +75,18 @@ public interface MoneroWallet {
   public String getPath();
   
   /**
-   * Get the wallet's seed.
-   * 
-   * @return the wallet's seed
-   */
-  public String getSeed();
-  
-  /**
    * Get the wallet's mnemonic phrase derived from the seed.
    * 
    * @return the wallet's mnemonic phrase
    */
   public String getMnemonic();
+  
+  /**
+   * Get the language of the wallet's mnemonic phrase.
+   * 
+   * @return the language of the wallet's mnemonic phrase
+   */
+  public String getMnemonicLanguage();
   
   /**
    * Get a list of available languages for the wallet's mnemonic phrase.
@@ -108,6 +108,20 @@ public interface MoneroWallet {
    * @return the wallet's private spend key
    */
   public String getPrivateSpendKey();
+  
+  /**
+   * Get the wallet's public view key.
+   * 
+   * @return the wallet's public view key
+   */
+  public String getPublicViewKey();
+  
+  /**
+   * Get the wallet's public spend key.
+   * 
+   * @return the wallet's public spend key
+   */
+  public String getPublicSpendKey();
     
   /**
    * Get the wallet's primary address.

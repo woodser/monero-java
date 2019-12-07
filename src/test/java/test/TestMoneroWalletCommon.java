@@ -40,6 +40,7 @@ import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
+import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroCheckReserve;
@@ -119,7 +120,14 @@ public abstract class TestMoneroWalletCommon {
    * 
    * @return the random test wallet
    */
-  protected abstract MoneroWallet createRandomWallet();
+  protected abstract MoneroWallet createWalletRandom();
+  
+  /**
+   * Create and open a random test wallet.
+   * 
+   * @return the random test wallet
+   */
+  protected abstract MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight);
   
   /**
    * Creates a wallet from keys.
@@ -133,26 +141,22 @@ public abstract class TestMoneroWalletCommon {
   
   // ------------------------------ BEGIN TESTS -------------------------------
   
-  // Can create a wallet from keys.
+  // Can create a random wallet
   @Test
-  public void testCreateWalletFromKeys() {
+  public void testCreateWalletRandom() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     Exception e1 = null;  // emulating Java "finally" but compatible with other languages
     try {
       
-      //String mnemonic = wallet.getMnemonic(); // TODO monero-wallet-rpc: cannot get mnemonic from wallet created from keys?
-      String primaryAddress = wallet.getPrimaryAddress();
-      String privateViewKey = wallet.getPrivateViewKey();
-      String privateSpendKey = wallet.getPrivateSpendKey();
-      
       // recreate test wallet from keys
-      wallet = createWalletFromKeys(primaryAddress, privateViewKey, privateSpendKey, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      wallet = createWalletRandom();
       Exception e2 = null;
       try {
-        //assertEquals(mnemonic, wallet.getMnemonic());
-        assertEquals(primaryAddress, wallet.getPrimaryAddress());
-        assertEquals(privateViewKey, wallet.getPrivateViewKey());
-        assertEquals(privateSpendKey, wallet.getPrivateSpendKey());
+        MoneroUtils.validateAddress(wallet.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
+        MoneroUtils.validatePrivateViewKey(wallet.getPrivateViewKey());
+        MoneroUtils.validatePrivateSpendKey(wallet.getPrivateSpendKey());
+        MoneroUtils.validateMnemonic(wallet.getMnemonic());
+        if (!(wallet instanceof MoneroWalletRpc)) assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getMnemonicLanguage());  // TODO monero-wallet-rpc: get mnemonic language
       } catch (Exception e) {
         e2 = e;
       }
@@ -167,9 +171,81 @@ public abstract class TestMoneroWalletCommon {
     if (e1 != null) throw new RuntimeException(e1);
   }
   
-  // Can create a wallet without the spend key.
+  // Can create a wallet from a mnemonic phrase
   @Test
-  public void createWalletWithoutSpendKey() {
+  public void testCreateWalletFromMnemonic() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    Exception e1 = null;  // emulating Java "finally" but compatible with other languages
+    try {
+      
+      // save for comparison
+      String primaryAddress = wallet.getPrimaryAddress();
+      String privateViewKey = wallet.getPrivateViewKey();
+      String privateSpendKey = wallet.getPrivateSpendKey();
+      
+      // recreate test wallet from keys
+      wallet = createWalletFromMnemonic(TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT);
+      Exception e2 = null;
+      try {
+        assertEquals(primaryAddress, wallet.getPrimaryAddress());
+        assertEquals(privateViewKey, wallet.getPrivateViewKey());
+        assertEquals(privateSpendKey, wallet.getPrivateSpendKey());
+        assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
+        assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getMnemonicLanguage());
+      } catch (Exception e) {
+        e2 = e;
+      }
+      wallet.close();
+      if (e2 != null) throw e2;
+    } catch (Exception e) {
+      e1 = e;
+    }
+    
+    // open main test wallet for other tests
+    wallet = getTestWallet();
+    if (e1 != null) throw new RuntimeException(e1);
+  }
+    
+  // Can create a wallet from keys
+  @Test
+  public void testCreateWalletFromKeys() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    Exception e1 = null;  // emulating Java "finally" but compatible with other languages
+    try {
+
+      // save for comparison
+      String primaryAddress = wallet.getPrimaryAddress();
+      String privateViewKey = wallet.getPrivateViewKey();
+      String privateSpendKey = wallet.getPrivateSpendKey();
+      
+      // recreate test wallet from keys
+      wallet = createWalletFromKeys(primaryAddress, privateViewKey, privateSpendKey, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      Exception e2 = null;
+      try {
+        assertEquals(primaryAddress, wallet.getPrimaryAddress());
+        assertEquals(privateViewKey, wallet.getPrivateViewKey());
+        assertEquals(privateSpendKey, wallet.getPrivateSpendKey());
+        if (!(wallet instanceof MoneroWalletRpc)) {
+          MoneroUtils.validateMnemonic(wallet.getMnemonic()); // TODO monero-wallet-rpc: cannot get mnemonic from wallet created from keys?
+          assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getMnemonicLanguage());
+        }
+      } catch (Exception e) {
+        e2 = e;
+      }
+      wallet.close();
+      if (e2 != null) throw e2;
+    } catch (Exception e) {
+      e1 = e;
+    }
+    
+    // open main test wallet for other tests
+    wallet = getTestWallet();
+    if (e1 != null) throw new RuntimeException(e1);
+  }
+  
+  // Can create a wallet without the spend key
+  @Test
+  public void testCreateWalletWithoutSpendKey() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     Exception e1 = null;
     try {
@@ -184,6 +260,22 @@ public abstract class TestMoneroWalletCommon {
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
         assertEquals(privateViewKey, wallet.getPrivateViewKey());
         assertEquals(null, wallet.getPrivateSpendKey());
+        
+        // cannot get mnemonic of watch-only wallet
+        try {
+          wallet.getMnemonic();
+          throw new RuntimeException("Should have thrown error");
+        } catch (Exception e) {
+          //assertEquals("The wallet is watch-only. Cannot retrieve mnemonic.", e.getMessage());  // TODO: test error message?
+          if ("Should have thrown error".equals(e.getMessage())) throw e;
+        }
+        try {
+          wallet.getMnemonicLanguage();
+          throw new RuntimeException("Should have thrown error");
+        } catch (Exception e) {
+          //assertEquals("The wallet is watch-only. Cannot retrieve mnemonic language.", e.getMessage());
+          if ("Should have thrown error".equals(e.getMessage())) throw e;
+        }
       } catch (Exception e) {
         e2 = e;
       }
@@ -214,7 +306,7 @@ public abstract class TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // create a random wallet
-    MoneroWallet wallet = createRandomWallet();
+    MoneroWallet wallet = createWalletRandom();
     
     // set a random attribute
     String uuid = UUID.randomUUID().toString();
@@ -244,6 +336,13 @@ public abstract class TestMoneroWalletCommon {
     assertEquals(TestUtils.MNEMONIC, mnemonic);
   }
   
+  // Can get the language of the mnemonic phrase
+  @Test
+  public void testGetMnemonicLanguage() {
+    String language = wallet.getMnemonicLanguage();
+    assertEquals(MoneroWallet.DEFAULT_LANGUAGE, language);
+  }
+  
   // Can get a list of supported languages for the mnemonic phrase
   @Test
   public void testGetLanguages() {
@@ -267,6 +366,22 @@ public abstract class TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     String privateSpendKey = wallet.getPrivateSpendKey();
     MoneroUtils.validatePrivateSpendKey(privateSpendKey);
+  }
+  
+  // Can get the public view key
+  @Test
+  public void testGetPublicViewKey() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    String publicViewKey = wallet.getPublicViewKey();
+    MoneroUtils.validatePrivateSpendKey(publicViewKey);
+  }
+  
+  // Can get the public view key
+  @Test
+  public void testGetPublicSpendKey() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    String publicSpendKey = wallet.getPublicSpendKey();
+    MoneroUtils.validatePrivateSpendKey(publicSpendKey);
   }
   
   // Can get the primary address
@@ -3012,7 +3127,7 @@ public abstract class TestMoneroWalletCommon {
     List<String> preparedMultisigHexes = new ArrayList<String>();
     List<String> walletIds = new ArrayList<String>();
     for (int i = 0; i < n; i++) {
-      MoneroWallet wallet = createRandomWallet();
+      MoneroWallet wallet = createWalletRandom();
       walletIds.add(wallet.getPath());
       wallet.setAttribute("name", wallet.getPath());  // set the name of each wallet as an attribute
       preparedMultisigHexes.add(wallet.prepareMultisig());
@@ -3819,7 +3934,7 @@ public abstract class TestMoneroWalletCommon {
   public void testSaveAndClose() {
     
     // create a random wallet
-    MoneroWallet wallet = createRandomWallet();
+    MoneroWallet wallet = createWalletRandom();
     String path = wallet.getPath();
             
     // set an attribute
