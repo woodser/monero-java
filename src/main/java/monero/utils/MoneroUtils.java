@@ -55,18 +55,6 @@ public class MoneroUtils {
   private final static Pattern INTEGRATED_ADDRESS_PATTERN = Pattern.compile("^[" + ALPHABET + "]{106}$");
 
   /**
-   * Validates a wallet seed.
-   * 
-   * TODO: beef this up
-   * 
-   * @param seed is the seed to validate
-   */
-  public static void validateSeed(String seed) {
-    GenUtils.assertNotNull(seed);
-    GenUtils.assertEquals(64, seed.length());
-  }
-  
-  /**
    * Validates the given mnemonic phrase.
    * 
    * @param mnemonic is the mnemonic to validate

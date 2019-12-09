@@ -327,7 +327,7 @@ public abstract class TestMoneroWalletCommon {
     this.wallet = getTestWallet();
   }
 
-  // Can get the mnemonic phrase derived from the seed
+  // Can get the mnemonic phrase
   @Test
   public void testGetMnemonic() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);

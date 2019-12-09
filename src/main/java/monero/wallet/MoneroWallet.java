@@ -75,7 +75,7 @@ public interface MoneroWallet {
   public String getPath();
   
   /**
-   * Get the wallet's mnemonic phrase derived from the seed.
+   * Get the wallet's mnemonic phrase.
    * 
    * @return the wallet's mnemonic phrase
    */
