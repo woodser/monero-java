@@ -130,10 +130,10 @@ public class MoneroTxWallet extends MoneroTx {
    * @return vouts of type MoneroOutputWallet
    */
   public List<MoneroOutputWallet> getVoutsWallet() {
-    List<MoneroOutput> vouts = getVouts();
+    List<MoneroOutput> vouts = getOutputs();
     if (vouts == null) return null;
     List<MoneroOutputWallet> voutsWallet = new ArrayList<MoneroOutputWallet>();
-    for (MoneroOutput vout : getVouts()) {
+    for (MoneroOutput vout : getOutputs()) {
       voutsWallet.add((MoneroOutputWallet) vout);
     }
     return voutsWallet;
@@ -146,18 +146,18 @@ public class MoneroTxWallet extends MoneroTx {
    * Callers must cast to extended type (MoneroOutput) because Java
    * paramaterized types do not recognize inheritance.
    * 
-   * @param vouts are MoneroOutputWallets to set for the wallet tx
+   * @param outputs are MoneroOutputWallets to set for the wallet tx
    * @return MoneroTxWallet is a reference to this tx for chaining
    */
-  public MoneroTxWallet setVouts(List<MoneroOutput> vouts) {
+  public MoneroTxWallet setOutputs(List<MoneroOutput> outputs) {
     
-    // validate that all vouts are wallet outputs
-    if (vouts != null) {
-      for (MoneroOutput vout : vouts) {
+    // validate that all outputs are wallet outputs
+    if (outputs != null) {
+      for (MoneroOutput vout : outputs) {
         if (!(vout instanceof MoneroOutputWallet)) throw new MoneroException("Wallet transaction vouts must be of type MoneroOutputWallet");
       }
     }
-    super.setVouts(vouts);
+    super.setOutputs(outputs);
     return this;
   }
   
@@ -168,8 +168,8 @@ public class MoneroTxWallet extends MoneroTx {
    * @return MoneroTxWallet is a reference to this tx for chaining
    */
   @JsonProperty("vouts")
-  public MoneroTxWallet setVoutsWallet(List<MoneroOutputWallet> outputs) {
-    return setVouts(new ArrayList<MoneroOutput>(outputs));
+  public MoneroTxWallet setOutputsWallet(List<MoneroOutputWallet> outputs) {
+    return setOutputs(new ArrayList<MoneroOutput>(outputs));
   }
   
   public String getNote() {
@@ -579,8 +579,8 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setVins(List<MoneroOutput> vins) {
-    super.setVins(vins);
+  public MoneroTxWallet setInputs(List<MoneroOutput> inputs) {
+    super.setInputs(inputs);
     return this;
   }
 

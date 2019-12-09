@@ -1507,7 +1507,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       tx.setVersion(version);
       tx.setUnlockTime(unlockTime);
       output.setTx(tx);
-      tx.setVouts(Arrays.asList(output));
+      tx.setOutputs(Arrays.asList(output));
       if (height > 0) {
         MoneroBlock block = new MoneroBlock().setHeight(height);
         block.setTxs(Arrays.asList(tx));
@@ -1515,7 +1515,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       }
       
       // announce output
-      for (MoneroWalletListenerI listener : listeners) listener.onOutputReceived((MoneroOutputWallet) tx.getVouts().get(0));
+      for (MoneroWalletListenerI listener : listeners) listener.onOutputReceived((MoneroOutputWallet) tx.getOutputs().get(0));
     }
     
     public void onOutputSpent(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version) {
@@ -1529,7 +1529,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       tx.setHash(txHash);
       tx.setVersion(version);
       output.setTx(tx);
-      tx.setVins(Arrays.asList(output));
+      tx.setInputs(Arrays.asList(output));
       if (height > 0) {
         MoneroBlock block = new MoneroBlock().setHeight(height);
         block.setTxs(Arrays.asList(tx));
@@ -1537,7 +1537,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       }
       
       // announce output
-      for (MoneroWalletListenerI listener : listeners) listener.onOutputSpent((MoneroOutputWallet) tx.getVins().get(0));
+      for (MoneroWalletListenerI listener : listeners) listener.onOutputSpent((MoneroOutputWallet) tx.getInputs().get(0));
     }
   }
   

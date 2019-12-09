@@ -1406,9 +1406,9 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals(64, output.getTx().getHash().length());
       assertTrue(output.getTx().getVersion() >= 0);
       assertTrue(output.getTx().getUnlockTime() >= 0);
-      assertNull(output.getTx().getVins());
-      assertEquals(1, output.getTx().getVouts().size());
-      assertTrue(output.getTx().getVouts().get(0) == output);
+      assertNull(output.getTx().getInputs());
+      assertEquals(1, output.getTx().getOutputs().size());
+      assertTrue(output.getTx().getOutputs().get(0) == output);
       
       // extra is not sent over the jni bridge
       assertNull(output.getTx().getExtra());
@@ -1433,9 +1433,9 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals(64, output.getTx().getHash().length());
       assertTrue(output.getTx().getVersion() >= 0);
       assertNull(output.getTx().getUnlockTime());
-      assertEquals(1, output.getTx().getVins().size());
-      assertTrue(output.getTx().getVins().get(0) == output);
-      assertNull(output.getTx().getVouts());
+      assertEquals(1, output.getTx().getInputs().size());
+      assertTrue(output.getTx().getInputs().get(0) == output);
+      assertNull(output.getTx().getOutputs());
       
       // extra is not sent over the jni bridge
       assertNull(output.getTx().getExtra());

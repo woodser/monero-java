@@ -910,20 +910,20 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     for (MoneroTxWallet tx : txs) {
       
       // sort vouts
-      if (tx.getVouts() != null) Collections.sort(tx.getVouts(), new VoutComparator());
+      if (tx.getOutputs() != null) Collections.sort(tx.getOutputs(), new VoutComparator());
       
       // collect queried vouts
       List<MoneroOutput> toRemoves = new ArrayList<MoneroOutput>();
-      for (MoneroOutput vout : tx.getVouts()) {
+      for (MoneroOutput vout : tx.getOutputs()) {
         if (query.meetsCriteria((MoneroOutputWallet) vout)) vouts.add((MoneroOutputWallet) vout);
         else toRemoves.add(vout);
       }
       
       // remove excluded vouts from tx
-      tx.getVouts().removeAll(toRemoves);
+      tx.getOutputs().removeAll(toRemoves);
       
       // remove excluded txs from block
-      if (tx.getVouts().isEmpty() && tx.getBlock() != null) tx.getBlock().getTxs().remove(tx);
+      if (tx.getOutputs().isEmpty() && tx.getBlock() != null) tx.getBlock().getTxs().remove(tx);
     }
     return vouts;
   }
@@ -2122,7 +2122,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // initialize tx with vout
     List<MoneroOutput> vouts = new ArrayList<MoneroOutput>();
     vouts.add((MoneroOutput) vout); // have to cast to extended type because Java paramaterized types do not recognize inheritance
-    tx.setVouts(vouts);
+    tx.setOutputs(vouts);
     return tx;
   }
   

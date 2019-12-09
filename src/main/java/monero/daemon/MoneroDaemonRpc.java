@@ -1101,18 +1101,18 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         tx.setExtra(GenUtils.reconcile(tx.getExtra(), GenUtils.listToIntArray(ints)));
       }
       else if (key.equals("vin")) {
-        List<Map<String, Object>> rpcVins = (List<Map<String, Object>>) val;
-        if (rpcVins.size() != 1 || !rpcVins.get(0).containsKey("gen")) {  // ignore miner vin TODO: why? probably needs re-enabled
-          List<MoneroOutput> vins = new ArrayList<MoneroOutput>();
-          for (Map<String, Object> rpcVin : rpcVins) vins.add(convertRpcOutput(rpcVin, tx));
-          tx.setVins(vins);
+        List<Map<String, Object>> rpcInputs = (List<Map<String, Object>>) val;
+        if (rpcInputs.size() != 1 || !rpcInputs.get(0).containsKey("gen")) {  // ignore miner vin TODO: why? probably needs re-enabled
+          List<MoneroOutput> inputs = new ArrayList<MoneroOutput>();
+          for (Map<String, Object> rpcInput : rpcInputs) inputs.add(convertRpcOutput(rpcInput, tx));
+          tx.setInputs(inputs);
         }
       }
       else if (key.equals("vout")) {
-        List<Map<String, Object>> rpcVouts = (List<Map<String, Object>>) val;
-        List<MoneroOutput> vouts = new ArrayList<MoneroOutput>();
-        for (Map<String, Object> rpcVout : rpcVouts) vouts.add(convertRpcOutput(rpcVout, tx));
-        tx.setVouts(vouts);
+        List<Map<String, Object>> rpcOutputs = (List<Map<String, Object>>) val;
+        List<MoneroOutput> outputs = new ArrayList<MoneroOutput>();
+        for (Map<String, Object> rpcOutput : rpcOutputs) outputs.add(convertRpcOutput(rpcOutput, tx));
+        tx.setOutputs(outputs);
       }
       else if (key.equals("rct_signatures")) tx.setRctSignatures(GenUtils.reconcile(tx.getRctSignatures(), (Map<String, Object>) val));
       else if (key.equals("rctsig_prunable")) tx.setRctSigPrunable(GenUtils.reconcile(tx.getRctSigPrunable(), val));
@@ -1172,10 +1172,10 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       tx.setNumConfirmations(0l);
     }
     if (tx.isFailed() == null) tx.setIsFailed(false);
-    if (tx.getOutputIndices() != null && tx.getVouts() != null)  {
-      GenUtils.assertEquals(tx.getOutputIndices().size(), (int) tx.getVouts().size());
-      for (int i = 0; i < tx.getVouts().size(); i++) {
-        tx.getVouts().get(i).setIndex(tx.getOutputIndices().get(i));  // transfer output indices to vouts
+    if (tx.getOutputIndices() != null && tx.getOutputs() != null)  {
+      GenUtils.assertEquals(tx.getOutputIndices().size(), (int) tx.getOutputs().size());
+      for (int i = 0; i < tx.getOutputs().size(); i++) {
+        tx.getOutputs().get(i).setIndex(tx.getOutputIndices().get(i));  // transfer output indices to vouts
       }
     }
     if (rpcTx.containsKey("as_json") && !"".equals(rpcTx.get("as_json"))) convertRpcTx(JsonUtils.deserialize(MoneroRpcConnection.MAPPER, (String) rpcTx.get("as_json"), new TypeReference<Map<String, Object>>(){}), tx);

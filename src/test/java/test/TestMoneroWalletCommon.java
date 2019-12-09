@@ -947,8 +947,8 @@ public abstract class TestMoneroWalletCommon {
     txs = getAndTestTxs(wallet, new MoneroTxQuery().setIncludeOutputs(true), ctx, true);
     boolean found = false;
     for (MoneroTxWallet tx : txs) {
-      if (tx.getVouts() != null) {
-        assertTrue(tx.getVouts().size() > 0);
+      if (tx.getOutputs() != null) {
+        assertTrue(tx.getOutputs().size() > 0);
         found = true;
       } else {
         assertTrue(tx.isOutgoing() || (tx.isIncoming() && !tx.isConfirmed())); // TODO: monero-wallet-rpc: return vouts for unconfirmed txs
@@ -961,7 +961,7 @@ public abstract class TestMoneroWalletCommon {
     txs = wallet.getTxs(new MoneroTxQuery().setOutputQuery(outputQuery));
     assertFalse(txs.isEmpty());
     for (MoneroTxWallet tx : txs) {
-      assertFalse(tx.getVouts() == null || tx.getVouts().isEmpty());
+      assertFalse(tx.getOutputs() == null || tx.getOutputs().isEmpty());
       found = false;
       for (MoneroOutputWallet vout : tx.getVoutsWallet()) {
         if (vout.isSpent() == false && vout.getAccountIndex() == 1 && vout.getSubaddressIndex() == 2) {
@@ -1521,10 +1521,10 @@ public abstract class TestMoneroWalletCommon {
     
     // test invalid hash in collection
     List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, new MoneroTxQuery().setIsConfirmed(true).setIncludeOutputs(true), 3, 5);
-    for (MoneroTxWallet randomTx : randomTxs) assertFalse(randomTx.getVouts().isEmpty());
+    for (MoneroTxWallet randomTx : randomTxs) assertFalse(randomTx.getOutputs().isEmpty());
     outputs = wallet.getOutputs(new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setTxHashes(randomTxs.get(0).getHash(), "invalid_id")));
     assertFalse(outputs.isEmpty());
-    assertEquals(outputs.size(), randomTxs.get(0).getVouts().size());
+    assertEquals(outputs.size(), randomTxs.get(0).getOutputs().size());
     MoneroTxWallet tx = outputs.get(0).getTx();
     for (MoneroOutputWallet output : outputs) assertTrue(tx == output.getTx());
   }
@@ -4345,13 +4345,13 @@ public abstract class TestMoneroWalletCommon {
     // test vouts
     if (Boolean.TRUE.equals(tx.isIncoming()) && Boolean.TRUE.equals(ctx.includeOutputs)) {
       if (tx.isConfirmed()) {
-        assertNotNull(tx.getVouts());
-        assertTrue(tx.getVouts().size() > 0);
+        assertNotNull(tx.getOutputs());
+        assertTrue(tx.getOutputs().size() > 0);
       } else {
-        assertNull(tx.getVouts());
+        assertNull(tx.getOutputs());
       }
     }
-    if (tx.getVouts() != null) for (MoneroOutputWallet vout : tx.getVoutsWallet()) testOutputWallet(vout);
+    if (tx.getOutputs() != null) for (MoneroOutputWallet vout : tx.getVoutsWallet()) testOutputWallet(vout);
     
     // test deep copy
     if (!Boolean.TRUE.equals(ctx.isCopy)) testTxWalletCopy(tx, ctx);
@@ -4371,7 +4371,7 @@ public abstract class TestMoneroWalletCommon {
     assertNotNull(tx.inTxPool());
     assertNotNull(tx.isLocked());
     TestUtils.testUnsignedBigInteger(tx.getFee());
-    assertNull(tx.getVins());
+    assertNull(tx.getInputs());
     if (tx.getPaymentId() != null) assertNotEquals(MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId()); // default payment id converted to null
     if (tx.getNote() != null) assertTrue(tx.getNote().length() > 0);  // empty notes converted to undefined
     assertTrue(tx.getUnlockTime() >= 0);
@@ -4405,10 +4405,10 @@ public abstract class TestMoneroWalletCommon {
         assertTrue(tx.getIncomingTransfers().get(i) != copy.getIncomingTransfers().get(i));
       }
     }
-    if (tx.getVouts() != null) {
-      for (int i = 0; i < tx.getVouts().size(); i++) {
-        assertEquals(copy.getVouts().get(i), tx.getVouts().get(i));
-        assertTrue(tx.getVouts().get(i) != copy.getVouts().get(i));
+    if (tx.getOutputs() != null) {
+      for (int i = 0; i < tx.getOutputs().size(); i++) {
+        assertEquals(copy.getOutputs().get(i), tx.getOutputs().get(i));
+        assertTrue(tx.getOutputs().get(i) != copy.getOutputs().get(i));
       }
     }
     
@@ -4494,7 +4494,7 @@ public abstract class TestMoneroWalletCommon {
     // vout has circular reference to its transaction which has some initialized fields
     MoneroTxWallet tx = output.getTx();
     assertNotNull(tx);
-    assertTrue(tx.getVouts().contains(output));
+    assertTrue(tx.getOutputs().contains(output));
     assertNotNull(tx.getHash());
     assertNotNull(tx.isLocked());
     assertEquals(true, tx.isConfirmed());  // TODO monero-wallet-rpc: possible to get unconfirmed vouts?
@@ -4690,7 +4690,7 @@ public abstract class TestMoneroWalletCommon {
     for (MoneroTxWallet tx : txs) {
       Integer prevAccountIdx = null;
       Integer prevSubaddressIdx = null;
-      if (tx.getVouts() == null) continue;
+      if (tx.getOutputs() == null) continue;
       for (MoneroOutputWallet vout : tx.getVoutsWallet()) {
         if (prevAccountIdx == null) prevAccountIdx = vout.getAccountIndex();
         else {

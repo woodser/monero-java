@@ -746,7 +746,7 @@ public class TestMoneroDaemonRpc {
     List<String> txHashes = new ArrayList<String>();
     for (MoneroTx tx : txs) txHashes.add(tx.getHash());
     for (MoneroTx tx : daemon.getTxs(txHashes)) {
-      for (MoneroOutput vin : tx.getVins()) keyImages.add(vin.getKeyImage().getHex());
+      for (MoneroOutput input : tx.getInputs()) keyImages.add(input.getKeyImage().getHex());
     }
     daemon.flushTxPool(txHashes);
     
@@ -763,7 +763,7 @@ public class TestMoneroDaemonRpc {
     keyImages = new ArrayList<String>();
     txs = getConfirmedTxs(daemon, 10);
     for (MoneroTx tx : txs) {
-      for (MoneroOutput vin : tx.getVins()) keyImages.add(vin.getKeyImage().getHex());
+      for (MoneroOutput input : tx.getInputs()) keyImages.add(input.getKeyImage().getHex());
     }
     
     // key images are all spent
@@ -1448,8 +1448,8 @@ public class TestMoneroDaemonRpc {
     assertNotNull(tx.isDoubleSpendSeen());
     assertTrue(tx.getVersion() >= 0);
     assertTrue(tx.getUnlockTime() >= 0);
-    assertNotNull(tx.getVins());
-    assertNotNull(tx.getVouts());
+    assertNotNull(tx.getInputs());
+    assertNotNull(tx.getOutputs());
     assertTrue(tx.getExtra().length > 0);
     
     // test presence of output indices
@@ -1503,7 +1503,7 @@ public class TestMoneroDaemonRpc {
     // test miner tx
     if (tx.isMinerTx()) {
       assertEquals(0, tx.getFee().equals(BigInteger.valueOf(0)));
-      assertEquals(null, tx.getVins());
+      assertEquals(null, tx.getInputs());
       assertNull(tx.getSignatures());
     } else {
       if (tx.getSignatures() != null) assertFalse(tx.getSignatures().isEmpty());
@@ -1537,16 +1537,16 @@ public class TestMoneroDaemonRpc {
 //      assertTrue(!tx.isConfirmed());
 //    }
     
-    // test vins and vouts
-    if (!tx.isMinerTx()) assertFalse(tx.getVins().isEmpty());
-    for (MoneroOutput vin : tx.getVins()) {
-      assertTrue(tx == vin.getTx());
-      testVin(vin, ctx);
+    // test inputs and outputs
+    if (!tx.isMinerTx()) assertFalse(tx.getInputs().isEmpty());
+    for (MoneroOutput input : tx.getInputs()) {
+      assertTrue(tx == input.getTx());
+      testInput(input, ctx);
     }
-    assertFalse(tx.getVouts().isEmpty());
-    for (MoneroOutput vout : tx.getVouts()) {
-      assert(tx == vout.getTx());
-      testVout(vout, ctx);
+    assertFalse(tx.getOutputs().isEmpty());
+    for (MoneroOutput output : tx.getOutputs()) {
+      assert(tx == output.getTx());
+      testVout(output, ctx);
     }
     
     // test pruned vs not pruned
@@ -1584,10 +1584,10 @@ public class TestMoneroDaemonRpc {
     if (!Boolean.TRUE.equals(ctx.doNotTestCopy)) testTxCopy(tx, ctx);
   }
   
-  private static void testVin(MoneroOutput vin, TestContext ctx) {
-    testOutput(vin);
-    testKeyImage(vin.getKeyImage(), ctx);
-    assertFalse(vin.getRingOutputIndices().isEmpty());
+  private static void testInput(MoneroOutput input, TestContext ctx) {
+    testOutput(input);
+    testKeyImage(input.getKeyImage(), ctx);
+    assertFalse(input.getRingOutputIndices().isEmpty());
   }
 
   private static void testKeyImage(MoneroKeyImage image, TestContext ctx) {
@@ -1619,21 +1619,21 @@ public class TestMoneroDaemonRpc {
     assertEquals(tx.toString(), copy.toString());
     assertTrue(copy != tx);
     
-    // test different vin references
-    if (copy.getVins() == null) assertEquals(tx.getVins(), null);
+    // test different input references
+    if (copy.getInputs() == null) assertEquals(tx.getInputs(), null);
     else {
-      assertFalse(copy.getVins() == tx.getVins());
-      for (int i = 0; i < copy.getVins().size(); i++) {
-        assertEquals(0, tx.getVins().get(i).getAmount().compareTo(copy.getVins().get(i).getAmount()));
+      assertFalse(copy.getInputs() == tx.getInputs());
+      for (int i = 0; i < copy.getInputs().size(); i++) {
+        assertEquals(0, tx.getInputs().get(i).getAmount().compareTo(copy.getInputs().get(i).getAmount()));
       }
     }
     
-    // test different vout references
-    if (copy.getVouts() == null) assertEquals(null, tx.getVouts());
+    // test different output references
+    if (copy.getOutputs() == null) assertEquals(null, tx.getOutputs());
     else {
-      assertTrue(copy.getVouts() != tx.getVouts());
-      for (int i = 0; i < copy.getVouts().size(); i++) {
-        assertEquals(0, tx.getVouts().get(i).getAmount().compareTo(copy.getVouts().get(i).getAmount()));
+      assertTrue(copy.getOutputs() != tx.getOutputs());
+      for (int i = 0; i < copy.getOutputs().size(); i++) {
+        assertEquals(0, tx.getOutputs().get(i).getAmount().compareTo(copy.getOutputs().get(i).getAmount()));
       }
     }
     

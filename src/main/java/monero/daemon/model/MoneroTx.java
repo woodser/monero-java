@@ -41,8 +41,8 @@ public class MoneroTx {
   private String prunableHash;
   private Long size;
   private Long weight;
-  private List<MoneroOutput> vins;
-  private List<MoneroOutput> vouts;
+  private List<MoneroOutput> inputs;
+  private List<MoneroOutput> outputs;
   private List<Integer> outputIndices;
   private String metadata;
   private int[] extra;  // TODO: switch to string for consistency with MoneroTxWallet
@@ -88,13 +88,13 @@ public class MoneroTx {
     this.prunableHash = tx.prunableHash;
     this.size = tx.size;
     this.weight = tx.weight;
-    if (tx.vins != null) {
-      this.vins = new ArrayList<MoneroOutput>();
-      for (MoneroOutput vin : tx.vins) vins.add(vin.copy().setTx(this));
+    if (tx.inputs != null) {
+      this.inputs = new ArrayList<MoneroOutput>();
+      for (MoneroOutput input : tx.inputs) inputs.add(input.copy().setTx(this));
     }
-    if (tx.vouts != null) {
-      this.vouts = new ArrayList<MoneroOutput>();
-      for (MoneroOutput vout : tx.vouts) vouts.add(vout.copy().setTx(this));
+    if (tx.outputs != null) {
+      this.outputs = new ArrayList<MoneroOutput>();
+      for (MoneroOutput vout : tx.outputs) outputs.add(vout.copy().setTx(this));
     }
     if (tx.outputIndices != null) this.outputIndices = new ArrayList<Integer>(tx.outputIndices);
     this.metadata = tx.metadata;
@@ -332,22 +332,22 @@ public class MoneroTx {
   }
   
   @JsonManagedReference
-  public List<MoneroOutput> getVins() {
-    return vins;
+  public List<MoneroOutput> getInputs() {
+    return inputs;
   }
   
-  public MoneroTx setVins(List<MoneroOutput> vins) {
-    this.vins = vins;
+  public MoneroTx setInputs(List<MoneroOutput> inputs) {
+    this.inputs = inputs;
     return this;
   }
   
   @JsonManagedReference
-  public List<MoneroOutput> getVouts() {
-    return vouts;
+  public List<MoneroOutput> getOutputs() {
+    return outputs;
   }
   
-  public MoneroTx setVouts(List<MoneroOutput> vouts) {
-    this.vouts = vouts;
+  public MoneroTx setOutputs(List<MoneroOutput> outputs) {
+    this.outputs = outputs;
     return this;
   }
   
@@ -512,90 +512,90 @@ public class MoneroTx {
     this.setUnlockTime(GenUtils.reconcile(this.getUnlockTime(), tx.getUnlockTime()));
     this.setNumConfirmations(GenUtils.reconcile(this.getNumConfirmations(), tx.getNumConfirmations(), null, null, true)); // num confirmations can increase
     
-    // merge vins
-    if (tx.getVins() != null) {
-      for (MoneroOutput merger : tx.getVins()) {
+    // merge inputs
+    if (tx.getInputs() != null) {
+      for (MoneroOutput merger : tx.getInputs()) {
         boolean merged = false;
         merger.setTx(this);
-        if (this.getVins() == null) this.setVins(new ArrayList<MoneroOutput>());
-        for (MoneroOutput mergee : this.getVins()) {
+        if (this.getInputs() == null) this.setInputs(new ArrayList<MoneroOutput>());
+        for (MoneroOutput mergee : this.getInputs()) {
           if (mergee.getKeyImage().getHex().equals(merger.getKeyImage().getHex())) {
             mergee.merge(merger);
             merged = true;
             break;
           }
         }
-        if (!merged) this.getVins().add(merger);
+        if (!merged) this.getInputs().add(merger);
       }
     }
     
-    // merge vouts
-    if (tx.getVouts() != null) {
-      for (MoneroOutput vout : tx.getVouts()) vout.setTx(this);
-      if (this.getVouts() == null) this.setVouts(tx.getVouts());
+    // merge outputs
+    if (tx.getOutputs() != null) {
+      for (MoneroOutput output : tx.getOutputs()) output.setTx(this);
+      if (this.getOutputs() == null) this.setOutputs(tx.getOutputs());
       else {
         
         // validate output indices if present
         int numIndices = 0;
-        for (MoneroOutput vout : this.getVouts()) if (vout.getIndex() != null) numIndices++;
-        for (MoneroOutput vout : tx.getVouts()) if (vout.getIndex() != null) numIndices++;
-        GenUtils.assertTrue("Some vouts have an output index and some do not", numIndices == 0 || this.getVouts().size() + tx.getVouts().size() == numIndices);
+        for (MoneroOutput vout : this.getOutputs()) if (vout.getIndex() != null) numIndices++;
+        for (MoneroOutput vout : tx.getOutputs()) if (vout.getIndex() != null) numIndices++;
+        GenUtils.assertTrue("Some vouts have an output index and some do not", numIndices == 0 || this.getOutputs().size() + tx.getOutputs().size() == numIndices);
         
         // merge by output indices if present
         if (numIndices > 0) {
-          for (MoneroOutput merger : tx.getVouts()) {
+          for (MoneroOutput merger : tx.getOutputs()) {
             boolean merged = false;
             merger.setTx(this);
-            if (this.getVouts() == null) this.setVouts(new ArrayList<MoneroOutput>());
-            for (MoneroOutput mergee : this.getVouts()) {
+            if (this.getOutputs() == null) this.setOutputs(new ArrayList<MoneroOutput>());
+            for (MoneroOutput mergee : this.getOutputs()) {
               if (mergee.getIndex().equals(merger.getIndex())) {
                 mergee.merge(merger);
                 merged = true;
                 break;
               }
             }
-            if (!merged) this.getVouts().add(merger);
+            if (!merged) this.getOutputs().add(merger);
           }
         } else {
           
           // determine if key images present
           int numKeyImages = 0;
-          for (MoneroOutput vout : this.getVouts()) {
+          for (MoneroOutput vout : this.getOutputs()) {
             if (vout.getKeyImage() != null) {
               GenUtils.assertNotNull(vout.getKeyImage().getHex());
               numKeyImages++;
             }
           }
-          for (MoneroOutput vout : tx.getVouts()) {
+          for (MoneroOutput vout : tx.getOutputs()) {
             if (vout.getKeyImage() != null) {
               GenUtils.assertNotNull(vout.getKeyImage().getHex());
               numKeyImages++;
             }
           }
-          GenUtils.assertTrue("Some vouts have a key image and some do not", numKeyImages == 0 || this.getVouts().size() + tx.getVouts().size() == numKeyImages);
+          GenUtils.assertTrue("Some vouts have a key image and some do not", numKeyImages == 0 || this.getOutputs().size() + tx.getOutputs().size() == numKeyImages);
           
           // merge by key images if present
           if (numKeyImages > 0) {
-            for (MoneroOutput merger : tx.getVouts()) {
+            for (MoneroOutput merger : tx.getOutputs()) {
               boolean merged = false;
               merger.setTx(this);
-              if (this.getVouts() == null) this.setVouts(new ArrayList<MoneroOutput>());
-              for (MoneroOutput mergee : this.getVouts()) {
+              if (this.getOutputs() == null) this.setOutputs(new ArrayList<MoneroOutput>());
+              for (MoneroOutput mergee : this.getOutputs()) {
                 if (mergee.getKeyImage().getHex().equals(merger.getKeyImage().getHex())) {
                   mergee.merge(merger);
                   merged = true;
                   break;
                 }
               }
-              if (!merged) this.getVouts().add(merger);
+              if (!merged) this.getOutputs().add(merger);
             }
           }
 
           // otherwise merge by position
           else {
-            GenUtils.assertEquals(this.getVouts().size(), tx.getVouts().size());
-            for (int i = 0; i < tx.getVouts().size(); i++) {
-              this.getVouts().get(i).merge(tx.getVouts().get(i));
+            GenUtils.assertEquals(this.getOutputs().size(), tx.getOutputs().size());
+            for (int i = 0; i < tx.getOutputs().size(); i++) {
+              this.getOutputs().get(i).merge(tx.getOutputs().get(i));
             }
           }
         }
@@ -658,19 +658,19 @@ public class MoneroTx {
     sb.append(GenUtils.kvLine("Max used block height", getMaxUsedBlockHeight(), indent));
     sb.append(GenUtils.kvLine("Max used block hash", getMaxUsedBlockHash(), indent));
     sb.append(GenUtils.kvLine("Signatures", getSignatures(), indent));
-    if (getVins() != null) {
-      sb.append(GenUtils.kvLine("Vins", "", indent));
-      for (int i = 0; i < getVins().size(); i++) {
+    if (getInputs() != null) {
+      sb.append(GenUtils.kvLine("Inputs", "", indent));
+      for (int i = 0; i < getInputs().size(); i++) {
         sb.append(GenUtils.kvLine(i + 1, "", indent + 1));
-        sb.append(getVins().get(i).toString(indent + 2));
+        sb.append(getInputs().get(i).toString(indent + 2));
         sb.append('\n');
       }
     }
-    if (getVouts() != null) {
-      sb.append(GenUtils.kvLine("Vouts", "", indent));
-      for (int i = 0; i < getVouts().size(); i++) {
+    if (getOutputs() != null) {
+      sb.append(GenUtils.kvLine("Outputs", "", indent));
+      for (int i = 0; i < getOutputs().size(); i++) {
         sb.append(GenUtils.kvLine(i + 1, "", indent + 1));
-        sb.append(getVouts().get(i).toString(indent + 2));
+        sb.append(getOutputs().get(i).toString(indent + 2));
         sb.append('\n');
       }
     }
@@ -715,8 +715,8 @@ public class MoneroTx {
     result = prime * result + ((size == null) ? 0 : size.hashCode());
     result = prime * result + ((unlockTime == null) ? 0 : unlockTime.hashCode());
     result = prime * result + ((version == null) ? 0 : version.hashCode());
-    result = prime * result + ((vins == null) ? 0 : vins.hashCode());
-    result = prime * result + ((vouts == null) ? 0 : vouts.hashCode());
+    result = prime * result + ((inputs == null) ? 0 : inputs.hashCode());
+    result = prime * result + ((outputs == null) ? 0 : outputs.hashCode());
     result = prime * result + ((weight == null) ? 0 : weight.hashCode());
     return result;
   }
@@ -824,12 +824,12 @@ public class MoneroTx {
     if (version == null) {
       if (other.version != null) return false;
     } else if (!version.equals(other.version)) return false;
-    if (vins == null) {
-      if (other.vins != null) return false;
-    } else if (!vins.equals(other.vins)) return false;
-    if (vouts == null) {
-      if (other.vouts != null) return false;
-    } else if (!vouts.equals(other.vouts)) return false;
+    if (inputs == null) {
+      if (other.inputs != null) return false;
+    } else if (!inputs.equals(other.inputs)) return false;
+    if (outputs == null) {
+      if (other.outputs != null) return false;
+    } else if (!outputs.equals(other.outputs)) return false;
     if (weight == null) {
       if (other.weight != null) return false;
     } else if (!weight.equals(other.weight)) return false;
