@@ -40,7 +40,7 @@ T *get_handle(JNIEnv *env, jobject obj, const char *field_name) {
 extern "C" {
 #endif
 
-// ------------------------------ STATIC METHODS ------------------------------
+// ------------------------------ STATIC UTILS ------------------------------
 
 JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_walletExistsJni(JNIEnv *, jclass, jstring);
 
@@ -51,6 +51,8 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletRandomJni
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *, jclass, jstring, jstring, jint, jstring, jlong);
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *, jclass, jstring, jstring, jint, jstring, jstring, jstring, jlong, jstring);
+
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getMnemonicLanguagesJni(JNIEnv *, jclass);
 
 // ----------------------------- INSTANCE METHODS -----------------------------
 
@@ -73,8 +75,6 @@ JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_getNetworkTypeJni(JNIE
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMnemonicJni(JNIEnv *, jobject);
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMnemonicLanguageJni(JNIEnv *, jobject);
-
-JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getLanguagesJni(JNIEnv *, jobject);
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPublicViewKeyJni(JNIEnv *, jobject);
 

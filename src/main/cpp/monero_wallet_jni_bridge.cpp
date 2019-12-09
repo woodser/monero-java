@@ -408,6 +408,26 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJ
   }
 }
 
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getMnemonicLanguagesJni(JNIEnv *env, jclass clazz) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_getLanguagesJni");
+
+  // get languages
+  vector<string> languages;
+  try {
+    languages = monero_wallet_core::get_mnemonic_languages();
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+
+  // build java string array
+  jobjectArray jlanguages = env->NewObjectArray(languages.size(), env->FindClass("java/lang/String"), nullptr);
+  for (int i = 0; i < languages.size(); i++) {
+    env->SetObjectArrayElement(jlanguages, i, env->NewStringUTF(languages[i].c_str()));
+  }
+  return jlanguages;
+}
+
 //  ------------------------------- JNI INSTANCE ------------------------------
 
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni(JNIEnv *env, jobject instance) {
@@ -516,27 +536,6 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMnemonicLanguage
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
   }
-}
-
-JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getLanguagesJni(JNIEnv *env, jobject instance) {
-  MTRACE("Java_monero_wallet_MoneroWalletJni_getLanguagesJni");
-  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-
-  // get languages
-  vector<string> languages;
-  try {
-    languages = wallet->get_languages();
-  } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
-    return 0;
-  }
-
-  // build and java string array
-  jobjectArray jlanguages = env->NewObjectArray(languages.size(), env->FindClass("java/lang/String"), nullptr);
-  for (int i = 0; i < languages.size(); i++) {
-    env->SetObjectArrayElement(jlanguages, i, env->NewStringUTF(languages[i].c_str()));
-  }
-  return jlanguages;
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPublicViewKeyJni(JNIEnv *env, jobject instance) {

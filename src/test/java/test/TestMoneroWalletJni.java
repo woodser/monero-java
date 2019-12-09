@@ -94,6 +94,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     wallet.startSyncing();
     return wallet;
   }
+  
+  @Override
+  protected List<String> getMnemonicLanguages() {
+    return MoneroWalletJni.getMnemonicLanguages();
+  }
 
   // --------------- DEMONSTRATION OF MONERO CORE ISSUES ----------------------
   
@@ -1516,8 +1521,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testGetLanguages() {
-    super.testGetLanguages();
+  public void testGetMnemonicLanguages() {
+    super.testGetMnemonicLanguages();
   }
 
   @Override

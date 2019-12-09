@@ -71,6 +71,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     return wallet;
   }
   
+  @Override
+  protected List<String> getMnemonicLanguages() {
+    return wallet.getMnemonicLanguages();
+  }
+  
   // ---------------------------- BEGIN TESTS ---------------------------------
   
   // Can create a wallet with a randomly generated mnemonic
@@ -430,8 +435,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testGetLanguages() {
-    super.testGetLanguages();
+  public void testGetMnemonicLanguages() {
+    super.testGetMnemonicLanguages();
   }
 
   @Override

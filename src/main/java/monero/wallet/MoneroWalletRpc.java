@@ -215,6 +215,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   /**
+   * Get a list of available languages for the wallet's mnemonic phrase.
+   * 
+   * @return the available languages for the wallet's mnemonic phrase
+   */
+  @SuppressWarnings("unchecked")
+  public List<String> getMnemonicLanguages() {
+    Map<String, Object> resp = rpc.sendJsonRequest("get_languages");
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (List<String>) result.get("languages");
+  }
+  
+  /**
    * Save and close the current wallet and stop the RPC server.
    */
   public void stop() {
@@ -251,14 +263,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public String getMnemonicLanguage() {
     throw new MoneroException("MoneroWalletRpc.getMnemonicLanguage() not supported");
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public List<String> getLanguages() {
-    Map<String, Object> resp = rpc.sendJsonRequest("get_languages");
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (List<String>) result.get("languages");
   }
 
   @SuppressWarnings("unchecked")

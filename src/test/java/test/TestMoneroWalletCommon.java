@@ -133,6 +133,14 @@ public abstract class TestMoneroWalletCommon {
    * Creates a wallet from keys.
    */
   protected abstract MoneroWallet createWalletFromKeys(String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long firstReceiveHeight, String language);
+  
+  /**
+   * Get the wallet's supported languages for the mnemonic phrase.  This is an
+   * instance method for wallet rpc and a static utility for other wallets.
+   * 
+   * @return List<String> are the wallet's supported languages
+   */
+  protected abstract List<String> getMnemonicLanguages();
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -345,9 +353,9 @@ public abstract class TestMoneroWalletCommon {
   
   // Can get a list of supported languages for the mnemonic phrase
   @Test
-  public void testGetLanguages() {
+  public void testGetMnemonicLanguages() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    List<String> languages = wallet.getLanguages();
+    List<String> languages = getMnemonicLanguages();
     assertFalse(languages.isEmpty());
     for (String language : languages) assertFalse(language.isEmpty());
   }

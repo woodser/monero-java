@@ -208,6 +208,15 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
   }
   
+  /**
+   * Get a list of available languages for the wallet's mnemonic phrase.
+   * 
+   * @return the available languages for the wallet's mnemonic phrase
+   */
+  public static List<String> getMnemonicLanguages() {
+    return Arrays.asList(getMnemonicLanguagesJni());
+  }
+  
   // ------------ WALLET METHODS SPECIFIC TO JNI IMPLEMENTATION ---------------
   
   /**
@@ -438,12 +447,6 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
-  }
-  
-  @Override
-  public List<String> getLanguages() {
-    assertNotClosed();
-    return Arrays.asList(getLanguagesJni());
   }
 
   @Override
@@ -1313,7 +1316,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String getMnemonicLanguageJni();
   
-  private native String[] getLanguagesJni();
+  private static native String[] getMnemonicLanguagesJni();
   
   private native String getPublicViewKeyJni();
   
