@@ -180,6 +180,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public MoneroBlockHeader getLastBlockHeader() {
     Map<String, Object> respMap = rpc.sendJsonRequest("get_last_block_header");
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
+    checkResponseStatus(resultMap);
     MoneroBlockHeader header = convertRpcBlockHeader((Map<String, Object>) resultMap.get("block_header"));
     return header;
   }
