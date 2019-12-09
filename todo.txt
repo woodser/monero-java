@@ -4,6 +4,7 @@ monero_tx::from_property_tree payment id threw runtime_error, how is "Can get tr
 compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
 MoneroRpcConnection LOGGER.fine() executing? could be major performance hit
 sweepAccounts() is leaving behind dust
+test seed offset
 
 wallet creation config
 ability to get mnemonic from wallet restored from keys
