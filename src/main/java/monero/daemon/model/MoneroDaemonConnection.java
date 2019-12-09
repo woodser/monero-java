@@ -38,8 +38,8 @@ public class MoneroDaemonConnection {
     return hash;
   }
   
-  public void setHash(String id) {
-    this.hash = id;
+  public void setHash(String hash) {
+    this.hash = hash;
   }
   
   public Long getAvgDownload() {

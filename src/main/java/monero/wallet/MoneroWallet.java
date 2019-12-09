@@ -405,12 +405,12 @@ public interface MoneroWallet {
   public MoneroSubaddress createSubaddress(int accountIdx, String label);
   
   /**
-   * Get a wallet transaction by id.
+   * Get a wallet transaction by hash.
    * 
-   * @param txId is an id of a transaction to get
+   * @param txHash is an hash of a transaction to get
    * @return the identified transactions
    */
-  public MoneroTxWallet getTx(String txId);
+  public MoneroTxWallet getTx(String txHash);
   
   /**
    * Get all wallet transactions.  Wallet transactions contain one or more
@@ -421,20 +421,20 @@ public interface MoneroWallet {
   public List<MoneroTxWallet> getTxs();
   
   /**
-   * Get wallet transactions by id.
+   * Get wallet transactions by hash.
    * 
-   * @param txIds are ids of transactions to get
+   * @param txHashes are ids of transactions to get
    * @return the identified transactions
    */
-  public List<MoneroTxWallet> getTxs(String... txIds);
+  public List<MoneroTxWallet> getTxs(String... txHashes);
   
   /**
-   * Get wallet transactions by id.
+   * Get wallet transactions by hash.
    * 
-   * @param txIds are ids of transactions to get
+   * @param txHashes are ids of transactions to get
    * @return the identified transactions
    */
-  public List<MoneroTxWallet> getTxs(List<String> txIds);
+  public List<MoneroTxWallet> getTxs(List<String> txHashes);
   
   /**
    * Get wallet transactions.  Wallet transactions contain one or more
@@ -642,7 +642,7 @@ public interface MoneroWallet {
    * Relay a previously created transaction.
    * 
    * @param txMetadata is transaction metadata previously created without relaying
-   * @return the id of the relayed tx
+   * @return the hash of the relayed tx
    */
   public String relayTx(String txMetadata);
   
@@ -650,7 +650,7 @@ public interface MoneroWallet {
    * Relay a previously created transaction.
    * 
    * @param tx is the transaction to relay
-   * @return the id of the relayed tx
+   * @return the hash of the relayed tx
    */
   public String relayTx(MoneroTxWallet tx);
   
@@ -840,79 +840,79 @@ public interface MoneroWallet {
   public boolean verify(String message, String address, String signature);
   
   /**
-   * Get a transaction's secret key from its id.
+   * Get a transaction's secret key from its hash.
    * 
-   * @param txId is the transaction's id
+   * @param txHash is the transaction's hash
    * @return is the transaction's secret key
    */
-  public String getTxKey(String txId);
+  public String getTxKey(String txHash);
   
   /**
    * Check a transaction in the blockchain with its secret key.
    * 
-   * @param txId specifies the transaction to check
+   * @param txHash specifies the transaction to check
    * @param txKey is the transaction's secret key
    * @param address is the destination public address of the transaction
    * @return the result of the check
    */
-  public MoneroCheckTx checkTxKey(String txId, String txKey, String address);
+  public MoneroCheckTx checkTxKey(String txHash, String txKey, String address);
   
   /**
    * Get a transaction signature to prove it.
    * 
-   * @param txId specifies the transaction to prove
+   * @param txHash specifies the transaction to prove
    * @param address is the destination public address of the transaction
    * @return the transaction signature
    */
-  public String getTxProof(String txId, String address);
+  public String getTxProof(String txHash, String address);
   
   /**
    * Get a transaction signature to prove it.
    * 
-   * @param txId specifies the transaction to prove
+   * @param txHash specifies the transaction to prove
    * @param address is the destination public address of the transaction
    * @param message is a message to include with the signature to further authenticate the proof (optional)
    * @return the transaction signature
    */
-  public String getTxProof(String txId, String address, String message);
+  public String getTxProof(String txHash, String address, String message);
   
   /**
    * Prove a transaction by checking its signature.
    * 
-   * @param txId specifies the transaction to prove
+   * @param txHash specifies the transaction to prove
    * @param address is the destination public address of the transaction
    * @param message is a message included with the signature to further authenticate the proof (optional)
    * @param signature is the transaction signature to confirm
    * @return the result of the check
    */
-  public MoneroCheckTx checkTxProof(String txId, String address, String message, String signature);
+  public MoneroCheckTx checkTxProof(String txHash, String address, String message, String signature);
   
   /**
    * Generate a signature to prove a spend. Unlike proving a transaction, it does not require the destination public address.
    * 
-   * @param txId specifies the transaction to prove
+   * @param txHash specifies the transaction to prove
    * @return the transaction signature
    */
-  public String getSpendProof(String txId);
+  public String getSpendProof(String txHash);
   
   /**
    * Generate a signature to prove a spend. Unlike proving a transaction, it does not require the destination public address.
    * 
-   * @param txId specifies the transaction to prove
+   * @param txHash specifies the transaction to prove
    * @param message is a message to include with the signature to further authenticate the proof (optional)
    * @return the transaction signature
    */
-  public String getSpendProof(String txId, String message);
+  public String getSpendProof(String txHash, String message);
   
   /**
    * Prove a spend using a signature. Unlike proving a transaction, it does not require the destination public address.
    * 
-   * @param txId specifies the transaction to prove
+   * @param txHash specifies the transaction to prove
    * @param message is a message included with the signature to further authenticate the proof (optional)
    * @param signature is the transaction signature to confirm
    * @return true if the signature is good, false otherwise
    */
-  public boolean checkSpendProof(String txId, String message, String signature);
+  public boolean checkSpendProof(String txHash, String message, String signature);
   
   /**
    * Generate a signature to prove the entire balance of the wallet.
@@ -945,34 +945,34 @@ public interface MoneroWallet {
   /**
    * Get a transaction note.
    * 
-   * @param txId specifies the transaction to get the note of
+   * @param txHash specifies the transaction to get the note of
    * @return the tx note
    */
-  public String getTxNote(String txId);
+  public String getTxNote(String txHash);
   
   /**
    * Get notes for multiple transactions.
    * 
-   * @param txIds identify the transactions to get notes for
+   * @param txHashes identify the transactions to get notes for
    * @return notes for the transactions
    */
-  public List<String> getTxNotes(List<String> txIds);
+  public List<String> getTxNotes(List<String> txHashes);
   
   /**
    * Set a note for a specific transaction.
    * 
-   * @param txId specifies the transaction
+   * @param txHash specifies the transaction
    * @param note specifies the note
    */
-  public void setTxNote(String txId, String note);
+  public void setTxNote(String txHash, String note);
   
   /**
    * Set notes for multiple transactions.
    * 
-   * @param txIds specify the transactions to set notes for
+   * @param txHashes specify the transactions to set notes for
    * @param notes are the notes to set for the transactions
    */
-  public void setTxNotes(List<String> txIds, List<String> notes);
+  public void setTxNotes(List<String> txHashes, List<String> notes);
   
   /**
    * Get all address book entries.

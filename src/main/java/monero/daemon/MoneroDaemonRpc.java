@@ -186,9 +186,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroBlockHeader getBlockHeaderByHash(String blockId) {
+  public MoneroBlockHeader getBlockHeaderByHash(String blockHash) {
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("hash", blockId);
+    params.put("hash", blockHash);
     Map<String, Object> respMap = rpc.sendJsonRequest("get_block_header_by_hash", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroBlockHeader header = convertRpcBlockHeader((Map<String, Object>) resultMap.get("block_header"));
@@ -225,9 +225,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroBlock getBlockById(String blockId) {
+  public MoneroBlock getBlockById(String blockHash) {
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("hash", blockId);
+    params.put("hash", blockHash);
     Map<String, Object> respMap = rpc.sendJsonRequest("get_block", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
     MoneroBlock block = convertRpcBlock(resultMap);
@@ -235,7 +235,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public List<MoneroBlock> getBlocksById(List<String> blockIds, Long startHeight, Boolean prune) {
+  public List<MoneroBlock> getBlocksById(List<String> blockHashes, Long startHeight, Boolean prune) {
     throw new RuntimeException("Not implemented");
   }
 
@@ -280,8 +280,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       for (int txIdx = 0; txIdx < rpcTxs.get(blockIdx).size(); txIdx++) {
         MoneroTx tx = new MoneroTx();
         txs.add(tx);
-        List<String> txIds = (List<String>) rpcBlocks.get(blockIdx).get("tx_hashes");
-        tx.setHash(txIds.get(txIdx));
+        List<String> txHashes = (List<String>) rpcBlocks.get(blockIdx).get("tx_hashes");
+        tx.setHash(txHashes.get(txIdx));
         tx.setIsConfirmed(true);
         tx.setInTxPool(false);
         tx.setIsMinerTx(false);
@@ -327,27 +327,27 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
   
   @Override
-  public List<String> getBlockIds(List<String> blockIds, Long startHeight) {
+  public List<String> getBlockIds(List<String> blockHashes, Long startHeight) {
     throw new RuntimeException("Not implemented");
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroTx> getTxs(Collection<String> txIds, Boolean prune) {
+  public List<MoneroTx> getTxs(Collection<String> txHashes, Boolean prune) {
     
     // validate input
-    if (txIds.isEmpty()) throw new MoneroException("Must provide an array of transaction ids");
+    if (txHashes.isEmpty()) throw new MoneroException("Must provide an array of transaction ids");
     
     // fetch transactions
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txs_hashes", txIds);
+    params.put("txs_hashes", txHashes);
     params.put("decode_as_json", true);
     params.put("prune", prune);
     Map<String, Object> respMap = rpc.sendPathRequest("get_transactions", params);
     try {
       checkResponseStatus(respMap);
     } catch (MoneroException e) {
-      if (e.getMessage().indexOf("Failed to parse hex representation of transaction hash") >= 0) throw new MoneroException("Invalid transaction id", e.getCode());
+      if (e.getMessage().indexOf("Failed to parse hex representation of transaction hash") >= 0) throw new MoneroException("Invalid transaction hash", e.getCode());
       throw e;
     }
     
@@ -377,9 +377,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public List<String> getTxHexes(Collection<String> txIds, Boolean prune) {
+  public List<String> getTxHexes(Collection<String> txHashes, Boolean prune) {
     List<String> hexes = new ArrayList<String>();
-    for (MoneroTx tx : getTxs(txIds, prune)) hexes.add(Boolean.TRUE.equals(prune) ? tx.getPrunedHex() : tx.getFullHex());
+    for (MoneroTx tx : getTxs(txHashes, prune)) hexes.add(Boolean.TRUE.equals(prune) ? tx.getPrunedHex() : tx.getFullHex());
     return hexes;
   }
 
@@ -430,9 +430,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void relayTxsById(Collection<String> txIds) {
+  public void relayTxsById(Collection<String> txHashes) {
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txids", txIds);
+    params.put("txids", txHashes);
     Map<String, Object> resp = rpc.sendJsonRequest("relay_tx", params);
     checkResponseStatus((Map<String, Object>) resp.get("result"));
   }
@@ -1498,7 +1498,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("wide_difficulty")) chain.setDifficulty(GenUtils.reconcile(chain.getDifficulty(), prefixedHexToBI((String) val)));
       else if (key.equals("height")) chain.setHeight(((BigInteger) val).longValue());
       else if (key.equals("length")) chain.setLength(((BigInteger) val).longValue());
-      else if (key.equals("block_hashes")) chain.setBlockIds((List<String>) val);
+      else if (key.equals("block_hashes")) chain.setBlockHashes((List<String>) val);
       else if (key.equals("main_chain_parent_block")) chain.setMainChainParentBlockHash((String) val);
       else LOGGER.warning("WARNING: ignoring unexpected field in alternative chain: " + key + ": " + val);
     }

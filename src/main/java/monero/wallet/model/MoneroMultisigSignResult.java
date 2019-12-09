@@ -8,7 +8,7 @@ import java.util.List;
 public class MoneroMultisigSignResult {
   
   private String signedMultisigTxHex;
-  private List<String> txIds;
+  private List<String> txHashes;
 
   public String getSignedMultisigTxHex() {
     return signedMultisigTxHex;
@@ -19,11 +19,11 @@ public class MoneroMultisigSignResult {
   }
 
   public List<String> getTxIds() {
-    return txIds;
+    return txHashes;
   }
 
-  public void setTxIds(List<String> txIds) {
-    this.txIds = txIds;
+  public void setTxIds(List<String> txHashes) {
+    this.txHashes = txHashes;
   }
 
   @Override
@@ -31,7 +31,7 @@ public class MoneroMultisigSignResult {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((signedMultisigTxHex == null) ? 0 : signedMultisigTxHex.hashCode());
-    result = prime * result + ((txIds == null) ? 0 : txIds.hashCode());
+    result = prime * result + ((txHashes == null) ? 0 : txHashes.hashCode());
     return result;
   }
 
@@ -44,9 +44,9 @@ public class MoneroMultisigSignResult {
     if (signedMultisigTxHex == null) {
       if (other.signedMultisigTxHex != null) return false;
     } else if (!signedMultisigTxHex.equals(other.signedMultisigTxHex)) return false;
-    if (txIds == null) {
-      if (other.txIds != null) return false;
-    } else if (!txIds.equals(other.txIds)) return false;
+    if (txHashes == null) {
+      if (other.txHashes != null) return false;
+    } else if (!txHashes.equals(other.txHashes)) return false;
     return true;
   }
 }

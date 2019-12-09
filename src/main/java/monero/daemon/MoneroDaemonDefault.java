@@ -52,33 +52,33 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   }
   
   @Override
-  public MoneroTx getTx(String txId) {
-    return getTx(txId, null);
+  public MoneroTx getTx(String txHash) {
+    return getTx(txHash, null);
   }
   
   @Override
-  public MoneroTx getTx(String txId, Boolean prune) {
-    return getTxs(Arrays.asList(txId), prune).get(0);
+  public MoneroTx getTx(String txHash, Boolean prune) {
+    return getTxs(Arrays.asList(txHash), prune).get(0);
   }
   
   @Override
-  public List<MoneroTx> getTxs(Collection<String> txIds) {
-    return getTxs(txIds, null);
+  public List<MoneroTx> getTxs(Collection<String> txHashes) {
+    return getTxs(txHashes, null);
   }
   
   @Override
-  public String getTxHex(String txId) {
-    return getTxHex(txId, false);
+  public String getTxHex(String txHash) {
+    return getTxHex(txHash, false);
   }
   
   @Override
-  public String getTxHex(String txId, Boolean prune) {
-    return getTxHexes(Arrays.asList(txId), prune).get(0);
+  public String getTxHex(String txHash, Boolean prune) {
+    return getTxHexes(Arrays.asList(txHash), prune).get(0);
   }
   
   @Override
-  public List<String> getTxHexes(Collection<String> txIds) {
-    return getTxHexes(txIds, null);
+  public List<String> getTxHexes(Collection<String> txHashes) {
+    return getTxHexes(txHashes, null);
   }
   
   @Override
@@ -92,8 +92,8 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   }
   
   @Override
-  public void relayTxById(String txId) {
-    relayTxsById(Arrays.asList(txId));
+  public void relayTxById(String txHash) {
+    relayTxsById(Arrays.asList(txHash));
   }
   
   @Override

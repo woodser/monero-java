@@ -380,8 +380,8 @@ public class TestMoneroDaemonRpc {
     }
     
     // fetch each tx by hash with pruning
-    for (String txId : txHashes) {
-      MoneroTx tx = daemon.getTx(txId, true);
+    for (String txHash : txHashes) {
+      MoneroTx tx = daemon.getTx(txHash, true);
       ctx.isPruned = true;
       testTx(tx, ctx);
     }
@@ -743,12 +743,12 @@ public class TestMoneroDaemonRpc {
       txs.add(tx);
     }
     List<String> keyImages = new ArrayList<String>();
-    List<String> txIds = new ArrayList<String>();
-    for (MoneroTx tx : txs) txIds.add(tx.getHash());
-    for (MoneroTx tx : daemon.getTxs(txIds)) {
+    List<String> txHashes = new ArrayList<String>();
+    for (MoneroTx tx : txs) txHashes.add(tx.getHash());
+    for (MoneroTx tx : daemon.getTxs(txHashes)) {
       for (MoneroOutput vin : tx.getVins()) keyImages.add(vin.getKeyImage().getHex());
     }
-    daemon.flushTxPool(txIds);
+    daemon.flushTxPool(txHashes);
     
     // key images are not spent
     testSpentStatuses(keyImages, MoneroKeyImageSpentStatus.NOT_SPENT);
@@ -770,7 +770,7 @@ public class TestMoneroDaemonRpc {
     testSpentStatuses(keyImages, MoneroKeyImageSpentStatus.CONFIRMED);
     
     // flush this test's txs from pool
-    daemon.flushTxPool(txIds);
+    daemon.flushTxPool(txHashes);
   }
   
   // Can get output indices given a list of transaction ids (binary)
@@ -1214,9 +1214,9 @@ public class TestMoneroDaemonRpc {
   private static void testSubmitThenRelay(List<MoneroTx> txs) {
     
     // submit txs hex but don't relay
-    List<String> txIds = new ArrayList<String>();
+    List<String> txHashes = new ArrayList<String>();
     for (MoneroTx tx : txs) {
-      txIds.add(tx.getHash());
+      txHashes.add(tx.getHash());
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
       testSubmitTxResultGood(result);
       assertEquals(false, result.isRelayed());
@@ -1239,8 +1239,8 @@ public class TestMoneroDaemonRpc {
     }
     
     // relay the txs
-    if (txIds.size() == 1) daemon.relayTxById(txIds.get(0));
-    else daemon.relayTxsById(txIds);
+    if (txHashes.size() == 1) daemon.relayTxById(txHashes.get(0));
+    else daemon.relayTxsById(txHashes);
     
     // ensure txs are relayed
     for (MoneroTx tx : txs) {
@@ -1679,10 +1679,10 @@ public class TestMoneroDaemonRpc {
     List<MoneroBlock> blocks = daemon.getBlocksByRange(startHeight, endHeight);
     
     // collect tx ids
-    List<String> txIds = new ArrayList<String>();
-    for (MoneroBlock block : blocks) txIds.addAll(block.getTxHashes());
-    assertFalse("No transactions found in the range [" + startHeight + ", " + endHeight + "]", txIds.isEmpty());  // TODO: this fails if no txs in last 200 blocks
-    return txIds;
+    List<String> txHashes = new ArrayList<String>();
+    for (MoneroBlock block : blocks) txHashes.addAll(block.getTxHashes());
+    assertFalse("No transactions found in the range [" + startHeight + ", " + endHeight + "]", txHashes.isEmpty());  // TODO: this fails if no txs in last 200 blocks
+    return txHashes;
   }
   
   private static MoneroTx getUnrelayedTx(MoneroWallet wallet, Integer accountIdx) {
@@ -1856,7 +1856,7 @@ public class TestMoneroDaemonRpc {
   
   private static void testAltChain(MoneroAltChain altChain) {
     assertNotNull(altChain);
-    assertFalse(altChain.getBlockIds().isEmpty());
+    assertFalse(altChain.getBlockHashes().isEmpty());
     TestUtils.testUnsignedBigInteger(altChain.getDifficulty(), true);
     assertTrue(altChain.getHeight() > 0);
     assertTrue(altChain.getLength() > 0);

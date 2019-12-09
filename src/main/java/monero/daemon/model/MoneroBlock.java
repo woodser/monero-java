@@ -19,7 +19,7 @@ public class MoneroBlock extends MoneroBlockHeader {
   private String hex;
   private MoneroTx minerTx;
   private List<MoneroTx> txs;
-  private List<String> txIds;
+  private List<String> txHashes;
   
   public MoneroBlock() {
     super();
@@ -37,7 +37,7 @@ public class MoneroBlock extends MoneroBlockHeader {
       this.txs = new ArrayList<MoneroTx>();
       for (MoneroTx tx : block.txs) txs.add(tx.copy().setBlock(this));
     }
-    if (block.getTxHashes() != null) this.txIds = new ArrayList<String>(block.getTxHashes());
+    if (block.getTxHashes() != null) this.txHashes = new ArrayList<String>(block.getTxHashes());
   }
   
   public String getHex() {
@@ -76,11 +76,11 @@ public class MoneroBlock extends MoneroBlockHeader {
   }
   
   public List<String> getTxHashes() {
-    return txIds;
+    return txHashes;
   }
   
   public MoneroBlock setTxHashes(List<String> txHashes) {
-    this.txIds = txHashes;
+    this.txHashes = txHashes;
     return this;
   }
   
@@ -143,7 +143,7 @@ public class MoneroBlock extends MoneroBlockHeader {
     int result = super.hashCode();
     result = prime * result + ((minerTx == null) ? 0 : minerTx.hashCode());
     result = prime * result + ((hex == null) ? 0 : hex.hashCode());
-    result = prime * result + ((txIds == null) ? 0 : txIds.hashCode());
+    result = prime * result + ((txHashes == null) ? 0 : txHashes.hashCode());
     result = prime * result + ((txs == null) ? 0 : txs.hashCode());
     return result;
   }
@@ -160,9 +160,9 @@ public class MoneroBlock extends MoneroBlockHeader {
     if (hex == null) {
       if (other.hex != null) return false;
     } else if (!hex.equals(other.hex)) return false;
-    if (txIds == null) {
-      if (other.txIds != null) return false;
-    } else if (!txIds.equals(other.txIds)) return false;
+    if (txHashes == null) {
+      if (other.txHashes != null) return false;
+    } else if (!txHashes.equals(other.txHashes)) return false;
     if (txs == null) {
       if (other.txs != null) return false;
     } else if (!txs.equals(other.txs)) return false;

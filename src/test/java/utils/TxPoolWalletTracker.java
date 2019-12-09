@@ -76,7 +76,7 @@ public class TxPoolWalletTracker {
     }
   }
   
-  private static void waitForTxsToClearPool(String... txIds) {
+  private static void waitForTxsToClearPool(String... txHashes) {
     MoneroDaemon daemon = TestUtils.getDaemonRpc(); 
       
     // attempt to start mining to push the network along
@@ -91,7 +91,7 @@ public class TxPoolWalletTracker {
     
     // loop until txs are not in pool
     boolean isFirst = true;
-    while (txsInPool(txIds)) {
+    while (txsInPool(txHashes)) {
       
       // print debug messsage one time
       if (isFirst) {  
@@ -108,12 +108,12 @@ public class TxPoolWalletTracker {
     if (startedMining) daemon.stopMining();
   }
   
-  private static boolean txsInPool(String...txIds) {
+  private static boolean txsInPool(String...txHashes) {
     MoneroDaemon daemon = TestUtils.getDaemonRpc();
     List<MoneroTx> txsPool = daemon.getTxPool();
     for (MoneroTx txPool : txsPool) {
-      for (String txId : txIds) {
-        if (txId.equals(txPool.getHash())) return true;
+      for (String txHash : txHashes) {
+        if (txHash.equals(txPool.getHash())) return true;
       }
     }
     return false;

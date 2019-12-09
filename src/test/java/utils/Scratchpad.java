@@ -25,7 +25,7 @@ public class Scratchpad {
     //MoneroTx tx = null;
     List<MoneroTxWallet> txs = null;
     //List<MoneroTransfer> transfers = null;
-    String txId = null;
+    String txHash = null;
     
     // -------------------------------- SCRATCHPAD ----------------------------
     

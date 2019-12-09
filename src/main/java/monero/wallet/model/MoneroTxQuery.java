@@ -292,8 +292,8 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setHash(String id) {
-    super.setHash(id);
+  public MoneroTxQuery setHash(String hash) {
+    super.setHash(hash);
     return this;
   }
 

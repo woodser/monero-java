@@ -729,7 +729,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
       for (MoneroTxWallet tx : txs) txMap.put(tx.getHash(), tx);
       List<MoneroTxWallet> txsSorted = new ArrayList<MoneroTxWallet>();
-      for (String txId : query.getTxHashes()) txsSorted.add(txMap.get(txId));
+      for (String txHash : query.getTxHashes()) txsSorted.add(txMap.get(txHash));
       txs = txsSorted;
     }
     LOGGER.fine("getTxs() returning " + txs.size() + " transactions");
@@ -955,10 +955,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public MoneroCheckTx checkTxKey(String txId, String txKey, String address) {
+  public MoneroCheckTx checkTxKey(String txHash, String txKey, String address) {
     assertNotClosed();
     try {
-      String checkStr = checkTxKeyJni(txId, txKey, address);
+      String checkStr = checkTxKeyJni(txHash, txKey, address);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckTx.class);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
@@ -966,20 +966,20 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public String getTxProof(String txId, String address, String message) {
+  public String getTxProof(String txHash, String address, String message) {
     assertNotClosed();
     try {
-      return getTxProofJni(txId, address, message);
+      return getTxProofJni(txHash, address, message);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
   }
 
   @Override
-  public MoneroCheckTx checkTxProof(String txId, String address, String message, String signature) {
+  public MoneroCheckTx checkTxProof(String txHash, String address, String message, String signature) {
     assertNotClosed();
     try {
-      String checkStr = checkTxProofJni(txId, address, message, signature);
+      String checkStr = checkTxProofJni(txHash, address, message, signature);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckTx.class);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
@@ -987,20 +987,20 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public String getSpendProof(String txId, String message) {
+  public String getSpendProof(String txHash, String message) {
     assertNotClosed();
     try {
-      return getSpendProofJni(txId, message);
+      return getSpendProofJni(txHash, message);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
   }
 
   @Override
-  public boolean checkSpendProof(String txId, String message, String signature) {
+  public boolean checkSpendProof(String txHash, String message, String signature) {
     assertNotClosed();
     try {
-      return checkSpendProofJni(txId, message, signature);
+      return checkSpendProofJni(txHash, message, signature);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -1049,25 +1049,25 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   }
 
   @Override
-  public String getTxKey(String txId) {
+  public String getTxKey(String txHash) {
     assertNotClosed();
     try {
-      return getTxKeyJni(txId);
+      return getTxKeyJni(txHash);
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
   }
 
   @Override
-  public List<String> getTxNotes(List<String> txIds) {
+  public List<String> getTxNotes(List<String> txHashes) {
     assertNotClosed();
-    return Arrays.asList(getTxNotesJni(txIds.toArray(new String[txIds.size()])));  // convert to array for jni
+    return Arrays.asList(getTxNotesJni(txHashes.toArray(new String[txHashes.size()])));  // convert to array for jni
   }
 
   @Override
-  public void setTxNotes(List<String> txIds, List<String> notes) {
+  public void setTxNotes(List<String> txHashes, List<String> notes) {
     assertNotClosed();
-    setTxNotesJni(txIds.toArray(new String[txIds.size()]), notes.toArray(new String[notes.size()]));
+    setTxNotesJni(txHashes.toArray(new String[txHashes.size()]), notes.toArray(new String[notes.size()]));
   }
 
   @Override
@@ -1397,25 +1397,25 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native String parseTxSetJni(String txSetJson);
   
-  private native String[] getTxNotesJni(String[] txIds);
+  private native String[] getTxNotesJni(String[] txHashes);
   
-  private native void setTxNotesJni(String[] txIds, String[] notes);
+  private native void setTxNotesJni(String[] txHashes, String[] notes);
   
   private native String signJni(String msg);
   
   private native boolean verifyJni(String msg, String address, String signature);
   
-  private native String getTxKeyJni(String txId);
+  private native String getTxKeyJni(String txHash);
   
-  private native String checkTxKeyJni(String txId, String txKey, String address);
+  private native String checkTxKeyJni(String txHash, String txKey, String address);
   
-  private native String getTxProofJni(String txId, String address, String message);
+  private native String getTxProofJni(String txHash, String address, String message);
   
-  private native String checkTxProofJni(String txId, String address, String message, String signature);
+  private native String checkTxProofJni(String txHash, String address, String message, String signature);
   
-  private native String getSpendProofJni(String txId, String message);
+  private native String getSpendProofJni(String txHash, String message);
   
-  private native boolean checkSpendProofJni(String txId, String message, String signature);
+  private native boolean checkSpendProofJni(String txHash, String message, String signature);
   
   private native String getReserveProofWalletJni(String message);
   
@@ -1492,7 +1492,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       for (MoneroWalletListenerI listener : listeners) listener.onNewBlock(height);
     }
     
-    public void onOutputReceived(long height, String txId, String amountStr, int accountIdx, int subaddressIdx, int version, long unlockTime) {
+    public void onOutputReceived(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version, long unlockTime) {
       
       // build received output
       MoneroOutputWallet output = new MoneroOutputWallet();
@@ -1500,7 +1500,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       output.setAccountIndex(accountIdx);
       output.setSubaddressIndex(subaddressIdx);
       MoneroTxWallet tx = new MoneroTxWallet();
-      tx.setHash(txId);
+      tx.setHash(txHash);
       tx.setVersion(version);
       tx.setUnlockTime(unlockTime);
       output.setTx(tx);
@@ -1515,7 +1515,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       for (MoneroWalletListenerI listener : listeners) listener.onOutputReceived((MoneroOutputWallet) tx.getVouts().get(0));
     }
     
-    public void onOutputSpent(long height, String txId, String amountStr, int accountIdx, int subaddressIdx, int version) {
+    public void onOutputSpent(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version) {
       
       // build spent output
       MoneroOutputWallet output = new MoneroOutputWallet();
@@ -1523,7 +1523,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       output.setAccountIndex(accountIdx);
       output.setSubaddressIndex(subaddressIdx);
       MoneroTxWallet tx = new MoneroTxWallet();
-      tx.setHash(txId);
+      tx.setHash(txHash);
       tx.setVersion(version);
       output.setTx(tx);
       tx.setVins(Arrays.asList(output));

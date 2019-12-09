@@ -79,10 +79,10 @@ public interface MoneroDaemon {
   public long getHeight();
   
   /**
-   * Get a block's id by its height.
+   * Get a block's hash by its height.
    * 
-   * @param height is the height of the block id to get
-   * @return the block's id at the given height
+   * @param height is the height of the block hash to get
+   * @return the block's hash at the given height
    */
   public String getBlockHash(long height);
   
@@ -111,12 +111,12 @@ public interface MoneroDaemon {
   public MoneroBlockHeader getLastBlockHeader();
   
   /**
-   * Get a block header by its id.
+   * Get a block header by its hash.
    * 
-   * @param blockId is the id of the block to get the header of
+   * @param blockHash is the hash of the block to get the header of
    * @return the block's header
    */
-  public MoneroBlockHeader getBlockHeaderByHash(String blockId);
+  public MoneroBlockHeader getBlockHeaderByHash(String blockHash);
   
   /**
    * Get a block header by its height.
@@ -136,24 +136,24 @@ public interface MoneroDaemon {
   public List<MoneroBlockHeader> getBlockHeadersByRange(Long startHeight, Long endHeight);
   
   /**
-   * Get a block by id.
+   * Get a block by hash.
    * 
-   * @param blockId is the id of the block to get
-   * @return the block with the given id
+   * @param blockHash is the hash of the block to get
+   * @return the block with the given hash
    */
-  public MoneroBlock getBlockById(String blockId);
+  public MoneroBlock getBlockById(String blockHash);
   
   /**
-   * Get blocks by id.
+   * Get blocks by hash.
    * 
-   * @param blockIds are array of hashes; first 10 blocks id goes sequential,
+   * @param blockHashes are array of hashes; first 10 blocks hash goes sequential,
    *        next goes in pow(2,n) offset, like 2, 4, 8, 16, 32, 64 and so on,
    *        and the last one is always genesis block
-   * @param startHeight is the start height to get blocks by id
+   * @param startHeight is the start height to get blocks by hash
    * @param prune specifies if returned blocks should be pruned (defaults to false)  // TODO: test default
    * @return the retrieved blocks
    */
-  public List<MoneroBlock> getBlocksById(List<String> blockIds, Long startHeight, Boolean prune);
+  public List<MoneroBlock> getBlocksById(List<String> blockHashes, Long startHeight, Boolean prune);
   
   /**
    * Get a block by height.
@@ -204,81 +204,81 @@ public interface MoneroDaemon {
   /**
    * Get block ids as a binary request to the daemon.
    * 
-   * @param blockIds specify block ids to fetch; first 10 blocks id goes
+   * @param blockHashes specify block ids to fetch; first 10 blocks hash goes
    *        sequential, next goes in pow(2,n) offset, like 2, 4, 8, 16, 32, 64
    *        and so on, and the last one is always genesis block
    * @param startHeight is the starting height of block ids to return
    * @return the requested block ids     
    */
-  public List<String> getBlockIds(List<String> blockIds, Long startHeight);
+  public List<String> getBlockIds(List<String> blockHashes, Long startHeight);
   
   /**
-   * Get a transaction by id.
+   * Get a transaction by hash.
    * 
-   * @param txId is the id of the transaction to get
-   * @return the transaction with the given id
+   * @param txHash is the hash of the transaction to get
+   * @return the transaction with the given hash
    */
-  public MoneroTx getTx(String txId);
+  public MoneroTx getTx(String txHash);
   
   /**
-   * Get a transaction by id.
+   * Get a transaction by hash.
    * 
-   * @param txId is the id of the transaction to get
+   * @param txHash is the hash of the transaction to get
    * @param prune specifies if the returned tx should be pruned (defaults to false)
-   * @return the transaction with the given id
+   * @return the transaction with the given hash
    */
-  public MoneroTx getTx(String txId, Boolean prune);
+  public MoneroTx getTx(String txHash, Boolean prune);
   
   /**
    * Get transactions by ids.
    * 
-   * @param txIds are ids of transactions to get
+   * @param txHashes are ids of transactions to get
    * @return the transactions with the given ids
    */
-  public List<MoneroTx> getTxs(Collection<String> txIds);
+  public List<MoneroTx> getTxs(Collection<String> txHashes);
   
   /**
    * Get transactions by ids.
    * 
-   * @param txIds are ids of transactions to get
+   * @param txHashes are ids of transactions to get
    * @param prune specifies if the returned txs should be pruned (defaults to false)
    * @return the transactions with the given ids
    */
-  public List<MoneroTx> getTxs(Collection<String> txIds, Boolean prune);
+  public List<MoneroTx> getTxs(Collection<String> txHashes, Boolean prune);
   
   /**
-   * Get a transaction hex by id.
+   * Get a transaction hex by hash.
    * 
-   * @param txId is the id of the transaction to get hex from
-   * @return the tx hex with the given id
+   * @param txHash is the hash of the transaction to get hex from
+   * @return the tx hex with the given hash
    */
-  public String getTxHex(String txId);
+  public String getTxHex(String txHash);
   
   /**
-   * Get a transaction hex by id.
+   * Get a transaction hex by hash.
    * 
-   * @param txId is the id of the transaction to get hex from
+   * @param txHash is the hash of the transaction to get hex from
    * @param prune specifies if the returned tx hex should be pruned (defaults to false)
-   * @return the tx hex with the given id
+   * @return the tx hex with the given hash
    */
-  public String getTxHex(String txId, Boolean prune);
+  public String getTxHex(String txHash, Boolean prune);
   
   /**
    * Get transaction hexes by ids.
    * 
-   * @param txIds are ids of transactions to get hexes from
+   * @param txHashes are ids of transactions to get hexes from
    * @return are the tx hexes
    */
-  public List<String> getTxHexes(Collection<String> txIds);
+  public List<String> getTxHexes(Collection<String> txHashes);
   
   /**
    * Get transaction hexes by ids.
    * 
-   * @param txIds are ids of transactions to get hexes from
+   * @param txHashes are ids of transactions to get hexes from
    * @param prune specifies if the returned tx hexes should be pruned (defaults to false)
    * @return are the tx hexes
    */
-  public List<String> getTxHexes(Collection<String> txIds, Boolean prune);
+  public List<String> getTxHexes(Collection<String> txHashes, Boolean prune);
   
   /**
    * Gets the total emissions and fees from the genesis block to the current height.
@@ -322,18 +322,18 @@ public interface MoneroDaemon {
   public MoneroSubmitTxResult submitTxHex(String txHex, Boolean doNotRelay);
   
   /**
-   * Relays a transaction by id.
+   * Relays a transaction by hash.
    * 
-   * @param txId identifies the transaction to relay
+   * @param txHash identifies the transaction to relay
    */
-  public void relayTxById(String txId);
+  public void relayTxById(String txHash);
   
   /**
-   * Relays transactions by id.
+   * Relays transactions by hash.
    * 
-   * @param txIds identify the transactions to relay
+   * @param txHashes identify the transactions to relay
    */
-  public void relayTxsById(Collection<String> txIds);
+  public void relayTxsById(Collection<String> txHashes);
   
   /**
    * Get valid transactions seen by the node but not yet mined into a block, as well

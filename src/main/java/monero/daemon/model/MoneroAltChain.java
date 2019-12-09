@@ -8,18 +8,18 @@ import java.util.List;
  */
 public class MoneroAltChain {
   
-  private List<String> blockIds;
+  private List<String> blockHashes;
   private BigInteger difficulty;
   private Long height;
   private Long length;
   private String mainChainParentBlockHash;
   
-  public List<String> getBlockIds() {
-    return blockIds;
+  public List<String> getBlockHashes() {
+    return blockHashes;
   }
   
-  public void setBlockIds(List<String> blockIds) {
-    this.blockIds = blockIds;
+  public void setBlockHashes(List<String> blockHashes) {
+    this.blockHashes = blockHashes;
   }
   
   public BigInteger getDifficulty() {

@@ -23,6 +23,8 @@ support createWallet(MoneroWalletConfig) with all possible fields?
 ability to set mnemonic language and get different mnemonic?
 "supported languages for the mnemonic phrase" doesn't make sense
 wallet creation config
+
+update sample code
 update build instructions
 update java-lite
 update spec

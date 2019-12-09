@@ -125,8 +125,8 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public MoneroTxWallet getTx(String txId) {
-    return getTxs(txId).get(0);
+  public MoneroTxWallet getTx(String txHash) {
+    return getTxs(txHash).get(0);
   }
   
   @Override
@@ -134,12 +134,12 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
     return getTxs(new MoneroTxQuery());
   }
   
-  public List<MoneroTxWallet> getTxs(String... txIds) {
-    return getTxs(new MoneroTxQuery().setTxHashes(txIds));
+  public List<MoneroTxWallet> getTxs(String... txHashes) {
+    return getTxs(new MoneroTxQuery().setTxHashes(txHashes));
   }
   
-  public List<MoneroTxWallet> getTxs(List<String> txIds) {
-    return getTxs(new MoneroTxQuery().setTxHashes(txIds));
+  public List<MoneroTxWallet> getTxs(List<String> txHashes) {
+    return getTxs(new MoneroTxQuery().setTxHashes(txHashes));
   }
   
   @Override
@@ -344,23 +344,23 @@ public abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public String getTxProof(String txId, String address) {
-    return getTxProof(txId, address, null);
+  public String getTxProof(String txHash, String address) {
+    return getTxProof(txHash, address, null);
   }
   
   @Override
-  public String getSpendProof(String txId) {
-    return getSpendProof(txId, null);
+  public String getSpendProof(String txHash) {
+    return getSpendProof(txHash, null);
   }
   
   @Override
-  public String getTxNote(String txId) {
-    return getTxNotes(Arrays.asList(txId)).get(0);
+  public String getTxNote(String txHash) {
+    return getTxNotes(Arrays.asList(txHash)).get(0);
   }
   
   @Override
-  public void setTxNote(String txId, String note) {
-    setTxNotes(Arrays.asList(txId), Arrays.asList(note));
+  public void setTxNote(String txHash, String note) {
+    setTxNotes(Arrays.asList(txHash), Arrays.asList(note));
   }
   
   @Override

@@ -683,15 +683,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // verify all specified tx ids found
     if (query.getTxHashes() != null) {
-      for (String txId : query.getTxHashes()) {
+      for (String txHash : query.getTxHashes()) {
         boolean found = false;
         for (MoneroTxWallet tx : txs) {
-          if (txId.equals(tx.getHash())) {
+          if (txHash.equals(tx.getHash())) {
             found = true;
             break;
           }
         }
-        if (!found) throw new MoneroException("Tx not found in wallet: " + txId);
+        if (!found) throw new MoneroException("Tx not found in wallet: " + txHash);
       }
     }
     
@@ -705,7 +705,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       Map<String, MoneroTxWallet> txsById = new HashMap<String, MoneroTxWallet>();  // store txs in temporary map for sorting
       for (MoneroTxWallet tx : txs) txsById.put(tx.getHash(), tx);
       List<MoneroTxWallet> orderedTxs = new ArrayList<MoneroTxWallet>();
-      for (String txId : query.getTxHashes()) orderedTxs.add(txsById.get(txId));
+      for (String txHash : query.getTxHashes()) orderedTxs.add(txsById.get(txHash));
       txs = orderedTxs;
     }
     return txs;
@@ -983,15 +983,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   public List<String> relayTxs(Collection<String> txMetadatas) {
     if (txMetadatas == null || txMetadatas.isEmpty()) throw new MoneroException("Must provide an array of tx metadata to relay");
-    List<String> txIds = new ArrayList<String>();
+    List<String> txHashes = new ArrayList<String>();
     for (String txMetadata : txMetadatas) {
       Map<String, Object> params = new HashMap<String, Object>();
       params.put("hex", txMetadata);
       Map<String, Object> resp = rpc.sendJsonRequest("relay_tx", params);
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
-      txIds.add((String) result.get("tx_hash"));
+      txHashes.add((String) result.get("tx_hash"));
     }
-    return txIds;
+    return txHashes;
   }
   
   @SuppressWarnings("unchecked")
@@ -1208,9 +1208,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public String getTxKey(String txId) {
+  public String getTxKey(String txHash) {
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txid", txId);
+    params.put("txid", txHash);
     Map<String, Object> resp = rpc.sendJsonRequest("get_tx_key", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return (String) result.get("tx_key");
@@ -1218,11 +1218,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroCheckTx checkTxKey(String txId, String txKey, String address) {
+  public MoneroCheckTx checkTxKey(String txHash, String txKey, String address) {
     
     // send request
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txid", txId);
+    params.put("txid", txHash);
     params.put("tx_key", txKey);
     params.put("address", address);
     Map<String, Object> resp = rpc.sendJsonRequest("check_tx_key", params);
@@ -1239,9 +1239,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public String getTxProof(String txId, String address, String message) {
+  public String getTxProof(String txHash, String address, String message) {
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txid", txId);
+    params.put("txid", txHash);
     params.put("address", address);
     params.put("message", message);
     Map<String, Object> resp = rpc.sendJsonRequest("get_tx_proof", params);
@@ -1251,11 +1251,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroCheckTx checkTxProof(String txId, String address, String message, String signature) {
+  public MoneroCheckTx checkTxProof(String txHash, String address, String message, String signature) {
     
     // send request
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txid", txId);
+    params.put("txid", txHash);
     params.put("address", address);
     params.put("message", message);
     params.put("signature", signature);
@@ -1276,9 +1276,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public String getSpendProof(String txId, String message) {
+  public String getSpendProof(String txHash, String message) {
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txid", txId);
+    params.put("txid", txHash);
     params.put("message", message);
     Map<String, Object> resp = rpc.sendJsonRequest("get_spend_proof", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
@@ -1287,9 +1287,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public boolean checkSpendProof(String txId, String message, String signature) {
+  public boolean checkSpendProof(String txHash, String message, String signature) {
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txid", txId);
+    params.put("txid", txHash);
     params.put("message", message);
     params.put("signature", signature);
     Map<String, Object> resp = rpc.sendJsonRequest("check_spend_proof", params);
@@ -1345,18 +1345,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @SuppressWarnings("unchecked")
   @Override
-  public List<String> getTxNotes(List<String> txIds) {
+  public List<String> getTxNotes(List<String> txHashes) {
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txids", txIds);
+    params.put("txids", txHashes);
     Map<String, Object> resp = rpc.sendJsonRequest("get_tx_notes", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return (List<String>) result.get("notes");
   }
 
   @Override
-  public void setTxNotes(List<String> txIds, List<String> notes) {
+  public void setTxNotes(List<String> txHashes, List<String> notes) {
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txids", txIds);
+    params.put("txids", txHashes);
     params.put("notes", notes);
     rpc.sendJsonRequest("set_tx_notes", params);
   }

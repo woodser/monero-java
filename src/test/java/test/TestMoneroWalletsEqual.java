@@ -274,9 +274,9 @@ public class TestMoneroWalletsEqual {
     }
     
     // compare collected transfers per tx for equality
-    for (String txId : txsTransfers1.keySet()) {
-      List<MoneroTransfer> txTransfers1 = txsTransfers1.get(txId);
-      List<MoneroTransfer> txTransfers2 = txsTransfers2.get(txId);
+    for (String txHash : txsTransfers1.keySet()) {
+      List<MoneroTransfer> txTransfers1 = txsTransfers1.get(txHash);
+      List<MoneroTransfer> txTransfers2 = txsTransfers2.get(txHash);
       assertEquals(txTransfers1.size(), txTransfers2.size());
       
       // normalize and compare transfers
@@ -363,9 +363,9 @@ public class TestMoneroWalletsEqual {
     }
     
     // compare collected outputs per tx for equality
-    for (String txId : txsOutputs1.keySet()) {
-      List<MoneroOutputWallet> txOutputs1 = txsOutputs1.get(txId);
-      List<MoneroOutputWallet> txOutputs2 = txsOutputs2.get(txId);
+    for (String txHash : txsOutputs1.keySet()) {
+      List<MoneroOutputWallet> txOutputs1 = txsOutputs1.get(txHash);
+      List<MoneroOutputWallet> txOutputs2 = txsOutputs2.get(txHash);
       assertEquals(txOutputs1.size(), txOutputs2.size());
       
       // normalize and compare outputs

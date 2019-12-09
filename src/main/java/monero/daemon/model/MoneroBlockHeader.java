@@ -268,7 +268,7 @@ public class MoneroBlockHeader {
     sb.append(GenUtils.kvLine("Miner tx hash", getMinerTxHash(), indent));
     sb.append(GenUtils.kvLine("Num txs", getNumTxs(), indent));
     sb.append(GenUtils.kvLine("Orphan status", getOrphanStatus(), indent));
-    sb.append(GenUtils.kvLine("Prev id", getPrevHash(), indent));
+    sb.append(GenUtils.kvLine("Prev hash", getPrevHash(), indent));
     sb.append(GenUtils.kvLine("Reward", getReward(), indent));
     sb.append(GenUtils.kvLine("Pow hash", getPowHash(), indent));
     String str = sb.toString();

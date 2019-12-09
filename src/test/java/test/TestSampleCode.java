@@ -59,7 +59,7 @@ public class TestSampleCode {
     // get transactions in the pool
     List<MoneroTx> txsInPool = daemon.getTxPool();
     for (MoneroTx tx : txsInPool) {
-      String id = tx.getHash();
+      String hash = tx.getHash();
       BigInteger fee = tx.getFee();
       boolean isDoubleSpendSeen = tx.isDoubleSpendSeen();
     }
@@ -80,7 +80,7 @@ public class TestSampleCode {
     MoneroSubaddress subaddress = walletRpc.getSubaddress(1, 0);
     BigInteger subaddressBalance = subaddress.getBalance();
     
-    // query a transaction by id
+    // query a transaction by hash
     MoneroTxWallet tx = walletRpc.getTx(walletRpc.getTxs(new MoneroTxQuery().setIsOutgoing(true)).get(0).getHash());  // *** REMOVE FROM README SAMPLE ***
     //MoneroTxWallet tx = walletRpc.getTx("314a0f1375db31cea4dac4e0a51514a6282b43792269b3660166d4d2b46437ca");
     long txHeight = tx.getHeight();
@@ -116,7 +116,7 @@ public class TestSampleCode {
       @Override
       public void onOutputReceived(MoneroOutputWallet output) {
         System.out.println("Wallet received funds!");
-        String txId = output.getTx().getHash();
+        String txHash = output.getTx().getHash();
         int accountIdx = output.getAccountIndex();
         int subaddressIdx = output.getSubaddressIndex();
         JNI_OUTPUT_RECEIVED = true;
