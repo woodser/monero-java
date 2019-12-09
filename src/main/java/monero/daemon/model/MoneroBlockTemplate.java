@@ -12,7 +12,7 @@ public class MoneroBlockTemplate {
   private BigInteger difficulty;
   private BigInteger expectedReward;
   private Long height;
-  private String prevId;
+  private String prevHash;
   private Long reservedOffset;
   private Long seedHeight;
   private String seedHash;
@@ -58,12 +58,12 @@ public class MoneroBlockTemplate {
     this.height = height;
   }
   
-  public String getPrevId() {
-    return prevId;
+  public String getPrevHash() {
+    return prevHash;
   }
   
-  public void setPrevId(String prevId) {
-    this.prevId = prevId;
+  public void setPrevHash(String prevHash) {
+    this.prevHash = prevHash;
   }
   
   public Long getReservedOffset() {

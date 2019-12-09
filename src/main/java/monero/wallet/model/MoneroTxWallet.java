@@ -326,7 +326,7 @@ public class MoneroTxWallet extends MoneroTx {
     // represent tx with one line string
     // TODO: proper csv export
     if (oneLine) {
-      sb.append(this.getId() + ", ");
+      sb.append(this.getHash() + ", ");
       sb.append((this.isConfirmed() ? this.getBlock().getTimestamp() : this.getReceivedTimestamp()) + ", ");
       sb.append(this.isConfirmed() + ", ");
       sb.append((this.getOutgoingAmount() != null? this.getOutgoingAmount().toString() : "") + ", ");
@@ -447,8 +447,8 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setId(String id) {
-    super.setId(id);
+  public MoneroTxWallet setHash(String id) {
+    super.setHash(id);
     return this;
   }
 
@@ -633,8 +633,8 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setLastFailedId(String lastFailedId) {
-    super.setLastFailedId(lastFailedId);
+  public MoneroTxWallet setLastFailedHash(String lastFailedId) {
+    super.setLastFailedHash(lastFailedId);
     return this;
   }
 
@@ -645,8 +645,8 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setMaxUsedBlockId(String maxUsedBlockId) {
-    super.setMaxUsedBlockId(maxUsedBlockId);
+  public MoneroTxWallet setMaxUsedBlockHash(String maxUsedBlockId) {
+    super.setMaxUsedBlockHash(maxUsedBlockId);
     return this;
   }
 

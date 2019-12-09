@@ -242,7 +242,7 @@ struct wallet_jni_listener : public monero_wallet_listener {
 
     // prepare parameters to invoke Java listener
     boost::optional<uint64_t> height = output.m_tx->get_height();
-    jstring jtx_id = env->NewStringUTF(output.m_tx->m_id.get().c_str());
+    jstring jtx_id = env->NewStringUTF(output.m_tx->m_hash.get().c_str());
     jstring jamount_str = env->NewStringUTF(to_string(*output.m_amount).c_str());
 
     // invoke Java listener's onOutputReceived()
@@ -265,7 +265,7 @@ struct wallet_jni_listener : public monero_wallet_listener {
 
     // prepare parameters to invoke Java listener
     boost::optional<uint64_t> height = output.m_tx->get_height();
-    jstring jtx_id = env->NewStringUTF(output.m_tx->m_id.get().c_str());
+    jstring jtx_id = env->NewStringUTF(output.m_tx->m_hash.get().c_str());
     jstring jamount_str = env->NewStringUTF(to_string(*output.m_amount).c_str());
 
     // invoke Java listener's onOutputSpent()

@@ -84,7 +84,7 @@ public interface MoneroDaemon {
    * @param height is the height of the block id to get
    * @return the block's id at the given height
    */
-  public String getBlockId(long height);
+  public String getBlockHash(long height);
   
   /**
    * Get a block template for mining a new block.
@@ -116,7 +116,7 @@ public interface MoneroDaemon {
    * @param blockId is the id of the block to get the header of
    * @return the block's header
    */
-  public MoneroBlockHeader getBlockHeaderById(String blockId);
+  public MoneroBlockHeader getBlockHeaderByHash(String blockId);
   
   /**
    * Get a block header by its height.

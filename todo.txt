@@ -9,6 +9,7 @@ collapse jni bridge utils and wallet functions
 wallet.getSeed() test and impls
 cpp library uses unmodified monero-project submodule
 monero-javascript uses only monero-cpp-library submodule
+jni tet_wallets dir fails to create if not already created
 test sweeps
 block and tx id or hash, including MoneroSubmitTxResult
 testSyncWithPoolSubmit not ported to js
@@ -20,7 +21,9 @@ MoneroRpcConnection LOGGER.fine() executing? could be major performance hit
 sweepAccounts() is leaving behind dust
 support createWallet(MoneroWalletConfig) with all possible fields?
 ability to set mnemonic language and get different mnemonic?
-
+"supported languages for the mnemonic phrase" doesn't make sense
+wallet creation config
+update build instructions
 update java-lite
 update spec
 update docs

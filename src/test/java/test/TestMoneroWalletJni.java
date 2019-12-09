@@ -1171,7 +1171,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
     
     // tx is now confirmed
-    assertTrue(wallet.getTx(sentTx.getId()).isConfirmed()); // TODO: tx is not guaranteed to confirm, which can cause occasional test failure
+    assertTrue(wallet.getTx(sentTx.getHash()).isConfirmed()); // TODO: tx is not guaranteed to confirm, which can cause occasional test failure
     
     // created wallet should have notified listeners of received outputs
     assertFalse(myListener.getOutputsReceived().isEmpty());
@@ -1397,8 +1397,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       
       // test output's tx
       assertNotNull(output.getTx());
-      assertNotNull(output.getTx().getId());
-      assertEquals(64, output.getTx().getId().length());
+      assertNotNull(output.getTx().getHash());
+      assertEquals(64, output.getTx().getHash().length());
       assertTrue(output.getTx().getVersion() >= 0);
       assertTrue(output.getTx().getUnlockTime() >= 0);
       assertNull(output.getTx().getVins());
@@ -1424,8 +1424,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       
       // test output's tx
       assertNotNull(output.getTx());
-      assertNotNull(output.getTx().getId());
-      assertEquals(64, output.getTx().getId().length());
+      assertNotNull(output.getTx().getHash());
+      assertEquals(64, output.getTx().getHash().length());
       assertTrue(output.getTx().getVersion() >= 0);
       assertNull(output.getTx().getUnlockTime());
       assertEquals(1, output.getTx().getVins().size());
@@ -1631,8 +1631,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
 
   @Override
-  public void testGetTxsById() {
-    super.testGetTxsById();
+  public void testGetTxsByHash() {
+    super.testGetTxsByHash();
   }
 
   @Override

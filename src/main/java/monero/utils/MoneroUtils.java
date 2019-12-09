@@ -244,7 +244,7 @@ public class MoneroUtils {
    */
   public static void mergeTx(List<MoneroTx> txs, MoneroTx tx) {
     for (MoneroTx aTx : txs) {
-      if (aTx.getId().equals(tx.getId())) {
+      if (aTx.getHash().equals(tx.getHash())) {
         aTx.merge(tx);
         return;
       }
@@ -260,7 +260,7 @@ public class MoneroUtils {
    */
   public static void mergeTx(List<MoneroTxWallet> txs, MoneroTxWallet tx) {
     for (MoneroTx aTx : txs) {
-      if (aTx.getId().equals(tx.getId())) {
+      if (aTx.getHash().equals(tx.getHash())) {
         aTx.merge(tx);
         return;
       }

@@ -178,7 +178,7 @@ public class TestMoneroWalletsEqual {
     for (MoneroTxWallet tx1 : txs1) {
       boolean found = false;
       for (MoneroTxWallet tx2 : txs2) {
-        if (tx1.getId().equals(tx2.getId())) {
+        if (tx1.getHash().equals(tx2.getHash())) {
           
           // transfer destination info if known for comparison
           if (tx1.getOutgoingTransfer() != null && tx1.getOutgoingTransfer().getDestinations() != null) {
@@ -248,27 +248,27 @@ public class TestMoneroWalletsEqual {
       
       // transfers must be consecutive per transaction
       if (lastTx1 != transfer1.getTx()) {
-        assertFalse(txsTransfers1.containsKey(transfer1.getTx().getId()));  // cannot be seen before
+        assertFalse(txsTransfers1.containsKey(transfer1.getTx().getHash()));  // cannot be seen before
         lastTx1 = transfer1.getTx();
       }
       if (lastTx2 != transfer2.getTx()) {
-        assertFalse(txsTransfers2.containsKey(transfer2.getTx().getId()));  // cannot be seen before
+        assertFalse(txsTransfers2.containsKey(transfer2.getTx().getHash()));  // cannot be seen before
         lastTx2 = transfer2.getTx();
       }
       
       // collect tx1 transfer
-      List<MoneroTransfer> txTransfers1 = txsTransfers1.get(transfer1.getTx().getId());
+      List<MoneroTransfer> txTransfers1 = txsTransfers1.get(transfer1.getTx().getHash());
       if (txTransfers1 == null) {
         txTransfers1 = new ArrayList<MoneroTransfer>();
-        txsTransfers1.put(transfer1.getTx().getId(), txTransfers1);
+        txsTransfers1.put(transfer1.getTx().getHash(), txTransfers1);
       }
       txTransfers1.add(transfer1);
       
       // collect tx2 transfer
-      List<MoneroTransfer> txTransfers2 = txsTransfers2.get(transfer2.getTx().getId());
+      List<MoneroTransfer> txTransfers2 = txsTransfers2.get(transfer2.getTx().getHash());
       if (txTransfers2 == null) {
         txTransfers2 = new ArrayList<MoneroTransfer>();
-        txsTransfers2.put(transfer2.getTx().getId(), txTransfers2);
+        txsTransfers2.put(transfer2.getTx().getHash(), txTransfers2);
       }
       txTransfers2.add(transfer2);
     }
@@ -337,27 +337,27 @@ public class TestMoneroWalletsEqual {
       
       // outputs must be consecutive per transaction
       if (lastTx1 != output1.getTx()) {
-        assertFalse(txsOutputs1.containsKey(output1.getTx().getId()));  // cannot be seen before
+        assertFalse(txsOutputs1.containsKey(output1.getTx().getHash()));  // cannot be seen before
         lastTx1 = (MoneroTxWallet) output1.getTx();
       }
       if (lastTx2 != output2.getTx()) {
-        assertFalse(txsOutputs2.containsKey(output2.getTx().getId()));  // cannot be seen before
+        assertFalse(txsOutputs2.containsKey(output2.getTx().getHash()));  // cannot be seen before
         lastTx2 = (MoneroTxWallet) output2.getTx();
       }
       
       // collect tx1 output
-      List<MoneroOutputWallet> txOutputs1 = txsOutputs1.get(output1.getTx().getId());
+      List<MoneroOutputWallet> txOutputs1 = txsOutputs1.get(output1.getTx().getHash());
       if (txOutputs1 == null) {
         txOutputs1 = new ArrayList<MoneroOutputWallet>();
-        txsOutputs1.put(output1.getTx().getId(), txOutputs1);
+        txsOutputs1.put(output1.getTx().getHash(), txOutputs1);
       }
       txOutputs1.add(output1);
       
       // collect tx2 output
-      List<MoneroOutputWallet> txOutputs2 = txsOutputs2.get(output2.getTx().getId());
+      List<MoneroOutputWallet> txOutputs2 = txsOutputs2.get(output2.getTx().getHash());
       if (txOutputs2 == null) {
         txOutputs2 = new ArrayList<MoneroOutputWallet>();
-        txsOutputs2.put(output2.getTx().getId(), txOutputs2);
+        txsOutputs2.put(output2.getTx().getHash(), txOutputs2);
       }
       txOutputs2.add(output2);
     }
@@ -372,7 +372,7 @@ public class TestMoneroWalletsEqual {
       for (int i = 0; i < txOutputs1.size(); i++) {
         MoneroOutput output1 = txOutputs1.get(i);
         MoneroOutput output2 = txOutputs2.get(i);
-        assertEquals(output1.getTx().getId(), output2.getTx().getId());
+        assertEquals(output1.getTx().getHash(), output2.getTx().getHash());
         assertEquals(output1, output2);
       }
     }

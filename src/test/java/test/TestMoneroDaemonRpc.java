@@ -128,14 +128,14 @@ public class TestMoneroDaemonRpc {
     assertTrue("Height must be greater than 0", height > 0);
   }
   
-  // Can get a block id by height
+  // Can get a block hash by height
   @Test
   public void testGetBlockIdByHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
-    String id = daemon.getBlockId(lastHeader.getHeight());
-    assertNotNull(id);
-    assertEquals(64, id.length());
+    String hash = daemon.getBlockHash(lastHeader.getHeight());
+    assertNotNull(hash);
+    assertEquals(64, hash.length());
   }
   
   // Can get a block template
@@ -154,21 +154,21 @@ public class TestMoneroDaemonRpc {
     testBlockHeader(lastHeader, true);
   }
   
-  // Can get a block header by id
+  // Can get a block header by hash
   @Test
   public void testGetBlockHeaderById() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
-    // retrieve by id of last block
+    // retrieve by hash of last block
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
-    String id = daemon.getBlockId(lastHeader.getHeight());
-    MoneroBlockHeader header = daemon.getBlockHeaderById(id);
+    String hash = daemon.getBlockHash(lastHeader.getHeight());
+    MoneroBlockHeader header = daemon.getBlockHeaderByHash(hash);
     testBlockHeader(header, true);
     assertEquals(lastHeader, header);
     
-    // retrieve by id of previous to last block
-    id = daemon.getBlockId(lastHeader.getHeight() - 1);
-    header = daemon.getBlockHeaderById(id);
+    // retrieve by hash of previous to last block
+    hash = daemon.getBlockHash(lastHeader.getHeight() - 1);
+    header = daemon.getBlockHeaderByHash(hash);
     testBlockHeader(header, true);
     assertEquals(lastHeader.getHeight() - 1, (long) header.getHeight());
   }
@@ -215,9 +215,9 @@ public class TestMoneroDaemonRpc {
     }
   }
   
-  // Can get a block by id
+  // Can get a block by hash
   @Test
-  public void testGetBlockById() {
+  public void testGetBlockByHash() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // test config
@@ -226,23 +226,23 @@ public class TestMoneroDaemonRpc {
     ctx.hasTxs = false;
     ctx.headerIsFull = true;
     
-    // retrieve by id of last block
+    // retrieve by hash of last block
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
-    String id = daemon.getBlockId(lastHeader.getHeight());
-    MoneroBlock block = daemon.getBlockById(id);
+    String hash = daemon.getBlockHash(lastHeader.getHeight());
+    MoneroBlock block = daemon.getBlockById(hash);
     testBlock(block, ctx);
     assertEquals(daemon.getBlockByHeight(block.getHeight()), block);
     assertEquals(null, block.getTxs());
     
-    // retrieve by id of previous to last block
-    id = daemon.getBlockId(lastHeader.getHeight() - 1);
-    block = daemon.getBlockById(id);
+    // retrieve by hash of previous to last block
+    hash = daemon.getBlockHash(lastHeader.getHeight() - 1);
+    block = daemon.getBlockById(hash);
     testBlock(block, ctx);
     assertEquals(daemon.getBlockByHeight(lastHeader.getHeight() - 1), block);
     assertEquals(null, block.getTxs());
   }
 
-  // Can get blocks by id which includes transactions (binary)
+  // Can get blocks by hash which includes transactions (binary)
   @Test
   public void testGetBlocksByIdBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -359,13 +359,13 @@ public class TestMoneroDaemonRpc {
     throw new RuntimeException("Not implemented");
   }
   
-  // Can get a transaction by id with and without pruning
+  // Can get a transaction by hash with and without pruning
   @Test
   public void testGetTxById() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction ids to test
-    List<String> txIds = getConfirmedTxIds(daemon);
+    List<String> txHashes = getConfirmedTxHash(daemon);
     
     // context for testing txs
     TestContext ctx = new TestContext();
@@ -373,35 +373,35 @@ public class TestMoneroDaemonRpc {
     ctx.isConfirmed = true;
     ctx.fromGetTxPool = false;
     
-    // fetch each tx by id without pruning
-    for (String txId : txIds) {
-      MoneroTx tx = daemon.getTx(txId);
+    // fetch each tx by hash without pruning
+    for (String txHash : txHashes) {
+      MoneroTx tx = daemon.getTx(txHash);
       testTx(tx, ctx);
     }
     
-    // fetch each tx by id with pruning
-    for (String txId : txIds) {
+    // fetch each tx by hash with pruning
+    for (String txId : txHashes) {
       MoneroTx tx = daemon.getTx(txId, true);
       ctx.isPruned = true;
       testTx(tx, ctx);
     }
     
-    // fetch invalid id
+    // fetch invalid hash
     try {
-      daemon.getTx("invalid tx id");
+      daemon.getTx("invalid tx hash");
       throw new RuntimeException("fail");
     } catch (MoneroException e) {
-      assertEquals("Invalid transaction id", e.getMessage());
+      assertEquals("Invalid transaction hash", e.getMessage());
     }
   }
   
   // Can get transactions by ids with and without pruning
   @Test
-  public void testGetTxsByIds() {
+  public void testGetTxsByHashes() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction ids to test
-    List<String> txIds = getConfirmedTxIds(daemon);
+    List<String> txHashes = getConfirmedTxHash(daemon);
     
     // context for testing txs
     TestContext ctx = new TestContext();
@@ -409,52 +409,52 @@ public class TestMoneroDaemonRpc {
     ctx.isConfirmed = true;
     ctx.fromGetTxPool = false;
     
-    // fetch txs by id without pruning
-    List<MoneroTx> txs = daemon.getTxs(txIds);
-    assertEquals(txIds.size(), txs.size());
+    // fetch txs by hash without pruning
+    List<MoneroTx> txs = daemon.getTxs(txHashes);
+    assertEquals(txHashes.size(), txs.size());
     for (MoneroTx tx : txs) {
       testTx(tx, ctx);
     }
     
-    // fetch txs by id with pruning
-    txs = daemon.getTxs(txIds, true);
+    // fetch txs by hash with pruning
+    txs = daemon.getTxs(txHashes, true);
     ctx.isPruned = true;
-    assertEquals(txIds.size(), txs.size());
+    assertEquals(txHashes.size(), txs.size());
     for (MoneroTx tx : txs) {
       testTx(tx, ctx);
     }
     
-    // fetch invalid id
-    txIds.add("invalid tx id");
+    // fetch invalid hash
+    txHashes.add("invalid tx hash");
     try {
-      daemon.getTxs(txIds);
+      daemon.getTxs(txHashes);
       throw new RuntimeException("fail");
     } catch (MoneroException e) {
-      assertEquals("Invalid transaction id", e.getMessage());
+      assertEquals("Invalid transaction hash", e.getMessage());
     }
   }
   
-  // Can get transactions by ids that are in the transaction pool
+  // Can get transactions by hashes that are in the transaction pool
   //@Ignore // TODO re-enable, monero-core: fix daemon.getTxs() hanging occasionally
   @Test
-  public void testGetTxsByIdsInPool() {
+  public void testGetTxsByHashesInPool() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet); // wait for wallet's txs in the pool to clear to ensure reliable sync
     
     // submit txs to the pool but don't relay
-    List<String> txIds = new ArrayList<String>();
+    List<String> txHashes = new ArrayList<String>();
     for (int i = 1; i < 3; i++) {
       System.out.print("Fetching unrelayed tx...");
       MoneroTx tx = getUnrelayedTx(wallet, i);
       System.out.println("done");
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
       testSubmitTxResultGood(result);
-      txIds.add(tx.getId());
+      txHashes.add(tx.getHash());
     }
     
-    // fetch txs by id
+    // fetch txs by hash
     System.out.print("Fetching txs...");
-    List<MoneroTx> txs = daemon.getTxs(txIds);
+    List<MoneroTx> txs = daemon.getTxs(txHashes);
     System.out.println("done");
     
     // context for testing tx
@@ -464,35 +464,35 @@ public class TestMoneroDaemonRpc {
     ctx.fromGetTxPool = false;
     
     // test fetched txs
-    assertEquals(txIds.size(), txs.size());
+    assertEquals(txHashes.size(), txs.size());
     for (MoneroTx tx : txs) {
       testTx(tx, ctx);
     }
     
     // clear txs from pool
-    daemon.flushTxPool(txIds);
+    daemon.flushTxPool(txHashes);
     wallet.sync();
   }
   
-  // Can get a transaction hex by id with and without pruning
+  // Can get a transaction hex by hash with and without pruning
   @Test
-  public void testGetTxHexById() {
+  public void getTxHexByHash() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction ids to test
-    List<String> txIds = getConfirmedTxIds(daemon);
+    List<String> txHashes = getConfirmedTxHash(daemon);
     
-    // fetch each tx hex by id with and without pruning
+    // fetch each tx hex by hash with and without pruning
     List<String> hexes = new ArrayList<String>();
     List<String> hexesPruned = new ArrayList<String>();
-    for (String txId : txIds) {
-      hexes.add(daemon.getTxHex(txId));
-      hexesPruned.add(daemon.getTxHex(txId, true));
+    for (String txHash : txHashes) {
+      hexes.add(daemon.getTxHex(txHash));
+      hexesPruned.add(daemon.getTxHex(txHash, true));
     }
     
     // test results
-    assertEquals(hexes.size(), txIds.size());
-    assertEquals(hexesPruned.size(), txIds.size());
+    assertEquals(hexes.size(), txHashes.size());
+    assertEquals(hexesPruned.size(), txHashes.size());
     for (int i = 0; i < hexes.size(); i++) {
       assertNotNull(hexes.get(i));
       assertNotNull(hexesPruned.get(i));
@@ -500,30 +500,30 @@ public class TestMoneroDaemonRpc {
       assertTrue(hexes.get(i).length() > hexesPruned.get(i).length()); // pruned hex is shorter
     }
     
-    // fetch invalid id
+    // fetch invalid hash
     try {
-      daemon.getTxHex("invalid tx id");
+      daemon.getTxHex("invalid tx hash");
       throw new RuntimeException("fail");
     } catch (MoneroException e) {
-      assertEquals("Invalid transaction id", e.getMessage());
+      assertEquals("Invalid transaction hash", e.getMessage());
     }
   }
   
-  // Can get transaction hexes by ids with and without pruning
+  // Can get transaction hexes by hashes with and without pruning
   @Test
-  public void testGetTxHexesByIds() {
+  public void testGetTxHexesByHashes() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
-    // fetch transaction ids to test
-    List<String> txIds = getConfirmedTxIds(daemon);
+    // fetch transaction hashes to test
+    List<String> txHashes = getConfirmedTxHash(daemon);
     
-    // fetch tx hexes by id with and without pruning
-    List<String> hexes = daemon.getTxHexes(txIds);
-    List<String> hexesPruned = daemon.getTxHexes(txIds, true);
+    // fetch tx hexes by hash with and without pruning
+    List<String> hexes = daemon.getTxHexes(txHashes);
+    List<String> hexesPruned = daemon.getTxHexes(txHashes, true);
     
     // test results
-    assertEquals(hexes.size(), txIds.size());
-    assertEquals(hexesPruned.size(), txIds.size());
+    assertEquals(hexes.size(), txHashes.size());
+    assertEquals(hexesPruned.size(), txHashes.size());
     for (int i = 0; i < hexes.size(); i++) {
       assertNotNull(hexes.get(i));
       assertNotNull(hexesPruned.get(i));
@@ -531,13 +531,13 @@ public class TestMoneroDaemonRpc {
       assertTrue(hexes.get(i).length() > hexesPruned.get(i).length()); // pruned hex is shorter
     }
     
-    // fetch invalid id
-    txIds.add("invalid tx id");
+    // fetch invalid hash
+    txHashes.add("invalid tx hash");
     try {
-      daemon.getTxHexes(txIds);
+      daemon.getTxHexes(txHashes);
       throw new RuntimeException("fail");
     } catch (MoneroException e) {
-      assertEquals("Invalid transaction id", e.getMessage());
+      assertEquals("Invalid transaction hash", e.getMessage());
     }
   }
   
@@ -585,7 +585,7 @@ public class TestMoneroDaemonRpc {
     }
     
     // flush the tx from the pool, gg
-    daemon.flushTxPool(tx.getId());
+    daemon.flushTxPool(tx.getHash());
     wallet.sync();
   }
   
@@ -625,7 +625,7 @@ public class TestMoneroDaemonRpc {
         assertTrue(stats.getNumTxs() > i);
         testTxPoolStats(stats);
       } finally {
-        daemon.flushTxPool(tx.getId());
+        daemon.flushTxPool(tx.getHash());
         wallet.sync();
       }
     }
@@ -665,9 +665,9 @@ public class TestMoneroDaemonRpc {
     wallet.sync();
   }
   
-  // Can flush a transaction from the pool by id
+  // Can flush a transaction from the pool by hash
   @Test
-  public void testFlushTxFromPoolById() {
+  public void testFlushTxFromPoolByHash() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
@@ -683,11 +683,11 @@ public class TestMoneroDaemonRpc {
       txs.add(tx);
     }
     
-    // remove each tx from the pool by id and test
+    // remove each tx from the pool by hash and test
     for (int i = 0; i < txs.size(); i++) {
       
       // flush tx from pool
-      daemon.flushTxPool(txs.get(i).getId());
+      daemon.flushTxPool(txs.get(i).getHash());
       
       // test tx pool
       List<MoneroTx> poolTxs = daemon.getTxPool();
@@ -703,7 +703,7 @@ public class TestMoneroDaemonRpc {
   
   // Can flush transactions from the pool by ids
   @Test
-  public void testFlushTxsFromPoolByIds() {
+  public void testFlushTxsFromPoolByHashes() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
@@ -711,17 +711,17 @@ public class TestMoneroDaemonRpc {
     List<MoneroTx> txPoolBefore = daemon.getTxPool();
     
     // submit txs to the pool but don't relay
-    List<String> txIds = new ArrayList<String>();
+    List<String> txHashes = new ArrayList<String>();
     for (int i = 1; i < 3; i++) {
       MoneroTx tx = getUnrelayedTx(wallet, i);
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
       testSubmitTxResultGood(result);
-      txIds.add(tx.getId());
+      txHashes.add(tx.getHash());
     }
-    assertEquals(txPoolBefore.size() + txIds.size(), daemon.getTxPool().size());
+    assertEquals(txPoolBefore.size() + txHashes.size(), daemon.getTxPool().size());
     
     // remove all txs by ids
-    daemon.flushTxPool(txIds);
+    daemon.flushTxPool(txHashes);
     
     // pool is back to original state
     assertEquals(txPoolBefore.size(), daemon.getTxPool().size());
@@ -744,7 +744,7 @@ public class TestMoneroDaemonRpc {
     }
     List<String> keyImages = new ArrayList<String>();
     List<String> txIds = new ArrayList<String>();
-    for (MoneroTx tx : txs) txIds.add(tx.getId());
+    for (MoneroTx tx : txs) txIds.add(tx.getHash());
     for (MoneroTx tx : daemon.getTxs(txIds)) {
       for (MoneroOutput vin : tx.getVins()) keyImages.add(vin.getKeyImage().getHex());
     }
@@ -1159,7 +1159,7 @@ public class TestMoneroDaemonRpc {
     List<MoneroTx> txs = daemon.getTxPool();
     boolean found = false;
     for (MoneroTx aTx : txs) {
-      if (aTx.getId().equals(tx1.getId())) {
+      if (aTx.getHash().equals(tx1.getHash())) {
         assertEquals(true, aTx.isRelayed());
         found = true;
         break;
@@ -1169,7 +1169,7 @@ public class TestMoneroDaemonRpc {
     
     // tx1 is recognized by the wallet
     wallet.sync();
-    wallet.getTx(tx1.getId());
+    wallet.getTx(tx1.getHash());
     
     // submit and relay tx2 hex which double spends tx1
     result = daemon.submitTxHex(tx2.getFullHex());
@@ -1180,7 +1180,7 @@ public class TestMoneroDaemonRpc {
     txs = daemon.getTxPool();
     found = false;
     for (MoneroTx aTx : txs) {
-      if (aTx.getId().equals(tx2.getId())) {
+      if (aTx.getHash().equals(tx2.getHash())) {
         found = true;
         break;
       }
@@ -1216,7 +1216,7 @@ public class TestMoneroDaemonRpc {
     // submit txs hex but don't relay
     List<String> txIds = new ArrayList<String>();
     for (MoneroTx tx : txs) {
-      txIds.add(tx.getId());
+      txIds.add(tx.getHash());
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
       testSubmitTxResultGood(result);
       assertEquals(false, result.isRelayed());
@@ -1225,7 +1225,7 @@ public class TestMoneroDaemonRpc {
       List<MoneroTx> poolTxs = daemon.getTxPool();
       boolean found = false;
       for (MoneroTx aTx : poolTxs) {
-        if (aTx.getId().equals(tx.getId())) {
+        if (aTx.getHash().equals(tx.getHash())) {
           assertEquals(false, aTx.isRelayed());
           found = true;
           break;
@@ -1233,8 +1233,8 @@ public class TestMoneroDaemonRpc {
       }
       assertTrue("Tx was not found after being submitted to the daemon's tx pool", found);
       
-      // fetch tx by id and ensure not relayed
-      MoneroTx fetchedTx = daemon.getTx(tx.getId());
+      // fetch tx by hash and ensure not relayed
+      MoneroTx fetchedTx = daemon.getTx(tx.getHash());
       assertFalse(fetchedTx.isRelayed());
     }
     
@@ -1247,7 +1247,7 @@ public class TestMoneroDaemonRpc {
       List<MoneroTx> poolTxs = daemon.getTxPool();
       boolean found = false;
       for (MoneroTx aTx : poolTxs) {
-        if (aTx.getId().equals(tx.getId())) {
+        if (aTx.getHash().equals(tx.getHash())) {
           assertEquals(true, aTx.isRelayed());
           found = true;
           break;
@@ -1340,7 +1340,7 @@ public class TestMoneroDaemonRpc {
     assertNotNull(template.getDifficulty());
     assertNotNull(template.getExpectedReward());
     assertNotNull(template.getHeight());
-    assertNotNull(template.getPrevId());
+    assertNotNull(template.getPrevHash());
     assertNotNull(template.getReservedOffset());
     assertNotNull(template.getSeedHeight());
     assertTrue(template.getSeedHeight() > 0);
@@ -1355,7 +1355,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(header.getMajorVersion() >= 0);
     assertTrue(header.getMinorVersion() >= 0);
     assertTrue(header.getTimestamp() >= 0);
-    assertNotNull(header.getPrevId());
+    assertNotNull(header.getPrevHash());
     assertNotNull(header.getNonce());
     assertNull(header.getPowHash());  // never seen defined
     if (isFull) {
@@ -1363,8 +1363,8 @@ public class TestMoneroDaemonRpc {
       assertTrue(header.getDepth() >= 0);
       assertTrue(header.getDifficulty().compareTo(BigInteger.valueOf(0)) > 0);
       assertTrue(header.getCumulativeDifficulty().compareTo(BigInteger.valueOf(0)) > 0);
-      assertEquals(64, header.getId().length());
-      assertEquals(64, header.getMinerTxId().length());
+      assertEquals(64, header.getHash().length());
+      assertEquals(64, header.getMinerTxHash().length());
       assertTrue(header.getNumTxs() >= 0);
       assertNotNull(header.getOrphanStatus());
       assertNotNull(header.getReward());
@@ -1374,8 +1374,8 @@ public class TestMoneroDaemonRpc {
       assertNull(header.getDepth());
       assertNull(header.getDifficulty());
       assertNull(header.getCumulativeDifficulty());
-      assertNull(header.getId());
-      assertNull(header.getMinerTxId());
+      assertNull(header.getHash());
+      assertNull(header.getMinerTxHash());
       assertNull(header.getNumTxs());
       assertNull(header.getOrphanStatus());
       assertNull(header.getReward());
@@ -1439,7 +1439,7 @@ public class TestMoneroDaemonRpc {
     assertNotNull(ctx.fromGetTxPool);
     
     // standard across all txs
-    assertEquals(64, tx.getId().length());
+    assertEquals(64, tx.getHash().length());
     if (tx.isRelayed() == null) assertTrue(tx.inTxPool());  // TODO monero-daemon-rpc: add relayed to get_transactions
     else assertNotNull(tx.isRelayed());
     assertNotNull(tx.isConfirmed());
@@ -1487,15 +1487,15 @@ public class TestMoneroDaemonRpc {
       assertEquals(tx.isConfirmed(), false);
       assertEquals(tx.isDoubleSpendSeen(), false);
       assertEquals(tx.getLastFailedHeight(), null);
-      assertEquals(tx.getLastFailedId(), null);
+      assertEquals(tx.getLastFailedHash(), null);
       assertTrue(tx.getReceivedTimestamp() > 0);
       assertTrue(tx.getSize() > 0);
       assertTrue(tx.getWeight() > 0);
       assertNotNull(tx.isKeptByBlock());
       assertEquals(null, tx.getLastFailedHeight());
-      assertEquals(null, tx.getLastFailedId());
+      assertEquals(null, tx.getLastFailedHash());
       assertTrue(tx.getMaxUsedBlockHeight() >= 0);
-      assertNotNull(tx.getMaxUsedBlockId());
+      assertNotNull(tx.getMaxUsedBlockHash());
     } else {
       assertEquals(tx.getLastRelayedTimestamp(), null);
     }
@@ -1522,7 +1522,7 @@ public class TestMoneroDaemonRpc {
       }
     }
     assertNull(tx.getLastFailedHeight());
-    assertNull(tx.getLastFailedId());
+    assertNull(tx.getLastFailedHash());
     
     // received time only for tx pool or failed txs
     if (tx.getReceivedTimestamp() != null) {
@@ -1663,7 +1663,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
-  private static List<String> getConfirmedTxIds(MoneroDaemon daemon) {
+  private static List<String> getConfirmedTxHash(MoneroDaemon daemon) {
     
     // get valid height range
     long height = daemon.getHeight();
@@ -1680,7 +1680,7 @@ public class TestMoneroDaemonRpc {
     
     // collect tx ids
     List<String> txIds = new ArrayList<String>();
-    for (MoneroBlock block : blocks) txIds.addAll(block.getTxIds());
+    for (MoneroBlock block : blocks) txIds.addAll(block.getTxHashes());
     assertFalse("No transactions found in the range [" + startHeight + ", " + endHeight + "]", txIds.isEmpty());  // TODO: this fails if no txs in last 200 blocks
     return txIds;
   }
@@ -1860,13 +1860,13 @@ public class TestMoneroDaemonRpc {
     TestUtils.testUnsignedBigInteger(altChain.getDifficulty(), true);
     assertTrue(altChain.getHeight() > 0);
     assertTrue(altChain.getLength() > 0);
-    assertEquals(64, altChain.getMainChainParentBlockId().length());
+    assertEquals(64, altChain.getMainChainParentBlockHash().length());
   }
 
   private static void testDaemonConnection(MoneroDaemonConnection connection) {
     assertTrue(connection instanceof MoneroDaemonConnection);
     testKnownPeer(connection.getPeer(), true);
-    assertFalse(connection.getId().isEmpty());
+    assertFalse(connection.getHash().isEmpty());
     assertTrue(connection.getAvgDownload() >= 0);
     assertTrue(connection.getAvgUpload() >= 0);
     assertTrue(connection.getCurrentDownload() >= 0);

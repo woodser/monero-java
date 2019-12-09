@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MoneroDaemonConnection {
   
   private MoneroDaemonPeer peer;
-  private String id;
+  private String hash;
   private Long avgDownload;
   private Long avgUpload;
   private Long currentDownload;
@@ -34,12 +34,12 @@ public class MoneroDaemonConnection {
     this.peer = peer;
   }
   
-  public String getId() {
-    return id;
+  public String getHash() {
+    return hash;
   }
   
-  public void setId(String id) {
-    this.id = id;
+  public void setHash(String id) {
+    this.hash = id;
   }
   
   public Long getAvgDownload() {

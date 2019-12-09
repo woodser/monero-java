@@ -59,7 +59,7 @@ public class TestSampleCode {
     // get transactions in the pool
     List<MoneroTx> txsInPool = daemon.getTxPool();
     for (MoneroTx tx : txsInPool) {
-      String id = tx.getId();
+      String id = tx.getHash();
       BigInteger fee = tx.getFee();
       boolean isDoubleSpendSeen = tx.isDoubleSpendSeen();
     }
@@ -81,7 +81,7 @@ public class TestSampleCode {
     BigInteger subaddressBalance = subaddress.getBalance();
     
     // query a transaction by id
-    MoneroTxWallet tx = walletRpc.getTx(walletRpc.getTxs(new MoneroTxQuery().setIsOutgoing(true)).get(0).getId());  // *** REMOVE FROM README SAMPLE ***
+    MoneroTxWallet tx = walletRpc.getTx(walletRpc.getTxs(new MoneroTxQuery().setIsOutgoing(true)).get(0).getHash());  // *** REMOVE FROM README SAMPLE ***
     //MoneroTxWallet tx = walletRpc.getTx("314a0f1375db31cea4dac4e0a51514a6282b43792269b3660166d4d2b46437ca");
     long txHeight = tx.getHeight();
     List<MoneroIncomingTransfer> incomingTransfers = tx.getIncomingTransfers();
@@ -116,7 +116,7 @@ public class TestSampleCode {
       @Override
       public void onOutputReceived(MoneroOutputWallet output) {
         System.out.println("Wallet received funds!");
-        String txId = output.getTx().getId();
+        String txId = output.getTx().getHash();
         int accountIdx = output.getAccountIndex();
         int subaddressIdx = output.getSubaddressIndex();
         JNI_OUTPUT_RECEIVED = true;
@@ -144,7 +144,7 @@ public class TestSampleCode {
     
     // the transaction is (probably) confirmed
     TimeUnit.SECONDS.sleep(10); // wait 10s for auto refresh
-    boolean isConfirmed = walletRpc.getTx(sentTx.getId()).isConfirmed();
+    boolean isConfirmed = walletRpc.getTx(sentTx.getHash()).isConfirmed();
     
     // create a request to send funds from the RPC wallet to multiple destinations in the JNI wallet
     MoneroSendRequest request = new MoneroSendRequest()

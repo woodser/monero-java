@@ -12,7 +12,7 @@ public class MoneroAltChain {
   private BigInteger difficulty;
   private Long height;
   private Long length;
-  private String mainChainParentBlockId;
+  private String mainChainParentBlockHash;
   
   public List<String> getBlockIds() {
     return blockIds;
@@ -46,11 +46,11 @@ public class MoneroAltChain {
     this.length = length;
   }
   
-  public String getMainChainParentBlockId() {
-    return mainChainParentBlockId;
+  public String getMainChainParentBlockHash() {
+    return mainChainParentBlockHash;
   }
   
-  public void setMainChainParentBlockId(String mainChainParentBlockId) {
-    this.mainChainParentBlockId = mainChainParentBlockId;
+  public void setMainChainParentBlockHash(String mainChainParentBlockHash) {
+    this.mainChainParentBlockHash = mainChainParentBlockHash;
   }
 }

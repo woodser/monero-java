@@ -51,7 +51,7 @@ public class TxPoolWalletTracker {
     Set<String> txIdsPool = new HashSet<String>();
     for (MoneroTx tx : TestUtils.getDaemonRpc().getTxPool()) {
       if (!tx.isRelayed() || tx.isFailed()) continue;
-      txIdsPool.add(tx.getId());
+      txIdsPool.add(tx.getHash());
     }
     
     // get ids of txs from wallets to wait for
@@ -60,7 +60,7 @@ public class TxPoolWalletTracker {
       if (!clearedWallets.contains(wallet)) {
         wallet.sync();
         for (MoneroTxWallet tx : wallet.getTxs()) {
-          txIdsWallet.add(tx.getId());
+          txIdsWallet.add(tx.getHash());
         }
       }
     }
@@ -113,7 +113,7 @@ public class TxPoolWalletTracker {
     List<MoneroTx> txsPool = daemon.getTxPool();
     for (MoneroTx txPool : txsPool) {
       for (String txId : txIds) {
-        if (txId.equals(txPool.getId())) return true;
+        if (txId.equals(txPool.getHash())) return true;
       }
     }
     return false;

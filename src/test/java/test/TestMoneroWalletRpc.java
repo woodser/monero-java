@@ -357,8 +357,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     super.testTxWallet(tx, ctx);
   }
   
-  protected void testInvalidTxIdException(MoneroException e) {
-    super.testInvalidTxIdException(e);
+  protected void testInvalidTxHashException(MoneroException e) {
+    super.testInvalidTxHashException(e);
     assertEquals(-8, (int) e.getCode());
   }
   
@@ -545,8 +545,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   @Override
-  public void testGetTxsById() {
-    super.testGetTxsById();
+  public void testGetTxsByHash() {
+    super.testGetTxsByHash();
   }
 
   @Override

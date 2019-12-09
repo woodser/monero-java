@@ -19,7 +19,7 @@ public class MoneroTx {
   public static final String DEFAULT_PAYMENT_ID = "0000000000000000";
 
   private MoneroBlock block;
-  private String id;
+  private String hash;
   private Integer version;
   private Boolean isMinerTx;
   private String paymentId;
@@ -51,9 +51,9 @@ public class MoneroTx {
   private Boolean isKeptByBlock;
   private Boolean isFailed;
   private Long lastFailedHeight;
-  private String lastFailedId;
+  private String lastFailedHash;
   private Long maxUsedBlockHeight;
-  private String maxUsedBlockId;
+  private String maxUsedBlockHash;
   private List<String> signatures;
   
   public MoneroTx() {
@@ -66,7 +66,7 @@ public class MoneroTx {
    * @param tx is the transaction to make a deep copy of
    */
   public MoneroTx(final MoneroTx tx) {
-    this.id = tx.id;
+    this.hash = tx.hash;
     this.version = tx.version;
     this.isMinerTx = tx.isMinerTx;
     this.paymentId = tx.paymentId;
@@ -104,9 +104,9 @@ public class MoneroTx {
     this.isKeptByBlock = tx.isKeptByBlock;
     this.isFailed = tx.isFailed;
     this.lastFailedHeight = tx.lastFailedHeight;
-    this.lastFailedId = tx.lastFailedId;
+    this.lastFailedHash = tx.lastFailedHash;
     this.maxUsedBlockHeight = tx.maxUsedBlockHeight;
-    this.maxUsedBlockId = tx.maxUsedBlockId;
+    this.maxUsedBlockHash = tx.maxUsedBlockHash;
     if (tx.signatures != null) this.signatures = new ArrayList<String>(tx.signatures);
   }
   
@@ -128,12 +128,12 @@ public class MoneroTx {
     return this.getBlock() == null ? null : this.getBlock().getHeight();
   }
   
-  public String getId() {
-    return id;
+  public String getHash() {
+    return hash;
   }
   
-  public MoneroTx setId(String id) {
-    this.id = id;
+  public MoneroTx setHash(String hash) {
+    this.hash = hash;
     return this;
   }
   
@@ -425,12 +425,12 @@ public class MoneroTx {
     return this;
   }
   
-  public String getLastFailedId() {
-    return lastFailedId;
+  public String getLastFailedHash() {
+    return lastFailedHash;
   }
   
-  public MoneroTx setLastFailedId(String lastFailedId) {
-    this.lastFailedId = lastFailedId;
+  public MoneroTx setLastFailedHash(String lastFailedHash) {
+    this.lastFailedHash = lastFailedHash;
     return this;
   }
   
@@ -443,12 +443,12 @@ public class MoneroTx {
     return this;
   }
   
-  public String getMaxUsedBlockId() {
-    return maxUsedBlockId;
+  public String getMaxUsedBlockHash() {
+    return maxUsedBlockHash;
   }
   
-  public MoneroTx setMaxUsedBlockId(String maxUsedBlockId) {
-    this.maxUsedBlockId = maxUsedBlockId;
+  public MoneroTx setMaxUsedBlockHash(String maxUsedBlockHash) {
+    this.maxUsedBlockHash = maxUsedBlockHash;
     return this;
   }
   
@@ -481,7 +481,7 @@ public class MoneroTx {
     }
     
     // otherwise merge tx fields
-    this.setId(GenUtils.reconcile(this.getId(), tx.getId()));
+    this.setHash(GenUtils.reconcile(this.getHash(), tx.getHash()));
     this.setVersion(GenUtils.reconcile(this.getVersion(), tx.getVersion()));
     this.setPaymentId(GenUtils.reconcile(this.getPaymentId(), tx.getPaymentId()));
     this.setFee(GenUtils.reconcile(this.getFee(), tx.getFee()));
@@ -505,9 +505,9 @@ public class MoneroTx {
     this.setIsKeptByBlock(GenUtils.reconcile(this.isKeptByBlock(), tx.isKeptByBlock()));
     this.setIsFailed(GenUtils.reconcile(this.isFailed(), tx.isFailed()));
     this.setLastFailedHeight(GenUtils.reconcile(this.getLastFailedHeight(), tx.getLastFailedHeight()));
-    this.setLastFailedId(GenUtils.reconcile(this.getLastFailedId(), tx.getLastFailedId()));
+    this.setLastFailedHash(GenUtils.reconcile(this.getLastFailedHash(), tx.getLastFailedHash()));
     this.setMaxUsedBlockHeight(GenUtils.reconcile(this.getMaxUsedBlockHeight(), tx.getMaxUsedBlockHeight()));
-    this.setMaxUsedBlockId(GenUtils.reconcile(this.getMaxUsedBlockId(), tx.getMaxUsedBlockId()));
+    this.setMaxUsedBlockHash(GenUtils.reconcile(this.getMaxUsedBlockHash(), tx.getMaxUsedBlockHash()));
     this.setSignatures(GenUtils.reconcile(this.getSignatures(), tx.getSignatures()));
     this.setUnlockTime(GenUtils.reconcile(this.getUnlockTime(), tx.getUnlockTime()));
     this.setNumConfirmations(GenUtils.reconcile(this.getNumConfirmations(), tx.getNumConfirmations(), null, null, true)); // num confirmations can increase
@@ -623,7 +623,7 @@ public class MoneroTx {
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
     sb.append(GenUtils.getIndent(indent) + "=== TX ===\n");
-    sb.append(GenUtils.kvLine("Tx ID: ", getId(), indent));
+    sb.append(GenUtils.kvLine("Tx hash: ", getHash(), indent));
     sb.append(GenUtils.kvLine("Height", getHeight(), indent));
     sb.append(GenUtils.kvLine("Version", getVersion(), indent));
     sb.append(GenUtils.kvLine("Is miner tx", isMinerTx(), indent));
@@ -654,9 +654,9 @@ public class MoneroTx {
     sb.append(GenUtils.kvLine("Kept by block", isKeptByBlock(), indent));
     sb.append(GenUtils.kvLine("Is failed", isFailed(), indent));
     sb.append(GenUtils.kvLine("Last failed height", getLastFailedHeight(), indent));
-    sb.append(GenUtils.kvLine("Last failed id", getLastFailedId(), indent));
+    sb.append(GenUtils.kvLine("Last failed hash", getLastFailedHash(), indent));
     sb.append(GenUtils.kvLine("Max used block height", getMaxUsedBlockHeight(), indent));
-    sb.append(GenUtils.kvLine("Max used block id", getMaxUsedBlockId(), indent));
+    sb.append(GenUtils.kvLine("Max used block hash", getMaxUsedBlockHash(), indent));
     sb.append(GenUtils.kvLine("Signatures", getSignatures(), indent));
     if (getVins() != null) {
       sb.append(GenUtils.kvLine("Vins", "", indent));
@@ -686,7 +686,7 @@ public class MoneroTx {
     result = prime * result + Arrays.hashCode(extra);
     result = prime * result + ((fee == null) ? 0 : fee.hashCode());
     result = prime * result + ((fullHex == null) ? 0 : fullHex.hashCode());
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    result = prime * result + ((hash == null) ? 0 : hash.hashCode());
     result = prime * result + ((inTxPool == null) ? 0 : inTxPool.hashCode());
     result = prime * result + ((isMinerTx == null) ? 0 : isMinerTx.hashCode());
     result = prime * result + ((isConfirmed == null) ? 0 : isConfirmed.hashCode());
@@ -696,10 +696,10 @@ public class MoneroTx {
     result = prime * result + ((isRelayed == null) ? 0 : isRelayed.hashCode());
     result = prime * result + ((key == null) ? 0 : key.hashCode());
     result = prime * result + ((lastFailedHeight == null) ? 0 : lastFailedHeight.hashCode());
-    result = prime * result + ((lastFailedId == null) ? 0 : lastFailedId.hashCode());
+    result = prime * result + ((lastFailedHash == null) ? 0 : lastFailedHash.hashCode());
     result = prime * result + ((lastRelayedTimestamp == null) ? 0 : lastRelayedTimestamp.hashCode());
     result = prime * result + ((maxUsedBlockHeight == null) ? 0 : maxUsedBlockHeight.hashCode());
-    result = prime * result + ((maxUsedBlockId == null) ? 0 : maxUsedBlockId.hashCode());
+    result = prime * result + ((maxUsedBlockHash == null) ? 0 : maxUsedBlockHash.hashCode());
     result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
     result = prime * result + ((ringSize == null) ? 0 : ringSize.hashCode());
     result = prime * result + ((numConfirmations == null) ? 0 : numConfirmations.hashCode());
@@ -737,9 +737,9 @@ public class MoneroTx {
     if (fullHex == null) {
       if (other.fullHex != null) return false;
     } else if (!fullHex.equals(other.fullHex)) return false;
-    if (id == null) {
-      if (other.id != null) return false;
-    } else if (!id.equals(other.id)) return false;
+    if (hash == null) {
+      if (other.hash != null) return false;
+    } else if (!hash.equals(other.hash)) return false;
     if (inTxPool == null) {
       if (other.inTxPool != null) return false;
     } else if (!inTxPool.equals(other.inTxPool)) return false;
@@ -767,18 +767,18 @@ public class MoneroTx {
     if (lastFailedHeight == null) {
       if (other.lastFailedHeight != null) return false;
     } else if (!lastFailedHeight.equals(other.lastFailedHeight)) return false;
-    if (lastFailedId == null) {
-      if (other.lastFailedId != null) return false;
-    } else if (!lastFailedId.equals(other.lastFailedId)) return false;
+    if (lastFailedHash == null) {
+      if (other.lastFailedHash != null) return false;
+    } else if (!lastFailedHash.equals(other.lastFailedHash)) return false;
     if (lastRelayedTimestamp == null) {
       if (other.lastRelayedTimestamp != null) return false;
     } else if (!lastRelayedTimestamp.equals(other.lastRelayedTimestamp)) return false;
     if (maxUsedBlockHeight == null) {
       if (other.maxUsedBlockHeight != null) return false;
     } else if (!maxUsedBlockHeight.equals(other.maxUsedBlockHeight)) return false;
-    if (maxUsedBlockId == null) {
-      if (other.maxUsedBlockId != null) return false;
-    } else if (!maxUsedBlockId.equals(other.maxUsedBlockId)) return false;
+    if (maxUsedBlockHash == null) {
+      if (other.maxUsedBlockHash != null) return false;
+    } else if (!maxUsedBlockHash.equals(other.maxUsedBlockHash)) return false;
     if (metadata == null) {
       if (other.metadata != null) return false;
     } else if (!metadata.equals(other.metadata)) return false;

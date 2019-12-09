@@ -682,11 +682,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     txs = txsQueried;
     
     // verify all specified tx ids found
-    if (query.getTxIds() != null) {
-      for (String txId : query.getTxIds()) {
+    if (query.getTxHashes() != null) {
+      for (String txId : query.getTxHashes()) {
         boolean found = false;
         for (MoneroTxWallet tx : txs) {
-          if (txId.equals(tx.getId())) {
+          if (txId.equals(tx.getHash())) {
             found = true;
             break;
           }
@@ -701,11 +701,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     // order txs if tx ids given
-    if (query.getTxIds() != null && !query.getTxIds().isEmpty()) {
+    if (query.getTxHashes() != null && !query.getTxHashes().isEmpty()) {
       Map<String, MoneroTxWallet> txsById = new HashMap<String, MoneroTxWallet>();  // store txs in temporary map for sorting
-      for (MoneroTxWallet tx : txs) txsById.put(tx.getId(), tx);
+      for (MoneroTxWallet tx : txs) txsById.put(tx.getHash(), tx);
       List<MoneroTxWallet> orderedTxs = new ArrayList<MoneroTxWallet>();
-      for (String txId : query.getTxIds()) orderedTxs.add(txsById.get(txId));
+      for (String txId : query.getTxHashes()) orderedTxs.add(txsById.get(txId));
       txs = orderedTxs;
     }
     return txs;
@@ -1924,7 +1924,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // build transactions
     for (int i = 0; i < fees.size(); i++) {
       MoneroTxWallet tx = txs.get(i);
-      if (ids != null) tx.setId(ids.get(i));
+      if (ids != null) tx.setHash(ids.get(i));
       if (keys != null) tx.setKey(keys.get(i));
       if (blobs != null) tx.setFullHex(blobs.get(i));
       if (metadatas != null) tx.setMetadata(metadatas.get(i));
@@ -1976,8 +1976,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     MoneroTransfer transfer = null;
     for (String key : rpcTx.keySet()) {
       Object val = rpcTx.get(key);
-      if (key.equals("txid")) tx.setId((String) val);
-      else if (key.equals("tx_hash")) tx.setId((String) val);
+      if (key.equals("txid")) tx.setHash((String) val);
+      else if (key.equals("tx_hash")) tx.setHash((String) val);
       else if (key.equals("fee")) tx.setFee((BigInteger) val);
       else if (key.equals("note")) { if (!"".equals(val)) tx.setNote((String) val); }
       else if (key.equals("tx_key")) tx.setKey((String) val);
@@ -2100,7 +2100,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("spent")) vout.setIsSpent((Boolean) val);
       else if (key.equals("key_image")) vout.setKeyImage(new MoneroKeyImage((String) val));
       else if (key.equals("global_index")) vout.setIndex(((BigInteger) val).intValue());
-      else if (key.equals("tx_hash")) tx.setId((String) val);
+      else if (key.equals("tx_hash")) tx.setHash((String) val);
       else if (key.equals("unlocked")) tx.setIsLocked(!(Boolean) val);
       else if (key.equals("frozen")) vout.setIsFrozen((Boolean) val);
       else if (key.equals("subaddr_index")) {
@@ -2217,13 +2217,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @param skipIfAbsent specifies if the tx should not be added if it doesn't already exist
    */
   private static void mergeTx(MoneroTxWallet tx, Map<String, MoneroTxWallet> txMap, Map<Long, MoneroBlock> blockMap, boolean skipIfAbsent) {
-    GenUtils.assertNotNull(tx.getId());
+    GenUtils.assertNotNull(tx.getHash());
 
     // if tx doesn't exist, add it (unless skipped)
-    MoneroTxWallet aTx = txMap.get(tx.getId());
+    MoneroTxWallet aTx = txMap.get(tx.getHash());
     if (aTx == null) {
       if (!skipIfAbsent) {
-        txMap.put(tx.getId(), tx);
+        txMap.put(tx.getHash(), tx);
       } else {
         LOGGER.warning("WARNING: tx does not already exist");
       }

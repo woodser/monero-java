@@ -725,11 +725,11 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
     
     // re-sort txs which is lost over jni serialization
-    if (query.getTxIds() != null) {
+    if (query.getTxHashes() != null) {
       Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
-      for (MoneroTxWallet tx : txs) txMap.put(tx.getId(), tx);
+      for (MoneroTxWallet tx : txs) txMap.put(tx.getHash(), tx);
       List<MoneroTxWallet> txsSorted = new ArrayList<MoneroTxWallet>();
-      for (String txId : query.getTxIds()) txsSorted.add(txMap.get(txId));
+      for (String txId : query.getTxHashes()) txsSorted.add(txMap.get(txId));
       txs = txsSorted;
     }
     LOGGER.fine("getTxs() returning " + txs.size() + " transactions");
@@ -1500,7 +1500,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       output.setAccountIndex(accountIdx);
       output.setSubaddressIndex(subaddressIdx);
       MoneroTxWallet tx = new MoneroTxWallet();
-      tx.setId(txId);
+      tx.setHash(txId);
       tx.setVersion(version);
       tx.setUnlockTime(unlockTime);
       output.setTx(tx);
@@ -1523,7 +1523,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       output.setAccountIndex(accountIdx);
       output.setSubaddressIndex(subaddressIdx);
       MoneroTxWallet tx = new MoneroTxWallet();
-      tx.setId(txId);
+      tx.setHash(txId);
       tx.setVersion(version);
       output.setTx(tx);
       tx.setVins(Arrays.asList(output));
@@ -1583,7 +1583,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
      */
     public MoneroBlock toBlock() {
       MoneroBlock block = new MoneroBlock();
-      block.setId(getId());
+      block.setHash(getHash());
       block.setHeight(getHeight());
       block.setTimestamp(getTimestamp());
       block.setSize(getSize());
@@ -1595,16 +1595,16 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       block.setMajorVersion(getMajorVersion());
       block.setMinorVersion(getMinorVersion());
       block.setNonce(getNonce());
-      block.setMinerTxId(getMinerTxId());
+      block.setMinerTxHash(getMinerTxHash());
       block.setNumTxs(getNumTxs());
       block.setOrphanStatus(getOrphanStatus());
-      block.setPrevId(getPrevId());
+      block.setPrevHash(getPrevHash());
       block.setReward(getReward());
       block.setPowHash(getPowHash());
       block.setHex(getHex());
       block.setMinerTx(getMinerTx());
       block.setTxs(getTxs());
-      block.setTxIds(getTxIds());
+      block.setTxHashes(getTxHashes());
       for (MoneroTx tx : getTxs()) tx.setBlock(block);  // re-assign tx block references
       return block;
     }

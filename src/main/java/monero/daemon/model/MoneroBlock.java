@@ -37,7 +37,7 @@ public class MoneroBlock extends MoneroBlockHeader {
       this.txs = new ArrayList<MoneroTx>();
       for (MoneroTx tx : block.txs) txs.add(tx.copy().setBlock(this));
     }
-    if (block.getTxIds() != null) this.txIds = new ArrayList<String>(block.getTxIds());
+    if (block.getTxHashes() != null) this.txIds = new ArrayList<String>(block.getTxHashes());
   }
   
   public String getHex() {
@@ -75,12 +75,12 @@ public class MoneroBlock extends MoneroBlockHeader {
     return this;
   }
   
-  public List<String> getTxIds() {
+  public List<String> getTxHashes() {
     return txIds;
   }
   
-  public MoneroBlock setTxIds(List<String> txIds) {
-    this.txIds = txIds;
+  public MoneroBlock setTxHashes(List<String> txHashes) {
+    this.txIds = txHashes;
     return this;
   }
   
@@ -97,7 +97,7 @@ public class MoneroBlock extends MoneroBlockHeader {
     
     // merge reconcilable block extensions
     this.setHex(GenUtils.reconcile(this.getHex(), block.getHex()));
-    this.setTxIds(GenUtils.reconcile(this.getTxIds(), block.getTxIds()));
+    this.setTxHashes(GenUtils.reconcile(this.getTxHashes(), block.getTxHashes()));
     
     // merge miner tx
     if (this.getMinerTx() == null) this.setMinerTx(block.getMinerTx());
@@ -122,7 +122,7 @@ public class MoneroBlock extends MoneroBlockHeader {
     sb.append(super.toString(indent));
     sb.append("\n");
     sb.append(GenUtils.kvLine("Hex", getHex(), indent));
-    sb.append(GenUtils.kvLine("Txs ids", getTxIds(), indent));
+    sb.append(GenUtils.kvLine("Txs hashes", getTxHashes(), indent));
     if (getMinerTx() != null) {
       sb.append(GenUtils.kvLine("Miner tx", "", indent));
       sb.append(getMinerTx().toString(indent + 1) + "\n");
@@ -171,8 +171,8 @@ public class MoneroBlock extends MoneroBlockHeader {
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
   
-  public MoneroBlock setId(String id) {
-    super.setId(id);
+  public MoneroBlock setHash(String hash) {
+    super.setHash(hash);
     return this;
   }
   
@@ -255,8 +255,8 @@ public class MoneroBlock extends MoneroBlockHeader {
   }
   
   @Override
-  public MoneroBlock setPrevId(String prevId) {
-    super.setPrevId(prevId);
+  public MoneroBlock setPrevHash(String prevHash) {
+    super.setPrevHash(prevHash);
     return this;
   }
   

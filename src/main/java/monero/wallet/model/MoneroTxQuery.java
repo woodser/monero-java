@@ -21,7 +21,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   
   private Boolean isOutgoing;
   private Boolean isIncoming;
-  private List<String> txIds;
+  private List<String> txHashes;
   private Boolean hasPaymentId;
   private List<String> paymentIds;
   private Long height;
@@ -39,7 +39,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     super(query);
     this.isOutgoing = query.isOutgoing;
     this.isIncoming = query.isIncoming;
-    if (query.txIds != null) this.txIds = new ArrayList<String>(query.txIds);
+    if (query.txHashes != null) this.txHashes = new ArrayList<String>(query.txHashes);
     this.hasPaymentId = query.hasPaymentId;
     if (query.paymentIds != null) this.paymentIds = new ArrayList<String>(query.paymentIds);
     this.height = query.height;
@@ -80,22 +80,22 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     return this;
   }
 
-  public List<String> getTxIds() {
-    return txIds;
+  public List<String> getTxHashes() {
+    return txHashes;
   }
 
-  public MoneroTxQuery setTxIds(List<String> txIds) {
-    this.txIds = txIds;
+  public MoneroTxQuery setTxHashes(List<String> txHashes) {
+    this.txHashes = txHashes;
     return this;
   }
   
-  public MoneroTxQuery setTxIds(String... txIds) {
-    this.txIds = GenUtils.arrayToList(txIds);
+  public MoneroTxQuery setTxHashes(String... txHashes) {
+    this.txHashes = GenUtils.arrayToList(txHashes);
     return this;
   }
   
-  public MoneroTxQuery setTxId(String txId) {
-    return setTxIds(Arrays.asList(txId));
+  public MoneroTxQuery setTxHash(String txHash) {
+    return setTxHashes(Arrays.asList(txHash));
   }
 
   @JsonProperty("hasPaymentId")
@@ -180,7 +180,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     if (tx == null) return false;
     
     // filter on tx
-    if (this.getId() != null && !this.getId().equals(tx.getId())) return false;
+    if (this.getHash() != null && !this.getHash().equals(tx.getHash())) return false;
     if (this.getPaymentId() != null && !this.getPaymentId().equals(tx.getPaymentId())) return false;
     if (this.isConfirmed() != null && this.isConfirmed() != tx.isConfirmed()) return false;
     if (this.inTxPool() != null && this.inTxPool() != tx.inTxPool()) return false;
@@ -238,7 +238,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     
     // filter on remaining fields
     Long txHeight = tx.getBlock() == null ? null : tx.getBlock().getHeight();
-    if (this.getTxIds() != null && !this.getTxIds().contains(tx.getId())) return false;
+    if (this.getTxHashes() != null && !this.getTxHashes().contains(tx.getHash())) return false;
     if (this.getPaymentIds() != null && !this.getPaymentIds().contains(tx.getPaymentId())) return false;
     if (this.getHeight() != null && !this.getHeight().equals(txHeight)) return false;
     if (this.getMinHeight() != null && (txHeight == null || txHeight < this.getMinHeight())) return false;
@@ -292,8 +292,8 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setId(String id) {
-    super.setId(id);
+  public MoneroTxQuery setHash(String id) {
+    super.setHash(id);
     return this;
   }
 
@@ -478,8 +478,8 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setLastFailedId(String lastFailedId) {
-    super.setLastFailedId(lastFailedId);
+  public MoneroTxQuery setLastFailedHash(String lastFailedId) {
+    super.setLastFailedHash(lastFailedId);
     return this;
   }
 
@@ -490,8 +490,8 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setMaxUsedBlockId(String maxUsedBlockId) {
-    super.setMaxUsedBlockId(maxUsedBlockId);
+  public MoneroTxQuery setMaxUsedBlockHash(String maxUsedBlockId) {
+    super.setMaxUsedBlockHash(maxUsedBlockId);
     return this;
   }
 

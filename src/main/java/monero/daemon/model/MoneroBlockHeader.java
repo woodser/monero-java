@@ -9,7 +9,7 @@ import common.utils.GenUtils;
  */
 public class MoneroBlockHeader {
   
-  private String id;
+  private String hash;
   private Long height;
   private Long timestamp;
   private Long size;
@@ -21,10 +21,10 @@ public class MoneroBlockHeader {
   private Integer majorVersion;
   private Integer minorVersion;
   private Integer nonce;
-  private String minerTxId;
+  private String minerTxHash;
   private Integer numTxs;
   private Boolean orphanStatus;
-  private String prevId;
+  private String prevHash;
   private BigInteger reward;
   private String powHash;
   
@@ -33,7 +33,7 @@ public class MoneroBlockHeader {
   }
   
   public MoneroBlockHeader(MoneroBlockHeader header) {
-    this.id = header.id;
+    this.hash = header.hash;
     this.height = header.height;
     this.timestamp = header.timestamp;
     this.size = header.size;
@@ -47,17 +47,17 @@ public class MoneroBlockHeader {
     this.nonce = header.nonce;
     this.numTxs = header.numTxs;
     this.orphanStatus = header.orphanStatus;
-    this.prevId = header.prevId;
+    this.prevHash = header.prevHash;
     this.reward = header.reward;
     this.powHash = header.powHash;
   }
   
-  public String getId() {
-    return id;
+  public String getHash() {
+    return hash;
   }
   
-  public MoneroBlockHeader setId(String id) {
-    this.id = id;
+  public MoneroBlockHeader setHash(String hash) {
+    this.hash = hash;
     return this;
   }
   
@@ -171,12 +171,12 @@ public class MoneroBlockHeader {
     return this;
   }
   
-  public String getMinerTxId() {
-    return minerTxId;
+  public String getMinerTxHash() {
+    return minerTxHash;
   }
   
-  public MoneroBlockHeader setMinerTxId(String minerTxId) {
-    this.minerTxId = minerTxId;
+  public MoneroBlockHeader setMinerTxHash(String minerTxHash) {
+    this.minerTxHash = minerTxHash;
     return this;
   }
   
@@ -198,12 +198,12 @@ public class MoneroBlockHeader {
     return this;
   }
   
-  public String getPrevId() {
-    return prevId;
+  public String getPrevHash() {
+    return prevHash;
   }
   
-  public MoneroBlockHeader setPrevId(String prevId) {
-    this.prevId = prevId;
+  public MoneroBlockHeader setPrevHash(String prevHash) {
+    this.prevHash = prevHash;
     return this;
   }
   
@@ -228,7 +228,7 @@ public class MoneroBlockHeader {
   public MoneroBlockHeader merge(MoneroBlockHeader header) {
     GenUtils.assertNotNull(header);
     if (this == header) return this;
-    this.setId(GenUtils.reconcile(this.getId(), header.getId()));
+    this.setHash(GenUtils.reconcile(this.getHash(), header.getHash()));
     this.setHeight(GenUtils.reconcile(this.getHeight(), header.getHeight(), null, null, true));  // height can increase
     this.setTimestamp(GenUtils.reconcile(this.getTimestamp(), header.getTimestamp(), null, null, true));  // block timestamp can increase
     this.setSize(GenUtils.reconcile(this.getSize(), header.getSize()));
@@ -239,10 +239,10 @@ public class MoneroBlockHeader {
     this.setMajorVersion(GenUtils.reconcile(this.getMajorVersion(), header.getMajorVersion()));
     this.setMinorVersion(GenUtils.reconcile(this.getMinorVersion(), header.getMinorVersion()));
     this.setNonce(GenUtils.reconcile(this.getNonce(), header.getNonce()));
-    this.setMinerTxId(GenUtils.reconcile(this.getMinerTxId(), header.getMinerTxId()));
+    this.setMinerTxHash(GenUtils.reconcile(this.getMinerTxHash(), header.getMinerTxHash()));
     this.setNumTxs(GenUtils.reconcile(this.getNumTxs(), header.getNumTxs()));
     this.setOrphanStatus(GenUtils.reconcile(this.getOrphanStatus(), header.getOrphanStatus()));
-    this.setPrevId(GenUtils.reconcile(this.getPrevId(), header.getPrevId()));
+    this.setPrevHash(GenUtils.reconcile(this.getPrevHash(), header.getPrevHash()));
     this.setReward(GenUtils.reconcile(this.getReward(), header.getReward()));
     this.setPowHash(GenUtils.reconcile(this.getPowHash(), header.getPowHash()));
     return this;
@@ -254,7 +254,7 @@ public class MoneroBlockHeader {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
-    sb.append(GenUtils.kvLine("Id", getId(), indent));
+    sb.append(GenUtils.kvLine("Hash", getHash(), indent));
     sb.append(GenUtils.kvLine("Height", getHeight(), indent));
     sb.append(GenUtils.kvLine("Timestamp", getTimestamp(), indent));
     sb.append(GenUtils.kvLine("Size", getSize(), indent));
@@ -265,10 +265,10 @@ public class MoneroBlockHeader {
     sb.append(GenUtils.kvLine("Major version", getMajorVersion(), indent));
     sb.append(GenUtils.kvLine("Minor version", getMinorVersion(), indent));
     sb.append(GenUtils.kvLine("Nonce", getNonce(), indent));
-    sb.append(GenUtils.kvLine("Miner tx id", getMinerTxId(), indent));
+    sb.append(GenUtils.kvLine("Miner tx hash", getMinerTxHash(), indent));
     sb.append(GenUtils.kvLine("Num txs", getNumTxs(), indent));
     sb.append(GenUtils.kvLine("Orphan status", getOrphanStatus(), indent));
-    sb.append(GenUtils.kvLine("Prev id", getPrevId(), indent));
+    sb.append(GenUtils.kvLine("Prev id", getPrevHash(), indent));
     sb.append(GenUtils.kvLine("Reward", getReward(), indent));
     sb.append(GenUtils.kvLine("Pow hash", getPowHash(), indent));
     String str = sb.toString();
@@ -280,12 +280,12 @@ public class MoneroBlockHeader {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((minerTxId == null) ? 0 : minerTxId.hashCode());
+    result = prime * result + ((minerTxHash == null) ? 0 : minerTxHash.hashCode());
     result = prime * result + ((cumulativeDifficulty == null) ? 0 : cumulativeDifficulty.hashCode());
     result = prime * result + ((depth == null) ? 0 : depth.hashCode());
     result = prime * result + ((difficulty == null) ? 0 : difficulty.hashCode());
     result = prime * result + ((height == null) ? 0 : height.hashCode());
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    result = prime * result + ((hash == null) ? 0 : hash.hashCode());
     result = prime * result + ((longTermWeight == null) ? 0 : longTermWeight.hashCode());
     result = prime * result + ((majorVersion == null) ? 0 : majorVersion.hashCode());
     result = prime * result + ((minorVersion == null) ? 0 : minorVersion.hashCode());
@@ -293,7 +293,7 @@ public class MoneroBlockHeader {
     result = prime * result + ((numTxs == null) ? 0 : numTxs.hashCode());
     result = prime * result + ((orphanStatus == null) ? 0 : orphanStatus.hashCode());
     result = prime * result + ((powHash == null) ? 0 : powHash.hashCode());
-    result = prime * result + ((prevId == null) ? 0 : prevId.hashCode());
+    result = prime * result + ((prevHash == null) ? 0 : prevHash.hashCode());
     result = prime * result + ((reward == null) ? 0 : reward.hashCode());
     result = prime * result + ((size == null) ? 0 : size.hashCode());
     result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
@@ -307,9 +307,9 @@ public class MoneroBlockHeader {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroBlockHeader other = (MoneroBlockHeader) obj;
-    if (minerTxId == null) {
-      if (other.minerTxId != null) return false;
-    } else if (!minerTxId.equals(other.minerTxId)) return false;
+    if (minerTxHash == null) {
+      if (other.minerTxHash != null) return false;
+    } else if (!minerTxHash.equals(other.minerTxHash)) return false;
     if (cumulativeDifficulty == null) {
       if (other.cumulativeDifficulty != null) return false;
     } else if (!cumulativeDifficulty.equals(other.cumulativeDifficulty)) return false;
@@ -322,9 +322,9 @@ public class MoneroBlockHeader {
     if (height == null) {
       if (other.height != null) return false;
     } else if (!height.equals(other.height)) return false;
-    if (id == null) {
-      if (other.id != null) return false;
-    } else if (!id.equals(other.id)) return false;
+    if (hash == null) {
+      if (other.hash != null) return false;
+    } else if (!hash.equals(other.hash)) return false;
     if (longTermWeight == null) {
       if (other.longTermWeight != null) return false;
     } else if (!longTermWeight.equals(other.longTermWeight)) return false;
@@ -346,9 +346,9 @@ public class MoneroBlockHeader {
     if (powHash == null) {
       if (other.powHash != null) return false;
     } else if (!powHash.equals(other.powHash)) return false;
-    if (prevId == null) {
-      if (other.prevId != null) return false;
-    } else if (!prevId.equals(other.prevId)) return false;
+    if (prevHash == null) {
+      if (other.prevHash != null) return false;
+    } else if (!prevHash.equals(other.prevHash)) return false;
     if (reward == null) {
       if (other.reward != null) return false;
     } else if (!reward.equals(other.reward)) return false;

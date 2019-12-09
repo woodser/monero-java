@@ -158,7 +158,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public String getBlockId(long height) {
+  public String getBlockHash(long height) {
     Map<String, Object> respMap = rpc.sendJsonRequest("on_get_block_hash", Arrays.asList(height));
     return (String) respMap.get("result");
   }
@@ -186,7 +186,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroBlockHeader getBlockHeaderById(String blockId) {
+  public MoneroBlockHeader getBlockHeaderByHash(String blockId) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("hash", blockId);
     Map<String, Object> respMap = rpc.sendJsonRequest("get_block_header_by_hash", params);
@@ -281,7 +281,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         MoneroTx tx = new MoneroTx();
         txs.add(tx);
         List<String> txIds = (List<String>) rpcBlocks.get(blockIdx).get("tx_hashes");
-        tx.setId(txIds.get(txIdx));
+        tx.setHash(txIds.get(txIdx));
         tx.setIsConfirmed(true);
         tx.setInTxPool(false);
         tx.setIsMinerTx(false);
@@ -369,7 +369,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     List<MoneroTx> poolTxs = getTxPool();
     for (MoneroTx tx : txs) {
       for (MoneroTx poolTx : poolTxs) {
-        if (tx.getId().equals(poolTx.getId())) tx.merge(poolTx);
+        if (tx.getHash().equals(poolTx.getHash())) tx.merge(poolTx);
       }
     }
     
@@ -987,7 +987,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("difficulty_top64")) { }  // handled by wide_difficulty
       else if (key.equals("wide_difficulty")) template.setDifficulty(GenUtils.reconcile(template.getDifficulty(), prefixedHexToBI((String) val)));
       else if (key.equals("height")) template.setHeight(((BigInteger) val).longValue());
-      else if (key.equals("prev_hash")) template.setPrevId((String) val);
+      else if (key.equals("prev_hash")) template.setPrevHash((String) val);
       else if (key.equals("reserved_offset")) template.setReservedOffset(((BigInteger) val).longValue());
       else if (key.equals("status")) {}  // handled elsewhere
       else if (key.equals("untrusted")) {}  // handled elsewhere
@@ -1016,14 +1016,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("cumulative_difficulty_top64")) { } // handled by wide_cumulative_difficulty
       else if (key.equals("wide_difficulty")) header.setDifficulty(GenUtils.reconcile(header.getDifficulty(), prefixedHexToBI((String) val)));
       else if (key.equals("wide_cumulative_difficulty")) header.setCumulativeDifficulty(GenUtils.reconcile(header.getCumulativeDifficulty(), prefixedHexToBI((String) val)));
-      else if (key.equals("hash")) header.setId(GenUtils.reconcile(header.getId(), (String) val));
+      else if (key.equals("hash")) header.setHash(GenUtils.reconcile(header.getHash(), (String) val));
       else if (key.equals("height")) header.setHeight(GenUtils.reconcile(header.getHeight(), ((BigInteger) val).longValue()));
       else if (key.equals("major_version")) header.setMajorVersion(GenUtils.reconcile(header.getMajorVersion(), ((BigInteger) val).intValue()));
       else if (key.equals("minor_version")) header.setMinorVersion(GenUtils.reconcile(header.getMinorVersion(), ((BigInteger) val).intValue()));
       else if (key.equals("nonce")) header.setNonce(GenUtils.reconcile(header.getNonce(), ((BigInteger) val).intValue()));
       else if (key.equals("num_txes")) header.setNumTxs(GenUtils.reconcile(header.getNumTxs(), ((BigInteger) val).intValue()));
       else if (key.equals("orphan_status")) header.setOrphanStatus(GenUtils.reconcile(header.getOrphanStatus(), (Boolean) val));
-      else if (key.equals("prev_hash") || key.equals("prev_id")) header.setPrevId(GenUtils.reconcile(header.getPrevId(), (String) val));
+      else if (key.equals("prev_hash") || key.equals("prev_id")) header.setPrevHash(GenUtils.reconcile(header.getPrevHash(), (String) val));
       else if (key.equals("reward")) header.setReward(GenUtils.reconcile(header.getReward(), (BigInteger) val));
       else if (key.equals("timestamp")) header.setTimestamp(GenUtils.reconcile(header.getTimestamp(), ((BigInteger) val).longValue()));
       else if (key.equals("block_weight")) header.setWeight(GenUtils.reconcile(header.getWeight(), ((BigInteger) val).longValue()));
@@ -1031,7 +1031,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("pow_hash")) header.setPowHash(GenUtils.reconcile(header.getPowHash(), "".equals(val) ? null : (String) val));
       else if (key.equals("tx_hashes")) {}  // used in block model, not header model
       else if (key.equals("miner_tx")) {}   // used in block model, not header model
-      else if (key.equals("miner_tx_hash")) header.setMinerTxId((String) val);
+      else if (key.equals("miner_tx_hash")) header.setMinerTxHash((String) val);
       else LOGGER.warning("WARNING: ignoring unexpected block header field: '" + key + "': " + val);
     }
     return header;
@@ -1044,7 +1044,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     MoneroBlock block = new MoneroBlock();
     convertRpcBlockHeader(rpcBlock.containsKey("block_header") ? (Map<String, Object>) rpcBlock.get("block_header") : rpcBlock, block);
     block.setHex((String) rpcBlock.get("blob"));
-    block.setTxIds(rpcBlock.containsKey("tx_hashes") ? (List<String>) rpcBlock.get("tx_hashes") : new ArrayList<String>());
+    block.setTxHashes(rpcBlock.containsKey("tx_hashes") ? (List<String>) rpcBlock.get("tx_hashes") : new ArrayList<String>());
     
     // build miner tx
     Map<String, Object> rpcMinerTx = (Map<String, Object>) (rpcBlock.containsKey("json") ? JsonUtils.deserialize(MoneroRpcConnection.MAPPER, (String) rpcBlock.get("json"), new TypeReference<Map<String, Object>>(){}).get("miner_tx") : rpcBlock.get("miner_tx")); // may need to be parsed from json
@@ -1077,7 +1077,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     MoneroBlock block = null;
     for (String key : rpcTx.keySet()) {
       Object val = rpcTx.get(key);
-      if (key.equals("tx_hash") || key.equals("id_hash")) tx.setId(GenUtils.reconcile(tx.getId(), (String) val));
+      if (key.equals("tx_hash") || key.equals("id_hash")) tx.setHash(GenUtils.reconcile(tx.getHash(), (String) val));
       else if (key.equals("block_timestamp")) {
         if (block == null) block = new MoneroBlock();
         block.setTimestamp(GenUtils.reconcile(block.getTimestamp(), ((BigInteger) val).longValue()));
@@ -1142,11 +1142,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         if (DEFAULT_ID.equals((String) val)) tx.setIsFailed(GenUtils.reconcile(tx.isFailed(), false));
         else {
           tx.setIsFailed(GenUtils.reconcile(tx.isFailed(), true));
-          tx.setLastFailedId(GenUtils.reconcile(tx.getLastFailedId(), (String) val));
+          tx.setLastFailedHash(GenUtils.reconcile(tx.getLastFailedHash(), (String) val));
         }
       }
       else if (key.equals("max_used_block_height")) tx.setMaxUsedBlockHeight(GenUtils.reconcile(tx.getMaxUsedBlockHeight(), ((BigInteger) val).longValue()));
-      else if (key.equals("max_used_block_id_hash")) tx.setMaxUsedBlockId(GenUtils.reconcile(tx.getMaxUsedBlockId(), (String) val));
+      else if (key.equals("max_used_block_id_hash")) tx.setMaxUsedBlockHash(GenUtils.reconcile(tx.getMaxUsedBlockHash(), (String) val));
       else if (key.equals("prunable_hash")) tx.setPrunableHash(GenUtils.reconcile(tx.getPrunableHash(), "".equals((String) val) ? null : (String) val));
       else if (key.equals("prunable_as_hex")) tx.setPrunableHex(GenUtils.reconcile(tx.getPrunableHex(), "".equals((String) val) ? null : (String) val));
       else if (key.equals("pruned_as_hex")) tx.setPrunedHex(GenUtils.reconcile(tx.getPrunedHex(), "".equals((String) val) ? null : (String) val));
@@ -1288,7 +1288,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       if (key.equals("address")) peer.setAddress((String) val);
       else if (key.equals("avg_download")) connection.setAvgDownload(((BigInteger) val).longValue());
       else if (key.equals("avg_upload")) connection.setAvgUpload(((BigInteger) val).longValue());
-      else if (key.equals("connection_id")) connection.setId((String) val);
+      else if (key.equals("connection_id")) connection.setHash((String) val);
       else if (key.equals("current_download")) connection.setCurrentDownload(((BigInteger) val).longValue());
       else if (key.equals("current_upload")) connection.setCurrentUpload(((BigInteger) val).longValue());
       else if (key.equals("height")) connection.setHeight(((BigInteger) val).longValue());
@@ -1499,7 +1499,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("height")) chain.setHeight(((BigInteger) val).longValue());
       else if (key.equals("length")) chain.setLength(((BigInteger) val).longValue());
       else if (key.equals("block_hashes")) chain.setBlockIds((List<String>) val);
-      else if (key.equals("main_chain_parent_block")) chain.setMainChainParentBlockId((String) val);
+      else if (key.equals("main_chain_parent_block")) chain.setMainChainParentBlockHash((String) val);
       else LOGGER.warning("WARNING: ignoring unexpected field in alternative chain: " + key + ": " + val);
     }
     return chain;
@@ -1585,7 +1585,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
           
           // fetch and compare latest block header
           MoneroBlockHeader header = daemon.getLastBlockHeader();
-          if (!header.getId().equals(lastHeader.getId())) {
+          if (!header.getHash().equals(lastHeader.getHash())) {
             lastHeader = header;
             for (MoneroDaemonListener listener : listeners) {
               listener.onBlockHeader(header); // notify listener
