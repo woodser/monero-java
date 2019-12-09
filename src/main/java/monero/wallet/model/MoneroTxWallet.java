@@ -447,8 +447,8 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setHash(String id) {
-    super.setHash(id);
+  public MoneroTxWallet setHash(String hash) {
+    super.setHash(hash);
     return this;
   }
 

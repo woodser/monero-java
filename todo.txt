@@ -30,6 +30,7 @@ update docs
 release
 
 HIGH
+basic test which exercises most of wallet
 all deserialization methods should log warning for unrecognized field keys (monero_utils.cpp)
 support pay for service in wallet, get/set_rpc_client_secret_key
 convert MoneroTx extra to string
