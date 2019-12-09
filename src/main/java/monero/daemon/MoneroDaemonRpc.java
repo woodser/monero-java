@@ -336,7 +336,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public List<MoneroTx> getTxs(Collection<String> txHashes, Boolean prune) {
     
     // validate input
-    if (txHashes.isEmpty()) throw new MoneroException("Must provide an array of transaction ids");
+    if (txHashes.isEmpty()) throw new MoneroException("Must provide an array of transaction hashes");
     
     // fetch transactions
     Map<String, Object> params = new HashMap<String, Object>();
@@ -500,16 +500,16 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   
   @SuppressWarnings("unchecked")
   @Override
-  public void flushTxPool(String... ids) {
+  public void flushTxPool(String... hashes) {
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txids", ids);
+    params.put("txids", hashes);
     Map<String, Object> resp = rpc.sendJsonRequest("flush_txpool", params);
     checkResponseStatus((Map<String, Object>) resp.get("result"));
   }
   
   @Override
-  public void flushTxPool(Collection<String> ids) {
-    flushTxPool(ids.toArray(new String[0]));
+  public void flushTxPool(Collection<String> hashes) {
+    flushTxPool(hashes.toArray(new String[0]));
   }
 
   @SuppressWarnings("unchecked")

@@ -202,13 +202,13 @@ public interface MoneroDaemon {
   public List<MoneroBlock> getBlocksByRangeChunked(Long startHeight, Long endHeight, Long maxChunkSize);
   
   /**
-   * Get block ids as a binary request to the daemon.
+   * Get block hashes as a binary request to the daemon.
    * 
-   * @param blockHashes specify block ids to fetch; first 10 blocks hash goes
+   * @param blockHashes specify block hashes to fetch; first 10 blocks hash goes
    *        sequential, next goes in pow(2,n) offset, like 2, 4, 8, 16, 32, 64
    *        and so on, and the last one is always genesis block
-   * @param startHeight is the starting height of block ids to return
-   * @return the requested block ids     
+   * @param startHeight is the starting height of block hashes to return
+   * @return the requested block hashes     
    */
   public List<String> getBlockIds(List<String> blockHashes, Long startHeight);
   
@@ -230,19 +230,19 @@ public interface MoneroDaemon {
   public MoneroTx getTx(String txHash, Boolean prune);
   
   /**
-   * Get transactions by ids.
+   * Get transactions by hashes.
    * 
-   * @param txHashes are ids of transactions to get
-   * @return the transactions with the given ids
+   * @param txHashes are hashes of transactions to get
+   * @return the transactions with the given hashes
    */
   public List<MoneroTx> getTxs(Collection<String> txHashes);
   
   /**
-   * Get transactions by ids.
+   * Get transactions by hashes.
    * 
-   * @param txHashes are ids of transactions to get
+   * @param txHashes are hashes of transactions to get
    * @param prune specifies if the returned txs should be pruned (defaults to false)
-   * @return the transactions with the given ids
+   * @return the transactions with the given hashes
    */
   public List<MoneroTx> getTxs(Collection<String> txHashes, Boolean prune);
   
@@ -264,17 +264,17 @@ public interface MoneroDaemon {
   public String getTxHex(String txHash, Boolean prune);
   
   /**
-   * Get transaction hexes by ids.
+   * Get transaction hexes by hashes.
    * 
-   * @param txHashes are ids of transactions to get hexes from
+   * @param txHashes are hashes of transactions to get hexes from
    * @return are the tx hexes
    */
   public List<String> getTxHexes(Collection<String> txHashes);
   
   /**
-   * Get transaction hexes by ids.
+   * Get transaction hexes by hashes.
    * 
-   * @param txHashes are ids of transactions to get hexes from
+   * @param txHashes are hashes of transactions to get hexes from
    * @param prune specifies if the returned tx hexes should be pruned (defaults to false)
    * @return are the tx hexes
    */
@@ -344,9 +344,9 @@ public interface MoneroDaemon {
   public List<MoneroTx> getTxPool();
   
   /**
-   * Get ids of transactions in the transaction pool.
+   * Get hashes of transactions in the transaction pool.
    * 
-   * @return ids of transactions in the transaction pool
+   * @return hashes of transactions in the transaction pool
    */
   public List<String> getTxPoolIds();
   
@@ -372,16 +372,16 @@ public interface MoneroDaemon {
   /**
    * Flush transactions from the tx pool.
    * 
-   * @param ids are ids of transactions to flush
+   * @param hashes are hashes of transactions to flush
    */
-  public void flushTxPool(String... ids);
+  public void flushTxPool(String... hashes);
   
   /**
    * Flush transactions from the tx pool.
    * 
-   * @param ids are ids of transactions to flush
+   * @param hashes are hashes of transactions to flush
    */
-  public void flushTxPool(Collection<String> ids);
+  public void flushTxPool(Collection<String> hashes);
   
   /**
    * Get the spent status of the given key image.
@@ -470,9 +470,9 @@ public interface MoneroDaemon {
   public List<MoneroAltChain> getAltChains();
   
   /**
-   * Get known block ids which are not on the main chain.
+   * Get known block hashes which are not on the main chain.
    * 
-   * @return known block ids which are not on the main chain
+   * @return known block hashes which are not on the main chain
    */
   public List<String> getAltBlockIds();
   

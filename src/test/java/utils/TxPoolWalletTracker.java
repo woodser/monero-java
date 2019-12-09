@@ -47,14 +47,14 @@ public class TxPoolWalletTracker {
   
   public void waitForWalletTxsToClearPool(MoneroWallet... wallets) {
     
-    // get ids of txs in the pool
+    // get hashes of txs in the pool
     Set<String> txIdsPool = new HashSet<String>();
     for (MoneroTx tx : TestUtils.getDaemonRpc().getTxPool()) {
       if (!tx.isRelayed() || tx.isFailed()) continue;
       txIdsPool.add(tx.getHash());
     }
     
-    // get ids of txs from wallets to wait for
+    // get hashes of txs from wallets to wait for
     Set<String> txIdsWallet = new HashSet<String>();
     for (MoneroWallet wallet : wallets) {
       if (!clearedWallets.contains(wallet)) {

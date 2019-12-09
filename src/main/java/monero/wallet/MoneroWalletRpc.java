@@ -681,7 +681,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     txs = txsQueried;
     
-    // verify all specified tx ids found
+    // verify all specified tx hashes found
     if (query.getTxHashes() != null) {
       for (String txHash : query.getTxHashes()) {
         boolean found = false;
@@ -700,7 +700,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (tx.isConfirmed() && tx.getBlock() == null) return getTxs(query);
     }
     
-    // order txs if tx ids given
+    // order txs if tx hashes given
     if (query.getTxHashes() != null && !query.getTxHashes().isEmpty()) {
       Map<String, MoneroTxWallet> txsById = new HashMap<String, MoneroTxWallet>();  // store txs in temporary map for sorting
       for (MoneroTxWallet tx : txs) txsById.put(tx.getHash(), tx);
@@ -1895,7 +1895,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     // get lists
-    List<String> ids = (List<String>) rpcTxs.get("tx_hash_list");
+    List<String> hashes = (List<String>) rpcTxs.get("tx_hash_list");
     List<String> keys = (List<String>) rpcTxs.get("tx_key_list");
     List<String> blobs = (List<String>) rpcTxs.get("tx_blob_list");
     List<String> metadatas = (List<String>) rpcTxs.get("tx_metadata_list");
@@ -1905,7 +1905,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // ensure all lists are the same size
     Set<Integer> sizes = new HashSet<Integer>();
     if (amounts != null) sizes.add(amounts.size());
-    if (ids != null) sizes.add(ids.size());
+    if (hashes != null) sizes.add(hashes.size());
     if (keys != null) sizes.add(keys.size());
     if (blobs != null) sizes.add(blobs.size());
     if (metadatas != null) sizes.add(metadatas.size());
@@ -1924,7 +1924,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // build transactions
     for (int i = 0; i < fees.size(); i++) {
       MoneroTxWallet tx = txs.get(i);
-      if (ids != null) tx.setHash(ids.get(i));
+      if (hashes != null) tx.setHash(hashes.get(i));
       if (keys != null) tx.setKey(keys.get(i));
       if (blobs != null) tx.setFullHex(blobs.get(i));
       if (metadatas != null) tx.setMetadata(metadatas.get(i));
@@ -2212,7 +2212,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * when sent from/to same account #4500
    *
    * @param tx is the transaction to merge into the existing txs
-   * @param txMap maps tx ids to txs
+   * @param txMap maps tx hashes to txs
    * @param blockMap maps block heights to blocks
    * @param skipIfAbsent specifies if the tx should not be added if it doesn't already exist
    */

@@ -1,4 +1,5 @@
 v15.0.1
+restructure cpp project to src/main/cpp, src/test, etc
 seed == private spend key
 rename getLanguages() -> getMnemonicLanguages()
 wallet rpc support getting mnemonic, public view key, public spend key?

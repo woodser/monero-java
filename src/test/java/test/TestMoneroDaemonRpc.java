@@ -351,7 +351,7 @@ public class TestMoneroDaemonRpc {
     testGetBlocksRange(endHeight - numBlocks - 1, null, height, true);
   };
   
-  // Can get block ids (binary)
+  // Can get block hashes (binary)
   @Test
   public void testGetBlockIdsBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -364,7 +364,7 @@ public class TestMoneroDaemonRpc {
   public void testGetTxById() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
-    // fetch transaction ids to test
+    // fetch transaction hashes to test
     List<String> txHashes = getConfirmedTxHash(daemon);
     
     // context for testing txs
@@ -395,12 +395,12 @@ public class TestMoneroDaemonRpc {
     }
   }
   
-  // Can get transactions by ids with and without pruning
+  // Can get transactions by hashes with and without pruning
   @Test
   public void testGetTxsByHashes() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
-    // fetch transaction ids to test
+    // fetch transaction hashes to test
     List<String> txHashes = getConfirmedTxHash(daemon);
     
     // context for testing txs
@@ -479,7 +479,7 @@ public class TestMoneroDaemonRpc {
   public void getTxHexByHash() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
-    // fetch transaction ids to test
+    // fetch transaction hashes to test
     List<String> txHashes = getConfirmedTxHash(daemon);
     
     // fetch each tx hex by hash with and without pruning
@@ -589,7 +589,7 @@ public class TestMoneroDaemonRpc {
     wallet.sync();
   }
   
-  // Can get ids of transactions in the transaction pool (binary)
+  // Can get hashes of transactions in the transaction pool (binary)
   @Test
   public void testGetIdsOfTxsInPoolBin() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -701,7 +701,7 @@ public class TestMoneroDaemonRpc {
     wallet.sync();
   }
   
-  // Can flush transactions from the pool by ids
+  // Can flush transactions from the pool by hashes
   @Test
   public void testFlushTxsFromPoolByHashes() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -720,7 +720,7 @@ public class TestMoneroDaemonRpc {
     }
     assertEquals(txPoolBefore.size() + txHashes.size(), daemon.getTxPool().size());
     
-    // remove all txs by ids
+    // remove all txs by hashes
     daemon.flushTxPool(txHashes);
     
     // pool is back to original state
@@ -773,7 +773,7 @@ public class TestMoneroDaemonRpc {
     daemon.flushTxPool(txHashes);
   }
   
-  // Can get output indices given a list of transaction ids (binary)
+  // Can get output indices given a list of transaction hashes (binary)
   @Test
   public void testGetOutputIndicesFromTxIdsBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -851,7 +851,7 @@ public class TestMoneroDaemonRpc {
     }
   }
   
-  // Can get alternative block ids
+  // Can get alternative block hashes
   @Test
   public void testGetAlternativeBlockIds() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -1418,7 +1418,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(minerTx.getExtra().length > 0);
     assertTrue(minerTx.getUnlockTime() >= 0);
 
-//    // TODO: miner tx does not have ids in binary requests so this will fail, need to derive using prunable data
+//    // TODO: miner tx does not have hashes in binary requests so this will fail, need to derive using prunable data
 //    TestContext ctx = new TestContext();
 //    ctx.hasJson = false;
 //    ctx.isPruned = true;
@@ -1678,7 +1678,7 @@ public class TestMoneroDaemonRpc {
     // get blocks
     List<MoneroBlock> blocks = daemon.getBlocksByRange(startHeight, endHeight);
     
-    // collect tx ids
+    // collect tx hashes
     List<String> txHashes = new ArrayList<String>();
     for (MoneroBlock block : blocks) txHashes.addAll(block.getTxHashes());
     assertFalse("No transactions found in the range [" + startHeight + ", " + endHeight + "]", txHashes.isEmpty());  // TODO: this fails if no txs in last 200 blocks

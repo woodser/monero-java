@@ -407,7 +407,7 @@ public interface MoneroWallet {
   /**
    * Get a wallet transaction by hash.
    * 
-   * @param txHash is an hash of a transaction to get
+   * @param txHash is the hash of a transaction to get
    * @return the identified transactions
    */
   public MoneroTxWallet getTx(String txHash);
@@ -423,7 +423,7 @@ public interface MoneroWallet {
   /**
    * Get wallet transactions by hash.
    * 
-   * @param txHashes are ids of transactions to get
+   * @param txHashes are hashes of transactions to get
    * @return the identified transactions
    */
   public List<MoneroTxWallet> getTxs(String... txHashes);
@@ -431,7 +431,7 @@ public interface MoneroWallet {
   /**
    * Get wallet transactions by hash.
    * 
-   * @param txHashes are ids of transactions to get
+   * @param txHashes are hashes of transactions to get
    * @return the identified transactions
    */
   public List<MoneroTxWallet> getTxs(List<String> txHashes);
@@ -658,7 +658,7 @@ public interface MoneroWallet {
    * Relay previously created transactions.
    * 
    * @param txMetadatas are transaction metadata previously created without relaying
-   * @return the ids of the relayed txs
+   * @return the hashes of the relayed txs
    */
   public List<String> relayTxs(Collection<String> txMetadatas);
   
@@ -666,7 +666,7 @@ public interface MoneroWallet {
    * Relay previously created transactions.
    * 
    * @param txs are the transactions to relay
-   * @return the ids of the relayed txs
+   * @return the hashes of the relayed txs
    */
   public List<String> relayTxs(List<MoneroTxWallet> txs);
   
@@ -1181,7 +1181,7 @@ public interface MoneroWallet {
    * Submit signed multisig transactions as represented by a hex string.
    * 
    * @param signedMultisigTxHex is the signed multisig hex returned from signMultisigTxs()
-   * @return the resulting transaction ids
+   * @return the resulting transaction hashes
    */
   public List<String> submitMultisigTxHex(String signedMultisigTxHex);
 
