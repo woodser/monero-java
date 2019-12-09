@@ -1,11 +1,9 @@
 v15.0.1
-restructure cpp project to src/main/cpp, src/test, etc
-seed == private spend key
 rename getLanguages() -> getMnemonicLanguages()
 get_languages() should be static utility for wasm and jni?
-ability to get mnemonic from wallet restored from keys
-ability to get mnemonic from wallet rpc
-jni test_wallets dir fails to create if not already created
+"supported languages for the mnemonic phrase" doesn't make sense
+
+restructure cpp project to src/main/cpp, src/test, etc
 testSyncWithPoolSubmit not ported to js
 wallet rpc tests: WARNING: unrecognized field deserializing node to output: default
 monero_tx::from_property_tree payment id threw runtime_error, how is "Can get transactions by payment ids" test passing in Java?
@@ -14,8 +12,10 @@ compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting mone
 MoneroRpcConnection LOGGER.fine() executing? could be major performance hit
 sweepAccounts() is leaving behind dust
 ability to set mnemonic language and get different mnemonic?
-"supported languages for the mnemonic phrase" doesn't make sense
+
 wallet creation config
+ability to get mnemonic from wallet restored from keys
+ability to get mnemonic from wallet rpc
 
 test sweeps
 update sample code

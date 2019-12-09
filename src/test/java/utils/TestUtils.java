@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -135,6 +136,12 @@ public class TestUtils {
       
       // create wallet from mnemonic phrase if it doesn't exist
       if (!MoneroWalletJni.walletExists(WALLET_JNI_PATH_1)) {
+        
+        // create directory for test wallets if it doesn't exist
+        File testWalletsDir = new File(TestUtils.TEST_WALLETS_DIR);
+        if (!testWalletsDir.exists()) testWalletsDir.mkdirs();
+        
+        // create wallet with connection
         MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
         walletJni = MoneroWalletJni.createWalletFromMnemonic(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_PASSWORD, NETWORK_TYPE, TestUtils.MNEMONIC, daemonConnection, FIRST_RECEIVE_HEIGHT);
         assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, walletJni.getRestoreHeight());
