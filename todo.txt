@@ -8,6 +8,7 @@ ability to get mnemonic from wallet rpc
 ability to set mnemonic language and get different mnemonic?
 
 test sweeps, sweepAccounts is leaving behind dust
+update readme: MoneroJS for seo
 update sample code
 update build instructions
 update java-lite
