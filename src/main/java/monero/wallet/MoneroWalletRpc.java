@@ -132,7 +132,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("filename", name);
     params.put("password", password);
     rpc.sendJsonRequest("open_wallet", params);
-    addressCache.clear();
+    clear();
     path = name;
   }
   
@@ -153,6 +153,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("password", password);
     params.put("language", language);
     rpc.sendJsonRequest("create_wallet", params);
+    clear();
     path = name;
   }
   
@@ -181,6 +182,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("language", language);
     params.put("autosave_current", saveCurrent);
     rpc.sendJsonRequest("restore_deterministic_wallet", params);
+    clear();
     path = name;
   }
   
@@ -211,6 +213,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("restore_height", restoreHeight);
     params.put("autosave_current", saveCurrent);
     rpc.sendJsonRequest("generate_from_keys", params);  // TODO: info indicates if wallet is watch-only, programatically expose?
+    clear();
     path = name;
   }
   
@@ -1646,14 +1649,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @Override
   public void close(boolean save) {
-    addressCache.clear();
-    path = null;
+    clear();
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("autosave_current", save);
     rpc.sendJsonRequest("close_wallet", params);
   }
   
   // ------------------------------ PRIVATE -----------------------------------
+  
+  private void clear() {
+    addressCache.clear();
+    path = null;
+  }
   
   private Map<Integer, List<Integer>> getAccountIndices(boolean getSubaddressIndices) {
     Map<Integer, List<Integer>> indices = new HashMap<Integer, List<Integer>>();

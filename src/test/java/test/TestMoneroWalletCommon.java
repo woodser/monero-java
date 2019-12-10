@@ -222,7 +222,6 @@ public abstract class TestMoneroWalletCommon {
     try {
 
       // create test wallet with offset
-      wallet.close(); // TODO: monero-wallet-rpc: if wallet is not closed, primary address will not change
       wallet = createWalletFromMnemonic(TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT, "my secret offset!");
       Exception e2 = null;
       try {
