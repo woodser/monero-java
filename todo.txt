@@ -1,13 +1,12 @@
 v15.0.1
-compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
-test seed offset
-
 wallet creation config
+jni and keys wallet support seed offset with common test
+test sweeps, sweepAccounts is leaving behind dust
+
 ability to get mnemonic from wallet restored from keys
 ability to get mnemonic from wallet rpc
 ability to set mnemonic language and get different mnemonic?
 
-test sweeps, sweepAccounts is leaving behind dust
 update readme: MoneroJS for seo
 update sample code
 update build instructions
