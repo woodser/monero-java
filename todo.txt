@@ -1,9 +1,8 @@
 v15.0.1
-wallet rpc german not german mnemonic
-new wallet getHeight() as if synced
-
-wallet creation config
+parseTxSet() -> describeTxSet()
 jni and keys wallet support seed offset with common test
+new wallet getHeight() as if synced
+wallet creation config
 test sweeps, sweepAccounts is leaving behind dust
 ability to get mnemonic from wallet restored from keys
 ability to get mnemonic from wallet rpc
