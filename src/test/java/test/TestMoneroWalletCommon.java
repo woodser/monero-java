@@ -1054,6 +1054,7 @@ public abstract class TestMoneroWalletCommon {
     
     // get random transactions with payment hashes for testing
     List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, new MoneroTxQuery().setHasPaymentId(true), 3, 5);
+    assertFalse("No txs with payment ids to test", randomTxs.isEmpty());
     for (MoneroTxWallet randomTx : randomTxs) {
       assertNotNull(randomTx.getPaymentId());
     }
