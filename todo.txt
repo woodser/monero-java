@@ -1,7 +1,5 @@
 v15.0.1
 compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
-MoneroRpcConnection LOGGER.fine() executing? could be major performance hit
-sweepAccounts() is leaving behind dust
 test seed offset
 
 wallet creation config
@@ -9,7 +7,7 @@ ability to get mnemonic from wallet restored from keys
 ability to get mnemonic from wallet rpc
 ability to set mnemonic language and get different mnemonic?
 
-test sweeps
+test sweeps, sweepAccounts is leaving behind dust
 update sample code
 update build instructions
 update java-lite
