@@ -125,7 +125,6 @@ public class MoneroRpcConnection {
 
       // deserialize response
       Map<String, Object> respMap = JsonUtils.toMap(MAPPER, EntityUtils.toString(resp.getEntity(), "UTF-8"));
-      LOGGER.fine("Received response to method '" + method + "': " + JsonUtils.serialize(respMap));
       EntityUtils.consume(resp.getEntity());
 
       // check RPC response for errors
@@ -179,7 +178,6 @@ public class MoneroRpcConnection {
       
       // deserialize response
       Map<String, Object> respMap = JsonUtils.toMap(MAPPER, EntityUtils.toString(resp.getEntity(), "UTF-8"));
-      LOGGER.fine("Received response to path '" + path + "': " + JsonUtils.serialize(respMap));
       EntityUtils.consume(resp.getEntity());
 
       // check RPC response for errors
