@@ -1,5 +1,4 @@
 v15.0.1
-wallet rpc tests: WARNING: unrecognized field deserializing node to output: default
 monero_tx::from_property_tree payment id threw runtime_error, how is "Can get transactions by payment ids" test passing in Java?
 compare wallet_rpc_server from v15.0.2 to v14.1.0 for differences affecting monero_wallet.cpp
 MoneroRpcConnection LOGGER.fine() executing? could be major performance hit
@@ -20,6 +19,7 @@ update docs
 release
 
 HIGH
+cpp library deserialization log warning for unrecognized fields
 cpp library uses unmodified monero-project submodule?
 wallet rpc support getting public view key, public spend key?
 basic test which exercises most of wallet
