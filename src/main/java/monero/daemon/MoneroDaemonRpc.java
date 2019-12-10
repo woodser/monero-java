@@ -1100,15 +1100,15 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         for (BigInteger bi : (List<BigInteger>) val) ints.add(bi.intValue());
         tx.setExtra(GenUtils.reconcile(tx.getExtra(), GenUtils.listToIntArray(ints)));
       }
-      else if (key.equals("vin")) {
+      else if (key.equals("input")) {
         List<Map<String, Object>> rpcInputs = (List<Map<String, Object>>) val;
-        if (rpcInputs.size() != 1 || !rpcInputs.get(0).containsKey("gen")) {  // ignore miner vin TODO: why? probably needs re-enabled
+        if (rpcInputs.size() != 1 || !rpcInputs.get(0).containsKey("gen")) {  // ignore miner input TODO: why? probably needs re-enabled
           List<MoneroOutput> inputs = new ArrayList<MoneroOutput>();
           for (Map<String, Object> rpcInput : rpcInputs) inputs.add(convertRpcOutput(rpcInput, tx));
           tx.setInputs(inputs);
         }
       }
-      else if (key.equals("vout")) {
+      else if (key.equals("output")) {
         List<Map<String, Object>> rpcOutputs = (List<Map<String, Object>>) val;
         List<MoneroOutput> outputs = new ArrayList<MoneroOutput>();
         for (Map<String, Object> rpcOutput : rpcOutputs) outputs.add(convertRpcOutput(rpcOutput, tx));
@@ -1175,7 +1175,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     if (tx.getOutputIndices() != null && tx.getOutputs() != null)  {
       GenUtils.assertEquals(tx.getOutputIndices().size(), (int) tx.getOutputs().size());
       for (int i = 0; i < tx.getOutputs().size(); i++) {
-        tx.getOutputs().get(i).setIndex(tx.getOutputIndices().get(i));  // transfer output indices to vouts
+        tx.getOutputs().get(i).setIndex(tx.getOutputIndices().get(i));  // transfer output indices to outputs
       }
     }
     if (rpcTx.containsKey("as_json") && !"".equals(rpcTx.get("as_json"))) convertRpcTx(JsonUtils.deserialize(MoneroRpcConnection.MAPPER, (String) rpcTx.get("as_json"), new TypeReference<Map<String, Object>>(){}), tx);
@@ -1192,7 +1192,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     output.setTx(tx);
     for (String key : rpcOutput.keySet()) {
       Object val = rpcOutput.get(key);
-      if (key.equals("gen")) throw new Error("Output with 'gen' from daemon rpc is miner tx which we ignore (i.e. each miner vin is null)");
+      if (key.equals("gen")) throw new Error("Output with 'gen' from daemon rpc is miner tx which we ignore (i.e. each miner input is null)");
       else if (key.equals("key")) {
         Map<String, Object> rpcKey = (Map<String, Object>) val;
         output.setAmount(GenUtils.reconcile(output.getAmount(), (BigInteger) rpcKey.get("amount")));

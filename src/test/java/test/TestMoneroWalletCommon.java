@@ -951,10 +951,10 @@ public abstract class TestMoneroWalletCommon {
         assertTrue(tx.getOutputs().size() > 0);
         found = true;
       } else {
-        assertTrue(tx.isOutgoing() || (tx.isIncoming() && !tx.isConfirmed())); // TODO: monero-wallet-rpc: return vouts for unconfirmed txs
+        assertTrue(tx.isOutgoing() || (tx.isIncoming() && !tx.isConfirmed())); // TODO: monero-wallet-rpc: return outputs for unconfirmed txs
       }
     }
-    assertTrue("No vouts found in txs", found);
+    assertTrue("No outputs found in txs", found);
     
     // get txs with output query
     MoneroOutputQuery outputQuery = new MoneroOutputQuery().setIsSpent(false).setAccountIndex(1).setSubaddressIndex(2);
@@ -963,13 +963,13 @@ public abstract class TestMoneroWalletCommon {
     for (MoneroTxWallet tx : txs) {
       assertFalse(tx.getOutputs() == null || tx.getOutputs().isEmpty());
       found = false;
-      for (MoneroOutputWallet vout : tx.getVoutsWallet()) {
-        if (vout.isSpent() == false && vout.getAccountIndex() == 1 && vout.getSubaddressIndex() == 2) {
+      for (MoneroOutputWallet output : tx.getOutputsWallet()) {
+        if (output.isSpent() == false && output.getAccountIndex() == 1 && output.getSubaddressIndex() == 2) {
           found = true;
           break;
         }
       }
-      if (!found) fail("Tx does not contain specified vout");
+      if (!found) fail("Tx does not contain specified output");
     }
     
     // get unlocked txs
@@ -1468,7 +1468,7 @@ public abstract class TestMoneroWalletCommon {
       assertEquals(false, output.isSpent());
     }
     
-    // get spent vouts to account 1
+    // get spent outputs to account 1
     outputs = getAndTestOutputs(wallet, new MoneroOutputQuery().setAccountIndex(1).setIsSpent(true), true);
     for (MoneroOutputWallet output : outputs) {
       assertEquals(1, (int) output.getAccountIndex());
@@ -1483,12 +1483,12 @@ public abstract class TestMoneroWalletCommon {
     for (MoneroTxWallet tx : txs) {
       txHashes.add(tx.getHash());
       outputs = getAndTestOutputs(wallet, new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setHash(tx.getHash())), true);
-      for (MoneroOutputWallet vout : outputs) assertEquals(vout.getTx().getHash(), tx.getHash());
+      for (MoneroOutputWallet output : outputs) assertEquals(output.getTx().getHash(), tx.getHash());
     }
     
     // get outputs with tx hashes
     outputs = getAndTestOutputs(wallet, new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setTxHashes(txHashes)), true);
-    for (MoneroOutputWallet vout : outputs) assertTrue(txHashes.contains(vout.getTx().getHash()));
+    for (MoneroOutputWallet output : outputs) assertTrue(txHashes.contains(output.getTx().getHash()));
     
     // get confirmed outputs to specific subaddress with pre-built query
     int accountIdx = 0;
@@ -3981,7 +3981,7 @@ public abstract class TestMoneroWalletCommon {
   /**
    * Fetches and tests transactions according to the given query.
    * 
-   * TODO: ensure each tx passes query filter, same with testGetTransfer and getAndTestVouts
+   * TODO: ensure each tx passes query filter, same with testGetTransfer and getAndTestOutputs
    */
   private List<MoneroTxWallet> getAndTestTxs(MoneroWallet wallet, MoneroTxQuery query, TestContext ctx, Boolean isExpected) {
     MoneroTxQuery copy = null;
@@ -4013,18 +4013,18 @@ public abstract class TestMoneroWalletCommon {
   }
 
   /**
-   * Fetches and tests wallet outputs (i.e. wallet tx vouts) according to the given query.
+   * Fetches and tests wallet outputs (i.e. wallet tx outputs) according to the given query.
    */
   private static List<MoneroOutputWallet> getAndTestOutputs(MoneroWallet wallet, MoneroOutputQuery query, Boolean isExpected) {
     MoneroOutputQuery copy = null;
     if (query != null) copy = query.copy();
-    List<MoneroOutputWallet> vouts = wallet.getOutputs(query);
+    List<MoneroOutputWallet> outputs = wallet.getOutputs(query);
     assertEquals(copy, query);
-    if (Boolean.FALSE.equals(isExpected)) assertEquals(0, vouts.size());
-    if (Boolean.TRUE.equals(isExpected)) assertTrue("Vouts were expected but not found; run send tests", vouts.size() > 0);
-    for (MoneroOutputWallet vout : vouts) testOutputWallet(vout);
+    if (Boolean.FALSE.equals(isExpected)) assertEquals(0, outputs.size());
+    if (Boolean.TRUE.equals(isExpected)) assertTrue("Outputs were expected but not found; run send tests", outputs.size() > 0);
+    for (MoneroOutputWallet output : outputs) testOutputWallet(output);
     if (query != null) assertEquals(copy, query);
-    return vouts;
+    return outputs;
   }
   
   /**
@@ -4294,9 +4294,9 @@ public abstract class TestMoneroWalletCommon {
       // test locked state
       if (tx.getUnlockTime() == 0) assertEquals(tx.isConfirmed(), !tx.isLocked());
       else assertEquals(true, tx.isLocked());
-      if (tx.getVoutsWallet() != null) {
-        for (MoneroOutputWallet vout : tx.getVoutsWallet()) {
-          assertEquals(tx.isLocked(), vout.isLocked());
+      if (tx.getOutputsWallet() != null) {
+        for (MoneroOutputWallet output : tx.getOutputsWallet()) {
+          assertEquals(tx.isLocked(), output.isLocked());
         }
       }
       
@@ -4342,7 +4342,7 @@ public abstract class TestMoneroWalletCommon {
       assertNull(tx.getLastRelayedTimestamp());
     }
     
-    // test vouts
+    // test outputs
     if (Boolean.TRUE.equals(tx.isIncoming()) && Boolean.TRUE.equals(ctx.includeOutputs)) {
       if (tx.isConfirmed()) {
         assertNotNull(tx.getOutputs());
@@ -4351,7 +4351,7 @@ public abstract class TestMoneroWalletCommon {
         assertNull(tx.getOutputs());
       }
     }
-    if (tx.getOutputs() != null) for (MoneroOutputWallet vout : tx.getVoutsWallet()) testOutputWallet(vout);
+    if (tx.getOutputs() != null) for (MoneroOutputWallet output : tx.getOutputsWallet()) testOutputWallet(output);
     
     // test deep copy
     if (!Boolean.TRUE.equals(ctx.isCopy)) testTxWalletCopy(tx, ctx);
@@ -4491,13 +4491,13 @@ public abstract class TestMoneroWalletCommon {
     assertTrue(output.getKeyImage().getHex().length() > 0);
     TestUtils.testUnsignedBigInteger(output.getAmount(), true);
     
-    // vout has circular reference to its transaction which has some initialized fields
+    // output has circular reference to its transaction which has some initialized fields
     MoneroTxWallet tx = output.getTx();
     assertNotNull(tx);
     assertTrue(tx.getOutputs().contains(output));
     assertNotNull(tx.getHash());
     assertNotNull(tx.isLocked());
-    assertEquals(true, tx.isConfirmed());  // TODO monero-wallet-rpc: possible to get unconfirmed vouts?
+    assertEquals(true, tx.isConfirmed());  // TODO monero-wallet-rpc: possible to get unconfirmed outputs?
     assertEquals(true, tx.isRelayed());
     assertEquals(false, tx.isFailed());
     assertTrue(tx.getHeight() > 0);
@@ -4506,7 +4506,7 @@ public abstract class TestMoneroWalletCommon {
     MoneroOutputWallet copy = output.copy();
     assertTrue(copy != output);
     assertEquals(output.toString(), copy.toString());
-    assertNull(copy.getTx());  // TODO: should vout copy do deep copy of tx so models are graph instead of tree?  Would need to work out circular references
+    assertNull(copy.getTx());  // TODO: should output copy do deep copy of tx so models are graph instead of tree?  Would need to work out circular references
   }
   
   /**
@@ -4691,16 +4691,16 @@ public abstract class TestMoneroWalletCommon {
       Integer prevAccountIdx = null;
       Integer prevSubaddressIdx = null;
       if (tx.getOutputs() == null) continue;
-      for (MoneroOutputWallet vout : tx.getVoutsWallet()) {
-        if (prevAccountIdx == null) prevAccountIdx = vout.getAccountIndex();
+      for (MoneroOutputWallet output : tx.getOutputsWallet()) {
+        if (prevAccountIdx == null) prevAccountIdx = output.getAccountIndex();
         else {
-          assertTrue(prevAccountIdx <= vout.getAccountIndex());
-          if (prevAccountIdx < vout.getAccountIndex()) {
+          assertTrue(prevAccountIdx <= output.getAccountIndex());
+          if (prevAccountIdx < output.getAccountIndex()) {
             prevSubaddressIdx = null;
-            prevAccountIdx = vout.getAccountIndex();
+            prevAccountIdx = output.getAccountIndex();
           }
-          if (prevSubaddressIdx == null) prevSubaddressIdx = vout.getSubaddressIndex();
-          else assertTrue(vout.getKeyImage().toString() + " " + prevSubaddressIdx + " > " + vout.getSubaddressIndex(), prevSubaddressIdx <= vout.getSubaddressIndex()); // TODO: this does not test that index < other index if subaddresses are equal
+          if (prevSubaddressIdx == null) prevSubaddressIdx = output.getSubaddressIndex();
+          else assertTrue(output.getKeyImage().toString() + " " + prevSubaddressIdx + " > " + output.getSubaddressIndex(), prevSubaddressIdx <= output.getSubaddressIndex()); // TODO: this does not test that index < other index if subaddresses are equal
         }
       }
     }

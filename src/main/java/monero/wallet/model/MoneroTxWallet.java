@@ -125,22 +125,7 @@ public class MoneroTxWallet extends MoneroTx {
   }
   
   /**
-   * Returns a copy of this model's vouts as a list of type MoneroOutputWallet.
-   * 
-   * @return vouts of type MoneroOutputWallet
-   */
-  public List<MoneroOutputWallet> getVoutsWallet() {
-    List<MoneroOutput> vouts = getOutputs();
-    if (vouts == null) return null;
-    List<MoneroOutputWallet> voutsWallet = new ArrayList<MoneroOutputWallet>();
-    for (MoneroOutput vout : getOutputs()) {
-      voutsWallet.add((MoneroOutputWallet) vout);
-    }
-    return voutsWallet;
-  }
-  
-  /**
-   * Set the tx's vouts (MoneroOutputWallet) which contain information relative
+   * Set the tx's outputs (MoneroOutputWallet) which contain information relative
    * to a wallet.
    * 
    * Callers must cast to extended type (MoneroOutput) because Java
@@ -153,8 +138,8 @@ public class MoneroTxWallet extends MoneroTx {
     
     // validate that all outputs are wallet outputs
     if (outputs != null) {
-      for (MoneroOutput vout : outputs) {
-        if (!(vout instanceof MoneroOutputWallet)) throw new MoneroException("Wallet transaction vouts must be of type MoneroOutputWallet");
+      for (MoneroOutput output : outputs) {
+        if (!(output instanceof MoneroOutputWallet)) throw new MoneroException("Wallet transaction outputs must be of type MoneroOutputWallet");
       }
     }
     super.setOutputs(outputs);
@@ -162,14 +147,29 @@ public class MoneroTxWallet extends MoneroTx {
   }
   
   /**
-   * Set vouts with compile-time binding to MoneroOutputWallet for deserialization.
+   * Set outputs with compile-time binding to MoneroOutputWallet for deserialization.
    * 
-   * @param outputs are the tx's vouts
+   * @param outputs are the tx's outputs
    * @return MoneroTxWallet is a reference to this tx for chaining
    */
-  @JsonProperty("vouts")
+  @JsonProperty("outputs")
   public MoneroTxWallet setOutputsWallet(List<MoneroOutputWallet> outputs) {
     return setOutputs(new ArrayList<MoneroOutput>(outputs));
+  }
+  
+  /**
+   * Returns a copy of this model's outputs as a list of type MoneroOutputWallet.
+   * 
+   * @return outputs of type MoneroOutputWallet
+   */
+  public List<MoneroOutputWallet> getOutputsWallet() {
+    List<MoneroOutput> outputs = getOutputs();
+    if (outputs == null) return null;
+    List<MoneroOutputWallet> outputsWallet = new ArrayList<MoneroOutputWallet>();
+    for (MoneroOutput output : getOutputs()) {
+      outputsWallet.add((MoneroOutputWallet) output);
+    }
+    return outputsWallet;
   }
   
   public String getNote() {

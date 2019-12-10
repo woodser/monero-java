@@ -209,8 +209,8 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     if (this.getOutputQuery() != null && !this.getOutputQuery().isDefault()) {
       if (tx.getOutputs() == null || tx.getOutputs().isEmpty()) return false;
       boolean matchFound = false;
-      for (MoneroOutputWallet vout : tx.getVoutsWallet()) {
-        if (this.getOutputQuery().meetsCriteria(vout)) {
+      for (MoneroOutputWallet output : tx.getOutputsWallet()) {
+        if (this.getOutputQuery().meetsCriteria(output)) {
           matchFound = true;
           break;
         }
@@ -268,8 +268,8 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setOutputs(List<MoneroOutput> vouts) {
-    super.setOutputs(vouts);
+  public MoneroTxQuery setOutputs(List<MoneroOutput> outputs) {
+    super.setOutputs(outputs);
     return this;
   }
 

@@ -1453,7 +1453,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(tx.getExtra().length > 0);
     
     // test presence of output indices
-    // TODO: change this over to vouts only
+    // TODO: change this over to outputs only
     if (tx.isMinerTx()) assertEquals(tx.getOutputIndices(), null); // TODO: how to get output indices for miner transactions?
     if (tx.inTxPool() || ctx.fromGetTxPool || Boolean.FALSE.equals(ctx.hasOutputIndices)) assertEquals(null, tx.getOutputIndices());
     else assertNotNull(tx.getOutputIndices());
@@ -1546,7 +1546,7 @@ public class TestMoneroDaemonRpc {
     assertFalse(tx.getOutputs().isEmpty());
     for (MoneroOutput output : tx.getOutputs()) {
       assert(tx == output.getTx());
-      testVout(output, ctx);
+      testOutput(output, ctx);
     }
     
     // test pruned vs not pruned
@@ -1598,11 +1598,11 @@ public class TestMoneroDaemonRpc {
     }
   }
 
-  private static void testVout(MoneroOutput vout, TestContext ctx) {
-    testOutput(vout);
-    if (vout.getTx().inTxPool() || Boolean.FALSE.equals(ctx.hasOutputIndices)) assertEquals(null, vout.getIndex());
-    else assertTrue(vout.getIndex() >= 0);
-    assertEquals(64, vout.getStealthPublicKey().length());
+  private static void testOutput(MoneroOutput output, TestContext ctx) {
+    testOutput(output);
+    if (output.getTx().inTxPool() || Boolean.FALSE.equals(ctx.hasOutputIndices)) assertEquals(null, output.getIndex());
+    else assertTrue(output.getIndex() >= 0);
+    assertEquals(64, output.getStealthPublicKey().length());
   }
 
   private static void testOutput(MoneroOutput output) {

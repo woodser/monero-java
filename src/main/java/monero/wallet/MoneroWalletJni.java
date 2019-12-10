@@ -822,7 +822,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
       sanitizeBlock(block);
       for (MoneroTx tx : block.getTxs()) {
         MoneroTxWallet txWallet = (MoneroTxWallet) tx;
-        outputs.addAll(txWallet.getVoutsWallet());
+        outputs.addAll(txWallet.getOutputsWallet());
       }
     }
     return outputs;

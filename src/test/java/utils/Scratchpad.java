@@ -45,7 +45,7 @@ public class Scratchpad {
 //    
 //    for (MoneroBlock block : daemon.getBlocksByRange(daemon.getHeight() - numBlocks, daemon.getHeight() - 1)) {
 //      for (MoneroTx tx : block.getTxs()) {
-//        numOutputs += tx.getVouts().size();
+//        numOutputs += tx.getOutputs().size();
 //      }
 //    }
 //    

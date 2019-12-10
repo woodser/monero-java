@@ -877,7 +877,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
     Map<Long, MoneroBlock> blockMap = new HashMap<Long, MoneroBlock>();
     
-    // collect txs with vouts for each indicated account using `incoming_transfers` rpc call
+    // collect txs with outputs for each indicated account using `incoming_transfers` rpc call
     Map<String, Object> params = new HashMap<String, Object>();
     String transferType;
     if (Boolean.TRUE.equals(query.isSpent())) transferType = "unavailable";
@@ -893,10 +893,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       Map<String, Object> resp = rpc.sendJsonRequest("incoming_transfers", params);
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       
-      // convert response to txs with vouts and merge
+      // convert response to txs with outputs and merge
       if (!result.containsKey("transfers")) continue;
-      for (Map<String, Object> rpcVout : (List<Map<String, Object>>) result.get("transfers")) {
-        MoneroTxWallet tx = convertRpcTxWithVout(rpcVout);
+      for (Map<String, Object> rpcOutput : (List<Map<String, Object>>) result.get("transfers")) {
+        MoneroTxWallet tx = convertRpcTxWithOutput(rpcOutput);
         mergeTx(tx, txMap, blockMap, false);
       }
     }
@@ -905,27 +905,27 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>(txMap.values());
     Collections.sort(txs, new TxHeightComparator());
     
-    // collect queried vouts
-    List<MoneroOutputWallet> vouts = new ArrayList<MoneroOutputWallet>();
+    // collect queried outputs
+    List<MoneroOutputWallet> outputs = new ArrayList<MoneroOutputWallet>();
     for (MoneroTxWallet tx : txs) {
       
-      // sort vouts
-      if (tx.getOutputs() != null) Collections.sort(tx.getOutputs(), new VoutComparator());
+      // sort outputs
+      if (tx.getOutputs() != null) Collections.sort(tx.getOutputs(), new OutputComparator());
       
-      // collect queried vouts
+      // collect queried outputs
       List<MoneroOutput> toRemoves = new ArrayList<MoneroOutput>();
-      for (MoneroOutput vout : tx.getOutputs()) {
-        if (query.meetsCriteria((MoneroOutputWallet) vout)) vouts.add((MoneroOutputWallet) vout);
-        else toRemoves.add(vout);
+      for (MoneroOutput output : tx.getOutputs()) {
+        if (query.meetsCriteria((MoneroOutputWallet) output)) outputs.add((MoneroOutputWallet) output);
+        else toRemoves.add(output);
       }
       
-      // remove excluded vouts from tx
+      // remove excluded outputs from tx
       tx.getOutputs().removeAll(toRemoves);
       
       // remove excluded txs from block
       if (tx.getOutputs().isEmpty() && tx.getBlock() != null) tx.getBlock().getTxs().remove(tx);
     }
-    return vouts;
+    return outputs;
   }
   
   @SuppressWarnings("unchecked")
@@ -2088,7 +2088,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   @SuppressWarnings("unchecked")
-  private static MoneroTxWallet convertRpcTxWithVout(Map<String, Object> rpcVout) {
+  private static MoneroTxWallet convertRpcTxWithOutput(Map<String, Object> rpcOutput) {
     
     // initialize tx
     MoneroTxWallet tx = new MoneroTxWallet();
@@ -2096,33 +2096,33 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setIsRelayed(true);
     tx.setIsFailed(false);
     
-    // initialize vout
-    MoneroOutputWallet vout = new MoneroOutputWallet().setTx(tx);
-    for (String key : rpcVout.keySet()) {
-      Object val = rpcVout.get(key);
-      if (key.equals("amount")) vout.setAmount((BigInteger) val);
-      else if (key.equals("spent")) vout.setIsSpent((Boolean) val);
-      else if (key.equals("key_image")) vout.setKeyImage(new MoneroKeyImage((String) val));
-      else if (key.equals("global_index")) vout.setIndex(((BigInteger) val).intValue());
+    // initialize output
+    MoneroOutputWallet output = new MoneroOutputWallet().setTx(tx);
+    for (String key : rpcOutput.keySet()) {
+      Object val = rpcOutput.get(key);
+      if (key.equals("amount")) output.setAmount((BigInteger) val);
+      else if (key.equals("spent")) output.setIsSpent((Boolean) val);
+      else if (key.equals("key_image")) output.setKeyImage(new MoneroKeyImage((String) val));
+      else if (key.equals("global_index")) output.setIndex(((BigInteger) val).intValue());
       else if (key.equals("tx_hash")) tx.setHash((String) val);
       else if (key.equals("unlocked")) tx.setIsLocked(!(Boolean) val);
-      else if (key.equals("frozen")) vout.setIsFrozen((Boolean) val);
+      else if (key.equals("frozen")) output.setIsFrozen((Boolean) val);
       else if (key.equals("subaddr_index")) {
         Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) val;
-        vout.setAccountIndex(rpcIndices.get("major").intValue());
-        vout.setSubaddressIndex(rpcIndices.get("minor").intValue());
+        output.setAccountIndex(rpcIndices.get("major").intValue());
+        output.setSubaddressIndex(rpcIndices.get("minor").intValue());
       }
       else if (key.equals("block_height")) {
         long height = ((BigInteger) val).longValue();
         tx.setBlock(new MoneroBlock().setHeight(height).setTxs(tx));
       }
-      else LOGGER.warning("WARNING: ignoring unexpected transaction field with vout: " + key + ": " + val);
+      else LOGGER.warning("WARNING: ignoring unexpected transaction field with output: " + key + ": " + val);
     }
     
-    // initialize tx with vout
-    List<MoneroOutput> vouts = new ArrayList<MoneroOutput>();
-    vouts.add((MoneroOutput) vout); // have to cast to extended type because Java paramaterized types do not recognize inheritance
-    tx.setOutputs(vouts);
+    // initialize tx with output
+    List<MoneroOutput> outputs = new ArrayList<MoneroOutput>();
+    outputs.add((MoneroOutput) output); // have to cast to extended type because Java paramaterized types do not recognize inheritance
+    tx.setOutputs(outputs);
     return tx;
   }
   
@@ -2288,9 +2288,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   /**
-   * Compares two vouts by ascending account and subaddress indices.
+   * Compares two outputs by ascending account and subaddress indices.
    */
-  public static class VoutComparator implements Comparator<MoneroOutput> {
+  public static class OutputComparator implements Comparator<MoneroOutput> {
     
     @Override
     public int compare(MoneroOutput o1, MoneroOutput o2) {

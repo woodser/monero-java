@@ -94,7 +94,7 @@ public class MoneroTx {
     }
     if (tx.outputs != null) {
       this.outputs = new ArrayList<MoneroOutput>();
-      for (MoneroOutput vout : tx.outputs) outputs.add(vout.copy().setTx(this));
+      for (MoneroOutput output : tx.outputs) outputs.add(output.copy().setTx(this));
     }
     if (tx.outputIndices != null) this.outputIndices = new ArrayList<Integer>(tx.outputIndices);
     this.metadata = tx.metadata;
@@ -537,9 +537,9 @@ public class MoneroTx {
         
         // validate output indices if present
         int numIndices = 0;
-        for (MoneroOutput vout : this.getOutputs()) if (vout.getIndex() != null) numIndices++;
-        for (MoneroOutput vout : tx.getOutputs()) if (vout.getIndex() != null) numIndices++;
-        GenUtils.assertTrue("Some vouts have an output index and some do not", numIndices == 0 || this.getOutputs().size() + tx.getOutputs().size() == numIndices);
+        for (MoneroOutput output : this.getOutputs()) if (output.getIndex() != null) numIndices++;
+        for (MoneroOutput output : tx.getOutputs()) if (output.getIndex() != null) numIndices++;
+        GenUtils.assertTrue("Some outputs have an output index and some do not", numIndices == 0 || this.getOutputs().size() + tx.getOutputs().size() == numIndices);
         
         // merge by output indices if present
         if (numIndices > 0) {
@@ -560,19 +560,19 @@ public class MoneroTx {
           
           // determine if key images present
           int numKeyImages = 0;
-          for (MoneroOutput vout : this.getOutputs()) {
-            if (vout.getKeyImage() != null) {
-              GenUtils.assertNotNull(vout.getKeyImage().getHex());
+          for (MoneroOutput output : this.getOutputs()) {
+            if (output.getKeyImage() != null) {
+              GenUtils.assertNotNull(output.getKeyImage().getHex());
               numKeyImages++;
             }
           }
-          for (MoneroOutput vout : tx.getOutputs()) {
-            if (vout.getKeyImage() != null) {
-              GenUtils.assertNotNull(vout.getKeyImage().getHex());
+          for (MoneroOutput output : tx.getOutputs()) {
+            if (output.getKeyImage() != null) {
+              GenUtils.assertNotNull(output.getKeyImage().getHex());
               numKeyImages++;
             }
           }
-          GenUtils.assertTrue("Some vouts have a key image and some do not", numKeyImages == 0 || this.getOutputs().size() + tx.getOutputs().size() == numKeyImages);
+          GenUtils.assertTrue("Some outputs have a key image and some do not", numKeyImages == 0 || this.getOutputs().size() + tx.getOutputs().size() == numKeyImages);
           
           // merge by key images if present
           if (numKeyImages > 0) {
