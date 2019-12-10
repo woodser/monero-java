@@ -123,9 +123,9 @@ public abstract class TestMoneroWalletCommon {
   protected abstract MoneroWallet createWalletRandom();
   
   /**
-   * Create and open a random test wallet.
+   * Create and open a test wallet from a mnemonic phrase.
    * 
-   * @return the random test wallet
+   * @return the created test wallet
    */
   protected abstract MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight, String offset);
   
