@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.types.Filter;
 import common.utils.GenUtils;
@@ -66,6 +67,7 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
    * 
    * @return true if locked outputs queried, false of unlocked outputs queried, null if both
    */
+  @JsonProperty("isLocked")
   @Override
   public Boolean isLocked() {
     if (txQuery == null) return null;
@@ -111,6 +113,12 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
     return true;
   }
   
+  /**
+   * Indicates if this output query is default, specifying no query options.
+   * 
+   * @return true if the query is default, false otherwise
+   */
+  @JsonIgnore
   public boolean isDefault() {
     return meetsCriteria(EMPTY_OUTPUT);
   }

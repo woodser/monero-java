@@ -19,7 +19,7 @@ public class MoneroOutputWallet extends MoneroOutput {
   private Boolean isFrozen;
   
   public MoneroOutputWallet() {
-    // nothing to construct
+    super();
   }
   
   /**
@@ -105,6 +105,7 @@ public class MoneroOutputWallet extends MoneroOutput {
    * 
    * @return a boolean indicating the locked state of this output's tx
    */
+  @JsonProperty("isLocked")
   public Boolean isLocked() {
     if (getTx() == null) return null;
     return getTx().isLocked();
