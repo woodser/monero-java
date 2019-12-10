@@ -127,7 +127,7 @@ public abstract class TestMoneroWalletCommon {
    * 
    * @return the random test wallet
    */
-  protected abstract MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight);
+  protected abstract MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight, String offset);
   
   /**
    * Creates a wallet from keys.
@@ -192,14 +192,45 @@ public abstract class TestMoneroWalletCommon {
       String privateSpendKey = wallet.getPrivateSpendKey();
       
       // recreate test wallet from keys
-      wallet = createWalletFromMnemonic(TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT);
+      wallet = createWalletFromMnemonic(TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT, null);
       Exception e2 = null;
       try {
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
         assertEquals(privateViewKey, wallet.getPrivateViewKey());
         assertEquals(privateSpendKey, wallet.getPrivateSpendKey());
         assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
-        assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getMnemonicLanguage());
+        if (!(wallet instanceof MoneroWalletRpc)) assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getMnemonicLanguage());
+      } catch (Exception e) {
+        e2 = e;
+      }
+      wallet.close();
+      if (e2 != null) throw e2;
+    } catch (Exception e) {
+      e1 = e;
+    }
+    
+    // open main test wallet for other tests
+    wallet = getTestWallet();
+    if (e1 != null) throw new RuntimeException(e1);
+  }
+  
+  // Can create a wallet from a mnemonic phrase with a secret offset
+  @Test
+  public void testCreateWalletFromMnemonicWithOffset() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    Exception e1 = null;  // emulating Java "finally" but compatible with other languages
+    try {
+
+      // create test wallet with offset
+      wallet.close(); // TODO: monero-wallet-rpc: if wallet is not closed, primary address will not change
+      wallet = createWalletFromMnemonic(TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT, "my secret offset!");
+      Exception e2 = null;
+      try {
+        MoneroUtils.validateMnemonic(wallet.getMnemonic());
+        assertNotEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
+        MoneroUtils.validateAddress(wallet.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
+        assertNotEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
+        if (!(wallet instanceof MoneroWalletRpc)) assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getMnemonicLanguage());  // TODO monero-wallet-rpc: support
       } catch (Exception e) {
         e2 = e;
       }

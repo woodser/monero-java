@@ -349,24 +349,27 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletRandomJni
   }
 }
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint jnetwork_type, jstring jmnemonic, jlong jrestore_height) {
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint jnetwork_type, jstring jmnemonic, jlong jrestore_height, jstring joffset) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni");
 
   // collect and release string params
   const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
   const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
-  const char* _mnemonic = env->GetStringUTFChars(jmnemonic, NULL);
+  const char* _mnemonic = jmnemonic ? env->GetStringUTFChars(jmnemonic, NULL) : nullptr;
+  const char* _offset = joffset ? env->GetStringUTFChars(joffset, NULL) : nullptr;
   string path = string(_path ? _path : "");
   string password = string(_password ? _password : "");
   string mnemonic = string(_mnemonic ? _mnemonic : "");
+  string offset = string(_offset ? _offset : "");
   env->ReleaseStringUTFChars(jpath, _path);
   env->ReleaseStringUTFChars(jpassword, _password);
   env->ReleaseStringUTFChars(jmnemonic, _mnemonic);
+  env->ReleaseStringUTFChars(joffset, _offset);
 
   // construct wallet
   try {
     monero_rpc_connection daemon_connection;
-    monero_wallet* wallet = monero_wallet_core::create_wallet_from_mnemonic(path, password, static_cast<monero_network_type>(jnetwork_type), mnemonic, daemon_connection, (uint64_t) jrestore_height);
+    monero_wallet* wallet = monero_wallet_core::create_wallet_from_mnemonic(path, password, static_cast<monero_network_type>(jnetwork_type), mnemonic, daemon_connection, (uint64_t) jrestore_height, offset);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);

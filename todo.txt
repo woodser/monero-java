@@ -1,11 +1,10 @@
 v15.0.1
-parseTxSet() -> describeTxSet()
+wallet rpc old wallet results from getHeight(), getPrimaryAddress() if not closed
 jni and keys wallet support seed offset with common test
-new wallet getHeight() as if synced
 wallet creation config
 test sweeps, sweepAccounts is leaving behind dust
 ability to get mnemonic from wallet restored from keys
-ability to get mnemonic from wallet rpc
+ability to get mnemonic, language from wallet rpc
 ability to set mnemonic language and get different mnemonic?
 
 update readme: MoneroJS for seo
@@ -17,6 +16,7 @@ update docs
 release
 
 HIGH
+collect and report monero-wallet-rpc issues
 cpp library deserialization log warning for unrecognized fields
 cpp library uses unmodified monero-project submodule?
 wallet rpc support getting public view key, public spend key?

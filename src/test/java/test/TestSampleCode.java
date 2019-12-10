@@ -96,7 +96,7 @@ public class TestSampleCode {
     List<MoneroOutputWallet> outputs = walletRpc.getOutputs(outputQuery);
     
     // create a wallet from a mnemonic phrase using Java native bindings to Monero Core
-    MoneroWalletJni walletJni = MoneroWalletJni.createWalletFromMnemonic("./test_wallets/" + UUID.randomUUID().toString(), "supersecretpassword123", MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, new MoneroRpcConnection("http://localhost:38081"), TestUtils.FIRST_RECEIVE_HEIGHT);
+    MoneroWalletJni walletJni = MoneroWalletJni.createWalletFromMnemonic("./test_wallets/" + UUID.randomUUID().toString(), "supersecretpassword123", MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, new MoneroRpcConnection("http://localhost:38081"), TestUtils.FIRST_RECEIVE_HEIGHT, null);
     //MoneroWalletJni walletJni = MoneroWalletJni.createWalletFromMnemonic("MyWallet", "supersecretpassword123", MoneroNetworkType.STAGENET, "hefty value ...", new MoneroRpcConnection("http://localhost:38081"), 384151l);
     
     // synchronize the wallet and receive progress notifications

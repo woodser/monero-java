@@ -60,8 +60,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   @Override
-  protected MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight) {
-    wallet.createWalletFromMnemonic(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, mnemonic, restoreHeight);
+  protected MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight, String offset) {
+    wallet.createWalletFromMnemonic(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, mnemonic, restoreHeight, null, offset, null);
     return wallet;
   }
   
@@ -137,7 +137,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       List<MoneroTxWallet> txs = wallet.getTxs();
       assertFalse(txs.isEmpty()); // wallet is used
       assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, (long) txs.get(0).getHeight());
-      wallet.close();
+      wallet.close(); // TODO: monero-wallet-rpc: if wallet is not closed, primary address will not change
       
       // create wallet with non-defaults
       path = UUID.randomUUID().toString();
@@ -401,7 +401,12 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Test
   public void testCreateWalletFromMnemonic() {
-    super.testCreateWalletRandom();
+    super.testCreateWalletFromMnemonic();
+  }
+  
+  @Test
+  public void testCreateWalletFromMnemonicWithOffset() {
+    super.testCreateWalletFromMnemonicWithOffset();
   }
   
   @Test
