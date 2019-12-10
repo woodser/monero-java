@@ -1,4 +1,5 @@
 v15.0.1
+wallet rpc german not german mnemonic
 wallet creation config
 jni and keys wallet support seed offset with common test
 test sweeps, sweepAccounts is leaving behind dust
