@@ -1,15 +1,17 @@
 v15.0.1
+daemon version vs daemon info version
+js monero_wallet_keys get_version()
+
 wallet creation config
 spec wallet creation
 update sample code, demo js keys-only sample, use MoneroJS for seo
-daemon version vs daemon info version
-js monero_wallet_keys get_version()
 wallet rpc returns old wallet results for getHeight(), getTxs() if not closed even after new wallet created
 test sweeps, sweepAccounts is leaving behind dust
 ability to get mnemonic from wallet restored from keys
 ability to get mnemonic, language, restore height from wallet rpc
 ability to set mnemonic language and get different mnemonic?
 
+test build instructions
 js public npm module
 update java-lite
 update docs
