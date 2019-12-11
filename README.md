@@ -8,11 +8,11 @@ In addition, this project conforms to an [API specification](http://moneroecosys
 
 ## Main Features
 
-- Cohesive APIs with rigorous focus on ease-of-use
 - Manage a Monero daemon using RPC
 - Manage a Monero wallet using RPC and JNI
+- Cohesive APIs with rigorous focus on ease-of-use
 - Fetch and process binary data from the daemon (e.g. raw blocks)
-- Query wallet transactions, transfers, and outputs by their many attributes
+- Query wallet transactions, transfers, and outputs by their attributes
 - Be notified when blocks are added to the chain, as the wallet synchronizes, or when the wallet sends or receives funds
 - Validate addresses in native Java
 - Full multisig support
@@ -20,7 +20,7 @@ In addition, this project conforms to an [API specification](http://moneroecosys
 
 ## Sample Code
 
-This code introduces the API.  See the [Javadoc](https://moneroecosystem.org/monero-java/), [specification PDF](http://moneroecosystem.org/monero-java/monero-spec.pdf), or [JUnit tests](src/test/java) for more details.
+This code demonstrates the API.  See the [Javadoc](https://moneroecosystem.org/monero-java/), [specification PDF](http://moneroecosystem.org/monero-java/monero-spec.pdf), or [JUnit tests](src/test/java) for more details.
 
 ```java
 // connect to a daemon
@@ -174,11 +174,11 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 
 [API specification](http://moneroecosystem.org/monero-java/monero-spec.pdf)
 
-[Java reference implementation (lite version)](https://github.com/woodser/monero-java-lite)
+[monero-java-lite](https://github.com/woodser/monero-java-lite)
 
-[JavaScript reference implementation](https://github.com/monero-ecosystem/monero-javascript)
+[monero-javascript](https://github.com/monero-ecosystem/monero-javascript)
 
-[C++ reference implementation](https://github.com/woodser/monero-cpp-library)
+[monero-cpp-library](https://github.com/woodser/monero-cpp-library)
 
 ## License
 
