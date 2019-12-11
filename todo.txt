@@ -1,11 +1,11 @@
 v15.0.1
-update spec
-update sample code, demo js keys-only sample, use MoneroJS for seo
 build instructions include switch of monero-core fork to wasm_modifications branch
-
+wallet creation config
+spec wallet creation
+update sample code, demo js keys-only sample, use MoneroJS for seo
+daemon version vs daemon info version
 js monero_wallet_keys get_version()
 wallet rpc returns old wallet results for getHeight(), getTxs() if not closed even after new wallet created
-wallet creation config
 test sweeps, sweepAccounts is leaving behind dust
 ability to get mnemonic from wallet restored from keys
 ability to get mnemonic, language, restore height from wallet rpc
