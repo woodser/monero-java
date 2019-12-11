@@ -92,8 +92,8 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   }
   
   @Override
-  public void relayTxById(String txHash) {
-    relayTxsById(Arrays.asList(txHash));
+  public void relayTxByHash(String txHash) {
+    relayTxsByHash(Arrays.asList(txHash));
   }
   
   @Override

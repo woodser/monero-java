@@ -2397,7 +2397,7 @@ public abstract class TestMoneroWalletCommon {
       }
       
       // relay unless doNotRelay
-      if (!Boolean.TRUE.equals(request.getDoNotRelay())) daemon.relayTxById(tx.getHash());
+      if (!Boolean.TRUE.equals(request.getDoNotRelay())) daemon.relayTxByHash(tx.getHash());
 
       // sync wallet which updates from pool
       wallet.sync();

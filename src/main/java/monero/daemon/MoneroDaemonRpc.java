@@ -226,7 +226,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroBlock getBlockById(String blockHash) {
+  public MoneroBlock getBlockByHash(String blockHash) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("hash", blockHash);
     Map<String, Object> respMap = rpc.sendJsonRequest("get_block", params);
@@ -236,7 +236,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public List<MoneroBlock> getBlocksById(List<String> blockHashes, Long startHeight, Boolean prune) {
+  public List<MoneroBlock> getBlocksByHash(List<String> blockHashes, Long startHeight, Boolean prune) {
     throw new RuntimeException("Not implemented");
   }
 
@@ -431,7 +431,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void relayTxsById(Collection<String> txHashes) {
+  public void relayTxsByHash(Collection<String> txHashes) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("txids", txHashes);
     Map<String, Object> resp = rpc.sendJsonRequest("relay_tx", params);

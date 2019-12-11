@@ -141,7 +141,7 @@ public interface MoneroDaemon {
    * @param blockHash is the hash of the block to get
    * @return the block with the given hash
    */
-  public MoneroBlock getBlockById(String blockHash);
+  public MoneroBlock getBlockByHash(String blockHash);
   
   /**
    * Get blocks by hash.
@@ -153,7 +153,7 @@ public interface MoneroDaemon {
    * @param prune specifies if returned blocks should be pruned (defaults to false)  // TODO: test default
    * @return the retrieved blocks
    */
-  public List<MoneroBlock> getBlocksById(List<String> blockHashes, Long startHeight, Boolean prune);
+  public List<MoneroBlock> getBlocksByHash(List<String> blockHashes, Long startHeight, Boolean prune);
   
   /**
    * Get a block by height.
@@ -326,14 +326,14 @@ public interface MoneroDaemon {
    * 
    * @param txHash identifies the transaction to relay
    */
-  public void relayTxById(String txHash);
+  public void relayTxByHash(String txHash);
   
   /**
    * Relays transactions by hash.
    * 
    * @param txHashes identify the transactions to relay
    */
-  public void relayTxsById(Collection<String> txHashes);
+  public void relayTxsByHash(Collection<String> txHashes);
   
   /**
    * Get valid transactions seen by the node but not yet mined into a block, as well

@@ -156,7 +156,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get a block header by hash
   @Test
-  public void testGetBlockHeaderById() {
+  public void testGetBlockHeaderByHash() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // retrieve by hash of last block
@@ -229,14 +229,14 @@ public class TestMoneroDaemonRpc {
     // retrieve by hash of last block
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
     String hash = daemon.getBlockHash(lastHeader.getHeight());
-    MoneroBlock block = daemon.getBlockById(hash);
+    MoneroBlock block = daemon.getBlockByHash(hash);
     testBlock(block, ctx);
     assertEquals(daemon.getBlockByHeight(block.getHeight()), block);
     assertEquals(null, block.getTxs());
     
     // retrieve by hash of previous to last block
     hash = daemon.getBlockHash(lastHeader.getHeight() - 1);
-    block = daemon.getBlockById(hash);
+    block = daemon.getBlockByHash(hash);
     testBlock(block, ctx);
     assertEquals(daemon.getBlockByHeight(lastHeader.getHeight() - 1), block);
     assertEquals(null, block.getTxs());
@@ -244,7 +244,7 @@ public class TestMoneroDaemonRpc {
 
   // Can get blocks by hash which includes transactions (binary)
   @Test
-  public void testGetBlocksByIdBinary() {
+  public void testGetBlocksByHashBinary() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     throw new RuntimeException("Not implemented");
   }
@@ -361,7 +361,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get a transaction by hash with and without pruning
   @Test
-  public void testGetTxById() {
+  public void testGetTxByHash() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction hashes to test
@@ -730,7 +730,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get the spent status of key images
   @Test
-  @Ignore // TODO: hanging like getTxsByIds()
+  @Ignore // TODO: hanging like getTxsByHash()
   public void testGetSpentStatusOfKeyImages() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
@@ -1239,8 +1239,8 @@ public class TestMoneroDaemonRpc {
     }
     
     // relay the txs
-    if (txHashes.size() == 1) daemon.relayTxById(txHashes.get(0));
-    else daemon.relayTxsById(txHashes);
+    if (txHashes.size() == 1) daemon.relayTxByHash(txHashes.get(0));
+    else daemon.relayTxsByHash(txHashes);
     
     // ensure txs are relayed
     for (MoneroTx tx : txs) {
