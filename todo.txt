@@ -1,4 +1,9 @@
 v15.0.1
+update spec
+js monero_wallet_keys get_version()
+js keys-only sample code
+update sample code, user MoneroJS for seo
+
 wallet rpc returns old wallet results for getHeight(), getTxs() if not closed even after new wallet created
 wallet creation config
 test sweeps, sweepAccounts is leaving behind dust
@@ -6,11 +11,7 @@ ability to get mnemonic from wallet restored from keys
 ability to get mnemonic, language, restore height from wallet rpc
 ability to set mnemonic language and get different mnemonic?
 
-update readme: MoneroJS for seo
-update sample code
-update build instructions
 update java-lite
-update spec
 update docs
 release
 
