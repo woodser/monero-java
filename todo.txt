@@ -1,5 +1,4 @@
 v15.0.1
-js ./build/monero-javascript.wasm
 build instructions include switch of monero-core fork to wasm_modifications branch
 update spec
 js monero_wallet_keys get_version()
@@ -13,6 +12,7 @@ ability to get mnemonic from wallet restored from keys
 ability to get mnemonic, language, restore height from wallet rpc
 ability to set mnemonic language and get different mnemonic?
 
+js public npm module
 update java-lite
 update docs
 release
