@@ -167,6 +167,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param mnemonic is the mnemonic of the wallet to construct
    * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
    * @param restoreHeight is the block height to restore from (default = 0)
+   * @param offset is a string used to derive a new seed from an existing seed, allowing password-protected wallets to be recovered from a plain-text mnemonic
    */
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic) { return createWalletFromMnemonic(path, password, networkType, mnemonic, null, null, null); }
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection) { return createWalletFromMnemonic(path, password, networkType, mnemonic, daemonConnection, null, null); }
