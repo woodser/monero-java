@@ -1,5 +1,4 @@
 v15.0.1
-build instructions include switch of monero-core fork to wasm_modifications branch
 wallet creation config
 spec wallet creation
 update sample code, demo js keys-only sample, use MoneroJS for seo
