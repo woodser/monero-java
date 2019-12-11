@@ -348,7 +348,7 @@ public interface MoneroDaemon {
    * 
    * @return hashes of transactions in the transaction pool
    */
-  public List<String> getTxPoolIds();
+  public List<String> getTxPoolHashes();
   
   /**
    * Get all transaction pool backlog.

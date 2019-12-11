@@ -465,7 +465,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public List<String> getTxPoolIds() {
+  public List<String> getTxPoolHashes() {
     throw new RuntimeException("Not implemented");
   }
 
