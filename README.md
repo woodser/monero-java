@@ -1,10 +1,10 @@
+**Compatible with [Monero Core v0.15.0.1](https://web.getmonero.org/downloads/) Carbon Chameleon**
+
 # Monero Java Library
 
 This project is a library for using a Monero wallet and daemon in Java using RPC and JNI bindings to [Monero Core](https://github.com/monero-project/monero).
 
 In addition, this project conforms to an [API specification](http://moneroecosystem.org/monero-java/monero-spec.pdf) intended to be intuitive, robust, and suitable for long-term use in the Monero project.
-
-This library is compatible with [Monero Core v0.15.0.1 Carbon Chamaeleon](https://github.com/monero-project/monero/tree/v0.15.0.1).
 
 ## Main Features
 
@@ -143,14 +143,12 @@ walletJni.close(true);
 
 You are now ready to use this library with [monero-daemon-rpc](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.
 
-If you want to process binary data or use a Monero wallet using JNI instead of RPC, a dynamic library must be built for your specific platform for this Java library to use.  This project uses a [C++ counterpart library](https://github.com/woodser/monero-cpp-library) to support JNI (included as a submodule in ./external/monero-cpp-library).
+If you want to process binary data or use a Monero wallet using JNI instead of RPC, a dynamic library must be built for your specific platform for this Java library to use.  This project uses a [C++ counterpart library](https://github.com/woodser/monero-cpp-library) to support JNI, which is included as a submodule in ./external/monero-cpp-library.
 
-1. [Build the C++ library as a dynamic library](https://github.com/woodser/monero-cpp-library#building-a-dynamic--shared-library)
-2. Copy the built libmonero-cpp.dylib in step 1 to ./external-libs
-3. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/` (change as appropriate)
-4. Build libmonero-java.dylib to ./build: `./bin/build-libmonero-java.sh`
-5. Copy ./build/libmonero-java.dylib to ./lib
-6. Run TestMoneroCppUtils.java JUnit tests to verify the dynamic library is working with Java JNI
+1. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/` (change as appropriate)
+2. `cd <project_root>`
+3. `./bin/build-libmonero-java.sh
+4. Run TestMoneroCppUtils.java JUnit tests to verify the dynamic library is working with Java JNI
 
 ## How to Run Monero RPC
 

@@ -10,7 +10,9 @@ project(MoneroJavaJni)
 # System
 #############
 
-set(MONERO_CPP "external/monero-cpp-library")
+set(MONERO_CPP "${CMAKE_SOURCE_DIR}/external/monero-cpp-library")
+message(STATUS MONERO_CPP : ${MONERO_CPP} : ${MONERO_CPP})
+
 set(MONERO_CPP_SRC "${MONERO_CPP}/src")
 set(MONERO_CORE ${MONERO_CPP}/external/monero-core)
 set(MONERO_CORE_SRC "${MONERO_CORE}/src")
@@ -32,9 +34,6 @@ include_directories("${MONERO_CORE_SRC}/wallet")
 include_directories("${MONERO_CORE_SRC}/wallet/api")
 include_directories("${MONERO_CORE_SRC}/crypto/crypto_ops_builder/include/")
 include_directories(${BOOST})
-
-set(EXTERNAL_LIBS_DIR ${CMAKE_SOURCE_DIR}/external-libs)
-message(STATUS EXTERNAL_LIBS_DIR : ${EXTERNAL_LIBS_DIR})
 
 # TODO: remove TRUEs, how are APPLE, DEPENDS, etc initialized?
 if (TRUE OR HIDAPI_FOUND OR LibUSB_COMPILE_TEST_PASSED)
@@ -63,7 +62,7 @@ message(STATUS EXTRA_LIBRARIES: ${EXTRA_LIBRARIES})
 #include_directories(${BOOST})
 add_library(monero-cpp SHARED IMPORTED)
 set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION
-        ${EXTERNAL_LIBS_DIR}/libmonero-cpp.dylib)
+        ${MONERO_CPP}/build/libmonero-cpp.dylib)
 
 ###############################################
 # Build Java dynamic library (.dylib) for JNI
