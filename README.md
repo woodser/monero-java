@@ -138,7 +138,7 @@ walletJni.close(true);
 
 ## How to Run This Library
 
-1. Clone the project repository: `git clone --recurse-submodules https://github.com/monero-ecosystem/monero-java.git`
+1. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
 2. cd `monero-java`
 3. Install dependencies using Maven: `maven install`
 
@@ -146,11 +146,11 @@ You are now ready to use this library with [monero-daemon-rpc](https://getmonero
 
 If you want to process binary data or use a Monero wallet using JNI instead of RPC, a dynamic library must be built for your specific platform for this Java library to use.  This project uses a [C++ counterpart library](https://github.com/woodser/monero-cpp-library) to support JNI, which is included as a submodule in ./external/monero-cpp-library.
 
-1. [Build ./external/monero-cpp-library as a dynamic library](https://github.com/woodser/monero-cpp-library#building-a-dynamic--shared-library)
-2. `cd <monero_java_project_root>`
-3. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/` (change as appropriate)
-4. Build Java dylib to ./build/libmonero-java.dylib: `./bin/build-libmonero-java.sh`
-5. Run TestMoneroCppUtils.java JUnit tests to verify the dynamic library is working with Java JNI
+1. Update submodules: `./bin/update_submodules`
+2. [Build ./external/monero-cpp-library as a dynamic library](https://github.com/woodser/monero-cpp-library#building-a-dynamic--shared-library)
+4. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/` (change as appropriate)
+5. Build dylib to ./build/libmonero-java.dylib: `./bin/build-libmonero-java.sh`
+6. Run TestMoneroCppUtils.java JUnit tests to verify the dynamic library is working with Java JNI
 
 ## How to Run Monero RPC
 
