@@ -1,10 +1,9 @@
 v15.0.1
-build instructions include switch of monero-core fork to wasm_modifications branch
 update spec
-js monero_wallet_keys get_version()
-js keys-only sample code
-update sample code, user MoneroJS for seo
+update sample code, demo js keys-only sample, use MoneroJS for seo
+build instructions include switch of monero-core fork to wasm_modifications branch
 
+js monero_wallet_keys get_version()
 wallet rpc returns old wallet results for getHeight(), getTxs() if not closed even after new wallet created
 wallet creation config
 test sweeps, sweepAccounts is leaving behind dust
