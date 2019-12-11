@@ -1,4 +1,6 @@
 v15.0.1
+js ./build/monero-javascript.wasm
+build instructions include switch of monero-core fork to wasm_modifications branch
 update spec
 js monero_wallet_keys get_version()
 js keys-only sample code
