@@ -1100,7 +1100,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         for (BigInteger bi : (List<BigInteger>) val) ints.add(bi.intValue());
         tx.setExtra(GenUtils.reconcile(tx.getExtra(), GenUtils.listToIntArray(ints)));
       }
-      else if (key.equals("input")) {
+      else if (key.equals("vin")) {
         List<Map<String, Object>> rpcInputs = (List<Map<String, Object>>) val;
         if (rpcInputs.size() != 1 || !rpcInputs.get(0).containsKey("gen")) {  // ignore miner input TODO: why? probably needs re-enabled
           List<MoneroOutput> inputs = new ArrayList<MoneroOutput>();
@@ -1108,7 +1108,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
           tx.setInputs(inputs);
         }
       }
-      else if (key.equals("output")) {
+      else if (key.equals("vout")) {
         List<Map<String, Object>> rpcOutputs = (List<Map<String, Object>>) val;
         List<MoneroOutput> outputs = new ArrayList<MoneroOutput>();
         for (Map<String, Object> rpcOutput : rpcOutputs) outputs.add(convertRpcOutput(rpcOutput, tx));
