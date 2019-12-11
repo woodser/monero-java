@@ -210,7 +210,7 @@ public interface MoneroDaemon {
    * @param startHeight is the starting height of block hashes to return
    * @return the requested block hashes     
    */
-  public List<String> getBlockIds(List<String> blockHashes, Long startHeight);
+  public List<String> getBlockHashes(List<String> blockHashes, Long startHeight);
   
   /**
    * Get a transaction by hash.
@@ -474,7 +474,7 @@ public interface MoneroDaemon {
    * 
    * @return known block hashes which are not on the main chain
    */
-  public List<String> getAltBlockIds();
+  public List<String> getAltBlockHashes();
   
 //  /**
 //   * Get the daemon's current download and upload bandwidth limits.

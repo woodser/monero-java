@@ -855,7 +855,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetAlternativeBlockIds() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    List<String> altBlockIds = daemon.getAltBlockIds();
+    List<String> altBlockIds = daemon.getAltBlockHashes();
     for (String altBlockId : altBlockIds) {
       assertNotNull(altBlockId);
       assertEquals(64, altBlockId.length());  // TODO: common validation

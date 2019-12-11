@@ -328,7 +328,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
   
   @Override
-  public List<String> getBlockIds(List<String> blockHashes, Long startHeight) {
+  public List<String> getBlockHashes(List<String> blockHashes, Long startHeight) {
     throw new RuntimeException("Not implemented");
   }
 
@@ -633,7 +633,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<String> getAltBlockIds() {
+  public List<String> getAltBlockHashes() {
     Map<String, Object> resp = rpc.sendPathRequest("get_alt_blocks_hashes");
     checkResponseStatus(resp);
     if (!resp.containsKey("blks_hashes")) return new ArrayList<String>();
