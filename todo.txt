@@ -1,8 +1,10 @@
 v15.0.1
-daemon version vs daemon info version, 0.15.0.1-release vs {"number":196608,"isRelease":true}
 wallet creation config
 spec wallet creation
 update sample code, demo js keys-only sample, use MoneroJS for seo
+
+why no offset in create from keys?
+daemon version vs daemon info version, 0.15.0.1-release vs {"number":196608,"isRelease":true}
 wallet rpc returns old wallet results for getHeight(), getTxs() if not closed even after new wallet created
 test sweeps, sweepAccounts is leaving behind dust
 ability to get mnemonic from wallet restored from keys
