@@ -140,17 +140,16 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * 
    * @param path is the path to create the wallet
    * @param password is the password encrypt the wallet
-   * @param networkType is the wallet's network type (default = MoneroNetworkType.MAINNET)
+   * @param networkType is the wallet's network type
    * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
    * @param language is the wallet and mnemonic's language (default = "English")
    * @return the newly created wallet
    */
-  public static MoneroWalletJni createWalletRandom(String path, String password) { return createWalletRandom(path, password, null, null, null); }
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType) { return createWalletRandom(path, password, networkType, null, null); }
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, String daemonUri) { return createWalletRandom(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri), null); }
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection) { return createWalletRandom(path, password, networkType, daemonConnection, null); }
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, String language) {
-    if (networkType == null) networkType = MoneroNetworkType.MAINNET;
+    if (networkType == null) throw new MoneroException("Must provide a network type");
     if (language == null) language = DEFAULT_LANGUAGE;
     long jniWalletHandle;
     if (daemonConnection == null) jniWalletHandle = createWalletRandomJni(path, password, networkType.ordinal(), null, null, null, language);
