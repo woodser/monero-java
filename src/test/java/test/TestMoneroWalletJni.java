@@ -25,6 +25,7 @@ import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
+import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroMultisigInfo;
@@ -41,6 +42,7 @@ import monero.wallet.model.MoneroWalletListener;
 import monero.wallet.model.MoneroWalletListenerI;
 import utils.StartMining;
 import utils.TestUtils;
+import utils.WalletEqualityUtils;
 
 /**
  * Tests specific to the JNI wallet.
@@ -365,7 +367,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(restoreHeight, wallet.getRestoreHeight());
     wallet.close();
   }
-
+  
   @Test
   public void testCreateWalletFromKeysJni() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -450,7 +452,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals(daemon.getHeight(), wallet.getHeight());
       
       // compare wallet to ground truth
-      testWalletsEqualOnChain(walletGt, wallet);
+      testWalletEqualityOnChain(walletGt, wallet);
     } finally {
       walletGt.close();
       wallet.close();
@@ -554,7 +556,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       // compare with ground truth
       if (!skipGtComparison) {
         walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, wallet.getMnemonic(), startHeightExpected);
-        testWalletsEqualOnChain(walletGt, wallet);
+        testWalletEqualityOnChain(walletGt, wallet);
       }
       
       // if testing post-sync notifications, wait for a block to be added to the chain
@@ -641,7 +643,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, (long) walletKeys.getTxs().get(0).getHeight());  // wallet should be fully synced so first tx happens on true restore height
       
       // compare with ground truth
-      testWalletsEqualOnChain(walletGt, walletKeys);
+      testWalletEqualityOnChain(walletGt, walletKeys);
     } finally {
       walletGt.close();
       walletKeys.close();
@@ -737,8 +739,32 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   // Is equal to the RPC wallet
   @Test
-  public void testCompareRpcWallet() {
-    testWalletsEqualOnChain(TestUtils.getWalletRpc(), wallet);
+  public void testWalletEqualityRpc() {
+    WalletEqualityUtils.testWalletEqualityOnChain(TestUtils.getWalletRpc(), wallet);
+  }
+  
+  // Is equal to the RPC wallet with a seed offset
+  @Test
+  public void testWalletEqualityRpcWithOffset() {
+    
+    // use common offset to compare wallet implementations
+    String seedOffset = "my super secret offset!";
+    
+    // create rpc wallet with offset
+    MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
+    walletRpc.createWalletFromMnemonic(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, walletRpc.getMnemonic(), TestUtils.FIRST_RECEIVE_HEIGHT, null, seedOffset, null);
+    
+    // create jni wallet with offset
+    MoneroWalletJni walletJni = MoneroWalletJni.createWalletFromMnemonic(
+            TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(),
+            TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE,
+            TestUtils.MNEMONIC,
+            TestUtils.getDaemonRpc().getRpcConnection(),
+            TestUtils.FIRST_RECEIVE_HEIGHT,
+            seedOffset);
+    
+    // deep compare
+    WalletEqualityUtils.testWalletEqualityOnChain(walletRpc, walletJni);
   }
   
   @Test
@@ -1469,8 +1495,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   // possible configuration: on chain xor local wallet data ("strict"), txs ordered same way? TBD
-  protected static void testWalletsEqualOnChain(MoneroWalletJni wallet1, MoneroWalletJni wallet2) {
-    TestMoneroWalletCommon.testWalletsEqualOnChain(wallet1, wallet2);
+  private static void testWalletEqualityOnChain(MoneroWalletJni wallet1, MoneroWalletJni wallet2) {
+    WalletEqualityUtils.testWalletEqualityOnChain(wallet1, wallet2);
     assertEquals(wallet1.getNetworkType(), wallet2.getNetworkType());
     //assertEquals(wallet1.getRestoreHeight(), wallet2.getRestoreHeight()); // TODO monero-core: restore height is lost after close
     assertEquals(wallet1.getDaemonConnection(), wallet2.getDaemonConnection());
@@ -1571,8 +1597,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Override
-  public void testCompareGroundTruth() {
-    super.testCompareGroundTruth();
+  public void testWalletEqualityGroundTruth() {
+    super.testWalletEqualityGroundTruth();
   }
 
   @Override

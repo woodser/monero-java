@@ -1,5 +1,4 @@
 v15.0.1
-test seed offset equality
 update sample code, demo js keys-only sample, use MoneroJS for seo
 
 test sweeps, sweepAccounts is leaving behind dust

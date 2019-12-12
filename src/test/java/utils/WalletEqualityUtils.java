@@ -1,4 +1,4 @@
-package test;
+package utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -10,8 +10,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.junit.Test;
 
 import common.utils.GenUtils;
 import monero.daemon.model.MoneroOutput;
@@ -28,47 +26,19 @@ import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxWallet;
-import utils.TestUtils;
 
 /**
- * Compares two wallets for equality using only on-chain data.
- * 
- * This test will sync the two wallets until their height is equal to guarantee equal state.
- * 
- * The RPC and JNI wallets are tested by default unless overriden by subclassing or using the setters.
+ * Utilities to deep compare wallets.
  */
-public class TestMoneroWalletsEqual {
-  
-  //private static final Logger LOGGER = Logger.getLogger(TestMoneroWalletsEqual.class); // logger
-  
-  private MoneroWallet w1;
-  private MoneroWallet w2;
+public class WalletEqualityUtils {
 
-  public MoneroWallet getWallet1() {
-    return w1;
-  }
-  
-  public TestMoneroWalletsEqual setWallet1(MoneroWallet w1) {
-    this.w1 = w1;
-    return this;
-  }
-  
-  public MoneroWallet getWallet2() {
-    return w2;
-  }
-  
-  public TestMoneroWalletsEqual setWallet2(MoneroWallet w2) {
-    this.w2 = w2;
-    return this;
-  }
-  
-  @Test
-  public void testWalletsEqualOnChain() {
+  /**
+   * Compares two wallets for equality using only on-chain data.
+   * 
+   * This test will sync the two wallets until their height is equal to guarantee equal state.
+   */
+  public static void testWalletEqualityOnChain(MoneroWallet w1, MoneroWallet w2) {
     TestUtils.TX_POOL_WALLET_TRACKER.reset(); // all wallets need to wait for txs to confirm to reliably sync
-    
-    // default to rpc and jni wallets
-    if (w1 == null) w1 = TestUtils.getWalletRpc();
-    if (w2 == null) w2 = TestUtils.getWalletJni();
     
     // wait for relayed txs associated with wallets to clear pool
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(w1, w2);
@@ -79,7 +49,7 @@ public class TestMoneroWalletsEqual {
       w2.sync();
     }
     
-    // test that wallets are equal based using only on-chain data
+    // test that wallets are equal using only on-chain data
     assertEquals(w1.getHeight(), w2.getHeight());
     assertEquals(w1.getMnemonic(), w2.getMnemonic());
     assertEquals(w1.getPrimaryAddress(), w2.getPrimaryAddress());
@@ -98,7 +68,7 @@ public class TestMoneroWalletsEqual {
     testOutputWalletsEqualOnChain(w1.getOutputs(outputQuery), w2.getOutputs(outputQuery));
   }
   
-  protected void testAccountsEqualOnChain(List<MoneroAccount> accounts1, List<MoneroAccount> accounts2) {
+  private static void testAccountsEqualOnChain(List<MoneroAccount> accounts1, List<MoneroAccount> accounts2) {
     for (int i = 0; i < Math.max(accounts1.size(), accounts2.size()); i++) {
       if (i < accounts1.size() && i < accounts2.size()) {
         testAccountsEqualOnChain(accounts1.get(i), accounts2.get(i));
@@ -120,7 +90,7 @@ public class TestMoneroWalletsEqual {
     }
   }
   
-  protected void testAccountsEqualOnChain(MoneroAccount account1, MoneroAccount account2) {
+  private static void testAccountsEqualOnChain(MoneroAccount account1, MoneroAccount account2) {
     
     // nullify off-chain data for comparison
     List<MoneroSubaddress> subaddresses1 = account1.getSubaddresses();
@@ -135,7 +105,7 @@ public class TestMoneroWalletsEqual {
     testSubaddressesEqualOnChain(subaddresses1, subaddresses2);
   }
   
-  protected void testSubaddressesEqualOnChain(List<MoneroSubaddress> subaddresses1, List<MoneroSubaddress> subaddresses2) {
+  private static void testSubaddressesEqualOnChain(List<MoneroSubaddress> subaddresses1, List<MoneroSubaddress> subaddresses2) {
     for (int i = 0; i < Math.max(subaddresses1.size(), subaddresses2.size()); i++) {
       if (i < subaddresses1.size() && i < subaddresses2.size()) {
         testSubaddressesEqualOnChain(subaddresses1.get(i), subaddresses2.get(i));
@@ -155,13 +125,13 @@ public class TestMoneroWalletsEqual {
     }
   }
   
-  protected void testSubaddressesEqualOnChain(MoneroSubaddress subaddress1, MoneroSubaddress subaddress2) {
+  private static void testSubaddressesEqualOnChain(MoneroSubaddress subaddress1, MoneroSubaddress subaddress2) {
     subaddress1.setLabel(null); // nullify off-chain data for comparison
     subaddress2.setLabel(null);
     assertEquals(subaddress1, subaddress2);
   }
   
-  protected void testTxWalletsEqualOnChain(List<MoneroTxWallet> txs1, List<MoneroTxWallet> txs2) {
+  private static void testTxWalletsEqualOnChain(List<MoneroTxWallet> txs1, List<MoneroTxWallet> txs2) {
     
     // nullify off-chain data for comparison
     List<MoneroTxWallet> allTxs = new ArrayList<MoneroTxWallet>(txs1);
@@ -226,7 +196,7 @@ public class TestMoneroWalletsEqual {
     }
   }
   
-  protected void testTransfersEqualOnChain(List<MoneroTransfer> transfers1, List<MoneroTransfer> transfers2) {
+  private static void testTransfersEqualOnChain(List<MoneroTransfer> transfers1, List<MoneroTransfer> transfers2) {
     assertEquals(transfers1.size(), transfers2.size());
     
     // test and collect transfers per transaction
@@ -315,7 +285,7 @@ public class TestMoneroWalletsEqual {
     }
   }
   
-  protected void testOutputWalletsEqualOnChain(List<MoneroOutputWallet> outputs1, List<MoneroOutputWallet> outputs2) {
+  private static void testOutputWalletsEqualOnChain(List<MoneroOutputWallet> outputs1, List<MoneroOutputWallet> outputs2) {
     assertEquals(outputs1.size(), outputs2.size());
     
     // test and collect outputs per transaction

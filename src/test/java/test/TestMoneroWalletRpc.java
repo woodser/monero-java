@@ -482,8 +482,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   @Override
-  public void testCompareGroundTruth() {
-    super.testCompareGroundTruth();
+  public void testWalletEqualityGroundTruth() {
+    super.testWalletEqualityGroundTruth();
   }
 
   @Override

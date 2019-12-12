@@ -65,6 +65,7 @@ import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 import utils.StartMining;
 import utils.TestUtils;
+import utils.WalletEqualityUtils;
 
 /**
  * Runs common tests that every Monero wallet implementation should support.
@@ -214,7 +215,7 @@ public abstract class TestMoneroWalletCommon {
     if (e1 != null) throw new RuntimeException(e1);
   }
   
-  // Can create a wallet from a mnemonic phrase with a secret offset
+  // Can create a wallet from a mnemonic phrase with a seed offset
   @Test
   public void testCreateWalletFromMnemonicWithOffset() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -544,11 +545,11 @@ public abstract class TestMoneroWalletCommon {
   
   // Is equal to a ground truth wallet according to on-chain data
   @Test
-  public void testCompareGroundTruth() {
+  public void testWalletEqualityGroundTruth() {
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     MoneroWalletJni walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT);
     try {
-      testWalletsEqualOnChain(walletGt, wallet);
+      WalletEqualityUtils.testWalletEqualityOnChain(walletGt, wallet);
     } finally {
       walletGt.close();
     }
@@ -4110,10 +4111,6 @@ public abstract class TestMoneroWalletCommon {
   
   protected void testSignatureHeaderCheckException(MoneroException e) {
     assertEquals("Signature header check error", e.getMessage());
-  }
-  
-  protected static void testWalletsEqualOnChain(MoneroWallet wallet1, MoneroWallet wallet2) {
-    new TestMoneroWalletsEqual().setWallet1(wallet1).setWallet2(wallet2).testWalletsEqualOnChain();
   }
   
   private static void testAccount(MoneroAccount account) {
