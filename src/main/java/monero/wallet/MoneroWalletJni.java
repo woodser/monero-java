@@ -166,14 +166,14 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param mnemonic is the mnemonic of the wallet to construct
    * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
    * @param restoreHeight is the block height to restore from (default = 0)
-   * @param offset is a string used to derive a new seed from an existing seed, allowing password-protected wallets to be recovered from a plain-text mnemonic
+   * @param seedOffset is a string used to derive a new mnemonic from the given mnemonic, allowing password-protected wallets to be recovered from a plain-text mnemonic
    */
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic) { return createWalletFromMnemonic(path, password, networkType, mnemonic, null, null, null); }
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection) { return createWalletFromMnemonic(path, password, networkType, mnemonic, daemonConnection, null, null); }
-  public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String offset) {
+  public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String seedOffset) {
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (restoreHeight == null) restoreHeight = 0l;
-    long jniWalletHandle = createWalletFromMnemonicJni(path, password, networkType.ordinal(), mnemonic, restoreHeight, offset);
+    long jniWalletHandle = createWalletFromMnemonicJni(path, password, networkType.ordinal(), mnemonic, restoreHeight, seedOffset);
     MoneroWalletJni wallet = new MoneroWalletJni(jniWalletHandle);
     wallet.setDaemonConnection(daemonConnection);
     return wallet;
@@ -1282,7 +1282,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native static long createWalletRandomJni(String path, String password, int networkType, String daemonUrl, String daemonUsername, String daemonPassword, String language);
   
-  private native static long createWalletFromMnemonicJni(String path, String password, int networkType, String mnemonic, long restoreHeight, String offset);
+  private native static long createWalletFromMnemonicJni(String path, String password, int networkType, String mnemonic, long restoreHeight, String seedOffset);
   
   private native static long createWalletFromKeysJni(String path, String password, int networkType, String address, String viewKey, String spendKey, long restoreHeight, String language);
   

@@ -60,8 +60,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   @Override
-  protected MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight, String offset) {
-    wallet.createWalletFromMnemonic(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, mnemonic, restoreHeight, null, offset, null);
+  protected MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight, String seedOffset) {
+    wallet.createWalletFromMnemonic(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, mnemonic, restoreHeight, null, seedOffset, null);
     return wallet;
   }
   

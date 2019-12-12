@@ -82,8 +82,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Override
-  protected MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight, String offset) {
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletFromMnemonic(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, mnemonic, daemon.getRpcConnection(), restoreHeight, offset);
+  protected MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight, String seedOffset) {
+    MoneroWalletJni wallet = MoneroWalletJni.createWalletFromMnemonic(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, mnemonic, daemon.getRpcConnection(), restoreHeight, seedOffset);
     wallet.startSyncing();
     return wallet;
   }

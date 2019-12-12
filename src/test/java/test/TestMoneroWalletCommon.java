@@ -127,7 +127,7 @@ public abstract class TestMoneroWalletCommon {
    * 
    * @return the created test wallet
    */
-  protected abstract MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight, String offset);
+  protected abstract MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight, String seedOffset);
   
   /**
    * Creates a wallet from keys.

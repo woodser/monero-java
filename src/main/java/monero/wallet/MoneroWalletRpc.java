@@ -166,18 +166,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @param mnemonic is the mnemonic of the wallet to construct
    * @param restoreHeight is the block height to restore from (default = 0)
    * @param language is the language of the mnemonic in case the old language is invalid
-   * @param offset is the offset for restoring from mnemonic
+   * @param seedOffset is the seedOffset for restoring from mnemonic
    * @param saveCurrent specifies if the current RPC wallet should be saved before being closed
    */
   public void createWalletFromMnemonic(String name, String password, String mnemonic) { createWalletFromMnemonic(name, password, mnemonic, null, null, null, null); }
   public void createWalletFromMnemonic(String name, String password, String mnemonic, Long restoreHeight) { createWalletFromMnemonic(name, password, mnemonic, restoreHeight, null, null, null); }
-  public void createWalletFromMnemonic(String name, String password, String mnemonic, Long restoreHeight, String language, String offset, Boolean saveCurrent) {
+  public void createWalletFromMnemonic(String name, String password, String mnemonic, Long restoreHeight, String language, String seedOffset, Boolean saveCurrent) {
     if (language == null) language = DEFAULT_LANGUAGE;
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("filename", name);
     params.put("password", password);
     params.put("seed", mnemonic);
-    params.put("seed_offset", offset);
+    params.put("seed_offset", seedOffset);
     params.put("restore_height", restoreHeight);
     params.put("language", language);
     params.put("autosave_current", saveCurrent);
