@@ -1,8 +1,9 @@
 v15.0.1
+update java-lite
+test cpp sample
 test sweeps, sweepAccounts is leaving behind dust
 test build instructions
 js public npm module
-update java-lite
 update docs
 release
 
