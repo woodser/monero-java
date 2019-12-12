@@ -13,6 +13,7 @@ ability to get mnemonic language, restore height from wallet rpc
 ability to set mnemonic language and get different mnemonic?
 
 HIGH
+support isWatchOnly()
 collect and report monero-wallet-rpc issues
 cpp library deserialization log warning for unrecognized fields
 cpp library uses unmodified monero-project submodule?
