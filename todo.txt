@@ -12,8 +12,8 @@ release
 
 CORE
 support seed offset in createWalletFromKeys()
-ability to get mnemonic from wallet restored from keys
-ability to get mnemonic, language, restore height from wallet rpc
+ability to get mnemonic from wallet rpc restored from keys
+ability to get mnemonic language, restore height from wallet rpc
 ability to set mnemonic language and get different mnemonic?
 
 HIGH
@@ -179,7 +179,6 @@ failure in sync test does not propagate back through c++ and back to Java to ind
 wallet2 sweep_all if subaddress_indices are not specified it chooses random subaddress, 0 last in create_transactions_all()
 
 LOW
-unlockTime should probably be long / uint64_t
 on_money_spent() tx in vs out are same tx always
 on_money_spent() / on_money_received() do not provide output index
 common wallet tests test structures of txs, transfers, and outputs in testGetTxs(), etc
