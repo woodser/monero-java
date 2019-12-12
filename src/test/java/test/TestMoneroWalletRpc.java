@@ -119,7 +119,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   // Can create a wallet from a mnemonic phrase
   @Test
-  public void testCreateWalletFromMnemonicRpc() {
+  public void testCreateWalletFromMnemonicRpc() throws InterruptedException {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     try {
       
@@ -128,10 +128,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       wallet.createWalletFromMnemonic(path, TestUtils.WALLET_PASSWORD, TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT);
       assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
       assertEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
-      if (wallet.getHeight() != 1) System.out.println("WARNING: createWalletFromMnemonic() already has height as if synced");
-      if (wallet.getTxs().size() != 0) System.out.println("WARNING: createWalletFromMnemonic() already has txs as if synced");
-      //assertEquals(1, wallet.getHeight());      // TODO monero core: sometimes height is as if synced
-      //assertEquals(0, wallet.getTxs().size());  // TODO monero core: sometimes wallet has txs as if synced
       wallet.sync();
       assertEquals(daemon.getHeight(), wallet.getHeight());
       List<MoneroTxWallet> txs = wallet.getTxs();
@@ -145,9 +141,10 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       MoneroUtils.validateMnemonic(wallet.getMnemonic());
       assertNotEquals(TestUtils.MNEMONIC, wallet.getMnemonic());  // mnemonic is different because of offset
       assertNotEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
-      assertEquals(1, wallet.getHeight());
+      wallet.sync();
+      assertEquals(daemon.getHeight(), wallet.getHeight());
+      assertTrue(wallet.getTxs().isEmpty());  // wallet is not used
       wallet.close();
-      
     } finally {
       
       // open main test wallet for other tests

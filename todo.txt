@@ -3,7 +3,6 @@ wallet creation config
 spec wallet creation
 update sample code, demo js keys-only sample, use MoneroJS for seo
 
-wallet rpc returns old wallet results for getHeight(), getTxs() if not closed even after new wallet created
 test sweeps, sweepAccounts is leaving behind dust
 test build instructions
 js public npm module
