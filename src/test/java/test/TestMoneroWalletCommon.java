@@ -4746,7 +4746,7 @@ public abstract class TestMoneroWalletCommon {
 //    // collect matching tx hashes from network blocks in order
 //    List<String> expectedTxIds = new ArrayList<String>();
 //    for (MoneroBlock networkBlock : networkBlocks) {
-//      for (String txHash : networkBlock.getTxIds()) {
+//      for (String txHash : networkBlock.getTxHashes()) {
 //        if (!txHashes.contains(txHash)) expectedTxIds.add(txHash);
 //      }
 //    }

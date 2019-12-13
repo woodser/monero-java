@@ -1628,7 +1628,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     MoneroMultisigSignResult signResult = new MoneroMultisigSignResult();
     signResult.setSignedMultisigTxHex((String) result.get("tx_data_hex"));
-    signResult.setTxIds((List<String>) result.get("tx_hash_list"));
+    signResult.setTxHashes((List<String>) result.get("tx_hash_list"));
     return signResult;
   }
 

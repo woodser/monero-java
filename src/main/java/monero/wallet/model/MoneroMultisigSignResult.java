@@ -18,11 +18,11 @@ public class MoneroMultisigSignResult {
     this.signedMultisigTxHex = signedTxMultisigHex;
   }
 
-  public List<String> getTxIds() {
+  public List<String> getTxHashes() {
     return txHashes;
   }
 
-  public void setTxIds(List<String> txHashes) {
+  public void setTxHashes(List<String> txHashes) {
     this.txHashes = txHashes;
   }
 
