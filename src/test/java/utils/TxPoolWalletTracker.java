@@ -48,26 +48,26 @@ public class TxPoolWalletTracker {
   public void waitForWalletTxsToClearPool(MoneroWallet... wallets) {
     
     // get hashes of txs in the pool
-    Set<String> txIdsPool = new HashSet<String>();
+    Set<String> txHashesPool = new HashSet<String>();
     for (MoneroTx tx : TestUtils.getDaemonRpc().getTxPool()) {
       if (!tx.isRelayed() || tx.isFailed()) continue;
-      txIdsPool.add(tx.getHash());
+      txHashesPool.add(tx.getHash());
     }
     
     // get hashes of txs from wallets to wait for
-    Set<String> txIdsWallet = new HashSet<String>();
+    Set<String> txHashesWallet = new HashSet<String>();
     for (MoneroWallet wallet : wallets) {
       if (!clearedWallets.contains(wallet)) {
         wallet.sync();
         for (MoneroTxWallet tx : wallet.getTxs()) {
-          txIdsWallet.add(tx.getHash());
+          txHashesWallet.add(tx.getHash());
         }
       }
     }
     
     // wait for txs to clear pool
-    txIdsPool.retainAll(txIdsWallet);
-    waitForTxsToClearPool(txIdsPool.toArray(new String[txIdsPool.size()]));
+    txHashesPool.retainAll(txHashesWallet);
+    waitForTxsToClearPool(txHashesPool.toArray(new String[txHashesPool.size()]));
     
     // sync wallets with the pool
     for (MoneroWallet wallet : wallets) {
