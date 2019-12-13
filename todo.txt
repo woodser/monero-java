@@ -1,5 +1,4 @@
 v15.0.1
-getGetReserveProofAccount()
 test cpp sample
 test sweeps, sweepAccounts is leaving behind dust
 final full tests
@@ -9,6 +8,7 @@ test build instructions
 release
 
 CORE
+getGetReserveProofAccount() still seg faulting, crashes eclipse
 support seed offset in createWalletFromKeys()
 ability to get mnemonic from wallet rpc restored from keys
 ability to get mnemonic language, restore height from wallet rpc
