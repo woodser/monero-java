@@ -113,7 +113,7 @@ public class TxPoolWalletTracker {
     List<MoneroTx> txsPool = daemon.getTxPool();
     for (MoneroTx txPool : txsPool) {
       for (String txHash : txHashes) {
-        if (txHash.equals(txPool.getHash())) return true;
+        if (txHash.equals(txPool.getHash()) && !txPool.isFailed()) return true;
       }
     }
     return false;
