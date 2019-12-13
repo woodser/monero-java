@@ -1321,13 +1321,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @SuppressWarnings("unchecked")
   @Override
   public boolean checkSpendProof(String txHash, String message, String signature) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txid", txHash);
-    params.put("message", message);
-    params.put("signature", signature);
-    Map<String, Object> resp = rpc.sendJsonRequest("check_spend_proof", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (boolean) result.get("good");
+    try {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("txid", txHash);
+      params.put("message", message);
+      params.put("signature", signature);
+      Map<String, Object> resp = rpc.sendJsonRequest("check_spend_proof", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      return (boolean) result.get("good");
+    } catch (MoneroRpcException e) {
+      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcException("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+      throw e;
+    }
   }
 
   @SuppressWarnings("unchecked")
