@@ -248,7 +248,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     String path = getRandomWalletPath();
     MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
     MoneroUtils.validateMnemonic(wallet.getMnemonic());
-    MoneroUtils.validateAddress(wallet.getPrimaryAddress(), MoneroNetworkType.MAINNET);
+    MoneroUtils.validateAddress(wallet.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
     assertEquals(MoneroNetworkType.MAINNET, wallet.getNetworkType());
     assertEquals(null, wallet.getDaemonConnection());
     assertFalse(wallet.isConnected());
