@@ -1,5 +1,5 @@
 v15.0.1
-background mining causes tests to hang on idle computer
+jni testUpdateLockedSameAccountSplit() hanging after mining stops
 test cpp sample
 test sweeps, sweepAccounts is leaving behind dust
 final full tests
