@@ -1216,80 +1216,106 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @SuppressWarnings("unchecked")
   @Override
   public String getTxKey(String txHash) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txid", txHash);
-    Map<String, Object> resp = rpc.sendJsonRequest("get_tx_key", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (String) result.get("tx_key");
+    try {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("txid", txHash);
+      Map<String, Object> resp = rpc.sendJsonRequest("get_tx_key", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      return (String) result.get("tx_key");
+    } catch (MoneroRpcException e) {
+      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcException("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+      throw e;
+    }
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public MoneroCheckTx checkTxKey(String txHash, String txKey, String address) {
-    
-    // send request
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txid", txHash);
-    params.put("tx_key", txKey);
-    params.put("address", address);
-    Map<String, Object> resp = rpc.sendJsonRequest("check_tx_key", params);
-    
-    // interpret result
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    MoneroCheckTx check = new MoneroCheckTx();
-    check.setIsGood(true);
-    check.setNumConfirmations(((BigInteger) result.get("confirmations")).longValue());
-    check.setInTxPool((Boolean) result.get("in_pool"));
-    check.setReceivedAmount((BigInteger) result.get("received"));
-    return check;
+    try {
+      
+      // send request
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("txid", txHash);
+      params.put("tx_key", txKey);
+      params.put("address", address);
+      Map<String, Object> resp = rpc.sendJsonRequest("check_tx_key", params);
+      
+      // interpret result
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      MoneroCheckTx check = new MoneroCheckTx();
+      check.setIsGood(true);
+      check.setNumConfirmations(((BigInteger) result.get("confirmations")).longValue());
+      check.setInTxPool((Boolean) result.get("in_pool"));
+      check.setReceivedAmount((BigInteger) result.get("received"));
+      return check;
+    } catch (MoneroRpcException e) {
+      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcException("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+      throw e;
+    }
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public String getTxProof(String txHash, String address, String message) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txid", txHash);
-    params.put("address", address);
-    params.put("message", message);
-    Map<String, Object> resp = rpc.sendJsonRequest("get_tx_proof", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (String) result.get("signature");
+    try {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("txid", txHash);
+      params.put("address", address);
+      params.put("message", message);
+      Map<String, Object> resp = rpc.sendJsonRequest("get_tx_proof", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      return (String) result.get("signature");
+    } catch (MoneroRpcException e) {
+      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcException("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+      throw e;
+    }
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public MoneroCheckTx checkTxProof(String txHash, String address, String message, String signature) {
     
-    // send request
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txid", txHash);
-    params.put("address", address);
-    params.put("message", message);
-    params.put("signature", signature);
-    Map<String, Object> resp = rpc.sendJsonRequest("check_tx_proof", params);
-    
-    // interpret response
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    boolean isGood = (boolean) result.get("good");
-    MoneroCheckTx check = new MoneroCheckTx();
-    check.setIsGood(isGood);
-    if (isGood) {
-      check.setNumConfirmations(((BigInteger) result.get("confirmations")).longValue());
-      check.setInTxPool((boolean) result.get("in_pool"));
-      check.setReceivedAmount((BigInteger) result.get("received"));
+    try {
+      
+      // send request
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("txid", txHash);
+      params.put("address", address);
+      params.put("message", message);
+      params.put("signature", signature);
+      Map<String, Object> resp = rpc.sendJsonRequest("check_tx_proof", params);
+      
+      // interpret response
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      boolean isGood = (boolean) result.get("good");
+      MoneroCheckTx check = new MoneroCheckTx();
+      check.setIsGood(isGood);
+      if (isGood) {
+        check.setNumConfirmations(((BigInteger) result.get("confirmations")).longValue());
+        check.setInTxPool((boolean) result.get("in_pool"));
+        check.setReceivedAmount((BigInteger) result.get("received"));
+      }
+      return check;
+    } catch (MoneroRpcException e) {
+      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcException("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+      throw e;
     }
-    return check;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public String getSpendProof(String txHash, String message) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("txid", txHash);
-    params.put("message", message);
-    Map<String, Object> resp = rpc.sendJsonRequest("get_spend_proof", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (String) result.get("signature");
+    try {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("txid", txHash);
+      params.put("message", message);
+      Map<String, Object> resp = rpc.sendJsonRequest("get_spend_proof", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      return (String) result.get("signature");
+    } catch (MoneroRpcException e) {
+      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcException("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+      throw e;
+    }
   }
 
   @SuppressWarnings("unchecked")
