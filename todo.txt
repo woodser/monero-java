@@ -1,6 +1,4 @@
 v15.0.1
-jni testMultisig() mining found found, stop x 5, never started 
-? background mining is enabled, but not started, waiting until start triggers
 getGetReserveProofAccount()
 test cpp sample
 test sweeps, sweepAccounts is leaving behind dust

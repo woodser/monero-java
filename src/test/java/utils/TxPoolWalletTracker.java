@@ -1,7 +1,6 @@
 package utils;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -33,28 +32,26 @@ public class TxPoolWalletTracker {
     clearedWallets.clear();
   }
   
-  /**
-   * Reset the tracker such that all wallets except the given sending wallet will
-   * need to wait for pool txs to confirm in order to reliably sync.
-   * 
-   * @param sendingWallet is the wallet which sent the tx and therefore should not cause txs to be waited on
-   */
-  public void resetExcept(MoneroWallet sendingWallet) {
-    boolean found = clearedWallets.contains(sendingWallet);
-    clearedWallets.clear();
-    if (found) clearedWallets.add(sendingWallet);
-  }
+//  /**
+//   * Reset the tracker such that all wallets except the given sending wallet will
+//   * need to wait for pool txs to confirm in order to reliably sync.
+//   * 
+//   * @param sendingWallet is the wallet which sent the tx and therefore should not cause txs to be waited on
+//   */
+//  public void resetExcept(MoneroWallet sendingWallet) {
+//    boolean found = clearedWallets.contains(sendingWallet);
+//    clearedWallets.clear();
+//    if (found) clearedWallets.add(sendingWallet);
+//  }
   
+  /**
+   * Waits for transactions in the pool belonging to the given wallets to clear.
+   * 
+   * @param wallets have transactions to wait on if in the pool
+   */
   public void waitForWalletTxsToClearPool(MoneroWallet... wallets) {
     
-    // get hashes of txs in the pool
-    Set<String> txHashesPool = new HashSet<String>();
-    for (MoneroTx tx : TestUtils.getDaemonRpc().getTxPool()) {
-      if (!tx.isRelayed() || tx.isFailed()) continue;
-      txHashesPool.add(tx.getHash());
-    }
-    
-    // get hashes of txs from wallets to wait for
+    // get wallet tx hashes
     Set<String> txHashesWallet = new HashSet<String>();
     for (MoneroWallet wallet : wallets) {
       if (!clearedWallets.contains(wallet)) {
@@ -65,38 +62,37 @@ public class TxPoolWalletTracker {
       }
     }
     
-    // wait for txs to clear pool
-    txHashesPool.retainAll(txHashesWallet);
-    waitForTxsToClearPool(txHashesPool.toArray(new String[txHashesPool.size()]));
-    
-    // sync wallets with the pool
-    for (MoneroWallet wallet : wallets) {
-      wallet.sync();
-      clearedWallets.add(wallet);
-    }
-  }
-  
-  private static void waitForTxsToClearPool(String... txHashes) {
-    MoneroDaemon daemon = TestUtils.getDaemonRpc(); 
-      
-    // attempt to start mining to push the network along
-    boolean startedMining = false;
-    MoneroMiningStatus miningStatus = daemon.getMiningStatus();
-    if (!miningStatus.isActive()) {
-      try {
-        StartMining.startMining();
-        startedMining = true;
-      } catch (Exception e) { } // no problem
-    }
-    
-    // loop until txs are not in pool
+    // loop until all wallet txs clear from pool
     boolean isFirst = true;
-    while (txsInPool(txHashes)) {
+    boolean miningStarted = false;
+    MoneroDaemon daemon = TestUtils.getDaemonRpc();
+    while (true) {
       
-      // print debug messsage one time
-      if (isFirst) {  
-        System.out.println("Waiting for wallet txs to clear from the pool in order to fully sync and avoid double spend attempts (known issue)");
+      // get hashes of relayed, non-failed txs in the pool
+      Set<String> txHashesPool = new HashSet<String>();
+      for (MoneroTx tx : daemon.getTxPool()) {
+        if (!tx.isRelayed()) continue;
+        else if (tx.isFailed()) daemon.flushTxPool(tx.getHash());  // flush tx if failed
+        else txHashesPool.add(tx.getHash());
+      }
+      
+      // get hashes to wait for as intersection of wallet and pool txs
+      txHashesPool.retainAll(txHashesWallet);
+      
+      // break if no txs to wait for
+      if (txHashesPool.isEmpty()) break;
+
+      // if first time waiting, log message and start mining
+      if (isFirst) {
         isFirst = false;
+        System.out.println("Waiting for wallet txs to clear from the pool in order to fully sync and avoid double spend attempts (known issue)");
+        MoneroMiningStatus miningStatus = daemon.getMiningStatus();
+        if (!miningStatus.isActive()) {
+          try {
+            StartMining.startMining();
+            miningStarted = true;
+          } catch (Exception e) { } // no problem
+        }
       }
       
       // sleep for a moment
@@ -104,18 +100,13 @@ public class TxPoolWalletTracker {
       catch (InterruptedException e) {  throw new RuntimeException(e); } 
     }
     
-    // stop mining at end of test
-    if (startedMining) daemon.stopMining();
-  }
-  
-  private static boolean txsInPool(String...txHashes) {
-    MoneroDaemon daemon = TestUtils.getDaemonRpc();
-    List<MoneroTx> txsPool = daemon.getTxPool();
-    for (MoneroTx txPool : txsPool) {
-      for (String txHash : txHashes) {
-        if (txHash.equals(txPool.getHash()) && !txPool.isFailed()) return true;
-      }
+    // stop mining if started mining
+    if (miningStarted) daemon.stopMining();
+    
+    // sync wallets with the pool
+    for (MoneroWallet wallet : wallets) {
+      wallet.sync();
+      clearedWallets.add(wallet);
     }
-    return false;
   }
 }
