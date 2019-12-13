@@ -101,7 +101,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       MoneroUtils.validateMnemonic(wallet.getMnemonic());
       assertNotEquals(mnemonic, wallet.getMnemonic());
       MoneroUtils.validateAddress(wallet.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
-      assertEquals(1, wallet.getHeight()); // TODO monero core: why is height of unsynced wallet 1?
       wallet.close();
       
       // attempt to create wallet which already exists
