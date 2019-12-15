@@ -1162,7 +1162,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   public void startMining(Long numThreads, Boolean backgroundMining, Boolean ignoreBattery) {
     assertNotClosed();
     try {
-      startMiningJni(numThreads == null ? 0l : (long) numThreads, backgroundMining, ignoreBattery);
+      startMiningJni(numThreads == null ? 0l : (long) numThreads, Boolean.TRUE.equals(backgroundMining), Boolean.TRUE.equals(ignoreBattery));
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
@@ -1442,7 +1442,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   private native void setAttributeJni(String key, String val);
 
-  private native void startMiningJni(long numThreads, Boolean backgroundMining, Boolean ignoreBattery);
+  private native void startMiningJni(long numThreads, boolean backgroundMining, boolean ignoreBattery);
   
   private native void stopMiningJni();
   
