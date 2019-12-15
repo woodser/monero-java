@@ -535,7 +535,7 @@ public interface MoneroWallet {
    * (i.e. that the wallet can spend one time).  Outputs are part of
    * transactions which are stored in blocks on the blockchain.
    * 
-   * @return List<MoneroOutputWallet> are all wallet outputs
+   * @return all wallet outputs
    */
   public List<MoneroOutputWallet> getOutputs();
   
@@ -549,7 +549,7 @@ public interface MoneroWallet {
    * filtering is optional and no filtering is applied when not defined.
    * 
    * @param query specifies attributes of outputs to get
-   * @return List<MoneroOutputWallet> are wallet outputs per the query
+   * @return queried wallet outputs
    */
   public List<MoneroOutputWallet> getOutputs(MoneroOutputQuery query);
   

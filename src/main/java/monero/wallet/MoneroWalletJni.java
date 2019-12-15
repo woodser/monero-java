@@ -143,7 +143,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param networkType is the wallet's network type
    * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
    * @param language is the wallet and mnemonic's language (default = "English")
-   * @return the newly created wallet
+   * @return the wallet created with a randomly generated mnemonic
    */
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType) { return createWalletRandom(path, password, networkType, null, null); }
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, String daemonUri) { return createWalletRandom(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri), null); }
@@ -166,7 +166,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param mnemonic is the mnemonic of the wallet to construct
    * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
    * @param restoreHeight is the block height to restore from (default = 0)
-   * @param seedOffset is a string used to derive a new mnemonic from the given mnemonic, allowing password-protected wallets to be recovered from a plain-text mnemonic
+   * @param seedOffset is the offset used to derive a new seed from the given mnemonic to recover a secret wallet from the mnemonic phrase
+   * @return the wallet created from a mnemonic
    */
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic) { return createWalletFromMnemonic(path, password, networkType, mnemonic, null, null, null); }
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection) { return createWalletFromMnemonic(path, password, networkType, mnemonic, daemonConnection, null, null); }
@@ -191,6 +192,7 @@ public class MoneroWalletJni extends MoneroWalletDefault {
    * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    * @param language is the wallet and mnemonic's language (default = "English")
+   * @return the wallet created from keys
    */
   public static MoneroWalletJni createWalletFromKeys(String path, String password, MoneroNetworkType networkType, String address, String viewKey, String spendKey) { return createWalletFromKeys(path, password, networkType, address, viewKey, spendKey, null, null, null); }
   public static MoneroWalletJni createWalletFromKeys(String path, String password, MoneroNetworkType networkType, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight) { return createWalletFromKeys(path, password, networkType, address, viewKey, spendKey, daemonConnection, restoreHeight, null); }
@@ -383,6 +385,8 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   /**
    * Get the listeners registered with the wallet.
+   * 
+   * @return the registered listeners
    */
   public Set<MoneroWalletListenerI> getListeners() {
     assertNotClosed();

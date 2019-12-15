@@ -36,6 +36,9 @@ public class WalletEqualityUtils {
    * Compares two wallets for equality using only on-chain data.
    * 
    * This test will sync the two wallets until their height is equal to guarantee equal state.
+   * 
+   * @param w1 a wallet to compare
+   * @param w2 a wallet to compare
    */
   public static void testWalletEqualityOnChain(MoneroWallet w1, MoneroWallet w2) {
     TestUtils.TX_POOL_WALLET_TRACKER.reset(); // all wallets need to wait for txs to confirm to reliably sync

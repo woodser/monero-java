@@ -170,7 +170,7 @@ public class GenUtils {
    * Returns a string indentation of the given length;
    * 
    * @param length is the length of the indentation
-   * @returns {string} is an indentation string of the given length
+   * @return an indentation string of the given length
    */
   public static String getIndent(int length) {
     String str = "";
@@ -182,6 +182,11 @@ public class GenUtils {
    * Produces a new array containing the elements between the start and end indices.
    * <p>
    * Code from <a href="https://commons.apache.org/proper/commons-lang/">Apache Commons Lang</a>.
+   * 
+   * @param array is the array to derive a subarray from
+   * @param startIndexInclusive is the start index of the subarray, inclusive
+   * @param endIndexExclusive is the end index of the subarray, exclusive
+   * @return the subarray
    */
   public static int[] subarray(final int[] array, int startIndexInclusive, int endIndexExclusive) {
     if (array == null) return null;
@@ -202,8 +207,7 @@ public class GenUtils {
    * 
    * @param val1 is a value to reconcile
    * @param val2 is a value to reconcile
-   * @return the reconciled value if reconcilable
-   * @throws Exception if the values cannot be reconciled
+   * @return the reconciled value if reconcilable, throws exception otherwise
    */
   public static <T> T reconcile(T val1, T val2) {
     return reconcile(val1, val2, null, null, null);
@@ -217,8 +221,7 @@ public class GenUtils {
    * @param resolveDefined uses defined value if true or null, null if false
    * @param resolveTrue uses true over false if true, false over true if false, must be equal if null
    * @param resolveMax uses max over min if true, min over max if false, must be equal if null
-   * @returns the reconciled value if reconcilable
-   * @throws Exception if the values cannot be reconciled
+   * @return the reconciled value if reconcilable, throws exception otherwise
    */
   @SuppressWarnings("unchecked")
   public static <T> T reconcile(T val1, T val2, Boolean resolveDefined, Boolean resolveTrue, Boolean resolveMax) {

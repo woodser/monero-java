@@ -182,6 +182,7 @@ public class TestUtils {
    * @param networkType is the ground truth wallet's network type
    * @param mnemonic is the ground truth wallet's mnemonic
    * @param restoreHeight is the ground truth wallet's restore height
+   * @return the created wallet
    */
   public static MoneroWalletJni createWalletGroundTruth(MoneroNetworkType networkType, String mnemonic, Long restoreHeight) {
     MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);

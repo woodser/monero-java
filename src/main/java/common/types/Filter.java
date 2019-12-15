@@ -21,6 +21,7 @@ public interface Filter<T> {
    * Returns a new list comprised of elements from the given list that meet the
    * filter's criteria.
    * 
+   * @param filter filters the items
    * @param items are the items to filter
    * @return the items that meet this filter's criteria
    */
@@ -34,6 +35,7 @@ public interface Filter<T> {
    * Returns a new set comprised of elements from the given set that meet the
    * filter's criteria.
    * 
+   * @param filter filters the items
    * @param items are the items to filter
    * @return the items that meet this filter's criteria
    */

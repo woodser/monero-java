@@ -166,7 +166,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @param mnemonic is the mnemonic of the wallet to construct
    * @param restoreHeight is the block height to restore from (default = 0)
    * @param language is the language of the mnemonic in case the old language is invalid
-   * @param seedOffset is the seedOffset for restoring from mnemonic
+   * @param seedOffset is the offset used to derive a new seed from the given mnemonic to recover a secret wallet from the mnemonic phrase
    * @param saveCurrent specifies if the current RPC wallet should be saved before being closed
    */
   public void createWalletFromMnemonic(String name, String password, String mnemonic) { createWalletFromMnemonic(name, password, mnemonic, null, null, null, null); }

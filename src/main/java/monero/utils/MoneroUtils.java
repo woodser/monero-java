@@ -16,7 +16,6 @@ import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
 import monero.wallet.model.MoneroAddressType;
 import monero.wallet.model.MoneroDecodedAddress;
-import monero.wallet.model.MoneroTxWallet;
 
 /**
  * Collection of Monero utilities.
@@ -225,28 +224,10 @@ public class MoneroUtils {
   /**
    * Merges a transaction into a list of existing transactions.
    * 
-   * TODO: collapse into MoneroUtils.mergeTx(List<MoneroTxWallet> txs, ...)?
-   * 
    * @param txs are existing transactions to merge into
    * @param tx is the transaction to merge into the list
    */
-  public static void mergeTx(List<MoneroTx> txs, MoneroTx tx) {
-    for (MoneroTx aTx : txs) {
-      if (aTx.getHash().equals(tx.getHash())) {
-        aTx.merge(tx);
-        return;
-      }
-    }
-    txs.add(tx);
-  }
-  
-  /**
-   * Merges a transaction into a list of existing transactions.
-   * 
-   * @param txs are existing transactions to merge into
-   * @param tx is the transaction to merge into the list
-   */
-  public static void mergeTx(List<MoneroTxWallet> txs, MoneroTxWallet tx) {
+  public static <T extends MoneroTx> void mergeTx(List<T> txs, T tx) {
     for (MoneroTx aTx : txs) {
       if (aTx.getHash().equals(tx.getHash())) {
         aTx.merge(tx);

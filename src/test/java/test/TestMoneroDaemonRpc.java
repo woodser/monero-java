@@ -1686,7 +1686,7 @@ public class TestMoneroDaemonRpc {
   }
   
   private static MoneroTx getUnrelayedTx(MoneroWallet wallet, Integer accountIdx) {
-    assertTrue("Txs sent from/to same account are not properly synced from the pool", accountIdx > 0);
+    assertTrue("Txs sent from/to same account are not properly synced from the pool", accountIdx > 0);  // TODO monero core
     MoneroSendRequest req = new MoneroSendRequest(accountIdx, wallet.getPrimaryAddress(), TestUtils.MAX_FEE); 
     req.setDoNotRelay(true);
     MoneroTx tx = wallet.send(req).getTxs().get(0);
