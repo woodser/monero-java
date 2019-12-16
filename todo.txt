@@ -1,5 +1,4 @@
 v15.0.1
-full tests
 js public npm module
 test build instructions
 release
@@ -10,6 +9,8 @@ support seed offset in createWalletFromKeys()
 ability to get mnemonic from wallet rpc restored from keys
 ability to get mnemonic language, restore height from wallet rpc
 ability to set mnemonic language and get different mnemonic?
+sweep address or account leaving behind dust
+sweeping address or account with dust fails with "No unlocked balance in the specified subaddress(es)", catch in sweepWallet()?
 
 HIGH
 support isWatchOnly()
