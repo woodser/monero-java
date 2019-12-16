@@ -16,7 +16,7 @@ In addition, this project conforms to an [API specification](http://moneroecosys
 - Be notified when blocks are added to the chain, as the wallet synchronizes, or when the wallet sends or receives funds
 - Validate addresses in native Java
 - Full multisig support
-- Over 200 passing JUnit test cases
+- Over 270 passing JUnit test cases
 
 ## Sample Code
 
