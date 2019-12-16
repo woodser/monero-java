@@ -3745,8 +3745,8 @@ public abstract class TestMoneroWalletCommon {
       if (account.getIndex() == 0) continue;  // skip default account
       for (MoneroSubaddress subaddress : account.getSubaddresses()) {
         subaddresses.add(subaddress);
-        if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0) subaddressesBalance.add(subaddress);
-        if (subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) subaddressesUnlocked.add(subaddress);
+        if (subaddress.getBalance().compareTo(TestUtils.MAX_FEE) > 0) subaddressesBalance.add(subaddress);
+        if (subaddress.getUnlockedBalance().compareTo(TestUtils.MAX_FEE) > 0) subaddressesUnlocked.add(subaddress);
       }
     }
     
