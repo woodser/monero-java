@@ -1,7 +1,7 @@
 v15.0.1
-test build instructions
-update docs
+full tests
 js public npm module
+test build instructions
 release
 
 CORE
