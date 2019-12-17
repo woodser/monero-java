@@ -1,17 +1,3 @@
-v15.0.1
-js public npm module
-test build instructions
-release
-
-CORE
-getGetReserveProofAccount() still seg faulting, crashes eclipse
-support seed offset in createWalletFromKeys()
-ability to get mnemonic from wallet rpc restored from keys
-ability to get mnemonic language, restore height from wallet rpc
-ability to set mnemonic language and get different mnemonic?
-sweep address or account leaving behind dust
-sweeping address or account with dust fails with "No unlocked balance in the specified subaddress(es)", catch in sweepWallet()?
-
 HIGH
 support isWatchOnly()
 collect and report monero-wallet-rpc issues
@@ -127,10 +113,15 @@ Separate wallet2 core wallet functionality from networking, persistence, and oth
 Generalize multisig wallet creation to 1) prepare, 2) make, 3) exchange for M-N times
 
 ISSUES TO OPEN
+getGetReserveProofAccount() still seg faulting on 0 conf, crashes eclipse
+support seed offset in createWalletFromKeys()
+ability to get mnemonic from wallet rpc restored from keys
+ability to get mnemonic language, restore height from wallet rpc
+ability to set mnemonic language and get different mnemonic?
+sweep address or account leaving behind dust
+sweeping address or account with dust fails with "No unlocked balance in the specified subaddress(es)", catch in sweepWallet()?
 outgoing transactions should expire: e.g. send tx, pending, shut down, return 1 day later, tx gets sent then, but recipient could have expired destination
 peer.getLastSeenTimestamp() occasionally returns -1, -4, -7, -8, etc
-prove reserves still not working on 0 conf
-wallet rpc restore from mnemonic sometimes has height or wallet txs as if already synced
 
 MEDIUM / OUTDATED?
 test rapid send through a wallet
