@@ -86,7 +86,11 @@ target_link_libraries(monero-java
 	${EXTRA_LIBRARIES}
 )
 
-add_custom_command(TARGET monero-java 
-    POST_BUILD COMMAND 
-    ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@loader_path/"
-    $<TARGET_FILE:monero-java>)
+# search for libmonero-cpp.dylib in same directory as libmonero-java.dylib on mac for portability
+# command: install_name_tool -add_rpath @loader_path/ ./libmonero-java.dylib 
+if (APPLE)
+	add_custom_command(TARGET monero-java 
+	    POST_BUILD COMMAND 
+	    ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@loader_path/"
+	    $<TARGET_FILE:monero-java>)
+endif()
