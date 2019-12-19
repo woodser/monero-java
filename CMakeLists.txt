@@ -68,8 +68,7 @@ add_library(monero-cpp SHARED IMPORTED)
 #set(CMAKE_INSTALL_RPATH $ORIGIN)
 #SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-
-set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/build/libmonero-cpp.dylib)
+set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION ./libmonero-cpp.dylib)
 
 ###############################################
 # Build Java dynamic library (.dylib) for JNI
@@ -87,21 +86,7 @@ target_link_libraries(monero-java
 	${EXTRA_LIBRARIES}
 )
 
-#SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
-#SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-#SET(CMAKE_INSTALL_RPATH "$\{ORIGIN\}")
-#SET(MACOSX_RPATH TRUE)
-
-#add_custom_command (TARGET monero-java
-    #POST_BUILD COMMAND "${CMAKE_INSTALL_NAME_TOOL}"
-        #"-change" "${CMAKE_SOURCE_DIR}/build/libmonero-cpp.dylib" "./libmonero-cpp.dylib"
-    #"$<TARGET_FILE:monero-java>" VERBATIM)
-
-
-#SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
-#SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-#set(CMAKE_INSTALL_RPATH $ORIGIN)
-#SET(CMAKE_INSTALL_RPATH "${CMAKE_SOURCE_DIR}/build/")
-#SET(CMAKE_INSTALL_RPATH "")
-#SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-#set_target_properties(monero-java PROPERTIES LINK_FLAGS "-Wl,-rpath,./")
+add_custom_command(TARGET monero-java 
+    POST_BUILD COMMAND 
+    ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@loader_path/"
+    $<TARGET_FILE:monero-java>)
