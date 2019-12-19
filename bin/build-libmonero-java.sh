@@ -6,9 +6,12 @@
 cd ./external/monero-cpp-library/ && 
 ./bin/build-libmonero-cpp.sh &&
 
-# Make libmonero-java.dylib and copy to ./lib
+# Copy libmonero-cpp.dylib to ./build
 cd ../../ &&
-mkdir -p ./build && 
+mkdir -p ./build &&
+cp ./external/monero-cpp-library/build/libmonero-cpp.dylib ./build &&
+
+# Make libmonero-java.dylib
 cd build && 
 cmake .. && 
 cmake --build . && 
