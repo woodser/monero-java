@@ -61,13 +61,6 @@ message(STATUS EXTRA_LIBRARIES: ${EXTRA_LIBRARIES})
 
 #include_directories(${BOOST})
 add_library(monero-cpp SHARED IMPORTED)
-#SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
-#SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
-#SET(CMAKE_INSTALL_RPATH "")
-#SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
-#set(CMAKE_INSTALL_RPATH $ORIGIN)
-#SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
 set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION ./libmonero-cpp.dylib)
 
 ###############################################
