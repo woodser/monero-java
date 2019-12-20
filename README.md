@@ -150,9 +150,7 @@ walletJni.close(true);
 
 **For Gradle, add to build.gradle:**
 
-```json
-compile 'io.github.monero-ecosystem:monero-java:0.2.1'
-```
+`compile 'io.github.monero-ecosystem:monero-java:0.2.1'`
 
 You are now ready to use this library with [monero-daemon-rpc](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.
 
