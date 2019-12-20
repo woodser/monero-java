@@ -163,7 +163,7 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 5. [Build ./external/monero-cpp-library as a dynamic library](https://github.com/woodser/monero-cpp-library#how-to-run-this-library)
 6. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/` (change as appropriate)
 7. Build dylibs to ./build/: `./bin/build-libmonero-java.sh`
-8. Run TestMoneroCppUtils.java JUnit tests to verify the dynamic library is working with Java JNI
+8. Run TestMoneroCppUtils.java JUnit tests to verify the dynamic libraries are working with Java JNI
 9. Add the dylibs libmonero-cpp.dylib and libmonero-java.dylib within ./build/ to your application's classpath
 
 ## How to Run Monero RPC
