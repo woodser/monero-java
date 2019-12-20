@@ -156,7 +156,7 @@ compile 'io.github.monero-ecosystem:monero-java:0.2.1'
 
 You are now ready to use this library with [monero-daemon-rpc](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.
 
-If you want to process binary data or use a Monero wallet using JNI instead of RPC, a dynamic library must be built for your specific platform for this Java library to use.  This project uses a [C++ counterpart library](https://github.com/woodser/monero-cpp-library) to support JNI, which is included as a submodule in ./external/monero-cpp-library.
+If you want to process binary data or use a Monero wallet using JNI instead of RPC, dynamic libraries must be built for your specific platform for this Java library to use.  This project uses a [C++ counterpart library](https://github.com/woodser/monero-cpp-library) to support JNI, which is included as a submodule in ./external/monero-cpp-library.
 
 1. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
 2. `cd monero-java`
