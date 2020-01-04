@@ -1,4 +1,5 @@
 HIGH
+rename MoneroWalletJni to MoneroWalletCore?
 support isWatchOnly()
 collect and report monero-wallet-rpc issues
 cpp library deserialization log warning for unrecognized fields
