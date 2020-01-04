@@ -1,5 +1,6 @@
 HIGH
 rename MoneroWalletJni to MoneroWalletCore?
+CMakeLists builds core directly instead of using libraries
 support isWatchOnly()
 collect and report monero-wallet-rpc issues
 cpp library deserialization log warning for unrecognized fields
