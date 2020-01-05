@@ -35,6 +35,7 @@
  */
 
 #include <iostream>
+#include "chacha.h" // TODO: explicitly include because wallet2.h #include "crypto/chacha.h" is ignored
 #include "monero_wallet_jni_bridge.h"
 #include "wallet/monero_wallet_core.h"
 #include "utils/monero_utils.h"

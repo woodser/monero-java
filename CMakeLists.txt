@@ -30,9 +30,10 @@ include_directories("${MONERO_CORE}/external/")
 include_directories("${MONERO_CORE}/external/easylogging++")
 include_directories("${MONERO_CORE}/external/rapidjson/include")
 include_directories("${MONERO_CORE_SRC}/")
+include_directories("${MONERO_CORE_SRC}/crypto")
+include_directories("${MONERO_CORE_SRC}/crypto/crypto_ops_builder/include/")
 include_directories("${MONERO_CORE_SRC}/wallet")
 include_directories("${MONERO_CORE_SRC}/wallet/api")
-include_directories("${MONERO_CORE_SRC}/crypto/crypto_ops_builder/include/")
 include_directories(${BOOST})
 
 # TODO: remove TRUEs, how are APPLE, DEPENDS, etc initialized?
