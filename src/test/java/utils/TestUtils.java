@@ -15,7 +15,7 @@ import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroNetworkType;
 import monero.rpc.MoneroRpcConnection;
 import monero.rpc.MoneroRpcException;
-import monero.utils.MoneroUtilsJni;
+import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
 
@@ -32,7 +32,7 @@ public class TestUtils {
   static {
     if (CPP_LOG_ENABLED) {
       System.loadLibrary("monero-java");
-      MoneroUtilsJni.initLogging(CPP_LOG_PATH, CPP_LOG_LEVEL, CPP_LOG_CONSOLE);
+      MoneroUtils.initJniLogging(CPP_LOG_PATH, CPP_LOG_LEVEL, CPP_LOG_CONSOLE);
     }
   }
   

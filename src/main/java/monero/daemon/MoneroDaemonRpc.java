@@ -67,8 +67,8 @@ import monero.daemon.model.MoneroTxPoolStats;
 import monero.daemon.model.MoneroVersion;
 import monero.rpc.MoneroRpcConnection;
 import monero.rpc.MoneroRpcException;
-import monero.utils.MoneroUtilsJni;
 import monero.utils.MoneroException;
+import monero.utils.MoneroUtils;
 
 /**
  * Implements a Monero daemon using monero-daemon-rpc.
@@ -261,7 +261,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     byte[] respBin = rpc.sendBinaryRequest("get_blocks_by_height.bin", params);
     
     // convert binary blocks to map
-    Map<String, Object> rpcResp = MoneroUtilsJni.binaryBlocksToMap(respBin);
+    Map<String, Object> rpcResp = MoneroUtils.binaryBlocksToMap(respBin);
     checkResponseStatus(rpcResp);
     
     // build blocks with transactions

@@ -1,4 +1,5 @@
 HIGH
+update readme sample with MoneroUtils
 rename MoneroWalletJni to MoneroWalletCore?
 CMakeLists builds core directly instead of using libraries
 support isWatchOnly()

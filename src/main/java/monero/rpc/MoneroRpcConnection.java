@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import common.utils.JsonUtils;
-import monero.utils.MoneroUtilsJni;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 
@@ -201,7 +200,7 @@ public class MoneroRpcConnection {
   public byte[] sendBinaryRequest(String path, Map<String, Object> params) {
     
     // serialize params to monero's portable binary storage format
-    byte[] paramsBin = MoneroUtilsJni.mapToBinary(params);
+    byte[] paramsBin = MoneroUtils.mapToBinary(params);
 
     try {
       

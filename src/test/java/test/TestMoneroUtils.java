@@ -1,10 +1,15 @@
 package test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -20,6 +25,64 @@ import utils.TestUtils;
  * Tests static Monero utilities.
  */
 public class TestMoneroUtils {
+  
+  // Can serialize heights with small numbers
+  @Test
+  public void testSerializeHeightsSmall() {
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put("heights", Arrays.asList(111, 222, 333));
+    byte[] binary = MoneroUtils.mapToBinary(map);
+    assertTrue(binary.length > 0);
+    //for (int i = 0; i < binary.length; i++) System.out.println(binary[i]);
+    Map<String, Object> map2 = MoneroUtils.binaryToMap(binary);
+    assertEquals(map, map2);
+  };
+  
+  // Can serialize heights with big numbers
+  @Test
+  public void testSerializeHeightsBig() {
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put("heights", Arrays.asList(123456, 1234567, 870987));
+    byte[] binary = MoneroUtils.mapToBinary(map);
+    assertTrue(binary.length > 0);
+    Map<String, Object> map2 = MoneroUtils.binaryToMap(binary);
+    assertEquals(map, map2);
+  }
+  
+  // Can serialize map with text
+  @Test
+  public void testSerializeTextShort() {
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put("msg", "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    byte[] binary = MoneroUtils.mapToBinary(map);
+    assertTrue(binary.length > 0);
+    Map<String, Object> map2 = MoneroUtils.binaryToMap(binary);
+    assertEquals(map, map2);
+  }
+  
+  // Can serialize json with long text
+  @Test
+  public void testSerializeTextLong() {
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put("msg", "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" +
+            "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" + 
+            "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" + 
+            "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" + 
+            "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" + 
+            "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" + 
+            "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" + 
+            "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" + 
+            "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" + 
+            "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" + 
+            "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" + 
+            "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" + 
+            "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" + 
+            "Hello there my good man lets make a nice long text to test with lots of exclamation marks!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    byte[] binary = MoneroUtils.mapToBinary(map);
+    assertTrue(binary.length > 0);
+    Map<String, Object> map2 = MoneroUtils.binaryToMap(binary);
+    assertEquals(map, map2);
+  }
   
   @Test
   public void testAddressValidation() {
@@ -90,6 +153,8 @@ public class TestMoneroUtils {
     testInvalidAddress("51qY4cQh9HkTeQB3GNAGPK2zRGen5UeW1WzegSizVsmf6z5NvM2GLoN6zzk1vHyzGAAfA8pGhuYAeCFZjHAp59jRj6LZRFrjuGK8Whthg2", MoneroNetworkType.STAGENET);
     testInvalidAddress("718B5D2JmMh5TJVWFbygJR15dvio5Z5B24hfSrWDzeroM8j8Lqc9sMoFE6324xg2ReaAZqHJkgfGFRugRmYHugHZ4f17Gxo", MoneroNetworkType.STAGENET);
   }
+  
+  // ---------------------------- PRIVATE HELPERS -----------------------------
   
   private static void testInvalidAddress(String address, MoneroNetworkType networkType) {
     try {
