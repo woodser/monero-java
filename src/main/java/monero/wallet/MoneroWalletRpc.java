@@ -76,7 +76,7 @@ import monero.wallet.model.MoneroTxWallet;
 /**
  * Implements a Monero wallet using monero-wallet-rpc.
  */
-public class MoneroWalletRpc extends MoneroWalletDefault {
+public class MoneroWalletRpc extends MoneroWalletBase {
 
   private String path;  // wallet's path identifier
   private MoneroRpcConnection rpc;  // handles rpc interactions

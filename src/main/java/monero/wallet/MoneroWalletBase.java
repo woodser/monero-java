@@ -47,9 +47,9 @@ import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 
 /**
- * Default implementation of a Monero Wallet.
+ * Abstract base implementation of a Monero wallet.
  */
-public abstract class MoneroWalletDefault implements MoneroWallet {
+public abstract class MoneroWalletBase implements MoneroWallet {
   
   @Override
   public String getPrimaryAddress() {

@@ -72,7 +72,7 @@ import monero.wallet.model.MoneroWalletListenerI;
 /**
  * Implements a Monero wallet using JNI to bridge to Monero Core C++.
  */
-public class MoneroWalletJni extends MoneroWalletDefault {
+public class MoneroWalletJni extends MoneroWalletBase {
   
   // ----------------------------- PRIVATE SETUP ------------------------------
 
