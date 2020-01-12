@@ -178,15 +178,16 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   // ------------------------------- BEGIN TESTS ------------------------------
   
+  // Can get the daemon's height
   @Test
   public void testDaemon() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     assertTrue(wallet.isConnected());
     long daemonHeight = wallet.getDaemonHeight();
     assertTrue(daemonHeight > 0);
-
   }
   
+  // Can get the daemon's max peer height
   @Test
   public void testGetDaemonMaxPeerHeight() {
     long height = wallet.getDaemonMaxPeerHeight();
@@ -199,6 +200,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 //    assertTrue(height > 0);
 //  }
   
+  // Can set the daemon connection
   @Test
   public void testSetDaemonConnection() {
     
@@ -240,6 +242,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
   }
   
+  // Can create a random core wallet
   @Test
   public void testCreateWalletRandomJni() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -291,6 +294,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     wallet.close();
   }
   
+  // Can create a core wallet from mnemonic
   @Test
   public void testCreateWalletFromMnemonicJni() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -368,6 +372,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     wallet.close();
   }
   
+  // Can create a core wallet from keys
   @Test
   public void testCreateWalletFromKeysJni() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -470,31 +475,35 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
   }
   
-  // Can sync a wallet with a mnemonic
+  // Can sync a wallet created from mnemonic from the genesis
   @Test
   public void testSyncMnemonicFromGenesis() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     testSyncMnemonic(null, null, true, false);
   }
   
+  // Can sync a wallet created from mnemonic from a restore height
   @Test
   public void testSyncMnemonicFromRestoreHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     testSyncMnemonic(null, TestUtils.FIRST_RECEIVE_HEIGHT);
   }
   
+  // Can sync a wallet created from mnemonic from a start height
   @Test
   public void testSyncMnemonicFromStartHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     testSyncMnemonic(TestUtils.FIRST_RECEIVE_HEIGHT, null, false, true);
   }
   
+  // Can sync a wallet created from mnemonic from a start height less than the restore height
   @Test
   public void testSyncMnemonicStartHeightLTRestoreHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     testSyncMnemonic(TestUtils.FIRST_RECEIVE_HEIGHT, TestUtils.FIRST_RECEIVE_HEIGHT + 3l);
   }
   
+  // Can sync a wallet created from mnemonic from a start height greater than the restore height
   @Test
   public void testSyncMnemonicStartHeightGTRestoreHeight() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
@@ -605,7 +614,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
   }
   
-  // TODO: factor out common code with other testSync() methods
+  // Can sync a wallet created from keys
   @Test
   public void testSyncWalletFromKeys() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -767,6 +776,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     WalletEqualityUtils.testWalletEqualityOnChain(walletRpc, walletJni);
   }
   
+  // Can be saved
   @Test
   public void testSave() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -856,6 +866,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     wallet.close(true);
   }
   
+  // Can be moved
   @Test
   public void testMoveTo() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -987,7 +998,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 //    walletDisk3.close();
 //  }
 
-  // Can close a wallet
+  // Can be closed
   @Test
   public void testClose() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -1041,7 +1052,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
    * so neither is privy to the local wallet data of the other.
    */
 
-  // Test #1: notifies listeners of outputs sent from/to the same account using local wallet data
+  // Notification test #1: notifies listeners of outputs sent from/to the same account using local wallet data
   @Test
   public void testOutputNotificationsSameAccounts() {
     List<String> issues = testOutputNotifications(true);
@@ -1051,7 +1062,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertFalse(msg, msg.contains("ERROR:"));
   }
   
-  // Test #2: notifies listeners of outputs sent from/to different accounts using local wallet data
+  // Notification test #2: notifies listeners of outputs sent from/to different accounts using local wallet data
   @Test
   public void testOutputNotificationsDifferentAccounts() {
     List<String> issues = testOutputNotifications(false);
@@ -1171,6 +1182,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     return false;
   }
   
+  // Can be created and receive funds
   @Test
   public void testCreateAndReceive() {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
@@ -1209,6 +1221,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     myWallet.close();
   }
   
+  // Supports multisig sample code
   @Test
   public void testMultisigSample() {
     createMultisigWallet(2, 2);

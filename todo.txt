@@ -1,4 +1,5 @@
 HIGH
+support ssl
 delete old local branches
 rename MoneroWalletJni to MoneroWalletCore? Or MoneroWallet, MoneroWalletI, MoneroWalletBase, MoneroWalletCore, MoneroWalletRpc, etc
 update readme sample with MoneroUtils
