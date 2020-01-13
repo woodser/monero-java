@@ -190,6 +190,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   // Can get the daemon's max peer height
   @Test
   public void testGetDaemonMaxPeerHeight() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     long height = wallet.getDaemonMaxPeerHeight();
     assertTrue(height > 0);
   }
