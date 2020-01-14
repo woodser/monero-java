@@ -470,7 +470,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       wallet.sync();
       fail("Should have thrown exception");
     } catch (MoneroException e) {
-      // exception expected
+      assertEquals("Wallet is not connected to daemon", e.getMessage());
     } finally {
       wallet.close();
     }
@@ -596,7 +596,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
           
           // ensure wallet has time to detect new block
           try {
-            TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL);
+            TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL);  // sleep for the wallet interval
           } catch (InterruptedException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
@@ -1405,7 +1405,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
    */
   private class WalletSyncTester extends SyncProgressTester implements MoneroWalletListenerI {
     
-    private Long prevHeight;  // independent from super
+    private Long walletTesterPrevHeight;  // renamed from prevHeight to not interfere with super's prevHeight
     private MoneroOutputWallet prevOutputReceived;
     private MoneroOutputWallet prevOutputSpent;
     private BigInteger incomingTotal;
@@ -1426,8 +1426,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
         assertTrue("Listener has completed and is not registered so should not be called again", wallet.getListeners().contains(this));
         onNewBlockAfterDone = true;
       }
-      if (prevHeight != null) assertEquals(prevHeight + 1, height);
-      prevHeight = height;
+      if (walletTesterPrevHeight != null) assertEquals(walletTesterPrevHeight + 1, height);
+      walletTesterPrevHeight = height;
     }
 
     @Override
@@ -1486,7 +1486,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     public void onDone(long chainHeight) {
       super.onDone(chainHeight);
-      assertNotNull(prevHeight);
+      assertNotNull(walletTesterPrevHeight);
       assertNotNull(prevOutputReceived);
       assertNotNull(prevOutputSpent);
       BigInteger balance = incomingTotal.subtract(outgoingTotal);
