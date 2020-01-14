@@ -442,12 +442,12 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonConne
 
   // get daemon connection
   try {
-    shared_ptr<monero_rpc_connection> daemon_connection = wallet->get_daemon_connection();
-    if (daemon_connection == nullptr) return 0;
+    boost::optional<monero_rpc_connection> daemon_connection = wallet->get_daemon_connection();
+    if (daemon_connection == boost::none) return 0;
 
     // return string[uri, username, password]
     jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
-    if (!daemon_connection->m_uri.empty()) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(daemon_connection->m_uri.c_str()));
+    if (daemon_connection->m_uri != boost::none && !daemon_connection->m_uri.get().empty()) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(daemon_connection->m_uri.get().c_str()));
     if (daemon_connection->m_username != boost::none && !daemon_connection->m_username.get().empty()) env->SetObjectArrayElement(vals, 1, env->NewStringUTF(daemon_connection->m_username.get().c_str()));
     if (daemon_connection->m_password != boost::none && !daemon_connection->m_password.get().empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(daemon_connection->m_password.get().c_str()));
     return vals;
