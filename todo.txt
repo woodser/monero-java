@@ -1,5 +1,5 @@
 HIGH
-initialize 2 wallets and test that notifications only sent to one
+test that 2 wallets do not interfere with each other's notifications
 all wallet methods top-level, can use base if wanted
 collapse MoneroWalletListener, MoneroWalletListenerI, and MoneroSyncListener?
 support ssl
