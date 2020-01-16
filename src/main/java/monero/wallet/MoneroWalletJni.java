@@ -98,7 +98,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
    */
   private MoneroWalletJni(long jniWalletHandle) {
     this.jniWalletHandle = jniWalletHandle;
-    this.jniListener = new WalletJniListener();
+    this.jniListener = new WalletJniListener(this);
     this.listeners = new LinkedHashSet<MoneroWalletListenerI>();
     this.isClosed = false;
   }
@@ -368,7 +368,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   public void addListener(MoneroWalletListenerI listener) {
     assertNotClosed();
     listeners.add(listener);
-    jniListener.setIsListening(true);
+    setIsListening(true);
   }
   
   /**
@@ -380,7 +380,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     assertNotClosed();
     if (!listeners.contains(listener)) throw new MoneroException("Listener is not registered to wallet");
     listeners.remove(listener);
-    if (listeners.isEmpty()) jniListener.setIsListening(false);
+    if (listeners.isEmpty()) setIsListening(false);
   }
   
   /**
@@ -1482,21 +1482,20 @@ public class MoneroWalletJni extends MoneroWalletBase {
   @SuppressWarnings("unused") // called directly from jni c++
   private class WalletJniListener {
     
-    /**
-     * Enables or disables listening in the c++ wallet.
-     */
-    public void setIsListening(boolean isEnabled) {
-      jniListenerHandle = setListenerJni(isEnabled ? this : null);
+    private MoneroWalletJni wallet; // wallet to notify listeners
+    
+    public WalletJniListener(MoneroWalletJni wallet) {  // TODO: make this MoneroWallet when all methods moved to top-level
+      this.wallet = wallet;
     }
     
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
-      for (MoneroWalletListenerI listener : listeners) {
+      for (MoneroWalletListenerI listener : wallet.getListeners()) {
         listener.onSyncProgress(height, startHeight, endHeight, percentDone, message);
       }
     }
     
     public void onNewBlock(long height) {
-      for (MoneroWalletListenerI listener : listeners) listener.onNewBlock(height);
+      for (MoneroWalletListenerI listener : wallet.getListeners()) listener.onNewBlock(height);
     }
     
     public void onOutputReceived(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version, long unlockTime) {
@@ -1519,7 +1518,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       }
       
       // announce output
-      for (MoneroWalletListenerI listener : listeners) listener.onOutputReceived((MoneroOutputWallet) tx.getOutputs().get(0));
+      for (MoneroWalletListenerI listener : wallet.getListeners()) listener.onOutputReceived((MoneroOutputWallet) tx.getOutputs().get(0));
     }
     
     public void onOutputSpent(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version) {
@@ -1541,7 +1540,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       }
       
       // announce output
-      for (MoneroWalletListenerI listener : listeners) listener.onOutputSpent((MoneroOutputWallet) tx.getInputs().get(0));
+      for (MoneroWalletListenerI listener : wallet.getListeners()) listener.onOutputSpent((MoneroOutputWallet) tx.getInputs().get(0));
     }
   }
   
@@ -1652,6 +1651,13 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
   
   // ---------------------------- PRIVATE HELPERS -----------------------------
+  
+  /**
+   * Enables or disables listening in the c++ wallet.
+   */
+  private void setIsListening(boolean isEnabled) {
+    jniListenerHandle = setListenerJni(isEnabled ? jniListener : null);
+  }
   
   private void assertNotClosed() {
     if (isClosed) throw new MoneroException("Wallet is closed");

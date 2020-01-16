@@ -1,4 +1,6 @@
 HIGH
+initialize 2 wallets and test that notifications only sent to one
+all wallet methods top-level, can use base if wanted
 collapse MoneroWalletListener, MoneroWalletListenerI, and MoneroSyncListener?
 support ssl
 delete old local branches
