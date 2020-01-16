@@ -33,7 +33,6 @@ import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendRequest;
-import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
@@ -747,6 +746,35 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
   }
   
+  // Does not interfere with other wallet nofications
+  @Test
+  public void testWalletsDontInterfere() {
+    
+    // create 2 wallets with a recent restore height
+    long height = daemon.getHeight();
+    long restoreHeight = height - 5;
+    MoneroWalletJni wallet1 = MoneroWalletJni.createWalletFromMnemonic(getRandomWalletPath(), TestUtils.WALLET_PASSWORD, MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, daemon.getRpcConnection(), restoreHeight, null);
+    MoneroWalletJni wallet2 = MoneroWalletJni.createWalletFromMnemonic(getRandomWalletPath(), TestUtils.WALLET_PASSWORD, MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, daemon.getRpcConnection(), restoreHeight, null);
+    
+    // track notifications of each wallet
+    SyncProgressTester tester1 = new SyncProgressTester(wallet1, restoreHeight, height);
+    SyncProgressTester tester2 = new SyncProgressTester(wallet1, restoreHeight, height);
+    wallet1.addListener(tester1);
+    wallet2.addListener(tester2);
+    
+    // sync first wallet and test that 2nd is not notified
+    wallet1.sync();
+    assertTrue(tester1.isNotified());
+    assertFalse(tester2.isNotified());
+    
+    // sync 2nd wallet and test that 2nd is not notified
+    SyncProgressTester tester3 = new SyncProgressTester(wallet1, restoreHeight, height);
+    wallet1.addListener(tester3);
+    wallet2.sync();
+    assertTrue(tester2.isNotified());
+    assertFalse(tester3.isNotified());
+  }
+  
   // Is equal to the RPC wallet
   @Test
   public void testWalletEqualityRpc() {
@@ -1329,7 +1357,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   /**
    * Internal class to test progress updates.
    */
-  private class SyncProgressTester implements MoneroSyncListener {
+  private class SyncProgressTester extends MoneroWalletListener {
     
     private static final long PRINT_INCREMENT = 2500; // print every 2500 blocks
     
@@ -1350,7 +1378,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       this.isDone = false;
     }
     
-    @SuppressWarnings("unlikely-arg-type")
     @Override
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
       if ((height - startHeight) % PRINT_INCREMENT == 0 || percentDone == 1.0) System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
@@ -1393,6 +1420,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
         assertEquals(chainHeight, (long) prevCompleteHeight);
       }
       onSyncProgressAfterDone = false;  // test subsequent onSyncProgress() calls
+    }
+    
+    public Boolean isNotified() {
+      return prevHeight != null;
     }
     
     public Boolean getOnSyncProgressAfterDone() {
