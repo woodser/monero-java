@@ -173,11 +173,7 @@ public class TestUtils {
   }
   
   /**
-   * Creates a new wallet which is considered to be "ground truth".
-   * 
-   * The best wallet known to serve as ground truth is a freshly created jni wallet restored from mnemonic.
-   * By observation, it is consistent with a freshly restored wallet using cli even when persisted rpc and
-   * jni wallets become inconsistent.
+   * Creates a new wallet considered to be "ground truth".
    * 
    * @param networkType is the ground truth wallet's network type
    * @param mnemonic is the ground truth wallet's mnemonic
