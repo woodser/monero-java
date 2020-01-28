@@ -74,7 +74,7 @@ public class WalletEqualityUtils {
   private static void testAccountsEqualOnChain(List<MoneroAccount> accounts1, List<MoneroAccount> accounts2) {
     for (int i = 0; i < Math.max(accounts1.size(), accounts2.size()); i++) {
       if (i < accounts1.size() && i < accounts2.size()) {
-        testAccountsEqualOnChain(accounts1.get(i), accounts2.get(i));
+        testAccountEqualOnChain(accounts1.get(i), accounts2.get(i));
       } else if (i >= accounts1.size()) {
         for (int j = i; j < accounts2.size(); j++) {
           assertEquals(BigInteger.valueOf(0), accounts2.get(j).getBalance());
@@ -93,7 +93,7 @@ public class WalletEqualityUtils {
     }
   }
   
-  private static void testAccountsEqualOnChain(MoneroAccount account1, MoneroAccount account2) {
+  private static void testAccountEqualOnChain(MoneroAccount account1, MoneroAccount account2) {
     
     // nullify off-chain data for comparison
     List<MoneroSubaddress> subaddresses1 = account1.getSubaddresses();

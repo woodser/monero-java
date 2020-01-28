@@ -170,30 +170,30 @@ void detachJVM(JNIEnv *env, int envStat) {
 }
 
 /**
- * Listens for wallet notifications and notifies the cpp listener in Java.
+ * Listens for wallet notifications and notifies the listener in Java.
  */
 struct wallet_jni_listener : public monero_wallet_listener {
 
   jobject jlistener;
+  JNIEnv* m_env;
 
   // TODO: use this env instead of attaching each time? performance improvement?
   wallet_jni_listener(JNIEnv* env, jobject listener) {
     jlistener = env->NewGlobalRef(listener);
+    m_env = env;
   }
 
-  ~wallet_jni_listener() { };
-
-  void deleteGlobalJavaRef(JNIEnv *env) {
+  ~wallet_jni_listener() {
     std::lock_guard<std::mutex> lock(_listenerMutex);
-    env->DeleteGlobalRef(jlistener);
+    m_env->DeleteGlobalRef(jlistener);
     jlistener = nullptr;
-  }
+  };
 
   void on_sync_progress(uint64_t height, uint64_t start_height, uint64_t end_height, double percent_done, const string& message) {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *env;
-    int envStat = attachJVM(&env);
+    int envStat = attachJVM(&env);	// TODO: necessary to attach every time?
     if (envStat == JNI_ERR) return;
 
     // prepare callback arguments
@@ -605,7 +605,6 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv
   wallet_jni_listener* old_listener = get_handle<wallet_jni_listener>(env, instance, JNI_LISTENER_HANDLE);
   if (old_listener != nullptr) {
     wallet->remove_listener(*old_listener);
-    old_listener->deleteGlobalJavaRef(env);
     delete old_listener;
   }
 
@@ -924,7 +923,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
     unordered_set<shared_ptr<monero_block>> seen_block_ptrs;
     for (const shared_ptr<monero_tx_wallet>& tx : txs) {
       if (tx->m_block == boost::none) {
-        if (unconfirmed_block == nullptr) unconfirmed_block = shared_ptr<monero_block>(new monero_block());
+        if (unconfirmed_block == nullptr) unconfirmed_block = make_shared<monero_block>();
         tx->m_block = unconfirmed_block;
         unconfirmed_block->m_txs.push_back(tx);
       }
@@ -971,7 +970,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNI
     for (auto const& transfer : transfers) {
       shared_ptr<monero_tx_wallet> tx = transfer->m_tx;
       if (tx->m_block == boost::none) {
-        if (unconfirmed_block == nullptr) unconfirmed_block = shared_ptr<monero_block>(new monero_block());
+        if (unconfirmed_block == nullptr) unconfirmed_block = make_shared<monero_block>();
         tx->m_block = unconfirmed_block;
         unconfirmed_block->m_txs.push_back(tx);
       }
@@ -1002,7 +1001,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEn
   env->ReleaseStringUTFChars(joutput_query, _output_query);
   try {
 
-    // deserialize output request
+    // deserialize output query
     shared_ptr<monero_output_query> output_query = monero_output_query::deserialize_from_block(output_query_json);
     MTRACE("Fetching outputs with request: " << output_query->serialize());
 

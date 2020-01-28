@@ -3605,10 +3605,10 @@ public abstract class TestMoneroWalletCommon {
       MoneroMiningStatus miningStatus = daemon.getMiningStatus();
       if (!miningStatus.isActive()) {
         try {
-          wallet.startMining(7l, false, true);
+          StartMining.startMining();
           startedMining = true;
         } catch (Exception e) {
-          // no problem
+          System.err.println("Warning: could not start mining: " + e.getMessage()); // not fatal
         }
       }
       
