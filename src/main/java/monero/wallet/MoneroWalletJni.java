@@ -960,6 +960,26 @@ public class MoneroWalletJni extends MoneroWalletBase {
     }
     return JsonUtils.deserialize(parsedTxSetJson, MoneroTxSet.class);
   }
+  
+  @Override
+  public String signTxs(String unsignedTxHex) {
+    assertNotClosed();
+    try {
+      return signTxsJni(unsignedTxHex);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
+
+  @Override
+  public List<String> submitTxs(String signedTxHex) {
+    assertNotClosed();
+    try {
+      return Arrays.asList(submitTxsJni(signedTxHex));
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
 
   @Override
   public MoneroCheckTx checkTxKey(String txHash, String txKey, String address) {
@@ -1403,6 +1423,10 @@ public class MoneroWalletJni extends MoneroWalletBase {
   private native String sweepDustJni(boolean doNotRelay);
   
   private native String parseTxSetJni(String txSetJson);
+  
+  private native String signTxsJni(String unsignedTxHex);
+  
+  private native String[] submitTxsJni(String signedTxHex);
   
   private native String[] getTxNotesJni(String[] txHashes);
   

@@ -815,6 +815,22 @@ public interface MoneroWallet {
   public MoneroTxSet parseTxSet(MoneroTxSet txSet);
   
   /**
+   * Sign unsigned transactions from a watch-only wallet.
+   * 
+   * @param unsignedTxHex is unsigned transaction hex from when the transactions were created
+   * @return the signed transaction hex
+   */
+  public String signTxs(String unsignedTxHex);
+  
+  /**
+   * Submit signed transactions from a watch-only wallet.
+   * 
+   * @param signedTxHex is signed transaction hex from signTxs()
+   * @retur the resulting transaction hashes
+   */
+  public List<String> submitTxs(String signedTxHex);
+  
+  /**
    * Sign a message.
    * 
    * @param message is the message to sign
@@ -1163,17 +1179,17 @@ public interface MoneroWallet {
   public int importMultisigHex(List<String> multisigHexes);
   
   /**
-   * Sign previously created multisig transactions as represented by hex.
+   * Sign multisig transactions from a multisig wallet.
    * 
-   * @param multisigTxHex is the hex shared among the multisig transactions when they were created
+   * @param multisigTxHex represents unsigned multisig transactions as hex
    * @return the result of signing the multisig transactions
    */
   public MoneroMultisigSignResult signMultisigTxHex(String multisigTxHex);
   
   /**
-   * Submit signed multisig transactions as represented by a hex string.
+   * Submit signed multisig transactions from a multisig wallet.
    * 
-   * @param signedMultisigTxHex is the signed multisig hex returned from signMultisigTxs()
+   * @param signedMultisigTxHex is signed multisig hex returned from signMultisigTxHex()
    * @return the resulting transaction hashes
    */
   public List<String> submitMultisigTxHex(String signedMultisigTxHex);

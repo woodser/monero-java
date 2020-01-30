@@ -1851,8 +1851,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Override
-  public void testParseTxSet() {
-    super.testParseTxSet();
+  public void testWatchOnlyWallet() {
+    super.testWatchOnlyWallet();
   }
 
   @Override
