@@ -963,12 +963,22 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   
   @Override
   public String signTxs(String unsignedTxHex) {
-    throw new RuntimeException("Not implemented");
+    assertNotClosed();
+    try {
+      return signTxsJni(unsignedTxHex);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
   public List<String> submitTxs(String signedTxHex) {
-    throw new RuntimeException("Not implemented");
+    assertNotClosed();
+    try {
+      return Arrays.asList(submitTxsJni(signedTxHex));
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
   }
 
   @Override
@@ -1413,6 +1423,10 @@ public class MoneroWalletJni extends MoneroWalletDefault {
   private native String sweepDustJni(boolean doNotRelay);
   
   private native String parseTxSetJni(String txSetJson);
+  
+  private native String signTxsJni(String unsignedTxHex);
+  
+  private native String[] submitTxsJni(String signedTxHex);
   
   private native String[] getTxNotesJni(String[] txHashes);
   
