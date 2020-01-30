@@ -960,6 +960,16 @@ public class MoneroWalletJni extends MoneroWalletDefault {
     }
     return JsonUtils.deserialize(parsedTxSetJson, MoneroTxSet.class);
   }
+  
+  @Override
+  public String signTxs(String unsignedTxHex) {
+    throw new RuntimeException("Not implemented");
+  }
+
+  @Override
+  public List<String> submitTxs(String signedTxHex) {
+    throw new RuntimeException("Not implemented");
+  }
 
   @Override
   public MoneroCheckTx checkTxKey(String txHash, String txKey, String address) {

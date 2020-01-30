@@ -1190,6 +1190,26 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resp = rpc.sendJsonRequest("describe_transfer", params);
     return convertRpcDescribeTransfer((Map<String, Object>) resp.get("result"));
   }
+  
+  @SuppressWarnings("unchecked")
+  @Override
+  public String signTxs(String unsignedTxHex) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("unsigned_txset", unsignedTxHex);
+    Map<String, Object> resp = rpc.sendJsonRequest("sign_transfer", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("signed_txset");
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<String> submitTxs(String signedTxHex) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("tx_data_hex", signedTxHex);
+    Map<String, Object> resp = rpc.sendJsonRequest("submit_transfer", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (List<String>) result.get("tx_hash_list");
+  }
 
   @SuppressWarnings("unchecked")
   @Override

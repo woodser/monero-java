@@ -2102,43 +2102,54 @@ public abstract class TestMoneroWalletCommon {
     TestUtils.testUnsignedBigInteger(result.getUnspentAmount(), hasUnspent);
   }
   
-  // Can parse a tx set hex returned from sending transfers.
+  // Can parse, sign, and submit an unsigned tx set from a watch-only wallet
   @Test
-  public void testParseTxSet() {
+  public void testWatchOnlyWallet() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     try {
+      
+      // collect info from main online test wallet and close
+      List<MoneroKeyImage> keyImages = wallet.getKeyImages();          
+      String primaryAddress = wallet.getPrimaryAddress();
+      String privateViewKey = wallet.getPrivateViewKey();
+      wallet.close();
 
-      // create watch-only wallet by witholding spend key
-      wallet = createWalletFromKeys(wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
-      wallet.sync();  
+      // create watch-only wallet by witholding spend key and importing key images
+      wallet = createWalletFromKeys(primaryAddress, privateViewKey, null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
       
+      // try...finally to close watch-only wallet in case of error
       try {
+        
+        // sync watch-only wallet and import key images
+        wallet.sync();
+        wallet.importKeyImages(keyImages);
       
-        // create unsigned transactions to send funds
-        MoneroTxWallet tx = wallet.createTx(0, TestUtils.getRandomWalletAddress(), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).getTxs().get(0);
+        // create unsigned transaction
+        MoneroTxSet unsignedTxSet = wallet.createTx(0, primaryAddress, TestUtils.MAX_FEE.multiply(new BigInteger("3")));
         
         // test resulting tx set
-        MoneroTxSet txSet = tx.getTxSet();
-        assertNotNull(txSet.getUnsignedTxHex());
-        assertFalse(txSet.getUnsignedTxHex().isEmpty());
-        
-        // switch to main test wallet
-        wallet.close();
+        assertFalse(unsignedTxSet.getUnsignedTxHex().isEmpty());
+      
+        // switch to main online test wallet
         wallet = getTestWallet();
-        
-        // parse the tx set
-        MoneroTxSet parsedTxSet = wallet.parseTxSet(txSet);
-        
-        // test the parsed tx set
+      
+        // parse tx set
+        MoneroTxSet parsedTxSet = wallet.parseTxSet(unsignedTxSet);
         testParsedTxSet(parsedTxSet);
+        
+        // sign tx set
+        String signedTxHex = wallet.signTxs(unsignedTxSet.getUnsignedTxHex());
+        assertFalse(signedTxHex.isEmpty());
+        
+        // submit signed tx set
+        List<String> txHashes = wallet.submitTxs(signedTxHex);
+        assertEquals(1, txHashes.size());
+        assertEquals(64, txHashes.get(0).length());
       } finally {
         wallet.close();
       }
-
     } finally {
-      
-      // open main test wallet for other tests
-      wallet = getTestWallet();
+      wallet = getTestWallet(); // open main test wallet for other tests
     }
   }
   
