@@ -2142,9 +2142,11 @@ public abstract class TestMoneroWalletCommon {
         assertFalse(signedTxHex.isEmpty());
         
         // submit signed tx set
-        List<String> txHashes = wallet.submitTxs(signedTxHex);
-        assertEquals(1, txHashes.size());
-        assertEquals(64, txHashes.get(0).length());
+        if (TEST_RELAYS) {
+          List<String> txHashes = wallet.submitTxs(signedTxHex);
+          assertEquals(1, txHashes.size());
+          assertEquals(64, txHashes.get(0).length());
+        }
       } finally {
         wallet.close();
       }
@@ -2200,7 +2202,7 @@ public abstract class TestMoneroWalletCommon {
     
     // edit each address book entry
     for (int idx : indices) {
-      wallet.editAddressBookEntry(idx, false, null, true, "hello there!!", false, null);
+      wallet.editAddressBookEntry(idx, false, null, true, "hello there!!");
     }
     entries = wallet.getAddressBookEntries(indices);
     for (MoneroAddressBookEntry entry : entries) {
