@@ -38,8 +38,8 @@ public class TestUtils {
   
   // monero daemon rpc endpoint configuration (adjust per your configuration)
   public static final String DAEMON_RPC_URI = "http://localhost:38081";
-  public static final String DAEMON_RPC_USERNAME = null;
-  public static final String DAEMON_RPC_PASSWORD = null;  
+  public static final String DAEMON_RPC_USERNAME = "superuser";
+  public static final String DAEMON_RPC_PASSWORD = "abctesting123";  
   
   // monero wallet rpc configuration (adjust per your configuration)
   public static final String WALLET_RPC_URI = "http://localhost:38083";
@@ -146,6 +146,7 @@ public class TestUtils {
         walletJni = MoneroWalletJni.createWalletFromMnemonic(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_PASSWORD, NETWORK_TYPE, TestUtils.MNEMONIC, daemonConnection, FIRST_RECEIVE_HEIGHT, null);
         assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, walletJni.getRestoreHeight());
         walletJni.sync(new WalletSyncPrinter());
+        walletJni.save();
         walletJni.startSyncing();
       }
       
