@@ -435,7 +435,6 @@ public class TestMoneroDaemonRpc {
   }
   
   // Can get transactions by hashes that are in the transaction pool
-  //@Ignore // TODO re-enable, monero-core: fix daemon.getTxs() hanging occasionally
   @Test
   public void testGetTxsByHashesInPool() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -444,11 +443,10 @@ public class TestMoneroDaemonRpc {
     // submit txs to the pool but don't relay
     List<String> txHashes = new ArrayList<String>();
     for (int i = 1; i < 3; i++) {
-      System.out.print("Fetching unrelayed tx...");
       MoneroTx tx = getUnrelayedTx(wallet, i);
-      System.out.println("done");
       MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
       testSubmitTxResultGood(result);
+      assertFalse(result.isRelayed());
       txHashes.add(tx.getHash());
     }
     
@@ -1943,7 +1941,7 @@ public class TestMoneroDaemonRpc {
       TestUtils.testUnsignedBigInteger(result.getCredits(), false); // 0 credits
       assertNull(result.getTopBlockHash());
       assertEquals(true, result.isGood());
-    } catch (Exception e) {
+    } catch (AssertionError e) {
       System.out.println("Submit result is not good: " + JsonUtils.serialize(result));
       throw e;
     }

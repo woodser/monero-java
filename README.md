@@ -10,7 +10,7 @@ In addition, this project conforms to an [API specification](http://moneroecosys
 
 - Manage a Monero daemon using RPC
 - Manage a Monero wallet using RPC and JNI
-- Cohesive APIs with rigorous focus on ease-of-use
+- Cohesive APIs with focus on ease-of-use
 - Fetch and process binary data from the daemon (e.g. raw blocks)
 - Query wallet transactions, transfers, and outputs by their attributes
 - Be notified when blocks are added to the chain, as the wallet synchronizes, or when the wallet sends or receives funds
@@ -53,7 +53,7 @@ MoneroSubaddress subaddress = walletRpc.getSubaddress(1, 0);
 BigInteger subaddressBalance = subaddress.getBalance();
 
 // query a transaction by id
-MoneroTxWallet tx = walletRpc.getTx("314a0f1375db31cea4dac4e0a51514a6282b43792269b3660166d4d2b46437ca");
+MoneroTxWallet tx = walletRpc.getTx("32088012e68be1c090dc022f7852ca4d7c23066241649cdfaeb14ec1fd5a10f8");
 long txHeight = tx.getHeight();
 List<MoneroIncomingTransfer> incomingTransfers = tx.getIncomingTransfers();
 List<MoneroDestination> destinations = tx.getOutgoingTransfer().getDestinations();
@@ -200,7 +200,7 @@ This project is licensed under MIT.
 
 ## Donate
 
-If you get value from this library, please consider donating.  Thank you.
+If you get value from this library, please consider donating.  Thank you!
 
 <p align="center">
 	<img src="donate.png" width="115" height="115"/>

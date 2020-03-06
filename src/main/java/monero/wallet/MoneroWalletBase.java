@@ -369,11 +369,6 @@ public abstract class MoneroWalletBase implements MoneroWallet {
   }
   
   @Override
-  public int addAddressBookEntry(String address, String description) {
-    return addAddressBookEntry(address, description, null);
-  }
-  
-  @Override
   public boolean isMultisig() {
     return getMultisigInfo().isMultisig();
   }

@@ -681,6 +681,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     query.setOutputQuery(outputQuery);
     
     // filter txs that don't meet transfer and output queries
+    transferQuery.setTxQuery(null);    // break circular reference for meets criteria TODO: meetsCriteria should handle loop
     List<MoneroTxWallet> txsQueried = new ArrayList<MoneroTxWallet>();
     for (MoneroTxWallet tx : txs) {
       if (query.meetsCriteria(tx)) txsQueried.add(tx);
@@ -1442,10 +1443,9 @@ public class MoneroWalletRpc extends MoneroWalletBase {
 
   @SuppressWarnings("unchecked")
   @Override
-  public int addAddressBookEntry(String address, String description, String paymentId) {
+  public int addAddressBookEntry(String address, String description) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("address", address);
-    params.put("payment_id", paymentId);
     params.put("description", description);
     Map<String, Object> respMap = rpc.sendJsonRequest("add_address_book", params);
     Map<String, Object> resultMap = (Map<String, Object>) respMap.get("result");
@@ -1453,13 +1453,11 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   @Override
-  public void editAddressBookEntry(int index, boolean setAddress, String address, boolean setDescription, String description, boolean setPaymentId, String paymentId) {
+  public void editAddressBookEntry(int index, boolean setAddress, String address, boolean setDescription, String description) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("index", index);
     params.put("set_address", setAddress);
     params.put("address", address);
-    params.put("set_payment_id", setPaymentId);
-    params.put("payment_id", paymentId);
     params.put("set_description", setDescription);
     params.put("description", description);
     rpc.sendJsonRequest("edit_address_book", params);

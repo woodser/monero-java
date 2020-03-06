@@ -1108,15 +1108,15 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
 
   @Override
-  public int addAddressBookEntry(String address, String description, String paymentId) {
+  public int addAddressBookEntry(String address, String description) {
     assertNotClosed();
-    return addAddressBookEntryJni(address, description, paymentId);
+    return addAddressBookEntryJni(address, description);
   }
 
   @Override
-  public void editAddressBookEntry(int index, boolean setAddress, String address, boolean setDescription, String description, boolean setPaymentId, String paymentId) {
+  public void editAddressBookEntry(int index, boolean setAddress, String address, boolean setDescription, String description) {
     assertNotClosed();
-    editAddressBookEntryJni(index, setAddress, address, setDescription, description, setPaymentId, paymentId);
+    editAddressBookEntryJni(index, setAddress, address, setDescription, description);
   }
 
   @Override
@@ -1456,9 +1456,9 @@ public class MoneroWalletJni extends MoneroWalletBase {
   
   private native String getAddressBookEntriesJni(int[] indices);
   
-  private native int addAddressBookEntryJni(String address, String description, String paymentId);
+  private native int addAddressBookEntryJni(String address, String description);
   
-  private native void editAddressBookEntryJni(int index, boolean setAddress, String address, boolean setDescription, String description, boolean setPaymentId, String paymentId);
+  private native void editAddressBookEntryJni(int index, boolean setAddress, String address, boolean setDescription, String description);
   
   private native void deleteAddressBookEntryJni(int entryIdx);
   

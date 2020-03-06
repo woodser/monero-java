@@ -82,7 +82,7 @@ public class TestSampleCode {
     
     // query a transaction by hash
     MoneroTxWallet tx = walletRpc.getTx(walletRpc.getTxs(new MoneroTxQuery().setIsOutgoing(true)).get(0).getHash());  // *** REMOVE FROM README SAMPLE ***
-    //MoneroTxWallet tx = walletRpc.getTx("314a0f1375db31cea4dac4e0a51514a6282b43792269b3660166d4d2b46437ca");
+    //MoneroTxWallet tx = walletRpc.getTx("32088012e68be1c090dc022f7852ca4d7c23066241649cdfaeb14ec1fd5a10f8");
     long txHeight = tx.getHeight();
     List<MoneroIncomingTransfer> incomingTransfers = tx.getIncomingTransfers();
     List<MoneroDestination> destinations = tx.getOutgoingTransfer().getDestinations();
@@ -97,7 +97,7 @@ public class TestSampleCode {
     
     // create a wallet from a mnemonic phrase using Java native bindings to Monero Core
     MoneroWalletJni walletJni = MoneroWalletJni.createWalletFromMnemonic("./test_wallets/" + UUID.randomUUID().toString(), "supersecretpassword123", MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, new MoneroRpcConnection("http://localhost:38081"), TestUtils.FIRST_RECEIVE_HEIGHT, null);
-    //MoneroWalletJni walletJni = MoneroWalletJni.createWalletFromMnemonic("MyWallet", "supersecretpassword123", MoneroNetworkType.STAGENET, "hefty value ...", new MoneroRpcConnection("http://localhost:38081"), 384151l);
+    //MoneroWalletJni walletJni = MoneroWalletJni.createWalletFromMnemonic("MyWallet", "supersecretpassword123", MoneroNetworkType.STAGENET, "hefty value ...", new MoneroRpcConnection("http://localhost:38081"), 501788);
     
     // synchronize the wallet and receive progress notifications
     walletJni.sync(new MoneroSyncListener() {
@@ -110,7 +110,7 @@ public class TestSampleCode {
     // start syncing the wallet continuously in the background
     walletJni.startSyncing();
     
-    // be notified when the JNI wallet receives funds
+    // receive notifications when the JNI wallet receives funds
     walletJni.addListener(new MoneroWalletListener() {
       
       @Override
@@ -149,7 +149,7 @@ public class TestSampleCode {
     // create a request to send funds from the RPC wallet to multiple destinations in the JNI wallet
     MoneroSendRequest request = new MoneroSendRequest()
             .setAccountIndex(1)                           // send from account 1
-            .setSubaddressIndices(0, 1)                   // send from subaddreses in account 1
+            .setSubaddressIndices(0, 1)                   // send from subaddresses in account 1
             .setPriority(MoneroSendPriority.UNIMPORTANT)  // no rush
             .setDestinations(
                     new MoneroDestination(walletJni.getAddress(1, 0), new BigInteger("50000")),
