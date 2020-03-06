@@ -68,7 +68,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     MoneroWalletJni wallet = MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
     //wallet.sync();
     //wallet.save();
-    wallet.startSyncing();
+    if (wallet.isConnected()) wallet.startSyncing();
     return wallet;
   }
 
@@ -77,21 +77,21 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
     //wallet.sync();
     //wallet.save();
-    wallet.startSyncing();
+    if (wallet.isConnected()) wallet.startSyncing();
     return wallet;
   }
   
   @Override
   protected MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight, String seedOffset) {
     MoneroWalletJni wallet = MoneroWalletJni.createWalletFromMnemonic(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, mnemonic, daemon.getRpcConnection(), restoreHeight, seedOffset);
-    wallet.startSyncing();
+    if (wallet.isConnected()) wallet.startSyncing();
     return wallet;
   }
   
   @Override
   protected MoneroWallet createWalletFromKeys(String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
     MoneroWalletJni wallet = MoneroWalletJni.createWalletFromKeys(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, address, privateViewKey, privateSpendKey, daemonConnection, restoreHeight, language);
-    wallet.startSyncing();
+    if (wallet.isConnected()) wallet.startSyncing();
     return wallet;
   }
   
