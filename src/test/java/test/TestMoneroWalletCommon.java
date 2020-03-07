@@ -1384,9 +1384,12 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
-  // Can get the wallet's incoming and outgoing transfers using convenience methods
+  // Can get incoming and outgoing transfers using convenience methods
   @Test
   public void testGetIncomingOutgoingTransfers() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    int accountIdx = 1;
+    int subaddressIdx = 1;
     
     // get incoming transfers
     List<MoneroIncomingTransfer> inTransfers = wallet.getIncomingTransfers();
@@ -1394,15 +1397,16 @@ public abstract class TestMoneroWalletCommon {
     for (MoneroIncomingTransfer transfer : inTransfers) {
       assertTrue(transfer.isIncoming());
       testTransfer(transfer, null);
+      System.out.println(transfer.getAccountIndex() + ", " + transfer.getSubaddressIndex());
     }
     
     // get incoming transfers with query
-    inTransfers = wallet.getIncomingTransfers(new MoneroTransferQuery().setAccountIndex(0).setSubaddressIndex(1));
+    inTransfers = wallet.getIncomingTransfers(new MoneroTransferQuery().setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx));
     assertFalse(inTransfers.isEmpty());
     for (MoneroIncomingTransfer transfer : inTransfers) {
       assertTrue(transfer.isIncoming());
-      assertEquals(0, (int) transfer.getAccountIndex());
-      assertEquals(1, (int) transfer.getSubaddressIndex());
+      assertEquals(accountIdx, (int) transfer.getAccountIndex());
+      assertEquals(subaddressIdx, (int) transfer.getSubaddressIndex());
       testTransfer(transfer, null);
     }
     
@@ -1422,12 +1426,12 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // get outgoing transfers with query
-    outTransfers = wallet.getOutgoingTransfers(new MoneroTransferQuery().setAccountIndex(0).setSubaddressIndex(1));
+    outTransfers = wallet.getOutgoingTransfers(new MoneroTransferQuery().setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx));
     assertFalse(outTransfers.isEmpty());
     for (MoneroOutgoingTransfer transfer : outTransfers) {
       assertTrue(transfer.isOutgoing());
-      assertEquals(0, (int) transfer.getAccountIndex());
-      assertTrue(transfer.getSubaddressIndices().contains(1));
+      assertEquals(accountIdx, (int) transfer.getAccountIndex());
+      assertTrue(transfer.getSubaddressIndices().contains(subaddressIdx));
       testTransfer(transfer, null);
     }
     
@@ -2964,6 +2968,7 @@ public abstract class TestMoneroWalletCommon {
     request.setAccountIndex(srcAccount.getIndex());
     request.setDestinations(new ArrayList<MoneroDestination>());
     for (int i = 0; i < destinationAddresses.size(); i++) {
+      System.out.println("sending to address: " + destinationAddresses.get(i));
       request.getDestinations().add(new MoneroDestination(destinationAddresses.get(i), sendAmountPerSubaddress));
     }
     MoneroSendRequest reqCopy = request.copy();
