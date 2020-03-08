@@ -2163,37 +2163,63 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testOfflineWallet() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    String primaryAddress  = wallet.getPrimaryAddress();
+    String privateViewKey = wallet.getPrivateViewKey();
+    String privateSpendKey = wallet.getPrivateSpendKey();
+    MoneroWallet watchOnlyWallet = null;
     MoneroWallet offlineWallet = null;
     try {
       
-      // export outputs and key images from live wallet
-      BigInteger balance = wallet.getBalance();
-      assertTrue(balance.compareTo(new BigInteger("0")) > 0);
-      List<MoneroTxWallet> txs = wallet.getTxs();
-      assertFalse(txs.isEmpty());
-      String outputsHex = wallet.getOutputsHex();
-      List<MoneroKeyImage> keyImages = wallet.getKeyImages();
+      // create and sync watch-only wallet
+      watchOnlyWallet = createWalletFromKeys(wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      String watchOnlyPath = watchOnlyWallet.getPath();
+      watchOnlyWallet.sync();
+      assertTrue(watchOnlyWallet.getTxs().size() > 0);
+      
+      // export outputs from watch-only wallet
+      String outputsHex = watchOnlyWallet.getOutputsHex();
       
       // create offline wallet
-      offlineWallet = createWalletFromMnemonic(TestUtils.MNEMONIC, null, TestUtils.FIRST_RECEIVE_HEIGHT, "");
+      watchOnlyWallet.close(true);  // only one wallet open at a time to accomodate wallet rpc tests
+      offlineWallet = createWalletFromKeys(primaryAddress, privateViewKey, privateSpendKey, null, (long) 0, null);
+      String offlineWalletPath = offlineWallet.getPath();
       assertEquals(0, offlineWallet.getTxs().size());
       
-      // import outputs and key images
+      // import outputs to offline wallet
       offlineWallet.importOutputsHex(outputsHex);
-      offlineWallet.importKeyImages(keyImages);
       
-      // wallet knows balance and transactions
-      assertEquals(balance, offlineWallet.getBalance());
-      assertEquals(new BigInteger("0"), offlineWallet.getUnlockedBalance());
-      //assertEquals(txs.size(), offlineWallet.getTxs());
+      // export key images from offline wallet
+      List<MoneroKeyImage> keyImages = offlineWallet.getKeyImages();
       
-      // TODO: create tx offline?
-//      // create a tx
-//      MoneroTxSet txSet = offlineWallet.createTx(0, offlineWallet.getPrimaryAddress(), TestUtils.MAX_FEE.multiply(new BigInteger("3")));
-//      System.out.println(JsonUtils.serialize(txSet));
-//      throw new RuntimeException("Not implemented");
+      // import key images to watch-only wallet
+      offlineWallet.close(true);
+      watchOnlyWallet = openWallet(watchOnlyPath);
+      watchOnlyWallet.importKeyImages(keyImages);
+      
+      // create unsigned tx using watch-only wallet
+      MoneroTxSet unsignedTxSet = watchOnlyWallet.createTx(0, primaryAddress, TestUtils.MAX_FEE.multiply(new BigInteger("3")));
+      
+      // sign tx using offline wallet
+      watchOnlyWallet.close(true);
+      offlineWallet = openWallet(offlineWalletPath);
+      String signedTxHex = offlineWallet.signTxs(unsignedTxSet.getUnsignedTxHex());
+      assertFalse(signedTxHex.isEmpty());
+      
+      // test tx parsing
+      MoneroTxSet parsedTxSet = offlineWallet.parseTxSet(unsignedTxSet);
+      testParsedTxSet(parsedTxSet);
+      
+      // submit signed tx using watch-only wallet
+      if (TEST_RELAYS) {
+        offlineWallet.close();
+        watchOnlyWallet = openWallet(watchOnlyPath);
+        List<String> txHashes = watchOnlyWallet.submitTxs(signedTxHex);
+        assertEquals(1, txHashes.size());
+        assertEquals(64, txHashes.get(0).length());
+      }
     } finally {
-      if (offlineWallet != null) offlineWallet.close();
+      try { watchOnlyWallet.close(); } catch (Exception e) {}
+      try { offlineWallet.close(); } catch (Exception e) {}
       wallet = getTestWallet(); // open main test wallet for other tests
     }
   }
