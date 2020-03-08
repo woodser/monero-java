@@ -82,8 +82,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Override
-  protected MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight, String seedOffset) {
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletFromMnemonic(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, mnemonic, daemon.getRpcConnection(), restoreHeight, seedOffset);
+  protected MoneroWallet createWalletFromMnemonic(String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String seedOffset) {
+    MoneroWalletJni wallet = MoneroWalletJni.createWalletFromMnemonic(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, mnemonic, daemonConnection, restoreHeight, seedOffset);
     if (wallet.isConnected()) wallet.startSyncing();
     return wallet;
   }
@@ -1856,6 +1856,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   public void testWatchOnlyWallet() {
     super.testWatchOnlyWallet();
+  }
+  
+  @Override
+  public void testOfflineWallet() {
+    super.testOfflineWallet();
   }
 
   @Override

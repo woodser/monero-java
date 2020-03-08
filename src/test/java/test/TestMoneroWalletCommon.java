@@ -128,7 +128,7 @@ public abstract class TestMoneroWalletCommon {
    * 
    * @return the created test wallet
    */
-  protected abstract MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight, String seedOffset);
+  protected abstract MoneroWallet createWalletFromMnemonic(String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String seedOffset);
   
   /**
    * Creates a wallet from keys.
@@ -193,7 +193,7 @@ public abstract class TestMoneroWalletCommon {
       String privateSpendKey = wallet.getPrivateSpendKey();
       
       // recreate test wallet from keys
-      wallet = createWalletFromMnemonic(TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      wallet = createWalletFromMnemonic(TestUtils.MNEMONIC, daemon.getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
       Exception e2 = null;
       try {
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
@@ -223,7 +223,7 @@ public abstract class TestMoneroWalletCommon {
     try {
 
       // create test wallet with offset
-      wallet = createWalletFromMnemonic(TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT, "my secret offset!");
+      wallet = createWalletFromMnemonic(TestUtils.MNEMONIC, daemon.getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, "my secret offset!");
       Exception e2 = null;
       try {
         MoneroUtils.validateMnemonic(wallet.getMnemonic());
@@ -2157,6 +2157,43 @@ public abstract class TestMoneroWalletCommon {
     } finally {
       wallet = getTestWallet(); // open main test wallet for other tests
     }
+  }
+  
+  // Supports offline functionality
+  @Test
+  public void testOfflineWallet() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    
+    // export outputs and key images from live wallet
+    BigInteger balance = wallet.getBalance();
+    assertTrue(balance.compareTo(new BigInteger("0")) > 0);
+    List<MoneroTxWallet> txs = wallet.getTxs();
+    assertFalse(txs.isEmpty());
+    String outputsHex = wallet.getOutputsHex();
+    List<MoneroKeyImage> keyImages = wallet.getKeyImages();
+    
+    // create offline wallet
+    MoneroWallet offlineWallet = createWalletFromMnemonic(TestUtils.MNEMONIC, null, TestUtils.FIRST_RECEIVE_HEIGHT, "");
+    assertEquals(0, offlineWallet.getTxs().size());
+    
+    // import outputs and key images
+    offlineWallet.importOutputsHex(outputsHex);
+    offlineWallet.importKeyImages(keyImages);
+    
+    // wallet knows balance and transactions
+    assertEquals(balance, offlineWallet.getBalance());
+    assertEquals(new BigInteger("0"), offlineWallet.getUnlockedBalance());
+    //assertEquals(txs.size(), offlineWallet.getTxs());
+    
+    // TODO: create tx offline?
+//    // create a tx
+//    MoneroTxSet txSet = offlineWallet.createTx(0, offlineWallet.getPrimaryAddress(), TestUtils.MAX_FEE.multiply(new BigInteger("3")));
+//    System.out.println(JsonUtils.serialize(txSet));
+//    throw new RuntimeException("Not implemented");
+    
+    // open main test wallet for other tests
+    offlineWallet.close();
+    wallet = getTestWallet();
   }
   
   // Can sign and verify messages

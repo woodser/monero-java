@@ -60,7 +60,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   @Override
-  protected MoneroWallet createWalletFromMnemonic(String mnemonic, Long restoreHeight, String seedOffset) {
+  protected MoneroWallet createWalletFromMnemonic(String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String seedOffset) {
+    assertEquals("Cannot specify daemon connection when creating rpc wallet", null, daemonConnection);  // TODO: impl and use wallet rpc set daemon
     wallet.createWalletFromMnemonic(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, mnemonic, restoreHeight, null, seedOffset, null);
     return wallet;
   }
@@ -683,6 +684,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Override
   public void testWatchOnlyWallet() {
     super.testWatchOnlyWallet();
+  }
+  
+  @Override
+  public void testOfflineWallet() {
+    super.testOfflineWallet();
   }
 
   @Override
