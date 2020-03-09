@@ -411,11 +411,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   @Test
-  public void testCreateWalletWithoutSpendKey() {
-    super.testCreateWalletWithoutSpendKey();
-  }
-  
-  @Test
   public void testGetVersion() {
     super.testGetVersion();
   }
@@ -682,13 +677,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   @Override
-  public void testWatchOnlyWallet() {
-    super.testWatchOnlyWallet();
-  }
-  
-  @Override
-  public void testOfflineWallet() {
-    super.testOfflineWallet();
+  public void testWatchOnlyAndOfflineWallets() {
+    super.testWatchOnlyAndOfflineWallets();
   }
 
   @Override

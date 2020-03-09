@@ -61,6 +61,21 @@ public interface MoneroWallet {
   public static final String DEFAULT_LANGUAGE = "English";
   
   /**
+   * Indicates if the wallet is connected a daemon.
+   * 
+   * @return true if the wallet is connected to a daemon, false otherwise
+   */
+  public boolean isConnected();
+  
+  /**
+   * Indicates if the wallet is watch-only, meaning it does have the private
+   * spend key and can therefore only observe incoming outputs.
+   * 
+   * @return {bool} true if the wallet is watch-only, false otherwise
+   */
+  public boolean isWatchOnly();
+  
+  /**
    * Returns the wallet version.
    * 
    * @return the wallet version

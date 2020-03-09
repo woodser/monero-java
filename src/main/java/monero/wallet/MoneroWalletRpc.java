@@ -240,6 +240,10 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   
   // -------------------------- COMMON WALLET METHODS -------------------------
   
+  public boolean isConnected() {
+    throw new RuntimeException("Not implemented");
+  }
+  
   @SuppressWarnings("unchecked")
   @Override
   public MoneroVersion getVersion() {
@@ -256,15 +260,21 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   @SuppressWarnings("unchecked")
   @Override
   public String getMnemonic() {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("key_type", "mnemonic");
-    Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (String) result.get("key");
+    try {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("key_type", "mnemonic");
+      Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      return (String) result.get("key");
+    } catch (MoneroException e) {
+      if (e.getCode() == -29) return null;  // wallet is watch-only
+      throw e;
+    }
   }
 
   @Override
   public String getMnemonicLanguage() {
+    if (getMnemonic() == null) return null;
     throw new MoneroException("MoneroWalletRpc.getMnemonicLanguage() not supported");
   }
 

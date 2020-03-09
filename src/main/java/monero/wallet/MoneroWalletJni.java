@@ -275,20 +275,6 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
   
   /**
-   * Indicates if the wallet is connected a daemon.
-   * 
-   * @return true if the wallet is connected to a daemon, false otherwise
-   */
-  public boolean isConnected() {
-    assertNotClosed();
-    try {
-      return isConnectedJni();
-    } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
-    }
-  }
-  
-  /**
    * Get the maximum height of the peers the wallet's daemon is connected to.
    *
    * @return the maximum height of the peers the wallet's daemon is connected to
@@ -415,6 +401,15 @@ public class MoneroWalletJni extends MoneroWalletBase {
   
   // -------------------------- COMMON WALLET METHODS -------------------------
   
+  public boolean isConnected() {
+    assertNotClosed();
+    try {
+      return isConnectedJni();
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
+  
   @Override
   public MoneroVersion getVersion() {
     assertNotClosed();
@@ -436,21 +431,17 @@ public class MoneroWalletJni extends MoneroWalletBase {
   @Override
   public String getMnemonic() {
     assertNotClosed();
-    try {
-      return getMnemonicJni();
-    } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
-    }
+    String mnemonic = getMnemonicJni();
+    if ("".equals(mnemonic)) return null;
+    return mnemonic;
   }
   
   @Override
   public String getMnemonicLanguage() {
     assertNotClosed();
-    try {
-      return getMnemonicLanguageJni();
-    } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
-    }
+    String mnemonicLanguage = getMnemonicLanguageJni();
+    if ("".equals(mnemonicLanguage)) return null;
+    return mnemonicLanguage;
   }
 
   @Override

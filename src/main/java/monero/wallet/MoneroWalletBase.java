@@ -52,6 +52,11 @@ import monero.wallet.model.MoneroTxWallet;
 public abstract class MoneroWalletBase implements MoneroWallet {
   
   @Override
+  public boolean isWatchOnly() {
+    return null == getMnemonic();
+  }
+  
+  @Override
   public String getPrimaryAddress() {
     return getAddress(0, 0);
   }
