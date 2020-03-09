@@ -222,59 +222,6 @@ public class MoneroWalletJni extends MoneroWalletBase {
   // ------------ WALLET METHODS SPECIFIC TO JNI IMPLEMENTATION ---------------
   
   /**
-   * Set the wallet's daemon connection.
-   * 
-   * @param uri is the uri of the daemon for the wallet to use
-   */
-  public void setDaemonConnection(String uri) {
-    setDaemonConnection(uri, null, null);
-  }
-  
-  /**
-   * Set the wallet's daemon connection.
-   * 
-   * @param uri is the daemon's URI
-   * @param username is the username to authenticate with the daemon (optional)
-   * @param password is the password to authenticate with the daemon (optional)
-   */
-  public void setDaemonConnection(String uri, String username, String password) {
-    if (uri == null) setDaemonConnection((MoneroRpcConnection) null);
-    else setDaemonConnection(new MoneroRpcConnection(uri, username, password));
-  }
-  
-  /**
-   * Set the wallet's daemon connection
-   * 
-   * @param daemonConnection manages daemon connection information
-   */
-  public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
-    assertNotClosed();
-    if (daemonConnection == null) setDaemonConnectionJni("", "", "");
-    else {
-      try {
-        setDaemonConnectionJni(daemonConnection.getUri() == null ? "" : daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword());
-      } catch (Exception e) {
-        throw new MoneroException(e.getMessage());
-      }
-    }
-  }
-  
-  /**
-   * Get the wallet's daemon connection.
-   * 
-   * @return the wallet's daemon connection
-   */
-  public MoneroRpcConnection getDaemonConnection() {
-    assertNotClosed();
-    try {
-      String[] vals = getDaemonConnectionJni();
-      return vals == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2]);
-    } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
-    }
-  }
-  
-  /**
    * Get the maximum height of the peers the wallet's daemon is connected to.
    *
    * @return the maximum height of the peers the wallet's daemon is connected to
@@ -400,6 +347,28 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
   
   // -------------------------- COMMON WALLET METHODS -------------------------
+  
+  public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
+    assertNotClosed();
+    if (daemonConnection == null) setDaemonConnectionJni("", "", "");
+    else {
+      try {
+        setDaemonConnectionJni(daemonConnection.getUri() == null ? "" : daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword());
+      } catch (Exception e) {
+        throw new MoneroException(e.getMessage());
+      }
+    }
+  }
+  
+  public MoneroRpcConnection getDaemonConnection() {
+    assertNotClosed();
+    try {
+      String[] vals = getDaemonConnectionJni();
+      return vals == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2]);
+    } catch (Exception e) {
+      throw new MoneroException(e.getMessage());
+    }
+  }
   
   public boolean isConnected() {
     assertNotClosed();

@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import common.utils.GenUtils;
+import monero.rpc.MoneroRpcConnection;
 import monero.utils.MoneroException;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -50,6 +51,15 @@ import monero.wallet.model.MoneroTxWallet;
  * Abstract base implementation of a Monero wallet.
  */
 public abstract class MoneroWalletBase implements MoneroWallet {
+  
+  public void setDaemonConnection(String uri) {
+    setDaemonConnection(uri, null, null);
+  }
+  
+  public void setDaemonConnection(String uri, String username, String password) {
+    if (uri == null) setDaemonConnection((MoneroRpcConnection) null);
+    else setDaemonConnection(new MoneroRpcConnection(uri, username, password));
+  }
   
   @Override
   public boolean isWatchOnly() {

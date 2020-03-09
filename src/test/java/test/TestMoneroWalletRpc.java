@@ -61,14 +61,15 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   protected MoneroWallet createWalletFromMnemonic(String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String seedOffset) {
-    assertEquals("Cannot specify daemon connection when creating rpc wallet", null, daemonConnection);  // TODO: impl and use wallet rpc set daemon
     wallet.createWalletFromMnemonic(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, mnemonic, restoreHeight, null, seedOffset, null);
+    wallet.setDaemonConnection(daemonConnection); // TODO monero-wallet-rpc: ability to set connection before creating if offline wallet
     return wallet;
   }
   
   @Override
   protected MoneroWallet createWalletFromKeys(String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long firstReceiveHeight, String language) {
-    wallet.createWalletFromKeys(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, address, privateViewKey, privateSpendKey, daemonConnection, firstReceiveHeight, language, true);
+    wallet.createWalletFromKeys(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, address, privateViewKey, privateSpendKey, firstReceiveHeight, language, true);
+    wallet.setDaemonConnection(daemonConnection);
     return wallet;
   }
   

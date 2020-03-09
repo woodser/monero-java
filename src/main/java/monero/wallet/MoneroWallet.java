@@ -28,6 +28,7 @@ import java.util.List;
 
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroVersion;
+import monero.rpc.MoneroRpcConnection;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -61,19 +62,49 @@ public interface MoneroWallet {
   public static final String DEFAULT_LANGUAGE = "English";
   
   /**
-   * Indicates if the wallet is connected a daemon.
-   * 
-   * @return true if the wallet is connected to a daemon, false otherwise
-   */
-  public boolean isConnected();
-  
-  /**
    * Indicates if the wallet is watch-only, meaning it does have the private
    * spend key and can therefore only observe incoming outputs.
    * 
    * @return {bool} true if the wallet is watch-only, false otherwise
    */
   public boolean isWatchOnly();
+  
+  /**
+   * Set the wallet's daemon connection.
+   * 
+   * @param uri is the uri of the daemon for the wallet to use
+   */
+  public void setDaemonConnection(String uri);
+  
+  /**
+   * Set the wallet's daemon connection.
+   * 
+   * @param uri is the daemon's URI
+   * @param username is the username to authenticate with the daemon (optional)
+   * @param password is the password to authenticate with the daemon (optional)
+   */
+  public void setDaemonConnection(String uri, String username, String password);
+  
+  /**
+   * Set the wallet's daemon connection
+   * 
+   * @param daemonConnection manages daemon connection information
+   */
+  public void setDaemonConnection(MoneroRpcConnection daemonConnection);
+  
+  /**
+   * Get the wallet's daemon connection.
+   * 
+   * @return the wallet's daemon connection
+   */
+  public MoneroRpcConnection getDaemonConnection();
+  
+  /**
+   * Indicates if the wallet is connected a daemon.
+   * 
+   * @return true if the wallet is connected to a daemon, false otherwise
+   */
+  public boolean isConnected(); // TODO: isConnectedToDaemon?
   
   /**
    * Returns the wallet version.

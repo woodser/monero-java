@@ -2063,6 +2063,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testWatchOnlyAndOfflineWallets() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // collect info from main test wallet
     String primaryAddress = wallet.getPrimaryAddress();
@@ -2095,7 +2096,7 @@ public abstract class TestMoneroWalletCommon {
       offlineWallet = createWalletFromKeys(primaryAddress, privateViewKey, privateSpendKey, null, (long) 0, null);
       assertFalse(offlineWallet.isConnected());
       assertFalse(offlineWallet.isWatchOnly());
-      assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic());
+      if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic()); // TODO monero-core: cannot get mnemonic from offline wallet rpc
       String offlineWalletPath = offlineWallet.getPath();
       assertEquals(0, offlineWallet.getTxs().size());
       

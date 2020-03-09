@@ -46,6 +46,7 @@ import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroVersion;
 import monero.rpc.MoneroRpcConnection;
 import monero.rpc.MoneroRpcException;
+import monero.rpc.SslOptions;
 import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.model.MoneroAccount;
@@ -78,8 +79,8 @@ import monero.wallet.model.MoneroTxWallet;
  */
 public class MoneroWalletRpc extends MoneroWalletBase {
 
-  private String path;  // wallet's path identifier
-  private MoneroRpcConnection rpc;  // handles rpc interactions
+  private String path;                                      // wallet's path identifier
+  private MoneroRpcConnection rpc;                          // handles rpc interactions
   private Map<Integer, Map<Integer, String>> addressCache;  // cache static addresses to reduce requests
   
   // static
@@ -195,13 +196,12 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    * @param address is the address of the wallet to construct
    * @param viewKey is the view key of the wallet to construct
    * @param spendKey is the spend key of the wallet to construct or null to create a view-only wallet
-   * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    * @param language is the wallet and mnemonic's language (default = "English")
    */
-  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey) { createWalletFromKeys(name, password, address, viewKey, spendKey, null, null, null, null); }
-  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight) { createWalletFromKeys(name, password, address, viewKey, spendKey, daemonConnection, restoreHeight, null, null); }
-  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language, Boolean saveCurrent) {
+  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey) { createWalletFromKeys(name, password, address, viewKey, spendKey, null, null, null); }
+  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, Long restoreHeight) { createWalletFromKeys(name, password, address, viewKey, spendKey, restoreHeight, null, null); }
+  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, Long restoreHeight, String language, Boolean saveCurrent) {
     if (restoreHeight == null) restoreHeight = 0l;
     if (language == null) language = DEFAULT_LANGUAGE;
     Map<String, Object> params = new HashMap<String, Object>();
@@ -212,7 +212,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("spendkey", spendKey);
     params.put("restore_height", restoreHeight);
     params.put("autosave_current", saveCurrent);
-    rpc.sendJsonRequest("generate_from_keys", params);  // TODO: info indicates if wallet is watch-only, programatically expose?
+    rpc.sendJsonRequest("generate_from_keys", params);
     clear();
     path = name;
   }
@@ -240,8 +240,48 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   
   // -------------------------- COMMON WALLET METHODS -------------------------
   
-  public boolean isConnected() {
+  public boolean isWatchOnly() {
+    try {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("key_type", "mnemonic");
+      rpc.sendJsonRequest("query_key", params);
+      return false; // key retrieval succeeds if not watch only
+    } catch (MoneroException e) {
+      if (e.getCode() == -29) return true;  // wallet is watch-only
+      if (e.getCode() == -1) return false;  // wallet is offline but not watch-only
+      throw e;
+    }
+  }
+  
+  public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
+    setDaemonConnection(daemonConnection, null, null);
+  }
+  
+  public void setDaemonConnection(MoneroRpcConnection daemonConnection, Boolean isTrusted, SslOptions sslOptions) {
+    if (sslOptions == null) sslOptions = new SslOptions();
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("address", daemonConnection == null ? "placeholder" : daemonConnection.getUri());
+    params.put("trusted", isTrusted);
+    params.put("ssl_support", "autodetect");
+    params.put("ssl_private_key_path", sslOptions.getPrivateKeyPath());
+    params.put("ssl_certificate_path", sslOptions.getCertificatePath());
+    params.put("ssl_ca_file", sslOptions.getCertificateAuthorityFile());
+    params.put("ssl_allowed_fingerprints", sslOptions.getAllowedFingerprints());
+    params.put("ssl_allow_any_cert", sslOptions.getAllowAnyCert());
+    rpc.sendJsonRequest("set_daemon", params);
+  }
+  
+  public MoneroRpcConnection getDaemonConnection() {
     throw new RuntimeException("Not implemented");
+  }
+  
+  public boolean isConnected() {
+    try {
+      sync(); // wallet rpc auto syncs so worst case this call blocks and blocks upfront  TODO: better way to determine if wallet rpc is connected to daemon?
+      return true;
+    } catch (MoneroException e) {
+      return false;
+    }
   }
   
   @SuppressWarnings("unchecked")
@@ -750,11 +790,16 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     if (query.getTxQuery() == null) query.setTxQuery(new MoneroTxQuery());
     MoneroTxQuery txQuery = query.getTxQuery();
     txQuery.setTransferQuery(null); // break circular link for meetsCriteria()
+    
+    // check if pool txs explicitly requested without daemon connection
+    if (txQuery.inTxPool() != null && Boolean.TRUE.equals(txQuery.inTxPool()) && !isConnected()) {
+      throw new MoneroException("Cannot fetch pool transactions because wallet has no daemon connection");
+    }
 
     // build params for get_transfers rpc call
     Map<String, Object> params = new HashMap<String, Object>();
     boolean canBeConfirmed = !Boolean.FALSE.equals(txQuery.isConfirmed()) && !Boolean.TRUE.equals(txQuery.inTxPool()) && !Boolean.TRUE.equals(txQuery.isFailed()) && !Boolean.FALSE.equals(txQuery.isRelayed());
-    boolean canBeInTxPool = !Boolean.TRUE.equals(txQuery.isConfirmed()) && !Boolean.FALSE.equals(txQuery.inTxPool()) && !Boolean.TRUE.equals(txQuery.isFailed()) && !Boolean.FALSE.equals(txQuery.isRelayed()) && txQuery.getHeight() == null && txQuery.getMinHeight() == null && txQuery.getMaxHeight() == null;
+    boolean canBeInTxPool = isConnected() && !Boolean.TRUE.equals(txQuery.isConfirmed()) && !Boolean.FALSE.equals(txQuery.inTxPool()) && !Boolean.TRUE.equals(txQuery.isFailed()) && !Boolean.FALSE.equals(txQuery.isRelayed()) && txQuery.getHeight() == null && txQuery.getMinHeight() == null && txQuery.getMaxHeight() == null;
     boolean canBeIncoming = !Boolean.FALSE.equals(query.isIncoming()) && !Boolean.TRUE.equals(query.isOutgoing()) && !Boolean.TRUE.equals(query.hasDestinations());
     boolean canBeOutgoing = !Boolean.FALSE.equals(query.isOutgoing()) && !Boolean.TRUE.equals(query.isIncoming());
     params.put("in", canBeIncoming && canBeConfirmed);
