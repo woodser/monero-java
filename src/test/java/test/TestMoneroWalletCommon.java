@@ -2092,7 +2092,7 @@ public abstract class TestMoneroWalletCommon {
       String outputsHex = watchOnlyWallet.getOutputsHex();
       
       // create offline wallet
-      watchOnlyWallet.close(true);  // only one wallet open at a time to accomodate wallet rpc
+      watchOnlyWallet.close(true);  // only one wallet open at a time to accommodate testing wallet rpc
       offlineWallet = createWalletFromKeys(primaryAddress, privateViewKey, privateSpendKey, null, (long) 0, null);
       assertFalse(offlineWallet.isConnected());
       assertFalse(offlineWallet.isWatchOnly());
@@ -3193,8 +3193,7 @@ public abstract class TestMoneroWalletCommon {
       if (address == null) address = result.getAddress();
       else assertEquals(address, result.getAddress());
       madeMultisigHexes.add(result.getMultisigHex());
-      
-      wallet.close();
+      wallet.close(true);
     }
     
     // handle m/n which exchanges keys n - m times
@@ -3239,7 +3238,7 @@ public abstract class TestMoneroWalletCommon {
           }
           
           //wallet.save();
-          wallet.close();
+          wallet.close(true);
         }
         
         // use results for next round of exchange

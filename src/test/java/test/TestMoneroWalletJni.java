@@ -74,7 +74,9 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
   @Override
   protected MoneroWallet createWalletRandom() {
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
+    String path = TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString();
+    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
+    assertEquals(path, wallet.getPath());
     //wallet.sync();
     //wallet.save();
     if (wallet.isConnected()) wallet.startSyncing();
@@ -83,14 +85,18 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   @Override
   protected MoneroWallet createWalletFromMnemonic(String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String seedOffset) {
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletFromMnemonic(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, mnemonic, daemonConnection, restoreHeight, seedOffset);
+    String path = TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString();
+    MoneroWalletJni wallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, mnemonic, daemonConnection, restoreHeight, seedOffset);
+    assertEquals(path, wallet.getPath());
     if (wallet.isConnected()) wallet.startSyncing();
     return wallet;
   }
   
   @Override
   protected MoneroWallet createWalletFromKeys(String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletFromKeys(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, address, privateViewKey, privateSpendKey, daemonConnection, restoreHeight, language);
+    String path = TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString();
+    MoneroWalletJni wallet = MoneroWalletJni.createWalletFromKeys(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, address, privateViewKey, privateSpendKey, daemonConnection, restoreHeight, language);
+    assertEquals(path, wallet.getPath());
     if (wallet.isConnected()) wallet.startSyncing();
     return wallet;
   }
@@ -1267,7 +1273,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     testCreateMultisigWallet(2, 4);
   }
   
-  @SuppressWarnings("unused")
   private void testCreateMultisigWallet(int M, int N) {
     System.out.println("Creating " + M + "/" + N + " multisig wallet");
     
