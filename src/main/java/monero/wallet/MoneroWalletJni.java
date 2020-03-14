@@ -348,6 +348,11 @@ public class MoneroWalletJni extends MoneroWalletBase {
   
   // -------------------------- COMMON WALLET METHODS -------------------------
   
+  public boolean isWatchOnly() {
+    assertNotClosed();
+    return isWatchOnlyJni();
+  }
+  
   public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
     assertNotClosed();
     if (daemonConnection == null) setDaemonConnectionJni("", "", "");
@@ -1280,9 +1285,11 @@ public class MoneroWalletJni extends MoneroWalletBase {
   
   private native long getDaemonMaxPeerHeightJni();
   
-  private native String[] getDaemonConnectionJni(); // returns [uri, username, password]
+  private native boolean isWatchOnlyJni();
   
   private native void setDaemonConnectionJni(String uri, String username, String password);
+  
+  private native String[] getDaemonConnectionJni(); // returns [uri, username, password]
   
   private native boolean isConnectedJni();
   
