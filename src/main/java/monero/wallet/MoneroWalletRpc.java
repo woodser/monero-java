@@ -732,6 +732,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     
     // filter txs that don't meet transfer and output queries
     transferQuery.setTxQuery(null);    // break circular reference for meets criteria TODO: meetsCriteria should handle loop
+    outputQuery.setTxQuery(null);
     List<MoneroTxWallet> txsQueried = new ArrayList<MoneroTxWallet>();
     for (MoneroTxWallet tx : txs) {
       if (query.meetsCriteria(tx)) txsQueried.add(tx);
