@@ -723,10 +723,13 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     try {
       
       // start syncing
+      assertEquals(1, wallet.getHeight());
       assertEquals(restoreHeight, wallet.getRestoreHeight());
       wallet.startSyncing();
+      assertFalse(wallet.isSynced());
+      assertEquals(BigInteger.valueOf(0), wallet.getBalance());
       
-      // pause for sync to complete automatically
+      // pause for sync to start
       try {
         System.out.println("Sleeping to test that sync starts automatically...");
         TimeUnit.MILLISECONDS.sleep(15000);
@@ -735,13 +738,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
         throw new RuntimeException(e.getMessage());
       }
       
-      // test that wallet is synced
-      assertTrue(wallet.isSynced());
-      assertEquals(daemon.getHeight(), wallet.getHeight());
+      // test that wallet has started syncing
+      assertTrue(wallet.getHeight() > 1);
       
       // stop syncing
       wallet.stopSyncing();
-      assertTrue(wallet.isSynced()); // wallet is still synced
       
    // TODO monero core: wallet.cpp m_synchronized only ever set to true, never false
 //      // wait for block to be added to chain
@@ -811,7 +812,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
             seedOffset);
     
     // deep compare
-    WalletEqualityUtils.testWalletEqualityOnChain(walletRpc, walletJni);
+    try {
+      WalletEqualityUtils.testWalletEqualityOnChain(walletRpc, walletJni);
+    } finally {
+      walletJni.close();
+    }
   }
   
   // Can be saved

@@ -69,7 +69,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Override
   protected MoneroWallet createWalletFromKeys(String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long firstReceiveHeight, String language) {
     wallet.createWalletFromKeys(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, address, privateViewKey, privateSpendKey, firstReceiveHeight, language, true);
-    wallet.setDaemonConnection(daemonConnection);
+    wallet.setDaemonConnection(daemonConnection);   // TODO: causes wallet to have no daemon connection if authenticating
     return wallet;
   }
   

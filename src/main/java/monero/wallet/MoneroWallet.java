@@ -1244,4 +1244,11 @@ public interface MoneroWallet {
    * @param save specifies if the wallet should be saved before being closed (default false)
    */
   public void close(boolean save);
+  
+  /**
+   * Indicates if this wallet is closed or not.
+   * 
+   * @return true if the wallet is closed, false otherwise
+   */
+  public boolean isClosed();
 }

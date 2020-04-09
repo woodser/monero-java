@@ -1760,6 +1760,16 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     rpc.sendJsonRequest("close_wallet", params);
   }
   
+  @Override
+  public boolean isClosed() {
+    try {
+      this.getPrimaryAddress();
+    } catch (Exception e) {
+      return e instanceof MoneroRpcException && ((MoneroRpcException) e).getCode() == -13 && ((MoneroRpcException) e).getMessage().indexOf("No wallet file") > -1;
+    }
+    return false;
+  }
+  
   // ------------------------------ PRIVATE -----------------------------------
   
   private void clear() {

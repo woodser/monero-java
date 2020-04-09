@@ -264,6 +264,7 @@ public abstract class TestMoneroWalletCommon {
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
         assertEquals(privateViewKey, wallet.getPrivateViewKey());
         assertEquals(privateSpendKey, wallet.getPrivateSpendKey());
+        assertTrue(wallet.isConnected());
         if (!(wallet instanceof MoneroWalletRpc)) {
           MoneroUtils.validateMnemonic(wallet.getMnemonic()); // TODO monero-wallet-rpc: cannot get mnemonic from wallet created from keys?
           assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getMnemonicLanguage());
@@ -2083,7 +2084,7 @@ public abstract class TestMoneroWalletCommon {
       assertEquals(null, watchOnlyWallet.getMnemonic());
       assertEquals(null, watchOnlyWallet.getMnemonicLanguage());
       assertTrue(watchOnlyWallet.isWatchOnly());
-      assertTrue(watchOnlyWallet.isConnected());
+      assertTrue(watchOnlyWallet.isConnected());  // TODO: this fails with monero-wallet-rpc and monerod with authentication
       String watchOnlyPath = watchOnlyWallet.getPath();
       watchOnlyWallet.sync();
       assertTrue(watchOnlyWallet.getTxs().size() > 0);
@@ -3155,6 +3156,7 @@ public abstract class TestMoneroWalletCommon {
   private void testMultisig(int m, int n, boolean testTx) {
     System.out.println("testMultisig(" + m + ", " + n + ")");
     String BEGIN_MULTISIG_NAME = "begin_multisig_wallet";
+    MoneroWallet curWallet = null;
     try {
       // set name attribute of test wallet at beginning of test
       wallet.setAttribute("name", BEGIN_MULTISIG_NAME);
@@ -3247,7 +3249,7 @@ public abstract class TestMoneroWalletCommon {
       }
       
       // print final multisig address
-      MoneroWallet curWallet = openWallet(walletIds.get(0));
+      curWallet = openWallet(walletIds.get(0));
       assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
       //System.out.println("FINAL MULTISIG ADDRESS: " + curWallet.getPrimaryAddress());
       curWallet.close();
@@ -3471,6 +3473,7 @@ public abstract class TestMoneroWalletCommon {
     } finally {
       
       // re-open main test wallet
+      if (curWallet != null && !curWallet.isClosed()) curWallet.close();  // TODO: MoneroWallet.isClosed()
       wallet = getTestWallet();
       assertEquals(BEGIN_MULTISIG_NAME, wallet.getAttribute("name"));
     }    

@@ -337,15 +337,6 @@ public class MoneroWalletJni extends MoneroWalletBase {
     moveToJni(path, password);
   }
   
-  /**
-   * Indicates if this wallet is closed or not.
-   * 
-   * @return true if the wallet is closed, false otherwise
-   */
-  public boolean isClosed() {
-    return isClosed;
-  }
-  
   // -------------------------- COMMON WALLET METHODS -------------------------
   
   public boolean isWatchOnly() {
@@ -1261,6 +1252,11 @@ public class MoneroWalletJni extends MoneroWalletBase {
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     }
+  }
+  
+  @Override
+  public boolean isClosed() {
+    return isClosed;
   }
   
   // ------------------------------ NATIVE METHODS ----------------------------

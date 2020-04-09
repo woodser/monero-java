@@ -122,6 +122,7 @@ Separate wallet2 core wallet functionality from networking, persistence, and oth
 Generalize multisig wallet creation to 1) prepare, 2) make, 3) exchange for M-N times
 
 ISSUES TO OPEN
+monero-wallet-rpc set_daemon doesn't support username/password
 getGetReserveProofAccount() still seg faulting on 0 conf, crashes eclipse
 support seed offset in createWalletFromKeys()
 ability to get mnemonic from wallet rpc restored from keys
