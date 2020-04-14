@@ -3161,7 +3161,7 @@ public abstract class TestMoneroWalletCommon {
       // set name attribute of test wallet at beginning of test
       wallet.setAttribute("name", BEGIN_MULTISIG_NAME);
       wallet.save();
-      //wallet.close();
+      wallet.close();
       
       // create n wallets and prepare multisig hexes
       List<String> preparedMultisigHexes = new ArrayList<String>();
@@ -3172,7 +3172,6 @@ public abstract class TestMoneroWalletCommon {
         wallet.setAttribute("name", wallet.getPath());  // set the name of each wallet as an attribute
         preparedMultisigHexes.add(wallet.prepareMultisig());
         //System.out.println("PREPARED HEX: " + preparedMultisigHexes.get(preparedMultisigHexes.size() - 1));
-        
         wallet.close(true);
       }
 
@@ -3401,6 +3400,7 @@ public abstract class TestMoneroWalletCommon {
         assertNull(txSet.getSignedTxHex());
         assertNull(txSet.getUnsignedTxHex());
         assertFalse(txSet.getTxs().isEmpty());
+        curWallet.close();
         
         // parse multisig tx hex and test
         testParsedTxSet(curWallet.parseTxSet(txSet));
@@ -3443,6 +3443,7 @@ public abstract class TestMoneroWalletCommon {
         for (MoneroTxSet sweepTxSet : txSets) {
           testParsedTxSet(curWallet.parseTxSet(sweepTxSet));
         }
+        curWallet.close();
         
         // sign the tx with participants 1 through m - 1 to meet threshold
         multisigTxHex = txSet.getMultisigTxHex();
