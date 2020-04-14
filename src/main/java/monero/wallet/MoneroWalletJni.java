@@ -1247,6 +1247,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   public void close(boolean save) {
     if (isClosed) return; // closing a closed wallet has no effect
     isClosed = true;
+    setIsListening(false);
     try {
       closeJni(save);
     } catch (Exception e) {
