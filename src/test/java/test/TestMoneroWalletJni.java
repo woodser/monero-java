@@ -1146,7 +1146,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     wallet.startSyncing();
     
     // send tx
-    MoneroTxWallet tx = wallet.send(request).getTxs().get(0);
+    MoneroTxWallet tx = wallet.sendTx(request).getTxs().get(0);
     
     // test wallet's balance
     BigInteger balanceAfter = wallet.getBalance();
@@ -1246,7 +1246,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // send funds to the created wallet
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
-    MoneroTxWallet sentTx = wallet.send(0, myWallet.getPrimaryAddress(), TestUtils.MAX_FEE).getTxs().get(0);
+    MoneroTxWallet sentTx = wallet.sendTx(0, myWallet.getPrimaryAddress(), TestUtils.MAX_FEE).getTxs().get(0);
     
     // wait until block added to the chain
     // TODO monero core: notify on refresh from pool instead instead of confirmation

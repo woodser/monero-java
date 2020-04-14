@@ -1104,8 +1104,8 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_importKeyImagesJni(
   }
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendSplitJni(JNIEnv* env, jobject instance, jstring jsend_request) {
-  MTRACE("Java_monero_wallet_MoneroWalletJni_sendSplitJni(request)");
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendTxsJni(JNIEnv* env, jobject instance, jstring jsend_request) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_sendTxsJni(request)");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _send_request = jsend_request ? env->GetStringUTFChars(jsend_request, NULL) : nullptr;
   string send_request_json = string(_send_request ? _send_request : "");

@@ -125,7 +125,7 @@ public class TestSampleCode {
     
     // send funds from the RPC wallet to the JNI wallet
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(walletRpc); // wait for txs to clear pool *** REMOVE FROM README SAMPLE ***
-    MoneroTxSet txSet = walletRpc.send(0, walletJni.getPrimaryAddress(), new BigInteger("50000"));
+    MoneroTxSet txSet = walletRpc.sendTx(0, walletJni.getPrimaryAddress(), new BigInteger("50000"));
     MoneroTxWallet sentTx = txSet.getTxs().get(0);  // send methods return tx set(s) which contain sent txs unless further steps needed in a multisig or watch-only wallet
     assertTrue(sentTx.inTxPool());
     

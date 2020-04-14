@@ -716,7 +716,7 @@ public interface MoneroWallet {
    * @param request configures the transaction
    * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxSet send(MoneroSendRequest request);
+  public MoneroTxSet sendTx(MoneroSendRequest request);
   
   /**
    * Create and relay a transaction to transfers funds from this wallet to
@@ -727,7 +727,7 @@ public interface MoneroWallet {
    * @param amount is the amount being sent
    * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxSet send(int accountIndex, String address, BigInteger amount);
+  public MoneroTxSet sendTx(int accountIndex, String address, BigInteger amount);
   
   /**
    * Create and relay a transaction to transfers funds from this wallet to
@@ -739,7 +739,7 @@ public interface MoneroWallet {
    * @param priority is the send priority (default normal)
    * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxSet send(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
+  public MoneroTxSet sendTx(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
   
   /**
    * Create and relay one or more transactions to transfer funds from this
@@ -748,7 +748,7 @@ public interface MoneroWallet {
    * @param request configures the transactions
    * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxSet sendSplit(MoneroSendRequest request);
+  public MoneroTxSet sendTxs(MoneroSendRequest request);
   
   /**
    * Create and relay one or more transactions which transfer funds from this
@@ -759,11 +759,11 @@ public interface MoneroWallet {
    * @param amount is the amount being sent
    * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxSet sendSplit(int accountIndex, String address, BigInteger amount);
+  public MoneroTxSet sendTxs(int accountIndex, String address, BigInteger amount);
   
   /**
    * Create and relay one or more transactions to transfer funds from this
-   * wallet to a destination address with a priority.
+   * wallet to a destination address.
    * 
    * @param accountIndex is the index of the account to withdraw funds from
    * @param address is the destination address to send funds to
@@ -771,7 +771,7 @@ public interface MoneroWallet {
    * @param priority is the send priority (default normal)
    * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxSet sendSplit(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
+  public MoneroTxSet sendTxs(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
   
   /**
    * Sweep an output with a given key image.

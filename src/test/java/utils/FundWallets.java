@@ -65,7 +65,7 @@ public class FundWallets {
       List<MoneroDestination> destinations = new ArrayList<MoneroDestination>();
       for (String address : subaddresses) destinations.add(new MoneroDestination(address, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(2))));
       System.out.println("Transferring....");
-      MoneroTxSet txSet = srcWallet.sendSplit(new MoneroSendRequest().setDestinations(destinations).setAccountIndex(0));
+      MoneroTxSet txSet = srcWallet.sendTxs(new MoneroSendRequest().setDestinations(destinations).setAccountIndex(0));
       System.out.println("Tx set has " + txSet.getTxs().size() + " transactions");
       assertFalse(txSet.getTxs().isEmpty());
       //for (MoneroTxWallet tx : txSet.getTxs()) System.out.println(tx);

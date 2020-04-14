@@ -1,4 +1,6 @@
 HIGH
+rename build scripts to use underscores like javascript
+organize todos
 sync(listener, startHeight) api change
 test that 2 wallets do not interfere with each other's notifications
 all wallet methods top-level, can use base if wanted

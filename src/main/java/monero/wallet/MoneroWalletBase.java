@@ -253,7 +253,7 @@ public abstract class MoneroWalletBase implements MoneroWallet {
     request.setDoNotRelay(true);
     
     // invoke common method which doesn't relay
-    MoneroTxSet txSet = sendSplit(request);
+    MoneroTxSet txSet = sendTxs(request);
     
     // restore doNotRelay of request and txs
     request.setDoNotRelay(requestedDoNotRelay);
@@ -284,32 +284,32 @@ public abstract class MoneroWalletBase implements MoneroWallet {
   }
   
   @Override
-  public MoneroTxSet send(MoneroSendRequest request) {
+  public MoneroTxSet sendTx(MoneroSendRequest request) {
     if (request == null) throw new MoneroException("Send request cannot be null");
-    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with send() which prevents splitting; use sendSplit() instead");
+    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with send() which prevents splitting; use sendTxs() instead");
     request = request.copy();
     request.setCanSplit(false);
-    return sendSplit(request);
+    return sendTxs(request);
   }
   
   @Override
-  public MoneroTxSet send(int accountIndex, String address, BigInteger sendAmount) {
-    return send(accountIndex, address, sendAmount, null);
+  public MoneroTxSet sendTx(int accountIndex, String address, BigInteger sendAmount) {
+    return sendTx(accountIndex, address, sendAmount, null);
   }
   
   @Override
-  public MoneroTxSet send(int accountIndex, String address, BigInteger sendAmount, MoneroSendPriority priority) {
-    return send(new MoneroSendRequest(accountIndex, address, sendAmount, priority));
+  public MoneroTxSet sendTx(int accountIndex, String address, BigInteger sendAmount, MoneroSendPriority priority) {
+    return sendTx(new MoneroSendRequest(accountIndex, address, sendAmount, priority));
   }
   
   @Override
-  public MoneroTxSet sendSplit(int accountIndex, String address, BigInteger sendAmount) {
-    return sendSplit(new MoneroSendRequest(accountIndex, address, sendAmount));
+  public MoneroTxSet sendTxs(int accountIndex, String address, BigInteger sendAmount) {
+    return sendTxs(new MoneroSendRequest(accountIndex, address, sendAmount));
   }
   
   @Override
-  public MoneroTxSet sendSplit(int accountIndex, String address, BigInteger sendAmount, MoneroSendPriority priority) {
-    return sendSplit(new MoneroSendRequest(accountIndex, address, sendAmount, priority));
+  public MoneroTxSet sendTxs(int accountIndex, String address, BigInteger sendAmount, MoneroSendPriority priority) {
+    return sendTxs(new MoneroSendRequest(accountIndex, address, sendAmount, priority));
   }
   
   @Override

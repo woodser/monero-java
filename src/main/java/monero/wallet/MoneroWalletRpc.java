@@ -1059,7 +1059,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   @SuppressWarnings("unchecked")
-  public MoneroTxSet sendSplit(MoneroSendRequest request) {
+  public MoneroTxSet sendTxs(MoneroSendRequest request) {
     
     // validate, copy, and normalize request
     if (request == null) throw new MoneroException("Send request cannot be null");
