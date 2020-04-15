@@ -73,6 +73,7 @@ import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.model.MoneroWalletConfig;
 
 /**
  * Implements a Monero wallet using monero-wallet-rpc.
@@ -138,6 +139,36 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   /**
+   * Create and open a new wallet instance on the RPC server.
+   * 
+   * @param config configures the wallet to create
+   */
+  public void createWallet(MoneroWalletConfig config) {
+    
+    // validate config
+    if (config.getNetworkType() != null) throw new MoneroException("Cannot specify network type when creating RPC wallet");
+    if (config.getMnemonic() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
+      throw new MoneroException("Wallet may be initialized with a mnemonic or keys but not both");
+    }
+    if (config.getServerUri() != null || config.getServerUsername() != null || config.getServerPassword() != null) {
+      throw new MoneroException("Cannot specify server configuration when creating a new wallet");
+    }
+    
+    // create wallet
+    if (config.getMnemonic() != null) {
+      createWalletFromMnemonic(config.getPath(), config.getPassword(), config.getMnemonic(), config.getRestoreHeight(), config.getLanguage(), config.getSeedOffset(), config.getSaveCurrent());
+    } else if (config.getPrimaryAddress() != null) {
+      if (config.getSeedOffset() != null) throw new MoneroException("Cannot specify seed offset when creating wallet from keys");
+      createWalletFromKeys(config.getPath(), config.getPassword(), config.getPrimaryAddress(), config.getPrivateViewKey(), config.getPrivateSpendKey(), config.getRestoreHeight(), config.getLanguage(), config.getSaveCurrent());
+    } else {
+      if (config.getSeedOffset() != null) throw new MoneroException("Cannot specify seed offset when creating random wallet");
+      if (config.getRestoreHeight() != null) throw new MoneroException("Cannot specify restore height when creating random wallet");
+      if (config.getSaveCurrent() == false) throw new MoneroException("Current wallet is saved automatically when creating random wallet"); // TODO: done automatically?
+      createWalletRandom(config.getPath(), config.getPassword(), config.getLanguage());
+    }    
+  }
+  
+  /**
    * Create and open a new wallet with a randomly generated seed on the RPC server.
    * 
    * @param name is the name of the wallet file to create
@@ -145,7 +176,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    * @param language is the language for the wallet's mnemonic seed
    */
   public void createWalletRandom(String name, String password) { createWalletRandom(name, password, null); }
-  public void createWalletRandom(String name, String password, String language) {
+  private void createWalletRandom(String name, String password, String language) {
     if (name == null || name.isEmpty()) throw new MoneroException("Wallet name is not initialized");
     if (password == null || password.isEmpty()) throw new MoneroException("Password is not initialized");
     if (language == null || language.isEmpty()) language = DEFAULT_LANGUAGE;
