@@ -19,6 +19,7 @@ import monero.utils.MoneroException;
 import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
+import monero.wallet.model.MoneroWalletConfig;
 import utils.TestUtils;
 
 /**
@@ -181,7 +182,7 @@ public class TestMoneroUtils {
       // create test wallets
       List<MoneroWallet> wallets = new ArrayList<MoneroWallet>();
       for (int i = 0; i < repeat; i++) {
-        wallets.add(MoneroWalletJni.createWalletRandom(TestUtils.TEST_WALLETS_DIR + "/temp_" + UUID.randomUUID().toString() + "_" + i, TestUtils.WALLET_PASSWORD, networkType));
+        wallets.add(MoneroWalletJni.createWallet(new MoneroWalletConfig().setPath(TestUtils.TEST_WALLETS_DIR + "/temp_" + UUID.randomUUID().toString() + "_" + i).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(networkType)));
       }
       
       // output primary address tests

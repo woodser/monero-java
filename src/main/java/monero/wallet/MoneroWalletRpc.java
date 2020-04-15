@@ -163,7 +163,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     } else {
       if (config.getSeedOffset() != null) throw new MoneroException("Cannot specify seed offset when creating random wallet");
       if (config.getRestoreHeight() != null) throw new MoneroException("Cannot specify restore height when creating random wallet");
-      if (config.getSaveCurrent() == false) throw new MoneroException("Current wallet is saved automatically when creating random wallet"); // TODO: done automatically?
+      if (config.getSaveCurrent() == false) throw new MoneroException("Current wallet is saved automatically when creating random wallet");
       createWalletRandom(config.getPath(), config.getPassword(), config.getLanguage());
     }    
   }
@@ -176,7 +176,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    * @param language is the language for the wallet's mnemonic seed
    */
   public void createWalletRandom(String name, String password) { createWalletRandom(name, password, null); }
-  private void createWalletRandom(String name, String password, String language) {
+  public void createWalletRandom(String name, String password, String language) {
     if (name == null || name.isEmpty()) throw new MoneroException("Wallet name is not initialized");
     if (password == null || password.isEmpty()) throw new MoneroException("Password is not initialized");
     if (language == null || language.isEmpty()) language = DEFAULT_LANGUAGE;

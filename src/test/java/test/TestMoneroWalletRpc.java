@@ -24,6 +24,7 @@ import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.model.MoneroWalletConfig;
 import utils.TestUtils;
 
 /**
@@ -55,20 +56,20 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   protected MoneroWallet createWalletRandom() {
-    wallet.createWalletRandom(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD);
+    wallet.createWallet(new MoneroWalletConfig().setPath(UUID.randomUUID().toString()).setPassword(TestUtils.WALLET_PASSWORD));
     return wallet;
   }
   
   @Override
   protected MoneroWallet createWalletFromMnemonic(String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String seedOffset) {
-    wallet.createWalletFromMnemonic(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, mnemonic, restoreHeight, null, seedOffset, null);
+    wallet.createWallet(new MoneroWalletConfig().setPath(UUID.randomUUID().toString()).setPassword(TestUtils.WALLET_PASSWORD).setMnemonic(mnemonic).setRestoreHeight(restoreHeight).setSeedOffset(seedOffset));
     wallet.setDaemonConnection(daemonConnection); // TODO monero-wallet-rpc: ability to set connection before creating if offline wallet
     return wallet;
   }
   
   @Override
   protected MoneroWallet createWalletFromKeys(String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long firstReceiveHeight, String language) {
-    wallet.createWalletFromKeys(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, address, privateViewKey, privateSpendKey, firstReceiveHeight, language, true);
+    wallet.createWallet(new MoneroWalletConfig().setPath(UUID.randomUUID().toString()).setPassword(TestUtils.WALLET_PASSWORD).setPrimaryAddress(address).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setRestoreHeight(firstReceiveHeight).setLanguage(language).setSaveCurrent(true));
     wallet.setDaemonConnection(daemonConnection);   // TODO: causes wallet to have no daemon connection if authenticating
     return wallet;
   }

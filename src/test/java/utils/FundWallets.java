@@ -15,6 +15,7 @@ import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroTxSet;
+import monero.wallet.model.MoneroWalletConfig;
 
 /**
  * Utility to fund test wallets.
@@ -44,7 +45,7 @@ public class FundWallets {
       // create wallet and create and collect subaddresses
       List<String> subaddresses = new ArrayList<String>();
       String path = TestUtils.TEST_WALLETS_DIR + "/funded_" + UUID.randomUUID().toString();
-      MoneroWalletJni fundedWallet = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_PASSWORD, MoneroNetworkType.STAGENET);
+      MoneroWalletJni fundedWallet = MoneroWalletJni.createWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(MoneroNetworkType.STAGENET));
       for (int accountIdx = 0; accountIdx < NUM_ACCOUNTS; accountIdx++) {
         fundedWallet.createAccount();
         for (int subaddressIdx = 0; subaddressIdx < NUM_SUBADDRESSES_PER_ACCOUNT; subaddressIdx++) {

@@ -1,11 +1,10 @@
 package monero.wallet.model;
 
 import monero.daemon.model.MoneroNetworkType;
+import monero.rpc.MoneroRpcConnection;
 
 /**
- * Configuration to create a new Monero wallet.
- * 
- * TODO: order according to wallet usage params
+ * Configuration to create new Monero wallets.
  */
 public class MoneroWalletConfig {
   
@@ -53,6 +52,17 @@ public class MoneroWalletConfig {
   
   public MoneroWalletConfig setNetworkType(String networkType) {
     throw new RuntimeException("not implemented");  // TODO: MoneroNetworkType.parse(networkType)
+  }
+  
+  public MoneroRpcConnection getServer() {
+    return new MoneroRpcConnection(this.serverUri, this.serverUsername, this.serverPassword);
+  }
+  
+  public MoneroWalletConfig setServer(MoneroRpcConnection server) {
+    this.serverUri = server == null ? null : server.getUri();
+    this.serverUsername = server == null ? null : server.getUsername();
+    this.serverPassword = server == null ? null : server.getPassword();
+    return this;
   }
   
   public String getServerUri() {

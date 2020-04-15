@@ -119,26 +119,6 @@ public class MoneroWalletJni extends MoneroWalletBase {
   /**
    * Open an existing wallet.
    * 
-   * @param path is the path to the wallet file to open
-   * @param password is the password of the wallet file to open
-   * @param networkType is the wallet's network type
-   * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
-   * @return the opened wallet
-   */
-  public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType) { return openWallet(path, password, networkType, (MoneroRpcConnection) null); }
-  public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType, String daemonUri) { return openWallet(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri)); }
-  public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection) {
-    if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist at path: " + path);
-    if (networkType == null) throw new MoneroException("Must provide a network type");
-    long jniWalletHandle = openWalletJni(path, password, networkType.ordinal());
-    MoneroWalletJni wallet = new MoneroWalletJni(jniWalletHandle);
-    if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
-    return wallet;
-  }
-  
-  /**
-   * Open an existing wallet.
-   * 
    * @param config configures the wallet to open
    * @return the wallet instance
    */
@@ -155,11 +135,31 @@ public class MoneroWalletJni extends MoneroWalletBase {
     if (config.getPrivateSpendKey() != null) throw new MoneroException("Cannot specify private spend key when opening wallet");
     if (config.getRestoreHeight() != null) throw new MoneroException("Cannot specify restore height when opening wallet");
     if (config.getLanguage() != null) throw new MoneroException("Cannot specify language when opening wallet");
-    if (config.getSaveCurrent() != null) throw new MoneroException("Cannot save current wallet when opening wallet");
+    if (config.getSaveCurrent() != null) throw new MoneroException("Cannot save current wallet when opening JNI wallet");
     
     // open wallet
     MoneroRpcConnection connection = new MoneroRpcConnection(config.getServerUri(), config.getServerUsername(), config.getServerPassword());
     return openWallet(config.getPath(), config.getPassword(), config.getNetworkType(), connection);
+  }
+  
+  /**
+   * Open an existing wallet.
+   * 
+   * @param path is the path to the wallet file to open
+   * @param password is the password of the wallet file to open
+   * @param networkType is the wallet's network type
+   * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
+   * @return the opened wallet
+   */
+  public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType) { return openWallet(path, password, networkType, (MoneroRpcConnection) null); }
+  public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType, String daemonUri) { return openWallet(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri)); }
+  public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection) {
+    if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist at path: " + path);
+    if (networkType == null) throw new MoneroException("Must provide a network type");
+    long jniWalletHandle = openWalletJni(path, password, networkType.ordinal());
+    MoneroWalletJni wallet = new MoneroWalletJni(jniWalletHandle);
+    if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
+    return wallet;
   }
   
   /**
