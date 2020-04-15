@@ -52,7 +52,7 @@ public class TestSampleCode {
   public void testSampleCode() throws InterruptedException {
     
     // connect to a daemon
-    MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:38081");
+    MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:38081", "superuser", "abctesting123");
     long height = daemon.getHeight();                 // 1523651
     BigInteger feeEstimate = daemon.getFeeEstimate(); // 1014313512
     

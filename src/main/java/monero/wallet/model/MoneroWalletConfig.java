@@ -4,7 +4,7 @@ import monero.daemon.model.MoneroNetworkType;
 import monero.rpc.MoneroRpcConnection;
 
 /**
- * Configuration to create new Monero wallets.
+ * Configuration to create a Monero wallet.
  */
 public class MoneroWalletConfig {
   
