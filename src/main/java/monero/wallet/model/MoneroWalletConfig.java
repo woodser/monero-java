@@ -50,8 +50,8 @@ public class MoneroWalletConfig {
     return this;
   }
   
-  public MoneroWalletConfig setNetworkType(String networkType) {
-    throw new RuntimeException("not implemented");  // TODO: MoneroNetworkType.parse(networkType)
+  public MoneroWalletConfig setNetworkType(String networkTypeStr) {
+    return setNetworkType(MoneroNetworkType.parse(networkTypeStr));
   }
   
   public MoneroRpcConnection getServer() {
