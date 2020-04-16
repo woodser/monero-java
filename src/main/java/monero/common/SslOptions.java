@@ -1,4 +1,4 @@
-package monero.rpc;
+package monero.common;
 
 import java.util.List;
 

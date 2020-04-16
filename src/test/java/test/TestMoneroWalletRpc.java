@@ -16,9 +16,9 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import monero.rpc.MoneroRpcConnection;
-import monero.utils.MoneroException;
-import monero.utils.MoneroUtils;
+import monero.common.MoneroException;
+import monero.common.MoneroRpcConnection;
+import monero.common.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;

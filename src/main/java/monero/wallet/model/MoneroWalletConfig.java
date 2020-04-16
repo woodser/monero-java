@@ -1,7 +1,7 @@
 package monero.wallet.model;
 
+import monero.common.MoneroRpcConnection;
 import monero.daemon.model.MoneroNetworkType;
-import monero.rpc.MoneroRpcConnection;
 
 /**
  * Configuration to create a Monero wallet.

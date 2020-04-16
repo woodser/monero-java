@@ -37,13 +37,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
 import common.utils.JsonUtils;
+import monero.common.MoneroException;
+import monero.common.MoneroRpcConnection;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroVersion;
-import monero.rpc.MoneroRpcConnection;
-import monero.utils.MoneroException;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;

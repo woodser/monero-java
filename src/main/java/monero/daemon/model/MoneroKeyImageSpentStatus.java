@@ -1,6 +1,6 @@
 package monero.daemon.model;
 
-import monero.utils.MoneroException;
+import monero.common.MoneroException;
 
 /**
  * Enumerate key image spent statuses.

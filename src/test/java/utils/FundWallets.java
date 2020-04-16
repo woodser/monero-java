@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroNetworkType;
-import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroDestination;

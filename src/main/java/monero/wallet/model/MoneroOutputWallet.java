@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
+import monero.common.MoneroException;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
-import monero.utils.MoneroException;
 
 /**
  * Models a Monero output with wallet extensions.

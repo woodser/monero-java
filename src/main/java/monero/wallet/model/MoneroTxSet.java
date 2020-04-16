@@ -7,8 +7,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
+import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroTx;
-import monero.utils.MoneroUtils;
 
 /**
  * Groups transactions who share common hex data which is needed in order to

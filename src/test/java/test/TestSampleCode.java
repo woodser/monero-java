@@ -10,13 +10,13 @@ import java.util.concurrent.TimeUnit;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import monero.common.MoneroRpcConnection;
 import monero.daemon.MoneroDaemon;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
-import monero.rpc.MoneroRpcConnection;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroDestination;

@@ -1,4 +1,4 @@
-package monero.utils;
+package monero.common;
 
 import common.utils.GenUtils;
 

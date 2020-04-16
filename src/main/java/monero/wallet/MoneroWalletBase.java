@@ -28,8 +28,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import common.utils.GenUtils;
-import monero.rpc.MoneroRpcConnection;
-import monero.utils.MoneroException;
+import monero.common.MoneroException;
+import monero.common.MoneroRpcConnection;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIncomingTransfer;

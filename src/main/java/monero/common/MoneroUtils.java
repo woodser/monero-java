@@ -1,4 +1,4 @@
-package monero.utils;
+package monero.common;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -17,7 +17,6 @@ import common.utils.GenUtils;
 import common.utils.JsonUtils;
 import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
-import monero.rpc.MoneroRpcConnection;
 import monero.wallet.model.MoneroAddressType;
 import monero.wallet.model.MoneroDecodedAddress;
 

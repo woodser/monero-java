@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
-import monero.utils.MoneroUtils;
+import monero.common.MoneroUtils;
 
 /**
  * Models a Monero block in the blockchain.

@@ -37,6 +37,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import common.utils.GenUtils;
 import common.utils.JsonUtils;
+import monero.common.MoneroException;
+import monero.common.MoneroRpcConnection;
+import monero.common.MoneroRpcException;
+import monero.common.MoneroUtils;
 import monero.daemon.model.ConnectionType;
 import monero.daemon.model.MoneroAltChain;
 import monero.daemon.model.MoneroBan;
@@ -65,10 +69,6 @@ import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxBacklogEntry;
 import monero.daemon.model.MoneroTxPoolStats;
 import monero.daemon.model.MoneroVersion;
-import monero.rpc.MoneroRpcConnection;
-import monero.rpc.MoneroRpcException;
-import monero.utils.MoneroException;
-import monero.utils.MoneroUtils;
 
 /**
  * Implements a Monero daemon using monero-daemon-rpc.

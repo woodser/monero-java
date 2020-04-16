@@ -1,7 +1,6 @@
-package monero.rpc;
+package monero.common;
 
 import common.utils.JsonUtils;
-import monero.utils.MoneroException;
 
 /**
  * Exception when interacting with the Monero daemon or wallet RPC API.

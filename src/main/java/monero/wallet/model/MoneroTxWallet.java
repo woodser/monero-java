@@ -9,10 +9,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
+import monero.common.MoneroException;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
-import monero.utils.MoneroException;
 
 /**
  * Models a Monero transaction with wallet extensions.

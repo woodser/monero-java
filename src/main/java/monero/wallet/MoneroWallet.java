@@ -26,9 +26,9 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 
+import monero.common.MoneroRpcConnection;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroVersion;
-import monero.rpc.MoneroRpcConnection;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroAddressBookEntry;

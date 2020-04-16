@@ -13,7 +13,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import common.utils.JsonUtils;
-import monero.rpc.MoneroRpcConnection;
+import monero.common.MoneroRpcConnection;
 
 /**
  * Tests serialization and deserialization.

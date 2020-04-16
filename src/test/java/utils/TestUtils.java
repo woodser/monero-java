@@ -11,11 +11,11 @@ import java.math.BigInteger;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import monero.common.MoneroRpcConnection;
+import monero.common.MoneroRpcException;
+import monero.common.MoneroUtils;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroNetworkType;
-import monero.rpc.MoneroRpcConnection;
-import monero.rpc.MoneroRpcException;
-import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroWalletConfig;

@@ -4,10 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import monero.common.MoneroUtils;
 import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroTx;
-import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroTxWallet;
 

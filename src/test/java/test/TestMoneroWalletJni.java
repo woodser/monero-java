@@ -17,12 +17,12 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import monero.common.MoneroException;
+import monero.common.MoneroRpcConnection;
+import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroNetworkType;
-import monero.rpc.MoneroRpcConnection;
-import monero.utils.MoneroException;
-import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;

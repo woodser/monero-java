@@ -1,4 +1,4 @@
-package monero.rpc;
+package monero.common;
 
 import java.math.BigInteger;
 import java.net.URI;
@@ -24,8 +24,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import common.utils.JsonUtils;
-import monero.utils.MoneroException;
-import monero.utils.MoneroUtils;
 
 /**
  * Maintains a connection and sends requests to a Monero RPC API.

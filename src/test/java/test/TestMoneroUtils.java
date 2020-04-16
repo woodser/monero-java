@@ -14,9 +14,9 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import monero.common.MoneroException;
+import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroNetworkType;
-import monero.utils.MoneroException;
-import monero.utils.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroWalletConfig;
