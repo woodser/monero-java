@@ -125,6 +125,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   public static MoneroWalletJni openWallet(MoneroWalletConfig config) {
     
     // validate config
+    if (config == null) throw new MoneroException("Must specify config to open wallet");
     if (config.getPath() == null) throw new MoneroException("Must specify path to open wallet");
     if (config.getPassword() == null) throw new MoneroException("Must specify password to decrypt wallet");
     if (config.getNetworkType() == null) throw new MoneroException("Must specify a network type: 'mainnet', 'testnet' or 'stagenet'");
@@ -135,11 +136,10 @@ public class MoneroWalletJni extends MoneroWalletBase {
     if (config.getPrivateSpendKey() != null) throw new MoneroException("Cannot specify private spend key when opening wallet");
     if (config.getRestoreHeight() != null) throw new MoneroException("Cannot specify restore height when opening wallet");
     if (config.getLanguage() != null) throw new MoneroException("Cannot specify language when opening wallet");
-    if (config.getSaveCurrent() != null) throw new MoneroException("Cannot save current wallet when opening JNI wallet");
+    if (Boolean.TRUE.equals(config.getSaveCurrent())) throw new MoneroException("Cannot save current wallet when opening JNI wallet");
     
     // open wallet
-    MoneroRpcConnection connection = new MoneroRpcConnection(config.getServerUri(), config.getServerUsername(), config.getServerPassword());
-    return openWallet(config.getPath(), config.getPassword(), config.getNetworkType(), connection);
+    return openWallet(config.getPath(), config.getPassword(), config.getNetworkType(), config.getServer());
   }
   
   /**
@@ -171,24 +171,24 @@ public class MoneroWalletJni extends MoneroWalletBase {
   public static MoneroWalletJni createWallet(MoneroWalletConfig config) {
     
     // validate config
+    if (config == null) throw new MoneroException("Must specify config to open wallet");
     if (config.getNetworkType() == null) throw new MoneroException("Must specify a network type: 'mainnet', 'testnet' or 'stagenet'");
     if (config.getMnemonic() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
       throw new MoneroException("Wallet may be initialized with a mnemonic or keys but not both");
     }
-    if (config.getSaveCurrent() != null) throw new MoneroException("Cannot save current wallet when creating new JNI wallet");
+    if (Boolean.TRUE.equals(config.getSaveCurrent() != null)) throw new MoneroException("Cannot save current wallet when creating JNI wallet");
     
     // create wallet
-    MoneroRpcConnection connection = new MoneroRpcConnection(config.getServerUri(), config.getServerUsername(), config.getServerPassword());
     if (config.getMnemonic() != null) {
       if (config.getLanguage() != null) throw new MoneroException("Cannot specify language when creating wallet from mnemonic");
-      return createWalletFromMnemonic(config.getPath(), config.getPassword(), config.getNetworkType(), config.getMnemonic(), connection, config.getRestoreHeight(), config.getSeedOffset());
+      return createWalletFromMnemonic(config.getPath(), config.getPassword(), config.getNetworkType(), config.getMnemonic(), config.getServer(), config.getRestoreHeight(), config.getSeedOffset());
     } else if (config.getPrimaryAddress() != null) {
       if (config.getSeedOffset() != null) throw new MoneroException("Cannot specify seed offset when creating wallet from keys");
-      return createWalletFromKeys(config.getPath(), config.getPassword(), config.getNetworkType(), config.getPrimaryAddress(), config.getPrivateViewKey(), config.getPrivateSpendKey(), connection, config.getRestoreHeight(), config.getLanguage());
+      return createWalletFromKeys(config.getPath(), config.getPassword(), config.getNetworkType(), config.getPrimaryAddress(), config.getPrivateViewKey(), config.getPrivateSpendKey(), config.getServer(), config.getRestoreHeight(), config.getLanguage());
     } else {
       if (config.getSeedOffset() != null) throw new MoneroException("Cannot specify seed offset when creating random wallet");
       if (config.getRestoreHeight() != null) throw new MoneroException("Cannot specify restore height when creating random wallet");
-      return createWalletRandom(config.getPath(), config.getPassword(), config.getNetworkType(), connection, config.getLanguage());
+      return createWalletRandom(config.getPath(), config.getPassword(), config.getNetworkType(), config.getServer(), config.getLanguage());
     }
   }
   

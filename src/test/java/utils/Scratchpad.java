@@ -1,11 +1,8 @@
 package utils;
 
-import java.util.List;
-
 import monero.daemon.MoneroDaemon;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
-import monero.wallet.model.MoneroTxWallet;
 
 /**
  * Scratchpad for quick scripting.
@@ -19,17 +16,8 @@ public class Scratchpad {
     MoneroDaemon daemon = TestUtils.getDaemonRpc();
     MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
     MoneroWalletJni walletJni = TestUtils.getWalletJni();
-    //MoneroRpc rpc = new MoneroRpc(TestUtils.WALLET_RPC_CONFIG);
-    
-//    // common variables
-    //MoneroTx tx = null;
-    List<MoneroTxWallet> txs = null;
-    //List<MoneroTransfer> transfers = null;
-    String txHash = null;
     
     // -------------------------------- SCRATCHPAD ----------------------------
-    
-    
     
     // MEASURE LAST 30 DAYS
 //    int numBlocks = 30 * 24 * 60 / 2;

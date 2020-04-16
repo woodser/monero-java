@@ -146,6 +146,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   public void createWallet(MoneroWalletConfig config) {
     
     // validate config
+    if (config == null) throw new MoneroException("Must specify config to create wallet");
     if (config.getNetworkType() != null) throw new MoneroException("Cannot specify network type when creating RPC wallet");
     if (config.getMnemonic() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
       throw new MoneroException("Wallet may be initialized with a mnemonic or keys but not both");
