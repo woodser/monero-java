@@ -22,6 +22,8 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
 
   private MoneroTxQuery txQuery;
   private List<Integer> subaddressIndices;
+  private BigInteger minAmount;
+  private BigInteger maxAmount;
   private static MoneroOutputWallet EMPTY_OUTPUT = new MoneroOutputWallet();
   
   public MoneroOutputQuery() {
@@ -30,6 +32,8 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
   
   public MoneroOutputQuery(final MoneroOutputQuery query) {
     super(query);
+    if (query.getMinAmount() != null) this.minAmount = query.getMinAmount();
+    if (query.getMaxAmount() != null) this.maxAmount = query.getMaxAmount();
     if (query.subaddressIndices != null) this.subaddressIndices = new ArrayList<Integer>(query.subaddressIndices);
     this.txQuery = query.txQuery;  // reference original by default, MoneroTxQuery's deep copy will set this to itself
   }
@@ -38,6 +42,22 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
     return new MoneroOutputQuery(this);
   }
   
+  public BigInteger getMinAmount() {
+    return minAmount;
+  }
+
+  public void setMinAmount(BigInteger minAmount) {
+    this.minAmount = minAmount;
+  }
+
+  public BigInteger getMaxAmount() {
+    return maxAmount;
+  }
+
+  public void setMaxAmount(BigInteger maxAmount) {
+    this.maxAmount = maxAmount;
+  }
+
   @JsonIgnore
   public MoneroTxQuery getTxQuery() {
     return txQuery;
@@ -108,6 +128,10 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
     
     // filter with tx query
     if (this.getTxQuery() != null && !this.getTxQuery().meetsCriteria(output.getTx())) return false;
+    
+    // filter on remaining fields
+    if (this.getMinAmount() != null && (this.getAmount() == null || this.getAmount().compareTo(this.getMinAmount()) < 0)) return false;
+    if (this.getMaxAmount() != null && (this.getAmount() == null || this.getAmount().compareTo(this.getMaxAmount()) > 0)) return false;
     
     // output meets query
     return true;

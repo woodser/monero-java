@@ -332,6 +332,7 @@ public abstract class TestMoneroWalletCommon {
   // Can get the language of the mnemonic phrase
   @Test
   public void testGetMnemonicLanguage() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     String language = wallet.getMnemonicLanguage();
     assertEquals(MoneroWallet.DEFAULT_LANGUAGE, language);
   }
@@ -500,6 +501,7 @@ public abstract class TestMoneroWalletCommon {
   // Is equal to a ground truth wallet according to on-chain data
   @Test
   public void testWalletEqualityGroundTruth() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     MoneroWalletJni walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT);
     try {
@@ -1486,11 +1488,13 @@ public abstract class TestMoneroWalletCommon {
     MoneroOutputQuery outputQuery = new MoneroOutputQuery();
     outputQuery.setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx);
     outputQuery.setTxQuery(new MoneroTxQuery().setIsConfirmed(true));
+    outputQuery.setMinAmount(TestUtils.MAX_FEE);
     outputs = getAndTestOutputs(wallet, outputQuery, true);
     for (MoneroOutputWallet output : outputs) {
       assertEquals(accountIdx, (int) output.getAccountIndex());
       assertEquals(subaddressIdx, (int) output.getSubaddressIndex());
       assertEquals(true, output.getTx().isConfirmed());
+      assertTrue(output.getAmount().compareTo(TestUtils.MAX_FEE) >= 0);
     }
     
     // get output by key image
@@ -3976,6 +3980,7 @@ public abstract class TestMoneroWalletCommon {
   // Can save and close the wallet in a single call
   @Test
   public void testSaveAndClose() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // create a random wallet
     MoneroWallet wallet = createWalletRandom();

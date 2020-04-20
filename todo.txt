@@ -1,4 +1,5 @@
 HIGH
+verify gradle and maven builds after package renames
 rename build scripts to use underscores like javascript
 organize todos
 sync(listener, startHeight) api change
