@@ -4,7 +4,7 @@
 
 # Make libmonero-cpp.dylib
 cd ./external/monero-cpp-library/ && 
-./bin/build-libmonero-cpp.sh &&
+./bin/build_libmonero_cpp.sh &&
 
 # Copy libmonero-cpp.dylib to ./build
 cd ../../ &&
