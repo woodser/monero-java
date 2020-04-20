@@ -130,8 +130,8 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
     if (this.getTxQuery() != null && !this.getTxQuery().meetsCriteria(output.getTx())) return false;
     
     // filter on remaining fields
-    if (this.getMinAmount() != null && (this.getAmount() == null || this.getAmount().compareTo(this.getMinAmount()) < 0)) return false;
-    if (this.getMaxAmount() != null && (this.getAmount() == null || this.getAmount().compareTo(this.getMaxAmount()) > 0)) return false;
+    if (this.getMinAmount() != null && (output.getAmount() == null || output.getAmount().compareTo(this.getMinAmount()) < 0)) return false;
+    if (this.getMaxAmount() != null && (output.getAmount() == null || output.getAmount().compareTo(this.getMaxAmount()) > 0)) return false;
     
     // output meets query
     return true;
