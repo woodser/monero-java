@@ -60,8 +60,7 @@ public class MoneroRpcConnection {
   }
   
   public MoneroRpcConnection(URI uri, String username, String password) {
-    if (uri == null) throw new MoneroException("Must provide URI of RPC endpoint");
-    this.uri = uri.toString();
+    this.uri = uri == null ? null : uri.toString();
     this.username = username;
     this.password = password;
     if (username != null || password != null) {

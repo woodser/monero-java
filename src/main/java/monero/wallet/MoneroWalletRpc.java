@@ -166,9 +166,6 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     if (config.getMnemonic() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
       throw new MoneroException("Wallet may be initialized with a mnemonic or keys but not both");
     }
-    if (config.getServerUri() != null || config.getServerUsername() != null || config.getServerPassword() != null) {
-      throw new MoneroException("Cannot specify server configuration when creating a new wallet");
-    }
     
     // create wallet
     if (config.getMnemonic() != null) {
@@ -181,7 +178,12 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       if (config.getRestoreHeight() != null) throw new MoneroException("Cannot specify restore height when creating random wallet");
       if (config.getSaveCurrent() == false) throw new MoneroException("Current wallet is saved automatically when creating random wallet");
       createWalletRandom(config.getPath(), config.getPassword(), config.getLanguage());
-    }    
+    }
+    
+    // set daemon connection if provided
+    if (config.getServerUri() != null) {
+      setDaemonConnection(config.getServer());
+    }
   }
   
   /**

@@ -55,7 +55,7 @@ public class MoneroWalletConfig {
   }
   
   public MoneroRpcConnection getServer() {
-    return new MoneroRpcConnection(this.serverUri, this.serverUsername, this.serverPassword);
+    return this.serverUri == null || this.serverUri.isEmpty() ? null : new MoneroRpcConnection(this.serverUri, this.serverUsername, this.serverPassword);
   }
   
   public MoneroWalletConfig setServer(MoneroRpcConnection server) {

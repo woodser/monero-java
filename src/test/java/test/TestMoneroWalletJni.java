@@ -65,41 +65,44 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Override
-  protected MoneroWallet openWallet(String path) {
-    MoneroWalletJni wallet = MoneroWalletJni.openWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setServer(daemon.getRpcConnection()));
-    //MoneroWalletJni wallet = MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, daemon.getRpcConnection());
-    //wallet.sync();
-    //wallet.save();
-    if (wallet.isConnected()) wallet.startSyncing();
-    return wallet;
+  protected MoneroWalletJni openWallet(MoneroWalletConfig config) {
+    return openWallet(config, true);
   }
-
-  @Override
-  protected MoneroWallet createWalletRandom() {
-    String path = TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString();
-    MoneroWalletJni wallet = MoneroWalletJni.createWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setServer(daemon.getRpcConnection()));
-    assertEquals(path, wallet.getPath());
-    //wallet.sync();
-    //wallet.save();
-    if (wallet.isConnected()) wallet.startSyncing();
+  
+  protected MoneroWalletJni openWallet(MoneroWalletConfig config, boolean startSyncing) {
+    
+    // assign defaults
+    if (config == null) config = new MoneroWalletConfig();
+    if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
+    if (config.getNetworkType() == null) config.setNetworkType(TestUtils.NETWORK_TYPE);
+    if (config.getServer() == null && config.getServerUri() == null) config.setServer(daemon.getRpcConnection());
+    
+    // open wallet
+    MoneroWalletJni wallet = MoneroWalletJni.openWallet(config);
+    if (startSyncing != false && wallet.isConnected()) wallet.startSyncing();
     return wallet;
   }
   
   @Override
-  protected MoneroWallet createWalletFromMnemonic(String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String seedOffset) {
-    String path = TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString();
-    MoneroWalletJni wallet = MoneroWalletJni.createWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setMnemonic(mnemonic).setServer(daemonConnection).setRestoreHeight(restoreHeight).setSeedOffset(seedOffset));
-    assertEquals(path, wallet.getPath());
-    if (wallet.isConnected()) wallet.startSyncing();
-    return wallet;
+  protected MoneroWalletJni createWallet(MoneroWalletConfig config) {
+    return createWallet(config, true);
   }
   
-  @Override
-  protected MoneroWallet createWalletFromKeys(String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
-    String path = TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString();
-    MoneroWalletJni wallet = MoneroWalletJni.createWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setPrimaryAddress(address).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setServer(daemonConnection).setRestoreHeight(restoreHeight).setLanguage(language));
-    assertEquals(path, wallet.getPath());
-    if (wallet.isConnected()) wallet.startSyncing();
+  protected MoneroWalletJni createWallet(MoneroWalletConfig config, boolean startSyncing) {
+    
+    // assign defaults
+    if (config == null) config = new MoneroWalletConfig();
+    boolean random = config.getMnemonic() == null && config.getPrimaryAddress() == null;
+    if (config.getPath() == null) config.setPath(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString());
+    if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
+    if (config.getNetworkType() == null) config.setNetworkType(TestUtils.NETWORK_TYPE);
+    if (config.getServer() == null && config.getServerUri() == null) config.setServer(daemon.getRpcConnection());
+    if (config.getRestoreHeight() == null && !random) config.setRestoreHeight(0l);
+    
+    // create wallet
+    MoneroWalletJni wallet = MoneroWalletJni.createWallet(config);
+    if (!random) assertEquals(config.getRestoreHeight() == null ? 0l : config.getRestoreHeight(), wallet.getRestoreHeight());
+    if (startSyncing != false && wallet.isConnected()) wallet.startSyncing();
     return wallet;
   }
   
@@ -121,7 +124,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       
       // create and sync a new wallet
       String path = getRandomWalletPath();
-      wallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_PASSWORD, MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
       wallet.sync();
       
       // repeatedly export and re-import key images and test transfer size
@@ -157,7 +160,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // lets make some wallets and then go away
     for (int i = 0; i < 20; i++) {
       String path = getRandomWalletPath();
-      MoneroWalletJni willLeaveYouHanging = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_PASSWORD, MoneroNetworkType.STAGENET, TestUtils.getDaemonRpc().getRpcConnection());
+      MoneroWalletJni willLeaveYouHanging = createWallet(new MoneroWalletConfig().setPath(path));
       willLeaveYouHanging.startSyncing();
       willLeaveYouHanging.addListener(new MoneroWalletListener());  // listen for wallet events which could aggrevate hanging
     }
@@ -213,7 +216,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // create random wallet with defaults
     String path = getRandomWalletPath();
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
+    MoneroWalletJni wallet = createWallet(new MoneroWalletConfig().setPath(path).setServerUri(""));
     assertEquals(null, wallet.getDaemonConnection());
     
     // set daemon uri
@@ -257,7 +260,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
     // create random wallet with defaults
     String path = getRandomWalletPath();
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_PASSWORD, MoneroNetworkType.MAINNET);
+    MoneroWalletJni wallet = createWallet(new MoneroWalletConfig().setPath(path).setNetworkType(MoneroNetworkType.MAINNET).setServerUri(""));
     MoneroUtils.validateMnemonic(wallet.getMnemonic());
     MoneroUtils.validateAddress(wallet.getPrimaryAddress(), MoneroNetworkType.MAINNET);
     assertEquals(MoneroNetworkType.MAINNET, wallet.getNetworkType());
@@ -285,7 +288,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
     // create random wallet with non defaults
     path = getRandomWalletPath();
-    wallet = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_PASSWORD, MoneroNetworkType.TESTNET, daemon.getRpcConnection(), "Spanish");
+    wallet = createWallet(new MoneroWalletConfig().setPath(path).setNetworkType(MoneroNetworkType.TESTNET).setLanguage("Spanish"));
     MoneroUtils.validateMnemonic(wallet.getMnemonic());
     MoneroUtils.validateAddress(wallet.getPrimaryAddress(), MoneroNetworkType.TESTNET);
     assertEquals(MoneroNetworkType.TESTNET, wallet.getNetworkType());
@@ -309,7 +312,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // create wallet with mnemonic and defaults
     String path = getRandomWalletPath();
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, null, null, null);
+    MoneroWalletJni wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC).setServerUri(""));
     assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
     assertEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
@@ -325,7 +328,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // create wallet without restore height
     path = getRandomWalletPath();
-    wallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, daemon.getRpcConnection(), null, null);
+    wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC));
     assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
     assertEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
@@ -343,7 +346,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // create wallet with mnemonic, no connection, and restore height
     long restoreHeight = 10000;
     path = getRandomWalletPath();
-    wallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, null, restoreHeight, null);
+    wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(restoreHeight).setServerUri(""));
     assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
     assertEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
@@ -355,7 +358,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals(restoreHeight, wallet.getRestoreHeight());
     wallet.save();
     wallet.close();
-    wallet = MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
+    wallet = openWallet(new MoneroWalletConfig().setPath(path).setServerUri(""));
     assertFalse(wallet.isConnected());
     assertFalse(wallet.isSynced());
     assertEquals(1, wallet.getHeight());
@@ -364,7 +367,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
 
     // create wallet with mnemonic, connection, and restore height
     path = getRandomWalletPath();
-    wallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, daemon.getRpcConnection(), restoreHeight, null);
+    wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(restoreHeight));
     assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
     assertEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
@@ -387,7 +390,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // recreate test wallet from keys
     String path = getRandomWalletPath();
-    MoneroWalletJni walletKeys = MoneroWalletJni.createWalletFromKeys(path, TestUtils.WALLET_PASSWORD, wallet.getNetworkType(), wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), wallet.getDaemonConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+    MoneroWalletJni walletKeys = createWallet(new MoneroWalletConfig().setPath(path).setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
     try {
       assertEquals(wallet.getMnemonic(), walletKeys.getMnemonic());
       assertEquals(wallet.getPrimaryAddress(), walletKeys.getPrimaryAddress());
@@ -408,7 +411,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Ignore // TODO monero core: cannot re-sync from lower block height after wallet saved
   public void testResyncExisting() {
     assertTrue(MoneroWalletJni.walletExists(TestUtils.WALLET_JNI_PATH_1));
-    MoneroWalletJni wallet = MoneroWalletJni.openWallet(TestUtils.WALLET_JNI_PATH_1, TestUtils.WALLET_PASSWORD, MoneroNetworkType.STAGENET);
+    MoneroWalletJni wallet = openWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_JNI_PATH_1).setServerUri(""), false);
     wallet.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
     //long startHeight = TestUtils.TEST_RESTORE_HEIGHT;
     long startHeight = 0;
@@ -433,7 +436,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertTrue("Not connected to daemon", daemon.isConnected());
 
     // create test wallet
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(getRandomWalletPath(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpcConnection(), null);
+    MoneroWalletJni wallet = createWallet(new MoneroWalletConfig(), false);
     long restoreHeight = daemon.getHeight();
 
     // test wallet's height before syncing
@@ -451,7 +454,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     progressTester.onDone(wallet.getDaemonHeight());
     
     // test result after syncing
-    MoneroWalletJni walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, wallet.getMnemonic(), restoreHeight);
+    MoneroWalletJni walletGt = createWallet(new MoneroWalletConfig().setMnemonic(wallet.getMnemonic()).setRestoreHeight(restoreHeight));
+    walletGt.sync();
     try {
       assertTrue(wallet.isConnected());
       assertTrue(wallet.isSynced());
@@ -465,7 +469,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals(daemon.getHeight(), wallet.getHeight());
       
       // compare wallet to ground truth
-      walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, wallet.getMnemonic(), restoreHeight);
+      walletGt = createWallet(new MoneroWalletConfig().setMnemonic(wallet.getMnemonic()).setRestoreHeight(restoreHeight));
       testWalletEqualityOnChain(walletGt, wallet);
     } finally {
       if (walletGt != null) walletGt.close();
@@ -473,7 +477,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
     
     // attempt to sync unconnected wallet
-    wallet = MoneroWalletJni.createWalletRandom(getRandomWalletPath(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, null, null);
+    wallet = createWallet(new MoneroWalletConfig().setServerUri(""));
     try {
       wallet.sync();
       fail("Should have thrown exception");
@@ -525,7 +529,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     if (startHeight != null && restoreHeight != null) assertTrue(startHeight <= TestUtils.FIRST_RECEIVE_HEIGHT || restoreHeight <= TestUtils.FIRST_RECEIVE_HEIGHT);
     
     // create wallet from mnemonic
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletFromMnemonic(getRandomWalletPath(), TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.getDaemonRpc().getRpcConnection(), restoreHeight, null);
+    MoneroWalletJni wallet = createWallet(new MoneroWalletConfig().setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(restoreHeight), false);
     
     // sanitize expected sync bounds
     if (restoreHeight == null) restoreHeight = 0l;
@@ -630,7 +634,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // recreate test wallet from keys
     String path = getRandomWalletPath();
-    MoneroWalletJni walletKeys = MoneroWalletJni.createWalletFromKeys(path, TestUtils.WALLET_PASSWORD,  wallet.getNetworkType(), wallet.getPrimaryAddress(), wallet.getPrivateViewKey(), wallet.getPrivateSpendKey(), wallet.getDaemonConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+    MoneroWalletJni walletKeys = createWallet(new MoneroWalletConfig().setPath(path).setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT), false);
     
     // create ground truth wallet for comparison
     MoneroWalletJni walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT);
@@ -686,7 +690,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // test unconnected wallet
     String path = getRandomWalletPath();
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, null, null);
+    MoneroWalletJni wallet = createWallet(new MoneroWalletConfig().setServerUri(""));
     try {
       assertNotNull(wallet.getMnemonic());
       assertEquals(1, wallet.getHeight());
@@ -698,9 +702,9 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       wallet.close();
     }
     
-    // test connected wallet
+    // test connecting wallet
     path = getRandomWalletPath();
-    wallet = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, null, null);
+    wallet = createWallet(new MoneroWalletConfig().setPath(path).setServerUri(""));
     try {
       assertNotNull(wallet.getMnemonic());
       wallet.setDaemonConnection(daemon.getRpcConnection());
@@ -721,7 +725,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // test that sync starts automatically
     long restoreHeight = daemon.getHeight() - 100;
     path = getRandomWalletPath();
-    wallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, daemon.getRpcConnection(), restoreHeight, null);
+    wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(restoreHeight));
     try {
       
       // start syncing
@@ -764,8 +768,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // create 2 wallets with a recent restore height
     long height = daemon.getHeight();
     long restoreHeight = height - 5;
-    MoneroWalletJni wallet1 = MoneroWalletJni.createWalletFromMnemonic(getRandomWalletPath(), TestUtils.WALLET_PASSWORD, MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, daemon.getRpcConnection(), restoreHeight, null);
-    MoneroWalletJni wallet2 = MoneroWalletJni.createWalletFromMnemonic(getRandomWalletPath(), TestUtils.WALLET_PASSWORD, MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, daemon.getRpcConnection(), restoreHeight, null);
+    MoneroWalletJni wallet1 = createWallet(new MoneroWalletConfig().setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(restoreHeight));
+    MoneroWalletJni wallet2 = createWallet(new MoneroWalletConfig().setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(restoreHeight));
     
     // track notifications of each wallet
     SyncProgressTester tester1 = new SyncProgressTester(wallet1, restoreHeight, height);
@@ -804,14 +808,14 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     walletRpc.createWalletFromMnemonic(UUID.randomUUID().toString(), TestUtils.WALLET_PASSWORD, walletRpc.getMnemonic(), TestUtils.FIRST_RECEIVE_HEIGHT, null, seedOffset, null);
     
     // create jni wallet with offset
-    MoneroWalletJni walletJni = MoneroWalletJni.createWalletFromMnemonic(
-            getRandomWalletPath(),
-            TestUtils.WALLET_PASSWORD,
-            TestUtils.NETWORK_TYPE,
-            TestUtils.MNEMONIC,
-            TestUtils.getDaemonRpc().getRpcConnection(),
-            TestUtils.FIRST_RECEIVE_HEIGHT,
-            seedOffset);
+    MoneroWalletJni walletJni = createWallet(new MoneroWalletConfig()
+            .setPath(getRandomWalletPath())
+            .setPassword(TestUtils.WALLET_PASSWORD)
+            .setNetworkType(TestUtils.NETWORK_TYPE)
+            .setMnemonic(TestUtils.MNEMONIC)
+            .setServer(TestUtils.getDaemonRpc().getRpcConnection())
+            .setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT)
+            .setSeedOffset(seedOffset));
     
     // deep compare
     try {
@@ -834,7 +838,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // cannot open non-existant wallet
     try {
-      MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
+      openWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE));
       fail("Cannot open non-existant wallet");
     } catch (MoneroException e) {
       assertEquals("Wallet does not exist at path: " + path, e.getMessage());
@@ -842,7 +846,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // create wallet at the path
     long restoreHeight = daemon.getHeight() - 200;
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, null, restoreHeight, null);
+    MoneroWalletJni wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(restoreHeight).setServerUri(""));
     
     // test wallet at newly created state
     try {
@@ -865,7 +869,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       wallet.close();
       
       // re-open the wallet
-      wallet = MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
+      wallet = openWallet(new MoneroWalletConfig().setPath(path).setServerUri(""));
       
       // test wallet is at newly created state
       assertTrue(MoneroWalletJni.walletExists(path));
@@ -892,7 +896,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       wallet.close();
       
       // re-open the wallet
-      wallet = MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
+      wallet = openWallet(new MoneroWalletConfig().setPath(path).setServerUri(""));
       
       // test wallet state is saved
       assertFalse(wallet.isConnected());
@@ -927,7 +931,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // create wallet at the path
     long restoreHeight = daemon.getHeight() - 200;
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, null, restoreHeight, null);
+    MoneroWalletJni wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(restoreHeight).setServerUri(""));
     String subaddressLabel = "Move test wallet subaddress!";
     MoneroAccount account = wallet.createAccount(subaddressLabel);
     wallet.save();
@@ -948,7 +952,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertTrue(MoneroWalletJni.walletExists(movedPath));
     
     // re-open and test wallet
-    wallet = MoneroWalletJni.openWallet(movedPath, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
+    wallet = openWallet(new MoneroWalletConfig().setPath(movedPath).setServerUri(""));
     assertEquals(subaddressLabel, wallet.getSubaddress(account.getIndex(), 0).getLabel());
     
     // move wallet back
@@ -1052,7 +1056,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // create a test wallet
     String path = getRandomWalletPath();
-    MoneroWalletJni wallet = MoneroWalletJni.createWalletRandom(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, TestUtils.DAEMON_RPC_URI);
+    MoneroWalletJni wallet = createWallet(new MoneroWalletConfig().setPath(path));
     wallet.sync();
     assertTrue(wallet.getHeight() > 1);
     assertTrue(wallet.isSynced());
@@ -1075,7 +1079,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     catch (MoneroException e) { assertEquals("Wallet is closed", e.getMessage()); }
     
     // re-open the wallet
-    wallet = MoneroWalletJni.openWallet(path, TestUtils.WALLET_PASSWORD, TestUtils.NETWORK_TYPE, TestUtils.getDaemonRpc().getRpcConnection());
+    wallet = openWallet(new MoneroWalletConfig().setPath(path));
     wallet.sync();
     assertEquals(wallet.getDaemonHeight(), wallet.getHeight());
     assertFalse(wallet.isClosed());
@@ -1239,7 +1243,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // create a random stagenet wallet
     String path = getRandomWalletPath();
-    MoneroWalletJni myWallet = MoneroWalletJni.createWalletRandom(path, "mysupersecretpassword123", MoneroNetworkType.STAGENET, TestUtils.getDaemonRpc().getRpcConnection());
+    MoneroWalletJni myWallet = createWallet(new MoneroWalletConfig().setPath(path));
     myWallet.startSyncing();
     
     // listen for received outputs
@@ -1286,7 +1290,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // create participating wallets
     List<MoneroWallet> wallets = new ArrayList<MoneroWallet>();
     for (int i = 0; i < N; i++) {
-      wallets.add(createWalletRandom());
+      wallets.add(createWallet(new MoneroWalletConfig()));
     }
     
     // prepare and collect multisig hex from each participant

@@ -28,7 +28,6 @@ import org.junit.Test;
 import common.types.Filter;
 import common.utils.JsonUtils;
 import monero.common.MoneroException;
-import monero.common.MoneroRpcConnection;
 import monero.common.MoneroUtils;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroBlock;
@@ -63,6 +62,7 @@ import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.model.MoneroWalletConfig;
 import utils.StartMining;
 import utils.TestUtils;
 import utils.WalletEqualityUtils;
@@ -73,10 +73,10 @@ import utils.WalletEqualityUtils;
 public abstract class TestMoneroWalletCommon {
   
   // test constants
-  protected static final boolean LITE_MODE = false;
+  protected static final boolean LITE_MODE = true;
   protected static final boolean TEST_NON_RELAYS = true;
   protected static final boolean TEST_RELAYS = true;
-  protected static final boolean TEST_NOTIFICATIONS = true;
+  protected static final boolean TEST_NOTIFICATIONS = false;
   protected static final boolean TEST_RESETS = false;
   private static final int MAX_TX_PROOFS = 25;   // maximum number of transactions to check for each proof, undefined to check all
   private static final int SEND_MAX_DIFF = 60;
@@ -111,29 +111,19 @@ public abstract class TestMoneroWalletCommon {
   /**
    * Open a test wallet.
    * 
-   * @param path identifies the test wallet to open
-   * @return MoneroWallet returns a reference to the opened wallet
+   * @param config configures the wallet to open
+   * @return MoneroWallet is the opened wallet
    */
-  protected abstract MoneroWallet openWallet(String path);
+  protected MoneroWallet openWallet(String path) { return openWallet(path); }
+  protected abstract MoneroWallet openWallet(MoneroWalletConfig config);
   
   /**
-   * Create and open a random test wallet.
+   * Create a test wallet.
    * 
-   * @return the random test wallet
+   * @param config configures the wallet to create
+   * @return MoneroWallet is the created wallet
    */
-  protected abstract MoneroWallet createWalletRandom();
-  
-  /**
-   * Create and open a test wallet from a mnemonic phrase.
-   * 
-   * @return the created test wallet
-   */
-  protected abstract MoneroWallet createWalletFromMnemonic(String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String seedOffset);
-  
-  /**
-   * Creates a wallet from keys.
-   */
-  protected abstract MoneroWallet createWalletFromKeys(String address, String privateViewKey, String privateSpendKey, MoneroRpcConnection daemonConnection, Long firstReceiveHeight, String language);
+  protected abstract MoneroWallet createWallet(MoneroWalletConfig config);
   
   /**
    * Get the wallet's supported languages for the mnemonic phrase.  This is an
@@ -158,7 +148,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       
       // recreate test wallet from keys
-      wallet = createWalletRandom();
+      wallet = createWallet(new MoneroWalletConfig());
       Exception e2 = null;
       try {
         MoneroUtils.validateAddress(wallet.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
@@ -193,7 +183,7 @@ public abstract class TestMoneroWalletCommon {
       String privateSpendKey = wallet.getPrivateSpendKey();
       
       // recreate test wallet from keys
-      wallet = createWalletFromMnemonic(TestUtils.MNEMONIC, daemon.getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      wallet = createWallet(new MoneroWalletConfig().setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
       Exception e2 = null;
       try {
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
@@ -223,7 +213,7 @@ public abstract class TestMoneroWalletCommon {
     try {
 
       // create test wallet with offset
-      wallet = createWalletFromMnemonic(TestUtils.MNEMONIC, daemon.getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, "my secret offset!");
+      wallet = createWallet(new MoneroWalletConfig().setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setSeedOffset("my secret offset!"));
       Exception e2 = null;
       try {
         MoneroUtils.validateMnemonic(wallet.getMnemonic());
@@ -258,7 +248,7 @@ public abstract class TestMoneroWalletCommon {
       String privateSpendKey = wallet.getPrivateSpendKey();
       
       // recreate test wallet from keys
-      wallet = createWalletFromKeys(primaryAddress, privateViewKey, privateSpendKey, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      wallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
       Exception e2 = null;
       try {
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
@@ -299,7 +289,7 @@ public abstract class TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // create a random wallet
-    MoneroWallet wallet = createWalletRandom();
+    MoneroWallet wallet = createWallet(new MoneroWalletConfig());
     
     // set a random attribute
     String uuid = UUID.randomUUID().toString();
@@ -2081,7 +2071,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       
       // create and sync watch-only wallet
-      watchOnlyWallet = createWalletFromKeys(primaryAddress, privateViewKey, null, TestUtils.getDaemonRpc().getRpcConnection(), TestUtils.FIRST_RECEIVE_HEIGHT, null);
+      watchOnlyWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
       assertEquals(primaryAddress, watchOnlyWallet.getPrimaryAddress());
       assertEquals(privateViewKey, watchOnlyWallet.getPrivateViewKey());
       assertEquals(null, watchOnlyWallet.getPrivateSpendKey());
@@ -2098,7 +2088,7 @@ public abstract class TestMoneroWalletCommon {
       
       // create offline wallet
       watchOnlyWallet.close(true);  // only one wallet open at a time to accommodate testing wallet rpc
-      offlineWallet = createWalletFromKeys(primaryAddress, privateViewKey, privateSpendKey, null, (long) 0, null);
+      offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setServerUri(""));
       assertFalse(offlineWallet.isConnected());
       assertFalse(offlineWallet.isWatchOnly());
       if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic()); // TODO monero-core: cannot get mnemonic from offline wallet rpc
@@ -3171,7 +3161,7 @@ public abstract class TestMoneroWalletCommon {
       List<String> preparedMultisigHexes = new ArrayList<String>();
       List<String> walletIds = new ArrayList<String>();
       for (int i = 0; i < n; i++) {
-        MoneroWallet wallet = createWalletRandom();
+        MoneroWallet wallet = createWallet(new MoneroWalletConfig());
         walletIds.add(wallet.getPath());
         wallet.setAttribute("name", wallet.getPath());  // set the name of each wallet as an attribute
         preparedMultisigHexes.add(wallet.prepareMultisig());
@@ -3983,7 +3973,7 @@ public abstract class TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // create a random wallet
-    MoneroWallet wallet = createWalletRandom();
+    MoneroWallet wallet = createWallet(new MoneroWalletConfig());
     String path = wallet.getPath();
             
     // set an attribute
