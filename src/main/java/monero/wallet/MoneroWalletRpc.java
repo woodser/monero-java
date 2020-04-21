@@ -141,6 +141,21 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   /**
    * Create and open a new wallet instance on the RPC server.
    * 
+   * All supported configuration:
+   *  path - path of the wallet to create (optional, in-memory wallet if not given)
+   *  password - password of the wallet to create
+   *  mnemonic - mnemonic of the wallet to create (optional)
+   *  seedOffset - the offset used to derive a new seed from the given mnemonic to recover a secret wallet from the mnemonic phrase
+   *  primaryAddress - primary address of the wallet to create (only provide if restoring from keys)
+   *  privateViewKey - private view key of the wallet to create (optional)
+   *  privateSpendKey - private spend key of the wallet to create (optional)
+   *  restoreHeight - block height to scan from when restoring a wallet (defaults to 0 unless generating random wallet)
+   *  language - language of the wallet's mnemonic phrase (defaults to "English" or auto-detected)
+   * 
+   * For example:
+   *  MoneroWallet walletRpc = MoneroWalletRpc.connect(new MoneroRpcConnection("http://localhost:38083", "rpc_user", "rpc_password_123")); // TODO
+   *  walletRpc.createWallet(new MoneroWalletConfig().setPath("mywallet").setPassword("abc123").setNetworkType(MoneroNetworkType.STAGENET));
+   * 
    * @param config configures the wallet to create
    */
   public void createWallet(MoneroWalletConfig config) {
