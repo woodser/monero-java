@@ -32,6 +32,7 @@ import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.model.MoneroWalletConfig;
 import monero.wallet.model.MoneroWalletListener;
 import utils.TestUtils;
 
@@ -96,8 +97,20 @@ public class TestSampleCode {
     List<MoneroOutputWallet> outputs = walletRpc.getOutputs(outputQuery);
     
     // create a wallet from a mnemonic phrase using Java native bindings to Monero Core
-    MoneroWalletJni walletJni = MoneroWalletJni.createWalletFromMnemonic("./test_wallets/" + UUID.randomUUID().toString(), "supersecretpassword123", MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, new MoneroRpcConnection("http://localhost:38081"), TestUtils.FIRST_RECEIVE_HEIGHT, null);
-    //MoneroWalletJni walletJni = MoneroWalletJni.createWalletFromMnemonic("MyWallet", "supersecretpassword123", MoneroNetworkType.STAGENET, "hefty value ...", new MoneroRpcConnection("http://localhost:38081"), 501788);
+    MoneroWalletJni walletJni = MoneroWalletJni.createWallet(new MoneroWalletConfig()   // *** REPLACE WITH BELOW FOR README ***
+            .setPath("./test_wallets/" + UUID.randomUUID())
+            .setPassword("supersecretpassword123")
+            .setNetworkType(MoneroNetworkType.STAGENET)
+            .setMnemonic(TestUtils.MNEMONIC)
+            .setServer(new MoneroRpcConnection("http://localhost:38081", "superuser", "abctesting123"))
+            .setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+//    MoneroWalletJni walletJni = MoneroWalletJni.createWallet(new MoneroWalletConfig()
+//            .setPath("MyWallet")
+//            .setPassword("supersecretpassword123")
+//            .setNetworkType(MoneroNetworkType.STAGENET)
+//            .setMnemonic("hefty value ...")
+//            .setServer(new MoneroRpcConnection("http://localhost:38081", "superuser", "abctesting123"))
+//            .setRestoreHeight(501788L));
     
     // synchronize the wallet and receive progress notifications
     walletJni.sync(new MoneroSyncListener() {

@@ -27,7 +27,7 @@
 
 using namespace std;
 
-JNIEXPORT jbyteArray JNICALL Java_monero_utils_MoneroUtils_jsonToBinaryJni(JNIEnv *env, jclass clazz, jstring json) {
+JNIEXPORT jbyteArray JNICALL Java_monero_common_MoneroUtils_jsonToBinaryJni(JNIEnv *env, jclass clazz, jstring json) {
 
   // convert json jstring to string
   string json_str = jstring2string(env, json);
@@ -52,7 +52,7 @@ JNIEXPORT jbyteArray JNICALL Java_monero_utils_MoneroUtils_jsonToBinaryJni(JNIEn
   return result;
 }
 
-JNIEXPORT jstring JNICALL Java_monero_utils_MoneroUtils_binaryToJsonJni(JNIEnv *env, jclass clazz, jbyteArray bin) {
+JNIEXPORT jstring JNICALL Java_monero_common_MoneroUtils_binaryToJsonJni(JNIEnv *env, jclass clazz, jbyteArray bin) {
 
   // convert the jbyteArray to a string
   int binLength = env->GetArrayLength(bin);
@@ -68,7 +68,7 @@ JNIEXPORT jstring JNICALL Java_monero_utils_MoneroUtils_binaryToJsonJni(JNIEnv *
   return env->NewStringUTF(json_str.c_str());
 }
 
-JNIEXPORT jstring JNICALL Java_monero_utils_MoneroUtils_binaryBlocksToJsonJni(JNIEnv *env, jclass clazz, jbyteArray blocks_bin) {
+JNIEXPORT jstring JNICALL Java_monero_common_MoneroUtils_binaryBlocksToJsonJni(JNIEnv *env, jclass clazz, jbyteArray blocks_bin) {
 
   // convert the jbyteArray to a string
   int binLength = env->GetArrayLength(blocks_bin);
@@ -103,13 +103,13 @@ std::string jstring2string(JNIEnv *env, jstring jStr) {
   return ret;
 }
 
-JNIEXPORT void JNICALL Java_monero_utils_MoneroUtils_initLoggingJni(JNIEnv* env, jclass clazz, jstring jpath, jboolean console) {
+JNIEXPORT void JNICALL Java_monero_common_MoneroUtils_initLoggingJni(JNIEnv* env, jclass clazz, jstring jpath, jboolean console) {
   const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
   string path = string(_path ? _path : "");
   env->ReleaseStringUTFChars(jpath, _path);
   mlog_configure(path, console);
 }
 
-JNIEXPORT void JNICALL Java_monero_utils_MoneroUtils_setLogLevelJni(JNIEnv* env, jclass clazz, jint level) {
+JNIEXPORT void JNICALL Java_monero_common_MoneroUtils_setLogLevelJni(JNIEnv* env, jclass clazz, jint level) {
   mlog_set_log_level(level);
 }
