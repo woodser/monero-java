@@ -181,12 +181,12 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    * All supported configuration:
    *   path - path of the wallet to create (optional, in-memory wallet if not given)
    *   password - password of the wallet to create
-   *   mnemonic - mnemonic of the wallet to create (optional)
+   *   mnemonic - mnemonic of the wallet to create (optional, random wallet created if neither mnemonic nor keys given)
    *   seedOffset - the offset used to derive a new seed from the given mnemonic to recover a secret wallet from the mnemonic phrase
    *   primaryAddress - primary address of the wallet to create (only provide if restoring from keys)
    *   privateViewKey - private view key of the wallet to create (optional)
    *   privateSpendKey - private spend key of the wallet to create (optional)
-   *   restoreHeight - block height to scan from when restoring a wallet (defaults to 0 unless generating random wallet)
+   *   restoreHeight - block height to start scanning from (defaults to 0 unless generating random wallet)
    *   language - language of the wallet's mnemonic phrase (defaults to "English" or auto-detected)
    *   serverUri - uri of the daemon to use (optional, monero-wallet-rpc usually started with daemon config)
    *   serverUsername - username to authenticate with the daemon (optional)

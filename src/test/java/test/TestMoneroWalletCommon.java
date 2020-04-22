@@ -38,6 +38,7 @@ import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroVersion;
 import monero.wallet.MoneroWallet;
+import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -108,15 +109,16 @@ public abstract class TestMoneroWalletCommon {
   protected abstract MoneroWallet getTestWallet();
   
   /**
-   * Open a test wallet.
+   * Open a test wallet with default configuration for each wallet type.
    * 
    * @param config configures the wallet to open
    * @return MoneroWallet is the opened wallet
    */
+  protected MoneroWallet openWallet(String path) { return openWallet(new MoneroWalletConfig().setPath(path)); }
   protected abstract MoneroWallet openWallet(MoneroWalletConfig config);
   
   /**
-   * Create a test wallet.
+   * Create a test wallet with default configuration for each wallet type.
    * 
    * @param config configures the wallet to create
    * @return MoneroWallet is the created wallet
@@ -146,7 +148,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       
       // recreate test wallet from keys
-      wallet = createWallet(new MoneroWalletConfig().setServer(daemon.getRpcConnection()));
+      wallet = createWallet(new MoneroWalletConfig());
       Exception e2 = null;
       try {
         MoneroUtils.validateAddress(wallet.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
@@ -181,7 +183,7 @@ public abstract class TestMoneroWalletCommon {
       String privateSpendKey = wallet.getPrivateSpendKey();
       
       // recreate test wallet from keys
-      wallet = createWallet(new MoneroWalletConfig().setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setServer(daemon.getRpcConnection()));
+      wallet = createWallet(new MoneroWalletConfig().setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
       Exception e2 = null;
       try {
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
@@ -211,7 +213,7 @@ public abstract class TestMoneroWalletCommon {
     try {
 
       // create test wallet with offset
-      wallet = createWallet(new MoneroWalletConfig().setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setSeedOffset("my secret offset!").setServer(daemon.getRpcConnection()));
+      wallet = createWallet(new MoneroWalletConfig().setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setSeedOffset("my secret offset!"));
       Exception e2 = null;
       try {
         MoneroUtils.validateMnemonic(wallet.getMnemonic());
@@ -246,7 +248,7 @@ public abstract class TestMoneroWalletCommon {
       String privateSpendKey = wallet.getPrivateSpendKey();
       
       // recreate test wallet from keys
-      wallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setServer(daemon.getRpcConnection()));
+      wallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
       Exception e2 = null;
       try {
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
@@ -287,7 +289,7 @@ public abstract class TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // create a random wallet
-    MoneroWallet wallet = createWallet(new MoneroWalletConfig().setServer(daemon.getRpcConnection()));
+    MoneroWallet wallet = createWallet(new MoneroWalletConfig());
     
     // set a random attribute
     String uuid = UUID.randomUUID().toString();
@@ -298,7 +300,7 @@ public abstract class TestMoneroWalletCommon {
     wallet.close(true);
     
     // re-open the wallet using its path
-    wallet = openWallet(new MoneroWalletConfig().setPath(path).setServer(daemon.getRpcConnection()));
+    wallet = openWallet(path);
     
     // test the attribute
     assertEquals(uuid, wallet.getAttribute("uuid"));
@@ -491,7 +493,7 @@ public abstract class TestMoneroWalletCommon {
   public void testWalletEqualityGroundTruth() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
-    MoneroWallet walletGt = createWallet(new MoneroWalletConfig().setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setServer(daemon.getRpcConnection()));
+    MoneroWalletJni walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT);
     try {
       WalletEqualityUtils.testWalletEqualityOnChain(walletGt, wallet);
     } finally {
@@ -2068,7 +2070,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       
       // create and sync watch-only wallet
-      watchOnlyWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setServer(daemon.getRpcConnection()));
+      watchOnlyWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
       assertEquals(primaryAddress, watchOnlyWallet.getPrimaryAddress());
       assertEquals(privateViewKey, watchOnlyWallet.getPrivateViewKey());
       assertEquals(null, watchOnlyWallet.getPrivateSpendKey());
@@ -2085,7 +2087,7 @@ public abstract class TestMoneroWalletCommon {
       
       // create offline wallet
       watchOnlyWallet.close(true);  // only one wallet open at a time to accommodate testing wallet rpc
-      offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey));
+      offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setServerUri(""));
       assertFalse(offlineWallet.isConnected());
       assertFalse(offlineWallet.isWatchOnly());
       if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic()); // TODO monero-core: cannot get mnemonic from offline wallet rpc
@@ -2100,7 +2102,7 @@ public abstract class TestMoneroWalletCommon {
       
       // import key images to watch-only wallet
       offlineWallet.close(true);
-      watchOnlyWallet = openWallet(new MoneroWalletConfig().setPath(watchOnlyPath).setServer(daemon.getRpcConnection()));
+      watchOnlyWallet = openWallet(watchOnlyPath);
       watchOnlyWallet.importKeyImages(keyImages);
       
       // create unsigned tx using watch-only wallet
@@ -2108,7 +2110,7 @@ public abstract class TestMoneroWalletCommon {
       
       // sign tx using offline wallet
       watchOnlyWallet.close(true);
-      offlineWallet = openWallet(new MoneroWalletConfig().setPath(offlineWalletPath).setServer(daemon.getRpcConnection()));
+      offlineWallet = openWallet(offlineWalletPath);
       String signedTxHex = offlineWallet.signTxs(unsignedTxSet.getUnsignedTxHex());
       assertFalse(signedTxHex.isEmpty());
       
@@ -2119,7 +2121,7 @@ public abstract class TestMoneroWalletCommon {
       // submit signed tx using watch-only wallet
       if (TEST_RELAYS) {
         offlineWallet.close();
-        watchOnlyWallet = openWallet(new MoneroWalletConfig().setPath(watchOnlyPath).setServer(daemon.getRpcConnection()));
+        watchOnlyWallet = openWallet(watchOnlyPath);
         List<String> txHashes = watchOnlyWallet.submitTxs(signedTxHex);
         assertEquals(1, txHashes.size());
         assertEquals(64, txHashes.get(0).length());
@@ -3157,7 +3159,7 @@ public abstract class TestMoneroWalletCommon {
       List<String> preparedMultisigHexes = new ArrayList<String>();
       List<String> walletIds = new ArrayList<String>();
       for (int i = 0; i < n; i++) {
-        MoneroWallet wallet = createWallet(new MoneroWalletConfig().setServer(daemon.getRpcConnection()));
+        MoneroWallet wallet = createWallet(new MoneroWalletConfig());
         walletIds.add(wallet.getPath());
         wallet.setAttribute("name", wallet.getPath());  // set the name of each wallet as an attribute
         preparedMultisigHexes.add(wallet.prepareMultisig());
@@ -3171,7 +3173,7 @@ public abstract class TestMoneroWalletCommon {
       for (int i = 0; i < walletIds.size(); i++) {
         
         // open the wallet
-        MoneroWallet wallet = openWallet(new MoneroWalletConfig().setPath(walletIds.get(i)).setServer(daemon.getRpcConnection()));
+        MoneroWallet wallet = openWallet(walletIds.get(i));
         assertEquals(walletIds.get(i), wallet.getAttribute("name"));
         
         // collect prepared multisig hexes from wallet's peers
@@ -3203,7 +3205,7 @@ public abstract class TestMoneroWalletCommon {
             String walletId = walletIds.get(j);
             
             // open the wallet
-            MoneroWallet wallet = openWallet(new MoneroWalletConfig().setPath(walletId).setServer(daemon.getRpcConnection()));
+            MoneroWallet wallet = openWallet(walletId);
             assertEquals(walletIds.get(j), wallet.getAttribute("name"));
             
             // collect the multisig hexes of the wallet's peers from last round
@@ -3238,7 +3240,7 @@ public abstract class TestMoneroWalletCommon {
       }
       
       // print final multisig address
-      curWallet = openWallet(new MoneroWalletConfig().setPath(walletIds.get(0)).setServer(daemon.getRpcConnection()));
+      curWallet = openWallet(walletIds.get(0));
       assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
       //System.out.println("FINAL MULTISIG ADDRESS: " + curWallet.getPrimaryAddress());
       curWallet.close();
@@ -3249,7 +3251,7 @@ public abstract class TestMoneroWalletCommon {
         System.out.println("Creating account");
         
         // create an account in the first multisig wallet to receive funds to
-        curWallet = openWallet(new MoneroWalletConfig().setPath(walletIds.get(0)).setServer(daemon.getRpcConnection()));
+        curWallet = openWallet(walletIds.get(0));
         assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
         curWallet.createAccount();
         
@@ -3272,7 +3274,7 @@ public abstract class TestMoneroWalletCommon {
         String returnAddress = curWallet.getPrimaryAddress(); // funds will be returned to this address from the multisig wallet
         
         // open the first multisig participant
-        curWallet = openWallet(new MoneroWalletConfig().setPath(walletIds.get(0)).setServer(daemon.getRpcConnection()));
+        curWallet = openWallet(walletIds.get(0));
         assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
         testMultisigInfo(curWallet.getMultisigInfo(), m, n);
         curWallet.startSyncing();
@@ -3359,7 +3361,7 @@ public abstract class TestMoneroWalletCommon {
         String multisigTxHex = txSet.getMultisigTxHex();
         System.out.println("Signing");
         for (int i = 1; i < m; i++) {
-          curWallet = openWallet(new MoneroWalletConfig().setPath(walletIds.get(i)).setServer(daemon.getRpcConnection()));
+          curWallet = openWallet(walletIds.get(i));
           MoneroMultisigSignResult result = curWallet.signMultisigTxHex(multisigTxHex);
           multisigTxHex = result.getSignedMultisigTxHex();
           curWallet.close(true);
@@ -3369,7 +3371,7 @@ public abstract class TestMoneroWalletCommon {
         
         // submit the signed multisig tx hex to the network
         System.out.println("Submitting");
-        curWallet = openWallet(new MoneroWalletConfig().setPath(walletIds.get(0)).setServer(daemon.getRpcConnection()));
+        curWallet = openWallet(walletIds.get(0));
         List<String> txHashes = curWallet.submitMultisigTxHex(multisigTxHex);
         curWallet.save();
         
@@ -3399,7 +3401,7 @@ public abstract class TestMoneroWalletCommon {
         multisigTxHex = txSet.getMultisigTxHex();
         System.out.println("Signing sweep output");
         for (int i = 1; i < m; i++) {
-          curWallet = openWallet(new MoneroWalletConfig().setPath(walletIds.get(i)).setServer(daemon.getRpcConnection()));
+          curWallet = openWallet(walletIds.get(i));
           MoneroMultisigSignResult result = curWallet.signMultisigTxHex(multisigTxHex);
           multisigTxHex = result.getSignedMultisigTxHex();
           curWallet.close(true);
@@ -3407,7 +3409,7 @@ public abstract class TestMoneroWalletCommon {
         
         // submit the signed multisig tx hex to the network
         System.out.println("Submitting sweep output");
-        curWallet = openWallet(new MoneroWalletConfig().setPath(walletIds.get(0)).setServer(daemon.getRpcConnection()));
+        curWallet = openWallet(walletIds.get(0));
         txHashes = curWallet.submitMultisigTxHex(multisigTxHex);
         curWallet.save();
         
@@ -3439,7 +3441,7 @@ public abstract class TestMoneroWalletCommon {
         multisigTxHex = txSet.getMultisigTxHex();
         System.out.println("Signing sweep");
         for (int i = 1; i < m; i++) {
-          curWallet = openWallet(new MoneroWalletConfig().setPath(walletIds.get(i)).setServer(daemon.getRpcConnection()));
+          curWallet = openWallet(walletIds.get(i));
           MoneroMultisigSignResult result = curWallet.signMultisigTxHex(multisigTxHex);
           multisigTxHex = result.getSignedMultisigTxHex();
           curWallet.close(true);
@@ -3447,7 +3449,7 @@ public abstract class TestMoneroWalletCommon {
         
         // submit the signed multisig tx hex to the network
         System.out.println("Submitting sweep");
-        curWallet = openWallet(new MoneroWalletConfig().setPath(walletIds.get(0)).setServer(daemon.getRpcConnection()));
+        curWallet = openWallet(walletIds.get(0));
         txHashes = curWallet.submitMultisigTxHex(multisigTxHex);
         curWallet.save();
         
@@ -3479,7 +3481,7 @@ public abstract class TestMoneroWalletCommon {
     // collect multisig hex of all participants to synchronize
     List<String> multisigHexes = new ArrayList<String>();
     for (String walletId : walletIds) {
-      MoneroWallet wallet = openWallet(new MoneroWalletConfig().setPath(walletId).setServer(daemon.getRpcConnection()));
+      MoneroWallet wallet = openWallet(walletId);
       wallet.sync();
       multisigHexes.add(wallet.getMultisigHex());
       wallet.close(true);
@@ -3489,14 +3491,14 @@ public abstract class TestMoneroWalletCommon {
     for (int i = 0; i < walletIds.size(); i++) {
       List<String> peerMultisigHexes = new ArrayList<String>();
       for (int j = 0; j < walletIds.size(); j++) if (j != i) peerMultisigHexes.add(multisigHexes.get(j));
-      MoneroWallet wallet = openWallet(new MoneroWalletConfig().setPath(walletIds.get(i)).setServer(daemon.getRpcConnection()));
+      MoneroWallet wallet = openWallet(walletIds.get(i));
       wallet.importMultisigHex(peerMultisigHexes);
       wallet.sync();
       wallet.close(true);
     }
     
     // re-open current wallet and return
-    MoneroWallet endWallet = openWallet(new MoneroWalletConfig().setPath(path).setServer(daemon.getRpcConnection()));
+    MoneroWallet endWallet = openWallet(path);
     endWallet.sync();
     return endWallet;
   }
@@ -3969,7 +3971,7 @@ public abstract class TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // create a random wallet
-    MoneroWallet wallet = createWallet(new MoneroWalletConfig().setServer(daemon.getRpcConnection()));
+    MoneroWallet wallet = createWallet(new MoneroWalletConfig());
     String path = wallet.getPath();
             
     // set an attribute
@@ -3980,7 +3982,7 @@ public abstract class TestMoneroWalletCommon {
     wallet.close();
     
     // re-open the wallet and ensure attribute was not saved
-    wallet = openWallet(new MoneroWalletConfig().setPath(path).setServer(daemon.getRpcConnection()));
+    wallet = openWallet(path);
     assertEquals(null, wallet.getAttribute("id"));
     
     // set the attribute and close with saving
@@ -3988,7 +3990,7 @@ public abstract class TestMoneroWalletCommon {
     wallet.close(true);
     
     // re-open the wallet and ensure attribute was saved
-    wallet = openWallet(new MoneroWalletConfig().setPath(path).setServer(daemon.getRpcConnection()));
+    wallet = openWallet(path);
     assertEquals(uuid, wallet.getAttribute("id"));
     
     // re-open main test wallet

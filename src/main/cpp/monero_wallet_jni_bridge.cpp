@@ -1363,10 +1363,6 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_checkTxKeyJni(JNIEn
   env->ReleaseStringUTFChars(jtx_key, _tx_key);
   env->ReleaseStringUTFChars(jaddress, _address);
   try {
-      cout << "JNI bridge checking tx key!" << endl;
-      cout << tx_hash << endl;
-      cout << tx_key << endl;
-      cout << address << endl;
     return env->NewStringUTF(wallet->check_tx_key(tx_hash, tx_key, address)->serialize().c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
