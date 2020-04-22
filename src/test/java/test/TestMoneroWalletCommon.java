@@ -3390,10 +3390,10 @@ public abstract class TestMoneroWalletCommon {
         assertNull(txSet.getSignedTxHex());
         assertNull(txSet.getUnsignedTxHex());
         assertFalse(txSet.getTxs().isEmpty());
-        curWallet.close();
         
         // parse multisig tx hex and test
         testParsedTxSet(curWallet.parseTxSet(txSet));
+        curWallet.close();
         
         // sign the tx with participants 1 through m - 1 to meet threshold
         multisigTxHex = txSet.getMultisigTxHex();
