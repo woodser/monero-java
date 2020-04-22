@@ -128,14 +128,30 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    * @param password is the wallet's password
    */
   public void openWallet(String name, String password) {
-    if (name == null || name.isEmpty()) throw new MoneroException("Filename is not initialized");
-    if (password == null || password.isEmpty()) throw new MoneroException("Password is not initialized");
+    openWallet(new MoneroWalletConfig().setPath(name).setPassword(password));
+  }
+  
+  /**
+   * Open an existing wallet on the RPC server.
+   * 
+   * @param config configures the wallet to open
+   */
+  public void openWallet(MoneroWalletConfig config) {
+    if (config == null) throw new MoneroException("Must provide configuration of wallet to open");
+    if (config.getPath() == null || config.getPath().isEmpty()) throw new MoneroException("Filename is not initialized");
+    if (config.getPassword() == null || config.getPassword().isEmpty()) throw new MoneroException("Password is not initialized");
+    // TODO: validate that other fields are null?
+    
+    // open wallet on rpc server
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("filename", name);
-    params.put("password", password);
+    params.put("filename", config.getPath());
+    params.put("password", config.getPassword());
     rpc.sendJsonRequest("open_wallet", params);
     clear();
-    path = name;
+    path = this.getPath();
+    
+    // set daemon connection if provided
+    if (config.getServer() != null) setDaemonConnection(config.getServer());
   }
   
   /**
@@ -176,14 +192,12 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     } else {
       if (config.getSeedOffset() != null) throw new MoneroException("Cannot specify seed offset when creating random wallet");
       if (config.getRestoreHeight() != null) throw new MoneroException("Cannot specify restore height when creating random wallet");
-      if (config.getSaveCurrent() == false) throw new MoneroException("Current wallet is saved automatically when creating random wallet");
+      if (Boolean.FALSE.equals(config.getSaveCurrent())) throw new MoneroException("Current wallet is saved automatically when creating random wallet");
       createWalletRandom(config.getPath(), config.getPassword(), config.getLanguage());
     }
     
     // set daemon connection if provided
-    if (config.getServerUri() != null) {
-      setDaemonConnection(config.getServer());
-    }
+    if (config.getServerUri() != null) setDaemonConnection(config.getServer());
   }
   
   /**
@@ -307,6 +321,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   public void setDaemonConnection(MoneroRpcConnection daemonConnection, Boolean isTrusted, SslOptions sslOptions) {
+    if (daemonConnection.getUsername() != null && !daemonConnection.getUsername().isEmpty()) throw new MoneroException("monero-wallet-rpc does not support setting daemon connection with authentication");
     if (sslOptions == null) sslOptions = new SslOptions();
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("address", daemonConnection == null ? "placeholder" : daemonConnection.getUri());
