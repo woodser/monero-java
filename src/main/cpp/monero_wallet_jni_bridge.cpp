@@ -1118,7 +1118,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendTxsJni(JNIEnv* 
   // submit send request
   monero_tx_set tx_set;
   try {
-    tx_set = wallet->send_split(*send_request);
+    tx_set = wallet->send_txs(*send_request);
     MTRACE("Got " << tx_set.m_txs.size() << " txs");
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);

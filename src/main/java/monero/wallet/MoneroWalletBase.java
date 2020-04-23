@@ -286,7 +286,7 @@ public abstract class MoneroWalletBase implements MoneroWallet {
   @Override
   public MoneroTxSet sendTx(MoneroSendRequest request) {
     if (request == null) throw new MoneroException("Send request cannot be null");
-    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with send() which prevents splitting; use sendTxs() instead");
+    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with sendTx() which prevents splitting; use sendTxs() instead");
     request = request.copy();
     request.setCanSplit(false);
     return sendTxs(request);

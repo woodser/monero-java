@@ -2754,7 +2754,7 @@ public abstract class TestMoneroWalletCommon {
     MoneroSendRequest reqCopy = request.copy();
     
     // send to self
-    // can use create() or send() because request's doNotRelay is used, but exercise both calls
+    // can use createTx() or sendTx() because request's doNotRelay is used, but exercise both calls
     if (!Boolean.FALSE.equals(request.getCanSplit())) {
       txs.addAll((Boolean.TRUE.equals(request.getDoNotRelay()) ? wallet.createTxs(request) : wallet.sendTxs(request)).getTxs());
     } else {
