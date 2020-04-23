@@ -339,8 +339,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertEquals("English", wallet.getMnemonicLanguage());
     assertEquals(path, wallet.getPath());
     assertFalse(wallet.isSynced());
-    assertEquals(1, wallet.getHeight()); // TODO monero core: why does height of new unsynced wallet start at 1?
-    assertEquals(0, wallet.getRestoreHeight());
+    assertEquals(1, wallet.getHeight());
+    assertEquals(0, wallet.getRestoreHeight()); // TODO: restore height is lost after closing only in JNI
     wallet.close();
     
     // create wallet with mnemonic, no connection, and restore height
