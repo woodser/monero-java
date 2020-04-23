@@ -1355,7 +1355,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
 
   @SuppressWarnings("unchecked")
   @Override
-  public String sign(String msg) {
+  public String signMessage(String msg) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("data", msg);
     Map<String, Object> resp = rpc.sendJsonRequest("sign", params);
@@ -1365,7 +1365,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
 
   @SuppressWarnings("unchecked")
   @Override
-  public boolean verify(String msg, String address, String signature) {
+  public boolean verifyMessage(String msg, String address, String signature) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("data", msg);
     params.put("address", address);

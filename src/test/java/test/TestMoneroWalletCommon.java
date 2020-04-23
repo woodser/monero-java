@@ -2138,10 +2138,10 @@ public abstract class TestMoneroWalletCommon {
   public void testSignAndVerifyMessages() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     String msg = "This is a super important message which needs to be signed and verified.";
-    String signature = wallet.sign(msg);
-    boolean verified = wallet.verify(msg, wallet.getAddress(0, 0), signature);
+    String signature = wallet.signMessage(msg);
+    boolean verified = wallet.verifyMessage(msg, wallet.getAddress(0, 0), signature);
     assertEquals(true, verified);
-    verified = wallet.verify(msg, TestUtils.getRandomWalletAddress(), signature);
+    verified = wallet.verifyMessage(msg, TestUtils.getRandomWalletAddress(), signature);
     assertEquals(false, verified);
   }
   

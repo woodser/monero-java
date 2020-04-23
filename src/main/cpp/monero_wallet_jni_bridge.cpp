@@ -1300,14 +1300,14 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_relayTxsJni(JN
   return jtx_hashes;
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signJni(JNIEnv* env, jobject instance, jstring jmsg) {
-  MTRACE("Java_monero_wallet_MoneroWalletJni_signJni");
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signMessageJni(JNIEnv* env, jobject instance, jstring jmsg) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_signMessageJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _msg = jmsg ? env->GetStringUTFChars(jmsg, NULL) : nullptr;
   string msg = string(_msg ? _msg : "");
   env->ReleaseStringUTFChars(jmsg, _msg);
   try {
-    string signature = wallet->sign(msg);
+    string signature = wallet->sign_message(msg);
     return env->NewStringUTF(signature.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -1315,8 +1315,8 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signJni(JNIEnv* env
   }
 }
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_verifyJni(JNIEnv* env, jobject instance, jstring jmsg, jstring jaddress, jstring jsignature) {
-  MTRACE("Java_monero_wallet_MoneroWalletJni_verifyJni");
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_verifyMessageJni(JNIEnv* env, jobject instance, jstring jmsg, jstring jaddress, jstring jsignature) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_verifyMessageJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _msg = jmsg ? env->GetStringUTFChars(jmsg, NULL) : nullptr;
   const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
@@ -1328,7 +1328,7 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_verifyJni(JNIEnv* 
   env->ReleaseStringUTFChars(jaddress, _address);
   env->ReleaseStringUTFChars(jsignature, _signature);
   try {
-    bool is_good = wallet->verify(msg, address, signature);
+    bool is_good = wallet->verify_message(msg, address, signature);
     return static_cast<jboolean>(is_good);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);

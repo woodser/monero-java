@@ -882,7 +882,7 @@ public interface MoneroWallet {
    * @param message is the message to sign
    * @return the signature
    */
-  public String sign(String message);
+  public String signMessage(String message);
   
   /**
    * Verify a signature on a message.
@@ -892,7 +892,7 @@ public interface MoneroWallet {
    * @param signature is the signature
    * @return true if the signature is good, false otherwise
    */
-  public boolean verify(String message, String address, String signature);
+  public boolean verifyMessage(String message, String address, String signature);
   
   /**
    * Get a transaction's secret key from its hash.

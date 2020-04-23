@@ -1108,13 +1108,13 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
 
   @Override
-  public String sign(String msg) {
+  public String signMessage(String msg) {
     assertNotClosed();
     return signJni(msg);
   }
 
   @Override
-  public boolean verify(String msg, String address, String signature) {
+  public boolean verifyMessage(String msg, String address, String signature) {
     assertNotClosed();
     return verifyJni(msg, address, signature);
   }
