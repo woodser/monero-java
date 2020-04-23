@@ -159,7 +159,7 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 1. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
 2. `cd monero-java`
 3. Install dependencies using Maven: `mvn install`
-4. Update submodules: `./bin/update_submodules`
+4. Update submodules: `./bin/update_submodules.sh`
 5. [Build ./external/monero-cpp-library as a dynamic library](https://github.com/woodser/monero-cpp-library#how-to-run-this-library)
 6. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/` (change as appropriate)
 7. Build dylibs to ./build/: `./bin/build_libmonero_java.sh`
