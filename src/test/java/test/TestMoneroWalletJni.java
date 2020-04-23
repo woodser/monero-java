@@ -253,7 +253,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
   }
   
-  // Can create a random core wallet
+  // Can create a random native wallet
   @Test
   public void testCreateWalletRandomJni() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -305,12 +305,12 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     wallet.close();
   }
   
-  // Can create a core wallet from mnemonic
+  // Can create a native wallet from mnemonic
   @Test
   public void testCreateWalletFromMnemonicJni() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
-    // create wallet with mnemonic and defaults
+    // create unconnected wallet with mnemonic
     String path = getRandomWalletPath();
     MoneroWalletJni wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC).setServerUri(""));
     assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
@@ -353,11 +353,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertNull(wallet.getDaemonConnection());
     assertFalse(wallet.isConnected());
     assertEquals("English", wallet.getMnemonicLanguage());
-    assertEquals(path, wallet.getPath());
     assertEquals(1, wallet.getHeight()); // TODO monero core: why does height of new unsynced wallet start at 1?
     assertEquals(restoreHeight, wallet.getRestoreHeight());
-    wallet.save();
-    wallet.close();
+    assertEquals(path, wallet.getPath());
+    wallet.close(true);
     wallet = openWallet(new MoneroWalletConfig().setPath(path).setServerUri(""));
     assertFalse(wallet.isConnected());
     assertFalse(wallet.isSynced());
@@ -383,7 +382,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     wallet.close();
   }
   
-  // Can create a core wallet from keys
+  // Can create a native wallet from keys
   @Test
   public void testCreateWalletFromKeysJni() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
