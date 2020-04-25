@@ -147,8 +147,9 @@ public abstract class TestMoneroWalletCommon {
     Exception e1 = null;  // emulating Java "finally" but compatible with other languages
     try {
       
-      // recreate test wallet from keys
+      // create random wallet
       wallet = createWallet(new MoneroWalletConfig());
+      String path = wallet.getPath();
       Exception e2 = null;
       try {
         MoneroUtils.validateAddress(wallet.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
@@ -161,6 +162,14 @@ public abstract class TestMoneroWalletCommon {
       }
       wallet.close();
       if (e2 != null) throw e2;
+      
+      // attempt to create wallet at same path
+      try {
+        createWallet(new MoneroWalletConfig().setPath(path));
+        throw new Error("Should have thrown error");
+      } catch(Exception e) {
+        assertEquals("Wallet already exists: " + path, e.getMessage());
+      }
     } catch (Exception e) {
       e1 = e;
     }
@@ -182,8 +191,9 @@ public abstract class TestMoneroWalletCommon {
       String privateViewKey = wallet.getPrivateViewKey();
       String privateSpendKey = wallet.getPrivateSpendKey();
       
-      // recreate test wallet from keys
+      // recreate test wallet from mnemonic
       wallet = createWallet(new MoneroWalletConfig().setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+      String path = wallet.getPath();
       Exception e2 = null;
       try {
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
@@ -196,6 +206,14 @@ public abstract class TestMoneroWalletCommon {
       }
       wallet.close();
       if (e2 != null) throw e2;
+      
+      // attempt to create wallet at same path
+      try {
+        createWallet(new MoneroWalletConfig().setPath(path));
+        throw new Error("Should have thrown error");
+      } catch(Exception e) {
+        assertEquals("Wallet already exists: " + path, e.getMessage());
+      }
     } catch (Exception e) {
       e1 = e;
     }
@@ -249,11 +267,13 @@ public abstract class TestMoneroWalletCommon {
       
       // recreate test wallet from keys
       wallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+      String path = wallet.getPath();
       Exception e2 = null;
       try {
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
         assertEquals(privateViewKey, wallet.getPrivateViewKey());
         assertEquals(privateSpendKey, wallet.getPrivateSpendKey());
+        if (!wallet.isConnected()) System.out.println("WARNING: wallet created from keys is not connected to authenticated daemon");  // TODO monero-core: keys wallets not connected
         assertTrue("Wallet created from keys is not connected to authenticated daemon", wallet.isConnected());
         if (!(wallet instanceof MoneroWalletRpc)) {
           MoneroUtils.validateMnemonic(wallet.getMnemonic()); // TODO monero-wallet-rpc: cannot get mnemonic from wallet created from keys?
@@ -264,6 +284,14 @@ public abstract class TestMoneroWalletCommon {
       }
       wallet.close();
       if (e2 != null) throw e2;
+      
+      // attempt to create wallet at same path
+      try {
+        createWallet(new MoneroWalletConfig().setPath(path));
+        throw new Error("Should have thrown error");
+      } catch(Exception e) {
+        assertEquals("Wallet already exists: " + path, e.getMessage());
+      }
     } catch (Exception e) {
       e1 = e;
     }

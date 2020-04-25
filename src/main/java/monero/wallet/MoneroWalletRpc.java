@@ -237,7 +237,12 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("filename", name);
     params.put("password", password);
     params.put("language", language);
-    rpc.sendJsonRequest("create_wallet", params);
+    try {
+      rpc.sendJsonRequest("create_wallet", params);
+    } catch (Exception e) {
+      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroException("Wallet already exists: " + name);
+      throw e;
+    }
     clear();
     path = name;
   }
@@ -266,7 +271,12 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("restore_height", restoreHeight);
     params.put("language", language);
     params.put("autosave_current", saveCurrent);
-    rpc.sendJsonRequest("restore_deterministic_wallet", params);
+    try {
+      rpc.sendJsonRequest("restore_deterministic_wallet", params);
+    } catch (Exception e) {
+      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroException("Wallet already exists: " + name);
+      throw e;
+    }
     clear();
     path = name;
   }
@@ -296,7 +306,12 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("spendkey", spendKey);
     params.put("restore_height", restoreHeight);
     params.put("autosave_current", saveCurrent);
-    rpc.sendJsonRequest("generate_from_keys", params);
+    try {
+      rpc.sendJsonRequest("generate_from_keys", params);
+    } catch (Exception e) {
+      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroException("Wallet already exists: " + name);
+      throw e;
+    }
     clear();
     path = name;
   }
