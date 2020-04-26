@@ -120,7 +120,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     } finally {
       
       // open main test wallet for other tests
-      wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
+      wallet.openWallet(TestUtils.WALLET_NAME, TestUtils.WALLET_PASSWORD);
     }
   }
   
@@ -155,7 +155,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     } finally {
       
       // open main test wallet for other tests
-      wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
+      wallet.openWallet(TestUtils.WALLET_NAME, TestUtils.WALLET_PASSWORD);
     }
   }
   
@@ -202,7 +202,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       
       // open main test wallet for other tests
       try {
-        wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
+        wallet.openWallet(TestUtils.WALLET_NAME, TestUtils.WALLET_PASSWORD);
       } catch (MoneroException e) {
         assertEquals(-1, (int) e.getCode()); // ok if wallet is already open
       }
@@ -345,7 +345,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     wallet.close();
     
     // re-open main test wallet for other tests
-    wallet.openWallet(TestUtils.WALLET_RPC_NAME_1, TestUtils.WALLET_PASSWORD);
+    wallet.openWallet(TestUtils.WALLET_NAME, TestUtils.WALLET_PASSWORD);
   }
   
   // Can stop the RPC server

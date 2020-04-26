@@ -253,7 +253,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
   }
   
-  // Can create a random native wallet
+  // Can create a random JNI wallet
   @Test
   public void testCreateWalletRandomJni() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -305,7 +305,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     wallet.close();
   }
   
-  // Can create a native wallet from mnemonic
+  // Can create a JNI wallet from mnemonic
   @Test
   public void testCreateWalletFromMnemonicJni() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -382,7 +382,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     wallet.close();
   }
   
-  // Can create a native wallet from keys
+  // Can create a JNI wallet from keys
   @Test
   public void testCreateWalletFromKeysJni() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
@@ -409,8 +409,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Test
   @Ignore // TODO monero core: cannot re-sync from lower block height after wallet saved
   public void testResyncExisting() {
-    assertTrue(MoneroWalletJni.walletExists(TestUtils.WALLET_JNI_PATH_1));
-    MoneroWalletJni wallet = openWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_JNI_PATH_1).setServerUri(""), false);
+    assertTrue(MoneroWalletJni.walletExists(TestUtils.WALLET_JNI_PATH));
+    MoneroWalletJni wallet = openWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_JNI_PATH).setServerUri(""), false);
     wallet.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
     //long startHeight = TestUtils.TEST_RESTORE_HEIGHT;
     long startHeight = 0;

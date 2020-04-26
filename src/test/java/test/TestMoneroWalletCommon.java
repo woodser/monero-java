@@ -2935,7 +2935,7 @@ public abstract class TestMoneroWalletCommon {
         break;
       }
     }
-    assertTrue("Wallet does not have enough balance; load '" + TestUtils.WALLET_RPC_NAME_1 + "' with XMR in order to test sending", hasBalance);
+    assertTrue("Wallet does not have enough balance; load '" + TestUtils.WALLET_NAME + "' with XMR in order to test sending", hasBalance);
     assertNotNull("Wallet is waiting on unlocked funds", srcAccount);
     BigInteger balance = srcAccount.getBalance();
     BigInteger unlockedBalance = srcAccount.getUnlockedBalance();

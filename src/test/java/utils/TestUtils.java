@@ -46,14 +46,12 @@ public class TestUtils {
   public static final String WALLET_RPC_URI = "http://localhost:38083";
   public static final String WALLET_RPC_USERNAME = "rpc_user";
   public static final String WALLET_RPC_PASSWORD = "abc123";
-  public static final String WALLET_RPC_NAME_1 = "test_wallet_1";
-  public static final String WALLET_RPC_NAME_2 = "test_wallet_2";
+
+  // test wallet config
+  public static final String WALLET_NAME = "test_wallet_1";
   public static final String WALLET_PASSWORD = "supersecretpassword123";
-  
-  // wallet jni configuration (adjust per your configuration)
   public static final String TEST_WALLETS_DIR = "./test_wallets";
-  public static final String WALLET_JNI_PATH_1 = TEST_WALLETS_DIR + "/test_wallet_1";
-  public static final String WALLET_JNI_PATH_2 = TEST_WALLETS_DIR + "/test_wallet_2";
+  public static final String WALLET_JNI_PATH = TEST_WALLETS_DIR + "/" + WALLET_NAME;
   
   // test wallet constants
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
@@ -103,7 +101,7 @@ public class TestUtils {
     
     // attempt to open test wallet
     try {
-      walletRpc.openWallet(WALLET_RPC_NAME_1, WALLET_PASSWORD);
+      walletRpc.openWallet(WALLET_NAME, WALLET_PASSWORD);
     } catch (MoneroRpcException e) {
       e.printStackTrace();
       
@@ -111,7 +109,7 @@ public class TestUtils {
       if (e.getCode() == -1) {
         
         // create wallet
-        walletRpc.createWallet(new MoneroWalletConfig().setPath(WALLET_RPC_NAME_1).setPassword(WALLET_PASSWORD).setMnemonic(MNEMONIC).setRestoreHeight(FIRST_RECEIVE_HEIGHT));
+        walletRpc.createWallet(new MoneroWalletConfig().setPath(WALLET_NAME).setPassword(WALLET_PASSWORD).setMnemonic(MNEMONIC).setRestoreHeight(FIRST_RECEIVE_HEIGHT));
       } else {
         throw e;
       }
@@ -137,7 +135,7 @@ public class TestUtils {
     if (walletJni == null || walletJni.isClosed()) {
       
       // create wallet from mnemonic phrase if it doesn't exist
-      if (!MoneroWalletJni.walletExists(WALLET_JNI_PATH_1)) {
+      if (!MoneroWalletJni.walletExists(WALLET_JNI_PATH)) {
         
         // create directory for test wallets if it doesn't exist
         File testWalletsDir = new File(TestUtils.TEST_WALLETS_DIR);
@@ -145,7 +143,7 @@ public class TestUtils {
         
         // create wallet with connection
         MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
-        walletJni = MoneroWalletJni.createWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_JNI_PATH_1).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(NETWORK_TYPE).setMnemonic(TestUtils.MNEMONIC).setServer(daemonConnection).setRestoreHeight(FIRST_RECEIVE_HEIGHT));
+        walletJni = MoneroWalletJni.createWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_JNI_PATH).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(NETWORK_TYPE).setMnemonic(TestUtils.MNEMONIC).setServer(daemonConnection).setRestoreHeight(FIRST_RECEIVE_HEIGHT));
         assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, walletJni.getRestoreHeight());
         walletJni.sync(new WalletSyncPrinter());
         walletJni.save();
@@ -154,7 +152,7 @@ public class TestUtils {
       
       // otherwise open existing wallet and update daemon connection
       else {
-        walletJni = MoneroWalletJni.openWallet(WALLET_JNI_PATH_1, WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
+        walletJni = MoneroWalletJni.openWallet(WALLET_JNI_PATH, WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
         walletJni.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
         walletJni.sync(new WalletSyncPrinter());
         walletJni.startSyncing();
