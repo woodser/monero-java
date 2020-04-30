@@ -365,7 +365,7 @@ public class TestMoneroDaemonRpc {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction hashes to test
-    List<String> txHashes = getConfirmedTxHash(daemon);
+    List<String> txHashes = getConfirmedTxHashes(daemon);
     
     // context for testing txs
     TestContext ctx = new TestContext();
@@ -401,7 +401,7 @@ public class TestMoneroDaemonRpc {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction hashes to test
-    List<String> txHashes = getConfirmedTxHash(daemon);
+    List<String> txHashes = getConfirmedTxHashes(daemon);
     
     // context for testing txs
     TestContext ctx = new TestContext();
@@ -478,7 +478,7 @@ public class TestMoneroDaemonRpc {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction hashes to test
-    List<String> txHashes = getConfirmedTxHash(daemon);
+    List<String> txHashes = getConfirmedTxHashes(daemon);
     
     // fetch each tx hex by hash with and without pruning
     List<String> hexes = new ArrayList<String>();
@@ -513,7 +513,7 @@ public class TestMoneroDaemonRpc {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // fetch transaction hashes to test
-    List<String> txHashes = getConfirmedTxHash(daemon);
+    List<String> txHashes = getConfirmedTxHashes(daemon);
     
     // fetch tx hexes by hash with and without pruning
     List<String> hexes = daemon.getTxHexes(txHashes);
@@ -1661,25 +1661,14 @@ public class TestMoneroDaemonRpc {
     }
   }
   
-  private static List<String> getConfirmedTxHash(MoneroDaemon daemon) {
-    
-    // get valid height range
-    long height = daemon.getHeight();
-    int numBlocks = 200;
-    int numBlocksAgo = 200;
-    assertTrue(numBlocks > 0);
-    assertTrue(numBlocksAgo >= numBlocks);
-    assertTrue(height - numBlocksAgo + numBlocks - 1 < height);
-    long startHeight = height - numBlocksAgo;
-    long endHeight = height - numBlocksAgo + numBlocks - 1;
-    
-    // get blocks
-    List<MoneroBlock> blocks = daemon.getBlocksByRange(startHeight, endHeight);
-    
-    // collect tx hashes
+  private static List<String> getConfirmedTxHashes(MoneroDaemon daemon) {
+    int numTxs = 5;
     List<String> txHashes = new ArrayList<String>();
-    for (MoneroBlock block : blocks) txHashes.addAll(block.getTxHashes());
-    assertFalse("No transactions found in the range [" + startHeight + ", " + endHeight + "]", txHashes.isEmpty());  // TODO: this fails if no txs in last 200 blocks
+    long height = daemon.getHeight();
+    while (txHashes.size() < numTxs) {
+      MoneroBlock block = daemon.getBlockByHeight(--height);
+      for (String txHash : block.getTxHashes()) txHashes.add(txHash);
+    }
     return txHashes;
   }
   
