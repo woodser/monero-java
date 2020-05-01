@@ -366,19 +366,19 @@ public class MoneroWalletJni extends MoneroWalletBase {
    * 
    * @return the height of the first block that the wallet scans
    */
-  public long getRestoreHeight() {
+  public long getSyncHeight() {
     assertNotClosed();
-    return getRestoreHeightJni();
+    return getSyncHeightJni();
   }
   
   /**
    * Set the height of the first block that the wallet scans.
    * 
-   * @param restoreHeight is the height of the first block that the wallet scans
+   * @param syncHeight is the height of the first block that the wallet scans
    */
-  public void setRestoreHeight(long restoreHeight) {
+  public void setSyncHeight(long syncHeight) {
     assertNotClosed();
-    setRestoreHeightJni(restoreHeight);
+    setSyncHeightJni(syncHeight);
   }
   
   /**
@@ -564,7 +564,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   @Override
   public MoneroSyncResult sync(Long startHeight, MoneroSyncListener listener) {
     assertNotClosed();
-    if (startHeight == null) startHeight = Math.max(getHeight(), getRestoreHeight());
+    if (startHeight == null) startHeight = Math.max(getHeight(), getSyncHeight());
     
     // wrap and register sync listener as wallet listener if given
     SyncListenerWrapper syncListenerWrapper = null;
@@ -1362,9 +1362,9 @@ public class MoneroWalletJni extends MoneroWalletBase {
   
   private native long getHeightJni();
   
-  private native long getRestoreHeightJni();
+  private native long getSyncHeightJni();
   
-  private native void setRestoreHeightJni(long height);
+  private native void setSyncHeightJni(long height);
   
   private native long getDaemonHeightJni();
   
