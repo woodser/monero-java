@@ -46,16 +46,18 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
     return minAmount;
   }
 
-  public void setMinAmount(BigInteger minAmount) {
+  public MoneroOutputQuery setMinAmount(BigInteger minAmount) {
     this.minAmount = minAmount;
+    return this;
   }
 
   public BigInteger getMaxAmount() {
     return maxAmount;
   }
 
-  public void setMaxAmount(BigInteger maxAmount) {
+  public MoneroOutputQuery setMaxAmount(BigInteger maxAmount) {
     this.maxAmount = maxAmount;
+    return this;
   }
 
   @JsonIgnore

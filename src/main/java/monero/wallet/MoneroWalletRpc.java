@@ -1228,6 +1228,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     GenUtils.assertNull(request.getSweepEachSubaddress());
     GenUtils.assertNull(request.getBelowAmount());
     GenUtils.assertNull("Splitting is not applicable when sweeping output", request.getCanSplit());
+    if (request.getDestinations().size() != 1 || request.getDestinations().get(0).getAddress() == null || request.getDestinations().get(0).getAddress().isEmpty()) throw new MoneroException("Must provide exactly one destination address to sweep output to");
     
     // build request parameters
     Map<String, Object> params = new HashMap<String, Object>();

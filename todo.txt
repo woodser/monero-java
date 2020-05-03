@@ -114,6 +114,9 @@ stress tester
 
 --------- MONERO CORE ISSUES ---------
 
+TO OPEN
+keys wallet setDaemonConnection not working with authentication
+
 OPEN ISSUES
 User experience: 5 - 1 = 4 but wallet2 reports the incorrect balance until the first confirmation: https://github.com/monero-project/monero/issues/5809
 User experience: let users spend low confirmation funds without being locked for 10 blocks: https://github.com/monero-project/monero/issues/5810
