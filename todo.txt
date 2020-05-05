@@ -101,6 +101,7 @@ open monero core issues
 testGetReserveProofAccount() still fails if 0 confirmations, could prevent with tx pool tracker
 separate tests which demonstrate monero core issues
 investigate monero core issues
+swap gui's lib with monero-cpp-library
 (in no particular order...)
 Monero REST API 2.0 based on refined model
 refactor wallet2 to support wasm
