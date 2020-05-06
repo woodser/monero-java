@@ -117,6 +117,7 @@ stress tester
 
 TO OPEN
 keys wallet setDaemonConnection not working with authentication
+daemon cannot check for update while mining
 
 OPEN ISSUES
 User experience: 5 - 1 = 4 but wallet2 reports the incorrect balance until the first confirmation: https://github.com/monero-project/monero/issues/5809
