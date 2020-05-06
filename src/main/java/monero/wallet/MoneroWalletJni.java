@@ -237,6 +237,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, String daemonUri) { return createWalletRandom(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri), null); }
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection) { return createWalletRandom(path, password, networkType, daemonConnection, null); }
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, String language) {
+    if (path != null && !path.isEmpty() && MoneroWalletJni.walletExists(path)) throw new MoneroException("Wallet already exists: " + path);
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (language == null) language = DEFAULT_LANGUAGE;
     long jniWalletHandle;
@@ -260,6 +261,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic) { return createWalletFromMnemonic(path, password, networkType, mnemonic, null, null, null); }
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection) { return createWalletFromMnemonic(path, password, networkType, mnemonic, daemonConnection, null, null); }
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String seedOffset) {
+    if (path != null && !path.isEmpty() && MoneroWalletJni.walletExists(path)) throw new MoneroException("Wallet already exists: " + path);
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (restoreHeight == null) restoreHeight = 0l;
     long jniWalletHandle = createWalletFromMnemonicJni(path, password, networkType.ordinal(), mnemonic, restoreHeight, seedOffset);
@@ -285,6 +287,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   public static MoneroWalletJni createWalletFromKeys(String path, String password, MoneroNetworkType networkType, String address, String viewKey, String spendKey) { return createWalletFromKeys(path, password, networkType, address, viewKey, spendKey, null, null, null); }
   public static MoneroWalletJni createWalletFromKeys(String path, String password, MoneroNetworkType networkType, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight) { return createWalletFromKeys(path, password, networkType, address, viewKey, spendKey, daemonConnection, restoreHeight, null); }
   public static MoneroWalletJni createWalletFromKeys(String path, String password, MoneroNetworkType networkType, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
+    if (path != null && !path.isEmpty() && MoneroWalletJni.walletExists(path)) throw new MoneroException("Wallet already exists: " + path);
     if (restoreHeight == null) restoreHeight = 0l;
     if (networkType == null) throw new MoneroException("Must provide a network type");
     if (language == null) language = DEFAULT_LANGUAGE;

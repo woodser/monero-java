@@ -3311,7 +3311,7 @@ public abstract class TestMoneroWalletCommon {
         
         // attempt to start mining
         try { StartMining.startMining(); }
-        catch (MoneroException e) { }
+        catch (MoneroException e) { if ("BUSY".equals(e.getMessage())) throw e; }
         
         // wait for the multisig wallet's funds to unlock // TODO: could replace with condition_variable and notify
         Long lastNumConfirmations = null;
@@ -3324,7 +3324,7 @@ public abstract class TestMoneroWalletCommon {
           // fetch and test outputs
           List<MoneroOutputWallet> outputs = curWallet.getOutputs();
           if (outputs.isEmpty()) System.out.println("No outputs reported yet");
-          else{
+          else {
             
             // print num confirmations
             long height = daemon.getHeight();
