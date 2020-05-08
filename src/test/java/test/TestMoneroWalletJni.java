@@ -328,7 +328,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // create wallet without restore height
     path = getRandomWalletPath();
-    wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC));
+    wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC), false);
     assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
     assertEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
     assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
@@ -706,12 +706,12 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     try {
       assertNotNull(wallet.getMnemonic());
       wallet.setDaemonConnection(daemon.getRpcConnection());
-      wallet.startSyncing();
       assertEquals(1, wallet.getHeight());
-      long chainHeight = wallet.getDaemonHeight();
       assertFalse(wallet.isSynced());
       assertEquals(BigInteger.valueOf(0), wallet.getBalance());
+      long chainHeight = wallet.getDaemonHeight();
       wallet.setSyncHeight(chainHeight - 3);
+      wallet.startSyncing();
       assertEquals(chainHeight - 3, wallet.getSyncHeight());
       assertEquals(daemon.getRpcConnection(), wallet.getDaemonConnection());
       wallet.stopSyncing();
@@ -723,15 +723,15 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // test that sync starts automatically
     long restoreHeight = daemon.getHeight() - 100;
     path = getRandomWalletPath();
-    wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(restoreHeight));
+    wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(restoreHeight), false);
     try {
       
       // start syncing
       assertEquals(1, wallet.getHeight());
       assertEquals(restoreHeight, wallet.getSyncHeight());
-      wallet.startSyncing();
       assertFalse(wallet.isSynced());
       assertEquals(BigInteger.valueOf(0), wallet.getBalance());
+      wallet.startSyncing();
       
       // pause for sync to start
       try {

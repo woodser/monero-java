@@ -2138,7 +2138,7 @@ public abstract class TestMoneroWalletCommon {
       
       // sign tx using offline wallet
       watchOnlyWallet.close(true);
-      offlineWallet = openWallet(offlineWalletPath);
+      offlineWallet = openWallet(new MoneroWalletConfig().setPath(offlineWalletPath).setServerUri(""));
       String signedTxHex = offlineWallet.signTxs(unsignedTxSet.getUnsignedTxHex());
       assertFalse(signedTxHex.isEmpty());
       
