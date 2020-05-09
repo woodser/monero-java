@@ -567,7 +567,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     assertNotClosed();
     if (startHeight == null) startHeight = Math.max(getHeight(), getSyncHeight());
     
-    // wrap and register sync listener as wallet listener if given
+    // register listener if given
     if (listener != null) addListener(listener);
     
     // sync wallet and handle exception
