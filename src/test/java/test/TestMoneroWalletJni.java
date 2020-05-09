@@ -2,6 +2,7 @@ package test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -1092,66 +1093,46 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   @Test
   public void testReceivesFundsWithin10Seconds() throws InterruptedException {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
+    testReceivesFundsWithin10Seconds(false);
+  }
+  
+  @Test
+  public void testReceivesFundsWithin10SecondsSameAccount() throws InterruptedException {
+    org.junit.Assume.assumeTrue(TEST_RELAYS);
+    testReceivesFundsWithin10Seconds(true);
+  }
+  
+  private void testReceivesFundsWithin10Seconds(boolean sameAccount) throws InterruptedException {
     MoneroWalletJni receiver = null;
     try {
+      
+      // assign wallet to receive funds
+      receiver = sameAccount ? wallet : createWallet(new MoneroWalletConfig());
+      
+      // listen for received funds
+      OutputNotificationCollector receiverListener = new OutputNotificationCollector();
+      receiver.addListener(receiverListener);
       
       // listen for sent funds
       MoneroWalletJni sender = wallet;
       OutputNotificationCollector senderListener = new OutputNotificationCollector();
       sender.addListener(senderListener);
       
-      // create wallet to receive funds
-      receiver = createWallet(new MoneroWalletConfig());
-      
-      // listen for received funds
-      OutputNotificationCollector receiverListener = new OutputNotificationCollector();
-      receiver.addListener(receiverListener);
-      
-      // send funds from sender
-      MoneroTxSet txSet = sender.sendTx(0, receiver.getPrimaryAddress(), TestUtils.MAX_FEE);  // TODO: send(), look up in/out txs by hash
+      // send funds
+      MoneroTxSet txSet = sender.sendTx(0, receiver.getPrimaryAddress(), TestUtils.MAX_FEE);
+      String txHash = txSet.getTxs().get(0).getHash();
+      sender.getTx(txHash);
+      if (senderListener.getOutputsSpent().isEmpty()) System.out.println("WARNING: no notification on send");
       
       // funds received within 10 seconds
       TimeUnit.SECONDS.sleep(10);
-      assertFalse(receiverListener.getOutputsReceived().isEmpty());
-      for (MoneroOutputWallet output : receiverListener.getOutputsReceived()) assertFalse(output.getTx().isConfirmed());  // received unconfirmed outputs
-      
-      // tx is queryable
-      String txHash = txSet.getTxs().get(0).getHash();
-      MoneroTxWallet sentUnconfirmed = sender.getTx(txHash);
-      System.out.println(sentUnconfirmed);
-      MoneroTxWallet receivedUnconfirmed = receiver.getTx(txHash);
-      System.out.println(receivedUnconfirmed);
-      assertFalse(senderListener.getOutputsSpent().isEmpty());
+      receiver.getTx(txHash);
+      assertFalse("No notification of received funds within 10 seconds in " + (sameAccount ? "same account" : "different wallets"), receiverListener.getOutputsReceived().isEmpty());
+      for (MoneroOutputWallet output : receiverListener.getOutputsReceived()) assertNotEquals(null, output.getTx().isConfirmed());
     } finally {
-      if (receiver != null) receiver.close();
+      if (!sameAccount && receiver != null) receiver.close();
     }
-    
-//  // receive notifications when the wallet receives funds
-//  let fundsReceived = false;
-//  await that.wallet.addListener(new class extends MoneroWalletListener {
-//    onUnconfirmedOutputReceived(output) {
-//      console.log("Received unconfirmed funds!");
-//      console.log(output.toString());
-//      fundsReceived = true;
-//      TestUtils.testUnsignedBigInteger(output.getAmount(), true);
-//      assert.equal(output.getAmount().toString(), TestUtils.MAX_FEE.toString());
-//      assert(output.getTx().getHash());
-//      assert.equal(undefined, output.getTx().getBlock());
-//      assert.equal(typeof output.getAccountIndex(), "number");
-//      assert.equal(typeof output.getSubaddressIndex(), "number");
-//    }
-//  });
-//  
-//  // transfer from rpc wallet
-//  let walletRpc = await TestUtils.getWalletRpc();
-//  await TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(walletRpc);
-//  let txSet = await that.wallet.sendTx(0, await that.wallet.getPrimaryAddress(), TestUtils.MAX_FEE);
-//  
-//  // funds received within 10 seconds
-//  await new Promise(function(resolve) { setTimeout(resolve, 10000); });
-//  assert(fundsReceived, "Funds not received within 10 seconds");
-//} catch (e) {
   }
   
   /**
