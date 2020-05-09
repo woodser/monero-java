@@ -59,7 +59,6 @@ import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroSubaddress;
-import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
@@ -67,7 +66,6 @@ import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
-import monero.wallet.model.MoneroWalletListener;
 import monero.wallet.model.MoneroWalletListenerI;
 
 /**
@@ -565,16 +563,12 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
 
   @Override
-  public MoneroSyncResult sync(Long startHeight, MoneroSyncListener listener) {
+  public MoneroSyncResult sync(Long startHeight, MoneroWalletListenerI listener) {
     assertNotClosed();
     if (startHeight == null) startHeight = Math.max(getHeight(), getSyncHeight());
     
     // wrap and register sync listener as wallet listener if given
-    SyncListenerWrapper syncListenerWrapper = null;
-    if (listener != null) {
-      syncListenerWrapper = new SyncListenerWrapper(listener);
-      addListener(syncListenerWrapper);
-    }
+    if (listener != null) addListener(listener);
     
     // sync wallet and handle exception
     try {
@@ -583,7 +577,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     } catch (Exception e) {
       throw new MoneroException(e.getMessage());
     } finally {
-      if (syncListenerWrapper != null) removeListener(syncListenerWrapper); // unregister sync listener
+      if (listener != null) removeListener(listener); // unregister listener
     }
   }
   
@@ -1634,23 +1628,6 @@ public class MoneroWalletJni extends MoneroWalletBase {
       
       // announce output
       for (MoneroWalletListenerI listener : wallet.getListeners()) listener.onOutputSpent((MoneroOutputWallet) tx.getInputs().get(0));
-    }
-  }
-  
-  /**
-   * Wraps a sync listener as a general wallet listener.
-   */
-  private class SyncListenerWrapper extends MoneroWalletListener {
-    
-    private MoneroSyncListener listener;
-    
-    public SyncListenerWrapper(MoneroSyncListener listener) {
-      this.listener = listener;
-    }
-    
-    @Override
-    public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
-      listener.onSyncProgress(height, startHeight, endHeight, percentDone, message);
     }
   }
   

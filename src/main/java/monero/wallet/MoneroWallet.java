@@ -46,13 +46,13 @@ import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroSubaddress;
-import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.model.MoneroWalletListenerI;
 
 /**
  * Monero wallet interface.
@@ -236,10 +236,10 @@ public interface MoneroWallet {
   /**
    * Synchronize the wallet with the daemon as a one-time synchronous process.
    * 
-   * @param listener is invoked as sync progress is made
+   * @param listener - listener to receive notifications during synchronization
    * @return the sync result
    */
-  public MoneroSyncResult sync(MoneroSyncListener listener);
+  public MoneroSyncResult sync(MoneroWalletListenerI listener);
   
   /**
    * Synchronize the wallet with the daemon as a one-time synchronous process.
@@ -253,10 +253,10 @@ public interface MoneroWallet {
    * Synchronize the wallet with the daemon as a one-time synchronous process.
    * 
    * @param startHeight is the start height to sync from (defaults to the last synced block)
-   * @param listener is invoked as sync progress is made
+   * @param listener - listener to receive notifications during synchronization
    * @return the sync result
    */
-  public MoneroSyncResult sync(Long startHeight, MoneroSyncListener listener);
+  public MoneroSyncResult sync(Long startHeight, MoneroWalletListenerI listener);
   
   /**
    * Start an asynchronous thread to continuously synchronize the wallet with the daemon.

@@ -1,7 +1,7 @@
 package monero.wallet.model;
 
 /**
- * Provides default handling for wallet notifications.
+ * Default wallet listener which takes no action on notifications.
  */
 public class MoneroWalletListener implements MoneroWalletListenerI {
 

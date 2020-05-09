@@ -1108,7 +1108,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       receiver.addListener(receiverListener);
       
       // send funds from sender
-      sender.sendTx(0, receiver.getPrimaryAddress(), TestUtils.MAX_FEE);
+      sender.sendTx(0, receiver.getPrimaryAddress(), TestUtils.MAX_FEE);  // TODO: send(), look up in/out txs by hash
       
       // funds received within 10 seconds
       TimeUnit.SECONDS.sleep(10);

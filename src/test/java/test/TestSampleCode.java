@@ -26,7 +26,6 @@ import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroSubaddress;
-import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxQuery;
@@ -113,7 +112,7 @@ public class TestSampleCode {
 //            .setRestoreHeight(501788L));
     
     // synchronize the wallet and receive progress notifications
-    walletJni.sync(new MoneroSyncListener() {
+    walletJni.sync(new MoneroWalletListener() {
       @Override
       public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
         // feed a progress bar?

@@ -66,7 +66,6 @@ import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroSubaddress;
-import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
@@ -74,6 +73,7 @@ import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
+import monero.wallet.model.MoneroWalletListenerI;
 
 /**
  * Implements a Monero wallet using monero-wallet-rpc.
@@ -538,7 +538,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroSyncResult sync(Long startHeight, MoneroSyncListener listener) {
+  public MoneroSyncResult sync(Long startHeight, MoneroWalletListenerI listener) {
     if (listener != null) throw new MoneroException("Monero Wallet RPC does not support reporting sync progress");
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("start_height", startHeight);

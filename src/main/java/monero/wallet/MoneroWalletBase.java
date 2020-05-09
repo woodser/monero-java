@@ -39,13 +39,13 @@ import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSendPriority;
 import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroSubaddress;
-import monero.wallet.model.MoneroSyncListener;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
+import monero.wallet.model.MoneroWalletListenerI;
 
 /**
  * Abstract base implementation of a Monero wallet.
@@ -77,7 +77,7 @@ public abstract class MoneroWalletBase implements MoneroWallet {
   }
   
   @Override
-  public MoneroSyncResult sync(MoneroSyncListener listener) {
+  public MoneroSyncResult sync(MoneroWalletListenerI listener) {
     return sync(null, listener);
   }
   
@@ -87,7 +87,7 @@ public abstract class MoneroWalletBase implements MoneroWallet {
   }
   
   @Override
-  public MoneroSyncResult sync(Long startHeight, MoneroSyncListener listener) {
+  public MoneroSyncResult sync(Long startHeight, MoneroWalletListenerI listener) {
     return sync(startHeight, listener);
   }
   

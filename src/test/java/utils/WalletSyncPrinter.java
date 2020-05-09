@@ -1,11 +1,11 @@
 package utils;
 
-import monero.wallet.model.MoneroSyncListener;
+import monero.wallet.model.MoneroWalletListener;
 
 /**
  * Print sync progress every X blocks.
  */
-public class WalletSyncPrinter implements MoneroSyncListener {
+public class WalletSyncPrinter extends MoneroWalletListener {
   
   private long blockResolution;
   
