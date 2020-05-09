@@ -5,7 +5,7 @@ import common.utils.JsonUtils;
 /**
  * Exception when interacting with the Monero daemon or wallet RPC API.
  */
-public class MoneroRpcException extends MoneroException {
+public class MoneroRpcException extends MoneroError {
 
   private static final long serialVersionUID = -6282368684634114151L;
   

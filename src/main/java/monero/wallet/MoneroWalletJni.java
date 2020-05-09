@@ -37,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
 import common.utils.JsonUtils;
-import monero.common.MoneroException;
+import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroKeyImage;
@@ -126,8 +126,8 @@ public class MoneroWalletJni extends MoneroWalletBase {
   public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType) { return openWallet(path, password, networkType, (MoneroRpcConnection) null); }
   public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType, String daemonUri) { return openWallet(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri)); }
   public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection) {
-    if (!walletExistsJni(path)) throw new MoneroException("Wallet does not exist at path: " + path);
-    if (networkType == null) throw new MoneroException("Must provide a network type");
+    if (!walletExistsJni(path)) throw new MoneroError("Wallet does not exist at path: " + path);
+    if (networkType == null) throw new MoneroError("Must provide a network type");
     long jniWalletHandle = openWalletJni(path, password, networkType.ordinal());
     MoneroWalletJni wallet = new MoneroWalletJni(jniWalletHandle);
     if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
@@ -155,18 +155,18 @@ public class MoneroWalletJni extends MoneroWalletBase {
   public static MoneroWalletJni openWallet(MoneroWalletConfig config) {
     
     // validate config
-    if (config == null) throw new MoneroException("Must specify config to open wallet");
-    if (config.getPath() == null) throw new MoneroException("Must specify path to open wallet");
-    if (config.getPassword() == null) throw new MoneroException("Must specify password to decrypt wallet");
-    if (config.getNetworkType() == null) throw new MoneroException("Must specify a network type: 'mainnet', 'testnet' or 'stagenet'");
-    if (config.getMnemonic() != null) throw new MoneroException("Cannot specify mnemonic when opening wallet");
-    if (config.getSeedOffset() != null) throw new MoneroException("Cannot specify seed offset when opening wallet");
-    if (config.getPrimaryAddress() != null) throw new MoneroException("Cannot specify primary address when opening wallet");
-    if (config.getPrivateViewKey() != null) throw new MoneroException("Cannot specify private view key when opening wallet");
-    if (config.getPrivateSpendKey() != null) throw new MoneroException("Cannot specify private spend key when opening wallet");
-    if (config.getRestoreHeight() != null) throw new MoneroException("Cannot specify restore height when opening wallet");
-    if (config.getLanguage() != null) throw new MoneroException("Cannot specify language when opening wallet");
-    if (Boolean.TRUE.equals(config.getSaveCurrent())) throw new MoneroException("Cannot save current wallet when opening JNI wallet");
+    if (config == null) throw new MoneroError("Must specify config to open wallet");
+    if (config.getPath() == null) throw new MoneroError("Must specify path to open wallet");
+    if (config.getPassword() == null) throw new MoneroError("Must specify password to decrypt wallet");
+    if (config.getNetworkType() == null) throw new MoneroError("Must specify a network type: 'mainnet', 'testnet' or 'stagenet'");
+    if (config.getMnemonic() != null) throw new MoneroError("Cannot specify mnemonic when opening wallet");
+    if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when opening wallet");
+    if (config.getPrimaryAddress() != null) throw new MoneroError("Cannot specify primary address when opening wallet");
+    if (config.getPrivateViewKey() != null) throw new MoneroError("Cannot specify private view key when opening wallet");
+    if (config.getPrivateSpendKey() != null) throw new MoneroError("Cannot specify private spend key when opening wallet");
+    if (config.getRestoreHeight() != null) throw new MoneroError("Cannot specify restore height when opening wallet");
+    if (config.getLanguage() != null) throw new MoneroError("Cannot specify language when opening wallet");
+    if (Boolean.TRUE.equals(config.getSaveCurrent())) throw new MoneroError("Cannot save current wallet when opening JNI wallet");
     
     // open wallet
     return openWallet(config.getPath(), config.getPassword(), config.getNetworkType(), config.getServer());
@@ -200,23 +200,23 @@ public class MoneroWalletJni extends MoneroWalletBase {
   public static MoneroWalletJni createWallet(MoneroWalletConfig config) {
     
     // validate config
-    if (config == null) throw new MoneroException("Must specify config to open wallet");
-    if (config.getNetworkType() == null) throw new MoneroException("Must specify a network type: 'mainnet', 'testnet' or 'stagenet'");
+    if (config == null) throw new MoneroError("Must specify config to open wallet");
+    if (config.getNetworkType() == null) throw new MoneroError("Must specify a network type: 'mainnet', 'testnet' or 'stagenet'");
     if (config.getMnemonic() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
-      throw new MoneroException("Wallet may be initialized with a mnemonic or keys but not both");
+      throw new MoneroError("Wallet may be initialized with a mnemonic or keys but not both");
     }
-    if (Boolean.TRUE.equals(config.getSaveCurrent() != null)) throw new MoneroException("Cannot save current wallet when creating JNI wallet");
+    if (Boolean.TRUE.equals(config.getSaveCurrent() != null)) throw new MoneroError("Cannot save current wallet when creating JNI wallet");
     
     // create wallet
     if (config.getMnemonic() != null) {
-      if (config.getLanguage() != null) throw new MoneroException("Cannot specify language when creating wallet from mnemonic");
+      if (config.getLanguage() != null) throw new MoneroError("Cannot specify language when creating wallet from mnemonic");
       return createWalletFromMnemonic(config.getPath(), config.getPassword(), config.getNetworkType(), config.getMnemonic(), config.getServer(), config.getRestoreHeight(), config.getSeedOffset());
     } else if (config.getPrimaryAddress() != null) {
-      if (config.getSeedOffset() != null) throw new MoneroException("Cannot specify seed offset when creating wallet from keys");
+      if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating wallet from keys");
       return createWalletFromKeys(config.getPath(), config.getPassword(), config.getNetworkType(), config.getPrimaryAddress(), config.getPrivateViewKey(), config.getPrivateSpendKey(), config.getServer(), config.getRestoreHeight(), config.getLanguage());
     } else {
-      if (config.getSeedOffset() != null) throw new MoneroException("Cannot specify seed offset when creating random wallet");
-      if (config.getRestoreHeight() != null) throw new MoneroException("Cannot specify restore height when creating random wallet");
+      if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating random wallet");
+      if (config.getRestoreHeight() != null) throw new MoneroError("Cannot specify restore height when creating random wallet");
       return createWalletRandom(config.getPath(), config.getPassword(), config.getNetworkType(), config.getServer(), config.getLanguage());
     }
   }
@@ -235,8 +235,8 @@ public class MoneroWalletJni extends MoneroWalletBase {
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, String daemonUri) { return createWalletRandom(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri), null); }
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection) { return createWalletRandom(path, password, networkType, daemonConnection, null); }
   public static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, String language) {
-    if (path != null && !path.isEmpty() && MoneroWalletJni.walletExists(path)) throw new MoneroException("Wallet already exists: " + path);
-    if (networkType == null) throw new MoneroException("Must provide a network type");
+    if (path != null && !path.isEmpty() && MoneroWalletJni.walletExists(path)) throw new MoneroError("Wallet already exists: " + path);
+    if (networkType == null) throw new MoneroError("Must provide a network type");
     if (language == null) language = DEFAULT_LANGUAGE;
     long jniWalletHandle;
     if (daemonConnection == null) jniWalletHandle = createWalletRandomJni(path, password, networkType.ordinal(), null, null, null, language);
@@ -259,8 +259,8 @@ public class MoneroWalletJni extends MoneroWalletBase {
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic) { return createWalletFromMnemonic(path, password, networkType, mnemonic, null, null, null); }
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection) { return createWalletFromMnemonic(path, password, networkType, mnemonic, daemonConnection, null, null); }
   public static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String seedOffset) {
-    if (path != null && !path.isEmpty() && MoneroWalletJni.walletExists(path)) throw new MoneroException("Wallet already exists: " + path);
-    if (networkType == null) throw new MoneroException("Must provide a network type");
+    if (path != null && !path.isEmpty() && MoneroWalletJni.walletExists(path)) throw new MoneroError("Wallet already exists: " + path);
+    if (networkType == null) throw new MoneroError("Must provide a network type");
     if (restoreHeight == null) restoreHeight = 0l;
     long jniWalletHandle = createWalletFromMnemonicJni(path, password, networkType.ordinal(), mnemonic, restoreHeight, seedOffset);
     MoneroWalletJni wallet = new MoneroWalletJni(jniWalletHandle);
@@ -285,9 +285,9 @@ public class MoneroWalletJni extends MoneroWalletBase {
   public static MoneroWalletJni createWalletFromKeys(String path, String password, MoneroNetworkType networkType, String address, String viewKey, String spendKey) { return createWalletFromKeys(path, password, networkType, address, viewKey, spendKey, null, null, null); }
   public static MoneroWalletJni createWalletFromKeys(String path, String password, MoneroNetworkType networkType, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight) { return createWalletFromKeys(path, password, networkType, address, viewKey, spendKey, daemonConnection, restoreHeight, null); }
   public static MoneroWalletJni createWalletFromKeys(String path, String password, MoneroNetworkType networkType, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
-    if (path != null && !path.isEmpty() && MoneroWalletJni.walletExists(path)) throw new MoneroException("Wallet already exists: " + path);
+    if (path != null && !path.isEmpty() && MoneroWalletJni.walletExists(path)) throw new MoneroError("Wallet already exists: " + path);
     if (restoreHeight == null) restoreHeight = 0l;
-    if (networkType == null) throw new MoneroException("Must provide a network type");
+    if (networkType == null) throw new MoneroError("Must provide a network type");
     if (language == null) language = DEFAULT_LANGUAGE;
     try {
       long jniWalletHandle = createWalletFromKeysJni(path, password, networkType.ordinal(), address, viewKey, spendKey, restoreHeight, language);
@@ -295,7 +295,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       wallet.setDaemonConnection(daemonConnection);
       return wallet;
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
   
@@ -320,7 +320,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return getDaemonMaxPeerHeightJni();
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
   
@@ -334,7 +334,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return isDaemonSyncedJni();
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
   
@@ -348,7 +348,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return isSyncedJni();
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
   
@@ -400,7 +400,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
    */
   public void removeListener(MoneroWalletListenerI listener) {
     assertNotClosed();
-    if (!listeners.contains(listener)) throw new MoneroException("Listener is not registered to wallet");
+    if (!listeners.contains(listener)) throw new MoneroError("Listener is not registered to wallet");
     listeners.remove(listener);
     if (listeners.isEmpty()) setIsListening(false);
   }
@@ -440,7 +440,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       try {
         setDaemonConnectionJni(daemonConnection.getUri() == null ? "" : daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword());
       } catch (Exception e) {
-        throw new MoneroException(e.getMessage());
+        throw new MoneroError(e.getMessage());
       }
     }
   }
@@ -451,7 +451,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       String[] vals = getDaemonConnectionJni();
       return vals == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2]);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
   
@@ -460,7 +460,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return isConnectedJni();
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
   
@@ -471,7 +471,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       String versionJson = getVersionJni();
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, versionJson, MoneroVersion.class);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
   
@@ -531,7 +531,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       String integratedAddressJson = getIntegratedAddressJni("", paymentId);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, integratedAddressJson, MoneroIntegratedAddress.class);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -542,7 +542,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       String integratedAddressJson = decodeIntegratedAddressJni(integratedAddress);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, integratedAddressJson, MoneroIntegratedAddress.class);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -558,7 +558,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return getDaemonHeightJni();
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -575,7 +575,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       Object[] results = syncJni(startHeight);
       return new MoneroSyncResult((long) results[0], (boolean) results[1]);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     } finally {
       if (listener != null) removeListener(listener); // unregister listener
     }
@@ -587,7 +587,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       startSyncingJni();
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
   
@@ -596,7 +596,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       stopSyncingJni();
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
   
@@ -606,7 +606,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       rescanSpentJni();
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -616,7 +616,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       rescanBlockchainJni();
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -679,7 +679,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       MoneroSubaddress subaddress = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressJson, MoneroSubaddress.class);
       return sanitizeSubaddress(subaddress);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -688,8 +688,8 @@ public class MoneroWalletJni extends MoneroWalletBase {
     assertNotClosed();
     try {
       return new BigInteger(getBalanceWalletJni());
-    } catch (MoneroException e) {
-      throw new MoneroException(e.getMessage());
+    } catch (MoneroError e) {
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -698,8 +698,8 @@ public class MoneroWalletJni extends MoneroWalletBase {
     assertNotClosed();
     try {
       return new BigInteger(getBalanceAccountJni(accountIdx));
-    } catch (MoneroException e) {
-      throw new MoneroException(e.getMessage());
+    } catch (MoneroError e) {
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -708,8 +708,8 @@ public class MoneroWalletJni extends MoneroWalletBase {
     assertNotClosed();
     try {
       return new BigInteger(getBalanceSubaddressJni(accountIdx, subaddressIdx));
-    } catch (MoneroException e) {
-      throw new MoneroException(e.getMessage());
+    } catch (MoneroError e) {
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -718,8 +718,8 @@ public class MoneroWalletJni extends MoneroWalletBase {
     assertNotClosed();
     try {
       return new BigInteger(getUnlockedBalanceWalletJni());
-    } catch (MoneroException e) {
-      throw new MoneroException(e.getMessage());
+    } catch (MoneroError e) {
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -728,8 +728,8 @@ public class MoneroWalletJni extends MoneroWalletBase {
     assertNotClosed();
     try {
       return new BigInteger(getUnlockedBalanceAccountJni(accountIdx));
-    } catch (MoneroException e) {
-      throw new MoneroException(e.getMessage());
+    } catch (MoneroError e) {
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -738,8 +738,8 @@ public class MoneroWalletJni extends MoneroWalletBase {
     assertNotClosed();
     try {
       return new BigInteger(getUnlockedBalanceSubaddressJni(accountIdx, subaddressIdx));
-    } catch (MoneroException e) {
-      throw new MoneroException(e.getMessage());
+    } catch (MoneroError e) {
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -756,7 +756,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       blocksJson = getTxsJni(JsonUtils.serialize(query.getBlock()));
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
     
     // deserialize blocks
@@ -811,7 +811,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       blocksJson = getTransfersJni(JsonUtils.serialize(query.getTxQuery().getBlock()));
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
     
     // deserialize blocks
@@ -919,7 +919,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return Arrays.asList(relayTxsJni(txMetadatasArr));
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -930,7 +930,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     LOGGER.fine("Send request: " + JsonUtils.serialize(request));
     
     // validate request
-    if (request == null) throw new MoneroException("Send request cannot be null");
+    if (request == null) throw new MoneroError("Send request cannot be null");
     
     // submit send request to JNI and get response as json rooted at tx set
     String txSetJson;
@@ -938,7 +938,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       txSetJson = sendTxsJni(JsonUtils.serialize(request));
       LOGGER.fine("Received sendTxs() response from JNI: " + txSetJson.substring(0, Math.min(5000, txSetJson.length())) + "...");
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
     
     // deserialize and return tx set
@@ -953,7 +953,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     assertNotClosed();
     
     // validate request
-    if (request == null) throw new MoneroException("Send request cannot be null");
+    if (request == null) throw new MoneroError("Send request cannot be null");
     
     // submit send request to JNI and get response as json rooted at tx set
     String txSetsJson;
@@ -961,7 +961,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       txSetsJson = sweepUnlockedJni(JsonUtils.serialize(request));
       LOGGER.fine("Received sweepUnlocked() response from JNI: " + txSetsJson.substring(0, Math.min(5000, txSetsJson.length())) + "...");
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
     
     // deserialize and return tx sets
@@ -976,7 +976,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
       return txSet;
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -985,7 +985,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     assertNotClosed();
     String txSetJson;
     try { txSetJson = sweepDustJni(doNotRelay); }
-    catch (Exception e) { throw new MoneroException(e.getMessage()); }
+    catch (Exception e) { throw new MoneroError(e.getMessage()); }
     MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
     return txSet;
   }
@@ -997,7 +997,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       parsedTxSetJson = parseTxSetJni(JsonUtils.serialize(txSet));
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
     return JsonUtils.deserialize(parsedTxSetJson, MoneroTxSet.class);
   }
@@ -1008,7 +1008,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return signTxsJni(unsignedTxHex);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1018,7 +1018,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return Arrays.asList(submitTxsJni(signedTxHex));
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1029,7 +1029,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       String checkStr = checkTxKeyJni(txHash, txKey, address);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckTx.class);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1039,7 +1039,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return getTxProofJni(txHash, address, message);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1050,7 +1050,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       String checkStr = checkTxProofJni(txHash, address, message, signature);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckTx.class);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1060,7 +1060,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return getSpendProofJni(txHash, message);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1070,7 +1070,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return checkSpendProofJni(txHash, message, signature);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1079,7 +1079,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return getReserveProofWalletJni(message);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1089,7 +1089,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return getReserveProofAccountJni(accountIdx, amount.toString(), message);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage(), -1);
+      throw new MoneroError(e.getMessage(), -1);
     }
   }
 
@@ -1100,7 +1100,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       String checkStr = checkReserveProofJni(address, message, signature);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckReserve.class);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage(), -1);
+      throw new MoneroError(e.getMessage(), -1);
     }
   }
 
@@ -1122,7 +1122,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return getTxKeyJni(txHash);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1196,7 +1196,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return createPaymentUriJni(JsonUtils.serialize(request));
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1207,7 +1207,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       String sendRequestJson = parsePaymentUriJni(uri);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, sendRequestJson, MoneroSendRequest.class);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
   
@@ -1229,7 +1229,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       startMiningJni(numThreads == null ? 0l : (long) numThreads, Boolean.TRUE.equals(backgroundMining), Boolean.TRUE.equals(ignoreBattery));
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1239,7 +1239,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       stopMiningJni();
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
   
@@ -1256,7 +1256,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       String multisigInfoJson = getMultisigInfoJni();
       return JsonUtils.deserialize(multisigInfoJson, MoneroMultisigInfo.class);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1271,7 +1271,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       String initMultisigResultJson = makeMultisigJni(multisigHexes.toArray(new String[multisigHexes.size()]), threshold, password);
       return JsonUtils.deserialize(initMultisigResultJson, MoneroMultisigInitResult.class);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1281,7 +1281,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       String initMultisigResultJson = exchangeMultisigKeysJni(multisigHexes.toArray(new String[multisigHexes.size()]), password);
       return JsonUtils.deserialize(initMultisigResultJson, MoneroMultisigInitResult.class);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1290,7 +1290,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return getMultisigHexJni();
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
   
@@ -1299,7 +1299,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return importMultisigHexJni(multisigHexes.toArray(new String[multisigHexes.size()]));
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1309,7 +1309,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       String signMultisigResultJson = signMultisigTxHexJni(multisigTxHex);
       return JsonUtils.deserialize(signMultisigResultJson, MoneroMultisigSignResult.class);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -1318,7 +1318,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       return Arrays.asList(submitMultisigTxHexJni(signedMultisigTxHex));
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
   
@@ -1336,7 +1336,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     try {
       closeJni(save);
     } catch (Exception e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
   
@@ -1730,7 +1730,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
   
   private void assertNotClosed() {
-    if (isClosed) throw new MoneroException("Wallet is closed");
+    if (isClosed) throw new MoneroError("Wallet is closed");
   }
   
   private static MoneroAccount sanitizeAccount(MoneroAccount account) {

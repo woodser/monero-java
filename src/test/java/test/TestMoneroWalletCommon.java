@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import common.types.Filter;
 import common.utils.JsonUtils;
-import monero.common.MoneroException;
+import monero.common.MoneroError;
 import monero.common.MoneroUtils;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroBlock;
@@ -451,7 +451,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       subaddress = wallet.getAddressIndex(nonWalletAddress);
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Address doesn't belong to the wallet", e.getMessage());
     }
     
@@ -459,7 +459,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       subaddress = wallet.getAddressIndex("this is definitely not an address");
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Invalid address", e.getMessage());
     }
   }
@@ -488,7 +488,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       integratedAddress = wallet.getIntegratedAddress(invalidPaymentId);
       fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have thrown a RPC exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       //assertEquals(-5, (int) e.getCode());  // TODO: error codes specific to rpc?
       assertEquals("Invalid payment ID: " + invalidPaymentId, e.getMessage());
     }
@@ -1131,7 +1131,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.getTx(unknownId1);
       fail("Should have thrown error getting tx hash unknown to wallet");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Tx not found in wallet: " + unknownId1, e.getMessage());
     }
     
@@ -1139,7 +1139,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.getTxs(new MoneroTxQuery().setTxHash(unknownId1));
       throw new Error("Should have thrown error getting tx hash unknown to wallet");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Tx not found in wallet: " + unknownId1, e.getMessage());
     }
     
@@ -1147,7 +1147,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.getTxs(txHash, unknownId1);
       fail("Should have thrown error getting tx hash unknown to wallet");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Tx not found in wallet: " + unknownId1, e.getMessage());
     }
     
@@ -1155,7 +1155,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.getTxs(txHash, unknownId1, unknownId2);
       fail("Should have thrown error getting tx hash unknown to wallet");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Tx not found in wallet: " + unknownId1, e.getMessage()); // TODO: list all invalid hashes in error description?
     }
     
@@ -1163,7 +1163,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.getTx(invalidHash);
       fail("Should have thrown error getting tx hash unknown to wallet");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Tx not found in wallet: " + invalidHash, e.getMessage());
     }
     
@@ -1171,7 +1171,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.getTxs(txHash, invalidHash);
       fail("Should have thrown error getting tx hash unknown to wallet");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Tx not found in wallet: " + invalidHash, e.getMessage());
     }
     
@@ -1179,7 +1179,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.getTxs(txHash, invalidHash, "invalid_id_2");
       fail("Should have thrown error getting tx hash unknown to wallet");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Tx not found in wallet: " + invalidHash, e.getMessage());
     }
   }
@@ -1353,7 +1353,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       transfers = wallet.getTransfers(new MoneroTransferQuery().setAccountIndex(0).setSubaddressIndex(-1));
       throw new RuntimeException("Should have failed");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertNotEquals("Should have failed", e.getMessage());
     }
   }
@@ -1386,7 +1386,7 @@ public abstract class TestMoneroWalletCommon {
     // get incoming transfers with contradictory query
     try {
       inTransfers = wallet.getIncomingTransfers(new MoneroTransferQuery().setIsIncoming(false));
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Transfer query contradicts getting incoming transfers", e.getMessage());
     }
     
@@ -1411,7 +1411,7 @@ public abstract class TestMoneroWalletCommon {
     // get outgoing transfers with contradictory query
     try {
       outTransfers = wallet.getOutgoingTransfers(new MoneroTransferQuery().setIsOutgoing(false));
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Transfer query contradicts getting outgoing transfers", e.getMessage());
     }
   }
@@ -1685,7 +1685,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.getTxKey("invalid_tx_id");
       fail("Should throw exception for invalid key");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       testInvalidTxHashException(e);
     }
     
@@ -1696,7 +1696,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.checkTxKey("invalid_tx_id", key, destination.getAddress());
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       testInvalidTxHashException(e);
     }
     
@@ -1704,7 +1704,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.checkTxKey(tx.getHash(), "invalid_tx_key", destination.getAddress());
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       testInvalidTxKeyException(e);
     }
     
@@ -1712,7 +1712,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.checkTxKey(tx.getHash(), key, "invalid_tx_address");
       throw new RuntimeException("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       testInvalidAddressException(e);
     }
     
@@ -1768,7 +1768,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.getTxProof("invalid_tx_id", destination.getAddress());
       throw new RuntimeException("Should throw exception for invalid key");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       testInvalidTxHashException(e);
     }
     
@@ -1776,7 +1776,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.checkTxProof("invalid_tx_id", destination.getAddress(), null, signature);
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       testInvalidTxHashException(e);
     }
     
@@ -1784,7 +1784,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.checkTxProof(tx.getHash(), "invalid_tx_address", null, signature);
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       testInvalidAddressException(e);
     }
     
@@ -1799,7 +1799,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       check = wallet.checkTxProof(tx.getHash(), destination.getAddress(), "This is the right message", wrongSignature);  
       assertEquals(check.isGood(), false);
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       testInvalidSignatureException(e);
     }
   }
@@ -1832,7 +1832,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.getSpendProof("invalid_tx_id");
       throw new RuntimeException("Should throw exception for invalid key");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       testInvalidTxHashException(e);
     }
     
@@ -1840,7 +1840,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.checkSpendProof("invalid_tx_id", null, signature);
       throw new RuntimeException("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       testInvalidTxHashException(e);
     }
     
@@ -1876,7 +1876,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.checkReserveProof(differentAddress, "Test message", signature);
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       testNoSubaddressException(e);
     }
     
@@ -1884,7 +1884,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.checkReserveProof((wallet.getSubaddress(0, 1)).getAddress(), "Test message", signature);
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       testNoSubaddressException(e);
     }
     
@@ -1897,7 +1897,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", "wrong signature");
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       testSignatureHeaderCheckException(e);
     }
   }
@@ -1926,12 +1926,12 @@ public abstract class TestMoneroWalletCommon {
         try {
           wallet.getReserveProofAccount(account.getIndex(), account.getBalance(), msg);
           throw new RuntimeException("Should have thrown exception");
-        } catch (MoneroException e) {
+        } catch (MoneroError e) {
           assertEquals(-1, (int) e.getCode());
           try {
             wallet.getReserveProofAccount(account.getIndex(), TestUtils.MAX_FEE, msg);
             throw new RuntimeException("Should have thrown exception");
-          } catch (MoneroException e2) {
+          } catch (MoneroError e2) {
             assertEquals(-1, (int) e2.getCode());
           }
         }
@@ -1943,7 +1943,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.getReserveProofAccount(0, accounts.get(0).getBalance().add(TestUtils.MAX_FEE), "Test message");
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals(-1, (int) e.getCode());
     }
     
@@ -1952,7 +1952,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.checkReserveProof(differentAddress, "Test message", signature);
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals(-1, (int) e.getCode());
     }
     
@@ -1960,7 +1960,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.checkReserveProof((wallet.getSubaddress(0, 1)).getAddress(), "Test message", signature);
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals(-1, (int) e.getCode());
     }
     
@@ -1973,7 +1973,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", "wrong signature");
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals(-1, (int) e.getCode());
     }
   }
@@ -2311,7 +2311,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.createPaymentUri(request1);
       fail("Should have thrown RPC exception with invalid parameters");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertTrue(e.getMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
     }
     request1.getDestinations().get(0).setAddress(address);
@@ -2321,7 +2321,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       wallet.createPaymentUri(request1);
       fail("Should have thrown RPC exception with invalid parameters");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertTrue(e.getMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
     }
   }
@@ -2405,7 +2405,7 @@ public abstract class TestMoneroWalletCommon {
       try {
         MoneroTxWallet fetched = wallet.getTx(tx.getHash());
         assertNotNull(fetched);
-      } catch (MoneroException e) {
+      } catch (MoneroError e) {
         fail("Wallet should be aware of its tx in pool after syncing");
       }
       
@@ -2457,7 +2457,7 @@ public abstract class TestMoneroWalletCommon {
         try {
           wallet.getTx(tx.getHash());
           fail("Wallet should no longer be aware of tx which was not relayed and was manually removed from pool");
-        } catch (MoneroException e) {
+        } catch (MoneroError e) {
           // exception expected
         }
         
@@ -2511,7 +2511,7 @@ public abstract class TestMoneroWalletCommon {
       try {
         MoneroTxWallet fetched = wallet.getTx(tx.getHash());
         assertNotNull(fetched);
-      } catch (MoneroException e) {
+      } catch (MoneroError e) {
         throw new RuntimeException("Wallet should be aware of its tx in pool after syncing");
       }
       
@@ -2718,7 +2718,7 @@ public abstract class TestMoneroWalletCommon {
     String paymentId = integratedAddress.getPaymentId();
     try {
       testSendToSingle(new MoneroSendRequest().setCanSplit(false).setPaymentId(paymentId + paymentId + paymentId + paymentId));  // 64 character payment id
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Standalone payment IDs are obsolete. Use subaddresses or integrated addresses instead", e.getMessage());
     }
   }
@@ -3089,7 +3089,7 @@ public abstract class TestMoneroWalletCommon {
     List<MoneroTxWallet> txs = null;
     try {
       txs = wallet.sweepDust(true).getTxs();
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("No dust to sweep", e.getMessage());
       return;
     }
@@ -3128,7 +3128,7 @@ public abstract class TestMoneroWalletCommon {
     List<MoneroTxWallet> txs = null;
     try {
       txs = wallet.sweepDust().getTxs();
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("No dust to sweep", e.getMessage());
       return;
     }
@@ -3169,7 +3169,7 @@ public abstract class TestMoneroWalletCommon {
       
       // stop mining at end of test
       try { daemon.stopMining(); }
-      catch (MoneroException e) { }
+      catch (MoneroError e) { }
     }
   }
   
@@ -3311,7 +3311,7 @@ public abstract class TestMoneroWalletCommon {
         
         // attempt to start mining
         try { StartMining.startMining(); }
-        catch (MoneroException e) { if ("BUSY".equals(e.getMessage())) throw e; }
+        catch (MoneroError e) { if ("BUSY".equals(e.getMessage())) throw e; }
         
         // wait for the multisig wallet's funds to unlock // TODO: could replace with condition_variable and notify
         Long lastNumConfirmations = null;
@@ -3362,7 +3362,7 @@ public abstract class TestMoneroWalletCommon {
           MoneroTxSet txSet = curWallet.sendTxs(1, returnAddress, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3)));
           System.out.println("WARNING: wallet returned a tx set from sendTxs() even though it has not been synchronized with participants, expected exception: " + JsonUtils.serialize(txSet));  // TODO monero core: wallet_rpc_server.cpp:995 should throw if no txs created
           //throw new RuntimeException("Should have failed sending funds without synchronizing with peers");
-        } catch (MoneroException e) {
+        } catch (MoneroError e) {
           if (!e.getMessage().contains("Should have failed")) { // TODO: remove this check when wallet rpc throws exception as expected
             assertEquals("No transaction created", e.getMessage());
           }
@@ -3696,13 +3696,13 @@ public abstract class TestMoneroWalletCommon {
       // stop mining if it was started by this test
       if (startedMining) wallet.stopMining();
       
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       throw e;
     } finally {
       
       // stop mining at end of test
       try { daemon.stopMining(); }
-      catch (MoneroException e) { }
+      catch (MoneroError e) { }
     }
   }
   
@@ -3745,7 +3745,7 @@ public abstract class TestMoneroWalletCommon {
     ctx.isSendResponse = isSendResponse;
     try {
       testTxWallet(tx, ctx);
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       System.out.println(tx.toString());
       throw e;
     }
@@ -4114,27 +4114,27 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
-  protected void testInvalidAddressException(MoneroException e) {
+  protected void testInvalidAddressException(MoneroError e) {
     assertEquals("Invalid address", e.getMessage());
   }
   
-  protected void testInvalidTxHashException(MoneroException e) {
+  protected void testInvalidTxHashException(MoneroError e) {
     assertEquals("TX hash has invalid format", e.getMessage());
   }
   
-  protected void testInvalidTxKeyException(MoneroException e) {
+  protected void testInvalidTxKeyException(MoneroError e) {
     assertEquals("Tx key has invalid format", e.getMessage());
   }
   
-  protected void testInvalidSignatureException(MoneroException e) {
+  protected void testInvalidSignatureException(MoneroError e) {
     assertEquals("Signature size mismatch with additional tx pubkeys", e.getMessage());
   }
   
-  protected void testNoSubaddressException(MoneroException e) {
+  protected void testNoSubaddressException(MoneroError e) {
     assertEquals("Address must not be a subaddress", e.getMessage());
   }
   
-  protected void testSignatureHeaderCheckException(MoneroException e) {
+  protected void testSignatureHeaderCheckException(MoneroError e) {
     assertEquals("Signature header check error", e.getMessage());
   }
   

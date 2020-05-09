@@ -130,7 +130,7 @@ public class MoneroRpcConnection {
       throw e1;
     } catch (Exception e2) {
       //e3.printStackTrace();
-      throw new MoneroException(e2);
+      throw new MoneroError(e2);
     }
   }
   
@@ -183,7 +183,7 @@ public class MoneroRpcConnection {
       throw e1;
     } catch (Exception e2) {
       e2.printStackTrace();
-      throw new MoneroException(e2);
+      throw new MoneroError(e2);
     }
   }
   
@@ -224,7 +224,7 @@ public class MoneroRpcConnection {
       throw e1;
     } catch (Exception e2) {
       e2.printStackTrace();
-      throw new MoneroException(e2);
+      throw new MoneroError(e2);
     }
   }
   

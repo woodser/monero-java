@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
-import monero.common.MoneroException;
+import monero.common.MoneroError;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
@@ -139,7 +139,7 @@ public class MoneroTxWallet extends MoneroTx {
     // validate that all outputs are wallet outputs
     if (outputs != null) {
       for (MoneroOutput output : outputs) {
-        if (!(output instanceof MoneroOutputWallet)) throw new MoneroException("Wallet transaction outputs must be of type MoneroOutputWallet");
+        if (!(output instanceof MoneroOutputWallet)) throw new MoneroError("Wallet transaction outputs must be of type MoneroOutputWallet");
       }
     }
     super.setOutputs(outputs);
@@ -246,7 +246,7 @@ public class MoneroTxWallet extends MoneroTx {
   }
   
   public MoneroTxWallet merge(MoneroTx tx) {
-    if (tx != null && !(tx instanceof MoneroTxWallet)) throw new MoneroException("Wallet transaction must be merged with type MoneroTxWallet");
+    if (tx != null && !(tx instanceof MoneroTxWallet)) throw new MoneroError("Wallet transaction must be merged with type MoneroTxWallet");
     return merge((MoneroTxWallet) tx);
   }
   
@@ -261,7 +261,7 @@ public class MoneroTxWallet extends MoneroTx {
    * @return this tx for chaining
    */
   public MoneroTxWallet merge(MoneroTxWallet tx) {
-    if (!(tx instanceof MoneroTxWallet)) throw new MoneroException("Wallet transaction must be merged with type MoneroTxWallet");
+    if (!(tx instanceof MoneroTxWallet)) throw new MoneroError("Wallet transaction must be merged with type MoneroTxWallet");
     if (this == tx) return this;
     
     // merge base classes

@@ -17,7 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import monero.common.MoneroException;
+import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroKeyImage;
@@ -170,14 +170,14 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // start mining
     try { StartMining.startMining(); }
-    catch (MoneroException e) { }
+    catch (MoneroError e) { }
     
     // wait for a block
     daemon.getNextBlockHeader();
     
     // stop mining
     try { daemon.stopMining(); }
-    catch (MoneroException e) { }
+    catch (MoneroError e) { }
     
     // check in on the daemon
     daemon.getHeight();
@@ -246,7 +246,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     try {
       wallet.sync();
       fail("Exception expected");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Wallet is not connected to daemon", e.getMessage());
     } finally {
       wallet.close();
@@ -275,7 +275,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // cannot get daemon chain height
     try {
       wallet.getDaemonHeight();
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Wallet is not connected to daemon", e.getMessage());
     }
     
@@ -323,7 +323,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertFalse(wallet.isSynced());
     assertEquals(1, wallet.getHeight());
     assertEquals(0, wallet.getSyncHeight());
-    try { wallet.startSyncing(); } catch (MoneroException e) { assertEquals("Wallet is not connected to daemon", e.getMessage()); }
+    try { wallet.startSyncing(); } catch (MoneroError e) { assertEquals("Wallet is not connected to daemon", e.getMessage()); }
     wallet.close();
     
     // create wallet without restore height
@@ -479,7 +479,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     try {
       wallet.sync();
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Wallet is not connected to daemon", e.getMessage());
     } finally {
       wallet.close();
@@ -694,7 +694,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals(1, wallet.getHeight());
       assertEquals(BigInteger.valueOf(0), wallet.getBalance());
       wallet.startSyncing();
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Wallet is not connected to daemon", e.getMessage());
     } finally {
       wallet.close();
@@ -838,7 +838,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     try {
       openWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE));
       fail("Cannot open non-existant wallet");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Wallet does not exist at path: " + path, e.getMessage());
     }
     
@@ -1066,15 +1066,15 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // attempt to interact with the wallet
     try { wallet.getHeight(); }
-    catch (MoneroException e) { assertEquals("Wallet is closed", e.getMessage()); }
+    catch (MoneroError e) { assertEquals("Wallet is closed", e.getMessage()); }
     try { wallet.getMnemonic(); }
-    catch (MoneroException e) { assertEquals("Wallet is closed", e.getMessage()); }
+    catch (MoneroError e) { assertEquals("Wallet is closed", e.getMessage()); }
     try { wallet.sync(); }
-    catch (MoneroException e) { assertEquals("Wallet is closed", e.getMessage()); }
+    catch (MoneroError e) { assertEquals("Wallet is closed", e.getMessage()); }
     try { wallet.startSyncing(); }
-    catch (MoneroException e) { assertEquals("Wallet is closed", e.getMessage()); }
+    catch (MoneroError e) { assertEquals("Wallet is closed", e.getMessage()); }
     try { wallet.stopSyncing(); }
-    catch (MoneroException e) { assertEquals("Wallet is closed", e.getMessage()); }
+    catch (MoneroError e) { assertEquals("Wallet is closed", e.getMessage()); }
     
     // re-open the wallet
     wallet = openWallet(new MoneroWalletConfig().setPath(path));
@@ -1113,7 +1113,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       // funds received within 10 seconds
       TimeUnit.SECONDS.sleep(10);
       assertFalse(receiverListener.getOutputsReceived().isEmpty());
-      for (MoneroOutputWallet output : receiverListener.getOutputsReceived()) assertFalse(output.getTx().isConfirmed());  // received outputs are unconfirmed
+      for (MoneroOutputWallet output : receiverListener.getOutputsReceived()) assertFalse(output.getTx().isConfirmed());  // received unconfirmed outputs
       assertFalse(senderListener.getOutputsSpent().isEmpty());
     } finally {
       if (receiver != null) receiver.close();

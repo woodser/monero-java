@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import common.utils.GenUtils;
-import monero.common.MoneroException;
+import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -124,7 +124,7 @@ public abstract class MoneroWalletBase implements MoneroWallet {
   @Override
   public MoneroSubaddress getSubaddress(int accountIdx, int subaddressIdx) {
     List<MoneroSubaddress> subaddresses = getSubaddresses(accountIdx, Arrays.asList(subaddressIdx));
-    if (subaddresses.isEmpty()) throw new MoneroException("Subaddress at index " + subaddressIdx + " is not initialized");
+    if (subaddresses.isEmpty()) throw new MoneroError("Subaddress at index " + subaddressIdx + " is not initialized");
     GenUtils.assertEquals("Only 1 subaddress should be returned", 1, subaddresses.size());
     return subaddresses.get(0);
   }
@@ -182,7 +182,7 @@ public abstract class MoneroWalletBase implements MoneroWallet {
     MoneroTransferQuery _query;
     if (query == null) _query = new MoneroTransferQuery();
     else {
-      if (Boolean.FALSE.equals(query.isIncoming())) throw new MoneroException("Transfer query contradicts getting incoming transfers");
+      if (Boolean.FALSE.equals(query.isIncoming())) throw new MoneroError("Transfer query contradicts getting incoming transfers");
       _query = query.copy();
     }
     _query.setIsIncoming(true);
@@ -207,7 +207,7 @@ public abstract class MoneroWalletBase implements MoneroWallet {
     MoneroTransferQuery _query;
     if (query == null) _query = new MoneroTransferQuery();
     else {
-      if (Boolean.FALSE.equals(query.isOutgoing())) throw new MoneroException("Transfer query contradicts getting outgoing transfers");
+      if (Boolean.FALSE.equals(query.isOutgoing())) throw new MoneroError("Transfer query contradicts getting outgoing transfers");
       _query = query.copy();
     }
     _query.setIsOutgoing(true);
@@ -227,8 +227,8 @@ public abstract class MoneroWalletBase implements MoneroWallet {
   
   @Override
   public MoneroTxSet createTx(MoneroSendRequest request) {
-    if (request == null) throw new MoneroException("Send request cannot be null");
-    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with createTx() which prevents splitting; use createTxs() instead");
+    if (request == null) throw new MoneroError("Send request cannot be null");
+    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroError("Cannot request split transactions with createTx() which prevents splitting; use createTxs() instead");
     request = request.copy();
     request.setCanSplit(false);
     return createTxs(request);
@@ -246,7 +246,7 @@ public abstract class MoneroWalletBase implements MoneroWallet {
   
   @Override
   public MoneroTxSet createTxs(MoneroSendRequest request) {
-    if (request == null) throw new MoneroException("Send request cannot be null");
+    if (request == null) throw new MoneroError("Send request cannot be null");
     
     // modify request to not relay
     Boolean requestedDoNotRelay = request.getDoNotRelay();
@@ -285,8 +285,8 @@ public abstract class MoneroWalletBase implements MoneroWallet {
   
   @Override
   public MoneroTxSet sendTx(MoneroSendRequest request) {
-    if (request == null) throw new MoneroException("Send request cannot be null");
-    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroException("Cannot request split transactions with sendTx() which prevents splitting; use sendTxs() instead");
+    if (request == null) throw new MoneroError("Send request cannot be null");
+    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroError("Cannot request split transactions with sendTx() which prevents splitting; use sendTxs() instead");
     request = request.copy();
     request.setCanSplit(false);
     return sendTxs(request);

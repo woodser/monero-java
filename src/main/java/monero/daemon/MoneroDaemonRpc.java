@@ -37,7 +37,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import common.utils.GenUtils;
 import common.utils.JsonUtils;
-import monero.common.MoneroException;
+import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroRpcException;
 import monero.common.MoneroUtils;
@@ -129,7 +129,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     try {
       getHeight();
       return true;
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       return false;
     }
   }
@@ -337,7 +337,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public List<MoneroTx> getTxs(Collection<String> txHashes, Boolean prune) {
     
     // validate input
-    if (txHashes.isEmpty()) throw new MoneroException("Must provide an array of transaction hashes");
+    if (txHashes.isEmpty()) throw new MoneroError("Must provide an array of transaction hashes");
     
     // fetch transactions
     Map<String, Object> params = new HashMap<String, Object>();
@@ -347,8 +347,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     Map<String, Object> respMap = rpc.sendPathRequest("get_transactions", params);
     try {
       checkResponseStatus(respMap);
-    } catch (MoneroException e) {
-      if (e.getMessage().indexOf("Failed to parse hex representation of transaction hash") >= 0) throw new MoneroException("Invalid transaction hash", e.getCode());
+    } catch (MoneroError e) {
+      if (e.getMessage().indexOf("Failed to parse hex representation of transaction hash") >= 0) throw new MoneroError("Invalid transaction hash", e.getCode());
       throw e;
     }
     
@@ -423,7 +423,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     try {
       checkResponseStatus(resp);
       submitResult.setIsGood(true);
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       submitResult.setIsGood(false);
     }
     return submitResult;
@@ -476,7 +476,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public MoneroTxPoolStats getTxPoolStats() {
-    throw new MoneroException("Response contains field 'histo' which is binary'");
+    throw new MoneroError("Response contains field 'histo' which is binary'");
 //    let resp = await this.config.rpc.sendPathRequest("get_transaction_pool_stats");
 //    MoneroDaemonRpc._checkResponseStatus(resp);
 //    let stats = MoneroDaemonRpc._convertRpcTxPoolStats(resp.pool_stats);
@@ -516,7 +516,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public List<MoneroKeyImageSpentStatus> getKeyImageSpentStatuses(Collection<String> keyImages) {
-    if (keyImages == null || keyImages.isEmpty()) throw new MoneroException("Must provide key images to check the status of");
+    if (keyImages == null || keyImages.isEmpty()) throw new MoneroError("Must provide key images to check the status of");
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("key_images", keyImages);
     Map<String, Object> resp = rpc.sendPathRequest("is_key_image_spent", params);
@@ -648,7 +648,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   @Override
   public int setDownloadLimit(int limit) {
     if (limit == -1) return resetDownloadLimit();
-    if (limit <= 0) throw new MoneroException("Download limit must be an integer greater than 0");
+    if (limit <= 0) throw new MoneroError("Download limit must be an integer greater than 0");
     return setBandwidthLimits(limit, 0)[0];
   }
 
@@ -665,7 +665,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   @Override
   public int setUploadLimit(int limit) {
     if (limit == -1) return resetUploadLimit();
-    if (limit <= 0) throw new MoneroException("Upload limit must be an integer greater than 0");
+    if (limit <= 0) throw new MoneroError("Upload limit must be an integer greater than 0");
     return setBandwidthLimits(0, limit)[1];
   }
 
@@ -717,7 +717,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public void setOutgoingPeerLimit(int limit) {
-    if (limit < 0) throw new MoneroException("Outgoing peer limit must be >= 0");
+    if (limit < 0) throw new MoneroError("Outgoing peer limit must be >= 0");
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("out_peers", limit);
     Map<String, Object> resp = rpc.sendPathRequest("out_peers", params);
@@ -726,7 +726,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public void setIncomingPeerLimit(int limit) {
-    if (limit < 0) throw new MoneroException("Incoming peer limit must be >= 0");
+    if (limit < 0) throw new MoneroError("Incoming peer limit must be >= 0");
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("in_peers", limit);
     Map<String, Object> resp = rpc.sendPathRequest("in_peers", params);
@@ -800,8 +800,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public void startMining(String address, Long numThreads, Boolean isBackground, Boolean ignoreBattery) {
-    if (address == null || address.isEmpty()) throw new MoneroException("Must provide address to mine to");
-    if (numThreads == null || numThreads <= 0) throw new MoneroException("Number of threads must be an integer greater than 0");
+    if (address == null || address.isEmpty()) throw new MoneroError("Must provide address to mine to");
+    if (numThreads == null || numThreads <= 0) throw new MoneroError("Number of threads must be an integer greater than 0");
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("miner_address", address);
     params.put("threads_count", numThreads);
@@ -827,7 +827,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public void submitBlocks(Collection<String> blockBlobs) {
-    if (blockBlobs.isEmpty()) throw new MoneroException("Must provide an array of mined block blobs to submit");
+    if (blockBlobs.isEmpty()) throw new MoneroError("Must provide an array of mined block blobs to submit");
     Map<String, Object> resp = rpc.sendJsonRequest("submit_block", blockBlobs);
     checkResponseStatus((Map<String, Object>) resp.get("result"));
   }
@@ -876,7 +876,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         removeListener(customListener);
         return customListener.getLastBlockHeader();
       } catch (InterruptedException e) {
-        throw new MoneroException(e);
+        throw new MoneroError(e);
       }
     }
   }
@@ -1317,7 +1317,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         else if (rpcType == 2) connection.setType(ConnectionType.IPV6);
         else if (rpcType == 3) connection.setType(ConnectionType.TOR);
         else if (rpcType == 4) connection.setType(ConnectionType.I2P);
-        else throw new MoneroException("Invalid RPC connection type, expected 0-4: " + rpcType);
+        else throw new MoneroError("Invalid RPC connection type, expected 0-4: " + rpcType);
       }
       else LOGGER.warning("WARNING: ignoring unexpected field in connection: " + key + ": " + val);
     }
@@ -1548,7 +1548,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     
     public void removeListener(MoneroDaemonListener listener) {
       boolean found = listeners.remove(listener);
-      if (!found) throw new MoneroException("Listener is not registered");
+      if (!found) throw new MoneroError("Listener is not registered");
       if (listeners.isEmpty()) {
         runnable.terminate();
         runnable = null;

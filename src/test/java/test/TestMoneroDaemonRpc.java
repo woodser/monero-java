@@ -21,7 +21,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import common.utils.JsonUtils;
-import monero.common.MoneroException;
+import monero.common.MoneroError;
 import monero.common.MoneroRpcException;
 import monero.common.MoneroUtils;
 import monero.daemon.MoneroDaemon;
@@ -390,7 +390,7 @@ public class TestMoneroDaemonRpc {
     try {
       daemon.getTx("invalid tx hash");
       throw new RuntimeException("fail");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Invalid transaction hash", e.getMessage());
     }
   }
@@ -429,7 +429,7 @@ public class TestMoneroDaemonRpc {
     try {
       daemon.getTxs(txHashes);
       throw new RuntimeException("fail");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Invalid transaction hash", e.getMessage());
     }
   }
@@ -502,7 +502,7 @@ public class TestMoneroDaemonRpc {
     try {
       daemon.getTxHex("invalid tx hash");
       throw new RuntimeException("fail");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Invalid transaction hash", e.getMessage());
     }
   }
@@ -534,7 +534,7 @@ public class TestMoneroDaemonRpc {
     try {
       daemon.getTxHexes(txHashes);
       throw new RuntimeException("fail");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Invalid transaction hash", e.getMessage());
     }
   }
@@ -876,7 +876,7 @@ public class TestMoneroDaemonRpc {
     try {
       daemon.setDownloadLimit(0);
       fail("Should have thrown error on invalid input");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Download limit must be an integer greater than 0", e.getMessage());
     }
     assertEquals(daemon.getDownloadLimit(), initVal);
@@ -898,7 +898,7 @@ public class TestMoneroDaemonRpc {
     try {
       daemon.setUploadLimit(0);
       fail("Should have thrown error on invalid input");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals("Upload limit must be an integer greater than 0", e.getMessage());
     }
     assertEquals(initVal, daemon.getUploadLimit());
@@ -1005,7 +1005,7 @@ public class TestMoneroDaemonRpc {
     
     // stop mining at beginning of test
     try { daemon.stopMining(); }
-    catch (MoneroException e) { }
+    catch (MoneroError e) { }
     
     // generate address to mine to
     String address = wallet.getPrimaryAddress();
@@ -1026,7 +1026,7 @@ public class TestMoneroDaemonRpc {
       
       // stop mining at beginning of test
       try { daemon.stopMining(); }
-      catch (MoneroException e) { }
+      catch (MoneroError e) { }
       
       // test status without mining
       MoneroMiningStatus status = daemon.getMiningStatus();
@@ -1047,13 +1047,13 @@ public class TestMoneroDaemonRpc {
       assertTrue(status.getSpeed() >= 0);
       assertEquals(threadCount, (int) status.getNumThreads());
       assertEquals(isBackground, status.isBackground());
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       throw e;
     } finally {
       
       // stop mining at end of test
       try { daemon.stopMining(); }
-      catch (MoneroException e) { }
+      catch (MoneroError e) { }
     }
   }
   
@@ -1128,7 +1128,7 @@ public class TestMoneroDaemonRpc {
     try {
       daemon.getHeight();
       throw new RuntimeException("Should have thrown error");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertNotEquals("Should have thrown error", e.getMessage());
     }
   }
@@ -1270,7 +1270,7 @@ public class TestMoneroDaemonRpc {
       // start mining if possible to help push the network along
       String address = wallet.getPrimaryAddress();
       try { daemon.startMining(address, 8l, false, true); }
-      catch (MoneroException e) { }
+      catch (MoneroError e) { }
       
       // register a listener
       MoneroDaemonListener listener = new MoneroDaemonListener();
@@ -1285,13 +1285,13 @@ public class TestMoneroDaemonRpc {
       
       // unregister listener so daemon does not keep polling
       daemon.removeListener(listener);
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       throw e;
     } finally {
       
       // stop mining
       try { daemon.stopMining(); }
-      catch (MoneroException e) { }
+      catch (MoneroError e) { }
     }
   }
   

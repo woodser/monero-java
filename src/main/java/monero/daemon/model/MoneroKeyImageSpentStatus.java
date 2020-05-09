@@ -1,6 +1,6 @@
 package monero.daemon.model;
 
-import monero.common.MoneroException;
+import monero.common.MoneroError;
 
 /**
  * Enumerate key image spent statuses.
@@ -14,6 +14,6 @@ public enum MoneroKeyImageSpentStatus {
     if (status == 0) return NOT_SPENT;
     else if (status == 1) return CONFIRMED;
     else if (status == 2) return TX_POOL;
-    throw new MoneroException("Invalid integer value for spent status: " + status);
+    throw new MoneroError("Invalid integer value for spent status: " + status);
   }
 }

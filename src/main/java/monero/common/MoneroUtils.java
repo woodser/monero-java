@@ -68,7 +68,7 @@ public class MoneroUtils {
    * Validates the given mnemonic phrase.
    * 
    * @param mnemonic is the mnemonic to validate
-   * @throws MoneroException if the given mnemonic is invalid
+   * @throws MoneroError if the given mnemonic is invalid
    */
   public static void validateMnemonic(String mnemonic) {
     GenUtils.assertNotNull("Mnemonic phrase is not initialized", mnemonic);
@@ -116,7 +116,7 @@ public class MoneroUtils {
       if (INTEGRATED_ADDRESS_PATTERN.matcher(address).matches()) {
         isIntegrated = true;
       } else {
-        throw new MoneroException("Address has invalid regex pattern");
+        throw new MoneroError("Address has invalid regex pattern");
       }
     }
     
@@ -169,7 +169,7 @@ public class MoneroUtils {
       MoneroDecodedAddress decodedAddress = decodeAddress(address);
       GenUtils.assertEquals("Address network type mismatch: " + networkType + " vs " + decodedAddress.getNetworkType(), networkType, decodedAddress.getNetworkType());
     } catch (AssertionError e) {
-      throw new MoneroException(e.getMessage());
+      throw new MoneroError(e.getMessage());
     }
   }
 
@@ -182,11 +182,11 @@ public class MoneroUtils {
    * Validates the given view key.
    * 
    * @param viewKey is the view key to validate
-   * @throws MoneroException if the given view key is invalid
+   * @throws MoneroError if the given view key is invalid
    */
   public static void validateViewKey(String viewKey) {
-    if (viewKey == null) throw new MoneroException("View key is null");
-    if (viewKey.length() != VIEW_KEY_LENGTH) throw new MoneroException("View key is " + viewKey.length() + " characters but must be " + VIEW_KEY_LENGTH);
+    if (viewKey == null) throw new MoneroError("View key is null");
+    if (viewKey.length() != VIEW_KEY_LENGTH) throw new MoneroError("View key is " + viewKey.length() + " characters but must be " + VIEW_KEY_LENGTH);
   }
   
   /**
@@ -199,17 +199,17 @@ public class MoneroUtils {
     try {
       return new URI(endpoint);
     } catch (Exception e) {
-      throw new MoneroException(e);
+      throw new MoneroError(e);
     }
   }
 
   public static void validateHex(String str) {
-    if (!str.matches("^([0-9A-Fa-f]{2})+$")) throw new MoneroException("Invalid hex: " + str);
+    if (!str.matches("^([0-9A-Fa-f]{2})+$")) throw new MoneroError("Invalid hex: " + str);
   }
 
   public static void validateBase58(String standardAddress) {
     for (char c : standardAddress.toCharArray()) {
-      if (!CHARS.contains((Character) c)) throw new MoneroException("Invalid Base58 " + standardAddress);
+      if (!CHARS.contains((Character) c)) throw new MoneroError("Invalid Base58 " + standardAddress);
     }
   }
   

@@ -16,7 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import monero.common.MoneroException;
+import monero.common.MoneroError;
 import monero.common.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc;
@@ -114,7 +114,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       // attempt to create wallet which already exists
       try {
         createWallet(new MoneroWalletConfig().setPath(path).setLanguage("Spanish"));
-      } catch (MoneroException e) {
+      } catch (MoneroError e) {
         assertEquals(-21, (int) e.getCode());
       }
     } finally {
@@ -188,14 +188,14 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       // attempt to re-open already opened wallet
       try {
         wallet.openWallet(names.get(numTestWallets - 1), TestUtils.WALLET_PASSWORD);
-      } catch (MoneroException e) {
+      } catch (MoneroError e) {
         assertEquals(-1, (int) e.getCode());
       }
       
       // attempt to open non-existent
       try {
         wallet.openWallet("btc_integrity", TestUtils.WALLET_PASSWORD);
-      } catch (MoneroException e) {
+      } catch (MoneroError e) {
         assertEquals(-1, (int) e.getCode());  // -1 indicates wallet does not exist (or is open by another app)
       }
     } finally {
@@ -203,7 +203,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       // open main test wallet for other tests
       try {
         wallet.openWallet(TestUtils.WALLET_NAME, TestUtils.WALLET_PASSWORD);
-      } catch (MoneroException e) {
+      } catch (MoneroError e) {
         assertEquals(-1, (int) e.getCode()); // ok if wallet is already open
       }
     }
@@ -264,7 +264,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     try {
       wallet.getAccounts(false, tag.getTag());
       fail("Should have thrown exception with unregistered tag");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals(-1, (int) e.getCode());
     }
     
@@ -272,7 +272,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     try {
       wallet.getAccounts(false, "non_existing_tag");
       fail("Should have thrown exception with unregistered tag");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals(-1, (int) e.getCode());
     }
   }
@@ -319,19 +319,19 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     // attempt to interact with the wallet
     try {
       wallet.getHeight();
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals(-13, (int) e.getCode());
       assertEquals("No wallet file", e.getMessage());
     }
     try {
       wallet.getMnemonic();
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals(-13, (int) e.getCode());
       assertEquals("No wallet file", e.getMessage());
     }
     try {
       wallet.sync();
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertEquals(-13, (int) e.getCode());
       assertEquals("No wallet file", e.getMessage());
     }
@@ -366,32 +366,32 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     super.testTxWallet(tx, ctx);
   }
   
-  protected void testInvalidTxHashException(MoneroException e) {
+  protected void testInvalidTxHashException(MoneroError e) {
     super.testInvalidTxHashException(e);
     assertEquals(-8, (int) e.getCode());
   }
   
-  protected void testInvalidTxKeyException(MoneroException e) {
+  protected void testInvalidTxKeyException(MoneroError e) {
     super.testInvalidTxKeyException(e);
     assertEquals(-25, (int) e.getCode());
   }
   
-  protected void testInvalidAddressException(MoneroException e) {
+  protected void testInvalidAddressException(MoneroError e) {
     super.testInvalidAddressException(e);
     assertEquals(-2, (int) e.getCode());
   }
   
-  protected void testInvalidSignatureException(MoneroException e) {
+  protected void testInvalidSignatureException(MoneroError e) {
     super.testInvalidSignatureException(e);
     assertEquals(-1, (int) e.getCode()); // TODO: sometimes comes back bad, sometimes throws exception.  ensure txs come from different addresses?
   }
   
-  protected void testNoSubaddressException(MoneroException e) {
+  protected void testNoSubaddressException(MoneroError e) {
     super.testNoSubaddressException(e);
     assertEquals(-1, (int) e.getCode());
   }
   
-  protected void testSignatureHeaderCheckException(MoneroException e) {
+  protected void testSignatureHeaderCheckException(MoneroError e) {
     super.testSignatureHeaderCheckException(e);
     assertEquals(-1, (int) e.getCode());
   }

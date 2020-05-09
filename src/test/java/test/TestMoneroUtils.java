@@ -14,7 +14,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import monero.common.MoneroException;
+import monero.common.MoneroError;
 import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.MoneroWallet;
@@ -161,7 +161,7 @@ public class TestMoneroUtils {
     try {
       MoneroUtils.validateAddress(address, networkType);
       fail("Should have thrown exception");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       assertFalse(e.getMessage().isEmpty());
     }
   }

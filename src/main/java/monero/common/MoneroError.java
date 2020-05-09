@@ -5,7 +5,7 @@ import common.utils.GenUtils;
 /**
  * Exception when interacting with a Monero wallet or daemon.
  */
-public class MoneroException extends RuntimeException {
+public class MoneroError extends RuntimeException {
 
   private static final long serialVersionUID = -6282368684634114151L;
   
@@ -16,7 +16,7 @@ public class MoneroException extends RuntimeException {
    * 
    * @param e is the existing exception
    */
-  public MoneroException(Throwable e) {
+  public MoneroError(Throwable e) {
     super(e);
   }
   
@@ -25,7 +25,7 @@ public class MoneroException extends RuntimeException {
    * 
    * @param message is a human-readable description of the error
    */
-  public MoneroException(String message) {
+  public MoneroError(String message) {
     this(message, null);
   }
   
@@ -35,7 +35,7 @@ public class MoneroException extends RuntimeException {
    * @param message is a human-readable description of the error
    * @param code is the error code (optional)
    */
-  public MoneroException(String message, Integer code) {
+  public MoneroError(String message, Integer code) {
     super(message);
     GenUtils.assertNotNull("Exeption message cannot be null", message);
     this.code = code;

@@ -38,7 +38,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import common.utils.GenUtils;
-import monero.common.MoneroException;
+import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroRpcException;
 import monero.common.MoneroUtils;
@@ -149,9 +149,9 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    * @param config configures the wallet to open
    */
   public void openWallet(MoneroWalletConfig config) {
-    if (config == null) throw new MoneroException("Must provide configuration of wallet to open");
-    if (config.getPath() == null || config.getPath().isEmpty()) throw new MoneroException("Filename is not initialized");
-    if (config.getPassword() == null || config.getPassword().isEmpty()) throw new MoneroException("Password is not initialized");
+    if (config == null) throw new MoneroError("Must provide configuration of wallet to open");
+    if (config.getPath() == null || config.getPath().isEmpty()) throw new MoneroError("Filename is not initialized");
+    if (config.getPassword() == null || config.getPassword().isEmpty()) throw new MoneroError("Password is not initialized");
     // TODO: ensure other fields are uninitialized?
     
     // open wallet on rpc server
@@ -198,22 +198,22 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   public void createWallet(MoneroWalletConfig config) {
     
     // validate config
-    if (config == null) throw new MoneroException("Must specify config to create wallet");
-    if (config.getNetworkType() != null) throw new MoneroException("Cannot specify network type when creating RPC wallet");
+    if (config == null) throw new MoneroError("Must specify config to create wallet");
+    if (config.getNetworkType() != null) throw new MoneroError("Cannot specify network type when creating RPC wallet");
     if (config.getMnemonic() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
-      throw new MoneroException("Wallet may be initialized with a mnemonic or keys but not both");
+      throw new MoneroError("Wallet may be initialized with a mnemonic or keys but not both");
     }
     
     // create wallet
     if (config.getMnemonic() != null) {
       createWalletFromMnemonic(config.getPath(), config.getPassword(), config.getMnemonic(), config.getRestoreHeight(), config.getLanguage(), config.getSeedOffset(), config.getSaveCurrent());
     } else if (config.getPrimaryAddress() != null) {
-      if (config.getSeedOffset() != null) throw new MoneroException("Cannot specify seed offset when creating wallet from keys");
+      if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating wallet from keys");
       createWalletFromKeys(config.getPath(), config.getPassword(), config.getPrimaryAddress(), config.getPrivateViewKey(), config.getPrivateSpendKey(), config.getRestoreHeight(), config.getLanguage(), config.getSaveCurrent());
     } else {
-      if (config.getSeedOffset() != null) throw new MoneroException("Cannot specify seed offset when creating random wallet");
-      if (config.getRestoreHeight() != null) throw new MoneroException("Cannot specify restore height when creating random wallet");
-      if (Boolean.FALSE.equals(config.getSaveCurrent())) throw new MoneroException("Current wallet is saved automatically when creating random wallet");
+      if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating random wallet");
+      if (config.getRestoreHeight() != null) throw new MoneroError("Cannot specify restore height when creating random wallet");
+      if (Boolean.FALSE.equals(config.getSaveCurrent())) throw new MoneroError("Current wallet is saved automatically when creating random wallet");
       createWalletRandom(config.getPath(), config.getPassword(), config.getLanguage());
     }
     
@@ -230,8 +230,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    */
   public void createWalletRandom(String name, String password) { createWalletRandom(name, password, null); }
   public void createWalletRandom(String name, String password, String language) {
-    if (name == null || name.isEmpty()) throw new MoneroException("Wallet name is not initialized");
-    if (password == null || password.isEmpty()) throw new MoneroException("Password is not initialized");
+    if (name == null || name.isEmpty()) throw new MoneroError("Wallet name is not initialized");
+    if (password == null || password.isEmpty()) throw new MoneroError("Password is not initialized");
     if (language == null || language.isEmpty()) language = DEFAULT_LANGUAGE;
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("filename", name);
@@ -240,7 +240,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     try {
       rpc.sendJsonRequest("create_wallet", params);
     } catch (Exception e) {
-      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroException("Wallet already exists: " + name);
+      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroError("Wallet already exists: " + name);
       throw e;
     }
     clear();
@@ -274,7 +274,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     try {
       rpc.sendJsonRequest("restore_deterministic_wallet", params);
     } catch (Exception e) {
-      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroException("Wallet already exists: " + name);
+      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroError("Wallet already exists: " + name);
       throw e;
     }
     clear();
@@ -309,7 +309,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     try {
       rpc.sendJsonRequest("generate_from_keys", params);
     } catch (Exception e) {
-      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroException("Wallet already exists: " + name);
+      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroError("Wallet already exists: " + name);
       throw e;
     }
     clear();
@@ -345,7 +345,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       params.put("key_type", "mnemonic");
       rpc.sendJsonRequest("query_key", params);
       return false; // key retrieval succeeds if not watch only
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       if (e.getCode() == -29) return true;  // wallet is watch-only
       if (e.getCode() == -1) return false;  // wallet is offline but not watch-only
       throw e;
@@ -357,7 +357,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   public void setDaemonConnection(MoneroRpcConnection daemonConnection, Boolean isTrusted, SslOptions sslOptions) {
-    if (daemonConnection.getUsername() != null && !daemonConnection.getUsername().isEmpty()) throw new MoneroException("monero-wallet-rpc does not support setting daemon connection with authentication");
+    if (daemonConnection.getUsername() != null && !daemonConnection.getUsername().isEmpty()) throw new MoneroError("monero-wallet-rpc does not support setting daemon connection with authentication");
     if (sslOptions == null) sslOptions = new SslOptions();
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("address", daemonConnection == null ? "placeholder" : daemonConnection.getUri());
@@ -379,7 +379,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     try {
       sync(); // wallet rpc auto syncs so worst case this call blocks and blocks upfront  TODO: better way to determine if wallet rpc is connected to daemon?
       return true;
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       return false;
     }
   }
@@ -406,7 +406,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (String) result.get("key");
-    } catch (MoneroException e) {
+    } catch (MoneroError e) {
       if (e.getCode() == -29) return null;  // wallet is watch-only
       throw e;
     }
@@ -415,7 +415,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   @Override
   public String getMnemonicLanguage() {
     if (getMnemonic() == null) return null;
-    throw new MoneroException("MoneroWalletRpc.getMnemonicLanguage() not supported");
+    throw new MoneroError("MoneroWalletRpc.getMnemonicLanguage() not supported");
   }
 
   @SuppressWarnings("unchecked")
@@ -431,12 +431,12 @@ public class MoneroWalletRpc extends MoneroWalletBase {
 
   @Override
   public String getPublicViewKey() {
-    throw new MoneroException("MoneroWalletRpc.getPublicViewKey() not supported");
+    throw new MoneroError("MoneroWalletRpc.getPublicViewKey() not supported");
   }
 
   @Override
   public String getPublicSpendKey() {
-    throw new MoneroException("MoneroWalletRpc.getPublicSpendKey() not supported");
+    throw new MoneroError("MoneroWalletRpc.getPublicSpendKey() not supported");
   }
   
   @SuppressWarnings("unchecked")
@@ -485,7 +485,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       result = (Map<String, Object>) resp.get("result");
     } catch (MoneroRpcException e) {
       System.out.println(e.getMessage());
-      if (e.getCode() == -2) throw new MoneroException(e.getMessage(), e.getCode());
+      if (e.getCode() == -2) throw new MoneroError(e.getMessage(), e.getCode());
       throw e;
     }
     
@@ -508,7 +508,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       String integratedAddressStr = (String) result.get("integrated_address");
       return decodeIntegratedAddress(integratedAddressStr);
     } catch (MoneroRpcException e) {
-      if (e.getMessage().contains("Invalid payment ID")) throw new MoneroException("Invalid payment ID: " + paymentId, ERROR_CODE_INVALID_PAYMENT_ID);
+      if (e.getMessage().contains("Invalid payment ID")) throw new MoneroError("Invalid payment ID: " + paymentId, ERROR_CODE_INVALID_PAYMENT_ID);
       throw e;
     }
   }
@@ -533,13 +533,13 @@ public class MoneroWalletRpc extends MoneroWalletBase {
 
   @Override
   public long getDaemonHeight() {
-    throw new MoneroException("monero-wallet-rpc does not support getting the chain height");
+    throw new MoneroError("monero-wallet-rpc does not support getting the chain height");
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public MoneroSyncResult sync(Long startHeight, MoneroWalletListenerI listener) {
-    if (listener != null) throw new MoneroException("Monero Wallet RPC does not support reporting sync progress");
+    if (listener != null) throw new MoneroError("Monero Wallet RPC does not support reporting sync progress");
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("start_height", startHeight);
     Map<String, Object> resp = rpc.sendJsonRequest("refresh", params);
@@ -554,7 +554,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   
   @Override
   public void stopSyncing() {
-    throw new MoneroException("Monero Wallet RPC does not support the ability to stop syncing");
+    throw new MoneroError("Monero Wallet RPC does not support the ability to stop syncing");
   }
   
   @Override
@@ -665,14 +665,14 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses, boolean skipBalances) {
-    if (accountIdx < 0) throw new MoneroException("Account index must be greater than or equal to 0");
+    if (accountIdx < 0) throw new MoneroError("Account index must be greater than or equal to 0");
     for (MoneroAccount account : getAccounts()) {
       if (account.getIndex() == accountIdx) {
         if (includeSubaddresses) account.setSubaddresses(getSubaddresses(accountIdx, null, skipBalances));
         return account;
       }
     }
-    throw new MoneroException("Account with index " + accountIdx + " does not exist");
+    throw new MoneroError("Account with index " + accountIdx + " does not exist");
   }
 
   @SuppressWarnings("unchecked")
@@ -850,7 +850,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
             break;
           }
         }
-        if (!found) throw new MoneroException("Tx not found in wallet: " + txHash);
+        if (!found) throw new MoneroError("Tx not found in wallet: " + txHash);
       }
     }
     
@@ -894,7 +894,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     
     // check if pool txs explicitly requested without daemon connection
     if (txQuery.inTxPool() != null && Boolean.TRUE.equals(txQuery.inTxPool()) && !isConnected()) {
-      throw new MoneroException("Cannot fetch pool transactions because wallet has no daemon connection");
+      throw new MoneroError("Cannot fetch pool transactions because wallet has no daemon connection");
     }
 
     // build params for get_transfers rpc call
@@ -1146,7 +1146,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   @SuppressWarnings("unchecked")
   @Override
   public List<String> relayTxs(Collection<String> txMetadatas) {
-    if (txMetadatas == null || txMetadatas.isEmpty()) throw new MoneroException("Must provide an array of tx metadata to relay");
+    if (txMetadatas == null || txMetadatas.isEmpty()) throw new MoneroError("Must provide an array of tx metadata to relay");
     List<String> txHashes = new ArrayList<String>();
     for (String txMetadata : txMetadatas) {
       Map<String, Object> params = new HashMap<String, Object>();
@@ -1162,7 +1162,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   public MoneroTxSet sendTxs(MoneroSendRequest request) {
     
     // validate, copy, and normalize request
-    if (request == null) throw new MoneroException("Send request cannot be null");
+    if (request == null) throw new MoneroError("Send request cannot be null");
     GenUtils.assertNotNull(request.getDestinations());
     GenUtils.assertNull(request.getSweepEachSubaddress());
     GenUtils.assertNull(request.getBelowAmount());
@@ -1173,7 +1173,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     
     // determine account and subaddresses to send from
     Integer accountIdx = request.getAccountIndex();
-    if (accountIdx == null) throw new MoneroException("Must specify the account index to send from");
+    if (accountIdx == null) throw new MoneroError("Must specify the account index to send from");
     List<Integer> subaddressIndices = request.getSubaddressIndices() == null ? null : new ArrayList<Integer>(request.getSubaddressIndices()); // fetch all or copy given indices
     
     // build request parameters
@@ -1228,7 +1228,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     GenUtils.assertNull(request.getSweepEachSubaddress());
     GenUtils.assertNull(request.getBelowAmount());
     GenUtils.assertNull("Splitting is not applicable when sweeping output", request.getCanSplit());
-    if (request.getDestinations().size() != 1 || request.getDestinations().get(0).getAddress() == null || request.getDestinations().get(0).getAddress().isEmpty()) throw new MoneroException("Must provide exactly one destination address to sweep output to");
+    if (request.getDestinations().size() != 1 || request.getDestinations().get(0).getAddress() == null || request.getDestinations().get(0).getAddress().isEmpty()) throw new MoneroError("Must provide exactly one destination address to sweep output to");
     
     // build request parameters
     Map<String, Object> params = new HashMap<String, Object>();
@@ -1259,13 +1259,13 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   public List<MoneroTxSet> sweepUnlocked(MoneroSendRequest request) {
     
     // validate request
-    if (request == null) throw new MoneroException("Sweep request cannot be null");
-    if (request.getDestinations() == null || request.getDestinations().size() != 1) throw new MoneroException("Must specify exactly one destination to sweep to");
-    if (request.getDestinations().get(0).getAddress() == null) throw new MoneroException("Must specify destination address to sweep to");
-    if (request.getDestinations().get(0).getAmount() != null) throw new MoneroException("Cannot specify amount in sweep request");
-    if (request.getKeyImage() != null) throw new MoneroException("Key image defined; use sweepOutput() to sweep an output by its key image");
+    if (request == null) throw new MoneroError("Sweep request cannot be null");
+    if (request.getDestinations() == null || request.getDestinations().size() != 1) throw new MoneroError("Must specify exactly one destination to sweep to");
+    if (request.getDestinations().get(0).getAddress() == null) throw new MoneroError("Must specify destination address to sweep to");
+    if (request.getDestinations().get(0).getAmount() != null) throw new MoneroError("Cannot specify amount in sweep request");
+    if (request.getKeyImage() != null) throw new MoneroError("Key image defined; use sweepOutput() to sweep an output by its key image");
     if (request.getSubaddressIndices() != null && request.getSubaddressIndices().isEmpty()) request.setSubaddressIndices((List<Integer>) null);
-    if (request.getAccountIndex() == null && request.getSubaddressIndices() != null) throw new MoneroException("Must specify account index if subaddress indices are specified");
+    if (request.getAccountIndex() == null && request.getSubaddressIndices() != null) throw new MoneroError("Must specify account index if subaddress indices are specified");
     
     // determine account and subaddress indices to sweep; default to all with unlocked balance if not specified
     LinkedHashMap<Integer, List<Integer>> indices = new LinkedHashMap<Integer, List<Integer>>();  // java type preserves insertion order
@@ -1334,7 +1334,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
         tx.setInTxPool(tx.isRelayed());
       }
     } else if (txSet.getMultisigTxHex() == null && txSet.getSignedTxHex() == null && txSet.getUnsignedTxHex() == null) {
-      throw new MoneroException("No dust to sweep");
+      throw new MoneroError("No dust to sweep");
     }
     return txSet;
   }
@@ -1948,14 +1948,14 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   private MoneroTxSet rpcSweepAccount(MoneroSendRequest request) {
     
     // validate request
-    if (request == null) throw new MoneroException("Sweep request cannot be null");
-    if (request.getAccountIndex() == null) throw new MoneroException("Must specify an account index to sweep from");
-    if (request.getDestinations() == null || request.getDestinations().size() != 1) throw new MoneroException("Must specify exactly one destination to sweep to");
-    if (request.getDestinations().get(0).getAddress() == null) throw new MoneroException("Must specify destination address to sweep to");
-    if (request.getDestinations().get(0).getAmount() != null) throw new MoneroException("Cannot specify amount in sweep request");
-    if (request.getKeyImage() != null) throw new MoneroException("Key image defined; use sweepOutput() to sweep an output by its key image");
+    if (request == null) throw new MoneroError("Sweep request cannot be null");
+    if (request.getAccountIndex() == null) throw new MoneroError("Must specify an account index to sweep from");
+    if (request.getDestinations() == null || request.getDestinations().size() != 1) throw new MoneroError("Must specify exactly one destination to sweep to");
+    if (request.getDestinations().get(0).getAddress() == null) throw new MoneroError("Must specify destination address to sweep to");
+    if (request.getDestinations().get(0).getAmount() != null) throw new MoneroError("Cannot specify amount in sweep request");
+    if (request.getKeyImage() != null) throw new MoneroError("Key image defined; use sweepOutput() to sweep an output by its key image");
     if (request.getSubaddressIndices() != null && request.getSubaddressIndices().isEmpty()) request.setSubaddressIndices((List<Integer>) null);
-    if (Boolean.TRUE.equals(request.getSweepEachSubaddress())) throw new MoneroException("Cannot sweep each subaddress with RPC `sweep_all`");
+    if (Boolean.TRUE.equals(request.getSweepEachSubaddress())) throw new MoneroError("Cannot sweep each subaddress with RPC `sweep_all`");
     
     // sweep from all subaddresses if not otherwise defined
     if (request.getSubaddressIndices() == null) {
@@ -1964,7 +1964,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
         request.getSubaddressIndices().add(subaddress.getIndex());
       }
     }
-    if (request.getSubaddressIndices().size() == 0) throw new MoneroException("No subaddresses to sweep from");
+    if (request.getSubaddressIndices().size() == 0) throw new MoneroError("No subaddresses to sweep from");
     
     // common request params
     boolean doNotRelay = request.getDoNotRelay() != null && request.getDoNotRelay();
@@ -2273,7 +2273,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
           for (String destinationKey : rpcDestination.keySet()) {
             if (destinationKey.equals("address")) destination.setAddress((String) rpcDestination.get(destinationKey));
             else if (destinationKey.equals("amount")) destination.setAmount((BigInteger) rpcDestination.get(destinationKey));
-            else throw new MoneroException("Unrecognized transaction destination field: " + destinationKey);
+            else throw new MoneroError("Unrecognized transaction destination field: " + destinationKey);
           }
         }
         if (transfer == null) transfer = new MoneroOutgoingTransfer().setTx(tx);
@@ -2427,7 +2427,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       tx.setIsFailed(true);
       tx.setIsMinerTx(false);
     } else {
-      throw new MoneroException("Unrecognized transfer type: " + rpcType);
+      throw new MoneroError("Unrecognized transfer type: " + rpcType);
     }
     return isOutgoing;
   }
