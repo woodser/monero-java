@@ -36,6 +36,7 @@ import monero.wallet.model.MoneroSendRequest;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
+import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
 import monero.wallet.model.MoneroWalletListener;
@@ -1108,12 +1109,19 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       receiver.addListener(receiverListener);
       
       // send funds from sender
-      sender.sendTx(0, receiver.getPrimaryAddress(), TestUtils.MAX_FEE);  // TODO: send(), look up in/out txs by hash
+      MoneroTxSet txSet = sender.sendTx(0, receiver.getPrimaryAddress(), TestUtils.MAX_FEE);  // TODO: send(), look up in/out txs by hash
       
       // funds received within 10 seconds
       TimeUnit.SECONDS.sleep(10);
       assertFalse(receiverListener.getOutputsReceived().isEmpty());
       for (MoneroOutputWallet output : receiverListener.getOutputsReceived()) assertFalse(output.getTx().isConfirmed());  // received unconfirmed outputs
+      
+      // tx is queryable
+      String txHash = txSet.getTxs().get(0).getHash();
+      MoneroTxWallet sentUnconfirmed = sender.getTx(txHash);
+      System.out.println(sentUnconfirmed);
+      MoneroTxWallet receivedUnconfirmed = receiver.getTx(txHash);
+      System.out.println(receivedUnconfirmed);
       assertFalse(senderListener.getOutputsSpent().isEmpty());
     } finally {
       if (receiver != null) receiver.close();
