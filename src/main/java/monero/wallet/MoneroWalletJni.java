@@ -1590,10 +1590,17 @@ public class MoneroWalletJni extends MoneroWalletBase {
       tx.setUnlockTime(unlockTime);
       output.setTx(tx);
       tx.setOutputs(Arrays.asList(output));
+      tx.setIsIncoming(true);
       if (height > 0) {
         MoneroBlock block = new MoneroBlock().setHeight(height);
         block.setTxs(Arrays.asList(tx));
         tx.setBlock(block);
+        tx.setIsConfirmed(true);
+        tx.setInTxPool(false);
+        tx.setIsFailed(false);
+      } else {
+        tx.setIsConfirmed(false);
+        tx.setInTxPool(true);
       }
       
       // announce output
@@ -1612,10 +1619,17 @@ public class MoneroWalletJni extends MoneroWalletBase {
       tx.setVersion(version);
       output.setTx(tx);
       tx.setInputs(Arrays.asList(output));
+      tx.setIsIncoming(false);
       if (height > 0) {
         MoneroBlock block = new MoneroBlock().setHeight(height);
         block.setTxs(Arrays.asList(tx));
         tx.setBlock(block);
+        tx.setIsConfirmed(true);
+        tx.setInTxPool(false);
+        tx.setIsFailed(false);
+      } else {
+        tx.setIsConfirmed(false);
+        tx.setInTxPool(true);
       }
       
       // announce output

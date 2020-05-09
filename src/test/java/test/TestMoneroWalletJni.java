@@ -1089,6 +1089,63 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   // ----------------------------- NOTIFICATION TESTS -------------------------
   
+  @Test
+  public void testReceivesFundsWithin10Seconds() throws InterruptedException {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    MoneroWalletJni receiver = null;
+    try {
+      
+      // listen for sent funds
+      MoneroWalletJni sender = wallet;
+      OutputNotificationCollector senderListener = new OutputNotificationCollector();
+      sender.addListener(senderListener);
+      
+      // create wallet to receive funds
+      receiver = createWallet(new MoneroWalletConfig());
+      
+      // listen for received funds
+      OutputNotificationCollector receiverListener = new OutputNotificationCollector();
+      receiver.addListener(receiverListener);
+      
+      // send funds from sender
+      sender.sendTx(0, receiver.getPrimaryAddress(), TestUtils.MAX_FEE);
+      
+      // funds received within 10 seconds
+      TimeUnit.SECONDS.sleep(10);
+      assertFalse(receiverListener.getOutputsReceived().isEmpty());
+      for (MoneroOutputWallet output : receiverListener.getOutputsReceived()) assertFalse(output.getTx().isConfirmed());  // received outputs are unconfirmed
+      assertFalse(senderListener.getOutputsSpent().isEmpty());
+    } finally {
+      if (receiver != null) receiver.close();
+    }
+    
+//  // receive notifications when the wallet receives funds
+//  let fundsReceived = false;
+//  await that.wallet.addListener(new class extends MoneroWalletListener {
+//    onUnconfirmedOutputReceived(output) {
+//      console.log("Received unconfirmed funds!");
+//      console.log(output.toString());
+//      fundsReceived = true;
+//      TestUtils.testUnsignedBigInteger(output.getAmount(), true);
+//      assert.equal(output.getAmount().toString(), TestUtils.MAX_FEE.toString());
+//      assert(output.getTx().getHash());
+//      assert.equal(undefined, output.getTx().getBlock());
+//      assert.equal(typeof output.getAccountIndex(), "number");
+//      assert.equal(typeof output.getSubaddressIndex(), "number");
+//    }
+//  });
+//  
+//  // transfer from rpc wallet
+//  let walletRpc = await TestUtils.getWalletRpc();
+//  await TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(walletRpc);
+//  let txSet = await that.wallet.sendTx(0, await that.wallet.getPrimaryAddress(), TestUtils.MAX_FEE);
+//  
+//  // funds received within 10 seconds
+//  await new Promise(function(resolve) { setTimeout(resolve, 10000); });
+//  assert(fundsReceived, "Funds not received within 10 seconds");
+//} catch (e) {
+  }
+  
   /**
    * 4 output notification tests are considered when transferring within one wallet.  // TODO: multi-wallet tests
    * 
@@ -1104,6 +1161,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   // Notification test #1: notifies listeners of outputs sent from/to the same account using local wallet data
   @Test
   public void testOutputNotificationsSameAccounts() {
+    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
     List<String> issues = testOutputNotifications(true, false);
     if (issues == null) return;
     String msg = "testOutputNotificationsSameAccounts() generated " + issues.size() + " issues:\n" + issuesToStr(issues);
@@ -1114,6 +1172,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   // Notification test #2: notifies listeners of outputs sent from/to different accounts using local wallet data
   @Test
   public void testOutputNotificationsDifferentAccounts() {
+    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
     List<String> issues = testOutputNotifications(false, false);
     if (issues == null) return;
     String msg = "testOutputNotificationsDifferentAccounts() generated " + issues.size() + " issues:\n" + issuesToStr(issues);
@@ -1124,6 +1183,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   // Notification test #3: notifies listeners of swept outputs
   @Test
   public void testOutputNotificationsSweepOutput() {
+    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
     List<String> issues = testOutputNotifications(false, true);
     if (issues == null) return;
     String msg = "testOutputNotificationsSweepOutput() generated " + issues.size() + " issues:\n" + issuesToStr(issues);
