@@ -848,14 +848,14 @@ public abstract class TestMoneroWalletCommon {
     List<String> txHashes = new ArrayList<String>();
     for (MoneroTxWallet randomTx : randomTxs) {
       txHashes.add(randomTx.getHash());
-      List<MoneroTxWallet> txs = getAndTestTxs(wallet, new MoneroTxQuery().setTxHash(randomTx.getHash()), null, true);
+      List<MoneroTxWallet> txs = getAndTestTxs(wallet, new MoneroTxQuery().setHash(randomTx.getHash()), null, true);
       assertEquals(txs.size(), 1);
       MoneroTxWallet merged = txs.get(0).merge(randomTx.copy()); // txs change with chain so check mergeability
       testTxWallet(merged, null);
     }
     
     // get transactions by hashes
-    List<MoneroTxWallet> txs = getAndTestTxs(wallet, new MoneroTxQuery().setTxHashes(txHashes), null, null);
+    List<MoneroTxWallet> txs = getAndTestTxs(wallet, new MoneroTxQuery().setHashes(txHashes), null, null);
     assertEquals(txs.size(), randomTxs.size());
     for (MoneroTxWallet tx : txs) assertTrue(txHashes.contains(tx.getHash()));
     
@@ -1098,7 +1098,7 @@ public abstract class TestMoneroWalletCommon {
         
         // fetch tx with filtering
         List<MoneroTxWallet> filteredTxs = wallet.getTxs(new MoneroTxQuery().setTransferQuery(new MoneroTransferQuery().setIsIncoming(true).setAccountIndex(transfer.getAccountIndex())));
-        MoneroTxWallet filteredTx = Filter.apply(new MoneroTxQuery().setTxHashes(tx.getHash()), filteredTxs).get(0);
+        MoneroTxWallet filteredTx = Filter.apply(new MoneroTxQuery().setHashes(tx.getHash()), filteredTxs).get(0);
         
         // txs should be the same (mergeable)
         assertEquals(tx.getHash(), filteredTx.getHash());
@@ -1137,7 +1137,7 @@ public abstract class TestMoneroWalletCommon {
     
     // fetch unknown tx hash using query
     try {
-      wallet.getTxs(new MoneroTxQuery().setTxHash(unknownId1));
+      wallet.getTxs(new MoneroTxQuery().setHash(unknownId1));
       throw new Error("Should have thrown error getting tx hash unknown to wallet");
     } catch (MoneroError e) {
       assertEquals("Tx not found in wallet: " + unknownId1, e.getMessage());
@@ -1309,7 +1309,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // get transfers with tx hashes
-    transfers = getAndTestTransfers(wallet, new MoneroTransferQuery().setTxQuery(new MoneroTxQuery().setTxHashes(txHashes)), null, true);
+    transfers = getAndTestTransfers(wallet, new MoneroTransferQuery().setTxQuery(new MoneroTxQuery().setHashes(txHashes)), null, true);
     for (MoneroTransfer transfer : transfers) assertTrue(txHashes.contains(transfer.getTx().getHash()));
     
     // TODO: test that transfers with the same txHash have the same tx reference
@@ -1340,7 +1340,7 @@ public abstract class TestMoneroWalletCommon {
     
     // test invalid hash in collection
     List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, null, 3, 5);
-    transfers = wallet.getTransfers(new MoneroTransferQuery().setTxQuery(new MoneroTxQuery().setTxHashes(randomTxs.get(0).getHash(), "invalid_id")));
+    transfers = wallet.getTransfers(new MoneroTransferQuery().setTxQuery(new MoneroTxQuery().setHashes(randomTxs.get(0).getHash(), "invalid_id")));
     assertTrue(transfers.size() > 0);
     MoneroTxWallet tx = transfers.get(0).getTx();
     for (MoneroTransfer transfer : transfers) assertTrue(tx == transfer.getTx());
@@ -1496,7 +1496,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // get outputs with tx hashes
-    outputs = getAndTestOutputs(wallet, new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setTxHashes(txHashes)), true);
+    outputs = getAndTestOutputs(wallet, new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setHashes(txHashes)), true);
     for (MoneroOutputWallet output : outputs) assertTrue(txHashes.contains(output.getTx().getHash()));
     
     // get confirmed outputs to specific subaddress with pre-built query
@@ -1533,7 +1533,7 @@ public abstract class TestMoneroWalletCommon {
     // test invalid hash in collection
     List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, new MoneroTxQuery().setIsConfirmed(true).setIncludeOutputs(true), 3, 5);
     for (MoneroTxWallet randomTx : randomTxs) assertFalse(randomTx.getOutputs().isEmpty());
-    outputs = wallet.getOutputs(new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setTxHashes(randomTxs.get(0).getHash(), "invalid_id")));
+    outputs = wallet.getOutputs(new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setHashes(randomTxs.get(0).getHash(), "invalid_id")));
     assertFalse(outputs.isEmpty());
     assertEquals(outputs.size(), randomTxs.get(0).getOutputs().size());
     MoneroTxWallet tx = outputs.get(0).getTx();
@@ -2829,7 +2829,7 @@ public abstract class TestMoneroWalletCommon {
       for (String txHash : txHashes) assertEquals(64, txHash.length());
       
       // fetch txs for testing
-      txs = wallet.getTxs(new MoneroTxQuery().setTxHashes(txHashes));
+      txs = wallet.getTxs(new MoneroTxQuery().setHashes(txHashes));
     }
     
     // test that balance and unlocked balance decreased
@@ -3111,7 +3111,7 @@ public abstract class TestMoneroWalletCommon {
     for (String txHash : txHashes) assertEquals(64, txHash.length());
     
     // fetch and test txs
-    txs = wallet.getTxs(new MoneroTxQuery().setTxHashes(txHashes));
+    txs = wallet.getTxs(new MoneroTxQuery().setHashes(txHashes));
     ctx.config.setDoNotRelay(false);
     for (MoneroTxWallet tx : txs) {
       testTxWallet(tx, ctx);
@@ -3408,7 +3408,7 @@ public abstract class TestMoneroWalletCommon {
         curWallet = synchronizeMultisigParticipants(curWallet, walletIds);
         
         // fetch the wallet's multisig txs
-        List<MoneroTxWallet> multisigTxs = curWallet.getTxs(new MoneroTxQuery().setTxHashes(txHashes));
+        List<MoneroTxWallet> multisigTxs = curWallet.getTxs(new MoneroTxQuery().setHashes(txHashes));
         assertEquals(multisigTxs.size(), txHashes.size());
         
         // sweep an output from subaddress [1,1]
@@ -3446,7 +3446,7 @@ public abstract class TestMoneroWalletCommon {
         curWallet = synchronizeMultisigParticipants(curWallet, walletIds);
         
         // fetch the wallet's multisig txs
-        multisigTxs = curWallet.getTxs(new MoneroTxQuery().setTxHashes(txHashes));
+        multisigTxs = curWallet.getTxs(new MoneroTxQuery().setHashes(txHashes));
         assertEquals(multisigTxs.size(), txHashes.size());
         
         // sweep remaining balance
@@ -3486,7 +3486,7 @@ public abstract class TestMoneroWalletCommon {
         curWallet = synchronizeMultisigParticipants(curWallet, walletIds);
         
         // fetch the wallet's multisig txs
-        multisigTxs = curWallet.getTxs(new MoneroTxQuery().setTxHashes(txHashes));
+        multisigTxs = curWallet.getTxs(new MoneroTxQuery().setHashes(txHashes));
         assertEquals(multisigTxs.size(), txHashes.size());
         
         curWallet.close(true);
@@ -3657,7 +3657,7 @@ public abstract class TestMoneroWalletCommon {
         // get incoming/outgoing txs with sent hashes
         List<String> txHashes = new ArrayList<String>();
         for (MoneroTxWallet sentTx : sentTxs) txHashes.add(sentTx.getHash());
-        MoneroTxQuery txQuery = new MoneroTxQuery().setTxHashes(txHashes);
+        MoneroTxQuery txQuery = new MoneroTxQuery().setHashes(txHashes);
         List<MoneroTxWallet> fetchedTxs = getAndTestTxs(wallet, txQuery, null, true);
         assertFalse(fetchedTxs.isEmpty());
         
@@ -4696,10 +4696,10 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // tx hashes must be in order if requested
-    if (query.getTxHashes() != null) {
-      assertEquals(txs.size(), query.getTxHashes().size());
-      for (int i = 0; i < query.getTxHashes().size(); i++) {
-        assertEquals(query.getTxHashes().get(i), txs.get(i).getHash());
+    if (query.getHashes() != null) {
+      assertEquals(txs.size(), query.getHashes().size());
+      for (int i = 0; i < query.getHashes().size(); i++) {
+        assertEquals(query.getHashes().get(i), txs.get(i).getHash());
       }
     }
     
@@ -4708,10 +4708,10 @@ public abstract class TestMoneroWalletCommon {
     Long prevBlockHeight = null;
     for (MoneroBlock block : blocks) {
       if (prevBlockHeight == null) prevBlockHeight = block.getHeight();
-      else if (query.getTxHashes() == null) assertTrue("Blocks are not in order of heights: " + prevBlockHeight + " vs " + block.getHeight(), block.getHeight() > prevBlockHeight);
+      else if (query.getHashes() == null) assertTrue("Blocks are not in order of heights: " + prevBlockHeight + " vs " + block.getHeight(), block.getHeight() > prevBlockHeight);
       for (MoneroTx tx : block.getTxs()) {
         assertTrue(tx.getBlock() == block);
-        if (query.getTxHashes() == null) {
+        if (query.getHashes() == null) {
           assertEquals(txs.get(index).getHash(), tx.getHash()); // verify tx order is self-consistent with blocks unless txs manually re-ordered by querying by hash
           assertTrue(txs.get(index) == tx);
         }

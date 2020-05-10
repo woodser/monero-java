@@ -773,11 +773,11 @@ public class MoneroWalletJni extends MoneroWalletBase {
     }
     
     // re-sort txs which is lost over jni serialization
-    if (query.getTxHashes() != null) {
+    if (query.getHashes() != null) {
       Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
       for (MoneroTxWallet tx : txs) txMap.put(tx.getHash(), tx);
       List<MoneroTxWallet> txsSorted = new ArrayList<MoneroTxWallet>();
-      for (String txHash : query.getTxHashes()) txsSorted.add(txMap.get(txHash));
+      for (String txHash : query.getHashes()) txsSorted.add(txMap.get(txHash));
       txs = txsSorted;
     }
     LOGGER.fine("getTxs() returning " + txs.size() + " transactions");

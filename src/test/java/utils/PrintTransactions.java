@@ -18,7 +18,7 @@ public class PrintTransactions {
     MoneroTxQuery query = new MoneroTxQuery();
     List<String> hashes = new ArrayList<String>();
     hashes.add("d16e603efed00a3d2e14085d0ebe96734145d9eba851f6afd02ab76f9d5b62c0");
-    query.setTxHashes(hashes);
+    query.setHashes(hashes);
     List<MoneroTxWallet> txs = wallet.getTxs(query);
     for (MoneroTx tx : txs) {
       System.out.println(tx);

@@ -841,8 +841,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     txs = txsQueried;
     
     // verify all specified tx hashes found
-    if (query.getTxHashes() != null) {
-      for (String txHash : query.getTxHashes()) {
+    if (query.getHashes() != null) {
+      for (String txHash : query.getHashes()) {
         boolean found = false;
         for (MoneroTxWallet tx : txs) {
           if (txHash.equals(tx.getHash())) {
@@ -860,11 +860,11 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     }
     
     // order txs if tx hashes given
-    if (query.getTxHashes() != null && !query.getTxHashes().isEmpty()) {
+    if (query.getHashes() != null && !query.getHashes().isEmpty()) {
       Map<String, MoneroTxWallet> txsById = new HashMap<String, MoneroTxWallet>();  // store txs in temporary map for sorting
       for (MoneroTxWallet tx : txs) txsById.put(tx.getHash(), tx);
       List<MoneroTxWallet> orderedTxs = new ArrayList<MoneroTxWallet>();
-      for (String txHash : query.getTxHashes()) orderedTxs.add(txsById.get(txHash));
+      for (String txHash : query.getHashes()) orderedTxs.add(txsById.get(txHash));
       txs = orderedTxs;
     }
     return txs;

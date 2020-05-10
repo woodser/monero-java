@@ -21,7 +21,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   
   private Boolean isOutgoing;
   private Boolean isIncoming;
-  private List<String> txHashes;
+  private List<String> hashes;
   private Boolean hasPaymentId;
   private List<String> paymentIds;
   private Long height;
@@ -39,7 +39,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     super(query);
     this.isOutgoing = query.isOutgoing;
     this.isIncoming = query.isIncoming;
-    if (query.txHashes != null) this.txHashes = new ArrayList<String>(query.txHashes);
+    if (query.hashes != null) this.hashes = new ArrayList<String>(query.hashes);
     this.hasPaymentId = query.hasPaymentId;
     if (query.paymentIds != null) this.paymentIds = new ArrayList<String>(query.paymentIds);
     this.height = query.height;
@@ -80,24 +80,20 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     return this;
   }
 
-  public List<String> getTxHashes() {
-    return txHashes;
+  public List<String> getHashes() {
+    return hashes;
   }
 
-  public MoneroTxQuery setTxHashes(List<String> txHashes) {
-    this.txHashes = txHashes;
+  public MoneroTxQuery setHashes(List<String> hashes) {
+    this.hashes = hashes;
     return this;
   }
   
-  public MoneroTxQuery setTxHashes(String... txHashes) {
-    this.txHashes = GenUtils.arrayToList(txHashes);
+  public MoneroTxQuery setHashes(String... hashes) {
+    this.hashes = GenUtils.arrayToList(hashes);
     return this;
   }
   
-  public MoneroTxQuery setTxHash(String txHash) {
-    return setTxHashes(Arrays.asList(txHash));
-  }
-
   @JsonProperty("hasPaymentId")
   public Boolean hasPaymentId() {
     return hasPaymentId;
@@ -238,7 +234,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     
     // filter on remaining fields
     Long txHeight = tx.getBlock() == null ? null : tx.getBlock().getHeight();
-    if (this.getTxHashes() != null && !this.getTxHashes().contains(tx.getHash())) return false;
+    if (this.getHashes() != null && !this.getHashes().contains(tx.getHash())) return false;
     if (this.getPaymentIds() != null && !this.getPaymentIds().contains(tx.getPaymentId())) return false;
     if (this.getHeight() != null && !this.getHeight().equals(txHeight)) return false;
     if (this.getMinHeight() != null && (txHeight == null || txHeight < this.getMinHeight())) return false;

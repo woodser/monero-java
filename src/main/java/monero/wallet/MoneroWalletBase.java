@@ -145,11 +145,11 @@ public abstract class MoneroWalletBase implements MoneroWallet {
   }
   
   public List<MoneroTxWallet> getTxs(String... txHashes) {
-    return getTxs(new MoneroTxQuery().setTxHashes(txHashes));
+    return getTxs(new MoneroTxQuery().setHashes(txHashes));
   }
   
   public List<MoneroTxWallet> getTxs(List<String> txHashes) {
-    return getTxs(new MoneroTxQuery().setTxHashes(txHashes));
+    return getTxs(new MoneroTxQuery().setHashes(txHashes));
   }
   
   @Override
