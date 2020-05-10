@@ -64,7 +64,7 @@ import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroSendRequest;
+import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
@@ -1159,28 +1159,28 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   @SuppressWarnings("unchecked")
-  public MoneroTxSet sendTxs(MoneroSendRequest request) {
+  public MoneroTxSet sendTxs(MoneroTxConfig config) {
     
     // validate, copy, and normalize request
-    if (request == null) throw new MoneroError("Send request cannot be null");
-    GenUtils.assertNotNull(request.getDestinations());
-    GenUtils.assertNull(request.getSweepEachSubaddress());
-    GenUtils.assertNull(request.getBelowAmount());
-    if (request.getCanSplit() == null) {
-      request = request.copy();
-      request.setCanSplit(true);
+    if (config == null) throw new MoneroError("Send request cannot be null");
+    GenUtils.assertNotNull(config.getDestinations());
+    GenUtils.assertNull(config.getSweepEachSubaddress());
+    GenUtils.assertNull(config.getBelowAmount());
+    if (config.getCanSplit() == null) {
+      config = config.copy();
+      config.setCanSplit(true);
     }
     
     // determine account and subaddresses to send from
-    Integer accountIdx = request.getAccountIndex();
+    Integer accountIdx = config.getAccountIndex();
     if (accountIdx == null) throw new MoneroError("Must specify the account index to send from");
-    List<Integer> subaddressIndices = request.getSubaddressIndices() == null ? null : new ArrayList<Integer>(request.getSubaddressIndices()); // fetch all or copy given indices
+    List<Integer> subaddressIndices = config.getSubaddressIndices() == null ? null : new ArrayList<Integer>(config.getSubaddressIndices()); // fetch all or copy given indices
     
     // build request parameters
     Map<String, Object> params = new HashMap<String, Object>();
     List<Map<String, Object>> destinationMaps = new ArrayList<Map<String, Object>>();
     params.put("destinations", destinationMaps);
-    for (MoneroDestination destination : request.getDestinations()) {
+    for (MoneroDestination destination : config.getDestinations()) {
       GenUtils.assertNotNull("Destination address is not defined", destination.getAddress());
       GenUtils.assertNotNull("Destination amount is not defined", destination.getAmount());
       Map<String, Object> destinationMap = new HashMap<String, Object>();
@@ -1190,56 +1190,56 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     }
     params.put("account_index", accountIdx);
     params.put("subaddr_indices", subaddressIndices);
-    params.put("payment_id", request.getPaymentId());
-    params.put("unlock_time", request.getUnlockTime());
-    params.put("do_not_relay", request.getDoNotRelay());
-    params.put("priority", request.getPriority() == null ? null : request.getPriority().ordinal());
+    params.put("payment_id", config.getPaymentId());
+    params.put("unlock_time", config.getUnlockTime());
+    params.put("do_not_relay", config.getDoNotRelay());
+    params.put("priority", config.getPriority() == null ? null : config.getPriority().ordinal());
     params.put("get_tx_hex", true);
     params.put("get_tx_metadata", true);
-    if (request.getCanSplit()) params.put("get_tx_keys", true); // param to get tx key(s) depends if split
+    if (config.getCanSplit()) params.put("get_tx_keys", true); // param to get tx key(s) depends if split
     else params.put("get_tx_key", true);
     
     // send request
-    Map<String, Object> resp = rpc.sendJsonRequest(request.getCanSplit() ? "transfer_split" : "transfer", params);
+    Map<String, Object> resp = rpc.sendJsonRequest(config.getCanSplit() ? "transfer_split" : "transfer", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     
     // pre-initialize txs iff present.  multisig and watch-only wallets will have tx set without transactions
     List<MoneroTxWallet> txs = null;
-    int numTxs = request.getCanSplit() ? (result.containsKey("fee_list") ? ((List<String>) result.get("fee_list")).size() : 0) : (result.containsKey("fee") ? 1 : 0);
+    int numTxs = config.getCanSplit() ? (result.containsKey("fee_list") ? ((List<String>) result.get("fee_list")).size() : 0) : (result.containsKey("fee") ? 1 : 0);
     if (numTxs > 0) txs = new ArrayList<MoneroTxWallet>();
     for (int i = 0; i < numTxs; i++) {
       MoneroTxWallet tx = new MoneroTxWallet();
-      initSentTxWallet(request, tx);
+      initSentTxWallet(config, tx);
       tx.getOutgoingTransfer().setAccountIndex(accountIdx);
       if (subaddressIndices != null && subaddressIndices.size() == 1) tx.getOutgoingTransfer().setSubaddressIndices(subaddressIndices);
       txs.add(tx);
     }
     
     // initialize tx set from rpc response with pre-initialized txs
-    if (request.getCanSplit()) return convertRpcSentTxsToTxSet(result, txs);
+    if (config.getCanSplit()) return convertRpcSentTxsToTxSet(result, txs);
     else return convertRpcTxToTxSet(result, txs == null ? null : txs.get(0), true);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroTxSet sweepOutput(MoneroSendRequest request) {
+  public MoneroTxSet sweepOutput(MoneroTxConfig config) {
     
     // validate request
-    GenUtils.assertNull(request.getSweepEachSubaddress());
-    GenUtils.assertNull(request.getBelowAmount());
-    GenUtils.assertNull("Splitting is not applicable when sweeping output", request.getCanSplit());
-    if (request.getDestinations().size() != 1 || request.getDestinations().get(0).getAddress() == null || request.getDestinations().get(0).getAddress().isEmpty()) throw new MoneroError("Must provide exactly one destination address to sweep output to");
+    GenUtils.assertNull(config.getSweepEachSubaddress());
+    GenUtils.assertNull(config.getBelowAmount());
+    GenUtils.assertNull("Splitting is not applicable when sweeping output", config.getCanSplit());
+    if (config.getDestinations().size() != 1 || config.getDestinations().get(0).getAddress() == null || config.getDestinations().get(0).getAddress().isEmpty()) throw new MoneroError("Must provide exactly one destination address to sweep output to");
     
     // build request parameters
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("address", request.getDestinations().get(0).getAddress());
-    params.put("account_index", request.getAccountIndex());
-    params.put("subaddr_indices", request.getSubaddressIndices());
-    params.put("key_image", request.getKeyImage());
-    params.put("unlock_time", request.getUnlockTime());
-    params.put("do_not_relay", request.getDoNotRelay());
-    params.put("priority", request.getPriority() == null ? null : request.getPriority().ordinal());
-    params.put("payment_id", request.getPaymentId());
+    params.put("address", config.getDestinations().get(0).getAddress());
+    params.put("account_index", config.getAccountIndex());
+    params.put("subaddr_indices", config.getSubaddressIndices());
+    params.put("key_image", config.getKeyImage());
+    params.put("unlock_time", config.getUnlockTime());
+    params.put("do_not_relay", config.getDoNotRelay());
+    params.put("priority", config.getPriority() == null ? null : config.getPriority().ordinal());
+    params.put("payment_id", config.getPaymentId());
     params.put("get_tx_key", true);
     params.put("get_tx_hex", true);
     params.put("get_tx_metadata", true);
@@ -1249,33 +1249,33 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
 
     // build and return tx response
-    MoneroTxWallet tx = initSentTxWallet(request, null);
+    MoneroTxWallet tx = initSentTxWallet(config, null);
     MoneroTxSet txSet = convertRpcTxToTxSet(result, tx, true);
     tx.getOutgoingTransfer().getDestinations().get(0).setAmount(tx.getOutgoingTransfer().getAmount());  // initialize destination amount
     return txSet;
   }
   
   @Override
-  public List<MoneroTxSet> sweepUnlocked(MoneroSendRequest request) {
+  public List<MoneroTxSet> sweepUnlocked(MoneroTxConfig config) {
     
     // validate request
-    if (request == null) throw new MoneroError("Sweep request cannot be null");
-    if (request.getDestinations() == null || request.getDestinations().size() != 1) throw new MoneroError("Must specify exactly one destination to sweep to");
-    if (request.getDestinations().get(0).getAddress() == null) throw new MoneroError("Must specify destination address to sweep to");
-    if (request.getDestinations().get(0).getAmount() != null) throw new MoneroError("Cannot specify amount in sweep request");
-    if (request.getKeyImage() != null) throw new MoneroError("Key image defined; use sweepOutput() to sweep an output by its key image");
-    if (request.getSubaddressIndices() != null && request.getSubaddressIndices().isEmpty()) request.setSubaddressIndices((List<Integer>) null);
-    if (request.getAccountIndex() == null && request.getSubaddressIndices() != null) throw new MoneroError("Must specify account index if subaddress indices are specified");
+    if (config == null) throw new MoneroError("Sweep request cannot be null");
+    if (config.getDestinations() == null || config.getDestinations().size() != 1) throw new MoneroError("Must specify exactly one destination to sweep to");
+    if (config.getDestinations().get(0).getAddress() == null) throw new MoneroError("Must specify destination address to sweep to");
+    if (config.getDestinations().get(0).getAmount() != null) throw new MoneroError("Cannot specify amount in sweep request");
+    if (config.getKeyImage() != null) throw new MoneroError("Key image defined; use sweepOutput() to sweep an output by its key image");
+    if (config.getSubaddressIndices() != null && config.getSubaddressIndices().isEmpty()) config.setSubaddressIndices((List<Integer>) null);
+    if (config.getAccountIndex() == null && config.getSubaddressIndices() != null) throw new MoneroError("Must specify account index if subaddress indices are specified");
     
     // determine account and subaddress indices to sweep; default to all with unlocked balance if not specified
     LinkedHashMap<Integer, List<Integer>> indices = new LinkedHashMap<Integer, List<Integer>>();  // java type preserves insertion order
-    if (request.getAccountIndex() != null) {
-      if (request.getSubaddressIndices() != null) {
-        indices.put(request.getAccountIndex(), request.getSubaddressIndices());
+    if (config.getAccountIndex() != null) {
+      if (config.getSubaddressIndices() != null) {
+        indices.put(config.getAccountIndex(), config.getSubaddressIndices());
       } else {
         List<Integer> subaddressIndices = new ArrayList<Integer>();
-        indices.put(request.getAccountIndex(), subaddressIndices);
-        for (MoneroSubaddress subaddress : getSubaddresses(request.getAccountIndex())) {
+        indices.put(config.getAccountIndex(), subaddressIndices);
+        for (MoneroSubaddress subaddress : getSubaddresses(config.getAccountIndex())) {
           if (subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) subaddressIndices.add(subaddress.getIndex());
         }
       }
@@ -1297,7 +1297,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     for (Integer accountIdx : indices.keySet()) {
       
       // copy and modify the original request
-      MoneroSendRequest copy = request.copy();
+      MoneroTxConfig copy = config.copy();
       copy.setAccountIndex(accountIdx);
       copy.setSweepEachSubaddress(false);
       
@@ -1674,14 +1674,14 @@ public class MoneroWalletRpc extends MoneroWalletBase {
 
   @SuppressWarnings("unchecked")
   @Override
-  public String createPaymentUri(MoneroSendRequest request) {
-    GenUtils.assertNotNull("Must provide send request to create a payment URI", request);
+  public String createPaymentUri(MoneroTxConfig config) {
+    GenUtils.assertNotNull("Must provide send request to create a payment URI", config);
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("address", request.getDestinations().get(0).getAddress());
-    params.put("amount", request.getDestinations().get(0).getAmount() != null ? request.getDestinations().get(0).getAmount().toString() : null);
-    params.put("payment_id", request.getPaymentId());
-    params.put("recipient_name", request.getRecipientName());
-    params.put("tx_description", request.getNote());
+    params.put("address", config.getDestinations().get(0).getAddress());
+    params.put("amount", config.getDestinations().get(0).getAmount() != null ? config.getDestinations().get(0).getAmount().toString() : null);
+    params.put("payment_id", config.getPaymentId());
+    params.put("recipient_name", config.getRecipientName());
+    params.put("tx_description", config.getNote());
     Map<String, Object> resp = rpc.sendJsonRequest("make_uri", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return (String) result.get("uri");
@@ -1689,22 +1689,22 @@ public class MoneroWalletRpc extends MoneroWalletBase {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroSendRequest parsePaymentUri(String uri) {
+  public MoneroTxConfig parsePaymentUri(String uri) {
     GenUtils.assertNotNull("Must provide URI to parse", uri);
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("uri", uri);
     Map<String, Object> resp = rpc.sendJsonRequest("parse_uri", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     Map<String, Object> rpcUri = (Map<String, Object>) result.get("uri");
-    MoneroSendRequest request = new MoneroSendRequest((String) rpcUri.get("address"), (BigInteger) rpcUri.get("amount"));
-    request.setPaymentId((String) rpcUri.get("payment_id"));
-    request.setRecipientName((String) rpcUri.get("recipient_name"));
-    request.setNote((String) rpcUri.get("tx_description"));
-    if ("".equals(request.getDestinations().get(0).getAddress())) request.getDestinations().get(0).setAddress(null);
-    if ("".equals(request.getPaymentId())) request.setPaymentId(null);
-    if ("".equals(request.getRecipientName())) request.setRecipientName(null);
-    if ("".equals(request.getNote())) request.setNote(null);
-    return request;
+    MoneroTxConfig config = new MoneroTxConfig((String) rpcUri.get("address"), (BigInteger) rpcUri.get("amount"));
+    config.setPaymentId((String) rpcUri.get("payment_id"));
+    config.setRecipientName((String) rpcUri.get("recipient_name"));
+    config.setNote((String) rpcUri.get("tx_description"));
+    if ("".equals(config.getDestinations().get(0).getAddress())) config.getDestinations().get(0).setAddress(null);
+    if ("".equals(config.getPaymentId())) config.setPaymentId(null);
+    if ("".equals(config.getRecipientName())) config.setRecipientName(null);
+    if ("".equals(config.getNote())) config.setNote(null);
+    return config;
   }
   
   @SuppressWarnings("unchecked")
@@ -1945,38 +1945,38 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   @SuppressWarnings("unchecked")
-  private MoneroTxSet rpcSweepAccount(MoneroSendRequest request) {
+  private MoneroTxSet rpcSweepAccount(MoneroTxConfig config) {
     
     // validate request
-    if (request == null) throw new MoneroError("Sweep request cannot be null");
-    if (request.getAccountIndex() == null) throw new MoneroError("Must specify an account index to sweep from");
-    if (request.getDestinations() == null || request.getDestinations().size() != 1) throw new MoneroError("Must specify exactly one destination to sweep to");
-    if (request.getDestinations().get(0).getAddress() == null) throw new MoneroError("Must specify destination address to sweep to");
-    if (request.getDestinations().get(0).getAmount() != null) throw new MoneroError("Cannot specify amount in sweep request");
-    if (request.getKeyImage() != null) throw new MoneroError("Key image defined; use sweepOutput() to sweep an output by its key image");
-    if (request.getSubaddressIndices() != null && request.getSubaddressIndices().isEmpty()) request.setSubaddressIndices((List<Integer>) null);
-    if (Boolean.TRUE.equals(request.getSweepEachSubaddress())) throw new MoneroError("Cannot sweep each subaddress with RPC `sweep_all`");
+    if (config == null) throw new MoneroError("Sweep request cannot be null");
+    if (config.getAccountIndex() == null) throw new MoneroError("Must specify an account index to sweep from");
+    if (config.getDestinations() == null || config.getDestinations().size() != 1) throw new MoneroError("Must specify exactly one destination to sweep to");
+    if (config.getDestinations().get(0).getAddress() == null) throw new MoneroError("Must specify destination address to sweep to");
+    if (config.getDestinations().get(0).getAmount() != null) throw new MoneroError("Cannot specify amount in sweep request");
+    if (config.getKeyImage() != null) throw new MoneroError("Key image defined; use sweepOutput() to sweep an output by its key image");
+    if (config.getSubaddressIndices() != null && config.getSubaddressIndices().isEmpty()) config.setSubaddressIndices((List<Integer>) null);
+    if (Boolean.TRUE.equals(config.getSweepEachSubaddress())) throw new MoneroError("Cannot sweep each subaddress with RPC `sweep_all`");
     
     // sweep from all subaddresses if not otherwise defined
-    if (request.getSubaddressIndices() == null) {
-      request.setSubaddressIndices(new ArrayList<Integer>());
-      for (MoneroSubaddress subaddress : getSubaddresses(request.getAccountIndex())) {
-        request.getSubaddressIndices().add(subaddress.getIndex());
+    if (config.getSubaddressIndices() == null) {
+      config.setSubaddressIndices(new ArrayList<Integer>());
+      for (MoneroSubaddress subaddress : getSubaddresses(config.getAccountIndex())) {
+        config.getSubaddressIndices().add(subaddress.getIndex());
       }
     }
-    if (request.getSubaddressIndices().size() == 0) throw new MoneroError("No subaddresses to sweep from");
+    if (config.getSubaddressIndices().size() == 0) throw new MoneroError("No subaddresses to sweep from");
     
     // common request params
-    boolean doNotRelay = request.getDoNotRelay() != null && request.getDoNotRelay();
+    boolean doNotRelay = config.getDoNotRelay() != null && config.getDoNotRelay();
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("account_index", request.getAccountIndex());
-    params.put("subaddr_indices", request.getSubaddressIndices());
-    params.put("address", request.getDestinations().get(0).getAddress());
-    params.put("priority", request.getPriority() == null ? null : request.getPriority().ordinal());
-    params.put("unlock_time", request.getUnlockTime());
-    params.put("payment_id", request.getPaymentId());
+    params.put("account_index", config.getAccountIndex());
+    params.put("subaddr_indices", config.getSubaddressIndices());
+    params.put("address", config.getDestinations().get(0).getAddress());
+    params.put("priority", config.getPriority() == null ? null : config.getPriority().ordinal());
+    params.put("unlock_time", config.getUnlockTime());
+    params.put("payment_id", config.getPaymentId());
     params.put("do_not_relay", doNotRelay);
-    params.put("below_amount", request.getBelowAmount());
+    params.put("below_amount", config.getBelowAmount());
     params.put("get_tx_keys", true);
     params.put("get_tx_hex", true);
     params.put("get_tx_metadata", true);
@@ -2000,13 +2000,13 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       tx.setIsFailed(false);
       tx.setRingSize(MoneroUtils.RING_SIZE);
       MoneroOutgoingTransfer transfer = tx.getOutgoingTransfer();
-      transfer.setAccountIndex(request.getAccountIndex());
-      if (request.getSubaddressIndices().size() == 1) transfer.setSubaddressIndices(new ArrayList<Integer>(request.getSubaddressIndices()));
-      MoneroDestination destination = new MoneroDestination(request.getDestinations().get(0).getAddress(), transfer.getAmount());
+      transfer.setAccountIndex(config.getAccountIndex());
+      if (config.getSubaddressIndices().size() == 1) transfer.setSubaddressIndices(new ArrayList<Integer>(config.getSubaddressIndices()));
+      MoneroDestination destination = new MoneroDestination(config.getDestinations().get(0).getAddress(), transfer.getAmount());
       transfer.setDestinations(Arrays.asList(destination));
       tx.setOutgoingTransfer(transfer);
-      tx.setPaymentId(request.getPaymentId());
-      if (tx.getUnlockTime() == null) tx.setUnlockTime(request.getUnlockTime() == null ? 0l : request.getUnlockTime());
+      tx.setPaymentId(config.getPaymentId());
+      if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? 0l : config.getUnlockTime());
       if (!tx.getDoNotRelay()) {
         if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
         if (tx.isDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
@@ -2054,30 +2054,30 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   /**
    * Initializes a sent transaction.
    * 
-   * @param request is the send configuration
+   * @param config is the send configuration
    * @param tx is an existing transaction to initialize (optional)
    * @return tx is the initialized send tx
    */
-  private static MoneroTxWallet initSentTxWallet(MoneroSendRequest request, MoneroTxWallet tx) {
+  private static MoneroTxWallet initSentTxWallet(MoneroTxConfig config, MoneroTxWallet tx) {
     if (tx == null) tx = new MoneroTxWallet();
     tx.setIsOutgoing(true);
     tx.setIsConfirmed(false);
     tx.setNumConfirmations(0l);
-    tx.setInTxPool(Boolean.TRUE.equals(request.getDoNotRelay()) ? false : true);
-    tx.setDoNotRelay(Boolean.TRUE.equals(request.getDoNotRelay()) ? true : false);
+    tx.setInTxPool(Boolean.TRUE.equals(config.getDoNotRelay()) ? false : true);
+    tx.setDoNotRelay(Boolean.TRUE.equals(config.getDoNotRelay()) ? true : false);
     tx.setIsRelayed(!Boolean.TRUE.equals(tx.getDoNotRelay()));
     tx.setIsMinerTx(false);
     tx.setIsFailed(false);
     tx.setIsLocked(true);
     tx.setRingSize(MoneroUtils.RING_SIZE);
     MoneroOutgoingTransfer transfer = new MoneroOutgoingTransfer().setTx(tx);
-    if (request.getSubaddressIndices() != null && request.getSubaddressIndices().size() == 1) transfer.setSubaddressIndices(new ArrayList<Integer>(request.getSubaddressIndices())); // we know src subaddress indices iff request specifies 1
+    if (config.getSubaddressIndices() != null && config.getSubaddressIndices().size() == 1) transfer.setSubaddressIndices(new ArrayList<Integer>(config.getSubaddressIndices())); // we know src subaddress indices iff request specifies 1
     List<MoneroDestination> destCopies = new ArrayList<MoneroDestination>();
-    for (MoneroDestination dest : request.getDestinations()) destCopies.add(dest.copy());
+    for (MoneroDestination dest : config.getDestinations()) destCopies.add(dest.copy());
     transfer.setDestinations(destCopies);
     tx.setOutgoingTransfer(transfer);
-    tx.setPaymentId(request.getPaymentId());
-    if (tx.getUnlockTime() == null) tx.setUnlockTime(request.getUnlockTime() == null ? 0l : request.getUnlockTime());
+    tx.setPaymentId(config.getPaymentId());
+    if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? 0l : config.getUnlockTime());
     if (!Boolean.TRUE.equals(tx.getDoNotRelay())) {
       if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
       if (tx.isDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);

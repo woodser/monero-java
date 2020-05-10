@@ -10,13 +10,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import common.utils.GenUtils;
 
 /**
- * Configures a request to send/sweep funds or create a payment URI.
+ * Configures a transaction to send, sweep, or create a payment URI.
  */
-public class MoneroSendRequest {
+public class MoneroTxConfig {
 
   private List<MoneroDestination> destinations;
   private String paymentId;
-  private MoneroSendPriority priority;
+  private MoneroTxPriority priority;
   private BigInteger fee;
   private Integer accountIndex;
   private List<Integer> subaddressIndices;
@@ -29,57 +29,57 @@ public class MoneroSendRequest {
   private Boolean sweepEachSubaddress;
   private String keyImage;
   
-  public MoneroSendRequest() {
+  public MoneroTxConfig() {
     this((String) null);
   }
   
-  public MoneroSendRequest(String address) {
+  public MoneroTxConfig(String address) {
     this(address, null);
   }
   
-  public MoneroSendRequest(String address, BigInteger amount) {
+  public MoneroTxConfig(String address, BigInteger amount) {
     this(null, address, amount);
   }
   
-  public MoneroSendRequest(Integer accountIndex, String address) {
+  public MoneroTxConfig(Integer accountIndex, String address) {
     this(accountIndex, address, null);
   }
 
-  public MoneroSendRequest(Integer accountIndex, String address, BigInteger amount) {
+  public MoneroTxConfig(Integer accountIndex, String address, BigInteger amount) {
     this(accountIndex, address, amount, null);
   }
   
-  public MoneroSendRequest(Integer accountIndex, String address, BigInteger amount, MoneroSendPriority priority) {
+  public MoneroTxConfig(Integer accountIndex, String address, BigInteger amount, MoneroTxPriority priority) {
     this.accountIndex = accountIndex;
     if (address != null || amount != null) this.destinations = Arrays.asList(new MoneroDestination(address, amount)); // map address and amount to default destination
     this.priority = priority;
   }
   
-  MoneroSendRequest(final MoneroSendRequest req) {
-    if (req.destinations != null) {
+  MoneroTxConfig(final MoneroTxConfig config) {
+    if (config.destinations != null) {
       this.destinations = new ArrayList<MoneroDestination>();
-      for (MoneroDestination destination : req.getDestinations()) this.destinations.add(destination.copy());
+      for (MoneroDestination destination : config.getDestinations()) this.destinations.add(destination.copy());
     }
-    this.paymentId = req.paymentId;
-    this.priority = req.priority;
-    this.fee = req.fee;
-    this.accountIndex = req.accountIndex;
-    if (req.subaddressIndices != null) this.subaddressIndices = new ArrayList<Integer>(req.subaddressIndices);
-    this.unlockTime = req.unlockTime;
-    this.canSplit = req.canSplit;
-    this.doNotRelay = req.doNotRelay;
-    this.note = req.note;
-    this.recipientName = req.recipientName;
-    this.belowAmount = req.belowAmount;
-    this.sweepEachSubaddress = req.sweepEachSubaddress;
-    this.keyImage = req.keyImage;
+    this.paymentId = config.paymentId;
+    this.priority = config.priority;
+    this.fee = config.fee;
+    this.accountIndex = config.accountIndex;
+    if (config.subaddressIndices != null) this.subaddressIndices = new ArrayList<Integer>(config.subaddressIndices);
+    this.unlockTime = config.unlockTime;
+    this.canSplit = config.canSplit;
+    this.doNotRelay = config.doNotRelay;
+    this.note = config.note;
+    this.recipientName = config.recipientName;
+    this.belowAmount = config.belowAmount;
+    this.sweepEachSubaddress = config.sweepEachSubaddress;
+    this.keyImage = config.keyImage;
   }
   
-  public MoneroSendRequest copy() {
-    return new MoneroSendRequest(this);
+  public MoneroTxConfig copy() {
+    return new MoneroTxConfig(this);
   }
   
-  public MoneroSendRequest addDestination(MoneroDestination destination) {
+  public MoneroTxConfig addDestination(MoneroDestination destination) {
     if (this.destinations == null) this.destinations = new ArrayList<MoneroDestination>();
     this.destinations.add(destination);
     return this;
@@ -90,12 +90,12 @@ public class MoneroSendRequest {
   }
   
   @JsonProperty("destinations")
-  public MoneroSendRequest setDestinations(List<MoneroDestination> destinations) {
+  public MoneroTxConfig setDestinations(List<MoneroDestination> destinations) {
     this.destinations = destinations;
     return this;
   }
   
-  public MoneroSendRequest setDestinations(MoneroDestination... destinations) {
+  public MoneroTxConfig setDestinations(MoneroDestination... destinations) {
     this.destinations = GenUtils.arrayToList(destinations);
     return this;
   }
@@ -104,16 +104,16 @@ public class MoneroSendRequest {
     return paymentId;
   }
   
-  public MoneroSendRequest setPaymentId(String paymentId) {
+  public MoneroTxConfig setPaymentId(String paymentId) {
     this.paymentId = paymentId;
     return this;
   }
   
-  public MoneroSendPriority getPriority() {
+  public MoneroTxPriority getPriority() {
     return priority;
   }
   
-  public MoneroSendRequest setPriority(MoneroSendPriority priority) {
+  public MoneroTxConfig setPriority(MoneroTxPriority priority) {
     this.priority = priority;
     return this;
   }
@@ -122,7 +122,7 @@ public class MoneroSendRequest {
     return fee;
   }
   
-  public MoneroSendRequest setFee(BigInteger fee) {
+  public MoneroTxConfig setFee(BigInteger fee) {
     this.fee = fee;
     return this;
   }
@@ -131,7 +131,7 @@ public class MoneroSendRequest {
     return accountIndex;
   }
   
-  public MoneroSendRequest setAccountIndex(Integer accountIndex) {
+  public MoneroTxConfig setAccountIndex(Integer accountIndex) {
     this.accountIndex = accountIndex;
     return this;
   }
@@ -140,18 +140,18 @@ public class MoneroSendRequest {
     return subaddressIndices;
   }
   
-  public MoneroSendRequest setSubaddressIndex(int subaddressIndex) {
+  public MoneroTxConfig setSubaddressIndex(int subaddressIndex) {
     setSubaddressIndices(subaddressIndex);
     return this;
   }
   
   @JsonProperty("subaddressIndices")
-  public MoneroSendRequest setSubaddressIndices(List<Integer> subaddressIndices) {
+  public MoneroTxConfig setSubaddressIndices(List<Integer> subaddressIndices) {
     this.subaddressIndices = subaddressIndices;
     return this;
   }
   
-  public MoneroSendRequest setSubaddressIndices(Integer... subaddressIndices) {
+  public MoneroTxConfig setSubaddressIndices(Integer... subaddressIndices) {
     this.subaddressIndices = GenUtils.arrayToList(subaddressIndices);
     return this;
   }
@@ -160,7 +160,7 @@ public class MoneroSendRequest {
     return unlockTime;
   }
 
-  public MoneroSendRequest setUnlockTime(Long unlockTime) {
+  public MoneroTxConfig setUnlockTime(Long unlockTime) {
     this.unlockTime = unlockTime;
     return this;
   }
@@ -169,7 +169,7 @@ public class MoneroSendRequest {
     return canSplit;
   }
   
-  public MoneroSendRequest setCanSplit(Boolean canSplit) {
+  public MoneroTxConfig setCanSplit(Boolean canSplit) {
     this.canSplit = canSplit;
     return this;
   }
@@ -178,7 +178,7 @@ public class MoneroSendRequest {
     return doNotRelay;
   }
   
-  public MoneroSendRequest setDoNotRelay(Boolean doNotRelay) {
+  public MoneroTxConfig setDoNotRelay(Boolean doNotRelay) {
     this.doNotRelay = doNotRelay;
     return this;
   }
@@ -187,7 +187,7 @@ public class MoneroSendRequest {
     return note;
   }
   
-  public MoneroSendRequest setNote(String note) {
+  public MoneroTxConfig setNote(String note) {
     this.note = note;
     return this;
   }
@@ -196,7 +196,7 @@ public class MoneroSendRequest {
     return recipientName;
   }
   
-  public MoneroSendRequest setRecipientName(String recipientName) {
+  public MoneroTxConfig setRecipientName(String recipientName) {
     this.recipientName = recipientName;
     return this;
   }
@@ -205,7 +205,7 @@ public class MoneroSendRequest {
     return belowAmount;
   }
   
-  public MoneroSendRequest setBelowAmount(BigInteger belowAmount) {
+  public MoneroTxConfig setBelowAmount(BigInteger belowAmount) {
     this.belowAmount = belowAmount;
     return this;
   }
@@ -214,7 +214,7 @@ public class MoneroSendRequest {
     return sweepEachSubaddress;
   }
   
-  public MoneroSendRequest setSweepEachSubaddress(Boolean sweepEachSubaddress) {
+  public MoneroTxConfig setSweepEachSubaddress(Boolean sweepEachSubaddress) {
     this.sweepEachSubaddress = sweepEachSubaddress;
     return this;
   }
@@ -223,7 +223,7 @@ public class MoneroSendRequest {
     return keyImage;
   }
   
-  public MoneroSendRequest setKeyImage(String keyImage) {
+  public MoneroTxConfig setKeyImage(String keyImage) {
     this.keyImage = keyImage;
     return this;
   }
@@ -254,7 +254,7 @@ public class MoneroSendRequest {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    MoneroSendRequest other = (MoneroSendRequest) obj;
+    MoneroTxConfig other = (MoneroTxConfig) obj;
     if (accountIndex == null) {
       if (other.accountIndex != null) return false;
     } else if (!accountIndex.equals(other.accountIndex)) return false;

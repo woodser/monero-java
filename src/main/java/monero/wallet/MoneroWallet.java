@@ -43,8 +43,8 @@ import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroSendPriority;
-import monero.wallet.model.MoneroSendRequest;
+import monero.wallet.model.MoneroTxPriority;
+import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
@@ -638,12 +638,12 @@ public interface MoneroWallet {
   
   /**
    * Create a transaction to transfer funds from this wallet according to the
-   * given request.  The transaction may be relayed later.
+   * given config.  The transaction may be relayed later.
    * 
-   * @param request configures the transaction to create
+   * @param config configures the transaction to create
    * @return a tx set for the requested transaction if possible
    */
-  public MoneroTxSet createTx(MoneroSendRequest request);
+  public MoneroTxSet createTx(MoneroTxConfig config);
   
   /**
    * Create a transaction to transfers funds from this wallet to a destination address.
@@ -666,16 +666,16 @@ public interface MoneroWallet {
    * @param priority is the send priority (default normal)
    * @return a tx set for the requested transaction if possible
    */
-  public MoneroTxSet createTx(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
+  public MoneroTxSet createTx(int accountIndex, String address, BigInteger amount, MoneroTxPriority priority);
   
   /**
    * Create one or more transactions to transfer funds from this wallet
-   * according to the given request.  The transactions may later be relayed.
+   * according to the given config.  The transactions may later be relayed.
    * 
-   * @param request configures the transactions to create
+   * @param config configures the transactions to create
    * @return a tx set for the requested transactions if possible
    */
-  public MoneroTxSet createTxs(MoneroSendRequest request);
+  public MoneroTxSet createTxs(MoneroTxConfig config);
   
   /**
    * Relay a previously created transaction.
@@ -711,12 +711,12 @@ public interface MoneroWallet {
   
   /**
    * Create and relay a transaction to transfer funds from this wallet
-   * according to the given request.
+   * according to the given config.
    * 
-   * @param request configures the transaction
+   * @param config configures the transaction
    * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxSet sendTx(MoneroSendRequest request);
+  public MoneroTxSet sendTx(MoneroTxConfig config);
   
   /**
    * Create and relay a transaction to transfers funds from this wallet to
@@ -739,16 +739,16 @@ public interface MoneroWallet {
    * @param priority is the send priority (default normal)
    * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxSet sendTx(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
+  public MoneroTxSet sendTx(int accountIndex, String address, BigInteger amount, MoneroTxPriority priority);
   
   /**
    * Create and relay one or more transactions to transfer funds from this
-   * wallet according to the given request.
+   * wallet according to the given config.
    * 
-   * @param request configures the transactions
+   * @param config configures the transactions
    * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxSet sendTxs(MoneroSendRequest request);
+  public MoneroTxSet sendTxs(MoneroTxConfig config);
   
   /**
    * Create and relay one or more transactions which transfer funds from this
@@ -771,15 +771,15 @@ public interface MoneroWallet {
    * @param priority is the send priority (default normal)
    * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxSet sendTxs(int accountIndex, String address, BigInteger amount, MoneroSendPriority priority);
+  public MoneroTxSet sendTxs(int accountIndex, String address, BigInteger amount, MoneroTxPriority priority);
   
   /**
    * Sweep an output with a given key image.
    * 
-   * @param request configures the sweep transaction
+   * @param config configures the sweep transaction
    * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxSet sweepOutput(MoneroSendRequest request);
+  public MoneroTxSet sweepOutput(MoneroTxConfig config);
   
   /**
    * Sweep an output with a given key image.
@@ -798,7 +798,7 @@ public interface MoneroWallet {
    * @param priority is the transaction priority (optional)
    * @return a tx set with the requested transaction if possible
    */
-  public MoneroTxSet sweepOutput(String address, String keyImage, MoneroSendPriority priority);
+  public MoneroTxSet sweepOutput(String address, String keyImage, MoneroTxPriority priority);
   
   /**
    * Sweep a subaddress's unlocked funds to an address.
@@ -828,12 +828,12 @@ public interface MoneroWallet {
   public List<MoneroTxSet> sweepWallet(String address);
 
   /**
-   * Sweep all unlocked funds according to the given request.
+   * Sweep all unlocked funds according to the given config.
    * 
-   * @param request is the sweep configuration
+   * @param config is the sweep configuration
    * @return the tx sets with the requested transactions
    */
-  public List<MoneroTxSet> sweepUnlocked(MoneroSendRequest request);
+  public List<MoneroTxSet> sweepUnlocked(MoneroTxConfig config);
   
   /**
    * Sweep all unmixable dust outputs back to the wallet to make them easier to spend and mix.
@@ -1104,18 +1104,18 @@ public interface MoneroWallet {
   /**
    * Creates a payment URI from a send configuration.
    * 
-   * @param request specifies configuration for a potential tx
+   * @param config specifies configuration for a potential tx
    * @return the payment uri
    */
-  public String createPaymentUri(MoneroSendRequest request);
+  public String createPaymentUri(MoneroTxConfig config);
   
   /**
-   * Parses a payment URI to a send request.
+   * Parses a payment URI to a transaction configuration.
    * 
    * @param uri is the payment uri to parse
    * @return the send configuration parsed from the uri
    */
-  public MoneroSendRequest parsePaymentUri(String uri);
+  public MoneroTxConfig parsePaymentUri(String uri);
   
   /**
    * Get an attribute.

@@ -57,7 +57,7 @@ import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroSendRequest;
+import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
@@ -924,18 +924,18 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
 
   @Override
-  public MoneroTxSet sendTxs(MoneroSendRequest request) {
+  public MoneroTxSet sendTxs(MoneroTxConfig config) {
     assertNotClosed();
     LOGGER.fine("java sendTxs(request)");
-    LOGGER.fine("Send request: " + JsonUtils.serialize(request));
+    LOGGER.fine("Send request: " + JsonUtils.serialize(config));
     
     // validate request
-    if (request == null) throw new MoneroError("Send request cannot be null");
+    if (config == null) throw new MoneroError("Send request cannot be null");
     
     // submit send request to JNI and get response as json rooted at tx set
     String txSetJson;
     try {
-      txSetJson = sendTxsJni(JsonUtils.serialize(request));
+      txSetJson = sendTxsJni(JsonUtils.serialize(config));
       LOGGER.fine("Received sendTxs() response from JNI: " + txSetJson.substring(0, Math.min(5000, txSetJson.length())) + "...");
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
@@ -949,16 +949,16 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
   
   @Override
-  public List<MoneroTxSet> sweepUnlocked(MoneroSendRequest request) {
+  public List<MoneroTxSet> sweepUnlocked(MoneroTxConfig config) {
     assertNotClosed();
     
     // validate request
-    if (request == null) throw new MoneroError("Send request cannot be null");
+    if (config == null) throw new MoneroError("Send request cannot be null");
     
     // submit send request to JNI and get response as json rooted at tx set
     String txSetsJson;
     try {
-      txSetsJson = sweepUnlockedJni(JsonUtils.serialize(request));
+      txSetsJson = sweepUnlockedJni(JsonUtils.serialize(config));
       LOGGER.fine("Received sweepUnlocked() response from JNI: " + txSetsJson.substring(0, Math.min(5000, txSetsJson.length())) + "...");
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
@@ -969,10 +969,10 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
 
   @Override
-  public MoneroTxSet sweepOutput(MoneroSendRequest request) {
+  public MoneroTxSet sweepOutput(MoneroTxConfig config) {
     assertNotClosed();
     try {
-      String txSetJson = sweepOutputJni(JsonUtils.serialize(request));
+      String txSetJson = sweepOutputJni(JsonUtils.serialize(config));
       MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
       return txSet;
     } catch (Exception e) {
@@ -1191,7 +1191,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
 
   @Override
-  public String createPaymentUri(MoneroSendRequest request) {
+  public String createPaymentUri(MoneroTxConfig request) {
     assertNotClosed();
     try {
       return createPaymentUriJni(JsonUtils.serialize(request));
@@ -1201,11 +1201,11 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
 
   @Override
-  public MoneroSendRequest parsePaymentUri(String uri) {
+  public MoneroTxConfig parsePaymentUri(String uri) {
     assertNotClosed();
     try {
       String sendRequestJson = parsePaymentUriJni(uri);
-      return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, sendRequestJson, MoneroSendRequest.class);
+      return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, sendRequestJson, MoneroTxConfig.class);
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }

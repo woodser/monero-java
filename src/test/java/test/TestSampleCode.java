@@ -23,8 +23,8 @@ import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroSendPriority;
-import monero.wallet.model.MoneroSendRequest;
+import monero.wallet.model.MoneroTxPriority;
+import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
@@ -158,17 +158,17 @@ public class TestSampleCode {
     TimeUnit.SECONDS.sleep(10); // wait 10s for auto refresh
     boolean isConfirmed = walletRpc.getTx(sentTx.getHash()).isConfirmed();
     
-    // create a request to send funds from the RPC wallet to multiple destinations in the JNI wallet
-    MoneroSendRequest request = new MoneroSendRequest()
+    // create a config to send funds from the RPC wallet to multiple destinations in the JNI wallet
+    MoneroTxConfig config = new MoneroTxConfig()
             .setAccountIndex(1)                           // send from account 1
             .setSubaddressIndices(0, 1)                   // send from subaddresses in account 1
-            .setPriority(MoneroSendPriority.UNIMPORTANT)  // no rush
+            .setPriority(MoneroTxPriority.UNIMPORTANT)  // no rush
             .setDestinations(
                     new MoneroDestination(walletJni.getAddress(1, 0), new BigInteger("50000")),
                     new MoneroDestination(walletJni.getAddress(2, 0), new BigInteger("50000")));
     
     // create the transaction, confirm with the user, and relay to the network
-    MoneroTxWallet createdTx = walletRpc.createTx(request).getTxs().get(0);
+    MoneroTxWallet createdTx = walletRpc.createTx(config).getTxs().get(0);
     BigInteger fee = createdTx.getFee();  // "Are you sure you want to send ...?"
     walletRpc.relayTx(createdTx); // submit the transaction which will notify the JNI wallet
     

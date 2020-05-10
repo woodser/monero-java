@@ -52,7 +52,7 @@ import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxPoolStats;
 import monero.daemon.model.MoneroVersion;
 import monero.wallet.MoneroWallet;
-import monero.wallet.model.MoneroSendRequest;
+import monero.wallet.model.MoneroTxConfig;
 import utils.TestUtils;
 
 /**
@@ -1674,9 +1674,9 @@ public class TestMoneroDaemonRpc {
   
   private static MoneroTx getUnrelayedTx(MoneroWallet wallet, Integer accountIdx) {
     assertTrue("Txs sent from/to same account are not properly synced from the pool", accountIdx > 0);  // TODO monero core
-    MoneroSendRequest req = new MoneroSendRequest(accountIdx, wallet.getPrimaryAddress(), TestUtils.MAX_FEE); 
-    req.setDoNotRelay(true);
-    MoneroTx tx = wallet.sendTx(req).getTxs().get(0);
+    MoneroTxConfig config = new MoneroTxConfig(accountIdx, wallet.getPrimaryAddress(), TestUtils.MAX_FEE); 
+    config.setDoNotRelay(true);
+    MoneroTx tx = wallet.sendTx(config).getTxs().get(0);
     assertFalse(tx.getFullHex().isEmpty());
     assertEquals(tx.getDoNotRelay(), true);
     return tx;

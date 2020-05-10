@@ -33,7 +33,7 @@ import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroSendRequest;
+import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
@@ -1210,12 +1210,12 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       }
       tx = (wallet.sweepOutput(wallet.getAddress(destinationAccounts[0], 0), outputs.get(0).getKeyImage().getHex())).getTxs().get(0);
     } else {
-      MoneroSendRequest request = new MoneroSendRequest();
-      request.setAccountIndex(0);
+      MoneroTxConfig config = new MoneroTxConfig();
+      config.setAccountIndex(0);
       for (int destinationAccount : destinationAccounts) {
-        request.addDestination(new MoneroDestination(wallet.getAddress(destinationAccount, 0), TestUtils.MAX_FEE));
+        config.addDestination(new MoneroDestination(wallet.getAddress(destinationAccount, 0), TestUtils.MAX_FEE));
       }
-      tx = wallet.sendTx(request).getTxs().get(0);
+      tx = wallet.sendTx(config).getTxs().get(0);
     }
     
     // test wallet's balance
@@ -1615,8 +1615,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   // jni-specific tx tests
   @Override
-  protected void testTxWallet(MoneroTxWallet tx, TestContext ctx) {
-    if (ctx == null) ctx = new TestContext();
+  protected void testTxWallet(MoneroTxWallet tx, TxContext ctx) {
+    if (ctx == null) ctx = new TxContext();
     
     // run common tests
     super.testTxWallet(tx, ctx);

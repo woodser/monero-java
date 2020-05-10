@@ -359,8 +359,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   // rpc-specific tx tests
   @Override
-  protected void testTxWallet(MoneroTxWallet tx, TestContext ctx) {
-    ctx = new TestContext(ctx);
+  protected void testTxWallet(MoneroTxWallet tx, TxContext ctx) {
+    ctx = new TxContext(ctx);
     
     // run common tests
     super.testTxWallet(tx, ctx);

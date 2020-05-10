@@ -1,9 +1,9 @@
 package monero.wallet.model;
 
 /**
- * Enumerates send priorities.
+ * Enumerates transaction priorities.
  */
-public enum MoneroSendPriority {
+public enum MoneroTxPriority {
   DEFAULT,
   UNIMPORTANT,
   NORMAL,
