@@ -160,7 +160,8 @@ public class WalletEqualityUtils {
             transferDestinationInfo(tx2, tx1);
           }
           
-          // test tx equality
+          // test tx equality by merging
+          assertTrue("Txs are not mergeable", TestUtils.txsMergeable(tx1, tx2));
           assertEquals(tx1, tx2);
           found = true;
           

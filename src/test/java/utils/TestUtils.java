@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -18,6 +19,7 @@ import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
+import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
 
 /**
@@ -225,6 +227,20 @@ public class TestUtils {
         return "87a1Yf47UqyQFCrMqqtxfvhJN9se3PgbmU7KUFWqhSu5aih6YsZYoxfjgyxAM1DztNNSdoYTZYn9xa3vHeJjoZqdAybnLzN"; // subaddress
       default:
         throw new RuntimeException("Invalid network type: " + networkType);
+    }
+  }
+  
+  public static boolean txsMergeable(MoneroTxWallet tx1, MoneroTxWallet tx2) {
+    try {
+      MoneroTxWallet copy1 = tx1.copy();
+      MoneroTxWallet copy2 = tx2.copy();
+      if (copy1.isConfirmed()) copy1.setBlock(tx1.getBlock().copy().setTxs(Arrays.asList(copy1)));
+      if (copy2.isConfirmed()) copy2.setBlock(tx2.getBlock().copy().setTxs(Arrays.asList(copy2)));
+      copy1.merge(copy2);
+      return true;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
     }
   }
 }
