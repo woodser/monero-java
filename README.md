@@ -13,18 +13,6 @@ This project is a Java library for using a Monero wallet and daemon with RPC and
 - Conforms to an [API specification](https://moneroecosystem.org/monero-java/monero-spec.pdf) intended to be intuitive and robust.
 - Over 270 passing JUnit test cases.
 
-### Main Features
-
-- Manage a Monero daemon using RPC
-- Manage a Monero wallet using RPC and JNI
-- Cohesive APIs with focus on ease-of-use
-- Fetch and process binary data from the daemon (e.g. raw blocks)
-- Query wallet transactions, transfers, and outputs by their attributes
-- Be notified when blocks are added to the chain, as the wallet synchronizes, or when the wallet sends or receives funds
-- Validate addresses in native Java
-- Full multisig support
-- Over 270 passing JUnit test cases
-
 ### Architecture
 
 <p align="center">
