@@ -1,12 +1,19 @@
 **Compatible with [Monero Core v0.15.0.1](https://web.getmonero.org/downloads/) Carbon Chameleon**
 
-# Monero Java Library
+## Monero Java Library
 
-This project is a library for using a Monero wallet and daemon in Java using RPC and JNI bindings to [Monero Core](https://github.com/monero-project/monero).
+This project is a Java library for using a Monero wallet and daemon with RPC and native bindings to [Monero Core v0.15.0.5 Carbon Chameleon](https://web.getmonero.org/downloads/).
 
-In addition, this project conforms to an [API specification](http://moneroecosystem.org/monero-java/monero-spec.pdf) intended to be intuitive, robust, and suitable for long-term use in the Monero project.
+- Supports RPC bindings to monero-wallet-rpc and monero-daemon-rpc.
+- Supports client-side wallets in NodeJS and web apps using JNI bindings to Monero Core.
+- Supports offline, watch-only, and multisig wallets.
+- Query wallet transactions, transfers, and outputs by their many attributes.
+- Fetch and process binary data from the daemon (e.g. raw blocks).
+- Receive notifications when blocks are added to the chain or when wallets sync, send, and receive.
+- Conforms to an [API specification](https://moneroecosystem.org/monero-java/monero-spec.pdf) intended to be intuitive and robust.
+- Over 270 passing JUnit test cases.
 
-## Main Features
+### Main Features
 
 - Manage a Monero daemon using RPC
 - Manage a Monero wallet using RPC and JNI
@@ -18,7 +25,14 @@ In addition, this project conforms to an [API specification](http://moneroecosys
 - Full multisig support
 - Over 270 passing JUnit test cases
 
-## Sample Code
+### Architecture
+
+<p align="center">
+	<img width="85%" height="auto" src="architecture.png"/><br>
+	<i>Wallet implementations use RPC or WebAssembly bindings to Monero Core and are interchangeable by conforming to a common interface, <a href="https://moneroecosystem.org/monero-javascript/MoneroWallet.html">MoneroWallet.js</a>.</i>
+</p>
+
+### Sample Code
 
 This code demonstrates the API.  See the [Javadoc](https://moneroecosystem.org/monero-java/), [specification PDF](http://moneroecosystem.org/monero-java/monero-spec.pdf), or [JUnit tests](src/test/java) for more details.
 
@@ -136,7 +150,7 @@ assertTrue(JNI_OUTPUT_RECEIVED);
 walletJni.close(true);
 ```
 
-## How to Use This Library
+### How to Use This Library
 
 **For Maven, add to pom.xml:**
 
@@ -166,7 +180,7 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 8. Run TestMoneroCppUtils.java JUnit tests to verify the dynamic libraries are working with Java JNI
 9. Add the dylibs libmonero-cpp.dylib and libmonero-java.dylib within ./build/ to your application's classpath
 
-## How to Run Monero RPC
+### How to Run Monero RPC
 
 1. Download and extract the latest [Monero CLI](https://getmonero.org/downloads/) for your platform.
 2. Start Monero daemon locally: `./monerod --stagenet` (or use a remote daemon).
@@ -177,14 +191,14 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 	
 	e.g. For wallet name `test_wallet_1`, user `rpc_user`, password `abc123`, stagenet: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir ./`
 
-## How to Run JUnit Tests
+### How to Run JUnit Tests
 
 1. [Set up this library with JNI support](#how-to-use-this-library)
 2. Run monero-wallet-rpc and monero-daemon-rpc.  See [How to Run Monero RPC](#how-to-run-monero-rpc). 
 3. Configure the appropriate RPC endpoints, authentication, and test wallet in [TestUtils.java](src/test/java/utils/TestUtils.java).
 4. Run all *.java files in src/main/test as JUnits.
 
-## See Also
+### See Also
 
 [API specification](http://moneroecosystem.org/monero-java/monero-spec.pdf)
 
@@ -194,16 +208,15 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 
 [monero-cpp-library](https://github.com/woodser/monero-cpp-library)
 
-## License
+### License
 
 This project is licensed under MIT.
 
-## Donate
+### Donations
 
-If you get value from this library, please consider donating.  Thank you!
+If this library brings you value, please consider donating.  Thank you!
 
 <p align="center">
-	<img src="donate.png" width="115" height="115"/>
+	<img src="donate.png" width="115" height="115"/><br>
+	<code>46FR1GKVqFNQnDiFkH7AuzbUBrGQwz2VdaXTDD4jcjRE8YkkoTYTmZ2Vohsz9gLSqkj5EM6ai9Q7sBoX4FPPYJdGKQQXPVz</code>
 </p>
-
-`46FR1GKVqFNQnDiFkH7AuzbUBrGQwz2VdaXTDD4jcjRE8YkkoTYTmZ2Vohsz9gLSqkj5EM6ai9Q7sBoX4FPPYJdGKQQXPVz`
