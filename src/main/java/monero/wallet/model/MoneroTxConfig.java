@@ -2,12 +2,12 @@ package monero.wallet.model;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
+import monero.common.MoneroError;
 
 /**
  * Configures a transaction to send, sweep, or create a payment URI.
@@ -51,7 +51,8 @@ public class MoneroTxConfig {
   
   public MoneroTxConfig(Integer accountIndex, String address, BigInteger amount, MoneroTxPriority priority) {
     this.accountIndex = accountIndex;
-    if (address != null || amount != null) this.destinations = Arrays.asList(new MoneroDestination(address, amount)); // map address and amount to default destination
+    if (address != null) setAddress(address);
+    if (amount != null) setAmount(amount);
     this.priority = priority;
   }
   
@@ -77,6 +78,52 @@ public class MoneroTxConfig {
   
   public MoneroTxConfig copy() {
     return new MoneroTxConfig(this);
+  }
+  
+  /**
+   * Set the address of a single-destination configuration.
+   * 
+   * @param address - the address to set for the single destination
+   * @return MoneroTxConfig this configuration for chaining
+   */
+  public MoneroTxConfig setAddress(String address) {
+    if (this.destinations != null && this.destinations.size() > 1) throw new MoneroError("Cannot set address because MoneroTxConfig already has multiple destinations");
+    if (this.destinations == null || this.destinations.isEmpty()) addDestination(new MoneroDestination(address));
+    else this.destinations.get(0).setAddress(address);
+    return this;
+  }
+  
+  /**
+   * Get the address of a single-destination configuration.
+   * 
+   * @return String the address of the single destination
+   */
+  public String getAddress() {
+    if (this.destinations == null || this.destinations.size() != 1) throw new MoneroError("Cannot get address because MoneroTxConfig does not have exactly one destination");
+    return this.destinations.get(0).getAddress();
+  }
+  
+  /**
+   * Set the amount of a single-destination configuration.
+   * 
+   * @param amount - the amount to set for the single destination
+   * @return MoneroTxConfig this configuration for chaining
+   */
+  public MoneroTxConfig setAmount(BigInteger amount) {
+    if (this.destinations != null && this.destinations.size() > 1) throw new MoneroError("Cannot set amount because MoneroTxConfig already has multiple destinations");
+    if (this.destinations == null || this.destinations.isEmpty()) addDestination(new MoneroDestination(null, amount));
+    else this.destinations.get(0).setAmount(amount);
+    return this;
+  }
+  
+  /**
+   * Get the amount of a single-destination configuration.
+   * 
+   * @return BigInteger the amount of the single destination
+   */
+  public BigInteger getAmount() {
+    if (this.destinations == null || this.destinations.size() != 1) throw new MoneroError("Cannot get amount because MoneroTxConfig does not have exactly one destination");
+    return this.destinations.get(0).getAmount();
   }
   
   public MoneroTxConfig addDestination(MoneroDestination destination) {
