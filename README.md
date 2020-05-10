@@ -17,7 +17,7 @@ This project is a Java library for using a Monero wallet and daemon with RPC and
 
 <p align="center">
 	<img width="90%" height="auto" src="architecture.png"/><br>
-	<i>Wallet implementations use RPC or WebAssembly bindings to Monero Core and are interchangeable by conforming to a common interface, <a href="https://moneroecosystem.org/monero-javascript/MoneroWallet.html">MoneroWallet.js</a>.</i>
+	<i>Wallet implementations use RPC or JNI bindings to Monero Core and are interchangeable by conforming to a common interface, <a href="https://moneroecosystem.org/monero-java/monero/wallet/MoneroWallet.html">MoneroWallet.java</a>.</i>
 </p>
 
 ### Sample Code
