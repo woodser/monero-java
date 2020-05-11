@@ -917,7 +917,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
 
     // deserialize tx query
     shared_ptr<monero_tx_query> tx_query = monero_tx_query::deserialize_from_block(tx_query_json);
-    MTRACE("Fetching txs with query: " << tx_query->serialize());
+    //cout << "Fetching txs with query: " << tx_query->serialize() << endl;
 
     // get txs
     vector<shared_ptr<monero_tx_wallet>> txs = wallet->get_txs(*tx_query);

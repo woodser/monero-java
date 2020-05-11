@@ -23,11 +23,11 @@ import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroTxPriority;
-import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
+import monero.wallet.model.MoneroTxConfig;
+import monero.wallet.model.MoneroTxPriority;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
@@ -49,7 +49,75 @@ public class TestSampleCode {
   
   @SuppressWarnings("unused")
   @Test
-  public void testSampleCode() throws InterruptedException {
+  public void testSampleCodeShort() throws InterruptedException {
+    
+    // connect to a daemon
+    MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:38081", "superuser", "abctesting123");
+    long height = daemon.getHeight();                       // 1523651
+    BigInteger feeEstimate = daemon.getFeeEstimate();       // 1014313512
+    List<MoneroTx> txsInPool = daemon.getTxPool();          // get transactions in the pool
+    
+    // open wallet on monero-wallet-rpc
+    MoneroWalletRpc walletRpc = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");  // connect to monero-wallet-rpc
+    walletRpc.openWallet("test_wallet_1", "supersecretpassword123");  // *** CHANGE README TO "sample_wallet_rpc" ***
+    String primaryAddress = walletRpc.getPrimaryAddress();  // 555zgduFhmKd2o8rPUz...
+    BigInteger balance = walletRpc.getBalance();            // 533648366742
+    List<MoneroTxWallet> txs = walletRpc.getTxs();          // get transactions containing transfers to/from the wallet
+    
+    // create wallet from mnemonic phrase using JNI bindings to Monero Core
+    MoneroWalletJni walletJni = MoneroWalletJni.createWallet(new MoneroWalletConfig()
+            .setPath("./test_wallets/" + UUID.randomUUID().toString())
+            .setPassword("supersecretpassword123")
+            .setNetworkType(MoneroNetworkType.STAGENET)
+            .setServerUri("http://localhost:38081")
+            .setServerUsername("superuser")
+            .setServerPassword("abctesting123")
+            .setMnemonic("spying swept ashtray going hence jester swagger cease spying unusual boss vain dyslexic divers among unfit asleep bays ostrich maverick skirting jaunt scenic shuffled spying")
+            .setRestoreHeight(573936l));
+    
+    // synchronize the wallet and receive progress notifications
+    walletJni.sync(new MoneroWalletListener() {
+      @Override
+      public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
+        // feed a progress bar?
+      }
+    });
+    
+    // synchronize in the background
+    walletJni.startSyncing();
+    
+    // listen for incoming transfers
+    walletJni.addListener(new MoneroWalletListener() {
+      @Override
+      public void onOutputReceived(MoneroOutputWallet output) {
+        BigInteger amount = output.getAmount();
+        String txHash = output.getTx().getHash();
+        JNI_OUTPUT_RECEIVED = true;
+      }
+    });
+    
+    // sends funds from RPC wallet to JNI wallet
+    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(walletRpc); // *** REMOVE FROM README SAMPLE ***
+    MoneroTxSet txSet = walletRpc.sendTx(new MoneroTxConfig()
+            .setAccountIndex(0)
+            .setAddress(walletJni.getAddress(1, 0))
+            .setAmount(new BigInteger("50000"))
+            .setPriority(MoneroTxPriority.UNIMPORTANT));  // no hurry
+    MoneroTxWallet sentTx = txSet.getTxs().get(0);     // send methods return tx set(s) which contain sent txs
+    String txHash = sentTx.getHash();
+    
+    // wallet receives unconfirmed funds within 10 seconds
+    TimeUnit.SECONDS.sleep(10);
+    assertTrue("Output not received", JNI_OUTPUT_RECEIVED);
+    walletJni.getTx(txHash);
+    
+    // save and close JNI wallet
+    walletJni.close(true);
+  }
+  
+  @SuppressWarnings("unused")
+  @Test
+  public void testSampleCodeLong() throws InterruptedException {
     
     // connect to a daemon
     MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:38081", "superuser", "abctesting123");

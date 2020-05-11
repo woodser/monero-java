@@ -79,6 +79,12 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     this.isIncoming = isIncoming;
     return this;
   }
+  
+  @Override
+  public MoneroTxQuery setHash(String hash) {
+    super.setHash(hash);
+    return setHashes(Arrays.asList(hash));
+  }
 
   public List<String> getHashes() {
     return hashes;
@@ -286,13 +292,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     super.setBlock(block);
     return this;
   }
-
-  @Override
-  public MoneroTxQuery setHash(String hash) {
-    super.setHash(hash);
-    return this;
-  }
-
+  
   @Override
   public MoneroTxQuery setVersion(Integer version) {
     super.setVersion(version);

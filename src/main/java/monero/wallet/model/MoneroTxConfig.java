@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
@@ -98,6 +99,7 @@ public class MoneroTxConfig {
    * 
    * @return String the address of the single destination
    */
+  @JsonIgnore
   public String getAddress() {
     if (this.destinations == null || this.destinations.size() != 1) throw new MoneroError("Cannot get address because MoneroTxConfig does not have exactly one destination");
     return this.destinations.get(0).getAddress();
@@ -121,6 +123,7 @@ public class MoneroTxConfig {
    * 
    * @return BigInteger the amount of the single destination
    */
+  @JsonIgnore
   public BigInteger getAmount() {
     if (this.destinations == null || this.destinations.size() != 1) throw new MoneroError("Cannot get amount because MoneroTxConfig does not have exactly one destination");
     return this.destinations.get(0).getAmount();
