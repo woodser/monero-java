@@ -1,9 +1,9 @@
 ## Monero Java Library
 
-This project is a Java library for using a Monero wallet and daemon with RPC and native bindings to [Monero Core v0.15.0.5 Carbon Chameleon](https://web.getmonero.org/downloads/).
+This project is a Java library for using Monero with RPC and native bindings to [Monero Core v0.15.0.5 Carbon Chameleon](https://web.getmonero.org/downloads/).
 
 - Supports RPC bindings to monero-wallet-rpc and monero-daemon-rpc.
-- Supports client-side wallets in NodeJS and web apps using JNI bindings to Monero Core.
+- Supports client-side wallets using JNI bindings to Monero Core.
 - Supports offline, watch-only, and multisig wallets.
 - Query wallet transactions, transfers, and outputs by their many attributes.
 - Fetch and process binary data from the daemon (e.g. raw blocks).
@@ -149,7 +149,7 @@ This project is licensed under MIT.
 
 ### Donations
 
-If this library brings you value, please consider donating.  Thank you!
+If this library brings you value, please consider donating.
 
 <p align="center">
 	<img src="donate.png" width="115" height="115"/><br>
