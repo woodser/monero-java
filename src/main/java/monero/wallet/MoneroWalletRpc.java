@@ -160,7 +160,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("password", config.getPassword());
     rpc.sendJsonRequest("open_wallet", params);
     clear();
-    path = this.getPath();
+    path = config.getPath();
     
     // set daemon if provided
     if (config.getServer() != null) setDaemonConnection(config.getServer());
