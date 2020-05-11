@@ -170,8 +170,8 @@ public class TestUtils {
     }
     
     // ensure we're testing the right wallet
-    assertEquals(TestUtils.MNEMONIC, walletRpc.getMnemonic());
-    assertEquals(TestUtils.ADDRESS, walletRpc.getPrimaryAddress());
+    assertEquals(TestUtils.MNEMONIC, walletJni.getMnemonic());
+    assertEquals(TestUtils.ADDRESS, walletJni.getPrimaryAddress());
     return walletJni;
   }
   

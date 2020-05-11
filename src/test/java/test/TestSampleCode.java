@@ -2,6 +2,7 @@ package test;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.UUID;
@@ -45,7 +46,13 @@ public class TestSampleCode {
   
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    TestUtils.TX_POOL_WALLET_TRACKER.reset(); // all wallets need to wait for txs to confirm to reliably sync
+
+    // create directory for test wallets if it doesn't exist
+    File testWalletsDir = new File(TestUtils.TEST_WALLETS_DIR);
+    if (!testWalletsDir.exists()) testWalletsDir.mkdirs();
+    
+    // all wallets need to wait for txs to confirm to reliably sync
+    TestUtils.TX_POOL_WALLET_TRACKER.reset(); 
   }
   
   @SuppressWarnings("unused")
