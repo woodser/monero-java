@@ -169,7 +169,9 @@ public class TestUtils {
       });
     }
     
-    // return cached wallet jni
+    // ensure we're testing the right wallet
+    assertEquals(TestUtils.MNEMONIC, walletRpc.getMnemonic());
+    assertEquals(TestUtils.ADDRESS, walletRpc.getPrimaryAddress());
     return walletJni;
   }
   
