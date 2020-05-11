@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import monero.common.MoneroRpcConnection;
@@ -58,7 +59,7 @@ public class TestSampleCode {
     List<MoneroTx> txsInPool = daemon.getTxPool();          // get transactions in the pool
     
     // open wallet on monero-wallet-rpc
-    MoneroWalletRpc walletRpc = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");  // connect to monero-wallet-rpc
+    MoneroWalletRpc walletRpc = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
     walletRpc.openWallet("test_wallet_1", "supersecretpassword123");  // *** CHANGE README TO "sample_wallet_rpc" ***
     String primaryAddress = walletRpc.getPrimaryAddress();  // 555zgduFhmKd2o8rPUz...
     BigInteger balance = walletRpc.getBalance();            // 533648366742
@@ -66,7 +67,7 @@ public class TestSampleCode {
     
     // create wallet from mnemonic phrase using JNI bindings to Monero Core
     MoneroWalletJni walletJni = MoneroWalletJni.createWallet(new MoneroWalletConfig()
-            .setPath("./test_wallets/" + UUID.randomUUID().toString())
+            .setPath("./test_wallets/" + UUID.randomUUID().toString())  // *** CHANGE README TO "sample_wallet_jni" ***
             .setPassword("supersecretpassword123")
             .setNetworkType(MoneroNetworkType.STAGENET)
             .setServerUri("http://localhost:38081")
@@ -96,7 +97,7 @@ public class TestSampleCode {
       }
     });
     
-    // sends funds from RPC wallet to JNI wallet
+    // send funds from RPC wallet to JNI wallet
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(walletRpc); // *** REMOVE FROM README SAMPLE ***
     MoneroTxSet txSet = walletRpc.sendTx(new MoneroTxConfig()
             .setAccountIndex(0)
@@ -108,8 +109,7 @@ public class TestSampleCode {
     
     // wallet receives unconfirmed funds within 10 seconds
     TimeUnit.SECONDS.sleep(10);
-    assertTrue("Output not received", JNI_OUTPUT_RECEIVED);
-    walletJni.getTx(txHash);
+    assertTrue(JNI_OUTPUT_RECEIVED);
     
     // save and close JNI wallet
     walletJni.close(true);
@@ -117,6 +117,7 @@ public class TestSampleCode {
   
   @SuppressWarnings("unused")
   @Test
+  @Ignore
   public void testSampleCodeLong() throws InterruptedException {
     
     // connect to a daemon
