@@ -103,8 +103,8 @@ public class TestSampleCode {
             .setAccountIndex(0)
             .setAddress(walletJni.getAddress(1, 0))
             .setAmount(new BigInteger("50000"))
-            .setPriority(MoneroTxPriority.UNIMPORTANT));  // no hurry
-    MoneroTxWallet sentTx = txSet.getTxs().get(0);     // send methods return tx set(s) which contain sent txs
+            .setPriority(MoneroTxPriority.UNIMPORTANT)); // no hurry
+    MoneroTxWallet sentTx = txSet.getTxs().get(0); // send methods return tx set which contain sent tx(s)
     String txHash = sentTx.getHash();
     
     // wallet receives unconfirmed funds within 10 seconds
