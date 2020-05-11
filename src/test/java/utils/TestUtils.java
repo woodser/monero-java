@@ -105,7 +105,6 @@ public class TestUtils {
     try {
       walletRpc.openWallet(WALLET_NAME, WALLET_PASSWORD);
     } catch (MoneroRpcException e) {
-      e.printStackTrace();
       
       // -1 returned when wallet does not exist or fails to open e.g. it's already open by another application
       if (e.getCode() == -1) {
