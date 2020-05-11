@@ -13,7 +13,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import monero.common.MoneroRpcConnection;
-import monero.common.MoneroRpcException;
+import monero.common.MoneroRpcError;
 import monero.common.MoneroUtils;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroNetworkType;
@@ -104,7 +104,7 @@ public class TestUtils {
     // attempt to open test wallet
     try {
       walletRpc.openWallet(WALLET_NAME, WALLET_PASSWORD);
-    } catch (MoneroRpcException e) {
+    } catch (MoneroRpcError e) {
       
       // -1 returned when wallet does not exist or fails to open e.g. it's already open by another application
       if (e.getCode() == -1) {

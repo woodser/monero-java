@@ -5,14 +5,14 @@ import common.utils.JsonUtils;
 /**
  * Exception when interacting with the Monero daemon or wallet RPC API.
  */
-public class MoneroRpcException extends MoneroError {
+public class MoneroRpcError extends MoneroError {
 
   private static final long serialVersionUID = -6282368684634114151L;
   
   private String rpcMethod;
   private Object rpcParams;
   
-  public MoneroRpcException(String rpcDescription, Integer rpcCode, String rpcMethod, Object rpcParams) {
+  public MoneroRpcError(String rpcDescription, Integer rpcCode, String rpcMethod, Object rpcParams) {
     super(rpcDescription, rpcCode);
     this.rpcMethod = rpcMethod;
     this.rpcParams = rpcParams;

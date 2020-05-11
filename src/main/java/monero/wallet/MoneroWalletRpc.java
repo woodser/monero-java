@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 import common.utils.GenUtils;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
-import monero.common.MoneroRpcException;
+import monero.common.MoneroRpcError;
 import monero.common.MoneroUtils;
 import monero.common.SslOptions;
 import monero.daemon.model.MoneroBlock;
@@ -239,8 +239,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("language", language);
     try {
       rpc.sendJsonRequest("create_wallet", params);
-    } catch (Exception e) {
-      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroError("Wallet already exists: " + name);
+    } catch (MoneroRpcError e) {
+      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroRpcError("Wallet already exists: " + name, e.getCode(), e.getRpcMethod(), e.getRpcParams());
       throw e;
     }
     clear();
@@ -308,8 +308,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("autosave_current", saveCurrent);
     try {
       rpc.sendJsonRequest("generate_from_keys", params);
-    } catch (Exception e) {
-      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroError("Wallet already exists: " + name);
+    } catch (MoneroRpcError e) {
+      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroRpcError("Wallet already exists: " + name, e.getCode(), e.getRpcMethod(), e.getRpcParams());
       throw e;
     }
     clear();
@@ -450,7 +450,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (String) result.get("key");
-    } catch (MoneroRpcException e) {
+    } catch (MoneroRpcError e) {
       if (e.getCode() == -29 && e.getMessage().contains("watch-only")) return null; // return null if wallet is watch-only
       throw e;
     }
@@ -483,7 +483,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       params.put("address", address);
       Map<String, Object> resp = rpc.sendJsonRequest("get_address_index", params);
       result = (Map<String, Object>) resp.get("result");
-    } catch (MoneroRpcException e) {
+    } catch (MoneroRpcError e) {
       System.out.println(e.getMessage());
       if (e.getCode() == -2) throw new MoneroError(e.getMessage(), e.getCode());
       throw e;
@@ -507,7 +507,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       String integratedAddressStr = (String) result.get("integrated_address");
       return decodeIntegratedAddress(integratedAddressStr);
-    } catch (MoneroRpcException e) {
+    } catch (MoneroRpcError e) {
       if (e.getMessage().contains("Invalid payment ID")) throw new MoneroError("Invalid payment ID: " + paymentId, ERROR_CODE_INVALID_PAYMENT_ID);
       throw e;
     }
@@ -1400,8 +1400,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> resp = rpc.sendJsonRequest("get_tx_key", params);
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (String) result.get("tx_key");
-    } catch (MoneroRpcException e) {
-      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcException("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+    } catch (MoneroRpcError e) {
+      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
       throw e;
     }
   }
@@ -1426,8 +1426,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       check.setInTxPool((Boolean) result.get("in_pool"));
       check.setReceivedAmount((BigInteger) result.get("received"));
       return check;
-    } catch (MoneroRpcException e) {
-      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcException("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+    } catch (MoneroRpcError e) {
+      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
       throw e;
     }
   }
@@ -1443,8 +1443,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> resp = rpc.sendJsonRequest("get_tx_proof", params);
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (String) result.get("signature");
-    } catch (MoneroRpcException e) {
-      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcException("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+    } catch (MoneroRpcError e) {
+      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
       throw e;
     }
   }
@@ -1474,8 +1474,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
         check.setReceivedAmount((BigInteger) result.get("received"));
       }
       return check;
-    } catch (MoneroRpcException e) {
-      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcException("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+    } catch (MoneroRpcError e) {
+      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
       throw e;
     }
   }
@@ -1490,8 +1490,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> resp = rpc.sendJsonRequest("get_spend_proof", params);
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (String) result.get("signature");
-    } catch (MoneroRpcException e) {
-      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcException("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+    } catch (MoneroRpcError e) {
+      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
       throw e;
     }
   }
@@ -1507,8 +1507,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> resp = rpc.sendJsonRequest("check_spend_proof", params);
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (boolean) result.get("good");
-    } catch (MoneroRpcException e) {
-      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcException("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+    } catch (MoneroRpcError e) {
+      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
       throw e;
     }
   }
@@ -1717,7 +1717,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       String value = (String) result.get("value");
       return value.isEmpty() ? null : value;
-    } catch (MoneroRpcException e) {
+    } catch (MoneroRpcError e) {
       if (e.getCode() == -45) return null;  // -45: attribute not found
       throw e;
     }
@@ -1866,7 +1866,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     try {
       this.getPrimaryAddress();
     } catch (Exception e) {
-      return e instanceof MoneroRpcException && ((MoneroRpcException) e).getCode() == -13 && ((MoneroRpcException) e).getMessage().indexOf("No wallet file") > -1;
+      return e instanceof MoneroRpcError && ((MoneroRpcError) e).getCode() == -13 && ((MoneroRpcError) e).getMessage().indexOf("No wallet file") > -1;
     }
     return false;
   }

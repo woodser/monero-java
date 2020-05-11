@@ -126,7 +126,7 @@ public class MoneroRpcConnection {
       // check RPC response for errors
       validateRpcResponse(respMap, method, params);
       return respMap;
-    } catch (MoneroRpcException e1) {
+    } catch (MoneroRpcError e1) {
       throw e1;
     } catch (Exception e2) {
       //e3.printStackTrace();
@@ -179,7 +179,7 @@ public class MoneroRpcConnection {
       // check RPC response for errors
       validateRpcResponse(respMap, path, params);
       return respMap;
-    } catch (MoneroRpcException e1) {
+    } catch (MoneroRpcError e1) {
       throw e1;
     } catch (Exception e2) {
       e2.printStackTrace();
@@ -220,7 +220,7 @@ public class MoneroRpcConnection {
 //    let resp = await this._throttledRequest(opts);
 //    if (resp.error) throw new MoneroRpcError(resp.error.code, resp.error.message, opts);
 //    return new Uint8Array(resp, 0, resp.length);
-    } catch (MoneroRpcException e1) {
+    } catch (MoneroRpcError e1) {
       throw e1;
     } catch (Exception e2) {
       e2.printStackTrace();
@@ -267,7 +267,7 @@ public class MoneroRpcConnection {
       } catch (Exception e) {
         // could not get content
       }
-      throw new MoneroRpcException(code + " " + resp.getStatusLine().getReasonPhrase() + (content == null || content.isEmpty() ? "" : (": " + content)), code, null, null);
+      throw new MoneroRpcError(code + " " + resp.getStatusLine().getReasonPhrase() + (content == null || content.isEmpty() ? "" : (": " + content)), code, null, null);
     }
   }
 
@@ -277,6 +277,6 @@ public class MoneroRpcConnection {
     if (error == null) return;
     String msg = (String) error.get("message");
     int code = ((BigInteger) error.get("code")).intValue();
-    throw new MoneroRpcException(msg, code, method, params);
+    throw new MoneroRpcError(msg, code, method, params);
   }
 }

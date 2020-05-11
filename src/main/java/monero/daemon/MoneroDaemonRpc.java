@@ -39,7 +39,7 @@ import common.utils.GenUtils;
 import common.utils.JsonUtils;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
-import monero.common.MoneroRpcException;
+import monero.common.MoneroRpcError;
 import monero.common.MoneroUtils;
 import monero.daemon.model.ConnectionType;
 import monero.daemon.model.MoneroAltChain;
@@ -973,7 +973,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   
   private static void checkResponseStatus(Map<String, Object> resp) {
     String status = (String) resp.get("status");
-    if (!"OK".equals(status)) throw new MoneroRpcException(status, null, null, null);
+    if (!"OK".equals(status)) throw new MoneroRpcError(status, null, null, null);
   }
   
   private static MoneroBlockTemplate convertRpcBlockTemplate(Map<String, Object> rpcTemplate) {

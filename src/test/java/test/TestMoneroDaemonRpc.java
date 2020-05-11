@@ -22,7 +22,7 @@ import org.junit.Test;
 
 import common.utils.JsonUtils;
 import monero.common.MoneroError;
-import monero.common.MoneroRpcException;
+import monero.common.MoneroRpcError;
 import monero.common.MoneroUtils;
 import monero.daemon.MoneroDaemon;
 import monero.daemon.MoneroDaemonRpc;
@@ -1071,7 +1071,7 @@ public class TestMoneroDaemonRpc {
     try {
       daemon.submitBlock(template.getBlockHashingBlob());
       fail("Should have thrown error");
-    } catch (MoneroRpcException e) {
+    } catch (MoneroRpcError e) {
       assertEquals(-7, (int) e.getCode());
       assertEquals("Block not accepted", e.getMessage());
     }
@@ -1105,7 +1105,7 @@ public class TestMoneroDaemonRpc {
       try {
         result = daemon.downloadUpdate("./ohhai/there");
         fail("Should have thrown error");
-      } catch (MoneroRpcException e) {
+      } catch (MoneroRpcError e) {
         assertNotEquals("Should have thrown error", e.getMessage());
         assertEquals(500, (int) e.getCode());  // TODO monero-daemon-rpc: this causes a 500 in daemon rpc
       }
