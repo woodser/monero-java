@@ -1907,7 +1907,7 @@ public abstract class TestMoneroWalletCommon {
   @Ignore // TODO
   public void testGetReserveProofAccount() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-        
+    
     // test proofs of accounts
     int numNonZeroTests = 0;
     String msg = "Test message";

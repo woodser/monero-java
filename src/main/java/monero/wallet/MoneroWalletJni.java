@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -57,11 +58,11 @@ import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
+import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
@@ -412,7 +413,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
    */
   public Set<MoneroWalletListenerI> getListeners() {
     assertNotClosed();
-    return listeners;
+    return new HashSet<MoneroWalletListenerI>(listeners);
   }
 
   /**

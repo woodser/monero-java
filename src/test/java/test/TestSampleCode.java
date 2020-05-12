@@ -46,13 +46,17 @@ public class TestSampleCode {
   
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
+    
+    // all wallets need to wait for txs to confirm to reliably sync
+    TestUtils.TX_POOL_WALLET_TRACKER.reset(); 
+    
+    // pre-create test wallet
+    MoneroWalletRpc wallet = TestUtils.getWalletRpc();
+    wallet.close();
 
     // create directory for test wallets if it doesn't exist
     File testWalletsDir = new File(TestUtils.TEST_WALLETS_DIR);
     if (!testWalletsDir.exists()) testWalletsDir.mkdirs();
-    
-    // all wallets need to wait for txs to confirm to reliably sync
-    TestUtils.TX_POOL_WALLET_TRACKER.reset(); 
   }
   
   @SuppressWarnings("unused")

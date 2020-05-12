@@ -33,10 +33,10 @@ import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
+import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
@@ -1092,6 +1092,22 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   // ----------------------------- NOTIFICATION TESTS -------------------------
   
   @Test
+  public void testStopListening() throws InterruptedException {
+    
+    // create wallet and start background synchronizing
+    MoneroWalletJni wallet = createWallet(new MoneroWalletConfig());
+    
+    // add listener
+    OutputNotificationCollector listener = new OutputNotificationCollector();
+    wallet.addListener(listener);
+    TimeUnit.SECONDS.sleep(1);
+    
+    // remove listener and close
+    wallet.removeListener(listener);
+    wallet.close();
+  }
+  
+  @Test
   public void testReceivesFundsWithin10Seconds() throws InterruptedException {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
     testReceivesFundsWithin10Seconds(false);
@@ -1099,38 +1115,43 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   @Test
   public void testReceivesFundsWithin10SecondsSameAccount() throws InterruptedException {
-    org.junit.Assume.assumeTrue(TEST_RELAYS);
+    org.junit.Assume.assumeTrue(TEST_RELAYS && !LITE_MODE);
     testReceivesFundsWithin10Seconds(true);
   }
   
   private void testReceivesFundsWithin10Seconds(boolean sameAccount) throws InterruptedException {
+    MoneroWalletJni sender = wallet;
     MoneroWalletJni receiver = null;
+    OutputNotificationCollector receiverListener = null;
+    OutputNotificationCollector senderListener = null;
     try {
       
       // assign wallet to receive funds
       receiver = sameAccount ? wallet : createWallet(new MoneroWalletConfig());
       
-      // listen for received funds
-      OutputNotificationCollector receiverListener = new OutputNotificationCollector();
-      receiver.addListener(receiverListener);
-      
       // listen for sent funds
-      MoneroWalletJni sender = wallet;
-      OutputNotificationCollector senderListener = new OutputNotificationCollector();
+      senderListener = new OutputNotificationCollector();
       sender.addListener(senderListener);
       
+      // listen for received funds
+      receiverListener = new OutputNotificationCollector();
+      receiver.addListener(receiverListener);
+      
       // send funds
+      TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(sender);
       MoneroTxSet txSet = sender.sendTx(0, receiver.getPrimaryAddress(), TestUtils.MAX_FEE);
       String txHash = txSet.getTxs().get(0).getHash();
       sender.getTx(txHash);
       if (senderListener.getOutputsSpent().isEmpty()) System.out.println("WARNING: no notification on send");
       
-      // funds received within 10 seconds
+      // unconfirmed funds received within 10 seconds
       TimeUnit.SECONDS.sleep(10);
       receiver.getTx(txHash);
       assertFalse("No notification of received funds within 10 seconds in " + (sameAccount ? "same account" : "different wallets"), receiverListener.getOutputsReceived().isEmpty());
       for (MoneroOutputWallet output : receiverListener.getOutputsReceived()) assertNotEquals(null, output.getTx().isConfirmed());
     } finally {
+      sender.removeListener(senderListener);
+      receiver.removeListener(receiverListener);
       if (!sameAccount && receiver != null) receiver.close();
     }
   }
@@ -1567,8 +1588,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       // extra is not sent over the jni bridge
       assertNull(output.getTx().getExtra());
       
-      // add incoming amount to running total
-      incomingTotal = incomingTotal.add(output.getAmount());
+      // add incoming amount to running total if confirmed
+      if (output.getTx().isConfirmed()) incomingTotal = incomingTotal.add(output.getAmount());
     }
 
     @Override
