@@ -56,7 +56,7 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getMnemonicLan
 
 // ----------------------------- INSTANCE METHODS -----------------------------
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isWatchOnlyJni(JNIEnv *, jobject);
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isViewOnlyJni(JNIEnv *, jobject);
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *, jobject, jstring, jstring, jstring);
 

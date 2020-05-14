@@ -10,7 +10,6 @@ collapse MoneroWalletListener, MoneroWalletListenerI, and MoneroSyncListener?
 support ssl
 delete old local branches
 update readme sample with MoneroUtils
-support isWatchOnly()
 collect and report monero-wallet-rpc issues
 cpp library deserialization log warning for unrecognized fields
 cpp library uses unmodified monero-project submodule?
@@ -27,7 +26,6 @@ CMakeLists builds core directly instead of using libraries?
 update wasm cpp
 new rpc api will need containers for every call
 remove dependency on libwallet_merged, randomx if possible
-support wallet.isWatchOnly()
 add ability for jni and c++ wallets to disallow rpc version misamtch by configuration 
 automate sweep tests by funding wallets, waiting, then testing, rather than manually running funded wallets
 replace MoneroIntegratedAddress and MoneroDecodedAddress with MoneroAddress with address, address type, network type, primaryAddress, paymentId?

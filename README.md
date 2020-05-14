@@ -4,7 +4,7 @@ This project is a Java library for using Monero with RPC and native bindings to 
 
 - Supports RPC bindings to monero-wallet-rpc and monero-daemon-rpc.
 - Supports client-side wallets using JNI bindings to Monero Core.
-- Supports offline, watch-only, and multisig wallets.
+- Supports view-only, offline, and multisig wallets.
 - Query wallet transactions, transfers, and outputs by their many attributes.
 - Fetch and process binary data from the daemon (e.g. raw blocks).
 - Receive notifications when blocks are added to the chain or when wallets sync, send, and receive.
@@ -69,12 +69,11 @@ walletJni.addListener(new MoneroWalletListener() {
 });
 
 // send funds from RPC wallet to JNI wallet
-MoneroTxSet txSet = walletRpc.sendTx(new MoneroTxConfig()
+MoneroTxWallet sentTx = walletRpc.createTx(new MoneroTxConfig()
         .setAccountIndex(0)
         .setAddress(walletJni.getAddress(1, 0))
         .setAmount(new BigInteger("50000"))
-        .setPriority(MoneroTxPriority.UNIMPORTANT)); // no hurry
-MoneroTxWallet sentTx = txSet.getTxs().get(0); // send methods return tx set which contains sent tx(s)
+        .setRelay(true));
 String txHash = sentTx.getHash();
 
 // wallet receives unconfirmed funds within 10 seconds

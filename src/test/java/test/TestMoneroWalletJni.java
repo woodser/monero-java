@@ -1944,8 +1944,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   @Override
-  public void testWatchOnlyAndOfflineWallets() {
-    super.testWatchOnlyAndOfflineWallets();
+  public void testViewOnlyAndOfflineWallets() {
+    super.testViewOnlyAndOfflineWallets();
   }
 
   @Override

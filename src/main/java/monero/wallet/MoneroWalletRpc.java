@@ -339,15 +339,15 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   
   // -------------------------- COMMON WALLET METHODS -------------------------
   
-  public boolean isWatchOnly() {
+  public boolean isViewOnly() {
     try {
       Map<String, Object> params = new HashMap<String, Object>();
       params.put("key_type", "mnemonic");
       rpc.sendJsonRequest("query_key", params);
-      return false; // key retrieval succeeds if not watch only
+      return false; // key retrieval succeeds if not view-only
     } catch (MoneroError e) {
-      if (e.getCode() == -29) return true;  // wallet is watch-only
-      if (e.getCode() == -1) return false;  // wallet is offline but not watch-only
+      if (e.getCode() == -29) return true;  // wallet is view-only
+      if (e.getCode() == -1) return false;  // wallet is offline but not view-only
       throw e;
     }
   }
@@ -407,7 +407,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (String) result.get("key");
     } catch (MoneroError e) {
-      if (e.getCode() == -29) return null;  // wallet is watch-only
+      if (e.getCode() == -29) return null;  // wallet is view-only
       throw e;
     }
   }
@@ -443,7 +443,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   @Override
   public String getPrivateSpendKey() {
 
-    // get private spend key which returns error if wallet is watch-only
+    // get private spend key which returns error if wallet is view-only
     try {
       Map<String, Object> params = new HashMap<String, Object>();
       params.put("key_type", "spend_key");
@@ -451,7 +451,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (String) result.get("key");
     } catch (MoneroRpcError e) {
-      if (e.getCode() == -29 && e.getMessage().contains("watch-only")) return null; // return null if wallet is watch-only
+      if (e.getCode() == -29 && e.getMessage().contains("view-only")) return null; // return null if wallet is view-only
       throw e;
     }
   }
@@ -1203,7 +1203,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     Map<String, Object> resp = rpc.sendJsonRequest(config.getCanSplit() ? "transfer_split" : "transfer", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     
-    // pre-initialize txs iff present.  multisig and watch-only wallets will have tx set without transactions
+    // pre-initialize txs iff present.  multisig and view-only wallets will have tx set without transactions
     List<MoneroTxWallet> txs = null;
     int numTxs = config.getCanSplit() ? (result.containsKey("fee_list") ? ((List<String>) result.get("fee_list")).size() : 0) : (result.containsKey("fee") ? 1 : 0);
     if (numTxs > 0) txs = new ArrayList<MoneroTxWallet>();

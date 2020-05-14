@@ -61,12 +61,12 @@ public interface MoneroWallet {
   public static final String DEFAULT_LANGUAGE = "English";
   
   /**
-   * Indicates if the wallet is watch-only, meaning it does have the private
+   * Indicates if the wallet is view-only, meaning it does have the private
    * spend key and can therefore only observe incoming outputs.
    * 
-   * @return {bool} true if the wallet is watch-only, false otherwise
+   * @return {bool} true if the wallet is view-only, false otherwise
    */
-  public boolean isWatchOnly();
+  public boolean isViewOnly();
   
   /**
    * Set the wallet's daemon connection.
@@ -718,7 +718,7 @@ public interface MoneroWallet {
   public MoneroTxSet parseTxSet(MoneroTxSet txSet);
   
   /**
-   * Sign unsigned transactions from a watch-only wallet.
+   * Sign unsigned transactions from a view-only wallet.
    * 
    * @param unsignedTxHex is unsigned transaction hex from when the transactions were created
    * @return the signed transaction hex
@@ -726,7 +726,7 @@ public interface MoneroWallet {
   public String signTxs(String unsignedTxHex);
   
   /**
-   * Submit signed transactions from a watch-only wallet.
+   * Submit signed transactions from a view-only wallet.
    * 
    * @param signedTxHex is signed transaction hex from signTxs()
    * @retur the resulting transaction hashes

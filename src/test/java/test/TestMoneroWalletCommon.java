@@ -2081,10 +2081,10 @@ public abstract class TestMoneroWalletCommon {
     TestUtils.testUnsignedBigInteger(result.getUnspentAmount(), hasUnspent);
   }
   
-  // Supports watch-only and offline wallets to create, sign, and submit transactions
+  // Supports view-only and offline wallets to create, sign, and submit transactions
   @SuppressWarnings("unused")
   @Test
-  public void testWatchOnlyAndOfflineWallets() {
+  public void testViewOnlyAndOfflineWallets() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS || TEST_RELAYS);
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
@@ -2093,32 +2093,32 @@ public abstract class TestMoneroWalletCommon {
     String privateViewKey = wallet.getPrivateViewKey();
     String privateSpendKey = wallet.getPrivateSpendKey();
     
-    // create, sign, and submit transactions using watch-only and offline wallets
-    MoneroWallet watchOnlyWallet = null;
+    // create, sign, and submit transactions using view-only and offline wallets
+    MoneroWallet viewOnlyWallet = null;
     MoneroWallet offlineWallet = null;
     try {
       
-      // create and sync watch-only wallet
-      watchOnlyWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
-      assertEquals(primaryAddress, watchOnlyWallet.getPrimaryAddress());
-      assertEquals(privateViewKey, watchOnlyWallet.getPrivateViewKey());
-      assertEquals(null, watchOnlyWallet.getPrivateSpendKey());
-      assertEquals(null, watchOnlyWallet.getMnemonic());
-      assertEquals(null, watchOnlyWallet.getMnemonicLanguage());
-      assertTrue(watchOnlyWallet.isWatchOnly());
-      assertTrue(watchOnlyWallet.isConnected());  // TODO: this fails with monero-wallet-rpc and monerod with authentication
-      String watchOnlyPath = watchOnlyWallet.getPath();
-      watchOnlyWallet.sync();
-      assertTrue(watchOnlyWallet.getTxs().size() > 0);
+      // create and sync view-only wallet
+      viewOnlyWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+      assertEquals(primaryAddress, viewOnlyWallet.getPrimaryAddress());
+      assertEquals(privateViewKey, viewOnlyWallet.getPrivateViewKey());
+      assertEquals(null, viewOnlyWallet.getPrivateSpendKey());
+      assertEquals(null, viewOnlyWallet.getMnemonic());
+      assertEquals(null, viewOnlyWallet.getMnemonicLanguage());
+      assertTrue(viewOnlyWallet.isViewOnly());
+      assertTrue(viewOnlyWallet.isConnected());  // TODO: this fails with monero-wallet-rpc and monerod with authentication
+      String viewOnlyPath = viewOnlyWallet.getPath();
+      viewOnlyWallet.sync();
+      assertTrue(viewOnlyWallet.getTxs().size() > 0);
       
-      // export outputs from watch-only wallet
-      String outputsHex = watchOnlyWallet.getOutputsHex();
+      // export outputs from view-only wallet
+      String outputsHex = viewOnlyWallet.getOutputsHex();
       
       // create offline wallet
-      watchOnlyWallet.close(true);  // only one wallet open at a time to accommodate testing wallet rpc
+      viewOnlyWallet.close(true);  // only one wallet open at a time to accommodate testing wallet rpc
       offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setServerUri(""));
       assertFalse(offlineWallet.isConnected());
-      assertFalse(offlineWallet.isWatchOnly());
+      assertFalse(offlineWallet.isViewOnly());
       if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic()); // TODO monero-core: cannot get mnemonic from offline wallet rpc
       String offlineWalletPath = offlineWallet.getPath();
       assertEquals(0, offlineWallet.getTxs().size());
@@ -2129,17 +2129,17 @@ public abstract class TestMoneroWalletCommon {
       // export key images from offline wallet
       List<MoneroKeyImage> keyImages = offlineWallet.getKeyImages();
       
-      // import key images to watch-only wallet
+      // import key images to view-only wallet
       offlineWallet.close(true);
-      watchOnlyWallet = openWallet(watchOnlyPath);
-      watchOnlyWallet.importKeyImages(keyImages);
+      viewOnlyWallet = openWallet(viewOnlyPath);
+      viewOnlyWallet.importKeyImages(keyImages);
       
-      // create unsigned tx using watch-only wallet
-      MoneroTxWallet unsignedTx = watchOnlyWallet.createTx(new MoneroTxConfig().setAccountIndex(0).setAddress(primaryAddress).setAmount(TestUtils.MAX_FEE.multiply(new BigInteger("3"))));
+      // create unsigned tx using view-only wallet
+      MoneroTxWallet unsignedTx = viewOnlyWallet.createTx(new MoneroTxConfig().setAccountIndex(0).setAddress(primaryAddress).setAmount(TestUtils.MAX_FEE.multiply(new BigInteger("3"))));
       assertNotNull(unsignedTx.getTxSet().getUnsignedTxHex());
       
       // sign tx using offline wallet
-      watchOnlyWallet.close(true);
+      viewOnlyWallet.close(true);
       offlineWallet = openWallet(new MoneroWalletConfig().setPath(offlineWalletPath).setServerUri(""));
       String signedTxHex = offlineWallet.signTxs(unsignedTx.getTxSet().getUnsignedTxHex());
       assertFalse(signedTxHex.isEmpty());
@@ -2148,16 +2148,16 @@ public abstract class TestMoneroWalletCommon {
       MoneroTxSet parsedTxSet = offlineWallet.parseTxSet(unsignedTx.getTxSet());
       testParsedTxSet(parsedTxSet);
       
-      // submit signed tx using watch-only wallet
+      // submit signed tx using view-only wallet
       if (TEST_RELAYS) {
         offlineWallet.close();
-        watchOnlyWallet = openWallet(watchOnlyPath);
-        List<String> txHashes = watchOnlyWallet.submitTxs(signedTxHex);
+        viewOnlyWallet = openWallet(viewOnlyPath);
+        List<String> txHashes = viewOnlyWallet.submitTxs(signedTxHex);
         assertEquals(1, txHashes.size());
         assertEquals(64, txHashes.get(0).length());
       }
     } finally {
-      try { watchOnlyWallet.close(); } catch (Exception e) {}
+      try { viewOnlyWallet.close(); } catch (Exception e) {}
       try { offlineWallet.close(); } catch (Exception e) {}
       wallet = getTestWallet(); // open main test wallet for other tests
     }

@@ -434,10 +434,10 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getMnemonicLan
 
 //  ------------------------------- JNI INSTANCE ------------------------------
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isWatchOnlyJni(JNIEnv *env, jobject instance) {
-  MTRACE("Java_monero_wallet_MoneroWalletJni_isWatchOnlyJni");
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isViewOnlyJni(JNIEnv *env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletJni_isViewOnlyJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  return wallet->is_watch_only();
+  return wallet->is_view_only();
 }
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *env, jobject instance, jstring juri, jstring jusername, jstring jpassword) {
