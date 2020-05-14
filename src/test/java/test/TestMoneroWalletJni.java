@@ -1283,7 +1283,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // since sending from/to the same wallet, the net amount spent = tx fee = outputs spent - outputs received
     BigInteger netAmount = new BigInteger("0");
     for (MoneroOutputWallet outputSpent : listener.getOutputsSpent()) netAmount = netAmount.add(outputSpent.getAmount());
-    for (MoneroOutputWallet outputReceived : listener.getOutputsReceived()) netAmount = netAmount.subtract(outputReceived.getAmount());
+    for (MoneroOutputWallet outputReceived : listener.getOutputsReceived()) if (outputReceived.getTx().isConfirmed()) netAmount = netAmount.subtract(outputReceived.getAmount());
     if (tx.getFee().compareTo(netAmount) != 0) {
       errors.add("WARNING: net output amount must equal tx fee: " + tx.getFee().toString() + " vs " + netAmount.toString() + " (probably received notifications from other tests)");
       return errors;
