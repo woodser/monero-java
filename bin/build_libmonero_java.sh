@@ -1,7 +1,8 @@
 #!/bin/sh
 
-#EMCC_DEBUG=1 
+#EMCC_DEBUG=1
 
+HOST_NCORES=$(nproc 2>/dev/null || shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
 
 # Make libmonero-cpp.dylib
 cd ./external/monero-cpp-library/ && 
@@ -13,7 +14,6 @@ mkdir -p ./build &&
 cp ./external/monero-cpp-library/build/libmonero-cpp.dylib ./build &&
 
 # Make libmonero-java.dylib
-HOST_NCORES=$(nproc 2>/dev/null || shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
 cd build && 
 cmake .. && 
 cmake --build . -j$HOST_NCORES && 
