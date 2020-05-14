@@ -186,7 +186,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     if (this.getPaymentId() != null && !this.getPaymentId().equals(tx.getPaymentId())) return false;
     if (this.isConfirmed() != null && this.isConfirmed() != tx.isConfirmed()) return false;
     if (this.inTxPool() != null && this.inTxPool() != tx.inTxPool()) return false;
-    if (this.getDoNotRelay() != null && this.getDoNotRelay() != tx.getDoNotRelay()) return false;
+    if (this.getRelay() != null && this.getRelay() != tx.getRelay()) return false;
     if (this.isRelayed() != null && this.isRelayed() != tx.isRelayed()) return false;
     if (this.isFailed() != null && this.isFailed() != tx.isFailed()) return false;
     if (this.isMinerTx() != null && this.isMinerTx() != tx.isMinerTx()) return false;
@@ -318,8 +318,8 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setDoNotRelay(Boolean doNotRelay) {
-    super.setDoNotRelay(doNotRelay);
+  public MoneroTxQuery setRelay(Boolean relay) {
+    super.setRelay(relay);
     return this;
   }
 

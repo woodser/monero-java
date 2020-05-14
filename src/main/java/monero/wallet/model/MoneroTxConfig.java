@@ -23,7 +23,7 @@ public class MoneroTxConfig {
   private List<Integer> subaddressIndices;
   private Long unlockTime;
   private Boolean canSplit;
-  private Boolean doNotRelay;
+  private Boolean relay;
   private String note;
   private String recipientName;
   private BigInteger belowAmount;
@@ -31,30 +31,7 @@ public class MoneroTxConfig {
   private String keyImage;
   
   public MoneroTxConfig() {
-    this((String) null);
-  }
-  
-  public MoneroTxConfig(String address) {
-    this(address, null);
-  }
-  
-  public MoneroTxConfig(String address, BigInteger amount) {
-    this(null, address, amount);
-  }
-  
-  public MoneroTxConfig(Integer accountIndex, String address) {
-    this(accountIndex, address, null);
-  }
-
-  public MoneroTxConfig(Integer accountIndex, String address, BigInteger amount) {
-    this(accountIndex, address, amount, null);
-  }
-  
-  public MoneroTxConfig(Integer accountIndex, String address, BigInteger amount, MoneroTxPriority priority) {
-    this.accountIndex = accountIndex;
-    if (address != null) setAddress(address);
-    if (amount != null) setAmount(amount);
-    this.priority = priority;
+    // necessary for deserialization
   }
   
   MoneroTxConfig(final MoneroTxConfig config) {
@@ -69,7 +46,7 @@ public class MoneroTxConfig {
     if (config.subaddressIndices != null) this.subaddressIndices = new ArrayList<Integer>(config.subaddressIndices);
     this.unlockTime = config.unlockTime;
     this.canSplit = config.canSplit;
-    this.doNotRelay = config.doNotRelay;
+    this.relay = config.relay;
     this.note = config.note;
     this.recipientName = config.recipientName;
     this.belowAmount = config.belowAmount;
@@ -224,12 +201,12 @@ public class MoneroTxConfig {
     return this;
   }
   
-  public Boolean getDoNotRelay() {
-    return doNotRelay;
+  public Boolean getRelay() {
+    return relay;
   }
   
-  public MoneroTxConfig setDoNotRelay(Boolean doNotRelay) {
-    this.doNotRelay = doNotRelay;
+  public MoneroTxConfig setRelay(Boolean relay) {
+    this.relay = relay;
     return this;
   }
   
@@ -286,7 +263,7 @@ public class MoneroTxConfig {
     result = prime * result + ((belowAmount == null) ? 0 : belowAmount.hashCode());
     result = prime * result + ((canSplit == null) ? 0 : canSplit.hashCode());
     result = prime * result + ((destinations == null) ? 0 : destinations.hashCode());
-    result = prime * result + ((doNotRelay == null) ? 0 : doNotRelay.hashCode());
+    result = prime * result + ((relay == null) ? 0 : relay.hashCode());
     result = prime * result + ((fee == null) ? 0 : fee.hashCode());
     result = prime * result + ((keyImage == null) ? 0 : keyImage.hashCode());
     result = prime * result + ((note == null) ? 0 : note.hashCode());
@@ -317,9 +294,9 @@ public class MoneroTxConfig {
     if (destinations == null) {
       if (other.destinations != null) return false;
     } else if (!destinations.equals(other.destinations)) return false;
-    if (doNotRelay == null) {
-      if (other.doNotRelay != null) return false;
-    } else if (!doNotRelay.equals(other.doNotRelay)) return false;
+    if (relay == null) {
+      if (other.relay != null) return false;
+    } else if (!relay.equals(other.relay)) return false;
     if (fee == null) {
       if (other.fee != null) return false;
     } else if (!fee.equals(other.fee)) return false;

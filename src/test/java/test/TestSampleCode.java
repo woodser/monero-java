@@ -31,7 +31,6 @@ import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxPriority;
 import monero.wallet.model.MoneroTxQuery;
-import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
 import monero.wallet.model.MoneroWalletListener;
@@ -110,12 +109,11 @@ public class TestSampleCode {
     
     // send funds from RPC wallet to JNI wallet
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(walletRpc); // *** REMOVE FROM README SAMPLE ***
-    MoneroTxSet txSet = walletRpc.sendTx(new MoneroTxConfig()
+    MoneroTxWallet sentTx = walletRpc.createTx(new MoneroTxConfig()
             .setAccountIndex(0)
             .setAddress(walletJni.getAddress(1, 0))
             .setAmount(new BigInteger("50000"))
-            .setPriority(MoneroTxPriority.UNIMPORTANT)); // no hurry
-    MoneroTxWallet sentTx = txSet.getTxs().get(0); // send methods return tx set which contains sent tx(s)
+            .setRelay(true));
     String txHash = sentTx.getHash();
     
     // wallet receives unconfirmed funds within 10 seconds
@@ -217,8 +215,11 @@ public class TestSampleCode {
     
     // send funds from the RPC wallet to the JNI wallet
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(walletRpc); // wait for txs to clear pool *** REMOVE FROM README SAMPLE ***
-    MoneroTxSet txSet = walletRpc.sendTx(0, walletJni.getPrimaryAddress(), new BigInteger("50000"));
-    MoneroTxWallet sentTx = txSet.getTxs().get(0);  // send methods return tx set(s) which contain sent txs
+    MoneroTxWallet sentTx = walletRpc.createTx(new MoneroTxConfig()
+            .setAccountIndex(0)
+            .setAddress(walletJni.getPrimaryAddress())
+            .setAmount(new BigInteger("50000"))
+            .setRelay(true));
     assertTrue(sentTx.inTxPool());
     
     // mine with 7 threads to push the network along
@@ -248,7 +249,7 @@ public class TestSampleCode {
                     new MoneroDestination(walletJni.getAddress(2, 0), new BigInteger("50000")));
     
     // create the transaction, confirm with the user, and relay to the network
-    MoneroTxWallet createdTx = walletRpc.createTx(config).getTxs().get(0);
+    MoneroTxWallet createdTx = walletRpc.createTx(config);
     BigInteger fee = createdTx.getFee();  // "Are you sure you want to send ...?"
     walletRpc.relayTx(createdTx); // submit the transaction which will notify the JNI wallet
     

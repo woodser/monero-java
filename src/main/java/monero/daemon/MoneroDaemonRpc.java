@@ -286,7 +286,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         tx.setIsConfirmed(true);
         tx.setInTxPool(false);
         tx.setIsMinerTx(false);
-        tx.setDoNotRelay(false);
+        tx.setRelay(true);
         tx.setIsRelayed(true);
         tx.setIsFailed(false);
         tx.setIsDoubleSpendSeen(false);
@@ -1128,7 +1128,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         for (BigInteger bi : (List<BigInteger>) val) indices.add(bi.intValue());
         tx.setOutputIndices(GenUtils.reconcile(tx.getOutputIndices(), indices));
       }
-      else if (key.equals("do_not_relay")) tx.setDoNotRelay(GenUtils.reconcile(tx.getDoNotRelay(), (Boolean) val));
+      else if (key.equals("do_not_relay")) tx.setRelay(GenUtils.reconcile(tx.getRelay(), !(Boolean) val));
       else if (key.equals("kept_by_block")) tx.setIsKeptByBlock(GenUtils.reconcile(tx.isKeptByBlock(), (Boolean) val));
       else if (key.equals("signatures")) tx.setSignatures(GenUtils.reconcile(tx.getSignatures(), (List<String>) val));
       else if (key.equals("last_failed_height")) {
@@ -1165,8 +1165,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     
     // initialize remaining known fields
     if (tx.isConfirmed()) {
+      tx.setRelay(GenUtils.reconcile(tx.getRelay(), true));
       tx.setIsRelayed(GenUtils.reconcile(tx.isRelayed(), true));
-      tx.setDoNotRelay(GenUtils.reconcile(tx.getDoNotRelay(), false));
       tx.setIsFailed(GenUtils.reconcile(tx.isFailed(), false));
     } else {
       tx.setNumConfirmations(0l);

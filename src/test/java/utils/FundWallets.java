@@ -14,7 +14,7 @@ import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroTxConfig;
-import monero.wallet.model.MoneroTxSet;
+import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
 
 /**
@@ -66,10 +66,10 @@ public class FundWallets {
       List<MoneroDestination> destinations = new ArrayList<MoneroDestination>();
       for (String address : subaddresses) destinations.add(new MoneroDestination(address, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(2))));
       System.out.println("Transferring....");
-      MoneroTxSet txSet = srcWallet.sendTxs(new MoneroTxConfig().setDestinations(destinations).setAccountIndex(0));
-      System.out.println("Tx set has " + txSet.getTxs().size() + " transactions");
-      assertFalse(txSet.getTxs().isEmpty());
-      //for (MoneroTxWallet tx : txSet.getTxs()) System.out.println(tx);
+      List<MoneroTxWallet> txs = srcWallet.createTxs(new MoneroTxConfig().setDestinations(destinations).setAccountIndex(0).setRelay(true));
+      System.out.println("Tx set has " + txs.size() + " transactions");
+      assertFalse(txs.isEmpty());
+      //for (MoneroTxWallet tx : txs) System.out.println(tx);
     }
     
     System.out.println("Wallets funded successfully");

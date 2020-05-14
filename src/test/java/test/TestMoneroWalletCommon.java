@@ -2082,9 +2082,10 @@ public abstract class TestMoneroWalletCommon {
   }
   
   // Supports watch-only and offline wallets to create, sign, and submit transactions
+  @SuppressWarnings("unused")
   @Test
   public void testWatchOnlyAndOfflineWallets() {
-    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS || TEST_RELAYS);
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // collect info from main test wallet
@@ -2134,16 +2135,17 @@ public abstract class TestMoneroWalletCommon {
       watchOnlyWallet.importKeyImages(keyImages);
       
       // create unsigned tx using watch-only wallet
-      MoneroTxSet unsignedTxSet = watchOnlyWallet.createTx(0, primaryAddress, TestUtils.MAX_FEE.multiply(new BigInteger("3")));
+      MoneroTxWallet unsignedTx = watchOnlyWallet.createTx(new MoneroTxConfig().setAccountIndex(0).setAddress(primaryAddress).setAmount(TestUtils.MAX_FEE.multiply(new BigInteger("3"))));
+      assertNotNull(unsignedTx.getTxSet().getUnsignedTxHex());
       
       // sign tx using offline wallet
       watchOnlyWallet.close(true);
       offlineWallet = openWallet(new MoneroWalletConfig().setPath(offlineWalletPath).setServerUri(""));
-      String signedTxHex = offlineWallet.signTxs(unsignedTxSet.getUnsignedTxHex());
+      String signedTxHex = offlineWallet.signTxs(unsignedTx.getTxSet().getUnsignedTxHex());
       assertFalse(signedTxHex.isEmpty());
       
       // parse or "describe" unsigned tx set
-      MoneroTxSet parsedTxSet = offlineWallet.parseTxSet(unsignedTxSet);
+      MoneroTxSet parsedTxSet = offlineWallet.parseTxSet(unsignedTx.getTxSet());
       testParsedTxSet(parsedTxSet);
       
       // submit signed tx using watch-only wallet
@@ -2291,7 +2293,7 @@ public abstract class TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // test with address and amount
-    MoneroTxConfig config1 = new MoneroTxConfig(wallet.getAddress(0, 0), BigInteger.valueOf(0));
+    MoneroTxConfig config1 = new MoneroTxConfig().setAddress(wallet.getAddress(0, 0)).setAmount(BigInteger.valueOf(0));
     String uri = wallet.createPaymentUri(config1);
     MoneroTxConfig config2 = wallet.parsePaymentUri(uri);
     assertEquals(config1, config2);
@@ -2343,30 +2345,33 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testSyncWithPoolSameAccounts() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    String address = wallet.getPrimaryAddress();
-    BigInteger amount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(5));
-    MoneroTxConfig config = new MoneroTxConfig().setAccountIndex(0).setDoNotRelay(true).setDestinations(new MoneroDestination(address, amount));
-    testSyncWithPoolSubmit(config);
+    testSyncWithPoolSubmit(new MoneroTxConfig()
+            .setAccountIndex(0)
+            .setAddress(wallet.getPrimaryAddress())
+            .setAmount(TestUtils.MAX_FEE.multiply(new BigInteger("5")))
+            .setRelay(false));
   }
   
   // Can sync with txs submitted and discarded from the pool
   @Test
   public void testSyncWithPoolSubmitAndDiscard() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    String address = wallet.getPrimaryAddress();
-    BigInteger amount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(5));
-    MoneroTxConfig config = new MoneroTxConfig().setAccountIndex(2).setDoNotRelay(true).setDestinations(new MoneroDestination(address, amount));
-    testSyncWithPoolSubmit(config);
+    testSyncWithPoolSubmit(new MoneroTxConfig()
+            .setAccountIndex(2)
+            .setAddress(wallet.getPrimaryAddress())
+            .setAmount(TestUtils.MAX_FEE.multiply(new BigInteger("5")))
+            .setRelay(false));
   }
   
   // Can sync with txs submitted and relayed from the pool
   @Test
   public void testSyncWithPoolSubmitAndRelay() {
     org.junit.Assume.assumeTrue(TEST_RELAYS && !LITE_MODE);
-    String address = wallet.getPrimaryAddress();
-    BigInteger amount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(5));
-    MoneroTxConfig config = new MoneroTxConfig().setAccountIndex(2).setDoNotRelay(false).setDestinations(new MoneroDestination(address, amount));
-    testSyncWithPoolSubmit(config);
+    testSyncWithPoolSubmit(new MoneroTxConfig()
+            .setAccountIndex(2)
+            .setAddress(wallet.getPrimaryAddress())
+            .setAmount(TestUtils.MAX_FEE.multiply(new BigInteger("5")))
+            .setRelay(true));
   }
   
   private void testSyncWithPoolSubmit(MoneroTxConfig config) {
@@ -2380,15 +2385,16 @@ public abstract class TestMoneroWalletCommon {
     BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance();
     
     // create tx but do not relay
-    MoneroTxConfig configCopy = config.copy();
-    MoneroTxWallet tx = wallet.createTx(config).getTxs().get(0);
+    MoneroTxConfig configNoRelay = config.copy().setRelay(false);
+    MoneroTxConfig configNoRelayCopy = configNoRelay.copy();
+    MoneroTxWallet tx = wallet.createTx(configNoRelay);
     
     // create tx using same config which is double spend
-    MoneroTxWallet txDoubleSpend = wallet.createTx(config).getTxs().get(0);
+    MoneroTxWallet txDoubleSpend = wallet.createTx(configNoRelay);
     
     // test that config is unchanged
-    assert(configCopy != config);
-    assertEquals(configCopy, config);
+    assert(configNoRelayCopy != configNoRelay);
+    assertEquals(configNoRelayCopy, configNoRelay);
     
     // submit tx directly to the pool but do not relay
     MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
@@ -2416,8 +2422,8 @@ public abstract class TestMoneroWalletCommon {
         throw new RuntimeException("Tx submit result should have been double spend");
       }
       
-      // relay unless doNotRelay
-      if (!Boolean.TRUE.equals(config.getDoNotRelay())) daemon.relayTxByHash(tx.getHash());
+      // relay if configured
+      if (Boolean.TRUE.equals(config.getRelay())) daemon.relayTxByHash(tx.getHash());
 
       // sync wallet which updates from pool
       wallet.sync();
@@ -2431,7 +2437,7 @@ public abstract class TestMoneroWalletCommon {
         assertNotEquals("Wallet unlocked balance should revert to original after flushing tx from pool without relaying", unlockedBalanceBefore, wallet.getUnlockedBalance());  // TODO: test exact amounts, maybe in ux test
         
         // create tx using same config which is no longer double spend
-        MoneroTxWallet tx2 = wallet.sendTx(config).getTxs().get(0);
+        MoneroTxWallet tx2 = wallet.createTx(configNoRelay);
         MoneroSubmitTxResult result2 = daemon.submitTxHex(tx2.getFullHex(), true);
         
         // test result and flush on finally
@@ -2445,7 +2451,7 @@ public abstract class TestMoneroWalletCommon {
         }
       }
     } finally  {
-      if (Boolean.TRUE.equals(config.getDoNotRelay())) {
+      if (!Boolean.TRUE.equals(config.getRelay())) {
         
         // flush the tx from the pool
         daemon.flushTxPool(tx.getHash());
@@ -2479,20 +2485,21 @@ public abstract class TestMoneroWalletCommon {
     // TODO monero core: update from pool does not prevent creating double spend tx
    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
     
-    // create config
-    String address = wallet.getPrimaryAddress();
-    BigInteger amount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(5));
-    MoneroTxConfig config = new MoneroTxConfig().setAccountIndex(2).setDestinations(new MoneroDestination(address, amount));
-    
     // record wallet balances before submitting tx to pool
     BigInteger balanceBefore = wallet.getBalance();
     BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance();
     
+    // create config
+    MoneroTxConfig config = new MoneroTxConfig()
+            .setAccountIndex(2)
+            .setAddress(wallet.getPrimaryAddress())
+            .setAmount(TestUtils.MAX_FEE.multiply(new BigInteger("5")));
+    
     // create tx to relay
-    MoneroTxWallet tx = wallet.createTx(config).getTxs().get(0);
+    MoneroTxWallet tx = wallet.createTx(config);
     
     // create another tx using same config which would be double spend
-    MoneroTxWallet txDoubleSpend = wallet.createTx(config).getTxs().get(0);
+    MoneroTxWallet txDoubleSpend = wallet.createTx(config);
     
     // relay first tx directly to daemon
     MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex());
@@ -2533,7 +2540,7 @@ public abstract class TestMoneroWalletCommon {
       // create tx using same config which is no longer double spend
       MoneroTxWallet tx2 = null;
       try {
-        tx2 = wallet.sendTx(config).getTxs().get(0);
+        tx2 = wallet.createTx(config.copy().setRelay(true));
       } catch (Exception e) {
         issues.add("WARNING: creating and sending tx through wallet should succeed after syncing wallet with pool but creates a double spend"); // TODO monero core: this fails meaning wallet did not recognize tx relayed directly to pool
       }
@@ -2565,7 +2572,11 @@ public abstract class TestMoneroWalletCommon {
     BigInteger unlockedBalance1 = wallet.getUnlockedBalance();
     
     // send funds to external address
-    MoneroTxWallet tx = wallet.sendTx(0, TestUtils.getRandomWalletAddress(), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).getTxs().get(0);
+    MoneroTxWallet tx = wallet.createTx(new MoneroTxConfig()
+            .setAccountIndex(0)
+            .setAddress(TestUtils.getRandomWalletAddress())
+            .setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3)))
+            .setRelay(true));
     
     // collect balances after
     BigInteger balance2 = wallet.getBalance();
@@ -2644,13 +2655,10 @@ public abstract class TestMoneroWalletCommon {
     config.setDestinations(new MoneroDestination(address, sendAmount));
     config.setAccountIndex(srcAccount.getIndex());
     config.setSubaddressIndices(fromSubaddressIndices);
+    config.setRelay(true);
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     MoneroTxConfig configCopy = config.copy();
-    if (!Boolean.FALSE.equals(config.getCanSplit())) {
-      txs.addAll(wallet.sendTxs(config).getTxs());
-    } else {
-      txs.addAll(wallet.sendTx(config).getTxs());
-    }
+    txs.addAll(wallet.createTxs(config));
     if (Boolean.FALSE.equals(config.getCanSplit())) assertEquals(1, txs.size());  // must have exactly one tx if no split
     
     // test that config is unchanged
@@ -2734,14 +2742,14 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testCreateThenRelay() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
-    testSendToSingle(new MoneroTxConfig().setCanSplit(false).setDoNotRelay(true));
+    testSendToSingle(new MoneroTxConfig().setCanSplit(false));
   }
   
   // Can create then relay split transactions to send to a single address
   @Test
   public void testCreateThenRelaySplit() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
-    testSendToSingle(new MoneroTxConfig().setCanSplit(true).setDoNotRelay(true));
+    testSendToSingle(new MoneroTxConfig().setCanSplit(true));
   }
   
   private void testSendToSingle(MoneroTxConfig config) {
@@ -2782,12 +2790,7 @@ public abstract class TestMoneroWalletCommon {
     MoneroTxConfig configCopy = config.copy();
     
     // send to self
-    // can use createTx() or sendTx() because config's doNotRelay is used, but exercise both calls
-    if (!Boolean.FALSE.equals(config.getCanSplit())) {
-      txs.addAll((Boolean.TRUE.equals(config.getDoNotRelay()) ? wallet.createTxs(config) : wallet.sendTxs(config)).getTxs());
-    } else {
-      txs.addAll((Boolean.TRUE.equals(config.getDoNotRelay()) ? wallet.createTx(config) : wallet.sendTx(config)).getTxs());
-    }
+    txs.addAll(wallet.createTxs(config));
     if (Boolean.FALSE.equals(config.getCanSplit())) assertEquals(1, txs.size());  // must have exactly one tx if no split
     
     // test that config is unchanged
@@ -2798,7 +2801,7 @@ public abstract class TestMoneroWalletCommon {
     testCommonTxSets(txs, false, false, false);
     
     // handle non-relayed transaction
-    if (Boolean.TRUE.equals(config.getDoNotRelay())) {
+    if (!Boolean.TRUE.equals(config.getRelay())) {
       
       // build test context
       TxContext ctx = new TxContext();
@@ -2846,7 +2849,7 @@ public abstract class TestMoneroWalletCommon {
     TxContext ctx = new TxContext();
     ctx.wallet = wallet;
     ctx.config = config;
-    ctx.isSendResponse = Boolean.TRUE.equals(config.getDoNotRelay()) ? false : true;
+    ctx.isSendResponse = Boolean.TRUE.equals(config.getRelay());
     
     // test transactions
     assertTrue(txs.size() > 0);
@@ -2880,7 +2883,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // if tx was relayed, all wallets will need to wait for tx to confirm in order to reliably sync
-    if (Boolean.TRUE.equals(config.getDoNotRelay())) {
+    if (Boolean.TRUE.equals(config.getRelay())) {
       TestUtils.TX_POOL_WALLET_TRACKER.reset(); // TODO: resetExcept(wallet), or does this test wallet also need to be waited on?
     }
   }
@@ -2969,18 +2972,15 @@ public abstract class TestMoneroWalletCommon {
     MoneroTxConfig config = new MoneroTxConfig();
     config.setAccountIndex(srcAccount.getIndex());
     config.setDestinations(new ArrayList<MoneroDestination>());
+    config.setRelay(true);
+    config.setCanSplit(canSplit);
     for (int i = 0; i < destinationAddresses.size(); i++) {
       config.getDestinations().add(new MoneroDestination(destinationAddresses.get(i), sendAmountPerSubaddress));
     }
     MoneroTxConfig configCopy = config.copy();
     
     // send tx(s) with config
-    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-    if (canSplit) {
-      txs.addAll(wallet.sendTxs(config).getTxs());
-    } else {
-      txs.addAll(wallet.sendTx(config).getTxs());
-    }
+    List<MoneroTxWallet> txs = wallet.createTxs(config);
     if (!canSplit) assertEquals(1, txs.size());
     
     // test that config is unchanged
@@ -3040,7 +3040,6 @@ public abstract class TestMoneroWalletCommon {
     assertTrue("Wallet does not have enough sweepable outputs; run send tests", outputsToSweep.size() >= numOutputs);
     
     // sweep each output by key image
-    boolean useParams = true; // for loop flips in order to alternate test
     for (MoneroOutputWallet output : outputsToSweep) {
       testOutputWallet(output);
       assertFalse(output.isSpent());
@@ -3049,10 +3048,8 @@ public abstract class TestMoneroWalletCommon {
       
       // sweep output to address
       String address = wallet.getAddress(output.getAccountIndex(), output.getSubaddressIndex());
-      MoneroTxConfig config = new MoneroTxConfig(address).setKeyImage(output.getKeyImage().getHex());
-      MoneroTxWallet tx;
-      if (useParams) tx = wallet.sweepOutput(address, output.getKeyImage().getHex(), null).getTxs().get(0); // test params
-      else tx = wallet.sweepOutput(config).getTxs().get(0);  // test config
+      MoneroTxConfig config = new MoneroTxConfig().setAddress(address).setKeyImage(output.getKeyImage().getHex()).setRelay(true);
+      MoneroTxWallet tx = wallet.sweepOutput(config);
       
       // test resulting tx
       TxContext ctx = new TxContext();
@@ -3063,7 +3060,6 @@ public abstract class TestMoneroWalletCommon {
       ctx.isSweepResponse = true;
       ctx.isSweepOutputResponse = true;
       testTxWallet(tx, ctx);
-      useParams = !useParams;
     }
     
     // get outputs after sweeping
@@ -3088,7 +3084,7 @@ public abstract class TestMoneroWalletCommon {
     // generate non-relayed transactions to sweep dust
     List<MoneroTxWallet> txs = null;
     try {
-      txs = wallet.sweepDust(true).getTxs();
+      txs = wallet.sweepDust(false);
     } catch (MoneroError e) {
       assertEquals("No dust to sweep", e.getMessage());
       return;
@@ -3097,7 +3093,7 @@ public abstract class TestMoneroWalletCommon {
     // test txs
     TxContext ctx = new TxContext();
     ctx.isSendResponse = true;
-    ctx.config = new MoneroTxConfig().setDoNotRelay(true);
+    ctx.config = new MoneroTxConfig().setRelay(false);
     ctx.isSweepResponse = true;
     for (MoneroTxWallet tx : txs) {
       testTxWallet(tx, ctx);
@@ -3112,7 +3108,7 @@ public abstract class TestMoneroWalletCommon {
     
     // fetch and test txs
     txs = wallet.getTxs(new MoneroTxQuery().setHashes(txHashes));
-    ctx.config.setDoNotRelay(false);
+    ctx.config.setRelay(true);
     for (MoneroTxWallet tx : txs) {
       testTxWallet(tx, ctx);
     }
@@ -3127,7 +3123,7 @@ public abstract class TestMoneroWalletCommon {
     // sweep dust which will throw exception if no dust to sweep (dust does not exist after rct) 
     List<MoneroTxWallet> txs = null;
     try {
-      txs = wallet.sweepDust().getTxs();
+      txs = wallet.sweepDust(true);
     } catch (MoneroError e) {
       assertEquals("No dust to sweep", e.getMessage());
       return;
@@ -3178,6 +3174,10 @@ public abstract class TestMoneroWalletCommon {
     String BEGIN_MULTISIG_NAME = "begin_multisig_wallet";
     MoneroWallet curWallet = null;
     try {
+      
+      // wait for txs to clear pool
+      TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);    
+      
       // set name attribute of test wallet at beginning of test
       wallet.setAttribute("name", BEGIN_MULTISIG_NAME);
       wallet.save();
@@ -3298,7 +3298,7 @@ public abstract class TestMoneroWalletCommon {
         curWallet = getTestWallet();  // get / open the main test wallet
         assertEquals(BEGIN_MULTISIG_NAME, curWallet.getAttribute("name"));
         assertTrue(curWallet.getBalance().compareTo(BigInteger.valueOf(0)) > 0);
-        curWallet.sendTx(new MoneroTxConfig().setAccountIndex(0).setDestinations(destinations));
+        curWallet.createTx(new MoneroTxConfig().setAccountIndex(0).setDestinations(destinations).setRelay(true));
         String returnAddress = curWallet.getPrimaryAddress(); // funds will be returned to this address from the multisig wallet
         
         // open the first multisig participant
@@ -3359,13 +3359,10 @@ public abstract class TestMoneroWalletCommon {
         
         // attempt creating and relaying transaction without synchronizing with participants
         try {
-          MoneroTxSet txSet = curWallet.sendTxs(1, returnAddress, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3)));
-          System.out.println("WARNING: wallet returned a tx set from sendTxs() even though it has not been synchronized with participants, expected exception: " + JsonUtils.serialize(txSet));  // TODO monero core: wallet_rpc_server.cpp:995 should throw if no txs created
-          //throw new RuntimeException("Should have failed sending funds without synchronizing with peers");
+          curWallet.createTx(new MoneroTxConfig().setAccountIndex(1).setAddress(returnAddress).setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).setRelay(true)).getTxSet();
+          throw new RuntimeException("Should have failed sending funds without synchronizing with peers");
         } catch (MoneroError e) {
-          if (!e.getMessage().contains("Should have failed")) { // TODO: remove this check when wallet rpc throws exception as expected
-            assertEquals("No transaction created", e.getMessage());
-          }
+          assertEquals("No transaction created", e.getMessage());
         }
         
         // synchronize the multisig participants since receiving outputs
@@ -3375,11 +3372,12 @@ public abstract class TestMoneroWalletCommon {
         
         // send funds from a subaddress in the multisig wallet
         System.out.println("Sending");
-        MoneroTxSet txSet = curWallet.sendTxs(new MoneroTxConfig(returnAddress, TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0));
+        List<MoneroTxWallet> txs = curWallet.createTxs(new MoneroTxConfig().setAddress(returnAddress).setAmount(TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0).setRelay(true));
+        assertFalse(txs.isEmpty());
+        MoneroTxSet txSet = txs.get(0).getTxSet();
         assertNotNull(txSet.getMultisigTxHex());
         assertNull(txSet.getSignedTxHex());
         assertNull(txSet.getUnsignedTxHex());
-        assertFalse(txSet.getTxs().isEmpty());
         
         // parse multisig tx hex and test
         testParsedTxSet(curWallet.parseTxSet(txSet));
@@ -3415,7 +3413,7 @@ public abstract class TestMoneroWalletCommon {
         outputs = curWallet.getOutputs(new MoneroOutputQuery().setAccountIndex(1).setSubaddressIndex(1));
         assertFalse(outputs.isEmpty());
         assertFalse(outputs.get(0).isSpent());
-        txSet = curWallet.sweepOutput(returnAddress, outputs.get(0).getKeyImage().getHex());
+        txSet = curWallet.sweepOutput(new MoneroTxConfig().setAddress(returnAddress).setKeyImage(outputs.get(0).getKeyImage().getHex()).setRelay(true)).getTxSet();
         assertNotNull(txSet.getMultisigTxHex());
         assertNull(txSet.getSignedTxHex());
         assertNull(txSet.getUnsignedTxHex());
@@ -3451,18 +3449,19 @@ public abstract class TestMoneroWalletCommon {
         
         // sweep remaining balance
         System.out.println("Sweeping");
-        List<MoneroTxSet> txSets = curWallet.sweepUnlocked(new MoneroTxConfig(returnAddress).setAccountIndex(1)); // TODO: test multisig with sweepEachSubaddress which will generate multiple tx sets without synchronizing participants
-        assertEquals(1, txSets.size()); // only one tx set created per account
-        txSet = txSets.get(0);
+        txs = curWallet.sweepUnlocked(new MoneroTxConfig().setAddress(returnAddress).setAccountIndex(1).setRelay(true)); // TODO: test multisig with sweepEachSubaddress which will generate multiple tx sets without synchronizing participants
+        assertFalse("No txs created on sweepUnlocked", txs.isEmpty());
+        txSet = txs.get(0).getTxSet();
+        for (MoneroTxWallet tx : txs) {
+          assertTrue(tx.getTxSet() == txSet);
+          assertTrue(tx.getTxSet().getTxs().contains(tx));
+        }
         assertNotNull(txSet.getMultisigTxHex());
         assertNull(txSet.getSignedTxHex());
         assertNull(txSet.getUnsignedTxHex());
-        assertFalse(txSet.getTxs().isEmpty());
         
-        // parse each multisig tx hex and test
-        for (MoneroTxSet sweepTxSet : txSets) {
-          testParsedTxSet(curWallet.parseTxSet(sweepTxSet));
-        }
+        // parse multisig tx hex and test
+        testParsedTxSet(curWallet.parseTxSet(txSet));
         curWallet.close();
         
         // sign the tx with participants 1 through m - 1 to meet threshold
@@ -3546,10 +3545,13 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testUpdateLockedSameAccount() {
     org.junit.Assume.assumeTrue(TEST_RELAYS && TEST_NOTIFICATIONS);
-    MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress(), TestUtils.MAX_FEE);
-    config.setAccountIndex(0);
-    config.setUnlockTime(3l);
-    config.setCanSplit(false);
+    MoneroTxConfig config = new MoneroTxConfig()
+            .setAddress(wallet.getPrimaryAddress())
+            .setAmount(TestUtils.MAX_FEE)
+            .setAccountIndex(0)
+            .setUnlockTime(3l)
+            .setCanSplit(false)
+            .setRelay(true);
     testSendAndUpdateTxs(config);
   }
   
@@ -3557,10 +3559,14 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testUpdateLockedSameAccountSplit() {
     org.junit.Assume.assumeTrue(TEST_RELAYS && TEST_NOTIFICATIONS && !LITE_MODE);
-    MoneroTxConfig config = new MoneroTxConfig(0, wallet.getPrimaryAddress(), TestUtils.MAX_FEE);
-    config.setAccountIndex(0);
-    config.setUnlockTime(3l);
-    config.setCanSplit(true);
+    MoneroTxConfig config = new MoneroTxConfig()
+            .setAccountIndex(0)
+            .setAddress(wallet.getPrimaryAddress())
+            .setAmount(TestUtils.MAX_FEE)
+            .setAccountIndex(0)
+            .setUnlockTime(3l)
+            .setCanSplit(true)
+            .setRelay(true);
     testSendAndUpdateTxs(config);
   }
   
@@ -3568,9 +3574,13 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testUpdateLockedDifferentAccounts() {
     org.junit.Assume.assumeTrue(TEST_RELAYS && TEST_NOTIFICATIONS && !LITE_MODE);
-    MoneroTxConfig config = new MoneroTxConfig(0, wallet.getSubaddress(1, 0).getAddress(), TestUtils.MAX_FEE);
-    config.setUnlockTime(3l);
-    config.setCanSplit(false);
+    MoneroTxConfig config = new MoneroTxConfig()
+            .setAccountIndex(0)
+            .setAddress(wallet.getSubaddress(1, 0).getAddress())
+            .setAmount(TestUtils.MAX_FEE)
+            .setUnlockTime(3l)
+            .setCanSplit(false)
+            .setRelay(true);
     testSendAndUpdateTxs(config);
   }
   
@@ -3578,9 +3588,13 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testUpdateLockedDifferentAccountsSplit() {
     org.junit.Assume.assumeTrue(TEST_RELAYS && TEST_NOTIFICATIONS && !LITE_MODE);
-    MoneroTxConfig config = new MoneroTxConfig(0, wallet.getSubaddress(1, 0).getAddress(), TestUtils.MAX_FEE);
-    config.setAccountIndex(0);
-    config.setUnlockTime(3l);
+    MoneroTxConfig config = new MoneroTxConfig()
+            .setAccountIndex(0)
+            .setAddress(wallet.getSubaddress(1, 0).getAddress())
+            .setAmount(TestUtils.MAX_FEE)
+            .setAccountIndex(0)
+            .setUnlockTime(3l)
+            .setRelay(true);
     testSendAndUpdateTxs(config);
   }
   
@@ -3605,8 +3619,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       
       // send transactions
-      List<MoneroTxWallet> sentTxs;
-      sentTxs = (!Boolean.FALSE.equals(config.getCanSplit()) ? wallet.sendTxs(config) : wallet.sendTx(config)).getTxs();
+      List<MoneroTxWallet> sentTxs = wallet.createTxs(config);
       
       // build test context
       TxContext ctx = new TxContext();
@@ -3783,16 +3796,16 @@ public abstract class TestMoneroWalletCommon {
       
       // sweep unlocked account
       MoneroSubaddress unlockedSubaddress = subaddressesUnlocked.get(i);
-      MoneroTxSet txSet = wallet.sweepSubaddress(unlockedSubaddress.getAccountIndex(), unlockedSubaddress.getIndex(), wallet.getPrimaryAddress());
+      List<MoneroTxWallet> txs = wallet.sweepUnlocked(new MoneroTxConfig().setAccountIndex(unlockedSubaddress.getAccountIndex()).setSubaddressIndex(unlockedSubaddress.getIndex()).setAddress(wallet.getPrimaryAddress()).setRelay(true));
       
       // test transactions
-      List<MoneroTxWallet> txs = txSet.getTxs();
       assertTrue(txs.size() > 0);
       for (MoneroTxWallet tx : txs) {
-        assertTrue(txSet == tx.getTxSet());
-        MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress());
-        config.setAccountIndex(unlockedSubaddress.getAccountIndex());
-        config.setSubaddressIndices(unlockedSubaddress.getIndex());
+        assertTrue(tx.getTxSet().getTxs().contains(tx));
+        MoneroTxConfig config = new MoneroTxConfig()
+                .setAddress(wallet.getPrimaryAddress())
+                .setAccountIndex(unlockedSubaddress.getAccountIndex())
+                .setSubaddressIndices(unlockedSubaddress.getIndex());
         TxContext ctx = new TxContext();
         ctx.wallet = wallet;
         ctx.config = config;
@@ -3864,19 +3877,20 @@ public abstract class TestMoneroWalletCommon {
       
       // sweep unlocked account
       MoneroAccount unlockedAccount = accountsUnlocked.get(i);
-      List<MoneroTxWallet> txs = wallet.sweepAccount(unlockedAccount.getIndex(), wallet.getPrimaryAddress()).getTxs();
+      List<MoneroTxWallet> txs = wallet.sweepUnlocked(new MoneroTxConfig().setAccountIndex(unlockedAccount.getIndex()).setAddress(wallet.getPrimaryAddress()).setRelay(true));
       
       // test transactions
       assertTrue(txs.size() > 0);
       for (MoneroTxWallet tx : txs) {
-        MoneroTxConfig config = new MoneroTxConfig(wallet.getPrimaryAddress());
-        config.setAccountIndex(unlockedAccount.getIndex());
+        MoneroTxConfig config = new MoneroTxConfig().setAddress(wallet.getPrimaryAddress()).setAccountIndex(unlockedAccount.getIndex());
         TxContext ctx = new TxContext();
         ctx.wallet = wallet;
         ctx.config = config;
         ctx.isSendResponse = true;
         ctx.isSweepResponse = true;
         testTxWallet(tx, ctx);
+        assertNotNull(tx.getTxSet());
+        assert(tx.getTxSet().getTxs().contains(tx));
       }
       
       // assert no unlocked funds in account
@@ -3942,22 +3956,24 @@ public abstract class TestMoneroWalletCommon {
     
     // sweep
     String destination = wallet.getPrimaryAddress();
-    MoneroTxConfig config = new MoneroTxConfig(destination).setSweepEachSubaddress(sweepEachSubaddress);
+    MoneroTxConfig config = new MoneroTxConfig().setAddress(destination).setSweepEachSubaddress(sweepEachSubaddress).setRelay(true);
     MoneroTxConfig copy = config.copy();
-    List<MoneroTxSet> txSets = wallet.sweepUnlocked(config);
+    List<MoneroTxWallet> txs = wallet.sweepUnlocked(config);
     assertEquals(copy, config);  // config is unchanged
-    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-    for (MoneroTxSet txSet : txSets) {
-      assertNull(txSet.getMultisigTxHex());
-      assertNull(txSet.getSignedTxHex());
-      assertNull(txSet.getUnsignedTxHex());
-      txs.addAll(txSet.getTxs());
+    for (MoneroTxWallet tx : txs) {
+      assertTrue(tx.getTxSet().getTxs().contains(tx));
+      assertNull(tx.getTxSet().getMultisigTxHex());
+      assertNull(tx.getTxSet().getSignedTxHex());
+      assertNull(tx.getTxSet().getUnsignedTxHex());
+      assert(tx.getTxSet().getTxs().contains(tx));
     }
     assertTrue(txs.size() > 0);
     for (MoneroTxWallet tx : txs) {
-      config = new MoneroTxConfig(destination);
-      config.setAccountIndex(tx.getOutgoingTransfer().getAccountIndex());
-      config.setSweepEachSubaddress(sweepEachSubaddress);
+      config = new MoneroTxConfig()
+              .setAddress(destination)
+              .setAccountIndex(tx.getOutgoingTransfer().getAccountIndex())
+              .setSweepEachSubaddress(sweepEachSubaddress)
+              .setRelay(true);
       TxContext ctx = new TxContext();
       ctx.wallet = wallet;
       ctx.config = config;
@@ -4212,10 +4228,10 @@ public abstract class TestMoneroWalletCommon {
       assertTrue(tx.getBlock().getTxs().contains(tx));
       assertTrue(tx.getBlock().getHeight() > 0);
       assertTrue(tx.getBlock().getTimestamp() > 0);
+      assertEquals(true, tx.getRelay());
       assertEquals(true, tx.isRelayed());
       assertEquals(false, tx.isFailed());
       assertEquals(false, tx.inTxPool());
-      assertEquals(false, tx.getDoNotRelay());
       assertEquals(false, tx.isDoubleSpendSeen());
       assertTrue(tx.getNumConfirmations() > 0);
     } else {
@@ -4226,7 +4242,7 @@ public abstract class TestMoneroWalletCommon {
     // test in tx pool
     if (tx.inTxPool()) {
       assertEquals(false, tx.isConfirmed());
-      assertEquals(false, tx.getDoNotRelay());
+      assertEquals(true, tx.getRelay());
       assertEquals(true, tx.isRelayed());
       assertEquals(false, tx.isDoubleSpendSeen()); // TODO: test double spend attempt
       assertEquals(true, tx.isLocked());
@@ -4252,8 +4268,8 @@ public abstract class TestMoneroWalletCommon {
     } else {
       if (tx.isRelayed()) assertEquals(tx.isDoubleSpendSeen(), false);
       else {
+        assertEquals(false, tx.getRelay());
         assertEquals(false, tx.isRelayed());
-        assertEquals(true, tx.getDoNotRelay());
         assertNull(tx.isDoubleSpendSeen());
       }
     }
@@ -4266,8 +4282,8 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // test relayed tx
-    if (tx.isRelayed()) assertEquals(tx.getDoNotRelay(), false);
-    if (tx.getDoNotRelay()) assertTrue(!tx.isRelayed());
+    if (tx.isRelayed()) assertEquals(tx.getRelay(), true);
+    if (!tx.getRelay()) assertTrue(!tx.isRelayed());
     
     // test outgoing transfer per configuration
     if (Boolean.FALSE.equals(ctx.hasOutgoingTransfer)) assertNull(tx.getOutgoingTransfer());
@@ -4367,9 +4383,9 @@ public abstract class TestMoneroWalletCommon {
       }
       
       // test relayed txs
-      if (!Boolean.TRUE.equals(config.getDoNotRelay())) {
+      if (Boolean.TRUE.equals(config.getRelay())) {
         assertEquals(true, tx.inTxPool());
-        assertEquals(false, tx.getDoNotRelay());
+        assertEquals(true, tx.getRelay());
         assertEquals(true, tx.isRelayed());
         assertTrue(tx.getLastRelayedTimestamp() > 0);
         assertEquals(false, tx.isDoubleSpendSeen());
@@ -4378,7 +4394,7 @@ public abstract class TestMoneroWalletCommon {
       // test non-relayed txs
       else {
         assertEquals(false, tx.inTxPool());
-        assertEquals(true, tx.getDoNotRelay());
+        assertEquals(false, tx.getRelay());
         assertEquals(false, tx.isRelayed());
         assertNull(tx.getLastRelayedTimestamp());
         assertNull(tx.isDoubleSpendSeen());

@@ -1469,10 +1469,10 @@ public class TestMoneroDaemonRpc {
       assertTrue(tx.getBlock().getTxs().contains(tx));
       assertTrue(tx.getBlock().getHeight() > 0);
       assertTrue(tx.getBlock().getTimestamp() > 0);
+      assertEquals(true, tx.getRelay());
       assertEquals(true, tx.isRelayed());
       assertEquals(false, tx.isFailed());
       assertEquals(false, tx.inTxPool());
-      assertEquals(false, tx.getDoNotRelay());
       assertEquals(false, tx.isDoubleSpendSeen());
       assertEquals(null, tx.getNumConfirmations()); // client must compute
     } else {
@@ -1511,11 +1511,11 @@ public class TestMoneroDaemonRpc {
     if (tx.isFailed()) {
       assertTrue(tx.getReceivedTimestamp() > 0);
     } else {
-      if (tx.isRelayed() == null) assertEquals(null, tx.getDoNotRelay()); // TODO monero-daemon-rpc: add relayed to get_transactions
+      if (tx.isRelayed() == null) assertEquals(null, tx.getRelay()); // TODO monero-daemon-rpc: add relayed to get_transactions
       else if (tx.isRelayed()) assertEquals(false, tx.isDoubleSpendSeen());
       else {
         assertEquals(false, tx.isRelayed());
-        assertEquals(true, tx.getDoNotRelay());
+        assertEquals(false, tx.getRelay());
         assertNotNull(tx.isDoubleSpendSeen());
       }
     }
@@ -1526,14 +1526,6 @@ public class TestMoneroDaemonRpc {
     if (tx.getReceivedTimestamp() != null) {
       assertTrue(tx.inTxPool() || tx.isFailed());
     }
-    
-    // test relayed tx
-    // this is not strictly correct because a tx can be submitted then relayed
-//    if (tx.isRelayed()) assertEquals(false, tx.getDoNotRelay());
-//    if (tx.getDoNotRelay()) {
-//      assertTrue(!tx.isRelayed());
-//      assertTrue(!tx.isConfirmed());
-//    }
     
     // test inputs and outputs
     if (!tx.isMinerTx()) assertFalse(tx.getInputs().isEmpty());
@@ -1674,11 +1666,10 @@ public class TestMoneroDaemonRpc {
   
   private static MoneroTx getUnrelayedTx(MoneroWallet wallet, Integer accountIdx) {
     assertTrue("Txs sent from/to same account are not properly synced from the pool", accountIdx > 0);  // TODO monero core
-    MoneroTxConfig config = new MoneroTxConfig(accountIdx, wallet.getPrimaryAddress(), TestUtils.MAX_FEE); 
-    config.setDoNotRelay(true);
-    MoneroTx tx = wallet.sendTx(config).getTxs().get(0);
+    MoneroTxConfig config = new MoneroTxConfig().setAccountIndex(accountIdx).setAddress(wallet.getPrimaryAddress()).setAmount(TestUtils.MAX_FEE); 
+    MoneroTx tx = wallet.createTx(config);
     assertFalse(tx.getFullHex().isEmpty());
-    assertEquals(tx.getDoNotRelay(), true);
+    assertEquals(tx.getRelay(), false);
     return tx;
   }
   

@@ -37,7 +37,6 @@ import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxConfig;
-import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
 import monero.wallet.model.MoneroWalletListener;
@@ -1139,8 +1138,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       
       // send funds
       TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(sender);
-      MoneroTxSet txSet = sender.sendTx(0, receiver.getPrimaryAddress(), TestUtils.MAX_FEE);
-      String txHash = txSet.getTxs().get(0).getHash();
+      MoneroTxWallet tx = sender.createTx(new MoneroTxConfig().setAccountIndex(0).setAddress(receiver.getPrimaryAddress()).setAmount(TestUtils.MAX_FEE).setRelay(true));
+      String txHash = tx.getHash();
       sender.getTx(txHash);
       if (senderListener.getOutputsSpent().isEmpty()) System.out.println("WARNING: no notification on send");
       
@@ -1229,14 +1228,18 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
         errors.add("ERROR: No outputs available to sweep");
         return errors;
       }
-      tx = (wallet.sweepOutput(wallet.getAddress(destinationAccounts[0], 0), outputs.get(0).getKeyImage().getHex())).getTxs().get(0);
+      tx = wallet.sweepOutput(new MoneroTxConfig()
+              .setAddress(wallet.getAddress(destinationAccounts[0], 0))
+              .setKeyImage(outputs.get(0).getKeyImage().getHex())
+              .setRelay(true));
     } else {
       MoneroTxConfig config = new MoneroTxConfig();
       config.setAccountIndex(0);
       for (int destinationAccount : destinationAccounts) {
         config.addDestination(new MoneroDestination(wallet.getAddress(destinationAccount, 0), TestUtils.MAX_FEE));
       }
-      tx = wallet.sendTx(config).getTxs().get(0);
+      config.setRelay(true);
+      tx = wallet.createTx(config);
     }
     
     // test wallet's balance
@@ -1255,7 +1258,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
         errors.add("ERROR: Tx failed in mempool: " + tx.getHash());
         return errors;
       }
-      daemon.getNextBlockHeader();
+      try { TimeUnit.SECONDS.sleep(5); } catch (Exception e) { throw new RuntimeException(e); }
     }
     try { daemon.stopMining(); } catch (Exception e) { }
     
@@ -1335,7 +1338,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       
       // send funds to the created wallet
       TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
-      MoneroTxWallet sentTx = wallet.sendTx(0, myWallet.getPrimaryAddress(), TestUtils.MAX_FEE).getTxs().get(0);
+      MoneroTxWallet sentTx = wallet.createTx(new MoneroTxConfig().setAccountIndex(0).setAddress(myWallet.getPrimaryAddress()).setAmount(TestUtils.MAX_FEE).setRelay(true));
       
       // wait for funds to confirm
       try { StartMining.startMining(); } catch (Exception e) { }

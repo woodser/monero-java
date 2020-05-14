@@ -64,11 +64,11 @@ import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
+import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
@@ -1159,7 +1159,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   @SuppressWarnings("unchecked")
-  public MoneroTxSet sendTxs(MoneroTxConfig config) {
+  public List<MoneroTxWallet> createTxs(MoneroTxConfig config) {
     
     // validate, copy, and normalize request
     if (config == null) throw new MoneroError("Send request cannot be null");
@@ -1192,7 +1192,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("subaddr_indices", subaddressIndices);
     params.put("payment_id", config.getPaymentId());
     params.put("unlock_time", config.getUnlockTime());
-    params.put("do_not_relay", config.getDoNotRelay());
+    params.put("do_not_relay", !Boolean.TRUE.equals(config.getRelay()));
     params.put("priority", config.getPriority() == null ? null : config.getPriority().ordinal());
     params.put("get_tx_hex", true);
     params.put("get_tx_metadata", true);
@@ -1216,13 +1216,13 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     }
     
     // initialize tx set from rpc response with pre-initialized txs
-    if (config.getCanSplit()) return convertRpcSentTxsToTxSet(result, txs);
-    else return convertRpcTxToTxSet(result, txs == null ? null : txs.get(0), true);
+    if (config.getCanSplit()) return convertRpcSentTxsToTxSet(result, txs).getTxs();
+    else return convertRpcTxToTxSet(result, txs == null ? null : txs.get(0), true).getTxs();
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroTxSet sweepOutput(MoneroTxConfig config) {
+  public MoneroTxWallet sweepOutput(MoneroTxConfig config) {
     
     // validate request
     GenUtils.assertNull(config.getSweepEachSubaddress());
@@ -1237,7 +1237,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("subaddr_indices", config.getSubaddressIndices());
     params.put("key_image", config.getKeyImage());
     params.put("unlock_time", config.getUnlockTime());
-    params.put("do_not_relay", config.getDoNotRelay());
+    params.put("do_not_relay", !Boolean.TRUE.equals(config.getRelay()));
     params.put("priority", config.getPriority() == null ? null : config.getPriority().ordinal());
     params.put("payment_id", config.getPaymentId());
     params.put("get_tx_key", true);
@@ -1248,15 +1248,15 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     Map<String, Object> resp = (Map<String, Object>) rpc.sendJsonRequest("sweep_single", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
 
-    // build and return tx response
+    // build and return tx
     MoneroTxWallet tx = initSentTxWallet(config, null);
-    MoneroTxSet txSet = convertRpcTxToTxSet(result, tx, true);
+    convertRpcTxToTxSet(result, tx, true);
     tx.getOutgoingTransfer().getDestinations().get(0).setAmount(tx.getOutgoingTransfer().getAmount());  // initialize destination amount
-    return txSet;
+    return tx;
   }
   
   @Override
-  public List<MoneroTxSet> sweepUnlocked(MoneroTxConfig config) {
+  public List<MoneroTxWallet> sweepUnlocked(MoneroTxConfig config) {
     
     // validate request
     if (config == null) throw new MoneroError("Sweep request cannot be null");
@@ -1293,7 +1293,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     }
     
     // sweep from each account and collect resulting tx sets
-    List<MoneroTxSet> txSets = new ArrayList<MoneroTxSet>();
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     for (Integer accountIdx : indices.keySet()) {
       
       // copy and modify the original request
@@ -1301,42 +1301,41 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       copy.setAccountIndex(accountIdx);
       copy.setSweepEachSubaddress(false);
       
-      // sweep all subaddresses together  // TODO monero core: can this reveal outputs belong to the same wallet?
+      // sweep all subaddresses together  // TODO monero core: can this reveal outputs belong to same wallet?
       if (!Boolean.TRUE.equals(copy.getSweepEachSubaddress())) {
         copy.setSubaddressIndices(indices.get(accountIdx));
-        txSets.add(rpcSweepAccount(copy));
+        txs.addAll(rpcSweepAccount(copy));
       }
       
       // otherwise sweep each subaddress individually
       else {
         for (int subaddressIdx : indices.get(accountIdx)) {
           copy.setSubaddressIndices(subaddressIdx);
-          txSets.add(rpcSweepAccount(copy));
+          txs.addAll(rpcSweepAccount(copy));
         }
       }
     }
     
-    // return resulting tx sets
-    return txSets;
+    return txs;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroTxSet sweepDust(boolean doNotRelay) {
+  public List<MoneroTxWallet> sweepDust(boolean relay) {
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("do_not_relay", doNotRelay);
+    params.put("do_not_relay", !relay);
     Map<String, Object> resp = rpc.sendJsonRequest("sweep_dust", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     MoneroTxSet txSet = convertRpcSentTxsToTxSet(result, null);
     if (txSet.getTxs() != null) {
       for (MoneroTxWallet tx : txSet.getTxs()) {
-        tx.setIsRelayed(!doNotRelay);
-        tx.setInTxPool(tx.isRelayed());
+        tx.setIsRelayed(relay);
+        tx.setInTxPool(relay);
       }
     } else if (txSet.getMultisigTxHex() == null && txSet.getSignedTxHex() == null && txSet.getUnsignedTxHex() == null) {
       throw new MoneroError("No dust to sweep");
     }
-    return txSet;
+    return txSet.getTxs();
   }
   
   @SuppressWarnings("unchecked")
@@ -1696,7 +1695,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     Map<String, Object> resp = rpc.sendJsonRequest("parse_uri", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     Map<String, Object> rpcUri = (Map<String, Object>) result.get("uri");
-    MoneroTxConfig config = new MoneroTxConfig((String) rpcUri.get("address"), (BigInteger) rpcUri.get("amount"));
+    MoneroTxConfig config = new MoneroTxConfig().setAddress((String) rpcUri.get("address")).setAmount((BigInteger) rpcUri.get("amount"));
     config.setPaymentId((String) rpcUri.get("payment_id"));
     config.setRecipientName((String) rpcUri.get("recipient_name"));
     config.setNote((String) rpcUri.get("tx_description"));
@@ -1945,7 +1944,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   @SuppressWarnings("unchecked")
-  private MoneroTxSet rpcSweepAccount(MoneroTxConfig config) {
+  private List<MoneroTxWallet> rpcSweepAccount(MoneroTxConfig config) {
     
     // validate request
     if (config == null) throw new MoneroError("Sweep request cannot be null");
@@ -1967,7 +1966,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     if (config.getSubaddressIndices().size() == 0) throw new MoneroError("No subaddresses to sweep from");
     
     // common request params
-    boolean doNotRelay = config.getDoNotRelay() != null && config.getDoNotRelay();
+    boolean relay = Boolean.TRUE.equals(config.getRelay());
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("account_index", config.getAccountIndex());
     params.put("subaddr_indices", config.getSubaddressIndices());
@@ -1975,7 +1974,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("priority", config.getPriority() == null ? null : config.getPriority().ordinal());
     params.put("unlock_time", config.getUnlockTime());
     params.put("payment_id", config.getPaymentId());
-    params.put("do_not_relay", doNotRelay);
+    params.put("do_not_relay", !relay);
     params.put("below_amount", config.getBelowAmount());
     params.put("get_tx_keys", true);
     params.put("get_tx_hex", true);
@@ -1993,9 +1992,9 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       tx.setIsLocked(true);
       tx.setIsConfirmed(false);
       tx.setNumConfirmations(0l);
-      tx.setDoNotRelay(doNotRelay);
-      tx.setInTxPool(!doNotRelay);
-      tx.setIsRelayed(!doNotRelay);
+      tx.setRelay(relay);
+      tx.setInTxPool(relay);
+      tx.setIsRelayed(relay);
       tx.setIsMinerTx(false);
       tx.setIsFailed(false);
       tx.setRingSize(MoneroUtils.RING_SIZE);
@@ -2007,12 +2006,12 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       tx.setOutgoingTransfer(transfer);
       tx.setPaymentId(config.getPaymentId());
       if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? 0l : config.getUnlockTime());
-      if (!tx.getDoNotRelay()) {
+      if (tx.getRelay()) {
         if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
         if (tx.isDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
       }
     }
-    return txSet;
+    return txSet.getTxs();
   }
   
   // ---------------------------- PRIVATE STATIC ------------------------------
@@ -2060,12 +2059,13 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    */
   private static MoneroTxWallet initSentTxWallet(MoneroTxConfig config, MoneroTxWallet tx) {
     if (tx == null) tx = new MoneroTxWallet();
+    boolean relay = Boolean.TRUE.equals(config.getRelay());
     tx.setIsOutgoing(true);
     tx.setIsConfirmed(false);
     tx.setNumConfirmations(0l);
-    tx.setInTxPool(Boolean.TRUE.equals(config.getDoNotRelay()) ? false : true);
-    tx.setDoNotRelay(Boolean.TRUE.equals(config.getDoNotRelay()) ? true : false);
-    tx.setIsRelayed(!Boolean.TRUE.equals(tx.getDoNotRelay()));
+    tx.setInTxPool(relay);
+    tx.setRelay(relay);
+    tx.setIsRelayed(relay);
     tx.setIsMinerTx(false);
     tx.setIsFailed(false);
     tx.setIsLocked(true);
@@ -2078,7 +2078,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     tx.setOutgoingTransfer(transfer);
     tx.setPaymentId(config.getPaymentId());
     if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? 0l : config.getUnlockTime());
-    if (!Boolean.TRUE.equals(tx.getDoNotRelay())) {
+    if (tx.getRelay()) {
       if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
       if (tx.isDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
     }
@@ -2383,7 +2383,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       tx.setIsConfirmed(true);
       tx.setInTxPool(false);
       tx.setIsRelayed(true);
-      tx.setDoNotRelay(false);
+      tx.setRelay(true);
       tx.setIsFailed(false);
       tx.setIsMinerTx(false);
     } else if (rpcType.equals("out")) {
@@ -2391,7 +2391,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       tx.setIsConfirmed(true);
       tx.setInTxPool(false);
       tx.setIsRelayed(true);
-      tx.setDoNotRelay(false);
+      tx.setRelay(true);
       tx.setIsFailed(false);
       tx.setIsMinerTx(false);
     } else if (rpcType.equals("pool")) {
@@ -2399,7 +2399,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       tx.setIsConfirmed(false);
       tx.setInTxPool(true);
       tx.setIsRelayed(true);
-      tx.setDoNotRelay(false);
+      tx.setRelay(true);
       tx.setIsFailed(false);
       tx.setIsMinerTx(false);  // TODO: but could it be?
     } else if (rpcType.equals("pending")) {
@@ -2407,7 +2407,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       tx.setIsConfirmed(false);
       tx.setInTxPool(true);
       tx.setIsRelayed(true);
-      tx.setDoNotRelay(false);
+      tx.setRelay(true);
       tx.setIsFailed(false);
       tx.setIsMinerTx(false);
     } else if (rpcType.equals("block")) {
@@ -2415,7 +2415,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       tx.setIsConfirmed(true);
       tx.setInTxPool(false);
       tx.setIsRelayed(true);
-      tx.setDoNotRelay(false);
+      tx.setRelay(true);
       tx.setIsFailed(false);
       tx.setIsMinerTx(true);
     } else if (rpcType.equals("failed")) {
@@ -2423,7 +2423,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       tx.setIsConfirmed(false);
       tx.setInTxPool(false);
       tx.setIsRelayed(true);
-      tx.setDoNotRelay(false);
+      tx.setRelay(true);
       tx.setIsFailed(true);
       tx.setIsMinerTx(false);
     } else {

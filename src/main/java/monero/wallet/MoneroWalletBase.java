@@ -22,7 +22,6 @@
 
 package monero.wallet;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,14 +35,12 @@ import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroTxPriority;
-import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
+import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxQuery;
-import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletListenerI;
 
@@ -226,43 +223,12 @@ public abstract class MoneroWalletBase implements MoneroWallet {
   }
   
   @Override
-  public MoneroTxSet createTx(MoneroTxConfig config) {
+  public MoneroTxWallet createTx(MoneroTxConfig config) {
     if (config == null) throw new MoneroError("Send request cannot be null");
     if (Boolean.TRUE.equals(config.getCanSplit())) throw new MoneroError("Cannot request split transactions with createTx() which prevents splitting; use createTxs() instead");
     config = config.copy();
     config.setCanSplit(false);
-    return createTxs(config);
-  }
-  
-  @Override
-  public MoneroTxSet createTx(int accountIndex, String address, BigInteger sendAmount) {
-    return createTx(accountIndex, address, sendAmount, null);
-  }
-  
-  @Override
-  public MoneroTxSet createTx(int accountIndex, String address, BigInteger sendAmount, MoneroTxPriority priority) {
-    return createTx(new MoneroTxConfig(accountIndex, address, sendAmount, priority));
-  }
-  
-  @Override
-  public MoneroTxSet createTxs(MoneroTxConfig config) {
-    if (config == null) throw new MoneroError("Send request cannot be null");
-    
-    // modify request to not relay
-    Boolean requestedDoNotRelay = config.getDoNotRelay();
-    config.setDoNotRelay(true);
-    
-    // invoke common method which doesn't relay
-    MoneroTxSet txSet = sendTxs(config);
-    
-    // restore doNotRelay of request and txs
-    config.setDoNotRelay(requestedDoNotRelay);
-    if (txSet.getTxs() != null) {
-      for (MoneroTxWallet tx : txSet.getTxs()) tx.setDoNotRelay(requestedDoNotRelay);
-    }
-    
-    // return results
-    return txSet;
+    return createTxs(config).get(0);
   }
   
   @Override
@@ -281,76 +247,6 @@ public abstract class MoneroWalletBase implements MoneroWallet {
     List<String> txHexes = new ArrayList<String>();
     for (MoneroTxWallet tx : txs) txHexes.add(tx.getMetadata());
     return relayTxs(txHexes);
-  }
-  
-  @Override
-  public MoneroTxSet sendTx(MoneroTxConfig request) {
-    if (request == null) throw new MoneroError("Send request cannot be null");
-    if (Boolean.TRUE.equals(request.getCanSplit())) throw new MoneroError("Cannot request split transactions with sendTx() which prevents splitting; use sendTxs() instead");
-    request = request.copy();
-    request.setCanSplit(false);
-    return sendTxs(request);
-  }
-  
-  @Override
-  public MoneroTxSet sendTx(int accountIndex, String address, BigInteger sendAmount) {
-    return sendTx(accountIndex, address, sendAmount, null);
-  }
-  
-  @Override
-  public MoneroTxSet sendTx(int accountIndex, String address, BigInteger sendAmount, MoneroTxPriority priority) {
-    return sendTx(new MoneroTxConfig(accountIndex, address, sendAmount, priority));
-  }
-  
-  @Override
-  public MoneroTxSet sendTxs(int accountIndex, String address, BigInteger sendAmount) {
-    return sendTxs(new MoneroTxConfig(accountIndex, address, sendAmount));
-  }
-  
-  @Override
-  public MoneroTxSet sendTxs(int accountIndex, String address, BigInteger sendAmount, MoneroTxPriority priority) {
-    return sendTxs(new MoneroTxConfig(accountIndex, address, sendAmount, priority));
-  }
-  
-  @Override
-  public MoneroTxSet sweepOutput(String address, String keyImage) {
-    return sweepOutput(address, keyImage, null);
-  }
-  
-  @Override
-  public MoneroTxSet sweepOutput(String address, String keyImage, MoneroTxPriority priority) {
-    MoneroTxConfig config = new MoneroTxConfig(address).setPriority(priority);
-    config.setKeyImage(keyImage);
-    return sweepOutput(config);
-  }
-  
-  @Override
-  public MoneroTxSet sweepSubaddress(int accountIdx, int subaddressIdx, String address) {
-    MoneroTxConfig config = new MoneroTxConfig(address);
-    config.setAccountIndex(accountIdx);
-    config.setSubaddressIndices(subaddressIdx);
-    List<MoneroTxSet> txSets = sweepUnlocked(config);
-    GenUtils.assertEquals("Only one tx set should be created when sweeping from a subaddress", 1, (int) txSets.size());
-    return txSets.get(0);
-  }
-  
-  @Override
-  public MoneroTxSet sweepAccount(int accountIdx, String address) {
-    MoneroTxConfig config = new MoneroTxConfig(address);
-    config.setAccountIndex(accountIdx);
-    List<MoneroTxSet> txSets = sweepUnlocked(config);
-    GenUtils.assertEquals("Only one tx set should be created when sweeping from an account", 1, (int) txSets.size());
-    return txSets.get(0);
-  }
-  
-  @Override
-  public List<MoneroTxSet> sweepWallet(String address) {
-    return sweepUnlocked(new MoneroTxConfig(address));
-  }
-  
-  @Override
-  public MoneroTxSet sweepDust() {
-    return sweepDust(false);
   }
   
   @Override

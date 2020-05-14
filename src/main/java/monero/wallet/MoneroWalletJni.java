@@ -923,34 +923,44 @@ public class MoneroWalletJni extends MoneroWalletBase {
       throw new MoneroError(e.getMessage());
     }
   }
-
+  
   @Override
-  public MoneroTxSet sendTxs(MoneroTxConfig config) {
+  public List<MoneroTxWallet> createTxs(MoneroTxConfig config) {
     assertNotClosed();
-    LOGGER.fine("java sendTxs(request)");
-    LOGGER.fine("Send request: " + JsonUtils.serialize(config));
+    LOGGER.fine("java createTxs(request)");
+    LOGGER.fine("Tx config: " + JsonUtils.serialize(config));
     
     // validate request
-    if (config == null) throw new MoneroError("Send request cannot be null");
+    if (config == null) throw new MoneroError("Tx config cannot be null");
     
-    // submit send request to JNI and get response as json rooted at tx set
+    // submit tx config to JNI and get response as json rooted at tx set
     String txSetJson;
     try {
-      txSetJson = sendTxsJni(JsonUtils.serialize(config));
-      LOGGER.fine("Received sendTxs() response from JNI: " + txSetJson.substring(0, Math.min(5000, txSetJson.length())) + "...");
+      txSetJson = createTxsJni(JsonUtils.serialize(config));
+      LOGGER.fine("Received createTxs() response from JNI: " + txSetJson.substring(0, Math.min(5000, txSetJson.length())) + "...");
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
     
-    // deserialize and return tx set
+    // deserialize and return txs
     MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
-    if (txSet.getTxs() == null) LOGGER.info("Created tx set without txs: " + JsonUtils.serialize(txSet) + " in sendTxs()");
-    else LOGGER.fine("Created " + txSet.getTxs().size() + " transaction(s) in last send request");
-    return txSet;
+    return txSet.getTxs();
   }
   
   @Override
-  public List<MoneroTxSet> sweepUnlocked(MoneroTxConfig config) {
+  public MoneroTxWallet sweepOutput(MoneroTxConfig config) {
+    assertNotClosed();
+    try {
+      String txSetJson = sweepOutputJni(JsonUtils.serialize(config));
+      MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
+      return txSet.getTxs().get(0);
+    } catch (Exception e) {
+      throw new MoneroError(e.getMessage());
+    }
+  }
+  
+  @Override
+  public List<MoneroTxWallet> sweepUnlocked(MoneroTxConfig config) {
     assertNotClosed();
     
     // validate request
@@ -965,30 +975,23 @@ public class MoneroWalletJni extends MoneroWalletBase {
       throw new MoneroError(e.getMessage());
     }
     
-    // deserialize and return tx sets
-    return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, txSetsJson, TxSetsContainer.class).txSets;
+    // deserialize tx sets
+    List<MoneroTxSet> txSets = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, txSetsJson, TxSetsContainer.class).txSets;
+    
+    // return txs
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    for (MoneroTxSet txSet : txSets) txs.addAll(txSet.getTxs());
+    return txs;
   }
 
   @Override
-  public MoneroTxSet sweepOutput(MoneroTxConfig config) {
-    assertNotClosed();
-    try {
-      String txSetJson = sweepOutputJni(JsonUtils.serialize(config));
-      MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
-      return txSet;
-    } catch (Exception e) {
-      throw new MoneroError(e.getMessage());
-    }
-  }
-
-  @Override
-  public MoneroTxSet sweepDust(boolean doNotRelay) {
+  public List<MoneroTxWallet> sweepDust(boolean relay) {
     assertNotClosed();
     String txSetJson;
-    try { txSetJson = sweepDustJni(doNotRelay); }
+    try { txSetJson = sweepDustJni(relay); }
     catch (Exception e) { throw new MoneroError(e.getMessage()); }
     MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
-    return txSet;
+    return txSet.getTxs();
   }
   
   @Override
@@ -1464,11 +1467,11 @@ public class MoneroWalletJni extends MoneroWalletBase {
   
   private native String[] relayTxsJni(String[] txMetadatas);
   
-  private native String sendTxsJni(String sendRequestJson);
+  private native String createTxsJni(String txConfigJson);
   
-  private native String sweepUnlockedJni(String sendRequestJson);
+  private native String sweepUnlockedJni(String txConfigJson);
   
-  private native String sweepOutputJni(String sendRequestJson);
+  private native String sweepOutputJni(String txConfigJson);
   
   private native String sweepDustJni(boolean doNotRelay);
   

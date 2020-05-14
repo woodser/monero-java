@@ -1091,7 +1091,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_importKeyImagesJni(
 
   // deserialize key images to import
   vector<shared_ptr<monero_key_image>> key_images = monero_key_image::deserialize_key_images(key_images_json);
-  MTRACE("Deserialized " << key_images.size() << " key images from java json");
+  //MTRACE("Deserialized " << key_images.size() << " key images from java json");
 
   // import key images
   shared_ptr<monero_key_image_import_result> result;
@@ -1104,7 +1104,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_importKeyImagesJni(
   }
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendTxsJni(JNIEnv* env, jobject instance, jstring jconfig) {
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createTxsJni(JNIEnv* env, jobject instance, jstring jconfig) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_sendTxsJni(request)");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _config = jconfig ? env->GetStringUTFChars(jconfig, NULL) : nullptr;
@@ -1113,24 +1113,24 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendTxsJni(JNIEnv* 
 
   // deserialize send request
   shared_ptr<monero_tx_config> config = monero_tx_config::deserialize(config_json);
-  MTRACE("Deserialized send request, re-serialized: " << config->serialize());
+  //MTRACE("Deserialized tx config, re-serialized: " << config->serialize());
 
   // submit send request
-  monero_tx_set tx_set;
+  vector<shared_ptr<monero_tx_wallet>> txs;
   try {
-    tx_set = wallet->send_txs(*config);
-    MTRACE("Got " << tx_set.m_txs.size() << " txs");
+    txs = wallet->create_txs(*config);
+    //MTRACE("Got " << txs.size() << " txs");
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
   }
 
   // serialize and return tx set
-  return env->NewStringUTF(tx_set.serialize().c_str());
+  return env->NewStringUTF(txs[0]->m_tx_set.get()->serialize().c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepUnlockedJni(JNIEnv* env, jobject instance, jstring jconfig) {
-  MTRACE("Java_monero_wallet_MoneroWalletJni_sweepUnlockedJni(request)");
+  MTRACE("Java_monero_wallet_MoneroWalletJni_sweepUnlockedJni(config)");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _config = jconfig ? env->GetStringUTFChars(jconfig, NULL) : nullptr;
   string config_json = string(_config ? _config : "");
@@ -1138,16 +1138,23 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepUnlockedJni(JN
 
   // deserialize send request
   shared_ptr<monero_tx_config> config = monero_tx_config::deserialize(config_json);
-  MTRACE("Deserialized send request, re-serialized: " << config->serialize());
+  //MTRACE("Deserialized tx config, re-serialized: " << config->serialize());
 
-  // submit send request
-  vector<monero_tx_set> tx_sets;
+  // submit request with configuration
+  vector<shared_ptr<monero_tx_wallet>> txs;
   try {
-    tx_sets = wallet->sweep_unlocked(*config);
-    MTRACE("Got " << tx_sets.size() << " tx sets");
+    txs = wallet->sweep_unlocked(*config);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
+  }
+
+  // collect tx sets
+  vector<shared_ptr<monero_tx_set>> tx_sets;
+  for (int i = 0; i < txs.size(); i++) {
+    if (std::find(tx_sets.begin(), tx_sets.end(), txs[i]->m_tx_set.get()) == tx_sets.end()) {
+      tx_sets.push_back(txs[i]->m_tx_set.get());
+    }
   }
 
   // wrap and serialize tx sets
@@ -1171,34 +1178,34 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepOutputJni(JNIE
   shared_ptr<monero_tx_config> config = monero_tx_config::deserialize(config_json);
   MTRACE("Deserialized send request, re-serialized: " << config->serialize());
 
-  // submit send request
-  monero_tx_set tx_set;
+  // submit request with configuration
+  shared_ptr<monero_tx_wallet> tx;
   try {
-    tx_set = wallet->sweep_output(*config);
+    tx = wallet->sweep_output(*config);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
   }
 
   // serialize and return tx set
-  return env->NewStringUTF(tx_set.serialize().c_str());
+  return env->NewStringUTF(tx->m_tx_set.get()->serialize().c_str());
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepDustJni(JNIEnv* env, jobject instance, jboolean do_not_relay) {
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepDustJni(JNIEnv* env, jobject instance, jboolean relay) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_sweepDustJni(request)");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
 
   // sweep dust
-  monero_tx_set tx_set;
+  vector<shared_ptr<monero_tx_wallet>> txs;
   try {
-    tx_set = wallet->sweep_dust(do_not_relay);
+    txs = wallet->sweep_dust(relay);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
   }
 
   // serialize and return tx set
-  return env->NewStringUTF(tx_set.serialize().c_str());
+  return env->NewStringUTF(txs[0]->m_tx_set.get()->serialize().c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_parseTxSetJni(JNIEnv* env, jobject instance, jstring jtx_set_json) {

@@ -483,8 +483,8 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setDoNotRelay(Boolean doNotRelay) {
-    super.setDoNotRelay(doNotRelay);
+  public MoneroTxWallet setRelay(Boolean relay) {
+    super.setRelay(relay);
     return this;
   }
 

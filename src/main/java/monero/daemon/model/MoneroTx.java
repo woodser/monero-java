@@ -25,7 +25,7 @@ public class MoneroTx {
   private String paymentId;
   private BigInteger fee;
   private Integer ringSize;
-  private Boolean doNotRelay;
+  private Boolean relay;
   private Boolean isRelayed;
   private Boolean isConfirmed;
   private Boolean inTxPool;
@@ -72,7 +72,7 @@ public class MoneroTx {
     this.paymentId = tx.paymentId;
     this.fee = tx.fee;
     this.ringSize = tx.ringSize;
-    this.doNotRelay = tx.doNotRelay;
+    this.relay = tx.relay;
     this.isRelayed = tx.isRelayed;
     this.isConfirmed = tx.isConfirmed;
     this.inTxPool = tx.inTxPool;
@@ -183,12 +183,12 @@ public class MoneroTx {
     return this;
   }
   
-  public Boolean getDoNotRelay() {
-    return doNotRelay;
+  public Boolean getRelay() {
+    return relay;
   }
   
-  public MoneroTx setDoNotRelay(Boolean doNotRelay) {
-    this.doNotRelay = doNotRelay;
+  public MoneroTx setRelay(Boolean relay) {
+    this.relay = relay;
     return this;
   }
   
@@ -487,8 +487,8 @@ public class MoneroTx {
     this.setFee(GenUtils.reconcile(this.getFee(), tx.getFee()));
     this.setRingSize(GenUtils.reconcile(this.getRingSize(), tx.getRingSize()));
     this.setIsConfirmed(GenUtils.reconcile(this.isConfirmed(), tx.isConfirmed(), null, true, null));
-    this.setDoNotRelay(GenUtils.reconcile(this.getDoNotRelay(), tx.getDoNotRelay(), null, false, null));  // tx can become relayed
-    this.setIsRelayed(GenUtils.reconcile(this.isRelayed(), tx.isRelayed(), null, true, null));      // tx can become relayed
+    this.setRelay(GenUtils.reconcile(this.getRelay(), tx.getRelay(), null, true, null));        // tx can become relayed
+    this.setIsRelayed(GenUtils.reconcile(this.isRelayed(), tx.isRelayed(), null, true, null));  // tx can become relayed
     this.setIsDoubleSpendSeen(GenUtils.reconcile(this.isDoubleSpendSeen(), tx.isDoubleSpendSeen()));
     this.setKey(GenUtils.reconcile(this.getKey(), tx.getKey()));
     this.setFullHex(GenUtils.reconcile(this.getFullHex(), tx.getFullHex()));
@@ -630,7 +630,7 @@ public class MoneroTx {
     sb.append(GenUtils.kvLine("Payment ID", getPaymentId(), indent));
     sb.append(GenUtils.kvLine("Fee", getFee(), indent));
     sb.append(GenUtils.kvLine("Ring size", getRingSize(), indent));
-    sb.append(GenUtils.kvLine("Do not relay", getDoNotRelay(), indent));
+    sb.append(GenUtils.kvLine("Relay", getRelay(), indent));
     sb.append(GenUtils.kvLine("Is relayed", isRelayed(), indent));
     sb.append(GenUtils.kvLine("Is confirmed", isConfirmed(), indent));
     sb.append(GenUtils.kvLine("In tx pool", inTxPool(), indent));
@@ -682,7 +682,7 @@ public class MoneroTx {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((doNotRelay == null) ? 0 : doNotRelay.hashCode());
+    result = prime * result + ((relay == null) ? 0 : relay.hashCode());
     result = prime * result + Arrays.hashCode(extra);
     result = prime * result + ((fee == null) ? 0 : fee.hashCode());
     result = prime * result + ((fullHex == null) ? 0 : fullHex.hashCode());
@@ -727,9 +727,9 @@ public class MoneroTx {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroTx other = (MoneroTx) obj;
-    if (doNotRelay == null) {
-      if (other.doNotRelay != null) return false;
-    } else if (!doNotRelay.equals(other.doNotRelay)) return false;
+    if (relay == null) {
+      if (other.relay != null) return false;
+    } else if (!relay.equals(other.relay)) return false;
     if (!Arrays.equals(extra, other.extra)) return false;
     if (fee == null) {
       if (other.fee != null) return false;

@@ -43,12 +43,11 @@ import monero.wallet.model.MoneroMultisigSignResult;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroTxPriority;
-import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroSubaddress;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
+import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
@@ -637,45 +636,46 @@ public interface MoneroWallet {
   public List<MoneroKeyImage> getNewKeyImagesFromLastImport();
   
   /**
-   * Create a transaction to transfer funds from this wallet according to the
-   * given config.  The transaction may be relayed later.
+   * Create a transaction to transfer funds from this wallet.
    * 
    * @param config configures the transaction to create
-   * @return a tx set for the requested transaction if possible
+   * @return the created transaction
    */
-  public MoneroTxSet createTx(MoneroTxConfig config);
+  public MoneroTxWallet createTx(MoneroTxConfig config);
   
   /**
-   * Create a transaction to transfers funds from this wallet to a destination address.
-   * The transaction may be relayed later.
-   * 
-   * @param accountIndex is the index of the account to withdraw funds from
-   * @param address is the destination address to send funds to
-   * @param amount is the amount being sent
-   * @return a tx set for the requested transaction if possible
-   */
-  public MoneroTxSet createTx(int accountIndex, String address, BigInteger amount);
-  
-  /**
-   * Create a transaction to transfers funds from this wallet to a destination address.
-   * The transaction may be relayed later.
-   * 
-   * @param accountIndex is the index of the account to withdraw funds from
-   * @param address is the destination address to send funds to
-   * @param amount is the amount being sent
-   * @param priority is the send priority (default normal)
-   * @return a tx set for the requested transaction if possible
-   */
-  public MoneroTxSet createTx(int accountIndex, String address, BigInteger amount, MoneroTxPriority priority);
-  
-  /**
-   * Create one or more transactions to transfer funds from this wallet
-   * according to the given config.  The transactions may later be relayed.
+   * Create one or more transactions to transfer funds from this wallet.
    * 
    * @param config configures the transactions to create
-   * @return a tx set for the requested transactions if possible
+   * @return the created transactions
    */
-  public MoneroTxSet createTxs(MoneroTxConfig config);
+  public List<MoneroTxWallet> createTxs(MoneroTxConfig config);
+  
+  /**
+   * Sweep an output with a given key image.
+   * 
+   * @param config configures the sweep transaction
+   * @return the created transaction
+   */
+  public MoneroTxWallet sweepOutput(MoneroTxConfig config);
+
+  /**
+   * Sweep all unlocked funds according to the given config.
+   * 
+   * @param config is the sweep configuration
+   * @return the created transactions
+   */
+  public List<MoneroTxWallet> sweepUnlocked(MoneroTxConfig config);
+  
+  /**
+   * Sweep all unmixable dust outputs back to the wallet to make them easier to spend and mix.
+   * 
+   * NOTE: Dust only exists pre RCT, so this method will throw "no dust to sweep" on new wallets.
+   * 
+   * @param relay specifies if the resulting transaction should not be relayed (defaults to false i.e. not relayed)
+   * @return the created transactions
+   */
+  public List<MoneroTxWallet> sweepDust(boolean relay);
   
   /**
    * Relay a previously created transaction.
@@ -708,149 +708,6 @@ public interface MoneroWallet {
    * @return the hashes of the relayed txs
    */
   public List<String> relayTxs(List<MoneroTxWallet> txs);
-  
-  /**
-   * Create and relay a transaction to transfer funds from this wallet
-   * according to the given config.
-   * 
-   * @param config configures the transaction
-   * @return a tx set with the requested transaction if possible
-   */
-  public MoneroTxSet sendTx(MoneroTxConfig config);
-  
-  /**
-   * Create and relay a transaction to transfers funds from this wallet to
-   * a destination address.
-   * 
-   * @param accountIndex is the index of the account to withdraw funds from
-   * @param address is the destination address to send funds to
-   * @param amount is the amount being sent
-   * @return a tx set with the requested transaction if possible
-   */
-  public MoneroTxSet sendTx(int accountIndex, String address, BigInteger amount);
-  
-  /**
-   * Create and relay a transaction to transfers funds from this wallet to
-   * a destination address.
-   * 
-   * @param accountIndex is the index of the account to withdraw funds from
-   * @param address is the destination address to send funds to
-   * @param amount is the amount being sent
-   * @param priority is the send priority (default normal)
-   * @return a tx set with the requested transaction if possible
-   */
-  public MoneroTxSet sendTx(int accountIndex, String address, BigInteger amount, MoneroTxPriority priority);
-  
-  /**
-   * Create and relay one or more transactions to transfer funds from this
-   * wallet according to the given config.
-   * 
-   * @param config configures the transactions
-   * @return a tx set with the requested transaction if possible
-   */
-  public MoneroTxSet sendTxs(MoneroTxConfig config);
-  
-  /**
-   * Create and relay one or more transactions which transfer funds from this
-   * wallet to a destination address.
-   * 
-   * @param accountIndex is the index of the account to withdraw funds from
-   * @param address is the destination address to send funds to
-   * @param amount is the amount being sent
-   * @return a tx set with the requested transaction if possible
-   */
-  public MoneroTxSet sendTxs(int accountIndex, String address, BigInteger amount);
-  
-  /**
-   * Create and relay one or more transactions to transfer funds from this
-   * wallet to a destination address.
-   * 
-   * @param accountIndex is the index of the account to withdraw funds from
-   * @param address is the destination address to send funds to
-   * @param amount is the amount being sent
-   * @param priority is the send priority (default normal)
-   * @return a tx set with the requested transaction if possible
-   */
-  public MoneroTxSet sendTxs(int accountIndex, String address, BigInteger amount, MoneroTxPriority priority);
-  
-  /**
-   * Sweep an output with a given key image.
-   * 
-   * @param config configures the sweep transaction
-   * @return a tx set with the requested transaction if possible
-   */
-  public MoneroTxSet sweepOutput(MoneroTxConfig config);
-  
-  /**
-   * Sweep an output with a given key image.
-   * 
-   * @param address is the destination address to send to
-   * @param keyImage is the key image hex of the output to sweep
-   * @return a tx set with the requested transaction if possible
-   */
-  public MoneroTxSet sweepOutput(String address, String keyImage);
-  
-  /**
-   * Sweep an output with a given key image.
-   * 
-   * @param address is the destination address to send to
-   * @param keyImage is the key image hex of the output to sweep
-   * @param priority is the transaction priority (optional)
-   * @return a tx set with the requested transaction if possible
-   */
-  public MoneroTxSet sweepOutput(String address, String keyImage, MoneroTxPriority priority);
-  
-  /**
-   * Sweep a subaddress's unlocked funds to an address.
-   * 
-   * @param accountIdx is the index of the account
-   * @param subaddressIdx is the index of the subaddress
-   * @param address is the address to sweep the subaddress's funds to
-   * @return a tx set with the requested transactions if possible
-   */
-  public MoneroTxSet sweepSubaddress(int accountIdx, int subaddressIdx, String address);
-  
-  /**
-   * Sweep an acount's unlocked funds to an address.
-   * 
-   * @param accountIdx is the index of the account
-   * @param address is the address to sweep the account's funds to
-   * @return a tx set with the requested transactions if possible
-   */
-  public MoneroTxSet sweepAccount(int accountIdx, String address);
-  
-  /**
-   * Sweep the wallet's unlocked funds to an address.
-   * 
-   * @param address is the address to sweep the wallet's funds to
-   * @return the tx sets with the transactions which sweep the wallet
-   */
-  public List<MoneroTxSet> sweepWallet(String address);
-
-  /**
-   * Sweep all unlocked funds according to the given config.
-   * 
-   * @param config is the sweep configuration
-   * @return the tx sets with the requested transactions
-   */
-  public List<MoneroTxSet> sweepUnlocked(MoneroTxConfig config);
-  
-  /**
-   * Sweep all unmixable dust outputs back to the wallet to make them easier to spend and mix.
-   * 
-   * NOTE: Dust only exists pre RCT, so this method will throw "no dust to sweep" on new wallets.
-   * 
-   * @return a tx set with the requested transactions if possible
-   */
-  public MoneroTxSet sweepDust();
-  
-  /**
-   * Sweep all unmixable dust outputs back to the wallet to make them easier to spend and mix.
-   * 
-   * @param doNotRelay specifies if the resulting transaction should not be relayed (defaults to false i.e. relayed)
-   * @return a tx set with the requested transactions if possible
-   */
-  public MoneroTxSet sweepDust(boolean doNotRelay);
   
   /**
    * Parses a tx set containing unsigned or multisig tx hex to a new tx set containing structured transactions.
