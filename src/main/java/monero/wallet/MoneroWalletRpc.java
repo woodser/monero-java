@@ -451,7 +451,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (String) result.get("key");
     } catch (MoneroRpcError e) {
-      if (e.getCode() == -29 && e.getMessage().contains("view-only")) return null; // return null if wallet is view-only
+      if (e.getCode() == -29 && e.getMessage().contains("watch-only")) return null; // return null if wallet is view-only
       throw e;
     }
   }
