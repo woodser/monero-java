@@ -1904,7 +1904,6 @@ public abstract class TestMoneroWalletCommon {
   
   // Can prove reserves in an account
   @Test
-  @Ignore // TODO
   public void testGetReserveProofAccount() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
