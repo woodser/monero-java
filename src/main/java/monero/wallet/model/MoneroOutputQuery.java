@@ -20,11 +20,10 @@ import monero.daemon.model.MoneroTx;
  */
 public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<MoneroOutputWallet> {
 
-  private MoneroTxQuery txQuery;
+  protected MoneroTxQuery txQuery;
   private List<Integer> subaddressIndices;
   private BigInteger minAmount;
   private BigInteger maxAmount;
-  private static MoneroOutputWallet EMPTY_OUTPUT = new MoneroOutputWallet();
   
   public MoneroOutputQuery() {
     super();
@@ -67,6 +66,7 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
 
   public MoneroOutputQuery setTxQuery(MoneroTxQuery txQuery) {
     this.txQuery = txQuery;
+    if (txQuery != null) txQuery.outputQuery = this;
     return this;
   }
   
@@ -110,6 +110,11 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
   
   @Override
   public boolean meetsCriteria(MoneroOutputWallet output) {
+    return meetsCriteria(output, true);
+  }
+    
+  protected boolean meetsCriteria(MoneroOutputWallet output, boolean queryParent) {
+
     if (!(output instanceof MoneroOutputWallet)) return false;
     
     // filter on output
@@ -129,7 +134,7 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
     if (this.getSubaddressIndices() != null && !this.getSubaddressIndices().contains(output.getSubaddressIndex())) return false;
     
     // filter with tx query
-    if (this.getTxQuery() != null && !this.getTxQuery().meetsCriteria(output.getTx())) return false;
+    if (this.getTxQuery() != null && !this.getTxQuery().meetsCriteria(output.getTx(), false)) return false;
     
     // filter on remaining fields
     if (this.getMinAmount() != null && (output.getAmount() == null || output.getAmount().compareTo(this.getMinAmount()) < 0)) return false;
@@ -137,16 +142,6 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
     
     // output meets query
     return true;
-  }
-  
-  /**
-   * Indicates if this output query is default, specifying no query options.
-   * 
-   * @return true if the query is default, false otherwise
-   */
-  @JsonIgnore
-  public boolean isDefault() {
-    return meetsCriteria(EMPTY_OUTPUT);
   }
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------

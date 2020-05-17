@@ -17,6 +17,7 @@ import common.utils.GenUtils;
  */
 public class MoneroTransferQuery extends MoneroTransfer implements Filter<MoneroTransfer> {
 
+  protected MoneroTxQuery txQuery;
   private Boolean isIncoming;
   private String address;
   private List<String> addresses;
@@ -24,7 +25,6 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
   private List<Integer> subaddressIndices;
   private List<MoneroDestination> destinations;
   private Boolean hasDestinations;
-  private MoneroTxQuery txQuery;
   
   public MoneroTransferQuery() {
     
@@ -140,13 +140,17 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
 
   public MoneroTransferQuery setTxQuery(MoneroTxQuery txQuery) {
     this.txQuery = txQuery;
+    if (txQuery != null) txQuery.transferQuery = this;
     return this;
   }
-
+  
   @Override
   public boolean meetsCriteria(MoneroTransfer transfer) {
+    return meetsCriteria(transfer, true);
+  }
+
+  protected boolean meetsCriteria(MoneroTransfer transfer, boolean queryParent) {
     GenUtils.assertNotNull("transfer is null", transfer);
-    if (txQuery != null && txQuery.getTransferQuery() != null) throw new RuntimeException("Transfer query's tx query cannot have a circular transfer query");   // TODO: could auto detect and handle this.  port to js
     
     // filter on common fields
     if (this.isIncoming() != null && this.isIncoming() != transfer.isIncoming()) return false;
@@ -169,25 +173,25 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
       MoneroOutgoingTransfer outTransfer = (MoneroOutgoingTransfer) transfer;
       
       // filter on addresses
-      if (this.getAddress() != null && (outTransfer.getAddresses() == null || !outTransfer.getAddresses().contains(this.getAddress()))) return false;   // TODO: will filter all transfers if they don't contain addresses
-      if (this.getAddresses() != null) {
+      if (getAddress() != null && (outTransfer.getAddresses() == null || !outTransfer.getAddresses().contains(this.getAddress()))) return false;   // TODO: will filter all transfers if they don't contain addresses
+      if (getAddresses() != null) {
         List<String> intersections = new ArrayList<String>(this.getAddresses());
         intersections.retainAll(outTransfer.getAddresses());
         if (intersections.isEmpty()) return false;  // must have overlapping addresses
       }
       
       // filter on subaddress indices
-      if (this.getSubaddressIndex() != null && (outTransfer.getSubaddressIndices() == null || !outTransfer.getSubaddressIndices().contains(this.getSubaddressIndex()))) return false;
-      if (this.getSubaddressIndices() != null) {
+      if (getSubaddressIndex() != null && (outTransfer.getSubaddressIndices() == null || !outTransfer.getSubaddressIndices().contains(this.getSubaddressIndex()))) return false;
+      if (getSubaddressIndices() != null) {
         List<Integer> intersections = new ArrayList<Integer>(this.getSubaddressIndices());
         intersections.retainAll(outTransfer.getSubaddressIndices());
         if (intersections.isEmpty()) return false;  // must have overlapping subaddress indices
       }
       
       // filter on having destinations
-      if (this.hasDestinations() != null) {
-        if (this.hasDestinations() && outTransfer.getDestinations() == null) return false;
-        if (!this.hasDestinations() && outTransfer.getDestinations() != null) return false;
+      if (hasDestinations() != null) {
+        if (hasDestinations() && outTransfer.getDestinations() == null) return false;
+        if (!hasDestinations() && outTransfer.getDestinations() != null) return false;
       }
       
       // filter on destinations TODO: start with test for this
@@ -198,7 +202,7 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
     else throw new RuntimeException("Transfer must be MoneroIncomingTransfer or MoneroOutgoingTransfer");
     
     // filter with tx filter
-    if (this.getTxQuery() != null && !this.getTxQuery().meetsCriteria(transfer.getTx())) return false;    
+    if (queryParent && getTxQuery() != null && !getTxQuery().meetsCriteria(transfer.getTx(), false)) return false;    
     return true;
   }
   

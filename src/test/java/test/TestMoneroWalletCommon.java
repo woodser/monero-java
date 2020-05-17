@@ -983,6 +983,19 @@ public abstract class TestMoneroWalletCommon {
     for (MoneroTxWallet tx : txs) {
       assertFalse(tx.isLocked());
     }
+    
+    // get confirmed transactions sent from/to same account with a transfer with destinations
+    txs = wallet.getTxs(new MoneroTxQuery().setIsIncoming(true).setIsOutgoing(true).setIncludeOutputs(true).setIsConfirmed(true).setTransferQuery(new MoneroTransferQuery().setHasDestinations(true)));
+    assertFalse(txs.isEmpty());
+    for (MoneroTxWallet tx : txs) {
+      assertTrue(tx.isIncoming());
+      assertTrue(tx.isOutgoing());
+      assertTrue(tx.isConfirmed());
+      assertFalse(tx.getOutputsWallet().isEmpty());
+      assertNotNull(tx.getOutgoingTransfer());
+      assertNotNull(tx.getOutgoingTransfer().getDestinations());
+      assertFalse(tx.getOutgoingTransfer().getDestinations().isEmpty());
+    }
   }
   
   // Can get transactions by height
@@ -1327,6 +1340,16 @@ public abstract class TestMoneroWalletCommon {
       assertTrue(((MoneroOutgoingTransfer) transfer).getDestinations().size() > 0);
       assertEquals(true, transfer.getTx().isConfirmed());
     }
+    
+    // get incoming transfers to account 0 which has outgoing transfers (i.e. originated from the same wallet)
+    transfers = wallet.getTransfers(new MoneroTransferQuery().setAccountIndex(1).setIsIncoming(true).setTxQuery(new MoneroTxQuery().setIsOutgoing(true)));
+    assertFalse(transfers.isEmpty());
+    for (MoneroTransfer transfer : transfers) {
+      assertTrue(transfer.isIncoming());
+      assertEquals(1, (int) transfer.getAccountIndex());
+      assertTrue(transfer.getTx().isOutgoing());
+      assertNull(transfer.getTx().getOutgoingTransfer());
+    }
   }
   
   // Validates inputs when getting transfers
@@ -1519,6 +1542,17 @@ public abstract class TestMoneroWalletCommon {
     outputs = wallet.getOutputs(new MoneroOutputQuery().setKeyImage(new MoneroKeyImage(keyImage)));
     assertEquals(1, outputs.size());
     assertEquals(keyImage, outputs.get(0).getKeyImage().getHex());
+    
+    // get outputs whose transaction is confirmed and has incoming and outgoing transfers
+    outputs = wallet.getOutputs(new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setIsConfirmed(true).setIsIncoming(true).setIsOutgoing(true).setIncludeOutputs(true)));
+    assertFalse(outputs.isEmpty());
+    for (MoneroOutputWallet output : outputs) {
+      assertTrue(output.getTx().isIncoming());
+      assertTrue(output.getTx().isOutgoing());
+      assertTrue(output.getTx().isConfirmed());
+      assertFalse(output.getTx().getOutputsWallet().isEmpty());
+      assertTrue(output.getTx().getOutputsWallet().contains(output));
+    }
   }
   
   // Validates inputs when getting wallet outputs
@@ -4362,10 +4396,8 @@ public abstract class TestMoneroWalletCommon {
       // test locked state
       if (tx.getUnlockTime() == 0) assertEquals(tx.isConfirmed(), !tx.isLocked());
       else assertEquals(true, tx.isLocked());
-      if (tx.getOutputsWallet() != null) {
-        for (MoneroOutputWallet output : tx.getOutputsWallet()) {
-          assertEquals(tx.isLocked(), output.isLocked());
-        }
+      for (MoneroOutputWallet output : tx.getOutputsWallet()) {
+        assertEquals(tx.isLocked(), output.isLocked());
       }
       
       // test destinations of sent tx

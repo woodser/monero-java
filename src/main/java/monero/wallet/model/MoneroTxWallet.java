@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -104,6 +105,38 @@ public class MoneroTxWallet extends MoneroTx {
     return getOutgoingTransfer() != null ? getOutgoingTransfer().getAmount() : null;
   }
   
+  @JsonIgnore
+  public List<MoneroTransfer> getTransfers() {
+    return getTransfers(null);
+  }
+  
+  public List<MoneroTransfer> getTransfers(MoneroTransferQuery query) {
+    List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
+    if (getOutgoingTransfer() != null && (query == null || query.meetsCriteria(getOutgoingTransfer()))) transfers.add(getOutgoingTransfer());
+    if (getIncomingTransfers() != null) {
+      for (MoneroTransfer transfer : getIncomingTransfers()) {
+        if (query == null || query.meetsCriteria(transfer)) transfers.add(transfer);
+      }
+    }
+    return transfers;
+  }
+  
+  public List<MoneroTransfer> filterTransfers(MoneroTransferQuery query) {
+    List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
+    if (getOutgoingTransfer() != null && (query == null || query.meetsCriteria(getOutgoingTransfer()))) transfers.add(getOutgoingTransfer());
+    else setOutgoingTransfer(null);
+    if (getIncomingTransfers() != null) {
+      List<MoneroTransfer> toRemoves = new ArrayList<MoneroTransfer>();
+      for (MoneroTransfer transfer : getIncomingTransfers()) {
+        if (query == null || query.meetsCriteria(transfer)) transfers.add(transfer);
+        else toRemoves.add(transfer);
+      }
+      getIncomingTransfers().removeAll(toRemoves);
+      if (getIncomingTransfers().isEmpty()) setIncomingTransfers(null);
+    }
+    return transfers;
+  }
+  
   @JsonManagedReference
   public List<MoneroIncomingTransfer> getIncomingTransfers() {
     return incomingTransfers;
@@ -163,13 +196,31 @@ public class MoneroTxWallet extends MoneroTx {
    * @return outputs of type MoneroOutputWallet
    */
   public List<MoneroOutputWallet> getOutputsWallet() {
-    List<MoneroOutput> outputs = getOutputs();
-    if (outputs == null) return null;
+    return getOutputsWallet(null);
+  }
+  
+  public List<MoneroOutputWallet> getOutputsWallet(MoneroOutputQuery query) {
     List<MoneroOutputWallet> outputsWallet = new ArrayList<MoneroOutputWallet>();
-    for (MoneroOutput output : getOutputs()) {
-      outputsWallet.add((MoneroOutputWallet) output);
+    List<MoneroOutput> outputs = getOutputs();
+    if (outputs == null) return outputsWallet;
+    for (MoneroOutput output : outputs) {
+      if (query == null || query.meetsCriteria((MoneroOutputWallet) output)) outputsWallet.add((MoneroOutputWallet) output);
     }
     return outputsWallet;
+  }
+  
+  public List<MoneroOutputWallet> filterOutputsWallet(MoneroOutputQuery query) {
+    List<MoneroOutputWallet> outputs = new ArrayList<MoneroOutputWallet>();
+    if (getOutputs() != null) {
+      List<MoneroOutput> toRemoves = new ArrayList<MoneroOutput>();
+      for (MoneroOutput output : getOutputs()) {
+        if (query == null || query.meetsCriteria((MoneroOutputWallet) output)) outputs.add((MoneroOutputWallet) output);
+        else toRemoves.add(output);
+      }
+      getOutputs().removeAll(toRemoves);
+      if (getOutputs().isEmpty()) setOutputs(null);
+    }
+    return outputs;
   }
   
   public String getNote() {

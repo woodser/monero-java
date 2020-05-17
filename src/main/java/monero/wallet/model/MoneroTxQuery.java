@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.types.Filter;
 import common.utils.GenUtils;
+import monero.common.MoneroError;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroOutput;
 
@@ -28,8 +29,8 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   private Long minHeight;
   private Long maxHeight;
   private Boolean includeOutputs;
-  private MoneroTransferQuery transferQuery;
-  private MoneroOutputQuery outputQuery;
+  protected MoneroTransferQuery transferQuery;
+  protected MoneroOutputQuery outputQuery;
   
   public MoneroTxQuery() {
     
@@ -46,14 +47,8 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     this.minHeight = query.minHeight;
     this.maxHeight = query.maxHeight;
     this.includeOutputs = query.includeOutputs;
-    if (query.transferQuery != null) {
-      this.transferQuery = new MoneroTransferQuery(query.transferQuery);
-      if (query.transferQuery.getTxQuery() == query) this.transferQuery.setTxQuery(this);
-    }
-    if (query.outputQuery != null) {
-      this.outputQuery = new MoneroOutputQuery(query.outputQuery);
-      if (query.outputQuery.getTxQuery() == query) this.outputQuery.setTxQuery(this) ;
-    }
+    if (query.transferQuery != null) this.setTransferQuery(new MoneroTransferQuery(query.transferQuery));
+    if (query.outputQuery != null) this.setOutputQuery(new MoneroOutputQuery(query.outputQuery));
   }
   
   public MoneroTxQuery copy() {
@@ -165,6 +160,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
 
   public MoneroTxQuery setTransferQuery(MoneroTransferQuery transferQuery) {
     this.transferQuery = transferQuery;
+    if (transferQuery != null) transferQuery.txQuery = this;
     return this;
   }
   
@@ -174,12 +170,17 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
 
   public MoneroTxQuery setOutputQuery(MoneroOutputQuery outputQuery) {
     this.outputQuery = outputQuery;
+    if (outputQuery != null) outputQuery.txQuery = this;
     return this;
   }
   
   @Override
   public boolean meetsCriteria(MoneroTxWallet tx) {
-    if (tx == null) return false;
+    return meetsCriteria(tx, true);
+  }
+  
+  protected boolean meetsCriteria(MoneroTxWallet tx, boolean queryChildren) {
+    if (tx == null) throw new MoneroError("null given to MoneroTxQuery.meetsCriteria()");
     
     // filter on tx
     if (this.getHash() != null && !this.getHash().equals(tx.getHash())) return false;
@@ -192,34 +193,6 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     if (this.isMinerTx() != null && this.isMinerTx() != tx.isMinerTx()) return false;
     if (this.isLocked() != null && this.isLocked() != tx.isLocked()) return false;
     
-    // at least one transfer must meet transfer query if defined
-    if (this.getTransferQuery() != null) {
-      boolean matchFound = false;
-      if (tx.getOutgoingTransfer() != null && this.getTransferQuery().meetsCriteria(tx.getOutgoingTransfer())) matchFound = true;
-      else if (tx.getIncomingTransfers() != null) {
-        for (MoneroTransfer incomingTransfer : tx.getIncomingTransfers()) {
-          if (this.getTransferQuery().meetsCriteria(incomingTransfer)) {
-            matchFound = true;
-            break;
-          }
-        }
-      }
-      if (!matchFound) return false;
-    }
-    
-    // at least one output must meet output query if defined
-    if (this.getOutputQuery() != null && !this.getOutputQuery().isDefault()) {
-      if (tx.getOutputs() == null || tx.getOutputs().isEmpty()) return false;
-      boolean matchFound = false;
-      for (MoneroOutputWallet output : tx.getOutputsWallet()) {
-        if (this.getOutputQuery().meetsCriteria(output)) {
-          matchFound = true;
-          break;
-        }
-      }
-      if (!matchFound) return false;
-    }
-    
     // filter on having a payment id
     if (this.hasPaymentId() != null) {
       if (this.hasPaymentId() && tx.getPaymentId() == null) return false;
@@ -227,16 +200,10 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     }
     
     // filter on incoming
-    if (this.isIncoming() != null) {
-      if (this.isIncoming() && !tx.isIncoming()) return false;
-      if (!this.isIncoming() && tx.isIncoming()) return false;
-    }
+    if (this.isIncoming() != null && this.isIncoming() != Boolean.TRUE.equals(tx.isIncoming())) return false;
     
     // filter on outgoing
-    if (this.isOutgoing() != null) {
-      if (this.isOutgoing() && !tx.isOutgoing()) return false;
-      if (!this.isOutgoing() && tx.isOutgoing()) return false;
-    }
+    if (this.isOutgoing() != null && this.isOutgoing() != Boolean.TRUE.equals(tx.isOutgoing())) return false;
     
     // filter on remaining fields
     Long txHeight = tx.getBlock() == null ? null : tx.getBlock().getHeight();
@@ -246,8 +213,38 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     if (this.getMinHeight() != null && (txHeight == null || txHeight < this.getMinHeight())) return false;
     if (this.getMaxHeight() != null && (txHeight == null || txHeight > this.getMaxHeight())) return false;
     
-    // transaction meets query criteria
-    return true;
+    // done if not querying transfers or outputs
+    if (!queryChildren) return true;
+    
+    // at least one transfer must meet transfer query if defined
+    if (this.getTransferQuery() != null) {
+      boolean matchFound = false;
+      if (tx.getOutgoingTransfer() != null && this.getTransferQuery().meetsCriteria(tx.getOutgoingTransfer(), false)) matchFound = true;
+      else if (tx.getIncomingTransfers() != null) {
+        for (MoneroTransfer incomingTransfer : tx.getIncomingTransfers()) {
+          if (this.getTransferQuery().meetsCriteria(incomingTransfer, false)) {
+            matchFound = true;
+            break;
+          }
+        }
+      }
+      if (!matchFound) return false;
+    }
+    
+    // at least one output must meet output query if defined
+    if (this.getOutputQuery() != null) {
+      if (tx.getOutputs() == null || tx.getOutputs().isEmpty()) return false;
+      boolean matchFound = false;
+      for (MoneroOutputWallet output : tx.getOutputsWallet()) {
+        if (this.getOutputQuery().meetsCriteria(output, false)) {
+          matchFound = true;
+          break;
+        }
+      }
+      if (!matchFound) return false;
+    }
+    
+    return true;  // transaction meets query criteria
   }
   
   @Override

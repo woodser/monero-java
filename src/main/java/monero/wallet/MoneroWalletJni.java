@@ -867,8 +867,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     for (MoneroBlock block : blocks) {
       sanitizeBlock(block);
       for (MoneroTx tx : block.getTxs()) {
-        MoneroTxWallet txWallet = (MoneroTxWallet) tx;
-        outputs.addAll(txWallet.getOutputsWallet());
+        outputs.addAll(((MoneroTxWallet) tx).getOutputsWallet());
       }
     }
     return outputs;
