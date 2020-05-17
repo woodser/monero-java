@@ -792,7 +792,6 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     
     // fetch all transfers that meet tx query
     List<MoneroTransfer> transfers = getTransfersAux(new MoneroTransferQuery().setTxQuery(decontextualize(query.copy())));
-    System.out.println("Fetched " + transfers.size() + " transfers");
     
     // collect unique txs from transfers while retaining order
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
@@ -814,7 +813,6 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     // fetch and merge outputs if queried
     if (Boolean.TRUE.equals(query.getIncludeOutputs()) || outputQuery != null) {
       List<MoneroOutputWallet> outputs = getOutputsAux(new MoneroOutputQuery().setTxQuery(decontextualize(query.copy())));
-      System.out.println("Fetched " + outputs.size() + " outputs");
       
       // merge output txs one time while retaining order
       Set<MoneroTxWallet> outputTxs = new HashSet<MoneroTxWallet>();
