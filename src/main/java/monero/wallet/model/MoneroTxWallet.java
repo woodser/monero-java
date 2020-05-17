@@ -123,8 +123,12 @@ public class MoneroTxWallet extends MoneroTx {
   
   public List<MoneroTransfer> filterTransfers(MoneroTransferQuery query) {
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
+    
+    // collect outgoing transfer or erase if filtered
     if (getOutgoingTransfer() != null && (query == null || query.meetsCriteria(getOutgoingTransfer()))) transfers.add(getOutgoingTransfer());
     else setOutgoingTransfer(null);
+    
+    // collect incoming transfers or erase if filtered
     if (getIncomingTransfers() != null) {
       List<MoneroTransfer> toRemoves = new ArrayList<MoneroTransfer>();
       for (MoneroTransfer transfer : getIncomingTransfers()) {
@@ -134,6 +138,7 @@ public class MoneroTxWallet extends MoneroTx {
       getIncomingTransfers().removeAll(toRemoves);
       if (getIncomingTransfers().isEmpty()) setIncomingTransfers(null);
     }
+    
     return transfers;
   }
   

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017-2019 woodser
+ * Copyright (c) 2017-2020 woodser
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -792,6 +792,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     
     // fetch all transfers that meet tx query
     List<MoneroTransfer> transfers = getTransfersAux(new MoneroTransferQuery().setTxQuery(decontextualize(query.copy())));
+    System.out.println("Fetched " + transfers.size() + " transfers");
     
     // collect unique txs from transfers while retaining order
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
@@ -813,6 +814,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     // fetch and merge outputs if queried
     if (Boolean.TRUE.equals(query.getIncludeOutputs()) || outputQuery != null) {
       List<MoneroOutputWallet> outputs = getOutputsAux(new MoneroOutputQuery().setTxQuery(decontextualize(query.copy())));
+      System.out.println("Fetched " + outputs.size() + " outputs");
       
       // merge output txs one time while retaining order
       Set<MoneroTxWallet> outputTxs = new HashSet<MoneroTxWallet>();
@@ -1931,18 +1933,11 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       // sort outputs
       if (tx.getOutputs() != null) Collections.sort(tx.getOutputs(), new OutputComparator());
       
-      // collect queried outputs
-      List<MoneroOutput> toRemoves = new ArrayList<MoneroOutput>();
-      for (MoneroOutput output : tx.getOutputs()) {
-        if (query.meetsCriteria((MoneroOutputWallet) output)) outputs.add((MoneroOutputWallet) output);
-        else toRemoves.add(output);
-      }
-      
-      // remove excluded outputs from tx
-      tx.getOutputs().removeAll(toRemoves);
+      // collect queried outputs, erase if excluded
+      outputs.addAll(tx.filterOutputsWallet(query));
       
       // remove excluded txs from block
-      if (tx.getOutputs().isEmpty() && tx.getBlock() != null) tx.getBlock().getTxs().remove(tx);
+      if (tx.getOutputs() == null && tx.getBlock() != null) tx.getBlock().getTxs().remove(tx);
     }
     return outputs;
   }
@@ -2020,7 +2015,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   // ---------------------------- PRIVATE STATIC ------------------------------
   
   /**
-   * Remove query criteria which require looking up other transfers/outputs to
+   * Remove criteria which requires looking up other transfers/outputs to
    * fulfill query.
    * 
    * @param query the query to decontextualize

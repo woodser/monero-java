@@ -180,7 +180,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
   
   protected boolean meetsCriteria(MoneroTxWallet tx, boolean queryChildren) {
-    if (tx == null) throw new MoneroError("null given to MoneroTxQuery.meetsCriteria()");
+    if (tx == null) throw new MoneroError("No tx given to MoneroTxQuery.meetsCriteria()");
     
     // filter on tx
     if (this.getHash() != null && !this.getHash().equals(tx.getHash())) return false;

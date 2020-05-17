@@ -49,6 +49,17 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
   public MoneroTransferQuery copy() {
     return new MoneroTransferQuery(this);
   }
+  
+  @JsonIgnore
+  public MoneroTxQuery getTxQuery() {
+    return txQuery;
+  }
+
+  public MoneroTransferQuery setTxQuery(MoneroTxQuery txQuery) {
+    this.txQuery = txQuery;
+    if (txQuery != null) txQuery.transferQuery = this;
+    return this;
+  }
 
   public Boolean isIncoming() {
     return isIncoming;
@@ -133,17 +144,6 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
     return this;
   }
 
-  @JsonIgnore
-  public MoneroTxQuery getTxQuery() {
-    return txQuery;
-  }
-
-  public MoneroTransferQuery setTxQuery(MoneroTxQuery txQuery) {
-    this.txQuery = txQuery;
-    if (txQuery != null) txQuery.transferQuery = this;
-    return this;
-  }
-  
   @Override
   public boolean meetsCriteria(MoneroTransfer transfer) {
     return meetsCriteria(transfer, true);
