@@ -984,7 +984,7 @@ public abstract class TestMoneroWalletCommon {
       assertFalse(tx.isLocked());
     }
     
-    // get confirmed transactions sent from/to same account with a transfer with destinations
+    // get confirmed transactions sent from/to same wallet with a transfer with destinations
     txs = wallet.getTxs(new MoneroTxQuery().setIsIncoming(true).setIsOutgoing(true).setIncludeOutputs(true).setIsConfirmed(true).setTransferQuery(new MoneroTransferQuery().setHasDestinations(true)));
     assertFalse(txs.isEmpty());
     for (MoneroTxWallet tx : txs) {
