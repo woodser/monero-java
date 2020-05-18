@@ -105,7 +105,7 @@ public class MoneroOutputWallet extends MoneroOutput {
    * 
    * @return a boolean indicating the locked state of this output's tx
    */
-  @JsonProperty("isLocked")
+  @JsonIgnore
   public Boolean isLocked() {
     if (getTx() == null) return null;
     return getTx().isLocked();
