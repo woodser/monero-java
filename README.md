@@ -14,7 +14,7 @@ This project is a Java library for using Monero with RPC and native bindings to 
 ### Architecture
 
 <p align="center">
-	<img width="90%" height="auto" src="architecture.png"/><br>
+	<img width="90%" height="auto" src="docs/architecture.png"/><br>
 	<i>Wallet implementations use RPC or JNI bindings to Monero Core and are interchangeable by conforming to a common interface, <a href="https://moneroecosystem.org/monero-java/monero/wallet/MoneroWallet.html">MoneroWallet.java</a>.</i>
 </p>
 
