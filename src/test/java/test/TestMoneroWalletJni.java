@@ -43,6 +43,7 @@ import monero.wallet.model.MoneroWalletListener;
 import utils.StartMining;
 import utils.TestUtils;
 import utils.WalletEqualityUtils;
+import utils.WalletSyncPrinter;
 
 /**
  * Tests specific to the JNI wallet.
@@ -1462,9 +1463,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   /**
    * Internal class to test progress updates.
    */
-  private class SyncProgressTester extends MoneroWalletListener {
-    
-    private static final long PRINT_INCREMENT = 2500; // print every 2500 blocks
+  private class SyncProgressTester extends WalletSyncPrinter {
     
     protected MoneroWalletJni wallet;
     private Long prevHeight;
@@ -1485,7 +1484,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     @Override
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
-      if ((height - startHeight) % PRINT_INCREMENT == 0 || percentDone == 1.0) System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
+      super.onSyncProgress(height, startHeight, endHeight, percentDone, message);
       
       // registered wallet listeners will continue to get sync notifications after the wallet's initial sync
       if (isDone) {
