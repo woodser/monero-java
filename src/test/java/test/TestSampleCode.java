@@ -109,14 +109,15 @@ public class TestSampleCode {
     
     // send funds from RPC wallet to JNI wallet
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(walletRpc); // *** REMOVE FROM README SAMPLE ***
-    MoneroTxWallet sentTx = walletRpc.createTx(new MoneroTxConfig()
+    MoneroTxWallet createdTx = walletRpc.createTx(new MoneroTxConfig()
             .setAccountIndex(0)
             .setAddress(walletJni.getAddress(1, 0))
             .setAmount(new BigInteger("50000"))
-            .setRelay(true));
-    String txHash = sentTx.getHash();
+            .setRelay(false)); // create transaction and relay to the network if true
+    BigInteger fee = createdTx.getFee(); // "Are you sure you want to send... ?"
+    walletRpc.relayTx(createdTx); // relay the transaction
     
-    // wallet receives unconfirmed funds within 10 seconds
+    // recipient receives unconfirmed funds within 10 seconds
     TimeUnit.SECONDS.sleep(10);
     assertTrue(JNI_OUTPUT_RECEIVED);
     
