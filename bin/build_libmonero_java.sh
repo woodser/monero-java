@@ -4,16 +4,16 @@
 
 HOST_NCORES=$(nproc 2>/dev/null || shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
 
-# Make libmonero-cpp.dylib
+# build libmonero-cpp shared library
 cd ./external/monero-cpp-library/ && 
 ./bin/build_libmonero_cpp.sh &&
 
-# Copy libmonero-cpp.dylib to ./build
+# copy libmonero-cpp shared library to ./build
 cd ../../ &&
 mkdir -p ./build &&
-cp ./external/monero-cpp-library/build/libmonero-cpp.dylib ./build &&
+cp ./external/monero-cpp-library/build/libmonero-cpp.* ./build &&
 
-# Make libmonero-java.dylib
+# build libmonero-java shared library to ./build
 cd build && 
 cmake .. && 
 cmake --build . -j$HOST_NCORES && 

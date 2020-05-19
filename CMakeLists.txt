@@ -62,7 +62,15 @@ message(STATUS EXTRA_LIBRARIES: ${EXTRA_LIBRARIES})
 
 #include_directories(${BOOST})
 add_library(monero-cpp SHARED IMPORTED)
-set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION ./libmonero-cpp.dylib)
+
+# import shared c++ library
+if (APPLE)
+  set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION ./libmonero-cpp.dylib)
+elseif (WIN32)
+  set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION ./libmonero-cpp.dll)
+else()
+  set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION ./libmonero-cpp.so)
+endif()
 
 ###############################################
 # Build Java dynamic library (.dylib) for JNI
