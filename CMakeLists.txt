@@ -18,10 +18,18 @@ set(MONERO_CORE ${MONERO_CPP}/external/monero-core)
 set(MONERO_CORE_SRC "${MONERO_CORE}/src")
 set(BOOST ${MONERO_CPP}/external/boost-sdk)
 
-# header includes
+# java header includes
 include_directories("$ENV{JAVA_HOME}")
 include_directories("$ENV{JAVA_HOME}/include")
-include_directories("$ENV{JAVA_HOME}/include/darwin")
+if (APPLE)
+  include_directories("$ENV{JAVA_HOME}/include/darwin")
+elseif (WIN32)
+  include_directories("$ENV{JAVA_HOME}/include/win32")
+else()
+  include_directories("$ENV{JAVA_HOME}/include/linux")
+endif()
+
+# monero core header includes
 include_directories("${MONERO_CPP}/external/libsodium/include/sodium")
 include_directories("${MONERO_CPP}/external/openssl-sdk/include")
 include_directories("${MONERO_CPP_SRC}/")
