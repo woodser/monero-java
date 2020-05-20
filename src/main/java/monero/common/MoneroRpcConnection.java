@@ -98,7 +98,7 @@ public class MoneroRpcConnection {
    * Sends a request to the RPC API.
    * 
    * @param method specifies the method to request
-   * @param params specifies input parameters (Map<String, Object>, List<Object>, String, etc)
+   * @param params specifies input parameters (supports &lt;Map&lt;String, Object&gt;, List&lt;Object&gt;&lt;/code&gt;, String, etc)
    * @return the RPC API response as a map
    */
   public Map<String, Object> sendJsonRequest(String method, Object params) {

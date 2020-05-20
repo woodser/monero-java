@@ -729,7 +729,7 @@ public interface MoneroWallet {
    * Submit signed transactions from a view-only wallet.
    * 
    * @param signedTxHex is signed transaction hex from signTxs()
-   * @retur the resulting transaction hashes
+   * @return the resulting transaction hashes
    */
   public List<String> submitTxs(String signedTxHex);
   

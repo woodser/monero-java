@@ -235,6 +235,7 @@ public class MoneroUtils {
   /**
    * Merges a transaction into a list of existing transactions.
    * 
+   * @param <T> is a MoneroTx or subclasses like MoneroTxWallet
    * @param txs are existing transactions to merge into
    * @param tx is the transaction to merge into the list
    */

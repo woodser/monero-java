@@ -50,6 +50,7 @@ public class JsonUtils {
   /**
    * Deserializes JSON to a specific class.
    * 
+   * @param <T> templated type
    * @param json is the JSON to deserialize
    * @param clazz specifies the class to deserialize to
    * @return T is the object deserialized from JSON to the given class
@@ -61,6 +62,7 @@ public class JsonUtils {
   /**
    * Deserializes JSON to a specific class.
    * 
+   * @param <T> templated type
    * @param mapper is the jackson object mapper to use
    * @param json is the JSON to deserialize
    * @param clazz specifies the class to deserialize to
@@ -77,8 +79,9 @@ public class JsonUtils {
   /**
    * Deserializes JSON to a parameterized type.
    * 
+   * @param <T> the map, list, object, etc to deserialize
    * @param json is the JSON to deserialize
-   * @param type is the parameterized type to deserialize to (e.g. new TypeReference<Map<String, Object>>(){})
+   * @param type is the parameterized type to deserialize to (e.g. new TypeReference&lt;Map&lt;String, Object&gt;&gt;(){})
    * @return T is the object deserialized from JSON to the given parameterized type
    */
   public static <T> T deserialize(String json, TypeReference<T> type) {
@@ -88,9 +91,10 @@ public class JsonUtils {
   /**
    * Deserializes JSON to a parameterized type.
    * 
+   * @param <T> the map, list, object, etc to deserialize
    * @param mapper is the jackson object mapper to use
    * @param json is the JSON to deserialize
-   * @param type is the parameterized type to deserialize to (e.g. new TypeReference<Map<String, Object>>(){})
+   * @param type is the parameterized type to deserialize to (e.g. new TypeReference&lt;Map&lt;String, Object&gt;&gt;(){})
    * @return T is the object deserialized from JSON to the given parameterized type
    */
   public static <T> T deserialize(ObjectMapper mapper, String json, TypeReference<T> type) {
@@ -105,7 +109,7 @@ public class JsonUtils {
    * Converts a JSON string to a map.
    * 
    * @param json is the string to convert to a map
-   * @return Map<String, Object> is the json string converted to a map
+   * @return the json string converted to a map
    */
   public static Map<String, Object> toMap(String json) {
     return deserialize(DEFAULT_MAPPER, json, new TypeReference<Map<String, Object>>(){});
@@ -116,7 +120,7 @@ public class JsonUtils {
    * 
    * @param mapper is the jackson object mapper to use
    * @param json is the string to convert to a map
-   * @return Map<String, Object> is the json string converted to a map
+   * @return is the json string converted to a map
    */
   public static Map<String, Object> toMap(ObjectMapper mapper, String json) {
     return deserialize(mapper, json, new TypeReference<Map<String, Object>>(){});
@@ -126,7 +130,7 @@ public class JsonUtils {
    * Converts an object to a map.
    * 
    * @param obj is the object to a convert to a map
-   * @return Map<String, Object> is the object converted to a map
+   * @return the object converted to a map
    */
   public static Map<String, Object> toMap(Object obj) {
     return toMap(DEFAULT_MAPPER, serialize(obj));
@@ -137,7 +141,7 @@ public class JsonUtils {
    * 
    * @param mapper is the jackson object mapper to use
    * @param obj is the object to a convert to a map
-   * @return Map<String, Object> is the object converted to a map
+   * @return the object converted to a map
    */
   public static Map<String, Object> toMap(ObjectMapper mapper, Object obj) {
     return toMap(mapper, serialize(obj));

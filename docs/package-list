@@ -1,8 +1,7 @@
 common.types
 common.utils
+monero.common
 monero.daemon
 monero.daemon.model
-monero.rpc
-monero.utils
 monero.wallet
 monero.wallet.model

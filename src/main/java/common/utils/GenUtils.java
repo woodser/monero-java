@@ -144,8 +144,9 @@ public class GenUtils {
   /**
    * Converts a templated array to a list.
    * 
+   * @param <T> templated type
    * @param arr is an array of type T to convert to a list
-   * @return List<T> is the array converted to a list
+   * @return the array converted to a list
    */
   public static <T> List<T> arrayToList(T[] arr) {
     List<T> list = new ArrayList<T>(arr.length);
@@ -205,6 +206,7 @@ public class GenUtils {
    * Convenience method to reconcile two values with default configuration by
    * calling reconcile(val1, val2, null, null, null).
    * 
+   * @param <T> templated type
    * @param val1 is a value to reconcile
    * @param val2 is a value to reconcile
    * @return the reconciled value if reconcilable, throws exception otherwise
@@ -216,6 +218,7 @@ public class GenUtils {
   /**
    * Reconciles two values.
    * 
+   * @param <T> templated type
    * @param val1 is a value to reconcile
    * @param val2 is a value to reconcile
    * @param resolveDefined uses defined value if true or null, null if false

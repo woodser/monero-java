@@ -36,7 +36,7 @@ public class FundWallets {
    * @param srcWallet is the source wallet to fund test wallets with
    * @param numWallets is the number of wallets to fund
    * @param numAccounts is the number of accounts to fund in each test wallet
-   * @param numSubaddressesPerAccount is the number of subaddresses to fund in each account (num accounts * num subaddresses must be <= 16) // TODO: support funding more subaddresses
+   * @param numSubaddressesPerAccount is the number of subaddresses to fund in each account (num accounts * num subaddresses must be less than or equal to 16) // TODO: support funding more subaddresses
    */
   public static void fundWallets(MoneroWallet srcWallet, int numWallets, int numAccounts, int numSubaddressesPerAccount) {
     TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(srcWallet);
