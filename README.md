@@ -1,5 +1,20 @@
 # Monero Java Library
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Sample code](#sample-code)
+- [How to include this library](#how-to-include-this-library)
+- [How to build JNI shared library](#how-to-build-jni-shared-library)
+- [How to run Monero RPC](#how-to-run-monero-rpc)
+- [How to run JUnit tests](#how-to-run-junit-tests)
+- [See also](#see-also)
+- [License](#license)
+- [Donations](#donations)
+
+## Overview
+
 This project is a Java library for using Monero with RPC and native bindings to [Monero Core v0.15.0.5 Carbon Chameleon](https://web.getmonero.org/downloads/).
 
 - Supports RPC bindings to monero-wallet-rpc and monero-daemon-rpc.
@@ -85,7 +100,7 @@ assertTrue(JNI_OUTPUT_RECEIVED);
 walletJni.close(true);
 ```
 
-## How to Use This Library
+## How to include this library
 
 **For Maven, add to pom.xml:**
 
@@ -103,7 +118,9 @@ walletJni.close(true);
 
 You are now ready to use this library with [monero-daemon-rpc](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.
 
-If you want to process binary data or use a Monero wallet using JNI instead of RPC, dynamic libraries must be built for your specific platform for this Java library to use.  This project uses a [C++ counterpart library](https://github.com/woodser/monero-cpp-library) to support JNI, which is included as a submodule in ./external/monero-cpp-library.
+## How to build JNI shared library
+
+If you want to process binary data or use a Monero wallet using JNI instead of RPC, shared libraries must be built for your specific platform for this Java library to use.  This project uses a [C++ counterpart library](https://github.com/woodser/monero-cpp-library) to support JNI, which is included as a submodule in ./external/monero-cpp-library.
 
 1. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
 2. `cd monero-java`
@@ -128,7 +145,7 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 
 ## How to Run JUnit Tests
 
-1. [Set up this library with JNI support](#how-to-use-this-library)
+1. [Include]((#how-to-include-this-library) this library with [JNI support](#how-to-build-jni-shared-library)
 2. Run monero-wallet-rpc and monero-daemon-rpc.  See [How to Run Monero RPC](#how-to-run-monero-rpc). 
 3. Configure the appropriate RPC endpoints, authentication, and test wallet in [TestUtils.java](src/test/java/utils/TestUtils.java).
 4. Run all *.java files in src/main/test as JUnits.
@@ -136,8 +153,6 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 ## See Also
 
 [API specification](http://moneroecosystem.org/monero-java/monero-spec.pdf)
-
-[monero-java-lite](https://github.com/woodser/monero-java-lite)
 
 [monero-javascript](https://github.com/monero-ecosystem/monero-javascript)
 
