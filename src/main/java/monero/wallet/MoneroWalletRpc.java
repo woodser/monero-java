@@ -132,19 +132,28 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   /**
-   * Open an existing wallet on the monero-wallet-rpc server.
+   * <p>Open an existing wallet on the monero-wallet-rpc server.</p>
    * 
-   * Example:
-   *   MoneroWallet walletRpc = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
-   *   walletRpc.openWallet(new MoneroWalletConfig().setPath("mywallet").setPassword("abc123").setServerUri("http://localhost:38081"));
+   * <p>Example:<p>
    * 
-   * All supported configuration:
-   *   path - path of the wallet to create (optional, in-memory wallet if not given)
-   *   password - password of the wallet to create
-   *   serverUri - uri of a daemon to use (optional, monero-wallet-rpc usually started with daemon config)
-   *   serverUsername - username to authenticate with the daemon (optional)
-   *   serverPassword - password to authenticate with the daemon (optional)
-   *   server - MoneroRpcConnection providing daemon configuration (optional)
+   * <code>
+   * MoneroWallet walletRpc = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");<br>
+   * walletRpc.openWallet("mywallet1", "supersecretpassword");<br>
+   * walletRpc.openWallet(new MoneroWalletConfig()<br>
+   * &nbsp;&nbsp; .setPath("mywallet")<br>
+   * &nbsp;&nbsp; .setPassword("abc123")<br>
+   * &nbsp;&nbsp; .setServerUri("http://localhost:38081"));<br>
+   * </code>
+   * 
+   * <p>
+   * All supported configuration:<br>
+   * &nbsp;&nbsp; path - path of the wallet to create (optional, in-memory wallet if not given)<br>
+   * &nbsp;&nbsp; password - password of the wallet to create<br>
+   * &nbsp;&nbsp; serverUri - uri of a daemon to use (optional, monero-wallet-rpc usually started with daemon config)<br>
+   * &nbsp;&nbsp; serverUsername - username to authenticate with the daemon (optional)<br>
+   * &nbsp;&nbsp; serverPassword - password to authenticate with the daemon (optional)<br>
+   * &nbsp;&nbsp; server - MoneroRpcConnection providing daemon configuration (optional)<br>
+   * </p>
    * 
    * @param config configures the wallet to open
    */
@@ -167,31 +176,35 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   /**
-   * Create and open a wallet on the monero-wallet-rpc server.
+   * <p>Create and open a wallet on the monero-wallet-rpc server.</p>
    * 
-   * Example:
-   *   MoneroWallet walletRpc = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
-   *   walletRpc.createWallet(new MoneroWalletConfig()
-   *        .setPath("mywallet")
-   *        .setPassword("supersecretpassword")
-   *        .setNetworkType(MoneroNetworkType.STAGENET)
-   *        .setMnemonic("coexist igloo pamphlet lagoon...")
-   *        .setRestoreHeight(1543218l));
+   * <p>Example:<p>
    * 
-   * All supported configuration:
-   *   path - path of the wallet to create (optional, in-memory wallet if not given)
-   *   password - password of the wallet to create
-   *   mnemonic - mnemonic of the wallet to create (optional, random wallet created if neither mnemonic nor keys given)
-   *   seedOffset - the offset used to derive a new seed from the given mnemonic to recover a secret wallet from the mnemonic phrase
-   *   primaryAddress - primary address of the wallet to create (only provide if restoring from keys)
-   *   privateViewKey - private view key of the wallet to create (optional)
-   *   privateSpendKey - private spend key of the wallet to create (optional)
-   *   restoreHeight - block height to start scanning from (defaults to 0 unless generating random wallet)
-   *   language - language of the wallet's mnemonic phrase (defaults to "English" or auto-detected)
-   *   serverUri - uri of the daemon to use (optional, monero-wallet-rpc usually started with daemon config)
-   *   serverUsername - username to authenticate with the daemon (optional)
-   *   serverPassword - password to authenticate with the daemon (optional)
-   *   server - MoneroRpcConnection providing server configuration (optional)
+   * <code>
+   * MoneroWallet walletRpc = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");<br>
+   * walletRpc.createWallet(new MoneroWalletConfig()<br>
+   * &nbsp;&nbsp; .setPath("mywallet")<br>
+   * &nbsp;&nbsp; .setPassword("supersecretpassword")<br>
+   * &nbsp;&nbsp; .setMnemonic("coexist igloo pamphlet lagoon...")<br>
+   * &nbsp;&nbsp; .setRestoreHeight(1543218l));<br>
+   * </code>
+   * 
+   * <p>
+   * All supported configuration:<br>
+   * &nbsp;&nbsp; path - path of the wallet to create (optional, in-memory wallet if not given)<br>
+   * &nbsp;&nbsp; password - password of the wallet to create<br>
+   * &nbsp;&nbsp; mnemonic - mnemonic of the wallet to create (optional, random wallet created if neither mnemonic nor keys given)<br>
+   * &nbsp;&nbsp; seedOffset - the offset used to derive a new seed from the given mnemonic to recover a secret wallet from the mnemonic phrase<br>
+   * &nbsp;&nbsp; primaryAddress - primary address of the wallet to create (only provide if restoring from keys)<br>
+   * &nbsp;&nbsp; privateViewKey - private view key of the wallet to create (optional)<br>
+   * &nbsp;&nbsp; privateSpendKey - private spend key of the wallet to create (optional)<br>
+   * &nbsp;&nbsp; restoreHeight - block height to start scanning from (defaults to 0 unless generating random wallet)<br>
+   * &nbsp;&nbsp; language - language of the wallet's mnemonic phrase (defaults to "English" or auto-detected)<br>
+   * &nbsp;&nbsp; serverUri - uri of the daemon to use (optional, monero-wallet-rpc usually started with daemon config)<br>
+   * &nbsp;&nbsp; serverUsername - username to authenticate with the daemon (optional)<br>
+   * &nbsp;&nbsp; serverPassword - password to authenticate with the daemon (optional)<br>
+   * &nbsp;&nbsp; server - MoneroRpcConnection providing server configuration (optional)<br>
+   * <p>
    * 
    * @param config configures the wallet to create
    */
@@ -228,7 +241,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    * @param password is the wallet's password
    * @param language is the language for the wallet's mnemonic seed
    */
-  public void createWalletRandom(String name, String password, String language) {
+  private void createWalletRandom(String name, String password, String language) {
     if (name == null || name.isEmpty()) throw new MoneroError("Wallet name is not initialized");
     if (password == null || password.isEmpty()) throw new MoneroError("Password is not initialized");
     if (language == null || language.isEmpty()) language = DEFAULT_LANGUAGE;
@@ -245,7 +258,6 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     clear();
     path = name;
   }
-  public void createWalletRandom(String name, String password) { createWalletRandom(name, password, null); }
 
   
   /**
@@ -260,7 +272,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    * @param seedOffset is the offset used to derive a new seed from the given mnemonic to recover a secret wallet from the mnemonic phrase
    * @param saveCurrent specifies if the current RPC wallet should be saved before being closed
    */
-  public void createWalletFromMnemonic(String name, String password, String mnemonic, Long restoreHeight, String language, String seedOffset, Boolean saveCurrent) {
+  private void createWalletFromMnemonic(String name, String password, String mnemonic, Long restoreHeight, String language, String seedOffset, Boolean saveCurrent) {
     if (language == null) language = DEFAULT_LANGUAGE;
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("filename", name);
@@ -279,8 +291,6 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     clear();
     path = name;
   }
-  public void createWalletFromMnemonic(String name, String password, String mnemonic) { createWalletFromMnemonic(name, password, mnemonic, null, null, null, null); }
-  public void createWalletFromMnemonic(String name, String password, String mnemonic, Long restoreHeight) { createWalletFromMnemonic(name, password, mnemonic, restoreHeight, null, null, null); }
   
   /**
    * Create a wallet on the RPC server from an address, view key, and (optionally) spend key.
@@ -294,7 +304,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    * @param language is the wallet and mnemonic's language (default = "English")
    * @param saveCurrent specifies if the current RPC wallet should be saved before being closed
    */
-  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, Long restoreHeight, String language, Boolean saveCurrent) {
+  private void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, Long restoreHeight, String language, Boolean saveCurrent) {
     if (restoreHeight == null) restoreHeight = 0l;
     if (language == null) language = DEFAULT_LANGUAGE;
     Map<String, Object> params = new HashMap<String, Object>();
@@ -314,8 +324,6 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     clear();
     path = name;
   }
-  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey) { createWalletFromKeys(name, password, address, viewKey, spendKey, null, null, null); }
-  public void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, Long restoreHeight) { createWalletFromKeys(name, password, address, viewKey, spendKey, restoreHeight, null, null); }
   
   /**
    * Get a list of available languages for the wallet's mnemonic phrase.

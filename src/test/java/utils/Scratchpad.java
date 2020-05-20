@@ -1,8 +1,11 @@
 package utils;
 
-import monero.daemon.MoneroDaemon;
+import java.util.UUID;
+
+import monero.daemon.model.MoneroNetworkType;
+import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
-import monero.wallet.MoneroWalletRpc;
+import monero.wallet.model.MoneroWalletConfig;
 
 /**
  * Scratchpad for quick scripting.
@@ -13,11 +16,25 @@ public class Scratchpad {
   public static void main(String[] args) {
     
     // initialize daemon, wallet, and direct rpc interface
-    MoneroDaemon daemon = TestUtils.getDaemonRpc();
-    MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
-    MoneroWalletJni walletJni = TestUtils.getWalletJni();
+//    MoneroDaemon daemon = TestUtils.getDaemonRpc();
+//    MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
+//    MoneroWalletJni walletJni = TestUtils.getWalletJni();
     
     // -------------------------------- SCRATCHPAD ----------------------------
+    
+    // create wallet from mnemonic
+    MoneroWallet walletJni = MoneroWalletJni.createWallet(new MoneroWalletConfig()
+      .setPath("./test_wallets/" + UUID.randomUUID().toString())  // leave blank for in-memory wallet
+      .setPassword("abctesting123")
+      .setNetworkType(MoneroNetworkType.STAGENET)
+      .setServerUri("http://localhost:38081")
+      .setServerUsername("superuser")
+      .setServerPassword("abctesting123")
+      .setMnemonic("biggest duets beware eskimos coexist igloo pamphlet lagoon odometer hounded jukebox enough pride cocoa nylon wolf geometry buzzer vivid federal idols gang semifinal subtly coexist")
+      .setRestoreHeight(573800l));
+    walletJni.sync(new WalletSyncPrinter());
+    System.out.println("WASM wallet daemon height: " + walletJni.getDaemonHeight());
+    System.out.println("WASM wallet mnemonic: " + walletJni.getMnemonic());
     
     // MEASURE LAST 30 DAYS
 //    int numBlocks = 30 * 24 * 60 / 2;

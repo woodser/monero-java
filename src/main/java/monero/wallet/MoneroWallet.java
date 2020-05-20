@@ -475,16 +475,41 @@ public interface MoneroWallet {
   public List<MoneroTxWallet> getTxs(List<String> txHashes);
   
   /**
-   * Get wallet transactions.  Wallet transactions contain one or more
-   * transfers that are either incoming or outgoing to the wallet.
+   * <p>Get wallet transactions that meet the criteria defined in a query object.</p>
    * 
-   * Query results can be filtered by passing a transaction query.
-   * Transactions must meet every criteria defined in the query in order to
-   * be returned.  All filtering is optional and no filtering is applied when
-   * not defined.
+   * <p>Transactions must meet every criteria defined in the query in order to
+   * be returned.  All criteria are optional and no filtering is applied when
+   * not defined.</p>
+   * 
+   * <p>
+   * All supported query criteria:<br>
+   * &nbsp;&nbsp; isConfirmed - path of the wallet to open<br>
+   * &nbsp;&nbsp; password - password of the wallet to open<br>
+   * &nbsp;&nbsp; networkType - network type of the wallet to open (one of MoneroNetworkType.MAINNET|TESTNET|STAGENET)<br>
+   * &nbsp;&nbsp; serverUri - uri of the wallet's daemon (optional)<br>
+   * &nbsp;&nbsp; serverUsername - username to authenticate with the daemon (optional)<br>
+   * &nbsp;&nbsp; serverPassword - password to authenticate with the daemon (optional)<br>
+   * &nbsp;&nbsp; server - MoneroRpcConnection providing server configuration (optional)<br>
+   * &nbsp;&nbsp; isConfirmed - get txs that are confirmed or not (optional)<br>
+   * &nbsp;&nbsp; inTxPool - get txs that are in the tx pool or not (optional)<br>
+   * &nbsp;&nbsp; isRelayed - get txs that are relayed or not (optional)<br>
+   * &nbsp;&nbsp; isFailed - get txs that are failed or not (optional)<br>
+   * &nbsp;&nbsp; isMinerTx - get miner txs or not (optional)<br>
+   * &nbsp;&nbsp; hash - get a tx with the hash (optional)<br>
+   * &nbsp;&nbsp; hashes - get txs with the hashes (optional)<br>
+   * &nbsp;&nbsp; paymentId - get transactions with the payment id (optional)<br>
+   * &nbsp;&nbsp; paymentIds - get transactions with the payment ids (optional)<br>
+   * &nbsp;&nbsp; hasPaymentId - get transactions with a payment id or not (optional)<br>
+   * &nbsp;&nbsp; minHeight - get txs with height greater than or equal to the given height (optional)<br>
+   * &nbsp;&nbsp; maxHeight - get txs with height less than or equal to the given height (optional)<br>
+   * &nbsp;&nbsp; isOutgoing - get txs with an outgoing transfer or not (optional)<br>
+   * &nbsp;&nbsp; isIncoming - get txs with an incoming transfer or not (optional)<br>
+   * &nbsp;&nbsp; transferQuery - get txs that have a transfer that meets this query (optional)<br>
+   * &nbsp;&nbsp; includeOutputs - specifies that tx outputs should be returned with tx results (optional)<br>
+   * </p>
    * 
    * @param query specifies attributes of transactions to get
-   * @return wallet transactions per the query
+   * @return wallet transactions that meet the query
    */
   public List<MoneroTxWallet> getTxs(MoneroTxQuery query);
   
@@ -528,20 +553,26 @@ public interface MoneroWallet {
   public List<MoneroTransfer> getTransfers(int accountIdx, int subaddressIdx);
   
   /**
-   * Get incoming and outgoing transfers to and from this wallet.  An outgoing
-   * transfer represents a total amount sent from one or more subaddresses
-   * within an account to individual destination addresses, each with their
-   * own amount.  An incoming transfer represents a total amount received into
-   * a subaddress within an account.  Transfers belong to transactions which
-   * are stored on the blockchain.
+   * <p>Get tranfsers that meet the criteria defined in a query object.</p>
    * 
-   * Query results can be filtered by passing in a MoneroTransferQuery.
-   * Transfers must meet every criteria defined in the query in order to be
-   * returned.  All filtering is optional and no filtering is applied when not
-   * defined.
+   * <p>Transfers must meet every criteria defined in the query in order to be
+   * returned.  All criteria are optional and no filtering is applied when not
+   * defined.</p>
+   * 
+   * All supported query criteria:<br>
+   * &nbsp;&nbsp; isOutgoing - get transfers that are outgoing or not (optional)<br>
+   * &nbsp;&nbsp; isIncoming - get transfers that are incoming or not (optional)<br>
+   * &nbsp;&nbsp; address - wallet's address that a transfer either originated from (if outgoing) or is destined for (if incoming) (optional)<br>
+   * &nbsp;&nbsp; accountIndex - get transfers that either originated from (if outgoing) or are destined for (if incoming) a specific account index (optional)<br>
+   * &nbsp;&nbsp; subaddressIndex - get transfers that either originated from (if outgoing) or are destined for (if incoming) a specific subaddress index (optional)<br>
+   * &nbsp;&nbsp; subaddressIndices - get transfers that either originated from (if outgoing) or are destined for (if incoming) specific subaddress indices (optional)<br>
+   * &nbsp;&nbsp; amount - amount being transferred (optional)<br>
+   * &nbsp;&nbsp; destinations - individual destinations of an outgoing transfer, which is local wallet data and NOT recoverable from the blockchain (optional)<br>
+   * &nbsp;&nbsp; hasDestinations - get transfers that have destinations or not (optional)<br>
+   * &nbsp;&nbsp; txQuery - get transfers whose transaction meets this query (optional)<br>
    * 
    * @param query specifies attributes of transfers to get
-   * @return wallet transfers per the query
+   * @return wallet transfers that meet the query
    */
   public List<MoneroTransfer> getTransfers(MoneroTransferQuery query);
   
@@ -553,7 +584,17 @@ public interface MoneroWallet {
   public List<MoneroIncomingTransfer> getIncomingTransfers();
   
   /**
-   * Get the wallet's incoming transfers according to the given query.
+   * <p>Get the wallet's incoming transfers that meet criteria in a query object.</p>
+   * 
+   * <p>
+   * All supported query criteria:<br>
+   * &nbsp;&nbsp; address - destination address (optional)<br>
+   * &nbsp;&nbsp; accountIndex - get incoming transfers to a specific account index (optional)<br>
+   * &nbsp;&nbsp; subaddressIndex - get incoming transfers to a specific subaddress index (optional)<br>
+   * &nbsp;&nbsp; subaddressIndices - get incoming transfers to specific subaddress indices (optional)<br>
+   * &nbsp;&nbsp; amount - amount transferred (optional)<br>
+   * &nbsp;&nbsp; txQuery - get transfers whose transaction meets this query (optional)<br>
+   * </p>
    * 
    * @param query specifies which incoming transfers to get
    * @return the wallet's incoming transfers according to the given query
@@ -568,7 +609,19 @@ public interface MoneroWallet {
   public List<MoneroOutgoingTransfer> getOutgoingTransfers();
   
   /**
-   * Get the wallet's outgoing transfers according to the given query.
+   * <p>Get the wallet's outgoing transfers that meet criteria in a query object.</p>
+   * 
+   * <p>
+   * All supported query criteria:<br>
+   * &nbsp;&nbsp; address - source address of funds (optional)<br>
+   * &nbsp;&nbsp; accountIndex - get outgoing transfers from a specific account index (optional)<br>
+   * &nbsp;&nbsp; subaddressIndex - get outgoing transfers from a specific subaddress index (optional)<br>
+   * &nbsp;&nbsp; subaddressIndices - get outgoing transfers from specific subaddress indices (optional)<br>
+   * &nbsp;&nbsp; amount - amount transferred (optional)<br>
+   * &nbsp;&nbsp; destinations - individual destinations of an outgoing transfer, which is local wallet data and NOT recoverable from the blockchain (optional)<br>
+   * &nbsp;&nbsp; hasDestinations - get transfers that have destinations or not (optional)<br>
+   * &nbsp;&nbsp; txQuery - get transfers whose transaction meets this query (optional)<br>
+   * </p>
    * 
    * @param query specifies which outgoing transfers to get
    * @return the wallet's outgoing transfers according to the given query
@@ -585,16 +638,27 @@ public interface MoneroWallet {
   public List<MoneroOutputWallet> getOutputs();
   
   /**
-   * Get outputs created from previous transactions that belong to the wallet
-   * (i.e. that the wallet can spend one time).  Outputs are part of
-   * transactions which are stored in blocks on the blockchain.
+   * <p>Get outputs which meet the criteria defined in a query object.</p>
    * 
-   * Results can be configured by passing a MoneroOutputQuery.  Outputs must
-   * meet every criteria defined in the query in order to be returned.  All
-   * filtering is optional and no filtering is applied when not defined.
+   * <p>Outputs must meet every criteria defined in the query in order to be
+   * returned.  All criteria are optional and no filtering is applied when not
+   * defined.</p>
+   * 
+   * <p>
+   * All supported query criteria:<br>
+   * &nbsp;&nbsp; accountIndex - get outputs associated with a specific account index (optional)<br>
+   * &nbsp;&nbsp; subaddressIndex - get outputs associated with a specific subaddress index (optional)<br>
+   * &nbsp;&nbsp; subaddressIndices - get outputs associated with specific subaddress indices (optional)<br>
+   * &nbsp;&nbsp; amount - get outputs with a specific amount (optional)<br>
+   * &nbsp;&nbsp; minAmount - get outputs greater than or equal to a minimum amount (optional)<br>
+   * &nbsp;&nbsp; maxAmount - get outputs less than or equal to a maximum amount (optional)<br>
+   * &nbsp;&nbsp; isSpent - get outputs that are spent or not (optional)<br>
+   * &nbsp;&nbsp; keyImage - get outputs that match the fields defined in the given key image (optional)<br>
+   * &nbsp;&nbsp; txQuery - get outputs whose transaction meets this filter (optional)<br>
+   * </p>
    * 
    * @param query specifies attributes of outputs to get
-   * @return queried wallet outputs
+   * @return outputs that meet the query
    */
   public List<MoneroOutputWallet> getOutputs(MoneroOutputQuery query);
   
