@@ -702,6 +702,20 @@ public interface MoneroWallet {
   /**
    * Create a transaction to transfer funds from this wallet.
    * 
+   * <p>
+   * All supported configuration:<br>
+   * &nbsp;&nbsp; address - single destination address (required unless `destinations` provided)<br>
+   * &nbsp;&nbsp; amount - single destination amount (required unless `destinations` provided)<br>
+   * &nbsp;&nbsp; accountIndex - source account index to transfer funds from (required)<br>
+   * &nbsp;&nbsp; subaddressIndex - source subaddress index to transfer funds from (optional)<br>
+   * &nbsp;&nbsp; subaddressIndices - source subaddress indices to transfer funds from (optional)<br>
+   * &nbsp;&nbsp; relay - relay the transaction to peers to commit to the blockchain (default false)<br>
+   * &nbsp;&nbsp; priority - transaction priority (default MoneroTxPriority.NORMAL)<br>
+   * &nbsp;&nbsp; destinations - addresses and amounts in a multi-destination tx (required unless `address` and `amount` provided)<br>
+   * &nbsp;&nbsp; paymentId - transaction payment ID (optional)<br>
+   * &nbsp;&nbsp; unlockTime - number of confirmations before the recipient can spend the funds (default 0)<br>
+   * </p>
+   * 
    * @param config configures the transaction to create
    * @return the created transaction
    */
@@ -709,6 +723,21 @@ public interface MoneroWallet {
   
   /**
    * Create one or more transactions to transfer funds from this wallet.
+   * 
+   * <p>
+   * All supported configuration:<br>
+   * &nbsp;&nbsp; address - single destination address (required unless `destinations` provided)<br>
+   * &nbsp;&nbsp; amount - single destination amount (required unless `destinations` provided)<br>
+   * &nbsp;&nbsp; accountIndex - source account index to transfer funds from (required)<br>
+   * &nbsp;&nbsp; subaddressIndex - source subaddress index to transfer funds from (optional)<br>
+   * &nbsp;&nbsp; subaddressIndices - source subaddress indices to transfer funds from (optional)<br>
+   * &nbsp;&nbsp; relay - relay the transactions to peers to commit to the blockchain (default false)<br>
+   * &nbsp;&nbsp; priority - transaction priority (default MoneroTxPriority.NORMAL)<br>
+   * &nbsp;&nbsp; destinations - addresses and amounts in a multi-destination tx (required unless `address` and `amount` provided)<br>
+   * &nbsp;&nbsp; paymentId - transaction payment ID (optional)<br>
+   * &nbsp;&nbsp; unlockTime - number of confirmations before the recipient can spend the funds (default 0)<br>
+   * &nbsp;&nbsp; canSplit - allow funds to be transferred using multiple transactions (default true)<br>
+   * </p>
    * 
    * @param config configures the transactions to create
    * @return the created transactions
@@ -718,6 +747,15 @@ public interface MoneroWallet {
   /**
    * Sweep an output with a given key image.
    * 
+   * <p>
+   * All supported configuration:<br>
+   * &nbsp;&nbsp; address - single destination address (required)<br>
+   * &nbsp;&nbsp; keyImage - key image to sweep (required)<br>
+   * &nbsp;&nbsp; relay - relay the transaction to peers to commit to the blockchain (default false)<br>
+   * &nbsp;&nbsp; unlockTime - number of confirmations before the recipient can spend the funds (default 0)<br>
+   * &nbsp;&nbsp; priority - transaction priority (default MoneroTxPriority.NORMAL)<br>
+   * </p>
+   * 
    * @param config configures the sweep transaction
    * @return the created transaction
    */
@@ -725,6 +763,17 @@ public interface MoneroWallet {
 
   /**
    * Sweep all unlocked funds according to the given config.
+   * 
+   * <p>
+   * All supported configuration:<br>
+   * &nbsp;&nbsp; address - single destination address (required)<br>
+   * &nbsp;&nbsp; accountIndex - source account index to sweep from from (required)<br>
+   * &nbsp;&nbsp; subaddressIndex - source subaddress index to sweep from (optional)<br>
+   * &nbsp;&nbsp; subaddressIndices - source subaddress indices to sweep from (optional)<br>
+   * &nbsp;&nbsp; relay - relay the transactions to peers to commit to the blockchain (default false)<br>
+   * &nbsp;&nbsp; priority - transaction priority (default MoneroTxPriority.NORMAL)<br>
+   * &nbsp;&nbsp; unlockTime - number of confirmations before the recipient can spend the funds (default 0)<br>
+   * </p>
    * 
    * @param config is the sweep configuration
    * @return the created transactions
@@ -736,7 +785,7 @@ public interface MoneroWallet {
    * 
    * NOTE: Dust only exists pre RCT, so this method will throw "no dust to sweep" on new wallets.
    * 
-   * @param relay specifies if the resulting transaction should not be relayed (defaults to false i.e. not relayed)
+   * @param relay specifies if the resulting transaction should be relayed (defaults to false i.e. not relayed)
    * @return the created transactions
    */
   public List<MoneroTxWallet> sweepDust(boolean relay);
