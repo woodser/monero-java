@@ -19,11 +19,11 @@ This project is a Java library for using Monero with RPC and native bindings to 
 
 - Supports RPC bindings to monero-wallet-rpc and monero-daemon-rpc.
 - Supports client-side wallets using JNI bindings to Monero Core.
-- Supports view-only, offline, and multisig wallets.
+- Supports multisig, view-only, offline, wallets.
+- Conforms to an [API specification](https://moneroecosystem.org/monero-java/monero-spec.pdf) intended to be intuitive and robust.
 - Query wallet transactions, transfers, and outputs by their many attributes.
 - Fetch and process binary data from the daemon (e.g. raw blocks).
 - Receive notifications when blocks are added to the chain or when wallets sync, send, and receive.
-- Conforms to an [API specification](https://moneroecosystem.org/monero-java/monero-spec.pdf) intended to be intuitive and robust.
 - Over 270 passing JUnit test cases.
 
 ## Architecture
