@@ -126,11 +126,11 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 2. `cd monero-java`
 3. Install dependencies using Maven: `mvn install`
 4. Update submodules: `./bin/update_submodules.sh`
-5. [Build ./external/monero-cpp-library as a shared library](https://github.com/woodser/monero-cpp-library#how-to-run-this-library)
+5. [Build ./external/monero-cpp-library as a shared library.](https://github.com/woodser/monero-cpp-library#how-to-run-this-library)
 6. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_66.jdk/Contents/Home/` (change as appropriate)
 7. Build shared libraries to ./build/: `./bin/build_libmonero_java.sh`
-8. Run TestMoneroCppUtils.java JUnit tests to verify the shared libraries are working with Java JNI
-9. Add the shared libraries within ./build/ to your application's classpath
+8. Run TestMoneroCppUtils.java JUnit tests to verify the shared libraries are working with Java JNI.
+9. Add the shared libraries within ./build/ to your application's classpath.
 
 ## How to run Monero RPC
 
@@ -145,7 +145,7 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 
 ## How to run JUnit tests
 
-1. [Include](#how-to-include-this-library) this library with [JNI support](#how-to-build-jni-shared-libraries)
+1. [Include](#how-to-include-this-library) this library with [JNI support](#how-to-build-jni-shared-libraries).
 2. Run monero-wallet-rpc and monero-daemon-rpc.  See [How to Run Monero RPC](#how-to-run-monero-rpc). 
 3. Configure the appropriate RPC endpoints, authentication, and test wallet in [TestUtils.java](src/test/java/utils/TestUtils.java).
 4. Run all *.java files in src/main/test as JUnits.
