@@ -12,7 +12,6 @@ import monero.wallet.model.MoneroWalletConfig;
  */
 public class Scratchpad {
 
-  @SuppressWarnings("unused")
   public static void main(String[] args) {
     
     // initialize daemon, wallet, and direct rpc interface
@@ -35,6 +34,12 @@ public class Scratchpad {
     walletJni.sync(new WalletSyncPrinter());
     System.out.println("WASM wallet daemon height: " + walletJni.getDaemonHeight());
     System.out.println("WASM wallet mnemonic: " + walletJni.getMnemonic());
+    
+//    walletJni.createTx(new MoneroTxConfig()
+//            .setAddress("52FnB7ABUrKJzVQRpbMNrqDFWbcKLjFUq8Rgek7jZEuB6WE2ZggXaTf4FK6H8gQymvSrruHHrEuKhMN3qTMiBYzREKsmRKM")
+//            .setAmount(walletJni.getUnlockedBalance(0).divide(new BigInteger("4")).multiply(new BigInteger("3")))
+//            .setAccountIndex(0)
+//            .setRelay(true));
     
     // MEASURE LAST 30 DAYS
 //    int numBlocks = 30 * 24 * 60 / 2;

@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import common.utils.GenUtils;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWallet;
@@ -196,7 +195,6 @@ public class WalletEqualityUtils {
     else {
       tgt.getOutgoingTransfer().setDestinations(src.getOutgoingTransfer().getDestinations());
       tgt.getOutgoingTransfer().setAmount(src.getOutgoingTransfer().getAmount());
-      tgt.getOutgoingTransfer().setNumSuggestedConfirmations(GenUtils.reconcile(src.getOutgoingTransfer().getNumSuggestedConfirmations(), tgt.getOutgoingTransfer().getNumSuggestedConfirmations(), null, null, true));  // suggested confirmations can grow with amount
     }
   }
   

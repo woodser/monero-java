@@ -110,7 +110,7 @@ public class MoneroRpcConnection {
       body.put("id", "0");
       body.put("method", method);
       if (params != null) body.put("params", params);
-      LOGGER.fine("Sending json request with method '" + method + "' and body: " + JsonUtils.serialize(body));
+      //System.out.println("Sending json request with method '" + method + "' and body: " + JsonUtils.serialize(body));
 
       // send http request and validate response
       HttpPost post = new HttpPost(uri.toString() + "/json_rpc");
@@ -124,6 +124,7 @@ public class MoneroRpcConnection {
       EntityUtils.consume(resp.getEntity());
 
       // check RPC response for errors
+      //System.out.println("Received response: " + respMap);
       validateRpcResponse(respMap, method, params);
       return respMap;
     } catch (MoneroRpcError e1) {
@@ -166,7 +167,7 @@ public class MoneroRpcConnection {
         HttpEntity entity = new StringEntity(JsonUtils.serialize(params));
         post.setEntity(entity);
       }
-      LOGGER.fine("Sending path request with path '" + path + "' and params: " + JsonUtils.serialize(params));
+      //System.out.println("Sending path request with path '" + path + "' and params: " + JsonUtils.serialize(params));
       
       // send request and validate response
       HttpResponse resp = client.execute(post);
@@ -177,6 +178,7 @@ public class MoneroRpcConnection {
       EntityUtils.consume(resp.getEntity());
 
       // check RPC response for errors
+      //System.out.println("Received response: " + respMap);
       validateRpcResponse(respMap, path, params);
       return respMap;
     } catch (MoneroRpcError e1) {

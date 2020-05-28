@@ -15,7 +15,7 @@
 
 ## Overview
 
-This project is a Java library for using Monero with RPC and native bindings to [Monero Core v0.15.0.5 Carbon Chameleon](https://web.getmonero.org/downloads/).
+This project is a Java library for using Monero with RPC and native bindings to [Monero Core v0.16.0.0 'Nitrogen Nebula'](https://web.getmonero.org/downloads/).
 
 - Supports RPC bindings to monero-wallet-rpc and monero-daemon-rpc.
 - Supports client-side wallets using JNI bindings to Monero Core.

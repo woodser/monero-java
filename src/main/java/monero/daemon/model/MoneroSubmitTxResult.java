@@ -4,6 +4,8 @@ import java.math.BigInteger;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import common.utils.JsonUtils;
+
 /**
  * Models the result from submitting a tx to a daemon.
  */
@@ -17,7 +19,6 @@ public class MoneroSubmitTxResult {
   private Boolean hasInvalidInput;
   private Boolean hasInvalidOutput;
   private Boolean hasTooFewOutputs;
-  private Boolean isRct;
   private Boolean isOverspend;
   private Boolean isTooBig;
   private Boolean sanityCheckFailed;
@@ -95,15 +96,6 @@ public class MoneroSubmitTxResult {
     this.hasTooFewOutputs = hasTooFewOutputs;
   }
   
-  @JsonProperty("isRct")
-  public Boolean isRct() {
-    return isRct;
-  }
-  
-  public void setIsRct(Boolean isRct) {
-    this.isRct = isRct;
-  }
-  
   @JsonProperty("isOverspend")
   public Boolean isOverspend() {
     return isOverspend;
@@ -152,5 +144,9 @@ public class MoneroSubmitTxResult {
 
   public void setTopBlockHash(String topBlockHash) {
     this.topBlockHash = topBlockHash;
+  }
+  
+  public String toString() {
+    return JsonUtils.serialize(this);
   }
 }

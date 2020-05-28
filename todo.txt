@@ -117,8 +117,10 @@ TO OPEN
 keys wallet setDaemonConnection not working with authentication
 daemon cannot check for update while mining
 No notification of unconfirmed funds within 10 seconds
+syncing wallet does not update failed txs
 
 OPEN ISSUES
+testGetReserveProofAccount() exception, re-enable test reserves or report issue - issue #6595
 User experience: 5 - 1 = 4 but wallet2 reports the incorrect balance until the first confirmation: https://github.com/monero-project/monero/issues/5809
 User experience: let users spend low confirmation funds without being locked for 10 blocks: https://github.com/monero-project/monero/issues/5810
 wallet2 does not fully sync transactions in the pool: https://github.com/monero-project/monero/issues/5811

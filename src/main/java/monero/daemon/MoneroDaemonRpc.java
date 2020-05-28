@@ -1088,7 +1088,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         block.setHeight(GenUtils.reconcile(block.getHeight(), ((BigInteger) val).longValue()));
       }
       else if (key.equals("last_relayed_time")) tx.setLastRelayedTimestamp(GenUtils.reconcile(tx.getLastRelayedTimestamp(), ((BigInteger) val).longValue()));
-      else if (key.equals("receive_time")) tx.setReceivedTimestamp(GenUtils.reconcile(tx.getReceivedTimestamp(), ((BigInteger) val).longValue()));
+      else if (key.equals("receive_time") || key.equals("received_timestamp")) tx.setReceivedTimestamp(GenUtils.reconcile(tx.getReceivedTimestamp(), ((BigInteger) val).longValue()));
       else if (key.equals("in_pool")) {
         tx.setIsConfirmed(GenUtils.reconcile(tx.isConfirmed(), !(Boolean) val));
         tx.setInTxPool(GenUtils.reconcile(tx.inTxPool(), (Boolean) val));
@@ -1265,7 +1265,6 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("invalid_output")) result.setHasInvalidOutput((Boolean) val);
       else if (key.equals("too_few_outputs")) result.setHasTooFewOutputs((Boolean) val);
       else if (key.equals("low_mixin")) result.setIsMixinTooLow((Boolean) val);
-      else if (key.equals("not_rct")) result.setIsRct(!Boolean.TRUE.equals(val));
       else if (key.equals("not_relayed")) result.setIsRelayed(!Boolean.TRUE.equals(val));
       else if (key.equals("overspend")) result.setIsOverspend((Boolean) val);
       else if (key.equals("reason")) result.setReason("".equals((String) val) ? null : (String) val);

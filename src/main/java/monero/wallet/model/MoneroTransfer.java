@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
+import monero.common.MoneroError;
 
 /**
  * Models a base transfer of funds to or from the wallet.
@@ -18,7 +19,6 @@ public abstract class MoneroTransfer {
   private MoneroTxWallet tx;
   private BigInteger amount;
   private Integer accountIndex;
-  private Long numSuggestedConfirmations;
   
   public MoneroTransfer() {
     // nothing to initialize
@@ -27,7 +27,6 @@ public abstract class MoneroTransfer {
   public MoneroTransfer(final MoneroTransfer transfer) {
     this.amount = transfer.amount;
     this.accountIndex = transfer.accountIndex;
-    this.numSuggestedConfirmations = transfer.numSuggestedConfirmations;
   }
   
   public abstract MoneroTransfer copy();
@@ -69,23 +68,6 @@ public abstract class MoneroTransfer {
   }
   
   /**
-   * Return how many confirmations till it's not economically worth re-writing the chain.
-   * That is, the number of confirmations before the transaction is highly unlikely to be
-   * double spent or overwritten and may be considered settled, e.g. for a merchant to trust
-   * as finalized.
-   * 
-   * @return Integer is the number of confirmations before it's not worth rewriting the chain
-   */
-  public Long getNumSuggestedConfirmations() {
-    return numSuggestedConfirmations;
-  }
-  
-  public MoneroTransfer setNumSuggestedConfirmations(Long numSuggestedConfirmations) {
-    this.numSuggestedConfirmations = numSuggestedConfirmations;
-    return this;
-  }
-  
-  /**
    * Updates this transaction by merging the latest information from the given
    * transaction.
    * 
@@ -110,12 +92,9 @@ public abstract class MoneroTransfer {
     
     // TODO monero core: failed tx in pool (after testUpdateLockedDifferentAccounts()) causes non-originating saved wallets to return duplicate incoming transfers but one has amount/numSuggestedConfirmations of 0
     if (this.getAmount() != null && transfer.getAmount() != null && !this.getAmount().equals(transfer.getAmount()) && (BigInteger.valueOf(0).equals(this.getAmount()) || BigInteger.valueOf(0).equals(transfer.getAmount()))) {
-      this.setAmount(GenUtils.reconcile(this.getAmount(), transfer.getAmount(), null, null, true));
-      this.setNumSuggestedConfirmations(GenUtils.reconcile(this.getNumSuggestedConfirmations(), transfer.getNumSuggestedConfirmations(), null, null, true));
-      System.out.println("WARNING: failed tx in pool causes non-originating wallets to return duplicate incoming transfers but with one amount/numSuggestedConfirmations of 0");
+      throw new MoneroError("WARNING: failed tx in pool causes non-originating wallets to return duplicate incoming transfers but with one amount/numSuggestedConfirmations of 0");
     } else {
       this.setAmount(GenUtils.reconcile(this.getAmount(), transfer.getAmount()));
-      this.setNumSuggestedConfirmations(GenUtils.reconcile(this.getNumSuggestedConfirmations(), transfer.getNumSuggestedConfirmations(), null, null, false));  // TODO monero-wallet-rpc: outgoing txs become 0 when confirmed
     }
     
     return this;
@@ -127,9 +106,9 @@ public abstract class MoneroTransfer {
   
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
+    sb.append(GenUtils.kvLine("Is incoming", this.isIncoming(), indent));
     sb.append(GenUtils.kvLine("Amount", this.getAmount() != null ? this.getAmount().toString() : null, indent));
     sb.append(GenUtils.kvLine("Account index", this.getAccountIndex(), indent));
-    sb.append(GenUtils.kvLine("Num suggested confirmations", getNumSuggestedConfirmations(), indent));
     String str = sb.toString();
     return str.isEmpty() ? str :  str.substring(0, str.length() - 1);	  // strip last newline
   }
@@ -140,7 +119,6 @@ public abstract class MoneroTransfer {
     int result = 1;
     result = prime * result + ((accountIndex == null) ? 0 : accountIndex.hashCode());
     result = prime * result + ((amount == null) ? 0 : amount.hashCode());
-    result = prime * result + ((numSuggestedConfirmations == null) ? 0 : numSuggestedConfirmations.hashCode());
     return result;
   }
 
@@ -156,9 +134,6 @@ public abstract class MoneroTransfer {
     if (amount == null) {
       if (other.amount != null) return false;
     } else if (!amount.equals(other.amount)) return false;
-    if (numSuggestedConfirmations == null) {
-      if (other.numSuggestedConfirmations != null) return false;
-    } else if (!numSuggestedConfirmations.equals(other.numSuggestedConfirmations)) return false;
     return true;
   }
 }

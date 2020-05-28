@@ -53,4 +53,13 @@ public class MoneroAddressBookEntry {
   public void setDescription(String description) {
     this.description = description;
   }
+  
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Index: " + index + "\n");
+    sb.append("Address: " + address + "\n");
+    sb.append("Payment ID: " + paymentId + "\n");
+    sb.append("Description: " + description);
+    return sb.toString();
+  }
 }

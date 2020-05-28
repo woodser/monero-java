@@ -13,6 +13,7 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
 
   private Integer subaddressIndex;
   private String address;
+  private Long numSuggestedConfirmations;
   
   public MoneroIncomingTransfer() {
     // nothing to initialize
@@ -22,6 +23,7 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     super(transfer);
     this.subaddressIndex = transfer.subaddressIndex;
     this.address = transfer.address;
+    this.numSuggestedConfirmations = transfer.numSuggestedConfirmations;
   }
   
   @Override
@@ -51,6 +53,23 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     this.address = address;
     return this;
   }
+  
+  /**
+   * Return how many confirmations till it's not economically worth re-writing the chain.
+   * That is, the number of confirmations before the transaction is highly unlikely to be
+   * double spent or overwritten and may be considered settled, e.g. for a merchant to trust
+   * as finalized.
+   * 
+   * @return the number of confirmations before it's not worth rewriting the chain
+   */
+  public Long getNumSuggestedConfirmations() {
+    return numSuggestedConfirmations;
+  }
+  
+  public MoneroIncomingTransfer setNumSuggestedConfirmations(Long numSuggestedConfirmations) {
+    this.numSuggestedConfirmations = numSuggestedConfirmations;
+    return this;
+  }
 
   public MoneroIncomingTransfer merge(MoneroTransfer transfer) {
     GenUtils.assertTrue(transfer instanceof MoneroIncomingTransfer);
@@ -73,6 +92,7 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     if (this == transfer) return this;
     this.setSubaddressIndex(GenUtils.reconcile(this.getSubaddressIndex(), transfer.getSubaddressIndex()));
     this.setAddress(GenUtils.reconcile(this.getAddress(), transfer.getAddress()));
+    this.setNumSuggestedConfirmations(GenUtils.reconcile(this.getNumSuggestedConfirmations(), transfer.getNumSuggestedConfirmations(), null, null, false));
     return this;
   }
   
@@ -85,6 +105,7 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     sb.append(super.toString(indent) + "\n");
     sb.append(GenUtils.kvLine("Subaddress index", this.getSubaddressIndex(), indent));
     sb.append(GenUtils.kvLine("Address", this.getAddress(), indent));
+    sb.append(GenUtils.kvLine("Num suggested confirmations", getNumSuggestedConfirmations(), indent));
     String str = sb.toString();
     return str.substring(0, str.length() - 1);
   }
@@ -95,6 +116,7 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     int result = super.hashCode();
     result = prime * result + ((address == null) ? 0 : address.hashCode());
     result = prime * result + ((subaddressIndex == null) ? 0 : subaddressIndex.hashCode());
+    result = prime * result + ((numSuggestedConfirmations == null) ? 0 : numSuggestedConfirmations.hashCode());
     return result;
   }
 
@@ -110,6 +132,9 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
     if (subaddressIndex == null) {
       if (other.subaddressIndex != null) return false;
     } else if (!subaddressIndex.equals(other.subaddressIndex)) return false;
+    if (numSuggestedConfirmations == null) {
+      if (other.numSuggestedConfirmations != null) return false;
+    } else if (!numSuggestedConfirmations.equals(other.numSuggestedConfirmations)) return false;
     return true;
   }
   
@@ -130,12 +155,6 @@ public class MoneroIncomingTransfer extends MoneroTransfer {
   @Override
   public MoneroIncomingTransfer setAccountIndex(Integer accountIndex) {
     super.setAccountIndex(accountIndex);
-    return this;
-  }
-  
-  @Override
-  public MoneroIncomingTransfer setNumSuggestedConfirmations(Long numSuggestedConfirmations) {
-    super.setNumSuggestedConfirmations(numSuggestedConfirmations);
     return this;
   }
 }

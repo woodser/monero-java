@@ -59,9 +59,9 @@ public class TestUtils {
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
   public static final MoneroNetworkType NETWORK_TYPE = MoneroNetworkType.STAGENET;
   public static final String LANGUAGE = "English";
-  public static final String MNEMONIC = "spying swept ashtray going hence jester swagger cease spying unusual boss vain dyslexic divers among unfit asleep bays ostrich maverick skirting jaunt scenic shuffled spying"; 
-  public static final String ADDRESS = "55bcxMRhBWea6xxsot8moF1rdPprjJR2x4mfnNnTGgBJFgXa4gWXmWAYdUBKiRcJxy9AUAGJEg28DejvWdJU2VgUDrUvCHG";
-  public static final long FIRST_RECEIVE_HEIGHT = 573936; // NOTE: this value MUST be the height of the wallet's first tx for tests
+  public static final String MNEMONIC = "hijack lucky rally sober hockey robot gumball amaze gave fifteen organs gecko skater wizard demonstrate upright system vegan tobacco tsunami lurk withdrawn tomorrow uphill organs"; 
+  public static final String ADDRESS = "52FnB7ABUrKJzVQRpbMNrqDFWbcKLjFUq8Rgek7jZEuB6WE2ZggXaTf4FK6H8gQymvSrruHHrEuKhMN3qTMiBYzREKsmRKM";
+  public static final long FIRST_RECEIVE_HEIGHT = 589429; // NOTE: this value MUST be the height of the wallet's first tx for tests
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class.getName());
@@ -214,7 +214,7 @@ public class TestUtils {
   }
   
   // TODO: switch to local wallet (like js version) if/when it can generate addresses
-  public static String getRandomWalletAddress() {
+  public static String getExternalWalletAddress() {
     MoneroNetworkType networkType = getDaemonRpc().getInfo().getNetworkType();
     switch (networkType) {
       case STAGENET:

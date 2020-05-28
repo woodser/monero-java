@@ -1087,7 +1087,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       } else {
         List<Integer> subaddressIndices = new ArrayList<Integer>();
         indices.put(config.getAccountIndex(), subaddressIndices);
-        for (MoneroSubaddress subaddress : getSubaddresses(config.getAccountIndex())) {
+        for (MoneroSubaddress subaddress : getSubaddresses(config.getAccountIndex())) { // TODO: wallet rpc sweep_all now supports req.subaddr_indices_all
           if (subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) > 0) subaddressIndices.add(subaddress.getIndex());
         }
       }
@@ -2083,6 +2083,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       else if (key.equals("label")) { if (!"".equals(val)) subaddress.setLabel((String) val); }
       else if (key.equals("used")) subaddress.setIsUsed((Boolean) val);
       else if (key.equals("blocks_to_unlock")) subaddress.setNumBlocksToUnlock(((BigInteger) val).longValue());
+      else if (key.equals("time_to_unlock")) {} // ignoring
       else LOGGER.warning("WARNING: ignoring unexpected subaddress field: " + key + ": " + val);
     }
     return subaddress;
@@ -2153,51 +2154,59 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     // build shared tx set
     MoneroTxSet txSet = convertRpcTxSet(rpcTxs);
     
-    // done if rpc contains no txs
-    if (!rpcTxs.containsKey("fee_list")) {
+    // get number of txs
+    int numTxs = rpcTxs.containsKey("fee_list") ? ((List<BigInteger>) rpcTxs.get("fee_list")).size() : 0;
+    
+    // done if rpc response contains no txs
+    if (numTxs == 0) {
       GenUtils.assertNull(txs);
       return txSet;
     }
-    
-    // get lists
-    List<String> hashes = (List<String>) rpcTxs.get("tx_hash_list");
-    List<String> keys = (List<String>) rpcTxs.get("tx_key_list");
-    List<String> blobs = (List<String>) rpcTxs.get("tx_blob_list");
-    List<String> metadatas = (List<String>) rpcTxs.get("tx_metadata_list");
-    List<BigInteger> fees = (List<BigInteger>) rpcTxs.get("fee_list");
-    List<BigInteger> amounts = (List<BigInteger>) rpcTxs.get("amount_list");
-    
-    // ensure all lists are the same size
-    Set<Integer> sizes = new HashSet<Integer>();
-    if (amounts != null) sizes.add(amounts.size());
-    if (hashes != null) sizes.add(hashes.size());
-    if (keys != null) sizes.add(keys.size());
-    if (blobs != null) sizes.add(blobs.size());
-    if (metadatas != null) sizes.add(metadatas.size());
-    if (fees != null) sizes.add(fees.size());
-    if (amounts != null) sizes.add(amounts.size());
-    GenUtils.assertEquals("RPC lists are different sizes", 1, sizes.size());
     
     // pre-initialize txs if none given
     if (txs != null) txSet.setTxs(txs);
     else {
       txs = new ArrayList<MoneroTxWallet>();
-      for (int i = 0; i < fees.size(); i++) txs.add(new MoneroTxWallet());
-      txSet.setTxs(txs);
+      for (int i = 0; i < numTxs; i++) txs.add(new MoneroTxWallet());
     }
-
-    // build transactions
-    for (int i = 0; i < fees.size(); i++) {
-      MoneroTxWallet tx = txs.get(i);
-      if (hashes != null) tx.setHash(hashes.get(i));
-      if (keys != null) tx.setKey(keys.get(i));
-      if (blobs != null) tx.setFullHex(blobs.get(i));
-      if (metadatas != null) tx.setMetadata(metadatas.get(i));
-      tx.setFee((BigInteger) fees.get(i));
+    for (MoneroTxWallet tx : txs) {
+      tx.setTxSet(txSet);
       tx.setIsOutgoing(true);
-      if (tx.getOutgoingTransfer() != null) tx.getOutgoingTransfer().setAmount((BigInteger) amounts.get(i));
-      else tx.setOutgoingTransfer(new MoneroOutgoingTransfer().setTx(tx).setAmount((BigInteger) amounts.get(i)));
-      tx.setTxSet(txSet); // link tx to parent set
+    }
+    txSet.setTxs(txs);
+    
+    // initialize txs from rpc lists
+    for (String key : rpcTxs.keySet()) {
+      Object val = rpcTxs.get(key);
+      if (key.equals("tx_hash_list")) {
+        List<String> hashes = (List<String>) val;
+        for (int i = 0; i < hashes.size(); i++) txs.get(i).setHash(hashes.get(i));
+      } else if (key.equals("tx_key_list")) {
+        List<String> keys = (List<String>) val;
+        for (int i = 0; i < keys.size(); i++) txs.get(i).setKey(keys.get(i));
+      } else if (key.equals("tx_blob_list")) {
+        List<String> blobs = (List<String>) val;
+        for (int i = 0; i < blobs.size(); i++) txs.get(i).setFullHex(blobs.get(i));
+      } else if (key.equals("tx_metadata_list")) {
+        List<String> metadatas = (List<String>) val;
+        for (int i = 0; i < metadatas.size(); i++) txs.get(i).setMetadata(metadatas.get(i));
+      } else if (key.equals("fee_list")) {
+        List<BigInteger> fees = (List<BigInteger>) val;
+        for (int i = 0; i < fees.size(); i++) txs.get(i).setFee(fees.get(i));
+      } else if (key.equals("amount_list")) {
+        List<BigInteger> amounts = (List<BigInteger>) val;
+        for (int i = 0; i < amounts.size(); i++) {
+          if (txs.get(i).getOutgoingTransfer() != null) txs.get(i).getOutgoingTransfer().setAmount((BigInteger) amounts.get(i));
+          else txs.get(i).setOutgoingTransfer(new MoneroOutgoingTransfer().setTx(txs.get(i)).setAmount((BigInteger) amounts.get(i)));
+        }
+      } else if (key.equals("weight_list")) {
+        List<BigInteger> weights = (List<BigInteger>) val;
+        for (int i = 0; i < weights.size(); i++) txs.get(i).setWeight(weights.get(i).longValue());
+      } else if (key.equals("multisig_txset") || key.equals("unsigned_txset") || key.equals("signed_txset")) {
+        // handled elsewhere
+      } else {
+        LOGGER.warning("WARNING: ignoring unexpected transaction field: " + key + ": " + val);
+      }
     }
     
     return txSet;
@@ -2249,6 +2258,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       else if (key.equals("type")) { } // type already handled
       else if (key.equals("tx_size")) tx.setSize(((BigInteger) val).longValue());
       else if (key.equals("unlock_time")) tx.setUnlockTime(((BigInteger) val).longValue());
+      else if (key.equals("weight")) tx.setWeight(((BigInteger) val).longValue());
       else if (key.equals("locked")) tx.setIsLocked((Boolean) val);
       else if (key.equals("tx_blob")) tx.setFullHex((String) val);
       else if (key.equals("tx_metadata")) tx.setMetadata((String) val);
@@ -2267,18 +2277,15 @@ public class MoneroWalletRpc extends MoneroWalletBase {
           // timestamp of unconfirmed tx is current request time
         }
       }
-      else if (key.equals("confirmations")) {
-        if (!tx.isConfirmed()) tx.setNumConfirmations(0l);
-        else tx.setNumConfirmations(((BigInteger) val).longValue());
-      }
+      else if (key.equals("confirmations")) tx.setNumConfirmations(((BigInteger) val).longValue());
       else if (key.equals("suggested_confirmations_threshold")) {
         if (transfer == null) transfer = (isOutgoing ? new MoneroOutgoingTransfer() : new MoneroIncomingTransfer()).setTx(tx);
-        transfer.setNumSuggestedConfirmations(((BigInteger) val).longValue());
+        if (!isOutgoing) ((MoneroIncomingTransfer) transfer).setNumSuggestedConfirmations(((BigInteger) val).longValue());
       }
       else if (key.equals("amount")) {
         if (transfer == null) transfer = (isOutgoing ? new MoneroOutgoingTransfer() : new MoneroIncomingTransfer()).setTx(tx);
         transfer.setAmount((BigInteger) val);
-      }
+      } else if (key.equals("amounts")) {}  // ignoring, amounts sum to amount
       else if (key.equals("address")) {
         if (!isOutgoing) {
           if (transfer == null) transfer = new MoneroIncomingTransfer().setTx(tx);
@@ -2334,6 +2341,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     
     // initialize final fields
     if (transfer != null) {
+      if (tx.isConfirmed() == null) tx.setIsConfirmed(false);
+      if (!transfer.getTx().isConfirmed()) tx.setNumConfirmations(0l);
       if (isOutgoing) {
         tx.setIsOutgoing(true);
         if (tx.getOutgoingTransfer() != null) tx.getOutgoingTransfer().merge(transfer);

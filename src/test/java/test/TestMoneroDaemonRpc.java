@@ -1237,8 +1237,13 @@ public class TestMoneroDaemonRpc {
     }
     
     // relay the txs
-    if (txHashes.size() == 1) daemon.relayTxByHash(txHashes.get(0));
-    else daemon.relayTxsByHash(txHashes);
+    try {
+      if (txHashes.size() == 1) daemon.relayTxByHash(txHashes.get(0));
+      else daemon.relayTxsByHash(txHashes);
+    } catch (Exception e) {
+      daemon.flushTxPool(txHashes); // flush txs when relay fails to prevent double spends in other tests
+      throw e;
+    }
     
     // ensure txs are relayed
     for (MoneroTx tx : txs) {
@@ -1344,7 +1349,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(template.getSeedHeight() > 0);
     assertNotNull(template.getSeedHash());
     assertFalse(template.getSeedHash().isEmpty());
-    assertNull(template.getNextSeedHash());
+    // next seed hash can be null or initialized  // TODO: test circumstances for each
   }
   
   private static void testBlockHeader(MoneroBlockHeader header, boolean isFull) {
@@ -1867,15 +1872,15 @@ public class TestMoneroDaemonRpc {
     assertFalse(peer.getId().isEmpty());
     assertFalse(peer.getHost().isEmpty());
     assertTrue(peer.getPort() > 0);
-    assertTrue(peer.getRpcPort() >= 0);
+    assertTrue(peer.getRpcPort() == null || peer.getRpcPort() >= 0);
     assertNotNull(peer.isOnline());
-    TestUtils.testUnsignedBigInteger(peer.getRpcCreditsPerHash());
+    if (peer.getRpcCreditsPerHash() != null) TestUtils.testUnsignedBigInteger(peer.getRpcCreditsPerHash());
     if (fromConnection) assertNull(peer.getLastSeenTimestamp());
     else {
       if (peer.getLastSeenTimestamp() < 0) System.out.println("Last seen timestamp is invalid: " + peer.getLastSeenTimestamp());
       assertTrue(peer.getLastSeenTimestamp() >= 0);
     }
-    assertTrue(peer.getPruningSeed() >= 0);
+    assertTrue(peer.getPruningSeed() == null || peer.getPruningSeed() >= 0);
   }
 
   private static void testUpdateCheckResult(MoneroDaemonUpdateCheckResult result) {
@@ -1908,13 +1913,12 @@ public class TestMoneroDaemonRpc {
   private static void testSubmitTxResultGood(MoneroSubmitTxResult result) {
     testSubmitTxResultCommon(result);
     try {
-      assertEquals(false, result.isDoubleSpend());
+      assertEquals("tx submission is double spend.", false, result.isDoubleSpend());
       assertEquals(false, result.isFeeTooLow());
       assertEquals(false, result.isMixinTooLow());
       assertEquals(false, result.hasInvalidInput());
       assertEquals(false, result.hasInvalidOutput());
       assertEquals(false, result.hasTooFewOutputs());
-      assertEquals(true, result.isRct());
       assertEquals(false, result.isOverspend());
       assertEquals(false, result.isTooBig());
       assertEquals(false, result.getSanityCheckFailed());
@@ -1935,7 +1939,6 @@ public class TestMoneroDaemonRpc {
     assertEquals(false, result.isMixinTooLow());
     assertEquals(false, result.hasInvalidInput());
     assertEquals(false, result.hasInvalidOutput());
-    assertEquals(true, result.isRct());
     assertEquals(false, result.isOverspend());
     assertEquals(false, result.isTooBig());
   }
@@ -1948,7 +1951,6 @@ public class TestMoneroDaemonRpc {
     assertNotNull(result.isMixinTooLow());
     assertNotNull(result.hasInvalidInput());
     assertNotNull(result.hasInvalidOutput());
-    assertNotNull(result.isRct());
     assertNotNull(result.isOverspend());
     assertNotNull(result.isTooBig());
     assertNotNull(result.getSanityCheckFailed());

@@ -447,7 +447,7 @@ public abstract class TestMoneroWalletCommon {
     assertEquals(subaddressIdx, (int) subaddress.getIndex());
 
     // test valid but unfound address
-    String nonWalletAddress = TestUtils.getRandomWalletAddress();
+    String nonWalletAddress = TestUtils.getExternalWalletAddress();
     try {
       subaddress = wallet.getAddressIndex(nonWalletAddress);
       fail("Should have thrown exception");
@@ -1906,7 +1906,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // test different wallet address
-    String differentAddress = TestUtils.getRandomWalletAddress();
+    String differentAddress = TestUtils.getExternalWalletAddress();
     try {
       wallet.checkReserveProof(differentAddress, "Test message", signature);
       fail("Should have thrown exception");
@@ -1974,14 +1974,24 @@ public abstract class TestMoneroWalletCommon {
     
     // test error when not enough balance for requested minimum reserve amount
     try {
-      wallet.getReserveProofAccount(0, accounts.get(0).getBalance().add(TestUtils.MAX_FEE), "Test message");
-      fail("Should have thrown exception");
+      String proof = wallet.getReserveProofAccount(0, accounts.get(0).getBalance().add(TestUtils.MAX_FEE), "Test message");
+      System.out.println("Account balance: " + wallet.getBalance(0));
+      System.out.println("accounts.get(0) balance: " + accounts.get(0).getBalance());
+      MoneroCheckReserve reserve = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", proof);
+      try {
+        wallet.getReserveProofAccount(0, accounts.get(0).getBalance().add(TestUtils.MAX_FEE), "Test message");
+        fail("expecting this to succeed");
+      } catch (Exception e) {
+        assertEquals("expecting this to succeed", e.getMessage());
+      }
+      System.out.println("Check reserve proof: " + JsonUtils.serialize(reserve));
+      fail("Should have thrown exception but got reserve proof: https://github.com/monero-project/monero/issues/6595");
     } catch (MoneroError e) {
       assertEquals(-1, (int) e.getCode());
     }
     
     // test different wallet address
-    String differentAddress = TestUtils.getRandomWalletAddress();
+    String differentAddress = TestUtils.getExternalWalletAddress();
     try {
       wallet.checkReserveProof(differentAddress, "Test message", signature);
       fail("Should have thrown exception");
@@ -2204,7 +2214,7 @@ public abstract class TestMoneroWalletCommon {
     String signature = wallet.signMessage(msg);
     boolean verified = wallet.verifyMessage(msg, wallet.getAddress(0, 0), signature);
     assertEquals(true, verified);
-    verified = wallet.verifyMessage(msg, TestUtils.getRandomWalletAddress(), signature);
+    verified = wallet.verifyMessage(msg, TestUtils.getExternalWalletAddress(), signature);
     assertEquals(false, verified);
   }
   
@@ -2220,7 +2230,7 @@ public abstract class TestMoneroWalletCommon {
     
     // test adding standard addresses
     int NUM_ENTRIES = 5;
-    String address = TestUtils.getRandomWalletAddress();
+    String address = TestUtils.getExternalWalletAddress();
     List<Integer> indices = new ArrayList<Integer>();
     for (int i = 0; i < NUM_ENTRIES; i++) {
       indices.add(wallet.addAddressBookEntry(address, "hi there!"));
@@ -2278,9 +2288,9 @@ public abstract class TestMoneroWalletCommon {
       for (MoneroAddressBookEntry entry : entries) {
         if (idx == entry.getIndex()) {
           testAddressBookEntry(entry);
-          assertEquals(entry.getDescription(), integratedDescriptions.get(idx));
-          assertEquals(entry.getAddress(), integratedAddresses.get(idx).getStandardAddress());
-          assertTrue(MoneroUtils.paymentIdsEqual(integratedAddresses.get(idx).getPaymentId(), entry.getPaymentId()));
+          assertEquals(integratedDescriptions.get(idx), entry.getDescription());
+          assertEquals(integratedAddresses.get(idx).toString(), entry.getAddress());
+          assertEquals(null, entry.getPaymentId());
           found = true;
           break;
         }
@@ -2431,7 +2441,7 @@ public abstract class TestMoneroWalletCommon {
     
     // submit tx directly to the pool but do not relay
     MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-    if (!result.isGood()) throw new RuntimeException("Transaction could not be submitted to the pool" + JsonUtils.serialize(result));
+    if (!result.isGood()) throw new RuntimeException("Transaction could not be submitted to the pool: " + JsonUtils.serialize(result));
     assertTrue(result.isGood());
     
     // sync wallet which checks pool
@@ -2607,7 +2617,7 @@ public abstract class TestMoneroWalletCommon {
     // send funds to external address
     MoneroTxWallet tx = wallet.createTx(new MoneroTxConfig()
             .setAccountIndex(0)
-            .setAddress(TestUtils.getRandomWalletAddress())
+            .setAddress(TestUtils.getExternalWalletAddress())
             .setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3)))
             .setRelay(true));
     
@@ -3596,7 +3606,6 @@ public abstract class TestMoneroWalletCommon {
             .setAccountIndex(0)
             .setAddress(wallet.getPrimaryAddress())
             .setAmount(TestUtils.MAX_FEE)
-            .setAccountIndex(0)
             .setUnlockTime(3l)
             .setCanSplit(true)
             .setRelay(true);
@@ -4253,7 +4262,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // test common field types
-    testTxWalletTypes(tx);
+    testTxWalletTypes(tx, ctx);
     
     // test confirmed
     if (tx.isConfirmed()) {
@@ -4462,7 +4471,7 @@ public abstract class TestMoneroWalletCommon {
    * 
    * @param tx is the tx to test
    */
-  private static void testTxWalletTypes(MoneroTxWallet tx) {
+  private static void testTxWalletTypes(MoneroTxWallet tx, TxContext ctx) {
     assertNotNull(tx.getHash());
     assertNotNull(tx.isConfirmed());
     assertNotNull(tx.isMinerTx());
@@ -4476,7 +4485,8 @@ public abstract class TestMoneroWalletCommon {
     if (tx.getNote() != null) assertTrue(tx.getNote().length() > 0);  // empty notes converted to undefined
     assertTrue(tx.getUnlockTime() >= 0);
     assertNull(tx.getSize());   // TODO monero-wallet-rpc: add tx_size to get_transfers and get_transfer_by_txid
-    assertNull(tx.getWeight());
+    if (Boolean.TRUE.equals(ctx.isSendResponse)) assertTrue(tx.getWeight() > 0);
+    else assertNull(tx.getWeight());
     assertNull(tx.getReceivedTimestamp());  // TODO monero-wallet-rpc: return received timestamp (asked to file issue if wanted)
   }
 
@@ -4528,7 +4538,6 @@ public abstract class TestMoneroWalletCommon {
     assertNotNull(transfer);
     TestUtils.testUnsignedBigInteger(transfer.getAmount());
     if (!Boolean.TRUE.equals(ctx.isSweepOutputResponse)) assertTrue(transfer.getAccountIndex() >= 0);
-    if (!Boolean.TRUE.equals(ctx.isSendResponse)) assertTrue(transfer.getNumSuggestedConfirmations() >= 0); // TODO monero-wallet-rpc: some outgoing transfers have suggested_confirmations_threshold = 0
     if (transfer.isIncoming()) testIncomingTransfer((MoneroIncomingTransfer) transfer);
     else testOutgoingTransfer((MoneroOutgoingTransfer) transfer, ctx);
     

@@ -83,8 +83,8 @@ public class TestSampleCode {
             .setServerUri("http://localhost:38081")
             .setServerUsername("superuser")
             .setServerPassword("abctesting123")
-            .setMnemonic("spying swept ashtray going hence jester swagger cease spying unusual boss vain dyslexic divers among unfit asleep bays ostrich maverick skirting jaunt scenic shuffled spying")
-            .setRestoreHeight(573936l));
+            .setMnemonic(TestUtils.MNEMONIC)                    // *** REPLACE WITH MNEMONIC IN README ***
+            .setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT)); // *** REPLACE WITH FIRST RECEIVE HEIGHT IN README ***
     
     // synchronize the wallet and receive progress notifications
     walletJni.sync(new MoneroWalletListener() {
