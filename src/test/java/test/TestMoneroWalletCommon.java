@@ -2436,7 +2436,7 @@ public abstract class TestMoneroWalletCommon {
     MoneroTxWallet txDoubleSpend = wallet.createTx(configNoRelay);
     
     // test that config is unchanged
-    assert(configNoRelayCopy != configNoRelay);
+    assertTrue(configNoRelayCopy != configNoRelay);
     assertEquals(configNoRelayCopy, configNoRelay);
     
     // submit tx directly to the pool but do not relay
@@ -2705,7 +2705,7 @@ public abstract class TestMoneroWalletCommon {
     if (Boolean.FALSE.equals(config.getCanSplit())) assertEquals(1, txs.size());  // must have exactly one tx if no split
     
     // test that config is unchanged
-    assert(configCopy != config);
+    assertTrue(configCopy != config);
     assertEquals(configCopy, config);
     
     // test that balances of intended subaddresses decreased
@@ -2837,7 +2837,7 @@ public abstract class TestMoneroWalletCommon {
     if (Boolean.FALSE.equals(config.getCanSplit())) assertEquals(1, txs.size());  // must have exactly one tx if no split
     
     // test that config is unchanged
-    assert(configCopy != config);
+    assertTrue(configCopy != config);
     assertEquals(configCopy, config);
     
     // test common tx set among txs
@@ -3027,7 +3027,7 @@ public abstract class TestMoneroWalletCommon {
     if (!canSplit) assertEquals(1, txs.size());
     
     // test that config is unchanged
-    assert(configCopy != config);
+    assertTrue(configCopy != config);
     assertEquals(configCopy, config);
     
     // test that wallet balance decreased
@@ -3838,16 +3838,17 @@ public abstract class TestMoneroWalletCommon {
       
       // sweep unlocked account
       MoneroSubaddress unlockedSubaddress = subaddressesUnlocked.get(i);
-      List<MoneroTxWallet> txs = wallet.sweepUnlocked(new MoneroTxConfig().setAccountIndex(unlockedSubaddress.getAccountIndex()).setSubaddressIndex(unlockedSubaddress.getIndex()).setAddress(wallet.getPrimaryAddress()).setRelay(true));
+      MoneroTxConfig config = new MoneroTxConfig()
+              .setAddress(wallet.getPrimaryAddress())
+              .setAccountIndex(unlockedSubaddress.getAccountIndex())
+              .setSubaddressIndices(unlockedSubaddress.getIndex())
+              .setRelay(true);
+      List<MoneroTxWallet> txs = wallet.sweepUnlocked(config);
       
       // test transactions
       assertTrue(txs.size() > 0);
       for (MoneroTxWallet tx : txs) {
         assertTrue(tx.getTxSet().getTxs().contains(tx));
-        MoneroTxConfig config = new MoneroTxConfig()
-                .setAddress(wallet.getPrimaryAddress())
-                .setAccountIndex(unlockedSubaddress.getAccountIndex())
-                .setSubaddressIndices(unlockedSubaddress.getIndex());
         TxContext ctx = new TxContext();
         ctx.wallet = wallet;
         ctx.config = config;
@@ -3856,9 +3857,9 @@ public abstract class TestMoneroWalletCommon {
         testTxWallet(tx, ctx);
       }
       
-      // assert no unlocked funds in subaddress
+      // assert unlocked balance is less than max fee
       MoneroSubaddress subaddress = wallet.getSubaddress(unlockedSubaddress.getAccountIndex(), unlockedSubaddress.getIndex());
-      assertTrue(subaddress.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) == 0);
+      assertTrue(subaddress.getUnlockedBalance().compareTo(TestUtils.MAX_FEE) < 0);
     }
     
     // test subaddresses after sweeping
@@ -3883,9 +3884,9 @@ public abstract class TestMoneroWalletCommon {
         }
       }
       
-      // test that unlocked balance is 0 if swept, unchanged otherwise
+      // assert unlocked balance is less than max fee if swept, unchanged otherwise
       if (swept) {
-        assertTrue(subaddressAfter.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) == 0);
+        assertTrue(subaddressAfter.getUnlockedBalance().compareTo(TestUtils.MAX_FEE) < 0);
       } else {
         assertTrue(subaddressBefore.getUnlockedBalance().compareTo(subaddressAfter.getUnlockedBalance()) == 0);
       }
@@ -3919,12 +3920,12 @@ public abstract class TestMoneroWalletCommon {
       
       // sweep unlocked account
       MoneroAccount unlockedAccount = accountsUnlocked.get(i);
-      List<MoneroTxWallet> txs = wallet.sweepUnlocked(new MoneroTxConfig().setAccountIndex(unlockedAccount.getIndex()).setAddress(wallet.getPrimaryAddress()).setRelay(true));
+      MoneroTxConfig config = new MoneroTxConfig().setAddress(wallet.getPrimaryAddress()).setAccountIndex(unlockedAccount.getIndex()).setRelay(true);
+      List<MoneroTxWallet> txs = wallet.sweepUnlocked(config);
       
       // test transactions
       assertTrue(txs.size() > 0);
       for (MoneroTxWallet tx : txs) {
-        MoneroTxConfig config = new MoneroTxConfig().setAddress(wallet.getPrimaryAddress()).setAccountIndex(unlockedAccount.getIndex());
         TxContext ctx = new TxContext();
         ctx.wallet = wallet;
         ctx.config = config;
@@ -3932,12 +3933,12 @@ public abstract class TestMoneroWalletCommon {
         ctx.isSweepResponse = true;
         testTxWallet(tx, ctx);
         assertNotNull(tx.getTxSet());
-        assert(tx.getTxSet().getTxs().contains(tx));
+        assertTrue(tx.getTxSet().getTxs().contains(tx));
       }
       
-      // assert no unlocked funds in account
+      // assert unlocked account balance less than max fee
       MoneroAccount account = wallet.getAccount(unlockedAccount.getIndex());
-      assertEquals(BigInteger.valueOf(0), account.getUnlockedBalance());
+      assertTrue(account.getUnlockedBalance().compareTo(TestUtils.MAX_FEE) < 0);
     }
     
     // test accounts after sweeping
@@ -3956,9 +3957,9 @@ public abstract class TestMoneroWalletCommon {
         }
       }
       
-      // test that unlocked balance is 0 if swept, unchanged otherwise
+      // assert unlocked balance is less than max fee if swept, unchanged otherwise
       if (swept) {
-        assertTrue(accountAfter.getUnlockedBalance().compareTo(BigInteger.valueOf(0)) == 0);
+        assertTrue(accountAfter.getUnlockedBalance().compareTo(TestUtils.MAX_FEE) < 0);
       } else {
         assertTrue(accountBefore.getUnlockedBalance().compareTo(accountAfter.getUnlockedBalance()) == 0);
       }
@@ -4007,7 +4008,6 @@ public abstract class TestMoneroWalletCommon {
       assertNull(tx.getTxSet().getMultisigTxHex());
       assertNull(tx.getTxSet().getSignedTxHex());
       assertNull(tx.getTxSet().getUnsignedTxHex());
-      assert(tx.getTxSet().getTxs().contains(tx));
     }
     assertTrue(txs.size() > 0);
     for (MoneroTxWallet tx : txs) {
@@ -4578,8 +4578,8 @@ public abstract class TestMoneroWalletCommon {
         testDestination(destination);
         sum = sum.add(destination.getAmount());
       }
-      if (!transfer.getAmount().equals(sum)) System.out.println(transfer.getTx().toString());
-      assertEquals(transfer.getAmount(), sum);
+      if (!transfer.getAmount().equals(sum)) System.out.println(transfer.getTx().getTxSet() == null ? transfer.getTx().toString() : transfer.getTx().getTxSet().toString());
+      assertEquals(transfer.getAmount(), sum);  // TODO: sum of destinations != outgoing amount in split txs
     }
   }
   
@@ -4636,7 +4636,7 @@ public abstract class TestMoneroWalletCommon {
   }
   
   private static void testCommonTxSets(List<MoneroTxWallet> txs, boolean hasSigned, boolean hasUnsigned, boolean hasMultisig) {
-    assert(txs.size() > 0);
+    assertTrue(txs.size() > 0);
     
     // assert that all sets are same reference
     MoneroTxSet set = null;
@@ -4665,7 +4665,7 @@ public abstract class TestMoneroWalletCommon {
   private static void testCheckTx(MoneroTxWallet tx, MoneroCheckTx check) {
     assertNotNull(check.isGood());
     if (check.isGood()) {
-      assert(check.getNumConfirmations() >= 0);
+      assertTrue(check.getNumConfirmations() >= 0);
       assertNotNull(check.getInTxPool());
       TestUtils.testUnsignedBigInteger(check.getReceivedAmount());
       if (check.getInTxPool()) assertEquals(0, (long) check.getNumConfirmations());
@@ -4681,7 +4681,7 @@ public abstract class TestMoneroWalletCommon {
     assertNotNull(check.isGood());
     if (check.isGood()) {
       TestUtils.testUnsignedBigInteger(check.getTotalAmount());
-      assert(check.getTotalAmount().compareTo(BigInteger.valueOf(0)) >= 0);
+      assertTrue(check.getTotalAmount().compareTo(BigInteger.valueOf(0)) >= 0);
       TestUtils.testUnsignedBigInteger(check.getUnconfirmedSpentAmount());
       assertTrue(check.getUnconfirmedSpentAmount().compareTo(BigInteger.valueOf(0)) >= 0);
     } else {

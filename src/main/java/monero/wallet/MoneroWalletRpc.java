@@ -1959,7 +1959,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     if (config.getDestinations().get(0).getAddress() == null) throw new MoneroError("Must specify destination address to sweep to");
     if (config.getDestinations().get(0).getAmount() != null) throw new MoneroError("Cannot specify amount in sweep request");
     if (config.getKeyImage() != null) throw new MoneroError("Key image defined; use sweepOutput() to sweep an output by its key image");
-    if (config.getSubaddressIndices() != null && config.getSubaddressIndices().isEmpty()) config.setSubaddressIndices((List<Integer>) null);
+    if (config.getSubaddressIndices() != null && config.getSubaddressIndices().size() == 0) throw new MoneroError("Empty list given for subaddresses indices to sweep");
     if (Boolean.TRUE.equals(config.getSweepEachSubaddress())) throw new MoneroError("Cannot sweep each subaddress with RPC `sweep_all`");
     
     // sweep from all subaddresses if not otherwise defined
