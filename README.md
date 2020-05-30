@@ -5,7 +5,7 @@
 - [Overview](#overview)
 - [Architecture](#architecture)
 - [Sample code](#sample-code)
-- [How to include this library](#how-to-include-this-library)
+- [How to include this library in your project](#how-to-include-this-library-in-your-project)
 - [How to build JNI shared library](#how-to-build-jni-shared-libraries)
 - [How to run Monero RPC](#how-to-run-monero-rpc)
 - [How to run JUnit tests](#how-to-run-junit-tests)
@@ -15,7 +15,7 @@
 
 ## Overview
 
-This project is a Java library for using Monero with RPC and native bindings to [Monero Core v0.16.0.0 'Nitrogen Nebula'](https://web.getmonero.org/downloads/).
+This project is a Java library for using Monero via RPC and native bindings to [Monero Core v0.16.0.0 'Nitrogen Nebula'](https://web.getmonero.org/downloads/).
 
 - Supports RPC bindings to monero-wallet-rpc and monero-daemon-rpc.
 - Supports client-side wallets using JNI bindings to Monero Core.
@@ -100,7 +100,7 @@ assertTrue(JNI_OUTPUT_RECEIVED);
 walletJni.close(true);
 ```
 
-## How to include this library
+## How to include this library in your project
 
 **For Maven, add to pom.xml:**
 
@@ -145,7 +145,7 @@ If you want to process binary data or use a Monero wallet using JNI instead of R
 
 ## How to run JUnit tests
 
-1. [Include](#how-to-include-this-library) this library with [JNI support](#how-to-build-jni-shared-libraries).
+1. [Include](#how-to-include-this-library-in-your-project) this library with [JNI support](#how-to-build-jni-shared-libraries).
 2. Run monero-wallet-rpc and monero-daemon-rpc.  See [How to Run Monero RPC](#how-to-run-monero-rpc). 
 3. Configure the appropriate RPC endpoints, authentication, and test wallet in [TestUtils.java](src/test/java/utils/TestUtils.java).
 4. Run all *.java files in src/main/test as JUnits.
