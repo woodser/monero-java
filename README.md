@@ -121,7 +121,7 @@ You are now ready to use this library with [monero-daemon-rpc](https://getmonero
 
 ## Developer guide
 
-Please refer to [monero-javascript's developer guide](https://github.com/monero-ecosystem/monero-javascript#developer-guide) which mostly translates to monero-java.
+Please refer to [monero-javascript's developer guide](https://github.com/monero-ecosystem/monero-javascript#developer-guide) which mostly translates to this Java library.
 
 ## How to build JNI shared libraries
 
