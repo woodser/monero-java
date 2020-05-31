@@ -2,29 +2,30 @@
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Sample code](#sample-code)
-- [How to include this library in your project](#how-to-include-this-library-in-your-project)
-- [How to build JNI shared library](#how-to-build-jni-shared-libraries)
-- [How to run Monero RPC](#how-to-run-monero-rpc)
-- [How to run JUnit tests](#how-to-run-junit-tests)
-- [See also](#see-also)
-- [License](#license)
-- [Donations](#donations)
+* [Overview](#overview)
+* [Architecture](#architecture)
+* [Sample code](#sample-code)
+* [How to include this library in your project](#how-to-include-this-library-in-your-project)
+* [Developer guide](#developer-guide)
+* [How to build JNI shared library](#how-to-build-jni-shared-libraries)
+* [How to run Monero RPC](#how-to-run-monero-rpc)
+* [How to run JUnit tests](#how-to-run-junit-tests)
+* [See also](#see-also)
+* [License](#license)
+* [Donations](#donations)
 
 ## Overview
 
 This project is a Java library for using Monero via RPC and native bindings to [Monero Core v0.16.0.0 'Nitrogen Nebula'](https://web.getmonero.org/downloads/).
 
-- Supports RPC bindings to monero-wallet-rpc and monero-daemon-rpc.
-- Supports client-side wallets using JNI bindings to Monero Core.
-- Supports multisig, view-only, and offline wallets.
-- Conforms to an [API specification](https://moneroecosystem.org/monero-java/monero-spec.pdf) intended to be intuitive and robust.
-- Query wallet transactions, transfers, and outputs by their many attributes.
-- Fetch and process binary data from the daemon (e.g. raw blocks).
-- Receive notifications when blocks are added to the chain or when wallets sync, send, and receive.
-- Over 270 passing JUnit test cases.
+* Supports RPC bindings to monero-wallet-rpc and monero-daemon-rpc.
+* Supports client-side wallets using JNI bindings to Monero Core.
+* Supports multisig, view-only, and offline wallets.
+* Conforms to an [API specification](https://moneroecosystem.org/monero-java/monero-spec.pdf) intended to be intuitive and robust.
+* Query wallet transactions, transfers, and outputs by their many attributes.
+* Fetch and process binary data from the daemon (e.g. raw blocks).
+* Receive notifications when blocks are added to the chain or when wallets sync, send, and receive.
+* Over 270 passing JUnit test cases.
 
 ## Architecture
 
@@ -116,7 +117,11 @@ walletJni.close(true);
 
 `compile 'io.github.monero-ecosystem:monero-java:0.2.1'`
 
-You are now ready to use this library with [monero-daemon-rpc](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.
+You are now ready to use this library with [monero-daemon-rpc](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.  If you wish to use native JNI bindings, first [build the JNI shared libraries](#how-to-build-jni-shared-libraries).
+
+## Developer guide
+
+Please refer to [monero-javascript's developer guide](https://github.com/monero-ecosystem/monero-javascript#developer-guide) which mostly translates to monero-java.
 
 ## How to build JNI shared libraries
 
