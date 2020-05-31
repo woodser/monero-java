@@ -1980,7 +1980,7 @@ public abstract class TestMoneroWalletCommon {
       MoneroCheckReserve reserve = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", proof);
       try {
         wallet.getReserveProofAccount(0, accounts.get(0).getBalance().add(TestUtils.MAX_FEE), "Test message");
-        fail("expecting this to succeed");
+        throw new RuntimeException("expecting this to succeed");
       } catch (Exception e) {
         assertEquals("expecting this to succeed", e.getMessage());
       }
