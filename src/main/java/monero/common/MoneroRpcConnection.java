@@ -6,18 +6,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -43,7 +43,7 @@ public class MoneroRpcConnection {
 
   // instance variables
   private String uri;
-  private HttpClient client;
+  private CloseableHttpClient client;
   private String username;
   private String password;
   
@@ -64,8 +64,10 @@ public class MoneroRpcConnection {
     this.username = username;
     this.password = password;
     if (username != null || password != null) {
-      CredentialsProvider creds = new BasicCredentialsProvider();
-      creds.setCredentials(new AuthScope(uri.getHost(), uri.getPort()), new UsernamePasswordCredentials(username, password));
+      if (username == null) throw new MoneroError("username cannot be null because password is not null");
+      if (password == null) throw new MoneroError("password cannot be null because username is not null");
+      BasicCredentialsProvider creds = new BasicCredentialsProvider();
+      creds.setCredentials(new AuthScope(uri.getHost(), uri.getPort()), new UsernamePasswordCredentials(username, password.toCharArray()));
       this.client = HttpClients.custom().setDefaultCredentialsProvider(creds).build();
     } else {
       this.client = HttpClients.createDefault();
@@ -102,6 +104,7 @@ public class MoneroRpcConnection {
    * @return the RPC API response as a map
    */
   public Map<String, Object> sendJsonRequest(String method, Object params) {
+    CloseableHttpResponse resp = null;
     try {
 
       // build request body
@@ -116,7 +119,7 @@ public class MoneroRpcConnection {
       HttpPost post = new HttpPost(uri.toString() + "/json_rpc");
       HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
       post.setEntity(entity);
-      HttpResponse resp = client.execute(post);
+      resp = client.execute(post);
       validateHttpResponse(resp);
 
       // deserialize response
@@ -132,6 +135,10 @@ public class MoneroRpcConnection {
     } catch (Exception e2) {
       //e3.printStackTrace();
       throw new MoneroError(e2);
+    } finally {
+      try {
+        resp.close();
+      } catch (Exception e) {}
     }
   }
   
@@ -159,6 +166,7 @@ public class MoneroRpcConnection {
   public Map<String, Object> sendPathRequest(String path, Map<String, Object> params) {
     //System.out.println("sendPathRequest(" + path + ", " + JsonUtils.serialize(params) + ")");
     
+    CloseableHttpResponse resp = null;
     try {
       
       // build request
@@ -170,7 +178,7 @@ public class MoneroRpcConnection {
       //System.out.println("Sending path request with path '" + path + "' and params: " + JsonUtils.serialize(params));
       
       // send request and validate response
-      HttpResponse resp = client.execute(post);
+      resp = client.execute(post);
       validateHttpResponse(resp);
       
       // deserialize response
@@ -186,6 +194,10 @@ public class MoneroRpcConnection {
     } catch (Exception e2) {
       e2.printStackTrace();
       throw new MoneroError(e2);
+    } finally {
+      try {
+        resp.close();
+      } catch (Exception e) {}
     }
   }
   
@@ -200,19 +212,19 @@ public class MoneroRpcConnection {
     
     // serialize params to monero's portable binary storage format
     byte[] paramsBin = MoneroUtils.mapToBinary(params);
-
+    CloseableHttpResponse resp = null;
     try {
       
       // build request
       HttpPost post = new HttpPost(uri.toString() + "/" + path);
       if (paramsBin != null) {
-        HttpEntity entity = new ByteArrayEntity(paramsBin);
+        HttpEntity entity = new ByteArrayEntity(paramsBin, ContentType.DEFAULT_BINARY);
         post.setEntity(entity);
       }
       LOGGER.fine("Sending binary request with path '" + path + "' and params: " + JsonUtils.serialize(params));
       
       // send request and validate response
-      HttpResponse resp = client.execute(post);
+      resp = client.execute(post);
       validateHttpResponse(resp);
       
       // deserialize response
@@ -227,6 +239,10 @@ public class MoneroRpcConnection {
     } catch (Exception e2) {
       e2.printStackTrace();
       throw new MoneroError(e2);
+    } finally {
+      try {
+        resp.close();
+      } catch (Exception e) {}
     }
   }
   
@@ -260,8 +276,8 @@ public class MoneroRpcConnection {
   
   // ------------------------------ STATIC UTILITIES --------------------------
 
-  private static void validateHttpResponse(HttpResponse resp) {
-    int code = resp.getStatusLine().getStatusCode();
+  private static void validateHttpResponse(CloseableHttpResponse resp) {
+    int code = resp.getCode();
     if (code < 200 || code > 299) {
       String content = null;
       try {
@@ -269,7 +285,7 @@ public class MoneroRpcConnection {
       } catch (Exception e) {
         // could not get content
       }
-      throw new MoneroRpcError(code + " " + resp.getStatusLine().getReasonPhrase() + (content == null || content.isEmpty() ? "" : (": " + content)), code, null, null);
+      throw new MoneroRpcError(code + " " + resp.getReasonPhrase() + (content == null || content.isEmpty() ? "" : (": " + content)), code, null, null);
     }
   }
 
