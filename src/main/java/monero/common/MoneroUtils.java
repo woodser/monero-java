@@ -318,7 +318,7 @@ public class MoneroUtils {
 
     Keccak.Digest256 digest256 = new Keccak.Digest256();
     byte[] hashbytes = digest256.digest(withoutChecksumBytes);
-    String encodedStr = Hex.encodeHexString(hashbytes);
+    String encodedStr = new String(Hex.encodeHex(hashbytes));
 
     String hashChecksum = encodedStr.substring(0, 8);
     return hashChecksum != null && hashChecksum.equals(checksumCheck);
