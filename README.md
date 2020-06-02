@@ -143,7 +143,7 @@ If you want to process binary data or use a client-side wallet instead of RPC, s
 8. Run TestMoneroCppUtils.java JUnit tests to verify the shared libraries are working with Java JNI.
 9. Add the shared libraries within ./build/ to your application's classpath.
 
-## Running Junit tests
+## Running JUnit tests
 
 1. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
 2. `cd monero-java`
