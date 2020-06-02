@@ -19,6 +19,7 @@ This project is a Java library for creating Monero applications via RPC and nati
 
 * Supports wallet and daemon RPC clients.
 * Supports fully client-side wallets using native JNI bindings.
+* Supports multisig, view-only, and offline wallets.
 * Uses a clearly defined [data model and API specification](https://moneroecosystem.org/monero-java/monero-spec.pdf) intended to be intuitive and robust.
 * Wallet implementations are interchangeable by conforming to a [common interface](https://moneroecosystem.org/monero-java/index.html?monero/wallet/MoneroWallet.html).
 * Query wallet transactions, transfers, and outputs by their many attributes.
@@ -30,8 +31,7 @@ This project is a Java library for creating Monero applications via RPC and nati
 
 <p align="center">
 	<img width="80%" height="auto" src="docs/architecture.png"/><br>
-	<i>Wallet implementations use RPC or JNI bindings to Monero Core and are interchangeable by conforming to a common interface, <a href="https://moneroecosystem.org/monero-java/monero/wallet/MoneroWallet.html">MoneroWallet.java</a>.</i>
-	<i>Build Java applications using RPC or JNI bindings to <a href="https://github.com/monero-project/monero">monero-project/monero</a>.  Wallet implementations are interchangeable by conforming to a common interface, <a href="https://moneroecosystem.org/monero-java/index.html?monero/wallet/MoneroWallet.html">MoneroWallet.js</a>.</i>
+	<i>Build Java applications using RPC or JNI bindings to <a href="https://github.com/monero-project/monero">monero-project/monero</a>.  Wallet implementations are interchangeable by conforming to a common interface, <a href="https://moneroecosystem.org/monero-java/index.html?monero/wallet/MoneroWallet.html">MoneroWallet.java</a>.</i>
 </p>
 
 ## Sample code
@@ -109,15 +109,15 @@ walletJni.close(true);
 <dependency>
   <groupId>io.github.monero-ecosystem</groupId>
   <artifactId>monero-java</artifactId>
-  <version>0.2.1</version>
+  <version>0.3.0</version>
 </dependency>
 ```
 
 ### For Gradle, add to build.gradle:
 
-`compile 'io.github.monero-ecosystem:monero-java:0.2.1'`
+`compile 'io.github.monero-ecosystem:monero-java:0.3.0'`
 
-You are now ready to use this library with [monero-daemon-rpc](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.  If you want to client-side wallets via native JNI bindings, first [build the JNI shared libraries](#building-jni-shared-libraries-from-source).
+You are now ready to use this library with [monero-daemon-rpc](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.  If you want to use client-side wallets via native JNI bindings, first [build the JNI shared libraries](#building-jni-shared-libraries-from-source).
 
 ### If using RPC servers:
 
@@ -131,7 +131,7 @@ Please refer to [monero-javascript's developer guide](https://github.com/monero-
 
 ## Building JNI shared libraries from source
 
-If you want to process binary data or use a client-side wallet via JNI instead of RPC, shared libraries must be built for your specific platform for this Java library to use.  This project uses a [C++ counterpart library](https://github.com/woodser/monero-cpp-library) to support JNI, which is included as a submodule in ./external/monero-cpp-library.
+If you want to process binary data or use a client-side wallet instead of RPC, shared libraries must be built for your specific platform for this Java library to use.  This project uses a C++ counterpart library, [monero-cpp-library](https://github.com/woodser/monero-cpp-library), to support JNI, which is included as a submodule in ./external/monero-cpp-library.
 
 1. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
 2. `cd monero-java`
@@ -145,7 +145,7 @@ If you want to process binary data or use a client-side wallet via JNI instead o
 
 ## Running Junit tests
 
-1. Clone monero-java repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
+1. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
 2. `cd monero-java`
 3. [Build JNI shared libraries from source.](#building-jni-shared-libraries-from-source)
 3. [Run monero-wallet-rpc and monero-daemon-rpc.](#if-using-rpc-servers)
