@@ -11,7 +11,7 @@ public class MoneroDaemonConnectionSpan {
   private Long rate;
   private Long speed;
   private Long size;
-  private Long startBlockHeight;
+  private Long startHeight;
   
   public String getConnectionId() {
     return connectionId;
@@ -62,10 +62,10 @@ public class MoneroDaemonConnectionSpan {
   }
   
   public Long getStartHeight() {
-    return startBlockHeight;
+    return startHeight;
   }
   
   public void setStartHeight(Long startHeight) {
-    this.startBlockHeight = startHeight;
+    this.startHeight = startHeight;
   }
 }
