@@ -10,7 +10,7 @@ project(MoneroJavaJni)
 # System
 #############
 
-set(MONERO_CPP "${CMAKE_SOURCE_DIR}/external/monero-cpp-library")
+set(MONERO_CPP "${CMAKE_SOURCE_DIR}/external/monero-cpp")
 message(STATUS MONERO_CPP : ${MONERO_CPP} : ${MONERO_CPP})
 
 set(MONERO_CPP_SRC "${MONERO_CPP}/src")
