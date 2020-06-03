@@ -1418,7 +1418,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
           if (!overview.isEmpty()) LOGGER.warning("WARNING: ignoring non-empty 'overview' field (not implemented): " + overview); // TODO
         } catch (Exception e) {
           //e.printStackTrace();
-          LOGGER.warning("WARNING: failed to parse 'overview' field: " + val);
+          LOGGER.warning("Failed to parse 'overview' field: " + val);
         }
       }
       else if (key.equals("credits")) syncInfo.setCredits((BigInteger) val);
