@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 
-git submodule update --init --recursive
-git submodule foreach --recursive git fetch
-git submodule foreach --recursive git checkout master
-git submodule foreach --recursive git pull --ff-only origin master
+# update monero-java
+git submodule update --init
+git checkout master
+git pull --ff-only origin master
+
+# update monero-cpp
+cd ./external/monero-cpp
+git submodule update --init
+git checkout master
+git pull --ff-only origin master
+
+# update monero-core
+cd ./external/monero-core
+git submodule update --init
+git checkout master
+git pull --ff-only origin master
+cd ../../../../
