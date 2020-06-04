@@ -17,8 +17,8 @@ A Java library for creating Monero applications using RPC or JNI bindings to [mo
 * [Architecture](#architecture)
 * [Sample code](#sample-code)
 * [Using monero-java in your project](#using-monero-java-in-your-project)
-* [Developer guide](#developer-guide)
 * [Building JNI shared libraries from source](#building-jni-shared-libraries-from-source)
+* [Developer guide](#developer-guide)
 * [Running JUnit tests](#running-junit-tests)
 * [See also](#see-also)
 * [License](#license)
@@ -122,10 +122,6 @@ You are now ready to use this library with [monero-daemon-rpc](https://getmonero
 2. Start monero-daemon-rpc, e.g.: `./monerod --stagenet` (or use a remote daemon).
 3. Start monero-wallet-rpc, e.g.: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir ./`
 
-## Developer guide
-
-Please refer to [monero-javascript's developer guide](https://github.com/monero-ecosystem/monero-javascript#developer-guide) which mostly translates to monero-java.
-
 ## Building JNI shared libraries from source
 
 If you want to process binary data or use a client-side wallet instead of RPC, shared libraries must be built for your specific platform for this Java library to use.  This project uses a C++ counterpart library, [monero-cpp](https://github.com/monero-ecosystem/monero-cpp), to support JNI, which is included as a submodule in ./external/monero-cpp.
@@ -139,6 +135,10 @@ If you want to process binary data or use a client-side wallet instead of RPC, s
 7. Build shared libraries to ./build/: `./bin/build_libmonero_java.sh`
 8. Run TestMoneroCppUtils.java JUnit tests to verify the shared libraries are working with Java JNI.
 9. Add the shared libraries within ./build/ to your application's classpath.
+
+## Developer guide
+
+Please refer to [monero-javascript's developer guide](https://github.com/monero-ecosystem/monero-javascript#developer-guide) which mostly translates to monero-java.
 
 ## Running JUnit tests
 
