@@ -144,7 +144,7 @@ Please refer to [monero-javascript's developer guide](https://github.com/monero-
 
 1. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
 2. `cd monero-java`
-3. [Build JNI shared libraries from source.](#building-jni-shared-libraries-from-source)
+3. If using JNI, [build JNI shared libraries from source](#building-jni-shared-libraries-from-source).
 3. Start RPC servers:
 	1. Download and install [Monero CLI](https://web.getmonero.org/downloads/).
 	2. Start monero-daemon-rpc, e.g.: `./monerod --stagenet` (or use a remote daemon).
