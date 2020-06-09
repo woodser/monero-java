@@ -59,6 +59,7 @@ import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxConfig;
+import monero.wallet.model.MoneroTxPriority;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
@@ -3017,6 +3018,7 @@ public abstract class TestMoneroWalletCommon {
     config.setDestinations(new ArrayList<MoneroDestination>());
     config.setRelay(true);
     config.setCanSplit(canSplit);
+    config.setPriority(MoneroTxPriority.NORMAL);
     for (int i = 0; i < destinationAddresses.size(); i++) {
       config.getDestinations().add(new MoneroDestination(destinationAddresses.get(i), sendAmountPerSubaddress));
     }
