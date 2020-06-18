@@ -171,6 +171,14 @@ public abstract class TestMoneroWalletCommon {
       } catch(Exception e) {
         assertEquals("Wallet already exists: " + path, e.getMessage());
       }
+      
+      // attempt to create wallet with unknown language
+      try {
+        createWallet(new MoneroWalletConfig().setLanguage("english")); // TODO: support lowercase?
+        throw new Error("Should have thrown error");
+      } catch (Exception e) {
+        assertEquals("Unknown language: english", e.getMessage());
+      }
     } catch (Exception e) {
       e1 = e;
     }
