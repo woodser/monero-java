@@ -26,7 +26,7 @@ public interface MoneroWalletListenerI {
   public void onNewBlock(long height);
 
   /**
-   * Invoked when the wallet's balance changes.
+   * Invoked when the wallet's balances change.
    * 
    * @param newBalance - new wallet balance
    * @param newUnlockedBalance - new unlocked wallet balance
