@@ -40,6 +40,7 @@ import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
 import monero.wallet.model.MoneroWalletListener;
+import utils.Pair;
 import utils.StartMining;
 import utils.TestUtils;
 import utils.WalletEqualityUtils;
@@ -1282,12 +1283,23 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
     
     // since sending from/to the same wallet, the net amount spent = tx fee = outputs spent - outputs received
+    int numConfirmedOutputs = 0;
     BigInteger netAmount = new BigInteger("0");
     for (MoneroOutputWallet outputSpent : listener.getOutputsSpent()) netAmount = netAmount.add(outputSpent.getAmount());
-    for (MoneroOutputWallet outputReceived : listener.getOutputsReceived()) if (outputReceived.getTx().isConfirmed()) netAmount = netAmount.subtract(outputReceived.getAmount());
+    for (MoneroOutputWallet outputReceived : listener.getOutputsReceived()) {
+      if (outputReceived.getTx().isConfirmed()) {
+        numConfirmedOutputs++;
+        netAmount = netAmount.subtract(outputReceived.getAmount());
+      }
+    }
     if (tx.getFee().compareTo(netAmount) != 0) {
       errors.add("WARNING: net output amount must equal tx fee: " + tx.getFee().toString() + " vs " + netAmount.toString() + " (probably received notifications from other tests)");
       return errors;
+    }
+    
+    // receives balance notification per confirmed output
+    if (listener.getBalanceNotifications().size() < numConfirmedOutputs) {
+      errors.add("ERROR: expected at least one updated balance notification per confirmed output received");
     }
     
     // test wallet's balance
@@ -1429,12 +1441,23 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
    */
   private class OutputNotificationCollector extends MoneroWalletListener {
     
+    private List<Pair<BigInteger, BigInteger>> balanceNotifications;
     private List<MoneroOutputWallet> outputsReceived;
     private List<MoneroOutputWallet> outputsSpent;
     
     public OutputNotificationCollector() {
+      balanceNotifications = new ArrayList<Pair<BigInteger, BigInteger>>();
       outputsReceived = new ArrayList<MoneroOutputWallet>();
       outputsSpent = new ArrayList<MoneroOutputWallet>();
+    }
+    
+    @Override
+    public void onBalancesChanged(BigInteger newBalance, BigInteger newUnlockedBalance) {
+      if (!balanceNotifications.isEmpty()) {
+        Pair<BigInteger, BigInteger> lastNotification = balanceNotifications.get(balanceNotifications.size() - 1);
+        assertTrue(!newBalance.equals(lastNotification.getFirst()) || !newUnlockedBalance.equals(lastNotification.getSecond())); // test that balances change
+      }
+      balanceNotifications.add(new Pair<BigInteger, BigInteger>(newBalance, newUnlockedBalance));
     }
     
     @Override
@@ -1445,6 +1468,10 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     @Override
     public void onOutputSpent(MoneroOutputWallet output) {
       outputsSpent.add(output);
+    }
+    
+    public List<Pair<BigInteger, BigInteger>> getBalanceNotifications() {
+      return balanceNotifications;
     }
     
     public List<MoneroOutputWallet> getOutputsReceived() {
@@ -1547,6 +1574,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     private BigInteger incomingTotal;
     private BigInteger outgoingTotal;
     private Boolean onNewBlockAfterDone;
+    private BigInteger prevBalance;
+    private BigInteger prevUnlockedBalance;
     
     public WalletSyncTester(MoneroWalletJni wallet, long startHeight, long endHeight) {
       super(wallet, startHeight, endHeight);
@@ -1565,6 +1594,15 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       if (walletTesterPrevHeight != null) assertEquals(walletTesterPrevHeight + 1, height);
       assertTrue(height >= super.startHeight);
       walletTesterPrevHeight = height;
+    }
+    
+    @Override
+    public void onBalancesChanged(BigInteger newBalance, BigInteger newUnlockedBalance) {
+      assertEquals(wallet.getBalance(), newBalance);
+      assertEquals(wallet.getUnlockedBalance(), newUnlockedBalance);
+      if (this.prevBalance != null) assertTrue(!newBalance.equals(this.prevBalance) || !newUnlockedBalance.equals(this.prevUnlockedBalance));
+      this.prevBalance = newBalance;
+      this.prevUnlockedBalance = newUnlockedBalance;
     }
 
     @Override
@@ -1629,6 +1667,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       BigInteger balance = incomingTotal.subtract(outgoingTotal);
       assertEquals(balance, wallet.getBalance());
       onNewBlockAfterDone = false;  // test subsequent onNewBlock() calls
+      assertEquals(wallet.getBalance(), prevBalance);
+      assertEquals(wallet.getUnlockedBalance(), prevUnlockedBalance);
     }
     
     public Boolean getOnNewBlockAfterDone() {

@@ -189,7 +189,7 @@ struct wallet_jni_listener : public monero_wallet_listener {
     jlistener = nullptr;
   };
 
-  void on_sync_progress(uint64_t height, uint64_t start_height, uint64_t end_height, double percent_done, const string& message) {
+  void on_sync_progress(uint64_t height, uint64_t start_height, uint64_t end_height, double percent_done, const string& message) override {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *env;
@@ -215,7 +215,7 @@ struct wallet_jni_listener : public monero_wallet_listener {
     detachJVM(env, envStat);
   }
 
-  void on_new_block(uint64_t height) {
+  void on_new_block(uint64_t height) override {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *env;
@@ -234,7 +234,27 @@ struct wallet_jni_listener : public monero_wallet_listener {
     detachJVM(env, envStat);
   }
 
-  void on_output_received(const monero_output_wallet& output) {
+  void on_balances_changed(uint64_t new_balance, uint64_t new_unlocked_balance) override {
+    std::lock_guard<std::mutex> lock(_listenerMutex);
+    if (jlistener == nullptr) return;
+    JNIEnv *env;
+    int envStat = attachJVM(&env);
+    if (envStat == JNI_ERR) return;
+
+    // invoke Java listener's onBalancesChanged()
+    jstring jbalance_str = env->NewStringUTF(to_string(new_balance).c_str());
+    jstring junlocked_balance_str = env->NewStringUTF(to_string(new_unlocked_balance).c_str());
+    jmethodID listenerClass_onBalanceChanged = env->GetMethodID(class_WalletListener, "onBalancesChanged", "(Ljava/lang/String;Ljava/lang/String;)V");
+    env->CallVoidMethod(jlistener, listenerClass_onBalanceChanged, jbalance_str, junlocked_balance_str);
+
+    // check for and rethrow Java exception
+    jthrowable jexception = env->ExceptionOccurred();
+    if (jexception) rethrow_java_exception_as_cpp_exception(env, jexception);  // TODO: does not detach JVM
+
+    detachJVM(env, envStat);
+  }
+
+  void on_output_received(const monero_output_wallet& output) override {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *env;
@@ -257,7 +277,7 @@ struct wallet_jni_listener : public monero_wallet_listener {
     detachJVM(env, envStat);
   }
 
-  void on_output_spent(const monero_output_wallet& output) {
+  void on_output_spent(const monero_output_wallet& output) override {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *env;

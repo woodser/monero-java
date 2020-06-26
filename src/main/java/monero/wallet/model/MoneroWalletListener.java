@@ -1,5 +1,7 @@
 package monero.wallet.model;
 
+import java.math.BigInteger;
+
 /**
  * Default wallet listener which takes no action on notifications.
  */
@@ -10,6 +12,9 @@ public class MoneroWalletListener implements MoneroWalletListenerI {
 
   @Override
   public void onNewBlock(long height) { }
+  
+  @Override
+  public void onBalancesChanged(BigInteger newBalance, BigInteger newUnlockedBalance) { }
 
   @Override
   public void onOutputReceived(MoneroOutputWallet output) { }

@@ -1599,6 +1599,10 @@ public class MoneroWalletJni extends MoneroWalletBase {
       for (MoneroWalletListenerI listener : wallet.getListeners()) listener.onNewBlock(height);
     }
     
+    public void onBalancesChanged(String newBalanceStr, String newUnlockedBalanceStr) {
+      for (MoneroWalletListenerI listener : wallet.getListeners()) listener.onBalancesChanged(new BigInteger(newBalanceStr), new BigInteger(newUnlockedBalanceStr));
+    }
+    
     public void onOutputReceived(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version, long unlockTime) {
       
       // build received output
