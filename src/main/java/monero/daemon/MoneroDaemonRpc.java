@@ -237,7 +237,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public List<MoneroBlock> getBlocksByHash(List<String> blockHashes, Long startHeight, Boolean prune) {
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("MoneroDaemonRpc.getBlocksByHash() not implemented");
   }
 
   @SuppressWarnings("unchecked")
@@ -329,7 +329,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   
   @Override
   public List<String> getBlockHashes(List<String> blockHashes, Long startHeight) {
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("MoneroDaemonRpc.getBlockHashes() not implemented");
   }
 
   @SuppressWarnings("unchecked")
@@ -466,12 +466,12 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public List<String> getTxPoolHashes() {
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("MoneroDaemonRpc.getTxPoolHashes() not implemented");
   }
 
   @Override
   public List<MoneroTxBacklogEntry> getTxPoolBacklog() {
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("MoneroDaemonRpc.getTxPoolBacklog() not implemented");
   }
 
   @Override
@@ -530,7 +530,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @Override
   public List<MoneroOutput> getOutputs(Collection<MoneroOutput> outputs) {
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("MoneroDaemonRpc.getOutputs() not implemented");
   }
 
   @SuppressWarnings("unchecked")

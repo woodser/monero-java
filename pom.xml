@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.github.monero-ecosystem</groupId>
 	<artifactId>monero-java</artifactId>
-	<version>0.3.3</version>
+	<version>0.3.4</version>
 	<name>Monero Java Library</name>
 	<description>A Java library for using Monero</description>
 	<url>https://github.com/monero-ecosystem/monero-java</url>
@@ -106,6 +106,19 @@
 							<source>${java-version}</source>
 							<target>${java-version}</target>
 						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>3.0.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>

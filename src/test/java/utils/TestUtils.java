@@ -59,9 +59,9 @@ public class TestUtils {
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
   public static final MoneroNetworkType NETWORK_TYPE = MoneroNetworkType.STAGENET;
   public static final String LANGUAGE = "English";
-  public static final String MNEMONIC = "hijack lucky rally sober hockey robot gumball amaze gave fifteen organs gecko skater wizard demonstrate upright system vegan tobacco tsunami lurk withdrawn tomorrow uphill organs"; 
-  public static final String ADDRESS = "52FnB7ABUrKJzVQRpbMNrqDFWbcKLjFUq8Rgek7jZEuB6WE2ZggXaTf4FK6H8gQymvSrruHHrEuKhMN3qTMiBYzREKsmRKM";
-  public static final long FIRST_RECEIVE_HEIGHT = 589429; // NOTE: this value MUST be the height of the wallet's first tx for tests
+  public static final String MNEMONIC = "today pliers diode ulcers sifting winter hospital feline slug bobsled popular wickets pact eclipse bumper island biplane silk building befit stylishly guest pyramid ramped eclipse"; 
+  public static final String ADDRESS = "59CFSozVFViMaHoPp9ou1ugtqN4dhxsBf6n39EKXaV6TbDF9PFUfYE5UUraSzfSRP2fyTUQHcN1K3T11T7B9wfzbQS68SPn";
+  public static final long FIRST_RECEIVE_HEIGHT = 26; // NOTE: this value MUST be the height of the wallet's first tx for tests
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class.getName());

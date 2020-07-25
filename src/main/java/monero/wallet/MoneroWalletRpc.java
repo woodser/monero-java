@@ -381,7 +381,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   public MoneroRpcConnection getDaemonConnection() {
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("MoneroWalletRpc.getNewKeyImagesFromLastImport() not implemented");
   }
   
   public boolean isConnected() {
@@ -786,9 +786,10 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     subaddress.setNumBlocksToUnlock(0l);
     return subaddress;
   }
-
+  
   @Override
-  public List<MoneroTxWallet> getTxs(MoneroTxQuery query) {
+  public List<MoneroTxWallet> getTxs(MoneroTxQuery query, Collection<String> missingTxHashes) {
+    if (missingTxHashes != null) throw new MoneroError("MoneroWalletRpc.getTxs() does not support collecting unfound tx hashes");
     
     // copy query
     query = query == null ? new MoneroTxQuery() : query.copy();
@@ -2571,14 +2572,14 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       int heightComparison = TX_HEIGHT_COMPARATOR.compare(ow1.getTx(), ow2.getTx());
       if (heightComparison != 0) return heightComparison;
       
-      // compare by account index, subaddress index, and output
-      if (ow1.getAccountIndex() < ow2.getAccountIndex()) return -1;
-      else if (ow1.getAccountIndex() == ow2.getAccountIndex()) {
-        int compare = ow1.getSubaddressIndex().compareTo(ow2.getSubaddressIndex());
-        if (compare != 0) return compare;
-        return ow1.getIndex().compareTo(ow2.getIndex());
-      }
-      return 1;
+      // compare by account index, subaddress index, output index, then key image hex
+      int compare = ow1.getAccountIndex().compareTo(ow2.getAccountIndex());
+      if (compare != 0) return compare;
+      compare = ow1.getSubaddressIndex().compareTo(ow2.getSubaddressIndex());
+      if (compare != 0) return compare;
+      compare = ow1.getIndex().compareTo(ow2.getIndex());
+      if (compare != 0) return compare;
+      return ow1.getKeyImage().getHex().compareTo(ow2.getKeyImage().getHex());
     }
   }
 }

@@ -475,6 +475,15 @@ public interface MoneroWallet {
   public List<MoneroTxWallet> getTxs(List<String> txHashes);
   
   /**
+   * Get wallet transactions by hash and collect missing tx hashes.
+   * 
+   * @param txHashes are hashes of transactions to get
+   * @param missingTxHashes is populated with requested but missing tx hashes
+   * @return the found transactions
+   */
+  public List<MoneroTxWallet> getTxs(List<String> txHashes, Collection<String> missingTxHashes);
+  
+  /**
    * <p>Get wallet transactions that meet the criteria defined in a query object.</p>
    * 
    * <p>Transactions must meet every criteria defined in the query in order to
@@ -508,10 +517,53 @@ public interface MoneroWallet {
    * &nbsp;&nbsp; includeOutputs - specifies that tx outputs should be returned with tx results (optional)<br>
    * </p>
    * 
-   * @param query specifies attributes of transactions to get
+   * @param query - attributes of transactions to get
    * @return wallet transactions that meet the query
    */
   public List<MoneroTxWallet> getTxs(MoneroTxQuery query);
+  
+  /**
+   * <p>Get wallet transactions that meet the criteria defined in a query object.</p>
+   * 
+   * <p>Transactions must meet every criteria defined in the query in order to
+   * be returned.  All criteria are optional and no filtering is applied when
+   * not defined.</p>
+   * 
+   * <p>If querying transactions by hash, unfound or unmet transaction hashes are
+   * added to the provided collection.</p>
+   * 
+   * <p>
+   * All supported query criteria:<br>
+   * &nbsp;&nbsp; isConfirmed - path of the wallet to open<br>
+   * &nbsp;&nbsp; password - password of the wallet to open<br>
+   * &nbsp;&nbsp; networkType - network type of the wallet to open (one of MoneroNetworkType.MAINNET|TESTNET|STAGENET)<br>
+   * &nbsp;&nbsp; serverUri - uri of the wallet's daemon (optional)<br>
+   * &nbsp;&nbsp; serverUsername - username to authenticate with the daemon (optional)<br>
+   * &nbsp;&nbsp; serverPassword - password to authenticate with the daemon (optional)<br>
+   * &nbsp;&nbsp; server - MoneroRpcConnection providing server configuration (optional)<br>
+   * &nbsp;&nbsp; isConfirmed - get txs that are confirmed or not (optional)<br>
+   * &nbsp;&nbsp; inTxPool - get txs that are in the tx pool or not (optional)<br>
+   * &nbsp;&nbsp; isRelayed - get txs that are relayed or not (optional)<br>
+   * &nbsp;&nbsp; isFailed - get txs that are failed or not (optional)<br>
+   * &nbsp;&nbsp; isMinerTx - get miner txs or not (optional)<br>
+   * &nbsp;&nbsp; hash - get a tx with the hash (optional)<br>
+   * &nbsp;&nbsp; hashes - get txs with the hashes (optional)<br>
+   * &nbsp;&nbsp; paymentId - get transactions with the payment id (optional)<br>
+   * &nbsp;&nbsp; paymentIds - get transactions with the payment ids (optional)<br>
+   * &nbsp;&nbsp; hasPaymentId - get transactions with a payment id or not (optional)<br>
+   * &nbsp;&nbsp; minHeight - get txs with height greater than or equal to the given height (optional)<br>
+   * &nbsp;&nbsp; maxHeight - get txs with height less than or equal to the given height (optional)<br>
+   * &nbsp;&nbsp; isOutgoing - get txs with an outgoing transfer or not (optional)<br>
+   * &nbsp;&nbsp; isIncoming - get txs with an incoming transfer or not (optional)<br>
+   * &nbsp;&nbsp; transferQuery - get txs that have a transfer that meets this query (optional)<br>
+   * &nbsp;&nbsp; includeOutputs - specifies that tx outputs should be returned with tx results (optional)<br>
+   * </p>
+   * 
+   * @param query - attributes of transactions to get
+   * @param missingTxHashes - populated with hashes of unfound or unmet transactions that were queried by hash (throws error if null and queried transaction hashes are unfound or unmet)
+   * @return wallet transactions that meet the query
+   */
+  public List<MoneroTxWallet> getTxs(MoneroTxQuery query, Collection<String> missingTxHashes);
   
   /**
    * Get all incoming and outgoing transfers to and from this wallet.  An

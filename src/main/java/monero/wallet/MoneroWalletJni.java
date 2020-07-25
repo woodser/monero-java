@@ -409,7 +409,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
   
   /**
-   * Register a listener receive wallet notifications.
+   * Register a listener to receive wallet notifications.
    * 
    * @param listener is the listener to receive wallet notifications
    */
@@ -770,7 +770,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
 
   @Override
-  public List<MoneroTxWallet> getTxs(MoneroTxQuery query) {
+  public List<MoneroTxWallet> getTxs(MoneroTxQuery query, Collection<String> missingTxHashes) {
     assertNotClosed();
     
     // copy and normalize tx query up to block
@@ -786,7 +786,10 @@ public class MoneroWalletJni extends MoneroWalletBase {
     }
     
     // deserialize blocks
-    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
+    DeserializedBlocksContainer deserializedBlocks = deserializeBlocks(blocksJson);
+    if (missingTxHashes == null && !deserializedBlocks.missingTxHashes.isEmpty()) throw new MoneroError("Missing requested tx hashes: " + deserializedBlocks.missingTxHashes);
+    for (String missingTxHash : deserializedBlocks.missingTxHashes) missingTxHashes.add(missingTxHash);
+    List<MoneroBlock> blocks = deserializedBlocks.blocks;
     
     // collect txs
     List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
@@ -803,7 +806,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
       for (MoneroTxWallet tx : txs) txMap.put(tx.getHash(), tx);
       List<MoneroTxWallet> txsSorted = new ArrayList<MoneroTxWallet>();
-      for (String txHash : query.getHashes()) txsSorted.add(txMap.get(txHash));
+      for (String txHash : query.getHashes()) if (txMap.containsKey(txHash)) txsSorted.add(txMap.get(txHash));
       txs = txsSorted;
     }
     LOGGER.fine("getTxs() returning " + txs.size() + " transactions");
@@ -841,7 +844,9 @@ public class MoneroWalletJni extends MoneroWalletBase {
     }
     
     // deserialize blocks
-    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
+    DeserializedBlocksContainer deserializedBlocks = deserializeBlocks(blocksJson);
+    if (!deserializedBlocks.missingTxHashes.isEmpty()) throw new RuntimeException("Missing tx hashes: " + deserializedBlocks.missingTxHashes);
+    List<MoneroBlock> blocks = deserializedBlocks.blocks;
     
     // collect transfers
     List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
@@ -885,7 +890,9 @@ public class MoneroWalletJni extends MoneroWalletBase {
     String blocksJson = getOutputsJni(JsonUtils.serialize(query.getTxQuery().getBlock()));
     
     // deserialize blocks
-    List<MoneroBlock> blocks = deserializeBlocks(blocksJson);
+    DeserializedBlocksContainer deserializedBlocks = deserializeBlocks(blocksJson);
+    if (!deserializedBlocks.missingTxHashes.isEmpty()) throw new RuntimeException("Missing tx hashes: " + deserializedBlocks.missingTxHashes);
+    List<MoneroBlock> blocks = deserializedBlocks.blocks;
     
     // collect outputs
     List<MoneroOutputWallet> outputs = new ArrayList<MoneroOutputWallet>();
@@ -934,7 +941,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   @Override
   public List<MoneroKeyImage> getNewKeyImagesFromLastImport() {
     assertNotClosed();
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("MoneroWalletJni.getNewKeyImagesFromLastImport() not implemented");
   }
   
   @Override
@@ -1197,25 +1204,25 @@ public class MoneroWalletJni extends MoneroWalletBase {
   @Override
   public void tagAccounts(String tag, Collection<Integer> accountIndices) {
     assertNotClosed();
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("MoneroWalletJni.getNewKeyImagesFromLastImport() not implemented");
   }
 
   @Override
   public void untagAccounts(Collection<Integer> accountIndices) {
     assertNotClosed();
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("MoneroWalletJni.tagAccounts() not implemented");
   }
 
   @Override
   public List<MoneroAccountTag> getAccountTags() {
     assertNotClosed();
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("MoneroWalletJni.getAccountTags() not implemented");
   }
 
   @Override
   public void setAccountTagLabel(String tag, String label) {
     assertNotClosed();
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("MoneroWalletJni.setAccountTagLabel() not implemented");
   }
 
   @Override
@@ -1603,9 +1610,9 @@ public class MoneroWalletJni extends MoneroWalletBase {
       for (MoneroWalletListenerI listener : wallet.getListeners()) listener.onBalancesChanged(new BigInteger(newBalanceStr), new BigInteger(newUnlockedBalanceStr));
     }
     
-    public void onOutputReceived(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version, long unlockTime) {
+    public void onOutputReceived(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version, long unlockTime, boolean isLocked) {
       
-      // build received output
+      // build output to announce
       MoneroOutputWallet output = new MoneroOutputWallet();
       output.setAmount(new BigInteger(amountStr));
       output.setAccountIndex(accountIdx);
@@ -1617,6 +1624,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       output.setTx(tx);
       tx.setOutputs(Arrays.asList(output));
       tx.setIsIncoming(true);
+      tx.setIsLocked(isLocked);
       if (height > 0) {
         MoneroBlock block = new MoneroBlock().setHeight(height);
         block.setTxs(Arrays.asList(tx));
@@ -1728,6 +1736,12 @@ public class MoneroWalletJni extends MoneroWalletBase {
   
   private static class BlocksContainer {
     public List<MoneroBlockWallet> blocks;
+    public List<String> missingTxHashes;
+  }
+  
+  private static class DeserializedBlocksContainer {
+    public List<MoneroBlock> blocks;
+    public List<String> missingTxHashes;
   }
   
   private static class TxSetsContainer {
@@ -1740,12 +1754,14 @@ public class MoneroWalletJni extends MoneroWalletBase {
     public KeyImagesContainer(List<MoneroKeyImage> keyImages) { this.keyImages = keyImages; };
   }
   
-  private static List<MoneroBlock> deserializeBlocks(String blocksJson) {
-    List<MoneroBlockWallet> blockWallets =  JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class).blocks;
-    List<MoneroBlock> blocks = new ArrayList<MoneroBlock>();
-    if (blockWallets == null) return blocks;
-    for (MoneroBlockWallet blockWallet: blockWallets) blocks.add(blockWallet.toBlock());
-    return blocks;
+  private static DeserializedBlocksContainer deserializeBlocks(String blocksJson) {
+    DeserializedBlocksContainer deserializedBlocks = new DeserializedBlocksContainer();
+    deserializedBlocks.blocks = new ArrayList<MoneroBlock>();
+    deserializedBlocks.missingTxHashes = new ArrayList<String>();
+    BlocksContainer deserializedContainer = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class);
+    if (deserializedContainer.blocks != null) for (MoneroBlockWallet blockWallet : deserializedContainer.blocks) deserializedBlocks.blocks.add(blockWallet.toBlock());
+    if (deserializedContainer.missingTxHashes != null) for (String missingTxHash : deserializedContainer.missingTxHashes) deserializedBlocks.missingTxHashes.add(missingTxHash);
+    return deserializedBlocks;
   }
   
   private static class AddressBookEntriesContainer {

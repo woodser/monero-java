@@ -249,7 +249,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   
   @Override
   public String toString() {
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("MoneroTxQuery.toString() not implemented");
   }
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------

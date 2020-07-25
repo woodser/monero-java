@@ -42,6 +42,6 @@ public interface Filter<T> {
    * @return the items that meet this filter's criteria
    */
   public static <T> Set<T> apply(Filter<? extends T> filter, Set<? extends T> items) {
-    throw new RuntimeException("Not implemented");
+    throw new RuntimeException("Filter.apply() not implemented");
   }
 }

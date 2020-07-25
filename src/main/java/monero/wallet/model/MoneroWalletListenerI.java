@@ -34,7 +34,8 @@ public interface MoneroWalletListenerI {
   public void onBalancesChanged(BigInteger newBalance, BigInteger newUnlockedBalance);
   
   /**
-   * Invoked when the wallet receives an output.
+   * Invoked when the wallet receives an unconfirmed output, when the output is confirmed,
+   * and when the output is unlocked.
    * 
    * @param output - the received output
    */

@@ -24,6 +24,7 @@ package monero.wallet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import common.utils.GenUtils;
@@ -146,7 +147,17 @@ public abstract class MoneroWalletBase implements MoneroWallet {
   }
   
   public List<MoneroTxWallet> getTxs(List<String> txHashes) {
-    return getTxs(new MoneroTxQuery().setHashes(txHashes));
+    return getTxs(txHashes, null);
+  }
+  
+  @Override
+  public List<MoneroTxWallet> getTxs(List<String> txHashes, Collection<String> missingTxHashes) {
+    return getTxs(new MoneroTxQuery().setHashes(txHashes), missingTxHashes);
+  }
+  
+  @Override
+  public List<MoneroTxWallet> getTxs(MoneroTxQuery query) {
+    return getTxs(query, null);
   }
   
   @Override
