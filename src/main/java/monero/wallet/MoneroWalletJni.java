@@ -1204,13 +1204,13 @@ public class MoneroWalletJni extends MoneroWalletBase {
   @Override
   public void tagAccounts(String tag, Collection<Integer> accountIndices) {
     assertNotClosed();
-    throw new RuntimeException("MoneroWalletJni.getNewKeyImagesFromLastImport() not implemented");
+    throw new RuntimeException("MoneroWalletJni.tagAccounts() not implemented");
   }
 
   @Override
   public void untagAccounts(Collection<Integer> accountIndices) {
     assertNotClosed();
-    throw new RuntimeException("MoneroWalletJni.tagAccounts() not implemented");
+    throw new RuntimeException("MoneroWalletJni.untagAccounts() not implemented");
   }
 
   @Override

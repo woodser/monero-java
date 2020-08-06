@@ -10,8 +10,8 @@ public class StartMining {
   }
   
   public static void startMining() {
-    long numThreads = 1;
+    long numThreads = 16;
     //TestUtils.getWalletRpc().startMining(numThreads, false, true);
-    TestUtils.getDaemonRpc().startMining("56SWsnhejUTbgNs2EgyXdfNXUawymMMuAC9voZZSQrHzJHNxGsAvMnoUja7JcKVtPwNc1oKAkoAt1cv6EmtKRQ22U37B7cT", numThreads, false, false);  // random subaddress
+    TestUtils.getDaemonRpc().startMining("586ehiDDayx273iusViduzEFF2ACgkiBFEBuJUkLyACX9svXeWtxCZXBviT6WRaYoWFspnXN3rsazGNW8i3ah6nwV4RmAjA", numThreads, false, false);  // random subaddress
   }
 }
