@@ -3377,7 +3377,7 @@ public abstract class TestMoneroWalletCommon {
         try { StartMining.startMining(); }
         catch (MoneroError e) { if ("BUSY".equals(e.getMessage())) throw e; }
         
-        // wait for the multisig wallet's funds to unlock // TODO: could replace with condition_variable and notify
+        // wait for the multisig wallet's funds to unlock // TODO: replace with MoneroWalletListener.onOutputReceived() which is called when output unlocked
         Long lastNumConfirmations = null;
         while (true) {
           
@@ -3436,7 +3436,7 @@ public abstract class TestMoneroWalletCommon {
         
         // send funds from a subaddress in the multisig wallet
         System.out.println("Sending");
-        List<MoneroTxWallet> txs = curWallet.createTxs(new MoneroTxConfig().setAddress(returnAddress).setAmount(TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0).setRelay(true));
+        List<MoneroTxWallet> txs = curWallet.createTxs(new MoneroTxConfig().setAddress(returnAddress).setAmount(TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0).setRelay(true));  // TODO: this should fail with setRelay(true) because not relayed without co-signatures
         assertFalse(txs.isEmpty());
         MoneroTxSet txSet = txs.get(0).getTxSet();
         assertNotNull(txSet.getMultisigTxHex());
@@ -3578,7 +3578,7 @@ public abstract class TestMoneroWalletCommon {
       wallet.close(true);
     }
     
-    // import each wallet's peer multisig hexIt 
+    // import each wallet's peer multisig hex
     for (int i = 0; i < walletIds.size(); i++) {
       List<String> peerMultisigHexes = new ArrayList<String>();
       for (int j = 0; j < walletIds.size(); j++) if (j != i) peerMultisigHexes.add(multisigHexes.get(j));
