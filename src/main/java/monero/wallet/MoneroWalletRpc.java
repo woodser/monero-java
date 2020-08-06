@@ -381,7 +381,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   public MoneroRpcConnection getDaemonConnection() {
-    throw new RuntimeException("MoneroWalletRpc.getNewKeyImagesFromLastImport() not implemented");
+    throw new RuntimeException("MoneroWalletRpc.getDaemonConnection() not implemented");
   }
   
   public boolean isConnected() {

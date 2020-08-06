@@ -16,16 +16,18 @@ public class MoneroBan {
     return host;
   }
   
-  public void setHost(String host) {
+  public MoneroBan setHost(String host) {
     this.host = host;
+    return this;
   }
   
   public Integer getIp() {
     return ip;
   }
   
-  public void setIp(Integer ip) {
+  public MoneroBan setIp(Integer ip) {
     this.ip = ip;
+    return this;
   }
   
   @JsonProperty("isBanned")
@@ -33,15 +35,17 @@ public class MoneroBan {
     return isBanned;
   }
   
-  public void setIsBanned(Boolean isBanned) {
+  public MoneroBan setIsBanned(Boolean isBanned) {
     this.isBanned = isBanned;
+    return this;
   }
   
   public Long getSeconds() {
     return seconds;
   }
   
-  public void setSeconds(Long seconds) {
+  public MoneroBan setSeconds(Long seconds) {
     this.seconds = seconds;
+    return this;
   }
 }
