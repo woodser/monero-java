@@ -737,6 +737,16 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonMaxPeerHeigh
   }
 }
 
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getHeightByDateJni(JNIEnv* env, jobject instance, jint year, jint month, jint day) {
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    return wallet->get_height_by_date(year, month, day);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+}
+
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *env, jobject instance, jlong start_height) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_syncJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);

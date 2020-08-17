@@ -226,6 +226,16 @@ public interface MoneroWallet {
   public long getDaemonHeight();
   
   /**
+   * Get the blockchain's height by date.
+   * 
+   * @param year - year of the height to get
+   * @param month - month of the height to get as a number between 1 and 12
+   * @param day - day of the height to get as a number between 1 and 31
+   * @return the blockchain's height at the given date
+   */
+  public long getHeightByDate(int year, int month, int day);
+
+  /**
    * Synchronize the wallet with the daemon as a one-time synchronous process.
    * 
    * @return the sync result

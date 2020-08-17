@@ -12,6 +12,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -555,6 +556,30 @@ public abstract class TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     long height = wallet.getHeight();
     assertTrue(height >= 0);
+  }
+  
+  // Can get a blockchain height by date
+  @SuppressWarnings("deprecation")
+  @Test
+  public void testGetHeightByDate() {
+    org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    
+    // collect dates to test starting 100 days ago
+    Date now = new Date();
+    List<Date> dates = new ArrayList<Date>();
+    for (long i = 100; i >= 0; i--) {
+      dates.add(new Date(now.getTime() - 24 * i * 60 * 60 * 1000)); // subtract i days
+    }
+
+    // test heights by date
+    Long lastHeight = null;
+    for (Date date : dates) {
+      long height = wallet.getHeightByDate(date.getYear() + 1900, date.getMonth() + 1, date.getDate());
+      assertTrue(height >= 0);
+      if (lastHeight != null) assertTrue(height >= lastHeight);
+      lastHeight = height;
+    }
+    assertTrue(lastHeight > 0);
   }
   
   // Can get the locked and unlocked balances of the wallet, accounts, and subaddresses

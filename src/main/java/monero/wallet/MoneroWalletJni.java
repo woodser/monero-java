@@ -587,6 +587,16 @@ public class MoneroWalletJni extends MoneroWalletBase {
       throw new MoneroError(e.getMessage());
     }
   }
+  
+  @Override
+  public long getHeightByDate(int year, int month, int day) {
+    assertNotClosed();
+    try {
+      return getHeightByDateJni(year, month ,day);
+    } catch (Exception e) {
+      throw new MoneroError(e.getMessage());
+    }
+  }
 
   @Override
   public MoneroSyncResult sync(Long startHeight, MoneroWalletListenerI listener) {
@@ -1401,6 +1411,8 @@ public class MoneroWalletJni extends MoneroWalletBase {
   private native long getDaemonHeightJni();
   
   private native long getDaemonMaxPeerHeightJni();
+  
+  private native long getHeightByDateJni(int year, int month, int day);
   
   private native boolean isViewOnlyJni();
   

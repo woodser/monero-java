@@ -432,6 +432,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testGetHeight() {
     super.testGetHeight();
   }
+  
+  @Override
+  public void testGetHeightByDate() {
+    super.testGetHeightByDate();
+  }
 
   @Override
   public void testGetMnemonic() {

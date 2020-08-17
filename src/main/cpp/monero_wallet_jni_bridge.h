@@ -104,6 +104,8 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonHeightJni(JN
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonMaxPeerHeightJni(JNIEnv *, jobject);
 
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getHeightByDateJni(JNIEnv *, jobject, jint, jint, jint);
+
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *, jobject, jobject);
 
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *, jobject, jlong);

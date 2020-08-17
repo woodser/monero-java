@@ -1853,6 +1853,11 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
 
   @Override
+  public void testGetHeightByDate() {
+    super.testGetHeightByDate();
+  }
+
+  @Override
   public void testGetMnemonic() {
     super.testGetMnemonic();
   }

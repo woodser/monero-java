@@ -544,6 +544,11 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   public long getDaemonHeight() {
     throw new MoneroError("monero-wallet-rpc does not support getting the chain height");
   }
+  
+  @Override
+  public long getHeightByDate(int year, int month, int day) {
+    throw new MoneroError("monero-wallet-rpc does not support getting a height by date");
+  }
 
   @SuppressWarnings("unchecked")
   @Override
