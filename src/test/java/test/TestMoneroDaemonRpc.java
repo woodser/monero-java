@@ -543,7 +543,7 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetMinerTxSum() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
-    MoneroMinerTxSum sum = daemon.getMinerTxSum(0l, 50000l);
+    MoneroMinerTxSum sum = daemon.getMinerTxSum(0l, Math.min(50000l, daemon.getHeight()));
     testMinerTxSum(sum);
   }
   
