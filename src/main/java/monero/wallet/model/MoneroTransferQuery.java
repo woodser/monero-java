@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.types.Filter;
 import common.utils.GenUtils;
+import monero.common.MoneroError;
 
 /**
  * Configures a query to retrieve transfers.
@@ -43,6 +44,7 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
     }
     this.hasDestinations = query.hasDestinations;
     this.txQuery = query.txQuery;  // reference original by default, MoneroTxQuery's deep copy will set this to itself
+    validate();
   }
   
   @Override
@@ -108,6 +110,7 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
 
   public MoneroTransferQuery setSubaddressIndex(Integer subaddressIndex) {
     this.subaddressIndex = subaddressIndex;
+    validate();
     return this;
   }
 
@@ -117,11 +120,13 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
 
   public MoneroTransferQuery setSubaddressIndices(List<Integer> subaddressIndices) {
     this.subaddressIndices = subaddressIndices;
+    validate();
     return this;
   }
   
   public MoneroTransferQuery setSubaddressIndices(Integer... subaddressIndices) {
     this.subaddressIndices = GenUtils.arrayToList(subaddressIndices);
+    validate();
     return this;
   }
 
@@ -204,6 +209,11 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
     // filter with tx filter
     if (queryParent && getTxQuery() != null && !getTxQuery().meetsCriteria(transfer.getTx(), false)) return false;    
     return true;
+  }
+  
+  private void validate() {
+    if (subaddressIndex != null && subaddressIndex < 0) throw new MoneroError("Subaddress index must be >= 0");
+    if (subaddressIndices != null) for (Integer subaddressIdx : subaddressIndices) if (subaddressIdx < 0) throw new MoneroError("Subaddress indices must be >= 0");
   }
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------

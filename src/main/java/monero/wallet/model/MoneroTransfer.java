@@ -27,6 +27,7 @@ public abstract class MoneroTransfer {
   public MoneroTransfer(final MoneroTransfer transfer) {
     this.amount = transfer.amount;
     this.accountIndex = transfer.accountIndex;
+    validate();
   }
   
   public abstract MoneroTransfer copy();
@@ -64,6 +65,7 @@ public abstract class MoneroTransfer {
 
   public MoneroTransfer setAccountIndex(Integer accountIndex) {
     this.accountIndex = accountIndex;
+    validate();
     return this;
   }
   
@@ -135,5 +137,9 @@ public abstract class MoneroTransfer {
       if (other.amount != null) return false;
     } else if (!amount.equals(other.amount)) return false;
     return true;
+  }
+  
+  private void validate() {
+    if (accountIndex != null && accountIndex < 0) throw new MoneroError("Account index must be >= 0");
   }
 }
