@@ -795,32 +795,8 @@ public class MoneroWalletJni extends MoneroWalletBase {
       throw new MoneroError(e.getMessage());
     }
     
-    // deserialize blocks
-    DeserializedBlocksContainer deserializedBlocks = deserializeBlocks(blocksJson);
-    if (missingTxHashes == null && !deserializedBlocks.missingTxHashes.isEmpty()) throw new MoneroError("Missing requested tx hashes: " + deserializedBlocks.missingTxHashes);
-    for (String missingTxHash : deserializedBlocks.missingTxHashes) missingTxHashes.add(missingTxHash);
-    List<MoneroBlock> blocks = deserializedBlocks.blocks;
-    
-    // collect txs
-    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-    for (MoneroBlock block : blocks) {
-      sanitizeBlock(block);
-      for (MoneroTx tx : block.getTxs()) {
-        if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
-        txs.add((MoneroTxWallet) tx);
-      }
-    }
-    
-    // re-sort txs which is lost over jni serialization
-    if (query.getHashes() != null) {
-      Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
-      for (MoneroTxWallet tx : txs) txMap.put(tx.getHash(), tx);
-      List<MoneroTxWallet> txsSorted = new ArrayList<MoneroTxWallet>();
-      for (String txHash : query.getHashes()) if (txMap.containsKey(txHash)) txsSorted.add(txMap.get(txHash));
-      txs = txsSorted;
-    }
-    LOGGER.fine("getTxs() returning " + txs.size() + " transactions");
-    return txs;
+    // deserialize and return txs
+    return deserializeTxs(query, blocksJson, missingTxHashes);
   }
 
   @Override
@@ -853,25 +829,8 @@ public class MoneroWalletJni extends MoneroWalletBase {
       throw new MoneroError(e.getMessage());
     }
     
-    // deserialize blocks
-    DeserializedBlocksContainer deserializedBlocks = deserializeBlocks(blocksJson);
-    if (!deserializedBlocks.missingTxHashes.isEmpty()) throw new RuntimeException("Missing tx hashes: " + deserializedBlocks.missingTxHashes);
-    List<MoneroBlock> blocks = deserializedBlocks.blocks;
-    
-    // collect transfers
-    List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
-    for (MoneroBlock block : blocks) {
-      sanitizeBlock(block);
-      for (MoneroTx tx : block.getTxs()) {
-        if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
-        MoneroTxWallet txWallet = (MoneroTxWallet) tx;
-        if (txWallet.getOutgoingTransfer() != null) transfers.add(txWallet.getOutgoingTransfer());
-        if (txWallet.getIncomingTransfers() != null) {
-          for (MoneroIncomingTransfer transfer : txWallet.getIncomingTransfers()) transfers.add(transfer);
-        }
-      }
-    }
-    return transfers;
+    // deserialize and return transfers
+    return deserializeTransfers(query, blocksJson);
   }
 
   @Override
@@ -899,20 +858,8 @@ public class MoneroWalletJni extends MoneroWalletBase {
     // serialize query from block and fetch outputs from jni
     String blocksJson = getOutputsJni(JsonUtils.serialize(query.getTxQuery().getBlock()));
     
-    // deserialize blocks
-    DeserializedBlocksContainer deserializedBlocks = deserializeBlocks(blocksJson);
-    if (!deserializedBlocks.missingTxHashes.isEmpty()) throw new RuntimeException("Missing tx hashes: " + deserializedBlocks.missingTxHashes);
-    List<MoneroBlock> blocks = deserializedBlocks.blocks;
-    
-    // collect outputs
-    List<MoneroOutputWallet> outputs = new ArrayList<MoneroOutputWallet>();
-    for (MoneroBlock block : blocks) {
-      sanitizeBlock(block);
-      for (MoneroTx tx : block.getTxs()) {
-        outputs.addAll(((MoneroTxWallet) tx).getOutputsWallet());
-      }
-    }
-    return outputs;
+    // deserialize and return outputs
+    return deserializeOutputs(query, blocksJson);
   }
   
   @Override
@@ -1488,12 +1435,6 @@ public class MoneroWalletJni extends MoneroWalletBase {
   
   private native String createSubaddressJni(int accountIdx, String label);
   
-  /**
-   * Gets txs from the native layer using strings to communicate.
-   * 
-   * @param txQueryJson is a tx query serialized to a json string
-   * @return a serialized BlocksContainer to preserve model relationships
-   */
   private native String getTxsJni(String txQueryJson);
   
   private native String getTransfersJni(String transferQueryJson);
@@ -1746,7 +1687,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     public List<MoneroSubaddress> subaddresses;
   };
   
-  private static class BlocksContainer {
+  private static class BlocksWalletContainer {
     public List<MoneroBlockWallet> blocks;
     public List<String> missingTxHashes;
   }
@@ -1767,13 +1708,83 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
   
   private static DeserializedBlocksContainer deserializeBlocks(String blocksJson) {
-    DeserializedBlocksContainer deserializedBlocks = new DeserializedBlocksContainer();
-    deserializedBlocks.blocks = new ArrayList<MoneroBlock>();
-    deserializedBlocks.missingTxHashes = new ArrayList<String>();
-    BlocksContainer deserializedContainer = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksContainer.class);
-    if (deserializedContainer.blocks != null) for (MoneroBlockWallet blockWallet : deserializedContainer.blocks) deserializedBlocks.blocks.add(blockWallet.toBlock());
-    if (deserializedContainer.missingTxHashes != null) for (String missingTxHash : deserializedContainer.missingTxHashes) deserializedBlocks.missingTxHashes.add(missingTxHash);
-    return deserializedBlocks;
+    DeserializedBlocksContainer deserializedBlocksContainer = new DeserializedBlocksContainer();
+    deserializedBlocksContainer.blocks = new ArrayList<MoneroBlock>();
+    deserializedBlocksContainer.missingTxHashes = new ArrayList<String>();
+    BlocksWalletContainer blocksWalletContainer = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksWalletContainer.class);
+    if (blocksWalletContainer.blocks != null) for (MoneroBlockWallet blockWallet : blocksWalletContainer.blocks) deserializedBlocksContainer.blocks.add(blockWallet.toBlock());
+    if (blocksWalletContainer.missingTxHashes != null) for (String missingTxHash : blocksWalletContainer.missingTxHashes) deserializedBlocksContainer.missingTxHashes.add(missingTxHash);
+    return deserializedBlocksContainer;
+  }
+  
+  private static List<MoneroTxWallet> deserializeTxs(MoneroTxQuery query, String blocksJson, Collection<String> missingTxHashes) {
+    
+    // deserialize blocks
+    DeserializedBlocksContainer deserializedBlocks = deserializeBlocks(blocksJson);
+    if (missingTxHashes == null && !deserializedBlocks.missingTxHashes.isEmpty()) throw new MoneroError("Missing requested tx hashes: " + deserializedBlocks.missingTxHashes);
+    for (String missingTxHash : deserializedBlocks.missingTxHashes) missingTxHashes.add(missingTxHash);
+    List<MoneroBlock> blocks = deserializedBlocks.blocks;
+    
+    // collect txs
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    for (MoneroBlock block : blocks) {
+      sanitizeBlock(block);
+      for (MoneroTx tx : block.getTxs()) {
+        if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
+        txs.add((MoneroTxWallet) tx);
+      }
+    }
+    
+    // re-sort txs which is lost over jni serialization
+    if (query.getHashes() != null) {
+      Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
+      for (MoneroTxWallet tx : txs) txMap.put(tx.getHash(), tx);
+      List<MoneroTxWallet> txsSorted = new ArrayList<MoneroTxWallet>();
+      for (String txHash : query.getHashes()) if (txMap.containsKey(txHash)) txsSorted.add(txMap.get(txHash));
+      txs = txsSorted;
+    }
+    return txs;
+  }
+  
+  private static List<MoneroTransfer> deserializeTransfers(MoneroTransferQuery query, String blocksJson) {
+    
+    // deserialize blocks
+    DeserializedBlocksContainer deserializedBlocks = deserializeBlocks(blocksJson);
+    if (!deserializedBlocks.missingTxHashes.isEmpty()) throw new RuntimeException("Missing tx hashes: " + deserializedBlocks.missingTxHashes);
+    List<MoneroBlock> blocks = deserializedBlocks.blocks;
+    
+    // collect transfers
+    List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
+    for (MoneroBlock block : blocks) {
+      sanitizeBlock(block);
+      for (MoneroTx tx : block.getTxs()) {
+        if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
+        MoneroTxWallet txWallet = (MoneroTxWallet) tx;
+        if (txWallet.getOutgoingTransfer() != null) transfers.add(txWallet.getOutgoingTransfer());
+        if (txWallet.getIncomingTransfers() != null) {
+          for (MoneroIncomingTransfer transfer : txWallet.getIncomingTransfers()) transfers.add(transfer);
+        }
+      }
+    }
+    return transfers;
+  }
+  
+  private static List<MoneroOutputWallet> deserializeOutputs(MoneroOutputQuery query, String blocksJson) {
+    
+    // deserialize blocks
+    DeserializedBlocksContainer deserializedBlocks = deserializeBlocks(blocksJson);
+    if (!deserializedBlocks.missingTxHashes.isEmpty()) throw new RuntimeException("Missing tx hashes: " + deserializedBlocks.missingTxHashes);
+    List<MoneroBlock> blocks = deserializedBlocks.blocks;
+    
+    // collect outputs
+    List<MoneroOutputWallet> outputs = new ArrayList<MoneroOutputWallet>();
+    for (MoneroBlock block : blocks) {
+      sanitizeBlock(block);
+      for (MoneroTx tx : block.getTxs()) {
+        outputs.addAll(((MoneroTxWallet) tx).getOutputsWallet());
+      }
+    }
+    return outputs;
   }
   
   private static class AddressBookEntriesContainer {

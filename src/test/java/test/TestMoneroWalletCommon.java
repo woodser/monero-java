@@ -565,10 +565,11 @@ public abstract class TestMoneroWalletCommon {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // collect dates to test starting 100 days ago
-    Date now = new Date();
+    long DAY_MS = 24 * 60 * 60 * 1000;
+    Date yesterday = new Date(new Date().getTime() - DAY_MS); // TODO monero-core: today's date can throw exception as "in future" so we test up to yesterday
     List<Date> dates = new ArrayList<Date>();
-    for (long i = 100; i >= 0; i--) {
-      dates.add(new Date(now.getTime() - 24 * i * 60 * 60 * 1000)); // subtract i days
+    for (long i = 99; i >= 0; i--) {
+      dates.add(new Date(yesterday.getTime() - DAY_MS * i)); // subtract i days
     }
 
     // test heights by date
@@ -580,6 +581,15 @@ public abstract class TestMoneroWalletCommon {
       lastHeight = height;
     }
     assertTrue(lastHeight > 0);
+    
+    // test future date
+    try {
+      Date tomorrow = new Date(yesterday.getTime() + DAY_MS * 2);
+      wallet.getHeightByDate(tomorrow.getYear() + 1900, tomorrow.getMonth() + 1, tomorrow.getDate());
+      fail("Expected exception on future date");
+    } catch (MoneroError err) {
+      assertEquals("specified date is in the future", err.getMessage());
+    }
   }
   
   // Can get the locked and unlocked balances of the wallet, accounts, and subaddresses

@@ -18,12 +18,14 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import common.utils.JsonUtils;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroNetworkType;
+import monero.daemon.model.MoneroSubmitTxResult;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
@@ -1347,7 +1349,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   
   private void testReceivedOutputNotificationsWithUnlockTime(long unlockDelay) throws InterruptedException {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
-    long unlockHeight = daemon.getHeight() + unlockDelay; // expected unlock height
+    long expectedUnlockHeight = daemon.getHeight() + unlockDelay;
     
     // create wallet to test received output notifications
     MoneroWalletJni receiver = createWallet(new MoneroWalletConfig());
@@ -1357,7 +1359,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       .setAccountIndex(0)
       .setAddress(receiver.getPrimaryAddress())
       .setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(10)))
-      .setUnlockTime(unlockHeight)
+      .setUnlockTime(expectedUnlockHeight)
       .setRelay(false)
     );
     
@@ -1365,9 +1367,13 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     ReceivedOutputNotificationTester listener = new ReceivedOutputNotificationTester(tx.getHash());
     receiver.addListener(listener);
     
+    // flush tx to prevent double spends from previous tests
+    daemon.flushTxPool();
+    
     // relay transaction to pool
     long submitHeight = daemon.getHeight();
-    daemon.submitTxHex(tx.getFullHex());
+    MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex());
+    assertTrue("Bad submit tx result: " + JsonUtils.serialize(result), result.isGood());
     
     // test notification of tx in pool within 10 seconds
     TimeUnit.SECONDS.sleep(10);
@@ -1379,50 +1385,41 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       @Override
       public void onNewBlock(long height) {
         if (listener.testComplete) return;
-        try {
-          
-          // test notification of first confirmation within 10 seconds
-          if (listener.confirmedHeight == null) {
-            
-            // stop mining for test
-            daemon.stopMining();
-            
-            // receives notification of output confirmation within 10 seconds
-            try { TimeUnit.SECONDS.sleep(10); }
-            catch (InterruptedException e) { throw new RuntimeException(e); }
-            if (Boolean.TRUE.equals(listener.lastNotifiedOutput.getTx().isConfirmed())) {
-              listener.confirmedHeight = listener.lastNotifiedOutput.getTx().getHeight();
-              if (height != submitHeight) System.out.println("WARNING: tx submitted on height " + submitHeight + " but confirmed on height " + listener.confirmedHeight);
-            } else {
-              System.out.println("WARNING: no confirmation yet by height " + height); // TODO monero-core: sometimes pool tx does not confirm for several blocks
+        new Thread(new Runnable() {
+          @Override
+          public void run() {
+            try {
+              
+              // first confirmation expected within 10 seconds of new block
+              if (listener.confirmedHeight == null) {
+                TimeUnit.SECONDS.sleep(10);
+                if (listener.confirmedHeight == null && Boolean.TRUE.equals(listener.lastNotifiedOutput.getTx().isConfirmed())) { // only run by first thread after confirmation
+                  listener.confirmedHeight = listener.lastNotifiedOutput.getTx().getHeight();
+                  if (listener.confirmedHeight != submitHeight) System.out.println("WARNING: tx submitted on height " + submitHeight + " but confirmed on height " + listener.confirmedHeight);  // TODO monero-core: sometimes pool tx does not confirm for several blocks
+                }
+              }
+              
+              // output should be locked until max of expected unlock height and 10 blocks after confirmation
+              if ((listener.confirmedHeight == null || height < Math.max(listener.confirmedHeight + 10, expectedUnlockHeight)) && !Boolean.TRUE.equals(listener.lastNotifiedOutput.isLocked())) throw new RuntimeException("Last notified output expected to be locked but isLocked=" + listener.lastNotifiedOutput.isLocked() + " at height " + height);
+              
+              // test unlock notification
+              if (listener.confirmedHeight != null && height == Math.max(listener.confirmedHeight + 10, expectedUnlockHeight)) {
+                
+                // receives notification of unlocked tx within 1 second of block notification
+                System.out.println("Sleeping on height: " + height);
+                TimeUnit.SECONDS.sleep(1);
+                if (!Boolean.FALSE.equals(listener.lastNotifiedOutput.isLocked())) throw new RuntimeException("Last notified output expected to be unlocked but isLocked=" + listener.lastNotifiedOutput.isLocked());
+                listener.unlockedSeen = true;
+                listener.testComplete = true;
+              }
+            } catch (Exception e) {
+              System.out.println("Exception!");
+              e.printStackTrace();
+              listener.testComplete = true;
+              listener.testError = e.getMessage();
             }
-            
-            // resume mining to complete test
-            StartMining.startMining();
           }
-          
-          // output should be locked until unlock height
-          if (height < unlockHeight && !Boolean.TRUE.equals(listener.lastNotifiedOutput.isLocked())) throw new RuntimeException("Last notified output expected to be locked but isLocked=" + listener.lastNotifiedOutput.isLocked() + " at height " + height);
-          
-          // test unlock notification
-          if (height == unlockHeight) {
-            
-            // stop mining for test
-            daemon.stopMining();
-            
-            // receives notification of unlocked tx within 1 second of block notification
-            try { TimeUnit.SECONDS.sleep(1); }
-            catch (InterruptedException e) { throw new RuntimeException(e); }
-            if (!Boolean.FALSE.equals(listener.lastNotifiedOutput.isLocked())) throw new RuntimeException("Last notified output expected to be unlocked but isLocked=" + listener.lastNotifiedOutput.isLocked());
-            listener.unlockedSeen = true;
-            listener.testComplete = true;
-          }
-        } catch (Exception e) {
-          System.out.println("Exception!");
-          e.printStackTrace();
-          listener.testComplete = true;
-          if (daemon.getMiningStatus().isActive()) daemon.stopMining();
-        }
+        }).start();
       }
     });
     
@@ -1431,7 +1428,9 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     // run until test completes
     while (!listener.testComplete) TimeUnit.SECONDS.sleep(10);
-    assertNotNull("No notification of output confirmed", listener.confirmedHeight);
+    if (daemon.getMiningStatus().isActive()) daemon.stopMining();
+    assertNull(listener.testError, listener.testError);
+    assertNotNull("No notification of confirmed output", listener.confirmedHeight);
     assertTrue("No notification of output unlocked", listener.unlockedSeen);
   }
   
@@ -1440,6 +1439,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     protected String txHash;
     protected MoneroOutputWallet lastNotifiedOutput;
     protected boolean testComplete = false;
+    protected String testError = null;
     protected boolean unlockedSeen = false;
     protected Long confirmedHeight = null;
 

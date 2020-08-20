@@ -558,8 +558,10 @@ public class MoneroTx {
         }
         GenUtils.assertTrue("Some outputs have a key image and some do not", numKeyImages == 0 || this.getOutputs().size() + tx.getOutputs().size() == numKeyImages);
         
-        // merge outputs by key image if present, otherwise append (cannot merge by global index because pre-RingCT output indices are not unique)
+        // merge outputs 
         for (MoneroOutput merger : tx.getOutputs()) {
+          
+          // merge by key images if present
           if (numKeyImages > 0) {
             boolean merged = false;
             merger.setTx(this);
@@ -572,8 +574,14 @@ public class MoneroTx {
               }
             }
             if (!merged) this.getOutputs().add(merger); // add new key image
-          } else {
-            this.getOutputs().add(merger); // no key images present, append
+          }
+          
+          // otherwise merge by position (cannot merge by global index because pre-RingCT output indices are not unique)
+          else {
+            GenUtils.assertEquals(this.getOutputs().size(), tx.getOutputs().size());
+            for (int i = 0; i < tx.getOutputs().size(); i++) {
+              this.getOutputs().get(i).merge(tx.getOutputs().get(i));
+            }
           }
         }
       }
