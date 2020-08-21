@@ -3653,7 +3653,7 @@ public abstract class TestMoneroWalletCommon {
             .setAddress(wallet.getPrimaryAddress())
             .setAmount(TestUtils.MAX_FEE)
             .setAccountIndex(0)
-            .setUnlockHeight(3l)
+            .setUnlockHeight(daemon.getHeight() + 3l)
             .setCanSplit(false)
             .setRelay(true);
     testSendAndUpdateTxs(config);
@@ -3667,7 +3667,7 @@ public abstract class TestMoneroWalletCommon {
             .setAccountIndex(0)
             .setAddress(wallet.getPrimaryAddress())
             .setAmount(TestUtils.MAX_FEE)
-            .setUnlockHeight(3l)
+            .setUnlockHeight(daemon.getHeight() + 3l)
             .setCanSplit(true)
             .setRelay(true);
     testSendAndUpdateTxs(config);
@@ -3681,7 +3681,7 @@ public abstract class TestMoneroWalletCommon {
             .setAccountIndex(0)
             .setAddress(wallet.getSubaddress(1, 0).getAddress())
             .setAmount(TestUtils.MAX_FEE)
-            .setUnlockHeight(3l)
+            .setUnlockHeight(daemon.getHeight() + 3l)
             .setCanSplit(false)
             .setRelay(true);
     testSendAndUpdateTxs(config);
@@ -3696,13 +3696,13 @@ public abstract class TestMoneroWalletCommon {
             .setAddress(wallet.getSubaddress(1, 0).getAddress())
             .setAmount(TestUtils.MAX_FEE)
             .setAccountIndex(0)
-            .setUnlockHeight(3l)
+            .setUnlockHeight(daemon.getHeight() + 3l)
             .setRelay(true);
     testSendAndUpdateTxs(config);
   }
   
   /**
-   * Tests sending a tx with an unlockHeight then tracking and updating it as
+   * Tests sending a tx with an unlock height then tracking and updating it as
    * blocks are added to the chain.
    * 
    * TODO: test wallet accounting throughout this; dedicated method? probably.
