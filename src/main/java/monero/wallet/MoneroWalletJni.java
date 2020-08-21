@@ -1563,7 +1563,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       for (MoneroWalletListenerI listener : wallet.getListeners()) listener.onBalancesChanged(new BigInteger(newBalanceStr), new BigInteger(newUnlockedBalanceStr));
     }
     
-    public void onOutputReceived(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version, long unlockTime, boolean isLocked) {
+    public void onOutputReceived(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version, long unlockHeight, boolean isLocked) {
       
       // build output to announce
       MoneroOutputWallet output = new MoneroOutputWallet();
@@ -1573,7 +1573,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       MoneroTxWallet tx = new MoneroTxWallet();
       tx.setHash(txHash);
       tx.setVersion(version);
-      tx.setUnlockTime(unlockTime);
+      tx.setUnlockHeight(unlockHeight);
       output.setTx(tx);
       tx.setOutputs(Arrays.asList(output));
       tx.setIsIncoming(true);

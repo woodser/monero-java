@@ -1338,16 +1338,16 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   // Can receive notifications when outputs are received, confirmed, and unlocked
   @Test
   public void testReceivedOutputNotifications() throws InterruptedException {
-    testReceivedOutputNotificationsWithUnlockTime(0l);
+    testReceivedOutputNotificationsWithUnlockHeight(0l);
   }
   
-  // Can receive notifications when outputs are received, confirmed, and unlocked with an unlock time
+  // Can receive notifications when outputs are received, confirmed, and unlocked with an unlock height
   @Test
-  public void testReceivedOutputNotificationsWithUnlockTime() throws InterruptedException {
-    testReceivedOutputNotificationsWithUnlockTime(13l);
+  public void testReceivedOutputNotificationsWithUnlockHeight() throws InterruptedException {
+    testReceivedOutputNotificationsWithUnlockHeight(13l);
   }
   
-  private void testReceivedOutputNotificationsWithUnlockTime(long unlockDelay) throws InterruptedException {
+  private void testReceivedOutputNotificationsWithUnlockHeight(long unlockDelay) throws InterruptedException {
     org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
     long expectedUnlockHeight = daemon.getHeight() + unlockDelay;
     
@@ -1359,7 +1359,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       .setAccountIndex(0)
       .setAddress(receiver.getPrimaryAddress())
       .setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(10)))
-      .setUnlockTime(expectedUnlockHeight)
+      .setUnlockHeight(expectedUnlockHeight)
       .setRelay(false)
     );
     
@@ -1740,7 +1740,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertNotNull(output.getTx().getHash());
       assertEquals(64, output.getTx().getHash().length());
       assertTrue(output.getTx().getVersion() >= 0);
-      assertTrue(output.getTx().getUnlockTime() >= 0);
+      assertTrue(output.getTx().getUnlockHeight() >= 0);
       assertNull(output.getTx().getInputs());
       assertEquals(1, output.getTx().getOutputs().size());
       assertTrue(output.getTx().getOutputs().get(0) == output);
@@ -1767,7 +1767,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertNotNull(output.getTx().getHash());
       assertEquals(64, output.getTx().getHash().length());
       assertTrue(output.getTx().getVersion() >= 0);
-      assertNull(output.getTx().getUnlockTime());
+      assertNull(output.getTx().getUnlockHeight());
       assertEquals(1, output.getTx().getInputs().size());
       assertTrue(output.getTx().getInputs().get(0) == output);
       assertNull(output.getTx().getOutputs());

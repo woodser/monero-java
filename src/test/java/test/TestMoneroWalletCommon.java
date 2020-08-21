@@ -3653,7 +3653,7 @@ public abstract class TestMoneroWalletCommon {
             .setAddress(wallet.getPrimaryAddress())
             .setAmount(TestUtils.MAX_FEE)
             .setAccountIndex(0)
-            .setUnlockTime(3l)
+            .setUnlockHeight(3l)
             .setCanSplit(false)
             .setRelay(true);
     testSendAndUpdateTxs(config);
@@ -3667,7 +3667,7 @@ public abstract class TestMoneroWalletCommon {
             .setAccountIndex(0)
             .setAddress(wallet.getPrimaryAddress())
             .setAmount(TestUtils.MAX_FEE)
-            .setUnlockTime(3l)
+            .setUnlockHeight(3l)
             .setCanSplit(true)
             .setRelay(true);
     testSendAndUpdateTxs(config);
@@ -3681,7 +3681,7 @@ public abstract class TestMoneroWalletCommon {
             .setAccountIndex(0)
             .setAddress(wallet.getSubaddress(1, 0).getAddress())
             .setAmount(TestUtils.MAX_FEE)
-            .setUnlockTime(3l)
+            .setUnlockHeight(3l)
             .setCanSplit(false)
             .setRelay(true);
     testSendAndUpdateTxs(config);
@@ -3696,13 +3696,13 @@ public abstract class TestMoneroWalletCommon {
             .setAddress(wallet.getSubaddress(1, 0).getAddress())
             .setAmount(TestUtils.MAX_FEE)
             .setAccountIndex(0)
-            .setUnlockTime(3l)
+            .setUnlockHeight(3l)
             .setRelay(true);
     testSendAndUpdateTxs(config);
   }
   
   /**
-   * Tests sending a tx with an unlockTime then tracking and updating it as
+   * Tests sending a tx with an unlockHeight then tracking and updating it as
    * blocks are added to the chain.
    * 
    * TODO: test wallet accounting throughout this; dedicated method? probably.
@@ -4454,7 +4454,7 @@ public abstract class TestMoneroWalletCommon {
       assertEquals(false, tx.isConfirmed());
       testTransfer(tx.getOutgoingTransfer(), ctx);
       assertEquals(MoneroUtils.RING_SIZE, (int) tx.getRingSize());
-      assertEquals(config.getUnlockTime() != null ? config.getUnlockTime() : 0, (long) tx.getUnlockTime());
+      assertEquals(config.getUnlockHeight() != null ? config.getUnlockHeight() : 0, (long) tx.getUnlockHeight());
       assertNull(tx.getBlock());
       assertTrue(tx.getKey().length() > 0);
       assertNotNull(tx.getFullHex());
@@ -4464,7 +4464,7 @@ public abstract class TestMoneroWalletCommon {
       assertTrue(tx.isLocked());
       
       // test locked state
-      if (tx.getUnlockTime() == 0) assertEquals(tx.isConfirmed(), !tx.isLocked());
+      if (tx.getUnlockHeight() == 0) assertEquals(tx.isConfirmed(), !tx.isLocked());
       else assertEquals(true, tx.isLocked());
       for (MoneroOutputWallet output : tx.getOutputsWallet()) {
         assertEquals(tx.isLocked(), output.isLocked());
@@ -4544,7 +4544,7 @@ public abstract class TestMoneroWalletCommon {
     assertNull(tx.getInputs());
     if (tx.getPaymentId() != null) assertNotEquals(MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId()); // default payment id converted to null
     if (tx.getNote() != null) assertTrue(tx.getNote().length() > 0);  // empty notes converted to undefined
-    assertTrue(tx.getUnlockTime() >= 0);
+    assertTrue(tx.getUnlockHeight() >= 0);
     assertNull(tx.getSize());   // TODO monero-wallet-rpc: add tx_size to get_transfers and get_transfer_by_txid
     if (Boolean.TRUE.equals(ctx.isSendResponse)) assertTrue(tx.getWeight() > 0);
     else assertNull(tx.getWeight());
@@ -4768,7 +4768,7 @@ public abstract class TestMoneroWalletCommon {
       if (parsedTx.getChangeAmount().equals(BigInteger.valueOf(0))) assertNull(parsedTx.getChangeAddress());
       else MoneroUtils.validateAddress(parsedTx.getChangeAddress(), TestUtils.NETWORK_TYPE);
       assertTrue(parsedTx.getRingSize() > 1);
-      assertTrue(parsedTx.getUnlockTime() >= 0);
+      assertTrue(parsedTx.getUnlockHeight() >= 0);
       assertTrue(parsedTx.getNumDummyOutputs() >= 0);
       assertFalse(parsedTx.getExtraHex().isEmpty());
       assertTrue(parsedTx.getPaymentId() == null || !parsedTx.getPaymentId().isEmpty());

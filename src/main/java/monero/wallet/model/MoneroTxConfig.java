@@ -21,7 +21,7 @@ public class MoneroTxConfig {
   private BigInteger fee;
   private Integer accountIndex;
   private List<Integer> subaddressIndices;
-  private Long unlockTime;
+  private Long unlockHeight;
   private Boolean canSplit;
   private Boolean relay;
   private String note;
@@ -44,7 +44,7 @@ public class MoneroTxConfig {
     this.fee = config.fee;
     this.accountIndex = config.accountIndex;
     if (config.subaddressIndices != null) this.subaddressIndices = new ArrayList<Integer>(config.subaddressIndices);
-    this.unlockTime = config.unlockTime;
+    this.unlockHeight = config.unlockHeight;
     this.canSplit = config.canSplit;
     this.relay = config.relay;
     this.note = config.note;
@@ -183,12 +183,27 @@ public class MoneroTxConfig {
     return this;
   }
   
-  public Long getUnlockTime() {
-    return unlockTime;
+  /**
+   * Get the minimum height for the transaction to unlock.  The transaction
+   * will unlock on the maximum of the returned unlock height and the
+   * confirmation height + 10.
+   * 
+   * @return the minimum height for the transaction to unlock
+   */
+  public Long getUnlockHeight() {
+    return unlockHeight;
   }
 
-  public MoneroTxConfig setUnlockTime(Long unlockTime) {
-    this.unlockTime = unlockTime;
+  /**
+   * Set the minimum height for the transaction to unlock.  The transaction
+   * will unlock on the maximum of the given unlock height and the confirmation
+   * height + 10.
+   * 
+   * @param unlockHeight the minimum height for the transaction to unlock
+   * @return this configuration for chaining
+   */
+  public MoneroTxConfig setUnlockHeight(Long unlockHeight) {
+    this.unlockHeight = unlockHeight;
     return this;
   }
 
@@ -272,7 +287,7 @@ public class MoneroTxConfig {
     result = prime * result + ((recipientName == null) ? 0 : recipientName.hashCode());
     result = prime * result + ((subaddressIndices == null) ? 0 : subaddressIndices.hashCode());
     result = prime * result + ((sweepEachSubaddress == null) ? 0 : sweepEachSubaddress.hashCode());
-    result = prime * result + ((unlockTime == null) ? 0 : unlockTime.hashCode());
+    result = prime * result + ((unlockHeight == null) ? 0 : unlockHeight.hashCode());
     return result;
   }
 
@@ -319,9 +334,9 @@ public class MoneroTxConfig {
     if (sweepEachSubaddress == null) {
       if (other.sweepEachSubaddress != null) return false;
     } else if (!sweepEachSubaddress.equals(other.sweepEachSubaddress)) return false;
-    if (unlockTime == null) {
-      if (other.unlockTime != null) return false;
-    } else if (!unlockTime.equals(other.unlockTime)) return false;
+    if (unlockHeight == null) {
+      if (other.unlockHeight != null) return false;
+    } else if (!unlockHeight.equals(other.unlockHeight)) return false;
     return true;
   }
 }

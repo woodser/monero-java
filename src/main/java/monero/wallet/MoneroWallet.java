@@ -775,7 +775,7 @@ public interface MoneroWallet {
    * &nbsp;&nbsp; priority - transaction priority (default MoneroTxPriority.NORMAL)<br>
    * &nbsp;&nbsp; destinations - addresses and amounts in a multi-destination tx (required unless `address` and `amount` provided)<br>
    * &nbsp;&nbsp; paymentId - transaction payment ID (optional)<br>
-   * &nbsp;&nbsp; unlockTime - number of confirmations before the recipient can spend the funds (default 0)<br>
+   * &nbsp;&nbsp; unlockHeight - number of confirmations before the recipient can spend the funds (default 0)<br>
    * </p>
    * 
    * @param config configures the transaction to create
@@ -797,7 +797,7 @@ public interface MoneroWallet {
    * &nbsp;&nbsp; priority - transaction priority (default MoneroTxPriority.NORMAL)<br>
    * &nbsp;&nbsp; destinations - addresses and amounts in a multi-destination tx (required unless `address` and `amount` provided)<br>
    * &nbsp;&nbsp; paymentId - transaction payment ID (optional)<br>
-   * &nbsp;&nbsp; unlockTime - number of confirmations before the recipient can spend the funds (default 0)<br>
+   * &nbsp;&nbsp; unlockHeight - number of confirmations before the recipient can spend the funds (default 0)<br>
    * &nbsp;&nbsp; canSplit - allow funds to be transferred using multiple transactions (default true)<br>
    * </p>
    * 
@@ -814,7 +814,7 @@ public interface MoneroWallet {
    * &nbsp;&nbsp; address - single destination address (required)<br>
    * &nbsp;&nbsp; keyImage - key image to sweep (required)<br>
    * &nbsp;&nbsp; relay - relay the transaction to peers to commit to the blockchain (default false)<br>
-   * &nbsp;&nbsp; unlockTime - number of confirmations before the recipient can spend the funds (default 0)<br>
+   * &nbsp;&nbsp; unlockHeight - number of confirmations before the recipient can spend the funds (default 0)<br>
    * &nbsp;&nbsp; priority - transaction priority (default MoneroTxPriority.NORMAL)<br>
    * </p>
    * 
@@ -834,7 +834,7 @@ public interface MoneroWallet {
    * &nbsp;&nbsp; subaddressIndices - source subaddress indices to sweep from (optional)<br>
    * &nbsp;&nbsp; relay - relay the transactions to peers to commit to the blockchain (default false)<br>
    * &nbsp;&nbsp; priority - transaction priority (default MoneroTxPriority.NORMAL)<br>
-   * &nbsp;&nbsp; unlockTime - number of confirmations before the recipient can spend the funds (default 0)<br>
+   * &nbsp;&nbsp; unlockHeight - number of confirmations before the recipient can spend the funds (default 0)<br>
    * </p>
    * 
    * @param config is the sweep configuration

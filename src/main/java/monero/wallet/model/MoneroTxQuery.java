@@ -345,8 +345,8 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setUnlockTime(Long unlockTime) {
-    super.setUnlockTime(unlockTime);
+  public MoneroTxQuery setUnlockHeight(Long unlockHeight) {
+    super.setUnlockHeight(unlockHeight);
     return this;
   }
 
