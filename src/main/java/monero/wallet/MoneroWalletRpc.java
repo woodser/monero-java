@@ -794,7 +794,6 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   
   @Override
   public List<MoneroTxWallet> getTxs(MoneroTxQuery query, Collection<String> missingTxHashes) {
-    if (missingTxHashes != null) throw new MoneroError("MoneroWalletRpc.getTxs() does not support collecting unfound tx hashes");
     
     // copy query
     query = query == null ? new MoneroTxQuery() : query.copy();
@@ -851,8 +850,9 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     }
     txs = txsQueried;
     
-    // verify all specified tx hashes found
+    // collect unfound tx hashes
     if (query.getHashes() != null) {
+      List<String> unfoundTxHashes = new ArrayList<String>();
       for (String txHash : query.getHashes()) {
         boolean found = false;
         for (MoneroTxWallet tx : txs) {
@@ -861,8 +861,12 @@ public class MoneroWalletRpc extends MoneroWalletBase {
             break;
           }
         }
-        if (!found) throw new MoneroError("Tx not found in wallet: " + txHash);
+        if (!found) unfoundTxHashes.add(txHash);
       }
+     
+      // if txs not found, collect missing hashes or throw error if no collection given
+      if (missingTxHashes != null) for (String unfoundTxHash : unfoundTxHashes) missingTxHashes.add(unfoundTxHash);
+      else if (unfoundTxHashes.size() > 0) throw new MoneroError("Wallet missing requested tx hashes: " + unfoundTxHashes);
     }
     
     // special case: re-fetch txs if inconsistency caused by needing to make multiple rpc calls
@@ -2378,7 +2382,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Object val = rpcOutput.get(key);
       if (key.equals("amount")) output.setAmount((BigInteger) val);
       else if (key.equals("spent")) output.setIsSpent((Boolean) val);
-      else if (key.equals("key_image")) output.setKeyImage(new MoneroKeyImage((String) val));
+      else if (key.equals("key_image")) { if (!"".equals(val)) output.setKeyImage(new MoneroKeyImage((String) val)); }
       else if (key.equals("global_index")) output.setIndex(((BigInteger) val).intValue());
       else if (key.equals("tx_hash")) tx.setHash((String) val);
       else if (key.equals("unlocked")) tx.setIsLocked(!(Boolean) val);

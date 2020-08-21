@@ -536,53 +536,19 @@ public class MoneroTx {
       if (this.getOutputs() == null) this.setOutputs(tx.getOutputs());
       else {
         
-        // validate output indices if present
-        int numIndices = 0;
-        for (MoneroOutput output : this.getOutputs()) if (output.getIndex() != null) numIndices++;
-        for (MoneroOutput output : tx.getOutputs()) if (output.getIndex() != null) numIndices++;
-        GenUtils.assertTrue("Some outputs have an output index and some do not", numIndices == 0 || this.getOutputs().size() + tx.getOutputs().size() == numIndices);
-        
-        // determine if key images present
-        int numKeyImages = 0;
-        for (MoneroOutput output : this.getOutputs()) {
-          if (output.getKeyImage() != null) {
-            GenUtils.assertNotNull(output.getKeyImage().getHex());
-            numKeyImages++;
-          }
-        }
-        for (MoneroOutput output : tx.getOutputs()) {
-          if (output.getKeyImage() != null) {
-            GenUtils.assertNotNull(output.getKeyImage().getHex());
-            numKeyImages++;
-          }
-        }
-        GenUtils.assertTrue("Some outputs have a key image and some do not", numKeyImages == 0 || this.getOutputs().size() + tx.getOutputs().size() == numKeyImages);
-        
-        // merge outputs 
+        // merge outputs if key image or stealth public key present, otherwise append
         for (MoneroOutput merger : tx.getOutputs()) {
-          
-          // merge by key images if present
-          if (numKeyImages > 0) {
-            boolean merged = false;
-            merger.setTx(this);
-            if (this.getOutputs() == null) this.setOutputs(new ArrayList<MoneroOutput>());
-            for (MoneroOutput mergee : this.getOutputs()) {
-              if (mergee.getKeyImage().getHex().equals(merger.getKeyImage().getHex())) {
-                mergee.merge(merger);
-                merged = true;
-                break;
-              }
-            }
-            if (!merged) this.getOutputs().add(merger); // add new key image
-          }
-          
-          // otherwise merge by position (cannot merge by global index because pre-RingCT output indices are not unique)
-          else {
-            GenUtils.assertEquals(this.getOutputs().size(), tx.getOutputs().size());
-            for (int i = 0; i < tx.getOutputs().size(); i++) {
-              this.getOutputs().get(i).merge(tx.getOutputs().get(i));
+          boolean merged = false;
+          merger.setTx(this);
+          for (MoneroOutput mergee : this.getOutputs()) {
+            if ((merger.getKeyImage() != null && mergee.getKeyImage().getHex().equals(merger.getKeyImage().getHex())) ||
+                (merger.getStealthPublicKey() != null && mergee.getStealthPublicKey().equals(merger.getStealthPublicKey()))) {
+             mergee.merge(merger);
+             merged = true;
+             break;
             }
           }
+          if (!merged) this.getOutputs().add(merger); // append output
         }
       }
     }

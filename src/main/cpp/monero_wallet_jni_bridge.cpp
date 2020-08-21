@@ -952,7 +952,8 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
     //cout << "Fetching txs with query: " << tx_query->serialize() << endl;
 
     // get txs
-    vector<shared_ptr<monero_tx_wallet>> txs = wallet->get_txs(*tx_query);
+    vector<string> missing_tx_hashes;
+    vector<shared_ptr<monero_tx_wallet>> txs = wallet->get_txs(*tx_query, missing_tx_hashes);
     MTRACE("Got " << txs.size() << " txs");
 
     // return unique blocks to preserve model relationships as tree
@@ -977,6 +978,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv* e
     rapidjson::Document doc;
     doc.SetObject();
     doc.AddMember("blocks", monero_utils::to_rapidjson_val(doc.GetAllocator(), blocks), doc.GetAllocator());
+    if (!missing_tx_hashes.empty()) doc.AddMember("missingTxHashes", monero_utils::to_rapidjson_val(doc.GetAllocator(), missing_tx_hashes), doc.GetAllocator());
     string blocks_json = monero_utils::serialize(doc);
     return env->NewStringUTF(blocks_json.c_str());
   } catch (...) {

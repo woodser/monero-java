@@ -1,6 +1,6 @@
 # Monero Java Library
 
-A Java library for creating Monero applications using RPC or JNI bindings to [monero v0.16.0.1 'Nitrogen Nebula'](https://github.com/monero-project/monero/tree/v0.16.0.1).
+A Java library for creating Monero applications using RPC or JNI bindings to [monero v0.16.0.3 'Nitrogen Nebula'](https://github.com/monero-project/monero/tree/v0.16.0.3).
 
 * Supports wallet and daemon RPC clients.
 * Supports client-side wallets using JNI bindings.
@@ -49,7 +49,7 @@ String primaryAddress = walletRpc.getPrimaryAddress();  // 555zgduFhmKd2o8rPUz..
 BigInteger balance = walletRpc.getBalance();            // 533648366742
 List<MoneroTxWallet> txs = walletRpc.getTxs();          // get transactions containing transfers to/from the wallet
 
-// create wallet from mnemonic phrase using JNI bindings to Monero Core
+// create wallet from mnemonic phrase using JNI bindings to monero-project
 MoneroWalletJni walletJni = MoneroWalletJni.createWallet(new MoneroWalletConfig()
         .setPath("sample_wallet_jni")
         .setPassword("supersecretpassword123")
@@ -140,7 +140,7 @@ If you want to process binary data or use a client-side wallet instead of RPC, s
 
 ## Developer guide
 
-Please refer to [monero-javascript's developer guide](https://github.com/monero-ecosystem/monero-javascript#developer-guide) which mostly translates to monero-java.
+Refer to [monero-javascript's developer guide](https://github.com/monero-ecosystem/monero-javascript#developer-guide) which mostly translates to monero-java.
 
 ## Running JUnit tests
 

@@ -75,7 +75,7 @@ public class TestSampleCode {
     BigInteger balance = walletRpc.getBalance();            // 533648366742
     List<MoneroTxWallet> txs = walletRpc.getTxs();          // get transactions containing transfers to/from the wallet
     
-    // create wallet from mnemonic phrase using JNI bindings to Monero Core
+    // create wallet from mnemonic phrase using JNI bindings to monero-project
     MoneroWalletJni walletJni = MoneroWalletJni.createWallet(new MoneroWalletConfig()
             .setPath("./test_wallets/" + UUID.randomUUID().toString())  // *** CHANGE README TO "sample_wallet_jni" ***
             .setPassword("supersecretpassword123")
@@ -174,7 +174,7 @@ public class TestSampleCode {
     MoneroOutputQuery outputQuery = new MoneroOutputQuery().setIsSpent(false);
     List<MoneroOutputWallet> outputs = walletRpc.getOutputs(outputQuery);
     
-    // create a wallet from a mnemonic phrase using Java native bindings to Monero Core
+    // create a wallet from a mnemonic phrase using Java native bindings to monero-project
     MoneroWalletJni walletJni = MoneroWalletJni.createWallet(new MoneroWalletConfig()   // *** REPLACE WITH BELOW FOR README ***
             .setPath("./test_wallets/" + UUID.randomUUID())
             .setPassword("supersecretpassword123")
