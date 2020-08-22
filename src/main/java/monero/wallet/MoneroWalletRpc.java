@@ -992,6 +992,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       config = config.copy();
       config.setCanSplit(true);
     }
+    if (Boolean.TRUE.equals(config.getRelay()) && isMultisig()) throw new MoneroError("Cannot relay multisig transaction until co-signed");
     
     // determine account and subaddresses to send from
     Integer accountIdx = config.getAccountIndex();

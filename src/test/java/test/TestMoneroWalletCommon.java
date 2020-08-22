@@ -3463,7 +3463,7 @@ public abstract class TestMoneroWalletCommon {
         
         // attempt creating and relaying transaction without synchronizing with participants
         try {
-          curWallet.createTx(new MoneroTxConfig().setAccountIndex(1).setAddress(returnAddress).setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))).setRelay(true)).getTxSet();
+          curWallet.createTx(new MoneroTxConfig().setAccountIndex(1).setAddress(returnAddress).setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3)))).getTxSet();
           throw new RuntimeException("Should have failed sending funds without synchronizing with peers");
         } catch (MoneroError e) {
           assertEquals("No transaction created", e.getMessage());
@@ -3474,9 +3474,18 @@ public abstract class TestMoneroWalletCommon {
         curWallet = synchronizeMultisigParticipants(curWallet, walletIds);
         assertEquals(walletIds.get(0), curWallet.getAttribute("name"));
         
+        // attempt relaying created transactions without co-signing
+        try {
+          curWallet.createTxs(new MoneroTxConfig().setAddress(returnAddress).setAmount(TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0).setRelay(true));
+          throw new RuntimeException("Should have failed");
+        } catch (Exception e) {
+          assertTrue(e instanceof MoneroError);
+          assertEquals("Cannot relay multisig transaction until co-signed", e.getMessage());
+        }
+        
         // send funds from a subaddress in the multisig wallet
         System.out.println("Sending");
-        List<MoneroTxWallet> txs = curWallet.createTxs(new MoneroTxConfig().setAddress(returnAddress).setAmount(TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0).setRelay(true));  // TODO: this should fail with setRelay(true) because not relayed without co-signatures
+        List<MoneroTxWallet> txs = curWallet.createTxs(new MoneroTxConfig().setAddress(returnAddress).setAmount(TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0));
         assertFalse(txs.isEmpty());
         MoneroTxSet txSet = txs.get(0).getTxSet();
         assertNotNull(txSet.getMultisigTxHex());
