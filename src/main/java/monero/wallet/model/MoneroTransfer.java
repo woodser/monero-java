@@ -70,8 +70,8 @@ public abstract class MoneroTransfer {
   }
   
   /**
-   * Updates this transaction by merging the latest information from the given
-   * transaction.
+   * Updates this transfer by merging the latest information from the given
+   * transfer.
    * 
    * Merging can modify or build references to the transfer given so it
    * should not be re-used or it should be copied before calling this method.
@@ -92,9 +92,9 @@ public abstract class MoneroTransfer {
     // otherwise merge transfer fields
     this.setAccountIndex(GenUtils.reconcile(this.getAccountIndex(), transfer.getAccountIndex()));
     
-    // TODO monero core: failed tx in pool (after testUpdateLockedDifferentAccounts()) causes non-originating saved wallets to return duplicate incoming transfers but one has amount/numSuggestedConfirmations of 0
+    // TODO monero core: returning transfers with 0 amount/numSuggestedConfirmations
     if (this.getAmount() != null && transfer.getAmount() != null && !this.getAmount().equals(transfer.getAmount()) && (BigInteger.valueOf(0).equals(this.getAmount()) || BigInteger.valueOf(0).equals(transfer.getAmount()))) {
-      throw new MoneroError("WARNING: failed tx in pool causes non-originating wallets to return duplicate incoming transfers but with one amount/numSuggestedConfirmations of 0");
+      //throw new MoneroError("WARNING: monero core returning transfers with 0 amount/numSuggestedConfirmations");
     } else {
       this.setAmount(GenUtils.reconcile(this.getAmount(), transfer.getAmount()));
     }
