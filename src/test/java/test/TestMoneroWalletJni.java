@@ -721,6 +721,8 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertEquals(daemon.getRpcConnection(), wallet.getDaemonConnection());
       wallet.stopSyncing();
       wallet.sync();
+      wallet.stopSyncing();
+      wallet.stopSyncing();
     } finally {
       wallet.close();
     }

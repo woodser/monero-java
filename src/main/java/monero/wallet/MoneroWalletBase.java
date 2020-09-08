@@ -291,6 +291,11 @@ public abstract class MoneroWalletBase implements MoneroWallet {
   }
   
   @Override
+  public int importMultisigHex(String... multisigHexes) {
+    return importMultisigHex(Arrays.asList(multisigHexes));
+  }
+  
+  @Override
   public void close() {
     close(false); // close without saving
   }

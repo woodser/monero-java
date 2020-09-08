@@ -273,7 +273,7 @@ public interface MoneroWallet {
   public void startSyncing();
   
   /**
-   * Stop the asynchronous thread to continuously synchronize the wallet with the daemon.
+   * Stop synchronizing the wallet with the daemon.
    */
   public void stopSyncing();
   
@@ -1235,6 +1235,14 @@ public interface MoneroWallet {
    * @return this wallet's multisig info as hex for other participants
    */
   public String getMultisigHex();
+  
+  /**
+   * Import multisig info as hex from other participants.
+   * 
+   * @param multisigHexes are multisig hex from each participant
+   * @return the number of outputs signed with the given multisig hex
+   */
+  public int importMultisigHex(String... multisigHexes);
   
   /**
    * Import multisig info as hex from other participants.
