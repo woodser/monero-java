@@ -33,6 +33,15 @@ public class MoneroUtils {
     }
   }
   
+  /**
+   * Get the version of the monero-java library.
+   * 
+   * @return the version of this monero-java library
+   */
+  static String getVersion() {
+    return "0.3.5";
+  }
+  
   public static final long WALLET2_REFRESH_INTERVAL = 10000;  // core wallet2 syncs on a fixed intervals
   public static final int RING_SIZE = 12;                     // network-enforced ring size
 
