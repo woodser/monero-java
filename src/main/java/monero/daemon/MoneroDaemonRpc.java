@@ -1364,6 +1364,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("outgoing_connections_count")) info.setNumOutgoingConnections(((BigInteger) val).intValue());
       else if (key.equals("rpc_connections_count")) info.setNumRpcConnections(((BigInteger) val).intValue());
       else if (key.equals("start_time")) info.setStartTimestamp(((BigInteger) val).longValue());
+      else if (key.equals("adjusted_time")) info.setAdjustedTimestamp(((BigInteger) val).longValue());
       else if (key.equals("status")) {}  // handled elsewhere
       else if (key.equals("target")) info.setTarget(((BigInteger) val).longValue());
       else if (key.equals("target_height")) info.setTargetHeight(((BigInteger) val).longValue());

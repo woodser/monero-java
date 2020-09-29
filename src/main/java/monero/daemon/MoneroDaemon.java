@@ -476,22 +476,6 @@ public interface MoneroDaemon {
    */
   public List<String> getAltBlockHashes();
   
-//  /**
-//   * Get the daemon's current download and upload bandwidth limits.
-//   *
-//   * @return MoneroDaemonBandwidthLimits contains the current upload and download bandwidth limits
-//   */
-//  public MoneroDaemonBandwidthLimits getBandwidthLimits();
-//  
-//  /**
-//   * Set the daemon's current download and upload bandwidth limits.
-//   * 
-//   * @param downloadLimit is the download limit to set (-1 to reset to default, 0 or null to make no change)
-//   * @param uploadLimit is the upload limit to set (-1 to reset to default, 0 or null to make no change)
-//   * @return MoneroDaemonBandwidthLimits are the daemon's bandwidth limits after setting
-//   */
-//  public MoneroDaemonBandwidthLimits setBandwidthLimits(Integer downloadLimit, Integer uploadLimit);
-  
   /**
    * Get the download bandwidth limit.
    * 

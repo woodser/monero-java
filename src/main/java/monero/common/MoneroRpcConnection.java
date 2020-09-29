@@ -127,7 +127,9 @@ public class MoneroRpcConnection {
       EntityUtils.consume(resp.getEntity());
 
       // check RPC response for errors
-      //System.out.println("Received response: " + respMap);
+      //String respStr = JsonUtils.serialize(respMap);
+      //respStr = respStr.substring(0, Math.min(1000, respStr.length()));
+      //System.out.println("Received response: " + respStr);
       validateRpcResponse(respMap, method, params);
       return respMap;
     } catch (MoneroRpcError e1) {

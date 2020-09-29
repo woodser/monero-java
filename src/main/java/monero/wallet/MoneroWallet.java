@@ -37,6 +37,8 @@ import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroMessageSignatureResult;
+import monero.wallet.model.MoneroMessageSignatureType;
 import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroMultisigSignResult;
@@ -917,14 +919,25 @@ public interface MoneroWallet {
   public String signMessage(String message);
   
   /**
+   * Sign a message.
+   * 
+   * @param msg - the message to sign
+   * @param signatureType - sign with spend key or view key
+   * @param accountIdx - the account index of the message signature (default 0)
+   * @param subaddressIdx - the subaddress index of the message signature (default 0)
+   * @return the signature
+   */
+  public String signMessage(String message, MoneroMessageSignatureType signatureType, int accountIdx, int subaddressIdx);
+  
+  /**
    * Verify a signature on a message.
    * 
    * @param message is the signed message
    * @param address is the signing address
    * @param signature is the signature
-   * @return true if the signature is good, false otherwise
+   * @return the message signature verification result
    */
-  public boolean verifyMessage(String message, String address, String signature);
+  public MoneroMessageSignatureResult verifyMessage(String message, String address, String signature);
   
   /**
    * Get a transaction's secret key from its hash.

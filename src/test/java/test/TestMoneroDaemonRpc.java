@@ -278,7 +278,7 @@ public class TestMoneroDaemonRpc {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
     
     // set number of blocks to test
-    int numBlocks = 200;
+    int numBlocks = 100;
     
     // select random heights  // TODO: this is horribly inefficient way of computing last 100 blocks if not shuffling
     long currentHeight = daemon.getHeight();
@@ -334,7 +334,7 @@ public class TestMoneroDaemonRpc {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // get long height range
-    long numBlocks = 2160; // test ~3 days of blocks
+    long numBlocks = Math.min(daemon.getHeight() - 2, 1440); // test up to ~2 days of blocks
     assertTrue(numBlocks > 0);
     long height = daemon.getHeight();
     assertTrue(height - numBlocks - 1 < height);
@@ -1662,7 +1662,7 @@ public class TestMoneroDaemonRpc {
     int numTxs = 5;
     List<String> txHashes = new ArrayList<String>();
     long height = daemon.getHeight();
-    while (txHashes.size() < numTxs) {
+    while (txHashes.size() < numTxs && height >= 0) {
       MoneroBlock block = daemon.getBlockByHeight(--height);
       for (String txHash : block.getTxHashes()) txHashes.add(txHash);
     }
@@ -1772,6 +1772,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(info.getNumOutgoingConnections() >= 0);
     assertTrue(info.getNumRpcConnections() >= 0);
     assertTrue(info.getStartTimestamp() > 0);
+    assertTrue(info.getAdjustedTimestamp() > 0);
     assertTrue(info.getTarget() > 0);
     assertTrue(info.getTargetHeight() >= 0);
     assertTrue(info.getNumTxs() >= 0);

@@ -29,6 +29,11 @@ public class MoneroSubaddress {
     this.address = address;
   }
   
+  public MoneroSubaddress(int accountIndex, int index) {
+    this.accountIndex = accountIndex;
+    this.index = index;
+  }
+  
   public Integer getAccountIndex() {
     return accountIndex;
   }

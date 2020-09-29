@@ -29,6 +29,7 @@ public class MoneroDaemonInfo {
   private Integer numOutgoingConnections;
   private Integer numRpcConnections;
   private Long startTimestamp;
+  private Long adjustedTimestamp;
   private Long target;
   private Long targetHeight;
   private String topBlockHash;
@@ -199,6 +200,14 @@ public class MoneroDaemonInfo {
   
   public void setStartTimestamp(Long startTimestamp) {
     this.startTimestamp = startTimestamp;
+  }
+  
+  public Long getAdjustedTimestamp() {
+    return adjustedTimestamp;
+  }
+  
+  public void setAdjustedTimestamp(Long adjustedTimestamp) {
+    this.adjustedTimestamp = adjustedTimestamp;
   }
   
   public Long getTarget() {

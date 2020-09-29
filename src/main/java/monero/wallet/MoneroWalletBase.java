@@ -34,6 +34,7 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroMessageSignatureType;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSubaddress;
@@ -258,6 +259,11 @@ public abstract class MoneroWalletBase implements MoneroWallet {
     List<String> txHexes = new ArrayList<String>();
     for (MoneroTxWallet tx : txs) txHexes.add(tx.getMetadata());
     return relayTxs(txHexes);
+  }
+  
+  @Override
+  public String signMessage(String message) {
+    return signMessage(message, MoneroMessageSignatureType.SIGN_WITH_SPEND_KEY, 0, 0);
   }
   
   @Override

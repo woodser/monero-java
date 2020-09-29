@@ -58,6 +58,8 @@ import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroMessageSignatureResult;
+import monero.wallet.model.MoneroMessageSignatureType;
 import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroMultisigSignResult;
@@ -1193,9 +1195,12 @@ public class MoneroWalletRpc extends MoneroWalletBase {
 
   @SuppressWarnings("unchecked")
   @Override
-  public String signMessage(String msg) {
+  public String signMessage(String msg, MoneroMessageSignatureType signatureType, int accountIdx, int subaddressIdx) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("data", msg);
+    params.put("signature_type", signatureType == MoneroMessageSignatureType.SIGN_WITH_SPEND_KEY ? "spend" : "view");
+    params.put("account_index", accountIdx);
+    params.put("address_index", subaddressIdx);
     Map<String, Object> resp = rpc.sendJsonRequest("sign", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return (String) result.get("signature");
@@ -1203,14 +1208,24 @@ public class MoneroWalletRpc extends MoneroWalletBase {
 
   @SuppressWarnings("unchecked")
   @Override
-  public boolean verifyMessage(String msg, String address, String signature) {
+  public MoneroMessageSignatureResult verifyMessage(String msg, String address, String signature) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("data", msg);
     params.put("address", address);
     params.put("signature", signature);
-    Map<String, Object> resp = rpc.sendJsonRequest("verify", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (boolean) result.get("good");
+    try {
+      Map<String, Object> resp = rpc.sendJsonRequest("verify", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      boolean isGood = (boolean) result.get("good");
+      return new MoneroMessageSignatureResult(
+          isGood,
+          !isGood ? null : (Boolean) result.get("old"),
+          !isGood || !result.containsKey("signature_type") ? null : "view".equals(result.get("signature_type")) ? MoneroMessageSignatureType.SIGN_WITH_VIEW_KEY : MoneroMessageSignatureType.SIGN_WITH_SPEND_KEY,
+          !isGood ? null : ((BigInteger) result.get("version")).intValue());
+    } catch (MoneroRpcError e) {
+      if (e.getCode() == -2) return new MoneroMessageSignatureResult(false, null, null, null);
+      throw e;
+    }
   }
 
   @SuppressWarnings("unchecked")

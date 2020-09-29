@@ -1431,6 +1431,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     // run until test completes
     while (!listener.testComplete) TimeUnit.SECONDS.sleep(10);
     if (daemon.getMiningStatus().isActive()) daemon.stopMining();
+    receiver.close();
     assertNull(listener.testError, listener.testError);
     assertNotNull("No notification of confirmed output", listener.confirmedHeight);
     assertTrue("No notification of output unlocked", listener.unlockedSeen);

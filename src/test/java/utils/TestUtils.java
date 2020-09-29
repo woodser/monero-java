@@ -61,7 +61,7 @@ public class TestUtils {
   public static final String LANGUAGE = "English";
   public static final String MNEMONIC = "niece cube almost phase zeal ultimate pyramid tapestry hickory bulb bifocals festival always wayside sphere kept upwards wagtail invoke radar pager flippant sensible stunning kept"; 
   public static final String ADDRESS = "59dF9pSotECe1Fn4dBGZXWHYyNdo53rbZ7YYseu9jBKCf4c2cUzhuFVRH8HuD4wyaKTqtD3VF3F4eQe3Kzq342F5U8R4jeq";
-  public static final long FIRST_RECEIVE_HEIGHT = 437; // NOTE: this value MUST be the height of the wallet's first tx for tests
+  public static final long FIRST_RECEIVE_HEIGHT = 201; // NOTE: this value MUST be the height of the wallet's first tx for tests
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class.getName());

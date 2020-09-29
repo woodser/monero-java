@@ -49,6 +49,8 @@ import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroKeyImageImportResult;
+import monero.wallet.model.MoneroMessageSignatureResult;
+import monero.wallet.model.MoneroMessageSignatureType;
 import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroMultisigSignResult;
@@ -2267,15 +2269,52 @@ public abstract class TestMoneroWalletCommon {
   }
   
   // Can sign and verify messages
+  // TODO: test with view-only wallet
   @Test
   public void testSignAndVerifyMessages() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
+    
+    // message to sign and subaddresses to test
     String msg = "This is a super important message which needs to be signed and verified.";
-    String signature = wallet.signMessage(msg);
-    boolean verified = wallet.verifyMessage(msg, wallet.getAddress(0, 0), signature);
-    assertEquals(true, verified);
-    verified = wallet.verifyMessage(msg, TestUtils.getExternalWalletAddress(), signature);
-    assertEquals(false, verified);
+    List<MoneroSubaddress> subaddresses = Arrays.asList(new MoneroSubaddress(0, 0), new MoneroSubaddress(0, 1), new MoneroSubaddress(1, 0));
+    
+    // test signing message with subaddresses
+    for (MoneroSubaddress subaddress : subaddresses) {
+      
+      // sign and verify message with spend key
+      String signature = wallet.signMessage(msg, MoneroMessageSignatureType.SIGN_WITH_SPEND_KEY, subaddress.getAccountIndex(), subaddress.getIndex());
+      MoneroMessageSignatureResult result = wallet.verifyMessage(msg, wallet.getAddress(subaddress.getAccountIndex(), subaddress.getIndex()), signature);
+      assertEquals(new MoneroMessageSignatureResult(true, false, MoneroMessageSignatureType.SIGN_WITH_SPEND_KEY, 2), result);
+      
+      // verify message with incorrect address
+      result = wallet.verifyMessage(msg, wallet.getAddress(0, 2), signature);
+      assertEquals(new MoneroMessageSignatureResult(false, null, null, null), result);
+      
+      // verify message with invalid address
+      result = wallet.verifyMessage(msg, "invalid address", signature);
+      assertEquals(new MoneroMessageSignatureResult(false, null, null, null), result);
+      
+      // verify message with external address
+      result = wallet.verifyMessage(msg, TestUtils.getExternalWalletAddress(), signature);
+      assertEquals(new MoneroMessageSignatureResult(false, null, null, null), result);
+      
+      // sign and verify message with view key
+      signature = wallet.signMessage(msg, MoneroMessageSignatureType.SIGN_WITH_VIEW_KEY, subaddress.getAccountIndex(), subaddress.getIndex());
+      result = wallet.verifyMessage(msg, wallet.getAddress(subaddress.getAccountIndex(), subaddress.getIndex()), signature);
+      assertEquals(new MoneroMessageSignatureResult(true, false, MoneroMessageSignatureType.SIGN_WITH_VIEW_KEY, 2), result);
+      
+      // verify message with incorrect address
+      result = wallet.verifyMessage(msg, wallet.getAddress(0, 2), signature);
+      assertEquals(new MoneroMessageSignatureResult(false, null, null, null), result);
+      
+      // verify message with external address
+      result = wallet.verifyMessage(msg, TestUtils.getExternalWalletAddress(), signature);
+      assertEquals(new MoneroMessageSignatureResult(false, null, null, null), result);
+      
+      // verify message with invalid address
+      result = wallet.verifyMessage(msg, "invalid address", signature);
+      assertEquals(new MoneroMessageSignatureResult(false, null, null, null), result);
+    }
   }
   
   // Has an address book
@@ -3396,12 +3435,12 @@ public abstract class TestMoneroWalletCommon {
         }
         curWallet.close(true);
         
-        System.out.println("Sending funds from main wallet");
         
         // send funds from the main test wallet to destinations in the first multisig wallet
         curWallet = getTestWallet();  // get / open the main test wallet
         assertEquals(BEGIN_MULTISIG_NAME, curWallet.getAttribute("name"));
         assertTrue(curWallet.getBalance().compareTo(BigInteger.valueOf(0)) > 0);
+        System.out.println("Sending funds from main wallet");
         curWallet.createTx(new MoneroTxConfig().setAccountIndex(0).setDestinations(destinations).setRelay(true));
         String returnAddress = curWallet.getPrimaryAddress(); // funds will be returned to this address from the multisig wallet
         
@@ -3463,7 +3502,7 @@ public abstract class TestMoneroWalletCommon {
         
         // attempt creating and relaying transaction without synchronizing with participants
         try {
-          curWallet.createTx(new MoneroTxConfig().setAccountIndex(1).setAddress(returnAddress).setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3)))).getTxSet();
+          curWallet.createTxs(new MoneroTxConfig().setAccountIndex(1).setAddress(returnAddress).setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))));
           throw new RuntimeException("Should have failed sending funds without synchronizing with peers");
         } catch (MoneroError e) {
           assertEquals("No transaction created", e.getMessage());
@@ -3632,8 +3671,8 @@ public abstract class TestMoneroWalletCommon {
       List<String> peerMultisigHexes = new ArrayList<String>();
       for (int j = 0; j < walletIds.size(); j++) if (j != i) peerMultisigHexes.add(multisigHexes.get(j));
       MoneroWallet wallet = openWallet(walletIds.get(i));
+      wallet.sync();  // TODO monero-core: creating multisig tx fails if wallet not explicitly synced before import_multisig_hex: https://github.com/monero-project/monero/issues/6850
       wallet.importMultisigHex(peerMultisigHexes);
-      wallet.sync();
       wallet.close(true);
     }
     

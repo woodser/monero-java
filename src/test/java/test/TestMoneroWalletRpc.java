@@ -34,7 +34,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   protected MoneroWalletRpc wallet;
   
   public TestMoneroWalletRpc() {
-    this.wallet = (MoneroWalletRpc) getTestWallet();
+    super();
+    wallet = (MoneroWalletRpc) super.wallet;
   }
 
   @BeforeClass

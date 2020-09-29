@@ -1345,14 +1345,15 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_relayTxsJni(JN
   return jtx_hashes;
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signMessageJni(JNIEnv* env, jobject instance, jstring jmsg) {
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signMessageJni(JNIEnv* env, jobject instance, jstring jmsg, jint message_signature_type, jint account_idx, jint subaddress_idx) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_signMessageJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _msg = jmsg ? env->GetStringUTFChars(jmsg, NULL) : nullptr;
   string msg = string(_msg ? _msg : "");
   env->ReleaseStringUTFChars(jmsg, _msg);
+  monero_message_signature_type signature_type = message_signature_type == 0 ? monero_message_signature_type::SIGN_WITH_SPEND_KEY : monero_message_signature_type::SIGN_WITH_VIEW_KEY;
   try {
-    string signature = wallet->sign_message(msg);
+    string signature = wallet->sign_message(msg, signature_type, account_idx, subaddress_idx);
     return env->NewStringUTF(signature.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -1360,7 +1361,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signMessageJni(JNIE
   }
 }
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_verifyMessageJni(JNIEnv* env, jobject instance, jstring jmsg, jstring jaddress, jstring jsignature) {
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_verifyMessageJni(JNIEnv* env, jobject instance, jstring jmsg, jstring jaddress, jstring jsignature) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_verifyMessageJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _msg = jmsg ? env->GetStringUTFChars(jmsg, NULL) : nullptr;
@@ -1373,8 +1374,8 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_verifyMessageJni(J
   env->ReleaseStringUTFChars(jaddress, _address);
   env->ReleaseStringUTFChars(jsignature, _signature);
   try {
-    bool is_good = wallet->verify_message(msg, address, signature);
-    return static_cast<jboolean>(is_good);
+    monero_message_signature_result result = wallet->verify_message(msg, address, signature);
+    return env->NewStringUTF(result.serialize().c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
