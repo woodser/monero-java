@@ -923,6 +923,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   // Can be moved
+  // TODO: update to be consistent with monero-javascript, file issues with wallet2 store_to()
   @Test
   public void testMoveTo() {
     org.junit.Assume.assumeTrue(TEST_NON_RELAYS);
