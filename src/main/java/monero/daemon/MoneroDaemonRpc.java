@@ -1533,25 +1533,29 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     }
 
     public void addListener(MoneroDaemonListener listener) {
-      
-      // register listener
-      listeners.add(listener);
-      
-      // start polling thread
-      if (runnable == null) {
-        runnable = new MoneroDaemonPollerRunnable(daemon, POLL_INTERVAL_MS);
-        Thread thread = new Thread(runnable);
-        thread.setDaemon(true); // daemon thread does not prevent JVM from halting
-        thread.start();
+      synchronized(listeners) { 
+        
+        // register listener
+        listeners.add(listener);
+        
+        // start polling thread
+        if (runnable == null) {
+          runnable = new MoneroDaemonPollerRunnable(daemon, POLL_INTERVAL_MS);
+          Thread thread = new Thread(runnable);
+          thread.setDaemon(true); // daemon thread does not prevent JVM from halting
+          thread.start();
+        }
       }
     }
     
     public void removeListener(MoneroDaemonListener listener) {
-      boolean found = listeners.remove(listener);
-      if (!found) throw new MoneroError("Listener is not registered");
-      if (listeners.isEmpty()) {
-        runnable.terminate();
-        runnable = null;
+      synchronized(listeners) {
+        boolean found = listeners.remove(listener);
+        if (!found) throw new MoneroError("Listener is not registered");
+        if (listeners.isEmpty()) {
+          runnable.terminate();
+          runnable = null;
+        }
       }
     }
     
@@ -1588,8 +1592,10 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
           MoneroBlockHeader header = daemon.getLastBlockHeader();
           if (!header.getHash().equals(lastHeader.getHash())) {
             lastHeader = header;
-            for (MoneroDaemonListener listener : listeners) {
-              listener.onBlockHeader(header); // notify listener
+            synchronized(listeners) {
+              for (MoneroDaemonListener listener : listeners) {
+                listener.onBlockHeader(header); // notify listener
+              }
             }
           }
         }
