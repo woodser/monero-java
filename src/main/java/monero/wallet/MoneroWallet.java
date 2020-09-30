@@ -921,7 +921,7 @@ public interface MoneroWallet {
   /**
    * Sign a message.
    * 
-   * @param msg - the message to sign
+   * @param message - the message to sign
    * @param signatureType - sign with spend key or view key
    * @param accountIdx - the account index of the message signature (default 0)
    * @param subaddressIdx - the subaddress index of the message signature (default 0)
