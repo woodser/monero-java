@@ -1,3 +1,6 @@
+support wallet.changePassword()
+moveTo(path, password) password not supported, update to be like monero-javascript
+
 HIGH
 restore height is lost after closing wallet in JNI but not WASM
 verify gradle and maven builds after package renames
