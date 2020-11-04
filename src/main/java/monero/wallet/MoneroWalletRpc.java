@@ -873,7 +873,10 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     
     // special case: re-fetch txs if inconsistency caused by needing to make multiple rpc calls
     for (MoneroTxWallet tx : txs) {
-      if (tx.isConfirmed() && tx.getBlock() == null) return getTxs(query);
+      if (tx.isConfirmed() && tx.getBlock() == null) {
+        LOGGER.warning("Inconsistency detected building txs from multiple rpc calls, re-fetching");
+        return getTxs(query);
+      }
     }
     
     // order txs if tx hashes given

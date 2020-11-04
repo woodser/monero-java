@@ -1662,7 +1662,7 @@ public class TestMoneroDaemonRpc {
     int numTxs = 5;
     List<String> txHashes = new ArrayList<String>();
     long height = daemon.getHeight();
-    while (txHashes.size() < numTxs && height >= 0) {
+    while (txHashes.size() < numTxs && height > 0) {
       MoneroBlock block = daemon.getBlockByHeight(--height);
       for (String txHash : block.getTxHashes()) txHashes.add(txHash);
     }

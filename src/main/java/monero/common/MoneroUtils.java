@@ -39,7 +39,7 @@ public class MoneroUtils {
    * @return the version of this monero-java library
    */
   static String getVersion() {
-    return "0.3.6";
+    return "0.3.7";
   }
   
   public static final long WALLET2_REFRESH_INTERVAL = 10000;  // core wallet2 syncs on a fixed intervals
