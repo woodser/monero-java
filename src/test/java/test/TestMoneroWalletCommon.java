@@ -2726,7 +2726,7 @@ public abstract class TestMoneroWalletCommon {
     
     // test balances
     assertTrue(unlockedBalance2.compareTo(unlockedBalance1) < 0); // unlocked balance should decrease
-    BigInteger expectedBalance = balance1.subtract(tx.getOutgoingAmount().subtract(tx.getFee()));
+    BigInteger expectedBalance = balance1.subtract(tx.getOutgoingAmount()).subtract(tx.getFee());
     assertEquals("Balance after send was not balance before - net tx amount - fee (5 - 1 != 4 test)", expectedBalance, balance2);
   }
   

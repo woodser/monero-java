@@ -124,7 +124,6 @@ wallet rpc sweep_all subaddr_indices_all gathers subaddresses with 0 unlocked ba
 
 OPEN ISSUES
 testGetReserveProofAccount() exception, re-enable test reserves or report issue - issue #6595
-User experience: 5 - 1 = 4 but wallet2 reports the incorrect balance until the first confirmation: https://github.com/monero-project/monero/issues/5809
 User experience: let users spend low confirmation funds without being locked for 10 blocks: https://github.com/monero-project/monero/issues/5810
 wallet2 does not fully sync transactions in the pool: https://github.com/monero-project/monero/issues/5811
 wallet2 import_key_images erases incoming transfers: https://github.com/monero-project/monero/issues/5812
