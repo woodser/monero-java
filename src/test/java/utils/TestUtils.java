@@ -45,7 +45,7 @@ public class TestUtils {
   public static final String DAEMON_RPC_PASSWORD = "abctesting123";  
   
   // monero wallet rpc configuration (adjust per your configuration)
-  public static final String WALLET_RPC_URI = "http://localhost:38083";
+  public static final String WALLET_RPC_URI = "http://localhost:38084";
   public static final String WALLET_RPC_USERNAME = "rpc_user";
   public static final String WALLET_RPC_PASSWORD = "abc123";
 
