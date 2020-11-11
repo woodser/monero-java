@@ -8,6 +8,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import common.types.Filter;
+import common.utils.JsonUtils;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,13 +23,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import common.types.Filter;
-import common.utils.JsonUtils;
 import monero.common.MoneroError;
 import monero.common.MoneroUtils;
 import monero.daemon.MoneroDaemonRpc;
@@ -67,6 +62,9 @@ import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import utils.StartMining;
 import utils.TestUtils;
 import utils.WalletEqualityUtils;
@@ -2708,26 +2706,50 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testSendToExternal() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
-    
-    // collect balances before
-    BigInteger balance1 = wallet.getBalance();
-    BigInteger unlockedBalance1 = wallet.getUnlockedBalance();
-    
-    // send funds to external address
-    MoneroTxWallet tx = wallet.createTx(new MoneroTxConfig()
-            .setAccountIndex(0)
-            .setAddress(TestUtils.getExternalWalletAddress())
-            .setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3)))
-            .setRelay(true));
-    
-    // collect balances after
-    BigInteger balance2 = wallet.getBalance();
-    BigInteger unlockedBalance2 = wallet.getUnlockedBalance();
-    
-    // test balances
-    assertTrue(unlockedBalance2.compareTo(unlockedBalance1) < 0); // unlocked balance should decrease
-    BigInteger expectedBalance = balance1.subtract(tx.getOutgoingAmount()).subtract(tx.getFee());
-    assertEquals("Balance after send was not balance before - net tx amount - fee (5 - 1 != 4 test)", expectedBalance, balance2);
+    try {
+      
+      // wait one time for wallet txs in the pool to clear
+      TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
+      
+      // create recipient wallet
+      wallet.close();
+      wallet = createWallet(new MoneroWalletConfig());
+      String recipientPath = wallet.getPath();
+      String recipientAddress = wallet.getPrimaryAddress();
+      
+      // collect sender balances before
+      wallet.close();
+      wallet = getTestWallet();
+      BigInteger balance1 = wallet.getBalance();
+      BigInteger unlockedBalance1 = wallet.getUnlockedBalance();
+      
+      // send funds to recipient
+      BigInteger amount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3));
+      MoneroTxWallet tx = wallet.createTx(new MoneroTxConfig()
+              .setAccountIndex(0)
+              .setAddress(recipientAddress)
+              .setAmount(amount)
+              .setRelay(true));
+      
+      // test sender balances after
+      BigInteger balance2 = wallet.getBalance();
+      BigInteger unlockedBalance2 = wallet.getUnlockedBalance();
+      assertTrue(unlockedBalance2.compareTo(unlockedBalance1) < 0); // unlocked balance should decrease
+      BigInteger expectedBalance = balance1.subtract(tx.getOutgoingAmount()).subtract(tx.getFee());
+      assertEquals("Balance after send was not balance before - net tx amount - fee (5 - 1 != 4 test)", expectedBalance, balance2);
+      
+      // test recipient balance after
+      wallet.close();
+      wallet = openWallet(new MoneroWalletConfig().setPath(recipientPath));
+      wallet.sync();
+      assertFalse(wallet.getTxs(new MoneroTxQuery().setIsConfirmed(false)).isEmpty());
+      assertEquals(amount, wallet.getBalance());
+    } finally {
+      
+      // re-open main test wallet
+      if (!wallet.isClosed()) wallet.close();
+      wallet = getTestWallet();
+    }
   }
   
   // Can send from multiple subaddresses in a single transaction
