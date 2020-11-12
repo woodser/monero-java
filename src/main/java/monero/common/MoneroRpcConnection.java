@@ -27,6 +27,8 @@ import common.utils.JsonUtils;
 
 /**
  * Maintains a connection and sends requests to a Monero RPC API.
+ * 
+ * TODO: refactor MoneroRpcConnection extends MoneroConnection?
  */
 public class MoneroRpcConnection {
 
@@ -46,9 +48,10 @@ public class MoneroRpcConnection {
   private CloseableHttpClient client;
   private String username;
   private String password;
+  private String zmqUri;
   
   public MoneroRpcConnection(URI uri) {
-    this(uri, null, null);
+    this(uri, null, null, null);
   }
   
   public MoneroRpcConnection(String uri) {
@@ -56,10 +59,18 @@ public class MoneroRpcConnection {
   }
   
   public MoneroRpcConnection(String uri, String username, String password) {
-    this((URI) (uri == null ? null : MoneroUtils.parseUri(uri)), username, password);
+    this((URI) (uri == null ? null : MoneroUtils.parseUri(uri)), username, password, null);
+  }
+
+  public MoneroRpcConnection(String uri, String username, String password, String zmqUri) {
+    this((URI) (uri == null ? null : MoneroUtils.parseUri(uri)), username, password, (URI) (zmqUri == null ? null : MoneroUtils.parseUri(zmqUri)));
   }
   
   public MoneroRpcConnection(URI uri, String username, String password) {
+    this(uri, username, password, null);
+  }
+  
+  public MoneroRpcConnection(URI uri, String username, String password, URI zmqUri) {
     this.uri = uri == null ? null : uri.toString();
     this.username = username;
     this.password = password;
@@ -72,6 +83,7 @@ public class MoneroRpcConnection {
     } else {
       this.client = HttpClients.createDefault();
     }
+    this.zmqUri = zmqUri == null ? null : zmqUri.toString();
   }
   
   public String getUri() {
@@ -84,6 +96,10 @@ public class MoneroRpcConnection {
   
   public String getPassword() {
     return password;
+  }
+  
+  public String getZmqUri() {
+    return zmqUri;
   }
   
   /**

@@ -22,8 +22,13 @@ x * Copyright (c) 2017-2020 woodser
 
 package monero.wallet;
 
+import common.utils.GenUtils;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,8 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-
-import common.utils.GenUtils;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroRpcError;
@@ -85,6 +88,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   private String path;                                      // wallet's path identifier
   private MoneroRpcConnection rpc;                          // handles rpc interactions
   private Map<Integer, Map<Integer, String>> addressCache;  // cache static addresses to reduce requests
+  private Process process;                                  // process running monero-wallet-rpc if applicable
   
   // static
   private static final int ERROR_CODE_INVALID_PAYMENT_ID = -5;  // invalid payment id error code
@@ -112,7 +116,88 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     addressCache = new HashMap<Integer, Map<Integer, String>>();
   }
   
+  /**
+   * Create a process running monero-wallet-rpc and connect to it.
+   * 
+   * Use `stopProcess()` to stop the newly created process.
+   * 
+   * @param cmd - path and arguments to external monero-wallet-rpc executable
+   * @throws IOException 
+   */
+  public MoneroWalletRpc(List<String> cmd) throws IOException {
+    
+    // --wallet-dir is executable's parent directory unless overriden
+    int walletDirIdx = cmd.indexOf("--wallet-dir");
+    if (walletDirIdx < 0) {
+      cmd = new ArrayList<String>(cmd); // preserve original cmd
+      cmd.add("--wallet-dir");
+      cmd.add(Path.of(cmd.get(0)).getParent().toString());
+    }
+    
+    // start process
+    ProcessBuilder pb = new ProcessBuilder(cmd);
+    process = pb.start();
+    
+    // read process output until success
+    String line;
+    String uri = null;
+    StringBuilder sb = new StringBuilder();
+    BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+    boolean success = false;
+    while ((line = in.readLine()) != null) {
+      sb.append(line).append('\n'); // capture output in case of error
+      
+      // extract uri from e.g. "I Binding on 127.0.0.1 (IPv4):38085"
+      String uriLineContains = "I Binding on ";
+      int uriLineContainsIdx = line.indexOf(uriLineContains);
+      if (uriLineContainsIdx >= 0) {
+        String host = line.substring(uriLineContainsIdx + uriLineContains.length(), line.lastIndexOf(' '));
+        String port = line.substring(line.lastIndexOf(':'));
+        uri = "http://" + host + port;  // TODO: handle and test https
+      }
+      
+      // read success message
+      if (line.contains("Starting wallet RPC server")) {
+        success = true;
+        break;
+      }
+    }
+    in.close();
+    
+    // throw error with process output if unsuccessful
+    if (!success) throw new MoneroError("Failed to start monero-wallet-rpc server:\n\n" + sb.toString().trim());
+    
+    // get username, password, and zmq publish uri from params
+    int userPassIdx = cmd.indexOf("--rpc-login");
+    String userPass = userPassIdx >= 0 ? cmd.get(userPassIdx + 1) : null;
+    String username = userPass == null ? null : userPass.substring(0, userPass.indexOf(':'));
+    String password = userPass == null ? null : userPass.substring(userPass.indexOf(':') + 1);
+    int zmqUriIdx = cmd.indexOf("--zmq-pub");
+    String zmqUri = zmqUriIdx >= 0 ? cmd.get(zmqUriIdx + 1) : null;
+    
+    // initialize internal state
+    rpc = new MoneroRpcConnection(uri, username, password, zmqUri);
+    addressCache = new HashMap<Integer, Map<Integer, String>>();
+  }
+  
   // --------------------------- RPC WALLET METHODS ---------------------------
+  
+  /**
+   * Get the process running monero-wallet-rpc.
+   * 
+   * @return the process running monero-wallet-rpc, null if not created from new process
+   */
+  public Process getProcess() {
+    return process;
+  }
+  
+  /**
+   * Stop the process running monero-wallet-rpc.
+   */
+  public void stopProcess() {
+    if (process == null) throw new MoneroError("MoneroWalletRpc instance not created from new process");
+    process.destroy();
+  }
   
   /**
    * Get the wallet's RPC connection.
