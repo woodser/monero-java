@@ -25,7 +25,7 @@ package monero.wallet;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
-
+import java.util.Set;
 import monero.common.MoneroRpcConnection;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroVersion;
@@ -61,6 +61,27 @@ import monero.wallet.model.MoneroWalletListenerI;
 public interface MoneroWallet {
   
   public static final String DEFAULT_LANGUAGE = "English";
+  
+  /**
+   * Register a listener to receive wallet notifications.
+   * 
+   * @param listener is the listener to receive wallet notifications
+   */
+  public void addListener(MoneroWalletListenerI listener);
+  
+  /**
+   * Unregister a listener to receive wallet notifications.
+   * 
+   * @param listener is the listener to unregister
+   */
+  public void removeListener(MoneroWalletListenerI listener);
+  
+  /**
+   * Get the listeners registered with the wallet.
+   * 
+   * @return the registered listeners
+   */
+  public Set<MoneroWalletListenerI> getListeners();
   
   /**
    * Indicates if the wallet is view-only, meaning it does have the private
@@ -214,9 +235,9 @@ public interface MoneroWallet {
   public MoneroIntegratedAddress decodeIntegratedAddress(String integratedAddress);
   
   /**
-   * Get the height of the last block processed by the wallet (its index + 1).
+   * Get the block height that the wallet is synced to.
    * 
-   * @return the height of the last block processed by the wallet
+   * @return the block height that the wallet is synced to
    */
   public long getHeight();
   

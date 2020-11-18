@@ -48,6 +48,7 @@ public class TestUtils {
   public static final String WALLET_RPC_URI = "http://localhost:38084";
   public static final String WALLET_RPC_USERNAME = "rpc_user";
   public static final String WALLET_RPC_PASSWORD = "abc123";
+  public static final String WALLET_RPC_ZMQ_URI = "tcp://127.0.0.1:58083";
 
   // test wallet config
   public static final String WALLET_NAME = "test_wallet_1";
@@ -97,7 +98,7 @@ public class TestUtils {
     if (walletRpc == null) {
       
       // construct wallet rpc instance with daemon connection
-      MoneroRpcConnection rpc = new MoneroRpcConnection(WALLET_RPC_URI, WALLET_RPC_USERNAME, WALLET_RPC_PASSWORD);
+      MoneroRpcConnection rpc = new MoneroRpcConnection(WALLET_RPC_URI, WALLET_RPC_USERNAME, WALLET_RPC_PASSWORD, WALLET_RPC_ZMQ_URI);
       walletRpc = new MoneroWalletRpc(rpc);
     }
     

@@ -11,11 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import monero.common.MoneroError;
 import monero.common.MoneroUtils;
 import monero.wallet.MoneroWallet;
@@ -24,6 +19,9 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import utils.TestUtils;
 
 /**
@@ -56,6 +54,17 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
     
     // open wallet
+//    MoneroWalletRpc wallet = new MoneroWalletRpc(Arrays.asList(
+//        "/Applications/monero-x86_64-apple-darwin11-v0.17.1.1-rct-zmq/monero-wallet-rpc",
+//        "--daemon-address", "http://localhost:38081",
+//        "--daemon-login", "superuser:abctesting123",
+//        "--stagenet",
+//        "--rpc-bind-port", "38085",
+//        "--rpc-login", "rpc_user:abc123",
+//        "--wallet-dir", "/Applications/monero-x86_64-apple-darwin11-v0.17.1.1-rct-zmq", // TODO: extracted from path to exec
+//        "--rpc-access-control-origins", "http://localhost:9100",
+//        "--zmq-rpc-bind-port", "38083",
+//        "--zmq-pub", "tcp://127.0.0.1:58083"));
     wallet.openWallet(config.getPath(), config.getPassword());
     
     // serverUri "" denotes offline wallet for tests
@@ -863,5 +872,45 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Override
   public void testSaveAndClose() {
     super.testSaveAndClose();
+  }
+  
+  @Override
+  public void testOutputNotificationsSameAccounts() {
+    super.testOutputNotificationsSameAccounts();
+  }
+  
+  @Override
+  public void testOutputNotificationsDifferentAccounts() {
+    super.testOutputNotificationsSameAccounts();
+  }
+  
+  @Override
+  public void testOutputNotificationsSweepOutput() {
+    super.testOutputNotificationsSweepOutput();
+  }
+  
+  @Override
+  public void testStopListening() {
+    super.testStopListening();
+  }
+  
+  @Override
+  public void testReceivesFundsWithin10Seconds() {
+    super.testReceivesFundsWithin10Seconds();
+  }
+  
+  @Override
+  public void testReceivesFundsWithin10SecondsSameAccount() {
+    super.testReceivesFundsWithin10SecondsSameAccount();
+  }
+  
+  @Override
+  public void testReceivedOutputNotifications() {
+    super.testReceivedOutputNotifications();
+  }
+  
+  @Override
+  public void testReceivedOutputNotificationsWithUnlockHeight() {
+    super.testReceivedOutputNotificationsWithUnlockHeight();
   }
 }

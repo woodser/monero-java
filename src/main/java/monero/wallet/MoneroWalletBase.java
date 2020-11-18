@@ -22,12 +22,14 @@
 
 package monero.wallet;
 
+import common.utils.GenUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
-
-import common.utils.GenUtils;
+import java.util.Set;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.wallet.model.MoneroAccount;
@@ -50,6 +52,21 @@ import monero.wallet.model.MoneroWalletListenerI;
  * Abstract base implementation of a Monero wallet.
  */
 public abstract class MoneroWalletBase implements MoneroWallet {
+  
+  protected Set<MoneroWalletListenerI> listeners = new LinkedHashSet<MoneroWalletListenerI>();
+  
+  public void addListener(MoneroWalletListenerI listener) {
+    listeners.add(listener);
+  }
+  
+  public void removeListener(MoneroWalletListenerI listener) {
+    if (!listeners.contains(listener)) throw new MoneroError("Listener is not registered to wallet");
+    listeners.remove(listener);
+  }
+  
+  public Set<MoneroWalletListenerI> getListeners() {
+    return new HashSet<MoneroWalletListenerI>(listeners);
+  }
   
   public void setDaemonConnection(String uri) {
     setDaemonConnection(uri, null, null);

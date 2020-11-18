@@ -2,7 +2,6 @@ package test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -13,36 +12,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import common.utils.JsonUtils;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroNetworkType;
-import monero.daemon.model.MoneroSubmitTxResult;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
-import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroMultisigInitResult;
-import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
-import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
 import monero.wallet.model.MoneroWalletListener;
-import utils.Pair;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import utils.StartMining;
 import utils.TestUtils;
 import utils.WalletEqualityUtils;
@@ -52,11 +43,12 @@ import utils.WalletSyncPrinter;
  * Tests specific to the JNI wallet.
  */
 public class TestMoneroWalletJni extends TestMoneroWalletCommon {
-
+  
   protected MoneroWalletJni wallet;
 
   public TestMoneroWalletJni() {
-    this.wallet = (MoneroWalletJni) getTestWallet();
+    super();
+    this.wallet = (MoneroWalletJni) super.wallet;
   }
 
   @BeforeClass
@@ -1095,403 +1087,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     assertTrue(wallet.isClosed());
   }
   
-  // ----------------------------- NOTIFICATION TESTS -------------------------
-  
-  @Test
-  public void testStopListening() throws InterruptedException {
-    
-    // create wallet and start background synchronizing
-    MoneroWalletJni wallet = createWallet(new MoneroWalletConfig());
-    
-    // add listener
-    OutputNotificationCollector listener = new OutputNotificationCollector();
-    wallet.addListener(listener);
-    TimeUnit.SECONDS.sleep(1);
-    
-    // remove listener and close
-    wallet.removeListener(listener);
-    wallet.close();
-  }
-  
-  @Test
-  public void testReceivesFundsWithin10Seconds() throws InterruptedException {
-    org.junit.Assume.assumeTrue(TEST_RELAYS);
-    testReceivesFundsWithin10Seconds(false);
-  }
-  
-  @Test
-  public void testReceivesFundsWithin10SecondsSameAccount() throws InterruptedException {
-    org.junit.Assume.assumeTrue(TEST_RELAYS && !LITE_MODE);
-    testReceivesFundsWithin10Seconds(true);
-  }
-  
-  private void testReceivesFundsWithin10Seconds(boolean sameAccount) throws InterruptedException {
-    MoneroWalletJni sender = wallet;
-    MoneroWalletJni receiver = null;
-    OutputNotificationCollector receiverListener = null;
-    OutputNotificationCollector senderListener = null;
-    try {
-      
-      // assign wallet to receive funds
-      receiver = sameAccount ? wallet : createWallet(new MoneroWalletConfig());
-      
-      // listen for sent funds
-      senderListener = new OutputNotificationCollector();
-      sender.addListener(senderListener);
-      
-      // listen for received funds
-      receiverListener = new OutputNotificationCollector();
-      receiver.addListener(receiverListener);
-      
-      // send funds
-      TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(sender);
-      MoneroTxWallet tx = sender.createTx(new MoneroTxConfig().setAccountIndex(0).setAddress(receiver.getPrimaryAddress()).setAmount(TestUtils.MAX_FEE).setRelay(true));
-      String txHash = tx.getHash();
-      sender.getTx(txHash);
-      if (senderListener.getOutputsSpent().isEmpty()) System.out.println("WARNING: no notification on send");
-      
-      // unconfirmed funds received within 10 seconds
-      TimeUnit.SECONDS.sleep(10);
-      receiver.getTx(txHash);
-      assertFalse("No notification of received funds within 10 seconds in " + (sameAccount ? "same account" : "different wallets"), receiverListener.getOutputsReceived().isEmpty());
-      for (MoneroOutputWallet output : receiverListener.getOutputsReceived()) assertNotEquals(null, output.getTx().isConfirmed());
-    } finally {
-      sender.removeListener(senderListener);
-      receiver.removeListener(receiverListener);
-      if (!sameAccount && receiver != null) receiver.close();
-    }
-  }
-  
-  /**
-   * 4 output notification tests are considered when transferring within one wallet.  // TODO: multi-wallet tests
-   * 
-   * 1. with local wallet data, transfer from/to same account
-   * 2. with local wallet data, transfer from/to different accounts
-   * 3. without local wallet data, transfer from/to same account
-   * 4. without local wallet data, transfer from/to different accounts
-   * 
-   * For example, two wallets may be instantiated with the same mnemonic,
-   * so neither is privy to the local wallet data of the other.
-   */
-
-  // Notification test #1: notifies listeners of outputs sent from/to the same account using local wallet data
-  @Test
-  public void testOutputNotificationsSameAccounts() {
-    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
-    List<String> issues = testOutputNotifications(true, false);
-    if (issues == null) return;
-    String msg = "testOutputNotificationsSameAccounts() generated " + issues.size() + " issues:\n" + issuesToStr(issues);
-    System.out.println(msg);
-    assertFalse(msg, msg.contains("ERROR:"));
-  }
-  
-  // Notification test #2: notifies listeners of outputs sent from/to different accounts using local wallet data
-  @Test
-  public void testOutputNotificationsDifferentAccounts() {
-    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
-    List<String> issues = testOutputNotifications(false, false);
-    if (issues == null) return;
-    String msg = "testOutputNotificationsDifferentAccounts() generated " + issues.size() + " issues:\n" + issuesToStr(issues);
-    System.out.println(msg);
-    assertFalse(msg, msg.contains("ERROR:"));
-  }
-  
-  // Notification test #3: notifies listeners of swept outputs
-  @Test
-  public void testOutputNotificationsSweepOutput() {
-    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
-    List<String> issues = testOutputNotifications(false, true);
-    if (issues == null) return;
-    String msg = "testOutputNotificationsSweepOutput() generated " + issues.size() + " issues:\n" + issuesToStr(issues);
-    System.out.println(msg);
-    assertFalse(msg, msg.contains("ERROR:"));
-  }
-  
-  private List<String> testOutputNotifications(boolean sameAccount, boolean sweepOutput) {
-    
-    // collect errors and warnings
-    List<String> errors = new ArrayList<String>();
-    
-    // wait for wallet txs in the pool in case they were sent from another wallet and therefore will not fully sync until confirmed // TODO monero core
-    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
-    
-    // get balances before for later comparison
-    BigInteger balanceBefore = wallet.getBalance();
-    BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance();
-    
-    // register a listener to collect notifications
-    OutputNotificationCollector listener = new OutputNotificationCollector();
-    wallet.addListener(listener);
-    
-    // start syncing to test automatic notifications
-    wallet.startSyncing();
-    
-    // send tx
-    MoneroTxWallet tx = null;
-    int[] destinationAccounts = sameAccount ? (sweepOutput ? new int[] {0} : new int[] {0, 1, 2}) : (sweepOutput ? new int[] {1} : new int[] {1, 2, 3});
-    if (sweepOutput) {
-      List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setIsLocked(false).setAccountIndex(0).setMinAmount(TestUtils.MAX_FEE.multiply(new BigInteger("5"))));
-      if (outputs.isEmpty()) {
-        errors.add("ERROR: No outputs available to sweep");
-        return errors;
-      }
-      tx = wallet.sweepOutput(new MoneroTxConfig()
-              .setAddress(wallet.getAddress(destinationAccounts[0], 0))
-              .setKeyImage(outputs.get(0).getKeyImage().getHex())
-              .setRelay(true));
-    } else {
-      MoneroTxConfig config = new MoneroTxConfig();
-      config.setAccountIndex(0);
-      for (int destinationAccount : destinationAccounts) {
-        config.addDestination(new MoneroDestination(wallet.getAddress(destinationAccount, 0), TestUtils.MAX_FEE));
-      }
-      config.setRelay(true);
-      tx = wallet.createTx(config);
-    }
-    
-    // test wallet's balance
-    BigInteger balanceAfter = wallet.getBalance();
-    BigInteger unlockedBalanceAfter = wallet.getUnlockedBalance();
-    BigInteger balanceAfterExpected = balanceBefore.subtract(tx.getFee());  // txs sent from/to same wallet so only decrease in balance is tx fee
-    if (balanceAfterExpected.compareTo(balanceAfter) != 0) errors.add("WARNING: wallet balance immediately after send expected to be " + balanceAfterExpected + " but was " + balanceAfter);
-    if (unlockedBalanceBefore.compareTo(unlockedBalanceAfter) <= 0 && unlockedBalanceBefore.compareTo(new BigInteger("0")) != 0) errors.add("WARNING: Wallet unlocked balance immediately after send was expected to decrease but changed from " + unlockedBalanceBefore + " to " + unlockedBalanceAfter);
-        
-    // wait for wallet to send notifications
-    if (listener.getOutputsSpent().isEmpty()) errors.add("WARNING: wallet does not notify listeners of outputs when tx sent directly through wallet or when refreshed from the pool; must wait for confirmation to receive notifications and have correct balance");
-    try { StartMining.startMining(); } catch (Exception e) { }
-    while (listener.getOutputsSpent().isEmpty()) {
-      if (wallet.getTx(tx.getHash()).isFailed()) {
-        try { daemon.stopMining(); } catch (Exception e) { }
-        errors.add("ERROR: Tx failed in mempool: " + tx.getHash());
-        return errors;
-      }
-      try { TimeUnit.SECONDS.sleep(5); } catch (Exception e) { throw new RuntimeException(e); }
-    }
-    try { daemon.stopMining(); } catch (Exception e) { }
-    
-    // test output notifications
-    if (listener.getOutputsReceived().isEmpty()) {
-      errors.add("ERROR: got " + listener.getOutputsReceived().size() + " output received notifications when at least 1 was expected");
-      return errors;
-    }
-    if (listener.getOutputsSpent().isEmpty()) {
-      errors.add("ERROR: got " + listener.getOutputsSpent().size() + " output spent notifications when at least 1 was expected");
-      return errors;
-    }
-    
-    // must receive outputs with known subaddresses and amounts
-    for (int destinationAccount : destinationAccounts) {
-      if (!hasOutput(listener.getOutputsReceived(), destinationAccount, 0, sweepOutput ? null : TestUtils.MAX_FEE)) {
-        errors.add("ERROR: missing expected received output to subaddress [" + destinationAccount + ", 0] of amount " + TestUtils.MAX_FEE);
-        return errors;
-      }
-    }
-    
-    // since sending from/to the same wallet, the net amount spent = tx fee = outputs spent - outputs received
-    int numConfirmedOutputs = 0;
-    BigInteger netAmount = new BigInteger("0");
-    for (MoneroOutputWallet outputSpent : listener.getOutputsSpent()) netAmount = netAmount.add(outputSpent.getAmount());
-    for (MoneroOutputWallet outputReceived : listener.getOutputsReceived()) {
-      if (outputReceived.getTx().isConfirmed()) {
-        numConfirmedOutputs++;
-        netAmount = netAmount.subtract(outputReceived.getAmount());
-      }
-    }
-    if (tx.getFee().compareTo(netAmount) != 0) {
-      errors.add("WARNING: net output amount must equal tx fee: " + tx.getFee().toString() + " vs " + netAmount.toString() + " (probably received notifications from other tests)");
-      return errors;
-    }
-    
-    // receives balance notification per confirmed output
-    if (listener.getBalanceNotifications().size() < numConfirmedOutputs) {
-      errors.add("ERROR: expected at least one updated balance notification per confirmed output received");
-    }
-    
-    // test wallet's balance
-    balanceAfter = wallet.getBalance();
-    unlockedBalanceAfter = wallet.getUnlockedBalance();
-    if (balanceAfterExpected.compareTo(balanceAfter) != 0) errors.add("WARNING: Wallet balance after confirmation expected to be " + balanceAfterExpected + " but was " + balanceAfter);
-    if (unlockedBalanceBefore.compareTo(unlockedBalanceAfter) <= 0 && unlockedBalanceBefore.compareTo(new BigInteger("0")) != 0) errors.add("WARNING: Wallet unlocked balance immediately after send was expected to decrease but changed from " + unlockedBalanceBefore + " to " + unlockedBalanceAfter);
-    
-    // remove listener
-    wallet.removeListener(listener);
-
-    // return all errors and warnings as single string
-    return errors;
-  }
-  
-  private static String issuesToStr(List<String> issues) {
-    if (issues.isEmpty()) return null;
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < issues.size(); i++) {
-      sb.append((i + 1) + ": " + issues.get(i));
-      if (i < issues.size() - 1) sb.append('\n');
-    }
-    return sb.toString();
-  }
-  
-  private static boolean hasOutput(List<MoneroOutputWallet> outputs, int accountIdx, int subaddressIdx, BigInteger amount) { // TODO: use comon filter?
-    MoneroOutputQuery query = new MoneroOutputQuery().setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx).setAmount(amount);
-    for (MoneroOutputWallet output : outputs) {
-      if (query.meetsCriteria(output)) return true;
-    }
-    return false;
-  }
-  
-  // Can receive notifications when outputs are received, confirmed, and unlocked
-  @Test
-  public void testReceivedOutputNotifications() throws InterruptedException {
-    testReceivedOutputNotificationsWithUnlockHeight(0l);
-  }
-  
-  // Can receive notifications when outputs are received, confirmed, and unlocked with an unlock height
-  @Test
-  public void testReceivedOutputNotificationsWithUnlockHeight() throws InterruptedException {
-    testReceivedOutputNotificationsWithUnlockHeight(13l);
-  }
-  
-  private void testReceivedOutputNotificationsWithUnlockHeight(long unlockDelay) throws InterruptedException {
-    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
-    long expectedUnlockHeight = daemon.getHeight() + unlockDelay;
-    
-    // create wallet to test received output notifications
-    MoneroWalletJni receiver = createWallet(new MoneroWalletConfig());
-    
-    // create tx to transfer funds to receiver
-    MoneroTxWallet tx = wallet.createTx(new MoneroTxConfig()
-      .setAccountIndex(0)
-      .setAddress(receiver.getPrimaryAddress())
-      .setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(10)))
-      .setUnlockHeight(expectedUnlockHeight)
-      .setRelay(false)
-    );
-    
-    // register listener to test notifications
-    ReceivedOutputNotificationTester listener = new ReceivedOutputNotificationTester(tx.getHash());
-    receiver.addListener(listener);
-    
-    // flush tx to prevent double spends from previous tests
-    daemon.flushTxPool();
-    
-    // relay transaction to pool
-    long submitHeight = daemon.getHeight();
-    MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex());
-    assertTrue("Bad submit tx result: " + JsonUtils.serialize(result), result.isGood());
-    
-    // test notification of tx in pool within 10 seconds
-    TimeUnit.SECONDS.sleep(10);
-    assertNotNull(listener.lastNotifiedOutput);
-    assertFalse(listener.lastNotifiedOutput.getTx().isConfirmed());
-    
-    // listen for new blocks to test output notifications
-    receiver.addListener(new MoneroWalletListener() {
-      @Override
-      public void onNewBlock(long height) {
-        if (listener.testComplete) return;
-        new Thread(new Runnable() {
-          @Override
-          public void run() {
-            try {
-              
-              // first confirmation expected within 10 seconds of new block
-              if (listener.confirmedHeight == null) {
-                TimeUnit.SECONDS.sleep(10);
-                if (listener.confirmedHeight == null && Boolean.TRUE.equals(listener.lastNotifiedOutput.getTx().isConfirmed())) { // only run by first thread after confirmation
-                  listener.confirmedHeight = listener.lastNotifiedOutput.getTx().getHeight();
-                  if (listener.confirmedHeight != submitHeight) System.out.println("WARNING: tx submitted on height " + submitHeight + " but confirmed on height " + listener.confirmedHeight);  // TODO monero-core: sometimes pool tx does not confirm for several blocks
-                }
-              }
-              
-              // output should be locked until max of expected unlock height and 10 blocks after confirmation
-              if ((listener.confirmedHeight == null || height < Math.max(listener.confirmedHeight + 10, expectedUnlockHeight)) && !Boolean.TRUE.equals(listener.lastNotifiedOutput.isLocked())) throw new RuntimeException("Last notified output expected to be locked but isLocked=" + listener.lastNotifiedOutput.isLocked() + " at height " + height);
-              
-              // test unlock notification
-              if (listener.confirmedHeight != null && height == Math.max(listener.confirmedHeight + 10, expectedUnlockHeight)) {
-                
-                // receives notification of unlocked tx within 1 second of block notification
-                System.out.println("Sleeping on height: " + height);
-                TimeUnit.SECONDS.sleep(1);
-                if (!Boolean.FALSE.equals(listener.lastNotifiedOutput.isLocked())) throw new RuntimeException("Last notified output expected to be unlocked but isLocked=" + listener.lastNotifiedOutput.isLocked());
-                listener.unlockedSeen = true;
-                listener.testComplete = true;
-              }
-            } catch (Exception e) {
-              System.out.println("Exception!");
-              e.printStackTrace();
-              listener.testComplete = true;
-              listener.testError = e.getMessage();
-            }
-          }
-        }).start();
-      }
-    });
-    
-    // mine until complete
-    StartMining.startMining();
-    
-    // run until test completes
-    while (!listener.testComplete) TimeUnit.SECONDS.sleep(10);
-    if (daemon.getMiningStatus().isActive()) daemon.stopMining();
-    receiver.close();
-    assertNull(listener.testError, listener.testError);
-    assertNotNull("No notification of confirmed output", listener.confirmedHeight);
-    assertTrue("No notification of output unlocked", listener.unlockedSeen);
-  }
-  
-  private class ReceivedOutputNotificationTester extends MoneroWalletListener {
-
-    protected String txHash;
-    protected MoneroOutputWallet lastNotifiedOutput;
-    protected boolean testComplete = false;
-    protected String testError = null;
-    protected boolean unlockedSeen = false;
-    protected Long confirmedHeight = null;
-
-    public ReceivedOutputNotificationTester(String txHash) {
-      this.txHash = txHash;
-    }
-    
-    @Override
-    public void onOutputReceived(MoneroOutputWallet output) {
-      if (output.getTx().getHash().equals(txHash)) lastNotifiedOutput = output;
-    }
-  }
-  
-  // Can be created and receive funds
-  @Test
-  public void testCreateAndReceive() {
-    org.junit.Assume.assumeTrue(TEST_NOTIFICATIONS);
-    MoneroWalletJni myWallet = null;
-    try {
-      
-      // create a random stagenet wallet
-      String path = getRandomWalletPath();
-      myWallet = createWallet(new MoneroWalletConfig().setPath(path));
-      myWallet.startSyncing();
-      
-      // listen for received outputs
-      OutputNotificationCollector myListener = new OutputNotificationCollector();
-      myWallet.addListener(myListener);
-      
-      // send funds to the created wallet
-      TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(wallet);
-      MoneroTxWallet sentTx = wallet.createTx(new MoneroTxConfig().setAccountIndex(0).setAddress(myWallet.getPrimaryAddress()).setAmount(TestUtils.MAX_FEE).setRelay(true));
-      
-      // wait for funds to confirm
-      try { StartMining.startMining(); } catch (Exception e) { }
-      while (!(wallet.getTx(sentTx.getHash())).isConfirmed()) {
-        if (wallet.getTx(sentTx.getHash()).isFailed()) throw new Error("Tx failed in mempool: " + sentTx.getHash());
-        daemon.getNextBlockHeader();
-      }
-      
-      // created wallet should have notified listeners of received outputs
-      assertFalse(myListener.getOutputsReceived().isEmpty());
-    } finally {
-      try { daemon.stopMining(); } catch (Exception e) { }
-      myWallet.close();
-    }
-  }
-  
   // Supports multisig sample code
   @Test
   public void testMultisigSample() {
@@ -1559,53 +1154,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   }
   
   // ---------------------------------- HELPERS -------------------------------
-  
-  /**
-   * Wallet listener to collect output notifications.
-   */
-  private class OutputNotificationCollector extends MoneroWalletListener {
-    
-    private List<Pair<BigInteger, BigInteger>> balanceNotifications;
-    private List<MoneroOutputWallet> outputsReceived;
-    private List<MoneroOutputWallet> outputsSpent;
-    
-    public OutputNotificationCollector() {
-      balanceNotifications = new ArrayList<Pair<BigInteger, BigInteger>>();
-      outputsReceived = new ArrayList<MoneroOutputWallet>();
-      outputsSpent = new ArrayList<MoneroOutputWallet>();
-    }
-    
-    @Override
-    public void onBalancesChanged(BigInteger newBalance, BigInteger newUnlockedBalance) {
-      if (!balanceNotifications.isEmpty()) {
-        Pair<BigInteger, BigInteger> lastNotification = balanceNotifications.get(balanceNotifications.size() - 1);
-        assertTrue(!newBalance.equals(lastNotification.getFirst()) || !newUnlockedBalance.equals(lastNotification.getSecond())); // test that balances change
-      }
-      balanceNotifications.add(new Pair<BigInteger, BigInteger>(newBalance, newUnlockedBalance));
-    }
-    
-    @Override
-    public void onOutputReceived(MoneroOutputWallet output) {
-      outputsReceived.add(output);
-    }
-    
-    @Override
-    public void onOutputSpent(MoneroOutputWallet output) {
-      outputsSpent.add(output);
-    }
-    
-    public List<Pair<BigInteger, BigInteger>> getBalanceNotifications() {
-      return balanceNotifications;
-    }
-    
-    public List<MoneroOutputWallet> getOutputsReceived() {
-      return outputsReceived;
-    }
-    
-    public List<MoneroOutputWallet> getOutputsSpent() {
-      return outputsSpent;
-    }
-  }
   
   public static String getRandomWalletPath() {
     return TestUtils.TEST_WALLETS_DIR + "/test_wallet_" + System.currentTimeMillis();
@@ -2284,5 +1832,45 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
   @Override
   public void testSaveAndClose() {
     super.testSaveAndClose();
+  }
+  
+  @Override
+  public void testOutputNotificationsSameAccounts() {
+    super.testOutputNotificationsSameAccounts();
+  }
+  
+  @Override
+  public void testOutputNotificationsDifferentAccounts() {
+    super.testOutputNotificationsSameAccounts();
+  }
+  
+  @Override
+  public void testOutputNotificationsSweepOutput() {
+    super.testOutputNotificationsSweepOutput();
+  }
+  
+  @Override
+  public void testStopListening() {
+    super.testStopListening();
+  }
+  
+  @Override
+  public void testReceivesFundsWithin10Seconds() {
+    super.testReceivesFundsWithin10Seconds();
+  }
+  
+  @Override
+  public void testReceivesFundsWithin10SecondsSameAccount() {
+    super.testReceivesFundsWithin10SecondsSameAccount();
+  }
+  
+  @Override
+  public void testReceivedOutputNotifications() {
+    super.testReceivedOutputNotifications();
+  }
+  
+  @Override
+  public void testReceivedOutputNotificationsWithUnlockHeight() {
+    super.testReceivedOutputNotificationsWithUnlockHeight();
   }
 }
