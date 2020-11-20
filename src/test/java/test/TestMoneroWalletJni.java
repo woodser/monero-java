@@ -1182,7 +1182,7 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     }
     
     @Override
-    public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
+    public synchronized void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
       super.onSyncProgress(height, startHeight, endHeight, percentDone, message);
       
       // registered wallet listeners will continue to get sync notifications after the wallet's initial sync
@@ -1223,7 +1223,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
         assertEquals(chainHeight - 1, (long) prevHeight);  // otherwise last height is chain height - 1
         assertEquals(chainHeight, (long) prevCompleteHeight);
       }
-      onSyncProgressAfterDone = false;  // test subsequent onSyncProgress() calls
     }
     
     public Boolean isNotified() {
@@ -1270,8 +1269,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
     
     @Override
     public void onBalancesChanged(BigInteger newBalance, BigInteger newUnlockedBalance) {
-      assertEquals(wallet.getBalance(), newBalance);
-      assertEquals(wallet.getUnlockedBalance(), newUnlockedBalance);
       if (this.prevBalance != null) assertTrue(!newBalance.equals(this.prevBalance) || !newUnlockedBalance.equals(this.prevUnlockedBalance));
       this.prevBalance = newBalance;
       this.prevUnlockedBalance = newUnlockedBalance;
@@ -1338,7 +1335,6 @@ public class TestMoneroWalletJni extends TestMoneroWalletCommon {
       assertNotNull(prevOutputSpent);
       BigInteger balance = incomingTotal.subtract(outgoingTotal);
       assertEquals(balance, wallet.getBalance());
-      onNewBlockAfterDone = false;  // test subsequent onNewBlock() calls
       assertEquals(wallet.getBalance(), prevBalance);
       assertEquals(wallet.getUnlockedBalance(), prevUnlockedBalance);
     }

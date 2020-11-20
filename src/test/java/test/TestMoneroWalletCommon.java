@@ -1670,7 +1670,6 @@ public abstract class TestMoneroWalletCommon {
     BigInteger walletBalance = wallet.getBalance();
     BigInteger walletUnlockedBalance = wallet.getUnlockedBalance();
     List<MoneroAccount> accounts = wallet.getAccounts(true);  // includes subaddresses
-    List<MoneroTxWallet> txs = wallet.getTxs();
     
     // test wallet balance
     TestUtils.testUnsignedBigInteger(walletBalance);
@@ -1719,6 +1718,7 @@ public abstract class TestMoneroWalletCommon {
     
     // balance may not equal sum of unspent outputs if unconfirmed txs
     // TODO monero-wallet-rpc: reason not to return unspent outputs on unconfirmed txs? then this isn't necessary
+    List<MoneroTxWallet> txs = wallet.getTxs();
     boolean hasUnconfirmedTx = false;
     for (MoneroTxWallet tx : txs) if (tx.inTxPool()) hasUnconfirmedTx = true;
     
@@ -2259,6 +2259,7 @@ public abstract class TestMoneroWalletCommon {
         offlineWallet.close();
         viewOnlyWallet = openWallet(viewOnlyPath);
         List<String> txHashes = viewOnlyWallet.submitTxs(signedTxHex);
+        TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(viewOnlyWallet); // wait for confirmation for other tests
         assertEquals(1, txHashes.size());
         assertEquals(64, txHashes.get(0).length());
       }
@@ -2614,7 +2615,7 @@ public abstract class TestMoneroWalletCommon {
         assertEquals("Wallet balance should be same as original since tx was flushed and not relayed", balanceBefore, wallet.getBalance());
         assertEquals("Wallet unlocked balance should be same as original since tx was flushed and not relayed", unlockedBalanceBefore, wallet.getUnlockedBalance());
       } else {
-        TestUtils.TX_POOL_WALLET_TRACKER.reset(); // all wallets will need to wait for tx to confirm in order to reliably sync
+        TestUtils.TX_POOL_WALLET_TRACKER.reset(); // all wallets need to wait for tx to confirm in order to reliably sync
       }
     }
   }
@@ -2902,7 +2903,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testSendSplit() {
     org.junit.Assume.assumeTrue(TEST_RELAYS);
-    testSendToSingle(new MoneroTxConfig().setCanSplit(true));
+    testSendToSingle(new MoneroTxConfig().setCanSplit(true).setRelay(true));
   }
   
   // Can create then relay a transaction to send to a single address
@@ -3049,8 +3050,8 @@ public abstract class TestMoneroWalletCommon {
       assertTrue("Created txs should be among locked txs", found);
     }
     
-    // if tx was relayed, all wallets will need to wait for tx to confirm in order to reliably sync
-    if (Boolean.TRUE.equals(config.getRelay())) {
+    // if tx was relayed in separate step, all wallets will need to wait for tx to confirm in order to reliably sync
+    if (!Boolean.TRUE.equals(config.getRelay())) {
       TestUtils.TX_POOL_WALLET_TRACKER.reset(); // TODO: resetExcept(wallet), or does this test wallet also need to be waited on?
     }
   }
@@ -4510,7 +4511,7 @@ public abstract class TestMoneroWalletCommon {
     // test notification of tx in pool within 10 seconds
     try { TimeUnit.SECONDS.sleep(REFRESH_RATE); } catch (Exception e) { throw new RuntimeException(e); }
     assertNotNull(listener.lastNotifiedOutput);
-    assertFalse(listener.lastNotifiedOutput.getTx().isConfirmed());
+    if (listener.lastOnNewBlockHeight == null || listener.lastOnNewBlockHeight < submitHeight) assertFalse(listener.lastNotifiedOutput.getTx().isConfirmed());
     
     // listen for new blocks to test output notifications
     receiver.addListener(new MoneroWalletListener() {

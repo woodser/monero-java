@@ -20,7 +20,7 @@ public class WalletSyncPrinter extends MoneroWalletListener {
   }
   
   @Override
-  public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
+  public synchronized void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
     if (percentDone == 1.0 || percentDone >= this.nextIncrement) {
       System.out.println("onSyncProgress(" + height + ", " + startHeight + ", " + endHeight + ", " + percentDone + ", " + message + ")");
       this.nextIncrement += this.syncResolution;
