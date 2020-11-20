@@ -115,9 +115,9 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   /**
-   * Create a process running monero-wallet-rpc and connect to it.
+   * Create an internal process running monero-wallet-rpc and connect to it.
    * 
-   * Use `stopProcess()` to stop the newly created process.
+   * Use `stopProcess()` to stop the newly created process. // TODO: use existing stop() instead?
    * 
    * @param cmd - path and arguments to external monero-wallet-rpc executable
    * @throws IOException 
@@ -136,6 +136,9 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     ProcessBuilder pb = new ProcessBuilder(cmd);
     process = pb.start();
     
+    // print output to console for debug
+    boolean printOutput = false;
+    
     // read process output until success
     String line;
     String uri = null;
@@ -143,6 +146,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
     boolean success = false;
     while ((line = in.readLine()) != null) {
+      if (printOutput) System.out.println(line);
       sb.append(line).append('\n'); // capture output in case of error
       
       // extract uri from e.g. "I Binding on 127.0.0.1 (IPv4):38085"
@@ -156,11 +160,24 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       
       // read success message
       if (line.contains("Starting wallet RPC server")) {
+        if (printOutput) {
+          new Thread(new Runnable() {
+            public void run() {
+              try {
+                String line;
+                BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                while ((line = in.readLine()) != null) System.out.println(line);
+              } catch (IOException e) {
+                e.printStackTrace();
+              }
+            }
+          }).start();
+        }
         success = true;
         break;
       }
     }
-    in.close();
+    if (!printOutput) in.close();
     
     // throw error with process output if unsuccessful
     if (!success) throw new MoneroError("Failed to start monero-wallet-rpc server:\n\n" + sb.toString().trim());
@@ -181,7 +198,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   // --------------------------- RPC WALLET METHODS ---------------------------
   
   /**
-   * Get the process running monero-wallet-rpc.
+   * Get the internal process running monero-wallet-rpc.
    * 
    * @return the process running monero-wallet-rpc, null if not created from new process
    */
@@ -190,7 +207,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
   
   /**
-   * Stop the process running monero-wallet-rpc.
+   * Stop the internal process running monero-wallet-rpc.
    */
   public void stopProcess() {
     if (process == null) throw new MoneroError("MoneroWalletRpc instance not created from new process");
@@ -2147,6 +2164,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    * Enables or disables listening to ZMQ notifications from monero-wallet-rpc.
    */
   private void setIsListening(boolean isEnabled) {
+    System.out.println("setIsListening(" + isEnabled + ")");
     if (rpcListener == null && isEnabled) rpcListener = new WalletRpcListener();
     rpcListener.setIsEnabled(isEnabled);
   }
@@ -2156,6 +2174,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    */
   private class WalletRpcListener {
     
+    private boolean isOpen;
     private Thread thread;
     private ZMQ.Context context;
     private ZMQ.Socket subscriber;
@@ -2166,10 +2185,20 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     public WalletRpcListener() {
       prevBalance = getBalance();
       prevUnlockedBalance = getUnlockedBalance();
-      checkForChangedUnlockedTxs(); // cache locked txs for later comparison
-      
       context = ZMQ.context(1);
       subscriber = context.socket(ZMQ.SUB); // TODO: use non-deprecated api
+    }
+    
+    public void setIsEnabled(boolean isEnabled) {
+      if (isEnabled) open();
+      else close();
+    }
+    
+    private void open() {
+      if (isOpen) return;
+      
+      // cache locked txs for later comparison
+      checkForChangedUnlockedTxs(); 
       
       // create thread which polls zmq publications
       thread = new Thread(new Runnable() {
@@ -2195,11 +2224,22 @@ public class MoneroWalletRpc extends MoneroWalletBase {
           poller.register(subscriber, ZMQ.Poller.POLLIN);
           while (!Thread.currentThread().isInterrupted()) {
             try {
+              System.out.println("Polling...");
               poller.poll();
-              if (poller.pollin(0)) processZmqPublication(subscriber.recvStr());
+              
+              // process notification in separate thread
+              if (poller.pollin(0)) {
+                String notification = subscriber.recvStr();
+                new Thread(new Runnable() {
+                  @Override
+                  public void run() {
+                    processZmqPublication(notification);
+                  }
+                }).start();
+              }
             }
-            catch (zmq.ZError.IOException e) { }  // exceptions expected when closed mid-poll
-            catch (java.nio.channels.ClosedSelectorException e2) { }
+            catch (zmq.ZError.IOException e) { e.printStackTrace(); }  // exceptions expected when closed mid-poll
+            catch (java.nio.channels.ClosedSelectorException e2) { e2.printStackTrace(); }
           }
           
           // close if disconnects
@@ -2207,17 +2247,17 @@ public class MoneroWalletRpc extends MoneroWalletBase {
         }
       });
       thread.setDaemon(true);
-    }
-    
-    public void setIsEnabled(boolean isEnabled) {
-      if (isEnabled) thread.start();
-      else close();
+      thread.start();
+      isOpen = true;
     }
     
     private void close() {
+      if (!isOpen) return;
       subscriber.close();
       context.close();
       thread.interrupt();
+      prevLockedTxHashes.clear();
+      isOpen = false;
     }
     
     @SuppressWarnings("unchecked")
@@ -2239,7 +2279,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
         Map<String, Object> contentMap = JsonUtils.toMap(MoneroRpcConnection.MAPPER, content.substring(bodyIdx + 1)); // TODO: keep mapper in MoneroRpcConnection?
         long height = ((BigInteger) contentMap.get("first_height")).longValue();
         System.out.println("Notifying listeners of height: " + height);
-        for (MoneroWalletListenerI listener : getListeners()) listener.onNewBlock(height);
+        onNewBlockMt(height);
         
         // notify if balances change
         boolean balancesChanged = checkForChangedBalances();
@@ -2264,7 +2304,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
         output.setTx(tx);
         tx.setOutputs(Arrays.asList(output));
         long height = ((BigInteger) contentMap.get("height")).longValue();
-        tx.setIsLocked(tx.getUnlockHeight() <= height);
+        tx.setIsLocked(true);
         if (height > 0) {
           MoneroBlock block = new MoneroBlock().setHeight(height);
           block.setTxs(Arrays.asList(tx));
@@ -2281,13 +2321,15 @@ public class MoneroWalletRpc extends MoneroWalletBase {
         System.out.println("Parsed TX:\n\n" + tx);
         if (topic.equals("json-full-money_received")) {
           tx.setIsIncoming(true);
-          for (MoneroWalletListenerI listener : getListeners()) listener.onOutputReceived(output);
+          prevLockedTxHashes.add(tx.getHash()); // watch for unlock
+          onOutputReceivedMt(output);
         } else if (topic.equals("json-full-money_spent")) {
           tx.setIsIncoming(false);
-          for (MoneroWalletListenerI listener : getListeners()) listener.onOutputSpent(output);
+          prevLockedTxHashes.add(tx.getHash()); // watch for unlock
+          onOutputSpentMt(output);
         } else if (topic.equals("json-full-unconfirmed_money_received")) {
           tx.setIsIncoming(true);
-          for (MoneroWalletListenerI listener : getListeners()) listener.onOutputReceived(output);
+          onOutputReceivedMt(output);
           checkForChangedBalances();
         } else {
           LOGGER.warning("Received unsupported notification: " + content);
@@ -2300,13 +2342,45 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       //json-minimal-unconfirmed_money_received
     }
     
+    private void onNewBlockMt(long height) {
+      for (MoneroWalletListenerI listener : getListeners()) {
+        new Thread(new Runnable() {
+          @Override public void run() { listener.onNewBlock(height); }
+        }).start();
+      }
+    }
+    
+    private void onOutputReceivedMt(MoneroOutputWallet output) {
+      for (MoneroWalletListenerI listener : getListeners()) {
+        new Thread(new Runnable() {
+          @Override public void run() { listener.onOutputReceived(output); }
+        }).start();
+      }
+    }
+    
+    private void onOutputSpentMt(MoneroOutputWallet output) {
+      for (MoneroWalletListenerI listener : getListeners()) {
+        new Thread(new Runnable() {
+          @Override public void run() { listener.onOutputSpent(output); }
+        }).start();
+      }
+    }
+    
+    private void onBalancesChangedMt(BigInteger newBalance, BigInteger newUnlockedBalance) {
+      for (MoneroWalletListenerI listener : getListeners()) {
+        new Thread(new Runnable() {
+          @Override public void run() { listener.onBalancesChanged(newBalance, newUnlockedBalance); }
+        }).start();
+      }
+    }
+    
     private boolean checkForChangedBalances() {
       BigInteger balance = getBalance();
       BigInteger unlockedBalance = getUnlockedBalance();
       if (!balance.equals(prevBalance) || !unlockedBalance.equals(prevUnlockedBalance)) {
         prevBalance =  balance;
         prevUnlockedBalance = unlockedBalance;
-        for (MoneroWalletListenerI listener : getListeners()) listener.onBalancesChanged(balance, unlockedBalance);
+        onBalancesChangedMt(balance, unlockedBalance);
         return true;
       }
       return false;

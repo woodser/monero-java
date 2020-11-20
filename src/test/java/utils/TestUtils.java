@@ -9,9 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroRpcError;
 import monero.common.MoneroUtils;
@@ -39,17 +40,25 @@ public class TestUtils {
     }
   }
   
-  // monero daemon rpc endpoint configuration (adjust per your configuration)
+  // monero daemon rpc endpoint configuration (change per your configuration)
   public static final String DAEMON_RPC_URI = "http://localhost:38081";
   public static final String DAEMON_RPC_USERNAME = "superuser";
-  public static final String DAEMON_RPC_PASSWORD = "abctesting123";  
+  public static final String DAEMON_RPC_PASSWORD = "abctesting123";
   
-  // monero wallet rpc configuration (adjust per your configuration)
-  public static final String WALLET_RPC_URI = "http://localhost:38084";
+  // monero wallet rpc configuration (change per your configuration)
+  public static final int WALLET_RPC_PORT_START = 38084; // test wallet executables will bind to consecutive ports after these
+  public static final int WALLET_RPC_ZMQ_PORT_START = 58083;
+  public static final int WALLET_RPC_ZMQ_BIND_PORT_START = 48083;  // TODO: zmq bind port necessary?
+  public static final String WALLET_RPC_ZMQ_DOMAIN = "127.0.0.1";
+  public static final String WALLET_RPC_DOMAIN = "localhost";
+  public static final String WALLET_RPC_URI = "http://" + WALLET_RPC_DOMAIN + ":" + WALLET_RPC_PORT_START;
+  public static final String WALLET_RPC_ZMQ_URI = "tcp://" + WALLET_RPC_ZMQ_DOMAIN + ":" + WALLET_RPC_ZMQ_PORT_START;
   public static final String WALLET_RPC_USERNAME = "rpc_user";
   public static final String WALLET_RPC_PASSWORD = "abc123";
-  public static final String WALLET_RPC_ZMQ_URI = "tcp://127.0.0.1:58083";
-
+  public static final String WALLET_RPC_LOCAL_EXEC_PATH = "/Applications/monero-x86_64-apple-darwin11-v0.17.1.1-rct-zmq/monero-wallet-rpc"; // TODO: test error messages with invalid params, TODO: dummy path for public repo
+  public static final String WALLET_RPC_LOCAL_WALLET_DIR = "/Applications/monero-x86_64-apple-darwin11-v0.17.1.1-rct-zmq";  // defaults to exec path's parent directory
+  public static final String WALLET_RPC_ACCESS_CONTROL_ORIGINS = "http://localhost:8080"; // cors access from web browser
+  
   // test wallet config
   public static final String WALLET_NAME = "test_wallet_1";
   public static final String WALLET_PASSWORD = "supersecretpassword123";
@@ -79,7 +88,7 @@ public class TestUtils {
   public static TxPoolWalletTracker TX_POOL_WALLET_TRACKER = new TxPoolWalletTracker();
   
   /**
-   * Get a daemon RPC singleton instance shared among tests.
+   * Get a singleton instance of a monero-daemon-rpc client.
    */
   private static MoneroDaemonRpc daemonRpc;
   public static MoneroDaemonRpc getDaemonRpc() {
@@ -91,7 +100,7 @@ public class TestUtils {
   }
   
   /**
-   * Get a singleton instance of a wallet supported by RPC.
+   * Get a singleton instance of a monero-wallet-rpc client.
    */
   private static MoneroWalletRpc walletRpc;
   public static MoneroWalletRpc getWalletRpc() {
@@ -130,7 +139,45 @@ public class TestUtils {
   }
   
   /**
-   * Get a singleton instance of a wallet supported by JNI.
+   * Create a monero-wallet-rpc process bound to the next available ports.
+   */
+  private static Map<MoneroWalletRpc, Integer> WALLET_PORT_OFFSETS = new HashMap<MoneroWalletRpc, Integer>();
+  public static MoneroWalletRpc startWalletRpcProcess() throws IOException {
+    
+    // get next available offset of ports to bind to
+    int portOffset = 1;
+    while (WALLET_PORT_OFFSETS.values().contains(portOffset)) portOffset++;
+    
+    // create client with internal monero-wallet-rpc process
+    MoneroWalletRpc wallet = new MoneroWalletRpc(Arrays.asList(
+        TestUtils.WALLET_RPC_LOCAL_EXEC_PATH,
+        "--" + TestUtils.NETWORK_TYPE.toString().toLowerCase(),
+        "--daemon-address", TestUtils.DAEMON_RPC_URI,
+        "--daemon-login", TestUtils.DAEMON_RPC_USERNAME + ":" + TestUtils.DAEMON_RPC_PASSWORD,
+        "--rpc-bind-port", "" + (TestUtils.WALLET_RPC_PORT_START + portOffset),
+        "--rpc-login", TestUtils.WALLET_RPC_USERNAME + ":" + TestUtils.WALLET_RPC_PASSWORD,
+        "--wallet-dir", TestUtils.WALLET_RPC_LOCAL_WALLET_DIR,
+        "--rpc-access-control-origins", TestUtils.WALLET_RPC_ACCESS_CONTROL_ORIGINS,
+        "--zmq-rpc-bind-port", "" + (TestUtils.WALLET_RPC_ZMQ_BIND_PORT_START + portOffset),
+        "--zmq-pub", "tcp://" + WALLET_RPC_ZMQ_DOMAIN + ":" + (TestUtils.WALLET_RPC_ZMQ_PORT_START + portOffset)));
+    
+    // register wallet with port offset
+    WALLET_PORT_OFFSETS.put(wallet, portOffset);
+    return wallet;
+  }
+  
+  /**
+   * Stop a monero-wallet-rpc process and release its ports.
+   * 
+   * @param walletRpc - wallet created with internal monero-wallet-rpc process
+   */
+  public static void stopWalletRpcProcess(MoneroWalletRpc walletRpc) {
+    WALLET_PORT_OFFSETS.remove(walletRpc);
+    walletRpc.stopProcess();
+  }
+  
+  /**
+   * Get a singleton instance of a wallet supported by JNI bindings to monero-project's wallet2.
    */
   private static MoneroWalletJni walletJni;
   public static MoneroWalletJni getWalletJni() {

@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,23 +54,19 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     if (config == null) config = new MoneroWalletConfig();
     if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
     
-    // open wallet
-//    MoneroWalletRpc wallet = new MoneroWalletRpc(Arrays.asList(
-//        "/Applications/monero-x86_64-apple-darwin11-v0.17.1.1-rct-zmq/monero-wallet-rpc",
-//        "--daemon-address", "http://localhost:38081",
-//        "--daemon-login", "superuser:abctesting123",
-//        "--stagenet",
-//        "--rpc-bind-port", "38085",
-//        "--rpc-login", "rpc_user:abc123",
-//        "--wallet-dir", "/Applications/monero-x86_64-apple-darwin11-v0.17.1.1-rct-zmq", // TODO: extracted from path to exec
-//        "--rpc-access-control-origins", "http://localhost:9100",
-//        "--zmq-rpc-bind-port", "38083",
-//        "--zmq-pub", "tcp://127.0.0.1:58083"));
-    wallet.openWallet(config.getPath(), config.getPassword());
-    
-    // serverUri "" denotes offline wallet for tests
-    if ("".equals(config.getServerUri())) wallet.setDaemonConnection("");
-    return wallet;
+    try {
+      // create client connected to internal monero-wallet-rpc executable
+      MoneroWalletRpc wallet = TestUtils.startWalletRpcProcess();
+      
+      // open wallet
+      wallet.openWallet(config.getPath(), config.getPassword());
+      
+      // serverUri "" denotes offline wallet for tests
+      if ("".equals(config.getServerUri())) wallet.setDaemonConnection("");
+      return wallet;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
   
   @Override
@@ -82,12 +79,19 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
     if (config.getRestoreHeight() == null && !random) config.setRestoreHeight(0l);
     
-    // create wallet
-    wallet.createWallet(config);
-    
-    // serverUri "" denotes offline wallet for tests
-    if ("".equals(config.getServerUri())) wallet.setDaemonConnection("");
-    return wallet;
+    try {
+      // create client connected to internal monero-wallet-rpc executable
+      MoneroWalletRpc wallet = TestUtils.startWalletRpcProcess();
+      
+      // create wallet
+      wallet.createWallet(config);
+      
+      // serverUri "" denotes offline wallet for tests
+      if ("".equals(config.getServerUri())) wallet.setDaemonConnection("");
+      return wallet;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
   
   @Override
