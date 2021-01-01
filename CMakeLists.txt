@@ -46,7 +46,7 @@ include_directories(${BOOST})
 
 # TODO: remove TRUEs, how are APPLE, DEPENDS, etc initialized?
 if (TRUE OR HIDAPI_FOUND OR LibUSB_COMPILE_TEST_PASSED)
-  if (TRUE OR APPLE)
+  if (APPLE)
     if(TRUE OR DEPENDS)
       list(APPEND EXTRA_LIBRARIES "-framework Foundation -framework IOKit")
     else()
