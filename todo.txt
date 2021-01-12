@@ -1,4 +1,6 @@
 HIGH
+collapse MoneroOutputWallet, MoneroTxWallet into MoneroOutput, MoneroTx?
+recover wallet when stuck opened by another application
 logging config for rpc requests
 support wallet.changePassword()
 moveTo(path, password) password not supported, update to be like monero-javascript
@@ -116,6 +118,7 @@ stress tester
 --------- MONERO CORE ISSUES ---------
 
 TO OPEN
+wallet2 recognizes pool tx vouts but not vins (e.g. if funds sent from another copy of wallet) 
 keys wallet setDaemonConnection not working with authentication
 daemon cannot check for update while mining
 No notification of unconfirmed funds within 10 seconds

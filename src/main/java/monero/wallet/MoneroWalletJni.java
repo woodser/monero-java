@@ -22,23 +22,19 @@
 
 package monero.wallet;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
+import common.utils.GenUtils;
+import common.utils.JsonUtils;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
-
-import common.utils.GenUtils;
-import common.utils.JsonUtils;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.daemon.model.MoneroBlock;
@@ -84,14 +80,14 @@ public class MoneroWalletJni extends MoneroWalletBase {
     System.loadLibrary("monero-java");
   }
   
-  // logger
+  // class variables 
   private static final Logger LOGGER = Logger.getLogger(MoneroWalletJni.class.getName());
+  private static final long DEFAULT_SYNC_PERIOD_IN_MS = 10000; // default period betweeen syncs in ms
   
   // instance variables
   private long jniWalletHandle;                 // memory address of the wallet in c++; this variable is read directly by name in c++
   private long jniListenerHandle;               // memory address of the wallet listener in c++; this variable is read directly by name in c++
   private WalletJniListener jniListener;        // receives notifications from jni c++
-  private Set<MoneroWalletListenerI> listeners; // externally subscribed wallet listeners
   private boolean isClosed;                     // whether or not wallet is closed
   
   /**
@@ -101,8 +97,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
    */
   private MoneroWalletJni(long jniWalletHandle) {
     this.jniWalletHandle = jniWalletHandle;
-    this.jniListener = new WalletJniListener(this);
-    this.listeners = new LinkedHashSet<MoneroWalletListenerI>();
+    this.jniListener = new WalletJniListener();
     this.isClosed = false;
   }
   
@@ -412,39 +407,6 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
   
   /**
-   * Register a listener to receive wallet notifications.
-   * 
-   * @param listener is the listener to receive wallet notifications
-   */
-  public void addListener(MoneroWalletListenerI listener) {
-    assertNotClosed();
-    listeners.add(listener);
-    setIsListening(true);
-  }
-  
-  /**
-   * Unregister a listener to receive wallet notifications.
-   * 
-   * @param listener is the listener to unregister
-   */
-  public void removeListener(MoneroWalletListenerI listener) {
-    assertNotClosed();
-    if (!listeners.contains(listener)) throw new MoneroError("Listener is not registered to wallet");
-    listeners.remove(listener);
-    if (listeners.isEmpty()) setIsListening(false);
-  }
-  
-  /**
-   * Get the listeners registered with the wallet.
-   * 
-   * @return the registered listeners
-   */
-  public Set<MoneroWalletListenerI> getListeners() {
-    assertNotClosed();
-    return new HashSet<MoneroWalletListenerI>(listeners);
-  }
-
-  /**
    * Move the wallet from its current path to the given path.
    * 
    * @param path is the new wallet's path
@@ -456,6 +418,23 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
   
   // -------------------------- COMMON WALLET METHODS -------------------------
+  
+  public void addListener(MoneroWalletListenerI listener) {
+    assertNotClosed();
+    super.addListener(listener);
+    setIsListening(true);
+  }
+  
+  public void removeListener(MoneroWalletListenerI listener) {
+    assertNotClosed();
+    super.removeListener(listener);
+    if (listeners.isEmpty()) setIsListening(false);
+  }
+  
+  public Set<MoneroWalletListenerI> getListeners() {
+    assertNotClosed();
+    return super.getListeners();
+  }
   
   public boolean isViewOnly() {
     assertNotClosed();
@@ -621,10 +600,10 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
   
   @Override
-  public void startSyncing() {
+  public void startSyncing(Long syncPeriodInMs) {
     assertNotClosed();
     try {
-      startSyncingJni();
+      startSyncingJni(syncPeriodInMs == null ? DEFAULT_SYNC_PERIOD_IN_MS : syncPeriodInMs);
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
@@ -723,65 +702,37 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
 
   @Override
-  public BigInteger getBalance() {
+  public BigInteger getBalance(Integer accountIdx, Integer subaddressIdx) {
     assertNotClosed();
     try {
-      return new BigInteger(getBalanceWalletJni());
+      if (accountIdx == null) {
+        if (subaddressIdx != null) throw new MoneroError("Must provide account index with subaddress index");
+        return new BigInteger(getBalanceWalletJni());
+      } else {
+        if (subaddressIdx == null) return new BigInteger(getBalanceAccountJni(accountIdx));
+        else return new BigInteger(getBalanceSubaddressJni(accountIdx, subaddressIdx));
+      }
     } catch (MoneroError e) {
       throw new MoneroError(e.getMessage());
     }
   }
-
+  
   @Override
-  public BigInteger getBalance(int accountIdx) {
+  public BigInteger getUnlockedBalance(Integer accountIdx, Integer subaddressIdx) {
     assertNotClosed();
     try {
-      return new BigInteger(getBalanceAccountJni(accountIdx));
+      if (accountIdx == null) {
+        if (subaddressIdx != null) throw new MoneroError("Must provide account index with subaddress index");
+        return new BigInteger(getUnlockedBalanceWalletJni());
+      } else {
+        if (subaddressIdx == null) return new BigInteger(getUnlockedBalanceAccountJni(accountIdx));
+        else return new BigInteger(getUnlockedBalanceSubaddressJni(accountIdx, subaddressIdx));
+      }
     } catch (MoneroError e) {
       throw new MoneroError(e.getMessage());
     }
   }
-
-  @Override
-  public BigInteger getBalance(int accountIdx, int subaddressIdx) {
-    assertNotClosed();
-    try {
-      return new BigInteger(getBalanceSubaddressJni(accountIdx, subaddressIdx));
-    } catch (MoneroError e) {
-      throw new MoneroError(e.getMessage());
-    }
-  }
-
-  @Override
-  public BigInteger getUnlockedBalance() {
-    assertNotClosed();
-    try {
-      return new BigInteger(getUnlockedBalanceWalletJni());
-    } catch (MoneroError e) {
-      throw new MoneroError(e.getMessage());
-    }
-  }
-
-  @Override
-  public BigInteger getUnlockedBalance(int accountIdx) {
-    assertNotClosed();
-    try {
-      return new BigInteger(getUnlockedBalanceAccountJni(accountIdx));
-    } catch (MoneroError e) {
-      throw new MoneroError(e.getMessage());
-    }
-  }
-
-  @Override
-  public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx) {
-    assertNotClosed();
-    try {
-      return new BigInteger(getUnlockedBalanceSubaddressJni(accountIdx, subaddressIdx));
-    } catch (MoneroError e) {
-      throw new MoneroError(e.getMessage());
-    }
-  }
-
+  
   @Override
   public List<MoneroTxWallet> getTxs(MoneroTxQuery query, Collection<String> missingTxHashes) {
     assertNotClosed();
@@ -1419,7 +1370,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   
   private native Object[] syncJni(long startHeight);
   
-  private native void startSyncingJni();
+  private native void startSyncingJni(long syncPeriodInMs);
   
   private native void stopSyncingJni();
   
@@ -1549,7 +1500,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   
   private native void closeJni(boolean save);
   
-  // ------------------------------- LISTENERS --------------------------------
+  // -------------------------------- LISTENER --------------------------------
   
   /**
    * Receives notifications directly from jni c++.
@@ -1557,24 +1508,16 @@ public class MoneroWalletJni extends MoneroWalletBase {
   @SuppressWarnings("unused") // called directly from jni c++
   private class WalletJniListener {
     
-    private MoneroWalletJni wallet; // wallet to notify listeners
-    
-    public WalletJniListener(MoneroWalletJni wallet) {  // TODO: make this MoneroWallet when all methods moved to top-level
-      this.wallet = wallet;
-    }
-    
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
-      for (MoneroWalletListenerI listener : wallet.getListeners()) {
-        listener.onSyncProgress(height, startHeight, endHeight, percentDone, message);
-      }
+      for (MoneroWalletListenerI listener : getListeners()) listener.onSyncProgress(height, startHeight, endHeight, percentDone, message);
     }
     
     public void onNewBlock(long height) {
-      for (MoneroWalletListenerI listener : wallet.getListeners()) listener.onNewBlock(height);
+      for (MoneroWalletListenerI listener : getListeners()) listener.onNewBlock(height);
     }
     
     public void onBalancesChanged(String newBalanceStr, String newUnlockedBalanceStr) {
-      for (MoneroWalletListenerI listener : wallet.getListeners()) listener.onBalancesChanged(new BigInteger(newBalanceStr), new BigInteger(newUnlockedBalanceStr));
+      for (MoneroWalletListenerI listener : getListeners()) listener.onBalancesChanged(new BigInteger(newBalanceStr), new BigInteger(newUnlockedBalanceStr));
     }
     
     public void onOutputReceived(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version, long unlockHeight, boolean isLocked) {
@@ -1605,7 +1548,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       }
       
       // announce output
-      for (MoneroWalletListenerI listener : wallet.getListeners()) listener.onOutputReceived((MoneroOutputWallet) tx.getOutputs().get(0));
+      for (MoneroWalletListenerI listener : getListeners()) listener.onOutputReceived((MoneroOutputWallet) tx.getOutputs().get(0));
     }
     
     public void onOutputSpent(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version) {
@@ -1634,7 +1577,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
       }
       
       // announce output
-      for (MoneroWalletListenerI listener : wallet.getListeners()) listener.onOutputSpent((MoneroOutputWallet) tx.getInputs().get(0));
+      for (MoneroWalletListenerI listener : getListeners()) listener.onOutputSpent((MoneroOutputWallet) tx.getInputs().get(0));
     }
   }
   

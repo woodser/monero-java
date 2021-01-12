@@ -110,7 +110,7 @@ public class GenUtils {
   public static void assertEquals(String failMsg, Object expected, Object actual) {
     try {
       assertEquals(expected, actual);
-    } catch (Exception e) {
+    } catch (AssertionError e) {
       throw new AssertionError(failMsg);
     }
   }
@@ -136,7 +136,7 @@ public class GenUtils {
   public static void assertNotEquals(String failMsg, Object val1, Object val2) {
     try {
       assertNotEquals(val1, val2);
-    } catch (Exception e) {
+    } catch (AssertionError e) {
       throw new AssertionError(failMsg);
     }
   }

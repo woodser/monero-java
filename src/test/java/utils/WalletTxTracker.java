@@ -1,10 +1,9 @@
 package utils;
 
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import monero.common.MoneroUtils;
 import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroTx;
@@ -20,11 +19,11 @@ import monero.wallet.model.MoneroTxWallet;
  * 
  * TODO monero core: sync txs relayed outside wallet so this class is unecessary
  */
-public class TxPoolWalletTracker {
+public class WalletTxTracker {
 
   private Set<MoneroWallet> clearedWallets;
   
-  public TxPoolWalletTracker() {
+  public WalletTxTracker() {
     clearedWallets = new HashSet<MoneroWallet>();
   }
   
@@ -96,7 +95,7 @@ public class TxPoolWalletTracker {
       }
       
       // sleep for a moment
-      try { TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL); }
+      try { TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS); }
       catch (InterruptedException e) {  throw new RuntimeException(e); } 
     }
     
@@ -108,5 +107,35 @@ public class TxPoolWalletTracker {
       wallet.sync();
       clearedWallets.add(wallet);
     }
+  }
+  
+  public BigInteger waitForUnlockedBalance(MoneroWallet wallet, Integer accountIndex, Integer subaddressIndex, BigInteger minAmount) {
+    if (minAmount == null) minAmount = new BigInteger("0");
+    
+    // check if wallet has unlocked balance
+    BigInteger unlockedBalance = wallet.getUnlockedBalance(accountIndex, subaddressIndex);
+    if (unlockedBalance.compareTo(minAmount) > 0) return unlockedBalance;
+   
+    // start mining
+    MoneroDaemon daemon = TestUtils.getDaemonRpc();
+    boolean miningStarted = false;
+    if (!daemon.getMiningStatus().isActive()) {
+      try {
+        StartMining.startMining();
+        miningStarted = true;
+      } catch (Exception err) { }
+    }
+    
+    // wait for unlocked balance // TODO: promote to MoneroWallet interface?
+    System.out.println("Waiting for unlocked balance");
+    while (unlockedBalance.compareTo(minAmount) < 0) {
+      unlockedBalance = wallet.getUnlockedBalance(accountIndex, subaddressIndex);
+      try { TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS); }
+      catch (InterruptedException e) { throw new RuntimeException(e); }
+    }
+    
+    // stop mining if started
+    if (miningStarted) daemon.stopMining();
+    return unlockedBalance;
   }
 }

@@ -637,7 +637,7 @@ public interface MoneroDaemon {
    * 
    * @return the header of the next block added to the chain
    */
-  public MoneroBlockHeader getNextBlockHeader();
+  public MoneroBlockHeader waitForNextBlockHeader();
   
   /**
    * Register a listener to be notified when blocks are added to the chain.

@@ -1,8 +1,7 @@
 package monero.daemon.model;
 
-import java.math.BigInteger;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.math.BigInteger;
 
 /**
  * Monero daemon info.
@@ -39,6 +38,8 @@ public class MoneroDaemonInfo {
   private Long databaseSize;
   private Boolean updateAvailable;
   private BigInteger credits;
+  private Boolean isBusySyncing;
+  private Boolean isSynchronized;
   
   public String getVersion() {
     return version;
@@ -280,5 +281,23 @@ public class MoneroDaemonInfo {
 
   public void setCredits(BigInteger credits) {
     this.credits = credits;
+  }
+  
+  @JsonProperty("isBusySyncing")
+  public Boolean isBusySyncing() {
+    return isBusySyncing;
+  }
+  
+  public void setIsBusySyncing(Boolean isBusySyncing) {
+    this.isBusySyncing = isBusySyncing;
+  }
+  
+  @JsonProperty("isSynchronized")
+  public Boolean isSynchronized() {
+    return isSynchronized;
+  }
+  
+  public void setIsSynchronized(Boolean isSynchronized) {
+    this.isSynchronized = isSynchronized;
   }
 }

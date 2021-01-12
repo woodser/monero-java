@@ -858,7 +858,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   @Override
-  public MoneroBlockHeader getNextBlockHeader() {
+  public MoneroBlockHeader waitForNextBlockHeader() {
     Object syncObject  = new Object();
     synchronized(syncObject) {
       try {
@@ -995,7 +995,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("seed_height")) template.setSeedHeight(((BigInteger) val).longValue());
       else if (key.equals("seed_hash")) template.setSeedHash((String) val);
       else if (key.equals("next_seed_hash")) template.setNextSeedHash((String) val);
-      else LOGGER.warning("WARNING: ignoring unexpected field in block template: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected field in block template: " + key + ": " + val);
     }
     if ("".equals(template.getNextSeedHash())) template.setNextSeedHash(null);
     return template;
@@ -1021,7 +1021,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("height")) header.setHeight(GenUtils.reconcile(header.getHeight(), ((BigInteger) val).longValue()));
       else if (key.equals("major_version")) header.setMajorVersion(GenUtils.reconcile(header.getMajorVersion(), ((BigInteger) val).intValue()));
       else if (key.equals("minor_version")) header.setMinorVersion(GenUtils.reconcile(header.getMinorVersion(), ((BigInteger) val).intValue()));
-      else if (key.equals("nonce")) header.setNonce(GenUtils.reconcile(header.getNonce(), ((BigInteger) val).intValue()));
+      else if (key.equals("nonce")) header.setNonce(GenUtils.reconcile(header.getNonce(), ((BigInteger) val).longValue()));
       else if (key.equals("num_txes")) header.setNumTxs(GenUtils.reconcile(header.getNumTxs(), ((BigInteger) val).intValue()));
       else if (key.equals("orphan_status")) header.setOrphanStatus(GenUtils.reconcile(header.getOrphanStatus(), (Boolean) val));
       else if (key.equals("prev_hash") || key.equals("prev_id")) header.setPrevHash(GenUtils.reconcile(header.getPrevHash(), (String) val));
@@ -1033,7 +1033,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("tx_hashes")) {}  // used in block model, not header model
       else if (key.equals("miner_tx")) {}   // used in block model, not header model
       else if (key.equals("miner_tx_hash")) header.setMinerTxHash((String) val);
-      else LOGGER.warning("WARNING: ignoring unexpected block header field: '" + key + "': " + val);
+      else LOGGER.warning("ignoring unexpected block header field: '" + key + "': " + val);
     }
     return header;
   }
@@ -1096,9 +1096,13 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("double_spend_seen")) tx.setIsDoubleSpendSeen(GenUtils.reconcile(tx.isDoubleSpendSeen(), (Boolean) val));
       else if (key.equals("version")) tx.setVersion(GenUtils.reconcile(tx.getVersion(), ((BigInteger) val).intValue()));
       else if (key.equals("extra")) {
-        List<Integer> ints = new ArrayList<Integer>();
-        for (BigInteger bi : (List<BigInteger>) val) ints.add(bi.intValue());
-        tx.setExtra(GenUtils.reconcile(tx.getExtra(), GenUtils.listToIntArray(ints)));
+        if (val instanceof String) {
+          LOGGER.warning("extra field as string not being assigned to int[]: " + key + ": " + val); // TODO: how to set string to int[]? - or, extra is string which can encode int[]
+        } else {
+          List<Integer> ints = new ArrayList<Integer>();
+          for (BigInteger bi : (List<BigInteger>) val) ints.add(bi.intValue());
+          tx.setExtra(GenUtils.reconcile(tx.getExtra(), GenUtils.listToIntArray(ints)));
+        }
       }
       else if (key.equals("vin")) {
         List<Map<String, Object>> rpcInputs = (List<Map<String, Object>>) val;
@@ -1151,7 +1155,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("prunable_hash")) tx.setPrunableHash(GenUtils.reconcile(tx.getPrunableHash(), "".equals((String) val) ? null : (String) val));
       else if (key.equals("prunable_as_hex")) tx.setPrunableHex(GenUtils.reconcile(tx.getPrunableHex(), "".equals((String) val) ? null : (String) val));
       else if (key.equals("pruned_as_hex")) tx.setPrunedHex(GenUtils.reconcile(tx.getPrunedHex(), "".equals((String) val) ? null : (String) val));
-      else LOGGER.warning("WARNING: ignoring unexpected field in rpc tx: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected field in rpc tx: " + key + ": " + val);
     }
     
     // link block and tx
@@ -1203,7 +1207,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       }
       else if (key.equals("amount")) output.setAmount(GenUtils.reconcile(output.getAmount(), (BigInteger) val));
       else if (key.equals("target")) output.setStealthPublicKey(GenUtils.reconcile(output.getStealthPublicKey(), (String) ((Map<String, Object>) val).get("key")));
-      else LOGGER.warning("WARNING: ignoring unexpected field output: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected field output: " + key + ": " + val);
     }
     return output;
   }
@@ -1220,7 +1224,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("user_uri")) result.setUserUri((String) val);
       else if (key.equals("version")) result.setVersion((String) val);
       else if (key.equals("untrusted")) {}  // handled elsewhere
-      else LOGGER.warning("WARNING: ignoring unexpected field in rpc check update result: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected field in rpc check update result: " + key + ": " + val);
     }
     if ("".equals(result.getAutoUri())) result.setAutoUri(null);
     if ("".equals(result.getUserUri())) result.setUserUri(null);
@@ -1249,7 +1253,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("rpc_port")) peer.setRpcPort(((BigInteger) val).intValue());
       else if (key.equals("pruning_seed")) peer.setPruningSeed(((BigInteger) val).intValue());
       else if (key.equals("rpc_credits_per_hash")) peer.setRpcCreditsPerHash((BigInteger) val);
-      else LOGGER.warning("WARNING: ignoring unexpected field in rpc peer: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected field in rpc peer: " + key + ": " + val);
     }
     return peer;
   }
@@ -1273,7 +1277,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("credits")) result.setCredits((BigInteger) val);
       else if (key.equals("status") || key.equals("untrusted")) {}  // handled elsewhere
       else if (key.equals("top_hash")) result.setTopBlockHash("".equals(val) ? null : (String) val);
-      else LOGGER.warning("WARNING: ignoring unexpected field in submit tx hex result: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected field in submit tx hex result: " + key + ": " + val);
     }
     return result;
   }
@@ -1318,7 +1322,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         else if (rpcType == 4) connection.setType(ConnectionType.I2P);
         else throw new MoneroError("Invalid RPC connection type, expected 0-4: " + rpcType);
       }
-      else LOGGER.warning("WARNING: ignoring unexpected field in connection: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected field in connection: " + key + ": " + val);
     }
     return connection;
   }
@@ -1331,7 +1335,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("total_instances")) entry.setNumInstances(((BigInteger) val).longValue());
       else if (key.equals("unlocked_instances")) entry.setNumUnlockedInstances(((BigInteger) val).longValue());
       else if (key.equals("recent_instances")) entry.setNumRecentInstances(((BigInteger) val).longValue());
-      else LOGGER.warning("WARNING: ignoring unexpected field in output histogram: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected field in output histogram: " + key + ": " + val);
     }
     return entry;
   }
@@ -1380,7 +1384,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("stagenet")) { if ((Boolean) val) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroNetworkType.STAGENET)); }
       else if (key.equals("credits")) info.setCredits((BigInteger) val);
       else if (key.equals("top_block_hash") || key.equals("top_hash")) info.setTopBlockHash(GenUtils.reconcile(info.getTopBlockHash(), "".equals(val) ? null : (String) val));  // TODO monero-wallet-rpc: daemon info top_hash is redundant with top_block_hash, only returned if pay-for-service enabled
-      else LOGGER.warning("WARNING: Ignoring unexpected info field: " + key + ": " + val);
+      else if (key.equals("busy_syncing")) info.setIsBusySyncing((Boolean) val);
+      else if (key.equals("synchronized")) info.setIsSynchronized((Boolean) val);
+      else LOGGER.warning("Ignoring unexpected info field: " + key + ": " + val);
     }
     return info;
   }
@@ -1416,7 +1422,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("overview")) {  // this returns [] without pruning
         try {
           List<Object> overview = JsonUtils.deserialize((String) val, new TypeReference<List<Object>>(){});
-          if (!overview.isEmpty()) LOGGER.warning("WARNING: ignoring non-empty 'overview' field (not implemented): " + overview); // TODO
+          if (!overview.isEmpty()) LOGGER.warning("ignoring non-empty 'overview' field (not implemented): " + overview); // TODO
         } catch (Exception e) {
           //e.printStackTrace();
           LOGGER.warning("Failed to parse 'overview' field: " + val);
@@ -1425,7 +1431,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("credits")) syncInfo.setCredits((BigInteger) val);
       else if (key.equals("top_hash")) syncInfo.setTopBlockHash("".equals(val) ? null : (String) val);
       else if (key.equals("untrusted")) {}  // handled elsewhere
-      else LOGGER.warning("WARNING: ignoring unexpected field in sync info: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected field in sync info: " + key + ": " + val);
     }
     return syncInfo;
   }
@@ -1446,7 +1452,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("window")) info.setWindow(((BigInteger) val).intValue());
       else if (key.equals("credits")) info.setCredits((BigInteger) val);
       else if (key.equals("top_hash")) info.setTopBlockHash("".equals(val) ? null : (String) val);
-      else LOGGER.warning("WARNING: ignoring unexpected field in hard fork info: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected field in hard fork info: " + key + ": " + val);
     }
     return info;
   }
@@ -1462,7 +1468,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("size")) span.setSize(((BigInteger) val).longValue());
       else if (key.equals("speed")) span.setSpeed(((BigInteger) val).longValue());
       else if (key.equals("start_block_height")) span.setStartHeight(((BigInteger) val).longValue());
-      else LOGGER.warning("WARNING: ignoring unexpected field in daemon connection span: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected field in daemon connection span: " + key + ": " + val);
     }
     return span;
   }
@@ -1501,7 +1507,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("length")) chain.setLength(((BigInteger) val).longValue());
       else if (key.equals("block_hashes")) chain.setBlockHashes((List<String>) val);
       else if (key.equals("main_chain_parent_block")) chain.setMainChainParentBlockHash((String) val);
-      else LOGGER.warning("WARNING: ignoring unexpected field in alternative chain: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected field in alternative chain: " + key + ": " + val);
     }
     return chain;
   }

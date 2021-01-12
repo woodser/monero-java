@@ -1,9 +1,9 @@
 package test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,14 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.junit.Test;
-
 import monero.common.MoneroError;
 import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
 import monero.wallet.model.MoneroWalletConfig;
+import org.junit.jupiter.api.Test;
 import utils.TestUtils;
 
 /**

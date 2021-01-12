@@ -21,7 +21,7 @@ public interface MoneroWalletListenerI {
   /**
    * Invoked when a new block is added to the chain.
    * 
-   * @param height - the height of the block added to the chain
+   * @param height - the height of the new block (i.e. the number of blocks before it).
    */
   public void onNewBlock(long height);
 
@@ -34,17 +34,17 @@ public interface MoneroWalletListenerI {
   public void onBalancesChanged(BigInteger newBalance, BigInteger newUnlockedBalance);
   
   /**
-   * Invoked when the wallet receives an unconfirmed output, when the output is confirmed,
-   * and when the output is unlocked.
+   * Invoked 3 times per received output: once when unconfirmed, once when confirmed, and
+   * once when unlocked.
    * 
    * @param output - the received output
    */
   public void onOutputReceived(MoneroOutputWallet output);
   
   /**
-   * Invoked when the wallet spends an output.
+   * Invoked twice per spent output: once when confirmed and once when unlocked.
    * 
    * @param output - the spent output
    */
-  public void onOutputSpent(MoneroOutputWallet output);
+  public void onOutputSpent(MoneroOutputWallet output); // TODO (monero-project): support notification of unconfirmed spent funds
 }

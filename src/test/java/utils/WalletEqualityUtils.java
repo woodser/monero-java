@@ -1,8 +1,8 @@
 package utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -40,10 +40,10 @@ public class WalletEqualityUtils {
    * @param w2 a wallet to compare
    */
   public static void testWalletEqualityOnChain(MoneroWallet w1, MoneroWallet w2) {
-    TestUtils.TX_POOL_WALLET_TRACKER.reset(); // all wallets need to wait for txs to confirm to reliably sync
+    TestUtils.WALLET_TX_TRACKER.reset(); // all wallets need to wait for txs to confirm to reliably sync
     
     // wait for relayed txs associated with wallets to clear pool
-    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(w1, w2);
+    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(w1, w2);
     
     // sync the wallets until same height
     while (w1.getHeight() != w2.getHeight()) {
@@ -160,7 +160,7 @@ public class WalletEqualityUtils {
           }
           
           // test tx equality by merging
-          assertTrue("Txs are not mergeable", TestUtils.txsMergeable(tx1, tx2));
+          assertTrue(TestUtils.txsMergeable(tx1, tx2), "Txs are not mergeable");
           assertEquals(tx1, tx2);
           found = true;
           

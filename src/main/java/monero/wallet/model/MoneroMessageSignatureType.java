@@ -1,7 +1,5 @@
 package monero.wallet.model;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
 /**
  * Enumerate message signature types.
  */

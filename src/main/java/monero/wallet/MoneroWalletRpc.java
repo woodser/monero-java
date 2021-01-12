@@ -22,8 +22,12 @@ x * Copyright (c) 2017-2020 woodser
 
 package monero.wallet;
 
+import common.utils.GenUtils;
+import common.utils.JsonUtils;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,9 +39,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-
-import common.utils.GenUtils;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroRpcError;
@@ -76,24 +81,29 @@ import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
 import monero.wallet.model.MoneroWalletListenerI;
+import org.zeromq.SocketType;
+import org.zeromq.ZContext;
+import org.zeromq.ZMQ;
 
 /**
  * Implements a Monero wallet using monero-wallet-rpc.
  */
 public class MoneroWalletRpc extends MoneroWalletBase {
 
-  private String path;                                      // wallet's path identifier
-  private MoneroRpcConnection rpc;                          // handles rpc interactions
-  private Map<Integer, Map<Integer, String>> addressCache;  // cache static addresses to reduce requests
-  
-  // static
-  private static final int ERROR_CODE_INVALID_PAYMENT_ID = -5;  // invalid payment id error code
-  private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class.getName()); // logger
+  // class variables
+  private static final Logger LOGGER = Logger.getLogger(MoneroWalletRpc.class.getName());
   private static final TxHeightComparator TX_HEIGHT_COMPARATOR = new TxHeightComparator();
+  private static final int ERROR_CODE_INVALID_PAYMENT_ID = -5; // invalid payment id error code
+  private static final long DEFAULT_SYNC_PERIOD_IN_MS = 20000; // default period between syncs in ms (defined by DEFAULT_AUTO_REFRESH_PERIOD in wallet_rpc_server.cpp)
   
-  public MoneroWalletRpc(URI uri) {
-    this(new MoneroRpcConnection(uri));
-  }
+  // instance variables
+  private String path;                                     // wallet's path identifier
+  private MoneroRpcConnection rpc;                         // handles rpc interactions
+  private WalletRpcZmqListener zmqListener;                // listener which processes zmq notifications from monero-wallet-rpc
+  private WalletRpcPollListener pollListener;              // listener which polls monero-wallet-rpc
+  private Map<Integer, Map<Integer, String>> addressCache; // cache static addresses to reduce requests
+  private Process process;                                 // process running monero-wallet-rpc if applicable
+  private long syncPeriodInMs = DEFAULT_SYNC_PERIOD_IN_MS; // period between syncs in ms (default 20000)
   
   public MoneroWalletRpc(String uri) {
     this(new MoneroRpcConnection(uri));
@@ -103,8 +113,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     this(new MoneroRpcConnection(uri, username, password));
   }
   
-  public MoneroWalletRpc(URI uri, String username, String password) {
-    this(new MoneroRpcConnection(uri, username, password));
+  public MoneroWalletRpc(String uri, String username, String password, String zmqUri) {
+    this(new MoneroRpcConnection(uri, username, password, zmqUri));
   }
   
   public MoneroWalletRpc(MoneroRpcConnection rpc) {
@@ -112,7 +122,101 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     addressCache = new HashMap<Integer, Map<Integer, String>>();
   }
   
+  /**
+   * Create an internal process running monero-wallet-rpc and connect to it.
+   * 
+   * Use `stopProcess()` to stop the newly created process.
+   * 
+   * @param cmd - path then arguments to external monero-wallet-rpc executable
+   * @throws IOException 
+   */
+  public MoneroWalletRpc(List<String> cmd) throws IOException {
+    
+    // start process
+    ProcessBuilder pb = new ProcessBuilder(cmd);
+    pb.redirectErrorStream(true);
+    process = pb.start();
+    
+    // print output to console for debug
+    boolean printOutput = false;
+    
+    // read process output until success
+    String line;
+    String uri = null;
+    StringBuilder sb = new StringBuilder();
+    BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+    boolean success = false;
+    while ((line = in.readLine()) != null) {
+      if (printOutput) System.out.println(line);
+      sb.append(line).append('\n'); // capture output in case of error
+      
+      // extract uri from e.g. "I Binding on 127.0.0.1 (IPv4):38085"
+      String uriLineContains = "Binding on ";
+      int uriLineContainsIdx = line.indexOf(uriLineContains);
+      if (uriLineContainsIdx >= 0) {
+        String host = line.substring(uriLineContainsIdx + uriLineContains.length(), line.lastIndexOf(' '));
+        String port = line.substring(line.lastIndexOf(':') + 1);
+        int sslIdx = cmd.indexOf("--rpc-ssl");
+        boolean sslEnabled = sslIdx >= 0 ? "enabled".equalsIgnoreCase(cmd.get(sslIdx + 1)) : false;
+        uri = (sslEnabled ? "https" : "http") + "://" + host + ":" + port;
+      }
+      
+      // read success message
+      if (line.contains("Starting wallet RPC server")) {
+        if (printOutput) {
+          new Thread(new Runnable() { // continue printing output in separate, non-blocking thread
+            public void run() {
+              try {
+                String line;
+                BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                while ((line = in.readLine()) != null) System.out.println(line);
+              } catch (IOException e) {
+                //e.printStackTrace(); // exception expected on close
+              }
+            }
+          }).start();
+        }
+        success = true;
+        break;
+      }
+    }
+    if (!printOutput) in.close();
+    
+    // throw error with process output if unsuccessful
+    if (!success) throw new MoneroError("Failed to start monero-wallet-rpc server:\n\n" + sb.toString().trim());
+    
+    // get username, password, and zmq publish uri from params
+    int userPassIdx = cmd.indexOf("--rpc-login");
+    String userPass = userPassIdx >= 0 ? cmd.get(userPassIdx + 1) : null;
+    String username = userPass == null ? null : userPass.substring(0, userPass.indexOf(':'));
+    String password = userPass == null ? null : userPass.substring(userPass.indexOf(':') + 1);
+    int zmqUriIdx = cmd.indexOf("--zmq-pub");
+    String zmqUri = zmqUriIdx >= 0 ? cmd.get(zmqUriIdx + 1) : null;
+    
+    // initialize internal state
+    rpc = new MoneroRpcConnection(uri, username, password, zmqUri);
+    addressCache = new HashMap<Integer, Map<Integer, String>>();
+  }
+  
   // --------------------------- RPC WALLET METHODS ---------------------------
+  
+  /**
+   * Get the internal process running monero-wallet-rpc.
+   * 
+   * @return the process running monero-wallet-rpc, null if not created from new process
+   */
+  public Process getProcess() {
+    return process;
+  }
+  
+  /**
+   * Stop the internal process running monero-wallet-rpc, if applicable.
+   */
+  public int stopProcess() throws InterruptedException {
+    if (process == null) throw new MoneroError("MoneroWalletRpc instance not created from new process");
+    process.destroyForcibly();  // TODO: why need to destroy forcibly?
+    return process.waitFor();
+  }
   
   /**
    * Get the wallet's RPC connection.
@@ -286,8 +390,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("autosave_current", saveCurrent);
     try {
       rpc.sendJsonRequest("restore_deterministic_wallet", params);
-    } catch (Exception e) {
-      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroError("Wallet already exists: " + name);
+    } catch (MoneroRpcError e) {
+      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroRpcError("Wallet already exists: " + name, e.getCode(), e.getRpcMethod(), e.getRpcParams());
       throw e;
     }
     clear();
@@ -343,12 +447,21 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    * Save and close the current wallet and stop the RPC server.
    */
   public void stop() {
+    clear();
     rpc.sendJsonRequest("stop_wallet");
-    addressCache.clear();
-    path = null;
   }
   
   // -------------------------- COMMON WALLET METHODS -------------------------
+  
+  public void addListener(MoneroWalletListenerI listener) {
+    super.addListener(listener);
+    setIsListening(true);
+  }
+  
+  public void removeListener(MoneroWalletListenerI listener) {
+    super.removeListener(listener);
+    if (getListeners().isEmpty()) setIsListening(false);
+  }
   
   public boolean isViewOnly() {
     try {
@@ -357,8 +470,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       rpc.sendJsonRequest("query_key", params);
       return false; // key retrieval succeeds if not view-only
     } catch (MoneroError e) {
-      if (e.getCode() == -29) return true;  // wallet is view-only
-      if (e.getCode() == -1) return false;  // wallet is offline but not view-only
+      if (Integer.valueOf(-29).equals(e.getCode())) return true;  // wallet is view-only
+      if (Integer.valueOf(-1).equals(e.getCode())) return false;  // wallet is offline but not view-only
       throw e;
     }
   }
@@ -388,10 +501,10 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   
   public boolean isConnected() {
     try {
-      sync(); // wallet rpc auto syncs so worst case this call blocks and blocks upfront  TODO: better way to determine if wallet rpc is connected to daemon?
-      return true;
+      checkReserveProof(getPrimaryAddress(), "", ""); // TODO (monero-project): provide better way to know if wallet rpc is connected to daemon
+      throw new RuntimeException("check reserve expected to fail");
     } catch (MoneroError e) {
-      return false;
+      return !e.getMessage().contains("Failed to connect to daemon");
     }
   }
   
@@ -418,7 +531,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (String) result.get("key");
     } catch (MoneroError e) {
-      if (e.getCode() == -29) return null;  // wallet is view-only
+      if (Integer.valueOf(-29).equals(e.getCode())) return null;  // wallet is view-only
       throw e;
     }
   }
@@ -462,7 +575,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (String) result.get("key");
     } catch (MoneroRpcError e) {
-      if (e.getCode() == -29 && e.getMessage().contains("watch-only")) return null; // return null if wallet is view-only
+      if (Integer.valueOf(-29).equals(e.getCode()) && e.getMessage().contains("watch-only")) return null; // return null if wallet is view-only
       throw e;
     }
   }
@@ -496,7 +609,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       result = (Map<String, Object>) resp.get("result");
     } catch (MoneroRpcError e) {
       System.out.println(e.getMessage());
-      if (e.getCode() == -2) throw new MoneroError(e.getMessage(), e.getCode());
+      if (Integer.valueOf(-2).equals(e.getCode())) throw new MoneroError(e.getMessage(), e.getCode());
       throw e;
     }
     
@@ -552,25 +665,45 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     throw new MoneroError("monero-wallet-rpc does not support getting a height by date");
   }
 
+  private Object SYNC_LOCK = new Object();
   @SuppressWarnings("unchecked")
   @Override
   public MoneroSyncResult sync(Long startHeight, MoneroWalletListenerI listener) {
     if (listener != null) throw new MoneroError("Monero Wallet RPC does not support reporting sync progress");
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("start_height", startHeight);
-    Map<String, Object> resp = rpc.sendJsonRequest("refresh", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return new MoneroSyncResult(((BigInteger) result.get("blocks_fetched")).longValue(), (Boolean) result.get("received_money"));
+    synchronized(SYNC_LOCK) {  // TODO (monero-project): monero-wallet-rpc hangs at 100% cpu utilization if refresh called concurrently
+      Map<String, Object> resp = rpc.sendJsonRequest("refresh", params);
+      if (pollListener != null && pollListener.isEnabled) pollListener.poll(); // poll if listening
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      return new MoneroSyncResult(((BigInteger) result.get("blocks_fetched")).longValue(), (Boolean) result.get("received_money"));
+    }
   }
   
   @Override
-  public void startSyncing() {
-    // nothing to do because wallet rpc syncs automatically
+  public void startSyncing(Long syncPeriodInMs) {
+    
+    // convert ms to seconds for rpc parameter
+    long syncPeriodInSeconds = (syncPeriodInMs == null ? DEFAULT_SYNC_PERIOD_IN_MS : syncPeriodInMs) / 1000;
+    
+    // send rpc request
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("enable", true);
+    params.put("period", syncPeriodInSeconds);
+    rpc.sendJsonRequest("auto_refresh", params);
+    
+    // update sync period for poller
+    this.syncPeriodInMs = syncPeriodInSeconds * 1000;
+    
+    // poll if listening
+    if (pollListener != null && pollListener.isEnabled) pollListener.poll();
   }
   
   @Override
   public void stopSyncing() {
-    throw new MoneroError("Monero Wallet RPC does not support the ability to stop syncing");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("enable", false);
+    rpc.sendJsonRequest("auto_refresh", params);
   }
   
   @Override
@@ -583,32 +716,12 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
 
   @Override
-  public BigInteger getBalance() {
-    return getBalances(null, null)[0];
-  }
-
-  @Override
-  public BigInteger getBalance(int accountIdx) {
-    return getBalances(accountIdx, null)[0];
-  }
-
-  @Override
-  public BigInteger getBalance(int accountIdx, int subaddressIdx) {
+  public BigInteger getBalance(Integer accountIdx, Integer subaddressIdx) {
     return getBalances(accountIdx, subaddressIdx)[0];
   }
 
   @Override
-  public BigInteger getUnlockedBalance() {
-    return getBalances(null, null)[1];
-  }
-
-  @Override
-  public BigInteger getUnlockedBalance(int accountIdx) {
-    return getBalances(accountIdx, null)[1];
-  }
-
-  @Override
-  public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx) {
+  public BigInteger getUnlockedBalance(Integer accountIdx, Integer subaddressIdx) {
     return getBalances(accountIdx, subaddressIdx)[1];
   }
   
@@ -865,7 +978,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
         }
         if (!found) unfoundTxHashes.add(txHash);
       }
-     
+      
       // if txs not found, collect missing hashes or throw error if no collection given
       if (missingTxHashes != null) for (String unfoundTxHash : unfoundTxHashes) missingTxHashes.add(unfoundTxHash);
       else if (unfoundTxHashes.size() > 0) throw new MoneroError("Wallet missing requested tx hashes: " + unfoundTxHashes);
@@ -884,7 +997,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, MoneroTxWallet> txsById = new HashMap<String, MoneroTxWallet>();  // store txs in temporary map for sorting
       for (MoneroTxWallet tx : txs) txsById.put(tx.getHash(), tx);
       List<MoneroTxWallet> orderedTxs = new ArrayList<MoneroTxWallet>();
-      for (String txHash : query.getHashes()) orderedTxs.add(txsById.get(txHash));
+      for (String txHash : query.getHashes()) if (txsById.get(txHash) != null) orderedTxs.add(txsById.get(txHash));
       txs = orderedTxs;
     }
     return txs;
@@ -1226,7 +1339,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
           !isGood || !result.containsKey("signature_type") ? null : "view".equals(result.get("signature_type")) ? MoneroMessageSignatureType.SIGN_WITH_VIEW_KEY : MoneroMessageSignatureType.SIGN_WITH_SPEND_KEY,
           !isGood ? null : ((BigInteger) result.get("version")).intValue());
     } catch (MoneroRpcError e) {
-      if (e.getCode() == -2) return new MoneroMessageSignatureResult(false, null, null, null);
+      if (Integer.valueOf(-2).equals(e.getCode())) return new MoneroMessageSignatureResult(false, null, null, null);
       throw e;
     }
   }
@@ -1241,7 +1354,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (String) result.get("tx_key");
     } catch (MoneroRpcError e) {
-      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+      if (Integer.valueOf(-8).equals(e.getCode()) && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
       throw e;
     }
   }
@@ -1267,7 +1380,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       check.setReceivedAmount((BigInteger) result.get("received"));
       return check;
     } catch (MoneroRpcError e) {
-      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+      if (Integer.valueOf(-8).equals(e.getCode()) && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
       throw e;
     }
   }
@@ -1284,7 +1397,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (String) result.get("signature");
     } catch (MoneroRpcError e) {
-      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+      if (Integer.valueOf(-8).equals(e.getCode()) && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
       throw e;
     }
   }
@@ -1315,7 +1428,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       }
       return check;
     } catch (MoneroRpcError e) {
-      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+      if (Integer.valueOf(-8).equals(e.getCode()) && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
       throw e;
     }
   }
@@ -1331,7 +1444,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (String) result.get("signature");
     } catch (MoneroRpcError e) {
-      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+      if (Integer.valueOf(-8).equals(e.getCode()) && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
       throw e;
     }
   }
@@ -1348,7 +1461,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
       return (boolean) result.get("good");
     } catch (MoneroRpcError e) {
-      if (e.getCode() == -8 && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
+      if (Integer.valueOf(-8).equals(e.getCode()) && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());  // normalize error message
       throw e;
     }
   }
@@ -1558,7 +1671,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       String value = (String) result.get("value");
       return value.isEmpty() ? null : value;
     } catch (MoneroRpcError e) {
-      if (e.getCode() == -45) return null;  // -45: attribute not found
+      if (Integer.valueOf(-45).equals(e.getCode())) return null;  // -45: attribute not found
       throw e;
     }
   }
@@ -1706,7 +1819,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     try {
       this.getPrimaryAddress();
     } catch (Exception e) {
-      return e instanceof MoneroRpcError && ((MoneroRpcError) e).getCode() == -13 && ((MoneroRpcError) e).getMessage().indexOf("No wallet file") > -1;
+      return e instanceof MoneroRpcError && Integer.valueOf(-8).equals(((MoneroRpcError) e).getCode()) && ((MoneroRpcError) e).getMessage().indexOf("No wallet file") > -1;
     }
     return false;
   }
@@ -1714,6 +1827,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   // ------------------------------ PRIVATE -----------------------------------
   
   private void clear() {
+    setIsListening(false);
+    listeners.clear();
     addressCache.clear();
     path = null;
   }
@@ -2046,6 +2161,414 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       }
     }
     return txSet.getTxs();
+  }
+  
+  // -------------------------------- LISTENER --------------------------------
+  
+  /**
+   * Enables or disables listening to monero-wallet-rpc.
+   */
+  private void setIsListening(boolean isEnabled) {
+    if (rpc.getZmqUri() == null) {
+      if (pollListener == null && isEnabled) pollListener = new WalletRpcPollListener();
+      if (pollListener != null) pollListener.setIsEnabled(isEnabled);
+    } else {
+      if (zmqListener == null && isEnabled) zmqListener = new WalletRpcZmqListener();
+      if (zmqListener != null) zmqListener.setIsEnabled(isEnabled);
+    }
+  }
+  
+  /**
+   * Polls monero-wallet-rpc to provide listener notifications.
+   * 
+   * TODO: refactor base listener class with zmq listener
+   */
+  private class WalletRpcPollListener {
+    
+    private boolean isEnabled;
+    private boolean isPollLoopRunning; // poll loop runs until disabled
+    private boolean isPolling;
+    private Long prevHeight;
+    private BigInteger prevBalance;
+    private BigInteger prevUnlockedBalance;
+    private List<MoneroTxWallet> prevLockedTxs = new ArrayList<MoneroTxWallet>();
+    private Set<String> prevUnconfirmedNotifications = new HashSet<String>(); // tx hashes of previous notifications
+    private Set<String> prevConfirmedNotifications = new HashSet<String>(); // tx hashes of previously confirmed but not yet unlocked notifications
+    
+    WalletRpcPollListener() {
+      reset();
+    }
+    
+    private void reset() {
+      isEnabled = false;
+      prevHeight = null;
+      prevBalance = null;
+      prevUnlockedBalance = null;
+      prevLockedTxs.clear();
+      prevUnconfirmedNotifications.clear();
+      prevConfirmedNotifications.clear();
+    }
+    
+    public void setIsEnabled(boolean isEnabled) {
+      this.isEnabled = isEnabled;
+      if (isEnabled) runPollLoop();
+      else reset();
+    }
+    
+    private synchronized void runPollLoop() {
+      
+      // skip if already polling on loop
+      if (isPollLoopRunning) return;
+      isPollLoopRunning = true;
+      
+      // poll while enabled
+      Thread pollThread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          while (isEnabled && !Thread.currentThread().isInterrupted()) {
+            try {
+              if (isEnabled) poll();
+              TimeUnit.MILLISECONDS.sleep(syncPeriodInMs);
+            } catch (Exception e) {
+              isPollLoopRunning = false;
+              if (isEnabled) throw new RuntimeException(e);
+            }
+          }
+          isPollLoopRunning = false;
+        }
+      });
+      pollThread.start();
+    }
+    
+    public void poll() {
+      
+      // skip if already polling
+      if (isPolling) return;
+      isPolling = true;
+      
+      // take initial snapshot
+      if (prevHeight == null) {
+        prevHeight = getHeight();
+        prevLockedTxs = getTxs(new MoneroTxQuery().setIsLocked(true));
+        isPolling = false;
+        return;
+      }
+      
+      // notify on height changes
+      long height = getHeight();
+      if (prevHeight != height) {
+        for (long i = prevHeight; i < height; i++) onNewBlock(i);
+        prevHeight = height;
+      }
+      
+      // notify on balance changes
+      checkForChangedBalances();
+      
+      // get locked txs for comparison to previous
+      List<MoneroTxWallet> lockedTxs = getTxs(new MoneroTxQuery().setIsLocked(true).setIncludeOutputs(true));
+      
+      // notify on new unconfirmed and confirmed txs
+      for (MoneroTxWallet lockedTx : lockedTxs) {
+        boolean unannounced = lockedTx.isConfirmed() ? prevConfirmedNotifications.add(lockedTx.getHash()) : prevUnconfirmedNotifications.add(lockedTx.getHash());
+        if (unannounced) notifyOutputs(lockedTx);
+      }
+      
+      // collect hashes of txs no longer locked
+      List<String> noLongerLockedHashes = new ArrayList<String>();
+      for (MoneroTxWallet prevLockedTx : prevLockedTxs) {
+        if (getTx(lockedTxs, prevLockedTx.getHash()) == null) {
+          noLongerLockedHashes.add(prevLockedTx.getHash());
+        }
+      }
+      
+      // fetch txs that are no longer locked
+      List<MoneroTxWallet> unlockedTxs = getTxs(new MoneroTxQuery().setHashes(noLongerLockedHashes).setIncludeOutputs(true), new ArrayList<String>()); // ignore missing tx hashes which could be removed due to re-org
+      
+      // notify listeners of newly unlocked tx outputs
+      for (MoneroTxWallet unlockedTx : unlockedTxs) {
+        prevUnconfirmedNotifications.remove(unlockedTx.getHash()); // stop tracking tx notifications
+        prevConfirmedNotifications.remove(unlockedTx.getHash());
+        notifyOutputs(unlockedTx);
+      }
+      
+      // save locked txs for next comparison
+      prevLockedTxs = lockedTxs;
+      isPolling = false;
+    }
+    
+    private void notifyOutputs(MoneroTxWallet tx) {
+      
+      // notify spent outputs
+      if (tx.getOutgoingTransfer() != null) {
+        MoneroOutputWallet output = new MoneroOutputWallet().setAmount(tx.getOutgoingTransfer().getAmount()).setTx(tx); // TODO (monero-project): monero-wallet-rpc does not allow scrape of tx spent outputs so providing one output with outgoing transfer amount linked to tx
+        for (MoneroWalletListenerI listener : listeners) listener.onOutputSpent(output);
+      }
+      
+      // notify received outputs
+      if (tx.getIncomingTransfers() != null) {
+        if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) {  // TODO (monero-project): outputs only returned for confirmed txs
+          for (MoneroOutputWallet output : tx.getOutputsWallet()) {
+            if (output.getAccountIndex() != null) { // TODO: ensure sender does not get this notification unless sent to them
+              for (MoneroWalletListenerI listener : listeners) listener.onOutputReceived(output);
+            }
+          }
+        } else {
+          for (MoneroIncomingTransfer transfer : tx.getIncomingTransfers()) {
+            MoneroOutputWallet output = new MoneroOutputWallet().setAccountIndex(transfer.getAccountIndex()).setSubaddressIndex(transfer.getSubaddressIndex()).setAmount(transfer.getAmount()).setTx(tx); // TODO (monero-project): monero-wallet-rpc does not allow scrape of unconfirmed received outputs so using transfer values as outputs
+            for (MoneroWalletListenerI listener : listeners) listener.onOutputReceived(output);
+          }
+        }
+      }
+    }
+    
+    private void onNewBlock(long height) {
+      for (MoneroWalletListenerI listener : listeners) listener.onNewBlock(height);
+    }
+    
+    private MoneroTxWallet getTx(List<MoneroTxWallet> txs, String txHash) {
+      for (MoneroTxWallet tx : txs) if (txHash.equals(tx.getHash())) return tx;
+      return null;
+    }
+    
+    // TODO: factor to common wallet rpc listener
+    private boolean checkForChangedBalances() {
+      BigInteger balance = getBalance();
+      BigInteger unlockedBalance = getUnlockedBalance();
+      if (!balance.equals(prevBalance) || !unlockedBalance.equals(prevUnlockedBalance)) {
+        prevBalance =  balance;
+        prevUnlockedBalance = unlockedBalance;
+        for (MoneroWalletListenerI listener : getListeners()) listener.onBalancesChanged(balance, unlockedBalance);
+        return true;
+      }
+      return false;
+    }
+  }
+  
+  /**
+   * Receives ZMQ notifications directly from monero-wallet-rpc. 
+   */
+  private class WalletRpcZmqListener {
+    
+    private boolean isEnabled;
+    private Thread pollThread;
+    private ExecutorService processNotificationPool;
+    private ZContext context;
+    private ZMQ.Socket subscriber;
+    private BigInteger prevBalance;
+    private BigInteger prevUnlockedBalance;
+    private List<String> prevLockedTxHashes = new ArrayList<String>();
+    
+    public WalletRpcZmqListener() {
+      prevBalance = getBalance();
+      prevUnlockedBalance = getUnlockedBalance();
+    }
+    
+    public void setIsEnabled(boolean isEnabled) {
+      if (isEnabled) start();
+      else stop();
+    }
+    
+    private void start() {
+      if (isEnabled) return;
+      isEnabled = true;
+      
+      // cache locked txs for later comparison
+      checkForChangedUnlockedTxs(); 
+      
+      // create pool to process notifications in serial without blocking polling
+      processNotificationPool = Executors.newFixedThreadPool(1);
+      
+      // create thread which polls zmq publications
+      pollThread = new Thread(new Runnable() {
+        @Override public void run() {
+          
+          // create subscriber
+          context = new ZContext();
+          subscriber = context.createSocket(SocketType.SUB);
+          
+          // subscribe to topic
+          subscriber.connect(getRpcConnection().getZmqUri());
+          subscriber.subscribe("json-minimal-chain_main".getBytes()); // TODO (monero-project): these notifications not received if subscribed to json-full
+          subscriber.subscribe("json-full-money_received".getBytes());
+          subscriber.subscribe("json-full-money_spent".getBytes());
+          subscriber.subscribe("json-full-unconfirmed_money_received".getBytes());
+          
+          // TODO: refine topics
+          //subscriber.subscribe("json-full".getBytes());
+          //subscriber.subscribe("json-minimal".getBytes());
+          
+          // TODO: the content of these are yet to to be decided, see how much full is used
+          //json-minimal-money_received
+          //json-minimal-money_spent
+          //json-minimal-unconfirmed_money_received
+          
+          // poll for zmq publications
+          ZMQ.Poller poller = context.createPoller(1);
+          poller.register(subscriber, ZMQ.Poller.POLLIN);
+          while (!Thread.currentThread().isInterrupted() && isEnabled) {
+            try {
+              poller.poll();
+              if (poller.pollin(0)) {
+                String notification = subscriber.recvStr();
+                processNotificationPool.submit(new Runnable() {
+                  @Override
+                  public void run() {
+                    processZmqNotification(notification);
+                  }
+                });
+              }
+            } catch (Exception e) {
+              if (!Thread.currentThread().isInterrupted() && isEnabled) {
+                throw e;
+              }
+            }
+          }
+          
+          stop(); // stop if disconnects
+        }
+      });
+      pollThread.start();
+    }
+    
+    private void stop() {
+      if (!isEnabled) return;
+      isEnabled = false;
+      subscriber.close();
+      context.close();
+      prevLockedTxHashes.clear();
+      processNotificationPool.shutdown();
+      pollThread.interrupt();
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void processZmqNotification(String content) {
+      
+      System.out.println("Processing zmq notification: " + content);
+      
+      // parse json content to map
+      // TODO: more efficent way?
+      int bodyIdx = content.indexOf(":");
+      String topic = content.substring(0, bodyIdx);
+      if (content.substring(bodyIdx + 1).isEmpty()) {
+        System.out.println("WARNING: empty body to parse zmq notification");
+        return;
+      }
+      
+      // process topics
+      if (topic.equals("json-minimal-chain_main")) {
+        Map<String, Object> contentMap = JsonUtils.toMap(MoneroRpcConnection.MAPPER, content.substring(bodyIdx + 1)); // TODO: keep mapper in MoneroRpcConnection?
+        long height = ((BigInteger) contentMap.get("first_height")).longValue();
+        for (MoneroWalletListenerI listener : getListeners()) listener.onNewBlock(height);
+        
+        // notify if balances change
+        boolean balancesChanged = checkForChangedBalances();
+        
+        // notify when txs unlock after wallet is synced
+        if (balancesChanged) checkForChangedUnlockedTxs();  // TODO: only check for unlocked txs when isSynced() 
+      } else {
+        
+        // parse json to maps
+        Map<String, Object> contentMap = JsonUtils.toMap(MoneroRpcConnection.MAPPER, content.substring(bodyIdx + 1));
+        Map<String, Object> txMap = (Map<String, Object>) (contentMap.containsKey("tx_in") ? contentMap.get("tx_in") : contentMap.get("tx"));
+        
+        // build output
+        MoneroOutputWallet output = new MoneroOutputWallet();
+        output.setAmount((BigInteger) contentMap.get("amount"));
+        output.setAccountIndex(((BigInteger) contentMap.get("subaddr_index_major")).intValue());  // TODO: deserialize as {major: 0, minor: 0}
+        output.setSubaddressIndex(((BigInteger) contentMap.get("subaddr_index_minor")).intValue());
+        MoneroTxWallet tx = new MoneroTxWallet();
+        tx.setHash((String) contentMap.get("txid"));
+        tx.setVersion(((BigInteger) txMap.get("version")).intValue());
+        tx.setUnlockHeight(((BigInteger) txMap.get("unlock_time")).longValue());
+        output.setTx(tx);
+        tx.setOutputs(Arrays.asList(output));
+        long height = ((BigInteger) contentMap.get("height")).longValue();
+        tx.setIsLocked(true);
+        if (height > 0) {
+          MoneroBlock block = new MoneroBlock().setHeight(height);
+          block.setTxs(Arrays.asList(tx));
+          tx.setBlock(block);
+          tx.setIsConfirmed(true);
+          tx.setInTxPool(false);
+          tx.setIsFailed(false);
+        } else {
+          tx.setIsConfirmed(false);
+          tx.setInTxPool(true);
+        }
+        
+        // announce output
+        if (topic.equals("json-full-money_received")) {
+          tx.setIsIncoming(true);
+          prevLockedTxHashes.add(tx.getHash()); // watch for unlock
+          for (MoneroWalletListenerI listener : getListeners()) listener.onOutputReceived(output);
+        } else if (topic.equals("json-full-money_spent")) {
+          tx.setIsIncoming(false);
+          prevLockedTxHashes.add(tx.getHash()); // watch for unlock
+          for (MoneroWalletListenerI listener : getListeners()) listener.onOutputSpent(output);
+        } else if (topic.equals("json-full-unconfirmed_money_received")) {
+          tx.setIsIncoming(true);
+          for (MoneroWalletListenerI listener : getListeners()) listener.onOutputReceived(output);
+          checkForChangedBalances();
+        } else {
+          LOGGER.warning("Received unsupported notification: " + content);
+        }
+      }
+    }
+    
+    private boolean checkForChangedBalances() {
+      BigInteger balance = getBalance();
+      BigInteger unlockedBalance = getUnlockedBalance();
+      if (!balance.equals(prevBalance) || !unlockedBalance.equals(prevUnlockedBalance)) {
+        prevBalance =  balance;
+        prevUnlockedBalance = unlockedBalance;
+        for (MoneroWalletListenerI listener : getListeners()) listener.onBalancesChanged(balance, unlockedBalance);
+        return true;
+      }
+      return false;
+    }
+    
+    private void checkForChangedUnlockedTxs() {
+      
+      // get locked txs
+      List<MoneroTxWallet> lockedTxs = getTxs(new MoneroTxQuery().setIsLocked(true).setIsConfirmed(true));
+      
+      // collect hashes of txs no longer locked
+      List<String> txHashesNoLongerLocked = new ArrayList<String>();
+      for (String prevLockedTxHash : prevLockedTxHashes) {
+        boolean found = false;
+        for (MoneroTxWallet lockedTx : lockedTxs) {
+          if (lockedTx.getHash().equals(prevLockedTxHash)) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) txHashesNoLongerLocked.add(prevLockedTxHash);
+      }
+      
+      // fetch txs that are no longer locked
+      List<MoneroTxWallet> txsNoLongerLocked = new ArrayList<MoneroTxWallet>();
+      if (!txHashesNoLongerLocked.isEmpty()) {
+        MoneroTxQuery query = new MoneroTxQuery()
+            .setHashes(txHashesNoLongerLocked)
+            .setIsLocked(false)
+            .setIsConfirmed(true)
+            .setIncludeOutputs(true);
+        txsNoLongerLocked = getTxs(query, new ArrayList<String>());
+      }
+      
+      // notify listeners of newly unlocked tx outputs
+      for (MoneroTxWallet unlockedTx : txsNoLongerLocked) {
+        for (MoneroOutputWallet output : unlockedTx.getOutputsWallet()) {
+          for (MoneroWalletListenerI listener : getListeners()) {
+            listener.onOutputReceived(output);
+          }
+        }
+      }
+      
+      // re-assign currently locked tx hashes // TODO: needs mutex for thread safety?
+      prevLockedTxHashes.clear();
+      for (MoneroTxWallet lockedTx : lockedTxs) prevLockedTxHashes.add(lockedTx.getHash());
+    }
   }
   
   // ---------------------------- PRIVATE STATIC ------------------------------
@@ -2522,13 +3045,15 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   private static void mergeTx(MoneroTxWallet tx, Map<String, MoneroTxWallet> txMap, Map<Long, MoneroBlock> blockMap, boolean skipIfAbsent) {
     GenUtils.assertNotNull(tx.getHash());
 
-    // if tx doesn't exist, add it (unless skipped)
+    // if tx doesn't exist, add it unless skipped
     MoneroTxWallet aTx = txMap.get(tx.getHash());
     if (aTx == null) {
-      if (!skipIfAbsent) {
-        txMap.put(tx.getHash(), tx);
+      if (skipIfAbsent) {
+        LOGGER.warning("tx does not already exist and is being skipped during merge:\n" + tx);
+        try { throw new RuntimeException("tx does not already exist and is being skipped during merge"); }
+        catch (Exception e) { e.printStackTrace(); }
       } else {
-        LOGGER.warning("WARNING: tx does not already exist");
+        txMap.put(tx.getHash(), tx);
       }
     }
 

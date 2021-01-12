@@ -20,7 +20,7 @@ public class MoneroBlockHeader {
   private BigInteger cumulativeDifficulty;
   private Integer majorVersion;
   private Integer minorVersion;
-  private Integer nonce;
+  private Long nonce;
   private String minerTxHash;
   private Integer numTxs;
   private Boolean orphanStatus;
@@ -162,11 +162,11 @@ public class MoneroBlockHeader {
     return this;
   }
   
-  public Integer getNonce() {
+  public Long getNonce() {
     return nonce;
   }
   
-  public MoneroBlockHeader setNonce(Integer nonce) {
+  public MoneroBlockHeader setNonce(Long nonce) {
     this.nonce = nonce;
     return this;
   }

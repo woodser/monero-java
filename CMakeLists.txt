@@ -16,7 +16,6 @@ message(STATUS MONERO_CPP : ${MONERO_CPP} : ${MONERO_CPP})
 set(MONERO_CPP_SRC "${MONERO_CPP}/src")
 set(MONERO_CORE ${MONERO_CPP}/external/monero-core)
 set(MONERO_CORE_SRC "${MONERO_CORE}/src")
-set(BOOST ${MONERO_CPP}/external/boost-sdk)
 
 # java header includes
 include_directories("$ENV{JAVA_HOME}")
@@ -42,18 +41,19 @@ include_directories("${MONERO_CORE_SRC}/crypto")
 include_directories("${MONERO_CORE_SRC}/crypto/crypto_ops_builder/include/")
 include_directories("${MONERO_CORE_SRC}/wallet")
 include_directories("${MONERO_CORE_SRC}/wallet/api")
-include_directories(${BOOST})
 
 # TODO: remove TRUEs, how are APPLE, DEPENDS, etc initialized?
 if (TRUE OR HIDAPI_FOUND OR LibUSB_COMPILE_TEST_PASSED)
   if (APPLE)
     if(TRUE OR DEPENDS)
-      list(APPEND EXTRA_LIBRARIES "-framework Foundation -framework IOKit")
+      list(APPEND EXTRA_LIBRARIES "-framework Foundation -framework IOKit -framework AppKit")
     else()
       find_library(COREFOUNDATION CoreFoundation)
       find_library(IOKIT IOKit)
+      find_library(APPKIT AppKit)
       list(APPEND EXTRA_LIBRARIES ${IOKIT})
       list(APPEND EXTRA_LIBRARIES ${COREFOUNDATION})
+      list(APPEND EXTRA_LIBRARIES ${APPKIT})
     endif()
   endif()
   if (WIN32)
@@ -61,14 +61,46 @@ if (TRUE OR HIDAPI_FOUND OR LibUSB_COMPILE_TEST_PASSED)
   endif()
 endif()
 
-#list(APPEND EXTRA_LIBRARIES "-framework Foundation -framework IOKit")
 message(STATUS EXTRA_LIBRARIES: ${EXTRA_LIBRARIES})
+
+############
+# Boost
+############
+
+set(Boost_NO_BOOST_CMAKE 1)
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost 1.58 QUIET REQUIRED COMPONENTS chrono date_time filesystem program_options regex serialization wserialization system thread)
+message(STATUS "Using Boost include dir at ${Boost_INCLUDE_DIR}")
+include_directories(${Boost_INCLUDE_DIR})
+
+############
+# OpenSSL
+############
+
+if (APPLE AND NOT IOS)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=x86-64 -fvisibility=default -std=c++11")
+  if (NOT OPENSSL_ROOT_DIR)
+      EXECUTE_PROCESS(COMMAND brew --prefix openssl
+        OUTPUT_VARIABLE OPENSSL_ROOT_DIR
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    message(STATUS "Using OpenSSL found at ${OPENSSL_ROOT_DIR}")
+  endif()
+endif()
+
+find_package(OpenSSL REQUIRED)
+message(STATUS "Using OpenSSL include dir at ${OPENSSL_INCLUDE_DIR}")
+include_directories(${OPENSSL_INCLUDE_DIR})
+
+if(STATIC AND NOT IOS)
+  if(UNIX)
+    set(OPENSSL_LIBRARIES "${OPENSSL_LIBRARIES};${CMAKE_DL_LIBS};${CMAKE_THREAD_LIBS_INIT}")
+  endif()
+endif()
 
 ######################
 # monero-cpp
 ######################
 
-#include_directories(${BOOST})
 add_library(monero-cpp SHARED IMPORTED)
 
 # import shared c++ library
@@ -92,15 +124,17 @@ set(
 add_library(monero-java SHARED ${MONERO_JNI_SRC_FILES})
 
 target_link_libraries(monero-java
-	monero-cpp
-	${EXTRA_LIBRARIES}
+    monero-cpp
+    ${Boost_LIBRARIES}
+    ${OPENSSL_LIBRARIES}
+    ${EXTRA_LIBRARIES}
 )
 
 # search for libmonero-cpp.dylib in same directory as libmonero-java.dylib on mac for portability
 # command: install_name_tool -add_rpath @loader_path/ ./libmonero-java.dylib 
 if (APPLE)
-	add_custom_command(TARGET monero-java 
-	    POST_BUILD COMMAND 
-	    ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@loader_path/"
-	    $<TARGET_FILE:monero-java>)
+    add_custom_command(TARGET monero-java 
+        POST_BUILD COMMAND 
+        ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@loader_path/"
+        $<TARGET_FILE:monero-java>)
 endif()

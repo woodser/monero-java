@@ -22,12 +22,15 @@
 
 package monero.wallet;
 
+import common.utils.GenUtils;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
-
-import common.utils.GenUtils;
+import java.util.Set;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.wallet.model.MoneroAccount;
@@ -50,6 +53,21 @@ import monero.wallet.model.MoneroWalletListenerI;
  * Abstract base implementation of a Monero wallet.
  */
 public abstract class MoneroWalletBase implements MoneroWallet {
+  
+  protected Set<MoneroWalletListenerI> listeners = new LinkedHashSet<MoneroWalletListenerI>();
+  
+  public void addListener(MoneroWalletListenerI listener) {
+    listeners.add(listener);
+  }
+  
+  public void removeListener(MoneroWalletListenerI listener) {
+    if (!listeners.contains(listener)) throw new MoneroError("Listener is not registered with wallet");
+    listeners.remove(listener);
+  }
+  
+  public Set<MoneroWalletListenerI> getListeners() {
+    return new HashSet<MoneroWalletListenerI>(listeners);
+  }
   
   public void setDaemonConnection(String uri) {
     setDaemonConnection(uri, null, null);
@@ -88,6 +106,31 @@ public abstract class MoneroWalletBase implements MoneroWallet {
   @Override
   public MoneroSyncResult sync(Long startHeight, MoneroWalletListenerI listener) {
     return sync(startHeight, listener);
+  }
+  
+  @Override
+  public void startSyncing() {
+    startSyncing(null);
+  }
+  
+  @Override
+  public BigInteger getBalance() {
+    return getBalance(null, null);
+  }
+
+  @Override
+  public BigInteger getBalance(Integer accountIdx) {
+    return getBalance(accountIdx, null);
+  }
+  
+  @Override
+  public BigInteger getUnlockedBalance() {
+    return getUnlockedBalance(null, null);
+  }
+
+  @Override
+  public BigInteger getUnlockedBalance(Integer accountIdx) {
+    return getUnlockedBalance(accountIdx, null);
   }
   
   @Override

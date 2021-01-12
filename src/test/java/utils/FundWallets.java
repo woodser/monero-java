@@ -1,14 +1,12 @@
 package utils;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletJni;
@@ -39,7 +37,7 @@ public class FundWallets {
    * @param numSubaddressesPerAccount is the number of subaddresses to fund in each account (num accounts * num subaddresses must be less than or equal to 16) // TODO: support funding more subaddresses
    */
   public static void fundWallets(MoneroWallet srcWallet, int numWallets, int numAccounts, int numSubaddressesPerAccount) {
-    TestUtils.TX_POOL_WALLET_TRACKER.waitForWalletTxsToClearPool(srcWallet);
+    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(srcWallet);
     for (int i = 0; i < NUM_WALLETS; i++) {
       
       // create wallet and create and collect subaddresses
@@ -58,7 +56,7 @@ public class FundWallets {
       // wait for unlocked funds
       while (srcWallet.getUnlockedBalance(0).compareTo(TestUtils.MAX_FEE) < 0) {
         System.out.println("Waiting...");
-        try { TimeUnit.MILLISECONDS.sleep(MoneroUtils.WALLET2_REFRESH_INTERVAL); }
+        try { TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS); }
         catch (InterruptedException e) { throw new RuntimeException(e.getMessage()); }
       }
       

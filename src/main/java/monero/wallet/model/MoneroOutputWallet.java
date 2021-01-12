@@ -2,9 +2,11 @@ package monero.wallet.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import common.utils.GenUtils;
+import java.math.BigInteger;
+import java.util.List;
 import monero.common.MoneroError;
+import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 
@@ -166,5 +168,32 @@ public class MoneroOutputWallet extends MoneroOutput {
       if (other.subaddressIndex != null) return false;
     } else if (!subaddressIndex.equals(other.subaddressIndex)) return false;
     return true;
+  }
+  
+  // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
+
+  public MoneroOutputWallet setKeyImage(MoneroKeyImage keyImage) {
+    super.setKeyImage(keyImage);
+    return this;
+  }
+  
+  public MoneroOutputWallet setAmount(BigInteger amount) {
+    super.setAmount(amount);
+    return this;
+  }
+  
+  public MoneroOutputWallet setIndex(Integer index) {
+    super.setIndex(index);
+    return this;
+  }
+  
+  public MoneroOutputWallet setRingOutputIndices(List<Integer> ringOutputIndices) {
+    super.setRingOutputIndices(ringOutputIndices);
+    return this;
+  }
+  
+  public MoneroOutputWallet setStealthPublicKey(String stealthPublicKey) {
+    super.setStealthPublicKey(stealthPublicKey);
+    return this;
   }
 }

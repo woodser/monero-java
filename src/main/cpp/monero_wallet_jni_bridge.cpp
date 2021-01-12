@@ -128,8 +128,6 @@ static jclass class_WalletListener;
 //static jclass class_Transfer;
 //static jclass class_Ledger;
 
-std::mutex _listenerMutex;
-
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
   cachedJVM = jvm;
   JNIEnv *env;
@@ -176,6 +174,7 @@ struct wallet_jni_listener : public monero_wallet_listener {
 
   jobject jlistener;
   JNIEnv* m_env;
+  std::mutex _listenerMutex;
 
   // TODO: use this env instead of attaching each time? performance improvement?
   wallet_jni_listener(JNIEnv* env, jobject listener) {
@@ -772,11 +771,11 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv
   }
 }
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_startSyncingJni(JNIEnv *env, jobject instance) {
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_startSyncingJni(JNIEnv *env, jobject instance, jlong sync_period_in_ms) {
   MTRACE("Java_monero_wallet_MoneroWalletJni_startSyncingJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   try {
-    wallet->start_syncing();
+    wallet->start_syncing(sync_period_in_ms);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
   }

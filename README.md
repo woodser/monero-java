@@ -1,6 +1,6 @@
 # Monero Java Library
 
-A Java library for creating Monero applications using RPC and JNI bindings to [monero v0.17.1.1 'Oxygen Orion'](https://github.com/monero-project/monero/tree/v0.17.1.1).
+A Java library for creating Monero applications using RPC and JNI bindings to [monero v0.17.1.9 'Oxygen Orion'](https://github.com/monero-project/monero/tree/v0.17.1.9).
 
 * Supports wallet and daemon RPC clients.
 * Supports client-side wallets using JNI bindings.
@@ -10,33 +10,31 @@ A Java library for creating Monero applications using RPC and JNI bindings to [m
 * Query wallet transactions, transfers, and outputs by their properties.
 * Fetch and process binary data from the daemon (e.g. raw blocks).
 * Receive notifications when blocks are added to the chain or when wallets sync, send, or receive.
-* Over 270 passing JUnit tests.
+* Over 275 passing JUnit tests.
 
 ## Table of contents
 
 * [Architecture](#architecture)
 * [Sample code](#sample-code)
+* [Documentation](#documentation)
 * [Using monero-java in your project](#using-monero-java-in-your-project)
 * [Building JNI shared libraries from source](#building-jni-shared-libraries-from-source)
-* [Developer guide](#developer-guide)
 * [Running JUnit tests](#running-junit-tests)
-* [See also](#see-also)
+* [Related projects](#related-projects)
 * [License](#license)
 * [Donations](#donations)
 
 ## Architecture
 
 <p align="center">
-	<img width="80%" height="auto" src="docs/architecture.png"/><br>
+	<img width="85%" height="auto" src="docs/architecture.png"/><br>
 	<i>Build Java applications using RPC or JNI bindings to <a href="https://github.com/monero-project/monero">monero-project/monero</a>.  Wallet implementations are interchangeable by conforming to a common interface, <a href="https://moneroecosystem.org/monero-java/index.html?monero/wallet/MoneroWallet.html">MoneroWallet.java</a>.</i>
 </p>
 
 ## Sample code
 
-This code introduces the API used in monero-java.  See the [Javadoc](https://moneroecosystem.org/monero-java/), [specification PDF](http://moneroecosystem.org/monero-java/monero-spec.pdf), or [JUnit tests](src/test/java) for more detail.
-
 ```java
-// connect to a daemon
+// connect to daemon
 MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:38081", "superuser", "abctesting123");
 long height = daemon.getHeight();                       // 1523651
 BigInteger feeEstimate = daemon.getFeeEstimate();       // 1014313512
@@ -68,15 +66,17 @@ walletJni.sync(new MoneroWalletListener() {
   }
 });
 
-// synchronize in the background
-walletJni.startSyncing();
+// synchronize in the background every 5 seconds
+walletJni.startSyncing(5000l);
 
-// listen for incoming transfers
+// receive notifications when funds are received, confirmed, and unlocked
 walletJni.addListener(new MoneroWalletListener() {
   @Override
   public void onOutputReceived(MoneroOutputWallet output) {
     BigInteger amount = output.getAmount();
     String txHash = output.getTx().getHash();
+    Boolean isConfirmed = output.getTx().isConfirmed();
+    Boolean isLocked = output.getTx().isLocked();
     JNI_OUTPUT_RECEIVED = true;
   }
 });
@@ -90,13 +90,20 @@ MoneroTxWallet createdTx = walletRpc.createTx(new MoneroTxConfig()
 BigInteger fee = createdTx.getFee(); // "Are you sure you want to send... ?"
 walletRpc.relayTx(createdTx); // relay the transaction
 
-// recipient receives unconfirmed funds within 10 seconds
-TimeUnit.SECONDS.sleep(10);
+// recipient receives unconfirmed funds within 5 seconds
+TimeUnit.SECONDS.sleep(5);
 assertTrue(JNI_OUTPUT_RECEIVED);
 
 // save and close JNI wallet
 walletJni.close(true);
 ```
+
+## Documentation
+
+* [Javadoc](https://moneroecosystem.org/monero-java/)
+* [JUnit tests](src/main/test/java/test)
+* [API and model overview with visual diagrams](http://moneroecosystem.org/monero-java/monero-spec.pdf)
+* [monero-javascript documentation](https://github.com/monero-ecosystem/monero-javascript#documentation) provides additional documentation which translates to monero-java
 
 ## Using monero-java in your project
 
@@ -133,14 +140,10 @@ If you want to process binary data or use a client-side wallet instead of RPC, s
 3. Install dependencies using Maven: `mvn install`
 4. Update submodules: `./bin/update_submodules.sh`
 5. [Build ./external/monero-cpp as a shared library.](https://github.com/monero-ecosystem/monero-cpp#using-this-library-in-your-project)
-6. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home` (change as appropriate)
+6. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home` (change to path of Java JDK on your system)
 7. Build shared libraries to ./build/: `./bin/build_libmonero_java.sh`
 8. Run TestMoneroUtils.java JUnit tests to verify the shared libraries are working with Java JNI.
 9. Add the shared libraries within ./build/ to your application's classpath.
-
-## Developer guide
-
-Refer to [monero-javascript's developer guide](https://github.com/monero-ecosystem/monero-javascript#developer-guide) which mostly translates to monero-java.
 
 ## Running JUnit tests
 
@@ -154,9 +157,8 @@ Refer to [monero-javascript's developer guide](https://github.com/monero-ecosyst
 4. Configure the appropriate RPC endpoints, authentication, and test wallet in [TestUtils.java](src/test/java/utils/TestUtils.java).
 4. Run all *.java files in src/main/test as JUnits.
 
-## See also
+## Related projects
 
-* [API specification](http://moneroecosystem.org/monero-java/monero-spec.pdf)
 * [monero-javascript](https://github.com/monero-ecosystem/monero-javascript)
 * [monero-cpp](https://github.com/monero-ecosystem/monero-cpp)
 

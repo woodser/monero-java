@@ -25,7 +25,7 @@ package monero.wallet;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
-
+import java.util.Set;
 import monero.common.MoneroRpcConnection;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroVersion;
@@ -61,6 +61,27 @@ import monero.wallet.model.MoneroWalletListenerI;
 public interface MoneroWallet {
   
   public static final String DEFAULT_LANGUAGE = "English";
+  
+  /**
+   * Register a listener to receive wallet notifications.
+   * 
+   * @param listener is the listener to receive wallet notifications
+   */
+  public void addListener(MoneroWalletListenerI listener);
+  
+  /**
+   * Unregister a listener to receive wallet notifications.
+   * 
+   * @param listener is the listener to unregister
+   */
+  public void removeListener(MoneroWalletListenerI listener);
+  
+  /**
+   * Get the listeners registered with the wallet.
+   * 
+   * @return the registered listeners
+   */
+  public Set<MoneroWalletListenerI> getListeners();
   
   /**
    * Indicates if the wallet is view-only, meaning it does have the private
@@ -214,9 +235,9 @@ public interface MoneroWallet {
   public MoneroIntegratedAddress decodeIntegratedAddress(String integratedAddress);
   
   /**
-   * Get the height of the last block processed by the wallet (its index + 1).
+   * Get the block height that the wallet is synced to.
    * 
-   * @return the height of the last block processed by the wallet
+   * @return the block height that the wallet is synced to
    */
   public long getHeight();
   
@@ -270,9 +291,16 @@ public interface MoneroWallet {
   public MoneroSyncResult sync(Long startHeight, MoneroWalletListenerI listener);
   
   /**
-   * Start an asynchronous thread to continuously synchronize the wallet with the daemon.
+   * Start background synchronizing.
    */
   public void startSyncing();
+  
+  /**
+   * Start background synchronizing with a maximum period between syncs.
+   * 
+   * @param syncPeriodInMs - maximum period between syncs in milliseconds
+   */
+  public void startSyncing(Long syncPeriodInMs);
   
   /**
    * Stop synchronizing the wallet with the daemon.
@@ -309,19 +337,19 @@ public interface MoneroWallet {
   /**
    * Get an account's balance.
    * 
-   * @param accountIdx is the index of the account to get the balance of
-   * @return the account's balance
+   * @param accountIdx - index of the account to get the balance of (default all accounts if null)
+   * @return the requested balance
    */
-  public BigInteger getBalance(int accountIdx);
+  public BigInteger getBalance(Integer accountIdx);
   
   /**
    * Get a subaddress's balance.
    * 
-   * @param accountIdx is the index of the subaddress's account to get the balance of
-   * @param subaddressIdx is the index of the subaddress to get the balance of
-   * @return the subaddress's balance
+   * @param accountIdx - index of the account to get the balance of (default all accounts if null)
+   * @param subaddressIdx - index of the subaddress to get the balance of (default all subaddresses if null)
+   * @return the requested balance
    */
-  public BigInteger getBalance(int accountIdx, int subaddressIdx);
+  public BigInteger getBalance(Integer accountIdx, Integer subaddressIdx);
   
   /**
    * Get the wallet's unlocked balance.
@@ -333,19 +361,19 @@ public interface MoneroWallet {
   /**
    * Get an account's unlocked balance.
    * 
-   * @param accountIdx is the index of the account to get the unlocked balance of
-   * @return the account's unlocked balance
+   * @param accountIdx - index of the account to get the unlocked balance of (default all accounts if null)
+   * @return the requested unlocked balance
    */
-  public BigInteger getUnlockedBalance(int accountIdx);
+  public BigInteger getUnlockedBalance(Integer accountIdx);
   
   /**
    * Get a subaddress's unlocked balance.
    * 
-   * @param accountIdx is the index of the subaddress's account to get the unlocked balance of
-   * @param subaddressIdx is the index of the subaddress to get the unlocked balance of
-   * @return the subaddress's balance
+   * @param accountIdx - index of the subaddress to get the unlocked balance of (default all accounts if null)
+   * @param subaddressIdx - index of the subaddress to get the unlocked balance of (default all subaddresses if null)
+   * @return the requested unlocked balance
    */
-  public BigInteger getUnlockedBalance(int accountIdx, int subaddressIdx);
+  public BigInteger getUnlockedBalance(Integer accountIdx, Integer subaddressIdx);
   
   /**
    * Get all accounts.

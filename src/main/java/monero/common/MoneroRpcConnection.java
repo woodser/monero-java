@@ -27,6 +27,8 @@ import common.utils.JsonUtils;
 
 /**
  * Maintains a connection and sends requests to a Monero RPC API.
+ * 
+ * TODO: refactor MoneroRpcConnection extends MoneroConnection?
  */
 public class MoneroRpcConnection {
 
@@ -46,9 +48,10 @@ public class MoneroRpcConnection {
   private CloseableHttpClient client;
   private String username;
   private String password;
+  private String zmqUri;
   
   public MoneroRpcConnection(URI uri) {
-    this(uri, null, null);
+    this(uri, null, null, null);
   }
   
   public MoneroRpcConnection(String uri) {
@@ -56,10 +59,18 @@ public class MoneroRpcConnection {
   }
   
   public MoneroRpcConnection(String uri, String username, String password) {
-    this((URI) (uri == null ? null : MoneroUtils.parseUri(uri)), username, password);
+    this((URI) (uri == null ? null : MoneroUtils.parseUri(uri)), username, password, null);
+  }
+
+  public MoneroRpcConnection(String uri, String username, String password, String zmqUri) {
+    this((URI) (uri == null ? null : MoneroUtils.parseUri(uri)), username, password, (URI) (zmqUri == null ? null : MoneroUtils.parseUri(zmqUri)));
   }
   
   public MoneroRpcConnection(URI uri, String username, String password) {
+    this(uri, username, password, null);
+  }
+  
+  public MoneroRpcConnection(URI uri, String username, String password, URI zmqUri) {
     this.uri = uri == null ? null : uri.toString();
     this.username = username;
     this.password = password;
@@ -72,6 +83,7 @@ public class MoneroRpcConnection {
     } else {
       this.client = HttpClients.createDefault();
     }
+    this.zmqUri = zmqUri == null ? null : zmqUri.toString();
   }
   
   public String getUri() {
@@ -84,6 +96,10 @@ public class MoneroRpcConnection {
   
   public String getPassword() {
     return password;
+  }
+  
+  public String getZmqUri() {
+    return zmqUri;
   }
   
   /**
@@ -115,21 +131,23 @@ public class MoneroRpcConnection {
       if (params != null) body.put("params", params);
       //System.out.println("Sending json request with method '" + method + "' and body: " + JsonUtils.serialize(body));
 
-      // send http request and validate response
+      // send http request
       HttpPost post = new HttpPost(uri.toString() + "/json_rpc");
       HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
       post.setEntity(entity);
       resp = client.execute(post);
+      
+      // validate response
       validateHttpResponse(resp);
 
       // deserialize response
       Map<String, Object> respMap = JsonUtils.toMap(MAPPER, EntityUtils.toString(resp.getEntity(), "UTF-8"));
       EntityUtils.consume(resp.getEntity());
-
-      // check RPC response for errors
       //String respStr = JsonUtils.serialize(respMap);
-      //respStr = respStr.substring(0, Math.min(1000, respStr.length()));
+      //respStr = respStr.substring(0, Math.min(10000, respStr.length()));
       //System.out.println("Received response: " + respStr);
+
+      // check rpc response for errors
       validateRpcResponse(respMap, method, params);
       return respMap;
     } catch (MoneroRpcError e1) {
@@ -138,9 +156,8 @@ public class MoneroRpcConnection {
       //e3.printStackTrace();
       throw new MoneroError(e2);
     } finally {
-      try {
-        resp.close();
-      } catch (Exception e) {}
+      try { resp.close(); }
+      catch (Exception e) {}
     }
   }
   
@@ -171,24 +188,24 @@ public class MoneroRpcConnection {
     CloseableHttpResponse resp = null;
     try {
       
-      // build request
+      // send http request
       HttpPost post = new HttpPost(uri.toString() + "/" + path);
       if (params != null) {
         HttpEntity entity = new StringEntity(JsonUtils.serialize(params));
         post.setEntity(entity);
       }
       //System.out.println("Sending path request with path '" + path + "' and params: " + JsonUtils.serialize(params));
-      
-      // send request and validate response
       resp = client.execute(post);
+      
+      // validate response
       validateHttpResponse(resp);
       
       // deserialize response
       Map<String, Object> respMap = JsonUtils.toMap(MAPPER, EntityUtils.toString(resp.getEntity(), "UTF-8"));
       EntityUtils.consume(resp.getEntity());
-
-      // check RPC response for errors
       //System.out.println("Received response: " + respMap);
+
+      // check rpc response for errors
       validateRpcResponse(respMap, path, params);
       return respMap;
     } catch (MoneroRpcError e1) {
@@ -197,9 +214,8 @@ public class MoneroRpcConnection {
       e2.printStackTrace();
       throw new MoneroError(e2);
     } finally {
-      try {
-        resp.close();
-      } catch (Exception e) {}
+      try { resp.close(); }
+      catch (Exception e) {}
     }
   }
   
@@ -217,34 +233,28 @@ public class MoneroRpcConnection {
     CloseableHttpResponse resp = null;
     try {
       
-      // build request
+      // send http request
       HttpPost post = new HttpPost(uri.toString() + "/" + path);
       if (paramsBin != null) {
         HttpEntity entity = new ByteArrayEntity(paramsBin, ContentType.DEFAULT_BINARY);
         post.setEntity(entity);
       }
       LOGGER.fine("Sending binary request with path '" + path + "' and params: " + JsonUtils.serialize(params));
-      
-      // send request and validate response
       resp = client.execute(post);
+      
+      // validate response
       validateHttpResponse(resp);
       
       // deserialize response
       return EntityUtils.toByteArray(resp.getEntity());
-      
-//    // send request and store binary response as Uint8Array
-//    let resp = await this._throttledRequest(opts);
-//    if (resp.error) throw new MoneroRpcError(resp.error.code, resp.error.message, opts);
-//    return new Uint8Array(resp, 0, resp.length);
     } catch (MoneroRpcError e1) {
       throw e1;
     } catch (Exception e2) {
       e2.printStackTrace();
       throw new MoneroError(e2);
     } finally {
-      try {
-        resp.close();
-      } catch (Exception e) {}
+      try { resp.close(); }
+      catch (Exception e) {}
     }
   }
   
