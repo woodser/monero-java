@@ -358,16 +358,11 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("filename", name);
     params.put("password", password);
     params.put("language", language);
-    try {
-      rpc.sendJsonRequest("create_wallet", params);
-    } catch (MoneroRpcError e) {
-      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroRpcError("Wallet already exists: " + name, e.getCode(), e.getRpcMethod(), e.getRpcParams());
-      throw e;
-    }
+    try { rpc.sendJsonRequest("create_wallet", params); }
+    catch (MoneroRpcError e) { handleCreateWalletError(name, e); }
     clear();
     path = name;
   }
-
   
   /**
    * Create and open a wallet from an existing mnemonic phrase on the RPC server,
@@ -391,12 +386,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("restore_height", restoreHeight);
     params.put("language", language);
     params.put("autosave_current", saveCurrent);
-    try {
-      rpc.sendJsonRequest("restore_deterministic_wallet", params);
-    } catch (MoneroRpcError e) {
-      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroRpcError("Wallet already exists: " + name, e.getCode(), e.getRpcMethod(), e.getRpcParams());
-      throw e;
-    }
+    try { rpc.sendJsonRequest("restore_deterministic_wallet", params); }
+    catch (MoneroRpcError e) { handleCreateWalletError(name, e); }
     clear();
     path = name;
   }
@@ -424,14 +415,16 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("spendkey", spendKey);
     params.put("restore_height", restoreHeight);
     params.put("autosave_current", saveCurrent);
-    try {
-      rpc.sendJsonRequest("generate_from_keys", params);
-    } catch (MoneroRpcError e) {
-      if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroRpcError("Wallet already exists: " + name, e.getCode(), e.getRpcMethod(), e.getRpcParams());
-      throw e;
-    }
+    try { rpc.sendJsonRequest("generate_from_keys", params); }
+    catch (MoneroRpcError e) { handleCreateWalletError(name, e); }
     clear();
     path = name;
+  }
+  
+  private void handleCreateWalletError(String name, MoneroRpcError e) {
+    if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroRpcError("Wallet already exists: " + name, e.getCode(), e.getRpcMethod(), e.getRpcParams());
+    if (e.getMessage().equals("Electrum-style word list failed verification")) throw new MoneroRpcError("Invalid mnemonic", e.getCode(), e.getRpcMethod(), e.getRpcParams());
+    throw e;
   }
   
   /**
