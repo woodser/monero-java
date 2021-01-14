@@ -92,9 +92,9 @@ public abstract class MoneroTransfer {
     // otherwise merge transfer fields
     this.setAccountIndex(GenUtils.reconcile(this.getAccountIndex(), transfer.getAccountIndex()));
     
-    // TODO monero core: returning transfers with 0 amount/numSuggestedConfirmations
+    // TODO monero-project: returning transfers with 0 amount/numSuggestedConfirmations
     if (this.getAmount() != null && transfer.getAmount() != null && !this.getAmount().equals(transfer.getAmount()) && (BigInteger.valueOf(0).equals(this.getAmount()) || BigInteger.valueOf(0).equals(transfer.getAmount()))) {
-      //throw new MoneroError("WARNING: monero core returning transfers with 0 amount/numSuggestedConfirmations");
+      //throw new MoneroError("WARNING: monero-project returning transfers with 0 amount/numSuggestedConfirmations");
     } else {
       this.setAmount(GenUtils.reconcile(this.getAmount(), transfer.getAmount()));
     }

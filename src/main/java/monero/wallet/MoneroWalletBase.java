@@ -52,7 +52,7 @@ import monero.wallet.model.MoneroWalletListenerI;
 /**
  * Abstract base implementation of a Monero wallet.
  */
-public abstract class MoneroWalletBase implements MoneroWallet {
+abstract class MoneroWalletBase implements MoneroWallet {
   
   protected Set<MoneroWalletListenerI> listeners = new LinkedHashSet<MoneroWalletListenerI>();
   

@@ -17,7 +17,7 @@ import monero.wallet.model.MoneroTxWallet;
  * This is only necessary because txs relayed outside wallets are not fully incorporated
  * into the wallet state until confirmed.
  * 
- * TODO monero core: sync txs relayed outside wallet so this class is unecessary
+ * TODO monero-project: sync txs relayed outside wallet so this class is unecessary
  */
 public class WalletTxTracker {
 

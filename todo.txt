@@ -26,7 +26,6 @@ standardize expected test failures vs exceptions
 exclude heavy tests by config, e.g. testMultisig
 cpp use rapidjson for model deserialization
 daemon.getNextBlockHeader() sometimes hangs, daemon hangs
-CMakeLists builds core directly instead of using libraries?
 update wasm cpp
 new rpc api will need containers for every call
 remove dependency on libwallet_merged, randomx if possible
@@ -99,10 +98,10 @@ rename getLanguages() to getSupportedLanguages()?
 
 BIG PICTURE
 open library issues
-open monero core issues
+open monero-project issues
 testGetReserveProofAccount() still fails if 0 confirmations, could prevent with tx pool tracker
-separate tests which demonstrate monero core issues
-investigate monero core issues
+separate tests which demonstrate monero-project issues
+investigate monero-project issues
 swap gui's lib with monero-cpp
 (in no particular order...)
 Monero REST API 2.0 based on refined model
@@ -115,7 +114,7 @@ javascript local wallet ui
 MyMonero implementations
 stress tester
 
---------- MONERO CORE ISSUES ---------
+--------- MONERO PROJECT ISSUES ---------
 
 TO OPEN
 wallet2 recognizes pool tx vouts but not vins (e.g. if funds sent from another copy of wallet) 

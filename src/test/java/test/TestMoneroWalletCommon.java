@@ -264,7 +264,7 @@ public abstract class TestMoneroWalletCommon {
 //      try {
 //        String invalidMnemonic = "memoir hull oilfield desk algebra inbound innocent unplugs fully okay five inflamed giant factual ritual toyed topic snake unhappy guarded tweezers haunted inundate giant";
 //        wallet = createWallet(new MoneroWalletConfig().setMnemonic(invalidMnemonic).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
-//        assertEquals(invalidMnemonic, wallet.getMnemonic());  // TODO monero-core: detect mnemonic mismatch
+//        assertEquals(invalidMnemonic, wallet.getMnemonic());  // TODO monero-project: detect mnemonic mismatch
 //        throw new Error("Should have thrown error");
 //      } catch(Exception e) {
 //        assertEquals("Invalid mnemonic", e.getMessage());
@@ -332,7 +332,7 @@ public abstract class TestMoneroWalletCommon {
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
         assertEquals(privateViewKey, wallet.getPrivateViewKey());
         assertEquals(privateSpendKey, wallet.getPrivateSpendKey());
-        if (!wallet.isConnected()) System.out.println("WARNING: wallet created from keys is not connected to authenticated daemon");  // TODO monero-core: keys wallets not connected
+        if (!wallet.isConnected()) System.out.println("WARNING: wallet created from keys is not connected to authenticated daemon");  // TODO monero-project: keys wallets not connected
         assertTrue(wallet.isConnected(), "Wallet created from keys is not connected to authenticated daemon");
         if (!(wallet instanceof MoneroWalletRpc)) {
           MoneroUtils.validateMnemonic(wallet.getMnemonic()); // TODO monero-wallet-rpc: cannot get mnemonic from wallet created from keys?
@@ -599,7 +599,7 @@ public abstract class TestMoneroWalletCommon {
     
     // collect dates to test starting 100 days ago
     long DAY_MS = 24 * 60 * 60 * 1000;
-    Date yesterday = new Date(new Date().getTime() - DAY_MS); // TODO monero-core: today's date can throw exception as "in future" so we test up to yesterday
+    Date yesterday = new Date(new Date().getTime() - DAY_MS); // TODO monero-project: today's date can throw exception as "in future" so we test up to yesterday
     List<Date> dates = new ArrayList<Date>();
     for (long i = 99; i >= 0; i--) {
       dates.add(new Date(yesterday.getTime() - DAY_MS * i)); // subtract i days
@@ -2214,7 +2214,7 @@ public abstract class TestMoneroWalletCommon {
   }
   
   // Can import key images
-  // TODO monero core: importing key images can cause erasure of incoming transfers per wallet2.cpp:11957
+  // TODO monero-project: importing key images can cause erasure of incoming transfers per wallet2.cpp:11957
   @Disabled 
   @Test
   public void testImportKeyImages() {
@@ -2276,7 +2276,7 @@ public abstract class TestMoneroWalletCommon {
       offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setServerUri(""));
       assertFalse(offlineWallet.isConnected());
       assertFalse(offlineWallet.isViewOnly());
-      if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic()); // TODO monero-core: cannot get mnemonic from offline wallet rpc
+      if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic()); // TODO monero-project: cannot get mnemonic from offline wallet rpc
       if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(0, offlineWallet.getTxs().size());  // TODO: monero-wallet-rpc has these transactions cached on startup
       String offlineWalletPath = offlineWallet.getPath();
       
@@ -2571,7 +2571,7 @@ public abstract class TestMoneroWalletCommon {
   private void testSyncWithPoolSubmit(MoneroTxConfig config) {
     
     // wait for txs to confirm and for sufficient unlocked balance
-    // TODO monero core: update from pool does not prevent creating double spend tx
+    // TODO monero-project: update from pool does not prevent creating double spend tx
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
     assertNull(config.getSubaddressIndices());
     TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(wallet, config.getAccountIndex(), null, config.getAmount());
@@ -2624,7 +2624,7 @@ public abstract class TestMoneroWalletCommon {
       // sync wallet which updates from pool
       wallet.sync();
       
-      // TODO monero project: this code fails which indicates issues // TODO (monero-project): sync txs from pool
+      // TODO monero-project: this code fails which indicates issues // TODO (monero-project): sync txs from pool
       boolean runFailingCoreCode = false;
       if (runFailingCoreCode) {
         
@@ -2678,7 +2678,7 @@ public abstract class TestMoneroWalletCommon {
   assumeTrue(TEST_RELAYS && !LITE_MODE);
     
     // wait one time for wallet txs in the pool to clear
-    // TODO monero core: update from pool does not prevent creating double spend tx
+    // TODO monero-project: update from pool does not prevent creating double spend tx
    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // record wallet balances before submitting tx to pool
@@ -2738,7 +2738,7 @@ public abstract class TestMoneroWalletCommon {
       try {
         tx2 = wallet.createTx(config.copy().setRelay(true));
       } catch (Exception e) {
-        issues.add("WARNING: creating and sending tx through wallet should succeed after syncing wallet with pool but creates a double spend"); // TODO monero core: this fails meaning wallet did not recognize tx relayed directly to pool
+        issues.add("WARNING: creating and sending tx through wallet should succeed after syncing wallet with pool but creates a double spend"); // TODO monero-project: this fails meaning wallet did not recognize tx relayed directly to pool
       }
       
       // submit the transaction to the pool and test
@@ -3689,7 +3689,7 @@ public abstract class TestMoneroWalletCommon {
       List<String> peerMultisigHexes = new ArrayList<String>();
       for (int j = 0; j < wallets.size(); j++) if (j != i) peerMultisigHexes.add(multisigHexes.get(j));
       MoneroWallet wallet = wallets.get(i);
-      wallet.sync();  // TODO monero-core: creating multisig tx fails if wallet not explicitly synced before import_multisig_hex: https://github.com/monero-project/monero/issues/6850
+      wallet.sync();  // TODO monero-project: creating multisig tx fails if wallet not explicitly synced before import_multisig_hex: https://github.com/monero-project/monero/issues/6850
       wallet.importMultisigHex(peerMultisigHexes);
     }
   }
@@ -4312,7 +4312,7 @@ public abstract class TestMoneroWalletCommon {
     // collect errors and warnings
     List<String> errors = new ArrayList<String>();
     
-    // wait for wallet txs in the pool in case they were sent from another wallet and therefore will not fully sync until confirmed // TODO monero core
+    // wait for wallet txs in the pool in case they were sent from another wallet and therefore will not fully sync until confirmed // TODO monero-project
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // get balances before for later comparison
@@ -4539,7 +4539,7 @@ public abstract class TestMoneroWalletCommon {
                 // first confirmation expected
                 if (listener.confirmedHeight == null && Boolean.TRUE.equals(listener.lastNotifiedOutput.getTx().isConfirmed())) { // only run by first thread after confirmation
                   listener.confirmedHeight = listener.lastNotifiedOutput.getTx().getHeight();
-                  if (listener.confirmedHeight != submitHeight) System.out.println("WARNING: tx submitted on height " + submitHeight + " but confirmed on height " + listener.confirmedHeight);  // TODO monero-core: sometimes pool tx does not confirm for several blocks
+                  if (listener.confirmedHeight != submitHeight) System.out.println("WARNING: tx submitted on height " + submitHeight + " but confirmed on height " + listener.confirmedHeight);  // TODO monero-project: sometimes pool tx does not confirm for several blocks
                 }
                 
                 // skip tests if more recent block received
@@ -5383,7 +5383,7 @@ public abstract class TestMoneroWalletCommon {
       }
     }
     
-    // TODO monero core wallet2 does not provide ordered blocks or txs
+    // TODO monero-project wallet2 does not provide ordered blocks or txs
 //    // collect given tx hashes
 //    List<String> txHashes = new ArrayList<String>();
 //    for (MoneroTx tx : txs) txHashes.add(tx.getId());

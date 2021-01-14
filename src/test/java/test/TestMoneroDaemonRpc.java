@@ -1138,7 +1138,7 @@ public class TestMoneroDaemonRpc {
     assumeTrue(TEST_RELAYS && !LITE_MODE);
     
     // wait one time for wallet txs in the pool to clear
-    // TODO monero core: update from pool does not prevent creating double spend tx
+    // TODO monero-project: update from pool does not prevent creating double spend tx
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // create 2 txs, the second will double spend outputs of first
@@ -1668,7 +1668,7 @@ public class TestMoneroDaemonRpc {
   }
   
   private static MoneroTx getUnrelayedTx(MoneroWallet wallet, Integer accountIdx) {
-    assertTrue(accountIdx > 0, "Txs sent from/to same account are not properly synced from the pool");  // TODO monero core
+    assertTrue(accountIdx > 0, "Txs sent from/to same account are not properly synced from the pool");  // TODO monero-project
     MoneroTxConfig config = new MoneroTxConfig().setAccountIndex(accountIdx).setAddress(wallet.getPrimaryAddress()).setAmount(TestUtils.MAX_FEE); 
     MoneroTx tx = wallet.createTx(config);
     assertFalse(tx.getFullHex().isEmpty());

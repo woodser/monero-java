@@ -366,7 +366,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     }
     
     // fetch unconfirmed txs from pool and merge additional fields  // TODO monero-daemon-rpc: merge rpc calls so this isn't necessary?
-    //System.out.println("Fetching from pool...");  // TODO monero core: getTxPool() can get stuck under certain conditions (observed it before coordinating tx pool as part of tests, so double spend related?)
+    //System.out.println("Fetching from pool...");  // TODO monero-project: getTxPool() can get stuck under certain conditions (observed it before coordinating tx pool as part of tests, so double spend related?)
     List<MoneroTx> poolTxs = getTxPool();
     for (MoneroTx tx : txs) {
       for (MoneroTx poolTx : poolTxs) {

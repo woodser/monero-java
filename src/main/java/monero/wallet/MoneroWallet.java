@@ -251,9 +251,9 @@ public interface MoneroWallet {
   /**
    * Get the blockchain's height by date as a conservative estimate for scanning.
    * 
-   * @param year - year of the height to get
-   * @param month - month of the height to get as a number between 1 and 12
-   * @param day - day of the height to get as a number between 1 and 31
+   * @param year year of the height to get
+   * @param month month of the height to get as a number between 1 and 12
+   * @param day day of the height to get as a number between 1 and 31
    * @return the blockchain's approximate height at the given date
    */
   public long getHeightByDate(int year, int month, int day);
@@ -268,7 +268,7 @@ public interface MoneroWallet {
   /**
    * Synchronize the wallet with the daemon as a one-time synchronous process.
    * 
-   * @param listener - listener to receive notifications during synchronization
+   * @param listener listener to receive notifications during synchronization
    * @return the sync result
    */
   public MoneroSyncResult sync(MoneroWalletListenerI listener);
@@ -285,7 +285,7 @@ public interface MoneroWallet {
    * Synchronize the wallet with the daemon as a one-time synchronous process.
    * 
    * @param startHeight is the start height to sync from (defaults to the last synced block)
-   * @param listener - listener to receive notifications during synchronization
+   * @param listener listener to receive notifications during synchronization
    * @return the sync result
    */
   public MoneroSyncResult sync(Long startHeight, MoneroWalletListenerI listener);
@@ -298,7 +298,7 @@ public interface MoneroWallet {
   /**
    * Start background synchronizing with a maximum period between syncs.
    * 
-   * @param syncPeriodInMs - maximum period between syncs in milliseconds
+   * @param syncPeriodInMs maximum period between syncs in milliseconds
    */
   public void startSyncing(Long syncPeriodInMs);
   
@@ -337,7 +337,7 @@ public interface MoneroWallet {
   /**
    * Get an account's balance.
    * 
-   * @param accountIdx - index of the account to get the balance of (default all accounts if null)
+   * @param accountIdx index of the account to get the balance of (default all accounts if null)
    * @return the requested balance
    */
   public BigInteger getBalance(Integer accountIdx);
@@ -345,8 +345,8 @@ public interface MoneroWallet {
   /**
    * Get a subaddress's balance.
    * 
-   * @param accountIdx - index of the account to get the balance of (default all accounts if null)
-   * @param subaddressIdx - index of the subaddress to get the balance of (default all subaddresses if null)
+   * @param accountIdx index of the account to get the balance of (default all accounts if null)
+   * @param subaddressIdx index of the subaddress to get the balance of (default all subaddresses if null)
    * @return the requested balance
    */
   public BigInteger getBalance(Integer accountIdx, Integer subaddressIdx);
@@ -361,7 +361,7 @@ public interface MoneroWallet {
   /**
    * Get an account's unlocked balance.
    * 
-   * @param accountIdx - index of the account to get the unlocked balance of (default all accounts if null)
+   * @param accountIdx index of the account to get the unlocked balance of (default all accounts if null)
    * @return the requested unlocked balance
    */
   public BigInteger getUnlockedBalance(Integer accountIdx);
@@ -369,8 +369,8 @@ public interface MoneroWallet {
   /**
    * Get a subaddress's unlocked balance.
    * 
-   * @param accountIdx - index of the subaddress to get the unlocked balance of (default all accounts if null)
-   * @param subaddressIdx - index of the subaddress to get the unlocked balance of (default all subaddresses if null)
+   * @param accountIdx index of the subaddress to get the unlocked balance of (default all accounts if null)
+   * @param subaddressIdx index of the subaddress to get the unlocked balance of (default all subaddresses if null)
    * @return the requested unlocked balance
    */
   public BigInteger getUnlockedBalance(Integer accountIdx, Integer subaddressIdx);
@@ -557,7 +557,7 @@ public interface MoneroWallet {
    * &nbsp;&nbsp; includeOutputs - specifies that tx outputs should be returned with tx results (optional)<br>
    * </p>
    * 
-   * @param query - attributes of transactions to get
+   * @param query specifies properties of the transactions to get
    * @return wallet transactions that meet the query
    */
   public List<MoneroTxWallet> getTxs(MoneroTxQuery query);
@@ -599,8 +599,8 @@ public interface MoneroWallet {
    * &nbsp;&nbsp; includeOutputs - specifies that tx outputs should be returned with tx results (optional)<br>
    * </p>
    * 
-   * @param query - attributes of transactions to get
-   * @param missingTxHashes - populated with hashes of unfound or unmet transactions that were queried by hash (throws error if null and queried transaction hashes are unfound or unmet)
+   * @param query specifies properties of the transactions to get
+   * @param missingTxHashes populated with hashes of unfound or unmet transactions that were queried by hash (throws error if null and queried transaction hashes are unfound or unmet)
    * @return wallet transactions that meet the query
    */
   public List<MoneroTxWallet> getTxs(MoneroTxQuery query, Collection<String> missingTxHashes);
@@ -949,10 +949,10 @@ public interface MoneroWallet {
   /**
    * Sign a message.
    * 
-   * @param message - the message to sign
-   * @param signatureType - sign with spend key or view key
-   * @param accountIdx - the account index of the message signature (default 0)
-   * @param subaddressIdx - the subaddress index of the message signature (default 0)
+   * @param message the message to sign
+   * @param signatureType sign with spend key or view key
+   * @param accountIdx the account index of the message signature (default 0)
+   * @param subaddressIdx the subaddress index of the message signature (default 0)
    * @return the signature
    */
   public String signMessage(String message, MoneroMessageSignatureType signatureType, int accountIdx, int subaddressIdx);
@@ -1265,7 +1265,7 @@ public interface MoneroWallet {
    * This process must be repeated with participants exactly N-M times.
    * 
    * @param multisigHexes are multisig hex from each participant
-   * @param password is the wallet's password // TODO monero core: redundant? wallet is created with password
+   * @param password is the wallet's password // TODO monero-project: redundant? wallet is created with password
    * @return the result which has the multisig's address xor this wallet's multisig hex to share with participants iff not done
    */
   public MoneroMultisigInitResult exchangeMultisigKeys(List<String> multisigHexes, String password);

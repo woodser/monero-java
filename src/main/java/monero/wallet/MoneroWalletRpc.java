@@ -127,8 +127,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
    * 
    * Use `stopProcess()` to stop the newly created process.
    * 
-   * @param cmd - path then arguments to external monero-wallet-rpc executable
-   * @throws IOException 
+   * @param cmd path then arguments to external monero-wallet-rpc executable
+   * @throws IOException if input/output error with process
    */
   public MoneroWalletRpc(List<String> cmd) throws IOException {
     
@@ -211,11 +211,14 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   
   /**
    * Stop the internal process running monero-wallet-rpc, if applicable.
+   * 
+   * @return the error code from stopping the process
    */
-  public int stopProcess() throws InterruptedException {
+  public int stopProcess() {
     if (process == null) throw new MoneroError("MoneroWalletRpc instance not created from new process");
-    process.destroyForcibly();  // TODO: why need to destroy forcibly?
-    return process.waitFor();
+    process.destroyForcibly();
+    try { return process.waitFor(); }
+    catch (Exception e) { throw new MoneroError(e); }
   }
   
   /**
@@ -1242,7 +1245,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       copy.setAccountIndex(accountIdx);
       copy.setSweepEachSubaddress(false);
       
-      // sweep all subaddresses together  // TODO monero core: can this reveal outputs belong to same wallet?
+      // sweep all subaddresses together // TODO monero-project: can this reveal outputs belong to same wallet?
       if (!Boolean.TRUE.equals(copy.getSweepEachSubaddress())) {
         copy.setSubaddressIndices(indices.get(accountIdx));
         txs.addAll(rpcSweepAccount(copy));
@@ -1936,7 +1939,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     params.put("pending", canBeOutgoing && canBeInTxPool);
     params.put("failed", !Boolean.FALSE.equals(txQuery.isFailed()) && !Boolean.TRUE.equals(txQuery.isConfirmed()) && !Boolean.TRUE.equals(txQuery.inTxPool()));
     if (txQuery.getMinHeight() != null) {
-      if (txQuery.getMinHeight() > 0) params.put("min_height", txQuery.getMinHeight() - 1); // TODO monero core: wallet2::get_payments() min_height is exclusive, so manually offset to match intended range (issues #5751, #5598)
+      if (txQuery.getMinHeight() > 0) params.put("min_height", txQuery.getMinHeight() - 1); // TODO monero-project: wallet2::get_payments() min_height is exclusive, so manually offset to match intended range (issues #5751, #5598)
       else params.put("min_height", txQuery.getMinHeight());
     }
     if (txQuery.getMaxHeight() != null) params.put("max_height", txQuery.getMaxHeight());
@@ -3034,7 +3037,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   /**
    * Merges a transaction into a unique set of transactions.
    *
-   * TODO monero-core: skipIfAbsent only necessary because incoming payments not returned
+   * TODO monero-project: skipIfAbsent only necessary because incoming payments not returned
    * when sent from/to same account #4500
    *
    * @param tx is the transaction to merge into the existing txs

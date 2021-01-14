@@ -69,13 +69,13 @@ import monero.wallet.model.MoneroWalletConfig;
 import monero.wallet.model.MoneroWalletListenerI;
 
 /**
- * Implements a Monero wallet using JNI to bridge to Monero Core C++.
+ * Implements a Monero wallet using JNI to bridge to monero-project's wallet2 in C++.
  */
 public class MoneroWalletJni extends MoneroWalletBase {
   
   // ----------------------------- PRIVATE SETUP ------------------------------
 
-  // load Monero Core C++ as a dynamic library
+  // load monero-project C++ as a dynamic library
   static {
     System.loadLibrary("monero-java");
   }

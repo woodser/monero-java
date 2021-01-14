@@ -14,8 +14,8 @@ set(MONERO_CPP "${CMAKE_SOURCE_DIR}/external/monero-cpp")
 message(STATUS MONERO_CPP : ${MONERO_CPP} : ${MONERO_CPP})
 
 set(MONERO_CPP_SRC "${MONERO_CPP}/src")
-set(MONERO_CORE ${MONERO_CPP}/external/monero-core)
-set(MONERO_CORE_SRC "${MONERO_CORE}/src")
+set(MONERO_PROJECT ${MONERO_CPP}/external/monero-project)
+set(MONERO_PROJECT_SRC "${MONERO_PROJECT}/src")
 
 # java header includes
 include_directories("$ENV{JAVA_HOME}")
@@ -28,19 +28,19 @@ else()
   include_directories("$ENV{JAVA_HOME}/include/linux")
 endif()
 
-# monero core header includes
+# monero-project header includes
 include_directories("${MONERO_CPP}/external/libsodium/include/sodium")
 include_directories("${MONERO_CPP}/external/openssl-sdk/include")
 include_directories("${MONERO_CPP_SRC}/")
-include_directories("${MONERO_CORE}/contrib/epee/include")
-include_directories("${MONERO_CORE}/external/")
-include_directories("${MONERO_CORE}/external/easylogging++")
-include_directories("${MONERO_CORE}/external/rapidjson/include")
-include_directories("${MONERO_CORE_SRC}/")
-include_directories("${MONERO_CORE_SRC}/crypto")
-include_directories("${MONERO_CORE_SRC}/crypto/crypto_ops_builder/include/")
-include_directories("${MONERO_CORE_SRC}/wallet")
-include_directories("${MONERO_CORE_SRC}/wallet/api")
+include_directories("${MONERO_PROJECT}/contrib/epee/include")
+include_directories("${MONERO_PROJECT}/external/")
+include_directories("${MONERO_PROJECT}/external/easylogging++")
+include_directories("${MONERO_PROJECT}/external/rapidjson/include")
+include_directories("${MONERO_PROJECT_SRC}/")
+include_directories("${MONERO_PROJECT_SRC}/crypto")
+include_directories("${MONERO_PROJECT_SRC}/crypto/crypto_ops_builder/include/")
+include_directories("${MONERO_PROJECT_SRC}/wallet")
+include_directories("${MONERO_PROJECT_SRC}/wallet/api")
 
 # TODO: remove TRUEs, how are APPLE, DEPENDS, etc initialized?
 if (TRUE OR HIDAPI_FOUND OR LibUSB_COMPILE_TEST_PASSED)
