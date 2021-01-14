@@ -101,8 +101,8 @@ walletFull.close(true);
 ## Documentation
 
 * [Javadoc](https://moneroecosystem.org/monero-java/)
-* [JUnit tests](src/main/test/java/test)
 * [API and model overview with visual diagrams](http://moneroecosystem.org/monero-java/monero-spec.pdf)
+* [JUnit tests](src/main/test/java/test)
 * [monero-javascript documentation](https://github.com/monero-ecosystem/monero-javascript#documentation) provides additional documentation which translates to monero-java
 
 ## Using monero-java in your project

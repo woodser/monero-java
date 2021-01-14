@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.4.1)
 #SET(CMAKE_CXX_COMPILER /path/to/cpp/compiler)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -F/Library/Frameworks -pthread")
 
-project(MoneroJavaJni)
+project(monero-java-jni)
 
 #############
 # System

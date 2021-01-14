@@ -69,7 +69,7 @@ import monero.wallet.model.MoneroWalletConfig;
 import monero.wallet.model.MoneroWalletListenerI;
 
 /**
- * Implements a Monero wallet using JNI bindings to monero-project's wallet2 in C++.
+ * Implements a Monero wallet using fully client-side JNI bindings to monero-project's wallet2 in C++.
  */
 public class MoneroWalletFull extends MoneroWalletBase {
   
