@@ -113,7 +113,7 @@ else()
 endif()
 
 ###############################################
-# Build Java dynamic library (.dylib) for JNI
+# Build Java dynamic library for JNI
 ###############################################
 
 set(

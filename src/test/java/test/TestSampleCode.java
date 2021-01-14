@@ -11,7 +11,7 @@ import monero.daemon.MoneroDaemon;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
-import monero.wallet.MoneroWalletJni;
+import monero.wallet.MoneroWalletFull;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroTxConfig;
@@ -27,7 +27,7 @@ import utils.TestUtils;
  */
 public class TestSampleCode {
   
-  private static boolean JNI_OUTPUT_RECEIVED = false;
+  private static boolean OUTPUT_RECEIVED = false;
   
   @BeforeAll
   public static void setUpBeforeClass() throws Exception {
@@ -62,8 +62,8 @@ public class TestSampleCode {
     List<MoneroTxWallet> txs = walletRpc.getTxs();          // get transactions containing transfers to/from the wallet
     
     // create wallet from mnemonic phrase using JNI bindings to monero-project
-    MoneroWalletJni walletJni = MoneroWalletJni.createWallet(new MoneroWalletConfig()
-            .setPath("./test_wallets/" + UUID.randomUUID().toString())  // *** CHANGE README TO "sample_wallet_jni" ***
+    MoneroWalletFull walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
+            .setPath("./test_wallets/" + UUID.randomUUID().toString())  // *** CHANGE README TO "sample_wallet_full" ***
             .setPassword("supersecretpassword123")
             .setNetworkType(MoneroNetworkType.STAGENET)
             .setServerUri("http://localhost:38081")
@@ -73,7 +73,7 @@ public class TestSampleCode {
             .setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT)); // *** REPLACE WITH FIRST RECEIVE HEIGHT IN README ***
     
     // synchronize the wallet and receive progress notifications
-    walletJni.sync(new MoneroWalletListener() {
+    walletFull.sync(new MoneroWalletListener() {
       @Override
       public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
         // feed a progress bar?
@@ -81,26 +81,26 @@ public class TestSampleCode {
     });
     
     // synchronize in the background every 5 seconds
-    walletJni.startSyncing(5000l);
+    walletFull.startSyncing(5000l);
     
     // receive notifications when funds are received, confirmed, and unlocked
-    walletJni.addListener(new MoneroWalletListener() {
+    walletFull.addListener(new MoneroWalletListener() {
       @Override
       public void onOutputReceived(MoneroOutputWallet output) {
         BigInteger amount = output.getAmount();
         String txHash = output.getTx().getHash();
         Boolean isConfirmed = output.getTx().isConfirmed();
         Boolean isLocked = output.getTx().isLocked();
-        JNI_OUTPUT_RECEIVED = true;
+        OUTPUT_RECEIVED = true;
       }
     });
     
-    // send funds from RPC wallet to JNI wallet
+    // send funds from RPC wallet to full wallet
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(walletRpc);                              // *** REMOVE FROM README SAMPLE ***
     TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(walletRpc, 0, null, new BigInteger("50000")); // *** REMOVE FROM README SAMPLE ***
     MoneroTxWallet createdTx = walletRpc.createTx(new MoneroTxConfig()
             .setAccountIndex(0)
-            .setAddress(walletJni.getAddress(1, 0))
+            .setAddress(walletFull.getAddress(1, 0))
             .setAmount(new BigInteger("50000"))
             .setRelay(false)); // create transaction and relay to the network if true
     BigInteger fee = createdTx.getFee(); // "Are you sure you want to send... ?"
@@ -108,9 +108,9 @@ public class TestSampleCode {
     
     // recipient receives unconfirmed funds within 5 seconds
     TimeUnit.SECONDS.sleep(5);
-    assertTrue(JNI_OUTPUT_RECEIVED);
+    assertTrue(OUTPUT_RECEIVED);
     
-    // save and close JNI wallet
-    walletJni.close(true);
+    // save and close full wallet
+    walletFull.close(true);
   }
 }

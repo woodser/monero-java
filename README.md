@@ -48,8 +48,8 @@ BigInteger balance = walletRpc.getBalance();            // 533648366742
 List<MoneroTxWallet> txs = walletRpc.getTxs();          // get transactions containing transfers to/from the wallet
 
 // create wallet from mnemonic phrase using JNI bindings to monero-project
-MoneroWalletJni walletJni = MoneroWalletJni.createWallet(new MoneroWalletConfig()
-        .setPath("sample_wallet_jni")
+MoneroWalletFull walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
+        .setPath("sample_wallet_full")
         .setPassword("supersecretpassword123")
         .setNetworkType(MoneroNetworkType.STAGENET)
         .setServerUri("http://localhost:38081")
@@ -59,7 +59,7 @@ MoneroWalletJni walletJni = MoneroWalletJni.createWallet(new MoneroWalletConfig(
         .setRestoreHeight(573936l));
 
 // synchronize the wallet and receive progress notifications
-walletJni.sync(new MoneroWalletListener() {
+walletFull.sync(new MoneroWalletListener() {
   @Override
   public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
     // feed a progress bar?
@@ -67,24 +67,24 @@ walletJni.sync(new MoneroWalletListener() {
 });
 
 // synchronize in the background every 5 seconds
-walletJni.startSyncing(5000l);
+walletFull.startSyncing(5000l);
 
 // receive notifications when funds are received, confirmed, and unlocked
-walletJni.addListener(new MoneroWalletListener() {
+walletFull.addListener(new MoneroWalletListener() {
   @Override
   public void onOutputReceived(MoneroOutputWallet output) {
     BigInteger amount = output.getAmount();
     String txHash = output.getTx().getHash();
     Boolean isConfirmed = output.getTx().isConfirmed();
     Boolean isLocked = output.getTx().isLocked();
-    JNI_OUTPUT_RECEIVED = true;
+    OUTPUT_RECEIVED = true;
   }
 });
 
-// send funds from RPC wallet to JNI wallet
+// send funds from RPC wallet to full wallet
 MoneroTxWallet createdTx = walletRpc.createTx(new MoneroTxConfig()
         .setAccountIndex(0)
-        .setAddress(walletJni.getAddress(1, 0))
+        .setAddress(walletFull.getAddress(1, 0))
         .setAmount(new BigInteger("50000"))
         .setRelay(false)); // create transaction and relay to the network if true
 BigInteger fee = createdTx.getFee(); // "Are you sure you want to send... ?"
@@ -92,10 +92,10 @@ walletRpc.relayTx(createdTx); // relay the transaction
 
 // recipient receives unconfirmed funds within 5 seconds
 TimeUnit.SECONDS.sleep(5);
-assertTrue(JNI_OUTPUT_RECEIVED);
+assertTrue(OUTPUT_RECEIVED);
 
-// save and close JNI wallet
-walletJni.close(true);
+// save and close wallet
+walletFull.close(true);
 ```
 
 ## Documentation

@@ -71,7 +71,7 @@ import monero.wallet.model.MoneroWalletListenerI;
 /**
  * Implements a Monero wallet using JNI to bridge to monero-project's wallet2 in C++.
  */
-public class MoneroWalletJni extends MoneroWalletBase {
+public class MoneroWalletFull extends MoneroWalletBase {
   
   // ----------------------------- PRIVATE SETUP ------------------------------
 
@@ -81,7 +81,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   }
   
   // class variables 
-  private static final Logger LOGGER = Logger.getLogger(MoneroWalletJni.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(MoneroWalletFull.class.getName());
   private static final long DEFAULT_SYNC_PERIOD_IN_MS = 10000; // default period betweeen syncs in ms
   
   // instance variables
@@ -95,7 +95,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
    * 
    * @param jniWalletHandle is the memory address of the wallet in c++
    */
-  private MoneroWalletJni(long jniWalletHandle) {
+  private MoneroWalletFull(long jniWalletHandle) {
     this.jniWalletHandle = jniWalletHandle;
     this.jniListener = new WalletJniListener();
     this.isClosed = false;
@@ -122,16 +122,16 @@ public class MoneroWalletJni extends MoneroWalletBase {
    * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
    * @return the opened wallet
    */
-  public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection) {
+  public static MoneroWalletFull openWallet(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection) {
     if (!walletExistsJni(path)) throw new MoneroError("Wallet does not exist at path: " + path);
     if (networkType == null) throw new MoneroError("Must provide a network type");
     long jniWalletHandle = openWalletJni(path, password, networkType.ordinal());
-    MoneroWalletJni wallet = new MoneroWalletJni(jniWalletHandle);
+    MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle);
     if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
     return wallet;
   }
-  public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType) { return openWallet(path, password, networkType, (MoneroRpcConnection) null); }
-  public static MoneroWalletJni openWallet(String path, String password, MoneroNetworkType networkType, String daemonUri) { return openWallet(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri)); }
+  public static MoneroWalletFull openWallet(String path, String password, MoneroNetworkType networkType) { return openWallet(path, password, networkType, (MoneroRpcConnection) null); }
+  public static MoneroWalletFull openWallet(String path, String password, MoneroNetworkType networkType, String daemonUri) { return openWallet(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri)); }
   
   /**
    * <p>Open an existing wallet using JNI bindings to wallet2.h.</p>
@@ -139,7 +139,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
    * <p>Example:</p>
    * 
    * <code>
-   * MoneroWallet wallet = MoneroWalletJni.openWallet(new MoneroWalletConfig()<br>
+   * MoneroWallet wallet = MoneroWalletFull.openWallet(new MoneroWalletConfig()<br>
    * &nbsp;&nbsp; .setPath("mywallet")<br>
    * &nbsp;&nbsp; .setPassword("supersecretpassword")<br>
    * &nbsp;&nbsp; .setNetworkType(MoneroNetworkType.STAGENET)<br>
@@ -160,7 +160,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
    * @param config configures the wallet to open
    * @return the wallet instance
    */
-  public static MoneroWalletJni openWallet(MoneroWalletConfig config) {
+  public static MoneroWalletFull openWallet(MoneroWalletConfig config) {
     
     // validate config
     if (config == null) throw new MoneroError("Must specify config to open wallet");
@@ -174,7 +174,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     if (config.getPrivateSpendKey() != null) throw new MoneroError("Cannot specify private spend key when opening wallet");
     if (config.getRestoreHeight() != null) throw new MoneroError("Cannot specify restore height when opening wallet");
     if (config.getLanguage() != null) throw new MoneroError("Cannot specify language when opening wallet");
-    if (Boolean.TRUE.equals(config.getSaveCurrent())) throw new MoneroError("Cannot save current wallet when opening JNI wallet");
+    if (Boolean.TRUE.equals(config.getSaveCurrent())) throw new MoneroError("Cannot save current wallet when opening full wallet");
     
     // open wallet
     return openWallet(config.getPath(), config.getPassword(), config.getNetworkType(), config.getServer());
@@ -187,7 +187,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
    * 
    * <code>
    * // create stagenet wallet with randomly generated mnemonic<br>
-   * MoneroWallet wallet1 = MoneroWalletJni.createWallet(new MoneroWalletConfig()<br>
+   * MoneroWallet wallet1 = MoneroWalletFull.createWallet(new MoneroWalletConfig()<br>
    * &nbsp;&nbsp; .setPath("/mywallets/wallet1")<br>
    * &nbsp;&nbsp; .setPassword("supersecretpassword")<br>
    * &nbsp;&nbsp; .setNetworkType(MoneroNetworkType.STAGENET)<br>
@@ -196,7 +196,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
    * &nbsp;&nbsp; .setServerPassword("abctesting123"));<br><br>
    * 
    * // restore mainnet wallet from mnemonic<br>
-   * MoneroWallet wallet2 = MoneroWalletJni.createWallet(new MoneroWalletConfig()<br>
+   * MoneroWallet wallet2 = MoneroWalletFull.createWallet(new MoneroWalletConfig()<br>
    * &nbsp;&nbsp; .setPath("/mywallets/wallet2")  // leave blank for in-memory wallet<br>
    * &nbsp;&nbsp; .setPassword("abctesting123")<br>
    * &nbsp;&nbsp; .setNetworkType("mainnet")<br>
@@ -228,7 +228,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
    * @param config configures the wallet to create
    * @return the wallet instance
    */
-  public static MoneroWalletJni createWallet(MoneroWalletConfig config) {
+  public static MoneroWalletFull createWallet(MoneroWalletConfig config) {
     
     // validate config
     if (config == null) throw new MoneroError("Must specify config to open wallet");
@@ -236,7 +236,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
     if (config.getMnemonic() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
       throw new MoneroError("Wallet may be initialized with a mnemonic or keys but not both");
     }
-    if (Boolean.TRUE.equals(config.getSaveCurrent() != null)) throw new MoneroError("Cannot save current wallet when creating JNI wallet");
+    if (Boolean.TRUE.equals(config.getSaveCurrent() != null)) throw new MoneroError("Cannot save current wallet when creating full wallet");
     
     // create wallet
     if (config.getMnemonic() != null) {
@@ -262,14 +262,14 @@ public class MoneroWalletJni extends MoneroWalletBase {
    * @param language is the wallet and mnemonic's language (default = "English")
    * @return the wallet created with a randomly generated mnemonic
    */
-  private static MoneroWalletJni createWalletRandom(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, String language) {
-    if (path != null && !path.isEmpty() && MoneroWalletJni.walletExists(path)) throw new MoneroError("Wallet already exists: " + path);
+  private static MoneroWalletFull createWalletRandom(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, String language) {
+    if (path != null && !path.isEmpty() && MoneroWalletFull.walletExists(path)) throw new MoneroError("Wallet already exists: " + path);
     if (networkType == null) throw new MoneroError("Must provide a network type");
     if (language == null) language = DEFAULT_LANGUAGE;
     long jniWalletHandle;
     if (daemonConnection == null) jniWalletHandle = createWalletRandomJni(path, password, networkType.ordinal(), null, null, null, language);
     else jniWalletHandle = createWalletRandomJni(path, password, networkType.ordinal(), daemonConnection.getUri(), daemonConnection.getUsername(), daemonConnection.getPassword(), language);
-    return new MoneroWalletJni(jniWalletHandle);
+    return new MoneroWalletFull(jniWalletHandle);
   }
   
   /**
@@ -284,12 +284,12 @@ public class MoneroWalletJni extends MoneroWalletBase {
    * @param seedOffset is the offset used to derive a new seed from the given mnemonic to recover a secret wallet from the mnemonic phrase
    * @return the wallet created from a mnemonic
    */
-  private static MoneroWalletJni createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String seedOffset) {
-    if (path != null && !path.isEmpty() && MoneroWalletJni.walletExists(path)) throw new MoneroError("Wallet already exists: " + path);
+  private static MoneroWalletFull createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String seedOffset) {
+    if (path != null && !path.isEmpty() && MoneroWalletFull.walletExists(path)) throw new MoneroError("Wallet already exists: " + path);
     if (networkType == null) throw new MoneroError("Must provide a network type");
     if (restoreHeight == null) restoreHeight = 0l;
     long jniWalletHandle = createWalletFromMnemonicJni(path, password, networkType.ordinal(), mnemonic, restoreHeight, seedOffset);
-    MoneroWalletJni wallet = new MoneroWalletJni(jniWalletHandle);
+    MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle);
     wallet.setDaemonConnection(daemonConnection);
     return wallet;
   }
@@ -308,14 +308,14 @@ public class MoneroWalletJni extends MoneroWalletBase {
    * @param language is the wallet and mnemonic's language (default = "English")
    * @return the wallet created from keys
    */
-  private static MoneroWalletJni createWalletFromKeys(String path, String password, MoneroNetworkType networkType, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
-    if (path != null && !path.isEmpty() && MoneroWalletJni.walletExists(path)) throw new MoneroError("Wallet already exists: " + path);
+  private static MoneroWalletFull createWalletFromKeys(String path, String password, MoneroNetworkType networkType, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
+    if (path != null && !path.isEmpty() && MoneroWalletFull.walletExists(path)) throw new MoneroError("Wallet already exists: " + path);
     if (restoreHeight == null) restoreHeight = 0l;
     if (networkType == null) throw new MoneroError("Must provide a network type");
     if (language == null) language = DEFAULT_LANGUAGE;
     try {
       long jniWalletHandle = createWalletFromKeysJni(path, password, networkType.ordinal(), address, viewKey, spendKey, restoreHeight, language);
-      MoneroWalletJni wallet = new MoneroWalletJni(jniWalletHandle);
+      MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle);
       wallet.setDaemonConnection(daemonConnection);
       return wallet;
     } catch (Exception e) {
@@ -852,7 +852,7 @@ public class MoneroWalletJni extends MoneroWalletBase {
   @Override
   public List<MoneroKeyImage> getNewKeyImagesFromLastImport() {
     assertNotClosed();
-    throw new RuntimeException("MoneroWalletJni.getNewKeyImagesFromLastImport() not implemented");
+    throw new RuntimeException("MoneroWalletFull.getNewKeyImagesFromLastImport() not implemented");
   }
   
   @Override
@@ -1126,25 +1126,25 @@ public class MoneroWalletJni extends MoneroWalletBase {
   @Override
   public void tagAccounts(String tag, Collection<Integer> accountIndices) {
     assertNotClosed();
-    throw new RuntimeException("MoneroWalletJni.tagAccounts() not implemented");
+    throw new RuntimeException("MoneroWalletFull.tagAccounts() not implemented");
   }
 
   @Override
   public void untagAccounts(Collection<Integer> accountIndices) {
     assertNotClosed();
-    throw new RuntimeException("MoneroWalletJni.untagAccounts() not implemented");
+    throw new RuntimeException("MoneroWalletFull.untagAccounts() not implemented");
   }
 
   @Override
   public List<MoneroAccountTag> getAccountTags() {
     assertNotClosed();
-    throw new RuntimeException("MoneroWalletJni.getAccountTags() not implemented");
+    throw new RuntimeException("MoneroWalletFull.getAccountTags() not implemented");
   }
 
   @Override
   public void setAccountTagLabel(String tag, String label) {
     assertNotClosed();
-    throw new RuntimeException("MoneroWalletJni.setAccountTagLabel() not implemented");
+    throw new RuntimeException("MoneroWalletFull.setAccountTagLabel() not implemented");
   }
 
   @Override

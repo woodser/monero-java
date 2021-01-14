@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.MoneroWallet;
-import monero.wallet.MoneroWalletJni;
+import monero.wallet.MoneroWalletFull;
 import monero.wallet.model.MoneroWalletConfig;
 
 /**
@@ -17,12 +17,12 @@ public class Scratchpad {
     // initialize daemon, wallet, and direct rpc interface
 //    MoneroDaemon daemon = TestUtils.getDaemonRpc();
 //    MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
-//    MoneroWalletJni walletJni = TestUtils.getWalletJni();
+//    MoneroWalletFull walletFull = TestUtils.getWalletFull();
     
     // -------------------------------- SCRATCHPAD ----------------------------
     
     // create wallet from mnemonic
-    MoneroWallet walletJni = MoneroWalletJni.createWallet(new MoneroWalletConfig()
+    MoneroWallet walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
       .setPath("./test_wallets/" + UUID.randomUUID().toString())  // leave blank for in-memory wallet
       .setPassword("abctesting123")
       .setNetworkType(MoneroNetworkType.STAGENET)
@@ -31,13 +31,13 @@ public class Scratchpad {
       .setServerPassword("abctesting123")
       .setMnemonic("biggest duets beware eskimos coexist igloo pamphlet lagoon odometer hounded jukebox enough pride cocoa nylon wolf geometry buzzer vivid federal idols gang semifinal subtly coexist")
       .setRestoreHeight(573800l));
-    walletJni.sync(new WalletSyncPrinter());
-    System.out.println("WASM wallet daemon height: " + walletJni.getDaemonHeight());
-    System.out.println("WASM wallet mnemonic: " + walletJni.getMnemonic());
+    walletFull.sync(new WalletSyncPrinter());
+    System.out.println("WASM wallet daemon height: " + walletFull.getDaemonHeight());
+    System.out.println("WASM wallet mnemonic: " + walletFull.getMnemonic());
     
-//    walletJni.createTx(new MoneroTxConfig()
+//    walletFull.createTx(new MoneroTxConfig()
 //            .setAddress("52FnB7ABUrKJzVQRpbMNrqDFWbcKLjFUq8Rgek7jZEuB6WE2ZggXaTf4FK6H8gQymvSrruHHrEuKhMN3qTMiBYzREKsmRKM")
-//            .setAmount(walletJni.getUnlockedBalance(0).divide(new BigInteger("4")).multiply(new BigInteger("3")))
+//            .setAmount(walletFull.getUnlockedBalance(0).divide(new BigInteger("4")).multiply(new BigInteger("3")))
 //            .setAccountIndex(0)
 //            .setRelay(true));
     
@@ -65,8 +65,8 @@ public class Scratchpad {
 //    System.out.println("Total size: " + totalSize);
     
 //    // TIMING TEST
-//    String path = TestMoneroWalletJni.getRandomWalletPath();
-//    MoneroWalletJni myWallet = MoneroWalletJni.createWalletFromMnemonic(path, TestUtils.WALLET_JNI_PW, MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, TestUtils.getDaemonRpc().getRpcConnection());
+//    String path = TestMoneroWalletFull.getRandomWalletPath();
+//    MoneroWalletFull myWallet = MoneroWalletFull.createWalletFromMnemonic(path, TestUtils.WALLET_FULL_PW, MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, TestUtils.getDaemonRpc().getRpcConnection());
 //    myWallet.save();
 //    long now = System.currentTimeMillis();;
 //    myWallet.addListener(new MoneroWalletListener());
@@ -80,10 +80,10 @@ public class Scratchpad {
 //    List<String> addresses = new ArrayList<String>();
 //    for (int i = 0; i < 20; i++) {
 //      String temp = UUID.randomUUID().toString();
-//      walletJni = new MoneroWalletJni(TestUtils.TEST_WALLETS_DIR + "/" + temp, TestUtils.WALLET_JNI_PW, MoneroNetworkType.STAGENET, daemonConnection, "English");
-//      mnemonics.add(walletJni.getMnemonic());
-//      addresses.add(walletJni.getPrimaryAddress());
-//      ((MoneroWalletJni) walletJni).close();
+//      walletFull = new MoneroWalletFull(TestUtils.TEST_WALLETS_DIR + "/" + temp, TestUtils.WALLET_FULL_PW, MoneroNetworkType.STAGENET, daemonConnection, "English");
+//      mnemonics.add(walletFull.getMnemonic());
+//      addresses.add(walletFull.getPrimaryAddress());
+//      ((MoneroWalletFull) walletFull).close();
 //    }
 //    for (int i = 0; i < 20; i++) {
 //      System.out.println(mnemonics.get(i));

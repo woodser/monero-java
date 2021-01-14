@@ -9,7 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.MoneroWallet;
-import monero.wallet.MoneroWalletJni;
+import monero.wallet.MoneroWalletFull;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxWallet;
@@ -25,7 +25,7 @@ public class FundWallets {
   public static final int NUM_SUBADDRESSES_PER_ACCOUNT = 3; 
   
   public static void main(String[] args) {
-    fundWallets(TestUtils.getWalletJni(), NUM_WALLETS, NUM_ACCOUNTS, NUM_SUBADDRESSES_PER_ACCOUNT);
+    fundWallets(TestUtils.getWalletFull(), NUM_WALLETS, NUM_ACCOUNTS, NUM_SUBADDRESSES_PER_ACCOUNT);
   }
   
   /**
@@ -43,7 +43,7 @@ public class FundWallets {
       // create wallet and create and collect subaddresses
       List<String> subaddresses = new ArrayList<String>();
       String path = TestUtils.TEST_WALLETS_DIR + "/funded_" + UUID.randomUUID().toString();
-      MoneroWalletJni fundedWallet = MoneroWalletJni.createWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(MoneroNetworkType.STAGENET));
+      MoneroWalletFull fundedWallet = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(MoneroNetworkType.STAGENET));
       for (int accountIdx = 0; accountIdx < NUM_ACCOUNTS; accountIdx++) {
         fundedWallet.createAccount();
         for (int subaddressIdx = 0; subaddressIdx < NUM_SUBADDRESSES_PER_ACCOUNT; subaddressIdx++) {

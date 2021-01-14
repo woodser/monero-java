@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
   TestSerialization.class,
   TestMoneroUtils.class,
   TestMoneroDaemonRpc.class,
-  TestMoneroWalletJni.class,
+  TestMoneroWalletFull.class,
   TestMoneroWalletRpc.class
 })
 public class TestAll {}

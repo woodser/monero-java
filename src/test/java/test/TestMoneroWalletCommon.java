@@ -260,7 +260,7 @@ public abstract class TestMoneroWalletCommon {
       if (e2 != null) throw e2;
       
       // attempt to create wallet with missing mnemonic word
-      // TODO: this fails for rpc and jni
+      // TODO: this fails for rpc and full wallets
 //      try {
 //        String invalidMnemonic = "memoir hull oilfield desk algebra inbound innocent unplugs fully okay five inflamed giant factual ritual toyed topic snake unhappy guarded tweezers haunted inundate giant";
 //        wallet = createWallet(new MoneroWalletConfig().setMnemonic(invalidMnemonic).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));

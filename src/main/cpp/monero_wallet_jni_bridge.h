@@ -22,8 +22,8 @@
 
 #include <jni.h>
 
-#ifndef _Included_MoneroWalletJniBridge
-#define _Included_MoneroWalletJniBridge
+#ifndef _Included_MoneroWalletFullBridge
+#define _Included_MoneroWalletFullBridge
 
 jfieldID get_handle_field(JNIEnv *env, jobject obj, const char *field_name) {
   jclass c = env->GetObjectClass(obj);
@@ -42,203 +42,203 @@ extern "C" {
 
 // ------------------------------ STATIC UTILS ------------------------------
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_walletExistsJni(JNIEnv *, jclass, jstring);
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_walletExistsJni(JNIEnv *, jclass, jstring);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_openWalletJni(JNIEnv *, jclass, jstring, jstring, jint);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletJni(JNIEnv *, jclass, jstring, jstring, jint);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletRandomJni(JNIEnv *, jclass, jstring, jstring, jint, jstring, jstring, jstring, jstring);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_createWalletRandomJni(JNIEnv *, jclass, jstring, jstring, jint, jstring, jstring, jstring, jstring);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromMnemonicJni(JNIEnv *, jclass, jstring, jstring, jint, jstring, jlong, jstring);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_createWalletFromMnemonicJni(JNIEnv *, jclass, jstring, jstring, jint, jstring, jlong, jstring);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_createWalletFromKeysJni(JNIEnv *, jclass, jstring, jstring, jint, jstring, jstring, jstring, jlong, jstring);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_createWalletFromKeysJni(JNIEnv *, jclass, jstring, jstring, jint, jstring, jstring, jstring, jlong, jstring);
 
-JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getMnemonicLanguagesJni(JNIEnv *, jclass);
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getMnemonicLanguagesJni(JNIEnv *, jclass);
 
 // ----------------------------- INSTANCE METHODS -----------------------------
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isViewOnlyJni(JNIEnv *, jobject);
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isViewOnlyJni(JNIEnv *, jobject);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setDaemonConnectionJni(JNIEnv *, jobject, jstring, jstring, jstring);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setDaemonConnectionJni(JNIEnv *, jobject, jstring, jstring, jstring);
 
-JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonConnectionJni(JNIEnv *, jobject);
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getDaemonConnectionJni(JNIEnv *, jobject);
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isConnectedJni(JNIEnv *, jobject);
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isConnectedJni(JNIEnv *, jobject);
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isDaemonSyncedJni(JNIEnv *, jobject);
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isDaemonSyncedJni(JNIEnv *, jobject);
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isSyncedJni(JNIEnv *, jobject);
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isSyncedJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getVersionJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getVersionJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPathJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getPathJni(JNIEnv *, jobject);
 
-JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_getNetworkTypeJni(JNIEnv *, jobject);
+JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_getNetworkTypeJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMnemonicJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getMnemonicJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMnemonicLanguageJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getMnemonicLanguageJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPublicViewKeyJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getPublicViewKeyJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPrivateViewKeyJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getPrivateViewKeyJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPublicSpendKeyJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getPublicSpendKeyJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getPrivateSpendKeyJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getPrivateSpendKeyJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressJni(JNIEnv *, jobject, jint, jint);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getAddressJni(JNIEnv *, jobject, jint, jint);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressIndexJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getAddressIndexJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getIntegratedAddressJni(JNIEnv *, jobject, jstring, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getIntegratedAddressJni(JNIEnv *, jobject, jstring, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_decodeIntegratedAddressJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_decodeIntegratedAddressJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getHeightJni(JNIEnv *, jobject);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_getHeightJni(JNIEnv *, jobject);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getSyncHeightJni(JNIEnv *, jobject);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_getSyncHeightJni(JNIEnv *, jobject);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setSyncHeightJni(JNIEnv *, jobject, jlong);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setSyncHeightJni(JNIEnv *, jobject, jlong);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonHeightJni(JNIEnv *, jobject);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_getDaemonHeightJni(JNIEnv *, jobject);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getDaemonMaxPeerHeightJni(JNIEnv *, jobject);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_getDaemonMaxPeerHeightJni(JNIEnv *, jobject);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_getHeightByDateJni(JNIEnv *, jobject, jint, jint, jint);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_getHeightByDateJni(JNIEnv *, jobject, jint, jint, jint);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletJni_setListenerJni(JNIEnv *, jobject, jobject);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_setListenerJni(JNIEnv *, jobject, jobject);
 
-JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_syncJni(JNIEnv *, jobject, jlong);
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_syncJni(JNIEnv *, jobject, jlong);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_startSyncing(JNIEnv *, jobject, jlong);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_startSyncing(JNIEnv *, jobject, jlong);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_stopSyncing(JNIEnv *, jobject);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_stopSyncing(JNIEnv *, jobject);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_rescanSpentJni(JNIEnv *, jobject);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_rescanSpentJni(JNIEnv *, jobject);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_rescanBlockchainJni(JNIEnv *, jobject);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_rescanBlockchainJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceWalletJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getBalanceWalletJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceAccountJni(JNIEnv *, jobject, jint);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getBalanceAccountJni(JNIEnv *, jobject, jint);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getBalanceSubaddressJni(JNIEnv *, jobject, jint, jint);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getBalanceSubaddressJni(JNIEnv *, jobject, jint, jint);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceWalletJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getUnlockedBalanceWalletJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceAccountJni(JNIEnv *, jobject, jint);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getUnlockedBalanceAccountJni(JNIEnv *, jobject, jint);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getUnlockedBalanceSubaddressJni(JNIEnv *, jobject, jint, jint);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getUnlockedBalanceSubaddressJni(JNIEnv *, jobject, jint, jint);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountsJni(JNIEnv *, jobject, jboolean, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getAccountsJni(JNIEnv *, jobject, jboolean, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAccountJni(JNIEnv *, jobject, jint, jboolean);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getAccountJni(JNIEnv *, jobject, jint, jboolean);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createAccountJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_createAccountJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getSubaddressesJni(JNIEnv *, jobject, jint, jintArray);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getSubaddressesJni(JNIEnv *, jobject, jint, jintArray);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createSubaddressJni(JNIEnv *, jobject, jint, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_createSubaddressJni(JNIEnv *, jobject, jint, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxsJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getTxsJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTransfersJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getTransfersJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getOutputsJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getKeyImagesJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getKeyImagesJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_importKeyImagesJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_importKeyImagesJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sendTxsJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_sendTxsJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepUnlockedJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_sweepUnlockedJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepOutputJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_sweepOutputJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_sweepDustJni(JNIEnv *, jobject, jboolean);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_sweepDustJni(JNIEnv *, jobject, jboolean);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_parseTxSetJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_parseTxSetJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signTxsJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_signTxsJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_submitTxsJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_submitTxsJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_relayTxsJni(JNIEnv *, jobject, jobjectArray);
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_relayTxsJni(JNIEnv *, jobject, jobjectArray);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signMessageJni(JNIEnv *, jobject, jstring, jint, jint, jint);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_signMessageJni(JNIEnv *, jobject, jstring, jint, jint, jint);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_verifyMessageJni(JNIEnv *, jobject, jstring, jstring, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_verifyMessageJni(JNIEnv *, jobject, jstring, jstring, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxKeyJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getTxKeyJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_checkTxKeyJni(JNIEnv *, jobject, jstring, jstring, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_checkTxKeyJni(JNIEnv *, jobject, jstring, jstring, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getTxProofJni(JNIEnv *, jobject, jstring, jstring, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getTxProofJni(JNIEnv *, jobject, jstring, jstring, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_checkTxProofJni(JNIEnv *, jobject, jstring, jstring, jstring, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_checkTxProofJni(JNIEnv *, jobject, jstring, jstring, jstring, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getSpendProofJni(JNIEnv *, jobject, jstring, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getSpendProofJni(JNIEnv *, jobject, jstring, jstring);
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_checkSpendProofJni(JNIEnv *, jobject, jstring, jstring, jstring);
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_checkSpendProofJni(JNIEnv *, jobject, jstring, jstring, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getReserveProofWalletJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getReserveProofWalletJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getReserveProofAccountJni(JNIEnv *, jobject, jint, jstring, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getReserveProofAccountJni(JNIEnv *, jobject, jint, jstring, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_checkReserveProofJni(JNIEnv *, jobject, jstring, jstring, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_checkReserveProofJni(JNIEnv *, jobject, jstring, jstring, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_createPaymentUriJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_createPaymentUriJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_parsePaymentUriJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_parsePaymentUriJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getOutputsHexJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getOutputsHexJni(JNIEnv *, jobject);
 
-JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_importOutputsHexJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_importOutputsHexJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_getTxNotesJni(JNIEnv *, jobject, jobjectArray);
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getTxNotesJni(JNIEnv *, jobject, jobjectArray);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setTxNotesJni(JNIEnv *, jobject, jobjectArray, jobjectArray);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setTxNotesJni(JNIEnv *, jobject, jobjectArray, jobjectArray);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAddressBookEntriesJni(JNIEnv *, jobject, jintArray);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getAddressBookEntriesJni(JNIEnv *, jobject, jintArray);
 
-JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_addAddressBookEntryJni(JNIEnv *, jobject, jstring, jstring);
+JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_addAddressBookEntryJni(JNIEnv *, jobject, jstring, jstring);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_editAddressBookEntryJni(JNIEnv *, jobject, jint, jboolean, jstring, jboolean, jstring);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_editAddressBookEntryJni(JNIEnv *, jobject, jint, jboolean, jstring, jboolean, jstring);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_deleteAddressBookEntryJni(JNIEnv *, jobject, jint);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_deleteAddressBookEntryJni(JNIEnv *, jobject, jint);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getAttributeJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getAttributeJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_setAttributeJni(JNIEnv *, jobject, jstring, jstring);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setAttributeJni(JNIEnv *, jobject, jstring, jstring);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_startMiningJni(JNIEnv *, jobject, jlong, jboolean, jboolean);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_startMiningJni(JNIEnv *, jobject, jlong, jboolean, jboolean);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_stopMiningJni(JNIEnv *, jobject);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_stopMiningJni(JNIEnv *, jobject);
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletJni_isMultisigImportNeededJni(JNIEnv *, jobject);
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isMultisigImportNeededJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMultisigInfoJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getMultisigInfoJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_prepareMultisigJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_prepareMultisigJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_makeMultisigJni(JNIEnv *, jobject, jobjectArray, jint, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_makeMultisigJni(JNIEnv *, jobject, jobjectArray, jint, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_exchangeMultisigKeysJni(JNIEnv *, jobject, jobjectArray, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_exchangeMultisigKeysJni(JNIEnv *, jobject, jobjectArray, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_getMultisigHexJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getMultisigHexJni(JNIEnv *, jobject);
 
-JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletJni_importMultisigHexJni(JNIEnv *, jobject, jobjectArray);
+JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_importMultisigHexJni(JNIEnv *, jobject, jobjectArray);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletJni_signMultisigTxHexJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_signMultisigTxHexJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletJni_submitMultisigTxHexJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_submitMultisigTxHexJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_saveJni(JNIEnv *, jobject);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_saveJni(JNIEnv *, jobject);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_moveToJni(JNIEnv *, jobject, jstring, jstring);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_moveToJni(JNIEnv *, jobject, jstring, jstring);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletJni_closeJni(JNIEnv *, jobject, jboolean);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_closeJni(JNIEnv *, jobject, jboolean);
 
 #ifdef __cplusplus
 }

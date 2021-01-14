@@ -45,9 +45,9 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void beforeAll() {
     super.beforeAll();
     
-    // if jni tests ran, wait for jni wallet's pool txs to confirm
-    if (TestMoneroWalletJni.JNI_TESTS_RUN) {
-      TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(TestUtils.getWalletJni());
+    // if full tests ran, wait for full wallet's pool txs to confirm
+    if (TestMoneroWalletFull.FULL_TESTS_RUN) {
+      TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(TestUtils.getWalletFull());
     }
   }
   
