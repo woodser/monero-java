@@ -77,7 +77,7 @@ walletFull.addListener(new MoneroWalletListener() {
     String txHash = output.getTx().getHash();
     Boolean isConfirmed = output.getTx().isConfirmed();
     Boolean isLocked = output.getTx().isLocked();
-    OUTPUT_RECEIVED = true;
+    FUNDS_RECEIVED = true;
   }
 });
 
@@ -92,7 +92,7 @@ walletRpc.relayTx(createdTx); // relay the transaction
 
 // recipient receives unconfirmed funds within 5 seconds
 TimeUnit.SECONDS.sleep(5);
-assertTrue(OUTPUT_RECEIVED);
+assertTrue(FUNDS_RECEIVED);
 
 // save and close wallet
 walletFull.close(true);

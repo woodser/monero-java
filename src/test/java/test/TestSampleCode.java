@@ -27,7 +27,7 @@ import utils.TestUtils;
  */
 public class TestSampleCode {
   
-  private static boolean OUTPUT_RECEIVED = false;
+  private static boolean FUNDS_RECEIVED = false;
   
   @BeforeAll
   public static void setUpBeforeClass() throws Exception {
@@ -91,7 +91,7 @@ public class TestSampleCode {
         String txHash = output.getTx().getHash();
         Boolean isConfirmed = output.getTx().isConfirmed();
         Boolean isLocked = output.getTx().isLocked();
-        OUTPUT_RECEIVED = true;
+        FUNDS_RECEIVED = true;
       }
     });
     
@@ -108,7 +108,7 @@ public class TestSampleCode {
     
     // recipient receives unconfirmed funds within 5 seconds
     TimeUnit.SECONDS.sleep(5);
-    assertTrue(OUTPUT_RECEIVED);
+    assertTrue(FUNDS_RECEIVED);
     
     // save and close full wallet
     walletFull.close(true);
