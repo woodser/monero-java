@@ -113,13 +113,13 @@ walletFull.close(true);
 <dependency>
   <groupId>io.github.monero-ecosystem</groupId>
   <artifactId>monero-java</artifactId>
-  <version>0.5.0</version>
+  <version>0.5.1</version>
 </dependency>
 ```
 
 #### For Gradle, add to build.gradle:
 
-`compile 'io.github.monero-ecosystem:monero-java:0.5.0'`
+`compile 'io.github.monero-ecosystem:monero-java:0.5.1'`
 
 You are now ready to use this library with [monero-daemon-rpc](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.
 
@@ -135,12 +135,17 @@ If you want to use client-side wallets via native JNI bindings, first [build the
 
 If you want to process binary data or use a client-side wallet instead of RPC, shared libraries must be built for your specific platform for this Java library to use.  This project uses a C++ counterpart library, [monero-cpp](https://github.com/monero-ecosystem/monero-cpp), to support JNI, which is included as a submodule in ./external/monero-cpp.
 
-1. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
-2. `cd monero-java`
-3. Install dependencies using Maven: `mvn install`
+1. Install maven and Java JDK for your system<br>
+ Ubuntu: `sudo apt-get install maven default-jdk`<br>
+ Mac: `brew install maven openjdk`
+2. `export JAVA_HOME=/path/to/jdk`, for example:<br>
+ Ubuntu: `export JAVA_HOME=/usr/lib/jvm/default-java`<br>
+ Mac example: `export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home`
+2. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
+3. `cd ./monero-java`
+3. Install Maven dependencies: `mvn install`
 4. Update submodules: `./bin/update_submodules.sh`
 5. [Build ./external/monero-cpp as a shared library.](https://github.com/monero-ecosystem/monero-cpp#using-this-library-in-your-project)
-6. `export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home` (change to path of Java JDK on your system)
 7. Build shared libraries to ./build/: `./bin/build_libmonero_java.sh`
 8. Run TestMoneroUtils.java JUnit tests to verify the shared libraries are working with Java JNI.
 9. Add the shared libraries within ./build/ to your application's classpath.

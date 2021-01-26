@@ -952,7 +952,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     String movedPath = TestUtils.TEST_WALLETS_DIR + "/moved/" + walletName;
     wallet.moveTo(movedPath, TestUtils.WALLET_PASSWORD);
     assertFalse(MoneroWalletFull.walletExists(path));
-    assertFalse(MoneroWalletFull.walletExists(movedPath)); // wallet does not exist until saved
+    assertTrue(MoneroWalletFull.walletExists(movedPath));
     wallet.save();
     assertFalse(MoneroWalletFull.walletExists(path));
     assertTrue(MoneroWalletFull.walletExists(movedPath));
@@ -966,7 +966,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     
     // move wallet back
     wallet.moveTo(path, TestUtils.WALLET_PASSWORD);
-    assertFalse(MoneroWalletFull.walletExists(path));  // wallet does not exist until saved
+    assertTrue(MoneroWalletFull.walletExists(path));
     assertFalse(MoneroWalletFull.walletExists(movedPath));
     wallet.save();
     assertTrue(MoneroWalletFull.walletExists(path));

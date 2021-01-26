@@ -163,6 +163,58 @@ public class MoneroTxWallet extends MoneroTx {
   }
   
   /**
+   * Set the tx's inputs (MoneroOutputWallet) which contain information relative
+   * to a wallet.
+   * 
+   * Callers must cast to extended type (MoneroOutput) because Java
+   * paramaterized types do not recognize inheritance.
+   * 
+   * @param inputs are MoneroOutputWallets to set for the wallet tx
+   * @return MoneroTxWallet is a reference to this tx for chaining
+   */
+  public MoneroTxWallet setInputs(List<MoneroOutput> inputs) {
+    
+    // validate that all inputs are wallet inputs
+    if (inputs != null) {
+      for (MoneroOutput input : inputs) {
+        if (!(input instanceof MoneroOutputWallet)) throw new MoneroError("Wallet transaction inputs must be of type MoneroOutputWallet");
+      }
+    }
+    super.setInputs(inputs);
+    return this;
+  }
+  
+  /**
+   * Set inputs with compile-time binding to MoneroOutputWallet for deserialization.
+   * 
+   * @param inputs are the tx's inputs
+   * @return MoneroTxWallet is a reference to this tx for chaining
+   */
+  @JsonProperty("inputs")
+  public MoneroTxWallet setInputsWallet(List<MoneroOutputWallet> inputs) {
+    return setInputs(new ArrayList<MoneroOutput>(inputs));
+  }
+  
+  /**
+   * Returns a copy of this model's inputs as a list of type MoneroOutputWallet.
+   * 
+   * @return inputs of type MoneroOutputWallet
+   */
+  public List<MoneroOutputWallet> getInputsWallet() {
+    return getInputsWallet(null);
+  }
+  
+  public List<MoneroOutputWallet> getInputsWallet(MoneroOutputQuery query) {
+    List<MoneroOutputWallet> inputsWallet = new ArrayList<MoneroOutputWallet>();
+    List<MoneroOutput> inputs = getInputs();
+    if (inputs == null) return inputsWallet;
+    for (MoneroOutput output : inputs) {
+      if (query == null || query.meetsCriteria((MoneroOutputWallet) output)) inputsWallet.add((MoneroOutputWallet) output);
+    }
+    return inputsWallet;
+  }
+  
+  /**
    * Set the tx's outputs (MoneroOutputWallet) which contain information relative
    * to a wallet.
    * 
@@ -631,12 +683,6 @@ public class MoneroTxWallet extends MoneroTx {
   @Override
   public MoneroTxWallet setWeight(Long weight) {
     super.setWeight(weight);
-    return this;
-  }
-
-  @Override
-  public MoneroTxWallet setInputs(List<MoneroOutput> inputs) {
-    super.setInputs(inputs);
     return this;
   }
 

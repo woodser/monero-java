@@ -1,5 +1,9 @@
 package monero.common;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import common.utils.GenUtils;
+import common.utils.JsonUtils;
+import java.io.File;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayList;
@@ -7,18 +11,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import org.apache.commons.codec.binary.Hex;
-import org.bouncycastle.jcajce.provider.digest.Keccak;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-
-import common.utils.GenUtils;
-import common.utils.JsonUtils;
 import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
 import monero.wallet.model.MoneroAddressType;
 import monero.wallet.model.MoneroDecodedAddress;
+import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.jcajce.provider.digest.Keccak;
 
 /**
  * Collection of Monero utilities.
@@ -39,7 +37,7 @@ public class MoneroUtils {
    * @return the version of this monero-java library
    */
   static String getVersion() {
-    return "0.5.0";
+    return "0.5.1";
   }
   
   public static final int RING_SIZE = 12; // network-enforced ring size
@@ -71,7 +69,19 @@ public class MoneroUtils {
   private final static BigDecimal UINT64_MAX = new BigDecimal(Math.pow(2, 64));
   private final static Pattern STANDARD_ADDRESS_PATTERN = Pattern.compile("^[" + ALPHABET + "]{95}$");
   private final static Pattern INTEGRATED_ADDRESS_PATTERN = Pattern.compile("^[" + ALPHABET + "]{106}$");
-
+  
+  /**
+   * Indicates if a wallet keys file exists at the given path.
+   * 
+   * @param path is the path with wallet name to check for existence
+   * @return true if a wallet keys file exists at the given path, false otherwise
+   */
+  public static boolean walletExists(String path) {
+    String basePath = path.lastIndexOf('.') > path.lastIndexOf(File.separatorChar) ? path.substring(0, path.lastIndexOf('.')) : path;
+    File keysFile = new File(basePath + ".keys");
+    return keysFile.exists() && keysFile.isFile();
+  }
+  
   /**
    * Validates the given mnemonic phrase.
    * 

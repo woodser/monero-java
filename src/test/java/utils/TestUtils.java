@@ -146,7 +146,7 @@ public class TestUtils {
   }
   
   /**
-   * Create a monero-wallet-rpc process bound to the next available port.
+   * Start a monero-wallet-rpc process bound to the next available port.
    */
   public static Map<MoneroWalletRpc, Integer> WALLET_PORT_OFFSETS = new HashMap<MoneroWalletRpc, Integer>();
   public static MoneroWalletRpc startWalletRpcProcess() throws IOException {
@@ -181,7 +181,7 @@ public class TestUtils {
   }
   
   /**
-   * Stop a monero-wallet-rpc process and release its port.
+   * Stop a monero-wallet-rpc process and release its associated port.
    * 
    * @param walletRpc - wallet created with internal monero-wallet-rpc process
    */

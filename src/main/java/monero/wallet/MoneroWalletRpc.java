@@ -932,7 +932,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
     Map<Long, MoneroBlock> blockMap = new HashMap<Long, MoneroBlock>();
     for (MoneroTxWallet tx : txs) {
-      mergeTx(tx, txMap, blockMap, false);
+      mergeTx(tx, txMap, blockMap);
     }
     
     // fetch and merge outputs if queried
@@ -943,7 +943,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       Set<MoneroTxWallet> outputTxs = new HashSet<MoneroTxWallet>();
       for (MoneroOutputWallet output : outputs) {
         if (!outputTxs.contains(output.getTx())) {
-          mergeTx(output.getTx(), txMap, blockMap, true);
+          mergeTx(output.getTx(), txMap, blockMap);
           outputTxs.add(output.getTx());
         }
       }
@@ -1979,7 +1979,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
         }
         
         // merge tx
-        mergeTx(tx, txMap, blockMap, false);
+        mergeTx(tx, txMap, blockMap);
       }
     }
     
@@ -2065,7 +2065,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       if (!result.containsKey("transfers")) continue;
       for (Map<String, Object> rpcOutput : (List<Map<String, Object>>) result.get("transfers")) {
         MoneroTxWallet tx = convertRpcTxWithOutput(rpcOutput);
-        mergeTx(tx, txMap, blockMap, false);
+        mergeTx(tx, txMap, blockMap);
       }
     }
     
@@ -2218,14 +2218,22 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       isPollLoopRunning = true;
       
       // poll while enabled
+      String path = getPath();
       Thread pollThread = new Thread(new Runnable() {
         @Override
         public void run() {
           while (isEnabled && !Thread.currentThread().isInterrupted()) {
-            try {
-              if (isEnabled) poll();
-              TimeUnit.MILLISECONDS.sleep(syncPeriodInMs);
-            } catch (Exception e) {
+            long start = System.currentTimeMillis();
+            try { poll(); }
+            catch (Exception e) { 
+              if (isEnabled) {
+                System.err.println("Failed to background poll " + path);
+                e.printStackTrace();
+              }
+            }
+            long sleepTime = syncPeriodInMs - (System.currentTimeMillis() - start); // target regular sync period by accounting for poll time
+            try { TimeUnit.MILLISECONDS.sleep(sleepTime); }
+            catch (Exception e) {
               isPollLoopRunning = false;
               if (isEnabled) throw new RuntimeException(e);
             }
@@ -2250,24 +2258,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
         return;
       }
       
-      // notify on height changes
-      long height = getHeight();
-      if (prevHeight != height) {
-        for (long i = prevHeight; i < height; i++) onNewBlock(i);
-        prevHeight = height;
-      }
-      
-      // notify on balance changes
-      checkForChangedBalances();
-      
       // get locked txs for comparison to previous
       List<MoneroTxWallet> lockedTxs = getTxs(new MoneroTxQuery().setIsLocked(true).setIncludeOutputs(true));
-      
-      // notify on new unconfirmed and confirmed txs
-      for (MoneroTxWallet lockedTx : lockedTxs) {
-        boolean unannounced = lockedTx.isConfirmed() ? prevConfirmedNotifications.add(lockedTx.getHash()) : prevUnconfirmedNotifications.add(lockedTx.getHash());
-        if (unannounced) notifyOutputs(lockedTx);
-      }
       
       // collect hashes of txs no longer locked
       List<String> noLongerLockedHashes = new ArrayList<String>();
@@ -2280,38 +2272,68 @@ public class MoneroWalletRpc extends MoneroWalletBase {
       // fetch txs that are no longer locked
       List<MoneroTxWallet> unlockedTxs = getTxs(new MoneroTxQuery().setHashes(noLongerLockedHashes).setIncludeOutputs(true), new ArrayList<String>()); // ignore missing tx hashes which could be removed due to re-org
       
-      // notify listeners of newly unlocked tx outputs
+      // save locked txs for next comparison
+      prevLockedTxs = lockedTxs;
+      
+      // announce height changes
+      long height = getHeight();
+      if (prevHeight != height) {
+        for (long i = prevHeight; i < height; i++) onNewBlock(i);
+        prevHeight = height;
+      }
+      
+      // announce balance changes
+      checkForChangedBalances();
+      
+      // announce new unconfirmed and confirmed txs
+      for (MoneroTxWallet lockedTx : lockedTxs) {
+        boolean unannounced = lockedTx.isConfirmed() ? prevConfirmedNotifications.add(lockedTx.getHash()) : prevUnconfirmedNotifications.add(lockedTx.getHash());
+        if (unannounced) notifyOutputs(lockedTx);
+      }
+      
+      // announce new unlocked outputs
       for (MoneroTxWallet unlockedTx : unlockedTxs) {
         prevUnconfirmedNotifications.remove(unlockedTx.getHash()); // stop tracking tx notifications
         prevConfirmedNotifications.remove(unlockedTx.getHash());
         notifyOutputs(unlockedTx);
       }
       
-      // save locked txs for next comparison
-      prevLockedTxs = lockedTxs;
       isPolling = false;
     }
     
     private void notifyOutputs(MoneroTxWallet tx) {
       
       // notify spent outputs
+      // TODO (monero-project): monero-wallet-rpc does not allow scrape of tx inputs so providing one input with outgoing transfer values
       if (tx.getOutgoingTransfer() != null) {
-        MoneroOutputWallet output = new MoneroOutputWallet().setAmount(tx.getOutgoingTransfer().getAmount()).setTx(tx); // TODO (monero-project): monero-wallet-rpc does not allow scrape of tx spent outputs so providing one output with outgoing transfer amount linked to tx
+        GenUtils.assertNull(tx.getInputs());
+        MoneroOutputWallet output = new MoneroOutputWallet()
+            .setAmount(tx.getOutgoingTransfer().getAmount())
+            .setAccountIndex(tx.getOutgoingTransfer().getAccountIndex())
+            .setSubaddressIndex(tx.getOutgoingTransfer().getSubaddressIndices().size() == 1 ? tx.getOutgoingTransfer().getSubaddressIndices().get(0) : null) // initialize if transfer sourced from single subaddress
+            .setTx(tx);
+        tx.setInputsWallet(Arrays.asList(output));
         for (MoneroWalletListenerI listener : listeners) listener.onOutputSpent(output);
       }
       
       // notify received outputs
       if (tx.getIncomingTransfers() != null) {
-        if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) {  // TODO (monero-project): outputs only returned for confirmed txs
+        if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) { // TODO (monero-project): outputs only returned for confirmed txs
           for (MoneroOutputWallet output : tx.getOutputsWallet()) {
-            if (output.getAccountIndex() != null) { // TODO: ensure sender does not get this notification unless sent to them
-              for (MoneroWalletListenerI listener : listeners) listener.onOutputReceived(output);
-            }
-          }
-        } else {
-          for (MoneroIncomingTransfer transfer : tx.getIncomingTransfers()) {
-            MoneroOutputWallet output = new MoneroOutputWallet().setAccountIndex(transfer.getAccountIndex()).setSubaddressIndex(transfer.getSubaddressIndex()).setAmount(transfer.getAmount()).setTx(tx); // TODO (monero-project): monero-wallet-rpc does not allow scrape of unconfirmed received outputs so using transfer values as outputs
             for (MoneroWalletListenerI listener : listeners) listener.onOutputReceived(output);
+          }
+        } else { // TODO (monero-project): monero-wallet-rpc does not allow scrape of unconfirmed received outputs so using incoming transfer values
+          List<MoneroOutputWallet> outputs = new ArrayList<MoneroOutputWallet>();
+          for (MoneroIncomingTransfer transfer : tx.getIncomingTransfers()) {
+            outputs.add(new MoneroOutputWallet()
+                .setAccountIndex(transfer.getAccountIndex())
+                .setSubaddressIndex(transfer.getSubaddressIndex())
+                .setAmount(transfer.getAmount())
+                .setTx(tx));
+          }
+          tx.setOutputsWallet(outputs);
+          for (MoneroWalletListenerI listener : listeners) {
+            for (MoneroOutputWallet output : tx.getOutputsWallet()) listener.onOutputReceived(output);
           }
         }
       }
@@ -2953,6 +2975,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
         txSet.setTxs(new ArrayList<MoneroTxWallet>());
         for (Map<String, Object> txMap : (List<Map<String, Object>>) val) {
           MoneroTxWallet tx = convertRpcTxWithTransfer(txMap, null, true);
+          tx.setTxSet(txSet);
           txSet.getTxs().add(tx);
         }
       }
@@ -3030,47 +3053,23 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   /**
    * Merges a transaction into a unique set of transactions.
    *
-   * TODO monero-project: skipIfAbsent only necessary because incoming payments not returned
-   * when sent from/to same account #4500
-   *
    * @param tx is the transaction to merge into the existing txs
    * @param txMap maps tx hashes to txs
    * @param blockMap maps block heights to blocks
-   * @param skipIfAbsent specifies if the tx should not be added if it doesn't already exist
    */
-  private static void mergeTx(MoneroTxWallet tx, Map<String, MoneroTxWallet> txMap, Map<Long, MoneroBlock> blockMap, boolean skipIfAbsent) {
+  private static void mergeTx(MoneroTxWallet tx, Map<String, MoneroTxWallet> txMap, Map<Long, MoneroBlock> blockMap) {
     GenUtils.assertNotNull(tx.getHash());
 
-    // if tx doesn't exist, add it unless skipped
+    // merge tx
     MoneroTxWallet aTx = txMap.get(tx.getHash());
-    if (aTx == null) {
-      if (skipIfAbsent) {
-        LOGGER.warning("tx does not already exist and is being skipped during merge:\n" + tx);
-        try { throw new RuntimeException("tx does not already exist and is being skipped during merge"); }
-        catch (Exception e) { e.printStackTrace(); }
-      } else {
-        txMap.put(tx.getHash(), tx);
-      }
-    }
+    if (aTx == null) txMap.put(tx.getHash(), tx); // cache new tx
+    else aTx.merge(tx); // merge with existing tx
 
-    // otherwise merge with existing tx
-    else {
-      if (aTx.isFailed() != null & tx.isFailed() != null && !aTx.isFailed().equals(tx.isFailed())) {
-        System.out.println("ERROR: Merging these transactions will throw an error because their isFailed state is different");
-        System.out.println(aTx);
-        System.out.println(tx);
-      }
-      aTx.merge(tx);
-    }
-
-    // if confirmed, merge tx's block
+    // merge tx's block if confirmed
     if (tx.getHeight() != null) {
       MoneroBlock aBlock = blockMap.get(tx.getHeight());
-      if (aBlock == null) {
-        blockMap.put(tx.getHeight(), tx.getBlock());
-      } else {
-        aBlock.merge(tx.getBlock());
-      }
+      if (aBlock == null) blockMap.put(tx.getHeight(), tx.getBlock()); // cache new block
+      else aBlock.merge(tx.getBlock()); // merge with existing block
     }
   }
   

@@ -1,4 +1,5 @@
 HIGH
+remove years from copyrights
 collapse MoneroOutputWallet, MoneroTxWallet into MoneroOutput, MoneroTx?
 recover wallet when stuck opened by another application
 logging config for rpc requests

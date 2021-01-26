@@ -47,7 +47,9 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     
     // if full tests ran, wait for full wallet's pool txs to confirm
     if (TestMoneroWalletFull.FULL_TESTS_RUN) {
-      TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(TestUtils.getWalletFull());
+      MoneroWallet walletFull = TestUtils.getWalletFull();
+      TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(walletFull);
+      walletFull.close(true);
     }
   }
   

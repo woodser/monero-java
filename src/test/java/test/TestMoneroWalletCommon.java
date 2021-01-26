@@ -131,7 +131,12 @@ public abstract class TestMoneroWalletCommon {
   
   @AfterEach
   public void afterEach(TestInfo testInfo) {
-    //System.out.println("After test " + testInfo.getDisplayName());
+    System.out.println("After test " + testInfo.getDisplayName());
+    
+    if (daemon.getMiningStatus().isActive()) {
+      System.err.println("WARNING: mining is active after test " + testInfo.getDisplayName() + ", stopping");
+      daemon.stopMining();
+    }
   }
   
   /**
@@ -4250,7 +4255,7 @@ public abstract class TestMoneroWalletCommon {
       try { TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS); }
       catch (Exception e) { throw new RuntimeException(e); }
       receiver.getTx(txHash);
-      assertFalse(receiverListener.getOutputsReceived().isEmpty(), "No notification of received funds within sync period in " + (sameAccount ? "same account" : "different wallets")); // TODO (monero-project): notify of funds sent from/to same account with amount 0
+      assertFalse(receiverListener.getOutputsReceived().isEmpty(), "No notification of received funds in " + (sameAccount ? "same account" : "different wallets")); // TODO (monero-project): notify of funds sent from/to same account with amount 0
       for (MoneroOutputWallet output : receiverListener.getOutputsReceived()) assertNotEquals(null, output.getTx().isConfirmed());
     } finally {
       sender.removeListener(senderListener);
@@ -4368,10 +4373,11 @@ public abstract class TestMoneroWalletCommon {
       
       // stop if tx confirms without notification
       if (wallet.getTx(tx.getHash()).isConfirmed()) {
+        try { daemon.stopMining(); } catch (Exception e) { }
         
-        // wait a moment for the notification to be received
+        // wait a moment for notification to be received
         boolean isWalletRpcWithoutZmq = wallet instanceof MoneroWalletRpc && ((MoneroWalletRpc) wallet).getRpcConnection().getZmqUri() == null;
-        try { TimeUnit.SECONDS.sleep(isWalletRpcWithoutZmq ? 20 : 1); } catch (Exception e) { throw new RuntimeException(e); }  // polling listener takes up to refresh interval   // TODO: set refresh interval
+        try { TimeUnit.MILLISECONDS.sleep(isWalletRpcWithoutZmq ? TestUtils.SYNC_PERIOD_IN_MS : 1); } catch (Exception e) { throw new RuntimeException(e); }  // polling listener takes up to refresh interval
         if (!hasOutput(listener.getOutputsSpent(), tx.getHash(), null, null, null)) {
           errors.add("ERROR: tx is confirmed but no notifications were received");
           return errors;
@@ -4382,6 +4388,8 @@ public abstract class TestMoneroWalletCommon {
     try { daemon.stopMining(); } catch (Exception e) { }
     
     // test output notifications
+    for (MoneroOutputWallet input : listener.getOutputsSpent()) testNotifiedOutput(wallet, input, true); // output is tx input
+    for (MoneroOutputWallet output : listener.getOutputsReceived()) testNotifiedOutput(wallet, output, false);
     if (!hasOutput(listener.getOutputsReceived(), tx.getHash(), null, null, null)) {
       errors.add("ERROR: got " + listener.getOutputsReceived().size() + " output received notifications when at least 1 was expected");
       return errors;
@@ -4445,6 +4453,20 @@ public abstract class TestMoneroWalletCommon {
       if (query.meetsCriteria(output)) return true;
     }
     return false;
+  }
+  
+  private static void testNotifiedOutput(MoneroWallet wallet, MoneroOutputWallet output, boolean isTxInput) {
+    
+    // test tx link
+    assertNotNull(output.getTx());
+    if (isTxInput) assertTrue(output.getTx().getInputs().contains(output));
+    else assertTrue(output.getTx().getOutputs().contains(output));
+    
+    // test output values
+    TestUtils.testUnsignedBigInteger(output.getAmount());
+    assertTrue(output.getAccountIndex() >= 0);
+    if (output.getSubaddressIndex() == null) assertTrue(isTxInput && wallet instanceof MoneroWalletRpc, "Output must have subaddress index unless it is an input from monero-wallet-rpc since monero-wallet-rpc does not support scrape of tx inputs"); // TODO (monero-project): allow scrape of tx inputs
+    else assertTrue(output.getSubaddressIndex() >= 0);
   }
   
   // Can stop listening
@@ -5267,6 +5289,7 @@ public abstract class TestMoneroWalletCommon {
     // TODO: use common tx wallet test?
     assertNull(parsedTxSet.getMultisigTxHex());
     for (MoneroTxWallet parsedTx : parsedTxSet.getTxs()) {
+      assertTrue(parsedTx.getTxSet() == parsedTxSet);
       TestUtils.testUnsignedBigInteger(parsedTx.getInputSum(), true);
       TestUtils.testUnsignedBigInteger(parsedTx.getOutputSum(), true);
       TestUtils.testUnsignedBigInteger(parsedTx.getFee());
