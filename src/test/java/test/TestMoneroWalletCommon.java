@@ -2274,7 +2274,6 @@ public abstract class TestMoneroWalletCommon {
       String outputsHex = viewOnlyWallet.getOutputsHex();
       
       // create offline wallet
-      closeWallet(viewOnlyWallet, true); // only one wallet open at a time to accommodate testing wallet rpc
       offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setServerUri(""));
       assertFalse(offlineWallet.isConnected());
       assertFalse(offlineWallet.isViewOnly());
@@ -2289,8 +2288,6 @@ public abstract class TestMoneroWalletCommon {
       List<MoneroKeyImage> keyImages = offlineWallet.getKeyImages();
       
       // import key images to view-only wallet
-      closeWallet(offlineWallet, true);
-      viewOnlyWallet = openWallet(viewOnlyPath);
       viewOnlyWallet.importKeyImages(keyImages);
       
       // create unsigned tx using view-only wallet
@@ -2298,8 +2295,6 @@ public abstract class TestMoneroWalletCommon {
       assertNotNull(unsignedTx.getTxSet().getUnsignedTxHex());
       
       // sign tx using offline wallet
-      closeWallet(viewOnlyWallet, true);
-      offlineWallet = openWallet(new MoneroWalletConfig().setPath(offlineWalletPath).setServerUri(""));
       String signedTxHex = offlineWallet.signTxs(unsignedTx.getTxSet().getUnsignedTxHex());
       assertFalse(signedTxHex.isEmpty());
       
@@ -2309,16 +2304,14 @@ public abstract class TestMoneroWalletCommon {
       
       // submit signed tx using view-only wallet
       if (TEST_RELAYS) {
-        closeWallet(offlineWallet);
-        viewOnlyWallet = openWallet(viewOnlyPath);
         List<String> txHashes = viewOnlyWallet.submitTxs(signedTxHex);
         assertEquals(1, txHashes.size());
         assertEquals(64, txHashes.get(0).length());
         TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(viewOnlyWallet); // wait for confirmation for other tests
       }
     } finally {
-      try { closeWallet(viewOnlyWallet); } catch (Exception e) {}
-      try { closeWallet(offlineWallet); } catch (Exception e) {}
+      try { closeWallet(viewOnlyWallet); } catch (Exception e) { }
+      try { closeWallet(offlineWallet); } catch (Exception e) { }
     }
   }
   
