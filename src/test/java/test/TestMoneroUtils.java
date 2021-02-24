@@ -84,6 +84,7 @@ public class TestMoneroUtils {
     assertEquals(map, map2);
   }
   
+  // Can validate addresses
   @Test
   public void testAddressValidation() {
     

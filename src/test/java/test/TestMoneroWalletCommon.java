@@ -2282,7 +2282,8 @@ public abstract class TestMoneroWalletCommon {
       String offlineWalletPath = offlineWallet.getPath();
       
       // import outputs to offline wallet
-      offlineWallet.importOutputsHex(outputsHex);
+      int numOutputsImported = offlineWallet.importOutputsHex(outputsHex);
+      assertTrue(numOutputsImported > 0, "No outputs imported");
       
       // export key images from offline wallet
       List<MoneroKeyImage> keyImages = offlineWallet.getKeyImages();
@@ -2933,6 +2934,7 @@ public abstract class TestMoneroWalletCommon {
     String paymentId = integratedAddress.getPaymentId();
     try {
       testSendToSingle(new MoneroTxConfig().setCanSplit(false).setPaymentId(paymentId + paymentId + paymentId + paymentId));  // 64 character payment id
+      fail("Should have thrown");
     } catch (MoneroError e) {
       assertEquals("Standalone payment IDs are obsolete. Use subaddresses or integrated addresses instead", e.getMessage());
     }
@@ -2995,6 +2997,17 @@ public abstract class TestMoneroWalletCommon {
     config.setAccountIndex(fromAccount.getIndex());
     config.setSubaddressIndices(fromSubaddress.getIndex());
     MoneroTxConfig configCopy = config.copy();
+    
+    // test sending to invalid address
+    try {
+      config.setAddress("my invalid address");
+      if (!Boolean.FALSE.equals(config.getCanSplit())) wallet.createTxs(config);
+      else wallet.createTx(config);
+      fail("Should have thrown error creating tx with invalid address");
+    } catch (MoneroError e) {
+      assertEquals("Invalid destination address", e.getMessage());
+      config.setAddress(address);
+    }
     
     // send to self
     txs.addAll(wallet.createTxs(config));

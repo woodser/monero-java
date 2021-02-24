@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import common.utils.GenUtils;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -414,6 +415,38 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     } finally {
       walletKeys.close();
     }
+  }
+  
+  // Is compatible with monero-wallet-rpc's wallet files
+  @Test
+  public void testWalletCompatibility() {
+    
+    // create wallet using monero-wallet-rpc
+    String walletName = GenUtils.getUUID();
+    MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
+    walletRpc.createWallet(new MoneroWalletConfig().setPath(walletName).setPassword(TestUtils.WALLET_PASSWORD).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+    walletRpc.sync();
+    walletRpc.close(true);
+    
+    // open as full wallet
+    MoneroWalletFull walletFull = MoneroWalletFull.openWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_RPC_LOCAL_WALLET_DIR + "/" + walletName).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setServerUri(TestUtils.DAEMON_RPC_URI).setServerUsername(TestUtils.DAEMON_RPC_USERNAME).setServerPassword(TestUtils.DAEMON_RPC_PASSWORD));
+    walletFull.sync();
+    assertEquals(TestUtils.MNEMONIC, walletFull.getMnemonic());
+    assertEquals(TestUtils.ADDRESS, walletFull.getPrimaryAddress());
+    walletFull.close(true);
+    
+    // create full wallet
+    walletName = GenUtils.getUUID();
+    walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_RPC_LOCAL_WALLET_DIR + "/" + walletName).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setServerUri(TestUtils.DAEMON_RPC_URI).setServerUsername(TestUtils.DAEMON_RPC_USERNAME).setServerPassword(TestUtils.DAEMON_RPC_PASSWORD));
+    walletFull.sync();
+    walletFull.close(true);
+    
+    // open wallet using monero-wallet-rpc
+    walletRpc.openWallet(new MoneroWalletConfig().setPath(walletName).setPassword(TestUtils.WALLET_PASSWORD));
+    walletRpc.sync();
+    assertEquals(TestUtils.MNEMONIC, walletRpc.getMnemonic());
+    assertEquals(TestUtils.ADDRESS, walletRpc.getPrimaryAddress());
+    walletRpc.close(true);
   }
   
   // Can re-sync an existing wallet from scratch

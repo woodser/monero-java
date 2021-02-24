@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Collection of general purpose utilities.
@@ -327,5 +328,14 @@ public class GenUtils {
   public static String kvLine(Object key, Object value, int indent, boolean newline, boolean ignoreUndefined) {
     if (value == null && ignoreUndefined) return "";
     return GenUtils.getIndent(indent) + key + ": " + value + (newline ? '\n' : "");
+  }
+  
+  /**
+   * Generates a UUID.
+   * 
+   * @return the UUID
+   */
+  public static String getUUID() {
+    return UUID.randomUUID().toString(); 
   }
 }
