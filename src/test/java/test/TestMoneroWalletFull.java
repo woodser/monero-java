@@ -1595,8 +1595,8 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testGetTxsValidateInputs() {
-    super.testGetTxsValidateInputs();
+  public void testValidateInputsGetTxs() {
+    super.testValidateInputsGetTxs();
   }
 
   @Test
@@ -1610,8 +1610,8 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testGetTransfersValidateInputs() {
-    super.testGetTransfersValidateInputs();
+  public void testValidateInputsGetTransfers() {
+    super.testValidateInputsGetTransfers();
   }
   
   @Test
@@ -1630,8 +1630,8 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testGetOutputsValidateInputs() {
-    super.testGetOutputsValidateInputs();
+  public void testValidateInputsGetOutputs() {
+    super.testValidateInputsGetOutputs();
   }
 
   @Test
@@ -1728,6 +1728,11 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   @Test
   public void testMining() {
     super.testMining();
+  }
+  
+  @Test
+  public void testValidateInputsSendingFunds() {
+    super.testValidateInputsSendingFunds();
   }
   
   @Test

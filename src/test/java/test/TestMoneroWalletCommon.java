@@ -1228,7 +1228,7 @@ public abstract class TestMoneroWalletCommon {
   
   // Validates inputs when getting transactions
   @Test
-  public void testGetTxsValidateInputs() {
+  public void testValidateInputsGetTxs() {
     assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // fetch random txs for testing
@@ -1461,7 +1461,7 @@ public abstract class TestMoneroWalletCommon {
   
   // Validates inputs when getting transfers
   @Test
-  public void testGetTransfersValidateInputs() {
+  public void testValidateInputsGetTransfers() {
     assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // test with invalid hash
@@ -1664,7 +1664,7 @@ public abstract class TestMoneroWalletCommon {
   
   // Validates inputs when getting wallet outputs
   @Test
-  public void testGetOutputsValidateInputs() {
+  public void testValidateInputsGetOutputs() {
     assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // test with invalid hash
@@ -2529,6 +2529,19 @@ public abstract class TestMoneroWalletCommon {
   }
   
   // ------------------------------- TEST RELAYS ------------------------------
+  
+  // Validates inputs when sending funds
+  @Test
+  public void testValidateInputsSendingFunds() {
+    
+    // try sending with invalid address
+    try {
+      wallet.createTx(new MoneroTxConfig().setAddress("my invalid address").setAccountIndex(0).setAmount(TestUtils.MAX_FEE));
+      fail("Should have thrown");
+    } catch (MoneroError err) {
+      assertEquals("Invalid destination address", err.getMessage());
+    }
+  }
   
   // Can sync with txs in the pool sent from/to the same account
   // TODO: this test fails because wallet does not recognize pool tx sent from/to same account
