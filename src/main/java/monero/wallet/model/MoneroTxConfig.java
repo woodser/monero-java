@@ -106,6 +106,10 @@ public class MoneroTxConfig {
     return this.destinations.get(0).getAmount();
   }
   
+  public MoneroTxConfig addDestination(String address, BigInteger amount) {
+    return addDestination(new MoneroDestination(address, amount));
+  }
+  
   public MoneroTxConfig addDestination(MoneroDestination destination) {
     if (this.destinations == null) this.destinations = new ArrayList<MoneroDestination>();
     this.destinations.add(destination);

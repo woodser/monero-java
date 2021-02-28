@@ -74,7 +74,7 @@ public class TestUtils {
   public static final String LANGUAGE = "English";
   public static final String MNEMONIC = "limits linen agreed gesture medicate having nurse doing pests tonic nugget pimple anxiety saucepan movement acquire estate likewise exult niece pedantic voyage fuselage gyrate fuselage"; 
   public static final String ADDRESS = "54mANzvpzCWQD9FPG9a4XXaRjvQF7uLCxRc6i2uGx9pnQ6nUKaoKZ2oC9kC3Ee6SKBgFLzkwssZ9QH6TeiNGC6CFA99Hnck";
-  public static final long FIRST_RECEIVE_HEIGHT = 501; // NOTE: this value MUST be the height of the wallet's first tx for tests
+  public static final long FIRST_RECEIVE_HEIGHT = 171; // NOTE: this value must be the height of the wallet's first tx for tests
   public static final long SYNC_PERIOD_IN_MS = 5000; // period between wallet syncs in milliseconds
   
   // logger configuration
