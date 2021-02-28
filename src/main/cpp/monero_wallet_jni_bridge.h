@@ -158,7 +158,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_sweepOutputJni(JNI
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_sweepDustJni(JNIEnv *, jobject, jboolean);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_parseTxSetJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_describeTxSetJni(JNIEnv *, jobject, jstring);
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_signTxsJni(JNIEnv *, jobject, jstring);
 

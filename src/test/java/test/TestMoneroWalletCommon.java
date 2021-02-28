@@ -2300,8 +2300,8 @@ public abstract class TestMoneroWalletCommon {
       assertFalse(signedTxHex.isEmpty());
       
       // parse or "describe" unsigned tx set
-      MoneroTxSet parsedTxSet = offlineWallet.parseTxSet(unsignedTx.getTxSet());
-      testParsedTxSet(parsedTxSet);
+      MoneroTxSet describedTxSet = offlineWallet.describeTxSet(unsignedTx.getTxSet());
+      testDescribedTxSet(describedTxSet);
       
       // submit signed tx using view-only wallet
       if (TEST_RELAYS) {
@@ -3594,7 +3594,7 @@ public abstract class TestMoneroWalletCommon {
         assertNull(txSet.getUnsignedTxHex());
         
         // parse multisig tx hex and test
-        testParsedTxSet(participant.parseTxSet(txSet));
+        testDescribedTxSet(participant.describeTxSet(txSet));
         
         // sign the tx with participants 1 through m - 1 to meet threshold
         String multisigTxHex = txSet.getMultisigTxHex();
@@ -3629,7 +3629,7 @@ public abstract class TestMoneroWalletCommon {
         assertFalse(txSet.getTxs().isEmpty());
         
         // parse multisig tx hex and test
-        testParsedTxSet(participant.parseTxSet(txSet));
+        testDescribedTxSet(participant.describeTxSet(txSet));
         
         // sign the tx with participants 1 through m - 1 to meet threshold
         multisigTxHex = txSet.getMultisigTxHex();
@@ -3665,7 +3665,7 @@ public abstract class TestMoneroWalletCommon {
         assertNull(txSet.getUnsignedTxHex());
         
         // parse multisig tx hex and test
-        testParsedTxSet(participant.parseTxSet(txSet));
+        testDescribedTxSet(participant.describeTxSet(txSet));
         
         // sign the tx with participants 1 through m - 1 to meet threshold
         multisigTxHex = txSet.getMultisigTxHex();
@@ -4367,7 +4367,8 @@ public abstract class TestMoneroWalletCommon {
       MoneroTxConfig config = new MoneroTxConfig();
       config.setAccountIndex(0);
       for (int destinationAccount : destinationAccounts) {
-        config.addDestination(new MoneroDestination(wallet.getAddress(destinationAccount, 0), TestUtils.MAX_FEE));
+        config.addDestination(wallet.getAddress(destinationAccount, 0), TestUtils.MAX_FEE);
+        config.addDestination(wallet.getAddress(destinationAccount, 0), TestUtils.MAX_FEE);
       }
       config.setRelay(true);
       tx = wallet.createTx(config);
@@ -5298,17 +5299,17 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
-  private static void testParsedTxSet(MoneroTxSet parsedTxSet) {
-    assertNotNull(parsedTxSet.getTxs());
-    assertFalse(parsedTxSet.getTxs().isEmpty());
-    assertNull(parsedTxSet.getSignedTxHex());
-    assertNull(parsedTxSet.getUnsignedTxHex());
+  private static void testDescribedTxSet(MoneroTxSet describedTxSet) {
+    assertNotNull(describedTxSet.getTxs());
+    assertFalse(describedTxSet.getTxs().isEmpty());
+    assertNull(describedTxSet.getSignedTxHex());
+    assertNull(describedTxSet.getUnsignedTxHex());
     
     // test each transaction        
     // TODO: use common tx wallet test?
-    assertNull(parsedTxSet.getMultisigTxHex());
-    for (MoneroTxWallet parsedTx : parsedTxSet.getTxs()) {
-      assertTrue(parsedTx.getTxSet() == parsedTxSet);
+    assertNull(describedTxSet.getMultisigTxHex());
+    for (MoneroTxWallet parsedTx : describedTxSet.getTxs()) {
+      assertTrue(parsedTx.getTxSet() == describedTxSet);
       TestUtils.testUnsignedBigInteger(parsedTx.getInputSum(), true);
       TestUtils.testUnsignedBigInteger(parsedTx.getOutputSum(), true);
       TestUtils.testUnsignedBigInteger(parsedTx.getFee());

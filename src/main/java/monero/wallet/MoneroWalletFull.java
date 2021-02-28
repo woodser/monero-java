@@ -937,15 +937,15 @@ public class MoneroWalletFull extends MoneroWalletBase {
   }
   
   @Override
-  public MoneroTxSet parseTxSet(MoneroTxSet txSet) {
+  public MoneroTxSet describeTxSet(MoneroTxSet txSet) {
     assertNotClosed();
-    String parsedTxSetJson;
+    String describedTxSetJson;
     try {
-      parsedTxSetJson = parseTxSetJni(JsonUtils.serialize(txSet));
+      describedTxSetJson = describeTxSetJni(JsonUtils.serialize(txSet));
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
-    return JsonUtils.deserialize(parsedTxSetJson, MoneroTxSet.class);
+    return JsonUtils.deserialize(describedTxSetJson, MoneroTxSet.class);
   }
   
   @Override
@@ -1424,7 +1424,7 @@ public class MoneroWalletFull extends MoneroWalletBase {
   
   private native String sweepDustJni(boolean doNotRelay);
   
-  private native String parseTxSetJni(String txSetJson);
+  private native String describeTxSetJni(String txSetJson);
   
   private native String signTxsJni(String unsignedTxHex);
   

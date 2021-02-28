@@ -915,12 +915,12 @@ public interface MoneroWallet {
   public List<String> relayTxs(List<MoneroTxWallet> txs);
   
   /**
-   * Parses a tx set containing unsigned or multisig tx hex to a new tx set containing structured transactions.
+   * Describes a tx set containing unsigned or multisig tx hex to a new tx set containing structured transactions.
    * 
    * @param txSet is a tx set containing unsigned or multisig tx hex
-   * @return the parsed tx set containing structured transactions
+   * @return the tx set containing structured transactions
    */
-  public MoneroTxSet parseTxSet(MoneroTxSet txSet);
+  public MoneroTxSet describeTxSet(MoneroTxSet txSet);
   
   /**
    * Sign unsigned transactions from a view-only wallet.

@@ -1283,7 +1283,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroTxSet parseTxSet(MoneroTxSet txSet) {
+  public MoneroTxSet describeTxSet(MoneroTxSet txSet) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("unsigned_txset", txSet.getUnsignedTxHex());
     params.put("multisig_txset", txSet.getMultisigTxHex());
