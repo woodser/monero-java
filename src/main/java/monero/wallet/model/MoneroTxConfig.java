@@ -96,6 +96,16 @@ public class MoneroTxConfig {
   }
   
   /**
+   * Set the amount of a single-destination configuration.
+   * 
+   * @param amount - the amount to set for the single destination in atomic units as a string
+   * @return MoneroTxConfig this configuration for chaining
+   */
+  public MoneroTxConfig setAmount(String amount) {
+    return setAmount(new BigInteger(amount));
+  }
+  
+  /**
    * Get the amount of a single-destination configuration.
    * 
    * @return BigInteger the amount of the single destination
