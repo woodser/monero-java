@@ -4277,8 +4277,8 @@ public abstract class TestMoneroWalletCommon {
       assertFalse(receiverListener.getOutputsReceived().isEmpty(), "No notification of received funds in " + (sameAccount ? "same account" : "different wallets")); // TODO (monero-project): notify of funds sent from/to same account with amount 0
       for (MoneroOutputWallet output : receiverListener.getOutputsReceived()) assertNotEquals(null, output.getTx().isConfirmed());
     } finally {
-      sender.removeListener(senderListener);
-      receiver.removeListener(receiverListener);
+      if (sender != null) sender.removeListener(senderListener);
+      if (receiver != null) receiver.removeListener(receiverListener);
       if (!sameAccount && receiver != null) closeWallet(receiver);
     }
   }
