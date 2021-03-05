@@ -3268,7 +3268,7 @@ public abstract class TestMoneroWalletCommon {
     int numOutputs = 3;
     
     // get outputs to sweep (not spent, unlocked, and amount >= fee)
-    List<MoneroOutputWallet> spendableUnlockedOutputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setIsLocked(false));
+    List<MoneroOutputWallet> spendableUnlockedOutputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)));
     List<MoneroOutputWallet> outputsToSweep = new ArrayList<MoneroOutputWallet>();
     for (int i = 0; i < spendableUnlockedOutputs.size() && outputsToSweep.size() < numOutputs; i++) {
       if (spendableUnlockedOutputs.get(i).getAmount().compareTo(TestUtils.MAX_FEE) > 0) outputsToSweep.add(spendableUnlockedOutputs.get(i));  // output cannot be swept if amount does not cover fee
@@ -4171,7 +4171,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // all unspent, unlocked outputs must be less than fee
-    List<MoneroOutputWallet> spendableOutputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setIsLocked(false));
+    List<MoneroOutputWallet> spendableOutputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)));
     for (MoneroOutputWallet spendableOutput : spendableOutputs) {
       assertTrue(spendableOutput.getAmount().compareTo(TestUtils.MAX_FEE) < 0, "Unspent output should have been swept\n" + spendableOutput.toString());
     }
@@ -4354,7 +4354,7 @@ public abstract class TestMoneroWalletCommon {
     MoneroTxWallet tx = null;
     int[] destinationAccounts = sameAccount ? (sweepOutput ? new int[] {0} : new int[] {0, 1, 2}) : (sweepOutput ? new int[] {1} : new int[] {1, 2, 3});
     if (sweepOutput) {
-      List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setIsLocked(false).setAccountIndex(0).setMinAmount(TestUtils.MAX_FEE.multiply(new BigInteger("5"))));
+      List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)).setAccountIndex(0).setMinAmount(TestUtils.MAX_FEE.multiply(new BigInteger("5"))));
       if (outputs.isEmpty()) {
         errors.add("ERROR: No outputs available to sweep from account 0");
         return errors;
