@@ -1026,15 +1026,17 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   
   @SuppressWarnings("unchecked")
   @Override
-  public String getOutputsHex() {
-    Map<String, Object> resp = rpc.sendJsonRequest("export_outputs");
+  public String exportOutputs(boolean all) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("all", all);
+    Map<String, Object> resp = rpc.sendJsonRequest("export_outputs", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return (String) result.get("outputs_data_hex");
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public int importOutputsHex(String outputsHex) {
+  public int importOutputs(String outputsHex) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("outputs_data_hex", outputsHex);
     Map<String, Object> resp = rpc.sendJsonRequest("import_outputs", params);
@@ -1043,8 +1045,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
 
   @Override
-  public List<MoneroKeyImage> getKeyImages() {
-    return rpcExportKeyImages(true);
+  public List<MoneroKeyImage> exportKeyImages(boolean all) {
+    return rpcExportKeyImages(all);
   }
 
   @SuppressWarnings("unchecked")

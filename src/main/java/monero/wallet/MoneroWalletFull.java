@@ -817,22 +817,22 @@ public class MoneroWalletFull extends MoneroWalletBase {
   }
   
   @Override
-  public String getOutputsHex() {
+  public String exportOutputs(boolean all) {
     assertNotClosed();
-    String outputsHex = getOutputsHexJni();
+    String outputsHex = exportOutputsJni(all);
     return outputsHex.isEmpty() ? null : outputsHex;
   }
 
   @Override
-  public int importOutputsHex(String outputsHex) {
+  public int importOutputs(String outputsHex) {
     assertNotClosed();
-    return importOutputsHexJni(outputsHex);
+    return importOutputsJni(outputsHex);
   }
 
   @Override
-  public List<MoneroKeyImage> getKeyImages() {
+  public List<MoneroKeyImage> exportKeyImages(boolean all) {
     assertNotClosed();
-    String keyImagesJson = getKeyImagesJni();
+    String keyImagesJson = exportKeyImagesJni(all);
     List<MoneroKeyImage> keyImages = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, keyImagesJson, KeyImagesContainer.class).keyImages;
     return keyImages;
   }
@@ -1406,11 +1406,11 @@ public class MoneroWalletFull extends MoneroWalletBase {
   
   private native String getOutputsJni(String outputQueryJson);
   
-  private native String getOutputsHexJni();
+  private native String exportOutputsJni(boolean all);
   
-  private native int importOutputsHexJni(String outputsHex);
+  private native int importOutputsJni(String outputsHex);
   
-  private native String getKeyImagesJni();
+  private native String exportKeyImagesJni(boolean all);
   
   private native String importKeyImagesJni(String keyImagesJson);
   

@@ -1685,7 +1685,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testGetOutputsHex() {
     assumeTrue(TEST_NON_RELAYS);
-    String outputsHex = wallet.getOutputsHex();
+    String outputsHex = wallet.exportOutputs();
     assertNotNull(outputsHex);  // TODO: this will fail if wallet has no outputs; run these tests on new wallet
     assertTrue(outputsHex.length() > 0);
   }
@@ -1696,11 +1696,11 @@ public abstract class TestMoneroWalletCommon {
     assumeTrue(TEST_NON_RELAYS);
     
     // get outputs hex
-    String outputsHex = wallet.getOutputsHex();
+    String outputsHex = wallet.exportOutputs();
     
     // import outputs hex
     if (outputsHex != null) {
-      int numImported = wallet.importOutputsHex(outputsHex);
+      int numImported = wallet.importOutputs(outputsHex);
       assertTrue(numImported > 0);
     }
   }
@@ -2179,11 +2179,11 @@ public abstract class TestMoneroWalletCommon {
     // TODO: test that get transaction has note
   }
   
-  // Can get signed key images
+  // Can export signed key images
   @Test
   public void testGetSignedKeyImages() {
     assumeTrue(TEST_NON_RELAYS);
-    List<MoneroKeyImage> images = wallet.getKeyImages();
+    List<MoneroKeyImage> images = wallet.exportKeyImages();
     assertTrue(images.size() > 0, "No signed key images in wallet");
     for (MoneroKeyImage image : images) {
       assertTrue(image instanceof MoneroKeyImage);
@@ -2198,11 +2198,11 @@ public abstract class TestMoneroWalletCommon {
     assumeTrue(TEST_NON_RELAYS);
     
     // get outputs hex
-    String outputsHex = wallet.getOutputsHex();
+    String outputsHex = wallet.exportOutputs();
     
     // import outputs hex
     if (outputsHex != null) {
-      int numImported = wallet.importOutputsHex(outputsHex);
+      int numImported = wallet.importOutputs(outputsHex);
       assertTrue(numImported > 0);
     }
     
@@ -2221,7 +2221,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testImportKeyImages() {
     assumeTrue(TEST_NON_RELAYS);
-    List<MoneroKeyImage> images = wallet.getKeyImages();
+    List<MoneroKeyImage> images = wallet.exportKeyImages();
     assertTrue(images.size() > 0, "Wallet does not have any key images; run send tests");
     MoneroKeyImageImportResult result = wallet.importKeyImages(images);
     assertTrue(result.getHeight() > 0);
@@ -2271,7 +2271,7 @@ public abstract class TestMoneroWalletCommon {
       assertTrue(viewOnlyWallet.getTxs().size() > 0);
       
       // export outputs from view-only wallet
-      String outputsHex = viewOnlyWallet.getOutputsHex();
+      String outputsHex = viewOnlyWallet.exportOutputs();
       
       // create offline wallet
       offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setServerUri(""));
@@ -2282,11 +2282,11 @@ public abstract class TestMoneroWalletCommon {
       String offlineWalletPath = offlineWallet.getPath();
       
       // import outputs to offline wallet
-      int numOutputsImported = offlineWallet.importOutputsHex(outputsHex);
+      int numOutputsImported = offlineWallet.importOutputs(outputsHex);
       assertTrue(numOutputsImported > 0, "No outputs imported");
       
       // export key images from offline wallet
-      List<MoneroKeyImage> keyImages = offlineWallet.getKeyImages();
+      List<MoneroKeyImage> keyImages = offlineWallet.exportKeyImages();
       
       // import key images to view-only wallet
       viewOnlyWallet.importKeyImages(keyImages);

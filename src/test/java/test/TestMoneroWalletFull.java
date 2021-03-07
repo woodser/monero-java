@@ -146,7 +146,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
         List<MoneroTransfer> inTransfers1 = wallet.getTransfers(new MoneroTransferQuery().setIsIncoming(true));
         
         // export and re-import key images
-        List<MoneroKeyImage> keyImages = wallet.getKeyImages();
+        List<MoneroKeyImage> keyImages = wallet.exportKeyImages();
         wallet.importKeyImages(keyImages);
         
         // get incoming transfers after importing
@@ -417,7 +417,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     }
   }
   
-  // Is compatible with monero-wallet-rpc's wallet files
+  // Is compatible with monero-wallet-rpc wallet files
   @Test
   public void testWalletCompatibility() {
     
@@ -717,7 +717,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 //    walletKeys.sync(new WalletSyncPrinter());
 //  }
 //  
-//  List<MoneroKeyImage> keyImages = walletKeys.getKeyImages();
+//  List<MoneroKeyImage> keyImages = walletKeys.exportKeyImages();
 //  walletKeys.importKeyImages(keyImages);
   }
   

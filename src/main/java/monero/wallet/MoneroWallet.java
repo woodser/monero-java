@@ -755,11 +755,19 @@ public interface MoneroWallet {
   public List<MoneroOutputWallet> getOutputs(MoneroOutputQuery query);
   
   /**
-   * Export all outputs in hex format.
+   * Export outputs since the last export.
    * 
-   * @return all outputs in hex format, null if no outputs
+   * @return outputs since the last export in hex format
    */
-  public String getOutputsHex();
+  public String exportOutputs();
+  
+  /**
+   * Export outputs in hex format.
+   *
+   * @param all exports all outputs if true, else exports the outputs since the last export
+   * @return outputs in hex format
+   */
+  public String exportOutputs(boolean all);
   
   /**
    * Import outputs in hex format.
@@ -767,14 +775,22 @@ public interface MoneroWallet {
    * @param outputsHex are outputs in hex format
    * @return the number of outputs imported
    */
-  public int importOutputsHex(String outputsHex);
+  public int importOutputs(String outputsHex);
   
   /**
-   * Get all signed key images.
+   * Export key images since the last export.
    * 
-   * @return the wallet's signed key images
+   * @return signed key images since the last export
    */
-  public List<MoneroKeyImage> getKeyImages();
+  List<MoneroKeyImage> exportKeyImages();
+  
+  /**
+   * Export signed key images.
+   * 
+   * @param all exports all key images if true, else exports the key images since the last export
+   * @return signed key images
+   */
+  public List<MoneroKeyImage> exportKeyImages(boolean all);
   
   /**
    * Import signed key images and verify their spent status.

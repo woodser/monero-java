@@ -146,7 +146,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getTransfersJni(JN
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getOutputsJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getKeyImagesJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_exportKeyImagesJni(JNIEnv *, jobject, jboolean);
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_importKeyImagesJni(JNIEnv *, jobject, jstring);
 
@@ -192,9 +192,9 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_createPaymentUriJn
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_parsePaymentUriJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getOutputsHexJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_exportOutputsJni(JNIEnv *, jobject, jboolean);
 
-JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_importOutputsHexJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_importOutputsJni(JNIEnv *, jobject, jstring);
 
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getTxNotesJni(JNIEnv *, jobject, jobjectArray);
 
