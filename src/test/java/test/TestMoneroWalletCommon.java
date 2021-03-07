@@ -1681,13 +1681,18 @@ public abstract class TestMoneroWalletCommon {
     for (MoneroOutputWallet output : outputs) assertTrue(tx == output.getTx());
   }
   
-  // Can get outputs in hex format
+  // Can export outputs in hex format
   @Test
-  public void testGetOutputsHex() {
+  public void testExportOutputsHex() {
     assumeTrue(TEST_NON_RELAYS);
     String outputsHex = wallet.exportOutputs();
     assertNotNull(outputsHex);  // TODO: this will fail if wallet has no outputs; run these tests on new wallet
     assertTrue(outputsHex.length() > 0);
+    
+    // wallet exports outputs since last export by default
+    outputsHex = wallet.exportOutputs();
+    String outputsHexAll = wallet.exportOutputs(true);
+    assertTrue(outputsHexAll.length() > outputsHex.length());
   }
   
   // Can import outputs in hex format
@@ -1695,7 +1700,7 @@ public abstract class TestMoneroWalletCommon {
   public void testImportOutputsHex() {
     assumeTrue(TEST_NON_RELAYS);
     
-    // get outputs hex
+    // export outputs hex
     String outputsHex = wallet.exportOutputs();
     
     // import outputs hex
@@ -2181,7 +2186,7 @@ public abstract class TestMoneroWalletCommon {
   
   // Can export signed key images
   @Test
-  public void testGetSignedKeyImages() {
+  public void testExportKeyImages() {
     assumeTrue(TEST_NON_RELAYS);
     List<MoneroKeyImage> images = wallet.exportKeyImages();
     assertTrue(images.size() > 0, "No signed key images in wallet");
@@ -2190,6 +2195,11 @@ public abstract class TestMoneroWalletCommon {
       assertTrue(image.getHex().length() > 0);
       assertTrue(image.getSignature().length() > 0);
     }
+    
+    // wallet exports key images since last export by default
+    images = wallet.exportKeyImages();
+    List<MoneroKeyImage> imagesAll = wallet.exportKeyImages(true);
+    assert(imagesAll.size() > images.size());
   }
   
   // Can get new key images from the last import
@@ -2243,6 +2253,21 @@ public abstract class TestMoneroWalletCommon {
   public void testViewOnlyAndOfflineWallets() {
     assumeTrue(TEST_NON_RELAYS || TEST_RELAYS);
     
+    // create view-only and offline wallets
+    MoneroWallet viewOnlyWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+    MoneroWallet offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setServerUri("").setRestoreHeight(0l));
+    
+    // test tx signing with wallets
+    try {
+      testViewOnlyAndOfflineWallets(viewOnlyWallet, offlineWallet);
+    } finally {
+      closeWallet(viewOnlyWallet);
+      closeWallet(offlineWallet);
+    }
+  }
+  
+  protected void testViewOnlyAndOfflineWallets(MoneroWallet viewOnlyWallet, MoneroWallet offlineWallet) {
+    
     // wait for txs to confirm and for sufficient unlocked balance
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
     TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(wallet, 0, null, TestUtils.MAX_FEE.multiply(new BigInteger("4")));
@@ -2252,67 +2277,56 @@ public abstract class TestMoneroWalletCommon {
     String privateViewKey = wallet.getPrivateViewKey();
     String privateSpendKey = wallet.getPrivateSpendKey();
     
-    // create, sign, and submit transactions using view-only and offline wallets
-    MoneroWallet viewOnlyWallet = null;
-    MoneroWallet offlineWallet = null;
-    try {
-      
-      // create and sync view-only wallet
-      viewOnlyWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
-      assertEquals(primaryAddress, viewOnlyWallet.getPrimaryAddress());
-      assertEquals(privateViewKey, viewOnlyWallet.getPrivateViewKey());
-      assertEquals(null, viewOnlyWallet.getPrivateSpendKey());
-      assertEquals(null, viewOnlyWallet.getMnemonic());
-      assertEquals(null, viewOnlyWallet.getMnemonicLanguage());
-      assertTrue(viewOnlyWallet.isViewOnly());
-      assertTrue(viewOnlyWallet.isConnected());  // TODO: this fails with monero-wallet-rpc and monerod with authentication
-      String viewOnlyPath = viewOnlyWallet.getPath();
-      viewOnlyWallet.sync();
-      assertTrue(viewOnlyWallet.getTxs().size() > 0);
-      
-      // export outputs from view-only wallet
-      String outputsHex = viewOnlyWallet.exportOutputs();
-      
-      // create offline wallet
-      offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setServerUri(""));
-      assertFalse(offlineWallet.isConnected());
-      assertFalse(offlineWallet.isViewOnly());
-      if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic()); // TODO monero-project: cannot get mnemonic from offline wallet rpc
-      if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(0, offlineWallet.getTxs().size());  // TODO: monero-wallet-rpc has these transactions cached on startup
-      String offlineWalletPath = offlineWallet.getPath();
-      
-      // import outputs to offline wallet
-      int numOutputsImported = offlineWallet.importOutputs(outputsHex);
-      assertTrue(numOutputsImported > 0, "No outputs imported");
-      
-      // export key images from offline wallet
-      List<MoneroKeyImage> keyImages = offlineWallet.exportKeyImages();
-      
-      // import key images to view-only wallet
-      viewOnlyWallet.importKeyImages(keyImages);
-      
-      // create unsigned tx using view-only wallet
-      MoneroTxWallet unsignedTx = viewOnlyWallet.createTx(new MoneroTxConfig().setAccountIndex(0).setAddress(primaryAddress).setAmount(TestUtils.MAX_FEE.multiply(new BigInteger("3"))));
-      assertNotNull(unsignedTx.getTxSet().getUnsignedTxHex());
-      
-      // sign tx using offline wallet
-      String signedTxHex = offlineWallet.signTxs(unsignedTx.getTxSet().getUnsignedTxHex());
-      assertFalse(signedTxHex.isEmpty());
-      
-      // parse or "describe" unsigned tx set
-      MoneroTxSet describedTxSet = offlineWallet.describeTxSet(unsignedTx.getTxSet());
-      testDescribedTxSet(describedTxSet);
-      
-      // submit signed tx using view-only wallet
-      if (TEST_RELAYS) {
-        List<String> txHashes = viewOnlyWallet.submitTxs(signedTxHex);
-        assertEquals(1, txHashes.size());
-        assertEquals(64, txHashes.get(0).length());
-        TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(viewOnlyWallet); // wait for confirmation for other tests
-      }
-    } finally {
-      try { closeWallet(viewOnlyWallet); } catch (Exception e) { }
-      try { closeWallet(offlineWallet); } catch (Exception e) { }
+    // create and sync view-only wallet
+    viewOnlyWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+    assertEquals(primaryAddress, viewOnlyWallet.getPrimaryAddress());
+    assertEquals(privateViewKey, viewOnlyWallet.getPrivateViewKey());
+    assertEquals(null, viewOnlyWallet.getPrivateSpendKey());
+    assertEquals(null, viewOnlyWallet.getMnemonic());
+    assertEquals(null, viewOnlyWallet.getMnemonicLanguage());
+    assertTrue(viewOnlyWallet.isViewOnly());
+    assertTrue(viewOnlyWallet.isConnected());  // TODO: this fails with monero-wallet-rpc and monerod with authentication
+    viewOnlyWallet.sync();
+    assertTrue(viewOnlyWallet.getTxs().size() > 0);
+    
+    // export outputs from view-only wallet
+    String outputsHex = viewOnlyWallet.exportOutputs();
+    
+    // create offline wallet
+    offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setServerUri(""));
+    assertFalse(offlineWallet.isConnected());
+    assertFalse(offlineWallet.isViewOnly());
+    if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic()); // TODO monero-project: cannot get mnemonic from offline wallet rpc
+    if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(0, offlineWallet.getTxs().size());  // TODO: monero-wallet-rpc has these transactions cached on startup
+    
+    // import outputs to offline wallet
+    int numOutputsImported = offlineWallet.importOutputs(outputsHex);
+    assertTrue(numOutputsImported > 0, "No outputs imported");
+    
+    // export key images from offline wallet
+    List<MoneroKeyImage> keyImages = offlineWallet.exportKeyImages();
+    
+    // import key images to view-only wallet
+    viewOnlyWallet.importKeyImages(keyImages);
+    
+    // create unsigned tx using view-only wallet
+    MoneroTxWallet unsignedTx = viewOnlyWallet.createTx(new MoneroTxConfig().setAccountIndex(0).setAddress(primaryAddress).setAmount(TestUtils.MAX_FEE.multiply(new BigInteger("3"))));
+    assertNotNull(unsignedTx.getTxSet().getUnsignedTxHex());
+    
+    // sign tx using offline wallet
+    String signedTxHex = offlineWallet.signTxs(unsignedTx.getTxSet().getUnsignedTxHex());
+    assertFalse(signedTxHex.isEmpty());
+    
+    // parse or "describe" unsigned tx set
+    MoneroTxSet describedTxSet = offlineWallet.describeTxSet(unsignedTx.getTxSet());
+    testDescribedTxSet(describedTxSet);
+    
+    // submit signed tx using view-only wallet
+    if (TEST_RELAYS) {
+      List<String> txHashes = viewOnlyWallet.submitTxs(signedTxHex);
+      assertEquals(1, txHashes.size());
+      assertEquals(64, txHashes.get(0).length());
+      TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(viewOnlyWallet); // wait for confirmation for other tests
     }
   }
   

@@ -713,8 +713,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testGetOutputsHex() {
-    super.testGetOutputsHex();
+  public void testExportOutputsHex() {
+    super.testExportOutputsHex();
   }
 
   @Test
@@ -723,8 +723,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testGetSignedKeyImages() {
-    super.testGetSignedKeyImages();
+  public void testExportKeyImages() {
+    super.testExportKeyImages();
   }
 
   @Test
