@@ -713,13 +713,13 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testExportOutputsHex() {
-    super.testExportOutputsHex();
+  public void testExportOutputs() {
+    super.testExportOutputs();
   }
 
   @Test
-  public void testImportOutputsHex() {
-    super.testImportOutputsHex();
+  public void testImportOutputs() {
+    super.testImportOutputs();
   }
 
   @Test

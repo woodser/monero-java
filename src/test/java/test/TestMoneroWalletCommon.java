@@ -1683,7 +1683,7 @@ public abstract class TestMoneroWalletCommon {
   
   // Can export outputs in hex format
   @Test
-  public void testExportOutputsHex() {
+  public void testExportOutputs() {
     assumeTrue(TEST_NON_RELAYS);
     String outputsHex = wallet.exportOutputs();
     assertNotNull(outputsHex);  // TODO: this will fail if wallet has no outputs; run these tests on new wallet
@@ -1697,7 +1697,7 @@ public abstract class TestMoneroWalletCommon {
   
   // Can import outputs in hex format
   @Test
-  public void testImportOutputsHex() {
+  public void testImportOutputs() {
     assumeTrue(TEST_NON_RELAYS);
     
     // export outputs hex
@@ -2188,7 +2188,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testExportKeyImages() {
     assumeTrue(TEST_NON_RELAYS);
-    List<MoneroKeyImage> images = wallet.exportKeyImages();
+    List<MoneroKeyImage> images = wallet.exportKeyImages(true);
     assertTrue(images.size() > 0, "No signed key images in wallet");
     for (MoneroKeyImage image : images) {
       assertTrue(image instanceof MoneroKeyImage);
