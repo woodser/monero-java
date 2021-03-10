@@ -817,22 +817,22 @@ public class MoneroWalletFull extends MoneroWalletBase {
   }
   
   @Override
-  public String getOutputsHex() {
+  public String exportOutputs(boolean all) {
     assertNotClosed();
-    String outputsHex = getOutputsHexJni();
+    String outputsHex = exportOutputsJni(all);
     return outputsHex.isEmpty() ? null : outputsHex;
   }
 
   @Override
-  public int importOutputsHex(String outputsHex) {
+  public int importOutputs(String outputsHex) {
     assertNotClosed();
-    return importOutputsHexJni(outputsHex);
+    return importOutputsJni(outputsHex);
   }
 
   @Override
-  public List<MoneroKeyImage> getKeyImages() {
+  public List<MoneroKeyImage> exportKeyImages(boolean all) {
     assertNotClosed();
-    String keyImagesJson = getKeyImagesJni();
+    String keyImagesJson = exportKeyImagesJni(all);
     List<MoneroKeyImage> keyImages = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, keyImagesJson, KeyImagesContainer.class).keyImages;
     return keyImages;
   }
@@ -937,15 +937,15 @@ public class MoneroWalletFull extends MoneroWalletBase {
   }
   
   @Override
-  public MoneroTxSet parseTxSet(MoneroTxSet txSet) {
+  public MoneroTxSet describeTxSet(MoneroTxSet txSet) {
     assertNotClosed();
-    String parsedTxSetJson;
+    String describedTxSetJson;
     try {
-      parsedTxSetJson = parseTxSetJni(JsonUtils.serialize(txSet));
+      describedTxSetJson = describeTxSetJni(JsonUtils.serialize(txSet));
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
-    return JsonUtils.deserialize(parsedTxSetJson, MoneroTxSet.class);
+    return JsonUtils.deserialize(describedTxSetJson, MoneroTxSet.class);
   }
   
   @Override
@@ -1406,11 +1406,11 @@ public class MoneroWalletFull extends MoneroWalletBase {
   
   private native String getOutputsJni(String outputQueryJson);
   
-  private native String getOutputsHexJni();
+  private native String exportOutputsJni(boolean all);
   
-  private native int importOutputsHexJni(String outputsHex);
+  private native int importOutputsJni(String outputsHex);
   
-  private native String getKeyImagesJni();
+  private native String exportKeyImagesJni(boolean all);
   
   private native String importKeyImagesJni(String keyImagesJson);
   
@@ -1424,7 +1424,7 @@ public class MoneroWalletFull extends MoneroWalletBase {
   
   private native String sweepDustJni(boolean doNotRelay);
   
-  private native String parseTxSetJni(String txSetJson);
+  private native String describeTxSetJni(String txSetJson);
   
   private native String signTxsJni(String unsignedTxHex);
   

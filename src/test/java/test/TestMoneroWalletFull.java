@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import common.utils.GenUtils;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -145,7 +147,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
         List<MoneroTransfer> inTransfers1 = wallet.getTransfers(new MoneroTransferQuery().setIsIncoming(true));
         
         // export and re-import key images
-        List<MoneroKeyImage> keyImages = wallet.getKeyImages();
+        List<MoneroKeyImage> keyImages = wallet.exportKeyImages();
         wallet.importKeyImages(keyImages);
         
         // get incoming transfers after importing
@@ -416,6 +418,69 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     }
   }
   
+  // Is compatible with monero-wallet-rpc wallet files
+  @Test
+  public void testWalletFileCompatibility() {
+    assumeTrue(TEST_NON_RELAYS);
+    
+    // create wallet using monero-wallet-rpc
+    String walletName = GenUtils.getUUID();
+    MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
+    walletRpc.createWallet(new MoneroWalletConfig().setPath(walletName).setPassword(TestUtils.WALLET_PASSWORD).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+    walletRpc.sync();
+    BigInteger balance = walletRpc.getBalance();
+    String outputsHex = walletRpc.exportOutputs();
+    walletRpc.close(true);
+    
+    // open as full wallet
+    MoneroWalletFull walletFull = MoneroWalletFull.openWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_RPC_LOCAL_WALLET_DIR + "/" + walletName).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setServerUri(TestUtils.DAEMON_RPC_URI).setServerUsername(TestUtils.DAEMON_RPC_USERNAME).setServerPassword(TestUtils.DAEMON_RPC_PASSWORD));
+    walletFull.sync();
+    assertEquals(TestUtils.MNEMONIC, walletFull.getMnemonic());
+    assertEquals(TestUtils.ADDRESS, walletFull.getPrimaryAddress());
+    assertEquals(balance, walletFull.getBalance());
+    assertEquals(outputsHex.length(), walletFull.exportOutputs().length());
+    walletFull.close(true);
+    
+    // create full wallet
+    walletName = GenUtils.getUUID();
+    walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_RPC_LOCAL_WALLET_DIR + "/" + walletName).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setServerUri(TestUtils.DAEMON_RPC_URI).setServerUsername(TestUtils.DAEMON_RPC_USERNAME).setServerPassword(TestUtils.DAEMON_RPC_PASSWORD));
+    walletFull.sync();
+    balance = walletFull.getBalance();
+    outputsHex = walletFull.exportOutputs();
+    walletFull.close(true);
+    
+    // open wallet using monero-wallet-rpc
+    walletRpc.openWallet(new MoneroWalletConfig().setPath(walletName).setPassword(TestUtils.WALLET_PASSWORD));
+    walletRpc.sync();
+    assertEquals(TestUtils.MNEMONIC, walletRpc.getMnemonic());
+    assertEquals(TestUtils.ADDRESS, walletRpc.getPrimaryAddress());
+    assertEquals(balance, walletRpc.getBalance());
+    assertEquals(outputsHex.length(), walletRpc.exportOutputs().length());
+    walletRpc.close(true);
+  }
+  
+  // Is compatible with monero-wallet-rpc outputs and offline transaction signing
+  @SuppressWarnings("unused")
+  @Test
+  public void testViewOnlyAndOfflineWalletCompatibility() throws InterruptedException, IOException {
+    assumeTrue(!LITE_MODE && (TEST_NON_RELAYS || TEST_RELAYS));
+    
+    // create view-only wallet in wallet rpc process
+    MoneroWalletRpc viewOnlyWallet = TestUtils.startWalletRpcProcess();
+    viewOnlyWallet.createWallet(new MoneroWalletConfig().setPath(GenUtils.getUUID()).setPassword(TestUtils.WALLET_PASSWORD).setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+    
+    // create offline full wallet
+    MoneroWalletFull offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setServerUri("").setRestoreHeight(0l));
+    
+    // test tx signing with wallets
+    try { 
+      testViewOnlyAndOfflineWallets(viewOnlyWallet, offlineWallet);
+    } finally {
+      TestUtils.stopWalletRpcProcess(viewOnlyWallet);
+      closeWallet(offlineWallet);
+    }
+  };
+  
   // Can re-sync an existing wallet from scratch
   @Test
   @Disabled // TODO monero-project: cannot re-sync from lower block height after wallet saved
@@ -684,7 +749,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 //    walletKeys.sync(new WalletSyncPrinter());
 //  }
 //  
-//  List<MoneroKeyImage> keyImages = walletKeys.getKeyImages();
+//  List<MoneroKeyImage> keyImages = walletKeys.exportKeyImages();
 //  walletKeys.importKeyImages(keyImages);
   }
   
@@ -1562,8 +1627,8 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testGetTxsValidateInputs() {
-    super.testGetTxsValidateInputs();
+  public void testValidateInputsGetTxs() {
+    super.testValidateInputsGetTxs();
   }
 
   @Test
@@ -1577,8 +1642,8 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testGetTransfersValidateInputs() {
-    super.testGetTransfersValidateInputs();
+  public void testValidateInputsGetTransfers() {
+    super.testValidateInputsGetTransfers();
   }
   
   @Test
@@ -1597,8 +1662,8 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testGetOutputsValidateInputs() {
-    super.testGetOutputsValidateInputs();
+  public void testValidateInputsGetOutputs() {
+    super.testValidateInputsGetOutputs();
   }
 
   @Test
@@ -1642,18 +1707,18 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testGetOutputsHex() {
-    super.testGetOutputsHex();
+  public void testExportOutputs() {
+    super.testExportOutputs();
   }
 
   @Test
-  public void testImportOutputsHex() {
-    super.testImportOutputsHex();
+  public void testImportOutputs() {
+    super.testImportOutputs();
   }
 
   @Test
-  public void testGetSignedKeyImages() {
-    super.testGetSignedKeyImages();
+  public void testExportKeyImages() {
+    super.testExportKeyImages();
   }
 
   @Test
@@ -1695,6 +1760,11 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   @Test
   public void testMining() {
     super.testMining();
+  }
+  
+  @Test
+  public void testValidateInputsSendingFunds() {
+    super.testValidateInputsSendingFunds();
   }
   
   @Test

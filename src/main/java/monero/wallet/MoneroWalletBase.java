@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
+import monero.daemon.model.MoneroKeyImage;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIncomingTransfer;
@@ -275,6 +276,16 @@ abstract class MoneroWalletBase implements MoneroWallet {
   @Override
   public List<MoneroOutputWallet> getOutputs() {
     return getOutputs(null);
+  }
+  
+  @Override
+  public String exportOutputs() {
+    return exportOutputs(false);
+  }
+  
+  @Override
+  public List<MoneroKeyImage> exportKeyImages() {
+    return exportKeyImages(false);
   }
   
   @Override

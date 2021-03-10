@@ -1,14 +1,11 @@
 package monero.wallet.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import common.types.Filter;
+import common.utils.GenUtils;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import common.types.Filter;
-import common.utils.GenUtils;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroTx;
 
@@ -81,30 +78,6 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
   
   public MoneroOutputQuery setSubaddressIndices(Integer... subaddressIndices) {
     this.subaddressIndices = GenUtils.arrayToList(subaddressIndices);
-    return this;
-  }
-  
-  /**
-   * Indicates if the this query will fetch locked outputs, unlocked outputs, or both (null).
-   * 
-   * @return true if locked outputs queried, false of unlocked outputs queried, null if both
-   */
-  @JsonProperty("isLocked")
-  @Override
-  public Boolean isLocked() {
-    if (txQuery == null) return null;
-    return txQuery.isLocked();
-  }
-  
-  /**
-   * Convenience method to query outputs by the locked state of their tx.
-   * 
-   * @param isLocked specifies if the output's tx must be locked or unlocked (optional)
-   * @return this query for chaining
-   */
-  public MoneroOutputQuery setIsLocked(Boolean isLocked) {
-    if (txQuery == null) txQuery = new MoneroTxQuery();
-    txQuery.setIsLocked(isLocked);
     return this;
   }
   

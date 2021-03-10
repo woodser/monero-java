@@ -96,6 +96,16 @@ public class MoneroTxConfig {
   }
   
   /**
+   * Set the amount of a single-destination configuration.
+   * 
+   * @param amount - the amount to set for the single destination in atomic units as a string
+   * @return MoneroTxConfig this configuration for chaining
+   */
+  public MoneroTxConfig setAmount(String amount) {
+    return setAmount(new BigInteger(amount));
+  }
+  
+  /**
    * Get the amount of a single-destination configuration.
    * 
    * @return BigInteger the amount of the single destination
@@ -104,6 +114,10 @@ public class MoneroTxConfig {
   public BigInteger getAmount() {
     if (this.destinations == null || this.destinations.size() != 1) throw new MoneroError("Cannot get amount because MoneroTxConfig does not have exactly one destination");
     return this.destinations.get(0).getAmount();
+  }
+  
+  public MoneroTxConfig addDestination(String address, BigInteger amount) {
+    return addDestination(new MoneroDestination(address, amount));
   }
   
   public MoneroTxConfig addDestination(MoneroDestination destination) {

@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import monero.common.MoneroError;
@@ -56,7 +57,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @AfterAll
   public void afterAll() {
     super.afterAll();
-    for (MoneroWalletRpc walletRpc : TestUtils.WALLET_PORT_OFFSETS.keySet()) {
+    for (MoneroWalletRpc walletRpc : new HashSet<MoneroWalletRpc>(TestUtils.WALLET_PORT_OFFSETS.keySet())) {
       System.err.println("WARNING: Wallet RPC process was not stopped after all tests, stopping");
       try { TestUtils.stopWalletRpcProcess(walletRpc); }
       catch (Exception e) { throw new RuntimeException(e); }
@@ -66,7 +67,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @AfterEach
   public void afterEach(TestInfo testInfo) {
     super.afterEach(testInfo);
-    for (MoneroWalletRpc walletRpc : TestUtils.WALLET_PORT_OFFSETS.keySet()) {
+    for (MoneroWalletRpc walletRpc : new HashSet<MoneroWalletRpc>(TestUtils.WALLET_PORT_OFFSETS.keySet())) {
       System.err.println("WARNING: Wallet RPC process was not stopped after test " + testInfo.getDisplayName() + ", stopping");
       try { TestUtils.stopWalletRpcProcess(walletRpc); }
       catch (Exception e) { throw new RuntimeException(e); }
@@ -633,8 +634,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testGetTxsValidateInputs() {
-    super.testGetTxsValidateInputs();
+  public void testValidateInputsGetTxs() {
+    super.testValidateInputsGetTxs();
   }
 
   @Test
@@ -648,8 +649,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testGetTransfersValidateInputs() {
-    super.testGetTransfersValidateInputs();
+  public void testValidateInputsGetTransfers() {
+    super.testValidateInputsGetTransfers();
   }
   
   @Test
@@ -668,8 +669,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testGetOutputsValidateInputs() {
-    super.testGetOutputsValidateInputs();
+  public void testValidateInputsGetOutputs() {
+    super.testValidateInputsGetOutputs();
   }
 
   @Test
@@ -713,18 +714,18 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
 
   @Test
-  public void testGetOutputsHex() {
-    super.testGetOutputsHex();
+  public void testExportOutputs() {
+    super.testExportOutputs();
   }
 
   @Test
-  public void testImportOutputsHex() {
-    super.testImportOutputsHex();
+  public void testImportOutputs() {
+    super.testImportOutputs();
   }
 
   @Test
-  public void testGetSignedKeyImages() {
-    super.testGetSignedKeyImages();
+  public void testExportKeyImages() {
+    super.testExportKeyImages();
   }
 
   @Test
@@ -766,6 +767,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Test
   public void testMining() {
     super.testMining();
+  }
+  
+  @Test
+  public void testValidateInputsSendingFunds() {
+    super.testValidateInputsSendingFunds();
   }
   
   @Test

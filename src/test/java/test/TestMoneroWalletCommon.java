@@ -458,7 +458,7 @@ public abstract class TestMoneroWalletCommon {
     assumeTrue(TEST_NON_RELAYS);
     String primaryAddress = wallet.getPrimaryAddress();
     MoneroUtils.validateAddress(primaryAddress, TestUtils.NETWORK_TYPE);
-    assertEquals((wallet.getSubaddress(0, 0)).getAddress(), primaryAddress);
+    assertEquals(wallet.getAddress(0, 0), primaryAddress);
   }
   
   // Can get the address of a subaddress at a specified account and subaddress index
@@ -615,7 +615,9 @@ public abstract class TestMoneroWalletCommon {
       if (lastHeight != null) assertTrue(height >= lastHeight);
       lastHeight = height;
     }
-    assertTrue(lastHeight > 0);
+    assertTrue(lastHeight >= 0);
+    long height = wallet.getHeight();
+    assertTrue(height >= 0);
     
     // test future date
     try {
@@ -1228,7 +1230,7 @@ public abstract class TestMoneroWalletCommon {
   
   // Validates inputs when getting transactions
   @Test
-  public void testGetTxsValidateInputs() {
+  public void testValidateInputsGetTxs() {
     assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // fetch random txs for testing
@@ -1461,7 +1463,7 @@ public abstract class TestMoneroWalletCommon {
   
   // Validates inputs when getting transfers
   @Test
-  public void testGetTransfersValidateInputs() {
+  public void testValidateInputsGetTransfers() {
     assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // test with invalid hash
@@ -1664,7 +1666,7 @@ public abstract class TestMoneroWalletCommon {
   
   // Validates inputs when getting wallet outputs
   @Test
-  public void testGetOutputsValidateInputs() {
+  public void testValidateInputsGetOutputs() {
     assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // test with invalid hash
@@ -1681,26 +1683,31 @@ public abstract class TestMoneroWalletCommon {
     for (MoneroOutputWallet output : outputs) assertTrue(tx == output.getTx());
   }
   
-  // Can get outputs in hex format
+  // Can export outputs in hex format
   @Test
-  public void testGetOutputsHex() {
+  public void testExportOutputs() {
     assumeTrue(TEST_NON_RELAYS);
-    String outputsHex = wallet.getOutputsHex();
+    String outputsHex = wallet.exportOutputs();
     assertNotNull(outputsHex);  // TODO: this will fail if wallet has no outputs; run these tests on new wallet
     assertTrue(outputsHex.length() > 0);
+    
+    // wallet exports outputs since last export by default
+    outputsHex = wallet.exportOutputs();
+    String outputsHexAll = wallet.exportOutputs(true);
+    assertTrue(outputsHexAll.length() > outputsHex.length());
   }
   
   // Can import outputs in hex format
   @Test
-  public void testImportOutputsHex() {
+  public void testImportOutputs() {
     assumeTrue(TEST_NON_RELAYS);
     
-    // get outputs hex
-    String outputsHex = wallet.getOutputsHex();
+    // export outputs hex
+    String outputsHex = wallet.exportOutputs();
     
     // import outputs hex
     if (outputsHex != null) {
-      int numImported = wallet.importOutputsHex(outputsHex);
+      int numImported = wallet.importOutputs(outputsHex);
       assertTrue(numImported > 0);
     }
   }
@@ -2179,17 +2186,22 @@ public abstract class TestMoneroWalletCommon {
     // TODO: test that get transaction has note
   }
   
-  // Can get signed key images
+  // Can export signed key images
   @Test
-  public void testGetSignedKeyImages() {
+  public void testExportKeyImages() {
     assumeTrue(TEST_NON_RELAYS);
-    List<MoneroKeyImage> images = wallet.getKeyImages();
+    List<MoneroKeyImage> images = wallet.exportKeyImages(true);
     assertTrue(images.size() > 0, "No signed key images in wallet");
     for (MoneroKeyImage image : images) {
       assertTrue(image instanceof MoneroKeyImage);
       assertTrue(image.getHex().length() > 0);
       assertTrue(image.getSignature().length() > 0);
     }
+    
+    // wallet exports key images since last export by default
+    images = wallet.exportKeyImages();
+    List<MoneroKeyImage> imagesAll = wallet.exportKeyImages(true);
+    assert(imagesAll.size() > images.size());
   }
   
   // Can get new key images from the last import
@@ -2198,11 +2210,11 @@ public abstract class TestMoneroWalletCommon {
     assumeTrue(TEST_NON_RELAYS);
     
     // get outputs hex
-    String outputsHex = wallet.getOutputsHex();
+    String outputsHex = wallet.exportOutputs();
     
     // import outputs hex
     if (outputsHex != null) {
-      int numImported = wallet.importOutputsHex(outputsHex);
+      int numImported = wallet.importOutputs(outputsHex);
       assertTrue(numImported > 0);
     }
     
@@ -2221,7 +2233,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testImportKeyImages() {
     assumeTrue(TEST_NON_RELAYS);
-    List<MoneroKeyImage> images = wallet.getKeyImages();
+    List<MoneroKeyImage> images = wallet.exportKeyImages();
     assertTrue(images.size() > 0, "Wallet does not have any key images; run send tests");
     MoneroKeyImageImportResult result = wallet.importKeyImages(images);
     assertTrue(result.getHeight() > 0);
@@ -2241,7 +2253,22 @@ public abstract class TestMoneroWalletCommon {
   @SuppressWarnings("unused")
   @Test
   public void testViewOnlyAndOfflineWallets() {
-    assumeTrue(TEST_NON_RELAYS || TEST_RELAYS);
+    assumeTrue(!LITE_MODE && (TEST_NON_RELAYS || TEST_RELAYS));
+    
+    // create view-only and offline wallets
+    MoneroWallet viewOnlyWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+    MoneroWallet offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setServerUri("").setRestoreHeight(0l));
+    
+    // test tx signing with wallets
+    try {
+      testViewOnlyAndOfflineWallets(viewOnlyWallet, offlineWallet);
+    } finally {
+      closeWallet(viewOnlyWallet);
+      closeWallet(offlineWallet);
+    }
+  }
+  
+  protected void testViewOnlyAndOfflineWallets(MoneroWallet viewOnlyWallet, MoneroWallet offlineWallet) {
     
     // wait for txs to confirm and for sufficient unlocked balance
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
@@ -2250,68 +2277,55 @@ public abstract class TestMoneroWalletCommon {
     // collect info from main test wallet
     String primaryAddress = wallet.getPrimaryAddress();
     String privateViewKey = wallet.getPrivateViewKey();
-    String privateSpendKey = wallet.getPrivateSpendKey();
     
-    // create, sign, and submit transactions using view-only and offline wallets
-    MoneroWallet viewOnlyWallet = null;
-    MoneroWallet offlineWallet = null;
-    try {
-      
-      // create and sync view-only wallet
-      viewOnlyWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
-      assertEquals(primaryAddress, viewOnlyWallet.getPrimaryAddress());
-      assertEquals(privateViewKey, viewOnlyWallet.getPrivateViewKey());
-      assertEquals(null, viewOnlyWallet.getPrivateSpendKey());
-      assertEquals(null, viewOnlyWallet.getMnemonic());
-      assertEquals(null, viewOnlyWallet.getMnemonicLanguage());
-      assertTrue(viewOnlyWallet.isViewOnly());
-      assertTrue(viewOnlyWallet.isConnected());  // TODO: this fails with monero-wallet-rpc and monerod with authentication
-      String viewOnlyPath = viewOnlyWallet.getPath();
-      viewOnlyWallet.sync();
-      assertTrue(viewOnlyWallet.getTxs().size() > 0);
-      
-      // export outputs from view-only wallet
-      String outputsHex = viewOnlyWallet.getOutputsHex();
-      
-      // create offline wallet
-      offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setServerUri(""));
-      assertFalse(offlineWallet.isConnected());
-      assertFalse(offlineWallet.isViewOnly());
-      if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic()); // TODO monero-project: cannot get mnemonic from offline wallet rpc
-      if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(0, offlineWallet.getTxs().size());  // TODO: monero-wallet-rpc has these transactions cached on startup
-      String offlineWalletPath = offlineWallet.getPath();
-      
-      // import outputs to offline wallet
-      offlineWallet.importOutputsHex(outputsHex);
-      
-      // export key images from offline wallet
-      List<MoneroKeyImage> keyImages = offlineWallet.getKeyImages();
-      
-      // import key images to view-only wallet
-      viewOnlyWallet.importKeyImages(keyImages);
-      
-      // create unsigned tx using view-only wallet
-      MoneroTxWallet unsignedTx = viewOnlyWallet.createTx(new MoneroTxConfig().setAccountIndex(0).setAddress(primaryAddress).setAmount(TestUtils.MAX_FEE.multiply(new BigInteger("3"))));
-      assertNotNull(unsignedTx.getTxSet().getUnsignedTxHex());
-      
-      // sign tx using offline wallet
-      String signedTxHex = offlineWallet.signTxs(unsignedTx.getTxSet().getUnsignedTxHex());
-      assertFalse(signedTxHex.isEmpty());
-      
-      // parse or "describe" unsigned tx set
-      MoneroTxSet parsedTxSet = offlineWallet.parseTxSet(unsignedTx.getTxSet());
-      testParsedTxSet(parsedTxSet);
-      
-      // submit signed tx using view-only wallet
-      if (TEST_RELAYS) {
-        List<String> txHashes = viewOnlyWallet.submitTxs(signedTxHex);
-        assertEquals(1, txHashes.size());
-        assertEquals(64, txHashes.get(0).length());
-        TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(viewOnlyWallet); // wait for confirmation for other tests
-      }
-    } finally {
-      try { closeWallet(viewOnlyWallet); } catch (Exception e) { }
-      try { closeWallet(offlineWallet); } catch (Exception e) { }
+    // test and sync view-only wallet
+    assertEquals(primaryAddress, viewOnlyWallet.getPrimaryAddress());
+    assertEquals(privateViewKey, viewOnlyWallet.getPrivateViewKey());
+    assertEquals(null, viewOnlyWallet.getPrivateSpendKey());
+    assertEquals(null, viewOnlyWallet.getMnemonic());
+    assertEquals(null, viewOnlyWallet.getMnemonicLanguage());
+    assertTrue(viewOnlyWallet.isViewOnly());
+    assertTrue(viewOnlyWallet.isConnected());  // TODO: this fails with monero-wallet-rpc and monerod with authentication
+    viewOnlyWallet.sync();
+    assertTrue(viewOnlyWallet.getTxs().size() > 0);
+    
+    // export outputs from view-only wallet
+    String outputsHex = viewOnlyWallet.exportOutputs();
+    
+    // test offline wallet
+    assertFalse(offlineWallet.isConnected());
+    assertFalse(offlineWallet.isViewOnly());
+    if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic()); // TODO monero-project: cannot get mnemonic from offline wallet rpc
+    if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(0, offlineWallet.getTxs().size());  // TODO: monero-wallet-rpc has these transactions cached on startup
+    
+    // import outputs to offline wallet
+    int numOutputsImported = offlineWallet.importOutputs(outputsHex);
+    assertTrue(numOutputsImported > 0, "No outputs imported");
+    
+    // export key images from offline wallet
+    List<MoneroKeyImage> keyImages = offlineWallet.exportKeyImages();
+    
+    // import key images to view-only wallet
+    viewOnlyWallet.importKeyImages(keyImages);
+    
+    // create unsigned tx using view-only wallet
+    MoneroTxWallet unsignedTx = viewOnlyWallet.createTx(new MoneroTxConfig().setAccountIndex(0).setAddress(primaryAddress).setAmount(TestUtils.MAX_FEE.multiply(new BigInteger("3"))));
+    assertNotNull(unsignedTx.getTxSet().getUnsignedTxHex());
+    
+    // sign tx using offline wallet
+    String signedTxHex = offlineWallet.signTxs(unsignedTx.getTxSet().getUnsignedTxHex());
+    assertFalse(signedTxHex.isEmpty());
+    
+    // parse or "describe" unsigned tx set
+    MoneroTxSet describedTxSet = offlineWallet.describeTxSet(unsignedTx.getTxSet());
+    testDescribedTxSet(describedTxSet);
+    
+    // submit signed tx using view-only wallet
+    if (TEST_RELAYS) {
+      List<String> txHashes = viewOnlyWallet.submitTxs(signedTxHex);
+      assertEquals(1, txHashes.size());
+      assertEquals(64, txHashes.get(0).length());
+      TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(viewOnlyWallet); // wait for confirmation for other tests
     }
   }
   
@@ -2528,6 +2542,19 @@ public abstract class TestMoneroWalletCommon {
   }
   
   // ------------------------------- TEST RELAYS ------------------------------
+  
+  // Validates inputs when sending funds
+  @Test
+  public void testValidateInputsSendingFunds() {
+    
+    // try sending with invalid address
+    try {
+      wallet.createTx(new MoneroTxConfig().setAddress("my invalid address").setAccountIndex(0).setAmount(TestUtils.MAX_FEE));
+      fail("Should have thrown");
+    } catch (MoneroError err) {
+      assertEquals("Invalid destination address", err.getMessage());
+    }
+  }
   
   // Can sync with txs in the pool sent from/to the same account
   // TODO: this test fails because wallet does not recognize pool tx sent from/to same account
@@ -2933,6 +2960,7 @@ public abstract class TestMoneroWalletCommon {
     String paymentId = integratedAddress.getPaymentId();
     try {
       testSendToSingle(new MoneroTxConfig().setCanSplit(false).setPaymentId(paymentId + paymentId + paymentId + paymentId));  // 64 character payment id
+      fail("Should have thrown");
     } catch (MoneroError e) {
       assertEquals("Standalone payment IDs are obsolete. Use subaddresses or integrated addresses instead", e.getMessage());
     }
@@ -2995,6 +3023,17 @@ public abstract class TestMoneroWalletCommon {
     config.setAccountIndex(fromAccount.getIndex());
     config.setSubaddressIndices(fromSubaddress.getIndex());
     MoneroTxConfig configCopy = config.copy();
+    
+    // test sending to invalid address
+    try {
+      config.setAddress("my invalid address");
+      if (!Boolean.FALSE.equals(config.getCanSplit())) wallet.createTxs(config);
+      else wallet.createTx(config);
+      fail("Should have thrown error creating tx with invalid address");
+    } catch (MoneroError e) {
+      assertEquals("Invalid destination address", e.getMessage());
+      config.setAddress(address);
+    }
     
     // send to self
     txs.addAll(wallet.createTxs(config));
@@ -3242,7 +3281,7 @@ public abstract class TestMoneroWalletCommon {
     int numOutputs = 3;
     
     // get outputs to sweep (not spent, unlocked, and amount >= fee)
-    List<MoneroOutputWallet> spendableUnlockedOutputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setIsLocked(false));
+    List<MoneroOutputWallet> spendableUnlockedOutputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)));
     List<MoneroOutputWallet> outputsToSweep = new ArrayList<MoneroOutputWallet>();
     for (int i = 0; i < spendableUnlockedOutputs.size() && outputsToSweep.size() < numOutputs; i++) {
       if (spendableUnlockedOutputs.get(i).getAmount().compareTo(TestUtils.MAX_FEE) > 0) outputsToSweep.add(spendableUnlockedOutputs.get(i));  // output cannot be swept if amount does not cover fee
@@ -3568,7 +3607,7 @@ public abstract class TestMoneroWalletCommon {
         assertNull(txSet.getUnsignedTxHex());
         
         // parse multisig tx hex and test
-        testParsedTxSet(participant.parseTxSet(txSet));
+        testDescribedTxSet(participant.describeTxSet(txSet));
         
         // sign the tx with participants 1 through m - 1 to meet threshold
         String multisigTxHex = txSet.getMultisigTxHex();
@@ -3603,7 +3642,7 @@ public abstract class TestMoneroWalletCommon {
         assertFalse(txSet.getTxs().isEmpty());
         
         // parse multisig tx hex and test
-        testParsedTxSet(participant.parseTxSet(txSet));
+        testDescribedTxSet(participant.describeTxSet(txSet));
         
         // sign the tx with participants 1 through m - 1 to meet threshold
         multisigTxHex = txSet.getMultisigTxHex();
@@ -3639,7 +3678,7 @@ public abstract class TestMoneroWalletCommon {
         assertNull(txSet.getUnsignedTxHex());
         
         // parse multisig tx hex and test
-        testParsedTxSet(participant.parseTxSet(txSet));
+        testDescribedTxSet(participant.describeTxSet(txSet));
         
         // sign the tx with participants 1 through m - 1 to meet threshold
         multisigTxHex = txSet.getMultisigTxHex();
@@ -4145,7 +4184,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // all unspent, unlocked outputs must be less than fee
-    List<MoneroOutputWallet> spendableOutputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setIsLocked(false));
+    List<MoneroOutputWallet> spendableOutputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)));
     for (MoneroOutputWallet spendableOutput : spendableOutputs) {
       assertTrue(spendableOutput.getAmount().compareTo(TestUtils.MAX_FEE) < 0, "Unspent output should have been swept\n" + spendableOutput.toString());
     }
@@ -4251,8 +4290,8 @@ public abstract class TestMoneroWalletCommon {
       assertFalse(receiverListener.getOutputsReceived().isEmpty(), "No notification of received funds in " + (sameAccount ? "same account" : "different wallets")); // TODO (monero-project): notify of funds sent from/to same account with amount 0
       for (MoneroOutputWallet output : receiverListener.getOutputsReceived()) assertNotEquals(null, output.getTx().isConfirmed());
     } finally {
-      sender.removeListener(senderListener);
-      receiver.removeListener(receiverListener);
+      if (sender != null) sender.removeListener(senderListener);
+      if (receiver != null) receiver.removeListener(receiverListener);
       if (!sameAccount && receiver != null) closeWallet(receiver);
     }
   }
@@ -4328,7 +4367,7 @@ public abstract class TestMoneroWalletCommon {
     MoneroTxWallet tx = null;
     int[] destinationAccounts = sameAccount ? (sweepOutput ? new int[] {0} : new int[] {0, 1, 2}) : (sweepOutput ? new int[] {1} : new int[] {1, 2, 3});
     if (sweepOutput) {
-      List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setIsLocked(false).setAccountIndex(0).setMinAmount(TestUtils.MAX_FEE.multiply(new BigInteger("5"))));
+      List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)).setAccountIndex(0).setMinAmount(TestUtils.MAX_FEE.multiply(new BigInteger("5"))));
       if (outputs.isEmpty()) {
         errors.add("ERROR: No outputs available to sweep from account 0");
         return errors;
@@ -4341,7 +4380,7 @@ public abstract class TestMoneroWalletCommon {
       MoneroTxConfig config = new MoneroTxConfig();
       config.setAccountIndex(0);
       for (int destinationAccount : destinationAccounts) {
-        config.addDestination(new MoneroDestination(wallet.getAddress(destinationAccount, 0), TestUtils.MAX_FEE));
+        config.addDestination(wallet.getAddress(destinationAccount, 0), TestUtils.MAX_FEE);
       }
       config.setRelay(true);
       tx = wallet.createTx(config);
@@ -5272,17 +5311,17 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
-  private static void testParsedTxSet(MoneroTxSet parsedTxSet) {
-    assertNotNull(parsedTxSet.getTxs());
-    assertFalse(parsedTxSet.getTxs().isEmpty());
-    assertNull(parsedTxSet.getSignedTxHex());
-    assertNull(parsedTxSet.getUnsignedTxHex());
+  private static void testDescribedTxSet(MoneroTxSet describedTxSet) {
+    assertNotNull(describedTxSet.getTxs());
+    assertFalse(describedTxSet.getTxs().isEmpty());
+    assertNull(describedTxSet.getSignedTxHex());
+    assertNull(describedTxSet.getUnsignedTxHex());
     
     // test each transaction        
     // TODO: use common tx wallet test?
-    assertNull(parsedTxSet.getMultisigTxHex());
-    for (MoneroTxWallet parsedTx : parsedTxSet.getTxs()) {
-      assertTrue(parsedTx.getTxSet() == parsedTxSet);
+    assertNull(describedTxSet.getMultisigTxHex());
+    for (MoneroTxWallet parsedTx : describedTxSet.getTxs()) {
+      assertTrue(parsedTx.getTxSet() == describedTxSet);
       TestUtils.testUnsignedBigInteger(parsedTx.getInputSum(), true);
       TestUtils.testUnsignedBigInteger(parsedTx.getOutputSum(), true);
       TestUtils.testUnsignedBigInteger(parsedTx.getFee());

@@ -5,6 +5,7 @@ import common.utils.GenUtils;
 import common.utils.JsonUtils;
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,11 +38,12 @@ public class MoneroUtils {
    * @return the version of this monero-java library
    */
   static String getVersion() {
-    return "0.5.1";
+    return "0.5.2";
   }
   
   public static final int RING_SIZE = 12; // network-enforced ring size
-
+  
+  private static long AU_PER_XMR = 1000000000000l;
   private static final int NUM_MNEMONIC_WORDS = 25;
   private static final int VIEW_KEY_LENGTH = 64;
   private static final String ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -315,6 +317,35 @@ public class MoneroUtils {
   
   public static void setJniLogLevel(int level) {
     setLogLevelJni(level);
+  }
+  
+  
+  /**
+   * Convert XMR to atomic units.
+   * 
+   * @param amountXmr amount in XMR to convert to atomic units
+   * @return amount in atomic units
+   */
+  public static BigInteger xmrToAtomicUnits(double amountXmr) {
+    double decimalDivisor = 1;
+    String amountXmrStr = "" + amountXmr;
+    int decimalIdx = amountXmrStr.indexOf('.');
+    if (decimalIdx > -1) {
+      decimalDivisor = Math.pow(10, amountXmrStr.length() - decimalIdx - 1);
+      amountXmrStr = amountXmrStr.substring(0, decimalIdx) + amountXmrStr.substring(decimalIdx + 1);
+    }
+    return new BigInteger(amountXmrStr).multiply(BigInteger.valueOf(MoneroUtils.AU_PER_XMR)).divide(BigInteger.valueOf((long) decimalDivisor));
+  }
+  
+  /**
+   * Convert atomic units to XMR.
+   * 
+   * @param amountAtomicUnits amount in atomic units to convert to XMR
+   * @return amount in XMR 
+   */
+  public static double atomicUnitsToXmr(BigInteger amountAtomicUnits) {
+    BigInteger[] quotientAndRemainder = amountAtomicUnits.divideAndRemainder(BigInteger.valueOf(AU_PER_XMR));
+    return quotientAndRemainder[0].doubleValue() + quotientAndRemainder[1].doubleValue() / MoneroUtils.AU_PER_XMR;
   }
   
   // ---------------------------- PRIVATE HELPERS -----------------------------

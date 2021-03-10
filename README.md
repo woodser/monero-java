@@ -113,13 +113,13 @@ walletFull.close(true);
 <dependency>
   <groupId>io.github.monero-ecosystem</groupId>
   <artifactId>monero-java</artifactId>
-  <version>0.5.1</version>
+  <version>0.5.2</version>
 </dependency>
 ```
 
 #### For Gradle, add to build.gradle:
 
-`compile 'io.github.monero-ecosystem:monero-java:0.5.1'`
+`compile 'io.github.monero-ecosystem:monero-java:0.5.2'`
 
 You are now ready to use this library with [monero-daemon-rpc](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.
 
@@ -140,7 +140,7 @@ If you want to process binary data or use a client-side wallet instead of RPC, s
  Mac: `brew install maven openjdk`
 2. `export JAVA_HOME=/path/to/jdk`, for example:<br>
  Ubuntu: `export JAVA_HOME=/usr/lib/jvm/default-java`<br>
- Mac example: `export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home`
+ Mac: `export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home`
 2. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
 3. `cd ./monero-java`
 3. Install Maven dependencies: `mvn install`

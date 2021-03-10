@@ -118,10 +118,11 @@ stress tester
 --------- MONERO PROJECT ISSUES ---------
 
 TO OPEN
+less lag when starting wallet sync
+monero-wallet-rpc zmq notifications
 wallet2 recognizes pool tx vouts but not vins (e.g. if funds sent from another copy of wallet) 
 keys wallet setDaemonConnection not working with authentication
 daemon cannot check for update while mining
-No notification of unconfirmed funds within 10 seconds
 syncing wallet does not update failed txs
 wallet rpc sweep_all subaddr_indices_all gathers subaddresses with 0 unlocked balance which then fails
 

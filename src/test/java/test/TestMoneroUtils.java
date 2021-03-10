@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import monero.common.MoneroError;
 import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroNetworkType;
@@ -84,6 +84,7 @@ public class TestMoneroUtils {
     assertEquals(map, map2);
   }
   
+  // Can validate addresses
   @Test
   public void testAddressValidation() {
     
@@ -153,6 +154,19 @@ public class TestMoneroUtils {
     testInvalidAddress("51qY4cQh9HkTeQB3GNAGPK2zRGen5UeW1WzegSizVsmf6z5NvM2GLoN6zzk1vHyzGAAfA8pGhuYAeCFZjHAp59jRj6LZRFrjuGK8Whthg2", MoneroNetworkType.STAGENET);
     testInvalidAddress("718B5D2JmMh5TJVWFbygJR15dvio5Z5B24hfSrWDzeroM8j8Lqc9sMoFE6324xg2ReaAZqHJkgfGFRugRmYHugHZ4f17Gxo", MoneroNetworkType.STAGENET);
   }
+  
+  // Can convert between XMR and atomic units
+  @Test
+  public void testAtomicUnitConversion() {
+    assertEquals(new BigInteger("1000000000000").toString(), MoneroUtils.xmrToAtomicUnits(1).toString());
+    assertEquals(1, MoneroUtils.atomicUnitsToXmr(new BigInteger("1000000000000")));
+    assertEquals(new BigInteger("1000000000").toString(), MoneroUtils.xmrToAtomicUnits(0.001).toString());
+    assertEquals(.001, MoneroUtils.atomicUnitsToXmr(new BigInteger("1000000000")));
+    assertEquals(new BigInteger("250000000000").toString(), MoneroUtils.xmrToAtomicUnits(.25).toString());
+    assertEquals(.25, MoneroUtils.atomicUnitsToXmr(new BigInteger("250000000000")));
+    assertEquals(new BigInteger("1250000000000").toString(), MoneroUtils.xmrToAtomicUnits(1.25).toString());
+    assertEquals(1.25, MoneroUtils.atomicUnitsToXmr(new BigInteger("1250000000000")));
+  };
   
   // ---------------------------- PRIVATE HELPERS -----------------------------
   

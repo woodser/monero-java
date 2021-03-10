@@ -1026,15 +1026,17 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   
   @SuppressWarnings("unchecked")
   @Override
-  public String getOutputsHex() {
-    Map<String, Object> resp = rpc.sendJsonRequest("export_outputs");
+  public String exportOutputs(boolean all) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("all", all);
+    Map<String, Object> resp = rpc.sendJsonRequest("export_outputs", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return (String) result.get("outputs_data_hex");
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public int importOutputsHex(String outputsHex) {
+  public int importOutputs(String outputsHex) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("outputs_data_hex", outputsHex);
     Map<String, Object> resp = rpc.sendJsonRequest("import_outputs", params);
@@ -1043,8 +1045,8 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   }
 
   @Override
-  public List<MoneroKeyImage> getKeyImages() {
-    return rpcExportKeyImages(true);
+  public List<MoneroKeyImage> exportKeyImages(boolean all) {
+    return rpcExportKeyImages(all);
   }
 
   @SuppressWarnings("unchecked")
@@ -1137,8 +1139,14 @@ public class MoneroWalletRpc extends MoneroWalletBase {
     else params.put("get_tx_key", true);
     
     // send request
-    Map<String, Object> resp = rpc.sendJsonRequest(config.getCanSplit() ? "transfer_split" : "transfer", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    Map<String, Object> result = null;
+    try {
+      Map<String, Object> resp = rpc.sendJsonRequest(config.getCanSplit() ? "transfer_split" : "transfer", params);
+      result = (Map<String, Object>) resp.get("result");
+    } catch (MoneroRpcError err) {
+      if (err.getMessage().indexOf("WALLET_RPC_ERROR_CODE_WRONG_ADDRESS") > -1) throw new MoneroError("Invalid destination address");
+      throw err;
+    }
     
     // pre-initialize txs iff present.  multisig and view-only wallets will have tx set without transactions
     List<MoneroTxWallet> txs = null;
@@ -1277,7 +1285,7 @@ public class MoneroWalletRpc extends MoneroWalletBase {
   
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroTxSet parseTxSet(MoneroTxSet txSet) {
+  public MoneroTxSet describeTxSet(MoneroTxSet txSet) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("unsigned_txset", txSet.getUnsignedTxHex());
     params.put("multisig_txset", txSet.getMultisigTxHex());
