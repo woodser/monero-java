@@ -1,6 +1,6 @@
 # Monero Java Library
 
-A Java library for creating Monero applications using RPC and JNI bindings to [monero v0.17.1.9 'Oxygen Orion'](https://github.com/monero-project/monero/tree/v0.17.1.9).
+A Java library for creating Monero applications using RPC and JNI bindings to [monero v0.17.2.0 'Oxygen Orion'](https://github.com/monero-project/monero/tree/v0.17.2.0).
 
 * Supports wallet and daemon RPC clients.
 * Supports client-side wallets using JNI bindings.

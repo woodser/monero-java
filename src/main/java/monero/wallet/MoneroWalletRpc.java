@@ -1,5 +1,5 @@
 /**
-x * Copyright (c) woodser
+ * Copyright (c) woodser
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -2963,7 +2963,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("tx_hash")) tx.setHash((String) val);
       else if (key.equals("unlocked")) tx.setIsLocked(!(Boolean) val);
       else if (key.equals("frozen")) output.setIsFrozen((Boolean) val);
-      else if (key.equals("pubkey")) output.setStealthPublicKey((String) val);
+      //else if (key.equals("pubkey")) output.setStealthPublicKey((String) val);
       else if (key.equals("subaddr_index")) {
         Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) val;
         output.setAccountIndex(rpcIndices.get("major").intValue());
