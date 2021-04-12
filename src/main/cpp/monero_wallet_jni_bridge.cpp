@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017-2020 woodser
+ * Copyright (c) woodser
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -192,7 +192,7 @@ struct wallet_jni_listener : public monero_wallet_listener {
     std::lock_guard<std::mutex> lock(_listenerMutex);
     if (jlistener == nullptr) return;
     JNIEnv *env;
-    int envStat = attachJVM(&env);	// TODO: necessary to attach every time?
+    int envStat = attachJVM(&env); // TODO: necessary to attach every time?
     if (envStat == JNI_ERR) return;
 
     // prepare callback arguments
@@ -209,7 +209,7 @@ struct wallet_jni_listener : public monero_wallet_listener {
 
     // check for and rethrow Java exception
     jthrowable jexception = env->ExceptionOccurred();
-    if (jexception) rethrow_java_exception_as_cpp_exception(env, jexception);  // TODO: does not detach JVM
+    if (jexception) rethrow_java_exception_as_cpp_exception(env, jexception); // TODO: does not detach JVM
 
     detachJVM(env, envStat);
   }
@@ -228,7 +228,7 @@ struct wallet_jni_listener : public monero_wallet_listener {
 
     // check for and rethrow Java exception
     jthrowable jexception = env->ExceptionOccurred();
-    if (jexception) rethrow_java_exception_as_cpp_exception(env, jexception);  // TODO: does not detach JVM
+    if (jexception) rethrow_java_exception_as_cpp_exception(env, jexception); // TODO: does not detach JVM
 
     detachJVM(env, envStat);
   }
@@ -248,7 +248,7 @@ struct wallet_jni_listener : public monero_wallet_listener {
 
     // check for and rethrow Java exception
     jthrowable jexception = env->ExceptionOccurred();
-    if (jexception) rethrow_java_exception_as_cpp_exception(env, jexception);  // TODO: does not detach JVM
+    if (jexception) rethrow_java_exception_as_cpp_exception(env, jexception); // TODO: does not detach JVM
 
     detachJVM(env, envStat);
   }
@@ -264,7 +264,7 @@ struct wallet_jni_listener : public monero_wallet_listener {
     boost::optional<uint64_t> height = output.m_tx->get_height();
     jstring jtx_hash = env->NewStringUTF(output.m_tx->m_hash.get().c_str());
     jstring jamount_str = env->NewStringUTF(to_string(*output.m_amount).c_str());
-    int version = output.m_tx->m_version == boost::none ? 1 : *output.m_tx->m_version;  // TODO: version not present in unlocked output notification, defaulting to 1
+    int version = output.m_tx->m_version == boost::none ? 2 : *output.m_tx->m_version; // TODO: version not present in unlocked output notification, defaulting to 2
     bool is_locked = std::static_pointer_cast<monero_tx_wallet>(output.m_tx)->m_is_locked.get();
 
     // invoke Java listener's onOutputReceived()
@@ -273,7 +273,7 @@ struct wallet_jni_listener : public monero_wallet_listener {
 
     // check for and rethrow Java exception
     jthrowable jexception = env->ExceptionOccurred();
-    if (jexception) rethrow_java_exception_as_cpp_exception(env, jexception);  // TODO: does not detach JVM
+    if (jexception) rethrow_java_exception_as_cpp_exception(env, jexception); // TODO: does not detach JVM
 
     detachJVM(env, envStat);
   }
@@ -289,14 +289,18 @@ struct wallet_jni_listener : public monero_wallet_listener {
     boost::optional<uint64_t> height = output.m_tx->get_height();
     jstring jtx_hash = env->NewStringUTF(output.m_tx->m_hash.get().c_str());
     jstring jamount_str = env->NewStringUTF(to_string(*output.m_amount).c_str());
+    jstring jaccount_idx_str = env->NewStringUTF(output.m_account_index == boost::none ? "" : to_string(*output.m_account_index).c_str()); // TODO: subaddress indices not known for some inputs (e.g. after tx creation)
+    jstring jsubaddress_idx_str = env->NewStringUTF(output.m_subaddress_index == boost::none ? "" : to_string(*output.m_subaddress_index).c_str());
+    int version = output.m_tx->m_version == boost::none ? 2 : *output.m_tx->m_version; // TODO: version not present in unlocked output notification, defaulting to 2
+    bool is_locked = std::static_pointer_cast<monero_tx_wallet>(output.m_tx)->m_is_locked.get();
 
     // invoke Java listener's onOutputSpent()
-    jmethodID listenerClass_onOutputSpent = env->GetMethodID(class_WalletListener, "onOutputSpent", "(JLjava/lang/String;Ljava/lang/String;III)V");
-    env->CallVoidMethod(jlistener, listenerClass_onOutputSpent, height == boost::none ? 0 : *height, jtx_hash, jamount_str, *output.m_account_index, output.m_subaddress_index, *output.m_tx->m_version);
+    jmethodID listenerClass_onOutputSpent = env->GetMethodID(class_WalletListener, "onOutputSpent", "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJZ)V");
+    env->CallVoidMethod(jlistener, listenerClass_onOutputSpent, height == boost::none ? 0 : *height, jtx_hash, jamount_str, jaccount_idx_str, jsubaddress_idx_str, version, *output.m_tx->m_unlock_height, is_locked);
 
     // check for and rethrow Java exception
     jthrowable jexception = env->ExceptionOccurred();
-    if (jexception) rethrow_java_exception_as_cpp_exception(env, jexception);  // TODO: does not detach JVM
+    if (jexception) rethrow_java_exception_as_cpp_exception(env, jexception); // TODO: does not detach JVM
 
     detachJVM(env, envStat);
   }

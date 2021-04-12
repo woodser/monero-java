@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Collection of general purpose utilities.
@@ -337,5 +338,15 @@ public class GenUtils {
    */
   public static String getUUID() {
     return UUID.randomUUID().toString(); 
+  }
+  
+  /**
+   * Wait for the duration.
+   * 
+   * @param duration is the duration to wait for
+   */
+  public static void waitFor(long duration) {
+    try { TimeUnit.MILLISECONDS.sleep(duration); }
+    catch (InterruptedException e) { throw new RuntimeException(e); }
   }
 }

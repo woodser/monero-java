@@ -26,6 +26,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.TestInstance;
@@ -416,33 +417,33 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     super.testTxWallet(tx, ctx);
   }
   
-  protected void testInvalidTxHashException(MoneroError e) {
-    super.testInvalidTxHashException(e);
+  protected void testInvalidTxHashError(MoneroError e) {
+    super.testInvalidTxHashError(e);
     assertEquals(-8, (int) e.getCode());
   }
   
-  protected void testInvalidTxKeyException(MoneroError e) {
-    super.testInvalidTxKeyException(e);
+  protected void testInvalidTxKeyError(MoneroError e) {
+    super.testInvalidTxKeyError(e);
     assertEquals(-25, (int) e.getCode());
   }
   
-  protected void testInvalidAddressException(MoneroError e) {
-    super.testInvalidAddressException(e);
+  protected void testInvalidAddressError(MoneroError e) {
+    super.testInvalidAddressError(e);
     assertEquals(-2, (int) e.getCode());
   }
   
-  protected void testInvalidSignatureException(MoneroError e) {
-    super.testInvalidSignatureException(e);
+  protected void testInvalidSignatureError(MoneroError e) {
+    super.testInvalidSignatureError(e);
     assertEquals(-1, (int) e.getCode()); // TODO: sometimes comes back bad, sometimes throws exception.  ensure txs come from different addresses?
   }
   
-  protected void testNoSubaddressException(MoneroError e) {
-    super.testNoSubaddressException(e);
+  protected void testNoSubaddressError(MoneroError e) {
+    super.testNoSubaddressError(e);
     assertEquals(-1, (int) e.getCode());
   }
   
-  protected void testSignatureHeaderCheckException(MoneroError e) {
-    super.testSignatureHeaderCheckException(e);
+  protected void testSignatureHeaderCheckError(MoneroError e) {
+    super.testSignatureHeaderCheckError(e);
     assertEquals(-1, (int) e.getCode());
   }
   
@@ -920,43 +921,44 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   @Test
-  public void testOutputNotificationsSameAccounts() {
-    super.testOutputNotificationsSameAccounts();
+  @Tag("NotificationTest")
+  public void testNotificationsDifferentWallet() {
+    super.testNotificationsDifferentWallet();
   }
   
   @Test
-  public void testOutputNotificationsDifferentAccounts() {
-    super.testOutputNotificationsDifferentAccounts();
+  @Tag("NotificationTest")
+  public void testNotificationsDifferentWalletWhenRelayed() {
+    super.testNotificationsDifferentWalletWhenRelayed();
   }
   
   @Test
-  public void testOutputNotificationsSweepOutput() {
-    super.testOutputNotificationsSweepOutput();
+  @Tag("NotificationTest")
+  public void testNotificationsDifferentAccounts() {
+    super.testNotificationsDifferentAccounts();
+  }
+  
+  @Test
+  @Tag("NotificationTest")
+  public void testNotificationsSameAccount() {
+    super.testNotificationsSameAccount();
+  }
+  
+  @Test
+  @Tag("NotificationTest")
+  public void testNotificationsDifferentAccountSweepOutput() {
+    super.testNotificationsDifferentAccountSweepOutput();
+  }
+  
+  @Test
+  @Tag("NotificationTest")
+  public void testNotificationsSameAccountSweepOutputWhenRelayed() {
+    super.testNotificationsSameAccountSweepOutputWhenRelayed();
   }
   
   @Test
   public void testStopListening() {
     super.testStopListening();
-  }
-  
-  @Test
-  public void testReceivesFundsWithinSyncPeriod() {
-    super.testReceivesFundsWithinSyncPeriod();
-  }
-  
-  @Test
-  public void testReceivesFundsWithinSyncPeriodSameAccount() {
-    super.testReceivesFundsWithinSyncPeriodSameAccount();
-  }
-  
-  @Test
-  public void testReceivedOutputNotifications() {
-    super.testReceivedOutputNotifications();
-  }
-  
-  @Test
-  public void testReceivedOutputNotificationsWithUnlockHeight() {
-    super.testReceivedOutputNotificationsWithUnlockHeight();
   }
   
   @Test

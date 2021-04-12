@@ -112,6 +112,9 @@ public class WalletTxTracker {
   public BigInteger waitForUnlockedBalance(MoneroWallet wallet, Integer accountIndex, Integer subaddressIndex, BigInteger minAmount) {
     if (minAmount == null) minAmount = new BigInteger("0");
     
+    // check if wallet has balance
+    if (wallet.getBalance(accountIndex, subaddressIndex).compareTo(minAmount) < 0) throw new RuntimeException("Wallet does not have enough balance to wait for");
+    
     // check if wallet has unlocked balance
     BigInteger unlockedBalance = wallet.getUnlockedBalance(accountIndex, subaddressIndex);
     if (unlockedBalance.compareTo(minAmount) > 0) return unlockedBalance;

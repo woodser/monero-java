@@ -36,6 +36,7 @@ import monero.wallet.model.MoneroWalletListener;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -129,7 +130,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   /**
    * This test demonstrates that importing key images erases incoming transfers.
    */
-  @Disabled // TODO monero-project: fix this https://github.com/monero-project/monero/issues/5812
+  //@Disabled // TODO monero-project: fix this https://github.com/monero-project/monero/issues/5812
   @Test
   public void testImportKeyImagesAndTransfers() {
     MoneroWalletFull wallet = null; // create a wallet for this test since it becomes corrupt TODO: use common wallet and move to common tests when fixed
@@ -167,7 +168,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
    * syncing, have registered listeners, and which are not closed.
    */
   @Test
-  @Disabled // TODO monero-project: disabled because observing memory leak behavior when all tests run together
+  //@Disabled // TODO monero-project: disabled because observing memory leak behavior when all tests run together
   public void testCreateWalletsWithoutClose() {
     
     // lets make some wallets and then go away
@@ -1385,14 +1386,14 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       // test output
       assertNotNull(output.getAmount());
       assertTrue(output.getAccountIndex() >= 0);
-      assertTrue(output.getSubaddressIndex() >= 0);
+      if (output.getSubaddressIndex() != null) assertTrue(output.getSubaddressIndex() >= 0); // TODO (monero-project): can be undefined because inputs not provided so one created from outgoing transfer
       
       // test output's tx
       assertNotNull(output.getTx());
       assertNotNull(output.getTx().getHash());
       assertEquals(64, output.getTx().getHash().length());
       assertTrue(output.getTx().getVersion() >= 0);
-      assertNull(output.getTx().getUnlockHeight());
+      assertTrue(output.getTx().getUnlockHeight() >= 0);
       assertEquals(1, output.getTx().getInputs().size());
       assertTrue(output.getTx().getInputs().get(0) == output);
       assertNull(output.getTx().getOutputs());
@@ -1913,43 +1914,44 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   }
   
   @Test
-  public void testOutputNotificationsSameAccounts() {
-    super.testOutputNotificationsSameAccounts();
+  @Tag("NotificationTest")
+  public void testNotificationsDifferentWallet() {
+    super.testNotificationsDifferentWallet();
   }
   
   @Test
-  public void testOutputNotificationsDifferentAccounts() {
-    super.testOutputNotificationsDifferentAccounts();
+  @Tag("NotificationTest")
+  public void testNotificationsDifferentWalletWhenRelayed() {
+    super.testNotificationsDifferentWalletWhenRelayed();
   }
   
   @Test
-  public void testOutputNotificationsSweepOutput() {
-    super.testOutputNotificationsSweepOutput();
+  @Tag("NotificationTest")
+  public void testNotificationsDifferentAccounts() {
+    super.testNotificationsDifferentAccounts();
+  }
+  
+  @Test
+  @Tag("NotificationTest")
+  public void testNotificationsSameAccount() {
+    super.testNotificationsSameAccount();
+  }
+  
+  @Test
+  @Tag("NotificationTest")
+  public void testNotificationsDifferentAccountSweepOutput() {
+    super.testNotificationsDifferentAccountSweepOutput();
+  }
+  
+  @Test
+  @Tag("NotificationTest")
+  public void testNotificationsSameAccountSweepOutputWhenRelayed() {
+    super.testNotificationsSameAccountSweepOutputWhenRelayed();
   }
   
   @Test
   public void testStopListening() {
     super.testStopListening();
-  }
-  
-  @Test
-  public void testReceivesFundsWithinSyncPeriod() {
-    super.testReceivesFundsWithinSyncPeriod();
-  }
-  
-  @Test
-  public void testReceivesFundsWithinSyncPeriodSameAccount() {
-    super.testReceivesFundsWithinSyncPeriodSameAccount();
-  }
-  
-  @Test
-  public void testReceivedOutputNotifications() {
-    super.testReceivedOutputNotifications();
-  }
-  
-  @Test
-  public void testReceivedOutputNotificationsWithUnlockHeight() {
-    super.testReceivedOutputNotificationsWithUnlockHeight();
   }
   
   @Test

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017-2020 woodser
+ * Copyright (c) woodser
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -84,7 +84,7 @@ public interface MoneroWallet {
   public Set<MoneroWalletListenerI> getListeners();
   
   /**
-   * Indicates if the wallet is view-only, meaning it does have the private
+   * Indicates if the wallet is view-only, meaning it does not have the private
    * spend key and can therefore only observe incoming outputs.
    * 
    * @return {bool} true if the wallet is view-only, false otherwise
@@ -676,20 +676,20 @@ public interface MoneroWallet {
   public List<MoneroIncomingTransfer> getIncomingTransfers();
   
   /**
-   * <p>Get the wallet's incoming transfers that meet criteria in a query object.</p>
+   * <p>Get incoming transfers that meet a query.</p>
    * 
    * <p>
    * All supported query criteria:<br>
-   * &nbsp;&nbsp; address - destination address (optional)<br>
+   * &nbsp;&nbsp; address - get incoming transfers to a specific address in the wallet (optional)<br>
    * &nbsp;&nbsp; accountIndex - get incoming transfers to a specific account index (optional)<br>
    * &nbsp;&nbsp; subaddressIndex - get incoming transfers to a specific subaddress index (optional)<br>
-   * &nbsp;&nbsp; subaddressIndices - get incoming transfers to specific subaddress indices (optional)<br>
-   * &nbsp;&nbsp; amount - amount transferred (optional)<br>
+   * &nbsp;&nbsp; subaddressIndices - get transfers destined for specific subaddress indices (optional)<br>
+   * &nbsp;&nbsp; amount - amount being transferred (optional)<br>
    * &nbsp;&nbsp; txQuery - get transfers whose transaction meets this query (optional)<br>
    * </p>
    * 
    * @param query specifies which incoming transfers to get
-   * @return the wallet's incoming transfers according to the given query
+   * @return incoming transfers that meet the query
    */
   public List<MoneroIncomingTransfer> getIncomingTransfers(MoneroTransferQuery query);
   
@@ -701,22 +701,22 @@ public interface MoneroWallet {
   public List<MoneroOutgoingTransfer> getOutgoingTransfers();
   
   /**
-   * <p>Get the wallet's outgoing transfers that meet criteria in a query object.</p>
+   * <p>Get outgoing transfers that meet a query.</p>
    * 
    * <p>
    * All supported query criteria:<br>
-   * &nbsp;&nbsp; address - source address of funds (optional)<br>
+   * &nbsp;&nbsp; address - get outgoing transfers from a specific address in the wallet (optional)<br>
    * &nbsp;&nbsp; accountIndex - get outgoing transfers from a specific account index (optional)<br>
    * &nbsp;&nbsp; subaddressIndex - get outgoing transfers from a specific subaddress index (optional)<br>
    * &nbsp;&nbsp; subaddressIndices - get outgoing transfers from specific subaddress indices (optional)<br>
-   * &nbsp;&nbsp; amount - amount transferred (optional)<br>
+   * &nbsp;&nbsp; amount - amount being transferred (optional)<br>
    * &nbsp;&nbsp; destinations - individual destinations of an outgoing transfer, which is local wallet data and NOT recoverable from the blockchain (optional)<br>
    * &nbsp;&nbsp; hasDestinations - get transfers that have destinations or not (optional)<br>
    * &nbsp;&nbsp; txQuery - get transfers whose transaction meets this query (optional)<br>
    * </p>
    * 
    * @param query specifies which outgoing transfers to get
-   * @return the wallet's outgoing transfers according to the given query
+   * @return outgoing transfers that meet the query
    */
   public List<MoneroOutgoingTransfer> getOutgoingTransfers(MoneroTransferQuery query);
   
@@ -750,7 +750,7 @@ public interface MoneroWallet {
    * </p>
    * 
    * @param query specifies attributes of outputs to get
-   * @return outputs that meet the query
+   * @return the queried outputs
    */
   public List<MoneroOutputWallet> getOutputs(MoneroOutputQuery query);
   
@@ -875,12 +875,13 @@ public interface MoneroWallet {
    * <p>
    * All supported configuration:<br>
    * &nbsp;&nbsp; address - single destination address (required)<br>
-   * &nbsp;&nbsp; accountIndex - source account index to sweep from from (required)<br>
-   * &nbsp;&nbsp; subaddressIndex - source subaddress index to sweep from (optional)<br>
+   * &nbsp;&nbsp; accountIndex - source account index to sweep from (optional, defaults to all accounts)<br>
+   * &nbsp;&nbsp; subaddressIndex - source subaddress index to sweep from (optional, defaults to all subaddresses)<br>
    * &nbsp;&nbsp; subaddressIndices - source subaddress indices to sweep from (optional)<br>
    * &nbsp;&nbsp; relay - relay the transactions to peers to commit to the blockchain (default false)<br>
    * &nbsp;&nbsp; priority - transaction priority (default MoneroTxPriority.NORMAL)<br>
    * &nbsp;&nbsp; unlockHeight - minimum height for the transactions to unlock (default 0)<br>
+   * &nbsp;&nbsp; sweepEachSubaddress - sweep each subaddress individually if true (default false)<br>
    * </p>
    * 
    * @param config is the sweep configuration

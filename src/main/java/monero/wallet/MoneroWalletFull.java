@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017-2020 woodser
+ * Copyright (c) woodser
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -71,7 +71,7 @@ import monero.wallet.model.MoneroWalletListenerI;
 /**
  * Implements a Monero wallet using fully client-side JNI bindings to monero-project's wallet2 in C++.
  */
-public class MoneroWalletFull extends MoneroWalletBase {
+public class MoneroWalletFull extends MoneroWalletDefault {
   
   // ----------------------------- PRIVATE SETUP ------------------------------
 
@@ -1551,16 +1551,18 @@ public class MoneroWalletFull extends MoneroWalletBase {
       for (MoneroWalletListenerI listener : getListeners()) listener.onOutputReceived((MoneroOutputWallet) tx.getOutputs().get(0));
     }
     
-    public void onOutputSpent(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version) {
+    public void onOutputSpent(long height, String txHash, String amountStr, String accountIdxStr, String subaddressIdxStr, int version, long unlockHeight, boolean isLocked) {
       
       // build spent output
       MoneroOutputWallet output = new MoneroOutputWallet();
       output.setAmount(new BigInteger(amountStr));
-      output.setAccountIndex(accountIdx);
-      output.setSubaddressIndex(subaddressIdx);
+      if (accountIdxStr.length() > 0) output.setAccountIndex(Integer.parseInt(accountIdxStr));
+      if (subaddressIdxStr.length() > 0) output.setSubaddressIndex(Integer.parseInt(subaddressIdxStr));
       MoneroTxWallet tx = new MoneroTxWallet();
       tx.setHash(txHash);
       tx.setVersion(version);
+      tx.setUnlockHeight(unlockHeight);
+      tx.setIsLocked(isLocked);
       output.setTx(tx);
       tx.setInputs(Arrays.asList(output));
       tx.setIsIncoming(false);

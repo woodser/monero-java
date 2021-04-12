@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017-2020 woodser
+ * Copyright (c) woodser
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 
 /**
- * Default Monero daemon implementation.
+ * Abstract default implementation of a Monero daemon.
  */
 public abstract class MoneroDaemonDefault implements MoneroDaemon {
   

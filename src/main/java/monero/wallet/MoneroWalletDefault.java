@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017-2020 woodser
+ * Copyright (c) woodser
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,9 +51,9 @@ import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletListenerI;
 
 /**
- * Abstract base implementation of a Monero wallet.
+ * Abstract default implementation of a Monero wallet.
  */
-abstract class MoneroWalletBase implements MoneroWallet {
+abstract class MoneroWalletDefault implements MoneroWallet {
   
   protected Set<MoneroWalletListenerI> listeners = new LinkedHashSet<MoneroWalletListenerI>();
   

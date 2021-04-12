@@ -28,7 +28,7 @@ public interface Filter<T> {
    */
   public static <T> List<T> apply(Filter<T> filter, List<? extends T> items) {
     List<T> filtered = new ArrayList<T>();
-    for (T item : items) if (filter.meetsCriteria(item)) filtered.add(item);
+    for (T item : items) if (filter == null || filter.meetsCriteria(item)) filtered.add(item);
     return filtered;
   }
   
