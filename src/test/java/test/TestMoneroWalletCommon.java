@@ -36,7 +36,6 @@ import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroVersion;
 import monero.wallet.MoneroWallet;
-import monero.wallet.MoneroWalletFull;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -4381,11 +4380,7 @@ public abstract class TestMoneroWalletCommon {
       if (!sender.getBalance().equals(senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getFirst())) issues.add("ERROR: sender balance != last notified balance after sending (" + sender.getBalance() + " != " + senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getFirst() + ")");
       if (!sender.getUnlockedBalance().equals(senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getSecond())) issues.add("ERROR: sender unlocked balance != last notified unlocked balance after sending (" + sender.getUnlockedBalance() + " != " + senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getSecond() + ")");
     }
-    if (senderNotificationCollector.getOutputsSpent(outputQuery).size() == 0) {
-      if (sender instanceof MoneroWalletRpc) issues.add("ERROR: monero-wallet-rpc sender did not announce unconfirmed spent output"); // TODO: document issue
-      else if (sender instanceof MoneroWalletFull) issues.add("ERROR: sender did not announce unconfirmed spent output: https://github.com/monero-project/monero/issues/7035"); // TODO monero-project: https://github.com/monero-project/monero/issues/7035
-      else issues.add("ERROR: sender did not announce unconfirmed spent output");
-    }
+    if (senderNotificationCollector.getOutputsSpent(outputQuery).size() == 0) issues.add("ERROR: sender did not announce unconfirmed spent output");
     
     // wait for end of sync period
     GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS - (System.currentTimeMillis() - startTime));
