@@ -3414,320 +3414,306 @@ public abstract class TestMoneroWalletCommon {
   // Supports multisig wallets
   @Test
   public void testMultisig() {
-    assumeTrue(!LITE_MODE && TEST_RELAYS);
+    testMultisig(2, 2, false); // n/n
+    testMultisig(2, 3, false); // (n-1)/n
+    testMultisig(2, 4, TEST_RELAYS && !LITE_MODE); // m/n
+  }
+  
+  private void testMultisig(int m, int n, boolean testTx) {
+    
+    // create n participants
+    List<MoneroWallet> participants = new ArrayList<MoneroWallet>();
+    for (int i = 0; i < n; i++) participants.add(createWallet(new MoneroWalletConfig()));
+
+    // test multisig
     try {
-      
-      // test n/n
-      testMultisig(2, 2, false);
-      //testMultisig(3, 3, false);
-      //testMultisig(4, 4, false);
-      
-      // test (n-1)/n
-      testMultisig(2, 3, false);
-      //testMultisig(3, 4, false);
-      //testMultisig(5, 6, false);
-      
-      // test m/n
-      testMultisig(2, 4, true);
-      //testMultisig(3, 5, false);
-      //testMultisig(3, 7, false);
+      testMultisigParticipants(participants, m, n, testTx);
     } finally {
       
       // stop mining at end of test
       try { daemon.stopMining(); }
       catch (MoneroError e) { }
+      
+      // save and close participants
+      for (MoneroWallet participant : participants) closeWallet(participant, true);
     }
   }
   
-  private void testMultisig(int m, int n, boolean testTx) {
+  protected void testMultisigParticipants(List<MoneroWallet> participants, int m, int n, boolean testTx) {
     System.out.println("testMultisig(" + m + ", " + n + ")");
-    List<MoneroWallet> participants = new ArrayList<MoneroWallet>();
-    try {
-      
-      // create n wallets and prepare multisig hexes
-      List<String> preparedMultisigHexes = new ArrayList<String>();
-      for (int i = 0; i < n; i++) {
-        MoneroWallet participant = createWallet(new MoneroWalletConfig());
-        preparedMultisigHexes.add(participant.prepareMultisig());
-        //System.out.println("PREPARED HEX: " + preparedMultisigHexes.get(preparedMultisigHexes.size() - 1));
-        participants.add(participant);
-      }
+    assertEquals(n, participants.size());
+    
+    // prepare multisig hexes
+    List<String> preparedMultisigHexes = new ArrayList<String>();
+    for (int i = 0; i < n; i++) {
+      MoneroWallet participant = participants.get(i);
+      preparedMultisigHexes.add(participant.prepareMultisig());
+    }
 
-      // make wallets multisig
-      String address = null;
-      List<String> madeMultisigHexes = new ArrayList<String>();
-      for (int i = 0; i < participants.size(); i++) {
-        
-        // get the participant
-        MoneroWallet participant = participants.get(i);
-        
-        // collect prepared multisig hexes from wallet's peers
-        List<String> peerMultisigHexes = new ArrayList<String>();
-        for (int j = 0; j < participants.size(); j++) if (j != i) peerMultisigHexes.add(preparedMultisigHexes.get(j));
+    // make wallets multisig
+    String address = null;
+    List<String> madeMultisigHexes = new ArrayList<String>();
+    for (int i = 0; i < participants.size(); i++) {
+      MoneroWallet participant = participants.get(i);
+      
+      // collect prepared multisig hexes from wallet's peers
+      List<String> peerMultisigHexes = new ArrayList<String>();
+      for (int j = 0; j < participants.size(); j++) if (j != i) peerMultisigHexes.add(preparedMultisigHexes.get(j));
 
-        // make the wallet multisig
-        MoneroMultisigInitResult result = participant.makeMultisig(peerMultisigHexes, m, TestUtils.WALLET_PASSWORD);
-        //System.out.println("MADE RESULT: " + JsonUtils.serialize(result));
-        if (address == null) address = result.getAddress();
-        else assertEquals(address, result.getAddress());
-        madeMultisigHexes.add(result.getMultisigHex());
-      }
+      // make the wallet multisig
+      MoneroMultisigInitResult result = participant.makeMultisig(peerMultisigHexes, m, TestUtils.WALLET_PASSWORD);
+      if (address == null) address = result.getAddress();
+      else assertEquals(address, result.getAddress());
+      madeMultisigHexes.add(result.getMultisigHex());
+    }
+    
+    // handle m/n which exchanges keys n - m times
+    if (m != n) {
+      address = null;
       
-      // handle m/n which exchanges keys n - m times
-      if (m != n) {
-        address = null;
+      // exchange keys n - m times
+      assertEquals(n, madeMultisigHexes.size());
+      List<String> prevMultisigHexes = madeMultisigHexes;
+      for (int i = 0; i < n - m; i++) {
+        //System.out.println("Exchanging multisig keys round " + (i + 1) + " / " + (n - m));
         
-        // exchange keys n - m times
-        assertEquals(n, madeMultisigHexes.size());
-        List<String> prevMultisigHexes = madeMultisigHexes;
-        for (int i = 0; i < n - m; i++) {
-          //System.out.println("Exchanging multisig keys round " + (i + 1) + " / " + (n - m));
+        // exchange multisig keys with each wallet and collect results
+        List<String> exchangeMultisigHexes = new ArrayList<String>();
+        for (int j = 0; j < participants.size(); j++) {
+          MoneroWallet participant = participants.get(j);
           
-          // exchange multisig keys with each wallet and collect results
-          List<String> exchangeMultisigHexes = new ArrayList<String>();
-          for (int j = 0; j < participants.size(); j++) {
-            MoneroWallet participant = participants.get(j);
-            
-            // collect the multisig hexes of the wallet's peers from last round
-            List<String> peerMultisigHexes = new ArrayList<String>();
-            for (int k = 0; k < participants.size(); k++) if (k != j) peerMultisigHexes.add(prevMultisigHexes.get(k));
-            
-            // import the multisig hexes of the wallet's peers
-            MoneroMultisigInitResult result = participant.exchangeMultisigKeys(peerMultisigHexes, TestUtils.WALLET_PASSWORD);
-            //System.out.println("EXCHANGED MULTISIG KEYS RESULT: " + JsonUtils.serialize(result));
-            
-            // test result
-            if (i == n - m - 1) {  // result on last round has address and not multisig hex to share
-              assertNotNull(result.getAddress());
-              assertFalse(result.getAddress().isEmpty());
-              if (address == null) address = result.getAddress();
-              else assertEquals(address, result.getAddress());
-              assertNull(result.getMultisigHex());
-            } else {
-              assertNotNull(result.getMultisigHex());
-              assertFalse(result.getMultisigHex().isEmpty());
-              assertNull(result.getAddress());
-              exchangeMultisigHexes.add(result.getMultisigHex());
-            }
-          }
+          // collect the multisig hexes of the wallet's peers from last round
+          List<String> peerMultisigHexes = new ArrayList<String>();
+          for (int k = 0; k < participants.size(); k++) if (k != j) peerMultisigHexes.add(prevMultisigHexes.get(k));
           
-          // use results for next round of exchange
-          prevMultisigHexes = exchangeMultisigHexes;
-        }
-      }
-      
-      // print final multisig address
-      MoneroWallet participant = participants.get(0);
-      MoneroUtils.validateAddress(participant.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
-      //System.out.println("FINAL MULTISIG ADDRESS: " + participant.getPrimaryAddress());
-      testMultisigInfo(participant.getMultisigInfo(), m, n);
-      
-      // test sending a multisig transaction if configured
-      if (testTx) {
-        
-        System.out.println("Creating account");
-        
-        // create an account in the first multisig wallet to receive funds to
-        participant.createAccount();
-        
-        // get destinations to subaddresses within the account of the multisig wallet
-        int accountIdx = 1;
-        List<MoneroDestination> destinations = new ArrayList<MoneroDestination>();
-        for (int i = 0; i < 3; i++) {
-          participant.createSubaddress(accountIdx);
-          destinations.add(new MoneroDestination(participant.getAddress(accountIdx, i), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(2))));
-        }
-        
-        // wait for txs to confirm and for sufficient unlocked balance
-        TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
-        TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(wallet, 0, null, TestUtils.MAX_FEE.multiply(new BigInteger("20")));
-        
-        // send funds from the main test wallet to destinations in the first multisig wallet
-        assertTrue(wallet.getBalance().compareTo(BigInteger.valueOf(0)) > 0);
-        System.out.println("Sending funds from main wallet");
-        wallet.createTx(new MoneroTxConfig().setAccountIndex(0).setDestinations(destinations).setRelay(true));
-        String returnAddress = wallet.getPrimaryAddress(); // funds will be returned to this address from the multisig wallet
-        
-        System.out.println("Starting mining");
-        
-        // attempt to start mining
-        try { StartMining.startMining(); }
-        catch (MoneroError e) { if ("BUSY".equals(e.getMessage())) throw e; }
-        
-        // wait for the multisig wallet's funds to unlock // TODO: replace with MoneroWalletListener.onOutputReceived() which is called when output unlocked
-        Long lastNumConfirmations = null;
-        while (true) {
+          // import the multisig hexes of the wallet's peers
+          MoneroMultisigInitResult result = participant.exchangeMultisigKeys(peerMultisigHexes, TestUtils.WALLET_PASSWORD);
+          //System.out.println("EXCHANGED MULTISIG KEYS RESULT: " + JsonUtils.serialize(result));
           
-          // wait a moment
-          try { TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS); }
-          catch (InterruptedException e) {  throw new RuntimeException(e); }
-          
-          // fetch and test outputs
-          List<MoneroOutputWallet> outputs = participant.getOutputs();
-          if (outputs.isEmpty()) System.out.println("No outputs reported yet");
-          else {
-            
-            // print num confirmations
-            long height = daemon.getHeight();
-            long numConfirmations = height - outputs.get(0).getTx().getHeight();
-            if (lastNumConfirmations == null || lastNumConfirmations != numConfirmations) System.out.println("Output has " + (height - outputs.get(0).getTx().getHeight()) + " confirmations");
-            lastNumConfirmations = numConfirmations;
-            
-            // outputs are not spent
-            for (MoneroOutputWallet output : outputs) assertFalse(output.isSpent());
-            
-            // break if output is unlocked
-            if (!outputs.get(0).isLocked()) break;
+          // test result
+          if (i == n - m - 1) {  // result on last round has address and not multisig hex to share
+            assertNotNull(result.getAddress());
+            assertFalse(result.getAddress().isEmpty());
+            if (address == null) address = result.getAddress();
+            else assertEquals(address, result.getAddress());
+            assertNull(result.getMultisigHex());
+          } else {
+            assertNotNull(result.getMultisigHex());
+            assertFalse(result.getMultisigHex().isEmpty());
+            assertNull(result.getAddress());
+            exchangeMultisigHexes.add(result.getMultisigHex());
           }
         }
-          
-        // stop mining
-        daemon.stopMining();
         
-        // multisig wallet should have unlocked balance in account 1 subaddresses 0-3
-        for (int i = 0; i < 3; i++) {
-          assertTrue(participant.getUnlockedBalance(1, i).compareTo(BigInteger.valueOf(0)) > 0);
-        }
-        List<MoneroOutputWallet> outputs = participant.getOutputs(new MoneroOutputQuery().setAccountIndex(1));
-        assertFalse(outputs.isEmpty());
-        if (outputs.size() < 3) System.out.println("WARNING: not one output per subaddress?");
-        //assertTrue(outputs.size() >= 3);  // TODO
-        for (MoneroOutputWallet output : outputs) assertFalse(output.isLocked());
-        
-        // wallet requires importing multisig to be reliable
-        assertTrue(participant.isMultisigImportNeeded());
-        
-        // attempt creating and relaying transaction without synchronizing with participants
-        try {
-          participant.createTxs(new MoneroTxConfig().setAccountIndex(1).setAddress(returnAddress).setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))));
-          throw new RuntimeException("Should have failed sending funds without synchronizing with peers");
-        } catch (MoneroError e) {
-          assertEquals("No transaction created", e.getMessage());
-        }
-        
-        // synchronize the multisig participants since receiving outputs
-        System.out.println("Synchronizing participants");
-        synchronizeMultisigParticipants(participants);
-        
-        // attempt relaying created transactions without co-signing
-        try {
-          participant.createTx(new MoneroTxConfig().setAddress(returnAddress).setAmount(TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0).setRelay(true));
-          throw new RuntimeException("Should have failed");
-        } catch (Exception e) {
-          assertTrue(e instanceof MoneroError);
-          assertEquals("Cannot relay multisig transaction until co-signed", e.getMessage());
-        }
-        
-        // send funds from a subaddress in the multisig wallet
-        System.out.println("Sending");
-        List<MoneroTxWallet> txs = participant.createTxs(new MoneroTxConfig().setAddress(returnAddress).setAmount(TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0));
-        assertFalse(txs.isEmpty());
-        MoneroTxSet txSet = txs.get(0).getTxSet();
-        assertNotNull(txSet.getMultisigTxHex());
-        assertNull(txSet.getSignedTxHex());
-        assertNull(txSet.getUnsignedTxHex());
-        
-        // parse multisig tx hex and test
-        testDescribedTxSet(participant.describeTxSet(txSet));
-        
-        // sign the tx with participants 1 through m - 1 to meet threshold
-        String multisigTxHex = txSet.getMultisigTxHex();
-        System.out.println("Signing");
-        for (int i = 1; i < m; i++) {
-          MoneroMultisigSignResult result = participants.get(i).signMultisigTxHex(multisigTxHex);
-          multisigTxHex = result.getSignedMultisigTxHex();
-        }
-        
-        //System.out.println("Submitting signed multisig tx hex: " + multisigTxHex);
-        
-        // submit the signed multisig tx hex to the network
-        System.out.println("Submitting");
-        List<String> txHashes = participant.submitMultisigTxHex(multisigTxHex);
-        
-        // synchronize the multisig participants since spending outputs
-        System.out.println("Synchronizing participants");
-        synchronizeMultisigParticipants(participants);
-        
-        // fetch the wallet's multisig txs
-        List<MoneroTxWallet> multisigTxs = participant.getTxs(new MoneroTxQuery().setHashes(txHashes));
-        assertEquals(multisigTxs.size(), txHashes.size());
-        
-        // sweep an output from subaddress [1,1]
-        outputs = participant.getOutputs(new MoneroOutputQuery().setAccountIndex(1).setSubaddressIndex(1));
-        assertFalse(outputs.isEmpty());
-        assertFalse(outputs.get(0).isSpent());
-        txSet = participant.sweepOutput(new MoneroTxConfig().setAddress(returnAddress).setKeyImage(outputs.get(0).getKeyImage().getHex()).setRelay(true)).getTxSet();
-        assertNotNull(txSet.getMultisigTxHex());
-        assertNull(txSet.getSignedTxHex());
-        assertNull(txSet.getUnsignedTxHex());
-        assertFalse(txSet.getTxs().isEmpty());
-        
-        // parse multisig tx hex and test
-        testDescribedTxSet(participant.describeTxSet(txSet));
-        
-        // sign the tx with participants 1 through m - 1 to meet threshold
-        multisigTxHex = txSet.getMultisigTxHex();
-        System.out.println("Signing sweep output");
-        for (int i = 1; i < m; i++) {
-          MoneroMultisigSignResult result = participants.get(i).signMultisigTxHex(multisigTxHex);
-          multisigTxHex = result.getSignedMultisigTxHex();
-        }
-        
-        // submit the signed multisig tx hex to the network
-        System.out.println("Submitting sweep output");
-        txHashes = participant.submitMultisigTxHex(multisigTxHex);
-        
-        // synchronize the multisig participants since spending outputs
-        System.out.println("Synchronizing participants");
-        synchronizeMultisigParticipants(participants);
-        
-        // fetch the wallet's multisig txs
-        multisigTxs = participant.getTxs(new MoneroTxQuery().setHashes(txHashes));
-        assertEquals(multisigTxs.size(), txHashes.size());
-        
-        // sweep remaining balance
-        System.out.println("Sweeping");
-        txs = participant.sweepUnlocked(new MoneroTxConfig().setAddress(returnAddress).setAccountIndex(1).setRelay(true)); // TODO: test multisig with sweepEachSubaddress which will generate multiple tx sets without synchronizing participants
-        assertFalse(txs.isEmpty(), "No txs created on sweepUnlocked");
-        txSet = txs.get(0).getTxSet();
-        for (MoneroTxWallet tx : txs) {
-          assertTrue(tx.getTxSet() == txSet);
-          assertTrue(tx.getTxSet().getTxs().contains(tx));
-        }
-        assertNotNull(txSet.getMultisigTxHex());
-        assertNull(txSet.getSignedTxHex());
-        assertNull(txSet.getUnsignedTxHex());
-        
-        // parse multisig tx hex and test
-        testDescribedTxSet(participant.describeTxSet(txSet));
-        
-        // sign the tx with participants 1 through m - 1 to meet threshold
-        multisigTxHex = txSet.getMultisigTxHex();
-        System.out.println("Signing sweep");
-        for (int i = 1; i < m; i++) {
-          MoneroMultisigSignResult result = participants.get(i).signMultisigTxHex(multisigTxHex);
-          multisigTxHex = result.getSignedMultisigTxHex();
-        }
-        
-        // submit the signed multisig tx hex to the network
-        System.out.println("Submitting sweep");
-        txHashes = participant.submitMultisigTxHex(multisigTxHex);
-        
-        // synchronize the multisig participants since spending outputs
-        System.out.println("Synchronizing participants");
-        synchronizeMultisigParticipants(participants);
-        
-        // fetch the wallet's multisig txs
-        multisigTxs = participant.getTxs(new MoneroTxQuery().setHashes(txHashes));
-        assertEquals(multisigTxs.size(), txHashes.size());
+        // use results for next round of exchange
+        prevMultisigHexes = exchangeMultisigHexes;
       }
-    } finally {
+    }
+    
+    // print final multisig address
+    MoneroWallet participant = participants.get(0);
+    MoneroUtils.validateAddress(participant.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
+    //System.out.println("FINAL MULTISIG ADDRESS: " + participant.getPrimaryAddress());
+    testMultisigInfo(participant.getMultisigInfo(), m, n);
+    
+    // test sending a multisig transaction if configured
+    if (testTx) {
       
-      // save and close the participants
-      for (MoneroWallet participant : participants) {
-        closeWallet(participant, true);
+      // create an account in the first multisig wallet to receive funds
+      System.out.println("Creating account");
+      participant.createAccount();
+      
+      // get destinations to subaddresses within the account of the multisig wallet
+      int accountIdx = 1;
+      List<MoneroDestination> destinations = new ArrayList<MoneroDestination>();
+      for (int i = 0; i < 3; i++) {
+        participant.createSubaddress(accountIdx);
+        destinations.add(new MoneroDestination(participant.getAddress(accountIdx, i), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(2))));
       }
-    }    
+      
+      // wait for txs to confirm and for sufficient unlocked balance
+      TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+      TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(wallet, 0, null, TestUtils.MAX_FEE.multiply(new BigInteger("20")));
+      
+      // send funds from the main test wallet to destinations in the first multisig wallet
+      assertTrue(wallet.getBalance().compareTo(BigInteger.valueOf(0)) > 0);
+      System.out.println("Sending funds from main wallet");
+      wallet.createTx(new MoneroTxConfig().setAccountIndex(0).setDestinations(destinations).setRelay(true));
+      String returnAddress = wallet.getPrimaryAddress(); // funds will be returned to this address from the multisig wallet
+      
+      System.out.println("Starting mining");
+      
+      // attempt to start mining
+      try { StartMining.startMining(); }
+      catch (MoneroError e) { if ("BUSY".equals(e.getMessage())) throw e; }
+      
+      // wait for the multisig wallet's funds to unlock // TODO: replace with MoneroWalletListener.onOutputReceived() which is called when output unlocked
+      Long lastNumConfirmations = null;
+      while (true) {
+        
+        // wait a moment
+        try { TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS); }
+        catch (InterruptedException e) {  throw new RuntimeException(e); }
+        
+        // fetch and test outputs
+        List<MoneroOutputWallet> outputs = participant.getOutputs();
+        if (outputs.isEmpty()) System.out.println("No outputs reported yet");
+        else {
+          
+          // print num confirmations
+          long height = daemon.getHeight();
+          long numConfirmations = height - outputs.get(0).getTx().getHeight();
+          if (lastNumConfirmations == null || lastNumConfirmations != numConfirmations) System.out.println("Output has " + (height - outputs.get(0).getTx().getHeight()) + " confirmations");
+          lastNumConfirmations = numConfirmations;
+          
+          // outputs are not spent
+          for (MoneroOutputWallet output : outputs) assertFalse(output.isSpent());
+          
+          // break if output is unlocked
+          if (!outputs.get(0).isLocked()) break;
+        }
+      }
+        
+      // stop mining
+      daemon.stopMining();
+      
+      // multisig wallet should have unlocked balance in account 1 subaddresses 0-3
+      for (int i = 0; i < 3; i++) {
+        assertTrue(participant.getUnlockedBalance(1, i).compareTo(BigInteger.valueOf(0)) > 0);
+      }
+      List<MoneroOutputWallet> outputs = participant.getOutputs(new MoneroOutputQuery().setAccountIndex(1));
+      assertFalse(outputs.isEmpty());
+      if (outputs.size() < 3) System.out.println("WARNING: not one output per subaddress?");
+      //assertTrue(outputs.size() >= 3);  // TODO
+      for (MoneroOutputWallet output : outputs) assertFalse(output.isLocked());
+      
+      // wallet requires importing multisig to be reliable
+      assertTrue(participant.isMultisigImportNeeded());
+      
+      // attempt creating and relaying transaction without synchronizing with participants
+      try {
+        participant.createTxs(new MoneroTxConfig().setAccountIndex(1).setAddress(returnAddress).setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))));
+        throw new RuntimeException("Should have failed sending funds without synchronizing with peers");
+      } catch (MoneroError e) {
+        assertEquals("No transaction created", e.getMessage());
+      }
+      
+      // synchronize the multisig participants since receiving outputs
+      System.out.println("Synchronizing participants");
+      synchronizeMultisigParticipants(participants);
+      
+      // attempt relaying created transactions without co-signing
+      try {
+        participant.createTx(new MoneroTxConfig().setAddress(returnAddress).setAmount(TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0).setRelay(true));
+        throw new RuntimeException("Should have failed");
+      } catch (Exception e) {
+        assertTrue(e instanceof MoneroError);
+        assertEquals("Cannot relay multisig transaction until co-signed", e.getMessage());
+      }
+      
+      // send funds from a subaddress in the multisig wallet
+      System.out.println("Sending");
+      List<MoneroTxWallet> txs = participant.createTxs(new MoneroTxConfig().setAddress(returnAddress).setAmount(TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0));
+      assertFalse(txs.isEmpty());
+      MoneroTxSet txSet = txs.get(0).getTxSet();
+      assertNotNull(txSet.getMultisigTxHex());
+      assertNull(txSet.getSignedTxHex());
+      assertNull(txSet.getUnsignedTxHex());
+      
+      // parse multisig tx hex and test
+      testDescribedTxSet(participant.describeTxSet(txSet));
+      
+      // sign the tx with participants 1 through m - 1 to meet threshold
+      String multisigTxHex = txSet.getMultisigTxHex();
+      System.out.println("Signing");
+      for (int i = 1; i < m; i++) {
+        MoneroMultisigSignResult result = participants.get(i).signMultisigTxHex(multisigTxHex);
+        multisigTxHex = result.getSignedMultisigTxHex();
+      }
+      
+      //System.out.println("Submitting signed multisig tx hex: " + multisigTxHex);
+      
+      // submit the signed multisig tx hex to the network
+      System.out.println("Submitting");
+      List<String> txHashes = participant.submitMultisigTxHex(multisigTxHex);
+      
+      // synchronize the multisig participants since spending outputs
+      System.out.println("Synchronizing participants");
+      synchronizeMultisigParticipants(participants);
+      
+      // fetch the wallet's multisig txs
+      List<MoneroTxWallet> multisigTxs = participant.getTxs(new MoneroTxQuery().setHashes(txHashes));
+      assertEquals(multisigTxs.size(), txHashes.size());
+      
+      // sweep an output from subaddress [1,1]
+      outputs = participant.getOutputs(new MoneroOutputQuery().setAccountIndex(1).setSubaddressIndex(1));
+      assertFalse(outputs.isEmpty());
+      assertFalse(outputs.get(0).isSpent());
+      txSet = participant.sweepOutput(new MoneroTxConfig().setAddress(returnAddress).setKeyImage(outputs.get(0).getKeyImage().getHex()).setRelay(true)).getTxSet();
+      assertNotNull(txSet.getMultisigTxHex());
+      assertNull(txSet.getSignedTxHex());
+      assertNull(txSet.getUnsignedTxHex());
+      assertFalse(txSet.getTxs().isEmpty());
+      
+      // parse multisig tx hex and test
+      testDescribedTxSet(participant.describeTxSet(txSet));
+      
+      // sign the tx with participants 1 through m - 1 to meet threshold
+      multisigTxHex = txSet.getMultisigTxHex();
+      System.out.println("Signing sweep output");
+      for (int i = 1; i < m; i++) {
+        MoneroMultisigSignResult result = participants.get(i).signMultisigTxHex(multisigTxHex);
+        multisigTxHex = result.getSignedMultisigTxHex();
+      }
+      
+      // submit the signed multisig tx hex to the network
+      System.out.println("Submitting sweep output");
+      txHashes = participant.submitMultisigTxHex(multisigTxHex);
+      
+      // synchronize the multisig participants since spending outputs
+      System.out.println("Synchronizing participants");
+      synchronizeMultisigParticipants(participants);
+      
+      // fetch the wallet's multisig txs
+      multisigTxs = participant.getTxs(new MoneroTxQuery().setHashes(txHashes));
+      assertEquals(multisigTxs.size(), txHashes.size());
+      
+      // sweep remaining balance
+      System.out.println("Sweeping");
+      txs = participant.sweepUnlocked(new MoneroTxConfig().setAddress(returnAddress).setAccountIndex(1).setRelay(true)); // TODO: test multisig with sweepEachSubaddress which will generate multiple tx sets without synchronizing participants
+      assertFalse(txs.isEmpty(), "No txs created on sweepUnlocked");
+      txSet = txs.get(0).getTxSet();
+      for (MoneroTxWallet tx : txs) {
+        assertTrue(tx.getTxSet() == txSet);
+        assertTrue(tx.getTxSet().getTxs().contains(tx));
+      }
+      assertNotNull(txSet.getMultisigTxHex());
+      assertNull(txSet.getSignedTxHex());
+      assertNull(txSet.getUnsignedTxHex());
+      
+      // parse multisig tx hex and test
+      testDescribedTxSet(participant.describeTxSet(txSet));
+      
+      // sign the tx with participants 1 through m - 1 to meet threshold
+      multisigTxHex = txSet.getMultisigTxHex();
+      System.out.println("Signing sweep");
+      for (int i = 1; i < m; i++) {
+        MoneroMultisigSignResult result = participants.get(i).signMultisigTxHex(multisigTxHex);
+        multisigTxHex = result.getSignedMultisigTxHex();
+      }
+      
+      // submit the signed multisig tx hex to the network
+      System.out.println("Submitting sweep");
+      txHashes = participant.submitMultisigTxHex(multisigTxHex);
+      
+      // synchronize the multisig participants since spending outputs
+      System.out.println("Synchronizing participants");
+      synchronizeMultisigParticipants(participants);
+      
+      // fetch the wallet's multisig txs
+      multisigTxs = participant.getTxs(new MoneroTxQuery().setHashes(txHashes));
+      assertEquals(multisigTxs.size(), txHashes.size());
+    }
   }
   
   private void synchronizeMultisigParticipants(List<MoneroWallet> wallets) {

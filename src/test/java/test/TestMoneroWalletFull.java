@@ -482,6 +482,33 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     }
   };
   
+  // Is compatible with monero-wallet-rpc multisig wallets
+  @Test
+  public void testMultisigCompatibility() throws InterruptedException, IOException {
+    assumeTrue(!LITE_MODE);
+    
+    // create participants with full wallet and monero-wallet-rpc
+    List<MoneroWallet> participants = new ArrayList<MoneroWallet>();
+    participants.add(TestUtils.startWalletRpcProcess().createWallet(new MoneroWalletConfig().setPath(GenUtils.getUUID()).setPassword(TestUtils.WALLET_PASSWORD)));
+    participants.add(TestUtils.startWalletRpcProcess().createWallet(new MoneroWalletConfig().setPath(GenUtils.getUUID()).setPassword(TestUtils.WALLET_PASSWORD)));
+    participants.add(createWallet(new MoneroWalletConfig()));
+    
+    // test multisig
+    try {
+      testMultisigParticipants(participants, 3, 3, true);
+    } finally {
+      
+      // stop mining at end of test
+      try { daemon.stopMining(); }
+      catch (MoneroError e) { }
+      
+      // save and close participants
+      TestUtils.stopWalletRpcProcess((MoneroWalletRpc) participants.get(0));
+      TestUtils.stopWalletRpcProcess((MoneroWalletRpc) participants.get(1));
+      closeWallet(participants.get(2), true);
+    }
+  };
+  
   // Can re-sync an existing wallet from scratch
   @Test
   @Disabled // TODO monero-project: cannot re-sync from lower block height after wallet saved

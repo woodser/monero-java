@@ -236,9 +236,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * 
    * @param name is the name of the wallet file to open
    * @param password is the wallet's password
+   * @return this wallet client
    */
-  public void openWallet(String name, String password) {
-    openWallet(new MoneroWalletConfig().setPath(name).setPassword(password));
+  public MoneroWalletRpc openWallet(String name, String password) {
+    return openWallet(new MoneroWalletConfig().setPath(name).setPassword(password));
   }
   
   /**
@@ -266,8 +267,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * </p>
    * 
    * @param config configures the wallet to open
+   * @return this wallet client
    */
-  public void openWallet(MoneroWalletConfig config) {
+  public MoneroWalletRpc openWallet(MoneroWalletConfig config) {
     if (config == null) throw new MoneroError("Must provide configuration of wallet to open");
     if (config.getPath() == null || config.getPath().isEmpty()) throw new MoneroError("Filename is not initialized");
     if (config.getPassword() == null || config.getPassword().isEmpty()) throw new MoneroError("Password is not initialized");
@@ -283,6 +285,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // set daemon if provided
     if (config.getServer() != null) setDaemonConnection(config.getServer());
+    return this;
   }
   
   /**
@@ -317,8 +320,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * <p>
    * 
    * @param config configures the wallet to create
+   * @return this wallet client
    */
-  public void createWallet(MoneroWalletConfig config) {
+  public MoneroWalletRpc createWallet(MoneroWalletConfig config) {
     
     // validate config
     if (config == null) throw new MoneroError("Must specify config to create wallet");
@@ -342,6 +346,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // set daemon if provided
     if (config.getServer() != null) setDaemonConnection(config.getServer());
+    return this;
   }
   
   /**
@@ -350,8 +355,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @param name is the name of the wallet file to create
    * @param password is the wallet's password
    * @param language is the language for the wallet's mnemonic seed
+   * @return this wallet client
    */
-  private void createWalletRandom(String name, String password, String language) {
+  private MoneroWalletRpc createWalletRandom(String name, String password, String language) {
     if (name == null || name.isEmpty()) throw new MoneroError("Wallet name is not initialized");
     if (password == null || password.isEmpty()) throw new MoneroError("Password is not initialized");
     if (language == null || language.isEmpty()) language = DEFAULT_LANGUAGE;
@@ -363,6 +369,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     catch (MoneroRpcError e) { handleCreateWalletError(name, e); }
     clear();
     path = name;
+    return this;
   }
   
   /**
@@ -376,8 +383,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @param language is the language of the mnemonic in case the old language is invalid
    * @param seedOffset is the offset used to derive a new seed from the given mnemonic to recover a secret wallet from the mnemonic phrase
    * @param saveCurrent specifies if the current RPC wallet should be saved before being closed
+   * @return this wallet client
    */
-  private void createWalletFromMnemonic(String name, String password, String mnemonic, Long restoreHeight, String language, String seedOffset, Boolean saveCurrent) {
+  private MoneroWalletRpc createWalletFromMnemonic(String name, String password, String mnemonic, Long restoreHeight, String language, String seedOffset, Boolean saveCurrent) {
     if (language == null) language = DEFAULT_LANGUAGE;
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("filename", name);
@@ -391,6 +399,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     catch (MoneroRpcError e) { handleCreateWalletError(name, e); }
     clear();
     path = name;
+    return this;
   }
   
   /**
@@ -404,8 +413,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
    * @param language is the wallet and mnemonic's language (default = "English")
    * @param saveCurrent specifies if the current RPC wallet should be saved before being closed
+   * @return this wallet client
    */
-  private void createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, Long restoreHeight, String language, Boolean saveCurrent) {
+  private MoneroWalletRpc createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, Long restoreHeight, String language, Boolean saveCurrent) {
     if (restoreHeight == null) restoreHeight = 0l;
     if (language == null) language = DEFAULT_LANGUAGE;
     Map<String, Object> params = new HashMap<String, Object>();
@@ -420,6 +430,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     catch (MoneroRpcError e) { handleCreateWalletError(name, e); }
     clear();
     path = name;
+    return this;
   }
   
   private void handleCreateWalletError(String name, MoneroRpcError e) {
