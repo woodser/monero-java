@@ -24,12 +24,13 @@ import org.bouncycastle.jcajce.provider.digest.Keccak;
  */
 public class MoneroUtils {
   
+  // load JNI binding if available
+  private static boolean JNI_LOADED = false;
   static {
     try {
       System.loadLibrary("monero-java");
-    } catch (UnsatisfiedLinkError e) {
-      // OK, but JNI utils will not work
-    }
+      JNI_LOADED = true;
+    } catch (UnsatisfiedLinkError e) { }
   }
   
   /**
@@ -43,6 +44,7 @@ public class MoneroUtils {
   
   public static final int RING_SIZE = 12; // network-enforced ring size
   
+  private static int LOG_LEVEL = 0;
   private static long AU_PER_XMR = 1000000000000l;
   private static final int NUM_MNEMONIC_WORDS = 25;
   private static final int VIEW_KEY_LENGTH = 64;
@@ -179,6 +181,22 @@ public class MoneroUtils {
   }
   
   /**
+   * Determine if the given address is valid.
+   * 
+   * @param address is the address to validate
+   * @param networkType is the address's network type
+   * @return true if the address is valid, false otherwise
+   */
+  public static boolean isValidAddress(String address, MoneroNetworkType networkType) {
+      try {
+        validateAddress(address, networkType);
+        return true;
+      } catch (MoneroError e) {
+        return false;
+      }
+  }
+  
+  /**
    * Validates the given address.
    * 
    * @param address is the address to validate
@@ -229,7 +247,7 @@ public class MoneroUtils {
 
   public static void validateBase58(String standardAddress) {
     for (char c : standardAddress.toCharArray()) {
-      if (!CHARS.contains((Character) c)) throw new MoneroError("Invalid Base58 " + standardAddress);
+      if (!CHARS.contains(c)) throw new MoneroError("Invalid Base58 " + standardAddress);
     }
   }
   
@@ -310,15 +328,48 @@ public class MoneroUtils {
     return map;
   }
   
+  /**
+   * Log a message.
+   *
+   * @param level log level of the message
+   * @param msg message to log
+   */
+  public static void log(int level, String msg) {
+    GenUtils.assertTrue("Log level must be an integer >= 0", level >= 0);
+    if (MoneroUtils.LOG_LEVEL >= level) System.out.println(msg);
+  }
+  
+  /**
+   * Set the library's log level with 0 being least verbose.
+   *
+   * @param level - the library's log level
+   */
+  public static void setLogLevel(int level) {
+    GenUtils.assertTrue("Log level must be an integer >= 0", level >= 0);
+    MoneroUtils.LOG_LEVEL = level;
+    if (JNI_LOADED) setLogLevelJni(level);
+  }
+  
+  /**
+   * Get the library's log level.
+   *
+   * @return the library's log level
+   */
+  public static int getLogLevel() {
+    return MoneroUtils.LOG_LEVEL;
+  }
+  
+  /**
+   * Initialize JNI logging before using.
+   * 
+   * @param path the path to write logs to
+   * @param level the log level
+   * @param console specifies whether or not to write to the console
+   */
   public static void initJniLogging(String path, int level, boolean console) {
     initLoggingJni(path, console);
     setLogLevelJni(level);
   }
-  
-  public static void setJniLogLevel(int level) {
-    setLogLevelJni(level);
-  }
-  
   
   /**
    * Convert XMR to atomic units.
@@ -341,7 +392,7 @@ public class MoneroUtils {
    * Convert atomic units to XMR.
    * 
    * @param amountAtomicUnits amount in atomic units to convert to XMR
-   * @return amount in XMR 
+   * @return amount in XMR
    */
   public static double atomicUnitsToXmr(BigInteger amountAtomicUnits) {
     BigInteger[] quotientAndRemainder = amountAtomicUnits.divideAndRemainder(BigInteger.valueOf(AU_PER_XMR));
@@ -380,7 +431,7 @@ public class MoneroUtils {
     }
 
     int fullBlockCount = (int) Math.floor(bin.length / FULL_ENCODED_BLOCK_SIZE);
-    int lastBlockSize = (int) bin.length % FULL_ENCODED_BLOCK_SIZE;
+    int lastBlockSize = bin.length % FULL_ENCODED_BLOCK_SIZE;
     int lastBlockDecodedSize = ENCODED_BLOCK_SIZE.get(lastBlockSize);
     if (lastBlockDecodedSize < 0) {
       throw new IllegalArgumentException("Invalid encoded length");

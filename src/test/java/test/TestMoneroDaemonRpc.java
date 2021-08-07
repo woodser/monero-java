@@ -296,7 +296,7 @@ public class TestMoneroDaemonRpc {
       MoneroBlock block = blocks.get(i);
       if (!block.getTxs().isEmpty()) txFound = true;
       testBlock(block, BINARY_BLOCK_CTX);
-      assertEquals(block.getHeight(), heights.get(i));      
+      assertEquals(block.getHeight(), heights.get(i));
     }
     assertTrue(txFound, "No transactions found to test");
   }
@@ -400,6 +400,7 @@ public class TestMoneroDaemonRpc {
     
     // fetch transaction hashes to test
     List<String> txHashes = getConfirmedTxHashes(daemon);
+    assertTrue(txHashes.size() > 0);
     
     // context for testing txs
     TestContext ctx = new TestContext();
@@ -421,6 +422,14 @@ public class TestMoneroDaemonRpc {
     for (MoneroTx tx : txs) {
       testTx(tx, ctx);
     }
+    
+    // fetch missing hash
+    MoneroTx tx = wallet.createTx(new MoneroTxConfig().setAccountIndex(0).addDestination(wallet.getPrimaryAddress(), TestUtils.MAX_FEE));
+    assertNull(daemon.getTx(tx.getHash()));
+    txHashes.add(tx.getHash());
+    int numTxs = txs.size();
+    txs = daemon.getTxs(txHashes);
+    assertEquals(numTxs, txs.size());
     
     // fetch invalid hash
     txHashes.add("invalid tx hash");
@@ -1672,7 +1681,7 @@ public class TestMoneroDaemonRpc {
   
   private static MoneroTx getUnrelayedTx(MoneroWallet wallet, Integer accountIdx) {
     assertTrue(accountIdx > 0, "Txs sent from/to same account are not properly synced from the pool");  // TODO monero-project
-    MoneroTxConfig config = new MoneroTxConfig().setAccountIndex(accountIdx).setAddress(wallet.getPrimaryAddress()).setAmount(TestUtils.MAX_FEE); 
+    MoneroTxConfig config = new MoneroTxConfig().setAccountIndex(accountIdx).setAddress(wallet.getPrimaryAddress()).setAmount(TestUtils.MAX_FEE);
     MoneroTx tx = wallet.createTx(config);
     assertFalse(tx.getFullHex().isEmpty());
     assertEquals(tx.getRelay(), false);
@@ -1868,7 +1877,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(connection.getNumSends() >= 0);
     assertTrue(connection.getSendIdleTime() >= 0);
     assertNotNull(connection.getState());
-    assertTrue(connection.getNumSupportFlags() >= 0); 
+    assertTrue(connection.getNumSupportFlags() >= 0);
     assertNotNull(connection.getType());
   }
 

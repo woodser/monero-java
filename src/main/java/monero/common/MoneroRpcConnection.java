@@ -1,11 +1,14 @@
 package monero.common;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import common.utils.JsonUtils;
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -18,12 +21,6 @@ import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import common.utils.JsonUtils;
 
 /**
  * Maintains a connection and sends requests to a Monero RPC API.
@@ -59,11 +56,11 @@ public class MoneroRpcConnection {
   }
   
   public MoneroRpcConnection(String uri, String username, String password) {
-    this((URI) (uri == null ? null : MoneroUtils.parseUri(uri)), username, password, null);
+    this(uri == null ? null : MoneroUtils.parseUri(uri), username, password, null);
   }
 
   public MoneroRpcConnection(String uri, String username, String password, String zmqUri) {
-    this((URI) (uri == null ? null : MoneroUtils.parseUri(uri)), username, password, (URI) (zmqUri == null ? null : MoneroUtils.parseUri(zmqUri)));
+    this(uri == null ? null : MoneroUtils.parseUri(uri), username, password, zmqUri == null ? null : MoneroUtils.parseUri(zmqUri));
   }
   
   public MoneroRpcConnection(URI uri, String username, String password) {
@@ -129,7 +126,7 @@ public class MoneroRpcConnection {
       body.put("id", "0");
       body.put("method", method);
       if (params != null) body.put("params", params);
-      //System.out.println("Sending json request with method '" + method + "' and body: " + JsonUtils.serialize(body));
+      MoneroUtils.log(1, "Sending json request with method '" + method + "' and body: " + JsonUtils.serialize(body));
 
       // send http request
       HttpPost post = new HttpPost(uri.toString() + "/json_rpc");
@@ -143,9 +140,9 @@ public class MoneroRpcConnection {
       // deserialize response
       Map<String, Object> respMap = JsonUtils.toMap(MAPPER, EntityUtils.toString(resp.getEntity(), "UTF-8"));
       EntityUtils.consume(resp.getEntity());
-      //String respStr = JsonUtils.serialize(respMap);
-      //respStr = respStr.substring(0, Math.min(10000, respStr.length()));
-      //System.out.println("Received response: " + respStr);
+      String respStr = JsonUtils.serialize(respMap);
+      respStr = respStr.substring(0, Math.min(10000, respStr.length()));
+      MoneroUtils.log(1, "Received json response: " + respStr);
 
       // check rpc response for errors
       validateRpcResponse(respMap, method, params);
