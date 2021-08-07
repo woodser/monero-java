@@ -1089,4 +1089,10 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testInputKeyImages() {
     super.testInputKeyImages();
   }
+  
+  @Override
+  @Test
+  public void testProveUnrelayedTxs() {
+    super.testProveUnrelayedTxs();
+  }
 }

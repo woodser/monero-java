@@ -4753,6 +4753,53 @@ public abstract class TestMoneroWalletCommon {
     assertTrue(spendTx.getInputKeyImages().size() > 0);
   }
   
+  // Can prove unrelayed txs
+  @Test
+  public void testProveUnrelayedTxs() {
+      
+      // create unrelayed tx to verify
+      String address1 = "52FnB7ABUrKJzVQRpbMNrqDFWbcKLjFUq8Rgek7jZEuB6WE2ZggXaTf4FK6H8gQymvSrruHHrEuKhMN3qTMiBYzREKsmRKM";
+      String address2 = wallet.getAddress(0, 0);
+      String address3 = wallet.getAddress(1, 0);
+      MoneroTxWallet tx = wallet.createTx(new MoneroTxConfig()
+              .setAccountIndex(0)
+              .addDestination(address1, TestUtils.MAX_FEE)
+              .addDestination(address2, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(2l)))
+              .addDestination(address3, TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3l))));
+      
+      // submit tx to daemon but do not relay
+      MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
+      assertTrue(result.isGood());
+      
+      // create random wallet to verify transfers
+      MoneroWallet verifyingWallet = createWallet(new MoneroWalletConfig());
+      
+      // verify transfer 1
+      MoneroCheckTx check = verifyingWallet.checkTxKey(tx.getHash(), tx.getKey(), address1);
+      assertTrue(check.isGood());
+      assertTrue(check.getInTxPool());
+      assertEquals(0, check.getNumConfirmations());
+      assertEquals(TestUtils.MAX_FEE, check.getReceivedAmount());
+      
+      // verify transfer 2
+      check = verifyingWallet.checkTxKey(tx.getHash(), tx.getKey(), address2);
+      assertTrue(check.isGood());
+      assertTrue(check.getInTxPool());
+      assertEquals(0, check.getNumConfirmations());
+      assertTrue(check.getReceivedAmount().compareTo(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(2l))) >= 0); // + change amount
+      
+      // verify transfer 3
+      check = verifyingWallet.checkTxKey(tx.getHash(), tx.getKey(), address3);
+      assertTrue(check.isGood());
+      assertTrue(check.getInTxPool());
+      assertEquals(0, check.getNumConfirmations());
+      assertEquals(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3l)), check.getReceivedAmount());
+      
+      // cleanup
+      daemon.flushTxPool(tx.getHash());
+      closeWallet(verifyingWallet);
+  }
+  
   // --------------------------------- HELPERS --------------------------------
   
   /**
