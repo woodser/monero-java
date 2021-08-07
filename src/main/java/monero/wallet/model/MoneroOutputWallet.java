@@ -37,14 +37,17 @@ public class MoneroOutputWallet extends MoneroOutput {
     this.isFrozen = output.isFrozen;
   }
   
+  @Override
   public MoneroOutputWallet copy() {
     return new MoneroOutputWallet(this);
   }
   
+  @Override
   public MoneroTxWallet getTx() {
     return (MoneroTxWallet) super.getTx();
   }
   
+  @Override
   @JsonIgnore
   public MoneroOutputWallet setTx(MoneroTx tx) {
     if (tx != null && !(tx instanceof MoneroTxWallet)) throw new MoneroError("Wallet output's transaction must be of type MoneroTxWallet");
@@ -113,6 +116,7 @@ public class MoneroOutputWallet extends MoneroOutput {
     return getTx().isLocked();
   }
   
+  @Override
   public MoneroOutputWallet merge(MoneroOutput output) {
     return merge((MoneroOutputWallet) output);
   }
@@ -127,6 +131,7 @@ public class MoneroOutputWallet extends MoneroOutput {
     return this;
   }
   
+  @Override
   public String toString(int indent) {
     StringBuilder sb = new StringBuilder();
     sb.append(super.toString(indent) + "\n");
@@ -172,26 +177,31 @@ public class MoneroOutputWallet extends MoneroOutput {
   
   // ------------------- OVERRIDE CO-VARIANT RETURN TYPES ---------------------
 
+  @Override
   public MoneroOutputWallet setKeyImage(MoneroKeyImage keyImage) {
     super.setKeyImage(keyImage);
     return this;
   }
   
+  @Override
   public MoneroOutputWallet setAmount(BigInteger amount) {
     super.setAmount(amount);
     return this;
   }
   
-  public MoneroOutputWallet setIndex(Integer index) {
+  @Override
+  public MoneroOutputWallet setIndex(Long index) {
     super.setIndex(index);
     return this;
   }
   
-  public MoneroOutputWallet setRingOutputIndices(List<Integer> ringOutputIndices) {
+  @Override
+  public MoneroOutputWallet setRingOutputIndices(List<Long> ringOutputIndices) {
     super.setRingOutputIndices(ringOutputIndices);
     return this;
   }
   
+  @Override
   public MoneroOutputWallet setStealthPublicKey(String stealthPublicKey) {
     super.setStealthPublicKey(stealthPublicKey);
     return this;

@@ -57,11 +57,13 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     super();
   }
   
+  @Override
   @BeforeAll
   public void beforeAll() {
     super.beforeAll();
   }
   
+  @Override
   @AfterAll
   public void afterAll() {
     super.afterAll();
@@ -474,7 +476,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     MoneroWalletFull offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setServerUri("").setRestoreHeight(0l));
     
     // test tx signing with wallets
-    try { 
+    try {
       testViewOnlyAndOfflineWallets(viewOnlyWallet, offlineWallet);
     } finally {
       TestUtils.stopWalletRpcProcess(viewOnlyWallet);
@@ -647,7 +649,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       assertTrue(wallet.isConnected());
       assertFalse(wallet.isSynced());
       assertEquals(1, wallet.getHeight());
-      assertEquals((long) restoreHeight, (long) wallet.getSyncHeight());
+      assertEquals((long) restoreHeight, wallet.getSyncHeight());
       
       // register a wallet listener which tests notifications throughout the sync
       WalletSyncTester walletSyncTester = new WalletSyncTester(wallet, startHeightExpected, endHeightExpected);
@@ -776,7 +778,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 //    wallet.sync();
 //    walletKeys.sync(new WalletSyncPrinter());
 //  }
-//  
+//
 //  List<MoneroKeyImage> keyImages = walletKeys.exportKeyImages();
 //  walletKeys.importKeyImages(keyImages);
   }
@@ -854,9 +856,9 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
    // TODO monero-project: wallet.cpp m_synchronized only ever set to true, never false
 //      // wait for block to be added to chain
 //      daemon.getNextBlockHeader();
-//      
+//
 //      // wallet is no longer synced
-//      assertFalse(wallet.isSynced());  
+//      assertFalse(wallet.isSynced());
     } finally {
       wallet.close();
     }
@@ -1074,13 +1076,13 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 //  @Test
 //  public void testSave() {
 //    assumeTrue(TEST_NON_RELAYS);
-//    
+//
 //    // create unique path for new test wallet
 //    String path = TestUtils.TEST_WALLETS_DIR + "/test_wallet_" + UUID.randomUUID().toString();
-//    
+//
 //    // wallet does not exist
 //    assertFalse(MoneroWalletFull.walletExists(path));
-//    
+//
 //    // cannot open non-existant wallet
 //    try {
 //      new MoneroWalletFull(path, TestUtils.WALLET_FULL_PW, TestUtils.NETWORK_TYPE);
@@ -1088,14 +1090,14 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 //    } catch (MoneroException e) {
 //      assertEquals("Wallet does not exist at path: " + path, e.getMessage());
 //    }
-//    
+//
 //    // create in-memory wallet to test (no connection, english)
 //    MoneroWalletFull walletMemory = new MoneroWalletFull(TestUtils.NETWORK_TYPE, null, null);
 //    assertEquals(TestUtils.NETWORK_TYPE, walletMemory.getNetworkType());
 //    assertNull(walletMemory.getDaemonConnection());
 //    assertEquals("English", walletMemory.getMnemonicLanguage());
 //    assertEquals(1, walletMemory.getHeight());
-//    //assertEquals(0, walletMemory.getChainHeight()); // TODO: this causes dylib runtime_error; test default state of unconnected wallet 
+//    //assertEquals(0, walletMemory.getChainHeight()); // TODO: this causes dylib runtime_error; test default state of unconnected wallet
 //    //assertEquals(1, walletMemory.getRestoreHeight()); // TODO; new wallet() without connection but restoreHeight is checkpointed; where is that data cached?
 //    // attempt to save wallet without a path which hasn't been saved before
 //    try {
@@ -1104,15 +1106,15 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 //    } catch (MoneroException e) {
 //      assertEquals("Must specify path to save wallet because wallet has not been previously saved", e.getMessage());
 //    }
-//    
+//
 //    // save wallet to test_wallets directory
 //    walletMemory.save(path, TestUtils.WALLET_FULL_PW);
-//    
+//
 //    // read wallet saved to disk
 //    System.out.println("Attempting to read at path: " + path);
 //    MoneroWalletFull walletDisk1 = new MoneroWalletFull(path, TestUtils.WALLET_FULL_PW, TestUtils.NETWORK_TYPE);
 //    testJniWalletEquality(walletMemory, walletDisk1);
-//    
+//
 //    // sync wallet which isn't connected
 //    try {
 //      walletDisk1.sync();
@@ -1121,29 +1123,29 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 //      assertEquals(0, walletMemory.getHeight());
 //      assertEquals(1, walletMemory.getRestoreHeight());
 //    }
-//    
+//
 //    // set daemon connection
 //    walletDisk1.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
 //    assertNull(walletMemory.getDaemonConnection());
-//    
+//
 //    // save wallet to default path
 //    wallet.save();
-//    
+//
 //    // read wallet saved to disk
 //    MoneroWalletFull walletDisk2 = new MoneroWalletFull(path, TestUtils.WALLET_FULL_PW, TestUtils.NETWORK_TYPE);
 //    testJniWalletEquality(walletDisk1, walletDisk2);
-//    
+//
 //    // sync wallet
 //    long chainHeight = daemon.getHeight();
 //    walletDisk2.sync();
 //    assertEquals(chainHeight, walletDisk2.getHeight());
 //    assertEquals(chainHeight, walletDisk2.getRestoreHeight());
-//    
+//
 //    // save and re-open wallet
 //    walletDisk2.save();
 //    MoneroWalletFull walletDisk3 = new MoneroWalletFull(path, TestUtils.WALLET_FULL_PW, TestUtils.NETWORK_TYPE);
 //    testJniWalletEquality(walletDisk2, walletDisk3);
-//    
+//
 //    // close wallets to release (c++) resources
 //    walletMemory.close();
 //    walletDisk1.close();
@@ -1339,7 +1341,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   }
   
   /**
-   * Internal class to test all wallet notifications on sync. 
+   * Internal class to test all wallet notifications on sync.
    */
   private class WalletSyncTester extends SyncProgressTester {
     
@@ -1432,11 +1434,12 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       outgoingTotal = outgoingTotal.add(output.getAmount());
     }
     
+    @Override
     public void onDone(long chainHeight) {
       super.onDone(chainHeight);
       assertNotNull(walletTesterPrevHeight);
       assertNotNull(prevOutputReceived);
-      assertNotNull(prevOutputSpent); 
+      assertNotNull(prevOutputSpent);
       BigInteger balance = incomingTotal.subtract(outgoingTotal);
       assertEquals(balance, wallet.getBalance());
       assertEquals(prevBalance, wallet.getBalance());
@@ -1469,520 +1472,634 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
   
+  @Override
   @Test
   public void testCreateWalletRandom() {
     super.testCreateWalletRandom();
   }
   
+  @Override
   @Test
   public void testCreateWalletFromMnemonic() {
     super.testCreateWalletFromMnemonic();
   }
   
+  @Override
   @Test
   public void testCreateWalletFromMnemonicWithOffset() {
     super.testCreateWalletFromMnemonicWithOffset();
   }
   
+  @Override
   @Test
   public void testCreateWalletFromKeys() {
     super.testCreateWalletFromKeys();
   }
   
+  @Override
   @Test
   public void testGetVersion() {
     super.testGetVersion();
   }
   
+  @Override
   @Test
   public void testGetPath() {
     super.testGetPath();
   }
 
+  @Override
   @Test
   public void testGetHeight() {
     super.testGetHeight();
   }
 
+  @Override
   @Test
   public void testGetHeightByDate() {
     super.testGetHeightByDate();
   }
 
+  @Override
   @Test
   public void testGetMnemonic() {
     super.testGetMnemonic();
   }
 
+  @Override
   @Test
   public void testGetMnemonicLanguages() {
     super.testGetMnemonicLanguages();
   }
 
+  @Override
   @Test
   public void testGetPrivateViewKey() {
     super.testGetPrivateViewKey();
   }
   
+  @Override
   @Test
   public void testGetPrivateSpendKey() {
     super.testGetPrivateSpendKey();
   }
   
+  @Override
   @Test
   public void testGetPublicViewKey() {
     super.testGetPublicViewKey();
   }
   
+  @Override
   @Test
   public void testGetPublicSpendKey() {
     super.testGetPublicSpendKey();
   }
 
+  @Override
   @Test
   public void testGetPrimaryAddress() {
     super.testGetPrimaryAddress();
   }
 
+  @Override
   @Test
   public void testGetIntegratedAddressFromPaymentId() {
     super.testGetIntegratedAddressFromPaymentId();
   }
 
+  @Override
   @Test
   public void testDecodeIntegratedAddress() {
     super.testDecodeIntegratedAddress();
   }
 
+  @Override
   @Test
   public void testSyncWithoutProgress() {
     super.testSyncWithoutProgress();
   }
   
+  @Override
   @Test
   public void testWalletEqualityGroundTruth() {
     super.testWalletEqualityGroundTruth();
   }
 
+  @Override
   @Test
   public void testGetAccountsWithoutSubaddresses() {
     super.testGetAccountsWithoutSubaddresses();
   }
 
+  @Override
   @Test
   public void testGetAccountsWithSubaddresses() {
     super.testGetAccountsWithSubaddresses();
   }
 
+  @Override
   @Test
   public void testGetAccount() {
     super.testGetAccount();
   }
 
+  @Override
   @Test
   public void testCreateAccountWithoutLabel() {
     super.testCreateAccountWithoutLabel();
   }
 
+  @Override
   @Test
   public void testCreateAccountWithLabel() {
     super.testCreateAccountWithLabel();
   }
 
+  @Override
   @Test
   public void testGetSubaddresses() {
     super.testGetSubaddresses();
   }
 
+  @Override
   @Test
   public void testGetSubaddressesByIndices() {
     super.testGetSubaddressesByIndices();
   }
 
+  @Override
   @Test
   public void testGetSubaddressByIndex() {
     super.testGetSubaddressByIndex();
   }
 
+  @Override
   @Test
   public void testCreateSubaddress() {
     super.testCreateSubaddress();
   }
 
+  @Override
   @Test
   public void testGetSubaddressAddress() {
     super.testGetSubaddressAddress();
   }
 
+  @Override
   @Test
   public void testGetAddressIndices() {
     super.testGetAddressIndices();
   }
 
+  @Override
   @Test
   public void testGetAllBalances() {
     super.testGetAllBalances();
   }
 
+  @Override
   @Test
   public void testGetTxsWallet() {
     super.testGetTxsWallet();
   }
 
+  @Override
   @Test
   public void testGetTxsByHash() {
     super.testGetTxsByHash();
   }
 
+  @Override
   @Test
   public void testGetTxsWithQuery() {
     super.testGetTxsWithQuery();
   }
   
+  @Override
   @Test
   public void testGetTxsByHeight() {
     super.testGetTxsByHeight();
   }
 
+  @Override
   @Test
   public void testGetTxsWithPaymentIds() {
     super.testGetTxsWithPaymentIds();
   }
 
+  @Override
   @Test
   public void testGetTxsFieldsWithFiltering() {
     super.testGetTxsFieldsWithFiltering();
   }
 
+  @Override
   @Test
   public void testValidateInputsGetTxs() {
     super.testValidateInputsGetTxs();
   }
 
+  @Override
   @Test
   public void testGetTransfers() {
     super.testGetTransfers();
   }
 
+  @Override
   @Test
   public void testGetTransfersWithQuery() {
     super.testGetTransfersWithQuery();
   }
 
+  @Override
   @Test
   public void testValidateInputsGetTransfers() {
     super.testValidateInputsGetTransfers();
   }
   
+  @Override
   @Test
   public void testGetIncomingOutgoingTransfers() {
     super.testGetIncomingOutgoingTransfers();
   }
 
+  @Override
   @Test
   public void testGetOutputs() {
     super.testGetOutputs();
   }
 
+  @Override
   @Test
   public void testGetOutputsWithQuery() {
     super.testGetOutputsWithQuery();
   }
 
+  @Override
   @Test
   public void testValidateInputsGetOutputs() {
     super.testValidateInputsGetOutputs();
   }
 
+  @Override
   @Test
   public void testAccounting() {
     super.testAccounting();
   }
 
+  @Override
   @Test
   public void testCheckTxKey() {
     super.testCheckTxKey();
   }
 
+  @Override
   @Test
   public void testCheckTxProof() {
     super.testCheckTxProof();
   }
 
+  @Override
   @Test
   public void testCheckSpendProof() {
     super.testCheckSpendProof();
   }
 
+  @Override
   @Test
   public void testGetReserveProofWallet() {
     super.testGetReserveProofWallet();
   }
 
+  @Override
   @Test
   public void testGetReserveProofAccount() {
     super.testGetReserveProofAccount();
   }
 
+  @Override
   @Test
   public void testSetTxNote() {
     super.testSetTxNote();
   }
 
+  @Override
   @Test
   public void testSetTxNotes() {
     super.testSetTxNotes();
   }
 
+  @Override
   @Test
   public void testExportOutputs() {
     super.testExportOutputs();
   }
 
+  @Override
   @Test
   public void testImportOutputs() {
     super.testImportOutputs();
   }
 
+  @Override
   @Test
   public void testExportKeyImages() {
     super.testExportKeyImages();
   }
 
+  @Override
   @Test
   public void testGetNewKeyImagesFromLastImport() {
     super.testGetNewKeyImagesFromLastImport();
   }
 
+  @Override
   @Test
   @Disabled // TODO (monero-project): disabled because importing key images deletes corresponding incoming transfers: https://github.com/monero-project/monero/issues/5812
   public void testImportKeyImages() {
     super.testImportKeyImages();
   }
   
+  @Override
   @Test
   public void testViewOnlyAndOfflineWallets() {
     super.testViewOnlyAndOfflineWallets();
   }
 
+  @Override
   @Test
   public void testSignAndVerifyMessages() {
     super.testSignAndVerifyMessages();
   }
   
+  @Override
   @Test
   public void testAddressBook() {
     super.testAddressBook();
   }
 
+  @Override
   @Test
   public void testSetAttributes() {
     super.testSetAttributes();
   }
 
+  @Override
   @Test
   public void testCreatePaymentUri() {
     super.testCreatePaymentUri();
   }
 
+  @Override
   @Test
   public void testMining() {
     super.testMining();
   }
   
+  @Override
   @Test
   public void testValidateInputsSendingFunds() {
     super.testValidateInputsSendingFunds();
   }
   
+  @Override
   @Test
   public void testSyncWithPoolSameAccounts() {
     super.testSyncWithPoolSameAccounts();
   }
   
+  @Override
   @Test
   public void testSyncWithPoolSubmitAndDiscard() {
     super.testSyncWithPoolSubmitAndDiscard();
   }
   
+  @Override
   @Test
   public void testSyncWithPoolSubmitAndRelay() {
     super.testSyncWithPoolSubmitAndRelay();
   }
   
+  @Override
   @Test
   public void testSyncWithPoolRelay() {
     super.testSyncWithPoolRelay();
   }
   
+  @Override
   @Test
   public void testSendToExternal() {
     super.testSendToExternal();
   }
 
+  @Override
   @Test
   public void testSendFromSubaddresses() {
     super.testSendFromSubaddresses();
   }
   
+  @Override
   @Test
   public void testSendFromSubaddressesSplit() {
     super.testSendFromSubaddressesSplit();
   }
 
+  @Override
   @Test
   public void testSend() {
     super.testSend();
   }
 
+  @Override
   @Test
   public void testSendWithPaymentId() {
     super.testSendWithPaymentId();
   }
 
+  @Override
   @Test
   public void testSendSplit() {
     super.testSendSplit();
   }
 
+  @Override
   @Test
   public void testCreateThenRelay() {
     super.testCreateThenRelay();
   }
 
+  @Override
   @Test
   public void testCreateThenRelaySplit() {
     super.testCreateThenRelaySplit();
   }
 
+  @Override
   @Test
   public void testSendToMultiple() {
     super.testSendToMultiple();
   }
 
+  @Override
   @Test
   public void testSendToMultipleSplit() {
     super.testSendToMultipleSplit();
   }
 
+  @Override
   @Test
   public void testSendDustToMultipleSplit() {
     super.testSendDustToMultipleSplit();
   }
 
+  @Override
   @Test
   public void testUpdateLockedSameAccount() {
     super.testUpdateLockedSameAccount();
   }
 
+  @Override
   @Test
   public void testUpdateLockedSameAccountSplit() {
     super.testUpdateLockedSameAccountSplit();
   }
 
+  @Override
   @Test
   public void testUpdateLockedDifferentAccounts() {
     super.testUpdateLockedDifferentAccounts();
   }
 
+  @Override
   @Test
   public void testUpdateLockedDifferentAccountsSplit() {
     super.testUpdateLockedDifferentAccountsSplit();
   }
 
+  @Override
   @Test
   public void testSweepOutputs() {
     super.testSweepOutputs();
   }
 
+  @Override
   @Test
   public void testSweepSubaddresses() {
     super.testSweepSubaddresses();
   }
 
+  @Override
   @Test
   public void testSweepAccounts() {
     super.testSweepAccounts();
   }
 
+  @Override
   @Test
   public void testSweepWalletByAccounts() {
     super.testSweepWalletByAccounts();
   }
 
+  @Override
   @Test
   public void testSweepWalletBySubaddresses() {
     super.testSweepWalletBySubaddresses();
   }
 
+  @Override
   @Test
   public void testSweepDustNoRelay() {
     super.testSweepDustNoRelay();
   }
 
+  @Override
   @Test
   public void testSweepDust() {
     super.testSweepDust();
   }
 
+  @Override
   @Test
   public void testRescanBlockchain() {
     super.testRescanBlockchain();
   }
   
+  @Override
   @Test
   public void testMultisig() {
     super.testMultisig();
   }
   
+  @Override
   @Test
   public void testSaveAndClose() {
     super.testSaveAndClose();
   }
   
+  @Override
   @Test
   @Tag("NotificationTest")
   public void testNotificationsDifferentWallet() {
     super.testNotificationsDifferentWallet();
   }
   
+  @Override
   @Test
   @Tag("NotificationTest")
   public void testNotificationsDifferentWalletWhenRelayed() {
     super.testNotificationsDifferentWalletWhenRelayed();
   }
   
+  @Override
   @Test
   @Tag("NotificationTest")
   public void testNotificationsDifferentAccounts() {
     super.testNotificationsDifferentAccounts();
   }
   
+  @Override
   @Test
   @Tag("NotificationTest")
   public void testNotificationsSameAccount() {
     super.testNotificationsSameAccount();
   }
   
+  @Override
   @Test
   @Tag("NotificationTest")
   public void testNotificationsDifferentAccountSweepOutput() {
     super.testNotificationsDifferentAccountSweepOutput();
   }
   
+  @Override
   @Test
   @Tag("NotificationTest")
   public void testNotificationsSameAccountSweepOutputWhenRelayed() {
     super.testNotificationsSameAccountSweepOutputWhenRelayed();
   }
   
+  @Override
   @Test
   public void testStopListening() {
     super.testStopListening();
   }
   
+  @Override
   @Test
   public void testCreateAndReceive() {
     super.testCreateAndReceive();
+  }
+  
+  @Override
+  @Test
+  public void testFreezeOutputs() {
+    super.testFreezeOutputs();
+  }
+  
+  @Override
+  @Test
+  public void testInputKeyImages() {
+    super.testInputKeyImages();
   }
 }

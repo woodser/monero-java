@@ -30,6 +30,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   private Long maxHeight;
   private Boolean includeOutputs;
   protected MoneroTransferQuery transferQuery;
+  protected MoneroOutputQuery inputQuery;
   protected MoneroOutputQuery outputQuery;
   
   public MoneroTxQuery() {
@@ -48,28 +49,34 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     this.maxHeight = query.maxHeight;
     this.includeOutputs = query.includeOutputs;
     if (query.transferQuery != null) this.setTransferQuery(new MoneroTransferQuery(query.transferQuery));
+    if (query.inputQuery != null) this.setInputQuery(new MoneroOutputQuery(query.inputQuery));
     if (query.outputQuery != null) this.setOutputQuery(new MoneroOutputQuery(query.outputQuery));
   }
   
+  @Override
   public MoneroTxQuery copy() {
     return new MoneroTxQuery(this);
   }
   
+  @Override
   @JsonProperty("isOutgoing")
   public Boolean isOutgoing() {
     return isOutgoing;
   }
 
+  @Override
   public MoneroTxQuery setIsOutgoing(Boolean isOutgoing) {
     this.isOutgoing = isOutgoing;
     return this;
   }
 
+  @Override
   @JsonProperty("isIncoming")
   public Boolean isIncoming() {
     return isIncoming;
   }
 
+  @Override
   public MoneroTxQuery setIsIncoming(Boolean isIncoming) {
     this.isIncoming = isIncoming;
     return this;
@@ -114,10 +121,12 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     return this;
   }
   
+  @Override
   public MoneroTxQuery setPaymentId(String paymentId) {
     return setPaymentIds(Arrays.asList(paymentId));
   }
   
+  @Override
   public Long getHeight() {
     return height;
   }
@@ -161,6 +170,16 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   public MoneroTxQuery setTransferQuery(MoneroTransferQuery transferQuery) {
     this.transferQuery = transferQuery;
     if (transferQuery != null) transferQuery.txQuery = this;
+    return this;
+  }
+  
+  public MoneroOutputQuery getInputQuery() {
+    return inputQuery;
+  }
+  
+  public MoneroTxQuery setInputQuery(MoneroOutputQuery inputQuery) {
+    this.inputQuery = inputQuery;
+    if (inputQuery != null) inputQuery.txQuery = this;
     return this;
   }
   
@@ -226,6 +245,19 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
             matchFound = true;
             break;
           }
+        }
+      }
+      if (!matchFound) return false;
+    }
+    
+    // at least one input must meet input query if defined
+    if (this.getInputQuery() != null) {
+      if (tx.getInputs() == null || tx.getInputs().isEmpty()) return false;
+      boolean matchFound = false;
+      for (MoneroOutputWallet input : tx.getInputsWallet()) {
+        if (this.getInputQuery().meetsCriteria(input, false)) {
+          matchFound = true;
+          break;
         }
       }
       if (!matchFound) return false;
@@ -417,7 +449,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setOutputIndices(List<Integer> outputIndices) {
+  public MoneroTxQuery setOutputIndices(List<Long> outputIndices) {
     super.setOutputIndices(outputIndices);
     return this;
   }

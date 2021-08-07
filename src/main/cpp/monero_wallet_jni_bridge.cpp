@@ -1145,6 +1145,52 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_importKeyImagesJni
   }
 }
 
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_freezeOutputJni(JNIEnv* env, jobject instance, jstring jkey_image) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_freezeJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  const char* _key_image = jkey_image ? env->GetStringUTFChars(jkey_image, NULL) : nullptr;
+  string key_image = string(_key_image ? _key_image : "");
+  env->ReleaseStringUTFChars(jkey_image, _key_image);
+
+  // freeze output
+  try {
+    wallet->freeze_output(key_image);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_thawOutputJni(JNIEnv* env, jobject instance, jstring jkey_image) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_thawJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  const char* _key_image = jkey_image ? env->GetStringUTFChars(jkey_image, NULL) : nullptr;
+  string key_image = string(_key_image ? _key_image : "");
+  env->ReleaseStringUTFChars(jkey_image, _key_image);
+
+  // thaw output
+  try {
+    wallet->thaw_output(key_image);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
+JNIEXPORT bool JNICALL Java_monero_wallet_MoneroWalletFull_isOutputFrozenJni(JNIEnv* env, jobject instance, jstring jkey_image) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_isFrozenJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  const char* _key_image = jkey_image ? env->GetStringUTFChars(jkey_image, NULL) : nullptr;
+  string key_image = string(_key_image ? _key_image : "");
+  env->ReleaseStringUTFChars(jkey_image, _key_image);
+
+  // check if output is frozen
+  try {
+    return wallet->is_output_frozen(key_image);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return false;
+  }
+}
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_createTxsJni(JNIEnv* env, jobject instance, jstring jconfig) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_sendTxsJni(request)");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
@@ -1246,7 +1292,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_sweepDustJni(JNIEn
   }
 
   // serialize and return tx set
-  return env->NewStringUTF(txs[0]->m_tx_set.get()->serialize().c_str());
+  return env->NewStringUTF(txs.empty() ? std::string("{}").c_str() : txs[0]->m_tx_set.get()->serialize().c_str());
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_describeTxSetJni(JNIEnv* env, jobject instance, jstring jtx_set_json) {

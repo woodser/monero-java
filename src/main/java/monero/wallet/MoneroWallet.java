@@ -808,6 +808,28 @@ public interface MoneroWallet {
   public List<MoneroKeyImage> getNewKeyImagesFromLastImport();
   
   /**
+   * Freeze an output.
+   * 
+   * @param keyImage key image of the output to freeze
+   */
+  public void freezeOutput(String keyImage);
+  
+  /**
+   * Thaw a frozen output.
+   * 
+   * @param keyImage key image of the output to thaw
+   */
+  public void thawOutput(String keyImage);
+  
+  /**
+   * Check if an output is frozen.
+   * 
+   * @param keyImage key image of the output to check if frozen
+   * @return true if the output is frozen, false otherwise
+   */
+  public boolean isOutputFrozen(String keyImage);
+  
+  /**
    * Create a transaction to transfer funds from this wallet.
    * 
    * <p>

@@ -80,7 +80,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     System.loadLibrary("monero-java");
   }
   
-  // class variables 
+  // class variables
   private static final Logger LOGGER = Logger.getLogger(MoneroWalletFull.class.getName());
   private static final long DEFAULT_SYNC_PERIOD_IN_MS = 10000; // default period betweeen syncs in ms
   
@@ -419,28 +419,33 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   // -------------------------- COMMON WALLET METHODS -------------------------
   
+  @Override
   public void addListener(MoneroWalletListenerI listener) {
     assertNotClosed();
     super.addListener(listener);
     setIsListening(true);
   }
   
+  @Override
   public void removeListener(MoneroWalletListenerI listener) {
     assertNotClosed();
     super.removeListener(listener);
     if (listeners.isEmpty()) setIsListening(false);
   }
   
+  @Override
   public Set<MoneroWalletListenerI> getListeners() {
     assertNotClosed();
     return super.getListeners();
   }
   
+  @Override
   public boolean isViewOnly() {
     assertNotClosed();
     return isViewOnlyJni();
   }
   
+  @Override
   public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
     assertNotClosed();
     if (daemonConnection == null) setDaemonConnectionJni("", "", "");
@@ -453,6 +458,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     }
   }
   
+  @Override
   public MoneroRpcConnection getDaemonConnection() {
     assertNotClosed();
     try {
@@ -463,6 +469,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     }
   }
   
+  @Override
   public boolean isConnected() {
     assertNotClosed();
     try {
@@ -609,6 +616,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     }
   }
   
+  @Override
   public void stopSyncing() {
     assertNotClosed();
     try {
@@ -867,6 +875,36 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
   
   @Override
+  public void freezeOutput(String keyImage) {
+    assertNotClosed();
+    try {
+      freezeOutputJni(keyImage);
+    } catch (Exception e) {
+      throw new MoneroError(e.getMessage());
+    }
+  }
+  
+  @Override
+  public void thawOutput(String keyImage) {
+    assertNotClosed();
+    try {
+      thawOutputJni(keyImage);
+    } catch (Exception e) {
+      throw new MoneroError(e.getMessage());
+    }
+  }
+  
+  @Override
+  public boolean isOutputFrozen(String keyImage) {
+    assertNotClosed();
+    try {
+      return isOutputFrozenJni(keyImage);
+    } catch (Exception e) {
+      throw new MoneroError(e.getMessage());
+    }
+  }
+  
+  @Override
   public List<MoneroTxWallet> createTxs(MoneroTxConfig config) {
     assertNotClosed();
     LOGGER.fine("java createTxs(request)");
@@ -933,6 +971,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     try { txSetJson = sweepDustJni(relay); }
     catch (Exception e) { throw new MoneroError(e.getMessage()); }
     MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
+    if (txSet.getTxs() == null) txSet.setTxs(new ArrayList<MoneroTxWallet>());
     return txSet.getTxs();
   }
   
@@ -941,6 +980,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     assertNotClosed();
     String describedTxSetJson;
     try {
+      if (txSet.getTxs() != null) for (MoneroTxWallet tx : txSet.getTxs()) tx.setInputs(null); // set inputs to null  TODO: support input deserialization in jni bridge?
       describedTxSetJson = describeTxSetJni(JsonUtils.serialize(txSet));
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
@@ -1415,6 +1455,12 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private native String importKeyImagesJni(String keyImagesJson);
   
   private native String[] relayTxsJni(String[] txMetadatas);
+  
+  private native void freezeOutputJni(String KeyImage);
+  
+  private native void thawOutputJni(String keyImage);
+  
+  private native boolean isOutputFrozenJni(String keyImage);
   
   private native String createTxsJni(String txConfigJson);
   

@@ -16,8 +16,8 @@ public class MoneroOutput {
   private MoneroTx tx;
   private MoneroKeyImage keyImage;
   private BigInteger amount;
-  private Integer index;
-  private List<Integer> ringOutputIndices;
+  private Long index;
+  private List<Long> ringOutputIndices;
   private String stealthPublicKey;
   
   public MoneroOutput() {
@@ -28,7 +28,7 @@ public class MoneroOutput {
     if (output.keyImage != null) this.keyImage = output.keyImage.copy();
     this.amount = output.amount;
     this.index = output.index;
-    if (output.ringOutputIndices != null) this.ringOutputIndices = new ArrayList<Integer>(output.ringOutputIndices);
+    if (output.ringOutputIndices != null) this.ringOutputIndices = new ArrayList<Long>(output.ringOutputIndices);
     this.stealthPublicKey = output.stealthPublicKey;
   }
   
@@ -64,20 +64,20 @@ public class MoneroOutput {
     return this;
   }
   
-  public Integer getIndex() {
+  public Long getIndex() {
     return index;
   }
   
-  public MoneroOutput setIndex(Integer index) {
+  public MoneroOutput setIndex(Long index) {
     this.index = index;
     return this;
   }
   
-  public List<Integer> getRingOutputIndices() {
+  public List<Long> getRingOutputIndices() {
     return ringOutputIndices;
   }
   
-  public MoneroOutput setRingOutputIndices(List<Integer> ringOutputIndices) {
+  public MoneroOutput setRingOutputIndices(List<Long> ringOutputIndices) {
     this.ringOutputIndices = ringOutputIndices;
     return this;
   }
@@ -91,6 +91,7 @@ public class MoneroOutput {
     return this;
   }
   
+  @Override
   public String toString() {
     return toString(0);
   }

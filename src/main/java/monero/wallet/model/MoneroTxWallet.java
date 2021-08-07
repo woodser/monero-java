@@ -60,6 +60,7 @@ public class MoneroTxWallet extends MoneroTx {
     this.extraHex = tx.extraHex;
   }
   
+  @Override
   public MoneroTxWallet copy() {
     return new MoneroTxWallet(this);
   }
@@ -172,6 +173,7 @@ public class MoneroTxWallet extends MoneroTx {
    * @param inputs are MoneroOutputWallets to set for the wallet tx
    * @return MoneroTxWallet is a reference to this tx for chaining
    */
+  @Override
   public MoneroTxWallet setInputs(List<MoneroOutput> inputs) {
     
     // validate that all inputs are wallet inputs
@@ -224,6 +226,7 @@ public class MoneroTxWallet extends MoneroTx {
    * @param outputs are MoneroOutputWallets to set for the wallet tx
    * @return MoneroTxWallet is a reference to this tx for chaining
    */
+  @Override
   public MoneroTxWallet setOutputs(List<MoneroOutput> outputs) {
     
     // validate that all outputs are wallet outputs
@@ -353,6 +356,7 @@ public class MoneroTxWallet extends MoneroTx {
     return this;
   }
   
+  @Override
   public MoneroTxWallet merge(MoneroTx tx) {
     if (tx != null && !(tx instanceof MoneroTxWallet)) throw new MoneroError("Wallet transaction must be merged with type MoneroTxWallet");
     return merge((MoneroTxWallet) tx);
@@ -420,10 +424,12 @@ public class MoneroTxWallet extends MoneroTx {
     return this;  // for chaining
   }
   
+  @Override
   public String toString() {
     return toString(0, false);
   }
   
+  @Override
   public String toString(int indent) {
     return toString(indent, false);
   }
@@ -687,7 +693,7 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setOutputIndices(List<Integer> outputIndices) {
+  public MoneroTxWallet setOutputIndices(List<Long> outputIndices) {
     super.setOutputIndices(outputIndices);
     return this;
   }
