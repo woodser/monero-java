@@ -247,7 +247,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     params.put("height", height);
     Map<String, Object> respMap = rpc.sendJsonRequest("get_block", params);
     Map<String, Object> rpcBlock = (Map<String, Object>) respMap.get("result");
-    MoneroBlock block = convertRpcBlock((Map<String, Object>) rpcBlock);
+    MoneroBlock block = convertRpcBlock(rpcBlock);
     return block;
   }
 
@@ -290,7 +290,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         tx.setIsRelayed(true);
         tx.setIsFailed(false);
         tx.setIsDoubleSpendSeen(false);
-        List<Map<String, Object>> blockTxs = (List<Map<String, Object>>) rpcTxs.get(blockIdx);
+        List<Map<String, Object>> blockTxs = rpcTxs.get(blockIdx);
         convertRpcTx(blockTxs.get(txIdx), tx);
       }
       
@@ -480,7 +480,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 //    let resp = await this.config.rpc.sendPathRequest("get_transaction_pool_stats");
 //    MoneroDaemonRpc._checkResponseStatus(resp);
 //    let stats = MoneroDaemonRpc._convertRpcTxPoolStats(resp.pool_stats);
-//    
+//
 //    // uninitialize some stats if not applicable
 //    if (stats.getHisto98pc() === 0) stats.setHisto98pc(undefined);
 //    if (stats.getNumTxs() === 0) {
@@ -490,7 +490,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 //      stats.setHisto98pc(undefined);
 //      stats.setOldestTimestamp(undefined);
 //    }
-//    
+//
 //    return stats;
   }
 
@@ -568,7 +568,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 //  console.log(cumulative);
 //  console.log(startHeight);
 //  console.log(endHeight);
-//  
+//
 //  // send rpc request
 //  console.log("*********** SENDING REQUEST *************");
 //  if (startHeight === undefined) startHeight = 0;
@@ -578,13 +578,13 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 //    from_height: startHeight,
 //    to_height: endHeight
 //  });
-//  
+//
 //  console.log("RESPONSE");
 //  console.log(resp);
-//  
+//
 //  // build distribution entries from response
 //  let entries = [];
-//  if (!resp.result.distributions) return entries; 
+//  if (!resp.result.distributions) return entries;
 //  for (let rpcEntry of resp.result.distributions) {
 //    let entry = MoneroDaemonRpc._convertRpcOutputDistributionEntry(rpcEntry);
 //    entries.push(entry);
@@ -736,7 +736,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   @SuppressWarnings("unchecked")
   @Override
   public List<MoneroBan> getPeerBans() {
-    Map<String, Object> resp = (Map<String, Object>) rpc.sendJsonRequest("get_bans");
+    Map<String, Object> resp = rpc.sendJsonRequest("get_bans");
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     checkResponseStatus(result);
     List<MoneroBan> bans = new ArrayList<MoneroBan>();
@@ -766,13 +766,13 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 //    let resp = this.config.rpc.sendPathRequest("out_peers", {out_peers: limit});
 //    MoneroDaemonRpc._checkResponseStatus(resp);
 //  }
-//  
+//
 //  async setIncomingPeerLimit(limit) {
 //    assert(GenUtils.isInt(limit) && limit >= 0, "Incoming peer limit must be >= 0");
 //    let resp = this.config.rpc.sendPathRequest("in_peers", {in_peers: limit});
 //    MoneroDaemonRpc._checkResponseStatus(resp);
 //  }
-//  
+//
 //  async getPeerBans() {
 //    Map<String> resp = rpc.sendJsonRequest("get_bans");
 //    MoneroDaemonRpc._checkResponseStatus(resp.result);
@@ -786,11 +786,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 //    }
 //    return bans;
 //  }
-//  
+//
 //  async setPeerBan(ban) {
 //    return this.setPeerBans([ban]);
 //  }
-//  
+//
 //  async setPeerBans(bans) {
 //    let rpcBans = [];
 //    for (let ban of bans) rpcBans.push(MoneroDaemonRpc._convertRpcBan(ban));
@@ -1122,14 +1122,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("rctsig_prunable")) tx.setRctSigPrunable(GenUtils.reconcile(tx.getRctSigPrunable(), val));
       else if (key.equals("unlock_time")) tx.setUnlockHeight(GenUtils.reconcile(tx.getUnlockHeight(), ((BigInteger) val).longValue()));
       else if (key.equals("as_json") || key.equals("tx_json")) { }  // handled last so tx is as initialized as possible
-      else if (key.equals("as_hex") || key.equals("tx_blob")) tx.setFullHex(GenUtils.reconcile(tx.getFullHex(), "".equals((String) val) ? null : (String) val));
+      else if (key.equals("as_hex") || key.equals("tx_blob")) tx.setFullHex(GenUtils.reconcile(tx.getFullHex(), "".equals(val) ? null : (String) val));
       else if (key.equals("blob_size")) tx.setSize(GenUtils.reconcile(tx.getSize(), ((BigInteger) val).longValue()));
       else if (key.equals("weight")) tx.setWeight(GenUtils.reconcile(tx.getWeight(), ((BigInteger) val).longValue()));
       else if (key.equals("fee")) tx.setFee(GenUtils.reconcile(tx.getFee(), (BigInteger) val));
       else if (key.equals("relayed")) tx.setIsRelayed(GenUtils.reconcile(tx.isRelayed(), (Boolean) val));
       else if (key.equals("output_indices")) {
-        List<Integer> indices = new ArrayList<Integer>();
-        for (BigInteger bi : (List<BigInteger>) val) indices.add(bi.intValue());
+        List<Long> indices = new ArrayList<Long>();
+        for (BigInteger bi : (List<BigInteger>) val) indices.add(bi.longValue());
         tx.setOutputIndices(GenUtils.reconcile(tx.getOutputIndices(), indices));
       }
       else if (key.equals("do_not_relay")) tx.setRelay(GenUtils.reconcile(tx.getRelay(), !(Boolean) val));
@@ -1144,7 +1144,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         }
       }
       else if (key.equals("last_failed_id_hash")) {
-        if (DEFAULT_ID.equals((String) val)) tx.setIsFailed(GenUtils.reconcile(tx.isFailed(), false));
+        if (DEFAULT_ID.equals(val)) tx.setIsFailed(GenUtils.reconcile(tx.isFailed(), false));
         else {
           tx.setIsFailed(GenUtils.reconcile(tx.isFailed(), true));
           tx.setLastFailedHash(GenUtils.reconcile(tx.getLastFailedHash(), (String) val));
@@ -1152,9 +1152,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       }
       else if (key.equals("max_used_block_height")) tx.setMaxUsedBlockHeight(GenUtils.reconcile(tx.getMaxUsedBlockHeight(), ((BigInteger) val).longValue()));
       else if (key.equals("max_used_block_id_hash")) tx.setMaxUsedBlockHash(GenUtils.reconcile(tx.getMaxUsedBlockHash(), (String) val));
-      else if (key.equals("prunable_hash")) tx.setPrunableHash(GenUtils.reconcile(tx.getPrunableHash(), "".equals((String) val) ? null : (String) val));
-      else if (key.equals("prunable_as_hex")) tx.setPrunableHex(GenUtils.reconcile(tx.getPrunableHex(), "".equals((String) val) ? null : (String) val));
-      else if (key.equals("pruned_as_hex")) tx.setPrunedHex(GenUtils.reconcile(tx.getPrunedHex(), "".equals((String) val) ? null : (String) val));
+      else if (key.equals("prunable_hash")) tx.setPrunableHash(GenUtils.reconcile(tx.getPrunableHash(), "".equals(val) ? null : (String) val));
+      else if (key.equals("prunable_as_hex")) tx.setPrunableHex(GenUtils.reconcile(tx.getPrunableHex(), "".equals(val) ? null : (String) val));
+      else if (key.equals("pruned_as_hex")) tx.setPrunedHex(GenUtils.reconcile(tx.getPrunedHex(), "".equals(val) ? null : (String) val));
       else LOGGER.warning("ignoring unexpected field in rpc tx: " + key + ": " + val);
     }
     
@@ -1177,7 +1177,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     }
     if (tx.isFailed() == null) tx.setIsFailed(false);
     if (tx.getOutputIndices() != null && tx.getOutputs() != null)  {
-      GenUtils.assertEquals(tx.getOutputIndices().size(), (int) tx.getOutputs().size());
+      GenUtils.assertEquals(tx.getOutputIndices().size(), tx.getOutputs().size());
       for (int i = 0; i < tx.getOutputs().size(); i++) {
         tx.getOutputs().get(i).setIndex(tx.getOutputIndices().get(i));  // transfer output indices to outputs
       }
@@ -1201,8 +1201,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         Map<String, Object> rpcKey = (Map<String, Object>) val;
         output.setAmount(GenUtils.reconcile(output.getAmount(), (BigInteger) rpcKey.get("amount")));
         output.setKeyImage(GenUtils.reconcile(output.getKeyImage(), new MoneroKeyImage((String) rpcKey.get("k_image"))));
-        List<Integer> ringOutputIndices = new ArrayList<Integer>();
-        for (BigInteger bi : (List<BigInteger>) rpcKey.get("key_offsets")) ringOutputIndices.add(bi.intValue());
+        List<Long> ringOutputIndices = new ArrayList<Long>();
+        for (BigInteger bi : (List<BigInteger>) rpcKey.get("key_offsets")) ringOutputIndices.add(bi.longValue());
         output.setRingOutputIndices(GenUtils.reconcile(output.getRingOutputIndices(), ringOutputIndices));
       }
       else if (key.equals("amount")) output.setAmount(GenUtils.reconcile(output.getAmount(), (BigInteger) val));
@@ -1271,7 +1271,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("low_mixin")) result.setIsMixinTooLow((Boolean) val);
       else if (key.equals("not_relayed")) result.setIsRelayed(!Boolean.TRUE.equals(val));
       else if (key.equals("overspend")) result.setIsOverspend((Boolean) val);
-      else if (key.equals("reason")) result.setReason("".equals((String) val) ? null : (String) val);
+      else if (key.equals("reason")) result.setReason("".equals(val) ? null : (String) val);
       else if (key.equals("too_big")) result.setIsTooBig((Boolean) val);
       else if (key.equals("sanity_check_failed")) result.setSanityCheckFailed((Boolean) val);
       else if (key.equals("credits")) result.setCredits((BigInteger) val);
@@ -1539,7 +1539,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     }
 
     public void addListener(MoneroDaemonListener listener) {
-      synchronized(listeners) { 
+      synchronized(listeners) {
         
         // register listener
         listeners.add(listener);

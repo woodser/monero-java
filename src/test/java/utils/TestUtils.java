@@ -72,9 +72,9 @@ public class TestUtils {
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
   public static final MoneroNetworkType NETWORK_TYPE = MoneroNetworkType.STAGENET;
   public static final String LANGUAGE = "English";
-  public static final String MNEMONIC = "limits linen agreed gesture medicate having nurse doing pests tonic nugget pimple anxiety saucepan movement acquire estate likewise exult niece pedantic voyage fuselage gyrate fuselage"; 
-  public static final String ADDRESS = "54mANzvpzCWQD9FPG9a4XXaRjvQF7uLCxRc6i2uGx9pnQ6nUKaoKZ2oC9kC3Ee6SKBgFLzkwssZ9QH6TeiNGC6CFA99Hnck";
-  public static final long FIRST_RECEIVE_HEIGHT = 501; // NOTE: this value must be the height of the wallet's first tx for tests
+  public static final String MNEMONIC = "pests thorn nowhere mowing meant hubcaps bubble citadel fountain quote idiom origin entrance dullness vampire idled ointment eels unnoticed cease thwart glide anxiety atlas mowing";
+  public static final String ADDRESS = "56j5AskbiNeeb2UAnS85qpey93GYs4VWB78hazZKGdsKCGHvEXUD6nuMQqXaiiY8SwMWsmtAEXS9kA2ko7hgNtGHKsEWyhv";
+  public static final long FIRST_RECEIVE_HEIGHT = 22840; // NOTE: this value must be the height of the wallet's first tx for tests
   public static final long SYNC_PERIOD_IN_MS = 5000; // period between wallet syncs in milliseconds
   
   // logger configuration
@@ -252,6 +252,7 @@ public class TestUtils {
     
     // close the full wallet when the runtime is shutting down to release resources
     Runtime.getRuntime().addShutdownHook(new Thread() {
+      @Override
       public void run() {
         gtWallet.close();
       }
@@ -295,7 +296,7 @@ public class TestUtils {
       if (copy2.isConfirmed()) copy2.setBlock(tx2.getBlock().copy().setTxs(Arrays.asList(copy2)));
       copy1.merge(copy2);
       return true;
-    } catch (Exception e) {
+    } catch (Exception | AssertionError e) {
       e.printStackTrace();
       return false;
     }

@@ -11,7 +11,7 @@ public class MoneroCheckTx extends MoneroCheck {
   public Long numConfirmations;
   public BigInteger receivedAmount;
   
-  public Boolean getInTxPool() {
+  public Boolean inTxPool() {
     return inTxPool;
   }
   

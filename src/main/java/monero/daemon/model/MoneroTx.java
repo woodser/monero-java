@@ -43,7 +43,7 @@ public class MoneroTx {
   private Long weight;
   private List<MoneroOutput> inputs;
   private List<MoneroOutput> outputs;
-  private List<Integer> outputIndices;
+  private List<Long> outputIndices;
   private String metadata;
   private int[] extra;  // TODO: switch to string for consistency with MoneroTxWallet
   private Object rctSignatures; // TODO: implement
@@ -96,7 +96,7 @@ public class MoneroTx {
       this.outputs = new ArrayList<MoneroOutput>();
       for (MoneroOutput output : tx.outputs) outputs.add(output.copy().setTx(this));
     }
-    if (tx.outputIndices != null) this.outputIndices = new ArrayList<Integer>(tx.outputIndices);
+    if (tx.outputIndices != null) this.outputIndices = new ArrayList<Long>(tx.outputIndices);
     this.metadata = tx.metadata;
     if (tx.extra != null) this.extra = tx.extra.clone();
     this.rctSignatures = tx.rctSignatures;
@@ -351,11 +351,11 @@ public class MoneroTx {
     return this;
   }
   
-  public List<Integer> getOutputIndices() {
+  public List<Long> getOutputIndices() {
     return outputIndices;
   }
   
-  public MoneroTx setOutputIndices(List<Integer> outputIndices) {
+  public MoneroTx setOutputIndices(List<Long> outputIndices) {
     this.outputIndices = outputIndices;
     return this;
   }
@@ -562,6 +562,7 @@ public class MoneroTx {
     return this;  // for chaining
   }
   
+  @Override
   public String toString() {
     return toString(0);
   }

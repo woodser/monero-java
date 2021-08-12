@@ -34,6 +34,7 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
     this.txQuery = query.txQuery;  // reference original by default, MoneroTxQuery's deep copy will set this to itself
   }
   
+  @Override
   public MoneroOutputQuery copy() {
     return new MoneroOutputQuery(this);
   }
@@ -95,6 +96,7 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
     if (this.getSubaddressIndex() != null && !this.getSubaddressIndex().equals(output.getSubaddressIndex())) return false;
     if (this.getAmount() != null && this.getAmount().compareTo(output.getAmount()) != 0) return false;
     if (this.isSpent() != null && !this.isSpent().equals(output.isSpent())) return false;
+    if (this.isFrozen() != null && !this.isFrozen().equals(output.isFrozen())) return false;
     
     // filter on output key image
     if (this.getKeyImage() != null) {
@@ -150,6 +152,12 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
   }
   
   @Override
+  public MoneroOutputQuery setIsFrozen(Boolean isFrozen) {
+    super.setIsFrozen(isFrozen);
+    return this;
+  }
+  
+  @Override
   public MoneroOutputQuery setKeyImage(MoneroKeyImage keyImage) {
     super.setKeyImage(keyImage);
     return this;
@@ -162,13 +170,13 @@ public class MoneroOutputQuery extends MoneroOutputWallet implements Filter<Mone
   }
 
   @Override
-  public MoneroOutputQuery setIndex(Integer index) {
+  public MoneroOutputQuery setIndex(Long index) {
     super.setIndex(index);
     return this;
   }
 
   @Override
-  public MoneroOutputQuery setRingOutputIndices(List<Integer> ringOutputIndices) {
+  public MoneroOutputQuery setRingOutputIndices(List<Long> ringOutputIndices) {
     super.setRingOutputIndices(ringOutputIndices);
     return this;
   }

@@ -310,11 +310,11 @@ public class WalletEqualityUtils {
       // outputs must be consecutive per transaction
       if (lastTx1 != output1.getTx()) {
         assertFalse(txsOutputs1.containsKey(output1.getTx().getHash()));  // cannot be seen before
-        lastTx1 = (MoneroTxWallet) output1.getTx();
+        lastTx1 = output1.getTx();
       }
       if (lastTx2 != output2.getTx()) {
         assertFalse(txsOutputs2.containsKey(output2.getTx().getHash()));  // cannot be seen before
-        lastTx2 = (MoneroTxWallet) output2.getTx();
+        lastTx2 = output2.getTx();
       }
       
       // collect tx1 output

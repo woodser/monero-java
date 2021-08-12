@@ -59,11 +59,11 @@ public class MoneroRpcConnection {
   }
   
   public MoneroRpcConnection(String uri, String username, String password) {
-    this((URI) (uri == null ? null : MoneroUtils.parseUri(uri)), username, password, null);
+    this(uri == null ? null : MoneroUtils.parseUri(uri), username, password, null);
   }
 
   public MoneroRpcConnection(String uri, String username, String password, String zmqUri) {
-    this((URI) (uri == null ? null : MoneroUtils.parseUri(uri)), username, password, (URI) (zmqUri == null ? null : MoneroUtils.parseUri(zmqUri)));
+    this(uri == null ? null : MoneroUtils.parseUri(uri), username, password, zmqUri == null ? null : MoneroUtils.parseUri(zmqUri));
   }
   
   public MoneroRpcConnection(URI uri, String username, String password) {
@@ -129,7 +129,7 @@ public class MoneroRpcConnection {
       body.put("id", "0");
       body.put("method", method);
       if (params != null) body.put("params", params);
-      //System.out.println("Sending json request with method '" + method + "' and body: " + JsonUtils.serialize(body));
+      if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending json request with method '" + method + "' and body: " + JsonUtils.serialize(body));
 
       // send http request
       HttpPost post = new HttpPost(uri.toString() + "/json_rpc");
@@ -143,9 +143,11 @@ public class MoneroRpcConnection {
       // deserialize response
       Map<String, Object> respMap = JsonUtils.toMap(MAPPER, EntityUtils.toString(resp.getEntity(), "UTF-8"));
       EntityUtils.consume(resp.getEntity());
-      //String respStr = JsonUtils.serialize(respMap);
-      //respStr = respStr.substring(0, Math.min(10000, respStr.length()));
-      //System.out.println("Received response: " + respStr);
+      if (MoneroUtils.getLogLevel() >= 3) {
+        String respStr = JsonUtils.serialize(respMap);
+        respStr = respStr.substring(0, Math.min(10000, respStr.length()));
+        MoneroUtils.log(3, "Received json response: " + respStr);
+      }
 
       // check rpc response for errors
       validateRpcResponse(respMap, method, params);
@@ -183,12 +185,11 @@ public class MoneroRpcConnection {
    * @return the request's deserialized response
    */
   public Map<String, Object> sendPathRequest(String path, Map<String, Object> params) {
-    //System.out.println("sendPathRequest(" + path + ", " + JsonUtils.serialize(params) + ")");
-    
     CloseableHttpResponse resp = null;
     try {
       
       // send http request
+      if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending path request with path '" + path + "' and params: " + JsonUtils.serialize(params));
       HttpPost post = new HttpPost(uri.toString() + "/" + path);
       if (params != null) {
         HttpEntity entity = new StringEntity(JsonUtils.serialize(params));
@@ -203,8 +204,12 @@ public class MoneroRpcConnection {
       // deserialize response
       Map<String, Object> respMap = JsonUtils.toMap(MAPPER, EntityUtils.toString(resp.getEntity(), "UTF-8"));
       EntityUtils.consume(resp.getEntity());
-      //System.out.println("Received response: " + respMap);
-
+      if (MoneroUtils.getLogLevel() >= 3) {
+        String respStr = JsonUtils.serialize(respMap);
+        respStr = respStr.substring(0, Math.min(10000, respStr.length()));
+        MoneroUtils.log(3, "Received path response: " + respStr);
+      }
+      
       // check rpc response for errors
       validateRpcResponse(respMap, path, params);
       return respMap;
@@ -234,12 +239,12 @@ public class MoneroRpcConnection {
     try {
       
       // send http request
+      if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending binary request with path '" + path + "' and params: " + JsonUtils.serialize(params));
       HttpPost post = new HttpPost(uri.toString() + "/" + path);
       if (paramsBin != null) {
         HttpEntity entity = new ByteArrayEntity(paramsBin, ContentType.DEFAULT_BINARY);
         post.setEntity(entity);
       }
-      LOGGER.fine("Sending binary request with path '" + path + "' and params: " + JsonUtils.serialize(params));
       resp = client.execute(post);
       
       // validate response

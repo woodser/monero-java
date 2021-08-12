@@ -166,6 +166,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (line.contains("Starting wallet RPC server")) {
         if (printOutput) {
           new Thread(new Runnable() { // continue printing output in separate, non-blocking thread
+            @Override
             public void run() {
               try {
                 String line;
@@ -461,16 +462,19 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   // -------------------------- COMMON WALLET METHODS -------------------------
   
+  @Override
   public void addListener(MoneroWalletListenerI listener) {
     super.addListener(listener);
     setIsListening(true);
   }
   
+  @Override
   public void removeListener(MoneroWalletListenerI listener) {
     super.removeListener(listener);
     if (getListeners().isEmpty()) setIsListening(false);
   }
   
+  @Override
   public boolean isViewOnly() {
     try {
       Map<String, Object> params = new HashMap<String, Object>();
@@ -484,6 +488,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
   }
   
+  @Override
   public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
     setDaemonConnection(daemonConnection, null, null);
   }
@@ -503,10 +508,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     rpc.sendJsonRequest("set_daemon", params);
   }
   
+  @Override
   public MoneroRpcConnection getDaemonConnection() {
     throw new RuntimeException("MoneroWalletRpc.getDaemonConnection() not implemented");
   }
   
+  @Override
   public boolean isConnected() {
     try {
       checkReserveProof(getPrimaryAddress(), "", ""); // TODO (monero-project): provide better way to know if wallet rpc is connected to daemon
@@ -719,6 +726,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     rpc.sendJsonRequest("rescan_spent");
   }
   
+  @Override
   public void rescanBlockchain() {
     rpc.sendJsonRequest("rescan_blockchain");
   }
@@ -923,8 +931,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // temporarily disable transfer and output queries in order to collect all tx information
     MoneroTransferQuery transferQuery = query.getTransferQuery();
-    MoneroOutputQuery  outputQuery = query.getOutputQuery();
+    MoneroOutputQuery inputQuery = query.getInputQuery();
+    MoneroOutputQuery outputQuery = query.getOutputQuery();
     query.setTransferQuery(null);
+    query.setInputQuery(null);
     query.setOutputQuery(null);
     
     // fetch all transfers that meet tx query
@@ -963,6 +973,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // restore transfer and output queries
     query.setTransferQuery(transferQuery);
+    query.setInputQuery(inputQuery);
     query.setOutputQuery(outputQuery);
     
     // filter txs that don't meet transfer and output queries
@@ -1092,23 +1103,35 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public List<MoneroKeyImage> getNewKeyImagesFromLastImport() {
     return rpcExportKeyImages(false);
   }
-
-  @SuppressWarnings("unchecked")
+  
   @Override
-  public List<String> relayTxs(Collection<String> txMetadatas) {
-    if (txMetadatas == null || txMetadatas.isEmpty()) throw new MoneroError("Must provide an array of tx metadata to relay");
-    List<String> txHashes = new ArrayList<String>();
-    for (String txMetadata : txMetadatas) {
-      Map<String, Object> params = new HashMap<String, Object>();
-      params.put("hex", txMetadata);
-      Map<String, Object> resp = rpc.sendJsonRequest("relay_tx", params);
-      Map<String, Object> result = (Map<String, Object>) resp.get("result");
-      txHashes.add((String) result.get("tx_hash"));
-    }
-    poll(); // notify of changes
-    return txHashes;
+  public void freezeOutput(String keyImage) {
+    if (keyImage == null) throw new MoneroError("Must specify key image to freeze");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key_image", keyImage);
+    rpc.sendJsonRequest("freeze", params);
   }
   
+  @Override
+  public void thawOutput(String keyImage) {
+    if (keyImage == null) throw new MoneroError("Must specify key image to thaw");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key_image", keyImage);
+    rpc.sendJsonRequest("thaw", params);
+  }
+  
+  @Override
+  public boolean isOutputFrozen(String keyImage) {
+    if (keyImage == null) throw new MoneroError("Must specify key image to check if frozen");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key_image", keyImage);
+    Map<String, Object> resp = rpc.sendJsonRequest("frozen", params);
+    @SuppressWarnings("unchecked")
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return Boolean.TRUE.equals(result.get("frozen"));
+  }
+  
+  @Override
   @SuppressWarnings("unchecked")
   public List<MoneroTxWallet> createTxs(MoneroTxConfig config) {
     
@@ -1206,7 +1229,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("get_tx_metadata", true);
     
     // send request
-    Map<String, Object> resp = (Map<String, Object>) rpc.sendJsonRequest("sweep_single", params);
+    Map<String, Object> resp = rpc.sendJsonRequest("sweep_single", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     
     // notify of changes
@@ -1292,17 +1315,30 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("do_not_relay", !relay);
     Map<String, Object> resp = rpc.sendJsonRequest("sweep_dust", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    MoneroTxSet txSet = convertRpcSentTxsToTxSet(result, null);
-    if (txSet.getTxs() != null) {
-      for (MoneroTxWallet tx : txSet.getTxs()) {
-        tx.setIsRelayed(relay);
-        tx.setInTxPool(relay);
-      }
-    } else if (txSet.getMultisigTxHex() == null && txSet.getSignedTxHex() == null && txSet.getUnsignedTxHex() == null) {
-      throw new MoneroError("No dust to sweep");
-    }
     poll();
+    MoneroTxSet txSet = convertRpcSentTxsToTxSet(result, null);
+    if (txSet.getTxs() == null) return new ArrayList<MoneroTxWallet>();
+    for (MoneroTxWallet tx : txSet.getTxs()) {
+      tx.setIsRelayed(relay);
+      tx.setInTxPool(relay);
+    }
     return txSet.getTxs();
+  }
+  
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<String> relayTxs(Collection<String> txMetadatas) {
+    if (txMetadatas == null || txMetadatas.isEmpty()) throw new MoneroError("Must provide an array of tx metadata to relay");
+    List<String> txHashes = new ArrayList<String>();
+    for (String txMetadata : txMetadatas) {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("hex", txMetadata);
+      Map<String, Object> resp = rpc.sendJsonRequest("relay_tx", params);
+      Map<String, Object> result = (Map<String, Object>) resp.get("result");
+      txHashes.add((String) result.get("tx_hash"));
+    }
+    poll(); // notify of changes
+    return txHashes;
   }
   
   @SuppressWarnings("unchecked")
@@ -1455,7 +1491,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       }
       return check;
     } catch (MoneroRpcError e) {
-      if (Integer.valueOf(-1).equals(e.getCode()) && e.getMessage().equals("basic_string")) e = new MoneroRpcError("Must provide signature to check tx proof", -1, null, null); 
+      if (Integer.valueOf(-1).equals(e.getCode()) && e.getMessage().equals("basic_string")) e = new MoneroRpcError("Must provide signature to check tx proof", -1, null, null);
       if (Integer.valueOf(-8).equals(e.getCode()) && e.getMessage().indexOf("TX ID has invalid format") != -1) e = new MoneroRpcError("TX hash has invalid format", e.getCode(), e.getRpcMethod(), e.getRpcParams());
       throw e;
     }
@@ -1731,7 +1767,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public boolean isMultisigImportNeeded() {
     Map<String, Object> resp = rpc.sendJsonRequest("get_balance");
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return Boolean.TRUE.equals((Boolean) result.get("multisig_import_needed"));
+    return Boolean.TRUE.equals(result.get("multisig_import_needed"));
   }
 
   @Override
@@ -2390,7 +2426,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   /**
-   * Receives ZMQ notifications directly from monero-wallet-rpc. 
+   * Receives ZMQ notifications directly from monero-wallet-rpc.
    */
   private class WalletRpcZmqListener {
     
@@ -2418,7 +2454,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       isEnabled = true;
       
       // cache locked txs for later comparison
-      checkForChangedUnlockedTxs(); 
+      checkForChangedUnlockedTxs();
       
       // create pool to process notifications in serial without blocking polling
       processNotificationPool = Executors.newFixedThreadPool(1);
@@ -2509,7 +2545,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         boolean balancesChanged = checkForChangedBalances();
         
         // notify when txs unlock after wallet is synced
-        if (balancesChanged) checkForChangedUnlockedTxs();  // TODO: only check for unlocked txs when isSynced() 
+        if (balancesChanged) checkForChangedUnlockedTxs();  // TODO: only check for unlocked txs when isSynced()
       } else {
         
         // parse json to maps
@@ -2629,6 +2665,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     query.setIsIncoming(null);
     query.setIsOutgoing(null);
     query.setTransferQuery(null);
+    query.setInputQuery(null);
     query.setOutputQuery(null);
     return query;
   }
@@ -2636,16 +2673,17 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   private static boolean isContextual(MoneroTransferQuery query) {
     if (query == null) return false;
     if (query.getTxQuery() == null) return false;
-    if (query.getTxQuery().isIncoming() != null) return true; // requires context of all transfers
+    if (query.getTxQuery().isIncoming() != null) return true;       // requires context of all transfers
     if (query.getTxQuery().isOutgoing() != null) return true;
-    if (query.getTxQuery().getOutputQuery() != null) return true; // requires context of outputs
+    if (query.getTxQuery().getInputQuery() != null) return true;    // requires context of inputs
+    if (query.getTxQuery().getOutputQuery() != null) return true;   // requires context of outputs
     return false;
   }
   
   private static boolean isContextual(MoneroOutputQuery query) {
     if (query == null) return false;
     if (query.getTxQuery() == null) return false;
-    if (query.getTxQuery().isIncoming() != null) return true; // requires context of all transfers
+    if (query.getTxQuery().isIncoming() != null) return true;       // requires context of all transfers
     if (query.getTxQuery().isOutgoing() != null) return true;
     if (query.getTxQuery().getTransferQuery() != null) return true; // requires context of transfers
     return false;
@@ -2661,7 +2699,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("base_address")) account.setPrimaryAddress((String) val);
       else if (key.equals("tag")) account.setTag((String) val);
       else if (key.equals("label")) { } // label belongs to first subaddress
-      else LOGGER.warning("WARNING: ignoring unexpected account field: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected account field: " + key + ": " + val);
     }
     if ("".equals(account.getTag())) account.setTag(null);
     return account;
@@ -2681,7 +2719,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("used")) subaddress.setIsUsed((Boolean) val);
       else if (key.equals("blocks_to_unlock")) subaddress.setNumBlocksToUnlock(((BigInteger) val).longValue());
       else if (key.equals("time_to_unlock")) {} // ignoring
-      else LOGGER.warning("WARNING: ignoring unexpected subaddress field: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected subaddress field: " + key + ": " + val);
     }
     return subaddress;
   }
@@ -2793,16 +2831,25 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       } else if (key.equals("amount_list")) {
         List<BigInteger> amounts = (List<BigInteger>) val;
         for (int i = 0; i < amounts.size(); i++) {
-          if (txs.get(i).getOutgoingTransfer() != null) txs.get(i).getOutgoingTransfer().setAmount((BigInteger) amounts.get(i));
-          else txs.get(i).setOutgoingTransfer(new MoneroOutgoingTransfer().setTx(txs.get(i)).setAmount((BigInteger) amounts.get(i)));
+          if (txs.get(i).getOutgoingTransfer() != null) txs.get(i).getOutgoingTransfer().setAmount(amounts.get(i));
+          else txs.get(i).setOutgoingTransfer(new MoneroOutgoingTransfer().setTx(txs.get(i)).setAmount(amounts.get(i)));
         }
       } else if (key.equals("weight_list")) {
         List<BigInteger> weights = (List<BigInteger>) val;
         for (int i = 0; i < weights.size(); i++) txs.get(i).setWeight(weights.get(i).longValue());
       } else if (key.equals("multisig_txset") || key.equals("unsigned_txset") || key.equals("signed_txset")) {
         // handled elsewhere
+      } else if (key.equals("spent_key_images_list")) {
+        List<Map<String, Object>> inputKeyImagesList = (List<Map<String, Object>>) val;
+        for (int i = 0; i < inputKeyImagesList.size(); i++) {
+          GenUtils.assertTrue(txs.get(i).getInputs() == null);
+          txs.get(i).setInputsWallet(new ArrayList<MoneroOutputWallet>());
+          for (String inputKeyImage : (List<String>) inputKeyImagesList.get(i).get("key_images")) {
+            txs.get(i).getInputs().add(new MoneroOutputWallet().setKeyImage(new MoneroKeyImage().setHex(inputKeyImage)).setTx(txs.get(i)));
+          }
+        }
       } else {
-        LOGGER.warning("WARNING: ignoring unexpected transaction field: " + key + ": " + val);
+        LOGGER.warning("ignoring unexpected transaction list field: " + key + ": " + val);
       }
     }
     
@@ -2930,7 +2977,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("dummy_outputs")) tx.setNumDummyOutputs(((BigInteger) val).intValue());
       else if (key.equals("extra")) tx.setExtraHex((String) val);
       else if (key.equals("ring_size")) tx.setRingSize(((BigInteger) val).intValue());
-      else LOGGER.warning("WARNING: ignoring unexpected transaction field: " + key + ": " + val);
+      else if (key.equals("spent_key_images")) {
+        List<String> inputKeyImages = (List<String>) ((Map<String, Object>) val).get("key_images");
+        GenUtils.assertTrue(tx.getInputs() == null);
+        tx.setInputs(new ArrayList<MoneroOutput>());
+        for (String inputKeyImage : inputKeyImages) {
+          tx.getInputs().add(new MoneroOutput().setKeyImage(new MoneroKeyImage().setHex(inputKeyImage)).setTx(tx));
+        }
+      }
+      else LOGGER.warning("ignoring unexpected transaction field with transfer: " + key + ": " + val);
     }
     
     // link block and tx
@@ -2970,7 +3025,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (key.equals("amount")) output.setAmount((BigInteger) val);
       else if (key.equals("spent")) output.setIsSpent((Boolean) val);
       else if (key.equals("key_image")) { if (!"".equals(val)) output.setKeyImage(new MoneroKeyImage((String) val)); }
-      else if (key.equals("global_index")) output.setIndex(((BigInteger) val).intValue());
+      else if (key.equals("global_index")) output.setIndex(((BigInteger) val).longValue());
       else if (key.equals("tx_hash")) tx.setHash((String) val);
       else if (key.equals("unlocked")) tx.setIsLocked(!(Boolean) val);
       else if (key.equals("frozen")) output.setIsFrozen((Boolean) val);
@@ -2984,12 +3039,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         long height = ((BigInteger) val).longValue();
         tx.setBlock(new MoneroBlock().setHeight(height).setTxs(tx));
       }
-      else LOGGER.warning("WARNING: ignoring unexpected transaction field with output: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected transaction field with output: " + key + ": " + val);
     }
     
     // initialize tx with output
     List<MoneroOutput> outputs = new ArrayList<MoneroOutput>();
-    outputs.add((MoneroOutput) output); // have to cast to extended type because Java paramaterized types do not recognize inheritance
+    outputs.add(output);
     tx.setOutputs(outputs);
     return tx;
   }
@@ -3007,7 +3062,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           txSet.getTxs().add(tx);
         }
       }
-      else LOGGER.warning("WARNING: ignoring unexpected describe transfer field: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected describe transfer field: " + key + ": " + val);
     }
     return txSet;
   }
