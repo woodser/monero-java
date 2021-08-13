@@ -39,7 +39,7 @@ public class MoneroUtils {
    * @return the version of this monero-java library
    */
   static String getVersion() {
-    return "0.5.3";
+    return "0.5.4";
   }
   
   public static final int RING_SIZE = 12; // network-enforced ring size
