@@ -2918,9 +2918,10 @@ public abstract class TestMoneroWalletCommon {
     config.setAccountIndex(srcAccount.getIndex());
     config.setSubaddressIndices(fromSubaddressIndices);
     config.setRelay(true);
-    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     MoneroTxConfig configCopy = config.copy();
-    txs.addAll(wallet.createTxs(config));
+    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
+    if (!Boolean.FALSE.equals(config.getCanSplit())) txs.addAll(wallet.createTxs(config));
+    else txs.add(wallet.createTx(config));
     if (Boolean.FALSE.equals(config.getCanSplit())) assertEquals(1, txs.size());  // must have exactly one tx if no split
     
     // test that config is unchanged
@@ -3270,7 +3271,7 @@ public abstract class TestMoneroWalletCommon {
     assertTrue(account.getUnlockedBalance().compareTo(unlockedBalance) < 0);
     
     // build test context
-    config.setCanSplit(canSplit);  // for test context
+    config.setCanSplit(canSplit);
     TxContext ctx = new TxContext();
     ctx.wallet = wallet;
     ctx.config = config;
@@ -4288,7 +4289,7 @@ public abstract class TestMoneroWalletCommon {
   
   // TODO: test sweepUnlocked()
   private List<String> testWalletNotificationsAux(boolean sameWallet, boolean sameAccount, boolean sweepOutput, boolean createThenRelay, long unlockDelay) {
-    long MAX_POLL_TIME = TestUtils.SYNC_PERIOD_IN_MS; // maximum time granted for wallet to poll
+    long MAX_POLL_TIME = 5000l; // maximum time granted for wallet to poll
     
     // collect issues as test runs
     List<String> issues = new ArrayList<String>();
@@ -4320,17 +4321,24 @@ public abstract class TestMoneroWalletCommon {
     receiver.addListener(receiverNotificationCollector);
     
     // send funds
+    TxContext ctx = new TxContext();
+    ctx.wallet = wallet;
+    ctx.isSendResponse = true;
     MoneroTxWallet senderTx = null;
     int[] destinationAccounts = sameAccount ? (sweepOutput ? new int[] {0} : new int[] {0, 1, 2}) : (sweepOutput ? new int[] {1} : new int[] {1, 2, 3});
     List<MoneroOutputWallet> expectedOutputs = new ArrayList<MoneroOutputWallet>();
     if (sweepOutput) {
+      ctx.isSweepResponse = true;
+      ctx.isSweepOutputResponse = true;
       List<MoneroOutputWallet> outputs = sender.getOutputs(new MoneroOutputQuery().setIsSpent(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)).setAccountIndex(0).setMinAmount(TestUtils.MAX_FEE.multiply(new BigInteger("5"))));
       if (outputs.isEmpty()) {
         issues.add("ERROR: No outputs available to sweep from account 0");
         return issues;
       }
-      senderTx = sender.sweepOutput(new MoneroTxConfig().setAddress(receiver.getAddress(destinationAccounts[0], 0)).setKeyImage(outputs.get(0).getKeyImage().getHex()).setRelay(!createThenRelay));
+      MoneroTxConfig config = new MoneroTxConfig().setAddress(receiver.getAddress(destinationAccounts[0], 0)).setKeyImage(outputs.get(0).getKeyImage().getHex()).setRelay(!createThenRelay);
+      senderTx = sender.sweepOutput(config);
       expectedOutputs.add(new MoneroOutputWallet().setAmount(senderTx.getOutgoingTransfer().getDestinations().get(0).getAmount()).setAccountIndex(destinationAccounts[0]).setSubaddressIndex(0));
+      ctx.config = config;
     } else {
       MoneroTxConfig config = new MoneroTxConfig().setAccountIndex(0).setRelay(!createThenRelay);
       for (int destinationAccount : destinationAccounts) {
@@ -4338,11 +4346,15 @@ public abstract class TestMoneroWalletCommon {
         expectedOutputs.add(new MoneroOutputWallet().setAmount(TestUtils.MAX_FEE).setAccountIndex(destinationAccount).setSubaddressIndex(0));
       }
       senderTx = sender.createTx(config);
+      ctx.config = config;
     }
     if (createThenRelay) sender.relayTx(senderTx);
     
     // start timer to measure end of sync period
     long startTime = System.currentTimeMillis();
+    
+    // test send tx
+    testTxWallet(senderTx, ctx);
     
     // test sender after sending
     MoneroOutputQuery outputQuery = new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setHash(senderTx.getHash())); // query for outputs from sender tx
@@ -4362,12 +4374,10 @@ public abstract class TestMoneroWalletCommon {
       if (!sender.getUnlockedBalance().equals(senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getSecond())) issues.add("ERROR: sender unlocked balance != last notified unlocked balance after sending (" + sender.getUnlockedBalance() + " != " + senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getSecond() + ")");
     }
     if (senderNotificationCollector.getOutputsSpent(outputQuery).size() == 0) issues.add("ERROR: sender did not announce unconfirmed spent output");
-    
-    // wait for end of sync period
+        
+    // test receiver after 2 sync periods
     GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS - (System.currentTimeMillis() - startTime));
     startTime = System.currentTimeMillis(); // reset timer
-    
-    // test receiver after receiving
     MoneroTxWallet receiverTx = receiver.getTx(senderTx.getHash());
     if (!senderTx.getOutgoingAmount().equals(receiverTx.getIncomingAmount())) {
       if (sameAccount) issues.add("WARNING: sender tx outgoing amount != receiver tx incoming amount when sent to same account (" + senderTx.getOutgoingAmount() + " != " + receiverTx.getIncomingAmount() + ")");
@@ -4383,7 +4393,7 @@ public abstract class TestMoneroWalletCommon {
       if (!receiver.getBalance().equals(receiverNotificationCollector.getBalanceNotifications().get(receiverNotificationCollector.getBalanceNotifications().size() - 1).getFirst())) issues.add("ERROR: receiver balance != last notified balance after funds received");
       if (!receiver.getUnlockedBalance().equals(receiverNotificationCollector.getBalanceNotifications().get(receiverNotificationCollector.getBalanceNotifications().size() - 1).getSecond())) issues.add("ERROR: receiver unlocked balance != last notified unlocked balance after funds received");
     }
-    if (receiverNotificationCollector.getOutputsReceived(outputQuery).size() == 0) issues.add("ERROR: receiver did not announce received unconfirmed output");
+    if (receiverNotificationCollector.getOutputsReceived(outputQuery).size() == 0) issues.add("ERROR: receiver did not announce unconfirmed received output");
     else {
       for (MoneroOutputWallet output : getMissingOutputs(expectedOutputs, receiverNotificationCollector.getOutputsReceived(outputQuery), true)) {
         issues.add("ERROR: receiver did not announce received output for amount " + output.getAmount() + " to subaddress [" + output.getAccountIndex() + ", " + output.getSubaddressIndex() + "]");
@@ -4406,7 +4416,7 @@ public abstract class TestMoneroWalletCommon {
         lastHeight = height;
         Thread thread = new Thread(new Runnable() {
           @Override public void run() {
-            GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS + MAX_POLL_TIME); // wait sync period + poll time for notifications
+            GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS * 2 + MAX_POLL_TIME); // wait 2 sync periods + poll time for notifications
             List<Long> senderBlockNotifications = senderNotificationCollector.getBlockNotifications();
             List<Long> receiverBlockNotifications = receiverNotificationCollector.getBlockNotifications();
             for (long i = testStartHeight; i < height; i++) {
@@ -4437,7 +4447,7 @@ public abstract class TestMoneroWalletCommon {
           expectedUnlockHeight = Math.max(confirmHeight + NUM_BLOCKS_LOCKED, expectedUnlockHeight); // exact unlock height known
           Thread thread = new Thread(new Runnable() {
             @Override public void run() {
-              GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS + MAX_POLL_TIME); // wait sync period + poll time for notifications
+              GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS * 2 + MAX_POLL_TIME); // wait 2 sync periods + poll time for notifications
               MoneroOutputQuery confirmedQuery = outputQuery.getTxQuery().copy().setIsConfirmed(true).setIsLocked(true).getOutputQuery();
               if (senderNotificationCollector.getOutputsSpent(confirmedQuery).size() == 0) issues.add("ERROR: sender did not announce confirmed spent output"); // TODO: test amount
               if (receiverNotificationCollector.getOutputsReceived(confirmedQuery).size() == 0) issues.add("ERROR: receiver did not announce confirmed received output");
@@ -4465,7 +4475,7 @@ public abstract class TestMoneroWalletCommon {
       else if (height >= expectedUnlockHeight) {
         Thread thread = new Thread(new Runnable() {
           @Override public void run() {
-            GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS + MAX_POLL_TIME); // wait sync period + poll time for notifications
+            GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS * 2 + MAX_POLL_TIME); // wait 2 sync periods + poll time for notifications
             MoneroOutputQuery unlockedQuery = outputQuery.getTxQuery().copy().setIsLocked(false).getOutputQuery();
             if (senderNotificationCollector.getOutputsSpent(unlockedQuery).size() == 0) issues.add("ERROR: sender did not announce unlocked spent output"); // TODO: test amount?
             for (MoneroOutputWallet output : getMissingOutputs(expectedOutputs, receiverNotificationCollector.getOutputsReceived(unlockedQuery), true)) issues.add("ERROR: receiver did not announce unlocked received output for amount " + output.getAmount() + " to subaddress [" + output.getAccountIndex() + ", " + output.getSubaddressIndex() + "]");
@@ -5190,6 +5200,13 @@ public abstract class TestMoneroWalletCommon {
       assertNull(tx.getLastRelayedTimestamp());
     }
     
+    // test inputs
+    if (Boolean.TRUE.equals(tx.isOutgoing()) && Boolean.TRUE.equals(ctx.isSendResponse)) {
+      assertNotNull(tx.getInputs());
+      assertTrue(tx.getInputs().size() > 0);
+    }
+    if (tx.getInputs() != null) for (MoneroOutputWallet input : tx.getInputsWallet()) testInputWallet(input);
+    
     // test outputs
     if (Boolean.TRUE.equals(tx.isIncoming()) && Boolean.TRUE.equals(ctx.includeOutputs)) {
       if (tx.isConfirmed()) {
@@ -5228,6 +5245,12 @@ public abstract class TestMoneroWalletCommon {
       for (int i = 0; i < tx.getIncomingTransfers().size(); i++) {
         assertEquals(copy.getIncomingTransfers().get(i), tx.getIncomingTransfers().get(i));
         assertTrue(tx.getIncomingTransfers().get(i) != copy.getIncomingTransfers().get(i));
+      }
+    }
+    if (tx.getInputs() != null) {
+      for (int i = 0; i < tx.getInputs().size(); i++) {
+        assertEquals(copy.getInputs().get(i), tx.getInputs().get(i));
+        assertTrue(tx.getInputs().get(i) != copy.getInputs().get(i));
       }
     }
     if (tx.getOutputs() != null) {
@@ -5301,6 +5324,14 @@ public abstract class TestMoneroWalletCommon {
   private static void testDestination(MoneroDestination destination) {
     MoneroUtils.validateAddress(destination.getAddress(), TestUtils.NETWORK_TYPE);
     TestUtils.testUnsignedBigInteger(destination.getAmount(), true);
+  }
+  
+  private static void testInputWallet(MoneroOutputWallet input) {
+    assertNotNull(input);
+    assertNotNull(input.getKeyImage());
+    assertNotNull(input.getKeyImage().getHex());
+    assertTrue(input.getKeyImage().getHex().length() > 0);
+    assertNull(input.getAmount()); // must get info separately
   }
   
   private static void testOutputWallet(MoneroOutputWallet output) {

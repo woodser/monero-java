@@ -229,7 +229,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     if (this.getHashes() != null && !this.getHashes().contains(tx.getHash())) return false;
     if (this.getPaymentIds() != null && !this.getPaymentIds().contains(tx.getPaymentId())) return false;
     if (this.getHeight() != null && !this.getHeight().equals(txHeight)) return false;
-    if (this.getMinHeight() != null && (txHeight == null || txHeight < this.getMinHeight())) return false;
+    if (this.getMinHeight() != null && txHeight != null && txHeight < this.getMinHeight()) return false; // do not filter unconfirmed
     if (this.getMaxHeight() != null && (txHeight == null || txHeight > this.getMaxHeight())) return false;
     
     // done if not querying transfers or outputs
