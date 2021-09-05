@@ -58,8 +58,8 @@ public class TestUtils {
   public static final String WALLET_RPC_DOMAIN = "localhost";
   public static final String WALLET_RPC_URI = "http://" + WALLET_RPC_DOMAIN + ":" + WALLET_RPC_PORT_START;
   public static final String WALLET_RPC_ZMQ_URI = "tcp://" + WALLET_RPC_ZMQ_DOMAIN + ":" + WALLET_RPC_ZMQ_PORT_START;
-  public static final String WALLET_RPC_LOCAL_PATH = "/Applications/monero-x86_64-apple-darwin11-v0.17.2.0/monero-wallet-rpc";
-  public static final String WALLET_RPC_LOCAL_WALLET_DIR = "/Applications/monero-x86_64-apple-darwin11-v0.17.2.0";
+  public static final String WALLET_RPC_LOCAL_PATH = "/Applications/monero-x86_64-apple-darwin11-v0.17.2.3/monero-wallet-rpc";
+  public static final String WALLET_RPC_LOCAL_WALLET_DIR = "/Applications/monero-x86_64-apple-darwin11-v0.17.2.3";
   public static final String WALLET_RPC_ACCESS_CONTROL_ORIGINS = "http://localhost:8080"; // cors access from web browser
   
   // test wallet config
