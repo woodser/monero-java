@@ -58,6 +58,27 @@ import monero.daemon.model.MoneroVersion;
 public interface MoneroDaemon {
   
   /**
+   * Register a listener to receive daemon notifications.
+   * 
+   * @param listener the listener to unregister
+   */
+  public void addListener(MoneroDaemonListener listener);
+  
+  /**
+   * Unregister a listener to receive daemon notifications.
+   * 
+   * @param listener a previously registered listener to be unregistered
+   */
+  public void removeListener(MoneroDaemonListener listener);
+  
+  /**
+   * Get the listeners registered with the daemon.
+   * 
+   * @return the registered listeners
+   */
+  public List<MoneroDaemonListener> getListeners();
+  
+  /**
    * Gets the version of the daemon.
    * 
    * @return the version of the daemon
@@ -208,7 +229,7 @@ public interface MoneroDaemon {
    *        sequential, next goes in pow(2,n) offset, like 2, 4, 8, 16, 32, 64
    *        and so on, and the last one is always genesis block
    * @param startHeight is the starting height of block hashes to return
-   * @return the requested block hashes     
+   * @return the requested block hashes
    */
   public List<String> getBlockHashes(List<String> blockHashes, Long startHeight);
   
@@ -638,20 +659,6 @@ public interface MoneroDaemon {
    * @return the header of the next block added to the chain
    */
   public MoneroBlockHeader waitForNextBlockHeader();
-  
-  /**
-   * Register a listener to be notified when blocks are added to the chain.
-   * 
-   * @param listener is invoked when blocks are added to the chain
-   */
-  public void addListener(MoneroDaemonListener listener);
-  
-  /**
-   * Unregister a listener to be notified when blocks are added to the chain.
-   * 
-   * @param listener is a previously registered listener to be unregistered
-   */
-  public void removeListener(MoneroDaemonListener listener);
   
   // ----------------------------- STATIC UTILITIES ---------------------------
   

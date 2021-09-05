@@ -62,7 +62,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setDaemonConnectionJn
 
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getDaemonConnectionJni(JNIEnv *, jobject);
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isConnectedJni(JNIEnv *, jobject);
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isConnectedToDaemonJni(JNIEnv *, jobject);
 
 JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isDaemonSyncedJni(JNIEnv *, jobject);
 

@@ -126,7 +126,7 @@ public interface MoneroWallet {
    * 
    * @return true if the wallet is connected to a daemon, false otherwise
    */
-  public boolean isConnected(); // TODO: isConnectedToDaemon?
+  public boolean isConnectedToDaemon();
   
   /**
    * Returns the wallet version.

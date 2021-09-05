@@ -336,8 +336,8 @@ public abstract class TestMoneroWalletCommon {
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
         assertEquals(privateViewKey, wallet.getPrivateViewKey());
         assertEquals(privateSpendKey, wallet.getPrivateSpendKey());
-        if (!wallet.isConnected()) System.out.println("WARNING: wallet created from keys is not connected to authenticated daemon");  // TODO monero-project: keys wallets not connected
-        assertTrue(wallet.isConnected(), "Wallet created from keys is not connected to authenticated daemon");
+        if (!wallet.isConnectedToDaemon()) System.out.println("WARNING: wallet created from keys is not connected to authenticated daemon");  // TODO monero-project: keys wallets not connected
+        assertTrue(wallet.isConnectedToDaemon(), "Wallet created from keys is not connected to authenticated daemon");
         if (!(wallet instanceof MoneroWalletRpc)) {
           MoneroUtils.validateMnemonic(wallet.getMnemonic()); // TODO monero-wallet-rpc: cannot get mnemonic from wallet created from keys?
           assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getMnemonicLanguage());
@@ -2312,7 +2312,7 @@ public abstract class TestMoneroWalletCommon {
     assertEquals(null, viewOnlyWallet.getMnemonic());
     assertEquals(null, viewOnlyWallet.getMnemonicLanguage());
     assertTrue(viewOnlyWallet.isViewOnly());
-    assertTrue(viewOnlyWallet.isConnected());  // TODO: this fails with monero-wallet-rpc and monerod with authentication
+    assertTrue(viewOnlyWallet.isConnectedToDaemon());  // TODO: this fails with monero-wallet-rpc and monerod with authentication
     viewOnlyWallet.sync();
     assertTrue(viewOnlyWallet.getTxs().size() > 0);
     
@@ -2320,7 +2320,7 @@ public abstract class TestMoneroWalletCommon {
     String outputsHex = viewOnlyWallet.exportOutputs();
     
     // test offline wallet
-    assertFalse(offlineWallet.isConnected());
+    assertFalse(offlineWallet.isConnectedToDaemon());
     assertFalse(offlineWallet.isViewOnly());
     if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic()); // TODO monero-project: cannot get mnemonic from offline wallet rpc
     if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(0, offlineWallet.getTxs().size());  // TODO: monero-wallet-rpc has these transactions cached on startup

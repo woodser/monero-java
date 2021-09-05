@@ -423,14 +423,14 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   public void addListener(MoneroWalletListenerI listener) {
     assertNotClosed();
     super.addListener(listener);
-    setIsListening(true);
+    refreshListening();
   }
   
   @Override
   public void removeListener(MoneroWalletListenerI listener) {
     assertNotClosed();
     super.removeListener(listener);
-    if (listeners.isEmpty()) setIsListening(false);
+    refreshListening();
   }
   
   @Override
@@ -470,10 +470,10 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
   
   @Override
-  public boolean isConnected() {
+  public boolean isConnectedToDaemon() {
     assertNotClosed();
     try {
-      return isConnectedJni();
+      return isConnectedToDaemonJni();
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
@@ -1331,7 +1331,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   public void close(boolean save) {
     if (isClosed) return; // closing a closed wallet has no effect
     isClosed = true;
-    setIsListening(false);
+    refreshListening();
     try {
       closeJni(save);
     } catch (Exception e) {
@@ -1374,7 +1374,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private native String[] getDaemonConnectionJni(); // returns [uri, username, password]
   
-  private native boolean isConnectedJni();
+  private native boolean isConnectedToDaemonJni();
   
   private native boolean isDaemonSyncedJni();
   
@@ -1803,7 +1803,9 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   /**
    * Enables or disables listening in the c++ wallet.
    */
-  private void setIsListening(boolean isEnabled) {
+  private void refreshListening() {
+    boolean isEnabled = listeners.size() > 0;
+    if (jniListenerHandle == 0 && !isEnabled || jniListenerHandle > 0 && isEnabled) return; // no difference
     jniListenerHandle = setListenerJni(isEnabled ? jniListener : null);
   }
   
