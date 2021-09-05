@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
   TestMoneroUtils.class,
   TestMoneroDaemonRpc.class,
   TestMoneroWalletFull.class,
-  TestMoneroWalletRpc.class
+  TestMoneroWalletRpc.class,
+  TestMoneroRpcConnectionManager.class
 })
 public class TestAll {}

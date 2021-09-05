@@ -22,6 +22,9 @@
 
 package monero.daemon;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import common.utils.GenUtils;
+import common.utils.JsonUtils;
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
@@ -30,17 +33,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-
-import common.utils.GenUtils;
-import common.utils.JsonUtils;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroRpcError;
 import monero.common.MoneroUtils;
+import monero.common.TaskLooper;
 import monero.daemon.model.ConnectionType;
 import monero.daemon.model.MoneroAltChain;
 import monero.daemon.model.MoneroBan;
@@ -85,7 +83,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   
   // instance variables
   private MoneroRpcConnection rpc;
-  private MoneroDaemonPoller daemonPoller;
+  private DaemonPoller daemonPoller;
+  private List<MoneroDaemonListener> listeners;
   private Map<Long, MoneroBlockHeader> cachedHeaders;
   
   public MoneroDaemonRpc(URI uri) {
@@ -99,16 +98,30 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public MoneroDaemonRpc(String uri, String username, String password) {
     this(new MoneroRpcConnection(uri, username, password));
   }
-  
-  public MoneroDaemonRpc(URI uri, String username, String password) {
-    this(new MoneroRpcConnection(uri, username, password));
-  }
 
   public MoneroDaemonRpc(MoneroRpcConnection rpc) {
     GenUtils.assertNotNull(rpc);
     this.rpc = rpc;
-    this.daemonPoller = new MoneroDaemonPoller(this);
+    this.listeners = new ArrayList<MoneroDaemonListener>();
     this.cachedHeaders = new HashMap<Long, MoneroBlockHeader>();
+  }
+  
+  @Override
+  public void addListener(MoneroDaemonListener listener) {
+    listeners.add(listener);
+    refreshListening();
+  }
+  
+  @Override
+  public void removeListener(MoneroDaemonListener listener) {
+    if (!listeners.contains(listener)) throw new MoneroError("Listener is not registered with daemon");
+    listeners.remove(listener);
+    refreshListening();
+  }
+  
+  @Override
+  public List<MoneroDaemonListener> getListeners() {
+    return listeners;
   }
   
   /**
@@ -880,16 +893,6 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       }
     }
   }
-
-  @Override
-  public void addListener(MoneroDaemonListener listener) {
-    daemonPoller.addListener(listener);
-  }
-
-  @Override
-  public void removeListener(MoneroDaemonListener listener) {
-    daemonPoller.removeListener(listener);
-  }
   
   // ------------------------------- PRIVATE INSTANCE  ----------------------------
   
@@ -1523,92 +1526,58 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return new BigInteger(hex.substring(2), 16);
   }
   
+  private void refreshListening() {
+    if (daemonPoller == null && listeners.size() > 0) daemonPoller = new DaemonPoller(this);
+    if (daemonPoller != null) daemonPoller.setIsPolling(listeners.size() > 0);
+  }
+  
   /**
    * Polls a Monero daemon for updates and notifies listeners as they occur.
    */
-  private class MoneroDaemonPoller {
+  private class DaemonPoller {
     
-    private MoneroDaemon daemon;
-    private MoneroDaemonPollerRunnable runnable;
-    private List<MoneroDaemonListener> listeners;
-    private static final long POLL_INTERVAL_MS = 10000; // poll every X ms  TODO: poll interval should come from configuration
+    private static final long DEFAULT_POLL_PERIOD_IN_MS = 10000; // poll every X ms
     
-    public MoneroDaemonPoller(MoneroDaemon daemon) {
+    private MoneroDaemonRpc daemon;
+    private TaskLooper looper;
+    private MoneroBlockHeader lastHeader;
+    
+    public DaemonPoller(MoneroDaemonRpc daemon) {
       this.daemon = daemon;
-      this.listeners = new ArrayList<MoneroDaemonListener>();
-    }
-
-    public void addListener(MoneroDaemonListener listener) {
-      synchronized(listeners) {
-        
-        // register listener
-        listeners.add(listener);
-        
-        // start polling thread
-        if (runnable == null) {
-          runnable = new MoneroDaemonPollerRunnable(daemon, POLL_INTERVAL_MS);
-          Thread thread = new Thread(runnable);
-          thread.setDaemon(true); // daemon thread does not prevent JVM from halting
-          thread.start();
+      looper = new TaskLooper(new Runnable() {
+        @Override
+        public void run() {
+          poll();
         }
-      }
+      });
     }
     
-    public void removeListener(MoneroDaemonListener listener) {
-      synchronized(listeners) {
-        boolean found = listeners.remove(listener);
-        if (!found) throw new MoneroError("Listener is not registered");
-        if (listeners.isEmpty()) {
-          runnable.terminate();
-          runnable = null;
-        }
-      }
+    public void setIsPolling(boolean isPolling) {
+      if (isPolling) looper.start(DEFAULT_POLL_PERIOD_IN_MS); // TODO: allow configurable poll period
+      else looper.stop();
     }
     
-    private class MoneroDaemonPollerRunnable implements Runnable {
-      
-      private MoneroDaemon daemon;
-      private long interval;
-      private boolean isTerminated;
-      
-      public MoneroDaemonPollerRunnable(MoneroDaemon daemon, long interval) {
-        this.daemon = daemon;
-        this.interval = interval;
-        this.isTerminated = false;
-      }
-
-      @Override
-      public void run() {
+    private void poll() {
+      try {
         
-        // get header to detect changes while polling
-        MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
+        // get first header for comparison
+        if (lastHeader == null) {
+          lastHeader = daemon.getLastBlockHeader();
+          return;
+        }
         
-        // poll until stopped
-        while (!isTerminated) {
-          
-          // pause for interval ms
-          try {
-            TimeUnit.MILLISECONDS.sleep(interval);
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-            terminate();
-          }
-          
-          // fetch and compare latest block header
-          MoneroBlockHeader header = daemon.getLastBlockHeader();
-          if (!header.getHash().equals(lastHeader.getHash())) {
-            lastHeader = header;
-            synchronized(listeners) {
-              for (MoneroDaemonListener listener : listeners) {
-                listener.onBlockHeader(header); // notify listener
-              }
+        // fetch and compare latest block header
+        MoneroBlockHeader header = daemon.getLastBlockHeader();
+        if (!header.getHash().equals(lastHeader.getHash())) {
+          lastHeader = header;
+          synchronized(daemon.getListeners()) {
+            for (MoneroDaemonListener listener : daemon.getListeners()) {
+              listener.onBlockHeader(header); // notify listener
             }
           }
         }
-      }
-      
-      public void terminate() {
-        isTerminated = true;
+      } catch (Exception e) {
+        e.printStackTrace();
       }
     }
   }

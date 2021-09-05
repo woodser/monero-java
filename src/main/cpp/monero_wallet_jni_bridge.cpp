@@ -498,10 +498,10 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getDaemonConn
   }
 }
 
-JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isConnectedJni(JNIEnv* env, jobject instance) {
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isConnectedToDaemonJni(JNIEnv* env, jobject instance) {
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   try {
-    return static_cast<jboolean>(wallet->is_connected());
+    return static_cast<jboolean>(wallet->is_connected_to_daemon());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
