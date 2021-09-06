@@ -162,6 +162,9 @@ public class TestMoneroConnectionManager {
       assertTrue(orderedConnections.get(4) == walletRpcs.get(4).getRpcConnection());
       for (int i = 0; i < orderedConnections.size() - 1; i++) assertTrue(orderedConnections.get(i).isOnline());
       assertFalse(orderedConnections.get(4).isOnline());
+      
+      // stop polling connection
+      connectionManager.stopAutoRefresh();
     } finally {
       
       // stop monero-wallet-rpc instances
