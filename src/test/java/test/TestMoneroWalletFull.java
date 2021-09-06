@@ -709,7 +709,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
           
           // ensure wallet has time to detect new block
           try {
-            TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS + 2000); // sleep for wallet interval + time to sync
+            TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS + 3000); // sleep for wallet interval + time to sync
           } catch (InterruptedException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
