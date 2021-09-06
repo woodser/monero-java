@@ -27,6 +27,11 @@ public class MoneroConnectionManager {
   private List<MoneroConnectionManagerListener> listeners = new ArrayList<MoneroConnectionManagerListener>();
   private ConnectionComparator connectionComparator = new ConnectionComparator();
   
+  /**
+   * Add a connection. The connection may have an elevated priority for this manager to use.
+   * 
+   * @param connection - the connection to add
+   */
   public MoneroConnectionManager addConnection(MoneroRpcConnection connection) {
     for (MoneroRpcConnection aConnection : connections) {
       if (aConnection.getUri().equals(connection.getUri())) throw new MoneroError("Connection URI already exists");
@@ -35,27 +40,52 @@ public class MoneroConnectionManager {
     return this;
   }
   
+  /**
+   * Remove a connection.
+   * 
+   * @param connection - the connection to remove
+   */
   public MoneroConnectionManager removeConnection(MoneroRpcConnection connection) {
     if (!connections.remove(connection)) throw new MoneroError("Monero connection manager does not contain connection to remove");
     connection.setIsCurrentConnection(false);
     return this;
   }
   
+  /**
+   * Add a listener to receive notifications when the connection changes.
+   * 
+   * @param listener - the listener to add
+   */
   public MoneroConnectionManager addListener(MoneroConnectionManagerListener listener) {
     listeners.add(listener);
     return this;
   }
   
+  /**
+   * Remove a listener.
+   * 
+   * @param listener - the listener to remove
+   */
   public MoneroConnectionManager removeListener(MoneroConnectionManagerListener listener) {
     if (!listeners.remove(listener)) throw new MoneroError("Monero connection manager does not contain listener to remove");
     return this;
   }
   
+  /**
+   * Set the maximum request time before its connection is considered offline.
+   * 
+   * @param timeoutInMs - the timeout before the connection is considered offline
+   */
   public MoneroConnectionManager setTimeout(long timeoutInMs) {
     this.timeoutInMs = timeoutInMs;
     return this;
   }
   
+  /**
+   * Get the request timeout.
+   * 
+   * @return the request timeout before a connection is considered offline
+   */
   public long getTimeout() {
     return timeoutInMs;
   }
