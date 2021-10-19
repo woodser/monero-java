@@ -2285,6 +2285,7 @@ public abstract class TestMoneroWalletCommon {
     // create view-only and offline wallets
     MoneroWallet viewOnlyWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
     MoneroWallet offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setServerUri("").setRestoreHeight(0l));
+    viewOnlyWallet.sync();
     
     // test tx signing with wallets
     try {
@@ -2300,6 +2301,11 @@ public abstract class TestMoneroWalletCommon {
     // wait for txs to confirm and for sufficient unlocked balance
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
     TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(wallet, 0, null, TestUtils.MAX_FEE.multiply(new BigInteger("4")));
+    
+    // test getting txs, transfers, and outputs from view-only wallet
+    assertFalse(viewOnlyWallet.getTxs().isEmpty());
+    assertFalse(viewOnlyWallet.getTransfers().isEmpty());
+    assertFalse(viewOnlyWallet.getOutputs().isEmpty());
     
     // collect info from main test wallet
     String primaryAddress = wallet.getPrimaryAddress();

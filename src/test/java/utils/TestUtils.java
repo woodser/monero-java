@@ -72,9 +72,9 @@ public class TestUtils {
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
   public static final MoneroNetworkType NETWORK_TYPE = MoneroNetworkType.STAGENET;
   public static final String LANGUAGE = "English";
-  public static final String MNEMONIC = "upload toenail nephew megabyte reorder bicycle oxygen relic casket ledge wrist puffin hiding awoken under bovine sarcasm waking faked yoga urban myth atlas basin wrist";
-  public static final String ADDRESS = "59M2dSSmrKiimFavjWQ8zFGWe6ziHr9XUjhHcMVEj9ut4EdkcmcqawfgMrtEERipUJA8iNzU65eaELoFYcor1c4jK4FRj1N";
-  public static final long FIRST_RECEIVE_HEIGHT = 46179; // NOTE: this value must be the height of the wallet's first tx for tests
+  public static final String MNEMONIC = "rally adhesive language injury railway pamphlet moisture baptism strained sarcasm across edited omnibus dormant spout keyboard yeti eagle pepper pelican inkling dauntless ashtray bifocals across";
+  public static final String ADDRESS = "54C3R6CKseodnw7NPafr5ZdCRj1Qa4SYN56cgfozAwCeMj7TZazWe1bip8A5UCPKK7RrpGaP97vsxHabwYEWUCWQTspBZGZ";
+  public static final long FIRST_RECEIVE_HEIGHT = 6644; // NOTE: this value must be the height of the wallet's first tx for tests
   public static final long SYNC_PERIOD_IN_MS = 5000; // period between wallet syncs in milliseconds
   
   // logger configuration

@@ -22,8 +22,11 @@
 
 #include <jni.h>
 
-#ifndef _Included_MoneroWalletFullBridge
-#define _Included_MoneroWalletFullBridge
+#ifndef _Included_MoneroJniBridge // TODO: rename
+#define _Included_MoneroJniBridge
+
+// TODO: this causes warning
+std::string jstring2string(JNIEnv *env, jstring jStr);
 
 jfieldID get_handle_field(JNIEnv *env, jobject obj, const char *field_name) {
   jclass c = env->GetObjectClass(obj);
@@ -40,7 +43,19 @@ T *get_handle(JNIEnv *env, jobject obj, const char *field_name) {
 extern "C" {
 #endif
 
-// ------------------------------ STATIC UTILS ------------------------------
+// ------------------------------ STATIC UTILS --------------------------------
+
+JNIEXPORT jbyteArray JNICALL Java_monero_common_MoneroUtils_jsonToBinaryJni(JNIEnv *, jclass, jstring);
+
+JNIEXPORT jstring JNICALL Java_monero_common_MoneroUtils_binaryToJsonJni(JNIEnv *, jclass, jbyteArray);
+
+JNIEXPORT jstring JNICALL Java_monero_common_MoneroUtils_binaryBlocksToJsonJni(JNIEnv *, jclass, jbyteArray);
+
+JNIEXPORT void JNICALL Java_monero_common_MoneroUtils_initLoggingJni(JNIEnv *, jclass, jstring jpath, jboolean);
+
+JNIEXPORT void JNICALL Java_monero_common_MoneroUtils_setLogLevelJni(JNIEnv *, jclass, jint);
+
+// --------------------------- STATIC WALLET UTILS ----------------------------
 
 JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_walletExistsJni(JNIEnv *, jclass, jstring);
 

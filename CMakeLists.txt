@@ -118,8 +118,7 @@ endif()
 
 set(
     MONERO_JNI_SRC_FILES
-    src/main/cpp/monero_wallet_jni_bridge.cpp
-    src/main/cpp/monero_utils_jni_bridge.cpp
+    src/main/cpp/monero_jni_bridge.cpp
 )
 add_library(monero-java SHARED ${MONERO_JNI_SRC_FILES})
 

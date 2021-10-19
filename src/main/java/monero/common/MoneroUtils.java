@@ -39,7 +39,7 @@ public class MoneroUtils {
    * @return the version of this monero-java library
    */
   static String getVersion() {
-    return "0.5.5";
+    return "0.5.7";
   }
   
   public static final int RING_SIZE = 12; // network-enforced ring size
@@ -99,28 +99,104 @@ public class MoneroUtils {
     if (words.length != MoneroUtils.NUM_MNEMONIC_WORDS) throw new Error("Mnemonic phrase is " + words.length + " words but must be " + MoneroUtils.NUM_MNEMONIC_WORDS);
   }
   
-  // TODO: improve validation
+  /**
+   * Indicates if a private view key is valid.
+   * 
+   * @param privateViewKey is the private view key to validate
+   * @return true if the private view key is valid, false otherwise
+   */
+  public static boolean isValidPrivateViewKey(String privateViewKey) {
+    try {
+      validatePrivateViewKey(privateViewKey);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+  
+  /**
+   * Indicates if a public view key is valid.
+   * 
+   * @param publicViewKey is the public view key to validate
+   * @return true if the public view key is valid, false otherwise
+   */
+  public static boolean isValidPublicViewKey(String publicViewKey) {
+    try {
+      validatePublicViewKey(publicViewKey);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+  
+  /**
+   * Indicates if a private spend key is valid.
+   * 
+   * @param privateSpendKey is the private spend key to validate
+   * @return true if the private spend key is valid, false otherwise
+   */
+  public static boolean isValidPrivateSpendKey(String privateSpendKey) {
+    try {
+      validatePrivateSpendKey(privateSpendKey);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+  
+  /**
+   * Indicates if a public spend key is valid.
+   * 
+   * @param publicSpendKey is the public spend key to validate
+   * @return true if the public spend key is valid, false otherwise
+   */
+  public static boolean isValidPublicSpendKey(String publicSpendKey) {
+    try {
+      validatePublicSpendKey(publicSpendKey);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+  
+  /**
+   * Validate a private view key.
+   * 
+   * @param privateViewKey is the private view key to validate
+   * @throws MoneroError if the given private view key is invalid
+   */
   public static void validatePrivateViewKey(String privateViewKey) {
-    GenUtils.assertNotNull(privateViewKey);
-    GenUtils.assertEquals(64, privateViewKey.length());
+    if (!isHex64(privateViewKey)) throw new MoneroError("private view key expected to be 64 hex characters");
   }
   
-  // TODO: improve validation
-  public static void validatePrivateSpendKey(String privateSpendKey) {
-    GenUtils.assertNotNull(privateSpendKey);
-    GenUtils.assertEquals(64, privateSpendKey.length());
-  }
-  
-  // TODO: improve validation
+  /**
+   * Validate a public view key.
+   * 
+   * @param publicViewKey is the public view key to validate
+   * @throws MoneroError if the given public view key is invalid
+   */
   public static void validatePublicViewKey(String publicViewKey) {
-    GenUtils.assertNotNull(publicViewKey);
-    GenUtils.assertEquals(64, publicViewKey.length());
+    if (!isHex64(publicViewKey)) throw new MoneroError("public view key expected to be 64 hex characters");
   }
   
-  // TODO: improve validation
+  /**
+   * Validate a private spend key.
+   * 
+   * @param privateSpendKey is the private spend key to validate
+   * @throws MoneroError if the given private spend key is invalid
+   */
+  public static void validatePrivateSpendKey(String privateSpendKey) {
+    if (!isHex64(privateSpendKey)) throw new MoneroError("private spend key expected to be 64 hex characters");
+  }
+  
+  /**
+   * Validate a public spend key.
+   * 
+   * @param publicSpendKey is the public spend key to validate
+   * @throws MoneroError if the given public spend key is invalid
+   */
   public static void validatePublicSpendKey(String publicSpendKey) {
-    GenUtils.assertNotNull(publicSpendKey);
-    GenUtils.assertEquals(64, publicSpendKey.length());
+    if (!isHex64(publicSpendKey)) throw new MoneroError("public spend key expected to be 64 hex characters");
   }
   
   /**
@@ -410,6 +486,10 @@ public class MoneroUtils {
   private native static void initLoggingJni(String path, boolean console);
 
   private native static void setLogLevelJni(int level);
+  
+  private static boolean isHex64(String str) {
+    return str != null && str.length() == 64 && GenUtils.isHex(str);
+  }
 
   private static boolean isValidAddressHash(String decodedAddrStr) {
     String checksumCheck = decodedAddrStr.substring(decodedAddrStr.length() - 8);

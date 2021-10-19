@@ -144,6 +144,17 @@ public class GenUtils {
   }
   
   /**
+   * Indicates if the given argument is a hexidemal string.
+   * 
+   * @param str is the string to test
+   * @returns true if the given string is hexidecimal, false otherwise
+   */
+  public static boolean isHex(String str) {
+    if (str == null) return false;
+    return str.matches("-?[0-9a-fA-F]+");
+  }
+  
+  /**
    * Converts a templated array to a list.
    * 
    * @param <T> templated type
@@ -237,7 +248,7 @@ public class GenUtils {
     // check for BigInteger equality
     Integer comparison = null; // save comparison for later if applicable
     if (val1 instanceof BigInteger && val2 instanceof BigInteger) {
-      comparison = ((BigInteger) val1).compareTo((BigInteger) val2);  
+      comparison = ((BigInteger) val1).compareTo((BigInteger) val2);
       if (comparison == 0) return val1;
     }
     
@@ -337,7 +348,7 @@ public class GenUtils {
    * @return the UUID
    */
   public static String getUUID() {
-    return UUID.randomUUID().toString(); 
+    return UUID.randomUUID().toString();
   }
   
   /**

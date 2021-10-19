@@ -471,6 +471,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     // create view-only wallet in wallet rpc process
     MoneroWalletRpc viewOnlyWallet = TestUtils.startWalletRpcProcess();
     viewOnlyWallet.createWallet(new MoneroWalletConfig().setPath(GenUtils.getUUID()).setPassword(TestUtils.WALLET_PASSWORD).setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+    viewOnlyWallet.sync();
     
     // create offline full wallet
     MoneroWalletFull offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setServerUri("").setRestoreHeight(0l));
