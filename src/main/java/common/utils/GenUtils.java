@@ -147,7 +147,7 @@ public class GenUtils {
    * Indicates if the given argument is a hexidemal string.
    * 
    * @param str is the string to test
-   * @returns true if the given string is hexidecimal, false otherwise
+   * @return true if the given string is hexidecimal, false otherwise
    */
   public static boolean isHex(String str) {
     if (str == null) return false;
