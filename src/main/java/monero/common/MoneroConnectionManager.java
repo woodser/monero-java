@@ -204,7 +204,7 @@ public class MoneroConnectionManager {
    * @return MoneroRpcConnection is the given connection for convenience
    */
   public MoneroRpcConnection connect(MoneroRpcConnection connection) {
-    if (!connections.contains(connection)) addConnection(connection);
+    if (!connections.contains(connection)) addConnection(connection); // TODO: this allow multiple connections with same url
     connection.refreshConnection(timeoutInMs);
     if (!connection.isOnline()) throw new MoneroError("Connection is not online");
     if (!connection.isAuthenticated()) throw new MoneroError("Connection is not authenticated"); // TODO: test that this throws NPE when connecting to unauthenticated connection

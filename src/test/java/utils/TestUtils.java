@@ -42,10 +42,14 @@ public class TestUtils {
     }
   }
   
+  // directory with monero binaries to test (monerod and monero-wallet-rpc)
+  public static final String MONERO_BINS_DIR = "/Applications/monero-x86_64-apple-darwin11-v0.17.2.3";
+  
   // monero daemon rpc endpoint configuration (change per your configuration)
   public static final String DAEMON_RPC_URI = "http://localhost:38081";
   public static final String DAEMON_RPC_USERNAME = "superuser";
   public static final String DAEMON_RPC_PASSWORD = "abctesting123";
+  public static final String DAEMON_LOCAL_PATH = MONERO_BINS_DIR + "/monerod";
   
   // monero wallet rpc configuration (change per your configuration)
   public static final int WALLET_RPC_PORT_START = 38084; // test wallet executables will bind to consecutive ports after these
@@ -58,8 +62,8 @@ public class TestUtils {
   public static final String WALLET_RPC_DOMAIN = "localhost";
   public static final String WALLET_RPC_URI = "http://" + WALLET_RPC_DOMAIN + ":" + WALLET_RPC_PORT_START;
   public static final String WALLET_RPC_ZMQ_URI = "tcp://" + WALLET_RPC_ZMQ_DOMAIN + ":" + WALLET_RPC_ZMQ_PORT_START;
-  public static final String WALLET_RPC_LOCAL_PATH = "/Applications/monero-x86_64-apple-darwin11-v0.17.2.3/monero-wallet-rpc";
-  public static final String WALLET_RPC_LOCAL_WALLET_DIR = "/Applications/monero-x86_64-apple-darwin11-v0.17.2.3";
+  public static final String WALLET_RPC_LOCAL_PATH = MONERO_BINS_DIR + "/monero-wallet-rpc";
+  public static final String WALLET_RPC_LOCAL_WALLET_DIR = MONERO_BINS_DIR;
   public static final String WALLET_RPC_ACCESS_CONTROL_ORIGINS = "http://localhost:8080"; // cors access from web browser
   
   // test wallet config

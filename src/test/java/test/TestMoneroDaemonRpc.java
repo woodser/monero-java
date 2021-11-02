@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import common.utils.JsonUtils;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import monero.common.MoneroError;
+import monero.common.MoneroRpcConnection;
 import monero.common.MoneroRpcError;
 import monero.daemon.MoneroDaemon;
 import monero.daemon.MoneroDaemonRpc;
@@ -100,6 +102,47 @@ public class TestMoneroDaemonRpc {
   }
   
   // -------------------------------- NON RELAYS ------------------------------
+  
+  // Can start and stop a daemon process
+  @Test
+  public void testStartDaemon() {
+    
+    // create command to start monerod process
+    List<String> cmd = new ArrayList<String>(Arrays.asList(
+        TestUtils.DAEMON_LOCAL_PATH,
+        "--" + TestUtils.NETWORK_TYPE.toString().toLowerCase(),
+        "--no-igd",
+        "--hide-my-port",
+        "--data-dir", TestUtils.MONERO_BINS_DIR + "/node1",
+        "--p2p-bind-port", "58080",
+        "--rpc-bind-port", "58081",
+        "--rpc-login", "superuser:abctesting123",
+        "--zmq-rpc-bind-port", "58082"));
+    
+    // start monerod process from command
+    MoneroDaemonRpc daemon;
+    try {
+      daemon = new MoneroDaemonRpc(cmd);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    
+    // query daemon
+    MoneroRpcConnection connection = daemon.getRpcConnection();
+    assertEquals("http://127.0.0.1:58081", connection.getUri());
+    assertEquals("superuser", connection.getUsername());
+    assertEquals("abctesting123", connection.getPassword());
+    assertTrue(daemon.getHeight() > 0);
+    MoneroDaemonInfo info = daemon.getInfo();
+    testInfo(info);
+    
+    // add listeners
+    daemon.addListener(new MoneroDaemonListener());
+    daemon.addListener(new MoneroDaemonListener());
+    
+    // stop daemon
+    daemon.stopProcess();
+  }
   
   // Can get the daemon's version
   @Test
@@ -1796,7 +1839,6 @@ public class TestMoneroDaemonRpc {
     assertFalse(info.getTopBlockHash().isEmpty());
     assertNotNull(info.isBusySyncing());
     assertNotNull(info.isSynchronized());
-    assertNotEquals(info.isBusySyncing(), info.isSynchronized());
   }
 
   private static void testSyncInfo(MoneroDaemonSyncInfo syncInfo) { // TODO: consistent naming, daemon in name?

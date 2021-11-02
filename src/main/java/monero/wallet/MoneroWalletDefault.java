@@ -55,25 +55,34 @@ import monero.wallet.model.MoneroWalletListenerI;
  */
 abstract class MoneroWalletDefault implements MoneroWallet {
   
-  protected Set<MoneroWalletListenerI> listeners = new LinkedHashSet<MoneroWalletListenerI>();
+  protected Set<MoneroWalletListenerI> listeners;
   
+  public MoneroWalletDefault() {
+    this.listeners = new LinkedHashSet<MoneroWalletListenerI>();
+  }
+  
+  @Override
   public void addListener(MoneroWalletListenerI listener) {
     listeners.add(listener);
   }
   
+  @Override
   public void removeListener(MoneroWalletListenerI listener) {
     if (!listeners.contains(listener)) throw new MoneroError("Listener is not registered with wallet");
     listeners.remove(listener);
   }
   
+  @Override
   public Set<MoneroWalletListenerI> getListeners() {
     return new HashSet<MoneroWalletListenerI>(listeners);
   }
   
+  @Override
   public void setDaemonConnection(String uri) {
     setDaemonConnection(uri, null, null);
   }
   
+  @Override
   public void setDaemonConnection(String uri, String username, String password) {
     if (uri == null) setDaemonConnection((MoneroRpcConnection) null);
     else setDaemonConnection(new MoneroRpcConnection(uri, username, password));
@@ -187,10 +196,12 @@ abstract class MoneroWalletDefault implements MoneroWallet {
     return getTxs(new MoneroTxQuery());
   }
   
+  @Override
   public List<MoneroTxWallet> getTxs(String... txHashes) {
     return getTxs(new MoneroTxQuery().setHashes(txHashes));
   }
   
+  @Override
   public List<MoneroTxWallet> getTxs(List<String> txHashes) {
     return getTxs(txHashes, null);
   }

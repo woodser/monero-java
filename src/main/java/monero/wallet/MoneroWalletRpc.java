@@ -119,6 +119,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   public MoneroWalletRpc(MoneroRpcConnection rpc) {
+    super();
     this.rpc = rpc;
     addressCache = new HashMap<Integer, Map<Integer, String>>();
   }
@@ -132,6 +133,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @throws IOException if input/output error with process
    */
   public MoneroWalletRpc(List<String> cmd) throws IOException {
+    super();
     
     // start process
     ProcessBuilder pb = new ProcessBuilder(cmd);
@@ -218,6 +220,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    */
   public int stopProcess() {
     if (process == null) throw new MoneroError("MoneroWalletRpc instance not created from new process");
+    clear();
     process.destroyForcibly();
     try { return process.waitFor(); }
     catch (Exception e) { throw new MoneroError(e); }

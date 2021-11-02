@@ -25,6 +25,9 @@ package monero.daemon;
 import com.fasterxml.jackson.core.type.TypeReference;
 import common.utils.GenUtils;
 import common.utils.JsonUtils;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
@@ -33,6 +36,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
@@ -86,6 +90,12 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   private DaemonPoller daemonPoller;
   private List<MoneroDaemonListener> listeners;
   private Map<Long, MoneroBlockHeader> cachedHeaders;
+  private Process process; // process running monerod if applicable
+  
+  private MoneroDaemonRpc() {
+    this.listeners = new ArrayList<MoneroDaemonListener>();
+    this.cachedHeaders = new HashMap<Long, MoneroBlockHeader>();
+  }
   
   public MoneroDaemonRpc(URI uri) {
     this(new MoneroRpcConnection(uri));
@@ -100,10 +110,109 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
 
   public MoneroDaemonRpc(MoneroRpcConnection rpc) {
+    this();
     GenUtils.assertNotNull(rpc);
     this.rpc = rpc;
-    this.listeners = new ArrayList<MoneroDaemonListener>();
-    this.cachedHeaders = new HashMap<Long, MoneroBlockHeader>();
+  }
+  
+  /**
+   * Create an internal process running monerod and connect to it.
+   * 
+   * Use `stopProcess()` to stop the newly created process.
+   * 
+   * @param cmd path then arguments to external monerod executable
+   * @throws IOException if input/output error with process
+   */
+  public MoneroDaemonRpc(List<String> cmd) throws IOException {
+    this();
+    
+    // start process
+    ProcessBuilder pb = new ProcessBuilder(cmd);
+    pb.redirectErrorStream(true);
+    process = pb.start();
+    
+    // print output to console for debug
+    boolean printOutput = LOGGER.isLoggable(Level.FINER);
+    
+    // read process output until success
+    String line;
+    String uri = null;
+    StringBuilder sb = new StringBuilder();
+    BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+    boolean success = false;
+    while ((line = in.readLine()) != null) {
+      LOGGER.log(Level.FINER, line);
+      sb.append(line).append('\n'); // capture output in case of error
+      
+      // extract uri from e.g. "I Binding on 127.0.0.1 (IPv4):38085"
+      String uriLineContains = "Binding on ";
+      int uriLineContainsIdx = line.indexOf(uriLineContains);
+      if (uriLineContainsIdx >= 0) {
+        String host = line.substring(uriLineContainsIdx + uriLineContains.length(), line.lastIndexOf(' '));
+        String port = line.substring(line.lastIndexOf(':') + 1);
+        int sslIdx = cmd.indexOf("--rpc-ssl");
+        boolean sslEnabled = sslIdx >= 0 ? "enabled".equalsIgnoreCase(cmd.get(sslIdx + 1)) : false;
+        uri = (sslEnabled ? "https" : "http") + "://" + host + ":" + port;
+      }
+      
+      // read success message
+      if (line.contains("Starting p2p net loop")) {
+        if (printOutput) {
+          new Thread(new Runnable() { // continue printing output in separate, non-blocking thread
+            @Override
+            public void run() {
+              try {
+                String line;
+                BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                while ((line = in.readLine()) != null) LOGGER.log(Level.FINER, line);
+              } catch (IOException e) {
+                //e.printStackTrace(); // exception expected on close
+              }
+            }
+          }).start();
+        }
+        success = true;
+        break;
+      }
+    }
+    if (!printOutput) in.close();
+    
+    // throw error with process output if unsuccessful
+    if (!success) throw new MoneroError("Failed to start monerod:\n\n" + sb.toString().trim());
+    
+    // get username, password, and zmq publish uri from params
+    int userPassIdx = cmd.indexOf("--rpc-login");
+    String userPass = userPassIdx >= 0 ? cmd.get(userPassIdx + 1) : null;
+    String username = userPass == null ? null : userPass.substring(0, userPass.indexOf(':'));
+    String password = userPass == null ? null : userPass.substring(userPass.indexOf(':') + 1);
+    int zmqUriIdx = cmd.indexOf("--zmq-pub");
+    String zmqUri = zmqUriIdx >= 0 ? cmd.get(zmqUriIdx + 1) : null;
+    
+    // initialize internal state
+    rpc = new MoneroRpcConnection(uri, username, password, zmqUri);
+  }
+  
+  /**
+   * Get the internal process running monero-wallet-rpc.
+   * 
+   * @return the process running monero-wallet-rpc, null if not created from new process
+   */
+  public Process getProcess() {
+    return process;
+  }
+  
+  /**
+   * Stop the internal process running monero-wallet-rpc, if applicable.
+   * 
+   * @return the error code from stopping the process
+   */
+  public int stopProcess() {
+    if (process == null) throw new MoneroError("MoneroWalletRpc instance not created from new process");
+    process.destroyForcibly();
+    listeners.clear();
+    refreshListening();
+    try { return process.waitFor(); }
+    catch (Exception e) { throw new MoneroError(e); }
   }
   
   @Override
