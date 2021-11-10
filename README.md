@@ -166,6 +166,7 @@ If you want to process binary data or use a client-side wallet instead of RPC, s
 
 * [monero-javascript](https://github.com/monero-ecosystem/monero-javascript)
 * [monero-cpp](https://github.com/monero-ecosystem/monero-cpp)
+* [Haveno](https://github.com/haveno-dex/haveno)
 
 ## License
 
