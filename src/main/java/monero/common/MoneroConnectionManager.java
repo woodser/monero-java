@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -17,41 +18,18 @@ import java.util.concurrent.TimeUnit;
  */
 public class MoneroConnectionManager {
   
+  // static variables
   private static final long DEFAULT_TIMEOUT = 5000l;
-  private static final long DEFAULT_REFRESH_PERIOD = 10000l;
+  private static final long DEFAULT_CHECK_CONNECTION_PERIOD = 10000l;
   
-  private long timeoutInMs = DEFAULT_TIMEOUT;
-  private boolean autoSwitch;
-  private TaskLooper refreshLooper;
+  // instance variables
+  private MoneroRpcConnection currentConnection;
   private List<MoneroRpcConnection> connections = new ArrayList<MoneroRpcConnection>();
   private List<MoneroConnectionManagerListener> listeners = new ArrayList<MoneroConnectionManagerListener>();
   private ConnectionComparator connectionComparator = new ConnectionComparator();
-  
-  /**
-   * Add a connection. The connection may have an elevated priority for this manager to use.
-   * 
-   * @param connection - the connection to add
-   * @return this connection manager for chaining
-   */
-  public MoneroConnectionManager addConnection(MoneroRpcConnection connection) {
-    for (MoneroRpcConnection aConnection : connections) {
-      if (aConnection.getUri().equals(connection.getUri())) throw new MoneroError("Connection URI already exists");
-    }
-    connections.add(connection);
-    return this;
-  }
-  
-  /**
-   * Remove a connection.
-   * 
-   * @param connection - the connection to remove
-   * @return this connection manager for chaining
-   */
-  public MoneroConnectionManager removeConnection(MoneroRpcConnection connection) {
-    if (!connections.remove(connection)) throw new MoneroError("Monero connection manager does not contain connection to remove");
-    connection.setIsCurrentConnection(false);
-    return this;
-  }
+  private long timeoutMs = DEFAULT_TIMEOUT;
+  private boolean autoSwitch;
+  private TaskLooper checkConnectionLooper;
   
   /**
    * Add a listener to receive notifications when the connection changes.
@@ -76,23 +54,60 @@ public class MoneroConnectionManager {
   }
   
   /**
-   * Set the maximum request time before its connection is considered offline.
+   * Add a connection. The connection may have an elevated priority for this manager to use.
    * 
-   * @param timeoutInMs - the timeout before the connection is considered offline
+   * @param connection - the connection to add
    * @return this connection manager for chaining
    */
-  public MoneroConnectionManager setTimeout(long timeoutInMs) {
-    this.timeoutInMs = timeoutInMs;
+  public MoneroConnectionManager addConnection(MoneroRpcConnection connection) {
+    for (MoneroRpcConnection aConnection : connections) {
+      if (aConnection.getUri().equals(connection.getUri())) throw new MoneroError("Connection URI already exists with connection manager: " + connection.getUri());
+    }
+    connections.add(connection);
     return this;
   }
   
   /**
-   * Get the request timeout.
+   * Remove a connection.
    * 
-   * @return the request timeout before a connection is considered offline
+   * @param uri - uri of the connection to remove
+   * @return this connection manager for chaining
    */
-  public long getTimeout() {
-    return timeoutInMs;
+  public MoneroConnectionManager removeConnection(String uri) {
+    MoneroRpcConnection connection = getConnectionByUri(uri);
+    if (connection == null) throw new MoneroError("Connection manager does not contain connection to remove: " + uri);
+    connections.remove(connection);
+    if (connection == currentConnection) currentConnection = null;
+    return this;
+  }
+  
+  /**
+   * Indicates if the connection manager is connected to a node.
+   * 
+   * @return true if the current connection is set, online, and not unauthenticated. false otherwise
+   */
+  public boolean isConnected() {
+    return currentConnection != null && Boolean.TRUE.equals(currentConnection.isOnline()) && !Boolean.FALSE.equals(currentConnection.isAuthenticated());
+  }
+  
+  /**
+   * Get the current connection.
+   * 
+   * @return the current connection or null if no connection set
+   */
+  public MoneroRpcConnection getConnection() {
+    return currentConnection;
+  }
+  
+  /**
+   * Get a connection by URI.
+   * 
+   * @param uri is the URI of the connection to get
+   * @return the connection with the URI or null if no connection with the URI exists
+   */
+  public MoneroRpcConnection getConnectionByUri(String uri) {
+    for (MoneroRpcConnection connection : connections) if (connection.getUri().equals(uri)) return connection;
+    return null;
   }
   
   /**
@@ -107,63 +122,11 @@ public class MoneroConnectionManager {
   }
   
   /**
-   * Automatically refresh the connection status by polling the server in a fixed period loop.
+   * Get the best available connection in order of priority then response time.
    * 
-   * @return this connection manager for chaining
+   * @return the best available connection in order of priority then response time, null if no connections available
    */
-  public MoneroConnectionManager startAutoRefresh() {
-    startAutoRefresh(null);
-    return this;
-  }
-  
-  /**
-   * Automatically refresh the connection status by polling the server in a fixed period loop.
-   * 
-   * @param refreshPeriod is the time between refreshes in milliseconds (default 10000 or 10 seconds)
-   * @return this connection manager for chaining
-   */
-  public synchronized MoneroConnectionManager startAutoRefresh(Long refreshPeriod) {
-    if (refreshPeriod == null) refreshPeriod = DEFAULT_REFRESH_PERIOD;
-    if (refreshLooper == null) {
-      refreshLooper = new TaskLooper(new Runnable() {
-        @Override
-        public void run() {
-          try { if (getConnection() != null) refreshConnection(); }
-          catch (Exception e) { e.printStackTrace(); }
-        }
-      });
-    }
-    refreshLooper.start(refreshPeriod);
-    return this;
-  }
-  
-  /**
-   * Stop automatically refreshing the connection status.
-   * 
-   * @return this connection manager for chaining
-   */
-  public MoneroConnectionManager stopAutoRefresh() {
-    if (refreshLooper != null) refreshLooper.stop();
-    return this;
-  }
-  
-  /**
-   * Automatically switch to best available connection if current connection disconnects.
-   * 
-   * @param autoSwitch specifies if the connection should switch on disconnect
-   * @return this connection manager for chaining
-   */
-  public MoneroConnectionManager setAutoSwitch(boolean autoSwitch) {
-    this.autoSwitch = autoSwitch;
-    return this;
-  }
-  
-  /**
-   * Connect to best available connection in order of priority then response time.
-   * 
-   * @return the selected connection
-   */
-  public MoneroRpcConnection connect() {
+  public MoneroRpcConnection getBestAvailableConnection() {
     
     // try connections within each descending priority
     for (List<MoneroRpcConnection> prioritizedConnections : getConnectionsInDescendingPriority()) {
@@ -176,17 +139,16 @@ public class MoneroConnectionManager {
           completionService.submit(new Runnable() {
             @Override
             public void run() {
-              connection.refreshConnection(timeoutInMs);
+              connection.checkConnection(timeoutMs);
             }
           }, connection);
         }
         
-        // use first connectable response
+        // use first available connection
         pool.shutdown();
         for (int i = 0; i < prioritizedConnections.size(); i++) {
           MoneroRpcConnection connection = completionService.take().get();
           if (connection.isOnline() && !Boolean.FALSE.equals(connection.isAuthenticated())) {
-            setCurrentConnection(connection);
             return connection;
           }
         }
@@ -198,57 +160,78 @@ public class MoneroConnectionManager {
   }
   
   /**
-   * Connect to a given connection.
+   * Set the current connection without changing the credentials.
    * 
-   * @param connection is the connection to connect to
-   * @return MoneroRpcConnection is the given connection for convenience
+   * @param uri identifies the connection to make current
+   * @return this connection manager for chaining
    */
-  public MoneroRpcConnection connect(MoneroRpcConnection connection) {
-    if (!connections.contains(connection)) addConnection(connection); // TODO: this allow multiple connections with same url
-    connection.refreshConnection(timeoutInMs);
-    if (!connection.isOnline()) throw new MoneroError("Connection is not online");
-    if (!connection.isAuthenticated()) throw new MoneroError("Connection is not authenticated"); // TODO: test that this throws NPE when connecting to unauthenticated connection
-    setCurrentConnection(connection);
-    return connection;
+  public MoneroConnectionManager setConnection(String uri) {
+    if (uri == null) setConnection((MoneroRpcConnection) null);
+    else {
+      MoneroRpcConnection uriConnection = getConnectionByUri(uri);
+      if (currentConnection == uriConnection) return this;
+      currentConnection = uriConnection;
+      onConnectionChanged(currentConnection);
+    }
+    return this;
   }
   
   /**
-   * Indicates if the connection manager is connected to a node.
+   * Set the current connection.
+   * Update credentials if connection's URI was previously added. Otherwise add new connection.
+   * Notify if current connection changed.
+   * Does not check the connection.
    * 
-   * @return true if the manager is connected to a node
+   * @param connection is the connection to make current
+   * @return this connection manager for chaining
    */
-  public boolean isConnected() {
+  public MoneroConnectionManager setConnection(MoneroRpcConnection connection) {
+    if (currentConnection == connection) return this;
+    
+    // check if setting null connection
+    if (connection == null) {
+      currentConnection = null;
+      onConnectionChanged(null);
+      return this;
+    }
+    
+    // check if adding new connection
+    MoneroRpcConnection prevConnection = getConnectionByUri(connection.getUri());
+    if (prevConnection == null) {
+      addConnection(connection);
+      currentConnection = connection;
+      onConnectionChanged(currentConnection);
+      return this;
+    }
+    
+    // check if updating current connection
+    if (prevConnection != currentConnection || !Objects.equals(prevConnection.getUsername(), connection.getUsername()) || !Objects.equals(prevConnection.getPassword(), connection.getPassword())) {
+      prevConnection.setCredentials(connection.getUsername(), connection.getPassword());
+      currentConnection = prevConnection;
+      onConnectionChanged(currentConnection);
+    }
+    
+    return this;
+  }
+  
+  /**
+   * Check the current connection. If disconected and auto switch enabled, switches to best available connection.
+   * 
+   * @return this connection manager for chaining
+   */
+  public MoneroConnectionManager checkConnection() {
     MoneroRpcConnection connection = getConnection();
-    return connection != null && Boolean.TRUE.equals(connection.isOnline()) && !Boolean.FALSE.equals(connection.isAuthenticated());
+    if (connection != null && connection.checkConnection(timeoutMs)) onConnectionChanged(connection);
+    if (autoSwitch && (connection == null || !connection.isOnline() || Boolean.FALSE.equals(connection.isAuthenticated()))) setConnection(getBestAvailableConnection());
+    return this;
   }
   
   /**
-   * Get the currently used connection.
+   * Check all managed connections.
    * 
-   * @return the current connection
+   * @return this connection manager for chaining
    */
-  public MoneroRpcConnection getConnection() {
-    for (MoneroRpcConnection connection : connections) if (Boolean.TRUE.equals(connection.isCurrentConnection())) return connection;
-    return null;
-  }
-  
-  /**
-   * Refresh the current connection.
-   * 
-   * @return the current connection
-   */
-  public MoneroRpcConnection refreshConnection() {
-    MoneroRpcConnection connection = getConnection();
-    if (connection == null) throw new MoneroError("There is no current connection");
-    if (connection.refreshConnection(timeoutInMs)) onConnectionChanged(connection);
-    if (autoSwitch && (!connection.isOnline() || Boolean.FALSE.equals(connection.isAuthenticated()))) return connect();
-    return connection;
-  }
-  
-  /**
-   * Refresh all managed connections.
-   */
-  public void refreshAllConnections() {
+  public MoneroConnectionManager checkConnections() {
     MoneroRpcConnection currentConnection = getConnection();
     ExecutorService pool = Executors.newFixedThreadPool(connections.size());
     for (MoneroRpcConnection connection : connections) {
@@ -256,7 +239,7 @@ public class MoneroConnectionManager {
         @Override
         public void run() {
           try {
-            if (connection.refreshConnection(timeoutInMs) && connection == currentConnection) onConnectionChanged(connection);
+            if (connection.checkConnection(timeoutMs) && connection == currentConnection) onConnectionChanged(connection);
           } catch (MoneroError err) {
             // ignore error
           }
@@ -264,10 +247,83 @@ public class MoneroConnectionManager {
       });
     }
     try {
-      pool.awaitTermination(timeoutInMs, TimeUnit.MILLISECONDS);
+      pool.awaitTermination(timeoutMs, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
       throw new MoneroError(e);
     }
+    return this;
+  }
+  
+  /**
+   * Start checking connection status by polling the server in a fixed period loop.
+   * 
+   * @return this connection manager for chaining
+   */
+  public MoneroConnectionManager startCheckingConnection() {
+    startCheckingConnection(null);
+    return this;
+  }
+  
+  /**
+   * Start checking connection status by polling the server in a fixed period loop.
+   * 
+   * @param periodMs is the time between checks in milliseconds (default 10000 ms or 10 seconds)
+   * @return this connection manager for chaining
+   */
+  public synchronized MoneroConnectionManager startCheckingConnection(Long periodMs) {
+    if (periodMs == null) periodMs = DEFAULT_CHECK_CONNECTION_PERIOD;
+    if (checkConnectionLooper == null) {
+      checkConnectionLooper = new TaskLooper(new Runnable() {
+        @Override
+        public void run() {
+          try { if (getConnection() != null) checkConnection(); }
+          catch (Exception e) { e.printStackTrace(); }
+        }
+      });
+    }
+    checkConnectionLooper.start(periodMs);
+    return this;
+  }
+  
+  /**
+   * Stop automatically checking the connection status.
+   * 
+   * @return this connection manager for chaining
+   */
+  public MoneroConnectionManager stopCheckingConnection() {
+    if (checkConnectionLooper != null) checkConnectionLooper.stop();
+    return this;
+  }
+  
+  /**
+   * Automatically switch to best available connection if current connection is disconnected after being checked.
+   * 
+   * @param autoSwitch specifies if the connection should switch on disconnect
+   * @return this connection manager for chaining
+   */
+  public MoneroConnectionManager setAutoSwitch(boolean autoSwitch) {
+    this.autoSwitch = autoSwitch;
+    return this;
+  }
+  
+  /**
+   * Set the maximum request time before a connection is considered offline.
+   * 
+   * @param timeoutInMs is the timeout before a connection is considered offline
+   * @return this connection manager for chaining
+   */
+  public MoneroConnectionManager setTimeout(long timeoutInMs) {
+    this.timeoutMs = timeoutInMs;
+    return this;
+  }
+  
+  /**
+   * Get the request timeout.
+   * 
+   * @return the request timeout before a connection is considered offline
+   */
+  public long getTimeout() {
+    return timeoutMs;
   }
   
   /**
@@ -297,20 +353,14 @@ public class MoneroConnectionManager {
     return prioritizedConnections;
   }
   
-  private void setCurrentConnection(MoneroRpcConnection connection) {
-    if (connection == getConnection()) return;
-    for (MoneroRpcConnection aConnection : connections) aConnection.setIsCurrentConnection(aConnection == connection);
-    onConnectionChanged(connection);
-  }
-  
   private class ConnectionComparator implements Comparator<MoneroRpcConnection> {
     
     @Override
     public int compare(MoneroRpcConnection c1, MoneroRpcConnection c2) {
       
       // current connection is first
-      if (Boolean.TRUE.equals(c1.isCurrentConnection())) return -1;
-      if (Boolean.TRUE.equals(c2.isCurrentConnection())) return 1;
+      if (c1 == currentConnection) return -1;
+      if (c2 == currentConnection) return 1;
       
       // order by availability then priority then by name
       if (c1.isOnline() == c2.isOnline()) {

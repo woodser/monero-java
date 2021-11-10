@@ -48,7 +48,6 @@ public class MoneroRpcConnection {
   private String zmqUri;
   private String proxiedUri;
   private int priority = 0;
-  private Boolean isCurrentConnection;
   private Boolean isOnline;
   private Boolean isAuthenticated;
   private Long responseTime;
@@ -157,12 +156,12 @@ public class MoneroRpcConnection {
   }
   
   /**
-   * Refresh the connection status to update isOnline, isAuthenticated, etc.
+   * Check the connection status to update isOnline, isAuthenticated, etc.
    * 
    * @param timeoutInMs the maximum response time before considered offline
    * @return true if there is a change in status, false otherwise
    */
-  public boolean refreshConnection(long timeoutInMs) {
+  public boolean checkConnection(long timeoutInMs) {
     Boolean isOnlineBefore = isOnline;
     Boolean isAuthenticatedBefore = isAuthenticated;
     long startTime = System.currentTimeMillis();
@@ -460,14 +459,5 @@ public class MoneroRpcConnection {
             .setConnectTimeout(Timeout.ofMilliseconds(timeoutInMs))
             .setConnectionRequestTimeout(Timeout.ofMilliseconds(timeoutInMs))
             .build();
-  }
-  
-  protected MoneroRpcConnection setIsCurrentConnection(Boolean isCurrentConnection) {
-    this.isCurrentConnection = isCurrentConnection;
-    return this;
-  }
-  
-  protected Boolean isCurrentConnection() {
-    return isCurrentConnection;
   }
 }
