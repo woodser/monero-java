@@ -16,6 +16,7 @@ import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
 import monero.wallet.model.MoneroAddressType;
 import monero.wallet.model.MoneroDecodedAddress;
+import monero.wallet.model.MoneroIntegratedAddress;
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
 
@@ -197,6 +198,21 @@ public class MoneroUtils {
    */
   public static void validatePublicSpendKey(String publicSpendKey) {
     if (!isHex64(publicSpendKey)) throw new MoneroError("public spend key expected to be 64 hex characters");
+  }
+  
+  /**
+   * Get an integrated address.
+   * 
+   * @param standardAddress is the primary address or subaddress for the integrated address
+   * @param paymentId optionally specifies the integrated address's payment id (defaults to random payment id)
+   * @return the integrated address
+   */
+  public static MoneroIntegratedAddress getIntegratedAddress(MoneroNetworkType networkType, String standardAddress, String paymentId) {
+    try {
+      return JsonUtils.deserialize(getIntegratedAddressJni(networkType.ordinal(), standardAddress, paymentId == null ? "" : paymentId), MoneroIntegratedAddress.class);
+    } catch (Exception err) {
+      throw new MoneroError(err.getMessage());
+    }
   }
   
   /**
@@ -475,17 +491,16 @@ public class MoneroUtils {
     return quotientAndRemainder[0].doubleValue() + quotientAndRemainder[1].doubleValue() / MoneroUtils.AU_PER_XMR;
   }
   
-  // ---------------------------- PRIVATE HELPERS -----------------------------
+  // ---------------------------- NATIVE BINDINGS -----------------------------
   
+  private native static String getIntegratedAddressJni(int networkType, String standardAddress, String paymentId);
   private native static byte[] jsonToBinaryJni(String json);
-  
   private native static String binaryToJsonJni(byte[] bin);
-  
   private native static String binaryBlocksToJsonJni(byte[] binBlocks);
-  
   private native static void initLoggingJni(String path, boolean console);
-
   private native static void setLogLevelJni(int level);
+  
+  // ---------------------------- PRIVATE HELPERS -----------------------------
   
   private static boolean isHex64(String str) {
     return str != null && str.length() == 64 && GenUtils.isHex(str);

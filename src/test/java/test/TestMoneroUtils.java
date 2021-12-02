@@ -17,6 +17,7 @@ import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletFull;
+import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroWalletConfig;
 import org.junit.jupiter.api.Test;
 import utils.TestUtils;
@@ -25,6 +26,34 @@ import utils.TestUtils;
  * Tests static Monero utilities.
  */
 public class TestMoneroUtils {
+  
+  // Can get integrated addresses
+  @Test
+  public void testGetIntegratedAddresses() {
+    String standardAddress = "7BkLzfgpZZXjmEpLokETw3D1WbRr6uURFQupdEDFFZGYRJy5E47T4EkXuWYU5B5kF34kr7bqX6fLP6y9mkz32VgS1PATHkt";
+    String paymentId = "03284e41c342f036";
+    MoneroNetworkType networkType = MoneroNetworkType.STAGENET;
+    
+    // get integrated address with randomly generated payment id
+    MoneroIntegratedAddress integratedAddress = MoneroUtils.getIntegratedAddress(networkType, standardAddress, null);
+    assertEquals(standardAddress, integratedAddress.getStandardAddress());
+    assertEquals(16, integratedAddress.getPaymentId().length());
+    assertEquals(106, integratedAddress.getIntegratedAddress().length());
+    
+    // get integrated address with specific payment id
+    integratedAddress = MoneroUtils.getIntegratedAddress(networkType, standardAddress, paymentId);
+    assertEquals(standardAddress, integratedAddress.getStandardAddress());
+    assertEquals(paymentId, integratedAddress.getPaymentId());
+    assertEquals(106, integratedAddress.getIntegratedAddress().length());
+    
+    // get integrated address with invalid payment id
+    try {
+      MoneroUtils.getIntegratedAddress(networkType, standardAddress, "123");
+      fail("Getting integrated address with invalid payment id should have failed");
+    } catch (MoneroError err) {
+      assertEquals("Invalid payment id", err.getMessage());
+    }
+  }
   
   // Can serialize heights with small numbers
   @Test

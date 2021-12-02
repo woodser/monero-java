@@ -332,11 +332,26 @@ extern "C"
 
 // ------------------------------ STATIC UTILS --------------------------------
 
+JNIEXPORT jstring JNICALL Java_monero_common_MoneroUtils_getIntegratedAddressJni(JNIEnv *env, jclass clazz, jint jnetwork_type, jstring jstandard_address, jstring jpayment_id) {
+
+  // convert jstrings to strings
+  string standard_address = jstring2string(env, jstandard_address);
+  string payment_id = jstring2string(env, jpayment_id);
+
+  // get integrated address
+  try {
+    monero_integrated_address integrated_address = monero_utils::get_integrated_address(static_cast<monero_network_type>(jnetwork_type), standard_address, payment_id);
+    return env->NewStringUTF(integrated_address.serialize().c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+}
+
 JNIEXPORT jbyteArray JNICALL Java_monero_common_MoneroUtils_jsonToBinaryJni(JNIEnv *env, jclass clazz, jstring json) {
 
   // convert json jstring to string
   string json_str = jstring2string(env, json);
-  //string json_str = "{\"heights\":[123456,1234567,870987]}";
 
   // convert json to monero's portable storage binary format
   string bin_str;

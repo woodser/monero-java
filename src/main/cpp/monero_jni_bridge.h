@@ -45,6 +45,8 @@ extern "C" {
 
 // ------------------------------ STATIC UTILS --------------------------------
 
+JNIEXPORT jstring JNICALL Java_monero_common_MoneroUtils_getIntegratedAddressJni(JNIEnv *, jclass, jint, jstring, jstring);
+
 JNIEXPORT jbyteArray JNICALL Java_monero_common_MoneroUtils_jsonToBinaryJni(JNIEnv *, jclass, jstring);
 
 JNIEXPORT jstring JNICALL Java_monero_common_MoneroUtils_binaryToJsonJni(JNIEnv *, jclass, jbyteArray);
