@@ -221,7 +221,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public int stopProcess() {
     if (process == null) throw new MoneroError("MoneroWalletRpc instance not created from new process");
     clear();
-    process.destroyForcibly();
+    process.destroy();
     try { return process.waitFor(); }
     catch (Exception e) { throw new MoneroError(e); }
   }

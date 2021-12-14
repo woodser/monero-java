@@ -207,10 +207,10 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * @return the error code from stopping the process
    */
   public int stopProcess() {
-    if (process == null) throw new MoneroError("MoneroWalletRpc instance not created from new process");
-    process.destroyForcibly();
+    if (process == null) throw new MoneroError("MoneroDaemonRpc instance not created from new process");
     listeners.clear();
     refreshListening();
+    process.destroy();
     try { return process.waitFor(); }
     catch (Exception e) { throw new MoneroError(e); }
   }
