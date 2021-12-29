@@ -135,9 +135,10 @@ public class MoneroRpcConnection {
   }
 
   /**
-   * Set the connection's priority relative to other managed connections.
+   * Set the connection's priority relative to other connections. Priority 1 is highest,
+   * then priority 2, etc. The default priority of 0 is lowest priority.
    * 
-   * @param priority is the connection priority which increases as the value increases (default 0)
+   * @param priority is the connection priority (default 0)
    * @return this connection
    */
   public MoneroRpcConnection setPriority(int priority) {
