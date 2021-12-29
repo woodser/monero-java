@@ -320,7 +320,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testCreateWalletFromKeys() {
     assumeTrue(TEST_NON_RELAYS);
-    Exception e1 = null;  // emulating Java "finally" but compatible with other languages
+    Exception e1 = null; // emulating Java "finally" but compatible with other languages
     try {
 
       // save for comparison
@@ -329,14 +329,14 @@ public abstract class TestMoneroWalletCommon {
       String privateSpendKey = wallet.getPrivateSpendKey();
       
       // recreate test wallet from keys
-      MoneroWallet wallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+      MoneroWallet wallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(primaryAddress).setPrivateViewKey(privateViewKey).setPrivateSpendKey(privateSpendKey).setRestoreHeight(daemon.getHeight()));
       String path = wallet.getPath();
       Exception e2 = null;
       try {
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
         assertEquals(privateViewKey, wallet.getPrivateViewKey());
         assertEquals(privateSpendKey, wallet.getPrivateSpendKey());
-        if (!wallet.isConnectedToDaemon()) System.out.println("WARNING: wallet created from keys is not connected to authenticated daemon");  // TODO monero-project: keys wallets not connected
+        if (!wallet.isConnectedToDaemon()) System.out.println("WARNING: wallet created from keys is not connected to authenticated daemon"); // TODO monero-project: keys wallets not connected
         assertTrue(wallet.isConnectedToDaemon(), "Wallet created from keys is not connected to authenticated daemon");
         if (!(wallet instanceof MoneroWalletRpc)) {
           MoneroUtils.validateMnemonic(wallet.getMnemonic()); // TODO monero-wallet-rpc: cannot get mnemonic from wallet created from keys?
@@ -347,6 +347,27 @@ public abstract class TestMoneroWalletCommon {
       }
       closeWallet(wallet);
       if (e2 != null) throw e2;
+      
+      // recreate test wallet from spend key
+      if (!(wallet instanceof MoneroWalletRpc)) { // TODO monero-wallet-rpc: cannot create wallet from spend key?
+        wallet = createWallet(new MoneroWalletConfig().setPrivateSpendKey(privateSpendKey).setRestoreHeight(daemon.getHeight()));
+        e2 = null;
+        try {
+          assertEquals(primaryAddress, wallet.getPrimaryAddress());
+          assertEquals(privateViewKey, wallet.getPrivateViewKey());
+          assertEquals(privateSpendKey, wallet.getPrivateSpendKey());
+          if (!wallet.isConnectedToDaemon()) System.out.println("WARNING: wallet created from keys is not connected to authenticated daemon"); // TODO monero-project: keys wallets not connected
+          assertTrue(wallet.isConnectedToDaemon(), "Wallet created from keys is not connected to authenticated daemon");
+          if (!(wallet instanceof MoneroWalletRpc)) {
+            MoneroUtils.validateMnemonic(wallet.getMnemonic()); // TODO monero-wallet-rpc: cannot get mnemonic from wallet created from keys?
+            assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getMnemonicLanguage());
+          }
+        } catch (Exception e) {
+          e2 = e;
+        }
+        closeWallet(wallet);
+        if (e2 != null) throw e2;
+      }
       
       // attempt to create wallet at same path
       try {

@@ -338,7 +338,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // create wallet
     if (config.getMnemonic() != null) {
       createWalletFromMnemonic(config.getPath(), config.getPassword(), config.getMnemonic(), config.getRestoreHeight(), config.getLanguage(), config.getSeedOffset(), config.getSaveCurrent());
-    } else if (config.getPrimaryAddress() != null) {
+    } else if (config.getPrivateSpendKey() != null || config.getPrimaryAddress() != null) {
       if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating wallet from keys");
       createWalletFromKeys(config.getPath(), config.getPassword(), config.getPrimaryAddress(), config.getPrivateViewKey(), config.getPrivateSpendKey(), config.getRestoreHeight(), config.getLanguage(), config.getSaveCurrent());
     } else {

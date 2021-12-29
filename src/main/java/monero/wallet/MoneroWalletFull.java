@@ -242,7 +242,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     if (config.getMnemonic() != null) {
       if (config.getLanguage() != null) throw new MoneroError("Cannot specify language when creating wallet from mnemonic");
       return createWalletFromMnemonic(config.getPath(), config.getPassword(), config.getNetworkType(), config.getMnemonic(), config.getServer(), config.getRestoreHeight(), config.getSeedOffset());
-    } else if (config.getPrimaryAddress() != null) {
+    } else if (config.getPrivateSpendKey() != null || config.getPrimaryAddress() != null) {
       if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating wallet from keys");
       return createWalletFromKeys(config.getPath(), config.getPassword(), config.getNetworkType(), config.getPrimaryAddress(), config.getPrivateViewKey(), config.getPrivateSpendKey(), config.getServer(), config.getRestoreHeight(), config.getLanguage());
     } else {
