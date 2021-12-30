@@ -174,7 +174,9 @@ public class MoneroConnectionManager {
    * @return this connection manager for chaining
    */
   public MoneroConnectionManager setConnection(String uri) {
-    return setConnection(uri == null ? null : new MoneroRpcConnection(uri));
+    if (uri == null) return setConnection((MoneroRpcConnection) null);
+    MoneroRpcConnection connection = getConnectionByUri(uri);
+    return setConnection(connection == null ? new MoneroRpcConnection(uri) : connection);
   }
   
   /**
