@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -94,6 +95,10 @@ public class MoneroRpcConnection {
     } else {
       this.client = HttpClients.createDefault();
     }
+    if (!Objects.equals(this.username, username) || !Objects.equals(this.password, password)) {
+      isOnline = null;
+      isAuthenticated = null;
+    }
     this.username = username;
     this.password = password;
     return this;
@@ -157,7 +162,7 @@ public class MoneroRpcConnection {
   }
   
   /**
-   * Check the connection status to update isOnline, isAuthenticated, etc.
+   * Check the connection status to update isOnline, isAuthenticated, and response time.
    * 
    * @param timeoutInMs the maximum response time before considered offline
    * @return true if there is a change in status, false otherwise
@@ -182,6 +187,10 @@ public class MoneroRpcConnection {
     }
     if (isOnline) responseTime = System.currentTimeMillis() - startTime;
     return isOnlineBefore != isOnline || isAuthenticatedBefore != isAuthenticated;
+  }
+  
+  public boolean isConnected() {
+    return Boolean.TRUE.equals(isOnline) && !Boolean.FALSE.equals(isAuthenticated);
   }
   
   public Boolean isOnline() {
@@ -399,7 +408,7 @@ public class MoneroRpcConnection {
   
   @Override
   public String toString() {
-    return uri + " (username=" + username + ", password=" + (password == null ? "null" : "***, priority=" + priority + ", isOnline=" + isOnline + ", isAuthenticated=" + isAuthenticated + ")");
+    return uri + " (username=" + username + ", password=" + (password == null ? "null" : "***") + ", priority=" + priority + ", isOnline=" + isOnline + ", isAuthenticated=" + isAuthenticated + ")";
   }
   
   @Override

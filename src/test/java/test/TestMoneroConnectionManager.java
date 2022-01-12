@@ -185,22 +185,32 @@ public class TestMoneroConnectionManager {
       assertTrue(listener.changedConnections.get(listener.changedConnections.size() - 1) == walletRpcs.get(2).getRpcConnection());
       
       // set connection to new uri
+      connectionManager.stopCheckingConnection();
       String uri = "http://localhost:49999";
       connectionManager.setConnection(uri);
       assertEquals(uri, connectionManager.getConnection().getUri());
       assertEquals(9, listener.changedConnections.size());
       assertEquals(uri, listener.changedConnections.get(listener.changedConnections.size() - 1).getUri());
       
-      // test no available connection
-      connection = connectionManager.getBestAvailableConnection();
-      connectionManager.setConnection(connection);
+      // set connection to empty string
+      connectionManager.setConnection("");
+      assertEquals(null, connectionManager.getConnection());
       assertEquals(10, listener.changedConnections.size());
+      
+      // check all connections and test auto switch
       connectionManager.setAutoSwitch(true);
+      connectionManager.checkConnections();
+      assertEquals(11, listener.changedConnections.size());
+      assertTrue(connectionManager.isConnected());
+      
+      // shut down all connections
+      connection = connectionManager.getConnection();
+      connectionManager.startCheckingConnection(TestUtils.SYNC_PERIOD_IN_MS);
       for (MoneroWalletRpc walletRpc : walletRpcs) TestUtils.stopWalletRpcProcess(walletRpc);
       GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS + 100);
-      assertEquals(11, listener.changedConnections.size());
-      assertTrue(listener.changedConnections.get(listener.changedConnections.size() - 1) == connection);
       assertFalse(connection.isOnline());
+      assertEquals(12, listener.changedConnections.size());
+      assertTrue(listener.changedConnections.get(listener.changedConnections.size() - 1) == connection);
       
       // stop polling connection
       connectionManager.stopCheckingConnection();

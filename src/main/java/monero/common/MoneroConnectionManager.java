@@ -65,6 +65,7 @@ public class MoneroConnectionManager {
       if (aConnection.getUri().equals(connection.getUri())) throw new MoneroError("Connection URI already exists with connection manager: " + connection.getUri());
     }
     connections.add(connection);
+    if (autoSwitch && !isConnected()) setConnection(getBestAvailableConnection());
     return this;
   }
   
@@ -78,7 +79,10 @@ public class MoneroConnectionManager {
     MoneroRpcConnection connection = getConnectionByUri(uri);
     if (connection == null) throw new MoneroError("No connection exists with URI: " + uri);
     connections.remove(connection);
-    if (connection == currentConnection) currentConnection = null;
+    if (connection == currentConnection) {
+      currentConnection = null;
+      if (autoSwitch) setConnection(getBestAvailableConnection(connection));
+    }
     return this;
   }
   
@@ -88,7 +92,7 @@ public class MoneroConnectionManager {
    * @return true if the current connection is set, online, and not unauthenticated. false otherwise
    */
   public boolean isConnected() {
-    return currentConnection != null && Boolean.TRUE.equals(currentConnection.isOnline()) && !Boolean.FALSE.equals(currentConnection.isAuthenticated());
+    return currentConnection != null && currentConnection.isConnected();
   }
   
   /**
@@ -103,7 +107,7 @@ public class MoneroConnectionManager {
   /**
    * Get a connection by URI.
    * 
-   * @param uri is the URI of the connection to get
+   * @param uri - uri of the connection to get
    * @return the connection with the URI or null if no connection with the URI exists
    */
   public MoneroRpcConnection getConnectionByUri(String uri) {
@@ -153,9 +157,7 @@ public class MoneroConnectionManager {
         pool.shutdown();
         for (int i = 0; i < numTasks; i++) {
           MoneroRpcConnection connection = completionService.take().get();
-          if (connection.isOnline() && !Boolean.FALSE.equals(connection.isAuthenticated())) {
-            return connection;
-          }
+          if (connection.isConnected()) return connection;
         }
       } catch (Exception e) {
         throw new MoneroError(e);
@@ -174,7 +176,7 @@ public class MoneroConnectionManager {
    * @return this connection manager for chaining
    */
   public MoneroConnectionManager setConnection(String uri) {
-    if (uri == null) return setConnection((MoneroRpcConnection) null);
+    if (uri == null || "".equals(uri)) return setConnection((MoneroRpcConnection) null);
     MoneroRpcConnection connection = getConnectionByUri(uri);
     return setConnection(connection == null ? new MoneroRpcConnection(uri) : connection);
   }
@@ -198,6 +200,9 @@ public class MoneroConnectionManager {
       return this;
     }
     
+    // must provide uri
+    if (connection.getUri() == null || "".equals(connection.getUri())) throw new MoneroError("Connection is missing URI");
+    
     // check if adding new connection
     MoneroRpcConnection prevConnection = getConnectionByUri(connection.getUri());
     if (prevConnection == null) {
@@ -208,8 +213,9 @@ public class MoneroConnectionManager {
     }
     
     // check if updating current connection
-    if (prevConnection != currentConnection || !Objects.equals(prevConnection.getUsername(), connection.getUsername()) || !Objects.equals(prevConnection.getPassword(), connection.getPassword())) {
+    if (prevConnection != currentConnection || !Objects.equals(prevConnection.getUsername(), connection.getUsername()) || !Objects.equals(prevConnection.getPassword(), connection.getPassword()) || !Objects.equals(prevConnection.getPriority(), connection.getPriority())) {
       prevConnection.setCredentials(connection.getUsername(), connection.getPassword());
+      prevConnection.setPriority(connection.getPriority());
       currentConnection = prevConnection;
       onConnectionChanged(currentConnection);
     }
@@ -225,7 +231,7 @@ public class MoneroConnectionManager {
   public MoneroConnectionManager checkConnection() {
     MoneroRpcConnection connection = getConnection();
     if (connection != null && connection.checkConnection(timeoutMs)) onConnectionChanged(connection);
-    if (autoSwitch && (connection == null || !connection.isOnline() || Boolean.FALSE.equals(connection.isAuthenticated()))) {
+    if (autoSwitch && !isConnected()) {
       MoneroRpcConnection bestConnection = getBestAvailableConnection(connection);
       if (bestConnection != null) setConnection(bestConnection);
     }
@@ -238,6 +244,8 @@ public class MoneroConnectionManager {
    * @return this connection manager for chaining
    */
   public MoneroConnectionManager checkConnections() {
+    
+    // collect tasks to check connections
     MoneroRpcConnection currentConnection = getConnection();
     ExecutorService pool = Executors.newFixedThreadPool(connections.size());
     for (MoneroRpcConnection connection : connections) {
@@ -253,7 +261,25 @@ public class MoneroConnectionManager {
       });
     }
     try {
+      
+      // check connections in parallel
       pool.awaitTermination(timeoutMs, TimeUnit.MILLISECONDS);
+      
+      // auto switch to best connection
+      if (autoSwitch && !isConnected()) {
+        for (List<MoneroRpcConnection> prioritizedConnections : getConnectionsInAscendingPriority()) {
+          MoneroRpcConnection bestConnection = null;
+          for (MoneroRpcConnection prioritizedConnection : prioritizedConnections) {
+            if (prioritizedConnection.isConnected() && (bestConnection == null || prioritizedConnection.getResponseTime() < bestConnection.getResponseTime())) {
+              bestConnection = prioritizedConnection;
+            }
+          }
+          if (bestConnection != null) {
+            setConnection(bestConnection);
+            break;
+          }
+        }
+      }
     } catch (InterruptedException e) {
       throw new MoneroError(e);
     }
@@ -297,7 +323,7 @@ public class MoneroConnectionManager {
   }
   
   /**
-   * Stop automatically checking the connection status.
+   * Stop checking the connection status periodically.
    * 
    * @return this connection manager for chaining
    */
@@ -316,6 +342,15 @@ public class MoneroConnectionManager {
   public MoneroConnectionManager setAutoSwitch(boolean autoSwitch) {
     this.autoSwitch = autoSwitch;
     return this;
+  }
+  
+  /**
+   * Get if auto switch is enabled or disabled.
+   * 
+   * @return true if auto switch enabled, false otherwise
+   */
+  public boolean getAutoSwitch() {
+    return autoSwitch;
   }
   
   /**
