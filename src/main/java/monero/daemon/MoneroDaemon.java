@@ -31,10 +31,9 @@ import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroBlockTemplate;
-import monero.daemon.model.MoneroDaemonConnection;
 import monero.daemon.model.MoneroDaemonInfo;
 import monero.daemon.model.MoneroDaemonListener;
-import monero.daemon.model.MoneroDaemonPeer;
+import monero.daemon.model.MoneroPeer;
 import monero.daemon.model.MoneroDaemonSyncInfo;
 import monero.daemon.model.MoneroDaemonUpdateCheckResult;
 import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
@@ -542,18 +541,18 @@ public interface MoneroDaemon {
   public int resetUploadLimit();
   
   /**
-   * Get known peers including their last known online status.
+   * Get peers with active incoming or outgoing connections to the node.
    * 
-   * @return known peers
+   * @return the daemon's peers
    */
-  public List<MoneroDaemonPeer> getKnownPeers();
+  public List<MoneroPeer> getPeers();
   
   /**
-   * Get incoming and outgoing connections to the node.
+   * Get all known peers including their last known online status.
    * 
-   * @return the daemon's peer connections
+   * @return the daemon's known peers
    */
-  public List<MoneroDaemonConnection> getConnections();
+  public List<MoneroPeer> getKnownPeers();
   
   /**
    * Limit number of outgoing peers.

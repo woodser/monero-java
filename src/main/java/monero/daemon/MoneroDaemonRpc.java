@@ -49,11 +49,10 @@ import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroBlockTemplate;
-import monero.daemon.model.MoneroDaemonConnection;
-import monero.daemon.model.MoneroDaemonConnectionSpan;
+import monero.daemon.model.MoneroConnectionSpan;
 import monero.daemon.model.MoneroDaemonInfo;
 import monero.daemon.model.MoneroDaemonListener;
-import monero.daemon.model.MoneroDaemonPeer;
+import monero.daemon.model.MoneroPeer;
 import monero.daemon.model.MoneroDaemonSyncInfo;
 import monero.daemon.model.MoneroDaemonUpdateCheckResult;
 import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
@@ -798,11 +797,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroDaemonConnection> getConnections() {
+  public List<MoneroPeer> getPeers() {
     Map<String, Object> resp = rpc.sendJsonRequest("get_connections");
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     checkResponseStatus(result);
-    List<MoneroDaemonConnection> connections = new ArrayList<MoneroDaemonConnection>();
+    List<MoneroPeer> connections = new ArrayList<MoneroPeer>();
     if (!result.containsKey("connections")) return connections;
     for (Map<String, Object> rpcConnection : (List<Map<String, Object>>) result.get("connections")) {
       connections.add(convertRpcConnection(rpcConnection));
@@ -812,24 +811,24 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<MoneroDaemonPeer> getKnownPeers() {
+  public List<MoneroPeer> getKnownPeers() {
     
     // send request
     Map<String, Object> respMap = rpc.sendPathRequest("get_peer_list");
     checkResponseStatus(respMap);
     
     // build peers
-    List<MoneroDaemonPeer> peers = new ArrayList<MoneroDaemonPeer>();
+    List<MoneroPeer> peers = new ArrayList<MoneroPeer>();
     if (respMap.containsKey("gray_list")) {
       for (Map<String, Object> rpcPeer : (List<Map<String, Object>>) respMap.get("gray_list")) {
-        MoneroDaemonPeer peer = convertRpcPeer(rpcPeer);
+        MoneroPeer peer = convertRpcPeer(rpcPeer);
         peer.setIsOnline(false); // gray list means offline last checked
         peers.add(peer);
       }
     }
     if (respMap.containsKey("white_list")) {
       for (Map<String, Object> rpcPeer :  (List<Map<String, Object>>) respMap.get("white_list")) {
-        MoneroDaemonPeer peer = convertRpcPeer(rpcPeer);
+        MoneroPeer peer = convertRpcPeer(rpcPeer);
         peer.setIsOnline(true); // white list means online last checked
         peers.add(peer);
       }
@@ -1352,9 +1351,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return result;
   }
   
-  private static MoneroDaemonPeer convertRpcPeer(Map<String, Object> rpcPeer) {
+  private static MoneroPeer convertRpcPeer(Map<String, Object> rpcPeer) {
     GenUtils.assertNotNull(rpcPeer);
-    MoneroDaemonPeer peer = new MoneroDaemonPeer();
+    MoneroPeer peer = new MoneroPeer();
     for (String key : rpcPeer.keySet()) {
       Object val = rpcPeer.get(key);
       if (key.equals("host")) peer.setHost((String) val);
@@ -1394,49 +1393,47 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return result;
   }
   
-  private static MoneroDaemonConnection convertRpcConnection(Map<String, Object> rpcConnection) {
-    MoneroDaemonConnection connection = new MoneroDaemonConnection();
-    MoneroDaemonPeer peer = new MoneroDaemonPeer();
-    connection.setPeer(peer);
+  private static MoneroPeer convertRpcConnection(Map<String, Object> rpcConnection) {
+    MoneroPeer peer = new MoneroPeer();
     peer.setIsOnline(true);
     for (String key : rpcConnection.keySet()) {
       Object val = rpcConnection.get(key);
       if (key.equals("address")) peer.setAddress((String) val);
-      else if (key.equals("avg_download")) connection.setAvgDownload(((BigInteger) val).longValue());
-      else if (key.equals("avg_upload")) connection.setAvgUpload(((BigInteger) val).longValue());
-      else if (key.equals("connection_id")) connection.setHash((String) val);
-      else if (key.equals("current_download")) connection.setCurrentDownload(((BigInteger) val).longValue());
-      else if (key.equals("current_upload")) connection.setCurrentUpload(((BigInteger) val).longValue());
-      else if (key.equals("height")) connection.setHeight(((BigInteger) val).longValue());
+      else if (key.equals("avg_download")) peer.setAvgDownload(((BigInteger) val).longValue());
+      else if (key.equals("avg_upload")) peer.setAvgUpload(((BigInteger) val).longValue());
+      else if (key.equals("connection_id")) peer.setHash((String) val);
+      else if (key.equals("current_download")) peer.setCurrentDownload(((BigInteger) val).longValue());
+      else if (key.equals("current_upload")) peer.setCurrentUpload(((BigInteger) val).longValue());
+      else if (key.equals("height")) peer.setHeight(((BigInteger) val).longValue());
       else if (key.equals("host")) peer.setHost((String) val);
       else if (key.equals("ip")) {} // host used instead which is consistently a string
-      else if (key.equals("incoming")) connection.setIsIncoming((Boolean) val);
-      else if (key.equals("live_time")) connection.setLiveTime(((BigInteger) val).longValue());
-      else if (key.equals("local_ip")) connection.setIsLocalIp((Boolean) val);
-      else if (key.equals("localhost")) connection.setIsLocalHost((Boolean) val);
+      else if (key.equals("incoming")) peer.setIsIncoming((Boolean) val);
+      else if (key.equals("live_time")) peer.setLiveTime(((BigInteger) val).longValue());
+      else if (key.equals("local_ip")) peer.setIsLocalIp((Boolean) val);
+      else if (key.equals("localhost")) peer.setIsLocalHost((Boolean) val);
       else if (key.equals("peer_id")) peer.setId((String) val);
       else if (key.equals("port")) peer.setPort(Integer.parseInt((String) val));
       else if (key.equals("rpc_port")) peer.setRpcPort(((BigInteger) val).intValue());
-      else if (key.equals("recv_count")) connection.setNumReceives(((BigInteger) val).intValue());
-      else if (key.equals("recv_idle_time")) connection.setReceiveIdleTime(((BigInteger) val).longValue());
-      else if (key.equals("send_count")) connection.setNumSends(((BigInteger) val).intValue());
-      else if (key.equals("send_idle_time")) connection.setSendIdleTime(((BigInteger) val).longValue());
-      else if (key.equals("state")) connection.setState((String) val);
-      else if (key.equals("support_flags")) connection.setNumSupportFlags(((BigInteger) val).intValue());
+      else if (key.equals("recv_count")) peer.setNumReceives(((BigInteger) val).intValue());
+      else if (key.equals("recv_idle_time")) peer.setReceiveIdleTime(((BigInteger) val).longValue());
+      else if (key.equals("send_count")) peer.setNumSends(((BigInteger) val).intValue());
+      else if (key.equals("send_idle_time")) peer.setSendIdleTime(((BigInteger) val).longValue());
+      else if (key.equals("state")) peer.setState((String) val);
+      else if (key.equals("support_flags")) peer.setNumSupportFlags(((BigInteger) val).intValue());
       else if (key.equals("pruning_seed")) peer.setPruningSeed(((BigInteger) val).intValue());
       else if (key.equals("rpc_credits_per_hash"))  peer.setRpcCreditsPerHash((BigInteger) val);
       else if (key.equals("address_type")) {
         int rpcType = ((BigInteger) val).intValue();
-        if (rpcType == 0) connection.setType(ConnectionType.INVALID);
-        else if (rpcType == 1) connection.setType(ConnectionType.IPV4);
-        else if (rpcType == 2) connection.setType(ConnectionType.IPV6);
-        else if (rpcType == 3) connection.setType(ConnectionType.TOR);
-        else if (rpcType == 4) connection.setType(ConnectionType.I2P);
-        else throw new MoneroError("Invalid RPC connection type, expected 0-4: " + rpcType);
+        if (rpcType == 0) peer.setType(ConnectionType.INVALID);
+        else if (rpcType == 1) peer.setType(ConnectionType.IPV4);
+        else if (rpcType == 2) peer.setType(ConnectionType.IPV6);
+        else if (rpcType == 3) peer.setType(ConnectionType.TOR);
+        else if (rpcType == 4) peer.setType(ConnectionType.I2P);
+        else throw new MoneroError("Invalid RPC peer type, expected 0-4: " + rpcType);
       }
-      else LOGGER.warning("ignoring unexpected field in connection: " + key + ": " + val);
+      else LOGGER.warning("ignoring unexpected field in peer: " + key + ": " + val);
     }
-    return connection;
+    return peer;
   }
   
   private static MoneroOutputHistogramEntry convertRpcOutputHistogramEntry(Map<String, Object> rpcEntry) {
@@ -1516,13 +1513,13 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       Object val = rpcSyncInfo.get(key);
       if (key.equals("height")) syncInfo.setHeight(((BigInteger) val).longValue());
       else if (key.equals("peers")) {
-        syncInfo.setConnections(new ArrayList<MoneroDaemonConnection>());
+        syncInfo.setPeers(new ArrayList<MoneroPeer>());
         List<Map<String, Object>> rpcConnections = (List<Map<String, Object>>) val;
         for (Map<String, Object> rpcConnection : rpcConnections) {
-          syncInfo.getConnections().add(convertRpcConnection((Map<String, Object>) rpcConnection.get("info")));
+          syncInfo.getPeers().add(convertRpcConnection((Map<String, Object>) rpcConnection.get("info")));
         }
       } else if (key.equals("spans")) {
-        syncInfo.setSpans(new ArrayList<MoneroDaemonConnectionSpan>());
+        syncInfo.setSpans(new ArrayList<MoneroConnectionSpan>());
         List<Map<String, Object>> rpcSpans = (List<Map<String, Object>>) val;
         for (Map<String, Object> rpcSpan : rpcSpans) {
           syncInfo.getSpans().add(convertRpcConnectionSpan(rpcSpan));
@@ -1569,8 +1566,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     return info;
   }
   
-  private static MoneroDaemonConnectionSpan convertRpcConnectionSpan(Map<String, Object> rpcConnectionSpan) {
-    MoneroDaemonConnectionSpan span = new MoneroDaemonConnectionSpan();
+  private static MoneroConnectionSpan convertRpcConnectionSpan(Map<String, Object> rpcConnectionSpan) {
+    MoneroConnectionSpan span = new MoneroConnectionSpan();
     for (String key : rpcConnectionSpan.keySet()) {
       Object val = rpcConnectionSpan.get(key);
       if (key.equals("connection_id")) span.setConnectionId((String) val);

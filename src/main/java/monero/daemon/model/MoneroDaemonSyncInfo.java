@@ -9,8 +9,8 @@ import java.util.List;
 public class MoneroDaemonSyncInfo {
 
   private Long height;
-  private List<MoneroDaemonConnection> connections;
-  private List<MoneroDaemonConnectionSpan> spans;
+  private List<MoneroPeer> peers;
+  private List<MoneroConnectionSpan> spans;
   private Long targetHeight;
   private Integer nextNeededPruningSeed;
   private String overview;
@@ -25,19 +25,19 @@ public class MoneroDaemonSyncInfo {
     this.height = height;
   }
   
-  public List<MoneroDaemonConnection> getConnections() {
-    return connections;
+  public List<MoneroPeer> getPeers() {
+    return peers;
   }
   
-  public void setConnections(List<MoneroDaemonConnection> connections) {
-    this.connections = connections;
+  public void setPeers(List<MoneroPeer> peers) {
+    this.peers = peers;
   }
   
-  public List<MoneroDaemonConnectionSpan> getSpans() {
+  public List<MoneroConnectionSpan> getSpans() {
     return spans;
   }
   
-  public void setSpans(List<MoneroDaemonConnectionSpan> spans) {
+  public void setSpans(List<MoneroConnectionSpan> spans) {
     this.spans = spans;
   }
   

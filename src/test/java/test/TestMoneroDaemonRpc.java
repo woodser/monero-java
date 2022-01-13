@@ -27,11 +27,9 @@ import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroBlockTemplate;
-import monero.daemon.model.MoneroDaemonConnection;
-import monero.daemon.model.MoneroDaemonConnectionSpan;
+import monero.daemon.model.MoneroConnectionSpan;
 import monero.daemon.model.MoneroDaemonInfo;
 import monero.daemon.model.MoneroDaemonListener;
-import monero.daemon.model.MoneroDaemonPeer;
 import monero.daemon.model.MoneroDaemonSyncInfo;
 import monero.daemon.model.MoneroDaemonUpdateCheckResult;
 import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
@@ -43,6 +41,7 @@ import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroOutputDistributionEntry;
 import monero.daemon.model.MoneroOutputHistogramEntry;
+import monero.daemon.model.MoneroPeer;
 import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxPoolStats;
@@ -953,25 +952,25 @@ public class TestMoneroDaemonRpc {
     assertEquals(initVal, daemon.getUploadLimit());
   }
   
-  // Can get known peers which may be online or offline
+  // Can get peers with active incoming or outgoing connections
   @Test
-  public void testGetKnownPeers() {
+  public void testGetPeers() {
     assumeTrue(TEST_NON_RELAYS);
-    List<MoneroDaemonPeer> peers = daemon.getKnownPeers();
-    assertFalse(peers.isEmpty(), "Daemon has no known peers to test");
-    for (MoneroDaemonPeer peer : peers) {
-      testKnownPeer(peer, false);
+    List<MoneroPeer> peers = daemon.getPeers();
+    assertFalse(peers.isEmpty(), "Daemon has no incoming or outgoing peers to test");
+    for (MoneroPeer peer : peers) {
+      testPeer(peer);
     }
   }
   
-  // Can get incoming and outgoing peer connections
+  // Can get all known peers which may be online or offline
   @Test
-  public void testGetPeerConnections() {
+  public void testGetKnownPeers() {
     assumeTrue(TEST_NON_RELAYS);
-    List<MoneroDaemonConnection> connections = daemon.getConnections();
-    assertFalse(connections.isEmpty(), "Daemon has no incoming or outgoing connections to test");
-    for (MoneroDaemonConnection connection : connections) {
-      testDaemonConnection(connection);
+    List<MoneroPeer> peers = daemon.getKnownPeers();
+    assertFalse(peers.isEmpty(), "Daemon has no known peers to test");
+    for (MoneroPeer peer : peers) {
+      testKnownPeer(peer, false);
     }
   }
   
@@ -1844,16 +1843,16 @@ public class TestMoneroDaemonRpc {
   private static void testSyncInfo(MoneroDaemonSyncInfo syncInfo) { // TODO: consistent naming, daemon in name?
     assertTrue(syncInfo instanceof MoneroDaemonSyncInfo);
     assertTrue(syncInfo.getHeight() >= 0);
-    if (syncInfo.getConnections() != null) {
-      assertTrue(syncInfo.getConnections().size() > 0);
-      for (MoneroDaemonConnection connection : syncInfo.getConnections()) {
-        testDaemonConnection(connection);
+    if (syncInfo.getPeers() != null) {
+      assertTrue(syncInfo.getPeers().size() > 0);
+      for (MoneroPeer connection : syncInfo.getPeers()) {
+        testPeer(connection);
       }
     }
     if (syncInfo.getSpans() != null) {  // TODO: test that this is being hit, so far not used
       assertTrue(syncInfo.getSpans().size() > 0);
-      for (MoneroDaemonConnectionSpan span : syncInfo.getSpans()) {
-        testDaemonConnectionSpan(span);
+      for (MoneroConnectionSpan span : syncInfo.getSpans()) {
+        testConnectionSpan(span);
       }
     }
     assertTrue(syncInfo.getNextNeededPruningSeed() >= 0);
@@ -1862,7 +1861,7 @@ public class TestMoneroDaemonRpc {
     assertNull(syncInfo.getTopBlockHash());
   }
   
-  private static void testDaemonConnectionSpan(MoneroDaemonConnectionSpan span) {
+  private static void testConnectionSpan(MoneroConnectionSpan span) {
     assertNotNull(span);
     assertNotNull(span.getConnectionId());
     assertFalse(span.getConnectionId().isEmpty());
@@ -1902,28 +1901,28 @@ public class TestMoneroDaemonRpc {
     assertEquals(64, altChain.getMainChainParentBlockHash().length());
   }
 
-  private static void testDaemonConnection(MoneroDaemonConnection connection) {
-    assertTrue(connection instanceof MoneroDaemonConnection);
-    testKnownPeer(connection.getPeer(), true);
-    assertFalse(connection.getHash().isEmpty());
-    assertTrue(connection.getAvgDownload() >= 0);
-    assertTrue(connection.getAvgUpload() >= 0);
-    assertTrue(connection.getCurrentDownload() >= 0);
-    assertTrue(connection.getCurrentUpload() >= 0);
-    assertTrue(connection.getHeight() >= 0);
-    assertTrue(connection.getLiveTime() >= 0);
-    assertNotNull(connection.isLocalIp());
-    assertNotNull(connection.isLocalHost());
-    assertTrue(connection.getNumReceives() >= 0);
-    assertTrue(connection.getReceiveIdleTime() >= 0);
-    assertTrue(connection.getNumSends() >= 0);
-    assertTrue(connection.getSendIdleTime() >= 0);
-    assertNotNull(connection.getState());
-    assertTrue(connection.getNumSupportFlags() >= 0);
-    assertNotNull(connection.getType());
+  private static void testPeer(MoneroPeer peer) {
+    assertTrue(peer instanceof MoneroPeer);
+    testKnownPeer(peer, true);
+    assertFalse(peer.getHash().isEmpty());
+    assertTrue(peer.getAvgDownload() >= 0);
+    assertTrue(peer.getAvgUpload() >= 0);
+    assertTrue(peer.getCurrentDownload() >= 0);
+    assertTrue(peer.getCurrentUpload() >= 0);
+    assertTrue(peer.getHeight() >= 0);
+    assertTrue(peer.getLiveTime() >= 0);
+    assertNotNull(peer.isLocalIp());
+    assertNotNull(peer.isLocalHost());
+    assertTrue(peer.getNumReceives() >= 0);
+    assertTrue(peer.getReceiveIdleTime() >= 0);
+    assertTrue(peer.getNumSends() >= 0);
+    assertTrue(peer.getSendIdleTime() >= 0);
+    assertNotNull(peer.getState());
+    assertTrue(peer.getNumSupportFlags() >= 0);
+    assertNotNull(peer.getType());
   }
 
-  private static void testKnownPeer(MoneroDaemonPeer peer, boolean fromConnection) {
+  private static void testKnownPeer(MoneroPeer peer, boolean fromConnection) {
     assertNotNull(peer);
     assertFalse(peer.getId().isEmpty());
     assertFalse(peer.getHost().isEmpty());

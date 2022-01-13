@@ -3,7 +3,7 @@ package monero.daemon.model;
 /**
  * Monero daemon connection span.
  */
-public class MoneroDaemonConnectionSpan {
+public class MoneroConnectionSpan {
 
   private String connectionId;
   private Long numBlocks;
