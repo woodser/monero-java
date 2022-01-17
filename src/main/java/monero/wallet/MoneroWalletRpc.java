@@ -99,7 +99,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   // instance variables
   private String path;                                     // wallet's path identifier
-  private MoneroRpcConnection rpc;                         // handles rpc interactions
+  private MoneroRpcConnection rpc;                         // rpc connection to monero-wallet-rpc
+  private MoneroRpcConnection daemonConnection;            // current daemon connection (unknown/null until explicitly set)
   private WalletPoller walletPoller;                       // listener which polls monero-wallet-rpc
   private WalletRpcZmqListener zmqListener;                // listener which processes zmq notifications from monero-wallet-rpc
   private Map<Integer, Map<Integer, String>> addressCache; // cache static addresses to reduce requests
@@ -492,15 +493,16 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   @Override
-  public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
-    setDaemonConnection(daemonConnection, null, null);
+  public void setDaemonConnection(MoneroRpcConnection connection) {
+    setDaemonConnection(connection, null, null);
   }
   
-  public void setDaemonConnection(MoneroRpcConnection daemonConnection, Boolean isTrusted, SslOptions sslOptions) {
-    if (daemonConnection.getUsername() != null && !daemonConnection.getUsername().isEmpty()) throw new MoneroError("monero-wallet-rpc does not support setting daemon connection with authentication");
+  public void setDaemonConnection(MoneroRpcConnection connection, Boolean isTrusted, SslOptions sslOptions) {
     if (sslOptions == null) sslOptions = new SslOptions();
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("address", daemonConnection == null ? "placeholder" : daemonConnection.getUri());
+    params.put("address", connection == null ? "placeholder" : connection.getUri());
+    params.put("username", connection == null ? "" : connection.getUsername());
+    params.put("password", connection == null ? "" : connection.getPassword());
     params.put("trusted", isTrusted);
     params.put("ssl_support", "autodetect");
     params.put("ssl_private_key_path", sslOptions.getPrivateKeyPath());
@@ -509,11 +511,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("ssl_allowed_fingerprints", sslOptions.getAllowedFingerprints());
     params.put("ssl_allow_any_cert", sslOptions.getAllowAnyCert());
     rpc.sendJsonRequest("set_daemon", params);
+    this.daemonConnection = connection == null || connection.getUri() == null || connection.getUri().isEmpty() ? null : new MoneroRpcConnection(connection);
   }
   
   @Override
   public MoneroRpcConnection getDaemonConnection() {
-    throw new RuntimeException("MoneroWalletRpc.getDaemonConnection() not implemented");
+    return daemonConnection;
   }
   
   @Override
@@ -691,10 +694,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("start_height", startHeight);
     synchronized(SYNC_LOCK) {  // TODO (monero-project): monero-wallet-rpc hangs at 100% cpu utilization if refresh called concurrently
-      Map<String, Object> resp = rpc.sendJsonRequest("refresh", params);
-      poll();
-      Map<String, Object> result = (Map<String, Object>) resp.get("result");
-      return new MoneroSyncResult(((BigInteger) result.get("blocks_fetched")).longValue(), (Boolean) result.get("received_money"));
+      try {
+        Map<String, Object> resp = rpc.sendJsonRequest("refresh", params);
+        poll();
+        Map<String, Object> result = (Map<String, Object>) resp.get("result");
+        return new MoneroSyncResult(((BigInteger) result.get("blocks_fetched")).longValue(), (Boolean) result.get("received_money"));
+      } catch (MoneroError err) {
+        if (err.getMessage().equals("no connection to daemon")) throw new MoneroError("Wallet is not connected to daemon");
+        throw err;
+      }
     }
   }
   
@@ -2314,7 +2322,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           }
           
           // get locked txs for comparison to previous
-          long minHeight = height - 70; // only monitor recent txs
+          long minHeight = Math.max(0, height - 70); // only monitor recent txs
           List<MoneroTxWallet> lockedTxs = getTxs(new MoneroTxQuery().setIsLocked(true).setMinHeight(minHeight).setIncludeOutputs(true));
           
           // collect hashes of txs no longer locked

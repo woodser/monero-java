@@ -494,6 +494,12 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testGetPath() {
     super.testGetPath();
   }
+  
+  @Override
+  @Test
+  public void testSetDaemonConnection() {
+    super.testSetDaemonConnection();
+  }
 
   @Override
   @Test

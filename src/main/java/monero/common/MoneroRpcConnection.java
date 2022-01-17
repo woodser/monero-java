@@ -47,7 +47,6 @@ public class MoneroRpcConnection {
   private String username;
   private String password;
   private String zmqUri;
-  private String proxiedUri;
   private int priority = 0;
   private Boolean isOnline;
   private Boolean isAuthenticated;
@@ -78,6 +77,14 @@ public class MoneroRpcConnection {
   public MoneroRpcConnection(URI uri, String username, String password, URI zmqUri) {
     this.uri = uri == null ? null : uri.toString();
     this.setCredentials(username, password);;
+  }
+  
+  public MoneroRpcConnection(MoneroRpcConnection connection) {
+    this(connection.uri, connection.username, connection.password, connection.zmqUri);
+    this.priority = connection.priority;
+    this.isOnline = connection.isOnline;
+    this.isAuthenticated = connection.isAuthenticated;
+    this.responseTime = connection.responseTime;
   }
   
   public MoneroRpcConnection setCredentials(String username, String password) {
@@ -123,15 +130,6 @@ public class MoneroRpcConnection {
   
   public MoneroRpcConnection setZmqUri(String zmqUri) {
     this.zmqUri = zmqUri;
-    return this;
-  }
-  
-  public String getProxiedUri() {
-    return proxiedUri;
-  }
-  
-  public MoneroRpcConnection setProxiedUri(String proxiedUri) {
-    this.proxiedUri = proxiedUri;
     return this;
   }
   
@@ -408,7 +406,7 @@ public class MoneroRpcConnection {
   
   @Override
   public String toString() {
-    return uri + " (username=" + username + ", password=" + (password == null ? "null" : "***") + ", priority=" + priority + ", isOnline=" + isOnline + ", isAuthenticated=" + isAuthenticated + ")";
+    return uri + " (uri=" + uri + ", username=" + username + ", password=" + (password == null ? "null" : "***") + ", priority=" + priority + ", isOnline=" + isOnline + ", isAuthenticated=" + isAuthenticated + ")";
   }
   
   @Override

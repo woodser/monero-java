@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import monero.common.MoneroError;
-import monero.common.MoneroRpcConnection;
 import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
@@ -226,49 +225,6 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 //    long height = wallet.getApproximateChainHeight();
 //    assertTrue(height > 0);
 //  }
-  
-  // Can set the daemon connection
-  @Test
-  public void testSetDaemonConnection() {
-    
-    // create random wallet with defaults
-    String path = getRandomWalletPath();
-    MoneroWalletFull wallet = createWallet(new MoneroWalletConfig().setPath(path).setServerUri(""));
-    assertEquals(null, wallet.getDaemonConnection());
-    
-    // set daemon uri
-    wallet.setDaemonConnection(TestUtils.DAEMON_RPC_URI);
-    assertEquals(new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI), wallet.getDaemonConnection());
-    wallet.setDaemonConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD);
-    assertTrue(wallet.isConnectedToDaemon());
-    
-    // nullify daemon connection
-    wallet.setDaemonConnection((String) null);
-    assertEquals(null, wallet.getDaemonConnection());
-    wallet.setDaemonConnection(TestUtils.DAEMON_RPC_URI);
-    assertEquals(new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI), wallet.getDaemonConnection());
-    wallet.setDaemonConnection((MoneroRpcConnection) null);
-    assertEquals(null, wallet.getDaemonConnection());
-    
-    // set daemon uri to non-daemon
-    wallet.setDaemonConnection("www.getmonero.org");
-    assertEquals(new MoneroRpcConnection("www.getmonero.org"), wallet.getDaemonConnection());
-    assertFalse(wallet.isConnectedToDaemon());
-    
-    // set daemon to invalid uri
-    wallet.setDaemonConnection("abc123");
-    assertFalse(wallet.isConnectedToDaemon());
-    
-    // attempt to sync
-    try {
-      wallet.sync();
-      fail("Exception expected");
-    } catch (MoneroError e) {
-      assertEquals("Wallet is not connected to daemon", e.getMessage());
-    } finally {
-      wallet.close();
-    }
-  }
   
   // Can create a random full wallet
   @Test
@@ -1514,6 +1470,12 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   @Test
   public void testGetPath() {
     super.testGetPath();
+  }
+  
+  @Override
+  @Test
+  public void testSetDaemonConnection() {
+    super.testSetDaemonConnection();
   }
 
   @Override
