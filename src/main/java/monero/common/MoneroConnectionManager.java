@@ -21,7 +21,7 @@ public class MoneroConnectionManager {
   
   // static variables
   private static final long DEFAULT_TIMEOUT = 5000l;
-  private static final long DEFAULT_CHECK_CONNECTION_PERIOD = 10000l;
+  private static final long DEFAULT_CHECK_CONNECTION_PERIOD = 15000l;
   
   // instance variables
   private MoneroRpcConnection currentConnection;
@@ -65,7 +65,6 @@ public class MoneroConnectionManager {
       if (aConnection.getUri().equals(connection.getUri())) throw new MoneroError("Connection URI already exists with connection manager: " + connection.getUri());
     }
     connections.add(connection);
-    if (autoSwitch && !isConnected()) setConnection(getBestAvailableConnection());
     return this;
   }
   
@@ -81,7 +80,7 @@ public class MoneroConnectionManager {
     connections.remove(connection);
     if (connection == currentConnection) {
       currentConnection = null;
-      if (autoSwitch) setConnection(getBestAvailableConnection(connection));
+      onConnectionChanged(currentConnection);
     }
     return this;
   }

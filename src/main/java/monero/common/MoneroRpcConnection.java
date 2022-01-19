@@ -464,8 +464,7 @@ public class MoneroRpcConnection {
   private RequestConfig getTimeoutConfig(Long timeoutInMs) {
     if (timeoutInMs == null) return null;
     return RequestConfig.custom()
-            .setConnectTimeout(Timeout.ofMilliseconds(timeoutInMs))
-            .setConnectionRequestTimeout(Timeout.ofMilliseconds(timeoutInMs))
+            .setResponseTimeout(Timeout.ofMilliseconds(timeoutInMs))
             .build();
   }
 }
