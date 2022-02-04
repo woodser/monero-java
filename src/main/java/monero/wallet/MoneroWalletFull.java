@@ -1322,6 +1322,15 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
   
   @Override
+  public void changePassword(String oldPassword, String newPassword) {
+    try {
+      changePasswordJni(oldPassword, newPassword);
+    } catch (Exception e) {
+      throw new MoneroError(e.getMessage());
+    }
+  }
+  
+  @Override
   public void save() {
     assertNotClosed();
     saveJni();
@@ -1542,9 +1551,11 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private native String[] submitMultisigTxHexJni(String signedMultisigTxHex);
   
-  private native void saveJni();
+  private native void changePasswordJni(String oldPassword, String newPassword);
   
   private native void moveToJni(String path, String password);
+  
+  private native void saveJni();
   
   private native void closeJni(boolean save);
   

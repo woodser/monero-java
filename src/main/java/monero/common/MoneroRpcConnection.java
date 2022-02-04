@@ -75,7 +75,7 @@ public class MoneroRpcConnection {
   }
   
   public MoneroRpcConnection(URI uri, String username, String password, URI zmqUri) {
-    this.uri = uri == null ? null : uri.toString();
+    this.uri = uri == null ? null : MoneroUtils.parseUri(uri.toString()).toString();
     this.setCredentials(username, password);;
   }
   
@@ -160,7 +160,7 @@ public class MoneroRpcConnection {
   }
   
   /**
-   * Check the connection status to update isOnline, isAuthenticated, and response time.
+   * Check the connection to update online, authentication, and response time status.
    * 
    * @param timeoutInMs the maximum response time before considered offline
    * @return true if there is a change in status, false otherwise
@@ -187,18 +187,46 @@ public class MoneroRpcConnection {
     return isOnlineBefore != isOnline || isAuthenticatedBefore != isAuthenticated;
   }
   
-  public boolean isConnected() {
-    return Boolean.TRUE.equals(isOnline) && !Boolean.FALSE.equals(isAuthenticated);
+  /**
+   * Indicates if the connection is connected according to the last call to checkConnection().<br><br>
+   * 
+   * Note: must call checkConnection() manually unless using MoneroConnectionManager.
+   * 
+   * @return true or false to indicate if connected, or null if checkConnection() has not been called
+   */
+  public Boolean isConnected() {
+    return isOnline == null ? null : isOnline && !Boolean.FALSE.equals(isAuthenticated);
   }
   
+  /**
+   * Indicates if the connection is online according to the last call to checkConnection().<br><br>
+   * 
+   * Note: must call checkConnection() manually unless using MoneroConnectionManager.
+   * 
+   * @return true or false to indicate if online, or null if checkConnection() has not been called
+   */
   public Boolean isOnline() {
     return isOnline;
   }
 
+  /**
+   * Indicates if the connection is authenticated according to the last call to checkConnection().<br><br>
+   * 
+   * Note: must call checkConnection() manually unless using MoneroConnectionManager.
+   * 
+   * @return true if authenticated or no authentication, false if not authenticated, or null if checkConnection() has not been called
+   */
   public Boolean isAuthenticated() {
     return isAuthenticated;
   }
 
+  /**
+   * Get the response time of the last call to checkConnection().<br><br>
+   * 
+   * Note: must call checkConnection() manually unless using MoneroConnectionManager.
+   * 
+   * @return the response time of the last call to checkConnection() or null if checkConnection() has not been called
+   */
   public Long getResponseTime() {
     return responseTime;
   }
@@ -464,6 +492,8 @@ public class MoneroRpcConnection {
   private RequestConfig getTimeoutConfig(Long timeoutInMs) {
     if (timeoutInMs == null) return null;
     return RequestConfig.custom()
+            .setConnectTimeout(Timeout.ofMilliseconds(timeoutInMs))
+            .setConnectionRequestTimeout(Timeout.ofMilliseconds(timeoutInMs))
             .setResponseTimeout(Timeout.ofMilliseconds(timeoutInMs))
             .build();
   }

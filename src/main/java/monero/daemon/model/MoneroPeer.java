@@ -1,8 +1,8 @@
 package monero.daemon.model;
 
-import java.math.BigInteger;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import common.utils.GenUtils;
+import java.math.BigInteger;
 
 /**
  * Models a peer to the daemon.
@@ -254,5 +254,39 @@ public class MoneroPeer {
 
   public void setType(ConnectionType type) {
     this.type = type;
+  }
+  
+  @Override
+  public String toString() {
+    int indent = 0;
+    StringBuilder sb = new StringBuilder();
+    sb.append(GenUtils.getIndent(indent) + "=== MoneroPeer ===\n");
+    sb.append(GenUtils.kvLine("id", getId(), indent));
+    sb.append(GenUtils.kvLine("address", getHeight(), indent));
+    sb.append(GenUtils.kvLine("host", getHost(), indent));
+    sb.append(GenUtils.kvLine("port", getPort(), indent));
+    sb.append(GenUtils.kvLine("isOnline", isOnline(), indent));
+    sb.append(GenUtils.kvLine("lastSeenTimestamp", getLastSeenTimestamp(), indent));
+    sb.append(GenUtils.kvLine("pruningSeed", getPruningSeed(), indent));
+    sb.append(GenUtils.kvLine("rpcPort", getRpcPort(), indent));
+    sb.append(GenUtils.kvLine("rpcCreditsPerHash", getRpcCreditsPerHash(), indent));
+    sb.append(GenUtils.kvLine("hash", getHash(), indent));
+    sb.append(GenUtils.kvLine("avgDownload", getAvgDownload(), indent));
+    sb.append(GenUtils.kvLine("avgUpload", getAvgUpload(), indent));
+    sb.append(GenUtils.kvLine("currentDownload", getCurrentDownload(), indent));
+    sb.append(GenUtils.kvLine("currentUpload", getCurrentUpload(), indent));
+    sb.append(GenUtils.kvLine("height", getHeight(), indent));
+    sb.append(GenUtils.kvLine("isIncoming", isIncoming(), indent));
+    sb.append(GenUtils.kvLine("isLocalIp", isLocalIp(), indent));
+    sb.append(GenUtils.kvLine("isLocalHost", isLocalHost(), indent));
+    sb.append(GenUtils.kvLine("numReceives", getNumReceives(), indent));
+    sb.append(GenUtils.kvLine("numSends", getNumSends(), indent));
+    sb.append(GenUtils.kvLine("receiveIdleTime", getReceiveIdleTime(), indent));
+    sb.append(GenUtils.kvLine("sendIdleTime", getSendIdleTime(), indent));
+    sb.append(GenUtils.kvLine("state", getState(), indent));
+    sb.append(GenUtils.kvLine("numSupportFlags", getNumSupportFlags(), indent));
+    sb.append(GenUtils.kvLine("type", getType(), indent));
+    String str = sb.toString();
+    return str.substring(0, str.length() - 1);
   }
 }

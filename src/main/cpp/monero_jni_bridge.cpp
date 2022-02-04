@@ -1954,13 +1954,15 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_stopMiningJni(JNIEnv*
   }
 }
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_saveJni(JNIEnv* env, jobject instance) {
-  MTRACE("Java_monero_wallet_MoneroWalletFull_saveJni(path, password)");
-
-  // save wallet
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_changePasswordJni(JNIEnv* env, jobject instance, jstring jold_password, jstring jnew_password) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_changePasswordJni(oldPassword, newPassword)");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  const char* _old_password = jold_password ? env->GetStringUTFChars(jold_password, NULL) : nullptr;
+  const char* _new_password = jnew_password ? env->GetStringUTFChars(jnew_password, NULL) : nullptr;
+  string old_password = string(_old_password ? _old_password : "");
+  string new_password = string(_new_password ? _new_password : "");
   try {
-    wallet->save();
+    wallet->change_password(old_password, new_password);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
   }
@@ -1969,16 +1971,24 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_saveJni(JNIEnv* env, 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_moveToJni(JNIEnv* env, jobject instance, jstring jpath, jstring jpassword) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_moveToJni(path, password)");
   const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
-  const char* _password = jpath ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
+  const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
   string path = string(_path ? _path : "");
   string password = string(_password ? _password : "");
   env->ReleaseStringUTFChars(jpath, _path);
   env->ReleaseStringUTFChars(jpassword, _password);
-
-  // move wallet
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   try {
     wallet->move_to(path, password);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_saveJni(JNIEnv* env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_saveJni(path, password)");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    wallet->save();
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
   }

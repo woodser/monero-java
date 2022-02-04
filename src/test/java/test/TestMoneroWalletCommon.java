@@ -94,7 +94,7 @@ public abstract class TestMoneroWalletCommon {
   protected static final boolean TEST_RESETS = false;
   private static final int MAX_TX_PROOFS = 25; // maximum number of transactions to check for each proof, undefined to check all
   private static final int SEND_MAX_DIFF = 60;
-  private static final int SEND_DIVISOR = 2;
+  private static final int SEND_DIVISOR = 10;
   private static final int NUM_BLOCKS_LOCKED = 10;
   
   // instance variables
@@ -399,7 +399,7 @@ public abstract class TestMoneroWalletCommon {
   public void testGetPath() {
     assumeTrue(TEST_NON_RELAYS);
     
-    // create a random wallet
+    // create random wallet
     MoneroWallet wallet = createWallet(new MoneroWalletConfig());
     
     // set a random attribute
@@ -2642,6 +2642,80 @@ public abstract class TestMoneroWalletCommon {
     wallet.stopMining();
   }
   
+  // Can change the wallet password
+  @Test
+  public void testChangePassword() {
+    
+    // create random wallet
+    MoneroWallet wallet = createWallet(new MoneroWalletConfig().setPassword(TestUtils.WALLET_PASSWORD));
+    String path = wallet.getPath();
+    
+    // change password
+    String newPassword = GenUtils.getUUID();
+    wallet.changePassword(TestUtils.WALLET_PASSWORD, newPassword);
+    
+    // close wallet without saving
+    closeWallet(wallet);
+    
+    // old password does not work (password change is auto saved)
+    try {
+      openWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD));
+      fail("Should have thrown");
+    } catch (Exception e) {
+      assertTrue(e.getMessage().equals("Failed to open wallet") || e.getMessage().equals("invalid password")); // TODO: different errors from rpc and wallet2
+    }
+    
+    // open wallet with new password
+    wallet = openWallet(new MoneroWalletConfig().setPath(path).setPassword(newPassword));
+    
+    // change password with incorrect password
+    try {
+      wallet.changePassword("badpassword", newPassword);
+      fail("Should have thrown");
+    } catch (Exception e) {
+      assertEquals("Invalid original password.", e.getMessage());
+    }
+    
+    // save and close
+    closeWallet(wallet, true);
+    
+    // open wallet
+    wallet = openWallet(new MoneroWalletConfig().setPath(path).setPassword(newPassword));
+    
+    // close wallet
+    closeWallet(wallet);
+  }
+  
+  // Can save and close the wallet in a single call
+  @Test
+  public void testSaveAndClose() {
+    assumeTrue(TEST_NON_RELAYS);
+    
+    // create random wallet
+    MoneroWallet wallet = createWallet(new MoneroWalletConfig());
+    String path = wallet.getPath();
+    
+    // set an attribute
+    String uuid = UUID.randomUUID().toString();
+    wallet.setAttribute("id", uuid);
+    
+    // close the wallet without saving
+    closeWallet(wallet);
+    
+    // re-open the wallet and ensure attribute was not saved
+    wallet = openWallet(path);
+    assertEquals(null, wallet.getAttribute("id"));
+    
+    // set the attribute and close with saving
+    wallet.setAttribute("id", uuid);
+    closeWallet(wallet, true);
+    
+    // re-open the wallet and ensure attribute was saved
+    wallet = openWallet(path);
+    assertEquals(uuid, wallet.getAttribute("id"));
+    closeWallet(wallet);
+  }
+  
   // ------------------------------- TEST RELAYS ------------------------------
   
   // Validates inputs when sending funds
@@ -2881,6 +2955,36 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
+  // Can send to self
+  @Test
+  public void testSendToSelf() {
+    assumeTrue(TEST_RELAYS);
+    
+    // wait for txs to confirm and for sufficient unlocked balance
+    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    BigInteger amount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3));
+    TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(wallet, 0, null, amount);
+    
+    // collect sender balances before
+    BigInteger balance1 = wallet.getBalance();
+    BigInteger unlockedBalance1 = wallet.getUnlockedBalance();
+    
+    // send funds to self
+    MoneroTxWallet tx = wallet.createTx(new MoneroTxConfig()
+            .setAccountIndex(0)
+            .setAddress(wallet.getPrimaryAddress())
+            .setAmount(amount)
+            .setRelay(true));
+    
+    // test balances after
+    BigInteger balance2 = wallet.getBalance();
+    BigInteger unlockedBalance2 = wallet.getUnlockedBalance();
+    assertTrue(unlockedBalance2.compareTo(unlockedBalance1) < 0); // unlocked balance should decrease
+    BigInteger expectedBalance = balance1.subtract(tx.getFee());
+    if (!expectedBalance.equals(balance2)) System.out.println("Expected=" + expectedBalance + " - Actual=" + balance2 + " = " + (expectedBalance.subtract(balance2)));
+    assertEquals(expectedBalance, balance2, "Balance after send was not balance before - fee");
+  }
+  
   // Can send to an external address
   @Test
   public void testSendToExternal() {
@@ -2971,11 +3075,12 @@ public abstract class TestMoneroWalletCommon {
       fromSubaddressIndices.add(unlockedSubaddresses.get(i).getIndex());
     }
     
-    // determine the amount to send (slightly less than the sum to send from)
+    // determine the amount to send
     BigInteger sendAmount = BigInteger.valueOf(0);
     for (int fromSubaddressIdx : fromSubaddressIndices) {
-      sendAmount = sendAmount.add(srcAccount.getSubaddresses().get(fromSubaddressIdx).getUnlockedBalance()).subtract(TestUtils.MAX_FEE);
+      sendAmount = sendAmount.add(srcAccount.getSubaddresses().get(fromSubaddressIdx).getUnlockedBalance());
     }
+    sendAmount = sendAmount.divide(BigInteger.valueOf(SEND_DIVISOR));
     
     BigInteger fromBalance = BigInteger.valueOf(0);
     BigInteger fromUnlockedBalance = BigInteger.valueOf(0);
@@ -3004,18 +3109,20 @@ public abstract class TestMoneroWalletCommon {
     // test that balances of intended subaddresses decreased
     List<MoneroAccount> accountsAfter = wallet.getAccounts(true);
     assertEquals(accounts.size(), accountsAfter.size());
+    boolean srcUnlockedBalancedDecreased = false;
     for (int i = 0; i < accounts.size(); i++) {
       assertEquals(accounts.get(i).getSubaddresses().size(), accountsAfter.get(i).getSubaddresses().size());
       for (int j = 0; j < accounts.get(i).getSubaddresses().size(); j++) {
         MoneroSubaddress subaddressBefore = accounts.get(i).getSubaddresses().get(j);
         MoneroSubaddress subaddressAfter = accountsAfter.get(i).getSubaddresses().get(j);
         if (i == srcAccount.getIndex() && fromSubaddressIndices.contains(j)) {
-          assertTrue(subaddressAfter.getUnlockedBalance().compareTo(subaddressBefore.getUnlockedBalance()) < 0, "Subaddress [" + i + "," + j + "] unlocked balance should have decreased but changed from " + subaddressBefore.getUnlockedBalance().toString() + " to " + subaddressAfter.getUnlockedBalance().toString()); // TODO: Subaddress [0,1] unlocked balance should have decreased
+          if (subaddressAfter.getUnlockedBalance().compareTo(subaddressBefore.getUnlockedBalance()) < 0) srcUnlockedBalancedDecreased = true;
         } else {
           assertTrue(subaddressAfter.getUnlockedBalance().compareTo(subaddressBefore.getUnlockedBalance()) == 0, "Subaddress [" + i + "," + j + "] unlocked balance should not have changed");
         }
       }
     }
+    assertTrue(srcUnlockedBalancedDecreased, "Subaddress unlocked balances should have decreased");
     
     // test context
     TxContext ctx = new TxContext();
@@ -4283,36 +4390,6 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
-  // Can save and close the wallet in a single call
-  @Test
-  public void testSaveAndClose() {
-    assumeTrue(TEST_NON_RELAYS);
-    
-    // create a random wallet
-    MoneroWallet wallet = createWallet(new MoneroWalletConfig());
-    String path = wallet.getPath();
-            
-    // set an attribute
-    String uuid = UUID.randomUUID().toString();
-    wallet.setAttribute("id", uuid);
-    
-    // close the wallet without saving
-    closeWallet(wallet);
-    
-    // re-open the wallet and ensure attribute was not saved
-    wallet = openWallet(path);
-    assertEquals(null, wallet.getAttribute("id"));
-    
-    // set the attribute and close with saving
-    wallet.setAttribute("id", uuid);
-    closeWallet(wallet, true);
-    
-    // re-open the wallet and ensure attribute was saved
-    wallet = openWallet(path);
-    assertEquals(uuid, wallet.getAttribute("id"));
-    closeWallet(wallet);
-  }
-  
   // ----------------------------- NOTIFICATION TESTS -------------------------
   
   // Can generate notifications sending to different wallet
@@ -4676,7 +4753,7 @@ public abstract class TestMoneroWalletCommon {
   public void testCreateAndReceive() {
     assumeTrue(TEST_NOTIFICATIONS);
     
-    // create a random stagenet wallet
+    // create random stagenet wallet
     MoneroWallet receiver = createWallet(new MoneroWalletConfig());
     try {
       
@@ -4802,7 +4879,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // get available outputs above min amount
-    List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setIsFrozen(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)).setMinAmount(TestUtils.MAX_FEE));
+    List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setAccountIndex(0).setSubaddressIndex(1).setIsSpent(false).setIsFrozen(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)).setMinAmount(TestUtils.MAX_FEE));
     
     // filter dust outputs
     List<MoneroOutputWallet> dustOutputs = new ArrayList<MoneroOutputWallet>();
@@ -4818,7 +4895,7 @@ public abstract class TestMoneroWalletCommon {
     Set<String> availableKeyImages = new HashSet<String>();
     for (MoneroOutputWallet output : outputs) availableKeyImages.add(output.getKeyImage().getHex());
     Set<String> sweptKeyImages = new HashSet<String>();
-    List<MoneroTxWallet> txs = wallet.sweepUnlocked(new MoneroTxConfig().setAddress(wallet.getPrimaryAddress()));
+    List<MoneroTxWallet> txs = wallet.sweepUnlocked(new MoneroTxConfig().setAccountIndex(0).setSubaddressIndex(1).setAddress(wallet.getPrimaryAddress()));
     for (MoneroTxWallet tx : txs) {
       testSpendTx(tx);
       for (MoneroOutput input : tx.getInputs()) sweptKeyImages.add(input.getKeyImage().getHex());

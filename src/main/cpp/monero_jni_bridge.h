@@ -257,9 +257,11 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_signMultisigTxHexJ
 
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_submitMultisigTxHexJni(JNIEnv *, jobject, jstring);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_saveJni(JNIEnv *, jobject);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_changePasswordJniJni(JNIEnv *, jobject, jstring, jstring);
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_moveToJni(JNIEnv *, jobject, jstring, jstring);
+
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_saveJni(JNIEnv *, jobject);
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_closeJni(JNIEnv *, jobject, jboolean);
 

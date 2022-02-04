@@ -1882,6 +1882,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   @Override
+  public void changePassword(String oldPassword, String newPassword) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("old_password", oldPassword);
+    params.put("new_password", newPassword);
+    rpc.sendJsonRequest("change_wallet_password", params);
+  }
+  
+  @Override
   public void save() {
     rpc.sendJsonRequest("store");
   }

@@ -1347,6 +1347,14 @@ public interface MoneroWallet {
    * @return the resulting transaction hashes
    */
   public List<String> submitMultisigTxHex(String signedMultisigTxHex);
+  
+  /**
+   * Change the wallet password.
+   * 
+   * @param oldPassword is the wallet's old password
+   * @param newPassword is the wallet's new password
+   */
+  public void changePassword(String oldPassword, String newPassword);
 
   /**
    * Save the wallet at its current path.

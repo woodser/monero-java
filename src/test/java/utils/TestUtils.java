@@ -46,7 +46,7 @@ public class TestUtils {
   public static final String MONERO_BINS_DIR = "/Applications/monero-x86_64-apple-darwin11-v0.17.3.0";
   
   // monero daemon rpc endpoint configuration (change per your configuration)
-  public static final String DAEMON_RPC_URI = "http://localhost:38081";
+  public static final String DAEMON_RPC_URI = "localhost:38081";
   public static final String DAEMON_RPC_USERNAME = "superuser";
   public static final String DAEMON_RPC_PASSWORD = "abctesting123";
   public static final String DAEMON_LOCAL_PATH = MONERO_BINS_DIR + "/monerod";
@@ -60,7 +60,7 @@ public class TestUtils {
   public static final String WALLET_RPC_PASSWORD = "abc123";
   public static final String WALLET_RPC_ZMQ_DOMAIN = "127.0.0.1";
   public static final String WALLET_RPC_DOMAIN = "localhost";
-  public static final String WALLET_RPC_URI = "http://" + WALLET_RPC_DOMAIN + ":" + WALLET_RPC_PORT_START;
+  public static final String WALLET_RPC_URI = WALLET_RPC_DOMAIN + ":" + WALLET_RPC_PORT_START;
   public static final String WALLET_RPC_ZMQ_URI = "tcp://" + WALLET_RPC_ZMQ_DOMAIN + ":" + WALLET_RPC_ZMQ_PORT_START;
   public static final String WALLET_RPC_LOCAL_PATH = MONERO_BINS_DIR + "/monero-wallet-rpc";
   public static final String WALLET_RPC_LOCAL_WALLET_DIR = MONERO_BINS_DIR;
@@ -78,7 +78,7 @@ public class TestUtils {
   public static final String LANGUAGE = "English";
   public static final String MNEMONIC = "rally adhesive language injury railway pamphlet moisture baptism strained sarcasm across edited omnibus dormant spout keyboard yeti eagle pepper pelican inkling dauntless ashtray bifocals across";
   public static final String ADDRESS = "54C3R6CKseodnw7NPafr5ZdCRj1Qa4SYN56cgfozAwCeMj7TZazWe1bip8A5UCPKK7RrpGaP97vsxHabwYEWUCWQTspBZGZ";
-  public static final long FIRST_RECEIVE_HEIGHT = 6644; // NOTE: this value must be the height of the wallet's first tx for tests
+  public static final long FIRST_RECEIVE_HEIGHT = 2000; // NOTE: this value must be the height of the wallet's first tx for tests
   public static final long SYNC_PERIOD_IN_MS = 5000; // period between wallet syncs in milliseconds
   
   // logger configuration

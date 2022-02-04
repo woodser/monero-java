@@ -7,6 +7,9 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import monero.common.MoneroConnectionManager;
+import monero.common.MoneroConnectionManagerListener;
+import monero.common.MoneroRpcConnection;
 import monero.daemon.MoneroDaemon;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroNetworkType;
@@ -33,7 +36,7 @@ public class TestSampleCode {
   public static void setUpBeforeClass() throws Exception {
     
     // all wallets need to wait for txs to confirm to reliably sync
-    TestUtils.WALLET_TX_TRACKER.reset(); 
+    TestUtils.WALLET_TX_TRACKER.reset();
     
     // pre-create test wallet
     MoneroWalletRpc wallet = TestUtils.getWalletRpc();
@@ -44,6 +47,7 @@ public class TestSampleCode {
     if (!testWalletsDir.exists()) testWalletsDir.mkdirs();
   }
   
+  // Sample code demonstration
   @SuppressWarnings("unused")
   @Test
   public void testSampleCode() throws InterruptedException {
@@ -112,5 +116,53 @@ public class TestSampleCode {
     
     // save and close full wallet
     walletFull.close(true);
+  }
+  
+  // Connection manager demonstration
+  @SuppressWarnings("unused")
+  @Test
+  public void testConnectionManagerDemo() {
+    
+    // create connection manager
+    MoneroConnectionManager connectionManager = new MoneroConnectionManager();
+    
+    // add managed connections with priorities
+    connectionManager.addConnection(new MoneroRpcConnection("http://localhost:38081").setPriority(1)); // use localhost as first priority
+    connectionManager.addConnection(new MoneroRpcConnection("http://example.com")); // default priority is prioritized last
+    
+    // set current connection
+    connectionManager.setConnection(new MoneroRpcConnection("http://foo.bar", "admin", "password")); // connection is added if new
+    
+    // check connection status
+    connectionManager.checkConnection();
+    System.out.println("Connection manager is connected: " + connectionManager.isConnected());
+    System.out.println("Connection is online: " + connectionManager.getConnection().isOnline());
+    System.out.println("Connection is authenticated: " + connectionManager.getConnection().isAuthenticated());
+    
+    // receive notifications of any changes to current connection
+    connectionManager.addListener(new MoneroConnectionManagerListener() {
+      @Override
+      public void onConnectionChanged(MoneroRpcConnection connection) {
+        System.out.println("Connection changed to: " + connection);
+      }
+    });
+    
+    // check connection status every 10 seconds
+    connectionManager.startCheckingConnection(10000l);
+    
+    // automatically switch to best available connection if disconnected
+    connectionManager.setAutoSwitch(true);
+    
+    // get best available connection in order of priority then response time
+    MoneroRpcConnection bestConnection = connectionManager.getBestAvailableConnection();
+    
+    // check status of all connections
+    connectionManager.checkConnections();
+    
+    // get connections in order of current connection, online status from last check, priority, and name
+    List<MoneroRpcConnection> connections = connectionManager.getConnections();
+    
+    // clear connection manager
+    connectionManager.clear();
   }
 }

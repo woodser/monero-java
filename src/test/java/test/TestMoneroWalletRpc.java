@@ -882,6 +882,12 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  public void testSendToSelf() {
+    super.testSendToSelf();
+  }
+  
+  @Override
+  @Test
   public void testSendToExternal() {
     super.testSendToExternal();
   }
@@ -1022,6 +1028,12 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Test
   public void testMultisig() {
     super.testMultisig();
+  }
+  
+  @Override
+  @Test
+  public void testChangePassword() {
+    super.testChangePassword();
   }
   
   @Override

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.GenUtils;
+import common.utils.JsonUtils;
 import monero.common.MoneroError;
 
 /**
@@ -282,6 +283,11 @@ public class MoneroTxConfig {
   public MoneroTxConfig setKeyImage(String keyImage) {
     this.keyImage = keyImage;
     return this;
+  }
+  
+  @Override
+  public String toString() {
+    return JsonUtils.serialize(this);
   }
 
   @Override

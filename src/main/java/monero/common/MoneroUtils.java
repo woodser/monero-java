@@ -40,7 +40,7 @@ public class MoneroUtils {
    * @return the version of this monero-java library
    */
   static String getVersion() {
-    return "0.6.3";
+    return "0.6.4";
   }
   
   public static final int RING_SIZE = 12; // network-enforced ring size
@@ -323,12 +323,13 @@ public class MoneroUtils {
   /**
    * Converts the string to a URI.  Throws MoneroException if exception.
    * 
-   * @param endpoint is the string to convert to a URI
+   * @param uri is the string to convert to a URI
    * @return URI is the initialized object from the string endpoint
    */
-  public static URI parseUri(String endpoint) {
+  public static URI parseUri(String uri) {
+    if (uri != null && uri.length() > 0 && !uri.toLowerCase().matches("^\\w+://.+")) uri = "http://" + uri; // assume http if protocol not given
     try {
-      return new URI(endpoint);
+      return new URI(uri);
     } catch (Exception e) {
       throw new MoneroError(e);
     }
