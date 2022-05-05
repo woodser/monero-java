@@ -3898,7 +3898,7 @@ public abstract class TestMoneroWalletCommon {
     List<String> multisigHexes = new ArrayList<String>();
     for (MoneroWallet wallet : wallets) {
       wallet.sync();
-      multisigHexes.add(wallet.getMultisigHex()); // TODO: does wallet need saved?
+      multisigHexes.add(wallet.exportMultisigHex()); // TODO: does wallet need saved?
     }
     
     // import each wallet's peer multisig hex

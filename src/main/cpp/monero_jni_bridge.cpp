@@ -2102,11 +2102,11 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_exchangeMultisigKe
   }
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getMultisigHexJni(JNIEnv* env, jobject instance) {
-  MTRACE("Java_monero_wallet_MoneroWalletFull_getMultisigHexJni");
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_exportMultisigHexJni(JNIEnv* env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_exportMultisigHexJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   try {
-    string multisig_hex = wallet->get_multisig_hex();
+    string multisig_hex = wallet->export_multisig_hex();
     return env->NewStringUTF(multisig_hex.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);

@@ -1842,7 +1842,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   @SuppressWarnings("unchecked")
-  public String getMultisigHex() {
+  public String exportMultisigHex() {
     Map<String, Object> resp = rpc.sendJsonRequest("export_multisig_info");
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return (String) result.get("info");

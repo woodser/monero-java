@@ -1285,14 +1285,14 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
 
   @Override
-  public String getMultisigHex() {
+  public String exportMultisigHex() {
     try {
-      return getMultisigHexJni();
+      return exportMultisigHexJni();
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
   }
-  
+
   @Override
   public int importMultisigHex(List<String> multisigHexes) {
     try {
@@ -1543,7 +1543,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private native String exchangeMultisigKeysJni(String[] multisigHexes, String password);
   
-  private native String getMultisigHexJni();
+  private native String exportMultisigHexJni();
   
   private native int importMultisigHexJni(String[] multisigHexes);
   
