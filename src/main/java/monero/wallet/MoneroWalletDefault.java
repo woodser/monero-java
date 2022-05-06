@@ -47,6 +47,7 @@ import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroTxQuery;
+import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletListenerI;
 
@@ -318,12 +319,21 @@ abstract class MoneroWalletDefault implements MoneroWallet {
     return relayTx(tx.getMetadata());
   }
   
-  // TODO: this method is not tested
   @Override
   public List<String> relayTxs(List<MoneroTxWallet> txs) {
     List<String> txHexes = new ArrayList<String>();
     for (MoneroTxWallet tx : txs) txHexes.add(tx.getMetadata());
     return relayTxs(txHexes);
+  }
+  
+  @Override
+  public MoneroTxSet describeUnsignedTxSet(String unsignedTxHex) {
+    return describeTxSet(new MoneroTxSet().setUnsignedTxHex(unsignedTxHex));
+  }
+  
+  @Override
+  public MoneroTxSet describeMultisigTxSet(String multisigTxHex) {
+    return describeTxSet(new MoneroTxSet().setMultisigTxHex(multisigTxHex));
   }
   
   @Override

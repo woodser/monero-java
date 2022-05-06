@@ -954,7 +954,23 @@ public interface MoneroWallet {
   public List<String> relayTxs(List<MoneroTxWallet> txs);
   
   /**
-   * Describes a tx set containing unsigned or multisig tx hex to a new tx set containing structured transactions.
+   * Describe a tx set from unsigned tx hex.
+   * 
+   * @param unsignedTxHex unsigned tx hex
+   * @return the tx set containing structured transactions
+   */
+  public MoneroTxSet describeUnsignedTxSet(String unsignedTxHex);
+  
+  /**
+   * Describe a tx set from multisig tx hex.
+   * 
+   * @param multisigTxHex multisig tx hex
+   * @return the tx set containing structured transactions
+   */
+  public MoneroTxSet describeMultisigTxSet(String multisigTxHex);
+  
+  /**
+   * Describe a tx set containing unsigned or multisig tx hex to a new tx set containing structured transactions.
    * 
    * @param txSet is a tx set containing unsigned or multisig tx hex
    * @return the tx set containing structured transactions

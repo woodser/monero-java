@@ -1536,13 +1536,13 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // get incoming transfers to a specific address
-    String subaddress = wallet.getAddress(0, 1);
+    String subaddress = wallet.getAddress(1, 0);
     transfers = wallet.getTransfers(new MoneroTransferQuery().setIsIncoming(true).setAddress(subaddress));
     assertTrue(transfers.size() > 0);
     for (MoneroTransfer transfer : transfers) {
       assertTrue(transfer instanceof MoneroIncomingTransfer);
-      assertEquals(0, transfer.getAccountIndex());
-      assertEquals(1, ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
+      assertEquals(1, transfer.getAccountIndex());
+      assertEquals(0, ((MoneroIncomingTransfer) transfer).getSubaddressIndex());
       assertEquals(subaddress, ((MoneroIncomingTransfer) transfer).getAddress());
     }
   }
@@ -2418,7 +2418,7 @@ public abstract class TestMoneroWalletCommon {
     assertFalse(signedTxHex.isEmpty());
     
     // parse or "describe" unsigned tx set
-    MoneroTxSet describedTxSet = offlineWallet.describeTxSet(unsignedTx.getTxSet());
+    MoneroTxSet describedTxSet = offlineWallet.describeUnsignedTxSet(unsignedTx.getTxSet().getUnsignedTxHex());
     testDescribedTxSet(describedTxSet);
     
     // submit signed tx using view-only wallet
@@ -3797,7 +3797,7 @@ public abstract class TestMoneroWalletCommon {
       assertNull(txSet.getUnsignedTxHex());
       
       // parse multisig tx hex and test
-      testDescribedTxSet(participant.describeTxSet(txSet));
+      testDescribedTxSet(participant.describeMultisigTxSet(txSet.getMultisigTxHex()));
       
       // sign the tx with participants 1 through m - 1 to meet threshold
       String multisigTxHex = txSet.getMultisigTxHex();
@@ -3832,7 +3832,7 @@ public abstract class TestMoneroWalletCommon {
       assertFalse(txSet.getTxs().isEmpty());
       
       // parse multisig tx hex and test
-      testDescribedTxSet(participant.describeTxSet(txSet));
+      testDescribedTxSet(participant.describeMultisigTxSet(txSet.getMultisigTxHex()));
       
       // sign the tx with participants 1 through m - 1 to meet threshold
       multisigTxHex = txSet.getMultisigTxHex();
