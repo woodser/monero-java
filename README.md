@@ -1,6 +1,6 @@
 # Monero Java Library
 
-A Java library for creating Monero applications using RPC and JNI bindings to [monero v0.17.3.0 'Oxygen Orion'](https://github.com/monero-project/monero/tree/v0.17.3.0).
+A Java library for creating Monero applications using RPC and JNI bindings to [monero v0.17.3.2 'Oxygen Orion'](https://github.com/monero-project/monero/tree/v0.17.3.2).
 
 * Supports wallet and daemon RPC clients.
 * Supports client-side wallets using JNI bindings.
@@ -113,13 +113,13 @@ walletFull.close(true);
 <dependency>
   <groupId>io.github.monero-ecosystem</groupId>
   <artifactId>monero-java</artifactId>
-  <version>0.6.4</version>
+  <version>0.7.0</version>
 </dependency>
 ```
 
 #### For Gradle, add to build.gradle:
 
-`compile 'io.github.monero-ecosystem:monero-java:0.6.4'`
+`compile 'io.github.monero-ecosystem:monero-java:0.7.0'`
 
 You are now ready to use this library with [monero-daemon-rpc](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.
 
