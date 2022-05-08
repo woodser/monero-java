@@ -1333,14 +1333,6 @@ public interface MoneroWallet {
   public String exportMultisigHex();
   
   /**
-   * Alias for exportMultisigHex().
-   * 
-   * @return this wallet's multisig info as hex for other participants
-   */
-  @Deprecated
-  public String getMultisigHex();
-  
-  /**
    * Import multisig info as hex from other participants.
    * 
    * @param multisigHexes are multisig hex from each participant
