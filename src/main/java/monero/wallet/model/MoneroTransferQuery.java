@@ -43,7 +43,7 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
       for (MoneroDestination destination : query.getDestinations()) this.destinations.add(destination.copy());
     }
     this.hasDestinations = query.hasDestinations;
-    this.txQuery = query.txQuery;  // reference original by default, MoneroTxQuery's deep copy will set this to itself
+    this.txQuery = query.txQuery; // reference original by default, MoneroTxQuery's deep copy will set this to itself
     validate();
   }
   
@@ -63,6 +63,7 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
     return this;
   }
 
+  @Override
   public Boolean isIncoming() {
     return isIncoming;
   }
@@ -72,6 +73,7 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
     return this;
   }
   
+  @Override
   public Boolean isOutgoing() {
     return isIncoming == null ? null : !isIncoming;
   }
@@ -207,7 +209,7 @@ public class MoneroTransferQuery extends MoneroTransfer implements Filter<Monero
     else throw new RuntimeException("Transfer must be MoneroIncomingTransfer or MoneroOutgoingTransfer");
     
     // filter with tx filter
-    if (queryParent && getTxQuery() != null && !getTxQuery().meetsCriteria(transfer.getTx(), false)) return false;    
+    if (queryParent && getTxQuery() != null && !getTxQuery().meetsCriteria(transfer.getTx(), false)) return false;
     return true;
   }
   

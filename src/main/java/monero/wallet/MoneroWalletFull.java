@@ -540,10 +540,10 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
 
   @Override
-  public MoneroIntegratedAddress getIntegratedAddress(String paymentId) {
+  public MoneroIntegratedAddress getIntegratedAddress(String standardAddress, String paymentId) {
     assertNotClosed();
     try {
-      String integratedAddressJson = getIntegratedAddressJni("", paymentId);
+      String integratedAddressJson = getIntegratedAddressJni(standardAddress, paymentId);
       return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, integratedAddressJson, MoneroIntegratedAddress.class);
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
@@ -766,22 +766,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     assertNotClosed();
     
     // copy and normalize query up to block
-    if (query == null) query = new MoneroTransferQuery();
-    else {
-      if (query.getTxQuery() == null) query = query.copy();
-      else {
-        MoneroTxQuery txQuery = query.getTxQuery().copy();
-        if (query.getTxQuery().getTransferQuery() == query) query = txQuery.getTransferQuery();
-        else {
-          GenUtils.assertNull("Transfer query's tx query must be circular reference or null", query.getTxQuery().getTransferQuery());
-          query = query.copy();
-          query.setTxQuery(txQuery);
-        }
-      }
-    }
-    if (query.getTxQuery() == null) query.setTxQuery(new MoneroTxQuery());
-    query.getTxQuery().setTransferQuery(query);
-    if (query.getTxQuery().getBlock() == null) query.getTxQuery().setBlock(new MoneroBlock().setTxs(query.getTxQuery()));
+    query = normalizeTransferQuery(query);
     
     // serialize query from block and fetch transfers from jni
     String blocksJson;
@@ -794,7 +779,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     // deserialize and return transfers
     return deserializeTransfers(query, blocksJson);
   }
-
+  
   @Override
   public List<MoneroOutputWallet> getOutputs(MoneroOutputQuery query) {
     assertNotClosed();
@@ -980,9 +965,12 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   @Override
   public MoneroTxSet describeTxSet(MoneroTxSet txSet) {
     assertNotClosed();
+    txSet = new MoneroTxSet()
+            .setUnsignedTxHex(txSet.getUnsignedTxHex())
+            .setSignedTxHex(txSet.getSignedTxHex())
+            .setMultisigTxHex(txSet.getMultisigTxHex());
     String describedTxSetJson;
     try {
-      if (txSet.getTxs() != null) for (MoneroTxWallet tx : txSet.getTxs()) tx.setInputs(null); // avoid input deserialization which is not supported in monero-cpp
       describedTxSetJson = describeTxSetJni(JsonUtils.serialize(txSet));
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());

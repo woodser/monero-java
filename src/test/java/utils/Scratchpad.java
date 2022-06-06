@@ -36,14 +36,14 @@ public class Scratchpad {
     System.out.println("WASM wallet mnemonic: " + walletFull.getMnemonic());
     
 //    walletFull.createTx(new MoneroTxConfig()
-//            .setAddress("52FnB7ABUrKJzVQRpbMNrqDFWbcKLjFUq8Rgek7jZEuB6WE2ZggXaTf4FK6H8gQymvSrruHHrEuKhMN3qTMiBYzREKsmRKM")
-//            .setAmount(walletFull.getUnlockedBalance(0).divide(new BigInteger("4")).multiply(new BigInteger("3")))
+//            .addDestination("52FnB7ABUrKJzVQRpbMNrqDFWbcKLjFUq8Rgek7jZEuB6WE2ZggXaTf4FK6H8gQymvSrruHHrEuKhMN3qTMiBYzREKsmRKM", walletFull.getUnlockedBalance(0).divide(new BigInteger("8")).multiply(new BigInteger("1")))
+//            .addDestination("52aPELZwrwvVBNK4pvRZPNj4U5EEkZBsNTR2jozCLYyrhQySvYbWebTQEdt7RS9nFnRY9r88eFpt6UcsHKnVpCQDAFKu1Az", walletFull.getUnlockedBalance(0).divide(new BigInteger("8")).multiply(new BigInteger("1")))
 //            .setAccountIndex(0)
 //            .setRelay(true));
     
     // MEASURE LAST 30 DAYS
 //    int numBlocks = 30 * 24 * 60 / 2;
-//    
+//
 //    List<MoneroBlockHeader> headers = daemon.getBlockHeadersByRange(daemon.getHeight() - (numBlocks * 2), daemon.getHeight() - (numBlocks * 1));
 //    long totalSize = 0;
 //    int numOutputs = 0;
@@ -52,13 +52,13 @@ public class Scratchpad {
 //      totalSize += header.getSize();
 //      numTxs += header.getNumTxs();
 //    }
-//    
+//
 //    for (MoneroBlock block : daemon.getBlocksByRange(daemon.getHeight() - numBlocks, daemon.getHeight() - 1)) {
 //      for (MoneroTx tx : block.getTxs()) {
 //        numOutputs += tx.getOutputs().size();
 //      }
 //    }
-//    
+//
 //    System.out.println("Number of blocks: " + numBlocks);
 //    System.out.println("Num txs: " + numTxs);
 //    System.out.println("Num outputs: " + numOutputs);

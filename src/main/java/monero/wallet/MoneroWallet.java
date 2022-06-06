@@ -210,21 +210,22 @@ public interface MoneroWallet {
   
   /**
    * Get an integrated address based on this wallet's primary address and a
-   * randomly generated payment ID.  Generates a random payment ID if none is
-   * given.
+   * randomly generated payment ID.
    * 
    * @return the integrated address
    */
   public MoneroIntegratedAddress getIntegratedAddress();
   
   /**
-   * Get an integrated address based on this wallet's primary address and the
-   * given payment ID.  Generates a random payment ID if none is given.
+   * Get an integrated address based on the given standard address and payment
+   * ID. Uses the wallet's primary address if an address is not given.
+   * Generates a random payment ID if a payment ID is not given.
    * 
+   * @param standardAddress is the standard address to generate the integrated address from (wallet's primary address if null)
    * @param paymentId is the payment ID to generate an integrated address from (randomly generated if null)
    * @return the integrated address
    */
-  public MoneroIntegratedAddress getIntegratedAddress(String paymentId);
+  public MoneroIntegratedAddress getIntegratedAddress(String standardAddress, String paymentId);
   
   /**
    * Decode an integrated address to get its standard address and payment id.

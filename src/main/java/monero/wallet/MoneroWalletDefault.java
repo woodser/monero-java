@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
+import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroKeyImage;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -96,7 +97,7 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   
   @Override
   public MoneroIntegratedAddress getIntegratedAddress() {
-    return getIntegratedAddress(null);
+    return getIntegratedAddress(null, null);
   }
   
   @Override
@@ -244,17 +245,13 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   public List<MoneroIncomingTransfer> getIncomingTransfers(MoneroTransferQuery query) {
     
     // copy query and set direction
-    MoneroTransferQuery _query;
-    if (query == null) _query = new MoneroTransferQuery();
-    else {
-      if (Boolean.FALSE.equals(query.isIncoming())) throw new MoneroError("Transfer query contradicts getting incoming transfers");
-      _query = query.copy();
-    }
-    _query.setIsIncoming(true);
+    query = normalizeTransferQuery(query);
+    if (Boolean.FALSE.equals(query.isIncoming())) throw new MoneroError("Transfer query contradicts getting incoming transfers");
+    query.setIsIncoming(true);
     
     // fetch and cast transfers
     List<MoneroIncomingTransfer> inTransfers = new ArrayList<MoneroIncomingTransfer>();
-    for (MoneroTransfer transfer : getTransfers(_query)) {
+    for (MoneroTransfer transfer : getTransfers(query)) {
       inTransfers.add((MoneroIncomingTransfer) transfer);
     }
     return inTransfers;
@@ -269,17 +266,13 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   public List<MoneroOutgoingTransfer> getOutgoingTransfers(MoneroTransferQuery query) {
     
     // copy query and set direction
-    MoneroTransferQuery _query;
-    if (query == null) _query = new MoneroTransferQuery();
-    else {
-      if (Boolean.FALSE.equals(query.isOutgoing())) throw new MoneroError("Transfer query contradicts getting outgoing transfers");
-      _query = query.copy();
-    }
-    _query.setIsOutgoing(true);
+    query = normalizeTransferQuery(query);
+    if (Boolean.FALSE.equals(query.isOutgoing())) throw new MoneroError("Transfer query contradicts getting outgoing transfers");
+    query.setIsOutgoing(true);
     
     // fetch and cast transfers
     List<MoneroOutgoingTransfer> outTransfers = new ArrayList<MoneroOutgoingTransfer>();
-    for (MoneroTransfer transfer : getTransfers(_query)) {
+    for (MoneroTransfer transfer : getTransfers(query)) {
       outTransfers.add((MoneroOutgoingTransfer) transfer);
     }
     return outTransfers;
@@ -379,5 +372,25 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   @Override
   public void close() {
     close(false); // close without saving
+  }
+  
+  protected MoneroTransferQuery normalizeTransferQuery(MoneroTransferQuery query) {
+    if (query == null) query = new MoneroTransferQuery();
+    else {
+      if (query.getTxQuery() == null) query = query.copy();
+      else {
+        MoneroTxQuery txQuery = query.getTxQuery().copy();
+        if (query.getTxQuery().getTransferQuery() == query) query = txQuery.getTransferQuery();
+        else {
+          GenUtils.assertNull("Transfer query's tx query must be circular reference or null", query.getTxQuery().getTransferQuery());
+          query = query.copy();
+          query.setTxQuery(txQuery);
+        }
+      }
+    }
+    if (query.getTxQuery() == null) query.setTxQuery(new MoneroTxQuery());
+    query.getTxQuery().setTransferQuery(query);
+    if (query.getTxQuery().getBlock() == null) query.getTxQuery().setBlock(new MoneroBlock().setTxs(query.getTxQuery()));
+    return query;
   }
 }

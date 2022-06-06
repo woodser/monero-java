@@ -591,30 +591,44 @@ public abstract class TestMoneroWalletCommon {
   
   // Can get an integrated address given a payment id
   @Test
-  public void testGetIntegratedAddressFromPaymentId() {
+  public void testGetIntegratedAddress() {
     assumeTrue(TEST_NON_RELAYS);
     
     // save address for later comparison
-    String address = wallet.getSubaddress(0, 0).getAddress();
+    String address = wallet.getPrimaryAddress();
     
     // test valid payment id
     String paymentId = "03284e41c342f036";
-    MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(paymentId);
+    MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(null, paymentId);
     assertEquals(integratedAddress.getStandardAddress(), address);
     assertEquals(integratedAddress.getPaymentId(), paymentId);
     
     // test null payment id which generates a new one
-    integratedAddress = wallet.getIntegratedAddress(null);
+    integratedAddress = wallet.getIntegratedAddress();
     assertEquals(integratedAddress.getStandardAddress(), address);
     assertFalse(integratedAddress.getPaymentId().isEmpty());
+    
+    // test with primary address
+    String primaryAddress = "58qRVVjZ4KxMX57TH6yWqGcH5AswvZZS494hWHcHPt6cDkP7V8AqxFhi3RKXZueVRgUnk8niQGHSpY5Bm9DjuWn16GDKXpF";
+    integratedAddress = wallet.getIntegratedAddress(primaryAddress, paymentId);
+    assertEquals(integratedAddress.getStandardAddress(), primaryAddress);
+    assertEquals(integratedAddress.getPaymentId(), paymentId);
+    
+    // test with subaddress
+    String subaddress = "7B9w2xieXjhDumgPX39h1CAYELpsZ7Pe8Wqtr3pVL9jJ5gGDqgxjWt55gTYUCAuhahhM85ajEp6VbQfLDPETt4oT2ZRXa6n";
+    try {
+      integratedAddress = wallet.getIntegratedAddress(subaddress, null);
+      fail("Getting integrated address from subaddress should have failed");
+    } catch (MoneroError e) {
+      assertEquals("Subaddress shouldn't be used", e.getMessage());
+    }
     
     // test invalid payment id
     String invalidPaymentId = "invalid_payment_id_123456";
     try {
-      integratedAddress = wallet.getIntegratedAddress(invalidPaymentId);
-      fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have thrown a RPC exception");
+      integratedAddress = wallet.getIntegratedAddress(null, invalidPaymentId);
+      fail("Getting integrated address with invalid payment id " + invalidPaymentId + " should have thrown exception");
     } catch (MoneroError e) {
-      //assertEquals(-5, (int) e.getCode());  // TODO: error codes specific to rpc?
       assertEquals("Invalid payment ID: " + invalidPaymentId, e.getMessage());
     }
   }
@@ -623,7 +637,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testDecodeIntegratedAddress() {
     assumeTrue(TEST_NON_RELAYS);
-    MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress("03284e41c342f036");
+    MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(null, "03284e41c342f036");
     MoneroIntegratedAddress decodedAddress = wallet.decodeIntegratedAddress(integratedAddress.toString());
     assertEquals(integratedAddress, decodedAddress);
   }
@@ -1580,8 +1594,6 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testGetIncomingOutgoingTransfers() {
     assumeTrue(TEST_NON_RELAYS);
-    int accountIdx = 1;
-    int subaddressIdx = 1;
     
     // get incoming transfers
     List<MoneroIncomingTransfer> inTransfers = wallet.getIncomingTransfers();
@@ -1592,10 +1604,14 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // get incoming transfers with query
-    inTransfers = wallet.getIncomingTransfers(new MoneroTransferQuery().setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx));
+    BigInteger amount = inTransfers.get(0).getAmount();
+    int accountIdx = inTransfers.get(0).getAccountIndex();
+    int subaddressIdx = inTransfers.get(0).getSubaddressIndex();
+    inTransfers = wallet.getIncomingTransfers(new MoneroTransferQuery().setAmount(amount).setAccountIndex(accountIdx).setSubaddressIndex(subaddressIdx).setTxQuery(new MoneroTxQuery().setIsConfirmed(true)));
     assertFalse(inTransfers.isEmpty());
     for (MoneroIncomingTransfer transfer : inTransfers) {
       assertTrue(transfer.isIncoming());
+      assertEquals(amount, transfer.getAmount());
       assertEquals(accountIdx, (int) transfer.getAccountIndex());
       assertEquals(subaddressIdx, (int) transfer.getSubaddressIndex());
       testTransfer(transfer, null);
@@ -1979,10 +1995,10 @@ public abstract class TestMoneroWalletCommon {
   public void testCheckTxProof() {
     assumeTrue(TEST_NON_RELAYS);
     
-    // get random txs that are confirmed and have outgoing destinations
+    // get random txs with outgoing destinations
     List<MoneroTxWallet> txs;
     try {
-      txs = getRandomTransactions(wallet, new MoneroTxQuery().setIsConfirmed(true).setTransferQuery(new MoneroTransferQuery().setHasDestinations(true)), 2, MAX_TX_PROOFS);
+      txs = getRandomTransactions(wallet, new MoneroTxQuery().setTransferQuery(new MoneroTransferQuery().setHasDestinations(true)), 2, MAX_TX_PROOFS);
     } catch (AssertionError e) {
       if (e.getMessage().contains("found with")) fail("No txs with outgoing destinations found; run send tests");
       throw e;
@@ -2535,7 +2551,7 @@ public abstract class TestMoneroWalletCommon {
     Map<Integer, MoneroIntegratedAddress> integratedAddresses = new HashMap<Integer, MoneroIntegratedAddress>();
     Map<Integer, String> integratedDescriptions = new HashMap<Integer, String>();
     for (int i = 0; i < NUM_ENTRIES; i++) {
-      MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(paymentId + i); // create unique integrated address
+      MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(null, paymentId + i); // create unique integrated address
       String uuid = UUID.randomUUID().toString();
       int idx = wallet.addAddressBookEntry(integratedAddress.toString(), uuid);
       indices.add(idx);
@@ -2972,7 +2988,7 @@ public abstract class TestMoneroWalletCommon {
     // send funds to self
     MoneroTxWallet tx = wallet.createTx(new MoneroTxConfig()
             .setAccountIndex(0)
-            .setAddress(wallet.getPrimaryAddress())
+            .setAddress(wallet.getIntegratedAddress().getIntegratedAddress())
             .setAmount(amount)
             .setRelay(true));
     
@@ -3007,7 +3023,7 @@ public abstract class TestMoneroWalletCommon {
       // send funds to recipient
       MoneroTxWallet tx = wallet.createTx(new MoneroTxConfig()
               .setAccountIndex(0)
-              .setAddress(recipient.getPrimaryAddress())
+              .setAddress(wallet.getIntegratedAddress(recipient.getPrimaryAddress(), "54491f3bb3572a37").getIntegratedAddress())
               .setAmount(amount)
               .setRelay(true));
       

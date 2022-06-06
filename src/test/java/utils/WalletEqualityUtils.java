@@ -152,11 +152,11 @@ public class WalletEqualityUtils {
       for (MoneroTxWallet tx2 : txs2) {
         if (tx1.getHash().equals(tx2.getHash())) {
           
-          // transfer destination info if known for comparison
+          // transfer cached info if known for comparison
           if (tx1.getOutgoingTransfer() != null && tx1.getOutgoingTransfer().getDestinations() != null) {
-            if (tx2.getOutgoingTransfer() == null || tx2.getOutgoingTransfer().getDestinations() == null) transferDestinationInfo(tx1, tx2);
+            if (tx2.getOutgoingTransfer() == null || tx2.getOutgoingTransfer().getDestinations() == null) transferCachedInfo(tx1, tx2);
           } else if (tx2.getOutgoingTransfer() != null && tx2.getOutgoingTransfer().getDestinations() != null) {
-            transferDestinationInfo(tx2, tx1);
+            transferCachedInfo(tx2, tx1);
           }
           
           // test tx equality by merging
@@ -178,7 +178,7 @@ public class WalletEqualityUtils {
     }
   }
   
-  private static void transferDestinationInfo(MoneroTxWallet src, MoneroTxWallet tgt) {
+  private static void transferCachedInfo(MoneroTxWallet src, MoneroTxWallet tgt) {
     
     // fill in missing incoming transfers when sending from/to the same account
     if (src.getIncomingTransfers() != null) {
@@ -196,6 +196,9 @@ public class WalletEqualityUtils {
       tgt.getOutgoingTransfer().setDestinations(src.getOutgoingTransfer().getDestinations());
       tgt.getOutgoingTransfer().setAmount(src.getOutgoingTransfer().getAmount());
     }
+    
+    // transfer payment id if outgoing // TODO: monero-wallet-rpc does not provide payment id for outgoing transfer when cache missing https://github.com/monero-project/monero/issues/8378
+    if (tgt.getOutgoingTransfer() != null) tgt.setPaymentId(src.getPaymentId());
   }
   
   private static void testTransfersEqualOnChain(List<MoneroTransfer> transfers1, List<MoneroTransfer> transfers2) {
@@ -263,9 +266,9 @@ public class WalletEqualityUtils {
     
           // transfer destination info if known for comparison
           if (ot1.getDestinations() != null) {
-            if (ot2.getDestinations() == null) transferDestinationInfo(ot1.getTx(), ot2.getTx());
+            if (ot2.getDestinations() == null) transferCachedInfo(ot1.getTx(), ot2.getTx());
           } else if (ot2.getDestinations() != null) {
-            transferDestinationInfo(ot2.getTx(), ot1.getTx());
+            transferCachedInfo(ot2.getTx(), ot1.getTx());
           }
           
           // nullify other local wallet data

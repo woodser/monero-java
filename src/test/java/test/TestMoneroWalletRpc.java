@@ -557,8 +557,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
 
   @Override
   @Test
-  public void testGetIntegratedAddressFromPaymentId() {
-    super.testGetIntegratedAddressFromPaymentId();
+  public void testGetIntegratedAddress() {
+    super.testGetIntegratedAddress();
   }
 
   @Override

@@ -644,9 +644,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroIntegratedAddress getIntegratedAddress(String paymentId) {
+  public MoneroIntegratedAddress getIntegratedAddress(String standardAddress, String paymentId) {
     try {
       Map<String, Object> params = new HashMap<String, Object>();
+      params.put("standard_address", standardAddress);
       params.put("payment_id", paymentId);
       Map<String, Object> resp = rpc.sendJsonRequest("make_integrated_address", params);
       Map<String, Object> result = (Map<String, Object>) resp.get("result");
@@ -1040,6 +1041,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @Override
   public List<MoneroTransfer> getTransfers(MoneroTransferQuery query) {
+    
+    // copy and normalize query up to block
+    query = normalizeTransferQuery(query);
     
     // get transfers directly if query does not require tx context (other transfers, outputs)
     if (!isContextual(query)) return getTransfersAux(query);
