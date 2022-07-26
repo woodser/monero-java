@@ -47,20 +47,18 @@ public class TestMoneroUtils {
     assertEquals(paymentId, integratedAddress.getPaymentId());
     assertEquals(106, integratedAddress.getIntegratedAddress().length());
     
+    // get integrated address with subaddress
+    integratedAddress = MoneroUtils.getIntegratedAddress(networkType, subaddress, paymentId);
+    assertEquals(subaddress, integratedAddress.getStandardAddress());
+    assertEquals(paymentId, integratedAddress.getPaymentId());
+    assertEquals(106, integratedAddress.getIntegratedAddress().length());
+    
     // get integrated address with invalid payment id
     try {
       MoneroUtils.getIntegratedAddress(networkType, primaryAddress, "123");
       fail("Getting integrated address with invalid payment id should have failed");
     } catch (MoneroError err) {
       assertEquals("Invalid payment id", err.getMessage());
-    }
-    
-    // get integrated address with subaddress
-    try {
-      MoneroUtils.getIntegratedAddress(networkType, subaddress, null);
-      fail("Getting integrated address from subaddress should have failed");
-    } catch (MoneroError err) {
-      assertEquals("Cannot create integrated address from subaddress", err.getMessage());
     }
   }
   
