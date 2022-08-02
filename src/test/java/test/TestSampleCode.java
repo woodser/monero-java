@@ -53,7 +53,7 @@ public class TestSampleCode {
   public void testSampleCode() throws InterruptedException {
     
     // connect to daemon
-    MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:38081", "superuser", "abctesting123");
+    MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:28081", "", "");
     long height = daemon.getHeight();                       // 1523651
     BigInteger feeEstimate = daemon.getFeeEstimate();       // 1014313512
     List<MoneroTx> txsInPool = daemon.getTxPool();          // get transactions in the pool
@@ -69,8 +69,8 @@ public class TestSampleCode {
     MoneroWalletFull walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
             .setPath("./test_wallets/" + UUID.randomUUID().toString())  // *** CHANGE README TO "sample_wallet_full" ***
             .setPassword("supersecretpassword123")
-            .setNetworkType(MoneroNetworkType.STAGENET)
-            .setServerUri("http://localhost:38081")
+            .setNetworkType(MoneroNetworkType.TESTNET)
+            .setServerUri("http://localhost:28081")
             .setServerUsername("superuser")
             .setServerPassword("abctesting123")
             .setMnemonic(TestUtils.MNEMONIC)                    // *** REPLACE WITH MNEMONIC IN README ***
@@ -127,7 +127,7 @@ public class TestSampleCode {
     MoneroConnectionManager connectionManager = new MoneroConnectionManager();
     
     // add managed connections with priorities
-    connectionManager.addConnection(new MoneroRpcConnection("http://localhost:38081").setPriority(1)); // use localhost as first priority
+    connectionManager.addConnection(new MoneroRpcConnection("http://localhost:28081").setPriority(1)); // use localhost as first priority
     connectionManager.addConnection(new MoneroRpcConnection("http://example.com")); // default priority is prioritized last
     
     // set current connection

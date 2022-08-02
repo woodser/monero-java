@@ -33,6 +33,7 @@ import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroMiningStatus;
+import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
@@ -1261,7 +1262,7 @@ public abstract class TestMoneroWalletCommon {
   public void testGetTxsWithPaymentIds() {
     assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
-    // get random transactions with payment hashes for testing
+    // get random transactions with payment ids for testing
     List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, new MoneroTxQuery().setHasPaymentId(true), 3, 5);
     assertFalse(randomTxs.isEmpty(), "No txs with payment ids to test");
     for (MoneroTxWallet randomTx : randomTxs) {
@@ -2984,6 +2985,19 @@ public abstract class TestMoneroWalletCommon {
     // collect sender balances before
     BigInteger balance1 = wallet.getBalance();
     BigInteger unlockedBalance1 = wallet.getUnlockedBalance();
+    
+    // test error sending funds to self with integrated subaddress
+    // TODO (monero-project): sending funds to self with integrated subaddress throws error: https://github.com/monero-project/monero/issues/8380
+    try {
+      wallet.createTx(new MoneroTxConfig()
+              .setAccountIndex(0)
+              .setAddress(MoneroUtils.getIntegratedAddress(TestUtils.NETWORK_TYPE, wallet.getSubaddress(0, 1).getAddress(), null).getIntegratedAddress())
+              .setAmount(amount)
+              .setRelay(true));
+      throw new RuntimeException("Should have failed sending to self with integrated subaddress");
+    } catch (MoneroError err) {
+      if (!err.getMessage().contains("Total received by")) throw err;
+    }
     
     // send funds to self
     MoneroTxWallet tx = wallet.createTx(new MoneroTxConfig()
@@ -4769,7 +4783,7 @@ public abstract class TestMoneroWalletCommon {
   public void testCreateAndReceive() {
     assumeTrue(TEST_NOTIFICATIONS);
     
-    // create random stagenet wallet
+    // create random wallet
     MoneroWallet receiver = createWallet(new MoneroWalletConfig());
     try {
       

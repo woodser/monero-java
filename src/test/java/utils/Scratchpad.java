@@ -25,7 +25,7 @@ public class Scratchpad {
     MoneroWallet walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
       .setPath("./test_wallets/" + UUID.randomUUID().toString())  // leave blank for in-memory wallet
       .setPassword("abctesting123")
-      .setNetworkType(MoneroNetworkType.STAGENET)
+      .setNetworkType(MoneroNetworkType.TESTNET)
       .setServerUri("http://localhost:38081")
       .setServerUsername("superuser")
       .setServerPassword("abctesting123")
@@ -66,7 +66,7 @@ public class Scratchpad {
     
 //    // TIMING TEST
 //    String path = TestMoneroWalletFull.getRandomWalletPath();
-//    MoneroWalletFull myWallet = MoneroWalletFull.createWalletFromMnemonic(path, TestUtils.WALLET_FULL_PW, MoneroNetworkType.STAGENET, TestUtils.MNEMONIC, TestUtils.getDaemonRpc().getRpcConnection());
+//    MoneroWalletFull myWallet = MoneroWalletFull.createWalletFromMnemonic(path, TestUtils.WALLET_FULL_PW, MoneroNetworkType.TESTNET, TestUtils.MNEMONIC, TestUtils.getDaemonRpc().getRpcConnection());
 //    myWallet.save();
 //    long now = System.currentTimeMillis();;
 //    myWallet.addListener(new MoneroWalletListener());
@@ -74,13 +74,13 @@ public class Scratchpad {
 //    long newNow = System.currentTimeMillis();
 //    System.out.println("Sync took " + (((double) newNow - (double) now) / (double) 1000) + " seconds");
     
-//    // generate 20 random stagenet wallets
+//    // generate 20 random testnet wallets
 //    MoneroRpcConnection daemonConnection = new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD);
 //    List<String> mnemonics = new ArrayList<String>();
 //    List<String> addresses = new ArrayList<String>();
 //    for (int i = 0; i < 20; i++) {
 //      String temp = UUID.randomUUID().toString();
-//      walletFull = new MoneroWalletFull(TestUtils.TEST_WALLETS_DIR + "/" + temp, TestUtils.WALLET_FULL_PW, MoneroNetworkType.STAGENET, daemonConnection, "English");
+//      walletFull = new MoneroWalletFull(TestUtils.TEST_WALLETS_DIR + "/" + temp, TestUtils.WALLET_FULL_PW, MoneroNetworkType.TESTNET, daemonConnection, "English");
 //      mnemonics.add(walletFull.getMnemonic());
 //      addresses.add(walletFull.getPrimaryAddress());
 //      ((MoneroWalletFull) walletFull).close();
