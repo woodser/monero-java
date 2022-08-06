@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 public class TaskLooper {
   
   private Runnable task;
+  private long periodInMs;
   private boolean isStarted;
   private boolean isLooping;
 
@@ -26,39 +27,57 @@ public class TaskLooper {
    * @param periodInMs the loop period in milliseconds
    */
   public synchronized void start(long periodInMs) {
-    isStarted = true;
-    if (isLooping) return;
-    
-    // start looping
-    isLooping = true;
-    Thread loop = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        while (isStarted && !Thread.currentThread().isInterrupted()) {
-          
-          // run the task
-          long startTime = System.currentTimeMillis();
-          task.run();
-          
-          // wait remaining period
-          if (isStarted) {
-            try { TimeUnit.MILLISECONDS.sleep(periodInMs - (System.currentTimeMillis() - startTime)); } // target fixed period by accounting for run time
-            catch (Exception e) {
-              isLooping = false;
-              if (isStarted) throw new RuntimeException(e);
+    synchronized (this) {
+      this.periodInMs = periodInMs;
+      if (isStarted) return;
+      isStarted = true;
+      
+      // start looping
+      if (isLooping) return;
+      isLooping = true;
+      TaskLooper that = this;
+      Thread loop = new Thread(new Runnable() {
+        @Override
+        public void run() {
+          while (isStarted && !Thread.currentThread().isInterrupted()) {
+            
+            // run the task
+            long startTime = System.currentTimeMillis();
+            task.run();
+            
+            // wait remaining period
+            if (isStarted) {
+              try { TimeUnit.MILLISECONDS.sleep(that.periodInMs - (System.currentTimeMillis() - startTime)); } // target fixed period by accounting for run time
+              catch (Exception e) {
+                isLooping = false;
+                if (isStarted) throw new RuntimeException(e);
+              }
             }
           }
+          isLooping = false;
         }
-        isLooping = false;
-      }
-    });
-    loop.start();
+      });
+      loop.start();
+    }
   }
   
   /**
    * Stop the task loop.
    */
   public void stop() {
-    isStarted = false;
+    synchronized (this) {
+      isStarted = false;
+    }
+  }
+  
+  /**
+   * Set the loop period in milliseconds.
+   * 
+   * @param periodInMs the loop period in milliseconds
+   */
+  public void setPeriodInMs(long periodInMs) {
+    synchronized (this) {
+      this.periodInMs = periodInMs;
+    }
   }
 }
