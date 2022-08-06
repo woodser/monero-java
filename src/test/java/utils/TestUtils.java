@@ -43,7 +43,7 @@ public class TestUtils {
   }
   
   // directory with monero binaries to test (monerod and monero-wallet-rpc)
-  public static final String MONERO_BINS_DIR = "/path/to/bins";
+  public static final String MONERO_BINS_DIR = "/paths/to/bins";
   
   // monero daemon rpc endpoint configuration (change per your configuration)
   public static final String DAEMON_RPC_URI = "localhost:28081";
@@ -78,7 +78,7 @@ public class TestUtils {
   public static final String LANGUAGE = "English";
   public static final String MNEMONIC = "silk mocked cucumber lettuce hope adrenalin aching lush roles fuel revamp baptism wrist long tender teardrop midst pastry pigment equip frying inbound pinched ravine frying";
   public static final String ADDRESS = "A1y9sbVt8nqhZAVm3me1U18rUVXcjeNKuBd1oE2cTs8biA9cozPMeyYLhe77nPv12JA3ejJN3qprmREriit2fi6tJDi99RR";
-  public static final long FIRST_RECEIVE_HEIGHT = 150; // NOTE: this value must be the height of the wallet's first tx for tests
+  public static final long FIRST_RECEIVE_HEIGHT = 324; // NOTE: this value must be the height of the wallet's first tx for tests
   public static final long SYNC_PERIOD_IN_MS = 5000; // period between wallet syncs in milliseconds
   
   // logger configuration

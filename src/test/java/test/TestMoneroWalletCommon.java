@@ -33,7 +33,6 @@ import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockHeader;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroMiningStatus;
-import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
@@ -426,11 +425,13 @@ public abstract class TestMoneroWalletCommon {
     // create unconnected random wallet
     MoneroWallet wallet = createWallet(new MoneroWalletConfig().setServerUri(""));
     assertEquals(null, wallet.getDaemonConnection());
-    
-    // set daemon uri
-    wallet.setDaemonConnection(TestUtils.DAEMON_RPC_URI);
-    assertEquals(new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI), wallet.getDaemonConnection());
     assertFalse(wallet.isConnectedToDaemon());
+    
+    // set daemon with wrong credentials
+    wallet.setDaemonConnection(TestUtils.DAEMON_RPC_URI, "wronguser", "wrongpass");
+    assertEquals(new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, "wronguser", "wrongpass"), wallet.getDaemonConnection());
+    if ("".equals(TestUtils.DAEMON_RPC_USERNAME) || TestUtils.DAEMON_RPC_USERNAME == null) assertTrue(wallet.isConnectedToDaemon()); // TODO: monerod without authentication works with bad credentials?
+    else assertFalse(wallet.isConnectedToDaemon());
     
     // set daemon with authentication
     wallet.setDaemonConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD);
@@ -610,13 +611,14 @@ public abstract class TestMoneroWalletCommon {
     assertFalse(integratedAddress.getPaymentId().isEmpty());
     
     // test with primary address
-    String primaryAddress = "58qRVVjZ4KxMX57TH6yWqGcH5AswvZZS494hWHcHPt6cDkP7V8AqxFhi3RKXZueVRgUnk8niQGHSpY5Bm9DjuWn16GDKXpF";
+    String primaryAddress = wallet.getPrimaryAddress();
     integratedAddress = wallet.getIntegratedAddress(primaryAddress, paymentId);
     assertEquals(integratedAddress.getStandardAddress(), primaryAddress);
     assertEquals(integratedAddress.getPaymentId(), paymentId);
     
     // test with subaddress
-    String subaddress = "7B9w2xieXjhDumgPX39h1CAYELpsZ7Pe8Wqtr3pVL9jJ5gGDqgxjWt55gTYUCAuhahhM85ajEp6VbQfLDPETt4oT2ZRXa6n";
+    if (wallet.getSubaddresses(0).size() < 2) wallet.createSubaddress(0);
+    String subaddress = wallet.getSubaddress(0, 1).getAddress();
     try {
       integratedAddress = wallet.getIntegratedAddress(subaddress, null);
       fail("Getting integrated address from subaddress should have failed");
@@ -641,6 +643,14 @@ public abstract class TestMoneroWalletCommon {
     MoneroIntegratedAddress integratedAddress = wallet.getIntegratedAddress(null, "03284e41c342f036");
     MoneroIntegratedAddress decodedAddress = wallet.decodeIntegratedAddress(integratedAddress.toString());
     assertEquals(integratedAddress, decodedAddress);
+    
+    // decode invalid address
+    try {
+      wallet.decodeIntegratedAddress("bad address");
+      throw new Error("Should have failed decoding bad address");
+    } catch (MoneroError err) {
+      assertEquals("Invalid address", err.getMessage());
+    }
   }
   
   // Can sync (without progress)
@@ -1275,7 +1285,7 @@ public abstract class TestMoneroWalletCommon {
     assertTrue(paymentIds.size() > 1);
     for (String paymentId : paymentIds) {
       List<MoneroTxWallet> txs = getAndTestTxs(wallet, new MoneroTxQuery().setPaymentId(paymentId), null, null);
-      assertEquals(1, txs.size());
+      assertTrue(txs.size() > 0);
       assertNotNull(txs.get(0).getPaymentId());
       MoneroUtils.validatePaymentId(txs.get(0).getPaymentId());
     }
@@ -2610,21 +2620,21 @@ public abstract class TestMoneroWalletCommon {
   
   // Can convert between a tx config and payment URI
   @Test
-  public void testCreatePaymentUri() {
+  public void testGetPaymentUri() {
     assumeTrue(TEST_NON_RELAYS);
     
     // test with address and amount
     MoneroTxConfig config1 = new MoneroTxConfig().setAddress(wallet.getAddress(0, 0)).setAmount(BigInteger.valueOf(0));
-    String uri = wallet.createPaymentUri(config1);
+    String uri = wallet.getPaymentUri(config1);
     MoneroTxConfig config2 = wallet.parsePaymentUri(uri);
     assertEquals(config1, config2);
     
-    // test with all fields3
+    // test with subaddress and all fields
+    config1.getDestinations().get(0).setAddress(wallet.getSubaddress(0, 1).getAddress());
     config1.getDestinations().get(0).setAmount(new BigInteger("425000000000"));
-    config1.setPaymentId("03284e41c342f03603284e41c342f03603284e41c342f03603284e41c342f036");
     config1.setRecipientName("John Doe");
     config1.setNote("OMZG XMR FTW");
-    uri = wallet.createPaymentUri(config1);
+    uri = wallet.getPaymentUri(config1);
     config2 = wallet.parsePaymentUri(uri);
     assertEquals(config1, config2);
     
@@ -2632,17 +2642,17 @@ public abstract class TestMoneroWalletCommon {
     String address = config1.getDestinations().get(0).getAddress();
     config1.getDestinations().get(0).setAddress(null);
     try {
-      wallet.createPaymentUri(config1);
+      wallet.getPaymentUri(config1);
       fail("Should have thrown RPC exception with invalid parameters");
     } catch (MoneroError e) {
       assertTrue(e.getMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
     }
     config1.getDestinations().get(0).setAddress(address);
     
-    // test with invalid payment id
-    config1.setPaymentId("bizzup");
+    // test with standalone payment id
+    config1.setPaymentId("03284e41c342f03603284e41c342f03603284e41c342f03603284e41c342f036");
     try {
-      wallet.createPaymentUri(config1);
+      wallet.getPaymentUri(config1);
       fail("Should have thrown RPC exception with invalid parameters");
     } catch (MoneroError e) {
       assertTrue(e.getMessage().indexOf("Cannot make URI from supplied parameters") >= 0);
@@ -3386,7 +3396,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testSendToMultipleSplit() {
     assumeTrue(TEST_RELAYS);
-    testSendToMultiple(1, 15, true);
+    testSendToMultiple(3, 15, true);
   }
   
   // Can send dust to multiple addresses in split transactions
@@ -3433,7 +3443,7 @@ public abstract class TestMoneroWalletCommon {
     // get amount to send total and per subaddress
     BigInteger sendAmount = null;
     if (sendAmountPerSubaddress == null) {
-      sendAmount = unlockedBalance.subtract(TestUtils.MAX_FEE).divide(BigInteger.valueOf(SEND_DIVISOR));
+      sendAmount = TestUtils.MAX_FEE.multiply(new BigInteger("5")).multiply(BigInteger.valueOf(totalSubaddresses));
       sendAmountPerSubaddress = sendAmount.divide(BigInteger.valueOf(totalSubaddresses));
     } else {
       sendAmount = sendAmountPerSubaddress.multiply(BigInteger.valueOf(totalSubaddresses));
@@ -3645,19 +3655,18 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
-  protected void testMultisigParticipants(List<MoneroWallet> participants, int m, int n, boolean testTx) {
-    System.out.println("testMultisig(" + m + ", " + n + ")");
-    assertEquals(n, participants.size());
+  protected void testMultisigParticipants(List<MoneroWallet> participants, int M, int N, boolean testTx) {
+    System.out.println("testMultisig(" + M + ", " + N + ")");
+    assertEquals(N, participants.size());
     
     // prepare multisig hexes
     List<String> preparedMultisigHexes = new ArrayList<String>();
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < N; i++) {
       MoneroWallet participant = participants.get(i);
       preparedMultisigHexes.add(participant.prepareMultisig());
     }
 
     // make wallets multisig
-    String address = null;
     List<String> madeMultisigHexes = new ArrayList<String>();
     for (int i = 0; i < participants.size(); i++) {
       MoneroWallet participant = participants.get(i);
@@ -3667,60 +3676,51 @@ public abstract class TestMoneroWalletCommon {
       for (int j = 0; j < participants.size(); j++) if (j != i) peerMultisigHexes.add(preparedMultisigHexes.get(j));
 
       // make the wallet multisig
-      MoneroMultisigInitResult result = participant.makeMultisig(peerMultisigHexes, m, TestUtils.WALLET_PASSWORD);
-      if (address == null) address = result.getAddress();
-      else assertEquals(address, result.getAddress());
-      madeMultisigHexes.add(result.getMultisigHex());
+      String multisigHex = participant.makeMultisig(peerMultisigHexes, M, TestUtils.WALLET_PASSWORD);
+      madeMultisigHexes.add(multisigHex);
     }
     
-    // handle m/n which exchanges keys n - m times
-    if (m != n) {
-      address = null;
+    // exchange keys N - M + 1 times
+    String address = null;
+    assertEquals(N, madeMultisigHexes.size());
+    List<String> prevMultisigHexes = madeMultisigHexes;
+    for (int i = 0; i < N - M + 1; i++) {
+      //System.out.println("Exchanging multisig keys round " + (i + 1) + " / " + (N - M + 1));
       
-      // exchange keys n - m times
-      assertEquals(n, madeMultisigHexes.size());
-      List<String> prevMultisigHexes = madeMultisigHexes;
-      for (int i = 0; i < n - m; i++) {
-        //System.out.println("Exchanging multisig keys round " + (i + 1) + " / " + (n - m));
+      // exchange multisig keys with each wallet and collect results
+      List<String> exchangeMultisigHexes = new ArrayList<String>();
+      for (int j = 0; j < participants.size(); j++) {
+        MoneroWallet participant = participants.get(j);
         
-        // exchange multisig keys with each wallet and collect results
-        List<String> exchangeMultisigHexes = new ArrayList<String>();
-        for (int j = 0; j < participants.size(); j++) {
-          MoneroWallet participant = participants.get(j);
-          
-          // collect the multisig hexes of the wallet's peers from last round
-          List<String> peerMultisigHexes = new ArrayList<String>();
-          for (int k = 0; k < participants.size(); k++) if (k != j) peerMultisigHexes.add(prevMultisigHexes.get(k));
-          
-          // import the multisig hexes of the wallet's peers
-          MoneroMultisigInitResult result = participant.exchangeMultisigKeys(peerMultisigHexes, TestUtils.WALLET_PASSWORD);
-          //System.out.println("EXCHANGED MULTISIG KEYS RESULT: " + JsonUtils.serialize(result));
-          
-          // test result
-          if (i == n - m - 1) {  // result on last round has address and not multisig hex to share
-            assertNotNull(result.getAddress());
-            assertFalse(result.getAddress().isEmpty());
-            if (address == null) address = result.getAddress();
-            else assertEquals(address, result.getAddress());
-            assertNull(result.getMultisigHex());
-          } else {
-            assertNotNull(result.getMultisigHex());
-            assertFalse(result.getMultisigHex().isEmpty());
-            assertNull(result.getAddress());
-            exchangeMultisigHexes.add(result.getMultisigHex());
-          }
+        // collect the multisig hexes of the wallet's peers from last round
+        List<String> peerMultisigHexes = new ArrayList<String>();
+        for (int k = 0; k < participants.size(); k++) if (k != j) peerMultisigHexes.add(prevMultisigHexes.get(k));
+        
+        // import the multisig hexes of the wallet's peers
+        MoneroMultisigInitResult result = participant.exchangeMultisigKeys(peerMultisigHexes, TestUtils.WALLET_PASSWORD);
+        
+        // test result
+        assertNotNull(result.getMultisigHex());
+        assertFalse(result.getMultisigHex().isEmpty());
+        if (i == N - M) {  // result on last round has address
+          assertNotNull(result.getAddress());
+          assertFalse(result.getAddress().isEmpty());
+          if (address == null) address = result.getAddress();
+          else assertEquals(address, result.getAddress());
+        } else {
+          assertNull(result.getAddress());
+          exchangeMultisigHexes.add(result.getMultisigHex());
         }
-        
-        // use results for next round of exchange
-        prevMultisigHexes = exchangeMultisigHexes;
       }
+      
+      // use results for next round of exchange
+      prevMultisigHexes = exchangeMultisigHexes;
     }
     
-    // print final multisig address
+    // validate final multisig address
     MoneroWallet participant = participants.get(0);
     MoneroUtils.validateAddress(participant.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
-    //System.out.println("FINAL MULTISIG ADDRESS: " + participant.getPrimaryAddress());
-    testMultisigInfo(participant.getMultisigInfo(), m, n);
+    testMultisigInfo(participant.getMultisigInfo(), M, N);
     
     // test sending a multisig transaction if configured
     if (testTx) {
@@ -3832,7 +3832,7 @@ public abstract class TestMoneroWalletCommon {
       // sign the tx with participants 1 through m - 1 to meet threshold
       String multisigTxHex = txSet.getMultisigTxHex();
       System.out.println("Signing");
-      for (int i = 1; i < m; i++) {
+      for (int i = 1; i < M; i++) {
         MoneroMultisigSignResult result = participants.get(i).signMultisigTxHex(multisigTxHex);
         multisigTxHex = result.getSignedMultisigTxHex();
       }
@@ -3867,7 +3867,7 @@ public abstract class TestMoneroWalletCommon {
       // sign the tx with participants 1 through m - 1 to meet threshold
       multisigTxHex = txSet.getMultisigTxHex();
       System.out.println("Signing sweep output");
-      for (int i = 1; i < m; i++) {
+      for (int i = 1; i < M; i++) {
         MoneroMultisigSignResult result = participants.get(i).signMultisigTxHex(multisigTxHex);
         multisigTxHex = result.getSignedMultisigTxHex();
       }
@@ -3903,7 +3903,7 @@ public abstract class TestMoneroWalletCommon {
       // sign the tx with participants 1 through m - 1 to meet threshold
       multisigTxHex = txSet.getMultisigTxHex();
       System.out.println("Signing sweep");
-      for (int i = 1; i < m; i++) {
+      for (int i = 1; i < M; i++) {
         MoneroMultisigSignResult result = participants.get(i).signMultisigTxHex(multisigTxHex);
         multisigTxHex = result.getSignedMultisigTxHex();
       }
@@ -3941,11 +3941,11 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
-  private static void testMultisigInfo(MoneroMultisigInfo info, int m, int n) {
+  private static void testMultisigInfo(MoneroMultisigInfo info, int M, int N) {
     assertTrue(info.isMultisig());
     assertTrue(info.isReady());
-    assertEquals(m, (int) info.getThreshold());
-    assertEquals(n, (int) info.getNumParticipants());
+    assertEquals(M, (int) info.getThreshold());
+    assertEquals(N, (int) info.getNumParticipants());
   }
   
   // TODO: test sending to multiple accounts
@@ -4892,12 +4892,14 @@ public abstract class TestMoneroWalletCommon {
   // Provides key images of spent outputs
   @Test
   public void testInputKeyImages() {
+    int accountIndex = 0;
+    int subaddressIndex = 0;
     
     // test unrelayed single transaction
-    testSpendTx(wallet.createTx(new MoneroTxConfig().addDestination(wallet.getPrimaryAddress(), TestUtils.MAX_FEE).setAccountIndex(0)));
+    testSpendTx(wallet.createTx(new MoneroTxConfig().addDestination(wallet.getPrimaryAddress(), TestUtils.MAX_FEE).setAccountIndex(accountIndex)));
     
     // test unrelayed split transactions
-    for (MoneroTxWallet tx : wallet.createTxs(new MoneroTxConfig().addDestination(wallet.getPrimaryAddress(), TestUtils.MAX_FEE).setAccountIndex(0))) {
+    for (MoneroTxWallet tx : wallet.createTxs(new MoneroTxConfig().addDestination(wallet.getPrimaryAddress(), TestUtils.MAX_FEE).setAccountIndex(accountIndex))) {
       testSpendTx(tx);
     }
     
@@ -4909,7 +4911,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // get available outputs above min amount
-    List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setAccountIndex(0).setSubaddressIndex(1).setIsSpent(false).setIsFrozen(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)).setMinAmount(TestUtils.MAX_FEE));
+    List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setAccountIndex(accountIndex).setSubaddressIndex(subaddressIndex).setIsSpent(false).setIsFrozen(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)).setMinAmount(TestUtils.MAX_FEE));
     
     // filter dust outputs
     List<MoneroOutputWallet> dustOutputs = new ArrayList<MoneroOutputWallet>();
@@ -4925,7 +4927,7 @@ public abstract class TestMoneroWalletCommon {
     Set<String> availableKeyImages = new HashSet<String>();
     for (MoneroOutputWallet output : outputs) availableKeyImages.add(output.getKeyImage().getHex());
     Set<String> sweptKeyImages = new HashSet<String>();
-    List<MoneroTxWallet> txs = wallet.sweepUnlocked(new MoneroTxConfig().setAccountIndex(0).setSubaddressIndex(1).setAddress(wallet.getPrimaryAddress()));
+    List<MoneroTxWallet> txs = wallet.sweepUnlocked(new MoneroTxConfig().setAccountIndex(accountIndex).setSubaddressIndex(subaddressIndex).setAddress(wallet.getPrimaryAddress()));
     for (MoneroTxWallet tx : txs) {
       testSpendTx(tx);
       for (MoneroOutput input : tx.getInputs()) sweptKeyImages.add(input.getKeyImage().getHex());
@@ -4955,7 +4957,7 @@ public abstract class TestMoneroWalletCommon {
   public void testProveUnrelayedTxs() {
       
       // create unrelayed tx to verify
-      String address1 = "52FnB7ABUrKJzVQRpbMNrqDFWbcKLjFUq8Rgek7jZEuB6WE2ZggXaTf4FK6H8gQymvSrruHHrEuKhMN3qTMiBYzREKsmRKM";
+      String address1 = TestUtils.getExternalWalletAddress();
       String address2 = wallet.getAddress(0, 0);
       String address3 = wallet.getAddress(1, 0);
       MoneroTxWallet tx = wallet.createTx(new MoneroTxConfig()
@@ -5339,15 +5341,18 @@ public abstract class TestMoneroWalletCommon {
       }
       
       // test destinations of sent tx
-      assertEquals(config.getDestinations().size(), tx.getOutgoingTransfer().getDestinations().size());
-      for (int i = 0; i < config.getDestinations().size(); i++) {
-        assertEquals(config.getDestinations().get(i).getAddress(), tx.getOutgoingTransfer().getDestinations().get(i).getAddress());
-        if (Boolean.TRUE.equals(ctx.isSweepResponse)) {
-          assertEquals(1, config.getDestinations().size());
-          assertNull(config.getDestinations().get(i).getAmount());
-          assertEquals(tx.getOutgoingTransfer().getAmount().toString(), tx.getOutgoingTransfer().getDestinations().get(i).getAmount().toString());
-        } else {
-          assertEquals(config.getDestinations().get(i).getAmount().toString(), tx.getOutgoingTransfer().getDestinations().get(i).getAmount().toString());
+      if (tx.getOutgoingTransfer().getDestinations() == null) assertTrue(config.getCanSplit()); // TODO: destinations not returned from transfer_split
+      else {
+        assertEquals(config.getDestinations().size(), tx.getOutgoingTransfer().getDestinations().size());
+        for (int i = 0; i < config.getDestinations().size(); i++) {
+          assertEquals(config.getDestinations().get(i).getAddress(), tx.getOutgoingTransfer().getDestinations().get(i).getAddress());
+          if (Boolean.TRUE.equals(ctx.isSweepResponse)) {
+            assertEquals(1, config.getDestinations().size());
+            assertNull(config.getDestinations().get(i).getAmount());
+            assertEquals(tx.getOutgoingTransfer().getAmount().toString(), tx.getOutgoingTransfer().getDestinations().get(i).getAmount().toString());
+          } else {
+            assertEquals(config.getDestinations().get(i).getAmount().toString(), tx.getOutgoingTransfer().getDestinations().get(i).getAmount().toString());
+          }
         }
       }
       

@@ -211,7 +211,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getReserveProofAcc
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_checkReserveProofJni(JNIEnv *, jobject, jstring, jstring, jstring);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_createPaymentUriJni(JNIEnv *, jobject, jstring);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getPaymentUriJni(JNIEnv *, jobject, jstring);
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_parsePaymentUriJni(JNIEnv *, jobject, jstring);
 

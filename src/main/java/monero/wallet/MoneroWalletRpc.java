@@ -1204,13 +1204,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       throw err;
     }
     
-    // pre-initialize txs iff present.  multisig and view-only wallets will have tx set without transactions
+    // pre-initialize txs iff present. multisig and view-only wallets will have tx set without transactions
     List<MoneroTxWallet> txs = null;
     int numTxs = config.getCanSplit() ? (result.containsKey("fee_list") ? ((List<String>) result.get("fee_list")).size() : 0) : (result.containsKey("fee") ? 1 : 0);
     if (numTxs > 0) txs = new ArrayList<MoneroTxWallet>();
+    boolean copyDestinations = numTxs == 1;
     for (int i = 0; i < numTxs; i++) {
       MoneroTxWallet tx = new MoneroTxWallet();
-      initSentTxWallet(config, tx);
+      initSentTxWallet(config, tx, copyDestinations);
       tx.getOutgoingTransfer().setAccountIndex(accountIdx);
       if (subaddressIndices != null && subaddressIndices.size() == 1) tx.getOutgoingTransfer().setSubaddressIndices(subaddressIndices);
       txs.add(tx);
@@ -1256,9 +1257,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (Boolean.TRUE.equals(config.getRelay())) poll();
 
     // build and return tx
-    MoneroTxWallet tx = initSentTxWallet(config, null);
+    MoneroTxWallet tx = initSentTxWallet(config, null, true);
     convertRpcTxToTxSet(result, tx, true);
-    tx.getOutgoingTransfer().getDestinations().get(0).setAmount(tx.getOutgoingTransfer().getAmount());  // initialize destination amount
+    tx.getOutgoingTransfer().getDestinations().get(0).setAmount(tx.getOutgoingTransfer().getAmount()); // initialize destination amount
     return tx;
   }
   
@@ -1711,7 +1712,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public String createPaymentUri(MoneroTxConfig config) {
+  public String getPaymentUri(MoneroTxConfig config) {
     GenUtils.assertNotNull("Must provide send request to create a payment URI", config);
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("address", config.getDestinations().get(0).getAddress());
@@ -1806,26 +1807,23 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @Override
   @SuppressWarnings("unchecked")
   public String prepareMultisig() {
-    Map<String, Object> resp = rpc.sendJsonRequest("prepare_multisig");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("enable_multisig_experimental", true);
+    Map<String, Object> resp = rpc.sendJsonRequest("prepare_multisig", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return (String) result.get("multisig_info");
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public MoneroMultisigInitResult makeMultisig(List<String> multisigHexes, int threshold, String password) {
+  public String makeMultisig(List<String> multisigHexes, int threshold, String password) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("multisig_info", multisigHexes);
     params.put("threshold", threshold);
     params.put("password", password);
     Map<String, Object> resp = rpc.sendJsonRequest("make_multisig", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    MoneroMultisigInitResult msResult = new MoneroMultisigInitResult();
-    msResult.setAddress((String) result.get("address"));
-    msResult.setMultisigHex((String) result.get("multisig_info"));
-    if (msResult.getAddress().isEmpty()) msResult.setAddress(null);
-    if (msResult.getMultisigHex().isEmpty()) msResult.setMultisigHex(null);
-    return msResult;
+    return (String) result.get("multisig_info");
   }
 
   @Override
@@ -2733,9 +2731,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * 
    * @param config is the send configuration
    * @param tx is an existing transaction to initialize (optional)
+   * @param copyDestinations copies config destinations if true
    * @return tx is the initialized send tx
    */
-  private static MoneroTxWallet initSentTxWallet(MoneroTxConfig config, MoneroTxWallet tx) {
+  private static MoneroTxWallet initSentTxWallet(MoneroTxConfig config, MoneroTxWallet tx, boolean copyDestinations) {
     if (tx == null) tx = new MoneroTxWallet();
     boolean relay = Boolean.TRUE.equals(config.getRelay());
     tx.setIsOutgoing(true);
@@ -2750,9 +2749,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     tx.setRingSize(MoneroUtils.RING_SIZE);
     MoneroOutgoingTransfer transfer = new MoneroOutgoingTransfer().setTx(tx);
     if (config.getSubaddressIndices() != null && config.getSubaddressIndices().size() == 1) transfer.setSubaddressIndices(new ArrayList<Integer>(config.getSubaddressIndices())); // we know src subaddress indices iff request specifies 1
-    List<MoneroDestination> destCopies = new ArrayList<MoneroDestination>();
-    for (MoneroDestination dest : config.getDestinations()) destCopies.add(dest.copy());
-    transfer.setDestinations(destCopies);
+    if (copyDestinations) {
+      List<MoneroDestination> destCopies = new ArrayList<MoneroDestination>();
+      for (MoneroDestination dest : config.getDestinations()) destCopies.add(dest.copy());
+      transfer.setDestinations(destCopies);
+    }
     tx.setOutgoingTransfer(transfer);
     tx.setPaymentId(config.getPaymentId());
     if (tx.getUnlockHeight() == null) tx.setUnlockHeight(config.getUnlockHeight() == null ? 0l : config.getUnlockHeight());
@@ -3033,7 +3034,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("tx_hash")) tx.setHash((String) val);
       else if (key.equals("unlocked")) tx.setIsLocked(!(Boolean) val);
       else if (key.equals("frozen")) output.setIsFrozen((Boolean) val);
-      //else if (key.equals("pubkey")) output.setStealthPublicKey((String) val);
+      else if (key.equals("pubkey")) output.setStealthPublicKey((String) val);
       else if (key.equals("subaddr_index")) {
         Map<String, BigInteger> rpcIndices = (Map<String, BigInteger>) val;
         output.setAccountIndex(rpcIndices.get("major").intValue());
@@ -3066,6 +3067,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           txSet.getTxs().add(tx);
         }
       }
+      else if (key.equals("summary")) { } // TODO: support tx set summary fields?
       else LOGGER.warning("ignoring unexpected describe transfer field: " + key + ": " + val);
     }
     return txSet;

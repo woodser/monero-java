@@ -40,6 +40,7 @@ public class MoneroDaemonInfo {
   private BigInteger credits;
   private Boolean isBusySyncing;
   private Boolean isSynchronized;
+  private Boolean isRestricted;
   
   public String getVersion() {
     return version;
@@ -299,5 +300,14 @@ public class MoneroDaemonInfo {
   
   public void setIsSynchronized(Boolean isSynchronized) {
     this.isSynchronized = isSynchronized;
+  }
+  
+  @JsonProperty("isRestricted")
+  public Boolean isRestricted() {
+    return isRestricted;
+  }
+  
+  public void setIsRestricted(Boolean isRestricted) {
+    this.isRestricted = isRestricted;
   }
 }

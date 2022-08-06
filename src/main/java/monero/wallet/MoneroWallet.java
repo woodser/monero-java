@@ -1236,7 +1236,7 @@ public interface MoneroWallet {
    * @param config specifies configuration for a potential tx
    * @return the payment uri
    */
-  public String createPaymentUri(MoneroTxConfig config);
+  public String getPaymentUri(MoneroTxConfig config);
   
   /**
    * Parses a payment URI to a transaction configuration.
@@ -1311,9 +1311,9 @@ public interface MoneroWallet {
    * @param multisigHexes are multisig hex from each participant
    * @param threshold is the number of signatures needed to sign transfers
    * @param password is the wallet password
-   * @return the result which has the multisig's address xor this wallet's multisig hex to share with participants iff not N/N
+   * @return this wallet's multisig hex to share with participants
    */
-  public MoneroMultisigInitResult makeMultisig(List<String> multisigHexes, int threshold, String password);
+  public String makeMultisig(List<String> multisigHexes, int threshold, String password);
   
   /**
    * Exchange multisig hex with participants in a M/N multisig wallet.

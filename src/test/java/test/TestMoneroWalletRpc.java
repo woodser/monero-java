@@ -840,8 +840,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   @Test
-  public void testCreatePaymentUri() {
-    super.testCreatePaymentUri();
+  public void testGetPaymentUri() {
+    super.testGetPaymentUri();
   }
 
   @Override

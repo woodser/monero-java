@@ -1252,8 +1252,8 @@ public class TestMoneroDaemonRpc {
     assumeTrue(TEST_RELAYS && !LITE_MODE);
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
     List<MoneroTx> txs = new ArrayList<MoneroTx>();
-    txs.add(getUnrelayedTx(wallet, 2));
-    txs.add(getUnrelayedTx(wallet, 3));  // TODO: accounts cannot be re-used across send tests else isRelayed is true; wallet needs to update?
+    txs.add(getUnrelayedTx(wallet, 1));
+    txs.add(getUnrelayedTx(wallet, 2));  // TODO: accounts cannot be re-used across send tests else isRelayed is true; wallet needs to update?
     testSubmitThenRelay(txs);
   }
   
@@ -1294,8 +1294,8 @@ public class TestMoneroDaemonRpc {
     }
     
     // ensure txs are relayed
+    List<MoneroTx> poolTxs = daemon.getTxPool();
     for (MoneroTx tx : txs) {
-      List<MoneroTx> poolTxs = daemon.getTxPool();
       boolean found = false;
       for (MoneroTx aTx : poolTxs) {
         if (aTx.getHash().equals(tx.getHash())) {
@@ -1531,7 +1531,8 @@ public class TestMoneroDaemonRpc {
       assertEquals(false, tx.isFailed());
       assertEquals(false, tx.inTxPool());
       assertEquals(false, tx.isDoubleSpendSeen());
-      assertEquals(null, tx.getNumConfirmations()); // client must compute
+      if (Boolean.TRUE.equals(ctx.fromBinaryBlock)) assertNull(tx.getNumConfirmations());
+      else assertTrue(tx.getNumConfirmations() > 0);
     } else {
       assertEquals(null, tx.getBlock());
       assertEquals(0, (long) tx.getNumConfirmations());

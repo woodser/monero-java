@@ -248,7 +248,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    */
   public boolean isConnected() {
     try {
-      getHeight();
+      getVersion();
       return true;
     } catch (MoneroError e) {
       return false;
@@ -1200,6 +1200,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       }
       else if (key.equals("last_relayed_time")) tx.setLastRelayedTimestamp(GenUtils.reconcile(tx.getLastRelayedTimestamp(), ((BigInteger) val).longValue()));
       else if (key.equals("receive_time") || key.equals("received_timestamp")) tx.setReceivedTimestamp(GenUtils.reconcile(tx.getReceivedTimestamp(), ((BigInteger) val).longValue()));
+      else if (key.equals("confirmations")) tx.setNumConfirmations(GenUtils.reconcile(tx.getNumConfirmations(), ((BigInteger) val).longValue()));
       else if (key.equals("in_pool")) {
         tx.setIsConfirmed(GenUtils.reconcile(tx.isConfirmed(), !(Boolean) val));
         tx.setInTxPool(GenUtils.reconcile(tx.inTxPool(), (Boolean) val));
@@ -1317,7 +1318,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         output.setRingOutputIndices(GenUtils.reconcile(output.getRingOutputIndices(), ringOutputIndices));
       }
       else if (key.equals("amount")) output.setAmount(GenUtils.reconcile(output.getAmount(), (BigInteger) val));
-      else if (key.equals("target")) output.setStealthPublicKey(GenUtils.reconcile(output.getStealthPublicKey(), (String) ((Map<String, Object>) val).get("key")));
+      else if (key.equals("target"))  {
+        Map<String, Object> valMap = (Map<String, Object>) val;
+        String pubKey = valMap.containsKey("key") ? (String) valMap.get("key") : ((Map<String, String>) valMap.get("tagged_key")).get("key"); // TODO (monerod): rpc json uses {tagged_key={key=...}}, binary blocks use {key=...}
+        output.setStealthPublicKey(GenUtils.reconcile(output.getStealthPublicKey(), pubKey));
+      }
       else LOGGER.warning("ignoring unexpected field output: " + key + ": " + val);
     }
     return output;
@@ -1495,6 +1500,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("top_block_hash") || key.equals("top_hash")) info.setTopBlockHash(GenUtils.reconcile(info.getTopBlockHash(), "".equals(val) ? null : (String) val));  // TODO monero-wallet-rpc: daemon info top_hash is redundant with top_block_hash, only returned if pay-for-service enabled
       else if (key.equals("busy_syncing")) info.setIsBusySyncing((Boolean) val);
       else if (key.equals("synchronized")) info.setIsSynchronized((Boolean) val);
+      else if (key.equals("restricted")) info.setIsRestricted((Boolean) val);
       else LOGGER.warning("Ignoring unexpected info field: " + key + ": " + val);
     }
     return info;

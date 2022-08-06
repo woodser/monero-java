@@ -1858,8 +1858,8 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_deleteAddressBookEntr
   }
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_createPaymentUriJni(JNIEnv* env, jobject instance, jstring jconfig) {
-  MTRACE("Java_monero_wallet_MoneroWalletFull_createPaymentUriJni()");
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getPaymentUriJni(JNIEnv* env, jobject instance, jstring jconfig) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_getPaymentUriJni()");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _config = jconfig ? env->GetStringUTFChars(jconfig, NULL) : nullptr;
   string config_json = string(_config ? _config : "");
@@ -1872,7 +1872,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_createPaymentUriJn
   // get payment uri
   string payment_uri;
   try {
-    payment_uri = wallet->create_payment_uri(*config.get());
+    payment_uri = wallet->get_payment_uri(*config.get());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
@@ -2062,8 +2062,8 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_makeMultisigJni(JN
   // make the wallet multisig and return result
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   try {
-    monero_multisig_init_result result = wallet->make_multisig(multisig_hexes, threshold, password);
-    return env->NewStringUTF(result.serialize().c_str());
+    string multisig_hex = wallet->make_multisig(multisig_hexes, threshold, password);
+    return env->NewStringUTF(multisig_hex.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;

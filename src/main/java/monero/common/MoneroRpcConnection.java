@@ -90,9 +90,11 @@ public class MoneroRpcConnection {
   public MoneroRpcConnection setCredentials(String username, String password) {
     try { if (this.client != null) this.client.close(); }
     catch (IOException e) { throw new MoneroError(e); }
+    if ("".equals(username)) username = null;
+    if ("".equals(password)) password = null;
     if (username != null || password != null) {
-      if (username == null) throw new MoneroError("username cannot be null because password is not null");
-      if (password == null) throw new MoneroError("password cannot be null because username is not null");
+      if (username == null) throw new MoneroError("username cannot be empty because password is not empty");
+      if (password == null) throw new MoneroError("password cannot be empty because username is not empty");
       URI uriObj;
       try { uriObj = new URI(uri); }
       catch (URISyntaxException e) { throw new MoneroError(e); }

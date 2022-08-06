@@ -1178,10 +1178,10 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
 
   @Override
-  public String createPaymentUri(MoneroTxConfig request) {
+  public String getPaymentUri(MoneroTxConfig request) {
     assertNotClosed();
     try {
-      return createPaymentUriJni(JsonUtils.serialize(request));
+      return getPaymentUriJni(JsonUtils.serialize(request));
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
@@ -1253,10 +1253,9 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
 
   @Override
-  public MoneroMultisigInitResult makeMultisig(List<String> multisigHexes, int threshold, String password) {
+  public String makeMultisig(List<String> multisigHexes, int threshold, String password) {
     try {
-      String initMultisigResultJson = makeMultisigJni(multisigHexes.toArray(new String[multisigHexes.size()]), threshold, password);
-      return JsonUtils.deserialize(initMultisigResultJson, MoneroMultisigInitResult.class);
+      return makeMultisigJni(multisigHexes.toArray(new String[multisigHexes.size()]), threshold, password);
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
@@ -1509,7 +1508,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private native void deleteAddressBookEntryJni(int entryIdx);
   
-  private native String createPaymentUriJni(String sendRequestJson);
+  private native String getPaymentUriJni(String sendRequestJson);
   
   private native String parsePaymentUriJni(String uri);
   

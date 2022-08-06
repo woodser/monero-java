@@ -903,10 +903,10 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     // wallet does not exist
     assertFalse(MoneroWalletFull.walletExists(path));
     
-    // cannot open non-existant wallet
+    // cannot open non-existent wallet
     try {
       openWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE));
-      fail("Cannot open non-existant wallet");
+      fail("Cannot open non-existent wallet");
     } catch (MoneroError e) {
       assertEquals("Wallet does not exist at path: " + path, e.getMessage());
     }
@@ -1047,10 +1047,10 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 //    // wallet does not exist
 //    assertFalse(MoneroWalletFull.walletExists(path));
 //
-//    // cannot open non-existant wallet
+//    // cannot open non-existent wallet
 //    try {
 //      new MoneroWalletFull(path, TestUtils.WALLET_FULL_PW, TestUtils.NETWORK_TYPE);
-//      fail("Cannot open non-existant wallet");
+//      fail("Cannot open non-existent wallet");
 //    } catch (MoneroException e) {
 //      assertEquals("Wallet does not exist at path: " + path, e.getMessage());
 //    }
@@ -1160,6 +1160,8 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   // Supports multisig sample code
   @Test
   public void testMultisigSample() {
+    testCreateMultisigWallet(1, 2);
+    testCreateMultisigWallet(1, 4);
     testCreateMultisigWallet(2, 2);
     testCreateMultisigWallet(2, 3);
     testCreateMultisigWallet(2, 4);
@@ -1187,27 +1189,25 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       for (int j = 0; j < wallets.size(); j++) if (j != i) peerMultisigHexes.add(preparedMultisigHexes.get(j));
     
       // make wallet multisig and collect result hex
-      MoneroMultisigInitResult result = wallets.get(i).makeMultisig(peerMultisigHexes, M, TestUtils.WALLET_PASSWORD);
-      madeMultisigHexes.add(result.getMultisigHex());
+      String multisigHex = wallets.get(i).makeMultisig(peerMultisigHexes, M, TestUtils.WALLET_PASSWORD);
+      madeMultisigHexes.add(multisigHex);
     }
     
-    // if wallet is not N/N, exchange multisig keys N-M times
-    if (M != N) {
-      List<String> multisigHexes = madeMultisigHexes;
-      for (int i = 0; i < N - M; i++) {
+    // exchange multisig keys N - M + 1 times
+    List<String> multisigHexes = madeMultisigHexes;
+    for (int i = 0; i < N - M + 1; i++) {
+      
+      // exchange multisig keys among participants and collect results for next round if applicable
+      List<String> resultMultisigHexes = new ArrayList<String>();
+      for (MoneroWallet wallet : wallets) {
         
-        // exchange multisig keys among participants and collect results for next round if applicable
-        List<String> resultMultisigHexes = new ArrayList<String>();
-        for (MoneroWallet wallet : wallets) {
-          
-          // import the multisig hex of other participants and collect results
-          MoneroMultisigInitResult result = wallet.exchangeMultisigKeys(multisigHexes, TestUtils.WALLET_PASSWORD);
-          resultMultisigHexes.add(result.getMultisigHex());
-        }
-        
-        // use resulting multisig hex for next round of exchange if applicable
-        multisigHexes = resultMultisigHexes;
+        // import the multisig hex of other participants and collect results
+        MoneroMultisigInitResult result = wallet.exchangeMultisigKeys(multisigHexes, TestUtils.WALLET_PASSWORD);
+        resultMultisigHexes.add(result.getMultisigHex());
       }
+      
+      // use resulting multisig hex for next round of exchange if applicable
+      multisigHexes = resultMultisigHexes;
     }
     
     // wallets are now multisig
@@ -1817,8 +1817,8 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 
   @Override
   @Test
-  public void testCreatePaymentUri() {
-    super.testCreatePaymentUri();
+  public void testGetPaymentUri() {
+    super.testGetPaymentUri();
   }
 
   @Override
