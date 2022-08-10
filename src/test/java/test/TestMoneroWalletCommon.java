@@ -3671,6 +3671,14 @@ public abstract class TestMoneroWalletCommon {
     for (int i = 0; i < participants.size(); i++) {
       MoneroWallet participant = participants.get(i);
       
+      // test bad input
+      try {
+        participant.makeMultisig(Arrays.asList("asd", "dsa"), M, TestUtils.WALLET_PASSWORD);
+        throw new RuntimeException("Should have thrown error making wallet multisig with incorrect values");
+      } catch (MoneroError e) {
+        assertEquals("basic_string", e.getMessage()); // TODO (monero-project): improve error message https://github.com/monero-project/monero/issues/8493
+      }
+      
       // collect prepared multisig hexes from wallet's peers
       List<String> peerMultisigHexes = new ArrayList<String>();
       for (int j = 0; j < participants.size(); j++) if (j != i) peerMultisigHexes.add(preparedMultisigHexes.get(j));
@@ -3691,6 +3699,14 @@ public abstract class TestMoneroWalletCommon {
       List<String> exchangeMultisigHexes = new ArrayList<String>();
       for (int j = 0; j < participants.size(); j++) {
         MoneroWallet participant = participants.get(j);
+        
+        // test bad input
+        try {
+          participant.exchangeMultisigKeys(Arrays.asList("asd", "dsa"), TestUtils.WALLET_PASSWORD);
+          throw new RuntimeException("Should have thrown error exchanging multisig keys with bad input");
+        } catch (MoneroError e) {
+          assertTrue(e.getMessage().length() > 0);
+        }
         
         // collect the multisig hexes of the wallet's peers from last round
         List<String> peerMultisigHexes = new ArrayList<String>();
