@@ -80,6 +80,7 @@ public class TestUtils {
   public static final String ADDRESS = "A1y9sbVt8nqhZAVm3me1U18rUVXcjeNKuBd1oE2cTs8biA9cozPMeyYLhe77nPv12JA3ejJN3qprmREriit2fi6tJDi99RR";
   public static final long FIRST_RECEIVE_HEIGHT = 324; // NOTE: this value must be the height of the wallet's first tx for tests
   public static final long SYNC_PERIOD_IN_MS = 5000; // period between wallet syncs in milliseconds
+  public static final String OFFLINE_SERVER_URI = "offline_server_uri"; // dummy server uri to remain offline because wallet2 connects to default if not given
   
   // logger configuration
   public static final Logger LOGGER = Logger.getLogger(TestUtils.class.getName());
@@ -153,7 +154,8 @@ public class TestUtils {
    * Start a monero-wallet-rpc process bound to the next available port.
    */
   public static Map<MoneroWalletRpc, Integer> WALLET_PORT_OFFSETS = new HashMap<MoneroWalletRpc, Integer>();
-  public static MoneroWalletRpc startWalletRpcProcess() throws IOException {
+  public static MoneroWalletRpc startWalletRpcProcess() { return TestUtils.startWalletRpcProcess(false); }
+  public static MoneroWalletRpc startWalletRpcProcess(boolean offline) {
     
     // get next available offset of ports to bind to
     int portOffset = 1;
@@ -163,13 +165,13 @@ public class TestUtils {
     List<String> cmd = new ArrayList<String>(Arrays.asList(
         TestUtils.WALLET_RPC_LOCAL_PATH,
         "--" + TestUtils.NETWORK_TYPE.toString().toLowerCase(),
-        "--daemon-address", TestUtils.DAEMON_RPC_URI,
         "--rpc-bind-port", "" + (TestUtils.WALLET_RPC_PORT_START + portOffset),
         "--rpc-login", TestUtils.WALLET_RPC_USERNAME + ":" + TestUtils.WALLET_RPC_PASSWORD,
         "--wallet-dir", TestUtils.WALLET_RPC_LOCAL_WALLET_DIR,
         "--rpc-access-control-origins", TestUtils.WALLET_RPC_ACCESS_CONTROL_ORIGINS));
+    if (offline) cmd.add("--offline");
+    else cmd.addAll(Arrays.asList("--daemon-address", TestUtils.DAEMON_RPC_URI));
     if (TestUtils.DAEMON_RPC_USERNAME != null && !TestUtils.DAEMON_RPC_USERNAME.equals("")) cmd.addAll(Arrays.asList("--daemon-login", TestUtils.DAEMON_RPC_USERNAME + ":" + TestUtils.DAEMON_RPC_PASSWORD));
-    
     
     // start with zmq if enabled
     if (WALLET_RPC_ZMQ_ENABLED) {
@@ -180,9 +182,13 @@ public class TestUtils {
     }
     
     // register wallet with port offset
-    MoneroWalletRpc wallet = new MoneroWalletRpc(cmd);
-    WALLET_PORT_OFFSETS.put(wallet, portOffset);
-    return wallet;
+    try {
+      MoneroWalletRpc wallet = new MoneroWalletRpc(cmd);
+      WALLET_PORT_OFFSETS.put(wallet, portOffset);
+      return wallet;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
   
   /**

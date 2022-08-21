@@ -1293,6 +1293,9 @@ public class TestMoneroDaemonRpc {
       throw e;
     }
     
+    // wait for txs to be relayed // TODO (monero-project): all txs should be relayed: https://github.com/monero-project/monero/issues/8523
+    try { Thread.sleep(1000); } catch (Exception e) { throw new RuntimeException(e); }
+    
     // ensure txs are relayed
     List<MoneroTx> poolTxs = daemon.getTxPool();
     for (MoneroTx tx : txs) {

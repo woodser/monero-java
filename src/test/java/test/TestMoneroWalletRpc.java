@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -89,20 +88,17 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     // assign defaults
     if (config == null) config = new MoneroWalletConfig();
     if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
+    if (config.getServer() == null) config.setServer(daemon.getRpcConnection());
     
     // create client connected to internal monero-wallet-rpc process
-    MoneroWalletRpc wallet;
-    try {
-      wallet = TestUtils.startWalletRpcProcess();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    boolean offline = TestUtils.OFFLINE_SERVER_URI.equals(config.getServerUri());
+    MoneroWalletRpc wallet = TestUtils.startWalletRpcProcess(offline);
     
     // open wallet
     try {
       wallet.openWallet(config.getPath(), config.getPassword());
-      if ("".equals(config.getServerUri())) wallet.setDaemonConnection(""); // serverUri "" denotes offline wallet for tests
-      else wallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
+      wallet.setDaemonConnection(config.getServer(), true, null); // set daemon as trusted
+      if (wallet.isConnectedToDaemon()) wallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
       return wallet;
     } catch (MoneroError e) {
       try { TestUtils.stopWalletRpcProcess(wallet); } catch (Exception e2) { throw new RuntimeException(e2); }
@@ -119,20 +115,17 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     if (config.getPath() == null) config.setPath(UUID.randomUUID().toString());
     if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
     if (config.getRestoreHeight() == null && !random) config.setRestoreHeight(0l);
+    if (config.getServer() == null) config.setServer(daemon.getRpcConnection());
     
     // create client connected to internal monero-wallet-rpc process
-    MoneroWalletRpc wallet;
-    try {
-      wallet = TestUtils.startWalletRpcProcess();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    boolean offline = TestUtils.OFFLINE_SERVER_URI.equals(config.getServerUri());
+    MoneroWalletRpc wallet = TestUtils.startWalletRpcProcess(offline);
     
     // create wallet
     try {
       wallet.createWallet(config);
-      if ("".equals(config.getServerUri())) wallet.setDaemonConnection(""); // serverUri "" denotes offline wallet for tests
-      else wallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
+      wallet.setDaemonConnection(config.getServer(), true, null); // set daemon as trusted
+      if (wallet.isConnectedToDaemon()) wallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
       return wallet;
     } catch (MoneroError e) {
       try { TestUtils.stopWalletRpcProcess(wallet); } catch (Exception e2) { throw new RuntimeException(e2); }

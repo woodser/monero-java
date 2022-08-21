@@ -563,7 +563,6 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   @Override
   public List<MoneroTx> getTxPool() {
     
-    
     // send rpc request
     Map<String, Object> resp = rpc.sendPathRequest("get_transaction_pool");
     checkResponseStatus(resp);

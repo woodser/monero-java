@@ -422,9 +422,19 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testSetDaemonConnection() {
     
-    // create unconnected random wallet
+    // create random wallet with default daemon connection
     MoneroWallet wallet = createWallet(new MoneroWalletConfig().setServerUri(""));
+    assertEquals(new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD), wallet.getDaemonConnection());
+    assertTrue(wallet.isConnectedToDaemon()); // uses default localhost connection
+    
+    // set empty server uri
+    wallet.setDaemonConnection("");
     assertEquals(null, wallet.getDaemonConnection());
+    assertFalse(wallet.isConnectedToDaemon());
+    
+    // set offline server uri
+    wallet.setDaemonConnection(TestUtils.OFFLINE_SERVER_URI);
+    assertEquals(new MoneroRpcConnection(TestUtils.OFFLINE_SERVER_URI, "", ""), wallet.getDaemonConnection());
     assertFalse(wallet.isConnectedToDaemon());
     
     // set daemon with wrong credentials
@@ -435,6 +445,7 @@ public abstract class TestMoneroWalletCommon {
     
     // set daemon with authentication
     wallet.setDaemonConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD);
+    assertEquals(new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD), wallet.getDaemonConnection());
     assertTrue(wallet.isConnectedToDaemon());
     
     // nullify daemon connection
@@ -1821,7 +1832,7 @@ public abstract class TestMoneroWalletCommon {
     // import outputs hex
     if (outputsHex != null) {
       int numImported = wallet.importOutputs(outputsHex);
-      assertTrue(numImported > 0);
+      assertTrue(numImported >= 0);
     }
   }
   
@@ -2378,7 +2389,8 @@ public abstract class TestMoneroWalletCommon {
     
     // create view-only and offline wallets
     MoneroWallet viewOnlyWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
-    MoneroWallet offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setServerUri("").setRestoreHeight(0l));
+    MoneroWallet offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setServerUri(TestUtils.OFFLINE_SERVER_URI).setRestoreHeight(0l));
+    assertFalse(offlineWallet.isConnectedToDaemon());
     viewOnlyWallet.sync();
     
     // test tx signing with wallets
@@ -2423,7 +2435,7 @@ public abstract class TestMoneroWalletCommon {
     assertFalse(offlineWallet.isConnectedToDaemon());
     assertFalse(offlineWallet.isViewOnly());
     if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic()); // TODO monero-project: cannot get mnemonic from offline wallet rpc
-    if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(0, offlineWallet.getTxs().size());  // TODO: monero-wallet-rpc has these transactions cached on startup
+    assertEquals(0, offlineWallet.getTxs().size());
     
     // import outputs to offline wallet
     int numOutputsImported = offlineWallet.importOutputs(outputsHex);
@@ -2433,6 +2445,7 @@ public abstract class TestMoneroWalletCommon {
     List<MoneroKeyImage> keyImages = offlineWallet.exportKeyImages();
     
     // import key images to view-only wallet
+    assertTrue(viewOnlyWallet.isConnectedToDaemon());
     viewOnlyWallet.importKeyImages(keyImages);
     assertEquals(wallet.getBalance(), viewOnlyWallet.getBalance());
     
