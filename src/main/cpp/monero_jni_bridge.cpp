@@ -777,12 +777,12 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_decodeIntegratedAd
   MTRACE("Java_monero_wallet_MoneroWalletFull_decodeIntegratedAddressJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   const char* _integratedAddress = jintegrated_address ? env->GetStringUTFChars(jintegrated_address, NULL) : nullptr;
-  string integrated_address = string(_integratedAddress ? _integratedAddress : "");
+  string integrated_address_str = string(_integratedAddress ? _integratedAddress : "");
   env->ReleaseStringUTFChars(jintegrated_address, _integratedAddress);
 
   // serialize and return decoded integrated address
   try {
-    monero_integrated_address integrated_address = wallet->decode_integrated_address(string(_integratedAddress ? _integratedAddress : ""));
+    monero_integrated_address integrated_address = wallet->decode_integrated_address(integrated_address_str);
     string integrated_address_json = integrated_address.serialize();
     return env->NewStringUTF(integrated_address_json.c_str());
   } catch (...) {
@@ -894,6 +894,31 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_stopSyncingJni(JNIEnv
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   try {
     wallet->stop_syncing();
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_scanTxsJni(JNIEnv* env, jobject instance, jobjectArray jtx_hashes) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_scanTxsJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+
+  // get tx hashes from jobjectArray to vector<string>
+  vector<string> tx_hashes;
+  if (jtx_hashes != nullptr) {
+    jsize size = env->GetArrayLength(jtx_hashes);
+    for (int idx = 0; idx < size; idx++) {
+      jstring jstr = (jstring) env->GetObjectArrayElement(jtx_hashes, idx);
+      const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
+      string str = string(_str ? _str : "");
+      env->ReleaseStringUTFChars(jstr, _str);
+      tx_hashes.push_back(str);
+    }
+  }
+
+  // scan txs
+  try {
+    wallet->scan_txs(tx_hashes);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
   }

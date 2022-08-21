@@ -4438,6 +4438,38 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
+  // Can scan transactions by id
+  @Test
+  public void testScanTxs() {
+    
+    // get a few tx hashes
+    List<String> txHashes = new ArrayList<String>();
+    List<MoneroTxWallet> txs = wallet.getTxs();
+    if (txs.size() < 3) fail("Not enough txs to scan");
+    for (int i = 0; i < 3; i++) txHashes.add(txs.get(i).getHash());
+    
+    // start wallet without scanning
+    MoneroWallet scanWallet = createWallet(new MoneroWalletConfig().setMnemonic(wallet.getMnemonic()).setRestoreHeight(0l));
+    scanWallet.stopSyncing(); // TODO: create wallet without daemon connection (offline does not reconnect, default connects to localhost, offline then online causes confirmed txs to disappear)
+    assertTrue(scanWallet.isConnectedToDaemon());
+    
+    // scan txs
+    scanWallet.scanTxs(txHashes);
+    
+    // TODO: scanning txs causes merge problems reconciling 0 fee, isMinerTx with test txs
+    
+//    // txs are scanned
+//    assertEquals(txHashes.size(), scanWallet.getTxs().size());
+//    for (int i = 0; i < txHashes.size(); i++) {
+//      assertEquals(wallet.getTx(txHashes.get(i)), scanWallet.getTx(txHashes.get(i)));
+//    }
+//    List<MoneroTxWallet> scannedTxs = scanWallet.getTxs(txHashes);
+//    assertEquals(txHashes.size(), scannedTxs.size());
+    
+    // close wallet
+    closeWallet(scanWallet, false);
+  }
+  
   // Can rescan the blockchain
   @Test
   @Disabled // disabled so tests don't delete local cache

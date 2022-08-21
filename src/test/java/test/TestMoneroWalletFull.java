@@ -1995,6 +1995,12 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   public void testSweepDust() {
     super.testSweepDust();
   }
+  
+  @Override
+  @Test
+  public void testScanTxs() {
+    super.testScanTxs();
+  }
 
   @Override
   @Test

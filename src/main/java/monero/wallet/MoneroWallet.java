@@ -309,6 +309,13 @@ public interface MoneroWallet {
   public void stopSyncing();
   
   /**
+   * Scan transactions by their hash/id.
+   * 
+   * @param txHashes tx hashes to scan
+   */
+  public void scanTxs(Collection<String> txHashes);
+  
+  /**
    * Rescan the blockchain for spent outputs.
    *
    * Note: this can only be called with a trusted daemon.

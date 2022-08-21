@@ -340,13 +340,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     assertNull(address);
   }
   
-  // Can rescan spent
-  @Test
-  public void testRescanSpent() {
-    assumeTrue(TEST_NON_RELAYS);
-    wallet.rescanSpent();
-  }
-  
   // Can save the wallet
   @Test
   public void testSave() {
@@ -1009,6 +1002,19 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Test
   public void testSweepDust() {
     super.testSweepDust();
+  }
+  
+  @Override
+  @Test
+  public void testScanTxs() {
+    super.testScanTxs();
+  }
+  
+  // Can rescan spent // TODO: run this in full wallet too
+  @Test
+  public void testRescanSpent() {
+    assumeTrue(TEST_NON_RELAYS);
+    wallet.rescanSpent();
   }
   
   @Override

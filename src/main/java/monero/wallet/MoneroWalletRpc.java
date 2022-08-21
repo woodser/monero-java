@@ -735,6 +735,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   @Override
+  public void scanTxs(Collection<String> txHashes) {
+    if (txHashes == null || txHashes.isEmpty()) throw new MoneroError("No tx hashes given to scan");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("txids", txHashes);
+    rpc.sendJsonRequest("scan_tx", params);
+    poll(); // notify of changes
+  }
+  
+  @Override
   public void rescanSpent() {
     rpc.sendJsonRequest("rescan_spent");
   }

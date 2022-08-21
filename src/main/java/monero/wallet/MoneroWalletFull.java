@@ -586,7 +586,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
       throw new MoneroError(e.getMessage());
     }
   }
-
+  
   @Override
   public MoneroSyncResult sync(Long startHeight, MoneroWalletListenerI listener) {
     assertNotClosed();
@@ -621,6 +621,17 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     assertNotClosed();
     try {
       stopSyncingJni();
+    } catch (Exception e) {
+      throw new MoneroError(e.getMessage());
+    }
+  }
+  
+  @Override
+  public void scanTxs(Collection<String> txHashes) {
+    assertNotClosed();
+    String[] txMetadatasArr = txHashes.toArray(new String[txHashes.size()]); // convert to array for jni
+    try {
+      scanTxsJni(txMetadatasArr);
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
@@ -1411,6 +1422,8 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private native void startSyncingJni(long syncPeriodInMs);
   
   private native void stopSyncingJni();
+  
+  private native void scanTxsJni(String[] txHashes);
   
   private native void rescanSpentJni();
   
