@@ -2322,12 +2322,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     public void poll() {
       try {
         
-        // skip if next poll is already queued
-        if (numPolling > 1) return;
-        
         // synchronize polls
         synchronized(this) {
+          
+          // skip if next poll is already queued
+          if (numPolling > 1) return;
           numPolling++;
+          
+          // skip if wallet is closed
+          if (wallet.isClosed()) return;
           
           // take initial snapshot
           if (prevHeight == null) {
