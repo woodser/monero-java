@@ -424,8 +424,13 @@ public abstract class TestMoneroWalletCommon {
     
     // create random wallet with default daemon connection
     MoneroWallet wallet = createWallet(new MoneroWalletConfig().setServerUri(""));
-    assertEquals(new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD), wallet.getDaemonConnection());
-    assertTrue(wallet.isConnectedToDaemon()); // uses default localhost connection
+    if (wallet instanceof MoneroWalletRpc) {
+      assertEquals(new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD), wallet.getDaemonConnection());
+      assertTrue(wallet.isConnectedToDaemon()); // uses default localhost connection
+    } else {
+      assertEquals(null, wallet.getDaemonConnection());
+      assertFalse(wallet.isConnectedToDaemon());
+    }
     
     // set empty server uri
     wallet.setDaemonConnection("");
