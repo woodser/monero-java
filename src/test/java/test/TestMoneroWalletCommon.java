@@ -384,6 +384,35 @@ public abstract class TestMoneroWalletCommon {
     if (e1 != null) throw new RuntimeException(e1);
   }
   
+ // Can create wallets with subaddress lookahead
+ @Test
+ public void testSubaddressLookahead() {
+   assumeTrue(TEST_NON_RELAYS);
+   Exception e1 = null;  // emulating Java "finally" but compatible with other languages
+   MoneroWallet receiver = null;
+   try {
+     
+     // create wallet with high subaddress lookahead
+     receiver = createWallet(new MoneroWalletConfig().setAccountLookahead(1).setSubaddressLookahead(100000));
+     
+     // transfer funds to subaddress with high index
+     wallet.createTx(new MoneroTxConfig()
+             .setAccountIndex(0)
+             .addDestination(receiver.getSubaddress(0, 85000).getAddress(), TestUtils.MAX_FEE)
+             .setRelay(true));
+     
+     // observe unconfirmed funds
+     GenUtils.waitFor(1000);
+     receiver.sync();
+     assert(receiver.getBalance().compareTo(new BigInteger("0")) > 0);
+   } catch (Exception e) {
+     e1 = e;
+   }
+   
+   if (receiver != null) closeWallet(receiver);
+   if (e1 != null) throw new RuntimeException(e1);
+ }
+  
   // Can get the wallet's version
   @Test
   public void testGetVersion() {

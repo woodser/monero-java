@@ -445,95 +445,20 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletJni(JNIEnv
   }
 }
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_createWalletRandomJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint jnetwork_type, jstring jdaemon_uri, jstring jdaemon_username, jstring jdaemon_password, jstring jlanguage) {
-  MTRACE("Java_monero_wallet_MoneroWalletFull_createWalletRandomJni");
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_createWalletJni(JNIEnv *env, jclass clazz, jstring jconfig) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_createWalletJni");
 
-  // collect and release string params
-  const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
-  const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
-  const char* _daemonUri = jdaemon_uri ? env->GetStringUTFChars(jdaemon_uri, NULL) : nullptr;
-  const char* _daemonUsername = jdaemon_username ? env->GetStringUTFChars(jdaemon_username, NULL) : nullptr;
-  const char* _daemonPassword = jdaemon_password ? env->GetStringUTFChars(jdaemon_password, NULL) : nullptr;
-  const char* _language = jlanguage ? env->GetStringUTFChars(jlanguage, NULL) : nullptr;
-  string path = string(_path ? _path : "");
-  string password = string(_password ? _password : "");
-  string language = string(_language ? _language : "");
-  string daemon_uri = string(_daemonUri ? _daemonUri : "");
-  string daemon_username = string(_daemonUsername ? _daemonUsername : "");
-  string daemon_password = string(_daemonPassword ? _daemonPassword : "");
-  env->ReleaseStringUTFChars(jpath, _path);
-  env->ReleaseStringUTFChars(jpassword, _password);
-  env->ReleaseStringUTFChars(jdaemon_uri, _daemonUri);
-  env->ReleaseStringUTFChars(jdaemon_username, _daemonUsername);
-  env->ReleaseStringUTFChars(jdaemon_password, _daemonPassword);
-  env->ReleaseStringUTFChars(jlanguage, _language);
+  // get config as json string
+  const char* _config = jconfig ? env->GetStringUTFChars(jconfig, NULL) : nullptr;
+  string config_json = string(_config ? _config : "");
+  env->ReleaseStringUTFChars(jconfig, _config);
+
+  // deserialize wallet config
+  shared_ptr<monero_wallet_config> config = monero_wallet_config::deserialize(config_json);
 
   // construct wallet
   try {
-    monero_rpc_connection daemon_connection = monero_rpc_connection(daemon_uri, daemon_username, daemon_password);
-    monero_wallet* wallet = monero_wallet_full::create_wallet_random(path, password, static_cast<monero_network_type>(jnetwork_type), daemon_connection, language);
-    return reinterpret_cast<jlong>(wallet);
-  } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
-    return 0;
-  }
-}
-
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_createWalletFromMnemonicJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint jnetwork_type, jstring jmnemonic, jlong jrestore_height, jstring joffset) {
-  MTRACE("Java_monero_wallet_MoneroWalletFull_createWalletFromMnemonicJni");
-
-  // collect and release string params
-  const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
-  const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
-  const char* _mnemonic = jmnemonic ? env->GetStringUTFChars(jmnemonic, NULL) : nullptr;
-  const char* _offset = joffset ? env->GetStringUTFChars(joffset, NULL) : nullptr;
-  string path = string(_path ? _path : "");
-  string password = string(_password ? _password : "");
-  string mnemonic = string(_mnemonic ? _mnemonic : "");
-  string offset = string(_offset ? _offset : "");
-  env->ReleaseStringUTFChars(jpath, _path);
-  env->ReleaseStringUTFChars(jpassword, _password);
-  env->ReleaseStringUTFChars(jmnemonic, _mnemonic);
-  env->ReleaseStringUTFChars(joffset, _offset);
-
-  // construct wallet
-  try {
-    monero_rpc_connection daemon_connection;
-    monero_wallet* wallet = monero_wallet_full::create_wallet_from_mnemonic(path, password, static_cast<monero_network_type>(jnetwork_type), mnemonic, daemon_connection, (uint64_t) jrestore_height, offset);
-    return reinterpret_cast<jlong>(wallet);
-  } catch (...) {
-    rethrow_cpp_exception_as_java_exception(env);
-    return 0;
-  }
-}
-
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_createWalletFromKeysJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint network_type, jstring jaddress, jstring jview_key, jstring jspend_key, jlong restore_height, jstring jlanguage) {
-  MTRACE("Java_monero_wallet_MoneroWalletFull_createWalletFromKeysJni");
-
-  // collect and release string params
-  const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
-  const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
-  const char* _address = jaddress ? env->GetStringUTFChars(jaddress, NULL) : nullptr;
-  const char* _viewKey = jview_key ? env->GetStringUTFChars(jview_key, NULL) : nullptr;
-  const char* _spendKey = jspend_key ? env->GetStringUTFChars(jspend_key, NULL) : nullptr;
-  const char* _language = jlanguage ? env->GetStringUTFChars(jlanguage, NULL) : nullptr;
-  string path = string(_path ? _path : "");
-  string password = string(_password ? _password : "");
-  string address = string(_address ? _address : "");
-  string view_key = string(_viewKey ? _viewKey : "");
-  string spend_key = string(_spendKey ? _spendKey : "");
-  string language = string(_language ? _language : "");
-  env->ReleaseStringUTFChars(jpath, _path);
-  env->ReleaseStringUTFChars(jpassword, _password);
-  env->ReleaseStringUTFChars(jaddress, _address);
-  env->ReleaseStringUTFChars(jview_key, _viewKey);
-  env->ReleaseStringUTFChars(jspend_key, _spendKey);
-  env->ReleaseStringUTFChars(jlanguage, _language);
-
-  // construct wallet and return reference
-  try {
-    monero_rpc_connection daemon_connection; // TODO: take daemon connection parameters
-    monero_wallet* wallet = monero_wallet_full::create_wallet_from_keys(path, password, static_cast<monero_network_type>(network_type), address, view_key, spend_key, daemon_connection, restore_height, language);
+    monero_wallet* wallet = monero_wallet_full::create_wallet(*config);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);

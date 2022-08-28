@@ -223,6 +223,8 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    * &nbsp;&nbsp; serverUsername - username to authenticate with the daemon (optional)<br>
    * &nbsp;&nbsp; serverPassword - password to authenticate with the daemon (optional)<br>
    * &nbsp;&nbsp; server - MoneroRpcConnection providing server configuration (optional)<br>
+   * &nbsp;&nbsp; accountLookahead - number of accounts to scan (optional)<br>
+   * &nbsp;&nbsp; subaddressLookahead - number of subaddresses per account to scan (optional)<br>
    * </p>
    * 
    * @param config configures the wallet to create
@@ -233,6 +235,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     // validate config
     if (config == null) throw new MoneroError("Must specify config to open wallet");
     if (config.getNetworkType() == null) throw new MoneroError("Must specify a network type: 'mainnet', 'testnet' or 'stagenet'");
+    if (config.getPath() != null && !config.getPath().isEmpty() && MoneroWalletFull.walletExists(config.getPath())) throw new MoneroError("Wallet already exists: " + config.getPath());
     if (config.getMnemonic() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
       throw new MoneroError("Wallet may be initialized with a mnemonic or keys but not both");
     }
@@ -241,86 +244,48 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     // create wallet
     if (config.getMnemonic() != null) {
       if (config.getLanguage() != null) throw new MoneroError("Cannot specify language when creating wallet from mnemonic");
-      return createWalletFromMnemonic(config.getPath(), config.getPassword(), config.getNetworkType(), config.getMnemonic(), config.getServer(), config.getRestoreHeight(), config.getSeedOffset());
-    } else if (config.getPrivateSpendKey() != null || config.getPrimaryAddress() != null) {
+      return createWalletFromMnemonic(config);
+    } else if (config.getPrimaryAddress() != null || config.getPrivateSpendKey() != null) {
       if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating wallet from keys");
-      return createWalletFromKeys(config.getPath(), config.getPassword(), config.getNetworkType(), config.getPrimaryAddress(), config.getPrivateViewKey(), config.getPrivateSpendKey(), config.getServer(), config.getRestoreHeight(), config.getLanguage());
+      return createWalletFromKeys(config);
     } else {
       if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating random wallet");
       if (config.getRestoreHeight() != null) throw new MoneroError("Cannot specify restore height when creating random wallet");
-      return createWalletRandom(config.getPath(), config.getPassword(), config.getNetworkType(), config.getServer(), config.getLanguage());
+      return createWalletRandom(config);
     }
   }
   
-  /**
-   * Create a new wallet with a randomly generated seed.
-   * 
-   * @param path is the path to create the wallet
-   * @param password is the password encrypt the wallet
-   * @param networkType is the wallet's network type
-   * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
-   * @param language is the wallet and mnemonic's language (default = "English")
-   * @return the wallet created with a randomly generated mnemonic
-   */
-  private static MoneroWalletFull createWalletRandom(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, String language) {
-    if (path != null && !path.isEmpty() && MoneroWalletFull.walletExists(path)) throw new MoneroError("Wallet already exists: " + path);
-    if (networkType == null) throw new MoneroError("Must provide a network type");
-    if (language == null) language = DEFAULT_LANGUAGE;
-    long jniWalletHandle;
-    if (daemonConnection == null) jniWalletHandle = createWalletRandomJni(path, password, networkType.ordinal(), null, null, null, language);
-    else jniWalletHandle = createWalletRandomJni(path, password, networkType.ordinal(), daemonConnection.getUri(), daemonConnection.getUsername(), daemonConnection.getPassword(), language);
-    return new MoneroWalletFull(jniWalletHandle);
-  }
-  
-  /**
-   * Create a wallet from an existing mnemonic phrase.
-   * 
-   * @param path is the path to create the wallet
-   * @param password is the password encrypt the wallet
-   * @param networkType is the wallet's network type
-   * @param mnemonic is the mnemonic of the wallet to construct
-   * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
-   * @param restoreHeight is the block height to restore from (default = 0)
-   * @param seedOffset is the offset used to derive a new seed from the given mnemonic to recover a secret wallet from the mnemonic phrase
-   * @return the wallet created from a mnemonic
-   */
-  private static MoneroWalletFull createWalletFromMnemonic(String path, String password, MoneroNetworkType networkType, String mnemonic, MoneroRpcConnection daemonConnection, Long restoreHeight, String seedOffset) {
-    if (path != null && !path.isEmpty() && MoneroWalletFull.walletExists(path)) throw new MoneroError("Wallet already exists: " + path);
-    if (networkType == null) throw new MoneroError("Must provide a network type");
-    if (restoreHeight == null) restoreHeight = 0l;
-    long jniWalletHandle = createWalletFromMnemonicJni(path, password, networkType.ordinal(), mnemonic, restoreHeight, seedOffset);
+  private static MoneroWalletFull createWalletFromMnemonic(MoneroWalletConfig config) {
+    if (config.getRestoreHeight() == null) config.setRestoreHeight(0l);
+    long jniWalletHandle = createWalletJni(serializeWalletConfig(config));
     MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle);
-    wallet.setDaemonConnection(daemonConnection);
+    wallet.setDaemonConnection(config.getServer());
     return wallet;
   }
   
-  /**
-   * Create a wallet from an address, view key, and spend key.
-   * 
-   * @param path is the path to create the wallet
-   * @param password is the password encrypt the wallet
-   * @param networkType is the wallet's network type
-   * @param address is the address of the wallet to construct
-   * @param viewKey is the view key of the wallet to construct
-   * @param spendKey is the spend key of the wallet to construct
-   * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
-   * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
-   * @param language is the wallet and mnemonic's language (default = "English")
-   * @return the wallet created from keys
-   */
-  private static MoneroWalletFull createWalletFromKeys(String path, String password, MoneroNetworkType networkType, String address, String viewKey, String spendKey, MoneroRpcConnection daemonConnection, Long restoreHeight, String language) {
-    if (path != null && !path.isEmpty() && MoneroWalletFull.walletExists(path)) throw new MoneroError("Wallet already exists: " + path);
-    if (restoreHeight == null) restoreHeight = 0l;
-    if (networkType == null) throw new MoneroError("Must provide a network type");
-    if (language == null) language = DEFAULT_LANGUAGE;
+  private static MoneroWalletFull createWalletFromKeys(MoneroWalletConfig config) {
+    if (config.getRestoreHeight() == null) config.setRestoreHeight(0l);
+    if (config.getLanguage() == null) config.setLanguage(DEFAULT_LANGUAGE);
     try {
-      long jniWalletHandle = createWalletFromKeysJni(path, password, networkType.ordinal(), address, viewKey, spendKey, restoreHeight, language);
+      long jniWalletHandle = createWalletJni(serializeWalletConfig(config));
       MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle);
-      wallet.setDaemonConnection(daemonConnection);
+      wallet.setDaemonConnection(config.getServer());
       return wallet;
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
+  }
+  
+  private static MoneroWalletFull createWalletRandom(MoneroWalletConfig config) {
+    if (config.getLanguage() == null) config.setLanguage(DEFAULT_LANGUAGE);
+    long jniWalletHandle = createWalletJni(serializeWalletConfig(config));
+    return new MoneroWalletFull(jniWalletHandle);
+  }
+  
+  private static String serializeWalletConfig(MoneroWalletConfig config) {
+    Map<String, Object> configMap = JsonUtils.toMap(config);
+    configMap.put("networkType", config.getNetworkType().ordinal());
+    return JsonUtils.serialize(configMap);
   }
   
   /**
@@ -1357,11 +1322,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private native static long openWalletJni(String path, String password, int networkType);
   
-  private native static long createWalletRandomJni(String path, String password, int networkType, String daemonUrl, String daemonUsername, String daemonPassword, String language);
-  
-  private native static long createWalletFromMnemonicJni(String path, String password, int networkType, String mnemonic, long restoreHeight, String seedOffset);
-  
-  private native static long createWalletFromKeysJni(String path, String password, int networkType, String address, String viewKey, String spendKey, long restoreHeight, String language);
+  private native static long createWalletJni(String walletConfigJson);
   
   private native long getHeightJni();
   

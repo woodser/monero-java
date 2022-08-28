@@ -275,6 +275,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @return this wallet client
    */
   public MoneroWalletRpc openWallet(MoneroWalletConfig config) {
+    
+    // validate config
     if (config == null) throw new MoneroError("Must provide configuration of wallet to open");
     if (config.getPath() == null || config.getPath().isEmpty()) throw new MoneroError("Filename is not initialized");
     if (config.getPassword() == null || config.getPassword().isEmpty()) throw new MoneroError("Password is not initialized");
@@ -335,6 +337,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (config.getMnemonic() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
       throw new MoneroError("Wallet may be initialized with a mnemonic or keys but not both");
     }
+    if (config.getAccountLookahead() != null || config.getSubaddressLookahead() != null) throw new MoneroError("monero-wallet-rpc does not support creating wallets with subaddress lookahead over rpc");
     
     // create wallet
     if (config.getMnemonic() != null) {

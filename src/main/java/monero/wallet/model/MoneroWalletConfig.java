@@ -22,6 +22,8 @@ public class MoneroWalletConfig {
   private Long restoreHeight;
   private String language;
   private Boolean saveCurrent;
+  private Integer accountLookahead;     // number of accounts to scan
+  private Integer subaddressLookahead;  // number of subaddresses to scan per account
   
   public String getPath() {
     return path;
@@ -162,5 +164,35 @@ public class MoneroWalletConfig {
   public MoneroWalletConfig setSaveCurrent(Boolean saveCurrent) {
     this.saveCurrent = saveCurrent;
     return this;
+  }
+  
+  /**
+   * Set the number of accounts of scan.
+   * 
+   * @param accountLookahead the number of accounts to scan
+   * @return this config for convenience
+   */
+  public MoneroWalletConfig setAccountLookahead(Integer accountLookahead) {
+    this.accountLookahead = accountLookahead;
+    return this;
+  }
+  
+  public Integer getAccountLookahead() {
+    return accountLookahead;
+  }
+  
+  /**
+   * Set the number of subaddresses to scan per account.
+   * 
+   * @param subaddressLookahead the number of subaddresses to scan per account
+   * @return this config for convenience
+   */
+  public MoneroWalletConfig setSubaddressLookahead(Integer subaddressLookahead) {
+    this.subaddressLookahead = subaddressLookahead;
+    return this;
+  }
+  
+  public Integer getSubaddressLookahead() {
+    return subaddressLookahead;
   }
 }

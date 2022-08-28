@@ -471,6 +471,12 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  public void testSubaddressLookahead() {
+    super.testSubaddressLookahead();
+  }
+  
+  @Override
+  @Test
   public void testGetVersion() {
     super.testGetVersion();
   }
