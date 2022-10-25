@@ -3,8 +3,11 @@ package common.utils;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -359,5 +362,23 @@ public class GenUtils {
   public static void waitFor(long duration) {
     try { TimeUnit.MILLISECONDS.sleep(duration); }
     catch (InterruptedException e) { throw new RuntimeException(e); }
+  }
+  
+  /**
+   * Run tasks in parallel and wait to finish.
+   * 
+   * @param tasks are the tasks to run in parallel
+   */
+  public static void awaitTasks(Collection<Runnable> tasks) {
+    if (tasks.isEmpty()) return;
+    ExecutorService pool = Executors.newFixedThreadPool(tasks.size());
+    for (Runnable task : tasks) pool.submit(task);
+    pool.shutdown();
+    try {
+        if (!pool.awaitTermination(60000, TimeUnit.SECONDS)) pool.shutdownNow();
+    } catch (InterruptedException e) {
+        pool.shutdownNow();
+        throw new RuntimeException(e);
+    }
   }
 }

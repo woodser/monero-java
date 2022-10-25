@@ -279,7 +279,9 @@ public class MoneroRpcConnection {
       post.setConfig(getTimeoutConfig(timeoutInMs));
       HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
       post.setEntity(entity);
-      resp = client.execute(post);
+      synchronized (this) {
+        resp = client.execute(post);
+      }
       
       // validate response
       validateHttpResponse(resp);
@@ -354,7 +356,9 @@ public class MoneroRpcConnection {
         post.setEntity(entity);
       }
       post.setConfig(getTimeoutConfig(timeoutInMs));
-      resp = client.execute(post);
+      synchronized (this) {
+        resp = client.execute(post);
+      }
       
       // validate response
       validateHttpResponse(resp);
@@ -416,7 +420,9 @@ public class MoneroRpcConnection {
         HttpEntity entity = new ByteArrayEntity(paramsBin, ContentType.DEFAULT_BINARY);
         post.setEntity(entity);
       }
-      resp = client.execute(post);
+      synchronized (this) {
+        resp = client.execute(post);
+      }
       
       // validate response
       validateHttpResponse(resp);
