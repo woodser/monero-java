@@ -33,6 +33,7 @@ import monero.daemon.model.MoneroDaemonListener;
 import monero.daemon.model.MoneroDaemonSyncInfo;
 import monero.daemon.model.MoneroDaemonUpdateCheckResult;
 import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
+import monero.daemon.model.MoneroFeeEstimate;
 import monero.daemon.model.MoneroHardForkInfo;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroKeyImageSpentStatus;
@@ -600,8 +601,11 @@ public class TestMoneroDaemonRpc {
   @Test
   public void testGetFeeEstimate() {
     assumeTrue(TEST_NON_RELAYS);
-    BigInteger fee = daemon.getFeeEstimate();
-    TestUtils.testUnsignedBigInteger(fee, true);
+    MoneroFeeEstimate feeEstimate = daemon.getFeeEstimate();
+    TestUtils.testUnsignedBigInteger(feeEstimate.getFee(), true);
+    assertTrue(feeEstimate.getFees().size() == 4); // slow, normal, fast, fastest
+    for (int i = 0; i < 4; i++) TestUtils.testUnsignedBigInteger(feeEstimate.getFees().get(i), true);
+    TestUtils.testUnsignedBigInteger(feeEstimate.getQuantizationMask(), true);
   }
   
   // Can get all transactions in the transaction pool

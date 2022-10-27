@@ -55,7 +55,6 @@ public class TestSampleCode {
     // connect to daemon
     MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:28081", "", "");
     long height = daemon.getHeight();                       // 1523651
-    BigInteger feeEstimate = daemon.getFeeEstimate();       // 1014313512
     List<MoneroTx> txsInPool = daemon.getTxPool();          // get transactions in the pool
     
     // open wallet on monero-wallet-rpc

@@ -31,6 +31,7 @@ import monero.daemon.model.MoneroBan;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroBlockTemplate;
 import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
+import monero.daemon.model.MoneroFeeEstimate;
 import monero.daemon.model.MoneroKeyImageSpentStatus;
 import monero.daemon.model.MoneroOutputDistributionEntry;
 import monero.daemon.model.MoneroSubmitTxResult;
@@ -83,7 +84,7 @@ public abstract class MoneroDaemonDefault implements MoneroDaemon {
   }
   
   @Override
-  public BigInteger getFeeEstimate() {
+  public MoneroFeeEstimate getFeeEstimate() {
     return getFeeEstimate(null);
   }
   

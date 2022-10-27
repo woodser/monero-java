@@ -56,6 +56,7 @@ import monero.daemon.model.MoneroPeer;
 import monero.daemon.model.MoneroDaemonSyncInfo;
 import monero.daemon.model.MoneroDaemonUpdateCheckResult;
 import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
+import monero.daemon.model.MoneroFeeEstimate;
 import monero.daemon.model.MoneroHardForkInfo;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroKeyImageSpentStatus;
@@ -525,11 +526,15 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public BigInteger getFeeEstimate(Integer graceBlocks) {
+  public MoneroFeeEstimate getFeeEstimate(Integer graceBlocks) {
     Map<String, Object> resp = rpc.sendJsonRequest("get_fee_estimate");
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     checkResponseStatus(result);
-    return (BigInteger) result.get("fee");
+    List<BigInteger> fees = new ArrayList<BigInteger>();
+    for (BigInteger fee : (List<BigInteger>) result.get("fees")) fees.add(fee);
+    BigInteger fee = (BigInteger) result.get("fee");
+    BigInteger quantizationMask = (BigInteger) result.get("quantization_mask");
+    return new MoneroFeeEstimate(fee, fees, quantizationMask);
   }
 
   @Override

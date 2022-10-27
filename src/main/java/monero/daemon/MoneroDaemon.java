@@ -37,6 +37,7 @@ import monero.daemon.model.MoneroPeer;
 import monero.daemon.model.MoneroDaemonSyncInfo;
 import monero.daemon.model.MoneroDaemonUpdateCheckResult;
 import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
+import monero.daemon.model.MoneroFeeEstimate;
 import monero.daemon.model.MoneroHardForkInfo;
 import monero.daemon.model.MoneroKeyImageSpentStatus;
 import monero.daemon.model.MoneroMinerTxSum;
@@ -310,19 +311,19 @@ public interface MoneroDaemon {
   public MoneroMinerTxSum getMinerTxSum(long height, Long numBlocks);
   
   /**
-   * Get the fee estimate per kB.
+   * Get mining fee estimates per kB.
    * 
-   * @return is the fee estimate per kB.
+   * @return mining fee estimates per kB
    */
-  public BigInteger getFeeEstimate();
+  public MoneroFeeEstimate getFeeEstimate();
   
   /**
-   * Get the fee estimate per kB.
+   * Get mining fee estimates per kB.
    * 
    * @param graceBlocks TODO
-   * @return is the fee estimate per kB.
+   * @return mining fee estimates per kB
    */
-  public BigInteger getFeeEstimate(Integer graceBlocks);
+  public MoneroFeeEstimate getFeeEstimate(Integer graceBlocks);
   
   /**
    * Submits a transaction to the daemon's pool.

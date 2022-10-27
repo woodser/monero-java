@@ -3450,7 +3450,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testSendDustToMultipleSplit() {
     assumeTrue(TEST_RELAYS);
-    BigInteger dustAmt = daemon.getFeeEstimate().divide(BigInteger.valueOf(2));
+    BigInteger dustAmt = daemon.getFeeEstimate().getFee().divide(BigInteger.valueOf(2));
     testSendToMultiple(5, 3, true, dustAmt);
   }
   
