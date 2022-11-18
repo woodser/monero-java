@@ -571,7 +571,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     testSyncMnemonic(null, TestUtils.FIRST_RECEIVE_HEIGHT);
   }
   
-  // Can sync a wallet created from mnemonic from a start height
+  // Can sync a wallet created from mnemonic from a start height.
   @Test
   public void testSyncMnemonicFromStartHeight() {
     assumeTrue(TEST_NON_RELAYS && !LITE_MODE);

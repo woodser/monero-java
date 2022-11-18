@@ -43,7 +43,7 @@ public class TestUtils {
   }
   
   // directory with monero binaries to test (monerod and monero-wallet-rpc)
-  public static final String MONERO_BINS_DIR = "/paths/to/bins";
+  public static final String MONERO_BINS_DIR = "";
   
   // monero daemon rpc endpoint configuration (change per your configuration)
   public static final String DAEMON_RPC_URI = "localhost:28081";
