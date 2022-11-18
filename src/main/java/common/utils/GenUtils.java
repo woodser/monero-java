@@ -363,22 +363,32 @@ public class GenUtils {
     try { TimeUnit.MILLISECONDS.sleep(duration); }
     catch (InterruptedException e) { throw new RuntimeException(e); }
   }
-  
+
   /**
-   * Run tasks in parallel and wait to finish.
+   * Execute tasks in parallel.
    * 
-   * @param tasks are the tasks to run in parallel
+   * @param tasks are the tasks to execute in parallel
    */
-  public static void awaitTasks(Collection<Runnable> tasks) {
-    if (tasks.isEmpty()) return;
-    ExecutorService pool = Executors.newFixedThreadPool(tasks.size());
-    for (Runnable task : tasks) pool.submit(task);
-    pool.shutdown();
-    try {
-        if (!pool.awaitTermination(60000, TimeUnit.SECONDS)) pool.shutdownNow();
-    } catch (InterruptedException e) {
-        pool.shutdownNow();
-        throw new RuntimeException(e);
-    }
+  public static void executeTasks(Collection<Runnable> tasks) {
+    executeTasks(tasks, tasks.size());
+  }
+
+  /**
+   * Execute tasks in parallel.
+   * 
+   * @param tasks are the tasks to execute in parallel
+   * @param maxConcurrency is the maximum number of tasks to run in parallel
+   */
+  public static void executeTasks(Collection<Runnable> tasks, int maxConcurrency) {
+      if (tasks.isEmpty()) return;
+      ExecutorService pool = Executors.newFixedThreadPool(maxConcurrency);
+      for (Runnable task : tasks) pool.submit(task);
+      pool.shutdown();
+      try {
+          if (!pool.awaitTermination(60, TimeUnit.SECONDS)) pool.shutdownNow();
+      } catch (InterruptedException e) {
+          pool.shutdownNow();
+          throw new RuntimeException(e);
+      }
   }
 }

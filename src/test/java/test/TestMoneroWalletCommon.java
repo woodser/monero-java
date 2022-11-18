@@ -1312,13 +1312,12 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
-  // NOTE: payment hashes are deprecated so this test will require an old wallet to pass
   @Test
   public void testGetTxsWithPaymentIds() {
     assumeTrue(TEST_NON_RELAYS && !LITE_MODE);
     
     // get random transactions with payment ids for testing
-    List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, new MoneroTxQuery().setHasPaymentId(true), 3, 5);
+    List<MoneroTxWallet> randomTxs = getRandomTransactions(wallet, new MoneroTxQuery().setHasPaymentId(true), 2, 5);
     assertFalse(randomTxs.isEmpty(), "No txs with payment ids to test");
     for (MoneroTxWallet randomTx : randomTxs) {
       assertNotNull(randomTx.getPaymentId());
@@ -2381,7 +2380,7 @@ public abstract class TestMoneroWalletCommon {
     // import outputs hex
     if (outputsHex != null) {
       int numImported = wallet.importOutputs(outputsHex);
-      assertTrue(numImported > 0);
+      assertTrue(numImported >= 0);
     }
     
     // get and test new key images from last import
@@ -3314,7 +3313,6 @@ public abstract class TestMoneroWalletCommon {
     // init tx config
     BigInteger sendAmount = unlockedBalanceBefore.subtract(TestUtils.MAX_FEE).divide(BigInteger.valueOf(SEND_DIVISOR));
     String address = wallet.getPrimaryAddress();
-    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
     config.setDestinations(new MoneroDestination(address, sendAmount));
     config.setAccountIndex(fromAccount.getIndex());
     config.setSubaddressIndices(fromSubaddress.getIndex());
@@ -3332,7 +3330,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // send to self
-    txs.addAll(wallet.createTxs(config));
+    List<MoneroTxWallet> txs = wallet.createTxs(config);
     if (Boolean.FALSE.equals(config.getCanSplit())) assertEquals(1, txs.size());  // must have exactly one tx if no split
     
     // test that config is unchanged
