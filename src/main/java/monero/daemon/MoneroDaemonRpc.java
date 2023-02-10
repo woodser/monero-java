@@ -1234,7 +1234,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         for (Map<String, Object> rpcOutput : rpcOutputs) outputs.add(convertRpcOutput(rpcOutput, tx));
         tx.setOutputs(outputs);
       }
-      else if (key.equals("rct_signatures")) tx.setRctSignatures(GenUtils.reconcile(tx.getRctSignatures(), (Map<String, Object>) val));
+      else if (key.equals("rct_signatures")) {
+        Map<String, Object> rctSignaturesMap = (Map<String, Object>) val;
+        tx.setRctSignatures(GenUtils.reconcile(tx.getRctSignatures(), rctSignaturesMap));
+        if (rctSignaturesMap.containsKey("txnFee")) tx.setFee(GenUtils.reconcile(tx.getFee(), (BigInteger) rctSignaturesMap.get("txnFee")));
+      }
       else if (key.equals("rctsig_prunable")) tx.setRctSigPrunable(GenUtils.reconcile(tx.getRctSigPrunable(), val));
       else if (key.equals("unlock_time")) tx.setUnlockHeight(GenUtils.reconcile(tx.getUnlockHeight(), ((BigInteger) val).longValue()));
       else if (key.equals("as_json") || key.equals("tx_json")) { }  // handled last so tx is as initialized as possible

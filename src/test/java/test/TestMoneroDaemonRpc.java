@@ -1513,6 +1513,7 @@ public class TestMoneroDaemonRpc {
     assertNotNull(tx.getInputs());
     assertNotNull(tx.getOutputs());
     assertTrue(tx.getExtra().length > 0);
+    TestUtils.testUnsignedBigInteger(tx.getFee(), true);
     
     // test presence of output indices
     // TODO: change this over to outputs only
