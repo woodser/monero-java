@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -380,15 +381,23 @@ public class GenUtils {
    * @param maxConcurrency is the maximum number of tasks to run in parallel
    */
   public static void executeTasks(Collection<Runnable> tasks, int maxConcurrency) {
-      if (tasks.isEmpty()) return;
-      ExecutorService pool = Executors.newFixedThreadPool(maxConcurrency);
-      for (Runnable task : tasks) pool.submit(task);
-      pool.shutdown();
-      try {
-          if (!pool.awaitTermination(60, TimeUnit.SECONDS)) pool.shutdownNow();
-      } catch (InterruptedException e) {
-          pool.shutdownNow();
-          throw new RuntimeException(e);
-      }
+    if (tasks.isEmpty()) return;
+    ExecutorService pool = Executors.newFixedThreadPool(maxConcurrency);
+    List<Future<?>> futures = new ArrayList<Future<?>>();
+    for (Runnable task : tasks) futures.add(pool.submit(task));
+    pool.shutdown();
+    try {
+        if (!pool.awaitTermination(60, TimeUnit.SECONDS)) pool.shutdownNow();
+    } catch (InterruptedException e) {
+        pool.shutdownNow();
+        throw new RuntimeException(e);
+    }
+
+    // throw exception from any tasks
+    try {
+        for (Future<?> future : futures) future.get();
+    } catch (Exception e) {
+        throw new RuntimeException(e);
+    }
   }
 }
