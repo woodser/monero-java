@@ -34,6 +34,7 @@ public class TaskLooper {
    * Start the task loop.
    * 
    * @param periodInMs the loop period in milliseconds
+   * @return this instance for chaining
    */
   public synchronized TaskLooper start(long periodInMs) {
     synchronized (this) {
