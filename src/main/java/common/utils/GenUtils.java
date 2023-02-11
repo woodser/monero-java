@@ -358,10 +358,10 @@ public class GenUtils {
   /**
    * Wait for the duration.
    * 
-   * @param duration is the duration to wait for
+   * @param durationMs is the duration to wait for in milliseconds
    */
-  public static void waitFor(long duration) {
-    try { TimeUnit.MILLISECONDS.sleep(duration); }
+  public static void waitFor(long durationMs) {
+    try { TimeUnit.MILLISECONDS.sleep(durationMs); }
     catch (InterruptedException e) { throw new RuntimeException(e); }
   }
 
