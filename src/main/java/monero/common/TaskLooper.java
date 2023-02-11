@@ -20,20 +20,29 @@ public class TaskLooper {
   public TaskLooper(Runnable task) {
     this.task = task;
   }
+
+  /**
+   * Get the runnable task to invoke on a fixed period loop.
+   * 
+   * @return the runnable task
+   */
+  public Runnable getTask() {
+    return task;
+  }
   
   /**
    * Start the task loop.
    * 
    * @param periodInMs the loop period in milliseconds
    */
-  public synchronized void start(long periodInMs) {
+  public synchronized TaskLooper start(long periodInMs) {
     synchronized (this) {
       this.periodInMs = periodInMs;
-      if (isStarted) return;
+      if (isStarted) return this;
       isStarted = true;
       
       // start looping
-      if (isLooping) return;
+      if (isLooping) return this;
       isLooping = true;
       TaskLooper that = this;
       Thread loop = new Thread(new Runnable() {
@@ -58,6 +67,18 @@ public class TaskLooper {
         }
       });
       loop.start();
+    }
+    return this;
+  }
+
+  /**
+   * Indicates if looping.
+   * 
+   * @return true if looping, false otherwise
+   */
+  public boolean isStarted() {
+    synchronized(this) {
+      return isStarted;
     }
   }
   
