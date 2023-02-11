@@ -97,7 +97,7 @@ public class TestUtils {
   public static WalletTxTracker WALLET_TX_TRACKER = new WalletTxTracker();
   
   /**
-   * Get a singleton instance of a monero-daemon-rpc client.
+   * Get a singleton instance of a monerod client.
    */
   private static MoneroDaemonRpc daemonRpc;
   public static MoneroDaemonRpc getDaemonRpc() {

@@ -120,14 +120,14 @@ walletFull.close(true);
 
 `compile 'io.github.monero-ecosystem:monero-java:0.7.10'`
 
-You are now ready to use this library with [monero-daemon-rpc](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.
+You are now ready to use this library with [monerod](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.
 
 If you want to use client-side wallets via native JNI bindings, first [build the JNI shared libraries](#building-jni-shared-libraries-from-source).
 
 #### If using RPC servers:
 
 1. Download and install [Monero CLI](https://web.getmonero.org/downloads/).
-2. Start monero-daemon-rpc, e.g.: `./monerod --stagenet` (or use a remote daemon).
+2. Start monerod, e.g.: `./monerod --stagenet` (or use a remote daemon).
 3. Start monero-wallet-rpc, e.g.: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir ./`
 
 ## Building JNI shared libraries from source
@@ -156,7 +156,7 @@ If you want to process binary data or use a client-side wallet instead of RPC, s
 3. If using JNI, [build JNI shared libraries from source](#building-jni-shared-libraries-from-source).
 3. Start RPC servers:
 	1. Download and install [Monero CLI](https://web.getmonero.org/downloads/).
-	2. Start monero-daemon-rpc, e.g.: `./monerod --stagenet` (or use a remote daemon).
+	2. Start monerod, e.g.: `./monerod --stagenet` (or use a remote daemon).
 	3. Start monero-wallet-rpc, e.g.: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir ./`
 4. Configure the appropriate RPC endpoints, authentication, and other settings in [TestUtils.java](src/test/java/utils/TestUtils.java).
 4. Run all *.java files in src/main/test as JUnits.

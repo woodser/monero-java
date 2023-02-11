@@ -1159,7 +1159,7 @@ public class TestMoneroDaemonRpc {
         fail("Should have thrown error");
       } catch (MoneroRpcError e) {
         assertNotEquals(e.getMessage(), "Should have thrown error");
-        assertEquals(500, (int) e.getCode());  // TODO monero-daemon-rpc: this causes a 500 in daemon rpc
+        assertEquals(500, (int) e.getCode());  // TODO monerod: this causes a 500 in daemon rpc
       }
     }
   }
@@ -1502,7 +1502,7 @@ public class TestMoneroDaemonRpc {
     
     // standard across all txs
     assertEquals(64, tx.getHash().length());
-    if (tx.isRelayed() == null) assertTrue(tx.inTxPool());  // TODO monero-daemon-rpc: add relayed to get_transactions
+    if (tx.isRelayed() == null) assertTrue(tx.inTxPool());  // TODO monerod: add relayed to get_transactions
     else assertNotNull(tx.isRelayed());
     assertNotNull(tx.isConfirmed());
     assertNotNull(tx.inTxPool());
@@ -1577,7 +1577,7 @@ public class TestMoneroDaemonRpc {
     if (tx.isFailed()) {
       assertTrue(tx.getReceivedTimestamp() > 0);
     } else {
-      if (tx.isRelayed() == null) assertEquals(null, tx.getRelay()); // TODO monero-daemon-rpc: add relayed to get_transactions
+      if (tx.isRelayed() == null) assertEquals(null, tx.getRelay()); // TODO monerod: add relayed to get_transactions
       else if (tx.isRelayed()) assertEquals(false, tx.isDoubleSpendSeen());
       else {
         assertEquals(false, tx.isRelayed());
@@ -1606,7 +1606,7 @@ public class TestMoneroDaemonRpc {
     }
     
     // test pruned vs not pruned
-    if (ctx.fromGetTxPool || Boolean.TRUE.equals(ctx.fromBinaryBlock)) assertNull(tx.getPrunableHash());   // TODO monero-daemon-rpc: tx pool txs do not have prunable hash, TODO: getBlocksByHeight() has inconsistent client-side pruning
+    if (ctx.fromGetTxPool || Boolean.TRUE.equals(ctx.fromBinaryBlock)) assertNull(tx.getPrunableHash());   // TODO monerod: tx pool txs do not have prunable hash, TODO: getBlocksByHeight() has inconsistent client-side pruning
     else assertNotNull(tx.getPrunableHash());
     if (ctx.isPruned) {
       assertNull(tx.getRctSigPrunable());

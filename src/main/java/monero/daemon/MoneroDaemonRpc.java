@@ -73,7 +73,7 @@ import monero.daemon.model.MoneroTxPoolStats;
 import monero.daemon.model.MoneroVersion;
 
 /**
- * Implements a Monero daemon using monero-daemon-rpc.
+ * Implements a Monero daemon using monerod.
  * 
  * TODO: every call needs to checkResponseStatus
  */
@@ -487,7 +487,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       }
     }
     
-    // fetch unconfirmed txs from pool and merge additional fields  // TODO monero-daemon-rpc: merge rpc calls so this isn't necessary?
+    // fetch unconfirmed txs from pool and merge additional fields  // TODO monerod: merge rpc calls so this isn't necessary?
     //System.out.println("Fetching from pool...");  // TODO monero-project: getTxPool() can get stuck under certain conditions (observed it before coordinating tx pool as part of tests, so double spend related?)
     List<MoneroTx> poolTxs = getTxPool();
     for (MoneroTx tx : txs) {
@@ -1281,7 +1281,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     // link block and tx
     if (block != null) tx.setBlock(block.setTxs(Arrays.asList(tx)));
     
-    // TODO monero-daemon-rpc: unconfirmed txs misreport block height and timestamp
+    // TODO monerod: unconfirmed txs misreport block height and timestamp
     if (tx.getBlock() != null && tx.getBlock().getHeight() != null && (long) tx.getBlock().getHeight() == tx.getBlock().getTimestamp()) {
       tx.setBlock(null);
       tx.setIsConfirmed(false);
@@ -1304,7 +1304,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     }
     if (rpcTx.containsKey("as_json") && !"".equals(rpcTx.get("as_json"))) convertRpcTx(JsonUtils.deserialize(MoneroRpcConnection.MAPPER, (String) rpcTx.get("as_json"), new TypeReference<Map<String, Object>>(){}), tx);
     if (rpcTx.containsKey("tx_json") && !"".equals(rpcTx.get("tx_json"))) convertRpcTx(JsonUtils.deserialize(MoneroRpcConnection.MAPPER, (String) rpcTx.get("tx_json"), new TypeReference<Map<String, Object>>(){}), tx);
-    if (!Boolean.TRUE.equals(tx.isRelayed())) tx.setLastRelayedTimestamp(null);  // TODO monero-daemon-rpc: returns last_relayed_timestamp despite relayed: false, self inconsistent
+    if (!Boolean.TRUE.equals(tx.isRelayed())) tx.setLastRelayedTimestamp(null);  // TODO monerod: returns last_relayed_timestamp despite relayed: false, self inconsistent
     
     // return built transaction
     return tx;
