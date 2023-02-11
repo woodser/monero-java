@@ -1099,7 +1099,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>txHash</code> - is the hash of the transaction to get</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>the transaction with the given hash</dd>
+<dd>the transaction with the given hash or null if not found</dd>
 </dl>
 </li>
 </ul>
@@ -1117,7 +1117,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd><code>txHash</code> - is the hash of the transaction to get</dd>
 <dd><code>prune</code> - specifies if the returned tx should be pruned (defaults to false)</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>the transaction with the given hash</dd>
+<dd>the transaction with the given hash or null if not found</dd>
 </dl>
 </li>
 </ul>
@@ -1133,7 +1133,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>txHashes</code> - are hashes of transactions to get</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>the transactions with the given hashes</dd>
+<dd>found transactions with the given hashes</dd>
 </dl>
 </li>
 </ul>
@@ -1151,7 +1151,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd><code>txHashes</code> - are hashes of transactions to get</dd>
 <dd><code>prune</code> - specifies if the returned txs should be pruned (defaults to false)</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>the transactions with the given hashes</dd>
+<dd>found transactions with the given hashes</dd>
 </dl>
 </li>
 </ul>

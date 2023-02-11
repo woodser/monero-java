@@ -26,7 +26,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":10,"i1":10,"i2":10};
+var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -178,20 +178,34 @@ extends java.lang.Object</pre>
 <th class="colLast" scope="col">Description</th>
 </tr>
 <tr id="i0" class="altColor">
+<td class="colFirst"><code>java.lang.Runnable</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getTask()">getTask</a></span>()</code></th>
+<td class="colLast">
+<div class="block">Get the runnable task to invoke on a fixed period loop.</div>
+</td>
+</tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isStarted()">isStarted</a></span>()</code></th>
+<td class="colLast">
+<div class="block">Indicates if looping.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPeriodInMs(long)">setPeriodInMs</a></span>&#8203;(long&nbsp;periodInMs)</code></th>
 <td class="colLast">
 <div class="block">Set the loop period in milliseconds.</div>
 </td>
 </tr>
-<tr id="i1" class="rowColor">
-<td class="colFirst"><code>void</code></td>
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code><a href="TaskLooper.html" title="class in monero.common">TaskLooper</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#start(long)">start</a></span>&#8203;(long&nbsp;periodInMs)</code></th>
 <td class="colLast">
 <div class="block">Start the task loop.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#stop()">stop</a></span>()</code></th>
 <td class="colLast">
@@ -246,17 +260,45 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
+<a id="getTask()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getTask</h4>
+<pre class="methodSignature">public&nbsp;java.lang.Runnable&nbsp;getTask()</pre>
+<div class="block">Get the runnable task to invoke on a fixed period loop.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the runnable task</dd>
+</dl>
+</li>
+</ul>
 <a id="start(long)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>start</h4>
-<pre class="methodSignature">public&nbsp;void&nbsp;start&#8203;(long&nbsp;periodInMs)</pre>
+<pre class="methodSignature">public&nbsp;<a href="TaskLooper.html" title="class in monero.common">TaskLooper</a>&nbsp;start&#8203;(long&nbsp;periodInMs)</pre>
 <div class="block">Start the task loop.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>periodInMs</code> - the loop period in milliseconds</dd>
+</dl>
+</li>
+</ul>
+<a id="isStarted()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isStarted</h4>
+<pre class="methodSignature">public&nbsp;boolean&nbsp;isStarted()</pre>
+<div class="block">Indicates if looping.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>true if looping, false otherwise</dd>
 </dl>
 </li>
 </ul>
