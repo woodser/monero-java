@@ -495,6 +495,7 @@ public interface MoneroWallet {
    * 
    * @param txHash is the hash of a transaction to get
    * @return the identified transactions
+   * @throws MoneroError if the transaction is not found
    */
   public MoneroTxWallet getTx(String txHash);
   
@@ -511,6 +512,7 @@ public interface MoneroWallet {
    * 
    * @param txHashes are hashes of transactions to get
    * @return the identified transactions
+   * @throws MoneroError if a transaction is not found
    */
   public List<MoneroTxWallet> getTxs(String... txHashes);
   
@@ -519,6 +521,7 @@ public interface MoneroWallet {
    * 
    * @param txHashes are hashes of transactions to get
    * @return the identified transactions
+   * @throws MoneroError if a transaction is not found
    */
   public List<MoneroTxWallet> getTxs(List<String> txHashes);
   

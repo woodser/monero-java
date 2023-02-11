@@ -237,7 +237,7 @@ public interface MoneroDaemon {
    * Get a transaction by hash.
    * 
    * @param txHash is the hash of the transaction to get
-   * @return the transaction with the given hash
+   * @return the transaction with the given hash or null if not found
    */
   public MoneroTx getTx(String txHash);
   
@@ -246,7 +246,7 @@ public interface MoneroDaemon {
    * 
    * @param txHash is the hash of the transaction to get
    * @param prune specifies if the returned tx should be pruned (defaults to false)
-   * @return the transaction with the given hash
+   * @return the transaction with the given hash or null if not found
    */
   public MoneroTx getTx(String txHash, Boolean prune);
   
@@ -254,7 +254,7 @@ public interface MoneroDaemon {
    * Get transactions by hashes.
    * 
    * @param txHashes are hashes of transactions to get
-   * @return the transactions with the given hashes
+   * @return found transactions with the given hashes
    */
   public List<MoneroTx> getTxs(Collection<String> txHashes);
   
@@ -263,7 +263,7 @@ public interface MoneroDaemon {
    * 
    * @param txHashes are hashes of transactions to get
    * @param prune specifies if the returned txs should be pruned (defaults to false)
-   * @return the transactions with the given hashes
+   * @return found transactions with the given hashes
    */
   public List<MoneroTx> getTxs(Collection<String> txHashes, Boolean prune);
   
