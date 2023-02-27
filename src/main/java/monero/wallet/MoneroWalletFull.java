@@ -88,16 +88,19 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private long jniWalletHandle;                 // memory address of the wallet in c++; this variable is read directly by name in c++
   private long jniListenerHandle;               // memory address of the wallet listener in c++; this variable is read directly by name in c++
   private WalletJniListener jniListener;        // receives notifications from jni c++
+  private String password;
   private boolean isClosed;                     // whether or not wallet is closed
   
   /**
    * Private constructor with a handle to the memory address of the wallet in c++.
    * 
-   * @param jniWalletHandle is the memory address of the wallet in c++
+   * @param jniWalletHandle memory address of the wallet in c++
+   * @param password password of the wallet instance
    */
-  private MoneroWalletFull(long jniWalletHandle) {
+  private MoneroWalletFull(long jniWalletHandle, String password) {
     this.jniWalletHandle = jniWalletHandle;
     this.jniListener = new WalletJniListener();
+    this.password = password;
     this.isClosed = false;
   }
   
@@ -126,12 +129,30 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     if (!walletExistsJni(path)) throw new MoneroError("Wallet does not exist at path: " + path);
     if (networkType == null) throw new MoneroError("Must provide a network type");
     long jniWalletHandle = openWalletJni(path, password, networkType.ordinal());
-    MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle);
+    MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle, password);
     if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
     return wallet;
   }
   public static MoneroWalletFull openWallet(String path, String password, MoneroNetworkType networkType) { return openWallet(path, password, networkType, (MoneroRpcConnection) null); }
   public static MoneroWalletFull openWallet(String path, String password, MoneroNetworkType networkType, String daemonUri) { return openWallet(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri)); }
+
+  /**
+   * Open an existing wallet from byte[] data using JNI bindings to wallet2.h
+   * 
+   * @param password the password of the wallet file to open
+   * @param networkType the wallet's network type
+   * @param keysData the wallet's keys data
+   * @param cacheData the wallet's cache data
+   * @param daemonConnection connection configuration to a daemon (default = an unconnected wallet)
+   * @return the opened wallet
+   */
+  public static MoneroWalletFull openWalletData(String password, MoneroNetworkType networkType, byte[] keysData, byte[] cacheData, MoneroRpcConnection daemonConnection) {
+    if (networkType == null) throw new MoneroError("Must provide a network type");
+    long jniWalletHandle = openWalletDataJni(password, networkType.ordinal(), keysData, cacheData);
+    MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle, password);
+    if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
+    return wallet;
+  }
   
   /**
    * <p>Open an existing wallet using JNI bindings to wallet2.h.</p>
@@ -164,7 +185,6 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     
     // validate config
     if (config == null) throw new MoneroError("Must specify config to open wallet");
-    if (config.getPath() == null) throw new MoneroError("Must specify path to open wallet");
     if (config.getPassword() == null) throw new MoneroError("Must specify password to decrypt wallet");
     if (config.getNetworkType() == null) throw new MoneroError("Must specify a network type: 'mainnet', 'testnet' or 'stagenet'");
     if (config.getMnemonic() != null) throw new MoneroError("Cannot specify mnemonic when opening wallet");
@@ -175,9 +195,13 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     if (config.getRestoreHeight() != null) throw new MoneroError("Cannot specify restore height when opening wallet");
     if (config.getLanguage() != null) throw new MoneroError("Cannot specify language when opening wallet");
     if (Boolean.TRUE.equals(config.getSaveCurrent())) throw new MoneroError("Cannot save current wallet when opening full wallet");
-    
-    // open wallet
-    return openWallet(config.getPath(), config.getPassword(), config.getNetworkType(), config.getServer());
+
+    // read wallet data from disk if not provided
+    if (config.getKeysData() == null) {
+      return openWallet(config.getPath(), config.getPassword(), config.getNetworkType(), config.getServer());
+    } else {
+      return openWalletData(config.getPassword(), config.getNetworkType(), config.getKeysData(), config.getCacheData(), config.getServer());
+    }
   }
   
   /**
@@ -258,7 +282,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private static MoneroWalletFull createWalletFromMnemonic(MoneroWalletConfig config) {
     if (config.getRestoreHeight() == null) config.setRestoreHeight(0l);
     long jniWalletHandle = createWalletJni(serializeWalletConfig(config));
-    MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle);
+    MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle, config.getPassword());
     wallet.setDaemonConnection(config.getServer());
     return wallet;
   }
@@ -268,7 +292,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     if (config.getLanguage() == null) config.setLanguage(DEFAULT_LANGUAGE);
     try {
       long jniWalletHandle = createWalletJni(serializeWalletConfig(config));
-      MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle);
+      MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle, config.getPassword());
       wallet.setDaemonConnection(config.getServer());
       return wallet;
     } catch (Exception e) {
@@ -279,7 +303,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private static MoneroWalletFull createWalletRandom(MoneroWalletConfig config) {
     if (config.getLanguage() == null) config.setLanguage(DEFAULT_LANGUAGE);
     long jniWalletHandle = createWalletJni(serializeWalletConfig(config));
-    return new MoneroWalletFull(jniWalletHandle);
+    return new MoneroWalletFull(jniWalletHandle, config.getPassword());
   }
   
   private static String serializeWalletConfig(MoneroWalletConfig config) {
@@ -1215,6 +1239,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   @Override
   public MoneroMultisigInfo getMultisigInfo() {
+    assertNotClosed();
     try {
       String multisigInfoJson = getMultisigInfoJni();
       return JsonUtils.deserialize(multisigInfoJson, MoneroMultisigInfo.class);
@@ -1225,11 +1250,13 @@ public class MoneroWalletFull extends MoneroWalletDefault {
 
   @Override
   public String prepareMultisig() {
+    assertNotClosed();
     return prepareMultisigJni();
   }
 
   @Override
   public String makeMultisig(List<String> multisigHexes, int threshold, String password) {
+    assertNotClosed();
     try {
       return makeMultisigJni(multisigHexes.toArray(new String[multisigHexes.size()]), threshold, password);
     } catch (Exception e) {
@@ -1239,6 +1266,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
 
   @Override
   public MoneroMultisigInitResult exchangeMultisigKeys(List<String> multisigHexes, String password) {
+    assertNotClosed();
     try {
       String initMultisigResultJson = exchangeMultisigKeysJni(multisigHexes.toArray(new String[multisigHexes.size()]), password);
       return JsonUtils.deserialize(initMultisigResultJson, MoneroMultisigInitResult.class);
@@ -1249,6 +1277,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
 
   @Override
   public String exportMultisigHex() {
+    assertNotClosed();
     try {
       return exportMultisigHexJni();
     } catch (Exception e) {
@@ -1258,6 +1287,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
 
   @Override
   public int importMultisigHex(List<String> multisigHexes) {
+    assertNotClosed();
     try {
       return importMultisigHexJni(multisigHexes.toArray(new String[multisigHexes.size()]));
     } catch (Exception e) {
@@ -1267,6 +1297,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
 
   @Override
   public MoneroMultisigSignResult signMultisigTxHex(String multisigTxHex) {
+    assertNotClosed();
     try {
       String signMultisigResultJson = signMultisigTxHexJni(multisigTxHex);
       return JsonUtils.deserialize(signMultisigResultJson, MoneroMultisigSignResult.class);
@@ -1277,11 +1308,21 @@ public class MoneroWalletFull extends MoneroWalletDefault {
 
   @Override
   public List<String> submitMultisigTxHex(String signedMultisigTxHex) {
+    assertNotClosed();
     try {
       return Arrays.asList(submitMultisigTxHexJni(signedMultisigTxHex));
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
+  }
+
+  /**
+   * Get the wallet's keys and cache data.
+   * 
+   * @return the keys and cache data, respectively
+   */
+  public synchronized byte[][] getData() {
+    return new byte[][] { getKeysFileBufferJni(password, isViewOnly()), getCacheFileBufferJni(password) };
   }
   
   @Override
@@ -1303,6 +1344,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   public void close(boolean save) {
     if (isClosed) return; // closing a closed wallet has no effect
     isClosed = true;
+    password = null;
     refreshListening();
     try {
       closeJni(save);
@@ -1321,6 +1363,8 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private native static boolean walletExistsJni(String path);
   
   private native static long openWalletJni(String path, String password, int networkType);
+
+  private native static long openWalletDataJni(String password, int networkType, byte[] keysData, byte[] cacheData);
   
   private native static long createWalletJni(String walletConfigJson);
   
@@ -1511,6 +1555,10 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private native String signMultisigTxHexJni(String multisigTxHex);
   
   private native String[] submitMultisigTxHexJni(String signedMultisigTxHex);
+
+  private native byte[] getKeysFileBufferJni(String password, boolean viewOnly);
+
+  private native byte[] getCacheFileBufferJni(String password);
   
   private native void changePasswordJni(String oldPassword, String newPassword);
   

@@ -984,7 +984,41 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       wallet.close();
     }
   }
-  
+
+  // Can export and import wallet files
+  @Test
+  public void testGetData() {
+    assumeTrue(TEST_NON_RELAYS);
+    MoneroWalletFull wallet = null;
+    MoneroWalletFull wallet2 = null;
+    try {
+
+      // create random wallet
+      wallet = MoneroWalletFull.createWallet(new MoneroWalletConfig()
+              .setNetworkType(MoneroNetworkType.MAINNET)
+              .setPassword("password123"));
+
+      // export wallet files
+      byte[][] walletData = wallet.getData();
+      byte[] keysData = walletData[0];
+      byte[] cacheData = walletData[1];
+      
+      // import wallet files
+      wallet2 = MoneroWalletFull.openWallet(new MoneroWalletConfig()
+          .setNetworkType(MoneroNetworkType.MAINNET)
+          .setPassword("password123")
+          .setKeysData(keysData)
+          .setCacheData(cacheData));
+
+      // test that wallets are equal
+      assertEquals(wallet2.getMnemonic(), wallet.getMnemonic());
+      testWalletEqualityOnChain(wallet, wallet2);
+    } finally {
+      if (wallet != null) wallet.close();
+      if (wallet2 != null) wallet2.close();
+    }
+  }
+
   // Can be moved
   // TODO: update to be consistent with monero-javascript, file issues with wallet2 store_to()
   @Test

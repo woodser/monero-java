@@ -43,7 +43,8 @@ public class WalletEqualityUtils {
     TestUtils.WALLET_TX_TRACKER.reset(); // all wallets need to wait for txs to confirm to reliably sync
     
     // wait for relayed txs associated with wallets to clear pool
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(w1, w2);
+    assertEquals(w1.isConnectedToDaemon(), w2.isConnectedToDaemon());
+    if (w1.isConnectedToDaemon()) TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(w1, w2);
     
     // sync the wallets until same height
     while (w1.getHeight() != w2.getHeight()) {

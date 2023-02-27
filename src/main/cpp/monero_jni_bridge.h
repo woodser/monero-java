@@ -63,6 +63,8 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_walletExistsJni(J
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletJni(JNIEnv *, jclass, jstring, jstring, jint);
 
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletDataJni(JNIEnv *, jclass, jstring, jint, jbyteArray, jbyteArray);
+
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_createWalletJni(JNIEnv *, jclass, jstring);
 
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getMnemonicLanguagesJni(JNIEnv *, jclass);
@@ -262,6 +264,10 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_moveToJni(JNIEnv *, j
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_saveJni(JNIEnv *, jobject);
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_closeJni(JNIEnv *, jobject, jboolean);
+
+JNIEXPORT jbyteArray JNICALL Java_monero_wallet_MoneroWalletFull_getKeysFileBufferJni(JNIEnv *, jobject, jstring, jboolean);
+
+JNIEXPORT jbyteArray JNICALL Java_monero_wallet_MoneroWalletFull_getCacheFileBufferJni(JNIEnv *, jobject, jstring);
 
 #ifdef __cplusplus
 }

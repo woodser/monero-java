@@ -24,6 +24,8 @@ public class MoneroWalletConfig {
   private Boolean saveCurrent;
   private Integer accountLookahead;     // number of accounts to scan
   private Integer subaddressLookahead;  // number of subaddresses to scan per account
+  private byte[] keysData;
+  private byte[] cacheData;
   
   public String getPath() {
     return path;
@@ -194,5 +196,23 @@ public class MoneroWalletConfig {
   
   public Integer getSubaddressLookahead() {
     return subaddressLookahead;
+  }
+
+  public byte[] getKeysData() {
+    return keysData;
+  }
+
+  public MoneroWalletConfig setKeysData(byte[] keysData) {
+    this.keysData = keysData;
+    return this;
+  }
+
+  public byte[] getCacheData() {
+    return cacheData;
+  }
+
+  public MoneroWalletConfig setCacheData(byte[] cacheData) {
+    this.cacheData = cacheData;
+    return this;
   }
 }
