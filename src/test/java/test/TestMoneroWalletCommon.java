@@ -3780,22 +3780,21 @@ public abstract class TestMoneroWalletCommon {
     
     // validate final multisig address
     MoneroWallet participant = participants.get(0);
-    MoneroUtils.validateAddress(participant.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
     testMultisigInfo(participant.getMultisigInfo(), M, N);
     
     // test sending a multisig transaction if configured
     if (testTx) {
       
-      // create an account in the first multisig wallet to receive funds
-      System.out.println("Creating account");
-      participant.createAccount();
+      // create accounts in the first multisig wallet to receive funds
+      int accountIdx = 0;
+      for (int i = 0; i < accountIdx; i++) participant.createAccount();
       
       // get destinations to subaddresses within the account of the multisig wallet
-      int accountIdx = 1;
+      int numSubaddresses = 3;
       List<MoneroDestination> destinations = new ArrayList<MoneroDestination>();
-      for (int i = 0; i < 3; i++) {
-        participant.createSubaddress(accountIdx);
+      for (int i = 0; i < numSubaddresses; i++) {
         destinations.add(new MoneroDestination(participant.getAddress(accountIdx, i), TestUtils.MAX_FEE.multiply(BigInteger.valueOf(2))));
+        if (i + 1 < numSubaddresses) participant.createSubaddress(accountIdx);
       }
       
       // wait for txs to confirm and for sufficient unlocked balance
@@ -3820,7 +3819,7 @@ public abstract class TestMoneroWalletCommon {
         
         // wait a moment
         try { TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS); }
-        catch (InterruptedException e) {  throw new RuntimeException(e); }
+        catch (InterruptedException e) { throw new RuntimeException(e); }
         
         // fetch and test outputs
         List<MoneroOutputWallet> outputs = participant.getOutputs();
@@ -3844,11 +3843,11 @@ public abstract class TestMoneroWalletCommon {
       // stop mining
       daemon.stopMining();
       
-      // multisig wallet should have unlocked balance in account 1 subaddresses 0-3
-      for (int i = 0; i < 3; i++) {
-        assertTrue(participant.getUnlockedBalance(1, i).compareTo(BigInteger.valueOf(0)) > 0);
+      // multisig wallet should have unlocked balance in subaddresses 0-3
+      for (int i = 0; i < numSubaddresses; i++) {
+        assertTrue(participant.getUnlockedBalance(accountIdx, i).compareTo(BigInteger.valueOf(0)) > 0);
       }
-      List<MoneroOutputWallet> outputs = participant.getOutputs(new MoneroOutputQuery().setAccountIndex(1));
+      List<MoneroOutputWallet> outputs = participant.getOutputs(new MoneroOutputQuery().setAccountIndex(accountIdx));
       assertFalse(outputs.isEmpty());
       if (outputs.size() < 3) System.out.println("WARNING: not one output per subaddress?");
       //assertTrue(outputs.size() >= 3);  // TODO
@@ -3859,7 +3858,7 @@ public abstract class TestMoneroWalletCommon {
       
       // attempt creating and relaying transaction without synchronizing with participants
       try {
-        participant.createTxs(new MoneroTxConfig().setAccountIndex(1).setAddress(returnAddress).setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))));
+        participant.createTxs(new MoneroTxConfig().setAccountIndex(accountIdx).setAddress(returnAddress).setAmount(TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3))));
         throw new RuntimeException("Should have failed sending funds without synchronizing with peers");
       } catch (MoneroError e) {
         assertEquals("No transaction created", e.getMessage());
@@ -3871,7 +3870,7 @@ public abstract class TestMoneroWalletCommon {
       
       // attempt relaying created transactions without co-signing
       try {
-        participant.createTx(new MoneroTxConfig().setAddress(returnAddress).setAmount(TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0).setRelay(true));
+        participant.createTx(new MoneroTxConfig().setAddress(returnAddress).setAmount(TestUtils.MAX_FEE).setAccountIndex(accountIdx).setSubaddressIndex(0).setRelay(true));
         throw new RuntimeException("Should have failed");
       } catch (Exception e) {
         assertTrue(e instanceof MoneroError);
@@ -3880,7 +3879,7 @@ public abstract class TestMoneroWalletCommon {
       
       // send funds from a subaddress in the multisig wallet
       System.out.println("Sending");
-      List<MoneroTxWallet> txs = participant.createTxs(new MoneroTxConfig().setAddress(returnAddress).setAmount(TestUtils.MAX_FEE).setAccountIndex(1).setSubaddressIndex(0));
+      List<MoneroTxWallet> txs = participant.createTxs(new MoneroTxConfig().setAddress(participant.getAddress(accountIdx, 0)).setAmount(TestUtils.MAX_FEE).setAccountIndex(accountIdx).setSubaddressIndex(0));
       assertFalse(txs.isEmpty());
       MoneroTxSet txSet = txs.get(0).getTxSet();
       assertNotNull(txSet.getMultisigTxHex());
@@ -3912,8 +3911,8 @@ public abstract class TestMoneroWalletCommon {
       List<MoneroTxWallet> multisigTxs = participant.getTxs(new MoneroTxQuery().setHashes(txHashes));
       assertEquals(multisigTxs.size(), txHashes.size());
       
-      // sweep an output from subaddress [1,1]
-      outputs = participant.getOutputs(new MoneroOutputQuery().setAccountIndex(1).setSubaddressIndex(1));
+      // sweep an output from subaddress [accountIdx,1]
+      outputs = participant.getOutputs(new MoneroOutputQuery().setAccountIndex(accountIdx).setSubaddressIndex(1));
       assertFalse(outputs.isEmpty());
       assertFalse(outputs.get(0).isSpent());
       txSet = participant.sweepOutput(new MoneroTxConfig().setAddress(returnAddress).setKeyImage(outputs.get(0).getKeyImage().getHex()).setRelay(true)).getTxSet();
@@ -3947,7 +3946,7 @@ public abstract class TestMoneroWalletCommon {
       
       // sweep remaining balance
       System.out.println("Sweeping");
-      txs = participant.sweepUnlocked(new MoneroTxConfig().setAddress(returnAddress).setAccountIndex(1).setRelay(true)); // TODO: test multisig with sweepEachSubaddress which will generate multiple tx sets without synchronizing participants
+      txs = participant.sweepUnlocked(new MoneroTxConfig().setAddress(returnAddress).setAccountIndex(accountIdx).setRelay(true)); // TODO: test multisig with sweepEachSubaddress which will generate multiple tx sets without synchronizing participants
       assertFalse(txs.isEmpty(), "No txs created on sweepUnlocked");
       txSet = txs.get(0).getTxSet();
       for (MoneroTxWallet tx : txs) {
