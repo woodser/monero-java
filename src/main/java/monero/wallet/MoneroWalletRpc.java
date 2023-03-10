@@ -1824,7 +1824,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("enable_multisig_experimental", true);
     Map<String, Object> resp = rpc.sendJsonRequest("prepare_multisig", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (String) result.get("multisig_info");
+    String msInfo = (String) result.get("multisig_info");
+    addressCache.clear();
+    return msInfo;
   }
 
   @Override
@@ -1836,7 +1838,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("password", password);
     Map<String, Object> resp = rpc.sendJsonRequest("make_multisig", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (String) result.get("multisig_info");
+    String msInfo = (String) result.get("multisig_info");
+    addressCache.clear();
+    return msInfo;
   }
 
   @Override
@@ -1847,6 +1851,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("password", password);
     Map<String, Object> resp = rpc.sendJsonRequest("exchange_multisig_keys", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    addressCache.clear();
     MoneroMultisigInitResult msResult = new MoneroMultisigInitResult();
     msResult.setAddress((String) result.get("address"));
     msResult.setMultisigHex((String) result.get("multisig_info"));
