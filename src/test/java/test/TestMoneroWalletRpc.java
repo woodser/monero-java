@@ -603,6 +603,12 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
 
   @Override
   @Test
+  public void testSetAccountLabel() {
+    super.testSetAccountLabel();
+  }
+
+  @Override
+  @Test
   public void testGetSubaddresses() {
     super.testGetSubaddresses();
   }
@@ -627,6 +633,12 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
 
   @Override
   @Test
+  public void testSetSubaddressLabel() {
+    super.testSetSubaddressLabel();
+  }
+  
+  @Override
+  @Test
   public void testGetSubaddressAddress() {
     super.testGetSubaddressAddress();
   }
@@ -646,6 +658,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Override
   @Test
   public void testGetTxsWallet() {
+    MoneroUtils.setLogLevel(3);
     super.testGetTxsWallet();
   }
   

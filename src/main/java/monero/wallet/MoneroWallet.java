@@ -446,6 +446,14 @@ public interface MoneroWallet {
    * @return the created account
    */
   public MoneroAccount createAccount(String label);
+
+  /**
+   * Set an account label.
+   * 
+   * @param accountIdx index of the account to set the label for
+   * @param label the label to set
+   */
+  public void setAccountLabel(int accountIdx, String label);
   
   /**
    * Get all subaddresses in an account.
@@ -489,7 +497,16 @@ public interface MoneroWallet {
    * @return the created subaddress
    */
   public MoneroSubaddress createSubaddress(int accountIdx, String label);
-  
+
+  /**
+   * Set a subaddress label.
+   * 
+   * @param accountIdx index of the account to set the label for
+   * @param subaddressIdx index of the subaddress to set the label for
+   * @param label the label to set
+   */
+  public void setSubaddressLabel(int accountIdx, int subaddressIdx, String label);
+
   /**
    * Get a wallet transaction by hash.
    * 

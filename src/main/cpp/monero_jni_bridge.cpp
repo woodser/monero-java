@@ -1027,6 +1027,19 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_createSubaddressJn
   return env->NewStringUTF(subaddress_json.c_str());
 }
 
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setSubaddressLabelJni(JNIEnv* env, jobject instance, jint account_idx, jint subaddress_idx, jstring jlabel) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_setSubaddressLabelJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  const char* _label = jlabel ? env->GetStringUTFChars(jlabel, NULL) : nullptr;
+  string label = string(_label ? _label : "");
+  env->ReleaseStringUTFChars(jlabel, _label);
+  try {
+    wallet->set_subaddress_label(account_idx, subaddress_idx, label);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getTxsJni(JNIEnv* env, jobject instance, jstring jtx_query) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_getTxsJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);

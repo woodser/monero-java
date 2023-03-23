@@ -883,6 +883,19 @@ public abstract class TestMoneroWalletCommon {
     createdAccount = wallet.getAccount(createdAccount.getIndex());
     testAccount(createdAccount);
   }
+
+  // Can set account labels
+  @Test
+  public void testSetAccountLabel() {
+
+    // create account
+    if (wallet.getAccounts().size() < 2) wallet.createAccount();
+
+    // set account label
+    String label = GenUtils.getUUID();
+    wallet.setAccountLabel(1, label);
+    assertEquals(label, wallet.getSubaddress(1, 0).getLabel());
+  }
   
   // Can get subaddresses at a specified account index
   @Test
@@ -975,6 +988,21 @@ public abstract class TestMoneroWalletCommon {
       subaddressesNew = wallet.getSubaddresses(accountIdx);
       assertEquals(subaddresses.size(), subaddressesNew.size() - 1);
       assertEquals(subaddress, subaddressesNew.get(subaddressesNew.size() - 1));
+    }
+  }
+
+  // Can set subaddress labels
+  @Test
+  public void testSetSubaddressLabel() {
+
+    // create subaddresses
+    while (wallet.getSubaddresses(0).size() < 3) wallet.createSubaddress(0);
+
+    // set subaddress labels
+    for (int subaddressIdx = 0; subaddressIdx < wallet.getSubaddresses(0).size(); subaddressIdx++) {
+      String label = GenUtils.getUUID();
+      wallet.setSubaddressLabel(0, subaddressIdx, label);
+      assertEquals(label, wallet.getSubaddress(0, subaddressIdx).getLabel());
     }
   }
   

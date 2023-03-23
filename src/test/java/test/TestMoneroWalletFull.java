@@ -1629,6 +1629,12 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 
   @Override
   @Test
+  public void testSetAccountLabel() {
+    super.testSetAccountLabel();
+  }
+
+  @Override
+  @Test
   public void testGetSubaddresses() {
     super.testGetSubaddresses();
   }
@@ -1649,6 +1655,12 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   @Test
   public void testCreateSubaddress() {
     super.testCreateSubaddress();
+  }
+
+  @Override
+  @Test
+  public void testSetSubaddressLabel() {
+    super.testSetSubaddressLabel();
   }
 
   @Override

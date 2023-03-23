@@ -947,7 +947,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     subaddress.setNumBlocksToUnlock(0l);
     return subaddress;
   }
-  
+
+  @Override
+  public void setSubaddressLabel(int accountIdx, int subaddressIdx, String label) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    Map<String, Integer> idx = new HashMap<String, Integer>();
+    idx.put("major", accountIdx);
+    idx.put("minor", subaddressIdx);
+    params.put("index", idx);
+    params.put("label", label);
+    rpc.sendJsonRequest("label_address", params);
+  }
+
   @Override
   public List<MoneroTxWallet> getTxs(MoneroTxQuery query, Collection<String> missingTxHashes) {
     

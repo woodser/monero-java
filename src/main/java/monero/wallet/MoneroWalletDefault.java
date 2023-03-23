@@ -169,6 +169,11 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   public MoneroAccount createAccount() {
     return createAccount(null);
   }
+
+  @Override
+  public void setAccountLabel(int accountIdx, String label) {
+    setSubaddressLabel(accountIdx, 0, label);
+  }
   
   @Override
   public List<MoneroSubaddress> getSubaddresses(int accountIdx) {
