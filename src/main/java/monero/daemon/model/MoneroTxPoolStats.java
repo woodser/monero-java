@@ -1,5 +1,8 @@
 package monero.daemon.model;
 
+import java.math.BigInteger;
+import java.util.Map;
+
 /**
  * Models transaction pool statistics.
  */
@@ -10,12 +13,12 @@ public class MoneroTxPoolStats {
   private Integer numFailing;
   private Integer numDoubleSpends;
   private Integer num10m;
-  private Long feeTotal;
+  private BigInteger feeTotal;
   private Long bytesMax;
   private Long bytesMed;
   private Long bytesMin;
   private Long bytesTotal;
-  private Object histo;
+  private Map<Long, Integer> histo;
   private Long histo98pc;
   private Long oldestTimestamp;
   
@@ -59,11 +62,11 @@ public class MoneroTxPoolStats {
     this.num10m = num10m;
   }
   
-  public Long getFeeTotal() {
+  public BigInteger getFeeTotal() {
     return feeTotal;
   }
   
-  public void setFeeTotal(Long feeTotal) {
+  public void setFeeTotal(BigInteger feeTotal) {
     this.feeTotal = feeTotal;
   }
   
@@ -99,11 +102,11 @@ public class MoneroTxPoolStats {
     this.bytesTotal = bytesTotal;
   }
   
-  public Object getHisto() {
+  public Map<Long, Integer> getHisto() {
     return histo;
   }
   
-  public void setHisto(Object histo) {
+  public void setHisto(Map<Long, Integer> histo) {
     this.histo = histo;
   }
   

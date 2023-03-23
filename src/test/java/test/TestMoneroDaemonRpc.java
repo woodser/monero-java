@@ -14,8 +14,11 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
@@ -662,25 +665,31 @@ public class TestMoneroDaemonRpc {
   public void testGetTxPoolStatisticsBin() {
     assumeTrue(TEST_NON_RELAYS);
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
-    
-    // submit txs to the pool but don't relay (multiple txs result in binary `histo` field)
-    for (int i = 1; i < 3; i++) {
+    Throwable err = null;
+    Collection<String> txIds = new HashSet<String>();
+    try {
+
+      // submit txs to the pool but don't relay (multiple txs result in binary `histo` field)
+      for (int i = 1; i < 3; i++) {
       
-      // submit tx hex
-      MoneroTx tx =  getUnrelayedTx(wallet, i);
-      MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
-      assertTrue(result.isGood());
-      
-      // test stats
-      try {
+        // submit tx hex
+        MoneroTx tx =  getUnrelayedTx(wallet, i);
+        MoneroSubmitTxResult result = daemon.submitTxHex(tx.getFullHex(), true);
+        assertTrue(result.isGood(), JsonUtils.serialize(result));
+        txIds.add(tx.getHash());
+        
+        // get tx pool stats
         MoneroTxPoolStats stats = daemon.getTxPoolStats();
-        assertTrue(stats.getNumTxs() > i);
+        assertTrue(stats.getNumTxs() > i - 1);
         testTxPoolStats(stats);
-      } finally {
-        daemon.flushTxPool(tx.getHash());
-        wallet.sync();
       }
+    } catch (Throwable e) {
+      err = e;
     }
+
+    // flush txs
+    daemon.flushTxPool(txIds);
+    if (err != null) throw new RuntimeException(err);
   }
   
   // Can flush all transactions from the pool
@@ -1760,8 +1769,12 @@ public class TestMoneroDaemonRpc {
     if (stats.getNumTxs() > 0) {
       if (stats.getNumTxs() == 1) assertNull(stats.getHisto());
       else {
-        assertNotNull(stats.getHisto());
-        fail("Ready to test histogram");
+        Map<Long, Integer> histo = stats.getHisto();
+        assertNotNull(histo);
+        assertTrue(histo.size() > 0);
+        for (Long key : histo.keySet()) {
+          assertTrue(histo.get(key) >= 0);
+        }
       }
       assertTrue(stats.getBytesMax() > 0);
       assertTrue(stats.getBytesMed() > 0);

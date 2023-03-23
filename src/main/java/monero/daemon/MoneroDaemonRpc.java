@@ -600,24 +600,12 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     throw new RuntimeException("MoneroDaemonRpc.getTxPoolBacklog() not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public MoneroTxPoolStats getTxPoolStats() {
-    throw new MoneroError("Response contains field 'histo' which is binary'");
-//    let resp = await this.config.rpc.sendPathRequest("get_transaction_pool_stats");
-//    MoneroDaemonRpc._checkResponseStatus(resp);
-//    let stats = MoneroDaemonRpc._convertRpcTxPoolStats(resp.pool_stats);
-//
-//    // uninitialize some stats if not applicable
-//    if (stats.getHisto98pc() === 0) stats.setHisto98pc(undefined);
-//    if (stats.getNumTxs() === 0) {
-//      stats.setBytesMin(undefined);
-//      stats.setBytesMed(undefined);
-//      stats.setBytesMax(undefined);
-//      stats.setHisto98pc(undefined);
-//      stats.setOldestTimestamp(undefined);
-//    }
-//
-//    return stats;
+    Map<String, Object> resp = rpc.sendPathRequest("get_transaction_pool_stats");
+    checkResponseStatus(resp);
+    return convertRpcTxPoolStats((Map<String, Object>) resp.get("pool_stats"));
   }
 
   @Override
@@ -1370,6 +1358,44 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     if ("".equals(result.getVersion())) result.setVersion(null);
     if ("".equals(result.getHash())) result.setHash(null);
     return result;
+  }
+
+  @SuppressWarnings("unchecked")
+  private MoneroTxPoolStats convertRpcTxPoolStats(Map<String, Object> rpcStats) {
+    MoneroTxPoolStats stats = new MoneroTxPoolStats();
+    for (String key : rpcStats.keySet()) {
+      Object val = rpcStats.get(key);
+      if (key.equals("bytes_max")) stats.setBytesMax(((BigInteger) val).longValue());
+      else if (key.equals("bytes_med")) stats.setBytesMed(((BigInteger) val).longValue());
+      else if (key.equals("bytes_min")) stats.setBytesMin(((BigInteger) val).longValue());
+      else if (key.equals("bytes_total")) stats.setBytesTotal(((BigInteger) val).longValue());
+      else if (key.equals("histo_98pc")) stats.setHisto98pc(((BigInteger) val).longValue());
+      else if (key.equals("num_10m")) stats.setNum10m(((BigInteger) val).intValue());
+      else if (key.equals("num_double_spends")) stats.setNumDoubleSpends(((BigInteger) val).intValue());
+      else if (key.equals("num_failing")) stats.setNumFailing(((BigInteger) val).intValue());
+      else if (key.equals("num_not_relayed")) stats.setNumNotRelayed(((BigInteger) val).intValue());
+      else if (key.equals("oldest")) stats.setOldestTimestamp(((BigInteger) val).longValue());
+      else if (key.equals("txs_total")) stats.setNumTxs(((BigInteger) val).intValue());
+      else if (key.equals("fee_total")) stats.setFeeTotal((BigInteger) val);
+      else if (key.equals("histo")) {
+        stats.setHisto(new HashMap<Long, Integer>());
+        for (Map<String, BigInteger> elem : (List<Map<String, BigInteger>>) val) {
+          stats.getHisto().put(((BigInteger) elem.get("bytes")).longValue(), ((BigInteger) elem.get("txs")).intValue());
+        }
+      }
+      else LOGGER.warning("ignoring unexpected field in tx pool stats: '" + key + "': " + val);
+    }
+
+    // uninitialize some stats if not applicable
+    if (stats.getHisto98pc() == 0) stats.setHisto98pc(null);
+    if (stats.getNumTxs() == 0) {
+      stats.setBytesMin(null);
+      stats.setBytesMed(null);
+      stats.setBytesMax(null);
+      stats.setHisto98pc(null);
+      stats.setOldestTimestamp(null);
+    }
+    return stats;
   }
   
   private static MoneroDaemonUpdateDownloadResult convertRpcUpdateDownloadResult(Map<String, Object> rpcResult) {
