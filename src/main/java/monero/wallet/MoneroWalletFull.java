@@ -692,6 +692,13 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
 
   @Override
+  public void setSubaddressLabel(int accountIdx, int subaddressIdx, String label) {
+    assertNotClosed();
+    if (label == null) label = "";
+    setSubaddressLabelJni(accountIdx, subaddressIdx, label);
+  }
+  
+  @Override
   public String getAddress(int accountIdx, int subaddressIdx) {
     assertNotClosed();
     return getAddressJni(accountIdx, subaddressIdx);
@@ -1455,6 +1462,8 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private native String getSubaddressesJni(int accountIdx, int[] subaddressIndices);
   
   private native String createSubaddressJni(int accountIdx, String label);
+
+  private native void setSubaddressLabelJni(int accountIdx, int subaddressIdx, String label);
   
   private native String getTxsJni(String txQueryJson);
   
