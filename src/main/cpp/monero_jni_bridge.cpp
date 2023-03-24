@@ -431,7 +431,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletJni(JNIEnv
   const char* _path = env->GetStringUTFChars(jpath, NULL);
   const char* _password = env->GetStringUTFChars(jpassword, NULL);
   string path = string(_path);
-  string password = string(_password);
+  string password = string(_password ? _password : "");
   env->ReleaseStringUTFChars(jpath, _path);
   env->ReleaseStringUTFChars(jpassword, _password);
 
@@ -450,7 +450,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletDataJni(JN
 
   // convert password to string
   const char* _password = env->GetStringUTFChars(jpassword, NULL);
-  string password = string(_password);
+  string password = string(_password ? _password : "");
   env->ReleaseStringUTFChars(jpassword, _password);
 
   // convert keys bytes to string
