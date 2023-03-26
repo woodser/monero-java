@@ -34,6 +34,7 @@ import monero.daemon.model.MoneroBlockTemplate;
 import monero.daemon.model.MoneroDaemonInfo;
 import monero.daemon.model.MoneroDaemonListener;
 import monero.daemon.model.MoneroPeer;
+import monero.daemon.model.MoneroPruneResult;
 import monero.daemon.model.MoneroDaemonSyncInfo;
 import monero.daemon.model.MoneroDaemonUpdateCheckResult;
 import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
@@ -625,6 +626,14 @@ public interface MoneroDaemon {
    * @param blockBlobs are the mined blocks to submit
    */
   public void submitBlocks(Collection<String> blockBlobs);
+
+  /**
+   * Prune the blockchain.
+   * 
+   * @param check specifies to check the pruning (default false)
+   * @return the prune result
+   */
+  public MoneroPruneResult pruneBlockchain(boolean check);
   
   /**
    * Check for update.
