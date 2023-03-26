@@ -53,6 +53,7 @@ import monero.daemon.model.MoneroConnectionSpan;
 import monero.daemon.model.MoneroDaemonInfo;
 import monero.daemon.model.MoneroDaemonListener;
 import monero.daemon.model.MoneroPeer;
+import monero.daemon.model.MoneroPruneResult;
 import monero.daemon.model.MoneroDaemonSyncInfo;
 import monero.daemon.model.MoneroDaemonUpdateCheckResult;
 import monero.daemon.model.MoneroDaemonUpdateDownloadResult;
@@ -955,6 +956,20 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     if (blockBlobs.isEmpty()) throw new MoneroError("Must provide an array of mined block blobs to submit");
     Map<String, Object> resp = rpc.sendJsonRequest("submit_block", blockBlobs);
     checkResponseStatus((Map<String, Object>) resp.get("result"));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public MoneroPruneResult pruneBlockchain(boolean check) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("check", check);
+    Map<String, Object> resp = rpc.sendJsonRequest("prune_blockchain", params);
+    Map<String, Object> resultMap = (Map<String, Object>) resp.get("result");
+    checkResponseStatus(resultMap);
+    MoneroPruneResult result = new MoneroPruneResult();
+    result.setIsPruned((boolean) resultMap.get("pruned"));
+    result.setPruningSeed(((BigInteger) resultMap.get("pruning_seed")).intValue());
+    return result;
   }
 
   @Override

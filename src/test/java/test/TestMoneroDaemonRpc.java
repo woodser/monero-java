@@ -43,6 +43,7 @@ import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroOutputDistributionEntry;
 import monero.daemon.model.MoneroOutputHistogramEntry;
 import monero.daemon.model.MoneroPeer;
+import monero.daemon.model.MoneroPruneResult;
 import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxPoolStats;
@@ -1127,6 +1128,15 @@ public class TestMoneroDaemonRpc {
       assertEquals(-7, (int) e.getCode());
       assertEquals("Block not accepted", e.getMessage());
     }
+  }
+
+  // Can prune the blockchain
+  @Test
+  public void testPruneBlockchain() {
+    assumeTrue(TEST_NON_RELAYS);
+    MoneroPruneResult result = daemon.pruneBlockchain(true);
+    assertTrue(result.isPruned());
+    assertTrue(result.getPruningSeed() > 0);
   }
   
   // Can check for an update
