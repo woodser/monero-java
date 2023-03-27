@@ -3896,6 +3896,13 @@ public abstract class TestMoneroWalletCommon {
       System.out.println("Synchronizing participants");
       synchronizeMultisigParticipants(participants);
       
+      // expect error exporting key images
+      try {
+        participant.exportKeyImages(true);
+      } catch (Exception e) {
+        assertTrue(e.getMessage().contains("key_image generated not matched with cached key image"), "Unexpected error: " + e.getMessage());
+      }
+      
       // attempt relaying created transactions without co-signing
       try {
         participant.createTx(new MoneroTxConfig().setAddress(returnAddress).setAmount(TestUtils.MAX_FEE).setAccountIndex(accountIdx).setSubaddressIndex(0).setRelay(true));
