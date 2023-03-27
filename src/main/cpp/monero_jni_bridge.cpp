@@ -1208,17 +1208,21 @@ JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_importOutputsJni(JNIE
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_exportKeyImagesJni(JNIEnv* env, jobject instance, jboolean all) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_exportKeyImagesJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
 
-  // fetch key images
-  vector<shared_ptr<monero_key_image>> key_images = wallet->export_key_images(all);
-  MTRACE("Fetched " << key_images.size() << " key images");
+    // fetch key images
+    vector<shared_ptr<monero_key_image>> key_images = wallet->export_key_images(all);
+    MTRACE("Fetched " << key_images.size() << " key images");
 
-  // wrap and serialize key images
-  rapidjson::Document doc;
-  doc.SetObject();
-  doc.AddMember("keyImages", monero_utils::to_rapidjson_val(doc.GetAllocator(), key_images), doc.GetAllocator());
-  string key_images_json = monero_utils::serialize(doc);
-  return env->NewStringUTF(key_images_json.c_str());
+    // wrap and serialize key images
+    rapidjson::Document doc;
+    doc.SetObject();
+    doc.AddMember("keyImages", monero_utils::to_rapidjson_val(doc.GetAllocator(), key_images), doc.GetAllocator());
+    string key_images_json = monero_utils::serialize(doc);
+    return env->NewStringUTF(key_images_json.c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_importKeyImagesJni(JNIEnv* env, jobject instance, jstring jkey_images_json) {
