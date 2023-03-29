@@ -658,7 +658,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Override
   @Test
   public void testGetTxsWallet() {
-    MoneroUtils.setLogLevel(3);
     super.testGetTxsWallet();
   }
   
