@@ -3808,6 +3808,7 @@ public abstract class TestMoneroWalletCommon {
     
     // validate final multisig address
     MoneroWallet participant = participants.get(0);
+    MoneroUtils.validateAddress(participant.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
     testMultisigInfo(participant.getMultisigInfo(), M, N);
     
     // test sending a multisig transaction if configured

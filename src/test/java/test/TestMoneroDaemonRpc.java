@@ -660,16 +660,16 @@ public class TestMoneroDaemonRpc {
     throw new RuntimeException("Not implemented");
   }
   
-  // Can get transaction pool statistics (binary)
+  // Can get transaction pool statistics
   @Test
-  public void testGetTxPoolStatisticsBin() {
+  public void testGetTxPoolStatistics() {
     assumeTrue(TEST_NON_RELAYS);
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
     Throwable err = null;
     Collection<String> txIds = new HashSet<String>();
     try {
 
-      // submit txs to the pool but don't relay (multiple txs result in binary `histo` field)
+      // submit txs to the pool but don't relay
       for (int i = 1; i < 3; i++) {
       
         // submit tx hex

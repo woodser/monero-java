@@ -699,7 +699,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("start_height", startHeight);
     synchronized(SYNC_LOCK) {  // TODO (monero-project): monero-wallet-rpc hangs at 100% cpu utilization if refresh called concurrently
       try {
-        Map<String, Object> resp = rpc.sendJsonRequest("refresh", params);
+        Map<String, Object> resp = rpc.sendJsonRequest("refresh", params, 0l);
         poll();
         Map<String, Object> result = (Map<String, Object>) resp.get("result");
         return new MoneroSyncResult(((BigInteger) result.get("blocks_fetched")).longValue(), (Boolean) result.get("received_money"));
@@ -748,12 +748,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @Override
   public void rescanSpent() {
-    rpc.sendJsonRequest("rescan_spent");
+    rpc.sendJsonRequest("rescan_spent", 0l);
   }
   
   @Override
   public void rescanBlockchain() {
-    rpc.sendJsonRequest("rescan_blockchain");
+    rpc.sendJsonRequest("rescan_blockchain", null, 0l);
   }
 
   @Override
@@ -1834,10 +1834,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("enable_multisig_experimental", true);
     Map<String, Object> resp = rpc.sendJsonRequest("prepare_multisig", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    String msInfo = (String) result.get("multisig_info");
     addressCache.clear();
-    return msInfo;
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("multisig_info");
   }
 
   @Override
@@ -1848,10 +1847,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("threshold", threshold);
     params.put("password", password);
     Map<String, Object> resp = rpc.sendJsonRequest("make_multisig", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    String msInfo = (String) result.get("multisig_info");
     addressCache.clear();
-    return msInfo;
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("multisig_info");
   }
 
   @Override
@@ -1861,8 +1859,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("multisig_info", multisigHexes);
     params.put("password", password);
     Map<String, Object> resp = rpc.sendJsonRequest("exchange_multisig_keys", params);
-    Map<String, Object> result = (Map<String, Object>) resp.get("result");
     addressCache.clear();
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
     MoneroMultisigInitResult msResult = new MoneroMultisigInitResult();
     msResult.setAddress((String) result.get("address"));
     msResult.setMultisigHex((String) result.get("multisig_info"));

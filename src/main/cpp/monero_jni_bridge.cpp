@@ -1222,6 +1222,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_exportKeyImagesJni
     return env->NewStringUTF(key_images_json.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
+    return 0;
   }
 }
 
