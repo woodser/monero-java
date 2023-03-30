@@ -218,7 +218,7 @@ public class TestUtils {
         // create wallet with connection
         MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
         walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_FULL_PATH).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(NETWORK_TYPE).setMnemonic(TestUtils.MNEMONIC).setServer(daemonConnection).setRestoreHeight(FIRST_RECEIVE_HEIGHT));
-        assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, walletFull.getSyncHeight());
+        assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, walletFull.getRestoreHeight());
         walletFull.sync(new WalletSyncPrinter());
         walletFull.save();
         walletFull.startSyncing(TestUtils.SYNC_PERIOD_IN_MS); // start background synchronizing with sync period
@@ -257,7 +257,7 @@ public class TestUtils {
     MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
     String path = TestUtils.TEST_WALLETS_DIR + "/gt_wallet_" + System.currentTimeMillis();
     MoneroWalletFull gtWallet = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(networkType).setMnemonic(mnemonic).setServer(daemonConnection).setRestoreHeight(restoreHeight));
-    assertEquals(restoreHeight == null ? 0 : (long) restoreHeight, gtWallet.getSyncHeight());
+    assertEquals(restoreHeight == null ? 0 : (long) restoreHeight, gtWallet.getRestoreHeight());
     gtWallet.sync(new WalletSyncPrinter());
     gtWallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
     
