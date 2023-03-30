@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
+import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroBlock;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
@@ -77,7 +78,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
 
   // load monero-project C++ as a dynamic library
   static {
-    System.loadLibrary("monero-java");
+    MoneroUtils.loadNativeLibrary();
   }
   
   // class variables

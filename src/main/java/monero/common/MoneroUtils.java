@@ -28,10 +28,8 @@ public class MoneroUtils {
   // load JNI binding if available
   private static boolean JNI_LOADED = false;
   static {
-    try {
-      System.loadLibrary("monero-java");
-      JNI_LOADED = true;
-    } catch (UnsatisfiedLinkError e) { }
+    try { loadNativeLibrary(); }
+    catch (UnsatisfiedLinkError e) { }
   }
   
   /**
@@ -41,6 +39,15 @@ public class MoneroUtils {
    */
   public static String getVersion() {
     return "0.7.13";
+  }
+  
+  /**
+   * Load the native library.
+   */
+  public static void loadNativeLibrary() {
+    String libName = (System.getProperty("os.name").toLowerCase().contains("windows") ? "lib" : "") + "monero-java";
+    System.loadLibrary(libName);
+    JNI_LOADED = true;
   }
   
   public static final int RING_SIZE = 12; // network-enforced ring size
