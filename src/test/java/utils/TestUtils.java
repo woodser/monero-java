@@ -37,7 +37,7 @@ public class TestUtils {
   public static boolean CPP_LOG_CONSOLE = true;
   static {
     if (CPP_LOG_ENABLED) {
-      System.loadLibrary("monero-java");
+      MoneroUtils.loadNativeLibrary();
       MoneroUtils.initJniLogging(CPP_LOG_PATH, CPP_LOG_LEVEL, CPP_LOG_CONSOLE);
     }
   }

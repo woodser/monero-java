@@ -1,8 +1,15 @@
 cmake_minimum_required(VERSION 3.4.1)
 
+if (WIN32)
+  add_definitions( "-D_GLIBCXX_USE_NANOSLEEP=1" )
+  add_definitions( "-DWIN32_LEAN_AND_MEAN" )
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj -O2 -fPIC -std=c++11 -F/Library/Frameworks -pthread -lcrypto -lcrypt32") 
+else()
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -F/Library/Frameworks -pthread")
+endif()
+
 #SET(CMAKE_C_COMPILER /path/to/c/compiler)
 #SET(CMAKE_CXX_COMPILER /path/to/cpp/compiler)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++14 -F/Library/Frameworks -pthread")
 
 project(monero-java-jni)
 
@@ -97,6 +104,10 @@ if(STATIC AND NOT IOS)
   endif()
 endif()
 
+if (WIN32)
+  list(APPEND OPENSSL_LIBRARIES ws2_32 crypt32)
+endif()
+
 ######################
 # monero-cpp
 ######################
@@ -108,6 +119,7 @@ if (APPLE)
   set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION ./libmonero-cpp.dylib)
 elseif (WIN32)
   set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION ./libmonero-cpp.dll)
+  set_target_properties(monero-cpp PROPERTIES IMPORTED_IMPLIB ./libmonero-cpp.dll.a)
 else()
   set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION ./libmonero-cpp.so)
 endif()
@@ -128,6 +140,15 @@ target_link_libraries(monero-java
     ${OPENSSL_LIBRARIES}
     ${EXTRA_LIBRARIES}
 )
+
+if (WIN32)
+  target_link_options(monero-java PUBLIC "-Wl,--enable-auto-import,--export-all-symbols")
+endif()
+
+INSTALL(TARGETS monero-java
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Runtime
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Development)
 
 # search for libmonero-cpp.dylib in same directory as libmonero-java.dylib on mac for portability
 # command: install_name_tool -add_rpath @loader_path/ ./libmonero-java.dylib 
