@@ -111,9 +111,9 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_decodeIntegratedAd
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_getHeightJni(JNIEnv *, jobject);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_getSyncHeightJni(JNIEnv *, jobject);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_getRestoreHeightJni(JNIEnv *, jobject);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setSyncHeightJni(JNIEnv *, jobject, jlong);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setRestoreHeightJni(JNIEnv *, jobject, jlong);
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_getDaemonHeightJni(JNIEnv *, jobject);
 
