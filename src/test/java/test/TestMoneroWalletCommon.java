@@ -716,7 +716,7 @@ public abstract class TestMoneroWalletCommon {
   public void testWalletEqualityGroundTruth() {
     assumeTrue(TEST_NON_RELAYS);
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
-    MoneroWallet walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT);
+    MoneroWallet walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, null, TestUtils.FIRST_RECEIVE_HEIGHT);
     try {
       WalletEqualityUtils.testWalletEqualityOnChain(walletGt, wallet);
     } finally {
@@ -3868,7 +3868,7 @@ public abstract class TestMoneroWalletCommon {
           if (!outputs.get(0).isLocked()) break;
         }
       }
-        
+      
       // stop mining
       daemon.stopMining();
       
