@@ -244,10 +244,11 @@ public class TestUtils {
    * 
    * @param networkType is the ground truth wallet's network type
    * @param mnemonic is the ground truth wallet's mnemonic
+   * @param startHeight is the height to start syncing from
    * @param restoreHeight is the ground truth wallet's restore height
    * @return the created wallet
    */
-  public static MoneroWalletFull createWalletGroundTruth(MoneroNetworkType networkType, String mnemonic, Long restoreHeight) {
+  public static MoneroWalletFull createWalletGroundTruth(MoneroNetworkType networkType, String mnemonic, Long startHeight, Long restoreHeight) {
     
     // create directory for test wallets if it doesn't exist
     File testWalletsDir = new File(TestUtils.TEST_WALLETS_DIR);
@@ -258,7 +259,7 @@ public class TestUtils {
     String path = TestUtils.TEST_WALLETS_DIR + "/gt_wallet_" + System.currentTimeMillis();
     MoneroWalletFull gtWallet = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(networkType).setMnemonic(mnemonic).setServer(daemonConnection).setRestoreHeight(restoreHeight));
     assertEquals(restoreHeight == null ? 0 : (long) restoreHeight, gtWallet.getRestoreHeight());
-    gtWallet.sync(new WalletSyncPrinter());
+    gtWallet.sync(startHeight, new WalletSyncPrinter());
     gtWallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
     
     // close the full wallet when the runtime is shutting down to release resources

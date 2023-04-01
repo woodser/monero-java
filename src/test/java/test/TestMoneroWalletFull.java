@@ -524,7 +524,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     progressTester.onDone(wallet.getDaemonHeight());
     
     // test result after syncing
-    MoneroWalletFull walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, wallet.getMnemonic(), restoreHeight);
+    MoneroWalletFull walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, wallet.getMnemonic(), null, restoreHeight);
     walletGt.sync();
     try {
       assertTrue(wallet.isConnectedToDaemon());
@@ -646,7 +646,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       
       // compare with ground truth
       if (!skipGtComparison) {
-        walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, wallet.getMnemonic(), startHeightExpected);
+        walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, wallet.getMnemonic(), startHeight, restoreHeight);
         testWalletEqualityOnChain(walletGt, wallet);
       }
       
@@ -703,7 +703,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     MoneroWalletFull walletKeys = createWallet(new MoneroWalletConfig().setPath(path).setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT), false);
     
     // create ground truth wallet for comparison
-    MoneroWalletFull walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, TestUtils.FIRST_RECEIVE_HEIGHT);
+    MoneroWalletFull walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, null, TestUtils.FIRST_RECEIVE_HEIGHT);
     
     // test wallet and close as final step
     try {
