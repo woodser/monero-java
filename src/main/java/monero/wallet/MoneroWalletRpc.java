@@ -518,6 +518,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   @Override
+  public void setProxyUri(String uri) {
+    throw new MoneroError("MoneroWalletRpc.setProxyUri() not supported. Start monero-wallet-rpc with --proxy instead.");
+  }
+  
+  @Override
   public MoneroRpcConnection getDaemonConnection() {
     return daemonConnection;
   }

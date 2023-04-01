@@ -4,26 +4,48 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.utils.JsonUtils;
+
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import javax.net.ssl.SSLContext;
+
+import org.apache.hc.client5.http.DnsResolver;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.config.Registry;
+import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 
 /**
@@ -51,6 +73,7 @@ public class MoneroRpcConnection {
   private Boolean isOnline;
   private Boolean isAuthenticated;
   private Long responseTime;
+  private String proxyUri;
   
   private Map<String, Object> attributes = new HashMap<String, Object>();
   
@@ -85,6 +108,28 @@ public class MoneroRpcConnection {
     this.isOnline = connection.isOnline;
     this.isAuthenticated = connection.isAuthenticated;
     this.responseTime = connection.responseTime;
+    this.proxyUri = connection.proxyUri;
+  }
+
+  public String getUri() {
+    return uri;
+  }
+
+  public MoneroRpcConnection setUri(String uri) {
+    return setUri(MoneroUtils.parseUri(uri));
+  }
+
+  public MoneroRpcConnection setUri(URI uri) {
+    this.uri = MoneroUtils.parseUri(uri.toString()).toString();
+    return this;
+  }
+
+  public boolean isOnion() {
+    try {
+      return new URI(uri).getHost().endsWith(".onion");
+    } catch (Exception e) {
+      return false;
+    }
   }
   
   public MoneroRpcConnection setCredentials(String username, String password) {
@@ -95,9 +140,7 @@ public class MoneroRpcConnection {
     if (username != null || password != null) {
       if (username == null) throw new MoneroError("username cannot be empty because password is not empty");
       if (password == null) throw new MoneroError("password cannot be empty because username is not empty");
-      URI uriObj;
-      try { uriObj = new URI(uri); }
-      catch (URISyntaxException e) { throw new MoneroError(e); }
+      URI uriObj = MoneroUtils.parseUri(uri);
       BasicCredentialsProvider creds = new BasicCredentialsProvider();
       creds.setCredentials(new AuthScope(uriObj.getHost(), uriObj.getPort()), new UsernamePasswordCredentials(username, password.toCharArray()));
       this.client = HttpClients.custom().setDefaultCredentialsProvider(creds).build();
@@ -111,10 +154,6 @@ public class MoneroRpcConnection {
     this.username = username;
     this.password = password;
     return this;
-  }
-  
-  public String getUri() {
-    return uri;
   }
   
   public String getUsername() {
@@ -137,6 +176,15 @@ public class MoneroRpcConnection {
   
   public int getPriority() {
     return priority;
+  }
+
+  public MoneroRpcConnection setProxyUri(String proxyUri) {
+    this.proxyUri = proxyUri;
+    return this;
+  }
+
+  public String getProxyUri() {
+    return proxyUri;
   }
 
   /**
@@ -273,15 +321,22 @@ public class MoneroRpcConnection {
       body.put("method", method);
       if (params != null) body.put("params", params);
       if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending json request with method '" + method + "' and body: " + JsonUtils.serialize(body));
+      if (MoneroUtils.getLogLevel() >= 4) {
+        try {
+          throw new RuntimeException("Printing stacktrace for debug");
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
 
       // send http request
       HttpPost post = new HttpPost(uri.toString() + "/json_rpc");
-      post.setConfig(getTimeoutConfig(timeoutInMs));
+      post.setConfig(getRequestConfig(timeoutInMs));
       HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
       post.setEntity(entity);
       Map<String, Object> respMap;
       synchronized (this) {
-        resp = client.execute(post);
+        resp = request(post);
         
         // validate response
         validateHttpResponse(resp);
@@ -348,18 +403,27 @@ public class MoneroRpcConnection {
   public Map<String, Object> sendPathRequest(String path, Map<String, Object> params, Long timeoutInMs) {
     CloseableHttpResponse resp = null;
     try {
+
+      // logging
+      if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending path request with path '" + path + "' and params: " + JsonUtils.serialize(params));
+      if (MoneroUtils.getLogLevel() >= 4) {
+        try {
+          throw new RuntimeException("Printing stacktrace for debug");
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
       
       // send http request
-      if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending path request with path '" + path + "' and params: " + JsonUtils.serialize(params));
       HttpPost post = new HttpPost(uri.toString() + "/" + path);
       if (params != null) {
         HttpEntity entity = new StringEntity(JsonUtils.serialize(params));
         post.setEntity(entity);
       }
-      post.setConfig(getTimeoutConfig(timeoutInMs));
+      post.setConfig(getRequestConfig(timeoutInMs));
       Map<String, Object> respMap;
       synchronized (this) {
-        resp = client.execute(post);
+        resp = request(post);
         
         // validate response
         validateHttpResponse(resp);
@@ -413,11 +477,20 @@ public class MoneroRpcConnection {
     byte[] paramsBin = MoneroUtils.mapToBinary(params);
     CloseableHttpResponse resp = null;
     try {
+
+      // logging
+      if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending binary request with path '" + path + "' and params: " + JsonUtils.serialize(params));
+      if (MoneroUtils.getLogLevel() >= 4) {
+        try {
+          throw new RuntimeException("Printing stacktrace for debug");
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
       
       // create http request
-      if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending binary request with path '" + path + "' and params: " + JsonUtils.serialize(params));
       HttpPost post = new HttpPost(uri.toString() + "/" + path);
-      post.setConfig(getTimeoutConfig(timeoutInMs));
+      post.setConfig(getRequestConfig(timeoutInMs));
       if (paramsBin != null) {
         HttpEntity entity = new ByteArrayEntity(paramsBin, ContentType.DEFAULT_BINARY);
         post.setEntity(entity);
@@ -425,7 +498,7 @@ public class MoneroRpcConnection {
       
       // send http request
       synchronized (this) {
-        resp = client.execute(post);
+        resp = request(post);
         
         // validate response
         validateHttpResponse(resp);
@@ -503,12 +576,106 @@ public class MoneroRpcConnection {
     throw new MoneroRpcError(msg, code, method, params);
   }
   
-  private RequestConfig getTimeoutConfig(Long timeoutInMs) {
-    if (timeoutInMs == null) return null;
-    return RequestConfig.custom()
-            .setConnectTimeout(Timeout.ofMilliseconds(timeoutInMs))
-            .setConnectionRequestTimeout(Timeout.ofMilliseconds(timeoutInMs))
-            .setResponseTimeout(Timeout.ofMilliseconds(timeoutInMs))
-            .build();
+  private RequestConfig getRequestConfig(Long timeoutInMs) {
+    RequestConfig.Builder builder = RequestConfig.custom();
+    if (timeoutInMs != null) {
+      builder.setConnectTimeout(Timeout.ofMilliseconds(timeoutInMs));
+      builder.setConnectionRequestTimeout(Timeout.ofMilliseconds(timeoutInMs));
+      builder.setResponseTimeout(Timeout.ofMilliseconds(timeoutInMs));
+    }
+    return builder.build();
+  }
+
+  private CloseableHttpResponse request(HttpUriRequest request) throws IOException, URISyntaxException {
+    return proxyUri == null ? client.execute(request) : requestWithProxy(request);
+  }
+
+  private CloseableHttpResponse requestWithProxy(HttpUriRequest request) throws IOException {
+
+    // register socket factories to use socks5
+    Registry<ConnectionSocketFactory> reg = RegistryBuilder.<ConnectionSocketFactory>create()
+        .register("http", new SocksConnectionSocketFactory())
+        .register("https", new SocksSSLConnectionSocketFactory(SSLContexts.createSystemDefault())).build();
+
+    // create connection manager to use socket factories and fake dns resolver
+    boolean isLocal = false; // use fake dns resolver if not resolving DNS locally TODO: determine if request url is local
+    BasicHttpClientConnectionManager cm = isLocal?
+        new BasicHttpClientConnectionManager(reg) : 
+        new BasicHttpClientConnectionManager(reg, null, null, new FakeDnsResolver());
+
+    // create http client
+    CloseableHttpClient closeableHttpClient = HttpClients.custom().setConnectionManager(cm).build();
+    
+    // register socks address
+    URI proxyParsed = MoneroUtils.parseUri(proxyUri);
+    InetSocketAddress socksAddress = new InetSocketAddress(proxyParsed.getHost(), proxyParsed.getPort());
+    HttpClientContext context = HttpClientContext.create();
+    context.setAttribute("socks.address", socksAddress);
+
+    // execute request
+    CloseableHttpResponse httpResponse = closeableHttpClient.execute(request, context);
+    return httpResponse;
+  }
+
+  /**
+   * Routes connections over Socks, and avoids resolving hostnames locally.
+   * 
+   * Adapted from: http://stackoverflow.com/a/25203021/5616248
+   */
+  class SocksConnectionSocketFactory extends PlainConnectionSocketFactory {
+
+    /**
+     * creates an unconnected Socks Proxy socket
+     */
+    @Override
+    public Socket createSocket(final HttpContext context) throws IOException {
+        InetSocketAddress socksaddr = (InetSocketAddress) context.getAttribute("socks.address");
+        Proxy proxy = new Proxy(Proxy.Type.SOCKS, socksaddr);
+        return new Socket(proxy);
+    }
+
+    @Override
+    public Socket connectSocket(TimeValue connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
+                                InetSocketAddress localAddress, HttpContext context) throws IOException {
+        InetSocketAddress unresolvedRemote = InetSocketAddress.createUnresolved(host.getHostName(), remoteAddress.getPort());
+        return super.connectSocket(connectTimeout, socket, host, unresolvedRemote, localAddress, context);
+    }
+  }
+
+  private class SocksSSLConnectionSocketFactory extends SSLConnectionSocketFactory {
+
+    public SocksSSLConnectionSocketFactory(final SSLContext sslContext) {
+        super(sslContext);
+
+        // TODO: Or to allow "insecure" (eg self-signed certs)
+        // super(sslContext, ALLOW_ALL_HOSTNAME_VERIFIER);
+    }
+
+    @Override
+    public Socket createSocket(final HttpContext context) throws IOException {
+        InetSocketAddress socksaddr = (InetSocketAddress) context.getAttribute("socks.address");
+        Proxy proxy = new Proxy(Proxy.Type.SOCKS, socksaddr);
+        return new Socket(proxy);
+    }
+
+    @Override
+    public Socket connectSocket(TimeValue connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
+                                InetSocketAddress localAddress, HttpContext context) throws IOException {
+        // Convert address to unresolved
+        InetSocketAddress unresolvedRemote = InetSocketAddress.createUnresolved(host.getHostName(), remoteAddress.getPort());
+        return super.connectSocket(connectTimeout, socket, host, unresolvedRemote, localAddress, context);
+    }
+  }
+
+  class FakeDnsResolver implements DnsResolver {
+    @Override
+    public InetAddress[] resolve(String host) throws UnknownHostException {
+        return new InetAddress[]{InetAddress.getByAddress(new byte[]{1, 1, 1, 1})};
+    }
+
+    @Override
+    public String resolveCanonicalHostname(String host) throws UnknownHostException {
+      throw new UnsupportedOperationException("Unimplemented method 'resolveCanonicalHostname'");
+    }
   }
 }

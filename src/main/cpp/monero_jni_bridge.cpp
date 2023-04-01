@@ -535,6 +535,19 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setDaemonConnectionJn
   }
 }
 
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setProxyJni(JNIEnv *env, jobject instance, jstring juri) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_setProxyJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  const char* _uri = juri ? env->GetStringUTFChars(juri, NULL) : nullptr;
+  string uri = string(_uri ? _uri : "");
+  env->ReleaseStringUTFChars(juri, _uri);
+  try {
+    wallet->set_daemon_proxy(uri);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getDaemonConnectionJni(JNIEnv *env, jobject instance) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_getDaemonConnectionJni()");
 
