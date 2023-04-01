@@ -242,6 +242,15 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public MoneroRpcConnection getRpcConnection() {
     return this.rpc;
   }
+
+  /**
+   * Set the Tor proxy to the daemon.
+   * 
+   * @param uri the Tor proxy URI
+   */
+  public void setProxyUri(String uri) {
+    this.rpc.setProxyUri(uri);
+  }
   
   /**
    * Indicates if the client is connected to the daemon via RPC.

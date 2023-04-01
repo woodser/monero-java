@@ -449,6 +449,18 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
   
   @Override
+  public void setProxyUri(String uri) {
+    assertNotClosed();
+    if (uri == null) uri = "";
+    try {
+      setProxyJni(uri);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new MoneroError(e.getMessage());
+    }
+  }
+  
+  @Override
   public MoneroRpcConnection getDaemonConnection() {
     assertNotClosed();
     try {
@@ -1391,6 +1403,8 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private native boolean isViewOnlyJni();
   
   private native void setDaemonConnectionJni(String uri, String username, String password);
+  
+  private native void setProxyJni(String uri);
   
   private native String[] getDaemonConnectionJni(); // returns [uri, username, password]
   

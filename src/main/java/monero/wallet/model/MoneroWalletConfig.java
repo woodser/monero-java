@@ -1,5 +1,6 @@
 package monero.wallet.model;
 
+import common.utils.JsonUtils;
 import monero.common.MoneroRpcConnection;
 import monero.daemon.model.MoneroNetworkType;
 
@@ -214,5 +215,9 @@ public class MoneroWalletConfig {
   public MoneroWalletConfig setCacheData(byte[] cacheData) {
     this.cacheData = cacheData;
     return this;
+  }
+
+  public String toString() {
+    return JsonUtils.serialize(this);
   }
 }
