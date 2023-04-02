@@ -26,7 +26,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":9,"i8":9,"i9":9,"i10":9,"i11":9,"i12":9,"i13":9,"i14":9,"i15":9,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":9,"i24":9,"i25":9,"i26":9,"i27":9,"i28":9,"i29":9};
+var data = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":9,"i8":9,"i9":9,"i10":9,"i11":9,"i12":9,"i13":9,"i14":9,"i15":9,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":9,"i24":9,"i25":9,"i26":9,"i27":9,"i28":9,"i29":9,"i30":9,"i31":9,"i32":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -239,6 +239,13 @@ extends java.lang.Object</pre>
 </td>
 </tr>
 <tr id="i6" class="altColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getVersion()">getVersion</a></span>()</code></th>
+<td class="colLast">
+<div class="block">Get the version of the monero-java library.</div>
+</td>
+</tr>
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#initJniLogging(java.lang.String,int,boolean)">initJniLogging</a></span>&#8203;(java.lang.String&nbsp;path,
               int&nbsp;level,
@@ -247,7 +254,14 @@ extends java.lang.Object</pre>
 <div class="block">Initialize JNI logging before using.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i8" class="altColor">
+<td class="colFirst"><code>static boolean</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isNativeLibraryLoaded()">isNativeLibraryLoaded</a></span>()</code></th>
+<td class="colLast">
+<div class="block">Indicates if the native JNI library is loaded.</div>
+</td>
+</tr>
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isValidAddress(java.lang.String,monero.daemon.model.MoneroNetworkType)">isValidAddress</a></span>&#8203;(java.lang.String&nbsp;address,
               <a href="../daemon/model/MoneroNetworkType.html" title="enum in monero.daemon.model">MoneroNetworkType</a>&nbsp;networkType)</code></th>
@@ -255,35 +269,42 @@ extends java.lang.Object</pre>
 <div class="block">Determine if the given address is valid.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isValidPrivateSpendKey(java.lang.String)">isValidPrivateSpendKey</a></span>&#8203;(java.lang.String&nbsp;privateSpendKey)</code></th>
 <td class="colLast">
 <div class="block">Indicates if a private spend key is valid.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isValidPrivateViewKey(java.lang.String)">isValidPrivateViewKey</a></span>&#8203;(java.lang.String&nbsp;privateViewKey)</code></th>
 <td class="colLast">
 <div class="block">Indicates if a private view key is valid.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isValidPublicSpendKey(java.lang.String)">isValidPublicSpendKey</a></span>&#8203;(java.lang.String&nbsp;publicSpendKey)</code></th>
 <td class="colLast">
 <div class="block">Indicates if a public spend key is valid.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isValidPublicViewKey(java.lang.String)">isValidPublicViewKey</a></span>&#8203;(java.lang.String&nbsp;publicViewKey)</code></th>
 <td class="colLast">
 <div class="block">Indicates if a public view key is valid.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i14" class="altColor">
+<td class="colFirst"><code>static void</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#loadNativeLibrary()">loadNativeLibrary</a></span>()</code></th>
+<td class="colLast">
+<div class="block">Load the native library.</div>
+</td>
+</tr>
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#log(int,java.lang.String)">log</a></span>&#8203;(int&nbsp;level,
    java.lang.String&nbsp;msg)</code></th>
@@ -291,12 +312,12 @@ extends java.lang.Object</pre>
 <div class="block">Log a message.</div>
 </td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>static byte[]</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#mapToBinary(java.util.Map)">mapToBinary</a></span>&#8203;(java.util.Map&lt;java.lang.String,&#8203;java.lang.Object&gt;&nbsp;map)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code>static &lt;T extends <a href="../daemon/model/MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a>&gt;<br>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#mergeTx(java.util.List,T)">mergeTx</a></span>&#8203;(java.util.List&lt;T&gt;&nbsp;txs,
        T&nbsp;tx)</code></th>
@@ -304,14 +325,14 @@ extends java.lang.Object</pre>
 <div class="block">Merges a transaction into a list of existing transactions.</div>
 </td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i18" class="altColor">
 <td class="colFirst"><code>static java.net.URI</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#parseUri(java.lang.String)">parseUri</a></span>&#8203;(java.lang.String&nbsp;uri)</code></th>
 <td class="colLast">
 <div class="block">Converts the string to a URI.</div>
 </td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i19" class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#paymentIdsEqual(java.lang.String,java.lang.String)">paymentIdsEqual</a></span>&#8203;(java.lang.String&nbsp;paymentId1,
                java.lang.String&nbsp;paymentId2)</code></th>
@@ -319,14 +340,14 @@ extends java.lang.Object</pre>
 <div class="block">Determines if two payment ids are functionally equal.</div>
 </td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i20" class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setLogLevel(int)">setLogLevel</a></span>&#8203;(int&nbsp;level)</code></th>
 <td class="colLast">
 <div class="block">Set the library's log level with 0 being least verbose.</div>
 </td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i21" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#validateAddress(java.lang.String,monero.daemon.model.MoneroNetworkType)">validateAddress</a></span>&#8203;(java.lang.String&nbsp;address,
                <a href="../daemon/model/MoneroNetworkType.html" title="enum in monero.daemon.model">MoneroNetworkType</a>&nbsp;networkType)</code></th>
@@ -334,71 +355,71 @@ extends java.lang.Object</pre>
 <div class="block">Validates the given address.</div>
 </td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i22" class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#validateBase58(java.lang.String)">validateBase58</a></span>&#8203;(java.lang.String&nbsp;standardAddress)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i20" class="altColor">
+<tr id="i23" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#validateHex(java.lang.String)">validateHex</a></span>&#8203;(java.lang.String&nbsp;str)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i21" class="rowColor">
+<tr id="i24" class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#validateMnemonic(java.lang.String)">validateMnemonic</a></span>&#8203;(java.lang.String&nbsp;mnemonic)</code></th>
 <td class="colLast">
 <div class="block">Validates the given mnemonic phrase.</div>
 </td>
 </tr>
-<tr id="i22" class="altColor">
+<tr id="i25" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#validatePaymentId(java.lang.String)">validatePaymentId</a></span>&#8203;(java.lang.String&nbsp;paymentId)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i23" class="rowColor">
+<tr id="i26" class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#validatePrivateSpendKey(java.lang.String)">validatePrivateSpendKey</a></span>&#8203;(java.lang.String&nbsp;privateSpendKey)</code></th>
 <td class="colLast">
 <div class="block">Validate a private spend key.</div>
 </td>
 </tr>
-<tr id="i24" class="altColor">
+<tr id="i27" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#validatePrivateViewKey(java.lang.String)">validatePrivateViewKey</a></span>&#8203;(java.lang.String&nbsp;privateViewKey)</code></th>
 <td class="colLast">
 <div class="block">Validate a private view key.</div>
 </td>
 </tr>
-<tr id="i25" class="rowColor">
+<tr id="i28" class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#validatePublicSpendKey(java.lang.String)">validatePublicSpendKey</a></span>&#8203;(java.lang.String&nbsp;publicSpendKey)</code></th>
 <td class="colLast">
 <div class="block">Validate a public spend key.</div>
 </td>
 </tr>
-<tr id="i26" class="altColor">
+<tr id="i29" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#validatePublicViewKey(java.lang.String)">validatePublicViewKey</a></span>&#8203;(java.lang.String&nbsp;publicViewKey)</code></th>
 <td class="colLast">
 <div class="block">Validate a public view key.</div>
 </td>
 </tr>
-<tr id="i27" class="rowColor">
+<tr id="i30" class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#validateViewKey(java.lang.String)">validateViewKey</a></span>&#8203;(java.lang.String&nbsp;viewKey)</code></th>
 <td class="colLast">
 <div class="block">Validates the given view key.</div>
 </td>
 </tr>
-<tr id="i28" class="altColor">
+<tr id="i31" class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#walletExists(java.lang.String)">walletExists</a></span>&#8203;(java.lang.String&nbsp;path)</code></th>
 <td class="colLast">
 <div class="block">Indicates if a wallet keys file exists at the given path.</div>
 </td>
 </tr>
-<tr id="i29" class="rowColor">
+<tr id="i32" class="altColor">
 <td class="colFirst"><code>static java.math.BigInteger</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#xmrToAtomicUnits(double)">xmrToAtomicUnits</a></span>&#8203;(double&nbsp;amountXmr)</code></th>
 <td class="colLast">
@@ -471,6 +492,44 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
+<a id="getVersion()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getVersion</h4>
+<pre class="methodSignature">public static&nbsp;java.lang.String&nbsp;getVersion()</pre>
+<div class="block">Get the version of the monero-java library.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the version of this monero-java library</dd>
+</dl>
+</li>
+</ul>
+<a id="loadNativeLibrary()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>loadNativeLibrary</h4>
+<pre class="methodSignature">public static&nbsp;void&nbsp;loadNativeLibrary()</pre>
+<div class="block">Load the native library.</div>
+</li>
+</ul>
+<a id="isNativeLibraryLoaded()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isNativeLibraryLoaded</h4>
+<pre class="methodSignature">public static&nbsp;boolean&nbsp;isNativeLibraryLoaded()</pre>
+<div class="block">Indicates if the native JNI library is loaded.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>true if the native library is loaded, false otherwise</dd>
+</dl>
+</li>
+</ul>
 <a id="walletExists(java.lang.String)">
 <!--   -->
 </a>

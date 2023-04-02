@@ -171,6 +171,10 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/wallet/model/MoneroAccountTag.html#setAccountIndices(java.util.List)">setAccountIndices(List&lt;Integer&gt;)</a></span> - Method in class monero.wallet.model.<a href="../monero/wallet/model/MoneroAccountTag.html" title="class in monero.wallet.model">MoneroAccountTag</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/wallet/MoneroWallet.html#setAccountLabel(int,java.lang.String)">setAccountLabel(int, String)</a></span> - Method in interface monero.wallet.<a href="../monero/wallet/MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a></dt>
+<dd>
+<div class="block">Set an account label.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="../monero/wallet/model/MoneroWalletConfig.html#setAccountLookahead(java.lang.Integer)">setAccountLookahead(Integer)</a></span> - Method in class monero.wallet.model.<a href="../monero/wallet/model/MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></dt>
 <dd>
 <div class="block">Set the number of accounts of scan.</div>
@@ -429,7 +433,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroMinerTxSum.html#setFeeSum(java.math.BigInteger)">setFeeSum(BigInteger)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroMinerTxSum.html" title="class in monero.daemon.model">MoneroMinerTxSum</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroTxPoolStats.html#setFeeTotal(java.lang.Long)">setFeeTotal(Long)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroTxPoolStats.html" title="class in monero.daemon.model">MoneroTxPoolStats</a></dt>
+<dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroTxPoolStats.html#setFeeTotal(java.math.BigInteger)">setFeeTotal(BigInteger)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroTxPoolStats.html" title="class in monero.daemon.model">MoneroTxPoolStats</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroDaemonInfo.html#setFreeSpace(java.math.BigInteger)">setFreeSpace(BigInteger)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroDaemonInfo.html" title="class in monero.daemon.model">MoneroDaemonInfo</a></dt>
 <dd>&nbsp;</dd>
@@ -493,7 +497,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroKeyImage.html#setHex(java.lang.String)">setHex(String)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroTxPoolStats.html#setHisto(java.lang.Object)">setHisto(Object)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroTxPoolStats.html" title="class in monero.daemon.model">MoneroTxPoolStats</a></dt>
+<dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroTxPoolStats.html#setHisto(java.util.Map)">setHisto(Map&lt;Long, Integer&gt;)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroTxPoolStats.html" title="class in monero.daemon.model">MoneroTxPoolStats</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroTxPoolStats.html#setHisto98pc(java.lang.Long)">setHisto98pc(Long)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroTxPoolStats.html" title="class in monero.daemon.model">MoneroTxPoolStats</a></dt>
 <dd>&nbsp;</dd>
@@ -643,6 +647,8 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt><span class="memberNameLink"><a href="../monero/wallet/model/MoneroTxWallet.html#setIsOutgoing(java.lang.Boolean)">setIsOutgoing(Boolean)</a></span> - Method in class monero.wallet.model.<a href="../monero/wallet/model/MoneroTxWallet.html" title="class in monero.wallet.model">MoneroTxWallet</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroSubmitTxResult.html#setIsOverspend(java.lang.Boolean)">setIsOverspend(Boolean)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroSubmitTxResult.html" title="class in monero.daemon.model">MoneroSubmitTxResult</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroPruneResult.html#setIsPruned(java.lang.Boolean)">setIsPruned(Boolean)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroPruneResult.html" title="class in monero.daemon.model">MoneroPruneResult</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/wallet/model/MoneroMultisigInfo.html#setIsReady(java.lang.Boolean)">setIsReady(Boolean)</a></span> - Method in class monero.wallet.model.<a href="../monero/wallet/model/MoneroMultisigInfo.html" title="class in monero.wallet.model">MoneroMultisigInfo</a></dt>
 <dd>&nbsp;</dd>
@@ -967,6 +973,20 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/wallet/model/MoneroWalletConfig.html#setPrivateViewKey(java.lang.String)">setPrivateViewKey(String)</a></span> - Method in class monero.wallet.model.<a href="../monero/wallet/model/MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/common/MoneroRpcConnection.html#setProxyUri(java.lang.String)">setProxyUri(String)</a></span> - Method in class monero.common.<a href="../monero/common/MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/daemon/MoneroDaemonRpc.html#setProxyUri(java.lang.String)">setProxyUri(String)</a></span> - Method in class monero.daemon.<a href="../monero/daemon/MoneroDaemonRpc.html" title="class in monero.daemon">MoneroDaemonRpc</a></dt>
+<dd>
+<div class="block">Set the Tor proxy to the daemon.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="../monero/wallet/MoneroWallet.html#setProxyUri(java.lang.String)">setProxyUri(String)</a></span> - Method in interface monero.wallet.<a href="../monero/wallet/MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a></dt>
+<dd>
+<div class="block">Set the Tor proxy to the daemon.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="../monero/wallet/MoneroWalletFull.html#setProxyUri(java.lang.String)">setProxyUri(String)</a></span> - Method in class monero.wallet.<a href="../monero/wallet/MoneroWalletFull.html" title="class in monero.wallet">MoneroWalletFull</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/wallet/MoneroWalletRpc.html#setProxyUri(java.lang.String)">setProxyUri(String)</a></span> - Method in class monero.wallet.<a href="../monero/wallet/MoneroWalletRpc.html" title="class in monero.wallet">MoneroWalletRpc</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroTx.html#setPrunableHash(java.lang.String)">setPrunableHash(String)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/wallet/model/MoneroTxQuery.html#setPrunableHash(java.lang.String)">setPrunableHash(String)</a></span> - Method in class monero.wallet.model.<a href="../monero/wallet/model/MoneroTxQuery.html" title="class in monero.wallet.model">MoneroTxQuery</a></dt>
@@ -986,6 +1006,8 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt><span class="memberNameLink"><a href="../monero/wallet/model/MoneroTxWallet.html#setPrunedHex(java.lang.String)">setPrunedHex(String)</a></span> - Method in class monero.wallet.model.<a href="../monero/wallet/model/MoneroTxWallet.html" title="class in monero.wallet.model">MoneroTxWallet</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroPeer.html#setPruningSeed(java.lang.Integer)">setPruningSeed(Integer)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroPeer.html" title="class in monero.daemon.model">MoneroPeer</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroPruneResult.html#setPruningSeed(java.lang.Integer)">setPruningSeed(Integer)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroPruneResult.html" title="class in monero.daemon.model">MoneroPruneResult</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroFeeEstimate.html#setQuantizationMask(java.math.BigInteger)">setQuantizationMask(BigInteger)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroFeeEstimate.html" title="class in monero.daemon.model">MoneroFeeEstimate</a></dt>
 <dd>&nbsp;</dd>
@@ -1031,6 +1053,10 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroBlockTemplate.html#setReservedOffset(java.lang.Long)">setReservedOffset(Long)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroBlockTemplate.html" title="class in monero.daemon.model">MoneroBlockTemplate</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/wallet/MoneroWalletFull.html#setRestoreHeight(long)">setRestoreHeight(long)</a></span> - Method in class monero.wallet.<a href="../monero/wallet/MoneroWalletFull.html" title="class in monero.wallet">MoneroWalletFull</a></dt>
+<dd>
+<div class="block">Set the height of the first block that the wallet scans.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="../monero/wallet/model/MoneroWalletConfig.html#setRestoreHeight(java.lang.Long)">setRestoreHeight(Long)</a></span> - Method in class monero.wallet.model.<a href="../monero/wallet/model/MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroBlock.html#setReward(java.math.BigInteger)">setReward(BigInteger)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroBlock.html" title="class in monero.daemon.model">MoneroBlock</a></dt>
@@ -1153,16 +1179,20 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/wallet/model/MoneroTxConfig.html#setSubaddressIndices(java.util.List)">setSubaddressIndices(List&lt;Integer&gt;)</a></span> - Method in class monero.wallet.model.<a href="../monero/wallet/model/MoneroTxConfig.html" title="class in monero.wallet.model">MoneroTxConfig</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/wallet/MoneroWallet.html#setSubaddressLabel(int,int,java.lang.String)">setSubaddressLabel(int, int, String)</a></span> - Method in interface monero.wallet.<a href="../monero/wallet/MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a></dt>
+<dd>
+<div class="block">Set a subaddress label.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="../monero/wallet/MoneroWalletFull.html#setSubaddressLabel(int,int,java.lang.String)">setSubaddressLabel(int, int, String)</a></span> - Method in class monero.wallet.<a href="../monero/wallet/MoneroWalletFull.html" title="class in monero.wallet">MoneroWalletFull</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/wallet/MoneroWalletRpc.html#setSubaddressLabel(int,int,java.lang.String)">setSubaddressLabel(int, int, String)</a></span> - Method in class monero.wallet.<a href="../monero/wallet/MoneroWalletRpc.html" title="class in monero.wallet">MoneroWalletRpc</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/wallet/model/MoneroWalletConfig.html#setSubaddressLookahead(java.lang.Integer)">setSubaddressLookahead(Integer)</a></span> - Method in class monero.wallet.model.<a href="../monero/wallet/model/MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></dt>
 <dd>
 <div class="block">Set the number of subaddresses to scan per account.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="../monero/wallet/model/MoneroTxConfig.html#setSweepEachSubaddress(java.lang.Boolean)">setSweepEachSubaddress(Boolean)</a></span> - Method in class monero.wallet.model.<a href="../monero/wallet/model/MoneroTxConfig.html" title="class in monero.wallet.model">MoneroTxConfig</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="../monero/wallet/MoneroWalletFull.html#setSyncHeight(long)">setSyncHeight(long)</a></span> - Method in class monero.wallet.<a href="../monero/wallet/MoneroWalletFull.html" title="class in monero.wallet">MoneroWalletFull</a></dt>
-<dd>
-<div class="block">Set the height of the first block that the wallet scans.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="../monero/wallet/model/MoneroAccount.html#setTag(java.lang.String)">setTag(String)</a></span> - Method in class monero.wallet.model.<a href="../monero/wallet/model/MoneroAccount.html" title="class in monero.wallet.model">MoneroAccount</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/wallet/model/MoneroAccountTag.html#setTag(java.lang.String)">setTag(String)</a></span> - Method in class monero.wallet.model.<a href="../monero/wallet/model/MoneroAccountTag.html" title="class in monero.wallet.model">MoneroAccountTag</a></dt>
@@ -1276,6 +1306,10 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <div class="block">Set the upload bandwidth limit.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/MoneroDaemonRpc.html#setUploadLimit(int)">setUploadLimit(int)</a></span> - Method in class monero.daemon.<a href="../monero/daemon/MoneroDaemonRpc.html" title="class in monero.daemon">MoneroDaemonRpc</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/common/MoneroRpcConnection.html#setUri(java.lang.String)">setUri(String)</a></span> - Method in class monero.common.<a href="../monero/common/MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/common/MoneroRpcConnection.html#setUri(java.net.URI)">setUri(URI)</a></span> - Method in class monero.common.<a href="../monero/common/MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroDaemonUpdateCheckResult.html#setUserUri(java.lang.String)">setUserUri(String)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroDaemonUpdateCheckResult.html" title="class in monero.daemon.model">MoneroDaemonUpdateCheckResult</a></dt>
 <dd>&nbsp;</dd>
