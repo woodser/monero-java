@@ -50,6 +50,15 @@ public class MoneroUtils {
     JNI_LOADED = true;
   }
   
+  /**
+   * Indicates if the native JNI library is loaded.
+   * 
+   * @return true if the native library is loaded, false otherwise
+   */
+  public static boolean isNativeLibraryLoaded() {
+    return JNI_LOADED;
+  }
+  
   public static final int RING_SIZE = 12; // network-enforced ring size
   
   private static int LOG_LEVEL = 0;
