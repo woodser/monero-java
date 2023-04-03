@@ -496,16 +496,6 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         txs.add(convertRpcTx(rpcTxs.get(i), tx));
       }
     }
-    
-    // fetch unconfirmed txs from pool and merge additional fields  // TODO monerod: merge rpc calls so this isn't necessary?
-    //System.out.println("Fetching from pool...");  // TODO monero-project: getTxPool() can get stuck under certain conditions (observed it before coordinating tx pool as part of tests, so double spend related?)
-    List<MoneroTx> poolTxs = getTxPool();
-    for (MoneroTx tx : txs) {
-      for (MoneroTx poolTx : poolTxs) {
-        if (tx.getHash().equals(poolTx.getHash())) tx.merge(poolTx);
-      }
-    }
-    
     return txs;
   }
 
@@ -1389,7 +1379,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("histo")) {
         stats.setHisto(new HashMap<Long, Integer>());
         for (Map<String, BigInteger> elem : (List<Map<String, BigInteger>>) val) {
-          stats.getHisto().put(((BigInteger) elem.get("bytes")).longValue(), ((BigInteger) elem.get("txs")).intValue());
+          stats.getHisto().put(elem.get("bytes").longValue(), elem.get("txs").intValue());
         }
       }
       else LOGGER.warning("ignoring unexpected field in tx pool stats: '" + key + "': " + val);

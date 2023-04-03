@@ -1572,13 +1572,15 @@ public class TestMoneroDaemonRpc {
       assertEquals(tx.getLastFailedHeight(), null);
       assertEquals(tx.getLastFailedHash(), null);
       assertTrue(tx.getReceivedTimestamp() > 0);
-      assertTrue(tx.getSize() > 0);
-      assertTrue(tx.getWeight() > 0);
-      assertNotNull(tx.isKeptByBlock());
+      if (ctx.fromGetTxPool) {
+        assertTrue(tx.getSize() > 0);
+        assertTrue(tx.getWeight() > 0);
+        assertNotNull(tx.isKeptByBlock());
+        assertTrue(tx.getMaxUsedBlockHeight() >= 0);
+        assertNotNull(tx.getMaxUsedBlockHash());
+      }
       assertEquals(null, tx.getLastFailedHeight());
       assertEquals(null, tx.getLastFailedHash());
-      assertTrue(tx.getMaxUsedBlockHeight() >= 0);
-      assertNotNull(tx.getMaxUsedBlockHash());
     } else {
       assertEquals(tx.getLastRelayedTimestamp(), null);
     }
@@ -1600,8 +1602,10 @@ public class TestMoneroDaemonRpc {
       else if (tx.isRelayed()) assertEquals(false, tx.isDoubleSpendSeen());
       else {
         assertEquals(false, tx.isRelayed());
-        assertEquals(false, tx.getRelay());
-        assertNotNull(tx.isDoubleSpendSeen());
+        if (ctx.fromGetTxPool) {
+          assertEquals(false, tx.getRelay());
+          assertNotNull(tx.isDoubleSpendSeen());
+        }
       }
     }
     assertNull(tx.getLastFailedHeight());
