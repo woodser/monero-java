@@ -2408,8 +2408,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
       } catch (Exception e) {
         if (isPolling) {
-          System.err.println("Failed to background poll " + path);
-          e.printStackTrace();
+          System.err.println("Failed to background poll " + path + ": " + e.getMessage());
         }
       }
     }

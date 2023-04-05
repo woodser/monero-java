@@ -357,7 +357,6 @@ public class MoneroRpcConnection {
     } catch (MoneroRpcError e1) {
       throw e1;
     } catch (Exception e2) {
-      //e3.printStackTrace();
       throw new MoneroError(e2);
     } finally {
       try { resp.close(); }
@@ -444,7 +443,6 @@ public class MoneroRpcConnection {
     } catch (MoneroRpcError e1) {
       throw e1;
     } catch (Exception e2) {
-      e2.printStackTrace();
       throw new MoneroError(e2);
     } finally {
       try { resp.close(); }
@@ -511,7 +509,6 @@ public class MoneroRpcConnection {
     } catch (MoneroRpcError e1) {
       throw e1;
     } catch (Exception e2) {
-      e2.printStackTrace();
       throw new MoneroError(e2);
     } finally {
       try { resp.close(); }
@@ -599,7 +596,7 @@ public class MoneroRpcConnection {
 
     // create connection manager to use socket factories and fake dns resolver
     boolean isLocal = false; // use fake dns resolver if not resolving DNS locally TODO: determine if request url is local
-    BasicHttpClientConnectionManager cm = isLocal?
+    BasicHttpClientConnectionManager cm = isLocal ?
         new BasicHttpClientConnectionManager(reg) : 
         new BasicHttpClientConnectionManager(reg, null, null, new FakeDnsResolver());
 
