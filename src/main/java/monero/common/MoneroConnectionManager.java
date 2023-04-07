@@ -143,10 +143,11 @@ public class MoneroConnectionManager {
   /**
    * Indicates if the connection manager is connected to a node.
    * 
-   * @return true if the current connection is set, online, and not unauthenticated. false otherwise
+   * @return true if the current connection is set, online, and not unauthenticated, null if unknown, false otherwise
    */
-  public boolean isConnected() {
-    return currentConnection != null && currentConnection.isConnected();
+  public Boolean isConnected() {
+    if (currentConnection == null) return false;
+    return currentConnection.isConnected();
   }
   
   /**
@@ -237,7 +238,7 @@ public class MoneroConnectionManager {
   
   /**
    * Set the current connection.
-   * Update connection if its URI was previously added. Otherwise add new connection.
+   * Replace connection if its URI was previously added. Otherwise add new connection.
    * Notify if current connection changes.
    * Does not check the connection.
    * 
