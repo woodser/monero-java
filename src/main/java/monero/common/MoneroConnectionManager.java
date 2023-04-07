@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
@@ -238,7 +237,7 @@ public class MoneroConnectionManager {
   
   /**
    * Set the current connection.
-   * Update credentials if connection's URI was previously added. Otherwise add new connection.
+   * Update connection if its URI was previously added. Otherwise add new connection.
    * Notify if current connection changes.
    * Does not check the connection.
    * 
@@ -257,24 +256,13 @@ public class MoneroConnectionManager {
     
     // must provide uri
     if (connection.getUri() == null || "".equals(connection.getUri())) throw new MoneroError("Connection is missing URI");
-    
-    // check if adding new connection
+
+    // add or replace connection
     MoneroRpcConnection prevConnection = getConnectionByUri(connection.getUri());
-    if (prevConnection == null) {
-      addConnection(connection);
-      currentConnection = connection;
-      onConnectionChanged(currentConnection);
-      return this;
-    }
-    
-    // check if updating current connection
-    if (prevConnection != currentConnection || !Objects.equals(prevConnection.getUsername(), connection.getUsername()) || !Objects.equals(prevConnection.getPassword(), connection.getPassword()) || !Objects.equals(prevConnection.getPriority(), connection.getPriority())) {
-      prevConnection.setCredentials(connection.getUsername(), connection.getPassword());
-      prevConnection.setPriority(connection.getPriority());
-      currentConnection = prevConnection;
-      onConnectionChanged(currentConnection);
-    }
-    
+    if (prevConnection != null) connections.remove(prevConnection);
+    addConnection(connection);
+    currentConnection = connection;
+    onConnectionChanged(currentConnection);
     return this;
   }
   
