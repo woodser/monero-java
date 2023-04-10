@@ -74,6 +74,7 @@ public class MoneroRpcConnection {
   private Boolean isAuthenticated;
   private Long responseTime;
   private String proxyUri;
+  private boolean printStackTrace;
   
   private Map<String, Object> attributes = new HashMap<String, Object>();
   
@@ -109,6 +110,7 @@ public class MoneroRpcConnection {
     this.isAuthenticated = connection.isAuthenticated;
     this.responseTime = connection.responseTime;
     this.proxyUri = connection.proxyUri;
+    this.printStackTrace = connection.printStackTrace;
   }
 
   public String getUri() {
@@ -320,14 +322,6 @@ public class MoneroRpcConnection {
       body.put("id", "0");
       body.put("method", method);
       if (params != null) body.put("params", params);
-      if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending json request with method '" + method + "' and body: " + JsonUtils.serialize(body));
-      if (MoneroUtils.getLogLevel() >= 4) {
-        try {
-          throw new RuntimeException("Printing stacktrace for debug");
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
 
       // send http request
       HttpPost post = new HttpPost(uri.toString() + "/json_rpc");
@@ -336,6 +330,19 @@ public class MoneroRpcConnection {
       post.setEntity(entity);
       Map<String, Object> respMap;
       synchronized (this) {
+
+        // logging
+        if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending json request with method='" + method + "', body=" + JsonUtils.serialize(body) + ", uri=" + uri);
+        if (printStackTrace) {
+          try {
+            throw new RuntimeException("Debug stack trace for json request with method '" + method + "' and body " + JsonUtils.serialize(body));
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+
+        // make request
+        long startTime = System.currentTimeMillis();
         resp = request(post);
         
         // validate response
@@ -347,7 +354,7 @@ public class MoneroRpcConnection {
         if (MoneroUtils.getLogLevel() >= 3) {
           String respStr = JsonUtils.serialize(respMap);
           respStr = respStr.substring(0, Math.min(10000, respStr.length()));
-          MoneroUtils.log(3, "Received json response: " + respStr);
+          MoneroUtils.log(3, "Received json response from method='" + method + "', response=" + respStr + ", uri=" + uri + " (" + (System.currentTimeMillis() - startTime) + " ms)");
         }
       }
       
@@ -403,16 +410,6 @@ public class MoneroRpcConnection {
     CloseableHttpResponse resp = null;
     try {
 
-      // logging
-      if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending path request with path '" + path + "' and params: " + JsonUtils.serialize(params));
-      if (MoneroUtils.getLogLevel() >= 4) {
-        try {
-          throw new RuntimeException("Printing stacktrace for debug");
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-      
       // send http request
       HttpPost post = new HttpPost(uri.toString() + "/" + path);
       if (params != null) {
@@ -422,6 +419,19 @@ public class MoneroRpcConnection {
       post.setConfig(getRequestConfig(timeoutInMs));
       Map<String, Object> respMap;
       synchronized (this) {
+
+        // logging
+        if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending path request with path='" + path + "', params=" + JsonUtils.serialize(params) + ", uri=" + uri);
+        if (printStackTrace) {
+          try {
+            throw new RuntimeException("Debug stack trace for path request with path '" + path + "' and params " + JsonUtils.serialize(params));
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+
+        // send request
+        long startTime = System.currentTimeMillis();
         resp = request(post);
         
         // validate response
@@ -433,7 +443,7 @@ public class MoneroRpcConnection {
         if (MoneroUtils.getLogLevel() >= 3) {
           String respStr = JsonUtils.serialize(respMap);
           respStr = respStr.substring(0, Math.min(10000, respStr.length()));
-          MoneroUtils.log(3, "Received path response: " + respStr);
+          MoneroUtils.log(3, "Received path response from path='" + path + "', response=" + respStr + ", uri=" + uri + " (" + (System.currentTimeMillis() - startTime) + " ms)");
         }
       }
       
@@ -476,16 +486,6 @@ public class MoneroRpcConnection {
     CloseableHttpResponse resp = null;
     try {
 
-      // logging
-      if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending binary request with path '" + path + "' and params: " + JsonUtils.serialize(params));
-      if (MoneroUtils.getLogLevel() >= 4) {
-        try {
-          throw new RuntimeException("Printing stacktrace for debug");
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-      
       // create http request
       HttpPost post = new HttpPost(uri.toString() + "/" + path);
       post.setConfig(getRequestConfig(timeoutInMs));
@@ -496,6 +496,18 @@ public class MoneroRpcConnection {
       
       // send http request
       synchronized (this) {
+
+        // logging
+        if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending binary request with path='" + path + "', params=" + JsonUtils.serialize(params) + ", uri=" + uri);
+        if (printStackTrace) {
+          try {
+            throw new RuntimeException("Debug stack trace for binary request with path '" + path);
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+
+        // send request
         resp = request(post);
         
         // validate response
@@ -514,6 +526,15 @@ public class MoneroRpcConnection {
       try { resp.close(); }
       catch (Exception e) {}
     }
+  }
+
+  /**
+   * Enable or disable printing a stack trace on each request for debug.
+   * 
+   * @param printStackTrace sets if the stack trace should be printed
+   */
+  public void setPrintStackTrace(boolean printStackTrace) {
+    this.printStackTrace = printStackTrace;
   }
   
   @Override
