@@ -2015,6 +2015,7 @@ public class TestMoneroDaemonRpc {
       assertEquals(false, result.getSanityCheckFailed());
       TestUtils.testUnsignedBigInteger(result.getCredits(), false); // 0 credits
       assertNull(result.getTopBlockHash());
+      assertEquals(false, result.isTxExtraTooBig());
       assertEquals(true, result.isGood());
     } catch (AssertionError e) {
       System.out.println("Submit result is not good: " + JsonUtils.serialize(result));
