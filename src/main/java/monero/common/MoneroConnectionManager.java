@@ -110,6 +110,15 @@ public class MoneroConnectionManager {
   }
   
   /**
+   * Get all listeners.
+   * 
+   * @return all listeners
+   */
+  public List<MoneroConnectionManagerListener> getListeners() {
+    return listeners;
+  }
+  
+  /**
    * Add a connection. The connection may have an elevated priority for this manager to use.
    * 
    * @param connection - the connection to add
