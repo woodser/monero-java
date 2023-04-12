@@ -1452,6 +1452,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("credits")) result.setCredits((BigInteger) val);
       else if (key.equals("status") || key.equals("untrusted")) {}  // handled elsewhere
       else if (key.equals("top_hash")) result.setTopBlockHash("".equals(val) ? null : (String) val);
+      else if (key.equals("tx_extra_too_big")) result.setIsTxExtraTooBig((Boolean) val);
       else LOGGER.warning("ignoring unexpected field in submit tx hex result: " + key + ": " + val);
     }
     return result;

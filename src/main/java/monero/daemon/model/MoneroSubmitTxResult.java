@@ -25,6 +25,7 @@ public class MoneroSubmitTxResult {
   private String reason;
   private BigInteger credits;
   private String topBlockHash;
+  private Boolean isTxExtraTooBig;
   
   @JsonProperty("isGood")
   public Boolean isGood() {
@@ -144,6 +145,15 @@ public class MoneroSubmitTxResult {
 
   public void setTopBlockHash(String topBlockHash) {
     this.topBlockHash = topBlockHash;
+  }
+
+  @JsonProperty("isTxExtraTooBig")
+  public Boolean isTxExtraTooBig() {
+    return isTxExtraTooBig;
+  }
+  
+  public void setIsTxExtraTooBig(Boolean isTxExtraTooBig) {
+    this.isTxExtraTooBig = isTxExtraTooBig;
   }
   
   public String toString() {
