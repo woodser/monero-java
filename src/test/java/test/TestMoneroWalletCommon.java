@@ -2496,7 +2496,7 @@ public abstract class TestMoneroWalletCommon {
     assertFalse(offlineWallet.isConnectedToDaemon());
     assertFalse(offlineWallet.isViewOnly());
     if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic()); // TODO monero-project: cannot get mnemonic from offline wallet rpc
-    assertEquals(0, offlineWallet.getTxs().size());
+    assertEquals(0, offlineWallet.getTxs(new MoneroTxQuery().setInTxPool(false)).size());
     
     // import outputs to offline wallet
     int numOutputsImported = offlineWallet.importOutputs(outputsHex);
