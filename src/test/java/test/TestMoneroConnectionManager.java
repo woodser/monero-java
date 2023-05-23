@@ -209,6 +209,14 @@ public class TestMoneroConnectionManager {
       connectionManager.checkConnections();
       assertEquals(++numExpectedChanges, listener.changedConnections.size());
       assertTrue(connectionManager.isConnected());
+
+      // remove current connection and test auto switch
+      connectionManager.removeConnection(connectionManager.getConnection().getUri());
+      assertEquals(++numExpectedChanges, listener.changedConnections.size());
+      assertFalse(connectionManager.isConnected());
+      connectionManager.checkConnections();
+      assertEquals(++numExpectedChanges, listener.changedConnections.size());
+      assertTrue(connectionManager.isConnected());
       
       // shut down all connections
       connection = connectionManager.getConnection();

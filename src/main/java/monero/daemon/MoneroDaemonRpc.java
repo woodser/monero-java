@@ -212,7 +212,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
   
   /**
-   * Stop the internal process running monero-wallet-rpc, if applicable.
+   * Stop the internal process running monerod, if applicable.
    * 
    * @param force specifies if the process should be destroyed forcibly
    * @return the error code from stopping the process
