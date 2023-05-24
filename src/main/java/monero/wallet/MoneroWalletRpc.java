@@ -769,7 +769,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @Override
   public void rescanBlockchain() {
-    rpc.sendJsonRequest("rescan_blockchain", null, 0l);
+    rpc.sendJsonRequest("rescan_blockchain", 0l);
   }
 
   @Override

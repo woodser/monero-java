@@ -961,7 +961,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   public MoneroPruneResult pruneBlockchain(boolean check) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("check", check);
-    Map<String, Object> resp = rpc.sendJsonRequest("prune_blockchain", params);
+    Map<String, Object> resp = rpc.sendJsonRequest("prune_blockchain", params, 0l);
     Map<String, Object> resultMap = (Map<String, Object>) resp.get("result");
     checkResponseStatus(resultMap);
     MoneroPruneResult result = new MoneroPruneResult();
