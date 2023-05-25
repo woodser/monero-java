@@ -3761,6 +3761,14 @@ public abstract class TestMoneroWalletCommon {
       madeMultisigHexes.add(multisigHex);
     }
     
+    // try to get seed before wallet initialized
+    try {
+      participants.get(0).getMnemonic();
+      throw new RuntimeException("Should have thrown exception getting multisig seed before initialized");
+    } catch (Exception err) {
+      assertEquals(err.getMessage(), "This wallet is multisig, but not yet finalized");
+    }
+    
     // exchange keys N - M + 1 times
     String address = null;
     assertEquals(N, madeMultisigHexes.size());
@@ -3806,10 +3814,12 @@ public abstract class TestMoneroWalletCommon {
       prevMultisigHexes = exchangeMultisigHexes;
     }
     
-    // validate final multisig address
+    // validate final multisig
     MoneroWallet participant = participants.get(0);
     MoneroUtils.validateAddress(participant.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
     testMultisigInfo(participant.getMultisigInfo(), M, N);
+    String seed = participant.getMnemonic();
+    assertFalse(seed.isEmpty());
     
     // test sending a multisig transaction if configured
     if (testTx) {
