@@ -164,7 +164,7 @@ public abstract class TestMoneroWalletCommon {
    * @param config configures the wallet to open
    * @return MoneroWallet is the opened wallet
    */
-  protected MoneroWallet openWallet(String path) { return openWallet(new MoneroWalletConfig().setPath(path)); }
+  protected MoneroWallet openWallet(String path, String password) { return openWallet(new MoneroWalletConfig().setPath(path).setPassword(password)); }
   protected abstract MoneroWallet openWallet(MoneroWalletConfig config);
   
   /**
@@ -440,7 +440,7 @@ public abstract class TestMoneroWalletCommon {
     closeWallet(wallet, true);
     
     // re-open the wallet using its path
-    wallet = openWallet(path);
+    wallet = openWallet(path, null);
     
     // test the attribute
     assertEquals(uuid, wallet.getAttribute("uuid"));
@@ -2752,7 +2752,7 @@ public abstract class TestMoneroWalletCommon {
     String path = wallet.getPath();
     
     // change password
-    String newPassword = GenUtils.getUUID();
+    String newPassword = "";
     wallet.changePassword(TestUtils.WALLET_PASSWORD, newPassword);
     
     // close wallet without saving
@@ -2793,7 +2793,8 @@ public abstract class TestMoneroWalletCommon {
     assumeTrue(TEST_NON_RELAYS);
     
     // create random wallet
-    MoneroWallet wallet = createWallet(new MoneroWalletConfig());
+    String password = "";
+    MoneroWallet wallet = createWallet(new MoneroWalletConfig().setPassword(password));
     String path = wallet.getPath();
     
     // set an attribute
@@ -2804,7 +2805,7 @@ public abstract class TestMoneroWalletCommon {
     closeWallet(wallet);
     
     // re-open the wallet and ensure attribute was not saved
-    wallet = openWallet(path);
+    wallet = openWallet(path, password);
     assertEquals(null, wallet.getAttribute("id"));
     
     // set the attribute and close with saving
@@ -2812,7 +2813,7 @@ public abstract class TestMoneroWalletCommon {
     closeWallet(wallet, true);
     
     // re-open the wallet and ensure attribute was saved
-    wallet = openWallet(path);
+    wallet = openWallet(new MoneroWalletConfig().setPath(path).setPassword(password));
     assertEquals(uuid, wallet.getAttribute("id"));
     closeWallet(wallet);
   }
@@ -3923,9 +3924,12 @@ public abstract class TestMoneroWalletCommon {
         assertEquals("Cannot relay multisig transaction until co-signed", e.getMessage());
       }
       
-      // send funds from a subaddress in the multisig wallet
+      // create txs to send funds from a subaddress in the multisig wallet
       System.out.println("Sending");
-      List<MoneroTxWallet> txs = participant.createTxs(new MoneroTxConfig().setAddress(participant.getAddress(accountIdx, 0)).setAmount(TestUtils.MAX_FEE).setAccountIndex(accountIdx).setSubaddressIndex(0));
+      List<MoneroTxWallet> txs = participant.createTxs(new MoneroTxConfig()
+          .setAddress(wallet.getAddress(accountIdx, 0))
+          .setAmount(TestUtils.MAX_FEE)
+          .setAccountIndex(accountIdx).setSubaddressIndex(0));
       assertFalse(txs.isEmpty());
       MoneroTxSet txSet = txs.get(0).getTxSet();
       assertNotNull(txSet.getMultisigTxHex());
@@ -3948,6 +3952,7 @@ public abstract class TestMoneroWalletCommon {
       // submit the signed multisig tx hex to the network
       System.out.println("Submitting");
       List<String> txHashes = participant.submitMultisigTxHex(multisigTxHex);
+      assertTrue(txHashes.size() > 0);
       
       // synchronize the multisig participants since spending outputs
       System.out.println("Synchronizing participants");

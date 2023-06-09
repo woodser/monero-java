@@ -290,13 +290,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // validate config
     if (config == null) throw new MoneroError("Must provide configuration of wallet to open");
     if (config.getPath() == null || config.getPath().isEmpty()) throw new MoneroError("Filename is not initialized");
-    if (config.getPassword() == null || config.getPassword().isEmpty()) throw new MoneroError("Password is not initialized");
     // TODO: ensure other fields are uninitialized?
     
     // open wallet on rpc server
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("filename", config.getPath());
-    params.put("password", config.getPassword());
+    params.put("password", config.getPassword() == null ? "" : config.getPassword());
     rpc.sendJsonRequest("open_wallet", params);
     clear();
     path = config.getPath();
@@ -378,7 +377,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    */
   private MoneroWalletRpc createWalletRandom(String name, String password, String language) {
     if (name == null || name.isEmpty()) throw new MoneroError("Wallet name is not initialized");
-    if (password == null || password.isEmpty()) throw new MoneroError("Password is not initialized");
     if (language == null || language.isEmpty()) language = DEFAULT_LANGUAGE;
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("filename", name);
