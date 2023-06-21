@@ -38,7 +38,8 @@ public class TestUtils {
   static {
     if (CPP_LOG_ENABLED) {
       MoneroUtils.loadNativeLibrary();
-      MoneroUtils.initJniLogging(CPP_LOG_PATH, CPP_LOG_LEVEL, CPP_LOG_CONSOLE);
+      MoneroUtils.configureNativeLogging(CPP_LOG_PATH, CPP_LOG_CONSOLE);
+      MoneroUtils.setLogLevel(CPP_LOG_LEVEL);
     }
   }
   

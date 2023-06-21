@@ -404,15 +404,15 @@ JNIEXPORT jstring JNICALL Java_monero_common_MoneroUtils_binaryBlocksToJsonJni(J
   return env->NewStringUTF(json_str.c_str());
 }
 
-JNIEXPORT void JNICALL Java_monero_common_MoneroUtils_initLoggingJni(JNIEnv* env, jclass clazz, jstring jpath, jboolean console) {
+JNIEXPORT void JNICALL Java_monero_common_MoneroUtils_setLogLevelJni(JNIEnv* env, jclass clazz, jint level) {
+  monero_utils::set_log_level(level);
+}
+
+JNIEXPORT void JNICALL Java_monero_common_MoneroUtils_configureLoggingJni(JNIEnv* env, jclass clazz, jstring jpath, jboolean console) {
   const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
   string path = string(_path ? _path : "");
   env->ReleaseStringUTFChars(jpath, _path);
-  mlog_configure(path, console);
-}
-
-JNIEXPORT void JNICALL Java_monero_common_MoneroUtils_setLogLevelJni(JNIEnv* env, jclass clazz, jint level) {
-  mlog_set_log_level(level);
+  monero_utils::configure_logging(path, console);
 }
 
 // --------------------------- STATIC WALLET UTILS ----------------------------
