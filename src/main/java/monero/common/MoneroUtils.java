@@ -470,15 +470,13 @@ public class MoneroUtils {
   }
   
   /**
-   * Initialize JNI logging before using.
+   * Initialize JNI logging.
    * 
    * @param path the path to write logs to
-   * @param level the log level
    * @param console specifies whether or not to write to the console
    */
-  public static void initJniLogging(String path, int level, boolean console) {
-    initLoggingJni(path, console);
-    setLogLevelJni(level);
+  public static void configureNativeLogging(String path, boolean console) {
+    configureLoggingJni(path, console);
   }
   
   /**
@@ -515,7 +513,7 @@ public class MoneroUtils {
   private native static byte[] jsonToBinaryJni(String json);
   private native static String binaryToJsonJni(byte[] bin);
   private native static String binaryBlocksToJsonJni(byte[] binBlocks);
-  private native static void initLoggingJni(String path, boolean console);
+  private native static void configureLoggingJni(String path, boolean console);
   private native static void setLogLevelJni(int level);
   
   // ---------------------------- PRIVATE HELPERS -----------------------------

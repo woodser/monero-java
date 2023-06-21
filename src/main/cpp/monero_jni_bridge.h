@@ -53,9 +53,9 @@ JNIEXPORT jstring JNICALL Java_monero_common_MoneroUtils_binaryToJsonJni(JNIEnv 
 
 JNIEXPORT jstring JNICALL Java_monero_common_MoneroUtils_binaryBlocksToJsonJni(JNIEnv *, jclass, jbyteArray);
 
-JNIEXPORT void JNICALL Java_monero_common_MoneroUtils_initLoggingJni(JNIEnv *, jclass, jstring jpath, jboolean);
-
 JNIEXPORT void JNICALL Java_monero_common_MoneroUtils_setLogLevelJni(JNIEnv *, jclass, jint);
+
+JNIEXPORT void JNICALL Java_monero_common_MoneroUtils_configureLoggingJni(JNIEnv *, jclass, jstring jpath, jboolean);
 
 // --------------------------- STATIC WALLET UTILS ----------------------------
 
