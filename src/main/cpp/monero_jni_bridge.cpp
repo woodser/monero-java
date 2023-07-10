@@ -2164,8 +2164,8 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_moveToJni(JNIEnv* env
   const char* _path = jpath ? env->GetStringUTFChars(jpath, NULL) : nullptr;
   const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
   string path = string(_path ? _path : "");
-  string password = string(_password ? _password : "");
   env->ReleaseStringUTFChars(jpath, _path);
+  string password = string(_password ? _password : "");
   env->ReleaseStringUTFChars(jpassword, _password);
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   try {
@@ -2214,16 +2214,13 @@ JNIEXPORT jbyteArray JNICALL Java_monero_wallet_MoneroWalletFull_getKeysFileBuff
   }
 }
 
-JNIEXPORT jbyteArray JNICALL Java_monero_wallet_MoneroWalletFull_getCacheFileBufferJni(JNIEnv* env, jobject instance, jstring jpassword) {
-  MTRACE("Java_monero_wallet_MoneroWalletFull_getCacheFileBufferJni(password)");
+JNIEXPORT jbyteArray JNICALL Java_monero_wallet_MoneroWalletFull_getCacheFileBufferJni(JNIEnv* env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_getCacheFileBufferJni()");
   monero_wallet_full* wallet = get_handle<monero_wallet_full>(env, instance, JNI_WALLET_HANDLE);
-  const char* _password = jpassword ? env->GetStringUTFChars(jpassword, NULL) : nullptr;
-  string password = string(_password ? _password : "");
-  env->ReleaseStringUTFChars(jpassword, _password);
   try {
 
       // get cache buffer
-      std::string cache_buf = wallet->get_cache_file_buffer(password);
+      std::string cache_buf = wallet->get_cache_file_buffer();
 
       // create java object
       jbyteArray jcache_buf = env->NewByteArray(cache_buf.length());

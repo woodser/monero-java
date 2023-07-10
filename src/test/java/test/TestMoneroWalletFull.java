@@ -24,7 +24,6 @@ import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletFull;
 import monero.wallet.MoneroWalletRpc;
-import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroOutputWallet;
@@ -1020,54 +1019,60 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   }
 
   // Can be moved
-  // TODO: update to be consistent with monero-javascript, file issues with wallet2 store_to()
   @Test
   public void testMoveTo() {
     assumeTrue(TEST_NON_RELAYS);
-    
-    // create unique name for test wallet
-    String walletName = "test_wallet_" + System.currentTimeMillis();
-    String path = TestUtils.TEST_WALLETS_DIR + "/" + walletName;
-    
-    // wallet does not exist
-    assertFalse(MoneroWalletFull.walletExists(path));
-    
-    // create wallet at the path
-    long restoreHeight = daemon.getHeight() - 200;
-    MoneroWalletFull wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(restoreHeight).setServerUri(TestUtils.OFFLINE_SERVER_URI));
-    String subaddressLabel = "Move test wallet subaddress!";
-    MoneroAccount account = wallet.createAccount(subaddressLabel);
-    wallet.save();
-    
-    // wallet exists
-    assertTrue(MoneroWalletFull.walletExists(path));
-    
-    // move wallet to a subdirectory
-    String movedPath = TestUtils.TEST_WALLETS_DIR + "/moved/" + walletName;
-    wallet.moveTo(movedPath, TestUtils.WALLET_PASSWORD);
-    assertFalse(MoneroWalletFull.walletExists(path));
-    assertTrue(MoneroWalletFull.walletExists(movedPath));
-    wallet.save();
-    assertFalse(MoneroWalletFull.walletExists(path));
-    assertTrue(MoneroWalletFull.walletExists(movedPath));
-    wallet.close();
-    assertFalse(MoneroWalletFull.walletExists(path));
-    assertTrue(MoneroWalletFull.walletExists(movedPath));
-    
-    // re-open and test wallet
-    wallet = openWallet(new MoneroWalletConfig().setPath(movedPath).setServerUri(TestUtils.OFFLINE_SERVER_URI));
-    assertEquals(subaddressLabel, wallet.getSubaddress(account.getIndex(), 0).getLabel());
-    
-    // move wallet back
-    wallet.moveTo(path, TestUtils.WALLET_PASSWORD);
-    assertTrue(MoneroWalletFull.walletExists(path));
-    assertFalse(MoneroWalletFull.walletExists(movedPath));
-    wallet.save();
-    assertTrue(MoneroWalletFull.walletExists(path));
-    assertFalse(MoneroWalletFull.walletExists(movedPath));
-    wallet.close();
-    assertTrue(MoneroWalletFull.walletExists(path));
-    assertFalse(MoneroWalletFull.walletExists(movedPath));
+    MoneroWalletFull wallet = null;
+    Exception err = null;
+    try {
+      
+      // create random in-memory wallet with defaults
+      wallet = createWallet(new MoneroWalletConfig().setPath(""));
+      String mnemonic = wallet.getMnemonic();
+      wallet.setAttribute("mykey", "myval1");
+
+      // change password of in-memory wallet
+      String password2 = "abc123";
+      wallet.changePassword(TestUtils.WALLET_PASSWORD, password2);
+
+      // move wallet from memory to disk
+      String path1 = TestUtils.TEST_WALLETS_DIR + "/" + GenUtils.getUUID();
+      assertTrue(!MoneroWalletFull.walletExists(path1));
+      wallet.moveTo(path1);
+      assertTrue(MoneroWalletFull.walletExists(path1));
+      assertEquals(mnemonic, wallet.getMnemonic());
+      assertEquals(wallet.getAttribute("mykey"), "myval1");
+
+      // move to same path which is same as saving
+      wallet.setAttribute("mykey", "myval2");
+      wallet.moveTo(path1);
+      wallet.close();
+      assertTrue(MoneroWalletFull.walletExists(path1));
+      wallet = openWallet(new MoneroWalletConfig().setPath(path1).setPassword(password2));
+      assertEquals(mnemonic, wallet.getMnemonic());
+      assertEquals(wallet.getAttribute("mykey"), "myval2");
+
+      // move wallet to new directory
+      String path2 = TestUtils.TEST_WALLETS_DIR + "/moved/" + GenUtils.getUUID();
+      wallet.setAttribute("mykey", "myval3");
+      wallet.moveTo(path2);
+      assertFalse(MoneroWalletFull.walletExists(path1));
+      assertTrue(MoneroWalletFull.walletExists(path2));
+      assertEquals(mnemonic, wallet.getMnemonic());
+      
+      // re-open and test wallet
+      wallet.close();
+      wallet = openWallet(new MoneroWalletConfig().setPath(path2).setPassword(password2));
+      wallet.sync();
+      assertEquals(mnemonic, wallet.getMnemonic());
+      assertEquals(wallet.getAttribute("mykey"), "myval3");
+    } catch (Exception e) {
+      err = e;
+    }
+
+    // final cleanup
+    if (wallet != null) wallet.close();
+    if (err != null) throw new RuntimeException(err);
   }
   
   // TODO: this version assumes a wallet can be saved after creation which is not currently supported in wallet2
