@@ -395,14 +395,13 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     assertNotClosed();
     setRestoreHeightJni(syncHeight);
   }
-  
+
   /**
    * Move the wallet from its current path to the given path.
    * 
    * @param path is the new wallet's path
-   * @param password is the new wallet's password
    */
-  public void moveTo(String path, String password) {
+  public void moveTo(String path) {
     assertNotClosed();
     moveToJni(path, password);
   }
@@ -1342,13 +1341,15 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    * @return the keys and cache data, respectively
    */
   public synchronized byte[][] getData() {
-    return new byte[][] { getKeysFileBufferJni(password, isViewOnly()), getCacheFileBufferJni(password) };
+    return new byte[][] { getKeysFileBufferJni(password, isViewOnly()), getCacheFileBufferJni() };
   }
   
   @Override
   public void changePassword(String oldPassword, String newPassword) {
     try {
+      if (!password.equals(oldPassword)) throw new RuntimeException("Invalid original password.");
       changePasswordJni(oldPassword, newPassword);
+      password = newPassword;
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
@@ -1582,7 +1583,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
 
   private native byte[] getKeysFileBufferJni(String password, boolean viewOnly);
 
-  private native byte[] getCacheFileBufferJni(String password);
+  private native byte[] getCacheFileBufferJni();
   
   private native void changePasswordJni(String oldPassword, String newPassword);
   
