@@ -874,6 +874,7 @@ public interface MoneroWallet {
    * &nbsp;&nbsp; relay - relay the transaction to peers to commit to the blockchain (default false)<br>
    * &nbsp;&nbsp; priority - transaction priority (default MoneroTxPriority.NORMAL)<br>
    * &nbsp;&nbsp; destinations - addresses and amounts in a multi-destination tx (required unless `address` and `amount` provided)<br>
+   * &nbsp;&nbsp; subtractFeeFrom - list of destination indices to split the transaction fee (optional)<br>
    * &nbsp;&nbsp; paymentId - transaction payment ID (optional)<br>
    * &nbsp;&nbsp; unlockHeight - minimum height for the transaction to unlock (default 0)<br>
    * </p>

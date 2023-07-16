@@ -17,6 +17,7 @@ import monero.common.MoneroError;
 public class MoneroTxConfig {
 
   private List<MoneroDestination> destinations;
+  private List<Integer> subtractFeeFrom;
   private String paymentId;
   private MoneroTxPriority priority;
   private BigInteger fee;
@@ -40,6 +41,7 @@ public class MoneroTxConfig {
       this.destinations = new ArrayList<MoneroDestination>();
       for (MoneroDestination destination : config.getDestinations()) this.destinations.add(destination.copy());
     }
+    this.subtractFeeFrom = config.subtractFeeFrom;
     this.paymentId = config.paymentId;
     this.priority = config.priority;
     this.fee = config.fee;
@@ -142,6 +144,20 @@ public class MoneroTxConfig {
     return this;
   }
   
+  public List<Integer> getSubtractFeeFrom() {
+    return subtractFeeFrom;
+  }
+
+  @JsonProperty("subtractFeeFrom")
+  public MoneroTxConfig setSubtractFeeFrom(List<Integer> destinationIndices) {
+    this.subtractFeeFrom = destinationIndices;
+    return this;
+  }
+  
+  public MoneroTxConfig setSubtractFeeFrom(Integer... destinationIndices) {
+    return setSubtractFeeFrom(GenUtils.arrayToList(destinationIndices));
+  }
+  
   public String getPaymentId() {
     return paymentId;
   }
@@ -182,7 +198,7 @@ public class MoneroTxConfig {
     return subaddressIndices;
   }
   
-  public MoneroTxConfig setSubaddressIndex(int subaddressIndex) {
+  public MoneroTxConfig setSubaddressIndex(Integer subaddressIndex) {
     setSubaddressIndices(subaddressIndex);
     return this;
   }
@@ -194,8 +210,9 @@ public class MoneroTxConfig {
   }
   
   public MoneroTxConfig setSubaddressIndices(Integer... subaddressIndices) {
-    this.subaddressIndices = GenUtils.arrayToList(subaddressIndices);
-    return this;
+    List<Integer> asList = subaddressIndices == null ? null : GenUtils.arrayToList(subaddressIndices);
+    if (asList.size() == 1 && asList.get(0) == null) asList = null; // ...null becomes [null] so change to null
+    return setSubaddressIndices(asList);
   }
   
   /**
@@ -298,14 +315,15 @@ public class MoneroTxConfig {
     result = prime * result + ((belowAmount == null) ? 0 : belowAmount.hashCode());
     result = prime * result + ((canSplit == null) ? 0 : canSplit.hashCode());
     result = prime * result + ((destinations == null) ? 0 : destinations.hashCode());
-    result = prime * result + ((relay == null) ? 0 : relay.hashCode());
     result = prime * result + ((fee == null) ? 0 : fee.hashCode());
     result = prime * result + ((keyImage == null) ? 0 : keyImage.hashCode());
     result = prime * result + ((note == null) ? 0 : note.hashCode());
     result = prime * result + ((paymentId == null) ? 0 : paymentId.hashCode());
     result = prime * result + ((priority == null) ? 0 : priority.hashCode());
     result = prime * result + ((recipientName == null) ? 0 : recipientName.hashCode());
+    result = prime * result + ((relay == null) ? 0 : relay.hashCode());
     result = prime * result + ((subaddressIndices == null) ? 0 : subaddressIndices.hashCode());
+    result = prime * result + ((subtractFeeFrom == null) ? 0 : subtractFeeFrom.hashCode());
     result = prime * result + ((sweepEachSubaddress == null) ? 0 : sweepEachSubaddress.hashCode());
     result = prime * result + ((unlockHeight == null) ? 0 : unlockHeight.hashCode());
     return result;
@@ -329,9 +347,6 @@ public class MoneroTxConfig {
     if (destinations == null) {
       if (other.destinations != null) return false;
     } else if (!destinations.equals(other.destinations)) return false;
-    if (relay == null) {
-      if (other.relay != null) return false;
-    } else if (!relay.equals(other.relay)) return false;
     if (fee == null) {
       if (other.fee != null) return false;
     } else if (!fee.equals(other.fee)) return false;
@@ -348,9 +363,15 @@ public class MoneroTxConfig {
     if (recipientName == null) {
       if (other.recipientName != null) return false;
     } else if (!recipientName.equals(other.recipientName)) return false;
+    if (relay == null) {
+      if (other.relay != null) return false;
+    } else if (!relay.equals(other.relay)) return false;
     if (subaddressIndices == null) {
       if (other.subaddressIndices != null) return false;
     } else if (!subaddressIndices.equals(other.subaddressIndices)) return false;
+    if (subtractFeeFrom == null) {
+      if (other.subtractFeeFrom != null) return false;
+    } else if (!subtractFeeFrom.equals(other.subtractFeeFrom)) return false;
     if (sweepEachSubaddress == null) {
       if (other.sweepEachSubaddress != null) return false;
     } else if (!sweepEachSubaddress.equals(other.sweepEachSubaddress)) return false;
