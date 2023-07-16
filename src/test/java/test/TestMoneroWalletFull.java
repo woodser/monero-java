@@ -1989,6 +1989,18 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 
   @Override
   @Test
+  public void testSubtractFeeFrom() {
+    super.testSubtractFeeFrom();
+  }
+
+  @Override
+  @Test
+  public void testSubtractFeeFromSplit() {
+    super.testSubtractFeeFromSplit();
+  }
+
+  @Override
+  @Test
   public void testUpdateLockedSameAccount() {
     super.testUpdateLockedSameAccount();
   }
