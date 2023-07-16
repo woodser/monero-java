@@ -3480,6 +3480,20 @@ public abstract class TestMoneroWalletCommon {
     BigInteger dustAmt = daemon.getFeeEstimate().getFee().divide(BigInteger.valueOf(2));
     testSendToMultiple(5, 3, true, dustAmt);
   }
+
+  // Can subtract fees from destinations
+  @Test
+  public void testSubtractFeeFrom() {
+    assumeTrue(TEST_RELAYS);
+    testSendToMultiple(5, 3, false, null, true);
+  }
+
+  // Cannot subtract fees from destinations in split transactions
+  @Test
+  public void testSubtractFeeFromSplit() {
+    assumeTrue(TEST_RELAYS);
+    testSendToMultiple(3, 15, true, null, true);
+  }
   
   /**
    * Sends funds from the first unlocked account to multiple accounts and subaddresses.
@@ -3488,9 +3502,11 @@ public abstract class TestMoneroWalletCommon {
    * @param numSubaddressesPerAccount is the number of subaddresses per account to receive funds
    * @param canSplit specifies if the operation can be split into multiple transactions
    * @param sendAmountPerSubaddress is the amount to send to each subaddress (optional, computed if not given)
+   * @param subtractFeeFromDestinations specifies to subtract the fee from destination addresses
    */
   private void testSendToMultiple(int numAccounts, int numSubaddressesPerAccount, boolean canSplit) { testSendToMultiple(numAccounts, numSubaddressesPerAccount, canSplit, null); }
-  private void testSendToMultiple(int numAccounts, int numSubaddressesPerAccount, boolean canSplit, BigInteger sendAmountPerSubaddress) {
+  private void testSendToMultiple(int numAccounts, int numSubaddressesPerAccount, boolean canSplit, BigInteger sendAmountPerSubaddress) { testSendToMultiple(numAccounts, numSubaddressesPerAccount, canSplit, sendAmountPerSubaddress, false); }
+  private void testSendToMultiple(int numAccounts, int numSubaddressesPerAccount, boolean canSplit, BigInteger sendAmountPerSubaddress, boolean subtractFeeFromDestinations) {
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
     
     // compute the minimum account unlocked balance needed in order to fulfill the config
@@ -3542,17 +3558,34 @@ public abstract class TestMoneroWalletCommon {
     // build tx config
     MoneroTxConfig config = new MoneroTxConfig();
     config.setAccountIndex(srcAccount.getIndex());
+    config.setSubaddressIndices((Integer) null); // test assigning null
     config.setDestinations(new ArrayList<MoneroDestination>());
     config.setRelay(true);
     config.setCanSplit(canSplit);
     config.setPriority(MoneroTxPriority.NORMAL);
+    List<Integer> subtractFeeFrom = new ArrayList<Integer>();
     for (int i = 0; i < destinationAddresses.size(); i++) {
       config.getDestinations().add(new MoneroDestination(destinationAddresses.get(i), sendAmountPerSubaddress));
+      subtractFeeFrom.add(i);
     }
+    if (subtractFeeFromDestinations) config.setSubtractFeeFrom(subtractFeeFrom);
+
     MoneroTxConfig configCopy = config.copy();
     
     // send tx(s) with config
-    List<MoneroTxWallet> txs = wallet.createTxs(config);
+    List<MoneroTxWallet> txs  = null;
+    try {
+      txs = wallet.createTxs(config);
+    } catch (MoneroError e) {
+
+      // test error applying subtractFromFee with split txs
+      if (subtractFeeFromDestinations && txs == null) {
+        if (!e.getMessage().equals("subtractfeefrom transfers cannot be split over multiple transactions yet")) throw e;
+        return;
+      }
+
+      throw e;
+    }
     if (!canSplit) assertEquals(1, txs.size());
     
     // test that config is unchanged
@@ -3573,9 +3606,11 @@ public abstract class TestMoneroWalletCommon {
     
     // test each transaction
     assertTrue(txs.size() > 0);
+    BigInteger feeSum = BigInteger.valueOf(0);
     BigInteger outgoingSum = BigInteger.valueOf(0);
+    testTxsWallet(txs, ctx);
     for (MoneroTxWallet tx : txs) {
-      testTxWallet(tx, ctx);
+      feeSum = feeSum.add(tx.getFee());
       outgoingSum = outgoingSum.add(tx.getOutgoingAmount());
       if (tx.getOutgoingTransfer() != null && tx.getOutgoingTransfer().getDestinations() != null) {
         BigInteger destinationSum = BigInteger.valueOf(0);
@@ -3589,8 +3624,8 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // assert that outgoing amounts sum up to the amount sent within a small margin
-    if (Math.abs(sendAmount.subtract(outgoingSum).longValue()) > SEND_MAX_DIFF) { // send amounts may be slightly different
-      fail("Actual send amount is too different from requested send amount: " + sendAmount + " - " + outgoingSum + " = " + sendAmount.subtract(outgoingSum));
+    if (Math.abs(sendAmount.subtract(subtractFeeFromDestinations ? feeSum : BigInteger.valueOf(0)).subtract(outgoingSum).longValue()) > SEND_MAX_DIFF) { // send amounts may be slightly different
+      fail("Actual send amount is too different from requested send amount: " + sendAmount + " - " + (subtractFeeFromDestinations ? feeSum : BigInteger.valueOf(0)) + " - " + outgoingSum + " = " + sendAmount.subtract(subtractFeeFromDestinations ? feeSum : BigInteger.valueOf(0)).subtract(outgoingSum));
     }
   }
   
@@ -5288,7 +5323,39 @@ public abstract class TestMoneroWalletCommon {
     if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0) assertTrue(subaddress.isUsed());
     assertTrue(subaddress.getNumBlocksToUnlock() >= 0);
   }
-  
+
+  protected void testTxsWallet(List<MoneroTxWallet> txs, TxContext ctx) {
+
+    // test each transaction
+    assertTrue(txs.size() > 0);
+    for (MoneroTxWallet tx : txs) testTxWallet(tx, ctx);
+
+    // test destinations across transactions
+    if (ctx.config != null && ctx.config.getDestinations() != null) {
+      int destinationIdx = 0;
+      boolean subtractFeeFromDestinations = ctx.config.getSubtractFeeFrom() != null && ctx.config.getSubtractFeeFrom().size() > 0;
+      for (MoneroTxWallet tx : txs) {
+
+        // TODO: remove this after >18.2.2 when amounts_by_dest_list is official
+        if (tx.getOutgoingTransfer().getDestinations() == null) {
+          System.err.println("Tx missing destinations");
+          return;
+        }
+
+        BigInteger amountDiff = BigInteger.valueOf(0);
+        for (MoneroDestination destination : tx.getOutgoingTransfer().getDestinations()) {
+          MoneroDestination ctxDestination = ctx.config.getDestinations().get(destinationIdx);
+          assertEquals(ctxDestination.getAddress(), destination.getAddress());
+          if (subtractFeeFromDestinations) amountDiff = amountDiff.add(ctxDestination.getAmount().subtract(destination.getAmount()));
+          else assertEquals(ctxDestination.getAmount(), destination.getAmount());
+          destinationIdx++;
+        }
+        if (subtractFeeFromDestinations) assertEquals(amountDiff, tx.getFee());
+      }
+      assertEquals(destinationIdx, ctx.config.getDestinations().size());
+    }
+  }
+
   /**
    * Tests a wallet transaction with a test configuration.
    * 
@@ -5484,20 +5551,22 @@ public abstract class TestMoneroWalletCommon {
       }
       
       // test destinations of sent tx
-      if (tx.getOutgoingTransfer().getDestinations() == null) assertTrue(config.getCanSplit()); // TODO: destinations not returned from transfer_split
-      else {
-        assertEquals(config.getDestinations().size(), tx.getOutgoingTransfer().getDestinations().size());
-        for (int i = 0; i < config.getDestinations().size(); i++) {
-          assertEquals(config.getDestinations().get(i).getAddress(), tx.getOutgoingTransfer().getDestinations().get(i).getAddress());
-          if (Boolean.TRUE.equals(ctx.isSweepResponse)) {
-            assertEquals(1, config.getDestinations().size());
-            assertNull(config.getDestinations().get(i).getAmount());
-            assertEquals(tx.getOutgoingTransfer().getAmount().toString(), tx.getOutgoingTransfer().getDestinations().get(i).getAmount().toString());
-          } else {
-            assertEquals(config.getDestinations().get(i).getAmount().toString(), tx.getOutgoingTransfer().getDestinations().get(i).getAmount().toString());
+      if (tx.getOutgoingTransfer().getDestinations() == null) {
+        assertTrue(config.getCanSplit());
+        System.err.println("Destinations not returned from split transactions"); // TODO: remove this after >18.2.2 when amounts_by_dest_list official
+      } else {
+        assertNotNull(tx.getOutgoingTransfer().getDestinations());
+        assertTrue(tx.getOutgoingTransfer().getDestinations().size() > 0);
+        boolean subtractFeeFromDestinations = ctx.config.getSubtractFeeFrom() != null && ctx.config.getSubtractFeeFrom().size() > 0;
+        if (Boolean.TRUE.equals(ctx.isSweepResponse)) {
+          assertEquals(1, config.getDestinations().size());
+          assertNull(config.getDestinations().get(0).getAmount());
+          if (!subtractFeeFromDestinations) {
+            assertEquals(tx.getOutgoingTransfer().getAmount().toString(), tx.getOutgoingTransfer().getDestinations().get(0).getAmount().toString());
           }
         }
       }
+
       
       // test relayed txs
       if (Boolean.TRUE.equals(config.getRelay())) {
@@ -5645,7 +5714,7 @@ public abstract class TestMoneroWalletCommon {
         sum = sum.add(destination.getAmount());
       }
       if (!transfer.getAmount().equals(sum)) System.out.println(transfer.getTx().getTxSet() == null ? transfer.getTx().toString() : transfer.getTx().getTxSet().toString());
-      assertEquals(transfer.getAmount(), sum);  // TODO: sum of destinations != outgoing amount in split txs
+      assertEquals(sum, transfer.getAmount());
     }
   }
   

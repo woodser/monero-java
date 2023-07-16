@@ -1221,6 +1221,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       destinationMap.put("amount", destination.getAmount().toString());
       destinationMaps.add(destinationMap);
     }
+    if (config.getSubtractFeeFrom() != null) params.put("subtract_fee_from_outputs", config.getSubtractFeeFrom());
     params.put("account_index", accountIdx);
     params.put("subaddr_indices", subaddressIndices);
     params.put("payment_id", config.getPaymentId());
@@ -1231,6 +1232,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("get_tx_metadata", true);
     if (config.getCanSplit()) params.put("get_tx_keys", true); // param to get tx key(s) depends if split
     else params.put("get_tx_key", true);
+    
+    // cannot apply subtractFeeFrom with `transfer_split` call
+    if (config.getCanSplit() && config.getSubtractFeeFrom() != null && config.getSubtractFeeFrom().size() > 0) {
+      throw new MoneroError("subtractfeefrom transfers cannot be split over multiple transactions yet");
+    }
     
     // send request
     Map<String, Object> result = null;
@@ -1259,8 +1265,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (Boolean.TRUE.equals(config.getRelay())) poll();
     
     // initialize tx set from rpc response with pre-initialized txs
-    if (config.getCanSplit()) return convertRpcSentTxsToTxSet(result, txs).getTxs();
-    else return convertRpcTxToTxSet(result, txs == null ? null : txs.get(0), true).getTxs();
+    if (config.getCanSplit()) return convertRpcSentTxsToTxSet(result, txs, config).getTxs();
+    else return convertRpcTxToTxSet(result, txs == null ? null : txs.get(0), true, config).getTxs();
   }
 
   @SuppressWarnings("unchecked")
@@ -1271,7 +1277,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     GenUtils.assertNull(config.getSweepEachSubaddress());
     GenUtils.assertNull(config.getBelowAmount());
     GenUtils.assertNull("Splitting is not applicable when sweeping output", config.getCanSplit());
-    if (config.getDestinations().size() != 1 || config.getDestinations().get(0).getAddress() == null || config.getDestinations().get(0).getAddress().isEmpty()) throw new MoneroError("Must provide exactly one destination address to sweep output to");
+    if (config.getDestinations() == null || config.getDestinations().size() != 1 || config.getDestinations().get(0).getAddress() == null || config.getDestinations().get(0).getAddress().isEmpty()) throw new MoneroError("Must provide exactly one destination address to sweep output to");
+    if (config.getSubtractFeeFrom() != null && config.getSubtractFeeFrom().size() > 0) throw new MoneroError("Sweep transfers do not support subtracting fees from destinations");
     
     // build request parameters
     Map<String, Object> params = new HashMap<String, Object>();
@@ -1296,7 +1303,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
     // build and return tx
     MoneroTxWallet tx = initSentTxWallet(config, null, true);
-    convertRpcTxToTxSet(result, tx, true);
+    convertRpcTxToTxSet(result, tx, true, config);
     tx.getOutgoingTransfer().getDestinations().get(0).setAmount(tx.getOutgoingTransfer().getAmount()); // initialize destination amount
     return tx;
   }
@@ -1375,7 +1382,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> resp = rpc.sendJsonRequest("sweep_dust", params);
     if (relay) poll();
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    MoneroTxSet txSet = convertRpcSentTxsToTxSet(result, null);
+    MoneroTxSet txSet = convertRpcSentTxsToTxSet(result, null, null);
     if (txSet.getTxs() == null) return new ArrayList<MoneroTxWallet>();
     for (MoneroTxWallet tx : txSet.getTxs()) {
       tx.setIsRelayed(relay);
@@ -2097,7 +2104,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     for (String key : result.keySet()) {
       for (Map<String, Object> rpcTx :((List<Map<String, Object>>) result.get(key))) {
-        MoneroTxWallet tx = convertRpcTxWithTransfer(rpcTx, null, null);
+        MoneroTxWallet tx = convertRpcTxWithTransfer(rpcTx, null, null, null);
         if (tx.isConfirmed()) GenUtils.assertTrue(tx.getBlock().getTxs().contains(tx));
 //        if (tx.getId().equals("38436c710dfbebfb24a14cddfd430d422e7282bbe94da5e080643a1bd2880b44")) {
 //          System.out.println(rpcTx);
@@ -2237,6 +2244,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (config.getKeyImage() != null) throw new MoneroError("Key image defined; use sweepOutput() to sweep an output by its key image");
     if (config.getSubaddressIndices() != null && config.getSubaddressIndices().size() == 0) throw new MoneroError("Empty list given for subaddresses indices to sweep");
     if (Boolean.TRUE.equals(config.getSweepEachSubaddress())) throw new MoneroError("Cannot sweep each subaddress with RPC `sweep_all`");
+    if (config.getSubtractFeeFrom() != null && config.getSubtractFeeFrom().size() > 0) throw new MoneroError("Sweeping output does not support subtracting fees from destinations");
     
     // sweep from all subaddresses if not otherwise defined
     if (config.getSubaddressIndices() == null) {
@@ -2267,7 +2275,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     
     // initialize txs from response
-    MoneroTxSet txSet = convertRpcSentTxsToTxSet(result, null);
+    MoneroTxSet txSet = convertRpcSentTxsToTxSet(result, null, config);
     
     // initialize remaining known fields
     for (MoneroTxWallet tx : txSet.getTxs()) {
@@ -2782,9 +2790,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   /**
    * Initializes a sent transaction.
    * 
+   * TODO: remove copyDestinations after >18.2.2 when subtractFeeFrom fully supported
+   * 
    * @param config is the send configuration
    * @param tx is an existing transaction to initialize (optional)
-   * @param copyDestinations copies config destinations if true
+   * @param copyDestinations copies config destinations if true 
    * @return tx is the initialized send tx
    */
   private static MoneroTxWallet initSentTxWallet(MoneroTxConfig config, MoneroTxWallet tx, boolean copyDestinations) {
@@ -2835,14 +2845,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   /**
-   * Initializes a MoneroTxSet from from a list of rpc txs.
+   * Initializes a MoneroTxSet from a list of rpc txs.
    * 
    * @param rpcTxs are sent rpc txs to initialize the set from
    * @param txs are existing txs to further initialize (optional)
    * @return the converted tx set
    */
   @SuppressWarnings("unchecked")
-  private static MoneroTxSet convertRpcSentTxsToTxSet(Map<String, Object> rpcTxs, List<MoneroTxWallet> txs) {
+  private static MoneroTxSet convertRpcSentTxsToTxSet(Map<String, Object> rpcTxs, List<MoneroTxWallet> txs, MoneroTxConfig config) {
     
     // build shared tx set
     MoneroTxSet txSet = convertRpcTxSet(rpcTxs);
@@ -2889,8 +2899,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       } else if (key.equals("amount_list")) {
         List<BigInteger> amounts = (List<BigInteger>) val;
         for (int i = 0; i < amounts.size(); i++) {
-          if (txs.get(i).getOutgoingTransfer() != null) txs.get(i).getOutgoingTransfer().setAmount(amounts.get(i));
-          else txs.get(i).setOutgoingTransfer(new MoneroOutgoingTransfer().setTx(txs.get(i)).setAmount(amounts.get(i)));
+          if (txs.get(i).getOutgoingTransfer() == null) txs.get(i).setOutgoingTransfer(new MoneroOutgoingTransfer().setTx(txs.get(i)));
+          txs.get(i).getOutgoingTransfer().setAmount(amounts.get(i));
         }
       } else if (key.equals("weight_list")) {
         List<BigInteger> weights = (List<BigInteger>) val;
@@ -2906,6 +2916,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
             txs.get(i).getInputs().add(new MoneroOutputWallet().setKeyImage(new MoneroKeyImage().setHex(inputKeyImage)).setTx(txs.get(i)));
           }
         }
+      } else if (key.equals("amounts_by_dest_list")) {
+        List<Map<String, Object>> amountsByDestList = (List<Map<String, Object>>) val;
+        int destinationIdx = 0;
+        for (int txIdx = 0; txIdx < amountsByDestList.size(); txIdx++) {
+          List<BigInteger> amountsByDest = (List<BigInteger>) amountsByDestList.get(txIdx).get("amounts");
+          if (txs.get(txIdx).getOutgoingTransfer() == null) txs.get(txIdx).setOutgoingTransfer(new MoneroOutgoingTransfer().setTx(txs.get(txIdx)));
+          txs.get(txIdx).getOutgoingTransfer().setDestinations(new ArrayList<>());
+          for (BigInteger amount : amountsByDest) {
+            txs.get(txIdx).getOutgoingTransfer().getDestinations().add(new MoneroDestination(config.getDestinations().get(destinationIdx++).getAddress(), amount));
+          }
+        }
+        GenUtils.assertEquals(config.getDestinations().size(), destinationIdx);
       } else {
         LOGGER.warning("ignoring unexpected transaction list field: " + key + ": " + val);
       }
@@ -2922,9 +2944,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @param isOutgoing specifies if the tx is outgoing if true, incoming if false, or decodes from type if undefined
    * @returns the initialized tx set with a tx
    */
-  private static MoneroTxSet convertRpcTxToTxSet(Map<String, Object> rpcTx, MoneroTxWallet tx, Boolean isOutgoing) {
+  private static MoneroTxSet convertRpcTxToTxSet(Map<String, Object> rpcTx, MoneroTxWallet tx, Boolean isOutgoing, MoneroTxConfig config) {
     MoneroTxSet txSet = convertRpcTxSet(rpcTx);
-    txSet.setTxs(Arrays.asList(convertRpcTxWithTransfer(rpcTx, tx, isOutgoing).setTxSet(txSet)));
+    txSet.setTxs(Arrays.asList(convertRpcTxWithTransfer(rpcTx, tx, isOutgoing, config).setTxSet(txSet)));
     return txSet;
   }
   
@@ -2937,7 +2959,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * @returns the initialized tx with a transfer
    */
   @SuppressWarnings("unchecked")
-  private static MoneroTxWallet convertRpcTxWithTransfer(Map<String, Object> rpcTx, MoneroTxWallet tx, Boolean isOutgoing) {  // TODO: change everything to safe set
+  private static MoneroTxWallet convertRpcTxWithTransfer(Map<String, Object> rpcTx, MoneroTxWallet tx, Boolean isOutgoing, MoneroTxConfig config) {  // TODO: change everything to safe set
     
     // initialize tx to return
     if (tx == null) tx = new MoneroTxWallet();
@@ -3043,6 +3065,16 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           tx.getInputs().add(new MoneroOutputWallet().setKeyImage(new MoneroKeyImage().setHex(inputKeyImage)).setTx(tx));
         }
       }
+      else if (key.equals("amounts_by_dest")) {
+        GenUtils.assertTrue(isOutgoing);
+        List<BigInteger> amountsByDest = (List<BigInteger>) ((Map<String, Object>) val).get("amounts");
+        GenUtils.assertEquals(config.getDestinations().size(), amountsByDest.size());
+        if (transfer == null) transfer = new MoneroOutgoingTransfer().setTx(tx);
+        ((MoneroOutgoingTransfer) transfer).setDestinations(new ArrayList<>());
+        for (int i = 0; i < config.getDestinations().size(); i++) {
+          ((MoneroOutgoingTransfer) transfer).getDestinations().add(new MoneroDestination(config.getDestinations().get(i).getAddress(), amountsByDest.get(i)));
+        }
+      }
       else LOGGER.warning("ignoring unexpected transaction field with transfer: " + key + ": " + val);
     }
     
@@ -3055,7 +3087,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (!transfer.getTx().isConfirmed()) tx.setNumConfirmations(0l);
       if (isOutgoing) {
         tx.setIsOutgoing(true);
-        if (tx.getOutgoingTransfer() != null) tx.getOutgoingTransfer().merge(transfer);
+        if (tx.getOutgoingTransfer() != null) {
+          if (((MoneroOutgoingTransfer) transfer).getDestinations() != null) tx.getOutgoingTransfer().setDestinations(null); // overwrite to avoid reconcile error TODO: remove after >18.2.2 when amounts_by_dest supported
+          tx.getOutgoingTransfer().merge(transfer);
+        }
         else tx.setOutgoingTransfer((MoneroOutgoingTransfer) transfer);
       } else {
         tx.setIsIncoming(true);
@@ -3115,7 +3150,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (key.equals("desc")) {
         txSet.setTxs(new ArrayList<MoneroTxWallet>());
         for (Map<String, Object> txMap : (List<Map<String, Object>>) val) {
-          MoneroTxWallet tx = convertRpcTxWithTransfer(txMap, null, true);
+          MoneroTxWallet tx = convertRpcTxWithTransfer(txMap, null, true, null);
           tx.setTxSet(txSet);
           txSet.getTxs().add(tx);
         }

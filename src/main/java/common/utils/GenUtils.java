@@ -174,7 +174,7 @@ public class GenUtils {
   /**
    * Converts a list of integers to an int array.
    * 
-   * @param list is the list ot convert
+   * @param list is the list to convert
    * @return the int array
    */
   public static int[] listToIntArray(List<Integer> list) {
