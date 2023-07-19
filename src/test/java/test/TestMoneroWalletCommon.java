@@ -185,12 +185,12 @@ public abstract class TestMoneroWalletCommon {
   protected abstract void closeWallet(MoneroWallet wallet, boolean save);
   
   /**
-   * Get the wallet's supported languages for the mnemonic phrase.  This is an
+   * Get the wallet's supported languages for the seed.  This is an
    * instance method for wallet rpc and a static utility for other wallets.
    * 
    * @return List<String> are the wallet's supported languages
    */
-  protected abstract List<String> getMnemonicLanguages();
+  protected abstract List<String> getSeedLanguages();
   
   // ------------------------------ BEGIN TESTS -------------------------------
   
@@ -209,8 +209,8 @@ public abstract class TestMoneroWalletCommon {
         MoneroUtils.validateAddress(wallet.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
         MoneroUtils.validatePrivateViewKey(wallet.getPrivateViewKey());
         MoneroUtils.validatePrivateSpendKey(wallet.getPrivateSpendKey());
-        MoneroUtils.validateMnemonic(wallet.getMnemonic());
-        if (!(wallet instanceof MoneroWalletRpc)) assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getMnemonicLanguage());  // TODO monero-wallet-rpc: get mnemonic language
+        MoneroUtils.validateMnemonic(wallet.getSeed());
+        if (!(wallet instanceof MoneroWalletRpc)) assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getSeedLanguage());  // TODO monero-wallet-rpc: get seed language
       } catch (Exception e) {
         e2 = e;
       }
@@ -239,9 +239,9 @@ public abstract class TestMoneroWalletCommon {
     if (e1 != null) throw new RuntimeException(e1);
   }
   
-  // Can create a wallet from a mnemonic phrase.
+  // Can create a wallet from a seed.
   @Test
-  public void testCreateWalletFromMnemonic() {
+  public void testCreateWalletFromSeed() {
     assumeTrue(TEST_NON_RELAYS);
     Exception e1 = null;  // emulating Java "finally" but compatible with other languages
     try {
@@ -251,16 +251,16 @@ public abstract class TestMoneroWalletCommon {
       String privateViewKey = wallet.getPrivateViewKey();
       String privateSpendKey = wallet.getPrivateSpendKey();
       
-      // recreate test wallet from mnemonic
-      MoneroWallet wallet = createWallet(new MoneroWalletConfig().setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+      // recreate test wallet from seed
+      MoneroWallet wallet = createWallet(new MoneroWalletConfig().setSeed(TestUtils.SEED).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
       String path = wallet.getPath();
       Exception e2 = null;
       try {
         assertEquals(primaryAddress, wallet.getPrimaryAddress());
         assertEquals(privateViewKey, wallet.getPrivateViewKey());
         assertEquals(privateSpendKey, wallet.getPrivateSpendKey());
-        assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
-        if (!(wallet instanceof MoneroWalletRpc)) assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getMnemonicLanguage());
+        assertEquals(TestUtils.SEED, wallet.getSeed());
+        if (!(wallet instanceof MoneroWalletRpc)) assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getSeedLanguage());
       } catch (Exception e) {
         e2 = e;
       }
@@ -270,7 +270,7 @@ public abstract class TestMoneroWalletCommon {
       // attempt to create wallet with two missing words
       try {
         String invalidMnemonic = "memoir desk algebra inbound innocent unplugs fully okay five inflamed giant factual ritual toyed topic snake unhappy guarded tweezers haunted inundate giant";
-        wallet = createWallet(new MoneroWalletConfig().setMnemonic(invalidMnemonic).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+        wallet = createWallet(new MoneroWalletConfig().setSeed(invalidMnemonic).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
       } catch(Exception e) {
         assertEquals("Invalid mnemonic", e.getMessage());
       }
@@ -289,22 +289,22 @@ public abstract class TestMoneroWalletCommon {
     if (e1 != null) throw new RuntimeException(e1);
   }
   
-  // Can create a wallet from a mnemonic phrase with a seed offset
+  // Can create a wallet from a seed with a seed offset
   @Test
-  public void testCreateWalletFromMnemonicWithOffset() {
+  public void testCreateWalletFromSeedWithOffset() {
     assumeTrue(TEST_NON_RELAYS);
     Exception e1 = null;  // emulating Java "finally" but compatible with other languages
     try {
 
       // create test wallet with offset
-      MoneroWallet wallet = createWallet(new MoneroWalletConfig().setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setSeedOffset("my secret offset!"));
+      MoneroWallet wallet = createWallet(new MoneroWalletConfig().setSeed(TestUtils.SEED).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setSeedOffset("my secret offset!"));
       Exception e2 = null;
       try {
-        MoneroUtils.validateMnemonic(wallet.getMnemonic());
-        assertNotEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
+        MoneroUtils.validateMnemonic(wallet.getSeed());
+        assertNotEquals(TestUtils.SEED, wallet.getSeed());
         MoneroUtils.validateAddress(wallet.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
         assertNotEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
-        if (!(wallet instanceof MoneroWalletRpc)) assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getMnemonicLanguage());  // TODO monero-wallet-rpc: support
+        if (!(wallet instanceof MoneroWalletRpc)) assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getSeedLanguage());  // TODO monero-wallet-rpc: support
       } catch (Exception e) {
         e2 = e;
       }
@@ -340,8 +340,8 @@ public abstract class TestMoneroWalletCommon {
         if (!wallet.isConnectedToDaemon()) System.out.println("WARNING: wallet created from keys is not connected to authenticated daemon"); // TODO monero-project: keys wallets not connected
         assertTrue(wallet.isConnectedToDaemon(), "Wallet created from keys is not connected to authenticated daemon");
         if (!(wallet instanceof MoneroWalletRpc)) {
-          MoneroUtils.validateMnemonic(wallet.getMnemonic()); // TODO monero-wallet-rpc: cannot get mnemonic from wallet created from keys?
-          assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getMnemonicLanguage());
+          MoneroUtils.validateMnemonic(wallet.getSeed()); // TODO monero-wallet-rpc: cannot get seed from wallet created from keys?
+          assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getSeedLanguage());
         }
       } catch (Exception e) {
         e2 = e;
@@ -360,8 +360,8 @@ public abstract class TestMoneroWalletCommon {
           if (!wallet.isConnectedToDaemon()) System.out.println("WARNING: wallet created from keys is not connected to authenticated daemon"); // TODO monero-project: keys wallets not connected
           assertTrue(wallet.isConnectedToDaemon(), "Wallet created from keys is not connected to authenticated daemon");
           if (!(wallet instanceof MoneroWalletRpc)) {
-            MoneroUtils.validateMnemonic(wallet.getMnemonic()); // TODO monero-wallet-rpc: cannot get mnemonic from wallet created from keys?
-            assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getMnemonicLanguage());
+            MoneroUtils.validateMnemonic(wallet.getSeed()); // TODO monero-wallet-rpc: cannot get seed from wallet created from keys?
+            assertEquals(MoneroWallet.DEFAULT_LANGUAGE, wallet.getSeedLanguage());
           }
         } catch (Exception e) {
           e2 = e;
@@ -510,28 +510,28 @@ public abstract class TestMoneroWalletCommon {
     }
   }
 
-  // Can get the mnemonic phrase
+  // Can get the seed
   @Test
-  public void testGetMnemonic() {
+  public void testGetSeed() {
     assumeTrue(TEST_NON_RELAYS);
-    String mnemonic = wallet.getMnemonic();
-    MoneroUtils.validateMnemonic(mnemonic);
-    assertEquals(TestUtils.MNEMONIC, mnemonic);
+    String seed = wallet.getSeed();
+    MoneroUtils.validateMnemonic(seed);
+    assertEquals(TestUtils.SEED, seed);
   }
   
-  // Can get the language of the mnemonic phrase
+  // Can get the language of the seed
   @Test
-  public void testGetMnemonicLanguage() {
+  public void testGetSeedLanguage() {
     assumeTrue(TEST_NON_RELAYS);
-    String language = wallet.getMnemonicLanguage();
+    String language = wallet.getSeedLanguage();
     assertEquals(MoneroWallet.DEFAULT_LANGUAGE, language);
   }
   
-  // Can get a list of supported languages for the mnemonic phrase
+  // Can get a list of supported languages for the seed
   @Test
-  public void testGetMnemonicLanguages() {
+  public void testGetSeedLanguages() {
     assumeTrue(TEST_NON_RELAYS);
-    List<String> languages = getMnemonicLanguages();
+    List<String> languages = getSeedLanguages();
     assertFalse(languages.isEmpty());
     for (String language : languages) assertFalse(language.isEmpty());
   }
@@ -716,7 +716,7 @@ public abstract class TestMoneroWalletCommon {
   public void testWalletEqualityGroundTruth() {
     assumeTrue(TEST_NON_RELAYS);
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
-    MoneroWallet walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.MNEMONIC, null, TestUtils.FIRST_RECEIVE_HEIGHT);
+    MoneroWallet walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.SEED, null, TestUtils.FIRST_RECEIVE_HEIGHT);
     try {
       WalletEqualityUtils.testWalletEqualityOnChain(walletGt, wallet);
     } finally {
@@ -2482,8 +2482,8 @@ public abstract class TestMoneroWalletCommon {
     assertEquals(primaryAddress, viewOnlyWallet.getPrimaryAddress());
     assertEquals(privateViewKey, viewOnlyWallet.getPrivateViewKey());
     assertEquals(null, viewOnlyWallet.getPrivateSpendKey());
-    assertEquals(null, viewOnlyWallet.getMnemonic());
-    assertEquals(null, viewOnlyWallet.getMnemonicLanguage());
+    assertEquals(null, viewOnlyWallet.getSeed());
+    assertEquals(null, viewOnlyWallet.getSeedLanguage());
     assertTrue(viewOnlyWallet.isViewOnly());
     assertTrue(viewOnlyWallet.isConnectedToDaemon());  // TODO: this fails with monero-wallet-rpc and monerod with authentication
     viewOnlyWallet.sync();
@@ -2495,7 +2495,7 @@ public abstract class TestMoneroWalletCommon {
     // test offline wallet
     assertFalse(offlineWallet.isConnectedToDaemon());
     assertFalse(offlineWallet.isViewOnly());
-    if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.MNEMONIC, offlineWallet.getMnemonic()); // TODO monero-project: cannot get mnemonic from offline wallet rpc
+    if (!(offlineWallet instanceof MoneroWalletRpc)) assertEquals(TestUtils.SEED, offlineWallet.getSeed()); // TODO monero-project: cannot get seed from offline wallet rpc
     assertEquals(0, offlineWallet.getTxs(new MoneroTxQuery().setInTxPool(false)).size());
     
     // import outputs to offline wallet
@@ -3799,10 +3799,10 @@ public abstract class TestMoneroWalletCommon {
     
     // try to get seed before wallet initialized
     try {
-      participants.get(0).getMnemonic();
-      throw new RuntimeException("Should have thrown exception getting multisig seed before initialized");
-    } catch (Exception err) {
-      assertEquals(err.getMessage(), "This wallet is multisig, but not yet finalized");
+      participants.get(0).getSeed();
+      throw new RuntimeException("Expected error getting seed before multisig wallet initialized");
+    } catch (Exception e) {
+      assertEquals("This wallet is multisig, but not yet finalized", e.getMessage());
     }
     
     // exchange keys N - M + 1 times
@@ -3854,8 +3854,16 @@ public abstract class TestMoneroWalletCommon {
     MoneroWallet participant = participants.get(0);
     MoneroUtils.validateAddress(participant.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
     testMultisigInfo(participant.getMultisigInfo(), M, N);
-    String seed = participant.getMnemonic();
+    String seed = participant.getSeed();
     assertFalse(seed.isEmpty());
+
+    // restore participant from multisig seed
+    // TODO: fix restoring from seed
+    // participant = createWallet(new MoneroWalletConfig().setSeed(seed).setIsMultisig(true));
+    // MoneroUtils.validateAddress(participant.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
+    // assertEquals(address, participant.getPrimaryAddress());
+    // testMultisigInfo(participant.getMultisigInfo(), M, N);
+    // assertEquals(seed, participant.getSeed());
     
     // test sending a multisig transaction if configured
     if (testTx) {
@@ -4566,7 +4574,7 @@ public abstract class TestMoneroWalletCommon {
     for (int i = 0; i < 3; i++) txHashes.add(txs.get(i).getHash());
     
     // start wallet without scanning
-    MoneroWallet scanWallet = createWallet(new MoneroWalletConfig().setMnemonic(wallet.getMnemonic()).setRestoreHeight(0l));
+    MoneroWallet scanWallet = createWallet(new MoneroWalletConfig().setSeed(wallet.getSeed()).setRestoreHeight(0l));
     scanWallet.stopSyncing(); // TODO: create wallet without daemon connection (offline does not reconnect, default connects to localhost, offline then online causes confirmed txs to disappear)
     assertTrue(scanWallet.isConnectedToDaemon());
     

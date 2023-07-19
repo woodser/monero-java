@@ -188,7 +188,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     if (config == null) throw new MoneroError("Must specify config to open wallet");
     if (config.getPassword() == null) throw new MoneroError("Must specify password to decrypt wallet");
     if (config.getNetworkType() == null) throw new MoneroError("Must specify a network type: 'mainnet', 'testnet' or 'stagenet'");
-    if (config.getMnemonic() != null) throw new MoneroError("Cannot specify mnemonic when opening wallet");
+    if (config.getSeed() != null) throw new MoneroError("Cannot specify seed when opening wallet");
     if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when opening wallet");
     if (config.getPrimaryAddress() != null) throw new MoneroError("Cannot specify primary address when opening wallet");
     if (config.getPrivateViewKey() != null) throw new MoneroError("Cannot specify private view key when opening wallet");
@@ -211,7 +211,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    * <p>Examples:</p>
    * 
    * <code>
-   * // create stagenet wallet with randomly generated mnemonic<br>
+   * // create stagenet wallet with randomly generated seed<br>
    * MoneroWallet wallet1 = MoneroWalletFull.createWallet(new MoneroWalletConfig()<br>
    * &nbsp;&nbsp; .setPath("/mywallets/wallet1")<br>
    * &nbsp;&nbsp; .setPassword("supersecretpassword")<br>
@@ -220,7 +220,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    * &nbsp;&nbsp; .setServerUsername("superuser")<br>
    * &nbsp;&nbsp; .setServerPassword("abctesting123"));<br><br>
    * 
-   * // restore mainnet wallet from mnemonic<br>
+   * // restore mainnet wallet from seed<br>
    * MoneroWallet wallet2 = MoneroWalletFull.createWallet(new MoneroWalletConfig()<br>
    * &nbsp;&nbsp; .setPath("/mywallets/wallet2")  // leave blank for in-memory wallet<br>
    * &nbsp;&nbsp; .setPassword("abctesting123")<br>
@@ -228,7 +228,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    * &nbsp;&nbsp; .setServerUri("http://localhost:18081")<br>
    * &nbsp;&nbsp; .setServerUsername("superuser")<br>
    * &nbsp;&nbsp; .setServerPassword("abctesting123")<br>
-   * &nbsp;&nbsp; .setMnemonic("biggest duets beware eskimos coexist igloo...")<br>
+   * &nbsp;&nbsp; .setSeed("biggest duets beware eskimos coexist igloo...")<br>
    * &nbsp;&nbsp; .setRestoreHeight(573800l));<br>
    * </code>
    * 
@@ -237,13 +237,13 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    * &nbsp;&nbsp; path - path of the wallet to create (optional, in-memory wallet if not given)<br>
    * &nbsp;&nbsp; password - password of the wallet to create<br>
    * &nbsp;&nbsp; networkType - network type of the wallet to create (one of MoneroNetworkType.MAINNET|TESTNET|STAGENET)<br>
-   * &nbsp;&nbsp; mnemonic - mnemonic of the wallet to create (optional, random wallet created if neither mnemonic nor keys given)<br>
-   * &nbsp;&nbsp; seedOffset - the offset used to derive a new seed from the given mnemonic to recover a secret wallet from the mnemonic phrase<br>
+   * &nbsp;&nbsp; seed - seed of the wallet to create (optional, random wallet created if neither seed nor keys given)<br>
+   * &nbsp;&nbsp; seedOffset - the offset used to derive a new seed from the given seed to recover a secret wallet from the seed<br>
    * &nbsp;&nbsp; primaryAddress - primary address of the wallet to create (only provide if restoring from keys)<br>
    * &nbsp;&nbsp; privateViewKey - private view key of the wallet to create (optional)<br>
    * &nbsp;&nbsp; privateSpendKey - private spend key of the wallet to create (optional)<br>
    * &nbsp;&nbsp; restoreHeight - block height to start scanning from (defaults to 0 unless generating random wallet)<br>
-   * &nbsp;&nbsp; language - language of the wallet's mnemonic phrase (defaults to "English" or auto-detected)<br>
+   * &nbsp;&nbsp; language - language of the wallet's seed (defaults to "English" or auto-detected)<br>
    * &nbsp;&nbsp; serverUri - uri of the wallet's daemon (optional)<br>
    * &nbsp;&nbsp; serverUsername - username to authenticate with the daemon (optional)<br>
    * &nbsp;&nbsp; serverPassword - password to authenticate with the daemon (optional)<br>
@@ -261,15 +261,15 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     if (config == null) throw new MoneroError("Must specify config to open wallet");
     if (config.getNetworkType() == null) throw new MoneroError("Must specify a network type: 'mainnet', 'testnet' or 'stagenet'");
     if (config.getPath() != null && !config.getPath().isEmpty() && MoneroWalletFull.walletExists(config.getPath())) throw new MoneroError("Wallet already exists: " + config.getPath());
-    if (config.getMnemonic() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
-      throw new MoneroError("Wallet may be initialized with a mnemonic or keys but not both");
+    if (config.getSeed() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
+      throw new MoneroError("Wallet may be initialized with a seed or keys but not both");
     }
     if (Boolean.TRUE.equals(config.getSaveCurrent() != null)) throw new MoneroError("Cannot save current wallet when creating full wallet");
     
     // create wallet
-    if (config.getMnemonic() != null) {
-      if (config.getLanguage() != null) throw new MoneroError("Cannot specify language when creating wallet from mnemonic");
-      return createWalletFromMnemonic(config);
+    if (config.getSeed() != null) {
+      if (config.getLanguage() != null) throw new MoneroError("Cannot specify language when creating wallet from seed");
+      return createWalletFromSeed(config);
     } else if (config.getPrimaryAddress() != null || config.getPrivateSpendKey() != null) {
       if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating wallet from keys");
       return createWalletFromKeys(config);
@@ -280,7 +280,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     }
   }
   
-  private static MoneroWalletFull createWalletFromMnemonic(MoneroWalletConfig config) {
+  private static MoneroWalletFull createWalletFromSeed(MoneroWalletConfig config) {
     if (config.getRestoreHeight() == null) config.setRestoreHeight(0l);
     long jniWalletHandle = createWalletJni(serializeWalletConfig(config));
     MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle, config.getPassword());
@@ -314,12 +314,12 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
   
   /**
-   * Get a list of available languages for the wallet's mnemonic phrase.
+   * Get a list of available languages for the wallet's seed.
    * 
-   * @return the available languages for the wallet's mnemonic phrase
+   * @return the available languages for the wallet's seed.
    */
-  public static List<String> getMnemonicLanguages() {
-    return Arrays.asList(getMnemonicLanguagesJni());
+  public static List<String> getSeedLanguages() {
+    return Arrays.asList(getSeedLanguagesJni());
   }
   
   // ------------ WALLET METHODS SPECIFIC TO JNI IMPLEMENTATION ---------------
@@ -499,19 +499,19 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
 
   @Override
-  public String getMnemonic() {
+  public String getSeed() {
     assertNotClosed();
-    String mnemonic = getMnemonicJni();
-    if ("".equals(mnemonic)) return null;
-    return mnemonic;
+    String seed = getSeedJni();
+    if ("".equals(seed)) return null;
+    return seed;
   }
   
   @Override
-  public String getMnemonicLanguage() {
+  public String getSeedLanguage() {
     assertNotClosed();
-    String mnemonicLanguage = getMnemonicLanguageJni();
-    if ("".equals(mnemonicLanguage)) return null;
-    return mnemonicLanguage;
+    String seedLanguage = getSeedLanguageJni();
+    if ("".equals(seedLanguage)) return null;
+    return seedLanguage;
   }
 
   @Override
@@ -1421,11 +1421,11 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private native String getPathJni();
   
-  private native String getMnemonicJni();
+  private native String getSeedJni();
   
-  private native String getMnemonicLanguageJni();
+  private native String getSeedLanguageJni();
   
-  private static native String[] getMnemonicLanguagesJni();
+  private static native String[] getSeedLanguagesJni();
   
   private native String getPublicViewKeyJni();
   

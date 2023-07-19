@@ -315,7 +315,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * walletRpc.createWallet(new MoneroWalletConfig()<br>
    * &nbsp;&nbsp; .setPath("mywallet")<br>
    * &nbsp;&nbsp; .setPassword("supersecretpassword")<br>
-   * &nbsp;&nbsp; .setMnemonic("coexist igloo pamphlet lagoon...")<br>
+   * &nbsp;&nbsp; .setSeed("coexist igloo pamphlet lagoon...")<br>
    * &nbsp;&nbsp; .setRestoreHeight(1543218l));<br>
    * </code>
    * 
@@ -323,13 +323,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * All supported configuration:<br>
    * &nbsp;&nbsp; path - path of the wallet to create (optional, in-memory wallet if not given)<br>
    * &nbsp;&nbsp; password - password of the wallet to create<br>
-   * &nbsp;&nbsp; mnemonic - mnemonic of the wallet to create (optional, random wallet created if neither mnemonic nor keys given)<br>
-   * &nbsp;&nbsp; seedOffset - the offset used to derive a new seed from the given mnemonic to recover a secret wallet from the mnemonic phrase<br>
+   * &nbsp;&nbsp; seed - seed of the wallet to create (optional, random wallet created if neither seed nor keys given)<br>
+   * &nbsp;&nbsp; seedOffset - the offset used to derive a new seed from the given seed to recover a secret wallet from the seed<br>
    * &nbsp;&nbsp; primaryAddress - primary address of the wallet to create (only provide if restoring from keys)<br>
    * &nbsp;&nbsp; privateViewKey - private view key of the wallet to create (optional)<br>
    * &nbsp;&nbsp; privateSpendKey - private spend key of the wallet to create (optional)<br>
    * &nbsp;&nbsp; restoreHeight - block height to start scanning from (defaults to 0 unless generating random wallet)<br>
-   * &nbsp;&nbsp; language - language of the wallet's mnemonic phrase (defaults to "English" or auto-detected)<br>
+   * &nbsp;&nbsp; language - language of the wallet's seed (defaults to "English" or auto-detected)<br>
    * &nbsp;&nbsp; serverUri - uri of the daemon to use (optional, monero-wallet-rpc usually started with daemon config)<br>
    * &nbsp;&nbsp; serverUsername - username to authenticate with the daemon (optional)<br>
    * &nbsp;&nbsp; serverPassword - password to authenticate with the daemon (optional)<br>
@@ -344,23 +344,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // validate config
     if (config == null) throw new MoneroError("Must specify config to create wallet");
     if (config.getNetworkType() != null) throw new MoneroError("Cannot specify network type when creating RPC wallet");
-    if (config.getMnemonic() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
-      throw new MoneroError("Wallet may be initialized with a mnemonic or keys but not both");
+    if (config.getSeed() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
+      throw new MoneroError("Wallet may be initialized with a seed or keys but not both");
     }
     if (config.getAccountLookahead() != null || config.getSubaddressLookahead() != null) throw new MoneroError("monero-wallet-rpc does not support creating wallets with subaddress lookahead over rpc");
     
     // create wallet
-    if (config.getMnemonic() != null) {
-      createWalletFromMnemonic(config.getPath(), config.getPassword(), config.getMnemonic(), config.getRestoreHeight(), config.getLanguage(), config.getSeedOffset(), config.getSaveCurrent());
-    } else if (config.getPrivateSpendKey() != null || config.getPrimaryAddress() != null) {
-      if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating wallet from keys");
-      createWalletFromKeys(config.getPath(), config.getPassword(), config.getPrimaryAddress(), config.getPrivateViewKey(), config.getPrivateSpendKey(), config.getRestoreHeight(), config.getLanguage(), config.getSaveCurrent());
-    } else {
-      if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating random wallet");
-      if (config.getRestoreHeight() != null) throw new MoneroError("Cannot specify restore height when creating random wallet");
-      if (Boolean.FALSE.equals(config.getSaveCurrent())) throw new MoneroError("Current wallet is saved automatically when creating random wallet");
-      createWalletRandom(config.getPath(), config.getPassword(), config.getLanguage());
-    }
+    if (config.getSeed() != null) createWalletFromSeed(config);
+    else if (config.getPrivateSpendKey() != null || config.getPrimaryAddress() != null) createWalletFromKeys(config);
+    else createWalletRandom(config);
     
     // set daemon if provided
     if (config.getServer() != null) setDaemonConnection(config.getServer());
@@ -370,22 +362,28 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   /**
    * Create and open a new wallet with a randomly generated seed on the RPC server.
    * 
-   * @param name is the name of the wallet file to create
-   * @param password is the wallet's password
-   * @param language is the language for the wallet's mnemonic seed
+   * @param config configures the wallet to create
    * @return this wallet client
    */
-  private MoneroWalletRpc createWalletRandom(String name, String password, String language) {
-    if (name == null || name.isEmpty()) throw new MoneroError("Wallet name is not initialized");
-    if (language == null || language.isEmpty()) language = DEFAULT_LANGUAGE;
+  private MoneroWalletRpc createWalletRandom(MoneroWalletConfig config) {
+
+    // validate and normalize config
+    config = config.copy();
+    if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating random wallet");
+    if (config.getRestoreHeight() != null) throw new MoneroError("Cannot specify restore height when creating random wallet");
+    if (Boolean.FALSE.equals(config.getSaveCurrent())) throw new MoneroError("Current wallet is saved automatically when creating random wallet");
+    if (config.getPath() == null || config.getPath().isEmpty()) throw new MoneroError("Wallet name is not initialized");
+    if (config.getLanguage() == null || config.getLanguage().isEmpty()) config.setLanguage(DEFAULT_LANGUAGE);
+
+    // send request
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("filename", name);
-    params.put("password", password);
-    params.put("language", language);
+    params.put("filename", config.getPath());
+    params.put("password", config.getPassword());
+    params.put("language", config.getLanguage());
     try { rpc.sendJsonRequest("create_wallet", params); }
-    catch (MoneroRpcError e) { handleCreateWalletError(name, e); }
+    catch (MoneroRpcError e) { handleCreateWalletError(config.getPath(), e); }
     clear();
-    path = name;
+    path = config.getPath();
     return this;
   }
   
@@ -393,60 +391,50 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * Create and open a wallet from an existing mnemonic phrase on the RPC server,
    * closing the currently open wallet if applicable.
    * 
-   * @param name is the name of the wallet to create on the RPC server
-   * @param password is the wallet's password
-   * @param mnemonic is the mnemonic of the wallet to construct
-   * @param restoreHeight is the block height to restore from (default = 0)
-   * @param language is the language of the mnemonic in case the old language is invalid
-   * @param seedOffset is the offset used to derive a new seed from the given mnemonic to recover a secret wallet from the mnemonic phrase
-   * @param saveCurrent specifies if the current RPC wallet should be saved before being closed
+   * @param config configures the wallet to create
    * @return this wallet client
    */
-  private MoneroWalletRpc createWalletFromMnemonic(String name, String password, String mnemonic, Long restoreHeight, String language, String seedOffset, Boolean saveCurrent) {
-    if (language == null) language = DEFAULT_LANGUAGE;
+  private MoneroWalletRpc createWalletFromSeed(MoneroWalletConfig config) {
+    config = config.copy();
+    if (config.getLanguage() == null || config.getLanguage().isEmpty()) config.setLanguage(DEFAULT_LANGUAGE);
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("filename", name);
-    params.put("password", password);
-    params.put("seed", mnemonic);
-    params.put("seed_offset", seedOffset);
-    params.put("restore_height", restoreHeight);
-    params.put("language", language);
-    params.put("autosave_current", saveCurrent);
+    params.put("filename", config.getPath());
+    params.put("password", config.getPassword());
+    params.put("seed", config.getSeed());
+    params.put("seed_offset", config.getSeedOffset());
+    params.put("restore_height", config.getRestoreHeight());
+    params.put("language", config.getLanguage());
+    params.put("autosave_current", config.getSaveCurrent());
+    params.put("enable_multisig_experimental", config.getIsMultisig());
     try { rpc.sendJsonRequest("restore_deterministic_wallet", params); }
-    catch (MoneroRpcError e) { handleCreateWalletError(name, e); }
+    catch (MoneroRpcError e) { handleCreateWalletError(config.getPath(), e); }
     clear();
-    path = name;
+    path = config.getPath();
     return this;
   }
   
   /**
    * Create a wallet on the RPC server from an address, view key, and (optionally) spend key.
    * 
-   * @param name is the name of the wallet to create on the RPC server
-   * @param password is the password encrypt the wallet
-   * @param address is the address of the wallet to construct
-   * @param viewKey is the view key of the wallet to construct
-   * @param spendKey is the spend key of the wallet to construct or null to create a view-only wallet
-   * @param restoreHeight is the block height to restore (i.e. scan the chain) from (default = 0)
-   * @param language is the wallet and mnemonic's language (default = "English")
-   * @param saveCurrent specifies if the current RPC wallet should be saved before being closed
+   * @param config configures the wallet to create
    * @return this wallet client
    */
-  private MoneroWalletRpc createWalletFromKeys(String name, String password, String address, String viewKey, String spendKey, Long restoreHeight, String language, Boolean saveCurrent) {
-    if (restoreHeight == null) restoreHeight = 0l;
-    if (language == null) language = DEFAULT_LANGUAGE;
+  private MoneroWalletRpc createWalletFromKeys(MoneroWalletConfig config) {
+    config = config.copy();
+    if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating wallet from keys");
+    if (config.getRestoreHeight() == null) config.setRestoreHeight(0l);
     Map<String, Object> params = new HashMap<String, Object>();
-    params.put("filename", name);
-    params.put("password", password);
-    params.put("address", address);
-    params.put("viewkey", viewKey);
-    params.put("spendkey", spendKey);
-    params.put("restore_height", restoreHeight);
-    params.put("autosave_current", saveCurrent);
+    params.put("filename", config.getPath());
+    params.put("password", config.getPassword());
+    params.put("address", config.getPrimaryAddress());
+    params.put("viewkey", config.getPrivateViewKey());
+    params.put("spendkey", config.getPrivateSpendKey());
+    params.put("restore_height", config.getRestoreHeight());
+    params.put("autosave_current", config.getSaveCurrent());
     try { rpc.sendJsonRequest("generate_from_keys", params); }
-    catch (MoneroRpcError e) { handleCreateWalletError(name, e); }
+    catch (MoneroRpcError e) { handleCreateWalletError(config.getPath(), e); }
     clear();
-    path = name;
+    path = config.getPath();
     return this;
   }
   
@@ -457,12 +445,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   /**
-   * Get a list of available languages for the wallet's mnemonic phrase.
+   * Get a list of available languages for the wallet's seed.
    * 
-   * @return the available languages for the wallet's mnemonic phrase
+   * @return the available languages for the wallet's seed.
    */
   @SuppressWarnings("unchecked")
-  public List<String> getMnemonicLanguages() {
+  public List<String> getSeedLanguages() {
     Map<String, Object> resp = rpc.sendJsonRequest("get_languages");
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return (List<String>) result.get("languages");
@@ -561,7 +549,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @SuppressWarnings("unchecked")
   @Override
-  public String getMnemonic() {
+  public String getSeed() {
     try {
       Map<String, Object> params = new HashMap<String, Object>();
       params.put("key_type", "mnemonic");
@@ -575,9 +563,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
-  public String getMnemonicLanguage() {
-    if (getMnemonic() == null) return null;
-    throw new MoneroError("MoneroWalletRpc.getMnemonicLanguage() not supported");
+  public String getSeedLanguage() {
+    if (getSeed() == null) return null;
+    throw new MoneroError("MoneroWalletRpc.getSeedLanguage() not supported");
   }
 
   @SuppressWarnings("unchecked")
