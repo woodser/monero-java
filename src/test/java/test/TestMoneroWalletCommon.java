@@ -1093,10 +1093,7 @@ public abstract class TestMoneroWalletCommon {
     // test fetching with missing tx hashes
     String missingTxHash = "d01ede9cde813b2a693069b640c4b99c5adbdb49fbbd8da2c16c8087d0c3e320";
     txHashes.add(missingTxHash);
-    List<String> missingTxHashes = new ArrayList<String>();
-    fetchedTxs = wallet.getTxs(txHashes, missingTxHashes);
-    assertEquals(1, missingTxHashes.size());
-    assertEquals(missingTxHash, missingTxHashes.get(0));
+    fetchedTxs = wallet.getTxs(txHashes);
     assertEquals(txs.size(), fetchedTxs.size());
     for (int i = 0; i < txs.size(); i++) {
       assertEquals(txs.get(i).getHash(), fetchedTxs.get(i).getHash());
@@ -1415,67 +1412,38 @@ public abstract class TestMoneroWalletCommon {
     String unknownHash2 = "ff397104dd875882f5e7c66e4f852ee134f8cf45e21f0c40777c9188bc92e943";
     
     // fetch unknown tx hash
-    try {
-      wallet.getTx(unknownHash1);
-      fail("Should have thrown error getting tx hash unknown to wallet");
-    } catch (MoneroError e) {
-      assertEquals("Wallet missing requested tx hashes: " + Arrays.asList(unknownHash1), e.getMessage());
-    }
+    assertNull(wallet.getTx(unknownHash1));
     
     // fetch unknown tx hash using query
-    try {
-      wallet.getTxs(new MoneroTxQuery().setHash(unknownHash1));
-      throw new Error("Should have thrown error getting tx hash unknown to wallet");
-    } catch (MoneroError e) {
-      assertEquals("Wallet missing requested tx hashes: " + Arrays.asList(unknownHash1), e.getMessage());
-    }
+    assertEquals(0, wallet.getTxs(new MoneroTxQuery().setHash(unknownHash1)).size());
     
     // fetch unknown tx hash in collection
-    try {
-      wallet.getTxs(txHash, unknownHash1);
-      fail("Should have thrown error getting tx hash unknown to wallet");
-    } catch (MoneroError e) {
-      assertEquals("Wallet missing requested tx hashes: " + Arrays.asList(unknownHash1), e.getMessage());
-    }
-    
+    List<MoneroTxWallet> txs = wallet.getTxs(txHash, unknownHash1);
+    assertEquals(1, txs.size());
+    assertEquals(txHash, txs.get(0).getHash());
+
     // fetch unknown tx hashes in collection
-    try {
-      wallet.getTxs(txHash, unknownHash1, unknownHash2);
-      fail("Should have thrown error getting tx hash unknown to wallet");
-    } catch (MoneroError e) {
-      assertEquals("Wallet missing requested tx hashes: " + Arrays.asList(unknownHash1, unknownHash2), e.getMessage()); // TODO: list all invalid hashes in error description?
-    }
-    
+    txs = wallet.getTxs(txHash, unknownHash1, unknownHash2);
+    assertEquals(1, txs.size());
+    assertEquals(txHash, txs.get(0).getHash());
+
     // fetch invalid hash
-    try {
-      wallet.getTx(invalidHash);
-      fail("Should have thrown error getting tx hash unknown to wallet");
-    } catch (MoneroError e) {
-      assertEquals("Wallet missing requested tx hashes: " + Arrays.asList(invalidHash), e.getMessage());
-    }
+    assertNull(wallet.getTx(invalidHash));
     
     // fetch invalid hash collection
-    try {
-      wallet.getTxs(txHash, invalidHash);
-      fail("Should have thrown error getting tx hash unknown to wallet");
-    } catch (MoneroError e) {
-      assertEquals("Wallet missing requested tx hashes: " + Arrays.asList(invalidHash), e.getMessage());
-    }
-    
+    txs = wallet.getTxs(txHash, invalidHash);
+    assertEquals(1, txs.size());
+    assertEquals(txHash, txs.get(0).getHash());
+
     // fetch invalid hashes in collection
-    try {
-      wallet.getTxs(txHash, invalidHash, "invalid_hash_2");
-      fail("Should have thrown error getting tx hash unknown to wallet");
-    } catch (MoneroError e) {
-      assertEquals("Wallet missing requested tx hashes: " + Arrays.asList(invalidHash, "invalid_hash_2"), e.getMessage());
-    }
+    txs = wallet.getTxs(txHash, invalidHash, "invalid_hash_2");
+    assertEquals(1, txs.size());
+    assertEquals(txHash, txs.get(0).getHash());
     
     // test collection of invalid hashes
-    List<String> missingTxHashes = new ArrayList<String>();
-    List<MoneroTxWallet> txs = wallet.getTxs(new MoneroTxQuery().setHashes(Arrays.asList(txHash, invalidHash, "invalid_hash_2")), missingTxHashes);
+    txs = wallet.getTxs(new MoneroTxQuery().setHashes(Arrays.asList(txHash, invalidHash, "invalid_hash_2")));
     assertEquals(1, txs.size());
     for (MoneroTxWallet tx : txs) testTxWallet(tx);
-    assertEquals(Arrays.asList(invalidHash, "invalid_hash_2"), missingTxHashes);
   }
 
   // Can get transfers in the wallet, accounts, and subaddresses

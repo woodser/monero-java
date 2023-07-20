@@ -950,7 +950,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroTxWallet> getTxs(MoneroTxQuery query, Collection<String> missingTxHashes) {
+  public List<MoneroTxWallet> getTxs(MoneroTxQuery query) {
     
     // copy and normalize query
     query = query == null ? new MoneroTxQuery() : query.copy();
@@ -1014,25 +1014,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (tx.getBlock() != null) tx.getBlock().getTxs().remove(tx);
     }
     txs = txsQueried;
-    
-    // collect unfound tx hashes
-    if (query.getHashes() != null) {
-      List<String> unfoundTxHashes = new ArrayList<String>();
-      for (String txHash : query.getHashes()) {
-        boolean found = false;
-        for (MoneroTxWallet tx : txs) {
-          if (txHash.equals(tx.getHash())) {
-            found = true;
-            break;
-          }
-        }
-        if (!found) unfoundTxHashes.add(txHash);
-      }
-      
-      // if txs not found, collect missing hashes or throw error if no collection given
-      if (missingTxHashes != null) for (String unfoundTxHash : unfoundTxHashes) missingTxHashes.add(unfoundTxHash);
-      else if (unfoundTxHashes.size() > 0) throw new MoneroError("Wallet missing requested tx hashes: " + unfoundTxHashes);
-    }
     
     // special case: re-fetch txs if inconsistency caused by needing to make multiple rpc calls
     for (MoneroTxWallet tx : txs) {
@@ -2380,7 +2361,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           prevLockedTxs = lockedTxs;
           
           // fetch txs which are no longer locked
-          List<MoneroTxWallet> unlockedTxs = noLongerLockedHashes.isEmpty() ? new ArrayList<MoneroTxWallet>() : getTxs(new MoneroTxQuery().setIsLocked(false).setMinHeight(minHeight).setHashes(noLongerLockedHashes).setIncludeOutputs(true), new ArrayList<String>()); // ignore missing tx hashes which could be removed due to re-org
+          List<MoneroTxWallet> unlockedTxs = noLongerLockedHashes.isEmpty() ? new ArrayList<MoneroTxWallet>() : getTxs(new MoneroTxQuery().setIsLocked(false).setMinHeight(minHeight).setHashes(noLongerLockedHashes).setIncludeOutputs(true));
           
           // announce new unconfirmed and confirmed txs
           for (MoneroTxWallet lockedTx : lockedTxs) {
@@ -2673,7 +2654,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
             .setIsLocked(false)
             .setIsConfirmed(true)
             .setIncludeOutputs(true);
-        txsNoLongerLocked = getTxs(query, new ArrayList<String>());
+        txsNoLongerLocked = getTxs(query);
       }
       
       // notify listeners of newly unlocked tx outputs
