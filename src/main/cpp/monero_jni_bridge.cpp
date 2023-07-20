@@ -649,25 +649,45 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getSeedLanguageJni
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getPublicViewKeyJni(JNIEnv *env, jobject instance) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_getPublicViewKeyJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  return env->NewStringUTF(wallet->get_public_view_key().c_str());
+  try {
+    return env->NewStringUTF(wallet->get_public_view_key().c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getPrivateViewKeyJni(JNIEnv *env, jobject instance) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_getPrivateViewKeyJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  return env->NewStringUTF(wallet->get_private_view_key().c_str());
+  try {
+    return env->NewStringUTF(wallet->get_private_view_key().c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getPublicSpendKeyJni(JNIEnv *env, jobject instance) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_getPublicSpendKeyJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  return env->NewStringUTF(wallet->get_public_spend_key().c_str());
+  try {
+    return env->NewStringUTF(wallet->get_public_spend_key().c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getPrivateSpendKeyJni(JNIEnv *env, jobject instance) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_getPrivateSpendKeyJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  return env->NewStringUTF(wallet->get_private_spend_key().c_str());
+  try {
+    return env->NewStringUTF(wallet->get_private_spend_key().c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 }
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getAddressJni(JNIEnv *env, jobject instance, jint account_idx, jint subaddress_idx) {

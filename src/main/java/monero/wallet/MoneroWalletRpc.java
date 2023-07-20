@@ -551,21 +551,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @SuppressWarnings("unchecked")
   @Override
   public String getSeed() {
-    try {
-      Map<String, Object> params = new HashMap<String, Object>();
-      params.put("key_type", "mnemonic");
-      Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
-      Map<String, Object> result = (Map<String, Object>) resp.get("result");
-      return (String) result.get("key");
-    } catch (MoneroError e) {
-      if (Integer.valueOf(-29).equals(e.getCode())) return null;  // wallet is view-only
-      throw e;
-    }
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key_type", "mnemonic");
+    Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("key");
   }
 
   @Override
   public String getSeedLanguage() {
-    if (getSeed() == null) return null;
     throw new MoneroError("MoneroWalletRpc.getSeedLanguage() not supported");
   }
 
@@ -593,18 +587,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   @SuppressWarnings("unchecked")
   @Override
   public String getPrivateSpendKey() {
-
-    // get private spend key which returns error if wallet is view-only
-    try {
-      Map<String, Object> params = new HashMap<String, Object>();
-      params.put("key_type", "spend_key");
-      Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
-      Map<String, Object> result = (Map<String, Object>) resp.get("result");
-      return (String) result.get("key");
-    } catch (MoneroRpcError e) {
-      if (Integer.valueOf(-29).equals(e.getCode()) && e.getMessage().contains("watch-only")) return null; // return null if wallet is view-only
-      throw e;
-    }
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key_type", "spend_key");
+    Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("key");
   }
 
   @Override
