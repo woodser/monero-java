@@ -2481,10 +2481,26 @@ public abstract class TestMoneroWalletCommon {
     // test and sync view-only wallet
     assertEquals(primaryAddress, viewOnlyWallet.getPrimaryAddress());
     assertEquals(privateViewKey, viewOnlyWallet.getPrivateViewKey());
-    assertEquals(null, viewOnlyWallet.getPrivateSpendKey());
-    assertEquals(null, viewOnlyWallet.getSeed());
-    assertEquals(null, viewOnlyWallet.getSeedLanguage());
     assertTrue(viewOnlyWallet.isViewOnly());
+    String errMsg = "Should have failed";
+    try {
+      viewOnlyWallet.getPrivateSpendKey();
+      throw new RuntimeException(errMsg);
+    } catch (Exception e) {
+      assertNotEquals(errMsg, e.getMessage());
+    }
+    try {
+      viewOnlyWallet.getSeed();
+      throw new RuntimeException(errMsg);
+    } catch (Exception e) {
+      assertNotEquals(errMsg, e.getMessage());
+    }
+    try {
+      viewOnlyWallet.getSeedLanguage();
+      throw new RuntimeException(errMsg);
+    } catch (Exception e) {
+      assertNotEquals(errMsg, e.getMessage());
+    }
     assertTrue(viewOnlyWallet.isConnectedToDaemon());  // TODO: this fails with monero-wallet-rpc and monerod with authentication
     viewOnlyWallet.sync();
     assertTrue(viewOnlyWallet.getTxs().size() > 0);
