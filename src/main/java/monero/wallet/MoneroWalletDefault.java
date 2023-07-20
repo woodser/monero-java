@@ -26,7 +26,6 @@ import common.utils.GenUtils;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -195,7 +194,8 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   
   @Override
   public MoneroTxWallet getTx(String txHash) {
-    return getTxs(txHash).get(0);
+    List<MoneroTxWallet> txs = getTxs(txHash);
+    return txs.isEmpty() ? null : txs.get(0);
   }
   
   @Override
@@ -210,17 +210,7 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   
   @Override
   public List<MoneroTxWallet> getTxs(List<String> txHashes) {
-    return getTxs(txHashes, null);
-  }
-  
-  @Override
-  public List<MoneroTxWallet> getTxs(List<String> txHashes, Collection<String> missingTxHashes) {
-    return getTxs(new MoneroTxQuery().setHashes(txHashes), missingTxHashes);
-  }
-  
-  @Override
-  public List<MoneroTxWallet> getTxs(MoneroTxQuery query) {
-    return getTxs(query, null);
+    return getTxs(new MoneroTxQuery().setHashes(txHashes));
   }
   
   @Override
