@@ -1226,11 +1226,11 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("version")) tx.setVersion(GenUtils.reconcile(tx.getVersion(), ((BigInteger) val).intValue()));
       else if (key.equals("extra")) {
         if (val instanceof String) {
-          LOGGER.warning("extra field as string not being assigned to int[]: " + key + ": " + val); // TODO: how to set string to int[]? - or, extra is string which can encode int[]
+          LOGGER.warning("extra field as string not being assigned to byte[]: " + key + ": " + val); // TODO: how to set string to int[]? - or, extra is string which can encode byte[]
         } else {
-          List<Integer> ints = new ArrayList<Integer>();
-          for (BigInteger bi : (List<BigInteger>) val) ints.add(bi.intValue());
-          tx.setExtra(GenUtils.reconcile(tx.getExtra(), GenUtils.listToIntArray(ints)));
+          List<Byte> bytes = new ArrayList<Byte>();
+          for (BigInteger bi : (List<BigInteger>) val) bytes.add(bi.byteValue());
+          tx.setExtra(GenUtils.reconcile(tx.getExtra(), GenUtils.listToByteArray(bytes)));
         }
       }
       else if (key.equals("vin")) {

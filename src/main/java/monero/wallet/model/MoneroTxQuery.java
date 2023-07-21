@@ -472,7 +472,7 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setExtra(int[] extra) {
+  public MoneroTxQuery setExtra(byte[] extra) {
     super.setExtra(extra);
     return this;
   }

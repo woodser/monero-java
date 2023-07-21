@@ -705,7 +705,7 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setExtra(int[] extra) {
+  public MoneroTxWallet setExtra(byte[] extra) {
     super.setExtra(extra);
     return this;
   }
