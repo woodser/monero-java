@@ -183,6 +183,19 @@ public class GenUtils {
     for (int i = 0; i < list.size(); i++) ints[i] = list.get(i);
     return ints;
   }
+
+  /**
+   * Converts a list of integers to an int array.
+   * 
+   * @param list is the list to convert
+   * @return the int array
+   */
+  public static byte[] listToByteArray(List<Byte> list) {
+    if (list == null) return null;
+    byte[] bytes = new byte[list.size()];
+    for (int i = 0; i < list.size(); i++) bytes[i] = list.get(i);
+    return bytes;
+  }
   
   /**
    * Returns a string indentation of the given length;
@@ -298,13 +311,35 @@ public class GenUtils {
   }
   
   /**
-   * Reconciles two int arrays.  The arrays must be identical or an exception is thrown.
+   * Reconciles two int arrays. The arrays must be identical or an exception is thrown.
    * 
    * @param arr1 is an array to reconcile
    * @param arr2 is an array to reconcile
-   * @return T[] is the reconciled array
+   * @return int[] is the reconciled array
    */
   public static int[] reconcileIntArrays(int[] arr1, int[] arr2) {
+    
+    // check for same reference or null
+    if (arr1 == arr2) return arr1;
+    
+    // resolve one value defined
+    if (arr1 == null || arr2 == null) {
+      return arr1 == null ? arr2 : arr1;
+    }
+    
+    // assert deep equality
+    GenUtils.assertTrue("Cannot reconcile arrays", Arrays.equals(arr1, arr2));
+    return arr1;
+  }
+
+  /**
+   * Reconciles two byte arrays. The arrays must be identical or an exception is thrown.
+   * 
+   * @param arr1 is an array to reconcile
+   * @param arr2 is an array to reconcile
+   * @return byte[] is the reconciled array
+   */
+  public static byte[] reconcileByteArrays(byte[] arr1, byte[] arr2) {
     
     // check for same reference or null
     if (arr1 == arr2) return arr1;

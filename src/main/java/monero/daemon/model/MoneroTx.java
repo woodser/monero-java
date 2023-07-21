@@ -45,7 +45,7 @@ public class MoneroTx {
   private List<MoneroOutput> outputs;
   private List<Long> outputIndices;
   private String metadata;
-  private int[] extra;  // TODO: switch to string for consistency with MoneroTxWallet
+  private byte[] extra; // TODO: switch to string for consistency with MoneroTxWallet?
   private Object rctSignatures; // TODO: implement
   private Object rctSigPrunable;  // TODO: implement
   private Boolean isKeptByBlock;
@@ -374,11 +374,11 @@ public class MoneroTx {
     return this;
   }
   
-  public int[] getExtra() {
+  public byte[] getExtra() {
     return extra;
   }
   
-  public MoneroTx setExtra(int[] extra) {
+  public MoneroTx setExtra(byte[] extra) {
     this.extra = extra;
     return this;
   }
@@ -500,7 +500,7 @@ public class MoneroTx {
     this.setWeight(GenUtils.reconcile(this.getWeight(), tx.getWeight()));
     this.setOutputIndices(GenUtils.reconcile(this.getOutputIndices(), tx.getOutputIndices()));
     this.setMetadata(GenUtils.reconcile(this.getMetadata(), tx.getMetadata()));
-    this.setExtra(GenUtils.reconcileIntArrays(this.getExtra(), tx.getExtra()));
+    this.setExtra(GenUtils.reconcileByteArrays(this.getExtra(), tx.getExtra()));
     this.setRctSignatures(GenUtils.reconcile(this.getRctSignatures(), tx.getRctSignatures()));
     this.setRctSigPrunable(GenUtils.reconcile(this.getRctSigPrunable(), tx.getRctSigPrunable()));
     this.setIsKeptByBlock(GenUtils.reconcile(this.isKeptByBlock(), tx.isKeptByBlock()));
