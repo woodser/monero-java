@@ -1399,7 +1399,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       assertNotNull(output.getTx().getHash());
       assertEquals(64, output.getTx().getHash().length());
       assertTrue(output.getTx().getVersion() >= 0);
-      assertTrue(output.getTx().getUnlockHeight() >= 0);
+      assertTrue(output.getTx().getUnlockTime().compareTo(BigInteger.valueOf(0)) >= 0);
       assertNull(output.getTx().getInputs());
       assertEquals(1, output.getTx().getOutputs().size());
       assertTrue(output.getTx().getOutputs().get(0) == output);
@@ -1426,7 +1426,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       assertNotNull(output.getTx().getHash());
       assertEquals(64, output.getTx().getHash().length());
       assertTrue(output.getTx().getVersion() >= 0);
-      assertTrue(output.getTx().getUnlockHeight() >= 0);
+      assertTrue(output.getTx().getUnlockTime().compareTo(BigInteger.valueOf(0)) >= 0);
       assertEquals(1, output.getTx().getInputs().size());
       assertTrue(output.getTx().getInputs().get(0) == output);
       assertNull(output.getTx().getOutputs());

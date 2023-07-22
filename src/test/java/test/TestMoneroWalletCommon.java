@@ -4095,7 +4095,7 @@ public abstract class TestMoneroWalletCommon {
             .setAddress(wallet.getPrimaryAddress())
             .setAmount(TestUtils.MAX_FEE)
             .setAccountIndex(0)
-            .setUnlockHeight(daemon.getHeight() + 3l)
+            .setUnlockTime(daemon.getHeight() + 3l)
             .setCanSplit(false)
             .setRelay(true);
     testSendAndUpdateTxs(config);
@@ -4109,7 +4109,7 @@ public abstract class TestMoneroWalletCommon {
             .setAccountIndex(0)
             .setAddress(wallet.getPrimaryAddress())
             .setAmount(TestUtils.MAX_FEE)
-            .setUnlockHeight(daemon.getHeight() + 3l)
+            .setUnlockTime(daemon.getHeight() + 3l)
             .setCanSplit(true)
             .setRelay(true);
     testSendAndUpdateTxs(config);
@@ -4123,7 +4123,7 @@ public abstract class TestMoneroWalletCommon {
             .setAccountIndex(0)
             .setAddress(wallet.getSubaddress(1, 0).getAddress())
             .setAmount(TestUtils.MAX_FEE)
-            .setUnlockHeight(daemon.getHeight() + 3l)
+            .setUnlockTime(daemon.getHeight() + 3l)
             .setCanSplit(false)
             .setRelay(true);
     testSendAndUpdateTxs(config);
@@ -4138,13 +4138,13 @@ public abstract class TestMoneroWalletCommon {
             .setAddress(wallet.getSubaddress(1, 0).getAddress())
             .setAmount(TestUtils.MAX_FEE)
             .setAccountIndex(0)
-            .setUnlockHeight(daemon.getHeight() + 3l)
+            .setUnlockTime(daemon.getHeight() + 3l)
             .setRelay(true);
     testSendAndUpdateTxs(config);
   }
   
   /**
-   * Tests sending a tx with an unlock height then tracking and updating it as
+   * Tests sending a tx with an unlock time then tracking and updating it as
    * blocks are added to the chain.
    * 
    * TODO: test wallet accounting throughout this; dedicated method? probably.
@@ -4755,7 +4755,7 @@ public abstract class TestMoneroWalletCommon {
     
     // loop every sync period until unlock tested
     List<Thread> threads = new ArrayList<Thread>();
-    long expectedUnlockHeight = lastHeight + unlockDelay;
+    long expectedUnlockTime = lastHeight + unlockDelay;
     Long confirmHeight = null;
     while (true) {
       
@@ -4794,7 +4794,7 @@ public abstract class TestMoneroWalletCommon {
         // test confirm notifications
         if (tx.isConfirmed() && confirmHeight == null) {
           confirmHeight = tx.getHeight();
-          expectedUnlockHeight = Math.max(confirmHeight + NUM_BLOCKS_LOCKED, expectedUnlockHeight); // exact unlock height known
+          expectedUnlockTime = Math.max(confirmHeight + NUM_BLOCKS_LOCKED, expectedUnlockTime); // exact unlock time known
           Thread thread = new Thread(new Runnable() {
             @Override public void run() {
               GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS * 2 + MAX_POLL_TIME); // wait 2 sync periods + poll time for notifications
@@ -4822,7 +4822,7 @@ public abstract class TestMoneroWalletCommon {
       }
       
       // otherwise test unlock notifications
-      else if (height >= expectedUnlockHeight) {
+      else if (height >= expectedUnlockTime) {
         Thread thread = new Thread(new Runnable() {
           @Override public void run() {
             GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS * 2 + MAX_POLL_TIME); // wait 2 sync periods + poll time for notifications
@@ -5382,7 +5382,7 @@ public abstract class TestMoneroWalletCommon {
     TestUtils.testUnsignedBigInteger(tx.getFee());
     if (tx.getPaymentId() != null) assertNotEquals(MoneroTx.DEFAULT_PAYMENT_ID, tx.getPaymentId()); // default payment id converted to null
     if (tx.getNote() != null) assertTrue(tx.getNote().length() > 0);  // empty notes converted to undefined
-    assertTrue(tx.getUnlockHeight() >= 0);
+    assertTrue(tx.getUnlockTime().compareTo(BigInteger.valueOf(0)) >= 0);
     assertNull(tx.getSize());   // TODO monero-wallet-rpc: add tx_size to get_transfers and get_transfer_by_txid
     assertNull(tx.getReceivedTimestamp());  // TODO monero-wallet-rpc: return received timestamp (asked to file issue if wanted)
     
@@ -5526,7 +5526,7 @@ public abstract class TestMoneroWalletCommon {
       assertEquals(false, tx.isConfirmed());
       testTransfer(tx.getOutgoingTransfer(), ctx);
       assertEquals(MoneroUtils.RING_SIZE, (int) tx.getRingSize());
-      assertEquals(config.getUnlockHeight() != null ? config.getUnlockHeight() : 0, (long) tx.getUnlockHeight());
+      assertEquals(config.getUnlockTime() != null ? config.getUnlockTime() : BigInteger.valueOf(0), tx.getUnlockTime());
       assertNull(tx.getBlock());
       assertTrue(tx.getKey().length() > 0);
       assertNotNull(tx.getFullHex());
@@ -5536,7 +5536,7 @@ public abstract class TestMoneroWalletCommon {
       assertTrue(tx.isLocked());
       
       // test locked state
-      if (tx.getUnlockHeight() == 0) assertEquals(tx.isConfirmed(), !tx.isLocked());
+      if (BigInteger.valueOf(0).equals(tx.getUnlockTime())) assertEquals(tx.isConfirmed(), !tx.isLocked());
       else assertEquals(true, tx.isLocked());
       for (MoneroOutputWallet output : tx.getOutputsWallet()) {
         assertEquals(tx.isLocked(), output.isLocked());
@@ -5843,7 +5843,7 @@ public abstract class TestMoneroWalletCommon {
       if (parsedTx.getChangeAmount().equals(BigInteger.valueOf(0))) assertNull(parsedTx.getChangeAddress());
       else MoneroUtils.validateAddress(parsedTx.getChangeAddress(), TestUtils.NETWORK_TYPE);
       assertTrue(parsedTx.getRingSize() > 1);
-      assertTrue(parsedTx.getUnlockHeight() >= 0);
+      assertTrue(parsedTx.getUnlockTime().compareTo(BigInteger.valueOf(0)) >= 0);
       assertTrue(parsedTx.getNumDummyOutputs() >= 0);
       assertFalse(parsedTx.getExtraHex().isEmpty());
       assertTrue(parsedTx.getPaymentId() == null || !parsedTx.getPaymentId().isEmpty());

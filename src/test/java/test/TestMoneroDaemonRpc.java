@@ -1497,7 +1497,7 @@ public class TestMoneroDaemonRpc {
     assertTrue(minerTx.getVersion() >= 0);
     assertNotNull(minerTx.getExtra());
     assertTrue(minerTx.getExtra().length > 0);
-    assertTrue(minerTx.getUnlockHeight() >= 0);
+    assertTrue(minerTx.getUnlockTime().longValue() >= 0);
 
 //    // TODO: miner tx does not have hashes in binary requests so this will fail, need to derive using prunable data
 //    TestContext ctx = new TestContext();
@@ -1528,7 +1528,7 @@ public class TestMoneroDaemonRpc {
     assertNotNull(tx.isMinerTx());
     assertNotNull(tx.isDoubleSpendSeen());
     assertTrue(tx.getVersion() >= 0);
-    assertTrue(tx.getUnlockHeight() >= 0);
+    assertTrue(tx.getUnlockTime().compareTo(BigInteger.valueOf(0)) >= 0);
     assertNotNull(tx.getInputs());
     assertNotNull(tx.getOutputs());
     assertTrue(tx.getExtra().length > 0);

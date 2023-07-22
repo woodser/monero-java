@@ -154,6 +154,11 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
     return this;
   }
 
+  public MoneroTxQuery setUnlockTime(Long unlockTime) {
+    super.setUnlockTime(unlockTime == null ? null : BigInteger.valueOf(unlockTime));
+    return this;
+  }
+  
   public Boolean getIncludeOutputs() {
     return includeOutputs;
   }
@@ -377,8 +382,8 @@ public class MoneroTxQuery extends MoneroTxWallet implements Filter<MoneroTxWall
   }
 
   @Override
-  public MoneroTxQuery setUnlockHeight(Long unlockHeight) {
-    super.setUnlockHeight(unlockHeight);
+  public MoneroTxQuery setUnlockTime(BigInteger unlockTime) {
+    super.setUnlockTime(unlockTime);
     return this;
   }
 

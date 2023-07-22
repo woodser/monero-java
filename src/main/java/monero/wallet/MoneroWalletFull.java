@@ -1614,7 +1614,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
       for (MoneroWalletListenerI listener : getListeners()) listener.onBalancesChanged(new BigInteger(newBalanceStr), new BigInteger(newUnlockedBalanceStr));
     }
     
-    public void onOutputReceived(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version, long unlockHeight, boolean isLocked) {
+    public void onOutputReceived(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version, String unlockTimeStr, boolean isLocked) {
       
       // build output to announce
       MoneroOutputWallet output = new MoneroOutputWallet();
@@ -1624,7 +1624,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
       MoneroTxWallet tx = new MoneroTxWallet();
       tx.setHash(txHash);
       tx.setVersion(version);
-      tx.setUnlockHeight(unlockHeight);
+      tx.setUnlockTime(new BigInteger(unlockTimeStr));
       output.setTx(tx);
       tx.setOutputs(Arrays.asList(output));
       tx.setIsIncoming(true);
@@ -1645,7 +1645,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
       for (MoneroWalletListenerI listener : getListeners()) listener.onOutputReceived((MoneroOutputWallet) tx.getOutputs().get(0));
     }
     
-    public void onOutputSpent(long height, String txHash, String amountStr, String accountIdxStr, String subaddressIdxStr, int version, long unlockHeight, boolean isLocked) {
+    public void onOutputSpent(long height, String txHash, String amountStr, String accountIdxStr, String subaddressIdxStr, int version, String unlockTimeStr, boolean isLocked) {
       
       // build spent output
       MoneroOutputWallet output = new MoneroOutputWallet();
@@ -1655,7 +1655,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
       MoneroTxWallet tx = new MoneroTxWallet();
       tx.setHash(txHash);
       tx.setVersion(version);
-      tx.setUnlockHeight(unlockHeight);
+      tx.setUnlockTime(new BigInteger(unlockTimeStr));
       tx.setIsLocked(isLocked);
       output.setTx(tx);
       tx.setInputs(Arrays.asList(output));
