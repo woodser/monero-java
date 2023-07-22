@@ -1182,7 +1182,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("account_index", accountIdx);
     params.put("subaddr_indices", subaddressIndices);
     params.put("payment_id", config.getPaymentId());
-    params.put("unlock_time", config.getUnlockHeight());
+    params.put("unlock_time", config.getUnlockTime());
     params.put("do_not_relay", !Boolean.TRUE.equals(config.getRelay()));
     params.put("priority", config.getPriority() == null ? null : config.getPriority().ordinal());
     params.put("get_tx_hex", true);
@@ -1243,7 +1243,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("account_index", config.getAccountIndex());
     params.put("subaddr_indices", config.getSubaddressIndices());
     params.put("key_image", config.getKeyImage());
-    params.put("unlock_time", config.getUnlockHeight());
+    params.put("unlock_time", config.getUnlockTime());
     params.put("do_not_relay", !Boolean.TRUE.equals(config.getRelay()));
     params.put("priority", config.getPriority() == null ? null : config.getPriority().ordinal());
     params.put("payment_id", config.getPaymentId());
@@ -2219,7 +2219,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("subaddr_indices", config.getSubaddressIndices());
     params.put("address", config.getDestinations().get(0).getAddress());
     params.put("priority", config.getPriority() == null ? null : config.getPriority().ordinal());
-    params.put("unlock_time", config.getUnlockHeight());
+    params.put("unlock_time", config.getUnlockTime());
     params.put("payment_id", config.getPaymentId());
     params.put("do_not_relay", !relay);
     params.put("below_amount", config.getBelowAmount());
@@ -2251,7 +2251,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       MoneroDestination destination = new MoneroDestination(config.getDestinations().get(0).getAddress(), transfer.getAmount());
       transfer.setDestinations(Arrays.asList(destination));
       tx.setPaymentId(config.getPaymentId());
-      if (tx.getUnlockHeight() == null) tx.setUnlockHeight(config.getUnlockHeight() == null ? 0l : config.getUnlockHeight());
+      if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? BigInteger.valueOf(0) : config.getUnlockTime());
       if (tx.getRelay()) {
         if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
         if (tx.isDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
@@ -2580,7 +2580,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         MoneroTxWallet tx = new MoneroTxWallet();
         tx.setHash((String) contentMap.get("txid"));
         tx.setVersion(((BigInteger) txMap.get("version")).intValue());
-        tx.setUnlockHeight(((BigInteger) txMap.get("unlock_time")).longValue());
+        tx.setUnlockTime(((BigInteger) txMap.get("unlock_time")));
         output.setTx(tx);
         tx.setOutputs(Arrays.asList(output));
         long height = ((BigInteger) contentMap.get("height")).longValue();
@@ -2776,7 +2776,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     tx.setOutgoingTransfer(transfer);
     tx.setPaymentId(config.getPaymentId());
-    if (tx.getUnlockHeight() == null) tx.setUnlockHeight(config.getUnlockHeight() == null ? 0l : config.getUnlockHeight());
+    if (tx.getUnlockTime() == null) tx.setUnlockTime(config.getUnlockTime() == null ? BigInteger.valueOf(0) : config.getUnlockTime());
     if (tx.getRelay()) {
       if (tx.getLastRelayedTimestamp() == null) tx.setLastRelayedTimestamp(System.currentTimeMillis());  // TODO (monero-wallet-rpc): provide timestamp on response; unconfirmed timestamps vary
       if (tx.isDoubleSpendSeen() == null) tx.setIsDoubleSpendSeen(false);
@@ -2938,7 +2938,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       else if (key.equals("tx_key")) tx.setKey((String) val);
       else if (key.equals("type")) { } // type already handled
       else if (key.equals("tx_size")) tx.setSize(((BigInteger) val).longValue());
-      else if (key.equals("unlock_time")) tx.setUnlockHeight(((BigInteger) val).longValue());
+      else if (key.equals("unlock_time")) tx.setUnlockTime(((BigInteger) val));
       else if (key.equals("weight")) tx.setWeight(((BigInteger) val).longValue());
       else if (key.equals("locked")) tx.setIsLocked((Boolean) val);
       else if (key.equals("tx_blob")) tx.setFullHex((String) val);

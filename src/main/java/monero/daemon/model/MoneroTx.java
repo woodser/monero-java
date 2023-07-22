@@ -30,7 +30,7 @@ public class MoneroTx {
   private Boolean isConfirmed;
   private Boolean inTxPool;
   private Long numConfirmations;
-  private Long unlockHeight;
+  private BigInteger unlockTime;
   private Long lastRelayedTimestamp;
   private Long receivedTimestamp;
   private Boolean isDoubleSpendSeen;
@@ -77,7 +77,7 @@ public class MoneroTx {
     this.isConfirmed = tx.isConfirmed;
     this.inTxPool = tx.inTxPool;
     this.numConfirmations = tx.numConfirmations;
-    this.unlockHeight = tx.unlockHeight;
+    this.unlockTime = tx.unlockTime;
     this.lastRelayedTimestamp = tx.lastRelayedTimestamp;
     this.receivedTimestamp = tx.receivedTimestamp;
     this.isDoubleSpendSeen = tx.isDoubleSpendSeen;
@@ -231,12 +231,17 @@ public class MoneroTx {
     return this;
   }
   
-  public Long getUnlockHeight() {
-    return unlockHeight;
+  /**
+   * Get the minimum height or timestamp for the transactions to unlock.
+   * 
+   * @return the minimum height or timestamp for the transactin to unlock
+   */
+  public BigInteger getUnlockTime() {
+    return unlockTime;
   }
   
-  public MoneroTx setUnlockHeight(Long unlockHeight) {
-    this.unlockHeight = unlockHeight;
+  public MoneroTx setUnlockTime(BigInteger unlockTime) {
+    this.unlockTime = unlockTime;
     return this;
   }
   
@@ -505,7 +510,7 @@ public class MoneroTx {
     this.setMaxUsedBlockHeight(GenUtils.reconcile(this.getMaxUsedBlockHeight(), tx.getMaxUsedBlockHeight()));
     this.setMaxUsedBlockHash(GenUtils.reconcile(this.getMaxUsedBlockHash(), tx.getMaxUsedBlockHash()));
     this.setSignatures(GenUtils.reconcile(this.getSignatures(), tx.getSignatures()));
-    this.setUnlockHeight(GenUtils.reconcile(this.getUnlockHeight(), tx.getUnlockHeight()));
+    this.setUnlockTime(GenUtils.reconcile(this.getUnlockTime(), tx.getUnlockTime()));
     this.setNumConfirmations(GenUtils.reconcile(this.getNumConfirmations(), tx.getNumConfirmations(), null, null, true)); // num confirmations can increase
     
     // merge inputs
@@ -582,7 +587,7 @@ public class MoneroTx {
     sb.append(GenUtils.kvLine("Is confirmed", isConfirmed(), indent));
     sb.append(GenUtils.kvLine("In tx pool", inTxPool(), indent));
     sb.append(GenUtils.kvLine("Num confirmations", getNumConfirmations(), indent));
-    sb.append(GenUtils.kvLine("Unlock height", getUnlockHeight(), indent));
+    sb.append(GenUtils.kvLine("Unlock time", getUnlockTime(), indent));
     sb.append(GenUtils.kvLine("Last relayed time", getLastRelayedTimestamp(), indent));
     sb.append(GenUtils.kvLine("Received time", getReceivedTimestamp(), indent));
     sb.append(GenUtils.kvLine("Is double spend", isDoubleSpendSeen(), indent));
@@ -660,7 +665,7 @@ public class MoneroTx {
     result = prime * result + ((receivedTimestamp == null) ? 0 : receivedTimestamp.hashCode());
     result = prime * result + ((signatures == null) ? 0 : signatures.hashCode());
     result = prime * result + ((size == null) ? 0 : size.hashCode());
-    result = prime * result + ((unlockHeight == null) ? 0 : unlockHeight.hashCode());
+    result = prime * result + ((unlockTime == null) ? 0 : unlockTime.hashCode());
     result = prime * result + ((version == null) ? 0 : version.hashCode());
     result = prime * result + ((inputs == null) ? 0 : inputs.hashCode());
     result = prime * result + ((outputs == null) ? 0 : outputs.hashCode());
@@ -765,9 +770,9 @@ public class MoneroTx {
     if (size == null) {
       if (other.size != null) return false;
     } else if (!size.equals(other.size)) return false;
-    if (unlockHeight == null) {
-      if (other.unlockHeight != null) return false;
-    } else if (!unlockHeight.equals(other.unlockHeight)) return false;
+    if (unlockTime == null) {
+      if (other.unlockTime != null) return false;
+    } else if (!unlockTime.equals(other.unlockTime)) return false;
     if (version == null) {
       if (other.version != null) return false;
     } else if (!version.equals(other.version)) return false;

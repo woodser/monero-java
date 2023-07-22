@@ -627,8 +627,8 @@ public class MoneroTxWallet extends MoneroTx {
   }
 
   @Override
-  public MoneroTxWallet setUnlockHeight(Long unlockHeight) {
-    super.setUnlockHeight(unlockHeight);
+  public MoneroTxWallet setUnlockTime(BigInteger unlockTime) {
+    super.setUnlockTime(unlockTime);
     return this;
   }
 
