@@ -234,6 +234,7 @@ public class MoneroTxConfig {
    * @param unlockTime the minimum height or timestamp for the transaction to unlock
    * @return this configuration for chaining
    */
+  @JsonProperty("unlockTime")
   public MoneroTxConfig setUnlockTime(BigInteger unlockTime) {
     this.unlockTime = unlockTime;
     return this;
