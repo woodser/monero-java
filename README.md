@@ -54,7 +54,7 @@ MoneroWalletFull walletFull = MoneroWalletFull.createWallet(new MoneroWalletConf
         .setServerUri("http://localhost:38081")
         .setServerUsername("superuser")
         .setServerPassword("abctesting123")
-        .setMnemonic("hefty value scenic...")
+        .setSeed("hefty value scenic...")
         .setRestoreHeight(573936l));
 
 // synchronize the wallet and receive progress notifications

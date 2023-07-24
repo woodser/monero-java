@@ -64,7 +64,7 @@ public class TestSampleCode {
     BigInteger balance = walletRpc.getBalance();            // 533648366742
     List<MoneroTxWallet> txs = walletRpc.getTxs();          // get transactions containing transfers to/from the wallet
     
-    // create wallet from mnemonic phrase using JNI bindings to monero-project
+    // create wallet from seed using JNI bindings to monero-project
     MoneroWalletFull walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
             .setPath("./test_wallets/" + UUID.randomUUID().toString())  // *** CHANGE README TO "sample_wallet_full" ***
             .setPassword("supersecretpassword123")
@@ -72,7 +72,7 @@ public class TestSampleCode {
             .setServerUri("http://localhost:28081")
             .setServerUsername("superuser")
             .setServerPassword("abctesting123")
-            .setMnemonic(TestUtils.MNEMONIC)                    // *** REPLACE WITH MNEMONIC IN README ***
+            .setSeed(TestUtils.SEED)                        // *** REPLACE WITH SEED IN README ***
             .setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT)); // *** REPLACE WITH FIRST RECEIVE HEIGHT IN README ***
     
     // synchronize the wallet and receive progress notifications

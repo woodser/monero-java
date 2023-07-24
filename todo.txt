@@ -39,7 +39,7 @@ cleanup: order all methods and tests the same, even overrides
 should sweepUnlocked() sweep all accounts if not specified?
 prevent common occasional test failures caused by testing equality instead of mergeability (e.g. tx num confirmations increasing is expected)
 only have send() and createTxs() which return tx set? 
-new MoneroWalletFull(new MoneroWalletConfig().setMnemonic("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
+new MoneroWalletFull(new MoneroWalletConfig().setSeed("hello").setRestoreHeight(1234).setPath("/asdfasdfasdfafd").setPassword("....").setDaemonUri(new MoneroDaemonUri()), etc
 support cold wallet with sign_transfer, submit_transfer
 approximate chain height
 tx.getNumConfirmations() should be initialized whenever tx.getHeight() is

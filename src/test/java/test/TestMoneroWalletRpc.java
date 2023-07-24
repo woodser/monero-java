@@ -111,7 +111,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     
     // assign defaults
     if (config == null) config = new MoneroWalletConfig();
-    boolean random = config.getMnemonic() == null && config.getPrimaryAddress() == null;
+    boolean random = config.getSeed() == null && config.getPrimaryAddress() == null;
     if (config.getPath() == null) config.setPath(UUID.randomUUID().toString());
     if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
     if (config.getRestoreHeight() == null && !random) config.setRestoreHeight(0l);
@@ -145,13 +145,13 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   @Override
-  protected List<String> getMnemonicLanguages() {
-    return ((MoneroWalletRpc) wallet).getMnemonicLanguages();
+  protected List<String> getSeedLanguages() {
+    return ((MoneroWalletRpc) wallet).getSeedLanguages();
   }
   
   // ---------------------------- BEGIN TESTS ---------------------------------
   
-  // Can create a wallet with a randomly generated mnemonic
+  // Can create a wallet with a randomly generated seed
   @Test
   public void testCreateWalletRandomRpc() {
     assumeTrue(TEST_NON_RELAYS);
@@ -159,9 +159,9 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     // create random wallet with defaults
     String path = UUID.randomUUID().toString();
     MoneroWallet wallet = createWallet(new MoneroWalletConfig().setPath(path));
-    String mnemonic = wallet.getMnemonic();
-    MoneroUtils.validateMnemonic(mnemonic);
-    assertNotEquals(TestUtils.MNEMONIC, mnemonic);
+    String seed = wallet.getSeed();
+    MoneroUtils.validateMnemonic(seed);
+    assertNotEquals(TestUtils.SEED, seed);
     MoneroUtils.validateAddress(wallet.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
     wallet.sync();  // very quick because restore height is chain height
     closeWallet(wallet);
@@ -169,9 +169,9 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     // create random wallet with non defaults
     path = UUID.randomUUID().toString();
     wallet = createWallet(new MoneroWalletConfig().setPath(path).setLanguage("Spanish"));
-    MoneroUtils.validateMnemonic(wallet.getMnemonic());
-    assertNotEquals(mnemonic, wallet.getMnemonic());
-    mnemonic = wallet.getMnemonic();
+    MoneroUtils.validateMnemonic(wallet.getSeed());
+    assertNotEquals(seed, wallet.getSeed());
+    seed = wallet.getSeed();
     MoneroUtils.validateAddress(wallet.getPrimaryAddress(), TestUtils.NETWORK_TYPE);
     
     // attempt to create wallet which already exists
@@ -180,20 +180,20 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     } catch (MoneroError e) {
       assertEquals(e.getMessage(), "Wallet already exists: " + path);
       assertEquals(-21, (int) e.getCode());
-      assertEquals(mnemonic, wallet.getMnemonic());
+      assertEquals(seed, wallet.getSeed());
     }
     closeWallet(wallet);
   }
   
-  // Can create a RPC wallet from a mnemonic phrase
+  // Can create a RPC wallet from a seed
   @Test
-  public void testCreateWalletFromMnemonicRpc() {
+  public void testCreateWalletFromSeedRpc() {
     assumeTrue(TEST_NON_RELAYS);
       
-    // create wallet with mnemonic and defaults
+    // create wallet with seed and defaults
     String path = UUID.randomUUID().toString();
-    MoneroWallet wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
-    assertEquals(TestUtils.MNEMONIC, wallet.getMnemonic());
+    MoneroWallet wallet = createWallet(new MoneroWalletConfig().setPath(path).setSeed(TestUtils.SEED).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+    assertEquals(TestUtils.SEED, wallet.getSeed());
     assertEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
     wallet.sync();
     assertEquals(daemon.getHeight(), wallet.getHeight());
@@ -204,9 +204,9 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     
     // create wallet with non-defaults
     path = UUID.randomUUID().toString();
-    wallet = createWallet(new MoneroWalletConfig().setPath(path).setMnemonic(TestUtils.MNEMONIC).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setLanguage("German").setSeedOffset("my offset!").setSaveCurrent(false));
-    MoneroUtils.validateMnemonic(wallet.getMnemonic());
-    assertNotEquals(TestUtils.MNEMONIC, wallet.getMnemonic());  // mnemonic is different because of offset
+    wallet = createWallet(new MoneroWalletConfig().setPath(path).setSeed(TestUtils.SEED).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setLanguage("German").setSeedOffset("my offset!").setSaveCurrent(false));
+    MoneroUtils.validateMnemonic(wallet.getSeed());
+    assertNotEquals(TestUtils.SEED, wallet.getSeed()); // seed is different because of offset
     assertNotEquals(TestUtils.ADDRESS, wallet.getPrimaryAddress());
     wallet.sync();
     assertEquals(daemon.getHeight(), wallet.getHeight());
@@ -225,10 +225,10 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     for (int i = 0; i < numTestWallets; i++) names.add(UUID.randomUUID().toString());
     
     // create test wallets
-    List<String> mnemonics = new ArrayList<String>();
+    List<String> seeds = new ArrayList<String>();
     for (String name : names) {
       MoneroWalletRpc wallet = createWallet(new MoneroWalletConfig().setPath(name));
-      mnemonics.add(wallet.getMnemonic());
+      seeds.add(wallet.getSeed());
       closeWallet(wallet, true);
     }
     
@@ -236,7 +236,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     List<MoneroWallet> wallets = new ArrayList<MoneroWallet>();
     for (int i = 0; i < numTestWallets; i++) {
       MoneroWallet wallet = openWallet(new MoneroWalletConfig().setPath(names.get(i)).setPassword(TestUtils.WALLET_PASSWORD));
-      assertEquals(mnemonics.get(i), wallet.getMnemonic());
+      assertEquals(seeds.get(i), wallet.getSeed());
       wallets.add(wallet);
     }
     
@@ -368,7 +368,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
       assertEquals("No wallet file", e.getMessage());
     }
     try {
-      wallet.getMnemonic();
+      wallet.getSeed();
     } catch (MoneroError e) {
       assertEquals(-13, (int) e.getCode());
       assertEquals("No wallet file", e.getMessage());
@@ -453,14 +453,14 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   @Test
-  public void testCreateWalletFromMnemonic() {
-    super.testCreateWalletFromMnemonic();
+  public void testCreateWalletFromSeed() {
+    super.testCreateWalletFromSeed();
   }
   
   @Override
   @Test
-  public void testCreateWalletFromMnemonicWithOffset() {
-    super.testCreateWalletFromMnemonicWithOffset();
+  public void testCreateWalletFromSeedWithOffset() {
+    super.testCreateWalletFromSeedWithOffset();
   }
   
   @Override
@@ -507,14 +507,14 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
 
   @Override
   @Test
-  public void testGetMnemonic() {
-    super.testGetMnemonic();
+  public void testGetSeed() {
+    super.testGetSeed();
   }
 
   @Override
   @Test
-  public void testGetMnemonicLanguages() {
-    super.testGetMnemonicLanguages();
+  public void testGetSeedLanguages() {
+    super.testGetSeedLanguages();
   }
 
   @Override

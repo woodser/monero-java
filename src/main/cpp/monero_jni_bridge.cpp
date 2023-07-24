@@ -497,13 +497,13 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_createWalletJni(JNIE
   }
 }
 
-JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getMnemonicLanguagesJni(JNIEnv *env, jclass clazz) {
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getSeedLanguagesJni(JNIEnv *env, jclass clazz) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_getLanguagesJni");
 
   // get languages
   vector<string> languages;
   try {
-    languages = monero_wallet_full::get_mnemonic_languages();
+    languages = monero_wallet_full::get_seed_languages();
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
@@ -624,22 +624,22 @@ JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_getNetworkTypeJni(JNI
   return wallet->get_network_type();
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getMnemonicJni(JNIEnv *env, jobject instance) {
-  MTRACE("Java_monero_wallet_MoneroWalletFull_getMnemonicJni");
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getSeedJni(JNIEnv *env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_getSeedJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   try {
-    return env->NewStringUTF(wallet->get_mnemonic().c_str());
+    return env->NewStringUTF(wallet->get_seed().c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
   }
 }
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getMnemonicLanguageJni(JNIEnv *env, jobject instance) {
-  MTRACE("Java_monero_wallet_MoneroWalletFull_getMnemonicLanguageJni");
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getSeedLanguageJni(JNIEnv *env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_getSeedLanguageJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   try {
-    return env->NewStringUTF(wallet->get_mnemonic_language().c_str());
+    return env->NewStringUTF(wallet->get_seed_language().c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
