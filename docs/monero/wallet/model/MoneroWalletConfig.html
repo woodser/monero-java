@@ -26,7 +26,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10,"i20":10,"i21":10,"i22":10,"i23":10,"i24":10,"i25":10,"i26":10,"i27":10,"i28":10,"i29":10,"i30":10,"i31":10,"i32":10,"i33":10,"i34":10,"i35":10,"i36":10,"i37":10,"i38":10,"i39":10};
+var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10,"i20":10,"i21":10,"i22":10,"i23":10,"i24":10,"i25":10,"i26":10,"i27":10,"i28":10,"i29":10,"i30":10,"i31":10,"i32":10,"i33":10,"i34":10,"i35":10,"i36":10,"i37":10,"i38":10,"i39":10,"i40":10,"i41":10,"i42":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -157,6 +157,10 @@ extends java.lang.Object</pre>
 <th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E()">MoneroWalletConfig</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
+<tr class="rowColor">
+<th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(monero.wallet.model.MoneroWalletConfig)">MoneroWalletConfig</a></span>&#8203;(<a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a>&nbsp;config)</code></th>
+<td class="colLast">&nbsp;</td>
+</tr>
 </table>
 </li>
 </ul>
@@ -176,28 +180,28 @@ extends java.lang.Object</pre>
 <th class="colLast" scope="col">Description</th>
 </tr>
 <tr id="i0" class="altColor">
+<td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#copy()">copy</a></span>()</code></th>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr id="i1" class="rowColor">
 <td class="colFirst"><code>java.lang.Integer</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getAccountLookahead()">getAccountLookahead</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i1" class="rowColor">
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>byte[]</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getCacheData()">getCacheData</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>byte[]</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getKeysData()">getKeysData</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
-<td class="colFirst"><code>java.lang.String</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getLanguage()">getLanguage</a></span>()</code></th>
-<td class="colLast">&nbsp;</td>
-</tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getMnemonic()">getMnemonic</a></span>()</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getLanguage()">getLanguage</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i5" class="rowColor">
@@ -242,139 +246,154 @@ extends java.lang.Object</pre>
 </tr>
 <tr id="i13" class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getSeedOffset()">getSeedOffset</a></span>()</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getSeed()">getSeed</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i14" class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getSeedOffset()">getSeedOffset</a></span>()</code></th>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code><a href="../../common/MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getServer()">getServer</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getServerPassword()">getServerPassword</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getServerUri()">getServerUri</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i18" class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getServerUsername()">getServerUsername</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i19" class="rowColor">
 <td class="colFirst"><code>java.lang.Integer</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getSubaddressLookahead()">getSubaddressLookahead</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i20" class="altColor">
+<td class="colFirst"><code>java.lang.Boolean</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isMultisig()">isMultisig</a></span>()</code></th>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr id="i21" class="rowColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setAccountLookahead(java.lang.Integer)">setAccountLookahead</a></span>&#8203;(java.lang.Integer&nbsp;accountLookahead)</code></th>
 <td class="colLast">
 <div class="block">Set the number of accounts of scan.</div>
 </td>
 </tr>
-<tr id="i20" class="altColor">
+<tr id="i22" class="altColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setCacheData(byte%5B%5D)">setCacheData</a></span>&#8203;(byte[]&nbsp;cacheData)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i21" class="rowColor">
-<td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setKeysData(byte%5B%5D)">setKeysData</a></span>&#8203;(byte[]&nbsp;keysData)</code></th>
-<td class="colLast">&nbsp;</td>
-</tr>
-<tr id="i22" class="altColor">
-<td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setLanguage(java.lang.String)">setLanguage</a></span>&#8203;(java.lang.String&nbsp;language)</code></th>
-<td class="colLast">&nbsp;</td>
-</tr>
 <tr id="i23" class="rowColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setMnemonic(java.lang.String)">setMnemonic</a></span>&#8203;(java.lang.String&nbsp;mnemonic)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setIsMultisig(java.lang.Boolean)">setIsMultisig</a></span>&#8203;(java.lang.Boolean&nbsp;isMultisig)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i24" class="altColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setNetworkType(java.lang.String)">setNetworkType</a></span>&#8203;(java.lang.String&nbsp;networkTypeStr)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setKeysData(byte%5B%5D)">setKeysData</a></span>&#8203;(byte[]&nbsp;keysData)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i25" class="rowColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setNetworkType(monero.daemon.model.MoneroNetworkType)">setNetworkType</a></span>&#8203;(<a href="../../daemon/model/MoneroNetworkType.html" title="enum in monero.daemon.model">MoneroNetworkType</a>&nbsp;networkType)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setLanguage(java.lang.String)">setLanguage</a></span>&#8203;(java.lang.String&nbsp;language)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i26" class="altColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPassword(java.lang.String)">setPassword</a></span>&#8203;(java.lang.String&nbsp;password)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setNetworkType(java.lang.String)">setNetworkType</a></span>&#8203;(java.lang.String&nbsp;networkTypeStr)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i27" class="rowColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPath(java.lang.String)">setPath</a></span>&#8203;(java.lang.String&nbsp;path)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setNetworkType(monero.daemon.model.MoneroNetworkType)">setNetworkType</a></span>&#8203;(<a href="../../daemon/model/MoneroNetworkType.html" title="enum in monero.daemon.model">MoneroNetworkType</a>&nbsp;networkType)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i28" class="altColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPrimaryAddress(java.lang.String)">setPrimaryAddress</a></span>&#8203;(java.lang.String&nbsp;primaryAddress)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPassword(java.lang.String)">setPassword</a></span>&#8203;(java.lang.String&nbsp;password)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i29" class="rowColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPrivateSpendKey(java.lang.String)">setPrivateSpendKey</a></span>&#8203;(java.lang.String&nbsp;privateSpendKey)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPath(java.lang.String)">setPath</a></span>&#8203;(java.lang.String&nbsp;path)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i30" class="altColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPrivateViewKey(java.lang.String)">setPrivateViewKey</a></span>&#8203;(java.lang.String&nbsp;privateViewKey)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPrimaryAddress(java.lang.String)">setPrimaryAddress</a></span>&#8203;(java.lang.String&nbsp;primaryAddress)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i31" class="rowColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setRestoreHeight(java.lang.Long)">setRestoreHeight</a></span>&#8203;(java.lang.Long&nbsp;restoreHeight)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPrivateSpendKey(java.lang.String)">setPrivateSpendKey</a></span>&#8203;(java.lang.String&nbsp;privateSpendKey)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i32" class="altColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setSaveCurrent(java.lang.Boolean)">setSaveCurrent</a></span>&#8203;(java.lang.Boolean&nbsp;saveCurrent)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPrivateViewKey(java.lang.String)">setPrivateViewKey</a></span>&#8203;(java.lang.String&nbsp;privateViewKey)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i33" class="rowColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setSeedOffset(java.lang.String)">setSeedOffset</a></span>&#8203;(java.lang.String&nbsp;seedOffset)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setRestoreHeight(java.lang.Long)">setRestoreHeight</a></span>&#8203;(java.lang.Long&nbsp;restoreHeight)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i34" class="altColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setServer(monero.common.MoneroRpcConnection)">setServer</a></span>&#8203;(<a href="../../common/MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&nbsp;server)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setSaveCurrent(java.lang.Boolean)">setSaveCurrent</a></span>&#8203;(java.lang.Boolean&nbsp;saveCurrent)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i35" class="rowColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setServerPassword(java.lang.String)">setServerPassword</a></span>&#8203;(java.lang.String&nbsp;serverPassword)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setSeed(java.lang.String)">setSeed</a></span>&#8203;(java.lang.String&nbsp;seed)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i36" class="altColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setServerUri(java.lang.String)">setServerUri</a></span>&#8203;(java.lang.String&nbsp;serverUri)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setSeedOffset(java.lang.String)">setSeedOffset</a></span>&#8203;(java.lang.String&nbsp;seedOffset)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i37" class="rowColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setServerUsername(java.lang.String)">setServerUsername</a></span>&#8203;(java.lang.String&nbsp;serverUsername)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setServer(monero.common.MoneroRpcConnection)">setServer</a></span>&#8203;(<a href="../../common/MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&nbsp;server)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i38" class="altColor">
+<td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setServerPassword(java.lang.String)">setServerPassword</a></span>&#8203;(java.lang.String&nbsp;serverPassword)</code></th>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr id="i39" class="rowColor">
+<td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setServerUri(java.lang.String)">setServerUri</a></span>&#8203;(java.lang.String&nbsp;serverUri)</code></th>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr id="i40" class="altColor">
+<td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setServerUsername(java.lang.String)">setServerUsername</a></span>&#8203;(java.lang.String&nbsp;serverUsername)</code></th>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr id="i41" class="rowColor">
 <td class="colFirst"><code><a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setSubaddressLookahead(java.lang.Integer)">setSubaddressLookahead</a></span>&#8203;(java.lang.Integer&nbsp;subaddressLookahead)</code></th>
 <td class="colLast">
 <div class="block">Set the number of subaddresses to scan per account.</div>
 </td>
 </tr>
-<tr id="i39" class="rowColor">
+<tr id="i42" class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#toString()">toString</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
@@ -406,10 +425,19 @@ extends java.lang.Object</pre>
 <a id="&lt;init&gt;()">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>MoneroWalletConfig</h4>
 <pre>public&nbsp;MoneroWalletConfig()</pre>
+</li>
+</ul>
+<a id="&lt;init&gt;(monero.wallet.model.MoneroWalletConfig)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>MoneroWalletConfig</h4>
+<pre>public&nbsp;MoneroWalletConfig&#8203;(<a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a>&nbsp;config)</pre>
 </li>
 </ul>
 </li>
@@ -422,6 +450,15 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
+<a id="copy()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>copy</h4>
+<pre class="methodSignature">public&nbsp;<a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a>&nbsp;copy()</pre>
+</li>
+</ul>
 <a id="getPath()">
 <!--   -->
 </a>
@@ -557,22 +594,22 @@ extends java.lang.Object</pre>
 <pre class="methodSignature">public&nbsp;<a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a>&nbsp;setServerPassword&#8203;(java.lang.String&nbsp;serverPassword)</pre>
 </li>
 </ul>
-<a id="getMnemonic()">
+<a id="getSeed()">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getMnemonic</h4>
-<pre class="methodSignature">public&nbsp;java.lang.String&nbsp;getMnemonic()</pre>
+<h4>getSeed</h4>
+<pre class="methodSignature">public&nbsp;java.lang.String&nbsp;getSeed()</pre>
 </li>
 </ul>
-<a id="setMnemonic(java.lang.String)">
+<a id="setSeed(java.lang.String)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>setMnemonic</h4>
-<pre class="methodSignature">public&nbsp;<a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a>&nbsp;setMnemonic&#8203;(java.lang.String&nbsp;mnemonic)</pre>
+<h4>setSeed</h4>
+<pre class="methodSignature">public&nbsp;<a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a>&nbsp;setSeed&#8203;(java.lang.String&nbsp;seed)</pre>
 </li>
 </ul>
 <a id="getSeedOffset()">
@@ -785,6 +822,24 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>setCacheData</h4>
 <pre class="methodSignature">public&nbsp;<a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a>&nbsp;setCacheData&#8203;(byte[]&nbsp;cacheData)</pre>
+</li>
+</ul>
+<a id="isMultisig()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isMultisig</h4>
+<pre class="methodSignature">public&nbsp;java.lang.Boolean&nbsp;isMultisig()</pre>
+</li>
+</ul>
+<a id="setIsMultisig(java.lang.Boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setIsMultisig</h4>
+<pre class="methodSignature">public&nbsp;<a href="MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a>&nbsp;setIsMultisig&#8203;(java.lang.Boolean&nbsp;isMultisig)</pre>
 </li>
 </ul>
 <a id="toString()">

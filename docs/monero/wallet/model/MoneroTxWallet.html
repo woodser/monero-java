@@ -369,7 +369,7 @@ extends <a href="../../daemon/model/MoneroTx.html" title="class in monero.daemon
 </tr>
 <tr id="i31" class="rowColor">
 <td class="colFirst"><code><a href="MoneroTxWallet.html" title="class in monero.wallet.model">MoneroTxWallet</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setExtra(int%5B%5D)">setExtra</a></span>&#8203;(int[]&nbsp;extra)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setExtra(byte%5B%5D)">setExtra</a></span>&#8203;(byte[]&nbsp;extra)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i32" class="altColor">
@@ -609,7 +609,7 @@ extends <a href="../../daemon/model/MoneroTx.html" title="class in monero.daemon
 </tr>
 <tr id="i77" class="rowColor">
 <td class="colFirst"><code><a href="MoneroTxWallet.html" title="class in monero.wallet.model">MoneroTxWallet</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setUnlockHeight(java.lang.Long)">setUnlockHeight</a></span>&#8203;(java.lang.Long&nbsp;unlockHeight)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setUnlockTime(java.math.BigInteger)">setUnlockTime</a></span>&#8203;(java.math.BigInteger&nbsp;unlockTime)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i78" class="altColor">
@@ -644,7 +644,7 @@ extends <a href="../../daemon/model/MoneroTx.html" title="class in monero.daemon
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;monero.daemon.model.<a href="../../daemon/model/MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a></h3>
-<code><a href="../../daemon/model/MoneroTx.html#getBlock()">getBlock</a>, <a href="../../daemon/model/MoneroTx.html#getExtra()">getExtra</a>, <a href="../../daemon/model/MoneroTx.html#getFee()">getFee</a>, <a href="../../daemon/model/MoneroTx.html#getFullHex()">getFullHex</a>, <a href="../../daemon/model/MoneroTx.html#getHash()">getHash</a>, <a href="../../daemon/model/MoneroTx.html#getHeight()">getHeight</a>, <a href="../../daemon/model/MoneroTx.html#getInputs()">getInputs</a>, <a href="../../daemon/model/MoneroTx.html#getKey()">getKey</a>, <a href="../../daemon/model/MoneroTx.html#getLastFailedHash()">getLastFailedHash</a>, <a href="../../daemon/model/MoneroTx.html#getLastFailedHeight()">getLastFailedHeight</a>, <a href="../../daemon/model/MoneroTx.html#getLastRelayedTimestamp()">getLastRelayedTimestamp</a>, <a href="../../daemon/model/MoneroTx.html#getMaxUsedBlockHash()">getMaxUsedBlockHash</a>, <a href="../../daemon/model/MoneroTx.html#getMaxUsedBlockHeight()">getMaxUsedBlockHeight</a>, <a href="../../daemon/model/MoneroTx.html#getMetadata()">getMetadata</a>, <a href="../../daemon/model/MoneroTx.html#getNumConfirmations()">getNumConfirmations</a>, <a href="../../daemon/model/MoneroTx.html#getOutputIndices()">getOutputIndices</a>, <a href="../../daemon/model/MoneroTx.html#getOutputs()">getOutputs</a>, <a href="../../daemon/model/MoneroTx.html#getPaymentId()">getPaymentId</a>, <a href="../../daemon/model/MoneroTx.html#getPrunableHash()">getPrunableHash</a>, <a href="../../daemon/model/MoneroTx.html#getPrunableHex()">getPrunableHex</a>, <a href="../../daemon/model/MoneroTx.html#getPrunedHex()">getPrunedHex</a>, <a href="../../daemon/model/MoneroTx.html#getRctSignatures()">getRctSignatures</a>, <a href="../../daemon/model/MoneroTx.html#getRctSigPrunable()">getRctSigPrunable</a>, <a href="../../daemon/model/MoneroTx.html#getReceivedTimestamp()">getReceivedTimestamp</a>, <a href="../../daemon/model/MoneroTx.html#getRelay()">getRelay</a>, <a href="../../daemon/model/MoneroTx.html#getRingSize()">getRingSize</a>, <a href="../../daemon/model/MoneroTx.html#getSignatures()">getSignatures</a>, <a href="../../daemon/model/MoneroTx.html#getSize()">getSize</a>, <a href="../../daemon/model/MoneroTx.html#getUnlockHeight()">getUnlockHeight</a>, <a href="../../daemon/model/MoneroTx.html#getVersion()">getVersion</a>, <a href="../../daemon/model/MoneroTx.html#getWeight()">getWeight</a>, <a href="../../daemon/model/MoneroTx.html#inTxPool()">inTxPool</a>, <a href="../../daemon/model/MoneroTx.html#isConfirmed()">isConfirmed</a>, <a href="../../daemon/model/MoneroTx.html#isDoubleSpendSeen()">isDoubleSpendSeen</a>, <a href="../../daemon/model/MoneroTx.html#isFailed()">isFailed</a>, <a href="../../daemon/model/MoneroTx.html#isKeptByBlock()">isKeptByBlock</a>, <a href="../../daemon/model/MoneroTx.html#isMinerTx()">isMinerTx</a>, <a href="../../daemon/model/MoneroTx.html#isRelayed()">isRelayed</a></code></li>
+<code><a href="../../daemon/model/MoneroTx.html#getBlock()">getBlock</a>, <a href="../../daemon/model/MoneroTx.html#getExtra()">getExtra</a>, <a href="../../daemon/model/MoneroTx.html#getFee()">getFee</a>, <a href="../../daemon/model/MoneroTx.html#getFullHex()">getFullHex</a>, <a href="../../daemon/model/MoneroTx.html#getHash()">getHash</a>, <a href="../../daemon/model/MoneroTx.html#getHeight()">getHeight</a>, <a href="../../daemon/model/MoneroTx.html#getInputs()">getInputs</a>, <a href="../../daemon/model/MoneroTx.html#getKey()">getKey</a>, <a href="../../daemon/model/MoneroTx.html#getLastFailedHash()">getLastFailedHash</a>, <a href="../../daemon/model/MoneroTx.html#getLastFailedHeight()">getLastFailedHeight</a>, <a href="../../daemon/model/MoneroTx.html#getLastRelayedTimestamp()">getLastRelayedTimestamp</a>, <a href="../../daemon/model/MoneroTx.html#getMaxUsedBlockHash()">getMaxUsedBlockHash</a>, <a href="../../daemon/model/MoneroTx.html#getMaxUsedBlockHeight()">getMaxUsedBlockHeight</a>, <a href="../../daemon/model/MoneroTx.html#getMetadata()">getMetadata</a>, <a href="../../daemon/model/MoneroTx.html#getNumConfirmations()">getNumConfirmations</a>, <a href="../../daemon/model/MoneroTx.html#getOutputIndices()">getOutputIndices</a>, <a href="../../daemon/model/MoneroTx.html#getOutputs()">getOutputs</a>, <a href="../../daemon/model/MoneroTx.html#getPaymentId()">getPaymentId</a>, <a href="../../daemon/model/MoneroTx.html#getPrunableHash()">getPrunableHash</a>, <a href="../../daemon/model/MoneroTx.html#getPrunableHex()">getPrunableHex</a>, <a href="../../daemon/model/MoneroTx.html#getPrunedHex()">getPrunedHex</a>, <a href="../../daemon/model/MoneroTx.html#getRctSignatures()">getRctSignatures</a>, <a href="../../daemon/model/MoneroTx.html#getRctSigPrunable()">getRctSigPrunable</a>, <a href="../../daemon/model/MoneroTx.html#getReceivedTimestamp()">getReceivedTimestamp</a>, <a href="../../daemon/model/MoneroTx.html#getRelay()">getRelay</a>, <a href="../../daemon/model/MoneroTx.html#getRingSize()">getRingSize</a>, <a href="../../daemon/model/MoneroTx.html#getSignatures()">getSignatures</a>, <a href="../../daemon/model/MoneroTx.html#getSize()">getSize</a>, <a href="../../daemon/model/MoneroTx.html#getUnlockTime()">getUnlockTime</a>, <a href="../../daemon/model/MoneroTx.html#getVersion()">getVersion</a>, <a href="../../daemon/model/MoneroTx.html#getWeight()">getWeight</a>, <a href="../../daemon/model/MoneroTx.html#inTxPool()">inTxPool</a>, <a href="../../daemon/model/MoneroTx.html#isConfirmed()">isConfirmed</a>, <a href="../../daemon/model/MoneroTx.html#isDoubleSpendSeen()">isDoubleSpendSeen</a>, <a href="../../daemon/model/MoneroTx.html#isFailed()">isFailed</a>, <a href="../../daemon/model/MoneroTx.html#isKeptByBlock()">isKeptByBlock</a>, <a href="../../daemon/model/MoneroTx.html#isMinerTx()">isMinerTx</a>, <a href="../../daemon/model/MoneroTx.html#isRelayed()">isRelayed</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="methods.inherited.from.class.java.lang.Object">
@@ -1371,16 +1371,16 @@ extends <a href="../../daemon/model/MoneroTx.html" title="class in monero.daemon
 </dl>
 </li>
 </ul>
-<a id="setUnlockHeight(java.lang.Long)">
+<a id="setUnlockTime(java.math.BigInteger)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>setUnlockHeight</h4>
-<pre class="methodSignature">public&nbsp;<a href="MoneroTxWallet.html" title="class in monero.wallet.model">MoneroTxWallet</a>&nbsp;setUnlockHeight&#8203;(java.lang.Long&nbsp;unlockHeight)</pre>
+<h4>setUnlockTime</h4>
+<pre class="methodSignature">public&nbsp;<a href="MoneroTxWallet.html" title="class in monero.wallet.model">MoneroTxWallet</a>&nbsp;setUnlockTime&#8203;(java.math.BigInteger&nbsp;unlockTime)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="../../daemon/model/MoneroTx.html#setUnlockHeight(java.lang.Long)">setUnlockHeight</a></code>&nbsp;in class&nbsp;<code><a href="../../daemon/model/MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a></code></dd>
+<dd><code><a href="../../daemon/model/MoneroTx.html#setUnlockTime(java.math.BigInteger)">setUnlockTime</a></code>&nbsp;in class&nbsp;<code><a href="../../daemon/model/MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -1540,16 +1540,16 @@ extends <a href="../../daemon/model/MoneroTx.html" title="class in monero.daemon
 </dl>
 </li>
 </ul>
-<a id="setExtra(int[])">
+<a id="setExtra(byte[])">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>setExtra</h4>
-<pre class="methodSignature">public&nbsp;<a href="MoneroTxWallet.html" title="class in monero.wallet.model">MoneroTxWallet</a>&nbsp;setExtra&#8203;(int[]&nbsp;extra)</pre>
+<pre class="methodSignature">public&nbsp;<a href="MoneroTxWallet.html" title="class in monero.wallet.model">MoneroTxWallet</a>&nbsp;setExtra&#8203;(byte[]&nbsp;extra)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="../../daemon/model/MoneroTx.html#setExtra(int%5B%5D)">setExtra</a></code>&nbsp;in class&nbsp;<code><a href="../../daemon/model/MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a></code></dd>
+<dd><code><a href="../../daemon/model/MoneroTx.html#setExtra(byte%5B%5D)">setExtra</a></code>&nbsp;in class&nbsp;<code><a href="../../daemon/model/MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a></code></dd>
 </dl>
 </li>
 </ul>

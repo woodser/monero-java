@@ -224,7 +224,7 @@ extends java.lang.Object</pre>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i3" class="rowColor">
-<td class="colFirst"><code>int[]</code></td>
+<td class="colFirst"><code>byte[]</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getExtra()">getExtra</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -359,9 +359,11 @@ extends java.lang.Object</pre>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i30" class="altColor">
-<td class="colFirst"><code>java.lang.Long</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getUnlockHeight()">getUnlockHeight</a></span>()</code></th>
-<td class="colLast">&nbsp;</td>
+<td class="colFirst"><code>java.math.BigInteger</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getUnlockTime()">getUnlockTime</a></span>()</code></th>
+<td class="colLast">
+<div class="block">Get the minimum height or timestamp for the transactions to unlock.</div>
+</td>
 </tr>
 <tr id="i31" class="rowColor">
 <td class="colFirst"><code>java.lang.Integer</code></td>
@@ -425,7 +427,7 @@ extends java.lang.Object</pre>
 </tr>
 <tr id="i43" class="rowColor">
 <td class="colFirst"><code><a href="MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setExtra(int%5B%5D)">setExtra</a></span>&#8203;(int[]&nbsp;extra)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setExtra(byte%5B%5D)">setExtra</a></span>&#8203;(byte[]&nbsp;extra)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i44" class="altColor">
@@ -590,7 +592,7 @@ extends java.lang.Object</pre>
 </tr>
 <tr id="i76" class="altColor">
 <td class="colFirst"><code><a href="MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setUnlockHeight(java.lang.Long)">setUnlockHeight</a></span>&#8203;(java.lang.Long&nbsp;unlockHeight)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setUnlockTime(java.math.BigInteger)">setUnlockTime</a></span>&#8203;(java.math.BigInteger&nbsp;unlockTime)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i77" class="rowColor">
@@ -927,22 +929,27 @@ extends java.lang.Object</pre>
 <pre class="methodSignature">public&nbsp;<a href="MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a>&nbsp;setNumConfirmations&#8203;(java.lang.Long&nbsp;numConfirmations)</pre>
 </li>
 </ul>
-<a id="getUnlockHeight()">
+<a id="getUnlockTime()">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getUnlockHeight</h4>
-<pre class="methodSignature">public&nbsp;java.lang.Long&nbsp;getUnlockHeight()</pre>
+<h4>getUnlockTime</h4>
+<pre class="methodSignature">public&nbsp;java.math.BigInteger&nbsp;getUnlockTime()</pre>
+<div class="block">Get the minimum height or timestamp for the transactions to unlock.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the minimum height or timestamp for the transactin to unlock</dd>
+</dl>
 </li>
 </ul>
-<a id="setUnlockHeight(java.lang.Long)">
+<a id="setUnlockTime(java.math.BigInteger)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>setUnlockHeight</h4>
-<pre class="methodSignature">public&nbsp;<a href="MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a>&nbsp;setUnlockHeight&#8203;(java.lang.Long&nbsp;unlockHeight)</pre>
+<h4>setUnlockTime</h4>
+<pre class="methodSignature">public&nbsp;<a href="MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a>&nbsp;setUnlockTime&#8203;(java.math.BigInteger&nbsp;unlockTime)</pre>
 </li>
 </ul>
 <a id="getLastRelayedTimestamp()">
@@ -1203,16 +1210,16 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>getExtra</h4>
-<pre class="methodSignature">public&nbsp;int[]&nbsp;getExtra()</pre>
+<pre class="methodSignature">public&nbsp;byte[]&nbsp;getExtra()</pre>
 </li>
 </ul>
-<a id="setExtra(int[])">
+<a id="setExtra(byte[])">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>setExtra</h4>
-<pre class="methodSignature">public&nbsp;<a href="MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a>&nbsp;setExtra&#8203;(int[]&nbsp;extra)</pre>
+<pre class="methodSignature">public&nbsp;<a href="MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a>&nbsp;setExtra&#8203;(byte[]&nbsp;extra)</pre>
 </li>
 </ul>
 <a id="getRctSignatures()">
