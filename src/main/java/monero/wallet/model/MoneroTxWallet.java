@@ -410,7 +410,7 @@ public class MoneroTxWallet extends MoneroTx {
     }
     
     // merge simple extensions
-    this.setIsIncoming(GenUtils.reconcile(this.isIncoming(), tx.isIncoming()));
+    this.setIsIncoming(GenUtils.reconcile(this.isIncoming(), tx.isIncoming(), null, true, null)); // outputs seen on confirmation
     this.setIsOutgoing(GenUtils.reconcile(this.isOutgoing(), tx.isOutgoing()));
     this.setNote(GenUtils.reconcile(this.getNote(), tx.getNote()));
     this.setIsLocked(GenUtils.reconcile(this.isLocked(), tx.isLocked(), null, false, null));  // tx can become unlocked
