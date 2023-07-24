@@ -21,7 +21,7 @@ public class Scratchpad {
     
     // -------------------------------- SCRATCHPAD ----------------------------
     
-    // create wallet from mnemonic
+    // create wallet from seed
     MoneroWallet walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
       .setPath("./test_wallets/" + UUID.randomUUID().toString())  // leave blank for in-memory wallet
       .setPassword("abctesting123")
@@ -29,11 +29,11 @@ public class Scratchpad {
       .setServerUri("http://localhost:38081")
       .setServerUsername("superuser")
       .setServerPassword("abctesting123")
-      .setMnemonic("biggest duets beware eskimos coexist igloo pamphlet lagoon odometer hounded jukebox enough pride cocoa nylon wolf geometry buzzer vivid federal idols gang semifinal subtly coexist")
+      .setSeed("biggest duets beware eskimos coexist igloo pamphlet lagoon odometer hounded jukebox enough pride cocoa nylon wolf geometry buzzer vivid federal idols gang semifinal subtly coexist")
       .setRestoreHeight(573800l));
     walletFull.sync(new WalletSyncPrinter());
     System.out.println("Full wallet daemon height: " + walletFull.getDaemonHeight());
-    System.out.println("Full wallet mnemonic: " + walletFull.getMnemonic());
+    System.out.println("Full wallet seed: " + walletFull.getSeed());
     
 //    walletFull.createTx(new MoneroTxConfig()
 //            .addDestination("52FnB7ABUrKJzVQRpbMNrqDFWbcKLjFUq8Rgek7jZEuB6WE2ZggXaTf4FK6H8gQymvSrruHHrEuKhMN3qTMiBYzREKsmRKM", walletFull.getUnlockedBalance(0).divide(new BigInteger("8")).multiply(new BigInteger("1")))

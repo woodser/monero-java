@@ -67,7 +67,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletDataJni(JN
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_createWalletJni(JNIEnv *, jclass, jstring);
 
-JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getMnemonicLanguagesJni(JNIEnv *, jclass);
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getSeedLanguagesJni(JNIEnv *, jclass);
 
 // ----------------------------- INSTANCE METHODS -----------------------------
 
@@ -91,9 +91,9 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getPathJni(JNIEnv 
 
 JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_getNetworkTypeJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getMnemonicJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getSeedJni(JNIEnv *, jobject);
 
-JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getMnemonicLanguageJni(JNIEnv *, jobject);
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getSeedLanguageJni(JNIEnv *, jobject);
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getPublicViewKeyJni(JNIEnv *, jobject);
 

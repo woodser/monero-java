@@ -54,7 +54,7 @@ public class WalletEqualityUtils {
     
     // test that wallets are equal using only on-chain data
     assertEquals(w1.getHeight(), w2.getHeight());
-    assertEquals(w1.getMnemonic(), w2.getMnemonic());
+    assertEquals(w1.getSeed(), w2.getSeed());
     assertEquals(w1.getPrimaryAddress(), w2.getPrimaryAddress());
     assertEquals(w1.getPrivateViewKey(), w2.getPrivateViewKey());
     assertEquals(w1.getPrivateSpendKey(), w2.getPrivateSpendKey());

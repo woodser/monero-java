@@ -38,7 +38,7 @@ MoneroWallet walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
         .setServerUri("http://kyaklhqp4yyza4fmtbvs6z4lrzr5cljxwa7o2d42sfelfhczsmbwzfad.onion:18081")
         .setServerUsername("superuser")
         .setServerPassword("abctesting123")
-        .setMnemonic("hefty value scenic...")
+        .setSeed("hefty value scenic...")
         .setRestoreHeight(573936l));
 
 // set tor's proxy uri

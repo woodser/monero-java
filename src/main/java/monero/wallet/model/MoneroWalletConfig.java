@@ -1,5 +1,7 @@
 package monero.wallet.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import common.utils.JsonUtils;
 import monero.common.MoneroRpcConnection;
 import monero.daemon.model.MoneroNetworkType;
@@ -15,7 +17,7 @@ public class MoneroWalletConfig {
   private String serverUri;
   private String serverUsername;
   private String serverPassword;
-  private String mnemonic;
+  private String seed;
   private String seedOffset;
   private String primaryAddress;
   private String privateViewKey;
@@ -27,6 +29,37 @@ public class MoneroWalletConfig {
   private Integer subaddressLookahead;  // number of subaddresses to scan per account
   private byte[] keysData;
   private byte[] cacheData;
+  private Boolean isMultisig;
+
+  public MoneroWalletConfig() {
+    // default constructor
+  }
+
+  public MoneroWalletConfig(MoneroWalletConfig config) {
+    path = config.getPath();
+    password = config.getPassword();
+    networkType = config.getNetworkType();
+    serverUri = config.getServerUri();
+    serverUsername = config.getServerUsername();
+    serverPassword = config.getServerPassword();
+    seed = config.getSeed();
+    seedOffset = config.getSeedOffset();
+    primaryAddress = config.getPrimaryAddress();
+    privateViewKey = config.getPrivateViewKey();
+    privateSpendKey = config.getPrivateSpendKey();
+    restoreHeight = config.getRestoreHeight();
+    language = config.getLanguage();
+    saveCurrent = config.getSaveCurrent();
+    accountLookahead = config.getAccountLookahead();
+    subaddressLookahead = config.getSubaddressLookahead();
+    keysData = config.getKeysData();
+    cacheData = config.getCacheData();
+    isMultisig = config.isMultisig();
+  }
+
+  public MoneroWalletConfig copy() {
+    return new MoneroWalletConfig(this);
+  }
   
   public String getPath() {
     return path;
@@ -97,12 +130,12 @@ public class MoneroWalletConfig {
     return this;
   }
   
-  public String getMnemonic() {
-    return mnemonic;
+  public String getSeed() {
+    return seed;
   }
   
-  public MoneroWalletConfig setMnemonic(String mnemonic) {
-    this.mnemonic = mnemonic;
+  public MoneroWalletConfig setSeed(String seed) {
+    this.seed = seed;
     return this;
   }
   
@@ -217,6 +250,17 @@ public class MoneroWalletConfig {
     return this;
   }
 
+  @JsonProperty("isMultisig")
+  public Boolean isMultisig() {
+    return isMultisig;
+  }
+  
+  public MoneroWalletConfig setIsMultisig(Boolean isMultisig) {
+    this.isMultisig = isMultisig;
+    return this;
+  }
+
+  @Override
   public String toString() {
     return JsonUtils.serialize(this);
   }
