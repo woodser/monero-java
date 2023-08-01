@@ -28,7 +28,7 @@ A Java library for creating Monero applications using RPC and JNI bindings to [m
 
 <p align="center">
 	<img width="85%" height="auto" src="docs/architecture.png"/><br>
-	<i>Build Java applications using RPC or JNI bindings to <a href="https://github.com/monero-project/monero">monero-project/monero</a>.  Wallet implementations are interchangeable by conforming to a common interface, <a href="https://moneroecosystem.org/monero-java/index.html?monero/wallet/MoneroWallet.html">MoneroWallet.java</a>.</i>
+	<i>Build Java applications using RPC or JNI bindings to <a href="https://github.com/monero-project/monero">monero-project/monero</a>.  Wallet implementations are interchangeable by conforming to a common interface, <a href="https://moneroecosystem.org/monero-java/monero/wallet/MoneroWallet.html">MoneroWallet.java</a>.</i>
 </p>
 
 ## Sample code
