@@ -1220,7 +1220,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     List<String> preparedMultisigHexes = new ArrayList<String>();
     for (MoneroWallet wallet : wallets) preparedMultisigHexes.add(wallet.prepareMultisig());
     
-    // make each wallet multsig and collect results
+    // make each wallet multisig and collect results
     List<String> madeMultisigHexes = new ArrayList<String>();
     for (int i = 0; i < wallets.size(); i++) {
       
