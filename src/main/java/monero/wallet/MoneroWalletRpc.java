@@ -2317,18 +2317,21 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     public void poll() {
-      try {
-        
-        // synchronize polls
-        synchronized(this) {
-          
-          // skip if next poll is already queued
-          if (numPolling > 1) return;
-          numPolling++;
-          
+
+      // skip if next poll is queued
+      if (numPolling > 1) return;
+      numPolling++;
+
+      // synchronize polls
+      synchronized (this) {
+        try {
+
           // skip if wallet is closed
-          if (wallet.isClosed()) return;
-          
+          if (wallet.isClosed()) {
+            numPolling--;
+            return;
+          }
+
           // take initial snapshot
           if (prevHeight == null) {
             prevHeight = getHeight();
@@ -2379,10 +2382,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           // announce balance changes
           checkForChangedBalances();
           numPolling--;
-        }
-      } catch (Exception e) {
-        if (isPolling) {
-          System.err.println("Failed to background poll " + path + ": " + e.getMessage());
+        } catch (Exception e) {
+          numPolling--;
+          if (isPolling) System.err.println("Failed to background poll " + path + ": " + e.getMessage());
         }
       }
     }
