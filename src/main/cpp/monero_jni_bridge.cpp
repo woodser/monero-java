@@ -1107,13 +1107,16 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getTxsJni(JNIEnv* 
         blocks.push_back(tx->m_block.get());
       }
     }
-    MTRACE("Returning " << blocks.size() << " blocks");
 
     // wrap and serialize blocks
+    MTRACE("Returning " << blocks.size() << " blocks");
     rapidjson::Document doc;
     doc.SetObject();
     doc.AddMember("blocks", monero_utils::to_rapidjson_val(doc.GetAllocator(), blocks), doc.GetAllocator());
     string blocks_json = monero_utils::serialize(doc);
+
+    // free memory
+    monero_utils::free(blocks);
     return env->NewStringUTF(blocks_json.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -1164,6 +1167,9 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getTransfersJni(JN
     doc.SetObject();
     doc.AddMember("blocks", monero_utils::to_rapidjson_val(doc.GetAllocator(), blocks), doc.GetAllocator());
     string blocks_json = monero_utils::serialize(doc);
+
+    // free memory
+    monero_utils::free(blocks);
     return env->NewStringUTF(blocks_json.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -1188,7 +1194,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getOutputsJni(JNIE
     MTRACE("Got " << outputs.size() << " outputs");
 
     // return unique blocks to preserve model relationships as tree
-    vector<monero_block> blocks;
+    vector<shared_ptr<monero_block>> blocks;
     unordered_set<shared_ptr<monero_block>> seen_block_ptrs;
     for (auto const& output : outputs) {
       shared_ptr<monero_tx_wallet> tx = static_pointer_cast<monero_tx_wallet>(output->m_tx);
@@ -1196,7 +1202,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getOutputsJni(JNIE
       unordered_set<shared_ptr<monero_block>>::const_iterator got = seen_block_ptrs.find(*tx->m_block);
       if (got == seen_block_ptrs.end()) {
         seen_block_ptrs.insert(*tx->m_block);
-        blocks.push_back(**tx->m_block);
+        blocks.push_back(*tx->m_block);
       }
     }
     MTRACE("Returning " << blocks.size() << " blocks");
@@ -1206,6 +1212,9 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getOutputsJni(JNIE
     doc.SetObject();
     doc.AddMember("blocks", monero_utils::to_rapidjson_val(doc.GetAllocator(), blocks), doc.GetAllocator());
     string blocks_json = monero_utils::serialize(doc);
+
+    // free memory
+    monero_utils::free(blocks);
     return env->NewStringUTF(blocks_json.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
