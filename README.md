@@ -10,7 +10,7 @@ A Java library for creating Monero applications using RPC and JNI bindings to [m
 * Query wallet transactions, transfers, and outputs by their properties.
 * Fetch and process binary data from the daemon (e.g. raw blocks).
 * Receive notifications when blocks are added to the chain or when wallets sync, send, or receive.
-* Over 280 passing JUnit tests.
+* Over 300 passing JUnit tests.
 
 ## Table of contents
 
