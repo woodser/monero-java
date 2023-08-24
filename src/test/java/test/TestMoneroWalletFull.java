@@ -26,6 +26,7 @@ import monero.wallet.MoneroWalletFull;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroMultisigInitResult;
+import monero.wallet.model.MoneroOutputQuery;
 import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
@@ -1261,6 +1262,33 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       assertEquals(M, (int) info.getThreshold());
       assertEquals(N, (int) info.getNumParticipants());
       wallet.close(true);
+    }
+  }
+
+  // Does not leak memory
+  @Test
+  @Disabled
+  public void testMemoryLeak() {
+    System.out.println("Infinite loop starting, monitor memory in OS process manager...");
+    System.gc();
+    int i = 0;
+    boolean closeWallet = false;
+    long time = System.currentTimeMillis();
+    if (closeWallet) wallet.close(true);
+    while (true) {
+      if (closeWallet) wallet = TestUtils.getWalletFull();
+      wallet.sync();
+      wallet.getTxs();
+      wallet.getTransfers();
+      wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false));
+      if (i % 100 == 0) {
+        System.out.println("Garbage collecting on iteration " + i);
+        System.gc();
+        System.out.println((System.currentTimeMillis() - time) + " ms since last GC");
+        time = System.currentTimeMillis();
+      }
+      if (closeWallet) wallet.close(true);
+      i++;
     }
   }
   
