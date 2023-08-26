@@ -903,8 +903,10 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_scanTxsJni(JNIEnv* en
       const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
       string str = string(_str ? _str : "");
       env->ReleaseStringUTFChars(jstr, _str);
+      env->DeleteLocalRef(jstr);
       tx_hashes.push_back(str);
     }
+    env->DeleteLocalRef(jtx_hashes);
   }
 
   // scan txs
@@ -1475,8 +1477,10 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_relayTxsJni(J
       const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
       string str = string(_str ? _str : "");
       env->ReleaseStringUTFChars(jstr, _str);
+      env->DeleteLocalRef(jstr);
       tx_metadatas.push_back(str);
     }
+    env->DeleteLocalRef(jtx_metadatas);
   }
 
   // relay tx metadata
@@ -1710,8 +1714,10 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getTxNotesJni
       const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
       string str = string(_str ? _str : "");
       env->ReleaseStringUTFChars(jstr, _str);
+      env->DeleteLocalRef(jstr);
       tx_hashes.push_back(str);
     }
+    env->DeleteLocalRef(jtx_hashes);
   }
 
   // get tx notes
@@ -1744,8 +1750,10 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setTxNotesJni(JNIEnv*
       const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
       string str = string(_str ? _str : "");
       env->ReleaseStringUTFChars(jstr, _str);
+      env->DeleteLocalRef(jstr);
       tx_hashes.push_back(str);
     }
+    env->DeleteLocalRef(jtx_hashes);
   }
 
   // get tx notes from jobjectArray to vector<string>
@@ -1757,8 +1765,10 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setTxNotesJni(JNIEnv*
       const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
       string str = string(_str ? _str : "");
       env->ReleaseStringUTFChars(jstr, _str);
+      env->DeleteLocalRef(jstr);
       notes.push_back(str);
     }
+    env->DeleteLocalRef(jtx_notes);
   }
 
   // set tx notes
@@ -1998,8 +2008,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_makeMultisigJni(JN
       const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
       string str = string(_str ? _str : "");
       env->ReleaseStringUTFChars(jstr, _str);
+      env->DeleteLocalRef(jstr);
       multisig_hexes.push_back(str);
     }
+    env->DeleteLocalRef(jmultisig_hexes);
   }
 
   // get password as string
@@ -2030,8 +2042,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_exchangeMultisigKe
       const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
       string str = string(_str ? _str : "");
       env->ReleaseStringUTFChars(jstr, _str);
+      env->DeleteLocalRef(jstr);
       multisig_hexes.push_back(str);
     }
+    env->DeleteLocalRef(jmultisig_hexes);
   }
 
   // get password as string
@@ -2074,8 +2088,10 @@ JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_importMultisigHexJni(
       const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
       string str = string(_str ? _str : "");
       env->ReleaseStringUTFChars(jstr, _str);
+      env->DeleteLocalRef(jstr);
       multisig_hexes.push_back(str);
     }
+    env->DeleteLocalRef(jmultisig_hexes);
   }
 
   // import peer multisig hex and return the number of outputs they signed
