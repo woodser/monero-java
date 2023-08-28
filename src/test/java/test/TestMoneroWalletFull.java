@@ -462,7 +462,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     
     // test multisig
     try {
-      testMultisigParticipants(participants, 3, 3, true);
+      testMultisig(participants, 3, 3, true);
     } finally {
       
       // stop mining at end of test
@@ -2110,6 +2110,13 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   @Test
   public void testMultisig() {
     super.testMultisig();
+  }
+
+  @Override
+  @Test
+  @Disabled
+  public void testMultisigStress() {
+    super.testMultisigStress();
   }
   
   @Override

@@ -1058,6 +1058,13 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testMultisig() {
     super.testMultisig();
   }
+
+  @Override
+  @Test
+  @Disabled
+  public void testMultisigStress() {
+    super.testMultisigStress();
+  }
   
   @Override
   @Test

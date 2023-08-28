@@ -140,11 +140,9 @@ public class TestUtils {
     assertEquals(TestUtils.SEED, walletRpc.getSeed());
     assertEquals(TestUtils.ADDRESS, walletRpc.getPrimaryAddress());
     
-    // sync and save the wallet
+    // sync and save wallet
     walletRpc.sync();
     walletRpc.save();
-    
-    // start background synchronizing with sync rate
     walletRpc.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
     
     // return cached wallet rpc
@@ -220,18 +218,18 @@ public class TestUtils {
         MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
         walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_FULL_PATH).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(NETWORK_TYPE).setSeed(TestUtils.SEED).setServer(daemonConnection).setRestoreHeight(FIRST_RECEIVE_HEIGHT));
         assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, walletFull.getRestoreHeight());
-        walletFull.sync(new WalletSyncPrinter());
-        walletFull.save();
-        walletFull.startSyncing(TestUtils.SYNC_PERIOD_IN_MS); // start background synchronizing with sync period
       }
       
       // otherwise open existing wallet and update daemon connection
       else {
         walletFull = MoneroWalletFull.openWallet(WALLET_FULL_PATH, WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
         walletFull.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
-        walletFull.sync(new WalletSyncPrinter());
-        walletFull.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
       }
+
+      // sync and save wallet
+      walletFull.sync(new WalletSyncPrinter());
+      walletFull.save();
+      walletFull.startSyncing(TestUtils.SYNC_PERIOD_IN_MS); // start background synchronizing with sync period
     }
     
     // ensure we're testing the right wallet
