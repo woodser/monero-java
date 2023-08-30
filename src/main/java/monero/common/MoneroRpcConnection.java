@@ -539,7 +539,7 @@ public class MoneroRpcConnection {
   
   @Override
   public String toString() {
-    return uri + " (uri=" + uri + ", username=" + username + ", password=" + (password == null ? "null" : "***") + ", priority=" + priority + ", isOnline=" + isOnline + ", isAuthenticated=" + isAuthenticated + ")";
+    return uri + " (uri=" + uri + ", username=" + username + ", password=" + (password == null ? "null" : "***") + ", priority=" + priority + ", isOnline=" + isOnline + ", isAuthenticated=" + isAuthenticated + ", zmqUri=" + zmqUri + ", proxyUri=" + proxyUri + ")";
   }
   
   @Override
@@ -547,8 +547,10 @@ public class MoneroRpcConnection {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((password == null) ? 0 : password.hashCode());
+    result = prime * result + ((proxyUri == null) ? 0 : proxyUri.hashCode());
     result = prime * result + ((uri == null) ? 0 : uri.hashCode());
     result = prime * result + ((username == null) ? 0 : username.hashCode());
+    result = prime * result + ((zmqUri == null) ? 0 : zmqUri.hashCode());
     return result;
   }
 
@@ -561,12 +563,18 @@ public class MoneroRpcConnection {
     if (password == null) {
       if (other.password != null) return false;
     } else if (!password.equals(other.password)) return false;
+    if (proxyUri == null) {
+      if (other.proxyUri != null) return false;
+    } else if (!proxyUri.equals(other.proxyUri)) return false;
     if (uri == null) {
       if (other.uri != null) return false;
     } else if (!uri.equals(other.uri)) return false;
     if (username == null) {
       if (other.username != null) return false;
     } else if (!username.equals(other.username)) return false;
+    if (zmqUri == null) {
+      if (other.zmqUri != null) return false;
+    } else if (!zmqUri.equals(other.zmqUri)) return false;
     return true;
   }
   
@@ -618,7 +626,7 @@ public class MoneroRpcConnection {
     // create connection manager to use socket factories and fake dns resolver
     boolean isLocal = false; // use fake dns resolver if not resolving DNS locally TODO: determine if request url is local
     BasicHttpClientConnectionManager cm = isLocal ?
-        new BasicHttpClientConnectionManager(reg) : 
+        new BasicHttpClientConnectionManager(reg) :
         new BasicHttpClientConnectionManager(reg, null, null, new FakeDnsResolver());
 
     // create http client
