@@ -14,7 +14,7 @@ public class MoneroWalletConfig {
   private String path;
   private String password;
   private MoneroNetworkType networkType;
-  private String serverUri;
+  private MoneroRpcConnection server;
   private String serverUsername;
   private String serverPassword;
   private String seed;
@@ -39,9 +39,7 @@ public class MoneroWalletConfig {
     path = config.getPath();
     password = config.getPassword();
     networkType = config.getNetworkType();
-    serverUri = config.getServerUri();
-    serverUsername = config.getServerUsername();
-    serverPassword = config.getServerPassword();
+    if (config.getServer() != null) server = new MoneroRpcConnection(config.getServer());
     seed = config.getSeed();
     seedOffset = config.getSeedOffset();
     primaryAddress = config.getPrimaryAddress();
@@ -93,40 +91,43 @@ public class MoneroWalletConfig {
   }
   
   public MoneroRpcConnection getServer() {
-    return this.serverUri == null || this.serverUri.isEmpty() ? null : new MoneroRpcConnection(this.serverUri, this.serverUsername, this.serverPassword);
+    return server;
   }
   
   public MoneroWalletConfig setServer(MoneroRpcConnection server) {
-    this.serverUri = server == null ? null : server.getUri();
+    this.server = server;
     this.serverUsername = server == null ? null : server.getUsername();
     this.serverPassword = server == null ? null : server.getPassword();
     return this;
   }
   
   public String getServerUri() {
-    return serverUri;
+    return server == null ? null : server.getUri();
   }
   
   public MoneroWalletConfig setServerUri(String serverUri) {
-    this.serverUri = serverUri;
+    if (server == null) setServer(new MoneroRpcConnection(serverUri));
+    else server.setUri(serverUri);
     return this;
   }
   
   public String getServerUsername() {
-    return serverUsername;
+    return server == null ? null : server.getUsername();
   }
   
   public MoneroWalletConfig setServerUsername(String serverUsername) {
     this.serverUsername = serverUsername;
+    if (serverUsername != null && serverPassword != null) server.setCredentials(serverUsername, serverPassword);
     return this;
   }
   
   public String getServerPassword() {
-    return serverPassword;
+    return server == null ? null : server.getPassword();
   }
   
   public MoneroWalletConfig setServerPassword(String serverPassword) {
     this.serverPassword = serverPassword;
+    if (serverUsername != null && serverPassword != null) server.setCredentials(serverUsername, serverPassword);
     return this;
   }
   
