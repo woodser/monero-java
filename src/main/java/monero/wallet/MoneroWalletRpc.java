@@ -1017,7 +1017,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // special case: re-fetch txs if inconsistency caused by needing to make multiple rpc calls
     for (MoneroTxWallet tx : txs) {
-      if (tx.isConfirmed() && tx.getBlock() == null) {
+      if (tx.isConfirmed() && tx.getBlock() == null || !tx.isConfirmed() && tx.getBlock() != null) {
         LOGGER.warning("Inconsistency detected building txs from multiple rpc calls, re-fetching");
         return getTxs(query);
       }
