@@ -183,6 +183,12 @@ If you want to process binary data or use a client-side wallet instead of RPC, s
 15. Run TestMoneroUtils.java JUnit tests to verify the shared libraries are working with Java JNI.
 16. Add the shared libraries within ./build/ to your application's classpath.
 
+### Memory Growth
+
+If you see unrestricted memory growth using native bindings, consider applying [jemalloc](https://jemalloc.net/) to improve memory management with `malloc`. In many cases, this can completely resolve the memory growth.
+
+For example: `export LD_PRELOAD=/path/to/libjemalloc.a` then run your app.
+
 ## Running JUnit tests
 
 1. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
