@@ -2753,7 +2753,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * 
    * @param config is the send configuration
    * @param tx is an existing transaction to initialize (optional)
-   * @param copyDestinations copies config destinations if true 
+   * @param copyDestinations copies config destinations if true
    * @return tx is the initialized send tx
    */
   private static MoneroTxWallet initSentTxWallet(MoneroTxConfig config, MoneroTxWallet tx, boolean copyDestinations) {
@@ -2883,10 +2883,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           if (txs.get(txIdx).getOutgoingTransfer() == null) txs.get(txIdx).setOutgoingTransfer(new MoneroOutgoingTransfer().setTx(txs.get(txIdx)));
           txs.get(txIdx).getOutgoingTransfer().setDestinations(new ArrayList<>());
           for (BigInteger amount : amountsByDest) {
-            txs.get(txIdx).getOutgoingTransfer().getDestinations().add(new MoneroDestination(config.getDestinations().get(destinationIdx++).getAddress(), amount));
+            if (config.getDestinations().size() == 1) txs.get(txIdx).getOutgoingTransfer().getDestinations().add(new MoneroDestination(config.getDestinations().get(0).getAddress(), amount)); // sweeping can create multiple withone address
+            else txs.get(txIdx).getOutgoingTransfer().getDestinations().add(new MoneroDestination(config.getDestinations().get(destinationIdx++).getAddress(), amount));
           }
         }
-        GenUtils.assertEquals(config.getDestinations().size(), destinationIdx);
       } else {
         LOGGER.warning("ignoring unexpected transaction list field: " + key + ": " + val);
       }
