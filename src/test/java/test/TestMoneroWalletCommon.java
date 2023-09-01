@@ -454,14 +454,9 @@ public abstract class TestMoneroWalletCommon {
   public void testSetDaemonConnection() {
     
     // create random wallet with default daemon connection
-    MoneroWallet wallet = createWallet(new MoneroWalletConfig().setServerUri(""));
-    if (wallet instanceof MoneroWalletRpc) {
-      assertEquals(new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD), wallet.getDaemonConnection());
-      assertTrue(wallet.isConnectedToDaemon()); // uses default localhost connection
-    } else {
-      assertEquals(null, wallet.getDaemonConnection());
-      assertFalse(wallet.isConnectedToDaemon());
-    }
+    MoneroWallet wallet = createWallet(new MoneroWalletConfig());
+    assertEquals(new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD), wallet.getDaemonConnection());
+    assertTrue(wallet.isConnectedToDaemon()); // uses default localhost connection
     
     // set empty server uri
     wallet.setDaemonConnection("");
@@ -4075,7 +4070,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testMultisigStress() {
     //String walletName = "multisig_stress_d2015ffb-380f-474f-8a3e-60fdbd334dbb"; // set previous wallet name to resume stress test
-    String walletName = null; 
+    String walletName = null;
     testMultisigStress(walletName);
   }
 

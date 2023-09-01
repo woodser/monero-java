@@ -100,7 +100,7 @@ public class MoneroRpcConnection {
   
   public MoneroRpcConnection(URI uri, String username, String password, URI zmqUri) {
     this.uri = uri == null ? null : MoneroUtils.parseUri(uri.toString()).toString();
-    this.setCredentials(username, password);;
+    this.setCredentials(username, password);
   }
   
   public MoneroRpcConnection(MoneroRpcConnection connection) {
@@ -123,6 +123,7 @@ public class MoneroRpcConnection {
 
   public MoneroRpcConnection setUri(URI uri) {
     this.uri = MoneroUtils.parseUri(uri.toString()).toString();
+    setCredentials(username, password); // update credentials
     return this;
   }
 

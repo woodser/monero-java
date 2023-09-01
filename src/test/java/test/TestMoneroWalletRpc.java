@@ -118,12 +118,13 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     if (config.getServer() == null) config.setServer(daemon.getRpcConnection());
     
     // create client connected to internal monero-wallet-rpc process
-    boolean offline = TestUtils.OFFLINE_SERVER_URI.equals(config.getServerUri());
+    boolean offline = config.getServerUri().equals(MoneroUtils.parseUri(TestUtils.OFFLINE_SERVER_URI).toString());
     MoneroWalletRpc wallet = TestUtils.startWalletRpcProcess(offline);
     
     // create wallet
     try {
       wallet.createWallet(config);
+      System.out.println("Setting server: " + config.getServer());
       wallet.setDaemonConnection(config.getServer(), true, null); // set daemon as trusted
       if (wallet.isConnectedToDaemon()) wallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
       return wallet;
