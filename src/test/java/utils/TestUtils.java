@@ -218,6 +218,7 @@ public class TestUtils {
         MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
         walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_FULL_PATH).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(NETWORK_TYPE).setSeed(TestUtils.SEED).setServer(daemonConnection).setRestoreHeight(FIRST_RECEIVE_HEIGHT));
         assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, walletFull.getRestoreHeight());
+        assertEquals(daemonConnection, walletFull.getDaemonConnection());
       }
       
       // otherwise open existing wallet and update daemon connection
