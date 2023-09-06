@@ -14,7 +14,9 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -213,7 +215,7 @@ public class MoneroRpcConnection {
   }
   
   /**
-   * Check the connection to update online, authentication, and response time status.
+   * Check the connection and update online, authentication, and response time status.
    * 
    * @param timeoutInMs the maximum response time before considered offline
    * @return true if there is a change in status, false otherwise
@@ -223,17 +225,25 @@ public class MoneroRpcConnection {
     Boolean isAuthenticatedBefore = isAuthenticated;
     long startTime = System.currentTimeMillis();
     try {
-      sendJsonRequest("get_version", null, timeoutInMs);
+      List<Long> heights = new ArrayList<Long>();
+      for (long i = 0; i < 100; i++) heights.add(i);
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("heights", heights);
+      sendBinaryRequest("get_blocks_by_height.bin", params);  // assume daemon connection
       isOnline = true;
       isAuthenticated = true;
     } catch (Exception e) {
-      if (e instanceof MoneroRpcError && ((MoneroRpcError) e).getCode() == 401) {
-        isOnline = true;
-        isAuthenticated = false;
-      } else {
-        isOnline = false;
-        isAuthenticated = null;
-        responseTime = null;
+      isOnline = false;
+      isAuthenticated = null;
+      responseTime = null;
+      if (e instanceof MoneroRpcError) {
+        if (((MoneroRpcError) e).getCode() == 401) {
+          isOnline = true;
+          isAuthenticated = false;
+        } else if (((MoneroRpcError) e).getCode() == 404) { // fallback to latency check
+          isOnline = true;
+          isAuthenticated = true;
+        }
       }
     }
     if (isOnline) responseTime = System.currentTimeMillis() - startTime;
