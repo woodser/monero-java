@@ -25,6 +25,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import monero.common.MoneroConnectionManager;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroUtils;
@@ -385,34 +387,34 @@ public abstract class TestMoneroWalletCommon {
     
     if (e1 != null) throw new RuntimeException(e1);
   }
-  
- // Can create wallets with subaddress lookahead
- @Test
- public void testSubaddressLookahead() {
-   assumeTrue(TEST_NON_RELAYS);
-   Exception e1 = null;  // emulating Java "finally" but compatible with other languages
-   MoneroWallet receiver = null;
-   try {
+
+  // Can create wallets with subaddress lookahead
+  @Test
+  public void testSubaddressLookahead() {
+    assumeTrue(TEST_NON_RELAYS);
+    Exception e1 = null;  // emulating Java "finally" but compatible with other languages
+    MoneroWallet receiver = null;
+    try {
      
-     // create wallet with high subaddress lookahead
-     receiver = createWallet(new MoneroWalletConfig().setAccountLookahead(1).setSubaddressLookahead(100000));
+      // create wallet with high subaddress lookahead
+      receiver = createWallet(new MoneroWalletConfig().setAccountLookahead(1).setSubaddressLookahead(100000));
      
-     // transfer funds to subaddress with high index
-     wallet.createTx(new MoneroTxConfig()
-             .setAccountIndex(0)
-             .addDestination(receiver.getSubaddress(0, 85000).getAddress(), TestUtils.MAX_FEE)
-             .setRelay(true));
+      // transfer funds to subaddress with high index
+      wallet.createTx(new MoneroTxConfig()
+              .setAccountIndex(0)
+              .addDestination(receiver.getSubaddress(0, 85000).getAddress(), TestUtils.MAX_FEE)
+              .setRelay(true));
      
-     // observe unconfirmed funds
-     GenUtils.waitFor(1000);
-     receiver.sync();
-     assert(receiver.getBalance().compareTo(new BigInteger("0")) > 0);
-   } catch (Exception e) {
-     e1 = e;
-   }
+      // observe unconfirmed funds
+      GenUtils.waitFor(1000);
+      receiver.sync();
+      assert(receiver.getBalance().compareTo(new BigInteger("0")) > 0);
+    } catch (Exception e) {
+      e1 = e;
+    }
    
-   if (receiver != null) closeWallet(receiver);
-   if (e1 != null) throw new RuntimeException(e1);
+    if (receiver != null) closeWallet(receiver);
+    if (e1 != null) throw new RuntimeException(e1);
  }
   
   // Can get the wallet's version
@@ -505,6 +507,56 @@ public abstract class TestMoneroWalletCommon {
     } finally {
       closeWallet(wallet);
     }
+  }
+
+  // Can use a connection manager
+  @Test
+  public void testConnectionManager() {
+
+    // create connection manager with monerod connections
+    MoneroConnectionManager connectionManager = new MoneroConnectionManager();
+    MoneroRpcConnection connection1 = new MoneroRpcConnection(TestUtils.getDaemonRpc().getRpcConnection()).setPriority(1);
+    MoneroRpcConnection connection2 = new MoneroRpcConnection("localhost:48081").setPriority(2);
+    connectionManager.setConnection(connection1);
+    connectionManager.addConnection(connection2);
+
+    // create wallet with connection manager
+    MoneroWallet wallet = createWallet(new MoneroWalletConfig().setServerUri("").setConnectionManager(connectionManager));
+    assertEquals(TestUtils.getDaemonRpc().getRpcConnection(), wallet.getDaemonConnection());
+    assertTrue(wallet.isConnectedToDaemon());
+
+    // set manager's connection
+    connectionManager.setConnection(connection2);
+    GenUtils.waitFor(TestUtils.AUTO_CONNECT_TIMEOUT_MS);
+    assertEquals(connection2, wallet.getDaemonConnection());
+
+    // disconnect
+    connectionManager.setConnection((String) null);
+    assertEquals(null, wallet.getDaemonConnection());
+    assertFalse(wallet.isConnectedToDaemon());
+
+    // start polling connections
+    connectionManager.startPolling(TestUtils.SYNC_PERIOD_IN_MS);
+
+    // test that wallet auto connects
+    GenUtils.waitFor(TestUtils.AUTO_CONNECT_TIMEOUT_MS);
+    assertEquals(connection1, wallet.getDaemonConnection());
+    assertTrue(wallet.isConnectedToDaemon());
+
+    // set to another connection manager
+    MoneroConnectionManager connectionManager2 = new MoneroConnectionManager();
+    connectionManager2.setConnection(connection2);
+    wallet.setConnectionManager(connectionManager2);
+    assertEquals(connection2, wallet.getDaemonConnection());
+
+    // unset connection manager
+    wallet.setConnectionManager(null);
+    assertEquals(null, wallet.getConnectionManager());
+    assertEquals(connection2, wallet.getDaemonConnection());
+
+    // stop polling and close
+    connectionManager.stopPolling();
+    closeWallet(wallet);
   }
 
   // Can get the seed

@@ -14,6 +14,7 @@ import monero.daemon.MoneroDaemon;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
+import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletFull;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroOutputWallet;
@@ -131,6 +132,15 @@ public class TestSampleCode {
     
     // set current connection
     connectionManager.setConnection(new MoneroRpcConnection("http://foo.bar", "admin", "password")); // connection is added if new
+
+    // create wallet with managed connections or set later
+    MoneroWalletFull walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
+        .setPath("./test_wallets/" + UUID.randomUUID().toString())  // *** CHANGE README TO "sample_wallet_full" ***
+        .setPassword("supersecretpassword123")
+        .setNetworkType(MoneroNetworkType.TESTNET)
+        .setConnectionManager(connectionManager)
+        .setSeed(TestUtils.SEED)                        // *** REPLACE WITH SEED IN README ***
+        .setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT)); // *** REPLACE WITH FIRST RECEIVE HEIGHT IN README ***
     
     // check connection status
     connectionManager.checkConnection();
@@ -146,11 +156,8 @@ public class TestSampleCode {
       }
     });
     
-    // check connection status every 10 seconds
-    connectionManager.startCheckingConnection(10000l);
-    
-    // automatically switch to best available connection if disconnected
-    connectionManager.setAutoSwitch(true);
+    // check connections every 10 seconds (in order of priority) and switch to the best
+    connectionManager.startPolling(10000l);
     
     // get best available connection in order of priority then response time
     MoneroRpcConnection bestConnection = connectionManager.getBestAvailableConnection();

@@ -30,6 +30,9 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import monero.common.MoneroConnectionManager;
+import monero.common.MoneroConnectionManagerListener;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.daemon.model.MoneroBlock;
@@ -57,6 +60,8 @@ import monero.wallet.model.MoneroWalletListenerI;
 abstract class MoneroWalletDefault implements MoneroWallet {
   
   protected Set<MoneroWalletListenerI> listeners;
+  protected MoneroConnectionManager connectionManager;
+  protected MoneroConnectionManagerListener connectionManagerListener;
   
   public MoneroWalletDefault() {
     this.listeners = new LinkedHashSet<MoneroWalletListenerI>();
@@ -87,6 +92,26 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   public void setDaemonConnection(String uri, String username, String password) {
     if (uri == null) setDaemonConnection((MoneroRpcConnection) null);
     else setDaemonConnection(new MoneroRpcConnection(uri, username, password));
+  }
+
+  @Override
+  public void setConnectionManager(MoneroConnectionManager connectionManager) {
+    if (this.connectionManager != null) this.connectionManager.removeListener(connectionManagerListener);
+    this.connectionManager = connectionManager;
+    if (connectionManager == null) return;
+    if (connectionManagerListener == null) connectionManagerListener = new MoneroConnectionManagerListener() {
+      @Override
+      public void onConnectionChanged(MoneroRpcConnection connection) {
+        setDaemonConnection(connection);
+      }
+    };
+    connectionManager.addListener(connectionManagerListener);
+    setDaemonConnection(connectionManager.getConnection());
+  }
+
+  @Override
+  public MoneroConnectionManager getConnectionManager() {
+    return connectionManager;
   }
   
   @Override
@@ -367,6 +392,13 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   @Override
   public void close() {
     close(false); // close without saving
+  }
+
+  @Override
+  public void close(boolean save) {
+    if (connectionManager != null) connectionManager.removeListener(connectionManagerListener);
+    connectionManager = null;
+    connectionManagerListener = null;
   }
   
   protected MoneroTransferQuery normalizeTransferQuery(MoneroTransferQuery query) {

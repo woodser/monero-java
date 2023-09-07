@@ -331,10 +331,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * &nbsp;&nbsp; privateSpendKey - private spend key of the wallet to create (optional)<br>
    * &nbsp;&nbsp; restoreHeight - block height to start scanning from (defaults to 0 unless generating random wallet)<br>
    * &nbsp;&nbsp; language - language of the wallet's seed (defaults to "English" or auto-detected)<br>
+   * &nbsp;&nbsp; server - MoneroRpcConnection to a monero daemon (optional)<br>
    * &nbsp;&nbsp; serverUri - uri of the daemon to use (optional, monero-wallet-rpc usually started with daemon config)<br>
    * &nbsp;&nbsp; serverUsername - username to authenticate with the daemon (optional)<br>
    * &nbsp;&nbsp; serverPassword - password to authenticate with the daemon (optional)<br>
-   * &nbsp;&nbsp; server - MoneroRpcConnection providing server configuration (optional)<br>
+   * &nbsp;&nbsp; connectionManager - manage connections to monerod (optional)<br>
    * <p>
    * 
    * @param config configures the wallet to create
@@ -346,7 +347,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (config == null) throw new MoneroError("Must specify config to create wallet");
     if (config.getNetworkType() != null) throw new MoneroError("Cannot specify network type when creating RPC wallet");
     if (config.getSeed() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
-      throw new MoneroError("Wallet may be initialized with a seed or keys but not both");
+      throw new MoneroError("Wallet can be initialized with a seed or keys but not both");
     }
     if (config.getAccountLookahead() != null || config.getSubaddressLookahead() != null) throw new MoneroError("monero-wallet-rpc does not support creating wallets with subaddress lookahead over rpc");
     
@@ -355,8 +356,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     else if (config.getPrivateSpendKey() != null || config.getPrimaryAddress() != null) createWalletFromKeys(config);
     else createWalletRandom(config);
     
-    // set daemon if provided
-    if (config.getServer() != null) setDaemonConnection(config.getServer());
+    // set daemon or connection manager
+    if (config.getConnectionManager() != null) {
+      if (config.getServer() != null) throw new MoneroError("Wallet can be initialized with a server or connection manager but not both");
+      setConnectionManager(config.getConnectionManager());
+    } else if (config.getServer() != null) {
+      setDaemonConnection(config.getServer());
+    }
+
     return this;
   }
   
@@ -1903,6 +1910,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @Override
   public void close(boolean save) {
+    super.close(save);
     clear();
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("autosave_current", save);

@@ -108,7 +108,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     if (config.getPath() == null) config.setPath(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString());
     if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
     if (config.getNetworkType() == null) config.setNetworkType(TestUtils.NETWORK_TYPE);
-    if (config.getServer() == null) config.setServer(daemon.getRpcConnection());
+    if (config.getServer() == null && config.getConnectionManager() == null) config.setServer(daemon.getRpcConnection());
     if (config.getRestoreHeight() == null && !random) config.setRestoreHeight(0l);
     
     // create wallet
@@ -1551,6 +1551,11 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   @Test
   public void testSetDaemonConnection() {
     super.testSetDaemonConnection();
+  }
+
+  @Test
+  public void testConnectionManager() {
+    super.testConnectionManager();
   }
 
   @Override

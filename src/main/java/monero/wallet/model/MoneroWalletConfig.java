@@ -1,8 +1,10 @@
 package monero.wallet.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import common.utils.JsonUtils;
+import monero.common.MoneroConnectionManager;
 import monero.common.MoneroRpcConnection;
 import monero.daemon.model.MoneroNetworkType;
 
@@ -17,6 +19,7 @@ public class MoneroWalletConfig {
   private MoneroRpcConnection server;
   private String serverUsername;
   private String serverPassword;
+  private MoneroConnectionManager connectionManager;
   private String seed;
   private String seedOffset;
   private String primaryAddress;
@@ -39,7 +42,8 @@ public class MoneroWalletConfig {
     path = config.getPath();
     password = config.getPassword();
     networkType = config.getNetworkType();
-    if (config.getServer() != null) server = new MoneroRpcConnection(config.getServer());
+    server = config.getServer();
+    connectionManager = config.getConnectionManager();
     seed = config.getSeed();
     seedOffset = config.getSeedOffset();
     primaryAddress = config.getPrimaryAddress();
@@ -106,8 +110,11 @@ public class MoneroWalletConfig {
   }
   
   public MoneroWalletConfig setServerUri(String serverUri) {
-    if (server == null) setServer(new MoneroRpcConnection(serverUri));
-    else server.setUri(serverUri);
+    if (serverUri == null || serverUri.isEmpty())  setServer(null);
+    else {
+      if (server == null) setServer(new MoneroRpcConnection(serverUri));
+      else server.setUri(serverUri);
+    }
     return this;
   }
   
@@ -128,6 +135,16 @@ public class MoneroWalletConfig {
   public MoneroWalletConfig setServerPassword(String serverPassword) {
     this.serverPassword = serverPassword;
     if (serverUsername != null && serverPassword != null) server.setCredentials(serverUsername, serverPassword);
+    return this;
+  }
+
+  @JsonIgnore
+  public MoneroConnectionManager getConnectionManager() {
+    return connectionManager;
+  }
+  
+  public MoneroWalletConfig setConnectionManager(MoneroConnectionManager connectionManager) {
+    this.connectionManager = connectionManager;
     return this;
   }
   

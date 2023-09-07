@@ -176,7 +176,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    * &nbsp;&nbsp; serverUri - uri of the wallet's daemon (optional)<br>
    * &nbsp;&nbsp; serverUsername - username to authenticate with the daemon (optional)<br>
    * &nbsp;&nbsp; serverPassword - password to authenticate with the daemon (optional)<br>
-   * &nbsp;&nbsp; server - MoneroRpcConnection providing server configuration (optional)<br>
+   * &nbsp;&nbsp; server - MoneroRpcConnection to a monero daemon (optional)<br>
    * </p>
    * 
    * @param config configures the wallet to open
@@ -245,10 +245,11 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    * &nbsp;&nbsp; privateSpendKey - private spend key of the wallet to create (optional)<br>
    * &nbsp;&nbsp; restoreHeight - block height to start scanning from (defaults to 0 unless generating random wallet)<br>
    * &nbsp;&nbsp; language - language of the wallet's seed (defaults to "English" or auto-detected)<br>
+   * &nbsp;&nbsp; server - MoneroRpcConnection to a monero daemon (optional)<br>
    * &nbsp;&nbsp; serverUri - uri of the wallet's daemon (optional)<br>
    * &nbsp;&nbsp; serverUsername - username to authenticate with the daemon (optional)<br>
    * &nbsp;&nbsp; serverPassword - password to authenticate with the daemon (optional)<br>
-   * &nbsp;&nbsp; server - MoneroRpcConnection providing server configuration (optional)<br>
+   * &nbsp;&nbsp; connectionManager - manage connections to monerod (optional)<br>
    * &nbsp;&nbsp; accountLookahead - number of accounts to scan (optional)<br>
    * &nbsp;&nbsp; subaddressLookahead - number of subaddresses per account to scan (optional)<br>
    * </p>
@@ -266,26 +267,34 @@ public class MoneroWalletFull extends MoneroWalletDefault {
       throw new MoneroError("Wallet may be initialized with a seed or keys but not both");
     }
     if (Boolean.TRUE.equals(config.getSaveCurrent() != null)) throw new MoneroError("Cannot save current wallet when creating full wallet");
+
+    // set server from connection manager if provided
+    if (config.getConnectionManager() != null) {
+      if (config.getServer() != null) throw new MoneroError("Wallet can be initialized with a server or connection manager but not both");
+      config.setServer(config.getConnectionManager().getConnection());
+    }
     
     // create wallet
+    MoneroWalletFull wallet;
     if (config.getSeed() != null) {
       if (config.getLanguage() != null) throw new MoneroError("Cannot specify language when creating wallet from seed");
-      return createWalletFromSeed(config);
+      wallet = createWalletFromSeed(config);
     } else if (config.getPrimaryAddress() != null || config.getPrivateSpendKey() != null) {
       if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating wallet from keys");
-      return createWalletFromKeys(config);
+      wallet = createWalletFromKeys(config);
     } else {
       if (config.getSeedOffset() != null) throw new MoneroError("Cannot specify seed offset when creating random wallet");
       if (config.getRestoreHeight() != null) throw new MoneroError("Cannot specify restore height when creating random wallet");
-      return createWalletRandom(config);
+      wallet = createWalletRandom(config);
     }
+    wallet.setConnectionManager(config.getConnectionManager());
+    return wallet;
   }
   
   private static MoneroWalletFull createWalletFromSeed(MoneroWalletConfig config) {
     if (config.getRestoreHeight() == null) config.setRestoreHeight(0l);
     long jniWalletHandle = createWalletJni(serializeWalletConfig(config));
     MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle, config.getPassword());
-    wallet.setDaemonConnection(config.getServer());
     return wallet;
   }
   
@@ -295,7 +304,6 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     try {
       long jniWalletHandle = createWalletJni(serializeWalletConfig(config));
       MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle, config.getPassword());
-      wallet.setDaemonConnection(config.getServer());
       return wallet;
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
@@ -1364,6 +1372,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   @Override
   public void close(boolean save) {
+    super.close(save);
     if (isClosed) return; // closing a closed wallet has no effect
     isClosed = true;
     password = null;
