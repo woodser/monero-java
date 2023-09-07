@@ -217,19 +217,23 @@ public class MoneroRpcConnection {
   /**
    * Check the connection and update online, authentication, and response time status.
    * 
-   * @param timeoutInMs the maximum response time before considered offline
+   * @param timeoutMs the maximum response time before considered offline
    * @return true if there is a change in status, false otherwise
    */
-  public boolean checkConnection(long timeoutInMs) {
+  public boolean checkConnection(long timeoutMs) {
     Boolean isOnlineBefore = isOnline;
     Boolean isAuthenticatedBefore = isAuthenticated;
     long startTime = System.currentTimeMillis();
     try {
-      List<Long> heights = new ArrayList<Long>();
-      for (long i = 0; i < 100; i++) heights.add(i);
-      Map<String, Object> params = new HashMap<String, Object>();
-      params.put("heights", heights);
-      sendBinaryRequest("get_blocks_by_height.bin", params);  // assume daemon connection
+      if (MoneroUtils.isNativeLibraryLoaded()) {
+        List<Long> heights = new ArrayList<Long>();
+        for (long i = 0; i < 100; i++) heights.add(i);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("heights", heights);
+        sendBinaryRequest("get_blocks_by_height.bin", params); // assume daemon connection
+      } else {
+        sendJsonRequest("get_version", null, timeoutMs);
+      }
       isOnline = true;
       isAuthenticated = true;
     } catch (Exception e) {
