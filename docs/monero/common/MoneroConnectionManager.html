@@ -26,7 +26,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10,"i20":10,"i21":10,"i22":10,"i23":10,"i24":10,"i25":10};
+var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10,"i20":10,"i21":10,"i22":10,"i23":10,"i24":10,"i25":10,"i26":10,"i27":10,"i28":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -88,7 +88,7 @@ loadScripts(document, 'script');</script>
 <div>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
-<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#nested.class.summary">Nested</a>&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
@@ -162,11 +162,8 @@ extends java.lang.Object</pre>
  &nbsp;&nbsp; }<br>
  });<br><br>
  
- // check connection status every 10 seconds<br>
- connectionManager.startCheckingConnection(10000l);<br><br>
- 
- // automatically switch to best available connection if disconnected<br>
- connectionManager.setAutoSwitch(true);<br><br>
+ // start polling for best connection every 10 seconds and automatically switch<br>
+ connectionManager.startPolling(10000l);<br><br>
  
  // get best available connection in order of priority then response time<br>
  MoneroRpcConnection bestConnection = connectionManager.getBestAvailableConnection();<br><br>
@@ -186,6 +183,31 @@ extends java.lang.Object</pre>
 <div class="summary">
 <ul class="blockList">
 <li class="blockList">
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<section role="region">
+<ul class="blockList">
+<li class="blockList"><a id="nested.class.summary">
+<!--   -->
+</a>
+<h3>Nested Class Summary</h3>
+<table class="memberSummary">
+<caption><span>Nested Classes</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colSecond" scope="col">Class</th>
+<th class="colLast" scope="col">Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static class&nbsp;</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="MoneroConnectionManager.PollType.html" title="enum in monero.common">MoneroConnectionManager.PollType</a></span></code></th>
+<td class="colLast">
+<div class="block">Specify behavior when polling.</div>
+</td>
+</tr>
+</table>
+</li>
+</ul>
+</section>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
 <section role="region">
 <ul class="blockList">
@@ -223,184 +245,209 @@ extends java.lang.Object</pre>
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#addConnection(java.lang.String)">addConnection</a></span>&#8203;(java.lang.String&nbsp;uri)</code></th>
+<td class="colLast">
+<div class="block">Add a connection URI.</div>
+</td>
+</tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#addConnection(monero.common.MoneroRpcConnection)">addConnection</a></span>&#8203;(<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&nbsp;connection)</code></th>
 <td class="colLast">
 <div class="block">Add a connection.</div>
 </td>
 </tr>
-<tr id="i1" class="rowColor">
+<tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#addListener(monero.common.MoneroConnectionManagerListener)">addListener</a></span>&#8203;(<a href="MoneroConnectionManagerListener.html" title="interface in monero.common">MoneroConnectionManagerListener</a>&nbsp;listener)</code></th>
 <td class="colLast">
 <div class="block">Add a listener to receive notifications when the connection changes.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#checkConnection()">checkConnection</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Check the current connection.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#checkConnections()">checkConnections</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Check all managed connections.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#clear()">clear</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Remove all connections.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#disconnect()">disconnect</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Disconnect from the current connection.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getAutoSwitch()">getAutoSwitch</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Get if auto switch is enabled or disabled.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code><a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getBestAvailableConnection(monero.common.MoneroRpcConnection...)">getBestAvailableConnection</a></span>&#8203;(<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>...&nbsp;excludedConnections)</code></th>
 <td class="colLast">
 <div class="block">Get the best available connection in order of priority then response time.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code><a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getConnection()">getConnection</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Get the current connection.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code><a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getConnectionByUri(java.lang.String)">getConnectionByUri</a></span>&#8203;(java.lang.String&nbsp;uri)</code></th>
 <td class="colLast">
 <div class="block">Get a connection by URI.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>java.util.List&lt;<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getConnections()">getConnections</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Get all connections in order of current connection (if applicable), online status, priority, and name.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code>java.util.List&lt;<a href="MoneroConnectionManagerListener.html" title="interface in monero.common">MoneroConnectionManagerListener</a>&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getListeners()">getListeners</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Get all listeners.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>java.util.List&lt;<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getPeerConnections()">getPeerConnections</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Collect connectable peers of the managed connections.</div>
 </td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code>long</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getTimeout()">getTimeout</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Get the request timeout.</div>
 </td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i15" class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#hasConnection(java.lang.String)">hasConnection</a></span>&#8203;(java.lang.String&nbsp;uri)</code></th>
+<td class="colLast">
+<div class="block">Indicates if this manager has a connection with the given URI.</div>
+</td>
+</tr>
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>java.lang.Boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isConnected()">isConnected</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Indicates if the connection manager is connected to a node.</div>
 </td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#removeConnection(java.lang.String)">removeConnection</a></span>&#8203;(java.lang.String&nbsp;uri)</code></th>
 <td class="colLast">
 <div class="block">Remove a connection.</div>
 </td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i18" class="altColor">
 <td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#removeListener(monero.common.MoneroConnectionManagerListener)">removeListener</a></span>&#8203;(<a href="MoneroConnectionManagerListener.html" title="interface in monero.common">MoneroConnectionManagerListener</a>&nbsp;listener)</code></th>
 <td class="colLast">
 <div class="block">Remove a listener.</div>
 </td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i19" class="rowColor">
 <td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#removeListeners()">removeListeners</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Remove all listeners.</div>
 </td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i20" class="altColor">
 <td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#reset()">reset</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Reset to default state.</div>
 </td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i21" class="rowColor">
 <td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setAutoSwitch(boolean)">setAutoSwitch</a></span>&#8203;(boolean&nbsp;autoSwitch)</code></th>
 <td class="colLast">
-<div class="block">Automatically switch to best available connection if current connection is disconnected after being checked.</div>
+<div class="block">Automatically switch to the best available connection as connections are polled, based on priority, response time, and consistency.</div>
 </td>
 </tr>
-<tr id="i20" class="altColor">
+<tr id="i22" class="altColor">
 <td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setConnection(java.lang.String)">setConnection</a></span>&#8203;(java.lang.String&nbsp;uri)</code></th>
 <td class="colLast">
 <div class="block">Set the current connection without changing the credentials.</div>
 </td>
 </tr>
-<tr id="i21" class="rowColor">
+<tr id="i23" class="rowColor">
 <td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setConnection(monero.common.MoneroRpcConnection)">setConnection</a></span>&#8203;(<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&nbsp;connection)</code></th>
 <td class="colLast">
 <div class="block">Set the current connection.</div>
 </td>
 </tr>
-<tr id="i22" class="altColor">
+<tr id="i24" class="altColor">
 <td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setTimeout(long)">setTimeout</a></span>&#8203;(long&nbsp;timeoutInMs)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setTimeout(long)">setTimeout</a></span>&#8203;(long&nbsp;timeoutMs)</code></th>
 <td class="colLast">
 <div class="block">Set the maximum request time before a connection is considered offline.</div>
 </td>
 </tr>
-<tr id="i23" class="rowColor">
-<td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#startCheckingConnection()">startCheckingConnection</a></span>()</code></th>
-<td class="colLast">
-<div class="block">Check the connection and start checking the connection periodically.</div>
-</td>
-</tr>
-<tr id="i24" class="altColor">
-<td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#startCheckingConnection(java.lang.Long)">startCheckingConnection</a></span>&#8203;(java.lang.Long&nbsp;periodMs)</code></th>
-<td class="colLast">
-<div class="block">Check the connection and start checking the connection periodically.</div>
-</td>
-</tr>
 <tr id="i25" class="rowColor">
-<td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#stopCheckingConnection()">stopCheckingConnection</a></span>()</code></th>
+<td class="colFirst"><code>void</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#startPolling()">startPolling</a></span>()</code></th>
 <td class="colLast">
-<div class="block">Stop checking the connection status periodically.</div>
+<div class="block">Start polling connections.</div>
+</td>
+</tr>
+<tr id="i26" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#startPolling(java.lang.Long)">startPolling</a></span>&#8203;(java.lang.Long&nbsp;periodMs)</code></th>
+<td class="colLast">
+<div class="block">Start polling connections.</div>
+</td>
+</tr>
+<tr id="i27" class="rowColor">
+<td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#startPolling(java.lang.Long,java.lang.Boolean,java.lang.Long,monero.common.MoneroConnectionManager.PollType,java.util.Collection)">startPolling</a></span>&#8203;(java.lang.Long&nbsp;periodMs,
+            java.lang.Boolean&nbsp;autoSwitch,
+            java.lang.Long&nbsp;timeoutMs,
+            <a href="MoneroConnectionManager.PollType.html" title="enum in monero.common">MoneroConnectionManager.PollType</a>&nbsp;pollType,
+            java.util.Collection&lt;<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&gt;&nbsp;excludedConnections)</code></th>
+<td class="colLast">
+<div class="block">Start polling connections.</div>
+</td>
+</tr>
+<tr id="i28" class="altColor">
+<td class="colFirst"><code><a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#stopPolling()">stopPolling</a></span>()</code></th>
+<td class="colLast">
+<div class="block">Stop polling connections.</div>
 </td>
 </tr>
 </table>
@@ -506,6 +553,22 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
+<a id="addConnection(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addConnection</h4>
+<pre class="methodSignature">public&nbsp;<a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a>&nbsp;addConnection&#8203;(java.lang.String&nbsp;uri)</pre>
+<div class="block">Add a connection URI.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>uri</code> - - uri of the connection to add</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>this connection manager for chaining</dd>
+</dl>
+</li>
+</ul>
 <a id="addConnection(monero.common.MoneroRpcConnection)">
 <!--   -->
 </a>
@@ -535,80 +598,6 @@ extends java.lang.Object</pre>
 <dd><code>uri</code> - - uri of the connection to remove</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>this connection manager for chaining</dd>
-</dl>
-</li>
-</ul>
-<a id="isConnected()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>isConnected</h4>
-<pre class="methodSignature">public&nbsp;java.lang.Boolean&nbsp;isConnected()</pre>
-<div class="block">Indicates if the connection manager is connected to a node.</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if the current connection is set, online, and not unauthenticated, null if unknown, false otherwise</dd>
-</dl>
-</li>
-</ul>
-<a id="getConnection()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getConnection</h4>
-<pre class="methodSignature">public&nbsp;<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&nbsp;getConnection()</pre>
-<div class="block">Get the current connection.</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>the current connection or null if no connection set</dd>
-</dl>
-</li>
-</ul>
-<a id="getConnectionByUri(java.lang.String)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getConnectionByUri</h4>
-<pre class="methodSignature">public&nbsp;<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&nbsp;getConnectionByUri&#8203;(java.lang.String&nbsp;uri)</pre>
-<div class="block">Get a connection by URI.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>uri</code> - - uri of the connection to get</dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>the connection with the URI or null if no connection with the URI exists</dd>
-</dl>
-</li>
-</ul>
-<a id="getConnections()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getConnections</h4>
-<pre class="methodSignature">public&nbsp;java.util.List&lt;<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&gt;&nbsp;getConnections()</pre>
-<div class="block">Get all connections in order of current connection (if applicable), online status, priority, and name.</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>the list of sorted connections</dd>
-</dl>
-</li>
-</ul>
-<a id="getBestAvailableConnection(monero.common.MoneroRpcConnection...)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getBestAvailableConnection</h4>
-<pre class="methodSignature">public&nbsp;<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&nbsp;getBestAvailableConnection&#8203;(<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>...&nbsp;excludedConnections)</pre>
-<div class="block">Get the best available connection in order of priority then response time.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>excludedConnections</code> - - connections to be excluded from consideration (optional)</dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>the best available connection in order of priority then response time, null if no connections available</dd>
 </dl>
 </li>
 </ul>
@@ -650,6 +639,142 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
+<a id="getConnection()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getConnection</h4>
+<pre class="methodSignature">public&nbsp;<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&nbsp;getConnection()</pre>
+<div class="block">Get the current connection.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the current connection or null if no connection set</dd>
+</dl>
+</li>
+</ul>
+<a id="hasConnection(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hasConnection</h4>
+<pre class="methodSignature">public&nbsp;boolean&nbsp;hasConnection&#8203;(java.lang.String&nbsp;uri)</pre>
+<div class="block">Indicates if this manager has a connection with the given URI.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>uri</code> - - URI of the connection to check</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>true if this manager has a connection with the given URI, false otherwise</dd>
+</dl>
+</li>
+</ul>
+<a id="getConnectionByUri(java.lang.String)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getConnectionByUri</h4>
+<pre class="methodSignature">public&nbsp;<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&nbsp;getConnectionByUri&#8203;(java.lang.String&nbsp;uri)</pre>
+<div class="block">Get a connection by URI.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>uri</code> - - URI of the connection to get</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the connection with the URI or null if no connection with the URI exists</dd>
+</dl>
+</li>
+</ul>
+<a id="getConnections()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getConnections</h4>
+<pre class="methodSignature">public&nbsp;java.util.List&lt;<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&gt;&nbsp;getConnections()</pre>
+<div class="block">Get all connections in order of current connection (if applicable), online status, priority, and name.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the list of sorted connections</dd>
+</dl>
+</li>
+</ul>
+<a id="isConnected()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isConnected</h4>
+<pre class="methodSignature">public&nbsp;java.lang.Boolean&nbsp;isConnected()</pre>
+<div class="block">Indicates if the connection manager is connected to a node.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>true if the current connection is set, online, and not unauthenticated, null if unknown, false otherwise</dd>
+</dl>
+</li>
+</ul>
+<a id="startPolling()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>startPolling</h4>
+<pre class="methodSignature">public&nbsp;void&nbsp;startPolling()</pre>
+<div class="block">Start polling connections. Automatically connects to the best available connection based on priority, response time, and consistency.</div>
+</li>
+</ul>
+<a id="startPolling(java.lang.Long)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>startPolling</h4>
+<pre class="methodSignature">public&nbsp;void&nbsp;startPolling&#8203;(java.lang.Long&nbsp;periodMs)</pre>
+<div class="block">Start polling connections. Automatically connects to the best available connection based on priority, response time, and consistency.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>periodMs</code> - poll period in milliseconds (default 20s)</dd>
+</dl>
+</li>
+</ul>
+<a id="startPolling(java.lang.Long,java.lang.Boolean,java.lang.Long,monero.common.MoneroConnectionManager.PollType,java.util.Collection)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>startPolling</h4>
+<pre class="methodSignature">public&nbsp;<a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a>&nbsp;startPolling&#8203;(java.lang.Long&nbsp;periodMs,
+                                            java.lang.Boolean&nbsp;autoSwitch,
+                                            java.lang.Long&nbsp;timeoutMs,
+                                            <a href="MoneroConnectionManager.PollType.html" title="enum in monero.common">MoneroConnectionManager.PollType</a>&nbsp;pollType,
+                                            java.util.Collection&lt;<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&gt;&nbsp;excludedConnections)</pre>
+<div class="block">Start polling connections.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>periodMs</code> - poll period in milliseconds (default 20s)</dd>
+<dd><code>autoSwitch</code> - specifies to automatically switch to the best connection (default true unless changed)</dd>
+<dd><code>timeoutMs</code> - specifies the timeout to poll a single connection (default 5s unless changed)</dd>
+<dd><code>pollType</code> - one of PRIORITIZED (poll connections in order of priority until connected; default), CURRENT (poll current connection), or ALL (poll all connections)</dd>
+<dd><code>excludedConnections</code> - connections excluded from being polled</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>this connection manager for chaining</dd>
+</dl>
+</li>
+</ul>
+<a id="stopPolling()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>stopPolling</h4>
+<pre class="methodSignature">public&nbsp;<a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a>&nbsp;stopPolling()</pre>
+<div class="block">Stop polling connections.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>this connection manager for chaining</dd>
+</dl>
+</li>
+</ul>
 <a id="checkConnection()">
 <!--   -->
 </a>
@@ -678,47 +803,19 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a id="startCheckingConnection()">
+<a id="getBestAvailableConnection(monero.common.MoneroRpcConnection...)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>startCheckingConnection</h4>
-<pre class="methodSignature">public&nbsp;<a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a>&nbsp;startCheckingConnection()</pre>
-<div class="block">Check the connection and start checking the connection periodically.</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>this connection manager for chaining (after first checking the connection)</dd>
-</dl>
-</li>
-</ul>
-<a id="startCheckingConnection(java.lang.Long)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>startCheckingConnection</h4>
-<pre class="methodSignature">public&nbsp;<a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a>&nbsp;startCheckingConnection&#8203;(java.lang.Long&nbsp;periodMs)</pre>
-<div class="block">Check the connection and start checking the connection periodically.</div>
+<h4>getBestAvailableConnection</h4>
+<pre class="methodSignature">public&nbsp;<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&nbsp;getBestAvailableConnection&#8203;(<a href="MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>...&nbsp;excludedConnections)</pre>
+<div class="block">Get the best available connection in order of priority then response time.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>periodMs</code> - is the time between checks in milliseconds (default 10000 ms or 10 seconds)</dd>
+<dd><code>excludedConnections</code> - - connections to be excluded from consideration (optional)</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>this connection manager for chaining (after first checking the connection)</dd>
-</dl>
-</li>
-</ul>
-<a id="stopCheckingConnection()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>stopCheckingConnection</h4>
-<pre class="methodSignature">public&nbsp;<a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a>&nbsp;stopCheckingConnection()</pre>
-<div class="block">Stop checking the connection status periodically.</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>this connection manager for chaining</dd>
+<dd>the best available connection in order of priority then response time, null if no connections available</dd>
 </dl>
 </li>
 </ul>
@@ -729,10 +826,10 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>setAutoSwitch</h4>
 <pre class="methodSignature">public&nbsp;<a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a>&nbsp;setAutoSwitch&#8203;(boolean&nbsp;autoSwitch)</pre>
-<div class="block">Automatically switch to best available connection if current connection is disconnected after being checked.</div>
+<div class="block">Automatically switch to the best available connection as connections are polled, based on priority, response time, and consistency.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>autoSwitch</code> - specifies if the connection should switch on disconnect</dd>
+<dd><code>autoSwitch</code> - specifies if the connection should auto switch to a better connection</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>this connection manager for chaining</dd>
 </dl>
@@ -758,11 +855,11 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>setTimeout</h4>
-<pre class="methodSignature">public&nbsp;<a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a>&nbsp;setTimeout&#8203;(long&nbsp;timeoutInMs)</pre>
+<pre class="methodSignature">public&nbsp;<a href="MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a>&nbsp;setTimeout&#8203;(long&nbsp;timeoutMs)</pre>
 <div class="block">Set the maximum request time before a connection is considered offline.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>timeoutInMs</code> - is the timeout before a connection is considered offline</dd>
+<dd><code>timeoutMs</code> - is the timeout before a connection is considered offline</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>this connection manager for chaining</dd>
 </dl>
@@ -890,7 +987,7 @@ extends java.lang.Object</pre>
 <div>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
-<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#nested.class.summary">Nested</a>&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
