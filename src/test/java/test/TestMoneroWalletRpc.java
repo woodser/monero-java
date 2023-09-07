@@ -97,7 +97,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     // open wallet
     try {
       wallet.openWallet(config.getPath(), config.getPassword());
-      wallet.setDaemonConnection(config.getServer(), true, null); // set daemon as trusted
+      wallet.setDaemonConnection(wallet.getDaemonConnection(), true, null); // set daemon as trusted
       if (wallet.isConnectedToDaemon()) wallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
       return wallet;
     } catch (MoneroError e) {
@@ -115,17 +115,16 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     if (config.getPath() == null) config.setPath(UUID.randomUUID().toString());
     if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
     if (config.getRestoreHeight() == null && !random) config.setRestoreHeight(0l);
-    if (config.getServer() == null) config.setServer(daemon.getRpcConnection());
+    if (config.getServer() == null && config.getConnectionManager() == null) config.setServer(daemon.getRpcConnection());
     
     // create client connected to internal monero-wallet-rpc process
-    boolean offline = config.getServerUri().equals(MoneroUtils.parseUri(TestUtils.OFFLINE_SERVER_URI).toString());
+    boolean offline = MoneroUtils.parseUri(TestUtils.OFFLINE_SERVER_URI).toString().equals(config.getServerUri());
     MoneroWalletRpc wallet = TestUtils.startWalletRpcProcess(offline);
     
     // create wallet
     try {
       wallet.createWallet(config);
-      System.out.println("Setting server: " + config.getServer());
-      wallet.setDaemonConnection(config.getServer(), true, null); // set daemon as trusted
+      wallet.setDaemonConnection(wallet.getDaemonConnection(), true, null); // set daemon as trusted
       if (wallet.isConnectedToDaemon()) wallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
       return wallet;
     } catch (MoneroError e) {
@@ -492,6 +491,11 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Test
   public void testSetDaemonConnection() {
     super.testSetDaemonConnection();
+  }
+
+  @Test
+  public void testConnectionManager() {
+    super.testConnectionManager();
   }
 
   @Override

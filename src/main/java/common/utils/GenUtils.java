@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -393,7 +395,7 @@ public class GenUtils {
   /**
    * Wait for the duration.
    * 
-   * @param durationMs is the duration to wait for in milliseconds
+   * @param durationMs the duration to wait for in milliseconds
    */
   public static void waitFor(long durationMs) {
     try { TimeUnit.MILLISECONDS.sleep(durationMs); }
@@ -403,7 +405,7 @@ public class GenUtils {
   /**
    * Execute tasks in parallel.
    * 
-   * @param tasks are the tasks to execute in parallel
+   * @param tasks are tasks to execute in parallel
    */
   public static void executeTasks(Collection<Runnable> tasks) {
     executeTasks(tasks, tasks.size());
@@ -412,8 +414,8 @@ public class GenUtils {
   /**
    * Execute tasks in parallel.
    * 
-   * @param tasks are the tasks to execute in parallel
-   * @param maxConcurrency is the maximum number of tasks to run in parallel
+   * @param tasks are tasks to execute in parallel
+   * @param maxConcurrency the maximum number of tasks to run in parallel
    */
   public static void executeTasks(Collection<Runnable> tasks, int maxConcurrency) {
     if (tasks.isEmpty()) return;
@@ -434,5 +436,41 @@ public class GenUtils {
     } catch (Exception e) {
         throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Execute tasks in parallel.
+   * 
+   * @param <T> parameterized type
+   * @param tasks the tasks to execute in parallel
+   * @return the results of each task
+   * @throws InterruptedException
+   * @throws ExecutionException
+   */
+  public <T> List<T> executeTasks(List<Callable<T>> tasks) throws InterruptedException, ExecutionException {
+    return executeTasks(tasks, tasks.size());
+  }
+
+  /**
+   * Execute tasks in parallel.
+   * 
+   * @param <T> parameterized type
+   * @param tasks the tasks to execute in parallel
+   * @param maxConcurrency the maximum number of tasks to run in parallel
+   * @return the results of each task
+   * @throws InterruptedException
+   * @throws ExecutionException
+   */
+  public <T> List<T> executeTasks(List<Callable<T>> tasks, int maxConcurrency) throws InterruptedException, ExecutionException {
+    ExecutorService executor = Executors.newFixedThreadPool(maxConcurrency);
+    List<Future<T>> futures = new ArrayList<>();
+    List<T> results = new ArrayList<>();
+    try {
+      for (Callable<T> task : tasks) futures.add(executor.submit(task));
+      for (Future<T> future : futures) results.add(future.get());
+    } finally {
+      executor.shutdown();
+    }
+    return results;
   }
 }

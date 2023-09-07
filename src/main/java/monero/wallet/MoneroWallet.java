@@ -26,6 +26,8 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
+import monero.common.MoneroConnectionManager;
 import monero.common.MoneroRpcConnection;
 import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroVersion;
@@ -120,6 +122,20 @@ public interface MoneroWallet {
    * @return the wallet's daemon connection
    */
   public MoneroRpcConnection getDaemonConnection();
+
+  /**
+   * Set the wallet's daemon connection manager.
+   * 
+   * @param connectionManager manages connections to monerod
+   */
+  public void setConnectionManager(MoneroConnectionManager connectionManager);
+
+  /**
+   * Get the wallet's daemon connection manager.
+   * 
+   * @return the wallet's daemon connection manager
+   */
+  public MoneroConnectionManager getConnectionManager();
   
   /**
    * Set the Tor proxy to the daemon.
@@ -561,7 +577,7 @@ public interface MoneroWallet {
    * &nbsp;&nbsp; serverUri - uri of the wallet's daemon (optional)<br>
    * &nbsp;&nbsp; serverUsername - username to authenticate with the daemon (optional)<br>
    * &nbsp;&nbsp; serverPassword - password to authenticate with the daemon (optional)<br>
-   * &nbsp;&nbsp; server - MoneroRpcConnection providing server configuration (optional)<br>
+   * &nbsp;&nbsp; server - MoneroRpcConnection to a monero daemon (optional)<br>
    * &nbsp;&nbsp; isConfirmed - get txs that are confirmed or not (optional)<br>
    * &nbsp;&nbsp; inTxPool - get txs that are in the tx pool or not (optional)<br>
    * &nbsp;&nbsp; isRelayed - get txs that are relayed or not (optional)<br>

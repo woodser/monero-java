@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import monero.common.MoneroRpcConnection;
+import monero.common.MoneroConnectionManager.PollType;
 import monero.common.MoneroConnectionManager;
 import monero.common.MoneroConnectionManagerListener;
 import monero.wallet.MoneroWalletRpc;
@@ -24,13 +25,14 @@ public class TestMoneroConnectionManager {
   @Test
   public void testConnectionManager() throws InterruptedException, IOException {
     List<MoneroWalletRpc> walletRpcs = new ArrayList<MoneroWalletRpc>();
+    MoneroConnectionManager connectionManager = null;
     try {
       
       // start monero-wallet-rpc instances as test server connections (can also use monerod servers)
       for (int i = 0; i < 5; i++) walletRpcs.add(TestUtils.startWalletRpcProcess());
       
       // create connection manager
-      MoneroConnectionManager connectionManager = new MoneroConnectionManager();
+      connectionManager = new MoneroConnectionManager();
       
       // listen for changes
       ConnectionChangeCollector listener = new ConnectionChangeCollector();
@@ -51,16 +53,20 @@ public class TestMoneroConnectionManager {
       assertTrue(orderedConnections.get(3) == walletRpcs.get(0).getRpcConnection());
       assertEquals(orderedConnections.get(4).getUri(), walletRpcs.get(1).getRpcConnection().getUri());
       for (MoneroRpcConnection connection : orderedConnections) assertNull(connection.isOnline());
+
+      // test getting connection by uri
+      assertTrue(connectionManager.hasConnection(walletRpcs.get(0).getRpcConnection().getUri()));
+      assertTrue(connectionManager.getConnectionByUri(walletRpcs.get(0).getRpcConnection().getUri()) == walletRpcs.get(0).getRpcConnection());
       
       // test unknown connection
       int numExpectedChanges = 0;
       connectionManager.setConnection(orderedConnections.get(0));
       assertEquals(null, connectionManager.isConnected());
       assertEquals(++numExpectedChanges, listener.changedConnections.size());
-      
+
       // auto connect to best available connection
-      connectionManager.setAutoSwitch(true);
-      connectionManager.startCheckingConnection(TestUtils.SYNC_PERIOD_IN_MS);
+      connectionManager.startPolling(TestUtils.SYNC_PERIOD_IN_MS);
+      GenUtils.waitFor(TestUtils.AUTO_CONNECT_TIMEOUT_MS);
       assertTrue(connectionManager.isConnected());
       MoneroRpcConnection connection = connectionManager.getConnection();
       assertTrue(connection.isOnline());
@@ -68,13 +74,13 @@ public class TestMoneroConnectionManager {
       assertEquals(++numExpectedChanges, listener.changedConnections.size());
       assertTrue(listener.changedConnections.get(listener.changedConnections.size() - 1) == connection);
       connectionManager.setAutoSwitch(false);
-      connectionManager.stopCheckingConnection();
+      connectionManager.stopPolling();
       connectionManager.disconnect();
       assertEquals(++numExpectedChanges, listener.changedConnections.size());
       assertTrue(listener.changedConnections.get(listener.changedConnections.size() - 1) == null);
       
-      // start periodically checking connection
-      connectionManager.startCheckingConnection(TestUtils.SYNC_PERIOD_IN_MS);
+      // start periodically checking connection without auto switch
+      connectionManager.startPolling(TestUtils.SYNC_PERIOD_IN_MS, false, null, null, null);
       
       // connect to best available connection in order of priority and response time
       connection = connectionManager.getBestAvailableConnection();
@@ -108,10 +114,10 @@ public class TestMoneroConnectionManager {
       // test connection order
       orderedConnections = connectionManager.getConnections();
       assertTrue(orderedConnections.get(0) == walletRpcs.get(4).getRpcConnection());
-      assertTrue(orderedConnections.get(1) == walletRpcs.get(2).getRpcConnection());
-      assertTrue(orderedConnections.get(2) == walletRpcs.get(3).getRpcConnection());
-      assertTrue(orderedConnections.get(3) == walletRpcs.get(0).getRpcConnection());
-      assertEquals(orderedConnections.get(4).getUri(), walletRpcs.get(1).getRpcConnection().getUri());
+      assertTrue(orderedConnections.get(1) == walletRpcs.get(0).getRpcConnection());
+      assertEquals(orderedConnections.get(2).getUri(), walletRpcs.get(1).getRpcConnection().getUri());
+      assertTrue(orderedConnections.get(3) == walletRpcs.get(2).getRpcConnection());
+      assertTrue(orderedConnections.get(4) == walletRpcs.get(3).getRpcConnection());
       
       // check all connections
       connectionManager.checkConnections();
@@ -192,7 +198,7 @@ public class TestMoneroConnectionManager {
       assertTrue(listener.changedConnections.get(listener.changedConnections.size() - 1) == walletRpcs.get(0).getRpcConnection());
       
       // set connection to new uri
-      connectionManager.stopCheckingConnection();
+      connectionManager.stopPolling();
       String uri = "http://localhost:49999";
       connectionManager.setConnection(uri);
       assertEquals(uri, connectionManager.getConnection().getUri());
@@ -217,10 +223,26 @@ public class TestMoneroConnectionManager {
       connectionManager.checkConnections();
       assertEquals(++numExpectedChanges, listener.changedConnections.size());
       assertTrue(connectionManager.isConnected());
-      
+
+      // test polling current connection
+      connectionManager.setConnection((String) null);
+      assertFalse(connectionManager.isConnected());
+      assertEquals(++numExpectedChanges, listener.changedConnections.size());
+      connectionManager.startPolling(TestUtils.SYNC_PERIOD_IN_MS, null, null, PollType.CURRENT, null);
+      GenUtils.waitFor(TestUtils.AUTO_CONNECT_TIMEOUT_MS);
+      assertTrue(connectionManager.isConnected());
+      assertEquals(++numExpectedChanges, listener.changedConnections.size());
+
+      // test polling all connections
+      connectionManager.setConnection((String) null);
+      assertEquals(++numExpectedChanges, listener.changedConnections.size());
+      connectionManager.startPolling(TestUtils.SYNC_PERIOD_IN_MS, null, null, PollType.ALL, null);
+      GenUtils.waitFor(TestUtils.AUTO_CONNECT_TIMEOUT_MS);
+      assertTrue(connectionManager.isConnected());
+      assertEquals(++numExpectedChanges, listener.changedConnections.size());
+
       // shut down all connections
       connection = connectionManager.getConnection();
-      connectionManager.startCheckingConnection(TestUtils.SYNC_PERIOD_IN_MS);
       for (MoneroWalletRpc walletRpc : walletRpcs) TestUtils.stopWalletRpcProcess(walletRpc);
       GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS + 100);
       assertFalse(connection.isOnline());
@@ -232,6 +254,9 @@ public class TestMoneroConnectionManager {
       assertEquals(0, connectionManager.getConnections().size());
       assertEquals(null, connectionManager.getConnection());
     } finally {
+
+      // stop connection manager
+      if (connectionManager != null) connectionManager.reset();
       
       // stop monero-wallet-rpc instances
       for (MoneroWalletRpc walletRpc : walletRpcs) {
