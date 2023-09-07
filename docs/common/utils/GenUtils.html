@@ -26,8 +26,8 @@
     catch(err) {
     }
 //-->
-var data = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":9,"i8":9,"i9":9,"i10":9,"i11":9,"i12":9,"i13":9,"i14":9,"i15":9,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":9,"i24":9,"i25":9,"i26":9,"i27":9};
-var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"]};
+var data = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":9,"i8":9,"i9":9,"i10":9,"i11":9,"i12":9,"i13":9,"i14":9,"i15":10,"i16":10,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":9,"i24":9,"i25":9,"i26":9,"i27":9,"i28":9,"i29":9};
+var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -169,7 +169,7 @@ extends java.lang.Object</pre>
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colSecond" scope="col">Method</th>
@@ -292,27 +292,42 @@ extends java.lang.Object</pre>
 </td>
 </tr>
 <tr id="i15" class="rowColor">
+<td class="colFirst"><code>&lt;T&gt;&nbsp;java.util.List&lt;T&gt;</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#executeTasks(java.util.List)">executeTasks</a></span>&#8203;(java.util.List&lt;java.util.concurrent.Callable&lt;T&gt;&gt;&nbsp;tasks)</code></th>
+<td class="colLast">
+<div class="block">Execute tasks in parallel.</div>
+</td>
+</tr>
+<tr id="i16" class="altColor">
+<td class="colFirst"><code>&lt;T&gt;&nbsp;java.util.List&lt;T&gt;</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#executeTasks(java.util.List,int)">executeTasks</a></span>&#8203;(java.util.List&lt;java.util.concurrent.Callable&lt;T&gt;&gt;&nbsp;tasks,
+            int&nbsp;maxConcurrency)</code></th>
+<td class="colLast">
+<div class="block">Execute tasks in parallel.</div>
+</td>
+</tr>
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getIndent(int)">getIndent</a></span>&#8203;(int&nbsp;length)</code></th>
 <td class="colLast">
 <div class="block">Returns a string indentation of the given length;</div>
 </td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i18" class="altColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getUUID()">getUUID</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Generates a UUID.</div>
 </td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i19" class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isHex(java.lang.String)">isHex</a></span>&#8203;(java.lang.String&nbsp;str)</code></th>
 <td class="colLast">
 <div class="block">Indicates if the given argument is a hexidemal string.</div>
 </td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i20" class="altColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#kvLine(java.lang.Object,java.lang.Object,int)">kvLine</a></span>&#8203;(java.lang.Object&nbsp;key,
       java.lang.Object&nbsp;value,
@@ -321,7 +336,7 @@ extends java.lang.Object</pre>
 <div class="block">Returns a human-friendly key value line.</div>
 </td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i21" class="rowColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#kvLine(java.lang.Object,java.lang.Object,int,boolean,boolean)">kvLine</a></span>&#8203;(java.lang.Object&nbsp;key,
       java.lang.Object&nbsp;value,
@@ -332,21 +347,21 @@ extends java.lang.Object</pre>
 <div class="block">Returns a human-friendly key value line.</div>
 </td>
 </tr>
-<tr id="i20" class="altColor">
+<tr id="i22" class="altColor">
 <td class="colFirst"><code>static byte[]</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#listToByteArray(java.util.List)">listToByteArray</a></span>&#8203;(java.util.List&lt;java.lang.Byte&gt;&nbsp;list)</code></th>
 <td class="colLast">
 <div class="block">Converts a list of integers to an int array.</div>
 </td>
 </tr>
-<tr id="i21" class="rowColor">
+<tr id="i23" class="rowColor">
 <td class="colFirst"><code>static int[]</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#listToIntArray(java.util.List)">listToIntArray</a></span>&#8203;(java.util.List&lt;java.lang.Integer&gt;&nbsp;list)</code></th>
 <td class="colLast">
 <div class="block">Converts a list of integers to an int array.</div>
 </td>
 </tr>
-<tr id="i22" class="altColor">
+<tr id="i24" class="altColor">
 <td class="colFirst"><code>static &lt;T&gt;&nbsp;T</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#reconcile(T,T)">reconcile</a></span>&#8203;(T&nbsp;val1,
          T&nbsp;val2)</code></th>
@@ -355,7 +370,7 @@ extends java.lang.Object</pre>
  calling reconcile(val1, val2, null, null, null).</div>
 </td>
 </tr>
-<tr id="i23" class="rowColor">
+<tr id="i25" class="rowColor">
 <td class="colFirst"><code>static &lt;T&gt;&nbsp;T</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#reconcile(T,T,java.lang.Boolean,java.lang.Boolean,java.lang.Boolean)">reconcile</a></span>&#8203;(T&nbsp;val1,
          T&nbsp;val2,
@@ -366,7 +381,7 @@ extends java.lang.Object</pre>
 <div class="block">Reconciles two values.</div>
 </td>
 </tr>
-<tr id="i24" class="altColor">
+<tr id="i26" class="altColor">
 <td class="colFirst"><code>static byte[]</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#reconcileByteArrays(byte%5B%5D,byte%5B%5D)">reconcileByteArrays</a></span>&#8203;(byte[]&nbsp;arr1,
                    byte[]&nbsp;arr2)</code></th>
@@ -374,7 +389,7 @@ extends java.lang.Object</pre>
 <div class="block">Reconciles two byte arrays.</div>
 </td>
 </tr>
-<tr id="i25" class="rowColor">
+<tr id="i27" class="rowColor">
 <td class="colFirst"><code>static int[]</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#reconcileIntArrays(int%5B%5D,int%5B%5D)">reconcileIntArrays</a></span>&#8203;(int[]&nbsp;arr1,
                   int[]&nbsp;arr2)</code></th>
@@ -382,7 +397,7 @@ extends java.lang.Object</pre>
 <div class="block">Reconciles two int arrays.</div>
 </td>
 </tr>
-<tr id="i26" class="altColor">
+<tr id="i28" class="altColor">
 <td class="colFirst"><code>static int[]</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#subarray(int%5B%5D,int,int)">subarray</a></span>&#8203;(int[]&nbsp;array,
         int&nbsp;startIndexInclusive,
@@ -391,7 +406,7 @@ extends java.lang.Object</pre>
 <div class="block">Produces a new array containing the elements between the start and end indices.</div>
 </td>
 </tr>
-<tr id="i27" class="rowColor">
+<tr id="i29" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#waitFor(long)">waitFor</a></span>&#8203;(long&nbsp;durationMs)</code></th>
 <td class="colLast">
@@ -890,7 +905,7 @@ extends java.lang.Object</pre>
 <div class="block">Wait for the duration.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>durationMs</code> - is the duration to wait for in milliseconds</dd>
+<dd><code>durationMs</code> - the duration to wait for in milliseconds</dd>
 </dl>
 </li>
 </ul>
@@ -904,14 +919,14 @@ extends java.lang.Object</pre>
 <div class="block">Execute tasks in parallel.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>tasks</code> - are the tasks to execute in parallel</dd>
+<dd><code>tasks</code> - are tasks to execute in parallel</dd>
 </dl>
 </li>
 </ul>
 <a id="executeTasks(java.util.Collection,int)">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>executeTasks</h4>
 <pre class="methodSignature">public static&nbsp;void&nbsp;executeTasks&#8203;(java.util.Collection&lt;java.lang.Runnable&gt;&nbsp;tasks,
@@ -919,8 +934,56 @@ extends java.lang.Object</pre>
 <div class="block">Execute tasks in parallel.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>tasks</code> - are the tasks to execute in parallel</dd>
-<dd><code>maxConcurrency</code> - is the maximum number of tasks to run in parallel</dd>
+<dd><code>tasks</code> - are tasks to execute in parallel</dd>
+<dd><code>maxConcurrency</code> - the maximum number of tasks to run in parallel</dd>
+</dl>
+</li>
+</ul>
+<a id="executeTasks(java.util.List)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>executeTasks</h4>
+<pre class="methodSignature">public&nbsp;&lt;T&gt;&nbsp;java.util.List&lt;T&gt;&nbsp;executeTasks&#8203;(java.util.List&lt;java.util.concurrent.Callable&lt;T&gt;&gt;&nbsp;tasks)
+                                   throws java.lang.InterruptedException,
+                                          java.util.concurrent.ExecutionException</pre>
+<div class="block">Execute tasks in parallel.</div>
+<dl>
+<dt><span class="paramLabel">Type Parameters:</span></dt>
+<dd><code>T</code> - parameterized type</dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>tasks</code> - the tasks to execute in parallel</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the results of each task</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.lang.InterruptedException</code></dd>
+<dd><code>java.util.concurrent.ExecutionException</code></dd>
+</dl>
+</li>
+</ul>
+<a id="executeTasks(java.util.List,int)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>executeTasks</h4>
+<pre class="methodSignature">public&nbsp;&lt;T&gt;&nbsp;java.util.List&lt;T&gt;&nbsp;executeTasks&#8203;(java.util.List&lt;java.util.concurrent.Callable&lt;T&gt;&gt;&nbsp;tasks,
+                                          int&nbsp;maxConcurrency)
+                                   throws java.lang.InterruptedException,
+                                          java.util.concurrent.ExecutionException</pre>
+<div class="block">Execute tasks in parallel.</div>
+<dl>
+<dt><span class="paramLabel">Type Parameters:</span></dt>
+<dd><code>T</code> - parameterized type</dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>tasks</code> - the tasks to execute in parallel</dd>
+<dd><code>maxConcurrency</code> - the maximum number of tasks to run in parallel</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the results of each task</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.lang.InterruptedException</code></dd>
+<dd><code>java.util.concurrent.ExecutionException</code></dd>
 </dl>
 </li>
 </ul>

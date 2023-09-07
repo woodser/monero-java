@@ -263,7 +263,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/common/MoneroConnectionManager.html#setAutoSwitch(boolean)">setAutoSwitch(boolean)</a></span> - Method in class monero.common.<a href="../monero/common/MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></dt>
 <dd>
-<div class="block">Automatically switch to best available connection if current connection is disconnected after being checked.</div>
+<div class="block">Automatically switch to the best available connection as connections are polled, based on priority, response time, and consistency.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroDaemonUpdateCheckResult.html#setAutoUri(java.lang.String)">setAutoUri(String)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroDaemonUpdateCheckResult.html" title="class in monero.daemon.model">MoneroDaemonUpdateCheckResult</a></dt>
 <dd>&nbsp;</dd>
@@ -331,6 +331,12 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroConnectionSpan.html#setConnectionId(java.lang.String)">setConnectionId(String)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroConnectionSpan.html" title="class in monero.daemon.model">MoneroConnectionSpan</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/wallet/model/MoneroWalletConfig.html#setConnectionManager(monero.common.MoneroConnectionManager)">setConnectionManager(MoneroConnectionManager)</a></span> - Method in class monero.wallet.model.<a href="../monero/wallet/model/MoneroWalletConfig.html" title="class in monero.wallet.model">MoneroWalletConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/wallet/MoneroWallet.html#setConnectionManager(monero.common.MoneroConnectionManager)">setConnectionManager(MoneroConnectionManager)</a></span> - Method in interface monero.wallet.<a href="../monero/wallet/MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a></dt>
+<dd>
+<div class="block">Set the wallet's daemon connection manager.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="../monero/common/MoneroRpcConnection.html#setCredentials(java.lang.String,java.lang.String)">setCredentials(String, String)</a></span> - Method in class monero.common.<a href="../monero/common/MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/model/MoneroDaemonInfo.html#setCredits(java.math.BigInteger)">setCredits(BigInteger)</a></span> - Method in class monero.daemon.model.<a href="../monero/daemon/model/MoneroDaemonInfo.html" title="class in monero.daemon.model">MoneroDaemonInfo</a></dt>
@@ -1405,14 +1411,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>
 <div class="block">Start the task loop.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="../monero/common/MoneroConnectionManager.html#startCheckingConnection()">startCheckingConnection()</a></span> - Method in class monero.common.<a href="../monero/common/MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></dt>
-<dd>
-<div class="block">Check the connection and start checking the connection periodically.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="../monero/common/MoneroConnectionManager.html#startCheckingConnection(java.lang.Long)">startCheckingConnection(Long)</a></span> - Method in class monero.common.<a href="../monero/common/MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></dt>
-<dd>
-<div class="block">Check the connection and start checking the connection periodically.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="../monero/wallet/MoneroWallet.html#startMining(java.lang.Long,java.lang.Boolean,java.lang.Boolean)">startMining(Long, Boolean, Boolean)</a></span> - Method in interface monero.wallet.<a href="../monero/wallet/MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a></dt>
 <dd>
 <div class="block">Start mining.</div>
@@ -1427,6 +1425,18 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/MoneroDaemonRpc.html#startMining(java.lang.String,java.lang.Long,java.lang.Boolean,java.lang.Boolean)">startMining(String, Long, Boolean, Boolean)</a></span> - Method in class monero.daemon.<a href="../monero/daemon/MoneroDaemonRpc.html" title="class in monero.daemon">MoneroDaemonRpc</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/common/MoneroConnectionManager.html#startPolling()">startPolling()</a></span> - Method in class monero.common.<a href="../monero/common/MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></dt>
+<dd>
+<div class="block">Start polling connections.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="../monero/common/MoneroConnectionManager.html#startPolling(java.lang.Long)">startPolling(Long)</a></span> - Method in class monero.common.<a href="../monero/common/MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></dt>
+<dd>
+<div class="block">Start polling connections.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="../monero/common/MoneroConnectionManager.html#startPolling(java.lang.Long,java.lang.Boolean,java.lang.Long,monero.common.MoneroConnectionManager.PollType,java.util.Collection)">startPolling(Long, Boolean, Long, MoneroConnectionManager.PollType, Collection&lt;MoneroRpcConnection&gt;)</a></span> - Method in class monero.common.<a href="../monero/common/MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></dt>
+<dd>
+<div class="block">Start polling connections.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="../monero/wallet/MoneroWallet.html#startSyncing()">startSyncing()</a></span> - Method in interface monero.wallet.<a href="../monero/wallet/MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a></dt>
 <dd>
 <div class="block">Start background synchronizing.</div>
@@ -1453,10 +1463,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>
 <div class="block">Save and close the current wallet and stop the RPC server.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="../monero/common/MoneroConnectionManager.html#stopCheckingConnection()">stopCheckingConnection()</a></span> - Method in class monero.common.<a href="../monero/common/MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></dt>
-<dd>
-<div class="block">Stop checking the connection status periodically.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/MoneroDaemon.html#stopMining()">stopMining()</a></span> - Method in interface monero.daemon.<a href="../monero/daemon/MoneroDaemon.html" title="interface in monero.daemon">MoneroDaemon</a></dt>
 <dd>
 <div class="block">Stop mining.</div>
@@ -1471,6 +1477,10 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="../monero/wallet/MoneroWalletRpc.html#stopMining()">stopMining()</a></span> - Method in class monero.wallet.<a href="../monero/wallet/MoneroWalletRpc.html" title="class in monero.wallet">MoneroWalletRpc</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="../monero/common/MoneroConnectionManager.html#stopPolling()">stopPolling()</a></span> - Method in class monero.common.<a href="../monero/common/MoneroConnectionManager.html" title="class in monero.common">MoneroConnectionManager</a></dt>
+<dd>
+<div class="block">Stop polling connections.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="../monero/daemon/MoneroDaemonRpc.html#stopProcess()">stopProcess()</a></span> - Method in class monero.daemon.<a href="../monero/daemon/MoneroDaemonRpc.html" title="class in monero.daemon">MoneroDaemonRpc</a></dt>
 <dd>
 <div class="block">Stop the internal process running monero-wallet-rpc, if applicable.</div>
