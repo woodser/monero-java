@@ -543,6 +543,15 @@ public abstract class TestMoneroWalletCommon {
     assertEquals(connection1, wallet.getDaemonConnection());
     assertTrue(wallet.isConnectedToDaemon());
 
+    // test override with bad connection
+    wallet.addListener(new MoneroWalletListener());
+    connectionManager.setAutoSwitch(false);
+    connectionManager.setConnection("http://foo.bar.xyz");
+    assertEquals("http://foo.bar.xyz", wallet.getDaemonConnection().getUri());
+    assertEquals(wallet.isConnectedToDaemon(), false);
+    GenUtils.waitFor(5000);
+    assertEquals(wallet.isConnectedToDaemon(), false);
+
     // set to another connection manager
     MoneroConnectionManager connectionManager2 = new MoneroConnectionManager();
     connectionManager2.setConnection(connection2);
