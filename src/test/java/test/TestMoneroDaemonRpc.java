@@ -1357,13 +1357,11 @@ public class TestMoneroDaemonRpc {
       
       // wait for next block notification
       MoneroBlockHeader header = daemon.waitForNextBlockHeader();
+      daemon.removeListener(listener); // unregister listener so daemon does not keep polling
       testBlockHeader(header, true);
       
       // test that listener was called with equivalent header
       assertEquals(header, listener.getLastBlockHeader());
-      
-      // unregister listener so daemon does not keep polling
-      daemon.removeListener(listener);
     } catch (MoneroError e) {
       throw e;
     } finally {
