@@ -103,7 +103,7 @@ walletFull.close(true);
 * [API and model overview with visual diagrams](https://moneroecosystem.org/monero-java/monero-spec.pdf)
 * [JUnit tests](src/main/test/java/test)
 * [Using TOR](docs/tor.md)
-* [monero-javascript documentation](https://github.com/monero-ecosystem/monero-javascript#documentation) provides additional documentation which translates to monero-java
+* [monero-ts documentation](https://github.com/monero-ecosystem/monero-ts#documentation) provides additional documentation which translates to monero-java
 
 ## Using monero-java in your project
 
@@ -203,7 +203,7 @@ For example: `export LD_PRELOAD=/path/to/libjemalloc.a` then run your app.
 
 ## Related projects
 
-* [monero-javascript](https://github.com/monero-ecosystem/monero-javascript)
+* [monero-ts](https://github.com/monero-ecosystem/monero-ts)
 * [monero-cpp](https://github.com/monero-ecosystem/monero-cpp)
 * [Haveno](https://github.com/haveno-dex/haveno)
 
