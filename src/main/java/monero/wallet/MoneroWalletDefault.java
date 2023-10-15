@@ -420,4 +420,17 @@ abstract class MoneroWalletDefault implements MoneroWallet {
     if (query.getTxQuery().getBlock() == null) query.getTxQuery().setBlock(new MoneroBlock().setTxs(query.getTxQuery()));
     return query;
   }
+
+
+  protected static MoneroAccount sanitizeAccount(MoneroAccount account) {
+    if (account.getSubaddresses() != null) {
+      for (MoneroSubaddress subaddress : account.getSubaddresses()) sanitizeSubaddress(subaddress);
+    }
+    return account;
+  }
+
+  protected static MoneroSubaddress sanitizeSubaddress(MoneroSubaddress subaddress) {
+    if ("".equals(subaddress.getLabel())) subaddress.setLabel(null);
+    return subaddress;
+  }
 }

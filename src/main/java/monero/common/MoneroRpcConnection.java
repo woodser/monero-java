@@ -1,19 +1,20 @@
 package monero.common;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
-import org.apache.hc.client5.http.auth.AuthScope;
-import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import common.utils.JsonUtils;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 
 
 /**
@@ -21,11 +22,6 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
  * TODO: refactor MoneroRpcConnection extends MoneroConnection?
  */
 public class MoneroRpcConnection extends MoneroHttpConnection {
-
-  // instance variables
-  private String username;
-  private String password;
-  private String zmqUri;
 
   public MoneroRpcConnection(URI uri) {
     this(uri, null, null, null);
@@ -74,56 +70,19 @@ public class MoneroRpcConnection extends MoneroHttpConnection {
   }
 
   public MoneroRpcConnection setUri(URI uri) {
-    super.setUri(uri);
-    setCredentials(username, password); // update credentials
-    return this;
+    return (MoneroRpcConnection) super.setUri(uri);
   }
 
   public MoneroRpcConnection setCredentials(String username, String password) {
-    try { if (this.client != null) this.client.close(); }
-    catch (IOException e) { throw new MoneroError(e); }
-    if ("".equals(username)) username = null;
-    if ("".equals(password)) password = null;
-    if (username != null || password != null) {
-      if (username == null) throw new MoneroError("username cannot be empty because password is not empty");
-      if (password == null) throw new MoneroError("password cannot be empty because username is not empty");
-      URI uriObj = MoneroUtils.parseUri(uri);
-      BasicCredentialsProvider creds = new BasicCredentialsProvider();
-      creds.setCredentials(new AuthScope(uriObj.getHost(), uriObj.getPort()), new UsernamePasswordCredentials(username, password.toCharArray()));
-      this.client = HttpClients.custom().setDefaultCredentialsProvider(creds).build();
-    } else {
-      this.client = HttpClients.createDefault();
-    }
-    if (!Objects.equals(this.username, username) || !Objects.equals(this.password, password)) {
-      isOnline = null;
-      isAuthenticated = null;
-    }
-    this.username = username;
-    this.password = password;
-    return this;
+    return (MoneroRpcConnection) super.setCredentials(username, password);
   }
-  
-  public String getUsername() {
-    return username;
-  }
-  
-  public String getPassword() {
-    return password;
-  }
-  
-  
-  public String getZmqUri() {
-    return zmqUri;
-  }
-  
+
   public MoneroRpcConnection setZmqUri(String zmqUri) {
-    this.zmqUri = zmqUri;
-    return this;
+    return (MoneroRpcConnection) super.setZmqUri(zmqUri);
   }
 
   public MoneroRpcConnection setProxyUri(String proxyUri) {
-    this.proxyUri = proxyUri;
-    return this;
+    return (MoneroRpcConnection) super.setProxyUri(proxyUri);
   }
 
   /**
@@ -134,15 +93,7 @@ public class MoneroRpcConnection extends MoneroHttpConnection {
    * @return this connection
    */
   public MoneroRpcConnection setPriority(int priority) {
-    if (!(priority >= 0)) throw new MoneroError("Priority must be >= 0");
-    this.priority = priority;
-    return this;
-  }
-
-  @Override
-  protected HttpPost getHttpPost()
-  {
-    return new HttpPost(uri + "/json_rpc");
+    return (MoneroRpcConnection) super.setPriority(priority);
   }
 
   /**
@@ -185,37 +136,123 @@ public class MoneroRpcConnection extends MoneroHttpConnection {
     return isOnlineBefore != isOnline || isAuthenticatedBefore != isAuthenticated;
   }
 
+
+  /**
+   * Send a request to the RPC API.
+   *
+   * @param method specifies the method to request
+   * @return the RPC API response as a map
+   */
+  public Map<String, Object> sendJsonRequest(String method) {
+    return sendJsonRequest(method, (Map<String, Object>) null);
+  }
+
   /**
    * Send a request to the RPC API.
    *
    * @param method is the method to request
-   * @param params are the request's input parameters (supports &lt;Map&lt;String, Object&gt;, List&lt;Object&gt;&lt;/code&gt;, String, etc.)
+   * @param params are the request's input parameters (supports &lt;Map&lt;String, Object&gt;, List&lt;Object&gt;&lt;/code&gt;, String, etc)
+   * @return the RPC API response as a map
+   */
+  public Map<String, Object> sendJsonRequest(String method, Object params) {
+    return sendJsonRequest(method, params, null);
+  }
+
+  /**
+   * Send a request to the RPC API.
+   *
+   * @param method is the method to request
+   * @param params are the request's input parameters (supports &lt;Map&lt;String, Object&gt;, List&lt;Object&gt;&lt;/code&gt;, String, etc)
    * @param timeoutInMs is the request timeout in milliseconds
    * @return the RPC API response as a map
    */
   public Map<String, Object> sendJsonRequest(String method, Object params, Long timeoutInMs) {
-    // build request body
-    Map<String, Object> body = new HashMap<>();
-    body.put("jsonrpc", "2.0");
-    body.put("id", "0");
-    body.put("method", method);
-    if (params != null) body.put("params", params);
-
+    CloseableHttpResponse resp = null;
     try {
-      Map<String, Object> respMap = super.sendJsonRequest(method, body, timeoutInMs);
+
+      // build request body
+      Map<String, Object> body = new HashMap<String, Object>();
+      body.put("jsonrpc", "2.0");
+      body.put("id", "0");
+      body.put("method", method);
+      if (params != null) body.put("params", params);
+
+      // send http request
+      HttpPost post = new HttpPost(uri.toString() + "/json_rpc");
+      post.setConfig(getRequestConfig(timeoutInMs));
+      HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
+      post.setEntity(entity);
+      Map<String, Object> respMap;
+      synchronized (this) {
+
+        // logging
+        if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending json request with method='" + method + "', body=" + JsonUtils.serialize(body) + ", uri=" + uri);
+        if (printStackTrace) {
+          try {
+            throw new RuntimeException("Debug stack trace for json request with method '" + method + "' and body " + JsonUtils.serialize(body));
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+
+        // make request
+        long startTime = System.currentTimeMillis();
+        resp = request(post);
+
+        // validate response
+        validateHttpResponse(resp);
+
+        // deserialize response
+        respMap = JsonUtils.toMap(MAPPER, EntityUtils.toString(resp.getEntity(), "UTF-8"));
+        EntityUtils.consume(resp.getEntity());
+        if (MoneroUtils.getLogLevel() >= 3) {
+          String respStr = JsonUtils.serialize(respMap);
+          respStr = respStr.substring(0, Math.min(10000, respStr.length()));
+          MoneroUtils.log(3, "Received json response from method='" + method + "', response=" + respStr + ", uri=" + uri + " (" + (System.currentTimeMillis() - startTime) + " ms)");
+        }
+      }
+
       // check rpc response for errors
       validateRpcResponse(respMap, method, params);
       return respMap;
-
     } catch (MoneroRpcError e1) {
       throw e1;
     } catch (Exception e2) {
       throw new MoneroError(e2);
+    } finally {
+      try { resp.close(); }
+      catch (Exception e) {}
     }
   }
 
   /**
-   * Send an RPC request to the given path and with the given parameters.
+   * Send a RPC request to the given path and with the given paramters.
+   *
+   * E.g. "/get_transactions" with params
+   *
+   * @param path is the url path of the request to invoke
+   * @return the request's deserialized response
+   */
+  public Map<String, Object>sendPathRequest(String path) {
+    return sendPathRequest(path, null, null);
+  }
+
+  /**
+   * Send a RPC request to the given path and with the given paramters.
+   *
+   * E.g. "/get_transactions" with params
+   *
+   * @param path is the url path of the request to invoke
+   * @param params are request parameters sent in the body
+   * @return the request's deserialized response
+   */
+  public Map<String, Object> sendPathRequest(String path, Map<String, Object> params) {
+    return sendPathRequest(path, params, null);
+  }
+
+  /**
+   * Send a RPC request to the given path and with the given paramters.
+   *
    * E.g. "/get_transactions" with params
    *
    * @param path is the url path of the request to invoke
@@ -224,8 +261,46 @@ public class MoneroRpcConnection extends MoneroHttpConnection {
    * @return the request's deserialized response
    */
   public Map<String, Object> sendPathRequest(String path, Map<String, Object> params, Long timeoutInMs) {
+    CloseableHttpResponse resp = null;
     try {
-      Map<String, Object> respMap = super.sendPathRequest(path, params, timeoutInMs);
+
+      // send http request
+      HttpPost post = new HttpPost(uri.toString() + "/" + path);
+      if (params != null) {
+        HttpEntity entity = new StringEntity(JsonUtils.serialize(params));
+        post.setEntity(entity);
+      }
+      post.setConfig(getRequestConfig(timeoutInMs));
+      Map<String, Object> respMap;
+      synchronized (this) {
+
+        // logging
+        if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending path request with path='" + path + "', params=" + JsonUtils.serialize(params) + ", uri=" + uri);
+        if (printStackTrace) {
+          try {
+            throw new RuntimeException("Debug stack trace for path request with path '" + path + "' and params " + JsonUtils.serialize(params));
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+
+        // send request
+        long startTime = System.currentTimeMillis();
+        resp = request(post);
+
+        // validate response
+        validateHttpResponse(resp);
+
+        // deserialize response
+        respMap = JsonUtils.toMap(MAPPER, EntityUtils.toString(resp.getEntity(), "UTF-8"));
+        EntityUtils.consume(resp.getEntity());
+        if (MoneroUtils.getLogLevel() >= 3) {
+          String respStr = JsonUtils.serialize(respMap);
+          respStr = respStr.substring(0, Math.min(10000, respStr.length()));
+          MoneroUtils.log(3, "Received path response from path='" + path + "', response=" + respStr + ", uri=" + uri + " (" + (System.currentTimeMillis() - startTime) + " ms)");
+        }
+      }
+
       // check rpc response for errors
       validateRpcResponse(respMap, path, params);
       return respMap;
@@ -233,6 +308,77 @@ public class MoneroRpcConnection extends MoneroHttpConnection {
       throw e1;
     } catch (Exception e2) {
       throw new MoneroError(e2);
+    } finally {
+      try { resp.close(); }
+      catch (Exception e) {}
+    }
+  }
+
+  /**
+   * Send a binary RPC request.
+   *
+   * @param path is the path of the binary RPC method to invoke
+   * @param params are the request parameters
+   * @return byte[] is the binary response
+   */
+  public byte[] sendBinaryRequest(String path, Map<String, Object> params) {
+    return sendBinaryRequest(path, params, null);
+  }
+
+  /**
+   * Send a binary RPC request.
+   *
+   * @param path is the path of the binary RPC method to invoke
+   * @param params are the request parameters
+   * @param timeoutInMs is the request timeout in milliseconds
+   * @return byte[] is the binary response
+   */
+  public byte[] sendBinaryRequest(String path, Map<String, Object> params, Long timeoutInMs) {
+
+    // serialize params to monero's portable binary storage format
+    byte[] paramsBin = MoneroUtils.mapToBinary(params);
+    CloseableHttpResponse resp = null;
+    try {
+
+      // create http request
+      HttpPost post = new HttpPost(uri.toString() + "/" + path);
+      post.setConfig(getRequestConfig(timeoutInMs));
+      if (paramsBin != null) {
+        HttpEntity entity = new ByteArrayEntity(paramsBin, ContentType.DEFAULT_BINARY);
+        post.setEntity(entity);
+      }
+
+      // send http request
+      synchronized (this) {
+
+        // logging
+        if (MoneroUtils.getLogLevel() >= 2) MoneroUtils.log(2, "Sending binary request with path='" + path + "', params=" + JsonUtils.serialize(params) + ", uri=" + uri);
+        if (printStackTrace) {
+          try {
+            throw new RuntimeException("Debug stack trace for binary request with path '" + path);
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+
+        // send request
+        resp = request(post);
+
+        // validate response
+        validateHttpResponse(resp);
+
+        // deserialize response
+        byte[] entity = EntityUtils.toByteArray(resp.getEntity());
+        EntityUtils.consume(resp.getEntity());
+        return entity;
+      }
+    } catch (MoneroRpcError e1) {
+      throw e1;
+    } catch (Exception e2) {
+      throw new MoneroError(e2);
+    } finally {
+      try { resp.close(); }
+      catch (Exception e) {}
     }
   }
 

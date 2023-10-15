@@ -98,7 +98,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    * @param jniWalletHandle memory address of the wallet in c++
    * @param password password of the wallet instance
    */
-  private MoneroWalletFull(long jniWalletHandle, String password) {
+  protected MoneroWalletFull(long jniWalletHandle, String password) {
     this.jniWalletHandle = jniWalletHandle;
     this.jniListener = new WalletJniListener();
     this.password = password;
@@ -1858,18 +1858,6 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private void assertNotClosed() {
     if (isClosed) throw new MoneroError("Wallet is closed");
-  }
-  
-  private static MoneroAccount sanitizeAccount(MoneroAccount account) {
-    if (account.getSubaddresses() != null) {
-      for (MoneroSubaddress subaddress : account.getSubaddresses()) sanitizeSubaddress(subaddress);
-    }
-    return account;
-  }
-  
-  private static MoneroSubaddress sanitizeSubaddress(MoneroSubaddress subaddress) {
-    if ("".equals(subaddress.getLabel())) subaddress.setLabel(null);
-    return subaddress;
   }
   
   private static MoneroBlock sanitizeBlock(MoneroBlock block) {
