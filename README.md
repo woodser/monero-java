@@ -1,6 +1,6 @@
 # Monero Java Library
 
-A Java library for creating Monero applications using RPC and JNI bindings to [monero v0.18.2.2 'Fluorine Fermi'](https://github.com/monero-project/monero/tree/v0.18.2.2).
+A Java library for creating Monero applications using RPC and JNI bindings to [monero v0.18.3.1 'Fluorine Fermi'](https://github.com/monero-project/monero/tree/v0.18.3.1).
 
 * Supports wallet and daemon RPC clients.
 * Supports client-side wallets using JNI bindings.
@@ -103,7 +103,7 @@ walletFull.close(true);
 * [API and model overview with visual diagrams](https://moneroecosystem.org/monero-java/monero-spec.pdf)
 * [JUnit tests](src/main/test/java/test)
 * [Using TOR](docs/tor.md)
-* [monero-javascript documentation](https://github.com/monero-ecosystem/monero-javascript#documentation) provides additional documentation which translates to monero-java
+* [monero-ts documentation](https://github.com/monero-ecosystem/monero-ts#documentation) provides additional documentation which translates to monero-java
 
 ## Using monero-java in your project
 
@@ -113,17 +113,17 @@ walletFull.close(true);
 <dependency>
   <groupId>io.github.monero-ecosystem</groupId>
   <artifactId>monero-java</artifactId>
-  <version>0.8.6</version>
+  <version>0.8.7</version>
 </dependency>
 ```
 
 #### For Gradle, add to build.gradle:
 
-`compile 'io.github.monero-ecosystem:monero-java:0.8.6'`
+`compile 'io.github.monero-ecosystem:monero-java:0.8.7'`
 
 You are now ready to use this library with [monerod](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.
 
-If you want to use client-side wallets via native JNI bindings, first [build the JNI shared libraries](#building-jni-shared-libraries-from-source).
+If you want to use client-side wallets, first [build the JNI shared libraries](#building-jni-shared-libraries-from-source).
 
 #### If using RPC servers:
 
@@ -203,7 +203,7 @@ For example: `export LD_PRELOAD=/path/to/libjemalloc.a` then run your app.
 
 ## Related projects
 
-* [monero-javascript](https://github.com/monero-ecosystem/monero-javascript)
+* [monero-ts](https://github.com/monero-ecosystem/monero-ts)
 * [monero-cpp](https://github.com/monero-ecosystem/monero-cpp)
 * [Haveno](https://github.com/haveno-dex/haveno)
 

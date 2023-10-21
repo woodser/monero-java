@@ -4,7 +4,7 @@ collapse MoneroOutputWallet, MoneroTxWallet into MoneroOutput, MoneroTx?
 recover wallet when stuck opened by another application
 logging config for rpc requests
 support wallet.changePassword()
-moveTo(path, password) password not supported, update to be like monero-javascript
+moveTo(path, password) password not supported, update to be like monero-ts
 restore height is lost after closing wallet in JNI but not WASM
 organize todos
 sync(listener, startHeight) api change
