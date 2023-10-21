@@ -1,6 +1,6 @@
 package monero.common;
 
-public class MoneroLWSError extends MoneroError {
+public class MoneroLwsError extends MoneroError {
 
     /**
      * Construct the exception.
@@ -8,11 +8,11 @@ public class MoneroLWSError extends MoneroError {
      * @param message is a human-readable description of the error
      * @param code    is the error code (optional)
      */
-    public MoneroLWSError(String message, Integer code) {
+    public MoneroLwsError(String message, Integer code) {
         super(message, code);
     }
 
-    public MoneroLWSError(Exception e)
+    public MoneroLwsError(Exception e)
     {
         super(e);
     }

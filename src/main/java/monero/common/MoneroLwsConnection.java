@@ -10,22 +10,22 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MoneroLWSConnection extends MoneroHttpConnection {
+public class MoneroLwsConnection extends MoneroHttpConnection {
 
     private String auth;
     private String adminPath;
     private Long timeoutInMs;
 
-    public MoneroLWSConnection(String uri) {
+    public MoneroLwsConnection(String uri) {
         this(uri, "");
     }
 
-    public MoneroLWSConnection(String uri, String auth)
+    public MoneroLwsConnection(String uri, String auth)
     {
         this(uri, auth, 180000L);
     }
 
-    public MoneroLWSConnection(String uri, String auth, Long timeoutInMs) {
+    public MoneroLwsConnection(String uri, String auth, Long timeoutInMs) {
         super(uri);
 
         this.auth = auth;
@@ -173,7 +173,7 @@ public class MoneroLWSConnection extends MoneroHttpConnection {
         }
         else if (requiresAuthentication())
         {
-            throw new MoneroLWSError("Unauthorized ", 401);
+            throw new MoneroLwsError("Unauthorized ", 401);
         }
 
         return sendJsonRequest(method, params, timeoutInMs);
