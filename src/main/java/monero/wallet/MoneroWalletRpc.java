@@ -1242,7 +1242,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     GenUtils.assertNull(config.getBelowAmount());
     GenUtils.assertNull("Splitting is not applicable when sweeping output", config.getCanSplit());
     if (config.getDestinations() == null || config.getDestinations().size() != 1 || config.getDestinations().get(0).getAddress() == null || config.getDestinations().get(0).getAddress().isEmpty()) throw new MoneroError("Must provide exactly one destination address to sweep output to");
-    if (config.getSubtractFeeFrom() != null && config.getSubtractFeeFrom().size() > 0) throw new MoneroError("Sweep transfers do not support subtracting fees from destinations");
+    if (config.getSubtractFeeFrom() != null && config.getSubtractFeeFrom().size() > 0) throw new MoneroError("Sweep transactions do not support subtracting fees from destinations");
     
     // build request parameters
     Map<String, Object> params = new HashMap<String, Object>();
@@ -1283,6 +1283,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (config.getKeyImage() != null) throw new MoneroError("Key image defined; use sweepOutput() to sweep an output by its key image");
     if (config.getSubaddressIndices() != null && config.getSubaddressIndices().isEmpty()) config.setSubaddressIndices((List<Integer>) null);
     if (config.getAccountIndex() == null && config.getSubaddressIndices() != null) throw new MoneroError("Must specify account index if subaddress indices are specified");
+    if (config.getSubtractFeeFrom() != null && config.getSubtractFeeFrom().size() > 0) throw new MoneroError("Sweep transactions do not support subtracting fees from destinations");
     
     // determine account and subaddress indices to sweep; default to all with unlocked balance if not specified
     LinkedHashMap<Integer, List<Integer>> indices = new LinkedHashMap<Integer, List<Integer>>();  // java type preserves insertion order
@@ -2757,7 +2758,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   /**
    * Initializes a sent transaction.
    * 
-   * TODO: remove copyDestinations after >18.2.2 when subtractFeeFrom fully supported
+   * TODO: remove copyDestinations after >18.3.1 when subtractFeeFrom fully supported
    * 
    * @param config is the send configuration
    * @param tx is an existing transaction to initialize (optional)
@@ -3055,7 +3056,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (isOutgoing) {
         tx.setIsOutgoing(true);
         if (tx.getOutgoingTransfer() != null) {
-          if (((MoneroOutgoingTransfer) transfer).getDestinations() != null) tx.getOutgoingTransfer().setDestinations(null); // overwrite to avoid reconcile error TODO: remove after >18.2.2 when amounts_by_dest supported
+          if (((MoneroOutgoingTransfer) transfer).getDestinations() != null) tx.getOutgoingTransfer().setDestinations(null); // overwrite to avoid reconcile error TODO: remove after >18.3.1 when amounts_by_dest supported
           tx.getOutgoingTransfer().merge(transfer);
         }
         else tx.setOutgoingTransfer((MoneroOutgoingTransfer) transfer);

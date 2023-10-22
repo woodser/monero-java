@@ -38,7 +38,7 @@ public class TaskLooper {
    */
   public synchronized TaskLooper start(long periodInMs) {
     synchronized (this) {
-      this.periodInMs = periodInMs;
+      setPeriodInMs(periodInMs);
       if (isStarted) return this;
       isStarted = true;
       
@@ -98,6 +98,7 @@ public class TaskLooper {
    * @param periodInMs the loop period in milliseconds
    */
   public void setPeriodInMs(long periodInMs) {
+    if (periodInMs <= 0) throw new RuntimeException("Looper period must be greater than 0 ms");
     synchronized (this) {
       this.periodInMs = periodInMs;
     }

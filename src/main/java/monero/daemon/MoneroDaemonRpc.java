@@ -1177,7 +1177,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     
     // build miner tx
     Map<String, Object> rpcMinerTx = (Map<String, Object>) (rpcBlock.containsKey("json") ? JsonUtils.deserialize(MoneroRpcConnection.MAPPER, (String) rpcBlock.get("json"), new TypeReference<Map<String, Object>>(){}).get("miner_tx") : rpcBlock.get("miner_tx")); // may need to be parsed from json
-    MoneroTx minerTx = new MoneroTx().setIsConfirmed(true).setIsMinerTx(true);
+    MoneroTx minerTx = new MoneroTx().setIsConfirmed(true).setInTxPool(false).setIsMinerTx(true);
     MoneroDaemonRpc.convertRpcTx(rpcMinerTx, minerTx);
     block.setMinerTx(minerTx);
     

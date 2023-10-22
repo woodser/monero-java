@@ -543,6 +543,15 @@ public abstract class TestMoneroWalletCommon {
     assertEquals(connection1, wallet.getDaemonConnection());
     assertTrue(wallet.isConnectedToDaemon());
 
+    // test override with bad connection
+    wallet.addListener(new MoneroWalletListener());
+    connectionManager.setAutoSwitch(false);
+    connectionManager.setConnection("http://foo.bar.xyz");
+    assertEquals("http://foo.bar.xyz", wallet.getDaemonConnection().getUri());
+    assertEquals(wallet.isConnectedToDaemon(), false);
+    GenUtils.waitFor(5000);
+    assertEquals(wallet.isConnectedToDaemon(), false);
+
     // set to another connection manager
     MoneroConnectionManager connectionManager2 = new MoneroConnectionManager();
     connectionManager2.setConnection(connection2);
@@ -5520,7 +5529,7 @@ public abstract class TestMoneroWalletCommon {
       boolean subtractFeeFromDestinations = ctx.config.getSubtractFeeFrom() != null && ctx.config.getSubtractFeeFrom().size() > 0;
       for (MoneroTxWallet tx : txs) {
 
-        // TODO: remove this after >18.2.2 when amounts_by_dest_list is official
+        // TODO: remove this after >18.3.1 when amounts_by_dest_list is official
         if (tx.getOutgoingTransfer().getDestinations() == null) {
           System.err.println("Tx missing destinations");
           return;
@@ -5737,7 +5746,7 @@ public abstract class TestMoneroWalletCommon {
       // test destinations of sent tx
       if (tx.getOutgoingTransfer().getDestinations() == null) {
         assertTrue(config.getCanSplit());
-        System.err.println("Destinations not returned from split transactions"); // TODO: remove this after >18.2.2 when amounts_by_dest_list official
+        System.err.println("Destinations not returned from split transactions"); // TODO: remove this after >18.3.1 when amounts_by_dest_list official
       } else {
         assertNotNull(tx.getOutgoingTransfer().getDestinations());
         assertTrue(tx.getOutgoingTransfer().getDestinations().size() > 0);
