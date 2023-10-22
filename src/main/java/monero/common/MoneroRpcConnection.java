@@ -151,7 +151,7 @@ public class MoneroRpcConnection extends MoneroHttpConnection {
    * Send a request to the RPC API.
    *
    * @param method is the method to request
-   * @param params are the request's input parameters (supports &lt;Map&lt;String, Object&gt;, List&lt;Object&gt;&lt;/code&gt;, String, etc)
+   * @param params are the request's input parameters (supports &lt;Map&lt;String, Object&gt;, List&lt;Object&gt;&lt;/code&gt;, String, etc.)
    * @return the RPC API response as a map
    */
   public Map<String, Object> sendJsonRequest(String method, Object params) {
@@ -162,7 +162,7 @@ public class MoneroRpcConnection extends MoneroHttpConnection {
    * Send a request to the RPC API.
    *
    * @param method is the method to request
-   * @param params are the request's input parameters (supports &lt;Map&lt;String, Object&gt;, List&lt;Object&gt;&lt;/code&gt;, String, etc)
+   * @param params are the request's input parameters (supports &lt;Map&lt;String, Object&gt;, List&lt;Object&gt;&lt;/code&gt;, String, etc.)
    * @param timeoutInMs is the request timeout in milliseconds
    * @return the RPC API response as a map
    */
@@ -171,7 +171,7 @@ public class MoneroRpcConnection extends MoneroHttpConnection {
     try {
 
       // build request body
-      Map<String, Object> body = new HashMap<String, Object>();
+      Map<String, Object> body = new HashMap<>();
       body.put("jsonrpc", "2.0");
       body.put("id", "0");
       body.put("method", method);
@@ -221,13 +221,12 @@ public class MoneroRpcConnection extends MoneroHttpConnection {
       throw new MoneroError(e2);
     } finally {
       try { resp.close(); }
-      catch (Exception e) {}
+      catch (Exception ignored) {}
     }
   }
 
   /**
-   * Send a RPC request to the given path and with the given paramters.
-   *
+   * Send an RPC request to the given path and with the given parameters.
    * E.g. "/get_transactions" with params
    *
    * @param path is the url path of the request to invoke
@@ -238,8 +237,7 @@ public class MoneroRpcConnection extends MoneroHttpConnection {
   }
 
   /**
-   * Send a RPC request to the given path and with the given paramters.
-   *
+   * Send an RPC request to the given path and with the given parameters.
    * E.g. "/get_transactions" with params
    *
    * @param path is the url path of the request to invoke
@@ -251,8 +249,7 @@ public class MoneroRpcConnection extends MoneroHttpConnection {
   }
 
   /**
-   * Send a RPC request to the given path and with the given paramters.
-   *
+   * Send an RPC request to the given path and with the given parameters.
    * E.g. "/get_transactions" with params
    *
    * @param path is the url path of the request to invoke
@@ -310,7 +307,7 @@ public class MoneroRpcConnection extends MoneroHttpConnection {
       throw new MoneroError(e2);
     } finally {
       try { resp.close(); }
-      catch (Exception e) {}
+      catch (Exception ignored) {}
     }
   }
 
@@ -378,7 +375,7 @@ public class MoneroRpcConnection extends MoneroHttpConnection {
       throw new MoneroError(e2);
     } finally {
       try { resp.close(); }
-      catch (Exception e) {}
+      catch (Exception ignored) {}
     }
   }
 

@@ -43,6 +43,7 @@ public abstract class MoneroWalletJni extends MoneroWalletDefault {
      * @param password password of the wallet instance
      */
     protected MoneroWalletJni(long jniWalletHandle, String password) {
+        super();
         this.jniWalletHandle = jniWalletHandle;
         this.jniListener = new MoneroWalletJni.WalletJniListener();
         this.password = password;

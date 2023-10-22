@@ -9,26 +9,26 @@ public class MoneroHttpError extends MoneroError {
 
     private static final long serialVersionUID = -6282368684634114151L;
 
-    private String rpcMethod;
-    private Object rpcParams;
+    private String httpMethod;
+    private Object httpParams;
 
-    public MoneroHttpError(String rpcDescription, Integer rpcCode, String rpcMethod, Object rpcParams) {
-        super(rpcDescription, rpcCode);
-        this.rpcMethod = rpcMethod;
-        this.rpcParams = rpcParams;
+    public MoneroHttpError(String httpDescription, Integer httpCode, String httpMethod, Object httpParams) {
+        super(httpDescription, httpCode);
+        this.httpMethod = httpMethod;
+        this.httpParams = httpParams;
     }
 
-    public String getRpcMethod() {
-        return rpcMethod;
+    public String getHttpMethod() {
+        return httpMethod;
     }
 
-    public Object getRpcParams() {
-        return rpcParams;
+    public Object getHttpParams() {
+        return httpParams;
     }
 
     public String toString() {
         String str = super.toString();
-        if (rpcMethod != null || rpcParams != null) str += "\nRPC request: '" + rpcMethod + "' with params: " + JsonUtils.serialize(rpcParams);
+        if (httpMethod != null || httpParams != null) str += "\nRPC request: '" + httpMethod + "' with params: " + JsonUtils.serialize(httpParams);
         return str;
     }
 }

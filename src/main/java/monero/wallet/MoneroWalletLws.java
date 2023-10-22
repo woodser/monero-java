@@ -1,6 +1,6 @@
 package monero.wallet;
 
-/**
+/*
  * Copyright (c) woodser
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,53 +22,17 @@ package monero.wallet;
  * SOFTWARE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
 import common.utils.GenUtils;
 import common.utils.JsonUtils;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import monero.common.MoneroError;
 import monero.common.MoneroLwsConnection;
 import monero.common.MoneroRpcConnection;
-import monero.common.MoneroUtils;
 import monero.daemon.model.MoneroBlock;
-import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
-import monero.daemon.model.MoneroTx;
-import monero.daemon.model.MoneroVersion;
-import monero.wallet.model.MoneroAccount;
-import monero.wallet.model.MoneroAccountTag;
-import monero.wallet.model.MoneroAddressBookEntry;
-import monero.wallet.model.MoneroCheckReserve;
-import monero.wallet.model.MoneroCheckTx;
-import monero.wallet.model.MoneroIncomingTransfer;
-import monero.wallet.model.MoneroIntegratedAddress;
-import monero.wallet.model.MoneroKeyImageImportResult;
-import monero.wallet.model.MoneroMessageSignatureResult;
-import monero.wallet.model.MoneroMessageSignatureType;
-import monero.wallet.model.MoneroMultisigInfo;
-import monero.wallet.model.MoneroMultisigInitResult;
-import monero.wallet.model.MoneroMultisigSignResult;
-import monero.wallet.model.MoneroOutputQuery;
-import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroSubaddress;
-import monero.wallet.model.MoneroSyncResult;
-import monero.wallet.model.MoneroTransfer;
-import monero.wallet.model.MoneroTransferQuery;
-import monero.wallet.model.MoneroTxConfig;
-import monero.wallet.model.MoneroTxQuery;
-import monero.wallet.model.MoneroTxSet;
-import monero.wallet.model.MoneroTxWallet;
-import monero.wallet.model.MoneroWalletConfig;
-import monero.wallet.model.MoneroWalletListenerI;
+import monero.wallet.model.*;
 
 /**
  * Implements a Monero wallet using fully client-side JNI bindings to monero-project's wallet2 in C++.
@@ -90,6 +54,13 @@ public class MoneroWalletLws extends MoneroWalletJni {
      */
     protected MoneroWalletLws(long jniWalletHandle, String password) {
         super(jniWalletHandle, password);
+    }
+    // --------------------- LWS METHODS UTILITIES ------------------------
+
+    private void rescanAddresses(Long height, List<String> addresses)
+    {
+        int size = addresses.size();
+        lwsConnection.rescan(height, addresses.toArray(new String[size]));
     }
 
     // --------------------- WALLET MANAGEMENT UTILITIES ------------------------
@@ -273,19 +244,17 @@ public class MoneroWalletLws extends MoneroWalletJni {
     }
 
     protected static MoneroWalletLws createWalletFromSeed(MoneroWalletConfig config) {
-        if (config.getRestoreHeight() == null) config.setRestoreHeight(0l);
+        if (config.getRestoreHeight() == null) config.setRestoreHeight(0L);
         long jniWalletHandle = createWalletJni(serializeWalletConfig(config));
-        MoneroWalletLws wallet = new MoneroWalletLws(jniWalletHandle, config.getPassword());
-        return wallet;
+        return new MoneroWalletLws(jniWalletHandle, config.getPassword());
     }
 
     protected static MoneroWalletLws createWalletFromKeys(MoneroWalletConfig config) {
-        if (config.getRestoreHeight() == null) config.setRestoreHeight(0l);
+        if (config.getRestoreHeight() == null) config.setRestoreHeight(0L);
         if (config.getLanguage() == null) config.setLanguage(DEFAULT_LANGUAGE);
         try {
             long jniWalletHandle = createWalletJni(serializeWalletConfig(config));
-            MoneroWalletLws wallet = new MoneroWalletLws(jniWalletHandle, config.getPassword());
-            return wallet;
+            return new MoneroWalletLws(jniWalletHandle, config.getPassword());
         } catch (Exception e) {
             throw new MoneroError(e.getMessage());
         }
@@ -321,15 +290,74 @@ public class MoneroWalletLws extends MoneroWalletJni {
         return super.sync(startHeight, listener);
     }
 
+    private void startSyncingAccount(MoneroAccount account)
+    {
+        List<MoneroSubaddress> subaddresses = account.getSubaddresses();
+        int size = subaddresses.size() + 1;
+        String[] addresses = new String[size];
+        addresses[0] = account.getPrimaryAddress();
+        int i = 1;
+        for(MoneroSubaddress subaddress : subaddresses)
+        {
+            addresses[i] = subaddress.getAddress();
+            i++;
+        }
+
+        lwsConnection.modifyAccountStatus("active", addresses);
+    }
+
+    private void startSyncingAccounts()
+    {
+        stopSyncingAccounts(getAccounts());
+    }
+
+    private void startSyncingAccounts(List<MoneroAccount> accounts)
+    {
+        for(MoneroAccount account : accounts)
+        {
+            stopSyncingAccount(account);
+        }
+    }
+
     @Override
     public void startSyncing(Long syncPeriodInMs) {
-        // TO DO if admin modify account status to active
+        startSyncingAccounts();
         super.startSyncing(syncPeriodInMs);
+    }
+
+    private void stopSyncingAccount(MoneroAccount account)
+    {
+        List<MoneroSubaddress> subaddresses = account.getSubaddresses();
+        int size = subaddresses.size() + 1;
+        String[] addresses = new String[size];
+        addresses[0] = account.getPrimaryAddress();
+        int i = 1;
+        for(MoneroSubaddress subaddress : subaddresses)
+        {
+            addresses[i] = subaddress.getAddress();
+            i++;
+        }
+
+        lwsConnection.modifyAccountStatus("inactive", addresses);
+    }
+
+    private void stopSyncingAccounts()
+    {
+        stopSyncingAccounts(getAccounts());
+    }
+
+    private void stopSyncingAccounts(List<MoneroAccount> accounts)
+    {
+        for(MoneroAccount account : accounts)
+        {
+            stopSyncingAccount(account);
+        }
     }
 
     @Override
     public void stopSyncing() {
         // TO DO if admin modify account status to inactive
+        stopSyncingAccounts();
 
         super.stopSyncing();
     }
@@ -340,9 +368,52 @@ public class MoneroWalletLws extends MoneroWalletJni {
         super.rescanSpent();
     }
 
+    private void rescanAccount(MoneroAccount account)
+    {
+        rescanAccount(account, 1L);
+    }
+
+    private void rescanAccount(MoneroAccount account, Long height)
+    {
+        List<MoneroSubaddress> subaddresses = account.getSubaddresses();
+        int size = subaddresses.size() + 1;
+        String[] addresses = new String[size];
+        addresses[0] = account.getPrimaryAddress();
+        int i = 1;
+        for(MoneroSubaddress subaddress : subaddresses)
+        {
+            addresses[i] = subaddress.getAddress();
+            i++;
+        }
+
+        lwsConnection.rescan(height, addresses);
+    }
+
+    private void rescanAccounts()
+    {
+        rescanAccounts(1L);
+    }
+
+    private void rescanAccounts(Long height)
+    {
+        rescanAccounts(getAccounts(), height);
+    }
+
+    private void rescanAccounts(List<MoneroAccount> accounts)
+    {
+        rescanAccounts(accounts, 1L);
+    }
+
+    private void rescanAccounts(List<MoneroAccount> accounts, Long height) {
+        for(MoneroAccount account: accounts) {
+            rescanAccount(account, height);
+        }
+    }
+
     @Override
     public void rescanBlockchain() {
-        // TO DO if admin rescan addresses
+        rescanAccounts();
+
         super.rescanBlockchain();
     }
 
@@ -351,40 +422,69 @@ public class MoneroWalletLws extends MoneroWalletJni {
     public MoneroAccount createAccount(String label) {
         MoneroAccount account = super.createAccount(label);
 
-        // TO DO register to lws server
+        if (lwsConnection.isAuthenticated())
+        {
+            lwsConnection.addAccount(account.getPrimaryAddress(), getPrivateViewKey());
+        }
+        else
+        {
+            lwsConnection.login(account.getPrimaryAddress(), getPrivateViewKey(), true, false);
+        }
 
         return account;
     }
 
-    // LWS
     @Override
-    public BigInteger getBalance(Integer accountIdx, Integer subaddressIdx) {
-        assertNotClosed();
-        try {
-            if (accountIdx == null) {
-                if (subaddressIdx != null) throw new MoneroError("Must provide account index with subaddress index");
-                return new BigInteger(getBalanceWalletJni());
-            } else {
-                if (subaddressIdx == null) return new BigInteger(getBalanceAccountJni(accountIdx));
-                else return new BigInteger(getBalanceSubaddressJni(accountIdx, subaddressIdx));
-            }
-        } catch (MoneroError e) {
-            throw new MoneroError(e.getMessage());
+    public MoneroSubaddress createSubaddress(int accountIdx, String label)
+    {
+        MoneroSubaddress subaddress = super.createSubaddress(accountIdx, label);
+
+        if (lwsConnection.isAuthenticated())
+        {
+            lwsConnection.addAccount(subaddress.getAddress(), getPrivateViewKey());
         }
+
+        else if (lwsConnection.isConnected())
+        {
+            lwsConnection.login(subaddress.getAddress(), getPrivateViewKey(), true);
+        }
+
+        return subaddress;
     }
 
-    // LWS
+    @Override
+    public BigInteger getBalance(Integer accountIdx, Integer subaddressIdx) {
+        return getBalance(accountIdx, subaddressIdx, false);
+    }
+
     @Override
     public BigInteger getUnlockedBalance(Integer accountIdx, Integer subaddressIdx) {
+        return getBalance(accountIdx, subaddressIdx, true);
+    }
+
+    private BigInteger getBalance(Integer accountIdx, Integer subaddressIdx, boolean unlockedBalance) {
         assertNotClosed();
         try {
+            String address = getPrimaryAddress();
+
             if (accountIdx == null) {
                 if (subaddressIdx != null) throw new MoneroError("Must provide account index with subaddress index");
-                return new BigInteger(getUnlockedBalanceWalletJni());
             } else {
-                if (subaddressIdx == null) return new BigInteger(getUnlockedBalanceAccountJni(accountIdx));
-                else return new BigInteger(getUnlockedBalanceSubaddressJni(accountIdx, subaddressIdx));
+                if (subaddressIdx == null) return new BigInteger(getBalanceAccountJni(accountIdx));
+                else address = getAddress(accountIdx, subaddressIdx);
             }
+
+            Map<String, Object> addressInfo = lwsConnection.getAddressInfo(address, getPrivateViewKey());
+
+            BigInteger totalReceived = (BigInteger) addressInfo.get("total_received");
+            BigInteger totalSent = (BigInteger) addressInfo.get("total_sent");
+            if (!unlockedBalance)
+                return totalReceived.subtract(totalSent);
+
+            BigInteger lockedFunds = (BigInteger) addressInfo.get("locked_funds");
+
+            return totalReceived.subtract(totalSent).subtract(lockedFunds);
+
         } catch (MoneroError e) {
             throw new MoneroError(e.getMessage());
         }
@@ -466,8 +566,25 @@ public class MoneroWalletLws extends MoneroWalletJni {
     public List<String> relayTxs(Collection<String> txMetadatas) {
         assertNotClosed();
         String[] txMetadatasArr = txMetadatas.toArray(new String[txMetadatas.size()]); // convert to array for jni
+        List<String> result = new ArrayList<>();
+
         try {
-            return Arrays.asList(relayTxsJni(txMetadatasArr));
+            for(String txMetadata: txMetadatasArr)
+            {
+                Map<String, Object> submitResult = lwsConnection.submitRawTx(txMetadata);
+
+                String status = (String) submitResult.get("status");
+
+                if (!Objects.equals(status, "success"))
+                {
+                    throw new MoneroError("Error while relaying tx: " + txMetadata);
+                }
+
+                result.add("");
+            }
+
+            return result;
+            //return Arrays.asList(relayTxsJni(txMetadatasArr));
         } catch (Exception e) {
             throw new MoneroError(e.getMessage());
         }
@@ -494,6 +611,5 @@ public class MoneroWalletLws extends MoneroWalletJni {
             throw new MoneroError(e.getMessage());
         }
     }
-
 
 }
