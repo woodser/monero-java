@@ -25,13 +25,15 @@ package monero.wallet;
 import common.utils.GenUtils;
 import common.utils.JsonUtils;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.logging.Logger;
+
+import javafx.beans.binding.ObjectExpression;
 import monero.common.MoneroError;
 import monero.common.MoneroLwsConnection;
 import monero.common.MoneroRpcConnection;
-import monero.daemon.model.MoneroBlock;
-import monero.daemon.model.MoneroNetworkType;
+import monero.daemon.model.*;
 import monero.wallet.model.*;
 
 /**
@@ -490,11 +492,116 @@ public class MoneroWalletLws extends MoneroWalletJni {
         }
     }
 
+    private List<MoneroTxWallet> getAccountTxs(MoneroAccount account)
+    {
+        List<MoneroTxWallet> txs = new ArrayList<>();
+        String address = account.getPrimaryAddress();
+        String viewKey = getPrivateViewKey();
+
+        Map<String, Object> resp = lwsConnection.getAddressTxs(address, viewKey);
+
+        Long totalReceived = Long.parseLong((String)resp.getOrDefault("total_received", "0"));
+        Long scannedHeight = Long.parseLong((String)resp.getOrDefault("scanned_height", "0"));
+        Long scannedBlockHeight = Long.parseLong((String)resp.getOrDefault("scanned_block_height", "0"));
+        Long blockchainHeight = Long.parseLong((String)resp.getOrDefault("blockchain_height", "0"));
+        Map<String, Object>[] transactions = (Map<String, Object>[]) resp.get("transactions");
+
+        for (Map<String, Object> transaction : transactions) {
+            MoneroTxWallet tx = new MoneroTxWallet();
+
+            Boolean mempool = (Boolean)transaction.get("mempool");
+            Long txTotalReceived = Long.parseLong((String)transaction.getOrDefault("total_received", "0"));
+            Long txTotalSent = Long.parseLong((String)transaction.getOrDefault("total_sent", "0"));
+
+            boolean isIncoming = txTotalReceived == 0L && txTotalSent > 0L;
+            boolean isOutgoing = txTotalReceived > 0L && txTotalSent == 0L;
+
+            Long txTimestamp = Timestamp.valueOf((String)transaction.get("timestamp")).getTime();
+            Long txHeight = (Long) transaction.get("height");
+            Long txNumConfirmations = mempool ? 0L : blockchainHeight - txHeight;
+            Boolean isConfirmed = txNumConfirmations >= 10L;
+
+            tx.setNumConfirmations(txNumConfirmations);
+            tx.setHash((String)resp.getOrDefault("hash", ""));
+            tx.setFee(BigInteger.valueOf(Long.parseLong((String)transaction.getOrDefault("fee", "0"))));
+            tx.setReceivedTimestamp(Timestamp.valueOf((String)transaction.get("timestamp")).getTime());
+            tx.setIsIncoming(isIncoming);
+            tx.setIsOutgoing(isOutgoing);
+            tx.setIsConfirmed(isConfirmed);
+            tx.setInTxPool(mempool);
+            tx.setUnlockTime(BigInteger.valueOf(Long.parseLong((String)transaction.get("unlock_time"))));
+            tx.setIsMinerTx((Boolean) transaction.get("coinbase"));
+
+            if (isConfirmed)
+            {
+                MoneroBlock block = new MoneroBlock();
+                block.setHeight(txHeight);
+
+                tx.setBlock(block);
+            }
+
+            if (isIncoming) {
+                tx.setReceivedTimestamp(txTimestamp);
+                tx.setPaymentId((String)transaction.get("payment_id"));
+                tx.setIsLocked(!isConfirmed);
+            }
+            else if (isOutgoing) {
+                tx.setLastRelayedTimestamp(txTimestamp);
+                Map<String, Object>[] spentOutputs = (Map<String, Object>[])transaction.get("spent_outputs");
+                List<MoneroOutput> outputs = new ArrayList<>();
+
+                for (Map<String, Object> spentOutput : spentOutputs){
+                    MoneroOutput output = new MoneroOutput();
+                    long outIndex = Long.parseLong((String) spentOutput.get("out_index"));
+                    BigInteger amount = BigInteger.valueOf(Long.parseLong((String) spentOutput.get("amount")));
+                    output.setIndex(outIndex);
+                    output.setAmount(amount);
+                    String hex = (String)spentOutput.get("key_image");
+                    output.setKeyImage(new MoneroKeyImage(hex));
+
+                    if (outIndex == 0L)
+                    {
+                        tx.setOutputSum(amount);
+                    }
+
+                    outputs.add(output);
+                }
+
+                tx.setOutputs(outputs);
+
+            }
+
+        txs.add(tx);
+        }
+
+        return txs;
+    }
+
+    private List<MoneroTxWallet> getAccountsTxs()
+    {
+        return getAccountsTxs(getAccounts());
+    }
+
+    private List<MoneroTxWallet> getAccountsTxs(List<MoneroAccount> accounts)
+    {
+        List<MoneroTxWallet> txs = new ArrayList<>();
+
+        for(MoneroAccount account : accounts)
+        {
+            txs.addAll(getAccountTxs(account));
+        }
+
+        return txs;
+    }
+
     // LWS
     @Override
     public List<MoneroTxWallet> getTxs(MoneroTxQuery query) {
         assertNotClosed();
 
+        return getAccountsTxs();
+
+        /*
         // copy and normalize tx query up to block
         query = query == null ? new MoneroTxQuery() : query.copy();
         if (query.getBlock() == null) query.setBlock(new MoneroBlock().setTxs(query));
@@ -509,6 +616,7 @@ public class MoneroWalletLws extends MoneroWalletJni {
 
         // deserialize and return txs
         return deserializeTxs(query, blocksJson);
+        */
     }
 
     // LWS
@@ -531,11 +639,62 @@ public class MoneroWalletLws extends MoneroWalletJni {
         return deserializeTransfers(query, blocksJson);
     }
 
+    private List<MoneroOutputWallet> getAccountOutputs(MoneroAccount account)
+    {
+        String address = account.getPrimaryAddress();
+        String viewKey = getPrivateViewKey();
+        List<MoneroOutputWallet> result = new ArrayList<>();
+
+        Map<String, Object> resp = lwsConnection.getUnspentOuts(address, viewKey);
+        Map<String, Object>[] outputs = (Map<String, Object>[])resp.get("outputs");
+
+        for (Map<String, Object> output : outputs)
+        {
+            MoneroOutputWallet outputWallet = new MoneroOutputWallet();
+
+            outputWallet.setAccountIndex(account.getIndex());
+            outputWallet.setAmount(BigInteger.valueOf(Long.parseLong((String) output.get("amount"))));
+            outputWallet.setIndex((Long) output.get("global_index"));
+            outputWallet.setStealthPublicKey((String) output.get("public_key"));
+
+            List<String> spendKeyImages = (List<String>) output.get("spend_key_images");
+
+            Boolean isSpent = !spendKeyImages.isEmpty();
+
+            outputWallet.setIsSpent(isSpent);
+
+            if (isSpent)
+            {
+                outputWallet.setKeyImage(new MoneroKeyImage(spendKeyImages.get(0)));
+            }
+
+            result.add(outputWallet);
+        }
+
+        return result;
+    }
+
+    private List<MoneroOutputWallet> getAccountsOutputs()
+    {
+        List<MoneroAccount> accounts = getAccounts();
+        List<MoneroOutputWallet> outputs = new ArrayList<>();
+
+        for(MoneroAccount account : accounts)
+        {
+            outputs.addAll(getAccountOutputs(account));
+        }
+
+        return outputs;
+    }
+
     // LWS
     @Override
     public List<MoneroOutputWallet> getOutputs(MoneroOutputQuery query) {
         assertNotClosed();
 
+        return getAccountsOutputs();
+
+        /*
         // copy and normalize query up to block
         if (query == null) query = new MoneroOutputQuery();
         else {
@@ -549,6 +708,8 @@ public class MoneroWalletLws extends MoneroWalletJni {
                     query.setTxQuery(txQuery);
                 }
             }
+
+
         }
         if (query.getTxQuery() == null) query.setTxQuery(new MoneroTxQuery());
         query.getTxQuery().setOutputQuery(query);
@@ -559,6 +720,27 @@ public class MoneroWalletLws extends MoneroWalletJni {
 
         // deserialize and return outputs
         return deserializeOutputs(query, blocksJson);
+
+         */
+    }
+
+    private boolean submitRawTransaction(String rawTx)
+    {
+        Map<String, Object> submitResult = lwsConnection.submitRawTx(rawTx);
+
+        return (boolean) submitResult.get("status");
+    }
+
+    private boolean submitRawTransactions(Collection<String> rawTxs)
+    {
+        boolean result = true;
+
+        for(String rawTx : rawTxs)
+        {
+            result = result && submitRawTransaction(rawTx);
+        }
+
+        return result;
     }
 
     // LWS
@@ -571,14 +753,7 @@ public class MoneroWalletLws extends MoneroWalletJni {
         try {
             for(String txMetadata: txMetadatasArr)
             {
-                Map<String, Object> submitResult = lwsConnection.submitRawTx(txMetadata);
-
-                String status = (String) submitResult.get("status");
-
-                if (!Objects.equals(status, "success"))
-                {
-                    throw new MoneroError("Error while relaying tx: " + txMetadata);
-                }
+                submitRawTransaction(txMetadata);
 
                 result.add("");
             }

@@ -209,6 +209,21 @@ public class MoneroLwsConnection extends MoneroHttpConnection {
         return this.sendJsonRequest("get_random_outs", params);
     }
 
+    public Map<String, Object> getUnspentOuts(String address, String privateViewKey)
+    {
+        return getUnspentOuts(address, privateViewKey, "0", 0L, true);
+    }
+
+    public Map<String, Object> getUnspentOuts(String address, String privateViewKey, String amount)
+    {
+        return getUnspentOuts(address, privateViewKey, amount, 0L, true);
+    }
+
+    public Map<String, Object> getUnspentOuts(String address, String privateViewKey, String amount, Long mixin)
+    {
+        return getUnspentOuts(address, privateViewKey, amount, mixin, true);
+    }
+
     public Map<String, Object> getUnspentOuts(
             String address, String privateViewKey, String amount,
             Long mixin, Boolean useDust
