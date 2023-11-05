@@ -978,9 +978,9 @@ public interface MoneroWallet {
    * Sign unsigned transactions from a view-only wallet.
    * 
    * @param unsignedTxHex is unsigned transaction hex from when the transactions were created
-   * @return the signed transaction hex
+   * @return the signed transaction set
    */
-  public String signTxs(String unsignedTxHex);
+  public MoneroTxSet signTxs(String unsignedTxHex);
   
   /**
    * Submit signed transactions from a view-only wallet.

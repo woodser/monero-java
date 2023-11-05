@@ -1000,17 +1000,18 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     String describedTxSetJson;
     try {
       describedTxSetJson = describeTxSetJni(JsonUtils.serialize(txSet));
+      return JsonUtils.deserialize(describedTxSetJson, MoneroTxSet.class);
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
-    return JsonUtils.deserialize(describedTxSetJson, MoneroTxSet.class);
   }
   
   @Override
-  public String signTxs(String unsignedTxHex) {
+  public MoneroTxSet signTxs(String unsignedTxHex) {
     assertNotClosed();
     try {
-      return signTxsJni(unsignedTxHex);
+      String signedTxSetJson = signTxsJni(unsignedTxHex);
+      return JsonUtils.deserialize(signedTxSetJson, MoneroTxSet.class);
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }

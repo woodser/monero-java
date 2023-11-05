@@ -1384,12 +1384,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @SuppressWarnings("unchecked")
   @Override
-  public String signTxs(String unsignedTxHex) {
+  public MoneroTxSet signTxs(String unsignedTxHex) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("unsigned_txset", unsignedTxHex);
     Map<String, Object> resp = rpc.sendJsonRequest("sign_transfer", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
-    return (String) result.get("signed_txset");
+    return convertRpcSentTxsToTxSet(result, null, null);
   }
 
   @SuppressWarnings("unchecked")
@@ -2826,7 +2826,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     MoneroTxSet txSet = convertRpcTxSet(rpcTxs);
     
     // get number of txs
-    int numTxs = rpcTxs.containsKey("fee_list") ? ((List<BigInteger>) rpcTxs.get("fee_list")).size() : 0;
+    String numTxsKey = rpcTxs.containsKey("fee_list") ? "fee_list" : rpcTxs.containsKey("tx_hash_list") ? "tx_hash_list" : null;
+    int numTxs = numTxsKey == null ? 0 : ((List<?>) rpcTxs.get(numTxsKey)).size();
     
     // done if rpc response contains no txs
     if (numTxs == 0) {
@@ -2834,7 +2835,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       return txSet;
     }
     
-    // pre-initialize txs if none given
+    // initialize txs if none given
     if (txs != null) txSet.setTxs(txs);
     else {
       txs = new ArrayList<MoneroTxWallet>();

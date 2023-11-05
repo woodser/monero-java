@@ -2557,8 +2557,10 @@ public abstract class TestMoneroWalletCommon {
     assertNotNull(unsignedTx.getTxSet().getUnsignedTxHex());
     
     // sign tx using offline wallet
-    String signedTxHex = offlineWallet.signTxs(unsignedTx.getTxSet().getUnsignedTxHex());
-    assertFalse(signedTxHex.isEmpty());
+    MoneroTxSet signedTxSet = offlineWallet.signTxs(unsignedTx.getTxSet().getUnsignedTxHex());
+    assertFalse(signedTxSet.getSignedTxHex().isEmpty());
+    assertEquals(1, signedTxSet.getTxs().size());
+    assertFalse(signedTxSet.getTxs().get(0).getHash().isEmpty());
     
     // parse or "describe" unsigned tx set
     MoneroTxSet describedTxSet = offlineWallet.describeUnsignedTxSet(unsignedTx.getTxSet().getUnsignedTxHex());
@@ -2566,7 +2568,7 @@ public abstract class TestMoneroWalletCommon {
     
     // submit signed tx using view-only wallet
     if (TEST_RELAYS) {
-      List<String> txHashes = viewOnlyWallet.submitTxs(signedTxHex);
+      List<String> txHashes = viewOnlyWallet.submitTxs(signedTxSet.getSignedTxHex());
       assertEquals(1, txHashes.size());
       assertEquals(64, txHashes.get(0).length());
       TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(viewOnlyWallet); // wait for confirmation for other tests

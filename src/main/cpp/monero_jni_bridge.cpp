@@ -1408,14 +1408,16 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_describeTxSetJni(J
 
   try {
 
-    // deserialize tx set to parse
+    // deserialize tx set to describe
     monero_tx_set tx_set = monero_tx_set::deserialize(tx_set_json);
 
-    // parse tx set
+    // describe tx set
     monero_tx_set described_tx_set = wallet->describe_tx_set(tx_set);
 
-    // serialize and return parsed tx set
-    return env->NewStringUTF(described_tx_set.serialize().c_str());
+    // serialize, free, and return
+    std::string monero_tx_set_json = described_tx_set.serialize();
+    monero_utils::free(described_tx_set.m_txs);
+    return env->NewStringUTF(monero_tx_set_json.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
@@ -1431,9 +1433,15 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_signTxsJni(JNIEnv*
   string unsigned_tx_hex = string(_unsigned_tx_hex ? _unsigned_tx_hex : "");
   env->ReleaseStringUTFChars(junsigned_tx_hex, _unsigned_tx_hex);
 
-  // sign txs
   try {
-    return env->NewStringUTF(wallet->sign_txs(unsigned_tx_hex).c_str());
+
+    // sign txs
+    monero_tx_set signed_tx_set = wallet->sign_txs(unsigned_tx_hex);
+
+    // serialize, free, and return
+    std::string monero_tx_set_json = signed_tx_set.serialize();
+    monero_utils::free(signed_tx_set.m_txs);
+    return env->NewStringUTF(monero_tx_set_json.c_str());
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
     return 0;
