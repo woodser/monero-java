@@ -67,7 +67,8 @@ public class MoneroConnectionManager {
   private static final long DEFAULT_TIMEOUT = 5000l;
   private static final long DEFAULT_POLL_PERIOD = 20000l;
   private static final boolean DEFAULT_AUTO_SWITCH = true;
-  private static int MIN_BETTER_RESPONSES = 3;
+  private static final int MIN_BETTER_RESPONSES = 3;
+  private static ConnectionPriorityComparator priorityComparator = new ConnectionPriorityComparator();
 
   // instance variables
   private MoneroRpcConnection currentConnection;
@@ -359,7 +360,7 @@ public class MoneroConnectionManager {
     MoneroRpcConnection connection = getConnection();
     if (connection != null) {
       if (connection.checkConnection(timeoutMs)) connectionChanged = true;
-      processResponses(Arrays.asList(connection));
+      if (processResponses(Arrays.asList(connection)) != null) return this; // done if connection set from responses
     }
     if (autoSwitch && !isConnected()) {
       MoneroRpcConnection bestConnection = getBestAvailableConnection(connection);
@@ -541,13 +542,24 @@ public class MoneroConnectionManager {
       // order by availability then priority then by name
       if (c1.isOnline() == c2.isOnline()) {
         if (c1.getPriority() == c2.getPriority()) return c1.getUri().compareTo(c2.getUri());
-        else return c1.getPriority() == 0 ? 1 : c2.getPriority() == 0 ? -1 : c1.getPriority() - c2.getPriority();
+        return priorityComparator.compare(c1.getPriority(), c2.getPriority()) * -1; // order by priority in descending order
       } else {
         if (Boolean.TRUE.equals(c1.isOnline())) return -1;
         else if (Boolean.TRUE.equals(c2.isOnline())) return 1;
         else if (c1.isOnline() == null) return -1;
         else return 1; // c1 is offline
       }
+    }
+  }
+  
+  private static class ConnectionPriorityComparator implements Comparator<Integer> {
+
+    @Override
+    public int compare(Integer p1, Integer p2) {
+      if (p1 == p2) return 0;
+      if (p1 == 0) return -1;
+      if (p2 == 0) return 1;
+      return p2 - p1;
     }
   }
 
@@ -620,9 +632,9 @@ public class MoneroConnectionManager {
     }
   }
 
-  private void processResponses(Collection<MoneroRpcConnection> responses) {
+  private MoneroRpcConnection processResponses(Collection<MoneroRpcConnection> responses) {
 
-    // add non-existing connections
+    // add new connections
     for (MoneroRpcConnection connection : responses) {
       if (!responseTimes.containsKey(connection)) responseTimes.put(connection, new ArrayList<Long>());
     }
@@ -636,40 +648,58 @@ public class MoneroConnectionManager {
     }
 
     // update best connection based on responses and priority
-    updateBestConnectionInPriority();
+    return updateBestConnectionInPriority();
   }
 
-  private void updateBestConnectionInPriority() {
-    if (!autoSwitch) return;
+  private MoneroRpcConnection updateBestConnectionInPriority() {
+    if (!autoSwitch) return null;
     for (List<MoneroRpcConnection> prioritizedConnections : getConnectionsInAscendingPriority()) {
-      if (updateBestConnectionFromResponses(prioritizedConnections) != null) break;
+      MoneroRpcConnection bestConnectionFromResponses = getBestConnectionFromPrioritizedResponses(prioritizedConnections);
+      if (bestConnectionFromResponses != null) {
+        setConnection(bestConnectionFromResponses);
+        return bestConnectionFromResponses;
+      }
     }
+    return null;
   }
 
-  private MoneroRpcConnection updateBestConnectionFromResponses(Collection<MoneroRpcConnection> responses) {
-    MoneroRpcConnection bestConnection = Boolean.TRUE.equals(isConnected()) ? getConnection() : null;
-    if (bestConnection != null && (!responseTimes.containsKey(bestConnection) || responseTimes.get(bestConnection).size() < MIN_BETTER_RESPONSES)) return bestConnection;
-    if (Boolean.TRUE.equals(isConnected())) {
+  /**
+   * Get the best connection from the given responses.
+   * 
+   * @param responses are connection responses to update from
+   * @return MoneroRpcConnection is the best response among the given responses or null if none are best
+   */
+  private MoneroRpcConnection getBestConnectionFromPrioritizedResponses(Collection<MoneroRpcConnection> responses) {
 
-      // check if connection is consistently better
-      for (MoneroRpcConnection connection : responses) {
-        if (connection == bestConnection) continue;
-        if (!responseTimes.containsKey(connection) || responseTimes.get(connection).size() < MIN_BETTER_RESPONSES) continue;
-        boolean better = true;
-        for (int i = 0; i < MIN_BETTER_RESPONSES; i++) {
-          if (responseTimes.get(connection).get(i) == null || responseTimes.get(connection).get(i) >= responseTimes.get(bestConnection).get(i)) {
-            better = false;
-            break;
-          }
-        }
-        if (better) bestConnection = connection;
-      }
-    } else {
-      for (MoneroRpcConnection connection : responses) {
-        if (Boolean.TRUE.equals(connection.isConnected()) && (bestConnection == null || connection.getResponseTime() < bestConnection.getResponseTime())) bestConnection = connection;
-      }
+    // get best response
+    MoneroRpcConnection bestResponse = null;
+    for (MoneroRpcConnection connection : responses) {
+      if (Boolean.TRUE.equals(connection.isConnected()) && (bestResponse == null || connection.getResponseTime() < bestResponse.getResponseTime())) bestResponse = connection;
     }
-    if (bestConnection != null) setConnection(bestConnection);
+    
+    // no update if no responses
+    if (bestResponse == null) return null;
+    
+    // use best response if disconnected
+    MoneroRpcConnection bestConnection = getConnection();
+    if (bestConnection == null || !Boolean.TRUE.equals(bestConnection.isConnected())) return bestResponse;
+    
+    // use best response if different priority (assumes being called in descending priority)
+    if (priorityComparator.compare(bestResponse.getPriority(), bestConnection.getPriority()) != 0) return bestResponse;
+    
+    // check if a connection is consistently better
+    for (MoneroRpcConnection connection : responses) {
+      if (connection == bestConnection) continue;
+      if (!responseTimes.containsKey(connection) || responseTimes.get(connection).size() < MIN_BETTER_RESPONSES) continue;
+      boolean better = true;
+      for (int i = 0; i < MIN_BETTER_RESPONSES; i++) {
+        if (responseTimes.get(connection).get(i) == null || responseTimes.get(bestConnection).get(i) == null || responseTimes.get(connection).get(i) > responseTimes.get(bestConnection).get(i)) {
+          better = false;
+          break;
+        }
+      }
+      if (better) bestConnection = connection;
+    }
     return bestConnection;
   }
 }
