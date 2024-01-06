@@ -721,7 +721,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // update sync period for poller
     this.syncPeriodInMs = syncPeriodInSeconds * 1000;
-    if (walletPoller != null) walletPoller.setPeriodInMs(syncPeriodInMs);
+    if (walletPoller != null) walletPoller.setPeriodInMs(this.syncPeriodInMs);
     
     // poll if listening
     poll();
