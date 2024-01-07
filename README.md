@@ -135,11 +135,11 @@ If you want to use client-side wallets, first [build the JNI shared libraries](#
 
 If you want to process binary data or use a client-side wallet instead of RPC, shared libraries must be built for your specific platform for this Java library to use.  This project uses a C++ counterpart library, [monero-cpp](https://github.com/monero-ecosystem/monero-cpp), to support JNI, which is included as a submodule in ./external/monero-cpp.
 
-### Mac & Linux
+### macOS & Linux
 
 1. Install maven and Java JDK for your system<br>
  Ubuntu: `sudo apt-get install maven default-jdk`<br>
- Mac: `brew install maven openjdk`
+ Mac: download and install a [Java JDK](https://adoptium.net/temurin/).
 2. `export JAVA_HOME=/path/to/jdk`, for example:<br>
  Ubuntu: `export JAVA_HOME=/usr/lib/jvm/default-java`<br>
  Mac: `export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home`
@@ -147,10 +147,10 @@ If you want to process binary data or use a client-side wallet instead of RPC, s
 3. `cd ./monero-java`
 3. Install Maven dependencies: `mvn install`
 4. Update submodules: `./bin/update_submodules.sh`
-5. [Build ./external/monero-cpp as a shared library.](https://github.com/monero-ecosystem/monero-cpp#using-this-library-in-your-project)
-7. Build shared libraries to ./build/: `./bin/build_libmonero_java.sh`
-8. Run TestMoneroUtils.java JUnit tests to verify the shared libraries are working with Java JNI.
-9. Add the shared libraries within ./build/ to your application's classpath.
+5. Build the monero-cpp submodule (located at ./external/monero-cpp) as a shared library by following [instructions](https://github.com/monero-ecosystem/monero-cpp#using-monero-cpp-in-your-project) for your system.
+6. Build shared libraries to ./build/: `./bin/build_libmonero_java.sh`
+7. Run TestMoneroUtils.java JUnit tests to verify the shared libraries are working with Java JNI.
+8. Add the shared libraries within ./build/ to your application's classpath.
 
 
 ### Windows
@@ -178,7 +178,7 @@ If you want to process binary data or use a client-side wallet instead of RPC, s
 9. `cd ./monero-java`
 10. Install Maven dependencies: `mvn install`
 11. Update submodules: `./bin/update_submodules.sh`
-12. [Build ./external/monero-cpp as a shared library](https://github.com/monero-ecosystem/monero-cpp#building-libmonero-cppdll-on-windows). Follow instructions for Windows.
+12. Build the monero-cpp submodule (located at ./external/monero-cpp) as a shared library by following [instructions](https://github.com/monero-ecosystem/monero-cpp#windows) for Windows.
 13. Build shared libraries to ./build/: `./bin/build_libmonero_java.sh`
 15. Run TestMoneroUtils.java JUnit tests to verify the shared libraries are working with Java JNI.
 16. Add the shared libraries within ./build/ to your application's classpath.
