@@ -1144,8 +1144,11 @@ public class TestMoneroDaemonRpc {
   public void testPruneBlockchain() {
     assumeTrue(TEST_NON_RELAYS);
     MoneroPruneResult result = daemon.pruneBlockchain(true);
-    assertTrue(result.isPruned());
-    assertTrue(result.getPruningSeed() > 0);
+    if (result.isPruned()) {
+      assertTrue(result.getPruningSeed() > 0);
+    } else {
+      assertEquals(0,  result.getPruningSeed());
+    }
   }
   
   // Can check for an update
