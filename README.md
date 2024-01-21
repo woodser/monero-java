@@ -103,7 +103,7 @@ walletFull.close(true);
 * [API and model overview with visual diagrams](https://woodser.github.io/monero-java/monero-spec.pdf)
 * [JUnit tests](src/main/test/java/test)
 * [Using TOR](docs/tor.md)
-* [monero-ts documentation](https://github.com/monero-ecosystem/monero-ts#documentation) provides additional documentation which translates to monero-java
+* [monero-ts documentation](https://github.com/woodser/monero-ts#documentation) provides additional documentation which translates to monero-java
 
 ## Using monero-java in your project
 
@@ -133,7 +133,7 @@ If you want to use client-side wallets, first [build the JNI shared libraries](#
 
 ## Building JNI shared libraries from source
 
-If you want to process binary data or use a client-side wallet instead of RPC, shared libraries must be built for your specific platform for this Java library to use.  This project uses a C++ counterpart library, [monero-cpp](https://github.com/monero-ecosystem/monero-cpp), to support JNI, which is included as a submodule in ./external/monero-cpp.
+If you want to process binary data or use a client-side wallet instead of RPC, shared libraries must be built for your specific platform for this Java library to use.  This project uses a C++ counterpart library, [monero-cpp](https://github.com/woodser/monero-cpp), to support JNI, which is included as a submodule in ./external/monero-cpp.
 
 ### macOS & Linux
 
@@ -143,11 +143,11 @@ If you want to process binary data or use a client-side wallet instead of RPC, s
 2. `export JAVA_HOME=/path/to/jdk`, for example:<br>
  Ubuntu: `export JAVA_HOME=/usr/lib/jvm/default-java`<br>
  Mac: `export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home`
-2. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
+2. Clone the project repository: `git clone https://github.com/woodser/monero-java.git`
 3. `cd ./monero-java`
 3. Install Maven dependencies: `mvn install`
 4. Update submodules: `./bin/update_submodules.sh`
-5. Build the monero-cpp submodule (located at ./external/monero-cpp) as a shared library by following [instructions](https://github.com/monero-ecosystem/monero-cpp#using-monero-cpp-in-your-project) for your system.
+5. Build the monero-cpp submodule (located at ./external/monero-cpp) as a shared library by following [instructions](https://github.com/woodser/monero-cpp#using-monero-cpp-in-your-project) for your system.
 6. Build shared libraries to ./build/: `./bin/build_libmonero_java.sh`
 7. Run TestMoneroUtils.java JUnit tests to verify the shared libraries are working with Java JNI.
 8. Add the shared libraries within ./build/ to your application's classpath.
@@ -174,11 +174,11 @@ If you want to process binary data or use a client-side wallet instead of RPC, s
     `export JAVA_HOME=/path/to/jdk/` (if not set during installation)<br>
     `export MAVEN_HOME=/usr/local/apache-maven-3.x.x/`<br>
     `export PATH=$PATH:$JAVA_HOME/bin/:$MAVEN_HOME/bin/`<br>
-8. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
+8. Clone the project repository: `git clone https://github.com/woodser/monero-java.git`
 9. `cd ./monero-java`
 10. Install Maven dependencies: `mvn install`
 11. Update submodules: `./bin/update_submodules.sh`
-12. Build the monero-cpp submodule (located at ./external/monero-cpp) as a shared library by following [instructions](https://github.com/monero-ecosystem/monero-cpp#windows) for Windows.
+12. Build the monero-cpp submodule (located at ./external/monero-cpp) as a shared library by following [instructions](https://github.com/woodser/monero-cpp#windows) for Windows.
 13. Build shared libraries to ./build/: `./bin/build_libmonero_java.sh`
 15. Run TestMoneroUtils.java JUnit tests to verify the shared libraries are working with Java JNI.
 16. Add the shared libraries within ./build/ to your application's classpath.
@@ -191,7 +191,7 @@ For example: `export LD_PRELOAD=/path/to/libjemalloc.a` then run your app.
 
 ## Running JUnit tests
 
-1. Clone the project repository: `git clone https://github.com/monero-ecosystem/monero-java.git`
+1. Clone the project repository: `git clone https://github.com/woodser/monero-java.git`
 2. `cd monero-java`
 3. If using JNI, [build JNI shared libraries from source](#building-jni-shared-libraries-from-source).
 3. Start RPC servers:
@@ -203,8 +203,8 @@ For example: `export LD_PRELOAD=/path/to/libjemalloc.a` then run your app.
 
 ## Related projects
 
-* [monero-ts](https://github.com/monero-ecosystem/monero-ts)
-* [monero-cpp](https://github.com/monero-ecosystem/monero-cpp)
+* [monero-ts](https://github.com/woodser/monero-ts)
+* [monero-cpp](https://github.com/woodser/monero-cpp)
 * [Haveno](https://github.com/haveno-dex/haveno)
 
 ## License
