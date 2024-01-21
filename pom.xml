@@ -7,7 +7,7 @@
 	<version>0.8.9</version>
 	<name>Monero Java Library</name>
 	<description>A Java library for using Monero</description>
-	<url>https://github.com/monero-ecosystem/monero-java</url>
+	<url>https://github.com/woodser/monero-java</url>
 	<properties>
 		<java-version>1.8</java-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -72,9 +72,9 @@
 	</dependencies>
 
 	<scm>
-		<connection>scm:git:git://github.com/monero-ecosystem/monero-java.git</connection>
-		<developerConnection>scm:git:ssh://github.com/monero-ecosystem/monero-java.git</developerConnection>
-		<url>http://github.com/monero-ecosystem/monero-java/tree/master</url>
+		<connection>scm:git:git://github.com/woodser/monero-java.git</connection>
+		<developerConnection>scm:git:ssh://github.com/woodser/monero-java.git</developerConnection>
+		<url>http://github.com/woodser/monero-java/tree/master</url>
 	</scm>
 
 	<licenses>
