@@ -230,7 +230,7 @@ public class MoneroRpcConnection {
         for (long i = 0; i < 100; i++) heights.add(i);
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("heights", heights);
-        sendBinaryRequest("get_blocks_by_height.bin", params); // assume daemon connection
+        sendBinaryRequest("get_blocks_by_height.bin", params, timeoutMs); // assume daemon connection
       } else {
         sendJsonRequest("get_version", null, timeoutMs);
       }
