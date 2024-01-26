@@ -2393,7 +2393,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           numPolling--;
         } catch (Exception e) {
           numPolling--;
-          if (isPolling) System.err.println("Failed to background poll " + path + ": " + e.getMessage());
+          if (isPolling) System.err.println("Failed to background poll wallet '" + path + "': " + e.getMessage());
         }
       }
     }
@@ -2409,14 +2409,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
             .setSubaddressIndex(tx.getOutgoingTransfer().getSubaddressIndices().size() == 1 ? tx.getOutgoingTransfer().getSubaddressIndices().get(0) : null) // initialize if transfer sourced from single subaddress
             .setTx(tx);
         tx.setInputsWallet(Arrays.asList(output));
-        for (MoneroWalletListenerI listener :  wallet.getListeners()) listener.onOutputSpent(output);
+        announceOutputSpent(output);
       }
       
       // notify received outputs
       if (tx.getIncomingTransfers() != null) {
         if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) { // TODO (monero-project): outputs only returned for confirmed txs
           for (MoneroOutputWallet output : tx.getOutputsWallet()) {
-            for (MoneroWalletListenerI listener :  wallet.getListeners()) listener.onOutputReceived(output);
+            announceOutputReceived(output);
           }
         } else { // TODO (monero-project): monero-wallet-rpc does not allow scrape of unconfirmed received outputs so using incoming transfer values
           List<MoneroOutputWallet> outputs = new ArrayList<MoneroOutputWallet>();
@@ -2428,15 +2428,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
                 .setTx(tx));
           }
           tx.setOutputsWallet(outputs);
-          for (MoneroWalletListenerI listener :  wallet.getListeners()) {
-            for (MoneroOutputWallet output : tx.getOutputsWallet()) listener.onOutputReceived(output);
-          }
+            for (MoneroOutputWallet output : tx.getOutputsWallet()) {
+              announceOutputReceived(output);
+            }
         }
       }
     }
     
     private void onNewBlock(long height) {
-      for (MoneroWalletListenerI listener : wallet.getListeners()) listener.onNewBlock(height);
+      announceNewBlock(height);
     }
     
     private MoneroTxWallet getTx(List<MoneroTxWallet> txs, String txHash) {
@@ -2449,7 +2449,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       BigInteger[] balances = getBalances(null, null);
       if (!balances[0].equals(prevBalances[0]) || !balances[1].equals(prevBalances[1])) {
         prevBalances = balances;
-        for (MoneroWalletListenerI listener : wallet.getListeners()) listener.onBalancesChanged(balances[0], balances[1]);
+        announceBalancesChanged(balances[0], balances[1]);
         return true;
       }
       return false;
@@ -2570,7 +2570,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (topic.equals("json-minimal-chain_main")) {
         Map<String, Object> contentMap = JsonUtils.toMap(MoneroRpcConnection.MAPPER, content.substring(bodyIdx + 1)); // TODO: keep mapper in MoneroRpcConnection?
         long height = ((BigInteger) contentMap.get("first_height")).longValue();
-        for (MoneroWalletListenerI listener : getListeners()) listener.onNewBlock(height);
+        announceNewBlock(height);
         
         // notify if balances change
         boolean balancesChanged = checkForChangedBalances();
@@ -2612,14 +2612,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (topic.equals("json-full-money_received")) {
           tx.setIsIncoming(true);
           prevLockedTxHashes.add(tx.getHash()); // watch for unlock
-          for (MoneroWalletListenerI listener : getListeners()) listener.onOutputReceived(output);
+          announceOutputReceived(output);
         } else if (topic.equals("json-full-money_spent")) {
           tx.setIsIncoming(false);
           prevLockedTxHashes.add(tx.getHash()); // watch for unlock
-          for (MoneroWalletListenerI listener : getListeners()) listener.onOutputSpent(output);
+          announceOutputSpent(output);
         } else if (topic.equals("json-full-unconfirmed_money_received")) {
           tx.setIsIncoming(true);
-          for (MoneroWalletListenerI listener : getListeners()) listener.onOutputReceived(output);
+          announceOutputReceived(output);
           checkForChangedBalances();
         } else {
           LOGGER.warning("Received unsupported notification: " + content);
@@ -2633,7 +2633,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (!balance.equals(prevBalance) || !unlockedBalance.equals(prevUnlockedBalance)) {
         prevBalance =  balance;
         prevUnlockedBalance = unlockedBalance;
-        for (MoneroWalletListenerI listener : getListeners()) listener.onBalancesChanged(balance, unlockedBalance);
+        announceBalancesChanged(balance, unlockedBalance);
         return true;
       }
       return false;
@@ -2671,9 +2671,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       // notify listeners of newly unlocked tx outputs
       for (MoneroTxWallet unlockedTx : txsNoLongerLocked) {
         for (MoneroOutputWallet output : unlockedTx.getOutputsWallet()) {
-          for (MoneroWalletListenerI listener : getListeners()) {
-            listener.onOutputReceived(output);
-          }
+          announceOutputReceived(output);
         }
       }
       

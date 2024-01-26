@@ -1743,13 +1743,22 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         if (!header.getHash().equals(lastHeader.getHash())) {
           lastHeader = header;
           synchronized(daemon.getListeners()) {
-            for (MoneroDaemonListener listener : daemon.getListeners()) {
-              listener.onBlockHeader(header); // notify listener
-            }
+            announceBlockHeader(header);
           }
         }
       } catch (Exception e) {
         e.printStackTrace();
+      }
+    }
+
+    private void announceBlockHeader(MoneroBlockHeader header) {
+      for (MoneroDaemonListener listener : daemon.getListeners()) {
+        try {
+          listener.onBlockHeader(header);
+        } catch (Exception e) {
+          System.err.println("Error calling listener on new block header: " + e.getMessage());
+          e.printStackTrace();
+        }
       }
     }
   }

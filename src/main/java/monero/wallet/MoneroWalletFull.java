@@ -1613,15 +1613,15 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private class WalletJniListener {
     
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
-      for (MoneroWalletListenerI listener : getListeners()) listener.onSyncProgress(height, startHeight, endHeight, percentDone, message);
+      announceSyncProgress(height, startHeight, endHeight, percentDone, message);
     }
     
     public void onNewBlock(long height) {
-      for (MoneroWalletListenerI listener : getListeners()) listener.onNewBlock(height);
+      announceNewBlock(height);
     }
     
     public void onBalancesChanged(String newBalanceStr, String newUnlockedBalanceStr) {
-      for (MoneroWalletListenerI listener : getListeners()) listener.onBalancesChanged(new BigInteger(newBalanceStr), new BigInteger(newUnlockedBalanceStr));
+      announceBalancesChanged(new BigInteger(newBalanceStr), new BigInteger(newUnlockedBalanceStr));
     }
     
     public void onOutputReceived(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version, String unlockTimeStr, boolean isLocked) {
@@ -1652,7 +1652,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
       }
       
       // announce output
-      for (MoneroWalletListenerI listener : getListeners()) listener.onOutputReceived((MoneroOutputWallet) tx.getOutputs().get(0));
+      announceOutputReceived((MoneroOutputWallet) tx.getOutputs().get(0));
     }
     
     public void onOutputSpent(long height, String txHash, String amountStr, String accountIdxStr, String subaddressIdxStr, int version, String unlockTimeStr, boolean isLocked) {
@@ -1683,7 +1683,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
       }
       
       // announce output
-      for (MoneroWalletListenerI listener : getListeners()) listener.onOutputSpent((MoneroOutputWallet) tx.getInputs().get(0));
+      announceOutputSpent((MoneroOutputWallet) tx.getInputs().get(0));
     }
   }
   

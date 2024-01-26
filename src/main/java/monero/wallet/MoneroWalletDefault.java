@@ -82,7 +82,62 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   public Set<MoneroWalletListenerI> getListeners() {
     return new HashSet<MoneroWalletListenerI>(listeners);
   }
-  
+
+  protected void announceSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
+    for (MoneroWalletListenerI listener : listeners) {
+      try {
+        listener.onSyncProgress(height, startHeight, endHeight, percentDone, message);
+      } catch (Exception e) {
+        System.err.println("Error calling listener on sync progress: " + e.getMessage());
+        e.printStackTrace();
+      }
+    }
+  }
+
+  protected void announceNewBlock(long height) {
+    for (MoneroWalletListenerI listener : listeners) {
+      try {
+        listener.onNewBlock(height);
+      } catch (Exception e) {
+        System.err.println("Error calling listener on new block: " + e.getMessage());
+        e.printStackTrace();
+      }
+    }
+  }
+
+  protected void announceBalancesChanged(BigInteger balance, BigInteger unlockedBalance) {
+    for (MoneroWalletListenerI listener : listeners) {
+      try {
+        listener.onBalancesChanged(balance, unlockedBalance);
+      } catch (Exception e) {
+        System.err.println("Error calling listener on balances changed: " + e.getMessage());
+        e.printStackTrace();
+      }
+    }
+  }
+
+  protected void announceOutputReceived(MoneroOutputWallet output) {
+    for (MoneroWalletListenerI listener : listeners) {
+      try {
+        listener.onOutputReceived(output);
+      } catch (Exception e) {
+        System.err.println("Error calling listener on output received: " + e.getMessage());
+        e.printStackTrace();
+      }
+    }
+  }
+
+  protected void announceOutputSpent(MoneroOutputWallet output) {
+    for (MoneroWalletListenerI listener : listeners) {
+      try {
+        listener.onOutputSpent(output);
+      } catch (Exception e) {
+        System.err.println("Error calling listener on output spent: " + e.getMessage());
+        e.printStackTrace();
+      }
+    }
+  }
+
   @Override
   public void setDaemonConnection(String uri) {
     setDaemonConnection(uri, null, null);
