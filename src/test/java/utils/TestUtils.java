@@ -89,7 +89,7 @@ public class TestUtils {
   static {
     try {
       InputStream is = TestUtils.class.getClassLoader().getResourceAsStream("logger.properties");
-      LogManager.getLogManager().readConfiguration(is);
+      if (is != null) LogManager.getLogManager().readConfiguration(is);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
