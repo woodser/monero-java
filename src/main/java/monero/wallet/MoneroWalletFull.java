@@ -197,12 +197,23 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     if (config.getLanguage() != null) throw new MoneroError("Cannot specify language when opening wallet");
     if (Boolean.TRUE.equals(config.getSaveCurrent())) throw new MoneroError("Cannot save current wallet when opening full wallet");
 
-    // read wallet data from disk if not provided
-    if (config.getKeysData() == null) {
-      return openWallet(config.getPath(), config.getPassword(), config.getNetworkType(), config.getServer());
-    } else {
-      return openWalletData(config.getPassword(), config.getNetworkType(), config.getKeysData(), config.getCacheData(), config.getServer());
+    // set server from connection manager if provided
+    if (config.getConnectionManager() != null) {
+      if (config.getServer() != null) throw new MoneroError("Wallet can be opened with a server or connection manager but not both");
+      config.setServer(config.getConnectionManager().getConnection());
     }
+
+    // read wallet data from disk unless provided
+    MoneroWalletFull wallet;
+    if (config.getKeysData() == null) {
+      wallet = openWallet(config.getPath(), config.getPassword(), config.getNetworkType(), config.getServer());
+    } else {
+      wallet = openWalletData(config.getPassword(), config.getNetworkType(), config.getKeysData(), config.getCacheData(), config.getServer());
+    }
+
+    // set connection manager
+    wallet.setConnectionManager(config.getConnectionManager());
+    return wallet;
   }
   
   /**
@@ -270,7 +281,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
 
     // set server from connection manager if provided
     if (config.getConnectionManager() != null) {
-      if (config.getServer() != null) throw new MoneroError("Wallet can be initialized with a server or connection manager but not both");
+      if (config.getServer() != null) throw new MoneroError("Wallet can be created with a server or connection manager but not both");
       config.setServer(config.getConnectionManager().getConnection());
     }
     
@@ -287,6 +298,8 @@ public class MoneroWalletFull extends MoneroWalletDefault {
       if (config.getRestoreHeight() != null) throw new MoneroError("Cannot specify restore height when creating random wallet");
       wallet = createWalletRandom(config);
     }
+
+    // set connection manager
     wallet.setConnectionManager(config.getConnectionManager());
     return wallet;
   }
