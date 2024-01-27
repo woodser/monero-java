@@ -90,7 +90,6 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private long jniListenerHandle;               // memory address of the wallet listener in c++; this variable is read directly by name in c++
   private WalletJniListener jniListener;        // receives notifications from jni c++
   private String password;
-  private boolean isClosed;                     // whether or not wallet is closed
   
   /**
    * Private constructor with a handle to the memory address of the wallet in c++.
@@ -102,7 +101,6 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     this.jniWalletHandle = jniWalletHandle;
     this.jniListener = new WalletJniListener();
     this.password = password;
-    this.isClosed = false;
   }
   
   // --------------------- WALLET MANAGEMENT UTILITIES ------------------------
@@ -1386,9 +1384,8 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   @Override
   public void close(boolean save) {
-    super.close(save);
     if (isClosed) return; // closing a closed wallet has no effect
-    isClosed = true;
+    super.close(save);
     password = null;
     refreshListening();
     try {
@@ -1396,11 +1393,6 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
-  }
-  
-  @Override
-  public boolean isClosed() {
-    return isClosed;
   }
   
   // ------------------------------ NATIVE METHODS ----------------------------
