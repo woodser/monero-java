@@ -62,6 +62,7 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   protected Set<MoneroWalletListenerI> listeners;
   protected MoneroConnectionManager connectionManager;
   protected MoneroConnectionManagerListener connectionManagerListener;
+  protected boolean isClosed = false;
   
   public MoneroWalletDefault() {
     this.listeners = new LinkedHashSet<MoneroWalletListenerI>();
@@ -455,6 +456,12 @@ abstract class MoneroWalletDefault implements MoneroWallet {
     connectionManager = null;
     connectionManagerListener = null;
     listeners.clear();
+    isClosed = true;
+  }
+
+  @Override
+  public boolean isClosed() {
+    return isClosed;
   }
   
   protected MoneroTransferQuery normalizeTransferQuery(MoneroTransferQuery query) {
