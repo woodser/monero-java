@@ -132,7 +132,7 @@ public class TestSampleCode {
     // set current connection
     connectionManager.setConnection(new MoneroRpcConnection("http://foo.bar", "admin", "password")); // connection is added if new
 
-    // create wallet with managed connections or set later
+    // create or open wallet governed by connection manager
     MoneroWalletFull walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
         .setPath("./test_wallets/" + UUID.randomUUID().toString())  // *** CHANGE README TO "sample_wallet_full" ***
         .setPassword("supersecretpassword123")

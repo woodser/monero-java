@@ -87,7 +87,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     if (config == null) config = new MoneroWalletConfig();
     if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
     if (config.getNetworkType() == null) config.setNetworkType(TestUtils.NETWORK_TYPE);
-    if (config.getServer() == null) config.setServer(daemon.getRpcConnection());
+    if (config.getServer() == null && config.getConnectionManager() == null) config.setServer(daemon.getRpcConnection());
     
     // open wallet
     MoneroWalletFull wallet = MoneroWalletFull.openWallet(config);

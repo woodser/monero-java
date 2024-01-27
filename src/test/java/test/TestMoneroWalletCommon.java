@@ -530,6 +530,12 @@ public abstract class TestMoneroWalletCommon {
     GenUtils.waitFor(TestUtils.AUTO_CONNECT_TIMEOUT_MS);
     assertEquals(connection2, wallet.getDaemonConnection());
 
+    // reopen wallet with connection manager
+    String path = wallet.getPath();
+    closeWallet(wallet);
+    wallet = openWallet(new MoneroWalletConfig().setServerUri("").setConnectionManager(connectionManager).setPath(path));
+    assertEquals(connection2, wallet.getDaemonConnection());
+
     // disconnect
     connectionManager.setConnection((String) null);
     assertEquals(null, wallet.getDaemonConnection());

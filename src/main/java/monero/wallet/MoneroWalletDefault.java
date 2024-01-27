@@ -454,6 +454,7 @@ abstract class MoneroWalletDefault implements MoneroWallet {
     if (connectionManager != null) connectionManager.removeListener(connectionManagerListener);
     connectionManager = null;
     connectionManagerListener = null;
+    listeners.clear();
   }
   
   protected MoneroTransferQuery normalizeTransferQuery(MoneroTransferQuery query) {
