@@ -1003,8 +1003,14 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       byte[][] walletData = wallet.getData();
       byte[] keysData = walletData[0];
       byte[] cacheData = walletData[1];
+
+      // import keys file without cache
+      wallet2 = MoneroWalletFull.openWallet(new MoneroWalletConfig()
+          .setNetworkType(MoneroNetworkType.MAINNET)
+          .setPassword("password123")
+          .setKeysData(keysData));
       
-      // import wallet files
+      // import keys and cache files
       wallet2 = MoneroWalletFull.openWallet(new MoneroWalletConfig()
           .setNetworkType(MoneroNetworkType.MAINNET)
           .setPassword("password123")
