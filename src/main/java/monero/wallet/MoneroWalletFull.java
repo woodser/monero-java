@@ -147,7 +147,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    */
   public static MoneroWalletFull openWalletData(String password, MoneroNetworkType networkType, byte[] keysData, byte[] cacheData, MoneroRpcConnection daemonConnection) {
     if (networkType == null) throw new MoneroError("Must provide a network type");
-    long jniWalletHandle = openWalletDataJni(password, networkType.ordinal(), keysData, cacheData);
+    long jniWalletHandle = openWalletDataJni(password, networkType.ordinal(), keysData == null ? new byte[0] : keysData, cacheData == null ? new byte[0] : cacheData);
     MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle, password);
     if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
     return wallet;
