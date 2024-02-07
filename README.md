@@ -101,7 +101,7 @@ walletFull.close(true);
 
 * [Javadoc](https://woodser.github.io/monero-java/allclasses.html)
 * [API and model overview with visual diagrams](https://woodser.github.io/monero-java/monero-spec.pdf)
-* [JUnit tests](src/main/test/java/test)
+* [JUnit tests](src/test/java)
 * [Using TOR](docs/tor.md)
 * [monero-ts documentation](https://github.com/woodser/monero-ts#documentation) provides additional documentation which translates to monero-java
 
@@ -199,7 +199,7 @@ For example: `export LD_PRELOAD=/path/to/libjemalloc.a` then run your app.
 	2. Start monerod, e.g.: `./monerod --stagenet` (or use a remote daemon).
 	3. Start monero-wallet-rpc, e.g.: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir ./`
 4. Configure the appropriate RPC endpoints, authentication, and other settings in [TestUtils.java](src/test/java/utils/TestUtils.java).
-4. Run all *.java files in src/main/test as JUnits.
+4. Run all *.java files in src/test/java as JUnits.
 
 ## Related projects
 
