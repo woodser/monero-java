@@ -15,6 +15,9 @@
 		<jackson-version>[2.13.1, 2.13.2.2]</jackson-version>
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
+	<build>
+    	<testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
+  	</build>
 
 	<dependencies>
 		<dependency>
