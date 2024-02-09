@@ -5272,7 +5272,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testInputKeyImages() {
     int accountIndex = 0;
-    int subaddressIndex = 0;
+    int subaddressIndex = wallet.getSubaddresses(0).size() > 1 ? 1 : 0; // TODO: avoid subaddress 0 which is more likely to fail transaction sanity check
     
     // test unrelayed single transaction
     testSpendTx(wallet.createTx(new MoneroTxConfig().addDestination(wallet.getPrimaryAddress(), TestUtils.MAX_FEE).setAccountIndex(accountIndex)));
