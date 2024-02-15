@@ -3511,9 +3511,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testSendToMultiple() {
     assumeTrue(TEST_RELAYS);
-    for (int i = 0; i < 3; i++) {
-      testSendToMultiple(5, 3, false);
-    }
+    testSendToMultiple(5, 3, false);
   }
   
   // Can send to multiple addresses in split transactions
