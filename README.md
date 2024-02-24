@@ -5,7 +5,7 @@ A Java library for creating Monero applications using RPC and JNI bindings to [m
 * Supports wallet and daemon RPC clients.
 * Supports client-side wallets using JNI bindings.
 * Supports multisig, view-only, and offline wallets.
-* Wallet types are interchangeable by conforming to a [common interface](https://woodser.github.io/monero-java/monero/wallet/MoneroWallet.html).
+* Wallet types are interchangeable by conforming to a [common interface](https://woodser.github.io/monero-java/javadocs/monero/wallet/MoneroWallet.html).
 * Uses a clearly defined [data model and API specification](https://woodser.github.io/monero-java/monero-spec.pdf) intended to be intuitive and robust.
 * Query wallet transactions, transfers, and outputs by their properties.
 * Fetch and process binary data from the daemon (e.g. raw blocks).
@@ -28,7 +28,7 @@ A Java library for creating Monero applications using RPC and JNI bindings to [m
 
 <p align="center">
 	<img width="85%" height="auto" src="docs/architecture.png"/><br>
-	<i>Build Java applications using RPC or JNI bindings to <a href="https://github.com/monero-project/monero">monero-project/monero</a>.  Wallet implementations are interchangeable by conforming to a common interface, <a href="https://woodser.github.io/monero-java/monero/wallet/MoneroWallet.html">MoneroWallet.java</a>.</i>
+	<i>Build Java applications using RPC or JNI bindings to <a href="https://github.com/monero-project/monero">monero-project/monero</a>.  Wallet implementations are interchangeable by conforming to a common interface, <a href="https://woodser.github.io/monero-java/javadocs/monero/wallet/MoneroWallet.html">MoneroWallet.java</a>.</i>
 </p>
 
 ## Sample code
