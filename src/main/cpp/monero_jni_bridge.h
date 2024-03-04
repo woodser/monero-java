@@ -127,9 +127,9 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_setListenerJni(JNIEn
 
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_syncJni(JNIEnv *, jobject, jlong);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_startSyncing(JNIEnv *, jobject, jlong);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_startSyncingJni(JNIEnv *, jobject, jlong);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_stopSyncing(JNIEnv *, jobject);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_stopSyncingJni(JNIEnv *, jobject);
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_scanTxsJni(JNIEnv *, jobject, jobjectArray);
 
