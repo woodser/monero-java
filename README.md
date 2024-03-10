@@ -137,20 +137,20 @@ If you want to process binary data or use a client-side wallet instead of RPC, s
 
 ### macOS & Linux
 
-1. Install maven and Java JDK for your system<br>
- Ubuntu: `sudo apt-get install maven default-jdk`<br>
- Mac: download and install a [Java JDK](https://adoptium.net/temurin/).
-2. `export JAVA_HOME=/path/to/jdk`, for example:<br>
- Ubuntu: `export JAVA_HOME=/usr/lib/jvm/default-java`<br>
- Mac: `export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home`
-2. Clone the project repository: `git clone https://github.com/woodser/monero-java.git`
-3. `cd ./monero-java`
-3. Install Maven dependencies: `mvn install`
-4. Update submodules: `./bin/update_submodules.sh`
-5. Build the monero-cpp submodule (located at ./external/monero-cpp) as a shared library by following [instructions](https://github.com/woodser/monero-cpp#using-monero-cpp-in-your-project) for your system.
-6. Build shared libraries to ./build/: `./bin/build_libmonero_java.sh`
-7. Run TestMoneroUtils.java JUnit tests to verify the shared libraries are working with Java JNI.
-8. Add the shared libraries within ./build/ to your application's classpath.
+1. Install [maven](https://maven.apache.org/download.cgi) for your system.
+2. Install a Java JDK for your system, for example:<br>
+    ```
+    curl -s "https://get.sdkman.io" | bash
+    sdk install java 21.0.2.fx-librca
+    ```
+3. Clone the project repository: `git clone https://github.com/woodser/monero-java.git`
+4. `cd ./monero-java`
+5. Install Maven dependencies: `mvn install`
+6. Update submodules: `./bin/update_submodules.sh`
+7. Build the monero-cpp submodule (located at ./external/monero-cpp) as a shared library by following [instructions](https://github.com/woodser/monero-cpp#using-monero-cpp-in-your-project) for your system.
+8. Build shared libraries to ./build/: `./bin/build_libmonero_java.sh`
+9. Run TestMoneroUtils.java JUnit tests to verify the shared libraries are working with Java JNI.
+10. Add the shared libraries within ./build/ to your application's classpath.
 
 
 ### Windows
