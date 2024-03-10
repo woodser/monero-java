@@ -3,9 +3,9 @@ cmake_minimum_required(VERSION 3.4.1)
 if (WIN32)
   add_definitions( "-D_GLIBCXX_USE_NANOSLEEP=1" )
   add_definitions( "-DWIN32_LEAN_AND_MEAN" )
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj -O2 -fPIC -std=c++11 -F/Library/Frameworks -pthread -lcrypto -lcrypt32") 
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj -O2 -fPIC -std=c++14 -F/Library/Frameworks -pthread -lcrypto -lcrypt32") 
 else()
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -F/Library/Frameworks -pthread")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++14 -F/Library/Frameworks -pthread")
 endif()
 
 #SET(CMAKE_C_COMPILER /path/to/c/compiler)
@@ -89,7 +89,7 @@ include_directories(${Boost_INCLUDE_DIR})
 ############
 
 if (APPLE AND NOT IOS)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=default -std=c++11")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=default -std=c++14")
   if (NOT OPENSSL_ROOT_DIR)
       EXECUTE_PROCESS(COMMAND brew --prefix openssl
         OUTPUT_VARIABLE OPENSSL_ROOT_DIR
