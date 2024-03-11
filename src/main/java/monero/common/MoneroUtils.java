@@ -26,7 +26,6 @@ import org.bouncycastle.jcajce.provider.digest.Keccak;
 public class MoneroUtils {
   
   // load JNI binding if available
-  private static boolean JNI_LOADED = false;
   static {
     try { loadNativeLibrary(); }
     catch (UnsatisfiedLinkError e) { }
@@ -47,7 +46,6 @@ public class MoneroUtils {
   public static void loadNativeLibrary() {
     String libName = (System.getProperty("os.name").toLowerCase().contains("windows") ? "lib" : "") + "monero-java";
     System.loadLibrary(libName);
-    JNI_LOADED = true;
   }
   
   /**
@@ -56,7 +54,12 @@ public class MoneroUtils {
    * @return true if the native library is loaded, false otherwise
    */
   public static boolean isNativeLibraryLoaded() {
-    return JNI_LOADED;
+    try {
+      mapToBinary(new HashMap<>());
+      return true;
+    } catch (UnsatisfiedLinkError e) {
+      return false;
+    }
   }
   
   public static final int RING_SIZE = 12; // network-enforced ring size
@@ -457,7 +460,7 @@ public class MoneroUtils {
   public static void setLogLevel(int level) {
     GenUtils.assertTrue("Log level must be an integer >= 0", level >= 0);
     MoneroUtils.LOG_LEVEL = level;
-    if (JNI_LOADED) setLogLevelJni(level);
+    if (isNativeLibraryLoaded()) setLogLevelJni(level);
   }
   
   /**
