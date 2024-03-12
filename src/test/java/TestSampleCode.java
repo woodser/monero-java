@@ -57,13 +57,6 @@ public class TestSampleCode {
     long height = daemon.getHeight();                       // 1523651
     List<MoneroTx> txsInPool = daemon.getTxPool();          // get transactions in the pool
     
-    // open wallet on monero-wallet-rpc
-    MoneroWalletRpc walletRpc = new MoneroWalletRpc(TestUtils.WALLET_RPC_URI, TestUtils.WALLET_RPC_USERNAME, TestUtils.WALLET_RPC_PASSWORD); // *** REPLACE WITH CONSTANTS IN README ***
-    walletRpc.openWallet("test_wallet_1", "supersecretpassword123");  // *** CHANGE README TO "sample_wallet_rpc" ***
-    String primaryAddress = walletRpc.getPrimaryAddress();  // 555zgduFhmKd2o8rPUz...
-    BigInteger balance = walletRpc.getBalance();            // 533648366742
-    List<MoneroTxWallet> txs = walletRpc.getTxs();          // get transactions containing transfers to/from the wallet
-    
     // create wallet from seed using JNI bindings to monero-project
     MoneroWalletFull walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
             .setPath("./test_wallets/" + UUID.randomUUID().toString())  // *** CHANGE README TO "sample_wallet_full" ***
@@ -97,6 +90,13 @@ public class TestSampleCode {
         FUNDS_RECEIVED = true;
       }
     });
+
+    // connect to wallet RPC and open wallet
+    MoneroWalletRpc walletRpc = new MoneroWalletRpc(TestUtils.WALLET_RPC_URI, TestUtils.WALLET_RPC_USERNAME, TestUtils.WALLET_RPC_PASSWORD); // *** REPLACE WITH CONSTANTS IN README ***
+    walletRpc.openWallet("test_wallet_1", "supersecretpassword123");  // *** CHANGE README TO "sample_wallet_rpc" ***
+    String primaryAddress = walletRpc.getPrimaryAddress();  // 555zgduFhmKd2o8rPUz...
+    BigInteger balance = walletRpc.getBalance();            // 533648366742
+    List<MoneroTxWallet> txs = walletRpc.getTxs();          // get transactions containing transfers to/from the wallet
     
     // send funds from RPC wallet to full wallet
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(walletRpc);                                     // *** REMOVE FROM README SAMPLE ***

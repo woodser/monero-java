@@ -39,13 +39,6 @@ MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:38081", "superuser",
 long height = daemon.getHeight();                       // 1523651
 List<MoneroTx> txsInPool = daemon.getTxPool();          // get transactions in the pool
 
-// open wallet on monero-wallet-rpc
-MoneroWalletRpc walletRpc = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
-walletRpc.openWallet("sample_wallet_rpc", "supersecretpassword123");
-String primaryAddress = walletRpc.getPrimaryAddress();  // 555zgduFhmKd2o8rPUz...
-BigInteger balance = walletRpc.getBalance();            // 533648366742
-List<MoneroTxWallet> txs = walletRpc.getTxs();          // get transactions containing transfers to/from the wallet
-
 // create wallet from mnemonic phrase using JNI bindings to monero-project
 MoneroWalletFull walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
         .setPath("sample_wallet_full")
@@ -79,6 +72,13 @@ walletFull.addListener(new MoneroWalletListener() {
     FUNDS_RECEIVED = true;
   }
 });
+
+// connect to wallet RPC and open wallet
+MoneroWalletRpc walletRpc = new MoneroWalletRpc("http://localhost:38083", "rpc_user", "abc123");
+walletRpc.openWallet("sample_wallet_rpc", "supersecretpassword123");
+String primaryAddress = walletRpc.getPrimaryAddress();  // 555zgduFhmKd2o8rPUz...
+BigInteger balance = walletRpc.getBalance();            // 533648366742
+List<MoneroTxWallet> txs = walletRpc.getTxs();          // get transactions containing transfers to/from the wallet
 
 // send funds from RPC wallet to full wallet
 MoneroTxWallet createdTx = walletRpc.createTx(new MoneroTxConfig()
