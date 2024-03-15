@@ -113,13 +113,13 @@ walletFull.close(true);
 <dependency>
   <groupId>io.github.woodser</groupId>
   <artifactId>monero-java</artifactId>
-  <version>0.8.11</version>
+  <version>0.8.12</version>
 </dependency>
 ```
 
 #### For Gradle, add to build.gradle:
 
-`compile 'io.github.woodser:monero-java:0.8.11'`
+`compile 'io.github.woodser:monero-java:0.8.12'`
 
 You are now ready to use this library with [monerod](https://getmonero.org/resources/developer-guides/daemon-rpc.html) and [monero-wallet-rpc](https://getmonero.org/resources/developer-guides/wallet-rpc.html) endpoints.
 
