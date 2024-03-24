@@ -24,13 +24,7 @@ import org.bouncycastle.jcajce.provider.digest.Keccak;
  * Collection of Monero utilities.
  */
 public class MoneroUtils {
-  
-  // load JNI binding if available
-  static {
-    try { loadNativeLibrary(); }
-    catch (UnsatisfiedLinkError e) { }
-  }
-  
+
   /**
    * Get the version of the monero-java library.
    * 
@@ -39,7 +33,22 @@ public class MoneroUtils {
   public static String getVersion() {
     return "0.8.12";
   }
-  
+
+  // try to load jni bindings
+  static {
+    tryLoadNativeLibrary();
+  }
+
+  /**
+   * Try to load the native library if not already loaded.
+   */
+  public static void tryLoadNativeLibrary() {
+    if (!MoneroUtils.isNativeLibraryLoaded()) {
+      try { MoneroUtils.loadNativeLibrary(); }
+      catch (UnsatisfiedLinkError e) { }
+    }
+  }
+
   /**
    * Load the native library.
    */
@@ -57,7 +66,7 @@ public class MoneroUtils {
     try {
       mapToBinary(new HashMap<>());
       return true;
-    } catch (UnsatisfiedLinkError e) {
+    } catch (Exception | UnsatisfiedLinkError e) {
       return false;
     }
   }
