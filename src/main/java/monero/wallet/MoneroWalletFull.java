@@ -76,9 +76,9 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   // ----------------------------- PRIVATE SETUP ------------------------------
 
-  // load monero-project C++ as a dynamic library
+  // try to load jni bindings
   static {
-    MoneroUtils.loadNativeLibrary();
+    MoneroUtils.tryLoadNativeLibrary();
   }
   
   // class variables
