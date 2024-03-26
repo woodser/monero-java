@@ -24,34 +24,10 @@ set(MONERO_CPP_SRC "${MONERO_CPP}/src")
 set(MONERO_PROJECT ${MONERO_CPP}/external/monero-project)
 set(MONERO_PROJECT_SRC "${MONERO_PROJECT}/src")
 
-# java header includes
+# check JAVA_HOME
 if(NOT DEFINED ENV{JAVA_HOME} OR "$ENV{JAVA_HOME}" STREQUAL "")
   message(FATAL_ERROR "JAVA_HOME variable not set, for example: export JAVA_HOME=/path/to/jdk")
-else()
-  include_directories("$ENV{JAVA_HOME}")
-  include_directories("$ENV{JAVA_HOME}/include")
-  if (APPLE)
-    include_directories("$ENV{JAVA_HOME}/include/darwin")
-  elseif (WIN32)
-    include_directories("$ENV{JAVA_HOME}/include/win32")
-  else()
-    include_directories("$ENV{JAVA_HOME}/include/linux")
-  endif()
 endif()
-
-# monero-project header includes
-include_directories("${MONERO_CPP}/external/libsodium/include/sodium")
-include_directories("${MONERO_CPP}/external/openssl-sdk/include")
-include_directories("${MONERO_CPP_SRC}/")
-include_directories("${MONERO_PROJECT}/contrib/epee/include")
-include_directories("${MONERO_PROJECT}/external/")
-include_directories("${MONERO_PROJECT}/external/easylogging++")
-include_directories("${MONERO_PROJECT}/external/rapidjson/include")
-include_directories("${MONERO_PROJECT_SRC}/")
-include_directories("${MONERO_PROJECT_SRC}/crypto")
-include_directories("${MONERO_PROJECT_SRC}/crypto/crypto_ops_builder/include/")
-include_directories("${MONERO_PROJECT_SRC}/wallet")
-include_directories("${MONERO_PROJECT_SRC}/wallet/api")
 
 # TODO: remove TRUEs, how are APPLE, DEPENDS, etc initialized?
 if (TRUE OR HIDAPI_FOUND OR LibUSB_COMPILE_TEST_PASSED)
@@ -82,7 +58,6 @@ set(Boost_NO_BOOST_CMAKE 1)
 set(Boost_USE_MULTITHREADED ON)
 find_package(Boost 1.58 QUIET REQUIRED COMPONENTS chrono date_time filesystem program_options regex serialization wserialization system thread)
 message(STATUS "Using Boost include dir at ${Boost_INCLUDE_DIR}")
-include_directories(${Boost_INCLUDE_DIR})
 
 ############
 # OpenSSL
@@ -100,7 +75,6 @@ endif()
 
 find_package(OpenSSL REQUIRED)
 message(STATUS "Using OpenSSL include dir at ${OPENSSL_INCLUDE_DIR}")
-include_directories(${OPENSSL_INCLUDE_DIR})
 
 if(STATIC AND NOT IOS)
   if(UNIX)
@@ -137,6 +111,33 @@ set(
     src/main/cpp/monero_jni_bridge.cpp
 )
 add_library(monero-java SHARED ${MONERO_JNI_SRC_FILES})
+
+target_include_directories(monero-java PUBLIC
+  "$ENV{JAVA_HOME}"
+  "$ENV{JAVA_HOME}/include"
+  "${MONERO_CPP}/external/libsodium/include/sodium"
+  "${MONERO_CPP}/external/openssl-sdk/include"
+  "${MONERO_CPP_SRC}/"
+  "${MONERO_PROJECT}/contrib/epee/include"
+  "${MONERO_PROJECT}/external/"
+  "${MONERO_PROJECT}/external/easylogging++"
+  "${MONERO_PROJECT}/external/rapidjson/include"
+  "${MONERO_PROJECT_SRC}/"
+  "${MONERO_PROJECT_SRC}/crypto"
+  "${MONERO_PROJECT_SRC}/crypto/crypto_ops_builder/include/"
+  "${MONERO_PROJECT_SRC}/wallet"
+  "${MONERO_PROJECT_SRC}/wallet/api"
+  ${Boost_INCLUDE_DIR}
+  ${OPENSSL_INCLUDE_DIR}
+)
+
+if (APPLE)
+  target_include_directories(monero-java PUBLIC "$ENV{JAVA_HOME}/include/darwin")
+elseif (WIN32)
+  target_include_directories(monero-java PUBLIC "$ENV{JAVA_HOME}/include/win32")
+else()
+  target_include_directories(monero-java PUBLIC "$ENV{JAVA_HOME}/include/linux")
+endif()
 
 target_link_libraries(monero-java
     monero-cpp
