@@ -201,6 +201,43 @@
 							</execution>
 						</executions>
 					</plugin>
+			        <plugin>
+				        <groupId>org.apache.maven.plugins</groupId>
+				        <artifactId>maven-shade-plugin</artifactId>
+				        <version>3.2.4</version>
+				        <executions>
+					        <execution>
+						        <phase>package</phase>
+						        <goals>
+							        <goal>shade</goal>
+						        </goals>
+						        <configuration>
+							        <createDependencyReducedPom>false</createDependencyReducedPom>
+							        <shadedArtifactAttached>true</shadedArtifactAttached>
+							        <shadedClassifierName>shaded</shadedClassifierName>
+							        <transformers>
+								        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									        <manifestEntries>
+										        <Main-Class>monero.wallet.MoneroWalletFull</Main-Class>
+									        </manifestEntries>
+								        </transformer>
+								        <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+									        <resource>META-INF/native/linux-arm/libmonero-arm/libmonero-cpp.dylib</resource>
+									        <resource>META-INF/native/linux-arm/libmonero-arm/libmonero-java.dylib</resource>
+									        <resource>META-INF/native/mac/libmonero-cpp.dylib</resource>
+									        <resource>META-INF/native/mac/libmonero-java.dylib</resource>
+                                            <resource>META-INF/native/windows/libmonero-cpp.dll</resource>
+                                            <resource>META-INF/native/windows/libmonero-java.dll</resource>
+                                            <resource>META-INF/native/windows/libmonero-cpp.dll.a</resource>
+                                            <resource>META-INF/native/windows/libmonero-java.dll.a</resource>
+									        <resource>META-INF/native/linux-x86_64/libmonero-cpp.so</resource>
+									        <resource>META-INF/native/linux-x86_64/libmonero-java.so</resource>
+								        </transformer>
+							        </transformers>
+						        </configuration>
+					        </execution>
+				        </executions>
+			        </plugin>					
 				</plugins>
 			</build>
 		</profile>
