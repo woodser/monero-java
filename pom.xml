@@ -222,17 +222,22 @@
 									        </manifestEntries>
 								        </transformer>
 								        <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-									        <resource>META-INF/native/linux-arm/libmonero-arm/libmonero-cpp.dylib</resource>
-									        <resource>META-INF/native/linux-arm/libmonero-arm/libmonero-java.dylib</resource>
-									        <resource>META-INF/native/mac/libmonero-cpp.dylib</resource>
-									        <resource>META-INF/native/mac/libmonero-java.dylib</resource>
-                                            <resource>META-INF/native/windows/libmonero-cpp.dll</resource>
-                                            <resource>META-INF/native/windows/libmonero-java.dll</resource>
-                                            <resource>META-INF/native/windows/libmonero-cpp.dll.a</resource>
-                                            <resource>META-INF/native/windows/libmonero-java.dll.a</resource>
+									        <!-- Include all platform-specific native libraries -->
+									        <resource>META-INF/native/linux-arm/libmonero-cpp.so</resource>
+									        <resource>META-INF/native/linux-arm/libmonero-java.so</resource>
+									        <resource>META-INF/native/linux-arm64/libmonero-cpp.so</resource>
+									        <resource>META-INF/native/linux-arm64/libmonero-java.so</resource>
 									        <resource>META-INF/native/linux-x86_64/libmonero-cpp.so</resource>
 									        <resource>META-INF/native/linux-x86_64/libmonero-java.so</resource>
-								        </transformer>
+									        <resource>META-INF/native/mac-x86_64/libmonero-cpp.dylib</resource>
+									        <resource>META-INF/native/mac-x86_64/libmonero-java.dylib</resource>
+									        <resource>META-INF/native/mac-arm64/libmonero-cpp.dylib</resource>
+									        <resource>META-INF/native/mac-arm64/libmonero-java.dylib</resource>
+									        <resource>META-INF/native/windows/libmonero-cpp.dll</resource>
+									        <resource>META-INF/native/windows/libmonero-java.dll</resource>
+									        <resource>META-INF/native/windows/libmonero-cpp.dll.a</resource>
+									        <resource>META-INF/native/windows/libmonero-java.dll.a</resource>
+								        </transformer>								        </transformer>
 							        </transformers>
 						        </configuration>
 					        </execution>
