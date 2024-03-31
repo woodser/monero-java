@@ -1,7 +1,6 @@
+/lib/
 /target/
 /build/
 **/pom.xml.versionsBackup
 **/logs
 /test_wallets
-/external-libs/
-/log_java_tests.txt

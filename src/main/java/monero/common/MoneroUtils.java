@@ -4,9 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import common.utils.GenUtils;
 import common.utils.JsonUtils;
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,16 +50,89 @@ public class MoneroUtils {
   public static void tryLoadNativeLibrary() {
     if (!MoneroUtils.isNativeLibraryLoaded()) {
       try { MoneroUtils.loadNativeLibrary(); }
-      catch (UnsatisfiedLinkError e) { }
+      catch (Exception | UnsatisfiedLinkError e) { }
     }
   }
 
-  /**
-   * Load the native library.
-   */
   public static void loadNativeLibrary() {
-    String libName = (System.getProperty("os.name").toLowerCase().contains("windows") ? "lib" : "") + "monero-java";
-    System.loadLibrary(libName);
+
+    // try to load from java library path
+    try {
+      String libName = (System.getProperty("os.name").toLowerCase().contains("windows") ? "lib" : "") + "monero-java";
+      System.loadLibrary(libName);
+    } catch (Exception | UnsatisfiedLinkError e) {
+      // ignore error
+    }
+
+    // try to load from resources (e.g. in jar)
+    try {
+
+      // get system info
+      String osName = System.getProperty("os.name").toLowerCase();
+      String osArch = System.getProperty("os.arch").toLowerCase();
+
+      // get library file names and paths
+      String libraryPath = "/";
+      String libraryCppFile = null;
+      String libraryJavaFile = null;
+      String[] libraryFiles = null;
+      if (osName.contains("windows")) {
+        libraryPath += "windows/";
+        libraryFiles = new String[] { "libmonero-cpp.dll", "libmonero-cpp.dll.a", "libmonero-java.dll", "libmonero-java.dll.a" };
+        libraryCppFile = "libmonero-cpp.dll";
+        libraryJavaFile = "libmonero-java.dll";
+      } else if (osName.contains("linux")) {
+        libraryFiles = new String[] { "libmonero-cpp.so", "libmonero-java.so" };
+        libraryCppFile = "libmonero-cpp.so";
+        libraryJavaFile = "libmonero-java.so";
+        if (osArch.contains("x86_64")) {
+          libraryPath += "linux-x86_64/";
+        } else if (osArch.contains("aarch64")) {
+          libraryPath += "linux-arm64/";
+        }
+      } else if (osName.contains("mac")) {
+        libraryFiles = new String[] { "libmonero-cpp.dylib", "libmonero-java.dylib" };
+        libraryCppFile = "libmonero-cpp.dylib";
+        libraryJavaFile = "libmonero-java.dylib";
+        if (osArch.contains("x86_64")) {
+          libraryPath += "mac-x86_64/";
+        } else if (osArch.contains("aarch64")) {
+          libraryPath += "mac-arm64/";
+        }
+      } else {
+        throw new UnsupportedOperationException("Unsupported operating system: " + osName);
+      }
+
+      // copy all library files to temp directory
+      Path tempDirectory = Files.createTempDirectory("libmonero");
+      for (String libraryFile : libraryFiles) {
+        try (InputStream inputStream = MoneroUtils.class.getResourceAsStream(libraryPath + libraryFile); OutputStream outputStream = Files.newOutputStream(tempDirectory.resolve(libraryFile))) {
+          byte[] buffer = new byte[1024];
+          int bytesRead;
+          while ((bytesRead = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, bytesRead);
+          }
+        }
+      }
+
+      // load native libraries
+      try {
+        System.load(tempDirectory.resolve(libraryCppFile).toString());
+        System.load(tempDirectory.resolve(libraryJavaFile).toString());
+      } catch (Exception | UnsatisfiedLinkError e) {
+        e.printStackTrace();
+      }
+
+      // try to delete temporary files and folder
+      try {
+        for (String libraryFile : libraryFiles) Files.delete(tempDirectory.resolve(libraryFile));
+        Files.delete(tempDirectory);
+      } catch (AccessDeniedException e) {
+        //e.printStackTrace();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
   
   /**
