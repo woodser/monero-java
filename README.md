@@ -93,13 +93,13 @@ walletFull.close(true);
 <dependency>
   <groupId>io.github.woodser</groupId>
   <artifactId>monero-java</artifactId>
-  <version>0.8.19</version>
+  <version>0.8.20</version>
 </dependency>
 ```
 
 #### For Gradle, add to build.gradle:
 
-`compile 'io.github.woodser:monero-java:0.8.19'`
+`compile 'io.github.woodser:monero-java:0.8.20'`
 
 > [!NOTE]
 > If you're on Windows and want to use native wallets instead of monero-wallet-rpc, or if you want to process binary data, first install MSYS2:
