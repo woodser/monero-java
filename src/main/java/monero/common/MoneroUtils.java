@@ -65,6 +65,8 @@ public class MoneroUtils {
     }
 
     // try to load from resources (e.g. in jar)
+    Path tempDir = null;
+    String[] libraryFiles = null;
     try {
 
       // get system info
@@ -75,7 +77,6 @@ public class MoneroUtils {
       String libraryPath = "/";
       String libraryCppFile = null;
       String libraryJavaFile = null;
-      String[] libraryFiles = null;
       if (osName.contains("windows")) {
         libraryPath += "windows/";
         libraryFiles = new String[] { "libmonero-cpp.dll", "libmonero-cpp.dll.a", "libmonero-java.dll", "libmonero-java.dll.a" };
@@ -85,28 +86,22 @@ public class MoneroUtils {
         libraryFiles = new String[] { "libmonero-cpp.so", "libmonero-java.so" };
         libraryCppFile = "libmonero-cpp.so";
         libraryJavaFile = "libmonero-java.so";
-        if (osArch.contains("x86_64")) {
-          libraryPath += "linux-x86_64/";
-        } else if (osArch.contains("aarch64")) {
-          libraryPath += "linux-arm64/";
-        }
+        if (osArch.contains("x86_64")) libraryPath += "linux-x86_64/";
+        else if (osArch.contains("aarch64")) libraryPath += "linux-arm64/";
       } else if (osName.contains("mac")) {
         libraryFiles = new String[] { "libmonero-cpp.dylib", "libmonero-java.dylib" };
         libraryCppFile = "libmonero-cpp.dylib";
         libraryJavaFile = "libmonero-java.dylib";
-        if (osArch.contains("x86_64")) {
-          libraryPath += "mac-x86_64/";
-        } else if (osArch.contains("aarch64")) {
-          libraryPath += "mac-arm64/";
-        }
+        if (osArch.contains("x86_64")) libraryPath += "mac-x86_64/";
+        else if (osArch.contains("aarch64")) libraryPath += "mac-arm64/";
       } else {
         throw new UnsupportedOperationException("Unsupported operating system: " + osName);
       }
 
       // copy all library files to temp directory
-      Path tempDirectory = Files.createTempDirectory("libmonero");
+      tempDir = Files.createTempDirectory("libmonero");
       for (String libraryFile : libraryFiles) {
-        try (InputStream inputStream = MoneroUtils.class.getResourceAsStream(libraryPath + libraryFile); OutputStream outputStream = Files.newOutputStream(tempDirectory.resolve(libraryFile))) {
+        try (InputStream inputStream = MoneroUtils.class.getResourceAsStream(libraryPath + libraryFile); OutputStream outputStream = Files.newOutputStream(tempDir.resolve(libraryFile))) {
           byte[] buffer = new byte[1024];
           int bytesRead;
           while ((bytesRead = inputStream.read(buffer)) != -1) {
@@ -116,22 +111,21 @@ public class MoneroUtils {
       }
 
       // load native libraries
-      try {
-        System.load(tempDirectory.resolve(libraryCppFile).toString());
-        System.load(tempDirectory.resolve(libraryJavaFile).toString());
-      } catch (Exception | UnsatisfiedLinkError e) {
-        e.printStackTrace();
-      }
+      System.load(tempDir.resolve(libraryCppFile).toString());
+      System.load(tempDir.resolve(libraryJavaFile).toString());
+    } catch (Exception e) {
+      throw new MoneroError(e);
+    } finally {
 
       // try to delete temporary files and folder
       try {
-        for (String libraryFile : libraryFiles) Files.delete(tempDirectory.resolve(libraryFile));
-        Files.delete(tempDirectory);
-      } catch (AccessDeniedException e) {
+        if (tempDir != null) {
+          for (String libraryFile : libraryFiles) Files.delete(tempDir.resolve(libraryFile));
+          Files.delete(tempDir);
+        }
+      } catch (Exception e) {
         //e.printStackTrace();
       }
-    } catch (Exception e) {
-      e.printStackTrace();
     }
   }
   
