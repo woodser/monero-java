@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
-import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ public class MoneroUtils {
    * @return the version of this monero-java library
    */
   public static String getVersion() {
-    return "0.8.19";
+    return "0.8.20";
   }
 
   // try to load jni bindings
@@ -83,17 +82,15 @@ public class MoneroUtils {
         libraryCppFile = "libmonero-cpp.dll";
         libraryJavaFile = "libmonero-java.dll";
       } else if (osName.contains("linux")) {
+        libraryPath += osArch.contains("aarch64") ? "linux-arm64/" : "linux-x86_64/";
         libraryFiles = new String[] { "libmonero-cpp.so", "libmonero-java.so" };
         libraryCppFile = "libmonero-cpp.so";
         libraryJavaFile = "libmonero-java.so";
-        if (osArch.contains("x86_64")) libraryPath += "linux-x86_64/";
-        else if (osArch.contains("aarch64")) libraryPath += "linux-arm64/";
       } else if (osName.contains("mac")) {
+        libraryPath += osArch.contains("aarch64") ? "mac-arm64/" : "mac-x86_64/";
         libraryFiles = new String[] { "libmonero-cpp.dylib", "libmonero-java.dylib" };
         libraryCppFile = "libmonero-cpp.dylib";
         libraryJavaFile = "libmonero-java.dylib";
-        if (osArch.contains("x86_64")) libraryPath += "mac-x86_64/";
-        else if (osArch.contains("aarch64")) libraryPath += "mac-arm64/";
       } else {
         throw new UnsupportedOperationException("Unsupported operating system: " + osName);
       }
