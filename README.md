@@ -102,7 +102,7 @@ walletFull.close(true);
 `compile 'io.github.woodser:monero-java:0.8.21'`
 
 > [!NOTE]
-> If you're on Windows and want to use native wallets instead of monero-wallet-rpc, or if you want to process binary data, first install MSYS2:
+> On Windows, if you want to use native wallets instead of monero-wallet-rpc, or if you want to process binary data, first install MSYS2:
 > 1. Install [MSYS2](https://www.msys2.org/).
 > 2. Environment variables > System variables > Path > Edit > New > C:\msys64\mingw64\bin
 
