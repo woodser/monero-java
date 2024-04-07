@@ -101,6 +101,12 @@ walletFull.close(true);
 
 `compile 'io.github.woodser:monero-java:0.8.21'`
 
+#### If using RPC servers:
+
+1. Download and install [Monero CLI](https://web.getmonero.org/downloads/).
+2. Start monerod, e.g.: `./monerod --stagenet` (or use a remote daemon).
+3. Start monero-wallet-rpc, e.g.: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir ./`
+
 > [!NOTE]
 > On Windows, if you want to use native wallets instead of monero-wallet-rpc, or if you want to process binary data, first install MSYS2:
 > 1. Install [MSYS2](https://www.msys2.org/).
