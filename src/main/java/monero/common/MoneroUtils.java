@@ -35,7 +35,7 @@ public class MoneroUtils {
    * @return the version of this monero-java library
    */
   public static String getVersion() {
-    return "0.8.21";
+    return "0.8.22";
   }
 
   // try to load jni bindings
