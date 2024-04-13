@@ -2334,7 +2334,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           }
 
           // take initial snapshot
-          if (prevHeight == null) {
+          if (prevBalances == null) {
             prevHeight = getHeight();
             prevLockedTxs = getTxs(new MoneroTxQuery().setIsLocked(true));
             prevBalances = getBalances(null, null);
