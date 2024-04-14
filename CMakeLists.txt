@@ -150,6 +150,10 @@ if (WIN32)
   target_link_options(monero-java PUBLIC "-Wl,--enable-auto-import,--export-all-symbols")
 endif()
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_link_options(monero-java PRIVATE "-z" "noexecstack")
+endif()
+
 INSTALL(TARGETS monero-java
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Runtime
