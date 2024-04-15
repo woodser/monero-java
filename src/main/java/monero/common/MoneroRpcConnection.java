@@ -609,12 +609,13 @@ public class MoneroRpcConnection {
   }
 
   @SuppressWarnings("unchecked")
-  private static void validateRpcResponse(Map<String, Object> respMap, String method, Object params) {
+  private void validateRpcResponse(Map<String, Object> respMap, String method, Object params) {
     Map<String, Object> error = (Map<String, Object>) respMap.get("error");
     if (error == null) return;
-    String msg = (String) error.get("message");
+    String errorMsg = (String) error.get("message");
     int code = ((BigInteger) error.get("code")).intValue();
-    throw new MoneroRpcError(msg, code, method, params);
+    if ("".equals(errorMsg)) errorMsg = "Received error response from RPC request with method '" + method + "' to " + uri; // TODO (monero-project): response sometimes has empty error message
+    throw new MoneroRpcError(errorMsg, code, method, params);
   }
   
   private RequestConfig getRequestConfig(Long timeoutInMs) {
