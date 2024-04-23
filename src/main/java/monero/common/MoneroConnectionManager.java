@@ -686,6 +686,9 @@ public class MoneroConnectionManager {
     
     // use best response if different priority (assumes being called in descending priority)
     if (priorityComparator.compare(bestResponse.getPriority(), bestConnection.getPriority()) != 0) return bestResponse;
+
+    // keep best connection if not enough data
+    if (!responseTimes.containsKey(bestConnection)) return bestConnection;
     
     // check if a connection is consistently better
     for (MoneroRpcConnection connection : responses) {
