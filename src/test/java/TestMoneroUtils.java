@@ -18,6 +18,7 @@ import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletFull;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroWalletConfig;
 import org.junit.jupiter.api.Test;
 import utils.TestUtils;
@@ -232,6 +233,17 @@ public class TestMoneroUtils {
     assertEquals(new BigInteger("1250000000000").toString(), MoneroUtils.xmrToAtomicUnits(1.25).toString());
     assertEquals(1.25, MoneroUtils.atomicUnitsToXmr(new BigInteger("1250000000000")));
   };
+
+  @Test
+  public void testGetPaymentUri() {
+    MoneroTxConfig config = new MoneroTxConfig()
+        .setAddress("42U9v3qs5CjZEePHBZHwuSckQXebuZu299NSmVEmQ41YJZQhKcPyujyMSzpDH4VMMVSBo3U3b54JaNvQLwAjqDhKS3rvM3L")
+        .setAmount(MoneroUtils.xmrToAtomicUnits(0.25))
+        .setRecipientName("John Doe")
+        .setNote("My transfer to wallet");
+    String paymentUri = MoneroUtils.getPaymentUri(config);
+    assertEquals("monero:42U9v3qs5CjZEePHBZHwuSckQXebuZu299NSmVEmQ41YJZQhKcPyujyMSzpDH4VMMVSBo3U3b54JaNvQLwAjqDhKS3rvM3L?tx_amount=0.25&recipient_name=John%20Doe&tx_description=My%20transfer%20to%20wallet", paymentUri);
+  }
   
   // ---------------------------- PRIVATE HELPERS -----------------------------
   
