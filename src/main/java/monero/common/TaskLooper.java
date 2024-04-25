@@ -29,7 +29,7 @@ public class TaskLooper {
   public Runnable getTask() {
     return task;
   }
-  
+
   /**
    * Start the task loop.
    * 
@@ -37,6 +37,18 @@ public class TaskLooper {
    * @return this instance for chaining
    */
   public synchronized TaskLooper start(long periodInMs) {
+    start(periodInMs, false);
+    return this;
+  }
+  
+  /**
+   * Start the task loop.
+   * 
+   * @param periodInMs the loop period in milliseconds
+   * @param targetFixedPeriod specifies if the task should target a fixed period by accounting for run time
+   * @return this instance for chaining
+   */
+  public synchronized TaskLooper start(long periodInMs, boolean targetFixedPeriod) {
     synchronized (this) {
       setPeriodInMs(periodInMs);
       if (isStarted) return this;
@@ -55,9 +67,9 @@ public class TaskLooper {
             long startTime = System.currentTimeMillis();
             task.run();
             
-            // wait remaining period
+            // wait period
             if (isStarted) {
-              try { TimeUnit.MILLISECONDS.sleep(that.periodInMs - (System.currentTimeMillis() - startTime)); } // target fixed period by accounting for run time
+              try { TimeUnit.MILLISECONDS.sleep(that.periodInMs - (targetFixedPeriod ? System.currentTimeMillis() - startTime : 0)); } // target fixed period by accounting for run time
               catch (Exception e) {
                 isLooping = false;
                 if (isStarted) throw new RuntimeException(e);
