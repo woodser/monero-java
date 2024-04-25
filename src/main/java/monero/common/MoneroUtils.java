@@ -9,6 +9,8 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import monero.daemon.model.MoneroTx;
 import monero.wallet.model.MoneroAddressType;
 import monero.wallet.model.MoneroDecodedAddress;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroTxConfig;
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
 
@@ -586,6 +589,33 @@ public class MoneroUtils {
   public static double atomicUnitsToXmr(BigInteger amountAtomicUnits) {
     BigInteger[] quotientAndRemainder = amountAtomicUnits.divideAndRemainder(BigInteger.valueOf(AU_PER_XMR));
     return quotientAndRemainder[0].doubleValue() + quotientAndRemainder[1].doubleValue() / MoneroUtils.AU_PER_XMR;
+  }
+
+  /**
+   * Creates a payment URI from a tx configuration.
+   * 
+   * TODO: use native bindings to monero-project
+   * 
+   * @param config specifies configuration for a payment URI
+   * @return the payment URI
+   */
+  public static String getPaymentUri(MoneroTxConfig config) {
+    if (config.getAddress() == null) throw new IllegalArgumentException("Payment URI requires an address");
+    StringBuilder sb = new StringBuilder();
+    sb.append("monero:");
+    sb.append(config.getAddress());
+    StringBuilder paramSb = new StringBuilder();
+    if (config.getAmount() != null) paramSb.append("&tx_amount=").append(atomicUnitsToXmr(config.getAmount()));
+    if (config.getRecipientName() != null) paramSb.append("&recipient_name=").append(urlEncode(config.getRecipientName()));
+    if (config.getNote() != null) paramSb.append("&tx_description=").append(urlEncode(config.getNote()));
+    if (config.getPaymentId() != null && config.getPaymentId().length() > 0) throw new IllegalArgumentException("Standalone payment id deprecated, use integrated address instead");
+    char[] paramChars = paramSb.toString().toCharArray();
+    if (paramChars.length > 0) paramChars[0] = '?';
+    return sb.toString() + (paramChars.length > 0 ? new String(paramChars) : "");
+  }
+
+  private static String urlEncode(String string) {
+    return URLEncoder.encode(string, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
   }
   
   // ---------------------------- NATIVE BINDINGS -----------------------------
