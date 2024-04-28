@@ -72,6 +72,7 @@ public class MoneroRpcConnection {
   private String password;
   private String zmqUri;
   private int priority = 0;
+  private Long timeoutMs;
   private Boolean isOnline;
   private Boolean isAuthenticated;
   private Long responseTime;
@@ -178,10 +179,6 @@ public class MoneroRpcConnection {
     this.zmqUri = zmqUri;
     return this;
   }
-  
-  public int getPriority() {
-    return priority;
-  }
 
   public MoneroRpcConnection setProxyUri(String proxyUri) {
     this.proxyUri = proxyUri;
@@ -203,6 +200,25 @@ public class MoneroRpcConnection {
     if (!(priority >= 0)) throw new MoneroError("Priority must be >= 0");
     this.priority = priority;
     return this;
+  }
+
+  public int getPriority() {
+    return priority;
+  }
+
+  /**
+   * Set the RPC request timeout in milliseconds.
+   * 
+   * @param timeoutMs is the timeout in milliseconds, 0 to disable timeout, or null to use default
+   * @return this connection
+   */
+  public MoneroRpcConnection setTimeout(Long timeoutMs) {
+    this.timeoutMs = timeoutMs;
+    return this;
+  }
+
+  public Long getTimeout() {
+    return timeoutMs;
   }
   
   public MoneroRpcConnection setAttribute(String key, Object value) {
@@ -324,10 +340,10 @@ public class MoneroRpcConnection {
    * 
    * @param method is the method to request
    * @param params are the request's input parameters (supports &lt;Map&lt;String, Object&gt;, List&lt;Object&gt;&lt;/code&gt;, String, etc)
-   * @param timeoutInMs is the request timeout in milliseconds
+   * @param timeoutMs overrides the request timeout in milliseconds
    * @return the RPC API response as a map
    */
-  public Map<String, Object> sendJsonRequest(String method, Object params, Long timeoutInMs) {
+  public Map<String, Object> sendJsonRequest(String method, Object params, Long timeoutMs) {
     CloseableHttpResponse resp = null;
     try {
 
@@ -340,7 +356,7 @@ public class MoneroRpcConnection {
 
       // send http request
       HttpPost post = new HttpPost(uri.toString() + "/json_rpc");
-      post.setConfig(getRequestConfig(timeoutInMs));
+      post.setConfig(getRequestConfig(timeoutMs == null ? this.timeoutMs : timeoutMs));
       HttpEntity entity = new StringEntity(JsonUtils.serialize(body));
       post.setEntity(entity);
       Map<String, Object> respMap;
@@ -418,10 +434,10 @@ public class MoneroRpcConnection {
    * 
    * @param path is the url path of the request to invoke
    * @param params are request parameters sent in the body
-   * @param timeoutInMs is the request timeout in milliseconds
+   * @param timeoutMs overrides the request timeout in milliseconds
    * @return the request's deserialized response
    */
-  public Map<String, Object> sendPathRequest(String path, Map<String, Object> params, Long timeoutInMs) {
+  public Map<String, Object> sendPathRequest(String path, Map<String, Object> params, Long timeoutMs) {
     CloseableHttpResponse resp = null;
     try {
 
@@ -431,7 +447,7 @@ public class MoneroRpcConnection {
         HttpEntity entity = new StringEntity(JsonUtils.serialize(params));
         post.setEntity(entity);
       }
-      post.setConfig(getRequestConfig(timeoutInMs));
+      post.setConfig(getRequestConfig(timeoutMs == null ? this.timeoutMs : timeoutMs));
       Map<String, Object> respMap;
       synchronized (this) {
 
@@ -491,10 +507,10 @@ public class MoneroRpcConnection {
    * 
    * @param path is the path of the binary RPC method to invoke
    * @param params are the request parameters
-   * @param timeoutInMs is the request timeout in milliseconds
+   * @param timeoutMs overrides the request timeout in milliseconds
    * @return byte[] is the binary response
    */
-  public byte[] sendBinaryRequest(String path, Map<String, Object> params, Long timeoutInMs) {
+  public byte[] sendBinaryRequest(String path, Map<String, Object> params, Long timeoutMs) {
     
     // serialize params to monero's portable binary storage format
     byte[] paramsBin = MoneroUtils.mapToBinary(params);
@@ -503,7 +519,7 @@ public class MoneroRpcConnection {
 
       // create http request
       HttpPost post = new HttpPost(uri.toString() + "/" + path);
-      post.setConfig(getRequestConfig(timeoutInMs));
+      post.setConfig(getRequestConfig(timeoutMs == null ? this.timeoutMs : timeoutMs));
       if (paramsBin != null) {
         HttpEntity entity = new ByteArrayEntity(paramsBin, ContentType.DEFAULT_BINARY);
         post.setEntity(entity);
@@ -554,7 +570,7 @@ public class MoneroRpcConnection {
   
   @Override
   public String toString() {
-    return uri + " (uri=" + uri + ", username=" + username + ", password=" + (password == null ? "null" : "***") + ", priority=" + priority + ", isOnline=" + isOnline + ", isAuthenticated=" + isAuthenticated + ", zmqUri=" + zmqUri + ", proxyUri=" + proxyUri + ")";
+    return uri + " (uri=" + uri + ", username=" + username + ", password=" + (password == null ? "null" : "***") + ", priority=" + priority + ", timeoutMs=" + timeoutMs + ", isOnline=" + isOnline + ", isAuthenticated=" + isAuthenticated + ", zmqUri=" + zmqUri + ", proxyUri=" + proxyUri + ")";
   }
   
   @Override
@@ -618,12 +634,12 @@ public class MoneroRpcConnection {
     throw new MoneroRpcError(errorMsg, code, method, params);
   }
   
-  private RequestConfig getRequestConfig(Long timeoutInMs) {
+  private RequestConfig getRequestConfig(Long timeoutMs) {
     RequestConfig.Builder builder = RequestConfig.custom();
-    if (timeoutInMs != null) {
-      builder.setConnectTimeout(Timeout.ofMilliseconds(timeoutInMs));
-      builder.setConnectionRequestTimeout(Timeout.ofMilliseconds(timeoutInMs));
-      builder.setResponseTimeout(Timeout.ofMilliseconds(timeoutInMs));
+    if (timeoutMs != null) {
+      builder.setConnectTimeout(Timeout.ofMilliseconds(timeoutMs));
+      builder.setConnectionRequestTimeout(Timeout.ofMilliseconds(timeoutMs));
+      builder.setResponseTimeout(Timeout.ofMilliseconds(timeoutMs));
     }
     return builder.build();
   }
