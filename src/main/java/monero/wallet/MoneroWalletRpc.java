@@ -688,7 +688,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("start_height", startHeight);
     synchronized(SYNC_LOCK) {  // TODO (monero-project): monero-wallet-rpc hangs at 100% cpu utilization if refresh called concurrently
       try {
-        Map<String, Object> resp = rpc.sendJsonRequest("refresh", params, 0l);
+        Map<String, Object> resp = rpc.sendJsonRequest("refresh", params);
         poll();
         Map<String, Object> result = (Map<String, Object>) resp.get("result");
         return new MoneroSyncResult(((BigInteger) result.get("blocks_fetched")).longValue(), (Boolean) result.get("received_money"));
@@ -737,12 +737,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   
   @Override
   public void rescanSpent() {
-    rpc.sendJsonRequest("rescan_spent", 0l);
+    rpc.sendJsonRequest("rescan_spent");
   }
   
   @Override
   public void rescanBlockchain() {
-    rpc.sendJsonRequest("rescan_blockchain", 0l);
+    rpc.sendJsonRequest("rescan_blockchain");
   }
 
   @Override
