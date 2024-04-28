@@ -128,9 +128,15 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Start the task loop.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stop()" class="member-name-link">stop</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="TaskLooper.html" title="class in monero.common">TaskLooper</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#start(long,boolean)" class="member-name-link">start</a><wbr>(long&nbsp;periodInMs,
+ boolean&nbsp;targetFixedPeriod)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Start the task loop.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stop()" class="member-name-link">stop</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Stop the task loop.</div>
 </div>
 </div>
@@ -188,6 +194,21 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>periodInMs</code> - the loop period in milliseconds</dd>
+<dt>Returns:</dt>
+<dd>this instance for chaining</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="start(long,boolean)">
+<h3>start</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="TaskLooper.html" title="class in monero.common">TaskLooper</a></span>&nbsp;<span class="element-name">start</span><wbr><span class="parameters">(long&nbsp;periodInMs,
+ boolean&nbsp;targetFixedPeriod)</span></div>
+<div class="block">Start the task loop.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>periodInMs</code> - the loop period in milliseconds</dd>
+<dd><code>targetFixedPeriod</code> - specifies if the task should target a fixed period by accounting for run time</dd>
 <dt>Returns:</dt>
 <dd>this instance for chaining</dd>
 </dl>
