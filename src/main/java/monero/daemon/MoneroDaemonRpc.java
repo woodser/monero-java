@@ -129,6 +129,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     
     // start process
     ProcessBuilder pb = new ProcessBuilder(cmd);
+    pb.environment().put("LANG", "en_US.UTF-8"); // scrape output in english
     pb.redirectErrorStream(true);
     process = pb.start();
     
