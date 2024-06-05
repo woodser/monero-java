@@ -113,7 +113,7 @@ public class MoneroUtils {
       // load native libraries
       System.load(tempDir.resolve(libraryCppFile).toString());
       System.load(tempDir.resolve(libraryJavaFile).toString());
-    } catch (Exception e) {
+    } catch (Exception | UnsatisfiedLinkError e) {
       throw new MoneroError(e);
     } finally {
 
