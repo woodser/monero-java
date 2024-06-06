@@ -41,11 +41,6 @@ public class MoneroUtils {
     return "0.8.29";
   }
 
-  // try to load jni bindings
-  static {
-    tryLoadNativeLibrary();
-  }
-
   /**
    * Try to load the native library if not already loaded.
    */
@@ -57,6 +52,9 @@ public class MoneroUtils {
   }
 
   public static void loadNativeLibrary() {
+
+    // skip if already loaded
+    if (isNativeLibraryLoaded()) return;
 
     // try to load from java library path
     try {
@@ -136,7 +134,7 @@ public class MoneroUtils {
    */
   public static boolean isNativeLibraryLoaded() {
     try {
-      mapToBinary(new HashMap<>());
+      jsonToBinaryJni(JsonUtils.serialize(new HashMap<>()));
       return true;
     } catch (Exception | UnsatisfiedLinkError e) {
       return false;
@@ -309,6 +307,7 @@ public class MoneroUtils {
    * @return the integrated address
    */
   public static MoneroIntegratedAddress getIntegratedAddress(MoneroNetworkType networkType, String standardAddress, String paymentId) {
+    loadNativeLibrary();
     try {
       return JsonUtils.deserialize(getIntegratedAddressJni(networkType.ordinal(), standardAddress, paymentId == null ? "" : paymentId), MoneroIntegratedAddress.class);
     } catch (Exception err) {
@@ -482,10 +481,12 @@ public class MoneroUtils {
   }
   
   public static byte[] mapToBinary(Map<String, Object> map) {
+    loadNativeLibrary();
     return jsonToBinaryJni(JsonUtils.serialize(map));
   }
   
   public static Map<String, Object> binaryToMap(byte[] bin) {
+    loadNativeLibrary();
     return JsonUtils.deserialize(binaryToJsonJni(bin), new TypeReference<Map<String, Object>>(){});
   }
   
@@ -493,6 +494,7 @@ public class MoneroUtils {
   public static Map<String, Object> binaryBlocksToMap(byte[] binBlocks) {
     
     // convert binary blocks to json then to map
+    loadNativeLibrary();
     Map<String, Object> map = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, binaryBlocksToJsonJni(binBlocks), new TypeReference<Map<String, Object>>(){});
     
     // parse blocks to maps
@@ -560,6 +562,7 @@ public class MoneroUtils {
    * @param console specifies whether or not to write to the console
    */
   public static void configureNativeLogging(String path, boolean console) {
+    loadNativeLibrary();
     configureLoggingJni(path, console);
   }
   
