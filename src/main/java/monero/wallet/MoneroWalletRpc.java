@@ -574,14 +574,24 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getPublicViewKey() {
-    throw new MoneroError("MoneroWalletRpc.getPublicViewKey() not supported");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key_type", "public_view_key");
+    Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("key");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public String getPublicSpendKey() {
-    throw new MoneroError("MoneroWalletRpc.getPublicSpendKey() not supported");
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("key_type", "public_spend_key");
+    Map<String, Object> resp = rpc.sendJsonRequest("query_key", params);
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    return (String) result.get("key");
   }
   
   @SuppressWarnings("unchecked")
