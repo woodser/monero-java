@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.github.woodser</groupId>
 	<artifactId>monero-java</artifactId>
-	<version>0.8.29</version>
+	<version>0.8.30</version>
 	<name>Monero Java Library</name>
 	<description>A Java library for using Monero</description>
 	<url>https://github.com/woodser/monero-java</url>
