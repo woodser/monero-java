@@ -114,7 +114,7 @@ walletFull.close(true);
 
 ## Documentation
 
-* [Javadoc](https://woodser.github.io/monero-java/allclasses.html)
+* [Javadoc](https://woodser.github.io/monero-java/javadocs/index.html)
 * [API and model overview with visual diagrams](https://woodser.github.io/monero-java/monero-spec.pdf)
 * [JUnit tests](src/test/java)
 * [Using TOR](docs/tor.md)
