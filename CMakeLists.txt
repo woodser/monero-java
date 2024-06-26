@@ -110,9 +110,9 @@ set(
     MONERO_JNI_SRC_FILES
     src/main/cpp/monero_jni_bridge.cpp
 )
-add_library(monero-java SHARED ${MONERO_JNI_SRC_FILES})
+add_library(monero-java-static STATIC ${MONERO_JNI_SRC_FILES})
 
-target_include_directories(monero-java PUBLIC
+target_include_directories(monero-java-static PUBLIC
   "$ENV{JAVA_HOME}"
   "$ENV{JAVA_HOME}/include"
   "${MONERO_CPP}/external/libsodium/include/sodium"
@@ -132,19 +132,21 @@ target_include_directories(monero-java PUBLIC
 )
 
 if (APPLE)
-  target_include_directories(monero-java PUBLIC "$ENV{JAVA_HOME}/include/darwin")
+  target_include_directories(monero-java-static PUBLIC "$ENV{JAVA_HOME}/include/darwin")
 elseif (WIN32)
-  target_include_directories(monero-java PUBLIC "$ENV{JAVA_HOME}/include/win32")
+  target_include_directories(monero-java-static PUBLIC "$ENV{JAVA_HOME}/include/win32")
 else()
-  target_include_directories(monero-java PUBLIC "$ENV{JAVA_HOME}/include/linux")
+  target_include_directories(monero-java-static PUBLIC "$ENV{JAVA_HOME}/include/linux")
 endif()
 
-target_link_libraries(monero-java
+target_link_libraries(monero-java-static
     monero-cpp
     ${Boost_LIBRARIES}
     ${OPENSSL_LIBRARIES}
     ${EXTRA_LIBRARIES}
 )
+
+add_library(monero-java SHARED $<TARGET_OBJECTS:monero-java-static>)
 
 if (WIN32)
   target_link_options(monero-java PUBLIC "-Wl,--enable-auto-import,--export-all-symbols")
