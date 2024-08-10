@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.4.1)
 if (WIN32)
   add_definitions( "-D_GLIBCXX_USE_NANOSLEEP=1" )
   add_definitions( "-DWIN32_LEAN_AND_MEAN" )
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj -O2 -fPIC -std=c++14 -F/Library/Frameworks -pthread -lcrypto -lcrypt32") 
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj -O2 -fPIC -std=c++14 -F/Library/Frameworks -pthread -lcrypto -lcrypt32 -lbcrypt") 
 else()
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++14 -F/Library/Frameworks -pthread")
 endif()
@@ -83,7 +83,7 @@ if(STATIC AND NOT IOS)
 endif()
 
 if (WIN32)
-  list(APPEND OPENSSL_LIBRARIES ws2_32 crypt32)
+  list(APPEND OPENSSL_LIBRARIES ws2_32 crypt32 bcrypt)
 endif()
 
 ######################
