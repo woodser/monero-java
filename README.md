@@ -85,6 +85,14 @@ assertTrue(FUNDS_RECEIVED);
 walletFull.close(true);
 ```
 
+## Documentation
+
+* [Javadoc](https://woodser.github.io/monero-java/javadocs/index.html)
+* [API and model overview with visual diagrams](https://woodser.github.io/monero-java/monero-spec.pdf)
+* [JUnit tests](src/test/java)
+* [Using TOR](docs/tor.md)
+* [monero-ts documentation](https://github.com/woodser/monero-ts#documentation) provides additional documentation which translates to monero-java
+
 ## Using monero-java in your project
 
 #### For Maven, add to pom.xml:
@@ -111,14 +119,6 @@ walletFull.close(true);
 > On Windows, if you want to use native wallets instead of monero-wallet-rpc, or if you want to process binary data, first install MSYS2:
 > 1. Install [MSYS2](https://www.msys2.org/).
 > 2. Environment variables > System variables > Path > Edit > New > C:\msys64\mingw64\bin
-
-## Documentation
-
-* [Javadoc](https://woodser.github.io/monero-java/javadocs/index.html)
-* [API and model overview with visual diagrams](https://woodser.github.io/monero-java/monero-spec.pdf)
-* [JUnit tests](src/test/java)
-* [Using TOR](docs/tor.md)
-* [monero-ts documentation](https://github.com/woodser/monero-ts#documentation) provides additional documentation which translates to monero-java
 
 ## Building native libraries from source
 
