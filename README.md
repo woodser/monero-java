@@ -154,9 +154,9 @@ For convenience, native libraries for Linux, macOS, and Windows are distributed 
 6. Update packages: `pacman -Syu` and confirm at the prompts.
 7. Install dependencies. During installation, use default=all by leaving the input blank and pressing enter.
 
-    64-bit: `pacman -S mingw-w64-x86_64-toolchain make mingw-w64-x86_64-cmake git`
+    64-bit: `pacman -S mingw-w64-x86_64-toolchain make mingw-w64-x86_64-cmake git mingw-w64-x86_64-icu`
 
-    32-bit: `pacman -S mingw-w64-i686-toolchain make mingw-w64-i686-cmake git`
+    32-bit: `pacman -S mingw-w64-i686-toolchain make mingw-w64-i686-cmake git mingw-w64-i686-icu`
 8. Install Java JDK:
     ```
     curl -s "https://get.sdkman.io" | bash
