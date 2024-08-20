@@ -542,11 +542,15 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     Map<String, Object> resp = rpc.sendJsonRequest("get_fee_estimate");
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     checkResponseStatus(result);
-    List<BigInteger> fees = new ArrayList<BigInteger>();
-    for (BigInteger fee : (List<BigInteger>) result.get("fees")) fees.add(fee);
-    BigInteger fee = (BigInteger) result.get("fee");
-    BigInteger quantizationMask = (BigInteger) result.get("quantization_mask");
-    return new MoneroFeeEstimate(fee, fees, quantizationMask);
+    MoneroFeeEstimate feeEstimate = new MoneroFeeEstimate();
+    feeEstimate.setFee((BigInteger) result.get("fee"));
+    feeEstimate.setQuantizationMask((BigInteger) result.get("quantization_mask"));
+    if (result.containsKey("fees")) {
+      List<BigInteger> fees = new ArrayList<BigInteger>();
+      for (BigInteger fee : (List<BigInteger>) result.get("fees")) fees.add(fee);
+      feeEstimate.setFees(fees);
+    }
+    return feeEstimate;
   }
 
   @Override
