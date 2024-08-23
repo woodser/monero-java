@@ -4302,7 +4302,6 @@ public abstract class TestMoneroWalletCommon {
             .setAddress(wallet.getPrimaryAddress())
             .setAmount(TestUtils.MAX_FEE)
             .setAccountIndex(0)
-            .setUnlockTime(daemon.getHeight() + 3l)
             .setCanSplit(false)
             .setRelay(true);
     testSendAndUpdateTxs(config);
@@ -4316,7 +4315,6 @@ public abstract class TestMoneroWalletCommon {
             .setAccountIndex(0)
             .setAddress(wallet.getPrimaryAddress())
             .setAmount(TestUtils.MAX_FEE)
-            .setUnlockTime(daemon.getHeight() + 3l)
             .setCanSplit(true)
             .setRelay(true);
     testSendAndUpdateTxs(config);
@@ -4330,7 +4328,6 @@ public abstract class TestMoneroWalletCommon {
             .setAccountIndex(0)
             .setAddress(wallet.getSubaddress(1, 0).getAddress())
             .setAmount(TestUtils.MAX_FEE)
-            .setUnlockTime(daemon.getHeight() + 3l)
             .setCanSplit(false)
             .setRelay(true);
     testSendAndUpdateTxs(config);
@@ -4345,7 +4342,6 @@ public abstract class TestMoneroWalletCommon {
             .setAddress(wallet.getSubaddress(1, 0).getAddress())
             .setAmount(TestUtils.MAX_FEE)
             .setAccountIndex(0)
-            .setUnlockTime(daemon.getHeight() + 3l)
             .setRelay(true);
     testSendAndUpdateTxs(config);
   }
@@ -5733,7 +5729,7 @@ public abstract class TestMoneroWalletCommon {
       assertEquals(false, tx.isConfirmed());
       testTransfer(tx.getOutgoingTransfer(), ctx);
       assertEquals(MoneroUtils.RING_SIZE, (int) tx.getRingSize());
-      assertEquals(config.getUnlockTime() != null ? config.getUnlockTime() : BigInteger.valueOf(0), tx.getUnlockTime());
+      assertEquals(BigInteger.valueOf(0), tx.getUnlockTime());
       assertNull(tx.getBlock());
       assertTrue(tx.getKey().length() > 0);
       assertNotNull(tx.getFullHex());
