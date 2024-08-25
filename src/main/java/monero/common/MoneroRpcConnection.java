@@ -237,37 +237,39 @@ public class MoneroRpcConnection {
    * @return true if there is a change in status, false otherwise
    */
   public boolean checkConnection(long timeoutMs) {
-    Boolean isOnlineBefore = isOnline;
-    Boolean isAuthenticatedBefore = isAuthenticated;
-    long startTime = System.currentTimeMillis();
-    try {
-      if (MoneroUtils.isNativeLibraryLoaded()) {
-        List<Long> heights = new ArrayList<Long>();
-        for (long i = 0; i < 100; i++) heights.add(i);
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("heights", heights);
-        sendBinaryRequest("get_blocks_by_height.bin", params, timeoutMs); // assume daemon connection
-      } else {
-        sendJsonRequest("get_version", null, timeoutMs);
-      }
-      isOnline = true;
-      isAuthenticated = true;
-    } catch (Exception e) {
-      isOnline = false;
-      isAuthenticated = null;
-      responseTime = null;
-      if (e instanceof MoneroRpcError) {
-        if (((MoneroRpcError) e).getCode() == 401) {
-          isOnline = true;
-          isAuthenticated = false;
-        } else if (((MoneroRpcError) e).getCode() == 404) { // fallback to latency check
-          isOnline = true;
-          isAuthenticated = true;
+    synchronized (this) {
+      Boolean isOnlineBefore = isOnline;
+      Boolean isAuthenticatedBefore = isAuthenticated;
+      long startTime = System.currentTimeMillis();
+      try {
+        if (MoneroUtils.isNativeLibraryLoaded()) {
+          List<Long> heights = new ArrayList<Long>();
+          for (long i = 0; i < 100; i++) heights.add(i);
+          Map<String, Object> params = new HashMap<String, Object>();
+          params.put("heights", heights);
+          sendBinaryRequest("get_blocks_by_height.bin", params, timeoutMs); // assume daemon connection
+        } else {
+          sendJsonRequest("get_version", null, timeoutMs);
+        }
+        isOnline = true;
+        isAuthenticated = true;
+      } catch (Exception e) {
+        isOnline = false;
+        isAuthenticated = null;
+        responseTime = null;
+        if (e instanceof MoneroRpcError) {
+          if (((MoneroRpcError) e).getCode() == 401) {
+            isOnline = true;
+            isAuthenticated = false;
+          } else if (((MoneroRpcError) e).getCode() == 404) { // fallback to latency check
+            isOnline = true;
+            isAuthenticated = true;
+          }
         }
       }
+      if (isOnline) responseTime = System.currentTimeMillis() - startTime;
+      return isOnlineBefore != isOnline || isAuthenticatedBefore != isAuthenticated;
     }
-    if (isOnline) responseTime = System.currentTimeMillis() - startTime;
-    return isOnlineBefore != isOnline || isAuthenticatedBefore != isAuthenticated;
   }
   
   /**
