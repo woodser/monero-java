@@ -2018,6 +2018,7 @@ public class TestMoneroDaemonRpc {
       assertNull(result.getTopBlockHash());
       assertEquals(false, result.isTxExtraTooBig());
       assertEquals(true, result.isGood());
+      assertEquals(false, result.isNonzeroUnlockTime());
     } catch (AssertionError e) {
       System.out.println("Submit result is not good: " + JsonUtils.serialize(result));
       throw e;
