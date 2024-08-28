@@ -26,6 +26,7 @@ public class MoneroSubmitTxResult {
   private BigInteger credits;
   private String topBlockHash;
   private Boolean isTxExtraTooBig;
+  private Boolean isNonzeroUnlockTime;
   
   @JsonProperty("isGood")
   public Boolean isGood() {
@@ -154,6 +155,15 @@ public class MoneroSubmitTxResult {
   
   public void setIsTxExtraTooBig(Boolean isTxExtraTooBig) {
     this.isTxExtraTooBig = isTxExtraTooBig;
+  }
+
+  @JsonProperty("isNonzeroUnlockTime")
+  public Boolean isNonzeroUnlockTime() {
+    return isNonzeroUnlockTime;
+  }
+  
+  public void setIsNonzeroUnlockTime(Boolean isNonzeroUnlockTime) {
+    this.isNonzeroUnlockTime = isNonzeroUnlockTime;
   }
   
   public String toString() {
