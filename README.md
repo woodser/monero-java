@@ -107,7 +107,7 @@ walletFull.close(true);
 
 #### For Gradle, add to build.gradle:
 
-`compile 'io.github.woodser:monero-java:0.8.32'`
+`compile 'io.github.woodser:monero-java:0.8.33'`
 
 #### If using RPC servers:
 
