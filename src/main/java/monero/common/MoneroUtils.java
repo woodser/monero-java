@@ -60,6 +60,7 @@ public class MoneroUtils {
     try {
       String libName = (System.getProperty("os.name").toLowerCase().contains("windows") ? "lib" : "") + "monero-java";
       System.loadLibrary(libName);
+      if (isNativeLibraryLoaded()) return;
     } catch (Exception | UnsatisfiedLinkError e) {
       // ignore error
     }
@@ -93,13 +94,14 @@ public class MoneroUtils {
         libraryCppFile = "libmonero-cpp.dylib";
         libraryJavaFile = "libmonero-java.dylib";
       } else {
-        throw new UnsupportedOperationException("Unsupported operating system: " + osName);
+        throw new MoneroError("Unsupported operating system: " + osName);
       }
 
       // copy all library files to temp directory
       tempDir = Files.createTempDirectory("libmonero");
       for (String libraryFile : libraryFiles) {
         try (InputStream inputStream = MoneroUtils.class.getResourceAsStream(libraryPath + libraryFile); OutputStream outputStream = Files.newOutputStream(tempDir.resolve(libraryFile))) {
+          if (inputStream == null) throw new MoneroError("Missing native library for monero-java: " + libraryFile);
           byte[] buffer = new byte[1024];
           int bytesRead;
           while ((bytesRead = inputStream.read(buffer)) != -1) {
