@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch Current File",
+            "request": "launch",
+            "mainClass": "${file}",
+            "projectName": "monero-java",
+            "vmArgs": "-Djava.library.path=./build",
+        }
+    ]
+}
