@@ -134,12 +134,11 @@ For convenience, native libraries for Linux, macOS, and Windows are distributed 
     curl -s "https://get.sdkman.io" | bash
     sdk install java 21.0.2.fx-librca
     ```
-3. Clone the project repository: `git clone https://github.com/woodser/monero-java.git`
+3. Clone the project repository: `git clone --recurse-submodules https://github.com/woodser/monero-java.git`
 4. `cd ./monero-java`
 5. Install Maven dependencies: `mvn install`
-6. Update submodules: `./bin/update_submodules.sh`
-7. Build the monero-cpp submodule (located at ./external/monero-cpp) as a native library by following [instructions](https://github.com/woodser/monero-cpp#using-monero-cpp-in-your-project) for your system.
-8. Build native libraries to ./build/: `./bin/build_libmonero_java.sh`
+6. Build the monero-cpp submodule (located at ./external/monero-cpp) as a native library by following [instructions](https://github.com/woodser/monero-cpp#using-monero-cpp-in-your-project) for your system.
+7. Build native libraries to ./build/: `./bin/build_libmonero_java.sh`
 
 ### Windows
 
@@ -167,12 +166,11 @@ For convenience, native libraries for Linux, macOS, and Windows are distributed 
     export MAVEN_HOME=/usr/local/apache-maven-3.x.x/
     export PATH=$PATH:$JAVA_HOME/bin/:$MAVEN_HOME/bin/
     ```
-10. Clone the project repository: `git clone https://github.com/woodser/monero-java.git`
+10. Clone the project repository: `git clone --recurse-submodules https://github.com/woodser/monero-java.git`
 11. `cd ./monero-java`
 12. Install Maven dependencies: `mvn install`
-13. Update submodules: `./bin/update_submodules.sh`
-14. Build the monero-cpp submodule (located at ./external/monero-cpp) as a native library by following [instructions](https://github.com/woodser/monero-cpp#windows) for Windows.
-15. Build native libraries to ./build/: `./bin/build_libmonero_java.sh`
+13. Build the monero-cpp submodule (located at ./external/monero-cpp) as a native library by following [instructions](https://github.com/woodser/monero-cpp#windows) for Windows.
+14. Build native libraries to ./build/: `./bin/build_libmonero_java.sh`
 
 ### Loading native libraries
 
@@ -199,15 +197,14 @@ For example: `export LD_PRELOAD=/path/to/libjemalloc.a` then run your app.
 
 ## Running JUnit tests
 
-1. Clone the project repository: `git clone https://github.com/woodser/monero-java.git`
+1. Clone the project repository: `git clone --recurse-submodules https://github.com/woodser/monero-java.git`
 2. `cd monero-java`
-3. If using native libraries, first [build native libraries from source](#building-native-libraries-from-source).
 3. Start RPC servers:
 	1. Download and install [Monero CLI](https://web.getmonero.org/downloads/).
 	2. Start monerod, e.g.: `./monerod --stagenet` (or use a remote daemon).
 	3. Start monero-wallet-rpc, e.g.: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir ./`
 4. Configure the appropriate RPC endpoints, authentication, and other settings in [TestUtils.java](src/test/java/utils/TestUtils.java).
-4. Run all *.java files in src/test/java as JUnits.
+5. Run all *.java files in src/test/java as JUnits.
 
 ## Related projects
 
