@@ -2,11 +2,18 @@
     "configurations": [
         {
             "type": "java",
+            "name": "StartMining",
+            "request": "launch",
+            "mainClass": "utils.StartMining",
+            "projectName": "monero-java"
+        },
+        {
+            "type": "java",
             "name": "Launch Current File",
             "request": "launch",
             "mainClass": "${file}",
             "projectName": "monero-java",
-            "vmArgs": "-Djava.library.path=./build",
+            "vmArgs": "-Djava.library.path=./build"
         }
     ]
 }
