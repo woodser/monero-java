@@ -40,6 +40,7 @@ import monero.daemon.model.MoneroSubmitTxResult;
 import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroVersion;
 import monero.wallet.MoneroWallet;
+import monero.wallet.MoneroWalletLight;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
@@ -96,10 +97,10 @@ public abstract class TestMoneroWalletCommon {
   protected static final boolean TEST_RELAYS = true;
   protected static final boolean TEST_NOTIFICATIONS = true;
   protected static final boolean TEST_RESETS = false;
-  private static final int MAX_TX_PROOFS = 25; // maximum number of transactions to check for each proof, undefined to check all
-  private static final int SEND_MAX_DIFF = 60;
-  private static final int SEND_DIVISOR = 10;
-  private static final int NUM_BLOCKS_LOCKED = 10;
+  protected static final int MAX_TX_PROOFS = 25; // maximum number of transactions to check for each proof, undefined to check all
+  protected static final int SEND_MAX_DIFF = 60;
+  protected static final int SEND_DIVISOR = 10;
+  protected static final int NUM_BLOCKS_LOCKED = 10;
   
   // instance variables
   protected MoneroWallet wallet;        // wallet instance to test
@@ -3361,7 +3362,7 @@ public abstract class TestMoneroWalletCommon {
     testSendToSingle(new MoneroTxConfig().setCanSplit(true));
   }
   
-  private void testSendToSingle(MoneroTxConfig config) {
+  protected void testSendToSingle(MoneroTxConfig config) {
     TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
     if (config == null) config = new MoneroTxConfig();
     
@@ -5379,7 +5380,7 @@ public abstract class TestMoneroWalletCommon {
    * 
    * TODO: ensure each tx passes query filter, same with testGetTransfer and getAndTestOutputs
    */
-  private List<MoneroTxWallet> getAndTestTxs(MoneroWallet wallet, MoneroTxQuery query, TxContext ctx, Boolean isExpected) {
+  protected List<MoneroTxWallet> getAndTestTxs(MoneroWallet wallet, MoneroTxQuery query, TxContext ctx, Boolean isExpected) {
     MoneroTxQuery copy = null;
     if (query != null) copy = query.copy();
     List<MoneroTxWallet> txs = wallet.getTxs(query);
@@ -5477,7 +5478,7 @@ public abstract class TestMoneroWalletCommon {
     assertEquals("Signature header check error", e.getMessage());
   }
   
-  private static void testAccount(MoneroAccount account) {
+  protected void testAccount(MoneroAccount account) {
     
     // test account
     assertNotNull(account);
@@ -5506,7 +5507,7 @@ public abstract class TestMoneroWalletCommon {
     assertTrue(tag == null || tag.length() > 0);
   }
 
-  private static void testSubaddress(MoneroSubaddress subaddress) {
+  protected void testSubaddress(MoneroSubaddress subaddress) {
     assertTrue(subaddress.getAccountIndex() >= 0);
     assertTrue(subaddress.getIndex() >= 0);
     assertNotNull(subaddress.getAddress());
@@ -5913,7 +5914,7 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
-  private static void testDestination(MoneroDestination destination) {
+  protected static void testDestination(MoneroDestination destination) {
     MoneroUtils.validateAddress(destination.getAddress(), TestUtils.NETWORK_TYPE);
     TestUtils.testUnsignedBigInteger(destination.getAmount(), true);
   }
@@ -5973,7 +5974,7 @@ public abstract class TestMoneroWalletCommon {
     else return txs.subList(0, Math.min(maxTxs, txs.size()));
   }
   
-  private static void testCommonTxSets(List<MoneroTxWallet> txs, boolean hasSigned, boolean hasUnsigned, boolean hasMultisig) {
+  protected static void testCommonTxSets(List<MoneroTxWallet> txs, boolean hasSigned, boolean hasUnsigned, boolean hasMultisig) {
     assertTrue(txs.size() > 0);
     
     // assert that all sets are same reference
@@ -6209,7 +6210,7 @@ public abstract class TestMoneroWalletCommon {
     @Override
     public void onNewBlock(long height) {
       assertTrue(listening);
-      if (blockNotifications.size() > 0) assertTrue(height == blockNotifications.get(blockNotifications.size() - 1) + 1);
+      if (blockNotifications.size() > 0 && !(wallet instanceof MoneroWalletLight)) assertTrue(height == blockNotifications.get(blockNotifications.size() - 1) + 1);
       blockNotifications.add(height);
     }
     

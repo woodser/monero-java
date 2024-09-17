@@ -97,7 +97,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    * @param jniWalletHandle memory address of the wallet in c++
    * @param password password of the wallet instance
    */
-  private MoneroWalletFull(long jniWalletHandle, String password) {
+  protected MoneroWalletFull(long jniWalletHandle, String password) {
     this.jniWalletHandle = jniWalletHandle;
     this.jniListener = new WalletJniListener();
     this.password = password;
@@ -327,7 +327,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     return new MoneroWalletFull(jniWalletHandle, config.getPassword());
   }
   
-  private static String serializeWalletConfig(MoneroWalletConfig config) {
+  protected static String serializeWalletConfig(MoneroWalletConfig config) {
     Map<String, Object> configMap = JsonUtils.toMap(config);
     configMap.put("networkType", config.getNetworkType().ordinal());
     return JsonUtils.serialize(configMap);
@@ -1397,217 +1397,217 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   // ------------------------------ NATIVE METHODS ----------------------------
   
-  private native static boolean walletExistsJni(String path);
+  protected native static boolean walletExistsJni(String path);
   
-  private native static long openWalletJni(String path, String password, int networkType);
+  protected native static long openWalletJni(String path, String password, int networkType);
 
-  private native static long openWalletDataJni(String password, int networkType, byte[] keysData, byte[] cacheData);
+  protected native static long openWalletDataJni(String password, int networkType, byte[] keysData, byte[] cacheData);
   
-  private native static long createWalletJni(String walletConfigJson);
+  protected native static long createWalletJni(String walletConfigJson);
   
-  private native long getHeightJni();
+  protected native long getHeightJni();
   
-  private native long getRestoreHeightJni();
+  protected native long getRestoreHeightJni();
   
-  private native void setRestoreHeightJni(long height);
+  protected native void setRestoreHeightJni(long height);
   
-  private native long getDaemonHeightJni();
+  protected native long getDaemonHeightJni();
   
-  private native long getDaemonMaxPeerHeightJni();
+  protected native long getDaemonMaxPeerHeightJni();
   
-  private native long getHeightByDateJni(int year, int month, int day);
+  protected native long getHeightByDateJni(int year, int month, int day);
   
-  private native boolean isViewOnlyJni();
+  protected native boolean isViewOnlyJni();
   
-  private native void setDaemonConnectionJni(String uri, String username, String password);
+  protected native void setDaemonConnectionJni(String uri, String username, String password);
   
-  private native void setProxyJni(String uri);
+  protected native void setProxyJni(String uri);
   
-  private native String[] getDaemonConnectionJni(); // returns [uri, username, password]
+  protected native String[] getDaemonConnectionJni(); // returns [uri, username, password]
   
-  private native boolean isConnectedToDaemonJni();
+  protected native boolean isConnectedToDaemonJni();
   
-  private native boolean isDaemonSyncedJni();
+  protected native boolean isDaemonSyncedJni();
   
-  private native boolean isSyncedJni();
+  protected native boolean isSyncedJni();
   
-  private native int getNetworkTypeJni();
+  protected native int getNetworkTypeJni();
   
-  private native String getVersionJni();
+  protected native String getVersionJni();
   
-  private native String getPathJni();
+  protected native String getPathJni();
   
-  private native String getSeedJni();
+  protected native String getSeedJni();
   
-  private native String getSeedLanguageJni();
+  protected native String getSeedLanguageJni();
   
-  private static native String[] getSeedLanguagesJni();
+  protected static native String[] getSeedLanguagesJni();
   
-  private native String getPublicViewKeyJni();
+  protected native String getPublicViewKeyJni();
   
-  private native String getPrivateViewKeyJni();
+  protected native String getPrivateViewKeyJni();
   
-  private native String getPublicSpendKeyJni();
+  protected native String getPublicSpendKeyJni();
   
-  private native String getPrivateSpendKeyJni();
+  protected native String getPrivateSpendKeyJni();
   
-  private native String getAddressJni(int accountIdx, int subaddressIdx);
+  protected native String getAddressJni(int accountIdx, int subaddressIdx);
   
-  private native String getAddressIndexJni(String address);
+  protected native String getAddressIndexJni(String address);
   
-  private native String getIntegratedAddressJni(String standardAddress, String paymentId);
+  protected native String getIntegratedAddressJni(String standardAddress, String paymentId);
   
-  private native String decodeIntegratedAddressJni(String integratedAddress);
+  protected native String decodeIntegratedAddressJni(String integratedAddress);
   
-  private native long setListenerJni(WalletJniListener listener);
+  protected native long setListenerJni(WalletJniListener listener);
   
-  private native Object[] syncJni(long startHeight);
+  protected native Object[] syncJni(long startHeight);
   
-  private native void startSyncingJni(long syncPeriodInMs);
+  protected native void startSyncingJni(long syncPeriodInMs);
   
-  private native void stopSyncingJni();
+  protected native void stopSyncingJni();
   
-  private native void scanTxsJni(String[] txHashes);
+  protected native void scanTxsJni(String[] txHashes);
   
-  private native void rescanSpentJni();
+  protected native void rescanSpentJni();
   
-  private native void rescanBlockchainJni();
+  protected native void rescanBlockchainJni();
   
-  private native String getBalanceWalletJni();
+  protected native String getBalanceWalletJni();
   
-  private native String getBalanceAccountJni(int accountIdx);
+  protected native String getBalanceAccountJni(int accountIdx);
   
-  private native String getBalanceSubaddressJni(int accountIdx, int subaddressIdx);
+  protected native String getBalanceSubaddressJni(int accountIdx, int subaddressIdx);
   
-  private native String getUnlockedBalanceWalletJni();
+  protected native String getUnlockedBalanceWalletJni();
   
-  private native String getUnlockedBalanceAccountJni(int accountIdx);
+  protected native String getUnlockedBalanceAccountJni(int accountIdx);
   
-  private native String getUnlockedBalanceSubaddressJni(int accountIdx, int subaddressIdx);
+  protected native String getUnlockedBalanceSubaddressJni(int accountIdx, int subaddressIdx);
   
-  private native String getAccountsJni(boolean includeSubaddresses, String tag);
+  protected native String getAccountsJni(boolean includeSubaddresses, String tag);
   
-  private native String getAccountJni(int accountIdx, boolean includeSubaddresses);
+  protected native String getAccountJni(int accountIdx, boolean includeSubaddresses);
   
-  private native String createAccountJni(String label);
+  protected native String createAccountJni(String label);
   
-  private native String getSubaddressesJni(int accountIdx, int[] subaddressIndices);
+  protected native String getSubaddressesJni(int accountIdx, int[] subaddressIndices);
   
-  private native String createSubaddressJni(int accountIdx, String label);
+  protected native String createSubaddressJni(int accountIdx, String label);
 
-  private native void setSubaddressLabelJni(int accountIdx, int subaddressIdx, String label);
+  protected native void setSubaddressLabelJni(int accountIdx, int subaddressIdx, String label);
   
-  private native String getTxsJni(String txQueryJson);
+  protected native String getTxsJni(String txQueryJson);
   
-  private native String getTransfersJni(String transferQueryJson);
+  protected native String getTransfersJni(String transferQueryJson);
   
-  private native String getOutputsJni(String outputQueryJson);
+  protected native String getOutputsJni(String outputQueryJson);
   
-  private native String exportOutputsJni(boolean all);
+  protected native String exportOutputsJni(boolean all);
   
-  private native int importOutputsJni(String outputsHex);
+  protected native int importOutputsJni(String outputsHex);
   
-  private native String exportKeyImagesJni(boolean all);
+  protected native String exportKeyImagesJni(boolean all);
   
-  private native String importKeyImagesJni(String keyImagesJson);
+  protected native String importKeyImagesJni(String keyImagesJson);
   
-  private native String[] relayTxsJni(String[] txMetadatas);
+  protected native String[] relayTxsJni(String[] txMetadatas);
   
-  private native void freezeOutputJni(String KeyImage);
+  protected native void freezeOutputJni(String KeyImage);
   
-  private native void thawOutputJni(String keyImage);
+  protected native void thawOutputJni(String keyImage);
   
-  private native boolean isOutputFrozenJni(String keyImage);
+  protected native boolean isOutputFrozenJni(String keyImage);
   
-  private native String createTxsJni(String txConfigJson);
+  protected native String createTxsJni(String txConfigJson);
   
-  private native String sweepUnlockedJni(String txConfigJson);
+  protected native String sweepUnlockedJni(String txConfigJson);
   
-  private native String sweepOutputJni(String txConfigJson);
+  protected native String sweepOutputJni(String txConfigJson);
   
-  private native String sweepDustJni(boolean doNotRelay);
+  protected native String sweepDustJni(boolean doNotRelay);
   
-  private native String describeTxSetJni(String txSetJson);
+  protected native String describeTxSetJni(String txSetJson);
   
-  private native String signTxsJni(String unsignedTxHex);
+  protected native String signTxsJni(String unsignedTxHex);
   
-  private native String[] submitTxsJni(String signedTxHex);
+  protected native String[] submitTxsJni(String signedTxHex);
   
-  private native String[] getTxNotesJni(String[] txHashes);
+  protected native String[] getTxNotesJni(String[] txHashes);
   
-  private native void setTxNotesJni(String[] txHashes, String[] notes);
+  protected native void setTxNotesJni(String[] txHashes, String[] notes);
   
-  private native String signMessageJni(String msg, int signatureType, int accountIdx, int subaddressIdx);
+  protected native String signMessageJni(String msg, int signatureType, int accountIdx, int subaddressIdx);
   
-  private native String verifyMessageJni(String msg, String address, String signature);
+  protected native String verifyMessageJni(String msg, String address, String signature);
   
-  private native String getTxKeyJni(String txHash);
+  protected native String getTxKeyJni(String txHash);
   
-  private native String checkTxKeyJni(String txHash, String txKey, String address);
+  protected native String checkTxKeyJni(String txHash, String txKey, String address);
   
-  private native String getTxProofJni(String txHash, String address, String message);
+  protected native String getTxProofJni(String txHash, String address, String message);
   
-  private native String checkTxProofJni(String txHash, String address, String message, String signature);
+  protected native String checkTxProofJni(String txHash, String address, String message, String signature);
   
-  private native String getSpendProofJni(String txHash, String message);
+  protected native String getSpendProofJni(String txHash, String message);
   
-  private native boolean checkSpendProofJni(String txHash, String message, String signature);
+  protected native boolean checkSpendProofJni(String txHash, String message, String signature);
   
-  private native String getReserveProofWalletJni(String message);
+  protected native String getReserveProofWalletJni(String message);
   
-  private native String getReserveProofAccountJni(int accountIdx, String amount, String message);
+  protected native String getReserveProofAccountJni(int accountIdx, String amount, String message);
   
-  private native String checkReserveProofJni(String address, String message, String signature);
+  protected native String checkReserveProofJni(String address, String message, String signature);
   
-  private native String getAddressBookEntriesJni(int[] indices);
+  protected native String getAddressBookEntriesJni(int[] indices);
   
-  private native int addAddressBookEntryJni(String address, String description);
+  protected native int addAddressBookEntryJni(String address, String description);
   
-  private native void editAddressBookEntryJni(int index, boolean setAddress, String address, boolean setDescription, String description);
+  protected native void editAddressBookEntryJni(int index, boolean setAddress, String address, boolean setDescription, String description);
   
-  private native void deleteAddressBookEntryJni(int entryIdx);
+  protected native void deleteAddressBookEntryJni(int entryIdx);
   
-  private native String getPaymentUriJni(String sendRequestJson);
+  protected native String getPaymentUriJni(String sendRequestJson);
   
-  private native String parsePaymentUriJni(String uri);
+  protected native String parsePaymentUriJni(String uri);
   
-  private native String getAttributeJni(String key);
+  protected native String getAttributeJni(String key);
   
-  private native void setAttributeJni(String key, String val);
+  protected native void setAttributeJni(String key, String val);
 
-  private native void startMiningJni(long numThreads, boolean backgroundMining, boolean ignoreBattery);
+  protected native void startMiningJni(long numThreads, boolean backgroundMining, boolean ignoreBattery);
   
-  private native void stopMiningJni();
+  protected native void stopMiningJni();
   
-  private native boolean isMultisigImportNeededJni();
+  protected native boolean isMultisigImportNeededJni();
   
-  private native String getMultisigInfoJni();
+  protected native String getMultisigInfoJni();
   
-  private native String prepareMultisigJni();
+  protected native String prepareMultisigJni();
   
-  private native String makeMultisigJni(String[] multisigHexes, int threshold, String password);
+  protected native String makeMultisigJni(String[] multisigHexes, int threshold, String password);
   
-  private native String exchangeMultisigKeysJni(String[] multisigHexes, String password);
+  protected native String exchangeMultisigKeysJni(String[] multisigHexes, String password);
   
-  private native String exportMultisigHexJni();
+  protected native String exportMultisigHexJni();
   
-  private native int importMultisigHexJni(String[] multisigHexes);
+  protected native int importMultisigHexJni(String[] multisigHexes);
   
-  private native String signMultisigTxHexJni(String multisigTxHex);
+  protected native String signMultisigTxHexJni(String multisigTxHex);
   
-  private native String[] submitMultisigTxHexJni(String signedMultisigTxHex);
+  protected native String[] submitMultisigTxHexJni(String signedMultisigTxHex);
 
-  private native byte[] getKeysFileBufferJni(String password, boolean viewOnly);
+  protected native byte[] getKeysFileBufferJni(String password, boolean viewOnly);
 
-  private native byte[] getCacheFileBufferJni();
+  protected native byte[] getCacheFileBufferJni();
   
-  private native void changePasswordJni(String oldPassword, String newPassword);
+  protected native void changePasswordJni(String oldPassword, String newPassword);
   
-  private native void moveToJni(String path, String password);
+  protected native void moveToJni(String path, String password);
   
-  private native void saveJni();
+  protected native void saveJni();
   
-  private native void closeJni(boolean save);
+  protected native void closeJni(boolean save);
   
   // -------------------------------- LISTENER --------------------------------
   
@@ -1830,7 +1830,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     return transfers;
   }
   
-  private static List<MoneroOutputWallet> deserializeOutputs(MoneroOutputQuery query, String blocksJson) {
+  protected static List<MoneroOutputWallet> deserializeOutputs(MoneroOutputQuery query, String blocksJson) {
     
     // deserialize blocks
     DeserializedBlocksContainer deserializedBlocks = deserializeBlocks(blocksJson);
@@ -1862,7 +1862,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     jniListenerHandle = setListenerJni(isEnabled ? jniListener : null);
   }
   
-  private void assertNotClosed() {
+  protected void assertNotClosed() {
     if (isClosed) throw new MoneroError("Wallet is closed");
   }
   
