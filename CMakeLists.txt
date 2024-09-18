@@ -262,7 +262,6 @@ add_library(monero-java SHARED ${MONERO_JNI_SRC_FILES})
 target_include_directories(monero-java PUBLIC
   "$ENV{JAVA_HOME}"
   "$ENV{JAVA_HOME}/include"
-  "${MONERO_CPP}/external/libsodium/include/sodium"
   "${MONERO_CPP_SRC}/"
   "${MONERO_PROJECT}/contrib/epee/include"
   "${MONERO_PROJECT}/external/"
