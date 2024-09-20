@@ -1,3 +1,4 @@
 [submodule "external/monero-cpp"]
 	path = external/monero-cpp
-	url = https://github.com/woodser/monero-cpp
+	url = https://github.com/nsec1/monero-cpp.git
+	branch = buildStaticOption

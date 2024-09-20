@@ -76,22 +76,18 @@ public class MoneroUtils {
 
       // get library file names and paths
       String libraryPath = "/";
-      String libraryCppFile = null;
       String libraryJavaFile = null;
       if (osName.contains("windows")) {
         libraryPath += "windows/";
-        libraryFiles = new String[] { "libmonero-cpp.dll", "libmonero-cpp.dll.a", "libmonero-java.dll", "libmonero-java.dll.a" };
-        libraryCppFile = "libmonero-cpp.dll";
+        libraryFiles = new String[] { "libmonero-java.dll", "libmonero-java.dll.a" };
         libraryJavaFile = "libmonero-java.dll";
       } else if (osName.contains("linux")) {
         libraryPath += osArch.contains("aarch64") ? "linux-arm64/" : "linux-x86_64/";
-        libraryFiles = new String[] { "libmonero-cpp.so", "libmonero-java.so" };
-        libraryCppFile = "libmonero-cpp.so";
+        libraryFiles = new String[] { "libmonero-java.so" };
         libraryJavaFile = "libmonero-java.so";
       } else if (osName.contains("mac")) {
         libraryPath += osArch.contains("aarch64") ? "mac-arm64/" : "mac-x86_64/";
-        libraryFiles = new String[] { "libmonero-cpp.dylib", "libmonero-java.dylib" };
-        libraryCppFile = "libmonero-cpp.dylib";
+        libraryFiles = new String[] { "libmonero-java.dylib" };
         libraryJavaFile = "libmonero-java.dylib";
       } else {
         throw new MoneroError("Unsupported operating system: " + osName);
@@ -111,7 +107,6 @@ public class MoneroUtils {
       }
 
       // load native libraries
-      System.load(tempDir.resolve(libraryCppFile).toString());
       System.load(tempDir.resolve(libraryJavaFile).toString());
     } catch (Exception | UnsatisfiedLinkError e) {
       throw new MoneroError(e);
