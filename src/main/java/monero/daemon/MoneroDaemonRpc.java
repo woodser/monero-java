@@ -1113,9 +1113,8 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     MoneroBlockTemplate template = new MoneroBlockTemplate();
     for (String key : rpcTemplate.keySet()) {
       Object val = rpcTemplate.get(key);
-      if (key.equals("blockhashing_blob")) template.setBlockTemplateBlob((String) val);
-      else if (key.equals("blocktemplate_blob")) template.setBlockHashingBlob((String) val);
-      else if (key.equals("difficulty")) template.setDifficulty((BigInteger) val);
+      if (key.equals("blockhashing_blob")) template.setBlockHashingBlob((String) val);
+      else if (key.equals("blocktemplate_blob")) template.setBlockTemplateBlob((String) val);
       else if (key.equals("expected_reward")) template.setExpectedReward((BigInteger) val);
       else if (key.equals("difficulty")) { }  // handled by wide_difficulty
       else if (key.equals("difficulty_top64")) { }  // handled by wide_difficulty
