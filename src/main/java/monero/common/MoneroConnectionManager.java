@@ -360,7 +360,7 @@ public class MoneroConnectionManager {
     MoneroRpcConnection connection = getConnection();
     if (connection != null) {
       if (connection.checkConnection(timeoutMs)) connectionChanged = true;
-      if (processResponses(Arrays.asList(connection)) != null) return this; // done if connection set from responses
+      processResponses(Arrays.asList(connection));
     }
     if (autoSwitch && !isConnected()) {
       MoneroRpcConnection bestConnection = getBestAvailableConnection(connection);
