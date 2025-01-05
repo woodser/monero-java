@@ -168,10 +168,9 @@ public class TestMoneroConnectionManager {
       assertEquals(++numExpectedChanges, listener.changedConnections.size());
       
       // connect to specific endpoint with authentication
-      connectionManager.setAutoSwitch(false);
       orderedConnections.get(1).setCredentials("rpc_user", "abc123");
       connectionManager.checkConnection();
-      assertEquals(connection.getUri(), walletRpcs.get(1).getRpcConnection().getUri());
+      assertEquals(connectionManager.getConnection().getUri(), walletRpcs.get(1).getRpcConnection().getUri());
       assertTrue(connection.isOnline());
       assertTrue(connection.isAuthenticated());
       assertEquals(++numExpectedChanges, listener.changedConnections.size());
@@ -211,7 +210,6 @@ public class TestMoneroConnectionManager {
       assertEquals(++numExpectedChanges, listener.changedConnections.size());
       
       // check all connections and test auto switch
-      connectionManager.setAutoSwitch(true);
       connectionManager.checkConnections();
       assertEquals(++numExpectedChanges, listener.changedConnections.size());
       assertTrue(connectionManager.isConnected());
