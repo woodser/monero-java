@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Scratchpad",
+            "request": "launch",
+            "mainClass": "utils.Scratchpad",
+            "projectName": "monero-java"
+        },
+        {
+            "type": "java",
             "name": "StartMining",
             "request": "launch",
             "mainClass": "utils.StartMining",
