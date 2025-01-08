@@ -110,11 +110,13 @@ public class MoneroWalletConfig {
   }
   
   public MoneroWalletConfig setServerUri(String serverUri) {
-    if (serverUri == null || serverUri.isEmpty())  setServer(null);
-    else {
-      if (server == null) setServer(new MoneroRpcConnection(serverUri));
-      else server.setUri(serverUri);
+    if (serverUri == null || serverUri.isEmpty()) {
+      this.server = null;
+      return this;
     }
+    if (server == null) server = new MoneroRpcConnection(serverUri);
+    else server.setUri(serverUri);
+    if (serverUsername != null && serverPassword != null) server.setCredentials(serverUsername, serverPassword);
     return this;
   }
   
@@ -124,7 +126,7 @@ public class MoneroWalletConfig {
   
   public MoneroWalletConfig setServerUsername(String serverUsername) {
     this.serverUsername = serverUsername;
-    if (serverUsername != null && serverPassword != null) server.setCredentials(serverUsername, serverPassword);
+    if (server != null && serverUsername != null && serverPassword != null) server.setCredentials(serverUsername, serverPassword);
     return this;
   }
   
@@ -134,7 +136,7 @@ public class MoneroWalletConfig {
   
   public MoneroWalletConfig setServerPassword(String serverPassword) {
     this.serverPassword = serverPassword;
-    if (serverUsername != null && serverPassword != null) server.setCredentials(serverUsername, serverPassword);
+    if (server != null && serverUsername != null && serverPassword != null) server.setCredentials(serverUsername, serverPassword);
     return this;
   }
 
