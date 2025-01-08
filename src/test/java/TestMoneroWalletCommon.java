@@ -129,11 +129,13 @@ public abstract class TestMoneroWalletCommon {
   public void afterAll() {
     
     // try to stop mining
-    try { daemon.stopMining(); }
-    catch (MoneroError e) { }
+    if (daemon != null) {
+      try { daemon.stopMining(); }
+      catch (MoneroError e) { }
+    }
     
     // close wallet
-    wallet.close(true);
+    if (wallet != null) wallet.close(true);
   }
   
   @AfterEach
