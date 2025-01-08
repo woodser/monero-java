@@ -1131,7 +1131,7 @@ public class TestMoneroDaemonRpc {
     
     // try to submit block hashing blob without nonce
     try {
-      daemon.submitBlock(template.getBlockHashingBlob());
+      daemon.submitBlock(template.getBlockTemplateBlob());
       fail("Should have thrown error");
     } catch (MoneroRpcError e) {
       assertEquals(-7, (int) e.getCode());
