@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +32,8 @@ import org.bouncycastle.jcajce.provider.digest.Keccak;
  * Collection of Monero utilities.
  */
 public class MoneroUtils {
+
+  private static final BigInteger XMR_AU_MULTIPLIER = new BigInteger("1000000000000");
 
   /**
    * Get the version of the monero-java library.
@@ -575,14 +578,7 @@ public class MoneroUtils {
    * @return amount in atomic units
    */
   public static BigInteger xmrToAtomicUnits(double amountXmr) {
-    double decimalDivisor = 1;
-    String amountXmrStr = "" + amountXmr;
-    int decimalIdx = amountXmrStr.indexOf('.');
-    if (decimalIdx > -1) {
-      decimalDivisor = Math.pow(10, amountXmrStr.length() - decimalIdx - 1);
-      amountXmrStr = amountXmrStr.substring(0, decimalIdx) + amountXmrStr.substring(decimalIdx + 1);
-    }
-    return new BigInteger(amountXmrStr).multiply(BigInteger.valueOf(MoneroUtils.AU_PER_XMR)).divide(BigInteger.valueOf((long) decimalDivisor));
+    return new BigDecimal(amountXmr).multiply(new BigDecimal(XMR_AU_MULTIPLIER)).setScale(0, RoundingMode.HALF_UP).toBigInteger();
   }
   
   /**
@@ -592,8 +588,7 @@ public class MoneroUtils {
    * @return amount in XMR
    */
   public static double atomicUnitsToXmr(BigInteger amountAtomicUnits) {
-    BigInteger[] quotientAndRemainder = amountAtomicUnits.divideAndRemainder(BigInteger.valueOf(AU_PER_XMR));
-    return quotientAndRemainder[0].doubleValue() + quotientAndRemainder[1].doubleValue() / MoneroUtils.AU_PER_XMR;
+    return new BigDecimal(amountAtomicUnits).divide(new BigDecimal(XMR_AU_MULTIPLIER), 12, RoundingMode.HALF_UP).doubleValue();
   }
 
   /**
