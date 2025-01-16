@@ -232,6 +232,14 @@ public class TestMoneroUtils {
     assertEquals(.25, MoneroUtils.atomicUnitsToXmr(new BigInteger("250000000000")));
     assertEquals(new BigInteger("1250000000000").toString(), MoneroUtils.xmrToAtomicUnits(1.25).toString());
     assertEquals(1.25, MoneroUtils.atomicUnitsToXmr(new BigInteger("1250000000000")));
+    assertEquals(new BigInteger("2796726190000").toString(), MoneroUtils.xmrToAtomicUnits(2.79672619).toString());
+    assertEquals(2.79672619, MoneroUtils.atomicUnitsToXmr(new BigInteger("2796726190000")));
+    assertEquals(new BigInteger("2796726190001").toString(), MoneroUtils.xmrToAtomicUnits(2.796726190001).toString());
+    assertEquals(2.796726190001, MoneroUtils.atomicUnitsToXmr(new BigInteger("2796726190001")));
+    assertEquals(new BigInteger("2796726189999").toString(), MoneroUtils.xmrToAtomicUnits(2.796726189999).toString());
+    assertEquals(2.796726189999, MoneroUtils.atomicUnitsToXmr(new BigInteger("2796726189999")));
+    assertEquals(new BigInteger("2796726180000").toString(), MoneroUtils.xmrToAtomicUnits(2.79672618).toString());
+    assertEquals(2.79672618, MoneroUtils.atomicUnitsToXmr(new BigInteger("2796726180000")));
   };
 
   @Test
