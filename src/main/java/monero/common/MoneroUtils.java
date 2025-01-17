@@ -592,6 +592,28 @@ public class MoneroUtils {
   }
 
   /**
+   * Divide atomic units by another atomic units.
+   * 
+   * @param auDividend atomic units to divide
+   * @param auDivisor atomic units to divide by
+   * @return the result in atomic units
+   */
+  public static double divide(BigInteger auDividend, BigInteger auDivisor) {
+      return new BigDecimal(auDividend).divide(new BigDecimal(auDivisor), 12, RoundingMode.HALF_UP).doubleValue();
+  }
+
+  /**
+   * Multiply atomic units amount by a double.
+   * 
+   * @param amount1 atomic units to multiply
+   * @param amount2 double to multiply by 
+   * @return the result in atomic units
+   */
+  public static BigInteger multiply(BigInteger amount1, double amount2) {
+      return amount1 == null ? null : new BigDecimal(amount1).multiply(BigDecimal.valueOf(amount2)).setScale(0, RoundingMode.HALF_UP).toBigInteger();
+  }
+
+  /**
    * Creates a payment URI from a tx configuration.
    * 
    * TODO: use native bindings to monero-project
