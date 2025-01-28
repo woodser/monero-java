@@ -5508,7 +5508,7 @@ public abstract class TestMoneroWalletCommon {
     assertTrue(tag == null || tag.length() > 0);
   }
 
-  private static void testSubaddress(MoneroSubaddress subaddress) {
+  protected static void testSubaddress(MoneroSubaddress subaddress) {
     assertTrue(subaddress.getAccountIndex() >= 0);
     assertTrue(subaddress.getIndex() >= 0);
     assertNotNull(subaddress.getAddress());
@@ -5816,7 +5816,7 @@ public abstract class TestMoneroWalletCommon {
     if (!Boolean.TRUE.equals(ctx.isCopy)) testTxWalletCopy(tx, ctx);
   }
 
-  private void testTxWalletCopy(MoneroTxWallet tx, TxContext ctx) {
+  protected void testTxWalletCopy(MoneroTxWallet tx, TxContext ctx) {
     
     // copy tx and assert deep equality
     MoneroTxWallet copy = tx.copy();
@@ -5865,7 +5865,7 @@ public abstract class TestMoneroWalletCommon {
     assertEquals(merged.toString(), tx.toString());
   }
   
-  private static void testTransfer(MoneroTransfer transfer, TxContext ctx) {
+  protected static void testTransfer(MoneroTransfer transfer, TxContext ctx) {
     if (ctx == null) ctx = new TxContext();
     assertNotNull(transfer);
     TestUtils.testUnsignedBigInteger(transfer.getAmount());
@@ -5881,7 +5881,7 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
-  private static void testIncomingTransfer(MoneroIncomingTransfer transfer) {
+  protected static void testIncomingTransfer(MoneroIncomingTransfer transfer) {
     assertTrue(transfer.isIncoming());
     assertFalse(transfer.isOutgoing());
     assertNotNull(transfer.getAddress());
@@ -5889,7 +5889,7 @@ public abstract class TestMoneroWalletCommon {
     assertTrue(transfer.getNumSuggestedConfirmations() > 0);
   }
   
-  private static void testOutgoingTransfer(MoneroOutgoingTransfer transfer, TxContext ctx) {
+  protected static void testOutgoingTransfer(MoneroOutgoingTransfer transfer, TxContext ctx) {
     assertFalse(transfer.isIncoming());
     assertTrue(transfer.isOutgoing());
     if (!Boolean.TRUE.equals(ctx.isSendResponse)) assertNotNull(transfer.getSubaddressIndices());
@@ -5915,12 +5915,12 @@ public abstract class TestMoneroWalletCommon {
     }
   }
   
-  private static void testDestination(MoneroDestination destination) {
+  protected static void testDestination(MoneroDestination destination) {
     MoneroUtils.validateAddress(destination.getAddress(), TestUtils.NETWORK_TYPE);
     TestUtils.testUnsignedBigInteger(destination.getAmount(), true);
   }
   
-  private static void testInputWallet(MoneroOutputWallet input) {
+  protected static void testInputWallet(MoneroOutputWallet input) {
     assertNotNull(input);
     assertNotNull(input.getKeyImage());
     assertNotNull(input.getKeyImage().getHex());
@@ -5928,7 +5928,7 @@ public abstract class TestMoneroWalletCommon {
     assertNull(input.getAmount()); // must get info separately
   }
   
-  private static void testOutputWallet(MoneroOutputWallet output) {
+  protected static void testOutputWallet(MoneroOutputWallet output) {
     assertNotNull(output);
     assertTrue(output.getAccountIndex() >= 0);
     assertTrue(output.getSubaddressIndex() >= 0);
