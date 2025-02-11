@@ -142,35 +142,34 @@ For convenience, native libraries for Linux, macOS, and Windows are distributed 
 
 ### Windows
 
-1. Download and install [Java JDK](https://adoptium.net/temurin/). During installation, enable the option to set the $JAVA_HOME environment variable if possible.
-2. Install [MSYS2](https://www.msys2.org/).
-3. Install Maven:
+1. Install [MSYS2](https://www.msys2.org/).
+2. Install Maven:
 
     a. Download binary zip archive from https://maven.apache.org/download.cgi<br>
     b. Unpack to C:\msys64\usr\local
-4. Environment variables > System variables > Path > Edit > New > C:\msys64\mingw64\bin
-5. Start MSYS2 MINGW64 or MSYS MINGW32 depending on your system and use for the following steps.
-6. Update packages: `pacman -Syu` and confirm at the prompts.
-7. Install dependencies. During installation, use default=all by leaving the input blank and pressing enter.
+3. Environment variables > System variables > Path > Edit > New > C:\msys64\mingw64\bin
+4. Start MSYS2 MINGW64 or MSYS MINGW32 depending on your system and use for the following steps.
+5. Update packages: `pacman -Syu` and confirm at the prompts.
+6. Install dependencies. During installation, use default=all by leaving the input blank and pressing enter.
 
-    64-bit: `pacman -S mingw-w64-x86_64-toolchain make mingw-w64-x86_64-cmake git mingw-w64-x86_64-icu`
+    64-bit: `pacman -S mingw-w64-x86_64-toolchain make mingw-w64-x86_64-cmake git mingw-w64-x86_64-icu zip unzip`
 
     32-bit: `pacman -S mingw-w64-i686-toolchain make mingw-w64-i686-cmake git mingw-w64-i686-icu`
-8. Install Java JDK:
+7. Install Java JDK:
     ```
     curl -s "https://get.sdkman.io" | bash
     sdk install java 21.0.2.fx-librca
     ```
-9. Set environment variables (replace with your paths):
+8. Set environment variables (replace with your paths):
     ```
     export MAVEN_HOME=/usr/local/apache-maven-3.x.x/
     export PATH=$PATH:$JAVA_HOME/bin/:$MAVEN_HOME/bin/
     ```
-10. Clone the project repository: `git clone --recurse-submodules https://github.com/woodser/monero-java.git`
-11. `cd ./monero-java`
-12. Install Maven dependencies: `mvn install`
-13. Build the monero-cpp submodule (located at ./external/monero-cpp) as a native library by following [instructions](https://github.com/woodser/monero-cpp#windows) for Windows.
-14. Build native libraries to ./build/: `./bin/build_libmonero_java.sh`
+9. Clone the project repository: `git clone --recurse-submodules https://github.com/woodser/monero-java.git`
+10. `cd ./monero-java`
+11. Install Maven dependencies: `mvn install`
+12. Build the monero-cpp submodule (located at ./external/monero-cpp) as a native library by following [instructions](https://github.com/woodser/monero-cpp#windows) for Windows.
+13. Build native libraries to ./build/: `./bin/build_libmonero_java.sh`
 
 ### Loading native libraries
 
