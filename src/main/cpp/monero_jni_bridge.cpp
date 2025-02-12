@@ -1293,6 +1293,12 @@ JNIEXPORT bool JNICALL Java_monero_wallet_MoneroWalletFull_isOutputFrozenJni(JNI
   }
 }
 
+JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_getDefaultFeePriorityJni(JNIEnv* env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_getDefaultFeePriorityJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  return wallet->get_default_fee_priority();
+}
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_createTxsJni(JNIEnv* env, jobject instance, jstring jconfig) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_sendTxsJni(request)");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);

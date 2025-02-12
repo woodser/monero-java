@@ -63,6 +63,7 @@ import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxConfig;
+import monero.wallet.model.MoneroTxPriority;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
@@ -916,6 +917,17 @@ public class MoneroWalletFull extends MoneroWalletDefault {
       throw new MoneroError(e.getMessage());
     }
   }
+
+  @Override
+  public MoneroTxPriority getDefaultFeePriority() {
+    assertNotClosed();
+    try {
+      int moneroTxPriorityOrdinal = getDefaultFeePriorityJni();
+      return MoneroTxPriority.values()[moneroTxPriorityOrdinal];
+    } catch (Exception e) {
+      throw new MoneroError(e.getMessage());
+    }
+  }
   
   @Override
   public List<MoneroTxWallet> createTxs(MoneroTxConfig config) {
@@ -1518,6 +1530,8 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private native void thawOutputJni(String keyImage);
   
   private native boolean isOutputFrozenJni(String keyImage);
+
+  private native int getDefaultFeePriorityJni();
   
   private native String createTxsJni(String txConfigJson);
   

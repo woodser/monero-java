@@ -177,6 +177,8 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_thawOutputJni(JNIEnv 
 
 JNIEXPORT bool JNICALL Java_monero_wallet_MoneroWalletFull_isOutputFrozenJni(JNIEnv *, jobject, jstring);
 
+JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_getDefaultFeePriorityJni(JNIEnv *, jobject);
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_createTxsJni(JNIEnv *, jobject, jstring);
 
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_sweepUnlockedJni(JNIEnv *, jobject, jstring);

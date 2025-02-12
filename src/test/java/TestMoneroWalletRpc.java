@@ -1154,4 +1154,10 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testProveUnrelayedTxs() {
     super.testProveUnrelayedTxs();
   }
+  
+  @Override
+  @Test
+  public void testGetDefaultFeePriority() {
+    super.testGetDefaultFeePriority();
+  }
 }

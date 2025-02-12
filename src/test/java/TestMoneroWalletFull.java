@@ -2213,4 +2213,10 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   public void testProveUnrelayedTxs() {
     super.testProveUnrelayedTxs();
   }
+  
+  @Override
+  @Test
+  public void testGetDefaultFeePriority() {
+    super.testGetDefaultFeePriority();
+  }
 }

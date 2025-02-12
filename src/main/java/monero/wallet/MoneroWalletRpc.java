@@ -77,6 +77,7 @@ import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxConfig;
+import monero.wallet.model.MoneroTxPriority;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
@@ -1154,6 +1155,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     @SuppressWarnings("unchecked")
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return Boolean.TRUE.equals(result.get("frozen"));
+  }
+
+  @Override
+  public MoneroTxPriority getDefaultFeePriority() {
+    Map<String, Object> resp = rpc.sendJsonRequest("get_default_fee_priority");
+    @SuppressWarnings("unchecked")
+    Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    int priority = ((BigInteger) result.get("priority")).intValue();
+    return MoneroTxPriority.values()[priority];
   }
   
   @Override
