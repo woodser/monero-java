@@ -52,6 +52,7 @@ import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
 import monero.wallet.model.MoneroTxConfig;
+import monero.wallet.model.MoneroTxPriority;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxSet;
 import monero.wallet.model.MoneroTxWallet;
@@ -824,6 +825,13 @@ public interface MoneroWallet {
    * @return true if the output is frozen, false otherwise
    */
   public boolean isOutputFrozen(String keyImage);
+
+  /**
+   * Get the current default fee priority (unimportant, normal, elevated, etc).
+   * 
+   * @return the current fee priority
+   */
+  public MoneroTxPriority getDefaultFeePriority();
   
   /**
    * Create a transaction to transfer funds from this wallet.

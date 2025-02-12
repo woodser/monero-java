@@ -5373,6 +5373,13 @@ public abstract class TestMoneroWalletCommon {
       daemon.flushTxPool(tx.getHash());
       closeWallet(verifyingWallet);
   }
+
+  // Can get the default fee priority
+  @Test
+  public void testGetDefaultFeePriority() {
+    MoneroTxPriority defaultPriority = wallet.getDefaultFeePriority();
+    assertTrue(defaultPriority.ordinal() > 0);
+  }
   
   // --------------------------------- HELPERS --------------------------------
   
