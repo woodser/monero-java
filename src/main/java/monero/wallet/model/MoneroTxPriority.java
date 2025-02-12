@@ -14,6 +14,6 @@ public enum MoneroTxPriority {
   @JsonValue
   @Override
   public String toString() {
-    return String.valueOf(ordinal());
+    return String.valueOf(ordinal()); // TODO: returning ordinal instead of name for jni serialization
   }
 }
