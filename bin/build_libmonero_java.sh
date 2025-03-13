@@ -140,8 +140,7 @@ else
 
 cd build && 
 cmake .. && 
-cmake --build . -j$HOST_NCORES && 
-make .
+cmake --build . --verbose 
 cd ..
     cp build/libmonero-java* build/${VERSION}/release
     if [ $TARGET == "linux" ]; then
