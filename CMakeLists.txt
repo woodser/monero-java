@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.4.1)
 
 project(monero-java-jni)
+
 if (WIN32)
   add_definitions( "-D_GLIBCXX_USE_NANOSLEEP=1" )
   add_definitions( "-DWIN32_LEAN_AND_MEAN" )
@@ -31,7 +32,6 @@ endif()
 #############
 
 set(MONERO_CPP "${CMAKE_SOURCE_DIR}/external/monero-cpp")
-
 set(MONERO_CPP_SRC "${MONERO_CPP}/src")
 set(MONERO_PROJECT ${MONERO_CPP}/external/monero-project)
 set(MONERO_PROJECT_SRC "${MONERO_PROJECT}/src")
@@ -40,6 +40,7 @@ set(MONERO_PROJECT_SRC "${MONERO_PROJECT}/src")
 if(NOT DEFINED ENV{JAVA_HOME} OR "$ENV{JAVA_HOME}" STREQUAL "")
   message(FATAL_ERROR "JAVA_HOME variable not set, for example: export JAVA_HOME=/path/to/jdk")
 endif()
+
 
 # TODO: remove TRUEs, how are APPLE, DEPENDS, etc initialized?
 if (TRUE OR HIDAPI_FOUND OR LibUSB_COMPILE_TEST_PASSED)
@@ -147,6 +148,7 @@ target_include_directories(monero-java PUBLIC
   ${OPENSSL_INCLUDE_DIR}
 )
 
+# Support building for other Platforms from Linux
 # TODO: Add the windows and linux headers to this directory 
 if (DEFINED DEPENDS)
   target_include_directories(monero-java PUBLIC "${CMAKE_SOURCE_DIR}/include/jdk@21/${PLATFORM}")
