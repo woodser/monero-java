@@ -27,18 +27,34 @@ if [ -z $TARGET ]; then
 fi
 TARGET=$TEMPTARGET    
 
+DEP_EXTENSION=""
 if [ "${TARGET}" == "darwin" ]; then
     OS="darwin11"
     VENDOR="apple"
     if [ -z "${ARCH}" ] && [ $CURRENT_OS == "Linux" ]; then
         BUILD_BOTH_ARCHS=1
     fi
+    if [ -z "${INCLUSIVE}" ]; then
+        DEP_EXTENSION="dylib"
+    else
+        DEP_EXTENSION="a"
+    fi
 elif [ "${TARGET}" == "MSYS" ] || [ "${TARGET}" == "MINGW64_NT" ]; then
     OS="mingw32"
     VENDOR="w64"
+    if [ -z "${INCLUSIVE}" ]; then
+        DEP_EXTENSION="dll"
+    else
+        DEP_EXTENSION="dll.a"
+    fi
 else
     OS="gnu"
     VENDOR="linux"
+    if [ -z "${INCLUSIVE}" ]; then
+        DEP_EXTENSION="so"
+    else
+        DEP_EXTENSION="a"
+    fi
 fi
 
 CPU=""
@@ -61,16 +77,16 @@ if [ -z $SKIP_MCPP ]; then
     printf "\nlibmonero-java build script: Building libmonero-cpp shared library\n"
     if [ $BUILD_BOTH_ARCHS == 1 ]; then
         cd ./external/monero-cpp/ &&
-        SKIP_MP=$SKIP_MP TARGET=$TARGET ./bin/build_libmonero_cpp.sh || exit 1
+        SKIP_MP=$SKIP_MP TARGET=$TARGET STATIC=$INCLUSIVE ./bin/build_libmonero_cpp.sh || exit 1
         cd ../..
     else
         cd ./external/monero-cpp/ &&
-        ARCH=$CPU SKIP_MP=$SKIP_MP TARGET=$TARGET ./bin/build_libmonero_cpp.sh || exit 1
+        ARCH=$CPU SKIP_MP=$SKIP_MP TARGET=$TARGET STATIC=$INCLUSIVE ./bin/build_libmonero_cpp.sh || exit 1
         cd ../..
     fi
     mkdir build
     if [ $BUILD_BOTH_ARCHS == 1 ]; then
-        cp external/monero-cpp/build/darwin/release/libmonero-cpp.dylib ./build || exit 1
+        cp external/monero-cpp/build/darwin/release/libmonero-cpp.${DEP_EXTENSION} ./build || exit 1
     else
         cp external/monero-cpp/build/${VERSION}/release/libmonero-cpp* ./build || exit 1
     fi
@@ -97,7 +113,7 @@ if [ $CURRENT_OS == "Linux" ] && (
         printf "\nBuilding monero-java-jni for ${1} using Depends\n"
         TOOLCHAIN_FILE="external/monero-cpp/external/monero-project/contrib/depends/${1}/share/toolchain.cmake"
         cd  "build/${1}/release" && 
-        cmake -D TARGET=$1 -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=../../../$TOOLCHAIN_FILE ../../.. &&
+        cmake -DINCLUSIVE=$INCLUSIVE -D TARGET=$1 -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=../../../$TOOLCHAIN_FILE ../../.. &&
         make -j$HOST_NCORES
         cd ../../..
     }
@@ -109,11 +125,11 @@ if [ $CURRENT_OS == "Linux" ] && (
         mkdir -p "build/aarch64-${VENDOR}-${OS}/release"
 
         # x86_64
-        cp build/libmonero-cpp.dylib "build/x86_64-${VENDOR}-${OS}/release"
+        cp build/libmonero-cpp.${DEP_EXTENSION} "build/x86_64-${VENDOR}-${OS}/release"
         toolchainBuildJNI "x86_64-apple-darwin11"
 
         # aarch64
-        cp build/libmonero-cpp.dylib "build/aarch64-${VENDOR}-${OS}/release"
+        cp build/libmonero-cpp.${DEP_EXTENSION} "build/aarch64-${VENDOR}-${OS}/release"
         toolchainBuildJNI "aarch64-apple-darwin11"
 
         # lipo it together and store correctly 
@@ -122,13 +138,7 @@ if [ $CURRENT_OS == "Linux" ] && (
 
     else
         # Build 1 archive using Depends
-        if [ $TARGET == "linux" ]; then
-            cp build/libmonero-cpp.so build/${VERSION}/release
-        elif [ $TARGET == "darwin" ]; then
-            cp build/libmonero-cpp.dylib build/${VERSION}/release
-        else
-            cp build/libmonero-cpp.dll build/${VERSION}/release
-        fi
+        cp build/libmonero-cpp.${DEP_EXTENSION} build/${VERSION}/release
         toolchainBuildJNI $VERSION
     fi
 
@@ -138,16 +148,10 @@ else
 
     printf "\nBuilding monero-java-jni for ${VERSION} without Depends\n"
 
-cd build && 
-cmake .. && 
-cmake --build . --verbose 
-cd ..
+    cd build && 
+    cmake -DINCLUSIVE=$INCLUSIVE -DVERBOSE=1 -DTARGET=$VERSION .. && 
+    cmake --build . --verbose 
+    cd ..
     cp build/libmonero-java* build/${VERSION}/release
-    if [ $TARGET == "linux" ]; then
-        cp build/libmonero-cpp.so build/${VERSION}/release
-    elif [ $TARGET == "darwin" ]; then
-        cp build/libmonero-cpp.dylib build/${VERSION}/release
-    else
-        cp build/libmonero-cpp.dll build/${VERSION}/release
-    fi
+    cp build/libmonero-cpp.${DEP_EXTENSION} build/${VERSION}/release
 fi
