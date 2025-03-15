@@ -46,8 +46,10 @@ endif()
 if (TRUE OR HIDAPI_FOUND OR LibUSB_COMPILE_TEST_PASSED)
   if (APPLE)
     if(TRUE OR DEPENDS)
+      # Building for Apple on Linux
       list(APPEND EXTRA_LIBRARIES "-framework Foundation -framework IOKit -framework AppKit")
     else()
+      # Building for Apple on Mac
       find_library(COREFOUNDATION CoreFoundation)
       find_library(IOKIT IOKit)
       find_library(APPKIT AppKit)
@@ -106,8 +108,6 @@ endif()
 add_library(monero-cpp SHARED IMPORTED)
 
 # import shared c++ library
-
-# list everything in external-libs/monero-cpp, and then import them 
 
 if (APPLE)
   set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION ./libmonero-cpp.dylib)
