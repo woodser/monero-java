@@ -70,10 +70,10 @@ VERSION="${CPU}-${VENDOR}-${OS}"
 # Build Stuff 
 ###################
 
-# Build monero-cpp and installed it
+# Build monero-cpp and install it
 # "./build" is created here also.
 if [ -z $SKIP_MCPP ]; then
-    rm -rf build
+    rm -rf build &&  mkdir build
     printf "\nlibmonero-java build script: Building libmonero-cpp shared library\n"
     if [ $BUILD_BOTH_ARCHS == 1 ]; then
         cd ./external/monero-cpp/ &&
@@ -84,7 +84,6 @@ if [ -z $SKIP_MCPP ]; then
         ARCH=$CPU SKIP_MP=$SKIP_MP TARGET=$TARGET STATIC=$INCLUSIVE ./bin/build_libmonero_cpp.sh || exit 1
         cd ../..
     fi
-    mkdir build
     if [ $BUILD_BOTH_ARCHS == 1 ]; then
         cp external/monero-cpp/build/darwin/release/libmonero-cpp.${DEP_EXTENSION} ./build || exit 1
     else
@@ -123,6 +122,8 @@ if [ $CURRENT_OS == "Linux" ] && (
     if [ $BUILD_BOTH_ARCHS == 1 ]; then
         mkdir -p "build/x86_64-${VENDOR}-${OS}/release"
         mkdir -p "build/aarch64-${VENDOR}-${OS}/release"
+        mkdir -p build/darwin/release
+        cp build/libmonero-cpp.${DEP_EXTENSION} build/darwin/release
 
         # x86_64
         cp build/libmonero-cpp.${DEP_EXTENSION} "build/x86_64-${VENDOR}-${OS}/release"
@@ -133,7 +134,6 @@ if [ $CURRENT_OS == "Linux" ] && (
         toolchainBuildJNI "aarch64-apple-darwin11"
 
         # lipo it together and store correctly 
-        mkdir -p build/darwin/release
         external/monero-cpp/external/monero-project/contrib/depends/${CURRENT_ARCH}-apple-darwin11/native/bin/${CURRENT_ARCH}-apple-darwin11-lipo -create -output build/darwin/release/libmonero-java.dylib build/aarch64-${VENDOR}-${OS}/release/libmonero-java.dylib build/x86_64-${VENDOR}-${OS}/release/libmonero-java.dylib
 
     else
