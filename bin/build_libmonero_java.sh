@@ -73,7 +73,7 @@ VERSION="${CPU}-${VENDOR}-${OS}"
 # Build monero-cpp and install it
 # "./build" is created here also.
 if [ -z $SKIP_MCPP ]; then
-    rm -rf build &&  mkdir build
+    mkdir build
     printf "\nlibmonero-java build script: Building libmonero-cpp shared library\n"
     if [ $BUILD_BOTH_ARCHS == 1 ]; then
         cd ./external/monero-cpp/ &&
@@ -97,6 +97,7 @@ else
 fi
 
 # Build monero-java-jni-bridge
+rm -rf build/${VERSION}/release
 mkdir -p build/${VERSION}/release
 
 # Building on Linux using Depends
