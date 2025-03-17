@@ -39,9 +39,10 @@ if [ "${TARGET}" == "darwin" ]; then
     else
         DEP_EXTENSION="a"
     fi
-elif [ "${TARGET}" == "MSYS" ] || [ "${TARGET}" == "MINGW64_NT" ]; then
+elif [ "${TARGET}" == "MSYS" ]; then
+    bit=$(getconf LONG_BIT)
     OS="mingw32"
-    VENDOR="w64"
+    VENDOR="W${bit}"
     if [ -z "${INCLUSIVE}" ]; then
         DEP_EXTENSION="dll"
     else
@@ -90,8 +91,8 @@ if [ -z $SKIP_MCPP ]; then
         cp external/monero-cpp/build/${VERSION}/release/libmonero-cpp* ./build || exit 1
     fi
 else
-    mkdir temp_cpp
-    mv build/libmonero-cpp* temp_cpp
+    mkdir -p "temp_cpp/${VERSION}/release"
+    mv  "temp_cpp/${VERSION}/release/libmonero-cpp*"  "temp_cpp/${VERSION}/release"
     rm -rf build
     mv temp_cpp build
 fi
@@ -154,5 +155,5 @@ else
     cmake --build . --verbose 
     cd ..
     cp build/libmonero-java* build/${VERSION}/release
-    cp build/libmonero-cpp.${DEP_EXTENSION} build/${VERSION}/release
+    cp build/libmonero-cpp.${DEP_EXTENSION}* build/${VERSION}/release
 fi
