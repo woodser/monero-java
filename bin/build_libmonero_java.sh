@@ -46,7 +46,7 @@ elif [ "${TARGET}" == "MSYS" ]; then
     if [ -z "${INCLUSIVE}" ]; then
         DEP_EXTENSION="dll"
     else
-        DEP_EXTENSION="dll.a"
+        DEP_EXTENSION="a"
     fi
 else
     OS="gnu"
@@ -92,7 +92,7 @@ if [ -z $SKIP_MCPP ]; then
     fi
 else
     mkdir -p "temp_cpp/${VERSION}/release"
-    mv  "temp_cpp/${VERSION}/release/libmonero-cpp*"  "temp_cpp/${VERSION}/release"
+    mv  "build/${VERSION}/release/libmonero-cpp*"  "temp_cpp/${VERSION}/release"
     rm -rf build
     mv temp_cpp build
 fi
