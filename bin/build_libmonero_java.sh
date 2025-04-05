@@ -65,6 +65,9 @@ else
     CPU=$CURRENT_ARCH 
 fi
 VERSION="${CPU}-${VENDOR}-${OS}"
+if [ $BUILD_BOTH_ARCHS == 1 ]; then
+    VERSION="darwin"
+fi
 
 
 ###################
@@ -91,10 +94,8 @@ if [ -z $SKIP_MCPP ]; then
         cp external/monero-cpp/build/${VERSION}/release/libmonero-cpp* ./build || exit 1
     fi
 else
-    mkdir -p "temp_cpp/${VERSION}/release"
-    mv  "build/${VERSION}/release/libmonero-cpp*"  "temp_cpp/${VERSION}/release"
-    rm -rf build
-    mv temp_cpp build
+    rm -rf build && mkdir build
+    cp  "external/monero-cpp/build/${VERSION}/release/libmonero-cpp.${DEP_EXTENSION}"  build
 fi
 
 # Build monero-java-jni-bridge
@@ -124,7 +125,6 @@ if [ $CURRENT_OS == "Linux" ] && (
     if [ $BUILD_BOTH_ARCHS == 1 ]; then
         mkdir -p "build/x86_64-${VENDOR}-${OS}/release"
         mkdir -p "build/aarch64-${VENDOR}-${OS}/release"
-        mkdir -p build/darwin/release
         cp build/libmonero-cpp.${DEP_EXTENSION} build/darwin/release
 
         # x86_64
