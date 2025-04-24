@@ -146,7 +146,7 @@ public class MoneroUtils {
     }
   }
   
-  public static final int RING_SIZE = 12; // network-enforced ring size
+  public static final int RING_SIZE = 16; // network-enforced ring size
   
   private static int LOG_LEVEL = 0;
   private static long AU_PER_XMR = 1000000000000l;
