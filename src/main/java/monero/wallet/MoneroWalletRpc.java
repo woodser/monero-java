@@ -1794,8 +1794,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public void startMining(Long numThreads, Boolean backgroundMining, Boolean ignoreBattery) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("threads_count", numThreads);
-    params.put("backgroundMining", backgroundMining);
-    params.put("ignoreBattery", ignoreBattery);
+    params.put("do_background_mining", backgroundMining);
+    params.put("ignore_battery", ignoreBattery);
     rpc.sendJsonRequest("start_mining", params);
   }
 
