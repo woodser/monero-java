@@ -419,7 +419,7 @@ public interface MoneroDaemon {
    * @param keyImages are hex key images to get the statuses of
    * @return the spent status for each key image
    */
-  public List<MoneroKeyImageSpentStatus> getKeyImageSpentStatuses(Collection<String> keyImages);
+  public List<MoneroKeyImageSpentStatus> getKeyImageSpentStatuses(List<String> keyImages);
   
   /**
    * Get outputs identified by a list of output amounts and indices as a binary
