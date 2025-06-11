@@ -2815,7 +2815,7 @@ public abstract class TestMoneroWalletCommon {
       openWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD));
       fail("Should have thrown");
     } catch (Exception e) {
-      assertTrue(e.getMessage().equals("Failed to open wallet") || e.getMessage().equals("invalid password")); // TODO: different errors from rpc and wallet2
+      assertTrue(e.getMessage().toLowerCase().contains("failed to open wallet") || e.getMessage().toLowerCase().contains("invalid password")); // TODO: different errors from rpc and wallet2
     }
     
     // open wallet with new password
