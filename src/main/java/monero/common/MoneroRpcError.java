@@ -28,7 +28,7 @@ public class MoneroRpcError extends MoneroError {
   
   public String toString() {
     String str = super.toString();
-    if (rpcMethod != null || rpcParams != null) str += "\nRPC request: '" + rpcMethod + "' with params: " + JsonUtils.serialize(rpcParams);
+    if (rpcMethod != null) str += "\nRPC request: '" + rpcMethod + "'";
     return str;
   }
 }
