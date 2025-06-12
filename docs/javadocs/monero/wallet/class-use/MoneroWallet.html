@@ -54,11 +54,34 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Package</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color"><a href="#monero.wallet">monero.wallet</a></div>
+<div class="col-first even-row-color"><a href="#unnamed-package">Unnamed Package</a></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><a href="#monero.wallet">monero.wallet</a></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><a href="#utils">utils</a></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 <section class="class-uses">
 <ul class="block-list">
+<li>
+<section class="detail" id="unnamed-package">
+<h2>Uses of <a href="../MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a> in <a href="../../../package-summary.html">Unnamed Package</a></h2>
+<div class="caption"><span>Methods in <a href="../../../package-summary.html">Unnamed Package</a> with parameters of type <a href="../MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a></span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Method</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code>void</code></div>
+<div class="col-second even-row-color"><span class="type-name-label">TestMoneroWalletFull.</span><code><a href="../../../TestMoneroWalletFull.html#closeWallet(monero.wallet.MoneroWallet,boolean)" class="member-name-link">closeWallet</a><wbr>(<a href="../MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a>&nbsp;wallet,
+ boolean&nbsp;save)</code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>void</code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">TestMoneroWalletRpc.</span><code><a href="../../../TestMoneroWalletRpc.html#closeWallet(monero.wallet.MoneroWallet,boolean)" class="member-name-link">closeWallet</a><wbr>(<a href="../MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a>&nbsp;wallet,
+ boolean&nbsp;save)</code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+</div>
+</section>
+</li>
 <li>
 <section class="detail" id="monero.wallet">
 <h2>Uses of <a href="../MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a> in <a href="../package-summary.html">monero.wallet</a></h2>
@@ -76,6 +99,45 @@ loadScripts(document, 'script');</script>
 <div class="col-second odd-row-color"><code><a href="../MoneroWalletRpc.html" class="type-name-link" title="class in monero.wallet">MoneroWalletRpc</a></code></div>
 <div class="col-last odd-row-color">
 <div class="block">Implements a Monero wallet using monero-wallet-rpc.</div>
+</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="utils">
+<h2>Uses of <a href="../MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a> in <a href="../../../utils/package-summary.html">utils</a></h2>
+<div class="caption"><span>Methods in <a href="../../../utils/package-summary.html">utils</a> with parameters of type <a href="../MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a></span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Method</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code>static void</code></div>
+<div class="col-second even-row-color"><span class="type-name-label">FundWallets.</span><code><a href="../../../utils/FundWallets.html#fundWallets(monero.wallet.MoneroWallet,int,int,int)" class="member-name-link">fundWallets</a><wbr>(<a href="../MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a>&nbsp;srcWallet,
+ int&nbsp;numWallets,
+ int&nbsp;numAccounts,
+ int&nbsp;numSubaddressesPerAccount)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Utility to create and fund test wallets.</div>
+</div>
+<div class="col-first odd-row-color"><code>static void</code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">PrintBalances.</span><code><a href="../../../utils/PrintBalances.html#printBalances(monero.wallet.MoneroWallet)" class="member-name-link">printBalances</a><wbr>(<a href="../MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a>&nbsp;wallet)</code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>static void</code></div>
+<div class="col-second even-row-color"><span class="type-name-label">WalletEqualityUtils.</span><code><a href="../../../utils/WalletEqualityUtils.html#testWalletEqualityOnChain(monero.wallet.MoneroWallet,monero.wallet.MoneroWallet)" class="member-name-link">testWalletEqualityOnChain</a><wbr>(<a href="../MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a>&nbsp;w1,
+ <a href="../MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a>&nbsp;w2)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Compares two wallets for equality using only on-chain data.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html" title="class or interface in java.math" class="external-link">BigInteger</a></code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">WalletTxTracker.</span><code><a href="../../../utils/WalletTxTracker.html#waitForUnlockedBalance(monero.wallet.MoneroWallet,java.lang.Integer,java.lang.Integer,java.math.BigInteger)" class="member-name-link">waitForUnlockedBalance</a><wbr>(<a href="../MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a>&nbsp;wallet,
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;accountIndex,
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;subaddressIndex,
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html" title="class or interface in java.math" class="external-link">BigInteger</a>&nbsp;minAmount)</code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>void</code></div>
+<div class="col-second even-row-color"><span class="type-name-label">WalletTxTracker.</span><code><a href="../../../utils/WalletTxTracker.html#waitForWalletTxsToClearPool(monero.wallet.MoneroWallet...)" class="member-name-link">waitForWalletTxsToClearPool</a><wbr>(<a href="../MoneroWallet.html" title="interface in monero.wallet">MoneroWallet</a>...&nbsp;wallets)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Waits for transactions in the pool belonging to the given wallets to clear.</div>
 </div>
 </div>
 </section>
