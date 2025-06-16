@@ -355,7 +355,7 @@ JNIEXPORT jbyteArray JNICALL Java_monero_common_MoneroUtils_jsonToBinaryJni(JNIE
   string json_str = jstring2string(env, json);
 
   // convert json to monero's portable storage binary format
-  string bin_str;
+  std::string bin_str;
   monero_utils::json_to_binary(json_str, bin_str);
 
   // convert binary string to jbyteArray
@@ -364,12 +364,8 @@ JNIEXPORT jbyteArray JNICALL Java_monero_common_MoneroUtils_jsonToBinaryJni(JNIE
      return NULL; // out of memory error thrown
   }
 
-  // fill a temp structure to use to populate the java byte array
-  jbyte fill[bin_str.length()];
-  for (int i = 0; i < bin_str.length(); i++) {
-     fill[i] = bin_str[i];
-  }
-  env->SetByteArrayRegion(result, 0, bin_str.length(), fill);
+  // populate the java byte array
+  env->SetByteArrayRegion(result, 0, bin_str.length(), reinterpret_cast<const jbyte*>(bin_str.data()));
   return result;
 }
 
