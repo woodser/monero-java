@@ -220,8 +220,10 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    */
   public int stopProcess(boolean force) {
     if (process == null) throw new MoneroError("MoneroDaemonRpc instance not created from new process");
-    listeners.clear();
-    refreshListening();
+    synchronized (listeners) {
+      listeners.clear();
+      refreshListening();
+    }
     if (force) process.destroyForcibly();
     else process.destroy();
     try { return process.waitFor(); }
@@ -230,20 +232,26 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   
   @Override
   public void addListener(MoneroDaemonListener listener) {
-    listeners.add(listener);
-    refreshListening();
+    synchronized (listeners) {
+      listeners.add(listener);
+      refreshListening();
+    }
   }
   
   @Override
   public void removeListener(MoneroDaemonListener listener) {
-    if (!listeners.contains(listener)) throw new MoneroError("Listener is not registered with daemon");
-    listeners.remove(listener);
-    refreshListening();
+    synchronized (listeners) {
+      if (!listeners.contains(listener)) throw new MoneroError("Listener is not registered with daemon");
+      listeners.remove(listener);
+      refreshListening();
+    }
   }
   
   @Override
   public List<MoneroDaemonListener> getListeners() {
-    return listeners;
+    synchronized (listeners) {
+      return listeners;
+    }
   }
   
   /**
@@ -1704,8 +1712,10 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   }
   
   private void refreshListening() {
-    if (daemonPoller == null && listeners.size() > 0) daemonPoller = new DaemonPoller(this);
-    if (daemonPoller != null) daemonPoller.setIsPolling(listeners.size() > 0);
+    synchronized (listeners) {
+      if (daemonPoller == null && listeners.size() > 0) daemonPoller = new DaemonPoller(this);
+      if (daemonPoller != null) daemonPoller.setIsPolling(listeners.size() > 0);
+    }
   }
   
   /**
@@ -1747,9 +1757,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
         MoneroBlockHeader header = daemon.getLastBlockHeader();
         if (!header.getHash().equals(lastHeader.getHash())) {
           lastHeader = header;
-          synchronized(daemon.getListeners()) {
-            announceBlockHeader(header);
-          }
+          announceBlockHeader(header);
         }
       } catch (Exception e) {
         e.printStackTrace();
@@ -1757,12 +1765,14 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     }
 
     private void announceBlockHeader(MoneroBlockHeader header) {
-      for (MoneroDaemonListener listener : daemon.getListeners()) {
-        try {
-          listener.onBlockHeader(header);
-        } catch (Exception e) {
-          System.err.println("Error calling listener on new block header: " + e.getMessage());
-          e.printStackTrace();
+      synchronized (daemon.getListeners()) {
+        for (MoneroDaemonListener listener : daemon.getListeners()) {
+          try {
+            listener.onBlockHeader(header);
+          } catch (Exception e) {
+            System.err.println("Error calling listener on new block header: " + e.getMessage());
+            e.printStackTrace();
+          }
         }
       }
     }
