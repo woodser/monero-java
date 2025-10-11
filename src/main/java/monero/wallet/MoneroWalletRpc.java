@@ -441,7 +441,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
   
   private void handleCreateWalletError(String name, MoneroRpcError e) {
-    if (e.getMessage().equals("Cannot create wallet. Already exists.")) throw new MoneroRpcError("Wallet already exists: " + name, e.getCode(), e.getRpcMethod(), e.getRpcParams());
+    if (e.getMessage().toLowerCase().contains("already exists")) throw new MoneroRpcError("Wallet already exists: " + name, e.getCode(), e.getRpcMethod(), e.getRpcParams());
     if (e.getMessage().equals("Electrum-style word list failed verification")) throw new MoneroRpcError("Invalid mnemonic", e.getCode(), e.getRpcMethod(), e.getRpcParams());
     throw e;
   }
