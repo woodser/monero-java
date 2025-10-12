@@ -101,13 +101,13 @@ walletFull.close(true);
 <dependency>
   <groupId>io.github.woodser</groupId>
   <artifactId>monero-java</artifactId>
-  <version>0.8.38</version>
+  <version>0.8.9</version>
 </dependency>
 ```
 
 #### For Gradle, add to build.gradle:
 
-`compile 'io.github.woodser:monero-java:0.8.38'`
+`compile 'io.github.woodser:monero-java:0.8.39'`
 
 #### If using RPC servers:
 
