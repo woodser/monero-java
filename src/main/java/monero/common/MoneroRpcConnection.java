@@ -71,18 +71,18 @@ public class MoneroRpcConnection {
   private String username;
   private String password;
   private String zmqUri;
+  private String proxyUri;
   private int priority = 0;
   private Long timeoutMs;
   private Boolean isOnline;
   private Boolean isAuthenticated;
   private Long responseTime;
-  private String proxyUri;
   private boolean printStackTrace;
   
   private Map<String, Object> attributes = new HashMap<String, Object>();
   
   public MoneroRpcConnection(URI uri) {
-    this(uri, null, null, null);
+    this(uri, null, null, null, null);
   }
   
   public MoneroRpcConnection(String uri) {
@@ -90,24 +90,27 @@ public class MoneroRpcConnection {
   }
   
   public MoneroRpcConnection(String uri, String username, String password) {
-    this(uri == null ? null : MoneroUtils.parseUri(uri), username, password, null);
+    this(uri == null ? null : MoneroUtils.parseUri(uri), username, password, null, null);
   }
 
-  public MoneroRpcConnection(String uri, String username, String password, String zmqUri) {
-    this(uri == null ? null : MoneroUtils.parseUri(uri), username, password, zmqUri == null ? null : MoneroUtils.parseUri(zmqUri));
-  }
-  
   public MoneroRpcConnection(URI uri, String username, String password) {
-    this(uri, username, password, null);
+    this(uri, username, password, null, null);
+  }
+
+  public MoneroRpcConnection(String uri, String username, String password, String zmqUri, String proxyUri) {
+    this(uri == null ? null : MoneroUtils.parseUri(uri), username, password, zmqUri == null ? null : MoneroUtils.parseUri(zmqUri), proxyUri == null ? null : MoneroUtils.parseUri(proxyUri));
+    this.proxyUri = proxyUri;
   }
   
-  public MoneroRpcConnection(URI uri, String username, String password, URI zmqUri) {
+  public MoneroRpcConnection(URI uri, String username, String password, URI zmqUri, URI proxyUri) {
     this.uri = uri == null ? null : MoneroUtils.parseUri(uri.toString()).toString();
     this.setCredentials(username, password);
+    this.zmqUri = zmqUri == null ? null : MoneroUtils.parseUri(zmqUri.toString()).toString();
+    this.proxyUri = proxyUri == null ? null : MoneroUtils.parseUri(proxyUri.toString()).toString();
   }
   
   public MoneroRpcConnection(MoneroRpcConnection connection) {
-    this(connection.uri, connection.username, connection.password, connection.zmqUri);
+    this(connection.uri, connection.username, connection.password, connection.zmqUri, connection.proxyUri);
     this.priority = connection.priority;
     this.isOnline = connection.isOnline;
     this.isAuthenticated = connection.isAuthenticated;
@@ -170,7 +173,6 @@ public class MoneroRpcConnection {
     return password;
   }
   
-  
   public String getZmqUri() {
     return zmqUri;
   }
@@ -180,13 +182,13 @@ public class MoneroRpcConnection {
     return this;
   }
 
+  public String getProxyUri() {
+    return proxyUri;
+  }
+
   public MoneroRpcConnection setProxyUri(String proxyUri) {
     this.proxyUri = proxyUri;
     return this;
-  }
-
-  public String getProxyUri() {
-    return proxyUri;
   }
 
   /**
@@ -584,6 +586,7 @@ public class MoneroRpcConnection {
     result = prime * result + ((uri == null) ? 0 : uri.hashCode());
     result = prime * result + ((username == null) ? 0 : username.hashCode());
     result = prime * result + ((zmqUri == null) ? 0 : zmqUri.hashCode());
+    result = prime * result + ((proxyUri == null) ? 0 : proxyUri.hashCode());
     return result;
   }
 

@@ -191,7 +191,7 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     String zmqUri = zmqUriIdx >= 0 ? cmd.get(zmqUriIdx + 1) : null;
     
     // initialize internal state
-    rpc = new MoneroRpcConnection(uri, username, password, zmqUri);
+    rpc = new MoneroRpcConnection(uri, username, password, zmqUri, null);
   }
   
   /**
@@ -261,6 +261,16 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    */
   public MoneroRpcConnection getRpcConnection() {
     return this.rpc;
+  }
+
+  /**
+   * Set the daemon's RPC connection.
+   * 
+   * @param rpc the daemon's rpc connection
+   */
+  public void setRpcConnection(MoneroRpcConnection rpc) {
+    GenUtils.assertNotNull(rpc);
+    this.rpc = rpc;
   }
 
   /**

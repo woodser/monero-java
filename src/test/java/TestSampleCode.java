@@ -14,6 +14,7 @@ import monero.daemon.MoneroDaemon;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroNetworkType;
 import monero.daemon.model.MoneroTx;
+import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletFull;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroOutputWallet;
@@ -169,5 +170,63 @@ public class TestSampleCode {
     
     // clear connection manager
     connectionManager.clear();
+  }
+
+  @SuppressWarnings("unused")
+  private static void proxySampleCodeMonerod1() {
+
+    // create client connected to monerod with tor config
+    MoneroRpcConnection monerodConnection = new MoneroRpcConnection("http://kyaklhqp4yyza4fmtbvs6z4lrzr5cljxwa7o2d42sfelfhczsmbwzfad.onion:18081")
+        .setCredentials("superuser", "abctesting123")
+        .setProxyUri("<tor proxy uri>");
+    MoneroDaemonRpc monerod = new MoneroDaemonRpc(monerodConnection);
+  }
+
+  @SuppressWarnings("unused")
+  private static void proxySampleCodeMonerod2() {
+
+    // connect to monerod with tor address
+    MoneroDaemonRpc monerod = new MoneroDaemonRpc("http://kyaklhqp4yyza4fmtbvs6z4lrzr5cljxwa7o2d42sfelfhczsmbwzfad.onion:18081"); // can add username and password
+
+    // set tor's proxy uri
+    monerod.setProxyUri("<tor proxy uri>");
+  }
+
+  @SuppressWarnings("unused")
+  private static void proxySampleCodeWalletRpc() {
+
+      // create client connected to your monero-wallet-rpc instance
+      MoneroWallet walletRpc = new MoneroWalletRpc("http://localhost:38084"); // can add username and password
+
+      // open or create a wallet
+      // ...
+
+      // set connection to monerod with tor config
+      MoneroRpcConnection monerodConnection = new MoneroRpcConnection("http://kyaklhqp4yyza4fmtbvs6z4lrzr5cljxwa7o2d42sfelfhczsmbwzfad.onion:18081")
+              .setCredentials("superuser", "abctesting123")
+              .setProxyUri("<tor proxy uri>");
+      walletRpc.setDaemonConnection(monerodConnection);
+  }
+
+  @SuppressWarnings("unused")
+  private static void proxySampleCodeWalletFull() {
+
+      // option 1: get or create full wallet with tor config
+      MoneroWallet walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
+              .setPath("sample_wallet_full")
+              .setPassword("supersecretpassword123")
+              .setNetworkType(MoneroNetworkType.MAINNET)
+              .setSeed("hefty value scenic...")
+              .setRestoreHeight(573936l)
+              .setServerUri("http://kyaklhqp4yyza4fmtbvs6z4lrzr5cljxwa7o2d42sfelfhczsmbwzfad.onion:18081")
+              .setServerUsername("superuser")
+              .setServerPassword("abctesting123")
+              .setServerProxyUri("<tor proxy uri>"));
+
+      // option 2: set connection to monerod with tor config
+      MoneroRpcConnection monerodConnection = new MoneroRpcConnection("http://kyaklhqp4yyza4fmtbvs6z4lrzr5cljxwa7o2d42sfelfhczsmbwzfad.onion:18081")
+              .setCredentials("superuser", "abctesting123")
+              .setProxyUri("<tor proxy uri>");
+      walletFull.setDaemonConnection(monerodConnection);
   }
 }

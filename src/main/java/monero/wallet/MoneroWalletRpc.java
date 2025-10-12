@@ -116,10 +116,6 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     this(new MoneroRpcConnection(uri, username, password));
   }
   
-  public MoneroWalletRpc(String uri, String username, String password, String zmqUri) {
-    this(new MoneroRpcConnection(uri, username, password, zmqUri));
-  }
-  
   public MoneroWalletRpc(MoneroRpcConnection rpc) {
     super();
     this.rpc = rpc;
@@ -201,7 +197,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     String zmqUri = zmqUriIdx >= 0 ? cmd.get(zmqUriIdx + 1) : null;
     
     // initialize internal state
-    rpc = new MoneroRpcConnection(uri, username, password, zmqUri);
+    rpc = new MoneroRpcConnection(uri, username, password, zmqUri, null);
     addressCache = new HashMap<Integer, Map<Integer, String>>();
   }
   
@@ -512,13 +508,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("ssl_ca_file", sslOptions.getCertificateAuthorityFile());
     params.put("ssl_allowed_fingerprints", sslOptions.getAllowedFingerprints());
     params.put("ssl_allow_any_cert", sslOptions.getAllowAnyCert());
+    params.put("proxy", connection == null ? "" : connection.getProxyUri());
     rpc.sendJsonRequest("set_daemon", params);
     this.daemonConnection = connection == null || connection.getUri() == null || connection.getUri().isEmpty() ? null : new MoneroRpcConnection(connection);
-  }
-  
-  @Override
-  public void setProxyUri(String uri) {
-    throw new MoneroError("MoneroWalletRpc.setProxyUri() not supported. Start monero-wallet-rpc with --proxy instead.");
   }
   
   @Override
