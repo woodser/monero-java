@@ -41,7 +41,7 @@ public class MoneroUtils {
    * @return the version of this monero-java library
    */
   public static String getVersion() {
-    return "0.8.38";
+    return "0.8.39";
   }
 
   /**
