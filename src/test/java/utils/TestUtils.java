@@ -57,6 +57,8 @@ public class TestUtils {
   public static final boolean WALLET_RPC_ZMQ_ENABLED = false;
   public static final int WALLET_RPC_ZMQ_PORT_START = 58083;
   public static final int WALLET_RPC_ZMQ_BIND_PORT_START = 48083;  // TODO: zmq bind port necessary?
+  public static final boolean WALLET_RPC_PROXY_ENABLED = false;
+  public static final String WALLET_RPC_PROXY_URI = null;
   public static final String WALLET_RPC_USERNAME = "rpc_user";
   public static final String WALLET_RPC_PASSWORD = "abc123";
   public static final String WALLET_RPC_ZMQ_DOMAIN = "127.0.0.1";
@@ -118,7 +120,7 @@ public class TestUtils {
     if (walletRpc == null) {
       
       // construct wallet rpc instance with daemon connection
-      MoneroRpcConnection rpc = new MoneroRpcConnection(WALLET_RPC_URI, WALLET_RPC_USERNAME, WALLET_RPC_PASSWORD, WALLET_RPC_ZMQ_ENABLED ? WALLET_RPC_ZMQ_URI : null);
+      MoneroRpcConnection rpc = new MoneroRpcConnection(WALLET_RPC_URI, WALLET_RPC_USERNAME, WALLET_RPC_PASSWORD, WALLET_RPC_ZMQ_ENABLED ? WALLET_RPC_ZMQ_URI : null, WALLET_RPC_PROXY_ENABLED ? WALLET_RPC_PROXY_URI : null);
       walletRpc = new MoneroWalletRpc(rpc);
     }
     

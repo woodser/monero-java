@@ -139,13 +139,6 @@ public interface MoneroWallet {
   public MoneroConnectionManager getConnectionManager();
   
   /**
-   * Set the Tor proxy to the daemon.
-   * 
-   * @param uri the Tor proxy URI
-   */
-  public void setProxyUri(String uri);
-  
-  /**
    * Indicates if the wallet is connected a daemon.
    * 
    * @return true if the wallet is connected to a daemon, false otherwise

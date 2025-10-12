@@ -19,6 +19,7 @@ public class MoneroWalletConfig {
   private MoneroRpcConnection server;
   private String serverUsername;
   private String serverPassword;
+  private String serverProxyUri;
   private MoneroConnectionManager connectionManager;
   private String seed;
   private String seedOffset;
@@ -102,6 +103,7 @@ public class MoneroWalletConfig {
     this.server = server;
     this.serverUsername = server == null ? null : server.getUsername();
     this.serverPassword = server == null ? null : server.getPassword();
+    this.serverProxyUri = server == null ? null : server.getProxyUri();
     return this;
   }
   
@@ -117,6 +119,7 @@ public class MoneroWalletConfig {
     if (server == null) server = new MoneroRpcConnection(serverUri);
     else server.setUri(serverUri);
     if (serverUsername != null && serverPassword != null) server.setCredentials(serverUsername, serverPassword);
+    server.setProxyUri(serverProxyUri);
     return this;
   }
   
@@ -137,6 +140,16 @@ public class MoneroWalletConfig {
   public MoneroWalletConfig setServerPassword(String serverPassword) {
     this.serverPassword = serverPassword;
     if (server != null && serverUsername != null && serverPassword != null) server.setCredentials(serverUsername, serverPassword);
+    return this;
+  }
+
+  public String getServerProxyUri() {
+    return server == null ? null : server.getProxyUri();
+  }
+  
+  public MoneroWalletConfig setServerProxyUri(String serverProxyUri) {
+    this.serverProxyUri = serverProxyUri;
+    if (server != null) server.setProxyUri(serverProxyUri);
     return this;
   }
 
