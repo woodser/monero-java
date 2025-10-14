@@ -1,6 +1,6 @@
 # Monero Java Library
 
-A Java library for creating Monero applications using RPC and JNI bindings to [monero v0.18.4.1 'Fluorine Fermi'](https://github.com/monero-project/monero/tree/v0.18.4.1).
+A Java library for creating Monero applications using RPC and JNI bindings to [monero v0.18.4.3 'Fluorine Fermi'](https://github.com/monero-project/monero/tree/v0.18.4.3).
 
 * Supports wallet and daemon RPC clients.
 * Supports client-side wallets using JNI bindings.
