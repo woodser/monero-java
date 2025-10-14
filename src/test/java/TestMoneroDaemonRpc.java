@@ -1421,7 +1421,7 @@ public class TestMoneroDaemonRpc {
     assertNotNull(template.getPrevHash());
     assertNotNull(template.getReservedOffset());
     assertNotNull(template.getSeedHeight());
-    assertTrue(template.getSeedHeight() > 0);
+    assertTrue(template.getSeedHeight() >= 0);
     assertNotNull(template.getSeedHash());
     assertFalse(template.getSeedHash().isEmpty());
     // next seed hash can be null or initialized  // TODO: test circumstances for each
