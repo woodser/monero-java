@@ -1,25 +1,37 @@
 cmake_minimum_required(VERSION 3.5)
 
+project(monero-java-jni)
+
 if (WIN32)
   add_definitions( "-D_GLIBCXX_USE_NANOSLEEP=1" )
   add_definitions( "-DWIN32_LEAN_AND_MEAN" )
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj -O2 -fPIC -std=c++14 -F/Library/Frameworks -pthread -lcrypto -lcrypt32 -lbcrypt") 
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj -O2 -fPIC -std=c++14 -pthread -lcrypto -lcrypt32 -lbcrypt") 
 else()
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++14 -F/Library/Frameworks -pthread")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++14 -pthread")
 endif()
 
-#SET(CMAKE_C_COMPILER /path/to/c/compiler)
-#SET(CMAKE_CXX_COMPILER /path/to/cpp/compiler)
+set(PLATFORM "")
+if (DEFINED DEPENDS)
+  if (NOT DEFINED TARGET)
+    message(FATAL_ERROR "TARGET triplet arg is missing. TARGET is required in order to find the correct headers.")
+  elseif (${TARGET} MATCHES "apple")
+    set(PLATFORM "darwin")
+  elseif (${TARGET} MATCHES "linux")
+    set(PLATFORM "linux")
+  else()
+    set(PLATFORM "win32")
+  endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -F${CMAKE_SOURCE_DIR}/external/monero-cpp/external/monero-project/contrib/depends/${TARGET}/native/SDK/System/Library/Frameworks")
+else()
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -F/Library/Frameworks")
+endif()
 
-project(monero-java-jni)
 
 #############
 # System
 #############
 
 set(MONERO_CPP "${CMAKE_SOURCE_DIR}/external/monero-cpp")
-message(STATUS MONERO_CPP : ${MONERO_CPP} : ${MONERO_CPP})
-
 set(MONERO_CPP_SRC "${MONERO_CPP}/src")
 set(MONERO_PROJECT ${MONERO_CPP}/external/monero-project)
 set(MONERO_PROJECT_SRC "${MONERO_PROJECT}/src")
@@ -29,12 +41,15 @@ if(NOT DEFINED ENV{JAVA_HOME} OR "$ENV{JAVA_HOME}" STREQUAL "")
   message(FATAL_ERROR "JAVA_HOME variable not set, for example: export JAVA_HOME=/path/to/jdk")
 endif()
 
+
 # TODO: remove TRUEs, how are APPLE, DEPENDS, etc initialized?
 if (TRUE OR HIDAPI_FOUND OR LibUSB_COMPILE_TEST_PASSED)
   if (APPLE)
     if(TRUE OR DEPENDS)
+      # Building for Apple on Linux
       list(APPEND EXTRA_LIBRARIES "-framework Foundation -framework IOKit -framework AppKit")
     else()
+      # Building for Apple on Mac
       find_library(COREFOUNDATION CoreFoundation)
       find_library(IOKIT IOKit)
       find_library(APPKIT AppKit)
@@ -93,6 +108,7 @@ endif()
 add_library(monero-cpp SHARED IMPORTED)
 
 # import shared c++ library
+
 if (APPLE)
   set_target_properties(monero-cpp PROPERTIES IMPORTED_LOCATION ./libmonero-cpp.dylib)
 elseif (WIN32)
@@ -103,7 +119,7 @@ else()
 endif()
 
 ###############################################
-# Build Java dynamic library for JNI
+# Build Monero-Java native bridge
 ###############################################
 
 set(
@@ -112,6 +128,7 @@ set(
 )
 add_library(monero-java SHARED ${MONERO_JNI_SRC_FILES})
 
+message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 target_include_directories(monero-java PUBLIC
   "$ENV{JAVA_HOME}"
   "$ENV{JAVA_HOME}/include"
@@ -131,7 +148,11 @@ target_include_directories(monero-java PUBLIC
   ${OPENSSL_INCLUDE_DIR}
 )
 
-if (APPLE)
+# Support building for other Platforms from Linux
+# TODO: Add the windows and linux headers to this directory 
+if (DEFINED DEPENDS)
+  target_include_directories(monero-java PUBLIC "${CMAKE_SOURCE_DIR}/include/jdk@21/${PLATFORM}")
+elseif (APPLE)
   target_include_directories(monero-java PUBLIC "$ENV{JAVA_HOME}/include/darwin")
 elseif (WIN32)
   target_include_directories(monero-java PUBLIC "$ENV{JAVA_HOME}/include/win32")
@@ -161,7 +182,7 @@ INSTALL(TARGETS monero-java
 
 # search for libmonero-cpp.dylib in same directory as libmonero-java.dylib on mac for portability
 # command: install_name_tool -add_rpath @loader_path/ ./libmonero-java.dylib 
-if (APPLE)
+if (APPLE AND NOT CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
     add_custom_command(TARGET monero-java 
         POST_BUILD COMMAND 
         ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@loader_path/"
