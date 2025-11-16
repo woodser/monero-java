@@ -5,14 +5,16 @@
             "name": "Scratchpad",
             "request": "launch",
             "mainClass": "utils.Scratchpad",
-            "projectName": "monero-java"
+            "projectName": "monero-java",
+            "vmArgs": "-Djava.library.path=./build"
         },
         {
             "type": "java",
             "name": "StartMining",
             "request": "launch",
             "mainClass": "utils.StartMining",
-            "projectName": "monero-java"
+            "projectName": "monero-java",
+            "vmArgs": "-Djava.library.path=./build"
         },
         {
             "type": "java",
