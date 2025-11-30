@@ -1623,9 +1623,11 @@ public class TestMoneroDaemonRpc {
     }
     
     // test pruned vs not pruned
+    boolean isPruned = tx.getPrunedHex() != null; // tx might be pruned regardless of configuration
+    if (ctx.isPruned) assertTrue(isPruned);
     if (ctx.fromGetTxPool || Boolean.TRUE.equals(ctx.fromBinaryBlock)) assertNull(tx.getPrunableHash());   // TODO monerod: tx pool txs do not have prunable hash, TODO: getBlocksByHeight() has inconsistent client-side pruning
     else assertNotNull(tx.getPrunableHash());
-    if (ctx.isPruned) {
+    if (isPruned) {
       assertNull(tx.getRctSigPrunable());
       assertNull(tx.getSize());
       assertNull(tx.getLastRelayedTimestamp());
@@ -1633,7 +1635,9 @@ public class TestMoneroDaemonRpc {
       assertNull(tx.getFullHex());
       assertNotNull(tx.getPrunedHex());
     } else {
-      assertNull(tx.getPrunedHex());
+      assertTrue(tx.getVersion() >= 0);
+      assertTrue(tx.getUnlockTime().compareTo(BigInteger.ZERO) >= 0);
+      assertTrue(tx.getExtra().length > 0);
       if (Boolean.TRUE.equals(ctx.fromBinaryBlock)) assertNull(tx.getFullHex());         // TODO: getBlocksByHeight() has inconsistent client-side pruning
       else assertFalse(tx.getFullHex().isEmpty());
       if (Boolean.TRUE.equals(ctx.fromBinaryBlock)) assertNull(tx.getRctSigPrunable());  // TODO: getBlocksByHeight() has inconsistent client-side pruning
