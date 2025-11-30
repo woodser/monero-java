@@ -39,7 +39,7 @@ loadScripts(document, 'script');</script>
 <p>Summary:</p>
 <ul>
 <li>Nested</li>
-<li>Field</li>
+<li><a href="#field-summary">Field</a></li>
 <li><a href="#constructor-summary">Constr</a></li>
 <li><a href="#method-summary">Method</a></li>
 </ul>
@@ -47,7 +47,7 @@ loadScripts(document, 'script');</script>
 <li>
 <p>Detail:</p>
 <ul>
-<li>Field</li>
+<li><a href="#field-detail">Field</a></li>
 <li><a href="#constructor-detail">Constr</a></li>
 <li><a href="#method-detail">Method</a></li>
 </ul>
@@ -59,13 +59,13 @@ loadScripts(document, 'script');</script>
 <ul class="sub-nav-list">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field-summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor-summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method-summary">Method</a></li>
 </ul>
 <ul class="sub-nav-list">
 <li>Detail:&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field-detail">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor-detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method-detail">Method</a></li>
 </ul>
@@ -108,6 +108,21 @@ implements <a href="../../../common/types/Filter.html" title="interface in commo
 </section>
 <section class="summary">
 <ul class="summary-list">
+<!-- =========== FIELD SUMMARY =========== -->
+<li>
+<section class="field-summary" id="field-summary">
+<h2>Field Summary</h2>
+<div class="caption"><span>Fields</span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Field</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code>protected <a href="MoneroTxQuery.html" title="class in monero.wallet.model">MoneroTxQuery</a></code></div>
+<div class="col-second even-row-color"><code><a href="#txQuery" class="member-name-link">txQuery</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+</div>
+</section>
+</li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
 <li>
 <section class="constructor-summary" id="constructor-summary">
@@ -154,54 +169,58 @@ implements <a href="../../../common/types/Filter.html" title="interface in commo
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Indicates if the given item meets the criteria of this filter.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAccountIndex(java.lang.Integer)" class="member-name-link">setAccountIndex</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;accountIndex)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#meetsCriteria(monero.wallet.model.MoneroOutputWallet,boolean)" class="member-name-link">meetsCriteria</a><wbr>(<a href="MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a>&nbsp;output,
+ boolean&nbsp;queryParent)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAmount(java.math.BigInteger)" class="member-name-link">setAmount</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html" title="class or interface in java.math" class="external-link">BigInteger</a>&nbsp;amount)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAccountIndex(java.lang.Integer)" class="member-name-link">setAccountIndex</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;accountIndex)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setIndex(java.lang.Long)" class="member-name-link">setIndex</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&nbsp;index)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAmount(java.math.BigInteger)" class="member-name-link">setAmount</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html" title="class or interface in java.math" class="external-link">BigInteger</a>&nbsp;amount)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setIsFrozen(java.lang.Boolean)" class="member-name-link">setIsFrozen</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Boolean.html" title="class or interface in java.lang" class="external-link">Boolean</a>&nbsp;isFrozen)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setIndex(java.lang.Long)" class="member-name-link">setIndex</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&nbsp;index)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setIsSpent(java.lang.Boolean)" class="member-name-link">setIsSpent</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Boolean.html" title="class or interface in java.lang" class="external-link">Boolean</a>&nbsp;isSpent)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setIsFrozen(java.lang.Boolean)" class="member-name-link">setIsFrozen</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Boolean.html" title="class or interface in java.lang" class="external-link">Boolean</a>&nbsp;isFrozen)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setKeyImage(monero.daemon.model.MoneroKeyImage)" class="member-name-link">setKeyImage</a><wbr>(<a href="../../daemon/model/MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&nbsp;keyImage)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setIsSpent(java.lang.Boolean)" class="member-name-link">setIsSpent</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Boolean.html" title="class or interface in java.lang" class="external-link">Boolean</a>&nbsp;isSpent)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMaxAmount(java.math.BigInteger)" class="member-name-link">setMaxAmount</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html" title="class or interface in java.math" class="external-link">BigInteger</a>&nbsp;maxAmount)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setKeyImage(monero.daemon.model.MoneroKeyImage)" class="member-name-link">setKeyImage</a><wbr>(<a href="../../daemon/model/MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&nbsp;keyImage)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMinAmount(java.math.BigInteger)" class="member-name-link">setMinAmount</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html" title="class or interface in java.math" class="external-link">BigInteger</a>&nbsp;minAmount)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMaxAmount(java.math.BigInteger)" class="member-name-link">setMaxAmount</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html" title="class or interface in java.math" class="external-link">BigInteger</a>&nbsp;maxAmount)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRingOutputIndices(java.util.List)" class="member-name-link">setRingOutputIndices</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&gt;&nbsp;ringOutputIndices)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMinAmount(java.math.BigInteger)" class="member-name-link">setMinAmount</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html" title="class or interface in java.math" class="external-link">BigInteger</a>&nbsp;minAmount)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setStealthPublicKey(java.lang.String)" class="member-name-link">setStealthPublicKey</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;stealthPublicKey)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRingOutputIndices(java.util.List)" class="member-name-link">setRingOutputIndices</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&gt;&nbsp;ringOutputIndices)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSubaddressIndex(java.lang.Integer)" class="member-name-link">setSubaddressIndex</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;subaddressIndex)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setStealthPublicKey(java.lang.String)" class="member-name-link">setStealthPublicKey</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;stealthPublicKey)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSubaddressIndices(java.lang.Integer...)" class="member-name-link">setSubaddressIndices</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>...&nbsp;subaddressIndices)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSubaddressIndex(java.lang.Integer)" class="member-name-link">setSubaddressIndex</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&nbsp;subaddressIndex)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSubaddressIndices(java.util.List)" class="member-name-link">setSubaddressIndices</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&gt;&nbsp;subaddressIndices)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSubaddressIndices(java.lang.Integer...)" class="member-name-link">setSubaddressIndices</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>...&nbsp;subaddressIndices)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTx(monero.daemon.model.MoneroTx)" class="member-name-link">setTx</a><wbr>(<a href="../../daemon/model/MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a>&nbsp;tx)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSubaddressIndices(java.util.List)" class="member-name-link">setSubaddressIndices</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&gt;&nbsp;subaddressIndices)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTx(monero.wallet.model.MoneroTxWallet)" class="member-name-link">setTx</a><wbr>(<a href="MoneroTxWallet.html" title="class in monero.wallet.model">MoneroTxWallet</a>&nbsp;tx)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTx(monero.daemon.model.MoneroTx)" class="member-name-link">setTx</a><wbr>(<a href="../../daemon/model/MoneroTx.html" title="class in monero.daemon.model">MoneroTx</a>&nbsp;tx)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTxQuery(monero.wallet.model.MoneroTxQuery)" class="member-name-link">setTxQuery</a><wbr>(<a href="MoneroTxQuery.html" title="class in monero.wallet.model">MoneroTxQuery</a>&nbsp;txQuery)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTx(monero.wallet.model.MoneroTxWallet)" class="member-name-link">setTx</a><wbr>(<a href="MoneroTxWallet.html" title="class in monero.wallet.model">MoneroTxWallet</a>&nbsp;tx)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MoneroOutputQuery.html" title="class in monero.wallet.model">MoneroOutputQuery</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTxQuery(monero.wallet.model.MoneroTxQuery)" class="member-name-link">setTxQuery</a><wbr>(<a href="MoneroTxQuery.html" title="class in monero.wallet.model">MoneroTxQuery</a>&nbsp;txQuery)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -213,13 +232,27 @@ implements <a href="../../../common/types/Filter.html" title="interface in commo
 <code><a href="../../daemon/model/MoneroOutput.html#getAmount()">getAmount</a>, <a href="../../daemon/model/MoneroOutput.html#getIndex()">getIndex</a>, <a href="../../daemon/model/MoneroOutput.html#getKeyImage()">getKeyImage</a>, <a href="../../daemon/model/MoneroOutput.html#getRingOutputIndices()">getRingOutputIndices</a>, <a href="../../daemon/model/MoneroOutput.html#getStealthPublicKey()">getStealthPublicKey</a>, <a href="../../daemon/model/MoneroOutput.html#toString()">toString</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></h3>
-<code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#getClass--" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#notify--" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#notifyAll--" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#wait--" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#wait-long-" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#wait-long-int-" title="class or interface in java.lang" class="external-link">wait</a></code></div>
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#clone--" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#finalize--" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#getClass--" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#notify--" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#notifyAll--" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#wait--" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#wait-long-" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#wait-long-int-" title="class or interface in java.lang" class="external-link">wait</a></code></div>
 </section>
 </li>
 </ul>
 </section>
 <section class="details">
 <ul class="details-list">
+<!-- ============ FIELD DETAIL =========== -->
+<li>
+<section class="field-details" id="field-detail">
+<h2>Field Details</h2>
+<ul class="member-list">
+<li>
+<section class="detail" id="txQuery">
+<h3>txQuery</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="MoneroTxQuery.html" title="class in monero.wallet.model">MoneroTxQuery</a></span>&nbsp;<span class="element-name">txQuery</span></div>
+</section>
+</li>
+</ul>
+</section>
+</li>
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <li>
 <section class="constructor-details" id="constructor-detail">
@@ -323,6 +356,13 @@ implements <a href="../../../common/types/Filter.html" title="interface in commo
 <dt>Returns:</dt>
 <dd>true if the item meets the criteria of this filter, false otherwise</dd>
 </dl>
+</section>
+</li>
+<li>
+<section class="detail" id="meetsCriteria(monero.wallet.model.MoneroOutputWallet,boolean)">
+<h3>meetsCriteria</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">meetsCriteria</span><wbr><span class="parameters">(<a href="MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a>&nbsp;output,
+ boolean&nbsp;queryParent)</span></div>
 </section>
 </li>
 <li>

@@ -184,24 +184,28 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code>boolean</code></div>
 <div class="col-second even-row-color"><span class="type-name-label">MoneroOutputQuery.</span><code><a href="../MoneroOutputQuery.html#meetsCriteria(monero.wallet.model.MoneroOutputWallet)" class="member-name-link">meetsCriteria</a><wbr>(<a href="../MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a>&nbsp;output)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code><a href="../MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a></code></div>
-<div class="col-second odd-row-color"><span class="type-name-label">MoneroOutputWallet.</span><code><a href="../MoneroOutputWallet.html#merge(monero.wallet.model.MoneroOutputWallet)" class="member-name-link">merge</a><wbr>(<a href="../MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a>&nbsp;output)</code></div>
+<div class="col-first odd-row-color"><code>protected boolean</code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">MoneroOutputQuery.</span><code><a href="../MoneroOutputQuery.html#meetsCriteria(monero.wallet.model.MoneroOutputWallet,boolean)" class="member-name-link">meetsCriteria</a><wbr>(<a href="../MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a>&nbsp;output,
+ boolean&nbsp;queryParent)</code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>void</code></div>
-<div class="col-second even-row-color"><span class="type-name-label">MoneroWalletListener.</span><code><a href="../MoneroWalletListener.html#onOutputReceived(monero.wallet.model.MoneroOutputWallet)" class="member-name-link">onOutputReceived</a><wbr>(<a href="../MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a>&nbsp;output)</code></div>
+<div class="col-first even-row-color"><code><a href="../MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a></code></div>
+<div class="col-second even-row-color"><span class="type-name-label">MoneroOutputWallet.</span><code><a href="../MoneroOutputWallet.html#merge(monero.wallet.model.MoneroOutputWallet)" class="member-name-link">merge</a><wbr>(<a href="../MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a>&nbsp;output)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>void</code></div>
-<div class="col-second odd-row-color"><span class="type-name-label">MoneroWalletListenerI.</span><code><a href="../MoneroWalletListenerI.html#onOutputReceived(monero.wallet.model.MoneroOutputWallet)" class="member-name-link">onOutputReceived</a><wbr>(<a href="../MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a>&nbsp;output)</code></div>
-<div class="col-last odd-row-color">
+<div class="col-second odd-row-color"><span class="type-name-label">MoneroWalletListener.</span><code><a href="../MoneroWalletListener.html#onOutputReceived(monero.wallet.model.MoneroOutputWallet)" class="member-name-link">onOutputReceived</a><wbr>(<a href="../MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a>&nbsp;output)</code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>void</code></div>
+<div class="col-second even-row-color"><span class="type-name-label">MoneroWalletListenerI.</span><code><a href="../MoneroWalletListenerI.html#onOutputReceived(monero.wallet.model.MoneroOutputWallet)" class="member-name-link">onOutputReceived</a><wbr>(<a href="../MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a>&nbsp;output)</code></div>
+<div class="col-last even-row-color">
 <div class="block">Invoked 3 times per received output: once when unconfirmed, once when confirmed, and
  once when unlocked.</div>
 </div>
-<div class="col-first even-row-color"><code>void</code></div>
-<div class="col-second even-row-color"><span class="type-name-label">MoneroWalletListener.</span><code><a href="../MoneroWalletListener.html#onOutputSpent(monero.wallet.model.MoneroOutputWallet)" class="member-name-link">onOutputSpent</a><wbr>(<a href="../MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a>&nbsp;output)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>void</code></div>
-<div class="col-second odd-row-color"><span class="type-name-label">MoneroWalletListenerI.</span><code><a href="../MoneroWalletListenerI.html#onOutputSpent(monero.wallet.model.MoneroOutputWallet)" class="member-name-link">onOutputSpent</a><wbr>(<a href="../MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a>&nbsp;output)</code></div>
-<div class="col-last odd-row-color">
+<div class="col-second odd-row-color"><span class="type-name-label">MoneroWalletListener.</span><code><a href="../MoneroWalletListener.html#onOutputSpent(monero.wallet.model.MoneroOutputWallet)" class="member-name-link">onOutputSpent</a><wbr>(<a href="../MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a>&nbsp;output)</code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>void</code></div>
+<div class="col-second even-row-color"><span class="type-name-label">MoneroWalletListenerI.</span><code><a href="../MoneroWalletListenerI.html#onOutputSpent(monero.wallet.model.MoneroOutputWallet)" class="member-name-link">onOutputSpent</a><wbr>(<a href="../MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a>&nbsp;output)</code></div>
+<div class="col-last even-row-color">
 <div class="block">Invoked twice per spent output: once when confirmed and once when unlocked.</div>
 </div>
 </div>
