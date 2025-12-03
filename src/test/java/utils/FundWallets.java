@@ -37,7 +37,7 @@ public class FundWallets {
    * @param numSubaddressesPerAccount is the number of subaddresses to fund in each account (num accounts * num subaddresses must be less than or equal to 16) // TODO: support funding more subaddresses
    */
   public static void fundWallets(MoneroWallet srcWallet, int numWallets, int numAccounts, int numSubaddressesPerAccount) {
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(srcWallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(srcWallet);
     for (int i = 0; i < NUM_WALLETS; i++) {
       
       // create wallet and create and collect subaddresses

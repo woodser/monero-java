@@ -532,7 +532,9 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   @Override
   public List<String> getTxHexes(Collection<String> txHashes, Boolean prune) {
     List<String> hexes = new ArrayList<String>();
-    for (MoneroTx tx : getTxs(txHashes, prune)) hexes.add(Boolean.TRUE.equals(prune) ? tx.getPrunedHex() : tx.getFullHex());
+    for (MoneroTx tx : getTxs(txHashes, prune)) {
+      hexes.add(tx.getPrunedHex() == null ? tx.getFullHex() : tx.getPrunedHex()); // tx may be pruned regardless of configuration
+    }
     return hexes;
   }
 

@@ -524,6 +524,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       checkReserveProof(getPrimaryAddress(), "", ""); // TODO (monero-project): provide better way to know if wallet rpc is connected to daemon
       throw new RuntimeException("check reserve expected to fail");
     } catch (MoneroError e) {
+      if (e.getCode() == -13) throw e; // no wallet file
       return !e.getMessage().contains("Failed to connect to daemon");
     }
   }
@@ -3186,7 +3187,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       isOutgoing = true;
       tx.setIsConfirmed(false);
       tx.setInTxPool(false);
-      tx.setIsRelayed(true);
+      tx.setIsRelayed(false);
       tx.setRelay(true);
       tx.setIsFailed(true);
       tx.setIsMinerTx(false);

@@ -36,9 +36,6 @@ public class TestSampleCode {
   @BeforeAll
   public static void setUpBeforeClass() throws Exception {
     
-    // all wallets need to wait for txs to confirm to reliably sync
-    TestUtils.WALLET_TX_TRACKER.reset();
-    
     // pre-create test wallet
     MoneroWalletRpc wallet = TestUtils.getWalletRpc();
     wallet.close();
@@ -100,7 +97,7 @@ public class TestSampleCode {
     List<MoneroTxWallet> txs = walletRpc.getTxs();          // get transactions containing transfers to/from the wallet
     
     // send funds from RPC wallet to full wallet
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(walletRpc);                                     // *** REMOVE FROM README SAMPLE ***
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(walletRpc);                                     // *** REMOVE FROM README SAMPLE ***
     TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(walletRpc, 0, null, new BigInteger("250000000000")); // *** REMOVE FROM README SAMPLE ***
     MoneroTxWallet createdTx = walletRpc.createTx(new MoneroTxConfig()
             .setAccountIndex(0)

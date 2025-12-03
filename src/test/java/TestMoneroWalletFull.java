@@ -31,6 +31,7 @@ import monero.wallet.model.MoneroOutputWallet;
 import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
+import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
 import monero.wallet.model.MoneroWalletListener;
@@ -120,7 +121,8 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   
   @Override
   public void closeWallet(MoneroWallet wallet, boolean save) {
-    wallet.close(save);
+    if (wallet instanceof MoneroWalletRpc) TestUtils.stopWalletRpcProcess((MoneroWalletRpc) wallet);
+    else wallet.close(save);
   }
   
   @Override
@@ -388,14 +390,14 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     String walletName = GenUtils.getUUID();
     MoneroWalletRpc walletRpc = TestUtils.getWalletRpc();
     walletRpc.createWallet(new MoneroWalletConfig().setPath(walletName).setPassword(TestUtils.WALLET_PASSWORD).setSeed(TestUtils.SEED).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
-    walletRpc.sync();
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(walletRpc);
     BigInteger balance = walletRpc.getBalance();
     String outputsHex = walletRpc.exportOutputs();
     walletRpc.close(true);
     
     // open as full wallet
     MoneroWalletFull walletFull = MoneroWalletFull.openWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_RPC_LOCAL_WALLET_DIR + "/" + walletName).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setServerUri(TestUtils.DAEMON_RPC_URI).setServerUsername(TestUtils.DAEMON_RPC_USERNAME).setServerPassword(TestUtils.DAEMON_RPC_PASSWORD));
-    walletFull.sync();
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(walletFull);
     assertEquals(TestUtils.SEED, walletFull.getSeed());
     assertEquals(TestUtils.ADDRESS, walletFull.getPrimaryAddress());
     assertEquals(balance, walletFull.getBalance());
@@ -423,7 +425,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     assertEquals(TestUtils.ADDRESS, walletRpc.getPrimaryAddress());
     assertEquals(balance, walletRpc.getBalance());
     assertEquals(outputsHex.length(), walletRpc.exportOutputs().length());
-    walletRpc.close(true);
+    walletRpc.close(true); // TODO: this will not get called if there was an error above, leaving the wallet open
   }
   
   // Is compatible with monero-wallet-rpc outputs and offline transaction signing
@@ -433,8 +435,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     assumeTrue(!LITE_MODE && (TEST_NON_RELAYS || TEST_RELAYS));
     
     // create view-only wallet in wallet rpc process
-    MoneroWalletRpc viewOnlyWallet = TestUtils.startWalletRpcProcess();
-    viewOnlyWallet.createWallet(new MoneroWalletConfig().setPath(GenUtils.getUUID()).setPassword(TestUtils.WALLET_PASSWORD).setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
+    MoneroWalletRpc viewOnlyWallet = TestUtils.createWalletRpc(new MoneroWalletConfig().setPath(GenUtils.getUUID()).setPassword(TestUtils.WALLET_PASSWORD).setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
     viewOnlyWallet.sync();
     
     // create offline full wallet
@@ -456,8 +457,8 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     
     // create participants with full wallet and monero-wallet-rpc
     List<MoneroWallet> participants = new ArrayList<MoneroWallet>();
-    participants.add(TestUtils.startWalletRpcProcess().createWallet(new MoneroWalletConfig().setPath(GenUtils.getUUID()).setPassword(TestUtils.WALLET_PASSWORD)));
-    participants.add(TestUtils.startWalletRpcProcess().createWallet(new MoneroWalletConfig().setPath(GenUtils.getUUID()).setPassword(TestUtils.WALLET_PASSWORD)));
+    participants.add(TestUtils.createWalletRpc(new MoneroWalletConfig().setPath(GenUtils.getUUID()).setPassword(TestUtils.WALLET_PASSWORD)));
+    participants.add(TestUtils.createWalletRpc(new MoneroWalletConfig().setPath(GenUtils.getUUID()).setPassword(TestUtils.WALLET_PASSWORD)));
     participants.add(createWallet(new MoneroWalletConfig()));
     
     // test multisig
@@ -470,10 +471,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       catch (MoneroError e) { }
       
       // save and close participants
-      if (participants.get(0) instanceof MoneroWalletRpc) TestUtils.stopWalletRpcProcess((MoneroWalletRpc) participants.get(0));
-      else participants.get(0).close(true); // multisig tests might restore wallet from seed
-      TestUtils.stopWalletRpcProcess((MoneroWalletRpc) participants.get(1));
-      closeWallet(participants.get(2), true);
+      for (MoneroWallet participant : participants) closeWallet(participant, true);
     }
   };
   
@@ -597,6 +595,9 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   private void testSyncSeed(Long startHeight, Long restoreHeight, boolean skipGtComparison, boolean testPostSyncNotifications) {
     assertTrue(daemon.isConnected(), "Not connected to daemon");
     if (startHeight != null && restoreHeight != null) assertTrue(startHeight <= TestUtils.FIRST_RECEIVE_HEIGHT || restoreHeight <= TestUtils.FIRST_RECEIVE_HEIGHT);
+
+    // wait for txs to clear pool
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     
     // create wallet from seed
     MoneroWalletFull wallet = createWallet(new MoneroWalletConfig().setSeed(TestUtils.SEED).setRestoreHeight(restoreHeight), false);
@@ -862,6 +863,15 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   // Is equal to the RPC wallet.
   @Test
   public void testWalletEqualityRpc() {
+
+    // wait for txs to clear pool
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(TestUtils.getWalletRpc(), wallet);
+
+    // TODO: rescanning spent outputs is necessary for equality test to mark as spent/unspent correctly
+    wallet.rescanSpent();
+    TestUtils.getWalletRpc().rescanSpent();
+
+    // compare wallets based on on-chain data
     WalletEqualityUtils.testWalletEqualityOnChain(TestUtils.getWalletRpc(), wallet);
   }
   
@@ -1479,8 +1489,16 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       assertNotNull(walletTesterPrevHeight);
       assertNotNull(prevOutputReceived);
       assertNotNull(prevOutputSpent);
-      BigInteger balance = incomingTotal.subtract(outgoingTotal);
-      assertEquals(balance, wallet.getBalance());
+      BigInteger expectedBalance = incomingTotal.subtract(outgoingTotal);
+
+      // output notifications do not include pool fees or outgoing amount
+      BigInteger poolSpendAmount = BigInteger.ZERO;
+      for (MoneroTxWallet poolTx : wallet.getTxs(new MoneroTxQuery().setInTxPool(true))) {
+        poolSpendAmount = poolSpendAmount.add(poolTx.getFee()).add(poolTx.getOutgoingAmount() == null ? BigInteger.ZERO : poolTx.getOutgoingAmount());
+      }
+      expectedBalance = expectedBalance.subtract(poolSpendAmount);
+
+      assertEquals(expectedBalance, wallet.getBalance());
       assertEquals(prevBalance, wallet.getBalance());
       assertEquals(prevUnlockedBalance, wallet.getUnlockedBalance());
     }
@@ -1939,8 +1957,8 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   
   @Override
   @Test
-  public void testSyncWithPoolSubmitAndDiscard() {
-    super.testSyncWithPoolSubmitAndDiscard();
+  public void testSyncWithPoolSubmitAndFlush() {
+    super.testSyncWithPoolSubmitAndFlush();
   }
   
   @Override

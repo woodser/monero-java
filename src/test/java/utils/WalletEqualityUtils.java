@@ -8,8 +8,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
@@ -40,16 +42,21 @@ public class WalletEqualityUtils {
    * @param w2 a wallet to compare
    */
   public static void testWalletEqualityOnChain(MoneroWallet w1, MoneroWallet w2) {
-    TestUtils.WALLET_TX_TRACKER.reset(); // all wallets need to wait for txs to confirm to reliably sync
     
     // wait for relayed txs associated with wallets to clear pool
     assertEquals(w1.isConnectedToDaemon(), w2.isConnectedToDaemon());
-    if (w1.isConnectedToDaemon()) TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(w1, w2);
-    
-    // sync the wallets until same height
-    while (w1.getHeight() != w2.getHeight()) {
+    if (w1.isConnectedToDaemon()) {
+
+      // sync wallets until same height
       w1.sync();
       w2.sync();
+      while (w1.getHeight() != w2.getHeight()) {
+        w1.sync();
+        w2.sync();
+      }
+
+      // wait for txs to clear the pool
+      TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(w1, w2);
     }
     
     // test that wallets are equal using only on-chain data
@@ -61,7 +68,7 @@ public class WalletEqualityUtils {
     MoneroTxQuery txQuery = new MoneroTxQuery().setIsConfirmed(true);
     testTxWalletsEqualOnChain(w1.getTxs(txQuery), w2.getTxs(txQuery));
     txQuery.setIncludeOutputs(true);
-    testTxWalletsEqualOnChain(w1.getTxs(txQuery), w2.getTxs(txQuery));  // fetch and compare outputs
+    testTxWalletsEqualOnChain(w1.getTxs(txQuery), w2.getTxs(txQuery)); // fetch and compare outputs
     testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
     assertEquals(w1.getBalance(), w2.getBalance());
     assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
@@ -134,7 +141,21 @@ public class WalletEqualityUtils {
     assertEquals(subaddress1, subaddress2);
   }
   
-  private static void testTxWalletsEqualOnChain(List<MoneroTxWallet> txs1, List<MoneroTxWallet> txs2) {
+  public static void testTxWalletsEqualOnChain(List<MoneroTxWallet> txs1, List<MoneroTxWallet> txs2) {
+
+    // remove pool or failed txs for comparison
+    txs1 = new ArrayList<MoneroTxWallet>(txs1);
+    Set<MoneroTxWallet> toRemove = new HashSet<MoneroTxWallet>();
+    for (MoneroTxWallet tx : txs1) {
+      if (Boolean.TRUE.equals(tx.inTxPool()) || Boolean.TRUE.equals(tx.isFailed())) toRemove.add(tx);
+    }
+    txs1.removeAll(toRemove);
+    txs2 = new ArrayList<MoneroTxWallet>(txs2);
+    toRemove.clear();
+    for (MoneroTxWallet tx : txs2) {
+      if (Boolean.TRUE.equals(tx.inTxPool()) || Boolean.TRUE.equals(tx.isFailed())) toRemove.add(tx);
+    }
+    txs2.removeAll(toRemove);
     
     // nullify off-chain data for comparison
     List<MoneroTxWallet> allTxs = new ArrayList<MoneroTxWallet>(txs1);
@@ -160,7 +181,7 @@ public class WalletEqualityUtils {
             transferCachedInfo(tx2, tx1);
           }
           
-          // test tx equality by merging
+          // test tx equality
           assertTrue(TestUtils.txsMergeable(tx1, tx2), "Txs are not mergeable");
           assertEquals(tx1, tx2);
           found = true;
