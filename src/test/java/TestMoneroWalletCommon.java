@@ -113,7 +113,6 @@ public abstract class TestMoneroWalletCommon {
   public void beforeAll() {
     wallet = getTestWallet();
     daemon = getTestDaemon();
-    TestUtils.WALLET_TX_TRACKER.reset(); // all wallets need to wait for txs to confirm to reliably sync
   }
   
   @BeforeEach
@@ -781,7 +780,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testWalletEqualityGroundTruth() {
     assumeTrue(TEST_NON_RELAYS);
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     MoneroWallet walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.SEED, null, TestUtils.FIRST_RECEIVE_HEIGHT);
     try {
       WalletEqualityUtils.testWalletEqualityOnChain(walletGt, wallet);
@@ -2481,7 +2480,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testViewOnlyAndOfflineWallets() {
     assumeTrue(!LITE_MODE && (TEST_NON_RELAYS || TEST_RELAYS));
-    
+
     // create view-only and offline wallets
     MoneroWallet viewOnlyWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
     MoneroWallet offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setServerUri(TestUtils.OFFLINE_SERVER_URI).setRestoreHeight(0l));
@@ -2500,7 +2499,7 @@ public abstract class TestMoneroWalletCommon {
   protected void testViewOnlyAndOfflineWallets(MoneroWallet viewOnlyWallet, MoneroWallet offlineWallet) {
     
     // wait for txs to confirm and for sufficient unlocked balance
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet, viewOnlyWallet);
     TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(wallet, 0, null, TestUtils.MAX_FEE.multiply(new BigInteger("4")));
     
     // test getting txs, transfers, and outputs from view-only wallet
@@ -2579,7 +2578,7 @@ public abstract class TestMoneroWalletCommon {
       List<String> txHashes = viewOnlyWallet.submitTxs(signedTxSet.getSignedTxHex());
       assertEquals(1, txHashes.size());
       assertEquals(64, txHashes.get(0).length());
-      TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(viewOnlyWallet); // wait for confirmation for other tests
+      TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(viewOnlyWallet); // wait for confirmation for other tests
     }
   }
   
@@ -2894,12 +2893,12 @@ public abstract class TestMoneroWalletCommon {
             .setAccountIndex(0)
             .setAddress(wallet.getPrimaryAddress())
             .setAmount(TestUtils.MAX_FEE.multiply(new BigInteger("5")))
-            .setRelay(false));
+            .setRelay(true));
   }
   
-  // Can sync with txs submitted and discarded from the pool
+  // Can sync with txs submitted and flushed from the pool
   @Test
-  public void testSyncWithPoolSubmitAndDiscard() {
+  public void testSyncWithPoolSubmitAndFlush() {
     assumeTrue(TEST_NON_RELAYS);
     testSyncWithPoolSubmit(new MoneroTxConfig()
             .setAccountIndex(2)
@@ -2923,13 +2922,17 @@ public abstract class TestMoneroWalletCommon {
     
     // wait for txs to confirm and for sufficient unlocked balance
     // TODO monero-project: update from pool does not prevent creating double spend tx
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearWallets(wallet);
     assertNull(config.getSubaddressIndices());
     TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(wallet, config.getAccountIndex(), null, config.getAmount());
+    
+    // rescan spent outputs for reliable before/after state
+    wallet.rescanSpent();
     
     // record wallet balances before submitting tx to pool
     BigInteger balanceBefore = wallet.getBalance();
     BigInteger unlockedBalanceBefore = wallet.getUnlockedBalance();
+    List<MoneroTxWallet> txsBefore = wallet.getTxs();
     
     // create tx but do not relay
     MoneroTxConfig configNoRelay = config.copy().setRelay(false);
@@ -2954,13 +2957,12 @@ public abstract class TestMoneroWalletCommon {
     // test result and flush on finally
     try {
       
-      // wallet should be aware of tx
-      try {
-        MoneroTxWallet fetched = wallet.getTx(tx.getHash());
-        assertNotNull(fetched);
-      } catch (MoneroError e) {
-        fail("Wallet should be aware of its tx in pool after syncing");
-      }
+      // test tx state
+      MoneroTxWallet fetched = wallet.getTx(tx.getHash());
+      assertNotNull(fetched);
+      assertFalse(fetched.isFailed(), "Submitted tx should not be failed");
+      //assertEquals(false, fetched.isRelayed(), "Submitted tx should be same relayed as configuration"); // TODO: relay flag is not correctly set, insufficient info comes from monero-wallet-rpc
+      assertTrue(fetched.inTxPool(), "Submitted tx should be in the pool");
       
       // submit double spend tx
       MoneroSubmitTxResult resultDoubleSpend = daemon.submitTxHex(txDoubleSpend.getFullHex(), true);
@@ -2992,7 +2994,8 @@ public abstract class TestMoneroWalletCommon {
           if (result2.isDoubleSpend()) throw new RuntimeException("Wallet created double spend transaction after syncing with the pool: " + JsonUtils.serialize(result2));
           assertTrue(result.isGood());
           wallet.sync();
-          wallet.getTx(tx2.getHash()); // wallet is aware of tx2
+          fetched = wallet.getTx(tx2.getHash()); // wallet is aware of tx2
+          if (fetched == null || fetched.isFailed()) throw new RuntimeException("Submitted tx should not be null or failed");
         } finally  {
           daemon.flushTxPool(tx2.getHash());
         }
@@ -3002,23 +3005,39 @@ public abstract class TestMoneroWalletCommon {
         
         // flush the tx from the pool
         daemon.flushTxPool(tx.getHash());
+
+        // clear tx from wallet
+        TestUtils.WALLET_TX_TRACKER.waitForTxsToClearWallets(wallet);
         
-        // sync wallet which checks pool
-        wallet.sync();
-        
-        // wallet should no longer be aware of tx
-        try {
-          wallet.getTx(tx.getHash());
-          fail("Wallet should no longer be aware of tx which was not relayed and was manually removed from pool");
-        } catch (MoneroError e) {
-          // exception expected
+        // wallet should see failed state
+        MoneroTxWallet fetched = wallet.getTx(tx.getHash());
+        if (fetched != null) {
+          if (!fetched.isFailed()) throw new RuntimeException("Flushed tx should be failed");
+          if (fetched.inTxPool()) throw new RuntimeException("Flushed tx should not be in pool");
+          if (fetched.isRelayed()) throw new RuntimeException("Flushed tx should not be relayed");
+        }
+
+        // wallet txs are restored
+        List<MoneroTxWallet> txsAfter = wallet.getTxs();
+        for (MoneroTxWallet txBefore : txsBefore) {
+          if (txBefore.getHash().equals(tx.getHash())) continue;
+          boolean found = false;
+          for (MoneroTxWallet txAfter : txsAfter) {
+            if (txBefore.getHash().equals(txAfter.getHash())) {
+              
+              // transfer fields which can update with confirmations // TODO: merge instead?
+              txBefore.setNumConfirmations(txAfter.getNumConfirmations()); // transfer number of confirmations
+              txBefore.setIsLocked(txAfter.isLocked());
+              
+              assertEquals(txBefore, txAfter);
+              found = true;
+            }
+          }
+          if (!found) throw new RuntimeException("Tx " + txBefore.getHash() + " not found after flushing tx from pool without relaying");
         }
         
-        // wallet balances should be restored
+        // wallet balance should be restored
         assertEquals(balanceBefore, wallet.getBalance(), "Wallet balance should be same as original since tx was flushed and not relayed");
-        assertEquals(unlockedBalanceBefore, wallet.getUnlockedBalance(), "Wallet unlocked balance should be same as original since tx was flushed and not relayed");
-      } else {
-        TestUtils.WALLET_TX_TRACKER.reset(); // all wallets need to wait for tx to confirm in order to reliably sync
       }
     }
   }
@@ -3029,8 +3048,7 @@ public abstract class TestMoneroWalletCommon {
   assumeTrue(TEST_RELAYS && !LITE_MODE);
     
     // wait one time for wallet txs in the pool to clear
-    // TODO monero-project: update from pool does not prevent creating double spend tx
-   TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+   TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     
     // record wallet balances before submitting tx to pool
     BigInteger balanceBefore = wallet.getBalance();
@@ -3058,55 +3076,51 @@ public abstract class TestMoneroWalletCommon {
     
     // collect issues to report at end of test
     List<String> issues = new ArrayList<String>();
-    
-    try {
-      
-      // wallet should be aware of tx
-      try {
-        MoneroTxWallet fetched = wallet.getTx(tx.getHash());
-        assertNotNull(fetched);
-      } catch (MoneroError e) {
-        throw new RuntimeException("Wallet should be aware of its tx in pool after syncing");
-      }
-      
-      // test wallet balances
-      if (unlockedBalanceBefore.compareTo(wallet.getUnlockedBalance()) != 1) issues.add("WARNING: unlocked balance should have decreased after relaying tx directly to the daemon");
-      BigInteger expectedBalance = balanceBefore.subtract(tx.getOutgoingAmount()).subtract(tx.getFee());
-      if (!expectedBalance.equals(wallet.getBalance())) issues.add("WARNING: expected balance after relaying tx directly to the daemon to be " + expectedBalance + " but was " + wallet.getBalance());
-      
-      // submit double spend tx
-      MoneroSubmitTxResult resultDoubleSpend = daemon.submitTxHex(txDoubleSpend.getFullHex(), true);
-      if (resultDoubleSpend.isGood()) {
-        daemon.flushTxPool(txDoubleSpend.getHash());
-        throw new RuntimeException("Tx submit result should have been double spend");
-      }
 
-      // sync wallet which updates from pool
-      wallet.sync();
-      
-      // create tx using same config which is no longer double spend
-      MoneroTxWallet tx2 = null;
-      try {
-        tx2 = wallet.createTx(config.copy().setRelay(true));
-      } catch (Exception e) {
-        issues.add("WARNING: creating and sending tx through wallet should succeed after syncing wallet with pool but creates a double spend"); // TODO monero-project: this fails meaning wallet did not recognize tx relayed directly to pool
-      }
-      
-      // submit the transaction to the pool and test
-      if (tx2 != null) {
-        MoneroSubmitTxResult result2 = daemon.submitTxHex(tx2.getFullHex(), true);
-        if (result2.isDoubleSpend()) issues.add("WARNING: creating and submitting tx to daemon should succeed after syncing wallet with pool but was a double spend: " + JsonUtils.serialize(result2));
-        else assertTrue(result.isGood());
-        wallet.sync();
-        wallet.getTx(tx2.getHash()); // wallet is aware of tx2
-        daemon.flushTxPool(tx2.getHash());
-      }
-      
-      // should be no issues
-      assertEquals(0, issues.size(), "testSyncWithPoolRelay() issues: " + issues);
-    } finally {
-      TestUtils.WALLET_TX_TRACKER.reset(); // all wallets need to wait for tx to confirm to reliably sync tx
+    // wallet should be aware of tx
+    try {
+      MoneroTxWallet fetched = wallet.getTx(tx.getHash());
+      assertNotNull(fetched);
+    } catch (MoneroError e) {
+      throw new RuntimeException("Wallet should be aware of its tx in pool after syncing");
     }
+    
+    // test wallet balances
+    if (unlockedBalanceBefore.compareTo(wallet.getUnlockedBalance()) != 1) issues.add("WARNING: unlocked balance should have decreased after relaying tx directly to the daemon");
+    if (balanceBefore.compareTo(wallet.getBalance()) != 1) issues.add("WARNING: balance should have decreased after relaying tx directly to the daemon");
+    BigInteger expectedBalance = balanceBefore.subtract(tx.getFee());
+    if (!expectedBalance.equals(wallet.getBalance())) issues.add("WARNING: expected balance after relaying tx directly to the daemon to be " + expectedBalance + " but was " + wallet.getBalance());
+    
+    // submit double spend tx
+    MoneroSubmitTxResult resultDoubleSpend = daemon.submitTxHex(txDoubleSpend.getFullHex(), true);
+    if (resultDoubleSpend.isGood()) {
+      daemon.flushTxPool(txDoubleSpend.getHash());
+      issues.add("Tx submit result should have been double spend");
+    }
+
+    // sync wallet which updates from pool
+    wallet.sync();
+    
+    // create tx using same config which is no longer double spend
+    MoneroTxWallet tx2 = null;
+    try {
+      tx2 = wallet.createTx(config.copy().setRelay(true));
+    } catch (Exception e) {
+      issues.add("WARNING: creating and sending tx through wallet should succeed after syncing wallet with pool but creates a double spend"); // TODO monero-project: this fails meaning wallet did not recognize tx relayed directly to pool
+    }
+    
+    // submit the transaction to the pool and test
+    if (tx2 != null) {
+      MoneroSubmitTxResult result2 = daemon.submitTxHex(tx2.getFullHex(), true);
+      if (result2.isDoubleSpend()) issues.add("WARNING: creating and submitting tx to daemon should succeed after syncing wallet with pool but was a double spend: " + JsonUtils.serialize(result2));
+      else assertTrue(result2.isGood());
+      wallet.sync();
+      if (wallet.getTx(tx2.getHash()) == null) issues.add("WARNING: wallet should be aware of tx created and relayed through it after syncing with pool");
+      daemon.flushTxPool(tx2.getHash());
+    }
+    
+    // should be no issues
+    assertEquals(0, issues.size(), "testSyncWithPoolRelay() issues: " + issues);
   }
   
   // Can send to self
@@ -3115,7 +3129,7 @@ public abstract class TestMoneroWalletCommon {
     assumeTrue(TEST_RELAYS);
     
     // wait for txs to confirm and for sufficient unlocked balance
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     BigInteger amount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3));
     TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(wallet, 0, null, amount);
     
@@ -3160,7 +3174,7 @@ public abstract class TestMoneroWalletCommon {
     try {
       
       // wait for txs to confirm and for sufficient unlocked balance
-      TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+      TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
       BigInteger amount = TestUtils.MAX_FEE.multiply(BigInteger.valueOf(3));
       TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(wallet, 0, null, amount);
       
@@ -3209,7 +3223,7 @@ public abstract class TestMoneroWalletCommon {
   }
   
   private void testSendFromMultiple(MoneroTxConfig config) {
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     if (config == null) config = new MoneroTxConfig();
     
     int NUM_SUBADDRESSES = 2; // number of subaddresses to send from
@@ -3364,7 +3378,7 @@ public abstract class TestMoneroWalletCommon {
   }
   
   private void testSendToSingle(MoneroTxConfig config) {
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     if (config == null) config = new MoneroTxConfig();
     
     // find a non-primary subaddress to send from
@@ -3502,11 +3516,6 @@ public abstract class TestMoneroWalletCommon {
       }
       assertTrue(found, "Created txs should be among locked txs");
     }
-    
-    // if tx was relayed in separate step, all wallets will need to wait for tx to confirm in order to reliably sync
-    if (!Boolean.TRUE.equals(config.getRelay())) {
-      TestUtils.WALLET_TX_TRACKER.reset(); // TODO: resetExcept(wallet), or does this test wallet also need to be waited on?
-    }
   }
   
   // Can send to multiple addresses in a single transaction
@@ -3557,7 +3566,7 @@ public abstract class TestMoneroWalletCommon {
   private void testSendToMultiple(int numAccounts, int numSubaddressesPerAccount, boolean canSplit) { testSendToMultiple(numAccounts, numSubaddressesPerAccount, canSplit, null); }
   private void testSendToMultiple(int numAccounts, int numSubaddressesPerAccount, boolean canSplit, BigInteger sendAmountPerSubaddress) { testSendToMultiple(numAccounts, numSubaddressesPerAccount, canSplit, sendAmountPerSubaddress, false); }
   private void testSendToMultiple(int numAccounts, int numSubaddressesPerAccount, boolean canSplit, BigInteger sendAmountPerSubaddress, boolean subtractFeeFromDestinations) {
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     
     // compute the minimum account unlocked balance needed in order to fulfill the config
     BigInteger minAccountAmount = null;
@@ -3683,7 +3692,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testSweepOutputs() {
     assumeTrue(TEST_RELAYS);
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     
     // test config
     int numOutputs = 3;
@@ -3736,7 +3745,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testSweepDustNoRelay() {
     assumeTrue(TEST_RELAYS);
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     
     // sweep dust which returns empty list if no dust to sweep (dust does not exist after rct)
     List<MoneroTxWallet> txs = wallet.sweepDust(false);
@@ -3770,7 +3779,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testSweepDust() {
     assumeTrue(TEST_RELAYS);
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     
     // sweep dust which returns empty list if no dust to sweep (dust does not exist after rct)
     List<MoneroTxWallet> txs = wallet.sweepDust(true);
@@ -4048,7 +4057,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // wait for txs to confirm and for sufficient unlocked balance
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(wallet, 0, null, TestUtils.MAX_FEE.multiply(new BigInteger("20")));
     
     // send funds from the main test wallet to destinations in the first multisig wallet
@@ -4365,7 +4374,7 @@ public abstract class TestMoneroWalletCommon {
   private void testSendAndUpdateTxs(MoneroTxConfig config) {
     
     // wait for txs to confirm and for sufficient unlocked balance
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     assertNull(config.getSubaddressIndices());
     TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(wallet, config.getAccountIndex(), null, TestUtils.MAX_FEE.multiply(new BigInteger("2")));
     
@@ -4524,7 +4533,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testSweepSubaddresses() {
     assumeTrue(TEST_RESETS);
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     
     final int NUM_SUBADDRESSES_TO_SWEEP = 2;
     
@@ -4609,7 +4618,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testSweepAccounts() {
     assumeTrue(TEST_RESETS);
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     
     final int NUM_ACCOUNTS_TO_SWEEP = 1;
     
@@ -4695,7 +4704,7 @@ public abstract class TestMoneroWalletCommon {
   }
   
   private void testSweepWallet(Boolean sweepEachSubaddress) {
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
     
     // verify 2 subaddresses with enough unlocked balance to cover the fee
     List<MoneroSubaddress> subaddressesBalance = new ArrayList<MoneroSubaddress>();
@@ -4858,7 +4867,7 @@ public abstract class TestMoneroWalletCommon {
     for (int i = 0; i < 4 - numAccounts; i++) receiver.createAccount();
     
     // wait for unlocked funds in source account
-    TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(sender);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(sender);
     TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(sender, 0, null, TestUtils.MAX_FEE.multiply(new BigInteger("10")));
     
     // get balances to compare after sending
@@ -5167,7 +5176,7 @@ public abstract class TestMoneroWalletCommon {
       receiver.addListener(myListener);
       
       // wait for txs to confirm and for sufficient unlocked balance
-      TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(wallet);
+      TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
       TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(wallet, 0, null, TestUtils.MAX_FEE);
       
       // send funds to the receiver

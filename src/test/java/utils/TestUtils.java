@@ -13,8 +13,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+
+import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroRpcError;
 import monero.common.MoneroUtils;
@@ -151,13 +154,62 @@ public class TestUtils {
     // return cached wallet rpc
     return walletRpc;
   }
+
+  public static MoneroWalletRpc openWalletRpc(MoneroWalletConfig config) {
+
+    // assign defaults
+    if (config == null) config = new MoneroWalletConfig();
+    if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
+    if (config.getServer() == null && config.getConnectionManager() == null) config.setServer(TestUtils.getDaemonRpc().getRpcConnection());
+    
+    // create client connected to internal monero-wallet-rpc process
+    MoneroWalletRpc wallet = TestUtils.startWalletRpcProcess(config.getServerUri(), config.getServerUsername(), config.getServerPassword());
+    
+    // open wallet
+    try {
+      wallet.stopSyncing();
+      wallet.openWallet(config);
+      wallet.setDaemonConnection(wallet.getDaemonConnection(), true, null); // set daemon as trusted
+      if (wallet.isConnectedToDaemon()) wallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
+      return wallet;
+    } catch (MoneroError e) {
+      try { TestUtils.stopWalletRpcProcess(wallet); } catch (Exception e2) { throw new RuntimeException(e2); }
+      throw e;
+    }
+  }
+
+  public static MoneroWalletRpc createWalletRpc(MoneroWalletConfig config) {
+
+    // assign defaults
+    if (config == null) config = new MoneroWalletConfig();
+    boolean random = config.getSeed() == null && config.getPrimaryAddress() == null;
+    if (config.getPath() == null) config.setPath(UUID.randomUUID().toString());
+    if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
+    if (config.getRestoreHeight() == null && !random) config.setRestoreHeight(0l);
+    if (config.getServer() == null && config.getConnectionManager() == null) config.setServer(TestUtils.getDaemonRpc().getRpcConnection());
+    
+    // create client connected to internal monero-wallet-rpc process
+    MoneroWalletRpc wallet = TestUtils.startWalletRpcProcess(config.getServerUri(), config.getServerUsername(), config.getServerPassword());
+    
+    // create wallet
+    try {
+      wallet.stopSyncing();
+      wallet.createWallet(config);
+      wallet.setDaemonConnection(wallet.getDaemonConnection(), true, null); // set daemon as trusted
+      if (wallet.isConnectedToDaemon()) wallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
+      return wallet;
+    } catch (MoneroError e) {
+      try { TestUtils.stopWalletRpcProcess(wallet); } catch (Exception e2) { throw new RuntimeException(e2); }
+      throw e;
+    }
+  }
   
   /**
    * Start a monero-wallet-rpc process bound to the next available port.
    */
   public static Map<MoneroWalletRpc, Integer> WALLET_PORT_OFFSETS = new HashMap<MoneroWalletRpc, Integer>();
-  public static MoneroWalletRpc startWalletRpcProcess() { return TestUtils.startWalletRpcProcess(false); }
-  public static MoneroWalletRpc startWalletRpcProcess(boolean offline) {
+  public static MoneroWalletRpc startWalletRpcProcess() { return TestUtils.startWalletRpcProcess(null, null, null); }
+  public static MoneroWalletRpc startWalletRpcProcess(String daemonUri, String daemonUsername, String daemonPassword) {
     
     // get next available offset of ports to bind to
     int portOffset = 1;
@@ -171,9 +223,12 @@ public class TestUtils {
         "--rpc-login", TestUtils.WALLET_RPC_USERNAME + ":" + TestUtils.WALLET_RPC_PASSWORD,
         "--wallet-dir", TestUtils.WALLET_RPC_LOCAL_WALLET_DIR,
         "--rpc-access-control-origins", TestUtils.WALLET_RPC_ACCESS_CONTROL_ORIGINS));
+    boolean offline = TestUtils.OFFLINE_SERVER_URI.equals(daemonUri);
     if (offline) cmd.add("--offline");
-    else cmd.addAll(Arrays.asList("--daemon-address", TestUtils.DAEMON_RPC_URI));
-    if (TestUtils.DAEMON_RPC_USERNAME != null && !TestUtils.DAEMON_RPC_USERNAME.equals("")) cmd.addAll(Arrays.asList("--daemon-login", TestUtils.DAEMON_RPC_USERNAME + ":" + TestUtils.DAEMON_RPC_PASSWORD));
+    else if (daemonUri != null && !daemonUri.isEmpty()) {
+      cmd.addAll(Arrays.asList("--daemon-address", daemonUri));
+      if (daemonUsername != null && !daemonUsername.equals("")) cmd.addAll(Arrays.asList("--daemon-login", daemonUsername + ":" + daemonPassword));
+    }
     
     // start with zmq if enabled
     if (WALLET_RPC_ZMQ_ENABLED) {
@@ -198,7 +253,7 @@ public class TestUtils {
    * 
    * @param walletRpc - wallet created with internal monero-wallet-rpc process
    */
-  public static void stopWalletRpcProcess(MoneroWalletRpc walletRpc) throws InterruptedException {
+  public static void stopWalletRpcProcess(MoneroWalletRpc walletRpc) {
     WALLET_PORT_OFFSETS.remove(walletRpc);
     walletRpc.stopProcess();
   }

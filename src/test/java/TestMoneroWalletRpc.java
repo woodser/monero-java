@@ -50,7 +50,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
     // if full tests ran, wait for full wallet's pool txs to confirm
     if (TestMoneroWalletFull.FULL_TESTS_RUN) {
       MoneroWallet walletFull = TestUtils.getWalletFull();
-      TestUtils.WALLET_TX_TRACKER.waitForWalletTxsToClearPool(walletFull);
+      TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(walletFull);
       walletFull.close(true);
     }
   }
@@ -84,53 +84,12 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   protected MoneroWalletRpc openWallet(MoneroWalletConfig config) {
-    
-    // assign defaults
-    if (config == null) config = new MoneroWalletConfig();
-    if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
-    if (config.getServer() == null && config.getConnectionManager() == null) config.setServer(daemon.getRpcConnection());
-    
-    // create client connected to internal monero-wallet-rpc process
-    boolean offline = TestUtils.OFFLINE_SERVER_URI.equals(config.getServerUri());
-    MoneroWalletRpc wallet = TestUtils.startWalletRpcProcess(offline);
-    
-    // open wallet
-    try {
-      wallet.openWallet(config);
-      wallet.setDaemonConnection(wallet.getDaemonConnection(), true, null); // set daemon as trusted
-      if (wallet.isConnectedToDaemon()) wallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
-      return wallet;
-    } catch (MoneroError e) {
-      try { TestUtils.stopWalletRpcProcess(wallet); } catch (Exception e2) { throw new RuntimeException(e2); }
-      throw e;
-    }
+    return TestUtils.openWalletRpc(config);
   }
   
   @Override
   protected MoneroWalletRpc createWallet(MoneroWalletConfig config) {
-    
-    // assign defaults
-    if (config == null) config = new MoneroWalletConfig();
-    boolean random = config.getSeed() == null && config.getPrimaryAddress() == null;
-    if (config.getPath() == null) config.setPath(UUID.randomUUID().toString());
-    if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
-    if (config.getRestoreHeight() == null && !random) config.setRestoreHeight(0l);
-    if (config.getServer() == null && config.getConnectionManager() == null) config.setServer(daemon.getRpcConnection());
-    
-    // create client connected to internal monero-wallet-rpc process
-    boolean offline = MoneroUtils.parseUri(TestUtils.OFFLINE_SERVER_URI).toString().equals(config.getServerUri());
-    MoneroWalletRpc wallet = TestUtils.startWalletRpcProcess(offline);
-    
-    // create wallet
-    try {
-      wallet.createWallet(config);
-      wallet.setDaemonConnection(wallet.getDaemonConnection(), true, null); // set daemon as trusted
-      if (wallet.isConnectedToDaemon()) wallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
-      return wallet;
-    } catch (MoneroError e) {
-      try { TestUtils.stopWalletRpcProcess(wallet); } catch (Exception e2) { throw new RuntimeException(e2); }
-      throw e;
-    }
+    return TestUtils.createWalletRpc(config);
   }
   
   @Override
@@ -873,8 +832,8 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   @Test
-  public void testSyncWithPoolSubmitAndDiscard() {
-    super.testSyncWithPoolSubmitAndDiscard();
+  public void testSyncWithPoolSubmitAndFlush() {
+    super.testSyncWithPoolSubmitAndFlush();
   }
   
   @Override
