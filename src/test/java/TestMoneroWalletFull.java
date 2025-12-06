@@ -3,7 +3,6 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -15,7 +14,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroUtils;
@@ -26,12 +24,8 @@ import monero.wallet.MoneroWalletFull;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroMultisigInitResult;
-import monero.wallet.model.MoneroOutputQuery;
-import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroSyncResult;
 import monero.wallet.model.MoneroTransfer;
 import monero.wallet.model.MoneroTransferQuery;
-import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
 import monero.wallet.model.MoneroWalletListener;
@@ -45,7 +39,6 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import utils.StartMining;
 import utils.TestUtils;
 import utils.WalletEqualityUtils;
-import utils.WalletSyncPrinter;
 
 /**
  * Tests specific to the fully client-side wallet.
@@ -206,23 +199,6 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   
   // ------------------------------- BEGIN TESTS ------------------------------
   
-  // Can get the daemon's height
-  @Test
-  public void testDaemon() {
-    assumeTrue(TEST_NON_RELAYS);
-    assertTrue(wallet.isConnectedToDaemon());
-    long daemonHeight = wallet.getDaemonHeight();
-    assertTrue(daemonHeight > 0);
-  }
-  
-  // Can get the daemon's max peer height
-  @Test
-  public void testGetDaemonMaxPeerHeight() {
-    assumeTrue(TEST_NON_RELAYS);
-    long height = ((MoneroWalletFull) wallet).getDaemonMaxPeerHeight();
-    assertTrue(height > 0);
-  }
-  
 //  @Test
 //  public void getApproximateChainHeight() {
 //    long height = wallet.getApproximateChainHeight();
@@ -366,19 +342,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     // recreate test wallet from keys
     String path = getRandomWalletPath();
     MoneroWalletFull walletKeys = createWallet(new MoneroWalletConfig().setPath(path).setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT));
-    try {
-      assertEquals(wallet.getSeed(), walletKeys.getSeed());
-      assertEquals(wallet.getPrimaryAddress(), walletKeys.getPrimaryAddress());
-      assertEquals(wallet.getPrivateViewKey(), walletKeys.getPrivateViewKey());
-      assertEquals(wallet.getPublicViewKey(), walletKeys.getPublicViewKey());
-      assertEquals(wallet.getPrivateSpendKey(), walletKeys.getPrivateSpendKey());
-      assertEquals(wallet.getPublicSpendKey(), walletKeys.getPublicSpendKey());
-      assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, walletKeys.getRestoreHeight());
-      assertTrue(walletKeys.isConnectedToDaemon());
-      assertFalse(walletKeys.isSynced());
-    } finally {
-      walletKeys.close();
-    }
+    testCreateWalletFromKeysJni(walletKeys);
   }
   
   // Is compatible with monero-wallet-rpc wallet files
@@ -475,87 +439,6 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     }
   };
   
-  // Can re-sync an existing wallet from scratch
-  @Test
-  @Disabled // TODO monero-project: cannot re-sync from lower block height after wallet saved
-  public void testResyncExisting() {
-    assertTrue(MoneroWalletFull.walletExists(TestUtils.WALLET_FULL_PATH));
-    MoneroWalletFull wallet = openWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_FULL_PATH).setServerUri(TestUtils.OFFLINE_SERVER_URI), false);
-    wallet.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
-    //long startHeight = TestUtils.TEST_RESTORE_HEIGHT;
-    long startHeight = 0;
-    SyncProgressTester progressTester = new SyncProgressTester(wallet, startHeight, wallet.getDaemonHeight());
-    wallet.setRestoreHeight(1);
-    MoneroSyncResult result = wallet.sync(1l, progressTester);
-    progressTester.onDone(wallet.getDaemonHeight());
-    
-    // test result after syncing
-    assertTrue(wallet.isConnectedToDaemon());
-    assertTrue(wallet.isSynced());
-    assertEquals(wallet.getDaemonHeight() - startHeight, (long) result.getNumBlocksFetched());
-    assertTrue(result.getReceivedMoney());
-    assertEquals(daemon.getHeight(), wallet.getHeight());
-    wallet.close(true);
-  }
-
-  // Can sync a wallet with a randomly generated seed
-  @Test
-  public void testSyncRandom() {
-    assumeTrue(TEST_NON_RELAYS);
-    assertTrue(daemon.isConnected(), "Not connected to daemon");
-
-    // create test wallet
-    MoneroWalletFull wallet = createWallet(new MoneroWalletConfig(), false);
-    long restoreHeight = daemon.getHeight();
-
-    // test wallet's height before syncing
-    assertEquals(TestUtils.getDaemonRpc().getRpcConnection(), wallet.getDaemonConnection());
-    assertEquals(restoreHeight, wallet.getDaemonHeight());
-    assertTrue(wallet.isConnectedToDaemon());
-    assertFalse(wallet.isSynced());
-    assertEquals(1, wallet.getHeight());
-    assertEquals(restoreHeight, wallet.getRestoreHeight());
-    assertEquals(daemon.getHeight(), wallet.getDaemonHeight());
-
-    // sync the wallet
-    SyncProgressTester progressTester = new SyncProgressTester(wallet, wallet.getRestoreHeight(), wallet.getDaemonHeight());
-    MoneroSyncResult result = wallet.sync(null, progressTester);
-    progressTester.onDone(wallet.getDaemonHeight());
-    
-    // test result after syncing
-    MoneroWalletFull walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, wallet.getSeed(), null, restoreHeight);
-    walletGt.sync();
-    try {
-      assertTrue(wallet.isConnectedToDaemon());
-      assertTrue(wallet.isSynced());
-      assertEquals(0, (long) result.getNumBlocksFetched());
-      assertFalse(result.getReceivedMoney());
-      assertEquals(daemon.getHeight(), wallet.getHeight());
-
-      // sync the wallet with default params
-      wallet.sync();
-      assertTrue(wallet.isSynced());
-      assertEquals(daemon.getHeight(), wallet.getHeight());
-      
-      // compare wallet to ground truth
-      testWalletEqualityOnChain(walletGt, wallet);
-    } finally {
-      if (walletGt != null) walletGt.close(true);
-      wallet.close();
-    }
-    
-    // attempt to sync unconnected wallet
-    wallet = createWallet(new MoneroWalletConfig().setServerUri(TestUtils.OFFLINE_SERVER_URI));
-    try {
-      wallet.sync();
-      fail("Should have thrown exception");
-    } catch (MoneroError e) {
-      assertEquals("Wallet is not connected to daemon", e.getMessage());
-    } finally {
-      wallet.close();
-    }
-  }
-  
   // Can sync a wallet created from seed from the genesis
   @Test
   public void testSyncSeedFromGenesis() {
@@ -601,234 +484,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     
     // create wallet from seed
     MoneroWalletFull wallet = createWallet(new MoneroWalletConfig().setSeed(TestUtils.SEED).setRestoreHeight(restoreHeight), false);
-    
-    // sanitize expected sync bounds
-    if (restoreHeight == null) restoreHeight = 0l;
-    long startHeightExpected = startHeight == null ? restoreHeight : startHeight;
-    if (startHeightExpected == 0) startHeightExpected = 1;
-    long endHeightExpected = wallet.getDaemonMaxPeerHeight();
-    
-    // test wallet and close as final step
-    MoneroWalletFull walletGt = null;
-    try {
-      
-      // test wallet's height before syncing
-      assertTrue(wallet.isConnectedToDaemon());
-      assertFalse(wallet.isSynced());
-      assertEquals(1, wallet.getHeight());
-      assertEquals((long) restoreHeight, wallet.getRestoreHeight());
-      
-      // register a wallet listener which tests notifications throughout the sync
-      WalletSyncTester walletSyncTester = new WalletSyncTester(wallet, startHeightExpected, endHeightExpected);
-      wallet.addListener(walletSyncTester);
-      
-      // sync the wallet with a listener which tests sync notifications
-      SyncProgressTester progressTester = new SyncProgressTester(wallet, startHeightExpected, endHeightExpected);
-      MoneroSyncResult result = wallet.sync(startHeight, progressTester);
-      
-      // test completion of the wallet and sync listeners
-      progressTester.onDone(wallet.getDaemonHeight());
-      walletSyncTester.onDone(wallet.getDaemonHeight());
-      
-      // test result after syncing
-      assertTrue(wallet.isSynced());
-      assertEquals(wallet.getDaemonHeight() - startHeightExpected, (long) result.getNumBlocksFetched());
-      assertTrue(result.getReceivedMoney());
-      if (wallet.getHeight() != daemon.getHeight()) System.out.println("WARNING: wallet height " + wallet.getHeight() + " is not synced with daemon height " + daemon.getHeight());  // TODO: height may not be same after long sync
-      assertEquals(daemon.getHeight(), wallet.getDaemonHeight(), "Daemon heights are not equal: " + wallet.getDaemonHeight() + " vs " + daemon.getHeight());
-      if (startHeightExpected > TestUtils.FIRST_RECEIVE_HEIGHT) assertTrue(wallet.getTxs().get(0).getHeight() > TestUtils.FIRST_RECEIVE_HEIGHT);  // wallet is partially synced so first tx happens after true restore height
-      else assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, (long) wallet.getTxs().get(0).getHeight());  // wallet should be fully synced so first tx happens on true restore height
-      
-      // sync the wallet with default params
-      result = wallet.sync();
-      assertTrue(wallet.isSynced());
-      assertEquals(daemon.getHeight(), wallet.getHeight());
-      assertTrue(result.getNumBlocksFetched() == 0 || result.getNumBlocksFetched() == 1);  // block might be added to chain
-      assertFalse(result.getReceivedMoney());
-      
-      // compare with ground truth
-      if (!skipGtComparison) {
-        walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, wallet.getSeed(), startHeight, restoreHeight);
-        testWalletEqualityOnChain(walletGt, wallet);
-      }
-      
-      // if testing post-sync notifications, wait for a block to be added to the chain
-      // then test that sync arg listener was not invoked and registered wallet listener was invoked
-      if (testPostSyncNotifications) {
-        
-        // start automatic syncing
-        wallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
-        
-        // attempt to start mining to push the network along  // TODO: TestUtils.tryStartMining() : reqId, TestUtils.tryStopMining(reqId)
-        boolean startedMining = false;
-        try {
-          StartMining.startMining();
-          startedMining = true;
-        } catch (Exception e) {
-          // no problem
-        }
-        
-        try {
-          
-          // wait for block
-          System.out.println("Waiting for next block to test post sync notifications");
-          daemon.waitForNextBlockHeader();
-          
-          // ensure wallet has time to detect new block
-          try {
-            TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS + 3000); // sleep for wallet interval + time to sync
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-          }
-          
-          // test that wallet listener's onSyncProgress() and onNewBlock() were invoked after previous completion
-          assertTrue(walletSyncTester.getOnSyncProgressAfterDone());
-          assertTrue(walletSyncTester.getOnNewBlockAfterDone());
-        } finally {
-          if (startedMining) wallet.stopMining();
-        }
-      }
-    } finally {
-      if (walletGt != null) walletGt.close(true);
-      wallet.close();
-    }
-  }
-  
-  // Can sync a wallet created from keys
-  @Test
-  public void testSyncWalletFromKeys() {
-    assumeTrue(TEST_NON_RELAYS);
-    
-    // recreate test wallet from keys
-    String path = getRandomWalletPath();
-    MoneroWalletFull walletKeys = createWallet(new MoneroWalletConfig().setPath(path).setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT), false);
-    
-    // create ground truth wallet for comparison
-    MoneroWalletFull walletGt = TestUtils.createWalletGroundTruth(TestUtils.NETWORK_TYPE, TestUtils.SEED, null, TestUtils.FIRST_RECEIVE_HEIGHT);
-    
-    // test wallet and close as final step
-    try {
-      assertEquals(walletKeys.getSeed(), walletGt.getSeed());
-      assertEquals(walletKeys.getPrimaryAddress(), walletGt.getPrimaryAddress());
-      assertEquals(walletKeys.getPrivateViewKey(), walletGt.getPrivateViewKey());
-      assertEquals(walletKeys.getPublicViewKey(), walletGt.getPublicViewKey());
-      assertEquals(walletKeys.getPrivateSpendKey(), walletGt.getPrivateSpendKey());
-      assertEquals(walletKeys.getPublicSpendKey(), walletGt.getPublicSpendKey());
-      assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, walletGt.getRestoreHeight());
-      assertTrue(walletKeys.isConnectedToDaemon());
-      assertFalse(walletKeys.isSynced());
-      
-      // sync the wallet
-      SyncProgressTester progressTester = new SyncProgressTester(walletKeys, TestUtils.FIRST_RECEIVE_HEIGHT, walletKeys.getDaemonMaxPeerHeight());
-      MoneroSyncResult result = walletKeys.sync(progressTester);
-      progressTester.onDone(walletKeys.getDaemonHeight());
-      
-      // test result after syncing
-      assertTrue(walletKeys.isSynced());
-      assertEquals(walletKeys.getDaemonHeight() - TestUtils.FIRST_RECEIVE_HEIGHT, (long) result.getNumBlocksFetched());
-      assertTrue(result.getReceivedMoney());
-      assertEquals(daemon.getHeight(), walletKeys.getHeight());
-      assertEquals(daemon.getHeight(), walletKeys.getDaemonHeight());
-      assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, (long) walletKeys.getTxs().get(0).getHeight());  // wallet should be fully synced so first tx happens on true restore height
-      
-      // compare with ground truth
-      testWalletEqualityOnChain(walletGt, walletKeys);
-    } finally {
-      walletGt.close(true);
-      walletKeys.close();
-    }
-    
-    // TODO monero-project: importing key images can cause erasure of incoming transfers per wallet2.cpp:11957 which causes this test to fail
-//  // sync the wallets until same height
-//  while (wallet.getHeight() != walletKeys.getHeight()) {
-//    wallet.sync();
-//    walletKeys.sync(new WalletSyncPrinter());
-//  }
-//
-//  List<MoneroKeyImage> keyImages = walletKeys.exportKeyImages();
-//  walletKeys.importKeyImages(keyImages);
-  }
-  
-  // TODO: test start syncing, notification of syncs happening, stop syncing, no notifications, etc
-  // Can start and stop syncing
-  @Test
-  public void testStartStopSyncing() {
-    assumeTrue(TEST_NON_RELAYS);
-    
-    // test unconnected wallet
-    String path = getRandomWalletPath();
-    MoneroWalletFull wallet = createWallet(new MoneroWalletConfig().setServerUri(TestUtils.OFFLINE_SERVER_URI));
-    try {
-      assertNotNull(wallet.getSeed());
-      assertEquals(1, wallet.getHeight());
-      assertEquals(BigInteger.valueOf(0), wallet.getBalance());
-      wallet.startSyncing();
-    } catch (MoneroError e) {
-      assertEquals("Wallet is not connected to daemon", e.getMessage());
-    } finally {
-      wallet.close();
-    }
-    
-    // test connecting wallet
-    path = getRandomWalletPath();
-    wallet = createWallet(new MoneroWalletConfig().setPath(path).setServerUri(TestUtils.OFFLINE_SERVER_URI));
-    try {
-      assertNotNull(wallet.getSeed());
-      wallet.setDaemonConnection(daemon.getRpcConnection());
-      assertEquals(1, wallet.getHeight());
-      assertFalse(wallet.isSynced());
-      assertEquals(BigInteger.valueOf(0), wallet.getBalance());
-      long chainHeight = wallet.getDaemonHeight();
-      wallet.setRestoreHeight(chainHeight - 3);
-      wallet.startSyncing();
-      assertEquals(chainHeight - 3, wallet.getRestoreHeight());
-      assertEquals(daemon.getRpcConnection(), wallet.getDaemonConnection());
-      wallet.stopSyncing();
-      wallet.sync();
-      wallet.stopSyncing();
-      wallet.stopSyncing();
-    } finally {
-      wallet.close();
-    }
-    
-    // test that sync starts automatically
-    long restoreHeight = daemon.getHeight() - 100;
-    path = getRandomWalletPath();
-    wallet = createWallet(new MoneroWalletConfig().setPath(path).setSeed(TestUtils.SEED).setRestoreHeight(restoreHeight), false);
-    try {
-      
-      // start syncing
-      assertEquals(1, wallet.getHeight());
-      assertEquals(restoreHeight, wallet.getRestoreHeight());
-      assertFalse(wallet.isSynced());
-      assertEquals(BigInteger.valueOf(0), wallet.getBalance());
-      wallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
-      
-      // pause for sync to start
-      try {
-        System.out.println("Sleeping to test that sync starts automatically...");
-        TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS + 1000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-        throw new RuntimeException(e.getMessage());
-      }
-      
-      // test that wallet has started syncing
-      assertTrue(wallet.getHeight() > 1);
-      
-      // stop syncing
-      wallet.stopSyncing();
-      
-   // TODO monero-project: wallet.cpp m_synchronized only ever set to true, never false
-//      // wait for block to be added to chain
-//      daemon.getNextBlockHeader();
-//
-//      // wallet is no longer synced
-//      assertFalse(wallet.isSynced());
-    } finally {
-      wallet.close();
-    }
+    testSyncSeed(wallet, startHeight, restoreHeight, skipGtComparison, testPostSyncNotifications);
   }
   
   // Does not interfere with other wallet notifications
@@ -841,23 +497,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     MoneroWalletFull wallet1 = createWallet(new MoneroWalletConfig().setSeed(TestUtils.SEED).setRestoreHeight(restoreHeight), false);
     MoneroWalletFull wallet2 = createWallet(new MoneroWalletConfig().setSeed(TestUtils.SEED).setRestoreHeight(restoreHeight), false);
     
-    // track notifications of each wallet
-    SyncProgressTester tester1 = new SyncProgressTester(wallet1, restoreHeight, height);
-    SyncProgressTester tester2 = new SyncProgressTester(wallet1, restoreHeight, height);
-    wallet1.addListener(tester1);
-    wallet2.addListener(tester2);
-    
-    // sync first wallet and test that 2nd is not notified
-    wallet1.sync();
-    assertTrue(tester1.isNotified());
-    assertFalse(tester2.isNotified());
-    
-    // sync 2nd wallet and test that 1st is not notified
-    SyncProgressTester tester3 = new SyncProgressTester(wallet1, restoreHeight, height);
-    wallet1.addListener(tester3);
-    wallet2.sync();
-    assertTrue(tester2.isNotified());
-    assertFalse(tester3.isNotified());
+    testWalletsDoNotInterfere(wallet1, wallet2, height, restoreHeight);
   }
   
   // Is equal to the RPC wallet.
@@ -1178,41 +818,9 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   // Can be closed
   @Test
   public void testClose() {
-    assumeTrue(TEST_NON_RELAYS);
-    
-    // create a test wallet
     String path = getRandomWalletPath();
-    MoneroWalletFull wallet = createWallet(new MoneroWalletConfig().setPath(path));
-    wallet.sync();
-    assertTrue(wallet.getHeight() > 1);
-    assertTrue(wallet.isSynced());
-    assertFalse(wallet.isClosed());
-    
-    // close the wallet
-    wallet.close();
-    assertTrue(wallet.isClosed());
-    
-    // attempt to interact with the wallet
-    try { wallet.getHeight(); }
-    catch (MoneroError e) { assertEquals("Wallet is closed", e.getMessage()); }
-    try { wallet.getSeed(); }
-    catch (MoneroError e) { assertEquals("Wallet is closed", e.getMessage()); }
-    try { wallet.sync(); }
-    catch (MoneroError e) { assertEquals("Wallet is closed", e.getMessage()); }
-    try { wallet.startSyncing(); }
-    catch (MoneroError e) { assertEquals("Wallet is closed", e.getMessage()); }
-    try { wallet.stopSyncing(); }
-    catch (MoneroError e) { assertEquals("Wallet is closed", e.getMessage()); }
-    
-    // re-open the wallet
-    wallet = openWallet(new MoneroWalletConfig().setPath(path));
-    wallet.sync();
-    assertEquals(wallet.getDaemonHeight(), wallet.getHeight());
-    assertFalse(wallet.isClosed());
-    
-    // close the wallet
-    wallet.close();
-    assertTrue(wallet.isClosed());
+    MoneroWalletConfig config = new MoneroWalletConfig().setPath(path);
+    testClose(config);
   }
   
   // Supports multisig sample code
@@ -1281,232 +889,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     }
   }
 
-  // Does not leak memory
-  @Test
-  @Disabled
-  public void testMemoryLeak() {
-    System.out.println("Infinite loop starting, monitor memory in OS process manager...");
-    System.gc();
-    int i = 0;
-    boolean closeWallet = false;
-    long time = System.currentTimeMillis();
-    if (closeWallet) wallet.close(true);
-    while (true) {
-      if (closeWallet) wallet = TestUtils.getWalletFull();
-      wallet.sync();
-      wallet.getTxs();
-      wallet.getTransfers();
-      wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false));
-      if (i % 100 == 0) {
-        System.out.println("Garbage collecting on iteration " + i);
-        System.gc();
-        System.out.println((System.currentTimeMillis() - time) + " ms since last GC");
-        time = System.currentTimeMillis();
-      }
-      if (closeWallet) wallet.close(true);
-      i++;
-    }
-  }
-  
   // ---------------------------------- HELPERS -------------------------------
-  
-  public static String getRandomWalletPath() {
-    return TestUtils.TEST_WALLETS_DIR + "/test_wallet_" + System.currentTimeMillis();
-  }
-  
-  /**
-   * Internal class to test progress updates.
-   */
-  private class SyncProgressTester extends WalletSyncPrinter {
-    
-    protected MoneroWalletFull wallet;
-    private Long prevHeight;
-    private long startHeight;
-    private long prevEndHeight;
-    private Long prevCompleteHeight;
-    protected boolean isDone;
-    private Boolean onSyncProgressAfterDone;
-    
-    public SyncProgressTester(MoneroWalletFull wallet, long startHeight, long endHeight) {
-      this.wallet = wallet;
-      assertTrue(startHeight >= 0);
-      assertTrue(endHeight >= 0);
-      this.startHeight = startHeight;
-      this.prevEndHeight = endHeight;
-      this.isDone = false;
-    }
-    
-    @Override
-    public synchronized void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
-      super.onSyncProgress(height, startHeight, endHeight, percentDone, message);
-      
-      // registered wallet listeners will continue to get sync notifications after the wallet's initial sync
-      if (isDone) {
-        assertTrue(wallet.getListeners().contains(this), "Listener has completed and is not registered so should not be called again");
-        onSyncProgressAfterDone = true;
-      }
-      
-      // update tester's start height if new sync session
-      if (prevCompleteHeight != null && startHeight == prevCompleteHeight) this.startHeight = startHeight;
-      
-      // if sync is complete, record completion height for subsequent start heights
-      if (Double.compare(percentDone, 1) == 0) prevCompleteHeight = endHeight;
-      
-      // otherwise start height is equal to previous completion height
-      else if (prevCompleteHeight != null) assertEquals((long) prevCompleteHeight, startHeight);
-      
-      assertTrue(endHeight > startHeight, "end height > start height");
-      assertEquals(this.startHeight, startHeight);
-      assertTrue(endHeight >= prevEndHeight);  // chain can grow while syncing
-      prevEndHeight = endHeight;
-      assertTrue(height >= startHeight);
-      assertTrue(height < endHeight);
-      double expectedPercentDone = (double) (height - startHeight + 1) / (double) (endHeight - startHeight);
-      assertTrue(Double.compare(expectedPercentDone, percentDone) == 0);
-      if (prevHeight == null) assertEquals(startHeight, height);
-      else assertEquals(height, prevHeight + 1);
-      prevHeight = height;
-    }
-    
-    public void onDone(long chainHeight) {
-      assertFalse(isDone);
-      this.isDone = true;
-      if (prevHeight == null) {
-        assertNull(prevCompleteHeight);
-        assertEquals(chainHeight, startHeight);
-      } else {
-        assertEquals(chainHeight - 1, (long) prevHeight);  // otherwise last height is chain height - 1
-        assertEquals(chainHeight, (long) prevCompleteHeight);
-      }
-    }
-    
-    public Boolean isNotified() {
-      return prevHeight != null;
-    }
-    
-    public Boolean getOnSyncProgressAfterDone() {
-      return onSyncProgressAfterDone;
-    }
-  }
-  
-  /**
-   * Internal class to test all wallet notifications on sync.
-   */
-  private class WalletSyncTester extends SyncProgressTester {
-    
-    private Long walletTesterPrevHeight;  // renamed from prevHeight to not interfere with super's prevHeight
-    private MoneroOutputWallet prevOutputReceived;
-    private MoneroOutputWallet prevOutputSpent;
-    private BigInteger incomingTotal;
-    private BigInteger outgoingTotal;
-    private Boolean onNewBlockAfterDone;
-    private BigInteger prevBalance;
-    private BigInteger prevUnlockedBalance;
-    
-    public WalletSyncTester(MoneroWalletFull wallet, long startHeight, long endHeight) {
-      super(wallet, startHeight, endHeight);
-      assertTrue(startHeight >= 0);
-      assertTrue(endHeight >= 0);
-      incomingTotal = BigInteger.valueOf(0);
-      outgoingTotal = BigInteger.valueOf(0);
-    }
-    
-    @Override
-    public synchronized void onNewBlock(long height) {
-      if (isDone) {
-        assertTrue(wallet.getListeners().contains(this), "Listener has completed and is not registered so should not be called again");
-        onNewBlockAfterDone = true;
-      }
-      if (walletTesterPrevHeight != null) assertEquals(walletTesterPrevHeight + 1, height);
-      assertTrue(height >= super.startHeight);
-      walletTesterPrevHeight = height;
-    }
-    
-    @Override
-    public void onBalancesChanged(BigInteger newBalance, BigInteger newUnlockedBalance) {
-      if (this.prevBalance != null) assertTrue(!newBalance.equals(this.prevBalance) || !newUnlockedBalance.equals(this.prevUnlockedBalance));
-      this.prevBalance = newBalance;
-      this.prevUnlockedBalance = newUnlockedBalance;
-    }
-
-    @Override
-    public void onOutputReceived(MoneroOutputWallet output) {
-      assertNotNull(output);
-      prevOutputReceived = output;
-      
-      // test output
-      assertNotNull(output.getAmount());
-      assertTrue(output.getAccountIndex() >= 0);
-      assertTrue(output.getSubaddressIndex() >= 0);
-      
-      // test output's tx
-      assertNotNull(output.getTx());
-      assertNotNull(output.getTx().getHash());
-      assertEquals(64, output.getTx().getHash().length());
-      assertTrue(output.getTx().getVersion() >= 0);
-      assertTrue(output.getTx().getUnlockTime().compareTo(BigInteger.valueOf(0)) >= 0);
-      assertNull(output.getTx().getInputs());
-      assertEquals(1, output.getTx().getOutputs().size());
-      assertTrue(output.getTx().getOutputs().get(0) == output);
-      
-      // extra is not sent over the jni bridge
-      assertNull(output.getTx().getExtra());
-      
-      // add incoming amount to running total
-      if (output.isLocked()) incomingTotal = incomingTotal.add(output.getAmount()); // TODO: only add if not unlocked, test unlocked received
-    }
-
-    @Override
-    public void onOutputSpent(MoneroOutputWallet output) {
-      assertNotNull(output);
-      prevOutputSpent = output;
-      
-      // test output
-      assertNotNull(output.getAmount());
-      assertTrue(output.getAccountIndex() >= 0);
-      if (output.getSubaddressIndex() != null) assertTrue(output.getSubaddressIndex() >= 0); // TODO (monero-project): can be undefined because inputs not provided so one created from outgoing transfer
-      
-      // test output's tx
-      assertNotNull(output.getTx());
-      assertNotNull(output.getTx().getHash());
-      assertEquals(64, output.getTx().getHash().length());
-      assertTrue(output.getTx().getVersion() >= 0);
-      assertTrue(output.getTx().getUnlockTime().compareTo(BigInteger.valueOf(0)) >= 0);
-      assertEquals(1, output.getTx().getInputs().size());
-      assertTrue(output.getTx().getInputs().get(0) == output);
-      assertNull(output.getTx().getOutputs());
-      
-      // extra is not sent over the jni bridge
-      assertNull(output.getTx().getExtra());
-      
-      // add outgoing amount to running total
-      if (output.isLocked()) outgoingTotal = outgoingTotal.add(output.getAmount());
-    }
-    
-    @Override
-    public void onDone(long chainHeight) {
-      super.onDone(chainHeight);
-      assertNotNull(walletTesterPrevHeight);
-      assertNotNull(prevOutputReceived);
-      assertNotNull(prevOutputSpent);
-      BigInteger expectedBalance = incomingTotal.subtract(outgoingTotal);
-
-      // output notifications do not include pool fees or outgoing amount
-      BigInteger poolSpendAmount = BigInteger.ZERO;
-      for (MoneroTxWallet poolTx : wallet.getTxs(new MoneroTxQuery().setInTxPool(true))) {
-        poolSpendAmount = poolSpendAmount.add(poolTx.getFee()).add(poolTx.getOutgoingAmount() == null ? BigInteger.ZERO : poolTx.getOutgoingAmount());
-      }
-      expectedBalance = expectedBalance.subtract(poolSpendAmount);
-
-      assertEquals(expectedBalance, wallet.getBalance());
-      assertEquals(prevBalance, wallet.getBalance());
-      assertEquals(prevUnlockedBalance, wallet.getUnlockedBalance());
-    }
-    
-    public Boolean getOnNewBlockAfterDone() {
-      return onNewBlockAfterDone;
-    }
-  }
   
   // jni-specific tx tests
   @Override
@@ -1517,17 +900,54 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     super.testTxWallet(tx, ctx);
   }
   
-  // possible configuration: on chain xor local wallet data ("strict"), txs ordered same way? TBD
-  private static void testWalletEqualityOnChain(MoneroWalletFull wallet1, MoneroWalletFull wallet2) {
-    WalletEqualityUtils.testWalletEqualityOnChain(wallet1, wallet2);
-    assertEquals(wallet1.getNetworkType(), wallet2.getNetworkType());
-    assertEquals(wallet1.getRestoreHeight(), wallet2.getRestoreHeight());
-    assertEquals(wallet1.getDaemonConnection(), wallet2.getDaemonConnection());
-    assertEquals(wallet1.getSeedLanguage(), wallet2.getSeedLanguage());
-    // TODO: more jni-specific extensions
-  }
-  
   // -------------------- OVERRIDES TO BE DIRECTLY RUNNABLE -------------------
+
+  @Override
+  @Test
+  public void testSyncRandom() {
+    super.testSyncRandom();
+  }
+
+  @Override
+  @Test
+  @Disabled // TODO monero-project: cannot re-sync from lower block height after wallet saved
+  public void testResyncExisting() {
+    super.testResyncExisting();
+  }
+
+  @Override
+  @Test
+  public void testSyncWalletFromKeys() {
+    super.testSyncWalletFromKeys();
+  }
+
+  @Override
+  @Test
+  public void testStartStopSyncing() {
+    super.testStartStopSyncing();
+  }
+
+  // Can get the daemon's max peer height
+  @Override
+  @Test
+  public void testGetDaemonMaxPeerHeight() {
+    super.testGetDaemonMaxPeerHeight();
+  }
+
+  @Override
+  @Test
+  public void testDaemon()
+  {
+    super.testDaemon();
+  }
+
+  // Does not leak memory
+  @Override
+  @Test
+  @Disabled
+  public void testMemoryLeak() {
+    super.testMemoryLeak();
+  }
   
   @Override
   @Test
