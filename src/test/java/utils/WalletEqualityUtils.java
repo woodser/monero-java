@@ -16,6 +16,7 @@ import java.util.Set;
 import monero.daemon.model.MoneroOutput;
 import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWallet;
+import monero.wallet.MoneroWalletLight;
 import monero.wallet.MoneroWalletRpc.IncomingTransferComparator;
 import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroIncomingTransfer;
@@ -65,15 +66,16 @@ public class WalletEqualityUtils {
     assertEquals(w1.getPrimaryAddress(), w2.getPrimaryAddress());
     assertEquals(w1.getPrivateViewKey(), w2.getPrivateViewKey());
     assertEquals(w1.getPrivateSpendKey(), w2.getPrivateSpendKey());
+    Boolean lightWallet = w1 instanceof MoneroWalletLight || w2 instanceof MoneroWalletLight;
     MoneroTxQuery txQuery = new MoneroTxQuery().setIsConfirmed(true);
-    testTxWalletsEqualOnChain(w1.getTxs(txQuery), w2.getTxs(txQuery));
+    testTxWalletsEqualOnChain(w1.getTxs(txQuery), w2.getTxs(txQuery), lightWallet);
     txQuery.setIncludeOutputs(true);
-    testTxWalletsEqualOnChain(w1.getTxs(txQuery), w2.getTxs(txQuery)); // fetch and compare outputs
+    testTxWalletsEqualOnChain(w1.getTxs(txQuery), w2.getTxs(txQuery), lightWallet);  // fetch and compare outputs
     testAccountsEqualOnChain(w1.getAccounts(true), w2.getAccounts(true));
     assertEquals(w1.getBalance(), w2.getBalance());
     assertEquals(w1.getUnlockedBalance(), w2.getUnlockedBalance());
     MoneroTransferQuery transferQuery = new MoneroTransferQuery().setTxQuery(new MoneroTxQuery().setIsConfirmed(true));
-    testTransfersEqualOnChain(w1.getTransfers(transferQuery), w2.getTransfers(transferQuery));
+    testTransfersEqualOnChain(w1.getTransfers(transferQuery), w2.getTransfers(transferQuery), lightWallet);
     MoneroOutputQuery outputQuery = new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setIsConfirmed(true));
     testOutputWalletsEqualOnChain(w1.getOutputs(outputQuery), w2.getOutputs(outputQuery));
   }
@@ -141,7 +143,7 @@ public class WalletEqualityUtils {
     assertEquals(subaddress1, subaddress2);
   }
   
-  public static void testTxWalletsEqualOnChain(List<MoneroTxWallet> txs1, List<MoneroTxWallet> txs2) {
+  public static void testTxWalletsEqualOnChain(List<MoneroTxWallet> txs1, List<MoneroTxWallet> txs2, boolean lightWallet) {
 
     // remove pool or failed txs for comparison
     txs1 = new ArrayList<MoneroTxWallet>(txs1);
@@ -181,7 +183,13 @@ public class WalletEqualityUtils {
             transferCachedInfo(tx2, tx1);
           }
           
-          // test tx equality
+          // test tx equality by merging
+          if (lightWallet)
+          {
+            // cannot calculate accurate numSuggestedConfirmations when running private testnet
+            sanitizeTx(tx1);
+            sanitizeTx(tx2);
+          }
           assertTrue(TestUtils.txsMergeable(tx1, tx2), "Txs are not mergeable");
           assertEquals(tx1, tx2);
           found = true;
@@ -197,6 +205,31 @@ public class WalletEqualityUtils {
         }
       }
       assertTrue(found);  // each tx must have one and only one match
+    }
+  }
+
+  private static void sanitizeTx(MoneroTxWallet tx)
+  {
+    sanitizeTransfer(tx.getIncomingTransfers());
+  }
+
+  private static void sanitizeTransfer(List<MoneroIncomingTransfer> transfers)
+  {
+    if (transfers == null)
+    {
+      return;
+    }
+
+    for (MoneroTransfer moneroTransfer : transfers) {
+      sanitizeTransfer(moneroTransfer);
+    }
+  }
+
+  private static void sanitizeTransfer(MoneroTransfer transfer)
+  {
+    if (transfer instanceof MoneroIncomingTransfer)
+    {
+      ((MoneroIncomingTransfer)transfer).setNumSuggestedConfirmations(null);
     }
   }
   
@@ -223,7 +256,7 @@ public class WalletEqualityUtils {
     if (tgt.getOutgoingTransfer() != null) tgt.setPaymentId(src.getPaymentId());
   }
   
-  private static void testTransfersEqualOnChain(List<MoneroTransfer> transfers1, List<MoneroTransfer> transfers2) {
+  private static void testTransfersEqualOnChain(List<MoneroTransfer> transfers1, List<MoneroTransfer> transfers2, Boolean lightWallet) {
     assertEquals(transfers1.size(), transfers2.size());
     
     // test and collect transfers per transaction
@@ -307,6 +340,13 @@ public class WalletEqualityUtils {
         }
         
         // compare transfer equality
+
+        if (lightWallet) {
+          // cannot calculate accure numSuggestedConfirmations when running private testnet
+          sanitizeTransfer(transfer1);
+          sanitizeTransfer(transfer2);
+        }
+
         assertEquals(transfer1, transfer2);
       }
     }
