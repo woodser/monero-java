@@ -112,6 +112,7 @@ public class MoneroRpcConnection {
   public MoneroRpcConnection(MoneroRpcConnection connection) {
     this(connection.uri, connection.username, connection.password, connection.zmqUri, connection.proxyUri);
     this.priority = connection.priority;
+    this.timeoutMs = connection.timeoutMs;
     this.isOnline = connection.isOnline;
     this.isAuthenticated = connection.isAuthenticated;
     this.responseTime = connection.responseTime;
