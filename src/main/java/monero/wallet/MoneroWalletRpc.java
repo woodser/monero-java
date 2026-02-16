@@ -107,6 +107,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   private Map<Integer, Map<Integer, String>> addressCache; // cache static addresses to reduce requests
   private Process process;                                 // process running monero-wallet-rpc if applicable
   private long syncPeriodInMs = DEFAULT_SYNC_PERIOD_IN_MS; // period between syncs in ms (default 20000)
+  private String startupProxyUri;
   
   public MoneroWalletRpc(String uri) {
     this(new MoneroRpcConnection(uri));
@@ -188,13 +189,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // throw error with process output if unsuccessful
     if (!success) throw new MoneroError("Failed to start monero-wallet-rpc server:\n\n" + sb.toString().trim());
     
-    // get username, password, and zmq publish uri from params
+    // get username, password, zmq publish uri, and proxy uri from params
     int userPassIdx = cmd.indexOf("--rpc-login");
     String userPass = userPassIdx >= 0 ? cmd.get(userPassIdx + 1) : null;
     String username = userPass == null ? null : userPass.substring(0, userPass.indexOf(':'));
     String password = userPass == null ? null : userPass.substring(userPass.indexOf(':') + 1);
     int zmqUriIdx = cmd.indexOf("--zmq-pub");
     String zmqUri = zmqUriIdx >= 0 ? cmd.get(zmqUriIdx + 1) : null;
+    int proxyUriIdx = cmd.indexOf("--proxy");
+    startupProxyUri = proxyUriIdx >= 0 ? cmd.get(proxyUriIdx + 1) : null;
     
     // initialize internal state
     rpc = new MoneroRpcConnection(uri, username, password, zmqUri, null);
@@ -508,7 +511,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("ssl_ca_file", sslOptions.getCertificateAuthorityFile());
     params.put("ssl_allowed_fingerprints", sslOptions.getAllowedFingerprints());
     params.put("ssl_allow_any_cert", sslOptions.getAllowAnyCert());
-    params.put("proxy", connection == null ? "" : connection.getProxyUri());
+
+    // set proxy which must match startup proxy if applicable
+    if (connection.getProxyUri() == null) {
+      if (startupProxyUri != null) throw new MoneroError("Cannot set daemon connection without proxy URI because monero-wallet-rpc was started with a proxy URI: " + startupProxyUri);
+    } else {
+      if (startupProxyUri == null) params.put("proxy", connection == null ? "" : connection.getProxyUri());
+      else if (!startupProxyUri.equals(connection.getProxyUri())) {
+        throw new MoneroError("Cannot set daemon connection with proxy URI " + connection.getProxyUri() + " because monero-wallet-rpc was started with a different proxy URI: " + startupProxyUri);
+      }
+    }
+    if (!params.containsKey("proxy")) params.put("proxy", "");
+
     rpc.sendJsonRequest("set_daemon", params);
     this.daemonConnection = connection == null || connection.getUri() == null || connection.getUri().isEmpty() ? null : new MoneroRpcConnection(connection);
   }
