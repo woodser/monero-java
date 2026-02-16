@@ -3360,21 +3360,21 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testSendSplit() {
     assumeTrue(TEST_RELAYS);
-    testSendToSingle(new MoneroTxConfig().setCanSplit(true).setRelay(true));
+    testSendToSingle(new MoneroTxConfig().setCanSplit(true));
   }
   
   // Can create then relay a transaction to send to a single address
   @Test
   public void testCreateThenRelay() {
     assumeTrue(TEST_RELAYS);
-    testSendToSingle(new MoneroTxConfig().setCanSplit(false));
+    testSendToSingle(new MoneroTxConfig().setCanSplit(false).setRelay(false));
   }
   
   // Can create then relay split transactions to send to a single address
   @Test
   public void testCreateThenRelaySplit() {
     assumeTrue(TEST_RELAYS);
-    testSendToSingle(new MoneroTxConfig().setCanSplit(true));
+    testSendToSingle(new MoneroTxConfig().setCanSplit(true).setRelay(false));
   }
   
   private void testSendToSingle(MoneroTxConfig config) {
