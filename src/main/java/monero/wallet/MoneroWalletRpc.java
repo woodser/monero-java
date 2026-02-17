@@ -3092,6 +3092,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // initialize tx
     MoneroTxWallet tx = new MoneroTxWallet();
     tx.setIsConfirmed(true);
+    tx.setInTxPool(false);
     tx.setIsRelayed(true);
     tx.setIsFailed(false);
     
