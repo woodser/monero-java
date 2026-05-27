@@ -513,7 +513,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     params.put("ssl_allow_any_cert", sslOptions.getAllowAnyCert());
 
     // set proxy which must match startup proxy if applicable
-    if (connection.getProxyUri() == null) {
+    if (connection == null || connection.getProxyUri() == null) {
       if (startupProxyUri != null) throw new MoneroError("Cannot set daemon connection without proxy URI because monero-wallet-rpc was started with a proxy URI: " + startupProxyUri);
     } else {
       if (startupProxyUri == null) params.put("proxy", connection == null ? "" : connection.getProxyUri());
