@@ -2076,7 +2076,7 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_exportMultisigHexJ
   }
 }
 
-JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_importMultisigHexJni(JNIEnv* env, jobject instance, jobjectArray jmultisig_hexes) {
+JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_importMultisigHexJni(JNIEnv* env, jobject instance, jobjectArray jmultisig_hexes, jboolean refresh_after_import) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_importMultisigHexJni");
 
   // get peer multisig hex as vector<string>
@@ -2097,7 +2097,7 @@ JNIEXPORT jint JNICALL Java_monero_wallet_MoneroWalletFull_importMultisigHexJni(
   // import peer multisig hex and return the number of outputs they signed
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   try {
-    int num_outputs = wallet->import_multisig_hex(multisig_hexes);
+    int num_outputs = wallet->import_multisig_hex(multisig_hexes, refresh_after_import);
     return num_outputs;
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);

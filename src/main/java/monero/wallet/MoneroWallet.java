@@ -1337,7 +1337,7 @@ public interface MoneroWallet {
    * @return the number of outputs signed with the given multisig hex
    */
   public int importMultisigHex(String... multisigHexes);
-  
+
   /**
    * Import multisig info as hex from other participants.
    * 
@@ -1345,6 +1345,15 @@ public interface MoneroWallet {
    * @return the number of outputs signed with the given multisig hex
    */
   public int importMultisigHex(List<String> multisigHexes);
+  
+  /**
+   * Import multisig info as hex from other participants.
+   * 
+   * @param multisigHexes are multisig hex from each participant
+   * @param refreshAfterImport specifies if the wallet should be refreshed after importing
+   * @return the number of outputs signed with the given multisig hex
+   */
+  public int importMultisigHex(List<String> multisigHexes, boolean refreshAfterImport);
   
   /**
    * Sign multisig transactions from a multisig wallet.

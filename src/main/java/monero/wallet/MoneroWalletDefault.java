@@ -444,6 +444,11 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   public int importMultisigHex(String... multisigHexes) {
     return importMultisigHex(Arrays.asList(multisigHexes));
   }
+
+  @Override
+  public int importMultisigHex(List<String> multisigHexes) {
+    return importMultisigHex(multisigHexes, true);
+  }
   
   @Override
   public void close() {
