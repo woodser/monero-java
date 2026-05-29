@@ -1883,9 +1883,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   @SuppressWarnings("unchecked")
-  public int importMultisigHex(List<String> multisigHexes) {
+  public int importMultisigHex(List<String> multisigHexes, boolean refreshAfterImport) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("info", multisigHexes);
+    params.put("refresh_after_import", refreshAfterImport);
     Map<String, Object> resp = rpc.sendJsonRequest("import_multisig_info", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return ((BigInteger) result.get("n_outputs")).intValue();

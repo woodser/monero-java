@@ -1326,10 +1326,10 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
 
   @Override
-  public int importMultisigHex(List<String> multisigHexes) {
+  public int importMultisigHex(List<String> multisigHexes, boolean refreshAfterImport) {
     assertNotClosed();
     try {
-      return importMultisigHexJni(multisigHexes.toArray(new String[multisigHexes.size()]));
+      return importMultisigHexJni(multisigHexes.toArray(new String[multisigHexes.size()]), refreshAfterImport);
     } catch (Exception e) {
       throw new MoneroError(e.getMessage());
     }
@@ -1591,7 +1591,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private native String exportMultisigHexJni();
   
-  private native int importMultisigHexJni(String[] multisigHexes);
+  private native int importMultisigHexJni(String[] multisigHexes, boolean refreshAfterImport);
   
   private native String signMultisigTxHexJni(String multisigTxHex);
   
