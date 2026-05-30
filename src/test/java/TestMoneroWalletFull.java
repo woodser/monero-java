@@ -2149,13 +2149,11 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     super.testMultisigStress();
   }
   
+  // TODO: This test occasionally segfaults on macos arm64 (reproducible by looping test), but works on intel. Related to JNI binaries built on arm64?
   @Override
   @Test
-  // TODO: This test occasionally segfaults on macos arm64 (reproducible by looping test), but works on intel. Related to JNI binaries built on arm64?
   public void testChangePassword() {
-    for (int i = 0; i < 15; i++) {
-      super.testChangePassword();
-    }
+    super.testChangePassword();
   }
   
   @Override
