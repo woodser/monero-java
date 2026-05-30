@@ -1037,6 +1037,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   }
 
   // Can be moved
+  // TODO: This test occasionally segfaults on macos arm64 (reproducible by looping test), but works on intel. Related to JNI binaries built on arm64?
   @Test
   public void testMoveTo() {
     assumeTrue(TEST_NON_RELAYS);
@@ -2150,8 +2151,11 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  // TODO: This test occasionally segfaults on macos arm64 (reproducible by looping test), but works on intel. Related to JNI binaries built on arm64?
   public void testChangePassword() {
-    super.testChangePassword();
+    for (int i = 0; i < 15; i++) {
+      super.testChangePassword();
+    }
   }
   
   @Override
