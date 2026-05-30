@@ -123,18 +123,20 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    * @param password is the password of the wallet file to open
    * @param networkType is the wallet's network type
    * @param daemonConnection is connection configuration to a daemon (default = an unconnected wallet)
+   * @param regtest indicates if the wallet should be opened in regtest mode
    * @return the opened wallet
    */
-  public static MoneroWalletFull openWallet(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection) {
+  public static MoneroWalletFull openWallet(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection, boolean regtest) {
     if (!walletExistsJni(path)) throw new MoneroError("Wallet does not exist at path: " + path);
     if (networkType == null) throw new MoneroError("Must provide a network type");
-    long jniWalletHandle = openWalletJni(path, password, networkType.ordinal());
+    long jniWalletHandle = openWalletJni(path, password, networkType.ordinal(), regtest);
     MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle, password);
     if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
     return wallet;
   }
   public static MoneroWalletFull openWallet(String path, String password, MoneroNetworkType networkType) { return openWallet(path, password, networkType, (MoneroRpcConnection) null); }
   public static MoneroWalletFull openWallet(String path, String password, MoneroNetworkType networkType, String daemonUri) { return openWallet(path, password, networkType, daemonUri == null ? null : new MoneroRpcConnection(daemonUri)); }
+  public static MoneroWalletFull openWallet(String path, String password, MoneroNetworkType networkType, MoneroRpcConnection daemonConnection) { return openWallet(path, password, networkType, daemonConnection, false); }
 
   /**
    * Open an existing wallet from byte[] data using JNI bindings to wallet2.h
@@ -144,15 +146,17 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    * @param keysData the wallet's keys data
    * @param cacheData the wallet's cache data
    * @param daemonConnection connection configuration to a daemon (default = an unconnected wallet)
+   * @param regtest indicates if the wallet should be opened in regtest mode
    * @return the opened wallet
    */
-  public static MoneroWalletFull openWalletData(String password, MoneroNetworkType networkType, byte[] keysData, byte[] cacheData, MoneroRpcConnection daemonConnection) {
+  public static MoneroWalletFull openWalletData(String password, MoneroNetworkType networkType, byte[] keysData, byte[] cacheData, MoneroRpcConnection daemonConnection, boolean regtest) {
     if (networkType == null) throw new MoneroError("Must provide a network type");
-    long jniWalletHandle = openWalletDataJni(password, networkType.ordinal(), keysData == null ? new byte[0] : keysData, cacheData == null ? new byte[0] : cacheData);
+    long jniWalletHandle = openWalletDataJni(password, networkType.ordinal(), keysData == null ? new byte[0] : keysData, cacheData == null ? new byte[0] : cacheData, regtest);
     MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle, password);
     if (daemonConnection != null) wallet.setDaemonConnection(daemonConnection);
     return wallet;
   }
+  public static MoneroWalletFull openWalletData(String password, MoneroNetworkType networkType, byte[] keysData, byte[] cacheData, MoneroRpcConnection daemonConnection) { return openWalletData(password, networkType, keysData, cacheData, daemonConnection, false); }
   
   /**
    * <p>Open an existing wallet using JNI bindings to wallet2.h.</p>
@@ -1399,9 +1403,9 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private native static boolean walletExistsJni(String path);
   
-  private native static long openWalletJni(String path, String password, int networkType);
+  private native static long openWalletJni(String path, String password, int networkType, boolean regtest);
 
-  private native static long openWalletDataJni(String password, int networkType, byte[] keysData, byte[] cacheData);
+  private native static long openWalletDataJni(String password, int networkType, byte[] keysData, byte[] cacheData, boolean regtest);
   
   private native static long createWalletJni(String walletConfigJson);
   
