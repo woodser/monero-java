@@ -291,6 +291,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // validate config
     if (config == null) throw new MoneroError("Must provide configuration of wallet to open");
     if (config.getPath() == null || config.getPath().isEmpty()) throw new MoneroError("Filename is not initialized");
+    if (config.getRegtest() != null) throw new MoneroError("Cannot specify regtest mode when opening RPC wallet");
     // TODO: ensure other fields are uninitialized?
     
     // open wallet on rpc server
@@ -352,6 +353,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     // validate config
     if (config == null) throw new MoneroError("Must specify config to create wallet");
+    if (config.getRegtest() != null) throw new MoneroError("Cannot specify regtest mode when creating RPC wallet");
     if (config.getNetworkType() != null) throw new MoneroError("Cannot specify network type when creating RPC wallet");
     if (config.getSeed() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
       throw new MoneroError("Wallet can be initialized with a seed or keys but not both");

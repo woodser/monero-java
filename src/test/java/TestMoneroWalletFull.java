@@ -279,6 +279,14 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     if (daemon.isConnected()) assertEquals(daemon.getHeight(), wallet.getRestoreHeight());
     else assertTrue(wallet.getRestoreHeight() >= 0);
     wallet.close();
+
+    // test error creating wallet with regtest mode
+    try {
+      createWallet(new MoneroWalletConfig().setNetworkType(MoneroNetworkType.TESTNET).setRegtest(true));
+      throw new RuntimeException("Should have thrown exception");
+    } catch (Exception e) {
+      assertEquals("Network type must be mainnet when using regtest option", e.getMessage());
+    }
   }
   
   // Can create a full wallet from seed

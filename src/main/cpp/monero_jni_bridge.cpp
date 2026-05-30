@@ -426,7 +426,7 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_walletExistsJni(J
   return static_cast<jboolean>(wallet_exists);
 }
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint jnetwork_type) {
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletJni(JNIEnv *env, jclass clazz, jstring jpath, jstring jpassword, jint jnetwork_type, jboolean regtest) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_openWalletJni");
   const char* _path = env->GetStringUTFChars(jpath, NULL);
   const char* _password = env->GetStringUTFChars(jpassword, NULL);
@@ -437,7 +437,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletJni(JNIEnv
 
   // load wallet from file
   try {
-    monero_wallet* wallet = monero_wallet_full::open_wallet(path, password, static_cast<monero_network_type>(jnetwork_type));
+    monero_wallet* wallet = monero_wallet_full::open_wallet(path, password, static_cast<monero_network_type>(jnetwork_type), regtest);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
@@ -445,7 +445,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletJni(JNIEnv
   }
 }
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletDataJni(JNIEnv *env, jclass clazz, jstring jpassword, jint jnetwork_type, jbyteArray jkeys_data, jbyteArray jcache_data) {
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletDataJni(JNIEnv *env, jclass clazz, jstring jpassword, jint jnetwork_type, jbyteArray jkeys_data, jbyteArray jcache_data, jboolean regtest) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_openWalletDataJni()");
 
   // convert password to string
@@ -468,7 +468,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletDataJni(JN
 
   // load wallet from data
   try {
-    monero_wallet* wallet = monero_wallet_full::open_wallet_data(password, static_cast<monero_network_type>(jnetwork_type), keys_data, cache_data);
+    monero_wallet* wallet = monero_wallet_full::open_wallet_data(password, static_cast<monero_network_type>(jnetwork_type), keys_data, cache_data, monero_rpc_connection(), nullptr, regtest);
     return reinterpret_cast<jlong>(wallet);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);

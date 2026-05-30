@@ -34,6 +34,7 @@ public class MoneroWalletConfig {
   private byte[] keysData;
   private byte[] cacheData;
   private Boolean isMultisig;
+  private Boolean regtest;
 
   public MoneroWalletConfig() {
     // default constructor
@@ -58,6 +59,7 @@ public class MoneroWalletConfig {
     keysData = config.getKeysData();
     cacheData = config.getCacheData();
     isMultisig = config.isMultisig();
+    regtest = config.getRegtest();
   }
 
   public MoneroWalletConfig copy() {
@@ -290,6 +292,15 @@ public class MoneroWalletConfig {
   
   public MoneroWalletConfig setIsMultisig(Boolean isMultisig) {
     this.isMultisig = isMultisig;
+    return this;
+  }
+
+  public Boolean getRegtest() {
+    return regtest;
+  }
+  
+  public MoneroWalletConfig setRegtest(Boolean regtest) {
+    this.regtest = regtest;
     return this;
   }
 
