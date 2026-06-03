@@ -1544,8 +1544,6 @@ public class TestMoneroDaemonRpc {
       assertNotNull(tx.getBlock());
       assertTrue(tx.getBlock().getTxs().contains(tx));
       assertTrue(tx.getBlock().getHeight() > 0);
-      assertTrue(tx.getBlock().getTxs().contains(tx));
-      assertTrue(tx.getBlock().getHeight() > 0);
       assertTrue(tx.getBlock().getTimestamp() > 0);
       assertEquals(true, tx.getRelay());
       assertEquals(true, tx.isRelayed());
