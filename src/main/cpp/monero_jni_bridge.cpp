@@ -543,8 +543,9 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getDaemonConn
 
   // get daemon connection
   try {
-    boost::optional<monero_rpc_connection> daemon_connection = wallet->get_daemon_connection();
-    if (daemon_connection == boost::none) return 0;
+    boost::optional<std::shared_ptr<monero_rpc_connection>> connection = wallet->get_daemon_connection();
+    if (connection == boost::none) return 0;
+    const std::shared_ptr<monero_rpc_connection>& daemon_connection = connection.get();
 
     // return string[uri, username, password]
     jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
