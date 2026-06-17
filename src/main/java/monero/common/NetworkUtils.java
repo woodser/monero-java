@@ -208,6 +208,27 @@ public class NetworkUtils {
   }
 
   /**
+   * Determine if the given URL's host is a loopback address (e.g. "127.0.0.1", "::1" or "localhost").
+   *
+   * Recognizes the entire IPv4 loopback range (127.0.0.0/8), the IPv6 loopback
+   * address (::1) and the conventional "localhost" alias. Hostnames other than
+   * "localhost" are treated as non-loopback; no DNS resolution is performed.
+   *
+   * @param url is the URL to check (scheme optional)
+   * @return true if the host is a loopback address, false otherwise or if it cannot be parsed
+   */
+  public static boolean isLoopbackUrl(String url) {
+    try {
+      String host = stripIpv6Brackets(parseUri(url).getHost());
+      if (host == null) return false;
+      if (LOCALHOST.equalsIgnoreCase(host)) return true;
+      return isLiteralIp(host) && toInetAddress(host).isLoopbackAddress();
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  /**
    * Determine if the given URI's host is local or a private (non-routable) IP address.
    *
    * Covers loopback, wildcard, link-local, RFC 1918 site-local and IPv6 unique

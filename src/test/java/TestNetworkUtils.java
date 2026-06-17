@@ -124,6 +124,26 @@ public class TestNetworkUtils {
   }
 
   @Test
+  public void testIsLoopbackUrl() {
+    assertTrue(NetworkUtils.isLoopbackUrl("localhost"));
+    assertTrue(NetworkUtils.isLoopbackUrl("LOCALHOST"));
+    assertTrue(NetworkUtils.isLoopbackUrl("127.0.0.1"));
+    assertTrue(NetworkUtils.isLoopbackUrl("127.0.0.1:18081"));
+    assertTrue(NetworkUtils.isLoopbackUrl("http://127.0.0.1:18081"));
+    assertTrue(NetworkUtils.isLoopbackUrl("127.5.6.7")); // entire 127.0.0.0/8 range is loopback
+    assertTrue(NetworkUtils.isLoopbackUrl("::1"));
+    assertTrue(NetworkUtils.isLoopbackUrl("[::1]:18081"));
+    assertTrue(NetworkUtils.isLoopbackUrl("http://[::1]:18081"));
+    assertFalse(NetworkUtils.isLoopbackUrl(null));
+    assertFalse(NetworkUtils.isLoopbackUrl(""));
+    assertFalse(NetworkUtils.isLoopbackUrl("example.com"));
+    assertFalse(NetworkUtils.isLoopbackUrl("http://192.168.1.1:18081"));
+    assertFalse(NetworkUtils.isLoopbackUrl("8.8.8.8"));
+    assertFalse(NetworkUtils.isLoopbackUrl("[fe80::1]:18081"));
+    assertFalse(NetworkUtils.isLoopbackUrl("[2607:3c40:1900:33e0::1]:18089"));
+  }
+
+  @Test
   public void testIsPrivateIp() {
     // loopback / localhost
     assertTrue(NetworkUtils.isPrivateIp("127.0.0.1"));
