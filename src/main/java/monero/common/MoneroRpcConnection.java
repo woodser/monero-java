@@ -98,7 +98,7 @@ public class MoneroRpcConnection {
   }
   
   public MoneroRpcConnection(String uri, String username, String password) {
-    this(uri == null ? null : MoneroUtils.parseUri(uri), username, password, null, null);
+    this(uri == null ? null : NetworkUtils.parseUri(uri), username, password, null, null);
   }
 
   public MoneroRpcConnection(URI uri, String username, String password) {
@@ -106,15 +106,15 @@ public class MoneroRpcConnection {
   }
 
   public MoneroRpcConnection(String uri, String username, String password, String zmqUri, String proxyUri) {
-    this(uri == null ? null : MoneroUtils.parseUri(uri), username, password, zmqUri == null ? null : MoneroUtils.parseUri(zmqUri), proxyUri == null ? null : MoneroUtils.parseUri(proxyUri));
+    this(uri == null ? null : NetworkUtils.parseUri(uri), username, password, zmqUri == null ? null : NetworkUtils.parseUri(zmqUri), proxyUri == null ? null : NetworkUtils.parseUri(proxyUri));
     this.proxyUri = proxyUri;
   }
   
   public MoneroRpcConnection(URI uri, String username, String password, URI zmqUri, URI proxyUri) {
-    this.uri = uri == null ? null : MoneroUtils.parseUri(uri.toString()).toString();
+    this.uri = uri == null ? null : NetworkUtils.parseUri(uri.toString()).toString();
     this.setCredentials(username, password);
-    this.zmqUri = zmqUri == null ? null : MoneroUtils.parseUri(zmqUri.toString()).toString();
-    this.proxyUri = proxyUri == null ? null : MoneroUtils.parseUri(proxyUri.toString()).toString();
+    this.zmqUri = zmqUri == null ? null : NetworkUtils.parseUri(zmqUri.toString()).toString();
+    this.proxyUri = proxyUri == null ? null : NetworkUtils.parseUri(proxyUri.toString()).toString();
   }
   
   public MoneroRpcConnection(MoneroRpcConnection connection) {
@@ -134,11 +134,11 @@ public class MoneroRpcConnection {
   }
 
   public MoneroRpcConnection setUri(String uri) {
-    return setUri(MoneroUtils.parseUri(uri));
+    return setUri(NetworkUtils.parseUri(uri));
   }
 
   public MoneroRpcConnection setUri(URI uri) {
-    this.uri = MoneroUtils.parseUri(uri.toString()).toString();
+    this.uri = NetworkUtils.parseUri(uri.toString()).toString();
     setCredentials(username, password); // update credentials
     return this;
   }
@@ -160,7 +160,7 @@ public class MoneroRpcConnection {
     if (username != null || password != null) {
       if (username == null) throw new MoneroError("username cannot be empty because password is not empty");
       if (password == null) throw new MoneroError("password cannot be empty because username is not empty");
-      URI uriObj = MoneroUtils.parseUri(uri);
+      URI uriObj = NetworkUtils.parseUri(uri);
       creds = new BasicCredentialsProvider();
       creds.setCredentials(new AuthScope(uriObj.getHost(), uriObj.getPort()), new UsernamePasswordCredentials(username, password.toCharArray()));
     }
@@ -765,7 +765,7 @@ public class MoneroRpcConnection {
     CloseableHttpClient closeableHttpClient = builder.build();
 
     // register socks address
-    URI proxyParsed = MoneroUtils.parseUri(proxyUri);
+    URI proxyParsed = NetworkUtils.parseUri(proxyUri);
     InetSocketAddress socksAddress = new InetSocketAddress(proxyParsed.getHost(), proxyParsed.getPort());
     HttpClientContext context = HttpClientContext.create();
     context.setAttribute("socks.address", socksAddress);

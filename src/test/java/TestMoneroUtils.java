@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -342,5 +343,34 @@ public class TestMoneroUtils {
         System.out.println("MoneroUtils.validateAddress(\"" + wallets.get(i).getAddress(0, 1) + "\", MoneroNetworkType." + networkType + ");");
       }
     }
+  }
+
+  // Can parse a URI, defaulting to http and bracketing unbracketed IPv6 literals
+  @Test
+  public void testParseUri() {
+
+    // scheme is preserved when present
+    assertEquals("http://example.com", MoneroUtils.parseUri("http://example.com").toString());
+    assertEquals("https://example.com/p", MoneroUtils.parseUri("https://example.com/p").toString());
+    assertEquals("tcp://1.2.3.4:5", MoneroUtils.parseUri("tcp://1.2.3.4:5").toString());
+
+    // http is assumed when no scheme is given
+    assertEquals("example.com", MoneroUtils.parseUri("example.com").getHost());
+    assertEquals("node.example.com", MoneroUtils.parseUri("node.example.com:18081").getHost());
+    assertEquals("127.0.0.1", MoneroUtils.parseUri("127.0.0.1:18081").getHost());
+    assertEquals(18081, MoneroUtils.parseUri("127.0.0.1:18081").getPort());
+
+    // unbracketed IPv6 literals are bracketed so the authority parses
+    assertEquals("[::1]", MoneroUtils.parseUri("::1").getHost());
+    assertEquals("[2001:db8::1]", MoneroUtils.parseUri("2001:db8::1").getHost());
+    assertEquals("[fe80::1%eth0]", MoneroUtils.parseUri("fe80::1%eth0").getHost());
+
+    // already-bracketed IPv6 authorities are preserved
+    URI bracketed = MoneroUtils.parseUri("[2001:db8::1]:18081");
+    assertEquals("[2001:db8::1]", bracketed.getHost());
+    assertEquals(18081, bracketed.getPort());
+
+    // empty and null inputs do not throw a host
+    assertEquals(null, MoneroUtils.parseUri("").getHost());
   }
 }
