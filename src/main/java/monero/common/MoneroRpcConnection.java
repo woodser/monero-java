@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
 import org.apache.hc.client5.http.DnsResolver;
@@ -31,12 +32,16 @@ import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
 import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.TrustAllStrategy;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHost;
@@ -46,6 +51,7 @@ import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.net.InetAddressUtils;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
@@ -67,6 +73,7 @@ public class MoneroRpcConnection {
 
   // instance variables
   protected CloseableHttpClient client;
+  protected BasicCredentialsProvider credsProvider;
   protected String uri;
   protected String username;
   protected String password;
@@ -78,6 +85,7 @@ public class MoneroRpcConnection {
   protected Boolean isAuthenticated;
   protected Long responseTime;
   protected boolean printStackTrace;
+  protected boolean sslVerify = true;
   
   protected Map<String, Object> attributes = new HashMap<String, Object>();
   
@@ -118,6 +126,7 @@ public class MoneroRpcConnection {
     this.responseTime = connection.responseTime;
     this.proxyUri = connection.proxyUri;
     this.printStackTrace = connection.printStackTrace;
+    this.setSslVerify(connection.sslVerify); // rebuilds client with source's ssl setting
   }
 
   public String getUri() {
@@ -147,16 +156,16 @@ public class MoneroRpcConnection {
     catch (IOException e) { throw new MoneroError(e); }
     if ("".equals(username)) username = null;
     if ("".equals(password)) password = null;
+    BasicCredentialsProvider creds = null;
     if (username != null || password != null) {
       if (username == null) throw new MoneroError("username cannot be empty because password is not empty");
       if (password == null) throw new MoneroError("password cannot be empty because username is not empty");
       URI uriObj = MoneroUtils.parseUri(uri);
-      BasicCredentialsProvider creds = new BasicCredentialsProvider();
+      creds = new BasicCredentialsProvider();
       creds.setCredentials(new AuthScope(uriObj.getHost(), uriObj.getPort()), new UsernamePasswordCredentials(username, password.toCharArray()));
-      this.client = HttpClients.custom().setDefaultCredentialsProvider(creds).build();
-    } else {
-      this.client = HttpClients.createDefault();
     }
+    this.credsProvider = creds;
+    this.client = buildHttpClient(creds);
     if (!Objects.equals(this.username, username) || !Objects.equals(this.password, password)) {
       isOnline = null;
       isAuthenticated = null;
@@ -189,6 +198,28 @@ public class MoneroRpcConnection {
 
   public MoneroRpcConnection setProxyUri(String proxyUri) {
     this.proxyUri = proxyUri;
+    return this;
+  }
+
+  public boolean getSslVerify() {
+    return sslVerify;
+  }
+
+  /**
+   * Enable or disable TLS certificate and hostname verification for HTTPS connections.
+   *
+   * Verification is enabled by default. Disabling it allows connecting to daemons with
+   * self-signed certificates or certificates whose subject alternative names do not match
+   * the address (e.g. monerod's default `--rpc-ssl autodetect` certificate, or connecting
+   * by raw IP).
+   *
+   * @param sslVerify true to verify certificates (default), false to allow insecure connections
+   * @return this connection
+   */
+  public MoneroRpcConnection setSslVerify(boolean sslVerify) {
+    if (this.sslVerify == sslVerify && this.client != null) return this;
+    this.sslVerify = sslVerify;
+    setCredentials(username, password); // rebuild client with new ssl setting
     return this;
   }
 
@@ -594,7 +625,7 @@ public class MoneroRpcConnection {
   
   @Override
   public String toString() {
-    return uri + " (uri=" + uri + ", username=" + username + ", password=" + (password == null ? "null" : "***") + ", priority=" + priority + ", timeoutMs=" + timeoutMs + ", isOnline=" + isOnline + ", isAuthenticated=" + isAuthenticated + ", zmqUri=" + zmqUri + ", proxyUri=" + proxyUri + ")";
+    return uri + " (uri=" + uri + ", username=" + username + ", password=" + (password == null ? "null" : "***") + ", priority=" + priority + ", timeoutMs=" + timeoutMs + ", isOnline=" + isOnline + ", isAuthenticated=" + isAuthenticated + ", zmqUri=" + zmqUri + ", proxyUri=" + proxyUri + ", sslVerify=" + sslVerify + ")";
   }
   
   @Override
@@ -635,7 +666,47 @@ public class MoneroRpcConnection {
   }
   
   // ------------------------------ PRIVATE HELPERS --------------------------
-  
+
+  private CloseableHttpClient buildHttpClient(BasicCredentialsProvider creds) {
+    HttpClientBuilder builder = HttpClients.custom();
+    if (creds != null) builder.setDefaultCredentialsProvider(creds);
+    if (!sslVerify) {
+      Registry<ConnectionSocketFactory> reg = RegistryBuilder.<ConnectionSocketFactory>create()
+          .register("http", PlainConnectionSocketFactory.getSocketFactory())
+          .register("https", new SSLConnectionSocketFactory(createInsecureSslContext(), NoopHostnameVerifier.INSTANCE))
+          .build();
+      builder.setConnectionManager(new PoolingHttpClientConnectionManager(reg));
+    }
+    return builder.build();
+  }
+
+  // strip surrounding brackets from an IPv6 host literal, e.g. "[2a00:...]" -> "2a00:..."
+  private static String stripIpv6Brackets(String host) {
+    if (host != null && host.length() > 1 && host.charAt(0) == '[' && host.charAt(host.length() - 1) == ']') {
+      return host.substring(1, host.length() - 1);
+    }
+    return host;
+  }
+
+  // build the SOCKS target address from the request host. IP literals are resolved so the proxy
+  // receives a proper IPv4/IPv6 address type (avoids sending a bracketed IPv6 as a domain name);
+  // hostnames and .onion addresses are left unresolved so the proxy resolves them (avoids DNS leaks).
+  private static InetSocketAddress getSocksTargetAddress(String hostName, int port) throws IOException {
+    String cleanHost = stripIpv6Brackets(hostName);
+    if (InetAddressUtils.isIPv4Address(cleanHost) || InetAddressUtils.isIPv6Address(cleanHost)) {
+      return new InetSocketAddress(InetAddress.getByName(cleanHost), port); // getByName does not perform DNS for IP literals
+    }
+    return InetSocketAddress.createUnresolved(hostName, port);
+  }
+
+  private static SSLContext createInsecureSslContext() {
+    try {
+      return SSLContexts.custom().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build();
+    } catch (Exception e) {
+      throw new MoneroError(e);
+    }
+  }
+
   private static void validateHttpResponse(CloseableHttpResponse resp) {
     int code = resp.getCode();
     if (code < 200 || code > 299) {
@@ -676,9 +747,11 @@ public class MoneroRpcConnection {
   private CloseableHttpResponse requestWithProxy(HttpUriRequest request) throws IOException {
 
     // register socket factories to use socks5
+    SSLContext sslContext = sslVerify ? SSLContexts.createSystemDefault() : createInsecureSslContext();
+    HostnameVerifier hostnameVerifier = sslVerify ? null : NoopHostnameVerifier.INSTANCE; // null uses default verifier
     Registry<ConnectionSocketFactory> reg = RegistryBuilder.<ConnectionSocketFactory>create()
         .register("http", new SocksConnectionSocketFactory())
-        .register("https", new SocksSSLConnectionSocketFactory(SSLContexts.createSystemDefault())).build();
+        .register("https", new SocksSSLConnectionSocketFactory(sslContext, hostnameVerifier)).build();
 
     // create connection manager to use socket factories and fake dns resolver
     boolean isLocal = false; // use fake dns resolver if not resolving DNS locally TODO: determine if request url is local
@@ -686,9 +759,11 @@ public class MoneroRpcConnection {
         new BasicHttpClientConnectionManager(reg) :
         new BasicHttpClientConnectionManager(reg, null, null, new FakeDnsResolver());
 
-    // create http client
-    CloseableHttpClient closeableHttpClient = HttpClients.custom().setConnectionManager(cm).build();
-    
+    // create http client, applying credentials if set
+    HttpClientBuilder builder = HttpClients.custom().setConnectionManager(cm);
+    if (credsProvider != null) builder.setDefaultCredentialsProvider(credsProvider);
+    CloseableHttpClient closeableHttpClient = builder.build();
+
     // register socks address
     URI proxyParsed = MoneroUtils.parseUri(proxyUri);
     InetSocketAddress socksAddress = new InetSocketAddress(proxyParsed.getHost(), proxyParsed.getPort());
@@ -720,18 +795,15 @@ public class MoneroRpcConnection {
     @Override
     public Socket connectSocket(TimeValue connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
                                 InetSocketAddress localAddress, HttpContext context) throws IOException {
-        InetSocketAddress unresolvedRemote = InetSocketAddress.createUnresolved(host.getHostName(), remoteAddress.getPort());
-        return super.connectSocket(connectTimeout, socket, host, unresolvedRemote, localAddress, context);
+        InetSocketAddress socksRemote = getSocksTargetAddress(host.getHostName(), remoteAddress.getPort());
+        return super.connectSocket(connectTimeout, socket, host, socksRemote, localAddress, context);
     }
   }
 
   private class SocksSSLConnectionSocketFactory extends SSLConnectionSocketFactory {
 
-    public SocksSSLConnectionSocketFactory(final SSLContext sslContext) {
-        super(sslContext);
-
-        // TODO: Or to allow "insecure" (eg self-signed certs)
-        // super(sslContext, ALLOW_ALL_HOSTNAME_VERIFIER);
+    public SocksSSLConnectionSocketFactory(final SSLContext sslContext, final HostnameVerifier hostnameVerifier) {
+        super(sslContext, hostnameVerifier); // null hostnameVerifier uses the default verifier
     }
 
     @Override
@@ -742,11 +814,10 @@ public class MoneroRpcConnection {
     }
 
     @Override
-    public Socket connectSocket(TimeValue connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
-                                InetSocketAddress localAddress, HttpContext context) throws IOException {
-        // Convert address to unresolved
-        InetSocketAddress unresolvedRemote = InetSocketAddress.createUnresolved(host.getHostName(), remoteAddress.getPort());
-        return super.connectSocket(connectTimeout, socket, host, unresolvedRemote, localAddress, context);
+    public Socket connectSocket(Socket socket, HttpHost host, InetSocketAddress remoteAddress, InetSocketAddress localAddress,
+                                Timeout connectTimeout, Object attachment, HttpContext context) throws IOException {
+        InetSocketAddress socksRemote = getSocksTargetAddress(host.getHostName(), remoteAddress.getPort());
+        return super.connectSocket(socket, host, socksRemote, localAddress, connectTimeout, attachment, context);
     }
   }
 
