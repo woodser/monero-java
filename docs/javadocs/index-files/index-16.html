@@ -31,6 +31,7 @@ loadScripts(document, 'script');</script>
 <li>Class</li>
 <li>Use</li>
 <li><a href="../overview-tree.html">Tree</a></li>
+<li><a href="../deprecated-list.html">Deprecated</a></li>
 <li class="nav-bar-cell1-rev">Index</li>
 <li><a href="../help-doc.html#index">Help</a></li>
 </ul>
@@ -55,6 +56,14 @@ loadScripts(document, 'script');</script>
 <dl class="index">
 <dt><a href="../monero/daemon/model/MoneroNetworkType.html#parse(java.lang.String)" class="member-name-link">parse(String)</a> - Static method in enum monero.daemon.model.<a href="../monero/daemon/model/MoneroNetworkType.html" title="enum in monero.daemon.model">MoneroNetworkType</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="../monero/common/NetworkUtils.html#parseHostAndPort(java.lang.String,int)" class="member-name-link">parseHostAndPort(String, int)</a> - Static method in class monero.common.<a href="../monero/common/NetworkUtils.html" title="class in monero.common">NetworkUtils</a></dt>
+<dd>
+<div class="block">Parse an address of the form "host", "host:port", "[ipv6]" or "[ipv6]:port".</div>
+</dd>
+<dt><a href="../monero/common/NetworkUtils.html#parseHostAndPort(java.lang.String,int,boolean)" class="member-name-link">parseHostAndPort(String, int, boolean)</a> - Static method in class monero.common.<a href="../monero/common/NetworkUtils.html" title="class in monero.common">NetworkUtils</a></dt>
+<dd>
+<div class="block">Parse an address of the form "host", "host:port", "[ipv6]" or "[ipv6]:port".</div>
+</dd>
 <dt><a href="../monero/daemon/MoneroDaemon.html#parseNetworkType(java.lang.String)" class="member-name-link">parseNetworkType(String)</a> - Static method in interface monero.daemon.<a href="../monero/daemon/MoneroDaemon.html" title="interface in monero.daemon">MoneroDaemon</a></dt>
 <dd>
 <div class="block">Parses a network string to an enumerated type.</div>
@@ -69,7 +78,13 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="../monero/common/MoneroUtils.html#parseUri(java.lang.String)" class="member-name-link">parseUri(String)</a> - Static method in class monero.common.<a href="../monero/common/MoneroUtils.html" title="class in monero.common">MoneroUtils</a></dt>
 <dd>
-<div class="block">Converts the string to a URI.</div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated.</span>
+<div class="deprecation-comment">use <a href="../monero/common/NetworkUtils.html#parseUri(java.lang.String)"><code>NetworkUtils.parseUri(String)</code></a> instead</div>
+</div>
+</dd>
+<dt><a href="../monero/common/NetworkUtils.html#parseUri(java.lang.String)" class="member-name-link">parseUri(String)</a> - Static method in class monero.common.<a href="../monero/common/NetworkUtils.html" title="class in monero.common">NetworkUtils</a></dt>
+<dd>
+<div class="block">Convert a string to a URI, defaulting to the http scheme when none is given.</div>
 </dd>
 <dt><a href="../monero/common/MoneroRpcConnection.html#password" class="member-name-link">password</a> - Variable in class monero.common.<a href="../monero/common/MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a></dt>
 <dd>&nbsp;</dd>
