@@ -175,31 +175,36 @@ loadScripts(document, 'script');</script>
 <div class="block">Determine if the given URI's host is the local host (loopback or "localhost").</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isPrivateIp(java.lang.String)" class="member-name-link">isPrivateIp</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;uriString)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isLoopbackUrl(java.lang.String)" class="member-name-link">isLoopbackUrl</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;url)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Determine if the given URL's host is a loopback address (e.g.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isPrivateIp(java.lang.String)" class="member-name-link">isPrivateIp</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;uriString)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Determine if the given URI's host is local or a private (non-routable) IP address.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="NetworkUtils.HostAndPort.html" title="class in monero.common">NetworkUtils.HostAndPort</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#parseHostAndPort(java.lang.String,int)" class="member-name-link">parseHostAndPort</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;address,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="NetworkUtils.HostAndPort.html" title="class in monero.common">NetworkUtils.HostAndPort</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#parseHostAndPort(java.lang.String,int)" class="member-name-link">parseHostAndPort</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;address,
  int&nbsp;defaultPort)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Parse an address of the form "host", "host:port", "[ipv6]" or "[ipv6]:port".</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="NetworkUtils.HostAndPort.html" title="class in monero.common">NetworkUtils.HostAndPort</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#parseHostAndPort(java.lang.String,int,boolean)" class="member-name-link">parseHostAndPort</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;address,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="NetworkUtils.HostAndPort.html" title="class in monero.common">NetworkUtils.HostAndPort</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#parseHostAndPort(java.lang.String,int,boolean)" class="member-name-link">parseHostAndPort</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;address,
  int&nbsp;defaultPort,
  boolean&nbsp;portRequired)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Parse an address of the form "host", "host:port", "[ipv6]" or "[ipv6]:port".</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/net/URI.html" title="class or interface in java.net" class="external-link">URI</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#parseUri(java.lang.String)" class="member-name-link">parseUri</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;uriString)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/net/URI.html" title="class or interface in java.net" class="external-link">URI</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#parseUri(java.lang.String)" class="member-name-link">parseUri</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;uriString)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Convert a string to a URI, defaulting to the http scheme when none is given.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#stripIpv6Brackets(java.lang.String)" class="member-name-link">stripIpv6Brackets</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;host)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#stripIpv6Brackets(java.lang.String)" class="member-name-link">stripIpv6Brackets</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;host)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Strip surrounding brackets from an IPv6 literal, if present.</div>
 </div>
 </div>
@@ -376,6 +381,23 @@ loadScripts(document, 'script');</script>
 <dd><code>uriString</code> - is the URI to check (scheme optional)</dd>
 <dt>Returns:</dt>
 <dd>true if the host is local, false otherwise or if it cannot be parsed</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="isLoopbackUrl(java.lang.String)">
+<h3>isLoopbackUrl</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isLoopbackUrl</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;url)</span></div>
+<div class="block">Determine if the given URL's host is a loopback address (e.g. "127.0.0.1", "::1" or "localhost").
+
+ Recognizes the entire IPv4 loopback range (127.0.0.0/8), the IPv6 loopback
+ address (::1) and the conventional "localhost" alias. Hostnames other than
+ "localhost" are treated as non-loopback; no DNS resolution is performed.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>url</code> - is the URL to check (scheme optional)</dd>
+<dt>Returns:</dt>
+<dd>true if the host is a loopback address, false otherwise or if it cannot be parsed</dd>
 </dl>
 </section>
 </li>
