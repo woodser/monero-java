@@ -426,15 +426,16 @@ public class MoneroUtils {
   
   /**
    * Converts the string to a URI.  Throws MoneroException if exception.
-   * 
+   *
    * @param uri is the string to convert to a URI
    * @return URI is the initialized object from the string endpoint
+   * @deprecated use {@link NetworkUtils#parseUri(String)} instead
    */
+  @Deprecated
   public static URI parseUri(String uri) {
-    if (uri != null && uri.length() > 0 && !uri.toLowerCase().matches("^\\w+://.+")) uri = "http://" + uri; // assume http if protocol not given
     try {
-      return new URI(uri);
-    } catch (Exception e) {
+      return NetworkUtils.parseUri(uri);
+    } catch (IllegalArgumentException e) {
       throw new MoneroError(e);
     }
   }
