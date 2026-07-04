@@ -3035,6 +3035,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (transfer == null) transfer = new MoneroOutgoingTransfer().setTx(tx);
         ((MoneroOutgoingTransfer) transfer).setDestinations(destinations);
       }
+      else if (key.equals("sources")) {}  // ignoring
       else if (key.equals("multisig_txset") && val != null) {}  // handled elsewhere; this method only builds a tx wallet
       else if (key.equals("unsigned_txset") && val != null) {}  // handled elsewhere; this method only builds a tx wallet
       else if (key.equals("amount_in")) tx.setInputSum((BigInteger) val);
