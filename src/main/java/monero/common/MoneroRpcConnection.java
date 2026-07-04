@@ -9,12 +9,11 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,26 +33,21 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
-import org.apache.hc.client5.http.protocol.HttpClientContext;
-import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
-import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
+import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.TlsSocketStrategy;
 import org.apache.hc.client5.http.ssl.TrustAllStrategy;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.core5.http.config.Registry;
-import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.net.InetAddressUtils;
 import org.apache.hc.core5.ssl.SSLContexts;
-import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 
 /**
@@ -671,11 +665,13 @@ public class MoneroRpcConnection {
     HttpClientBuilder builder = HttpClients.custom();
     if (creds != null) builder.setDefaultCredentialsProvider(creds);
     if (!sslVerify) {
-      Registry<ConnectionSocketFactory> reg = RegistryBuilder.<ConnectionSocketFactory>create()
-          .register("http", PlainConnectionSocketFactory.getSocketFactory())
-          .register("https", new SSLConnectionSocketFactory(createInsecureSslContext(), NoopHostnameVerifier.INSTANCE))
-          .build();
-      builder.setConnectionManager(new PoolingHttpClientConnectionManager(reg));
+      TlsSocketStrategy tlsStrategy = ClientTlsStrategyBuilder.create()
+          .setSslContext(createInsecureSslContext())
+          .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+          .buildClassic();
+      builder.setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+          .setTlsSocketStrategy(tlsStrategy)
+          .build());
     }
     return builder.build();
   }
@@ -691,7 +687,7 @@ public class MoneroRpcConnection {
   // build the SOCKS target address from the request host. IP literals are resolved so the proxy
   // receives a proper IPv4/IPv6 address type (avoids sending a bracketed IPv6 as a domain name);
   // hostnames and .onion addresses are left unresolved so the proxy resolves them (avoids DNS leaks).
-  private static InetSocketAddress getSocksTargetAddress(String hostName, int port) throws IOException {
+  private static InetSocketAddress getSocksTargetAddress(String hostName, int port) throws UnknownHostException {
     String cleanHost = stripIpv6Brackets(hostName);
     if (InetAddressUtils.isIPv4Address(cleanHost) || InetAddressUtils.isIPv6Address(cleanHost)) {
       return new InetSocketAddress(InetAddress.getByName(cleanHost), port); // getByName does not perform DNS for IP literals
@@ -746,81 +742,39 @@ public class MoneroRpcConnection {
 
   private CloseableHttpResponse requestWithProxy(HttpUriRequest request) throws IOException {
 
-    // register socket factories to use socks5
+    // configure TLS (trust-all if ssl verification is disabled)
     SSLContext sslContext = sslVerify ? SSLContexts.createSystemDefault() : createInsecureSslContext();
-    HostnameVerifier hostnameVerifier = sslVerify ? null : NoopHostnameVerifier.INSTANCE; // null uses default verifier
-    Registry<ConnectionSocketFactory> reg = RegistryBuilder.<ConnectionSocketFactory>create()
-        .register("http", new SocksConnectionSocketFactory())
-        .register("https", new SocksSSLConnectionSocketFactory(sslContext, hostnameVerifier)).build();
+    HostnameVerifier hostnameVerifier = sslVerify ? new DefaultHostnameVerifier() : NoopHostnameVerifier.INSTANCE;
+    TlsSocketStrategy tlsStrategy = ClientTlsStrategyBuilder.create()
+        .setSslContext(sslContext)
+        .setHostnameVerifier(hostnameVerifier)
+        .buildClassic();
 
-    // create connection manager to use socket factories and fake dns resolver
-    boolean isLocal = false; // use fake dns resolver if not resolving DNS locally TODO: determine if request url is local
-    BasicHttpClientConnectionManager cm = isLocal ?
-        new BasicHttpClientConnectionManager(reg) :
-        new BasicHttpClientConnectionManager(reg, null, null, new FakeDnsResolver());
+    // Route all connections through the socks5 proxy. HttpClient 5.4+ performs socks routing via
+    // SocketConfig.setSocksProxyAddress. FakeDnsResolver keeps hostnames/.onion addresses unresolved
+    // so the proxy performs the lookup remotely (avoids DNS leaks).
+    URI proxyParsed = NetworkUtils.parseUri(proxyUri);
+    InetSocketAddress socksAddress = new InetSocketAddress(proxyParsed.getHost(), proxyParsed.getPort());
+    PoolingHttpClientConnectionManager cm = PoolingHttpClientConnectionManagerBuilder.create()
+        .setTlsSocketStrategy(tlsStrategy)
+        .setDnsResolver(new FakeDnsResolver())
+        .setDefaultSocketConfig(SocketConfig.custom().setSocksProxyAddress(socksAddress).build())
+        .build();
 
     // create http client, applying credentials if set
     HttpClientBuilder builder = HttpClients.custom().setConnectionManager(cm);
     if (credsProvider != null) builder.setDefaultCredentialsProvider(credsProvider);
     CloseableHttpClient closeableHttpClient = builder.build();
 
-    // register socks address
-    URI proxyParsed = NetworkUtils.parseUri(proxyUri);
-    InetSocketAddress socksAddress = new InetSocketAddress(proxyParsed.getHost(), proxyParsed.getPort());
-    HttpClientContext context = HttpClientContext.create();
-    context.setAttribute("socks.address", socksAddress);
-
     // execute request
-    CloseableHttpResponse httpResponse = closeableHttpClient.execute(request, context);
-    return httpResponse;
+    return closeableHttpClient.execute(request);
   }
 
   /**
-   * Routes connections over Socks, and avoids resolving hostnames locally.
-   * 
-   * Adapted from: http://stackoverflow.com/a/25203021/5616248
+   * Resolves target addresses for socks5 routing: hostnames and .onion addresses are left
+   * unresolved so the proxy performs the DNS lookup (avoids leaks), while IP literals are
+   * returned as-is. Adapted from: http://stackoverflow.com/a/25203021/5616248
    */
-  class SocksConnectionSocketFactory extends PlainConnectionSocketFactory {
-
-    /**
-     * creates an unconnected Socks Proxy socket
-     */
-    @Override
-    public Socket createSocket(final HttpContext context) throws IOException {
-        InetSocketAddress socksaddr = (InetSocketAddress) context.getAttribute("socks.address");
-        Proxy proxy = new Proxy(Proxy.Type.SOCKS, socksaddr);
-        return new Socket(proxy);
-    }
-
-    @Override
-    public Socket connectSocket(TimeValue connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress,
-                                InetSocketAddress localAddress, HttpContext context) throws IOException {
-        InetSocketAddress socksRemote = getSocksTargetAddress(host.getHostName(), remoteAddress.getPort());
-        return super.connectSocket(connectTimeout, socket, host, socksRemote, localAddress, context);
-    }
-  }
-
-  private class SocksSSLConnectionSocketFactory extends SSLConnectionSocketFactory {
-
-    public SocksSSLConnectionSocketFactory(final SSLContext sslContext, final HostnameVerifier hostnameVerifier) {
-        super(sslContext, hostnameVerifier); // null hostnameVerifier uses the default verifier
-    }
-
-    @Override
-    public Socket createSocket(final HttpContext context) throws IOException {
-        InetSocketAddress socksaddr = (InetSocketAddress) context.getAttribute("socks.address");
-        Proxy proxy = new Proxy(Proxy.Type.SOCKS, socksaddr);
-        return new Socket(proxy);
-    }
-
-    @Override
-    public Socket connectSocket(Socket socket, HttpHost host, InetSocketAddress remoteAddress, InetSocketAddress localAddress,
-                                Timeout connectTimeout, Object attachment, HttpContext context) throws IOException {
-        InetSocketAddress socksRemote = getSocksTargetAddress(host.getHostName(), remoteAddress.getPort());
-        return super.connectSocket(socket, host, socksRemote, localAddress, connectTimeout, attachment, context);
-    }
-  }
-
   class FakeDnsResolver implements DnsResolver {
     @Override
     public InetAddress[] resolve(String host) throws UnknownHostException {
@@ -829,7 +783,12 @@ public class MoneroRpcConnection {
 
     @Override
     public String resolveCanonicalHostname(String host) throws UnknownHostException {
-      throw new UnsupportedOperationException("Unimplemented method 'resolveCanonicalHostname'");
+      return host;
+    }
+
+    @Override
+    public List<InetSocketAddress> resolve(String host, int port) throws UnknownHostException {
+        return Collections.singletonList(getSocksTargetAddress(host, port));
     }
   }
 }
