@@ -47,6 +47,7 @@ import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroRpcError;
 import monero.common.MoneroUtils;
+import monero.common.NetworkUtils;
 import monero.common.SslOptions;
 import monero.common.TaskLooper;
 import monero.daemon.model.MoneroBlock;
@@ -519,7 +520,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (startupProxyUri != null) throw new MoneroError("Cannot set daemon connection without proxy URI because monero-wallet-rpc was started with a proxy URI: " + startupProxyUri);
     } else {
       if (startupProxyUri == null) params.put("proxy", connection == null ? "" : connection.getProxyUri());
-      else if (!startupProxyUri.equals(connection.getProxyUri())) {
+      else if (!NetworkUtils.isSameProxyUri(startupProxyUri, connection.getProxyUri())) {
         throw new MoneroError("Cannot set daemon connection with proxy URI " + connection.getProxyUri() + " because monero-wallet-rpc was started with a different proxy URI: " + startupProxyUri);
       }
     }
