@@ -95,6 +95,24 @@ public class TestNetworkUtils {
   }
 
   @Test
+  public void testIsSameProxyUri() {
+    // identical and null cases
+    assertTrue(NetworkUtils.isSameProxyUri(null, null));
+    assertTrue(NetworkUtils.isSameProxyUri("127.0.0.1:9050", "127.0.0.1:9050"));
+    assertFalse(NetworkUtils.isSameProxyUri("127.0.0.1:9050", null));
+    assertFalse(NetworkUtils.isSameProxyUri(null, "127.0.0.1:9050"));
+    // scheme prefix ignored (the reported socks5:// vs bare mismatch)
+    assertTrue(NetworkUtils.isSameProxyUri("socks5://127.0.0.1:9050", "127.0.0.1:9050"));
+    assertTrue(NetworkUtils.isSameProxyUri("127.0.0.1:9050", "socks5://127.0.0.1:9050"));
+    assertTrue(NetworkUtils.isSameProxyUri("socks5://127.0.0.1:9050", "socks4://127.0.0.1:9050"));
+    // ipv6 with and without scheme
+    assertTrue(NetworkUtils.isSameProxyUri("socks5://[::1]:9050", "[::1]:9050"));
+    // different host or port are not the same
+    assertFalse(NetworkUtils.isSameProxyUri("socks5://127.0.0.1:9050", "127.0.0.1:9051"));
+    assertFalse(NetworkUtils.isSameProxyUri("socks5://127.0.0.1:9050", "socks5://127.0.0.2:9050"));
+  }
+
+  @Test
   public void testIsIpv6Literal() {
     assertTrue(NetworkUtils.isIpv6Literal("::1"));
     assertTrue(NetworkUtils.isIpv6Literal("::"));

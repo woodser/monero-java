@@ -133,6 +133,30 @@ public class NetworkUtils {
   }
 
   /**
+   * Determine if two proxy URIs refer to the same proxy, ignoring any scheme
+   * (e.g. "socks5://") which may or may not be present on either side. For
+   * example "socks5://127.0.0.1:9050" and "127.0.0.1:9050" are equivalent.
+   *
+   * @param proxyUri1 is the first proxy URI (scheme optional)
+   * @param proxyUri2 is the second proxy URI (scheme optional)
+   * @return true if both are null or refer to the same host and port, false otherwise
+   */
+  public static boolean isSameProxyUri(String proxyUri1, String proxyUri2) {
+    if (proxyUri1 == null) return proxyUri2 == null;
+    if (proxyUri2 == null) return false;
+    if (proxyUri1.equals(proxyUri2)) return true;
+    try {
+      URI uri1 = parseUri(proxyUri1);
+      URI uri2 = parseUri(proxyUri2);
+      String host1 = stripIpv6Brackets(uri1.getHost());
+      String host2 = stripIpv6Brackets(uri2.getHost());
+      return host1 != null && host1.equalsIgnoreCase(host2) && uri1.getPort() == uri2.getPort();
+    } catch (IllegalArgumentException e) {
+      return false;
+    }
+  }
+
+  /**
    * Strip surrounding brackets from an IPv6 literal, if present.
    *
    * @param host is the host to strip
