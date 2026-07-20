@@ -4,17 +4,26 @@
 
 HOST_NCORES=$(nproc 2>/dev/null || shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
 
-# build libmonero-cpp shared library
-cd ./external/monero-cpp/ && 
+# build monero-cpp static library (also builds monero-project static dependencies)
+cd ./external/monero-cpp/ &&
 ./bin/build_libmonero_cpp.sh &&
 
-# copy libmonero-cpp shared library to ./build
+# build standalone libmonero-java library with dependencies linked statically
 cd ../../ &&
 mkdir -p ./build &&
-cp ./external/monero-cpp/build/libmonero-cpp.* ./build &&
+cd build &&
+cmake -DSTATIC=ON .. &&
+cmake --build . -j$HOST_NCORES &&
 
-# build libmonero-java shared library to ./build
-cd build && 
-cmake .. && 
-cmake --build . -j$HOST_NCORES && 
-make .
+# stage the built library into lib/<platform>/ so the jar bundles it (mirrors MoneroUtils load paths)
+case "$(uname -s)-$(uname -m)" in
+  Darwin-arm64)          PLATFORM=mac-arm64;    LIB=libmonero-java.dylib;;
+  Darwin-x86_64)         PLATFORM=mac-x86_64;   LIB=libmonero-java.dylib;;
+  Linux-aarch64)         PLATFORM=linux-arm64;  LIB=libmonero-java.so;;
+  Linux-x86_64)          PLATFORM=linux-x86_64; LIB=libmonero-java.so;;
+  MINGW*|MSYS*|CYGWIN*)  PLATFORM=windows;      LIB=libmonero-java.dll;;
+  *) echo "Unsupported platform: $(uname -s)-$(uname -m)" >&2; exit 1;;
+esac &&
+mkdir -p ../lib/$PLATFORM &&
+rm -f ../lib/$PLATFORM/libmonero-cpp.* &&
+cp ./$LIB ../lib/$PLATFORM/

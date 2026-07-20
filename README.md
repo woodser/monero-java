@@ -173,16 +173,15 @@ For convenience, native libraries for Linux, macOS, and Windows are distributed 
 
 ### Loading native libraries
 
-After building the native libraries to the ./build folder, add them to `PATH`, your application's classpath, or explictly load them in Java by calling:
+After building the native library to the ./build folder, add it to `PATH`, your application's classpath, or explictly load it in Java by calling:
 
 ```
-System.load(/absolute/path/to/libmonero-cpp.dll);
 System.load(/absolute/path/to/libmonero-java.dll);
 ```
 
 Alternatively, you can bundle the libraries into monero-java's JAR:
 
-1. Copy the libraries to their respective folder in ./lib.
+1. Copy the libraries to their respective folder in ./lib (e.g. from the CI build artifacts, which cover all supported platforms).
 2. `mvn install`
 3. Force update Maven snapshots: `mvn clean install -U`
 
