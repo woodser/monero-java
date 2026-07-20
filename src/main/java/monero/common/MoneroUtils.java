@@ -6,6 +6,7 @@ import common.utils.JsonUtils;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -41,7 +42,7 @@ public class MoneroUtils {
    * @return the version of this monero-java library
    */
   public static String getVersion() {
-    return "0.8.47";
+    return "0.8.48";
   }
 
   /**
@@ -633,7 +634,11 @@ public class MoneroUtils {
   }
 
   private static String urlEncode(String string) {
-    return URLEncoder.encode(string, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+    try {
+      return URLEncoder.encode(string, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
+    } catch (UnsupportedEncodingException e) {
+      throw new MoneroError(e); // utf-8 is always supported
+    }
   }
   
   // ---------------------------- NATIVE BINDINGS -----------------------------
