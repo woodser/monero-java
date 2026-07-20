@@ -22,6 +22,37 @@
 				<directory>lib</directory>
 			</resource>
 		</resources>
+		<plugins>
+			<plugin>
+				<!-- warn when native libraries are missing from ./lib so a jar without bundled natives is never built silently -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.4.1</version>
+				<executions>
+					<execution>
+						<id>warn-native-libraries</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<fail>false</fail>
+							<rules>
+								<requireFilesExist>
+									<files>
+										<file>${project.basedir}/lib/linux-x86_64/libmonero-java.so</file>
+										<file>${project.basedir}/lib/linux-arm64/libmonero-java.so</file>
+										<file>${project.basedir}/lib/mac-x86_64/libmonero-java.dylib</file>
+										<file>${project.basedir}/lib/mac-arm64/libmonero-java.dylib</file>
+										<file>${project.basedir}/lib/windows/libmonero-java.dll</file>
+									</files>
+									<message>Native libraries are missing from ./lib; the jar will not bundle all platforms (download from CI build artifacts).</message>
+								</requireFilesExist>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
   	</build>
 
 	<dependencies>
@@ -157,6 +188,35 @@
 			<id>release</id>
 			<build>
 				<plugins>
+					<plugin>
+						<!-- releases must bundle native libraries for all platforms (download from CI build artifacts into ./lib) -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-enforcer-plugin</artifactId>
+						<version>3.4.1</version>
+						<executions>
+							<execution>
+								<id>enforce-native-libraries</id>
+								<goals>
+									<goal>enforce</goal>
+								</goals>
+								<configuration>
+									<ignoreCache>true</ignoreCache> <!-- the warn-native-libraries execution caches this rule's result; re-evaluate so the release check fails hard -->
+									<rules>
+										<requireFilesExist>
+											<files>
+												<file>${project.basedir}/lib/linux-x86_64/libmonero-java.so</file>
+												<file>${project.basedir}/lib/linux-arm64/libmonero-java.so</file>
+												<file>${project.basedir}/lib/mac-x86_64/libmonero-java.dylib</file>
+												<file>${project.basedir}/lib/mac-arm64/libmonero-java.dylib</file>
+												<file>${project.basedir}/lib/windows/libmonero-java.dll</file>
+											</files>
+											<message>Release requires native libraries for all platforms in ./lib (download from CI build artifacts).</message>
+										</requireFilesExist>
+									</rules>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>

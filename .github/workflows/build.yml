@@ -431,14 +431,6 @@ jobs:
           for dir in lib/libmonero-java-*; do mv "$dir" "lib/${dir#lib/libmonero-java-}"; done
           ls -R lib
 
-      - name: Verify linux library on debian 12
-        run: |
-          mvn -B -q test-compile dependency:build-classpath -Dmaven.test.skip=false -Dmdep.outputFile=cp.txt
-          docker run --rm -v "$PWD:$PWD" -v "$HOME/.m2:$HOME/.m2" -w "$PWD" debian:12 bash -c "
-            apt-get update -qq && apt-get install -y -qq openjdk-17-jre-headless > /dev/null &&
-            mkdir -p test_wallets &&
-            java -cp target/classes:target/test-classes:\$(cat cp.txt) -Djava.library.path=lib/linux-x86_64 TestNativeLibrary"
-
       - name: Build jar with bundled native libraries
         run: |
           mvn -B -q package
@@ -448,6 +440,15 @@ jobs:
             jar tf "$JAR" | grep -qx "$lib" || { echo "missing $lib in jar"; exit 1; }
           done
 
+      - name: Verify jar on debian 11
+        run: |
+          # load through the jar's extract-from-resources path (no java.library.path), as consumers do; debian 11 enforces the glibc 2.31 floor
+          mvn -B -q test-compile dependency:build-classpath -Dmaven.test.skip=false -Dmdep.outputFile=cp.txt
+          JAR=$(ls target/monero-java-*.jar | grep -v -e '\-javadoc' -e '\-sources')
+          docker run --rm -v "$PWD:$PWD" -v "$HOME/.m2:$HOME/.m2" -w "$PWD" debian:11 bash -c "
+            apt-get update -qq && apt-get install -y -qq openjdk-11-jre-headless > /dev/null &&
+            mkdir -p test_wallets &&
+            java -cp $JAR:target/test-classes:\$(cat cp.txt) TestNativeLibrary"
 
       - name: Upload jar
         uses: actions/upload-artifact@v7
