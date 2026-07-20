@@ -38,6 +38,12 @@
 #include "monero_jni_bridge.h"
 #include "wallet/monero_wallet_full.h"
 #include "utils/monero_utils.h"
+#ifndef _WIN32
+#include <openssl/x509.h>
+#include <sys/stat.h>
+#include <cstdlib>
+#include <cstdio>
+#endif
 
 using namespace std;
 using namespace monero;
@@ -149,12 +155,32 @@ static jclass class_WalletListener;
 //static jclass class_Transfer;
 //static jclass class_Ledger;
 
+#ifndef _WIN32
+// statically linked OpenSSL bakes the build host's OPENSSLDIR; if absent at runtime, point OpenSSL to a known system CA location
+static void set_default_ssl_cert_paths() {
+  struct stat sb;
+  const char* env_file = getenv("SSL_CERT_FILE");
+  const char* env_dir = getenv("SSL_CERT_DIR");
+  if ((env_file != nullptr && *env_file) || (env_dir != nullptr && *env_dir)) return;
+  if (stat(X509_get_default_cert_file(), &sb) == 0 && S_ISREG(sb.st_mode) && sb.st_size > 0) return; // dir existence proves nothing (e.g. homebrew's cert dir exists but is always empty)
+  static const char* CERT_FILES[] = {"/etc/ssl/certs/ca-certificates.crt", "/etc/pki/tls/certs/ca-bundle.crt", "/etc/ssl/ca-bundle.pem", "/etc/ssl/cert.pem"};
+  static const char* CERT_DIRS[] = {"/etc/ssl/certs", "/etc/pki/tls/certs"};
+  bool found = false;
+  for (const char* file : CERT_FILES) if (stat(file, &sb) == 0) { setenv("SSL_CERT_FILE", file, 1); found = true; break; }
+  for (const char* dir : CERT_DIRS) if (stat(dir, &sb) == 0) { setenv("SSL_CERT_DIR", dir, 1); found = true; break; }
+  if (!found) fprintf(stderr, "monero-java: no system CA certificates found; TLS verification may fail\n");
+}
+#endif
+
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
   cachedJVM = jvm;
   JNIEnv *env;
   if (jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
     return -1;
   }
+#ifndef _WIN32
+  set_default_ssl_cert_paths(); // before any TLS context is created
+#endif
 
 //  class_ArrayList = static_cast<jclass>(env->NewGlobalRef(env->FindClass("java/util/ArrayList")));
 //  class_TransactionInfo = static_cast<jclass>(env->NewGlobalRef(env->FindClass("com/m2049r/xmrwallet/model/TransactionInfo")));
