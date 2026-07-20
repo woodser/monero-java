@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.github.woodser</groupId>
 	<artifactId>monero-java</artifactId>
-	<version>0.8.47</version>
+	<version>0.8.48</version>
 	<name>Monero Java Library</name>
 	<description>A Java library for using Monero</description>
 	<url>https://github.com/woodser/monero-java</url>
 	<properties>
-		<java-version>1.8</java-version>
+		<java-version>8</java-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<apachelog-version>2.11.0</apachelog-version>
 		<jackson-version>[2.13.1, 2.13.2.2]</jackson-version>
@@ -22,7 +22,30 @@
 				<directory>lib</directory>
 			</resource>
 		</resources>
+		<pluginManagement>
+			<plugins>
+				<!-- pin plugins invoked from CI so builds do not resolve latest from central -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>3.6.1</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
+			<plugin>
+				<!-- force the junit 5 provider; auto-detection picks junit 4 via junit-platform-runner and silently runs zero tests -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<artifactId>surefire-junit-platform</artifactId>
+						<version>3.2.5</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 			<plugin>
 				<!-- warn when native libraries are missing from ./lib so a jar without bundled natives is never built silently -->
 				<groupId>org.apache.maven.plugins</groupId>
@@ -164,8 +187,7 @@
 						<artifactId>maven-compiler-plugin</artifactId>
 						<version>3.8.0</version>
 						<configuration>
-							<source>${java-version}</source>
-							<target>${java-version}</target>
+							<release>${java-version}</release>
 						</configuration>
 					</plugin>
 					<plugin>
@@ -235,8 +257,7 @@
 						<artifactId>maven-compiler-plugin</artifactId>
 						<version>3.8.0</version>
 						<configuration>
-							<source>${java-version}</source>
-							<target>${java-version}</target>
+							<release>${java-version}</release>
 						</configuration>
 					</plugin>
 					<plugin>
