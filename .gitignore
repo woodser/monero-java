@@ -1,5 +1,6 @@
 /target/
 /build/
+/lib/
 **/pom.xml.versionsBackup
 **/logs
 /test_wallets
