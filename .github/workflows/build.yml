@@ -1,0 +1,456 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ubuntu:
+    name: ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    container: debian:11 # build against glibc 2.31 so the library runs on older distros (ubuntu 20.04+, debian 11+)
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            arch: linux-x86_64
+            march: x86-64
+            filearch: x86-64
+          - os: ubuntu-22.04-arm
+            arch: linux-arm64
+            march: armv8-a
+            filearch: aarch64
+
+    steps:
+      - name: Install git
+        run: |
+          apt update
+          apt install -y git ca-certificates
+          git config --global --add safe.directory '*'
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          # no maven cache: the container JVM resolves user.home to /root, not the $HOME the cache action saves
+
+      - name: Install dependencies
+        run: |
+          apt install -y build-essential cmake pkg-config file perl wget libzmq3-dev libunbound-dev libsodium-dev libunwind-dev liblzma-dev libreadline-dev libexpat1-dev libpgm-dev libhidapi-dev libusb-1.0-0-dev libprotobuf-dev protobuf-compiler libudev-dev libboost-chrono-dev libboost-date-time-dev libboost-filesystem-dev libboost-locale-dev libboost-program-options-dev libboost-regex-dev libboost-serialization-dev libboost-system-dev libboost-thread-dev python3 ccache git curl autoconf libtool gperf bison flex nettle-dev libevent-dev
+          # record versions of the distro libraries that get statically linked into the shipped binary
+          dpkg -s libsodium-dev libprotobuf-dev | grep -E '^(Package|Version)'
+
+      - name: Install maven
+        run: |
+          # distro maven is too old for the pinned plugins; install a current release
+          wget https://archive.apache.org/dist/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz
+          echo "831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6  apache-maven-3.9.16-bin.tar.gz" | sha512sum -c
+          tar xzf apache-maven-3.9.16-bin.tar.gz -C /opt
+          ln -s /opt/apache-maven-3.9.16/bin/mvn /usr/local/bin/mvn
+
+      - name: Install openssl
+        run: |
+          # distro openssl 1.1 is near end of life; build the current LTS statically (/etc/ssl matches most distros' CA layout)
+          wget https://github.com/openssl/openssl/releases/download/openssl-3.5.7/openssl-3.5.7.tar.gz
+          echo "a8c0d28a529ca480f9f36cf5792e2cd21984552a3c8e4aa11a24aa31aeac98e8  openssl-3.5.7.tar.gz" | sha256sum -c
+          tar xzf openssl-3.5.7.tar.gz
+          cd openssl-3.5.7
+          ./config --prefix=/usr/local --openssldir=/etc/ssl --libdir=lib no-shared no-tests -fPIC
+          make -j3
+          make install_sw
+
+      - name: Install expat
+        run: |
+          wget https://github.com/libexpat/libexpat/releases/download/R_2_7_1/expat-2.7.1.tar.bz2
+          echo "45c98ae1e9b5127325d25186cf8c511fa814078e9efeae7987a574b482b79b3d  expat-2.7.1.tar.bz2" | sha256sum -c
+          tar -xf expat-2.7.1.tar.bz2
+          cd expat-2.7.1
+          ./configure --enable-static --disable-shared --with-pic
+          make
+          make install
+
+      - name: Install unbound
+        run: |
+          wget https://www.nlnetlabs.nl/downloads/unbound/unbound-1.22.0.tar.gz
+          echo "c5dd1bdef5d5685b2cedb749158dd152c52d44f65529a34ac15cd88d4b1b3d43  unbound-1.22.0.tar.gz" | sha256sum -c
+          tar xzf unbound-1.22.0.tar.gz
+          cd unbound-1.22.0
+          ./configure --with-libexpat=/usr/local --with-ssl=/usr/local --enable-static --disable-shared --with-pic
+          make
+          make install
+
+      - name: Install libusb
+        run: |
+          wget https://github.com/libusb/libusb/releases/download/v1.0.27/libusb-1.0.27.tar.bz2
+          echo "ffaa41d741a8a3bee244ac8e54a72ea05bf2879663c098c82fc5757853441575  libusb-1.0.27.tar.bz2" | sha256sum -c
+          tar -xf libusb-1.0.27.tar.bz2
+          cd libusb-1.0.27
+          ./configure --disable-shared --disable-udev --with-pic
+          make
+          make install
+
+      - name: Install hidapi
+        run: |
+          wget https://github.com/libusb/hidapi/archive/refs/tags/hidapi-0.14.0.tar.gz
+          echo "a5714234abe6e1f53647dd8cba7d69f65f71c558b7896ed218864ffcf405bcbd  hidapi-0.14.0.tar.gz" | sha256sum -c
+          tar xzf hidapi-0.14.0.tar.gz
+          cd hidapi-hidapi-0.14.0
+          cmake -B build -DBUILD_SHARED_LIBS=OFF -DHIDAPI_WITH_HIDRAW=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 .
+          cmake --build build
+          cmake --install build
+
+      - name: Install boost
+        run: |
+          # system static boost is non-PIC and cannot link into a shared object; build PIC static boost matching the distro ABI (1.74.0)
+          wget https://archives.boost.io/release/1.74.0/source/boost_1_74_0.tar.bz2
+          echo "83bfc1507731a0906e387fc28b7ef5417d591429e51e788417fe9ff025e116b1  boost_1_74_0.tar.bz2" | sha256sum -c
+          tar xf boost_1_74_0.tar.bz2
+          cd boost_1_74_0
+          ./bootstrap.sh --with-libraries=chrono,date_time,filesystem,locale,program_options,regex,serialization,system,thread
+          ./b2 -j3 cxxflags="-fPIC -include limits" cflags=-fPIC link=static runtime-link=shared install
+
+      - name: Build monero-project
+        run: |
+          cd external/monero-cpp/external/monero-project
+          mkdir -p build/release
+          cd build/release
+          cmake -DSTATIC=ON -DBUILD_64=ON -DARCH="${{ matrix.march }}" -DCMAKE_BUILD_TYPE=Release -DUSE_DEVICE_TREZOR=OFF ../../
+          make -j3 wallet cryptonote_protocol
+
+      - name: Build monero-cpp
+        run: |
+          cd external/monero-cpp
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release "-DCMAKE_CXX_FLAGS=-DBOOST_UUID_DISABLE_ALIGNMENT" ..
+          # only the static library is consumed; the shared lib also fails to link on older binutils (randomx aarch64 CONDBR19 relocations)
+          cmake --build . -j3 --target monero-cpp-static
+
+      - name: Build monero-java
+        run: |
+          mkdir -p build
+          cd build
+          cmake -DSTATIC=ON -DBOOST_ROOT=/usr/local -DBoost_NO_SYSTEM_PATHS=ON ..
+          cmake --build . -j3
+
+      - name: Test native library
+        env:
+          MAVEN_OPTS: -Djava.library.path=build
+        run: |
+          file build/libmonero-java.so | grep -q '${{ matrix.filearch }}' || { echo "wrong architecture: $(file build/libmonero-java.so)"; exit 1; }
+          ldd build/libmonero-java.so
+          floor=$(objdump -T build/libmonero-java.so | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1)
+          echo "glibc floor: $floor"
+          test "$(printf '%s\nGLIBC_2.31\n' "$floor" | sort -V | tail -1)" = "GLIBC_2.31" || { echo "glibc floor $floor exceeds 2.31"; exit 1; }
+          if ldd build/libmonero-java.so | grep -vE 'linux-vdso|ld-linux|libc\.so|libm\.so|libpthread\.so|librt\.so|libdl\.so'; then
+            echo "library is not standalone: unexpected dynamic dependencies above"; exit 1
+          fi
+          nm -D --defined-only build/libmonero-java.so | grep -q ' JNI_OnLoad' || { echo "missing JNI_OnLoad export"; exit 1; }
+          test "$(nm -D --defined-only build/libmonero-java.so | grep -c ' Java_')" -ge 100 || { echo "missing JNI exports"; exit 1; }
+          # --exclude-libs hides the static closure; the bridge's own helpers stay exported, so check for leaked dependency symbols
+          if nm -D --defined-only build/libmonero-java.so | grep -E ' (SSL_|EVP_|BN_)'; then
+            echo "static closure symbols are exported"; exit 1
+          fi
+          mkdir -p test_wallets
+          mvn -B test -Dmaven.test.skip=false -Dtest=TestMoneroUtils,TestNativeLibrary -DargLine=-Djava.library.path=build
+
+      - name: Upload monero-java library
+        uses: actions/upload-artifact@v7
+        with:
+          name: libmonero-java-${{ matrix.arch }}
+          path: build/libmonero-java.so
+
+  windows:
+    name: windows
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup MSYS2 MINGW64
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-openssl
+            mingw-w64-x86_64-zeromq
+            mingw-w64-x86_64-libsodium
+            mingw-w64-x86_64-hidapi
+            mingw-w64-x86_64-unbound
+            mingw-w64-x86_64-protobuf
+            mingw-w64-x86_64-libusb
+            mingw-w64-x86_64-expat
+            mingw-w64-x86_64-ntldd
+            git
+            make
+            gettext
+            base-devel
+            wget
+
+      - name: Install ICU v75.1
+        run: |
+          wget https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-icu-75.1-2-any.pkg.tar.zst
+          echo "bf57882d43efcdfd746463613ea982c69b64aa4ba9bed4cb24c02a81ad06c3a9  mingw-w64-x86_64-icu-75.1-2-any.pkg.tar.zst" | sha256sum -c
+          pacman -U --noconfirm mingw-w64-x86_64-icu-75.1-2-any.pkg.tar.zst
+
+      - name: Install boost v1.87.0
+        run: |
+          wget https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-boost-1.87.0-3-any.pkg.tar.zst
+          echo "241919a5885a9270d0e0937e71cf5e146c2a8cabecc2714f09248350181cb1b6  mingw-w64-x86_64-boost-1.87.0-3-any.pkg.tar.zst" | sha256sum -c
+          pacman -U --noconfirm mingw-w64-x86_64-boost-1.87.0-3-any.pkg.tar.zst
+          # record versions of the msys2 libraries that get statically linked into the shipped binary
+          pacman -Q | grep mingw-w64 | sort
+
+      - name: Build monero-project
+        run: |
+          cd external/monero-cpp/external/monero-project
+          mkdir -p build/release
+          cd build/release
+          cmake -G "MSYS Makefiles" \
+            -D STATIC=ON \
+            -D ARCH="x86-64" \
+            -D BUILD_64=ON \
+            -D CMAKE_BUILD_TYPE=Release \
+            -D BUILD_TAG="win-x64" \
+            -D CMAKE_TOOLCHAIN_FILE="../../cmake/64-bit-toolchain.cmake" \
+            -D MSYS2_FOLDER=$(cd $MINGW_PREFIX/.. && pwd -W) \
+            -D USE_DEVICE_TREZOR=OFF \
+            ../../
+          make wallet cryptonote_protocol
+
+      - name: Build monero-cpp
+        run: |
+          cd external/monero-cpp
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release "-DCMAKE_CXX_FLAGS=-DBOOST_UUID_DISABLE_ALIGNMENT" ..
+          # only the static library is consumed; the shared lib also fails to link on older binutils (randomx aarch64 CONDBR19 relocations)
+          cmake --build . -j3 --target monero-cpp-static
+
+      - name: Build monero-java
+        run: |
+          export JAVA_HOME=$(cygpath -m "$JAVA_HOME")
+          mkdir -p build
+          cd build
+          cmake -DSTATIC=ON ..
+          cmake --build . -j3
+
+      - name: Test native library
+        run: |
+          objdump -f build/libmonero-java.dll | grep -q "x86-64" || { echo "wrong architecture"; exit 1; }
+          ntldd build/libmonero-java.dll
+          if ntldd build/libmonero-java.dll | grep -iE "mingw|msys|not found"; then
+            echo "library is not standalone: unexpected dynamic dependencies above"; exit 1
+          fi
+          # allow-list imports by name so a dependency resolving outside msys2 paths still fails
+          if ntldd build/libmonero-java.dll | grep -ivE "ntdll|kernel32|kernelbase|msvcrt|ws2_32|advapi32|user32|shell32|ole32|oleaut32|rpcrt4|crypt32|bcrypt|secur32|dnsapi|iphlpapi|setupapi|cfgmgr32|gdi32|winmm|userenv|version\.dll|api-ms-win" | grep -iE "\.dll"; then
+            echo "library is not standalone: unexpected dynamic dependencies above"; exit 1
+          fi
+          objdump -p build/libmonero-java.dll | grep -q "JNI_OnLoad" || { echo "missing JNI_OnLoad export"; exit 1; }
+          test "$(objdump -p build/libmonero-java.dll | grep -c ' Java_')" -ge 100 || { echo "missing JNI exports"; exit 1; }
+
+      - name: Test wallet operations
+        shell: bash # git bash, not msys2, so a leaked msys2 dll dependency fails to resolve
+        env:
+          MAVEN_OPTS: -Djava.library.path=build
+        run: |
+          mkdir -p test_wallets
+          mvn -B test -Dmaven.test.skip=false -Dtest=TestMoneroUtils,TestNativeLibrary -DargLine=-Djava.library.path=build
+
+      - name: Upload monero-java library
+        uses: actions/upload-artifact@v7
+        with:
+          name: libmonero-java-windows
+          path: build/libmonero-java.dll
+
+  mac:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            arch: mac-arm64
+            march: armv8-a
+            filearch: arm64
+          - os: macos-15-intel
+            arch: mac-x86_64
+            march: x86-64
+            filearch: x86_64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Install dependencies
+        run: |
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install libsodium openssl zmq libpgm miniupnpc expat libunwind-headers protobuf unbound libevent libnghttp2
+          # record versions of the brew libraries that get statically linked into the shipped binary
+          brew list --versions | sort
+
+      - name: Install hidapi (static)
+        run: |
+          # brew ships no static hidapi; build from source so the library is standalone
+          curl -fsSLO https://github.com/libusb/hidapi/archive/refs/tags/hidapi-0.14.0.tar.gz
+          echo "a5714234abe6e1f53647dd8cba7d69f65f71c558b7896ed218864ffcf405bcbd  hidapi-0.14.0.tar.gz" | shasum -a 256 -c
+          tar xzf hidapi-0.14.0.tar.gz
+          cd hidapi-hidapi-0.14.0
+          cmake -B build -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 .
+          cmake --build build
+          sudo cmake --install build
+
+      - name: Install boost
+        run: |
+          # brew's only static boost is the disabled boost@1.85 formula; build the same version from source (also keeps its objects at the 11.0 deployment target)
+          curl -fsSLO https://archives.boost.io/release/1.85.0/source/boost_1_85_0.tar.bz2
+          echo "7009fe1faa1697476bdc7027703a2badb84e849b7b0baad5086b087b971f8617  boost_1_85_0.tar.bz2" | shasum -a 256 -c
+          tar xf boost_1_85_0.tar.bz2
+          cd boost_1_85_0
+          ./bootstrap.sh --with-libraries=chrono,date_time,filesystem,locale,program_options,regex,serialization,system,thread
+          ./b2 -j3 cxxflags=-fPIC cflags=-fPIC link=static runtime-link=shared boost.locale.icu=off
+          sudo -E ./b2 -j3 cxxflags=-fPIC cflags=-fPIC link=static runtime-link=shared boost.locale.icu=off install
+
+      - name: Build monero-project
+        run: |
+          cd external/monero-cpp/external/monero-project
+          mkdir -p build/release
+          cd build/release
+          cmake -DSTATIC=ON -DBUILD_64=ON -DARCH="${{ matrix.march }}" -DCMAKE_BUILD_TYPE=Release -DUSE_DEVICE_TREZOR=OFF ../../
+          make -j3 wallet cryptonote_protocol
+
+      - name: Build monero-cpp
+        run: |
+          cd external/monero-cpp
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release "-DCMAKE_CXX_FLAGS=-DBOOST_UUID_DISABLE_ALIGNMENT" ..
+          # only the static library is consumed; the shared lib also fails to link on older binutils (randomx aarch64 CONDBR19 relocations)
+          cmake --build . -j3 --target monero-cpp-static
+
+      - name: Build monero-java
+        run: |
+          mkdir -p build
+          cd build
+          cmake -DSTATIC=ON -DBOOST_ROOT=/usr/local -DBoost_NO_SYSTEM_PATHS=ON ..
+          cmake --build . -j3
+
+      - name: Test native library
+        env:
+          MAVEN_OPTS: -Djava.library.path=build
+        run: |
+          lipo -archs build/libmonero-java.dylib | grep -qx '${{ matrix.filearch }}' || { echo "wrong architecture: $(lipo -archs build/libmonero-java.dylib)"; exit 1; }
+          otool -L build/libmonero-java.dylib
+          otool -l build/libmonero-java.dylib | grep minos
+          otool -l build/libmonero-java.dylib | grep -q 'minos 11.0' || { echo "unexpected macOS deployment target"; exit 1; }
+          if otool -L build/libmonero-java.dylib | tail -n +2 | grep -vE '@rpath/libmonero-java\.dylib|/usr/lib/|/System/Library/'; then
+            echo "library is not standalone: unexpected dynamic dependencies above"; exit 1
+          fi
+          nm -gU build/libmonero-java.dylib | grep -q ' _JNI_OnLoad' || { echo "missing JNI_OnLoad export"; exit 1; }
+          test "$(nm -gU build/libmonero-java.dylib | grep -c ' _Java_')" -ge 100 || { echo "missing JNI exports"; exit 1; }
+          if nm -gU build/libmonero-java.dylib | awk '{print $NF}' | grep -vE '^_(Java_|JNI_OnLoad$|JNI_OnUnload$)'; then
+            echo "unexpected exports above"; exit 1
+          fi
+          mkdir -p test_wallets
+          mvn -B test -Dmaven.test.skip=false -Dtest=TestMoneroUtils,TestNativeLibrary -DargLine=-Djava.library.path=build
+
+      - name: Upload monero-java library
+        uses: actions/upload-artifact@v7
+        with:
+          name: libmonero-java-${{ matrix.arch }}
+          path: build/libmonero-java.dylib
+
+  jar:
+    name: jar
+    runs-on: ubuntu-22.04
+    needs: [ubuntu, windows, mac]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Download native libraries
+        uses: actions/download-artifact@v7
+        with:
+          pattern: libmonero-java-*
+          path: lib
+
+      - name: Stage native libraries
+        run: |
+          for dir in lib/libmonero-java-*; do mv "$dir" "lib/${dir#lib/libmonero-java-}"; done
+          ls -R lib
+
+      - name: Verify linux library on debian 12
+        run: |
+          mvn -B -q test-compile dependency:build-classpath -Dmaven.test.skip=false -Dmdep.outputFile=cp.txt
+          docker run --rm -v "$PWD:$PWD" -v "$HOME/.m2:$HOME/.m2" -w "$PWD" debian:12 bash -c "
+            apt-get update -qq && apt-get install -y -qq openjdk-17-jre-headless > /dev/null &&
+            mkdir -p test_wallets &&
+            java -cp target/classes:target/test-classes:\$(cat cp.txt) -Djava.library.path=lib/linux-x86_64 TestNativeLibrary"
+
+      - name: Build jar with bundled native libraries
+        run: |
+          mvn -B -q package
+          JAR=$(ls target/monero-java-*.jar | grep -v -e '\-javadoc' -e '\-sources')
+          jar tf "$JAR" | grep libmonero-java
+          for lib in linux-x86_64/libmonero-java.so linux-arm64/libmonero-java.so mac-arm64/libmonero-java.dylib mac-x86_64/libmonero-java.dylib windows/libmonero-java.dll; do
+            jar tf "$JAR" | grep -qx "$lib" || { echo "missing $lib in jar"; exit 1; }
+          done
+
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v7
+        with:
+          name: monero-java
+          path: target/monero-java-*.jar
