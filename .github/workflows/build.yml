@@ -431,6 +431,13 @@ jobs:
           for dir in lib/libmonero-java-*; do mv "$dir" "lib/${dir#lib/libmonero-java-}"; done
           ls -R lib
 
+      - name: Upload combined native libraries
+        # single artifact laid out as ./lib so bin/stage_native_libs.sh can drop it straight in
+        uses: actions/upload-artifact@v7
+        with:
+          name: monero-java-native-libs
+          path: lib
+
       - name: Build jar with bundled native libraries
         run: |
           mvn -B -q package
