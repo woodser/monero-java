@@ -181,7 +181,7 @@ System.load(/absolute/path/to/libmonero-java.dll);
 
 Alternatively, you can bundle the libraries into monero-java's JAR:
 
-1. Copy the libraries to their respective folder in ./lib (e.g. from the CI build artifacts, which cover all supported platforms).
+1. Download the `monero-java-native-libs` artifact from the CI Build run and stage it into ./lib: `./bin/stage_native_libs.sh <path-to-zip>`.
 2. `mvn install`
 3. Force update Maven snapshots: `mvn clean install -U`
 
