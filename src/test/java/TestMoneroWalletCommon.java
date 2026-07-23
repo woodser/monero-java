@@ -3212,7 +3212,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testSendFromSubaddresses() {
     assumeTrue(TEST_RELAYS);
-    testSendFromMultiple(null);
+    testSendFromMultiple(new MoneroTxConfig().setCanSplit(false));
   }
   
   // Can send from multiple subaddresses in split transactions
