@@ -159,12 +159,6 @@ if(NOT UNBOUND_INCLUDE_DIR)
   message(FATAL_ERROR "Could not find libunbound")
 else()
   if(UNBOUND_LIBRARIES)
-    if (WIN32 OR UNBOUND_LIBRARIES MATCHES "\\.a$")
-      add_library(unbound STATIC IMPORTED)
-    else()
-      add_library(unbound SHARED IMPORTED)
-    endif()
-    set_target_properties(unbound PROPERTIES IMPORTED_LOCATION ${UNBOUND_LIBRARIES})
     if (STATIC)
       # static libunbound also requires expat and, when built with DoH, libevent + nghttp2
       find_library(EXPAT_LIBRARY expat HINTS /opt/homebrew/opt/expat/lib /usr/local/opt/expat/lib)
@@ -343,7 +337,6 @@ target_link_libraries(monero-java
     rpc_base
     net
     lmdb
-    unbound
     easylogging
     cryptonote_core
     cryptonote_protocol
