@@ -5543,10 +5543,13 @@ public abstract class TestMoneroWalletCommon {
     assertTrue(txs.size() > 0);
     for (MoneroTxWallet tx : txs) testTxWallet(tx, ctx);
 
-    // test destinations across transactions
+    // test destinations across transactions; monero-project does not preserve destination order or splitting, so aggregate by address
     if (ctx.config != null && ctx.config.getDestinations() != null) {
-      int destinationIdx = 0;
       boolean subtractFeeFromDestinations = ctx.config.getSubtractFeeFrom() != null && ctx.config.getSubtractFeeFrom().size() > 0;
+      Map<String, BigInteger> expectedAmounts = new HashMap<String, BigInteger>();
+      for (MoneroDestination destination : ctx.config.getDestinations()) expectedAmounts.merge(destination.getAddress(), destination.getAmount(), BigInteger::add);
+      Map<String, BigInteger> actualAmounts = new HashMap<String, BigInteger>();
+      BigInteger feeSum = BigInteger.valueOf(0);
       for (MoneroTxWallet tx : txs) {
 
         // TODO: remove this after >18.3.1 when amounts_by_dest_list is official
@@ -5555,17 +5558,21 @@ public abstract class TestMoneroWalletCommon {
           return;
         }
 
-        BigInteger amountDiff = BigInteger.valueOf(0);
+        feeSum = feeSum.add(tx.getFee());
         for (MoneroDestination destination : tx.getOutgoingTransfer().getDestinations()) {
-          MoneroDestination ctxDestination = ctx.config.getDestinations().get(destinationIdx);
-          assertEquals(ctxDestination.getAddress(), destination.getAddress());
-          if (subtractFeeFromDestinations) amountDiff = amountDiff.add(ctxDestination.getAmount().subtract(destination.getAmount()));
-          else assertEquals(ctxDestination.getAmount(), destination.getAmount());
-          destinationIdx++;
+          assertTrue(expectedAmounts.containsKey(destination.getAddress()), "Destination address not in config");
+          actualAmounts.merge(destination.getAddress(), destination.getAmount(), BigInteger::add);
         }
-        if (subtractFeeFromDestinations) assertEquals(amountDiff, tx.getFee());
       }
-      assertEquals(destinationIdx, ctx.config.getDestinations().size());
+
+      // each destination receives its requested amount, less fee if subtracted from destinations
+      if (subtractFeeFromDestinations) {
+        BigInteger amountDiff = BigInteger.valueOf(0);
+        for (String address : expectedAmounts.keySet()) amountDiff = amountDiff.add(expectedAmounts.get(address).subtract(actualAmounts.getOrDefault(address, BigInteger.valueOf(0))));
+        assertEquals(feeSum, amountDiff);
+      } else {
+        assertEquals(expectedAmounts, actualAmounts);
+      }
     }
   }
 
