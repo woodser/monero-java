@@ -184,27 +184,34 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Determine if the given URI's host is local or a private (non-routable) IP address.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="NetworkUtils.HostAndPort.html" title="class in monero.common">NetworkUtils.HostAndPort</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#parseHostAndPort(java.lang.String,int)" class="member-name-link">parseHostAndPort</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;address,
- int&nbsp;defaultPort)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isSameProxyUri(java.lang.String,java.lang.String)" class="member-name-link">isSameProxyUri</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;proxyUri1,
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;proxyUri2)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Parse an address of the form "host", "host:port", "[ipv6]" or "[ipv6]:port".</div>
+<div class="block">Determine if two proxy URIs refer to the same proxy, ignoring any scheme
+ (e.g.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="NetworkUtils.HostAndPort.html" title="class in monero.common">NetworkUtils.HostAndPort</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#parseHostAndPort(java.lang.String,int,boolean)" class="member-name-link">parseHostAndPort</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;address,
- int&nbsp;defaultPort,
- boolean&nbsp;portRequired)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#parseHostAndPort(java.lang.String,int)" class="member-name-link">parseHostAndPort</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;address,
+ int&nbsp;defaultPort)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Parse an address of the form "host", "host:port", "[ipv6]" or "[ipv6]:port".</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/net/URI.html" title="class or interface in java.net" class="external-link">URI</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#parseUri(java.lang.String)" class="member-name-link">parseUri</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;uriString)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="NetworkUtils.HostAndPort.html" title="class in monero.common">NetworkUtils.HostAndPort</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#parseHostAndPort(java.lang.String,int,boolean)" class="member-name-link">parseHostAndPort</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;address,
+ int&nbsp;defaultPort,
+ boolean&nbsp;portRequired)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Parse an address of the form "host", "host:port", "[ipv6]" or "[ipv6]:port".</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/net/URI.html" title="class or interface in java.net" class="external-link">URI</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#parseUri(java.lang.String)" class="member-name-link">parseUri</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;uriString)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Convert a string to a URI, defaulting to the http scheme when none is given.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#stripIpv6Brackets(java.lang.String)" class="member-name-link">stripIpv6Brackets</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;host)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#stripIpv6Brackets(java.lang.String)" class="member-name-link">stripIpv6Brackets</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;host)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Strip surrounding brackets from an IPv6 literal, if present.</div>
 </div>
 </div>
@@ -326,6 +333,23 @@ loadScripts(document, 'script');</script>
 <dd><code>port</code> - is the port</dd>
 <dt>Returns:</dt>
 <dd>the formatted "host:port"</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="isSameProxyUri(java.lang.String,java.lang.String)">
+<h3>isSameProxyUri</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isSameProxyUri</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;proxyUri1,
+ <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;proxyUri2)</span></div>
+<div class="block">Determine if two proxy URIs refer to the same proxy, ignoring any scheme
+ (e.g. "socks5://") which may or may not be present on either side. For
+ example "socks5://127.0.0.1:9050" and "127.0.0.1:9050" are equivalent.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>proxyUri1</code> - is the first proxy URI (scheme optional)</dd>
+<dd><code>proxyUri2</code> - is the second proxy URI (scheme optional)</dd>
+<dt>Returns:</dt>
+<dd>true if both are null or refer to the same host and port, false otherwise</dd>
 </dl>
 </section>
 </li>
