@@ -168,10 +168,6 @@
 			<id>ossrh</id>
 			<url>https://ossrh-staging-api.central.sonatype.com/content/repositories/snapshots</url>
 		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/</url>
-		</repository>
 	</distributionManagement>
 
 	<profiles>
@@ -210,6 +206,18 @@
 			<id>release</id>
 			<build>
 				<plugins>
+					<plugin>
+						<!-- publish releases straight to maven central via the portal; extensions=true remaps the deploy phase and autoPublish removes the manual promote step -->
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<version>0.11.0</version>
+						<extensions>true</extensions>
+						<configuration>
+							<publishingServerId>ossrh</publishingServerId>
+							<autoPublish>true</autoPublish>
+							<waitUntil>published</waitUntil>
+						</configuration>
+					</plugin>
 					<plugin>
 						<!-- releases must bundle native libraries for all platforms (download from CI build artifacts into ./lib) -->
 						<groupId>org.apache.maven.plugins</groupId>
