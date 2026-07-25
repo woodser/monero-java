@@ -209,10 +209,11 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     // read wallet data from disk unless provided
     MoneroWalletFull wallet;
     if (config.getKeysData() == null) {
-      wallet = openWallet(config.getPath(), config.getPassword(), config.getNetworkType(), config.getServer());
+      wallet = openWallet(config.getPath(), config.getPassword(), config.getNetworkType(), (MoneroRpcConnection) null);
     } else {
-      wallet = openWalletData(config.getPassword(), config.getNetworkType(), config.getKeysData(), config.getCacheData(), config.getServer());
+      wallet = openWalletData(config.getPassword(), config.getNetworkType(), config.getKeysData(), config.getCacheData(), null);
     }
+    if (config.getServer() != null) wallet.setDaemonConnection(config.getServer(), config.isTrustedDaemon());
 
     // set connection manager
     wallet.setConnectionManager(config.getConnectionManager());
@@ -461,17 +462,37 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   @Override
   public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
+    setDaemonConnection(daemonConnection, null);
+  }
+
+  @Override
+  public void setDaemonConnection(MoneroRpcConnection daemonConnection, Boolean isTrusted) {
     assertNotClosed();
-    if (daemonConnection == null) setDaemonConnectionJni("", "", "", "");
+    int isTrustedJni = isTrusted == null ? -1 : (isTrusted ? 1 : 0); // negative if unset
+    if (daemonConnection == null) setDaemonConnectionJni("", "", "", "", isTrustedJni);
     else {
       try {
-        setDaemonConnectionJni(daemonConnection.getUri() == null ? "" : daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword(), daemonConnection.getProxyUri());
+        setDaemonConnectionJni(daemonConnection.getUri() == null ? "" : daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword(), daemonConnection.getProxyUri(), isTrustedJni);
       } catch (Exception e) {
         throw new MoneroError(e.getMessage());
       }
     }
   }
-  
+
+  /**
+   * Indicates if the wallet's daemon is trusted.
+   *
+   * @return true if the daemon is trusted, false otherwise
+   */
+  public boolean isDaemonTrusted() {
+    assertNotClosed();
+    try {
+      return isDaemonTrustedJni();
+    } catch (Exception e) {
+      throw new MoneroError(e.getMessage());
+    }
+  }
+
   @Override
   public MoneroRpcConnection getDaemonConnection() {
     assertNotClosed();
@@ -1423,14 +1444,16 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private native boolean isViewOnlyJni();
   
-  private native void setDaemonConnectionJni(String uri, String username, String password, String proxyUri);
+  private native void setDaemonConnectionJni(String uri, String username, String password, String proxyUri, int isTrusted);
   
   private native String[] getDaemonConnectionJni(); // returns [uri, username, password]
   
   private native boolean isConnectedToDaemonJni();
   
   private native boolean isDaemonSyncedJni();
-  
+
+  private native boolean isDaemonTrustedJni();
+
   private native boolean isSyncedJni();
   
   private native int getNetworkTypeJni();

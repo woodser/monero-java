@@ -17,6 +17,7 @@ public class MoneroWalletConfig {
   private String password;
   private MoneroNetworkType networkType;
   private MoneroRpcConnection server;
+  private Boolean isTrustedDaemon;
   private String serverUsername;
   private String serverPassword;
   private String serverProxyUri;
@@ -45,6 +46,7 @@ public class MoneroWalletConfig {
     password = config.getPassword();
     networkType = config.getNetworkType();
     server = config.getServer();
+    isTrustedDaemon = config.isTrustedDaemon();
     connectionManager = config.getConnectionManager();
     seed = config.getSeed();
     seedOffset = config.getSeedOffset();
@@ -282,6 +284,16 @@ public class MoneroWalletConfig {
 
   public MoneroWalletConfig setCacheData(byte[] cacheData) {
     this.cacheData = cacheData;
+    return this;
+  }
+
+  @JsonProperty("isTrustedDaemon")
+  public Boolean isTrustedDaemon() {
+    return isTrustedDaemon;
+  }
+
+  public MoneroWalletConfig setIsTrustedDaemon(Boolean isTrustedDaemon) {
+    this.isTrustedDaemon = isTrustedDaemon;
     return this;
   }
 
