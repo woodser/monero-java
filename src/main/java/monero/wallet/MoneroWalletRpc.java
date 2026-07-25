@@ -500,7 +500,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public void setDaemonConnection(MoneroRpcConnection connection) {
     setDaemonConnection(connection, null, null);
   }
-  
+
+  @Override
+  public void setDaemonConnection(MoneroRpcConnection connection, Boolean isTrusted) {
+    setDaemonConnection(connection, isTrusted, null);
+  }
+
   public void setDaemonConnection(MoneroRpcConnection connection, Boolean isTrusted, SslOptions sslOptions) {
     if (sslOptions == null) sslOptions = new SslOptions();
     Map<String, Object> params = new HashMap<String, Object>();

@@ -94,7 +94,7 @@ void rethrow_java_exception_as_cpp_exception(JNIEnv* env, jthrowable jexception)
   throw runtime_error(msg);
 }
 
-void set_daemon_connection(JNIEnv *env, monero_wallet* wallet, jstring juri, jstring jusername, jstring jpassword, jstring jproxy_uri) {
+void set_daemon_connection(JNIEnv *env, monero_wallet* wallet, jstring juri, jstring jusername, jstring jpassword, jstring jproxy_uri, jint jis_trusted) {
 
   // collect and release string params
   const char* _uri = juri ? env->GetStringUTFChars(juri, NULL) : nullptr;
@@ -110,9 +110,12 @@ void set_daemon_connection(JNIEnv *env, monero_wallet* wallet, jstring juri, jst
   env->ReleaseStringUTFChars(jpassword, _password);
   env->ReleaseStringUTFChars(jproxy_uri, _proxy_uri);
 
+  // collect trusted param, which is unset if negative
+  boost::optional<bool> is_trusted = jis_trusted < 0 ? boost::none : boost::optional<bool>(jis_trusted != 0);
+
   // set daemon connection
   try {
-    wallet->set_daemon_connection(uri, username, password, proxy_uri);
+    wallet->set_daemon_connection(uri, username, password, proxy_uri, is_trusted);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
   }
@@ -551,13 +554,24 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isViewOnlyJni(JNI
   return wallet->is_view_only();
 }
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setDaemonConnectionJni(JNIEnv *env, jobject instance, jstring juri, jstring jusername, jstring jpassword, jstring jproxy_uri) {
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setDaemonConnectionJni(JNIEnv *env, jobject instance, jstring juri, jstring jusername, jstring jpassword, jstring jproxy_uri, jint jis_trusted) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_setDaemonConnectionJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   try {
-    set_daemon_connection(env, wallet, juri, jusername, jpassword, jproxy_uri);
+    set_daemon_connection(env, wallet, juri, jusername, jpassword, jproxy_uri, jis_trusted);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
+JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isDaemonTrustedJni(JNIEnv *env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_isDaemonTrustedJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    return static_cast<jboolean>(wallet->is_daemon_trusted());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return false;
   }
 }
 

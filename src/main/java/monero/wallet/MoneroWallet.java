@@ -116,10 +116,18 @@ public interface MoneroWallet {
    * @param daemonConnection manages daemon connection information
    */
   public void setDaemonConnection(MoneroRpcConnection daemonConnection);
-  
+
+  /**
+   * Set the wallet's daemon connection.
+   *
+   * @param daemonConnection manages daemon connection information
+   * @param isTrusted specifies if the daemon is trusted (default = trusted if local address)
+   */
+  public void setDaemonConnection(MoneroRpcConnection daemonConnection, Boolean isTrusted);
+
   /**
    * Get the wallet's daemon connection.
-   * 
+   *
    * @return the wallet's daemon connection
    */
   public MoneroRpcConnection getDaemonConnection();
