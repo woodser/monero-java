@@ -2564,6 +2564,8 @@ public abstract class TestMoneroWalletCommon {
     assertFalse(signedTxSet.getSignedTxHex().isEmpty());
     assertEquals(1, signedTxSet.getTxs().size());
     assertFalse(signedTxSet.getTxs().get(0).getHash().isEmpty());
+    assertFalse(signedTxSet.getTxs().get(0).getKey().isEmpty());
+    assertFalse(signedTxSet.getTxs().get(0).getFullHex().isEmpty());
     
     // parse or "describe" unsigned tx set
     MoneroTxSet describedTxSet = offlineWallet.describeUnsignedTxSet(unsignedTx.getTxSet().getUnsignedTxHex());

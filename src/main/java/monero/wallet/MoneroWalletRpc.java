@@ -1415,6 +1415,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public MoneroTxSet signTxs(String unsignedTxHex) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("unsigned_txset", unsignedTxHex);
+    params.put("export_raw", true);
+    params.put("get_tx_keys", true);
     Map<String, Object> resp = rpc.sendJsonRequest("sign_transfer", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     return convertRpcSentTxsToTxSet(result, null, null);
@@ -2885,7 +2887,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       } else if (key.equals("tx_key_list")) {
         List<String> keys = (List<String>) val;
         for (int i = 0; i < keys.size(); i++) txs.get(i).setKey(keys.get(i));
-      } else if (key.equals("tx_blob_list")) {
+      } else if (key.equals("tx_blob_list") || key.equals("tx_raw_list")) {
         List<String> blobs = (List<String>) val;
         for (int i = 0; i < blobs.size(); i++) txs.get(i).setFullHex(blobs.get(i));
       } else if (key.equals("tx_metadata_list")) {
