@@ -945,10 +945,10 @@
         <mxCell id="QYUe6zCbC_x82nWfNGpH-329" parent="QYUe6zCbC_x82nWfNGpH-248" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Verdana;" value="importOutputs(string outputsHex): uint" vertex="1">
           <mxGeometry height="26" width="814" y="318" as="geometry" />
         </mxCell>
-        <mxCell id="QYUe6zCbC_x82nWfNGpH-330" parent="QYUe6zCbC_x82nWfNGpH-248" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Verdana;" value="exportKeyImages(bool all=false): MoneroKeyImage[]" vertex="1">
+        <mxCell id="QYUe6zCbC_x82nWfNGpH-330" parent="QYUe6zCbC_x82nWfNGpH-248" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Verdana;" value="exportKeyImages(bool all=false): MoneroKeyImageExportResult" vertex="1">
           <mxGeometry height="26" width="814" y="344" as="geometry" />
         </mxCell>
-        <mxCell id="QYUe6zCbC_x82nWfNGpH-331" parent="QYUe6zCbC_x82nWfNGpH-248" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Verdana;" value="importKeyImages(MoneroKeyImage[] keyImages): MoneroKeyImageImportResult" vertex="1">
+        <mxCell id="QYUe6zCbC_x82nWfNGpH-331" parent="QYUe6zCbC_x82nWfNGpH-248" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Verdana;" value="importKeyImages(MoneroKeyImage[] keyImages, uint offset=0): MoneroKeyImageImportResult" vertex="1">
           <mxGeometry height="26" width="814" y="370" as="geometry" />
         </mxCell>
         <mxCell id="9wusJIeZhnCERMAPth61-1" parent="QYUe6zCbC_x82nWfNGpH-248" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Verdana;" value="freezeOutput(String keyImage): void" vertex="1">

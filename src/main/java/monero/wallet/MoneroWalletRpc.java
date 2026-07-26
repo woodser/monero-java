@@ -64,6 +64,7 @@ import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroKeyImageExportResult;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroMessageSignatureResult;
 import monero.wallet.model.MoneroMessageSignatureType;
@@ -1109,14 +1110,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroKeyImage> exportKeyImages(boolean all) {
+  public MoneroKeyImageExportResult exportKeyImages(boolean all) {
     return rpcExportKeyImages(all);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public MoneroKeyImageImportResult importKeyImages(List<MoneroKeyImage> keyImages) {
-    
+  public MoneroKeyImageImportResult importKeyImages(List<MoneroKeyImage> keyImages, long offset) {
+
     // convert key images to rpc parameter
     List<Map<String, Object>> rpcKeyImages = new ArrayList<Map<String, Object>>();
     for (MoneroKeyImage keyImage : keyImages) {
@@ -1125,10 +1126,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       rpcKeyImage.put("signature", keyImage.getSignature());
       rpcKeyImages.add(rpcKeyImage);
     }
-    
+
     // send rpc request
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("signed_key_images", rpcKeyImages);
+    params.put("offset", offset);
     Map<String, Object> resp = rpc.sendJsonRequest("import_key_images", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
     
@@ -1142,7 +1144,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public List<MoneroKeyImage> getNewKeyImagesFromLastImport() {
-    return rpcExportKeyImages(false);
+    return rpcExportKeyImages(false).getKeyImages();
   }
   
   @Override
@@ -1989,20 +1991,23 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    * Common method to get key images.
    * 
    * @param all specifies to get all xor only new images from last import
-   * @return {MoneroKeyImage[]} are the key images
+   * @return {MoneroKeyImageExportResult} the key images and their offset among the wallet's outputs
    */
   @SuppressWarnings("unchecked")
-  private List<MoneroKeyImage> rpcExportKeyImages(boolean all) {
+  private MoneroKeyImageExportResult rpcExportKeyImages(boolean all) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("all", all);
     Map<String, Object> resp = rpc.sendJsonRequest("export_key_images", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
+    MoneroKeyImageExportResult exportResult = new MoneroKeyImageExportResult();
+    if (result.containsKey("offset")) exportResult.setOffset(((BigInteger) result.get("offset")).longValue());
     List<MoneroKeyImage> images = new ArrayList<MoneroKeyImage>();
-    if (!result.containsKey("signed_key_images")) return images;
+    exportResult.setKeyImages(images);
+    if (!result.containsKey("signed_key_images")) return exportResult;
     for (Map<String, Object> rpcImage : (List<Map<String, Object>>) result.get("signed_key_images")) {
       images.add(new MoneroKeyImage((String) rpcImage.get("key_image"), (String) rpcImage.get("signature")));
     }
-    return images;
+    return exportResult;
   }
   
   @SuppressWarnings("unchecked")

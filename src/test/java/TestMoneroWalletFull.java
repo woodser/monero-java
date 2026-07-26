@@ -19,11 +19,11 @@ import java.util.concurrent.TimeUnit;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroUtils;
-import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletFull;
 import monero.wallet.MoneroWalletRpc;
+import monero.wallet.model.MoneroKeyImageExportResult;
 import monero.wallet.model.MoneroMultisigInfo;
 import monero.wallet.model.MoneroMultisigInitResult;
 import monero.wallet.model.MoneroOutputQuery;
@@ -153,8 +153,8 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
         List<MoneroTransfer> inTransfers1 = wallet.getTransfers(new MoneroTransferQuery().setIsIncoming(true));
         
         // export and re-import key images
-        List<MoneroKeyImage> keyImages = wallet.exportKeyImages();
-        wallet.importKeyImages(keyImages);
+        MoneroKeyImageExportResult keyImageResult = wallet.exportKeyImages();
+        wallet.importKeyImages(keyImageResult.getKeyImages(), keyImageResult.getOffset());
         
         // get incoming transfers after importing
         List<MoneroTransfer> inTransfers2 = wallet.getTransfers(new MoneroTransferQuery().setIsIncoming(true));

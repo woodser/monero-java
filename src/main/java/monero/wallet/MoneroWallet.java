@@ -38,6 +38,7 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroKeyImageExportResult;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroMessageSignatureResult;
 import monero.wallet.model.MoneroMessageSignatureType;
@@ -778,17 +779,17 @@ public interface MoneroWallet {
   /**
    * Export key images since the last export.
    * 
-   * @return signed key images since the last export
+   * @return signed key images since the last export and their offset among the wallet's outputs
    */
-  List<MoneroKeyImage> exportKeyImages();
+  MoneroKeyImageExportResult exportKeyImages();
   
   /**
    * Export signed key images.
    * 
    * @param all exports all key images if true, else exports the key images since the last export
-   * @return signed key images
+   * @return signed key images and their offset among the wallet's outputs
    */
-  public List<MoneroKeyImage> exportKeyImages(boolean all);
+  public MoneroKeyImageExportResult exportKeyImages(boolean all);
   
   /**
    * Import signed key images and verify their spent status.
@@ -797,6 +798,15 @@ public interface MoneroWallet {
    * @return results of the import
    */
   public MoneroKeyImageImportResult importKeyImages(List<MoneroKeyImage> keyImages);
+  
+  /**
+   * Import signed key images and verify their spent status.
+   * 
+   * @param keyImages are key images to import and verify (requires hex and signature)
+   * @param offset offset of the first key image among the wallet's outputs
+   * @return results of the import
+   */
+  public MoneroKeyImageImportResult importKeyImages(List<MoneroKeyImage> keyImages, long offset);
   
   /**
    * Get new key images from the last imported outputs.

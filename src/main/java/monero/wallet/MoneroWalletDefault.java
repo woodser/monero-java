@@ -41,6 +41,8 @@ import monero.wallet.model.MoneroAccount;
 import monero.wallet.model.MoneroAddressBookEntry;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroKeyImageExportResult;
+import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroMessageSignatureType;
 import monero.wallet.model.MoneroOutgoingTransfer;
 import monero.wallet.model.MoneroOutputWallet;
@@ -365,8 +367,13 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   }
   
   @Override
-  public List<MoneroKeyImage> exportKeyImages() {
+  public MoneroKeyImageExportResult exportKeyImages() {
     return exportKeyImages(false);
+  }
+  
+  @Override
+  public MoneroKeyImageImportResult importKeyImages(List<MoneroKeyImage> keyImages) {
+    return importKeyImages(keyImages, 0);
   }
   
   @Override

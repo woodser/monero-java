@@ -48,6 +48,7 @@ import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroDestination;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroKeyImageExportResult;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroMessageSignatureResult;
 import monero.wallet.model.MoneroMessageSignatureType;
@@ -2408,17 +2409,19 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testExportKeyImages() {
     assumeTrue(TEST_NON_RELAYS);
-    List<MoneroKeyImage> images = wallet.exportKeyImages(true);
+    MoneroKeyImageExportResult result = wallet.exportKeyImages(true);
+    assertEquals(0, (long) result.getOffset());
+    List<MoneroKeyImage> images = result.getKeyImages();
     assertTrue(images.size() > 0, "No signed key images in wallet");
     for (MoneroKeyImage image : images) {
       assertTrue(image instanceof MoneroKeyImage);
       assertTrue(image.getHex().length() > 0);
       assertTrue(image.getSignature().length() > 0);
     }
-    
+
     // wallet exports key images since last export by default
-    images = wallet.exportKeyImages();
-    List<MoneroKeyImage> imagesAll = wallet.exportKeyImages(true);
+    images = wallet.exportKeyImages().getKeyImages();
+    List<MoneroKeyImage> imagesAll = wallet.exportKeyImages(true).getKeyImages();
     assert(imagesAll.size() > images.size());
   }
   
@@ -2451,9 +2454,10 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testImportKeyImages() {
     assumeTrue(TEST_NON_RELAYS);
-    List<MoneroKeyImage> images = wallet.exportKeyImages();
+    MoneroKeyImageExportResult exportResult = wallet.exportKeyImages();
+    List<MoneroKeyImage> images = exportResult.getKeyImages();
     assertTrue(images.size() > 0, "Wallet does not have any key images; run send tests");
-    MoneroKeyImageImportResult result = wallet.importKeyImages(images);
+    MoneroKeyImageImportResult result = wallet.importKeyImages(images, exportResult.getOffset());
     assertTrue(result.getHeight() > 0);
     
     // determine if non-zero spent and unspent amounts are expected
@@ -2544,11 +2548,11 @@ public abstract class TestMoneroWalletCommon {
     assertTrue(numOutputsImported > 0, "No outputs imported");
     
     // export key images from offline wallet
-    List<MoneroKeyImage> keyImages = offlineWallet.exportKeyImages();
-    
+    MoneroKeyImageExportResult keyImageResult = offlineWallet.exportKeyImages();
+
     // import key images to view-only wallet
     assertTrue(viewOnlyWallet.isConnectedToDaemon());
-    viewOnlyWallet.importKeyImages(keyImages);
+    viewOnlyWallet.importKeyImages(keyImageResult.getKeyImages(), keyImageResult.getOffset());
     assertEquals(wallet.getBalance(), viewOnlyWallet.getBalance());
     
     // create unsigned tx using view-only wallet

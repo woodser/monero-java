@@ -50,6 +50,7 @@ import monero.wallet.model.MoneroCheckReserve;
 import monero.wallet.model.MoneroCheckTx;
 import monero.wallet.model.MoneroIncomingTransfer;
 import monero.wallet.model.MoneroIntegratedAddress;
+import monero.wallet.model.MoneroKeyImageExportResult;
 import monero.wallet.model.MoneroKeyImageImportResult;
 import monero.wallet.model.MoneroMessageSignatureResult;
 import monero.wallet.model.MoneroMessageSignatureType;
@@ -876,19 +877,22 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
 
   @Override
-  public List<MoneroKeyImage> exportKeyImages(boolean all) {
+  public MoneroKeyImageExportResult exportKeyImages(boolean all) {
     assertNotClosed();
-    String keyImagesJson = exportKeyImagesJni(all);
-    List<MoneroKeyImage> keyImages = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, keyImagesJson, KeyImagesContainer.class).keyImages;
-    return keyImages;
+    String resultJson = exportKeyImagesJni(all);
+    MoneroKeyImageExportResult result = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, resultJson, MoneroKeyImageExportResult.class);
+    if (result.getKeyImages() == null) result.setKeyImages(new ArrayList<MoneroKeyImage>());
+    return result;
   }
 
   @Override
-  public MoneroKeyImageImportResult importKeyImages(List<MoneroKeyImage> keyImages) {
+  public MoneroKeyImageImportResult importKeyImages(List<MoneroKeyImage> keyImages, long offset) {
     assertNotClosed();
     
-    // wrap and serialize key images in container for jni
-    KeyImagesContainer keyImageContainer = new KeyImagesContainer(keyImages);
+    // wrap and serialize offset and key images for jni
+    MoneroKeyImageExportResult keyImageContainer = new MoneroKeyImageExportResult();
+    keyImageContainer.setOffset(offset);
+    keyImageContainer.setKeyImages(keyImages);
     String importResultJson = importKeyImagesJni(JsonUtils.serialize(keyImageContainer));
     
     // deserialize response
@@ -1792,12 +1796,6 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private static class TxSetsContainer {
     public List<MoneroTxSet> txSets;
-  }
-  
-  private static class KeyImagesContainer {
-    public List<MoneroKeyImage> keyImages;
-    @SuppressWarnings("unused") public KeyImagesContainer() { } // necessary for serialization
-    public KeyImagesContainer(List<MoneroKeyImage> keyImages) { this.keyImages = keyImages; };
   }
   
   private static DeserializedBlocksContainer deserializeBlocks(String blocksJson) {
