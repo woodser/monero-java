@@ -120,22 +120,6 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&gt;</code></div>
-<div class="col-second even-row-color"><span class="type-name-label">MoneroWallet.</span><code><a href="../../../wallet/MoneroWallet.html#exportKeyImages()" class="member-name-link">exportKeyImages</a>()</code></div>
-<div class="col-last even-row-color">
-<div class="block">Export key images since the last export.</div>
-</div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&gt;</code></div>
-<div class="col-second odd-row-color"><span class="type-name-label">MoneroWallet.</span><code><a href="../../../wallet/MoneroWallet.html#exportKeyImages(boolean)" class="member-name-link">exportKeyImages</a><wbr>(boolean&nbsp;all)</code></div>
-<div class="col-last odd-row-color">
-<div class="block">Export signed key images.</div>
-</div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&gt;</code></div>
-<div class="col-second even-row-color"><span class="type-name-label">MoneroWalletFull.</span><code><a href="../../../wallet/MoneroWalletFull.html#exportKeyImages(boolean)" class="member-name-link">exportKeyImages</a><wbr>(boolean&nbsp;all)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&gt;</code></div>
-<div class="col-second odd-row-color"><span class="type-name-label">MoneroWalletRpc.</span><code><a href="../../../wallet/MoneroWalletRpc.html#exportKeyImages(boolean)" class="member-name-link">exportKeyImages</a><wbr>(boolean&nbsp;all)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&gt;</code></div>
 <div class="col-second even-row-color"><span class="type-name-label">MoneroWallet.</span><code><a href="../../../wallet/MoneroWallet.html#getNewKeyImagesFromLastImport()" class="member-name-link">getNewKeyImagesFromLastImport</a>()</code></div>
 <div class="col-last even-row-color">
 <div class="block">Get new key images from the last imported outputs.</div>
@@ -158,17 +142,34 @@ loadScripts(document, 'script');</script>
 <div class="block">Import signed key images and verify their spent status.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="../../../wallet/model/MoneroKeyImageImportResult.html" title="class in monero.wallet.model">MoneroKeyImageImportResult</a></code></div>
-<div class="col-second odd-row-color"><span class="type-name-label">MoneroWalletFull.</span><code><a href="../../../wallet/MoneroWalletFull.html#importKeyImages(java.util.List)" class="member-name-link">importKeyImages</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&gt;&nbsp;keyImages)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-second odd-row-color"><span class="type-name-label">MoneroWallet.</span><code><a href="../../../wallet/MoneroWallet.html#importKeyImages(java.util.List,long)" class="member-name-link">importKeyImages</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&gt;&nbsp;keyImages,
+ long&nbsp;offset)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Import signed key images and verify their spent status.</div>
+</div>
 <div class="col-first even-row-color"><code><a href="../../../wallet/model/MoneroKeyImageImportResult.html" title="class in monero.wallet.model">MoneroKeyImageImportResult</a></code></div>
-<div class="col-second even-row-color"><span class="type-name-label">MoneroWalletRpc.</span><code><a href="../../../wallet/MoneroWalletRpc.html#importKeyImages(java.util.List)" class="member-name-link">importKeyImages</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&gt;&nbsp;keyImages)</code></div>
+<div class="col-second even-row-color"><span class="type-name-label">MoneroWalletFull.</span><code><a href="../../../wallet/MoneroWalletFull.html#importKeyImages(java.util.List,long)" class="member-name-link">importKeyImages</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&gt;&nbsp;keyImages,
+ long&nbsp;offset)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code><a href="../../../wallet/model/MoneroKeyImageImportResult.html" title="class in monero.wallet.model">MoneroKeyImageImportResult</a></code></div>
+<div class="col-second odd-row-color"><span class="type-name-label">MoneroWalletRpc.</span><code><a href="../../../wallet/MoneroWalletRpc.html#importKeyImages(java.util.List,long)" class="member-name-link">importKeyImages</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&gt;&nbsp;keyImages,
+ long&nbsp;offset)</code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
 <li>
 <section class="detail" id="monero.wallet.model">
 <h2>Uses of <a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a> in <a href="../../../wallet/model/package-summary.html">monero.wallet.model</a></h2>
+<div class="caption"><span>Methods in <a href="../../../wallet/model/package-summary.html">monero.wallet.model</a> that return types with arguments of type <a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a></span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Method</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&gt;</code></div>
+<div class="col-second even-row-color"><span class="type-name-label">MoneroKeyImageExportResult.</span><code><a href="../../../wallet/model/MoneroKeyImageExportResult.html#getKeyImages()" class="member-name-link">getKeyImages</a>()</code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+</div>
 <div class="caption"><span>Methods in <a href="../../../wallet/model/package-summary.html">monero.wallet.model</a> with parameters of type <a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a></span></div>
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
@@ -180,6 +181,15 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color"><code><a href="../../../wallet/model/MoneroOutputWallet.html" title="class in monero.wallet.model">MoneroOutputWallet</a></code></div>
 <div class="col-second odd-row-color"><span class="type-name-label">MoneroOutputWallet.</span><code><a href="../../../wallet/model/MoneroOutputWallet.html#setKeyImage(monero.daemon.model.MoneroKeyImage)" class="member-name-link">setKeyImage</a><wbr>(<a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&nbsp;keyImage)</code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
+</div>
+<div class="caption"><span>Method parameters in <a href="../../../wallet/model/package-summary.html">monero.wallet.model</a> with type arguments of type <a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a></span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Method</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code>void</code></div>
+<div class="col-second even-row-color"><span class="type-name-label">MoneroKeyImageExportResult.</span><code><a href="../../../wallet/model/MoneroKeyImageExportResult.html#setKeyImages(java.util.List)" class="member-name-link">setKeyImages</a><wbr>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../MoneroKeyImage.html" title="class in monero.daemon.model">MoneroKeyImage</a>&gt;&nbsp;keyImages)</code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
