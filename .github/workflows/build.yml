@@ -147,6 +147,7 @@ jobs:
           cd build
           cmake -DSTATIC=ON -DBOOST_ROOT=/usr/local -DBoost_NO_SYSTEM_PATHS=ON ..
           cmake --build . -j3
+          strip --strip-unneeded libmonero-java.so # drop debug info and local symbols; JNI exports live in .dynsym
 
       - name: Test native library
         env:
@@ -265,6 +266,7 @@ jobs:
           cd build
           cmake -DSTATIC=ON ..
           cmake --build . -j3
+          strip --strip-unneeded libmonero-java.dll # drop debug info and symbols; JNI exports live in the export table
 
       - name: Test native library
         run: |
@@ -378,6 +380,7 @@ jobs:
           cd build
           cmake -DSTATIC=ON -DBOOST_ROOT=/usr/local -DBoost_NO_SYSTEM_PATHS=ON ..
           cmake --build . -j3
+          strip -x libmonero-java.dylib # drop local symbols; exported JNI symbols remain
 
       - name: Test native library
         env:
