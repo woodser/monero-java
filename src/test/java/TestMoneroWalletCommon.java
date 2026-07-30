@@ -6074,6 +6074,8 @@ public abstract class TestMoneroWalletCommon {
       assertFalse(parsedTx.getExtraHex().isEmpty());
       assertTrue(parsedTx.getPaymentId() == null || !parsedTx.getPaymentId().isEmpty());
       assertTrue(parsedTx.isOutgoing());
+      assertNotNull(parsedTx.isConfirmed());
+      assertNotNull(parsedTx.getNumConfirmations());
       assertNotNull(parsedTx.getOutgoingTransfer());
       assertNotNull(parsedTx.getOutgoingTransfer().getDestinations());
       assertFalse(parsedTx.getOutgoingTransfer().getDestinations().isEmpty());
