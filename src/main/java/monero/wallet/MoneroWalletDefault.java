@@ -64,7 +64,7 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   protected Set<MoneroWalletListenerI> listeners;
   protected MoneroConnectionManager connectionManager;
   protected MoneroConnectionManagerListener connectionManagerListener;
-  protected boolean isClosed = false;
+  protected volatile boolean isClosed = false;
   
   public MoneroWalletDefault() {
     this.listeners = new LinkedHashSet<MoneroWalletListenerI>();
