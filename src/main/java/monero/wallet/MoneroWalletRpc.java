@@ -978,7 +978,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public List<MoneroTxWallet> getTxs(MoneroTxQuery query) {
-    
+    return getTxs(query, 5);
+  }
+
+  private List<MoneroTxWallet> getTxs(MoneroTxQuery query, int maxAttempts) {
+
     // copy and normalize query
     query = query == null ? new MoneroTxQuery() : query.copy();
     if (query.getInputQuery() != null) query.getInputQuery().setTxQuery(query);
@@ -1045,8 +1049,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     // special case: re-fetch txs if inconsistency caused by needing to make multiple rpc calls
     for (MoneroTxWallet tx : txs) {
       if (tx.isConfirmed() && tx.getBlock() == null || !tx.isConfirmed() && tx.getBlock() != null) {
+        if (maxAttempts <= 1) throw new MoneroError("Unable to build consistent txs from multiple rpc calls");
         LOGGER.warning("Inconsistency detected building txs from multiple rpc calls, re-fetching");
-        return getTxs(query);
+        return getTxs(query, maxAttempts - 1);
       }
     }
     
