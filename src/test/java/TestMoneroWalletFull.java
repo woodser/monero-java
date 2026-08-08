@@ -1332,6 +1332,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     private long startHeight;
     private long prevEndHeight;
     private Long prevCompleteHeight;
+    private boolean sessionStart = true;
     protected boolean isDone;
     private Boolean onSyncProgressAfterDone;
     
@@ -1355,25 +1356,27 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       }
       
       // update tester's start height if new sync session
-      if (prevCompleteHeight != null && startHeight == prevCompleteHeight) this.startHeight = startHeight;
+      if (sessionStart && prevCompleteHeight != null && startHeight >= prevCompleteHeight) this.startHeight = startHeight;
       
-      // if sync is complete, record completion height for subsequent start heights
-      if (Double.compare(percentDone, 1) == 0) prevCompleteHeight = endHeight;
-      
-      // otherwise start height is equal to previous completion height
-      else if (prevCompleteHeight != null) assertEquals((long) prevCompleteHeight, startHeight);
-      
+      // progress notifications are throttled, so heights may skip, and the start height may rebase
+      // down to report progress while the wallet skips hashes below the sync start
       assertTrue(endHeight > startHeight, "end height > start height");
-      assertEquals(this.startHeight, startHeight);
+      assertTrue(startHeight <= this.startHeight, "start height only rebases down");
+      this.startHeight = startHeight;
       assertTrue(endHeight >= prevEndHeight);  // chain can grow while syncing
       prevEndHeight = endHeight;
-      assertTrue(height >= startHeight);
-      assertTrue(height < endHeight);
-      double expectedPercentDone = (double) (height - startHeight + 1) / (double) (endHeight - startHeight);
-      assertTrue(Double.compare(expectedPercentDone, percentDone) == 0);
-      if (prevHeight == null) assertEquals(startHeight, height);
-      else assertEquals(height, prevHeight + 1);
+      if (prevHeight != null) assertTrue(height >= prevHeight, "heights advance monotonically");
       prevHeight = height;
+      if (height < startHeight) {
+        assertTrue(sessionStart, "hash-skip notification only at the start of a sync session");
+        assertEquals(0.0, percentDone); // initial notification while the wallet skips ahead to the sync start
+      } else {
+        assertTrue(height < endHeight);
+        double expectedPercentDone = (double) (height - startHeight + 1) / (double) (endHeight - startHeight);
+        assertTrue(Double.compare(expectedPercentDone, percentDone) == 0);
+        if (Double.compare(percentDone, 1) == 0) prevCompleteHeight = endHeight; // record completion height for subsequent sync sessions
+      }
+      sessionStart = Double.compare(percentDone, 1) == 0; // completion starts a new session
     }
     
     public void onDone(long chainHeight) {
@@ -1403,6 +1406,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   private class WalletSyncTester extends SyncProgressTester {
     
     private Long walletTesterPrevHeight;  // renamed from prevHeight to not interfere with super's prevHeight
+    private long syncStartHeight;
     private MoneroOutputWallet prevOutputReceived;
     private MoneroOutputWallet prevOutputSpent;
     private BigInteger incomingTotal;
@@ -1415,6 +1419,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       super(wallet, startHeight, endHeight);
       assertTrue(startHeight >= 0);
       assertTrue(endHeight >= 0);
+      this.syncStartHeight = startHeight;
       incomingTotal = BigInteger.valueOf(0);
       outgoingTotal = BigInteger.valueOf(0);
     }
@@ -1426,7 +1431,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
         onNewBlockAfterDone = true;
       }
       if (walletTesterPrevHeight != null) assertEquals(walletTesterPrevHeight + 1, height);
-      assertTrue(height >= super.startHeight);
+      assertTrue(height >= syncStartHeight); // scanned blocks start at the requested height, not the rebased progress base
       walletTesterPrevHeight = height;
     }
     
