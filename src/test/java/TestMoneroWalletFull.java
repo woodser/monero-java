@@ -1355,25 +1355,25 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       }
       
       // update tester's start height if new sync session
-      if (prevCompleteHeight != null && startHeight == prevCompleteHeight) this.startHeight = startHeight;
+      if (prevCompleteHeight != null && startHeight >= prevCompleteHeight) this.startHeight = startHeight;
       
-      // if sync is complete, record completion height for subsequent start heights
-      if (Double.compare(percentDone, 1) == 0) prevCompleteHeight = endHeight;
-      
-      // otherwise start height is equal to previous completion height
-      else if (prevCompleteHeight != null) assertEquals((long) prevCompleteHeight, startHeight);
-      
+      // progress notifications are throttled, so heights may skip, and the start height may rebase
+      // down to report progress while the wallet skips hashes below the sync start
       assertTrue(endHeight > startHeight, "end height > start height");
-      assertEquals(this.startHeight, startHeight);
+      assertTrue(startHeight <= this.startHeight, "start height only rebases down");
+      this.startHeight = startHeight;
       assertTrue(endHeight >= prevEndHeight);  // chain can grow while syncing
       prevEndHeight = endHeight;
-      assertTrue(height >= startHeight);
-      assertTrue(height < endHeight);
-      double expectedPercentDone = (double) (height - startHeight + 1) / (double) (endHeight - startHeight);
-      assertTrue(Double.compare(expectedPercentDone, percentDone) == 0);
-      if (prevHeight == null) assertEquals(startHeight, height);
-      else assertEquals(height, prevHeight + 1);
+      if (prevHeight != null) assertTrue(height >= prevHeight, "heights advance monotonically");
       prevHeight = height;
+      if (height < startHeight) {
+        assertEquals(0.0, percentDone); // initial notification while the wallet skips ahead to the sync start
+      } else {
+        assertTrue(height < endHeight);
+        double expectedPercentDone = (double) (height - startHeight + 1) / (double) (endHeight - startHeight);
+        assertTrue(Double.compare(expectedPercentDone, percentDone) == 0);
+        if (Double.compare(percentDone, 1) == 0) prevCompleteHeight = endHeight; // record completion height for subsequent sync sessions
+      }
     }
     
     public void onDone(long chainHeight) {
