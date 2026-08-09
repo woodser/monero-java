@@ -345,7 +345,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     assertFalse(wallet.isConnectedToDaemon());
     assertFalse(wallet.isSynced());
     assertEquals(1, wallet.getHeight());
-    assertEquals(0, wallet.getRestoreHeight()); // restore height is lost after closing
+    assertEquals(restoreHeight, wallet.getRestoreHeight());
     wallet.close();
 
     // create wallet with seed, connection, and restore height
@@ -967,7 +967,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       assertEquals("English", wallet.getSeedLanguage());
       assertFalse(wallet.isSynced());
       assertEquals(1, wallet.getHeight());
-      assertEquals(0, wallet.getRestoreHeight()); // TODO monero-project: restoreHeight is reset to 0 after closing
+      assertEquals(restoreHeight, wallet.getRestoreHeight());
       
       // set the wallet's connection and sync
       wallet.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
@@ -991,7 +991,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       assertEquals(TestUtils.getDaemonRpc().getRpcConnection(), wallet.getDaemonConnection());
       assertTrue(wallet.isConnectedToDaemon());
       assertEquals(prevHeight, wallet.getHeight());
-      assertEquals(0, wallet.getRestoreHeight()); // TODO monero-project: restoreHeight is reset to 0 after closing
+      assertEquals(restoreHeight, wallet.getRestoreHeight());
       assertTrue(MoneroWalletFull.walletExists(path));
       assertEquals(TestUtils.SEED, wallet.getSeed());
       assertEquals(TestUtils.NETWORK_TYPE, wallet.getNetworkType());
