@@ -135,6 +135,10 @@ endif()
 find_library(SODIUM_LIBRARY sodium REQUIRED)
 message(STATUS "Using libsodium library at ${SODIUM_LIBRARY}")
 
+# monero includes real sodium headers not present in the vendored stubs
+find_path(SODIUM_INCLUDE_PATH sodium/crypto_shorthash_siphash24.h REQUIRED)
+message(STATUS "Using libsodium include dir at ${SODIUM_INCLUDE_PATH}")
+
 ############
 # HIDAPI
 ############
@@ -321,6 +325,7 @@ target_include_directories(monero-java PUBLIC
   "${MONERO_PROJECT_SRC}/wallet/api"
   ${Boost_INCLUDE_DIR}
   ${OPENSSL_INCLUDE_DIR}
+  ${SODIUM_INCLUDE_PATH}
 )
 
 if (APPLE)
