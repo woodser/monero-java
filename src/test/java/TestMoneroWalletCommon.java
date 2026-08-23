@@ -6083,6 +6083,19 @@ public abstract class TestMoneroWalletCommon {
       for (MoneroDestination destination : parsedTx.getOutgoingTransfer().getDestinations()) {
         testDestination(destination);
       }
+
+      // test input sources
+      assertNotNull(parsedTx.getInputs());
+      assertFalse(parsedTx.getInputs().isEmpty());
+      BigInteger inputSum = BigInteger.valueOf(0);
+      for (MoneroOutputWallet input : parsedTx.getInputsWallet()) {
+        assertTrue(input.getTx() == parsedTx);
+        TestUtils.testUnsignedBigInteger(input.getAmount(), true);
+        assertTrue(input.getIndex() >= 0);
+        assertEquals(64, input.getStealthPublicKey().length());
+        inputSum = inputSum.add(input.getAmount());
+      }
+      assertEquals(inputSum, parsedTx.getInputSum());
     }
   }
   

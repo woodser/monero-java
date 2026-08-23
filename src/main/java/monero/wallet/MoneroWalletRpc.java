@@ -3053,7 +3053,19 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (transfer == null) transfer = new MoneroOutgoingTransfer().setTx(tx);
         ((MoneroOutgoingTransfer) transfer).setDestinations(destinations);
       }
-      else if (key.equals("sources")) {}  // ignoring
+      else if (key.equals("sources")) {
+        GenUtils.assertTrue(tx.getInputs() == null);
+        tx.setInputs(new ArrayList<MoneroOutput>());
+        for (Map<String, Object> rpcSource : (List<Map<String, Object>>) val) {
+          MoneroOutputWallet input = new MoneroOutputWallet();
+          input.setTx(tx);
+          input.setAmount((BigInteger) rpcSource.get("amount"));
+          input.setIndex(((BigInteger) rpcSource.get("global_index")).longValue());
+          String pubkey = (String) rpcSource.get("pubkey");
+          if (pubkey != null) input.setStealthPublicKey(pubkey.substring(0, Math.min(64, pubkey.length()))); // dest key of dest||mask
+          tx.getInputs().add(input);
+        }
+      }
       else if (key.equals("multisig_txset") && val != null) {}  // handled elsewhere; this method only builds a tx wallet
       else if (key.equals("unsigned_txset") && val != null) {}  // handled elsewhere; this method only builds a tx wallet
       else if (key.equals("amount_in")) tx.setInputSum((BigInteger) val);
