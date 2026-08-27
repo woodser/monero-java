@@ -1428,10 +1428,10 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_describeTxSetJni(J
   try {
 
     // deserialize tx set to describe
-    monero_tx_set tx_set = monero_tx_set::deserialize(tx_set_json);
+    shared_ptr<monero_tx_set> tx_set = monero_tx_set::deserialize(tx_set_json);
 
     // describe tx set
-    monero_tx_set described_tx_set = wallet->describe_tx_set(tx_set);
+    monero_tx_set described_tx_set = wallet->describe_tx_set(*tx_set);
 
     // serialize, free, and return
     std::string monero_tx_set_json = described_tx_set.serialize();
