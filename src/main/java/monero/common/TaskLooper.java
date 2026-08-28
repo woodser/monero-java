@@ -54,15 +54,23 @@ public class TaskLooper {
       if (isStarted) return this;
       isStarted = true;
       
-      // start looping
+      // reuse a live loop, which observes isStarted under lock and continues
       if (isLooping) return this;
       isLooping = true;
       TaskLooper that = this;
       Thread loop = new Thread(new Runnable() {
         @Override
         public void run() {
-          while (isStarted && !Thread.currentThread().isInterrupted()) {
-            
+          while (true) {
+
+            // decide to exit and clear isLooping atomically so a restart cannot reuse a dead loop
+            synchronized (that) {
+              if (!isStarted || Thread.currentThread().isInterrupted()) {
+                isLooping = false;
+                return;
+              }
+            }
+
             // run the task
             long startTime = System.currentTimeMillis();
             task.run();
@@ -71,12 +79,12 @@ public class TaskLooper {
             if (isStarted) {
               try { TimeUnit.MILLISECONDS.sleep(that.periodInMs - (targetFixedPeriod ? System.currentTimeMillis() - startTime : 0)); } // target fixed period by accounting for run time
               catch (Exception e) {
-                isLooping = false;
+                synchronized (that) { isLooping = false; }
                 if (isStarted) throw new RuntimeException(e);
+                return;
               }
             }
           }
-          isLooping = false;
         }
       });
       loop.start();
