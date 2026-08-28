@@ -251,8 +251,9 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     // cannot get daemon chain height
     try {
       wallet.getDaemonHeight();
+      fail("Should have thrown exception");
     } catch (MoneroError e) {
-      assertEquals("Wallet is not connected to daemon", e.getMessage());
+      assertEquals("daemon error", e.getMessage()); // wallet2 masks errors from untrusted daemons
     }
     
     // set daemon connection and check chain height
@@ -307,7 +308,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     assertFalse(wallet.isSynced());
     assertEquals(1, wallet.getHeight());
     assertEquals(0, wallet.getRestoreHeight());
-    try { wallet.startSyncing(); } catch (MoneroError e) { assertEquals("Wallet is not connected to daemon", e.getMessage()); }
+    wallet.startSyncing(); // succeeds while offline, syncing when a daemon becomes reachable
     wallet.close();
     
     // create wallet without restore height
@@ -771,9 +772,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       assertNotNull(wallet.getSeed());
       assertEquals(1, wallet.getHeight());
       assertEquals(BigInteger.valueOf(0), wallet.getBalance());
-      wallet.startSyncing();
-    } catch (MoneroError e) {
-      assertEquals("Wallet is not connected to daemon", e.getMessage());
+      wallet.startSyncing(); // succeeds while offline, syncing when a daemon becomes reachable
     } finally {
       wallet.close();
     }
