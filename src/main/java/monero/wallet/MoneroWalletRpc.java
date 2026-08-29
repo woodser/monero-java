@@ -2421,8 +2421,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           
           // announce new unlocked outputs
           for (MoneroTxWallet unlockedTx : unlockedTxs) {
+            boolean missedConfirm = Boolean.TRUE.equals(unlockedTx.isConfirmed()) && !prevConfirmedNotifications.contains(unlockedTx.getHash());
             prevUnconfirmedNotifications.remove(unlockedTx.getHash()); // stop tracking tx notifications
             prevConfirmedNotifications.remove(unlockedTx.getHash());
+            if (missedConfirm) { // announce missed confirm transition if tx unlocked between polls
+              MoneroTxWallet confirmedTx = unlockedTx.copy().setIsLocked(true);
+              confirmedTx.setBlock(unlockedTx.getBlock().copy().setTxs(confirmedTx));
+              notifyOutputs(confirmedTx);
+            }
             notifyOutputs(unlockedTx);
           }
           
