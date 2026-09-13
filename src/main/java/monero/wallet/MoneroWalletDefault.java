@@ -154,17 +154,29 @@ abstract class MoneroWalletDefault implements MoneroWallet {
 
   @Override
   public void setConnectionManager(MoneroConnectionManager connectionManager) {
-    if (this.connectionManager != null) this.connectionManager.removeListener(connectionManagerListener);
+    removeConnectionManagerListener(this.connectionManager);
     this.connectionManager = connectionManager;
     if (connectionManager == null) return;
     if (connectionManagerListener == null) connectionManagerListener = new MoneroConnectionManagerListener() {
       @Override
       public void onConnectionChanged(MoneroRpcConnection connection) {
-        setDaemonConnection(connection);
+        if (isClosed) return;
+        try {
+          setDaemonConnection(connection);
+        } catch (MoneroError e) {
+          if (!isClosed) throw e; // ignore a connection change racing with wallet shutdown
+        }
       }
     };
     connectionManager.addListener(connectionManagerListener);
     setDaemonConnection(connectionManager.getConnection());
+  }
+
+  protected void removeConnectionManagerListener(MoneroConnectionManager manager) {
+    if (manager == null) return;
+    synchronized (manager.getListeners()) {
+      if (manager.getListeners().contains(connectionManagerListener)) manager.removeListener(connectionManagerListener);
+    }
   }
 
   @Override
