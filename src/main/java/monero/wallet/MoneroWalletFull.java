@@ -34,9 +34,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
+import monero.common.MoneroConnectionManager;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroUtils;
@@ -88,7 +90,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   // class variables
   private static final Logger LOGGER = Logger.getLogger(MoneroWalletFull.class.getName());
   private static final long DEFAULT_SYNC_PERIOD_IN_MS = 10000; // default period betweeen syncs in ms
-  private static final long CLOSE_WAIT_MS = 30000; // maximum time to wait for other calls to finish before closing
+  private static final long CLOSE_WAIT_MS = 45000; // maximum time to wait for other calls to finish before closing
 
   // instance variables
   private long jniWalletHandle;                 // memory address of the wallet in c++; this variable is read directly by name in c++
@@ -96,6 +98,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private WalletJniListener jniListener;        // receives notifications from jni c++
   private String password;
   private final ReentrantReadWriteLock callLock = new ReentrantReadWriteLock(); // calls hold the read lock so close() cannot free the wallet while they execute
+  private final Object closeLock = new Object(); // serialize close attempts independently of wallet operations
   
   /**
    * Private constructor with a handle to the memory address of the wallet in c++.
@@ -106,6 +109,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private MoneroWalletFull(long jniWalletHandle, String password) {
     this.jniWalletHandle = jniWalletHandle;
     this.jniListener = new WalletJniListener();
+    this.listeners = new CopyOnWriteArraySet<MoneroWalletListenerI>();
     this.password = password;
   }
   
@@ -472,7 +476,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     beginCall();
     try {
       super.addListener(listener);
-      refreshListening();
+      initListening();
     } finally {
       endCall();
     }
@@ -483,7 +487,6 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     beginCall();
     try {
       super.removeListener(listener);
-      refreshListening();
     } finally {
       endCall();
     }
@@ -505,6 +508,23 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     }
   }
   
+  @Override
+  public void setConnectionManager(MoneroConnectionManager connectionManager) {
+    beginCall();
+    try {
+      super.setConnectionManager(connectionManager);
+    } finally {
+      try {
+        if (isClosed) { // undo a registration that raced with close detaching the manager
+          removeConnectionManagerListener(connectionManager);
+          this.connectionManager = null;
+        }
+      } finally {
+        endCall();
+      }
+    }
+  }
+
   @Override
   public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
     setDaemonConnection(daemonConnection, null);
@@ -751,7 +771,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
       } catch (Exception e) {
         throw new MoneroError(e.getMessage());
       } finally {
-        if (listener != null) removeListener(listener); // unregister listener
+        if (listener != null) listeners.remove(listener); // cleanup can race with close or removal from the callback
       }
     } finally {
       endCall();
@@ -1802,27 +1822,32 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
   
   @Override
-  public synchronized void close(boolean save) {
-    if (isClosed) return; // closing a closed wallet has no effect
-    super.close(save); // marks the wallet closed so new calls are rejected
-    password = null;
-    refreshListening();
-    try { stopSyncingJni(); } catch (Exception e) { } // abort sync so in-flight calls finish promptly
-
-    // wait for in-flight calls to finish before freeing the wallet in c++
-    boolean locked = false;
-    try {
-      locked = callLock.writeLock().tryLock(CLOSE_WAIT_MS, TimeUnit.MILLISECONDS);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
+  public void close(boolean save) {
+    if (callLock.getReadHoldCount() > 0 || Boolean.TRUE.equals(jniListener.notifying.get())) {
+      throw new MoneroError("Cannot close wallet from an active wallet call or listener callback");
     }
-    if (!locked) LOGGER.warning("Closing wallet after timeout waiting for other calls to finish");
-    try {
-      closeJni(save);
-    } catch (Exception e) {
-      throw new MoneroError(e.getMessage());
-    } finally {
-      if (locked) callLock.writeLock().unlock();
+    synchronized (closeLock) {
+      if (jniWalletHandle == 0) return; // a failed close can be retried while its native handle remains
+      isClosed = true; // reject new calls before cancelling native I/O
+      boolean locked = false;
+      try {
+        requestShutdownJni();
+        removeConnectionManagerListener(connectionManager); // detach after cancellation so connection callbacks can finish
+        locked = callLock.writeLock().tryLock(CLOSE_WAIT_MS, TimeUnit.MILLISECONDS);
+        if (!locked) throw new MoneroError("Timed out waiting for active wallet calls; close can be retried");
+        removeConnectionManagerListener(connectionManager); // recheck after acquiring visibility of completed registrations
+        connectionManager = null;
+        closeJni(save);
+        password = null;
+        super.close(save); // clear Java listeners after native callbacks have finished
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new MoneroError("Interrupted waiting for active wallet calls; close can be retried");
+      } catch (Exception e) {
+        throw new MoneroError(e.getMessage());
+      } finally {
+        if (locked) callLock.writeLock().unlock();
+      }
     }
   }
   
@@ -2039,6 +2064,8 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   private native void moveToJni(String path, String password);
   
   private native void saveJni();
+
+  private native void requestShutdownJni();
   
   private native void closeJni(boolean save);
   
@@ -2049,17 +2076,29 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    */
   @SuppressWarnings("unused") // called directly from jni c++
   private class WalletJniListener {
+
+    private final ThreadLocal<Boolean> notifying = new ThreadLocal<Boolean>();
+
+    private void notifyListeners(Runnable notification) {
+      if (isClosed) return;
+      notifying.set(true);
+      try {
+        notification.run();
+      } finally {
+        notifying.remove();
+      }
+    }
     
     public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
-      announceSyncProgress(height, startHeight, endHeight, percentDone, message);
+      notifyListeners(() -> announceSyncProgress(height, startHeight, endHeight, percentDone, message));
     }
     
     public void onNewBlock(long height) {
-      announceNewBlock(height);
+      notifyListeners(() -> announceNewBlock(height));
     }
     
     public void onBalancesChanged(String newBalanceStr, String newUnlockedBalanceStr) {
-      announceBalancesChanged(new BigInteger(newBalanceStr), new BigInteger(newUnlockedBalanceStr));
+      notifyListeners(() -> announceBalancesChanged(new BigInteger(newBalanceStr), new BigInteger(newUnlockedBalanceStr)));
     }
     
     public void onOutputReceived(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version, String unlockTimeStr, boolean isLocked) {
@@ -2090,7 +2129,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
       }
       
       // announce output
-      announceOutputReceived((MoneroOutputWallet) tx.getOutputs().get(0));
+      notifyListeners(() -> announceOutputReceived((MoneroOutputWallet) tx.getOutputs().get(0)));
     }
     
     public void onOutputSpent(long height, String txHash, String amountStr, String accountIdxStr, String subaddressIdxStr, int version, String unlockTimeStr, boolean isLocked) {
@@ -2121,7 +2160,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
       }
       
       // announce output
-      announceOutputSpent((MoneroOutputWallet) tx.getInputs().get(0));
+      notifyListeners(() -> announceOutputSpent((MoneroOutputWallet) tx.getInputs().get(0)));
     }
   }
   
@@ -2281,12 +2320,12 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   // ---------------------------- PRIVATE HELPERS -----------------------------
   
   /**
-   * Enables or disables listening in the c++ wallet.
+   * Initializes the c++ listener once and retains it until close drains native callbacks.
    */
-  private void refreshListening() {
-    boolean isEnabled = listeners.size() > 0;
-    if (jniListenerHandle == 0 && !isEnabled || jniListenerHandle > 0 && isEnabled) return; // no difference
-    jniListenerHandle = setListenerJni(isEnabled ? jniListener : null);
+  private void initListening() {
+    synchronized (jniListener) {
+      if (jniListenerHandle == 0) jniListenerHandle = setListenerJni(jniListener);
+    }
   }
   
   private void assertNotClosed() {
@@ -2295,7 +2334,8 @@ public class MoneroWalletFull extends MoneroWalletDefault {
 
   // acquire the shared call lock so close() waits for this call before freeing the wallet
   private void beginCall() {
-    callLock.readLock().lock();
+    assertNotClosed();
+    if (!callLock.readLock().tryLock()) throw new MoneroError("Wallet is closed");
     if (isClosed) {
       callLock.readLock().unlock();
       throw new MoneroError("Wallet is closed");

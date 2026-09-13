@@ -511,9 +511,11 @@ public class MoneroConnectionManager {
   // ----------------------------- PRIVATE HELPERS ----------------------------
   
   private void onConnectionChanged(MoneroRpcConnection connection) {
+    List<MoneroConnectionManagerListener> listenersSnapshot;
     synchronized (listeners) {
-      for (MoneroConnectionManagerListener listener : listeners) listener.onConnectionChanged(connection);
+      listenersSnapshot = new ArrayList<MoneroConnectionManagerListener>(listeners);
     }
+    for (MoneroConnectionManagerListener listener : listenersSnapshot) listener.onConnectionChanged(connection);
   }
   
   private List<List<MoneroRpcConnection>> getConnectionsInAscendingPriority() {
