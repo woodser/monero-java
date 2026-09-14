@@ -224,19 +224,20 @@ void detachJVM(JNIEnv *env, int envStat) {
 struct wallet_jni_listener : public monero_wallet_listener {
 
   jobject jlistener;
-  JNIEnv* m_env;
   std::mutex _listenerMutex;
 
-  // TODO: use this env instead of attaching each time? performance improvement?
   wallet_jni_listener(JNIEnv* env, jobject listener) {
     jlistener = env->NewGlobalRef(listener);
-    m_env = env;
   }
 
   ~wallet_jni_listener() {
     std::lock_guard<std::mutex> lock(_listenerMutex);
-    m_env->DeleteGlobalRef(jlistener);
+    JNIEnv* env;
+    int envStat = attachJVM(&env); // a listener can be removed on a different thread than it was created
+    if (envStat == JNI_ERR) return;
+    env->DeleteGlobalRef(jlistener);
     jlistener = nullptr;
+    detachJVM(env, envStat);
   };
 
   void on_sync_progress(uint64_t height, uint64_t start_height, uint64_t end_height, double percent_done, const string& message) override {
@@ -2212,12 +2213,27 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_saveJni(JNIEnv* env, 
   }
 }
 
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_requestShutdownJni(JNIEnv* env, jobject instance) {
+  monero_wallet_full* wallet = get_handle<monero_wallet_full>(env, instance, JNI_WALLET_HANDLE);
+  try {
+    wallet->request_shutdown();
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_closeJni(JNIEnv* env, jobject instance, jboolean save) {
   MTRACE("Java_monero_wallet_MoneroWalletFull_CloseJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
-  if (save) wallet->save();
-  delete wallet;
-  wallet = nullptr;
+  try {
+    wallet->close(save); // cancel and drain native work before saving or releasing the JNI listener
+    delete wallet;
+    env->SetLongField(instance, get_handle_field(env, instance, JNI_WALLET_HANDLE), 0);
+    delete get_handle<wallet_jni_listener>(env, instance, JNI_LISTENER_HANDLE);
+    env->SetLongField(instance, get_handle_field(env, instance, JNI_LISTENER_HANDLE), 0);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
 }
 
 JNIEXPORT jbyteArray JNICALL Java_monero_wallet_MoneroWalletFull_getKeysFileBufferJni(JNIEnv* env, jobject instance, jstring jpassword, jboolean view_only) {

@@ -269,6 +269,8 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_moveToJni(JNIEnv *, j
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_saveJni(JNIEnv *, jobject);
 
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_requestShutdownJni(JNIEnv *, jobject);
+
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_closeJni(JNIEnv *, jobject, jboolean);
 
 JNIEXPORT jbyteArray JNICALL Java_monero_wallet_MoneroWalletFull_getKeysFileBufferJni(JNIEnv *, jobject, jstring, jboolean);
