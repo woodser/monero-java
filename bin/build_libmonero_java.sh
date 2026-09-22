@@ -8,6 +8,9 @@ HOST_NCORES=$(nproc 2>/dev/null || shell nproc 2>/dev/null || sysctl -n hw.ncpu 
 cd ./external/monero-cpp/ &&
 ./bin/build_libmonero_cpp.sh &&
 
+# build monero-project binaries using the existing configuration
+cmake --build ./external/monero-project/build/release -j$HOST_NCORES &&
+
 # build standalone libmonero-java library with dependencies linked statically
 cd ../../ &&
 mkdir -p ./build &&
