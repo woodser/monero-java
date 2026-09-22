@@ -303,6 +303,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     rpc.sendJsonRequest("open_wallet", params);
     clear();
     path = config.getPath();
+    isClosed = false;
 
     // set connection manager or server
     if (config.getConnectionManager() != null) {
@@ -372,6 +373,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     if (config.getSeed() != null) createWalletFromSeed(config);
     else if (config.getPrivateSpendKey() != null || config.getPrimaryAddress() != null) createWalletFromKeys(config);
     else createWalletRandom(config);
+    isClosed = false;
     
     // set connection manager or server
     if (config.getConnectionManager() != null) {
