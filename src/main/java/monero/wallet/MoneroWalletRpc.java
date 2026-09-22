@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import monero.common.MoneroError;
@@ -1969,6 +1970,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   // ------------------------------ PRIVATE -----------------------------------
   
   private void clear() {
+    listenerGeneration.incrementAndGet();
+    if (walletPoller != null) walletPoller.reset();
+    if (zmqListener != null) zmqListener.reset();
     listeners.clear();
     refreshListening();
     addressCache.clear();
@@ -2339,6 +2343,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     private boolean isPolling;
     private TaskLooper looper;
     private int numPolling = 0;
+    private final AtomicLong generation = new AtomicLong();
+    private long snapshotGeneration;
     private Long prevHeight;
     private BigInteger[] prevBalances;
     private List<MoneroTxWallet> prevLockedTxs = new ArrayList<MoneroTxWallet>();
@@ -2355,6 +2361,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       });
     }
     
+    public void reset() {
+      generation.incrementAndGet(); // invalidate in-flight polls without waiting on their callbacks
+    }
+
     public void setIsPolling(boolean isPolling) {
       this.isPolling = isPolling;
       if (isPolling) looper.start(syncPeriodInMs);
@@ -2373,33 +2383,47 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
       // synchronize polls
       synchronized (this) {
+        long pollGeneration = generation.get();
         try {
 
           // skip if wallet is closed
-          if (wallet.isClosed()) {
-            numPolling--;
-            return;
+          if (wallet.isClosed() || pollGeneration != generation.get()) return;
+
+          // reset snapshots only inside the serialized poll
+          if (snapshotGeneration != pollGeneration) {
+            prevHeight = null;
+            prevBalances = null;
+            prevLockedTxs.clear();
+            prevUnconfirmedNotifications.clear();
+            prevConfirmedNotifications.clear();
+            snapshotGeneration = pollGeneration;
           }
 
           // take initial snapshot
           if (prevBalances == null) {
             prevHeight = getHeight();
+            if (pollGeneration != generation.get()) return;
             prevLockedTxs = getTxs(new MoneroTxQuery().setIsLocked(true));
+            if (pollGeneration != generation.get()) return;
             prevBalances = getBalances(null, null);
-            numPolling--;
             return;
           }
           
           // announce height changes
           long height = getHeight();
+          if (pollGeneration != generation.get()) return;
           if (prevHeight != height) {
-            for (long i = prevHeight; i < height; i++) onNewBlock(i);
+            for (long i = prevHeight; i < height; i++) {
+              onNewBlock(i);
+              if (pollGeneration != generation.get()) return;
+            }
             prevHeight = height;
           }
           
           // get locked txs for comparison to previous
           long minHeight = Math.max(0, height - 70); // only monitor recent txs
           List<MoneroTxWallet> lockedTxs = getTxs(new MoneroTxQuery().setIsLocked(true).setMinHeight(minHeight).setIncludeOutputs(true));
+          if (pollGeneration != generation.get()) return;
           
           // collect hashes of txs no longer locked
           List<String> noLongerLockedHashes = new ArrayList<String>();
@@ -2414,11 +2438,13 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           
           // fetch txs which are no longer locked
           List<MoneroTxWallet> unlockedTxs = noLongerLockedHashes.isEmpty() ? new ArrayList<MoneroTxWallet>() : getTxs(new MoneroTxQuery().setIsLocked(false).setMinHeight(minHeight).setHashes(noLongerLockedHashes).setIncludeOutputs(true));
+          if (pollGeneration != generation.get()) return;
           
           // announce new unconfirmed and confirmed txs
           for (MoneroTxWallet lockedTx : lockedTxs) {
             boolean unannounced = lockedTx.isConfirmed() ? prevConfirmedNotifications.add(lockedTx.getHash()) : prevUnconfirmedNotifications.add(lockedTx.getHash());
-            if (unannounced) notifyOutputs(lockedTx);
+            if (unannounced) notifyOutputs(lockedTx, pollGeneration);
+            if (pollGeneration != generation.get()) return;
           }
           
           // announce new unlocked outputs
@@ -2429,22 +2455,25 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
             if (missedConfirm) { // announce missed confirm transition if tx unlocked between polls
               MoneroTxWallet confirmedTx = unlockedTx.copy().setIsLocked(true);
               confirmedTx.setBlock(unlockedTx.getBlock().copy().setTxs(confirmedTx));
-              notifyOutputs(confirmedTx);
+              notifyOutputs(confirmedTx, pollGeneration);
+              if (pollGeneration != generation.get()) return;
             }
-            notifyOutputs(unlockedTx);
+            notifyOutputs(unlockedTx, pollGeneration);
+            if (pollGeneration != generation.get()) return;
           }
           
           // announce balance changes
-          checkForChangedBalances();
-          numPolling--;
+          checkForChangedBalances(pollGeneration);
         } catch (Exception e) {
+          if (pollGeneration == generation.get() && isPolling) System.err.println("Failed to background poll wallet '" + path + "': " + e.getMessage());
+        } finally {
           numPolling--;
-          if (isPolling) System.err.println("Failed to background poll wallet '" + path + "': " + e.getMessage());
         }
       }
     }
     
-    private void notifyOutputs(MoneroTxWallet tx) {
+    private void notifyOutputs(MoneroTxWallet tx, long pollGeneration) {
+      if (pollGeneration != generation.get()) return;
       
       // notify spent outputs // TODO (monero-project): monero-wallet-rpc does not allow scrape of tx inputs so providing one input with outgoing amount
       if (tx.getOutgoingTransfer() != null) {
@@ -2456,6 +2485,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
             .setTx(tx);
         tx.setInputsWallet(Arrays.asList(output));
         announceOutputSpent(output);
+        if (pollGeneration != generation.get()) return;
       }
       
       // notify received outputs
@@ -2463,6 +2493,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) { // TODO (monero-project): outputs only returned for confirmed txs
           for (MoneroOutputWallet output : tx.getOutputsWallet()) {
             announceOutputReceived(output);
+            if (pollGeneration != generation.get()) return;
           }
         } else { // TODO (monero-project): monero-wallet-rpc does not allow scrape of unconfirmed received outputs so using incoming transfer values
           List<MoneroOutputWallet> outputs = new ArrayList<MoneroOutputWallet>();
@@ -2476,6 +2507,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           tx.setOutputsWallet(outputs);
             for (MoneroOutputWallet output : tx.getOutputsWallet()) {
               announceOutputReceived(output);
+              if (pollGeneration != generation.get()) return;
             }
         }
       }
@@ -2491,8 +2523,9 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     // TODO: factor to common wallet rpc listener
-    private boolean checkForChangedBalances() {
+    private boolean checkForChangedBalances(long pollGeneration) {
       BigInteger[] balances = getBalances(null, null);
+      if (pollGeneration != generation.get()) return false;
       if (!balances[0].equals(prevBalances[0]) || !balances[1].equals(prevBalances[1])) {
         prevBalances = balances;
         announceBalancesChanged(balances[0], balances[1]);
@@ -2507,18 +2540,19 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
    */
   private class WalletRpcZmqListener {
     
-    private boolean isPolling;
+    private volatile boolean isPolling;
+    private final AtomicLong generation = new AtomicLong();
     private Thread pollThread;
     private ExecutorService processNotificationPool;
     private ZContext context;
     private ZMQ.Socket subscriber;
     private BigInteger prevBalance;
     private BigInteger prevUnlockedBalance;
+    private long balanceGeneration = -1;
     private List<String> prevLockedTxHashes = new ArrayList<String>();
     
-    public WalletRpcZmqListener() {
-      prevBalance = getBalance();
-      prevUnlockedBalance = getUnlockedBalance();
+    public void reset() {
+      generation.incrementAndGet();
     }
     
     public void setIsPolling(boolean isPolling) {
@@ -2528,10 +2562,21 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     
     private void start() {
       if (isPolling) return;
-      isPolling = true;
+      final long notificationGeneration = generation.get();
+      long walletGeneration = listenerGeneration.get();
+      if (balanceGeneration != walletGeneration) {
+        BigInteger balance = getBalance();
+        BigInteger unlockedBalance = getUnlockedBalance();
+        if (notificationGeneration != generation.get()) return;
+        prevBalance = balance;
+        prevUnlockedBalance = unlockedBalance;
+        balanceGeneration = walletGeneration;
+      }
       
       // cache locked txs for later comparison
-      checkForChangedUnlockedTxs();
+      checkForChangedUnlockedTxs(notificationGeneration);
+      if (notificationGeneration != generation.get()) return;
+      isPolling = true;
       
       // create pool to process notifications in serial without blocking polling
       processNotificationPool = Executors.newFixedThreadPool(1);
@@ -2571,7 +2616,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
                 processNotificationPool.submit(new Runnable() {
                   @Override
                   public void run() {
-                    processZmqNotification(notification);
+                    processZmqNotification(notification, notificationGeneration);
                   }
                 });
               }
@@ -2582,7 +2627,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
             }
           }
           
-          stop(); // stop if disconnects
+          if (notificationGeneration == generation.get()) stop(); // stop if disconnects
         }
       });
       pollThread.start();
@@ -2591,6 +2636,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     private void stop() {
       if (!isPolling) return;
       isPolling = false;
+      reset();
       subscriber.close();
       context.close();
       prevLockedTxHashes.clear();
@@ -2599,7 +2645,8 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     
     @SuppressWarnings("unchecked")
-    private void processZmqNotification(String content) {
+    private void processZmqNotification(String content, long notificationGeneration) {
+      if (notificationGeneration != generation.get() || !isPolling) return;
       
       System.out.println("Processing zmq notification: " + content);
       
@@ -2616,13 +2663,15 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       if (topic.equals("json-minimal-chain_main")) {
         Map<String, Object> contentMap = JsonUtils.toMap(MoneroRpcConnection.MAPPER, content.substring(bodyIdx + 1)); // TODO: keep mapper in MoneroRpcConnection?
         long height = ((BigInteger) contentMap.get("first_height")).longValue();
+        if (notificationGeneration != generation.get()) return;
         announceNewBlock(height);
+        if (notificationGeneration != generation.get()) return;
         
         // notify if balances change
-        boolean balancesChanged = checkForChangedBalances();
+        boolean balancesChanged = checkForChangedBalances(notificationGeneration);
         
         // notify when txs unlock after wallet is synced
-        if (balancesChanged) checkForChangedUnlockedTxs();  // TODO: only check for unlocked txs when isSynced()
+        if (balancesChanged) checkForChangedUnlockedTxs(notificationGeneration);  // TODO: only check for unlocked txs when isSynced()
       } else {
         
         // parse json to maps
@@ -2655,6 +2704,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         }
         
         // announce output
+        if (notificationGeneration != generation.get()) return;
         if (topic.equals("json-full-money_received")) {
           tx.setIsIncoming(true);
           prevLockedTxHashes.add(tx.getHash()); // watch for unlock
@@ -2666,16 +2716,18 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         } else if (topic.equals("json-full-unconfirmed_money_received")) {
           tx.setIsIncoming(true);
           announceOutputReceived(output);
-          checkForChangedBalances();
+          checkForChangedBalances(notificationGeneration);
         } else {
           LOGGER.warning("Received unsupported notification: " + content);
         }
       }
     }
     
-    private boolean checkForChangedBalances() {
+    private boolean checkForChangedBalances(long notificationGeneration) {
+      if (notificationGeneration != generation.get()) return false;
       BigInteger balance = getBalance();
       BigInteger unlockedBalance = getUnlockedBalance();
+      if (notificationGeneration != generation.get()) return false;
       if (!balance.equals(prevBalance) || !unlockedBalance.equals(prevUnlockedBalance)) {
         prevBalance =  balance;
         prevUnlockedBalance = unlockedBalance;
@@ -2685,10 +2737,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       return false;
     }
     
-    private void checkForChangedUnlockedTxs() {
+    private void checkForChangedUnlockedTxs(long notificationGeneration) {
+      if (notificationGeneration != generation.get()) return;
       
       // get locked txs
       List<MoneroTxWallet> lockedTxs = getTxs(new MoneroTxQuery().setIsLocked(true).setIsConfirmed(true));
+      if (notificationGeneration != generation.get()) return;
       
       // collect hashes of txs no longer locked
       List<String> txHashesNoLongerLocked = new ArrayList<String>();
@@ -2712,12 +2766,14 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
             .setIsConfirmed(true)
             .setIncludeOutputs(true);
         txsNoLongerLocked = getTxs(query);
+        if (notificationGeneration != generation.get()) return;
       }
       
       // notify listeners of newly unlocked tx outputs
       for (MoneroTxWallet unlockedTx : txsNoLongerLocked) {
         for (MoneroOutputWallet output : unlockedTx.getOutputsWallet()) {
           announceOutputReceived(output);
+          if (notificationGeneration != generation.get()) return;
         }
       }
       

@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import monero.common.MoneroConnectionManager;
 import monero.common.MoneroConnectionManagerListener;
@@ -62,6 +63,7 @@ import monero.wallet.model.MoneroWalletListenerI;
 abstract class MoneroWalletDefault implements MoneroWallet {
   
   protected Set<MoneroWalletListenerI> listeners;
+  protected final AtomicLong listenerGeneration = new AtomicLong();
   protected MoneroConnectionManager connectionManager;
   protected MoneroConnectionManagerListener connectionManagerListener;
   protected volatile boolean isClosed = false;
@@ -87,7 +89,10 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   }
 
   protected void announceSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
-    for (MoneroWalletListenerI listener : listeners) {
+    long generation = listenerGeneration.get();
+    for (MoneroWalletListenerI listener : new ArrayList<MoneroWalletListenerI>(listeners)) {
+      if (generation != listenerGeneration.get()) return;
+      if (!listeners.contains(listener)) continue;
       try {
         listener.onSyncProgress(height, startHeight, endHeight, percentDone, message);
       } catch (Exception e) {
@@ -98,7 +103,10 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   }
 
   protected void announceNewBlock(long height) {
-    for (MoneroWalletListenerI listener : listeners) {
+    long generation = listenerGeneration.get();
+    for (MoneroWalletListenerI listener : new ArrayList<MoneroWalletListenerI>(listeners)) {
+      if (generation != listenerGeneration.get()) return;
+      if (!listeners.contains(listener)) continue;
       try {
         listener.onNewBlock(height);
       } catch (Exception e) {
@@ -109,7 +117,10 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   }
 
   protected void announceBalancesChanged(BigInteger balance, BigInteger unlockedBalance) {
-    for (MoneroWalletListenerI listener : listeners) {
+    long generation = listenerGeneration.get();
+    for (MoneroWalletListenerI listener : new ArrayList<MoneroWalletListenerI>(listeners)) {
+      if (generation != listenerGeneration.get()) return;
+      if (!listeners.contains(listener)) continue;
       try {
         listener.onBalancesChanged(balance, unlockedBalance);
       } catch (Exception e) {
@@ -120,7 +131,10 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   }
 
   protected void announceOutputReceived(MoneroOutputWallet output) {
-    for (MoneroWalletListenerI listener : listeners) {
+    long generation = listenerGeneration.get();
+    for (MoneroWalletListenerI listener : new ArrayList<MoneroWalletListenerI>(listeners)) {
+      if (generation != listenerGeneration.get()) return;
+      if (!listeners.contains(listener)) continue;
       try {
         listener.onOutputReceived(output);
       } catch (Exception e) {
@@ -131,7 +145,10 @@ abstract class MoneroWalletDefault implements MoneroWallet {
   }
 
   protected void announceOutputSpent(MoneroOutputWallet output) {
-    for (MoneroWalletListenerI listener : listeners) {
+    long generation = listenerGeneration.get();
+    for (MoneroWalletListenerI listener : new ArrayList<MoneroWalletListenerI>(listeners)) {
+      if (generation != listenerGeneration.get()) return;
+      if (!listeners.contains(listener)) continue;
       try {
         listener.onOutputSpent(output);
       } catch (Exception e) {
