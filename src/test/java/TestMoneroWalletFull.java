@@ -857,8 +857,8 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   @Test
   public void testWalletEqualityRpc() {
 
-    // wait for txs to clear pool
-    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(TestUtils.getWalletRpc(), wallet);
+    // wait for pending txs to clear from wallets before rescanning spent outputs
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearWallets(TestUtils.getWalletRpc(), wallet);
 
     // TODO: rescanning spent outputs is necessary for equality test to mark as spent/unspent correctly
     wallet.rescanSpent();
