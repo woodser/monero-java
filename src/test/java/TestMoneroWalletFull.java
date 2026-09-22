@@ -666,37 +666,23 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       if (testPostSyncNotifications) {
         
         // start automatic syncing
+        long walletHeight = wallet.getHeight();
         wallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
         
-        // attempt to start mining to push the network along  // TODO: TestUtils.tryStartMining() : reqId, TestUtils.tryStopMining(reqId)
-        boolean startedMining = false;
+        System.out.println("Waiting for next block to test post sync notifications");
+        StartMining.mineToHeight(walletHeight + 1);
+
+        // ensure wallet has time to detect new block
         try {
-          StartMining.startMining();
-          startedMining = true;
-        } catch (Exception e) {
-          // no problem
+          TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS + 3000); // sleep for wallet interval + time to sync
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+          throw new RuntimeException(e.getMessage());
         }
-        
-        try {
-          
-          // wait for block
-          System.out.println("Waiting for next block to test post sync notifications");
-          daemon.waitForNextBlockHeader();
-          
-          // ensure wallet has time to detect new block
-          try {
-            TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS + 3000); // sleep for wallet interval + time to sync
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-          }
-          
-          // test that wallet listener's onSyncProgress() and onNewBlock() were invoked after previous completion
-          assertTrue(walletSyncTester.getOnSyncProgressAfterDone());
-          assertTrue(walletSyncTester.getOnNewBlockAfterDone());
-        } finally {
-          if (startedMining) wallet.stopMining();
-        }
+
+        // test that wallet listener's onSyncProgress() and onNewBlock() were invoked after previous completion
+        assertTrue(walletSyncTester.getOnSyncProgressAfterDone());
+        assertTrue(walletSyncTester.getOnNewBlockAfterDone());
       }
     } finally {
       if (walletGt != null) walletGt.close(true);
