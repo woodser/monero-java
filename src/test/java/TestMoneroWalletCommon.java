@@ -2430,21 +2430,22 @@ public abstract class TestMoneroWalletCommon {
   public void testGetNewKeyImagesFromLastImport() {
     assumeTrue(TEST_NON_RELAYS);
     
-    // get outputs hex
-    String outputsHex = wallet.exportOutputs();
-    
-    // import outputs hex
-    if (outputsHex != null) {
-      int numImported = wallet.importOutputs(outputsHex);
-      assertTrue(numImported >= 0);
-    }
-    
-    // get and test new key images from last import
-    List<MoneroKeyImage> images = wallet.getNewKeyImagesFromLastImport();
-    if (images.isEmpty()) fail("No new key images in last import"); // TODO: these are already known to the wallet, so no new key images will be imported
-    for (MoneroKeyImage image : images) {
-      assertTrue(image.getHex().length() > 0);
-      assertTrue(image.getSignature().length() > 0);
+    // export all outputs for a fresh offline wallet
+    String outputsHex = wallet.exportOutputs(true);
+    MoneroWallet offlineWallet = createWallet(new MoneroWalletConfig().setPrimaryAddress(wallet.getPrimaryAddress()).setPrivateViewKey(wallet.getPrivateViewKey()).setPrivateSpendKey(wallet.getPrivateSpendKey()).setServerUri(TestUtils.OFFLINE_SERVER_URI).setRestoreHeight(0l));
+    try {
+      int numImported = offlineWallet.importOutputs(outputsHex);
+      assertTrue(numImported > 0, "No outputs imported");
+
+      // get and test new key images from last import
+      List<MoneroKeyImage> images = offlineWallet.getNewKeyImagesFromLastImport();
+      if (images.isEmpty()) fail("No new key images in last import");
+      for (MoneroKeyImage image : images) {
+        assertTrue(image.getHex().length() > 0);
+        assertTrue(image.getSignature().length() > 0);
+      }
+    } finally {
+      closeWallet(offlineWallet);
     }
   }
   
