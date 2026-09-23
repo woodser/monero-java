@@ -2348,6 +2348,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     private Long prevHeight;
     private BigInteger[] prevBalances;
     private List<MoneroTxWallet> prevLockedTxs = new ArrayList<MoneroTxWallet>();
+    private long prevLockedTxsMinHeight;
     private Set<String> prevUnconfirmedNotifications = new HashSet<String>(); // tx hashes of previous notifications
     private Set<String> prevConfirmedNotifications = new HashSet<String>(); // tx hashes of previously confirmed but not yet unlocked notifications
     
@@ -2394,6 +2395,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
             prevHeight = null;
             prevBalances = null;
             prevLockedTxs.clear();
+            prevLockedTxsMinHeight = 0;
             prevUnconfirmedNotifications.clear();
             prevConfirmedNotifications.clear();
             snapshotGeneration = pollGeneration;
@@ -2434,10 +2436,12 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
           }
           
           // save locked txs for next comparison
+          long prevMinHeight = prevLockedTxsMinHeight;
           prevLockedTxs = lockedTxs;
+          prevLockedTxsMinHeight = minHeight;
           
-          // fetch txs which are no longer locked
-          List<MoneroTxWallet> unlockedTxs = noLongerLockedHashes.isEmpty() ? new ArrayList<MoneroTxWallet>() : getTxs(new MoneroTxQuery().setIsLocked(false).setMinHeight(minHeight).setHashes(noLongerLockedHashes).setIncludeOutputs(true));
+          // use the previous snapshot's bound so tracked txs do not age out between polls
+          List<MoneroTxWallet> unlockedTxs = noLongerLockedHashes.isEmpty() ? new ArrayList<MoneroTxWallet>() : getTxs(new MoneroTxQuery().setIsLocked(false).setMinHeight(prevMinHeight).setHashes(noLongerLockedHashes).setIncludeOutputs(true));
           if (pollGeneration != generation.get()) return;
           
           // announce new unconfirmed and confirmed txs
