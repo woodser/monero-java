@@ -3565,6 +3565,10 @@ public abstract class TestMoneroWalletCommon {
   private void testSendToMultiple(int numAccounts, int numSubaddressesPerAccount, boolean canSplit, BigInteger sendAmountPerSubaddress) { testSendToMultiple(numAccounts, numSubaddressesPerAccount, canSplit, sendAmountPerSubaddress, false); }
   private void testSendToMultiple(int numAccounts, int numSubaddressesPerAccount, boolean canSplit, BigInteger sendAmountPerSubaddress, boolean subtractFeeFromDestinations) {
     TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
+
+    // include the last mined blocks before measuring balance changes
+    if (daemon.getMiningStatus().isActive()) daemon.stopMining();
+    wallet.sync();
     
     // compute the minimum account unlocked balance needed in order to fulfill the config
     BigInteger minAccountAmount = null;
