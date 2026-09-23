@@ -4852,241 +4852,271 @@ public abstract class TestMoneroWalletCommon {
   // TODO: test sweepUnlocked()
   private List<String> testWalletNotificationsAux(boolean sameWallet, boolean sameAccount, boolean sweepOutput, boolean createThenRelay, long unlockDelay) {
     long MAX_POLL_TIME = 5000l; // maximum time granted for wallet to poll
-    
+
     // collect issues as test runs
     List<String> issues = new ArrayList<String>();
-    
+
     // set sender and receiver
     MoneroWallet sender = wallet;
     MoneroWallet receiver = sameWallet ? sender : createWallet(new MoneroWalletConfig());
-    
-    // create receiver accounts if necessary
-    int numAccounts = receiver.getAccounts().size();
-    for (int i = 0; i < 4 - numAccounts; i++) receiver.createAccount();
-    
-    // wait for unlocked funds in source account
-    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(sender);
-    TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(sender, 0, null, TestUtils.MAX_FEE.multiply(new BigInteger("10")));
-    
-    // get balances to compare after sending
-    BigInteger senderBalanceBefore = sender.getBalance();
-    BigInteger senderUnlockedBalanceBefore = sender.getUnlockedBalance();
-    BigInteger receiverBalanceBefore = receiver.getBalance();
-    BigInteger receiverUnlockedBalanceBefore = receiver.getUnlockedBalance();
-    Long lastHeight = daemon.getHeight();
-    
-    // start collecting notifications from sender and receiver
+
     WalletNotificationCollector senderNotificationCollector = new WalletNotificationCollector();
     WalletNotificationCollector receiverNotificationCollector = new WalletNotificationCollector();
-    sender.addListener(senderNotificationCollector);
-    GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS / 2l);
-    receiver.addListener(receiverNotificationCollector);
-    
-    // send funds
-    TxContext ctx = new TxContext();
-    ctx.wallet = wallet;
-    ctx.isSendResponse = true;
-    MoneroTxWallet senderTx = null;
-    int[] destinationAccounts = sameAccount ? (sweepOutput ? new int[] {0} : new int[] {0, 1, 2}) : (sweepOutput ? new int[] {1} : new int[] {1, 2, 3});
-    List<MoneroOutputWallet> expectedOutputs = new ArrayList<MoneroOutputWallet>();
-    if (sweepOutput) {
-      ctx.isSweepResponse = true;
-      ctx.isSweepOutputResponse = true;
-      List<MoneroOutputWallet> outputs = sender.getOutputs(new MoneroOutputQuery().setIsSpent(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)).setAccountIndex(0).setMinAmount(TestUtils.MAX_FEE.multiply(new BigInteger("5"))));
-      if (outputs.isEmpty()) {
-        issues.add("ERROR: No outputs available to sweep from account 0");
-        return issues;
-      }
-      MoneroTxConfig config = new MoneroTxConfig().setAddress(receiver.getAddress(destinationAccounts[0], 0)).setKeyImage(outputs.get(0).getKeyImage().getHex()).setRelay(!createThenRelay);
-      senderTx = sender.sweepOutput(config);
-      expectedOutputs.add(new MoneroOutputWallet().setAmount(senderTx.getOutgoingTransfer().getDestinations().get(0).getAmount()).setAccountIndex(destinationAccounts[0]).setSubaddressIndex(0));
-      ctx.config = config;
-    } else {
-      MoneroTxConfig config = new MoneroTxConfig().setAccountIndex(0).setRelay(!createThenRelay);
-      for (int destinationAccount : destinationAccounts) {
-        config.addDestination(receiver.getAddress(destinationAccount, 0), TestUtils.MAX_FEE); // TODO: send and check random amounts?
-        expectedOutputs.add(new MoneroOutputWallet().setAmount(TestUtils.MAX_FEE).setAccountIndex(destinationAccount).setSubaddressIndex(0));
-      }
-      senderTx = sender.createTx(config);
-      ctx.config = config;
-    }
-    if (createThenRelay) sender.relayTx(senderTx);
-    
-    // start timer to measure end of sync period
-    long startTime = System.currentTimeMillis();
-    
-    // test send tx
-    testTxWallet(senderTx, ctx);
-    
-    // test sender after sending
-    MoneroOutputQuery outputQuery = new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setHash(senderTx.getHash())); // query for outputs from sender tx
-    if (sameWallet) {
-      if (senderTx.getIncomingAmount() == null) issues.add("WARNING: sender tx incoming amount is null when sent to same wallet");
-      else if (senderTx.getIncomingAmount().equals(new BigInteger("0"))) issues.add("WARNING: sender tx incoming amount is 0 when sent to same wallet");
-      else if (senderTx.getIncomingAmount().compareTo(senderTx.getOutgoingAmount().subtract(senderTx.getFee())) != 0) issues.add("WARNING: sender tx incoming amount != outgoing amount - fee when sent to same wallet");
-    } else {
-      if (senderTx.getIncomingAmount() != null) issues.add("ERROR: tx incoming amount should be null"); // TODO: should be 0? then can remove null checks in this method
-    }
-    senderTx = sender.getTxs(new MoneroTxQuery().setHash(senderTx.getHash()).setIncludeOutputs(true)).get(0);
-    if (!sender.getBalance().equals(senderBalanceBefore.subtract(senderTx.getFee()).subtract(senderTx.getOutgoingAmount()).add(senderTx.getIncomingAmount() == null ? new BigInteger("0") : senderTx.getIncomingAmount()))) issues.add("ERROR: sender balance after send != balance before - tx fee - outgoing amount + incoming amount (" + sender.getBalance() + " != " + senderBalanceBefore + " - " + senderTx.getFee() + " - " + senderTx.getOutgoingAmount() + " + " + senderTx.getIncomingAmount() + ")");
-    if (sender.getUnlockedBalance().compareTo(senderUnlockedBalanceBefore) >= 0) issues.add("ERROR: sender unlocked balance should have decreased after sending");
-    if (senderNotificationCollector.getBalanceNotifications().size() == 0) issues.add("ERROR: sender did not notify balance change after sending");
-    else {
-      if (!sender.getBalance().equals(senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getFirst())) issues.add("ERROR: sender balance != last notified balance after sending (" + sender.getBalance() + " != " + senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getFirst() + ")");
-      if (!sender.getUnlockedBalance().equals(senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getSecond())) issues.add("ERROR: sender unlocked balance != last notified unlocked balance after sending (" + sender.getUnlockedBalance() + " != " + senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getSecond() + ")");
-    }
-    if (senderNotificationCollector.getOutputsSpent(outputQuery).size() == 0) issues.add("ERROR: sender did not announce unconfirmed spent output");
-        
-    // test receiver after 2 sync periods
-    GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS - (System.currentTimeMillis() - startTime));
-    startTime = System.currentTimeMillis(); // reset timer
-    MoneroTxWallet receiverTx = receiver.getTx(senderTx.getHash());
-    if (!senderTx.getOutgoingAmount().equals(receiverTx.getIncomingAmount())) {
-      if (sameAccount) issues.add("WARNING: sender tx outgoing amount != receiver tx incoming amount when sent to same account (" + senderTx.getOutgoingAmount() + " != " + receiverTx.getIncomingAmount() + ")");
-      else if (sameAccount) issues.add("ERROR: sender tx outgoing amount != receiver tx incoming amount (" + senderTx.getOutgoingAmount() + " != " + receiverTx.getIncomingAmount() + ")");
-    }
-    if (!receiver.getBalance().equals(receiverBalanceBefore.add(receiverTx.getIncomingAmount() == null ? new BigInteger("0") : receiverTx.getIncomingAmount()).subtract(receiverTx.getOutgoingAmount() == null ? new BigInteger("0") : receiverTx.getOutgoingAmount()).subtract(sameWallet ? receiverTx.getFee() : new BigInteger("0")))) {
-      if (sameAccount) issues.add("WARNING: after sending, receiver balance != balance before + incoming amount - outgoing amount - tx fee when sent to same account (" + receiver.getBalance() + " != " + receiverBalanceBefore + " + " + receiverTx.getIncomingAmount() + " - " + receiverTx.getOutgoingAmount() + " - " + (sameWallet ? receiverTx.getFee() : new BigInteger("0")) + ")");
-      else issues.add("ERROR: after sending, receiver balance != balance before + incoming amount - outgoing amount - tx fee (" + receiver.getBalance() + " != " + receiverBalanceBefore + " + " + receiverTx.getIncomingAmount() + " - " + receiverTx.getOutgoingAmount() + " - " + (sameWallet ? receiverTx.getFee() : new BigInteger("0")) + ")");
-    }
-    if (!sameWallet && !receiver.getUnlockedBalance().equals(receiverUnlockedBalanceBefore)) issues.add("ERROR: receiver unlocked balance should not have changed after sending");
-    if (receiverNotificationCollector.getBalanceNotifications().size() == 0) issues.add("ERROR: receiver did not notify balance change when funds received");
-    else {
-      if (!receiver.getBalance().equals(receiverNotificationCollector.getBalanceNotifications().get(receiverNotificationCollector.getBalanceNotifications().size() - 1).getFirst())) issues.add("ERROR: receiver balance != last notified balance after funds received");
-      if (!receiver.getUnlockedBalance().equals(receiverNotificationCollector.getBalanceNotifications().get(receiverNotificationCollector.getBalanceNotifications().size() - 1).getSecond())) issues.add("ERROR: receiver unlocked balance != last notified unlocked balance after funds received");
-    }
-    if (receiverNotificationCollector.getOutputsReceived(outputQuery).size() == 0) issues.add("ERROR: receiver did not announce unconfirmed received output");
-    else {
-      for (MoneroOutputWallet output : getMissingOutputs(expectedOutputs, receiverNotificationCollector.getOutputsReceived(outputQuery), true)) {
-        issues.add("ERROR: receiver did not announce received output for amount " + output.getAmount() + " to subaddress [" + output.getAccountIndex() + ", " + output.getSubaddressIndex() + "]");
-      }
-    }
-    
-    // mine until test completes
-    StartMining.startMining();
-    
-    // loop every sync period until unlock tested
     List<Thread> threads = new ArrayList<Thread>();
-    long expectedUnlockTime = lastHeight + unlockDelay;
-    Long confirmHeight = null;
-    while (true) {
-      
-      // test height notifications
-      long height = daemon.getHeight();
-      if (height > lastHeight) {
-        long testStartHeight = lastHeight;
-        lastHeight = height;
-        Thread thread = new Thread(new Runnable() {
-          @Override public void run() {
-            GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS * 2 + MAX_POLL_TIME); // wait 2 sync periods + poll time for notifications
-            List<Long> senderBlockNotifications = senderNotificationCollector.getBlockNotifications();
-            List<Long> receiverBlockNotifications = receiverNotificationCollector.getBlockNotifications();
-            for (long i = testStartHeight; i < height; i++) {
-              if (!senderBlockNotifications.contains(i)) issues.add("ERROR: sender did not announce block " + i);
-              if (!receiverBlockNotifications.contains(i)) issues.add("ERROR: receiver did not announce block " + i);
-            }
-          }
-        });
-        threads.add(thread);
-        thread.start();
-      }
-      
-      // check if tx confirmed
-      if (confirmHeight == null) {
-        
-        // get updated tx
-        MoneroTxWallet tx = receiver.getTx(senderTx.getHash());
-        
-        // break if tx fails
-        if (tx.isFailed()) {
-          issues.add("ERROR: tx failed in tx pool");
-          break;
+    Throwable testFailure = null;
+    try {
+      // create receiver accounts if necessary
+      int numAccounts = receiver.getAccounts().size();
+      for (int i = 0; i < 4 - numAccounts; i++) receiver.createAccount();
+
+      // wait for unlocked funds in source account
+      TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(sender);
+      TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(sender, 0, null, TestUtils.MAX_FEE.multiply(new BigInteger("10")));
+
+      // include the last mined blocks before measuring balance changes
+      if (daemon.getMiningStatus().isActive()) daemon.stopMining();
+      sender.sync();
+      if (receiver != sender) receiver.sync();
+
+      // get balances to compare after sending
+      BigInteger senderBalanceBefore = sender.getBalance();
+      BigInteger senderUnlockedBalanceBefore = sender.getUnlockedBalance();
+      BigInteger receiverBalanceBefore = receiver.getBalance();
+      BigInteger receiverUnlockedBalanceBefore = receiver.getUnlockedBalance();
+      Long lastHeight = daemon.getHeight();
+
+      // start collecting notifications from sender and receiver
+      sender.addListener(senderNotificationCollector);
+      GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS / 2l);
+      receiver.addListener(receiverNotificationCollector);
+
+      // send funds
+      TxContext ctx = new TxContext();
+      ctx.wallet = wallet;
+      ctx.isSendResponse = true;
+      MoneroTxWallet senderTx = null;
+      int[] destinationAccounts = sameAccount ? (sweepOutput ? new int[] {0} : new int[] {0, 1, 2}) : (sweepOutput ? new int[] {1} : new int[] {1, 2, 3});
+      List<MoneroOutputWallet> expectedOutputs = new ArrayList<MoneroOutputWallet>();
+      if (sweepOutput) {
+        ctx.isSweepResponse = true;
+        ctx.isSweepOutputResponse = true;
+        List<MoneroOutputWallet> outputs = sender.getOutputs(new MoneroOutputQuery().setIsSpent(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)).setAccountIndex(0).setMinAmount(TestUtils.MAX_FEE.multiply(new BigInteger("5"))));
+        if (outputs.isEmpty()) {
+          issues.add("ERROR: No outputs available to sweep from account 0");
+          return issues;
         }
-        
-        // test confirm notifications
-        if (tx.isConfirmed() && confirmHeight == null) {
-          confirmHeight = tx.getHeight();
-          expectedUnlockTime = Math.max(confirmHeight + NUM_BLOCKS_LOCKED, expectedUnlockTime); // exact unlock time known
+        MoneroTxConfig config = new MoneroTxConfig().setAddress(receiver.getAddress(destinationAccounts[0], 0)).setKeyImage(outputs.get(0).getKeyImage().getHex()).setRelay(!createThenRelay);
+        senderTx = sender.sweepOutput(config);
+        expectedOutputs.add(new MoneroOutputWallet().setAmount(senderTx.getOutgoingTransfer().getDestinations().get(0).getAmount()).setAccountIndex(destinationAccounts[0]).setSubaddressIndex(0));
+        ctx.config = config;
+      } else {
+        MoneroTxConfig config = new MoneroTxConfig().setAccountIndex(0).setRelay(!createThenRelay);
+        for (int destinationAccount : destinationAccounts) {
+          config.addDestination(receiver.getAddress(destinationAccount, 0), TestUtils.MAX_FEE); // TODO: send and check random amounts?
+          expectedOutputs.add(new MoneroOutputWallet().setAmount(TestUtils.MAX_FEE).setAccountIndex(destinationAccount).setSubaddressIndex(0));
+        }
+        senderTx = sender.createTx(config);
+        ctx.config = config;
+      }
+      if (createThenRelay) sender.relayTx(senderTx);
+
+      // start timer to measure end of sync period
+      long startTime = System.currentTimeMillis();
+
+      // test send tx
+      testTxWallet(senderTx, ctx);
+
+      // test sender after sending
+      MoneroOutputQuery outputQuery = new MoneroOutputQuery().setTxQuery(new MoneroTxQuery().setHash(senderTx.getHash())); // query for outputs from sender tx
+      if (sameWallet) {
+        if (senderTx.getIncomingAmount() == null) issues.add("WARNING: sender tx incoming amount is null when sent to same wallet");
+        else if (senderTx.getIncomingAmount().equals(new BigInteger("0"))) issues.add("WARNING: sender tx incoming amount is 0 when sent to same wallet");
+        else if (senderTx.getIncomingAmount().compareTo(senderTx.getOutgoingAmount().subtract(senderTx.getFee())) != 0) issues.add("WARNING: sender tx incoming amount != outgoing amount - fee when sent to same wallet");
+      } else {
+        if (senderTx.getIncomingAmount() != null) issues.add("ERROR: tx incoming amount should be null"); // TODO: should be 0? then can remove null checks in this method
+      }
+      senderTx = sender.getTxs(new MoneroTxQuery().setHash(senderTx.getHash()).setIncludeOutputs(true)).get(0);
+      if (!sender.getBalance().equals(senderBalanceBefore.subtract(senderTx.getFee()).subtract(senderTx.getOutgoingAmount()).add(senderTx.getIncomingAmount() == null ? new BigInteger("0") : senderTx.getIncomingAmount()))) issues.add("ERROR: sender balance after send != balance before - tx fee - outgoing amount + incoming amount (" + sender.getBalance() + " != " + senderBalanceBefore + " - " + senderTx.getFee() + " - " + senderTx.getOutgoingAmount() + " + " + senderTx.getIncomingAmount() + ")");
+      BigInteger senderUnlockedBalanceAfter = sender.getUnlockedBalance();
+      if (senderUnlockedBalanceAfter.compareTo(senderUnlockedBalanceBefore) >= 0) issues.add("ERROR: sender unlocked balance should have decreased after sending (before: " + senderUnlockedBalanceBefore + ", after: " + senderUnlockedBalanceAfter + ")");
+      if (senderNotificationCollector.getBalanceNotifications().size() == 0) issues.add("ERROR: sender did not notify balance change after sending");
+      else {
+        if (!sender.getBalance().equals(senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getFirst())) issues.add("ERROR: sender balance != last notified balance after sending (" + sender.getBalance() + " != " + senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getFirst() + ")");
+        if (!sender.getUnlockedBalance().equals(senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getSecond())) issues.add("ERROR: sender unlocked balance != last notified unlocked balance after sending (" + sender.getUnlockedBalance() + " != " + senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getSecond() + ")");
+      }
+      if (senderNotificationCollector.getOutputsSpent(outputQuery).size() == 0) issues.add("ERROR: sender did not announce unconfirmed spent output");
+
+      // test receiver after 2 sync periods
+      GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS - (System.currentTimeMillis() - startTime));
+      startTime = System.currentTimeMillis(); // reset timer
+      MoneroTxWallet receiverTx = receiver.getTx(senderTx.getHash());
+      if (!senderTx.getOutgoingAmount().equals(receiverTx.getIncomingAmount())) {
+        if (sameAccount) issues.add("WARNING: sender tx outgoing amount != receiver tx incoming amount when sent to same account (" + senderTx.getOutgoingAmount() + " != " + receiverTx.getIncomingAmount() + ")");
+        else if (sameAccount) issues.add("ERROR: sender tx outgoing amount != receiver tx incoming amount (" + senderTx.getOutgoingAmount() + " != " + receiverTx.getIncomingAmount() + ")");
+      }
+      if (!receiver.getBalance().equals(receiverBalanceBefore.add(receiverTx.getIncomingAmount() == null ? new BigInteger("0") : receiverTx.getIncomingAmount()).subtract(receiverTx.getOutgoingAmount() == null ? new BigInteger("0") : receiverTx.getOutgoingAmount()).subtract(sameWallet ? receiverTx.getFee() : new BigInteger("0")))) {
+        if (sameAccount) issues.add("WARNING: after sending, receiver balance != balance before + incoming amount - outgoing amount - tx fee when sent to same account (" + receiver.getBalance() + " != " + receiverBalanceBefore + " + " + receiverTx.getIncomingAmount() + " - " + receiverTx.getOutgoingAmount() + " - " + (sameWallet ? receiverTx.getFee() : new BigInteger("0")) + ")");
+        else issues.add("ERROR: after sending, receiver balance != balance before + incoming amount - outgoing amount - tx fee (" + receiver.getBalance() + " != " + receiverBalanceBefore + " + " + receiverTx.getIncomingAmount() + " - " + receiverTx.getOutgoingAmount() + " - " + (sameWallet ? receiverTx.getFee() : new BigInteger("0")) + ")");
+      }
+      if (!sameWallet && !receiver.getUnlockedBalance().equals(receiverUnlockedBalanceBefore)) issues.add("ERROR: receiver unlocked balance should not have changed after sending");
+      if (receiverNotificationCollector.getBalanceNotifications().size() == 0) issues.add("ERROR: receiver did not notify balance change when funds received");
+      else {
+        if (!receiver.getBalance().equals(receiverNotificationCollector.getBalanceNotifications().get(receiverNotificationCollector.getBalanceNotifications().size() - 1).getFirst())) issues.add("ERROR: receiver balance != last notified balance after funds received");
+        if (!receiver.getUnlockedBalance().equals(receiverNotificationCollector.getBalanceNotifications().get(receiverNotificationCollector.getBalanceNotifications().size() - 1).getSecond())) issues.add("ERROR: receiver unlocked balance != last notified unlocked balance after funds received");
+      }
+      if (receiverNotificationCollector.getOutputsReceived(outputQuery).size() == 0) issues.add("ERROR: receiver did not announce unconfirmed received output");
+      else {
+        for (MoneroOutputWallet output : getMissingOutputs(expectedOutputs, receiverNotificationCollector.getOutputsReceived(outputQuery), true)) {
+          issues.add("ERROR: receiver did not announce received output for amount " + output.getAmount() + " to subaddress [" + output.getAccountIndex() + ", " + output.getSubaddressIndex() + "]");
+        }
+      }
+
+      // mine until test completes
+      StartMining.startMining();
+
+      // loop every sync period until unlock tested
+      long expectedUnlockTime = lastHeight + unlockDelay;
+      Long confirmHeight = null;
+      while (true) {
+
+        // test height notifications
+        long height = daemon.getHeight();
+        if (height > lastHeight) {
+          long testStartHeight = lastHeight;
+          lastHeight = height;
           Thread thread = new Thread(new Runnable() {
             @Override public void run() {
               GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS * 2 + MAX_POLL_TIME); // wait 2 sync periods + poll time for notifications
-              MoneroOutputQuery confirmedQuery = outputQuery.getTxQuery().copy().setIsConfirmed(true).setIsLocked(true).getOutputQuery();
-              if (senderNotificationCollector.getOutputsSpent(confirmedQuery).size() == 0) issues.add("ERROR: sender did not announce confirmed spent output"); // TODO: test amount
-              if (receiverNotificationCollector.getOutputsReceived(confirmedQuery).size() == 0) issues.add("ERROR: receiver did not announce confirmed received output");
-              else for (MoneroOutputWallet output : getMissingOutputs(expectedOutputs, receiverNotificationCollector.getOutputsReceived(confirmedQuery), true)) issues.add("ERROR: receiver did not announce confirmed received output for amount " + output.getAmount() + " to subaddress [" + output.getAccountIndex() + ", " + output.getSubaddressIndex() + "]");
-              
-              // if same wallet, net amount spent = tx fee = outputs spent - outputs received
-              if (sameWallet) {
-                BigInteger netAmount = new BigInteger("0");
-                for (MoneroOutputWallet outputSpent : senderNotificationCollector.getOutputsSpent(confirmedQuery)) netAmount = netAmount.add(outputSpent.getAmount());
-                for (MoneroOutputWallet outputReceived : senderNotificationCollector.getOutputsReceived(confirmedQuery)) netAmount = netAmount.subtract(outputReceived.getAmount());
-                if (tx.getFee().compareTo(netAmount) != 0) {
-                  if (sameAccount) issues.add("WARNING: net output amount != tx fee when funds sent to same account: " + netAmount + " vs " + tx.getFee());
-                  else if (sender instanceof MoneroWalletRpc) issues.add("WARNING: net output amount != tx fee when funds sent to same wallet because monero-wallet-rpc does not provide tx inputs: " + netAmount + " vs " + tx.getFee()); // TODO (monero-project): open issue to provide tx inputs
-                  else issues.add("ERROR: net output amount must equal tx fee when funds sent to same wallet: " + netAmount + " vs " + tx.getFee());
-                }
+              List<Long> senderBlockNotifications = senderNotificationCollector.getBlockNotifications();
+              List<Long> receiverBlockNotifications = receiverNotificationCollector.getBlockNotifications();
+              for (long i = testStartHeight; i < height; i++) {
+                if (!senderBlockNotifications.contains(i)) issues.add("ERROR: sender did not announce block " + i);
+                if (!receiverBlockNotifications.contains(i)) issues.add("ERROR: receiver did not announce block " + i);
               }
             }
           });
           threads.add(thread);
           thread.start();
         }
-      }
-      
-      // otherwise test unlock notifications
-      else if (height >= expectedUnlockTime) {
-        Thread thread = new Thread(new Runnable() {
-          @Override public void run() {
-            GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS * 2 + MAX_POLL_TIME); // wait 2 sync periods + poll time for notifications
-            MoneroOutputQuery unlockedQuery = outputQuery.getTxQuery().copy().setIsLocked(false).getOutputQuery();
-            if (senderNotificationCollector.getOutputsSpent(unlockedQuery).size() == 0) issues.add("ERROR: sender did not announce unlocked spent output"); // TODO: test amount?
-            for (MoneroOutputWallet output : getMissingOutputs(expectedOutputs, receiverNotificationCollector.getOutputsReceived(unlockedQuery), true)) issues.add("ERROR: receiver did not announce unlocked received output for amount " + output.getAmount() + " to subaddress [" + output.getAccountIndex() + ", " + output.getSubaddressIndex() + "]");
-            if (!sameWallet && !receiver.getBalance().equals(receiver.getUnlockedBalance())) issues.add("ERROR: receiver balance != unlocked balance after funds unlocked");
-            if (senderNotificationCollector.getBalanceNotifications().size() == 0) issues.add("ERROR: sender did not announce any balance notifications");
-            else {
-              if (!sender.getBalance().equals(senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getFirst())) issues.add("ERROR: sender balance != last notified balance after funds unlocked");
-              if (!sender.getUnlockedBalance().equals(senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getSecond())) issues.add("ERROR: sender unlocked balance != last notified unlocked balance after funds unlocked");
+
+        // check if tx confirmed
+        if (confirmHeight == null) {
+
+          // get updated tx
+          MoneroTxWallet tx = receiver.getTx(senderTx.getHash());
+
+          // break if tx fails
+          if (tx.isFailed()) {
+            issues.add("ERROR: tx failed in tx pool");
+            break;
+          }
+
+          // test confirm notifications
+          if (tx.isConfirmed() && confirmHeight == null) {
+            confirmHeight = tx.getHeight();
+            expectedUnlockTime = Math.max(confirmHeight + NUM_BLOCKS_LOCKED, expectedUnlockTime); // exact unlock time known
+            Thread thread = new Thread(new Runnable() {
+              @Override public void run() {
+                GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS * 2 + MAX_POLL_TIME); // wait 2 sync periods + poll time for notifications
+                MoneroOutputQuery confirmedQuery = outputQuery.getTxQuery().copy().setIsConfirmed(true).setIsLocked(true).getOutputQuery();
+                if (senderNotificationCollector.getOutputsSpent(confirmedQuery).size() == 0) issues.add("ERROR: sender did not announce confirmed spent output"); // TODO: test amount
+                if (receiverNotificationCollector.getOutputsReceived(confirmedQuery).size() == 0) issues.add("ERROR: receiver did not announce confirmed received output");
+                else for (MoneroOutputWallet output : getMissingOutputs(expectedOutputs, receiverNotificationCollector.getOutputsReceived(confirmedQuery), true)) issues.add("ERROR: receiver did not announce confirmed received output for amount " + output.getAmount() + " to subaddress [" + output.getAccountIndex() + ", " + output.getSubaddressIndex() + "]");
+
+                // if same wallet, net amount spent = tx fee = outputs spent - outputs received
+                if (sameWallet) {
+                  BigInteger netAmount = new BigInteger("0");
+                  for (MoneroOutputWallet outputSpent : senderNotificationCollector.getOutputsSpent(confirmedQuery)) netAmount = netAmount.add(outputSpent.getAmount());
+                  for (MoneroOutputWallet outputReceived : senderNotificationCollector.getOutputsReceived(confirmedQuery)) netAmount = netAmount.subtract(outputReceived.getAmount());
+                  if (tx.getFee().compareTo(netAmount) != 0) {
+                    if (sameAccount) issues.add("WARNING: net output amount != tx fee when funds sent to same account: " + netAmount + " vs " + tx.getFee());
+                    else if (sender instanceof MoneroWalletRpc) issues.add("WARNING: net output amount != tx fee when funds sent to same wallet because monero-wallet-rpc does not provide tx inputs: " + netAmount + " vs " + tx.getFee()); // TODO (monero-project): open issue to provide tx inputs
+                    else issues.add("ERROR: net output amount must equal tx fee when funds sent to same wallet: " + netAmount + " vs " + tx.getFee());
+                  }
+                }
+              }
+            });
+            threads.add(thread);
+            thread.start();
+          }
+        }
+
+        // otherwise test unlock notifications
+        else if (height >= expectedUnlockTime) {
+          Thread thread = new Thread(new Runnable() {
+            @Override public void run() {
+              GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS * 2 + MAX_POLL_TIME); // wait 2 sync periods + poll time for notifications
+              MoneroOutputQuery unlockedQuery = outputQuery.getTxQuery().copy().setIsLocked(false).getOutputQuery();
+              if (senderNotificationCollector.getOutputsSpent(unlockedQuery).size() == 0) issues.add("ERROR: sender did not announce unlocked spent output"); // TODO: test amount?
+              for (MoneroOutputWallet output : getMissingOutputs(expectedOutputs, receiverNotificationCollector.getOutputsReceived(unlockedQuery), true)) issues.add("ERROR: receiver did not announce unlocked received output for amount " + output.getAmount() + " to subaddress [" + output.getAccountIndex() + ", " + output.getSubaddressIndex() + "]");
+              if (!sameWallet && !receiver.getBalance().equals(receiver.getUnlockedBalance())) issues.add("ERROR: receiver balance != unlocked balance after funds unlocked");
+              if (senderNotificationCollector.getBalanceNotifications().size() == 0) issues.add("ERROR: sender did not announce any balance notifications");
+              else {
+                if (!sender.getBalance().equals(senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getFirst())) issues.add("ERROR: sender balance != last notified balance after funds unlocked");
+                if (!sender.getUnlockedBalance().equals(senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getSecond())) issues.add("ERROR: sender unlocked balance != last notified unlocked balance after funds unlocked");
+              }
+              if (receiverNotificationCollector.getBalanceNotifications().size() == 0) issues.add("ERROR: receiver did not announce any balance notifications");
+              else {
+                if (!receiver.getBalance().equals(receiverNotificationCollector.getBalanceNotifications().get(receiverNotificationCollector.getBalanceNotifications().size() - 1).getFirst())) issues.add("ERROR: receiver balance != last notified balance after funds unlocked");
+                if (!receiver.getUnlockedBalance().equals(receiverNotificationCollector.getBalanceNotifications().get(receiverNotificationCollector.getBalanceNotifications().size() - 1).getSecond())) issues.add("ERROR: receiver unlocked balance != last notified unlocked balance after funds unlocked");
+              }
             }
-            if (receiverNotificationCollector.getBalanceNotifications().size() == 0) issues.add("ERROR: receiver did not announce any balance notifications");
-            else {
-              if (!receiver.getBalance().equals(receiverNotificationCollector.getBalanceNotifications().get(receiverNotificationCollector.getBalanceNotifications().size() - 1).getFirst())) issues.add("ERROR: receiver balance != last notified balance after funds unlocked");
-              if (!receiver.getUnlockedBalance().equals(receiverNotificationCollector.getBalanceNotifications().get(receiverNotificationCollector.getBalanceNotifications().size() - 1).getSecond())) issues.add("ERROR: receiver unlocked balance != last notified unlocked balance after funds unlocked");
+          });
+          threads.add(thread);
+          thread.start();
+          break;
+        }
+
+        // wait for end of sync period
+        GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS - (System.currentTimeMillis() - startTime));
+        startTime = System.currentTimeMillis(); // reset timer
+      }
+
+      // wait for test threads
+      try {
+        for (Thread thread : threads) thread.join();
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+
+      // test notified outputs
+      for (MoneroOutputWallet output : senderNotificationCollector.getOutputsSpent(outputQuery)) testNotifiedOutput(output, true, issues);
+      for (MoneroOutputWallet output : senderNotificationCollector.getOutputsReceived(outputQuery)) testNotifiedOutput(output, false, issues);
+      for (MoneroOutputWallet output : receiverNotificationCollector.getOutputsSpent(outputQuery)) testNotifiedOutput(output, true, issues);
+      for (MoneroOutputWallet output : receiverNotificationCollector.getOutputsReceived(outputQuery)) testNotifiedOutput(output, false, issues);
+
+      return issues;
+    } catch (RuntimeException | Error e) {
+      testFailure = e;
+      throw e;
+    } finally {
+      try {
+        try {
+          for (Thread thread : threads) thread.join();
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+          throw new RuntimeException(e);
+        } finally {
+          try {
+            if (daemon.getMiningStatus().isActive()) daemon.stopMining();
+          } finally {
+            try {
+              if (sender.getListeners().contains(senderNotificationCollector)) sender.removeListener(senderNotificationCollector);
+              senderNotificationCollector.setListening(false);
+              if (receiver.getListeners().contains(receiverNotificationCollector)) receiver.removeListener(receiverNotificationCollector);
+              receiverNotificationCollector.setListening(false);
+            } finally {
+              if (sender != receiver) closeWallet(receiver);
             }
           }
-        });
-        threads.add(thread);
-        thread.start();
-        break;
+        }
+      } catch (RuntimeException | Error e) {
+        if (testFailure == null) throw e;
+        testFailure.addSuppressed(e);
       }
-      
-      // wait for end of sync period
-      GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS - (System.currentTimeMillis() - startTime));
-      startTime = System.currentTimeMillis(); // reset timer
     }
-    
-    // wait for test threads
-    try {
-      for (Thread thread : threads) thread.join();
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-    
-    // test notified outputs
-    for (MoneroOutputWallet output : senderNotificationCollector.getOutputsSpent(outputQuery)) testNotifiedOutput(output, true, issues);
-    for (MoneroOutputWallet output : senderNotificationCollector.getOutputsReceived(outputQuery)) testNotifiedOutput(output, false, issues);
-    for (MoneroOutputWallet output : receiverNotificationCollector.getOutputsSpent(outputQuery)) testNotifiedOutput(output, true, issues);
-    for (MoneroOutputWallet output : receiverNotificationCollector.getOutputsReceived(outputQuery)) testNotifiedOutput(output, false, issues);
-    
-    // clean up
-    if (daemon.getMiningStatus().isActive()) daemon.stopMining();
-    sender.removeListener(senderNotificationCollector);
-    senderNotificationCollector.setListening(false);
-    receiver.removeListener(receiverNotificationCollector);
-    receiverNotificationCollector.setListening(false);
-    if (sender != receiver) closeWallet(receiver);
-    return issues;
   }
-  
+
   private static List<MoneroOutputWallet> getMissingOutputs(List<MoneroOutputWallet> expectedOutputs, List<MoneroOutputWallet> actualOutputs, boolean matchSubaddress) {
     List<MoneroOutputWallet> missing = new ArrayList<MoneroOutputWallet>();
     List<MoneroOutputWallet> used = new ArrayList<MoneroOutputWallet>();
