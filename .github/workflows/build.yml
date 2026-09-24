@@ -33,6 +33,8 @@ jobs:
     steps:
       - name: Install git
         run: |
+          # bullseye security packages were removed from live mirrors after LTS ended
+          sed -i 's|^deb .* bullseye-security |deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/20260903T220410Z/ bullseye-security |' /etc/apt/sources.list
           apt update
           apt install -y git ca-certificates
           git config --global --add safe.directory '*'
@@ -453,6 +455,8 @@ jobs:
           mvn -B -q test-compile dependency:build-classpath -Dmaven.test.skip=false -Dmdep.outputFile=cp.txt
           JAR=$(ls target/monero-java-*.jar | grep -v -e '\-javadoc' -e '\-sources')
           docker run --rm -v "$PWD:$PWD" -v "$HOME/.m2:$HOME/.m2" -w "$PWD" debian:11 bash -c "
+            # bullseye security packages were removed from live mirrors after LTS ended
+            sed -i 's|^deb .* bullseye-security |deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/20260903T220410Z/ bullseye-security |' /etc/apt/sources.list &&
             apt-get update -qq && apt-get install -y -qq openjdk-11-jre-headless > /dev/null &&
             mkdir -p test_wallets &&
             java -cp $JAR:target/test-classes:\$(cat cp.txt) TestNativeLibrary"
