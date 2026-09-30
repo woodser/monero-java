@@ -97,7 +97,7 @@ walletFull.close(true);
 
 #### For Gradle, add to build.gradle:
 
-`compile 'io.github.woodser:monero-java:0.8.57'`
+`compile 'io.github.woodser:monero-java:0.8.58'`
 
 #### For Maven, add to pom.xml:
 
@@ -105,7 +105,7 @@ walletFull.close(true);
 <dependency>
   <groupId>io.github.woodser</groupId>
   <artifactId>monero-java</artifactId>
-  <version>0.8.57</version>
+  <version>0.8.58</version>
 </dependency>
 ```
 
