@@ -319,7 +319,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private static MoneroWalletFull createWalletFromSeed(MoneroWalletConfig config) {
     if (config.getRestoreHeight() == null) config.setRestoreHeight(0l);
-    long jniWalletHandle = createWalletJni(serializeWalletConfig(config));
+    long jniWalletHandle = createWalletWithSslJni(serializeWalletConfig(config));
     MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle, config.getPassword());
     return wallet;
   }
@@ -328,7 +328,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     if (config.getRestoreHeight() == null) config.setRestoreHeight(0l);
     if (config.getLanguage() == null) config.setLanguage(DEFAULT_LANGUAGE);
     try {
-      long jniWalletHandle = createWalletJni(serializeWalletConfig(config));
+      long jniWalletHandle = createWalletWithSslJni(serializeWalletConfig(config));
       MoneroWalletFull wallet = new MoneroWalletFull(jniWalletHandle, config.getPassword());
       return wallet;
     } catch (Exception e) {
@@ -338,7 +338,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private static MoneroWalletFull createWalletRandom(MoneroWalletConfig config) {
     if (config.getLanguage() == null) config.setLanguage(DEFAULT_LANGUAGE);
-    long jniWalletHandle = createWalletJni(serializeWalletConfig(config));
+    long jniWalletHandle = createWalletWithSslJni(serializeWalletConfig(config));
     return new MoneroWalletFull(jniWalletHandle, config.getPassword());
   }
   
@@ -535,10 +535,10 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     beginCall();
     try {
       int isTrustedJni = isTrusted == null ? -1 : (isTrusted ? 1 : 0); // negative if unset
-      if (daemonConnection == null) setDaemonConnectionJni("", "", "", "", isTrustedJni);
+      if (daemonConnection == null) setDaemonConnectionWithSslJni("", "", "", "", isTrustedJni, true);
       else {
         try {
-          setDaemonConnectionJni(daemonConnection.getUri() == null ? "" : daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword(), daemonConnection.getProxyUri(), isTrustedJni);
+          setDaemonConnectionWithSslJni(daemonConnection.getUri() == null ? "" : daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword(), daemonConnection.getProxyUri(), isTrustedJni, daemonConnection.getSslVerify());
         } catch (Exception e) {
           throw new MoneroError(e.getMessage());
         }
@@ -571,8 +571,8 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     beginCall();
     try {
       try {
-        String[] vals = getDaemonConnectionJni();
-        return vals == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2]);
+        String[] vals = getDaemonConnectionWithSslJni();
+        return vals == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2], null, vals[3]).setSslVerify(!"false".equals(vals[4]));
       } catch (Exception e) {
         throw new MoneroError(e.getMessage());
       }
@@ -1859,7 +1859,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
 
   private native static long openWalletDataJni(String password, int networkType, byte[] keysData, byte[] cacheData, boolean regtest);
   
-  private native static long createWalletJni(String walletConfigJson);
+  private native static long createWalletWithSslJni(String walletConfigJson);
   
   private native long getHeightJni();
   
@@ -1875,9 +1875,9 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private native boolean isViewOnlyJni();
   
-  private native void setDaemonConnectionJni(String uri, String username, String password, String proxyUri, int isTrusted);
+  private native void setDaemonConnectionWithSslJni(String uri, String username, String password, String proxyUri, int isTrusted, boolean sslVerify);
   
-  private native String[] getDaemonConnectionJni(); // returns [uri, username, password]
+  private native String[] getDaemonConnectionWithSslJni(); // returns [uri, username, password, proxyUri, sslVerify]
   
   private native boolean isConnectedToDaemonJni();
   

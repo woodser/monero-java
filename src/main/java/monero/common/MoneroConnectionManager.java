@@ -78,7 +78,7 @@ public class MoneroConnectionManager {
   private boolean autoSwitch = DEFAULT_AUTO_SWITCH;
   private long timeoutMs = DEFAULT_TIMEOUT;
   private TaskLooper poller;
-  private Map<MoneroRpcConnection, List<Long>> responseTimes = new HashMap<MoneroRpcConnection, List<Long>>();
+  private Map<String, List<Long>> responseTimes = new HashMap<String, List<Long>>(); // keyed by uri since connection hashes can change
 
   /**
    * Specify behavior when polling.
@@ -175,7 +175,7 @@ public class MoneroConnectionManager {
       MoneroRpcConnection connection = getConnectionByUri(uri);
       if (connection == null) throw new MoneroError("No connection exists with URI: " + uri);
       connections.remove(connection);
-      responseTimes.remove(connection);
+      responseTimes.remove(connection.getUri());
       if (connection == currentConnection) {
         currentConnection = null;
         onConnectionChanged(currentConnection);
@@ -637,13 +637,16 @@ public class MoneroConnectionManager {
   private MoneroRpcConnection processResponses(Collection<MoneroRpcConnection> responses) {
 
     // add new connections
+    Map<String, MoneroRpcConnection> responsesByUri = new HashMap<String, MoneroRpcConnection>();
     for (MoneroRpcConnection connection : responses) {
-      if (!responseTimes.containsKey(connection)) responseTimes.put(connection, new ArrayList<Long>());
+      responsesByUri.put(connection.getUri(), connection);
+      if (!responseTimes.containsKey(connection.getUri())) responseTimes.put(connection.getUri(), new ArrayList<Long>());
     }
 
     // insert response times or null
-    for (Entry<MoneroRpcConnection, List<Long>> responseTime : responseTimes.entrySet()) {
-      responseTime.getValue().add(0, responses.contains(responseTime.getKey()) ? responseTime.getKey().getResponseTime() : null);
+    for (Entry<String, List<Long>> responseTime : responseTimes.entrySet()) {
+      MoneroRpcConnection response = responsesByUri.get(responseTime.getKey());
+      responseTime.getValue().add(0, response == null ? null : response.getResponseTime());
 
       // remove old response times
       if (responseTime.getValue().size() > MIN_BETTER_RESPONSES) responseTime.getValue().remove(responseTime.getValue().size() - 1);
@@ -690,15 +693,15 @@ public class MoneroConnectionManager {
     if (priorityComparator.compare(bestResponse.getPriority(), bestConnection.getPriority()) != 0) return bestResponse;
 
     // keep best connection if not enough data
-    if (!responseTimes.containsKey(bestConnection)) return bestConnection;
+    if (!responseTimes.containsKey(bestConnection.getUri()) || responseTimes.get(bestConnection.getUri()).size() < MIN_BETTER_RESPONSES) return bestConnection;
     
     // check if a connection is consistently better
     for (MoneroRpcConnection connection : responses) {
       if (connection == bestConnection) continue;
-      if (!responseTimes.containsKey(connection) || responseTimes.get(connection).size() < MIN_BETTER_RESPONSES) continue;
+      if (!responseTimes.containsKey(connection.getUri()) || responseTimes.get(connection.getUri()).size() < MIN_BETTER_RESPONSES) continue;
       boolean better = true;
       for (int i = 0; i < MIN_BETTER_RESPONSES; i++) {
-        if (responseTimes.get(connection).get(i) == null || responseTimes.get(bestConnection).get(i) == null || responseTimes.get(connection).get(i) > responseTimes.get(bestConnection).get(i)) {
+        if (responseTimes.get(connection.getUri()).get(i) == null || responseTimes.get(bestConnection.getUri()).get(i) == null || responseTimes.get(connection.getUri()).get(i) > responseTimes.get(bestConnection.getUri()).get(i)) {
           better = false;
           break;
         }

@@ -52,6 +52,8 @@ import org.apache.hc.core5.util.Timeout;
 
 /**
  * Maintains a connection and sends requests to a Monero RPC API.
+ * Equality compares URI, credentials, proxy, ZMQ URI, and TLS verification.
+ * Do not mutate these settings while using a connection as a hash key.
  * 
  * TODO: refactor MoneroRpcConnection extends MoneroConnection?
  */
@@ -631,7 +633,7 @@ public class MoneroRpcConnection {
     result = prime * result + ((uri == null) ? 0 : uri.hashCode());
     result = prime * result + ((username == null) ? 0 : username.hashCode());
     result = prime * result + ((zmqUri == null) ? 0 : zmqUri.hashCode());
-    result = prime * result + ((proxyUri == null) ? 0 : proxyUri.hashCode());
+    result = prime * result + Boolean.hashCode(sslVerify);
     return result;
   }
 
@@ -641,6 +643,7 @@ public class MoneroRpcConnection {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     MoneroRpcConnection other = (MoneroRpcConnection) obj;
+    if (sslVerify != other.sslVerify) return false;
     if (password == null) {
       if (other.password != null) return false;
     } else if (!password.equals(other.password)) return false;
