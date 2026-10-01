@@ -65,7 +65,7 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletJni(JNIEnv
 
 JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletDataJni(JNIEnv *, jclass, jstring, jint, jbyteArray, jbyteArray, jboolean);
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_createWalletJni(JNIEnv *, jclass, jstring);
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_createWalletWithSslJni(JNIEnv *, jclass, jstring);
 
 JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getSeedLanguagesJni(JNIEnv *, jclass);
 
@@ -73,9 +73,9 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getSeedLangua
 
 JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isViewOnlyJni(JNIEnv *, jobject);
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setDaemonConnectionJni(JNIEnv *, jobject, jstring, jstring, jstring, jstring, jint);
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setDaemonConnectionWithSslJni(JNIEnv *, jobject, jstring, jstring, jstring, jstring, jint, jboolean);
 
-JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getDaemonConnectionJni(JNIEnv *, jobject);
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getDaemonConnectionWithSslJni(JNIEnv *, jobject);
 
 JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isConnectedToDaemonJni(JNIEnv *, jobject);
 

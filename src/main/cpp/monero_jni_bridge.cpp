@@ -95,7 +95,7 @@ void rethrow_java_exception_as_cpp_exception(JNIEnv* env, jthrowable jexception)
   throw runtime_error(msg);
 }
 
-void set_daemon_connection(JNIEnv *env, monero_wallet* wallet, jstring juri, jstring jusername, jstring jpassword, jstring jproxy_uri, jint jis_trusted) {
+void set_daemon_connection(JNIEnv *env, monero_wallet* wallet, jstring juri, jstring jusername, jstring jpassword, jstring jproxy_uri, jint jis_trusted, jboolean jssl_verify) {
 
   // collect and release string params
   const char* _uri = juri ? env->GetStringUTFChars(juri, NULL) : nullptr;
@@ -116,7 +116,9 @@ void set_daemon_connection(JNIEnv *env, monero_wallet* wallet, jstring juri, jst
 
   // set daemon connection
   try {
-    wallet->set_daemon_connection(uri, username, password, proxy_uri, is_trusted);
+    auto connection = std::make_shared<monero_rpc_connection>(uri, username, password, proxy_uri);
+    connection->m_ssl_verify = jssl_verify;
+    wallet->set_daemon_connection(connection, is_trusted);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
   }
@@ -507,8 +509,8 @@ JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_openWalletDataJni(JN
   }
 }
 
-JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_createWalletJni(JNIEnv *env, jclass clazz, jstring jconfig) {
-  MTRACE("Java_monero_wallet_MoneroWalletFull_createWalletJni");
+JNIEXPORT jlong JNICALL Java_monero_wallet_MoneroWalletFull_createWalletWithSslJni(JNIEnv *env, jclass clazz, jstring jconfig) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_createWalletWithSslJni");
 
   // get config as json string
   const char* _config = jconfig ? env->GetStringUTFChars(jconfig, NULL) : nullptr;
@@ -556,11 +558,11 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isViewOnlyJni(JNI
   return wallet->is_view_only();
 }
 
-JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setDaemonConnectionJni(JNIEnv *env, jobject instance, jstring juri, jstring jusername, jstring jpassword, jstring jproxy_uri, jint jis_trusted) {
-  MTRACE("Java_monero_wallet_MoneroWalletFull_setDaemonConnectionJni");
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setDaemonConnectionWithSslJni(JNIEnv *env, jobject instance, jstring juri, jstring jusername, jstring jpassword, jstring jproxy_uri, jint jis_trusted, jboolean jssl_verify) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_setDaemonConnectionWithSslJni");
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
   try {
-    set_daemon_connection(env, wallet, juri, jusername, jpassword, jproxy_uri, jis_trusted);
+    set_daemon_connection(env, wallet, juri, jusername, jpassword, jproxy_uri, jis_trusted, jssl_verify);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
   }
@@ -577,8 +579,8 @@ JNIEXPORT jboolean JNICALL Java_monero_wallet_MoneroWalletFull_isDaemonTrustedJn
   }
 }
 
-JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getDaemonConnectionJni(JNIEnv *env, jobject instance) {
-  MTRACE("Java_monero_wallet_MoneroWalletFull_getDaemonConnectionJni()");
+JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getDaemonConnectionWithSslJni(JNIEnv *env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_getDaemonConnectionWithSslJni()");
 
   // get wallet
   monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
@@ -588,12 +590,13 @@ JNIEXPORT jobjectArray JNICALL Java_monero_wallet_MoneroWalletFull_getDaemonConn
     std::shared_ptr<monero_rpc_connection> daemon_connection = wallet->get_daemon_connection();
     if (daemon_connection == nullptr) return 0;
 
-    // return string[uri, username, password]
-    jobjectArray vals = env->NewObjectArray(3, env->FindClass("java/lang/String"), nullptr);
+    // return string[uri, username, password, proxy_uri, ssl_verify]
+    jobjectArray vals = env->NewObjectArray(5, env->FindClass("java/lang/String"), nullptr);
     if (daemon_connection->m_uri != boost::none && !daemon_connection->m_uri.get().empty()) env->SetObjectArrayElement(vals, 0, env->NewStringUTF(daemon_connection->m_uri.get().c_str()));
     if (daemon_connection->m_username != boost::none && !daemon_connection->m_username.get().empty()) env->SetObjectArrayElement(vals, 1, env->NewStringUTF(daemon_connection->m_username.get().c_str()));
     if (daemon_connection->m_password != boost::none && !daemon_connection->m_password.get().empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(daemon_connection->m_password.get().c_str()));
-    if (daemon_connection->m_proxy_uri != boost::none && !daemon_connection->m_proxy_uri.get().empty()) env->SetObjectArrayElement(vals, 2, env->NewStringUTF(daemon_connection->m_proxy_uri.get().c_str()));
+    if (daemon_connection->m_proxy_uri != boost::none && !daemon_connection->m_proxy_uri.get().empty()) env->SetObjectArrayElement(vals, 3, env->NewStringUTF(daemon_connection->m_proxy_uri.get().c_str()));
+    env->SetObjectArrayElement(vals, 4, env->NewStringUTF(daemon_connection->m_ssl_verify ? "true" : "false"));
     return vals;
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);

@@ -510,14 +510,23 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     setDaemonConnection(connection, isTrusted, null);
   }
 
+  /**
+   * Explicit SSL options take precedence over the connection's verification setting.
+   * The cached connection records the requested allow-any-cert setting, not custom SSL options.
+   * Wallet RPC enforces a CA file or fingerprints; otherwise SSL autodetect can accept unverified certificates.
+   */
   public void setDaemonConnection(MoneroRpcConnection connection, Boolean isTrusted, SslOptions sslOptions) {
-    if (sslOptions == null) sslOptions = new SslOptions();
+    if (sslOptions == null) {
+      sslOptions = new SslOptions();
+      if (connection != null) sslOptions.setAllowAnyCert(!connection.getSslVerify());
+    }
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("address", connection == null ? "placeholder" : connection.getUri());
     params.put("username", connection == null ? "" : connection.getUsername());
     params.put("password", connection == null ? "" : connection.getPassword());
     params.put("trusted", isTrusted);
-    params.put("ssl_support", "autodetect");
+    boolean hasCertificates = (sslOptions.getCertificateAuthorityFile() != null && !sslOptions.getCertificateAuthorityFile().isEmpty()) || (sslOptions.getAllowedFingerprints() != null && !sslOptions.getAllowedFingerprints().isEmpty());
+    params.put("ssl_support", hasCertificates && !Boolean.TRUE.equals(sslOptions.getAllowAnyCert()) ? "enabled" : "autodetect"); // wallet rpc only enforces certificates if enabled
     params.put("ssl_private_key_path", sslOptions.getPrivateKeyPath());
     params.put("ssl_certificate_path", sslOptions.getCertificatePath());
     params.put("ssl_ca_file", sslOptions.getCertificateAuthorityFile());
@@ -535,8 +544,10 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     }
     if (!params.containsKey("proxy")) params.put("proxy", "");
 
+    MoneroRpcConnection daemonConnection = connection == null || connection.getUri() == null || connection.getUri().isEmpty() ? null : new MoneroRpcConnection(connection);
+    if (daemonConnection != null) daemonConnection.setSslVerify(!Boolean.TRUE.equals(params.get("ssl_allow_any_cert")));
     rpc.sendJsonRequest("set_daemon", params);
-    this.daemonConnection = connection == null || connection.getUri() == null || connection.getUri().isEmpty() ? null : new MoneroRpcConnection(connection);
+    this.daemonConnection = daemonConnection;
   }
   
   @Override

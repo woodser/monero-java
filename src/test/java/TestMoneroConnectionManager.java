@@ -23,6 +23,30 @@ import utils.TestUtils;
 public class TestMoneroConnectionManager {
 
   private static final int SYNC_PADDING = 1000;
+
+  @Test
+  public void testResponseTimesAfterSettingChange() {
+    class TestConnection extends MoneroRpcConnection {
+      TestConnection(String uri, long responseTime) {
+        super(uri);
+        this.isOnline = true;
+        this.isAuthenticated = true;
+        this.responseTime = responseTime;
+      }
+      @Override
+      public boolean checkConnection(long timeoutMs) {
+        return false;
+      }
+    }
+    MoneroRpcConnection slower = new TestConnection("http://localhost:18081", 2);
+    MoneroRpcConnection faster = new TestConnection("http://localhost:18082", 1);
+    MoneroConnectionManager connectionManager = new MoneroConnectionManager().addConnection(faster).setConnection(slower);
+    connectionManager.checkConnections();
+    connectionManager.checkConnections();
+    slower.setSslVerify(false); // changes the connection's hash
+    connectionManager.checkConnections();
+    assertTrue(faster == connectionManager.getConnection());
+  }
   
   @Test
   public void testConnectionManager() throws InterruptedException, IOException {
