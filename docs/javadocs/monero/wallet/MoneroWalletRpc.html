@@ -943,7 +943,9 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setDaemonConnection(monero.common.MoneroRpcConnection,java.lang.Boolean,monero.common.SslOptions)" class="member-name-link">setDaemonConnection</a><wbr>(<a href="../common/MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&nbsp;connection,
  <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Boolean.html" title="class or interface in java.lang" class="external-link">Boolean</a>&nbsp;isTrusted,
  <a href="../common/SslOptions.html" title="class in monero.common">SslOptions</a>&nbsp;sslOptions)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Explicit SSL options take precedence over the connection's verification setting.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSubaddressLabel(int,int,java.lang.String)" class="member-name-link">setSubaddressLabel</a><wbr>(int&nbsp;accountIdx,
  int&nbsp;subaddressIdx,
@@ -1425,6 +1427,9 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setDaemonConnection</span><wbr><span class="parameters">(<a href="../common/MoneroRpcConnection.html" title="class in monero.common">MoneroRpcConnection</a>&nbsp;connection,
  <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Boolean.html" title="class or interface in java.lang" class="external-link">Boolean</a>&nbsp;isTrusted,
  <a href="../common/SslOptions.html" title="class in monero.common">SslOptions</a>&nbsp;sslOptions)</span></div>
+<div class="block">Explicit SSL options take precedence over the connection's verification setting.
+ The cached connection records the requested allow-any-cert setting, not custom SSL options.
+ Wallet RPC enforces a CA file or fingerprints; otherwise SSL autodetect can accept unverified certificates.</div>
 </section>
 </li>
 <li>

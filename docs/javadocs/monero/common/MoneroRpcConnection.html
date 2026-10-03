@@ -94,6 +94,8 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">MoneroRpcConnection</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Maintains a connection and sends requests to a Monero RPC API.
+ Equality compares URI, credentials, proxy, ZMQ URI, and TLS verification.
+ Do not mutate these settings while using a connection as a hash key.
  
  TODO: refactor MoneroRpcConnection extends MoneroConnection?</div>
 </section>
