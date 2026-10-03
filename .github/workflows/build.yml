@@ -169,7 +169,7 @@ jobs:
             echo "static closure symbols are exported"; exit 1
           fi
           mkdir -p test_wallets
-          mvn -B test -Dmaven.test.skip=false -Dtest=TestMoneroUtils,TestNativeLibrary -DargLine=-Djava.library.path=build
+          mvn -B test -Dmaven.test.skip=false -Dtest=TestMoneroUtils,TestNativeLibrary,TestSerialization,TestMoneroConnectionManager#testResponseTimesAfterSettingChange -DargLine=-Djava.library.path=build
 
       - name: Upload monero-java library
         uses: actions/upload-artifact@v7
@@ -288,7 +288,7 @@ jobs:
           MAVEN_OPTS: -Djava.library.path=build
         run: |
           mkdir -p test_wallets
-          mvn -B test -Dmaven.test.skip=false -Dtest=TestMoneroUtils,TestNativeLibrary -DargLine=-Djava.library.path=build
+          mvn -B test -Dmaven.test.skip=false -Dtest=TestMoneroUtils,TestNativeLibrary,TestSerialization,TestMoneroConnectionManager#testResponseTimesAfterSettingChange -DargLine=-Djava.library.path=build
 
       - name: Upload monero-java library
         uses: actions/upload-artifact@v7
@@ -398,7 +398,7 @@ jobs:
             echo "unexpected exports above"; exit 1
           fi
           mkdir -p test_wallets
-          mvn -B test -Dmaven.test.skip=false -Dtest=TestMoneroUtils,TestNativeLibrary -DargLine=-Djava.library.path=build
+          mvn -B test -Dmaven.test.skip=false -Dtest=TestMoneroUtils,TestNativeLibrary,TestSerialization,TestMoneroConnectionManager#testResponseTimesAfterSettingChange -DargLine=-Djava.library.path=build
 
       - name: Upload monero-java library
         uses: actions/upload-artifact@v7
