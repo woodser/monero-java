@@ -1231,7 +1231,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
       GenUtils.assertNotNull("Destination amount is not defined", destination.getAmount());
       Map<String, Object> destinationMap = new HashMap<String, Object>();
       destinationMap.put("address", destination.getAddress());
-      destinationMap.put("amount", destination.getAmount().toString());
+      destinationMap.put("amount", destination.getAmount());
       destinationMaps.add(destinationMap);
     }
     if (config.getSubtractFeeFrom() != null) params.put("subtract_fee_from_outputs", config.getSubtractFeeFrom());
@@ -1626,7 +1626,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
   public String getReserveProofAccount(int accountIdx, BigInteger amount, String message) {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("account_index", accountIdx);
-    params.put("amount", amount.toString());
+    params.put("amount", amount);
     params.put("message", message);
     Map<String, Object> resp = rpc.sendJsonRequest("get_reserve_proof", params);
     Map<String, Object> result = (Map<String, Object>) resp.get("result");
@@ -1775,7 +1775,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     GenUtils.assertNotNull("Must provide send request to create a payment URI", config);
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("address", config.getDestinations().get(0).getAddress());
-    params.put("amount", config.getDestinations().get(0).getAmount() != null ? config.getDestinations().get(0).getAmount().toString() : null);
+    params.put("amount", config.getDestinations().get(0).getAmount());
     params.put("payment_id", config.getPaymentId());
     params.put("recipient_name", config.getRecipientName());
     params.put("tx_description", config.getNote());
