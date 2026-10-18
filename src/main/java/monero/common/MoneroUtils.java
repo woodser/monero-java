@@ -399,7 +399,9 @@ public class MoneroUtils {
     try {
       MoneroDecodedAddress decodedAddress = decodeAddress(address);
       GenUtils.assertEquals("Address network type mismatch: " + networkType + " vs " + decodedAddress.getNetworkType(), networkType, decodedAddress.getNetworkType());
-    } catch (AssertionError e) {
+    } catch (MoneroError e) {
+      throw e;
+    } catch (AssertionError | RuntimeException e) {
       throw new MoneroError(e.getMessage());
     }
   }
