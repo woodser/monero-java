@@ -1789,7 +1789,7 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setTxNotesJni(JNIEnv*
       jstring jstr = (jstring) env->GetObjectArrayElement(jtx_notes, idx);
       const char* _str = jstr ? env->GetStringUTFChars(jstr, NULL) : nullptr;
       string str = string(_str ? _str : "");
-      env->ReleaseStringUTFChars(jstr, _str);
+      if (_str) env->ReleaseStringUTFChars(jstr, _str);
       env->DeleteLocalRef(jstr);
       notes.push_back(str);
     }

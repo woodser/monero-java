@@ -1397,6 +1397,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     private BigInteger incomingTotal;
     private BigInteger outgoingTotal;
     private Boolean onNewBlockAfterDone;
+    private boolean testedTxNote;
     private BigInteger prevBalance;
     private BigInteger prevUnlockedBalance;
     
@@ -1446,6 +1447,17 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       assertNull(output.getTx().getInputs());
       assertEquals(1, output.getTx().getOutputs().size());
       assertTrue(output.getTx().getOutputs().get(0) == output);
+
+      // can read and write tx notes from a sync callback
+      String txHash = output.getTx().getHash();
+      String previousNote = wallet.getTxNote(txHash);
+      try {
+        wallet.setTxNote(txHash, "sync callback");
+        assertEquals("sync callback", wallet.getTxNote(txHash));
+        testedTxNote = true;
+      } finally {
+        wallet.setTxNote(txHash, previousNote);
+      }
       
       // extra is not sent over the jni bridge
       assertNull(output.getTx().getExtra());
@@ -1487,6 +1499,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
       assertNotNull(walletTesterPrevHeight);
       assertNotNull(prevOutputReceived);
       assertNotNull(prevOutputSpent);
+      assertTrue(testedTxNote);
       BigInteger expectedBalance = incomingTotal.subtract(outgoingTotal);
 
       // output notifications do not include pool fees or outgoing amount

@@ -1668,9 +1668,11 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
 
   @Override
   public void setTxNotes(List<String> txHashes, List<String> notes) {
+    List<String> rpcNotes = new ArrayList<String>();
+    for (String note : notes) rpcNotes.add(note == null ? "" : note); // wallet rpc rejects json null; the full wallet clears the note
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("txids", txHashes);
-    params.put("notes", notes);
+    params.put("notes", rpcNotes);
     rpc.sendJsonRequest("set_tx_notes", params);
   }
 

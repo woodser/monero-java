@@ -2376,6 +2376,10 @@ public abstract class TestMoneroWalletCommon {
     for (int i = 0; i < txs.size(); i++) {
       assertEquals(wallet.getTxNote(txs.get(i).getHash()), uuid + i);
     }
+
+    // null clears the note
+    wallet.setTxNote(txs.get(0).getHash(), null);
+    assertEquals("", wallet.getTxNote(txs.get(0).getHash()));
   }
   
   // Can get and set multiple transaction notes
@@ -2390,7 +2394,7 @@ public abstract class TestMoneroWalletCommon {
     assertTrue(txs.size() >= 3, "Test requires 3 or more wallet transactions; run send tests");
     List<String> txHashes = new ArrayList<String>();
     List<String> txNotes = new ArrayList<String>();
-    for (int i = 0; i < txHashes.size(); i++) {
+    for (int i = 0; i < txs.size(); i++) {
       txHashes.add(txs.get(i).getHash());
       txNotes.add(uuid + i);
     }
@@ -2402,6 +2406,16 @@ public abstract class TestMoneroWalletCommon {
       assertEquals(uuid + i, txNotes.get(i));
     }
     
+    // clear notes in a mixed batch without changing the caller's list
+    txNotes.set(0, null);
+    txNotes.set(1, "");
+    txNotes.set(2, "null");
+    List<String> expectedNotes = new ArrayList<String>(txNotes);
+    expectedNotes.set(0, "");
+    wallet.setTxNotes(txHashes, Collections.unmodifiableList(txNotes));
+    assertNull(txNotes.get(0));
+    assertEquals(expectedNotes, wallet.getTxNotes(txHashes));
+
     // TODO: test that get transaction has note
   }
   
