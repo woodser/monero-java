@@ -2238,20 +2238,18 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testGetReserveProofWallet() {
     assumeTrue(TEST_NON_RELAYS);
-    
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearWallets(wallet); // proof excludes unconfirmed change and incoming funds
+
     // get proof of entire wallet
     String signature = wallet.getReserveProofWallet("Test message");
-    
+
     // check proof of entire wallet
     MoneroCheckReserve check = wallet.checkReserveProof(wallet.getPrimaryAddress(), "Test message", signature);
     assertTrue(check.isGood());
     testCheckReserve(check);
-    BigInteger balance = wallet.getBalance();
-    if (!balance.equals(check.getTotalAmount())) {  // TODO monero-wallet-rpc: this check fails with unconfirmed txs
-      List<MoneroTxWallet> unconfirmedTxs = wallet.getTxs(new MoneroTxQuery().setInTxPool(true));
-      assertTrue(unconfirmedTxs.size() > 0, "Reserve amount must equal balance unless wallet has unconfirmed txs");
-    }
-    
+    BigInteger reserve = check.getTotalAmount().subtract(check.getUnconfirmedSpentAmount()); // TODO monero-project: compare total directly once failed txs stop unspending confirmed inputs
+    assertEquals(wallet.getBalance(), reserve);
+
     // test different wallet address
     String differentAddress = TestUtils.getExternalWalletAddress();
     try {
