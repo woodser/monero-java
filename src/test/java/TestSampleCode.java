@@ -51,18 +51,19 @@ public class TestSampleCode {
   public void testSampleCode() throws InterruptedException {
     
     // connect to daemon
-    MoneroDaemon daemon = new MoneroDaemonRpc("http://localhost:28081", "", "");
+    MoneroDaemon daemon = new MoneroDaemonRpc(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD);
     long height = daemon.getHeight();                       // 1523651
     List<MoneroTx> txsInPool = daemon.getTxPool();          // get transactions in the pool
     
     // create wallet from seed using JNI bindings to monero-project
     MoneroWalletFull walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
-            .setPath("./test_wallets/" + UUID.randomUUID().toString())  // *** CHANGE README TO "sample_wallet_full" ***
+            .setPath(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString())  // *** CHANGE README TO "sample_wallet_full" ***
             .setPassword("supersecretpassword123")
-            .setNetworkType(MoneroNetworkType.TESTNET)
-            .setServerUri("http://localhost:28081")
-            .setServerUsername("superuser")
-            .setServerPassword("abctesting123")
+            .setNetworkType(TestUtils.NETWORK_TYPE)
+            .setRegtest(true)
+            .setServerUri(TestUtils.DAEMON_RPC_URI)
+            .setServerUsername(TestUtils.DAEMON_RPC_USERNAME)
+            .setServerPassword(TestUtils.DAEMON_RPC_PASSWORD)
             .setSeed(TestUtils.SEED)                        // *** REPLACE WITH SEED IN README ***
             .setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT)); // *** REPLACE WITH FIRST RECEIVE HEIGHT IN README ***
     
@@ -124,7 +125,7 @@ public class TestSampleCode {
     MoneroConnectionManager connectionManager = new MoneroConnectionManager();
     
     // add managed connections with priorities
-    connectionManager.addConnection(new MoneroRpcConnection("http://localhost:28081").setPriority(1)); // use localhost as first priority
+    connectionManager.addConnection(new MoneroRpcConnection(TestUtils.DAEMON_RPC_URI, TestUtils.DAEMON_RPC_USERNAME, TestUtils.DAEMON_RPC_PASSWORD).setPriority(1)); // use localhost as first priority
     connectionManager.addConnection(new MoneroRpcConnection("http://example.com")); // default priority is prioritized last
     
     // set current connection
@@ -132,9 +133,10 @@ public class TestSampleCode {
 
     // create or open wallet governed by connection manager
     MoneroWalletFull walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
-        .setPath("./test_wallets/" + UUID.randomUUID().toString())  // *** CHANGE README TO "sample_wallet_full" ***
+        .setPath(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString())  // *** CHANGE README TO "sample_wallet_full" ***
         .setPassword("supersecretpassword123")
-        .setNetworkType(MoneroNetworkType.TESTNET)
+        .setNetworkType(TestUtils.NETWORK_TYPE)
+        .setRegtest(true)
         .setConnectionManager(connectionManager)
         .setSeed(TestUtils.SEED)                        // *** REPLACE WITH SEED IN README ***
         .setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT)); // *** REPLACE WITH FIRST RECEIVE HEIGHT IN README ***

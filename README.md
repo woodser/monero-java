@@ -199,14 +199,19 @@ For example: `export LD_PRELOAD=/path/to/libjemalloc.a` then run your app.
 
 ## Running JUnit tests
 
-1. Clone the project repository: `git clone --recurse-submodules https://github.com/woodser/monero-java.git`
-2. `cd monero-java`
-3. Start RPC servers:
-	1. Download and install [Monero CLI](https://web.getmonero.org/downloads/).
-	2. Start monerod, e.g.: `./monerod --stagenet` (or use a remote daemon).
-	3. Start monero-wallet-rpc, e.g.: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir ./`
-4. Configure the appropriate RPC endpoints, authentication, and other settings in [TestUtils.java](src/test/java/utils/TestUtils.java).
-5. Run all *.java files in src/test/java as JUnits.
+The integration suite uses standard Monero regtest, with mainnet-format addresses and no custom hardfork heights. Build the native library as described above, and build `daemon` and `wallet_rpc_server` in `external/monero-cpp/external/monero-project/build/release`.
+
+Run the tests marked `@Tag("CI")` against fresh, funded RPC servers:
+
+```sh
+python3 bin/test_regtest.py mvn -B test -Dmaven.test.skip=false -Dgroups=CI -DargLine=-Djava.library.path=build
+```
+
+The runner requires Python 3 and curl, creates temporary daemon and wallet directories, funds the test seed starting at height 171, and stops its processes when finished. Failed runs retain their logs and wallets at the printed path. Set `MONERO_BINS_DIR` to use another Monero build; `MONERO_DAEMON_RPC_PORT` and `MONERO_WALLET_RPC_PORT` override the default local ports 28081 and 28084. Existing listeners on those ports cause the runner to fail before starting the fixture.
+
+Remove `-Dgroups=CI` to run the full suite. Unmarked tests remain available and may require additional transaction history, account funding, or fixes to known upstream issues. Add or remove `@Tag("CI")` on test methods to adjust the expected passes; shared wallet tests have concrete overrides in both `TestMoneroWalletFull` and `TestMoneroWalletRpc`.
+
+CI runs the marked suite in the Linux x86-64 native build on pushes and pull requests. The other platforms retain the native-library smoke tests.
 
 ## Related projects
 

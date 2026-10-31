@@ -13,7 +13,9 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import monero.common.MoneroError;
@@ -88,6 +90,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     if (config == null) config = new MoneroWalletConfig();
     if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
     if (config.getNetworkType() == null) config.setNetworkType(TestUtils.NETWORK_TYPE);
+    if (config.getRegtest() == null && config.getNetworkType() == TestUtils.NETWORK_TYPE) config.setRegtest(true);
     if (config.getServer() == null && config.getConnectionManager() == null) config.setServer(daemon.getRpcConnection());
     
     // open wallet
@@ -109,6 +112,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     if (config.getPath() == null) config.setPath(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString());
     if (config.getPassword() == null) config.setPassword(TestUtils.WALLET_PASSWORD);
     if (config.getNetworkType() == null) config.setNetworkType(TestUtils.NETWORK_TYPE);
+    if (config.getRegtest() == null && config.getNetworkType() == TestUtils.NETWORK_TYPE) config.setRegtest(true);
     if (config.getServer() == null && config.getConnectionManager() == null) config.setServer(daemon.getRpcConnection());
     if (config.getRestoreHeight() == null && !random) config.setRestoreHeight(0l);
     
@@ -292,6 +296,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   
   // Can create a full wallet from seed
   @Test
+  @Tag("CI")
   public void testCreateWalletFromSeedFull() {
     assumeTrue(TEST_NON_RELAYS);
     
@@ -405,7 +410,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     walletRpc.close(true);
     
     // open as full wallet
-    MoneroWalletFull walletFull = MoneroWalletFull.openWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_RPC_LOCAL_WALLET_DIR + "/" + walletName).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setServerUri(TestUtils.DAEMON_RPC_URI).setServerUsername(TestUtils.DAEMON_RPC_USERNAME).setServerPassword(TestUtils.DAEMON_RPC_PASSWORD));
+    MoneroWalletFull walletFull = MoneroWalletFull.openWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_RPC_LOCAL_WALLET_DIR + "/" + walletName).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setRegtest(true).setServerUri(TestUtils.DAEMON_RPC_URI).setServerUsername(TestUtils.DAEMON_RPC_USERNAME).setServerPassword(TestUtils.DAEMON_RPC_PASSWORD));
     TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(walletFull);
     assertEquals(TestUtils.SEED, walletFull.getSeed());
     assertEquals(TestUtils.ADDRESS, walletFull.getPrimaryAddress());
@@ -416,7 +421,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     // create full wallet
     walletName = GenUtils.getUUID();
     String path = TestUtils.WALLET_RPC_LOCAL_WALLET_DIR + "/" + walletName;
-    walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setSeed(TestUtils.SEED).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setServerUri(TestUtils.DAEMON_RPC_URI).setServerUsername(TestUtils.DAEMON_RPC_USERNAME).setServerPassword(TestUtils.DAEMON_RPC_PASSWORD));
+    walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setRegtest(true).setSeed(TestUtils.SEED).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT).setServerUri(TestUtils.DAEMON_RPC_URI).setServerUsername(TestUtils.DAEMON_RPC_USERNAME).setServerPassword(TestUtils.DAEMON_RPC_PASSWORD));
     walletFull.sync();
     balance = walletFull.getBalance();
     outputsHex = walletFull.exportOutputs();
@@ -424,7 +429,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     
     // rebuild wallet cache using full wallet
     new File(path).delete();
-    walletFull = MoneroWalletFull.openWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setServerUri(TestUtils.DAEMON_RPC_URI).setServerUsername(TestUtils.DAEMON_RPC_USERNAME).setServerPassword(TestUtils.DAEMON_RPC_PASSWORD));
+    walletFull = MoneroWalletFull.openWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setRegtest(true).setServerUri(TestUtils.DAEMON_RPC_URI).setServerUsername(TestUtils.DAEMON_RPC_USERNAME).setServerPassword(TestUtils.DAEMON_RPC_PASSWORD));
     walletFull.close(true);
     
     // open wallet using monero-wallet-rpc
@@ -884,6 +889,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
             .setPath(getRandomWalletPath())
             .setPassword(TestUtils.WALLET_PASSWORD)
             .setNetworkType(TestUtils.NETWORK_TYPE)
+            .setRegtest(true)
             .setSeed(TestUtils.SEED)
             .setServer(TestUtils.getDaemonRpc().getRpcConnection())
             .setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT)
@@ -1026,6 +1032,39 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
     } finally {
       if (wallet != null) wallet.close();
       if (wallet2 != null) wallet2.close();
+    }
+  }
+
+  // Can reopen regtest wallets from disk and keys after the chain advances
+  @Test
+  @Tag("CI")
+  public void testOpenWalletRegtest() {
+    String path = getRandomWalletPath();
+    MoneroWalletFull wallet = createWallet(new MoneroWalletConfig().setPath(path).setSeed(TestUtils.SEED).setRestoreHeight(TestUtils.FIRST_RECEIVE_HEIGHT), false);
+    byte[] keys;
+    try {
+      wallet.sync();
+      keys = wallet.getData()[0];
+      wallet.save();
+    } finally {
+      wallet.close();
+    }
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("wallet_address", TestUtils.MINING_ADDRESS);
+    params.put("amount_of_blocks", 1);
+    daemon.getRpcConnection().sendJsonRequest("generateblocks", params);
+    for (boolean fromKeys : new boolean[] {false, true}) {
+      MoneroWalletConfig config = new MoneroWalletConfig().setNetworkType(TestUtils.NETWORK_TYPE).setRegtest(true).setPassword(TestUtils.WALLET_PASSWORD).setServer(daemon.getRpcConnection());
+      if (fromKeys) config.setKeysData(keys);
+      else config.setPath(path);
+      wallet = MoneroWalletFull.openWallet(config);
+      try {
+        wallet.sync();
+        assertEquals(daemon.getHeight(), wallet.getHeight());
+        assertTrue(wallet.getUnlockedBalance().signum() > 0);
+      } finally {
+        wallet.close();
+      }
     }
   }
 
@@ -1542,18 +1581,21 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   public void testCreateWalletRandom() {
     super.testCreateWalletRandom();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testCreateWalletFromSeed() {
     super.testCreateWalletFromSeed();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testCreateWalletFromSeedWithOffset() {
     super.testCreateWalletFromSeedWithOffset();
   }
@@ -1572,6 +1614,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   public void testGetVersion() {
     super.testGetVersion();
   }
@@ -1607,60 +1650,70 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetSeed() {
     super.testGetSeed();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetSeedLanguages() {
     super.testGetSeedLanguages();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetPrivateViewKey() {
     super.testGetPrivateViewKey();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testGetPrivateSpendKey() {
     super.testGetPrivateSpendKey();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testGetPublicViewKey() {
     super.testGetPublicViewKey();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testGetPublicSpendKey() {
     super.testGetPublicSpendKey();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetPrimaryAddress() {
     super.testGetPrimaryAddress();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetIntegratedAddress() {
     super.testGetIntegratedAddress();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testDecodeIntegratedAddress() {
     super.testDecodeIntegratedAddress();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSyncWithoutProgress() {
     super.testSyncWithoutProgress();
   }
@@ -1673,84 +1726,98 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetAccountsWithoutSubaddresses() {
     super.testGetAccountsWithoutSubaddresses();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetAccountsWithSubaddresses() {
     super.testGetAccountsWithSubaddresses();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetAccount() {
     super.testGetAccount();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testCreateAccountWithoutLabel() {
     super.testCreateAccountWithoutLabel();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testCreateAccountWithLabel() {
     super.testCreateAccountWithLabel();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSetAccountLabel() {
     super.testSetAccountLabel();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetSubaddresses() {
     super.testGetSubaddresses();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetSubaddressesByIndices() {
     super.testGetSubaddressesByIndices();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetSubaddressByIndex() {
     super.testGetSubaddressByIndex();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testCreateSubaddress() {
     super.testCreateSubaddress();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSetSubaddressLabel() {
     super.testSetSubaddressLabel();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetSubaddressAddress() {
     super.testGetSubaddressAddress();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetAddressIndices() {
     super.testGetAddressIndices();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetAllBalances() {
     super.testGetAllBalances();
   }
@@ -1932,6 +1999,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   public void testAddressBook() {
     super.testAddressBook();
   }
@@ -1944,6 +2012,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetPaymentUri() {
     super.testGetPaymentUri();
   }
@@ -1992,6 +2061,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   public void testSendToExternal() {
     super.testSendToExternal();
   }
@@ -2161,12 +2231,14 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   public void testChangePassword() {
     super.testChangePassword();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testSaveAndClose() {
     super.testSaveAndClose();
   }
@@ -2245,6 +2317,7 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   public void testGetDefaultFeePriority() {
     super.testGetDefaultFeePriority();
   }

@@ -15,6 +15,7 @@ import monero.common.MoneroRpcConnection;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletFull;
 import monero.wallet.model.MoneroWalletConfig;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import utils.TestUtils;
 
@@ -23,6 +24,7 @@ import utils.TestUtils;
  *
  * Has a main() so it can also run on a bare jvm, without maven: java -cp <classpath> TestNativeLibrary
  */
+@Tag("CI")
 public class TestNativeLibrary {
 
   /**

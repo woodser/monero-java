@@ -47,43 +47,44 @@ public class TestUtils {
   }
   
   // directory with monero binaries to test (monerod and monero-wallet-rpc)
-  public static final String MONERO_BINS_DIR = "";
+  public static final String MONERO_BINS_DIR = System.getenv().getOrDefault("MONERO_BINS_DIR", "external/monero-cpp/external/monero-project/build/release/bin");
   
   // monero daemon rpc endpoint configuration (change per your configuration)
-  public static final String DAEMON_RPC_URI = "localhost:28081";
-  public static final String DAEMON_RPC_USERNAME = "";
-  public static final String DAEMON_RPC_PASSWORD = "";
+  public static final String DAEMON_RPC_URI = "http://127.0.0.1:" + System.getenv().getOrDefault("MONERO_DAEMON_RPC_PORT", "28081");
+  public static final String DAEMON_RPC_USERNAME = System.getenv().getOrDefault("MONERO_DAEMON_RPC_USERNAME", "");
+  public static final String DAEMON_RPC_PASSWORD = System.getenv().getOrDefault("MONERO_DAEMON_RPC_PASSWORD", "");
   public static final String DAEMON_LOCAL_PATH = MONERO_BINS_DIR + "/monerod";
   
   // monero wallet rpc configuration (change per your configuration)
-  public static final int WALLET_RPC_PORT_START = 28084; // test wallet executables will bind to consecutive ports after these
+  public static final int WALLET_RPC_PORT_START = Integer.parseInt(System.getenv().getOrDefault("MONERO_WALLET_RPC_PORT", "28084")); // test wallet executables will bind to consecutive ports after these
   public static final boolean WALLET_RPC_ZMQ_ENABLED = false;
   public static final int WALLET_RPC_ZMQ_PORT_START = 58083;
   public static final int WALLET_RPC_ZMQ_BIND_PORT_START = 48083;  // TODO: zmq bind port necessary?
   public static final boolean WALLET_RPC_PROXY_ENABLED = false;
   public static final String WALLET_RPC_PROXY_URI = null;
-  public static final String WALLET_RPC_USERNAME = "rpc_user";
-  public static final String WALLET_RPC_PASSWORD = "abc123";
+  public static final String WALLET_RPC_USERNAME = System.getenv().getOrDefault("MONERO_WALLET_RPC_USERNAME", "rpc_user");
+  public static final String WALLET_RPC_PASSWORD = System.getenv().getOrDefault("MONERO_WALLET_RPC_PASSWORD", "abc123");
   public static final String WALLET_RPC_ZMQ_DOMAIN = "127.0.0.1";
   public static final String WALLET_RPC_DOMAIN = "localhost";
   public static final String WALLET_RPC_URI = WALLET_RPC_DOMAIN + ":" + WALLET_RPC_PORT_START;
   public static final String WALLET_RPC_ZMQ_URI = "tcp://" + WALLET_RPC_ZMQ_DOMAIN + ":" + WALLET_RPC_ZMQ_PORT_START;
   public static final String WALLET_RPC_LOCAL_PATH = MONERO_BINS_DIR + "/monero-wallet-rpc";
-  public static final String WALLET_RPC_LOCAL_WALLET_DIR = MONERO_BINS_DIR;
+  public static final String WALLET_RPC_LOCAL_WALLET_DIR = System.getenv().getOrDefault("MONERO_WALLET_RPC_DIR", "./test_wallets/regtest_rpc");
   public static final String WALLET_RPC_ACCESS_CONTROL_ORIGINS = "http://localhost:8080"; // cors access from web browser
   
   // test wallet config
   public static final String WALLET_NAME = "test_wallet_1";
   public static final String WALLET_PASSWORD = "supersecretpassword123";
-  public static final String TEST_WALLETS_DIR = "./test_wallets";
+  public static final String TEST_WALLETS_DIR = System.getenv().getOrDefault("MONERO_TEST_WALLETS_DIR", "./test_wallets/regtest");
   public static final String WALLET_FULL_PATH = TEST_WALLETS_DIR + "/" + WALLET_NAME;
   
   // test wallet constants
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
-  public static final MoneroNetworkType NETWORK_TYPE = MoneroNetworkType.TESTNET;
+  public static final MoneroNetworkType NETWORK_TYPE = MoneroNetworkType.MAINNET; // regtest uses mainnet addresses
   public static final String LANGUAGE = "English";
   public static final String SEED = "silk mocked cucumber lettuce hope adrenalin aching lush roles fuel revamp baptism wrist long tender teardrop midst pastry pigment equip frying inbound pinched ravine frying";
-  public static final String ADDRESS = "A1y9sbVt8nqhZAVm3me1U18rUVXcjeNKuBd1oE2cTs8biA9cozPMeyYLhe77nPv12JA3ejJN3qprmREriit2fi6tJDi99RR";
+  public static final String ADDRESS = "4ARcPLqcrRjhZAVm3me1U18rUVXcjeNKuBd1oE2cTs8biA9cozPMeyYLhe77nPv12JA3ejJN3qprmREriit2fi6tJAPbWJu";
+  public static final String MINING_ADDRESS = "42U9v3qs5CjZEePHBZHwuSckQXebuZu299NSmVEmQ41YJZQhKcPyujyMSzpDH4VMMVSBo3U3b54JaNvQLwAjqDhKS3rvM3L";
   public static final long FIRST_RECEIVE_HEIGHT = 171; // NOTE: this value must be the height of the wallet's first tx for tests
   public static final long SYNC_PERIOD_IN_MS = 5000; // period between wallet syncs in milliseconds
   public static final String OFFLINE_SERVER_URI = "offline_server_uri"; // dummy server uri to remain offline because wallet2 connects to default if not given
@@ -208,17 +209,21 @@ public class TestUtils {
    * Start a monero-wallet-rpc process bound to the next available port.
    */
   public static Map<MoneroWalletRpc, Integer> WALLET_PORT_OFFSETS = new HashMap<MoneroWalletRpc, Integer>();
-  public static MoneroWalletRpc startWalletRpcProcess() { return TestUtils.startWalletRpcProcess(null, null, null); }
+  public static MoneroWalletRpc startWalletRpcProcess() { return TestUtils.startWalletRpcProcess(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD); }
   public static MoneroWalletRpc startWalletRpcProcess(String daemonUri, String daemonUsername, String daemonPassword) {
     
     // get next available offset of ports to bind to
     int portOffset = 1;
     while (WALLET_PORT_OFFSETS.values().contains(portOffset)) portOffset++;
     
+    new File(WALLET_RPC_LOCAL_WALLET_DIR).mkdirs();
+
     // create command to start client with internal monero-wallet-rpc process
     List<String> cmd = new ArrayList<String>(Arrays.asList(
         TestUtils.WALLET_RPC_LOCAL_PATH,
-        "--" + TestUtils.NETWORK_TYPE.toString().toLowerCase(),
+        "--allow-mismatched-daemon-version",
+        "--daemon-ssl", "disabled",
+        "--rpc-ssl", "disabled",
         "--rpc-bind-port", "" + (TestUtils.WALLET_RPC_PORT_START + portOffset),
         "--rpc-login", TestUtils.WALLET_RPC_USERNAME + ":" + TestUtils.WALLET_RPC_PASSWORD,
         "--wallet-dir", TestUtils.WALLET_RPC_LOCAL_WALLET_DIR,
@@ -274,14 +279,14 @@ public class TestUtils {
         
         // create wallet with connection
         MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
-        walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_FULL_PATH).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(NETWORK_TYPE).setSeed(TestUtils.SEED).setServer(daemonConnection).setRestoreHeight(FIRST_RECEIVE_HEIGHT));
+        walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(TestUtils.WALLET_FULL_PATH).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(NETWORK_TYPE).setRegtest(true).setSeed(TestUtils.SEED).setServer(daemonConnection).setRestoreHeight(FIRST_RECEIVE_HEIGHT));
         assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, walletFull.getRestoreHeight());
         assertEquals(daemonConnection, walletFull.getDaemonConnection());
       }
       
       // otherwise open existing wallet and update daemon connection
       else {
-        walletFull = MoneroWalletFull.openWallet(WALLET_FULL_PATH, WALLET_PASSWORD, TestUtils.NETWORK_TYPE);
+        walletFull = MoneroWalletFull.openWallet(new MoneroWalletConfig().setPath(WALLET_FULL_PATH).setPassword(WALLET_PASSWORD).setNetworkType(NETWORK_TYPE).setRegtest(true));
         walletFull.setDaemonConnection(TestUtils.getDaemonRpc().getRpcConnection());
       }
 
@@ -315,7 +320,7 @@ public class TestUtils {
     // create ground truth wallet
     MoneroRpcConnection daemonConnection = new MoneroRpcConnection(DAEMON_RPC_URI, DAEMON_RPC_USERNAME, DAEMON_RPC_PASSWORD);
     String path = TestUtils.TEST_WALLETS_DIR + "/gt_wallet_" + System.currentTimeMillis();
-    MoneroWalletFull gtWallet = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(networkType).setSeed(seed).setServer(daemonConnection).setRestoreHeight(restoreHeight));
+    MoneroWalletFull gtWallet = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(networkType).setRegtest(true).setSeed(seed).setServer(daemonConnection).setRestoreHeight(restoreHeight));
     assertEquals(restoreHeight == null ? 0 : (long) restoreHeight, gtWallet.getRestoreHeight());
     gtWallet.sync(startHeight, new WalletSyncPrinter());
     gtWallet.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);

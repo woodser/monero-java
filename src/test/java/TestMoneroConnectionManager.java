@@ -14,6 +14,7 @@ import monero.common.MoneroConnectionManager.PollType;
 import monero.common.MoneroConnectionManager;
 import monero.common.MoneroConnectionManagerListener;
 import monero.wallet.MoneroWalletRpc;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import utils.TestUtils;
 
@@ -25,6 +26,7 @@ public class TestMoneroConnectionManager {
   private static final int SYNC_PADDING = 1000;
 
   @Test
+  @Tag("CI")
   public void testResponseTimesAfterSettingChange() {
     class TestConnection extends MoneroRpcConnection {
       TestConnection(String uri, long responseTime) {
@@ -194,7 +196,7 @@ public class TestMoneroConnectionManager {
       assertEquals(++numExpectedChanges, listener.changedConnections.size());
       
       // connect to specific endpoint with authentication
-      orderedConnections.get(1).setCredentials("rpc_user", "abc123");
+      orderedConnections.get(1).setCredentials(TestUtils.WALLET_RPC_USERNAME, TestUtils.WALLET_RPC_PASSWORD);
       connectionManager.checkConnection();
       assertEquals(connectionManager.getConnection().getUri(), walletRpcs.get(1).getRpcConnection().getUri());
       assertTrue(connection.isOnline());

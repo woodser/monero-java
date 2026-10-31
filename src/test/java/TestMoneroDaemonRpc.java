@@ -56,6 +56,7 @@ import monero.wallet.model.MoneroTxConfig;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import utils.TestUtils;
 
@@ -108,15 +109,21 @@ public class TestMoneroDaemonRpc {
   
   // Can start and stop a daemon process
   @Test
+  @Tag("CI")
   public void testStartDaemon() {
     
     // create command to start monerod process
     List<String> cmd = new ArrayList<String>(Arrays.asList(
         TestUtils.DAEMON_LOCAL_PATH,
-        "--" + TestUtils.NETWORK_TYPE.toString().toLowerCase(),
+        "--regtest",
+        "--offline",
+        "--fixed-difficulty", "1",
+        "--keep-fakechain",
+        "--check-updates", "disabled",
+        "--disable-dns-checkpoints",
         "--no-igd",
         "--hide-my-port",
-        "--data-dir", TestUtils.MONERO_BINS_DIR + "/node1",
+        "--data-dir", TestUtils.TEST_WALLETS_DIR + "/node1",
         "--p2p-bind-port", "58080",
         "--rpc-bind-port", "58081",
         "--rpc-login", "superuser:abctesting123",
@@ -149,6 +156,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get the daemon's version
   @Test
+  @Tag("CI")
   public void testGetVersion() {
     assumeTrue(TEST_NON_RELAYS);
     MoneroVersion version = daemon.getVersion();
@@ -159,6 +167,7 @@ public class TestMoneroDaemonRpc {
   
   // Can indicate if it's trusted
   @Test
+  @Tag("CI")
   public void testIsTrusted() {
     assumeTrue(TEST_NON_RELAYS);
     daemon.isTrusted();
@@ -166,6 +175,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get the blockchain height
   @Test
+  @Tag("CI")
   public void testGetHeight() {
     assumeTrue(TEST_NON_RELAYS);
     long height = daemon.getHeight();
@@ -174,6 +184,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get a block hash by height
   @Test
+  @Tag("CI")
   public void testGetBlockIdByHeight() {
     assumeTrue(TEST_NON_RELAYS);
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
@@ -184,6 +195,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get a block template
   @Test
+  @Tag("CI")
   public void testGetBlockTemplate() {
     assumeTrue(TEST_NON_RELAYS);
     MoneroBlockTemplate template = daemon.getBlockTemplate(TestUtils.ADDRESS, 2);
@@ -192,6 +204,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get the last block's header
   @Test
+  @Tag("CI")
   public void testGetLastBlockHeader() {
     assumeTrue(TEST_NON_RELAYS);
     MoneroBlockHeader lastHeader = daemon.getLastBlockHeader();
@@ -200,6 +213,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get a block header by hash
   @Test
+  @Tag("CI")
   public void testGetBlockHeaderByHash() {
     assumeTrue(TEST_NON_RELAYS);
     
@@ -219,6 +233,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get a block header by height
   @Test
+  @Tag("CI")
   public void testGetBlockHeaderByHeight() {
     assumeTrue(TEST_NON_RELAYS);
     
@@ -237,6 +252,7 @@ public class TestMoneroDaemonRpc {
   // Can get block headers by range
   // TODO: test start with no end, vice versa, inclusivity
   @Test
+  @Tag("CI")
   public void testGetBlockHeadersByRange() {
     assumeTrue(TEST_NON_RELAYS);
     
@@ -261,6 +277,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get a block by hash
   @Test
+  @Tag("CI")
   public void testGetBlockByHash() {
     assumeTrue(TEST_NON_RELAYS);
     
@@ -295,6 +312,7 @@ public class TestMoneroDaemonRpc {
 
   // Can get a block by height
   @Test
+  @Tag("CI")
   public void testGetBlockByHeight() {
     assumeTrue(TEST_NON_RELAYS);
     
@@ -602,6 +620,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get a fee estimate
   @Test
+  @Tag("CI")
   public void testGetFeeEstimate() {
     assumeTrue(TEST_NON_RELAYS);
     MoneroFeeEstimate feeEstimate = daemon.getFeeEstimate();
@@ -878,6 +897,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get general information
   @Test
+  @Tag("CI")
   public void testGetGeneralInformation() {
     assumeTrue(TEST_NON_RELAYS);
     MoneroDaemonInfo info = daemon.getInfo();
@@ -886,6 +906,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get sync information
   @Test
+  @Tag("CI")
   public void testGetSyncInformation() {
     assumeTrue(TEST_NON_RELAYS);
     MoneroDaemonSyncInfo syncInfo = daemon.getSyncInfo();
@@ -894,6 +915,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get hard fork information
   @Test
+  @Tag("CI")
   public void testGetHardForkInformation() {
     assumeTrue(TEST_NON_RELAYS);
     MoneroHardForkInfo hardForkInfo = daemon.getHardForkInfo();
@@ -1080,6 +1102,7 @@ public class TestMoneroDaemonRpc {
   
   // Can get mining status
   @Test
+  @Tag("CI")
   public void testGetMiningStatus() {
     assumeTrue(TEST_NON_RELAYS);
     
@@ -1851,7 +1874,8 @@ public class TestMoneroDaemonRpc {
     assertTrue(info.getHeight() >= 0);
     assertTrue(info.getHeightWithoutBootstrap() > 0);
     assertTrue(info.getNumIncomingConnections() >= 0);
-    assertNotNull(info.getNetworkType());
+    assertEquals(TestUtils.NETWORK_TYPE, info.getNetworkType());
+    assertTrue(info.isRegtest());
     assertNotNull(info.isOffline());
     assertTrue(info.getNumOutgoingConnections() >= 0);
     assertTrue(info.getNumRpcConnections() >= 0);

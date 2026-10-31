@@ -218,9 +218,9 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     // read wallet data from disk unless provided
     MoneroWalletFull wallet;
     if (config.getKeysData() == null) {
-      wallet = openWallet(config.getPath(), config.getPassword(), config.getNetworkType(), (MoneroRpcConnection) null);
+      wallet = openWallet(config.getPath(), config.getPassword(), config.getNetworkType(), null, Boolean.TRUE.equals(config.getRegtest()));
     } else {
-      wallet = openWalletData(config.getPassword(), config.getNetworkType(), config.getKeysData(), config.getCacheData(), null);
+      wallet = openWalletData(config.getPassword(), config.getNetworkType(), config.getKeysData(), config.getCacheData(), null, Boolean.TRUE.equals(config.getRegtest()));
     }
     if (config.getServer() != null) wallet.setDaemonConnection(config.getServer(), config.isTrustedDaemon());
 

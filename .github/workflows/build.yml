@@ -2,10 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [ master ]
   pull_request:
-    branches:
-      - master
   workflow_dispatch:
 
 permissions:
@@ -133,6 +130,7 @@ jobs:
           cd build/release
           cmake -DSTATIC=ON -DBUILD_64=ON -DARCH="${{ matrix.march }}" -DCMAKE_BUILD_TYPE=Release -DUSE_DEVICE_TREZOR=OFF ../../
           make -j3 wallet cryptonote_protocol
+          if [ "${{ matrix.arch }}" = "linux-x86_64" ]; then make -j3 daemon wallet_rpc_server; fi
 
       - name: Build monero-cpp
         run: |
@@ -168,8 +166,13 @@ jobs:
           if nm -D --defined-only build/libmonero-java.so | grep -E ' (SSL_|EVP_|BN_)'; then
             echo "static closure symbols are exported"; exit 1
           fi
-          mkdir -p test_wallets
+          mkdir -p test_wallets/regtest
           mvn -B test -Dmaven.test.skip=false -Dtest=TestMoneroUtils,TestNativeLibrary,TestSerialization,TestMoneroConnectionManager#testResponseTimesAfterSettingChange -DargLine=-Djava.library.path=build
+
+      - name: Test regtest suite
+        if: matrix.arch == 'linux-x86_64'
+        timeout-minutes: 30
+        run: python3 bin/test_regtest.py mvn -B test -Dmaven.test.skip=false -Dgroups=CI -DargLine=-Djava.library.path=build
 
       - name: Upload monero-java library
         uses: actions/upload-artifact@v7
@@ -288,7 +291,7 @@ jobs:
         env:
           MAVEN_OPTS: -Djava.library.path=build
         run: |
-          mkdir -p test_wallets
+          mkdir -p test_wallets/regtest
           mvn -B test -Dmaven.test.skip=false -Dtest=TestMoneroUtils,TestNativeLibrary,TestSerialization,TestMoneroConnectionManager#testResponseTimesAfterSettingChange -DargLine=-Djava.library.path=build
 
       - name: Upload monero-java library
@@ -413,7 +416,7 @@ jobs:
           if nm -gU build/libmonero-java.dylib | awk '{print $NF}' | grep -vE '^_(Java_|JNI_OnLoad$|JNI_OnUnload$)'; then
             echo "unexpected exports above"; exit 1
           fi
-          mkdir -p test_wallets
+          mkdir -p test_wallets/regtest
           mvn -B test -Dmaven.test.skip=false -Dtest=TestMoneroUtils,TestNativeLibrary,TestSerialization,TestMoneroConnectionManager#testResponseTimesAfterSettingChange -DargLine=-Djava.library.path=build
 
       - name: Upload monero-java library
@@ -474,7 +477,7 @@ jobs:
             # bullseye security packages were removed from live mirrors after LTS ended
             sed -i 's|^deb .* bullseye-security |deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/20260903T220410Z/ bullseye-security |' /etc/apt/sources.list &&
             apt-get update -qq && apt-get install -y -qq openjdk-11-jre-headless > /dev/null &&
-            mkdir -p test_wallets &&
+            mkdir -p test_wallets/regtest &&
             java -cp $JAR:target/test-classes:\$(cat cp.txt) TestNativeLibrary"
 
       - name: Upload jar

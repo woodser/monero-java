@@ -21,12 +21,14 @@ import monero.wallet.MoneroWalletFull;
 import monero.wallet.model.MoneroIntegratedAddress;
 import monero.wallet.model.MoneroTxConfig;
 import monero.wallet.model.MoneroWalletConfig;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import utils.TestUtils;
 
 /**
  * Tests static Monero utilities.
  */
+@Tag("CI")
 public class TestMoneroUtils {
   
   // Can get integrated addresses
