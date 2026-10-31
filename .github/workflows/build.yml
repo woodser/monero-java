@@ -332,9 +332,24 @@ jobs:
 
       - name: Install dependencies
         run: |
-          HOMEBREW_NO_AUTO_UPDATE=1 brew install libsodium openssl zmq libpgm miniupnpc expat libunwind-headers protobuf unbound libevent libnghttp2
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install libsodium openssl@3 zmq libpgm miniupnpc expat libunwind-headers protobuf
+          # keep incompatible brew headers and unbound out of the source builds
+          for formula in openssl@4 unbound; do
+            if brew list --versions "$formula" >/dev/null 2>&1; then brew unlink "$formula"; fi
+          done
           # record versions of the brew libraries that get statically linked into the shipped binary
           brew list --versions | sort
+
+      - name: Install unbound (static)
+        run: |
+          # brew's unbound uses OpenSSL 4; build against the same OpenSSL 3 as monero
+          curl -fsSLO https://www.nlnetlabs.nl/downloads/unbound/unbound-1.22.0.tar.gz
+          echo "c5dd1bdef5d5685b2cedb749158dd152c52d44f65529a34ac15cd88d4b1b3d43  unbound-1.22.0.tar.gz" | shasum -a 256 -c
+          tar xzf unbound-1.22.0.tar.gz
+          cd unbound-1.22.0
+          ./configure --with-libexpat="$(brew --prefix expat)" --with-ssl="$(brew --prefix openssl@3)" --with-libunbound-only --with-libevent=no --enable-static --disable-shared --with-pic
+          make -j3
+          sudo make install
 
       - name: Install hidapi (static)
         run: |
@@ -363,7 +378,7 @@ jobs:
           cd external/monero-cpp/external/monero-project
           mkdir -p build/release
           cd build/release
-          cmake -DSTATIC=ON -DBUILD_64=ON -DARCH="${{ matrix.march }}" -DCMAKE_BUILD_TYPE=Release -DUSE_DEVICE_TREZOR=OFF ../../
+          cmake -DSTATIC=ON -DBUILD_64=ON -DARCH="${{ matrix.march }}" -DCMAKE_BUILD_TYPE=Release -DUSE_DEVICE_TREZOR=OFF -DOPENSSL_ROOT_DIR="$(brew --prefix openssl@3)" ../../
           make -j3 wallet cryptonote_protocol
 
       - name: Build monero-cpp
@@ -371,7 +386,7 @@ jobs:
           cd external/monero-cpp
           mkdir -p build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release "-DCMAKE_CXX_FLAGS=-DBOOST_UUID_DISABLE_ALIGNMENT" ..
+          cmake -DCMAKE_BUILD_TYPE=Release "-DCMAKE_CXX_FLAGS=-DBOOST_UUID_DISABLE_ALIGNMENT" -DOPENSSL_ROOT_DIR="$(brew --prefix openssl@3)" ..
           # only the static library is consumed; the shared lib also fails to link on older binutils (randomx aarch64 CONDBR19 relocations)
           cmake --build . -j3 --target monero-cpp-static
 
@@ -379,7 +394,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -DSTATIC=ON -DBOOST_ROOT=/usr/local -DBoost_NO_SYSTEM_PATHS=ON ..
+          cmake -DSTATIC=ON -DBOOST_ROOT=/usr/local -DBoost_NO_SYSTEM_PATHS=ON -DOPENSSL_ROOT_DIR="$(brew --prefix openssl@3)" ..
           cmake --build . -j3
 
       - name: Test native library
