@@ -140,6 +140,10 @@ For convenience, native libraries for Linux, macOS, and Windows are distributed 
 6. Build the monero-cpp submodule (located at ./external/monero-cpp) as a native library by following [instructions](https://github.com/woodser/monero-cpp#using-monero-cpp-in-your-project) for your system.
 7. Build native libraries to ./build/: `./bin/build_libmonero_java.sh`
 
+On macOS, install `openssl@3` and build unbound against it as described in the [monero-cpp macOS instructions](https://github.com/woodser/monero-cpp#macos). To use another compatible OpenSSL installation for all native builds, set the `OPENSSL_ROOT_DIR` environment variable when running the build script.
+
+When switching OpenSSL installations, remove the old `build`, `external/monero-cpp/build`, and `external/monero-cpp/external/monero-project/build/release` directories first so CMake does not reuse cached headers and libraries.
+
 ### Windows
 
 1. Install [MSYS2](https://www.msys2.org/).

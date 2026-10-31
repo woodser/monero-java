@@ -107,16 +107,26 @@ endif()
 
 if (APPLE AND NOT IOS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=default -std=c++14")
-  if (NOT OPENSSL_ROOT_DIR)
-      EXECUTE_PROCESS(COMMAND brew --prefix openssl
-        OUTPUT_VARIABLE OPENSSL_ROOT_DIR
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-    message(STATUS "Using OpenSSL found at ${OPENSSL_ROOT_DIR}")
+  if (NOT OPENSSL_ROOT_DIR AND "$ENV{OPENSSL_ROOT_DIR}" STREQUAL "")
+    # use OpenSSL 3 with the pinned Boost version
+    execute_process(COMMAND brew --prefix openssl@3
+      OUTPUT_VARIABLE BREW_OPENSSL_ROOT_DIR
+      RESULT_VARIABLE BREW_OPENSSL_RESULT
+      ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (BREW_OPENSSL_RESULT EQUAL 0)
+      if (NOT EXISTS "${BREW_OPENSSL_ROOT_DIR}/include/openssl")
+        message(FATAL_ERROR "Install openssl@3 with Homebrew or set OPENSSL_ROOT_DIR to a compatible OpenSSL installation")
+      endif()
+      set(OPENSSL_ROOT_DIR "${BREW_OPENSSL_ROOT_DIR}")
+      message(STATUS "Using OpenSSL found at ${OPENSSL_ROOT_DIR}")
+    endif()
   endif()
 endif()
 
 find_package(OpenSSL REQUIRED)
 message(STATUS "Using OpenSSL include dir at ${OPENSSL_INCLUDE_DIR}")
+include_directories(${OPENSSL_INCLUDE_DIR}) # before dependency prefixes containing other OpenSSL headers
 
 if(STATIC AND NOT IOS)
   if(UNIX)
