@@ -112,6 +112,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   // Can create a wallet with a randomly generated seed
   @Test
+  @Tag("CI")
   public void testCreateWalletRandomRpc() {
     assumeTrue(TEST_NON_RELAYS);
 
@@ -146,6 +147,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   // Can create a RPC wallet from a seed
   @Test
+  @Tag("CI")
   public void testCreateWalletFromSeedRpc() {
     assumeTrue(TEST_NON_RELAYS);
       
@@ -175,6 +177,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   // Can open wallets
   @Test
+  @Tag("CI")
   public void testOpenWallet() {
     assumeTrue(TEST_NON_RELAYS);
 
@@ -221,6 +224,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   // Can indicate if multisig import is needed for correct balance information
   @Test
+  @Tag("CI")
   public void testIsMultisigNeeded() {
     assumeTrue(TEST_NON_RELAYS);
     assertEquals(false, wallet.isMultisigImportNeeded()); // TODO: test with multisig wallet
@@ -228,6 +232,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   // Can tag accounts and query accounts by tag
   @Test
+  @Tag("CI")
   public void testAccountTags() {
     assumeTrue(TEST_NON_RELAYS);
     
@@ -290,6 +295,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   // Can get addresses out of range of used accounts and subaddresses
   @Override
   @Test
+  @Tag("CI")
   public void testGetSubaddressAddressOutOfRange() {
     assumeTrue(TEST_NON_RELAYS);
     List<MoneroAccount> accounts = wallet.getAccounts(true);
@@ -301,6 +307,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   // Can save the wallet
   @Test
+  @Tag("CI")
   public void testSave() {
     assumeTrue(TEST_NON_RELAYS);
     wallet.save();
@@ -308,6 +315,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   // Can close a wallet
   @Test
+  @Tag("CI")
   public void testClose() {
     assumeTrue(TEST_NON_RELAYS);
     
@@ -406,24 +414,28 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   public void testCreateWalletRandom() {
     super.testCreateWalletRandom();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testCreateWalletFromSeed() {
     super.testCreateWalletFromSeed();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testCreateWalletFromSeedWithOffset() {
     super.testCreateWalletFromSeedWithOffset();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testCreateWalletFromKeys() {
     super.testCreateWalletFromKeys();
   }
@@ -436,29 +448,34 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   public void testGetVersion() {
     super.testGetVersion();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testGetPath() {
     super.testGetPath();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testSetDaemonConnection() {
     super.testSetDaemonConnection();
   }
 
   @Test
+  @Tag("CI")
   public void testConnectionManager() {
     super.testConnectionManager();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetHeight() {
     super.testGetHeight();
   }
@@ -471,24 +488,28 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetSeed() {
     super.testGetSeed();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetSeedLanguages() {
     super.testGetSeedLanguages();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetPrivateViewKey() {
     super.testGetPrivateViewKey();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testGetPrivateSpendKey() {
     super.testGetPrivateSpendKey();
   }
@@ -507,270 +528,315 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetPrimaryAddress() {
     super.testGetPrimaryAddress();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetIntegratedAddress() {
     super.testGetIntegratedAddress();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testDecodeIntegratedAddress() {
     super.testDecodeIntegratedAddress();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSyncWithoutProgress() {
     super.testSyncWithoutProgress();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testWalletEqualityGroundTruth() {
     super.testWalletEqualityGroundTruth();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetAccountsWithoutSubaddresses() {
     super.testGetAccountsWithoutSubaddresses();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetAccountsWithSubaddresses() {
     super.testGetAccountsWithSubaddresses();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetAccount() {
     super.testGetAccount();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testCreateAccountWithoutLabel() {
     super.testCreateAccountWithoutLabel();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testCreateAccountWithLabel() {
     super.testCreateAccountWithLabel();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSetAccountLabel() {
     super.testSetAccountLabel();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetSubaddresses() {
     super.testGetSubaddresses();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetSubaddressesByIndices() {
     super.testGetSubaddressesByIndices();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetSubaddressByIndex() {
     super.testGetSubaddressByIndex();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testCreateSubaddress() {
     super.testCreateSubaddress();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSetSubaddressLabel() {
     super.testSetSubaddressLabel();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testGetSubaddressAddress() {
     super.testGetSubaddressAddress();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetAddressIndices() {
     super.testGetAddressIndices();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetAllBalances() {
     super.testGetAllBalances();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetTxsWallet() {
     super.testGetTxsWallet();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testGetTxsByHash() {
     super.testGetTxsByHash();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetTxsWithQuery() {
     super.testGetTxsWithQuery();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testGetTxsByHeight() {
     super.testGetTxsByHeight();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetTxsWithPaymentIds() {
     super.testGetTxsWithPaymentIds();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetTxsFieldsWithFiltering() {
     super.testGetTxsFieldsWithFiltering();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testValidateInputsGetTxs() {
     super.testValidateInputsGetTxs();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetTransfers() {
     super.testGetTransfers();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetTransfersWithQuery() {
     super.testGetTransfersWithQuery();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testValidateInputsGetTransfers() {
     super.testValidateInputsGetTransfers();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testGetIncomingOutgoingTransfers() {
     super.testGetIncomingOutgoingTransfers();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetOutputs() {
     super.testGetOutputs();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetOutputsWithQuery() {
     super.testGetOutputsWithQuery();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testValidateInputsGetOutputs() {
     super.testValidateInputsGetOutputs();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testAccounting() {
     super.testAccounting();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSetTxNote() {
     super.testSetTxNote();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSetTxNotes() {
     super.testSetTxNotes();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testCheckTxKey() {
     super.testCheckTxKey();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testCheckTxProof() {
     super.testCheckTxProof();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testCheckSpendProof() {
     super.testCheckSpendProof();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetReserveProofWallet() {
     super.testGetReserveProofWallet();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetReserveProofAccount() {
     super.testGetReserveProofAccount();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testExportOutputs() {
     super.testExportOutputs();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testImportOutputs() {
     super.testImportOutputs();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testExportKeyImages() {
     super.testExportKeyImages();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testGetNewKeyImagesFromLastImport() {
     super.testGetNewKeyImagesFromLastImport();
   }
@@ -784,180 +850,210 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   public void testViewOnlyAndOfflineWallets() {
     super.testViewOnlyAndOfflineWallets();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSignAndVerifyMessages() {
     super.testSignAndVerifyMessages();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testAddressBook() {
     super.testAddressBook();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSetAttributes() {
     super.testSetAttributes();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testGetPaymentUri() {
     super.testGetPaymentUri();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testMining() {
     super.testMining();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testValidateInputsSendingFunds() {
     super.testValidateInputsSendingFunds();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testSyncWithPoolSameAccounts() {
     super.testSyncWithPoolSameAccounts();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testSyncWithPoolSubmitAndFlush() {
     super.testSyncWithPoolSubmitAndFlush();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testSyncWithPoolSubmitAndRelay() {
     super.testSyncWithPoolSubmitAndRelay();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testSyncWithPoolRelay() {
     super.testSyncWithPoolRelay();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testSendToSelf() {
     super.testSendToSelf();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testSendToExternal() {
     super.testSendToExternal();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSendFromSubaddresses() {
     super.testSendFromSubaddresses();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSendFromSubaddressesSplit() {
     super.testSendFromSubaddressesSplit();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSend() {
     super.testSend();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSendWithPaymentId() {
     super.testSendWithPaymentId();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSendSplit() {
     super.testSendSplit();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testCreateThenRelay() {
     super.testCreateThenRelay();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testCreateThenRelaySplit() {
     super.testCreateThenRelaySplit();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSendToMultiple() {
     super.testSendToMultiple();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSendToMultipleSplit() {
     super.testSendToMultipleSplit();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testSendDustToMultipleSplit() {
     super.testSendDustToMultipleSplit();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSubtractFeeFrom() {
     super.testSubtractFeeFrom();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSubtractFeeFromSplit() {
     super.testSubtractFeeFromSplit();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testUpdateLockedSameAccount() {
     super.testUpdateLockedSameAccount();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testUpdateLockedSameAccountSplit() {
     super.testUpdateLockedSameAccountSplit();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testUpdateLockedDifferentAccounts() {
     super.testUpdateLockedDifferentAccounts();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testUpdateLockedDifferentAccountsSplit() {
     super.testUpdateLockedDifferentAccountsSplit();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testSweepOutputs() {
     super.testSweepOutputs();
   }
@@ -988,24 +1084,28 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
 
   @Override
   @Test
+  @Tag("CI")
   public void testSweepDustNoRelay() {
     super.testSweepDustNoRelay();
   }
 
   @Override
   @Test
+  @Tag("CI")
   public void testSweepDust() {
     super.testSweepDust();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testScanTxs() {
     super.testScanTxs();
   }
   
   // Can rescan spent // TODO: run this in full wallet too
   @Test
+  @Tag("CI")
   public void testRescanSpent() {
     assumeTrue(TEST_NON_RELAYS);
     wallet.rescanSpent();
@@ -1019,6 +1119,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   public void testMultisig() {
     super.testMultisig();
   }
@@ -1032,18 +1133,21 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   public void testChangePassword() {
     super.testChangePassword();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testSaveAndClose() {
     super.testSaveAndClose();
   }
   
   @Override
   @Test
+  @Tag("CI")
   @Tag("NotificationTest")
   public void testNotificationsDifferentWallet() {
     super.testNotificationsDifferentWallet();
@@ -1051,6 +1155,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   @Tag("NotificationTest")
   public void testNotificationsDifferentWalletWhenRelayed() {
     super.testNotificationsDifferentWalletWhenRelayed();
@@ -1058,6 +1163,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   @Tag("NotificationTest")
   public void testNotificationsDifferentAccounts() {
     super.testNotificationsDifferentAccounts();
@@ -1072,6 +1178,7 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   @Tag("NotificationTest")
   public void testNotificationsDifferentAccountSweepOutput() {
     super.testNotificationsDifferentAccountSweepOutput();
@@ -1086,36 +1193,42 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   
   @Override
   @Test
+  @Tag("CI")
   public void testStopListening() {
     super.testStopListening();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testCreateAndReceive() {
     super.testCreateAndReceive();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testFreezeOutputs() {
     super.testFreezeOutputs();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testInputKeyImages() {
     super.testInputKeyImages();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testProveUnrelayedTxs() {
     super.testProveUnrelayedTxs();
   }
   
   @Override
   @Test
+  @Tag("CI")
   public void testGetDefaultFeePriority() {
     super.testGetDefaultFeePriority();
   }

@@ -128,7 +128,8 @@ public abstract class TestMoneroWalletCommon {
   @AfterAll
   public void afterAll() {
     
-    // try to stop mining
+    // stop mining
+    StartMining.stopMining();
     if (daemon != null) {
       try { daemon.stopMining(); }
       catch (MoneroError e) { }
@@ -142,9 +143,10 @@ public abstract class TestMoneroWalletCommon {
   public void afterEach(TestInfo testInfo) {
     System.out.println("After test " + testInfo.getDisplayName());
     
-    if (daemon.getMiningStatus().isActive()) {
+    if (StartMining.isMining() || daemon.getMiningStatus().isActive()) {
       System.err.println("WARNING: mining is active after test " + testInfo.getDisplayName() + ", stopping");
-      daemon.stopMining();
+      StartMining.stopMining();
+      if (daemon.getMiningStatus().isActive()) daemon.stopMining();
     }
   }
   
@@ -546,8 +548,9 @@ public abstract class TestMoneroWalletCommon {
     // start polling connections
     connectionManager.startPolling(TestUtils.SYNC_PERIOD_IN_MS);
 
-    // test that wallet auto connects
-    GenUtils.waitFor(TestUtils.AUTO_CONNECT_TIMEOUT_MS);
+    // test that wallet auto connects, allowing a timed out first check to retry after the polling period
+    long deadline = System.currentTimeMillis() + connectionManager.getTimeout() + TestUtils.SYNC_PERIOD_IN_MS * 2;
+    while (wallet.getDaemonConnection() == null && System.currentTimeMillis() < deadline) GenUtils.waitFor(100);
     assertEquals(connection1, wallet.getDaemonConnection());
     assertTrue(wallet.isConnectedToDaemon());
 
@@ -1300,14 +1303,15 @@ public abstract class TestMoneroWalletCommon {
 //    assertEquals(outgoingTx.getHash(), outgoingTxs.get(0).getHash());
     
     // get txs with output query
-    MoneroOutputQuery outputQuery = new MoneroOutputQuery().setIsSpent(false).setAccountIndex(1).setSubaddressIndex(2);
+    MoneroOutputWallet unspentOutput = wallet.getOutputs(new MoneroOutputQuery().setIsSpent(false).setAccountIndex(1)).get(0); // other tests spend from arbitrary subaddresses
+    MoneroOutputQuery outputQuery = new MoneroOutputQuery().setIsSpent(false).setAccountIndex(1).setSubaddressIndex(unspentOutput.getSubaddressIndex());
     txs = wallet.getTxs(new MoneroTxQuery().setOutputQuery(outputQuery));
     assertFalse(txs.isEmpty());
     for (MoneroTxWallet tx : txs) {
       assertFalse(tx.getOutputs() == null || tx.getOutputs().isEmpty());
       found = false;
       for (MoneroOutputWallet output : tx.getOutputsWallet()) {
-        if (output.isSpent() == false && output.getAccountIndex() == 1 && output.getSubaddressIndex() == 2) {
+        if (output.isSpent() == false && output.getAccountIndex() == 1 && output.getSubaddressIndex().equals(unspentOutput.getSubaddressIndex())) {
           found = true;
           break;
         }
@@ -2285,6 +2289,7 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testGetReserveProofAccount() {
     assumeTrue(TEST_NON_RELAYS);
+    TestUtils.WALLET_TX_TRACKER.waitForTxsToClearWallets(wallet); // proof excludes unconfirmed change and incoming funds
     
     // test proofs of accounts
     int numNonZeroTests = 0;
@@ -3580,7 +3585,7 @@ public abstract class TestMoneroWalletCommon {
     TestUtils.WALLET_TX_TRACKER.waitForTxsToClearPool(wallet);
 
     // include the last mined blocks before measuring balance changes
-    if (daemon.getMiningStatus().isActive()) daemon.stopMining();
+    StartMining.stopMining();
     wallet.sync();
     
     // compute the minimum account unlocked balance needed in order to fulfill the config
@@ -3830,8 +3835,7 @@ public abstract class TestMoneroWalletCommon {
     } finally {
       
       // stop mining at end of test
-      try { daemon.stopMining(); }
-      catch (MoneroError e) { }
+      StartMining.stopMining();
       
       // save and close participants
       for (MoneroWallet participant : participants) closeWallet(participant, true);
@@ -4082,9 +4086,8 @@ public abstract class TestMoneroWalletCommon {
     
     System.out.println("Starting mining");
     
-    // attempt to start mining
-    try { StartMining.startMining(); }
-    catch (MoneroError e) { if ("BUSY".equals(e.getMessage())) throw e; }
+    // start mining
+    StartMining.startMining();
     
     // wait for the multisig wallet's funds to unlock // TODO: replace with MoneroWalletListener.onOutputReceived() which is called when output unlocked
     Long lastNumConfirmations = null;
@@ -4114,7 +4117,7 @@ public abstract class TestMoneroWalletCommon {
     }
     
     // stop mining
-    daemon.stopMining();
+    StartMining.stopMining();
     
     // multisig wallet should have unlocked balance in subaddresses 0-3
     for (int i = 0; i < numAddressesToFund; i++) {
@@ -4290,7 +4293,7 @@ public abstract class TestMoneroWalletCommon {
     GenUtils.executeTasks(tasks);
     
     // stop mining
-    wallet.stopMining();
+    StartMining.stopMining();
   }
   
   private void synchronizeMultisigParticipants(List<MoneroWallet> wallets) {
@@ -4415,17 +4418,9 @@ public abstract class TestMoneroWalletCommon {
       // track resulting outgoing and incoming txs as blocks are added to the chain
       List<MoneroTxWallet> updatedTxs = null;
       
-      // attempt to start mining to push the network along
-      boolean startedMining = false;
-      MoneroMiningStatus miningStatus = daemon.getMiningStatus();
-      if (!miningStatus.isActive()) {
-        try {
-          StartMining.startMining();
-          startedMining = true;
-        } catch (Exception e) {
-          System.err.println("Warning: could not start mining: " + e.getMessage()); // not fatal
-        }
-      }
+      // start mining to push the network along
+      boolean startedMining = !StartMining.isMining();
+      StartMining.startMining();
       
       // loop to update txs through confirmations
       long numConfirmations = 0;
@@ -4485,15 +4480,14 @@ public abstract class TestMoneroWalletCommon {
       }
       
       // stop mining if it was started by this test
-      if (startedMining) wallet.stopMining();
+      if (startedMining) StartMining.stopMining();
       
     } catch (MoneroError e) {
       throw e;
     } finally {
       
       // stop mining at end of test
-      try { daemon.stopMining(); }
-      catch (MoneroError e) { }
+      StartMining.stopMining();
     }
   }
   
@@ -4891,7 +4885,7 @@ public abstract class TestMoneroWalletCommon {
       TestUtils.WALLET_TX_TRACKER.waitForUnlockedBalance(sender, 0, null, TestUtils.MAX_FEE.multiply(new BigInteger("10")));
 
       // include the last mined blocks before measuring balance changes
-      if (daemon.getMiningStatus().isActive()) daemon.stopMining();
+      StartMining.stopMining();
       sender.sync();
       if (receiver != sender) receiver.sync();
 
@@ -4988,7 +4982,7 @@ public abstract class TestMoneroWalletCommon {
         }
       }
 
-      // mine until test completes
+      // mine until the funds unlock
       StartMining.startMining();
 
       // loop every sync period until unlock tested
@@ -5060,6 +5054,7 @@ public abstract class TestMoneroWalletCommon {
 
         // otherwise test unlock notifications
         else if (height >= expectedUnlockTime) {
+          StartMining.stopMining(); // freeze the chain so unrelated unlocks cannot change balances before the final checks
           Thread thread = new Thread(new Runnable() {
             @Override public void run() {
               GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS * 2 + MAX_POLL_TIME); // wait 2 sync periods + poll time for notifications
@@ -5069,13 +5064,15 @@ public abstract class TestMoneroWalletCommon {
               if (!sameWallet && !receiver.getBalance().equals(receiver.getUnlockedBalance())) issues.add("ERROR: receiver balance != unlocked balance after funds unlocked");
               if (senderNotificationCollector.getBalanceNotifications().size() == 0) issues.add("ERROR: sender did not announce any balance notifications");
               else {
-                if (!sender.getBalance().equals(senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getFirst())) issues.add("ERROR: sender balance != last notified balance after funds unlocked");
-                if (!sender.getUnlockedBalance().equals(senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1).getSecond())) issues.add("ERROR: sender unlocked balance != last notified unlocked balance after funds unlocked");
+                Pair<BigInteger, BigInteger> lastNotified = senderNotificationCollector.getBalanceNotifications().get(senderNotificationCollector.getBalanceNotifications().size() - 1);
+                if (!sender.getBalance().equals(lastNotified.getFirst())) issues.add("ERROR: sender balance != last notified balance after funds unlocked (" + sender.getBalance() + " != " + lastNotified.getFirst() + ")");
+                if (!sender.getUnlockedBalance().equals(lastNotified.getSecond())) issues.add("ERROR: sender unlocked balance != last notified unlocked balance after funds unlocked (" + sender.getUnlockedBalance() + " != " + lastNotified.getSecond() + ")");
               }
               if (receiverNotificationCollector.getBalanceNotifications().size() == 0) issues.add("ERROR: receiver did not announce any balance notifications");
               else {
-                if (!receiver.getBalance().equals(receiverNotificationCollector.getBalanceNotifications().get(receiverNotificationCollector.getBalanceNotifications().size() - 1).getFirst())) issues.add("ERROR: receiver balance != last notified balance after funds unlocked");
-                if (!receiver.getUnlockedBalance().equals(receiverNotificationCollector.getBalanceNotifications().get(receiverNotificationCollector.getBalanceNotifications().size() - 1).getSecond())) issues.add("ERROR: receiver unlocked balance != last notified unlocked balance after funds unlocked");
+                Pair<BigInteger, BigInteger> lastNotified = receiverNotificationCollector.getBalanceNotifications().get(receiverNotificationCollector.getBalanceNotifications().size() - 1);
+                if (!receiver.getBalance().equals(lastNotified.getFirst())) issues.add("ERROR: receiver balance != last notified balance after funds unlocked (" + receiver.getBalance() + " != " + lastNotified.getFirst() + ")");
+                if (!receiver.getUnlockedBalance().equals(lastNotified.getSecond())) issues.add("ERROR: receiver unlocked balance != last notified unlocked balance after funds unlocked (" + receiver.getUnlockedBalance() + " != " + lastNotified.getSecond() + ")");
               }
             }
           });
@@ -5115,7 +5112,7 @@ public abstract class TestMoneroWalletCommon {
           throw new RuntimeException(e);
         } finally {
           try {
-            if (daemon.getMiningStatus().isActive()) daemon.stopMining();
+            StartMining.stopMining();
           } finally {
             try {
               if (sender.getListeners().contains(senderNotificationCollector)) sender.removeListener(senderNotificationCollector);
@@ -5228,7 +5225,7 @@ public abstract class TestMoneroWalletCommon {
       MoneroTxWallet sentTx = wallet.createTx(new MoneroTxConfig().setAccountIndex(0).setAddress(receiver.getPrimaryAddress()).setAmount(TestUtils.MAX_FEE).setRelay(true));
       
       // wait for funds to confirm
-      try { StartMining.startMining(); } catch (Exception e) { }
+      StartMining.startMining();
       while (!(wallet.getTx(sentTx.getHash())).isConfirmed()) {
         if (wallet.getTx(sentTx.getHash()).isFailed()) throw new Error("Tx failed in mempool: " + sentTx.getHash());
         daemon.waitForNextBlockHeader();
@@ -5239,7 +5236,7 @@ public abstract class TestMoneroWalletCommon {
       assertFalse(myListener.getOutputsReceived().isEmpty());
     } finally {
       closeWallet(receiver);
-      try { daemon.stopMining(); } catch (Exception e) { }
+      StartMining.stopMining();
     }
   }
   
@@ -5322,7 +5319,6 @@ public abstract class TestMoneroWalletCommon {
   @Test
   public void testInputKeyImages() {
     int accountIndex = 0;
-    int subaddressIndex = wallet.getSubaddresses(0).size() > 1 ? 1 : 0; // TODO: avoid subaddress 0 which is more likely to fail transaction sanity check
     
     // test unrelayed single transaction
     testSpendTx(wallet.createTx(new MoneroTxConfig().addDestination(wallet.getPrimaryAddress(), TestUtils.MAX_FEE).setAccountIndex(accountIndex)));
@@ -5339,8 +5335,12 @@ public abstract class TestMoneroWalletCommon {
       for (MoneroOutput input : tx.getInputs()) dustKeyImages.add(input.getKeyImage().getHex());
     }
     
-    // get available outputs above min amount
-    List<MoneroOutputWallet> outputs = wallet.getOutputs(new MoneroOutputQuery().setAccountIndex(accountIndex).setSubaddressIndex(subaddressIndex).setIsSpent(false).setIsFrozen(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)).setMinAmount(TestUtils.MAX_FEE));
+    // get available outputs above min amount from a subaddress with such outputs, preferring one other than 0 which is more likely to fail the tx sanity check
+    MoneroOutputQuery availableQuery = new MoneroOutputQuery().setAccountIndex(accountIndex).setIsSpent(false).setIsFrozen(false).setTxQuery(new MoneroTxQuery().setIsLocked(false)).setMinAmount(TestUtils.MAX_FEE);
+    int subaddressIndex = 0;
+    for (MoneroOutputWallet output : wallet.getOutputs(availableQuery)) if (output.getSubaddressIndex() > 0) { subaddressIndex = output.getSubaddressIndex(); break; }
+    List<MoneroOutputWallet> outputs = wallet.getOutputs(availableQuery.setSubaddressIndex(subaddressIndex));
+    assertFalse(outputs.isEmpty(), "Wallet does not have unlocked outputs in account " + accountIndex + "; run send tests");
     
     // filter dust outputs
     List<MoneroOutputWallet> dustOutputs = new ArrayList<MoneroOutputWallet>();
@@ -5578,7 +5578,7 @@ public abstract class TestMoneroWalletCommon {
     TestUtils.testUnsignedBigInteger(subaddress.getUnlockedBalance());
     assertTrue(subaddress.getNumUnspentOutputs() >= 0);
     assertNotNull(subaddress.isUsed());
-    if (subaddress.getBalance().compareTo(BigInteger.valueOf(0)) > 0) assertTrue(subaddress.isUsed());
+    if (subaddress.getNumUnspentOutputs() > 0) assertTrue(subaddress.isUsed()); // pool funds count toward the balance before the subaddress is used
     assertTrue(subaddress.getNumBlocksToUnlock() >= 0);
   }
 

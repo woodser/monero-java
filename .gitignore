@@ -3,4 +3,4 @@
 /lib/
 **/pom.xml.versionsBackup
 **/logs
-/test_wallets
+/test_regtest
