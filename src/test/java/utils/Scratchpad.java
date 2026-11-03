@@ -27,7 +27,7 @@ public class Scratchpad {
     // create wallet from seed on mainnet
     MoneroDaemon daemon = new MoneroDaemonRpc("http://xmr-node.cakewallet.com:18081");
     MoneroWallet walletFull = MoneroWalletFull.createWallet(new MoneroWalletConfig()
-      .setPath("./test_wallets/" + UUID.randomUUID().toString())  // leave blank for in-memory wallet
+      .setPath(TestUtils.TEST_WALLETS_DIR + "/" + UUID.randomUUID().toString())  // leave blank for in-memory wallet
       .setPassword("abctesting123")
       .setNetworkType(MoneroNetworkType.MAINNET)
       .setServerUri("http://xmr-node.cakewallet.com:18081")

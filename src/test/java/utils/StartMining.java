@@ -1,41 +1,61 @@
 package utils;
 
-import common.utils.GenUtils;
-import monero.daemon.MoneroDaemon;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Utility class to start mining.
+ * Mines regtest blocks on demand or one per block period in the background.
  */
 public class StartMining {
 
-  public static void main(String[] args) {
+  private static ScheduledExecutorService miner;
+
+  public static void main(String[] args) throws InterruptedException {
     startMining();
+    Thread.currentThread().join();
+  }
+
+  public static void generateBlocks(long numBlocks) {
+    generateBlocks(TestUtils.MINING_ADDRESS, numBlocks);
+  }
+
+  public static void generateBlocks(String address, long numBlocks) {
+    if (numBlocks <= 0) return;
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("wallet_address", address);
+    params.put("amount_of_blocks", numBlocks);
+    TestUtils.getDaemonRpc().getRpcConnection().sendJsonRequest("generateblocks", params);
   }
 
   public static void mineToHeight(long height) {
-    MoneroDaemon daemon = TestUtils.getDaemonRpc();
-    if (daemon.getHeight() >= height) return;
-    boolean startedMining = false;
-    if (!daemon.getMiningStatus().isActive()) {
-      try {
-        startMining();
-        startedMining = true;
-      } catch (Exception e) { }
-    }
-    try {
-      while (daemon.getHeight() < height) GenUtils.waitFor(TestUtils.SYNC_PERIOD_IN_MS);
-    } finally {
-      if (startedMining) daemon.stopMining();
-    }
+    generateBlocks(height - TestUtils.getDaemonRpc().getHeight());
   }
-  
-  public static void startMining() {
-    startMining(1);
+
+  public static synchronized void startMining() {
+    if (miner != null) return;
+    miner = Executors.newSingleThreadScheduledExecutor(runnable -> {
+      Thread thread = new Thread(runnable);
+      thread.setDaemon(true);
+      return thread;
+    });
+    miner.scheduleWithFixedDelay(() -> {
+      try { generateBlocks(1); }
+      catch (Exception e) { System.err.println("Failed to mine block: " + e.getMessage()); }
+    }, 0, TestUtils.BLOCK_PERIOD_IN_MS, TimeUnit.MILLISECONDS);
   }
-  
-  public static void startMining(long numThreads) {
-    //TestUtils.getWalletRpc().startMining(numThreads, false, true);
-    //TestUtils.getDaemonRpc().startMining("59dF9pSotECe1Fn4dBGZXWHYyNdo53rbZ7YYseu9jBKCf4c2cUzhuFVRH8HuD4wyaKTqtD3VF3F4eQe3Kzq342F5U8R4jeq", numThreads, false, false); // stagenet
-    TestUtils.getDaemonRpc().startMining("9tsUiG9bwcU7oTbAdBwBk2PzxFtysge5qcEsHEpetmEKgerHQa1fDqH7a4FiquZmms7yM22jdifVAD7jAb2e63GSJMuhY75", numThreads, false, false); // testnet
+
+  public static synchronized void stopMining() {
+    if (miner == null) return;
+    miner.shutdown(); // a block being mined completes first
+    try { miner.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); }
+    catch (InterruptedException e) { throw new RuntimeException(e); }
+    miner = null;
+  }
+
+  public static synchronized boolean isMining() {
+    return miner != null;
   }
 }

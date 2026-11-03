@@ -23,6 +23,7 @@ public class MoneroDaemonInfo {
   private Long height;
   private Long heightWithoutBootstrap;
   private MoneroNetworkType networkType;
+  private Boolean isRegtest;
   private Boolean isOffline;
   private Integer numIncomingConnections;
   private Integer numOutgoingConnections;
@@ -161,6 +162,15 @@ public class MoneroDaemonInfo {
   
   public void setNetworkType(MoneroNetworkType networkType) {
     this.networkType = networkType;
+  }
+
+  @JsonProperty("isRegtest")
+  public Boolean isRegtest() {
+    return isRegtest;
+  }
+
+  public void setIsRegtest(Boolean isRegtest) {
+    this.isRegtest = isRegtest;
   }
   
   @JsonProperty("isOffline")

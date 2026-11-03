@@ -1577,7 +1577,10 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
       else if (key.equals("was_bootstrap_ever_used")) info.setWasBootstrapEverUsed((Boolean) val);
       else if (key.equals("white_peerlist_size")) info.setNumOnlinePeers(((BigInteger) val).intValue());
       else if (key.equals("update_available")) info.setUpdateAvailable((Boolean) val);
-      else if (key.equals("nettype")) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroDaemon.parseNetworkType((String) val)));
+      else if (key.equals("nettype")) {
+        info.setIsRegtest("fakechain".equals(val));
+        info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), info.isRegtest() ? MoneroNetworkType.MAINNET : MoneroDaemon.parseNetworkType((String) val)));
+      }
       else if (key.equals("mainnet")) { if ((Boolean) val) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroNetworkType.MAINNET)); }
       else if (key.equals("testnet")) { if ((Boolean) val) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroNetworkType.TESTNET)); }
       else if (key.equals("stagenet")) { if ((Boolean) val) info.setNetworkType(GenUtils.reconcile(info.getNetworkType(), MoneroNetworkType.STAGENET)); }

@@ -18,13 +18,42 @@ import java.util.List;
 import java.util.Map;
 import monero.common.MoneroRpcConnection;
 import monero.common.SslOptions;
+import monero.daemon.MoneroDaemonRpc;
+import monero.daemon.model.MoneroDaemonInfo;
+import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.MoneroWalletRpc;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
  * Tests serialization and deserialization.
  */
+@Tag("CI")
 public class TestSerialization {
+
+  @Test
+  public void testDaemonNetworkType() {
+    Map<String, Object> info = new HashMap<String, Object>();
+    info.put("status", "OK");
+    MoneroDaemonRpc daemon = new MoneroDaemonRpc(new MoneroRpcConnection("http://localhost:18081") {
+      @Override
+      public Map<String, Object> sendJsonRequest(String method, Object params) {
+        assertEquals("get_info", method);
+        return Collections.singletonMap("result", info);
+      }
+    });
+    for (String network : Arrays.asList("mainnet", "testnet", "stagenet", "fakechain")) {
+      info.put("nettype", network);
+      MoneroDaemonInfo result = daemon.getInfo();
+      assertEquals("fakechain".equals(network), result.isRegtest());
+      assertEquals("fakechain".equals(network) ? MoneroNetworkType.MAINNET : MoneroNetworkType.parse(network), result.getNetworkType());
+      assertEquals(result.isRegtest(), JsonUtils.toMap(result).get("isRegtest"));
+    }
+    info.remove("nettype");
+    info.put("mainnet", true);
+    assertNull(daemon.getInfo().isRegtest());
+    assertEquals(MoneroNetworkType.MAINNET, daemon.getInfo().getNetworkType());
+  }
 
   @Test
   public void testSimpleSerialization() {

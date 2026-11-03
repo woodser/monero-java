@@ -199,14 +199,17 @@ For example: `export LD_PRELOAD=/path/to/libjemalloc.a` then run your app.
 
 ## Running JUnit tests
 
-1. Clone the project repository: `git clone --recurse-submodules https://github.com/woodser/monero-java.git`
-2. `cd monero-java`
-3. Start RPC servers:
-	1. Download and install [Monero CLI](https://web.getmonero.org/downloads/).
-	2. Start monerod, e.g.: `./monerod --stagenet` (or use a remote daemon).
-	3. Start monero-wallet-rpc, e.g.: `./monero-wallet-rpc --daemon-address http://localhost:38081 --stagenet --rpc-bind-port 38083 --rpc-login rpc_user:abc123 --wallet-dir ./`
-4. Configure the appropriate RPC endpoints, authentication, and other settings in [TestUtils.java](src/test/java/utils/TestUtils.java).
-5. Run all *.java files in src/test/java as JUnits.
+Tests run automatically in CI. To run them locally, first [build the native libraries](#building-native-libraries-from-source). A regtest network is created and started automatically in ./test_regtest when tests run.
+
+```sh
+# run all tests
+mvn test -Dmaven.test.skip=false -DargLine=-Djava.library.path=build
+
+# run tests by class or method
+mvn test -Dmaven.test.skip=false -DargLine=-Djava.library.path=build -Dtest=TestSampleCode
+```
+
+Tests can also be run directly from an IDE like VS Code or Eclipse with `-Djava.library.path=build` as a VM option.
 
 ## Related projects
 

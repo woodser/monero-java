@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletFull;
 import monero.wallet.model.MoneroDestination;
@@ -43,7 +42,7 @@ public class FundWallets {
       // create wallet and create and collect subaddresses
       List<String> subaddresses = new ArrayList<String>();
       String path = TestUtils.TEST_WALLETS_DIR + "/funded_" + UUID.randomUUID().toString();
-      MoneroWalletFull fundedWallet = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(MoneroNetworkType.STAGENET));
+      MoneroWalletFull fundedWallet = MoneroWalletFull.createWallet(new MoneroWalletConfig().setPath(path).setPassword(TestUtils.WALLET_PASSWORD).setNetworkType(TestUtils.NETWORK_TYPE).setRegtest(true));
       for (int accountIdx = 0; accountIdx < NUM_ACCOUNTS; accountIdx++) {
         fundedWallet.createAccount();
         for (int subaddressIdx = 0; subaddressIdx < NUM_SUBADDRESSES_PER_ACCOUNT; subaddressIdx++) {

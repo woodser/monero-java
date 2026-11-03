@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import monero.daemon.MoneroDaemon;
-import monero.daemon.model.MoneroMiningStatus;
 import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWallet;
 import monero.wallet.model.MoneroTxQuery;
@@ -73,7 +72,7 @@ public class WalletTxTracker {
       
       // break if no txs to wait for
       if (txHashesPool.isEmpty()) {
-        if (miningStarted) daemon.stopMining(); // stop mining if started mining
+        if (miningStarted) StartMining.stopMining(); // stop mining if started mining
         break;
       }
 
@@ -81,13 +80,8 @@ public class WalletTxTracker {
       if (isFirst) {
         isFirst = false;
         System.out.println("Waiting for wallet txs to clear from the pool in order to fully sync and avoid double spend attempts: " + txHashesPool);
-        MoneroMiningStatus miningStatus = daemon.getMiningStatus();
-        if (!miningStatus.isActive()) {
-          try {
-            StartMining.startMining();
-            miningStarted = true;
-          } catch (Exception e) { } // no problem
-        }
+        miningStarted = !StartMining.isMining();
+        StartMining.startMining();
       }
       
       // sleep for sync period
@@ -107,14 +101,8 @@ public class WalletTxTracker {
     if (unlockedBalance.compareTo(minAmount) > 0) return unlockedBalance;
    
     // start mining
-    MoneroDaemon daemon = TestUtils.getDaemonRpc();
-    boolean miningStarted = false;
-    if (!daemon.getMiningStatus().isActive()) {
-      try {
-        StartMining.startMining();
-        miningStarted = true;
-      } catch (Exception err) { }
-    }
+    boolean miningStarted = !StartMining.isMining();
+    StartMining.startMining();
     
     // wait for unlocked balance // TODO: promote to MoneroWallet interface?
     System.out.println("Waiting for unlocked balance");
@@ -125,7 +113,7 @@ public class WalletTxTracker {
     }
     
     // stop mining if started
-    if (miningStarted) daemon.stopMining();
+    if (miningStarted) StartMining.stopMining();
     return unlockedBalance;
   }
 }

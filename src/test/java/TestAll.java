@@ -12,6 +12,8 @@ import org.junit.runner.RunWith;
   TestSampleCode.class,
   TestSerialization.class,
   TestMoneroUtils.class,
+  TestNetworkUtils.class,
+  TestNativeLibrary.class,
   TestMoneroDaemonRpc.class,
   TestMoneroWalletFull.class,
   TestMoneroWalletRpc.class,
