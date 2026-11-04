@@ -12,7 +12,7 @@
 		<java-version>8</java-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<apachelog-version>2.11.0</apachelog-version>
-		<jackson-version>[2.13.1, 2.13.2.2]</jackson-version>
+		<jackson-version>2.21.7</jackson-version>
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
 	<build>
