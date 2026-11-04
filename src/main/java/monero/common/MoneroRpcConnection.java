@@ -1,6 +1,7 @@
 package monero.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.utils.JsonUtils;
@@ -65,6 +66,7 @@ public class MoneroRpcConnection {
     MAPPER = new ObjectMapper();
     MAPPER.setSerializationInclusion(Include.NON_NULL);
     MAPPER.configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS, true);
+    MAPPER.getFactory().setStreamReadConstraints(StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build()); // hex fields can exceed jackson's default string length
   }
 
   // instance variables

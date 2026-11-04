@@ -3,6 +3,7 @@ package common.utils;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -20,6 +21,7 @@ public class JsonUtils {
   static {
     DEFAULT_MAPPER = new ObjectMapper();
     DEFAULT_MAPPER.setSerializationInclusion(Include.NON_NULL);
+    DEFAULT_MAPPER.getFactory().setStreamReadConstraints(StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build()); // hex fields can exceed jackson's default string length
   }
   
   /**
