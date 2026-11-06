@@ -2,16 +2,16 @@ package utils;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Mines regtest blocks on demand or one per block period in the background.
+ * Mines regtest blocks on demand or at random intervals in the background.
  */
 public class StartMining {
 
-  private static ScheduledExecutorService miner;
+  private static ScheduledThreadPoolExecutor miner;
 
   public static void main(String[] args) throws InterruptedException {
     startMining();
@@ -36,15 +36,22 @@ public class StartMining {
 
   public static synchronized void startMining() {
     if (miner != null) return;
-    miner = Executors.newSingleThreadScheduledExecutor(runnable -> {
+    ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1, runnable -> {
       Thread thread = new Thread(runnable);
       thread.setDaemon(true);
       return thread;
     });
-    miner.scheduleWithFixedDelay(() -> {
-      try { generateBlocks(1); }
-      catch (Exception e) { System.err.println("Failed to mine block: " + e.getMessage()); }
-    }, 0, TestUtils.BLOCK_PERIOD_IN_MS, TimeUnit.MILLISECONDS);
+    executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false); // stopping skips the wait for the next block
+    executor.execute(() -> mineBlock(executor));
+    miner = executor;
+  }
+
+  private static void mineBlock(ScheduledThreadPoolExecutor executor) {
+    try { generateBlocks(1); }
+    catch (Exception e) { System.err.println("Failed to mine block: " + e.getMessage()); }
+    long delay = (long) (-Math.log(1 - Math.random()) * TestUtils.BLOCK_PERIOD_IN_MS); // exponential intervals like mined blocks
+    try { executor.schedule(() -> mineBlock(executor), delay, TimeUnit.MILLISECONDS); }
+    catch (RejectedExecutionException e) { } // mining stopped
   }
 
   public static synchronized void stopMining() {

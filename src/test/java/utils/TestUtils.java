@@ -92,7 +92,7 @@ public class TestUtils {
   public static final String MINING_ADDRESS = "45L2BnYnjPe4K74PfyNLCg37UPr7GTeVcRaSQYVTNFw9XebBpTexBTFNzCMhHWM5ftFBFiQMbAAd5ZR5fRdjx67R3h5mhTY";
   public static final long FIRST_RECEIVE_HEIGHT = 101; // NOTE: this value must be the height of the wallet's first tx for tests
   public static final long SYNC_PERIOD_IN_MS = 5000; // period between wallet syncs in milliseconds
-  public static final long BLOCK_PERIOD_IN_MS = 2000; // period between blocks mined in the background
+  public static final long BLOCK_PERIOD_IN_MS = 2000; // average period between blocks mined in the background
   public static final String OFFLINE_SERVER_URI = "offline_server_uri"; // dummy server uri to remain offline because wallet2 connects to default if not given
   public static final long AUTO_CONNECT_TIMEOUT_MS = 3000;
   
