@@ -22,83 +22,27 @@
 
 package monero.wallet;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
-import common.utils.GenUtils;
 import common.utils.JsonUtils;
-import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
-import monero.common.MoneroConnectionManager;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
-import monero.common.MoneroUtils;
-import monero.daemon.model.MoneroBlock;
-import monero.daemon.model.MoneroKeyImage;
 import monero.daemon.model.MoneroNetworkType;
-import monero.daemon.model.MoneroTx;
-import monero.daemon.model.MoneroVersion;
-import monero.wallet.model.MoneroAccount;
-import monero.wallet.model.MoneroAccountTag;
-import monero.wallet.model.MoneroAddressBookEntry;
-import monero.wallet.model.MoneroCheckReserve;
-import monero.wallet.model.MoneroCheckTx;
-import monero.wallet.model.MoneroIncomingTransfer;
-import monero.wallet.model.MoneroIntegratedAddress;
-import monero.wallet.model.MoneroKeyImageExportResult;
-import monero.wallet.model.MoneroKeyImageImportResult;
-import monero.wallet.model.MoneroMessageSignatureResult;
-import monero.wallet.model.MoneroMessageSignatureType;
-import monero.wallet.model.MoneroMultisigInfo;
-import monero.wallet.model.MoneroMultisigInitResult;
-import monero.wallet.model.MoneroMultisigSignResult;
-import monero.wallet.model.MoneroOutputQuery;
-import monero.wallet.model.MoneroOutputWallet;
-import monero.wallet.model.MoneroSubaddress;
-import monero.wallet.model.MoneroSyncResult;
-import monero.wallet.model.MoneroTransfer;
-import monero.wallet.model.MoneroTransferQuery;
-import monero.wallet.model.MoneroTxConfig;
-import monero.wallet.model.MoneroTxPriority;
-import monero.wallet.model.MoneroTxQuery;
-import monero.wallet.model.MoneroTxSet;
-import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
-import monero.wallet.model.MoneroWalletListenerI;
 
 /**
  * Implements a Monero wallet using fully client-side JNI bindings to monero-project's wallet2 in C++.
  */
-public class MoneroWalletFull extends MoneroWalletDefault {
+public class MoneroWalletFull extends MoneroWalletJni {
   
   // ----------------------------- PRIVATE SETUP ------------------------------
-
-  // try to load jni bindings
-  static {
-    MoneroUtils.tryLoadNativeLibrary();
-  }
   
   // class variables
-  private static final Logger LOGGER = Logger.getLogger(MoneroWalletFull.class.getName());
-  private static final long DEFAULT_SYNC_PERIOD_IN_MS = 10000; // default period betweeen syncs in ms
-  private static final long CLOSE_WAIT_MS = 45000; // maximum time to wait for other calls to finish before closing
+  protected static final Logger LOGGER = Logger.getLogger(MoneroWalletFull.class.getName());
 
-  // instance variables
-  private long jniWalletHandle;                 // memory address of the wallet in c++; this variable is read directly by name in c++
-  private long jniListenerHandle;               // memory address of the wallet listener in c++; this variable is read directly by name in c++
-  private WalletJniListener jniListener;        // receives notifications from jni c++
   private String password;
-  private final ReentrantReadWriteLock callLock = new ReentrantReadWriteLock(); // calls hold the read lock so close() cannot free the wallet while they execute
-  private final Object closeLock = new Object(); // serialize close attempts independently of wallet operations
   
   /**
    * Private constructor with a handle to the memory address of the wallet in c++.
@@ -106,10 +50,8 @@ public class MoneroWalletFull extends MoneroWalletDefault {
    * @param jniWalletHandle memory address of the wallet in c++
    * @param password password of the wallet instance
    */
-  private MoneroWalletFull(long jniWalletHandle, String password) {
-    this.jniWalletHandle = jniWalletHandle;
-    this.jniListener = new WalletJniListener();
-    this.listeners = new CopyOnWriteArraySet<MoneroWalletListenerI>();
+  protected MoneroWalletFull(long jniWalletHandle, String password) {
+    super(jniWalletHandle);
     this.password = password;
   }
   
@@ -290,7 +232,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     if (config.getSeed() != null && (config.getPrimaryAddress() != null || config.getPrivateViewKey() != null || config.getPrivateSpendKey() != null)) {
       throw new MoneroError("Wallet may be initialized with a seed or keys but not both");
     }
-    if (Boolean.TRUE.equals(config.getSaveCurrent() != null)) throw new MoneroError("Cannot save current wallet when creating full wallet");
+    if (Boolean.TRUE.equals(config.getSaveCurrent())) throw new MoneroError("Cannot save current wallet when creating full wallet");
 
     // set server from connection manager if provided
     if (config.getConnectionManager() != null) {
@@ -342,7 +284,7 @@ public class MoneroWalletFull extends MoneroWalletDefault {
     return new MoneroWalletFull(jniWalletHandle, config.getPassword());
   }
   
-  private static String serializeWalletConfig(MoneroWalletConfig config) {
+  protected static String serializeWalletConfig(MoneroWalletConfig config) {
     Map<String, Object> configMap = JsonUtils.toMap(config);
     configMap.put("networkType", config.getNetworkType().ordinal());
     return JsonUtils.serialize(configMap);
@@ -360,102 +302,6 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   // ------------ WALLET METHODS SPECIFIC TO JNI IMPLEMENTATION ---------------
   
   /**
-   * Get the maximum height of the peers the wallet's daemon is connected to.
-   *
-   * @return the maximum height of the peers the wallet's daemon is connected to
-   */
-  public long getDaemonMaxPeerHeight() {
-    beginCall();
-    try {
-      try {
-        return getDaemonMaxPeerHeightJni();
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  /**
-   * Indicates if the wallet's daemon is synced with the network.
-   * 
-   * @return true if the daemon is synced with the network, false otherwise
-   */
-  public boolean isDaemonSynced() {
-    beginCall();
-    try {
-      try {
-        return isDaemonSyncedJni();
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  /**
-   * Indicates if the wallet is synced with the daemon.
-   * 
-   * @return true if the wallet is synced with the daemon, false otherwise
-   */
-  public boolean isSynced() {
-    beginCall();
-    try {
-      try {
-        return isSyncedJni();
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  /**
-   * Get the wallet's network type (mainnet, testnet, or stagenet).
-   * 
-   * @return the wallet's network type
-   */
-  public MoneroNetworkType getNetworkType() {
-    beginCall();
-    try {
-      return MoneroNetworkType.values()[getNetworkTypeJni()];
-    } finally {
-      endCall();
-    }
-  }
-  
-  /**
-   * Get the height of the first block that the wallet scans.
-   * 
-   * @return the height of the first block that the wallet scans
-   */
-  public long getRestoreHeight() {
-    beginCall();
-    try {
-      return getRestoreHeightJni();
-    } finally {
-      endCall();
-    }
-  }
-  
-  /**
-   * Set the height of the first block that the wallet scans.
-   * 
-   * @param syncHeight is the height of the first block that the wallet scans
-   */
-  public void setRestoreHeight(long syncHeight) {
-    beginCall();
-    try {
-      setRestoreHeightJni(syncHeight);
-    } finally {
-      endCall();
-    }
-  }
-
-  /**
    * Move the wallet from its current path to the given path.
    * 
    * @param path is the new wallet's path
@@ -470,1316 +316,6 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   }
   
   // -------------------------- COMMON WALLET METHODS -------------------------
-  
-  @Override
-  public void addListener(MoneroWalletListenerI listener) {
-    beginCall();
-    try {
-      super.addListener(listener);
-      initListening();
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public void removeListener(MoneroWalletListenerI listener) {
-    beginCall();
-    try {
-      super.removeListener(listener);
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public Set<MoneroWalletListenerI> getListeners() {
-    assertNotClosed();
-    return super.getListeners();
-  }
-  
-  @Override
-  public boolean isViewOnly() {
-    beginCall();
-    try {
-      return isViewOnlyJni();
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public void setConnectionManager(MoneroConnectionManager connectionManager) {
-    beginCall();
-    try {
-      super.setConnectionManager(connectionManager);
-    } finally {
-      try {
-        if (isClosed) { // undo a registration that raced with close detaching the manager
-          removeConnectionManagerListener(connectionManager);
-          this.connectionManager = null;
-        }
-      } finally {
-        endCall();
-      }
-    }
-  }
-
-  @Override
-  public void setDaemonConnection(MoneroRpcConnection daemonConnection) {
-    setDaemonConnection(daemonConnection, null);
-  }
-
-  @Override
-  public void setDaemonConnection(MoneroRpcConnection daemonConnection, Boolean isTrusted) {
-    beginCall();
-    try {
-      int isTrustedJni = isTrusted == null ? -1 : (isTrusted ? 1 : 0); // negative if unset
-      if (daemonConnection == null) setDaemonConnectionWithSslJni("", "", "", "", isTrustedJni, true);
-      else {
-        try {
-          setDaemonConnectionWithSslJni(daemonConnection.getUri() == null ? "" : daemonConnection.getUri().toString(), daemonConnection.getUsername(), daemonConnection.getPassword(), daemonConnection.getProxyUri(), isTrustedJni, daemonConnection.getSslVerify());
-        } catch (Exception e) {
-          throw new MoneroError(e.getMessage());
-        }
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  /**
-   * Indicates if the wallet's daemon is trusted.
-   *
-   * @return true if the daemon is trusted, false otherwise
-   */
-  public boolean isDaemonTrusted() {
-    beginCall();
-    try {
-      try {
-        return isDaemonTrustedJni();
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroRpcConnection getDaemonConnection() {
-    beginCall();
-    try {
-      try {
-        String[] vals = getDaemonConnectionWithSslJni();
-        return vals == null ? null : new MoneroRpcConnection(vals[0], vals[1], vals[2], null, vals[3]).setSslVerify(!"false".equals(vals[4]));
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public boolean isConnectedToDaemon() {
-    beginCall();
-    try {
-      try {
-        return isConnectedToDaemonJni();
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public MoneroVersion getVersion() {
-    beginCall();
-    try {
-      try {
-        String versionJson = getVersionJni();
-        return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, versionJson, MoneroVersion.class);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public String getPath() {
-    beginCall();
-    try {
-      String path = getPathJni();
-      return path.isEmpty() ? null : path;
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public String getSeed() {
-    beginCall();
-    try {
-      String seed = getSeedJni();
-      if ("".equals(seed)) return null;
-      return seed;
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public String getSeedLanguage() {
-    beginCall();
-    try {
-      String seedLanguage = getSeedLanguageJni();
-      if ("".equals(seedLanguage)) return null;
-      return seedLanguage;
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public String getPrivateViewKey() {
-    beginCall();
-    try {
-      return getPrivateViewKeyJni();
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public String getPrivateSpendKey() {
-    beginCall();
-    try {
-      String privateSpendKey = getPrivateSpendKeyJni();
-      if ("".equals(privateSpendKey)) return null;
-      return privateSpendKey;
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public String getPublicViewKey() {
-    beginCall();
-    try {
-      return getPublicViewKeyJni();
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public String getPublicSpendKey() {
-    beginCall();
-    try {
-      return getPublicSpendKeyJni();
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroIntegratedAddress getIntegratedAddress(String standardAddress, String paymentId) {
-    beginCall();
-    try {
-      try {
-        String integratedAddressJson = getIntegratedAddressJni(standardAddress, paymentId);
-        return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, integratedAddressJson, MoneroIntegratedAddress.class);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroIntegratedAddress decodeIntegratedAddress(String integratedAddress) {
-    beginCall();
-    try {
-      try {
-        String integratedAddressJson = decodeIntegratedAddressJni(integratedAddress);
-        return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, integratedAddressJson, MoneroIntegratedAddress.class);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public long getHeight() {
-    beginCall();
-    try {
-      return getHeightJni();
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public long getDaemonHeight() {
-    beginCall();
-    try {
-      try {
-        return getDaemonHeightJni();
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public long getHeightByDate(int year, int month, int day) {
-    beginCall();
-    try {
-      try {
-        return getHeightByDateJni(year, month ,day);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public MoneroSyncResult sync(Long startHeight, MoneroWalletListenerI listener) {
-    beginCall();
-    try {
-      if (startHeight == null) startHeight = Math.max(getHeight(), getRestoreHeight());
-    
-      // register listener if given
-      if (listener != null) addListener(listener);
-    
-      // sync wallet and handle exception
-      try {
-        Object[] results = syncJni(startHeight);
-        return new MoneroSyncResult((long) results[0], (boolean) results[1]);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      } finally {
-        if (listener != null) listeners.remove(listener); // cleanup can race with close or removal from the callback
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public void startSyncing(Long syncPeriodInMs) {
-    beginCall();
-    try {
-      try {
-        startSyncingJni(syncPeriodInMs == null ? DEFAULT_SYNC_PERIOD_IN_MS : syncPeriodInMs);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public void stopSyncing() {
-    beginCall();
-    try {
-      try {
-        stopSyncingJni();
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public void scanTxs(Collection<String> txHashes) {
-    beginCall();
-    try {
-      String[] txMetadatasArr = txHashes.toArray(new String[txHashes.size()]); // convert to array for jni
-      try {
-        scanTxsJni(txMetadatasArr);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public void rescanSpent() {
-    beginCall();
-    try {
-      try {
-        rescanSpentJni();
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public void rescanBlockchain() {
-    beginCall();
-    try {
-      try {
-        rescanBlockchainJni();
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag) {
-    beginCall();
-    try {
-      String accountsJson = getAccountsJni(includeSubaddresses, tag);
-      List<MoneroAccount> accounts = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountsJson, AccountsContainer.class).accounts;
-      for (MoneroAccount account : accounts) sanitizeAccount(account);
-      return accounts;
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public MoneroAccount getAccount(int accountIdx, boolean includeSubaddresses) {
-    beginCall();
-    try {
-      String accountJson = getAccountJni(accountIdx, includeSubaddresses);
-      MoneroAccount account = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountJson, MoneroAccount.class);
-      sanitizeAccount(account);
-      return account;
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroAccount createAccount(String label) {
-    beginCall();
-    try {
-      String accountJson = createAccountJni(label);
-      MoneroAccount account = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountJson, MoneroAccount.class);
-      sanitizeAccount(account);
-      return account;
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public List<MoneroSubaddress> getSubaddresses(int accountIdx, List<Integer> subaddressIndices) {
-    beginCall();
-    try {
-      String subaddresses_json = getSubaddressesJni(accountIdx, GenUtils.listToIntArray(subaddressIndices));
-      List<MoneroSubaddress> subaddresses = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddresses_json, SubaddressesContainer.class).subaddresses;
-      for (MoneroSubaddress subaddress : subaddresses) sanitizeSubaddress(subaddress);
-      return subaddresses;
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroSubaddress createSubaddress(int accountIdx, String label) {
-    beginCall();
-    try {
-      String subaddressJson = createSubaddressJni(accountIdx, label);
-      MoneroSubaddress subaddress = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressJson, MoneroSubaddress.class);
-      sanitizeSubaddress(subaddress);
-      return subaddress;
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public void setSubaddressLabel(int accountIdx, int subaddressIdx, String label) {
-    beginCall();
-    try {
-      if (label == null) label = "";
-      setSubaddressLabelJni(accountIdx, subaddressIdx, label);
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public String getAddress(int accountIdx, int subaddressIdx) {
-    beginCall();
-    try {
-      return getAddressJni(accountIdx, subaddressIdx);
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroSubaddress getAddressIndex(String address) {
-    beginCall();
-    try {
-      try {
-        String subaddressJson = getAddressIndexJni(address);
-        MoneroSubaddress subaddress = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, subaddressJson, MoneroSubaddress.class);
-        return sanitizeSubaddress(subaddress);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public BigInteger getBalance(Integer accountIdx, Integer subaddressIdx) {
-    beginCall();
-    try {
-      try {
-        if (accountIdx == null) {
-          if (subaddressIdx != null) throw new MoneroError("Must provide account index with subaddress index");
-          return new BigInteger(getBalanceWalletJni());
-        } else {
-          if (subaddressIdx == null) return new BigInteger(getBalanceAccountJni(accountIdx));
-          else return new BigInteger(getBalanceSubaddressJni(accountIdx, subaddressIdx));
-        }
-      } catch (MoneroError e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public BigInteger getUnlockedBalance(Integer accountIdx, Integer subaddressIdx) {
-    beginCall();
-    try {
-      try {
-        if (accountIdx == null) {
-          if (subaddressIdx != null) throw new MoneroError("Must provide account index with subaddress index");
-          return new BigInteger(getUnlockedBalanceWalletJni());
-        } else {
-          if (subaddressIdx == null) return new BigInteger(getUnlockedBalanceAccountJni(accountIdx));
-          else return new BigInteger(getUnlockedBalanceSubaddressJni(accountIdx, subaddressIdx));
-        }
-      } catch (MoneroError e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public List<MoneroTxWallet> getTxs(MoneroTxQuery query) {
-    beginCall();
-    try {
-      // copy and normalize tx query up to block
-      query = query == null ? new MoneroTxQuery() : query.copy();
-      if (query.getBlock() == null) query.setBlock(new MoneroBlock().setTxs(query));
-    
-      // serialize query from block and fetch txs from jni
-      String blocksJson;
-      try {
-        blocksJson = getTxsJni(JsonUtils.serialize(query.getBlock()));
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    
-      // deserialize and return txs
-      return deserializeTxs(query, blocksJson);
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public List<MoneroTransfer> getTransfers(MoneroTransferQuery query) {
-    beginCall();
-    try {
-      // copy and normalize query up to block
-      query = normalizeTransferQuery(query);
-    
-      // serialize query from block and fetch transfers from jni
-      String blocksJson;
-      try {
-        blocksJson = getTransfersJni(JsonUtils.serialize(query.getTxQuery().getBlock()));
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    
-      // deserialize and return transfers
-      return deserializeTransfers(query, blocksJson);
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public List<MoneroOutputWallet> getOutputs(MoneroOutputQuery query) {
-    beginCall();
-    try {
-      // copy and normalize query up to block
-      if (query == null) query = new MoneroOutputQuery();
-      else {
-        if (query.getTxQuery() == null) query = query.copy();
-        else {
-          MoneroTxQuery txQuery = query.getTxQuery().copy();
-          if (query.getTxQuery().getOutputQuery() == query) query = txQuery.getOutputQuery();
-          else {
-            GenUtils.assertNull("Output query's tx query must be circular reference or null", query.getTxQuery().getOutputQuery());
-            query = query.copy();
-            query.setTxQuery(txQuery);
-          }
-        }
-      }
-      if (query.getTxQuery() == null) query.setTxQuery(new MoneroTxQuery());
-      query.getTxQuery().setOutputQuery(query);
-      if (query.getTxQuery().getBlock() == null) query.getTxQuery().setBlock(new MoneroBlock().setTxs(query.getTxQuery()));
-    
-      // serialize query from block and fetch outputs from jni
-      String blocksJson = getOutputsJni(JsonUtils.serialize(query.getTxQuery().getBlock()));
-    
-      // deserialize and return outputs
-      return deserializeOutputs(query, blocksJson);
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public String exportOutputs(boolean all) {
-    beginCall();
-    try {
-      String outputsHex = exportOutputsJni(all);
-      return outputsHex.isEmpty() ? null : outputsHex;
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public int importOutputs(String outputsHex) {
-    beginCall();
-    try {
-      return importOutputsJni(outputsHex);
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroKeyImageExportResult exportKeyImages(boolean all) {
-    beginCall();
-    try {
-      String resultJson = exportKeyImagesJni(all);
-      MoneroKeyImageExportResult result = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, resultJson, MoneroKeyImageExportResult.class);
-      if (result.getKeyImages() == null) result.setKeyImages(new ArrayList<MoneroKeyImage>());
-      return result;
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroKeyImageImportResult importKeyImages(List<MoneroKeyImage> keyImages, long offset) {
-    beginCall();
-    try {
-      // wrap and serialize offset and key images for jni
-      MoneroKeyImageExportResult keyImageContainer = new MoneroKeyImageExportResult();
-      keyImageContainer.setOffset(offset);
-      keyImageContainer.setKeyImages(keyImages);
-      String importResultJson = importKeyImagesJni(JsonUtils.serialize(keyImageContainer));
-    
-      // deserialize response
-      return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, importResultJson, MoneroKeyImageImportResult.class);
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public List<MoneroKeyImage> getNewKeyImagesFromLastImport() {
-    assertNotClosed();
-    throw new RuntimeException("MoneroWalletFull.getNewKeyImagesFromLastImport() not implemented");
-  }
-  
-  @Override
-  public void freezeOutput(String keyImage) {
-    beginCall();
-    try {
-      try {
-        freezeOutputJni(keyImage);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public void thawOutput(String keyImage) {
-    beginCall();
-    try {
-      try {
-        thawOutputJni(keyImage);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public boolean isOutputFrozen(String keyImage) {
-    beginCall();
-    try {
-      try {
-        return isOutputFrozenJni(keyImage);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroTxPriority getDefaultFeePriority() {
-    beginCall();
-    try {
-      try {
-        int moneroTxPriorityOrdinal = getDefaultFeePriorityJni();
-        return MoneroTxPriority.values()[moneroTxPriorityOrdinal];
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public List<MoneroTxWallet> createTxs(MoneroTxConfig config) {
-    beginCall();
-    try {
-      LOGGER.fine("java createTxs(request)");
-      LOGGER.fine("Tx config: " + JsonUtils.serialize(config));
-    
-      // validate request
-      if (config == null) throw new MoneroError("Tx config cannot be null");
-    
-      // submit tx config to JNI and get response as json rooted at tx set
-      String txSetJson;
-      try {
-        txSetJson = createTxsJni(JsonUtils.serialize(config));
-        LOGGER.fine("Received createTxs() response from JNI: " + txSetJson.substring(0, Math.min(5000, txSetJson.length())) + "...");
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    
-      // deserialize and return txs
-      MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
-      return txSet.getTxs();
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public MoneroTxWallet sweepOutput(MoneroTxConfig config) {
-    beginCall();
-    try {
-      try {
-        String txSetJson = sweepOutputJni(JsonUtils.serialize(config));
-        MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
-        return txSet.getTxs().get(0);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public List<MoneroTxWallet> sweepUnlocked(MoneroTxConfig config) {
-    beginCall();
-    try {
-      // validate request
-      if (config == null) throw new MoneroError("Send request cannot be null");
-    
-      // submit send request to JNI and get response as json rooted at tx set
-      String txSetsJson;
-      try {
-        txSetsJson = sweepUnlockedJni(JsonUtils.serialize(config));
-        LOGGER.fine("Received sweepUnlocked() response from JNI: " + txSetsJson.substring(0, Math.min(5000, txSetsJson.length())) + "...");
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    
-      // deserialize tx sets
-      List<MoneroTxSet> txSets = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, txSetsJson, TxSetsContainer.class).txSets;
-    
-      // return txs
-      List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-      for (MoneroTxSet txSet : txSets) txs.addAll(txSet.getTxs());
-      return txs;
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public List<MoneroTxWallet> sweepDust(boolean relay) {
-    beginCall();
-    try {
-      try {
-        String txSetJson = sweepDustJni(relay);
-        MoneroTxSet txSet = JsonUtils.deserialize(txSetJson, MoneroTxSet.class);
-        if (txSet.getTxs() == null) txSet.setTxs(new ArrayList<MoneroTxWallet>());
-        return txSet.getTxs();
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public List<String> relayTxs(Collection<String> txMetadatas) {
-    beginCall();
-    try {
-      String[] txMetadatasArr = txMetadatas.toArray(new String[txMetadatas.size()]); // convert to array for jni
-      try {
-        return Arrays.asList(relayTxsJni(txMetadatasArr));
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public MoneroTxSet describeTxSet(MoneroTxSet txSet) {
-    beginCall();
-    try {
-      txSet = new MoneroTxSet()
-              .setUnsignedTxHex(txSet.getUnsignedTxHex())
-              .setSignedTxHex(txSet.getSignedTxHex())
-              .setMultisigTxHex(txSet.getMultisigTxHex());
-      String describedTxSetJson;
-      try {
-        describedTxSetJson = describeTxSetJni(JsonUtils.serialize(txSet));
-        return JsonUtils.deserialize(describedTxSetJson, MoneroTxSet.class);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public MoneroTxSet signTxs(String unsignedTxHex) {
-    beginCall();
-    try {
-      try {
-        String signedTxSetJson = signTxsJni(unsignedTxHex);
-        return JsonUtils.deserialize(signedTxSetJson, MoneroTxSet.class);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public List<String> submitTxs(String signedTxHex) {
-    beginCall();
-    try {
-      try {
-        return Arrays.asList(submitTxsJni(signedTxHex));
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroCheckTx checkTxKey(String txHash, String txKey, String address) {
-    beginCall();
-    try {
-      try {
-        String checkStr = checkTxKeyJni(txHash, txKey, address);
-        return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckTx.class);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public String getTxProof(String txHash, String address, String message) {
-    beginCall();
-    try {
-      try {
-        return getTxProofJni(txHash, address, message);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroCheckTx checkTxProof(String txHash, String address, String message, String signature) {
-    beginCall();
-    try {
-      try {
-        String checkStr = checkTxProofJni(txHash, address, message, signature);
-        return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckTx.class);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public String getSpendProof(String txHash, String message) {
-    beginCall();
-    try {
-      try {
-        return getSpendProofJni(txHash, message);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public boolean checkSpendProof(String txHash, String message, String signature) {
-    beginCall();
-    try {
-      try {
-        return checkSpendProofJni(txHash, message, signature);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public String getReserveProofWallet(String message) {
-    beginCall();
-    try {
-      try {
-        return getReserveProofWalletJni(message);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public String getReserveProofAccount(int accountIdx, BigInteger amount, String message) {
-    beginCall();
-    try {
-      try {
-        return getReserveProofAccountJni(accountIdx, amount.toString(), message);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage(), -1);
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroCheckReserve checkReserveProof(String address, String message, String signature) {
-    beginCall();
-    try {
-      try {
-        String checkStr = checkReserveProofJni(address, message, signature);
-        return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, checkStr, MoneroCheckReserve.class);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage(), -1);
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public String signMessage(String msg, MoneroMessageSignatureType signatureType, int accountIdx, int subaddressIdx) {
-    beginCall();
-    try {
-      return signMessageJni(msg, signatureType.ordinal(), accountIdx, subaddressIdx);
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroMessageSignatureResult verifyMessage(String msg, String address, String signature) {
-    beginCall();
-    try {
-      try {
-        String resultJson = verifyMessageJni(msg, address, signature);
-        Map<String, Object> result = JsonUtils.deserialize(resultJson, new TypeReference<Map<String, Object>>(){});
-        boolean isGood = (boolean) result.get("isGood");
-        return new MoneroMessageSignatureResult(
-            isGood,
-            !isGood ? null : (Boolean) result.get("isOld"),
-            !isGood ? null : "spend".equals(result.get("signatureType")) ? MoneroMessageSignatureType.SIGN_WITH_SPEND_KEY : MoneroMessageSignatureType.SIGN_WITH_VIEW_KEY,
-            !isGood ? null : (Integer) result.get("version"));
-      } catch (Exception e) {
-        return new MoneroMessageSignatureResult(false, null, null, null); // jni can differentiate incorrect from invalid address, but rpc returns -2 for both, so returning bad result for consistency
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public String getTxKey(String txHash) {
-    beginCall();
-    try {
-      try {
-        return getTxKeyJni(txHash);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public List<String> getTxNotes(List<String> txHashes) {
-    beginCall();
-    try {
-      return Arrays.asList(getTxNotesJni(txHashes.toArray(new String[txHashes.size()])));  // convert to array for jni
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public void setTxNotes(List<String> txHashes, List<String> notes) {
-    beginCall();
-    try {
-      setTxNotesJni(txHashes.toArray(new String[txHashes.size()]), notes.toArray(new String[notes.size()]));
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public List<MoneroAddressBookEntry> getAddressBookEntries(List<Integer> entryIndices) {
-    beginCall();
-    try {
-      if (entryIndices == null) entryIndices = new ArrayList<Integer>();
-      String entriesJson = getAddressBookEntriesJni(GenUtils.listToIntArray(entryIndices));
-      List<MoneroAddressBookEntry> entries = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, entriesJson, AddressBookEntriesContainer.class).entries;
-      if (entries == null) entries = new ArrayList<MoneroAddressBookEntry>();
-      return entries;
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public int addAddressBookEntry(String address, String description) {
-    beginCall();
-    try {
-      return addAddressBookEntryJni(address, description);
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public void editAddressBookEntry(int index, boolean setAddress, String address, boolean setDescription, String description) {
-    beginCall();
-    try {
-      editAddressBookEntryJni(index, setAddress, address, setDescription, description);
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public void deleteAddressBookEntry(int entryIdx) {
-    beginCall();
-    try {
-      deleteAddressBookEntryJni(entryIdx);
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public void tagAccounts(String tag, Collection<Integer> accountIndices) {
-    assertNotClosed();
-    throw new RuntimeException("MoneroWalletFull.tagAccounts() not implemented");
-  }
-
-  @Override
-  public void untagAccounts(Collection<Integer> accountIndices) {
-    assertNotClosed();
-    throw new RuntimeException("MoneroWalletFull.untagAccounts() not implemented");
-  }
-
-  @Override
-  public List<MoneroAccountTag> getAccountTags() {
-    assertNotClosed();
-    throw new RuntimeException("MoneroWalletFull.getAccountTags() not implemented");
-  }
-
-  @Override
-  public void setAccountTagLabel(String tag, String label) {
-    assertNotClosed();
-    throw new RuntimeException("MoneroWalletFull.setAccountTagLabel() not implemented");
-  }
-
-  @Override
-  public String getPaymentUri(MoneroTxConfig request) {
-    beginCall();
-    try {
-      try {
-        return getPaymentUriJni(JsonUtils.serialize(request));
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroTxConfig parsePaymentUri(String uri) {
-    beginCall();
-    try {
-      try {
-        String sendRequestJson = parsePaymentUriJni(uri);
-        return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, sendRequestJson, MoneroTxConfig.class);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public String getAttribute(String key) {
-    beginCall();
-    try {
-      return getAttributeJni(key);
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public void setAttribute(String key, String val) {
-    beginCall();
-    try {
-      setAttributeJni(key, val);
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public void startMining(Long numThreads, Boolean backgroundMining, Boolean ignoreBattery) {
-    beginCall();
-    try {
-      try {
-        startMiningJni(numThreads == null ? 0l : (long) numThreads, Boolean.TRUE.equals(backgroundMining), Boolean.TRUE.equals(ignoreBattery));
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public void stopMining() {
-    beginCall();
-    try {
-      try {
-        stopMiningJni();
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-  
-  
-  @Override
-  public boolean isMultisigImportNeeded() {
-    beginCall();
-    try {
-      return isMultisigImportNeededJni();
-    } finally {
-      endCall();
-    }
-  }
-  
-  @Override
-  public MoneroMultisigInfo getMultisigInfo() {
-    beginCall();
-    try {
-      try {
-        String multisigInfoJson = getMultisigInfoJni();
-        return JsonUtils.deserialize(multisigInfoJson, MoneroMultisigInfo.class);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public String prepareMultisig() {
-    beginCall();
-    try {
-      return prepareMultisigJni();
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public String makeMultisig(List<String> multisigHexes, int threshold, String password) {
-    beginCall();
-    try {
-      try {
-        return makeMultisigJni(multisigHexes.toArray(new String[multisigHexes.size()]), threshold, password);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroMultisigInitResult exchangeMultisigKeys(List<String> multisigHexes, String password) {
-    beginCall();
-    try {
-      try {
-        String initMultisigResultJson = exchangeMultisigKeysJni(multisigHexes.toArray(new String[multisigHexes.size()]), password);
-        return JsonUtils.deserialize(initMultisigResultJson, MoneroMultisigInitResult.class);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public String exportMultisigHex() {
-    beginCall();
-    try {
-      try {
-        return exportMultisigHexJni();
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public int importMultisigHex(List<String> multisigHexes, boolean refreshAfterImport) {
-    beginCall();
-    try {
-      try {
-        return importMultisigHexJni(multisigHexes.toArray(new String[multisigHexes.size()]), refreshAfterImport);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public MoneroMultisigSignResult signMultisigTxHex(String multisigTxHex) {
-    beginCall();
-    try {
-      try {
-        String signMultisigResultJson = signMultisigTxHexJni(multisigTxHex);
-        return JsonUtils.deserialize(signMultisigResultJson, MoneroMultisigSignResult.class);
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
-
-  @Override
-  public List<String> submitMultisigTxHex(String signedMultisigTxHex) {
-    beginCall();
-    try {
-      try {
-        return Arrays.asList(submitMultisigTxHexJni(signedMultisigTxHex));
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      }
-    } finally {
-      endCall();
-    }
-  }
 
   /**
    * Get the wallet's keys and cache data.
@@ -1810,560 +346,328 @@ public class MoneroWalletFull extends MoneroWalletDefault {
       endCall();
     }
   }
-  
-  @Override
-  public void save() {
-    beginCall();
-    try {
-      saveJni();
-    } finally {
-      endCall();
-    }
-  }
-  
+ 
   @Override
   public void close(boolean save) {
-    if (callLock.getReadHoldCount() > 0 || Boolean.TRUE.equals(jniListener.notifying.get())) {
-      throw new MoneroError("Cannot close wallet from an active wallet call or listener callback");
-    }
-    synchronized (closeLock) {
-      if (jniWalletHandle == 0) return; // a failed close can be retried while its native handle remains
-      isClosed = true; // reject new calls before cancelling native I/O
-      boolean locked = false;
-      try {
-        requestShutdownJni();
-        removeConnectionManagerListener(connectionManager); // detach after cancellation so connection callbacks can finish
-        locked = callLock.writeLock().tryLock(CLOSE_WAIT_MS, TimeUnit.MILLISECONDS);
-        if (!locked) throw new MoneroError("Timed out waiting for active wallet calls; close can be retried");
-        removeConnectionManagerListener(connectionManager); // recheck after acquiring visibility of completed registrations
-        connectionManager = null;
-        closeJni(save);
-        password = null;
-        super.close(save); // clear Java listeners after native callbacks have finished
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        throw new MoneroError("Interrupted waiting for active wallet calls; close can be retried");
-      } catch (Exception e) {
-        throw new MoneroError(e.getMessage());
-      } finally {
-        if (locked) callLock.writeLock().unlock();
-      }
-    }
+    super.close(save);
+    password = null;
   }
-  
+
   // ------------------------------ NATIVE METHODS ----------------------------
-  
-  private native static boolean walletExistsJni(String path);
-  
-  private native static long openWalletJni(String path, String password, int networkType, boolean regtest);
+    
+  protected native static boolean walletExistsJni(String path);
+    
+  protected native static long openWalletJni(String path, String password, int networkType, boolean regtest);
 
-  private native static long openWalletDataJni(String password, int networkType, byte[] keysData, byte[] cacheData, boolean regtest);
+  protected native static long openWalletDataJni(String password, int networkType, byte[] keysData, byte[] cacheData, boolean regtest);
+    
+  protected native static long createWalletWithSslJni(String walletConfigJson);
   
-  private native static long createWalletWithSslJni(String walletConfigJson);
+  @Override
+  protected native long getHeightJni();
+    
+  @Override
+  protected native long getRestoreHeightJni();
+    
+  @Override
+  protected native void setRestoreHeightJni(long height);
+    
+  @Override
+  protected native long getDaemonHeightJni();
   
-  private native long getHeightJni();
-  
-  private native long getRestoreHeightJni();
-  
-  private native void setRestoreHeightJni(long height);
-  
-  private native long getDaemonHeightJni();
-  
-  private native long getDaemonMaxPeerHeightJni();
-  
-  private native long getHeightByDateJni(int year, int month, int day);
-  
-  private native boolean isViewOnlyJni();
-  
-  private native void setDaemonConnectionWithSslJni(String uri, String username, String password, String proxyUri, int isTrusted, boolean sslVerify);
-  
-  private native String[] getDaemonConnectionWithSslJni(); // returns [uri, username, password, proxyUri, sslVerify]
-  
-  private native boolean isConnectedToDaemonJni();
-  
-  private native boolean isDaemonSyncedJni();
+  @Override
+  protected native long getHeightByDateJni(int year, int month, int day);
 
-  private native boolean isDaemonTrustedJni();
+  @Override
+  protected native long getDaemonMaxPeerHeightJni();
 
-  private native boolean isSyncedJni();
-  
-  private native int getNetworkTypeJni();
-  
-  private native String getVersionJni();
-  
-  private native String getPathJni();
-  
-  private native String getSeedJni();
-  
-  private native String getSeedLanguageJni();
-  
-  private static native String[] getSeedLanguagesJni();
-  
-  private native String getPublicViewKeyJni();
-  
-  private native String getPrivateViewKeyJni();
-  
-  private native String getPublicSpendKeyJni();
-  
-  private native String getPrivateSpendKeyJni();
-  
-  private native String getAddressJni(int accountIdx, int subaddressIdx);
-  
-  private native String getAddressIndexJni(String address);
-  
-  private native String getIntegratedAddressJni(String standardAddress, String paymentId);
-  
-  private native String decodeIntegratedAddressJni(String integratedAddress);
-  
-  private native long setListenerJni(WalletJniListener listener);
-  
-  private native Object[] syncJni(long startHeight);
-  
-  private native void startSyncingJni(long syncPeriodInMs);
-  
-  private native void stopSyncingJni();
-  
-  private native void scanTxsJni(String[] txHashes);
-  
-  private native void rescanSpentJni();
-  
-  private native void rescanBlockchainJni();
-  
-  private native String getBalanceWalletJni();
-  
-  private native String getBalanceAccountJni(int accountIdx);
-  
-  private native String getBalanceSubaddressJni(int accountIdx, int subaddressIdx);
-  
-  private native String getUnlockedBalanceWalletJni();
-  
-  private native String getUnlockedBalanceAccountJni(int accountIdx);
-  
-  private native String getUnlockedBalanceSubaddressJni(int accountIdx, int subaddressIdx);
-  
-  private native String getAccountsJni(boolean includeSubaddresses, String tag);
-  
-  private native String getAccountJni(int accountIdx, boolean includeSubaddresses);
-  
-  private native String createAccountJni(String label);
-  
-  private native String getSubaddressesJni(int accountIdx, int[] subaddressIndices);
-  
-  private native String createSubaddressJni(int accountIdx, String label);
+  @Override
+  protected native boolean isViewOnlyJni();
+    
+  @Override
+  protected native void setDaemonConnectionWithSslJni(String uri, String username, String password, String proxyUri, int isTrusted, boolean sslVerify);
+      
+  @Override
+  protected native String[] getDaemonConnectionWithSslJni(); // returns [uri, username, password, proxyUri, sslVerify]
+    
+  @Override
+  protected native boolean isConnectedToDaemonJni();
+    
+  @Override
+  protected native boolean isDaemonSyncedJni();
 
-  private native void setSubaddressLabelJni(int accountIdx, int subaddressIdx, String label);
+  @Override
+  protected native boolean isDaemonTrustedJni();
+    
+  @Override
+  protected native boolean isSyncedJni();
+    
+  @Override
+  protected native int getNetworkTypeJni();
+    
+  @Override
+  protected native String getVersionJni();
+    
+  @Override
+  protected native String getPathJni();
+    
+  @Override
+  protected native String getSeedJni();
+    
+  @Override
+  protected native String getSeedLanguageJni();
   
-  private native String getTxsJni(String txQueryJson);
-  
-  private native String getTransfersJni(String transferQueryJson);
-  
-  private native String getOutputsJni(String outputQueryJson);
-  
-  private native String exportOutputsJni(boolean all);
-  
-  private native int importOutputsJni(String outputsHex);
-  
-  private native String exportKeyImagesJni(boolean all);
-  
-  private native String importKeyImagesJni(String keyImagesJson);
-  
-  private native String[] relayTxsJni(String[] txMetadatas);
-  
-  private native void freezeOutputJni(String KeyImage);
-  
-  private native void thawOutputJni(String keyImage);
-  
-  private native boolean isOutputFrozenJni(String keyImage);
+  protected static native String[] getSeedLanguagesJni();
+    
+  @Override
+  protected native String getPublicViewKeyJni();
+    
+  @Override
+  protected native String getPrivateViewKeyJni();
+    
+  @Override
+  protected native String getPublicSpendKeyJni();
+    
+  @Override
+  protected native String getPrivateSpendKeyJni();
+    
+  @Override
+  protected native String getAddressJni(int accountIdx, int subaddressIdx);
+    
+  @Override
+  protected native String getAddressIndexJni(String address);
+    
+  @Override
+  protected native String getIntegratedAddressJni(String standardAddress, String paymentId);
+    
+  @Override
+  protected native String decodeIntegratedAddressJni(String integratedAddress);
+    
+  @Override
+  protected native long setListenerJni(MoneroWalletJni.WalletJniListener listener);
+    
+  @Override
+  protected native Object[] syncJni(long startHeight);
+    
+  @Override
+  protected native void startSyncingJni(long syncPeriodInMs);
+    
+  @Override
+  protected native void stopSyncingJni();
+    
+  @Override
+  protected native void scanTxsJni(String[] txHashes);
+    
+  @Override
+  protected native void rescanSpentJni();
+    
+  @Override
+  protected native void rescanBlockchainJni();
+    
+  @Override
+  protected native String getBalanceWalletJni();
+    
+  @Override
+  protected native String getBalanceAccountJni(int accountIdx);
+    
+  @Override
+  protected native String getBalanceSubaddressJni(int accountIdx, int subaddressIdx);
+    
+  @Override
+  protected native String getUnlockedBalanceWalletJni();
+    
+  @Override
+  protected native String getUnlockedBalanceAccountJni(int accountIdx);
+    
+  @Override
+  protected native String getUnlockedBalanceSubaddressJni(int accountIdx, int subaddressIdx);
+    
+  @Override
+  protected native String getAccountsJni(boolean includeSubaddresses, String tag);
+    
+  @Override
+  protected native String getAccountJni(int accountIdx, boolean includeSubaddresses);
+    
+  @Override
+  protected native String createAccountJni(String label);
+    
+  @Override
+  protected native String getSubaddressesJni(int accountIdx, int[] subaddressIndices);
+    
+  @Override
+  protected native String createSubaddressJni(int accountIdx, String label);
 
-  private native int getDefaultFeePriorityJni();
+  protected native void setSubaddressLabelJni(int accountIdx, int subaddressIdx, String label);
+    
+  @Override
+  protected native String getTxsJni(String txQueryJson);
+    
+  @Override
+  protected native String getTransfersJni(String transferQueryJson);
+    
+  @Override
+  protected native String getOutputsJni(String outputQueryJson);
+    
+  @Override
+  protected native String exportOutputsJni(boolean all);
+    
+  @Override
+  protected native int importOutputsJni(String outputsHex);
   
-  private native String createTxsJni(String txConfigJson);
+  @Override
+  protected native String exportKeyImagesJni(boolean all);
+    
+  @Override
+  protected native String importKeyImagesJni(String keyImagesJson);
+    
+  @Override
+  protected native String[] relayTxsJni(String[] txMetadatas);
+    
+  @Override
+  protected native void freezeOutputJni(String KeyImage);
+    
+  @Override
+  protected native void thawOutputJni(String keyImage);
+    
+  @Override
+  protected native boolean isOutputFrozenJni(String keyImage);
   
-  private native String sweepUnlockedJni(String txConfigJson);
-  
-  private native String sweepOutputJni(String txConfigJson);
-  
-  private native String sweepDustJni(boolean doNotRelay);
-  
-  private native String describeTxSetJni(String txSetJson);
-  
-  private native String signTxsJni(String unsignedTxHex);
-  
-  private native String[] submitTxsJni(String signedTxHex);
-  
-  private native String[] getTxNotesJni(String[] txHashes);
-  
-  private native void setTxNotesJni(String[] txHashes, String[] notes);
-  
-  private native String signMessageJni(String msg, int signatureType, int accountIdx, int subaddressIdx);
-  
-  private native String verifyMessageJni(String msg, String address, String signature);
-  
-  private native String getTxKeyJni(String txHash);
-  
-  private native String checkTxKeyJni(String txHash, String txKey, String address);
-  
-  private native String getTxProofJni(String txHash, String address, String message);
-  
-  private native String checkTxProofJni(String txHash, String address, String message, String signature);
-  
-  private native String getSpendProofJni(String txHash, String message);
-  
-  private native boolean checkSpendProofJni(String txHash, String message, String signature);
-  
-  private native String getReserveProofWalletJni(String message);
-  
-  private native String getReserveProofAccountJni(int accountIdx, String amount, String message);
-  
-  private native String checkReserveProofJni(String address, String message, String signature);
-  
-  private native String getAddressBookEntriesJni(int[] indices);
-  
-  private native int addAddressBookEntryJni(String address, String description);
-  
-  private native void editAddressBookEntryJni(int index, boolean setAddress, String address, boolean setDescription, String description);
-  
-  private native void deleteAddressBookEntryJni(int entryIdx);
-  
-  private native String getPaymentUriJni(String sendRequestJson);
-  
-  private native String parsePaymentUriJni(String uri);
-  
-  private native String getAttributeJni(String key);
-  
-  private native void setAttributeJni(String key, String val);
+  @Override
+  protected native int getDefaultFeePriorityJni();
 
-  private native void startMiningJni(long numThreads, boolean backgroundMining, boolean ignoreBattery);
-  
-  private native void stopMiningJni();
-  
-  private native boolean isMultisigImportNeededJni();
-  
-  private native String getMultisigInfoJni();
-  
-  private native String prepareMultisigJni();
-  
-  private native String makeMultisigJni(String[] multisigHexes, int threshold, String password);
-  
-  private native String exchangeMultisigKeysJni(String[] multisigHexes, String password);
-  
-  private native String exportMultisigHexJni();
-  
-  private native int importMultisigHexJni(String[] multisigHexes, boolean refreshAfterImport);
-  
-  private native String signMultisigTxHexJni(String multisigTxHex);
-  
-  private native String[] submitMultisigTxHexJni(String signedMultisigTxHex);
+  @Override
+  protected native String createTxsJni(String txConfigJson);
+    
+  @Override
+  protected native String sweepUnlockedJni(String txConfigJson);
+    
+  @Override
+  protected native String sweepOutputJni(String txConfigJson);
+    
+  @Override
+  protected native String sweepDustJni(boolean doNotRelay);
+    
+  @Override
+  protected native String describeTxSetJni(String txSetJson);
+    
+  @Override
+  protected native String signTxsJni(String unsignedTxHex);
+    
+  @Override
+  protected native String[] submitTxsJni(String signedTxHex);
+    
+  @Override
+  protected native String[] getTxNotesJni(String[] txHashes);
+    
+  @Override
+  protected native void setTxNotesJni(String[] txHashes, String[] notes);
+    
+  @Override
+  protected native String signMessageJni(String msg, int signatureType, int accountIdx, int subaddressIdx);
+    
+  @Override
+  protected native String verifyMessageJni(String msg, String address, String signature);
+    
+  @Override
+  protected native String getTxKeyJni(String txHash);
+    
+  @Override
+  protected native String checkTxKeyJni(String txHash, String txKey, String address);
+    
+  @Override
+  protected native String getTxProofJni(String txHash, String address, String message);
+    
+  @Override
+  protected native String checkTxProofJni(String txHash, String address, String message, String signature);
+    
+  @Override
+  protected native String getSpendProofJni(String txHash, String message);
+    
+  @Override
+  protected native boolean checkSpendProofJni(String txHash, String message, String signature);
+    
+  @Override
+  protected native String getReserveProofWalletJni(String message);
+    
+  @Override
+  protected native String getReserveProofAccountJni(int accountIdx, String amount, String message);
+    
+  @Override
+  protected native String checkReserveProofJni(String address, String message, String signature);
+    
+  @Override
+  protected native String getAddressBookEntriesJni(int[] indices);
+    
+  @Override
+  protected native int addAddressBookEntryJni(String address, String description);
+    
+  @Override
+  protected native void editAddressBookEntryJni(int index, boolean setAddress, String address, boolean setDescription, String description);
+    
+  @Override
+  protected native void deleteAddressBookEntryJni(int entryIdx);
+    
+  @Override
+  protected native String getPaymentUriJni(String sendRequestJson);
+    
+  @Override
+  protected native String parsePaymentUriJni(String uri);
+    
+  @Override
+  protected native String getAttributeJni(String key);
+    
+  @Override
+  protected native void setAttributeJni(String key, String val);
+
+  @Override
+  protected native void startMiningJni(long numThreads, boolean backgroundMining, boolean ignoreBattery);
+    
+  @Override
+  protected native void stopMiningJni();
+    
+  @Override
+  protected native boolean isMultisigImportNeededJni();
+    
+  @Override
+  protected native String getMultisigInfoJni();
+    
+  @Override
+  protected native String prepareMultisigJni();
+    
+  @Override
+  protected native String makeMultisigJni(String[] multisigHexes, int threshold, String password);
+    
+  @Override
+  protected native String exchangeMultisigKeysJni(String[] multisigHexes, String password);
+    
+  @Override
+  protected native String exportMultisigHexJni();
+    
+  @Override
+  protected native int importMultisigHexJni(String[] multisigHexes, boolean refreshAfterImport);
+    
+  @Override
+  protected native String signMultisigTxHexJni(String multisigTxHex);
+    
+  @Override
+  protected native String[] submitMultisigTxHexJni(String signedMultisigTxHex);
 
   private native byte[] getKeysFileBufferJni(String password, boolean viewOnly);
 
   private native byte[] getCacheFileBufferJni();
+    
+  @Override
+  protected native void changePasswordJni(String oldPassword, String newPassword);
+    
+  @Override
+  protected native void moveToJni(String path, String password);
   
-  private native void changePasswordJni(String oldPassword, String newPassword);
-  
-  private native void moveToJni(String path, String password);
-  
-  private native void saveJni();
+  @Override
+  protected native void saveJni();
+    
+  @Override
+  protected native void requestShutdownJni();
 
-  private native void requestShutdownJni();
-  
-  private native void closeJni(boolean save);
-  
-  // -------------------------------- LISTENER --------------------------------
-  
-  /**
-   * Receives notifications directly from jni c++.
-   */
-  @SuppressWarnings("unused") // called directly from jni c++
-  private class WalletJniListener {
-
-    private final ThreadLocal<Boolean> notifying = new ThreadLocal<Boolean>();
-
-    private void notifyListeners(Runnable notification) {
-      if (isClosed) return;
-      notifying.set(true);
-      try {
-        notification.run();
-      } finally {
-        notifying.remove();
-      }
-    }
-    
-    public void onSyncProgress(long height, long startHeight, long endHeight, double percentDone, String message) {
-      notifyListeners(() -> announceSyncProgress(height, startHeight, endHeight, percentDone, message));
-    }
-    
-    public void onNewBlock(long height) {
-      notifyListeners(() -> announceNewBlock(height));
-    }
-    
-    public void onBalancesChanged(String newBalanceStr, String newUnlockedBalanceStr) {
-      notifyListeners(() -> announceBalancesChanged(new BigInteger(newBalanceStr), new BigInteger(newUnlockedBalanceStr)));
-    }
-    
-    public void onOutputReceived(long height, String txHash, String amountStr, int accountIdx, int subaddressIdx, int version, String unlockTimeStr, boolean isLocked) {
-      
-      // build output to announce
-      MoneroOutputWallet output = new MoneroOutputWallet();
-      output.setAmount(new BigInteger(amountStr));
-      output.setAccountIndex(accountIdx);
-      output.setSubaddressIndex(subaddressIdx);
-      MoneroTxWallet tx = new MoneroTxWallet();
-      tx.setHash(txHash);
-      tx.setVersion(version);
-      tx.setUnlockTime(new BigInteger(unlockTimeStr));
-      output.setTx(tx);
-      tx.setOutputs(Arrays.asList(output));
-      tx.setIsIncoming(true);
-      tx.setIsLocked(isLocked);
-      if (height > 0) {
-        MoneroBlock block = new MoneroBlock().setHeight(height);
-        block.setTxs(Arrays.asList(tx));
-        tx.setBlock(block);
-        tx.setIsConfirmed(true);
-        tx.setInTxPool(false);
-        tx.setIsFailed(false);
-      } else {
-        tx.setIsConfirmed(false);
-        tx.setInTxPool(true);
-      }
-      
-      // announce output
-      notifyListeners(() -> announceOutputReceived((MoneroOutputWallet) tx.getOutputs().get(0)));
-    }
-    
-    public void onOutputSpent(long height, String txHash, String amountStr, String accountIdxStr, String subaddressIdxStr, int version, String unlockTimeStr, boolean isLocked) {
-      
-      // build spent output
-      MoneroOutputWallet output = new MoneroOutputWallet();
-      output.setAmount(new BigInteger(amountStr));
-      if (accountIdxStr.length() > 0) output.setAccountIndex(Integer.parseInt(accountIdxStr));
-      if (subaddressIdxStr.length() > 0) output.setSubaddressIndex(Integer.parseInt(subaddressIdxStr));
-      MoneroTxWallet tx = new MoneroTxWallet();
-      tx.setHash(txHash);
-      tx.setVersion(version);
-      tx.setUnlockTime(new BigInteger(unlockTimeStr));
-      tx.setIsLocked(isLocked);
-      output.setTx(tx);
-      tx.setInputs(Arrays.asList(output));
-      tx.setIsIncoming(false);
-      if (height > 0) {
-        MoneroBlock block = new MoneroBlock().setHeight(height);
-        block.setTxs(Arrays.asList(tx));
-        tx.setBlock(block);
-        tx.setIsConfirmed(true);
-        tx.setInTxPool(false);
-        tx.setIsFailed(false);
-      } else {
-        tx.setIsConfirmed(false);
-        tx.setInTxPool(true);
-      }
-      
-      // announce output
-      notifyListeners(() -> announceOutputSpent((MoneroOutputWallet) tx.getInputs().get(0)));
-    }
-  }
-  
-  // ------------------------ RESPONSE DESERIALIZATION ------------------------
-  
-  /**
-   * Override MoneroBlock with wallet types for polymorphic deserialization.
-   */
-  private static class MoneroBlockWallet extends MoneroBlock {
-    
-    // default constructor necessary for serialization
-    @SuppressWarnings("unused")
-    public MoneroBlockWallet() {
-      super();
-    }
-    
-    @JsonProperty("txs")
-    public MoneroBlockWallet setTxWallets(List<MoneroTxWallet> txs) {
-      super.setTxs(new ArrayList<MoneroTx>(txs));
-      return this;
-    }
-    
-    /**
-     * Initializes a new MoneroBlock with direct references to this block.
-     * 
-     * TODO: more efficient way to deserialize directly into MoneroBlock?
-     * 
-     * @return MoneroBlock is the newly initialized block with direct references to this block
-     */
-    public MoneroBlock toBlock() {
-      MoneroBlock block = new MoneroBlock();
-      block.setHash(getHash());
-      block.setHeight(getHeight());
-      block.setTimestamp(getTimestamp());
-      block.setSize(getSize());
-      block.setWeight(getWeight());
-      block.setLongTermWeight(getLongTermWeight());
-      block.setDepth(getDepth());
-      block.setDifficulty(getDifficulty());
-      block.setCumulativeDifficulty(getCumulativeDifficulty());
-      block.setMajorVersion(getMajorVersion());
-      block.setMinorVersion(getMinorVersion());
-      block.setNonce(getNonce());
-      block.setMinerTxHash(getMinerTxHash());
-      block.setNumTxs(getNumTxs());
-      block.setOrphanStatus(getOrphanStatus());
-      block.setPrevHash(getPrevHash());
-      block.setReward(getReward());
-      block.setPowHash(getPowHash());
-      block.setHex(getHex());
-      block.setMinerTx(getMinerTx());
-      block.setTxs(getTxs());
-      block.setTxHashes(getTxHashes());
-      for (MoneroTx tx : getTxs()) tx.setBlock(block);  // re-assign tx block references
-      return block;
-    }
-  }
-  
-  private static class AccountsContainer {
-    public List<MoneroAccount> accounts;
-  };
-  
-  private static class SubaddressesContainer {
-    public List<MoneroSubaddress> subaddresses;
-  };
-  
-  private static class BlocksWalletContainer {
-    public List<MoneroBlockWallet> blocks;
-  }
-  
-  private static class DeserializedBlocksContainer {
-    public List<MoneroBlock> blocks;
-  }
-  
-  private static class TxSetsContainer {
-    public List<MoneroTxSet> txSets;
-  }
-  
-  private static DeserializedBlocksContainer deserializeBlocks(String blocksJson) {
-    DeserializedBlocksContainer deserializedBlocksContainer = new DeserializedBlocksContainer();
-    deserializedBlocksContainer.blocks = new ArrayList<MoneroBlock>();
-    BlocksWalletContainer blocksWalletContainer = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, blocksJson, BlocksWalletContainer.class);
-    if (blocksWalletContainer.blocks != null) for (MoneroBlockWallet blockWallet : blocksWalletContainer.blocks) deserializedBlocksContainer.blocks.add(blockWallet.toBlock());
-    return deserializedBlocksContainer;
-  }
-  
-  private static List<MoneroTxWallet> deserializeTxs(MoneroTxQuery query, String blocksJson) {
-    
-    // deserialize blocks
-    DeserializedBlocksContainer deserializedBlocks = deserializeBlocks(blocksJson);
-    List<MoneroBlock> blocks = deserializedBlocks.blocks;
-    
-    // collect txs
-    List<MoneroTxWallet> txs = new ArrayList<MoneroTxWallet>();
-    for (MoneroBlock block : blocks) {
-      sanitizeBlock(block);
-      for (MoneroTx tx : block.getTxs()) {
-        if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
-        txs.add((MoneroTxWallet) tx);
-      }
-    }
-    
-    // re-sort txs which is lost over jni serialization
-    if (query.getHashes() != null) {
-      Map<String, MoneroTxWallet> txMap = new HashMap<String, MoneroTxWallet>();
-      for (MoneroTxWallet tx : txs) txMap.put(tx.getHash(), tx);
-      List<MoneroTxWallet> txsSorted = new ArrayList<MoneroTxWallet>();
-      for (String txHash : query.getHashes()) if (txMap.containsKey(txHash)) txsSorted.add(txMap.get(txHash));
-      txs = txsSorted;
-    }
-    return txs;
-  }
-  
-  private static List<MoneroTransfer> deserializeTransfers(MoneroTransferQuery query, String blocksJson) {
-    
-    // deserialize blocks
-    DeserializedBlocksContainer deserializedBlocks = deserializeBlocks(blocksJson);
-    List<MoneroBlock> blocks = deserializedBlocks.blocks;
-    
-    // collect transfers
-    List<MoneroTransfer> transfers = new ArrayList<MoneroTransfer>();
-    for (MoneroBlock block : blocks) {
-      sanitizeBlock(block);
-      for (MoneroTx tx : block.getTxs()) {
-        if (block.getHeight() == null) tx.setBlock(null); // dereference placeholder block for unconfirmed txs
-        MoneroTxWallet txWallet = (MoneroTxWallet) tx;
-        if (txWallet.getOutgoingTransfer() != null) transfers.add(txWallet.getOutgoingTransfer());
-        if (txWallet.getIncomingTransfers() != null) {
-          for (MoneroIncomingTransfer transfer : txWallet.getIncomingTransfers()) transfers.add(transfer);
-        }
-      }
-    }
-    return transfers;
-  }
-  
-  private static List<MoneroOutputWallet> deserializeOutputs(MoneroOutputQuery query, String blocksJson) {
-    
-    // deserialize blocks
-    DeserializedBlocksContainer deserializedBlocks = deserializeBlocks(blocksJson);
-    List<MoneroBlock> blocks = deserializedBlocks.blocks;
-    
-    // collect outputs
-    List<MoneroOutputWallet> outputs = new ArrayList<MoneroOutputWallet>();
-    for (MoneroBlock block : blocks) {
-      sanitizeBlock(block);
-      for (MoneroTx tx : block.getTxs()) {
-        outputs.addAll(((MoneroTxWallet) tx).getOutputsWallet());
-      }
-    }
-    return outputs;
-  }
-  
-  private static class AddressBookEntriesContainer {
-    public List<MoneroAddressBookEntry> entries;
-  }
-  
-  // ---------------------------- PRIVATE HELPERS -----------------------------
-  
-  /**
-   * Initializes the c++ listener once and retains it until close drains native callbacks.
-   */
-  private void initListening() {
-    synchronized (jniListener) {
-      if (jniListenerHandle == 0) jniListenerHandle = setListenerJni(jniListener);
-    }
-  }
-  
-  private void assertNotClosed() {
-    if (isClosed) throw new MoneroError("Wallet is closed");
-  }
-
-  // acquire the shared call lock so close() waits for this call before freeing the wallet
-  private void beginCall() {
-    assertNotClosed();
-    if (!callLock.readLock().tryLock()) throw new MoneroError("Wallet is closed");
-    if (isClosed) {
-      callLock.readLock().unlock();
-      throw new MoneroError("Wallet is closed");
-    }
-  }
-
-  private void endCall() {
-    callLock.readLock().unlock();
-  }
-  
-  private static MoneroAccount sanitizeAccount(MoneroAccount account) {
-    if (account.getSubaddresses() != null) {
-      for (MoneroSubaddress subaddress : account.getSubaddresses()) sanitizeSubaddress(subaddress);
-    }
-    return account;
-  }
-  
-  private static MoneroSubaddress sanitizeSubaddress(MoneroSubaddress subaddress) {
-    if ("".equals(subaddress.getLabel())) subaddress.setLabel(null);
-    return subaddress;
-  }
-  
-  private static MoneroBlock sanitizeBlock(MoneroBlock block) {
-    for (MoneroTx tx : block.getTxs()) sanitizeTxWallet((MoneroTxWallet) tx);
-    return block;
-  }
-  
-  private static MoneroTxWallet sanitizeTxWallet(MoneroTxWallet tx) {
-    return tx;
-  }
+  @Override
+  protected native void closeJni(boolean save);
 }
