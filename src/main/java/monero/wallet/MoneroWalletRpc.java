@@ -1975,7 +1975,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
     try {
       this.getPrimaryAddress();
     } catch (Exception e) {
-      return e instanceof MoneroRpcError && Integer.valueOf(-8).equals(((MoneroRpcError) e).getCode()) && ((MoneroRpcError) e).getMessage().indexOf("No wallet file") > -1;
+      return e instanceof MoneroRpcError && Integer.valueOf(-13).equals(((MoneroRpcError) e).getCode()) && ((MoneroRpcError) e).getMessage().indexOf("No wallet file") > -1;
     }
     return false;
   }
