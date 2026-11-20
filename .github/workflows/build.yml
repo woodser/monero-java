@@ -13,6 +13,8 @@ jobs:
     name: ${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
     container: debian:11 # build against glibc 2.31 so the library runs on older distros (ubuntu 20.04+, debian 11+)
+    env:
+      MONERO_LWS_IMAGE: vtnerd/monero-lws@sha256:908f34089410b38f7247e20760beaefb9acbfd9ed3755fff9dc3ea18703201f0
 
     strategy:
       fail-fast: false
@@ -169,16 +171,33 @@ jobs:
           mkdir -p test_regtest/wallet_full
           mvn -B test -Dmaven.test.skip=false -Dtest=TestMoneroUtils,TestNativeLibrary,TestSerialization,TestMoneroConnectionManager#testResponseTimesAfterSettingChange -DargLine=-Djava.library.path=build
 
-      - name: Test regtest suite
-        if: matrix.arch == 'linux-x86_64'
-        timeout-minutes: 90
-        run: mvn -B test -Dmaven.test.skip=false -Dgroups=CI -DfailIfNoTests=true -DargLine=-Djava.library.path=build
-
       - name: Upload monero-java library
         uses: actions/upload-artifact@v7
         with:
           name: libmonero-java-${{ matrix.arch }}
           path: build/libmonero-java.so
+
+      - name: Install docker and pull monero-lws
+        if: matrix.arch == 'linux-x86_64'
+        run: |
+          apt install -y docker.io
+          docker pull "$MONERO_LWS_IMAGE"
+
+      - name: Test regtest suite
+        if: matrix.arch == 'linux-x86_64'
+        timeout-minutes: 90
+        env:
+          MONERO_LWS_DOCKER_NETWORK: container:${{ job.container.id }}
+        run: mvn -B test -Dmaven.test.skip=false -Dgroups=CI -DfailIfNoTests=true -DargLine=-Djava.library.path=build
+
+      - name: Upload regtest logs
+        if: failure() && matrix.arch == 'linux-x86_64'
+        uses: actions/upload-artifact@v7
+        with:
+          name: regtest-logs-${{ matrix.arch }}
+          path: |
+            test_regtest/lws/*.log
+            target/surefire-reports
 
   windows:
     name: windows
