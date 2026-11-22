@@ -14,6 +14,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -73,6 +74,8 @@ public class MoneroRpcConnection {
   // instance variables
   protected CloseableHttpClient client;
   protected BasicCredentialsProvider credsProvider;
+  protected CloseableHttpClient proxyClient; // reused by proxied requests so they share a connection
+  protected List<Object> proxyClientConfig; // client and proxy uri the proxy client was built for
   protected String uri;
   protected String username;
   protected String password;
@@ -750,6 +753,13 @@ public class MoneroRpcConnection {
 
   private CloseableHttpResponse requestWithProxy(HttpUriRequest request) throws IOException {
 
+    // reuse proxy client unless the proxy changed or the client was rebuilt for new credentials or ssl verification
+    String proxyUri = this.proxyUri;
+    List<Object> config = Arrays.asList(client, proxyUri);
+    if (config.equals(proxyClientConfig)) return proxyClient.execute(request);
+    if (proxyClient != null) proxyClient.close();
+    proxyClientConfig = null;
+
     // configure TLS (trust-all if ssl verification is disabled)
     SSLContext sslContext = sslVerify ? SSLContexts.createSystemDefault() : createInsecureSslContext();
     HostnameVerifier hostnameVerifier = sslVerify ? new DefaultHostnameVerifier() : NoopHostnameVerifier.INSTANCE;
@@ -774,6 +784,8 @@ public class MoneroRpcConnection {
     HttpClientBuilder builder = HttpClients.custom().setConnectionManager(cm);
     if (credsProvider != null) builder.setDefaultCredentialsProvider(credsProvider);
     CloseableHttpClient closeableHttpClient = builder.build();
+    proxyClient = closeableHttpClient;
+    proxyClientConfig = config;
 
     // execute request
     return closeableHttpClient.execute(request);

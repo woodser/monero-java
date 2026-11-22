@@ -6,9 +6,17 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import common.utils.GenUtils;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import monero.common.MoneroRpcConnection;
 import monero.common.MoneroConnectionManager.PollType;
 import monero.common.MoneroConnectionManager;
@@ -48,6 +56,63 @@ public class TestMoneroConnectionManager {
     slower.setSslVerify(false); // changes the connection's hash
     connectionManager.checkConnections();
     assertTrue(faster == connectionManager.getConnection());
+  }
+
+  // Can send proxied requests over one connection
+  @Test
+  @Tag("CI")
+  public void testProxiedRequestsShareConnection() throws IOException {
+    AtomicInteger numConnections = new AtomicInteger();
+    try (ServerSocket proxy = new ServerSocket(0, 50, InetAddress.getByName("127.0.0.1"))) {
+
+      // start socks5 proxy which answers rpc requests itself
+      Thread acceptor = new Thread(() -> {
+        try {
+          while (true) {
+            Socket socket = proxy.accept();
+            socket.setSoTimeout(10000); // handler ends when idle
+            numConnections.incrementAndGet();
+            Thread handler = new Thread(() -> answerProxiedRequests(socket));
+            handler.setDaemon(true);
+            handler.start();
+          }
+        } catch (IOException e) {
+          // proxy closed
+        }
+      });
+      acceptor.setDaemon(true);
+      acceptor.start();
+
+      // send requests through proxy
+      MoneroRpcConnection connection = new MoneroRpcConnection("http://127.0.0.1:18081").setProxyUri("socks5://127.0.0.1:" + proxy.getLocalPort()).setTimeout(10000l);
+      for (int i = 0; i < 3; i++) connection.sendJsonRequest("get_version");
+      assertEquals(1, numConnections.get());
+    }
+  }
+
+  private static void answerProxiedRequests(Socket socket) {
+    try (DataInputStream in = new DataInputStream(socket.getInputStream()); OutputStream out = socket.getOutputStream()) {
+
+      // accept socks5 handshake to connect to an ipv4 address
+      in.skipBytes(1);
+      in.readFully(new byte[in.readUnsignedByte()]);
+      out.write(new byte[] { 5, 0 });
+      in.readFully(new byte[10]);
+      out.write(new byte[] { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 });
+
+      // answer each request with an empty rpc result
+      String result = "{\"jsonrpc\":\"2.0\",\"id\":\"0\",\"result\":{}}";
+      byte[] response = ("HTTP/1.1 200 OK\r\nContent-Length: " + result.length() + "\r\n\r\n" + result).getBytes();
+      BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+      for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+        int contentLength = 0;
+        for (; !line.isEmpty(); line = reader.readLine()) if (line.toLowerCase().startsWith("content-length:")) contentLength = Integer.parseInt(line.substring(15).trim());
+        for (int i = 0; i < contentLength; i++) reader.read();
+        out.write(response);
+      }
+    } catch (Exception e) {
+      // connection closed
+    }
   }
   
   @Test
