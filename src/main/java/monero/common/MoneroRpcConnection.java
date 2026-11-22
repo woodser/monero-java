@@ -38,6 +38,7 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
+import org.apache.hc.client5.http.ssl.HostnameVerificationPolicy;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.TlsSocketStrategy;
 import org.apache.hc.client5.http.ssl.TrustAllStrategy;
@@ -673,6 +674,7 @@ public class MoneroRpcConnection {
       TlsSocketStrategy tlsStrategy = ClientTlsStrategyBuilder.create()
           .setSslContext(createInsecureSslContext())
           .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+          .setHostVerificationPolicy(HostnameVerificationPolicy.CLIENT) // keeps the TLS handshake from checking the hostname itself
           .buildClassic();
       builder.setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
           .setTlsSocketStrategy(tlsStrategy)
@@ -753,6 +755,7 @@ public class MoneroRpcConnection {
     TlsSocketStrategy tlsStrategy = ClientTlsStrategyBuilder.create()
         .setSslContext(sslContext)
         .setHostnameVerifier(hostnameVerifier)
+        .setHostVerificationPolicy(sslVerify ? HostnameVerificationPolicy.BOTH : HostnameVerificationPolicy.CLIENT) // CLIENT keeps the TLS handshake from checking the hostname itself
         .buildClassic();
 
     // Route all connections through the socks5 proxy. HttpClient 5.4+ performs socks routing via
