@@ -209,8 +209,9 @@ public class MoneroRpcConnection {
    *
    * Verification is enabled by default. Disabling it allows connecting to daemons with
    * self-signed certificates or certificates whose subject alternative names do not match
-   * the address (e.g. monerod's default `--rpc-ssl autodetect` certificate, or connecting
-   * by raw IP).
+   * the address (e.g. connecting by raw IP). Requests sent through this connection still
+   * fail if Java cannot parse the certificate, as with the certificate monerod generates
+   * by default, which has no issuer name.
    *
    * @param sslVerify true to verify certificates (default), false to allow insecure connections
    * @return this connection
