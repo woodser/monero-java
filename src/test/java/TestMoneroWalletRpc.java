@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +17,6 @@ import monero.common.MoneroUtils;
 import monero.wallet.MoneroWallet;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroAccount;
-import monero.wallet.model.MoneroAccountTag;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
 import org.junit.jupiter.api.AfterAll;
@@ -228,68 +226,6 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   public void testIsMultisigNeeded() {
     assumeTrue(TEST_NON_RELAYS);
     assertEquals(false, wallet.isMultisigImportNeeded()); // TODO: test with multisig wallet
-  }
-  
-  // Can tag accounts and query accounts by tag
-  @Test
-  @Tag("CI")
-  public void testAccountTags() {
-    assumeTrue(TEST_NON_RELAYS);
-    
-    // get accounts
-    List<MoneroAccount> accounts = wallet.getAccounts();
-    assertTrue(accounts.size() >= 3, "Not enough accounts to test; run create account test");
-    
-    // tag some of the accounts
-    MoneroAccountTag tag = new MoneroAccountTag("my_tag_" + UUID.randomUUID(), "my tag label", Arrays.asList(0, 1));
-    wallet.tagAccounts(tag.getTag(), tag.getAccountIndices());
-    
-    // query accounts by tag
-    List<MoneroAccount> taggedAccounts = wallet.getAccounts(false, tag.getTag());
-    assertEquals(2, taggedAccounts.size());
-    assertEquals(0, (int) taggedAccounts.get(0).getIndex());
-    assertEquals(tag.getTag(), taggedAccounts.get(0).getTag());
-    assertEquals(1, (int) taggedAccounts.get(1).getIndex());
-    assertEquals(tag.getTag(), taggedAccounts.get(1).getTag());
-
-    // set tag label
-    wallet.setAccountTagLabel(tag.getTag(), tag.getLabel());
-    
-    // fetch tags and ensure new tag is contained
-    List<MoneroAccountTag> tags = wallet.getAccountTags();
-    assertTrue(tags.contains(tag));
-    
-    // re-tag an account
-    MoneroAccountTag tag2 = new MoneroAccountTag("my_tag_" + UUID.randomUUID(), "my tag label 2", Arrays.asList(1));
-    wallet.tagAccounts(tag2.getTag(), tag2.getAccountIndices());
-    List<MoneroAccount> taggedAccounts2 = wallet.getAccounts(false, tag2.getTag());
-    assertEquals(1, taggedAccounts2.size(), 1);
-    assertEquals(1, taggedAccounts2.get(0).getIndex(), 1);
-    assertEquals(tag2.getTag(), taggedAccounts2.get(0).getTag());
-    
-    // re-query original tag which only applies to one account now
-    taggedAccounts = wallet.getAccounts(false, tag.getTag());
-    assertEquals(1, taggedAccounts.size());
-    assertEquals(0, (int) taggedAccounts.get(0).getIndex());
-    assertEquals(tag.getTag(), taggedAccounts.get(0).getTag());
-    
-    // untag and query accounts
-    wallet.untagAccounts(Arrays.asList(0, 1));
-    assertEquals(0, wallet.getAccountTags().size());
-    try {
-      wallet.getAccounts(false, tag.getTag());
-      fail("Should have thrown exception with unregistered tag");
-    } catch (MoneroError e) {
-      assertEquals(-1, (int) e.getCode());
-    }
-    
-    // test that non-existing tag returns no accounts
-    try {
-      wallet.getAccounts(false, "non_existing_tag");
-      fail("Should have thrown exception with unregistered tag");
-    } catch (MoneroError e) {
-      assertEquals(-1, (int) e.getCode());
-    }
   }
   
   // Can get addresses out of range of used accounts and subaddresses
@@ -601,6 +537,13 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   @Tag("CI")
   public void testSetAccountLabel() {
     super.testSetAccountLabel();
+  }
+
+  @Override
+  @Test
+  @Tag("CI")
+  public void testAccountTags() {
+    super.testAccountTags();
   }
 
   @Override

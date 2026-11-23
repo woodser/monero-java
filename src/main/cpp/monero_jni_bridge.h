@@ -237,6 +237,14 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_editAddressBookEntryJ
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_deleteAddressBookEntryJni(JNIEnv *, jobject, jint);
 
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_tagAccountsJni(JNIEnv *, jobject, jstring, jintArray);
+
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_untagAccountsJni(JNIEnv *, jobject, jintArray);
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getAccountTagsJni(JNIEnv *, jobject);
+
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setAccountTagLabelJni(JNIEnv *, jobject, jstring, jstring);
+
 JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getAttributeJni(JNIEnv *, jobject, jstring);
 
 JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setAttributeJni(JNIEnv *, jobject, jstring, jstring);
