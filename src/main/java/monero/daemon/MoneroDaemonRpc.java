@@ -36,6 +36,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import monero.common.MoneroError;
@@ -125,6 +128,19 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
    * @throws IOException if input/output error with process
    */
   public MoneroDaemonRpc(List<String> cmd) throws IOException {
+    this(cmd, null);
+  }
+  
+  /**
+   * Create an internal process running monerod and connect to it.
+   * 
+   * Use `stopProcess()` to stop the newly created process.
+   * 
+   * @param cmd path then arguments to external monerod executable
+   * @param cmdTimeoutMs is the timeout to start the process in milliseconds, after which it is destroyed, 0 or null to disable timeout
+   * @throws IOException if input/output error with process
+   */
+  public MoneroDaemonRpc(List<String> cmd, Long cmdTimeoutMs) throws IOException {
     this();
     
     // start process
@@ -140,58 +156,83 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     String line;
     String uri = null;
     StringBuilder sb = new StringBuilder();
-    BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
     boolean success = false;
-    while ((line = in.readLine()) != null) {
-      LOGGER.log(Level.FINER, line);
-      sb.append(line).append('\n'); // capture output in case of error
-      
-      // extract uri from e.g. "I Binding on 127.0.0.1 (IPv4):38085"
-      String uriLineContains = "Binding on ";
-      int uriLineContainsIdx = line.indexOf(uriLineContains);
-      if (uriLineContainsIdx >= 0) {
-        String host = line.substring(uriLineContainsIdx + uriLineContains.length(), line.lastIndexOf(' '));
-        String port = line.substring(line.lastIndexOf(':') + 1);
-        int sslIdx = cmd.indexOf("--rpc-ssl");
-        boolean sslEnabled = sslIdx >= 0 ? "enabled".equalsIgnoreCase(cmd.get(sslIdx + 1)) : false;
-        uri = (sslEnabled ? "https" : "http") + "://" + host + ":" + port;
+    AtomicBoolean isStartEnded = new AtomicBoolean(false); // set by the first of startup or timeout
+    Timer timer = null;
+    try {
+      // destroy process if it does not start within the timeout
+      if (cmdTimeoutMs != null && cmdTimeoutMs > 0) {
+        timer = new Timer(true);
+        timer.schedule(new TimerTask() {
+          @Override
+          public void run() {
+            if (isStartEnded.compareAndSet(false, true)) process.destroyForcibly();
+          }
+        }, cmdTimeoutMs);
       }
       
-      // read success message
-      if (line.contains("Starting p2p net loop")) {
-        if (printOutput) {
-          new Thread(new Runnable() { // continue printing output in separate, non-blocking thread
-            @Override
-            public void run() {
-              try {
-                String line;
-                BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                while ((line = in.readLine()) != null) LOGGER.log(Level.FINER, line);
-              } catch (IOException e) {
-                //e.printStackTrace(); // exception expected on close
-              }
-            }
-          }).start();
+      BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+      while ((line = in.readLine()) != null) {
+        LOGGER.log(Level.FINER, line);
+        sb.append(line).append('\n'); // capture output in case of error
+        
+        // extract uri from e.g. "I Binding on 127.0.0.1 (IPv4):38085"
+        String uriLineContains = "Binding on ";
+        int uriLineContainsIdx = line.indexOf(uriLineContains);
+        if (uriLineContainsIdx >= 0) {
+          String host = line.substring(uriLineContainsIdx + uriLineContains.length(), line.lastIndexOf(' '));
+          String port = line.substring(line.lastIndexOf(':') + 1);
+          int sslIdx = cmd.indexOf("--rpc-ssl");
+          boolean sslEnabled = sslIdx >= 0 ? "enabled".equalsIgnoreCase(cmd.get(sslIdx + 1)) : false;
+          uri = (sslEnabled ? "https" : "http") + "://" + host + ":" + port;
         }
-        success = true;
-        break;
+        
+        // read success message
+        if (line.contains("Starting p2p net loop")) {
+          if (!isStartEnded.compareAndSet(false, true)) break; // timed out
+          success = true;
+          if (printOutput) {
+            new Thread(new Runnable() { // continue printing output in separate, non-blocking thread
+              @Override
+              public void run() {
+                try {
+                  String line;
+                  BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                  while ((line = in.readLine()) != null) LOGGER.log(Level.FINER, line);
+                } catch (IOException e) {
+                  //e.printStackTrace(); // exception expected on close
+                }
+              }
+            }).start();
+          }
+          break;
+        }
       }
+      if (!printOutput) in.close();
+      
+      // throw error with process output if unsuccessful
+      if (!success) throw new MoneroError("Failed to start monerod:\n\n" + sb.toString().trim());
+      
+      // get username, password, and zmq publish uri from params
+      int userPassIdx = cmd.indexOf("--rpc-login");
+      String userPass = userPassIdx >= 0 ? cmd.get(userPassIdx + 1) : null;
+      String username = userPass == null ? null : userPass.substring(0, userPass.indexOf(':'));
+      String password = userPass == null ? null : userPass.substring(userPass.indexOf(':') + 1);
+      int zmqUriIdx = cmd.indexOf("--zmq-pub");
+      String zmqUri = zmqUriIdx >= 0 ? cmd.get(zmqUriIdx + 1) : null;
+      
+      // initialize internal state
+      rpc = new MoneroRpcConnection(uri, username, password, zmqUri, null);
+    } catch (IOException | RuntimeException e) {
+      // do not leave the process running
+      process.destroyForcibly();
+      try { process.waitFor(); }
+      catch (InterruptedException e2) { Thread.currentThread().interrupt(); }
+      if (!success && isStartEnded.get()) throw new MoneroError("Failed to start monerod within " + cmdTimeoutMs + " ms:\n\n" + sb.toString().trim());
+      throw e;
+    } finally {
+      if (timer != null) timer.cancel();
     }
-    if (!printOutput) in.close();
-    
-    // throw error with process output if unsuccessful
-    if (!success) throw new MoneroError("Failed to start monerod:\n\n" + sb.toString().trim());
-    
-    // get username, password, and zmq publish uri from params
-    int userPassIdx = cmd.indexOf("--rpc-login");
-    String userPass = userPassIdx >= 0 ? cmd.get(userPassIdx + 1) : null;
-    String username = userPass == null ? null : userPass.substring(0, userPass.indexOf(':'));
-    String password = userPass == null ? null : userPass.substring(userPass.indexOf(':') + 1);
-    int zmqUriIdx = cmd.indexOf("--zmq-pub");
-    String zmqUri = zmqUriIdx >= 0 ? cmd.get(zmqUriIdx + 1) : null;
-    
-    // initialize internal state
-    rpc = new MoneroRpcConnection(uri, username, password, zmqUri, null);
   }
   
   /**
