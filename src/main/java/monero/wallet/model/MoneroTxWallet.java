@@ -26,7 +26,6 @@ public class MoneroTxWallet extends MoneroTx {
   private List<MoneroIncomingTransfer> incomingTransfers;
   private MoneroOutgoingTransfer outgoingTransfer;
   private String note;
-  private Boolean isLocked;
   private BigInteger inputSum;
   private BigInteger outputSum;
   private String changeAddress;
@@ -51,7 +50,6 @@ public class MoneroTxWallet extends MoneroTx {
     }
     if (tx.outgoingTransfer != null) this.outgoingTransfer = tx.outgoingTransfer.copy().setTx(this);
     this.note = tx.note;
-    this.isLocked = tx.isLocked;
     this.inputSum = tx.inputSum;
     this.outputSum = tx.outputSum;
     this.changeAddress = tx.changeAddress;
@@ -292,16 +290,6 @@ public class MoneroTxWallet extends MoneroTx {
     return this;
   }
   
-  @JsonProperty("isLocked")
-  public Boolean isLocked() {
-    return isLocked;
-  }
-  
-  public MoneroTxWallet setIsLocked(Boolean isLocked) {
-    this.isLocked = isLocked;
-    return this;
-  }
-
   public BigInteger getInputSum() {
     return inputSum;
   }
@@ -413,7 +401,6 @@ public class MoneroTxWallet extends MoneroTx {
     this.setIsIncoming(GenUtils.reconcile(this.isIncoming(), tx.isIncoming(), null, true, null)); // outputs seen on confirmation
     this.setIsOutgoing(GenUtils.reconcile(this.isOutgoing(), tx.isOutgoing()));
     this.setNote(GenUtils.reconcile(this.getNote(), tx.getNote()));
-    this.setIsLocked(GenUtils.reconcile(this.isLocked(), tx.isLocked(), null, false, null));  // tx can become unlocked
     this.setInputSum(GenUtils.reconcile(this.getInputSum(), tx.getInputSum()));
     this.setOutputSum(GenUtils.reconcile(this.getOutputSum(), tx.getOutputSum()));
     this.setChangeAddress(GenUtils.reconcile(this.getChangeAddress(), tx.getChangeAddress()));
@@ -466,7 +453,6 @@ public class MoneroTxWallet extends MoneroTx {
       sb.append(this.getOutgoingTransfer().toString(indent + 1) + "\n");
     }
     sb.append(GenUtils.kvLine("Note", this.getNote(), indent));
-    sb.append(GenUtils.kvLine("Is locked", this.isLocked(), indent));
     sb.append(GenUtils.kvLine("Input sum", this.getInputSum(), indent));
     sb.append(GenUtils.kvLine("Output sum", this.getOutputSum(), indent));
     sb.append(GenUtils.kvLine("Change address", this.getChangeAddress(), indent));
@@ -499,7 +485,6 @@ public class MoneroTxWallet extends MoneroTx {
     result = prime * result + ((inputSum == null) ? 0 : inputSum.hashCode());
     result = prime * result + ((isIncoming == null) ? 0 : isIncoming.hashCode());
     result = prime * result + ((isOutgoing == null) ? 0 : isOutgoing.hashCode());
-    result = prime * result + ((isLocked == null) ? 0 : isLocked.hashCode());
     result = prime * result + ((note == null) ? 0 : note.hashCode());
     result = prime * result + ((numDummyOutputs == null) ? 0 : numDummyOutputs.hashCode());
     result = prime * result + ((outgoingTransfer == null) ? 0 : outgoingTransfer.hashCode());
@@ -534,9 +519,6 @@ public class MoneroTxWallet extends MoneroTx {
     if (isOutgoing == null) {
       if (other.isOutgoing != null) return false;
     } else if (!isOutgoing.equals(other.isOutgoing)) return false;
-    if (isLocked == null) {
-      if (other.isLocked != null) return false;
-    } else if (!isLocked.equals(other.isLocked)) return false;
     if (note == null) {
       if (other.note != null) return false;
     } else if (!note.equals(other.note)) return false;
@@ -617,6 +599,12 @@ public class MoneroTxWallet extends MoneroTx {
   @Override
   public MoneroTxWallet setInTxPool(Boolean inTxPool) {
     super.setInTxPool(inTxPool);
+    return this;
+  }
+
+  @Override
+  public MoneroTxWallet setIsLocked(Boolean isLocked) {
+    super.setIsLocked(isLocked);
     return this;
   }
 

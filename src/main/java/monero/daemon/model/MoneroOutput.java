@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import common.utils.GenUtils;
 
@@ -89,6 +90,17 @@ public class MoneroOutput {
   public MoneroOutput setStealthPublicKey(String stealthPublicKey) {
     this.stealthPublicKey = stealthPublicKey;
     return this;
+  }
+  
+  /**
+   * Convenience method to indicate if this output's tx is locked.
+   * 
+   * @return a boolean indicating the locked state of this output's tx
+   */
+  @JsonIgnore
+  public Boolean isLocked() {
+    if (getTx() == null) return null;
+    return getTx().isLocked();
   }
   
   @Override
