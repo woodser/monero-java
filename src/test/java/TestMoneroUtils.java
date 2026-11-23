@@ -2,6 +2,7 @@
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -124,6 +125,39 @@ public class TestMoneroUtils {
     assertEquals(map, map2);
   }
   
+  // Can reject invalid json and binary
+  @Test
+  public void testBinaryConversionInvalid() {
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put("heights", Arrays.asList(Arrays.asList(111), Arrays.asList(222)));
+    assertEquals("Invalid JSON", assertThrows(MoneroError.class, () -> MoneroUtils.mapToBinary(map)).getMessage());
+
+    map.put("heights", Arrays.asList(111, 222, 333));
+    byte[] binary = MoneroUtils.mapToBinary(map);
+    for (int size = 0; size < binary.length; size++) {
+      byte[] truncated = Arrays.copyOf(binary, size);
+      assertEquals("Invalid binary", assertThrows(MoneroError.class, () -> MoneroUtils.binaryToMap(truncated)).getMessage());
+    }
+    assertEquals(map, MoneroUtils.binaryToMap(binary));
+
+    char[] name = new char[255];
+    Arrays.fill(name, 'k');
+    map.clear();
+    map.put(new String(name), 1);
+    assertEquals("Failed to serialize binary", assertThrows(MoneroError.class, () -> MoneroUtils.mapToBinary(map)).getMessage());
+  }
+
+  // Can reject invalid binary blocks
+  @Test
+  public void testBinaryBlocksInvalid() {
+    try {
+      MoneroUtils.binaryBlocksToMap(new byte[] { 1, 2, 3 });
+      fail("Converting invalid binary blocks should have failed");
+    } catch (MoneroError err) {
+      assertEquals("failed to parse get_blocks_by_height.bin response", err.getMessage());
+    }
+  }
+
   // Can validate addresses
   @Test
   public void testAddressValidation() {
