@@ -1027,25 +1027,26 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   @Override
   public MoneroBlockHeader waitForNextBlockHeader() {
     Object syncObject  = new Object();
-    synchronized(syncObject) {
-      try {
-        MoneroDaemonListener customListener = new MoneroDaemonListener() {
-          @Override
-          public void onBlockHeader(MoneroBlockHeader header) {
-            super.onBlockHeader(header);
-            synchronized(syncObject) {
-              syncObject.notifyAll();
-            }
-          }
-        };
+    MoneroDaemonListener customListener = new MoneroDaemonListener() {
+      @Override
+      public void onBlockHeader(MoneroBlockHeader header) {
+        super.onBlockHeader(header);
+        synchronized(syncObject) {
+          syncObject.notifyAll();
+        }
+      }
+    };
+    try {
+      synchronized(syncObject) {
         addListener(customListener);
         syncObject.wait();
-        removeListener(customListener);
-        return customListener.getLastBlockHeader();
-      } catch (InterruptedException e) {
-        throw new MoneroError(e);
       }
+    } catch (InterruptedException e) {
+      throw new MoneroError(e);
+    } finally {
+      removeListener(customListener); // not while synchronized, which would deadlock with a second notification
     }
+    return customListener.getLastBlockHeader();
   }
   
   // ------------------------------- PRIVATE INSTANCE  ----------------------------

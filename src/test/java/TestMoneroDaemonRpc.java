@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -1472,6 +1473,26 @@ public class TestMoneroDaemonRpc {
       
       // stop mining
       StartMining.stopMining();
+    }
+  }
+  
+  // Can interrupt a block wait without leaving its listener registered
+  @Test
+  @Tag("CI")
+  public void testInterruptBlockWait() {
+    MoneroDaemonRpc daemon = new MoneroDaemonRpc("http://127.0.0.1:1") {
+      @Override
+      public MoneroBlockHeader getLastBlockHeader() {
+        return new MoneroBlockHeader().setHash("unchanged");
+      }
+    };
+    try {
+      Thread.currentThread().interrupt();
+      assertTrue(assertThrows(MoneroError.class, () -> daemon.waitForNextBlockHeader()).getCause() instanceof InterruptedException);
+      assertTrue(daemon.getListeners().isEmpty());
+    } finally {
+      Thread.interrupted();
+      for (MoneroDaemonListener listener : new ArrayList<MoneroDaemonListener>(daemon.getListeners())) daemon.removeListener(listener);
     }
   }
   
