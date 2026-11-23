@@ -990,6 +990,9 @@ public abstract class TestMoneroWalletCommon {
     assertEquals(1, (int) taggedAccounts.get(1).getIndex());
     assertEquals(tag.getTag(), taggedAccounts.get(1).getTag());
 
+    // tag has no label until one is set
+    assertTrue(wallet.getAccountTags().contains(new MoneroAccountTag(tag.getTag(), null, tag.getAccountIndices())));
+
     // set tag label
     wallet.setAccountTagLabel(tag.getTag(), tag.getLabel());
     
@@ -1010,6 +1013,22 @@ public abstract class TestMoneroWalletCommon {
     assertEquals(1, taggedAccounts.size());
     assertEquals(0, (int) taggedAccounts.get(0).getIndex());
     assertEquals(tag.getTag(), taggedAccounts.get(0).getTag());
+    
+    // test that tagging an account out of range fails
+    try {
+      wallet.tagAccounts(tag.getTag(), Arrays.asList(accounts.size()));
+      fail("Should have thrown exception with account out of range");
+    } catch (MoneroError e) {
+      assertEquals("Account index out of bound", e.getMessage());
+    }
+    
+    // test that labeling an unregistered tag fails
+    try {
+      wallet.setAccountTagLabel("non_existing_tag", "my label");
+      fail("Should have thrown exception with unregistered tag");
+    } catch (MoneroError e) {
+      assertEquals("Tag is unregistered", e.getMessage());
+    }
     
     // untag and query accounts
     wallet.untagAccounts(Arrays.asList(0, 1));
