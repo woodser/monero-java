@@ -16,9 +16,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import monero.common.MoneroError;
 import monero.common.MoneroRpcConnection;
@@ -153,6 +155,54 @@ public class TestMoneroDaemonRpc {
     
     // stop daemon
     daemon.stopProcess();
+  }
+  
+  // Can notify listeners when the daemon publishes a block to zmq
+  @Test
+  @Tag("CI")
+  public void testZmqBlockListener() throws IOException, InterruptedException {
+    
+    // start monerod process which publishes to zmq
+    MoneroDaemonRpc daemon = new MoneroDaemonRpc(new ArrayList<String>(Arrays.asList(
+        TestUtils.DAEMON_LOCAL_PATH,
+        "--regtest",
+        "--offline",
+        "--fixed-difficulty", "1",
+        "--keep-fakechain",
+        "--check-updates", "disabled",
+        "--disable-dns-checkpoints",
+        "--no-igd",
+        "--hide-my-port",
+        "--data-dir", TestUtils.TEST_WALLETS_DIR + "/node1",
+        "--p2p-bind-port", "58080",
+        "--rpc-bind-port", "58081",
+        "--zmq-rpc-bind-port", "58082",
+        "--zmq-pub", "tcp://127.0.0.1:58083")));
+    try {
+      assertEquals("tcp://127.0.0.1:58083", daemon.getRpcConnection().getZmqUri());
+      
+      // register a listener
+      CountDownLatch latch = new CountDownLatch(1);
+      daemon.addListener(new MoneroDaemonListener() {
+        @Override
+        public void onBlockHeader(MoneroBlockHeader header) {
+          latch.countDown();
+        }
+      });
+      
+      // mine blocks until notified, which is before the next poll if zmq is received
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("amount_of_blocks", 1);
+      params.put("wallet_address", TestUtils.MINING_ADDRESS);
+      long start = System.currentTimeMillis();
+      while (latch.getCount() > 0 && System.currentTimeMillis() - start < 5000) {
+        daemon.getRpcConnection().sendJsonRequest("generateblocks", params);
+        latch.await(1, TimeUnit.SECONDS);
+      }
+      assertEquals(0, latch.getCount(), "Listener was not notified of a block published to zmq");
+    } finally {
+      daemon.stopProcess();
+    }
   }
   
   // Can get the daemon's version
