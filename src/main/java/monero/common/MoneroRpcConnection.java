@@ -566,7 +566,7 @@ public class MoneroRpcConnection {
   public byte[] sendBinaryRequest(String path, Map<String, Object> params, Long timeoutMs) {
     
     // serialize params to monero's portable binary storage format
-    byte[] paramsBin = MoneroUtils.mapToBinary(params);
+    byte[] paramsBin = MoneroUtils.mapToBinary(params == null ? new HashMap<String, Object>() : params);
     CloseableHttpResponse resp = null;
     try {
 

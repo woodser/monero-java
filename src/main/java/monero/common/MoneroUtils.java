@@ -486,12 +486,20 @@ public class MoneroUtils {
   
   public static byte[] mapToBinary(Map<String, Object> map) {
     loadNativeLibrary();
-    return jsonToBinaryJni(JsonUtils.serialize(map));
+    try {
+      return jsonToBinaryJni(JsonUtils.serialize(map));
+    } catch (Exception err) {
+      throw new MoneroError(err.getMessage());
+    }
   }
   
   public static Map<String, Object> binaryToMap(byte[] bin) {
     loadNativeLibrary();
-    return JsonUtils.deserialize(binaryToJsonJni(bin), new TypeReference<Map<String, Object>>(){});
+    try {
+      return JsonUtils.deserialize(binaryToJsonJni(bin), new TypeReference<Map<String, Object>>(){});
+    } catch (Exception err) {
+      throw new MoneroError(err.getMessage());
+    }
   }
   
   @SuppressWarnings("unchecked")
@@ -499,7 +507,12 @@ public class MoneroUtils {
     
     // convert binary blocks to json then to map
     loadNativeLibrary();
-    Map<String, Object> map = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, binaryBlocksToJsonJni(binBlocks), new TypeReference<Map<String, Object>>(){});
+    Map<String, Object> map;
+    try {
+      map = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, binaryBlocksToJsonJni(binBlocks), new TypeReference<Map<String, Object>>(){});
+    } catch (Exception err) {
+      throw new MoneroError(err.getMessage());
+    }
     
     // parse blocks to maps
     List<Map<String, Object>> blockMaps = new ArrayList<Map<String, Object>>();

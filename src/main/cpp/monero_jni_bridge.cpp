@@ -392,7 +392,12 @@ JNIEXPORT jbyteArray JNICALL Java_monero_common_MoneroUtils_jsonToBinaryJni(JNIE
 
   // convert json to monero's portable storage binary format
   std::string bin_str;
-  monero_utils::json_to_binary(json_str, bin_str);
+  try {
+    monero_utils::json_to_binary(json_str, bin_str);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 
   // convert binary string to jbyteArray
   jbyteArray result = env->NewByteArray(bin_str.length());
@@ -412,10 +417,16 @@ JNIEXPORT jstring JNICALL Java_monero_common_MoneroUtils_binaryToJsonJni(JNIEnv 
   jboolean is_copy;
   jbyte* jbytes = env->GetByteArrayElements(bin, &is_copy);
   string bin_str = string((char*) jbytes, binLength);
+  env->ReleaseByteArrayElements(bin, jbytes, JNI_ABORT);
 
   // convert monero's portable storage binary format to json
   string json_str;
-  monero_utils::binary_to_json(bin_str, json_str);
+  try {
+    monero_utils::binary_to_json(bin_str, json_str);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 
   // convert string to jstring
   return env->NewStringUTF(json_str.c_str());
@@ -428,10 +439,16 @@ JNIEXPORT jstring JNICALL Java_monero_common_MoneroUtils_binaryBlocksToJsonJni(J
   jboolean is_copy;
   jbyte* jbytes = env->GetByteArrayElements(blocks_bin, &is_copy);
   string bin_str = string((char*) jbytes, binLength);
+  env->ReleaseByteArrayElements(blocks_bin, jbytes, JNI_ABORT);
 
   // convert monero's portable storage binary format to json
   string json_str;
-  monero_utils::binary_blocks_to_json(bin_str, json_str);
+  try {
+    monero_utils::binary_blocks_to_json(bin_str, json_str);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 
   // convert string to jstring
   return env->NewStringUTF(json_str.c_str());
