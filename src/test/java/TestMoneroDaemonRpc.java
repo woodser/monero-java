@@ -130,10 +130,18 @@ public class TestMoneroDaemonRpc {
         "--rpc-login", "superuser:abctesting123",
         "--zmq-rpc-bind-port", "58082"));
     
-    // start monerod process from command
+    // start monerod process from command, which is destroyed if not started within the timeout
     MoneroDaemonRpc daemon;
     try {
-      daemon = new MoneroDaemonRpc(cmd);
+      List<String> stalledCmd = new ArrayList<String>(cmd);
+      stalledCmd.set(stalledCmd.indexOf("--rpc-login") + 1, "superuser"); // stalls prompting for the password
+      try {
+        new MoneroDaemonRpc(stalledCmd, 1000l);
+        fail("Should have timed out");
+      } catch (MoneroError e) {
+        assertTrue(e.getMessage().contains("within 1000 ms"));
+      }
+      daemon = new MoneroDaemonRpc(cmd, 60000l);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

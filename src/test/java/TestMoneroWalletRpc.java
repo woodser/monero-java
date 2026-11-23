@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -107,6 +108,35 @@ public class TestMoneroWalletRpc extends TestMoneroWalletCommon {
   }
   
   // ---------------------------- BEGIN TESTS ---------------------------------
+  
+  // Can start a wallet rpc process within a timeout
+  @Test
+  @Tag("CI")
+  public void testStartProcessTimeout() throws IOException {
+    List<String> cmd = new ArrayList<String>(Arrays.asList(
+        TestUtils.WALLET_RPC_LOCAL_PATH,
+        "--offline",
+        "--rpc-bind-port", "58090",
+        "--rpc-login", TestUtils.WALLET_RPC_USERNAME, // stalls prompting for the password
+        "--wallet-dir", TestUtils.WALLET_RPC_LOCAL_WALLET_DIR));
+    
+    // process is destroyed if not started within the timeout
+    try {
+      new MoneroWalletRpc(cmd, 1000l);
+      fail("Should have timed out");
+    } catch (MoneroError e) {
+      assertTrue(e.getMessage().contains("within 1000 ms"));
+    }
+    
+    // start and stop process
+    cmd.set(cmd.indexOf("--rpc-login") + 1, TestUtils.WALLET_RPC_USERNAME + ":" + TestUtils.WALLET_RPC_PASSWORD);
+    MoneroWalletRpc walletRpc = new MoneroWalletRpc(cmd, 60000l);
+    try {
+      assertTrue(walletRpc.getVersion().getNumber() > 0);
+    } finally {
+      walletRpc.stopProcess();
+    }
+  }
   
   // Can create a wallet with a randomly generated seed
   @Test
