@@ -29,6 +29,7 @@ public class MoneroTx {
   private Boolean isRelayed;
   private Boolean isConfirmed;
   private Boolean inTxPool;
+  private Boolean isLocked;
   private Long numConfirmations;
   private BigInteger unlockTime;
   private Long lastRelayedTimestamp;
@@ -76,6 +77,7 @@ public class MoneroTx {
     this.isRelayed = tx.isRelayed;
     this.isConfirmed = tx.isConfirmed;
     this.inTxPool = tx.inTxPool;
+    this.isLocked = tx.isLocked;
     this.numConfirmations = tx.numConfirmations;
     this.unlockTime = tx.unlockTime;
     this.lastRelayedTimestamp = tx.lastRelayedTimestamp;
@@ -219,6 +221,16 @@ public class MoneroTx {
   
   public MoneroTx setInTxPool(Boolean inTxPool) {
     this.inTxPool = inTxPool;
+    return this;
+  }
+  
+  @JsonProperty("isLocked")
+  public Boolean isLocked() {
+    return isLocked;
+  }
+  
+  public MoneroTx setIsLocked(Boolean isLocked) {
+    this.isLocked = isLocked;
     return this;
   }
   
@@ -491,6 +503,7 @@ public class MoneroTx {
     this.setRelay(GenUtils.reconcile(this.getRelay(), tx.getRelay(), null, true, null));        // tx can become relayed
     this.setIsRelayed(GenUtils.reconcile(this.isRelayed(), tx.isRelayed(), null, true, null));  // tx can become relayed
     this.setIsDoubleSpendSeen(GenUtils.reconcile(this.isDoubleSpendSeen(), tx.isDoubleSpendSeen(), null, true, null)); // double spend can become seen
+    this.setIsLocked(GenUtils.reconcile(this.isLocked(), tx.isLocked(), null, false, null));  // tx can become unlocked
     this.setKey(GenUtils.reconcile(this.getKey(), tx.getKey()));
     this.setFullHex(GenUtils.reconcile(this.getFullHex(), tx.getFullHex()));
     this.setPrunedHex(GenUtils.reconcile(this.getPrunedHex(), tx.getPrunedHex()));
@@ -586,6 +599,7 @@ public class MoneroTx {
     sb.append(GenUtils.kvLine("Is relayed", isRelayed(), indent));
     sb.append(GenUtils.kvLine("Is confirmed", isConfirmed(), indent));
     sb.append(GenUtils.kvLine("In tx pool", inTxPool(), indent));
+    sb.append(GenUtils.kvLine("Is locked", isLocked(), indent));
     sb.append(GenUtils.kvLine("Num confirmations", getNumConfirmations(), indent));
     sb.append(GenUtils.kvLine("Unlock time", getUnlockTime(), indent));
     sb.append(GenUtils.kvLine("Last relayed time", getLastRelayedTimestamp(), indent));
@@ -645,6 +659,7 @@ public class MoneroTx {
     result = prime * result + ((isDoubleSpendSeen == null) ? 0 : isDoubleSpendSeen.hashCode());
     result = prime * result + ((isFailed == null) ? 0 : isFailed.hashCode());
     result = prime * result + ((isKeptByBlock == null) ? 0 : isKeptByBlock.hashCode());
+    result = prime * result + ((isLocked == null) ? 0 : isLocked.hashCode());
     result = prime * result + ((isRelayed == null) ? 0 : isRelayed.hashCode());
     result = prime * result + ((key == null) ? 0 : key.hashCode());
     result = prime * result + ((lastFailedHeight == null) ? 0 : lastFailedHeight.hashCode());
@@ -710,6 +725,9 @@ public class MoneroTx {
     if (isKeptByBlock == null) {
       if (other.isKeptByBlock != null) return false;
     } else if (!isKeptByBlock.equals(other.isKeptByBlock)) return false;
+    if (isLocked == null) {
+      if (other.isLocked != null) return false;
+    } else if (!isLocked.equals(other.isLocked)) return false;
     if (isRelayed == null) {
       if (other.isRelayed != null) return false;
     } else if (!isRelayed.equals(other.isRelayed)) return false;
