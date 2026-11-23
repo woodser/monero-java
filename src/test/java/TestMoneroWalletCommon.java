@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import monero.common.MoneroConnectionManager;
@@ -101,6 +102,7 @@ public abstract class TestMoneroWalletCommon {
   private static final int SEND_MAX_DIFF = 60;
   private static final int SEND_DIVISOR = 10;
   private static final int NUM_BLOCKS_LOCKED = 10;
+  private static final long MAX_POLL_TIME = 5000l; // maximum time granted for wallet to poll
   
   // instance variables
   protected MoneroWallet wallet;        // wallet instance to test
@@ -4862,8 +4864,6 @@ public abstract class TestMoneroWalletCommon {
   
   // TODO: test sweepUnlocked()
   private List<String> testWalletNotificationsAux(boolean sameWallet, boolean sameAccount, boolean sweepOutput, boolean createThenRelay, long unlockDelay) {
-    long MAX_POLL_TIME = 5000l; // maximum time granted for wallet to poll
-
     // collect issues as test runs
     List<String> issues = new ArrayList<String>();
 
@@ -5231,8 +5231,9 @@ public abstract class TestMoneroWalletCommon {
         daemon.waitForNextBlockHeader();
       }
       
-      // receiver should have notified listeners of received outputs
-      try { TimeUnit.MILLISECONDS.sleep(1000); } catch (InterruptedException e) {  throw new RuntimeException(e); } // zmq notifications received within 1 second
+      // receiver should notify listeners of received outputs within 2 sync periods + poll time
+      long deadline = System.currentTimeMillis() + TestUtils.SYNC_PERIOD_IN_MS * 2 + MAX_POLL_TIME;
+      while (myListener.getOutputsReceived().isEmpty() && System.currentTimeMillis() < deadline) GenUtils.waitFor(100);
       assertFalse(myListener.getOutputsReceived().isEmpty());
     } finally {
       closeWallet(receiver);
@@ -6286,10 +6287,10 @@ public abstract class TestMoneroWalletCommon {
   protected class WalletNotificationCollector extends MoneroWalletListener {
     
     private boolean listening = true;
-    private List<Long> blockNotifications = new ArrayList<Long>();
-    private List<Pair<BigInteger, BigInteger>> balanceNotifications = new ArrayList<Pair<BigInteger, BigInteger>>();
-    private List<MoneroOutputWallet> outputsReceived = new ArrayList<MoneroOutputWallet>();
-    private List<MoneroOutputWallet> outputsSpent = new ArrayList<MoneroOutputWallet>();
+    private List<Long> blockNotifications = new CopyOnWriteArrayList<Long>(); // read by tests while wallet threads notify
+    private List<Pair<BigInteger, BigInteger>> balanceNotifications = new CopyOnWriteArrayList<Pair<BigInteger, BigInteger>>();
+    private List<MoneroOutputWallet> outputsReceived = new CopyOnWriteArrayList<MoneroOutputWallet>();
+    private List<MoneroOutputWallet> outputsSpent = new CopyOnWriteArrayList<MoneroOutputWallet>();
     
     @Override
     public void onNewBlock(long height) {
