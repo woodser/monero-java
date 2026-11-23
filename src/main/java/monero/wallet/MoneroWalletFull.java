@@ -853,10 +853,14 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   public List<MoneroAccount> getAccounts(boolean includeSubaddresses, String tag) {
     beginCall();
     try {
-      String accountsJson = getAccountsJni(includeSubaddresses, tag);
-      List<MoneroAccount> accounts = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountsJson, AccountsContainer.class).accounts;
-      for (MoneroAccount account : accounts) sanitizeAccount(account);
-      return accounts;
+      try {
+        String accountsJson = getAccountsJni(includeSubaddresses, tag);
+        List<MoneroAccount> accounts = JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountsJson, AccountsContainer.class).accounts;
+        for (MoneroAccount account : accounts) sanitizeAccount(account);
+        return accounts;
+      } catch (Exception e) {
+        throw new MoneroError(e.getMessage());
+      }
     } finally {
       endCall();
     }
@@ -1560,26 +1564,61 @@ public class MoneroWalletFull extends MoneroWalletDefault {
 
   @Override
   public void tagAccounts(String tag, Collection<Integer> accountIndices) {
-    assertNotClosed();
-    throw new RuntimeException("MoneroWalletFull.tagAccounts() not implemented");
+    beginCall();
+    try {
+      if (accountIndices == null) accountIndices = new ArrayList<Integer>();
+      try {
+        tagAccountsJni(tag, GenUtils.listToIntArray(new ArrayList<Integer>(accountIndices)));
+      } catch (Exception e) {
+        throw new MoneroError(e.getMessage());
+      }
+    } finally {
+      endCall();
+    }
   }
 
   @Override
   public void untagAccounts(Collection<Integer> accountIndices) {
-    assertNotClosed();
-    throw new RuntimeException("MoneroWalletFull.untagAccounts() not implemented");
+    beginCall();
+    try {
+      if (accountIndices == null) accountIndices = new ArrayList<Integer>();
+      try {
+        untagAccountsJni(GenUtils.listToIntArray(new ArrayList<Integer>(accountIndices)));
+      } catch (Exception e) {
+        throw new MoneroError(e.getMessage());
+      }
+    } finally {
+      endCall();
+    }
   }
 
   @Override
   public List<MoneroAccountTag> getAccountTags() {
-    assertNotClosed();
-    throw new RuntimeException("MoneroWalletFull.getAccountTags() not implemented");
+    beginCall();
+    try {
+      try {
+        String accountTagsJson = getAccountTagsJni();
+        return JsonUtils.deserialize(MoneroRpcConnection.MAPPER, accountTagsJson, AccountTagsContainer.class).accountTags;
+      } catch (Exception e) {
+        throw new MoneroError(e.getMessage());
+      }
+    } finally {
+      endCall();
+    }
   }
 
   @Override
   public void setAccountTagLabel(String tag, String label) {
-    assertNotClosed();
-    throw new RuntimeException("MoneroWalletFull.setAccountTagLabel() not implemented");
+    beginCall();
+    try {
+      try {
+        setAccountTagLabelJni(tag, label);
+      } catch (Exception e) {
+        throw new MoneroError(e.getMessage());
+      }
+    } finally {
+      endCall();
+    }
   }
 
   @Override
@@ -2025,6 +2064,14 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private native void deleteAddressBookEntryJni(int entryIdx);
   
+  private native void tagAccountsJni(String tag, int[] accountIndices);
+  
+  private native void untagAccountsJni(int[] accountIndices);
+  
+  private native String getAccountTagsJni();
+  
+  private native void setAccountTagLabelJni(String tag, String label);
+  
   private native String getPaymentUriJni(String sendRequestJson);
   
   private native String parsePaymentUriJni(String uri);
@@ -2315,6 +2362,10 @@ public class MoneroWalletFull extends MoneroWalletDefault {
   
   private static class AddressBookEntriesContainer {
     public List<MoneroAddressBookEntry> entries;
+  }
+  
+  private static class AccountTagsContainer {
+    public List<MoneroAccountTag> accountTags;
   }
   
   // ---------------------------- PRIVATE HELPERS -----------------------------

@@ -1012,7 +1012,13 @@ JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getAccountsJni(JNI
   env->ReleaseStringUTFChars(jtag, _tag);
 
   // get accounts
-  vector<monero_account> accounts = wallet->get_accounts(include_subaddresses, tag);
+  vector<monero_account> accounts;
+  try {
+    accounts = wallet->get_accounts(include_subaddresses, tag);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
 
   // wrap and serialize accounts
   rapidjson::Document doc;
@@ -1884,6 +1890,91 @@ JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_deleteAddressBookEntr
   // delete address book entry
   try {
     wallet->delete_address_book_entry(index);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_tagAccountsJni(JNIEnv* env, jobject instance, jstring jtag, jintArray jaccount_indices) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_tagAccountsJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  const char* _tag = jtag ? env->GetStringUTFChars(jtag, NULL) : nullptr;
+  string tag = string(_tag ? _tag : "");
+  env->ReleaseStringUTFChars(jtag, _tag);
+
+  // convert account indices from jintArray to vector<uint32_t>
+  vector<uint32_t> account_indices;
+  if (jaccount_indices != nullptr) {
+    jsize num_account_indices = env->GetArrayLength(jaccount_indices);
+    jint* int_arr = env->GetIntArrayElements(jaccount_indices, 0);
+    for (int i = 0; i < num_account_indices; i++) account_indices.push_back(int_arr[i]);
+    env->ReleaseIntArrayElements(jaccount_indices, int_arr, JNI_ABORT);
+  }
+
+  // tag accounts
+  try {
+    wallet->tag_accounts(tag, account_indices);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_untagAccountsJni(JNIEnv* env, jobject instance, jintArray jaccount_indices) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_untagAccountsJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+
+  // convert account indices from jintArray to vector<uint32_t>
+  vector<uint32_t> account_indices;
+  if (jaccount_indices != nullptr) {
+    jsize num_account_indices = env->GetArrayLength(jaccount_indices);
+    jint* int_arr = env->GetIntArrayElements(jaccount_indices, 0);
+    for (int i = 0; i < num_account_indices; i++) account_indices.push_back(int_arr[i]);
+    env->ReleaseIntArrayElements(jaccount_indices, int_arr, JNI_ABORT);
+  }
+
+  // untag accounts
+  try {
+    wallet->untag_accounts(account_indices);
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+  }
+}
+
+JNIEXPORT jstring JNICALL Java_monero_wallet_MoneroWalletFull_getAccountTagsJni(JNIEnv* env, jobject instance) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_getAccountTagsJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+  try {
+
+    // get account tags
+    vector<shared_ptr<monero_account_tag>> account_tags = wallet->get_account_tags();
+
+    // wrap and serialize account tags
+    rapidjson::Document doc;
+    doc.SetObject();
+    doc.AddMember("accountTags", monero_utils::to_rapidjson_val(doc.GetAllocator(), account_tags), doc.GetAllocator());
+    string account_tags_json = gen_utils::serialize(doc);
+    return env->NewStringUTF(account_tags_json.c_str());
+  } catch (...) {
+    rethrow_cpp_exception_as_java_exception(env);
+    return 0;
+  }
+}
+
+JNIEXPORT void JNICALL Java_monero_wallet_MoneroWalletFull_setAccountTagLabelJni(JNIEnv* env, jobject instance, jstring jtag, jstring jlabel) {
+  MTRACE("Java_monero_wallet_MoneroWalletFull_setAccountTagLabelJni");
+  monero_wallet* wallet = get_handle<monero_wallet>(env, instance, JNI_WALLET_HANDLE);
+
+  // collect string params
+  const char* _tag = jtag ? env->GetStringUTFChars(jtag, NULL) : nullptr;
+  const char* _label = jlabel ? env->GetStringUTFChars(jlabel, NULL) : nullptr;
+  string tag = string(_tag == nullptr ? "" : _tag);
+  string label = string(_label == nullptr ? "" : _label);
+  env->ReleaseStringUTFChars(jtag, _tag);
+  env->ReleaseStringUTFChars(jlabel, _label);
+
+  // set account tag label
+  try {
+    wallet->set_account_tag_label(tag, label);
   } catch (...) {
     rethrow_cpp_exception_as_java_exception(env);
   }

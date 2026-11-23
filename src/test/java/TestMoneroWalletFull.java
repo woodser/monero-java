@@ -1811,6 +1811,13 @@ public class TestMoneroWalletFull extends TestMoneroWalletCommon {
   @Override
   @Test
   @Tag("CI")
+  public void testAccountTags() {
+    super.testAccountTags();
+  }
+
+  @Override
+  @Test
+  @Tag("CI")
   public void testGetSubaddresses() {
     super.testGetSubaddresses();
   }

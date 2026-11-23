@@ -1754,6 +1754,7 @@ public class MoneroWalletRpc extends MoneroWalletDefault {
         tags.add(tag);
         tag.setTag((String) accountTagMap.get("tag"));
         tag.setLabel((String) accountTagMap.get("label"));
+        if ("".equals(tag.getLabel())) tag.setLabel(null);
         List<BigInteger> accountIndicesBI = (List<BigInteger>) accountTagMap.get("accounts");
         List<Integer> accountIndices = new ArrayList<Integer>();
         for (BigInteger idx : accountIndicesBI) accountIndices.add(idx.intValue());
