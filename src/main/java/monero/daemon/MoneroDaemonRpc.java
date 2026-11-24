@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import monero.common.MoneroError;
@@ -72,6 +73,9 @@ import monero.daemon.model.MoneroTx;
 import monero.daemon.model.MoneroTxBacklogEntry;
 import monero.daemon.model.MoneroTxPoolStats;
 import monero.daemon.model.MoneroVersion;
+import org.zeromq.SocketType;
+import org.zeromq.ZContext;
+import org.zeromq.ZMQ;
 
 /**
  * Implements a Monero daemon using monerod.
@@ -1023,25 +1027,26 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   @Override
   public MoneroBlockHeader waitForNextBlockHeader() {
     Object syncObject  = new Object();
-    synchronized(syncObject) {
-      try {
-        MoneroDaemonListener customListener = new MoneroDaemonListener() {
-          @Override
-          public void onBlockHeader(MoneroBlockHeader header) {
-            super.onBlockHeader(header);
-            synchronized(syncObject) {
-              syncObject.notifyAll();
-            }
-          }
-        };
+    MoneroDaemonListener customListener = new MoneroDaemonListener() {
+      @Override
+      public void onBlockHeader(MoneroBlockHeader header) {
+        super.onBlockHeader(header);
+        synchronized(syncObject) {
+          syncObject.notifyAll();
+        }
+      }
+    };
+    try {
+      synchronized(syncObject) {
         addListener(customListener);
         syncObject.wait();
-        removeListener(customListener);
-        return customListener.getLastBlockHeader();
-      } catch (InterruptedException e) {
-        throw new MoneroError(e);
       }
+    } catch (InterruptedException e) {
+      throw new MoneroError(e);
+    } finally {
+      removeListener(customListener); // not while synchronized, which would deadlock with a second notification
     }
+    return customListener.getLastBlockHeader();
   }
   
   // ------------------------------- PRIVATE INSTANCE  ----------------------------
@@ -1735,14 +1740,21 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
   
   /**
    * Polls a Monero daemon for updates and notifies listeners as they occur.
+   * 
+   * Polls every poll period and when the daemon publishes a block to zmq, since zmq does not guarantee delivery.
    */
   private class DaemonPoller {
     
     private static final long DEFAULT_POLL_PERIOD_IN_MS = 10000; // poll every X ms
+    private static final String ZMQ_CHAIN_MAIN_TOPIC = "json-minimal-chain_main";
+    private static final int ZMQ_WAIT_TIMEOUT_MS = 200;
     
     private MoneroDaemonRpc daemon;
     private TaskLooper looper;
     private MoneroBlockHeader lastHeader;
+    private volatile boolean isPolling;
+    private String zmqUri;             // zmq uri subscribed to, if any
+    private volatile Thread zmqThread; // receives zmq publications while assigned
     
     public DaemonPoller(MoneroDaemonRpc daemon) {
       this.daemon = daemon;
@@ -1755,11 +1767,56 @@ public class MoneroDaemonRpc extends MoneroDaemonDefault {
     }
     
     public void setIsPolling(boolean isPolling) {
+      this.isPolling = isPolling;
       if (isPolling) looper.start(DEFAULT_POLL_PERIOD_IN_MS); // TODO: allow configurable poll period
       else looper.stop();
+      refreshZmq();
     }
     
-    private void poll() {
+    // zmq uri to subscribe to while polling, which is none with a proxy, since zmq would connect past it
+    private String getZmqUri() {
+      MoneroRpcConnection rpc = daemon.getRpcConnection();
+      return isPolling && rpc.getProxyUri() == null ? rpc.getZmqUri() : null;
+    }
+    
+    private void refreshZmq() {
+      synchronized (listeners) {
+        String uri = getZmqUri();
+        if (Objects.equals(uri, zmqUri)) return;
+        zmqUri = uri;
+        zmqThread = null; // stops the current subscriber
+        if (uri == null) return;
+        zmqThread = new Thread(new Runnable() {
+          @Override
+          public void run() {
+            try (ZContext context = new ZContext()) {
+              ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
+              subscriber.setReceiveTimeOut(ZMQ_WAIT_TIMEOUT_MS);
+              subscriber.setIPv6(uri.contains("[")); // an ipv6 address is in brackets, a host name keeps resolving to ipv4
+              subscriber.subscribe(ZMQ_CHAIN_MAIN_TOPIC.getBytes());
+              refreshZmq(); // the connection may have changed before connecting
+              if (zmqThread == Thread.currentThread()) subscriber.connect(uri);
+              while (zmqThread == Thread.currentThread()) {
+                if (subscriber.recv() != null) {
+                  while (subscriber.recv(ZMQ.DONTWAIT) != null); // one poll covers all pending publications
+                  poll();
+                }
+                refreshZmq(); // follow the connection's zmq uri and proxy
+              }
+            } catch (Exception e) {
+              LOGGER.warning("Could not receive blocks from zmq uri '" + uri + "', polling the daemon instead: " + e.getMessage());
+              synchronized (listeners) {
+                if (zmqThread == Thread.currentThread()) zmqUri = null; // subscribe again on the next poll
+              }
+            }
+          }
+        });
+        zmqThread.start();
+      }
+    }
+    
+    private synchronized void poll() {
+      refreshZmq();
       try {
         
         // get first header for comparison
