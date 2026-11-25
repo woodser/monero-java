@@ -137,6 +137,12 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code>protected int</code></div>
 <div class="col-second even-row-color"><code><a href="#priority" class="member-name-link">priority</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>protected org.apache.hc.client5.http.impl.classic.CloseableHttpClient</code></div>
+<div class="col-second odd-row-color"><code><a href="#proxyClient" class="member-name-link">proxyClient</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>protected <a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#proxyClientConfig" class="member-name-link">proxyClientConfig</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>protected <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#proxyUri" class="member-name-link">proxyUri</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
@@ -413,6 +419,18 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="proxyClient">
+<h3>proxyClient</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">org.apache.hc.client5.http.impl.classic.CloseableHttpClient</span>&nbsp;<span class="element-name">proxyClient</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="proxyClientConfig">
+<h3>proxyClientConfig</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&gt;</span>&nbsp;<span class="element-name">proxyClientConfig</span></div>
+</section>
+</li>
+<li>
 <section class="detail" id="uri">
 <h3>uri</h3>
 <div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">uri</span></div>
@@ -641,8 +659,9 @@ loadScripts(document, 'script');</script>
 
  Verification is enabled by default. Disabling it allows connecting to daemons with
  self-signed certificates or certificates whose subject alternative names do not match
- the address (e.g. monerod's default `--rpc-ssl autodetect` certificate, or connecting
- by raw IP).</div>
+ the address (e.g. connecting by raw IP). Requests sent through this connection still
+ fail if Java cannot parse the certificate, as with the certificate monerod generates
+ by default, which has no issuer name.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>sslVerify</code> - true to verify certificates (default), false to allow insecure connections</dd>
