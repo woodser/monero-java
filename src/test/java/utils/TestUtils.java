@@ -24,6 +24,7 @@ import monero.common.MoneroUtils;
 import monero.daemon.MoneroDaemonRpc;
 import monero.daemon.model.MoneroNetworkType;
 import monero.wallet.MoneroWalletFull;
+import monero.wallet.MoneroWalletLight;
 import monero.wallet.MoneroWalletRpc;
 import monero.wallet.model.MoneroTxWallet;
 import monero.wallet.model.MoneroWalletConfig;
@@ -76,12 +77,33 @@ public class TestUtils {
   public static final String WALLET_RPC_LOCAL_WALLET_DIR = System.getenv().getOrDefault("MONERO_WALLET_RPC_DIR", REGTEST_DIR + "/wallet_rpc");
   public static final String WALLET_RPC_ACCESS_CONTROL_ORIGINS = "http://localhost:8080"; // cors access from web browser
   
+  // monero daemon zmq endpoints, which monero-lws uses to follow the daemon
+  public static final int DAEMON_ZMQ_RPC_PORT = DAEMON_RPC_PORT + 1;
+  public static final int DAEMON_ZMQ_PUB_PORT = DAEMON_RPC_PORT + 2;
+
+  // monero-lws configuration (change per your configuration)
+  public static final int WALLET_LWS_PORT_START = Integer.parseInt(System.getenv().getOrDefault("MONERO_LWS_PORT", "8443"));
+  public static final int WALLET_LWS_ADMIN_PORT_START = Integer.parseInt(System.getenv().getOrDefault("MONERO_LWS_ADMIN_PORT", "8444"));
+  public static final String WALLET_LWS_DOMAIN = "127.0.0.1";
+  public static final String WALLET_LWS_ADMIN_DOMAIN = "127.0.0.1";
+  public static final String WALLET_LWS_URI = "http://" + WALLET_LWS_DOMAIN + ":" + WALLET_LWS_PORT_START;
+  public static final String WALLET_LWS_ADMIN_URI = "http://" + WALLET_LWS_ADMIN_DOMAIN + ":" + WALLET_LWS_ADMIN_PORT_START;
+  public static final String LWS_LOCAL_PATH = System.getenv("MONERO_LWS_PATH"); // monero-lws-daemon binary, monero-lws is run with docker if not set
+  public static final String LWS_DOCKER_IMAGE = System.getenv().getOrDefault("MONERO_LWS_IMAGE", "vtnerd/monero-lws:master");
+  // network of the docker container of monero-lws: it connects to the daemon and listens on the loopback, so it shares the one of the tests ("host", or "container:<id>" when the tests run in a container)
+  public static final String LWS_DOCKER_NETWORK = System.getenv().getOrDefault("MONERO_LWS_DOCKER_NETWORK", "host");
+
   // test wallet config
   public static final String WALLET_NAME = "test_wallet_1";
   public static final String WALLET_PASSWORD = "supersecretpassword123";
   public static final String TEST_WALLETS_DIR = System.getenv().getOrDefault("MONERO_TEST_WALLETS_DIR", REGTEST_DIR + "/wallet_full");
   public static final String WALLET_FULL_PATH = TEST_WALLETS_DIR + "/" + WALLET_NAME;
-  
+  public static final String WALLET_LIGHT_PATH = TEST_WALLETS_DIR + "/test_wallet_light";
+  // monero-lws only sees the txs to the accounts and subaddresses that it has registered, and all the wallets of the suite use the same seed: the lookahead
+  // covers the history of the test wallet and what the tests of the other wallets send to it (the multiple sends go up to 5 accounts and 15 subaddresses),
+  // with margin. The limit of monero-lws is 1000 subaddresses for an account
+  public static final int LIGHT_ACCOUNT_LOOKAHEAD = 10; // accounts that monero-lws scans
+  public static final int LIGHT_SUBADDRESS_LOOKAHEAD = 30; // subaddresses of each account that monero-lws scans
   // test wallet constants
   public static final BigInteger MAX_FEE = BigInteger.valueOf(7500000).multiply(BigInteger.valueOf(10000));
   public static final MoneroNetworkType NETWORK_TYPE = MoneroNetworkType.MAINNET; // regtest uses mainnet addresses
@@ -90,6 +112,7 @@ public class TestUtils {
   public static final String ADDRESS = "4ARcPLqcrRjhZAVm3me1U18rUVXcjeNKuBd1oE2cTs8biA9cozPMeyYLhe77nPv12JA3ejJN3qprmREriit2fi6tJAPbWJu";
   public static final String MINING_SEED = "wield dinner tipsy pepper laboratory zigzags evicted fowls entrance cigar ourselves onboard inkling cousin losing whole smog mops viewpoint highway skater hashing kept lawsuit highway"; // wallet mined to, which funds the test wallet's history
   public static final String MINING_ADDRESS = "45L2BnYnjPe4K74PfyNLCg37UPr7GTeVcRaSQYVTNFw9XebBpTexBTFNzCMhHWM5ftFBFiQMbAAd5ZR5fRdjx67R3h5mhTY";
+  public static final String PRIVATE_VIEW_KEY = "198820da9166ee114203eb38c29e00b0e8fc7df508aa632d56ead849093d3808";
   public static final long FIRST_RECEIVE_HEIGHT = 101; // NOTE: this value must be the height of the wallet's first tx for tests
   public static final long SYNC_PERIOD_IN_MS = 5000; // period between wallet syncs in milliseconds
   public static final long BLOCK_PERIOD_IN_MS = 2000; // average period between blocks mined in the background
@@ -316,6 +339,96 @@ public class TestUtils {
     return walletFull;
   }
   
+  public static MoneroWalletConfig getWalletLightConfig() {
+    MoneroWalletConfig config = new MoneroWalletConfig();
+    return config.setNetworkType(NETWORK_TYPE).setServerUri(TestUtils.WALLET_LWS_URI).setSeed(TestUtils.SEED).setAccountLookahead(LIGHT_ACCOUNT_LOOKAHEAD).setSubaddressLookahead(LIGHT_SUBADDRESS_LOOKAHEAD);
+  }
+
+  private static MoneroWalletLight walletLight;
+  public static MoneroWalletLight getWalletLight() {
+    Regtest.startLws();
+    
+    if (walletLight == null || walletLight.isClosed()) {
+      // create wallet from seed if it doesn't exist
+      if (!MoneroWalletLight.walletExists(getWalletLightConfig())) {
+    
+        // create directory for test wallets if it doesn't exist
+        File testWalletsDir = new File(TestUtils.TEST_WALLETS_DIR);
+        if (!testWalletsDir.exists()) testWalletsDir.mkdirs();
+        
+        // create wallet with connection
+        MoneroRpcConnection daemonConnection = new MoneroRpcConnection(WALLET_LWS_URI, "", "");
+        walletLight = MoneroWalletLight.createWallet(new MoneroWalletConfig().setNetworkType(NETWORK_TYPE).setSeed(TestUtils.SEED).setServer(daemonConnection).setRestoreHeight(FIRST_RECEIVE_HEIGHT).setAccountLookahead(LIGHT_ACCOUNT_LOOKAHEAD).setSubaddressLookahead(LIGHT_SUBADDRESS_LOOKAHEAD));
+        assertEquals(TestUtils.FIRST_RECEIVE_HEIGHT, walletLight.getRestoreHeight()); // the restore height is the one that it was given: monero-cpp gives monero-lws the one before, as it scans from the height after
+        assertEquals(daemonConnection, walletLight.getDaemonConnection());
+      }
+      // otherwise open existing wallet and update daemon connection
+      else {
+        walletLight = MoneroWalletLight.openWallet(getWalletLightConfig());
+      }
+    }
+
+    assertEquals(TestUtils.PRIVATE_VIEW_KEY, walletLight.getPrivateViewKey());
+    assertEquals(TestUtils.ADDRESS, walletLight.getPrimaryAddress());
+    assertEquals(TestUtils.SEED, walletLight.getSeed());
+
+    // monero-lws scans the account of a new wallet by itself, from its restore height: wait for it, or the first tests run with a wallet that
+    // does not have yet its history
+    waitForLwsScan(walletLight);
+
+    // sync and save wallet
+    walletLight.sync(new WalletSyncPrinter());
+    walletLight.startSyncing(TestUtils.SYNC_PERIOD_IN_MS);
+
+    return walletLight;
+  }
+
+  /**
+   * Wait until monero-lws has scanned the blocks of the daemon for the account of a light wallet.
+   * 
+   * monero-lws scans the blocks in the background, so right after some are generated (instantly on regtest)
+   * the account does not have yet what they have, and a light wallet that syncs then does not see it.
+   * 
+   * @param wallet is the light wallet whose account is waited for
+   * @return the scanned height of the account, one less than the height of the daemon which counts the blocks
+   */
+  public static long waitForLwsScan(MoneroWalletLight wallet) {
+    long height = getDaemonRpc().getHeight() - 1;
+    MoneroRpcConnection lws = new MoneroRpcConnection(WALLET_LWS_URI);
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("address", wallet.getPrimaryAddress());
+    params.put("view_key", wallet.getPrivateViewKey());
+    long timeout = System.currentTimeMillis() + 60000;
+    while (true) {
+      Object scanned = lws.sendPathRequest("get_address_info", params).get("scanned_block_height");
+      if (scanned != null && ((Number) scanned).longValue() >= height) return ((Number) scanned).longValue();
+      if (System.currentTimeMillis() > timeout) throw new MoneroError("Timed out waiting for monero-lws to scan up to height " + height);
+      try { Thread.sleep(200); }
+      catch (InterruptedException e) { Thread.currentThread().interrupt(); throw new MoneroError(e); }
+    }
+  }
+
+  /**
+   * Wait until the height that monero-lws has of the daemon reaches a height.
+   *
+   * monero-lws updates it by itself, apart from the scan of the blocks, so right after some are generated it can be behind the daemon
+   * and behind what it scanned, and a light wallet that asks for the height of the daemon then gets it.
+   *
+   * @param height is the height of the daemon to wait for, as a count of blocks (what the daemon returns as its height)
+   * @return the height that monero-lws has of the daemon, which is not less than the one given
+   */
+  public static long waitForLwsDaemonHeight(long height) {
+    MoneroRpcConnection lws = new MoneroRpcConnection(WALLET_LWS_URI);
+    long timeout = System.currentTimeMillis() + 60000;
+    while (true) {
+      Object current = lws.sendPathRequest("daemon_status", new HashMap<String, Object>()).get("height");
+      if (current != null && ((Number) current).longValue() >= height) return ((Number) current).longValue();
+      if (System.currentTimeMillis() > timeout) throw new MoneroError("Timed out waiting for monero-lws to see the daemon at height " + height);
+      try { Thread.sleep(200); }
+      catch (InterruptedException e) { Thread.currentThread().interrupt(); throw new MoneroError(e); }
+    }
+  }
+
   /**
    * Creates a new wallet considered to be "ground truth".
    * 

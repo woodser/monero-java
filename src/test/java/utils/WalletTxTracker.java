@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import monero.daemon.MoneroDaemon;
 import monero.daemon.model.MoneroTx;
 import monero.wallet.MoneroWallet;
+import monero.wallet.MoneroWalletLight;
 import monero.wallet.model.MoneroTxQuery;
 import monero.wallet.model.MoneroTxWallet;
 
@@ -88,6 +89,13 @@ public class WalletTxTracker {
       try { TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS); }
       catch (InterruptedException e) {  throw new RuntimeException(e); } 
     }
+    
+    // sync wallets with the pool
+    for (MoneroWallet wallet : wallets) {
+      while(wallet.getHeight() < daemon.getHeight()) {
+        wallet.sync();
+      }
+    }
   }
   
   public BigInteger waitForUnlockedBalance(MoneroWallet wallet, Integer accountIndex, Integer subaddressIndex, BigInteger minAmount) {
@@ -106,10 +114,19 @@ public class WalletTxTracker {
     
     // wait for unlocked balance // TODO: promote to MoneroWallet interface?
     System.out.println("Waiting for unlocked balance");
-    while (unlockedBalance.compareTo(minAmount) < 0) {
-      unlockedBalance = wallet.getUnlockedBalance(accountIndex, subaddressIndex);
-      try { TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS); }
-      catch (InterruptedException e) { throw new RuntimeException(e); }
+    if (minAmount == BigInteger.valueOf(0) && wallet instanceof MoneroWalletLight) {
+      while(unlockedBalance.compareTo(wallet.getBalance(accountIndex, subaddressIndex)) < 0) {
+        unlockedBalance = wallet.getUnlockedBalance(accountIndex, subaddressIndex);
+        try { TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS); }
+        catch (InterruptedException e) { throw new RuntimeException(e); }
+      }
+    }
+    else {
+      while (unlockedBalance.compareTo(minAmount) < 0) {
+        unlockedBalance = wallet.getUnlockedBalance(accountIndex, subaddressIndex);
+        try { TimeUnit.MILLISECONDS.sleep(TestUtils.SYNC_PERIOD_IN_MS); }
+        catch (InterruptedException e) { throw new RuntimeException(e); }
+      }
     }
     
     // stop mining if started
